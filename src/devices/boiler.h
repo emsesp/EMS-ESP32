@@ -161,11 +161,11 @@ class Boiler : public EMSdevice {
     void process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_UBASetPoints(std::shared_ptr<const Telegram> telegram);
     void process_UBAFlags(std::shared_ptr<const Telegram> telegram);
-    void process_MC10Status(std::shared_ptr<const Telegram> telegram);
+    void process_MC110Status(std::shared_ptr<const Telegram> telegram);
     void process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram);
     void process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram);
     void process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram);
-    void process_UBADHWStatus(std::shared_ptr<const Telegram> telegram);
+    void process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram);
     void process_UBAInformation(std::shared_ptr<const Telegram> telegram);
     void process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram);
     void process_CascadeMessage(std::shared_ptr<const Telegram> telegram);
@@ -180,6 +180,7 @@ class Boiler : public EMSdevice {
     bool set_warmwater_circulation_pump(const char * value, const int8_t id);
     bool set_warmwater_circulation_mode(const char * value, const int8_t id);
     bool set_warmwater_temp(const char * value, const int8_t id);
+    bool set_disinfect_temp(const char * value, const int8_t id);
     bool set_warmwater_maxpower(const char * value, const int8_t id);
     bool set_wWFlowTempOffset(const char * value, const int8_t id);
     bool set_flow_temp(const char * value, const int8_t id);

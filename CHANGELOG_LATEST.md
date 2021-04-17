@@ -1,13 +1,20 @@
 # Changelog
 
 ## Added
+
 - Mock API to simulate an ESP, for testing web
+- Able to write values from the Web UI
+  
 ## Fixed
+- Don't create Home Assistant MQTT discovery entries for device values that don't exists (#756 on EMS-ESP repo)
+- Update shower MQTT when a shower start is detected
 
 ## Changed
+
 - Icon for Network
 - MQTT Formatting payload (nested vs single) is a pull-down option
 - moved mqtt-topics and texts to local_EN, all topics lower case
 - Re-enabled Shower Alert (still experimental)
+- lowercased Flow temp in commands
 
 ## Removed

@@ -41,7 +41,7 @@ class Command {
   public:
     struct CmdFunction {
         uint8_t                     device_type_; // DeviceType::
-        uint8_t                     flag_;
+        uint8_t                     flag_;        // mqtt flags for command subscriptions
         const __FlashStringHelper * cmd_;
         cmdfunction_p               cmdfunction_;
         cmdfunction_json_p          cmdfunction_json_;

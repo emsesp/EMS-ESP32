@@ -404,8 +404,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         run_test("boiler");
 
-        DynamicJsonDocument doc(EMSESP_JSON_SIZE_LARGE_DYN);
-        JsonObject          json = doc.to<JsonObject>();
         // device type, command, data
         Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
     }

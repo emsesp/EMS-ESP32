@@ -61,7 +61,7 @@
 #define EMSESP_JSON_SIZE_MEDIUM_DYN 1024  // for large json docs, using DynamicJsonDocument
 #define EMSESP_JSON_SIZE_LARGE_DYN 2048   // for very large json docs, using DynamicJsonDocument
 #define EMSESP_JSON_SIZE_XLARGE_DYN 4096  // for very very large json docs, using DynamicJsonDocument
-#define EMSESP_JSON_SIZE_XXLARGE_DYN 5120 // for extra very very large json docs, using DynamicJsonDocument
+#define EMSESP_JSON_SIZE_XXLARGE_DYN 8192 // for extra very very large json docs, using DynamicJsonDocument
 
 // helpers for callback functions
 #define MAKE_PF_CB(__f) [&](std::shared_ptr<const Telegram> t) { __f(t); }                  // for process function callbacks to register_telegram_type()

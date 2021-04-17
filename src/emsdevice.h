@@ -141,6 +141,9 @@ enum DeviceValueTAG : uint8_t {
 // mqtt flags for command subscriptions
 enum MqttSubFlag : uint8_t { FLAG_NORMAL = 0, FLAG_HC, FLAG_WWC, FLAG_NOSUB };
 
+// mqtt-HA flags
+enum DeviceValueHA : uint8_t { HA_NONE = 0, HA_VALUE, HA_DONE};
+
 class EMSdevice {
   public:
     virtual ~EMSdevice() = default; // destructor of base class must always be virtual because it's a polymorphic class
@@ -269,16 +272,17 @@ class EMSdevice {
                                const __FlashStringHelper * const * options,
                                const __FlashStringHelper *         short_name,
                                const __FlashStringHelper *         full_name,
-                               uint8_t                             uom = DeviceValueUOM::NONE);
+                               uint8_t                             uom,
+                               bool                                has_cmd = false);
+    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom, cmdfunction_p f = nullptr);
 
-    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom = DeviceValueUOM::NONE);
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value);
     void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0);
 
     void register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f);
-    void register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f, uint8_t flag = 0);
+    void register_cmd(const __FlashStringHelper * cmd, cmdfunction_p f, uint8_t flag = 0);
 
     void publish_mqtt_ha_sensor();
 
@@ -295,6 +299,8 @@ class EMSdevice {
     void ha_config_done(const bool v) {
         ha_config_done_ = v;
     }
+
+    void ha_config_clear();
 
     enum Brand : uint8_t {
         NO_BRAND = 0, // 0
@@ -353,8 +359,8 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_EASY        = 1;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC10        = 2;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC20        = 3;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC20_2      = 4; // Variation on RC20, Older, like ES72
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC30_1      = 5; // variation on RC30, Newer models
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC20_N      = 4; // Variation on RC20, Older, like ES72
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC30_N      = 5; // variation on RC30, Newer models
     static constexpr uint8_t EMS_DEVICE_FLAG_RC30        = 6;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC35        = 7;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC300       = 8;
@@ -406,6 +412,8 @@ class EMSdevice {
         const __FlashStringHelper *         short_name;   // used in MQTT
         const __FlashStringHelper *         full_name;    // used in Web and Console
         uint8_t                             uom;          // DeviceValueUOM::*
+        uint8_t                             ha;           // DevcieValueHA::
+        bool                                has_cmd;      // true if there is a Console/MQTT command which matches the short_name
 
         DeviceValue(uint8_t                             device_type,
                     uint8_t                             tag,
@@ -415,7 +423,9 @@ class EMSdevice {
                     uint8_t                             options_size,
                     const __FlashStringHelper *         short_name,
                     const __FlashStringHelper *         full_name,
-                    uint8_t                             uom)
+                    uint8_t                             uom,
+                    uint8_t                             ha,
+                    bool                                has_cmd)
             : device_type(device_type)
             , tag(tag)
             , value_p(value_p)
@@ -424,7 +434,9 @@ class EMSdevice {
             , options_size(options_size)
             , short_name(short_name)
             , full_name(full_name)
-            , uom(uom) {
+            , uom(uom)
+            , ha(ha)
+            , has_cmd(has_cmd) {
         }
     };
     const std::vector<DeviceValue> devicevalues() const;

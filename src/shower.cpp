@@ -56,6 +56,7 @@ void Shower::loop() {
                 if (!shower_on_ && (time_now - timer_start_) > SHOWER_MIN_DURATION) {
                     shower_on_ = true;
                     send_mqtt_stat(true);
+                    publish_values();
                     LOG_DEBUG(F("[Shower] hot water still running, starting shower timer"));
                 }
                 // check if the shower has been on too long

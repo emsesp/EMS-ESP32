@@ -149,7 +149,7 @@ std::string EMSdevice::brand_to_string() const {
         break;
     case EMSdevice::Brand::NO_BRAND:
     default:
-        return read_flash_string(F("---"));
+        return read_flash_string(F(""));
         break;
     }
 
@@ -405,7 +405,7 @@ void EMSdevice::register_mqtt_topic(const std::string & topic, mqtt_subfunction_
 }
 
 // add command to library
-void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f, uint8_t flag) {
+void EMSdevice::register_cmd(const __FlashStringHelper * cmd, cmdfunction_p f, uint8_t flag) {
     Command::add(device_type_, cmd, f, flag);
 }
 
@@ -423,7 +423,14 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __
 //  short_name: used in Mqtt as keys
 //  full name: used in Web and Console unless empty (nullptr)
 //  uom: unit of measure from DeviceValueUOM
-void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * short_name, const __FlashStringHelper * full_name, uint8_t uom) {
+void EMSdevice::register_device_value(uint8_t                             tag,
+                                      void *                              value_p,
+                                      uint8_t                             type,
+                                      const __FlashStringHelper * const * options,
+                                      const __FlashStringHelper *         short_name,
+                                      const __FlashStringHelper *         full_name,
+                                      uint8_t                             uom,
+                                      bool                                has_cmd) {
     // init the value depending on it's type
     if (type == DeviceValueType::TEXT) {
         *(char *)(value_p) = {'\0'};
@@ -448,11 +455,18 @@ void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type,
         };
     }
 
-    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom);
+    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, 0, has_cmd);
 }
 
-void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom) {
-    register_device_value(tag, value_p, type, options, name[0], name[1], uom);
+void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom, cmdfunction_p f) {
+    register_device_value(tag, value_p, type, options, name[0], name[1], uom, (f != nullptr));
+    if (f != nullptr) {
+        if (tag >= TAG_HC1 && tag <= TAG_HC4) {
+            Command::add(device_type_, name[0], f, FLAG_HC);
+        } else {
+            Command::add(device_type_, name[0], f, 0);
+        }
+    }
 }
 
 // looks up the uom (suffix) for a given key from the device value table
@@ -570,7 +584,7 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
             if (sz > num_elements) {
                 // add the unit of measure (uom)
                 if (dv.uom == DeviceValueUOM::MINUTES) {
-                    data.add(nullptr);
+                    data.add(nullptr); // use null for time/date
                 } else {
                     data.add(uom_to_string(dv.uom));
                 }
@@ -583,7 +597,15 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
                     snprintf_P(name, sizeof(name), "(%s) %s", tag_to_string(dv.tag).c_str(), uuid::read_flash_string(dv.full_name).c_str());
                     data.add(name);
                 }
-                num_elements = sz + 2;
+
+                // add the name of the Command function if it exists
+                if (dv.has_cmd) {
+                    data.add(dv.short_name);
+                } else {
+                    data.add("");
+                }
+
+                num_elements = sz + 3; // increase count by 3
             }
         }
     }
@@ -595,11 +617,12 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
 // return false if empty
 // this is used to create both the MQTT payloads and Console messages (console = true)
 bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter, const bool nested, const bool console) {
-    bool       has_value = false; // to see if we've added a value. it's faster than doing a json.size() at the end
-    uint8_t    old_tag   = 255;   // NAN
-    JsonObject json      = root;
+    bool       has_values = false; // to see if we've added a value. it's faster than doing a json.size() at the end
+    uint8_t    old_tag    = 255;   // NAN
+    JsonObject json       = root;
 
-    for (const auto & dv : devicevalues_) {
+    for (auto & dv : devicevalues_) {
+        bool has_value = false;
         // only show if tag is either empty (TAG_NONE) or matches a value
         // and don't show if full_name is empty unless we're outputing for mqtt payloads
         // for nested we use all values
@@ -731,20 +754,33 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                 }
             }
         }
+        dv.ha      |= has_value ? DeviceValueHA::HA_VALUE : DeviceValueHA::HA_NONE;
+        has_values |= has_value;
     }
 
-    return has_value;
+    return has_values;
 }
 
 // create the Home Assistant configs for each value
-// this is called when an MQTT publish is done via an EMS Device, and only done once
+// this is called when an MQTT publish is done via an EMS Device
 void EMSdevice::publish_mqtt_ha_sensor() {
-    for (const auto & dv : devicevalues_) {
-        Mqtt::publish_mqtt_ha_sensor(dv.type, dv.tag, dv.full_name, device_type_, dv.short_name, dv.uom);
+    for (auto & dv : devicevalues_) {
+        if (dv.ha == DeviceValueHA::HA_VALUE) {
+            Mqtt::publish_mqtt_ha_sensor(dv.type, dv.tag, dv.full_name, device_type_, dv.short_name, dv.uom);
+            dv.ha |= DeviceValueHA::HA_DONE;
+        }
     }
+    if (!ha_config_done()) {
+        bool ok = publish_ha_config();
+        ha_config_done(ok); // see if it worked
+    }
+}
 
-    bool ok = publish_ha_config();
-    ha_config_done(ok); // see if it worked
+void EMSdevice::ha_config_clear() {
+    for (auto & dv : devicevalues_) {
+        dv.ha &= ~DeviceValueHA::HA_DONE;
+    }
+    ha_config_done(false);
 }
 
 // return the name of the telegram type
