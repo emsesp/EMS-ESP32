@@ -65,8 +65,10 @@ void Shell::start() {
 #endif
 
     line_buffer_.reserve(maximum_command_line_length_);
-    line_old_.reserve(maximum_command_line_length_);
-    line_old_.clear();
+    for (uint8_t i = 0; i < MAX_LINES; i++) {
+        line_old_[i].reserve(maximum_command_line_length_);
+        line_old_[i].clear();
+    }
     display_banner();
     display_prompt();
     shells_.insert(shared_from_this());
@@ -214,10 +216,20 @@ void Shell::loop_normal() {
     default:
         if (esc_) {
             if (c == 'A') { // cursor up
-                line_buffer_ = line_old_;
+                line_buffer_ = line_old_[line_no_];
+                if (line_no_ < MAX_LINES - 1) {
+                    line_no_++;
+                }
                 cursor_      = 0;
             } else if (c == 'B') { // cursor down
-                line_buffer_.clear();
+                if (line_no_) {
+                    line_no_--;
+                }
+                if (line_no_) {
+                    line_buffer_ = line_old_[line_no_ - 1];
+                } else {
+                    line_buffer_.clear();
+                }
                 cursor_ = 0;
             } else if (c == 'C') { // cursor  right
                 if (cursor_) {
@@ -498,7 +510,12 @@ void Shell::process_command() {
         println();
         return;
     }
-    line_old_ = line_buffer_;
+    uint8_t no = line_no_ ? line_no_ : MAX_LINES;
+    while (--no) {
+        line_old_[no] = line_old_[no - 1];
+    }
+    line_no_ = 0;
+    line_old_[0] = line_buffer_;
     while (!line_buffer_.empty()) {
         size_t      pos = line_buffer_.find(';');
         std::string line1;
