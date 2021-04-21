@@ -463,7 +463,7 @@ void System::send_heartbeat() {
         doc["adc"] = analog_;
     }
 
-    Mqtt::publish(F("heartbeat"), doc.as<JsonObject>()); // send to MQTT with retain off. This will add to MQTT queue.
+    Mqtt::publish(F_(heartbeat), doc.as<JsonObject>()); // send to MQTT with retain off. This will add to MQTT queue.
 }
 
 // measure and moving average adc
@@ -655,12 +655,12 @@ void System::show_users(uuid::console::Shell & shell) {
 }
 
 void System::show_system(uuid::console::Shell & shell) {
-    shell.printfln(F("Uptime:        %s"), uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
+    shell.printfln(F("Uptime: %s"), uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
 
 #ifndef EMSESP_STANDALONE
-    shell.printfln(F("SDK version:   %s"), ESP.getSdkVersion());
-    shell.printfln(F("CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
-    shell.printfln(F("Free heap:     %lu bytes"), (uint32_t)ESP.getFreeHeap());
+    shell.printfln(F("SDK version: %s"), ESP.getSdkVersion());
+    shell.printfln(F("CPU frequency: %lu MHz"), ESP.getCpuFreqMHz());
+    shell.printfln(F("Free heap: %lu bytes"), (uint32_t)ESP.getFreeHeap());
     shell.println();
 
     switch (WiFi.status()) {
@@ -676,7 +676,7 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(F("WiFi: Network scan complete"));
         break;
 
-    case WL_CONNECTED: {
+    case WL_CONNECTED:
         shell.printfln(F("WiFi: Connected"));
         shell.printfln(F("SSID: %s"), WiFi.SSID().c_str());
         shell.printfln(F("BSSID: %s"), WiFi.BSSIDstr().c_str());
@@ -686,7 +686,7 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
         shell.printfln(F("IPv4 gateway: %s"), uuid::printable_to_string(WiFi.gatewayIP()).c_str());
         shell.printfln(F("IPv4 nameserver: %s"), uuid::printable_to_string(WiFi.dnsIP()).c_str());
-    } break;
+        break;
 
     case WL_CONNECT_FAILED:
         shell.printfln(F("WiFi: Connection failed"));
@@ -736,150 +736,6 @@ void System::show_system(uuid::console::Shell & shell) {
     }
 
 #endif
-}
-
-// console commands to add
-void System::console_commands(Shell & shell, unsigned int context) {
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(restart)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) { EMSESP::system_.restart(); });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(wifi), F_(reconnect)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) { EMSESP::system_.wifi_reconnect(); });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::ADMIN, flash_string_vector{F_(format)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-        shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
-            if (completed) {
-                EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
-                    if (securitySettings.jwtSecret.equals(password.c_str())) {
-                        EMSESP::system_.format(shell);
-                    } else {
-                        shell.println(F("incorrect password"));
-                    }
-                });
-            }
-        });
-    });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::ADMIN, flash_string_vector{F_(passwd)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-        shell.enter_password(F_(new_password_prompt1), [](Shell & shell, bool completed, const std::string & password1) {
-            if (completed) {
-                shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
-                    if (completed) {
-                        if (password1 == password2) {
-                            EMSESP::esp8266React.getSecuritySettingsService()->update(
-                                [&](SecuritySettings & securitySettings) {
-                                    securitySettings.jwtSecret = password2.c_str();
-                                    return StateUpdateResult::CHANGED;
-                                },
-                                "local");
-                            shell.println(F("su password updated"));
-                        } else {
-                            shell.println(F("Passwords do not match"));
-                        }
-                    }
-                });
-            }
-        });
-    });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::USER, flash_string_vector{F_(show)}, [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-        EMSESP::system_.show_system(shell);
-        shell.println();
-    });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(hostname)},
-                                       flash_string_vector{F_(name_mandatory)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           shell.println("The network connection will be reset...");
-                                           Shell::loop_all();
-                                           delay(1000); // wait a second
-                                           EMSESP::esp8266React.getNetworkSettingsService()->update(
-                                               [&](NetworkSettings & networkSettings) {
-                                                   networkSettings.hostname = arguments.front().c_str();
-                                                   return StateUpdateResult::CHANGED;
-                                               },
-                                               "local");
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(wifi), F_(ssid)},
-                                       flash_string_vector{F_(name_mandatory)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           EMSESP::esp8266React.getNetworkSettingsService()->updateWithoutPropagation([&](NetworkSettings & networkSettings) {
-                                               networkSettings.ssid = arguments.front().c_str();
-                                               return StateUpdateResult::CHANGED;
-                                           });
-                                           shell.println("Use `wifi reconnect` to save and apply the new settings");
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::ADMIN, flash_string_vector{F_(set), F_(wifi), F_(password)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-        shell.enter_password(F_(new_password_prompt1), [](Shell & shell, bool completed, const std::string & password1) {
-            if (completed) {
-                shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
-                    if (completed) {
-                        if (password1 == password2) {
-                            EMSESP::esp8266React.getNetworkSettingsService()->updateWithoutPropagation([&](NetworkSettings & networkSettings) {
-                                networkSettings.password = password2.c_str();
-                                return StateUpdateResult::CHANGED;
-                            });
-                            shell.println("Use `wifi reconnect` to save and apply the new settings");
-                        } else {
-                            shell.println(F("Passwords do not match"));
-                        }
-                    }
-                });
-            }
-        });
-    });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(board_profile)},
-                                       flash_string_vector{F_(name_mandatory)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           std::vector<uint8_t> data; // led, dallas, rx, tx, button
-                                           std::string          board_profile = Helpers::toUpper(arguments.front());
-                                           if (!load_board_profile(data, board_profile)) {
-                                               shell.println(F("Invalid board profile"));
-                                               return;
-                                           }
-                                           EMSESP::webSettingsService.update(
-                                               [&](WebSettings & settings) {
-                                                   settings.board_profile = board_profile.c_str();
-                                                   settings.led_gpio      = data[0];
-                                                   settings.dallas_gpio   = data[1];
-                                                   settings.rx_gpio       = data[2];
-                                                   settings.tx_gpio       = data[3];
-                                                   settings.pbutton_gpio  = data[4];
-                                                   return StateUpdateResult::CHANGED;
-                                               },
-                                               "local");
-                                           shell.printfln("Loaded board profile %s (%d,%d,%d,%d,%d)", board_profile.c_str(), data[0], data[1], data[2], data[3], data[4]);
-                                           EMSESP::system_.network_init(true);
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::USER, flash_string_vector{F_(set)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-        EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-            shell.printfln(F_(hostname_fmt), networkSettings.hostname.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : networkSettings.hostname.c_str());
-            shell.printfln(F_(wifi_ssid_fmt), networkSettings.ssid.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : networkSettings.ssid.c_str());
-            shell.printfln(F_(wifi_password_fmt), networkSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
-        });
-        EMSESP::webSettingsService.read([&](WebSettings & settings) { shell.printfln(F_(board_profile_fmt), settings.board_profile.c_str()); });
-    });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::ADMIN, flash_string_vector{F_(show), F_(users)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-        EMSESP::system_.show_users(shell);
-    });
-
-    // enter the context
-    Console::enter_custom_context(shell, context);
 }
 
 // upgrade from previous versions of EMS-ESP
