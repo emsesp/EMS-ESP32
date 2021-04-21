@@ -8,6 +8,7 @@
 ## Fixed
 - Don't create Home Assistant MQTT discovery entries for device values that don't exists (#756 on EMS-ESP repo)
 - Update shower MQTT when a shower start is detected
+- S32 board profile
 
 ## Changed
 
@@ -16,5 +17,6 @@
 - moved mqtt-topics and texts to local_EN, all topics lower case
 - Re-enabled Shower Alert (still experimental)
 - lowercased Flow temp in commands
+- system console commands to main
 
 ## Removed

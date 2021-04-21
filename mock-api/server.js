@@ -285,7 +285,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
 
     if (board_profile == "S32") { // BBQKees Gateway S32
         data.led_gpio = 2;
-        data.dallas_gpio = 3;
+        data.dallas_gpio = 18;
         data.rx_gpio = 23;
         data.tx_gpio = 5;
         data.pbutton_gpio = 0;
@@ -295,7 +295,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
         data.rx_gpio = 5;
         data.tx_gpio = 17;
         data.pbutton_gpio = 33;
-    } else if (board_profile == "MT-ET") { // MT-ET Live D1 Mini
+    } else if (board_profile == "MH-ET") { // MH-ET Live D1 Mini
         data.led_gpio = 2;
         data.dallas_gpio = 18;
         data.rx_gpio = 23;
