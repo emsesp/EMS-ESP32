@@ -754,7 +754,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                 }
             }
         }
-        dv.ha      |= has_value ? DeviceValueHA::HA_VALUE : DeviceValueHA::HA_NONE;
+        dv.ha |= has_value ? DeviceValueHA::HA_VALUE : DeviceValueHA::HA_NONE;
         has_values |= has_value;
     }
 

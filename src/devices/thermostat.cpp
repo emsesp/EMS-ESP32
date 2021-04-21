@@ -794,8 +794,8 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
 
     // check why mode is both in the Monitor and Set for the RC300. It'll be read twice!
     // has_update(telegram->read_value(hc->mode, 0); // Auto = xFF, Manual = x00 eg. 10 00 FF 08 01 B9 FF
-    has_update(telegram->read_value(hc->daytemp, 2));     // is * 2
-    has_update(telegram->read_value(hc->nighttemp, 4));   // is * 2
+    has_update(telegram->read_value(hc->daytemp, 2));   // is * 2
+    has_update(telegram->read_value(hc->nighttemp, 4)); // is * 2
     has_update(telegram->read_value(hc->tempautotemp, 8));
     has_update(telegram->read_value(hc->manualtemp, 10)); // is * 2
     has_update(telegram->read_value(hc->program, 11));    // timer program 1 or 2
@@ -962,8 +962,8 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(hc->reducemode, 25));     // 0-nofrost, 1-reduce, 2-roomhold, 3-outdoorhold
     has_update(telegram->read_value(hc->control, 26));        // 0-off, 1-RC20 (remote), 2-RC35
     has_update(telegram->read_value(hc->controlmode, 33));    // 0-outdoortemp, 1-roomtemp
-    has_update(telegram->read_value(hc->tempautotemp, 37));    // 0-outdoortemp, 1-roomtemp
-    has_update(telegram->read_value(hc->noreducetemp, 38));    // outdoor temperature for no reduce
+    has_update(telegram->read_value(hc->tempautotemp, 37));   // 0-outdoortemp, 1-roomtemp
+    has_update(telegram->read_value(hc->noreducetemp, 38));   // outdoor temperature for no reduce
     has_update(telegram->read_value(hc->minflowtemp, 16));
     if (hc->heatingtype == 3) {
         has_update(telegram->read_value(hc->designtemp, 36));  // is * 1

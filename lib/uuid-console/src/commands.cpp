@@ -50,10 +50,7 @@ void Commands::add_command(const flash_string_vector & name, const flash_string_
     add_command(0, 0, name, arguments, function, nullptr);
 }
 
-void Commands::add_command(const flash_string_vector &  name,
-                           const flash_string_vector &  arguments,
-                           command_function             function,
-                           argument_completion_function arg_function) {
+void Commands::add_command(const flash_string_vector & name, const flash_string_vector & arguments, command_function function, argument_completion_function arg_function) {
     add_command(0, 0, name, arguments, function, arg_function);
 }
 
@@ -61,20 +58,11 @@ void Commands::add_command(unsigned int context, unsigned int flags, const flash
     add_command(context, flags, name, flash_string_vector{}, function, nullptr);
 }
 
-void Commands::add_command(unsigned int                context,
-                           unsigned int                flags,
-                           const flash_string_vector & name,
-                           const flash_string_vector & arguments,
-                           command_function            function) {
+void Commands::add_command(unsigned int context, unsigned int flags, const flash_string_vector & name, const flash_string_vector & arguments, command_function function) {
     add_command(context, flags, name, arguments, function, nullptr);
 }
 
-void Commands::add_command(unsigned int                 context,
-                           unsigned int                 flags,
-                           const flash_string_vector &  name,
-                           const flash_string_vector &  arguments,
-                           command_function             function,
-                           argument_completion_function arg_function) {
+void Commands::add_command(unsigned int context, unsigned int flags, const flash_string_vector & name, const flash_string_vector & arguments, command_function function, argument_completion_function arg_function) {
     commands_.emplace(std::piecewise_construct, std::forward_as_tuple(context), std::forward_as_tuple(flags, name, arguments, function, arg_function));
 }
 
@@ -179,8 +167,7 @@ bool Commands::find_longest_common_prefix(const std::multimap<size_t, const Comm
             for (auto command_it = std::next(commands.begin()); command_it != commands.end(); command_it++) {
                 // This relies on the null terminator character limiting the
                 // length before it becomes longer than any of the strings
-                if (pgm_read_byte(reinterpret_cast<PGM_P>(first) + length)
-                    != pgm_read_byte(reinterpret_cast<PGM_P>(*std::next(command_it->second->name_.begin(), component_prefix)) + length)) {
+                if (pgm_read_byte(reinterpret_cast<PGM_P>(first) + length) != pgm_read_byte(reinterpret_cast<PGM_P>(*std::next(command_it->second->name_.begin(), component_prefix)) + length)) {
                     all_match = false;
                     break;
                 }
@@ -275,8 +262,7 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
             result.replacement->push_back(std::move(read_flash_string(name)));
         }
 
-        if (command_line.total_size() > result.replacement->size()
-            && command_line.total_size() <= matching_command->name_.size() + matching_command->maximum_arguments()) {
+        if (command_line.total_size() > result.replacement->size() && command_line.total_size() <= matching_command->name_.size() + matching_command->maximum_arguments()) {
             // Try to auto-complete arguments
             std::vector<std::string> arguments{std::next(command_line->cbegin(), result.replacement->size()), command_line->cend()};
 
@@ -526,11 +512,7 @@ void Commands::for_each_available_command(Shell & shell, apply_function f) const
     }
 }
 
-Commands::Command::Command(unsigned int                 flags,
-                           const flash_string_vector    name,
-                           const flash_string_vector    arguments,
-                           command_function             function,
-                           argument_completion_function arg_function)
+Commands::Command::Command(unsigned int flags, const flash_string_vector name, const flash_string_vector arguments, command_function function, argument_completion_function arg_function)
     : flags_(flags)
     , name_(name)
     , arguments_(arguments)

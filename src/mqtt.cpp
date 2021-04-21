@@ -898,7 +898,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
 
     bool have_tag  = !EMSdevice::tag_to_string(tag).empty() && (device_type != EMSdevice::DeviceType::BOILER); // ignore boiler
-    bool is_nested = (nested_format_ == 1) || (device_type == EMSdevice::DeviceType::BOILER);                         // boiler never uses nested
+    bool is_nested = (nested_format_ == 1) || (device_type == EMSdevice::DeviceType::BOILER);                  // boiler never uses nested
 
     // create entity by add the tag if present, seperating with a .
     char new_entity[50];

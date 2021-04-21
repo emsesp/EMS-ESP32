@@ -142,7 +142,7 @@ enum DeviceValueTAG : uint8_t {
 enum MqttSubFlag : uint8_t { FLAG_NORMAL = 0, FLAG_HC, FLAG_WWC, FLAG_NOSUB };
 
 // mqtt-HA flags
-enum DeviceValueHA : uint8_t { HA_NONE = 0, HA_VALUE, HA_DONE};
+enum DeviceValueHA : uint8_t { HA_NONE = 0, HA_VALUE, HA_DONE };
 
 class EMSdevice {
   public:

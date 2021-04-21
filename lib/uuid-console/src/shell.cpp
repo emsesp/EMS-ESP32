@@ -220,7 +220,7 @@ void Shell::loop_normal() {
                 if (line_no_ < MAX_LINES - 1) {
                     line_no_++;
                 }
-                cursor_      = 0;
+                cursor_ = 0;
             } else if (c == 'B') { // cursor down
                 if (line_no_) {
                     line_no_--;
@@ -514,7 +514,7 @@ void Shell::process_command() {
     while (--no) {
         line_old_[no] = line_old_[no - 1];
     }
-    line_no_ = 0;
+    line_no_     = 0;
     line_old_[0] = line_buffer_;
     while (!line_buffer_.empty()) {
         size_t      pos = line_buffer_.find(';');

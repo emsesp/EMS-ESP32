@@ -395,9 +395,9 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
         gmtime_r(&message.time_.tv_sec, &utc);
         localtime_r(&message.time_.tv_sec, &tm);
         int16_t diff = 60 * (tm.tm_hour - utc.tm_hour) + tm.tm_min - utc.tm_min;
-        diff = diff > 720 ? diff - 1440 : diff < -720 ? diff + 1440 : diff;
-        tzh  = diff / 60;
-        tzm  = diff < 0 ? (0 - diff) % 60 : diff % 60;
+        diff         = diff > 720 ? diff - 1440 : diff < -720 ? diff + 1440 : diff;
+        tzh          = diff / 60;
+        tzm          = diff < 0 ? (0 - diff) % 60 : diff % 60;
     }
 
     if (udp_.beginPacket(host_, port_) != 1) {
@@ -407,15 +407,7 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
 
     udp_.printf_P(PSTR("<%u>1 "), ((unsigned int)message.content_->facility * 8) + std::min(7U, (unsigned int)message.content_->level));
     if (tm.tm_year != 0) {
-        udp_.printf_P(PSTR("%04u-%02u-%02uT%02u:%02u:%02u.%06u%+02d:%02d"),
-                      tm.tm_year + 1900,
-                      tm.tm_mon + 1,
-                      tm.tm_mday,
-                      tm.tm_hour,
-                      tm.tm_min,
-                      tm.tm_sec,
-                      (uint32_t)message.time_.tv_usec,
-                      tzh, tzm);
+        udp_.printf_P(PSTR("%04u-%02u-%02uT%02u:%02u:%02u.%06u%+02d:%02d"), tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, (uint32_t)message.time_.tv_usec, tzh, tzm);
     } else {
         udp_.print('-');
     }

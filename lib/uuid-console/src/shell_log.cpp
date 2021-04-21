@@ -96,7 +96,6 @@ void Shell::output_logs() {
             }
 
             ::yield();
-
         }
         display_prompt();
     }
