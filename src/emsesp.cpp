@@ -511,6 +511,10 @@ void EMSESP::publish_other_values() {
 }
 
 void EMSESP::publish_sensor_values(const bool time, const bool force) {
+    if (!dallas_enabled()) {
+        return;
+    }
+
     if (dallassensor_.updated_values() || time || force) {
         dallassensor_.publish_values(force);
     }
