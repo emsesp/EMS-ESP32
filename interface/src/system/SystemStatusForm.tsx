@@ -111,6 +111,8 @@ class SystemStatusForm extends Component<SystemStatusFormProps, SystemStatusForm
       <Dialog
         open={this.state.confirmRestart}
         onClose={this.onRestartRejected}
+        fullWidth
+        maxWidth="sm"
       >
         <DialogTitle>Confirm Restart</DialogTitle>
         <DialogContent dividers>
@@ -158,6 +160,8 @@ class SystemStatusForm extends Component<SystemStatusFormProps, SystemStatusForm
       <Dialog
         open={this.state.confirmFactoryReset}
         onClose={this.onFactoryResetRejected}
+        fullWidth
+        maxWidth="sm"
       >
         <DialogTitle>Confirm Factory Reset</DialogTitle>
         <DialogContent dividers>

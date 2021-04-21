@@ -250,6 +250,8 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
       <Dialog
         open={this.state.confirmScanDevices}
         onClose={this.onScanDevicesRejected}
+        fullWidth
+        maxWidth="sm"
       >
         <DialogTitle>Confirm Scan Devices</DialogTitle>
         <DialogContent dividers>
