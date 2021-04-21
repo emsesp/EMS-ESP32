@@ -32,7 +32,7 @@ class UserForm extends React.Component<UserFormProps> {
     const { user, creating, handleValueChange, onDoneEditing, onCancelEditing } = this.props;
     return (
       <ValidatorForm onSubmit={onDoneEditing} ref={this.formRef}>
-        <Dialog onClose={onCancelEditing} aria-labelledby="user-form-dialog-title" open>
+        <Dialog onClose={onCancelEditing} aria-labelledby="user-form-dialog-title" open fullWidth maxWidth="sm">
           <DialogTitle id="user-form-dialog-title">{creating ? 'Add' : 'Modify'} User</DialogTitle>
           <DialogContent dividers>
             <TextValidator
