@@ -137,7 +137,6 @@ MAKE_PSTR(unset, "<unset>")
 
 MAKE_PSTR_WORD(number)
 MAKE_PSTR_WORD(enum)
-MAKE_PSTR_WORD(boolean)
 MAKE_PSTR_WORD(text)
 
 MAKE_PSTR_WORD(2)

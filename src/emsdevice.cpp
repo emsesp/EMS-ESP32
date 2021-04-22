@@ -688,7 +688,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd) {
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                     json["value"] = (bool)(*(uint8_t *)(dv.value_p)) ? true : false;
                 }
-                json["type"]  = F_(boolean);
+                json["type"]  = F("boolean");
                 break;
             case DeviceValueType::TIME:
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
