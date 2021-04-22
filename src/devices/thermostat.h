@@ -36,7 +36,8 @@ class Thermostat : public EMSdevice {
 
         int16_t setpoint_roomTemp;
         int16_t curr_roomTemp;
-        uint8_t tempautotemp;
+        int16_t remotetemp; // for readback
+         uint8_t tempautotemp;
         uint8_t mode;
         uint8_t modetype;
         uint8_t summermode;

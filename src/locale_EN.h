@@ -429,6 +429,7 @@ MAKE_PSTR_LIST(holidaymode, F("holidaymode"), F("holiday mode"))
 MAKE_PSTR_LIST(flowtempoffset, F("flowtempoffset"), F("flow temperature offset"))
 MAKE_PSTR_LIST(reducemode, F("reducemode"), F("reduce mode"))
 MAKE_PSTR_LIST(noreducetemp, F("noreducetemp"), F("no reduce below temperature"))
+MAKE_PSTR_LIST(remotetemp, F("remotetemp"), F("room temperature from remote"))
 
 // heatpump
 MAKE_PSTR_LIST(airHumidity, F("airhumidity"), F("relative air humidity"))
