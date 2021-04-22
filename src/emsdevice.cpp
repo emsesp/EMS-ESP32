@@ -618,22 +618,28 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd) {
     for (auto & dv : devicevalues_) {
         if (strcmp(cmd, uuid::read_flash_string(dv.short_name).c_str()) == 0) {
             uint8_t divider = (dv.options_size == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
-            json["name"]    = cmd;
+            json["name"] = cmd;
             switch (dv.type) {
-            case DeviceValueType::ENUM:
-                // json["value"] = dv.options[*(uint8_t *)(dv.value_p)]; // text
+            case DeviceValueType::ENUM: {
                 if (Helpers::hasValue((uint8_t)(*(uint8_t *)(dv.value_p)))) {
-                    json["value"] = (uint8_t)(*(uint8_t *)(dv.value_p));
+                    json["value"] = dv.options[*(uint8_t *)(dv.value_p)]; // text
+                    // json["value"] = (uint8_t)(*(uint8_t *)(dv.value_p));
                 }
-                json["type"]  = "enum";
-                json["min"]   = 0;
-                json["max"]   = dv.options_size - 1;
+                json["type"]    = F_(enum);
+                uint8_t min     = (uuid::read_flash_string(dv.options[*(uint8_t *)(dv.value_p)]) == "") ? 1 : 0;
+                json["min"]     = min;
+                json["max"]     = dv.options_size - 1;
+                JsonArray enum_ = json.createNestedArray(F_(enum));
+                for (uint8_t i = min; i < dv.options_size; i++) {
+                    enum_.add(dv.options[i]);
+                }
                 break;
+            }
             case DeviceValueType::USHORT:
                 if (Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
                     json["value"] = Helpers::round2(*(uint16_t *)(dv.value_p), divider);
                 }
-                json["type"]  = "number";
+                json["type"]  = F_(number);
                 json["min"]   = 0;
                 json["max"]   = divider ? EMS_VALUE_USHORT_NOTSET / divider : EMS_VALUE_USHORT_NOTSET;
                 break;
@@ -641,7 +647,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd) {
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
                     json["value"] = Helpers::round2(*(uint8_t *)(dv.value_p), divider);
                 }
-                json["type"]  = "number";
+                json["type"]  = F_(number);
                 json["min"] = 0;
                 if (dv.uom == DeviceValueUOM::PERCENT) {
                     json["max"] = 100;
@@ -653,7 +659,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd) {
                 if (Helpers::hasValue(*(int16_t *)(dv.value_p))) {
                     json["value"] = Helpers::round2(*(int16_t *)(dv.value_p), divider);
                 }
-                json["type"]  = "number";
+                json["type"]  = F_(number);
                 json["min"] = divider ? -EMS_VALUE_SHORT_NOTSET / divider : -EMS_VALUE_SHORT_NOTSET;
                 json["max"] = divider ? EMS_VALUE_SHORT_NOTSET / divider : EMS_VALUE_SHORT_NOTSET;
                 break;
@@ -661,7 +667,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd) {
                 if (Helpers::hasValue(*(int8_t *)(dv.value_p))) {
                     json["value"] = Helpers::round2(*(int8_t *)(dv.value_p), divider);
                 }
-                json["type"]  = "number";
+                json["type"]  = F_(number);
                 if (dv.uom == DeviceValueUOM::PERCENT) {
                     json["min"] = -100;
                     json["max"] = 100;
@@ -674,7 +680,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd) {
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     json["value"] = Helpers::round2(*(uint32_t *)(dv.value_p), divider);
                 }
-                json["type"]  = "number";
+                json["type"]  = F_(number);
                 json["min"]   = 0;
                 json["max"]   = divider ? EMS_VALUE_ULONG_NOTSET / divider : EMS_VALUE_ULONG_NOTSET;
                 break;
@@ -682,13 +688,13 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd) {
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                     json["value"] = (bool)(*(uint8_t *)(dv.value_p)) ? true : false;
                 }
-                json["type"]  = "boolean";
+                json["type"]  = F_(boolean);
                 break;
             case DeviceValueType::TIME:
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     json["value"] = (divider) ? *(uint32_t *)(dv.value_p) / divider : *(uint32_t *)(dv.value_p);
                 }
-                json["type"]  = "number";
+                json["type"]  = F_(number);
                 json["min"]   = 0;
                 json["max"]   = divider ? EMS_VALUE_ULONG_NOTSET / divider : EMS_VALUE_ULONG_NOTSET;
                 break;
@@ -696,10 +702,10 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd) {
                 if (Helpers::hasValue((char *)(dv.value_p))) {
                     json["value"] = (char *)(dv.value_p);
                 }
-                json["type"]  = "text";
+                json["type"]  = F_(text);
                 break;
             default:
-                json["type"]  = "unknown";
+                json["type"]  = F_(unknown);
                 break;
             }
             if (dv.uom != DeviceValueUOM::NONE) {
