@@ -101,10 +101,10 @@ class EMSESPShell : virtual public uuid::console::Shell {
     void        stopped() override;
     void        display_banner() override;
     std::string hostname_text() override;
-    std::string context_text() override;
+    // std::string context_text() override;
     std::string prompt_suffix() override;
     void        end_of_transmission() override;
-    bool        exit_context() override;
+    // bool        exit_context() override;
 
   private:
     void        add_console_commands();

@@ -106,6 +106,8 @@ class EMSESP {
     static void    actual_master_thermostat(const uint8_t device_id);
     static uint8_t check_master_device(const uint8_t device_id, const uint16_t type_id, const bool read);
 
+    static bool get_device_value_info(JsonObject & root, const char * cmd, uint8_t devicetype);
+
     static void show_device_values(uuid::console::Shell & shell);
     static void show_sensor_values(uuid::console::Shell & shell);
 

@@ -349,11 +349,6 @@ void EMSESPShell::add_console_commands() {
             }
 
             const char * cmd = arguments[1].c_str();
-            if (Command::find_command(device_type, cmd) == nullptr) {
-                shell.print(F("Unknown command. Available commands are: "));
-                Command::show(shell, device_type);
-                return;
-            }
 
             DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
             JsonObject          json = doc.to<JsonObject>();
@@ -379,7 +374,10 @@ void EMSESPShell::add_console_commands() {
                 doc.shrinkToFit();
                 serializeJsonPretty(doc, shell);
                 shell.println();
+                return;
             }
+            shell.print(F("Unknown command. Available commands are: "));
+            Command::show(shell, device_type);
         },
         [&](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) -> std::vector<std::string> {
             if (arguments.size() == 0) {
@@ -416,6 +414,7 @@ std::string EMSESPShell::hostname_text() {
     return console_hostname_;
 }
 
+/*
 // remove commands from the current context to save memory before exiting
 bool EMSESPShell::exit_context() {
     unsigned int current_context = context();
@@ -429,7 +428,6 @@ bool EMSESPShell::exit_context() {
     return false;
 }
 
-/*
 // enter a custom context (sub-menu)
 void Console::enter_custom_context(Shell & shell, unsigned int context) {
     // load_standard_commands(context);
@@ -500,7 +498,8 @@ void Console::load_standard_commands(unsigned int context) {
     });
 
     EMSESPShell::commands->add_command(context, CommandFlags::USER, flash_string_vector{F_(exit)}, [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-        shell.exit_context();
+        shell.stop();
+        // shell.exit_context();
     });
 
     EMSESPShell::commands->add_command(context, CommandFlags::USER, flash_string_vector{F_(su)}, [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
@@ -664,7 +663,7 @@ void Console::load_system_commands(unsigned int context) {
 
 }
 
-
+/*
 // prompt, change per context
 std::string EMSESPShell::context_text() {
     switch (static_cast<ShellContext>(context())) {
@@ -678,6 +677,7 @@ std::string EMSESPShell::context_text() {
         return std::string{};
     }
 }
+*/
 
 // when in su (admin) show # as the prompt suffix
 std::string EMSESPShell::prompt_suffix() {

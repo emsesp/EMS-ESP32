@@ -313,6 +313,7 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
             if (mf.mqtt_subfunction_) {
                 if (!(mf.mqtt_subfunction_)(message)) {
                     LOG_ERROR(F("MQTT error: invalid payload %s for this topic %s"), message, topic);
+                    Mqtt::publish(F("response"), "invalid");
                 }
                 return;
             }
@@ -335,6 +336,7 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
                 // LOG_INFO(F("devicetype= %d, topic = %s, cmd = %s, message =  %s, id = %d"), mf.device_type_, topic, cmd_only, message, id);
                 if (!Command::call(mf.device_type_, cmd_only, message, id)) {
                     LOG_ERROR(F("No matching cmd (%s) in topic %s, id %d, or invalid data"), cmd_only, topic, id);
+                    Mqtt::publish(F("response"), "unknown");
                 }
                 return;
             }
@@ -379,11 +381,13 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
                 cmd_known                = Command::call(mf.device_type_, command, "", n, json);
                 if (cmd_known && json.size()) {
                     Mqtt::publish(F("response"), resp.as<JsonObject>());
-                }
+                    return;
+                 }
             }
 
             if (!cmd_known) {
                 LOG_ERROR(F("No matching cmd (%s) or invalid data"), command);
+                Mqtt::publish(F("response"), "unknown");
             }
 
             return;

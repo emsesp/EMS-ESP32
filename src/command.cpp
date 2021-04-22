@@ -58,10 +58,6 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
     std::string dname = EMSdevice::device_type_2_device_name(device_type);
 
     auto cf = find_command(device_type, cmd);
-    if (cf == nullptr) {
-        LOG_WARNING(F("Command %s on %s not found"), cmd, dname.c_str());
-        return false; // command not found or not json
-    }
 
 #ifdef EMSESP_DEBUG
     if (value == nullptr) {
@@ -79,10 +75,17 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
         return false;
     }
 
-    if (!cf->cmdfunction_json_) {
-        return ((cf->cmdfunction_)(value, id));
-    } else {
+    if (cf == nullptr) {
+        return EMSESP::get_device_value_info(json, cmd, device_type);
+    }
+
+    if (cf->cmdfunction_json_) {
         return ((cf->cmdfunction_json_)(value, id, json));
+    } else {
+        if (value == nullptr || strlen(value) == 0) {
+            return EMSESP::get_device_value_info(json, cmd, device_type);
+        }
+        return ((cf->cmdfunction_)(value, id));
     }
 }
 
