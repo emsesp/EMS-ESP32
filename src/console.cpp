@@ -375,9 +375,11 @@ void EMSESPShell::add_console_commands() {
                 serializeJsonPretty(doc, shell);
                 shell.println();
                 return;
+            } else if (!ok) {
+                shell.println(F("Unknown command, value, or id."));
+                shell.print(F("Available commands are: "));
+                Command::show(shell, device_type);
             }
-            shell.print(F("Unknown command. Available commands are: "));
-            Command::show(shell, device_type);
         },
         [&](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) -> std::vector<std::string> {
             if (arguments.size() == 0) {
