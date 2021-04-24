@@ -291,6 +291,7 @@ void Shell::loop_normal() {
         } else if (c >= '\x20' && c <= '\x7E') {
             if (line_buffer_.length() < maximum_command_line_length_) {
                 line_buffer_.insert(line_buffer_.length() - cursor_, 1, c);
+                line_no_ = 0;
             }
         }
         break;
