@@ -82,7 +82,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
         doc.shrinkToFit();
         std::string buffer;
         serializeJsonPretty(doc, buffer);
-        request->send(200, "text/plain", buffer.c_str());
+        request->send(200, "text/plain;charset=utf-8", buffer.c_str());
         return;
     }
     request->send(200, "text/plain", ok ? F("OK") : F("Invalid"));
