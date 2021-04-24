@@ -620,12 +620,25 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
     return (num_elements != 0);
 }
 
-bool EMSdevice::get_value_info(JsonObject & root, const char * cmd) {
+bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t id) {
     JsonObject json = root;
+    int8_t     tag  = id;
+
+    // check if we have hc or wwc
+    if (id >= 1 && id <= 4) {
+        tag = DeviceValueTAG::TAG_HC1 + id - 1;
+    } else if (id >= 8 && id <= 11) {
+        tag = DeviceValueTAG::TAG_WWC1 + id - 8;
+    }
+
+    // search device value with this tag
     for (auto & dv : devicevalues_) {
-        if (strcmp(cmd, uuid::read_flash_string(dv.short_name).c_str()) == 0) {
+        if (strcmp(cmd, uuid::read_flash_string(dv.short_name).c_str()) == 0 && (tag <= 0 || tag == dv.tag)) {
             uint8_t divider = (dv.options_size == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
-            json["name"] = cmd;
+            json["name"] = dv.short_name;
+            if (dv.tag >= DeviceValueTAG::TAG_HC1) {
+                json["circuit"] = tag_to_string(dv.tag);
+            }
             switch (dv.type) {
             case DeviceValueType::ENUM: {
                 if (Helpers::hasValue((uint8_t)(*(uint8_t *)(dv.value_p)))) {

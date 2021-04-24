@@ -4,6 +4,8 @@
 
 - Mock API to simulate an ESP, for testing web
 - Able to write values from the Web UI
+- check values with `"cmd":<valuename>` and data empty or `?`
+- set hc for values and commands by id or prefix `hc<x>`+separarator, separator can be any char
   
 ## Fixed
 - Don't create Home Assistant MQTT discovery entries for device values that don't exists (#756 on EMS-ESP repo)

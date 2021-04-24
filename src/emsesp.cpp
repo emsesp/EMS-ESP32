@@ -440,7 +440,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     // group by device type
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
-            // if we're using HA, if done is checked for each sensor in devices
+            // if we're using HA, done is checked for each sensor in devices
             if (Mqtt::ha_enabled()) {
                 emsdevice->publish_mqtt_ha_sensor(); // create the configs for each value as a sensor
             }
@@ -547,10 +547,10 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
     Mqtt::publish(F("response"), doc.as<JsonObject>());
 }
 
-bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, uint8_t devicetype) {
+bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->device_type() == devicetype) {
-            return emsdevice->get_value_info(root, cmd);
+            return emsdevice->get_value_info(root, cmd, id);
         }
     }
     return false;

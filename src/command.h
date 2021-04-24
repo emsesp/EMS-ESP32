@@ -65,6 +65,7 @@ class Command {
     static void                   add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb);
     static void                   show_all(uuid::console::Shell & shell);
     static Command::CmdFunction * find_command(const uint8_t device_type, const char * cmd);
+    static char *                 check_command(char * out, const char * cmd, int8_t & id);
 
     static void show(uuid::console::Shell & shell, uint8_t device_type);
     static void show_devices(uuid::console::Shell & shell);
