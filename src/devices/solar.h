@@ -75,6 +75,14 @@ class Solar : public EMSdevice {
     uint8_t  climateZone_;    // climate zone identifier
     uint16_t collector1Area_; // Area of collector field 1
     uint8_t  collector1Type_; // Type of collector field 1, 01=flat, 02=vacuum
+  // SM100wwTemperature - 0x07D6
+    uint8_t wwTemp_1_;
+    uint8_t wwTemp_3_;
+    uint8_t wwTemp_4_;
+    uint8_t wwTemp_5_;
+    uint8_t wwTemp_7_;
+    // SM100wwStatus - 0x07AA
+    uint8_t wwPump_;
 
     char    type_[20]; // Solar of WWC
     uint8_t id_;

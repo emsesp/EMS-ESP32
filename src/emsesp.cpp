@@ -450,8 +450,8 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA, false);
                 Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_BOILER_DATA), json);
                 json.clear();
-                emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA_WW, false);
-                Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_BOILER_DATA_WW), json);
+                emsdevice->generate_values_json(json, DeviceValueTAG::TAG_DEVICE_DATA_WW, false);
+                Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_DEVICE_DATA_WW), json);
                 need_publish = false;
             }
 
@@ -544,7 +544,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
         doc["value"] = value;
     }
 
-    Mqtt::publish(F("response"), doc.as<JsonObject>());
+    Mqtt::publish(F_(response), doc.as<JsonObject>());
 }
 
 bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype) {

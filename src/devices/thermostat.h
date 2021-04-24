@@ -37,7 +37,7 @@ class Thermostat : public EMSdevice {
         int16_t setpoint_roomTemp;
         int16_t curr_roomTemp;
         int16_t remotetemp; // for readback
-         uint8_t tempautotemp;
+        uint8_t tempautotemp;
         uint8_t mode;
         uint8_t modetype;
         uint8_t summermode;
@@ -143,7 +143,8 @@ class Thermostat : public EMSdevice {
     char     dateTime_[25];  // date and time stamp
     char     errorCode_[15]; // code from 0xA2 as string i.e. "A22(816)"
     uint16_t errorNumber_;   // used internally to build error code
-    char     lastCode_[30];
+    char     lastCode_[30];  // error log
+    char     dummychar_[5];  // for commands with no output
 
     // Installation parameters
     uint8_t ibaMainDisplay_;       // display on Thermostat: 0 int temp, 1 int setpoint, 2 ext temp, 3 burner temp, 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp

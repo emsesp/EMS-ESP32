@@ -34,7 +34,7 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     register_telegram_type(0x9D, F("WM10SetMessage"), false, MAKE_PF_CB(process_WM10SetMessage));
     register_telegram_type(0x1E, F("WM10TempMessage"), false, MAKE_PF_CB(process_WM10TempMessage));
 
-    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr, DeviceValueUOM::NONE); // empty full name to prevent being shown in web or console
+    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
     register_device_value(TAG_NONE, &activated_, DeviceValueType::BOOL, nullptr, FL_(activated), DeviceValueUOM::NONE);
     register_device_value(TAG_NONE, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
     register_device_value(TAG_NONE, &status_, DeviceValueType::INT, nullptr, FL_(status), DeviceValueUOM::NONE);
@@ -66,7 +66,7 @@ bool Switch::publish_ha_config() {
     ids.add("ems-esp-switch");
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/switch/config"), Mqtt::base().c_str());
+    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/switch/config"), Mqtt::base().c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     return true;

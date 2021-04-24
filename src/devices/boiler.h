@@ -32,6 +32,11 @@ class Boiler : public EMSdevice {
   private:
     static uuid::log::Logger logger_;
 
+    // specific boiler characteristics, stripping the top 4 bits
+    inline uint8_t model() const {
+        return (flags() & 0x0F);
+    }
+
     void check_active(const bool force = false);
 
     uint8_t boilerState_ = EMS_VALUE_UINT_NOTSET; // Boiler state flag - FOR INTERNAL USE
@@ -84,6 +89,8 @@ class Boiler : public EMSdevice {
 
     // main
     uint8_t  id_;               // product id
+    uint8_t  dummy8u_;          // for commands with no output
+    uint8_t  dummybool_;        // for commands with no output
     uint8_t  heatingActive_;    // Central heating is on/off
     uint8_t  tapwaterActive_;   // Hot tap water is on/off
     uint8_t  selFlowTemp_;      // Selected flow temperature
@@ -141,7 +148,7 @@ class Boiler : public EMSdevice {
     uint32_t nrgSuppCooling_;            // Energy supplied cooling
     uint32_t auxElecHeatNrgConsTotal_;   // Auxiliary electrical heater energy consumption total
     uint32_t auxElecHeatNrgConsHeating_; // Auxiliary electrical heater energy consumption heating
-    uint32_t auxElecHeatNrgConsDHW_;     // Auxiliary electrical heater energy consumption DHW
+    uint32_t auxElecHeatNrgConsWW_;      // Auxiliary electrical heater energy consumption DHW
     char     maintenanceMessage_[4];
     char     maintenanceDate_[12];
     uint8_t  maintenanceType_;

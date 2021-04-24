@@ -123,7 +123,7 @@ void Shower::send_mqtt_stat(bool state, bool force) {
         ids.add("ems-esp");
 
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/shower_active/config"), Mqtt::base().c_str());
+        snprintf_P(topic, sizeof(topic), PSTR("binary_sensor/%s/shower_active/config"), Mqtt::base().c_str());
         Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
     }
 }
