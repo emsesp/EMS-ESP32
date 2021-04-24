@@ -427,11 +427,11 @@ MAKE_PSTR_LIST(wWStarts2, F("wwstarts2"), F("# control starts"))
 MAKE_PSTR_LIST(wWWorkM, F("wwworkm"), F("active time"))
 
 // thermostat
-// extra commands, not published yet
-MAKE_PSTR_LIST(switchtime, F("switchtime"), F("switchtime"))
-MAKE_PSTR_LIST(temp, F("temp"), F("temporary set temperature"))
-MAKE_PSTR_LIST(hatemp, F("hatemp"), F("homeassistant temperature"))
-MAKE_PSTR_LIST(hamode, F("hamode"), F("homeassistent mode"))
+// extra commands, no long name, does not show on web
+MAKE_PSTR_LIST(switchtime, F("switchtime"))
+MAKE_PSTR_LIST(temp, F("temp"))
+MAKE_PSTR_LIST(hatemp, F("hatemp"))
+MAKE_PSTR_LIST(hamode, F("hamode"))
 
 // mqtt values / commands
 MAKE_PSTR_LIST(dateTime, F("datetime"), F("date/time"))
