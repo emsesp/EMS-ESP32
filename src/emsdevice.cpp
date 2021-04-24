@@ -211,31 +211,38 @@ std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
 
 // returns device_type from a string
 uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
-    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(boiler)))) {
+    // convert topic to lowercase and compare
+    char lowtopic[20];
+    strlcpy(lowtopic, topic, sizeof(lowtopic));
+    for (char * p = lowtopic; *p; p++) {
+        *p = tolower(*p);
+    }
+
+    if (!strcmp_P(lowtopic, reinterpret_cast<PGM_P>(F_(boiler)))) {
         return DeviceType::BOILER;
     }
 
-    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(thermostat)))) {
+    if (!strcmp_P(lowtopic, reinterpret_cast<PGM_P>(F_(thermostat)))) {
         return DeviceType::THERMOSTAT;
     }
 
-    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(system)))) {
+    if (!strcmp_P(lowtopic, reinterpret_cast<PGM_P>(F_(system)))) {
         return DeviceType::SYSTEM;
     }
 
-    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(heatpump)))) {
+    if (!strcmp_P(lowtopic, reinterpret_cast<PGM_P>(F_(heatpump)))) {
         return DeviceType::HEATPUMP;
     }
 
-    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(solar)))) {
+    if (!strcmp_P(lowtopic, reinterpret_cast<PGM_P>(F_(solar)))) {
         return DeviceType::SOLAR;
     }
 
-    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(mixer)))) {
+    if (!strcmp_P(lowtopic, reinterpret_cast<PGM_P>(F_(mixer)))) {
         return DeviceType::MIXER;
     }
 
-    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(dallassensor)))) {
+    if (!strcmp_P(lowtopic, reinterpret_cast<PGM_P>(F_(dallassensor)))) {
         return DeviceType::DALLASSENSOR;
     }
 
