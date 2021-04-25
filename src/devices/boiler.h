@@ -154,6 +154,20 @@ class Boiler : public EMSdevice {
     uint8_t  maintenanceType_;
     uint16_t maintenanceTime_;
 
+    // heatpump
+    uint8_t hpPower_;
+    int16_t hpTc0_;
+    int16_t hpTc1_;
+    int16_t hpTc3_;
+    int16_t hpTr3_;
+    int16_t hpTr4_;
+    int16_t hpTr5_;
+    int16_t hpTr6_;
+    int16_t hpTr7_;
+    int16_t hpTl2_;
+    int16_t hpPl1_;
+    int16_t hpPh1_;
+
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
     void process_UBATotalUptime(std::shared_ptr<const Telegram> telegram);
@@ -177,6 +191,8 @@ class Boiler : public EMSdevice {
     void process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram);
     void process_CascadeMessage(std::shared_ptr<const Telegram> telegram);
     void process_UBASettingsWW(std::shared_ptr<const Telegram> telegram);
+    void process_HpPower(std::shared_ptr<const Telegram> telegram);
+    void process_HpOutdoor(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
     bool set_warmwater_mode(const char * value, const int8_t id);

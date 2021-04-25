@@ -33,7 +33,8 @@ static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__
     F_(hours),
     F_(minutes),
     F_(ua),
-    F_(bar)
+    F_(bar),
+    F_(kw)
 
 };
 
@@ -649,11 +650,11 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
     // search device value with this tag
     for (auto & dv : devicevalues_) {
-        if (strcmp(cmd, uuid::read_flash_string(dv.short_name).c_str()) == 0 && (tag <= 0 || tag == dv.tag)) {
+        if (strcmp(cmd, Helpers::toLower(uuid::read_flash_string(dv.short_name)).c_str()) == 0 && (tag <= 0 || tag == dv.tag)) {
             uint8_t divider = (dv.options_size == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
             json["name"]    = dv.short_name;
-            if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-                json["circuit"] = tag_to_string(dv.tag);
+            if (!tag_to_mqtt(dv.tag).empty()) {
+                json["circuit"] = tag_to_mqtt(dv.tag);
             }
             switch (dv.type) {
             case DeviceValueType::ENUM: {

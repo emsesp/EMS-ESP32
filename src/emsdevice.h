@@ -57,7 +57,7 @@ enum DeviceValueType : uint8_t {
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
 // uom - also used with HA
 // sequence is important!
-enum DeviceValueUOM : uint8_t { NONE = 0, DEGREES, PERCENT, LMIN, KWH, WH, HOURS, MINUTES, UA, BAR, PUMP };
+enum DeviceValueUOM : uint8_t { NONE = 0, DEGREES, PERCENT, LMIN, KWH, WH, HOURS, MINUTES, UA, BAR, KW, PUMP };
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 enum DeviceValueTAG : uint8_t {

@@ -69,8 +69,8 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         uint8_t tag = TAG_WWC1 + hc_ - 1;
         register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
         register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(wwTemp), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::PUMP);
-        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(tempStatus), DeviceValueUOM::NONE);
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(wwPumpStatus), DeviceValueUOM::PUMP);
+        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(wwTempStatus), DeviceValueUOM::NONE);
     }
 
     id_ = product_id;

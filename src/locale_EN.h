@@ -160,6 +160,7 @@ MAKE_PSTR(minutes, "minutes")
 MAKE_PSTR(hours, "hours")
 MAKE_PSTR(ua, "uA")
 MAKE_PSTR(lmin, "l/min")
+MAKE_PSTR(kw, "kW")
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
@@ -318,7 +319,7 @@ MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(h
  */
 MAKE_PSTR(homeassistant, "homeassistant/")
 
-// if for all devices
+// id for all devices
 // empty full name to prevent being shown in web or console
 MAKE_PSTR_LIST(ID, F_(id))
 
@@ -395,6 +396,19 @@ MAKE_PSTR_LIST(auxElecHeatNrgConsTotal, F("auxelecheatnrgconstotal"), F("auxilia
 MAKE_PSTR_LIST(auxElecHeatNrgConsHeating, F("auxelecheatnrgconsheating"), F("auxiliary electrical heater energy consumption heating"))
 MAKE_PSTR_LIST(auxElecHeatNrgConsWW, F("auxelecheatnrgconsww"), F("auxiliary electrical heater energy consumption"))
 
+MAKE_PSTR_LIST(hpPower, F("hppower"), F("heatpump power"))
+MAKE_PSTR_LIST(hpTc0, F("hptc0"), F("water temperature condenser inlet (TC0)"))
+MAKE_PSTR_LIST(hpTc1, F("hptc1"), F("water temperture condenser output (TC1)"))
+MAKE_PSTR_LIST(hpTc3, F("hptc3"), F("condenser temperature (TC3)"))
+MAKE_PSTR_LIST(hpTr3, F("hptr3"), F("refrigerant temperature liquid side (condenser output) (TR3)"))
+MAKE_PSTR_LIST(hpTr4, F("hptr4"), F("evaporator inlet temperature (TR4)"))
+MAKE_PSTR_LIST(hpTr5, F("hptr5"), F("compressor Inlet temperature (TR5)"))
+MAKE_PSTR_LIST(hpTr6, F("hptr6"), F("compressor outlet temperature (TR6)"))
+MAKE_PSTR_LIST(hpTr7, F("hptr7"), F("refrigerant temperature gas side (condenser input) (TR7)"))
+MAKE_PSTR_LIST(hpTl2, F("hptl2"), F("air inlet temperature (TL2)"))
+MAKE_PSTR_LIST(hpPl1, F("hppl1"), F("low pressure side temperature (PL1)"))
+MAKE_PSTR_LIST(hpPh1, F("hpph1"), F("high pressure side temperature (PH1)"))
+
 MAKE_PSTR_LIST(wWSelTemp, F("wwseltemp"), F("selected temperature"))
 MAKE_PSTR_LIST(wWSetTemp, F("wwsettemp"), F("set temperature"))
 MAKE_PSTR_LIST(wWType, F("wwtype"), F("type"))
@@ -418,7 +432,7 @@ MAKE_PSTR_LIST(wWCharging, F("wwcharging"), F("charging"))
 MAKE_PSTR_LIST(wWRecharging, F("wwrecharging"), F("recharging"))
 MAKE_PSTR_LIST(wWTempOK, F("wwtempok"), F("temperature ok"))
 MAKE_PSTR_LIST(wWActive, F("wwactive"), F("active"))
-MAKE_PSTR_LIST(wWHeat, F("wwHeat"), F("heating"))
+MAKE_PSTR_LIST(wWHeat, F("wwheat"), F("heating"))
 MAKE_PSTR_LIST(wWSetPumpPower, F("wwsetpumppower"), F("pump set power"))
 MAKE_PSTR_LIST(mixerTemp, F("mixertemp"), F("mixer temperature"))
 MAKE_PSTR_LIST(tankMiddleTemp, F("tankmiddletemp"), F("tank middle temperature (TS3)"))
@@ -506,7 +520,8 @@ MAKE_PSTR_LIST(pumpStatus, F("pumpstatus"), F("pump status in assigned hc (PC1)"
 MAKE_PSTR_LIST(mixerStatus, F("valvestatus"), F("mixing valve actuator in assigned hc (VC1)"))
 MAKE_PSTR_LIST(flowTempVf, F("flowtempvf"), F("flow temperature in header (T0/Vf)"))
 
-MAKE_PSTR_LIST(tempStatus, F("tempstatus"), F("temperature switch in assigned hc (MC1)"))
+MAKE_PSTR_LIST(wwPumpStatus, F("pumpstatus"), F("pump status in assigned wwc (PC1)"))
+MAKE_PSTR_LIST(wwTempStatus, F("wwtempstatus"), F("temperature switch in assigned wwc (MC1)"))
 MAKE_PSTR_LIST(wwTemp, F("wwtemp"), F("current warm water temperature"))
 
 // solar
