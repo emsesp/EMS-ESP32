@@ -67,6 +67,7 @@ class System {
     void wifi_tweak();
     void syslog_start();
     bool check_upgrade();
+    bool heartbeat_json(JsonObject & json);
     void send_heartbeat();
 
     void led_init(bool refresh);

@@ -417,22 +417,15 @@ void System::show_mem(const char * note) {
 #endif
 }
 
-// send periodic MQTT message with system information
-void System::send_heartbeat() {
-    // don't send heartbeat if WiFi or MQTT is not connected
-    if (!Mqtt::connected()) {
-        return;
-    }
-
+// create the json for heartbeat
+bool System::heartbeat_json(JsonObject & doc) {
     int8_t rssi;
     if (!ethernet_connected_) {
         rssi = wifi_quality();
         if (rssi == -1) {
-            return;
+            return false;
         }
     }
-
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
 
     uint8_t ems_status = EMSESP::bus_status();
     if (ems_status == EMSESP::BUS_STATUS_TX_ERRORS) {
@@ -468,7 +461,22 @@ void System::send_heartbeat() {
         doc["adc"] = analog_;
     }
 
-    Mqtt::publish(F_(heartbeat), doc.as<JsonObject>()); // send to MQTT with retain off. This will add to MQTT queue.
+    return (doc.size() > 0);
+}
+
+// send periodic MQTT message with system information
+void System::send_heartbeat() {
+    // don't send heartbeat if WiFi or MQTT is not connected
+    if (!Mqtt::connected()) {
+        return;
+    }
+
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
+    JsonObject                                 json = doc.to<JsonObject>();
+
+    if (heartbeat_json(json)) {
+        Mqtt::publish(F_(heartbeat), doc.as<JsonObject>()); // send to MQTT with retain off. This will add to MQTT queue.
+    }
 }
 
 // measure and moving average adc
@@ -852,12 +860,20 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 // export status information including some basic settings
 // e.g. http://ems-esp/api?device=system&cmd=info
 bool System::command_info(const char * value, const int8_t id, JsonObject & json) {
+
+    if (id == 0) {
+        return EMSESP::system_.heartbeat_json(json);
+    }
+
     JsonObject node;
 
     node = json.createNestedObject("System");
 
     node["version"] = EMSESP_APP_VERSION;
     node["uptime"]  = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+#ifndef EMSESP_STANDALONE
+    node["freemem"] = ESP.getFreeHeap();
+#endif
 
     node = json.createNestedObject("Status");
 
