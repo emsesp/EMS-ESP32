@@ -149,6 +149,54 @@ MAKE_PSTR_LIST(div10, F_(10))
 MAKE_PSTR_LIST(div100, F_(100))
 MAKE_PSTR_LIST(div60, F_(60))
 
+// Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
+// uom - also used with HA
+MAKE_PSTR(percent, "%")
+MAKE_PSTR(degrees, "°C")
+MAKE_PSTR(kwh, "kWh")
+MAKE_PSTR(wh, "Wh")
+MAKE_PSTR(bar, "bar")
+MAKE_PSTR(minutes, "minutes")
+MAKE_PSTR(hours, "hours")
+MAKE_PSTR(ua, "uA")
+MAKE_PSTR(lmin, "l/min")
+
+// TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
+// use empty string if want to suppress showing tags
+MAKE_PSTR(tag_none, "")
+MAKE_PSTR(tag_heartbeat, "")
+MAKE_PSTR(tag_boiler_data, "")
+MAKE_PSTR(tag_device_data_ww, "warm water")
+MAKE_PSTR(tag_thermostat_data, "")
+MAKE_PSTR(tag_hc1, "hc1")
+MAKE_PSTR(tag_hc2, "hc2")
+MAKE_PSTR(tag_hc3, "hc3")
+MAKE_PSTR(tag_hc4, "hc4")
+MAKE_PSTR(tag_wwc1, "wwc1")
+MAKE_PSTR(tag_wwc2, "wwc2")
+MAKE_PSTR(tag_wwc3, "wwc3")
+MAKE_PSTR(tag_wwc4, "wwc4")
+MAKE_PSTR(tag_hs1, "hs1")
+MAKE_PSTR(tag_hs2, "hs2")
+MAKE_PSTR(tag_hs3, "hs3")
+MAKE_PSTR(tag_hs4, "hs4")
+MAKE_PSTR(tag_hs5, "hs5")
+MAKE_PSTR(tag_hs6, "hs6")
+MAKE_PSTR(tag_hs7, "hs7")
+MAKE_PSTR(tag_hs8, "hs8")
+MAKE_PSTR(tag_hs9, "hs9")
+MAKE_PSTR(tag_hs10, "hs10")
+MAKE_PSTR(tag_hs11, "hs11")
+MAKE_PSTR(tag_hs12, "hs12")
+MAKE_PSTR(tag_hs13, "hs13")
+MAKE_PSTR(tag_hs14, "hs14")
+MAKE_PSTR(tag_hs15, "hs15")
+MAKE_PSTR(tag_hs16, "hs16")
+
+// MQTT topic names
+// MAKE_PSTR(tag_heartbeat_mqtt, "heartbeat")
+MAKE_PSTR(tag_boiler_data_mqtt, "")
+MAKE_PSTR(tag_device_data_ww_mqtt, "ww")
 
 // boiler
 MAKE_PSTR_WORD(time)
@@ -169,6 +217,8 @@ MAKE_PSTR_WORD(flow)
 MAKE_PSTR_WORD(buffer)
 MAKE_PSTR(bufferedflow, "buffered flow")
 MAKE_PSTR(layeredbuffer, "layered buffer")
+MAKE_PSTR_WORD(maintenance)
+MAKE_PSTR_WORD(error)
 
 // boiler lists
 MAKE_PSTR_LIST(enum_off_time_date, F_(off), F_(time), F_(date))
@@ -176,6 +226,7 @@ MAKE_PSTR_LIST(enum_freq, F_(off), F_(1x3min), F_(2x3min), F_(3x3min), F_(4x3min
 MAKE_PSTR_LIST(enum_charge, F_(3wayvalve), F_(chargepump))
 MAKE_PSTR_LIST(enum_comfort, F_(hot), F_(eco), F_(intelligent))
 MAKE_PSTR_LIST(enum_flow, F_(off), F_(flow), F_(bufferedflow), F_(buffer), F_(layeredbuffer))
+MAKE_PSTR_LIST(enum_reset, F_(maintenance), F_(error))
 
 // thermostat
 MAKE_PSTR_WORD(light)
@@ -205,6 +256,7 @@ MAKE_PSTR_WORD(room)
 MAKE_PSTR_WORD(power)
 MAKE_PSTR_WORD(constant)
 MAKE_PSTR_WORD(simple)
+MAKE_PSTR_WORD(optimized)
 MAKE_PSTR_WORD(nofrost)
 MAKE_PSTR_WORD(comfort)
 MAKE_PSTR_WORD(manual)
@@ -221,7 +273,6 @@ MAKE_PSTR_WORD(maxflow)
 
 MAKE_PSTR_WORD(rc3x)
 MAKE_PSTR_WORD(rc20)
-MAKE_PSTR_WORD(error)
 MAKE_PSTR(internal_temperature, "internal temperature")
 MAKE_PSTR(internal_setpoint, "internal setpoint")
 MAKE_PSTR(external_temperature, "external temperature")
@@ -255,8 +306,9 @@ MAKE_PSTR_LIST(enum_modetype4, F_(blank), F_(nofrost), F_(eco), F_(heat))
 
 MAKE_PSTR_LIST(enum_reducemode, F_(nofrost), F_(reduce), F_(room), F_(outdoor))
 
-MAKE_PSTR_LIST(enum_controlmode, F_(off), F_(outdoor), F_(simple), F_(mpc), F_(room), F_(power), F_(constant))
+MAKE_PSTR_LIST(enum_controlmode, F_(off), F_(optimized), F_(simple), F_(mpc), F_(room), F_(power), F_(constant))
 MAKE_PSTR_LIST(enum_controlmode2, F_(outdoor), F_(room))
+MAKE_PSTR_LIST(enum_controlmode3, F_(off), F_(room), F_(outdoor), F("room+outdoor"))
 MAKE_PSTR_LIST(enum_control, F_(off), F_(rc20), F_(rc3x))
 
 MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(heat), F_(auto), F_(auto), F_(auto), F_(auto))
@@ -264,15 +316,21 @@ MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(h
 /*
  * MQTT topics and full text for values and commands
  */
+MAKE_PSTR(homeassistant, "homeassistant/")
+
+// if for all devices
+// empty full name to prevent being shown in web or console
+MAKE_PSTR_LIST(ID, F_(id))
 
 // Boiler
-// extra commands
+// extra commands, no output
 MAKE_PSTR_LIST(wwtapactivated, F("wwtapactivated"))
 MAKE_PSTR_LIST(reset, F("reset"))
 
 // single mqtt topics
-MAKE_PSTR(heating_active, "heating_active")
-MAKE_PSTR(tapwater_active, "tapwater_active")
+MAKE_PSTR_WORD(heating_active)
+MAKE_PSTR_WORD(tapwater_active)
+MAKE_PSTR_WORD(response)
 
 // mqtt, commands and text
 MAKE_PSTR_LIST(heatingActive, F("heatingactive"), F("heating active"))
@@ -313,6 +371,10 @@ MAKE_PSTR_LIST(UBAuptime, F("ubauptime"), F("total UBA operating time"))
 MAKE_PSTR_LIST(lastCode, F("lastcode"), F("last error code"))
 MAKE_PSTR_LIST(serviceCode, F("servicecode"), F("service code"))
 MAKE_PSTR_LIST(serviceCodeNumber, F("servicecodenumber"), F("service code number"))
+MAKE_PSTR_LIST(maintenanceMessage, F("maintenancemessage"), F("maintenance message"))
+MAKE_PSTR_LIST(maintenanceDate, F("maintenancedate"), F("maintenance set date"))
+MAKE_PSTR_LIST(maintenanceType, F_(maintenance), F("maintenance scheduled"))
+MAKE_PSTR_LIST(maintenanceTime, F("maintenancetime"), F("maintenance set time"))
 
 MAKE_PSTR_LIST(upTimeControl, F("uptimecontrol"), F("operating time total heat"))
 MAKE_PSTR_LIST(upTimeCompHeating, F("uptimecompheating"), F("operating time compressor heating"))
@@ -331,11 +393,7 @@ MAKE_PSTR_LIST(nrgSuppWw, F("nrgsuppww"), F("total energy warm supplied warm wat
 MAKE_PSTR_LIST(nrgSuppCooling, F("nrgsuppcooling"), F("total energy supplied cooling"))
 MAKE_PSTR_LIST(auxElecHeatNrgConsTotal, F("auxelecheatnrgconstotal"), F("auxiliary electrical heater energy consumption total"))
 MAKE_PSTR_LIST(auxElecHeatNrgConsHeating, F("auxelecheatnrgconsheating"), F("auxiliary electrical heater energy consumption heating"))
-MAKE_PSTR_LIST(auxElecHeatNrgConsDHW, F("auxelecheatnrgconsww"), F("auxiliary electrical heater energy consumption DHW"))
-MAKE_PSTR_LIST(maintenanceMessage, F("maintenancemessage"), F("maintenance message"))
-MAKE_PSTR_LIST(maintenanceDate, F("maintenancedate"), F("maintenance set date"))
-MAKE_PSTR_LIST(maintenance, F("maintenance"), F("maintenance scheduled"))
-MAKE_PSTR_LIST(maintenanceTime, F("maintenancetime"), F("maintenance set time"))
+MAKE_PSTR_LIST(auxElecHeatNrgConsWW, F("auxelecheatnrgconsww"), F("auxiliary electrical heater energy consumption"))
 
 MAKE_PSTR_LIST(wWSelTemp, F("wwseltemp"), F("selected temperature"))
 MAKE_PSTR_LIST(wWSetTemp, F("wwsettemp"), F("set temperature"))
@@ -369,10 +427,11 @@ MAKE_PSTR_LIST(wWStarts2, F("wwstarts2"), F("# control starts"))
 MAKE_PSTR_LIST(wWWorkM, F("wwworkm"), F("active time"))
 
 // thermostat
-// extra commands, not published yet
-MAKE_PSTR_LIST(remoteTemp, F("remotetemp"), F("remotetemp"))
-MAKE_PSTR_LIST(switchtime, F("switchtime"), F("switchtime"))
-MAKE_PSTR_LIST(temp, F("temp"), F("temporary set temperature"))
+// extra commands, no long name, does not show on web
+MAKE_PSTR_LIST(switchtime, F("switchtime"))
+MAKE_PSTR_LIST(temp, F("temp"))
+MAKE_PSTR_LIST(hatemp, F("hatemp"))
+MAKE_PSTR_LIST(hamode, F("hamode"))
 
 // mqtt values / commands
 MAKE_PSTR_LIST(dateTime, F("datetime"), F("date/time"))
@@ -392,11 +451,12 @@ MAKE_PSTR_LIST(dampedoutdoortemp, F("dampedoutdoortemp"), F("damped outdoor temp
 MAKE_PSTR_LIST(floordrystatus, F("floordry"), F("floor drying"))
 MAKE_PSTR_LIST(dampedoutdoortemp2, F("dampedoutdoortemp"), F("damped outdoor temperature"))
 MAKE_PSTR_LIST(floordrytemp, F("floordrytemp"), F("floor drying temperature"))
-MAKE_PSTR_LIST(wwMode, F("wwmode"), F("warm water mode"))
-MAKE_PSTR_LIST(wwSetTemp, F("wwsettemp"), F("warm water set temperature"))
-MAKE_PSTR_LIST(wwSetTempLow, F("wwsettemplow"), F("warm water set temperature low"))
-MAKE_PSTR_LIST(wwExtra1, F("wwextra1"), F("warm water circuit 1 extra"))
-MAKE_PSTR_LIST(wwExtra2, F("wwextra2"), F("warm water circuit 2 extra"))
+
+MAKE_PSTR_LIST(wwMode, F("wwmode"), F("mode"))
+MAKE_PSTR_LIST(wwSetTemp, F("wwsettemp"), F("set temperature"))
+MAKE_PSTR_LIST(wwSetTempLow, F("wwsettemplow"), F("set temperature low"))
+MAKE_PSTR_LIST(wwExtra1, F("wwextra1"), F("circuit 1 extra"))
+MAKE_PSTR_LIST(wwExtra2, F("wwextra2"), F("circuit 2 extra"))
 
 MAKE_PSTR_LIST(setpoint_roomTemp, F("seltemp"), F("selected room temperature"))
 MAKE_PSTR_LIST(curr_roomTemp, F("currtemp"), F("current room temperature"))
@@ -450,6 +510,7 @@ MAKE_PSTR_LIST(tempStatus, F("tempstatus"), F("temperature switch in assigned hc
 MAKE_PSTR_LIST(wwTemp, F("wwtemp"), F("current warm water temperature"))
 
 // solar
+MAKE_PSTR_LIST(type, F("type"), F("type"))
 MAKE_PSTR_LIST(collectorTemp, F("collectortemp"), F("collector temperature (TS1)"))
 MAKE_PSTR_LIST(tankBottomTemp, F("tankbottomtemp"), F("tank bottom temperature (TS2)"))
 MAKE_PSTR_LIST(tank2BottomTemp, F("tank2bottomtemp"), F("second tank bottom temperature (TS5)"))
@@ -469,6 +530,13 @@ MAKE_PSTR_LIST(pumpWorkTime, F("pumpWorktime"), F("pump working time"))
 MAKE_PSTR_LIST(energyLastHour, F("energylasthour"), F("energy last hour"))
 MAKE_PSTR_LIST(energyTotal, F("energytotal"), F("energy total"))
 MAKE_PSTR_LIST(energyToday, F("energytoday"), F("energy today"))
+
+MAKE_PSTR_LIST(wwTemp1, F("wwtemp1"), F("temperature 1"))
+MAKE_PSTR_LIST(wwTemp3, F("wwtemp3"), F("temperature 3"))
+MAKE_PSTR_LIST(wwTemp4, F("wwtemp4"), F("temperature 4"))
+MAKE_PSTR_LIST(wwTemp5, F("wwtemp5"), F("temperature 5"))
+MAKE_PSTR_LIST(wwTemp7, F("wwtemp7"), F("temperature 7"))
+MAKE_PSTR_LIST(wwPump, F("wwpump"), F("pump"))
 
 // switch
 MAKE_PSTR_LIST(activated, F("activated"), F("activated"))

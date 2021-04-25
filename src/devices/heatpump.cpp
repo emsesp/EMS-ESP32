@@ -33,7 +33,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_telegram_type(0x047B, F("HP2"), true, MAKE_PF_CB(process_HPMonitor2));
 
     // device values
-    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr, DeviceValueUOM::NONE); // empty full name to prevent being shown in web or console
+    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
     register_device_value(TAG_NONE, &airHumidity_, DeviceValueType::UINT, FL_(div2), FL_(airHumidity), DeviceValueUOM::PERCENT);
     register_device_value(TAG_NONE, &dewTemperature_, DeviceValueType::UINT, nullptr, FL_(dewTemperature), DeviceValueUOM::DEGREES);
 
@@ -61,7 +61,7 @@ bool Heatpump::publish_ha_config() {
     ids.add("ems-esp-heatpump");
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/heatpump/config"), Mqtt::base().c_str());
+    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/heatpump/config"), Mqtt::base().c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     return true;

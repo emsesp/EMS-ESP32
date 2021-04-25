@@ -62,11 +62,18 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 
     // special case for a device_id with 0x2A where it's not actual a solar module
     if (device_id == 0x2A) {
-        register_device_value(TAG_NONE, &type_, DeviceValueType::TEXT, nullptr, F("type"), F("type"), DeviceValueUOM::NONE);
-        strncpy(type_, "warm water circuit", sizeof(type_));
+        register_device_value(TAG_NONE, &type_, DeviceValueType::TEXT, nullptr, FL_(type), DeviceValueUOM::NONE);
+        strlcpy(type_, "warm water circuit", sizeof(type_));
+        register_device_value(TAG_DEVICE_DATA_WW, &wwTemp_1_, DeviceValueType::UINT, nullptr, FL_(wwTemp1), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_DEVICE_DATA_WW, &wwTemp_3_, DeviceValueType::UINT, nullptr, FL_(wwTemp3), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_DEVICE_DATA_WW, &wwTemp_4_, DeviceValueType::UINT, nullptr, FL_(wwTemp4), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_DEVICE_DATA_WW, &wwTemp_5_, DeviceValueType::UINT, nullptr, FL_(wwTemp5), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_DEVICE_DATA_WW, &wwTemp_7_, DeviceValueType::UINT, nullptr, FL_(wwTemp7), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_DEVICE_DATA_WW, &wwPump_, DeviceValueType::UINT, nullptr, FL_(wwPump), DeviceValueUOM::DEGREES);
+        return;
     }
 
-    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr, DeviceValueUOM::NONE); // empty full name to prevent being shown in web or console
+    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
     id_ = product_id;
 
     register_device_value(TAG_NONE, &collectorTemp_, DeviceValueType::SHORT, FL_(div10), FL_(collectorTemp), DeviceValueUOM::DEGREES);
@@ -88,6 +95,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     register_device_value(TAG_NONE, &energyLastHour_, DeviceValueType::ULONG, FL_(div10), FL_(energyLastHour), DeviceValueUOM::WH);
     register_device_value(TAG_NONE, &energyTotal_, DeviceValueType::ULONG, FL_(div10), FL_(energyTotal), DeviceValueUOM::KWH);
     register_device_value(TAG_NONE, &energyToday_, DeviceValueType::ULONG, nullptr, FL_(energyToday), DeviceValueUOM::WH);
+
 }
 
 // publish HA config
@@ -110,7 +118,7 @@ bool Solar::publish_ha_config() {
     ids.add("ems-esp-solar");
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/solar/config"), Mqtt::base().c_str());
+    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/solar/config"), Mqtt::base().c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     return true;
@@ -201,6 +209,22 @@ void Solar::process_SM100Monitor(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(heatExchangerTemp_, 20)); // is *10 - TS6: Heat exchanger temperature sensor
 }
 
+// SM100wwTemperatur - 0x07D6
+// Solar Module(0x2A) -> (0x00), (0x7D6), data: 01 C1 00 00 02 5B 01 AF 01 AD 80 00 01 90
+void Solar::process_SM100wwTemperature(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram->read_value(wwTemp_1_, 0));
+    has_update(telegram->read_value(wwTemp_3_, 4));
+    has_update(telegram->read_value(wwTemp_4_, 6));
+    has_update(telegram->read_value(wwTemp_5_, 8));
+    has_update(telegram->read_value(wwTemp_7_, 12));
+}
+
+// SM100wwStatus - 0x07AA
+// Solar Module(0x2A) -> (0x00), (0x7AA), data: 64 00 04 00 03 00 28 01 0F
+void Solar::process_SM100wwStatus(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram->read_value(wwPump_, 0));
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
@@ -208,22 +232,6 @@ void Solar::process_SM100Monitor(std::shared_ptr<const Telegram> telegram) {
 // e.g. B0 00 FF 00 02 63 80 00 80 00 00 00 80 00 80 00 80 00 00 80 00 5A
 void Solar::process_SM100Monitor2(std::shared_ptr<const Telegram> telegram) {
     // not implemented yet
-}
-
-// SM100wwTemperatur - 0x07D6
-// Solar Module(0x2A) -> (0x00), (0x7D6), data: 01 C1 00 00 02 5B 01 AF 01 AD 80 00 01 90
-void Solar::process_SM100wwTemperature(std::shared_ptr<const Telegram> telegram) {
-    // has_update(telegram->read_value(wwTemp_1_, 0));
-    // has_update(telegram->read_value(wwTemp_3_, 4));
-    // has_update(telegram->read_value(wwTemp_4_, 6));
-    // has_update(telegram->read_value(wwTemp_5_, 8));
-    // has_update(telegram->read_value(wwTemp_7_, 12));
-}
-
-// SM100wwStatus - 0x07AA
-// Solar Module(0x2A) -> (0x00), (0x7AA), data: 64 00 04 00 03 00 28 01 0F
-void Solar::process_SM100wwStatus(std::shared_ptr<const Telegram> telegram) {
-    // has_update(telegram->read_value(wwPump_, 0));
 }
 
 // SM100wwCommand - 0x07AB
