@@ -651,7 +651,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
     for (auto & dv : devicevalues_) {
         if (strcmp(cmd, uuid::read_flash_string(dv.short_name).c_str()) == 0 && (tag <= 0 || tag == dv.tag)) {
             uint8_t divider = (dv.options_size == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
-            json["name"] = dv.short_name;
+            json["name"]    = dv.short_name;
             if (dv.tag >= DeviceValueTAG::TAG_HC1) {
                 json["circuit"] = tag_to_string(dv.tag);
             }
@@ -675,16 +675,16 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                 if (Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
                     json["value"] = Helpers::round2(*(uint16_t *)(dv.value_p), divider);
                 }
-                json["type"]  = F_(number);
-                json["min"]   = 0;
-                json["max"]   = divider ? EMS_VALUE_USHORT_NOTSET / divider : EMS_VALUE_USHORT_NOTSET;
+                json["type"] = F_(number);
+                json["min"]  = 0;
+                json["max"]  = divider ? EMS_VALUE_USHORT_NOTSET / divider : EMS_VALUE_USHORT_NOTSET;
                 break;
             case DeviceValueType::UINT:
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
                     json["value"] = Helpers::round2(*(uint8_t *)(dv.value_p), divider);
                 }
-                json["type"]  = F_(number);
-                json["min"] = 0;
+                json["type"] = F_(number);
+                json["min"]  = 0;
                 if (dv.uom == DeviceValueUOM::PERCENT) {
                     json["max"] = 100;
                 } else {
@@ -695,15 +695,15 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                 if (Helpers::hasValue(*(int16_t *)(dv.value_p))) {
                     json["value"] = Helpers::round2(*(int16_t *)(dv.value_p), divider);
                 }
-                json["type"]  = F_(number);
-                json["min"] = divider ? -EMS_VALUE_SHORT_NOTSET / divider : -EMS_VALUE_SHORT_NOTSET;
-                json["max"] = divider ? EMS_VALUE_SHORT_NOTSET / divider : EMS_VALUE_SHORT_NOTSET;
+                json["type"] = F_(number);
+                json["min"]  = divider ? -EMS_VALUE_SHORT_NOTSET / divider : -EMS_VALUE_SHORT_NOTSET;
+                json["max"]  = divider ? EMS_VALUE_SHORT_NOTSET / divider : EMS_VALUE_SHORT_NOTSET;
                 break;
             case DeviceValueType::INT:
                 if (Helpers::hasValue(*(int8_t *)(dv.value_p))) {
                     json["value"] = Helpers::round2(*(int8_t *)(dv.value_p), divider);
                 }
-                json["type"]  = F_(number);
+                json["type"] = F_(number);
                 if (dv.uom == DeviceValueUOM::PERCENT) {
                     json["min"] = -100;
                     json["max"] = 100;
@@ -716,17 +716,17 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     json["value"] = Helpers::round2(*(uint32_t *)(dv.value_p), divider);
                 }
-                json["type"]  = F_(number);
-                json["min"]   = 0;
-                json["max"]   = divider ? EMS_VALUE_ULONG_NOTSET / divider : EMS_VALUE_ULONG_NOTSET;
+                json["type"] = F_(number);
+                json["min"]  = 0;
+                json["max"]  = divider ? EMS_VALUE_ULONG_NOTSET / divider : EMS_VALUE_ULONG_NOTSET;
                 break;
             case DeviceValueType::BOOL: {
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                     json["value"] = (bool)(*(uint8_t *)(dv.value_p)) ? true : false;
                 }
-                json["type"]  = F("boolean");
-                json["min"]   = 0;
-                json["max"]   = 1;
+                json["type"]    = F("boolean");
+                json["min"]     = 0;
+                json["max"]     = 1;
                 JsonArray enum_ = json.createNestedArray(F("enum"));
                 if (dv.options_size == 2) {
                     enum_.add(dv.options[1]);
@@ -747,18 +747,18 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     json["value"] = (divider) ? *(uint32_t *)(dv.value_p) / divider : *(uint32_t *)(dv.value_p);
                 }
-                json["type"]  = F_(number);
-                json["min"]   = 0;
-                json["max"]   = divider ? EMS_VALUE_ULONG_NOTSET / divider : EMS_VALUE_ULONG_NOTSET;
+                json["type"] = F_(number);
+                json["min"]  = 0;
+                json["max"]  = divider ? EMS_VALUE_ULONG_NOTSET / divider : EMS_VALUE_ULONG_NOTSET;
                 break;
             case DeviceValueType::TEXT:
                 if (Helpers::hasValue((char *)(dv.value_p))) {
                     json["value"] = (char *)(dv.value_p);
                 }
-                json["type"]  = F_(text);
+                json["type"] = F_(text);
                 break;
             default:
-                json["type"]  = F_(unknown);
+                json["type"] = F_(unknown);
                 break;
             }
             if (dv.uom != DeviceValueUOM::NONE) {
@@ -766,10 +766,10 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
             }
             json["writeable"] = dv.has_cmd;
             if (dv.min != 0 || dv.max != 0) {
-                json["min"]   = dv.min;
-                json["max"]   = dv.max;
+                json["min"] = dv.min;
+                json["max"] = dv.max;
             }
-             return true;
+            return true;
         }
     }
     return false;
@@ -916,7 +916,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                 }
             }
         }
-        dv.ha      |= has_value ? DeviceValueHA::HA_VALUE : DeviceValueHA::HA_NONE;
+        dv.ha |= has_value ? DeviceValueHA::HA_VALUE : DeviceValueHA::HA_NONE;
         has_values |= has_value;
     }
 

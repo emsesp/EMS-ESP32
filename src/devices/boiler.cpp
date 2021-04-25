@@ -1115,7 +1115,7 @@ bool Boiler::set_warmwater_circulation_mode(const char * value, const int8_t id)
 // 8            reset maintenance message Hxx
 // 12 & 13      Reset that Error-memory
 bool Boiler::set_reset(const char * value, const int8_t id) {
-    uint8_t     num;
+    uint8_t num;
     if (!Helpers::value2enum(value, num, FL_(enum_reset))) {
         return false;
     }
