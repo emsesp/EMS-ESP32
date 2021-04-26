@@ -158,7 +158,8 @@ void Shell::loop_normal() {
         // Interrupt (^C)
         line_buffer_.clear();
         println();
-        cursor_ = 0;
+        cursor_  = 0;
+        line_no_ = 0;
         break;
 
     case '\x04':
@@ -174,13 +175,15 @@ void Shell::loop_normal() {
         // Del/Backspace (^?)
         if (line_buffer_.length() > cursor_) {
             line_buffer_.erase(line_buffer_.length() - cursor_ - 1, 1);
+            line_no_ = 0;
         }
         break;
 
     case '\x09':
         // Tab (^I)
         process_completion();
-        cursor_ = 0;
+        cursor_  = 0;
+        line_no_ = 0;
         break;
 
     case '\x0A':
@@ -200,12 +203,14 @@ void Shell::loop_normal() {
     case '\x15':
         // Delete line (^U)
         line_buffer_.clear();
-        cursor_ = 0;
+        cursor_  = 0;
+        line_no_ = 0;
         break;
 
     case '\x17':
         // Delete word (^W)
         delete_buffer_word(true);
+        line_no_ = 0;
         break;
 
     case '\033':
@@ -251,6 +256,7 @@ void Shell::loop_normal() {
                 if ((esc_ == 3) && cursor_) {         // del
                     cursor_--;
                     line_buffer_.erase(line_buffer_.length() - cursor_ - 1, 1);
+                    line_no_ = 0;
                 } else if (esc_ == 4) { // end
                     cursor_ = 0;
                 } else if (esc_ == 1) { // pos1
