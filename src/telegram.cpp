@@ -546,7 +546,7 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         reset_retry_count();             // give up
         increment_telegram_fail_count(); // another Tx fail
 
-        LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request."), (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"), MAXIMUM_TX_RETRIES);
+        LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request: %s"), (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"), MAXIMUM_TX_RETRIES), telegram_last_->to_string().c_str();
         return;
     }
 
