@@ -19,7 +19,9 @@ class UnauthenticatedRoute extends Route<UnauthenticatedRouteProps> {
       if (authenticationContext.me) {
         return (<Redirect to={Authentication.fetchLoginRedirect(features)} />);
       }
-      return (<Component {...props} />);
+      if (Component) {
+        return (<Component {...props} />);
+      }
     }
     return (
       <Route {...rest} render={renderComponent} />

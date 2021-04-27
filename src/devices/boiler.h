@@ -32,6 +32,11 @@ class Boiler : public EMSdevice {
   private:
     static uuid::log::Logger logger_;
 
+    // specific boiler characteristics, stripping the top 4 bits
+    inline uint8_t model() const {
+        return (flags() & 0x0F);
+    }
+
     void check_active(const bool force = false);
 
     uint8_t boilerState_ = EMS_VALUE_UINT_NOTSET; // Boiler state flag - FOR INTERNAL USE
@@ -84,6 +89,8 @@ class Boiler : public EMSdevice {
 
     // main
     uint8_t  id_;               // product id
+    uint8_t  dummy8u_;          // for commands with no output
+    uint8_t  dummybool_;        // for commands with no output
     uint8_t  heatingActive_;    // Central heating is on/off
     uint8_t  tapwaterActive_;   // Hot tap water is on/off
     uint8_t  selFlowTemp_;      // Selected flow temperature
@@ -141,11 +148,25 @@ class Boiler : public EMSdevice {
     uint32_t nrgSuppCooling_;            // Energy supplied cooling
     uint32_t auxElecHeatNrgConsTotal_;   // Auxiliary electrical heater energy consumption total
     uint32_t auxElecHeatNrgConsHeating_; // Auxiliary electrical heater energy consumption heating
-    uint32_t auxElecHeatNrgConsDHW_;     // Auxiliary electrical heater energy consumption DHW
+    uint32_t auxElecHeatNrgConsWW_;      // Auxiliary electrical heater energy consumption DHW
     char     maintenanceMessage_[4];
     char     maintenanceDate_[12];
     uint8_t  maintenanceType_;
     uint16_t maintenanceTime_;
+
+    // heatpump
+    uint8_t hpPower_;
+    int16_t hpTc0_;
+    int16_t hpTc1_;
+    int16_t hpTc3_;
+    int16_t hpTr3_;
+    int16_t hpTr4_;
+    int16_t hpTr5_;
+    int16_t hpTr6_;
+    int16_t hpTr7_;
+    int16_t hpTl2_;
+    int16_t hpPl1_;
+    int16_t hpPh1_;
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
@@ -161,15 +182,17 @@ class Boiler : public EMSdevice {
     void process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_UBASetPoints(std::shared_ptr<const Telegram> telegram);
     void process_UBAFlags(std::shared_ptr<const Telegram> telegram);
-    void process_MC10Status(std::shared_ptr<const Telegram> telegram);
+    void process_MC110Status(std::shared_ptr<const Telegram> telegram);
     void process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram);
     void process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram);
     void process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram);
-    void process_UBADHWStatus(std::shared_ptr<const Telegram> telegram);
+    void process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram);
     void process_UBAInformation(std::shared_ptr<const Telegram> telegram);
     void process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram);
     void process_CascadeMessage(std::shared_ptr<const Telegram> telegram);
     void process_UBASettingsWW(std::shared_ptr<const Telegram> telegram);
+    void process_HpPower(std::shared_ptr<const Telegram> telegram);
+    void process_HpOutdoor(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
     bool set_warmwater_mode(const char * value, const int8_t id);
@@ -180,6 +203,7 @@ class Boiler : public EMSdevice {
     bool set_warmwater_circulation_pump(const char * value, const int8_t id);
     bool set_warmwater_circulation_mode(const char * value, const int8_t id);
     bool set_warmwater_temp(const char * value, const int8_t id);
+    bool set_disinfect_temp(const char * value, const int8_t id);
     bool set_warmwater_maxpower(const char * value, const int8_t id);
     bool set_wWFlowTempOffset(const char * value, const int8_t id);
     bool set_flow_temp(const char * value, const int8_t id);

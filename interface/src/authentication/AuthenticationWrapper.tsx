@@ -101,7 +101,7 @@ class AuthenticationWrapper extends React.Component<AuthenticationWrapperProps, 
         me: undefined
       }
     });
-    this.props.enqueueSnackbar("You have signed out.", { variant: 'success', });
+    this.props.enqueueSnackbar("You have signed out", { variant: 'success', });
     history.push('/');
   }
 

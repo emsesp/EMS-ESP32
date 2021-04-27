@@ -56,6 +56,7 @@ void Shower::loop() {
                 if (!shower_on_ && (time_now - timer_start_) > SHOWER_MIN_DURATION) {
                     shower_on_ = true;
                     send_mqtt_stat(true);
+                    publish_values();
                     LOG_DEBUG(F("[Shower] hot water still running, starting shower timer"));
                 }
                 // check if the shower has been on too long
@@ -122,7 +123,7 @@ void Shower::send_mqtt_stat(bool state, bool force) {
         ids.add("ems-esp");
 
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/shower_active/config"), Mqtt::base().c_str());
+        snprintf_P(topic, sizeof(topic), PSTR("binary_sensor/%s/shower_active/config"), Mqtt::base().c_str());
         Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
     }
 }

@@ -5,10 +5,8 @@ import { withSnackbar, WithSnackbarProps } from 'notistack';
 import * as Authentication from './Authentication';
 import { withAuthenticationContext, AuthenticationContextProps, AuthenticatedContext, AuthenticatedContextValue } from './AuthenticationContext';
 
-type ChildComponent = React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any>;
-
 interface AuthenticatedRouteProps extends RouteProps, WithSnackbarProps, AuthenticationContextProps {
-  component: ChildComponent;
+  component: React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any>;
 }
 
 type RenderComponent = (props: RouteComponentProps<any>) => React.ReactNode;
@@ -27,7 +25,7 @@ export class AuthenticatedRoute extends React.Component<AuthenticatedRouteProps>
         );
       }
       Authentication.storeLoginRedirect(location);
-      enqueueSnackbar("Please sign in to continue.", { variant: 'info' });
+      enqueueSnackbar("Please sign in to continue", { variant: 'info' });
       return (
         <Redirect to='/' />
       );

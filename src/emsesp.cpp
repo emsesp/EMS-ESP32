@@ -423,7 +423,7 @@ void EMSESP::reset_mqtt_ha() {
     }
 
     for (const auto & emsdevice : emsdevices) {
-        emsdevice->ha_config_done(false);
+        emsdevice->ha_config_clear();
     }
     dallassensor_.reload();
 }
@@ -440,8 +440,8 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     // group by device type
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
-            // if we're using HA and it's not already done, send the config topics first. only do this once
-            if (Mqtt::ha_enabled() && (!emsdevice->ha_config_done())) {
+            // if we're using HA, done is checked for each sensor in devices
+            if (Mqtt::ha_enabled()) {
                 emsdevice->publish_mqtt_ha_sensor(); // create the configs for each value as a sensor
             }
 
@@ -450,8 +450,8 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA, false);
                 Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_BOILER_DATA), json);
                 json.clear();
-                emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA_WW, false);
-                Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_BOILER_DATA_WW), json);
+                emsdevice->generate_values_json(json, DeviceValueTAG::TAG_DEVICE_DATA_WW, false);
+                Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_DEVICE_DATA_WW), json);
                 need_publish = false;
             }
 
@@ -511,6 +511,10 @@ void EMSESP::publish_other_values() {
 }
 
 void EMSESP::publish_sensor_values(const bool time, const bool force) {
+    if (!dallas_enabled()) {
+        return;
+    }
+
     if (dallassensor_.updated_values() || time || force) {
         dallassensor_.publish_values(force);
     }
@@ -540,7 +544,16 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
         doc["value"] = value;
     }
 
-    Mqtt::publish(F("response"), doc.as<JsonObject>());
+    Mqtt::publish(F_(response), doc.as<JsonObject>());
+}
+
+bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype) {
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice->device_type() == devicetype) {
+            return emsdevice->get_value_info(root, cmd, id);
+        }
+    }
+    return false;
 }
 
 // search for recognized device_ids : Me, All, otherwise print hex value

@@ -62,3 +62,11 @@ export interface EMSESPDeviceData {
   name: string;
   data: string[];
 }
+
+export interface DeviceValue {
+  id: number;
+  data: string,
+  uom: string,
+  name: string,
+  cmd: string
+}

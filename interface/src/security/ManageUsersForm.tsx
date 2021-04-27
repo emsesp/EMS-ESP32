@@ -11,12 +11,14 @@ import CheckIcon from '@material-ui/icons/Check';
 import IconButton from '@material-ui/core/IconButton';
 import SaveIcon from '@material-ui/icons/Save';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 import { withAuthenticatedContext, AuthenticatedContextProps } from '../authentication';
 import { RestFormProps, FormActions, FormButton, extractEventValue } from '../components';
 
 import UserForm from './UserForm';
 import { SecuritySettings, User } from './types';
+import GenerateToken from './GenerateToken';
 
 function compareUsers(a: User, b: User) {
   if (a.username < b.username) {
@@ -33,6 +35,7 @@ type ManageUsersFormProps = RestFormProps<SecuritySettings> & AuthenticatedConte
 type ManageUsersFormState = {
   creating: boolean;
   user?: User;
+  generateTokenFor?: string;
 }
 
 class ManageUsersForm extends React.Component<ManageUsersFormProps, ManageUsersFormState> {
@@ -64,6 +67,18 @@ class ManageUsersForm extends React.Component<ManageUsersFormProps, ManageUsersF
     const { data } = this.props;
     const users = data.users.filter(u => u.username !== user.username);
     this.props.setData({ ...data, users });
+  }
+
+  closeGenerateToken = () => {
+    this.setState({
+      generateTokenFor: undefined
+    });
+  }
+
+  generateToken = (user: User) => {
+    this.setState({
+      generateTokenFor: user.username
+    });
   }
 
   startEditingUser = (user: User) => {
@@ -103,7 +118,7 @@ class ManageUsersForm extends React.Component<ManageUsersFormProps, ManageUsersF
 
   render() {
     const { width, data } = this.props;
-    const { user, creating } = this.state;
+    const { user, creating, generateTokenFor } = this.state;
     return (
       <Fragment>
         <ValidatorForm onSubmit={this.onSubmit}>
@@ -122,11 +137,12 @@ class ManageUsersForm extends React.Component<ManageUsersFormProps, ManageUsersF
                     {user.username}
                   </TableCell>
                   <TableCell align="center">
-                    {
-                      user.admin ? <CheckIcon /> : <CloseIcon />
-                    }
+                    {user.admin ? <CheckIcon /> : <CloseIcon />}
                   </TableCell>
                   <TableCell align="center">
+                    <IconButton size="small" aria-label="Generate Token" onClick={() => this.generateToken(user)}>
+                      <VpnKeyIcon />
+                    </IconButton>
                     <IconButton size="small" aria-label="Delete" onClick={() => this.removeUser(user)}>
                       <DeleteIcon />
                     </IconButton>
@@ -164,6 +180,9 @@ class ManageUsersForm extends React.Component<ManageUsersFormProps, ManageUsersF
             </FormButton>
           </FormActions>
         </ValidatorForm>
+        {
+          generateTokenFor && <GenerateToken username={generateTokenFor} onClose={this.closeGenerateToken} />
+        }
         {
           user &&
           <UserForm

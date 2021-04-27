@@ -61,7 +61,7 @@
 #define EMSESP_JSON_SIZE_MEDIUM_DYN 1024  // for large json docs, using DynamicJsonDocument
 #define EMSESP_JSON_SIZE_LARGE_DYN 2048   // for very large json docs, using DynamicJsonDocument
 #define EMSESP_JSON_SIZE_XLARGE_DYN 4096  // for very very large json docs, using DynamicJsonDocument
-#define EMSESP_JSON_SIZE_XXLARGE_DYN 5120 // for extra very very large json docs, using DynamicJsonDocument
+#define EMSESP_JSON_SIZE_XXLARGE_DYN 8192 // for extra very very large json docs, using DynamicJsonDocument
 
 // helpers for callback functions
 #define MAKE_PF_CB(__f) [&](std::shared_ptr<const Telegram> t) { __f(t); }                  // for process function callbacks to register_telegram_type()
@@ -106,6 +106,8 @@ class EMSESP {
     static void    actual_master_thermostat(const uint8_t device_id);
     static uint8_t check_master_device(const uint8_t device_id, const uint16_t type_id, const bool read);
 
+    static bool get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype);
+
     static void show_device_values(uuid::console::Shell & shell);
     static void show_sensor_values(uuid::console::Shell & shell);
 
@@ -126,6 +128,10 @@ class EMSESP {
 
     static uint32_t sensor_fails() {
         return dallassensor_.fails();
+    }
+
+    static bool dallas_enabled() {
+        return (dallassensor_.dallas_enabled());
     }
 
     enum Watch : uint8_t { WATCH_OFF, WATCH_ON, WATCH_RAW, WATCH_UNKNOWN };

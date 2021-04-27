@@ -313,6 +313,7 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
             if (mf.mqtt_subfunction_) {
                 if (!(mf.mqtt_subfunction_)(message)) {
                     LOG_ERROR(F("MQTT error: invalid payload %s for this topic %s"), message, topic);
+                    Mqtt::publish(F_(response), "invalid");
                 }
                 return;
             }
@@ -327,14 +328,15 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
                 }
                 cmd_only++; // skip the /
                 int8_t id = -1;
-                // check for hcx/ prefix
-                if (cmd_only[0] == 'h' && cmd_only[1] == 'c' && cmd_only[3] == '/') {
-                    id = cmd_only[2] - '0';
-                    cmd_only += 4;
-                }
+                // check for hcx/ prefix, commented out, this is now in command::call
+                // if (cmd_only[0] == 'h' && cmd_only[1] == 'c' && cmd_only[3] == '/') {
+                //     id = cmd_only[2] - '0';
+                //     cmd_only += 4;
+                // }
                 // LOG_INFO(F("devicetype= %d, topic = %s, cmd = %s, message =  %s, id = %d"), mf.device_type_, topic, cmd_only, message, id);
                 if (!Command::call(mf.device_type_, cmd_only, message, id)) {
                     LOG_ERROR(F("No matching cmd (%s) in topic %s, id %d, or invalid data"), cmd_only, topic, id);
+                    Mqtt::publish(F_(response), "unknown");
                 }
                 return;
             }
@@ -378,12 +380,14 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
                 JsonObject          json = resp.to<JsonObject>();
                 cmd_known                = Command::call(mf.device_type_, command, "", n, json);
                 if (cmd_known && json.size()) {
-                    Mqtt::publish(F("response"), resp.as<JsonObject>());
+                    Mqtt::publish(F_(response), resp.as<JsonObject>());
+                    return;
                 }
             }
 
             if (!cmd_known) {
                 LOG_ERROR(F("No matching cmd (%s) or invalid data"), command);
+                Mqtt::publish(F_(response), "unknown");
             }
 
             return;
@@ -677,7 +681,7 @@ void Mqtt::ha_status() {
     ids.add("ems-esp");
 
     char topic[MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/system/config"), mqtt_base_.c_str());
+    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/system/config"), mqtt_base_.c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors
@@ -794,14 +798,15 @@ void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
     payload_text.reserve(measureJson(payload) + 1);
     serializeJson(payload, payload_text); // convert json to string
 
+    std::string fulltopic = uuid::read_flash_string(F_(homeassistant)) + topic;
 #if defined(EMSESP_STANDALONE)
-    LOG_DEBUG(F("Publishing HA topic=%s, payload=%s"), topic.c_str(), payload_text.c_str());
+    LOG_DEBUG(F("Publishing HA topic=%s, payload=%s"), fulltopic.c_str(), payload_text.c_str());
 #elif defined(EMSESP_DEBUG)
-    LOG_DEBUG(F("[debug] Publishing HA topic=%s, payload=%s"), topic.c_str(), payload_text.c_str());
+    LOG_DEBUG(F("[debug] Publishing HA topic=%s, payload=%s"), fulltopic.c_str(), payload_text.c_str());
 #endif
 
     // queue messages if the MQTT connection is not yet established. to ensure we don't miss messages
-    queue_publish_message(topic, payload_text, true); // with retain true
+    queue_publish_message(fulltopic, payload_text, true); // with retain true
 }
 
 // take top from queue and perform the publish or subscribe action
@@ -815,7 +820,7 @@ void Mqtt::process_queue() {
     auto mqtt_message = mqtt_messages_.front();
     auto message      = mqtt_message.content_;
     char topic[MQTT_TOPIC_MAX_SIZE];
-    if ((strncmp(message->topic.c_str(), "homeassistant/", 13) == 0)) {
+    if (message->topic.find(uuid::read_flash_string(F_(homeassistant))) == 0) {
         // leave topic as it is
         strcpy(topic, message->topic.c_str());
     } else {
@@ -898,7 +903,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
 
     bool have_tag  = !EMSdevice::tag_to_string(tag).empty() && (device_type != EMSdevice::DeviceType::BOILER); // ignore boiler
-    bool is_nested = (nested_format_ == 1) || (device_type == EMSdevice::DeviceType::BOILER);                         // boiler never uses nested
+    bool is_nested = (nested_format_ == 1) || (device_type == EMSdevice::DeviceType::BOILER);                  // boiler never uses nested
 
     // create entity by add the tag if present, seperating with a .
     char new_entity[50];
@@ -910,7 +915,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
 
     // device name
     char device_name[50];
-    strncpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str(), sizeof(device_name));
+    strlcpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str(), sizeof(device_name));
 
     // build unique identifier which will be used in the topic
     // and replacing all . with _ as not to break HA
@@ -950,7 +955,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     // look at the device value type
     if (type == DeviceValueType::BOOL) {
         // binary sensor
-        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/%s/config"), mqtt_base_.c_str(), uniq.c_str()); // topic
+        snprintf_P(topic, sizeof(topic), PSTR("binary_sensor/%s/%s/config"), mqtt_base_.c_str(), uniq.c_str()); // topic
 
         // how to render boolean. HA only accepts String values
         char result[10];
@@ -958,7 +963,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
         doc[F("payload_off")] = Helpers::render_boolean(result, false);
     } else {
         // normal HA sensor, not a boolean one
-        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/%s/config"), mqtt_base_.c_str(), uniq.c_str()); // topic
+        snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/%s/config"), mqtt_base_.c_str(), uniq.c_str()); // topic
 
         // unit of measure and map the HA icon
         if (uom != DeviceValueUOM::NONE && uom != DeviceValueUOM::PUMP) {
@@ -992,6 +997,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
         ids.add(ha_device);
     }
 
+    doc.shrinkToFit();
     publish_ha(topic, doc.as<JsonObject>());
 }
 

@@ -57,7 +57,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         type_       = Type::HC;
         hc_         = device_id - 0x20 + 1;
         uint8_t tag = TAG_HC1 + hc_ - 1;
-        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
+        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES);
         register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
         register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::PUMP);
@@ -67,10 +67,10 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         type_       = Type::WWC;
         hc_         = device_id - 0x28 + 1;
         uint8_t tag = TAG_WWC1 + hc_ - 1;
-        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
+        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
         register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(wwTemp), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::PUMP);
-        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(tempStatus));
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(wwPumpStatus), DeviceValueUOM::PUMP);
+        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(wwTempStatus), DeviceValueUOM::NONE);
     }
 
     id_ = product_id;
@@ -109,9 +109,9 @@ bool Mixer::publish_ha_config() {
     // determine the topic, if its HC and WWC. This is determined by the incoming telegram types.
     std::string topic(Mqtt::MQTT_TOPIC_MAX_SIZE, '\0');
     if (type_ == Type::HC) {
-        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/%s/mixer_hc%d/config"), Mqtt::base().c_str(), hc_);
+        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("sensor/%s/mixer_hc%d/config"), Mqtt::base().c_str(), hc_);
     } else {
-        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/%s/mixer_wwc%d/config"), Mqtt::base().c_str(), hc_); // WWC
+        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("sensor/%s/mixer_wwc%d/config"), Mqtt::base().c_str(), hc_); // WWC
     }
 
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
