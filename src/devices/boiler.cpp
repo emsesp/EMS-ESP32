@@ -602,10 +602,10 @@ void Boiler::process_HpOutdoor(std::shared_ptr<const Telegram> telegram){
     has_update(telegram->read_value(hpTr4_, 18));
     has_update(telegram->read_value(hpTr5_, 20));
     has_update(telegram->read_value(hpTr6_, 0));
-    has_update(telegram->read_value(hpTr7_, 31));
+    has_update(telegram->read_value(hpTr7_, 30));
     has_update(telegram->read_value(hpTl2_, 12));
-    has_update(telegram->read_value(hpPl1_, 27));
-    has_update(telegram->read_value(hpPh1_, 29));
+    has_update(telegram->read_value(hpPl1_, 26));
+    has_update(telegram->read_value(hpPh1_, 28));
 }
 
 // 0x2A - MC110Status
