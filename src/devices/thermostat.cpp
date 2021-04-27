@@ -110,6 +110,13 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         set_typeids     = {};
         register_telegram_type(monitor_typeids[0], F("EasyMonitor"), true, MAKE_PF_CB(process_EasyMonitor));
 
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_CRF) {
+        monitor_typeids = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
+        set_typeids     = {};
+        for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+            register_telegram_type(monitor_typeids[i], F("CRFMonitor"), true, MAKE_PF_CB(process_CRFMonitor));
+        }
+
         // RC300/RC100
     } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         monitor_typeids = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
@@ -468,6 +475,12 @@ uint8_t Thermostat::HeatingCircuit::get_mode() const {
         } else if (mode == 2) {
             return HeatingCircuit::Mode::AUTO;
         }
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_CRF) {
+        if (mode == 0) {
+            return HeatingCircuit::Mode::AUTO;
+        } else if (mode == 1) {
+            return HeatingCircuit::Mode::OFF;
+        }
     } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         if (mode == 0) {
             return HeatingCircuit::Mode::MANUAL;
@@ -513,6 +526,12 @@ uint8_t Thermostat::HeatingCircuit::get_mode_type() const {
             return HeatingCircuit::Mode::NIGHT;
         } else if (modetype == 1) {
             return HeatingCircuit::Mode::DAY;
+        }
+    } else if (model == EMS_DEVICE_FLAG_CRF) {
+        if (modetype == 0) {
+            return HeatingCircuit::Mode::OFF;
+        } else if (modetype == 1) {
+            return HeatingCircuit::Mode::ON;
         }
     } else if (model == EMS_DEVICE_FLAG_RC300) {
         if (modetype == 0) {
@@ -748,6 +767,19 @@ void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram
 
     has_update(telegram->read_value(hc->modetype, 0)); // 1 = nofrost, 2 = eco, 3 = heat
     has_update(telegram->read_value(hc->mode, 1));     // 1 = manual, 2 = auto
+}
+
+// type 0x02A5 - data from Worchester CRF200
+void Thermostat::process_CRFMonitor(std::shared_ptr<const Telegram> telegram) {
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    if (hc == nullptr) {
+        return;
+    }
+    has_update(telegram->read_value(hc->curr_roomTemp, 0)); // is * 10
+    has_update(telegram->read_bitvalue(hc->modetype, 2, 0));
+    has_update(telegram->read_bitvalue(hc->mode, 2, 4)); // bit 4, mode (auto=0 or off=1)
+    has_update(telegram->read_value(hc->setpoint_roomTemp, 6, 1)); // is * 2, force as single byte
+    has_update(telegram->read_value(hc->targetflowtemp, 4));
 }
 
 // type 0x02A5 - data from the Nefit RC1010/3000 thermostat (0x18) and RC300/310s on 0x10
@@ -2200,6 +2232,11 @@ void Thermostat::register_device_values_hc(std::shared_ptr<emsesp::Thermostat::H
         register_device_value(tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
         register_device_value(tag, &hc->program, DeviceValueType::UINT, nullptr, FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(tag, &hc->tempautotemp, DeviceValueType::UINT, FL_(div2), FL_(tempautotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_tempautotemp));
+        break;
+    case EMS_DEVICE_FLAG_CRF:
+        register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode5), FL_(mode), DeviceValueUOM::NONE);
+        register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype5), FL_(modetype), DeviceValueUOM::NONE);
+        register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT, nullptr, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
         break;
     case EMS_DEVICE_FLAG_RC20:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));

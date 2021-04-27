@@ -299,11 +299,13 @@ MAKE_PSTR_LIST(enum_mode, F_(manual), F_(auto))
 MAKE_PSTR_LIST(enum_mode2, F_(off), F_(manual), F_(auto))
 MAKE_PSTR_LIST(enum_mode3, F_(night), F_(day), F_(auto))
 MAKE_PSTR_LIST(enum_mode4, F_(blank), F_(manual), F_(auto), F_(holiday))
+MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))
 
 MAKE_PSTR_LIST(enum_modetype, F_(eco), F_(comfort))
 MAKE_PSTR_LIST(enum_modetype2, F_(day))
 MAKE_PSTR_LIST(enum_modetype3, F_(night), F_(day))
 MAKE_PSTR_LIST(enum_modetype4, F_(blank), F_(nofrost), F_(eco), F_(heat))
+MAKE_PSTR_LIST(enum_modetype5, F_(off), F_(on))
 
 MAKE_PSTR_LIST(enum_reducemode, F_(nofrost), F_(reduce), F_(room), F_(outdoor))
 
