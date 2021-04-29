@@ -98,7 +98,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA, &heatingActive_, DeviceValueType::BOOL, nullptr, FL_(heatingActive), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA, &tapwaterActive_, DeviceValueType::BOOL, nullptr, FL_(tapwaterActive), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA, &selFlowTemp_, DeviceValueType::UINT, nullptr, FL_(selFlowTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flow_temp));
-    register_device_value(TAG_BOILER_DATA, &selBurnPow_, DeviceValueType::UINT, nullptr, FL_(selBurnPow), DeviceValueUOM::PERCENT);
+    register_device_value(TAG_BOILER_DATA, &selBurnPow_, DeviceValueType::UINT, nullptr, FL_(selBurnPow), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_burn_power));
     register_device_value(TAG_BOILER_DATA, &heatingPumpMod_, DeviceValueType::UINT, nullptr, FL_(heatingPumpMod), DeviceValueUOM::PERCENT);
     register_device_value(TAG_BOILER_DATA, &heatingPump2Mod_, DeviceValueType::UINT, nullptr, FL_(heatingPump2Mod), DeviceValueUOM::PERCENT);
     register_device_value(TAG_BOILER_DATA, &outdoorTemp_, DeviceValueType::SHORT, FL_(div10), FL_(outdoorTemp), DeviceValueUOM::DEGREES);
@@ -761,6 +761,20 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
 
     LOG_INFO(F("Setting boiler flow temperature to %d C"), v);
     write_command(EMS_TYPE_UBASetPoints, 0, v, EMS_TYPE_UBASetPoints);
+
+    return true;
+}
+
+// set selected burner power
+bool Boiler::set_burn_power(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set burner max. power: Invalid value"));
+        return false;
+    }
+
+    LOG_INFO(F("Setting burner max. power to %d %"), v);
+    write_command(EMS_TYPE_UBASetPoints, 1, v, EMS_TYPE_UBASetPoints);
 
     return true;
 }
