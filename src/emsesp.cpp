@@ -553,6 +553,27 @@ bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const in
             return emsdevice->get_value_info(root, cmd, id);
         }
     }
+
+    if (devicetype == DeviceType::DALLASSENSOR) {
+        uint8_t i = 1;
+        for (const auto & sensor : EMSESP::sensor_devices()) {
+            char sensorID[10];
+            snprintf_P(sensorID, 10, PSTR("sensor%d"), i++);
+            if ((strcmp(cmd, sensorID) == 0) || (strcmp(cmd, Helpers::toLower(sensor.to_string()).c_str()) == 0)) {
+                root["name"] = sensor.to_string();
+                if (Helpers::hasValue(sensor.temperature_c)) {
+                    root["value"] = (float)(sensor.temperature_c) / 10;
+                }
+                root["type"]      = F_(number);
+                root["min"]       = -55;
+                root["max"]       = 125;
+                root["unit"]      = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
+                root["writeable"] = false;
+                return true;
+            }
+        }
+    }
+
     return false;
 }
 
