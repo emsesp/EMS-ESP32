@@ -298,7 +298,8 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 
     // not found, search device-id types for remote thermostats
     if (telegram->src >= 0x18 && telegram->src <= 0x1B) {
-        hc_num = telegram->src - 0x17;
+        hc_num  = telegram->src - 0x17;
+        toggle_ = true;
     }
 
     // still didn't recognize it, ignore it
