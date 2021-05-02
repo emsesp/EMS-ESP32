@@ -11,6 +11,7 @@ class AsyncWebServer;
 class AsyncWebServerRequest;
 class AsyncWebServerResponse;
 class AsyncJsonResponse;
+class PrettyAsyncJsonResponse;
 
 class AsyncWebParameter {
   private:
@@ -68,11 +69,13 @@ class AsyncWebServerRequest {
     AsyncWebServer *          _server;
     WebRequestMethodComposite _method;
 
+    String _url;
+
   public:
     void * _tempObject;
 
-    AsyncWebServerRequest(AsyncWebServer *, AsyncClient *);
-    ~AsyncWebServerRequest();
+    AsyncWebServerRequest(AsyncWebServer *, AsyncClient *){};
+    ~AsyncWebServerRequest(){};
 
     AsyncClient * client() {
         return _client;
@@ -82,12 +85,29 @@ class AsyncWebServerRequest {
         return _method;
     }
 
+    void method(WebRequestMethodComposite method_s) {
+        _method = method_s;
+    }
+
     void addInterestingHeader(const String & name){};
+
+    size_t args() const {
+        return 0;
+    }
 
     void send(AsyncWebServerResponse * response){};
     void send(AsyncJsonResponse * response){};
+    void send(PrettyAsyncJsonResponse * response){};
     void send(int code, const String & contentType = String(), const String & content = String()){};
     void send(int code, const String & contentType, const __FlashStringHelper *){};
+
+    const String & url() const {
+        return _url;
+    }
+
+    void url(const String & url_s) {
+        _url = url_s;
+    }
 
     bool hasParam(const String & name, bool post, bool file) const {
         return false;
@@ -174,9 +194,9 @@ class AsyncWebServerResponse {
     virtual ~AsyncWebServerResponse();
 };
 
-typedef std::function<void(AsyncWebServerRequest * request)> ArRequestHandlerFunction;
+typedef std::function<void(AsyncWebServerRequest * request)>                                                                                ArRequestHandlerFunction;
 typedef std::function<void(AsyncWebServerRequest * request, const String & filename, size_t index, uint8_t * data, size_t len, bool final)> ArUploadHandlerFunction;
-typedef std::function<void(AsyncWebServerRequest * request, uint8_t * data, size_t len, size_t index, size_t total)> ArBodyHandlerFunction;
+typedef std::function<void(AsyncWebServerRequest * request, uint8_t * data, size_t len, size_t index, size_t total)>                        ArBodyHandlerFunction;
 
 class AsyncWebServer {
   protected:

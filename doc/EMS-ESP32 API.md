@@ -15,8 +15,8 @@ OpenAPI is an open standard specification for describing REST APIs. From the [Op
 - Unless explicitly bypassed in the WebUI some operations required admin privileges in the form of an Access Token which can be generated from the Web UI's Security tab. An Access Token is a string 152 characters long. Token's do not expire. The token needs to be either embedded into the HTTP Header as `"Authorization: Bearer {ACCESS_TOKEN}"` or as query parameter `?access_token={ACCESS_TOKEN}`. To test you can use a command line instruction like
 
   ```bash
-    curl -i -H "Authorization: Bearer {ACCESS_TOKEN}" -X POST http://ems-esp/api/system/settings
-    curl -i -H "Authorization: Bearer {ACCESS_TOKEN}" -d '{ "name": "wwtemp", "value":60}' http://ems-esp/api/boiler
+    curl -i -H "Authorization: Bearer {ACCESS_TOKEN}" -X GET http://ems-esp/api/system/settings
+    curl -i -H "Authorization: Bearer {ACCESS_TOKEN}" -H "Content-Type: application/json" -d '{ "name": "wwtemp", "value":60}' http://ems-esp/api/boiler
   ```
 
 ## Error handling
@@ -36,26 +36,11 @@ OpenAPI is an open standard specification for describing REST APIs. From the [Op
     {"message":"Problems parsing JSON"}
     ```
 
-- Sending the wrong type of JSON values will result in a `400 Bad Request` response.
-
-    ```html
-    HTTP/1.1 400 Bad Request
-    {"message":"Body should be a JSON object"}
-    ```
-
-- Sending invalid fields will result in a `422 Unprocessable Entity` response. `code` can be missing, missing_field, invalid or unprocessable. For example when selecting an invalid heating circuit number.
+- Sending invalid fields will result in a `422 Unprocessable Entity` response.
 
     ```html
     HTTP/1.1 422 Unprocessable Entity
-    {
-       "message": "Validation Failed",
-       "errors": [
-         {
-           "field": "title",
-           "code": "missing_field"
-         }
-       ]
-    }
+    {"message":"Invalid command"}
     ```
 
 ## Endpoints
@@ -80,27 +65,16 @@ OpenAPI is an open standard specification for describing REST APIs. From the [Op
 | - | - | - | - | - |
 | GET | `/{device}` | return all device details and values | | |
 | GET | `/{device}/{name}` | return a specific parameter and all its properties (name, fullname, value, type, min, max, unit, writeable) | | |
-| GET | `/device={device}?cmd={name}?data={value}[?id={hc}` | to keep compatibility with v2. Unless bypassed in the EMS-ESP settings make sure you include `access_token={ACCESS_TOKEN}` | x |
-| POST/PUT | `/{device}[/{hc}][/{name}]` | sets a specific value to a parameter name. If no hc is selected and one is required for the device, the default will be used |  x | `{ "value": <value> [, "hc": {hc}] }` |
+| GET | `/device={device}?cmd={name}?data={value}[?hc=<number>` | Using HTTP query parameters. This is to keep compatibility with v2. Unless bypassed in the EMS-ESP settings make sure you include `access_token={ACCESS_TOKEN}` | x |
+| POST/PUT | `/{device}[/{hc}][/{name}]` | sets a specific value to a parameter name. If no hc is selected and one is required for the device, the default will be used |  x | `{ ["name" : <string>] , ["hc": <number>], "value": <value> }` |
 
 ## System Endpoints
 
 | Method | Endpoint | Description | Access Token required | JSON body data |
 | - | - | - | - | - |
 | GET | `/system/info` | list system information | | | |
-| GET | `/system/settings` | list all settings, except passwords | x |
-| POST/PUT | `/system/pin` | switch a GPIO state to HIGH or LOW | x | `{ "pin":<integer>, "value":<boolean> }` |
-| POST/PUT | `/system/send` | send a telegram to the EMS bus | x | `{ "telegram" : <string> }` |
-| POST/PUT | `/system/publish` | force an MQTT publish | x | `[{ "name" : <device> \| "ha" }]` |
-| POST/PUT | `/system/fetch` | fetch all EMS data from all devices | x | |
-| POST/PUT | `/system/restart` | restarts the EMS-ESP | x | |
-
-## To Do
-
-- add restart command
-- update EMS-ESP wiki/documentation for v3
-- make adjustments to the command line
-- change the URLs in the web UI help page to call system commands directly instead of via URLs
-- add long name to value query (only shortname is shown)
-- create Postman schema
-- rename setting "Enable API write commands" to something like "Use non-authenticated API" with a disclaimer that its insecure and not recommended
+| GET | `/system/settings` | list all settings, except passwords | |
+| POST/PUT | `/system/pin` | switch a GPIO state to HIGH or LOW | x | `{ "id":<gpio>, "value":<boolean> }` |
+| POST/PUT | `/system/send` | send a telegram to the EMS bus | x | `{ "value" : <string> }` |
+| POST/PUT | `/system/publish` | force an MQTT publish | x | `{ "value" : <device> \| "ha" }` |
+| POST/PUT | `/system/fetch` | fetch all EMS data from all devices | x | `{ "value" : <device> \| "all" }` |

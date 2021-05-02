@@ -23,16 +23,52 @@
 #include <AsyncJson.h>
 #include <ESPAsyncWebServer.h>
 
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #define EMSESP_API_SERVICE_PATH "/api"
 
 namespace emsesp {
 
+typedef std::unordered_map<std::string, std::string> KeyValueMap_t;
+typedef std::vector<std::string>                     Folder_t;
+
+class SUrlParser {
+  private:
+    KeyValueMap_t m_keysvalues;
+    Folder_t      m_folders;
+
+  public:
+    SUrlParser(){};
+    SUrlParser(const char * url);
+
+    bool parse(const char * url);
+
+    Folder_t & paths() {
+        return m_folders;
+    };
+
+    KeyValueMap_t & params() {
+        return m_keysvalues;
+    };
+
+    std::string path();
+};
+
 class WebAPIService {
   public:
-    WebAPIService(AsyncWebServer * server);
+    WebAPIService(AsyncWebServer * server, SecurityManager * securityManager);
 
   private:
-    void webAPIService(AsyncWebServerRequest * request);
+    SecurityManager *           _securityManager;
+    AsyncCallbackJsonWebHandler _apiHandler; // for POSTs
+
+    void webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json); // for POSTs
+    void webAPIService_get(AsyncWebServerRequest * request);                      // for GETs
+
+    void parse(AsyncWebServerRequest * request, std::string & device, std::string & cmd, int id, std::string & value);
+    void send_message_response(AsyncWebServerRequest * request, uint16_t error_code, const char * error_message = nullptr);
 };
 
 } // namespace emsesp

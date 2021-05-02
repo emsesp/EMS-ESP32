@@ -76,8 +76,8 @@
 #define EMSESP_DEFAULT_DALLAS_PARASITE false
 #endif
 
-#ifndef EMSESP_DEFAULT_API_ENABLED
-#define EMSESP_DEFAULT_API_ENABLED false // turn off, because its insecure
+#ifndef EMSESP_DEFAULT_NOTOKEN_API
+#define EMSESP_DEFAULT_NOTOKEN_API false
 #endif
 
 #ifndef EMSESP_DEFAULT_BOOL_FORMAT

@@ -55,7 +55,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["dallas_parasite"]      = settings.dallas_parasite;
     root["led_gpio"]             = settings.led_gpio;
     root["hide_led"]             = settings.hide_led;
-    root["api_enabled"]          = settings.api_enabled;
+    root["notoken_api"]          = settings.notoken_api;
     root["analog_enabled"]       = settings.analog_enabled;
     root["pbutton_gpio"]         = settings.pbutton_gpio;
     root["board_profile"]        = settings.board_profile;
@@ -169,7 +169,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.master_thermostat = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
 
     // doesn't need any follow-up actions
-    settings.api_enabled = root["api_enabled"] | EMSESP_DEFAULT_API_ENABLED;
+    settings.notoken_api = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
 
     return StateUpdateResult::CHANGED;
 }

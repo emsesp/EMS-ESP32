@@ -110,7 +110,7 @@ void WebDevicesService::device_data(AsyncWebServerRequest * request, JsonVariant
 void WebDevicesService::write_value(AsyncWebServerRequest * request, JsonVariant & json) {
     // only issue commands if the API is enabled
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        if (!settings.api_enabled) {
+        if (!settings.notoken_api) {
             request->send(403); // forbidden error
             return;
         }

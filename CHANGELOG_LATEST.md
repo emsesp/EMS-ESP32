@@ -21,5 +21,6 @@
 - Re-enabled Shower Alert (still experimental)
 - lowercased Flow temp in commands
 - system console commands to main
+- new secure API ([#50](https://github.com/emsesp/EMS-ESP32/issues/50))
 
 ## Removed

@@ -39,7 +39,7 @@ WebSettingsService EMSESP::webSettingsService = WebSettingsService(&webServer, &
 
 WebStatusService  EMSESP::webStatusService  = WebStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
 WebDevicesService EMSESP::webDevicesService = WebDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
-WebAPIService     EMSESP::webAPIService     = WebAPIService(&webServer);
+WebAPIService     EMSESP::webAPIService     = WebAPIService(&webServer, EMSESP::esp8266React.getSecurityManager());
 
 using DeviceFlags = EMSdevice;
 using DeviceType  = EMSdevice::DeviceType;
@@ -86,6 +86,15 @@ void EMSESP::fetch_device_values(const uint8_t device_id) {
                     return; // quit, we only want to return the selected device
                 }
             }
+        }
+    }
+}
+
+// for a specific EMS device type go and request data values
+void EMSESP::fetch_device_values_type(const uint8_t device_type) {
+    for (const auto & emsdevice : emsdevices) {
+        if ((emsdevice) && (emsdevice->device_type() == device_type)) {
+            emsdevice->fetch_values();
         }
     }
 }
@@ -744,7 +753,8 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         }
         read_next_ = false;
     } else if (watch() == WATCH_ON) {
-        if ((watch_id_ == WATCH_ID_NONE) || (telegram->type_id == watch_id_) || ((watch_id_ < 0x80) && ((telegram->src == watch_id_) || (telegram->dest == watch_id_)))) {
+        if ((watch_id_ == WATCH_ID_NONE) || (telegram->type_id == watch_id_)
+            || ((watch_id_ < 0x80) && ((telegram->src == watch_id_) || (telegram->dest == watch_id_)))) {
             LOG_NOTICE(pretty_telegram(telegram).c_str());
         } else if (!trace_raw_) {
             LOG_TRACE(pretty_telegram(telegram).c_str());
@@ -785,7 +795,8 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
                 found       = emsdevice->handle_telegram(telegram);
                 // if we correctly processes the telegram follow up with sending it via MQTT if needed
                 if (found && Mqtt::connected()) {
-                    if ((mqtt_.get_publish_onchange(emsdevice->device_type()) && emsdevice->has_update()) || (telegram->type_id == publish_id_ && telegram->dest == txservice_.ems_bus_id())) {
+                    if ((mqtt_.get_publish_onchange(emsdevice->device_type()) && emsdevice->has_update())
+                        || (telegram->type_id == publish_id_ && telegram->dest == txservice_.ems_bus_id())) {
                         if (telegram->type_id == publish_id_) {
                             publish_id_ = 0;
                         }
@@ -803,7 +814,8 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         if (watch() == WATCH_UNKNOWN) {
             LOG_NOTICE(pretty_telegram(telegram).c_str());
         }
-        if (first_scan_done_ && !knowndevice && (telegram->src != EMSbus::ems_bus_id()) && (telegram->src != 0x0B) && (telegram->src != 0x0C) && (telegram->src != 0x0D)) {
+        if (first_scan_done_ && !knowndevice && (telegram->src != EMSbus::ems_bus_id()) && (telegram->src != 0x0B) && (telegram->src != 0x0C)
+            && (telegram->src != 0x0D)) {
             send_read_request(EMSdevice::EMS_TYPE_VERSION, telegram->src);
         }
     }
@@ -899,7 +911,8 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
             // sometimes boilers share the same product id as controllers
             // so only add boilers if the device_id is 0x08, which is fixed for EMS
             if (device.device_type == DeviceType::BOILER) {
-                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER || (device_id >= EMSdevice::EMS_DEVICE_ID_BOILER_1 && device_id <= EMSdevice::EMS_DEVICE_ID_BOILER_F)) {
+                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER
+                    || (device_id >= EMSdevice::EMS_DEVICE_ID_BOILER_1 && device_id <= EMSdevice::EMS_DEVICE_ID_BOILER_F)) {
                     device_p = &device;
                     break;
                 }
@@ -915,7 +928,8 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     if (device_p == nullptr) {
         LOG_NOTICE(F("Unrecognized EMS device (device ID 0x%02X, product ID %d). Please report on GitHub."), device_id, product_id);
         std::string name("unknown");
-        emsdevices.push_back(EMSFactory::add(DeviceType::GENERIC, device_id, product_id, version, name, DeviceFlags::EMS_DEVICE_FLAG_NONE, EMSdevice::Brand::NO_BRAND));
+        emsdevices.push_back(
+            EMSFactory::add(DeviceType::GENERIC, device_id, product_id, version, name, DeviceFlags::EMS_DEVICE_FLAG_NONE, EMSdevice::Brand::NO_BRAND));
         return false; // not found
     }
 
@@ -933,7 +947,9 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         return true;
     }
 
-    Command::add_with_json(device_type, F_(info), [device_type](const char * value, const int8_t id, JsonObject & json) { return command_info(device_type, json, id); });
+    Command::add_with_json(device_type, F_(info), [device_type](const char * value, const int8_t id, JsonObject & json) {
+        return command_info(device_type, json, id);
+    });
 
     return true;
 }
@@ -952,7 +968,8 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t i
     }
 
     for (const auto & emsdevice : emsdevices) {
-        if (emsdevice && (emsdevice->device_type() == device_type) && ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat()))) {
+        if (emsdevice && (emsdevice->device_type() == device_type)
+            && ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat()))) {
             has_value |= emsdevice->generate_values_json(json, tag, (id < 1), (id == -1)); // nested for id -1,0 & console for id -1
         }
     }
@@ -966,7 +983,12 @@ void EMSESP::send_read_request(const uint16_t type_id, const uint8_t dest, const
 }
 
 // sends write request
-void EMSESP::send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid) {
+void EMSESP::send_write_request(const uint16_t type_id,
+                                const uint8_t  dest,
+                                const uint8_t  offset,
+                                uint8_t *      message_data,
+                                const uint8_t  message_length,
+                                const uint16_t validate_typeid) {
     txservice_.add(Telegram::Operation::TX_WRITE, dest, type_id, offset, message_data, message_length, validate_typeid, true);
 }
 
