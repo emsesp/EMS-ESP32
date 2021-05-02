@@ -22,6 +22,7 @@
 #define EMSESP_TEST_H
 
 #include "emsesp.h"
+#include <ESPAsyncWebServer.h>
 
 namespace emsesp {
 
@@ -29,14 +30,13 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "solar"
 // #define EMSESP_DEBUG_DEFAULT "mixer"
 // #define EMSESP_DEBUG_DEFAULT "web"
-// #define EMSESP_DEBUG_DEFAULT "general"
+#define EMSESP_DEBUG_DEFAULT "general"
 // #define EMSESP_DEBUG_DEFAULT "boiler"
 // #define EMSESP_DEBUG_DEFAULT "mqtt2"
 // #define EMSESP_DEBUG_DEFAULT "mqtt_nested"
 // #define EMSESP_DEBUG_DEFAULT "ha"
 // #define EMSESP_DEBUG_DEFAULT "board_profile"
-#define EMSESP_DEBUG_DEFAULT "shower_alert"
-
+// #define EMSESP_DEBUG_DEFAULT "shower_alert"
 
 class Test {
   public:
