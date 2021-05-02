@@ -63,35 +63,55 @@ bool System::command_send(const char * value, const int8_t id) {
 
 // fetch device values
 bool System::command_fetch(const char * value, const int8_t id) {
-    LOG_INFO(F("Requesting data from EMS devices"));
-    EMSESP::fetch_device_values();
+    std::string value_s(14, '\0');
+    if (Helpers::value2string(value, value_s)) {
+        if (value_s == "all") {
+            LOG_INFO(F("Requesting data from EMS devices"));
+            EMSESP::fetch_device_values();
+            return true;
+        } else if (value_s == "boiler") {
+            EMSESP::fetch_device_values_type(EMSdevice::DeviceType::BOILER);
+            return true;
+        } else if (value_s == "thermostat") {
+            EMSESP::fetch_device_values_type(EMSdevice::DeviceType::THERMOSTAT);
+            return true;
+        } else if (value_s == "solar") {
+            EMSESP::fetch_device_values_type(EMSdevice::DeviceType::SOLAR);
+            return true;
+        } else if (value_s == "mixer") {
+            EMSESP::fetch_device_values_type(EMSdevice::DeviceType::MIXER);
+            return true;
+        }
+    }
+
+    EMSESP::fetch_device_values(); // default if no name or id is given
     return true;
 }
 
 // mqtt publish
 bool System::command_publish(const char * value, const int8_t id) {
-    std::string ha(14, '\0');
-    if (Helpers::value2string(value, ha)) {
-        if (ha == "ha") {
+    std::string value_s(14, '\0');
+    if (Helpers::value2string(value, value_s)) {
+        if (value_s == "ha") {
             EMSESP::publish_all(true); // includes HA
             LOG_INFO(F("Publishing all data to MQTT, including HA configs"));
             return true;
-        } else if (ha == "boiler") {
+        } else if (value_s == "boiler") {
             EMSESP::publish_device_values(EMSdevice::DeviceType::BOILER);
             return true;
-        } else if (ha == "thermostat") {
+        } else if (value_s == "thermostat") {
             EMSESP::publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
             return true;
-        } else if (ha == "solar") {
+        } else if (value_s == "solar") {
             EMSESP::publish_device_values(EMSdevice::DeviceType::SOLAR);
             return true;
-        } else if (ha == "mixer") {
+        } else if (value_s == "mixer") {
             EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
             return true;
-        } else if (ha == "other") {
+        } else if (value_s == "other") {
             EMSESP::publish_other_values();
             return true;
-        } else if (ha == "dallassensor") {
+        } else if (value_s == "dallassensor") {
             EMSESP::publish_sensor_values(true);
             return true;
         }
@@ -848,7 +868,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["dallas_parasite"]      = settings.dallas_parasite;
         node["led_gpio"]             = settings.led_gpio;
         node["hide_led"]             = settings.hide_led;
-        node["api_enabled"]          = settings.api_enabled;
+        node["notoken_api"]          = settings.notoken_api;
         node["analog_enabled"]       = settings.analog_enabled;
         node["pbutton_gpio"]         = settings.pbutton_gpio;
         node["board_profile"]        = settings.board_profile;
