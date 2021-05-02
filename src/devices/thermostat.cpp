@@ -779,7 +779,7 @@ void Thermostat::process_CRFMonitor(std::shared_ptr<const Telegram> telegram) {
     }
     has_update(telegram->read_value(hc->curr_roomTemp, 0)); // is * 10
     has_update(telegram->read_bitvalue(hc->modetype, 2, 0));
-    has_update(telegram->read_bitvalue(hc->mode, 2, 4)); // bit 4, mode (auto=0 or off=1)
+    has_update(telegram->read_bitvalue(hc->mode, 2, 4));           // bit 4, mode (auto=0 or off=1)
     has_update(telegram->read_value(hc->setpoint_roomTemp, 6, 1)); // is * 2, force as single byte
     has_update(telegram->read_value(hc->targetflowtemp, 4));
 }
