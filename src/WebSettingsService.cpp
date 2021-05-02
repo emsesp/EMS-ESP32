@@ -27,7 +27,8 @@ using namespace std::placeholders; // for `_1` etc
 WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(WebSettings::read, WebSettings::update, this, server, EMSESP_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(WebSettings::read, WebSettings::update, this, fs, EMSESP_SETTINGS_FILE)
-    , _boardProfileHandler(EMSESP_BOARD_PROFILE_SERVICE_PATH, securityManager->wrapCallback(std::bind(&WebSettingsService::board_profile, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
+    , _boardProfileHandler(EMSESP_BOARD_PROFILE_SERVICE_PATH,
+                           securityManager->wrapCallback(std::bind(&WebSettingsService::board_profile, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
     _boardProfileHandler.setMethod(HTTP_POST);
     _boardProfileHandler.setMaxContentLength(256);
     server->addHandler(&_boardProfileHandler);

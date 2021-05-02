@@ -860,7 +860,6 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 // export status information including some basic settings
 // e.g. http://ems-esp/api?device=system&cmd=info
 bool System::command_info(const char * value, const int8_t id, JsonObject & json) {
-
     if (id == 0) {
         return EMSESP::system_.heartbeat_json(json);
     }
