@@ -940,6 +940,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
             }
         }
     }
+    if (EMSESP::sensor_devices().size()) {
+        JsonObject obj = devices2.createNestedObject();
+        obj["type"]    = F("Dallassensor");
+        obj["name"]    = F("Dallassensor");
+    }
 
     return true;
 }

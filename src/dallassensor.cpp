@@ -318,10 +318,18 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
     for (const auto & sensor : sensors_) {
         char sensorID[10]; // sensor{1-n}
         snprintf_P(sensorID, 10, PSTR("sensor%d"), i++);
-        JsonObject dataSensor = json.createNestedObject(sensorID);
-        dataSensor["id"]      = sensor.to_string();
-        if (Helpers::hasValue(sensor.temperature_c)) {
-            dataSensor["temp"] = (float)(sensor.temperature_c) / 10;
+        if (id == 0) {
+            if (Mqtt::dallas_format() == Mqtt::Dallas_Format::SENSORID && Helpers::hasValue(sensor.temperature_c)) {
+                json[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
+            } else if (Helpers::hasValue(sensor.temperature_c)) {
+                json[sensorID] = (float)(sensor.temperature_c) / 10;
+            }
+        } else {
+            JsonObject dataSensor = json.createNestedObject(sensorID);
+            dataSensor["id"]      = sensor.to_string();
+            if (Helpers::hasValue(sensor.temperature_c)) {
+                dataSensor["temp"] = (float)(sensor.temperature_c) / 10;
+            }
         }
     }
 
