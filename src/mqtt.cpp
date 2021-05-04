@@ -228,12 +228,27 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     }
     for (const auto & cf : Command::commands()) {
         if (subscribe_format_ == 2 && cf.flag_ == MqttSubFlag::FLAG_HC) {
-            shell.printfln(F(" %s/%s/hc1/%s"), mqtt_base_.c_str(), EMSdevice::device_type_2_device_name(cf.device_type_).c_str(), uuid::read_flash_string(cf.cmd_).c_str());
-            shell.printfln(F(" %s/%s/hc2/%s"), mqtt_base_.c_str(), EMSdevice::device_type_2_device_name(cf.device_type_).c_str(), uuid::read_flash_string(cf.cmd_).c_str());
-            shell.printfln(F(" %s/%s/hc3/%s"), mqtt_base_.c_str(), EMSdevice::device_type_2_device_name(cf.device_type_).c_str(), uuid::read_flash_string(cf.cmd_).c_str());
-            shell.printfln(F(" %s/%s/hc4/%s"), mqtt_base_.c_str(), EMSdevice::device_type_2_device_name(cf.device_type_).c_str(), uuid::read_flash_string(cf.cmd_).c_str());
+            shell.printfln(F(" %s/%s/hc1/%s"),
+                           mqtt_base_.c_str(),
+                           EMSdevice::device_type_2_device_name(cf.device_type_).c_str(),
+                           uuid::read_flash_string(cf.cmd_).c_str());
+            shell.printfln(F(" %s/%s/hc2/%s"),
+                           mqtt_base_.c_str(),
+                           EMSdevice::device_type_2_device_name(cf.device_type_).c_str(),
+                           uuid::read_flash_string(cf.cmd_).c_str());
+            shell.printfln(F(" %s/%s/hc3/%s"),
+                           mqtt_base_.c_str(),
+                           EMSdevice::device_type_2_device_name(cf.device_type_).c_str(),
+                           uuid::read_flash_string(cf.cmd_).c_str());
+            shell.printfln(F(" %s/%s/hc4/%s"),
+                           mqtt_base_.c_str(),
+                           EMSdevice::device_type_2_device_name(cf.device_type_).c_str(),
+                           uuid::read_flash_string(cf.cmd_).c_str());
         } else if (subscribe_format_ && cf.flag_ != MqttSubFlag::FLAG_NOSUB) {
-            shell.printfln(F(" %s/%s/%s"), mqtt_base_.c_str(), EMSdevice::device_type_2_device_name(cf.device_type_).c_str(), uuid::read_flash_string(cf.cmd_).c_str());
+            shell.printfln(F(" %s/%s/%s"),
+                           mqtt_base_.c_str(),
+                           EMSdevice::device_type_2_device_name(cf.device_type_).c_str(),
+                           uuid::read_flash_string(cf.cmd_).c_str());
         }
     }
     shell.println();
@@ -265,7 +280,12 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
                     shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s (pid %d)"), message.id_, topic, content->payload.c_str(), message.packet_id_);
                 }
             } else {
-                shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s (pid %d, retry #%d)"), message.id_, topic, content->payload.c_str(), message.packet_id_, message.retry_count_);
+                shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s (pid %d, retry #%d)"),
+                               message.id_,
+                               topic,
+                               content->payload.c_str(),
+                               message.packet_id_,
+                               message.retry_count_);
             }
         } else {
             // Subscribe messages
@@ -400,7 +420,10 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
 
 // print all the topics related to a specific device type
 void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type) {
-    if (std::count_if(mqtt_subfunctions_.cbegin(), mqtt_subfunctions_.cend(), [=](MQTTSubFunction const & mqtt_subfunction) { return device_type == mqtt_subfunction.device_type_; }) == 0) {
+    if (std::count_if(mqtt_subfunctions_.cbegin(),
+                      mqtt_subfunctions_.cend(),
+                      [=](MQTTSubFunction const & mqtt_subfunction) { return device_type == mqtt_subfunction.device_type_; })
+        == 0) {
         return;
     }
 
@@ -851,7 +874,13 @@ void Mqtt::process_queue() {
 
     // else try and publish it
     uint16_t packet_id = mqttClient_->publish(topic, mqtt_qos_, message->retain, message->payload.c_str(), message->payload.size(), false, mqtt_message.id_);
-    LOG_DEBUG(F("Publishing topic %s (#%02d, retain=%d, try#%d, size %d, pid %d)"), topic, mqtt_message.id_, message->retain, mqtt_message.retry_count_ + 1, message->payload.size(), packet_id);
+    LOG_DEBUG(F("Publishing topic %s (#%02d, retain=%d, try#%d, size %d, pid %d)"),
+              topic,
+              mqtt_message.id_,
+              message->retain,
+              mqtt_message.retry_count_ + 1,
+              message->payload.size(),
+              packet_id);
 
     if (packet_id == 0) {
         // it failed. if we retried n times, give up. remove from queue

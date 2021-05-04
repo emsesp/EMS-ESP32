@@ -25,7 +25,7 @@ class DummySettings {
     bool     shower_timer         = true;
     bool     shower_alert         = false;
     bool     hide_led             = false;
-    bool     api_enabled          = true;
+    bool     notoken_api          = false;
 
     // MQTT
     uint16_t publish_time      = 10; // seconds

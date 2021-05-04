@@ -148,7 +148,7 @@ class Thermostat : public EMSdevice {
     char     dummychar_[5];  // for commands with no output
 
     // Installation parameters
-    uint8_t ibaMainDisplay_;       // display on Thermostat: 0 int temp, 1 int setpoint, 2 ext temp, 3 burner temp, 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
+    uint8_t ibaMainDisplay_; // display on Thermostat: 0 int temp, 1 int setpoint, 2 ext temp, 3 burner temp, 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
     uint8_t ibaLanguage_;          // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
     int8_t  ibaCalIntTemperature_; // offset int. temperature sensor, by * 0.1 Kelvin (-5.0 to 5.0K)
     int8_t  ibaMinExtTemperature_; // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
@@ -255,7 +255,7 @@ class Thermostat : public EMSdevice {
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
 
     void register_mqtt_ha_config_hc(uint8_t hc_num);
-    void register_device_values_hc(std::shared_ptr<emsesp::Thermostat::HeatingCircuit> hc);
+    void register_device_values_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc);
 
     bool thermostat_ha_cmd(const char * message, uint8_t hc_num);
 

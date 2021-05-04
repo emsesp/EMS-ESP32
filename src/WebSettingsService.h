@@ -50,7 +50,7 @@ class WebSettings {
     bool     dallas_parasite;
     uint8_t  led_gpio;
     bool     hide_led;
-    bool     api_enabled;
+    bool     notoken_api;
     bool     analog_enabled;
     uint8_t  pbutton_gpio;
     String   board_profile;

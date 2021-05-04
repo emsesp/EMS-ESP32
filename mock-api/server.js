@@ -103,7 +103,7 @@ const verify_authentication = { access_token: '1234' };
 const signin = {
     "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWUsInZlcnNpb24iOiIzLjAuMmIwIn0.MsHSgoJKI1lyYz77EiT5ZN3ECMrb4mPv9FNy3udq0TU"
 };
-const generate_token = { token: '1234' }; 
+const generate_token = { token: '1234' };
 
 // EMS-ESP Project specific
 const EMSESP_SETTINGS_ENDPOINT = ENDPOINT_ROOT + "emsespSettings";
@@ -117,7 +117,7 @@ const emsesp_settings = {
     "tx_mode": 1, "tx_delay": 0, "ems_bus_id": 11, "syslog_enabled": false, "syslog_level": 3,
     "trace_raw": false, "syslog_mark_interval": 0, "syslog_host": "192.168.1.4", "syslog_port": 514,
     "master_thermostat": 0, "shower_timer": true, "shower_alert": false, "rx_gpio": 23, "tx_gpio": 5,
-    "dallas_gpio": 3, "dallas_parasite": false, "led_gpio": 2, "hide_led": false, "api_enabled": true,
+    "dallas_gpio": 3, "dallas_parasite": false, "led_gpio": 2, "hide_led": false, "notoken_api": false,
     "analog_enabled": false, "pbutton_gpio": 0, "board_profile": "S32"
 };
 const emsesp_alldevices = {

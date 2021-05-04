@@ -93,7 +93,12 @@ class EMSESP {
     static std::string pretty_telegram(std::shared_ptr<const Telegram> telegram);
 
     static void send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0, const uint8_t length = 0);
-    static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
+    static void send_write_request(const uint16_t type_id,
+                                   const uint8_t  dest,
+                                   const uint8_t  offset,
+                                   uint8_t *      message_data,
+                                   const uint8_t  message_length,
+                                   const uint16_t validate_typeid);
     static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value);
     static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
 
@@ -173,6 +178,7 @@ class EMSESP {
     }
 
     static void fetch_device_values(const uint8_t device_id = 0);
+    static void fetch_device_values_type(const uint8_t device_type);
 
     static bool add_device(const uint8_t device_id, const uint8_t product_id, std::string & version, const uint8_t brand);
     static void scan_devices();

@@ -52,7 +52,7 @@ class EMSESPHelp extends Component {
                             <ImportExportIcon />
                         </ListItemAvatar>
                         <ListItemText>
-                            To list your system settings <Link target="_blank" href={WebAPISystemSettings} color="primary">{'click here'}</Link>
+                            To export your system settings <Link target="_blank" href={WebAPISystemSettings} color="primary">{'click here'}</Link>
                         </ListItemText>
                     </ListItem>
 
@@ -62,7 +62,7 @@ class EMSESPHelp extends Component {
                             <BugReportIcon />
                         </ListItemAvatar>
                         <ListItemText>
-                            To create a report of the current EMS-ESP status <Link target="_blank" href={WebAPISystemInfo} color="primary">{'click here'}</Link>
+                            To export the current status of EMS-ESP <Link target="_blank" href={WebAPISystemInfo} color="primary">{'click here'}</Link>
                         </ListItemText>
                     </ListItem>
 

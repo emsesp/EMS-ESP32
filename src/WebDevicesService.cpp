@@ -23,10 +23,16 @@ namespace emsesp {
 using namespace std::placeholders; // for `_1` etc
 
 WebDevicesService::WebDevicesService(AsyncWebServer * server, SecurityManager * securityManager)
-    : _device_dataHandler(DEVICE_DATA_SERVICE_PATH, securityManager->wrapCallback(std::bind(&WebDevicesService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED))
-    , _writevalue_dataHandler(WRITE_VALUE_SERVICE_PATH, securityManager->wrapCallback(std::bind(&WebDevicesService::write_value, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED)) {
-    server->on(EMSESP_DEVICES_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebDevicesService::all_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
-    server->on(SCAN_DEVICES_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebDevicesService::scan_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+    : _device_dataHandler(DEVICE_DATA_SERVICE_PATH,
+                          securityManager->wrapCallback(std::bind(&WebDevicesService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED))
+    , _writevalue_dataHandler(WRITE_VALUE_SERVICE_PATH,
+                              securityManager->wrapCallback(std::bind(&WebDevicesService::write_value, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED)) {
+    server->on(EMSESP_DEVICES_SERVICE_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest(std::bind(&WebDevicesService::all_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+    server->on(SCAN_DEVICES_SERVICE_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest(std::bind(&WebDevicesService::scan_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 
     _device_dataHandler.setMethod(HTTP_POST);
     _device_dataHandler.setMaxContentLength(256);
@@ -104,7 +110,7 @@ void WebDevicesService::device_data(AsyncWebServerRequest * request, JsonVariant
 void WebDevicesService::write_value(AsyncWebServerRequest * request, JsonVariant & json) {
     // only issue commands if the API is enabled
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        if (!settings.api_enabled) {
+        if (!settings.notoken_api) {
             request->send(403); // forbidden error
             return;
         }

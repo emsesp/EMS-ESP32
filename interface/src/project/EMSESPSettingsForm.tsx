@@ -396,12 +396,12 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
         <BlockFormControlLabel
           control={
             <Checkbox
-              checked={data.api_enabled}
-              onChange={handleValueChange("api_enabled")}
-              value="api_enabled"
+              checked={data.notoken_api}
+              onChange={handleValueChange("notoken_api")}
+              value="notoken_api"
             />
           }
-          label="Enable API write commands"
+          label="Bypass Access Token authorization on API calls"
         />
         <BlockFormControlLabel
           control={

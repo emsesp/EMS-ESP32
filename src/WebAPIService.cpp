@@ -16,76 +16,308 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// SUrlParser from https://github.com/Mad-ness/simple-url-parser
+
 #include "emsesp.h"
 
 using namespace std::placeholders; // for `_1` etc
 
 namespace emsesp {
 
-WebAPIService::WebAPIService(AsyncWebServer * server) {
-    server->on(EMSESP_API_SERVICE_PATH, HTTP_GET, std::bind(&WebAPIService::webAPIService, this, _1));
+WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
+    : _securityManager(securityManager)
+    , _apiHandler("/api", std::bind(&WebAPIService::webAPIService_post, this, _1, _2), 256) { // for POSTS
+    server->on("/api", HTTP_GET, std::bind(&WebAPIService::webAPIService_get, this, _1));     // for GETS
+    server->addHandler(&_apiHandler);
 }
 
-// e.g. http://ems-esp/api?device=boiler&cmd=wwtemp&data=20&id=1
-void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
-    // must have device and cmd parameters
-    if ((!request->hasParam(F_(device))) || (!request->hasParam(F_(cmd)))) {
-        request->send(400, "text/plain", F("Invalid syntax"));
+// GET /{device}
+// GET /{device}/{name}
+// GET /device={device}?cmd={name}?data={value}[?id={hc}
+void WebAPIService::webAPIService_get(AsyncWebServerRequest * request) {
+    std::string device("");
+    std::string cmd("");
+    int         id = -1;
+    std::string value("");
+
+    parse(request, device, cmd, id, value); // pass it defaults
+}
+
+// For POSTS with an optional JSON body
+// HTTP_POST | HTTP_PUT | HTTP_PATCH
+// POST/PUT /{device}[/{hc}][/{name}]
+void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json) {
+    // extra the params from the json body
+    if (not json.is<JsonObject>()) {
+        webAPIService_get(request);
         return;
     }
 
-    // get device
-    String  device      = request->getParam(F_(device))->value();
-    uint8_t device_type = EMSdevice::device_name_2_device_type(device.c_str());
-    if (device_type == emsesp::EMSdevice::DeviceType::UNKNOWN) {
-        request->send(400, "text/plain", F("Invalid device"));
-        return;
-    }
+    // extract values from the json
+    // these will be used as default values
+    auto && body = json.as<JsonObject>();
 
-    // get cmd, we know we have one
-    String cmd = request->getParam(F_(cmd))->value();
-
-    String data;
-    if (request->hasParam(F_(data))) {
-        data = request->getParam(F_(data))->value();
-    }
-
-    String id;
-    if (request->hasParam(F_(id))) {
-        id = request->getParam(F_(id))->value();
-    }
-
-    if (id.isEmpty()) {
-        id = "-1";
-    }
-
-    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
-    JsonObject          json = doc.to<JsonObject>();
-    bool                ok   = false;
-
-    // execute the command
-    if (data.isEmpty()) {
-        ok = Command::call(device_type, cmd.c_str(), nullptr, id.toInt(), json); // command only
+    std::string device = body["name"].as<std::string>(); // note this was called device in the v2
+    std::string cmd    = body["cmd"].as<std::string>();
+    int         id     = -1;
+    if (body.containsKey("id")) {
+        id = body["id"];
+    } else if (body.containsKey("hc")) {
+        id = body["hc"];
     } else {
-        // we only allow commands with parameters if the API is enabled
-        bool api_enabled;
-        EMSESP::webSettingsService.read([&](WebSettings & settings) { api_enabled = settings.api_enabled; });
-        if (api_enabled) {
-            ok = Command::call(device_type, cmd.c_str(), data.c_str(), id.toInt(), json); // has cmd, data and id
-        } else {
-            request->send(401, "text/plain", F("Unauthorized"));
+        id = -1;
+    }
+
+    // make sure we have a value. There must always be a value
+    if (!body.containsKey("value")) {
+        send_message_response(request, 400, "Problems parsing JSON"); // Bad Request
+        return;
+    }
+    std::string value = body["value"].as<std::string>(); // always convert value to string
+
+    // now parse the URL. The URL is always leading and will overwrite anything provided in the json body
+    parse(request, device, cmd, id, value); // pass it defaults
+}
+
+// parse the URL looking for query or path parameters
+// reporting back any errors
+void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_s, std::string & cmd_s, int id, std::string & value_s) {
+#ifndef EMSESP_STANDALONE
+    // parse URL for the path names
+    SUrlParser p;
+    p.parse(request->url().c_str());
+
+    // remove the /api from the path
+    if (p.paths().front() == "api") {
+        p.paths().erase(p.paths().begin());
+    } else {
+        return; // bad URL
+    }
+
+    uint8_t device_type;
+    int8_t  id_n = -1; // default hc
+
+    // check for query parameters first
+    // /device={device}?cmd={name}?data={value}[?id={hc}
+    if (p.paths().size() == 0) {
+        // get the device
+        if (request->hasParam(F_(device))) {
+            device_s = request->getParam(F_(device))->value().c_str();
+        }
+
+        // get cmd
+        if (request->hasParam(F_(cmd))) {
+            cmd_s = request->getParam(F_(cmd))->value().c_str();
+        }
+
+        // get data, which is optional. This is now replaced with the name 'value' in JSON body
+        if (request->hasParam(F_(data))) {
+            value_s = request->getParam(F_(data))->value().c_str();
+        }
+        if (request->hasParam("value")) {
+            value_s = request->getParam("value")->value().c_str();
+        }
+
+        // get id (or hc), which is optional
+        if (request->hasParam(F_(id))) {
+            id_n = Helpers::atoint(request->getParam(F_(id))->value().c_str());
+        }
+        if (request->hasParam("hc")) {
+            id_n = Helpers::atoint(request->getParam("hc")->value().c_str());
+        }
+    } else {
+        // parse paths and json data
+        // /{device}[/{hc}][/{name}]
+        // first param must be a valid device, which includes "system"
+        device_s    = p.paths().front();
+        device_type = EMSdevice::device_name_2_device_type(device_s.c_str());
+
+        // if there are no more paths parameters, default to 'info'
+        auto num_paths = p.paths().size();
+        if (num_paths > 1) {
+            auto path2 = p.paths()[1]; // get next path
+            // if it's a system, the next path must be a command (info, settings,...)
+            if (device_type == EMSdevice::DeviceType::SYSTEM) {
+                cmd_s = path2;
+            } else {
+                // it's an EMS device
+                // path2 could be a hc which is optional or a name. first check if it's a hc
+                if (path2.substr(0, 2) == "hc") {
+                    id_n = (byte)path2[2] - '0'; // bit of a hack
+                    // there must be a name following
+                    if (num_paths > 2) {
+                        cmd_s = p.paths()[2];
+                    }
+                } else {
+                    cmd_s = path2;
+                }
+            }
+        }
+    }
+
+    // now go and validate everything
+
+    // device check
+    if (device_s.empty()) {
+        send_message_response(request, 422, "Missing device"); // Unprocessable Entity
+        return;
+    }
+    device_type = EMSdevice::device_name_2_device_type(device_s.c_str());
+    if (device_type == EMSdevice::DeviceType::UNKNOWN) {
+        send_message_response(request, 422, "Invalid device"); // Unprocessable Entity
+        return;
+    }
+
+    // cmd check
+    // if the cmd is empty, default it 'info'
+    if (cmd_s.empty()) {
+        cmd_s = "info";
+    }
+    if (Command::find_command(device_type, cmd_s.c_str()) == nullptr) {
+        send_message_response(request, 422, "Invalid cmd"); // Unprocessable Entity
+        return;
+    }
+
+    // check that we have permissions first. We require authenticating on 1 or more of these conditions:
+    //  1. any HTTP POSTs or PUTs
+    //  2. a HTTP GET which has a 'data' parameter which is not empty (to keep v2 compatibility)
+    auto method    = request->method();
+    bool have_data = !value_s.empty();
+    bool admin_allowed;
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+        Authentication authentication = _securityManager->authenticateRequest(request);
+        admin_allowed                 = settings.notoken_api | AuthenticationPredicates::IS_ADMIN(authentication);
+    });
+
+    if ((method != HTTP_GET) || ((method == HTTP_GET) && have_data)) {
+        if (!admin_allowed) {
+            send_message_response(request, 401, "Bad credentials"); // Unauthorized
             return;
         }
     }
-    if (ok && json.size()) {
-        // send json output back to web
-        doc.shrinkToFit();
-        std::string buffer;
-        serializeJsonPretty(doc, buffer);
-        request->send(200, "text/plain;charset=utf-8", buffer.c_str());
+
+    // now we have all the parameters go and execute the command
+    PrettyAsyncJsonResponse * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    JsonObject                json     = response->getRoot();
+
+    // EMSESP::logger().notice("Calling device=%s, cmd=%s, data=%s, id/hc=%d", device_s.c_str(), cmd_s.c_str(), value_s.c_str(), id_n);
+    bool ok = Command::call(device_type, cmd_s.c_str(), (have_data ? value_s.c_str() : nullptr), id_n, json);
+
+    // check for errors
+    if (!ok) {
+        send_message_response(request, 400, "Problems parsing elements"); // Bad Request
         return;
     }
-    request->send(200, "text/plain", ok ? F("OK") : F("Invalid"));
+
+    if (!json.size()) {
+        send_message_response(request, 200, "OK"); // OK
+        return;
+    }
+
+    // send the json that came back from the command call
+    response->setLength();
+    request->send(response); // send json response
+
+#endif
+}
+
+// send a HTTP error back, with optional JSON body data
+void WebAPIService::send_message_response(AsyncWebServerRequest * request, uint16_t error_code, const char * error_message) {
+    if (error_message == nullptr) {
+        AsyncWebServerResponse * response = request->beginResponse(error_code); // just send the code
+        request->send(response);
+    } else {
+        // build a return message and send it
+        PrettyAsyncJsonResponse * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
+        JsonObject                json     = response->getRoot();
+        json["message"]                    = error_message;
+        response->setCode(error_code);
+        response->setLength();
+        response->setContentType("application/json");
+        request->send(response);
+    }
+}
+
+/**
+ * Extract only the path component from the passed URI 
+ * and normalized it.
+ * Ex. //one/two////three///
+ * becomes
+ *  /one/two/three
+ */
+std::string SUrlParser::path() {
+    std::string s = "/"; // set up the beginning slash
+    for (std::string & f : m_folders) {
+        s += f;
+        s += "/";
+    }
+    s.pop_back(); // deleting last letter, that is slash '/'
+    return std::string(s);
+}
+
+SUrlParser::SUrlParser(const char * uri) {
+    parse(uri);
+}
+
+bool SUrlParser::parse(const char * uri) {
+    m_folders.clear();
+    m_keysvalues.clear();
+    enum Type { begin, folder, param, value };
+    std::string s;
+
+    const char * c = uri;
+    enum Type    t = Type::begin;
+    std::string  last_param;
+
+    if (c != NULL || *c != '\0') {
+        do {
+            if (*c == '/') {
+                if (s.length() > 0) {
+                    m_folders.push_back(s);
+                    s.clear();
+                }
+                t = Type::folder;
+            } else if (*c == '?' && (t == Type::folder || t == Type::begin)) {
+                if (s.length() > 0) {
+                    m_folders.push_back(s);
+                    s.clear();
+                }
+                t = Type::param;
+            } else if (*c == '=' && (t == Type::param || t == Type::begin)) {
+                m_keysvalues[s] = "";
+                last_param      = s;
+                s.clear();
+                t = Type::value;
+            } else if (*c == '&' && (t == Type::value || t == Type::param || t == Type::begin)) {
+                if (t == Type::value) {
+                    m_keysvalues[last_param] = s;
+                } else if ((t == Type::param || t == Type::begin) && (s.length() > 0)) {
+                    m_keysvalues[s] = "";
+                    last_param      = s;
+                }
+                t = Type::param;
+                s.clear();
+            } else if (*c == '\0' && s.length() > 0) {
+                if (t == Type::value) {
+                    m_keysvalues[last_param] = s;
+                } else if (t == Type::folder || t == Type::begin) {
+                    m_folders.push_back(s);
+                } else if (t == Type::param) {
+                    m_keysvalues[s] = "";
+                    last_param      = s;
+                }
+                s.clear();
+            } else if (*c == '\0' && s.length() == 0) {
+                if (t == Type::param && last_param.length() > 0) {
+                    m_keysvalues[last_param] = "";
+                }
+                s.clear();
+            } else {
+                s += *c;
+            }
+        } while (*c++ != '\0');
+    }
+    return true;
 }
 
 } // namespace emsesp

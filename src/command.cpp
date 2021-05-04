@@ -95,6 +95,7 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
     }
 }
 
+// set the id if there are prefixes
 char * Command::check_command(char * out, const char * cmd, int8_t & id) {
     // convert cmd to lowercase
     strlcpy(out, cmd, 20);
@@ -102,7 +103,7 @@ char * Command::check_command(char * out, const char * cmd, int8_t & id) {
         *p = tolower(*p);
     }
 
-    //scan for prefix hc.
+    // scan for prefix hc.
     for (uint8_t i = DeviceValueTAG::TAG_HC1; i <= DeviceValueTAG::TAG_HC4; i++) {
         if ((strncmp(out, EMSdevice::tag_to_string(i).c_str(), 3) == 0) && (strlen(out) > 4)) {
             strcpy(out, &out[4]);
@@ -111,7 +112,7 @@ char * Command::check_command(char * out, const char * cmd, int8_t & id) {
         }
     }
 
-    //scan for prefix wwc.
+    // scan for prefix wwc.
     for (uint8_t i = DeviceValueTAG::TAG_WWC1; i <= DeviceValueTAG::TAG_WWC4; i++) {
         if ((strncmp(out, EMSdevice::tag_to_string(i).c_str(), 4) == 0) && (strlen(out) > 5)) {
             strcpy(out, &out[5]);
@@ -122,7 +123,6 @@ char * Command::check_command(char * out, const char * cmd, int8_t & id) {
 
     return out;
 }
-
 
 // add a command to the list, which does not return json
 void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t flag) {

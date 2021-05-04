@@ -298,7 +298,14 @@ std::string EMSdevice::to_string() const {
     if (brand_ == Brand::NO_BRAND) {
         snprintf_P(&str[0], str.capacity() + 1, PSTR("%s (DeviceID:0x%02X, ProductID:%d, Version:%s)"), name_.c_str(), device_id_, product_id_, version_.c_str());
     } else {
-        snprintf_P(&str[0], str.capacity() + 1, PSTR("%s %s (DeviceID:0x%02X ProductID:%d, Version:%s)"), brand_to_string().c_str(), name_.c_str(), device_id_, product_id_, version_.c_str());
+        snprintf_P(&str[0],
+                   str.capacity() + 1,
+                   PSTR("%s %s (DeviceID:0x%02X ProductID:%d, Version:%s)"),
+                   brand_to_string().c_str(),
+                   name_.c_str(),
+                   device_id_,
+                   product_id_,
+                   version_.c_str());
     }
 
     return str;
@@ -470,7 +477,15 @@ void EMSdevice::register_device_value(uint8_t                             tag,
     devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, 0, has_cmd, min, max);
 }
 
-void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom, cmdfunction_p f, int32_t min, uint32_t max) {
+void EMSdevice::register_device_value(uint8_t                             tag,
+                                      void *                              value_p,
+                                      uint8_t                             type,
+                                      const __FlashStringHelper * const * options,
+                                      const __FlashStringHelper * const * name,
+                                      uint8_t                             uom,
+                                      cmdfunction_p                       f,
+                                      int32_t                             min,
+                                      uint32_t                            max) {
     register_device_value(tag, value_p, type, options, name[0], name[1], uom, (f != nullptr), min, max);
     if (f != nullptr) {
         if (tag >= TAG_HC1 && tag <= TAG_HC4) {
@@ -481,7 +496,13 @@ void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type,
     }
 }
 
-void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom, cmdfunction_p f) {
+void EMSdevice::register_device_value(uint8_t                             tag,
+                                      void *                              value_p,
+                                      uint8_t                             type,
+                                      const __FlashStringHelper * const * options,
+                                      const __FlashStringHelper * const * name,
+                                      uint8_t                             uom,
+                                      cmdfunction_p                       f) {
     register_device_value(tag, value_p, type, options, name, uom, f, 0, 0);
 }
 
@@ -489,7 +510,12 @@ void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type,
 //     register_device_value(tag, value_p, type, options, name, uom, nullptr, min, max);
 // }
 
-void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom) {
+void EMSdevice::register_device_value(uint8_t                             tag,
+                                      void *                              value_p,
+                                      uint8_t                             type,
+                                      const __FlashStringHelper * const * options,
+                                      const __FlashStringHelper * const * name,
+                                      uint8_t                             uom) {
     register_device_value(tag, value_p, type, options, name, uom, nullptr, 0, 0);
 }
 
@@ -657,7 +683,10 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
             const char * max     = "max";
             const char * value   = "value";
 
-            json["name"]    = dv.short_name;
+            json["name"] = dv.short_name;
+            if (dv.full_name != nullptr) {
+                json["fullname"] = dv.full_name;
+            }
             if (!tag_to_mqtt(dv.tag).empty()) {
                 json["circuit"] = tag_to_mqtt(dv.tag);
             }
@@ -811,7 +840,8 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
         // only show if tag is either empty (TAG_NONE) or matches a value
         // and don't show if full_name is empty unless we're outputing for mqtt payloads
         // for nested we use all values, dont show command only (have_cmd and no fulname)
-        if (((nested) || tag_filter == DeviceValueTAG::TAG_NONE || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !console) && !(dv.full_name == nullptr && dv.has_cmd)) {
+        if (((nested) || tag_filter == DeviceValueTAG::TAG_NONE || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !console)
+            && !(dv.full_name == nullptr && dv.has_cmd)) {
             // we have a tag if it matches the filter given, and that the tag name is not empty/""
             bool have_tag = ((dv.tag != tag_filter) && !tag_to_string(dv.tag).empty());
 
