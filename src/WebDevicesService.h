@@ -27,6 +27,8 @@
 #define EMSESP_DEVICES_SERVICE_PATH "/rest/allDevices"
 #define SCAN_DEVICES_SERVICE_PATH "/rest/scanDevices"
 #define DEVICE_DATA_SERVICE_PATH "/rest/deviceData"
+#define WRITE_VALUE_SERVICE_PATH "/rest/writeValue"
+
 
 namespace emsesp {
 
@@ -35,11 +37,15 @@ class WebDevicesService {
     WebDevicesService(AsyncWebServer * server, SecurityManager * securityManager);
 
   private:
+    // GET
     void all_devices(AsyncWebServerRequest * request);
     void scan_devices(AsyncWebServerRequest * request);
-    void device_data(AsyncWebServerRequest * request, JsonVariant & json);
 
-    AsyncCallbackJsonWebHandler _device_dataHandler;
+    // POST
+    void device_data(AsyncWebServerRequest * request, JsonVariant & json);
+    void write_value(AsyncWebServerRequest * request, JsonVariant & json);
+
+    AsyncCallbackJsonWebHandler _device_dataHandler, _writevalue_dataHandler;
 };
 
 } // namespace emsesp

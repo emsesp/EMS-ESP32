@@ -22,38 +22,11 @@
 #include <HttpEndpoint.h>
 #include <FSPersistence.h>
 
+#include "default_settings.h"
+
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
 #define EMSESP_SETTINGS_SERVICE_PATH "/rest/emsespSettings"
 #define EMSESP_BOARD_PROFILE_SERVICE_PATH "/rest/boardProfile"
-
-#define EMSESP_DEFAULT_TX_MODE 1       // EMS1.0
-#define EMSESP_DEFAULT_TX_DELAY 0      // no delay
-#define EMSESP_DEFAULT_EMS_BUS_ID 0x0B // service key
-#define EMSESP_DEFAULT_SYSLOG_ENABLED false
-#define EMSESP_DEFAULT_SYSLOG_LEVEL 3 // ERR
-#define EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL 0
-#define EMSESP_DEFAULT_SYSLOG_HOST ""
-#define EMSESP_DEFAULT_SYSLOG_PORT 514
-#define EMSESP_DEFAULT_TRACELOG_RAW false
-#define EMSESP_DEFAULT_MASTER_THERMOSTAT 0 // not set
-#define EMSESP_DEFAULT_SHOWER_TIMER false
-#define EMSESP_DEFAULT_SHOWER_ALERT false
-#define EMSESP_DEFAULT_HIDE_LED false
-#define EMSESP_DEFAULT_DALLAS_PARASITE false
-#define EMSESP_DEFAULT_API_ENABLED false // turn off, because its insecure
-#define EMSESP_DEFAULT_BOOL_FORMAT 1     // on/off
-#define EMSESP_DEFAULT_ANALOG_ENABLED false
-
-#ifndef EMSESP_DEFAULT_BOARD_PROFILE
-#define EMSESP_DEFAULT_BOARD_PROFILE "S32" // Gateway S32
-#endif
-
-// Default GPIO PIN definitions - based on Wemos/Nodemcu
-#define EMSESP_DEFAULT_RX_GPIO 23 // D7
-#define EMSESP_DEFAULT_TX_GPIO 5  // D8
-#define EMSESP_DEFAULT_DALLAS_GPIO 18
-#define EMSESP_DEFAULT_LED_GPIO 2
-#define EMSESP_DEFAULT_PBUTTON_GPIO 0
 
 namespace emsesp {
 

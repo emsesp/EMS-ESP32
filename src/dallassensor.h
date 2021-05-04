@@ -68,6 +68,10 @@ class DallasSensor {
         return sensorfails_;
     }
 
+    bool dallas_enabled() {
+        return (dallas_gpio_ != 0);
+    }
+
   private:
     static constexpr uint8_t MAX_SENSORS = 20;
 

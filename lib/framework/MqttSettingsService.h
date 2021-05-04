@@ -57,18 +57,6 @@ static String generateClientId() {
 #define FACTORY_MQTT_MAX_TOPIC_LENGTH 128
 #endif
 
-#define EMSESP_DEFAULT_BOOL_FORMAT 1       // on/off
-#define EMSESP_DEFAULT_DALLAS_FORMAT 1     // sensorid
-#define EMSESP_DEFAULT_HA_CLIMATE_FORMAT 1 // current temp
-#define EMSESP_DEFAULT_MQTT_QOS 0
-#define EMSESP_DEFAULT_MQTT_RETAIN false
-#define EMSESP_DEFAULT_HA_ENABLED false
-#define EMSESP_DEFAULT_PUBLISH_TIME 10
-#define EMSESP_DEFAULT_NESTED_FORMAT true
-#define EMSESP_DEFAULT_SUBSCRIBE_FORMAT 0
-
-#define EMSESP_DEFAULT_BOARD_PROFILE "S32"
-
 class MqttSettings {
   public:
     // host and port - if enabled
@@ -102,7 +90,7 @@ class MqttSettings {
     uint8_t  bool_format;
     uint8_t  ha_climate_format;
     bool     ha_enabled;
-    bool     nested_format;
+    uint8_t  nested_format;
     uint8_t  subscribe_format;
 
     static void              read(MqttSettings & settings, JsonObject & root);

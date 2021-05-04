@@ -52,7 +52,7 @@ class Shower {
     static constexpr uint32_t SHOWER_PAUSE_TIME        = 15000;  // in ms. 15 seconds, max time if water is switched off & on during a shower
     static constexpr uint32_t SHOWER_MIN_DURATION      = 120000; // in ms. 2 minutes, before recognizing its a shower
     static constexpr uint32_t SHOWER_OFFSET_TIME       = 5000;   // in ms. 5 seconds grace time, to calibrate actual time under the shower
-    static constexpr uint32_t SHOWER_COLDSHOT_DURATION = 10;     // in seconds. 10 seconds for cold water before turning back hot water
+    static constexpr uint32_t SHOWER_COLDSHOT_DURATION = 10000;  // 10 seconds for cold water before turning back hot water
     static constexpr uint32_t SHOWER_MAX_DURATION      = 420000; // in ms. 7 minutes, before trigger a shot of cold water
 
     void publish_values();
@@ -63,10 +63,13 @@ class Shower {
     bool     shower_alert_;          // true if we want the alert of cold water
     bool     ha_configdone_ = false; // for HA MQTT Discovery
     bool     shower_on_;
-    uint32_t timer_start_;     // ms
-    uint32_t timer_pause_;     // ms
-    uint32_t duration_;        // ms
-    bool     doing_cold_shot_; // true if we've just sent a jolt of cold water
+    uint32_t timer_start_; // ms
+    uint32_t timer_pause_; // ms
+    uint32_t duration_;    // ms
+
+    // cold shot
+    uint32_t alert_timer_start_; // ms
+    bool     doing_cold_shot_;   // true if we've just sent a jolt of cold water
 };
 
 } // namespace emsesp

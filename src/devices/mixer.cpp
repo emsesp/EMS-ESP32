@@ -57,20 +57,20 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         type_       = Type::HC;
         hc_         = device_id - 0x20 + 1;
         uint8_t tag = TAG_HC1 + hc_ - 1;
-        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
-        register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, F("flowSetTemp"), F("setpoint flow temperature"), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), F("flowTempHc"), F("flow temperature in assigned hc (TC1)"), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("pump status in assigned hc (PC1)"), DeviceValueUOM::PUMP);
-        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, F("valveStatus"), F("mixing valve actuator in assigned hc (VC1)"), DeviceValueUOM::PERCENT);
-        register_device_value(tag, &flowTempVf_, DeviceValueType::USHORT, FL_(div10), F("flowTempVf"), F("flow temperature in header (T0/Vf)"), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
+        register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::PUMP);
+        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
+        register_device_value(tag, &flowTempVf_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempVf), DeviceValueUOM::DEGREES);
     } else {
         type_       = Type::WWC;
         hc_         = device_id - 0x28 + 1;
         uint8_t tag = TAG_WWC1 + hc_ - 1;
-        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
-        register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), F("wwTemp"), F("current warm water temperature"), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("pump status in assigned hc (PC1)"), DeviceValueUOM::PUMP);
-        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, F("tempStatus"), F("temperature switch in assigned hc (MC1)"));
+        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
+        register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(wwTemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(wwPumpStatus), DeviceValueUOM::PUMP);
+        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(wwTempStatus), DeviceValueUOM::NONE);
     }
 
     id_ = product_id;
@@ -109,9 +109,9 @@ bool Mixer::publish_ha_config() {
     // determine the topic, if its HC and WWC. This is determined by the incoming telegram types.
     std::string topic(Mqtt::MQTT_TOPIC_MAX_SIZE, '\0');
     if (type_ == Type::HC) {
-        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/%s/mixer_hc%d/config"), Mqtt::base().c_str(), hc_);
+        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("sensor/%s/mixer_hc%d/config"), Mqtt::base().c_str(), hc_);
     } else {
-        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/%s/mixer_wwc%d/config"), Mqtt::base().c_str(), hc_); // WWC
+        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("sensor/%s/mixer_wwc%d/config"), Mqtt::base().c_str(), hc_); // WWC
     }
 
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
@@ -162,7 +162,6 @@ void Mixer::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
 // Mixer IPM - 0x001E Temperature Message in unmixed circuits
 // in unmixed circuits FlowTemp in 10C is zero, this is the measured flowtemp in header
 void Mixer::process_IPMTempMessage(std::shared_ptr<const Telegram> telegram) {
-
     has_update(telegram->read_value(flowTempVf_, 0)); // TC1, is * 10
 }
 

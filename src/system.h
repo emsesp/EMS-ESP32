@@ -48,14 +48,13 @@ class System {
     void loop();
 
     // commands
-    static void console_commands(Shell & shell, unsigned int context);
     static bool command_pin(const char * value, const int8_t id);
     static bool command_send(const char * value, const int8_t id);
     static bool command_publish(const char * value, const int8_t id);
     static bool command_fetch(const char * value, const int8_t id);
     static bool command_info(const char * value, const int8_t id, JsonObject & json);
     static bool command_settings(const char * value, const int8_t id, JsonObject & json);
-#if defined(EMSESP_TEST)
+#if defined(EMSESP_DEBUG)
     static bool command_test(const char * value, const int8_t id);
 #endif
 
@@ -68,6 +67,7 @@ class System {
     void wifi_tweak();
     void syslog_start();
     bool check_upgrade();
+    bool heartbeat_json(JsonObject & json);
     void send_heartbeat();
 
     void led_init(bool refresh);
@@ -103,6 +103,9 @@ class System {
         return true;
 #endif
     }
+    void show_system(uuid::console::Shell & shell);
+    void wifi_reconnect();
+    void show_users(uuid::console::Shell & shell);
 
   private:
     static uuid::log::Logger logger_;
@@ -135,9 +138,6 @@ class System {
     void system_check();
     void measure_analog();
 
-    void   show_system(uuid::console::Shell & shell);
-    void   show_users(uuid::console::Shell & shell);
-    void   wifi_reconnect();
     int8_t wifi_quality();
 
     bool     system_healthy_     = false;

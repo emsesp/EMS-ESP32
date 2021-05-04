@@ -9,7 +9,7 @@ export const BOARD_PROFILES: BoardProfiles = {
     "S32": "BBQKees Gateway S32",
     "E32": "BBQKees Gateway E32",
     "NODEMCU": "NodeMCU 32S",
-    "MT-ET": "MT-ET Live D1 Mini",
+    "MH-ET": "MH-ET Live D1 Mini",
     "LOLIN": "Lolin D32",
     "OLIMEX": "Olimex ESP32-EVB",
     "TLK110": "Generic Ethernet (TLK110)",

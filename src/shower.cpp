@@ -56,6 +56,7 @@ void Shower::loop() {
                 if (!shower_on_ && (time_now - timer_start_) > SHOWER_MIN_DURATION) {
                     shower_on_ = true;
                     send_mqtt_stat(true);
+                    publish_values();
                     LOG_DEBUG(F("[Shower] hot water still running, starting shower timer"));
                 }
                 // check if the shower has been on too long
@@ -83,12 +84,19 @@ void Shower::loop() {
                 }
 
                 // reset everything
-                timer_start_ = 0;
-                timer_pause_ = 0;
-                shower_on_   = false;
-                shower_alert_stop();
+                timer_start_       = 0;
+                timer_pause_       = 0;
+                shower_on_         = false;
+                doing_cold_shot_   = false;
+                alert_timer_start_ = 0;
             }
         }
+        return;
+    }
+
+    // at this point we're in the shower cold shot (doing_cold_shot_ == true)
+    // keep repeating until the time is up
+    if ((time_now - alert_timer_start_) > SHOWER_COLDSHOT_DURATION) {
     }
 }
 
@@ -115,7 +123,7 @@ void Shower::send_mqtt_stat(bool state, bool force) {
         ids.add("ems-esp");
 
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/shower_active/config"), Mqtt::base().c_str());
+        snprintf_P(topic, sizeof(topic), PSTR("binary_sensor/%s/shower_active/config"), Mqtt::base().c_str());
         Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
     }
 }
@@ -124,20 +132,17 @@ void Shower::send_mqtt_stat(bool state, bool force) {
 void Shower::shower_alert_stop() {
     if (doing_cold_shot_) {
         LOG_DEBUG(F("Shower Alert stopped"));
-        // Boiler::set_tapwarmwater_activated(true);
+        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "true");
         doing_cold_shot_ = false;
-        // showerColdShotStopTimer.detach(); // disable the timer
     }
 }
-
 // turn off hot water to send a shot of cold
 void Shower::shower_alert_start() {
     if (shower_alert_) {
-        LOG_DEBUG(F("Shower Alert started!"));
-        // Boiler::set_tapwarmwater_activated(false);
-        doing_cold_shot_ = true;
-        // start the timer for n seconds which will reset the water back to hot
-        // showerColdShotStopTimer.attach(SHOWER_COLDSHOT_DURATION, _showerColdShotStop);
+        LOG_DEBUG(F("Shower Alert started"));
+        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
+        doing_cold_shot_   = true;
+        alert_timer_start_ = uuid::get_uptime(); // timer starts now
     }
 }
 

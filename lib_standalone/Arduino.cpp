@@ -61,6 +61,10 @@ unsigned long millis() {
     return __millis;
 }
 
+int64_t esp_timer_get_time() {
+    return __millis;
+}
+
 void delay(unsigned long millis) {
     // __millis += millis;
 }

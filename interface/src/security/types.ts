@@ -9,3 +9,6 @@ export interface SecuritySettings {
   jwt_secret: string;
 }
 
+export interface GeneratedToken {
+  token: string;
+}

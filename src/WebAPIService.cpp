@@ -28,10 +28,6 @@ WebAPIService::WebAPIService(AsyncWebServer * server) {
 
 // e.g. http://ems-esp/api?device=boiler&cmd=wwtemp&data=20&id=1
 void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
-    // see if the API is enabled
-    bool api_enabled;
-    EMSESP::webSettingsService.read([&](WebSettings & settings) { api_enabled = settings.api_enabled; });
-
     // must have device and cmd parameters
     if ((!request->hasParam(F_(device))) || (!request->hasParam(F_(cmd)))) {
         request->send(400, "text/plain", F("Invalid syntax"));
@@ -48,12 +44,6 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
 
     // get cmd, we know we have one
     String cmd = request->getParam(F_(cmd))->value();
-
-    // look up command in our list
-    if (Command::find_command(device_type, cmd.c_str()) == nullptr) {
-        request->send(400, "text/plain", F("Invalid cmd"));
-        return;
-    }
 
     String data;
     if (request->hasParam(F_(data))) {
@@ -77,8 +67,10 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
     if (data.isEmpty()) {
         ok = Command::call(device_type, cmd.c_str(), nullptr, id.toInt(), json); // command only
     } else {
+        // we only allow commands with parameters if the API is enabled
+        bool api_enabled;
+        EMSESP::webSettingsService.read([&](WebSettings & settings) { api_enabled = settings.api_enabled; });
         if (api_enabled) {
-            // we only allow commands with parameters if the API is enabled
             ok = Command::call(device_type, cmd.c_str(), data.c_str(), id.toInt(), json); // has cmd, data and id
         } else {
             request->send(401, "text/plain", F("Unauthorized"));
@@ -90,7 +82,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
         doc.shrinkToFit();
         std::string buffer;
         serializeJsonPretty(doc, buffer);
-        request->send(200, "text/plain", buffer.c_str());
+        request->send(200, "text/plain;charset=utf-8", buffer.c_str());
         return;
     }
     request->send(200, "text/plain", ok ? F("OK") : F("Invalid"));

@@ -25,6 +25,9 @@
 #define SECURITY_SETTINGS_FILE "/config/securitySettings.json"
 #define SECURITY_SETTINGS_PATH "/rest/securitySettings"
 
+#define GENERATE_TOKEN_SIZE 512
+#define GENERATE_TOKEN_PATH "/rest/generateToken"
+
 #if FT_ENABLED(FT_SECURITY)
 
 class SecuritySettings {
@@ -82,6 +85,8 @@ class SecuritySettingsService : public StatefulService<SecuritySettings>, public
     HttpEndpoint<SecuritySettings>  _httpEndpoint;
     FSPersistence<SecuritySettings> _fsPersistence;
     ArduinoJsonJWT                  _jwtHandler;
+
+    void generateToken(AsyncWebServerRequest * request);
 
     void configureJWTHandler();
 

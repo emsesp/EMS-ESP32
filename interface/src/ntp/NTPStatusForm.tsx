@@ -89,6 +89,8 @@ class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
       <Dialog
         open={this.state.settingTime}
         onClose={this.closeSetTime}
+        fullWidth
+        maxWidth="sm"
       >
         <DialogTitle>Set Time</DialogTitle>
         <DialogContent dividers>

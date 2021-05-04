@@ -8,15 +8,15 @@ upload_flags =
 upload_port = 10.10.10.101
 
 [common]
-; options are EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_TEST ENABLE_CORS DEMSESP_DEFAULT_BOARD_PROFILE
-; debug_flags = -DENABLE_CORS -DEMSESP_DEBUG -DEMSESP_TEST -DCORS_ORIGIN=\"http://localhost:3000\" 
-; debug_flags = -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
+; options are EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
+; plus all the settings in default_settings.h, e.g. -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
+; debug_flags = -DEMSESP_DEBUG
 
 [env:esp32]
 monitor_filters = esp32_exception_decoder
 debug_tool = esp-prog
 debug_init_break = tbreak setup
 extra_scripts =
+  ; to prevent the web UI from building each time, comment out this next line
   ; pre:scripts/build_interface.py
-  ; scripts/upload_fw.py
 

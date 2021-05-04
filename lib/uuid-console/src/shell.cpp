@@ -65,8 +65,10 @@ void Shell::start() {
 #endif
 
     line_buffer_.reserve(maximum_command_line_length_);
-    line_old_.reserve(maximum_command_line_length_);
-    line_old_.clear();
+    for (uint8_t i = 0; i < MAX_LINES; i++) {
+        line_old_[i].reserve(maximum_command_line_length_);
+        line_old_[i].clear();
+    }
     display_banner();
     display_prompt();
     shells_.insert(shared_from_this());
@@ -156,7 +158,8 @@ void Shell::loop_normal() {
         // Interrupt (^C)
         line_buffer_.clear();
         println();
-        cursor_ = 0;
+        cursor_  = 0;
+        line_no_ = 0;
         break;
 
     case '\x04':
@@ -172,13 +175,15 @@ void Shell::loop_normal() {
         // Del/Backspace (^?)
         if (line_buffer_.length() > cursor_) {
             line_buffer_.erase(line_buffer_.length() - cursor_ - 1, 1);
+            line_no_ = 0;
         }
         break;
 
     case '\x09':
         // Tab (^I)
         process_completion();
-        cursor_ = 0;
+        cursor_  = 0;
+        line_no_ = 0;
         break;
 
     case '\x0A':
@@ -198,12 +203,14 @@ void Shell::loop_normal() {
     case '\x15':
         // Delete line (^U)
         line_buffer_.clear();
-        cursor_ = 0;
+        cursor_  = 0;
+        line_no_ = 0;
         break;
 
     case '\x17':
         // Delete word (^W)
         delete_buffer_word(true);
+        line_no_ = 0;
         break;
 
     case '\033':
@@ -214,10 +221,20 @@ void Shell::loop_normal() {
     default:
         if (esc_) {
             if (c == 'A') { // cursor up
-                line_buffer_ = line_old_;
-                cursor_      = 0;
+                line_buffer_ = line_old_[line_no_];
+                if (line_no_ < MAX_LINES - 1) {
+                    line_no_++;
+                }
+                cursor_ = 0;
             } else if (c == 'B') { // cursor down
-                line_buffer_.clear();
+                if (line_no_) {
+                    line_no_--;
+                }
+                if (line_no_) {
+                    line_buffer_ = line_old_[line_no_ - 1];
+                } else {
+                    line_buffer_.clear();
+                }
                 cursor_ = 0;
             } else if (c == 'C') { // cursor  right
                 if (cursor_) {
@@ -239,6 +256,7 @@ void Shell::loop_normal() {
                 if ((esc_ == 3) && cursor_) {         // del
                     cursor_--;
                     line_buffer_.erase(line_buffer_.length() - cursor_ - 1, 1);
+                    line_no_ = 0;
                 } else if (esc_ == 4) { // end
                     cursor_ = 0;
                 } else if (esc_ == 1) { // pos1
@@ -279,6 +297,7 @@ void Shell::loop_normal() {
         } else if (c >= '\x20' && c <= '\x7E') {
             if (line_buffer_.length() < maximum_command_line_length_) {
                 line_buffer_.insert(line_buffer_.length() - cursor_, 1, c);
+                line_no_ = 0;
             }
         }
         break;
@@ -498,7 +517,12 @@ void Shell::process_command() {
         println();
         return;
     }
-    line_old_ = line_buffer_;
+    uint8_t no = line_no_ ? line_no_ : MAX_LINES;
+    while (--no) {
+        line_old_[no] = line_old_[no - 1];
+    }
+    line_no_     = 0;
+    line_old_[0] = line_buffer_;
     while (!line_buffer_.empty()) {
         size_t      pos = line_buffer_.find(';');
         std::string line1;

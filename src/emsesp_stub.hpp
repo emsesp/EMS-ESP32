@@ -22,6 +22,7 @@
 #include "mqtt.h"
 #include "dallassensor.h"
 #include "version.h"
+#include "default_settings.h"
 
 // forward declarators
 // used to bind EMS-ESP functions to external frameworks

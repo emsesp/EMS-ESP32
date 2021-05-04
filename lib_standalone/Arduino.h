@@ -53,11 +53,7 @@ int  digitalRead(uint8_t pin);
 
 #define PROGMEM
 #define PGM_P const char *
-#define PSTR(s)                                                                                                                                                                                                            \
-    (__extension__({                                                                                                                                                                                                       \
-        static const char __c[] = (s);                                                                                                                                                                                     \
-        &__c[0];                                                                                                                                                                                                           \
-    }))
+#define PSTR(s) s
 
 class __FlashStringHelper;
 #define FPSTR(string_literal) (reinterpret_cast<const __FlashStringHelper *>(string_literal))
@@ -196,10 +192,12 @@ class NativeConsole : public Stream {
 #include <Network.h>
 
 extern NativeConsole Serial;
-extern ETHClass  ETH;
-extern WiFiClass WiFi;
+extern ETHClass      ETH;
+extern WiFiClass     WiFi;
 
 unsigned long millis();
+
+int64_t esp_timer_get_time();
 
 void delay(unsigned long millis);
 

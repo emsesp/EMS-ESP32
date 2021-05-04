@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(EMSESP_TEST)
+#if defined(EMSESP_DEBUG)
 
 #include "test.h"
 
@@ -191,7 +191,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     std::string command(20, '\0');
     if ((cmd.empty()) || (cmd == "default")) {
-        command = EMSESP_TEST_DEFAULT;
+        command = EMSESP_DEBUG_DEFAULT;
     } else {
         command = cmd;
     }
@@ -376,7 +376,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "boiler") {
         shell.printfln(F("Testing boiler..."));
         Mqtt::ha_enabled(false);
-        Mqtt::nested_format(true);
+        Mqtt::nested_format(1);
 
         run_test("boiler");
         shell.invoke_command("show devices");
@@ -399,6 +399,15 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("show mqtt");
     }
 
+    if (command == "shower_alert") {
+        shell.printfln(F("Testing Shower Alert..."));
+
+        run_test("boiler");
+
+        // device type, command, data
+        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
+    }
+
     if (command == "fr120") {
         shell.printfln(F("Testing adding a thermostat FR120..."));
 
@@ -414,8 +423,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "ha") {
         shell.printfln(F("Testing HA discovery"));
         Mqtt::ha_enabled(true);
-        // Mqtt::nested_format(true);
-        Mqtt::nested_format(false);
+        // Mqtt::nested_format(1);
+        Mqtt::nested_format(2);
 
         // run_test("boiler");
         run_test("thermostat");
@@ -436,11 +445,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         run_test("mixer");
 
         // first with nested
-        Mqtt::nested_format(true);
+        Mqtt::nested_format(1);
         shell.invoke_command("call system publish");
 
         // then without nested
-        Mqtt::nested_format(false);
+        Mqtt::nested_format(2);
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
     }

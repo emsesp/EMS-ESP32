@@ -419,7 +419,7 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
     }
 
     // build header. src, dest and offset have fixed positions
-    uint8_t src    = data[0];
+    uint8_t src    = ems_bus_id(); // data[0]; we can only send data with own bus_id.
     uint8_t dest   = data[1];
     uint8_t offset = data[3];
 
@@ -485,11 +485,16 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 }
 
 // send a Tx telegram to request data from an EMS device
-void TxService::read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset) {
+void TxService::read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t length) {
     LOG_DEBUG(F("Tx read request to device 0x%02X for type ID 0x%02X"), dest, type_id);
 
     uint8_t message_data[1] = {EMS_MAX_TELEGRAM_LENGTH}; // request all data, 32 bytes
-    add(Telegram::Operation::TX_READ, dest, type_id, offset, message_data, 1, 0);
+    // if length set, publish result and set telegram to front
+    if (length) {
+        message_data[0] = length;
+        EMSESP::set_read_id(type_id);
+    }
+    add(Telegram::Operation::TX_READ, dest, type_id, offset, message_data, 1, 0, length != 0);
 }
 
 // Send a raw telegram to the bus, telegram is a text string of hex values
@@ -541,7 +546,7 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         reset_retry_count();             // give up
         increment_telegram_fail_count(); // another Tx fail
 
-        LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request."), (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"), MAXIMUM_TX_RETRIES);
+        LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request: %s"), (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"), MAXIMUM_TX_RETRIES), telegram_last_->to_string().c_str();
         return;
     }
 

@@ -44,6 +44,8 @@ using uuid::log::Level;
 #define LOG_WARNING(...) logger_.warning(__VA_ARGS__)
 #define LOG_ERROR(...) logger_.err(__VA_ARGS__)
 
+#define MQTT_TOPIC(list_name) (__pstr__##list_name[0])
+
 // clang-format off
 // strings stored 32 bit aligned on ESP8266/ESP32
 #define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = string_literal;
@@ -99,10 +101,10 @@ class EMSESPShell : virtual public uuid::console::Shell {
     void        stopped() override;
     void        display_banner() override;
     std::string hostname_text() override;
-    std::string context_text() override;
+    // std::string context_text() override;
     std::string prompt_suffix() override;
     void        end_of_transmission() override;
-    bool        exit_context() override;
+    // bool        exit_context() override;
 
   private:
     void        add_console_commands();
@@ -134,8 +136,9 @@ class Console {
 
     uuid::log::Level log_level();
 
-    static void enter_custom_context(Shell & shell, unsigned int context);
+    // static void enter_custom_context(Shell & shell, unsigned int context);
     static void load_standard_commands(unsigned int context);
+    static void load_system_commands(unsigned int context);
 };
 
 } // namespace emsesp

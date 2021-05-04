@@ -423,7 +423,7 @@ void EMSESP::reset_mqtt_ha() {
     }
 
     for (const auto & emsdevice : emsdevices) {
-        emsdevice->ha_config_done(false);
+        emsdevice->ha_config_clear();
     }
     dallassensor_.reload();
 }
@@ -435,13 +435,13 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     JsonObject          json         = doc.to<JsonObject>();
     bool                need_publish = false;
 
-    bool nested = Mqtt::nested_format();
+    uint8_t nested = Mqtt::nested_format();
 
     // group by device type
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
-            // if we're using HA and it's not already done, send the config topics first. only do this once
-            if (Mqtt::ha_enabled() && (!emsdevice->ha_config_done())) {
+            // if we're using HA, done is checked for each sensor in devices
+            if (Mqtt::ha_enabled()) {
                 emsdevice->publish_mqtt_ha_sensor(); // create the configs for each value as a sensor
             }
 
@@ -450,8 +450,8 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA, false);
                 Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_BOILER_DATA), json);
                 json.clear();
-                emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA_WW, false);
-                Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_BOILER_DATA_WW), json);
+                emsdevice->generate_values_json(json, DeviceValueTAG::TAG_DEVICE_DATA_WW, false);
+                Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_DEVICE_DATA_WW), json);
                 need_publish = false;
             }
 
@@ -511,6 +511,10 @@ void EMSESP::publish_other_values() {
 }
 
 void EMSESP::publish_sensor_values(const bool time, const bool force) {
+    if (!dallas_enabled()) {
+        return;
+    }
+
     if (dallassensor_.updated_values() || time || force) {
         dallassensor_.publish_values(force);
     }
@@ -540,7 +544,37 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
         doc["value"] = value;
     }
 
-    Mqtt::publish(F("response"), doc.as<JsonObject>());
+    Mqtt::publish(F_(response), doc.as<JsonObject>());
+}
+
+bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype) {
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice->device_type() == devicetype) {
+            return emsdevice->get_value_info(root, cmd, id);
+        }
+    }
+
+    if (devicetype == DeviceType::DALLASSENSOR) {
+        uint8_t i = 1;
+        for (const auto & sensor : EMSESP::sensor_devices()) {
+            char sensorID[10];
+            snprintf_P(sensorID, 10, PSTR("sensor%d"), i++);
+            if ((strcmp(cmd, sensorID) == 0) || (strcmp(cmd, Helpers::toLower(sensor.to_string()).c_str()) == 0)) {
+                root["name"] = sensor.to_string();
+                if (Helpers::hasValue(sensor.temperature_c)) {
+                    root["value"] = (float)(sensor.temperature_c) / 10;
+                }
+                root["type"]      = F_(number);
+                root["min"]       = -55;
+                root["max"]       = 125;
+                root["unit"]      = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
+                root["writeable"] = false;
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 // search for recognized device_ids : Me, All, otherwise print hex value
@@ -947,14 +981,9 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t i
     return has_value;
 }
 
-// send a read request, passing it into to the Tx Service, with offset
-void EMSESP::send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset) {
-    txservice_.read_request(type_id, dest, offset);
-}
-
-// send a read request, passing it into to the Tx Service, with no offset
-void EMSESP::send_read_request(const uint16_t type_id, const uint8_t dest) {
-    txservice_.read_request(type_id, dest, 0); // 0 = no offset
+// send a read request, passing it into to the Tx Service, with optional offset and length
+void EMSESP::send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t length) {
+    txservice_.read_request(type_id, dest, offset, length);
 }
 
 // sends write request
