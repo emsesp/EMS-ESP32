@@ -97,7 +97,14 @@ bool Mixer::publish_ha_config() {
     snprintf_P(name, sizeof(name), PSTR("Mixer %02X"), device_id() - 0x20 + 1);
     doc["name"] = name;
 
-    doc["val_tpl"] = FJSON("{{value_json.id}}");
+    char tpl[30];
+    if (type_ == Type::HC) {
+        snprintf_P(tpl, sizeof(tpl), PSTR("{{value_json.hc%d.id}}"), device_id() - 0x20 + 1);
+     } else {
+        snprintf_P(tpl, sizeof(tpl), PSTR("{{value_json.wwc%d.id}}"), device_id() - 0x28 + 1);
+    }
+    doc["val_tpl"] = tpl;
+
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = FJSON("EMS-ESP Mixer");
     dev["sw"]      = EMSESP_APP_VERSION;
