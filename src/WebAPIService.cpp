@@ -173,10 +173,6 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
     if (cmd_s.empty()) {
         cmd_s = "info";
     }
-    if (Command::find_command(device_type, cmd_s.c_str()) == nullptr) {
-        send_message_response(request, 422, "Invalid cmd"); // Unprocessable Entity
-        return;
-    }
 
     // check that we have permissions first. We require authenticating on 1 or more of these conditions:
     //  1. any HTTP POSTs or PUTs
