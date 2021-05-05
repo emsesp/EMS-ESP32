@@ -129,29 +129,17 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
         // parse paths and json data
         // /{device}[/{hc}][/{name}]
         // first param must be a valid device, which includes "system"
-        device_s    = p.paths().front();
-        device_type = EMSdevice::device_name_2_device_type(device_s.c_str());
+        device_s = p.paths().front();
 
-        // if there are no more paths parameters, default to 'info'
         auto num_paths = p.paths().size();
-        if (num_paths > 1) {
-            auto path2 = p.paths()[1]; // get next path
-            // if it's a system, the next path must be a command (info, settings,...)
-            if (device_type == EMSdevice::DeviceType::SYSTEM) {
-                cmd_s = path2;
-            } else {
-                // it's an EMS device
-                // path2 could be a hc which is optional or a name. first check if it's a hc
-                if (path2.substr(0, 2) == "hc") {
-                    id_n = (byte)path2[2] - '0'; // bit of a hack
-                    // there must be a name following
-                    if (num_paths > 2) {
-                        cmd_s = p.paths()[2];
-                    }
-                } else {
-                    cmd_s = path2;
-                }
-            }
+        if (num_paths == 1) {
+            // if there are no more paths parameters, default to 'info'
+            cmd_s = "info";
+        } else if (num_paths == 2) {
+            cmd_s = p.paths()[1];
+        } else if (num_paths > 2) {
+            // command-check makes prefix to TAG
+            cmd_s = p.paths()[1] + "/" + p.paths()[2];
         }
     }
 
@@ -169,10 +157,6 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
     }
 
     // cmd check
-    // if the cmd is empty, default it 'info'
-    if (cmd_s.empty()) {
-        cmd_s = "info";
-    }
 
     // check that we have permissions first. We require authenticating on 1 or more of these conditions:
     //  1. any HTTP POSTs or PUTs

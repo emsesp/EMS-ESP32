@@ -672,6 +672,8 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
         tag = DeviceValueTAG::TAG_HC1 + id - 1;
     } else if (id >= 8 && id <= 11) {
         tag = DeviceValueTAG::TAG_WWC1 + id - 8;
+    } else if (id != -1) {
+        return false;
     }
 
     // search device value with this tag
