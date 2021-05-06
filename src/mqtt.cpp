@@ -387,8 +387,8 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
             bool        cmd_known = false;
             JsonVariant data      = doc["data"];
 
-            if (data.is<char *>()) {
-                cmd_known = Command::call(mf.device_type_, command, data.as<char *>(), n);
+            if (data.is<const char *>()) {
+                cmd_known = Command::call(mf.device_type_, command, data.as<const char *>(), n);
             } else if (data.is<int>()) {
                 char data_str[10];
                 cmd_known = Command::call(mf.device_type_, command, Helpers::itoa(data_str, (int16_t)data.as<int>()), n);

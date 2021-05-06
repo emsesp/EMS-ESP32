@@ -100,7 +100,7 @@ bool Mixer::publish_ha_config() {
     char tpl[30];
     if (type_ == Type::HC) {
         snprintf_P(tpl, sizeof(tpl), PSTR("{{value_json.hc%d.id}}"), device_id() - 0x20 + 1);
-     } else {
+    } else {
         snprintf_P(tpl, sizeof(tpl), PSTR("{{value_json.wwc%d.id}}"), device_id() - 0x28 + 1);
     }
     doc["val_tpl"] = tpl;

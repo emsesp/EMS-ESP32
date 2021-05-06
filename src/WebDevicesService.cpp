@@ -129,7 +129,7 @@ void WebDevicesService::write_value(AsyncWebServerRequest * request, JsonVariant
                     char         s[10];
                     // the data could be in any format, but we need string
                     JsonVariant data = dv["data"];
-                    if (data.is<char *>()) {
+                    if (data.is<const char *>()) {
                         ok = Command::call(device_type, cmd, data.as<const char *>());
                     } else if (data.is<int>()) {
                         ok = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0));

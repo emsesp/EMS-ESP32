@@ -323,8 +323,8 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                     shell.printf("  %s: ", key);
                     JsonVariant data = p.value();
                     shell.print(COLOR_BRIGHT_GREEN);
-                    if (data.is<char *>()) {
-                        shell.print(data.as<char *>());
+                    if (data.is<const char *>()) {
+                        shell.print(data.as<const char *>());
                     } else if (data.is<int>()) {
                         shell.print(data.as<int>());
                     } else if (data.is<float>()) {
@@ -986,7 +986,7 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t i
         tag = DeviceValueTAG::TAG_WWC1 + id - 9;
     } else if (id == -1) {
         tag = DeviceValueTAG::TAG_NONE;
-    } else  {
+    } else {
         return false;
     }
 
