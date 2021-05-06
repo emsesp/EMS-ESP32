@@ -15,8 +15,9 @@ OpenAPI is an open standard specification for describing REST APIs. From the [Op
 - Unless explicitly bypassed in the WebUI some operations required admin privileges in the form of an Access Token which can be generated from the Web UI's Security tab. An Access Token is a string 152 characters long. Token's do not expire. The token needs to be either embedded into the HTTP Header as `"Authorization: Bearer {ACCESS_TOKEN}"` or as query parameter `?access_token={ACCESS_TOKEN}`. To test you can use a command line instruction like
 
   ```bash
-    curl -i -H "Authorization: Bearer {ACCESS_TOKEN}" -X GET http://ems-esp/api/system/settings
-    curl -i -H "Authorization: Bearer {ACCESS_TOKEN}" -H "Content-Type: application/json" -d '{ "name": "wwtemp", "value":60}' http://ems-esp/api/boiler
+    % curl -i -H "Authorization: Bearer {ACCESS_TOKEN}" -X GET http://ems-esp/api/system/settings
+    % curl -i -H "Authorization: Bearer {ACCESS_TOKEN}" -H "Content-Type: application/json" -d '{ "name": "wwtemp", "value":60}' http://ems-esp/api/boiler
+    % curl -i http://ems-esp.local/api/system/settings\?access_token\="{ACCESS_TOKEN}"
   ```
 
 ## Error handling
@@ -66,7 +67,7 @@ OpenAPI is an open standard specification for describing REST APIs. From the [Op
 | GET | `/{device}` | return all device details and values | | |
 | GET | `/{device}/{name}` | return a specific parameter and all its properties (name, fullname, value, type, min, max, unit, writeable) | | |
 | GET | `/device={device}?cmd={name}?data={value}[?hc=<number>` | Using HTTP query parameters. This is to keep compatibility with v2. Unless bypassed in the EMS-ESP settings make sure you include `access_token={ACCESS_TOKEN}` | x |
-| POST/PUT | `/{device}[/{hc}][/{name}]` | sets a specific value to a parameter name. If no hc is selected and one is required for the device, the default will be used |  x | `{ ["name" : <string>] , ["hc": <number>], "value": <value> }` |
+| POST/PUT | `/{device}[/{hc\|wwc}][/{name}]` | sets a specific value to a parameter name. If no hc is selected and one is required for the device, the default will be used. The `hc` or `wwc` are only used with the `mixer` and `thermostat` devices, and optional | x | `{ ["name" : <string>] , ["hc": <number>], "value": <value> }` |
 
 ## System Endpoints
 
@@ -78,3 +79,40 @@ OpenAPI is an open standard specification for describing REST APIs. From the [Op
 | POST/PUT | `/system/send` | send a telegram to the EMS bus | x | `{ "value" : <string> }` |
 | POST/PUT | `/system/publish` | force an MQTT publish | x | `{ "value" : <device> \| "ha" }` |
 | POST/PUT | `/system/fetch` | fetch all EMS data from all devices | x | `{ "value" : <device> \| "all" }` |
+
+## Examples
+
+### From command line
+```bash
+# GETS do not need authentication
+% curl http://ems-esp.local/api/thermostat/temp
+
+# POSTS (with -d) need authentication tokens
+% curl http://ems-esp.local/api/thermostat/temp \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ8.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWUsInZlcnNpb24iOiIzLjEuMWIwIn0.qeGT53Aom4rDYeIT1Pr4BSMdeWyf4_zN9ue2c51ZnM0' \
+  -d '{ "value" : 22.5 }'
+
+# GET with authentication using query parameter with token
+% curl http://ems-esp.local/api/system/settings\?access_token\="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ8.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWUsInZlcnNpb24iOiIzLjEuMWIwIn0.qeGT53Aom4rDYeIT1Pr4BSMdeWyf4_zN9ue2c51ZnM0"
+```
+
+### Using Python
+```python
+import requests
+import json
+
+url = "http://ems-esp.local/api/thermostat/temp"
+
+token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ8.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWUsInZlcnNpb24iOiIzLjEuMWIwIn0.qeGT53Aom4rDYeIT1Pr4BSMdeWyf4_zN9ue2c51ZnM0"
+
+body = json.dumps({ "value": 22.5 })
+
+headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+
+response = requests.post(url, headers=headers, data=body, verify=False)
+
+print(response.json())
+```
+
+
