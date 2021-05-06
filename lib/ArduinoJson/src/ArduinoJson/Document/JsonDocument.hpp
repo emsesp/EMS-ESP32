@@ -1,4 +1,4 @@
-// ArduinoJson - arduinojson.org
+// ArduinoJson - https://arduinojson.org
 // Copyright Benoit Blanchon 2014-2021
 // MIT License
 
@@ -21,12 +21,12 @@ class JsonDocument : public Visitable {
   }
 
   template <typename T>
-  typename VariantAs<T>::type as() {
+  T as() {
     return getVariant().template as<T>();
   }
 
   template <typename T>
-  typename VariantConstAs<T>::type as() const {
+  T as() const {
     return getVariant().template as<T>();
   }
 
@@ -70,7 +70,7 @@ class JsonDocument : public Visitable {
   }
 
   bool set(const JsonDocument& src) {
-    return to<VariantRef>().set(src.as<VariantRef>());
+    return to<VariantRef>().set(src.as<VariantConstRef>());
   }
 
   template <typename T>
@@ -336,5 +336,9 @@ class JsonDocument : public Visitable {
   JsonDocument(const JsonDocument&);
   JsonDocument& operator=(const JsonDocument&);
 };
+
+inline bool convertToJson(const JsonDocument& src, VariantRef dst) {
+  return dst.set(src.as<VariantConstRef>());
+}
 
 }  // namespace ARDUINOJSON_NAMESPACE

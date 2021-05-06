@@ -2,7 +2,7 @@
 
 ---
 
-[![arduino-library-badge](https://www.ardu-badge.com/badge/ArduinoJson.svg?version=6.17.3)](https://www.ardu-badge.com/ArduinoJson/6.17.3)
+[![arduino-library-badge](https://www.ardu-badge.com/badge/ArduinoJson.svg?version=6.18.0)](https://www.ardu-badge.com/ArduinoJson/6.18.0)
 [![Continuous Integration](https://github.com/bblanchon/ArduinoJson/workflows/Continuous%20Integration/badge.svg?branch=6.x)](https://github.com/bblanchon/ArduinoJson/actions?query=workflow%3A%22Continuous+Integration%22+branch%3A6.x)
 [![Continuous Integration](https://ci.appveyor.com/api/projects/status/m7s53wav1l0abssg/branch/6.x?svg=true)](https://ci.appveyor.com/project/bblanchon/arduinojson/branch/6.x)
 [![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/arduinojson.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:arduinojson)
@@ -34,10 +34,11 @@ ArduinoJson is a C++ JSON library for Arduino and IoT (Internet Of Things).
     * Deduplicates strings
 * Versatile
     * [Supports custom allocators (to use external RAM chip, for example)](https://arduinojson.org/v6/how-to/use-external-ram-on-esp32/?utm_source=github&utm_medium=readme)
-    * Supports [Arduino's `String`](https://arduinojson.org/v6/api/config/enable_arduino_string/) and [STL's `std::string`](https://arduinojson.org/v6/api/config/enable_std_string/?utm_source=github&utm_medium=readme)
-    * Supports Arduino's `Stream` and [STL's `std::istream`/`std::ostream`](https://arduinojson.org/v6/api/config/enable_std_stream/?utm_source=github&utm_medium=readme)
+    * Supports [Arduino's `String`](https://arduinojson.org/v6/api/config/enable_arduino_string/?utm_source=github&utm_medium=readme) and [STL's `std::string`](https://arduinojson.org/v6/api/config/enable_std_string/?utm_source=github&utm_medium=readme)
+    * Supports [Arduino's `Stream`](https://arduinojson.org/v6/api/config/enable_arduino_stream/?utm_source=github&utm_medium=readme) and [STL's `std::istream`/`std::ostream`](https://arduinojson.org/v6/api/config/enable_std_stream/?utm_source=github&utm_medium=readme)
     * [Supports Flash strings](https://arduinojson.org/v6/api/config/enable_progmem/?utm_source=github&utm_medium=readme)
     * Supports [custom readers](https://arduinojson.org/v6/api/json/deserializejson/?utm_source=github&utm_medium=readme#custom-reader) and [custom writers](https://arduinojson.org/v6/api/json/serializejson/?utm_source=github&utm_medium=readme#custom-writer)
+    * Supports custom converters
 * Portable
     * Usable on any C++ project (not limited to Arduino)
     * Compatible with C++98
@@ -86,7 +87,7 @@ ArduinoJson is a C++ JSON library for Arduino and IoT (Internet Of Things).
     * [How-tos](https://arduinojson.org/v6/example/?utm_source=github&utm_medium=readme)
     * [FAQ](https://arduinojson.org/v6/faq/?utm_source=github&utm_medium=readme)
     * [Book](https://arduinojson.org/book/?utm_source=github&utm_medium=readme)
-    * [Changelog](changelog.md)
+    * [Changelog](CHANGELOG.md)
 * Vibrant user community
     * Most popular of all Arduino libraries on [GitHub](https://github.com/search?o=desc&q=arduino+library&s=stars&type=Repositories) and [PlatformIO](https://platformio.org/lib/search)
     * [Used in hundreds of projects](https://www.hackster.io/search?i=projects&q=arduinojson)

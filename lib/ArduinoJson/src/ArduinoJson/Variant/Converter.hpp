@@ -4,13 +4,9 @@
 
 #pragma once
 
-#include <ArduinoJson/Namespace.hpp>
-
 namespace ARDUINOJSON_NAMESPACE {
 
-struct VariantTag {};
-
-template <typename T>
-struct IsVariant : is_base_of<VariantTag, T> {};
+template <typename T, typename Enable = void>
+struct Converter;
 
 }  // namespace ARDUINOJSON_NAMESPACE

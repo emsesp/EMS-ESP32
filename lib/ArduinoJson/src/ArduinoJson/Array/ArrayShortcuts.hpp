@@ -1,4 +1,4 @@
-// ArduinoJson - arduinojson.org
+// ArduinoJson - https://arduinojson.org
 // Copyright Benoit Blanchon 2014-2021
 // MIT License
 
@@ -9,6 +9,8 @@
 
 namespace ARDUINOJSON_NAMESPACE {
 // Forward declarations.
+class ArrayRef;
+class ObjectRef;
 template <typename>
 class ElementProxy;
 
