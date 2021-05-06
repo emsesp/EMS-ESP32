@@ -26,7 +26,7 @@ class ProjectMenu extends Component<ProjectProps> {
           <ListItemIcon>
             <TuneIcon />
           </ListItemIcon>
-          <ListItemText primary="Settings" /> 
+          <ListItemText primary="Settings" />
         </ListItem>
       </List>
     );

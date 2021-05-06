@@ -30,7 +30,7 @@ class ValueForm extends React.Component<ValueFormProps> {
         const { devicevalue, handleValueChange, onDoneEditing, onCancelEditing } = this.props;
         return (
             <ValidatorForm onSubmit={onDoneEditing} ref={this.formRef}>
-                <Dialog  maxWidth="xs" onClose={onCancelEditing} aria-labelledby="user-form-dialog-title" open>
+                <Dialog maxWidth="xs" onClose={onCancelEditing} aria-labelledby="user-form-dialog-title" open>
                     <DialogTitle id="user-form-dialog-title">Change the {devicevalue.name}</DialogTitle>
                     <DialogContent dividers>
                         <TextValidator

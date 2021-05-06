@@ -30,7 +30,7 @@ export const busStatus = ({ status }: EMSESPStatus) => {
   }
 }
 
-export const qualityHighlight = ( value: number, theme: Theme) => {
+export const qualityHighlight = (value: number, theme: Theme) => {
   if (value >= 95) {
     return theme.palette.success.main;
   }

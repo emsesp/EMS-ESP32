@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import {restController, RestControllerProps, RestFormLoader, SectionContent } from '../components';
+import { restController, RestControllerProps, RestFormLoader, SectionContent } from '../components';
 import { NTP_SETTINGS_ENDPOINT } from '../api';
 
 import NTPSettingsForm from './NTPSettingsForm';

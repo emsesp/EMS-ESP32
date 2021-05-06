@@ -8,6 +8,6 @@ import App from './App';
 
 render((
   <Router history={history}>
-    <App/>
+    <App />
   </Router>
 ), document.getElementById("root"))

@@ -7,7 +7,7 @@ import { Paper, Typography, Fab } from '@material-ui/core';
 import ForwardIcon from '@material-ui/icons/Forward';
 
 import { withAuthenticationContext, AuthenticationContextProps } from './authentication/AuthenticationContext';
-import {PasswordValidator} from './components';
+import { PasswordValidator } from './components';
 import { PROJECT_NAME, SIGN_IN_ENDPOINT } from './api';
 
 const styles = (theme: Theme) => createStyles({

@@ -29,16 +29,16 @@ class MqttStatusForm extends Component<MqttStatusFormProps> {
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
-          <ListItemAvatar>
-            <HighlightAvatar color={mqttPublishHighlight(data, theme)}>
-              <SpeakerNotesOffIcon />
-            </HighlightAvatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary="MQTT Publish Errors"
-            secondary={data.mqtt_fails}
-          />
-        </ListItem>
+            <ListItemAvatar>
+              <HighlightAvatar color={mqttPublishHighlight(data, theme)}>
+                <SpeakerNotesOffIcon />
+              </HighlightAvatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary="MQTT Publish Errors"
+              secondary={data.mqtt_fails}
+            />
+          </ListItem>
         </Fragment>
       );
     }

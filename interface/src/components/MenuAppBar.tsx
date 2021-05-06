@@ -142,7 +142,7 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
             <Divider />
           </Fragment>
         )}
-        
+
         <List>
           <ListItem to='/network/' selected={path.startsWith('/network/')} button component={Link}>
             <ListItemIcon>

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import { AP_SETTINGS_ENDPOINT } from '../api';
-import {restController, RestControllerProps, RestFormLoader, SectionContent } from '../components';
+import { restController, RestControllerProps, RestFormLoader, SectionContent } from '../components';
 
 import APSettingsForm from './APSettingsForm';
 import { APSettings } from './types';

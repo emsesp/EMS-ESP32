@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import {restController, RestControllerProps, RestFormLoader, SectionContent } from '../components';
+import { restController, RestControllerProps, RestFormLoader, SectionContent } from '../components';
 import { MQTT_SETTINGS_ENDPOINT } from '../api';
 
 import MqttSettingsForm from './MqttSettingsForm';

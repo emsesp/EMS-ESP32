@@ -3,7 +3,7 @@ import { TextValidator, ValidatorComponentProps } from 'react-material-ui-form-v
 
 import { withStyles, WithStyles, createStyles } from '@material-ui/core/styles';
 import { InputAdornment, IconButton } from '@material-ui/core';
-import {Visibility,VisibilityOff } from '@material-ui/icons';
+import { Visibility, VisibilityOff } from '@material-ui/icons';
 
 const styles = createStyles({
   input: {

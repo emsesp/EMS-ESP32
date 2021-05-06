@@ -38,7 +38,7 @@ export function fetchLoginRedirect(features: Features): H.LocationDescriptorObje
 }
 
 /**
- * Wraps the normal fetch routene with one with provides the access token if present.
+ * Wraps the normal fetch routine with one with provides the access token if present.
  */
 export function authorizedFetch(url: RequestInfo, params?: RequestInit): Promise<Response> {
   const accessToken = getStorage().getItem(ACCESS_TOKEN);
@@ -55,8 +55,8 @@ export function authorizedFetch(url: RequestInfo, params?: RequestInit): Promise
 
 /**
  * fetch() does not yet support upload progress, this wrapper allows us to configure the xhr request 
- * for a single file upload and takes care of adding the Authroization header and redirecting on 
- * authroization errors as we do for normal fetch operations.
+ * for a single file upload and takes care of adding the Authorization header and redirecting on 
+ * authorization errors as we do for normal fetch operations.
  */
 export function redirectingAuthorizedUpload(xhr: XMLHttpRequest, url: string, file: File, onProgress: (event: ProgressEvent<EventTarget>) => void): Promise<void> {
   return new Promise((resolve, reject) => {
