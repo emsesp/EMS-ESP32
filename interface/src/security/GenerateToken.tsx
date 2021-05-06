@@ -48,7 +48,7 @@ class GenerateToken extends React.Component<GenerateTokenProps, GenerateTokenSta
                         <Fragment>
                             <Box bgcolor="primary.main" color="primary.contrastText" p={2} mt={2} mb={2}>
                                 <Typography variant="body1">
-                                    The token below may be used to access the secured APIs. This may be used for bearer authentication with the "Authorization" header or using the "access_token" query paramater.
+                                    The token below may be used to access the secured APIs, either as a Bearer authentication in the "Authorization" header or using the "access_token" query parameter.
                 </Typography>
                             </Box>
                             <Box mt={2} mb={2}>
