@@ -1,14 +1,14 @@
 export interface User {
-  username: string;
-  password: string;
-  admin: boolean;
+  username: string
+  password: string
+  admin: boolean
 }
 
 export interface SecuritySettings {
-  users: User[];
-  jwt_secret: string;
+  users: User[]
+  jwt_secret: string
 }
 
 export interface GeneratedToken {
-  token: string;
+  token: string
 }
