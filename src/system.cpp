@@ -787,8 +787,8 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
     node["version"] = EMSESP_APP_VERSION;
 
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
-        node                     = json.createNestedObject("WIFI");
-        node["ssid"]             = settings.ssid;
+        node = json.createNestedObject("WIFI");
+        // node["ssid"]             = settings.ssid; // commented out - people don't like others to see this
         node["hostname"]         = settings.hostname;
         node["static_ip_config"] = settings.staticIPConfig;
         JsonUtils::writeIP(node, "local_ip", settings.localIP);
