@@ -140,13 +140,14 @@ void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, cm
 }
 
 // add a command to the list, which does return json object as output
-void Command::add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb) {
+// optional parameter hidden for commands that will not show up on the Console
+void Command::add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb, bool hidden) {
     // if the command already exists for that device type don't add it
     if (find_command(device_type, uuid::read_flash_string(cmd).c_str()) != nullptr) {
         return;
     }
 
-    cmdfunctions_.emplace_back(device_type, MqttSubFlag::FLAG_NOSUB, cmd, nullptr, cb); // add command
+    cmdfunctions_.emplace_back(device_type, MqttSubFlag::FLAG_NOSUB, cmd, nullptr, cb, hidden); // add command
 }
 
 // see if a command exists for that device type
@@ -175,14 +176,23 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ch
 // output list of all commands to console for a specific DeviceType
 void Command::show(uuid::console::Shell & shell, uint8_t device_type) {
     if (cmdfunctions_.empty()) {
-        shell.println(F("No commands"));
+        shell.println(F("No commands available"));
     }
 
+    // create a list of commands, sort them, print them
+    std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
-        if (cf.device_type_ == device_type) {
-            shell.printf("%s ", uuid::read_flash_string(cf.cmd_).c_str());
+        if ((cf.device_type_ == device_type) && !cf.hidden_) {
+            sorted_cmds.push_back(uuid::read_flash_string(cf.cmd_));
         }
     }
+
+    sorted_cmds.sort();
+    for (auto & cl : sorted_cmds) {
+        shell.print(cl);
+        shell.print(" ");
+    }
+
     shell.println();
 }
 

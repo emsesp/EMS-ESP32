@@ -45,13 +45,20 @@ class Command {
         const __FlashStringHelper * cmd_;
         cmdfunction_p               cmdfunction_;
         cmdfunction_json_p          cmdfunction_json_;
+        bool                        hidden_; // if its command not to be shown on the Console
 
-        CmdFunction(const uint8_t device_type, const uint8_t flag, const __FlashStringHelper * cmd, cmdfunction_p cmdfunction, cmdfunction_json_p cmdfunction_json)
+        CmdFunction(const uint8_t               device_type,
+                    const uint8_t               flag,
+                    const __FlashStringHelper * cmd,
+                    cmdfunction_p               cmdfunction,
+                    cmdfunction_json_p          cmdfunction_json,
+                    bool                        hidden = false)
             : device_type_(device_type)
             , flag_(flag)
             , cmd_(cmd)
             , cmdfunction_(cmdfunction)
-            , cmdfunction_json_(cmdfunction_json) {
+            , cmdfunction_json_(cmdfunction_json)
+            , hidden_(hidden) {
         }
     };
 
@@ -62,7 +69,7 @@ class Command {
     static bool                   call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json);
     static bool                   call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id = 0);
     static void                   add(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t flag = 0);
-    static void                   add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb);
+    static void                   add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb, bool hidden = false);
     static void                   show_all(uuid::console::Shell & shell);
     static Command::CmdFunction * find_command(const uint8_t device_type, const char * cmd);
     static char *                 check_command(char * out, const char * cmd, int8_t & id);
