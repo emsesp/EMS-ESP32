@@ -9,8 +9,8 @@ import StarIcon from "@material-ui/icons/Star";
 import ImportExportIcon from "@material-ui/icons/ImportExport";
 import BugReportIcon from "@material-ui/icons/BugReportTwoTone";
 
-export const WebAPISystemSettings = window.location.origin + "/api?device=system&cmd=settings";
-export const WebAPISystemInfo = window.location.origin + "/api?device=system&cmd=info";
+export const WebAPISystemSettings = window.location.origin + "/api/system/settings";
+export const WebAPISystemInfo = window.location.origin + "/api/system/info";
 
 class EMSESPHelp extends Component {
 
