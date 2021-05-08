@@ -134,7 +134,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
         auto num_paths = p.paths().size();
         if (num_paths == 1) {
             // if there are no more paths parameters, default to 'info'
-            cmd_s = "info";
+            cmd_s = "info_short";
         } else if (num_paths == 2) {
             cmd_s = p.paths()[1];
         } else if (num_paths > 2) {
@@ -152,11 +152,11 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
     }
     device_type = EMSdevice::device_name_2_device_type(device_s.c_str());
     if (device_type == EMSdevice::DeviceType::UNKNOWN) {
-        send_message_response(request, 422, "Invalid device"); // Unprocessable Entity
+        send_message_response(request, 422, "Invalid call"); // Unprocessable Entity
         return;
     }
 
-    // cmd check
+    EMSESP::logger().notice("Calling device=%s, cmd=%s, data=%s, id/hc=%d", device_s.c_str(), cmd_s.c_str(), value_s.c_str(), id_n); // TODO remove
 
     // check that we have permissions first. We require authenticating on 1 or more of these conditions:
     //  1. any HTTP POSTs or PUTs
@@ -180,7 +180,6 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
     PrettyAsyncJsonResponse * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
     JsonObject                json     = response->getRoot();
 
-    // EMSESP::logger().notice("Calling device=%s, cmd=%s, data=%s, id/hc=%d", device_s.c_str(), cmd_s.c_str(), value_s.c_str(), id_n);
     bool ok = Command::call(device_type, cmd_s.c_str(), (have_data ? value_s.c_str() : nullptr), id_n, json);
 
     // check for errors
