@@ -35,6 +35,7 @@
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "format": "prettier --write '**/*.{ts,js,css,json,md}'",
+    "build-localhost": "PUBLIC_URL=/ react-app-rewired build",
     "mock-api": "nodemon --watch ../mock-api ../mock-api/server.js"
   },
   "eslintConfig": {
