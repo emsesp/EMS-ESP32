@@ -297,7 +297,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 }
 
 // show EMS device values to the shell console
-// this is the only time generate_values_json is called in verbose mode (set to true)
+// generate_values_json is called in verbose mode (set to true)
 void EMSESP::show_device_values(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
         shell.printfln(F("No EMS devices detected. Try using 'scan devices' from the ems menu."));
@@ -963,21 +963,27 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
 
     fetch_device_values(device_id); // go and fetch its data
 
-    // add info command, but not for all devices
+    // add info commands, but not for all devices
     if ((device_type == DeviceType::CONNECT) || (device_type == DeviceType::CONTROLLER) || (device_type == DeviceType::GATEWAY)) {
         return true;
     }
 
     Command::add_with_json(device_type, F_(info), [device_type](const char * value, const int8_t id, JsonObject & json) {
-        return command_info(device_type, json, id);
+        return command_info(device_type, json, id, true);
     });
+    Command::add_with_json(
+        device_type,
+        F("info_short"),
+        [device_type](const char * value, const int8_t id, JsonObject & json) { return command_info(device_type, json, id, false); },
+        true); // this command is hidden
 
     return true;
 }
 
 // export all values to info command
 // value is ignored here
-bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t id) {
+// info command always shows in verbose mode, so full names are displayed
+bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t id, bool verbose) {
     bool    has_value = false;
     uint8_t tag;
     if (id >= 1 && id <= 4) {
@@ -993,7 +999,7 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t i
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)
             && ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat()))) {
-            has_value |= emsdevice->generate_values_json(json, tag, (id == -1), false); // nested for id -1,0 & console for id -1
+            has_value |= emsdevice->generate_values_json(json, tag, (id == -1), verbose); // nested for id -1,0 & console for id -1
         }
     }
 
