@@ -1,6 +1,7 @@
 # Changelog
 
 ## Added
+- new command called `commands` which lists all available commands. `ems-esp/api/{device}/commands`
 
 ## Fixed
 
