@@ -4,11 +4,12 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CompressionPlugin = require('compression-webpack-plugin')
 const ProgmemGenerator = require('./progmem-generator.js')
 
-const path = require('path')
-const fs = require('fs')
-
 module.exports = function override(config, env) {
-  if (env === 'production') {
+  const hosted = process.env.REACT_APP_HOSTED
+
+  if (env === 'production' && !hosted) {
+    console.log('Custom webpack...')
+
     // rename the output file, we need it's path to be short for LittleFS
     config.output.filename = 'js/[id].[chunkhash:4].js'
     config.output.chunkFilename = 'js/[id].[chunkhash:4].js'

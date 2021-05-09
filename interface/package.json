@@ -13,6 +13,7 @@
     "@types/react-router": "^5.1.13",
     "@types/react-router-dom": "^5.1.7",
     "compression-webpack-plugin": "^5.0.2",
+    "env-cmd": "^10.1.0",
     "express": "^4.17.1",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
@@ -35,6 +36,7 @@
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "format": "prettier --write '**/*.{ts,js,css,json,md}'",
+    "build-hosted": "env-cmd -f .env.hosted npm run build",
     "build-localhost": "PUBLIC_URL=/ react-app-rewired build",
     "mock-api": "nodemon --watch ../mock-api ../mock-api/server.js"
   },
