@@ -156,8 +156,6 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
         return;
     }
 
-    EMSESP::logger().notice("Calling device=%s, cmd=%s, data=%s, id/hc=%d", device_s.c_str(), cmd_s.c_str(), value_s.c_str(), id_n); // TODO remove
-
     // check that we have permissions first. We require authenticating on 1 or more of these conditions:
     //  1. any HTTP POSTs or PUTs
     //  2. a HTTP GET which has a 'data' parameter which is not empty (to keep v2 compatibility)
