@@ -619,14 +619,15 @@ void System::system_check() {
 // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
 // no individual subscribe for pin command because id is needed
 void System::commands_init() {
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin, MqttSubFlag::FLAG_NOSUB);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch);
-    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info);
-    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin, F("set GPIO"), MqttSubFlag::FLAG_NOSUB);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, F("send a telegram"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, F("force a MQTT publish"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, F("refresh all EMS values"));
+    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, F("system status"));
+    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("list system settings"));
+    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("list system commands"));
 #if defined(EMSESP_DEBUG)
-    Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test, F("run tests"));
 #endif
 }
 
@@ -775,6 +776,11 @@ void System::show_system(uuid::console::Shell & shell) {
 // returns true if an upgrade was done
 bool System::check_upgrade() {
     return false;
+}
+
+// list commands
+bool System::command_commands(const char * value, const int8_t id, JsonObject & json) {
+    return Command::list(EMSdevice::DeviceType::SYSTEM, json);
 }
 
 // export all settings to JSON text

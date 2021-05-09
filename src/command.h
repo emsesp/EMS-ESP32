@@ -45,6 +45,7 @@ class Command {
         const __FlashStringHelper * cmd_;
         cmdfunction_p               cmdfunction_;
         cmdfunction_json_p          cmdfunction_json_;
+        const __FlashStringHelper * description_;
         bool                        hidden_; // if its command not to be shown on the Console
 
         CmdFunction(const uint8_t               device_type,
@@ -52,12 +53,14 @@ class Command {
                     const __FlashStringHelper * cmd,
                     cmdfunction_p               cmdfunction,
                     cmdfunction_json_p          cmdfunction_json,
+                    const __FlashStringHelper * description,
                     bool                        hidden = false)
             : device_type_(device_type)
             , flag_(flag)
             , cmd_(cmd)
             , cmdfunction_(cmdfunction)
             , cmdfunction_json_(cmdfunction_json)
+            , description_(description)
             , hidden_(hidden) {
         }
     };
@@ -66,17 +69,20 @@ class Command {
         return cmdfunctions_;
     }
 
-    static bool                   call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json);
-    static bool                   call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id = 0);
-    static void                   add(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t flag = 0);
-    static void                   add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb, bool hidden = false);
+    static bool call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json);
+    static bool call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id = 0);
+    static void add(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, const __FlashStringHelper * description, uint8_t flag = 0);
+    static void
+    add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb, const __FlashStringHelper * description, bool hidden = false);
     static void                   show_all(uuid::console::Shell & shell);
     static Command::CmdFunction * find_command(const uint8_t device_type, const char * cmd);
     static char *                 check_command(char * out, const char * cmd, int8_t & id);
 
-    static void show(uuid::console::Shell & shell, uint8_t device_type);
+    static void show(uuid::console::Shell & shell, uint8_t device_type, bool verbose);
     static void show_devices(uuid::console::Shell & shell);
     static bool device_has_commands(const uint8_t device_type);
+
+    static bool list(const uint8_t device_type, JsonObject & json);
 
   private:
     static uuid::log::Logger logger_;

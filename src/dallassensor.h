@@ -113,6 +113,7 @@ class DallasSensor {
     uint64_t get_id(const uint8_t addr[]);
 
     bool command_info(const char * value, const int8_t id, JsonObject & json);
+    bool command_commands(const char * value, const int8_t id, JsonObject & json);
 
     uint32_t            last_activity_ = uuid::get_uptime();
     uint32_t            last_publish_  = uuid::get_uptime();

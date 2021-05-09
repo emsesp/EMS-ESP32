@@ -43,11 +43,11 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
 
 #ifdef EMSESP_DEBUG
     if (value == nullptr) {
-        LOG_DEBUG(F("[DEBUG] Calling %s command %s"), dname.c_str(), cmd);
+        LOG_DEBUG(F("[DEBUG] Calling %s command '%s'"), dname.c_str(), cmd);
     } else if (id == -1) {
-        LOG_DEBUG(F("[DEBUG] Calling %s command %s, value %s, id is default"), dname.c_str(), cmd, value);
+        LOG_DEBUG(F("[DEBUG] Calling %s command '%s', value %s, id is default"), dname.c_str(), cmd, value);
     } else {
-        LOG_DEBUG(F("[DEBUG] Calling %s command %s, value %s, id is %d"), dname.c_str(), cmd, value, id);
+        LOG_DEBUG(F("[DEBUG] Calling %s command '%s', value %s, id is %d"), dname.c_str(), cmd, value, id);
     }
 #endif
 
@@ -67,11 +67,11 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
 #ifdef EMSESP_DEBUG
     std::string dname = EMSdevice::device_type_2_device_name(device_type);
     if (value == nullptr) {
-        LOG_DEBUG(F("[DEBUG] Calling %s command %s"), dname.c_str(), cmd);
+        LOG_DEBUG(F("[DEBUG] Calling %s command '%s'"), dname.c_str(), cmd);
     } else if (id == -1) {
-        LOG_DEBUG(F("[DEBUG] Calling %s command %s, value %s, id is default"), dname.c_str(), cmd, value);
+        LOG_DEBUG(F("[DEBUG] Calling %s command '%s', value %s, id is default"), dname.c_str(), cmd, value);
     } else {
-        LOG_DEBUG(F("[DEBUG] Calling %s command %s, value %s, id is %d"), dname.c_str(), cmd, value, id);
+        LOG_DEBUG(F("[DEBUG] Calling %s command '%s', value %s, id is %d"), dname.c_str(), cmd, value, id);
     }
 #endif
 
@@ -125,13 +125,16 @@ char * Command::check_command(char * out, const char * cmd, int8_t & id) {
 }
 
 // add a command to the list, which does not return json
-void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t flag) {
+void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, const __FlashStringHelper * description, uint8_t flag) {
     // if the command already exists for that device type don't add it
     if (find_command(device_type, uuid::read_flash_string(cmd).c_str()) != nullptr) {
         return;
     }
 
-    cmdfunctions_.emplace_back(device_type, flag, cmd, cb, nullptr);
+    // if the description is empty, it's hidden which means it will not show up in Web or Console as an available command
+    bool hidden = (description == nullptr);
+
+    cmdfunctions_.emplace_back(device_type, flag, cmd, cb, nullptr, description, hidden); // callback for json is nullptr
 
     // see if we need to subscribe
     if (Mqtt::enabled()) {
@@ -140,14 +143,15 @@ void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, cm
 }
 
 // add a command to the list, which does return json object as output
+// flag is fixed
 // optional parameter hidden for commands that will not show up on the Console
-void Command::add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb, bool hidden) {
+void Command::add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb, const __FlashStringHelper * description, bool hidden) {
     // if the command already exists for that device type don't add it
     if (find_command(device_type, uuid::read_flash_string(cmd).c_str()) != nullptr) {
         return;
     }
 
-    cmdfunctions_.emplace_back(device_type, MqttSubFlag::FLAG_NOSUB, cmd, nullptr, cb, hidden); // add command
+    cmdfunctions_.emplace_back(device_type, MqttSubFlag::FLAG_NOSUB, cmd, nullptr, cb, description, hidden); // callback for json is included
 }
 
 // see if a command exists for that device type
@@ -173,24 +177,77 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ch
     return nullptr; // command not found
 }
 
-// output list of all commands to console for a specific DeviceType
-void Command::show(uuid::console::Shell & shell, uint8_t device_type) {
+// list all commands for a specific device, output as json
+bool Command::list(const uint8_t device_type, JsonObject & json) {
     if (cmdfunctions_.empty()) {
-        shell.println(F("No commands available"));
+        json["message"] = "no commands available";
+        return false;
     }
 
-    // create a list of commands, sort them, print them
+    // create a list of commands, sort them
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
         if ((cf.device_type_ == device_type) && !cf.hidden_) {
             sorted_cmds.push_back(uuid::read_flash_string(cf.cmd_));
         }
     }
-
     sorted_cmds.sort();
+
     for (auto & cl : sorted_cmds) {
+        for (const auto & cf : cmdfunctions_) {
+            if ((cf.device_type_ == device_type) && !cf.hidden_ && cf.description_ && (cl == uuid::read_flash_string(cf.cmd_))) {
+                json[cl] = cf.description_;
+            }
+        }
+    }
+
+    return true;
+}
+
+// output list of all commands to console for a specific DeviceType
+void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbose) {
+    if (cmdfunctions_.empty()) {
+        shell.println(F("No commands available"));
+        return;
+    }
+
+    // create a list of commands, sort them
+    std::list<std::string> sorted_cmds;
+    for (const auto & cf : cmdfunctions_) {
+        if ((cf.device_type_ == device_type) && !cf.hidden_) {
+            sorted_cmds.push_back(uuid::read_flash_string(cf.cmd_));
+        }
+    }
+    sorted_cmds.sort();
+
+    // if not in verbose mode, just print them on a single line
+    if (!verbose) {
+        for (auto & cl : sorted_cmds) {
+            shell.print(cl);
+            shell.print(" ");
+        }
+        shell.println();
+        return;
+    }
+
+    // verbose mode
+    shell.println();
+    for (auto & cl : sorted_cmds) {
+        shell.print("  ");
         shell.print(cl);
-        shell.print(" ");
+        // find and print the description
+        for (const auto & cf : cmdfunctions_) {
+            if ((cf.device_type_ == device_type) && !cf.hidden_ && cf.description_ && (cl == uuid::read_flash_string(cf.cmd_))) {
+                // pad with spaces
+                for (uint8_t i = cl.length(); i++ < 22;) {
+                    shell.print(' ');
+                }
+                shell.print(COLOR_BRIGHT_CYAN);
+                shell.print(uuid::read_flash_string(cf.description_));
+                shell.print(COLOR_RESET);
+            }
+        }
+        shell.println();
     }
 
     shell.println();
@@ -244,24 +301,31 @@ void Command::show_devices(uuid::console::Shell & shell) {
 }
 
 // output list of all commands to console
+// calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
     shell.println(F("Available commands per device: "));
 
     // show system first
+    shell.print(COLOR_BOLD_ON);
     shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM).c_str());
-    show(shell, EMSdevice::DeviceType::SYSTEM);
+    shell.print(COLOR_RESET);
+    show(shell, EMSdevice::DeviceType::SYSTEM, true);
 
     // show sensor
     if (EMSESP::have_sensors()) {
+        shell.print(COLOR_BOLD_ON);
         shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR).c_str());
-        show(shell, EMSdevice::DeviceType::DALLASSENSOR);
+        shell.print(COLOR_RESET);
+        show(shell, EMSdevice::DeviceType::DALLASSENSOR, true);
     }
 
     // do this in the order of factory classes to keep a consistent order when displaying
     for (const auto & device_class : EMSFactory::device_handlers()) {
         if (Command::device_has_commands(device_class.first)) {
+            shell.print(COLOR_BOLD_ON);
             shell.printf(" %s: ", EMSdevice::device_type_2_device_name(device_class.first).c_str());
-            show(shell, device_class.first);
+            shell.print(COLOR_RESET);
+            show(shell, device_class.first, true);
         }
     }
 }
