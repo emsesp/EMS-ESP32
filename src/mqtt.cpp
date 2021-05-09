@@ -649,7 +649,7 @@ void Mqtt::on_connect() {
         doc["ip"] = WiFi.localIP().toString();
     }
 #endif
-    publish(F_(info), doc.as<JsonObject>());
+    publish(F_(info), doc.as<JsonObject>()); // topic called "info"
 
     // create the EMS-ESP device in HA, which is MQTT retained
     if (ha_enabled()) {
@@ -1026,7 +1026,6 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
         ids.add(ha_device);
     }
 
-    doc.shrinkToFit();
     publish_ha(topic, doc.as<JsonObject>());
 }
 
