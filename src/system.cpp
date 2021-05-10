@@ -886,10 +886,6 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 // export status information including some basic settings
 // e.g. http://ems-esp/api?device=system&cmd=info
 bool System::command_info(const char * value, const int8_t id, JsonObject & json) {
-    if (id == 0) {
-        return EMSESP::system_.heartbeat_json(json);
-    }
-
     JsonObject node;
 
     node = json.createNestedObject("System");
@@ -925,10 +921,12 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
         node["rx line quality"]       = EMSESP::rxservice_.quality();
         node["tx line quality"]       = EMSESP::txservice_.quality();
         if (Mqtt::enabled()) {
+            node["#MQTT publishes"]     = Mqtt::publish_count();
             node["#MQTT publish fails"] = Mqtt::publish_fails();
         }
         if (EMSESP::dallas_enabled()) {
             node["#dallas sensors"] = EMSESP::sensor_devices().size();
+            node["#dallas reads"]   = EMSESP::sensor_reads();
             node["#dallas fails"]   = EMSESP::sensor_fails();
         }
     }
@@ -948,8 +946,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
     }
     if (EMSESP::sensor_devices().size()) {
         JsonObject obj = devices2.createNestedObject();
-        obj["type"]    = F("Dallassensor");
-        obj["name"]    = F("Dallassensor");
+        obj["type"]    = F_(Dallassensor);
+        obj["name"]    = F_(Dallassensor);
     }
 
     return true;

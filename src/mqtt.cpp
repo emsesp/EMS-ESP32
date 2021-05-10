@@ -347,15 +347,9 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
                     return; // invalid topic name
                 }
                 cmd_only++; // skip the /
-                int8_t id = -1;
-                // check for hcx/ prefix, commented out, this is now in command::call
-                // if (cmd_only[0] == 'h' && cmd_only[1] == 'c' && cmd_only[3] == '/') {
-                //     id = cmd_only[2] - '0';
-                //     cmd_only += 4;
-                // }
-                // LOG_INFO(F("devicetype= %d, topic = %s, cmd = %s, message =  %s, id = %d"), mf.device_type_, topic, cmd_only, message, id);
-                if (!Command::call(mf.device_type_, cmd_only, message, id)) {
-                    LOG_ERROR(F("No matching cmd (%s) in topic %s, id %d, or invalid data"), cmd_only, topic, id);
+                // LOG_INFO(F("devicetype= %d, topic = %s, cmd = %s, message =  %s), mf.device_type_, topic, cmd_only, message);
+                if (!Command::call(mf.device_type_, cmd_only, message)) {
+                    LOG_ERROR(F("No matching cmd (%s) in topic %s, or invalid data"), cmd_only, topic);
                     Mqtt::publish(F_(response), "unknown");
                 }
                 return;

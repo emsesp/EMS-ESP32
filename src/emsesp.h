@@ -131,6 +131,10 @@ class EMSESP {
         return (!(dallassensor_.sensors().empty()));
     }
 
+    static uint32_t sensor_reads() {
+        return dallassensor_.reads();
+    }
+
     static uint32_t sensor_fails() {
         return dallassensor_.fails();
     }
