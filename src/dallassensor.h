@@ -64,6 +64,10 @@ class DallasSensor {
 
     const std::vector<Sensor> sensors() const;
 
+    uint32_t reads() {
+        return sensorreads_;
+    }
+
     uint32_t fails() {
         return sensorfails_;
     }
@@ -128,6 +132,7 @@ class DallasSensor {
     bool     parasite_    = false;
     bool     changed_     = false;
     uint32_t sensorfails_ = 0;
+    uint32_t sensorreads_ = 0;
     int8_t   scanretry_   = 0;
 };
 

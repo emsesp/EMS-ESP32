@@ -69,7 +69,7 @@ void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVari
     }
 
     // make sure we have a value. There must always be a value
-    if (!body.containsKey("value")) {
+    if (!body.containsKey(F_(value))) {
         send_message_response(request, 400, "Problems parsing JSON"); // Bad Request
         return;
     }
@@ -114,8 +114,8 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
         if (request->hasParam(F_(data))) {
             value_s = request->getParam(F_(data))->value().c_str();
         }
-        if (request->hasParam("value")) {
-            value_s = request->getParam("value")->value().c_str();
+        if (request->hasParam(F_(value))) {
+            value_s = request->getParam(F_(value))->value().c_str();
         }
 
         // get id (or hc), which is optional
@@ -134,15 +134,15 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
         auto num_paths = p.paths().size();
         if (num_paths == 1) {
             // if there are no more paths parameters, default to 'info'
-            cmd_s = "info_short";
+            // cmd_s = "info_short";
+            // check empty command in Command::find_command and set the default there!
         } else if (num_paths == 2) {
             cmd_s = p.paths()[1];
         } else if (num_paths > 2) {
-            // command-check makes prefix to TAG
+            // check in Command::find_command makes prefix to TAG
             cmd_s = p.paths()[1] + "/" + p.paths()[2];
         }
     }
-
     // now go and validate everything
 
     // device check

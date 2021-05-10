@@ -30,18 +30,18 @@ std::vector<Command::CmdFunction> Command::cmdfunctions_;
 // id may be used to represent a heating circuit for example, it's optional
 // returns false if error or not found
 bool Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id) {
-    std::string dname  = EMSdevice::device_type_2_device_name(device_type);
-    int8_t      id_new = id;
-    char        cmd_new[20];
+    int8_t id_new      = id;
+    char   cmd_new[20] = {'\0'};
+    strlcpy(cmd_new, cmd, 20);
 
-    check_command(cmd_new, cmd, id_new);
-    auto cf = find_command(device_type, cmd_new);
+    auto cf = find_command(device_type, cmd_new, id_new);
     if ((cf == nullptr) || (cf->cmdfunction_json_)) {
-        LOG_WARNING(F("Command %s on %s not found"), cmd, dname.c_str());
+        LOG_WARNING(F("Command %s on %s not found"), cmd, EMSdevice::device_type_2_device_name(device_type).c_str());
         return false; // command not found, or requires a json
     }
 
 #ifdef EMSESP_DEBUG
+    std::string dname = EMSdevice::device_type_2_device_name(device_type);
     if (value == nullptr) {
         LOG_DEBUG(F("[DEBUG] Calling %s command '%s'"), dname.c_str(), cmd);
     } else if (id == -1) {
@@ -58,11 +58,11 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
 // id may be used to represent a heating circuit for example
 // returns false if error or not found
 bool Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json) {
-    int8_t id_new = id;
-    char   cmd_new[20];
+    int8_t id_new      = id;
+    char   cmd_new[20] = {'\0'};
+    strlcpy(cmd_new, cmd, 20);
 
-    check_command(cmd_new, cmd, id_new);
-    auto cf = find_command(device_type, cmd_new);
+    auto cf = find_command(device_type, cmd_new, id_new);
 
 #ifdef EMSESP_DEBUG
     std::string dname = EMSdevice::device_type_2_device_name(device_type);
@@ -95,18 +95,27 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
     }
 }
 
-// set the id if there are prefixes
-char * Command::check_command(char * out, const char * cmd, int8_t & id) {
+// strip prefixes, check, and find command
+Command::CmdFunction * Command::find_command(const uint8_t device_type, char * cmd, int8_t & id) {
+    // no command for id0
+    if (id == 0) {
+        return nullptr;
+    }
+    // empty command is info with id0 or info_short
+    if (cmd[0] == '\0') {
+        // strcpy(cmd, "info_short");
+        strcpy(cmd, "info");
+        id = 0;
+    }
     // convert cmd to lowercase
-    strlcpy(out, cmd, 20);
-    for (char * p = out; *p; p++) {
+    for (char * p = cmd; *p; p++) {
         *p = tolower(*p);
     }
 
     // scan for prefix hc.
     for (uint8_t i = DeviceValueTAG::TAG_HC1; i <= DeviceValueTAG::TAG_HC4; i++) {
-        if ((strncmp(out, EMSdevice::tag_to_string(i).c_str(), 3) == 0) && (strlen(out) > 4)) {
-            strcpy(out, &out[4]);
+        if ((strncmp(cmd, EMSdevice::tag_to_string(i).c_str(), 3) == 0) && (strlen(cmd) > 3)) {
+            strcpy(cmd, &cmd[4]);
             id = 1 + i - DeviceValueTAG::TAG_HC1;
             break;
         }
@@ -114,14 +123,19 @@ char * Command::check_command(char * out, const char * cmd, int8_t & id) {
 
     // scan for prefix wwc.
     for (uint8_t i = DeviceValueTAG::TAG_WWC1; i <= DeviceValueTAG::TAG_WWC4; i++) {
-        if ((strncmp(out, EMSdevice::tag_to_string(i).c_str(), 4) == 0) && (strlen(out) > 5)) {
-            strcpy(out, &out[5]);
+        if ((strncmp(cmd, EMSdevice::tag_to_string(i).c_str(), 4) == 0) && (strlen(cmd) > 4)) {
+            strcpy(cmd, &cmd[5]);
             id = 8 + i - DeviceValueTAG::TAG_WWC1;
             break;
         }
     }
 
-    return out;
+    // empty command after processing prefix is info
+    if (cmd[0] == '\0') {
+        strlcpy(cmd, "info", 20);
+    }
+
+    return find_command(device_type ,cmd);
 }
 
 // add a command to the list, which does not return json
@@ -196,7 +210,11 @@ bool Command::list(const uint8_t device_type, JsonObject & json) {
     for (auto & cl : sorted_cmds) {
         for (const auto & cf : cmdfunctions_) {
             if ((cf.device_type_ == device_type) && !cf.hidden_ && cf.description_ && (cl == uuid::read_flash_string(cf.cmd_))) {
-                json[cl] = cf.description_;
+                if (cf.flag_ == FLAG_WW) {
+                    json[cl] = EMSdevice::tag_to_string(TAG_DEVICE_DATA_WW) + " " + uuid::read_flash_string(cf.description_);
+                } else {
+                    json[cl] = cf.description_;
+                }
             }
         }
     }
@@ -233,16 +251,28 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     // verbose mode
     shell.println();
     for (auto & cl : sorted_cmds) {
-        shell.print("  ");
-        shell.print(cl);
         // find and print the description
         for (const auto & cf : cmdfunctions_) {
             if ((cf.device_type_ == device_type) && !cf.hidden_ && cf.description_ && (cl == uuid::read_flash_string(cf.cmd_))) {
+                uint8_t i = cl.length();
+                shell.print("  ");
+                if (cf.flag_ == FLAG_HC) {
+                    shell.print("[hc] ");
+                    i += 5;
+                } else if (cf.flag_ == FLAG_WWC) {
+                    shell.print("[wwc] ");
+                    i += 6;
+                }
+                shell.print(cl);
                 // pad with spaces
-                for (uint8_t i = cl.length(); i++ < 22;) {
+                while (i++ < 22) {
                     shell.print(' ');
                 }
                 shell.print(COLOR_BRIGHT_CYAN);
+                if (cf.flag_ == FLAG_WW) {
+                    shell.print(EMSdevice::tag_to_string(TAG_DEVICE_DATA_WW));
+                    shell.print(' ');
+                }
                 shell.print(uuid::read_flash_string(cf.description_));
                 shell.print(COLOR_RESET);
             }

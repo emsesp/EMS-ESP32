@@ -70,13 +70,13 @@ class Command {
     }
 
     static bool call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json);
-    static bool call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id = 0);
+    static bool call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id = -1);
     static void add(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, const __FlashStringHelper * description, uint8_t flag = 0);
     static void
     add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb, const __FlashStringHelper * description, bool hidden = false);
     static void                   show_all(uuid::console::Shell & shell);
     static Command::CmdFunction * find_command(const uint8_t device_type, const char * cmd);
-    static char *                 check_command(char * out, const char * cmd, int8_t & id);
+    static Command::CmdFunction * find_command(const uint8_t device_type, char * cmd, int8_t & id);
 
     static void show(uuid::console::Shell & shell, uint8_t device_type, bool verbose);
     static void show_devices(uuid::console::Shell & shell);
