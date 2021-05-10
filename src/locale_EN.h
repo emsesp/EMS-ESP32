@@ -80,6 +80,7 @@ MAKE_PSTR_WORD(command)
 MAKE_PSTR_WORD(commands)
 MAKE_PSTR_WORD(info)
 MAKE_PSTR_WORD(settings)
+MAKE_PSTR_WORD(value)
 
 // devices
 MAKE_PSTR_WORD(boiler)
@@ -94,6 +95,7 @@ MAKE_PSTR_WORD(heatpump)
 MAKE_PSTR_WORD(generic)
 MAKE_PSTR_WORD(dallassensor)
 MAKE_PSTR_WORD(unknown)
+MAKE_PSTR_WORD(Dallassensor)
 
 // format strings
 MAKE_PSTR(EMSESP, "EMS-ESP")
@@ -165,6 +167,7 @@ MAKE_PSTR(hours, "hours")
 MAKE_PSTR(ua, "uA")
 MAKE_PSTR(lmin, "l/min")
 MAKE_PSTR(kw, "kW")
+MAKE_PSTR(w, "W")
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
@@ -329,6 +332,9 @@ MAKE_PSTR_LIST(enum_control, F_(off), F_(rc20), F_(rc3x))
 
 MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(heat), F_(auto), F_(auto), F_(auto), F_(auto))
 
+// solar list
+MAKE_PSTR_LIST(enum_solarmode, F_(constant), F("pwm"), F("analog"))
+
 /*
  * MQTT topics and full text for values and commands
  */
@@ -360,7 +366,7 @@ MAKE_PSTR_LIST(curFlowTemp, F("curflowtemp"), F("current flow temperature"))
 MAKE_PSTR_LIST(retTemp, F("rettemp"), F("return temperature"))
 MAKE_PSTR_LIST(switchTemp, F("switchtemp"), F("mixing switch temperature"))
 MAKE_PSTR_LIST(sysPress, F("syspress"), F("system pressure"))
-MAKE_PSTR_LIST(boilTemp, F("boiltemp"), F("max boiler temperature"))
+MAKE_PSTR_LIST(boilTemp, F("boiltemp"), F("boiler temperature"))
 MAKE_PSTR_LIST(exhaustTemp, F("exhausttemp"), F("exhaust temperature"))
 MAKE_PSTR_LIST(burnGas, F("burngas"), F("gas"))
 MAKE_PSTR_LIST(flameCurr, F("flamecurr"), F("flame current"))
@@ -545,6 +551,8 @@ MAKE_PSTR_LIST(tankBottomTemp, F("tankbottomtemp"), F("tank bottom temperature (
 MAKE_PSTR_LIST(tank2BottomTemp, F("tank2bottomtemp"), F("second tank bottom temperature (TS5)"))
 MAKE_PSTR_LIST(heatExchangerTemp, F("heatexchangertemp"), F("heat exchanger temperature (TS6)"))
 
+MAKE_PSTR_LIST(collectorMaxTemp, F("collectormaxtemp"), F("maximum collector temperature"))
+MAKE_PSTR_LIST(collectorMinTemp, F("collectormintemp"), F("minimum collector temperature"))
 MAKE_PSTR_LIST(tankMaxTemp, F("tankmaxtemp"), F("maximum tank temperature"))
 MAKE_PSTR_LIST(solarPumpModulation, F("solarpumpmodulation"), F("pump modulation (PS1)"))
 MAKE_PSTR_LIST(cylinderPumpModulation, F("cylinderpumpmodulation"), F("cylinder pump modulation (PS5)"))
@@ -554,7 +562,7 @@ MAKE_PSTR_LIST(valveStatus, F("valvestatus"), F("valve status"))
 MAKE_PSTR_LIST(tankHeated, F("tankheated"), F("tank heated"))
 MAKE_PSTR_LIST(collectorShutdown, F("collectorshutdown"), F("collector shutdown"))
 
-MAKE_PSTR_LIST(pumpWorkTime, F("pumpWorktime"), F("pump working time"))
+MAKE_PSTR_LIST(pumpWorkTime, F("pumpworktime"), F("pump working time"))
 
 MAKE_PSTR_LIST(energyLastHour, F("energylasthour"), F("energy last hour"))
 MAKE_PSTR_LIST(energyTotal, F("energytotal"), F("energy total"))
@@ -566,6 +574,13 @@ MAKE_PSTR_LIST(wwTemp4, F("wwtemp4"), F("temperature 4"))
 MAKE_PSTR_LIST(wwTemp5, F("wwtemp5"), F("temperature 5"))
 MAKE_PSTR_LIST(wwTemp7, F("wwtemp7"), F("temperature 7"))
 MAKE_PSTR_LIST(wwPump, F("wwpump"), F("pump"))
+
+MAKE_PSTR_LIST(wwMinTemp, F("wwmintemp"), F("minimum temperature"))
+MAKE_PSTR_LIST(pumpMinMod, F("pumpminmod"), F("minimum pump modulation"))
+MAKE_PSTR_LIST(maxFlow, F("maxflow"), F("maximum solar flow"))
+MAKE_PSTR_LIST(solarPower, F("solarpower"), F("actual solar power"))
+MAKE_PSTR_LIST(solarPumpTurnonDiff, F("turnondiff"), F("pump turn on difference"))
+MAKE_PSTR_LIST(solarPumpTurnoffDiff, F("turnoffdiff"), F("pump turn off difference"))
 
 // switch
 MAKE_PSTR_LIST(activated, F("activated"), F("activated"))

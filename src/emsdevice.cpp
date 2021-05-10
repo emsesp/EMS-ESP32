@@ -34,7 +34,8 @@ static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__
     F_(minutes),
     F_(ua),
     F_(bar),
-    F_(kw)
+    F_(kw),
+    F_(w)
 
 };
 

@@ -53,6 +53,7 @@ class WebSettings {
     bool     notoken_api;
     bool     analog_enabled;
     uint8_t  pbutton_gpio;
+    uint8_t  solar_maxflow;
     String   board_profile;
 
     static void              read(WebSettings & settings, JsonObject & root);
