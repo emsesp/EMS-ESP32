@@ -31,7 +31,6 @@
 namespace emsesp {
 
 // Home Assistant icons (https://materialdesignicons.com/)
-// MAKE_PSTR(icontemperature, "mdi:temperature-celsius")
 MAKE_PSTR(icontemperature, "mdi:coolant-temperature")
 MAKE_PSTR(iconpercent, "mdi:percent-outline")
 MAKE_PSTR(iconfire, "mdi:fire")
@@ -40,6 +39,8 @@ MAKE_PSTR(iconflame, "mdi:flash")
 MAKE_PSTR(iconvalve, "mdi:valve")
 MAKE_PSTR(iconpump, "mdi:pump")
 MAKE_PSTR(iconheatpump, "mdi:water-pump")
+MAKE_PSTR(iconclock, "mdi:clock-outline")
+MAKE_PSTR(iconmemory, "mdi:memory")
 
 enum DeviceValueType : uint8_t {
     BOOL,
@@ -57,7 +58,25 @@ enum DeviceValueType : uint8_t {
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
 // uom - also used with HA
 // sequence is important!
-enum DeviceValueUOM : uint8_t { NONE = 0, DEGREES, PERCENT, LMIN, KWH, WH, HOURS, MINUTES, UA, BAR, KW, W, PUMP };
+enum DeviceValueUOM : uint8_t {
+
+    NONE = 0,
+    DEGREES,
+    PERCENT,
+    LMIN,
+    KWH,
+    WH,
+    HOURS,
+    MINUTES,
+    UA,
+    BAR,
+    KW,
+    W,
+    KB,
+    SECONDS,
+    PUMP // special, do not remove
+
+};
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 enum DeviceValueTAG : uint8_t {
