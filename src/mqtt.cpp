@@ -703,10 +703,15 @@ void Mqtt::ha_status() {
 
     // create the sensors
     // must match the MQTT payload keys
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("WiFi strength"), EMSdevice::DeviceType::SYSTEM, F("rssi"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("WiFi strength"), EMSdevice::DeviceType::SYSTEM, F("rssi"), DeviceValueUOM::PERCENT);
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime (sec)"), EMSdevice::DeviceType::SYSTEM, F("uptime_sec"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Free memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT,
+                           DeviceValueTAG::TAG_HEARTBEAT,
+                           F("Uptime (sec)"),
+                           EMSdevice::DeviceType::SYSTEM,
+                           F("uptime_sec"),
+                           DeviceValueUOM::SECONDS);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Free memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"), DeviceValueUOM::KB);
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# MQTT fails"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"));
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Rx received"), EMSdevice::DeviceType::SYSTEM, F("rxreceived"));
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Rx fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"));
@@ -1001,6 +1006,14 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
             break;
         case DeviceValueUOM::PUMP:
             doc["ic"] = F_(iconpump);
+            break;
+        case DeviceValueUOM::SECONDS:
+        case DeviceValueUOM::MINUTES:
+        case DeviceValueUOM::HOURS:
+            doc["ic"] = F_(iconclock);
+            break;
+        case DeviceValueUOM::KB:
+            doc["ic"] = F_(iconmemory);
             break;
         case DeviceValueUOM::NONE:
         default:

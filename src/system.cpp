@@ -474,7 +474,7 @@ bool System::heartbeat_json(JsonObject & doc) {
         doc["dallasfails"] = EMSESP::sensor_fails();
     }
 #ifndef EMSESP_STANDALONE
-    doc["freemem"] = ESP.getFreeHeap();
+    doc["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes
 #endif
 
     if (analog_enabled_) {
@@ -893,7 +893,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
     node["version"] = EMSESP_APP_VERSION;
     node["uptime"]  = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
 #ifndef EMSESP_STANDALONE
-    node["freemem"] = ESP.getFreeHeap();
+    node["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes
 #endif
 
     node = json.createNestedObject("Status");
