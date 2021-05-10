@@ -492,6 +492,10 @@ void EMSdevice::register_device_value(uint8_t                             tag,
     if (f != nullptr) {
         if (tag >= TAG_HC1 && tag <= TAG_HC4) {
             Command::add(device_type_, name[0], f, name[1], FLAG_HC);
+        } else if (tag >= TAG_WWC1 && tag <= TAG_WWC4) {
+            Command::add(device_type_, name[0], f, name[1], FLAG_WWC);
+        } else if (tag == TAG_DEVICE_DATA_WW) {
+            Command::add(device_type_, name[0], f, name[1], FLAG_WW);
         } else {
             Command::add(device_type_, name[0], f, name[1], 0);
         }
@@ -687,7 +691,11 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
             json["name"] = dv.short_name;
             if (dv.full_name != nullptr) {
-                json["fullname"] = dv.full_name;
+                if (dv.tag == TAG_DEVICE_DATA_WW) {
+                    json["fullname"] = tag_to_string(dv.tag) + " " + uuid::read_flash_string(dv.full_name);
+                } else {
+                    json["fullname"] = dv.full_name;
+                }
             }
             if (!tag_to_mqtt(dv.tag).empty()) {
                 json["circuit"] = tag_to_mqtt(dv.tag);

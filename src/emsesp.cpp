@@ -1008,7 +1008,7 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t i
         tag = DeviceValueTAG::TAG_HC1 + id - 1;
     } else if (id >= 9 && id <= 10) {
         tag = DeviceValueTAG::TAG_WWC1 + id - 9;
-    } else if (id == -1) {
+    } else if (id == -1 || id == 0) {
         tag = DeviceValueTAG::TAG_NONE;
     } else {
         return false;
@@ -1017,7 +1017,7 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t i
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)
             && ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat()))) {
-            has_value |= emsdevice->generate_values_json(json, tag, (id == -1), verbose); // nested for id -1,0 & console for id -1
+            has_value |= emsdevice->generate_values_json(json, tag, (id < 1), verbose && (id == -1)); // nested for id -1,0 & console for id -1
         }
     }
 

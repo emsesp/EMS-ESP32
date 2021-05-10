@@ -94,7 +94,7 @@ enum DeviceValueTAG : uint8_t {
 };
 
 // mqtt flags for command subscriptions
-enum MqttSubFlag : uint8_t { FLAG_NORMAL = 0, FLAG_HC, FLAG_WWC, FLAG_NOSUB };
+enum MqttSubFlag : uint8_t { FLAG_NORMAL = 0, FLAG_HC, FLAG_WWC, FLAG_WW, FLAG_NOSUB };
 
 // mqtt-HA flags
 enum DeviceValueHA : uint8_t { HA_NONE = 0, HA_VALUE, HA_DONE };
