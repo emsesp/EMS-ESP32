@@ -71,6 +71,7 @@ enum DeviceValueUOM : uint8_t {
     UA,
     BAR,
     KW,
+    W,
     KB,
     SECONDS,
     PUMP // special, do not remove

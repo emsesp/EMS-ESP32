@@ -456,11 +456,13 @@ void EMSESP::publish_device_values(uint8_t device_type) {
 
             // if its a boiler, generate json for each group and publish it directly
             if (device_type == DeviceType::BOILER) {
-                emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA, false);
-                Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_BOILER_DATA), json);
-                json.clear();
-                emsdevice->generate_values_json(json, DeviceValueTAG::TAG_DEVICE_DATA_WW, false);
-                Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_DEVICE_DATA_WW), json);
+                if (emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA, false)) {
+                    Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_BOILER_DATA), json);
+                }
+                doc.clear();
+                if (emsdevice->generate_values_json(json, DeviceValueTAG::TAG_DEVICE_DATA_WW, false)) {
+                    Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_DEVICE_DATA_WW), json);
+                }
                 need_publish = false;
             }
 
@@ -471,14 +473,16 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                     if (nested) {
                         need_publish |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE, true); // nested
                     } else {
-                        emsdevice->generate_values_json(json, DeviceValueTAG::TAG_THERMOSTAT_DATA, false); // not nested
-                        Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE), json);
-                        json.clear();
+                        if (emsdevice->generate_values_json(json, DeviceValueTAG::TAG_THERMOSTAT_DATA, false)) { // not nested
+                            Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE), json);
+                        }
+                        doc.clear();
 
                         for (uint8_t hc_tag = TAG_HC1; hc_tag <= DeviceValueTAG::TAG_HC4; hc_tag++) {
-                            emsdevice->generate_values_json(json, hc_tag, false); // not nested
-                            Mqtt::publish(Mqtt::tag_to_topic(device_type, hc_tag), json);
-                            json.clear();
+                            if (emsdevice->generate_values_json(json, hc_tag, false)) { // not nested
+                                Mqtt::publish(Mqtt::tag_to_topic(device_type, hc_tag), json);
+                            }
+                            doc.clear();
                         }
                         need_publish = false;
                     }
@@ -491,9 +495,10 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                     need_publish |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE, true); // nested
                 } else {
                     for (uint8_t hc_tag = TAG_HC1; hc_tag <= DeviceValueTAG::TAG_WWC4; hc_tag++) {
-                        emsdevice->generate_values_json(json, hc_tag, false); // not nested
-                        Mqtt::publish(Mqtt::tag_to_topic(device_type, hc_tag), json);
-                        json.clear();
+                        if (emsdevice->generate_values_json(json, hc_tag, false)) { // not nested
+                            Mqtt::publish(Mqtt::tag_to_topic(device_type, hc_tag), json);
+                        }
+                        doc.clear();
                     }
                     need_publish = false;
                 }
@@ -1061,6 +1066,8 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // get_uptime is only updated once per loop, does not give the right time
         LOG_TRACE(F("[UART_DEBUG] Echo after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
+        // add to RxQueue for log/watch
+        rxservice_.add(data, length);
         return; // it's an echo
     }
 
@@ -1096,7 +1103,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 tx_successful = true;
                 // if telegram is longer read next part with offset + 25 for ems+
                 if (length == 32) {
-                    if (txservice_.read_next_tx() == read_id_) {
+                    if (txservice_.read_next_tx(data[3]) == read_id_) {
                         read_next_ = true;
                     }
                 }

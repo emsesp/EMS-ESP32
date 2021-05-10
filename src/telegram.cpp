@@ -590,9 +590,12 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
     tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram_last_), true, get_post_send_query());
 }
 
-uint16_t TxService::read_next_tx() {
+uint16_t TxService::read_next_tx(uint8_t offset) {
     // add to the top/front of the queue
     uint8_t message_data[1] = {EMS_MAX_TELEGRAM_LENGTH}; // request all data, 32 bytes
+    if (telegram_last_->offset != offset) {
+        return 0;
+    }
     add(Telegram::Operation::TX_READ, telegram_last_->dest, telegram_last_->type_id, telegram_last_->offset + 25, message_data, 1, 0, true);
     return telegram_last_->type_id;
 }
