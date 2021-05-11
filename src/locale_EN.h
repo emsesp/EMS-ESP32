@@ -336,6 +336,7 @@ MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(h
 
 // solar list
 MAKE_PSTR_LIST(enum_solarmode, F_(constant), F("pwm"), F("analog"))
+MAKE_PSTR_LIST(enum_collectortype, F_(blank), F("flat"), F("vacuum"))
 
 /*
  * MQTT topics and full text for values and commands
@@ -583,6 +584,24 @@ MAKE_PSTR_LIST(maxFlow, F("maxflow"), F("maximum solar flow"))
 MAKE_PSTR_LIST(solarPower, F("solarpower"), F("actual solar power"))
 MAKE_PSTR_LIST(solarPumpTurnonDiff, F("turnondiff"), F("pump turn on difference"))
 MAKE_PSTR_LIST(solarPumpTurnoffDiff, F("turnoffdiff"), F("pump turn off difference"))
+
+//SM100
+MAKE_PSTR_LIST(heatTransferSystem, F("heattransfersystem"), F("heattransfer system"))
+MAKE_PSTR_LIST(externalTank, F("externaltank"), F("external tank"))
+MAKE_PSTR_LIST(thermalDisinfect, F("thermaldisinfect"), F("thermal disinfection"))
+MAKE_PSTR_LIST(heatMetering, F("heatmetering"), F("heatmetering"))
+// MAKE_PSTR_LIST(solarIsEnabled, F("solarenabled"), F(""))
+
+        // telegram 0x035A
+MAKE_PSTR_LIST(solarPumpMode, F("solarpumpmode"), F("solar pump mode"))
+MAKE_PSTR_LIST(solarPumpKick, F("pumpkick"), F("pumpkick"))
+MAKE_PSTR_LIST(plainWaterMode, F("plainwatermode"), F("plain water mode"))
+MAKE_PSTR_LIST(doubleMatchFlow, F("doublematchflow"), F("doublematchflow"))
+
+        // telegram 0x380
+MAKE_PSTR_LIST(climateZone, F("climatezone"), F("climate zone"))
+MAKE_PSTR_LIST(collector1Area, F("collector1area"), F("collector 1 area"))
+MAKE_PSTR_LIST(collector1Type, F("collector1type"), F("collector 1 type"))
 
 // switch
 MAKE_PSTR_LIST(activated, F("activated"), F("activated"))
