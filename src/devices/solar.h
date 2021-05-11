@@ -128,6 +128,20 @@ class Solar : public EMSdevice {
     bool set_TurnoffDiff(const char * value, const int8_t id);
 
     bool set_SM10MaxFlow(const char * value, const int8_t id);
+    // SM100
+    bool set_heatTransferSystem(const char * value, const int8_t id);
+    bool set_externalTank(const char * value, const int8_t id);
+    bool set_thermalDisinfect(const char * value, const int8_t id);
+    bool set_heatMetering(const char * value, const int8_t id);
+    bool set_solarEnabled(const char * value, const int8_t id);
+    bool set_solarMode(const char * value, const int8_t id);
+    bool set_solarPumpKick(const char * value, const int8_t id);
+    bool set_plainWaterMode(const char * value, const int8_t id);
+    bool set_doubleMatchFlow(const char * value, const int8_t id);
+    bool set_climateZone(const char * value, const int8_t id);
+    bool set_collector1Area(const char * value, const int8_t id);
+    bool set_collector1Type(const char * value, const int8_t id);
+
 };
 
 } // namespace emsesp
