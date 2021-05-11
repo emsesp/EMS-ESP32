@@ -114,8 +114,14 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, char * c
 
     // scan for prefix hc.
     for (uint8_t i = DeviceValueTAG::TAG_HC1; i <= DeviceValueTAG::TAG_HC4; i++) {
-        if ((strncmp(cmd, EMSdevice::tag_to_string(i).c_str(), 3) == 0) && (strlen(cmd) > 3)) {
-            strcpy(cmd, &cmd[4]);
+        const char * tag = EMSdevice::tag_to_string(i).c_str();
+        uint8_t len = strlen(tag);
+        if (strncmp(cmd, tag, len) == 0) {
+            if (cmd[len] != '\0') {
+                strcpy(cmd, &cmd[len + 1]);
+            } else {
+                strcpy(cmd, &cmd[len]);
+            }
             id = 1 + i - DeviceValueTAG::TAG_HC1;
             break;
         }
@@ -123,8 +129,14 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, char * c
 
     // scan for prefix wwc.
     for (uint8_t i = DeviceValueTAG::TAG_WWC1; i <= DeviceValueTAG::TAG_WWC4; i++) {
-        if ((strncmp(cmd, EMSdevice::tag_to_string(i).c_str(), 4) == 0) && (strlen(cmd) > 4)) {
-            strcpy(cmd, &cmd[5]);
+        const char * tag = EMSdevice::tag_to_string(i).c_str();
+        uint8_t len = strlen(tag);
+        if (strncmp(cmd, tag, len) == 0) {
+            if (cmd[len] != '\0') {
+                strcpy(cmd, &cmd[len + 1]);
+            } else {
+                strcpy(cmd, &cmd[len]);
+            }
             id = 8 + i - DeviceValueTAG::TAG_WWC1;
             break;
         }
