@@ -63,7 +63,6 @@ Authentication SecuritySettingsService::authenticate(const String& username, con
 inline void populateJWTPayload(JsonObject& payload, User* user) {
   payload["username"] = user->username;
   payload["admin"] = user->admin;
-  payload["version"] = EMSESP_APP_VERSION; // proddy added
 }
 
 boolean SecuritySettingsService::validatePayload(JsonObject& parsedPayload, User* user) {

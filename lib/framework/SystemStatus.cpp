@@ -1,14 +1,19 @@
 #include <SystemStatus.h>
 
+#include "../../src/emsesp_stub.hpp" // proddy added
+
 using namespace std::placeholders; // for `_1` etc
 
 SystemStatus::SystemStatus(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&SystemStatus::systemStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+    server->on(SYSTEM_STATUS_SERVICE_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest(std::bind(&SystemStatus::systemStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_ESP_STATUS_SIZE);
     JsonObject          root     = response->getRoot();
+    root["emsesp_version"]       = EMSESP_APP_VERSION;
     root["esp_platform"]         = "ESP32";
     root["max_alloc_heap"]       = ESP.getMaxAllocHeap();
     root["psram_size"]           = ESP.getPsramSize();
