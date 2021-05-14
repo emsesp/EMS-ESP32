@@ -1,6 +1,11 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 
-import { restController, RestControllerProps, RestFormLoader, SectionContent } from '../components';
+import {
+  restController,
+  RestControllerProps,
+  RestFormLoader,
+  SectionContent
+} from '../components';
 import NetworkSettingsForm from './NetworkSettingsForm';
 import { NETWORK_SETTINGS_ENDPOINT } from '../api';
 import { NetworkSettings } from './types';
@@ -8,7 +13,6 @@ import { NetworkSettings } from './types';
 type NetworkSettingsControllerProps = RestControllerProps<NetworkSettings>;
 
 class NetworkSettingsController extends Component<NetworkSettingsControllerProps> {
-
   componentDidMount() {
     this.props.loadData();
   }
@@ -18,12 +22,14 @@ class NetworkSettingsController extends Component<NetworkSettingsControllerProps
       <SectionContent title="Network Settings">
         <RestFormLoader
           {...this.props}
-          render={formProps => <NetworkSettingsForm {...formProps} />}
+          render={(formProps) => <NetworkSettingsForm {...formProps} />}
         />
       </SectionContent>
     );
   }
-
 }
 
-export default restController(NETWORK_SETTINGS_ENDPOINT, NetworkSettingsController);
+export default restController(
+  NETWORK_SETTINGS_ENDPOINT,
+  NetworkSettingsController
+);

@@ -19,9 +19,9 @@ import Mqtt from './mqtt/Mqtt';
 import { withFeatures, WithFeaturesProps } from './features/FeaturesContext';
 import { Features } from './features/types';
 
-export const getDefaultRoute = (features: Features) => features.project ? `/${PROJECT_PATH}/` : "/network/";
+export const getDefaultRoute = (features: Features) =>
+  features.project ? `/${PROJECT_PATH}/` : '/network/';
 class AppRouting extends Component<WithFeaturesProps> {
-
   componentDidMount() {
     Authentication.clearLoginRedirect();
   }
@@ -35,9 +35,17 @@ class AppRouting extends Component<WithFeaturesProps> {
             <UnauthenticatedRoute exact path="/" component={SignIn} />
           )}
           {features.project && (
-            <AuthenticatedRoute exact path={`/${PROJECT_PATH}/*`} component={ProjectRouting} />
+            <AuthenticatedRoute
+              exact
+              path={`/${PROJECT_PATH}/*`}
+              component={ProjectRouting}
+            />
           )}
-          <AuthenticatedRoute exact path="/network/*" component={NetworkConnection} />
+          <AuthenticatedRoute
+            exact
+            path="/network/*"
+            component={NetworkConnection}
+          />
           <AuthenticatedRoute exact path="/ap/*" component={AccessPoint} />
           {features.ntp && (
             <AuthenticatedRoute exact path="/ntp/*" component={NetworkTime} />
@@ -52,7 +60,7 @@ class AppRouting extends Component<WithFeaturesProps> {
           <Redirect to={getDefaultRoute(features)} />
         </Switch>
       </AuthenticationWrapper>
-    )
+    );
   }
 }
 

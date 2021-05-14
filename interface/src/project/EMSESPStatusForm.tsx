@@ -1,6 +1,6 @@
-import React, { Component, Fragment } from "react";
+import React, { Component, Fragment } from 'react';
 
-import { WithTheme, withTheme } from "@material-ui/core/styles";
+import { WithTheme, withTheme } from '@material-ui/core/styles';
 import {
   TableContainer,
   Table,
@@ -13,35 +13,32 @@ import {
   ListItemText,
   withWidth,
   WithWidthProps,
-  isWidthDown,
-} from "@material-ui/core";
+  isWidthDown
+} from '@material-ui/core';
 
-import RefreshIcon from "@material-ui/icons/Refresh";
-import DeviceHubIcon from "@material-ui/icons/DeviceHub";
+import RefreshIcon from '@material-ui/icons/Refresh';
+import DeviceHubIcon from '@material-ui/icons/DeviceHub';
 
 import {
   RestFormProps,
   FormActions,
   FormButton,
-  HighlightAvatar,
-} from "../components";
+  HighlightAvatar
+} from '../components';
 
-import {
-  busStatus,
-  busStatusHighlight,
-  isConnected,
-} from "./EMSESPStatus";
+import { busStatus, busStatusHighlight, isConnected } from './EMSESPStatus';
 
-import { EMSESPStatus } from "./EMSESPtypes";
+import { EMSESPStatus } from './EMSESPtypes';
 
 function formatNumber(num: number) {
   return new Intl.NumberFormat().format(num);
 }
 
-type EMSESPStatusFormProps = RestFormProps<EMSESPStatus> & WithTheme & WithWidthProps;
+type EMSESPStatusFormProps = RestFormProps<EMSESPStatus> &
+  WithTheme &
+  WithWidthProps;
 
 class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
-
   createListItems() {
     const { data, theme, width } = this.props;
     return (
@@ -52,24 +49,30 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
               <DeviceHubIcon />
             </HighlightAvatar>
           </ListItemAvatar>
-          <ListItemText primary="Connection Status" secondary={busStatus(data)} />
+          <ListItemText
+            primary="Connection Status"
+            secondary={busStatus(data)}
+          />
         </ListItem>
         {isConnected(data) && (
           <TableContainer>
-            <Table size="small" padding={isWidthDown('xs', width!) ? "none" : "default"}>
+            <Table
+              size="small"
+              padding={isWidthDown('xs', width!) ? 'none' : 'default'}
+            >
               <TableBody>
                 <TableRow>
-                  <TableCell>
-                    # Telegrams Received
-                  </TableCell>
-                  <TableCell align="right">{formatNumber(data.rx_received)}&nbsp;(quality {data.rx_quality}%)
+                  <TableCell># Telegrams Received</TableCell>
+                  <TableCell align="right">
+                    {formatNumber(data.rx_received)}&nbsp;(quality{' '}
+                    {data.rx_quality}%)
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell >
-                    # Telegrams Sent
-                  </TableCell >
-                  <TableCell align="right">{formatNumber(data.tx_sent)}&nbsp;(quality {data.tx_quality}%)
+                  <TableCell># Telegrams Sent</TableCell>
+                  <TableCell align="right">
+                    {formatNumber(data.tx_sent)}&nbsp;(quality {data.tx_quality}
+                    %)
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -86,7 +89,11 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
         <List>{this.createListItems()}</List>
         <FormActions>
           <FormButton
-            startIcon={<RefreshIcon />} variant="contained" color="secondary" onClick={this.props.loadData}>
+            startIcon={<RefreshIcon />}
+            variant="contained"
+            color="secondary"
+            onClick={this.props.loadData}
+          >
             Refresh
           </FormButton>
         </FormActions>

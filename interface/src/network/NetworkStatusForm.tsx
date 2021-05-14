@@ -1,46 +1,46 @@
-import React, { Component, Fragment } from "react";
+import { Component, Fragment } from 'react';
 
-import { WithTheme, withTheme } from "@material-ui/core/styles";
+import { WithTheme, withTheme } from '@material-ui/core/styles';
 import {
   Avatar,
   Divider,
   List,
   ListItem,
   ListItemAvatar,
-  ListItemText,
-} from "@material-ui/core";
+  ListItemText
+} from '@material-ui/core';
 
-import DNSIcon from "@material-ui/icons/Dns";
-import WifiIcon from "@material-ui/icons/Wifi";
-import RouterIcon from "@material-ui/icons/Router";
-import SettingsInputComponentIcon from "@material-ui/icons/SettingsInputComponent";
-import SettingsInputAntennaIcon from "@material-ui/icons/SettingsInputAntenna";
-import DeviceHubIcon from "@material-ui/icons/DeviceHub";
-import RefreshIcon from "@material-ui/icons/Refresh";
+import DNSIcon from '@material-ui/icons/Dns';
+import WifiIcon from '@material-ui/icons/Wifi';
+import RouterIcon from '@material-ui/icons/Router';
+import SettingsInputComponentIcon from '@material-ui/icons/SettingsInputComponent';
+import SettingsInputAntennaIcon from '@material-ui/icons/SettingsInputAntenna';
+import DeviceHubIcon from '@material-ui/icons/DeviceHub';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 import {
   RestFormProps,
   FormActions,
   FormButton,
-  HighlightAvatar,
-} from "../components";
+  HighlightAvatar
+} from '../components';
 import {
   networkStatus,
   networkStatusHighlight,
   isConnected,
   isWiFi,
-  isEthernet,
-} from "./NetworkStatus";
-import { NetworkStatus } from "./types";
+  isEthernet
+} from './NetworkStatus';
+import { NetworkStatus } from './types';
 
 type NetworkStatusFormProps = RestFormProps<NetworkStatus> & WithTheme;
 
 class NetworkStatusForm extends Component<NetworkStatusFormProps> {
   dnsServers(status: NetworkStatus) {
     if (!status.dns_ip_1) {
-      return "none";
+      return 'none';
     }
-    return status.dns_ip_1 + (status.dns_ip_2 ? "," + status.dns_ip_2 : "");
+    return status.dns_ip_1 + (status.dns_ip_2 ? ',' + status.dns_ip_2 : '');
   }
 
   createListItems() {
@@ -110,7 +110,7 @@ class NetworkStatusForm extends Component<NetworkStatusFormProps> {
               </ListItemAvatar>
               <ListItemText
                 primary="Gateway IP"
-                secondary={data.gateway_ip || "none"}
+                secondary={data.gateway_ip || 'none'}
               />
             </ListItem>
             <Divider variant="inset" component="li" />

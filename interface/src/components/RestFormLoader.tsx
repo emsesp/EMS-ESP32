@@ -8,20 +8,23 @@ import { RestControllerProps } from '.';
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     loadingSettings: {
-      margin: theme.spacing(0.5),
+      margin: theme.spacing(0.5)
     },
     loadingSettingsDetails: {
       margin: theme.spacing(4),
-      textAlign: "center"
+      textAlign: 'center'
     },
     button: {
       marginRight: theme.spacing(2),
-      marginTop: theme.spacing(2),
+      marginTop: theme.spacing(2)
     }
   })
 );
 
-export type RestFormProps<D> = Omit<RestControllerProps<D>, "loading" | "errorMessage"> & { data: D };
+export type RestFormProps<D> = Omit<
+  RestControllerProps<D>,
+  'loading' | 'errorMessage'
+> & { data: D };
 
 interface RestFormLoaderProps<D> extends RestControllerProps<D> {
   render: (props: RestFormProps<D>) => JSX.Element;
@@ -46,7 +49,12 @@ export default function RestFormLoader<D>(props: RestFormLoaderProps<D>) {
         <Typography variant="h6" className={classes.loadingSettingsDetails}>
           {errorMessage}
         </Typography>
-        <Button variant="contained" color="secondary" className={classes.button} onClick={loadData}>
+        <Button
+          variant="contained"
+          color="secondary"
+          className={classes.button}
+          onClick={loadData}
+        >
           Retry
         </Button>
       </div>

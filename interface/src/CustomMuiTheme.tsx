@@ -1,17 +1,21 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 
 import { CssBaseline } from '@material-ui/core';
-import { MuiThemeProvider, createMuiTheme, StylesProvider } from '@material-ui/core/styles';
+import {
+  MuiThemeProvider,
+  createMuiTheme,
+  StylesProvider
+} from '@material-ui/core/styles';
 import { blueGrey, orange, red, green } from '@material-ui/core/colors';
 
 const theme = createMuiTheme({
   palette: {
-    type: "dark",
+    type: 'dark',
     primary: {
-      main: '#33bfff',
+      main: '#33bfff'
     },
     secondary: {
-      main: '#3d5afe',
+      main: '#3d5afe'
     },
     info: {
       main: blueGrey[500]
@@ -29,7 +33,6 @@ const theme = createMuiTheme({
 });
 
 export default class CustomMuiTheme extends Component {
-
   render() {
     return (
       <StylesProvider>
@@ -40,5 +43,4 @@ export default class CustomMuiTheme extends Component {
       </StylesProvider>
     );
   }
-
 }

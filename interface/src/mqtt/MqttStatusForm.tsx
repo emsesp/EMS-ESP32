@@ -1,23 +1,39 @@
-import React, { Component, Fragment } from 'react';
+import { Component, Fragment } from 'react';
 
 import { WithTheme, withTheme } from '@material-ui/core/styles';
-import { Avatar, Divider, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core';
+import {
+  Avatar,
+  Divider,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText
+} from '@material-ui/core';
 
 import DeviceHubIcon from '@material-ui/icons/DeviceHub';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import ReportIcon from '@material-ui/icons/Report';
-import SpeakerNotesOffIcon from "@material-ui/icons/SpeakerNotesOff";
+import SpeakerNotesOffIcon from '@material-ui/icons/SpeakerNotesOff';
 
-import { RestFormProps, FormActions, FormButton, HighlightAvatar } from '../components';
-import { mqttStatusHighlight, mqttStatus, mqttPublishHighlight, disconnectReason } from './MqttStatus';
+import {
+  RestFormProps,
+  FormActions,
+  FormButton,
+  HighlightAvatar
+} from '../components';
+import {
+  mqttStatusHighlight,
+  mqttStatus,
+  mqttPublishHighlight,
+  disconnectReason
+} from './MqttStatus';
 import { MqttStatus } from './types';
 
 type MqttStatusFormProps = RestFormProps<MqttStatus> & WithTheme;
 
 class MqttStatusForm extends Component<MqttStatusFormProps> {
-
   renderConnectionStatus() {
-    const { data, theme } = this.props
+    const { data, theme } = this.props;
     if (data.connected) {
       return (
         <Fragment>
@@ -50,7 +66,10 @@ class MqttStatusForm extends Component<MqttStatusFormProps> {
               <ReportIcon />
             </Avatar>
           </ListItemAvatar>
-          <ListItemText primary="Disconnect Reason" secondary={disconnectReason(data)} />
+          <ListItemText
+            primary="Disconnect Reason"
+            secondary={disconnectReason(data)}
+          />
         </ListItem>
         <Divider variant="inset" component="li" />
       </Fragment>
@@ -58,7 +77,7 @@ class MqttStatusForm extends Component<MqttStatusFormProps> {
   }
 
   createListItems() {
-    const { data, theme } = this.props
+    const { data, theme } = this.props;
     return (
       <Fragment>
         <ListItem>
@@ -78,18 +97,20 @@ class MqttStatusForm extends Component<MqttStatusFormProps> {
   render() {
     return (
       <Fragment>
-        <List>
-          {this.createListItems()}
-        </List>
+        <List>{this.createListItems()}</List>
         <FormActions>
-          <FormButton startIcon={<RefreshIcon />} variant="contained" color="secondary" onClick={this.props.loadData}>
+          <FormButton
+            startIcon={<RefreshIcon />}
+            variant="contained"
+            color="secondary"
+            onClick={this.props.loadData}
+          >
             Refresh
           </FormButton>
         </FormActions>
       </Fragment>
     );
   }
-
 }
 
 export default withTheme(MqttStatusForm);

@@ -1,8 +1,8 @@
 const OR = (
   validator1: (value: any) => boolean,
-  validator2: (value: any) => boolean,
+  validator2: (value: any) => boolean
 ) => {
-  return (value: any) => validator1(value) || validator2(value)
-}
+  return (value: any) => validator1(value) || validator2(value);
+};
 
-export default OR
+export default OR;

@@ -2,14 +2,19 @@ import * as React from 'react';
 import { withSnackbar, WithSnackbarProps } from 'notistack';
 import jwtDecode from 'jwt-decode';
 
-import history from '../history'
+import history from '../history';
 import { VERIFY_AUTHORIZATION_ENDPOINT } from '../api';
 import { ACCESS_TOKEN, authorizedFetch, getStorage } from './Authentication';
-import { AuthenticationContext, AuthenticationContextValue, Me } from './AuthenticationContext';
+import {
+  AuthenticationContext,
+  AuthenticationContextValue,
+  Me
+} from './AuthenticationContext';
 import FullScreenLoading from '../components/FullScreenLoading';
 import { withFeatures, WithFeaturesProps } from '../features/FeaturesContext';
 
-export const decodeMeJWT = (accessToken: string): Me => jwtDecode(accessToken) as Me;
+export const decodeMeJWT = (accessToken: string): Me =>
+  jwtDecode(accessToken) as Me;
 
 interface AuthenticationWrapperState {
   context: AuthenticationContextValue;
@@ -18,15 +23,17 @@ interface AuthenticationWrapperState {
 
 type AuthenticationWrapperProps = WithSnackbarProps & WithFeaturesProps;
 
-class AuthenticationWrapper extends React.Component<AuthenticationWrapperProps, AuthenticationWrapperState> {
-
+class AuthenticationWrapper extends React.Component<
+  AuthenticationWrapperProps,
+  AuthenticationWrapperState
+> {
   constructor(props: AuthenticationWrapperProps) {
     super(props);
     this.state = {
       context: {
         refresh: this.refresh,
         signIn: this.signIn,
-        signOut: this.signOut,
+        signOut: this.signOut
       },
       initialized: false
     };
@@ -39,7 +46,9 @@ class AuthenticationWrapper extends React.Component<AuthenticationWrapperProps, 
   render() {
     return (
       <React.Fragment>
-        {this.state.initialized ? this.renderContent() : this.renderContentLoading()}
+        {this.state.initialized
+          ? this.renderContent()
+          : this.renderContentLoading()}
       </React.Fragment>
     );
   }
@@ -53,9 +62,7 @@ class AuthenticationWrapper extends React.Component<AuthenticationWrapperProps, 
   }
 
   renderContentLoading() {
-    return (
-      <FullScreenLoading />
-    );
+    return <FullScreenLoading />;
   }
 
   refresh = () => {
@@ -64,34 +71,53 @@ class AuthenticationWrapper extends React.Component<AuthenticationWrapperProps, 
     //   this.setState({ initialized: true, context: { ...this.state.context, me: { admin: true, username: "admin" } } });
     //   return;
     // }
-    const accessToken = getStorage().getItem(ACCESS_TOKEN)
+    const accessToken = getStorage().getItem(ACCESS_TOKEN);
     if (accessToken) {
       authorizedFetch(VERIFY_AUTHORIZATION_ENDPOINT)
-        .then(response => {
-          const me = response.status === 200 ? decodeMeJWT(accessToken) : undefined;
-          this.setState({ initialized: true, context: { ...this.state.context, me } });
-        }).catch(error => {
-          this.setState({ initialized: true, context: { ...this.state.context, me: undefined } });
-          this.props.enqueueSnackbar("Error verifying authorization: " + error.message, {
-            variant: 'error',
+        .then((response) => {
+          const me =
+            response.status === 200 ? decodeMeJWT(accessToken) : undefined;
+          this.setState({
+            initialized: true,
+            context: { ...this.state.context, me }
           });
+        })
+        .catch((error) => {
+          this.setState({
+            initialized: true,
+            context: { ...this.state.context, me: undefined }
+          });
+          this.props.enqueueSnackbar(
+            'Error verifying authorization: ' + error.message,
+            {
+              variant: 'error'
+            }
+          );
         });
     } else {
-      this.setState({ initialized: true, context: { ...this.state.context, me: undefined } });
+      this.setState({
+        initialized: true,
+        context: { ...this.state.context, me: undefined }
+      });
     }
-  }
+  };
 
   signIn = (accessToken: string) => {
     try {
       getStorage().setItem(ACCESS_TOKEN, accessToken);
       const me: Me = decodeMeJWT(accessToken);
       this.setState({ context: { ...this.state.context, me } });
-      this.props.enqueueSnackbar(`Logged in as ${me.username}`, { variant: 'success' });
+      this.props.enqueueSnackbar(`Logged in as ${me.username}`, {
+        variant: 'success'
+      });
     } catch (err) {
-      this.setState({ initialized: true, context: { ...this.state.context, me: undefined } });
-      throw new Error("Failed to parse JWT " + err.message);
+      this.setState({
+        initialized: true,
+        context: { ...this.state.context, me: undefined }
+      });
+      throw new Error('Failed to parse JWT ' + err.message);
     }
-  }
+  };
 
   signOut = () => {
     getStorage().removeItem(ACCESS_TOKEN);
@@ -101,10 +127,9 @@ class AuthenticationWrapper extends React.Component<AuthenticationWrapperProps, 
         me: undefined
       }
     });
-    this.props.enqueueSnackbar("You have signed out", { variant: 'success', });
+    this.props.enqueueSnackbar('You have signed out', { variant: 'success' });
     history.push('/');
-  }
-
+  };
 }
 
-export default withFeatures(withSnackbar(AuthenticationWrapper))
+export default withFeatures(withSnackbar(AuthenticationWrapper));

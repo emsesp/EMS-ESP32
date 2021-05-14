@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { Redirect, Switch, RouteComponentProps } from 'react-router-dom'
+import { Component } from 'react';
+import { Redirect, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { Tabs, Tab } from '@material-ui/core';
 
@@ -10,26 +10,31 @@ import { AuthenticatedRoute } from '../authentication';
 import EMSESPSettingsController from './EMSESPSettingsController';
 
 class EMSESP extends Component<RouteComponentProps> {
-
-  handleTabChange = (event: React.ChangeEvent<{}>, path: string) => {
+  handleTabChange = (path: string) => {
     this.props.history.push(path);
   };
 
   render() {
     return (
       <MenuAppBar sectionTitle="Settings">
-        <Tabs value={this.props.match.url} onChange={this.handleTabChange} variant="fullWidth">
+        <Tabs
+          value={this.props.match.url}
+          onChange={(e, path) => this.handleTabChange(path)}
+          variant="fullWidth"
+        >
           <Tab value={`/${PROJECT_PATH}/settings`} label="EMS-ESP Settings" />
         </Tabs>
         <Switch>
-          <AuthenticatedRoute exact path={`/${PROJECT_PATH}/settings`} component={EMSESPSettingsController} />
+          <AuthenticatedRoute
+            exact
+            path={`/${PROJECT_PATH}/settings`}
+            component={EMSESPSettingsController}
+          />
           <Redirect to={`/${PROJECT_PATH}/settings`} />
         </Switch>
       </MenuAppBar>
-
-    )
+    );
   }
-
 }
 
 export default EMSESP;

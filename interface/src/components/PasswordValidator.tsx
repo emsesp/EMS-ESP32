@@ -1,5 +1,8 @@
 import React from 'react';
-import { TextValidator, ValidatorComponentProps } from 'react-material-ui-form-validator';
+import {
+  TextValidator,
+  ValidatorComponentProps
+} from 'react-material-ui-form-validator';
 
 import { withStyles, WithStyles, createStyles } from '@material-ui/core/styles';
 import { InputAdornment, IconButton } from '@material-ui/core';
@@ -7,20 +10,23 @@ import { Visibility, VisibilityOff } from '@material-ui/icons';
 
 const styles = createStyles({
   input: {
-    "&::-ms-reveal": {
-      display: "none"
+    '&::-ms-reveal': {
+      display: 'none'
     }
   }
 });
 
-type PasswordValidatorProps = WithStyles<typeof styles> & Exclude<ValidatorComponentProps, "type" | "InputProps">;
+type PasswordValidatorProps = WithStyles<typeof styles> &
+  Exclude<ValidatorComponentProps, 'type' | 'InputProps'>;
 
 interface PasswordValidatorState {
   showPassword: boolean;
 }
 
-class PasswordValidator extends React.Component<PasswordValidatorProps, PasswordValidatorState> {
-
+class PasswordValidator extends React.Component<
+  PasswordValidatorProps,
+  PasswordValidatorState
+> {
   state = {
     showPassword: false
   };
@@ -29,7 +35,7 @@ class PasswordValidator extends React.Component<PasswordValidatorProps, Password
     this.setState({
       showPassword: !this.state.showPassword
     });
-  }
+  };
 
   render() {
     const { classes, ...rest } = this.props;
@@ -39,7 +45,7 @@ class PasswordValidator extends React.Component<PasswordValidatorProps, Password
         type={this.state.showPassword ? 'text' : 'password'}
         InputProps={{
           classes,
-          endAdornment:
+          endAdornment: (
             <InputAdornment position="end">
               <IconButton
                 aria-label="Toggle password visibility"
@@ -48,11 +54,11 @@ class PasswordValidator extends React.Component<PasswordValidatorProps, Password
                 {this.state.showPassword ? <Visibility /> : <VisibilityOff />}
               </IconButton>
             </InputAdornment>
+          )
         }}
       />
     );
   }
-
 }
 
 export default withStyles(styles)(PasswordValidator);

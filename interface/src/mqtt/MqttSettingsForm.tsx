@@ -1,31 +1,31 @@
-import React from "react";
+import React from 'react';
 import {
   TextValidator,
   ValidatorForm,
-  SelectValidator,
-} from "react-material-ui-form-validator";
+  SelectValidator
+} from 'react-material-ui-form-validator';
 
-import { Checkbox, TextField, Typography } from "@material-ui/core";
-import SaveIcon from "@material-ui/icons/Save";
-import MenuItem from "@material-ui/core/MenuItem";
+import { Checkbox, TextField, Typography } from '@material-ui/core';
+import SaveIcon from '@material-ui/icons/Save';
+import MenuItem from '@material-ui/core/MenuItem';
 
 import {
   RestFormProps,
   FormActions,
   FormButton,
   BlockFormControlLabel,
-  PasswordValidator,
-} from "../components";
-import { isIP, isHostname, or, isPath } from "../validators";
+  PasswordValidator
+} from '../components';
+import { isIP, isHostname, or, isPath } from '../validators';
 
-import { MqttSettings } from "./types";
+import { MqttSettings } from './types';
 
 type MqttSettingsFormProps = RestFormProps<MqttSettings>;
 
 class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
   componentDidMount() {
-    ValidatorForm.addValidationRule("isIPOrHostname", or(isIP, isHostname));
-    ValidatorForm.addValidationRule("isPath", isPath);
+    ValidatorForm.addValidationRule('isIPOrHostname', or(isIP, isHostname));
+    ValidatorForm.addValidationRule('isPath', isPath);
   }
 
   render() {
@@ -36,38 +36,38 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           control={
             <Checkbox
               checked={data.enabled}
-              onChange={handleValueChange("enabled")}
+              onChange={handleValueChange('enabled')}
               value="enabled"
             />
           }
           label="Enable MQTT"
         />
         <TextValidator
-          validators={["required", "isIPOrHostname"]}
+          validators={['required', 'isIPOrHostname']}
           errorMessages={[
-            "Host is required",
-            "Not a valid IP address or hostname",
+            'Host is required',
+            'Not a valid IP address or hostname'
           ]}
           name="host"
           label="Host"
           fullWidth
           variant="outlined"
           value={data.host}
-          onChange={handleValueChange("host")}
+          onChange={handleValueChange('host')}
           margin="normal"
         />
         <TextValidator
           validators={[
-            "required",
-            "isNumber",
-            "minNumber:0",
-            "maxNumber:65535",
+            'required',
+            'isNumber',
+            'minNumber:0',
+            'maxNumber:65535'
           ]}
           errorMessages={[
-            "Port is required",
-            "Must be a number",
-            "Must be greater than 0 ",
-            "Max value is 65535",
+            'Port is required',
+            'Must be a number',
+            'Must be greater than 0 ',
+            'Max value is 65535'
           ]}
           name="port"
           label="Port"
@@ -75,18 +75,18 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           variant="outlined"
           value={data.port}
           type="number"
-          onChange={handleValueChange("port")}
+          onChange={handleValueChange('port')}
           margin="normal"
         />
         <TextValidator
-          validators={["required", "isPath"]}
-          errorMessages={["Base is required", "Not a valid Path"]}
+          validators={['required', 'isPath']}
+          errorMessages={['Base is required', 'Not a valid Path']}
           name="base"
           label="Base"
           fullWidth
           variant="outlined"
           value={data.base}
-          onChange={handleValueChange("base")}
+          onChange={handleValueChange('base')}
           margin="normal"
         />
         <TextField
@@ -95,7 +95,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           fullWidth
           variant="outlined"
           value={data.username}
-          onChange={handleValueChange("username")}
+          onChange={handleValueChange('username')}
           margin="normal"
         />
         <PasswordValidator
@@ -104,7 +104,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           fullWidth
           variant="outlined"
           value={data.password}
-          onChange={handleValueChange("password")}
+          onChange={handleValueChange('password')}
           margin="normal"
         />
         <TextField
@@ -113,21 +113,21 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           fullWidth
           variant="outlined"
           value={data.client_id}
-          onChange={handleValueChange("client_id")}
+          onChange={handleValueChange('client_id')}
           margin="normal"
         />
         <TextValidator
           validators={[
-            "required",
-            "isNumber",
-            "minNumber:1",
-            "maxNumber:65535",
+            'required',
+            'isNumber',
+            'minNumber:1',
+            'maxNumber:65535'
           ]}
           errorMessages={[
-            "Keep alive is required",
-            "Must be a number",
-            "Must be greater than 0",
-            "Max value is 65535",
+            'Keep alive is required',
+            'Must be a number',
+            'Must be greater than 0',
+            'Max value is 65535'
           ]}
           name="keep_alive"
           label="Keep Alive (seconds)"
@@ -135,7 +135,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           variant="outlined"
           value={data.keep_alive}
           type="number"
-          onChange={handleValueChange("keep_alive")}
+          onChange={handleValueChange('keep_alive')}
           margin="normal"
         />
         <SelectValidator
@@ -144,7 +144,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           value={data.mqtt_qos}
           fullWidth
           variant="outlined"
-          onChange={handleValueChange("mqtt_qos")}
+          onChange={handleValueChange('mqtt_qos')}
           margin="normal"
         >
           <MenuItem value={0}>0 (default)</MenuItem>
@@ -155,7 +155,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           control={
             <Checkbox
               checked={data.clean_session}
-              onChange={handleValueChange("clean_session")}
+              onChange={handleValueChange('clean_session')}
               value="clean_session"
             />
           }
@@ -165,7 +165,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           control={
             <Checkbox
               checked={data.mqtt_retain}
-              onChange={handleValueChange("mqtt_retain")}
+              onChange={handleValueChange('mqtt_retain')}
               value="mqtt_retain"
             />
           }
@@ -181,7 +181,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           value={data.nested_format}
           fullWidth
           variant="outlined"
-          onChange={handleValueChange("nested_format")}
+          onChange={handleValueChange('nested_format')}
           margin="normal"
         >
           <MenuItem value={1}>nested on a single topic</MenuItem>
@@ -193,7 +193,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           value={data.dallas_format}
           fullWidth
           variant="outlined"
-          onChange={handleValueChange("dallas_format")}
+          onChange={handleValueChange('dallas_format')}
           margin="normal"
         >
           <MenuItem value={1}>by Sensor ID</MenuItem>
@@ -205,7 +205,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           value={data.bool_format}
           fullWidth
           variant="outlined"
-          onChange={handleValueChange("bool_format")}
+          onChange={handleValueChange('bool_format')}
           margin="normal"
         >
           <MenuItem value={1}>"on"/"off"</MenuItem>
@@ -219,7 +219,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           value={data.subscribe_format}
           fullWidth
           variant="outlined"
-          onChange={handleValueChange("subscribe_format")}
+          onChange={handleValueChange('subscribe_format')}
           margin="normal"
         >
           <MenuItem value={0}>general device topic</MenuItem>
@@ -230,7 +230,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           control={
             <Checkbox
               checked={data.ha_enabled}
-              onChange={handleValueChange("ha_enabled")}
+              onChange={handleValueChange('ha_enabled')}
               value="ha_enabled"
             />
           }
@@ -243,7 +243,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
             value={data.ha_climate_format}
             fullWidth
             variant="outlined"
-            onChange={handleValueChange("ha_climate_format")}
+            onChange={handleValueChange('ha_climate_format')}
             margin="normal"
           >
             <MenuItem value={1}>use Current temperature (default)</MenuItem>
@@ -257,16 +257,16 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
         </Typography>
         <TextValidator
           validators={[
-            "required",
-            "isNumber",
-            "minNumber:0",
-            "maxNumber:65535",
+            'required',
+            'isNumber',
+            'minNumber:0',
+            'maxNumber:65535'
           ]}
           errorMessages={[
-            "Publish time is required",
-            "Must be a number",
-            "Must be 0 or greater",
-            "Max value is 65535",
+            'Publish time is required',
+            'Must be a number',
+            'Must be 0 or greater',
+            'Max value is 65535'
           ]}
           name="publish_time_boiler"
           label="Boiler Publish Interval (seconds, 0=on change)"
@@ -274,21 +274,21 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           variant="outlined"
           value={data.publish_time_boiler}
           type="number"
-          onChange={handleValueChange("publish_time_boiler")}
+          onChange={handleValueChange('publish_time_boiler')}
           margin="normal"
         />
         <TextValidator
           validators={[
-            "required",
-            "isNumber",
-            "minNumber:0",
-            "maxNumber:65535",
+            'required',
+            'isNumber',
+            'minNumber:0',
+            'maxNumber:65535'
           ]}
           errorMessages={[
-            "Publish time is required",
-            "Must be a number",
-            "Must be 0 or greater",
-            "Max value is 65535",
+            'Publish time is required',
+            'Must be a number',
+            'Must be 0 or greater',
+            'Max value is 65535'
           ]}
           name="publish_time_thermostat"
           label="Thermostat Publish Interval (seconds, 0=on change)"
@@ -296,21 +296,21 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           variant="outlined"
           value={data.publish_time_thermostat}
           type="number"
-          onChange={handleValueChange("publish_time_thermostat")}
+          onChange={handleValueChange('publish_time_thermostat')}
           margin="normal"
         />
         <TextValidator
           validators={[
-            "required",
-            "isNumber",
-            "minNumber:0",
-            "maxNumber:65535",
+            'required',
+            'isNumber',
+            'minNumber:0',
+            'maxNumber:65535'
           ]}
           errorMessages={[
-            "Publish time is required",
-            "Must be a number",
-            "Must be 0 or greater",
-            "Max value is 65535",
+            'Publish time is required',
+            'Must be a number',
+            'Must be 0 or greater',
+            'Max value is 65535'
           ]}
           name="publish_time_solar"
           label="Solar Publish Interval (seconds, 0=on change)"
@@ -318,21 +318,21 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           variant="outlined"
           value={data.publish_time_solar}
           type="number"
-          onChange={handleValueChange("publish_time_solar")}
+          onChange={handleValueChange('publish_time_solar')}
           margin="normal"
         />
         <TextValidator
           validators={[
-            "required",
-            "isNumber",
-            "minNumber:0",
-            "maxNumber:65535",
+            'required',
+            'isNumber',
+            'minNumber:0',
+            'maxNumber:65535'
           ]}
           errorMessages={[
-            "Publish time is required",
-            "Must be a number",
-            "Must be 0 or greater",
-            "Max value is 65535",
+            'Publish time is required',
+            'Must be a number',
+            'Must be 0 or greater',
+            'Max value is 65535'
           ]}
           name="publish_time_mixer"
           label="Mixer Publish Interval (seconds, 0=on change)"
@@ -340,21 +340,21 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           variant="outlined"
           value={data.publish_time_mixer}
           type="number"
-          onChange={handleValueChange("publish_time_mixer")}
+          onChange={handleValueChange('publish_time_mixer')}
           margin="normal"
         />
         <TextValidator
           validators={[
-            "required",
-            "isNumber",
-            "minNumber:0",
-            "maxNumber:65535",
+            'required',
+            'isNumber',
+            'minNumber:0',
+            'maxNumber:65535'
           ]}
           errorMessages={[
-            "Publish time is required",
-            "Must be a number",
-            "Must be 0 or greater",
-            "Max value is 65535",
+            'Publish time is required',
+            'Must be a number',
+            'Must be 0 or greater',
+            'Max value is 65535'
           ]}
           name="publish_time_sensor"
           label="Sensors Publish Interval (seconds, 0=on change)"
@@ -362,21 +362,21 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           variant="outlined"
           value={data.publish_time_sensor}
           type="number"
-          onChange={handleValueChange("publish_time_sensor")}
+          onChange={handleValueChange('publish_time_sensor')}
           margin="normal"
         />
         <TextValidator
           validators={[
-            "required",
-            "isNumber",
-            "minNumber:0",
-            "maxNumber:65535",
+            'required',
+            'isNumber',
+            'minNumber:0',
+            'maxNumber:65535'
           ]}
           errorMessages={[
-            "Publish time is required",
-            "Must be a number",
-            "Must be 0 or greater",
-            "Max value is 65535",
+            'Publish time is required',
+            'Must be a number',
+            'Must be 0 or greater',
+            'Max value is 65535'
           ]}
           name="publish_time_other"
           label="All other Modules Publish Interval (seconds, 0=on change)"
@@ -384,7 +384,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           variant="outlined"
           value={data.publish_time_other}
           type="number"
-          onChange={handleValueChange("publish_time_other")}
+          onChange={handleValueChange('publish_time_other')}
           margin="normal"
         />
         <FormActions>

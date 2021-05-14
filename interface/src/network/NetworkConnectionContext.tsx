@@ -7,7 +7,7 @@ export interface NetworkConnectionContextValue {
   deselectNetwork: () => void;
 }
 
-const NetworkConnectionContextDefaultValue = {} as NetworkConnectionContextValue
+const NetworkConnectionContextDefaultValue = {} as NetworkConnectionContextValue;
 export const NetworkConnectionContext = React.createContext(
   NetworkConnectionContextDefaultValue
 );
