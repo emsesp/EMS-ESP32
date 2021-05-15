@@ -656,7 +656,11 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
 
                 // add the name of the Command function if it exists
                 if (dv.has_cmd) {
-                    data.add(dv.short_name);
+                    if (dv.tag >= DeviceValueTAG::TAG_HC1) {
+                        data.add(tag_to_string(dv.tag) + "/" + uuid::read_flash_string(dv.short_name));
+                    } else {
+                        data.add(dv.short_name);
+                    }
                 } else {
                     data.add("");
                 }
