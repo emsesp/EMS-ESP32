@@ -21,8 +21,6 @@ jobs:
         run: |
           version=`grep -E '^#define EMSESP_APP_VERSION' ./src/version.h | awk -F'"' '{print $2}'`
           echo "::set-output name=version::$version"
-          platform=`grep -E '^#define EMSESP_PLATFORM' ./src/version.h | awk -F'"' '{print $2}'`
-          echo "::set-output name=platform::$platform"
 
       - name: Compile locally
         run: make
@@ -52,7 +50,7 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          title: ${{steps.build_info.outputs.platform}} Development Build v${{steps.build_info.outputs.version}}
+          title: ESP32 Development Build v${{steps.build_info.outputs.version}}
           automatic_release_tag: "latest"
           prerelease: true
           files: |
