@@ -30,18 +30,6 @@
 
 namespace emsesp {
 
-// Home Assistant icons (https://materialdesignicons.com/)
-MAKE_PSTR(icontemperature, "mdi:coolant-temperature")
-MAKE_PSTR(iconpercent, "mdi:percent-outline")
-MAKE_PSTR(iconfire, "mdi:fire")
-MAKE_PSTR(iconfan, "mdi:fan")
-MAKE_PSTR(iconflame, "mdi:flash")
-MAKE_PSTR(iconvalve, "mdi:valve")
-MAKE_PSTR(iconpump, "mdi:pump")
-MAKE_PSTR(iconheatpump, "mdi:water-pump")
-MAKE_PSTR(iconclock, "mdi:clock-outline")
-MAKE_PSTR(iconmemory, "mdi:memory")
-
 enum DeviceValueType : uint8_t {
     BOOL,
     INT,
@@ -74,9 +62,26 @@ enum DeviceValueUOM : uint8_t {
     W,
     KB,
     SECONDS,
-    PUMP // special, do not remove
+    DBM,
+    NUM
 
 };
+
+// Home Assistant icons (https://materialdesignicons.com)
+// the following are used with the UOMs (unit of measurements)
+MAKE_PSTR(icondegrees, "mdi:coolant-temperature") // DeviceValueUOM::DEGREES
+MAKE_PSTR(iconpercent, "mdi:percent-outline")     // DeviceValueUOM::PERCENT
+MAKE_PSTR(icontime, "mdi:clock-outline")          // DeviceValueUOM::SECONDS MINUTES & HOURS
+MAKE_PSTR(iconkb, "mdi:memory")                   // DeviceValueUOM::KB
+MAKE_PSTR(iconlmin, "mdi:water-boiler")           // DeviceValueUOM::LMIN
+MAKE_PSTR(iconkwh, "mdi:transmission-tower")      // DeviceValueUOM::KWH & WH
+MAKE_PSTR(iconua, "mdi:flash-circle")             // DeviceValueUOM::UA
+MAKE_PSTR(iconbar, "mdi:gauge")                   // DeviceValueUOM::BAR
+MAKE_PSTR(iconkw, "mdi:omega")                    // DeviceValueUOM::KW & W
+MAKE_PSTR(icondbm, "mdi:wifi-strength-2")         // DeviceValueUOM::DBM
+MAKE_PSTR(iconnum, "mdi:counter")                 // DeviceValueUOM::NUM
+
+MAKE_PSTR(icondevice, "mdi:home-automation") // for devices in HA
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 enum DeviceValueTAG : uint8_t {
