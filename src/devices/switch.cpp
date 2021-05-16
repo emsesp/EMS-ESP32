@@ -56,7 +56,10 @@ bool Switch::publish_ha_config() {
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
     doc["stat_t"] = stat_t;
 
-    doc["name"]    = FJSON("ID");
+    char name_s[40];
+    snprintf_P(name_s, sizeof(name_s), PSTR("* %s Product ID"), device_type_name().c_str());
+    doc["name"] = name_s;
+
     doc["val_tpl"] = FJSON("{{value_json.id}}");
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = FJSON("EMS-ESP Switch");

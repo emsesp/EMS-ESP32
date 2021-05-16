@@ -185,13 +185,16 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 // publish HA config
 bool Solar::publish_ha_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
-    doc["name"]    = FJSON("ID");
     doc["uniq_id"] = F_(solar);
     doc["ic"]      = F_(icondevice);
 
     char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
     doc["stat_t"] = stat_t;
+
+    char name_s[40];
+    snprintf_P(name_s, sizeof(name_s), PSTR("* %s Product ID"), device_type_name().c_str());
+    doc["name"] = name_s;
 
     doc["val_tpl"] = FJSON("{{value_json.id}}");
     JsonObject dev = doc.createNestedObject("dev");
