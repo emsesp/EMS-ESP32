@@ -340,12 +340,10 @@ MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(h
 MAKE_PSTR_LIST(enum_solarmode, F_(constant), F("pwm"), F("analog"))
 MAKE_PSTR_LIST(enum_collectortype, F_(blank), F("flat"), F("vacuum"))
 
-/*
- * MQTT topics and full text for values and commands
- */
+// MQTT topics and full text for values and commands
 MAKE_PSTR(homeassistant, "homeassistant/")
 
-// id for all devices
+// id used to store the device ID, goes into MQTT payload
 // empty full name to prevent being shown in web or console
 MAKE_PSTR_LIST(ID, F_(id))
 
