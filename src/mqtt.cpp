@@ -703,7 +703,13 @@ void Mqtt::ha_status() {
 
     // create the sensors
     // must match the MQTT payload keys
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("WiFi strength"), EMSdevice::DeviceType::SYSTEM, F("rssi"), DeviceValueUOM::PERCENT);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("WiFi RSSI"), EMSdevice::DeviceType::SYSTEM, F("rssi"), DeviceValueUOM::DBM);
+    publish_mqtt_ha_sensor(DeviceValueType::INT,
+                           DeviceValueTAG::TAG_HEARTBEAT,
+                           F("WiFi strength"),
+                           EMSdevice::DeviceType::SYSTEM,
+                           F("wifistrength"),
+                           DeviceValueUOM::PERCENT);
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"));
     publish_mqtt_ha_sensor(DeviceValueType::INT,
                            DeviceValueTAG::TAG_HEARTBEAT,
@@ -712,12 +718,17 @@ void Mqtt::ha_status() {
                            F("uptime_sec"),
                            DeviceValueUOM::SECONDS);
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Free memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"), DeviceValueUOM::KB);
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# MQTT fails"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Rx received"), EMSdevice::DeviceType::SYSTEM, F("rxreceived"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Rx fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx reads"), EMSdevice::DeviceType::SYSTEM, F("txread"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx writes"), EMSdevice::DeviceType::SYSTEM, F("txwrite"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# MQTT fails"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"), DeviceValueUOM::NUM);
+    publish_mqtt_ha_sensor(DeviceValueType::INT,
+                           DeviceValueTAG::TAG_HEARTBEAT,
+                           F("# Rx received"),
+                           EMSdevice::DeviceType::SYSTEM,
+                           F("rxreceived"),
+                           DeviceValueUOM::NUM);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Rx fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"), DeviceValueUOM::NUM);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx reads"), EMSdevice::DeviceType::SYSTEM, F("txread"), DeviceValueUOM::NUM);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx writes"), EMSdevice::DeviceType::SYSTEM, F("txwrite"), DeviceValueUOM::NUM);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"), DeviceValueUOM::NUM);
 }
 
 // add sub or pub task to the queue.
@@ -994,26 +1005,47 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
         snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/%s/config"), mqtt_base_.c_str(), uniq.c_str()); // topic
 
         // unit of measure and map the HA icon
-        if (uom != DeviceValueUOM::NONE && uom != DeviceValueUOM::PUMP) {
+        if (uom != DeviceValueUOM::NONE) {
             doc["unit_of_meas"] = EMSdevice::uom_to_string(uom);
         }
+
         switch (uom) {
         case DeviceValueUOM::DEGREES:
-            doc["ic"] = F_(icontemperature);
+            doc["ic"] = F_(icondegrees);
             break;
         case DeviceValueUOM::PERCENT:
             doc["ic"] = F_(iconpercent);
             break;
-        case DeviceValueUOM::PUMP:
-            doc["ic"] = F_(iconpump);
-            break;
         case DeviceValueUOM::SECONDS:
         case DeviceValueUOM::MINUTES:
         case DeviceValueUOM::HOURS:
-            doc["ic"] = F_(iconclock);
+            doc["ic"] = F_(icontime);
             break;
         case DeviceValueUOM::KB:
-            doc["ic"] = F_(iconmemory);
+            doc["ic"] = F_(iconkb);
+            break;
+        case DeviceValueUOM::LMIN:
+            doc["ic"] = F_(iconlmin);
+            break;
+        case DeviceValueUOM::WH:
+        case DeviceValueUOM::KWH:
+            doc["ic"] = F_(iconkwh);
+            break;
+        case DeviceValueUOM::UA:
+            doc["ic"] = F_(iconua);
+            break;
+        case DeviceValueUOM::BAR:
+            doc["ic"] = F_(iconbar);
+            break;
+        case DeviceValueUOM::W:
+        case DeviceValueUOM::KW:
+            doc["ic"] = F_(iconkw);
+            break;
+        case DeviceValueUOM::DBM:
+            doc["ic"] = F_(icondbm);
+            break;
+        case DeviceValueUOM::NUM:
+            doc["ic"] = F_(iconnum);
             break;
         case DeviceValueUOM::NONE:
         default:
