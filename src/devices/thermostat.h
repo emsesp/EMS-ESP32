@@ -39,6 +39,7 @@ class Thermostat : public EMSdevice {
         int16_t remotetemp; // for readback
         uint8_t tempautotemp;
         uint8_t mode;
+        uint8_t hamode; // special mode for HA. See https://github.com/emsesp/EMS-ESP32/issues/66
         uint8_t modetype;
         uint8_t summermode;
         uint8_t holidaymode;
