@@ -37,7 +37,9 @@ static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__
     F_(kw),
     F_(w),
     F_(kb),
-    F_(seconds)
+    F_(seconds),
+    F_(dbm),
+    F_(num)
 
 };
 
@@ -121,7 +123,7 @@ const std::string EMSdevice::tag_to_mqtt(uint8_t tag) {
 }
 
 const std::string EMSdevice::uom_to_string(uint8_t uom) {
-    if (uom == DeviceValueUOM::NONE || uom >= DeviceValueUOM::PUMP) {
+    if (uom == DeviceValueUOM::NONE) {
         return std::string{};
     }
     return uuid::read_flash_string(DeviceValueUOM_s[uom - 1]); // offset by 1 to account for NONE

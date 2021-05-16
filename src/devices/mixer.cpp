@@ -60,7 +60,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES);
         register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::PUMP);
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE);
         register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
         register_device_value(tag, &flowTempVf_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempVf), DeviceValueUOM::DEGREES);
     } else {
@@ -69,7 +69,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         uint8_t tag = TAG_WWC1 + hc_ - 1;
         register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
         register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(wwTemp), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(wwPumpStatus), DeviceValueUOM::PUMP);
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(wwPumpStatus), DeviceValueUOM::NONE);
         register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(wwTempStatus), DeviceValueUOM::NONE);
     }
 
@@ -88,6 +88,8 @@ bool Mixer::publish_ha_config() {
     char uniq_id[20];
     snprintf_P(uniq_id, sizeof(uniq_id), PSTR("Mixer%02X"), device_id() - 0x20 + 1);
     doc["uniq_id"] = uniq_id;
+
+    doc["ic"] = F_(icondevice);
 
     char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());

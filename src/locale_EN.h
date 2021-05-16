@@ -156,7 +156,7 @@ MAKE_PSTR_LIST(div100, F_(100))
 MAKE_PSTR_LIST(div60, F_(60))
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
-// uom - also used with HA
+// uom - also used with HA see https://github.com/home-assistant/core/blob/d7ac4bd65379e11461c7ce0893d3533d8d8b8cbf/homeassistant/const.py#L384
 MAKE_PSTR(percent, "%")
 MAKE_PSTR(degrees, "°C")
 MAKE_PSTR(kwh, "kWh")
@@ -170,6 +170,8 @@ MAKE_PSTR(kw, "kW")
 MAKE_PSTR(w, "W")
 MAKE_PSTR(kb, "KB")
 MAKE_PSTR(seconds, "seconds")
+MAKE_PSTR(dbm, "dBm")
+MAKE_PSTR(num, " ") // this is hack so HA renders numbers correctly
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
@@ -313,11 +315,11 @@ MAKE_PSTR_LIST(enum_wwCircMode2, F_(off), F_(on), F_(auto))
 MAKE_PSTR_LIST(enum_heatingtype, F_(off), F_(radiator), F_(convector), F_(floor))
 MAKE_PSTR_LIST(enum_summermode, F_(summer), F_(auto), F_(winter))
 
-MAKE_PSTR_LIST(enum_mode, F_(manual), F_(auto))
-MAKE_PSTR_LIST(enum_mode2, F_(off), F_(manual), F_(auto))
-MAKE_PSTR_LIST(enum_mode3, F_(night), F_(day), F_(auto))
-MAKE_PSTR_LIST(enum_mode4, F_(blank), F_(manual), F_(auto), F_(holiday))
-MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))
+MAKE_PSTR_LIST(enum_mode, F_(manual), F_(auto))                          // RC100, RC300, RC310
+MAKE_PSTR_LIST(enum_mode2, F_(off), F_(manual), F_(auto))                // RC20
+MAKE_PSTR_LIST(enum_mode3, F_(night), F_(day), F_(auto))                 // RC35, RC30
+MAKE_PSTR_LIST(enum_mode4, F_(blank), F_(manual), F_(auto), F_(holiday)) // JUNKERS
+MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))                            // CRF
 
 MAKE_PSTR_LIST(enum_modetype, F_(eco), F_(comfort))
 MAKE_PSTR_LIST(enum_modetype2, F_(day))
@@ -592,13 +594,13 @@ MAKE_PSTR_LIST(thermalDisinfect, F("thermaldisinfect"), F("thermal disinfection"
 MAKE_PSTR_LIST(heatMetering, F("heatmetering"), F("heatmetering"))
 // MAKE_PSTR_LIST(solarIsEnabled, F("solarenabled"), F(""))
 
-        // telegram 0x035A
+// telegram 0x035A
 MAKE_PSTR_LIST(solarPumpMode, F("solarpumpmode"), F("solar pump mode"))
 MAKE_PSTR_LIST(solarPumpKick, F("pumpkick"), F("pumpkick"))
 MAKE_PSTR_LIST(plainWaterMode, F("plainwatermode"), F("plain water mode"))
 MAKE_PSTR_LIST(doubleMatchFlow, F("doublematchflow"), F("doublematchflow"))
 
-        // telegram 0x380
+// telegram 0x380
 MAKE_PSTR_LIST(climateZone, F("climatezone"), F("climate zone"))
 MAKE_PSTR_LIST(collector1Area, F("collector1area"), F("collector 1 area"))
 MAKE_PSTR_LIST(collector1Type, F("collector1type"), F("collector 1 type"))

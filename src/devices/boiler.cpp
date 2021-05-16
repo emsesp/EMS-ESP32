@@ -111,7 +111,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA, &exhaustTemp_, DeviceValueType::USHORT, FL_(div10), FL_(exhaustTemp), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA, &burnGas_, DeviceValueType::BOOL, nullptr, FL_(burnGas), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA, &flameCurr_, DeviceValueType::USHORT, FL_(div10), FL_(flameCurr), DeviceValueUOM::UA);
-    register_device_value(TAG_BOILER_DATA, &heatingPump_, DeviceValueType::BOOL, nullptr, FL_(heatingPump), DeviceValueUOM::PUMP);
+    register_device_value(TAG_BOILER_DATA, &heatingPump_, DeviceValueType::BOOL, nullptr, FL_(heatingPump), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA, &fanWork_, DeviceValueType::BOOL, nullptr, FL_(fanWork), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA, &ignWork_, DeviceValueType::BOOL, nullptr, FL_(ignWork), DeviceValueUOM::NONE);
     register_device_value(
@@ -128,7 +128,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA, &setFlowTemp_, DeviceValueType::UINT, nullptr, FL_(setFlowTemp), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA, &setBurnPow_, DeviceValueType::UINT, nullptr, FL_(setBurnPow), DeviceValueUOM::PERCENT);
     register_device_value(TAG_BOILER_DATA, &curBurnPow_, DeviceValueType::UINT, nullptr, FL_(curBurnPow), DeviceValueUOM::PERCENT);
-    register_device_value(TAG_BOILER_DATA, &burnStarts_, DeviceValueType::ULONG, nullptr, FL_(burnStarts), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA, &burnStarts_, DeviceValueType::ULONG, nullptr, FL_(burnStarts), DeviceValueUOM::NUM);
     register_device_value(TAG_BOILER_DATA, &burnWorkMin_, DeviceValueType::TIME, nullptr, FL_(burnWorkMin), DeviceValueUOM::MINUTES);
     register_device_value(TAG_BOILER_DATA, &heatWorkMin_, DeviceValueType::TIME, nullptr, FL_(heatWorkMin), DeviceValueUOM::MINUTES);
     register_device_value(TAG_BOILER_DATA, &UBAuptime_, DeviceValueType::TIME, nullptr, FL_(UBAuptime), DeviceValueUOM::MINUTES);
@@ -151,8 +151,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(TAG_BOILER_DATA, &upTimeCompHeating_, DeviceValueType::TIME, FL_(div60), FL_(upTimeCompHeating), DeviceValueUOM::MINUTES);
         register_device_value(TAG_BOILER_DATA, &upTimeCompCooling_, DeviceValueType::TIME, FL_(div60), FL_(upTimeCompCooling), DeviceValueUOM::MINUTES);
         register_device_value(TAG_BOILER_DATA, &upTimeCompWw_, DeviceValueType::TIME, FL_(div60), FL_(upTimeCompWw), DeviceValueUOM::MINUTES);
-        register_device_value(TAG_BOILER_DATA, &heatingStarts_, DeviceValueType::ULONG, nullptr, FL_(heatingStarts), DeviceValueUOM::NONE);
-        register_device_value(TAG_BOILER_DATA, &coolingStarts_, DeviceValueType::ULONG, nullptr, FL_(coolingStarts), DeviceValueUOM::NONE);
+        register_device_value(TAG_BOILER_DATA, &heatingStarts_, DeviceValueType::ULONG, nullptr, FL_(heatingStarts), DeviceValueUOM::NUM);
+        register_device_value(TAG_BOILER_DATA, &coolingStarts_, DeviceValueType::ULONG, nullptr, FL_(coolingStarts), DeviceValueUOM::NUM);
         register_device_value(TAG_BOILER_DATA, &nrgConsTotal_, DeviceValueType::ULONG, nullptr, FL_(nrgConsTotal), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &nrgConsCompTotal_, DeviceValueType::ULONG, nullptr, FL_(nrgConsCompTotal), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &nrgConsCompHeating_, DeviceValueType::ULONG, nullptr, FL_(nrgConsCompHeating), DeviceValueUOM::KWH);
@@ -224,8 +224,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_DEVICE_DATA_WW, &wWSetPumpPower_, DeviceValueType::UINT, nullptr, FL_(wWSetPumpPower), DeviceValueUOM::PERCENT);
     register_device_value(TAG_DEVICE_DATA_WW, &mixerTemp_, DeviceValueType::USHORT, FL_(div10), FL_(mixerTemp), DeviceValueUOM::DEGREES);
     register_device_value(TAG_DEVICE_DATA_WW, &tankMiddleTemp_, DeviceValueType::USHORT, FL_(div10), FL_(tankMiddleTemp), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_DEVICE_DATA_WW, &wWStarts_, DeviceValueType::ULONG, nullptr, FL_(wWStarts), DeviceValueUOM::NONE);
-    register_device_value(TAG_DEVICE_DATA_WW, &wWStarts2_, DeviceValueType::ULONG, nullptr, FL_(wWStarts2), DeviceValueUOM::NONE);
+    register_device_value(TAG_DEVICE_DATA_WW, &wWStarts_, DeviceValueType::ULONG, nullptr, FL_(wWStarts), DeviceValueUOM::NUM);
+    register_device_value(TAG_DEVICE_DATA_WW, &wWStarts2_, DeviceValueType::ULONG, nullptr, FL_(wWStarts2), DeviceValueUOM::NUM);
     register_device_value(TAG_DEVICE_DATA_WW, &wWWorkM_, DeviceValueType::TIME, nullptr, FL_(wWWorkM), DeviceValueUOM::MINUTES);
 
     // fetch some initial data
@@ -243,6 +243,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 bool Boiler::publish_ha_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
     doc["uniq_id"] = F_(boiler);
+    doc["ic"]      = F_(icondevice);
 
     char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
@@ -804,11 +805,11 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
 bool Boiler::set_burn_power(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
-        LOG_WARNING(F("Set burner max. power: Invalid value"));
+        LOG_WARNING(F("Set burner max power: Invalid value"));
         return false;
     }
 
-    LOG_INFO(F("Setting burner max. power to %d %"), v);
+    LOG_INFO(F("Setting burner max power to %d %"), v);
     write_command(EMS_TYPE_UBASetPoints, 1, v, EMS_TYPE_UBASetPoints);
 
     return true;
@@ -990,11 +991,11 @@ bool Boiler::set_hyst_off(const char * value, const int8_t id) {
 bool Boiler::set_burn_period(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
-        LOG_WARNING(F("Set burner min. period: Invalid value"));
+        LOG_WARNING(F("Set burner min period: Invalid value"));
         return false;
     }
 
-    LOG_INFO(F("Setting burner min. period to %d min"), v);
+    LOG_INFO(F("Setting burner min period to %d min"), v);
     if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 10, v, EMS_TYPE_UBAParametersPlus);
     } else {
