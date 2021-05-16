@@ -139,7 +139,7 @@ class System {
     void system_check();
     void measure_analog();
 
-    int8_t wifi_quality();
+    int8_t wifi_quality(int8_t dBm);
 
     bool     system_healthy_     = false;
     uint32_t led_flash_speed_    = LED_WARNING_BLINK_FAST; // default boot flashes quickly
