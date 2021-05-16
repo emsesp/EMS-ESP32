@@ -923,11 +923,6 @@ void Mqtt::process_queue() {
 
 // HA config for a sensor and binary_sensor entity
 // entity must match the key/value pair in the *_data topic
-// e.g. homeassistant/sensor/ems-esp32/thermostat_hc1_seltemp/config
-// with:
-// {"uniq_id":"thermostat_hc1_seltemp","stat_t":"ems-esp32/thermostat_data","name":"Thermostat hc1 Setpoint room temperature",
-//  "val_tpl":"{{value_json.hc1.seltemp}}","unit_of_meas":"°C","ic":"mdi:temperature-celsius","dev":{"ids":["ems-esp-thermostat"]}}
-//
 // note: some string copying here into chars, it looks messy but does help with heap fragmentation issues
 void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice::DeviceValueType
                                   uint8_t                     tag,  // EMSdevice::DeviceValueTAG
@@ -940,10 +935,23 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
         return;
     }
 
+    // bool have_tag  = !EMSdevice::tag_to_string(tag).empty() && (device_type != EMSdevice::DeviceType::BOILER); // ignore boiler
+    bool have_tag = !EMSdevice::tag_to_string(tag).empty();
+
+    // nested_format is 1 if nested, otherwise 2 for single topics
+    bool is_nested;
+    if (device_type == EMSdevice::DeviceType::BOILER) {
+        is_nested = false; // boiler never uses nested
+    } else {
+        is_nested = (nested_format_ == 1);
+    }
+
+    char device_name[50];
+    strlcpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str(), sizeof(device_name));
+
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
 
-    bool have_tag  = !EMSdevice::tag_to_string(tag).empty() && (device_type != EMSdevice::DeviceType::BOILER); // ignore boiler
-    bool is_nested = (nested_format_ == 1) || (device_type == EMSdevice::DeviceType::BOILER);                  // boiler never uses nested
+    doc["~"] = mqtt_base_;
 
     // create entity by add the tag if present, seperating with a .
     char new_entity[50];
@@ -953,10 +961,6 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
         snprintf_P(new_entity, sizeof(new_entity), PSTR("%s"), uuid::read_flash_string(entity).c_str());
     }
 
-    // device name
-    char device_name[50];
-    strlcpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str(), sizeof(device_name));
-
     // build unique identifier which will be used in the topic
     // and replacing all . with _ as not to break HA
     std::string uniq(50, '\0');
@@ -964,14 +968,12 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     std::replace(uniq.begin(), uniq.end(), '.', '_');
     doc["uniq_id"] = uniq;
 
-    doc["~"] = mqtt_base_;
-
     // state topic
     char stat_t[MQTT_TOPIC_MAX_SIZE];
     snprintf_P(stat_t, sizeof(stat_t), PSTR("~/%s"), tag_to_topic(device_type, tag).c_str());
     doc["stat_t"] = stat_t;
 
-    // name
+    // name = <device> <tag> <name>
     char new_name[80];
     if (have_tag) {
         snprintf_P(new_name, sizeof(new_name), PSTR("%s %s %s"), device_name, EMSdevice::tag_to_string(tag).c_str(), uuid::read_flash_string(name).c_str());
@@ -982,6 +984,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     doc["name"] = new_name;
 
     // value template
+    // if its nested mqtt format then use the appended entity name, otherwise take the original
     char val_tpl[50];
     if (is_nested) {
         snprintf_P(val_tpl, sizeof(val_tpl), PSTR("{{value_json.%s}}"), new_entity);

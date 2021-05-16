@@ -175,10 +175,11 @@ MAKE_PSTR(num, " ") // this is hack so HA renders numbers correctly
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
+// tags must not have spaces
 MAKE_PSTR(tag_none, "")
 MAKE_PSTR(tag_heartbeat, "")
 MAKE_PSTR(tag_boiler_data, "")
-MAKE_PSTR(tag_device_data_ww, "warm water")
+MAKE_PSTR(tag_device_data_ww, "ww")
 MAKE_PSTR(tag_thermostat_data, "")
 MAKE_PSTR(tag_hc1, "hc1")
 MAKE_PSTR(tag_hc2, "hc2")
