@@ -702,15 +702,17 @@ void Mqtt::ha_status() {
     snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/system/config"), mqtt_base_.c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
-    // create the sensors
-    // must match the MQTT payload keys
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("WiFi RSSI"), EMSdevice::DeviceType::SYSTEM, F("rssi"), DeviceValueUOM::DBM);
-    publish_mqtt_ha_sensor(DeviceValueType::INT,
-                           DeviceValueTAG::TAG_HEARTBEAT,
-                           F("WiFi strength"),
-                           EMSdevice::DeviceType::SYSTEM,
-                           F("wifistrength"),
-                           DeviceValueUOM::PERCENT);
+    // create the sensors - must match the MQTT payload keys
+    if (!EMSESP::system_.ethernet_connected()) {
+        publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("WiFi RSSI"), EMSdevice::DeviceType::SYSTEM, F("rssi"), DeviceValueUOM::DBM);
+        publish_mqtt_ha_sensor(DeviceValueType::INT,
+                               DeviceValueTAG::TAG_HEARTBEAT,
+                               F("WiFi strength"),
+                               EMSdevice::DeviceType::SYSTEM,
+                               F("wifistrength"),
+                               DeviceValueUOM::PERCENT);
+    }
+
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"));
     publish_mqtt_ha_sensor(DeviceValueType::INT,
                            DeviceValueTAG::TAG_HEARTBEAT,
