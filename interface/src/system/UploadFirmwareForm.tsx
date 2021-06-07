@@ -25,7 +25,7 @@ class UploadFirmwareForm extends React.Component<UploadFirmwareFormProps> {
           Upload a new firmware file (.bin or .bin.gz) below to replace the
           existing firmware.
           <p></p>This can take up to a minute. Wait until you see "Activating
-          new Firmware" and EMS-ESP will then automatically restart.
+          new firmware" and EMS-ESP will then automatically restart.
         </Box>
         <SingleUpload
           onDrop={this.handleDrop}
