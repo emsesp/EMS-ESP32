@@ -1,6 +1,11 @@
 import React, { Component, Fragment } from 'react';
 import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
 
+import parseMilliseconds from 'parse-ms';
+
+import { Decoder } from '@msgpack/msgpack';
+const decoder = new Decoder();
+
 import {
   Table,
   TableBody,
@@ -37,7 +42,9 @@ import {
   EMSESPDevices,
   EMSESPDeviceData,
   Device,
-  DeviceValue
+  DeviceValue,
+  DeviceValueUOM,
+  DeviceValueUOM_s
 } from './EMSESPtypes';
 
 import ValueForm from './ValueForm';
@@ -85,25 +92,48 @@ interface EMSESPDevicesFormState {
   processing: boolean;
   deviceData?: EMSESPDeviceData;
   selectedDevice?: number;
-  devicevalue?: DeviceValue;
+  edit_devicevalue?: DeviceValue;
 }
 
 type EMSESPDevicesFormProps = RestFormProps<EMSESPDevices> &
   AuthenticatedContextProps &
   WithWidthProps;
 
-function formatTemp(t: string) {
-  if (t == null) {
-    return 'n/a';
+export const formatDuration = (duration_min: number) => {
+  const { days, hours, minutes } = parseMilliseconds(duration_min * 60000);
+  let formatted = '';
+  if (days) {
+    formatted += pluralize(days, 'day');
   }
-  return t + ' °C';
-}
+  if (hours) {
+    formatted += pluralize(hours, 'hour');
+  }
+  if (minutes) {
+    formatted += pluralize(minutes, 'minute');
+  }
+  return formatted;
+};
 
-function formatUnit(u: string) {
-  if (u == null) {
-    return u;
+const pluralize = (count: number, noun: string, suffix = 's') =>
+  ` ${count} ${noun}${count !== 1 ? suffix : ''} `;
+
+function formatValue(value: any, uom: number) {
+  switch (uom) {
+    case DeviceValueUOM.HOURS:
+      return formatDuration(value * 60);
+    case DeviceValueUOM.MINUTES:
+      return formatDuration(value);
+    case DeviceValueUOM.NONE:
+      return value;
+    case DeviceValueUOM.NUM:
+      return new Intl.NumberFormat().format(value);
+    case DeviceValueUOM.BOOLEAN:
+      return value ? 'on' : 'off';
+    default:
+      return (
+        new Intl.NumberFormat().format(value) + ' ' + DeviceValueUOM_s[uom]
+      );
   }
-  return ' ' + u;
 }
 
 class EMSESPDevicesForm extends Component<
@@ -119,25 +149,26 @@ class EMSESPDevicesForm extends Component<
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     this.setState({
-      devicevalue: {
-        ...this.state.devicevalue!,
+      edit_devicevalue: {
+        ...this.state.edit_devicevalue!,
         [name]: extractEventValue(event)
       }
     });
   };
 
   cancelEditingValue = () => {
-    this.setState({
-      devicevalue: undefined
-    });
+    this.setState({ edit_devicevalue: undefined });
   };
 
   doneEditingValue = () => {
-    const { devicevalue } = this.state;
+    const { edit_devicevalue, selectedDevice } = this.state;
 
     redirectingAuthorizedFetch(WRITE_VALUE_ENDPOINT, {
       method: 'POST',
-      body: JSON.stringify({ devicevalue: devicevalue }),
+      body: JSON.stringify({
+        id: selectedDevice,
+        devicevalue: edit_devicevalue
+      }),
       headers: {
         'Content-Type': 'application/json'
       }
@@ -165,23 +196,13 @@ class EMSESPDevicesForm extends Component<
         });
       });
 
-    if (devicevalue) {
-      this.setState({
-        devicevalue: undefined
-      });
+    if (edit_devicevalue) {
+      this.setState({ edit_devicevalue: undefined });
     }
   };
 
-  sendCommand = (i: number) => {
-    this.setState({
-      devicevalue: {
-        id: this.state.selectedDevice!,
-        data: this.state.deviceData?.data[i]!,
-        uom: this.state.deviceData?.data[i + 1]!,
-        name: this.state.deviceData?.data[i + 2]!,
-        cmd: this.state.deviceData?.data[i + 3]!
-      }
-    });
+  sendCommand = (dv: DeviceValue) => {
+    this.setState({ edit_devicevalue: dv });
   };
 
   noDevices = () => {
@@ -290,7 +311,7 @@ class EMSESPDevicesForm extends Component<
                   </TableCell>
                   <TableCell align="center">{sensorData.id}</TableCell>
                   <TableCell align="right">
-                    {formatTemp(sensorData.temp)}
+                    {formatValue(sensorData.temp, DeviceValueUOM.DEGREES)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -318,7 +339,7 @@ class EMSESPDevicesForm extends Component<
       >
         <DialogTitle>Confirm Scan Devices</DialogTitle>
         <DialogContent dividers>
-          Are you sure you want to initiate a scan on the EMS bus for all new
+          Are you sure you want to start a scan on the EMS bus for all new
           devices?
         </DialogContent>
         <DialogActions>
@@ -384,11 +405,12 @@ class EMSESPDevicesForm extends Component<
     })
       .then((response) => {
         if (response.status === 200) {
-          return response.json();
+          return response.arrayBuffer();
         }
         throw Error('Unexpected response code: ' + response.status);
       })
-      .then((json) => {
+      .then((arrayBuffer) => {
+        const json: any = decoder.decode(arrayBuffer);
         this.setState({ deviceData: json });
       })
       .catch((error) => {
@@ -429,40 +451,33 @@ class EMSESPDevicesForm extends Component<
             >
               <TableHead></TableHead>
               <TableBody>
-                {deviceData.data.map((item, i) => {
-                  if (i % 4) {
-                    return null;
-                  } else {
-                    return (
-                      <TableRow hover key={i}>
-                        <TableCell padding="checkbox" style={{ width: 18 }}>
-                          {deviceData.data[i + 3] && me.admin && (
-                            <CustomTooltip
-                              title="change value"
-                              placement="left-end"
-                            >
-                              <IconButton
-                                edge="start"
-                                size="small"
-                                aria-label="Edit"
-                                onClick={() => this.sendCommand(i)}
-                              >
-                                <EditIcon color="primary" fontSize="small" />
-                              </IconButton>
-                            </CustomTooltip>
-                          )}
-                        </TableCell>
-                        <TableCell padding="none" component="th" scope="row">
-                          {deviceData.data[i + 2]}
-                        </TableCell>
-                        <TableCell padding="none" align="right">
-                          {deviceData.data[i]}
-                          {formatUnit(deviceData.data[i + 1])}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  }
-                })}
+                {deviceData.data.map((item, i) => (
+                  <TableRow hover key={i}>
+                    <TableCell padding="checkbox" style={{ width: 18 }}>
+                      {item.c && me.admin && (
+                        <CustomTooltip
+                          title="change value"
+                          placement="left-end"
+                        >
+                          <IconButton
+                            edge="start"
+                            size="small"
+                            aria-label="Edit"
+                            onClick={() => this.sendCommand(item)}
+                          >
+                            <EditIcon color="primary" fontSize="small" />
+                          </IconButton>
+                        </CustomTooltip>
+                      )}
+                    </TableCell>
+                    <TableCell padding="none" component="th" scope="row">
+                      {item.n}
+                    </TableCell>
+                    <TableCell padding="none" align="right">
+                      {formatValue(item.v, item.u)}
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -479,7 +494,7 @@ class EMSESPDevicesForm extends Component<
   }
 
   render() {
-    const { devicevalue } = this.state;
+    const { edit_devicevalue } = this.state;
     return (
       <Fragment>
         <br></br>
@@ -509,9 +524,9 @@ class EMSESPDevicesForm extends Component<
           </Box>
         </Box>
         {this.renderScanDevicesDialog()}
-        {devicevalue && (
+        {edit_devicevalue && (
           <ValueForm
-            devicevalue={devicevalue}
+            devicevalue={edit_devicevalue}
             onDoneEditing={this.doneEditingValue}
             onCancelEditing={this.cancelEditingValue}
             handleValueChange={this.handleValueChange}

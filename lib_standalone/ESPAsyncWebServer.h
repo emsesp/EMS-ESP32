@@ -12,6 +12,7 @@ class AsyncWebServerRequest;
 class AsyncWebServerResponse;
 class AsyncJsonResponse;
 class PrettyAsyncJsonResponse;
+class MsgpackAsyncJsonResponse;
 
 class AsyncWebParameter {
   private:
@@ -98,6 +99,7 @@ class AsyncWebServerRequest {
     void send(AsyncWebServerResponse * response){};
     void send(AsyncJsonResponse * response){};
     void send(PrettyAsyncJsonResponse * response){};
+    void send(MsgpackAsyncJsonResponse * response){};
     void send(int code, const String & contentType = String(), const String & content = String()){};
     void send(int code, const String & contentType, const __FlashStringHelper *){};
 
@@ -194,9 +196,9 @@ class AsyncWebServerResponse {
     virtual ~AsyncWebServerResponse();
 };
 
-typedef std::function<void(AsyncWebServerRequest * request)>                                                                                ArRequestHandlerFunction;
+typedef std::function<void(AsyncWebServerRequest * request)> ArRequestHandlerFunction;
 typedef std::function<void(AsyncWebServerRequest * request, const String & filename, size_t index, uint8_t * data, size_t len, bool final)> ArUploadHandlerFunction;
-typedef std::function<void(AsyncWebServerRequest * request, uint8_t * data, size_t len, size_t index, size_t total)>                        ArBodyHandlerFunction;
+typedef std::function<void(AsyncWebServerRequest * request, uint8_t * data, size_t len, size_t index, size_t total)> ArBodyHandlerFunction;
 
 class AsyncWebServer {
   protected:

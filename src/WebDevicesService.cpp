@@ -26,7 +26,7 @@ WebDevicesService::WebDevicesService(AsyncWebServer * server, SecurityManager * 
     : _device_dataHandler(DEVICE_DATA_SERVICE_PATH,
                           securityManager->wrapCallback(std::bind(&WebDevicesService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED))
     , _writevalue_dataHandler(WRITE_VALUE_SERVICE_PATH,
-                              securityManager->wrapCallback(std::bind(&WebDevicesService::write_value, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED)) {
+                              securityManager->wrapCallback(std::bind(&WebDevicesService::write_value, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
     server->on(EMSESP_DEVICES_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&WebDevicesService::all_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
@@ -83,9 +83,10 @@ void WebDevicesService::all_devices(AsyncWebServerRequest * request) {
 }
 
 // The unique_id is the unique record ID from the Web table to identify which device to load
+// Compresses the JSON using MsgPack https://msgpack.org/index.html
 void WebDevicesService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
+        MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
                 if (emsdevice->unique_id() == json["id"]) {
@@ -108,27 +109,20 @@ void WebDevicesService::device_data(AsyncWebServerRequest * request, JsonVariant
 
 // takes a command and its data value from a specific Device, from the Web
 void WebDevicesService::write_value(AsyncWebServerRequest * request, JsonVariant & json) {
-    // only issue commands if the API is enabled
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        if (!settings.notoken_api) {
-            request->send(403); // forbidden error
-            return;
-        }
-    });
-
     if (json.is<JsonObject>()) {
         JsonObject dv = json["devicevalue"];
+        uint8_t    id = json["id"];
 
         // using the unique ID from the web find the real device type
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
-                if (emsdevice->unique_id() == dv["id"].as<int>()) {
-                    const char * cmd         = dv["cmd"];
+                if (emsdevice->unique_id() == id) {
+                    const char * cmd         = dv["c"];
                     uint8_t      device_type = emsdevice->device_type();
                     bool         ok          = false;
                     char         s[10];
                     // the data could be in any format, but we need string
-                    JsonVariant data = dv["data"];
+                    JsonVariant data = dv["v"];
                     if (data.is<const char *>()) {
                         ok = Command::call(device_type, cmd, data.as<const char *>());
                     } else if (data.is<int>()) {
@@ -139,16 +133,17 @@ void WebDevicesService::write_value(AsyncWebServerRequest * request, JsonVariant
                         ok = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false");
                     }
 
-                    if (ok) {
-                        request->send(200);
-                    }
-                    return; // found device, quit
+                    // send "Write command sent to device" or "Write command failed"
+                    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);
+                    request->send(response);
+                    return;
                 }
             }
         }
-
-        request->send(204); // no content error
     }
+
+    AsyncWebServerResponse * response = request->beginResponse(204); // Write command failed
+    request->send(response);
 }
 
 } // namespace emsesp

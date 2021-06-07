@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
+    "@msgpack/msgpack": "^2.7.0",
     "@types/lodash": "^4.14.168",
     "@types/node": "^15.0.1",
     "@types/react": "^17.0.4",

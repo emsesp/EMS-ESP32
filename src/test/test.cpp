@@ -333,29 +333,30 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         run_test("boiler");
         run_test("thermostat");
 
-        // test call
-        DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
-        JsonObject          json = doc.to<JsonObject>();
-        Command::call(EMSdevice::DeviceType::BOILER, "info", nullptr, -1, json);
 #if defined(EMSESP_STANDALONE)
-        Serial.print(COLOR_YELLOW);
-        if (json.size() != 0) {
-            serializeJson(doc, Serial);
-        }
-        shell.println();
-        Serial.print(COLOR_RESET);
-#endif
 
+        DynamicJsonDocument doc(8000); // some absurb high number
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
-                DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
+                doc.clear();
+                JsonObject json = doc.to<JsonObject>();
+                Command::call(emsdevice->device_type(), "info", nullptr, -1, json);
 
+                Serial.print(COLOR_YELLOW);
+                if (json.size() != 0) {
+                    serializeJson(doc, Serial);
+                }
+                shell.println();
+                Serial.print(COLOR_RESET);
+
+
+                doc.clear();
                 JsonObject root = doc.to<JsonObject>();
                 emsdevice->generate_values_json_web(root);
 
-#if defined(EMSESP_STANDALONE)
                 Serial.print(COLOR_BRIGHT_MAGENTA);
                 serializeJson(doc, Serial);
+                Serial.print(COLOR_RESET);
                 Serial.println();
                 Serial.print("** memoryUsage=");
                 Serial.print(doc.memoryUsage());
@@ -364,10 +365,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
                 Serial.print(" measureJson=");
                 Serial.print(measureJson(doc));
                 Serial.println(" **");
-                Serial.print(COLOR_RESET);
-#endif
             }
         }
+#endif
         return;
     }
 

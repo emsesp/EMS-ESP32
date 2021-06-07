@@ -87,6 +87,52 @@ class PrettyAsyncJsonResponse {
     }
 };
 
+class MsgpackAsyncJsonResponse {
+  protected:
+    DynamicJsonDocument _jsonBuffer;
+    JsonVariant _root;
+    bool        _isValid;
+
+  public:
+    MsgpackAsyncJsonResponse(bool isArray = false, size_t maxJsonBufferSize = DYNAMIC_JSON_DOCUMENT_SIZE)
+        : _jsonBuffer(maxJsonBufferSize)
+        , _isValid{false} {
+        if (isArray)
+            _root = _jsonBuffer.createNestedArray();
+        else
+            _root = _jsonBuffer.createNestedObject();
+    }
+
+    ~MsgpackAsyncJsonResponse() {
+    }
+
+    JsonVariant & getRoot() {
+        return _root;
+    }
+
+    bool _sourceValid() const {
+        return _isValid;
+    }
+
+    size_t setLength() {
+        return 0;
+    }
+
+    void setContentType(const char * s) {
+    }
+
+    size_t getSize() {
+        return _jsonBuffer.size();
+    }
+
+    size_t _fillBuffer(uint8_t * data, size_t len) {
+        return len;
+    }
+
+    void setCode(uint16_t) {
+    }
+};
+
 class AsyncJsonResponse {
   protected:
     DynamicJsonDocument _jsonBuffer;

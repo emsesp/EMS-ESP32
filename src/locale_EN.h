@@ -172,6 +172,7 @@ MAKE_PSTR(kb, "KB")
 MAKE_PSTR(seconds, "seconds")
 MAKE_PSTR(dbm, "dBm")
 MAKE_PSTR(num, " ") // this is hack so HA renders numbers correctly
+MAKE_PSTR(bool, " ") // this is hack so HA renders numbers correctly
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
@@ -220,7 +221,7 @@ MAKE_PSTR_WORD(3x3min)
 MAKE_PSTR_WORD(4x3min)
 MAKE_PSTR_WORD(5x3min)
 MAKE_PSTR_WORD(6x3min)
-MAKE_PSTR_WORD(continuos)
+MAKE_PSTR_WORD(continuous)
 MAKE_PSTR(3wayvalve, "3-way valve")
 MAKE_PSTR(chargepump, "charge pump")
 MAKE_PSTR_WORD(hot)
@@ -235,7 +236,7 @@ MAKE_PSTR_WORD(error)
 
 // boiler lists
 MAKE_PSTR_LIST(enum_off_time_date, F_(off), F_(time), F_(date))
-MAKE_PSTR_LIST(enum_freq, F_(off), F_(1x3min), F_(2x3min), F_(3x3min), F_(4x3min), F_(5x3min), F_(6x3min), F_(continuos))
+MAKE_PSTR_LIST(enum_freq, F_(off), F_(1x3min), F_(2x3min), F_(3x3min), F_(4x3min), F_(5x3min), F_(6x3min), F_(continuous))
 MAKE_PSTR_LIST(enum_charge, F_(3wayvalve), F_(chargepump))
 MAKE_PSTR_LIST(enum_comfort, F_(hot), F_(eco), F_(intelligent))
 MAKE_PSTR_LIST(enum_flow, F_(off), F_(flow), F_(bufferedflow), F_(buffer), F_(layeredbuffer))
