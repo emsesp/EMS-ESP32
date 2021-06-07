@@ -1,15 +1,21 @@
 import React, { RefObject } from 'react';
-import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
+import { ValidatorForm } from 'react-material-ui-form-validator';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Box,
-  Typography
+  Typography,
+  FormHelperText,
+  OutlinedInput,
+  InputAdornment,
+  TextField,
+  MenuItem
 } from '@material-ui/core';
+
 import { FormButton } from '../components';
-import { DeviceValue } from './EMSESPtypes';
+import { DeviceValue, DeviceValueUOM, DeviceValueUOM_s } from './EMSESPtypes';
 
 interface ValueFormProps {
   devicevalue: DeviceValue;
@@ -27,13 +33,6 @@ class ValueForm extends React.Component<ValueFormProps> {
     this.formRef.current.submit();
   };
 
-  buildLabel = (devicevalue: DeviceValue) => {
-    if (devicevalue.uom === '' || !devicevalue.uom) {
-      return 'New value';
-    }
-    return 'New value (' + devicevalue.uom + ')';
-  };
-
   render() {
     const {
       devicevalue,
@@ -41,6 +40,7 @@ class ValueForm extends React.Component<ValueFormProps> {
       onDoneEditing,
       onCancelEditing
     } = this.props;
+
     return (
       <ValidatorForm onSubmit={onDoneEditing} ref={this.formRef}>
         <Dialog
@@ -49,31 +49,52 @@ class ValueForm extends React.Component<ValueFormProps> {
           aria-labelledby="user-form-dialog-title"
           open
         >
-          <DialogTitle id="user-form-dialog-title">
-            Change the {devicevalue.name}
-          </DialogTitle>
+          <DialogTitle id="user-form-dialog-title">Change Value</DialogTitle>
           <DialogContent dividers>
-            <TextValidator
-              validators={['required']}
-              errorMessages={['is required']}
-              name="data"
-              label={this.buildLabel(devicevalue)}
-              fullWidth
-              variant="outlined"
-              value={devicevalue.data}
-              margin="normal"
-              onChange={handleValueChange('data')}
-            />
-            <Box color="warning.main" p={1} pl={0} pr={0} mt={0} mb={0}>
+            {devicevalue.u !== DeviceValueUOM.BOOLEAN && (
+              <OutlinedInput
+                id="outlined-adornment-value"
+                value={devicevalue.v}
+                autoFocus
+                fullWidth
+                onChange={handleValueChange('v')}
+                endAdornment={
+                  <InputAdornment position="end">
+                    {DeviceValueUOM_s[devicevalue.u]}
+                  </InputAdornment>
+                }
+                aria-describedby="outlined-value-helper-text"
+                inputProps={{
+                  'aria-label': 'value'
+                }}
+              />
+            )}
+            {devicevalue.u === DeviceValueUOM.BOOLEAN && (
+              <TextField
+                id="outlined-select-value"
+                select
+                value={devicevalue.v}
+                autoFocus
+                fullWidth
+                onChange={handleValueChange('v')}
+                variant="outlined"
+              >
+                <MenuItem value="true">on</MenuItem>
+                <MenuItem value="false">off</MenuItem>
+              </TextField>
+            )}
+            <FormHelperText id="outlined-value-helper-text">
+              {devicevalue.n}
+            </FormHelperText>
+            <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>
               <Typography variant="body2">
                 <i>
-                  Note: it may take a few seconds before the change is visible.
-                  If nothing happens check the logs.
+                  Note: it may take a few seconds before the change is
+                  registered with the EMS device.
                 </i>
               </Typography>
             </Box>
           </DialogContent>
-
           <DialogActions>
             <FormButton
               variant="contained"
