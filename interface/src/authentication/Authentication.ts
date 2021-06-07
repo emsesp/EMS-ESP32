@@ -97,7 +97,7 @@ export function redirectingAuthorizedUpload(
 }
 
 /**
- * Wraps the normal fetch routene which redirects on 401 response.
+ * Wraps the normal fetch routine which redirects on 401 response.
  */
 export function redirectingAuthorizedFetch(
   url: RequestInfo,
