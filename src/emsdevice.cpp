@@ -51,7 +51,7 @@ static const __FlashStringHelper * const DeviceValueTAG_s[] PROGMEM = {
     F_(tag_none),            // ""
     F_(tag_heartbeat),       // ""
     F_(tag_boiler_data),     // ""
-    F_(tag_device_data_ww),  // "warm water"
+    F_(tag_boiler_data_ww),  // "ww"
     F_(tag_thermostat_data), // ""
     F_(tag_hc1),             // "hc1"
     F_(tag_hc2),             // "hc2"
@@ -86,7 +86,7 @@ static const __FlashStringHelper * const DeviceValueTAG_mqtt[] PROGMEM = {
     F_(tag_none),                // ""
     F_(heartbeat),               // "heartbeat"
     F_(tag_boiler_data_mqtt),    // ""
-    F_(tag_device_data_ww_mqtt), // "ww"
+    F_(tag_boiler_data_ww_mqtt), // "ww"
     F_(tag_thermostat_data),     // ""
     F_(tag_hc1),                 // "hc1"
     F_(tag_hc2),                 // "hc2"
@@ -499,8 +499,6 @@ void EMSdevice::register_device_value(uint8_t                             tag,
             Command::add(device_type_, name[0], f, name[1], FLAG_HC);
         } else if (tag >= TAG_WWC1 && tag <= TAG_WWC4) {
             Command::add(device_type_, name[0], f, name[1], FLAG_WWC);
-        } else if (tag == TAG_DEVICE_DATA_WW) {
-            Command::add(device_type_, name[0], f, name[1], FLAG_WW);
         } else {
             Command::add(device_type_, name[0], f, name[1], 0);
         }
@@ -556,7 +554,7 @@ std::string EMSdevice::get_value_uom(const char * key) {
     return std::string{}; // not found
 }
 
-// prepare array of device values used for the Web UI
+// prepare array of device values used for the WebUI
 // v = value, u=uom, n=name, c=cmd
 void EMSdevice::generate_values_json_web(JsonObject & json) {
     json["name"]   = to_string_short();
@@ -622,7 +620,8 @@ void EMSdevice::generate_values_json_web(JsonObject & json) {
                 obj["u"] = dv.uom;
 
                 // add name, prefixing the tag if it exists
-                if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
+                // except if it's a BOILER which uses a tag to split the MQTT topics
+                if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty() || device_type_ == DeviceType::BOILER) {
                     obj["n"] = dv.full_name;
                 } else {
                     char name[50];
@@ -645,6 +644,8 @@ void EMSdevice::generate_values_json_web(JsonObject & json) {
     }
 }
 
+// builds json with specific device value information
+// e.g. http://ems-esp/api?device=thermostat&cmd=seltemp
 bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t id) {
     JsonObject json = root;
     int8_t     tag  = id;
@@ -668,8 +669,9 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
             const char * value   = "value";
 
             json["name"] = dv.short_name;
+            // prefix tag if it's included
             if (dv.full_name != nullptr) {
-                if (dv.tag == TAG_DEVICE_DATA_WW) {
+                if (dv.tag >= DeviceValueTAG::TAG_HC1) {
                     json["fullname"] = tag_to_string(dv.tag) + " " + uuid::read_flash_string(dv.full_name);
                 } else {
                     json["fullname"] = dv.full_name;
@@ -827,7 +829,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
         if (((nested) || tag_filter == DeviceValueTAG::TAG_NONE || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !console)
             && !(dv.full_name == nullptr && dv.has_cmd)) {
             // we have a tag if it matches the filter given, and that the tag name is not empty/""
-            bool have_tag = ((dv.tag != tag_filter) && !tag_to_string(dv.tag).empty());
+            bool have_tag = ((dv.tag != tag_filter) && !tag_to_string(dv.tag).empty()) && (device_type_ != DeviceType::BOILER);
 
             char name[80];
             if (console) {
