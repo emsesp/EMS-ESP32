@@ -237,7 +237,7 @@ MAKE_PSTR_WORD(error)
 // boiler lists
 MAKE_PSTR_LIST(enum_off_time_date, F_(off), F_(time), F_(date))
 MAKE_PSTR_LIST(enum_freq, F_(off), F_(1x3min), F_(2x3min), F_(3x3min), F_(4x3min), F_(5x3min), F_(6x3min), F_(continuous))
-MAKE_PSTR_LIST(enum_charge, F_(3wayvalve), F_(chargepump))
+MAKE_PSTR_LIST(enum_charge, F_(chargepump), F_(3wayvalve))
 MAKE_PSTR_LIST(enum_comfort, F_(hot), F_(eco), F_(intelligent))
 MAKE_PSTR_LIST(enum_flow, F_(off), F_(flow), F_(bufferedflow), F_(buffer), F_(layeredbuffer))
 MAKE_PSTR_LIST(enum_reset, F_(maintenance), F_(error))
