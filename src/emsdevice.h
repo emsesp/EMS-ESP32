@@ -89,7 +89,7 @@ enum DeviceValueTAG : uint8_t {
     TAG_NONE = 0, // wild card
     TAG_HEARTBEAT,
     TAG_BOILER_DATA,
-    TAG_DEVICE_DATA_WW,
+    TAG_BOILER_DATA_WW,
     TAG_THERMOSTAT_DATA,
     TAG_HC1,
     TAG_HC2,
@@ -119,7 +119,7 @@ enum DeviceValueTAG : uint8_t {
 };
 
 // mqtt flags for command subscriptions
-enum MqttSubFlag : uint8_t { FLAG_NORMAL = 0, FLAG_HC, FLAG_WWC, FLAG_WW, FLAG_NOSUB };
+enum MqttSubFlag : uint8_t { FLAG_NORMAL = 0, FLAG_HC, FLAG_WWC, FLAG_NOSUB };
 
 // mqtt-HA flags
 enum DeviceValueHA : uint8_t { HA_NONE = 0, HA_VALUE, HA_DONE };

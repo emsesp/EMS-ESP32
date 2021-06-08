@@ -53,7 +53,7 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
-    if (strcmp(command, "general2") == 0) {
+    if (strcmp(command, "310") == 0) {
         EMSESP::logger().info(F("Testing GB072/RC310..."));
 
         add_device(0x08, 123); // GB072
@@ -73,6 +73,9 @@ bool Test::run_test(const char * command, int8_t id) {
         // Thermostat 0x2A5 for HC1
         uart_telegram({0x10, 00, 0xFF, 00, 01,   0xA5, 0x80, 00, 01, 0x30, 0x28, 00, 0x30, 0x28, 01, 0x54,
                        03,   03, 01,   01, 0x54, 02,   0xA8, 00, 00, 0x11, 01,   03, 0xFF, 0xFF, 00});
+
+        // RC300WWmode2(0x31D), data: 00 00 09 07
+        uart_telegram({0x10, 00, 0xFF, 00, 02, 0x1D, 00, 00, 0x09, 0x07});
 
         return true;
     }
@@ -325,6 +328,15 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "gateway") {
         shell.printfln(F("Testing Gateway..."));
         run_test("gateway");
+    }
+
+    if (command == "310") {
+        shell.printfln(F("Testing RC310..."));
+        run_test("310");
+        shell.invoke_command("show devices");
+        shell.invoke_command("show");
+        shell.invoke_command("call system publish");
+        shell.invoke_command("show mqtt");
     }
 
     if (command == "web") {
@@ -915,6 +927,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("call mixer info");
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
+    }
+
+    if (command == "api") {
+        shell.printfln(F("Testing RESTful API..."));
+        // TODO add API
+        // AsyncWebServerRequest * request;
     }
 }
 

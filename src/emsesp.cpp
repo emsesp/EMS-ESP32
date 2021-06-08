@@ -460,8 +460,8 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                     Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_BOILER_DATA), json);
                 }
                 doc.clear();
-                if (emsdevice->generate_values_json(json, DeviceValueTAG::TAG_DEVICE_DATA_WW, false)) {
-                    Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_DEVICE_DATA_WW), json);
+                if (emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA_WW, false)) {
+                    Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_BOILER_DATA_WW), json);
                 }
                 need_publish = false;
             }
@@ -561,6 +561,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
     Mqtt::publish(F_(response), doc.as<JsonObject>());
 }
 
+// builds json with the detail of each value, for all device types and the dallas sensor
 bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->device_type() == devicetype) {
