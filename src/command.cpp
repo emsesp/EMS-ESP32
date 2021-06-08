@@ -88,9 +88,9 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
     if (cf->cmdfunction_json_) {
         return ((cf->cmdfunction_json_)(value, id_new, json));
     } else {
-        if (value == nullptr || strlen(value) == 0 || strcmp(value, "?") == 0 || strcmp(value, "*") == 0) {
-            return EMSESP::get_device_value_info(json, cmd_new, id_new, device_type);
-        }
+        // if (value == nullptr || strlen(value) == 0 || strcmp(value, "?") == 0 || strcmp(value, "*") == 0) {
+        //     return EMSESP::get_device_value_info(json, cmd_new, id_new, device_type);
+        // }
         return ((cf->cmdfunction_)(value, id_new));
     }
 }
@@ -101,9 +101,8 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, char * c
     if (id == 0) {
         return nullptr;
     }
-    // empty command is info with id0 or info_short
+    // empty command is info with id0
     if (cmd[0] == '\0') {
-        // strcpy(cmd, "info_short");
         strcpy(cmd, "info");
         id = 0;
     }
@@ -115,7 +114,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, char * c
     // scan for prefix hc.
     for (uint8_t i = DeviceValueTAG::TAG_HC1; i <= DeviceValueTAG::TAG_HC4; i++) {
         const char * tag = EMSdevice::tag_to_string(i).c_str();
-        uint8_t len = strlen(tag);
+        uint8_t      len = strlen(tag);
         if (strncmp(cmd, tag, len) == 0) {
             if (cmd[len] != '\0') {
                 strcpy(cmd, &cmd[len + 1]);
@@ -130,7 +129,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, char * c
     // scan for prefix wwc.
     for (uint8_t i = DeviceValueTAG::TAG_WWC1; i <= DeviceValueTAG::TAG_WWC4; i++) {
         const char * tag = EMSdevice::tag_to_string(i).c_str();
-        uint8_t len = strlen(tag);
+        uint8_t      len = strlen(tag);
         if (strncmp(cmd, tag, len) == 0) {
             if (cmd[len] != '\0') {
                 strcpy(cmd, &cmd[len + 1]);
@@ -147,7 +146,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, char * c
         strlcpy(cmd, "info", 20);
     }
 
-    return find_command(device_type ,cmd);
+    return find_command(device_type, cmd);
 }
 
 // add a command to the list, which does not return json
@@ -222,11 +221,7 @@ bool Command::list(const uint8_t device_type, JsonObject & json) {
     for (auto & cl : sorted_cmds) {
         for (const auto & cf : cmdfunctions_) {
             if ((cf.device_type_ == device_type) && !cf.hidden_ && cf.description_ && (cl == uuid::read_flash_string(cf.cmd_))) {
-                if (cf.flag_ == FLAG_WW) {
-                    json[cl] = EMSdevice::tag_to_string(TAG_DEVICE_DATA_WW) + " " + uuid::read_flash_string(cf.description_);
-                } else {
-                    json[cl] = cf.description_;
-                }
+                json[cl] = cf.description_;
             }
         }
     }
@@ -281,10 +276,6 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                     shell.print(' ');
                 }
                 shell.print(COLOR_BRIGHT_CYAN);
-                if (cf.flag_ == FLAG_WW) {
-                    shell.print(EMSdevice::tag_to_string(TAG_DEVICE_DATA_WW));
-                    shell.print(' ');
-                }
                 shell.print(uuid::read_flash_string(cf.description_));
                 shell.print(COLOR_RESET);
             }
