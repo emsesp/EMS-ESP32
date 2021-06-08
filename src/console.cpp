@@ -377,14 +377,14 @@ void EMSESPShell::add_console_commands() {
             JsonObject          json = doc.to<JsonObject>();
 
             bool ok = false;
-            // validate the command
+            // validate that a command is present
             if (arguments.size() < 2) {
-                // no cmd specified, default to empty command
-                if (Command::call(device_type, "", "", -1, json)) {
-                    serializeJsonPretty(doc, shell);
-                    shell.println();
-                    return;
-                }
+                // // no cmd specified, default to empty command
+                // if (Command::call(device_type, "", "", -1, json)) {
+                //     serializeJsonPretty(doc, shell);
+                //     shell.println();
+                //     return;
+                // }
                 shell.print(F("Missing command. Available commands are: "));
                 Command::show(shell, device_type, false); // non-verbose mode
                 return;
