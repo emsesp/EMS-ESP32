@@ -120,9 +120,9 @@ const pluralize = (count: number, noun: string, suffix = 's') =>
 function formatValue(value: any, uom: number) {
   switch (uom) {
     case DeviceValueUOM.HOURS:
-      return formatDuration(value * 60);
+      return value ? formatDuration(value * 60) : '0 hours';
     case DeviceValueUOM.MINUTES:
-      return formatDuration(value);
+      return value ? formatDuration(value) : '0 minutes';
     case DeviceValueUOM.NONE:
       return value;
     case DeviceValueUOM.NUM:
