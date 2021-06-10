@@ -81,6 +81,7 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
         return false;
     }
 
+    // this is for endpoints that don't have commands, i.e not writable (e.g. boiler/syspress)
     if (cf == nullptr) {
         return EMSESP::get_device_value_info(json, cmd_new, id_new, device_type);
     }
@@ -88,9 +89,9 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
     if (cf->cmdfunction_json_) {
         return ((cf->cmdfunction_json_)(value, id_new, json));
     } else {
-        // if (value == nullptr || strlen(value) == 0 || strcmp(value, "?") == 0 || strcmp(value, "*") == 0) {
-        //     return EMSESP::get_device_value_info(json, cmd_new, id_new, device_type);
-        // }
+        if ((device_type != EMSdevice::DeviceType::SYSTEM) && (value == nullptr || strlen(value) == 0 || strcmp(value, "?") == 0 || strcmp(value, "*") == 0)) {
+            return EMSESP::get_device_value_info(json, cmd_new, id_new, device_type);
+        }
         return ((cf->cmdfunction_)(value, id_new));
     }
 }
