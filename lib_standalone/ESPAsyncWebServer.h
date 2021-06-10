@@ -76,6 +76,7 @@ class AsyncWebServerRequest {
     void * _tempObject;
 
     AsyncWebServerRequest(AsyncWebServer *, AsyncClient *){};
+    AsyncWebServerRequest(){};
     ~AsyncWebServerRequest(){};
 
     AsyncClient * client() {
@@ -119,6 +120,10 @@ class AsyncWebServerRequest {
         return false;
     }
 
+    bool hasParam(const char * name) const {
+        return false;
+    }
+
     bool hasParam(const __FlashStringHelper * data) const {
         return false;
     }
@@ -136,6 +141,10 @@ class AsyncWebServerRequest {
     }
 
     AsyncWebParameter * getParam(const __FlashStringHelper * data) const {
+        return nullptr;
+    }
+
+    AsyncWebParameter * getParam(const char * name) const {
         return nullptr;
     }
 

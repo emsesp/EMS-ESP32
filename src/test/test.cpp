@@ -931,8 +931,17 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     if (command == "api") {
         shell.printfln(F("Testing RESTful API..."));
-        // TODO add API
-        // AsyncWebServerRequest * request;
+        Mqtt::ha_enabled(false);
+        run_test("general");
+        DynamicJsonDocument   doc(EMSESP_JSON_SIZE_XXLARGE_DYN);
+        JsonObject            json = doc.to<JsonObject>();
+        AsyncWebServerRequest request;
+        request.method(HTTP_GET);
+        request.url("/api/thermostat/seltemp");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
+        request.url("/api/boiler/syspress");
+        EMSESP::webAPIService.webAPIService_get(&request);
     }
 }
 

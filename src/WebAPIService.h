@@ -60,12 +60,12 @@ class WebAPIService {
   public:
     WebAPIService(AsyncWebServer * server, SecurityManager * securityManager);
 
+    void webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json); // for POSTs
+    void webAPIService_get(AsyncWebServerRequest * request);                      // for GETs
+
   private:
     SecurityManager *           _securityManager;
     AsyncCallbackJsonWebHandler _apiHandler; // for POSTs
-
-    void webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json); // for POSTs
-    void webAPIService_get(AsyncWebServerRequest * request);                      // for GETs
 
     void parse(AsyncWebServerRequest * request, std::string & device, std::string & cmd, int id, std::string & value);
     void send_message_response(AsyncWebServerRequest * request, uint16_t error_code, const char * error_message = nullptr);
