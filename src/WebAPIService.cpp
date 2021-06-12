@@ -195,8 +195,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
     response->setLength();
     request->send(response); // send json response
 
-// TODO debug
-#if defined EMSESP_STANDALONE
+#if defined(EMSESP_STANDALONE)
     Serial.print(COLOR_YELLOW);
     if (json.size() != 0) {
         serializeJsonPretty(json, Serial);
