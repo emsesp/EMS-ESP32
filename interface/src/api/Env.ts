@@ -3,6 +3,7 @@ export const PROJECT_PATH = process.env.REACT_APP_PROJECT_PATH!;
 
 export const ENDPOINT_ROOT = calculateEndpointRoot('/rest/');
 export const WEB_SOCKET_ROOT = calculateWebSocketRoot('/ws/');
+export const EVENT_SOURCE_ROOT = calculateEndpointRoot('/es/');
 
 function calculateEndpointRoot(endpointPath: string) {
   const httpRoot = process.env.REACT_APP_HTTP_ROOT;

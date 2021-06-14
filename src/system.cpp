@@ -849,6 +849,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         node                         = json.createNestedObject("Settings");
         node["tx_mode"]              = settings.tx_mode;
+        node["tx_delay"]             = settings.tx_delay;
         node["ems_bus_id"]           = settings.ems_bus_id;
         node["syslog_enabled"]       = settings.syslog_enabled;
         node["syslog_level"]         = settings.syslog_level;

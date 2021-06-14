@@ -1,21 +1,23 @@
 const express = require('express')
 const path = require('path')
-
 const msgpack = require('@msgpack/msgpack')
-// import { encode } from "@msgpack/msgpack";
 
+// REST API
 const app = express()
 const port = process.env.PORT || 3080
-
+const REST_ENDPOINT_ROOT = '/rest/'
 app.use(express.static(path.join(__dirname, '../interface/build')))
 app.use(express.json())
 
-const ENDPOINT_ROOT = '/rest/'
+// ES API
+const server = express()
+const es_port = 3090
+const ES_ENDPOINT_ROOT = '/es/'
 
 // NTP
-const NTP_STATUS_ENDPOINT = ENDPOINT_ROOT + 'ntpStatus'
-const NTP_SETTINGS_ENDPOINT = ENDPOINT_ROOT + 'ntpSettings'
-const TIME_ENDPOINT = ENDPOINT_ROOT + 'time'
+const NTP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpStatus'
+const NTP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpSettings'
+const TIME_ENDPOINT = REST_ENDPOINT_ROOT + 'time'
 const ntp_settings = {
   enabled: true,
   server: 'time.google.com',
@@ -31,8 +33,8 @@ const ntp_status = {
 }
 
 // AP
-const AP_SETTINGS_ENDPOINT = ENDPOINT_ROOT + 'apSettings'
-const AP_STATUS_ENDPOINT = ENDPOINT_ROOT + 'apStatus'
+const AP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'apSettings'
+const AP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'apStatus'
 const ap_settings = {
   provision_mode: 1,
   ssid: 'ems-esp',
@@ -49,10 +51,10 @@ const ap_status = {
 }
 
 // NETWORK
-const NETWORK_SETTINGS_ENDPOINT = ENDPOINT_ROOT + 'networkSettings'
-const NETWORK_STATUS_ENDPOINT = ENDPOINT_ROOT + 'networkStatus'
-const SCAN_NETWORKS_ENDPOINT = ENDPOINT_ROOT + 'scanNetworks'
-const LIST_NETWORKS_ENDPOINT = ENDPOINT_ROOT + 'listNetworks'
+const NETWORK_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'networkSettings'
+const NETWORK_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'networkStatus'
+const SCAN_NETWORKS_ENDPOINT = REST_ENDPOINT_ROOT + 'scanNetworks'
+const LIST_NETWORKS_ENDPOINT = REST_ENDPOINT_ROOT + 'listNetworks'
 const network_settings = {
   ssid: 'myWifi',
   password: 'myPassword',
@@ -134,7 +136,7 @@ const list_networks = {
 }
 
 // OTA
-const OTA_SETTINGS_ENDPOINT = ENDPOINT_ROOT + 'otaSettings'
+const OTA_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'otaSettings'
 const ota_settings = {
   enabled: true,
   port: 8266,
@@ -142,8 +144,8 @@ const ota_settings = {
 }
 
 // MQTT
-const MQTT_SETTINGS_ENDPOINT = ENDPOINT_ROOT + 'mqttSettings'
-const MQTT_STATUS_ENDPOINT = ENDPOINT_ROOT + 'mqttStatus'
+const MQTT_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttSettings'
+const MQTT_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttStatus'
 const mqtt_settings = {
   enabled: true,
   host: '192.168.1.4',
@@ -179,15 +181,15 @@ const mqtt_status = {
 }
 
 // SYSTEM
-const FEATURES_ENDPOINT = ENDPOINT_ROOT + 'features'
-const VERIFY_AUTHORIZATION_ENDPOINT = ENDPOINT_ROOT + 'verifyAuthorization'
-const SYSTEM_STATUS_ENDPOINT = ENDPOINT_ROOT + 'systemStatus'
-const SECURITY_SETTINGS_ENDPOINT = ENDPOINT_ROOT + 'securitySettings'
-const RESTART_ENDPOINT = ENDPOINT_ROOT + 'restart'
-const FACTORY_RESET_ENDPOINT = ENDPOINT_ROOT + 'factoryReset'
-const UPLOAD_FIRMWARE_ENDPOINT = ENDPOINT_ROOT + 'uploadFirmware'
-const SIGN_IN_ENDPOINT = ENDPOINT_ROOT + 'signIn'
-const GENERATE_TOKEN_ENDPOINT = ENDPOINT_ROOT + 'generateToken'
+const FEATURES_ENDPOINT = REST_ENDPOINT_ROOT + 'features'
+const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization'
+const SYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'systemStatus'
+const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings'
+const RESTART_ENDPOINT = REST_ENDPOINT_ROOT + 'restart'
+const FACTORY_RESET_ENDPOINT = REST_ENDPOINT_ROOT + 'factoryReset'
+const UPLOAD_FIRMWARE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFirmware'
+const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn'
+const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken'
 const system_status = {
   emsesp_version: '3.1 demo',
   esp_platform: 'ESP32',
@@ -226,13 +228,13 @@ const signin = {
 const generate_token = { token: '1234' }
 
 // EMS-ESP Project specific
-const EMSESP_SETTINGS_ENDPOINT = ENDPOINT_ROOT + 'emsespSettings'
-const EMSESP_ALLDEVICES_ENDPOINT = ENDPOINT_ROOT + 'allDevices'
-const EMSESP_SCANDEVICES_ENDPOINT = ENDPOINT_ROOT + 'scanDevices'
-const EMSESP_DEVICEDATA_ENDPOINT = ENDPOINT_ROOT + 'deviceData'
-const EMSESP_STATUS_ENDPOINT = ENDPOINT_ROOT + 'emsespStatus'
-const EMSESP_BOARDPROFILE_ENDPOINT = ENDPOINT_ROOT + 'boardProfile'
-const WRITE_VALUE_ENDPOINT = ENDPOINT_ROOT + 'writeValue'
+const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'emsespSettings'
+const EMSESP_ALLDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'allDevices'
+const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices'
+const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData'
+const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'emsespStatus'
+const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile'
+const WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
 const emsesp_settings = {
   tx_mode: 1,
   tx_delay: 0,
@@ -912,5 +914,60 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
   res.json(data)
 })
 
+// create helper middleware so we can reuse server-sent events
+const useServerSentEventsMiddleware = (req, res, next) => {
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache')
+
+  // only if you want anyone to access this endpoint
+  res.setHeader('Access-Control-Allow-Origin', '*')
+
+  res.flushHeaders()
+
+  const sendEventStreamData = (data) => {
+    const sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`
+    res.write(sseFormattedResponse)
+  }
+
+  // we are attaching sendEventStreamData to res, so we can use it later
+  Object.assign(res, {
+    sendEventStreamData,
+  })
+
+  next()
+}
+
+const streamLog = (req, res) => {
+  let interval = setInterval(function generateAndSendLog() {
+    count = count + 1
+
+    const data = {
+      time: '000+00:00:00.000',
+      level: 4,
+      message: 'this is message #' + count,
+    }
+
+    res.sendEventStreamData(data)
+  }, 1000)
+
+  res.on('close', () => {
+    clearInterval(interval)
+    res.end()
+  })
+}
+
+// event source, server-sent events SSE
+const ES_LOG_ENDPOINT = ES_ENDPOINT_ROOT + 'log'
+let count = 0
+server.get(ES_LOG_ENDPOINT, useServerSentEventsMiddleware, streamLog)
+server.listen(es_port, () =>
+  console.log(
+    `Mock EventSource server for EMS-ESP listening at http://localhost:${es_port}`,
+  ),
+)
+
+// rest API
 app.listen(port)
-console.log(`Mock API Server is up and running at: http://localhost:${port}`)
+console.log(
+  `Mock RESTful API server for EMS-ESP is up and running at http://localhost:${port}`,
+)

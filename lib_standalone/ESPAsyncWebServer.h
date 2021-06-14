@@ -13,6 +13,7 @@ class AsyncWebServerResponse;
 class AsyncJsonResponse;
 class PrettyAsyncJsonResponse;
 class MsgpackAsyncJsonResponse;
+class AsyncEventSource;
 
 class AsyncWebParameter {
   private:
@@ -197,6 +198,10 @@ class AsyncWebHandler {
     virtual bool isRequestHandlerTrivial() {
         return true;
     }
+
+    AsyncWebHandler & setFilter(ArRequestFilterFunction fn) {
+        return *this;
+    }
 };
 
 class AsyncWebServerResponse {
@@ -227,6 +232,19 @@ class AsyncWebServer {
     }
 
     void on(const char * uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest){};
+};
+
+
+class AsyncEventSource : public AsyncWebHandler {
+  public:
+    AsyncEventSource(const String & url){};
+    ~AsyncEventSource(){};
+
+    size_t count() const {
+        return 1;
+    }
+
+    void send(const char * message, const char * event = NULL, uint32_t id = 0, uint32_t reconnect = 0){};
 };
 
 
