@@ -1,23 +1,26 @@
 import { Component } from 'react';
-import { FormActions, FormButton } from '../components';
+
+import { createStyles, WithStyles, Theme } from '@material-ui/core';
 
 import {
-  createStyles,
-  WithStyles,
-  withStyles,
-  Typography,
-  Theme,
-  Paper
-} from '@material-ui/core';
+  restController,
+  RestControllerProps,
+  RestFormLoader,
+  SectionContent
+} from '../components';
 
-import { LogEvent } from './types';
-import { EVENT_SOURCE_ROOT } from '../api/Env';
-import LogEventConsole from './LogEventConsole';
 import { addAccessTokenParameter } from '../authentication';
 
-import SaveIcon from '@material-ui/icons/Save';
+import { ENDPOINT_ROOT, EVENT_SOURCE_ROOT } from '../api';
+export const FETCH_LOG_ENDPOINT = ENDPOINT_ROOT + 'fetchLog';
+export const LOG_SETTINGS_ENDPOINT = ENDPOINT_ROOT + 'logSettings';
 
-const LOG_EVENT_EVENT_SOURCE_URL = EVENT_SOURCE_ROOT + 'log';
+export const LOG_EVENT_EVENT_SOURCE_URL = EVENT_SOURCE_ROOT + 'log';
+
+import LogEventForm from './LogEventForm';
+import LogEventConsole from './LogEventConsole';
+
+import { LogEvent, LogSettings } from './types';
 
 interface LogEventControllerState {
   eventSource?: EventSource;
@@ -32,7 +35,8 @@ const styles = (theme: Theme) =>
     }
   });
 
-type LogEventControllerProps = WithStyles<typeof styles>;
+type LogEventControllerProps = RestControllerProps<LogSettings> &
+  WithStyles<typeof styles>;
 
 class LogEventController extends Component<
   LogEventControllerProps,
@@ -49,6 +53,8 @@ class LogEventController extends Component<
   }
 
   componentDidMount() {
+    this.props.loadData();
+    this.fetchLog();
     this.configureEventSource();
   }
 
@@ -60,6 +66,24 @@ class LogEventController extends Component<
       clearTimeout(this.reconnectTimeout);
     }
   }
+
+  fetchLog = () => {
+    fetch(FETCH_LOG_ENDPOINT)
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json();
+        } else {
+          throw Error('Unexpected status code: ' + response.status);
+        }
+      })
+      .then((json) => {
+        this.setState({ events: json.events });
+      })
+      .catch((error) => {
+        this.setState({ events: [] });
+        throw Error('Unexpected error: ' + error);
+      });
+  };
 
   configureEventSource = () => {
     this.eventSource = new EventSource(
@@ -86,24 +110,16 @@ class LogEventController extends Component<
   };
 
   render() {
-    const { classes } = this.props;
     return (
-      <Paper id="log-window" className={classes.content}>
-        <Typography variant="h6">System Log</Typography>
-        <FormActions>
-          <FormButton
-            startIcon={<SaveIcon />}
-            variant="contained"
-            color="secondary"
-            // onClick={this.requestNetworkScan}
-          >
-            Save
-          </FormButton>
-        </FormActions>
+      <SectionContent title="System Log" id="log-window">
+        <RestFormLoader
+          {...this.props}
+          render={(formProps) => <LogEventForm {...formProps} />}
+        />
         <LogEventConsole events={this.state.events} />
-      </Paper>
+      </SectionContent>
     );
   }
 }
 
-export default withStyles(styles)(LogEventController);
+export default restController(LOG_SETTINGS_ENDPOINT, LogEventController);

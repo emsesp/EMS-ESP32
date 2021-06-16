@@ -223,11 +223,8 @@ void WebAPIService::send_message_response(AsyncWebServerRequest * request, uint1
 }
 
 /**
- * Extract only the path component from the passed URI 
- * and normalized it.
- * Ex. //one/two////three///
- * becomes
- *  /one/two/three
+ * Extract only the path component from the passed URI and normalized it.
+ * Ex. //one/two////three/// becomes /one/two/three
  */
 std::string SUrlParser::path() {
     std::string s = "/"; // set up the beginning slash

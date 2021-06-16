@@ -38,10 +38,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     whiteSpace: 'nowrap'
   },
   debug: {
-    color: '#0000ff'
+    color: '#00FFFF'
   },
   info: {
-    color: '#00ff00'
+    color: '#ffff00'
   },
   notice: {
     color: '#ffff00'
@@ -67,7 +67,8 @@ const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
         return classes.info;
       case LogLevel.NOTICE:
         return classes.notice;
-      case LogLevel.ERR:
+      case LogLevel.WARNING:
+      case LogLevel.ERROR:
         return classes.err;
       default:
         return classes.unknown;
@@ -80,10 +81,14 @@ const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
         return 'DEBUG';
       case LogLevel.INFO:
         return 'INFO';
-      case LogLevel.ERR:
-        return 'ERR';
+      case LogLevel.ERROR:
+        return 'ERROR';
       case LogLevel.NOTICE:
         return 'NOTICE';
+      case LogLevel.WARNING:
+        return 'WARNING';
+      case LogLevel.TRACE:
+        return 'TRACE';
       default:
         return '?';
     }
@@ -91,17 +96,23 @@ const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
 
   const paddedLevelLabel = (level: LogLevel) => {
     const label = levelLabel(level);
-    return label.padStart(7, '\xa0');
+    return label.padStart(8, '\xa0');
+  };
+
+  const paddedNameLabel = (name: string) => {
+    const label = '[' + name + ']';
+    return label.padStart(8, '\xa0');
   };
 
   return (
-    <Box className={classes.console}>
+    <Box id="log-window" className={classes.console}>
       {events.map((e) => (
         <div className={classes.entry}>
-          <span>{e.time} </span>
+          <span>{e.time}</span>
           <span className={styleLevel(e.level)}>
             {paddedLevelLabel(e.level)}{' '}
           </span>
+          <span>{paddedNameLabel(e.name)} </span>
           <span>{e.message}</span>
         </div>
       ))}

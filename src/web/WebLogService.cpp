@@ -23,10 +23,22 @@ using namespace std::placeholders;
 namespace emsesp {
 
 WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * securityManager)
-    : _events(EVENT_SOURCE_LOG_PATH) {
+    : _events(EVENT_SOURCE_LOG_PATH)
+    , _setLevel(LOG_SETTINGS_PATH, std::bind(&WebLogService::setLevel, this, _1, _2), 256) { // for POSTS
+
     _events.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
     server->addHandler(&_events);
     server->on(EVENT_SOURCE_LOG_PATH, HTTP_GET, std::bind(&WebLogService::forbidden, this, _1));
+
+    // for bring back the whole log
+    server->on(FETCH_LOG_PATH, HTTP_GET, std::bind(&WebLogService::fetchLog, this, _1));
+
+    server->on(LOG_SETTINGS_PATH, HTTP_GET, std::bind(&WebLogService::getLevel, this, _1));
+
+    // for setting a level
+    server->addHandler(&_setLevel);
+
+    // start event source service
     start();
 }
 
@@ -40,22 +52,6 @@ void WebLogService::start() {
 
 uuid::log::Level WebLogService::log_level() const {
     return uuid::log::Logger::get_log_level(this);
-}
-
-void WebLogService::remove_queued_messages(uuid::log::Level level) {
-    unsigned long offset = 0;
-
-    for (auto it = log_messages_.begin(); it != log_messages_.end();) {
-        if (it->content_->level > level) {
-            offset++;
-            it = log_messages_.erase(it);
-        } else {
-            it->id_ -= offset;
-            it++;
-        }
-    }
-
-    log_message_id_ -= offset;
 }
 
 void WebLogService::log_level(uuid::log::Level level) {
@@ -86,22 +82,22 @@ void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
 }
 
 void WebLogService::loop() {
-    if (!_events.count()) {
+    if (!_events.count() || log_messages_.empty()) {
         return;
     }
 
-    while (!log_messages_.empty() && can_transmit()) {
-        transmit(log_messages_.front());
-        log_messages_.pop_front();
-    }
-}
-
-bool WebLogService::can_transmit() {
+    // put a small delay in
     const uint64_t now = uuid::get_uptime_ms();
-    if (now < last_transmit_ || now - last_transmit_ < 100) {
-        return false;
+    if (now < last_transmit_ || now - last_transmit_ < 50) {
+        return;
     }
-    return true;
+
+    // see if we've advanced
+    if (log_messages_.back().id_ > log_message_id_tail_) {
+        transmit(log_messages_.back());
+        log_message_id_tail_ = log_messages_.back().id_;
+        last_transmit_       = uuid::get_uptime_ms();
+    }
 }
 
 // send to web eventsource
@@ -110,6 +106,7 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
     JsonObject          logEvent     = jsonDocument.to<JsonObject>();
     logEvent["time"]                 = uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3);
     logEvent["level"]                = message.content_->level;
+    logEvent["name"]                 = message.content_->name;
     logEvent["message"]              = message.content_->text;
 
     size_t len    = measureJson(jsonDocument);
@@ -119,8 +116,57 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
         _events.send(buffer, "message", millis());
     }
     delete[] buffer;
+}
 
-    last_transmit_ = uuid::get_uptime_ms();
+// send the current log buffer to the API
+void WebLogService::fetchLog(AsyncWebServerRequest * request) {
+    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    JsonObject          root     = response->getRoot();
+
+    JsonArray log = root.createNestedArray("events");
+
+    for (const auto & msg : log_messages_) {
+        JsonObject logEvent = log.createNestedObject();
+        auto       message  = std::move(msg);
+        logEvent["time"]    = uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3);
+        logEvent["level"]   = message.content_->level;
+        logEvent["name"]    = message.content_->name;
+        logEvent["message"] = message.content_->text;
+    }
+
+    log_message_id_tail_ = log_messages_.back().id_;
+
+    response->setLength();
+    request->send(response);
+}
+
+// sets the level
+void WebLogService::setLevel(AsyncWebServerRequest * request, JsonVariant & json) {
+    if (not json.is<JsonObject>()) {
+        return;
+    }
+    auto &&          body  = json.as<JsonObject>();
+    uuid::log::Level level = body["level"];
+    log_level(level);
+
+    // send the value back
+    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
+    JsonObject          root     = response->getRoot();
+    root["level"]                = log_level();
+    response->setLength();
+    request->send(response);
+}
+
+// return the current log level
+void WebLogService::getLevel(AsyncWebServerRequest * request) {
+    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
+    JsonObject          root     = response->getRoot();
+
+    auto level    = log_level();
+    root["level"] = level;
+
+    response->setLength();
+    request->send(response);
 }
 
 } // namespace emsesp

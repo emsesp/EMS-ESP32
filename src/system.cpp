@@ -413,7 +413,6 @@ void System::loop() {
         send_heartbeat();
     }
 
-    /*
 #ifndef EMSESP_STANDALONE
 #if defined(EMSESP_DEBUG)
     static uint32_t last_memcheck_ = 0;
@@ -423,7 +422,6 @@ void System::loop() {
     }
 #endif
 #endif
-*/
 
 #endif
 }

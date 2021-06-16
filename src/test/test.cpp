@@ -930,6 +930,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     }
 
     if (command == "api") {
+#if defined(EMSESP_STANDALONE)
         shell.printfln(F("Testing RESTful API..."));
         Mqtt::ha_enabled(false);
         run_test("general");
@@ -942,6 +943,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         request.url("/api/boiler/syspress");
         EMSESP::webAPIService.webAPIService_get(&request);
+#endif
     }
 }
 
