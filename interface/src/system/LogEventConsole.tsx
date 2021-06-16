@@ -108,12 +108,10 @@ const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
     <Box id="log-window" className={classes.console}>
       {events.map((e) => (
         <div className={classes.entry}>
-          <span>{e.time}</span>
-          <span className={styleLevel(e.level)}>
-            {paddedLevelLabel(e.level)}{' '}
-          </span>
-          <span>{paddedNameLabel(e.name)} </span>
-          <span>{e.message}</span>
+          <span>{e.t}</span>
+          <span className={styleLevel(e.l)}>{paddedLevelLabel(e.l)} </span>
+          <span>{paddedNameLabel(e.n)} </span>
+          <span>{e.m}</span>
         </div>
       ))}
     </Box>

@@ -22,7 +22,7 @@ class EMSESPDevicesController extends Component<EMSESPDevicesControllerProps> {
 
   render() {
     return (
-      <SectionContent title="Devices & Sensors">
+      <SectionContent title="Devices &amp; Sensors">
         <RestFormLoader
           {...this.props}
           render={(formProps) => <EMSESPDevicesForm {...formProps} />}

@@ -18,46 +18,47 @@ const ES_ENDPOINT_ROOT = '/es/'
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings'
 const log_settings = {
   level: 6,
+  max_messages: 25,
 }
 
 const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog'
 const fetch_log = {
   events: [
     {
-      time: '000+00:00:00.001',
-      level: 3,
-      name: 'system',
-      message: 'this is message 3',
+      t: '000+00:00:00.001',
+      l: 3,
+      n: 'system',
+      m: 'this is message 3',
     },
     {
-      time: '000+00:00:00.002',
-      level: 4,
-      name: 'system',
-      message: 'this is message 4',
+      t: '000+00:00:00.002',
+      l: 4,
+      n: 'system',
+      m: 'this is message 4',
     },
     {
-      time: '000+00:00:00.002',
-      level: 5,
-      name: 'system',
-      message: 'this is message 5',
+      t: '000+00:00:00.002',
+      l: 5,
+      n: 'system',
+      m: 'this is message 5',
     },
     {
-      time: '000+00:00:00.002',
-      level: 6,
-      name: 'system',
-      message: 'this is message 6',
+      t: '000+00:00:00.002',
+      l: 6,
+      n: 'system',
+      m: 'this is message 6',
     },
     {
-      time: '000+00:00:00.002',
-      level: 7,
-      name: 'emsesp',
-      message: 'this is message 7',
+      t: '000+00:00:00.002',
+      l: 7,
+      n: 'emsesp',
+      m: 'this is message 7',
     },
     {
-      time: '000+00:00:00.002',
-      level: 8,
-      name: 'mqtt',
-      message: 'this is message 8',
+      t: '000+00:00:00.002',
+      l: 8,
+      n: 'mqtt',
+      m: 'this is message 8',
     },
   ],
 }
@@ -753,7 +754,9 @@ const emsesp_devicedata_3 = {
 
 // LOG
 app.get(FETCH_LOG_ENDPOINT, (req, res) => {
-  res.json(fetch_log)
+  const encoded = msgpack.encode(fetch_log)
+  res.write(encoded, 'binary')
+  res.end(null, 'binary')
 })
 app.get(LOG_SETTINGS_ENDPOINT, (req, res) => {
   res.json(log_settings)

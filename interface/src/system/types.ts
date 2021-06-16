@@ -47,12 +47,13 @@ export enum LogLevel {
 }
 
 export interface LogEvent {
-  time: string;
-  level: LogLevel;
-  name: string;
-  message: string;
+  t: string;
+  l: LogLevel;
+  n: string;
+  m: string;
 }
 
 export interface LogSettings {
   level: LogLevel;
+  max_messages: number;
 }

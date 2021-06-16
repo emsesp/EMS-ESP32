@@ -22,6 +22,9 @@ import LogEventConsole from './LogEventConsole';
 
 import { LogEvent, LogSettings } from './types';
 
+import { Decoder } from '@msgpack/msgpack';
+const decoder = new Decoder();
+
 interface LogEventControllerState {
   eventSource?: EventSource;
   events: LogEvent[];
@@ -71,12 +74,13 @@ class LogEventController extends Component<
     fetch(FETCH_LOG_ENDPOINT)
       .then((response) => {
         if (response.status === 200) {
-          return response.json();
+          return response.arrayBuffer();
         } else {
           throw Error('Unexpected status code: ' + response.status);
         }
       })
-      .then((json) => {
+      .then((arrayBuffer) => {
+        const json: any = decoder.decode(arrayBuffer);
         this.setState({ events: json.events });
       })
       .catch((error) => {

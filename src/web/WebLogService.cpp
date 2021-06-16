@@ -33,6 +33,7 @@ WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * security
     // for bring back the whole log
     server->on(FETCH_LOG_PATH, HTTP_GET, std::bind(&WebLogService::fetchLog, this, _1));
 
+    // get when page is loaded
     server->on(LOG_SETTINGS_PATH, HTTP_GET, std::bind(&WebLogService::getLevel, this, _1));
 
     // for setting a level
@@ -104,10 +105,10 @@ void WebLogService::loop() {
 void WebLogService::transmit(const QueuedLogMessage & message) {
     DynamicJsonDocument jsonDocument = DynamicJsonDocument(EMSESP_JSON_SIZE_SMALL);
     JsonObject          logEvent     = jsonDocument.to<JsonObject>();
-    logEvent["time"]                 = uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3);
-    logEvent["level"]                = message.content_->level;
-    logEvent["name"]                 = message.content_->name;
-    logEvent["message"]              = message.content_->text;
+    logEvent["t"]                    = uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3);
+    logEvent["l"]                    = message.content_->level;
+    logEvent["n"]                    = message.content_->name;
+    logEvent["m"]                    = message.content_->text;
 
     size_t len    = measureJson(jsonDocument);
     char * buffer = new char[len + 1];
@@ -120,18 +121,18 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
 
 // send the current log buffer to the API
 void WebLogService::fetchLog(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
-    JsonObject          root     = response->getRoot();
+    MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN); // 8kb buffer
+    JsonObject                 root     = response->getRoot();
 
     JsonArray log = root.createNestedArray("events");
 
     for (const auto & msg : log_messages_) {
         JsonObject logEvent = log.createNestedObject();
         auto       message  = std::move(msg);
-        logEvent["time"]    = uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3);
-        logEvent["level"]   = message.content_->level;
-        logEvent["name"]    = message.content_->name;
-        logEvent["message"] = message.content_->text;
+        logEvent["t"]       = uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3);
+        logEvent["l"]       = message.content_->level;
+        logEvent["n"]       = message.content_->name;
+        logEvent["m"]       = message.content_->text;
     }
 
     log_message_id_tail_ = log_messages_.back().id_;
@@ -140,7 +141,7 @@ void WebLogService::fetchLog(AsyncWebServerRequest * request) {
     request->send(response);
 }
 
-// sets the level
+// sets the level after a POST
 void WebLogService::setLevel(AsyncWebServerRequest * request, JsonVariant & json) {
     if (not json.is<JsonObject>()) {
         return;
@@ -157,14 +158,12 @@ void WebLogService::setLevel(AsyncWebServerRequest * request, JsonVariant & json
     request->send(response);
 }
 
-// return the current log level
+// return the current log level after a GET
 void WebLogService::getLevel(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
     JsonObject          root     = response->getRoot();
-
-    auto level    = log_level();
-    root["level"] = level;
-
+    root["level"]                = log_level();
+    root["max_messages"]         = maximum_log_messages();
     response->setLength();
     request->send(response);
 }
