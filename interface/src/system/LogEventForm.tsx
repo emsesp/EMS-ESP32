@@ -82,7 +82,10 @@ class LogEventForm extends Component<LogEventFormProps> {
           <MenuItem value={8}>TRACE</MenuItem>
         </SelectValidator>
         <Typography color="primary" variant="body2">
-          <i>Only the last {data.max_messages} messages are shown</i>
+          <i>
+            (the last {data.max_messages} messages are buffered. New log events
+            are shown in real-time.)
+          </i>
         </Typography>
       </ValidatorForm>
     );

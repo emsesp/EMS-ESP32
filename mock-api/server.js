@@ -18,7 +18,7 @@ const ES_ENDPOINT_ROOT = '/es/'
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings'
 const log_settings = {
   level: 6,
-  max_messages: 25,
+  max_messages: 30,
 }
 
 const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog'

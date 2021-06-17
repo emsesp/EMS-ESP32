@@ -89,7 +89,7 @@ void WebLogService::loop() {
 
     // put a small delay in
     const uint64_t now = uuid::get_uptime_ms();
-    if (now < last_transmit_ || now - last_transmit_ < 50) {
+    if (now < last_transmit_ || now - last_transmit_ < 100) {
         return;
     }
 
