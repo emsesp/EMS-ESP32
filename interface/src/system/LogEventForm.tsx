@@ -5,7 +5,7 @@ import {
   SelectValidator
 } from 'react-material-ui-form-validator';
 
-import { Typography } from '@material-ui/core';
+import { Typography, Grid } from '@material-ui/core';
 
 import MenuItem from '@material-ui/core/MenuItem';
 
@@ -65,28 +65,40 @@ class LogEventForm extends Component<LogEventFormProps> {
     const { data, saveData } = this.props;
     return (
       <ValidatorForm onSubmit={saveData}>
-        <SelectValidator
-          name="level"
-          label="Log Level"
-          value={data.level}
-          variant="outlined"
-          onChange={this.changeLevel}
-          margin="normal"
+        <Grid
+          container
+          spacing={0}
+          direction="row"
+          justify="flex-start"
+          alignItems="center"
         >
-          <MenuItem value={-1}>OFF</MenuItem>
-          <MenuItem value={3}>ERROR</MenuItem>
-          <MenuItem value={4}>WARNING</MenuItem>
-          <MenuItem value={5}>NOTICE</MenuItem>
-          <MenuItem value={6}>INFO</MenuItem>
-          <MenuItem value={7}>DEBUG</MenuItem>
-          <MenuItem value={8}>TRACE</MenuItem>
-        </SelectValidator>
-        <Typography color="primary" variant="body2">
-          <i>
-            (the last {data.max_messages} messages are buffered. New log events
-            are shown in real-time.)
-          </i>
-        </Typography>
+          <Grid item xs={2}>
+            <SelectValidator
+              name="level"
+              label="Log Level"
+              value={data.level}
+              variant="outlined"
+              onChange={this.changeLevel}
+              margin="normal"
+            >
+              <MenuItem value={-1}>OFF</MenuItem>
+              <MenuItem value={3}>ERROR</MenuItem>
+              <MenuItem value={4}>WARNING</MenuItem>
+              <MenuItem value={5}>NOTICE</MenuItem>
+              <MenuItem value={6}>INFO</MenuItem>
+              <MenuItem value={7}>DEBUG</MenuItem>
+              <MenuItem value={8}>TRACE</MenuItem>
+            </SelectValidator>
+          </Grid>
+          <Grid item md>
+            <Typography color="primary" variant="body2">
+              <i>
+                (the last {data.max_messages} messages are buffered and new log
+                events are shown in real time)
+              </i>
+            </Typography>
+          </Grid>
+        </Grid>
       </ValidatorForm>
     );
   }

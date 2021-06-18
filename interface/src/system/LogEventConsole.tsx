@@ -21,7 +21,7 @@ const leftOffset = () =>
 
 const useStyles = makeStyles((theme: Theme) => ({
   console: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(1),
     position: 'absolute',
     left: (offsets: Offsets) => offsets.leftOffset(),
     right: 24,
@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   entry: {
     color: '#bbbbbb',
     fontFamily: 'Courier New, monospace',
-    fontSize: '14px',
+    fontSize: '13px',
     letterSpacing: 'normal',
     whiteSpace: 'nowrap'
   },

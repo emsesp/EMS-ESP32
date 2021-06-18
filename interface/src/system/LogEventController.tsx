@@ -1,7 +1,5 @@
 import { Component } from 'react';
 
-import { createStyles, WithStyles, Theme } from '@material-ui/core';
-
 import {
   restController,
   RestControllerProps,
@@ -30,16 +28,7 @@ interface LogEventControllerState {
   events: LogEvent[];
 }
 
-const styles = (theme: Theme) =>
-  createStyles({
-    content: {
-      padding: theme.spacing(2),
-      margin: theme.spacing(3)
-    }
-  });
-
-type LogEventControllerProps = RestControllerProps<LogSettings> &
-  WithStyles<typeof styles>;
+type LogEventControllerProps = RestControllerProps<LogSettings>;
 
 class LogEventController extends Component<
   LogEventControllerProps,
