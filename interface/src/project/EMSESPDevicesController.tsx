@@ -6,6 +6,7 @@ import {
   RestFormLoader,
   SectionContent
 } from '../components';
+
 import { ENDPOINT_ROOT } from '../api';
 import EMSESPDevicesForm from './EMSESPDevicesForm';
 import { EMSESPDevices } from './EMSESPtypes';
@@ -21,7 +22,7 @@ class EMSESPDevicesController extends Component<EMSESPDevicesControllerProps> {
 
   render() {
     return (
-      <SectionContent title="Devices & Sensors">
+      <SectionContent title="Devices &amp; Sensors">
         <RestFormLoader
           {...this.props}
           render={(formProps) => <EMSESPDevicesForm {...formProps} />}

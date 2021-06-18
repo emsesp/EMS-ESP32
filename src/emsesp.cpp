@@ -40,6 +40,7 @@ WebSettingsService EMSESP::webSettingsService = WebSettingsService(&webServer, &
 WebStatusService  EMSESP::webStatusService  = WebStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
 WebDevicesService EMSESP::webDevicesService = WebDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
 WebAPIService     EMSESP::webAPIService     = WebAPIService(&webServer, EMSESP::esp8266React.getSecurityManager());
+WebLogService     EMSESP::webLogService     = WebLogService(&webServer, EMSESP::esp8266React.getSecurityManager());
 
 using DeviceFlags = EMSdevice;
 using DeviceType  = EMSdevice::DeviceType;
@@ -1209,11 +1210,12 @@ void EMSESP::start() {
 
 // main loop calling all services
 void EMSESP::loop() {
-    esp8266React.loop(); // web
+    esp8266React.loop(); // web services
     system_.loop();      // does LED and checks system health, and syslog service
 
     // if we're doing an OTA upload, skip MQTT and EMS
     if (!system_.upload_status()) {
+        webLogService.loop(); // log in Web UI
         rxservice_.loop();    // process any incoming Rx telegrams
         shower_.loop();       // check for shower on/off
         dallassensor_.loop(); // read dallas sensor temperatures

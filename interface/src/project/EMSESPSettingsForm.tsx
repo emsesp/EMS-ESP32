@@ -1,4 +1,5 @@
-import React from 'react';
+import { Component } from 'react';
+
 import {
   ValidatorForm,
   TextValidator,
@@ -11,12 +12,12 @@ import {
   Box,
   Link,
   withWidth,
-  WithWidthProps
+  WithWidthProps,
+  Grid
 } from '@material-ui/core';
+
 import SaveIcon from '@material-ui/icons/Save';
 import MenuItem from '@material-ui/core/MenuItem';
-
-import Grid from '@material-ui/core/Grid';
 
 import {
   redirectingAuthorizedFetch,
@@ -48,7 +49,7 @@ interface EMSESPSettingsFormState {
   processing: boolean;
 }
 
-class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
+class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
   state: EMSESPSettingsFormState = {
     processing: false
   };

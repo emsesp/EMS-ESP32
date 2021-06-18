@@ -35,10 +35,11 @@
 
 #include <ESP8266React.h>
 
-#include "WebStatusService.h"
-#include "WebDevicesService.h"
-#include "WebSettingsService.h"
-#include "WebAPIService.h"
+#include "web/WebStatusService.h"
+#include "web/WebDevicesService.h"
+#include "web/WebSettingsService.h"
+#include "web/WebAPIService.h"
+#include "web/WebLogService.h"
 
 #include "emsdevice.h"
 #include "emsfactory.h"
@@ -205,6 +206,7 @@ class EMSESP {
     static WebStatusService   webStatusService;
     static WebDevicesService  webDevicesService;
     static WebAPIService      webAPIService;
+    static WebLogService      webLogService;
 
     static uuid::log::Logger logger();
 

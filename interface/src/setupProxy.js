@@ -9,4 +9,13 @@ module.exports = function (app) {
       changeOrigin: true
     })
   );
+
+  app.use(
+    '/es/*',
+    createProxyMiddleware({
+      target: 'http://localhost:3090',
+      secure: false,
+      changeOrigin: true
+    })
+  );
 };

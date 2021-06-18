@@ -29,7 +29,6 @@
 #define DEVICE_DATA_SERVICE_PATH "/rest/deviceData"
 #define WRITE_VALUE_SERVICE_PATH "/rest/writeValue"
 
-
 namespace emsesp {
 
 class WebDevicesService {

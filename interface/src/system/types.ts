@@ -36,3 +36,24 @@ export interface OTASettings {
   port: number;
   password: string;
 }
+
+export enum LogLevel {
+  ERROR = 3,
+  WARNING = 4,
+  NOTICE = 5,
+  INFO = 6,
+  DEBUG = 7,
+  TRACE = 8
+}
+
+export interface LogEvent {
+  t: string;
+  l: LogLevel;
+  n: string;
+  m: string;
+}
+
+export interface LogSettings {
+  level: LogLevel;
+  max_messages: number;
+}

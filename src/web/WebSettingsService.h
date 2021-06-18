@@ -22,7 +22,7 @@
 #include <HttpEndpoint.h>
 #include <FSPersistence.h>
 
-#include "default_settings.h"
+#include "../default_settings.h"
 
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
 #define EMSESP_SETTINGS_SERVICE_PATH "/rest/emsespSettings"

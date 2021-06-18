@@ -23,14 +23,12 @@ class EMSESPSettingsController extends Component<EMSESPSettingsControllerProps> 
 
   render() {
     return (
-      // <Container maxWidth="md" disableGutters>
       <SectionContent title="" titleGutter>
         <RestFormLoader
           {...this.props}
           render={(formProps) => <EMSESPSettingsForm {...formProps} />}
         />
       </SectionContent>
-      // </Container>
     );
   }
 }
