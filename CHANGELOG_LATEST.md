@@ -5,6 +5,7 @@
 - new command called `commands` which lists all available commands. `ems-esp/api/{device}/commands`
 - More Home Assistant icons to match the UOMs
 - new API. Using secure access tokens and OpenAPI standard. See `doc/EMS-ESP32 API.md` and [#50](https://github.com/emsesp/EMS-ESP32/issues/50)
+- show log messages in Web UI [#71](https://github.com/emsesp/EMS-ESP32/issues/71)
 
 ## Fixed
 
