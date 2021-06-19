@@ -11,6 +11,7 @@
 
 - HA thermostat mode was not in sync with actual mode [#66](https://github.com/emsesp/EMS-ESP32/issues/66)
 - Don't publish rssi if Wifi is disabled and ethernet is being used
+- Booleans are shown as true/false in API GETs
 
 ## Changed
 

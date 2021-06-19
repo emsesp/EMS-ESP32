@@ -672,9 +672,11 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                     json["fullname"] = dv.full_name;
                 }
             }
+
             if (!tag_to_mqtt(dv.tag).empty()) {
                 json["circuit"] = tag_to_mqtt(dv.tag);
             }
+
             switch (dv.type) {
             case DeviceValueType::ENUM: {
                 if (Helpers::hasValue((uint8_t)(*(uint8_t *)(dv.value_p)))) {
@@ -684,16 +686,17 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                         json[value] = dv.options[*(uint8_t *)(dv.value_p)]; // text
                     }
                 }
-                json[type]      = F_(enum);
-                uint8_t min_    = (uuid::read_flash_string(dv.options[0]) == "") ? 1 : 0;
-                json[min]       = min_;
-                json[max]       = dv.options_size - 1;
+                json[type] = F_(enum);
+                // uint8_t min_    = (uuid::read_flash_string(dv.options[0]) == "") ? 1 : 0;
+                // json[min]       = min_;
+                // json[max]       = dv.options_size - 1;
                 JsonArray enum_ = json.createNestedArray(F_(enum));
-                for (uint8_t i = min_; i < dv.options_size; i++) {
+                for (uint8_t i = 0; i < dv.options_size; i++) {
                     enum_.add(dv.options[i]);
                 }
                 break;
             }
+
             case DeviceValueType::USHORT:
                 if (Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
                     json[value] = Helpers::round2(*(uint16_t *)(dv.value_p), divider);
@@ -702,6 +705,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                 json[min]  = 0;
                 json[max]  = divider ? EMS_VALUE_USHORT_NOTSET / divider : EMS_VALUE_USHORT_NOTSET;
                 break;
+
             case DeviceValueType::UINT:
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
                     json[value] = Helpers::round2(*(uint8_t *)(dv.value_p), divider);
@@ -714,6 +718,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                     json[max] = divider ? EMS_VALUE_UINT_NOTSET / divider : EMS_VALUE_UINT_NOTSET;
                 }
                 break;
+
             case DeviceValueType::SHORT:
                 if (Helpers::hasValue(*(int16_t *)(dv.value_p))) {
                     json[value] = Helpers::round2(*(int16_t *)(dv.value_p), divider);
@@ -722,6 +727,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                 json[min]  = divider ? -EMS_VALUE_SHORT_NOTSET / divider : -EMS_VALUE_SHORT_NOTSET;
                 json[max]  = divider ? EMS_VALUE_SHORT_NOTSET / divider : EMS_VALUE_SHORT_NOTSET;
                 break;
+
             case DeviceValueType::INT:
                 if (Helpers::hasValue(*(int8_t *)(dv.value_p))) {
                     json[value] = Helpers::round2(*(int8_t *)(dv.value_p), divider);
@@ -735,6 +741,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                     json[max] = divider ? EMS_VALUE_INT_NOTSET / divider : EMS_VALUE_INT_NOTSET;
                 }
                 break;
+
             case DeviceValueType::ULONG:
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     json[value] = Helpers::round2(*(uint32_t *)(dv.value_p), divider);
@@ -743,38 +750,15 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                 json[min]  = 0;
                 json[max]  = divider ? EMS_VALUE_ULONG_NOTSET / divider : EMS_VALUE_ULONG_NOTSET;
                 break;
+
             case DeviceValueType::BOOL: {
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
-                    if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF) {
-                        json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? F_(on) : F_(off);
-                    } else if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF_CAP) {
-                        json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? F_(ON) : F_(OFF);
-                    } else if (Mqtt::bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                        json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? true : false;
-                    } else {
-                        json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? 1 : 0;
-                    }
+                    json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? true : false;
                 }
-                json[type]      = F("boolean");
-                json[min]       = 0;
-                json[max]       = 1;
-                JsonArray enum_ = json.createNestedArray(F_(enum));
-
-                if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF) {
-                    enum_.add(F_(off));
-                    enum_.add(F_(on));
-                } else if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF_CAP) {
-                    enum_.add(F_(OFF));
-                    enum_.add(F_(ON));
-                } else if (Mqtt::bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                    enum_.add(false);
-                    enum_.add(true);
-                } else {
-                    enum_.add(0);
-                    enum_.add(1);
-                }
+                json[type] = F("boolean");
                 break;
             }
+
             case DeviceValueType::TIME:
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     json[value] = (divider) ? *(uint32_t *)(dv.value_p) / divider : *(uint32_t *)(dv.value_p);
@@ -783,28 +767,35 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                 json[min]  = 0;
                 json[max]  = divider ? EMS_VALUE_ULONG_NOTSET / divider : EMS_VALUE_ULONG_NOTSET;
                 break;
+
             case DeviceValueType::TEXT:
                 if (Helpers::hasValue((char *)(dv.value_p))) {
                     json[value] = (char *)(dv.value_p);
                 }
                 json[type] = F_(text);
                 break;
+
             default:
                 json[type] = F_(unknown);
                 break;
             }
-            if (dv.uom != DeviceValueUOM::NONE) {
+
+            // add uom if it's not a " " (single space)
+            if ((dv.uom != DeviceValueUOM::NONE) && (dv.uom != DeviceValueUOM::NUM) && (dv.uom != DeviceValueUOM::BOOLEAN)) {
                 json["unit"] = EMSdevice::uom_to_string(dv.uom);
             }
+
             json["writeable"] = dv.has_cmd;
             // if we have individual limits, overwrite the common limits
             if (dv.min != 0 || dv.max != 0) {
                 json[min] = dv.min;
                 json[max] = dv.max;
             }
+
             return true;
         }
     }
+
     return false;
 }
 
