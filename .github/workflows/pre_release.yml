@@ -13,36 +13,35 @@ jobs:
 
     steps:
 
-      - name: Checkout source code
+      - name: Get EMS-ESP source code and version
         uses: actions/checkout@v2
-
-      - name: Get build variables
         id: build_info
         run: |
           version=`grep -E '^#define EMSESP_APP_VERSION' ./src/version.h | awk -F'"' '{print $2}'`
           echo "::set-output name=version::$version"
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-
-      - name: Install pio
+      - name: Install PlatformIO
+       uses: actions/setup-python@v2
         run: |
           python -m pip install --upgrade pip
           pip install -U platformio
           platformio upgrade
           platformio update
 
-      - name: Build web
+      - name: Build WebUI
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
         run: |
           cd interface
-          npm install
+          npm ci
           npm run build
 
       - name: Build firmware
         run: |
           platformio run -e ci
 
-      - name: Release
+      - name: Create a GH Release
         id: "automatic_releases"
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
@@ -53,4 +52,4 @@ jobs:
           files: |
             CHANGELOG_LATEST.md
             ./build/firmware/*.*
-
+            
