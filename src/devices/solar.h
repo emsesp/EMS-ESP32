@@ -141,7 +141,6 @@ class Solar : public EMSdevice {
     bool set_climateZone(const char * value, const int8_t id);
     bool set_collector1Area(const char * value, const int8_t id);
     bool set_collector1Type(const char * value, const int8_t id);
-
 };
 
 } // namespace emsesp

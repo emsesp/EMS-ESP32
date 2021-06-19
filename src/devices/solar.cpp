@@ -128,8 +128,13 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         register_device_value(TAG_NONE, &energyToday_, DeviceValueType::ULONG, nullptr, FL_(energyToday), DeviceValueUOM::WH);
         register_device_value(TAG_NONE, &energyTotal_, DeviceValueType::ULONG, FL_(div10), FL_(energyTotal), DeviceValueUOM::KWH);
 
-        register_device_value(
-            TAG_NONE, &heatTransferSystem_, DeviceValueType::BOOL, nullptr, FL_(heatTransferSystem), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_heatTransferSystem));
+        register_device_value(TAG_NONE,
+                              &heatTransferSystem_,
+                              DeviceValueType::BOOL,
+                              nullptr,
+                              FL_(heatTransferSystem),
+                              DeviceValueUOM::BOOLEAN,
+                              MAKE_CF_CB(set_heatTransferSystem));
         register_device_value(TAG_NONE, &externalTank_, DeviceValueType::BOOL, nullptr, FL_(externalTank), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_externalTank));
         register_device_value(
             TAG_NONE, &thermalDisinfect_, DeviceValueType::BOOL, nullptr, FL_(thermalDisinfect), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_thermalDisinfect));
