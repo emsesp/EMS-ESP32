@@ -52,8 +52,4 @@ jobs:
           files: |
             CHANGELOG_LATEST.md
             ./build/firmware/*.*
-<<<<<<< HEAD
             
-=======
-            
->>>>>>> fdbbfe8ddbbb49c610cf6ab68a0d11bc3c9855b1
