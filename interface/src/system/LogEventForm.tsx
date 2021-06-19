@@ -87,7 +87,7 @@ class LogEventForm extends Component<LogEventFormProps> {
               <MenuItem value={5}>NOTICE</MenuItem>
               <MenuItem value={6}>INFO</MenuItem>
               <MenuItem value={7}>DEBUG</MenuItem>
-              <MenuItem value={8}>TRACE</MenuItem>
+              <MenuItem value={8}>ALL</MenuItem>
             </SelectValidator>
           </Grid>
           <Grid item md>

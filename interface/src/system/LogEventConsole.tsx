@@ -87,8 +87,8 @@ const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
         return 'NOTICE';
       case LogLevel.WARNING:
         return 'WARNING';
-      case LogLevel.TRACE:
-        return 'TRACE';
+      case LogLevel.ALL:
+        return 'ALL';
       default:
         return '?';
     }
