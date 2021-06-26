@@ -5,13 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.1.0] May 4 2021
+# [3.1.1] June 26 2021
+
+## Changed
+
+- new command called `commands` which lists all available commands. `ems-esp/api/{device}/commands`
+- More Home Assistant icons to match the UOMs
+- new API. Using secure access tokens and OpenAPI standard. See `doc/EMS-ESP32 API.md` and [#50](https://github.com/emsesp/EMS-ESP32/issues/50)
+- show log messages in Web UI [#71](https://github.com/emsesp/EMS-ESP32/issues/71)
+
+## Fixed
+
+- HA thermostat mode was not in sync with actual mode [#66](https://github.com/emsesp/EMS-ESP32/issues/66)
+- Don't publish rssi if Wifi is disabled and ethernet is being used
+- Booleans are shown as true/false in API GETs
+
+## Changed
+
+- `info` command always shows full names in API. For short names query the device or name directly, e.g. `http://ems-esp/api/boiler`
+- free memory is shown in kilobytes
+- boiler's warm water entities have ww added to the Home Assistant entity name [#67](https://github.com/emsesp/EMS-ESP32/issues/67)
+- improved layout and rendering of device values in the WebUI, also the edit value screen
+
+# [3.1.0] May 4 2021
+
+## Changed
 
 - Mock API to simulate an ESP, for testing web
 - Able to write values from the Web UI
 - check values with `"cmd":<valuename>` and data empty or `?`
 - set hc for values and commands by id or prefix `hc<x>`+separator, separator can be any char
-  
+
 ## Fixed
 
 - Don't create Home Assistant MQTT discovery entries for device values that don't exists (#756 on EMS-ESP repo)
@@ -27,9 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - lowercased Flow temp in commands
 - system console commands to main
 
-## Removed
-
-## [3.0.1] March 30 2021
+# [3.0.1] March 30 2021
 
 ## Added
 
@@ -87,9 +109,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Shower Alert (disabled for now)
 
-## [3.0.0] March 18 2021
+# [3.0.0] March 18 2021
 
-### Added
+## Added
 
 - Power settings, disabling BLE and turning off Wifi sleep
 - Rx and Tx counts to Heartbeat MQTT payload
@@ -106,7 +128,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RC300 `thermostat temp -1` to clear temporary setpoint in auto mode
 - Syslog port selectable (#744)
 
-### Fixed
+## Fixed
 
 - telegrams matched to masterthermostat 0x18
 - multiple roomcontrollers
@@ -117,7 +139,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - wrong position of values #723, #732
 - OTA Upload via Web on OSX
 
-### Changed
+## Changed
 
 - changed how telegram parameters are rendered for mqtt, console and web (#632)
 - split `show values` in smaller packages (edited)
