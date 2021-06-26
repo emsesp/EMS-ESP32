@@ -43,6 +43,7 @@ export enum LogLevel {
   NOTICE = 5,
   INFO = 6,
   DEBUG = 7,
+  TRACE = 8,
   ALL = 9
 }
 

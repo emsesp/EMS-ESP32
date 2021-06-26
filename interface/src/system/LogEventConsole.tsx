@@ -40,16 +40,22 @@ const useStyles = makeStyles((theme: Theme) => ({
   debug: {
     color: '#00FFFF'
   },
+  trace: {
+    color: '#00FFFF'
+  },
   info: {
     color: '#ffff00'
   },
   notice: {
     color: '#ffff00'
   },
-  err: {
+  error: {
     color: '#ff0000'
   },
-  unknown: {
+  warning: {
+    color: '#ff0000'
+  },
+  default: {
     color: '#ffffff'
   }
 }));
@@ -63,34 +69,37 @@ const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
     switch (level) {
       case LogLevel.DEBUG:
         return classes.debug;
+      case LogLevel.TRACE:
+        return classes.trace;
       case LogLevel.INFO:
         return classes.info;
       case LogLevel.NOTICE:
         return classes.notice;
       case LogLevel.WARNING:
+        return classes.warning;
       case LogLevel.ERROR:
-        return classes.err;
+        return classes.error;
       default:
-        return classes.unknown;
+        return classes.default;
     }
   };
 
   const levelLabel = (level: LogLevel) => {
     switch (level) {
-      case LogLevel.DEBUG:
-        return 'DEBUG';
-      case LogLevel.INFO:
-        return 'INFO';
       case LogLevel.ERROR:
         return 'ERROR';
-      case LogLevel.NOTICE:
-        return 'NOTICE';
       case LogLevel.WARNING:
         return 'WARNING';
-      case LogLevel.ALL:
-        return 'ALL';
+      case LogLevel.NOTICE:
+        return 'NOTICE';
+      case LogLevel.INFO:
+        return 'INFO';
+      case LogLevel.DEBUG:
+        return 'DEBUG';
+      case LogLevel.TRACE:
+        return 'TRACE';
       default:
-        return '?';
+        return '';
     }
   };
 
