@@ -30,17 +30,6 @@
 
 namespace emsesp {
 
-// Home Assistant icons (https://materialdesignicons.com/)
-// MAKE_PSTR(icontemperature, "mdi:temperature-celsius")
-MAKE_PSTR(icontemperature, "mdi:coolant-temperature")
-MAKE_PSTR(iconpercent, "mdi:percent-outline")
-MAKE_PSTR(iconfire, "mdi:fire")
-MAKE_PSTR(iconfan, "mdi:fan")
-MAKE_PSTR(iconflame, "mdi:flash")
-MAKE_PSTR(iconvalve, "mdi:valve")
-MAKE_PSTR(iconpump, "mdi:pump")
-MAKE_PSTR(iconheatpump, "mdi:water-pump")
-
 enum DeviceValueType : uint8_t {
     BOOL,
     INT,
@@ -57,14 +46,50 @@ enum DeviceValueType : uint8_t {
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
 // uom - also used with HA
 // sequence is important!
-enum DeviceValueUOM : uint8_t { NONE = 0, DEGREES, PERCENT, LMIN, KWH, WH, HOURS, MINUTES, UA, BAR, KW, PUMP };
+enum DeviceValueUOM : uint8_t {
+
+    NONE = 0, // 0
+    DEGREES,  // 1
+    PERCENT,  // 2
+    LMIN,     // 3
+    KWH,      // 4
+    WH,       // 5
+    HOURS,    // 6
+    MINUTES,  // 7
+    UA,       // 8
+    BAR,      // 9
+    KW,       // 10
+    W,        // 11
+    KB,       // 12
+    SECONDS,  // 13
+    DBM,      // 14
+    NUM,      // 15
+    BOOLEAN   // 16
+
+};
+
+// Home Assistant icons (https://materialdesignicons.com)
+// the following are used with the UOMs (unit of measurements)
+MAKE_PSTR(icondegrees, "mdi:coolant-temperature") // DeviceValueUOM::DEGREES
+MAKE_PSTR(iconpercent, "mdi:percent-outline")     // DeviceValueUOM::PERCENT
+MAKE_PSTR(icontime, "mdi:clock-outline")          // DeviceValueUOM::SECONDS MINUTES & HOURS
+MAKE_PSTR(iconkb, "mdi:memory")                   // DeviceValueUOM::KB
+MAKE_PSTR(iconlmin, "mdi:water-boiler")           // DeviceValueUOM::LMIN
+MAKE_PSTR(iconkwh, "mdi:transmission-tower")      // DeviceValueUOM::KWH & WH
+MAKE_PSTR(iconua, "mdi:flash-circle")             // DeviceValueUOM::UA
+MAKE_PSTR(iconbar, "mdi:gauge")                   // DeviceValueUOM::BAR
+MAKE_PSTR(iconkw, "mdi:omega")                    // DeviceValueUOM::KW & W
+MAKE_PSTR(icondbm, "mdi:wifi-strength-2")         // DeviceValueUOM::DBM
+MAKE_PSTR(iconnum, "mdi:counter")                 // DeviceValueUOM::NUM
+
+MAKE_PSTR(icondevice, "mdi:home-automation") // for devices in HA
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 enum DeviceValueTAG : uint8_t {
     TAG_NONE = 0, // wild card
     TAG_HEARTBEAT,
     TAG_BOILER_DATA,
-    TAG_DEVICE_DATA_WW,
+    TAG_BOILER_DATA_WW,
     TAG_THERMOSTAT_DATA,
     TAG_HC1,
     TAG_HC2,
@@ -220,7 +245,7 @@ class EMSdevice {
     std::string get_value_uom(const char * key);
     bool        get_value_info(JsonObject & root, const char * cmd, const int8_t id);
     bool        generate_values_json(JsonObject & json, const uint8_t tag_filter, const bool nested, const bool console = false);
-    bool        generate_values_json_web(JsonObject & json);
+    void        generate_values_json_web(JsonObject & json);
 
     void register_device_value(uint8_t                             tag,
                                void *                              value_p,
@@ -232,9 +257,28 @@ class EMSdevice {
                                bool                                has_cmd,
                                int32_t                             min,
                                uint32_t                            max);
-    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom, cmdfunction_p f, int32_t min, uint32_t max);
-    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom, cmdfunction_p f);
-    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom);
+    void register_device_value(uint8_t                             tag,
+                               void *                              value_p,
+                               uint8_t                             type,
+                               const __FlashStringHelper * const * options,
+                               const __FlashStringHelper * const * name,
+                               uint8_t                             uom,
+                               cmdfunction_p                       f,
+                               int32_t                             min,
+                               uint32_t                            max);
+    void register_device_value(uint8_t                             tag,
+                               void *                              value_p,
+                               uint8_t                             type,
+                               const __FlashStringHelper * const * options,
+                               const __FlashStringHelper * const * name,
+                               uint8_t                             uom,
+                               cmdfunction_p                       f);
+    void register_device_value(uint8_t                             tag,
+                               void *                              value_p,
+                               uint8_t                             type,
+                               const __FlashStringHelper * const * options,
+                               const __FlashStringHelper * const * name,
+                               uint8_t                             uom);
     // void register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom, int32_t min, uint32_t max);
 
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);

@@ -2,16 +2,15 @@
 
 **EMS-ESP** is an open-source firmware for the Espressif ESP8266 and ESP32 microcontroller that communicates with **EMS** (Energy Management System) based equipment from manufacturers like Bosch, Buderus, Nefit, Junkers, Worcester and Sieger.
 
-This is the firmware for the ESP32. Compared to version 2 for the ESP8266, this release has
+This project is the specifically for the ESP32. Compared with the previous ESP8266 (version 2) release it has the following enhancements:
 
 - Ethernet Support
-- Pre-configured board layouts
-- Writing values directly from the Web UI
-- Mock API server for faster offline development
-- Expose to more commands, via MQTT
-- Improvements to Dallas sensors, Shower service
-
-This version is the latest development track, where as v2 is in maintenance mode.
+- Pre-configured circuit board layouts
+- Supports writing EMS values directly from within Web UI
+- Mock API server for faster offline development and testing
+- Improved API and MQTT commands
+- Improvements to Dallas temperature sensors
+- Embedded log tracing in the Web UI
 
 [![version](https://img.shields.io/github/release/emsesp/EMS-ESP32.svg?label=Latest%20Release)](https://github.com/emsesp/EMS-ESP32/blob/main/CHANGELOG.md)
 [![release-date](https://img.shields.io/github/release-date/emsesp/EMS-ESP32.svg?label=Released)](https://github.com/emsesp/EMS-ESP32/commits/main)
@@ -26,7 +25,7 @@ If you like **EMS-ESP**, please give it a star, or fork it and contribute!
 [![GitHub forks](https://img.shields.io/github/forks/emsesp/EMS-ESP32.svg?style=social&label=Fork)](https://github.com/emsesp/EMS-ES32P/network)
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/prderbyshire/2)
 
-Note, EMS-ESP requires a small hardware circuit that can convert the EMS bus data to be read by the microcontroller. These can be ordered at <https://bbqkees-electronics.nl>.
+Note, EMS-ESP requires a small hardware circuit that can convert the EMS bus data to be read by the microcontroller. These can be ordered at <https://bbqkees-electronics.nl> or contact the contributors that can provide the schematic and designs.
 
 <img src="media/gateway-integration.jpg" width=40%>
 
@@ -34,17 +33,16 @@ Note, EMS-ESP requires a small hardware circuit that can convert the EMS bus dat
 
 # **Features**
 
-- Compatible with both ESP8266 and ESP32
 - A multi-user secure web interface to change settings and monitor the data
 - A console, accessible via Serial and Telnet for more monitoring
 - Native support for Home Assistant via [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/)
 - Can run standalone as an independent WiFi Access Point or join an existing WiFi network
 - Easy first-time configuration via a web Captive Portal
-- Support for more than [70 EMS devices](https://emsesp.github.io/docs/#/Supported-EMS-Devices) (boilers, thermostats, solar modules, mixer modules, heat pumps, gateways)
+- Support for more than [80 EMS devices](https://emsesp.github.io/docs/#/Supported-EMS-Devices) (boilers, thermostats, solar modules, mixer modules, heat pumps, gateways)
 
 ## **Demo**
 
-See a live demo on [here](https://ems-esp.derbyshire.nl). The data you see is static and any username/password is accepted.
+See a live demo [here](https://ems-esp.derbyshire.nl) using fake data. Log in with any username/password.
 
 # **Screenshots**
 
@@ -54,6 +52,7 @@ See a live demo on [here](https://ems-esp.derbyshire.nl). The data you see is st
 | ---------------------------------- | -------------------------------- |
 | <img src="media/web_settings.png"> | <img src="media/web_status.png"> |
 | <img src="media/web_devices.png">  | <img src="media/web_mqtt.png">   |
+| <img src="media/web_edit.png">     | <img src="media/web_log.png">    |
 
 ## Telnet Console
 
@@ -94,20 +93,12 @@ If you're looking for support on **EMS-ESP** there are some options available:
 
 # **Contributors ✨**
 
-EMS-ESP is a project originally created by [proddy](https://github.com/proddy) with the main contributors and owners:
+EMS-ESP is a project originally created and owned by [proddy](https://github.com/proddy). Key contributors are:
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center">
-    <a href="https://derbyshire.nl"><img src="https://avatars.githubusercontent.com/u/1230712?v=3?s=100" width="100px;" alt=""/>
-    <br/><sub><b>proddy</b></sub></a>
-    <br/>
-    </a> <a href="https://github.com/emsesp/EMS-ESP/commits?author=proddy" title="v2 Commits">v2</a>
-    <a href="https://github.com/emsesp/EMS-ESP32/commits?author=proddy" title="v3 Commits">v3</a>
-    </td>
     <td align="center">
     <a href="https://github.com/MichaelDvP"><img src="https://avatars.githubusercontent.com/u/59284019?v=3?s=100" width="100px;" alt=""/><br /><sub><b>MichaelDvP</b></sub></a><br /></a> <a href="https://github.com/emsesp/EMS-ESP/commits?author=MichaelDvP" title="v2 Commits">v2</a>
     <a href="https://github.com/emsesp/EMS-ESP32/commits?author=MichaelDvP" title="v3 Commits">v3</a>
@@ -126,11 +117,11 @@ You can also contribute to EMS-ESP by
 
 # **Libraries used**
 
-- [esp8266-react](https://github.com/rjwats/esp8266-react) by @rjwats for the framework that provides the  Web UI
-- [uuid-\*](https://github.com/nomis/mcu-uuid-console) from @nomis. The console, syslog, telnet and logging is based on these libraries
-- [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
-- [AsyncMqttClient](https://github.com/marvinroger/async-mqtt-client) for MQTT, with modifications from @bertmelis
-- ESPAsyncWebServer and AsyncTCP for the Web and TCP backends, with custom modifications for performance
+- [esp8266-react](https://github.com/rjwats/esp8266-react) by @rjwats for the framework that provides the core of the Web UI
+- [uuid-\*](https://github.com/nomis/mcu-uuid-console) from @nomis. The console, syslog, telnet and logging are based off these open source libraries
+- [ArduinoJson](https://github.com/bblanchon/ArduinoJson) for JSON
+- [AsyncMqttClient](https://github.com/marvinroger/async-mqtt-client) for the MQTT client, with custom modifications from @bertmelis and @proddy
+- ESPAsyncWebServer and AsyncTCP for the Web server and TCP backends, with custom modifications for performance
 
 # **License**
 

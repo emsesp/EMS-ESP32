@@ -27,7 +27,8 @@ using namespace std::placeholders; // for `_1` etc
 WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(WebSettings::read, WebSettings::update, this, server, EMSESP_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(WebSettings::read, WebSettings::update, this, fs, EMSESP_SETTINGS_FILE)
-    , _boardProfileHandler(EMSESP_BOARD_PROFILE_SERVICE_PATH, securityManager->wrapCallback(std::bind(&WebSettingsService::board_profile, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
+    , _boardProfileHandler(EMSESP_BOARD_PROFILE_SERVICE_PATH,
+                           securityManager->wrapCallback(std::bind(&WebSettingsService::board_profile, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
     _boardProfileHandler.setMethod(HTTP_POST);
     _boardProfileHandler.setMaxContentLength(256);
     server->addHandler(&_boardProfileHandler);
@@ -54,9 +55,10 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["dallas_parasite"]      = settings.dallas_parasite;
     root["led_gpio"]             = settings.led_gpio;
     root["hide_led"]             = settings.hide_led;
-    root["api_enabled"]          = settings.api_enabled;
+    root["notoken_api"]          = settings.notoken_api;
     root["analog_enabled"]       = settings.analog_enabled;
     root["pbutton_gpio"]         = settings.pbutton_gpio;
+    root["solar_maxflow"]        = settings.solar_maxflow;
     root["board_profile"]        = settings.board_profile;
 }
 
@@ -168,7 +170,8 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.master_thermostat = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
 
     // doesn't need any follow-up actions
-    settings.api_enabled = root["api_enabled"] | EMSESP_DEFAULT_API_ENABLED;
+    settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
+    settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
 
     return StateUpdateResult::CHANGED;
 }

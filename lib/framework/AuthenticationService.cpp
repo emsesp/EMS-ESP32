@@ -14,7 +14,7 @@ AuthenticationService::AuthenticationService(AsyncWebServer * server, SecurityMa
 }
 
 /**
- * Verifys that the request supplied a valid JWT.
+ * Verifies that the request supplied a valid JWT.
  */
 void AuthenticationService::verifyAuthorization(AsyncWebServerRequest * request) {
     Authentication authentication = _securityManager->authenticateRequest(request);

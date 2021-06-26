@@ -1,4 +1,4 @@
-// ArduinoJson - arduinojson.org
+// ArduinoJson - https://arduinojson.org
 // Copyright Benoit Blanchon 2014-2021
 // MIT License
 
@@ -26,7 +26,7 @@ struct Visitor {
     return TResult();
   }
 
-  TResult visitNegativeInteger(UInt) {
+  TResult visitSignedInteger(Integer) {
     return TResult();
   }
 
@@ -38,7 +38,7 @@ struct Visitor {
     return TResult();
   }
 
-  TResult visitPositiveInteger(UInt) {
+  TResult visitUnsignedInteger(UInt) {
     return TResult();
   }
 

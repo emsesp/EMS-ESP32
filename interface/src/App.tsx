@@ -14,7 +14,6 @@ import FeaturesWrapper from './features/FeaturesWrapper';
 const unauthorizedRedirect = () => <Redirect to="/" />;
 
 class App extends Component {
-
   notistackRef: RefObject<any> = React.createRef();
 
   componentDidMount() {
@@ -23,21 +22,29 @@ class App extends Component {
 
   onClickDismiss = (key: string | number | undefined) => () => {
     this.notistackRef.current.closeSnackbar(key);
-  }
+  };
 
   render() {
     return (
       <CustomMuiTheme>
-        <SnackbarProvider autoHideDuration={3000} maxSnack={3} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        <SnackbarProvider
+          autoHideDuration={3000}
+          maxSnack={3}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
           ref={this.notistackRef}
           action={(key) => (
             <IconButton onClick={this.onClickDismiss(key)} size="small">
               <CloseIcon />
             </IconButton>
-          )}>
+          )}
+        >
           <FeaturesWrapper>
             <Switch>
-              <Route exact path="/unauthorized" component={unauthorizedRedirect} />
+              <Route
+                exact
+                path="/unauthorized"
+                component={unauthorizedRedirect}
+              />
               <Route component={AppRouting} />
             </Switch>
           </FeaturesWrapper>
@@ -47,4 +54,4 @@ class App extends Component {
   }
 }
 
-export default App
+export default App;

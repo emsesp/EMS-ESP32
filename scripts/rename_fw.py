@@ -1,18 +1,16 @@
-Import("env")
-import os
-import re
 import shutil
+import re
+import os
+Import("env")
 
 OUTPUT_DIR = "build{}".format(os.path.sep)
+
 
 def bin_copy(source, target, env):
 
     # get the build info
     bag = {}
-    exprs = [
-    (re.compile(r'^#define EMSESP_APP_VERSION\s+"(\S+)"'), 'app_version'),
-    (re.compile(r'^#define EMSESP_PLATFORM\s+"(\S+)"'), 'platform'),
-    ]
+    exprs = [(re.compile(r'^#define EMSESP_APP_VERSION\s+"(\S+)"'), 'app_version')]
     with open('./src/version.h', 'r') as f:
         for l in f.readlines():
             for expr, var in exprs:
@@ -21,7 +19,7 @@ def bin_copy(source, target, env):
                     bag[var] = m.group(1)
 
     app_version = bag.get('app_version')
-    platform = bag.get("platform")
+    platform = "ESP32"
 
     # print(env.Dump())
     # my_flags = env.ParseFlags(env['BUILD_FLAGS'])
@@ -36,8 +34,8 @@ def bin_copy(source, target, env):
     print("platform: "+platform)
 
     # convert . to _ so Windows doesn't complain
-    variant = "EMS-ESP-" +  app_version.replace(".", "_") + "-" + platform
-    
+    variant = "EMS-ESP-" + app_version.replace(".", "_") + "-" + platform
+
     # check if output directories exist and create if necessary
     if not os.path.isdir(OUTPUT_DIR):
         os.mkdir(OUTPUT_DIR)
@@ -58,5 +56,6 @@ def bin_copy(source, target, env):
 
     # copy firmware.bin to firmware/<variant>.bin
     shutil.copy(str(target[0]), bin_file)
+
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", [bin_copy])

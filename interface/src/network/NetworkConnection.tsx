@@ -1,22 +1,31 @@
-import React, { Component } from 'react';
-import { Redirect, Switch, RouteComponentProps } from 'react-router-dom'
+import { Component } from 'react';
+import { Redirect, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { Tabs, Tab } from '@material-ui/core';
 
-import { withAuthenticatedContext, AuthenticatedContextProps, AuthenticatedRoute } from '../authentication';
+import {
+  withAuthenticatedContext,
+  AuthenticatedContextProps,
+  AuthenticatedRoute
+} from '../authentication';
 import { MenuAppBar } from '../components';
 
 import NetworkStatusController from './NetworkStatusController';
 import NetworkSettingsController from './NetworkSettingsController';
 import WiFiNetworkScanner from './WiFiNetworkScanner';
-import { NetworkConnectionContext, NetworkConnectionContextValue } from './NetworkConnectionContext';
+import {
+  NetworkConnectionContext,
+  NetworkConnectionContextValue
+} from './NetworkConnectionContext';
 
 import { WiFiNetwork } from './types';
 
 type NetworkConnectionProps = AuthenticatedContextProps & RouteComponentProps;
 
-class NetworkConnection extends Component<NetworkConnectionProps, NetworkConnectionContextValue> {
-
+class NetworkConnection extends Component<
+  NetworkConnectionProps,
+  NetworkConnectionContextValue
+> {
   constructor(props: NetworkConnectionProps) {
     super(props);
     this.state = {
@@ -28,13 +37,13 @@ class NetworkConnection extends Component<NetworkConnectionProps, NetworkConnect
   selectNetwork = (network: WiFiNetwork) => {
     this.setState({ selectedNetwork: network });
     this.props.history.push('/network/settings');
-  }
+  };
 
   deselectNetwork = () => {
     this.setState({ selectedNetwork: undefined });
-  }
+  };
 
-  handleTabChange = (event: React.ChangeEvent<{}>, path: string) => {
+  handleTabChange = (path: string) => {
     this.props.history.push(path);
   };
 
@@ -43,20 +52,44 @@ class NetworkConnection extends Component<NetworkConnectionProps, NetworkConnect
     return (
       <NetworkConnectionContext.Provider value={this.state}>
         <MenuAppBar sectionTitle="Network Connection">
-          <Tabs value={this.props.match.url} onChange={this.handleTabChange} variant="fullWidth">
+          <Tabs
+            value={this.props.match.url}
+            onChange={(e, path) => this.handleTabChange(path)}
+            variant="fullWidth"
+          >
             <Tab value="/network/status" label="Network Status" />
-            <Tab value="/network/scan" label="Scan WiFi Networks" disabled={!authenticatedContext.me.admin} />
-            <Tab value="/network/settings" label="Network Settings" disabled={!authenticatedContext.me.admin} />
+            <Tab
+              value="/network/scan"
+              label="Scan WiFi Networks"
+              disabled={!authenticatedContext.me.admin}
+            />
+            <Tab
+              value="/network/settings"
+              label="Network Settings"
+              disabled={!authenticatedContext.me.admin}
+            />
           </Tabs>
           <Switch>
-            <AuthenticatedRoute exact path="/network/status" component={NetworkStatusController} />
-            <AuthenticatedRoute exact path="/network/scan" component={WiFiNetworkScanner} />
-            <AuthenticatedRoute exact path="/network/settings" component={NetworkSettingsController} />
+            <AuthenticatedRoute
+              exact
+              path="/network/status"
+              component={NetworkStatusController}
+            />
+            <AuthenticatedRoute
+              exact
+              path="/network/scan"
+              component={WiFiNetworkScanner}
+            />
+            <AuthenticatedRoute
+              exact
+              path="/network/settings"
+              component={NetworkSettingsController}
+            />
             <Redirect to="/network/status" />
           </Switch>
         </MenuAppBar>
       </NetworkConnectionContext.Provider>
-    )
+    );
   }
 }
 

@@ -1,6 +1,11 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 
-import {restController, RestControllerProps, RestFormLoader, SectionContent } from '../components';
+import {
+  restController,
+  RestControllerProps,
+  RestFormLoader,
+  SectionContent
+} from '../components';
 import { SECURITY_SETTINGS_ENDPOINT } from '../api';
 
 import ManageUsersForm from './ManageUsersForm';
@@ -9,7 +14,6 @@ import { SecuritySettings } from './types';
 type ManageUsersControllerProps = RestControllerProps<SecuritySettings>;
 
 class ManageUsersController extends Component<ManageUsersControllerProps> {
-
   componentDidMount() {
     this.props.loadData();
   }
@@ -19,12 +23,14 @@ class ManageUsersController extends Component<ManageUsersControllerProps> {
       <SectionContent title="Manage Users" titleGutter>
         <RestFormLoader
           {...this.props}
-          render={formProps => <ManageUsersForm {...formProps} />}
+          render={(formProps) => <ManageUsersForm {...formProps} />}
         />
       </SectionContent>
-    )
+    );
   }
-
 }
 
-export default restController(SECURITY_SETTINGS_ENDPOINT, ManageUsersController);
+export default restController(
+  SECURITY_SETTINGS_ENDPOINT,
+  ManageUsersController
+);

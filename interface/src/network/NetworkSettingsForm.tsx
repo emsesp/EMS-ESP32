@@ -1,7 +1,14 @@
 import React, { Fragment } from 'react';
 import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
 
-import { Checkbox, List, ListItem, ListItemText, ListItemAvatar, ListItemSecondaryAction } from '@material-ui/core';
+import {
+  Checkbox,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  ListItemSecondaryAction
+} from '@material-ui/core';
 
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
@@ -10,31 +17,42 @@ import LockOpenIcon from '@material-ui/icons/LockOpen';
 import DeleteIcon from '@material-ui/icons/Delete';
 import SaveIcon from '@material-ui/icons/Save';
 
-import { RestFormProps, PasswordValidator, BlockFormControlLabel, FormActions, FormButton } from '../components';
+import {
+  RestFormProps,
+  PasswordValidator,
+  BlockFormControlLabel,
+  FormActions,
+  FormButton
+} from '../components';
 import { isIP, isHostname, optional } from '../validators';
 
-import { NetworkConnectionContext, NetworkConnectionContextValue } from './NetworkConnectionContext';
+import {
+  NetworkConnectionContext,
+  NetworkConnectionContextValue
+} from './NetworkConnectionContext';
 import { isNetworkOpen, networkSecurityMode } from './WiFiSecurityModes';
 import { NetworkSettings } from './types';
 
 type NetworkStatusFormProps = RestFormProps<NetworkSettings>;
 
 class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
-
   static contextType = NetworkConnectionContext;
   context!: React.ContextType<typeof NetworkConnectionContext>;
 
-  constructor(props: NetworkStatusFormProps, context: NetworkConnectionContextValue) {
+  constructor(
+    props: NetworkStatusFormProps,
+    context: NetworkConnectionContextValue
+  ) {
     super(props);
 
     const { selectedNetwork } = context;
     if (selectedNetwork) {
       const networkSettings: NetworkSettings = {
         ssid: selectedNetwork.ssid,
-        password: "",
+        password: '',
         hostname: props.data.hostname,
-        static_ip_config: false,
-      }
+        static_ip_config: false
+      };
       props.setData(networkSettings);
     }
   }
@@ -48,7 +66,7 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
   deselectNetworkAndLoadData = () => {
     this.context.deselectNetwork();
     this.props.loadData();
-  }
+  };
 
   componentWillUnmount() {
     this.context.deselectNetwork();
@@ -59,41 +77,51 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
     const { data, handleValueChange, saveData } = this.props;
     return (
       <ValidatorForm onSubmit={saveData} ref="NetworkSettingsForm">
-        {
-          selectedNetwork ?
-            <List>
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar>
-                    {isNetworkOpen(selectedNetwork) ? <LockOpenIcon /> : <LockIcon />}
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={selectedNetwork.ssid}
-                  secondary={"Security: " + networkSecurityMode(selectedNetwork) + ", Ch: " + selectedNetwork.channel}
-                />
-                <ListItemSecondaryAction>
-                  <IconButton aria-label="Manual Config" onClick={deselectNetwork}>
-                    <DeleteIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            </List>
-            :
-            <TextValidator
-              validators={['matchRegexp:^.{0,32}$']}
-              errorMessages={['SSID must be 32 characters or less']}
-              name="ssid"
-              label="SSID (leave blank to disable WiFi)"
-              fullWidth
-              variant="outlined"
-              value={data.ssid}
-              onChange={handleValueChange('ssid')}
-              margin="normal"
-            />
-        }
-        {
-          (!selectedNetwork || !isNetworkOpen(selectedNetwork)) &&
+        {selectedNetwork ? (
+          <List>
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar>
+                  {isNetworkOpen(selectedNetwork) ? (
+                    <LockOpenIcon />
+                  ) : (
+                    <LockIcon />
+                  )}
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={selectedNetwork.ssid}
+                secondary={
+                  'Security: ' +
+                  networkSecurityMode(selectedNetwork) +
+                  ', Ch: ' +
+                  selectedNetwork.channel
+                }
+              />
+              <ListItemSecondaryAction>
+                <IconButton
+                  aria-label="Manual Config"
+                  onClick={deselectNetwork}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          </List>
+        ) : (
+          <TextValidator
+            validators={['matchRegexp:^.{0,32}$']}
+            errorMessages={['SSID must be 32 characters or less']}
+            name="ssid"
+            label="SSID (leave blank to disable WiFi)"
+            fullWidth
+            variant="outlined"
+            value={data.ssid}
+            onChange={handleValueChange('ssid')}
+            margin="normal"
+          />
+        )}
+        {(!selectedNetwork || !isNetworkOpen(selectedNetwork)) && (
           <PasswordValidator
             validators={['matchRegexp:^.{0,64}$']}
             errorMessages={['Password must be 64 characters or less']}
@@ -105,10 +133,10 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
             onChange={handleValueChange('password')}
             margin="normal"
           />
-        }
+        )}
         <TextValidator
           validators={['required', 'isHostname']}
-          errorMessages={['Hostname is required', "Not a valid hostname"]}
+          errorMessages={['Hostname is required', 'Not a valid hostname']}
           name="hostname"
           label="Hostname"
           fullWidth
@@ -122,13 +150,12 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
             <Checkbox
               value="static_ip_config"
               checked={data.static_ip_config}
-              onChange={handleValueChange("static_ip_config")}
+              onChange={handleValueChange('static_ip_config')}
             />
           }
           label="Static IP Config"
         />
-        {
-          data.static_ip_config &&
+        {data.static_ip_config && (
           <Fragment>
             <TextValidator
               validators={['required', 'isIP']}
@@ -154,7 +181,10 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
             />
             <TextValidator
               validators={['required', 'isIP']}
-              errorMessages={['Subnet mask is required', 'Must be an IP address']}
+              errorMessages={[
+                'Subnet mask is required',
+                'Must be an IP address'
+              ]}
               name="subnet_mask"
               label="Subnet"
               fullWidth
@@ -186,9 +216,14 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
               margin="normal"
             />
           </Fragment>
-        }
+        )}
         <FormActions>
-          <FormButton startIcon={<SaveIcon />} variant="contained" color="primary" type="submit">
+          <FormButton
+            startIcon={<SaveIcon />}
+            variant="contained"
+            color="primary"
+            type="submit"
+          >
             Save
           </FormButton>
         </FormActions>

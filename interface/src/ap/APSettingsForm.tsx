@@ -1,10 +1,19 @@
 import React, { Fragment } from 'react';
-import { TextValidator, ValidatorForm, SelectValidator } from 'react-material-ui-form-validator';
+import {
+  TextValidator,
+  ValidatorForm,
+  SelectValidator
+} from 'react-material-ui-form-validator';
 
 import MenuItem from '@material-ui/core/MenuItem';
 import SaveIcon from '@material-ui/icons/Save';
 
-import { PasswordValidator, RestFormProps, FormActions, FormButton } from '../components';
+import {
+  PasswordValidator,
+  RestFormProps,
+  FormActions,
+  FormButton
+} from '../components';
 
 import { isAPEnabled } from './APModes';
 import { APSettings, APProvisionMode } from './types';
@@ -13,7 +22,6 @@ import { isIP } from '../validators';
 type APSettingsFormProps = RestFormProps<APSettings>;
 
 class APSettingsForm extends React.Component<APSettingsFormProps> {
-
   componentDidMount() {
     ValidatorForm.addValidationRule('isIP', isIP);
   }
@@ -22,23 +30,29 @@ class APSettingsForm extends React.Component<APSettingsFormProps> {
     const { data, handleValueChange, saveData } = this.props;
     return (
       <ValidatorForm onSubmit={saveData} ref="APSettingsForm">
-        <SelectValidator name="provision_mode"
+        <SelectValidator
+          name="provision_mode"
           label="Provide Access Point&hellip;"
           value={data.provision_mode}
           fullWidth
           variant="outlined"
           onChange={handleValueChange('provision_mode')}
-          margin="normal">
+          margin="normal"
+        >
           <MenuItem value={APProvisionMode.AP_MODE_ALWAYS}>Always</MenuItem>
-          <MenuItem value={APProvisionMode.AP_MODE_DISCONNECTED}>When Network Disconnected</MenuItem>
+          <MenuItem value={APProvisionMode.AP_MODE_DISCONNECTED}>
+            When Network Disconnected
+          </MenuItem>
           <MenuItem value={APProvisionMode.AP_NEVER}>Never</MenuItem>
         </SelectValidator>
-        {
-          isAPEnabled(data) &&
+        {isAPEnabled(data) && (
           <Fragment>
             <TextValidator
               validators={['required', 'matchRegexp:^.{1,32}$']}
-              errorMessages={['Access Point SSID is required', 'Access Point SSID must be 32 characters or less']}
+              errorMessages={[
+                'Access Point SSID is required',
+                'Access Point SSID must be 32 characters or less'
+              ]}
               name="ssid"
               label="Access Point SSID"
               fullWidth
@@ -49,7 +63,10 @@ class APSettingsForm extends React.Component<APSettingsFormProps> {
             />
             <PasswordValidator
               validators={['required', 'matchRegexp:^.{8,64}$']}
-              errorMessages={['Access Point Password is required', 'Access Point Password must be 8-64 characters']}
+              errorMessages={[
+                'Access Point Password is required',
+                'Access Point Password must be 8-64 characters'
+              ]}
               name="password"
               label="Access Point Password"
               fullWidth
@@ -71,7 +88,10 @@ class APSettingsForm extends React.Component<APSettingsFormProps> {
             />
             <TextValidator
               validators={['required', 'isIP']}
-              errorMessages={['Gateway IP is required', 'Must be an IP address']}
+              errorMessages={[
+                'Gateway IP is required',
+                'Must be an IP address'
+              ]}
               name="gateway_ip"
               label="Gateway"
               fullWidth
@@ -82,7 +102,10 @@ class APSettingsForm extends React.Component<APSettingsFormProps> {
             />
             <TextValidator
               validators={['required', 'isIP']}
-              errorMessages={['Subnet mask is required', 'Must be an IP address']}
+              errorMessages={[
+                'Subnet mask is required',
+                'Must be an IP address'
+              ]}
               name="subnet_mask"
               label="Subnet"
               fullWidth
@@ -92,9 +115,14 @@ class APSettingsForm extends React.Component<APSettingsFormProps> {
               margin="normal"
             />
           </Fragment>
-        }
+        )}
         <FormActions>
-          <FormButton startIcon={<SaveIcon />} variant="contained" color="primary" type="submit">
+          <FormButton
+            startIcon={<SaveIcon />}
+            variant="contained"
+            color="primary"
+            type="submit"
+          >
             Save
           </FormButton>
         </FormActions>

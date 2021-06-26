@@ -1,10 +1,19 @@
 import React from 'react';
-import { TextValidator, ValidatorForm, SelectValidator } from 'react-material-ui-form-validator';
+import {
+  TextValidator,
+  ValidatorForm,
+  SelectValidator
+} from 'react-material-ui-form-validator';
 
 import { Checkbox, MenuItem } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 
-import { RestFormProps, FormActions, FormButton, BlockFormControlLabel } from '../components';
+import {
+  RestFormProps,
+  FormActions,
+  FormButton,
+  BlockFormControlLabel
+} from '../components';
 import { isIP, isHostname, or } from '../validators';
 
 import { TIME_ZONES, timeZoneSelectItems, selectedTimeZone } from './TZ';
@@ -13,7 +22,6 @@ import { NTPSettings } from './types';
 type NTPSettingsFormProps = RestFormProps<NTPSettings>;
 
 class NTPSettingsForm extends React.Component<NTPSettingsFormProps> {
-
   componentDidMount() {
     ValidatorForm.addValidationRule('isIPOrHostname', or(isIP, isHostname));
   }
@@ -25,7 +33,7 @@ class NTPSettingsForm extends React.Component<NTPSettingsFormProps> {
       tz_label: event.target.value,
       tz_format: TIME_ZONES[event.target.value]
     });
-  }
+  };
 
   render() {
     const { data, handleValueChange, saveData } = this.props;
@@ -43,7 +51,10 @@ class NTPSettingsForm extends React.Component<NTPSettingsFormProps> {
         />
         <TextValidator
           validators={['required', 'isIPOrHostname']}
-          errorMessages={['Server is required', "Not a valid IP address or hostname"]}
+          errorMessages={[
+            'Server is required',
+            'Not a valid IP address or hostname'
+          ]}
           name="server"
           label="Server"
           fullWidth
@@ -68,7 +79,12 @@ class NTPSettingsForm extends React.Component<NTPSettingsFormProps> {
           {timeZoneSelectItems()}
         </SelectValidator>
         <FormActions>
-          <FormButton startIcon={<SaveIcon />} variant="contained" color="primary" type="submit">
+          <FormButton
+            startIcon={<SaveIcon />}
+            variant="contained"
+            color="primary"
+            type="submit"
+          >
             Save
           </FormButton>
         </FormActions>

@@ -63,35 +63,55 @@ bool System::command_send(const char * value, const int8_t id) {
 
 // fetch device values
 bool System::command_fetch(const char * value, const int8_t id) {
-    LOG_INFO(F("Requesting data from EMS devices"));
-    EMSESP::fetch_device_values();
+    std::string value_s(14, '\0');
+    if (Helpers::value2string(value, value_s)) {
+        if (value_s == "all") {
+            LOG_INFO(F("Requesting data from EMS devices"));
+            EMSESP::fetch_device_values();
+            return true;
+        } else if (value_s == "boiler") {
+            EMSESP::fetch_device_values_type(EMSdevice::DeviceType::BOILER);
+            return true;
+        } else if (value_s == "thermostat") {
+            EMSESP::fetch_device_values_type(EMSdevice::DeviceType::THERMOSTAT);
+            return true;
+        } else if (value_s == "solar") {
+            EMSESP::fetch_device_values_type(EMSdevice::DeviceType::SOLAR);
+            return true;
+        } else if (value_s == "mixer") {
+            EMSESP::fetch_device_values_type(EMSdevice::DeviceType::MIXER);
+            return true;
+        }
+    }
+
+    EMSESP::fetch_device_values(); // default if no name or id is given
     return true;
 }
 
 // mqtt publish
 bool System::command_publish(const char * value, const int8_t id) {
-    std::string ha(14, '\0');
-    if (Helpers::value2string(value, ha)) {
-        if (ha == "ha") {
+    std::string value_s(14, '\0');
+    if (Helpers::value2string(value, value_s)) {
+        if (value_s == "ha") {
             EMSESP::publish_all(true); // includes HA
             LOG_INFO(F("Publishing all data to MQTT, including HA configs"));
             return true;
-        } else if (ha == "boiler") {
+        } else if (value_s == "boiler") {
             EMSESP::publish_device_values(EMSdevice::DeviceType::BOILER);
             return true;
-        } else if (ha == "thermostat") {
+        } else if (value_s == "thermostat") {
             EMSESP::publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
             return true;
-        } else if (ha == "solar") {
+        } else if (value_s == "solar") {
             EMSESP::publish_device_values(EMSdevice::DeviceType::SOLAR);
             return true;
-        } else if (ha == "mixer") {
+        } else if (value_s == "mixer") {
             EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
             return true;
-        } else if (ha == "other") {
+        } else if (value_s == "other") {
             EMSESP::publish_other_values();
             return true;
-        } else if (ha == "dallassensor") {
+        } else if (value_s == "dallassensor") {
             EMSESP::publish_sensor_values(true);
             return true;
         }
@@ -393,7 +413,6 @@ void System::loop() {
         send_heartbeat();
     }
 
-    /*
 #ifndef EMSESP_STANDALONE
 #if defined(EMSESP_DEBUG)
     static uint32_t last_memcheck_ = 0;
@@ -403,7 +422,6 @@ void System::loop() {
     }
 #endif
 #endif
-*/
 
 #endif
 }
@@ -419,14 +437,6 @@ void System::show_mem(const char * note) {
 
 // create the json for heartbeat
 bool System::heartbeat_json(JsonObject & doc) {
-    int8_t rssi;
-    if (!ethernet_connected_) {
-        rssi = wifi_quality();
-        if (rssi == -1) {
-            return false;
-        }
-    }
-
     uint8_t ems_status = EMSESP::bus_status();
     if (ems_status == EMSESP::BUS_STATUS_TX_ERRORS) {
         doc["status"] = FJSON("txerror");
@@ -436,12 +446,9 @@ bool System::heartbeat_json(JsonObject & doc) {
         doc["status"] = FJSON("disconnected");
     }
 
-    if (!ethernet_connected_) {
-        doc["rssi"] = rssi;
-    }
-    doc["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
-    doc["uptime_sec"] = uuid::get_uptime_sec();
+    doc["uptime"] = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
 
+    doc["uptime_sec"] = uuid::get_uptime_sec();
     doc["rxreceived"] = EMSESP::rxservice_.telegram_count();
     doc["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
     doc["txread"]     = EMSESP::txservice_.telegram_read_count();
@@ -453,15 +460,24 @@ bool System::heartbeat_json(JsonObject & doc) {
     if (EMSESP::dallas_enabled()) {
         doc["dallasfails"] = EMSESP::sensor_fails();
     }
+
 #ifndef EMSESP_STANDALONE
-    doc["freemem"] = ESP.getFreeHeap();
+    doc["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes
 #endif
 
     if (analog_enabled_) {
         doc["adc"] = analog_;
     }
 
-    return (doc.size() > 0);
+#ifndef EMSESP_STANDALONE
+    if (!ethernet_connected_) {
+        int8_t rssi         = WiFi.RSSI();
+        doc["rssi"]         = rssi;
+        doc["wifistrength"] = wifi_quality(rssi);
+    }
+#endif
+
+    return true;
 }
 
 // send periodic MQTT message with system information
@@ -599,14 +615,15 @@ void System::system_check() {
 // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
 // no individual subscribe for pin command because id is needed
 void System::commands_init() {
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin, MqttSubFlag::FLAG_NOSUB);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch);
-    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info);
-    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin, F("set GPIO"), MqttSubFlag::FLAG_NOSUB);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, F("send a telegram"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, F("force a MQTT publish"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, F("refresh all EMS values"));
+    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, F("system status"));
+    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("list system settings"));
+    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("list system commands"));
 #if defined(EMSESP_DEBUG)
-    Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test, F("run tests"));
 #endif
 }
 
@@ -628,19 +645,12 @@ void System::led_monitor() {
     }
 }
 
-// Return the quality (Received Signal Strength Indicator) of the WiFi network as a %. Or -1 if disconnected.
+// Return the quality (Received Signal Strength Indicator) of the WiFi network as a %
 //  High quality: 90% ~= -55dBm
 //  Medium quality: 50% ~= -75dBm
 //  Low quality: 30% ~= -85dBm
 //  Unusable quality: 8% ~= -96dBm
-int8_t System::wifi_quality() {
-#ifdef EMSESP_STANDALONE
-    return 100;
-#else
-    if (WiFi.status() != WL_CONNECTED) {
-        return -1;
-    }
-    int32_t dBm = WiFi.RSSI();
+int8_t System::wifi_quality(int8_t dBm) {
     if (dBm <= -100) {
         return 0;
     }
@@ -649,7 +659,6 @@ int8_t System::wifi_quality() {
         return 100;
     }
     return 2 * (dBm + 100);
-#endif
 }
 
 // print users to console
@@ -693,7 +702,7 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(F("WiFi: Connected"));
         shell.printfln(F("SSID: %s"), WiFi.SSID().c_str());
         shell.printfln(F("BSSID: %s"), WiFi.BSSIDstr().c_str());
-        shell.printfln(F("RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality());
+        shell.printfln(F("RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
         shell.printfln(F("MAC address: %s"), WiFi.macAddress().c_str());
         shell.printfln(F("Hostname: %s"), WiFi.getHostname());
         shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
@@ -757,6 +766,11 @@ bool System::check_upgrade() {
     return false;
 }
 
+// list commands
+bool System::command_commands(const char * value, const int8_t id, JsonObject & json) {
+    return Command::list(EMSdevice::DeviceType::SYSTEM, json);
+}
+
 // export all settings to JSON text
 // e.g. http://ems-esp/api?device=system&cmd=settings
 // value and id are ignored
@@ -767,8 +781,8 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
     node["version"] = EMSESP_APP_VERSION;
 
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
-        node                     = json.createNestedObject("WIFI");
-        node["ssid"]             = settings.ssid;
+        node = json.createNestedObject("WIFI");
+        // node["ssid"]             = settings.ssid; // commented out - people don't like others to see this
         node["hostname"]         = settings.hostname;
         node["static_ip_config"] = settings.staticIPConfig;
         JsonUtils::writeIP(node, "local_ip", settings.localIP);
@@ -833,6 +847,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         node                         = json.createNestedObject("Settings");
         node["tx_mode"]              = settings.tx_mode;
+        node["tx_delay"]             = settings.tx_delay;
         node["ems_bus_id"]           = settings.ems_bus_id;
         node["syslog_enabled"]       = settings.syslog_enabled;
         node["syslog_level"]         = settings.syslog_level;
@@ -848,7 +863,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["dallas_parasite"]      = settings.dallas_parasite;
         node["led_gpio"]             = settings.led_gpio;
         node["hide_led"]             = settings.hide_led;
-        node["api_enabled"]          = settings.api_enabled;
+        node["notoken_api"]          = settings.notoken_api;
         node["analog_enabled"]       = settings.analog_enabled;
         node["pbutton_gpio"]         = settings.pbutton_gpio;
         node["board_profile"]        = settings.board_profile;
@@ -860,11 +875,6 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 // export status information including some basic settings
 // e.g. http://ems-esp/api?device=system&cmd=info
 bool System::command_info(const char * value, const int8_t id, JsonObject & json) {
-
-    if (id == 0) {
-        return EMSESP::system_.heartbeat_json(json);
-    }
-
     JsonObject node;
 
     node = json.createNestedObject("System");
@@ -872,7 +882,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
     node["version"] = EMSESP_APP_VERSION;
     node["uptime"]  = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
 #ifndef EMSESP_STANDALONE
-    node["freemem"] = ESP.getFreeHeap();
+    node["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes
 #endif
 
     node = json.createNestedObject("Status");
@@ -900,10 +910,12 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
         node["rx line quality"]       = EMSESP::rxservice_.quality();
         node["tx line quality"]       = EMSESP::txservice_.quality();
         if (Mqtt::enabled()) {
+            node["#MQTT publishes"]     = Mqtt::publish_count();
             node["#MQTT publish fails"] = Mqtt::publish_fails();
         }
         if (EMSESP::dallas_enabled()) {
             node["#dallas sensors"] = EMSESP::sensor_devices().size();
+            node["#dallas reads"]   = EMSESP::sensor_reads();
             node["#dallas fails"]   = EMSESP::sensor_fails();
         }
     }
@@ -923,8 +935,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
     }
     if (EMSESP::sensor_devices().size()) {
         JsonObject obj = devices2.createNestedObject();
-        obj["type"]    = F("Dallassensor");
-        obj["name"]    = F("Dallassensor");
+        obj["type"]    = F_(Dallassensor);
+        obj["name"]    = F_(Dallassensor);
     }
 
     return true;

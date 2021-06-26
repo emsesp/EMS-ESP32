@@ -7,7 +7,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     content: {
       padding: theme.spacing(2),
-      margin: theme.spacing(3),
+      margin: theme.spacing(3)
     }
   })
 );
@@ -15,13 +15,14 @@ const useStyles = makeStyles((theme: Theme) =>
 interface SectionContentProps {
   title: string;
   titleGutter?: boolean;
+  id?: string;
 }
 
 const SectionContent: React.FC<SectionContentProps> = (props) => {
-  const { children, title, titleGutter } = props;
+  const { children, title, titleGutter, id } = props;
   const classes = useStyles();
   return (
-    <Paper className={classes.content}>
+    <Paper id={id} className={classes.content}>
       <Typography variant="h6" gutterBottom={titleGutter}>
         {title}
       </Typography>

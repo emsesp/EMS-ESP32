@@ -24,6 +24,8 @@
 #include "version.h"
 #include "default_settings.h"
 
+#include <uuid/log.h>
+
 // forward declarators
 // used to bind EMS-ESP functions to external frameworks
 namespace emsesp {

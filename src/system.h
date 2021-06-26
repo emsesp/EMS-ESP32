@@ -54,6 +54,7 @@ class System {
     static bool command_fetch(const char * value, const int8_t id);
     static bool command_info(const char * value, const int8_t id, JsonObject & json);
     static bool command_settings(const char * value, const int8_t id, JsonObject & json);
+    static bool command_commands(const char * value, const int8_t id, JsonObject & json);
 #if defined(EMSESP_DEBUG)
     static bool command_test(const char * value, const int8_t id);
 #endif
@@ -138,7 +139,7 @@ class System {
     void system_check();
     void measure_analog();
 
-    int8_t wifi_quality();
+    int8_t wifi_quality(int8_t dBm);
 
     bool     system_healthy_     = false;
     uint32_t led_flash_speed_    = LED_WARNING_BLINK_FAST; // default boot flashes quickly

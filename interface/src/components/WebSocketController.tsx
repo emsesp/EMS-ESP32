@@ -7,7 +7,9 @@ import { addAccessTokenParameter } from '../authentication';
 import { extractEventValue } from '.';
 
 export interface WebSocketControllerProps<D> extends WithSnackbarProps {
-  handleValueChange: (name: keyof D) => (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleValueChange: (
+    name: keyof D
+  ) => (event: React.ChangeEvent<HTMLInputElement>) => void;
 
   setData: (data: D, callback?: () => void) => void;
   saveData: () => void;
@@ -25,8 +27,8 @@ interface WebSocketControllerState<D> {
 }
 
 enum WebSocketMessageType {
-  ID = "id",
-  PAYLOAD = "payload"
+  ID = 'id',
+  PAYLOAD = 'payload'
 }
 
 interface WebSocketIdMessage {
@@ -40,21 +42,32 @@ interface WebSocketPayloadMessage<D> {
   payload: D;
 }
 
-export type WebSocketMessage<D> = WebSocketIdMessage | WebSocketPayloadMessage<D>;
+export type WebSocketMessage<D> =
+  | WebSocketIdMessage
+  | WebSocketPayloadMessage<D>;
 
-export function webSocketController<D, P extends WebSocketControllerProps<D>>(wsUrl: string, wsThrottle: number, WebSocketController: React.ComponentType<P & WebSocketControllerProps<D>>) {
+export function webSocketController<D, P extends WebSocketControllerProps<D>>(
+  wsUrl: string,
+  wsThrottle: number,
+  WebSocketController: React.ComponentType<P & WebSocketControllerProps<D>>
+) {
   return withSnackbar(
-    class extends React.Component<Omit<P, keyof WebSocketControllerProps<D>> & WithSnackbarProps, WebSocketControllerState<D>> {
-      constructor(props: Omit<P, keyof WebSocketControllerProps<D>> & WithSnackbarProps) {
+    class extends React.Component<
+      Omit<P, keyof WebSocketControllerProps<D>> & WithSnackbarProps,
+      WebSocketControllerState<D>
+    > {
+      constructor(
+        props: Omit<P, keyof WebSocketControllerProps<D>> & WithSnackbarProps
+      ) {
         super(props);
         this.state = {
           ws: new Sockette(addAccessTokenParameter(wsUrl), {
             onmessage: this.onMessage,
             onopen: this.onOpen,
-            onclose: this.onClose,
+            onclose: this.onClose
           }),
           connected: false
-        }
+        };
       }
 
       componentWillUnmount() {
@@ -64,37 +77,42 @@ export function webSocketController<D, P extends WebSocketControllerProps<D>>(ws
       onMessage = (event: MessageEvent) => {
         const rawData = event.data;
         if (typeof rawData === 'string' || rawData instanceof String) {
-          this.handleMessage(JSON.parse(rawData as string) as WebSocketMessage<D>);
+          this.handleMessage(
+            JSON.parse(rawData as string) as WebSocketMessage<D>
+          );
         }
-      }
+      };
 
       handleMessage = (message: WebSocketMessage<D>) => {
+        const { clientId, data } = this.state;
+
         switch (message.type) {
           case WebSocketMessageType.ID:
             this.setState({ clientId: message.id });
             break;
           case WebSocketMessageType.PAYLOAD:
-            const { clientId, data } = this.state;
             if (clientId && (!data || clientId !== message.origin_id)) {
-              this.setState(
-                { data: message.payload }
-              );
+              this.setState({ data: message.payload });
             }
             break;
         }
-      }
+      };
 
       onOpen = () => {
         this.setState({ connected: true });
-      }
+      };
 
       onClose = () => {
-        this.setState({ connected: false, clientId: undefined, data: undefined });
-      }
+        this.setState({
+          connected: false,
+          clientId: undefined,
+          data: undefined
+        });
+      };
 
       setData = (data: D, callback?: () => void) => {
         this.setState({ data }, callback);
-      }
+      };
 
       saveData = throttle(() => {
         const { ws, connected, data } = this.state;
@@ -106,28 +124,35 @@ export function webSocketController<D, P extends WebSocketControllerProps<D>>(ws
       saveDataAndClear = throttle(() => {
         const { ws, connected, data } = this.state;
         if (connected) {
-          this.setState({
-            data: undefined
-          }, () => ws.json(data));
+          this.setState(
+            {
+              data: undefined
+            },
+            () => ws.json(data)
+          );
         }
       }, wsThrottle);
 
-      handleValueChange = (name: keyof D) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      handleValueChange = (name: keyof D) => (
+        event: React.ChangeEvent<HTMLInputElement>
+      ) => {
         const data = { ...this.state.data!, [name]: extractEventValue(event) };
         this.setState({ data });
-      }
+      };
 
       render() {
-        return <WebSocketController
-          {...this.props as P}
-          handleValueChange={this.handleValueChange}
-          setData={this.setData}
-          saveData={this.saveData}
-          saveDataAndClear={this.saveDataAndClear}
-          connected={this.state.connected}
-          data={this.state.data}
-        />;
+        return (
+          <WebSocketController
+            {...(this.props as P)}
+            handleValueChange={this.handleValueChange}
+            setData={this.setData}
+            saveData={this.saveData}
+            saveDataAndClear={this.saveDataAndClear}
+            connected={this.state.connected}
+            data={this.state.data}
+          />
+        );
       }
-
-    });
+    }
+  );
 }

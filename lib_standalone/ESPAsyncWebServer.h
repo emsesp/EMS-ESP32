@@ -11,6 +11,9 @@ class AsyncWebServer;
 class AsyncWebServerRequest;
 class AsyncWebServerResponse;
 class AsyncJsonResponse;
+class PrettyAsyncJsonResponse;
+class MsgpackAsyncJsonResponse;
+class AsyncEventSource;
 
 class AsyncWebParameter {
   private:
@@ -68,11 +71,14 @@ class AsyncWebServerRequest {
     AsyncWebServer *          _server;
     WebRequestMethodComposite _method;
 
+    String _url;
+
   public:
     void * _tempObject;
 
-    AsyncWebServerRequest(AsyncWebServer *, AsyncClient *);
-    ~AsyncWebServerRequest();
+    AsyncWebServerRequest(AsyncWebServer *, AsyncClient *){};
+    AsyncWebServerRequest(){};
+    ~AsyncWebServerRequest(){};
 
     AsyncClient * client() {
         return _client;
@@ -82,18 +88,40 @@ class AsyncWebServerRequest {
         return _method;
     }
 
+    void method(WebRequestMethodComposite method_s) {
+        _method = method_s;
+    }
+
     void addInterestingHeader(const String & name){};
+
+    size_t args() const {
+        return 0;
+    }
 
     void send(AsyncWebServerResponse * response){};
     void send(AsyncJsonResponse * response){};
+    void send(PrettyAsyncJsonResponse * response){};
+    void send(MsgpackAsyncJsonResponse * response){};
     void send(int code, const String & contentType = String(), const String & content = String()){};
     void send(int code, const String & contentType, const __FlashStringHelper *){};
+
+    const String & url() const {
+        return _url;
+    }
+
+    void url(const String & url_s) {
+        _url = url_s;
+    }
 
     bool hasParam(const String & name, bool post, bool file) const {
         return false;
     }
 
     bool hasParam(const char * name, bool post, bool file) const {
+        return false;
+    }
+
+    bool hasParam(const char * name) const {
         return false;
     }
 
@@ -114,6 +142,10 @@ class AsyncWebServerRequest {
     }
 
     AsyncWebParameter * getParam(const __FlashStringHelper * data) const {
+        return nullptr;
+    }
+
+    AsyncWebParameter * getParam(const char * name) const {
         return nullptr;
     }
 
@@ -166,6 +198,10 @@ class AsyncWebHandler {
     virtual bool isRequestHandlerTrivial() {
         return true;
     }
+
+    AsyncWebHandler & setFilter(ArRequestFilterFunction fn) {
+        return *this;
+    }
 };
 
 class AsyncWebServerResponse {
@@ -196,6 +232,19 @@ class AsyncWebServer {
     }
 
     void on(const char * uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest){};
+};
+
+
+class AsyncEventSource : public AsyncWebHandler {
+  public:
+    AsyncEventSource(const String & url){};
+    ~AsyncEventSource(){};
+
+    size_t count() const {
+        return 1;
+    }
+
+    void send(const char * message, const char * event = NULL, uint32_t id = 0, uint32_t reconnect = 0){};
 };
 
 

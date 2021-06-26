@@ -1,8 +1,23 @@
 import React, { Component, Fragment } from 'react';
 
 import { WithTheme, withTheme } from '@material-ui/core/styles';
-import { Avatar, Divider, List, ListItem, ListItemAvatar, ListItemText, Button } from '@material-ui/core';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Box, TextField } from '@material-ui/core';
+import {
+  Avatar,
+  Divider,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Button
+} from '@material-ui/core';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Box,
+  TextField
+} from '@material-ui/core';
 
 import SwapVerticalCircleIcon from '@material-ui/icons/SwapVerticalCircle';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
@@ -13,12 +28,22 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 
 import { RestFormProps, FormButton, HighlightAvatar } from '../components';
 import { isNtpActive, ntpStatusHighlight, ntpStatus } from './NTPStatus';
-import { formatDuration, formatDateTime, formatLocalDateTime } from './TimeFormat';
+import {
+  formatDuration,
+  formatDateTime,
+  formatLocalDateTime
+} from './TimeFormat';
 import { NTPStatus, Time } from './types';
-import { redirectingAuthorizedFetch, withAuthenticatedContext, AuthenticatedContextProps } from '../authentication';
+import {
+  redirectingAuthorizedFetch,
+  withAuthenticatedContext,
+  AuthenticatedContextProps
+} from '../authentication';
 import { TIME_ENDPOINT } from '../api';
 
-type NTPStatusFormProps = RestFormProps<NTPStatus> & WithTheme & AuthenticatedContextProps;
+type NTPStatusFormProps = RestFormProps<NTPStatus> &
+  WithTheme &
+  AuthenticatedContextProps;
 
 interface NTPStatusFormState {
   settingTime: boolean;
@@ -27,7 +52,6 @@ interface NTPStatusFormState {
 }
 
 class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
-
   constructor(props: NTPStatusFormProps) {
     super(props);
     this.state = {
@@ -41,20 +65,20 @@ class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
     this.setState({
       localTime: event.target.value
     });
-  }
+  };
 
   openSetTime = () => {
     this.setState({
       localTime: formatLocalDateTime(new Date()),
       settingTime: true
     });
-  }
+  };
 
   closeSetTime = () => {
     this.setState({
       settingTime: false
     });
-  }
+  };
 
   createTime = (): Time => ({
     local_time: formatLocalDateTime(new Date(this.state.localTime))
@@ -62,27 +86,34 @@ class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
 
   configureTime = () => {
     this.setState({ processing: true });
-    redirectingAuthorizedFetch(TIME_ENDPOINT,
-      {
-        method: 'POST',
-        body: JSON.stringify(this.createTime()),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      .then(response => {
+    redirectingAuthorizedFetch(TIME_ENDPOINT, {
+      method: 'POST',
+      body: JSON.stringify(this.createTime()),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then((response) => {
         if (response.status === 200) {
-          this.props.enqueueSnackbar("Time set successfully", { variant: 'success' });
-          this.setState({ processing: false, settingTime: false }, this.props.loadData);
+          this.props.enqueueSnackbar('Time set successfully', {
+            variant: 'success'
+          });
+          this.setState(
+            { processing: false, settingTime: false },
+            this.props.loadData
+          );
         } else {
-          throw Error("Error setting time, status code: " + response.status);
+          throw Error('Error setting time, status code: ' + response.status);
         }
       })
-      .catch(error => {
-        this.props.enqueueSnackbar(error.message || "Problem setting the time", { variant: 'error' });
+      .catch((error) => {
+        this.props.enqueueSnackbar(
+          error.message || 'Problem setting the time',
+          { variant: 'error' }
+        );
         this.setState({ processing: false, settingTime: false });
       });
-  }
+  };
 
   renderSetTimeDialog() {
     return (
@@ -94,7 +125,9 @@ class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
       >
         <DialogTitle>Set Time</DialogTitle>
         <DialogContent dividers>
-          <Box mb={2}>Enter local date and time below to set the device's time.</Box>
+          <Box mb={2}>
+            Enter local date and time below to set the device's time.
+          </Box>
           <TextField
             label="Local Time"
             type="datetime-local"
@@ -104,24 +137,35 @@ class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
             variant="outlined"
             fullWidth
             InputLabelProps={{
-              shrink: true,
+              shrink: true
             }}
           />
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" onClick={this.closeSetTime} color="secondary">
+          <Button
+            variant="contained"
+            onClick={this.closeSetTime}
+            color="secondary"
+          >
             Cancel
           </Button>
-          <Button startIcon={<AccessTimeIcon />} variant="contained" onClick={this.configureTime} disabled={this.state.processing} color="primary" autoFocus>
+          <Button
+            startIcon={<AccessTimeIcon />}
+            variant="contained"
+            onClick={this.configureTime}
+            disabled={this.state.processing}
+            color="primary"
+            autoFocus
+          >
             Set Time
           </Button>
         </DialogActions>
       </Dialog>
-    )
+    );
   }
 
   render() {
-    const { data, theme } = this.props
+    const { data, theme } = this.props;
     const me = this.props.authenticatedContext.me;
     return (
       <Fragment>
@@ -154,7 +198,10 @@ class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
                 <AccessTimeIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Local Time" secondary={formatDateTime(data.local_time)} />
+            <ListItemText
+              primary="Local Time"
+              secondary={formatDateTime(data.local_time)}
+            />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -163,7 +210,10 @@ class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
                 <SwapVerticalCircleIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="UTC Time" secondary={formatDateTime(data.utc_time)} />
+            <ListItemText
+              primary="UTC Time"
+              secondary={formatDateTime(data.utc_time)}
+            />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -172,19 +222,32 @@ class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
                 <AvTimerIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Uptime" secondary={formatDuration(data.uptime)} />
+            <ListItemText
+              primary="Uptime"
+              secondary={formatDuration(data.uptime)}
+            />
           </ListItem>
           <Divider variant="inset" component="li" />
         </List>
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} padding={1}>
-            <FormButton startIcon={<RefreshIcon />} variant="contained" color="secondary" onClick={this.props.loadData}>
+            <FormButton
+              startIcon={<RefreshIcon />}
+              variant="contained"
+              color="secondary"
+              onClick={this.props.loadData}
+            >
               Refresh
             </FormButton>
           </Box>
           {me.admin && !isNtpActive(data) && (
             <Box flexWrap="none" padding={1} whiteSpace="nowrap">
-              <Button onClick={this.openSetTime} variant="contained" color="primary" startIcon={<AccessTimeIcon />}>
+              <Button
+                onClick={this.openSetTime}
+                variant="contained"
+                color="primary"
+                startIcon={<AccessTimeIcon />}
+              >
                 Set Time
               </Button>
             </Box>

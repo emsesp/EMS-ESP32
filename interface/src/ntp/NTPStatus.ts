@@ -1,7 +1,8 @@
-import { Theme } from "@material-ui/core";
-import { NTPStatus, NTPSyncStatus } from "./types";
+import { Theme } from '@material-ui/core';
+import { NTPStatus, NTPSyncStatus } from './types';
 
-export const isNtpActive = ({ status }: NTPStatus) => status === NTPSyncStatus.NTP_ACTIVE;
+export const isNtpActive = ({ status }: NTPStatus) =>
+  status === NTPSyncStatus.NTP_ACTIVE;
 
 export const ntpStatusHighlight = ({ status }: NTPStatus, theme: Theme) => {
   switch (status) {
@@ -12,15 +13,15 @@ export const ntpStatusHighlight = ({ status }: NTPStatus, theme: Theme) => {
     default:
       return theme.palette.error.main;
   }
-}
+};
 
 export const ntpStatus = ({ status }: NTPStatus) => {
   switch (status) {
     case NTPSyncStatus.NTP_INACTIVE:
-      return "Inactive";
+      return 'Inactive';
     case NTPSyncStatus.NTP_ACTIVE:
-      return "Active";
+      return 'Active';
     default:
-      return "Unknown";
+      return 'Unknown';
   }
-}
+};

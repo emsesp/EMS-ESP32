@@ -1,9 +1,11 @@
 ArduinoJson: change log
 =======================
 
-HEAD
-----
+v6.18.0 (2021-05-05)
+-------
 
+* Added support for custom converters (issue #687)
+* Added support for `Printable` (issue #1444)
 * Removed support for `char` values, see below (issue #1498)
 * `deserializeJson()` leaves `\uXXXX` unchanged instead of returning `NotSupported`
 * `deserializeMsgPack()` inserts `null` instead of returning `NotSupported`
@@ -11,8 +13,16 @@ HEAD
 * Added `JsonVariant::is<JsonArrayConst/JsonObjectConst>()` (issue #1412)
 * Added `JsonVariant::is<JsonVariant/JsonVariantConst>()` (issue #1412)
 * Changed `JsonVariantConst::is<JsonArray/JsonObject>()` to return `false` (issue #1412)
+* Simplified `JsonVariant::as<T>()` to always return `T` (see below)
+* Updated folders list in `.mbedignore` (PR #1515 by @AGlass0fMilk)
+* Fixed member-call-on-null-pointer in `getMember()` when array is empty
+* `serializeMsgPack(doc, buffer, size)` doesn't add null-terminator anymore (issue #1545)
+* `serializeJson(doc, buffer, size)` adds null-terminator only if there is enough room
+* PlatformIO: set `build.libArchive` to `false` (PR #1550 by @askreet)
 
 > ### BREAKING CHANGES
+>
+> #### Support for `char` removed
 >
 > We cannot cast a `JsonVariant` to a `char` anymore, so the following will break:
 > ```c++
@@ -33,6 +43,31 @@ HEAD
 > int8_t age;
 > doc["age"] = age;  // OK
 > ```
+> A deprecation warning with the message "Support for `char` is deprecated, use `int8_t` or `uint8_t` instead" was added to allow a smooth transition.
+>
+> #### `as<T>()` always returns `T`
+>
+> Previously, `JsonVariant::as<T>()` could return a type different from `T`.
+> The most common example is `as<char*>()` that returned a `const char*`.
+> While this feature simplified a few use cases, it was confusing and complicated the
+> implementation of custom converters.
+>
+> Starting from this version, `as<T>` doesn't try to auto-correct the return type and always return `T`,
+> which means that you cannot write this anymore:
+>
+> ```c++
+> Serial.println(doc["sensor"].as<char*>());  // error: invalid conversion from 'const char*' to 'char*' [-fpermissive]
+> ```
+> 
+> Instead, you must write:
+>
+> ```c++
+> Serial.println(doc["sensor"].as<const char*>());  // OK
+> ```
+>
+> A deprecation warning with the message "Replace `as<char*>()` with `as<const char*>()`" was added to allow a smooth transition.
+>
+> #### `DeserializationError::NotSupported` removed
 >
 > On a different topic, `DeserializationError::NotSupported` has been removed.
 > Instead of returning this error:
@@ -40,7 +75,9 @@ HEAD
 > * `deserializeJson()` leaves `\uXXXX` unchanged (only when `ARDUINOJSON_DECODE_UNICODE` is `0`)
 > * `deserializeMsgPack()` replaces unsupported values with `null`s
 >
-> Lastly, a very minor change conserns `JsonVariantConst::is<T>()`.
+> #### Const-aware `is<T>()`
+>
+> Lastly, a very minor change concerns `JsonVariantConst::is<T>()`.
 > It used to return `true` for `JsonArray` and `JsonOject`, but now it returns `false`.
 > Instead, you must use `JsonArrayConst` and `JsonObjectConst`.
 

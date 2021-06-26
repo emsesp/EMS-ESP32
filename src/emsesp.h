@@ -35,10 +35,11 @@
 
 #include <ESP8266React.h>
 
-#include "WebStatusService.h"
-#include "WebDevicesService.h"
-#include "WebSettingsService.h"
-#include "WebAPIService.h"
+#include "web/WebStatusService.h"
+#include "web/WebDevicesService.h"
+#include "web/WebSettingsService.h"
+#include "web/WebAPIService.h"
+#include "web/WebLogService.h"
 
 #include "emsdevice.h"
 #include "emsfactory.h"
@@ -93,7 +94,12 @@ class EMSESP {
     static std::string pretty_telegram(std::shared_ptr<const Telegram> telegram);
 
     static void send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0, const uint8_t length = 0);
-    static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
+    static void send_write_request(const uint16_t type_id,
+                                   const uint8_t  dest,
+                                   const uint8_t  offset,
+                                   uint8_t *      message_data,
+                                   const uint8_t  message_length,
+                                   const uint16_t validate_typeid);
     static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value);
     static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
 
@@ -124,6 +130,10 @@ class EMSESP {
 
     static bool have_sensors() {
         return (!(dallassensor_.sensors().empty()));
+    }
+
+    static uint32_t sensor_reads() {
+        return dallassensor_.reads();
     }
 
     static uint32_t sensor_fails() {
@@ -173,6 +183,7 @@ class EMSESP {
     }
 
     static void fetch_device_values(const uint8_t device_id = 0);
+    static void fetch_device_values_type(const uint8_t device_type);
 
     static bool add_device(const uint8_t device_id, const uint8_t product_id, std::string & version, const uint8_t brand);
     static void scan_devices();
@@ -195,6 +206,7 @@ class EMSESP {
     static WebStatusService   webStatusService;
     static WebDevicesService  webDevicesService;
     static WebAPIService      webAPIService;
+    static WebLogService      webLogService;
 
     static uuid::log::Logger logger();
 
@@ -209,7 +221,8 @@ class EMSESP {
     static void process_version(std::shared_ptr<const Telegram> telegram);
     static void publish_response(std::shared_ptr<const Telegram> telegram);
     static void publish_all_loop();
-    static bool command_info(uint8_t device_type, JsonObject & json, const int8_t id);
+    static bool command_info(uint8_t device_type, JsonObject & json, const int8_t id, bool verbose = true);
+    static bool command_commands(uint8_t device_type, JsonObject & json, const int8_t id);
 
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
     static uint32_t           last_fetch_;

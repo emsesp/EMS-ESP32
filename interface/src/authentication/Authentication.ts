@@ -27,7 +27,9 @@ export function clearLoginRedirect() {
   getStorage().removeItem(SIGN_IN_SEARCH);
 }
 
-export function fetchLoginRedirect(features: Features): H.LocationDescriptorObject {
+export function fetchLoginRedirect(
+  features: Features
+): H.LocationDescriptorObject {
   const signInPathname = getStorage().getItem(SIGN_IN_PATHNAME);
   const signInSearch = getStorage().getItem(SIGN_IN_SEARCH);
   clearLoginRedirect();
@@ -38,43 +40,51 @@ export function fetchLoginRedirect(features: Features): H.LocationDescriptorObje
 }
 
 /**
- * Wraps the normal fetch routene with one with provides the access token if present.
+ * Wraps the normal fetch routine with one with provides the access token if present.
  */
-export function authorizedFetch(url: RequestInfo, params?: RequestInit): Promise<Response> {
+export function authorizedFetch(
+  url: RequestInfo,
+  params?: RequestInit
+): Promise<Response> {
   const accessToken = getStorage().getItem(ACCESS_TOKEN);
   if (accessToken) {
     params = params || {};
     params.credentials = 'include';
     params.headers = {
       ...params.headers,
-      "Authorization": 'Bearer ' + accessToken
+      Authorization: 'Bearer ' + accessToken
     };
   }
   return fetch(url, params);
 }
 
 /**
- * fetch() does not yet support upload progress, this wrapper allows us to configure the xhr request 
- * for a single file upload and takes care of adding the Authroization header and redirecting on 
- * authroization errors as we do for normal fetch operations.
+ * fetch() does not yet support upload progress, this wrapper allows us to configure the xhr request
+ * for a single file upload and takes care of adding the Authorization header and redirecting on
+ * authorization errors as we do for normal fetch operations.
  */
-export function redirectingAuthorizedUpload(xhr: XMLHttpRequest, url: string, file: File, onProgress: (event: ProgressEvent<EventTarget>) => void): Promise<void> {
+export function redirectingAuthorizedUpload(
+  xhr: XMLHttpRequest,
+  url: string,
+  file: File,
+  onProgress: (event: ProgressEvent<EventTarget>) => void
+): Promise<void> {
   return new Promise((resolve, reject) => {
-    xhr.open("POST", url, true);
+    xhr.open('POST', url, true);
     const accessToken = getStorage().getItem(ACCESS_TOKEN);
     if (accessToken) {
       xhr.withCredentials = true;
-      xhr.setRequestHeader("Authorization", 'Bearer ' + accessToken);
+      xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
     }
     xhr.upload.onprogress = onProgress;
     xhr.onload = function () {
       if (xhr.status === 401 || xhr.status === 403) {
-        history.push("/unauthorized");
+        history.push('/unauthorized');
       } else {
         resolve();
       }
     };
-    xhr.onerror = function (event: ProgressEvent<EventTarget>) {
+    xhr.onerror = function () {
       reject(new DOMException('Error', 'UploadError'));
     };
     xhr.onabort = function () {
@@ -87,19 +97,24 @@ export function redirectingAuthorizedUpload(xhr: XMLHttpRequest, url: string, fi
 }
 
 /**
- * Wraps the normal fetch routene which redirects on 401 response.
+ * Wraps the normal fetch routine which redirects on 401 response.
  */
-export function redirectingAuthorizedFetch(url: RequestInfo, params?: RequestInit): Promise<Response> {
+export function redirectingAuthorizedFetch(
+  url: RequestInfo,
+  params?: RequestInit
+): Promise<Response> {
   return new Promise<Response>((resolve, reject) => {
-    authorizedFetch(url, params).then(response => {
-      if (response.status === 401 || response.status === 403) {
-        history.push("/unauthorized");
-      } else {
-        resolve(response);
-      }
-    }).catch(error => {
-      reject(error);
-    });
+    authorizedFetch(url, params)
+      .then((response) => {
+        if (response.status === 401 || response.status === 403) {
+          history.push('/unauthorized');
+        } else {
+          resolve(response);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
   });
 }
 

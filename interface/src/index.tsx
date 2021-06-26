@@ -6,8 +6,9 @@ import { Router } from 'react-router';
 
 import App from './App';
 
-render((
+render(
   <Router history={history}>
-    <App/>
-  </Router>
-), document.getElementById("root"))
+    <App />
+  </Router>,
+  document.getElementById('root')
+);

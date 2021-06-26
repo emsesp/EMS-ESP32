@@ -1,5 +1,5 @@
-import { Theme } from "@material-ui/core";
-import { NetworkStatus, NetworkConnectionStatus } from "./types";
+import { Theme } from '@material-ui/core';
+import { NetworkStatus, NetworkConnectionStatus } from './types';
 
 export const isConnected = ({ status }: NetworkStatus) => {
   return (
@@ -36,22 +36,22 @@ export const networkStatusHighlight = (
 export const networkStatus = ({ status }: NetworkStatus) => {
   switch (status) {
     case NetworkConnectionStatus.WIFI_STATUS_NO_SHIELD:
-      return "Inactive";
+      return 'Inactive';
     case NetworkConnectionStatus.WIFI_STATUS_IDLE:
-      return "Idle";
+      return 'Idle';
     case NetworkConnectionStatus.WIFI_STATUS_NO_SSID_AVAIL:
-      return "No SSID Available";
+      return 'No SSID Available';
     case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
-      return "Connected (WiFi)";
+      return 'Connected (WiFi)';
     case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
-      return "Connected (Ethernet)";
+      return 'Connected (Ethernet)';
     case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
-      return "Connection Failed";
+      return 'Connection Failed';
     case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
-      return "Connection Lost";
+      return 'Connection Lost';
     case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
-      return "Disconnected";
+      return 'Disconnected';
     default:
-      return "Unknown";
+      return 'Unknown';
   }
 };

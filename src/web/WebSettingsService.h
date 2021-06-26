@@ -22,7 +22,7 @@
 #include <HttpEndpoint.h>
 #include <FSPersistence.h>
 
-#include "default_settings.h"
+#include "../default_settings.h"
 
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
 #define EMSESP_SETTINGS_SERVICE_PATH "/rest/emsespSettings"
@@ -50,9 +50,10 @@ class WebSettings {
     bool     dallas_parasite;
     uint8_t  led_gpio;
     bool     hide_led;
-    bool     api_enabled;
+    bool     notoken_api;
     bool     analog_enabled;
     uint8_t  pbutton_gpio;
+    uint8_t  solar_maxflow;
     String   board_profile;
 
     static void              read(WebSettings & settings, JsonObject & root);

@@ -1,4 +1,4 @@
-// ArduinoJson - arduinojson.org
+// ArduinoJson - https://arduinojson.org
 // Copyright Benoit Blanchon 2014-2021
 // MIT License
 
@@ -46,20 +46,6 @@ class MemberProxy : public VariantOperators<MemberProxy<TObject, TStringRef> >,
   template <typename TValue>
   FORCE_INLINE typename enable_if<!is_array<TValue>::value, this_type &>::type
   operator=(const TValue &src) {
-    /********************************************************************
-     **                THIS IS NOT A BUG IN THE LIBRARY                **
-     **                --------------------------------                **
-     **  Get a compilation error pointing here?                        **
-     **  It doesn't mean the error *is* here.                          **
-     **  Often, it's because you try to assign the wrong value type.   **
-     **                                                                **
-     **  For example:                                                  **
-     **    char age = 42                                               **
-     **    doc["age"] = age;                                           **
-     **  Instead, use:                                                 **
-     **    int8_t age = 42;                                            **
-     **    doc["age"] = age;                                           **
-     ********************************************************************/
     getOrAddUpstreamMember().set(src);
     return *this;
   }
@@ -81,9 +67,17 @@ class MemberProxy : public VariantOperators<MemberProxy<TObject, TStringRef> >,
     return getUpstreamMember().isNull();
   }
 
-  template <typename TValue>
-  FORCE_INLINE typename VariantAs<TValue>::type as() const {
-    return getUpstreamMember().template as<TValue>();
+  template <typename T>
+  FORCE_INLINE typename enable_if<!is_same<T, char *>::value, T>::type as()
+      const {
+    return getUpstreamMember().template as<T>();
+  }
+
+  template <typename T>
+  FORCE_INLINE typename enable_if<is_same<T, char *>::value, const char *>::type
+  ARDUINOJSON_DEPRECATED("Replace as<char*>() with as<const char*>()")
+      as() const {
+    return as<const char *>();
   }
 
   template <typename T>
@@ -191,6 +185,10 @@ class MemberProxy : public VariantOperators<MemberProxy<TObject, TStringRef> >,
 
   FORCE_INLINE VariantRef getOrAddUpstreamMember() const {
     return _object.getOrAddMember(_key);
+  }
+
+  friend bool convertToJson(const this_type &src, VariantRef dst) {
+    return dst.set(src.getUpstreamMember());
   }
 
   TObject _object;

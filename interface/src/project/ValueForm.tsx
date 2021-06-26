@@ -1,64 +1,121 @@
 import React, { RefObject } from 'react';
-import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Box, Typography } from '@material-ui/core';
+import { ValidatorForm } from 'react-material-ui-form-validator';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Box,
+  Typography,
+  FormHelperText,
+  OutlinedInput,
+  InputAdornment,
+  TextField,
+  MenuItem
+} from '@material-ui/core';
+
 import { FormButton } from '../components';
-import { DeviceValue } from './EMSESPtypes';
+import { DeviceValue, DeviceValueUOM, DeviceValueUOM_s } from './EMSESPtypes';
 
 interface ValueFormProps {
-    devicevalue: DeviceValue;
-    onDoneEditing: () => void;
-    onCancelEditing: () => void;
-    handleValueChange: (data: keyof DeviceValue) => (event: React.ChangeEvent<HTMLInputElement>) => void;
+  devicevalue: DeviceValue;
+  onDoneEditing: () => void;
+  onCancelEditing: () => void;
+  handleValueChange: (
+    data: keyof DeviceValue
+  ) => (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 class ValueForm extends React.Component<ValueFormProps> {
+  formRef: RefObject<any> = React.createRef();
 
-    formRef: RefObject<any> = React.createRef();
+  submit = () => {
+    this.formRef.current.submit();
+  };
 
-    submit = () => {
-        this.formRef.current.submit();
-    }
+  render() {
+    const {
+      devicevalue,
+      handleValueChange,
+      onDoneEditing,
+      onCancelEditing
+    } = this.props;
 
-    buildLabel = (devicevalue: DeviceValue) => {
-        if ((devicevalue.uom === "") || (!devicevalue.uom)) {
-            return "New value";
-        }
-        return "New value (" + devicevalue.uom + ")";
-    }
-
-    render() {
-        const { devicevalue, handleValueChange, onDoneEditing, onCancelEditing } = this.props;
-        return (
-            <ValidatorForm onSubmit={onDoneEditing} ref={this.formRef}>
-                <Dialog  maxWidth="xs" onClose={onCancelEditing} aria-labelledby="user-form-dialog-title" open>
-                    <DialogTitle id="user-form-dialog-title">Change the {devicevalue.name}</DialogTitle>
-                    <DialogContent dividers>
-                        <TextValidator
-                            validators={['required']}
-                            errorMessages={['is required']}
-                            name="data"
-                            label={this.buildLabel(devicevalue)}
-                            fullWidth
-                            variant="outlined"
-                            value={devicevalue.data}
-                            margin="normal"
-                            onChange={handleValueChange('data')}
-                        />
-                        <Box color="warning.main" p={1} pl={0} pr={0} mt={0} mb={0}>
-                            <Typography variant="body2">
-                                <i>Note: it may take a few seconds before the change is visible. If nothing happens check the logs.</i>
-                            </Typography>
-                        </Box>
-                    </DialogContent>
-
-                    <DialogActions>
-                        <FormButton variant="contained" color="secondary" onClick={onCancelEditing}>Cancel</FormButton>
-                        <FormButton variant="contained" color="primary" type="submit" onClick={this.submit}>Done</FormButton>
-                    </DialogActions>
-                </Dialog>
-            </ValidatorForm>
-        );
-    }
+    return (
+      <ValidatorForm onSubmit={onDoneEditing} ref={this.formRef}>
+        <Dialog
+          maxWidth="xs"
+          onClose={onCancelEditing}
+          aria-labelledby="user-form-dialog-title"
+          open
+        >
+          <DialogTitle id="user-form-dialog-title">Change Value</DialogTitle>
+          <DialogContent dividers>
+            {devicevalue.u !== DeviceValueUOM.BOOLEAN && (
+              <OutlinedInput
+                id="outlined-adornment-value"
+                value={devicevalue.v}
+                autoFocus
+                fullWidth
+                onChange={handleValueChange('v')}
+                endAdornment={
+                  <InputAdornment position="end">
+                    {DeviceValueUOM_s[devicevalue.u]}
+                  </InputAdornment>
+                }
+                aria-describedby="outlined-value-helper-text"
+                inputProps={{
+                  'aria-label': 'value'
+                }}
+              />
+            )}
+            {devicevalue.u === DeviceValueUOM.BOOLEAN && (
+              <TextField
+                id="outlined-select-value"
+                select
+                value={devicevalue.v}
+                autoFocus
+                fullWidth
+                onChange={handleValueChange('v')}
+                variant="outlined"
+              >
+                <MenuItem value="true">on</MenuItem>
+                <MenuItem value="false">off</MenuItem>
+              </TextField>
+            )}
+            <FormHelperText id="outlined-value-helper-text">
+              {devicevalue.n}
+            </FormHelperText>
+            <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>
+              <Typography variant="body2">
+                <i>
+                  Note: it may take a few seconds before the change is
+                  registered with the EMS device.
+                </i>
+              </Typography>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <FormButton
+              variant="contained"
+              color="secondary"
+              onClick={onCancelEditing}
+            >
+              Cancel
+            </FormButton>
+            <FormButton
+              variant="contained"
+              color="primary"
+              type="submit"
+              onClick={this.submit}
+            >
+              Done
+            </FormButton>
+          </DialogActions>
+        </Dialog>
+      </ValidatorForm>
+    );
+  }
 }
 
 export default ValueForm;

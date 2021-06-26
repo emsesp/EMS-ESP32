@@ -16,7 +16,7 @@ export interface EMSESPSettings {
   dallas_parasite: boolean;
   led_gpio: number;
   hide_led: boolean;
-  api_enabled: boolean;
+  notoken_api: boolean;
   analog_enabled: boolean;
   pbutton_gpio: number;
   trace_raw: boolean;
@@ -58,15 +58,54 @@ export interface EMSESPDevices {
   sensors: Sensor[];
 }
 
-export interface EMSESPDeviceData {
-  name: string;
-  data: string[];
+export interface DeviceValue {
+  v: any;
+  u: number;
+  n: string;
+  c: string;
 }
 
-export interface DeviceValue {
-  id: number;
-  data: string,
-  uom: string,
-  name: string,
-  cmd: string
+export interface EMSESPDeviceData {
+  name: string;
+  data: DeviceValue[];
 }
+
+export enum DeviceValueUOM {
+  NONE = 0,
+  DEGREES,
+  PERCENT,
+  LMIN,
+  KWH,
+  WH,
+  HOURS,
+  MINUTES,
+  UA,
+  BAR,
+  KW,
+  W,
+  KB,
+  SECONDS,
+  DBM,
+  NUM,
+  BOOLEAN
+}
+
+export const DeviceValueUOM_s = [
+  '',
+  '°C',
+  '%',
+  'l/min',
+  'kWh',
+  'Wh',
+  'hours',
+  'minutes',
+  'uA',
+  'bar',
+  'kW',
+  'W',
+  'KB',
+  'seconds',
+  'dBm',
+  'number',
+  'on/off'
+];

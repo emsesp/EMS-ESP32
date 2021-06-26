@@ -1,9 +1,10 @@
-import React from "react";
+import { Component } from 'react';
+
 import {
   ValidatorForm,
   TextValidator,
-  SelectValidator,
-} from "react-material-ui-form-validator";
+  SelectValidator
+} from 'react-material-ui-form-validator';
 
 import {
   Checkbox,
@@ -12,33 +13,33 @@ import {
   Link,
   withWidth,
   WithWidthProps,
-} from "@material-ui/core";
-import SaveIcon from "@material-ui/icons/Save";
-import MenuItem from "@material-ui/core/MenuItem";
+  Grid
+} from '@material-ui/core';
 
-import Grid from "@material-ui/core/Grid";
+import SaveIcon from '@material-ui/icons/Save';
+import MenuItem from '@material-ui/core/MenuItem';
 
 import {
   redirectingAuthorizedFetch,
   withAuthenticatedContext,
-  AuthenticatedContextProps,
-} from "../authentication";
+  AuthenticatedContextProps
+} from '../authentication';
 
 import {
   RestFormProps,
   FormActions,
   FormButton,
-  BlockFormControlLabel,
-} from "../components";
+  BlockFormControlLabel
+} from '../components';
 
-import { isIP, optional } from "../validators";
+import { isIP, optional } from '../validators';
 
-import { EMSESPSettings } from "./EMSESPtypes";
+import { EMSESPSettings } from './EMSESPtypes';
 
-import { boardProfileSelectItems } from "./EMSESPBoardProfiles";
+import { boardProfileSelectItems } from './EMSESPBoardProfiles';
 
-import { ENDPOINT_ROOT } from "../api";
-export const BOARD_PROFILE_ENDPOINT = ENDPOINT_ROOT + "boardProfile";
+import { ENDPOINT_ROOT } from '../api';
+export const BOARD_PROFILE_ENDPOINT = ENDPOINT_ROOT + 'boardProfile';
 
 type EMSESPSettingsFormProps = RestFormProps<EMSESPSettings> &
   AuthenticatedContextProps &
@@ -48,40 +49,40 @@ interface EMSESPSettingsFormState {
   processing: boolean;
 }
 
-class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
+class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
   state: EMSESPSettingsFormState = {
-    processing: false,
+    processing: false
   };
 
   componentDidMount() {
-    ValidatorForm.addValidationRule("isOptionalIP", optional(isIP));
+    ValidatorForm.addValidationRule('isOptionalIP', optional(isIP));
   }
 
   changeBoardProfile = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { data, setData } = this.props;
     setData({
       ...data,
-      board_profile: event.target.value,
+      board_profile: event.target.value
     });
 
-    if (event.target.value === "CUSTOM") return;
+    if (event.target.value === 'CUSTOM') return;
 
     this.setState({ processing: true });
     redirectingAuthorizedFetch(BOARD_PROFILE_ENDPOINT, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({ code: event.target.value }),
       headers: {
-        "Content-Type": "application/json",
-      },
+        'Content-Type': 'application/json'
+      }
     })
       .then((response) => {
         if (response.status === 200) {
           return response.json();
         }
-        throw Error("Unexpected response code: " + response.status);
+        throw Error('Unexpected response code: ' + response.status);
       })
       .then((json) => {
-        this.props.enqueueSnackbar("Profile loaded", { variant: "success" });
+        this.props.enqueueSnackbar('Profile loaded', { variant: 'success' });
         setData({
           ...data,
           led_gpio: json.led_gpio,
@@ -89,14 +90,14 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
           rx_gpio: json.rx_gpio,
           tx_gpio: json.tx_gpio,
           pbutton_gpio: json.pbutton_gpio,
-          board_profile: event.target.value,
+          board_profile: event.target.value
         });
         this.setState({ processing: false });
       })
       .catch((error) => {
         this.props.enqueueSnackbar(
-          error.message || "Problem fetching board profile",
-          { variant: "warning" }
+          error.message || 'Problem fetching board profile',
+          { variant: 'warning' }
         );
         this.setState({ processing: false });
       });
@@ -108,13 +109,13 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
       <ValidatorForm onSubmit={saveData}>
         <Box bgcolor="info.main" p={2} mt={2} mb={2}>
           <Typography variant="body1">
-            Adjust any of the EMS-ESP settings here. For help refer to the{" "}
+            Adjust any of the EMS-ESP settings here. For help refer to the{' '}
             <Link
               target="_blank"
               href="https://emsesp.github.io/docs/#/Configure-firmware32?id=ems-esp-settings"
               color="primary"
             >
-              {"online documentation"}
+              {'online documentation'}
             </Link>
             .
           </Typography>
@@ -139,7 +140,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
               value={data.tx_mode}
               fullWidth
               variant="outlined"
-              onChange={handleValueChange("tx_mode")}
+              onChange={handleValueChange('tx_mode')}
               margin="normal"
             >
               <MenuItem value={0}>Off</MenuItem>
@@ -156,7 +157,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
               value={data.ems_bus_id}
               fullWidth
               variant="outlined"
-              onChange={handleValueChange("ems_bus_id")}
+              onChange={handleValueChange('ems_bus_id')}
               margin="normal"
             >
               <MenuItem value={0x0b}>Service Key (0x0B)</MenuItem>
@@ -169,16 +170,16 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
           <Grid item xs={6}>
             <TextValidator
               validators={[
-                "required",
-                "isNumber",
-                "minNumber:0",
-                "maxNumber:120",
+                'required',
+                'isNumber',
+                'minNumber:0',
+                'maxNumber:120'
               ]}
               errorMessages={[
-                "Tx delay is required",
-                "Must be a number",
-                "Must be 0 or higher",
-                "Max value is 120",
+                'Tx delay is required',
+                'Must be a number',
+                'Must be 0 or higher',
+                'Max value is 120'
               ]}
               name="tx_delay"
               label="Tx start delay (seconds)"
@@ -186,7 +187,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
               variant="outlined"
               value={data.tx_delay}
               type="number"
-              onChange={handleValueChange("tx_delay")}
+              onChange={handleValueChange('tx_delay')}
               margin="normal"
             />
           </Grid>
@@ -216,12 +217,12 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
           margin="normal"
         >
           {boardProfileSelectItems()}
-          <MenuItem key={"CUSTOM"} value={"CUSTOM"}>
+          <MenuItem key={'CUSTOM'} value={'CUSTOM'}>
             Custom...
           </MenuItem>
         </SelectValidator>
 
-        {data.board_profile === "CUSTOM" && (
+        {data.board_profile === 'CUSTOM' && (
           <Grid
             container
             spacing={1}
@@ -232,18 +233,18 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
             <Grid item xs={4}>
               <TextValidator
                 validators={[
-                  "required",
-                  "isNumber",
-                  "minNumber:0",
-                  "maxNumber:40",
-                  "matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$",
+                  'required',
+                  'isNumber',
+                  'minNumber:0',
+                  'maxNumber:40',
+                  'matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$'
                 ]}
                 errorMessages={[
-                  "GPIO is required",
-                  "Must be a number",
-                  "Must be 0 or higher",
-                  "Max value is 40",
-                  "Not a valid GPIO",
+                  'GPIO is required',
+                  'Must be a number',
+                  'Must be 0 or higher',
+                  'Max value is 40',
+                  'Not a valid GPIO'
                 ]}
                 name="rx_gpio"
                 label="Rx GPIO"
@@ -251,25 +252,25 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                 variant="outlined"
                 value={data.rx_gpio}
                 type="number"
-                onChange={handleValueChange("rx_gpio")}
+                onChange={handleValueChange('rx_gpio')}
                 margin="normal"
               />
             </Grid>
             <Grid item xs={4}>
               <TextValidator
                 validators={[
-                  "required",
-                  "isNumber",
-                  "minNumber:0",
-                  "maxNumber:40",
-                  "matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$",
+                  'required',
+                  'isNumber',
+                  'minNumber:0',
+                  'maxNumber:40',
+                  'matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$'
                 ]}
                 errorMessages={[
-                  "GPIO is required",
-                  "Must be a number",
-                  "Must be 0 or higher",
-                  "Max value is 40",
-                  "Not a valid GPIO",
+                  'GPIO is required',
+                  'Must be a number',
+                  'Must be 0 or higher',
+                  'Max value is 40',
+                  'Not a valid GPIO'
                 ]}
                 name="tx_gpio"
                 label="Tx GPIO"
@@ -277,25 +278,25 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                 variant="outlined"
                 value={data.tx_gpio}
                 type="number"
-                onChange={handleValueChange("tx_gpio")}
+                onChange={handleValueChange('tx_gpio')}
                 margin="normal"
               />
             </Grid>
             <Grid item xs={4}>
               <TextValidator
                 validators={[
-                  "required",
-                  "isNumber",
-                  "minNumber:0",
-                  "maxNumber:40",
-                  "matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$",
+                  'required',
+                  'isNumber',
+                  'minNumber:0',
+                  'maxNumber:40',
+                  'matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$'
                 ]}
                 errorMessages={[
-                  "GPIO is required",
-                  "Must be a number",
-                  "Must be 0 or higher",
-                  "Max value is 40",
-                  "Not a valid GPIO",
+                  'GPIO is required',
+                  'Must be a number',
+                  'Must be 0 or higher',
+                  'Max value is 40',
+                  'Not a valid GPIO'
                 ]}
                 name="pbutton_gpio"
                 label="Button GPIO"
@@ -303,25 +304,25 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                 variant="outlined"
                 value={data.pbutton_gpio}
                 type="number"
-                onChange={handleValueChange("pbutton_gpio")}
+                onChange={handleValueChange('pbutton_gpio')}
                 margin="normal"
               />
             </Grid>
             <Grid item xs={4}>
               <TextValidator
                 validators={[
-                  "required",
-                  "isNumber",
-                  "minNumber:0",
-                  "maxNumber:40",
-                  "matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$",
+                  'required',
+                  'isNumber',
+                  'minNumber:0',
+                  'maxNumber:40',
+                  'matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$'
                 ]}
                 errorMessages={[
-                  "GPIO is required",
-                  "Must be a number",
-                  "Must be 0 or higher",
-                  "Max value is 40",
-                  "Not a valid GPIO",
+                  'GPIO is required',
+                  'Must be a number',
+                  'Must be 0 or higher',
+                  'Max value is 40',
+                  'Not a valid GPIO'
                 ]}
                 name="dallas_gpio"
                 label="Dallas GPIO (0=none)"
@@ -329,25 +330,25 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                 variant="outlined"
                 value={data.dallas_gpio}
                 type="number"
-                onChange={handleValueChange("dallas_gpio")}
+                onChange={handleValueChange('dallas_gpio')}
                 margin="normal"
               />
             </Grid>
             <Grid item xs={4}>
               <TextValidator
                 validators={[
-                  "required",
-                  "isNumber",
-                  "minNumber:0",
-                  "maxNumber:40",
-                  "matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$",
+                  'required',
+                  'isNumber',
+                  'minNumber:0',
+                  'maxNumber:40',
+                  'matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$'
                 ]}
                 errorMessages={[
-                  "GPIO is required",
-                  "Must be a number",
-                  "Must be 0 or higher",
-                  "Max value is 40",
-                  "Not a valid GPIO",
+                  'GPIO is required',
+                  'Must be a number',
+                  'Must be 0 or higher',
+                  'Max value is 40',
+                  'Not a valid GPIO'
                 ]}
                 name="led_gpio"
                 label="LED GPIO (0=none)"
@@ -355,7 +356,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                 variant="outlined"
                 value={data.led_gpio}
                 type="number"
-                onChange={handleValueChange("led_gpio")}
+                onChange={handleValueChange('led_gpio')}
                 margin="normal"
               />
             </Grid>
@@ -372,7 +373,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
             control={
               <Checkbox
                 checked={data.hide_led}
-                onChange={handleValueChange("hide_led")}
+                onChange={handleValueChange('hide_led')}
                 value="hide_led"
               />
             }
@@ -385,7 +386,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
             control={
               <Checkbox
                 checked={data.dallas_parasite}
-                onChange={handleValueChange("dallas_parasite")}
+                onChange={handleValueChange('dallas_parasite')}
                 value="dallas_parasite"
               />
             }
@@ -396,18 +397,18 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
         <BlockFormControlLabel
           control={
             <Checkbox
-              checked={data.api_enabled}
-              onChange={handleValueChange("api_enabled")}
-              value="api_enabled"
+              checked={data.notoken_api}
+              onChange={handleValueChange('notoken_api')}
+              value="notoken_api"
             />
           }
-          label="Enable API write commands"
+          label="Bypass Access Token authorization on API calls"
         />
         <BlockFormControlLabel
           control={
             <Checkbox
               checked={data.analog_enabled}
-              onChange={handleValueChange("analog_enabled")}
+              onChange={handleValueChange('analog_enabled')}
               value="analog_enabled"
             />
           }
@@ -424,7 +425,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
             control={
               <Checkbox
                 checked={data.shower_timer}
-                onChange={handleValueChange("shower_timer")}
+                onChange={handleValueChange('shower_timer')}
                 value="shower_timer"
               />
             }
@@ -434,7 +435,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
             control={
               <Checkbox
                 checked={data.shower_alert}
-                onChange={handleValueChange("shower_alert")}
+                onChange={handleValueChange('shower_alert')}
                 value="shower_alert"
               />
             }
@@ -451,7 +452,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
           control={
             <Checkbox
               checked={data.syslog_enabled}
-              onChange={handleValueChange("syslog_enabled")}
+              onChange={handleValueChange('syslog_enabled')}
               value="syslog_enabled"
             />
           }
@@ -468,30 +469,30 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
           >
             <Grid item xs={5}>
               <TextValidator
-                validators={["isOptionalIP"]}
-                errorMessages={["Not a valid IP address"]}
+                validators={['isOptionalIP']}
+                errorMessages={['Not a valid IP address']}
                 name="syslog_host"
                 label="IP"
                 fullWidth
                 variant="outlined"
                 value={data.syslog_host}
-                onChange={handleValueChange("syslog_host")}
+                onChange={handleValueChange('syslog_host')}
                 margin="normal"
               />
             </Grid>
             <Grid item xs={6}>
               <TextValidator
                 validators={[
-                  "required",
-                  "isNumber",
-                  "minNumber:0",
-                  "maxNumber:65535",
+                  'required',
+                  'isNumber',
+                  'minNumber:0',
+                  'maxNumber:65535'
                 ]}
                 errorMessages={[
-                  "Port is required",
-                  "Must be a number",
-                  "Must be greater than 0 ",
-                  "Max value is 65535",
+                  'Port is required',
+                  'Must be a number',
+                  'Must be greater than 0 ',
+                  'Max value is 65535'
                 ]}
                 name="syslog_port"
                 label="Port"
@@ -499,7 +500,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                 variant="outlined"
                 value={data.syslog_port}
                 type="number"
-                onChange={handleValueChange("syslog_port")}
+                onChange={handleValueChange('syslog_port')}
                 margin="normal"
               />
             </Grid>
@@ -510,7 +511,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                 value={data.syslog_level}
                 fullWidth
                 variant="outlined"
-                onChange={handleValueChange("syslog_level")}
+                onChange={handleValueChange('syslog_level')}
                 margin="normal"
               >
                 <MenuItem value={-1}>OFF</MenuItem>
@@ -524,16 +525,16 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
             <Grid item xs={6}>
               <TextValidator
                 validators={[
-                  "required",
-                  "isNumber",
-                  "minNumber:0",
-                  "maxNumber:65535",
+                  'required',
+                  'isNumber',
+                  'minNumber:0',
+                  'maxNumber:65535'
                 ]}
                 errorMessages={[
-                  "Syslog Mark is required",
-                  "Must be a number",
-                  "Must be 0 or higher",
-                  "Max value is 10",
+                  'Syslog Mark is required',
+                  'Must be a number',
+                  'Must be 0 or higher',
+                  'Max value is 10'
                 ]}
                 name="syslog_mark_interval"
                 label="Mark Interval seconds (0=off)"
@@ -541,7 +542,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                 variant="outlined"
                 value={data.syslog_mark_interval}
                 type="number"
-                onChange={handleValueChange("syslog_mark_interval")}
+                onChange={handleValueChange('syslog_mark_interval')}
                 margin="normal"
               />
             </Grid>
@@ -549,7 +550,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
               control={
                 <Checkbox
                   checked={data.trace_raw}
-                  onChange={handleValueChange("trace_raw")}
+                  onChange={handleValueChange('trace_raw')}
                   value="trace_raw"
                 />
               }

@@ -22,6 +22,7 @@
 #define EMSESP_TEST_H
 
 #include "emsesp.h"
+#include <ESPAsyncWebServer.h>
 
 namespace emsesp {
 
@@ -35,8 +36,9 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "mqtt_nested"
 // #define EMSESP_DEBUG_DEFAULT "ha"
 // #define EMSESP_DEBUG_DEFAULT "board_profile"
-#define EMSESP_DEBUG_DEFAULT "shower_alert"
-
+// #define EMSESP_DEBUG_DEFAULT "shower_alert"
+// #define EMSESP_DEBUG_DEFAULT "310"
+#define EMSESP_DEBUG_DEFAULT "api"
 
 class Test {
   public:

@@ -1,5 +1,5 @@
-import { Theme } from "@material-ui/core";
-import { APStatus, APNetworkStatus } from "./types";
+import { Theme } from '@material-ui/core';
+import { APStatus, APNetworkStatus } from './types';
 
 export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
   switch (status) {
@@ -12,17 +12,17 @@ export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
     default:
       return theme.palette.warning.main;
   }
-}
+};
 
 export const apStatus = ({ status }: APStatus) => {
   switch (status) {
     case APNetworkStatus.ACTIVE:
-      return "Active";
+      return 'Active';
     case APNetworkStatus.INACTIVE:
-      return "Inactive";
+      return 'Inactive';
     case APNetworkStatus.LINGERING:
-      return "Lingering until idle";
+      return 'Lingering until idle';
     default:
-      return "Unknown";
+      return 'Unknown';
   }
 };

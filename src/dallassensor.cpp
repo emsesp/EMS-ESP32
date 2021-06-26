@@ -40,8 +40,17 @@ void DallasSensor::start() {
 #ifndef EMSESP_STANDALONE
         bus_.begin(dallas_gpio_);
 #endif
-        // API call
-        Command::add_with_json(EMSdevice::DeviceType::DALLASSENSOR, F_(info), [&](const char * value, const int8_t id, JsonObject & json) { return command_info(value, id, json); });
+        // API calls
+        Command::add_with_json(
+            EMSdevice::DeviceType::DALLASSENSOR,
+            F_(info),
+            [&](const char * value, const int8_t id, JsonObject & json) { return command_info(value, id, json); },
+            F_(info_cmd));
+        Command::add_with_json(
+            EMSdevice::DeviceType::DALLASSENSOR,
+            F_(commands),
+            [&](const char * value, const int8_t id, JsonObject & json) { return command_commands(value, id, json); },
+            F_(commands_cmd));
     }
 }
 
@@ -125,6 +134,7 @@ void DallasSensor::loop() {
                         int16_t t;
                         t = get_temperature_c(addr);
                         if ((t >= -550) && (t <= 1250)) {
+                            sensorreads_++;
                             // check if we have this sensor already
                             bool found = false;
                             for (auto & sensor : sensors_) {
@@ -270,11 +280,13 @@ const std::vector<DallasSensor::Sensor> DallasSensor::sensors() const {
 
 // skip crc from id.
 DallasSensor::Sensor::Sensor(const uint8_t addr[])
-    : id_(((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16) | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6])) {
+    : id_(((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16)
+          | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6])) {
 }
 
 uint64_t DallasSensor::get_id(const uint8_t addr[]) {
-    return (((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16) | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6]));
+    return (((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16)
+            | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6]));
 }
 
 uint64_t DallasSensor::Sensor::id() const {
@@ -283,7 +295,13 @@ uint64_t DallasSensor::Sensor::id() const {
 
 std::string DallasSensor::Sensor::to_string() const {
     std::string str(20, '\0');
-    snprintf_P(&str[0], str.capacity() + 1, PSTR("%02X-%04X-%04X-%04X"), (unsigned int)(id_ >> 48) & 0xFF, (unsigned int)(id_ >> 32) & 0xFFFF, (unsigned int)(id_ >> 16) & 0xFFFF, (unsigned int)(id_)&0xFFFF);
+    snprintf_P(&str[0],
+               str.capacity() + 1,
+               PSTR("%02X-%04X-%04X-%04X"),
+               (unsigned int)(id_ >> 48) & 0xFF,
+               (unsigned int)(id_ >> 32) & 0xFFFF,
+               (unsigned int)(id_ >> 16) & 0xFFFF,
+               (unsigned int)(id_)&0xFFFF);
     return str;
 }
 
@@ -294,6 +312,11 @@ bool DallasSensor::updated_values() {
         return true;
     }
     return false;
+}
+
+// list commands
+bool DallasSensor::command_commands(const char * value, const int8_t id, JsonObject & json) {
+    return Command::list(EMSdevice::DeviceType::DALLASSENSOR, json);
 }
 
 // creates JSON doc from values
@@ -308,22 +331,22 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
     for (const auto & sensor : sensors_) {
         char sensorID[10]; // sensor{1-n}
         snprintf_P(sensorID, 10, PSTR("sensor%d"), i++);
-        if (id == 0) {
-            if (Mqtt::dallas_format() == Mqtt::Dallas_Format::SENSORID && Helpers::hasValue(sensor.temperature_c)) {
-                json[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
-            } else if (Helpers::hasValue(sensor.temperature_c)) {
-                json[sensorID] = (float)(sensor.temperature_c) / 10;
-            }
-        } else {
+        if (id == -1) { // show number and id
             JsonObject dataSensor = json.createNestedObject(sensorID);
             dataSensor["id"]      = sensor.to_string();
             if (Helpers::hasValue(sensor.temperature_c)) {
                 dataSensor["temp"] = (float)(sensor.temperature_c) / 10;
             }
+        } else { // show according to format
+            if (Mqtt::dallas_format() == Mqtt::Dallas_Format::SENSORID && Helpers::hasValue(sensor.temperature_c)) {
+                json[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
+            } else if (Helpers::hasValue(sensor.temperature_c)) {
+                json[sensorID] = (float)(sensor.temperature_c) / 10;
+            }
         }
     }
 
-    return true;
+    return (json.size() > 0);
 }
 
 // send all dallas sensor values as a JSON package to MQTT
@@ -414,7 +437,6 @@ void DallasSensor::publish_values(const bool force) {
         sensor_no++; // increment sensor count
     }
 
-    // doc.shrinkToFit();
     Mqtt::publish(F("dallassensor_data"), doc.as<JsonObject>());
 }
 

@@ -7,7 +7,6 @@
 #include <ETH.h>
 
 #include <ArduinoJson.h>
-#include <AsyncJson.h>
 #include <ESPAsyncWebServer.h>
 #include <IPAddress.h>
 #include <IPUtils.h>

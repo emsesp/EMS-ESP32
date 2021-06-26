@@ -102,10 +102,10 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
 
     uart_param_config(EMSUART_UART, &uart_config);
     uart_set_pin(EMSUART_UART, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-    EMS_UART.int_ena.val             = 0;          // disable all intr.
-    EMS_UART.int_clr.val             = 0xFFFFFFFF; // clear all intr. flags
-    EMS_UART.idle_conf.tx_brk_num    = 10;         // breaklength 10 bit
-    drop_next_rx_                    = true;
+    EMS_UART.int_ena.val          = 0;          // disable all intr.
+    EMS_UART.int_clr.val          = 0xFFFFFFFF; // clear all intr. flags
+    EMS_UART.idle_conf.tx_brk_num = 10;         // breaklength 10 bit
+    drop_next_rx_                 = true;
     // EMS_UART.idle_conf.rx_idle_thrhd = 256;
     // EMS_UART.auto_baud.glitch_filt   = 192;
 #if (EMSUART_UART != UART_NUM_2)
@@ -140,7 +140,6 @@ void EMSuart::restart() {
     EMS_UART.int_ena.brk_det = 1; // activate only break
     EMS_UART.conf0.txd_brk   = (tx_mode_ == EMS_TXMODE_HW) ? 1 : 0;
     portEXIT_CRITICAL(&mux_);
-
 }
 
 /*
