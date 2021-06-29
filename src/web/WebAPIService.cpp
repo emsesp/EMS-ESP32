@@ -182,11 +182,13 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
 
     // check for errors
     if (!ok) {
+        delete response;
         send_message_response(request, 400, "Problems parsing elements"); // Bad Request
         return;
     }
 
     if (!json.size()) {
+        delete response;
         send_message_response(request, 200, "OK"); // OK
         return;
     }
