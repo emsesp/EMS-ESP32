@@ -202,6 +202,10 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.nested_format     = root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT;
     newSettings.subscribe_format  = root["subscribe_format"] | EMSESP_DEFAULT_SUBSCRIBE_FORMAT;
 
+    if (newSettings.enabled != settings.enabled) {
+        changed = true;
+    }
+
     if (newSettings.mqtt_qos != settings.mqtt_qos) {
         emsesp::EMSESP::mqtt_.set_qos(newSettings.mqtt_qos);
         changed = true;
