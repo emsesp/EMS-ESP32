@@ -57,9 +57,6 @@ uuid::log::Logger Mqtt::logger_{F_(mqtt), uuid::log::Facility::DAEMON};
 // subscribe to an MQTT topic, and store the associated callback function
 // only if it already hasn't been added
 void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_subfunction_p cb) {
-    if (!enabled()) {
-        return;
-    }
 
     // check if we already have the topic subscribed, if so don't add it again
     if (!mqtt_subfunctions_.empty()) {
@@ -74,18 +71,18 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
         }
     }
 
-    LOG_DEBUG(F("Subscribing MQTT topic %s for device type %s"), topic.c_str(), EMSdevice::device_type_2_device_name(device_type).c_str());
-
-    // add to MQTT queue as a subscribe operation
-    auto message = queue_subscribe_message(topic);
-
-    if (message == nullptr) {
-        return;
-    }
-
     // register in our libary with the callback function.
     // We store the original topic without base
     mqtt_subfunctions_.emplace_back(device_type, std::move(topic), std::move(cb));
+
+    if (!enabled()) {
+        return;
+    }
+
+    LOG_DEBUG(F("Subscribing MQTT topic %s for device type %s"), topic.c_str(), EMSdevice::device_type_2_device_name(device_type).c_str());
+
+    // add to MQTT queue as a subscribe operation
+    queue_subscribe_message(topic);
 }
 
 // subscribe to the command topic if it doesn't exist yet
@@ -105,6 +102,10 @@ void Mqtt::register_command(const uint8_t device_type, const __FlashStringHelper
     if (!exists) {
         Mqtt::subscribe(device_type, cmd_topic, nullptr); // use an empty function handler to signal this is a command function only (e.g. ems-esp/boiler)
         LOG_DEBUG(F("Registering MQTT cmd %s with topic %s"), uuid::read_flash_string(cmd).c_str(), EMSdevice::device_type_2_device_name(device_type).c_str());
+    }
+
+    if (!enabled()) {
+        return;
     }
 
     // register the individual commands too (e.g. ems-esp/boiler/wwonetime)
