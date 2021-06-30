@@ -655,12 +655,9 @@ void Mqtt::on_connect() {
     EMSESP::shower_.send_mqtt_stat(false); // Send shower_activated as false
     EMSESP::system_.send_heartbeat();      // send heatbeat
 
-    if (connectcount_ > 1) {
-        // we doing a re-connect from a TCP break
-        // only re-subscribe again to all MQTT topics
-        resubscribe();
-        EMSESP::reset_mqtt_ha(); // re-create all HA devices if there are any
-    }
+    // re-subscribe to all MQTT topics
+    resubscribe();
+    EMSESP::reset_mqtt_ha(); // re-create all HA devices if there are any
 
     publish_retain(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
 
