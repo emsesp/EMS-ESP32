@@ -154,8 +154,12 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // validate the CRC. if it fails then increment the number of corrupt/incomplete telegrams and only report to console/syslog
     uint8_t crc = calculate_crc(data, length - 1);
     if (data[length - 1] != crc) {
-        telegram_error_count_++;
-        LOG_ERROR(F("Rx: %s (CRC %02X != %02X)"), Helpers::data_to_hex(data, length).c_str(), data[length - 1], crc);
+        if ((data[0] & 0x7F) != ems_bus_id()) { // do not count echos as errors
+            telegram_error_count_++;
+            LOG_WARNING(F("Rx: %s (CRC %02X != %02X)"), Helpers::data_to_hex(data, length).c_str(), data[length - 1], crc);
+        } else {
+            LOG_TRACE(F("Rx: %s (CRC %02X != %02X)"), Helpers::data_to_hex(data, length).c_str(), data[length - 1], crc);
+        }
         return;
     }
 
