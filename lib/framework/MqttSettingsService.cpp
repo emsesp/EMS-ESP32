@@ -84,7 +84,7 @@ void MqttSettingsService::onMqttConnect(bool sessionPresent) {
 }
 
 void MqttSettingsService::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-    // emsesp::EMSESP::logger().info(F("Disconnected from MQTT reason: %s"), (uint8_t)reason);
+    // emsesp::EMSESP::logger().info(F("Disconnected from MQTT reason: %d"), (uint8_t)reason);
     _disconnectReason = reason;
     _disconnectedAt   = uuid::get_uptime();
 }
@@ -121,14 +121,13 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 void MqttSettingsService::configureMqtt() {
-    // disconnect if currently connected
-    _mqttClient.disconnect();
-
     // only connect if WiFi is connected and MQTT is enabled
     if (_state.enabled && emsesp::EMSESP::system_.network_connected()) {
+        _mqttClient.disconnect();
         _mqttClient.setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
         if (_state.username.length() > 0) {
-            _mqttClient.setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername), retainCstr(_state.password.length() > 0 ? _state.password.c_str() : nullptr, &_retainedPassword));
+            _mqttClient.setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername),
+                                       retainCstr(_state.password.length() > 0 ? _state.password.c_str() : nullptr, &_retainedPassword));
         } else {
             _mqttClient.setCredentials(retainCstr(nullptr, &_retainedUsername), retainCstr(nullptr, &_retainedPassword));
         }

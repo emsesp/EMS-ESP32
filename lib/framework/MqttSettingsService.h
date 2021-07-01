@@ -9,7 +9,7 @@
 
 #include <uuid/common.h>
 
-#define MQTT_RECONNECTION_DELAY 1000
+#define MQTT_RECONNECTION_DELAY 2000 // 2 seconds
 
 #define MQTT_SETTINGS_FILE "/config/mqttSettings.json"
 #define MQTT_SETTINGS_SERVICE_PATH "/rest/mqttSettings"
