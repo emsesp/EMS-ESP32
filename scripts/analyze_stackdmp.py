@@ -23,4 +23,5 @@ call(['python', 'scripts/decoder.py ', '-s', '-e', os.getcwd()+"/.pio/build/esp1
 # % cd EMS-ESP
 # % python scripts/decoder_linux.py -s -e .pio/build/esp12e/firmware.elf scripts/stackdmp.txt
 
-#  python decoder_linux.py -s -e ../.pio/build/esp8266-debug/firmware.elf stackdmp.txt
+# python decoder_linux.py -s -e ../.pio/build/esp8266-debug/firmware.elf stackdmp.txt
+# python3 decoder.py -p ESP32 -e ../.pio/build/esp32/firmware.elf -t ~/.platformio/packages/toolchain-xtensa32  stackdmp.txt
