@@ -1,22 +1,31 @@
 ; example custom platformio.ini file for EMS-ESP
 
-[env]
+[common]
+; e.g. use build_flags = -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
+
+[env:esp32]
 upload_protocol = espota
 upload_flags = 
   --port=8266
   --auth=ems-esp-neo
 upload_port = 10.10.10.101
-
-[common]
-; options are EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
-; plus all the settings in default_settings.h, e.g. -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
-; debug_flags = -DEMSESP_DEBUG
-
-[env:esp32]
-monitor_filters = esp32_exception_decoder
-debug_tool = esp-prog
-debug_init_break = tbreak setup
 extra_scripts =
   ; to prevent the web UI from building each time, comment out this next line
   ; pre:scripts/build_interface.py
+
+; pio run -e debug
+; options for debugging are: EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
+[env:debug]
+board = esp32dev
+platform = espressif32
+board_build.partitions = esp32_partition_app1984k_spiffs64k.csv
+upload_protocol = esptool
+build_type = debug
+monitor_filters = esp32_exception_decoder
+debug_tool = esp-prog
+debug_init_break = tbreak setup
+build_flags = ${factory_settings.build_flags} -DEMSESP_DEBUG -DONEWIRE_CRC16=0 -DNO_GLOBAL_ARDUINOOTA -DARDUINOJSON_ENABLE_STD_STRING=1 -DESP32=1 -DARDUINO_ARCH_ESP32=1
+extra_scripts =
+  ; pre:scripts/build_interface.py
+  scripts/upload_fw.py
 
