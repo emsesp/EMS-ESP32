@@ -1096,7 +1096,7 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
     // data: displaycode(2), errornumber(2), year, month, hour, day, minute, duration(2), src-addr
     if (telegram->message_data[4] & 0x80) { // valid date
         char     code[3];
-        uint16_t codeNo;
+        uint16_t codeNo = EMS_VALUE_USHORT_NOTSET;
         code[0] = telegram->message_data[0];
         code[1] = telegram->message_data[1];
         code[2] = 0;
