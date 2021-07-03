@@ -934,8 +934,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.printfln(F("Testing RESTful API..."));
         Mqtt::ha_enabled(false);
         run_test("general");
-        DynamicJsonDocument   doc(EMSESP_JSON_SIZE_XXLARGE_DYN);
-        JsonObject            json = doc.to<JsonObject>();
         AsyncWebServerRequest request;
         request.method(HTTP_GET);
         request.url("/api/thermostat/seltemp");
@@ -944,6 +942,18 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         request.url("/api/boiler/syspress");
         EMSESP::webAPIService.webAPIService_get(&request);
 #endif
+    }
+
+    if (command == "crash") {
+        shell.printfln(F("Forcing a crash..."));
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdiv-by-zero"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+        uint8_t a = 2 / 0;
+        shell.printfln(F("Testing %s"), a);
+
+#pragma GCC diagnostic pop
     }
 }
 
