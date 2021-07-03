@@ -916,9 +916,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
             node["MQTT publish fails"] = Mqtt::publish_fails();
         }
         if (EMSESP::dallas_enabled()) {
-            node["#dallas sensors"] = EMSESP::sensor_devices().size();
-            node["#dallas reads"]   = EMSESP::sensor_reads();
-            node["#dallas fails"]   = EMSESP::sensor_fails();
+            node["dallas sensors"] = EMSESP::sensor_devices().size();
+            node["dallas reads"]   = EMSESP::sensor_reads();
+            node["dallas fails"]   = EMSESP::sensor_fails();
         }
     }
 
