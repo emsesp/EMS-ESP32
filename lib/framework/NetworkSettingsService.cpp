@@ -20,7 +20,7 @@ NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs,
     WiFi.mode(WIFI_MODE_NULL);
 
 #if defined(EMSESP_WIFI_TWEAK)
-    // https: //www.esp32.com/viewtopic.php?t=12055
+    // www.esp32.com/viewtopic.php?t=12055
     esp_wifi_set_bandwidth(ESP_IF_WIFI_STA, WIFI_BW_HT20);
     esp_wifi_set_bandwidth(ESP_IF_WIFI_AP, WIFI_BW_HT20);
 #endif
