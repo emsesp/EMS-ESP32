@@ -245,7 +245,7 @@ void System::wifi_tweak() {
     bool         s1 = WiFi.getSleep();
     WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
     bool s2 = WiFi.getSleep();
-    LOG_DEBUG(F("Adjusting WiFi - Tx power %d->%d, Sleep %d->%d"), p1, p2, s1, s2);
+    LOG_DEBUG(F("[DEBUG] Adjusting WiFi - Tx power %d->%d, Sleep %d->%d"), p1, p2, s1, s2);
 #endif
 }
 
@@ -415,11 +415,13 @@ void System::loop() {
 
 #ifndef EMSESP_STANDALONE
 #if defined(EMSESP_DEBUG)
+/*
     static uint32_t last_memcheck_ = 0;
     if (currentMillis - last_memcheck_ > 10000) { // 10 seconds
         last_memcheck_ = currentMillis;
         show_mem("core");
     }
+    */
 #endif
 #endif
 
