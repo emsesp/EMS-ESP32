@@ -240,7 +240,7 @@ void System::wifi_tweak() {
     // WIFI_POWER_2dBm = 8,// 2dBm
     // WIFI_POWER_MINUS_1dBm = -4// -1dBm
     wifi_power_t p1 = WiFi.getTxPower();
-    (void)WiFi.setTxPower(WIFI_POWER_19_5dBm);
+    (void)WiFi.setTxPower(WIFI_POWER_17dBm);
     wifi_power_t p2 = WiFi.getTxPower();
     bool         s1 = WiFi.getSleep();
     WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
