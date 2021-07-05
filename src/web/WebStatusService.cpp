@@ -73,6 +73,20 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         EMSESP::system_.ethernet_connected(false);
         break;
 
+    case SYSTEM_EVENT_STA_CONNECTED:
+        WiFi.enableIpV6();
+        break;
+
+    case SYSTEM_EVENT_ETH_CONNECTED:
+        // ETH.enableIpV6();  // TODO this crashes
+        break;
+
+    case SYSTEM_EVENT_GOT_IP6:
+#ifndef EMSESP_STANDALONE
+        EMSESP::logger().info(F("WiFi Connected with IP=%s, hostname=%s"), WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
+#endif
+        break;
+
     default:
         break;
     }
