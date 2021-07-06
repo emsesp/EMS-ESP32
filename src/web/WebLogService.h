@@ -65,6 +65,8 @@ class WebLogService : public uuid::log::Handler {
     void fetchLog(AsyncWebServerRequest * request);
     void getLevel(AsyncWebServerRequest * request);
 
+    char * messagetime(char * out, const uint64_t t);
+
     void                        setLevel(AsyncWebServerRequest * request, JsonVariant & json);
     AsyncCallbackJsonWebHandler _setLevel; // for POSTs
 
@@ -73,6 +75,7 @@ class WebLogService : public uuid::log::Handler {
     unsigned long               log_message_id_       = 0;                // The next identifier to use for queued log messages
     unsigned long               log_message_id_tail_  = 0;                // last event shown on the screen after fetch
     std::list<QueuedLogMessage> log_messages_;                            // Queued log messages, in the order they were received
+    time_t                      time_offset_          = 0;
 };
 
 } // namespace emsesp
