@@ -206,6 +206,9 @@ void System::get_settings() {
         // ADC
         analog_enabled_ = settings.analog_enabled;
 
+        // Sysclock
+        low_clock_ = settings.low_clock;
+
         // Syslog
         syslog_enabled_       = settings.syslog_enabled;
         syslog_level_         = settings.syslog_level;
@@ -274,6 +277,12 @@ void System::start(uint32_t heap_start) {
 
     // load in all the settings first
     get_settings();
+
+#ifndef EMSESP_STANDALONE
+    if (low_clock_) {
+        setCpuFrequencyMhz(160);
+    }
+#endif
 
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
         hostname(networkSettings.hostname.c_str()); // sets the hostname

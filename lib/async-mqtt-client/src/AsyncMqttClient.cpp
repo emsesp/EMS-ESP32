@@ -12,8 +12,10 @@ AsyncMqttClient::AsyncMqttClient()
 , _lastPingRequestTime(0)
 , _generatedClientId{0}
 , _ip()
+, _ipv6()
 , _host(nullptr)
 , _useIp(false)
+, _useIpv6(false)
 #if ASYNC_TCP_SSL_ENABLED
 , _secure(false)
 #endif
@@ -111,16 +113,33 @@ AsyncMqttClient& AsyncMqttClient::setWill(const char* topic, uint8_t qos, bool r
 }
 
 AsyncMqttClient& AsyncMqttClient::setServer(IPAddress ip, uint16_t port) {
-  _useIp = true;
-  _ip = ip;
-  _port = port;
+  _useIp   = true;
+  _useIpv6 = false;
+  _ip      = ip;
+  _port    = port;
+  return *this;
+}
+
+AsyncMqttClient& AsyncMqttClient::setServer(IPv6Address ipv6, uint16_t port) {
+  _useIpv6 = true;
+  _useIp   = false;
+  _ipv6    = ipv6;
+  _port    = port;
   return *this;
 }
 
 AsyncMqttClient& AsyncMqttClient::setServer(const char* host, uint16_t port) {
-  _useIp = false;
-  _host = host;
-  _port = port;
+  _port    = port;
+  _useIp   = false;
+  _useIpv6 = false;
+  _host    = host;
+  if (_ipv6.fromString(host)) {
+    _useIpv6 = true;
+    _useIp   = false;
+  } else if (_ip.fromString(host)) {
+    _useIpv6 = false;
+    _useIp   = true;
+  }
   return *this;
 }
 
@@ -698,6 +717,8 @@ void AsyncMqttClient::connect() {
 #else
   if (_useIp) {
     _client.connect(_ip, _port);
+  } else if (_useIpv6) {
+    _client.connect(_ipv6, _port);
   } else {
     _client.connect(_host, _port);
   }

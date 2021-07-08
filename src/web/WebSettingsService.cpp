@@ -55,6 +55,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["dallas_parasite"]      = settings.dallas_parasite;
     root["led_gpio"]             = settings.led_gpio;
     root["hide_led"]             = settings.hide_led;
+    root["low_clock"]            = settings.low_clock;
     root["notoken_api"]          = settings.notoken_api;
     root["analog_enabled"]       = settings.analog_enabled;
     root["pbutton_gpio"]         = settings.pbutton_gpio;
@@ -165,9 +166,10 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.hide_led = root["hide_led"] | EMSESP_DEFAULT_HIDE_LED;
     check_flag(prev, settings.hide_led, ChangeFlags::LED);
 
-    // these both need reboots to be applied
+    // these need reboots to be applied
     settings.ems_bus_id        = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
     settings.master_thermostat = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
+    settings.low_clock         = root["low_clock"] | false;;
 
     // doesn't need any follow-up actions
     settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;

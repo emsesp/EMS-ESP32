@@ -7,9 +7,7 @@
 #include <JsonUtils.h>
 
 #ifndef EMSESP_STANDALONE
-#if defined(EMSESP_WIFI_TWEAK)
 #include <esp_wifi.h>
-#endif
 #include <ETH.h>
 #endif
 
@@ -36,6 +34,10 @@ class NetworkSettings {
     String password;
     String hostname;
     bool   staticIPConfig;
+    bool   enableIPv6;
+    bool   bandwidth20;
+    int8_t tx_power;
+    bool   nosleep;
 
     // optional configuration for static IP address
     IPAddress localIP;
@@ -50,6 +52,10 @@ class NetworkSettings {
         root["password"]         = settings.password;
         root["hostname"]         = settings.hostname;
         root["static_ip_config"] = settings.staticIPConfig;
+        root["enableIPv6"]       = settings.enableIPv6;
+        root["bandwidth20"]      = settings.bandwidth20;
+        root["tx_power"]         = settings.tx_power;
+        root["nosleep"]          = settings.nosleep;
 
         // extended settings
         JsonUtils::writeIP(root, "local_ip", settings.localIP);
@@ -64,6 +70,10 @@ class NetworkSettings {
         settings.password       = root["password"] | FACTORY_WIFI_PASSWORD;
         settings.hostname       = root["hostname"] | FACTORY_WIFI_HOSTNAME;
         settings.staticIPConfig = root["static_ip_config"] | false;
+        settings.enableIPv6     = root["enableIPv6"] | false;
+        settings.bandwidth20    = root["bandwidth20"] | false;
+        settings.tx_power       = root["tx_power"] | 20;
+        settings.nosleep        = root["nosleep"] | false;
 
         // extended settings
         JsonUtils::readIP(root, "local_ip", settings.localIP);

@@ -62,6 +62,7 @@ class AsyncMqttClient {
   AsyncMqttClient& setCredentials(const char* username, const char* password = nullptr);
   AsyncMqttClient& setWill(const char* topic, uint8_t qos, bool retain, const char* payload = nullptr, size_t length = 0);
   AsyncMqttClient& setServer(IPAddress ip, uint16_t port);
+  AsyncMqttClient& setServer(IPv6Address ipv6, uint16_t port);
   AsyncMqttClient& setServer(const char* host, uint16_t port);
 #if ASYNC_TCP_SSL_ENABLED
   AsyncMqttClient& setSecure(bool secure);
@@ -102,8 +103,10 @@ class AsyncMqttClient {
 
   char _generatedClientId[18 + 1];  // esp8266-abc123 and esp32-abcdef123456
   IPAddress _ip;
+  IPv6Address _ipv6;
   const char* _host;
   bool _useIp;
+  bool _useIpv6;
 #if ASYNC_TCP_SSL_ENABLED
   bool _secure;
 #endif

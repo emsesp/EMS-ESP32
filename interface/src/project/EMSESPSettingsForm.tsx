@@ -414,6 +414,16 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
           }
           label="Enable ADC"
         />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.low_clock}
+              onChange={handleValueChange('low_clock')}
+              value="low_clock"
+            />
+          }
+          label="Low Clockrate (160MHz, changed on next reboot)"
+        />
         <Grid
           container
           spacing={0}
