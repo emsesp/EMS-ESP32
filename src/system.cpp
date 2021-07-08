@@ -279,6 +279,8 @@ void System::start(uint32_t heap_start) {
     get_settings();
 
 #ifndef EMSESP_STANDALONE
+    // disable bluetooth module
+    periph_module_disable(PERIPH_BT_MODULE);
     if (low_clock_) {
         setCpuFrequencyMhz(160);
     }
@@ -305,12 +307,8 @@ void System::adc_init(bool refresh) {
         get_settings();
     }
 #ifndef EMSESP_STANDALONE
-    // setCpuFrequencyMhz(160); // default is 240
-
-    // disable bluetooth & ADC
+    // disable ADC
     /*
-    btStop();
-    esp_bt_controller_disable();
     if (!analog_enabled_) {
         adc_power_release(); // turn off ADC to save power if not needed
     }
@@ -719,6 +717,9 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
         shell.printfln(F("IPv4 gateway: %s"), uuid::printable_to_string(WiFi.gatewayIP()).c_str());
         shell.printfln(F("IPv4 nameserver: %s"), uuid::printable_to_string(WiFi.dnsIP()).c_str());
+        if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+            shell.printfln(F("IPv6 address: %s"), uuid::printable_to_string(WiFi.localIPv6()).c_str());
+        }
         break;
 
     case WL_CONNECT_FAILED:
@@ -749,6 +750,9 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
         shell.printfln(F("IPv4 gateway: %s"), uuid::printable_to_string(ETH.gatewayIP()).c_str());
         shell.printfln(F("IPv4 nameserver: %s"), uuid::printable_to_string(ETH.dnsIP()).c_str());
+        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+            shell.printfln(F("IPv6 address: %s"), uuid::printable_to_string(ETH.localIPv6()).c_str());
+        }
     } else {
         shell.printfln(F("Ethernet: disconnected"));
     }

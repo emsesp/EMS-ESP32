@@ -40,7 +40,22 @@ class NetworkStatusForm extends Component<NetworkStatusFormProps> {
     if (!status.dns_ip_1) {
       return 'none';
     }
-    return status.dns_ip_1 + (status.dns_ip_2 ? ',' + status.dns_ip_2 : '');
+    if (!status.dns_ip_2 || status.dns_ip_2 === '0.0.0.0') {
+      return status.dns_ip_1;
+    }
+    return status.dns_ip_1 + ', ' + status.dns_ip_2;
+  }
+  IPs(status: NetworkStatus) {
+    if (
+      !status.local_ipv6 ||
+      status.local_ipv6 === '0000:0000:0000:0000:0000:0000:0000:0000'
+    ) {
+      return status.local_ip;
+    }
+    if (!status.local_ip || status.local_ip === '0.0.0.0') {
+      return status.local_ipv6;
+    }
+    return status.local_ip + ', ' + status.local_ipv6;
   }
 
   createListItems() {
@@ -77,7 +92,7 @@ class NetworkStatusForm extends Component<NetworkStatusFormProps> {
               <ListItemAvatar>
                 <Avatar>IP</Avatar>
               </ListItemAvatar>
-              <ListItemText primary="IP Address" secondary={data.local_ip} />
+              <ListItemText primary="IP Address" secondary={this.IPs(data)} />
             </ListItem>
             <Divider variant="inset" component="li" />
             <ListItem>

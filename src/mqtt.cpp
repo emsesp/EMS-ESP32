@@ -640,8 +640,14 @@ void Mqtt::on_connect() {
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.ethernet_connected()) {
         doc["ip"] = ETH.localIP().toString();
+        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+            doc["ipv6"] = ETH.localIPv6().toString();
+        }
     } else {
         doc["ip"] = WiFi.localIP().toString();
+        if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+            doc["ipv6"] = WiFi.localIPv6().toString();
+        }
     }
 #endif
     publish(F_(info), doc.as<JsonObject>()); // topic called "info"

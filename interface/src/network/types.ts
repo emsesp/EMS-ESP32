@@ -21,6 +21,7 @@ export enum WiFiEncryptionType {
 export interface NetworkStatus {
   status: NetworkConnectionStatus;
   local_ip: string;
+  local_ipv6: string;
   mac_address: string;
   rssi: number;
   ssid: string;
