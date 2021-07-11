@@ -679,7 +679,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
             switch (dv.type) {
             case DeviceValueType::ENUM: {
-                if (Helpers::hasValue((uint8_t)(*(uint8_t *)(dv.value_p)))) {
+                if (*(uint8_t *)(dv.value_p) < dv.options_size) {
                     if (Mqtt::bool_format() == BOOL_FORMAT_10) {
                         json[value] = (uint8_t)(*(uint8_t *)(dv.value_p));
                     } else {
@@ -781,7 +781,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
             }
 
             // add uom if it's not a " " (single space)
-            if ((dv.uom != DeviceValueUOM::NONE) && (dv.uom != DeviceValueUOM::NUM) && (dv.uom != DeviceValueUOM::BOOLEAN)) {
+            if (!uom_to_string(dv.uom).empty() && uom_to_string(dv.uom) != " ") {
                 json["unit"] = EMSdevice::uom_to_string(dv.uom);
             }
 
@@ -870,7 +870,8 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
             // handle ENUMs
             else if ((dv.type == DeviceValueType::ENUM) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
                 if (*(uint8_t *)(dv.value_p) < dv.options_size) {
-                    if (Mqtt::bool_format() == BOOL_FORMAT_10) {
+                    // check for numeric enum-format, but "hamode" always as text
+                    if ((Mqtt::bool_format() == BOOL_FORMAT_10) && (dv.short_name != FL_(hamode)[0])) {
                         json[name] = (uint8_t)(*(uint8_t *)(dv.value_p));
                     } else {
                         json[name] = dv.options[*(uint8_t *)(dv.value_p)];
