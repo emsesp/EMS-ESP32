@@ -429,9 +429,9 @@ void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
  * e.g. B0 0B FF 00 02 80 50 64 00 00 29 01 00 00 01
  */
 void Solar::process_SM100CollectorConfig(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(climateZone_, 0, 1));
-    has_update(telegram->read_value(collector1Area_, 3, 2));
-    has_update(telegram->read_value(collector1Type_, 5, 1));
+    has_update(telegram->read_value(climateZone_, 0));
+    has_update(telegram->read_value(collector1Area_, 3));
+    has_update(telegram->read_enumvalue(collector1Type_, 5, 1));
 }
 
 /*
@@ -688,7 +688,7 @@ bool Solar::set_collector1Type(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, num, FL_(enum_collectortype))) {
         return false;
     }
-    write_command(0x380, 5, num, 0x380);
+    write_command(0x380, 5, num + 1, 0x380);
     return true;
 }
 

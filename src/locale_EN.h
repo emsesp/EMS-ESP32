@@ -248,7 +248,6 @@ MAKE_PSTR_WORD(light)
 MAKE_PSTR_WORD(medium)
 MAKE_PSTR_WORD(heavy)
 MAKE_PSTR_WORD(own_prog)
-MAKE_PSTR(blank, "")
 MAKE_PSTR_WORD(start)
 MAKE_PSTR_WORD(heat)
 MAKE_PSTR_WORD(hold)
@@ -309,25 +308,24 @@ MAKE_PSTR_LIST(enum_ibaMainDisplay,
                F_(smoke_temperature))
 MAKE_PSTR_LIST(enum_ibaLanguage, F_(german), F_(dutch), F_(french), F_(italian))
 MAKE_PSTR_LIST(enum_floordrystatus, F_(off), F_(start), F_(heat), F_(hold), F_(cool), F_(end))
-MAKE_PSTR_LIST(enum_ibaBuildingType, F_(blank), F_(light), F_(medium), F_(heavy)) // RC300
+MAKE_PSTR_LIST(enum_ibaBuildingType, F_(light), F_(medium), F_(heavy)) // RC300
 MAKE_PSTR_LIST(enum_wwMode, F_(off), F_(low), F_(high), F_(auto), F_(own_prog))
 MAKE_PSTR_LIST(enum_wwCircMode, F_(off), F_(on), F_(auto), F_(own_prog))
-MAKE_PSTR_LIST(enum_ibaBuildingType2, F_(light), F_(medium), F_(heavy)) // RC30, RC35
 MAKE_PSTR_LIST(enum_wwMode2, F_(off), F_(on), F_(auto))
 MAKE_PSTR_LIST(enum_wwCircMode2, F_(off), F_(on), F_(auto))
 MAKE_PSTR_LIST(enum_heatingtype, F_(off), F_(radiator), F_(convector), F_(floor))
 MAKE_PSTR_LIST(enum_summermode, F_(summer), F_(auto), F_(winter))
 
-MAKE_PSTR_LIST(enum_mode, F_(manual), F_(auto))                          // RC100, RC300, RC310
-MAKE_PSTR_LIST(enum_mode2, F_(off), F_(manual), F_(auto))                // RC20
-MAKE_PSTR_LIST(enum_mode3, F_(night), F_(day), F_(auto))                 // RC35, RC30
-MAKE_PSTR_LIST(enum_mode4, F_(blank), F_(manual), F_(auto), F_(holiday)) // JUNKERS
-MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))                            // CRF
+MAKE_PSTR_LIST(enum_mode, F_(manual), F_(auto))               // RC100, RC300, RC310
+MAKE_PSTR_LIST(enum_mode2, F_(off), F_(manual), F_(auto))     // RC20
+MAKE_PSTR_LIST(enum_mode3, F_(night), F_(day), F_(auto))      // RC35, RC30
+MAKE_PSTR_LIST(enum_mode4, F_(manual), F_(auto), F_(holiday)) // JUNKERS
+MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))                 // CRF
 
 MAKE_PSTR_LIST(enum_modetype, F_(eco), F_(comfort))
 MAKE_PSTR_LIST(enum_modetype2, F_(day))
 MAKE_PSTR_LIST(enum_modetype3, F_(night), F_(day))
-MAKE_PSTR_LIST(enum_modetype4, F_(blank), F_(nofrost), F_(eco), F_(heat))
+MAKE_PSTR_LIST(enum_modetype4, F_(nofrost), F_(eco), F_(heat))
 MAKE_PSTR_LIST(enum_modetype5, F_(off), F_(on))
 
 MAKE_PSTR_LIST(enum_reducemode, F_(nofrost), F_(reduce), F_(room), F_(outdoor))
@@ -341,7 +339,7 @@ MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(h
 
 // solar list
 MAKE_PSTR_LIST(enum_solarmode, F_(constant), F("pwm"), F("analog"))
-MAKE_PSTR_LIST(enum_collectortype, F_(blank), F("flat"), F("vacuum"))
+MAKE_PSTR_LIST(enum_collectortype, F("flat"), F("vacuum"))
 
 // MQTT topics and full text for values and commands
 MAKE_PSTR(homeassistant, "homeassistant/")
