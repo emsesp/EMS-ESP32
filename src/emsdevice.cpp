@@ -40,7 +40,8 @@ static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__
     F_(seconds),
     F_(dbm),
     F_(num),
-    F_(bool)
+    F_(bool),
+    F_(blank)
 
 };
 
@@ -580,6 +581,12 @@ void EMSdevice::generate_values_json_web(JsonObject & json) {
                 }
             }
 
+            // handle commands without value
+            else if(dv.type == DeviceValueType::CMD) {
+                obj      = data.createNestedObject();
+                obj["v"] = "";
+            }
+
             else {
                 // handle Integers and Floats
                 // If a divider is specified, do the division to 2 decimals places and send back as double/float
@@ -633,6 +640,16 @@ void EMSdevice::generate_values_json_web(JsonObject & json) {
                     }
                 } else {
                     obj["c"] = "";
+                }
+
+                // add enum and text option settings
+                if ((dv.uom == DeviceValueUOM::LIST) && dv.has_cmd) {
+                    JsonArray l = obj.createNestedArray("l");
+                    for (uint8_t i = 0; i < dv.options_size; i++) {
+                        if (!uuid::read_flash_string(dv.options[i]).empty()) {
+                            l.add(uuid::read_flash_string(dv.options[i]));
+                        }
+                    }
                 }
             }
         }

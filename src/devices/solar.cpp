@@ -143,7 +143,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 
         // telegram 0x035A
         register_device_value(
-            TAG_NONE, &solarPumpMode_, DeviceValueType::ENUM, FL_(enum_solarmode), FL_(solarPumpMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_solarMode));
+            TAG_NONE, &solarPumpMode_, DeviceValueType::ENUM, FL_(enum_solarmode), FL_(solarPumpMode), DeviceValueUOM::LIST, MAKE_CF_CB(set_solarMode));
         register_device_value(TAG_NONE,
                               &solarPumpKick_,
                               DeviceValueType::BOOL,
@@ -180,7 +180,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
                               DeviceValueType::ENUM,
                               FL_(enum_collectortype),
                               FL_(collector1Type),
-                              DeviceValueUOM::NONE,
+                              DeviceValueUOM::LIST,
                               MAKE_CF_CB(set_collector1Type)); // Type of collector field 1, 01=flat, 02=vacuum
     }
 }

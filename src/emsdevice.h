@@ -39,7 +39,8 @@ enum DeviceValueType : uint8_t {
     ULONG,
     TIME, // same as ULONG (32 bits)
     ENUM,
-    TEXT
+    TEXT,
+    CMD
 
 };
 
@@ -64,7 +65,8 @@ enum DeviceValueUOM : uint8_t {
     SECONDS,  // 13
     DBM,      // 14
     NUM,      // 15
-    BOOLEAN   // 16
+    BOOLEAN,  // 16
+    LIST      // 17
 
 };
 

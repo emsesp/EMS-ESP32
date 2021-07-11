@@ -125,6 +125,7 @@ function formatValue(value: any, uom: number) {
     case DeviceValueUOM.MINUTES:
       return value ? formatDuration(value) : '0 minutes';
     case DeviceValueUOM.NONE:
+    case DeviceValueUOM.LIST:
       return value;
     case DeviceValueUOM.NUM:
       return new Intl.NumberFormat().format(value);

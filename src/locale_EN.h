@@ -175,6 +175,7 @@ MAKE_PSTR(seconds, "seconds")
 MAKE_PSTR(dbm, "dBm")
 MAKE_PSTR(num, " ")  // this is hack so HA renders numbers correctly
 MAKE_PSTR(bool, " ") // this is hack so HA renders numbers correctly
+MAKE_PSTR(blank, " ") // this is hack so HA renders numbers correctly
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
@@ -467,8 +468,9 @@ MAKE_PSTR_LIST(wWHystOn, F("wwhyston"), F("ww hysteresis on temperature"))
 MAKE_PSTR_LIST(wWHystOff, F("wwhystoff"), F("ww hysteresis off temperature"))
 
 // thermostat
+// extra commands
+MAKE_PSTR_LIST(switchtime, F("switchtime"), F("single program switchtime"))
 // extra commands, with no long name so they don't show up in WebUI
-MAKE_PSTR_LIST(switchtime, F("switchtime"))
 MAKE_PSTR_LIST(temp, F("temp"))
 MAKE_PSTR_LIST(hatemp, F("hatemp"))
 MAKE_PSTR_LIST(hamode, F("hamode"))

@@ -51,24 +51,40 @@ class ValueForm extends React.Component<ValueFormProps> {
         >
           <DialogTitle id="user-form-dialog-title">Change Value</DialogTitle>
           <DialogContent dividers>
-            {devicevalue.u !== DeviceValueUOM.BOOLEAN && (
-              <OutlinedInput
-                id="outlined-adornment-value"
+            {devicevalue.u === DeviceValueUOM.LIST && (
+              <TextField
+                id="outlined-select-value"
+                select
                 value={devicevalue.v}
                 autoFocus
                 fullWidth
                 onChange={handleValueChange('v')}
-                endAdornment={
-                  <InputAdornment position="end">
-                    {DeviceValueUOM_s[devicevalue.u]}
-                  </InputAdornment>
-                }
-                aria-describedby="outlined-value-helper-text"
-                inputProps={{
-                  'aria-label': 'value'
-                }}
-              />
+                variant="outlined"
+              >
+                {devicevalue.l.map((val) => (
+                  <MenuItem value={val}>{val}</MenuItem>
+                ))}
+              </TextField>
             )}
+            {devicevalue.u !== DeviceValueUOM.BOOLEAN &&
+              devicevalue.u !== DeviceValueUOM.LIST && (
+                <OutlinedInput
+                  id="outlined-adornment-value"
+                  value={devicevalue.v}
+                  autoFocus
+                  fullWidth
+                  onChange={handleValueChange('v')}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      {DeviceValueUOM_s[devicevalue.u]}
+                    </InputAdornment>
+                  }
+                  aria-describedby="outlined-value-helper-text"
+                  inputProps={{
+                    'aria-label': 'value'
+                  }}
+                />
+              )}
             {devicevalue.u === DeviceValueUOM.BOOLEAN && (
               <TextField
                 id="outlined-select-value"

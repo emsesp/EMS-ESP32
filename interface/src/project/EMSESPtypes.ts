@@ -64,6 +64,7 @@ export interface DeviceValue {
   u: number;
   n: string;
   c: string;
+  l: string[];
 }
 
 export interface EMSESPDeviceData {
@@ -88,7 +89,8 @@ export enum DeviceValueUOM {
   SECONDS,
   DBM,
   NUM,
-  BOOLEAN
+  BOOLEAN,
+  LIST
 }
 
 export const DeviceValueUOM_s = [
@@ -108,5 +110,6 @@ export const DeviceValueUOM_s = [
   'seconds',
   'dBm',
   'number',
-  'on/off'
+  'on/off',
+  ''
 ];

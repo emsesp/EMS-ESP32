@@ -87,7 +87,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     // MQTT commands for boiler topic
     register_device_value(
         TAG_BOILER_DATA, &wWTapActivated_, DeviceValueType::BOOL, nullptr, FL_(wwtapactivated), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_tapwarmwater_activated));
-    register_device_value(TAG_BOILER_DATA, &dummy8u_, DeviceValueType::ENUM, FL_(enum_reset), FL_(reset), DeviceValueUOM::NONE, MAKE_CF_CB(set_reset));
+    register_device_value(TAG_BOILER_DATA, &dummy8u_, DeviceValueType::CMD, FL_(enum_reset), FL_(reset), DeviceValueUOM::LIST, MAKE_CF_CB(set_reset));
 
     // add values
     // reserve_device_values(90);
@@ -141,7 +141,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueType::ENUM,
                           FL_(enum_off_time_date),
                           FL_(maintenanceType),
-                          DeviceValueUOM::NONE,
+                          DeviceValueUOM::LIST,
                           MAKE_CF_CB(set_maintenance));
     register_device_value(TAG_BOILER_DATA,
                           &maintenanceTime_,
@@ -196,14 +196,14 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA_WW, &wWSetTemp_, DeviceValueType::UINT, nullptr, FL_(wWSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_warmwater_temp));
     register_device_value(TAG_BOILER_DATA_WW, &wWType_, DeviceValueType::ENUM, FL_(enum_flow), FL_(wWType), DeviceValueUOM::NONE);
     register_device_value(
-        TAG_BOILER_DATA_WW, &wWComfort_, DeviceValueType::ENUM, FL_(enum_comfort), FL_(wWComfort), DeviceValueUOM::NONE, MAKE_CF_CB(set_warmwater_mode));
+        TAG_BOILER_DATA_WW, &wWComfort_, DeviceValueType::ENUM, FL_(enum_comfort), FL_(wWComfort), DeviceValueUOM::LIST, MAKE_CF_CB(set_warmwater_mode));
     register_device_value(
         TAG_BOILER_DATA_WW, &wWFlowTempOffset_, DeviceValueType::UINT, nullptr, FL_(wWFlowTempOffset), DeviceValueUOM::NONE, MAKE_CF_CB(set_wWFlowTempOffset));
     register_device_value(
         TAG_BOILER_DATA_WW, &wWMaxPower_, DeviceValueType::UINT, nullptr, FL_(wWMaxPower), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_warmwater_maxpower));
     register_device_value(
         TAG_BOILER_DATA_WW, &wWCircPump_, DeviceValueType::BOOL, nullptr, FL_(wWCircPump), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_warmwater_circulation_pump));
-    register_device_value(TAG_BOILER_DATA_WW, &wWChargeType_, DeviceValueType::ENUM, FL_(enum_charge), FL_(wWChargeType), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWChargeType_, DeviceValueType::ENUM, FL_(enum_charge), FL_(wWChargeType), DeviceValueUOM::LIST);
     register_device_value(TAG_BOILER_DATA_WW, &wWHystOn_, DeviceValueType::INT, nullptr, FL_(wWHystOn), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_ww_hyst_on));
     register_device_value(TAG_BOILER_DATA_WW, &wWHystOff_, DeviceValueType::INT, nullptr, FL_(wWHystOff), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_ww_hyst_off));
     register_device_value(TAG_BOILER_DATA_WW,
@@ -218,7 +218,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueType::ENUM,
                           FL_(enum_freq),
                           FL_(wWCircMode),
-                          DeviceValueUOM::NONE,
+                          DeviceValueUOM::LIST,
                           MAKE_CF_CB(set_warmwater_circulation_mode));
     register_device_value(TAG_BOILER_DATA_WW, &wWCirc_, DeviceValueType::BOOL, nullptr, FL_(wWCirc), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_warmwater_circulation));
     register_device_value(TAG_BOILER_DATA_WW, &wWCurTemp_, DeviceValueType::USHORT, FL_(div10), FL_(wWCurTemp), DeviceValueUOM::DEGREES);
