@@ -1231,7 +1231,8 @@ void EMSESP::loop() {
 
     console_.loop(); // telnet/serial console
 
-    // delay(1); // helps telnet catch up. don't think its needed in ESP32 3.1.0
+    // https://github.com/emsesp/EMS-ESP32/issues/78#issuecomment-877599145
+    delay(1); // helps telnet catch up. don't think its needed in ESP32 3.1.0
 }
 
 } // namespace emsesp
