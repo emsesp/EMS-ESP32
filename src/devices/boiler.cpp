@@ -86,7 +86,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     }
     // MQTT commands for boiler topic
     register_device_value(
-        TAG_BOILER_DATA, &dummybool_, DeviceValueType::BOOL, nullptr, FL_(wwtapactivated), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_tapwarmwater_activated));
+        TAG_BOILER_DATA, &wWTapActivated_, DeviceValueType::BOOL, nullptr, FL_(wwtapactivated), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_tapwarmwater_activated));
     register_device_value(TAG_BOILER_DATA, &dummy8u_, DeviceValueType::ENUM, FL_(enum_reset), FL_(reset), DeviceValueUOM::NONE, MAKE_CF_CB(set_reset));
 
     // add values
@@ -301,6 +301,11 @@ void Boiler::check_active(const bool force) {
         heatingActive_ = val;
         char s[7];
         Mqtt::publish(F_(heating_active), Helpers::render_boolean(s, b));
+    }
+
+    // check if we can use tapactivated in flow systems
+    if ((wWType_ == 1) && !Helpers::hasValue(wWTapActivated_, EMS_VALUE_BOOL)) {
+        wWTapActivated_= 1;
     }
 
     // check if tap water is active, bits 1 and 4 must be set
@@ -1150,14 +1155,16 @@ bool Boiler::set_tapwarmwater_activated(const char * value, const int8_t id) {
     // a setting of 0x00 puts it back into normal operating mode
     // when in test mode we're able to mess around with the 3-way valve settings
     if (!v) {
-        // on
+        // DHW off
         message_data[0] = 0x5A; // test mode on
         message_data[1] = 0x00; // burner output 0%
         message_data[3] = 0x64; // boiler pump capacity 100%
         message_data[4] = 0xFF; // 3-way valve hot water only
+        wWTapActivated_= 0;
     } else {
         // get out of test mode. Send all zeros.
         // telegram: 0B 08 1D 00 00
+        wWTapActivated_ = 1;
     }
 
     write_command(EMS_TYPE_UBAFunctionTest, 0, message_data, sizeof(message_data), 0);
