@@ -702,6 +702,8 @@ void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(hc->daytemp, 17));     // is * 2
     has_update(telegram->read_value(hc->nighttemp, 16));   // is * 2
     has_update(telegram->read_value(hc->nofrosttemp, 15)); // is * 2
+    has_update(telegram->read_enumvalue(hc->mode, 14, 1)); // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
+    hc->hamode = hc->mode ? hc->mode - 1 : 0;              // set special HA mode: off, on, auto
 }
 
 // type 0x0179, ff
@@ -714,6 +716,8 @@ void Thermostat::process_JunkersSet2(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(hc->daytemp, 7));     // is * 2
     has_update(telegram->read_value(hc->nighttemp, 6));   // is * 2
     has_update(telegram->read_value(hc->nofrosttemp, 5)); // is * 2
+    has_update(telegram->read_enumvalue(hc->mode, 4, 1)); // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
+    hc->hamode = hc->mode ? hc->mode - 1 : 0;             // set special HA mode: off, on, auto
 }
 
 // type 0xA3 - for external temp settings from the the RC* thermostats (e.g. RC35)
@@ -780,8 +784,6 @@ void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram
     has_update(telegram->read_value(hc->setpoint_roomTemp, 2)); // value is * 10
 
     has_update(telegram->read_enumvalue(hc->modetype, 0, 1)); // 1 = nofrost, 2 = eco, 3 = heat
-    has_update(telegram->read_enumvalue(hc->mode, 1, 1));     // 1 = manual, 2 = auto
-    hc->hamode = hc->mode + 1;                                // set special HA mode
 }
 
 // type 0x02A5 - data from Worchester CRF200
@@ -1611,7 +1613,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         } else {
             offset = EMS_OFFSET_JunkersSetMessage_set_mode;
         }
-        validate_typeid = monitor_typeids[hc_p];
+        validate_typeid = set_typeids[hc_p];
         if (mode == HeatingCircuit::Mode::NOFROST) {
             set_mode_value = 0x01;
         } else if (mode == HeatingCircuit::Mode::ECO || (mode == HeatingCircuit::Mode::NIGHT)) {
