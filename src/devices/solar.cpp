@@ -91,11 +91,8 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
             TAG_NONE, &solarPumpTurnonDiff_, DeviceValueType::UINT, nullptr, FL_(solarPumpTurnonDiff), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_TurnonDiff));
         register_device_value(
             TAG_NONE, &solarPumpTurnoffDiff_, DeviceValueType::UINT, nullptr, FL_(solarPumpTurnoffDiff), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_TurnoffDiff));
-        register_device_value(
-            TAG_NONE, &collectorMaxTemp_, DeviceValueType::UINT, nullptr, FL_(collectorMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_CollectorMaxTemp));
-        register_device_value(
-            TAG_NONE, &collectorMinTemp_, DeviceValueType::UINT, nullptr, FL_(collectorMinTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_CollectorMinTemp));
         register_device_value(TAG_NONE, &collectorShutdown_, DeviceValueType::BOOL, nullptr, FL_(collectorShutdown), DeviceValueUOM::BOOLEAN);
+        register_device_value(TAG_NONE, &tankHeated_, DeviceValueType::BOOL, nullptr, FL_(tankHeated), DeviceValueUOM::BOOLEAN);
         register_device_value(TAG_NONE, &solarPower_, DeviceValueType::ULONG, nullptr, FL_(solarPower), DeviceValueUOM::W);
         register_device_value(TAG_NONE, &energyLastHour_, DeviceValueType::ULONG, FL_(div10), FL_(energyLastHour), DeviceValueUOM::WH);
         register_device_value(TAG_NONE, &maxFlow_, DeviceValueType::UINT, FL_(div10), FL_(maxFlow), DeviceValueUOM::LMIN, MAKE_CF_CB(set_SM10MaxFlow));
@@ -219,12 +216,6 @@ bool Solar::publish_ha_config() {
 // Solar(0x30) -> All(0x00), (0x96), data: FF 18 19 0A 02 5A 27 0A 05 2D 1E 0F 64 28 0A
 void Solar::process_SM10Config(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(solarIsEnabled_, 0)); // FF on
-    uint8_t colmax = collectorMaxTemp_ / 10;
-    has_update(telegram->read_value(colmax, 3));
-    collectorMaxTemp_ = colmax * 10;
-    uint8_t colmin    = collectorMinTemp_ / 10;
-    has_update(telegram->read_value(colmin, 4));
-    collectorMinTemp_ = colmin * 10;
     has_update(telegram->read_value(solarPumpMinMod_, 2));
     has_update(telegram->read_value(solarPumpTurnonDiff_, 7));
     has_update(telegram->read_value(solarPumpTurnoffDiff_, 8));
@@ -237,7 +228,7 @@ void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
     uint8_t solarpumpmod = solarPumpModulation_;
 
     has_update(telegram->read_bitvalue(collectorShutdown_, 0, 3));
-    // has_update(telegram->read_bitvalue(tankHeated_, 0, x)); // tank full, to be determined
+    has_update(telegram->read_bitvalue(tankHeated_, 0, 2));    // tankMaxTemp reached
     has_update(telegram->read_value(collectorTemp_, 2));       // collector temp from SM10, is *10
     has_update(telegram->read_value(tankBottomTemp_, 5));      // tank bottom temp from SM10, is *10
     has_update(telegram->read_value(solarPumpModulation_, 4)); // modulation solar pump
