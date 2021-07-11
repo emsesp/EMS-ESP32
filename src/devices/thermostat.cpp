@@ -455,13 +455,19 @@ bool Thermostat::thermostat_ha_cmd(const char * message, uint8_t hc_num) {
     }
 
     // check for mode first, which is a string
-    if (!set_mode(message, hc_num)) {
+    if (message[0] >= 'A') {
+        if (set_mode(message, hc_num)) {
+            return true;
+        }
+    }
+    if ((message[0] >= '0' && message[0] <= '9') || message[0] == '-') {
         // otherwise handle as a numerical temperature value and set the setpoint temp
         float f = strtof((char *)message, 0);
         set_temperature(f, HeatingCircuit::Mode::AUTO, hc_num);
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 // decodes the thermostat mode for the heating circuit based on the thermostat type
@@ -1467,13 +1473,35 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
 // sets the thermostat working mode, where mode is a string
 // converts string mode to HeatingCircuit::Mode
 bool Thermostat::set_mode(const char * value, const int8_t id) {
-    // quit if its numerical, as it could be mistaken as a temperature value
-    if (value[0] < 'A') {
-        return false;
-    }
-
     std::string mode(10, '\0');
-    if (!Helpers::value2string(value, mode)) {
+
+    if (value[0] >= '0' && value[0] <= '9') {
+        uint8_t num = value[0] - '0';
+        switch (model()) {
+        case EMSdevice::EMS_DEVICE_FLAG_RC20:
+        case EMSdevice::EMS_DEVICE_FLAG_RC20_N:
+            mode = uuid::read_flash_string(FL_(enum_mode2)[num]);
+            break;
+        case EMSdevice::EMS_DEVICE_FLAG_RC30:
+        case EMSdevice::EMS_DEVICE_FLAG_RC35:
+        case EMSdevice::EMS_DEVICE_FLAG_RC30_N:
+            mode = uuid::read_flash_string(FL_(enum_mode3)[num]);
+            break;
+        case EMSdevice::EMS_DEVICE_FLAG_RC300:
+        case EMSdevice::EMS_DEVICE_FLAG_RC100:
+            mode = uuid::read_flash_string(FL_(enum_mode)[num]);
+            break;
+        case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
+            mode = uuid::read_flash_string(FL_(enum_mode4)[num]);
+            break;
+        case EMSdevice::EMS_DEVICE_FLAG_CRF:
+            mode = uuid::read_flash_string(FL_(enum_mode5)[num]);
+            break;
+        default:
+            LOG_WARNING(F("Set mode: Invalid mode"));
+            return false;
+        }
+    } else if (!Helpers::value2string(value, mode)) {
         LOG_WARNING(F("Set mode: Invalid mode"));
         return false;
     }
