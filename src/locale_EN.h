@@ -463,6 +463,8 @@ MAKE_PSTR_LIST(tankMiddleTemp, F("tankmiddletemp"), F("ww tank middle temperatur
 MAKE_PSTR_LIST(wWStarts, F("wwstarts"), F("ww # starts"))
 MAKE_PSTR_LIST(wWStarts2, F("wwstarts2"), F("ww # control starts"))
 MAKE_PSTR_LIST(wWWorkM, F("wwworkm"), F("ww active time"))
+MAKE_PSTR_LIST(wWHystOn, F("wwhyston"), F("ww hysteresis on temperature"))
+MAKE_PSTR_LIST(wWHystOff, F("wwhystoff"), F("ww hysteresis off temperature"))
 
 // thermostat
 // extra commands, with no long name so they don't show up in WebUI
