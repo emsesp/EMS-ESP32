@@ -20,7 +20,7 @@
 
 namespace emsesp {
 
-uint8_t WebSettings::flags_;
+uint8_t WebSettings::flags_ = 0;
 
 using namespace std::placeholders; // for `_1` etc
 
@@ -127,9 +127,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.syslog_port = root["syslog_port"] | EMSESP_DEFAULT_SYSLOG_PORT;
     check_flag(prev, settings.syslog_port, ChangeFlags::SYSLOG);
 
-    prev               = settings.trace_raw;
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
-    check_flag(prev, settings.trace_raw, ChangeFlags::SYSLOG);
     EMSESP::trace_raw(settings.trace_raw);
 
     // adc
@@ -209,6 +207,8 @@ void WebSettingsService::onUpdate() {
     if (WebSettings::has_flags(WebSettings::ChangeFlags::LED)) {
         EMSESP::system_.led_init(true); // reload settings
     }
+
+    WebSettings::reset_flags();
 }
 
 void WebSettingsService::begin() {
