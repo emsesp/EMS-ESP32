@@ -119,7 +119,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     String old_syslog_host = settings.syslog_host;
     settings.syslog_host   = root["syslog_host"] | EMSESP_DEFAULT_SYSLOG_HOST;
-    if (old_syslog_host.equals(settings.syslog_host.c_str())) {
+    if (!old_syslog_host.equals(settings.syslog_host)) {
         add_flags(ChangeFlags::SYSLOG);
     }
 
