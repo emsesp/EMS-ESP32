@@ -1475,7 +1475,11 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
 // sets the thermostat working mode, where mode is a string
 // converts string mode to HeatingCircuit::Mode
 bool Thermostat::set_mode(const char * value, const int8_t id) {
-    std::string mode(10, '\0');
+    std::string mode(20, '\0');
+    if (strlen(value) >= 20) {
+        LOG_WARNING(F("Set mode: Invalid mode"));
+        return false;
+    }
 
     if (value[0] >= '0' && value[0] <= '9') {
         uint8_t num = value[0] - '0';

@@ -613,10 +613,10 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     uint8_t offset = telegram->offset;
 
     // find name for src and dest by looking up known devices
-    std::string src_name;
-    std::string dest_name;
-    std::string type_name;
-    std::string direction;
+    std::string src_name("");
+    std::string dest_name("");
+    std::string type_name("");
+    std::string direction("");
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             // get src & dest
@@ -774,7 +774,7 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // if watching or reading...
     if ((telegram->type_id == read_id_) && (telegram->dest == txservice_.ems_bus_id())) {
-        LOG_NOTICE(pretty_telegram(telegram).c_str());
+        LOG_NOTICE(F("%s"), pretty_telegram(telegram).c_str());
         publish_response(telegram);
         if (!read_next_) {
             read_id_ = WATCH_ID_NONE;
@@ -783,12 +783,12 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     } else if (watch() == WATCH_ON) {
         if ((watch_id_ == WATCH_ID_NONE) || (telegram->type_id == watch_id_)
             || ((watch_id_ < 0x80) && ((telegram->src == watch_id_) || (telegram->dest == watch_id_)))) {
-            LOG_NOTICE(pretty_telegram(telegram).c_str());
+            LOG_NOTICE(F("%s"), pretty_telegram(telegram).c_str());
         } else if (!trace_raw_) {
-            LOG_TRACE(pretty_telegram(telegram).c_str());
+            LOG_TRACE(F("%s"), pretty_telegram(telegram).c_str());
         }
     } else if (!trace_raw_) {
-        LOG_TRACE(pretty_telegram(telegram).c_str());
+        LOG_TRACE(F("%s"), pretty_telegram(telegram).c_str());
     }
 
     // only process broadcast telegrams or ones sent to us on request
@@ -840,7 +840,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     if (!found) {
         LOG_DEBUG(F("No telegram type handler found for ID 0x%02X (src 0x%02X)"), telegram->type_id, telegram->src);
         if (watch() == WATCH_UNKNOWN) {
-            LOG_NOTICE(pretty_telegram(telegram).c_str());
+            LOG_NOTICE(F("%s"), pretty_telegram(telegram).c_str());
         }
         if (first_scan_done_ && !knowndevice && (telegram->src != EMSbus::ems_bus_id()) && (telegram->src != 0x0B) && (telegram->src != 0x0C)
             && (telegram->src != 0x0D)) {
