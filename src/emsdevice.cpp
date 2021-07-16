@@ -697,7 +697,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
             switch (dv.type) {
             case DeviceValueType::ENUM: {
                 if (*(uint8_t *)(dv.value_p) < dv.options_size) {
-                    if (Mqtt::bool_format() == BOOL_FORMAT_10) {
+                    if (EMSESP::enum_format() == ENUM_FORMAT_NUMBER) {
                         json[value] = (uint8_t)(*(uint8_t *)(dv.value_p));
                     } else {
                         json[value] = dv.options[*(uint8_t *)(dv.value_p)]; // text
@@ -770,7 +770,16 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
             case DeviceValueType::BOOL: {
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
-                    json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? true : false;
+                    uint8_t bool_format = EMSESP::bool_format();
+                    if (bool_format == BOOL_FORMAT_ONOFF) {
+                        json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? F_(on) : F_(off);
+                    } else if (bool_format == BOOL_FORMAT_ONOFF_CAP) {
+                        json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? F_(ON) : F_(OFF);
+                    } else if (bool_format == BOOL_FORMAT_TRUEFALSE) {
+                        json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? true : false;
+                    } else {
+                        json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? 1 : 0;
+                    }
                 }
                 json[type] = F("boolean");
                 break;
@@ -858,24 +867,17 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
             if ((dv.type == DeviceValueType::BOOL) && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see how to render the value depending on the setting
                 // when in console mode we always use on and off
-                if ((Mqtt::bool_format() == BOOL_FORMAT_ONOFF) || console) {
-                    // on or off as strings
+                uint8_t bool_format = EMSESP::bool_format();
+                if ((bool_format == BOOL_FORMAT_ONOFF) || console) {
                     json[name] = *(uint8_t *)(dv.value_p) ? F_(on) : F_(off);
-                    has_value  = true;
-                } else if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF_CAP) {
-                    // on or off as strings
+                } else if (bool_format == BOOL_FORMAT_ONOFF_CAP) {
                     json[name] = *(uint8_t *)(dv.value_p) ? F_(ON) : F_(OFF);
-                    has_value  = true;
-                } else if (Mqtt::bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                    // true or false values (as real booleans, not strings)
+                } else if (bool_format == BOOL_FORMAT_TRUEFALSE) {
                     json[name] = (bool)(*(uint8_t *)(dv.value_p)) ? true : false;
-                    has_value  = true;
                 } else {
-                    // numerical 1 or 0
                     json[name] = (uint8_t)(*(uint8_t *)(dv.value_p)) ? 1 : 0;
-                    has_value  = true;
                 }
-
+                has_value  = true;
             }
 
             // handle TEXT strings
@@ -888,7 +890,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
             else if ((dv.type == DeviceValueType::ENUM) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
                 if (*(uint8_t *)(dv.value_p) < dv.options_size) {
                     // check for numeric enum-format, but "hamode" always as text
-                    if ((Mqtt::bool_format() == BOOL_FORMAT_10) && (dv.short_name != FL_(hamode)[0])) {
+                    if ((EMSESP::enum_format() == ENUM_FORMAT_NUMBER) && (dv.short_name != FL_(hamode)[0])) {
                         json[name] = (uint8_t)(*(uint8_t *)(dv.value_p));
                     } else {
                         json[name] = dv.options[*(uint8_t *)(dv.value_p)];

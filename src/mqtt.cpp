@@ -35,8 +35,6 @@ uint32_t    Mqtt::publish_time_mixer_;
 uint32_t    Mqtt::publish_time_sensor_;
 uint32_t    Mqtt::publish_time_other_;
 bool        Mqtt::mqtt_enabled_;
-uint8_t     Mqtt::dallas_format_;
-uint8_t     Mqtt::bool_format_;
 uint8_t     Mqtt::ha_climate_format_;
 bool        Mqtt::ha_enabled_;
 uint8_t     Mqtt::nested_format_;
@@ -485,8 +483,6 @@ void Mqtt::load_settings() {
         mqtt_enabled_      = mqttSettings.enabled;
         ha_enabled_        = mqttSettings.ha_enabled;
         ha_climate_format_ = mqttSettings.ha_climate_format;
-        dallas_format_     = mqttSettings.dallas_format;
-        bool_format_       = mqttSettings.bool_format;
         nested_format_     = mqttSettings.nested_format;
         subscribe_format_  = mqttSettings.subscribe_format;
 

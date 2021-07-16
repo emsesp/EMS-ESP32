@@ -44,8 +44,6 @@ using uuid::console::Shell;
 // size of queue
 #define MAX_MQTT_MESSAGES 200
 
-enum { BOOL_FORMAT_ONOFF = 1, BOOL_FORMAT_TRUEFALSE, BOOL_FORMAT_10, BOOL_FORMAT_ONOFF_CAP }; // matches Web UI settings
-
 namespace emsesp {
 
 using mqtt_subfunction_p = std::function<bool(const char * message)>;
@@ -83,7 +81,6 @@ class Mqtt {
 
     enum Operation { PUBLISH, SUBSCRIBE };
 
-    enum Dallas_Format : uint8_t { SENSORID = 1, NUMBER };
     enum HA_Climate_Format : uint8_t { CURRENT = 1, SETPOINT, ZERO };
 
     static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // note this should really match the user setting in mqttSettings.maxTopicLength
@@ -159,14 +156,6 @@ class Mqtt {
         return ha_climate_format_;
     }
 
-    static uint8_t dallas_format() {
-        return dallas_format_;
-    }
-
-    static uint8_t bool_format() {
-        return bool_format_;
-    }
-
     static uint8_t nested_format() {
         return nested_format_;
     }
@@ -181,10 +170,6 @@ class Mqtt {
 
     static void ha_climate_format(uint8_t ha_climate_format) {
         ha_climate_format_ = ha_climate_format;
-    }
-
-    static void dallas_format(uint8_t dallas_format) {
-        dallas_format_ = dallas_format;
     }
 
     static void ha_enabled(bool ha_enabled) {
@@ -279,8 +264,6 @@ class Mqtt {
     static uint32_t    publish_time_other_;
     static uint32_t    publish_time_sensor_;
     static bool        mqtt_enabled_;
-    static uint8_t     dallas_format_;
-    static uint8_t     bool_format_;
     static uint8_t     ha_climate_format_;
     static bool        ha_enabled_;
     static uint8_t     nested_format_;

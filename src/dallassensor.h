@@ -36,6 +36,8 @@
 
 namespace emsesp {
 
+enum Dallas_Format : uint8_t { SENSORID = 1, NUMBER, NAME };
+
 class DallasSensor {
   public:
     class Sensor {
@@ -74,6 +76,14 @@ class DallasSensor {
 
     bool dallas_enabled() {
         return (dallas_gpio_ != 0);
+    }
+
+    uint8_t dallas_format() {
+        return dallas_format_;
+    }
+
+    void dallas_format(uint8_t dallas_format) {
+        dallas_format_ = dallas_format;
     }
 
   private:
@@ -134,6 +144,7 @@ class DallasSensor {
     uint32_t sensorfails_ = 0;
     uint32_t sensorreads_ = 0;
     int8_t   scanretry_   = 0;
+    uint8_t  dallas_format_ = 0;
 };
 
 } // namespace emsesp

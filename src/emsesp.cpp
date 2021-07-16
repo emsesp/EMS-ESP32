@@ -75,6 +75,8 @@ uint8_t  EMSESP::publish_all_idx_          = 0;
 uint8_t  EMSESP::unique_id_count_          = 0;
 bool     EMSESP::trace_raw_                = false;
 uint64_t EMSESP::tx_delay_                 = 0;
+uint8_t  EMSESP::bool_format_              = 1;
+uint8_t  EMSESP::enum_format_              = 1;
 
 // for a specific EMS device go and request data values
 // or if device_id is 0 it will fetch from all our known and active devices

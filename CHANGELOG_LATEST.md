@@ -22,5 +22,6 @@
 - added debug target to PlatformIO build to help hunt down system crashes
 - enumerated values always start at zero
 - maintenance settings for time/date as extra setting
+- move api/mqtt formats to `settings`, add `enum format`
 
 ## Removed

@@ -61,6 +61,9 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["pbutton_gpio"]         = settings.pbutton_gpio;
     root["solar_maxflow"]        = settings.solar_maxflow;
     root["board_profile"]        = settings.board_profile;
+    root["dallas_format"]        = settings.dallas_format;
+    root["bool_format"]          = settings.bool_format;
+    root["enum_format"]          = settings.enum_format;
 }
 
 // call on initialization and also when settings are updated via web or console
@@ -172,6 +175,15 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     // doesn't need any follow-up actions
     settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
     settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
+
+    settings.dallas_format = root["dallas_format"] | EMSESP_DEFAULT_DALLAS_FORMAT;
+    EMSESP::dallassensor_.dallas_format(settings.dallas_format);
+
+    settings.bool_format   = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
+    EMSESP::bool_format(settings.bool_format);
+
+    settings.enum_format   = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
+    EMSESP::enum_format(settings.enum_format);
 
     return StateUpdateResult::CHANGED;
 }

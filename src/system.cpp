@@ -835,8 +835,6 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["publish_time_mixer"]      = settings.publish_time_mixer;
         node["publish_time_other"]      = settings.publish_time_other;
         node["publish_time_sensor"]     = settings.publish_time_sensor;
-        node["dallas_format"]           = settings.dallas_format;
-        node["bool_format"]             = settings.bool_format;
         node["ha_climate_format"]       = settings.ha_climate_format;
         node["ha_enabled"]              = settings.ha_enabled;
         node["mqtt_qos"]                = settings.mqtt_qos;
@@ -879,6 +877,9 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["led_gpio"]             = settings.led_gpio;
         node["hide_led"]             = settings.hide_led;
         node["notoken_api"]          = settings.notoken_api;
+        node["dallas_format"]        = settings.dallas_format;
+        node["bool_format"]          = settings.bool_format;
+        node["enum_format"]          = settings.enum_format;
         node["analog_enabled"]       = settings.analog_enabled;
         node["pbutton_gpio"]         = settings.pbutton_gpio;
         node["board_profile"]        = settings.board_profile;

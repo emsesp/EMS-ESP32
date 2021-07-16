@@ -163,8 +163,6 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["publish_time_sensor"]     = settings.publish_time_sensor;
     root["mqtt_qos"]                = settings.mqtt_qos;
     root["mqtt_retain"]             = settings.mqtt_retain;
-    root["dallas_format"]           = settings.dallas_format;
-    root["bool_format"]             = settings.bool_format;
     root["ha_climate_format"]       = settings.ha_climate_format;
     root["ha_enabled"]              = settings.ha_enabled;
     root["nested_format"]           = settings.nested_format;
@@ -195,8 +193,6 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_time_other      = root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
 
-    newSettings.dallas_format     = root["dallas_format"] | EMSESP_DEFAULT_DALLAS_FORMAT;
-    newSettings.bool_format       = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
     newSettings.ha_climate_format = root["ha_climate_format"] | EMSESP_DEFAULT_HA_CLIMATE_FORMAT;
     newSettings.ha_enabled        = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
     newSettings.nested_format     = root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT;
@@ -208,11 +204,6 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
 
     if (newSettings.mqtt_qos != settings.mqtt_qos) {
         emsesp::EMSESP::mqtt_.set_qos(newSettings.mqtt_qos);
-        changed = true;
-    }
-
-    if (newSettings.dallas_format != settings.dallas_format) {
-        emsesp::EMSESP::mqtt_.dallas_format(newSettings.dallas_format);
         changed = true;
     }
 

@@ -17,7 +17,7 @@
  */
 
 #include "helpers.h"
-#include "mqtt.h"
+#include "emsesp.h"
 
 namespace emsesp {
 
@@ -124,7 +124,7 @@ char * Helpers::smallitoa(char * result, const uint16_t value) {
 
 // work out how to display booleans
 char * Helpers::render_boolean(char * result, bool value) {
-    uint8_t bool_format_ = Mqtt::bool_format();
+    uint8_t bool_format_ = EMSESP::bool_format();
     if (bool_format_ == BOOL_FORMAT_ONOFF) {
         strlcpy(result, value ? uuid::read_flash_string(F_(on)).c_str() : uuid::read_flash_string(F_(off)).c_str(), 5);
     } else if (bool_format_ == BOOL_FORMAT_ONOFF_CAP) {

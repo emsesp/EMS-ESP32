@@ -214,8 +214,6 @@ const mqtt_settings = {
   publish_time_sensor: 10,
   mqtt_qos: 0,
   mqtt_retain: false,
-  dallas_format: 1,
-  bool_format: 1,
   ha_climate_format: 1,
   ha_enabled: true,
   nested_format: 1,
@@ -307,6 +305,9 @@ const emsesp_settings = {
   analog_enabled: false,
   pbutton_gpio: 0,
   board_profile: 'S32',
+  dallas_format: 1,
+  bool_format: 1,
+  enum_format: 1,
 }
 const emsesp_alldevices = {
   devices: [

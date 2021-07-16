@@ -144,6 +144,22 @@ class EMSESP {
         return (dallassensor_.dallas_enabled());
     }
 
+    static uint8_t bool_format() {
+        return bool_format_;
+    }
+
+    static void bool_format(uint8_t format) {
+        bool_format_ = format;
+    }
+
+    static uint8_t enum_format() {
+        return enum_format_;
+    }
+
+    static void enum_format(uint8_t format) {
+        enum_format_ = format;
+    }
+
     enum Watch : uint8_t { WATCH_OFF, WATCH_ON, WATCH_RAW, WATCH_UNKNOWN };
     static void     watch_id(uint16_t id);
     static uint16_t watch_id() {
@@ -246,6 +262,8 @@ class EMSESP {
     static uint8_t  unique_id_count_;
     static bool     trace_raw_;
     static uint64_t tx_delay_;
+    static uint8_t  bool_format_;
+    static uint8_t  enum_format_;
 };
 
 } // namespace emsesp
