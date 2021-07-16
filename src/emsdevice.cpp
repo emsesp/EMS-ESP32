@@ -801,6 +801,10 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                 json[type] = F_(text);
                 break;
 
+            case DeviceValueType::CMD:
+                json[type] = F_(command);
+                break;
+
             default:
                 json[type] = F_(unknown);
                 break;
