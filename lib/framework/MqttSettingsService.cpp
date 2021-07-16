@@ -138,8 +138,6 @@ void MqttSettingsService::configureMqtt() {
         _mqttClient.setMaxTopicLength(_state.maxTopicLength);
         _mqttClient.connect();
     }
-
-    emsesp::EMSESP::dallassensor_.reload(); // added by Proddy for EMS-ESP
 }
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
