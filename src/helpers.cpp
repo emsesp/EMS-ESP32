@@ -417,12 +417,15 @@ bool Helpers::value2number(const char * v, int & value) {
 
 // checks if we can convert a char string to a float value
 bool Helpers::value2float(const char * v, float & value) {
+    value = 0;
     if ((v == nullptr) || (strlen(v) == 0)) {
-        value = 0;
         return false;
     }
-    value = atof((char *)v);
-    return true;
+    if (v[0] == '-' || v[0] == '.' || (v[0] >= '0' && v[0] <= '9')) {
+        value = atof((char *)v);
+        return true;
+    }
+    return false;
 }
 
 // https://stackoverflow.com/questions/313970/how-to-convert-stdstring-to-lower-case

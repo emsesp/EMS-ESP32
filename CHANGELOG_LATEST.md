@@ -8,6 +8,7 @@
 - optional low clockrate (160 MHz) (#83)
 - selectbox for enumerated values in web
 - settings for water hysteresis on/off
+- sensorname console-command, replace sensorid with a unique name
 
 ## Fixed
 

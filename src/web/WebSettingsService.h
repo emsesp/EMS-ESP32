@@ -28,6 +28,8 @@
 #define EMSESP_SETTINGS_SERVICE_PATH "/rest/emsespSettings"
 #define EMSESP_BOARD_PROFILE_SERVICE_PATH "/rest/boardProfile"
 
+#define NUM_SENSOR_NAMES 10
+
 namespace emsesp {
 
 enum { BOOL_FORMAT_ONOFF = 1, BOOL_FORMAT_ONOFF_CAP, BOOL_FORMAT_TRUEFALSE, BOOL_FORMAT_10 }; // matches Web UI settings
@@ -62,6 +64,12 @@ class WebSettings {
     uint8_t  dallas_format;
     uint8_t  bool_format;
     uint8_t  enum_format;
+
+    struct {
+      String  id;
+      String  name;
+      int16_t offset;
+    } sensor[NUM_SENSOR_NAMES];
 
     static void              read(WebSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebSettings & settings);

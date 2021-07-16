@@ -160,4 +160,8 @@
 #define EMSESP_DEFAULT_SOLAR_MAXFLOW 30
 #endif
 
+#ifndef EMSESP_DEFAULT_SENSOR_NAME
+#define EMSESP_DEFAULT_SENSOR_NAME ""
+#endif
+
 #endif

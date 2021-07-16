@@ -46,6 +46,7 @@ class DallasSensor {
         ~Sensor() = default;
 
         uint64_t    id() const;
+        std::string id_string() const;
         std::string to_string() const;
 
         int16_t temperature_c = EMS_VALUE_SHORT_NOTSET;
@@ -85,6 +86,8 @@ class DallasSensor {
     void dallas_format(uint8_t dallas_format) {
         dallas_format_ = dallas_format;
     }
+
+    void add_name(const char * id, const char * name, int16_t offset);
 
   private:
     static constexpr uint8_t MAX_SENSORS = 20;

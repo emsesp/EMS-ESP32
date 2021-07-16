@@ -507,6 +507,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
             >
               <MenuItem value={1}>by Sensor ID</MenuItem>
               <MenuItem value={2}>by Number</MenuItem>
+              <MenuItem value={3}>by Name</MenuItem>
             </SelectValidator>
           </Grid>
         </Grid>

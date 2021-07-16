@@ -64,13 +64,25 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["dallas_format"]        = settings.dallas_format;
     root["bool_format"]          = settings.bool_format;
     root["enum_format"]          = settings.enum_format;
+
+    for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+        char buf[20];
+        snprintf_P(buf, sizeof(buf), PSTR("sensor_id%d"), i);
+        root[buf] = settings.sensor[i].id;
+        snprintf_P(buf, sizeof(buf), PSTR("sensor_name%d"), i);
+        root[buf] = settings.sensor[i].name;
+        snprintf_P(buf, sizeof(buf), PSTR("sensor_offset%d"), i);
+        root[buf] = settings.sensor[i].offset;
+    }
 }
 
 // call on initialization and also when settings are updated via web or console
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
     // load default GPIO configuration based on board profile
     std::vector<uint8_t> data; // led, dallas, rx, tx, button
-    settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
+
+    String old_board_profile = settings.board_profile;
+    settings.board_profile   = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
         settings.board_profile = EMSESP_DEFAULT_BOARD_PROFILE; // invalid board configuration, override the default in case it has been misspelled
     }
@@ -81,13 +93,15 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     uint8_t default_tx_gpio      = data[3];
     uint8_t default_pbutton_gpio = data[4];
 
-    EMSESP::logger().info(F("EMS-ESP version %s"), EMSESP_APP_VERSION);
+    if (old_board_profile != settings.board_profile) {
+        EMSESP::logger().info(F("EMS-ESP version %s"), EMSESP_APP_VERSION);
 
-    // check to see if we have a settings file, if not it's a fresh install
-    if (!root.size()) {
-        EMSESP::logger().info(F("Initializing configuration with board profile %s"), settings.board_profile.c_str());
-    } else {
-        EMSESP::logger().info(F("Using configuration from board profile %s"), settings.board_profile.c_str());
+        // check to see if we have a settings file, if not it's a fresh install
+        if (!root.size()) {
+            EMSESP::logger().info(F("Initializing configuration with board profile %s"), settings.board_profile.c_str());
+        } else {
+            EMSESP::logger().info(F("Using configuration from board profile %s"), settings.board_profile.c_str());
+        }
     }
 
     int prev;
@@ -184,6 +198,16 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     settings.enum_format   = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
     EMSESP::enum_format(settings.enum_format);
+
+    for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+        char buf[20];
+        snprintf_P(buf, sizeof(buf), PSTR("sensor_id%d"), i);
+        settings.sensor[i].id = root[buf] | EMSESP_DEFAULT_SENSOR_NAME;
+        snprintf_P(buf, sizeof(buf), PSTR("sensor_name%d"), i);
+        settings.sensor[i].name = root[buf] | EMSESP_DEFAULT_SENSOR_NAME;
+        snprintf_P(buf, sizeof(buf), PSTR("sensor_offset%d"), i);
+        settings.sensor[i].offset = root[buf] | 0;
+    }
 
     return StateUpdateResult::CHANGED;
 }
