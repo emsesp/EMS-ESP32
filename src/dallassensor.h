@@ -48,6 +48,7 @@ class DallasSensor {
         uint64_t    id() const;
         std::string id_string() const;
         std::string to_string() const;
+        int16_t     offset() const;
 
         int16_t temperature_c = EMS_VALUE_SHORT_NOTSET;
         bool    read          = false;

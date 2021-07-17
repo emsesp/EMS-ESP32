@@ -140,7 +140,11 @@ void DallasSensor::loop() {
                             bool found = false;
                             for (auto & sensor : sensors_) {
                                 if (sensor.id() == get_id(addr)) {
-                                    changed_ |= (t != sensor.temperature_c);
+                                    t += sensor.offset();
+                                    if (t != sensor.temperature_c) {
+                                        sensor.temperature_c = t;
+                                        changed_ |= true;
+                                    }
                                     sensor.temperature_c = t;
                                     sensor.read          = true;
                                     found                = true;
@@ -150,7 +154,7 @@ void DallasSensor::loop() {
                             // add new sensor
                             if (!found && (sensors_.size() < (MAX_SENSORS - 1))) {
                                 sensors_.emplace_back(addr);
-                                sensors_.back().temperature_c = t;
+                                sensors_.back().temperature_c = t + sensors_.back().offset();
                                 sensors_.back().read          = true;
                                 changed_                      = true;
                             }
@@ -319,6 +323,20 @@ std::string DallasSensor::Sensor::to_string() const {
      });
 
     return str;
+}
+
+int16_t DallasSensor::Sensor::offset() const {
+    std::string str    = id_string();
+    int16_t     offset = 0;
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+        for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+            if (strcmp(settings.sensor[i].id.c_str(), str.c_str())  == 0) {
+                offset = settings.sensor[i].offset;
+            }
+        }
+    });
+
+    return offset;
 }
 
 void DallasSensor::add_name(const char * id, const char * name, int16_t offset) {
