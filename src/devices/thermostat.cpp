@@ -2173,6 +2173,13 @@ void Thermostat::register_device_values() {
                               FL_(ibaBuildingType),
                               DeviceValueUOM::LIST,
                               MAKE_CF_CB(set_building));
+        register_device_value(TAG_THERMOSTAT_DATA,
+                              &ibaMinExtTemperature_,
+                              DeviceValueType::INT,
+                              nullptr,
+                              FL_(ibaMinExtTemperature),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_minexttemp));
         register_device_value(TAG_THERMOSTAT_DATA, &wwSetTemp_, DeviceValueType::UINT, nullptr, FL_(wwSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemp));
         register_device_value(TAG_THERMOSTAT_DATA, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode), FL_(wwMode), DeviceValueUOM::LIST, MAKE_CF_CB(set_wwmode));
         register_device_value(
