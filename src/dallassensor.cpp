@@ -310,10 +310,10 @@ std::string DallasSensor::Sensor::id_string() const {
     return str;
 }
 
-std::string DallasSensor::Sensor::to_string() const {
+std::string DallasSensor::Sensor::to_string(const bool name) const {
     std::string str = id_string();
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        if (settings.dallas_format == Dallas_Format::NAME) {
+        if (settings.dallas_format == Dallas_Format::NAME || name) {
             for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
                 if (strcmp(settings.sensor[i].id.c_str(), str.c_str())  == 0) {
                     str = settings.sensor[i].name.c_str();
@@ -339,7 +339,24 @@ int16_t DallasSensor::Sensor::offset() const {
     return offset;
 }
 
-void DallasSensor::add_name(const char * id, const char * name, int16_t offset) {
+bool DallasSensor::add_name(const char * idstr, const char * name, int16_t offset) {
+    bool ok = false;
+    char id[20];
+    strlcpy(id, idstr, sizeof(id));
+
+    // check for number and convert to id
+    if (strlen(id) > 0 && strlen(id) <= 2 && id[0] >= '1' && id[0] <= '9') {
+        uint8_t no = atoi(idstr) - 1;
+        if (no < sensors_.size()) {
+            strlcpy(id, sensors_[no].id_string().c_str(), sizeof(id));
+        }
+    }
+    // check valid id
+    if (strlen(id) != 17 || id[2] != '-' || id[7] != '-' || id[12] !='-') {
+        LOG_WARNING(F("Invalid sensor id: %s"), id);
+        return ok;
+    }
+
     EMSESP::webSettingsService.update([&](WebSettings & settings) {
         // check for new name of stored id
         for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
@@ -354,6 +371,7 @@ void DallasSensor::add_name(const char * id, const char * name, int16_t offset) 
                     settings.sensor[i].offset = offset;
                     LOG_INFO(F("Setting name of sensor %s to %s"), id, name);
                 }
+                ok = true;
                 return StateUpdateResult::CHANGED;
             }
         }
@@ -364,6 +382,7 @@ void DallasSensor::add_name(const char * id, const char * name, int16_t offset) 
                 settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
                 settings.sensor[i].offset = offset;
                 LOG_INFO(F("Setting name of sensor %s to %s"), id, name);
+                ok = true;
                 return StateUpdateResult::CHANGED;
             }
         }
@@ -380,12 +399,14 @@ void DallasSensor::add_name(const char * id, const char * name, int16_t offset) 
                 settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
                 settings.sensor[i].offset = offset;
                 LOG_INFO(F("Setting name of sensor %s to %s"), id, name);
+                ok = true;
                 return StateUpdateResult::CHANGED;
             }
         }
         LOG_ERROR(F("List full, remove one sensorname first"));
         return StateUpdateResult::UNCHANGED;
     }, "local");
+    return ok;
 }
 
 // check to see if values have been updated

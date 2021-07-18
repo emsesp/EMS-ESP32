@@ -60,6 +60,7 @@ export interface Sensor {
 export interface EMSESPDevices {
   devices: Device[];
   sensors: Sensor[];
+  analog: number;
 }
 
 export interface DeviceValue {
@@ -93,7 +94,8 @@ export enum DeviceValueUOM {
   DBM,
   NUM,
   BOOLEAN,
-  LIST
+  LIST,
+  MV
 }
 
 export const DeviceValueUOM_s = [
@@ -114,5 +116,6 @@ export const DeviceValueUOM_s = [
   'dBm',
   'number',
   'on/off',
-  ''
+  '',
+  'mV'
 ];

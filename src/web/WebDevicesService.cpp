@@ -26,7 +26,9 @@ WebDevicesService::WebDevicesService(AsyncWebServer * server, SecurityManager * 
     : _device_dataHandler(DEVICE_DATA_SERVICE_PATH,
                           securityManager->wrapCallback(std::bind(&WebDevicesService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED))
     , _writevalue_dataHandler(WRITE_VALUE_SERVICE_PATH,
-                              securityManager->wrapCallback(std::bind(&WebDevicesService::write_value, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
+                              securityManager->wrapCallback(std::bind(&WebDevicesService::write_value, this, _1, _2), AuthenticationPredicates::IS_ADMIN))
+    , _writesensor_dataHandler(WRITE_SENSOR_SERVICE_PATH,
+                              securityManager->wrapCallback(std::bind(&WebDevicesService::write_sensor, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
     server->on(EMSESP_DEVICES_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&WebDevicesService::all_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
@@ -41,6 +43,10 @@ WebDevicesService::WebDevicesService(AsyncWebServer * server, SecurityManager * 
     _writevalue_dataHandler.setMethod(HTTP_POST);
     _writevalue_dataHandler.setMaxContentLength(256);
     server->addHandler(&_writevalue_dataHandler);
+
+    _writesensor_dataHandler.setMethod(HTTP_POST);
+    _writesensor_dataHandler.setMaxContentLength(256);
+    server->addHandler(&_writesensor_dataHandler);
 }
 
 void WebDevicesService::scan_devices(AsyncWebServerRequest * request) {
@@ -73,9 +79,12 @@ void WebDevicesService::all_devices(AsyncWebServerRequest * request) {
         for (const auto & sensor : EMSESP::sensor_devices()) {
             JsonObject obj = sensors.createNestedObject();
             obj["no"]      = i++;
-            obj["id"]      = sensor.to_string();
+            obj["id"]      = sensor.to_string(true);
             obj["temp"]    = Helpers::render_value(s, sensor.temperature_c, 10);
         }
+    }
+    if (EMSESP::system_.analog_enabled()) {
+        root["analog"] = EMSESP::system_.analog();
     }
 
     response->setLength();
@@ -143,6 +152,36 @@ void WebDevicesService::write_value(AsyncWebServerRequest * request, JsonVariant
     }
 
     AsyncWebServerResponse * response = request->beginResponse(204); // Write command failed
+    request->send(response);
+}
+
+// takes a sensorname and optional offset from the Web
+void WebDevicesService::write_sensor(AsyncWebServerRequest * request, JsonVariant & json) {
+    bool ok = false;
+    if (json.is<JsonObject>()) {
+        JsonObject  sn = json["sensorname"];
+        std::string id = sn["id"];
+        uint8_t     no = sn["no"];
+        char        nostr[3];
+        char        name[25];
+        int16_t     offset = 0;
+
+        strlcpy(name, id.c_str(), sizeof(name));
+        if (no > 0 && no < 100) {
+            itoa(no, nostr, 10);
+            char * c = strchr(name, ' '); // find space
+            if (c != nullptr) {
+                *c = '\0';
+                float v;
+                if (Helpers::value2float((c + 1), v)) {
+                    offset = v * 10;
+                }
+            }
+            ok = EMSESP::dallassensor_.add_name(nostr, name, offset);
+         }
+    }
+
+    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);
     request->send(response);
 }
 

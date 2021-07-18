@@ -81,6 +81,14 @@ class System {
     static bool is_valid_gpio(uint8_t pin);
     static bool load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile);
 
+    bool analog_enabled() {
+        return analog_enabled_;
+    }
+
+    uint16_t analog() {
+        return analog_;
+    }
+
     std::string hostname() {
         return hostname_;
     }
@@ -96,6 +104,7 @@ class System {
     void ethernet_connected(bool b) {
         ethernet_connected_ = b;
     }
+
     void network_connected(bool b) {
         network_connected_ = b;
     }

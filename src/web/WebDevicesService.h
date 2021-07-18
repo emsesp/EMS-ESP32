@@ -28,6 +28,7 @@
 #define SCAN_DEVICES_SERVICE_PATH "/rest/scanDevices"
 #define DEVICE_DATA_SERVICE_PATH "/rest/deviceData"
 #define WRITE_VALUE_SERVICE_PATH "/rest/writeValue"
+#define WRITE_SENSOR_SERVICE_PATH "/rest/writeSensor"
 
 namespace emsesp {
 
@@ -43,8 +44,9 @@ class WebDevicesService {
     // POST
     void device_data(AsyncWebServerRequest * request, JsonVariant & json);
     void write_value(AsyncWebServerRequest * request, JsonVariant & json);
+    void write_sensor(AsyncWebServerRequest * request, JsonVariant & json);
 
-    AsyncCallbackJsonWebHandler _device_dataHandler, _writevalue_dataHandler;
+    AsyncCallbackJsonWebHandler _device_dataHandler, _writevalue_dataHandler, _writesensor_dataHandler;
 };
 
 } // namespace emsesp

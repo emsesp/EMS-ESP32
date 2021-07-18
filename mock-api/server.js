@@ -282,6 +282,7 @@ const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData'
 const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'emsespStatus'
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile'
 const WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
++const WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
 const emsesp_settings = {
   tx_mode: 1,
   tx_delay: 0,

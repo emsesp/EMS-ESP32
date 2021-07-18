@@ -47,7 +47,7 @@ class DallasSensor {
 
         uint64_t    id() const;
         std::string id_string() const;
-        std::string to_string() const;
+        std::string to_string(const bool name = false) const;
         int16_t     offset() const;
 
         int16_t temperature_c = EMS_VALUE_SHORT_NOTSET;
@@ -88,7 +88,7 @@ class DallasSensor {
         dallas_format_ = dallas_format;
     }
 
-    void add_name(const char * id, const char * name, int16_t offset);
+    bool add_name(const char * idstr, const char * name, int16_t offset);
 
   private:
     static constexpr uint8_t MAX_SENSORS = 20;
@@ -134,7 +134,6 @@ class DallasSensor {
     bool command_commands(const char * value, const int8_t id, JsonObject & json);
 
     uint32_t            last_activity_ = uuid::get_uptime();
-    uint32_t            last_publish_  = uuid::get_uptime();
     State               state_         = State::IDLE;
     std::vector<Sensor> sensors_;
 
