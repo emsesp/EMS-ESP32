@@ -12,7 +12,7 @@ upload_flags =
   --port=8266
   --auth=ems-esp-neo
 upload_port = 10.10.10.101
-; to prevent the web UI from building each time, comment out this next line
+; to prevent the web UI from building each time, uncomment this next line
 ; extra_scripts =
 
 ; pio run -e debug
