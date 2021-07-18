@@ -168,7 +168,7 @@ void WebDevicesService::write_sensor(AsyncWebServerRequest * request, JsonVarian
 
         strlcpy(name, id.c_str(), sizeof(name));
         if (no > 0 && no < 100) {
-            itoa(no, nostr, 10);
+            Helpers::itoa(nostr, no, 10);
             char * c = strchr(name, ' '); // find space
             if (c != nullptr) {
                 *c = '\0';

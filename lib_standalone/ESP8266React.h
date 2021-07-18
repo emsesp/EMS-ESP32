@@ -58,6 +58,7 @@ class DummySettings {
     uint16_t publish_time_mixer      = 10;
     uint16_t publish_time_other      = 10;
     uint16_t publish_time_sensor     = 10;
+    bool     enableIPv6              = false;
 
 #define FACTORY_MQTT_MAX_TOPIC_LENGTH 128
 
@@ -80,6 +81,7 @@ class DummySettingsService : public StatefulService<DummySettings> {
 #define NetworkSettings DummySettings
 #define SecuritySettings DummySettings
 #define MqttSettings DummySettings
+#define NTPSettings DummySettings
 
 class ESP8266React {
   public:
@@ -107,6 +109,10 @@ class ESP8266React {
     }
 
     StatefulService<DummySettings> * getMqttSettingsService() {
+        return &_settings;
+    }
+
+    StatefulService<DummySettings> * getNTPSettingsService() {
         return &_settings;
     }
 

@@ -134,11 +134,13 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.syslog_mark_interval = root["syslog_mark_interval"] | EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL;
     check_flag(prev, settings.syslog_mark_interval, ChangeFlags::SYSLOG);
 
+#ifndef EMSESP_STANDALONE
     String old_syslog_host = settings.syslog_host;
     settings.syslog_host   = root["syslog_host"] | EMSESP_DEFAULT_SYSLOG_HOST;
     if (!old_syslog_host.equals(settings.syslog_host)) {
         add_flags(ChangeFlags::SYSLOG);
     }
+#endif
 
     prev                 = settings.syslog_port;
     settings.syslog_port = root["syslog_port"] | EMSESP_DEFAULT_SYSLOG_PORT;
@@ -184,7 +186,8 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     // these need reboots to be applied
     settings.ems_bus_id        = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
     settings.master_thermostat = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
-    settings.low_clock         = root["low_clock"] | false;;
+    settings.low_clock         = root["low_clock"] | false;
+    ;
 
     // doesn't need any follow-up actions
     settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
@@ -193,10 +196,10 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.dallas_format = root["dallas_format"] | EMSESP_DEFAULT_DALLAS_FORMAT;
     EMSESP::dallassensor_.dallas_format(settings.dallas_format);
 
-    settings.bool_format   = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
+    settings.bool_format = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
     EMSESP::bool_format(settings.bool_format);
 
-    settings.enum_format   = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
+    settings.enum_format = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
     EMSESP::enum_format(settings.enum_format);
 
     for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {

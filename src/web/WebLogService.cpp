@@ -38,15 +38,13 @@ WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * security
 
     // for setting a level
     server->addHandler(&_setLevel);
-
-    // start event source service
-    start();
 }
 
 void WebLogService::forbidden(AsyncWebServerRequest * request) {
     request->send(403);
 }
 
+// start event source service
 void WebLogService::start() {
     uuid::log::Logger::register_handler(this, uuid::log::Level::INFO); // default is INFO
 }
@@ -81,7 +79,7 @@ void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
     }
     log_messages_.emplace_back(log_message_id_++, std::move(message));
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
-        if (!settings.enabled || (time(nullptr) < 1500000000UL)) {
+        if (!settings.enabled || (time(nullptr) < 1500000000L)) {
             time_offset_ = 0;
         } else if (!time_offset_) {
             time_offset_ = time(nullptr) - uuid::get_uptime_sec();

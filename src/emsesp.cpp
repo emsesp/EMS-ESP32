@@ -1200,6 +1200,7 @@ void EMSESP::start() {
     shower_.start();            // initialize shower timer and shower alert
     dallassensor_.start();      // dallas external sensors
     webServer.begin();          // start web server
+    webLogService.start();      // start web log service
 
     emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
 
