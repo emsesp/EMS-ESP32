@@ -174,7 +174,7 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
               onChange={handleValueChange('enableIPv6')}
             />
           }
-          label="Enable IPv6"
+          label="Enable IPv6 support"
         />
         <BlockFormControlLabel
           control={
@@ -184,7 +184,7 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
               onChange={handleValueChange('bandwidth20')}
             />
           }
-          label="WiFi Low Bandwidth"
+          label="Use Lower WiFi Bandwidth"
         />
         <BlockFormControlLabel
           control={
@@ -194,7 +194,7 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
               onChange={handleValueChange('nosleep')}
             />
           }
-          label="Disable Wifi Sleepmode"
+          label="Disable WiFi Sleep Mode"
         />
         <BlockFormControlLabel
           control={
@@ -204,7 +204,7 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
               onChange={handleValueChange('static_ip_config')}
             />
           }
-          label="Static IP Config"
+          label="Use Static IPs"
         />
         {data.static_ip_config && (
           <Fragment>

@@ -159,7 +159,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
               value="clean_session"
             />
           }
-          label="Clean Session"
+          label="Set Clean Session"
         />
         <BlockFormControlLabel
           control={
@@ -169,7 +169,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
               value="mqtt_retain"
             />
           }
-          label="Retain Flag"
+          label="Use Retain Flag"
         />
         <br></br>
         <Typography variant="h6" color="primary">
@@ -184,8 +184,8 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           onChange={handleValueChange('nested_format')}
           margin="normal"
         >
-          <MenuItem value={1}>nested on a single topic</MenuItem>
-          <MenuItem value={2}>as individual topics</MenuItem>
+          <MenuItem value={1}>Nested on a single topic</MenuItem>
+          <MenuItem value={2}>As individual topics</MenuItem>
         </SelectValidator>
         <SelectValidator
           name="subscribe_format"
@@ -196,9 +196,9 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           onChange={handleValueChange('subscribe_format')}
           margin="normal"
         >
-          <MenuItem value={0}>general device topic</MenuItem>
-          <MenuItem value={1}>individual topics, main heating circuit</MenuItem>
-          <MenuItem value={2}>individual topics, all heating circuits</MenuItem>
+          <MenuItem value={0}>General device topic</MenuItem>
+          <MenuItem value={1}>Individual topics, main heating circuit</MenuItem>
+          <MenuItem value={2}>Individual topics, all heating circuits</MenuItem>
         </SelectValidator>
         <BlockFormControlLabel
           control={
@@ -220,9 +220,9 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
             onChange={handleValueChange('ha_climate_format')}
             margin="normal"
           >
-            <MenuItem value={1}>use Current temperature (default)</MenuItem>
-            <MenuItem value={2}>use Setpoint temperature</MenuItem>
-            <MenuItem value={3}>Fix to 0</MenuItem>
+            <MenuItem value={1}>Use Current temperature (default)</MenuItem>
+            <MenuItem value={2}>Use Setpoint temperature</MenuItem>
+            <MenuItem value={3}>Always set to 0</MenuItem>
           </SelectValidator>
         )}
         <br></br>
