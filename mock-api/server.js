@@ -108,6 +108,8 @@ const network_settings = {
   ssid: 'myWifi',
   password: 'myPassword',
   hostname: 'ems-esp',
+  nosleep: true,
+  tx_power: 20,
   static_ip_config: false,
 }
 const network_status = {
@@ -282,7 +284,7 @@ const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData'
 const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'emsespStatus'
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile'
 const WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
-+const WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
+const WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
 const emsesp_settings = {
   tx_mode: 1,
   tx_delay: 0,
@@ -905,6 +907,17 @@ app.post(WRITE_VALUE_ENDPOINT, (req, res) => {
 
   console.log(id)
   console.log(devicevalue)
+
+  res.sendStatus(200)
+})
+
+app.post(WRITE_SENSOR_ENDPOINT, (req, res) => {
+  const sensorname = req.body.sensorname
+  const id = sensorname.id
+  const no = sensorname.no
+
+  console.log(id)
+  console.log(no)
 
   res.sendStatus(200)
 })
