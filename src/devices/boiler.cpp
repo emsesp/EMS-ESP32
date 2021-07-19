@@ -85,8 +85,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x48F, F("HpOutdoor"), false, MAKE_PF_CB(process_HpOutdoor));
     }
     // MQTT commands for boiler topic
-    register_device_value(
-        TAG_BOILER_DATA, &wWTapActivated_, DeviceValueType::BOOL, nullptr, FL_(wwtapactivated), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_tapwarmwater_activated));
+    register_device_value(TAG_BOILER_DATA,
+                          &wWTapActivated_,
+                          DeviceValueType::BOOL,
+                          nullptr,
+                          FL_(wwtapactivated),
+                          DeviceValueUOM::BOOLEAN,
+                          MAKE_CF_CB(set_tapwarmwater_activated));
     register_device_value(TAG_BOILER_DATA, &dummy8u_, DeviceValueType::CMD, FL_(enum_reset), FL_(reset), DeviceValueUOM::LIST, MAKE_CF_CB(set_reset));
 
     // add values
@@ -143,20 +148,10 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           FL_(maintenanceType),
                           DeviceValueUOM::LIST,
                           MAKE_CF_CB(set_maintenance));
-    register_device_value(TAG_BOILER_DATA,
-                          &maintenanceTime_,
-                          DeviceValueType::USHORT,
-                          nullptr,
-                          FL_(maintenanceTime),
-                          DeviceValueUOM::HOURS,
-                          MAKE_CF_CB(set_maintenancetime));
-    register_device_value(TAG_BOILER_DATA,
-                          &maintenanceDate_,
-                          DeviceValueType::TEXT,
-                          nullptr,
-                          FL_(maintenanceDate),
-                          DeviceValueUOM::NONE,
-                          MAKE_CF_CB(set_maintenancedate));
+    register_device_value(
+        TAG_BOILER_DATA, &maintenanceTime_, DeviceValueType::USHORT, nullptr, FL_(maintenanceTime), DeviceValueUOM::HOURS, MAKE_CF_CB(set_maintenancetime));
+    register_device_value(
+        TAG_BOILER_DATA, &maintenanceDate_, DeviceValueType::TEXT, nullptr, FL_(maintenanceDate), DeviceValueUOM::NONE, MAKE_CF_CB(set_maintenancedate));
     // heatpump info
     if (model() == EMS_DEVICE_FLAG_HEATPUMP) {
         register_device_value(TAG_BOILER_DATA, &upTimeControl_, DeviceValueType::TIME, FL_(div60), FL_(upTimeControl), DeviceValueUOM::MINUTES);
@@ -305,7 +300,7 @@ void Boiler::check_active(const bool force) {
 
     // check if we can use tapactivated in flow systems
     if ((wWType_ == 1) && !Helpers::hasValue(wWTapActivated_, EMS_VALUE_BOOL)) {
-        wWTapActivated_= 1;
+        wWTapActivated_ = 1;
     }
 
     // check if tap water is active, bits 1 and 4 must be set
@@ -1160,7 +1155,7 @@ bool Boiler::set_tapwarmwater_activated(const char * value, const int8_t id) {
         message_data[1] = 0x00; // burner output 0%
         message_data[3] = 0x64; // boiler pump capacity 100%
         message_data[4] = 0xFF; // 3-way valve hot water only
-        wWTapActivated_= 0;
+        wWTapActivated_ = 0;
     } else {
         // get out of test mode. Send all zeros.
         // telegram: 0B 08 1D 00 00

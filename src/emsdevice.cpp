@@ -582,7 +582,7 @@ void EMSdevice::generate_values_json_web(JsonObject & json) {
             }
 
             // handle commands without value
-            else if(dv.type == DeviceValueType::CMD) {
+            else if (dv.type == DeviceValueType::CMD) {
                 obj      = data.createNestedObject();
                 obj["v"] = "";
             }
@@ -881,7 +881,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                 } else {
                     json[name] = (uint8_t)(*(uint8_t *)(dv.value_p)) ? 1 : 0;
                 }
-                has_value  = true;
+                has_value = true;
             }
 
             // handle TEXT strings

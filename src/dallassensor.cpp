@@ -315,12 +315,12 @@ std::string DallasSensor::Sensor::to_string(const bool name) const {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         if (settings.dallas_format == Dallas_Format::NAME || name) {
             for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
-                if (strcmp(settings.sensor[i].id.c_str(), str.c_str())  == 0) {
+                if (strcmp(settings.sensor[i].id.c_str(), str.c_str()) == 0) {
                     str = settings.sensor[i].name.c_str();
                 }
             }
         }
-     });
+    });
 
     return str;
 }
@@ -330,7 +330,7 @@ int16_t DallasSensor::Sensor::offset() const {
     int16_t     offset = 0;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
-            if (strcmp(settings.sensor[i].id.c_str(), str.c_str())  == 0) {
+            if (strcmp(settings.sensor[i].id.c_str(), str.c_str()) == 0) {
                 offset = settings.sensor[i].offset;
             }
         }
@@ -352,60 +352,62 @@ bool DallasSensor::add_name(const char * idstr, const char * name, int16_t offse
         }
     }
     // check valid id
-    if (strlen(id) != 17 || id[2] != '-' || id[7] != '-' || id[12] !='-') {
+    if (strlen(id) != 17 || id[2] != '-' || id[7] != '-' || id[12] != '-') {
         LOG_WARNING(F("Invalid sensor id: %s"), id);
         return ok;
     }
 
-    EMSESP::webSettingsService.update([&](WebSettings & settings) {
-        // check for new name of stored id
-        for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
-            if (strcmp(id, settings.sensor[i].id.c_str()) == 0) {
-                if (strlen(name) == 0 && offset == 0) { // delete entry if name and offset is empty
-                    settings.sensor[i].id     = "";
-                    settings.sensor[i].name   = "";
-                    settings.sensor[i].offset = 0;
-                    LOG_INFO(F("Deleting entry of sensor %s"), id);
-                } else {
+    EMSESP::webSettingsService.update(
+        [&](WebSettings & settings) {
+            // check for new name of stored id
+            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+                if (strcmp(id, settings.sensor[i].id.c_str()) == 0) {
+                    if (strlen(name) == 0 && offset == 0) { // delete entry if name and offset is empty
+                        settings.sensor[i].id     = "";
+                        settings.sensor[i].name   = "";
+                        settings.sensor[i].offset = 0;
+                        LOG_INFO(F("Deleting entry of sensor %s"), id);
+                    } else {
+                        settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
+                        settings.sensor[i].offset = offset;
+                        LOG_INFO(F("Setting name of sensor %s to %s"), id, name);
+                    }
+                    ok = true;
+                    return StateUpdateResult::CHANGED;
+                }
+            }
+            // check for free place
+            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+                if (settings.sensor[i].id.isEmpty()) {
+                    settings.sensor[i].id     = id;
                     settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
                     settings.sensor[i].offset = offset;
                     LOG_INFO(F("Setting name of sensor %s to %s"), id, name);
-                }
-                ok = true;
-                return StateUpdateResult::CHANGED;
-            }
-        }
-        // check for free place
-        for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
-            if (settings.sensor[i].id.isEmpty()) {
-                settings.sensor[i].id     = id;
-                settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
-                settings.sensor[i].offset = offset;
-                LOG_INFO(F("Setting name of sensor %s to %s"), id, name);
-                ok = true;
-                return StateUpdateResult::CHANGED;
-            }
-        }
-        // check if there is a unused id and overwrite it
-        for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
-            bool found = false;
-            for (const auto & sensor : sensors_) {
-                if (strcmp(sensor.id_string().c_str(), settings.sensor[i].id.c_str()) == 0) {
-                    found = true;
+                    ok = true;
+                    return StateUpdateResult::CHANGED;
                 }
             }
-            if (!found) {
-                settings.sensor[i].id     = id;
-                settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
-                settings.sensor[i].offset = offset;
-                LOG_INFO(F("Setting name of sensor %s to %s"), id, name);
-                ok = true;
-                return StateUpdateResult::CHANGED;
+            // check if there is a unused id and overwrite it
+            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+                bool found = false;
+                for (const auto & sensor : sensors_) {
+                    if (strcmp(sensor.id_string().c_str(), settings.sensor[i].id.c_str()) == 0) {
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    settings.sensor[i].id     = id;
+                    settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
+                    settings.sensor[i].offset = offset;
+                    LOG_INFO(F("Setting name of sensor %s to %s"), id, name);
+                    ok = true;
+                    return StateUpdateResult::CHANGED;
+                }
             }
-        }
-        LOG_ERROR(F("List full, remove one sensorname first"));
-        return StateUpdateResult::UNCHANGED;
-    }, "local");
+            LOG_ERROR(F("List full, remove one sensorname first"));
+            return StateUpdateResult::UNCHANGED;
+        },
+        "local");
     return ok;
 }
 

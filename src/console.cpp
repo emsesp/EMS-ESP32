@@ -711,47 +711,46 @@ void Console::load_system_commands(unsigned int context) {
                                            });
                                        });
 
-    EMSESPShell::commands
-        ->add_command(context,
-                      CommandFlags::ADMIN,
-                      flash_string_vector{F_(sensorname)},
-                      flash_string_vector{F_(sensorid_optional), F_(name_optional), F_(offset_optional)},
-                      [](Shell & shell, const std::vector<std::string> & arguments) {
-                          if (arguments.size() == 0) {
-                              EMSESP::webSettingsService.read([&](WebSettings & settings) {
-                                  for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
-                                      if (!settings.sensor[i].id.isEmpty()) {
-                                          shell.print(settings.sensor[i].id);
-                                          shell.print(" : ");
-                                          shell.print(settings.sensor[i].name);
-                                          shell.print(" : ");
-                                          char buf[10];
-                                          shell.println(Helpers::render_value(buf, settings.sensor[i].offset, 10));
-                                      }
-                                  }
-                              });
-                              return;
-                          }
-                          if (arguments.size() == 1) {
-                             EMSESP::dallassensor_.add_name(arguments.front().c_str(), "", 0);
-                              // shell.println(EMSESP::dallassensor_.get_name(arguments.front().c_str()));
-                              return;
-                          }
-                          int16_t offset = 0;
-                          float   val;
-                          if (arguments.size() == 2) {
-                              if (Helpers::value2float(arguments.back().c_str(), val)) {
-                                offset = (10 * val);
-                                EMSESP::dallassensor_.add_name(arguments.front().c_str(), "", offset);
-                                return;
-                              }
-                          } else if (arguments.size() == 3) {
-                              if (Helpers::value2float(arguments.back().c_str(), val)) {
-                                offset = (10 * val);
-                              }
-                          }
-                          EMSESP::dallassensor_.add_name(arguments.front().c_str(), arguments[1].c_str(), offset);
-                      });
+    EMSESPShell::commands->add_command(context,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(sensorname)},
+                                       flash_string_vector{F_(sensorid_optional), F_(name_optional), F_(offset_optional)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
+                                           if (arguments.size() == 0) {
+                                               EMSESP::webSettingsService.read([&](WebSettings & settings) {
+                                                   for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+                                                       if (!settings.sensor[i].id.isEmpty()) {
+                                                           shell.print(settings.sensor[i].id);
+                                                           shell.print(" : ");
+                                                           shell.print(settings.sensor[i].name);
+                                                           shell.print(" : ");
+                                                           char buf[10];
+                                                           shell.println(Helpers::render_value(buf, settings.sensor[i].offset, 10));
+                                                       }
+                                                   }
+                                               });
+                                               return;
+                                           }
+                                           if (arguments.size() == 1) {
+                                               EMSESP::dallassensor_.add_name(arguments.front().c_str(), "", 0);
+                                               // shell.println(EMSESP::dallassensor_.get_name(arguments.front().c_str()));
+                                               return;
+                                           }
+                                           int16_t offset = 0;
+                                           float   val;
+                                           if (arguments.size() == 2) {
+                                               if (Helpers::value2float(arguments.back().c_str(), val)) {
+                                                   offset = (10 * val);
+                                                   EMSESP::dallassensor_.add_name(arguments.front().c_str(), "", offset);
+                                                   return;
+                                               }
+                                           } else if (arguments.size() == 3) {
+                                               if (Helpers::value2float(arguments.back().c_str(), val)) {
+                                                   offset = (10 * val);
+                                               }
+                                           }
+                                           EMSESP::dallassensor_.add_name(arguments.front().c_str(), arguments[1].c_str(), offset);
+                                       });
 
     EMSESPShell::commands
         ->add_command(context,

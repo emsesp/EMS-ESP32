@@ -28,7 +28,7 @@ WebDevicesService::WebDevicesService(AsyncWebServer * server, SecurityManager * 
     , _writevalue_dataHandler(WRITE_VALUE_SERVICE_PATH,
                               securityManager->wrapCallback(std::bind(&WebDevicesService::write_value, this, _1, _2), AuthenticationPredicates::IS_ADMIN))
     , _writesensor_dataHandler(WRITE_SENSOR_SERVICE_PATH,
-                              securityManager->wrapCallback(std::bind(&WebDevicesService::write_sensor, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
+                               securityManager->wrapCallback(std::bind(&WebDevicesService::write_sensor, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
     server->on(EMSESP_DEVICES_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&WebDevicesService::all_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
@@ -178,7 +178,7 @@ void WebDevicesService::write_sensor(AsyncWebServerRequest * request, JsonVarian
                 }
             }
             ok = EMSESP::dallassensor_.add_name(nostr, name, offset);
-         }
+        }
     }
 
     AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);

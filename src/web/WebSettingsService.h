@@ -33,7 +33,7 @@
 namespace emsesp {
 
 enum { BOOL_FORMAT_ONOFF = 1, BOOL_FORMAT_ONOFF_CAP, BOOL_FORMAT_TRUEFALSE, BOOL_FORMAT_10 }; // matches Web UI settings
-enum { ENUM_FORMAT_TEXT = 1, ENUM_FORMAT_NUMBER }; // matches Web UI settings
+enum { ENUM_FORMAT_TEXT = 1, ENUM_FORMAT_NUMBER };                                            // matches Web UI settings
 
 class WebSettings {
   public:
@@ -66,9 +66,9 @@ class WebSettings {
     uint8_t  enum_format;
 
     struct {
-      String  id;
-      String  name;
-      int16_t offset;
+        String  id;
+        String  name;
+        int16_t offset;
     } sensor[NUM_SENSOR_NAMES];
 
     static void              read(WebSettings & settings, JsonObject & root);
