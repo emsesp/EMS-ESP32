@@ -77,7 +77,9 @@ void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
     if (log_messages_.size() >= maximum_log_messages_) {
         log_messages_.pop_front();
     }
+
     log_messages_.emplace_back(log_message_id_++, std::move(message));
+
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
         if (!settings.enabled || (time(nullptr) < 1500000000L)) {
             time_offset_ = 0;
@@ -94,18 +96,27 @@ void WebLogService::loop() {
 
     // put a small delay in
     const uint64_t now = uuid::get_uptime_ms();
-    if (now < last_transmit_ || now - last_transmit_ < 100) {
+    if (now < last_transmit_ || now - last_transmit_ < REFRESH_SYNC) {
         return;
     }
 
     // see if we've advanced
-    if (log_messages_.back().id_ > log_message_id_tail_) {
-        transmit(log_messages_.back());
-        log_message_id_tail_ = log_messages_.back().id_;
-        last_transmit_       = uuid::get_uptime_ms();
+    if (log_messages_.back().id_ <= log_message_id_tail_) {
+        return;
     }
+
+    // flush
+    for (auto it = log_messages_.begin(); it != log_messages_.end(); it++) {
+        if (it->id_ > log_message_id_tail_) {
+            transmit(*it);
+        }
+    }
+
+    log_message_id_tail_ = log_messages_.back().id_;
+    last_transmit_       = uuid::get_uptime_ms();
 }
 
+// convert time to real offset
 char * WebLogService::messagetime(char * out, const uint64_t t) {
     if (!time_offset_) {
         strcpy(out, uuid::log::format_timestamp_ms(t, 3).c_str());
@@ -122,8 +133,10 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
     DynamicJsonDocument jsonDocument = DynamicJsonDocument(EMSESP_JSON_SIZE_SMALL);
     JsonObject          logEvent     = jsonDocument.to<JsonObject>();
     char                time_string[25];
+
     logEvent["t"] = messagetime(time_string, message.content_->uptime_ms);
     logEvent["l"] = message.content_->level;
+    logEvent["i"] = message.id_;
     logEvent["n"] = message.content_->name;
     logEvent["m"] = message.content_->text;
 
@@ -147,8 +160,10 @@ void WebLogService::fetchLog(AsyncWebServerRequest * request) {
         JsonObject logEvent = log.createNestedObject();
         auto       message  = std::move(msg);
         char       time_string[25];
+
         logEvent["t"] = messagetime(time_string, message.content_->uptime_ms);
         logEvent["l"] = message.content_->level;
+        logEvent["i"] = message.id_;
         logEvent["n"] = message.content_->name;
         logEvent["m"] = message.content_->text;
     }
