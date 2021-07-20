@@ -41,12 +41,12 @@ void DallasSensor::start() {
         bus_.begin(dallas_gpio_);
 #endif
         // API calls
-        Command::add_with_json(
+        Command::add_returns_json(
             EMSdevice::DeviceType::DALLASSENSOR,
             F_(info),
             [&](const char * value, const int8_t id, JsonObject & json) { return command_info(value, id, json); },
             F_(info_cmd));
-        Command::add_with_json(
+        Command::add_returns_json(
             EMSdevice::DeviceType::DALLASSENSOR,
             F_(commands),
             [&](const char * value, const int8_t id, JsonObject & json) { return command_commands(value, id, json); },

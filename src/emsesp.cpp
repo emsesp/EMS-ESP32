@@ -982,18 +982,18 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         return true;
     }
 
-    Command::add_with_json(
+    Command::add_returns_json(
         device_type,
         F_(info),
         [device_type](const char * value, const int8_t id, JsonObject & json) { return command_info(device_type, json, id, true); },
         F_(info_cmd));
-    Command::add_with_json(
+    Command::add_returns_json(
         device_type,
         F("info_short"),
         [device_type](const char * value, const int8_t id, JsonObject & json) { return command_info(device_type, json, id, false); },
         nullptr,
-        true); // this command is hidden
-    Command::add_with_json(
+        CommandFlag::HIDDEN); // this command is hidden
+    Command::add_returns_json(
         device_type,
         F_(commands),
         [device_type](const char * value, const int8_t id, JsonObject & json) { return command_commands(device_type, json, id); },
