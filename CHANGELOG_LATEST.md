@@ -16,6 +16,7 @@
 - set mode allow numbers
 - Junkers thermostat shows mode as selected by set_mode
 - HA thermostat mode if bool-format: numbers is selected
+- Web UI System Log sometimes skipped a few log messages when watching real-time
 
 ## Changed
 
