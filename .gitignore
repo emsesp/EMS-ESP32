@@ -25,4 +25,4 @@ emsesp
 /interface/build
 node_modules
 /interface/.eslintcache
-
+test.sh

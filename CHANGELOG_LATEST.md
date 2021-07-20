@@ -2,13 +2,14 @@
 
 ## Added
 
-- support for IPv6 (web/api/mqtt, not syslog) (#83)
-- System Log in Web UI will show current time if the NTP Service is enabled (#82)
-- Network settings for Tx-power, WiFi-bandwidth, WiFi-sleepmode (#83)
-- optional low CPU clockrate (160 MHz) (#83)
+- support for IPv6 (web/api/mqtt, not syslog yet) [#83](https://github.com/emsesp/EMS-ESP32/issues/83)
+- System Log in Web UI will show current time if the NTP Service is enabled [#82](https://github.com/emsesp/EMS-ESP32/issues/82)
+- Network settings for Tx-power, WiFi-bandwidth, WiFi-sleepmode [#83](https://github.com/emsesp/EMS-ESP32/issues/83)
+- optional low CPU clockrate (160 MHz) [#83](https://github.com/emsesp/EMS-ESP32/issues/83)
 - select format for enumerated values in web
 - settings for water hysteresis on/off
-- dallas sensor name editable. `sensorname` console-command, replace sensorid with a unique name (#84)
+- dallas sensor name editable. `sensorname` console-command, replace sensorid with a unique name [#84](https://github.com/emsesp/EMS-ESP32/issues/84)
+- 'restart' system command. Can be invoked via API with authentication. [#87](https://github.com/emsesp/EMS-ESP32/issues/87)
 
 ## Fixed
 
@@ -25,3 +26,4 @@
 - maintenance settings for time/date as extra setting
 - move api/mqtt formats to `settings`, add `enum format`
 - UI improvements for editing Dallas Sensor details
+- Rest GET commands can also require authentication (via bearer access token) for better security
