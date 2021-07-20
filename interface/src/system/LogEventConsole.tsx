@@ -110,7 +110,12 @@ const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
 
   const paddedNameLabel = (name: string) => {
     const label = '[' + name + ']';
-    return label.padStart(8, '\xa0');
+    return label.padEnd(12, '\xa0');
+  };
+
+  const paddedIDLabel = (id: number) => {
+    const label = id + ':';
+    return label.padEnd(7, '\xa0');
   };
 
   return (
@@ -119,6 +124,7 @@ const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
         <div className={classes.entry}>
           <span>{e.t}</span>
           <span className={styleLevel(e.l)}>{paddedLevelLabel(e.l)} </span>
+          <span>{paddedIDLabel(e.i)} </span>
           <span>{paddedNameLabel(e.n)} </span>
           <span>{e.m}</span>
         </div>
