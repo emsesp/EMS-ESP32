@@ -6,7 +6,8 @@ import {
   DialogContent,
   DialogActions,
   FormHelperText,
-  OutlinedInput
+  OutlinedInput,
+  InputAdornment
 } from '@material-ui/core';
 
 import { FormButton } from '../components';
@@ -45,26 +46,27 @@ class SensorForm extends React.Component<SensorFormProps> {
           open
         >
           <DialogTitle id="user-form-dialog-title">
-            Change Sensor Name
+            Editing Sensor #{sensor.no}
           </DialogTitle>
           <DialogContent dividers>
-            <FormHelperText id="outlined-value-name-text">
-              Name of sensor #{sensor.no}
-            </FormHelperText>
+            <FormHelperText>Name (no spaces)</FormHelperText>
             <OutlinedInput
-              id="outlined-adornment-value"
+              id="id"
               value={sensor.id}
               autoFocus
               fullWidth
               onChange={handleSensorChange('id')}
-              aria-describedby="outlined-value-name-text"
-              inputProps={{
-                'aria-label': 'id'
-              }}
             />
-            <FormHelperText>
-              (optional 'offset' separated by space)
-            </FormHelperText>
+
+            <FormHelperText>Custom Offset</FormHelperText>
+            <OutlinedInput
+              id="offset"
+              value={sensor.offset}
+              fullWidth
+              type="number"
+              onChange={handleSensorChange('offset')}
+              endAdornment={<InputAdornment position="end">°C</InputAdornment>}
+            />
           </DialogContent>
           <DialogActions>
             <FormButton

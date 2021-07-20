@@ -278,7 +278,7 @@ const generate_token = { token: '1234' }
 
 // EMS-ESP Project specific
 const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'emsespSettings'
-const EMSESP_ALLDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'allDevices'
+const EMSESP_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'data'
 const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices'
 const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData'
 const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'emsespStatus'
@@ -312,7 +312,7 @@ const emsesp_settings = {
   bool_format: 1,
   enum_format: 1,
 }
-const emsesp_alldevices = {
+const emsesp_data = {
   devices: [
     {
       id: 1,
@@ -343,10 +343,11 @@ const emsesp_alldevices = {
     },
   ],
   sensors: [
-    { no: 1, id: '28-233D-9497-0C03', temp: '25.7' },
-    { no: 2, id: '28-243D-7437-1E3A', temp: '26.1' },
+    { no: 1, id: '28-233D-9497-0C03', temp: 25.7, offset: 12 },
+    { no: 2, id: '28-243D-7437-1E3A', temp: 26.1, offset: 0 },
   ],
 }
+
 const emsesp_status = {
   status: 0,
   rx_received: 344,
@@ -873,8 +874,8 @@ app.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
 app.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
   res.json(emsesp_settings)
 })
-app.get(EMSESP_ALLDEVICES_ENDPOINT, (req, res) => {
-  res.json(emsesp_alldevices)
+app.get(EMSESP_DATA_ENDPOINT, (req, res) => {
+  res.json(emsesp_data)
 })
 app.post(EMSESP_SCANDEVICES_ENDPOINT, (req, res) => {
   res.sendStatus(200)
@@ -904,7 +905,6 @@ app.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
 app.post(WRITE_VALUE_ENDPOINT, (req, res) => {
   const devicevalue = req.body.devicevalue
   const id = req.body.id
-
   console.log(id)
   console.log(devicevalue)
 
@@ -912,12 +912,8 @@ app.post(WRITE_VALUE_ENDPOINT, (req, res) => {
 })
 
 app.post(WRITE_SENSOR_ENDPOINT, (req, res) => {
-  const sensorname = req.body.sensorname
-  const id = sensorname.id
-  const no = sensorname.no
-
-  console.log(id)
-  console.log(no)
+  const sensor = req.body.sensor
+  console.log(sensor)
 
   res.sendStatus(200)
 })

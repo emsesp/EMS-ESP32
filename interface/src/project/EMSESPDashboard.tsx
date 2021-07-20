@@ -8,7 +8,7 @@ import { MenuAppBar } from '../components';
 import { AuthenticatedRoute } from '../authentication';
 
 import EMSESPStatusController from './EMSESPStatusController';
-import EMSESPDevicesController from './EMSESPDevicesController';
+import EMSESPDataController from './EMSESPDataController';
 import EMSESPHelp from './EMSESPHelp';
 
 class EMSESP extends Component<RouteComponentProps> {
@@ -24,18 +24,15 @@ class EMSESP extends Component<RouteComponentProps> {
           onChange={(e, path) => this.handleTabChange(path)}
           variant="fullWidth"
         >
-          <Tab
-            value={`/${PROJECT_PATH}/devices`}
-            label="Devices &amp; Sensors"
-          />
+          <Tab value={`/${PROJECT_PATH}/data`} label="Devices &amp; Sensors" />
           <Tab value={`/${PROJECT_PATH}/status`} label="EMS Status" />
           <Tab value={`/${PROJECT_PATH}/help`} label="EMS-ESP Help" />
         </Tabs>
         <Switch>
           <AuthenticatedRoute
             exact
-            path={`/${PROJECT_PATH}/devices`}
-            component={EMSESPDevicesController}
+            path={`/${PROJECT_PATH}/data`}
+            component={EMSESPDataController}
           />
           <AuthenticatedRoute
             exact
@@ -47,7 +44,7 @@ class EMSESP extends Component<RouteComponentProps> {
             path={`/${PROJECT_PATH}/help`}
             component={EMSESPHelp}
           />
-          <Redirect to={`/${PROJECT_PATH}/devices`} />
+          <Redirect to={`/${PROJECT_PATH}/data`} />
         </Switch>
       </MenuAppBar>
     );

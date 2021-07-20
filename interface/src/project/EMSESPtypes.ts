@@ -54,10 +54,11 @@ export interface Device {
 export interface Sensor {
   no: number;
   id: string;
-  temp: string;
+  temp: number;
+  offset: number;
 }
 
-export interface EMSESPDevices {
+export interface EMSESPData {
   devices: Device[];
   sensors: Sensor[];
   analog: number;

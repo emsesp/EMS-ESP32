@@ -16,15 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WebDevicesService_h
-#define WebDevicesService_h
+#ifndef WebDataService_h
+#define WebDataService_h
 
 #include <ArduinoJson.h>
 #include <AsyncJson.h>
 #include <ESPAsyncWebServer.h>
 #include <SecurityManager.h>
 
-#define EMSESP_DEVICES_SERVICE_PATH "/rest/allDevices"
+#define EMSESP_DATA_SERVICE_PATH "/rest/data"
 #define SCAN_DEVICES_SERVICE_PATH "/rest/scanDevices"
 #define DEVICE_DATA_SERVICE_PATH "/rest/deviceData"
 #define WRITE_VALUE_SERVICE_PATH "/rest/writeValue"
@@ -32,9 +32,9 @@
 
 namespace emsesp {
 
-class WebDevicesService {
+class WebDataService {
   public:
-    WebDevicesService(AsyncWebServer * server, SecurityManager * securityManager);
+    WebDataService(AsyncWebServer * server, SecurityManager * securityManager);
 
   private:
     // GET
