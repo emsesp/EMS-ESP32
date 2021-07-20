@@ -352,7 +352,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
             if (emsdevice) {
                 doc.clear();
                 JsonObject json = doc.to<JsonObject>();
-                Command::call(emsdevice->device_type(), "info", nullptr, -1, json);
+                Command::call(emsdevice->device_type(), "info", nullptr, true, -1, json);
 
                 Serial.print(COLOR_YELLOW);
                 if (json.size() != 0) {
@@ -424,7 +424,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         run_test("boiler");
 
         // device type, command, data
-        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
+        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false", true);
     }
 
     if (command == "fr120") {
@@ -935,12 +935,23 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         Mqtt::ha_enabled(false);
         run_test("general");
         AsyncWebServerRequest request;
+
+        // GET
         request.method(HTTP_GET);
         request.url("/api/thermostat/seltemp");
         EMSESP::webAPIService.webAPIService_get(&request);
 
         request.url("/api/boiler/syspress");
         EMSESP::webAPIService.webAPIService_get(&request);
+
+        request.url("/api/system/commands");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
+        // POST
+        request.method(HTTP_POST);
+        request.url("/api/system/commands");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
 #endif
     }
 

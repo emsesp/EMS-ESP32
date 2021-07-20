@@ -52,12 +52,14 @@ class System {
     static bool command_send(const char * value, const int8_t id);
     static bool command_publish(const char * value, const int8_t id);
     static bool command_fetch(const char * value, const int8_t id);
-    static bool command_info(const char * value, const int8_t id, JsonObject & json);
-    static bool command_settings(const char * value, const int8_t id, JsonObject & json);
-    static bool command_commands(const char * value, const int8_t id, JsonObject & json);
+    static bool command_restart(const char * value, const int8_t id);
 #if defined(EMSESP_DEBUG)
     static bool command_test(const char * value, const int8_t id);
 #endif
+
+    static bool command_info(const char * value, const int8_t id, JsonObject & json);
+    static bool command_settings(const char * value, const int8_t id, JsonObject & json);
+    static bool command_commands(const char * value, const int8_t id, JsonObject & json);
 
     void restart();
     void format(uuid::console::Shell & shell);

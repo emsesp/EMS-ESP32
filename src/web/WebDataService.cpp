@@ -118,6 +118,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
 }
 
 // takes a command and its data value from a specific Device, from the Web
+// assumes the service has been checked for admin authentication
 void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
         JsonObject dv = json["devicevalue"];
@@ -129,22 +130,22 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
                 if (emsdevice->unique_id() == id) {
                     const char * cmd         = dv["c"];
                     uint8_t      device_type = emsdevice->device_type();
-                    bool         ok          = false;
+                    uint8_t      cmd_return  = 1; // OK
                     char         s[10];
                     // the data could be in any format, but we need string
                     JsonVariant data = dv["v"];
                     if (data.is<const char *>()) {
-                        ok = Command::call(device_type, cmd, data.as<const char *>());
+                        cmd_return = Command::call(device_type, cmd, data.as<const char *>(), true);
                     } else if (data.is<int>()) {
-                        ok = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0));
+                        cmd_return = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0), true);
                     } else if (data.is<float>()) {
-                        ok = Command::call(device_type, cmd, Helpers::render_value(s, (float)data.as<float>(), 1));
+                        cmd_return = Command::call(device_type, cmd, Helpers::render_value(s, (float)data.as<float>(), 1), true);
                     } else if (data.is<bool>()) {
-                        ok = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false");
+                        cmd_return = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true);
                     }
 
                     // send "Write command sent to device" or "Write command failed"
-                    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);
+                    AsyncWebServerResponse * response = request->beginResponse((cmd_return == 1) ? 200 : 204);
                     request->send(response);
                     return;
                 }

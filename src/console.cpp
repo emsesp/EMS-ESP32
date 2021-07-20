@@ -376,15 +376,8 @@ void EMSESPShell::add_console_commands() {
             DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
             JsonObject          json = doc.to<JsonObject>();
 
-            bool ok = false;
             // validate that a command is present
             if (arguments.size() < 2) {
-                // // no cmd specified, default to empty command
-                // if (Command::call(device_type, "", "", -1, json)) {
-                //     serializeJsonPretty(doc, shell);
-                //     shell.println();
-                //     return;
-                // }
                 shell.print(F("Missing command. Available commands are: "));
                 Command::show(shell, device_type, false); // non-verbose mode
                 return;
@@ -392,30 +385,36 @@ void EMSESPShell::add_console_commands() {
 
             const char * cmd = arguments[1].c_str();
 
+            uint8_t cmd_return = 1; // OK
+
             if (arguments.size() == 2) {
                 // no value specified, just the cmd
-                ok = Command::call(device_type, cmd, nullptr, -1, json);
+                cmd_return = Command::call(device_type, cmd, nullptr, true, -1, json);
             } else if (arguments.size() == 3) {
                 if (strncmp(cmd, "info", 4) == 0) {
                     // info has a id but no value
-                    ok = Command::call(device_type, cmd, nullptr, atoi(arguments.back().c_str()), json);
+                    cmd_return = Command::call(device_type, cmd, nullptr, true, atoi(arguments.back().c_str()), json);
                 } else {
-                    // has a value but no id
-                    ok = Command::call(device_type, cmd, arguments.back().c_str(), -1, json);
+                    // has a value but no id so use -1
+                    cmd_return = Command::call(device_type, cmd, arguments.back().c_str(), true, -1, json);
                 }
             } else {
                 // use value, which could be an id or hc
-                ok = Command::call(device_type, cmd, arguments[2].c_str(), atoi(arguments[3].c_str()), json);
+                cmd_return = Command::call(device_type, cmd, arguments[2].c_str(), true, atoi(arguments[3].c_str()), json);
             }
 
-            if (ok && json.size()) {
+            if (cmd_return == 1 && json.size()) {
                 serializeJsonPretty(doc, shell);
                 shell.println();
                 return;
-            } else if (!ok) {
-                shell.println(F("Unknown command, value, or id."));
+            }
+
+            if (cmd_return == 2) {
+                shell.println(F("Unknown command"));
                 shell.print(F("Available commands are: "));
                 Command::show(shell, device_type, false); // non-verbose mode
+            } else if (cmd_return == 3) {
+                shell.println(F("Bad syntax"));
             }
         },
         [&](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) -> std::vector<std::string> {

@@ -34,6 +34,17 @@ using uuid::console::Shell;
 
 namespace emsesp {
 
+// mqtt flags for command subscriptions
+enum CommandFlag : uint8_t {
+    MQTT_SUB_FLAG_NORMAL = 0,        // 0
+    MQTT_SUB_FLAG_HC     = (1 << 0), // 1
+    MQTT_SUB_FLAG_WWC    = (1 << 1), // 2
+    MQTT_SUB_FLAG_NOSUB  = (1 << 2), // 4
+    HIDDEN               = (1 << 3), // 8
+    ADMIN_ONLY           = (1 << 4)  // 16
+
+};
+
 using cmdfunction_p      = std::function<bool(const char * data, const int8_t id)>;
 using cmdfunction_json_p = std::function<bool(const char * data, const int8_t id, JsonObject & json)>;
 
@@ -41,27 +52,37 @@ class Command {
   public:
     struct CmdFunction {
         uint8_t                     device_type_; // DeviceType::
-        uint8_t                     flag_;        // mqtt flags for command subscriptions
+        uint8_t                     flags_;       // mqtt flags for command subscriptions
         const __FlashStringHelper * cmd_;
         cmdfunction_p               cmdfunction_;
         cmdfunction_json_p          cmdfunction_json_;
         const __FlashStringHelper * description_;
-        bool                        hidden_; // if its command not to be shown on the Console
 
         CmdFunction(const uint8_t               device_type,
-                    const uint8_t               flag,
+                    const uint8_t               flags,
                     const __FlashStringHelper * cmd,
                     cmdfunction_p               cmdfunction,
                     cmdfunction_json_p          cmdfunction_json,
-                    const __FlashStringHelper * description,
-                    bool                        hidden = false)
+                    const __FlashStringHelper * description)
             : device_type_(device_type)
-            , flag_(flag)
+            , flags_(flags)
             , cmd_(cmd)
             , cmdfunction_(cmdfunction)
             , cmdfunction_json_(cmdfunction_json)
-            , description_(description)
-            , hidden_(hidden) {
+            , description_(description) {
+        }
+
+        inline void add_flags(uint8_t flags) {
+            flags_ |= flags;
+        }
+        inline bool has_flags(uint8_t flags) const {
+            return (flags_ & flags) == flags;
+        }
+        inline void remove_flags(uint8_t flags) {
+            flags_ &= ~flags;
+        }
+        inline uint8_t flags() const {
+            return flags_;
         }
     };
 
@@ -69,11 +90,21 @@ class Command {
         return cmdfunctions_;
     }
 
-    static bool call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json);
-    static bool call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id = -1);
-    static void add(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, const __FlashStringHelper * description, uint8_t flag = 0);
-    static void
-    add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb, const __FlashStringHelper * description, bool hidden = false);
+    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, bool authenticated, const int8_t id, JsonObject & json);
+    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, bool authenticated, const int8_t id = -1);
+
+    static void add(const uint8_t               device_type,
+                    const __FlashStringHelper * cmd,
+                    cmdfunction_p               cb,
+                    const __FlashStringHelper * description,
+                    uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_NORMAL);
+
+    static void add_returns_json(const uint8_t               device_type,
+                                 const __FlashStringHelper * cmd,
+                                 cmdfunction_json_p          cb,
+                                 const __FlashStringHelper * description,
+                                 uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_NORMAL);
+
     static void                   show_all(uuid::console::Shell & shell);
     static Command::CmdFunction * find_command(const uint8_t device_type, const char * cmd);
     static Command::CmdFunction * find_command(const uint8_t device_type, char * cmd, int8_t & id);

@@ -624,13 +624,14 @@ void System::system_check() {
 // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
 // no individual subscribe for pin command because id is needed
 void System::commands_init() {
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin, F("set GPIO"), MqttSubFlag::FLAG_NOSUB);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, F("send a telegram"));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, F("force a MQTT publish"));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, F("refresh all EMS values"));
-    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, F("system status"));
-    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("list system settings"));
-    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("list system commands"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin, F("set GPIO"), CommandFlag::MQTT_SUB_FLAG_NOSUB | CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, F("send a telegram"), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, F("force a MQTT publish"), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, F("refresh all EMS values"), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, F("restarts EMS-ESP"), CommandFlag::ADMIN_ONLY);
+    Command::add_returns_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, F("system status"));
+    Command::add_returns_json(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("list system settings"));
+    Command::add_returns_json(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("list system commands"));
 #if defined(EMSESP_DEBUG)
     Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test, F("run tests"));
 #endif
@@ -795,11 +796,12 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
     node            = json.createNestedObject("System");
     node["version"] = EMSESP_APP_VERSION;
 
+    // hide ssid from this list
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
-        node = json.createNestedObject("Network");
-        // node["ssid"]             = settings.ssid; // commented out - people don't like others to see this
+        node                     = json.createNestedObject("Network");
         node["hostname"]         = settings.hostname;
         node["static_ip_config"] = settings.staticIPConfig;
+        node["enableIPv6"]       = settings.enableIPv6;
         JsonUtils::writeIP(node, "local_ip", settings.localIP);
         JsonUtils::writeIP(node, "gateway_ip", settings.gatewayIP);
         JsonUtils::writeIP(node, "subnet_mask", settings.subnetMask);
@@ -839,6 +841,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["ha_enabled"]              = settings.ha_enabled;
         node["mqtt_qos"]                = settings.mqtt_qos;
         node["mqtt_retain"]             = settings.mqtt_retain;
+        node["subscribe_format"]        = settings.subscribe_format;
     });
 
 #ifndef EMSESP_STANDALONE
@@ -993,6 +996,14 @@ bool System::load_board_profile(std::vector<uint8_t> & data, const std::string &
         return (board_profile == "CUSTOM");
     }
 
+    return true;
+}
+
+// restart command - perform a hard reset
+bool System::command_restart(const char * value, const int8_t id) {
+#ifndef EMSESP_STANDALONE
+    ESP.restart();
+#endif
     return true;
 }
 

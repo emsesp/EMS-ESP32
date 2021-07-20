@@ -81,7 +81,20 @@ class Mqtt {
 
     enum Operation { PUBLISH, SUBSCRIBE };
 
-    enum HA_Climate_Format : uint8_t { CURRENT = 1, SETPOINT, ZERO };
+    enum HA_Climate_Format : uint8_t {
+        CURRENT = 1, // 1
+        SETPOINT,    // 2
+        ZERO         // 3
+
+    };
+
+    // subscribe_format
+    enum Subscribe_Format : uint8_t {
+        GENERAL = 0,        // 0
+        INDIVIDUAL_MAIN_HC, // 1
+        INDIVIDUAL_ALL_HC   // 2
+
+    };
 
     static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // note this should really match the user setting in mqttSettings.maxTopicLength
 
@@ -109,7 +122,7 @@ class Mqtt {
                                        const uint8_t               device_type,
                                        const __FlashStringHelper * entity,
                                        const uint8_t               uom = 0);
-    static void register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t tag = 0);
+    static void register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t flags = 0);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
