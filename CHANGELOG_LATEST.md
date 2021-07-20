@@ -5,10 +5,10 @@
 - support for IPv6 (web/api/mqtt, not syslog) (#83)
 - System Log in Web UI will show current time if the NTP Service is enabled (#82)
 - Network settings for Tx-power, WiFi-bandwidth, WiFi-sleepmode (#83)
-- optional low clockrate (160 MHz) (#83)
-- selectbox for enumerated values in web
+- optional low CPU clockrate (160 MHz) (#83)
+- select format for enumerated values in web
 - settings for water hysteresis on/off
-- sensorname console-command, replace sensorid with a unique name
+- dallas sensor name editable. `sensorname` console-command, replace sensorid with a unique name (#84)
 
 ## Fixed
 
@@ -24,5 +24,4 @@
 - enumerated values always start at zero
 - maintenance settings for time/date as extra setting
 - move api/mqtt formats to `settings`, add `enum format`
-
-## Removed
+- UI improvements for editing Dallas Sensor details
