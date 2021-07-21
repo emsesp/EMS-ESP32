@@ -240,7 +240,13 @@ class EMSESPDataForm extends Component<
     redirectingAuthorizedFetch(WRITE_SENSOR_ENDPOINT, {
       method: 'POST',
       body: JSON.stringify({
-        sensor: edit_Sensor
+        // because input field with type=number doens't like negative values, force it here
+        sensor: {
+          no: edit_Sensor?.no,
+          id: edit_Sensor?.id,
+          temp: edit_Sensor?.temp,
+          offset: Number(edit_Sensor?.offset)
+        }
       }),
       headers: {
         'Content-Type': 'application/json'
@@ -251,6 +257,7 @@ class EMSESPDataForm extends Component<
           this.props.enqueueSnackbar('Sensor updated', {
             variant: 'success'
           });
+          this.props.loadData();
         } else if (response.status === 204) {
           this.props.enqueueSnackbar('Sensor change failed', {
             variant: 'error'

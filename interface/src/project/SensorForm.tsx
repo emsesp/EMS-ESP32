@@ -1,13 +1,10 @@
 import React, { RefObject } from 'react';
-import { ValidatorForm } from 'react-material-ui-form-validator';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  FormHelperText,
-  OutlinedInput,
-  InputAdornment
+  DialogActions
 } from '@material-ui/core';
 
 import { FormButton } from '../components';
@@ -49,23 +46,32 @@ class SensorForm extends React.Component<SensorFormProps> {
             Editing Sensor #{sensor.no}
           </DialogTitle>
           <DialogContent dividers>
-            <FormHelperText>Name (no spaces)</FormHelperText>
-            <OutlinedInput
-              id="id"
-              value={sensor.id}
-              autoFocus
+            <TextValidator
+              validators={['matchRegexp:^([a-zA-Z0-9_.-]{0,19})$']}
+              errorMessages={['Not a valid name']}
               fullWidth
+              variant="outlined"
+              value={sensor.id}
               onChange={handleSensorChange('id')}
+              margin="normal"
+              label="Name"
+              name="id"
             />
-
-            <FormHelperText>Custom Offset</FormHelperText>
-            <OutlinedInput
-              id="offset"
+            <TextValidator
+              validators={['isFloat', 'minFloat:-5', 'maxFloat:5']}
+              errorMessages={[
+                'Must be a number',
+                'Must be greater than -5',
+                'Max value is +5'
+              ]}
+              label="Custom Offset (°C)"
+              name="offset"
               value={sensor.offset}
               fullWidth
-              type="number"
+              variant="outlined"
+              InputProps={{ inputProps: { min: '-5', max: '5', step: '0.1' } }}
+              margin="normal"
               onChange={handleSensorChange('offset')}
-              endAdornment={<InputAdornment position="end">°C</InputAdornment>}
             />
           </DialogContent>
           <DialogActions>
