@@ -67,7 +67,6 @@ class LogEventForm extends Component<LogEventFormProps> {
       <ValidatorForm onSubmit={saveData}>
         <Grid
           container
-          spacing={0}
           direction="row"
           justify="flex-start"
           alignItems="center"
@@ -75,8 +74,9 @@ class LogEventForm extends Component<LogEventFormProps> {
           <Grid item xs={2}>
             <SelectValidator
               name="level"
-              label="Log Level"
+              label="Filter on Log Level"
               value={data.level}
+              fullWidth
               variant="outlined"
               onChange={this.changeLevel}
               margin="normal"
@@ -93,8 +93,8 @@ class LogEventForm extends Component<LogEventFormProps> {
           <Grid item md>
             <Typography color="primary" variant="body2">
               <i>
-                (the last {data.max_messages} messages are buffered and new log
-                events are shown in real time)
+                &nbsp;(the last {data.max_messages} messages are retained and
+                all new log events are shown in real time below)
               </i>
             </Typography>
           </Grid>
