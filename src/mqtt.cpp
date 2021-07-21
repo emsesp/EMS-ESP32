@@ -108,7 +108,7 @@ void Mqtt::register_command(const uint8_t device_type, const __FlashStringHelper
     // register the individual commands too (e.g. ems-esp/boiler/wwonetime)
     // https://github.com/emsesp/EMS-ESP32/issues/31
     std::string topic(MQTT_TOPIC_MAX_SIZE, '\0');
-    if (subscribe_format_ == Subscribe_Format::INDIVIDUAL_MAIN_HC && ((flags & CommandFlag::MQTT_SUB_FLAG_HC) == CommandFlag::MQTT_SUB_FLAG_HC)) {
+    if (subscribe_format_ == Subscribe_Format::INDIVIDUAL_ALL_HC && ((flags & CommandFlag::MQTT_SUB_FLAG_HC) == CommandFlag::MQTT_SUB_FLAG_HC)) {
         topic = cmd_topic + "/hc1/" + uuid::read_flash_string(cmd);
         queue_subscribe_message(topic);
         topic = cmd_topic + "/hc2/" + uuid::read_flash_string(cmd);
@@ -140,7 +140,7 @@ void Mqtt::resubscribe() {
     }
     for (const auto & cf : Command::commands()) {
         std::string topic(MQTT_TOPIC_MAX_SIZE, '\0');
-        if (subscribe_format_ == Subscribe_Format::INDIVIDUAL_MAIN_HC && cf.has_flags(CommandFlag::MQTT_SUB_FLAG_HC)) {
+        if (subscribe_format_ == Subscribe_Format::INDIVIDUAL_ALL_HC && cf.has_flags(CommandFlag::MQTT_SUB_FLAG_HC)) {
             topic = EMSdevice::device_type_2_device_name(cf.device_type_) + "/hc1/" + uuid::read_flash_string(cf.cmd_);
             queue_subscribe_message(topic);
             topic = EMSdevice::device_type_2_device_name(cf.device_type_) + "/hc2/" + uuid::read_flash_string(cf.cmd_);
