@@ -186,13 +186,13 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
         delete response;
         send_message_response(request, 400, "Command not found"); // Bad Request
         return;
-    } else if (cmd_reply == CommandRet::ERROR) {
-        delete response;
-        send_message_response(request, 400, "Problems parsing elements"); // Bad Request
-        return;
     } else if (cmd_reply == CommandRet::NOT_ALLOWED) {
         delete response;
         send_message_response(request, 401, "Bad credentials"); // Unauthorized
+        return;
+    } else if (cmd_reply != CommandRet::OK) {
+        delete response;
+        send_message_response(request, 400, "Problems parsing elements"); // Bad Request
         return;
     }
 

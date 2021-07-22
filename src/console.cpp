@@ -413,7 +413,7 @@ void EMSESPShell::add_console_commands() {
                 shell.println(F("Unknown command"));
                 shell.print(F("Available commands are: "));
                 Command::show(shell, device_type, false); // non-verbose mode
-            } else if (cmd_return == CommandRet::ERROR) {
+            } else if (cmd_return != CommandRet::OK) {
                 shell.println(F("Bad syntax"));
             }
         },

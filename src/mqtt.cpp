@@ -351,7 +351,7 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
                 if (cmd_return == CommandRet::NOT_FOUND) {
                     LOG_ERROR(F("No matching cmd (%s) in topic %s"), cmd_only, topic);
                     Mqtt::publish(F_(response), "unknown");
-                } else if (cmd_return == CommandRet::ERROR) {
+                } else if (cmd_return != CommandRet::OK) {
                     LOG_ERROR(F("Invalid data with cmd (%s) in topic %s"), cmd_only, topic);
                     Mqtt::publish(F_(response), "unknown");
                 }
@@ -405,7 +405,7 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
             if (cmd_return == CommandRet::NOT_FOUND) {
                 LOG_ERROR(F("No matching cmd (%s)"), command);
                 Mqtt::publish(F_(response), "unknown");
-            } else if (cmd_return == CommandRet::ERROR) {
+            } else if (cmd_return != CommandRet::OK) {
                 LOG_ERROR(F("Invalid data for cmd (%s)"), command);
                 Mqtt::publish(F_(response), "unknown");
             }
