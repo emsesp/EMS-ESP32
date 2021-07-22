@@ -178,6 +178,12 @@ class EMSESP {
     static void set_read_id(uint16_t id) {
         read_id_ = id;
     }
+    static bool wait_validate() {
+        return (wait_validate_ != 0);
+    }
+    static void wait_validate(uint16_t wait) {
+        wait_validate_ = wait;
+    }
 
     enum Bus_status : uint8_t { BUS_STATUS_CONNECTED = 0, BUS_STATUS_TX_ERRORS, BUS_STATUS_OFFLINE };
     static uint8_t bus_status();
@@ -264,6 +270,7 @@ class EMSESP {
     static uint64_t tx_delay_;
     static uint8_t  bool_format_;
     static uint8_t  enum_format_;
+    static uint16_t wait_validate_;
 };
 
 } // namespace emsesp

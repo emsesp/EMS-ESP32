@@ -66,6 +66,7 @@ class SensorForm extends React.Component<SensorFormProps> {
               ]}
               label="Custom Offset (°C)"
               name="offset"
+              type="number"
               value={sensor.offset}
               fullWidth
               variant="outlined"
