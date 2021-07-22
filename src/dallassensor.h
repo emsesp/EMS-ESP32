@@ -133,6 +133,8 @@ class DallasSensor {
     bool command_info(const char * value, const int8_t id, JsonObject & json);
     bool command_commands(const char * value, const int8_t id, JsonObject & json);
 
+    void delete_ha_config(uint8_t index, const char * name);
+
     uint32_t            last_activity_ = uuid::get_uptime();
     State               state_         = State::IDLE;
     std::vector<Sensor> sensors_;

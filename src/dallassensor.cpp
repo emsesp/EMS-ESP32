@@ -339,6 +339,21 @@ int16_t DallasSensor::Sensor::offset() const {
     return offset;
 }
 
+// if HA enabled with MQTT Discovery, delete the old config entry by sending an empty topic
+// if we're using the name in the MQTT topic name (Dallas format = NAME)
+void DallasSensor::delete_ha_config(uint8_t index, const char * name) {
+    if (Mqtt::ha_enabled() && (dallas_format_ == Dallas_Format::NAME)) {
+        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        // use '_' as HA doesn't like '-' in the topic name
+        std::string topicname = name;
+        std::replace(topicname.begin(), topicname.end(), '-', '_');
+
+        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/dallassensor_%s/config"), Mqtt::base().c_str(), topicname.c_str());
+        Mqtt::publish(topic);
+        registered_ha_[index] = false; // forces a recreate of the HA config topic
+    }
+}
+
 // update dallas information like name and offset
 bool DallasSensor::update(const char * idstr, const char * name, int16_t offset) {
     bool ok = false;
@@ -365,15 +380,17 @@ bool DallasSensor::update(const char * idstr, const char * name, int16_t offset)
             for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
                 if (strcmp(id, settings.sensor[i].id.c_str()) == 0) {
                     if (strlen(name) == 0 && offset == 0) { // delete entry if name and offset is empty
+                        LOG_INFO(F("Deleting entry for sensor %s"), id);
+                        delete_ha_config(i, settings.sensor[i].name.c_str());
                         settings.sensor[i].id     = "";
                         settings.sensor[i].name   = "";
                         settings.sensor[i].offset = 0;
-                        LOG_INFO(F("Deleting entry for sensor %s"), id);
                     } else {
-                        settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
-                        settings.sensor[i].offset = offset;
                         char result[10];
                         LOG_INFO(F("Renaming sensor ID %s to %s with offset %s"), id, name, Helpers::render_value(result, offset, 10));
+                        delete_ha_config(i, settings.sensor[i].name.c_str()); // remove old name in HA
+                        settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
+                        settings.sensor[i].offset = offset;
                     }
                     ok = true;
                     return StateUpdateResult::CHANGED;
@@ -387,7 +404,7 @@ bool DallasSensor::update(const char * idstr, const char * name, int16_t offset)
                     settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
                     settings.sensor[i].offset = offset;
                     char result[10];
-                    LOG_INFO(F("Renaming sensor ID %s to %s with offset %s"), id, name, Helpers::render_value(result, offset, 10));
+                    LOG_INFO(F("Adding sensor ID %s to %s with offset %s"), id, name, Helpers::render_value(result, offset, 10));
                     ok = true;
                     return StateUpdateResult::CHANGED;
                 }
@@ -402,16 +419,18 @@ bool DallasSensor::update(const char * idstr, const char * name, int16_t offset)
                     }
                 }
                 if (!found) {
+                    char result[10];
+                    LOG_INFO(F("Renaming sensor ID %s to %s with offset %s"), id, name, Helpers::render_value(result, offset, 10));
+                    delete_ha_config(i, settings.sensor[i].name.c_str()); // remove old name in HA
                     settings.sensor[i].id     = id;
                     settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
                     settings.sensor[i].offset = offset;
-                    LOG_INFO(F("Renaming sensor %s to %s"), id, name);
-                    ok = true;
+                    ok                        = true;
                     return StateUpdateResult::CHANGED;
                 }
             }
 
-            LOG_ERROR(F("List full, remove a sensor first"));
+            LOG_ERROR(F("No more empty sensor slots, remove one first"));
             return StateUpdateResult::UNCHANGED;
         },
         "local");
@@ -488,7 +507,7 @@ void DallasSensor::publish_values(const bool force) {
         }
 
         // create the HA MQTT config
-        // to e.g. homeassistant/sensor/ems-esp/dallas_28-233D-9497-0C03/config
+        // to e.g. homeassistant/sensor/ems-esp/dallassensor_28-233D-9497-0C03/config
         if (Mqtt::ha_enabled()) {
             if (!(registered_ha_[sensor_no - 1]) || force) {
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
@@ -516,7 +535,7 @@ void DallasSensor::publish_values(const bool force) {
                 }
                 config["name"] = str;
 
-                snprintf_P(str, sizeof(str), PSTR("dallas_%s"), sensor.to_string().c_str());
+                snprintf_P(str, sizeof(str), PSTR("dallasensor_%s"), sensor.to_string().c_str());
                 config["uniq_id"] = str;
 
                 JsonObject dev = config.createNestedObject("dev");
@@ -525,12 +544,12 @@ void DallasSensor::publish_values(const bool force) {
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 if (dallas_format_ == Dallas_Format::NUMBER) {
-                    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/dallas_sensor%d/config"), Mqtt::base().c_str(), sensor_no);
+                    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/dallassensor_%d/config"), Mqtt::base().c_str(), sensor_no);
                 } else {
                     // use '_' as HA doesn't like '-' in the topic name
                     std::string topicname = sensor.to_string();
                     std::replace(topicname.begin(), topicname.end(), '-', '_');
-                    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/dallas_sensor%s/config"), Mqtt::base().c_str(), topicname.c_str());
+                    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/dallassensor_%s/config"), Mqtt::base().c_str(), topicname.c_str());
                 }
                 Mqtt::publish_ha(topic, config.as<JsonObject>());
 
