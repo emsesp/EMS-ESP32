@@ -77,6 +77,7 @@ bool     EMSESP::trace_raw_                = false;
 uint64_t EMSESP::tx_delay_                 = 0;
 uint8_t  EMSESP::bool_format_              = 1;
 uint8_t  EMSESP::enum_format_              = 1;
+uint16_t EMSESP::wait_validate_            = 0;
 
 // for a specific EMS device go and request data values
 // or if device_id is 0 it will fetch from all our known and active devices
@@ -838,6 +839,9 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
                         emsdevice->has_update(false);                    // reset flag
                         publish_device_values(emsdevice->device_type()); // publish to MQTT if we explicitly have too
                     }
+                }
+                if (wait_validate_ == telegram->type_id) {
+                    wait_validate_ = 0;
                 }
                 break;
             }

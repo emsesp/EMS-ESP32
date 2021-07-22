@@ -45,6 +45,16 @@ enum CommandFlag : uint8_t {
 
 };
 
+// returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
+enum CommandRet: uint8_t {
+    ERRORED = 0,
+    OK,
+    NOT_FOUND,
+    ERROR,
+    NOT_ALLOWED
+
+};
+
 using cmdfunction_p      = std::function<bool(const char * data, const int8_t id)>;
 using cmdfunction_json_p = std::function<bool(const char * data, const int8_t id, JsonObject & json)>;
 

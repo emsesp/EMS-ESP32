@@ -431,6 +431,9 @@ void TxService::add(const uint8_t  operation,
     } else {
         tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validateid); // add to back of queue
     }
+    if (validateid != 0) {
+        EMSESP::wait_validate(validateid);
+    }
 }
 
 // builds a Tx telegram and adds to queue
@@ -507,6 +510,9 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
         // tx_telegrams_.push_back(qtxt); // add to back of queue
         tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validate_id); // add to back of queue
     }
+    if (validate_id != 0) {
+        EMSESP::wait_validate(validate_id);
+    }
 }
 
 // send a Tx telegram to request data from an EMS device
@@ -570,6 +576,7 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
     if (++retry_count_ > MAXIMUM_TX_RETRIES) {
         reset_retry_count();             // give up
         increment_telegram_fail_count(); // another Tx fail
+        EMSESP::wait_validate(0);        // do not wait for validation
 
         LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request: %s"),
                   (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),

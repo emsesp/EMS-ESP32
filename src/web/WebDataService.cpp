@@ -100,6 +100,11 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
                 if (emsdevice->unique_id() == json["id"]) {
+                    // wait max 2.5 sec for updated data (post_send_delay is 2 sec)
+                    for (uint16_t i = 0; i < 2500 && EMSESP::wait_validate(); i++) {
+                        delay(1);
+                    }
+                    EMSESP::wait_validate(0); // reset in case of timeout
 #ifndef EMSESP_STANDALONE
                     JsonObject root = response->getRoot();
                     emsdevice->generate_values_json_web(root);
@@ -130,7 +135,7 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
                 if (emsdevice->unique_id() == id) {
                     const char * cmd         = dv["c"];
                     uint8_t      device_type = emsdevice->device_type();
-                    uint8_t      cmd_return  = 1; // OK
+                    uint8_t      cmd_return  = CommandRet::OK;
                     char         s[10];
                     // the data could be in any format, but we need string
                     JsonVariant data = dv["v"];
@@ -145,7 +150,7 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
                     }
 
                     // send "Write command sent to device" or "Write command failed"
-                    AsyncWebServerResponse * response = request->beginResponse((cmd_return == 1) ? 200 : 204);
+                    AsyncWebServerResponse * response = request->beginResponse((cmd_return == CommandRet::OK) ? 200 : 204);
                     request->send(response);
                     return;
                 }
@@ -166,7 +171,7 @@ void WebDataService::write_sensor(AsyncWebServerRequest * request, JsonVariant &
         // if valid add.
         uint8_t no = sensor["no"];
         if (no > 0 && no < 100) {
-            char        name[25];
+            char        name[20];
             std::string id = sensor["id"];
             strlcpy(name, id.c_str(), sizeof(name));
             float   offset   = sensor["offset"]; // this will be a float value. We'll convert it to int and * 10 it
