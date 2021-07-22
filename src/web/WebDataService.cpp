@@ -135,7 +135,7 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
                 if (emsdevice->unique_id() == id) {
                     const char * cmd         = dv["c"];
                     uint8_t      device_type = emsdevice->device_type();
-                    uint8_t      cmd_return  = 1; // OK
+                    uint8_t      cmd_return  = CommandRet::OK;
                     char         s[10];
                     // the data could be in any format, but we need string
                     JsonVariant data = dv["v"];
@@ -150,7 +150,7 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
                     }
 
                     // send "Write command sent to device" or "Write command failed"
-                    AsyncWebServerResponse * response = request->beginResponse((cmd_return == 1) ? 200 : 204);
+                    AsyncWebServerResponse * response = request->beginResponse((cmd_return == CommandRet::OK) ? 200 : 204);
                     request->send(response);
                     return;
                 }

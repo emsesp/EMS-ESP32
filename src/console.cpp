@@ -385,7 +385,7 @@ void EMSESPShell::add_console_commands() {
 
             const char * cmd = arguments[1].c_str();
 
-            uint8_t cmd_return = 1; // OK
+            uint8_t cmd_return = CommandRet::OK;
 
             if (arguments.size() == 2) {
                 // no value specified, just the cmd
@@ -403,17 +403,17 @@ void EMSESPShell::add_console_commands() {
                 cmd_return = Command::call(device_type, cmd, arguments[2].c_str(), true, atoi(arguments[3].c_str()), json);
             }
 
-            if (cmd_return == 1 && json.size()) {
+            if (cmd_return == CommandRet::OK && json.size()) {
                 serializeJsonPretty(doc, shell);
                 shell.println();
                 return;
             }
 
-            if (cmd_return == 2) {
+            if (cmd_return == CommandRet::NOT_FOUND) {
                 shell.println(F("Unknown command"));
                 shell.print(F("Available commands are: "));
                 Command::show(shell, device_type, false); // non-verbose mode
-            } else if (cmd_return == 3) {
+            } else if (cmd_return == CommandRet::ERROR) {
                 shell.println(F("Bad syntax"));
             }
         },
