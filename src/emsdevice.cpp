@@ -989,7 +989,7 @@ void EMSdevice::publish_mqtt_ha_sensor() {
 
 void EMSdevice::ha_config_clear() {
     for (auto & dv : devicevalues_) {
-        // dv.ha &= ~DeviceValueHA::HA_DONE; // repubish all with values
+        // dv.ha &= ~DeviceValueHA::HA_DONE; // republish all with values
         dv.ha = DeviceValueHA::HA_NONE; // also wait for new value
     }
     ha_config_done(false);

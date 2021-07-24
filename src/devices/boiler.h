@@ -49,7 +49,7 @@ class Boiler : public EMSdevice {
     static constexpr uint8_t  EMS_TYPE_UBAParameters      = 0x16;
     static constexpr uint8_t  EMS_TYPE_UBAParametersPlus  = 0xE6;
     static constexpr uint8_t  EMS_TYPE_UBAParameterWWPlus = 0xEA;
-    static constexpr uint16_t EMS_TYPE_UBAInfomration     = 0x495;
+    static constexpr uint16_t EMS_TYPE_UBAInformation     = 0x495;
     static constexpr uint16_t EMS_TYPE_UBAEnergySupplied  = 0x494;
 
     static constexpr uint8_t EMS_BOILER_SELFLOWTEMP_HEATING = 20; // was originally 70, changed to 30 for issue #193, then to 20 with issue #344

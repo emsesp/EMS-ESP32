@@ -468,9 +468,6 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
                                     17)); // can be 0 if no sensor, handled in export_values
     has_update(telegram->read_value(sysPress_, 21));
 
-    //has_update(telegram->read_value(temperatur_, 13)); // unknown temperature
-    //has_update(telegram->read_value(temperatur_, 27)); // unknown temperature
-
     // read 3 char service code / installation status as appears on the display
     if ((telegram->message_length > 3) && (telegram->offset == 0)) {
         serviceCode_[0] = (serviceCode_[0] == '~') ? 0xF0 : serviceCode_[0];
@@ -540,7 +537,7 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
 
 /*
  * UBAParametersPlus - type 0xE6
- * parameters originaly taken from
+ * parameters originally taken from
  * https://github.com/Th3M3/buderus_ems-wiki/blob/master/Einstellungen%20des%20Regelger%C3%A4ts%20MC110.md
  * 88 0B E6 00 01 46 00 00 46 0A 00 01 06 FA 0A 01 02 64 01 00 00 1E 00 3C 01 00 00 00 01 00 9A
  * from: issue #732

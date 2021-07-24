@@ -87,7 +87,7 @@ class Solar : public EMSdevice {
 
     // SM10Config - 0x96
     uint8_t  wwMinTemp_;
-    uint8_t  maxFlow_;    // set this to caltulate power
+    uint8_t  maxFlow_;    // set this to calculate power
     uint32_t solarPower_; // calculated from maxFlow
 
     std::deque<uint16_t> energy;

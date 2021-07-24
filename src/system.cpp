@@ -511,7 +511,7 @@ void System::measure_analog() {
     if (!measure_last_ || (uint32_t)(uuid::get_uptime() - measure_last_) >= SYSTEM_MEASURE_ANALOG_INTERVAL) {
         measure_last_ = uuid::get_uptime();
 #if defined(ESP32)
-        uint16_t a = analogRead(36);
+        uint16_t a = analogRead(ADC_CH0_GPIO);
 #else
         uint16_t a = 0; // standalone
 #endif
