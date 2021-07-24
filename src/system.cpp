@@ -510,10 +510,10 @@ void System::measure_analog() {
 
     if (!measure_last_ || (uint32_t)(uuid::get_uptime() - measure_last_) >= SYSTEM_MEASURE_ANALOG_INTERVAL) {
         measure_last_ = uuid::get_uptime();
-#if defined(ESP32)
-        uint16_t a = analogRead(ADC_CH0_GPIO);
+#if defined(EMSESP_STANDALONE)
+        uint16_t a = 0;
 #else
-        uint16_t a = 0; // standalone
+        uint16_t a = analogReadMilliVolts(ADC1_CHANNEL_0_GPIO_NUM);
 #endif
         static uint32_t sum_ = 0;
 

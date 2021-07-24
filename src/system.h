@@ -143,7 +143,6 @@ class System {
     static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL      = 60000; // in milliseconds, how often the MQTT heartbeat is sent (1 min)
     static constexpr uint32_t SYSTEM_MEASURE_ANALOG_INTERVAL = 500;
     static constexpr uint8_t  LED_ON                         = HIGH; // LED
-    static constexpr uint8_t  ADC_CH0_GPIO                   = 36;
 
 #ifndef EMSESP_STANDALONE
     static uuid::syslog::SyslogService syslog_;
