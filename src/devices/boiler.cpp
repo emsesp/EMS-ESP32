@@ -551,7 +551,7 @@ void Boiler::process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram)
     has_update(telegram->read_value(boilHystOff_, 8));
     has_update(telegram->read_value(boilHystOn_, 9));
     has_update(telegram->read_value(burnMinPeriod_, 10));
-    // has_update(telegram->read_value(pumpType_, 11));   // guess, RC300 manual: powercontroled, pressurcontrolled 1-4?
+    // has_update(telegram->read_value(pumpType_, 11));   // guess, RC300 manual: power controlled, pressure controlled 1-4?
     // has_update(telegram->read_value(pumpDelay_, 12));  // guess
     // has_update(telegram->read_value(pumpModMax_, 13)); // guess
     // has_update(telegram->read_value(pumpModMin_, 14)); // guess
