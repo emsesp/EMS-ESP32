@@ -1112,17 +1112,12 @@ bool Boiler::set_warmwater_activated(const char * value, const int8_t id) {
     LOG_INFO(F("Setting boiler warm water active %s"), v ? "on" : "off");
 
     // https://github.com/emsesp/EMS-ESP/issues/268
-    uint8_t n;
-    if (EMSbus::is_ht3()) {
-        n = (v ? 0x08 : 0x00); // 0x08 is on, 0x00 is off
-    } else {
-        n = (v ? 0xFF : 0x00); // 0xFF is on, 0x00 is off
-    }
+    // 08 for HT3 seems to be wrong, see https://github.com/emsesp/EMS-ESP32/issues/89
 
     if (get_toggle_fetch(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 1, v ? 1 : 0, EMS_TYPE_UBAParameterWWPlus);
     } else {
-        write_command(EMS_TYPE_UBAParameterWW, 1, n, 0x34);
+        write_command(EMS_TYPE_UBAParameterWW, 1, v ? 0xFF : 0, EMS_TYPE_UBAParameterWW);
     }
 
     return true;
