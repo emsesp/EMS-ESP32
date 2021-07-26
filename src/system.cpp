@@ -159,45 +159,37 @@ void System::format(uuid::console::Shell & shell) {
 }
 
 void System::syslog_start() {
+    bool was_enabled = syslog_enabled_;
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+        syslog_enabled_       = settings.syslog_enabled;
+        syslog_level_         = settings.syslog_level;
+        syslog_mark_interval_ = settings.syslog_mark_interval;
+        syslog_host_          = settings.syslog_host;
+        syslog_port_          = settings.syslog_port;
+    });
+#ifndef EMSESP_STANDALONE
     if (syslog_enabled_) {
-#ifndef EMSESP_STANDALONE
-        syslog_.start();
+        // start & configure syslog
+        if (!was_enabled) {
+            syslog_.start();
+            EMSESP::logger().info(F("Starting Syslog"));
+        }
         syslog_.log_level((uuid::log::Level)syslog_level_);
-#endif
-        EMSESP::logger().info(F("Starting Syslog"));
-    }
-}
-
-void System::syslog_init(bool refresh) {
-    if (refresh) {
-        get_settings();
-    }
-
-#ifndef EMSESP_STANDALONE
-    // check for empty or invalid hostname
-    IPAddress addr;
-    if (!addr.fromString(syslog_host_.c_str())) {
-        syslog_enabled_ = false;
-    }
-
-    // in case service is still running, this flushes the queue
-    // https://github.com/emsesp/EMS-ESP/issues/496
-    if (!syslog_enabled_) {
+        syslog_.mark_interval(syslog_mark_interval_);
+        syslog_.destination(syslog_host_.c_str(), syslog_port_);
+        syslog_.hostname(hostname().c_str());
+    } else if (was_enabled) {
+        // in case service is still running, this flushes the queue
+        // https://github.com/emsesp/EMS-ESP/issues/496
+        EMSESP::logger().info(F("Stopping Syslog"));
         syslog_.log_level((uuid::log::Level)-1);
         syslog_.mark_interval(0);
-        syslog_.destination((IPAddress)((uint32_t)0));
-        return;
+        syslog_.destination("");
     }
-
-    // start & configure syslog
-    syslog_.log_level((uuid::log::Level)syslog_level_);
-    syslog_.mark_interval(syslog_mark_interval_);
-    syslog_.destination(addr, syslog_port_);
-    syslog_.hostname(hostname().c_str());
 #endif
 }
 
-// read all the settings from the config files and store locally
+// read all the settings except syslog from the config files and store locally
 void System::get_settings() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         // Button
@@ -208,13 +200,6 @@ void System::get_settings() {
 
         // Sysclock
         low_clock_ = settings.low_clock;
-
-        // Syslog
-        syslog_enabled_       = settings.syslog_enabled;
-        syslog_level_         = settings.syslog_level;
-        syslog_mark_interval_ = settings.syslog_mark_interval;
-        syslog_host_          = settings.syslog_host;
-        syslog_port_          = settings.syslog_port;
 
         // LED
         hide_led_ = settings.hide_led;
@@ -296,7 +281,7 @@ void System::start(uint32_t heap_start) {
     adc_init(false);     // analog ADC
     button_init(false);  // the special button
     network_init(false); // network
-    syslog_init(false);  // init SysLog
+    syslog_start();      // start Syslog
 
     EMSESP::init_uart(); // start UART
 }
@@ -762,15 +747,17 @@ void System::show_system(uuid::console::Shell & shell) {
     if (!syslog_enabled_) {
         shell.printfln(F("Syslog: disabled"));
     } else {
-        shell.printfln(F("Syslog:"));
+        shell.printfln(F("Syslog: %s"),syslog_.started() ? "started" : "stopped");
         shell.print(F(" "));
         shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : uuid::read_flash_string(F_(unset)).c_str());
+        shell.printfln(F(" IP: %s"),uuid::printable_to_string(syslog_.ip()).c_str());
         shell.print(F(" "));
         shell.printfln(F_(port_fmt), syslog_port_);
         shell.print(F(" "));
         shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(syslog_level_)));
         shell.print(F(" "));
         shell.printfln(F_(mark_interval_fmt), syslog_mark_interval_);
+        shell.printfln(F(" Queued: %d"),syslog_.queued());
     }
 
 #endif
@@ -938,6 +925,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
             node["dallas sensors"] = EMSESP::sensor_devices().size();
             node["dallas reads"]   = EMSESP::sensor_reads();
             node["dallas fails"]   = EMSESP::sensor_fails();
+        }
+        if (EMSESP::system_.syslog_enabled_) {
+            node["syslog_ip"]      = syslog_.ip();
+            node["syslog_started"] = syslog_.started();
         }
     }
 

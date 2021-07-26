@@ -74,7 +74,6 @@ class System {
     void send_heartbeat();
 
     void led_init(bool refresh);
-    void syslog_init(bool refresh);
     void adc_init(bool refresh);
     void network_init(bool refresh);
     void button_init(bool refresh);
@@ -168,7 +167,7 @@ class System {
     std::string hostname_ = "ems-esp";
     bool        hide_led_;
     uint8_t     led_gpio_;
-    bool        syslog_enabled_;
+    bool        syslog_enabled_ = false;
     bool        analog_enabled_;
     bool        low_clock_;
     String      board_profile_;
