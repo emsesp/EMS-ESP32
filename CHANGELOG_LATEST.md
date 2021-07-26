@@ -17,6 +17,7 @@
 - Junkers thermostat shows mode as selected by set_mode
 - HA thermostat mode if bool-format: numbers is selected
 - Web UI System Log sometimes skipped a few log messages when watching real-time
+- fix wwactivated [#89](https://github.com/emsesp/EMS-ESP32/issues/89)
 
 ## Changed
 
