@@ -747,17 +747,17 @@ void System::show_system(uuid::console::Shell & shell) {
     if (!syslog_enabled_) {
         shell.printfln(F("Syslog: disabled"));
     } else {
-        shell.printfln(F("Syslog: %s"),syslog_.started() ? "started" : "stopped");
+        shell.printfln(F("Syslog: %s"), syslog_.started() ? "started" : "stopped");
         shell.print(F(" "));
         shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : uuid::read_flash_string(F_(unset)).c_str());
-        shell.printfln(F(" IP: %s"),uuid::printable_to_string(syslog_.ip()).c_str());
+        shell.printfln(F(" IP: %s"), uuid::printable_to_string(syslog_.ip()).c_str());
         shell.print(F(" "));
         shell.printfln(F_(port_fmt), syslog_port_);
         shell.print(F(" "));
         shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(syslog_level_)));
         shell.print(F(" "));
         shell.printfln(F_(mark_interval_fmt), syslog_mark_interval_);
-        shell.printfln(F(" Queued: %d"),syslog_.queued());
+        shell.printfln(F(" Queued: %d"), syslog_.queued());
     }
 
 #endif
