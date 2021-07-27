@@ -44,7 +44,6 @@ class GenerateToken extends React.Component<
         }
       })
       .then((generatedToken) => {
-        // console.log(generatedToken);
         this.setState({ token: generatedToken.token });
       })
       .catch((error) => {
