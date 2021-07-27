@@ -6,7 +6,7 @@ AsyncMqttClient::AsyncMqttClient()
 , _tail(nullptr)
 , _sent(0)
 , _state(DISCONNECTED)
-, _tlsBadFingerprint(false)
+, _disconnectReason(AsyncMqttClientDisconnectReason::TCP_DISCONNECTED)
 , _lastClientActivity(0)
 , _lastServerActivity(0)
 , _lastPingRequestTime(0)
@@ -194,7 +194,6 @@ void AsyncMqttClient::_freeCurrentParsedPacket() {
 
 void AsyncMqttClient::_clear() {
   _lastPingRequestTime = 0;
-  _tlsBadFingerprint = false;
   _freeCurrentParsedPacket();
   _clearQueue(true);  // keep session data for now
 
@@ -219,7 +218,7 @@ void AsyncMqttClient::_onConnect() {
     }
 
     if (!sslFoundFingerprint) {
-      _tlsBadFingerprint = true;
+      _disconnectReason = AsyncMqttClientDisconnectReason::TLS_BAD_FINGERPRINT;
       _client.close(true);
       return;
     }
@@ -243,17 +242,10 @@ void AsyncMqttClient::_onConnect() {
 void AsyncMqttClient::_onDisconnect() {
   log_i("TCP disconn");
   _state = DISCONNECTED;
-  AsyncMqttClientDisconnectReason reason;
-
-  if (_tlsBadFingerprint) {
-    reason = AsyncMqttClientDisconnectReason::TLS_BAD_FINGERPRINT;
-  } else {
-    reason = AsyncMqttClientDisconnectReason::TCP_DISCONNECTED;
-  }
 
   _clear();
 
-  for (auto callback : _onDisconnectUserCallbacks) callback(reason);
+  for (auto callback : _onDisconnectUserCallbacks) callback(_disconnectReason);
 }
 
 /*
@@ -541,6 +533,8 @@ void AsyncMqttClient::_onConnAck(bool sessionPresent, uint8_t connectReturnCode)
     for (auto callback : _onConnectUserCallbacks) callback(sessionPresent);
   } else {
     // Callbacks are handled by the onDisconnect function which is called from the AsyncTcp lib
+    _disconnectReason = static_cast<AsyncMqttClientDisconnectReason>(connectReturnCode);
+    return;
   }
   _handleQueue();  // send any remaining data from continued session
 }
@@ -710,6 +704,7 @@ void AsyncMqttClient::connect() {
   if (_state != DISCONNECTED) return;
   log_i("CONNECTING");
   _state = CONNECTING;
+  _disconnectReason = AsyncMqttClientDisconnectReason::TCP_DISCONNECTED;  // reset any previous
 
   _client.setRxTimeout(_keepAlive);
 
@@ -768,6 +763,12 @@ uint16_t AsyncMqttClient::publish(const char* topic, uint8_t qos, bool retain, c
   AsyncMqttClientInternals::OutPacket* msg = new AsyncMqttClientInternals::PublishOutPacket(topic, qos, retain, payload, length);
   _addBack(msg);
   return msg->packetId();
+}
+
+bool AsyncMqttClient::clearQueue() {
+  if (_state != DISCONNECTED) return false;
+  _clearQueue(false);
+  return true;
 }
 
 const char* AsyncMqttClient::getClientId() const {

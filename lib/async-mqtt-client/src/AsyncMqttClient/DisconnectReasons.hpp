@@ -1,6 +1,6 @@
 #pragma once
 
-enum class AsyncMqttClientDisconnectReason : int8_t {
+enum class AsyncMqttClientDisconnectReason : uint8_t {
   TCP_DISCONNECTED = 0,
 
   MQTT_UNACCEPTABLE_PROTOCOL_VERSION = 1,
