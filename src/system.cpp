@@ -926,10 +926,12 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
             node["dallas reads"]   = EMSESP::sensor_reads();
             node["dallas fails"]   = EMSESP::sensor_fails();
         }
+#ifndef EMSESP_STANDALONE
         if (EMSESP::system_.syslog_enabled_) {
             node["syslog_ip"]      = syslog_.ip();
             node["syslog_started"] = syslog_.started();
         }
+#endif
     }
 
     JsonArray devices2 = json.createNestedArray("Devices");
