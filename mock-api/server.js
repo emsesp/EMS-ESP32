@@ -18,7 +18,7 @@ const ES_ENDPOINT_ROOT = '/es/'
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings'
 const log_settings = {
   level: 6,
-  max_messages: 30,
+  max_messages: 50,
 }
 
 const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog'
@@ -770,14 +770,22 @@ app.get(FETCH_LOG_ENDPOINT, (req, res) => {
   res.end(null, 'binary')
 })
 app.get(LOG_SETTINGS_ENDPOINT, (req, res) => {
+  console.log(
+    'Fetching log settings ' +
+      log_settings.level +
+      ',' +
+      log_settings.max_messages,
+  )
   res.json(log_settings)
 })
 app.post(LOG_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('New log level is ' + req.body.level)
-  const data = {
-    level: req.body.level,
-  }
-  res.json(data)
+  console.log(
+    'Setting new level=' +
+      req.body.level +
+      ' max_messages=' +
+      req.body.max_messages,
+  )
+  res.sendStatus(200)
 })
 
 // NETWORK

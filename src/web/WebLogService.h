@@ -34,7 +34,7 @@ namespace emsesp {
 
 class WebLogService : public uuid::log::Handler {
   public:
-    static constexpr size_t MAX_LOG_MESSAGES = 30;
+    static constexpr size_t MAX_LOG_MESSAGES = 50;
     static constexpr size_t REFRESH_SYNC     = 200;
 
     WebLogService(AsyncWebServer * server, SecurityManager * securityManager);
@@ -49,7 +49,7 @@ class WebLogService : public uuid::log::Handler {
     virtual void operator<<(std::shared_ptr<uuid::log::Message> message);
 
   private:
-    AsyncEventSource _events;
+    AsyncEventSource events_;
 
     class QueuedLogMessage {
       public:
@@ -64,12 +64,12 @@ class WebLogService : public uuid::log::Handler {
     void forbidden(AsyncWebServerRequest * request);
     void transmit(const QueuedLogMessage & message);
     void fetchLog(AsyncWebServerRequest * request);
-    void getLevel(AsyncWebServerRequest * request);
+    void getValues(AsyncWebServerRequest * request);
 
     char * messagetime(char * out, const uint64_t t);
 
-    void                        setLevel(AsyncWebServerRequest * request, JsonVariant & json);
-    AsyncCallbackJsonWebHandler _setLevel; // for POSTs
+    void                        setValues(AsyncWebServerRequest * request, JsonVariant & json);
+    AsyncCallbackJsonWebHandler setValues_; // for POSTs
 
     uint64_t                    last_transmit_        = 0;                // Last transmit time
     size_t                      maximum_log_messages_ = MAX_LOG_MESSAGES; // Maximum number of log messages to buffer before they are output
