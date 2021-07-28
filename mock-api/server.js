@@ -246,7 +246,7 @@ const UPLOAD_FIRMWARE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFirmware'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn'
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken'
 const system_status = {
-  emsesp_version: '3.1 demo',
+  emsesp_version: '3.x demo',
   esp_platform: 'ESP32',
   max_alloc_heap: 113792,
   psram_size: 0,
@@ -349,7 +349,7 @@ const emsesp_data = {
     },
   ],
   sensors: [
-    { no: 1, id: '28-233D-9497-0C03', temp: 25.7, offset: 12 },
+    { no: 1, id: '28-233D-9497-0C03', temp: 25.7, offset: 1.2 },
     { no: 2, id: '28-243D-7437-1E3A', temp: 26.1, offset: 0 },
   ],
 }
