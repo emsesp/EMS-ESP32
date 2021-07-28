@@ -947,6 +947,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         request.url("/api/system/commands");
         EMSESP::webAPIService.webAPIService_get(&request);
 
+        request.url("/api/boiler/info");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
         // POST
         request.method(HTTP_POST);
         request.url("/api/system/commands");

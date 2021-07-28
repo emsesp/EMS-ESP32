@@ -126,7 +126,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
             id_n = Helpers::atoint(request->getParam("hc")->value().c_str());
         }
     } else {
-        // parse paths and json data
+        // parse paths and json data from the OpenAPI standard
         // /{device}[/{hc}][/{name}]
         // first param must be a valid device, which includes "system"
         device_s = p.paths().front();
