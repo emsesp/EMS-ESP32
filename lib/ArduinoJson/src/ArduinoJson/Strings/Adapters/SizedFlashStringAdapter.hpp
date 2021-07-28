@@ -5,15 +5,15 @@
 #pragma once
 
 #include <ArduinoJson/Namespace.hpp>
-#include <ArduinoJson/Strings/FlashStringIterator.hpp>
-#include <ArduinoJson/Strings/IsString.hpp>
 #include <ArduinoJson/Strings/StoragePolicy.hpp>
+#include <ArduinoJson/Strings/StringAdapter.hpp>
 
 namespace ARDUINOJSON_NAMESPACE {
 
-class SizedFlashStringAdapter {
+template <>
+class StringAdapter<const __FlashStringHelper*, true> {
  public:
-  SizedFlashStringAdapter(const __FlashStringHelper* str, size_t sz)
+  StringAdapter(const __FlashStringHelper* str, size_t sz)
       : _str(str), _size(sz) {}
 
   int compare(const char* other) const {
@@ -24,10 +24,6 @@ class SizedFlashStringAdapter {
     if (!other)
       return 1;
     return -strncmp_P(other, reinterpret_cast<const char*>(_str), _size);
-  }
-
-  bool equals(const char* expected) const {
-    return compare(expected) == 0;
   }
 
   bool isNull() const {
@@ -42,10 +38,6 @@ class SizedFlashStringAdapter {
     return _size;
   }
 
-  FlashStringIterator begin() const {
-    return FlashStringIterator(_str);
-  }
-
   typedef storage_policies::store_by_copy storage_policy;
 
  private:
@@ -53,8 +45,4 @@ class SizedFlashStringAdapter {
   size_t _size;
 };
 
-inline SizedFlashStringAdapter adaptString(const __FlashStringHelper* str,
-                                           size_t sz) {
-  return SizedFlashStringAdapter(str, sz);
-}
 }  // namespace ARDUINOJSON_NAMESPACE

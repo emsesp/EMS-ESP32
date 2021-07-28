@@ -28,4 +28,5 @@
 - maintenance settings for time/date as extra setting
 - move api/mqtt formats to `settings`, add `enum format`
 - UI improvements for editing Dallas Sensor details
-- Rest GET commands can also require authentication (via bearer access token) for better security
+- RESTful GET commands can also require authentication (via bearer access token) for better security
+- Updated AsyncMqttClient to 0.9.0 and ArduinoJson to 6.18.3

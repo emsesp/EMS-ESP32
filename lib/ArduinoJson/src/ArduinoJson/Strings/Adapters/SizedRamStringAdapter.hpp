@@ -5,23 +5,20 @@
 #pragma once
 
 #include <ArduinoJson/Namespace.hpp>
-#include <ArduinoJson/Strings/IsString.hpp>
 #include <ArduinoJson/Strings/StoragePolicy.hpp>
+#include <ArduinoJson/Strings/StringAdapter.hpp>
 
 #include <string.h>  // strcmp
 
 namespace ARDUINOJSON_NAMESPACE {
 
-class SizedRamStringAdapter {
+template <typename TChar>
+class StringAdapter<TChar*, true> {
  public:
-  SizedRamStringAdapter(const char* str, size_t n) : _str(str), _size(n) {}
+  StringAdapter(const char* str, size_t n) : _str(str), _size(n) {}
 
   int compare(const char* other) const {
     return safe_strncmp(_str, other, _size);
-  }
-
-  bool equals(const char* expected) const {
-    return compare(expected) == 0;
   }
 
   bool isNull() const {
@@ -36,20 +33,11 @@ class SizedRamStringAdapter {
     return _size;
   }
 
-  const char* begin() const {
-    return _str;
-  }
-
   typedef storage_policies::store_by_copy storage_policy;
 
  private:
   const char* _str;
   size_t _size;
 };
-
-template <typename TChar>
-inline SizedRamStringAdapter adaptString(const TChar* str, size_t size) {
-  return SizedRamStringAdapter(reinterpret_cast<const char*>(str), size);
-}
 
 }  // namespace ARDUINOJSON_NAMESPACE

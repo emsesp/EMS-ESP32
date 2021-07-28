@@ -1,6 +1,31 @@
 ArduinoJson: change log
 =======================
 
+v6.18.3 (2021-07-27)
+-------
+
+* Changed return type of `convertToJson()` and `Converter<T>::toJson()` to `void`
+* Added `as<std::string_view>()` and `is<std::string_view>()`
+
+v6.18.2 (2021-07-19)
+-------
+
+* Removed a symlink because the Arduino Library Specification forbids it
+
+v6.18.1 (2021-07-03)
+-------
+
+* Fixed support for `volatile float` and `volatile double` (issue #1557)
+* Fixed error `[Pe070]: incomplete type is not allowed` on IAR (issue #1560)
+* Fixed `serializeJson(doc, String)` when allocation fails (issue #1572)
+* Fixed clang-tidy warnings (issue #1574, PR #1577 by @armandas)
+* Added fake class `InvalidConversion<T1,T2>` to easily identify invalid conversions (issue #1585)
+* Added support for `std::string_view` (issue #1578, PR #1554 by @0xFEEDC0DE64)
+* Fixed warning `definition of implicit copy constructor for 'MsgPackDeserializer' is deprecated because it has a user-declared copy assignment operator`
+* Added `JsonArray::clear()` (issue #1597)
+* Fixed `JsonVariant::as<unsigned>()` (issue #1601)
+* Added support for ESP-IDF component build (PR #1562 by @qt1, PR #1599 by @andreaskuster)
+
 v6.18.0 (2021-05-05)
 -------
 
