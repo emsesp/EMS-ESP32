@@ -112,15 +112,17 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
       <ValidatorForm onSubmit={saveData}>
         <Box bgcolor="info.main" p={2} mt={2} mb={2}>
           <Typography variant="body1">
-            Adjust any of the EMS-ESP settings here. For help refer to the{' '}
-            <Link
-              target="_blank"
-              href="https://emsesp.github.io/docs/#/Configure-firmware32?id=ems-esp-settings"
-              color="primary"
-            >
-              {'online documentation'}
-            </Link>
-            .
+            <i>
+              consult the
+              <Link
+                target="_blank"
+                href="https://emsesp.github.io/docs/#/Configure-firmware32?id=ems-esp-settings"
+                color="primary"
+              >
+                {' documentation'}
+              </Link>
+              &nbsp;for help explaining the settings below
+            </i>
           </Typography>
         </Box>
 
