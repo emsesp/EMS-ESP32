@@ -10,6 +10,7 @@
 - settings for water hysteresis on/off
 - dallas sensor name editable. `sensorname` console-command, replace sensorid with a unique name [#84](https://github.com/emsesp/EMS-ESP32/issues/84)
 - 'restart' system command. Can be invoked via API with authentication. [#87](https://github.com/emsesp/EMS-ESP32/issues/87)
+- add Download button in Web UI for log
 
 ## Fixed
 
@@ -30,3 +31,4 @@
 - UI improvements for editing Dallas Sensor details
 - RESTful GET commands can also require authentication (via bearer access token) for better security
 - Updated AsyncMqttClient to 0.9.0 and ArduinoJson to 6.18.3
+- Download buttons for settings and info under the Help tab
