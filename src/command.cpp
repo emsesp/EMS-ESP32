@@ -189,7 +189,7 @@ void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, cm
 
 // add a command to the list, which does return a json object as output
 // flag is fixed to MqttSubFlag::FLAG_NOSUB
-void Command::add_returns_json(const uint8_t               device_type,
+void Command::add_json(const uint8_t               device_type,
                                const __FlashStringHelper * cmd,
                                cmdfunction_json_p          cb,
                                const __FlashStringHelper * description,

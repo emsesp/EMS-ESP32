@@ -109,7 +109,7 @@ class Command {
                     const __FlashStringHelper * description,
                     uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_NORMAL);
 
-    static void add_returns_json(const uint8_t               device_type,
+    static void add_json(const uint8_t               device_type,
                                  const __FlashStringHelper * cmd,
                                  cmdfunction_json_p          cb,
                                  const __FlashStringHelper * description,
