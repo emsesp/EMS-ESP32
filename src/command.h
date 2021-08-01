@@ -110,10 +110,10 @@ class Command {
                     uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_NORMAL);
 
     static void add_json(const uint8_t               device_type,
-                                 const __FlashStringHelper * cmd,
-                                 cmdfunction_json_p          cb,
-                                 const __FlashStringHelper * description,
-                                 uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_NORMAL);
+                         const __FlashStringHelper * cmd,
+                         cmdfunction_json_p          cb,
+                         const __FlashStringHelper * description,
+                         uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_NORMAL);
 
     static void                   show_all(uuid::console::Shell & shell);
     static Command::CmdFunction * find_command(const uint8_t device_type, const char * cmd);
