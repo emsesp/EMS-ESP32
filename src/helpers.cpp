@@ -36,13 +36,13 @@ char * Helpers::hextoa(char * result, const uint8_t value) {
 #ifdef EMSESP_STANDALONE
 // special function to work outside of ESP's libraries
 char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
-    unsigned long t = 0, res = 0;
-    unsigned long tmp   = value;
-    int           count = 0;
-
     if (NULL == ptr) {
         return NULL;
     }
+
+    unsigned long t     = 0;
+    unsigned long tmp   = value;
+    int           count = 0;
 
     if (tmp == 0) {
         count++;
@@ -56,6 +56,8 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
     ptr += count;
 
     *ptr = '\0';
+
+    unsigned long res = 0;
 
     do {
         res = value - base * (t = value / base);

@@ -107,8 +107,8 @@ void Mqtt::register_command(const uint8_t device_type, const __FlashStringHelper
 
     // register the individual commands too (e.g. ems-esp/boiler/wwonetime)
     // https://github.com/emsesp/EMS-ESP32/issues/31
-    std::string topic(MQTT_TOPIC_MAX_SIZE, '\0');
     if (subscribe_format_ == Subscribe_Format::INDIVIDUAL_ALL_HC && ((flags & CommandFlag::MQTT_SUB_FLAG_HC) == CommandFlag::MQTT_SUB_FLAG_HC)) {
+        std::string topic(MQTT_TOPIC_MAX_SIZE, '\0');
         topic = cmd_topic + "/hc1/" + uuid::read_flash_string(cmd);
         queue_subscribe_message(topic);
         topic = cmd_topic + "/hc2/" + uuid::read_flash_string(cmd);
@@ -118,6 +118,7 @@ void Mqtt::register_command(const uint8_t device_type, const __FlashStringHelper
         topic = cmd_topic + "/hc4/" + uuid::read_flash_string(cmd);
         queue_subscribe_message(topic);
     } else if (subscribe_format_ != Subscribe_Format::GENERAL && ((flags & CommandFlag::MQTT_SUB_FLAG_NOSUB) == CommandFlag::MQTT_SUB_FLAG_NOSUB)) {
+        std::string topic(MQTT_TOPIC_MAX_SIZE, '\0');
         topic = cmd_topic + "/" + uuid::read_flash_string(cmd);
         queue_subscribe_message(topic);
     }
