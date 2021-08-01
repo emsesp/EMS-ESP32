@@ -109,7 +109,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
         />
         <TextField
           name="client_id"
-          label="Client ID (optional)"
+          label="Client ID"
           fullWidth
           variant="outlined"
           value={data.client_id}
@@ -220,7 +220,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
             onChange={handleValueChange('ha_climate_format')}
             margin="normal"
           >
-            <MenuItem value={1}>Use Current temperature (default)</MenuItem>
+            <MenuItem value={1}>Use Current temperature</MenuItem>
             <MenuItem value={2}>Use Setpoint temperature</MenuItem>
             <MenuItem value={3}>Always set to 0</MenuItem>
           </SelectValidator>

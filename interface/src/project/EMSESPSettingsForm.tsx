@@ -113,7 +113,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
         <Box bgcolor="info.main" p={2} mt={2} mb={2}>
           <Typography variant="body1">
             <i>
-              consult the
+              Refer to the
               <Link
                 target="_blank"
                 href="https://emsesp.github.io/docs/#/Configure-firmware32?id=ems-esp-settings"
@@ -121,7 +121,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
               >
                 {' documentation'}
               </Link>
-              &nbsp;for help explaining the settings below
+              &nbsp;for information on each setting
             </i>
           </Typography>
         </Box>
@@ -207,7 +207,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
           <Typography variant="body2">
             <i>
               Select a pre-configured board layout to automatically set the GPIO
-              pins, or set your own custom configuration
+              pins. Select "Custom..." to view or manually edit the values.
             </i>
           </Typography>
         </Box>
@@ -417,7 +417,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
               value="low_clock"
             />
           }
-          label="Use lower CPU clock speed (only applied after restart)"
+          label="Run at a lower CPU clock speed"
         />
         <BlockFormControlLabel
           control={
@@ -427,7 +427,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
               value="notoken_api"
             />
           }
-          label="Bypass Access Token authorization on API calls (warning! security vulnerability)"
+          label="Bypass Access Token authorization on API calls"
         />
         <Grid
           container
@@ -510,9 +510,9 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
               onChange={handleValueChange('dallas_format')}
               margin="normal"
             >
-              <MenuItem value={1}>by ID</MenuItem>
-              <MenuItem value={2}>by Number</MenuItem>
-              <MenuItem value={3}>by Name</MenuItem>
+              <MenuItem value={1}>ID</MenuItem>
+              <MenuItem value={2}>Number</MenuItem>
+              <MenuItem value={3}>Name</MenuItem>
             </SelectValidator>
           </Grid>
         </Grid>
@@ -611,7 +611,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                   'Max value is 10'
                 ]}
                 name="syslog_mark_interval"
-                label="Mark Interval seconds (0=off)"
+                label="Mark Interval (seconds, 0=off)"
                 fullWidth
                 variant="outlined"
                 value={data.syslog_mark_interval}
@@ -628,7 +628,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                   value="trace_raw"
                 />
               }
-              label="Output EMS telegrams in raw format"
+              label="Output EMS telegrams as hexadecimal bytes"
             />
           </Grid>
         )}
