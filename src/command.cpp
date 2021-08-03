@@ -167,14 +167,13 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, char * c
 
 // add a command to the list, which does not return json
 // these commands are not callable directly via MQTT subscriptions either
-void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, const __FlashStringHelper * description, uint8_t flags) {
+void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, const cmd_function_p cb, const __FlashStringHelper * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
     if (find_command(device_type, uuid::read_flash_string(cmd).c_str()) != nullptr) {
         return;
     }
 
     // if the description is empty, it's hidden which means it will not show up in Web API or Console as an available command
-    // TODO check whether we still need this piece of code
     if (description == nullptr) {
         flags |= CommandFlag::HIDDEN;
     }
@@ -189,7 +188,11 @@ void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, cm
 
 // add a command to the list, which does return a json object as output
 // flag is fixed to MqttSubFlag::FLAG_NOSUB
-void Command::add_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb, const __FlashStringHelper * description, uint8_t flags) {
+void Command::add_json(const uint8_t               device_type,
+                       const __FlashStringHelper * cmd,
+                       const cmd_json_function_p   cb,
+                       const __FlashStringHelper * description,
+                       uint8_t                     flags) {
     // if the command already exists for that device type don't add it
     if (find_command(device_type, uuid::read_flash_string(cmd).c_str()) != nullptr) {
         return;

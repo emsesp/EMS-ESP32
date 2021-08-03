@@ -55,8 +55,8 @@ enum CommandRet : uint8_t {
 
 };
 
-using cmdfunction_p      = std::function<bool(const char * data, const int8_t id)>;
-using cmdfunction_json_p = std::function<bool(const char * data, const int8_t id, JsonObject & json)>;
+using cmd_function_p      = std::function<bool(const char * data, const int8_t id)>;
+using cmd_json_function_p = std::function<bool(const char * data, const int8_t id, JsonObject & json)>;
 
 class Command {
   public:
@@ -64,15 +64,15 @@ class Command {
         uint8_t                     device_type_; // DeviceType::
         uint8_t                     flags_;       // mqtt flags for command subscriptions
         const __FlashStringHelper * cmd_;
-        cmdfunction_p               cmdfunction_;
-        cmdfunction_json_p          cmdfunction_json_;
+        const cmd_function_p        cmdfunction_;
+        const cmd_json_function_p   cmdfunction_json_;
         const __FlashStringHelper * description_;
 
         CmdFunction(const uint8_t               device_type,
                     const uint8_t               flags,
                     const __FlashStringHelper * cmd,
-                    cmdfunction_p               cmdfunction,
-                    cmdfunction_json_p          cmdfunction_json,
+                    const cmd_function_p        cmdfunction,
+                    const cmd_json_function_p   cmdfunction_json,
                     const __FlashStringHelper * description)
             : device_type_(device_type)
             , flags_(flags)
@@ -105,13 +105,13 @@ class Command {
 
     static void add(const uint8_t               device_type,
                     const __FlashStringHelper * cmd,
-                    cmdfunction_p               cb,
+                    const cmd_function_p        cb,
                     const __FlashStringHelper * description,
                     uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_NORMAL);
 
     static void add_json(const uint8_t               device_type,
                          const __FlashStringHelper * cmd,
-                         cmdfunction_json_p          cb,
+                         const cmd_json_function_p   cb,
                          const __FlashStringHelper * description,
                          uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_NORMAL);
 

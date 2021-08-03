@@ -46,8 +46,8 @@ using uuid::console::Shell;
 
 namespace emsesp {
 
-using mqtt_subfunction_p = std::function<bool(const char * message)>;
-using cmdfunction_p      = std::function<bool(const char * data, const int8_t id)>;
+using mqtt_sub_function_p = std::function<bool(const char * message)>;
+using cmdfunction_p       = std::function<bool(const char * data, const int8_t id)>;
 
 struct MqttMessage {
     const uint8_t     operation;
@@ -100,8 +100,8 @@ class Mqtt {
 
     static void on_connect();
 
-    static void subscribe(const uint8_t device_type, const std::string & topic, mqtt_subfunction_p cb);
-    static void subscribe(const std::string & topic, mqtt_subfunction_p cb);
+    static void subscribe(const uint8_t device_type, const std::string & topic, mqtt_sub_function_p cb);
+    static void subscribe(const std::string & topic, mqtt_sub_function_p cb);
     static void resubscribe();
 
     static void publish(const std::string & topic, const std::string & payload);
@@ -239,11 +239,11 @@ class Mqtt {
 
     // function handlers for MQTT subscriptions
     struct MQTTSubFunction {
-        uint8_t            device_type_;      // which device type, from DeviceType::
-        const std::string  topic_;            // short topic name
-        mqtt_subfunction_p mqtt_subfunction_; // can be empty
+        uint8_t             device_type_;      // which device type, from DeviceType::
+        const std::string   topic_;            // short topic name
+        mqtt_sub_function_p mqtt_subfunction_; // can be empty
 
-        MQTTSubFunction(uint8_t device_type, const std::string && topic, mqtt_subfunction_p mqtt_subfunction)
+        MQTTSubFunction(uint8_t device_type, const std::string && topic, mqtt_sub_function_p mqtt_subfunction)
             : device_type_(device_type)
             , topic_(topic)
             , mqtt_subfunction_(mqtt_subfunction) {
