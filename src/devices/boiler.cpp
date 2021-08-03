@@ -87,6 +87,9 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
     // MQTT commands for boiler topic
 
+    register_device_value(TAG_BOILER_DATA, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
+    id_ = product_id; // note, must set the value after it has been initialized to have affect
+
     // first commands
     register_device_value(TAG_BOILER_DATA,
                           &wWTapActivated_,
@@ -95,11 +98,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           FL_(wwtapactivated),
                           DeviceValueUOM::BOOLEAN,
                           MAKE_CF_CB(set_tapwarmwater_activated));
-    // reset is a command, so uses a dummy variable which is unused
+    // reset is a command, so uses a dummy variable which is unused. It will not be shown in MQTT, Web or Console
     register_device_value(TAG_BOILER_DATA, &dummy8u_, DeviceValueType::CMD, FL_(enum_reset), FL_(reset), DeviceValueUOM::LIST, MAKE_CF_CB(set_reset));
-
-    register_device_value(TAG_BOILER_DATA, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
-    id_ = product_id; // note, must set the value after it has been initialized to have affect
 
     register_device_value(TAG_BOILER_DATA, &heatingActive_, DeviceValueType::BOOL, nullptr, FL_(heatingActive), DeviceValueUOM::BOOLEAN);
     register_device_value(TAG_BOILER_DATA, &tapwaterActive_, DeviceValueType::BOOL, nullptr, FL_(tapwaterActive), DeviceValueUOM::BOOLEAN);
