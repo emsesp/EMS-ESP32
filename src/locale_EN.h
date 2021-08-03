@@ -245,6 +245,7 @@ MAKE_PSTR_LIST(enum_charge, F_(chargepump), F_(3wayvalve))
 MAKE_PSTR_LIST(enum_comfort, F_(hot), F_(eco), F_(intelligent))
 MAKE_PSTR_LIST(enum_flow, F_(off), F_(flow), F_(bufferedflow), F_(buffer), F_(layeredbuffer))
 MAKE_PSTR_LIST(enum_reset, F_(maintenance), F_(error))
+MAKE_PSTR_LIST(enum_bool, F_(off), F_(on))
 
 // thermostat
 MAKE_PSTR_WORD(light)
