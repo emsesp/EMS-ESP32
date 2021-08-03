@@ -19,6 +19,7 @@
 - HA thermostat mode if bool-format: numbers is selected
 - Web UI System Log sometimes skipped a few log messages when watching real-time
 - fix wwactivated [#89](https://github.com/emsesp/EMS-ESP32/issues/89)
+- don't show commands (like reset) as Device values in the Web or Console
 
 ## Changed
 
