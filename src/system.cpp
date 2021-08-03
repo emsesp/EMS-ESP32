@@ -662,7 +662,7 @@ void System::show_users(uuid::console::Shell & shell) {
 
 #ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
-        for (User user : securitySettings.users) {
+        for (const User & user : securitySettings.users) {
             shell.printfln(F(" username: %s, password: %s, is_admin: %s"), user.username.c_str(), user.password.c_str(), user.admin ? F("yes") : F("no"));
         }
     });
