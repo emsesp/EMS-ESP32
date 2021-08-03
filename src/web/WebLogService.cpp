@@ -156,10 +156,9 @@ void WebLogService::fetchLog(AsyncWebServerRequest * request) {
 
     JsonArray log = root.createNestedArray("events");
 
-    for (const auto & msg : log_messages_) {
-        if (msg.content_->level <= log_level()) {
+    for (const auto & message : log_messages_) {
+        if (message.content_->level <= log_level()) {
             JsonObject logEvent = log.createNestedObject();
-            auto       message  = std::move(msg);
             char       time_string[25];
 
             logEvent["t"] = messagetime(time_string, message.content_->uptime_ms);
