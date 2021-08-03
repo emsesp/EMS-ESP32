@@ -421,7 +421,7 @@ class EMSESPDataForm extends Component<
         {this.noSensors() && (
           <Box color="warning.main" p={0} mt={0} mb={0}>
             <Typography variant="body1">
-              <i>no external temperature sensors were detected</i>
+              <i>no connected Dallas temperature sensors were detected</i>
             </Typography>
           </Box>
         )}
