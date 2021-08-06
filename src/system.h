@@ -52,12 +52,14 @@ class System {
     static bool command_send(const char * value, const int8_t id);
     static bool command_publish(const char * value, const int8_t id);
     static bool command_fetch(const char * value, const int8_t id);
-    static bool command_info(const char * value, const int8_t id, JsonObject & json);
-    static bool command_settings(const char * value, const int8_t id, JsonObject & json);
-    static bool command_commands(const char * value, const int8_t id, JsonObject & json);
+    static bool command_restart(const char * value, const int8_t id);
 #if defined(EMSESP_DEBUG)
     static bool command_test(const char * value, const int8_t id);
 #endif
+
+    static bool command_info(const char * value, const int8_t id, JsonObject & json);
+    static bool command_settings(const char * value, const int8_t id, JsonObject & json);
+    static bool command_commands(const char * value, const int8_t id, JsonObject & json);
 
     void restart();
     void format(uuid::console::Shell & shell);
@@ -72,7 +74,6 @@ class System {
     void send_heartbeat();
 
     void led_init(bool refresh);
-    void syslog_init(bool refresh);
     void adc_init(bool refresh);
     void network_init(bool refresh);
     void button_init(bool refresh);
@@ -80,6 +81,14 @@ class System {
 
     static bool is_valid_gpio(uint8_t pin);
     static bool load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile);
+
+    bool analog_enabled() {
+        return analog_enabled_;
+    }
+
+    uint16_t analog() {
+        return analog_;
+    }
 
     std::string hostname() {
         return hostname_;
@@ -97,9 +106,13 @@ class System {
         ethernet_connected_ = b;
     }
 
+    void network_connected(bool b) {
+        network_connected_ = b;
+    }
+
     bool network_connected() {
 #ifndef EMSESP_STANDALONE
-        return (ethernet_connected_ || WiFi.isConnected());
+        return network_connected_;
 #else
         return true;
 #endif
@@ -147,14 +160,16 @@ class System {
     uint32_t last_system_check_  = 0;
     bool     upload_status_      = false; // true if we're in the middle of a OTA firmware upload
     bool     ethernet_connected_ = false;
+    bool     network_connected_  = false;
     uint16_t analog_;
 
     // settings
     std::string hostname_ = "ems-esp";
     bool        hide_led_;
     uint8_t     led_gpio_;
-    bool        syslog_enabled_;
+    bool        syslog_enabled_ = false;
     bool        analog_enabled_;
+    bool        low_clock_;
     String      board_profile_;
     uint8_t     pbutton_gpio_;
     int8_t      syslog_level_;

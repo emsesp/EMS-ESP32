@@ -49,7 +49,7 @@ class Boiler : public EMSdevice {
     static constexpr uint8_t  EMS_TYPE_UBAParameters      = 0x16;
     static constexpr uint8_t  EMS_TYPE_UBAParametersPlus  = 0xE6;
     static constexpr uint8_t  EMS_TYPE_UBAParameterWWPlus = 0xEA;
-    static constexpr uint16_t EMS_TYPE_UBAInfomration     = 0x495;
+    static constexpr uint16_t EMS_TYPE_UBAInformation     = 0x495;
     static constexpr uint16_t EMS_TYPE_UBAEnergySupplied  = 0x494;
 
     static constexpr uint8_t EMS_BOILER_SELFLOWTEMP_HEATING = 20; // was originally 70, changed to 30 for issue #193, then to 20 with issue #344
@@ -83,6 +83,9 @@ class Boiler : public EMSdevice {
     uint32_t wWStarts_;           // Warm Water # starts
     uint32_t wWStarts2_;          // Warm water control starts
     uint32_t wWWorkM_;            // Warm Water # minutes
+    int8_t   wWHystOn_;
+    int8_t   wWHystOff_;
+    uint8_t  wWTapActivated_; // maintenance-mode to switch DHW off
 
     uint16_t mixerTemp_;      // mixing temperature
     uint16_t tankMiddleTemp_; // Tank middle temperature (TS3)
@@ -220,6 +223,10 @@ class Boiler : public EMSdevice {
     bool set_pump_delay(const char * value, const int8_t id);
     bool set_reset(const char * value, const int8_t id);
     bool set_maintenance(const char * value, const int8_t id);
+    bool set_maintenancetime(const char * value, const int8_t id);
+    bool set_maintenancedate(const char * value, const int8_t id);
+    bool set_ww_hyst_on(const char * value, const int8_t id);
+    bool set_ww_hyst_off(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

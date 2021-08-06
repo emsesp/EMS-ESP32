@@ -91,11 +91,8 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
             TAG_NONE, &solarPumpTurnonDiff_, DeviceValueType::UINT, nullptr, FL_(solarPumpTurnonDiff), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_TurnonDiff));
         register_device_value(
             TAG_NONE, &solarPumpTurnoffDiff_, DeviceValueType::UINT, nullptr, FL_(solarPumpTurnoffDiff), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_TurnoffDiff));
-        register_device_value(
-            TAG_NONE, &collectorMaxTemp_, DeviceValueType::UINT, nullptr, FL_(collectorMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_CollectorMaxTemp));
-        register_device_value(
-            TAG_NONE, &collectorMinTemp_, DeviceValueType::UINT, nullptr, FL_(collectorMinTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_CollectorMinTemp));
         register_device_value(TAG_NONE, &collectorShutdown_, DeviceValueType::BOOL, nullptr, FL_(collectorShutdown), DeviceValueUOM::BOOLEAN);
+        register_device_value(TAG_NONE, &tankHeated_, DeviceValueType::BOOL, nullptr, FL_(tankHeated), DeviceValueUOM::BOOLEAN);
         register_device_value(TAG_NONE, &solarPower_, DeviceValueType::ULONG, nullptr, FL_(solarPower), DeviceValueUOM::W);
         register_device_value(TAG_NONE, &energyLastHour_, DeviceValueType::ULONG, FL_(div10), FL_(energyLastHour), DeviceValueUOM::WH);
         register_device_value(TAG_NONE, &maxFlow_, DeviceValueType::UINT, FL_(div10), FL_(maxFlow), DeviceValueUOM::LMIN, MAKE_CF_CB(set_SM10MaxFlow));
@@ -143,7 +140,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 
         // telegram 0x035A
         register_device_value(
-            TAG_NONE, &solarPumpMode_, DeviceValueType::ENUM, FL_(enum_solarmode), FL_(solarPumpMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_solarMode));
+            TAG_NONE, &solarPumpMode_, DeviceValueType::ENUM, FL_(enum_solarmode), FL_(solarPumpMode), DeviceValueUOM::LIST, MAKE_CF_CB(set_solarMode));
         register_device_value(TAG_NONE,
                               &solarPumpKick_,
                               DeviceValueType::BOOL,
@@ -180,7 +177,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
                               DeviceValueType::ENUM,
                               FL_(enum_collectortype),
                               FL_(collector1Type),
-                              DeviceValueUOM::NONE,
+                              DeviceValueUOM::LIST,
                               MAKE_CF_CB(set_collector1Type)); // Type of collector field 1, 01=flat, 02=vacuum
     }
 }
@@ -219,12 +216,6 @@ bool Solar::publish_ha_config() {
 // Solar(0x30) -> All(0x00), (0x96), data: FF 18 19 0A 02 5A 27 0A 05 2D 1E 0F 64 28 0A
 void Solar::process_SM10Config(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(solarIsEnabled_, 0)); // FF on
-    uint8_t colmax = collectorMaxTemp_ / 10;
-    has_update(telegram->read_value(colmax, 3));
-    collectorMaxTemp_ = colmax * 10;
-    uint8_t colmin    = collectorMinTemp_ / 10;
-    has_update(telegram->read_value(colmin, 4));
-    collectorMinTemp_ = colmin * 10;
     has_update(telegram->read_value(solarPumpMinMod_, 2));
     has_update(telegram->read_value(solarPumpTurnonDiff_, 7));
     has_update(telegram->read_value(solarPumpTurnoffDiff_, 8));
@@ -237,7 +228,7 @@ void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
     uint8_t solarpumpmod = solarPumpModulation_;
 
     has_update(telegram->read_bitvalue(collectorShutdown_, 0, 3));
-    // has_update(telegram->read_bitvalue(tankHeated_, 0, x)); // tank full, to be determined
+    has_update(telegram->read_bitvalue(tankHeated_, 0, 2));    // tankMaxTemp reached
     has_update(telegram->read_value(collectorTemp_, 2));       // collector temp from SM10, is *10
     has_update(telegram->read_value(tankBottomTemp_, 5));      // tank bottom temp from SM10, is *10
     has_update(telegram->read_value(solarPumpModulation_, 4)); // modulation solar pump
@@ -315,9 +306,12 @@ void Solar::process_SM100SolarCircuitConfig(std::shared_ptr<const Telegram> tele
  * e.g. B0 0B F9 00 00 02 5A 00 00 6E
  */
 void Solar::process_SM100ParamCfg(std::shared_ptr<const Telegram> telegram) {
-    uint16_t t_id;
-    uint8_t  of;
-    int32_t  min, def, max, cur;
+    uint16_t t_id = EMS_VALUE_USHORT_NOTSET;
+    uint8_t  of   = EMS_VALUE_UINT_NOTSET;
+    int32_t  min  = EMS_VALUE_USHORT_NOTSET;
+    int32_t  def  = EMS_VALUE_USHORT_NOTSET;
+    int32_t  max  = EMS_VALUE_USHORT_NOTSET;
+    int32_t  cur  = EMS_VALUE_USHORT_NOTSET;
     has_update(telegram->read_value(t_id, 1));
     has_update(telegram->read_value(of, 3));
     has_update(telegram->read_value(min, 5));
@@ -346,7 +340,7 @@ void Solar::process_SM100Monitor(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(heatExchangerTemp_, 20)); // is *10 - TS6: Heat exchanger temperature sensor
 }
 
-// SM100wwTemperatur - 0x07D6
+// SM100wwTemperature - 0x07D6
 // Solar Module(0x2A) -> (0x00), (0x7D6), data: 01 C1 00 00 02 5B 01 AF 01 AD 80 00 01 90
 void Solar::process_SM100wwTemperature(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(wwTemp_1_, 0));
@@ -426,9 +420,9 @@ void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
  * e.g. B0 0B FF 00 02 80 50 64 00 00 29 01 00 00 01
  */
 void Solar::process_SM100CollectorConfig(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(climateZone_, 0, 1));
-    has_update(telegram->read_value(collector1Area_, 3, 2));
-    has_update(telegram->read_value(collector1Type_, 5, 1));
+    has_update(telegram->read_value(climateZone_, 0));
+    has_update(telegram->read_value(collector1Area_, 3));
+    has_update(telegram->read_enumvalue(collector1Type_, 5, 1));
 }
 
 /*
@@ -685,7 +679,7 @@ bool Solar::set_collector1Type(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, num, FL_(enum_collectortype))) {
         return false;
     }
-    write_command(0x380, 5, num, 0x380);
+    write_command(0x380, 5, num + 1, 0x380);
     return true;
 }
 

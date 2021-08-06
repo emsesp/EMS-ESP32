@@ -71,6 +71,7 @@ MAKE_PSTR_WORD(pin)
 MAKE_PSTR_WORD(publish)
 MAKE_PSTR_WORD(timeout)
 MAKE_PSTR_WORD(board_profile)
+MAKE_PSTR_WORD(sensorname)
 
 // for commands
 MAKE_PSTR_WORD(call)
@@ -124,6 +125,7 @@ MAKE_PSTR(invalid_watch, "Invalid watch type")
 MAKE_PSTR(data_mandatory, "\"XX XX ...\"")
 MAKE_PSTR(asterisks, "********")
 MAKE_PSTR(n_mandatory, "<n>")
+MAKE_PSTR(sensorid_optional, "[sensor ID]")
 MAKE_PSTR(id_optional, "[id|hc]")
 MAKE_PSTR(data_optional, "[data]")
 MAKE_PSTR(offset_optional, "[offset]")
@@ -173,8 +175,9 @@ MAKE_PSTR(w, "W")
 MAKE_PSTR(kb, "KB")
 MAKE_PSTR(seconds, "seconds")
 MAKE_PSTR(dbm, "dBm")
-MAKE_PSTR(num, " ")  // this is hack so HA renders numbers correctly
-MAKE_PSTR(bool, " ") // this is hack so HA renders numbers correctly
+MAKE_PSTR(num, " ")   // this is hack so HA renders numbers correctly
+MAKE_PSTR(bool, " ")  // this is hack so HA renders numbers correctly
+MAKE_PSTR(blank, " ") // this is hack so HA renders numbers correctly
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
@@ -242,13 +245,13 @@ MAKE_PSTR_LIST(enum_charge, F_(chargepump), F_(3wayvalve))
 MAKE_PSTR_LIST(enum_comfort, F_(hot), F_(eco), F_(intelligent))
 MAKE_PSTR_LIST(enum_flow, F_(off), F_(flow), F_(bufferedflow), F_(buffer), F_(layeredbuffer))
 MAKE_PSTR_LIST(enum_reset, F_(maintenance), F_(error))
+MAKE_PSTR_LIST(enum_bool, F_(off), F_(on))
 
 // thermostat
 MAKE_PSTR_WORD(light)
 MAKE_PSTR_WORD(medium)
 MAKE_PSTR_WORD(heavy)
 MAKE_PSTR_WORD(own_prog)
-MAKE_PSTR(blank, "")
 MAKE_PSTR_WORD(start)
 MAKE_PSTR_WORD(heat)
 MAKE_PSTR_WORD(hold)
@@ -309,25 +312,24 @@ MAKE_PSTR_LIST(enum_ibaMainDisplay,
                F_(smoke_temperature))
 MAKE_PSTR_LIST(enum_ibaLanguage, F_(german), F_(dutch), F_(french), F_(italian))
 MAKE_PSTR_LIST(enum_floordrystatus, F_(off), F_(start), F_(heat), F_(hold), F_(cool), F_(end))
-MAKE_PSTR_LIST(enum_ibaBuildingType, F_(blank), F_(light), F_(medium), F_(heavy)) // RC300
+MAKE_PSTR_LIST(enum_ibaBuildingType, F_(light), F_(medium), F_(heavy)) // RC300
 MAKE_PSTR_LIST(enum_wwMode, F_(off), F_(low), F_(high), F_(auto), F_(own_prog))
 MAKE_PSTR_LIST(enum_wwCircMode, F_(off), F_(on), F_(auto), F_(own_prog))
-MAKE_PSTR_LIST(enum_ibaBuildingType2, F_(light), F_(medium), F_(heavy)) // RC30, RC35
 MAKE_PSTR_LIST(enum_wwMode2, F_(off), F_(on), F_(auto))
 MAKE_PSTR_LIST(enum_wwCircMode2, F_(off), F_(on), F_(auto))
 MAKE_PSTR_LIST(enum_heatingtype, F_(off), F_(radiator), F_(convector), F_(floor))
 MAKE_PSTR_LIST(enum_summermode, F_(summer), F_(auto), F_(winter))
 
-MAKE_PSTR_LIST(enum_mode, F_(manual), F_(auto))                          // RC100, RC300, RC310
-MAKE_PSTR_LIST(enum_mode2, F_(off), F_(manual), F_(auto))                // RC20
-MAKE_PSTR_LIST(enum_mode3, F_(night), F_(day), F_(auto))                 // RC35, RC30
-MAKE_PSTR_LIST(enum_mode4, F_(blank), F_(manual), F_(auto), F_(holiday)) // JUNKERS
-MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))                            // CRF
+MAKE_PSTR_LIST(enum_mode, F_(manual), F_(auto))                      // RC100, RC300, RC310
+MAKE_PSTR_LIST(enum_mode2, F_(off), F_(manual), F_(auto))            // RC20
+MAKE_PSTR_LIST(enum_mode3, F_(night), F_(day), F_(auto))             // RC35, RC30
+MAKE_PSTR_LIST(enum_mode4, F_(nofrost), F_(eco), F_(heat), F_(auto)) // JUNKERS
+MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))                        // CRF
 
 MAKE_PSTR_LIST(enum_modetype, F_(eco), F_(comfort))
 MAKE_PSTR_LIST(enum_modetype2, F_(day))
 MAKE_PSTR_LIST(enum_modetype3, F_(night), F_(day))
-MAKE_PSTR_LIST(enum_modetype4, F_(blank), F_(nofrost), F_(eco), F_(heat))
+MAKE_PSTR_LIST(enum_modetype4, F_(nofrost), F_(eco), F_(heat))
 MAKE_PSTR_LIST(enum_modetype5, F_(off), F_(on))
 
 MAKE_PSTR_LIST(enum_reducemode, F_(nofrost), F_(reduce), F_(room), F_(outdoor))
@@ -341,7 +343,7 @@ MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(h
 
 // solar list
 MAKE_PSTR_LIST(enum_solarmode, F_(constant), F("pwm"), F("analog"))
-MAKE_PSTR_LIST(enum_collectortype, F_(blank), F("flat"), F("vacuum"))
+MAKE_PSTR_LIST(enum_collectortype, F("flat"), F("vacuum"))
 
 // MQTT topics and full text for values and commands
 MAKE_PSTR(homeassistant, "homeassistant/")
@@ -465,10 +467,13 @@ MAKE_PSTR_LIST(tankMiddleTemp, F("tankmiddletemp"), F("ww tank middle temperatur
 MAKE_PSTR_LIST(wWStarts, F("wwstarts"), F("ww # starts"))
 MAKE_PSTR_LIST(wWStarts2, F("wwstarts2"), F("ww # control starts"))
 MAKE_PSTR_LIST(wWWorkM, F("wwworkm"), F("ww active time"))
+MAKE_PSTR_LIST(wWHystOn, F("wwhyston"), F("ww hysteresis on temperature"))
+MAKE_PSTR_LIST(wWHystOff, F("wwhystoff"), F("ww hysteresis off temperature"))
 
 // thermostat
+// extra commands
+MAKE_PSTR_LIST(switchtime, F("switchtime"), F("single program switchtime"))
 // extra commands, with no long name so they don't show up in WebUI
-MAKE_PSTR_LIST(switchtime, F("switchtime"))
 MAKE_PSTR_LIST(temp, F("temp"))
 MAKE_PSTR_LIST(hatemp, F("hatemp"))
 MAKE_PSTR_LIST(hamode, F("hamode"))

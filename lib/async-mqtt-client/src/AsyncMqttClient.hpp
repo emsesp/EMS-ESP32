@@ -62,6 +62,7 @@ class AsyncMqttClient {
   AsyncMqttClient& setCredentials(const char* username, const char* password = nullptr);
   AsyncMqttClient& setWill(const char* topic, uint8_t qos, bool retain, const char* payload = nullptr, size_t length = 0);
   AsyncMqttClient& setServer(IPAddress ip, uint16_t port);
+  AsyncMqttClient& setServer(IPv6Address ipv6, uint16_t port);
   AsyncMqttClient& setServer(const char* host, uint16_t port);
 #if ASYNC_TCP_SSL_ENABLED
   AsyncMqttClient& setSecure(bool secure);
@@ -81,6 +82,7 @@ class AsyncMqttClient {
   uint16_t subscribe(const char* topic, uint8_t qos);
   uint16_t unsubscribe(const char* topic);
   uint16_t publish(const char* topic, uint8_t qos, bool retain, const char* payload = nullptr, size_t length = 0, bool dup = false, uint16_t message_id = 0);
+  bool clearQueue();  // Not MQTT compliant!
 
   const char* getClientId() const;
 
@@ -95,15 +97,17 @@ class AsyncMqttClient {
     DISCONNECTING,
     DISCONNECTED
   } _state;
-  bool _tlsBadFingerprint;
+  AsyncMqttClientDisconnectReason _disconnectReason;
   uint32_t _lastClientActivity;
   uint32_t _lastServerActivity;
   uint32_t _lastPingRequestTime;
 
   char _generatedClientId[18 + 1];  // esp8266-abc123 and esp32-abcdef123456
   IPAddress _ip;
+  IPv6Address _ipv6;
   const char* _host;
   bool _useIp;
+  bool _useIpv6;
 #if ASYNC_TCP_SSL_ENABLED
   bool _secure;
 #endif

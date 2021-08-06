@@ -47,6 +47,7 @@ void APSettingsService::manageAP() {
 
 void APSettingsService::startAP() {
     WiFi.softAPConfig(_state.localIP, _state.gatewayIP, _state.subnetMask);
+    esp_wifi_set_bandwidth(ESP_IF_WIFI_AP, WIFI_BW_HT20);
     WiFi.softAP(_state.ssid.c_str(), _state.password.c_str());
     if (!_dnsServer) {
         IPAddress apIp = WiFi.softAPIP();

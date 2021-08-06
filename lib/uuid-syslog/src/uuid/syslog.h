@@ -129,6 +129,7 @@ class SyslogService : public uuid::log::Handler {
 	 * @since 2.0.0
 	 */
     void destination(IPAddress host, uint16_t port = DEFAULT_PORT);
+    void destination(const char * host, uint16_t port = DEFAULT_PORT);
 
     /**
 	 * Get local hostname.
@@ -182,6 +183,20 @@ class SyslogService : public uuid::log::Handler {
 	 * @since 1.0.0
 	 */
     virtual void operator<<(std::shared_ptr<uuid::log::Message> message);
+
+    /**
+	* added MichaelDvP
+	* query status variables
+    */
+    size_t queued() {
+        return log_messages_.size();
+    }
+    bool started() {
+        return started_;
+    }
+    IPAddress ip() {
+        return ip_;
+    }
 
   private:
     /**
@@ -244,7 +259,8 @@ class SyslogService : public uuid::log::Handler {
 
     bool                        started_ = false;                         /*!< Flag to indicate that messages have started being transmitted. @since 1.0.0 */
     WiFiUDP                     udp_;                                     /*!< UDP client. @since 1.0.0 */
-    IPAddress                   host_;                                    /*!< Host to send messages to. @since 1.0.0 */
+    IPAddress                   ip_;                                      /*!< Host-IP to send messages to. @since 1.0.0 */
+    std::string                 host_;                                    /*!< Host to send messages to. */
     uint16_t                    port_          = DEFAULT_PORT;            /*!< Port to send messages to. @since 1.0.0 */
     uint64_t                    last_transmit_ = 0;                       /*!< Last transmit time. @since 1.0.0 */
     std::string                 hostname_{'-'};                           /*!< Local hostname. @since 1.0.0 */

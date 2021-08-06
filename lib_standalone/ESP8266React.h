@@ -26,13 +26,15 @@ class DummySettings {
     bool     shower_alert         = false;
     bool     hide_led             = false;
     bool     notoken_api          = false;
+    uint8_t  bool_format          = 1; // on off
+    uint8_t  enum_format          = 1;
+    uint8_t  dallas_format        = 1;
 
     // MQTT
     uint16_t publish_time      = 10; // seconds
     uint8_t  mqtt_qos          = 0;
     bool     mqtt_retain       = false;
     bool     enabled           = true;
-    uint8_t  dallas_format     = 1;
     uint8_t  nested_format     = 1;
     uint8_t  ha_climate_format = 1;
     bool     ha_enabled        = true;
@@ -56,7 +58,7 @@ class DummySettings {
     uint16_t publish_time_mixer      = 10;
     uint16_t publish_time_other      = 10;
     uint16_t publish_time_sensor     = 10;
-    uint8_t  bool_format             = 1; // on off
+    bool     enableIPv6              = false;
 
 #define FACTORY_MQTT_MAX_TOPIC_LENGTH 128
 
@@ -79,6 +81,7 @@ class DummySettingsService : public StatefulService<DummySettings> {
 #define NetworkSettings DummySettings
 #define SecuritySettings DummySettings
 #define MqttSettings DummySettings
+#define NTPSettings DummySettings
 
 class ESP8266React {
   public:
@@ -106,6 +109,10 @@ class ESP8266React {
     }
 
     StatefulService<DummySettings> * getMqttSettingsService() {
+        return &_settings;
+    }
+
+    StatefulService<DummySettings> * getNTPSettingsService() {
         return &_settings;
     }
 

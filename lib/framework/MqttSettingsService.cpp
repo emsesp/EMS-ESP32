@@ -84,7 +84,7 @@ void MqttSettingsService::onMqttConnect(bool sessionPresent) {
 }
 
 void MqttSettingsService::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-    // emsesp::EMSESP::logger().info(F("Disconnected from MQTT reason: %s"), (uint8_t)reason);
+    // emsesp::EMSESP::logger().info(F("Disconnected from MQTT reason: %d"), (uint8_t)reason);
     _disconnectReason = reason;
     _disconnectedAt   = uuid::get_uptime();
 }
@@ -101,6 +101,7 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     switch (event) {
     case SYSTEM_EVENT_STA_GOT_IP:
     case SYSTEM_EVENT_ETH_GOT_IP:
+    case SYSTEM_EVENT_GOT_IP6:
         if (_state.enabled) {
             // emsesp::EMSESP::logger().info(F("Network connection found, starting MQTT client"));
             onConfigUpdated();
@@ -121,14 +122,13 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 void MqttSettingsService::configureMqtt() {
-    // disconnect if currently connected
-    _mqttClient.disconnect();
-
     // only connect if WiFi is connected and MQTT is enabled
     if (_state.enabled && emsesp::EMSESP::system_.network_connected()) {
+        _mqttClient.disconnect();
         _mqttClient.setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
         if (_state.username.length() > 0) {
-            _mqttClient.setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername), retainCstr(_state.password.length() > 0 ? _state.password.c_str() : nullptr, &_retainedPassword));
+            _mqttClient.setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername),
+                                       retainCstr(_state.password.length() > 0 ? _state.password.c_str() : nullptr, &_retainedPassword));
         } else {
             _mqttClient.setCredentials(retainCstr(nullptr, &_retainedUsername), retainCstr(nullptr, &_retainedPassword));
         }
@@ -138,8 +138,6 @@ void MqttSettingsService::configureMqtt() {
         _mqttClient.setMaxTopicLength(_state.maxTopicLength);
         _mqttClient.connect();
     }
-
-    emsesp::EMSESP::dallassensor_.reload(); // added by Proddy for EMS-ESP
 }
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
@@ -163,8 +161,6 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["publish_time_sensor"]     = settings.publish_time_sensor;
     root["mqtt_qos"]                = settings.mqtt_qos;
     root["mqtt_retain"]             = settings.mqtt_retain;
-    root["dallas_format"]           = settings.dallas_format;
-    root["bool_format"]             = settings.bool_format;
     root["ha_climate_format"]       = settings.ha_climate_format;
     root["ha_enabled"]              = settings.ha_enabled;
     root["nested_format"]           = settings.nested_format;
@@ -195,20 +191,17 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_time_other      = root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
 
-    newSettings.dallas_format     = root["dallas_format"] | EMSESP_DEFAULT_DALLAS_FORMAT;
-    newSettings.bool_format       = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
     newSettings.ha_climate_format = root["ha_climate_format"] | EMSESP_DEFAULT_HA_CLIMATE_FORMAT;
     newSettings.ha_enabled        = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
     newSettings.nested_format     = root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT;
     newSettings.subscribe_format  = root["subscribe_format"] | EMSESP_DEFAULT_SUBSCRIBE_FORMAT;
 
-    if (newSettings.mqtt_qos != settings.mqtt_qos) {
-        emsesp::EMSESP::mqtt_.set_qos(newSettings.mqtt_qos);
+    if (newSettings.enabled != settings.enabled) {
         changed = true;
     }
 
-    if (newSettings.dallas_format != settings.dallas_format) {
-        emsesp::EMSESP::mqtt_.dallas_format(newSettings.dallas_format);
+    if (newSettings.mqtt_qos != settings.mqtt_qos) {
+        emsesp::EMSESP::mqtt_.set_qos(newSettings.mqtt_qos);
         changed = true;
     }
 

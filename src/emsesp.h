@@ -36,7 +36,7 @@
 #include <ESP8266React.h>
 
 #include "web/WebStatusService.h"
-#include "web/WebDevicesService.h"
+#include "web/WebDataService.h"
 #include "web/WebSettingsService.h"
 #include "web/WebAPIService.h"
 #include "web/WebLogService.h"
@@ -65,8 +65,8 @@
 #define EMSESP_JSON_SIZE_XXLARGE_DYN 8192 // for extra very very large json docs, using DynamicJsonDocument
 
 // helpers for callback functions
-#define MAKE_PF_CB(__f) [&](std::shared_ptr<const Telegram> t) { __f(t); }                  // for process function callbacks to register_telegram_type()
-#define MAKE_CF_CB(__f) [&](const char * value, const int8_t id) { return __f(value, id); } // for command function callbacks to register_mqtt_cmd()
+#define MAKE_PF_CB(__f) [&](std::shared_ptr<const Telegram> t) { __f(t); }                  // for Process Function callbacks to EMSDevice::process_function_p
+#define MAKE_CF_CB(__f) [&](const char * value, const int8_t id) { return __f(value, id); } // for Command Function callbacks Command::cmd_function_p
 
 namespace emsesp {
 
@@ -144,6 +144,22 @@ class EMSESP {
         return (dallassensor_.dallas_enabled());
     }
 
+    static uint8_t bool_format() {
+        return bool_format_;
+    }
+
+    static void bool_format(uint8_t format) {
+        bool_format_ = format;
+    }
+
+    static uint8_t enum_format() {
+        return enum_format_;
+    }
+
+    static void enum_format(uint8_t format) {
+        enum_format_ = format;
+    }
+
     enum Watch : uint8_t { WATCH_OFF, WATCH_ON, WATCH_RAW, WATCH_UNKNOWN };
     static void     watch_id(uint16_t id);
     static uint16_t watch_id() {
@@ -161,6 +177,12 @@ class EMSESP {
     }
     static void set_read_id(uint16_t id) {
         read_id_ = id;
+    }
+    static bool wait_validate() {
+        return (wait_validate_ != 0);
+    }
+    static void wait_validate(uint16_t wait) {
+        wait_validate_ = wait;
     }
 
     enum Bus_status : uint8_t { BUS_STATUS_CONNECTED = 0, BUS_STATUS_TX_ERRORS, BUS_STATUS_OFFLINE };
@@ -204,7 +226,7 @@ class EMSESP {
     static ESP8266React       esp8266React;
     static WebSettingsService webSettingsService;
     static WebStatusService   webStatusService;
-    static WebDevicesService  webDevicesService;
+    static WebDataService     webDataService;
     static WebAPIService      webAPIService;
     static WebLogService      webLogService;
 
@@ -246,6 +268,9 @@ class EMSESP {
     static uint8_t  unique_id_count_;
     static bool     trace_raw_;
     static uint64_t tx_delay_;
+    static uint8_t  bool_format_;
+    static uint8_t  enum_format_;
+    static uint16_t wait_validate_;
 };
 
 } // namespace emsesp

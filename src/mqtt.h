@@ -44,12 +44,10 @@ using uuid::console::Shell;
 // size of queue
 #define MAX_MQTT_MESSAGES 200
 
-enum { BOOL_FORMAT_ONOFF = 1, BOOL_FORMAT_TRUEFALSE, BOOL_FORMAT_10, BOOL_FORMAT_ONOFF_CAP }; // matches Web UI settings
-
 namespace emsesp {
 
-using mqtt_subfunction_p = std::function<bool(const char * message)>;
-using cmdfunction_p      = std::function<bool(const char * data, const int8_t id)>;
+using mqtt_sub_function_p = std::function<bool(const char * message)>;
+using cmdfunction_p       = std::function<bool(const char * data, const int8_t id)>;
 
 struct MqttMessage {
     const uint8_t     operation;
@@ -83,15 +81,27 @@ class Mqtt {
 
     enum Operation { PUBLISH, SUBSCRIBE };
 
-    enum Dallas_Format : uint8_t { SENSORID = 1, NUMBER };
-    enum HA_Climate_Format : uint8_t { CURRENT = 1, SETPOINT, ZERO };
+    enum HA_Climate_Format : uint8_t {
+        CURRENT = 1, // 1
+        SETPOINT,    // 2
+        ZERO         // 3
+
+    };
+
+    // subscribe_format
+    enum Subscribe_Format : uint8_t {
+        GENERAL = 0,        // 0
+        INDIVIDUAL_MAIN_HC, // 1
+        INDIVIDUAL_ALL_HC   // 2
+
+    };
 
     static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // note this should really match the user setting in mqttSettings.maxTopicLength
 
     static void on_connect();
 
-    static void subscribe(const uint8_t device_type, const std::string & topic, mqtt_subfunction_p cb);
-    static void subscribe(const std::string & topic, mqtt_subfunction_p cb);
+    static void subscribe(const uint8_t device_type, const std::string & topic, mqtt_sub_function_p cb);
+    static void subscribe(const std::string & topic, mqtt_sub_function_p cb);
     static void resubscribe();
 
     static void publish(const std::string & topic, const std::string & payload);
@@ -112,7 +122,7 @@ class Mqtt {
                                        const uint8_t               device_type,
                                        const __FlashStringHelper * entity,
                                        const uint8_t               uom = 0);
-    static void register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t tag = 0);
+    static void register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t flags = 0);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -159,14 +169,6 @@ class Mqtt {
         return ha_climate_format_;
     }
 
-    static uint8_t dallas_format() {
-        return dallas_format_;
-    }
-
-    static uint8_t bool_format() {
-        return bool_format_;
-    }
-
     static uint8_t nested_format() {
         return nested_format_;
     }
@@ -181,10 +183,6 @@ class Mqtt {
 
     static void ha_climate_format(uint8_t ha_climate_format) {
         ha_climate_format_ = ha_climate_format;
-    }
-
-    static void dallas_format(uint8_t dallas_format) {
-        dallas_format_ = dallas_format;
     }
 
     static void ha_enabled(bool ha_enabled) {
@@ -241,11 +239,11 @@ class Mqtt {
 
     // function handlers for MQTT subscriptions
     struct MQTTSubFunction {
-        uint8_t            device_type_;      // which device type, from DeviceType::
-        const std::string  topic_;            // short topic name
-        mqtt_subfunction_p mqtt_subfunction_; // can be empty
+        uint8_t             device_type_;      // which device type, from DeviceType::
+        const std::string   topic_;            // short topic name
+        mqtt_sub_function_p mqtt_subfunction_; // can be empty
 
-        MQTTSubFunction(uint8_t device_type, const std::string && topic, mqtt_subfunction_p mqtt_subfunction)
+        MQTTSubFunction(uint8_t device_type, const std::string && topic, mqtt_sub_function_p mqtt_subfunction)
             : device_type_(device_type)
             , topic_(topic)
             , mqtt_subfunction_(mqtt_subfunction) {
@@ -279,8 +277,6 @@ class Mqtt {
     static uint32_t    publish_time_other_;
     static uint32_t    publish_time_sensor_;
     static bool        mqtt_enabled_;
-    static uint8_t     dallas_format_;
-    static uint8_t     bool_format_;
     static uint8_t     ha_climate_format_;
     static bool        ha_enabled_;
     static uint8_t     nested_format_;

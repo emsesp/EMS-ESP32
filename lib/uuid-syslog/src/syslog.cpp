@@ -18,9 +18,6 @@
 
 #include "uuid/syslog.h"
 
-#include <Arduino.h>
-#include <WiFi.h>
-#include <WiFiUdp.h>
 
 #include "../../../src/emsesp.h"
 
@@ -153,16 +150,38 @@ void SyslogService::maximum_log_messages(size_t count) {
 }
 
 std::pair<IPAddress, uint16_t> SyslogService::destination() const {
-    return std::make_pair(host_, port_);
+    return std::make_pair(ip_, port_);
 }
 
 void SyslogService::destination(IPAddress host, uint16_t port) {
-    host_ = host;
+    ip_ = host;
     port_ = port;
 
-    if ((uint32_t)host_ == (uint32_t)0) {
+    if ((uint32_t)ip_ == (uint32_t)0) {
         started_ = false;
         remove_queued_messages(log_level());
+        host_.clear();
+    }
+}
+
+void SyslogService::destination(const char * host, uint16_t port) {
+    if (host == nullptr || host[0] == '\0') {
+        started_ = false;
+        remove_queued_messages(log_level());
+        ip_ = (IPAddress)(uint32_t)0;
+        host_.clear();
+        return;
+    }
+    host_ = host;
+    port_ = port;
+    if (ip_.fromString(host)) {
+        host_.clear();
+        if ((uint32_t)ip_ == (uint32_t)0) {
+            started_ = false;
+            remove_queued_messages(log_level());
+        }
+    } else {
+        ip_ = (IPAddress)(uint32_t)0;
     }
 }
 
@@ -257,12 +276,15 @@ void SyslogService::loop() {
 }
 
 bool SyslogService::can_transmit() {
+    if (!host_.empty() && (uint32_t)ip_ == 0) {
+        WiFi.hostByName(host_.c_str(), ip_);
+    }
 #if UUID_SYSLOG_HAVE_IPADDRESS_TYPE
-    if (host_.isV4() && (uint32_t)host_ == (uint32_t)0) {
+    if (ip_.isV4() && (uint32_t)ip_ == (uint32_t)0) {
         return false;
     }
 #else
-    if ((uint32_t)host_ == (uint32_t)0) {
+    if ((uint32_t)ip_ == (uint32_t)0) {
         return false;
     }
 #endif
@@ -276,14 +298,14 @@ bool SyslogService::can_transmit() {
 
 #if UUID_SYSLOG_ARP_CHECK
 #if UUID_SYSLOG_HAVE_IPADDRESS_TYPE
-    if (host_.isV4())
+    if (ip_.isV4())
 #endif
     {
         message_delay = 10;
     }
 #endif
 #if UUID_SYSLOG_NDP_CHECK && UUID_SYSLOG_HAVE_IPADDRESS_TYPE
-    if (host_.isV6()) {
+    if (ip_.isV6()) {
         message_delay = 10;
     }
 #endif
@@ -294,12 +316,12 @@ bool SyslogService::can_transmit() {
 
 #if UUID_SYSLOG_ARP_CHECK
 #if UUID_SYSLOG_HAVE_IPADDRESS_TYPE
-    if (host_.isV4())
+    if (ip_.isV4())
 #endif
     {
         ip4_addr_t ipaddr;
 
-        ip4_addr_set_u32(&ipaddr, (uint32_t)host_);
+        ip4_addr_set_u32(&ipaddr, (uint32_t)ip_);
 
         if (!ip4_addr_isloopback(&ipaddr) && !ip4_addr_ismulticast(&ipaddr) && !ip4_addr_isbroadcast(&ipaddr, netif_default)) {
             struct eth_addr *  eth_ret = nullptr;
@@ -326,10 +348,10 @@ bool SyslogService::can_transmit() {
 #endif
 
 #if UUID_SYSLOG_NDP_CHECK && UUID_SYSLOG_HAVE_IPADDRESS_TYPE
-    if (host_.isV6()) {
+    if (ip_.isV6()) {
         ip6_addr_t ip6addr;
 
-        IP6_ADDR(&ip6addr, host_.raw6()[0], host_.raw6()[1], host_.raw6()[2], host_.raw6()[3]);
+        IP6_ADDR(&ip6addr, ip_.raw6()[0], ip_.raw6()[1], ip_.raw6()[2], ip_.raw6()[3]);
         ip6_addr_assign_zone(&ip6addr, IP6_UNICAST, netif_default);
 
         if (!ip6_addr_isloopback(&ip6addr) && !ip6_addr_ismulticast(&ip6addr)) {
@@ -400,7 +422,7 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
         tzm          = diff < 0 ? (0 - diff) % 60 : diff % 60;
     }
 
-    if (udp_.beginPacket(host_, port_) != 1) {
+    if (udp_.beginPacket(ip_, port_) != 1) {
         last_transmit_ = uuid::get_uptime_ms();
         return false;
     }

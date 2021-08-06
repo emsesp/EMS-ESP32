@@ -5,5 +5,3 @@
 ## Fixed
 
 ## Changed
-
-## Removed

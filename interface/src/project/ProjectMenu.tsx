@@ -23,7 +23,7 @@ class ProjectMenu extends Component<ProjectProps> {
           to="/ems-esp/"
           selected={
             path.startsWith('/ems-esp/status') ||
-            path.startsWith('/ems-esp/devices') ||
+            path.startsWith('/ems-esp/data') ||
             path.startsWith('/ems-esp/help')
           }
           button

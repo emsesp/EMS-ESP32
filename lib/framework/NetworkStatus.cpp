@@ -25,6 +25,7 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
     // for Wifi
     if (wifi_status == WL_CONNECTED) {
         root["local_ip"]    = WiFi.localIP().toString();
+        root["local_ipv6"]  = WiFi.localIPv6().toString();
         root["mac_address"] = WiFi.macAddress();
         root["rssi"]        = WiFi.RSSI();
         root["ssid"]        = WiFi.SSID();
@@ -47,6 +48,7 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
     } else if (ethernet_connected) {
         // Ethernet
         root["local_ip"]    = ETH.localIP().toString();
+        root["local_ipv6"]  = ETH.localIPv6().toString();
         root["mac_address"] = ETH.macAddress();
         root["subnet_mask"] = ETH.subnetMask().toString();
         root["gateway_ip"]  = ETH.gatewayIP().toString();

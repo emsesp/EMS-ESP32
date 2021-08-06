@@ -26,6 +26,8 @@
 #include <string>
 #include <algorithm> // for count_if
 
+#include "WString.h"
+
 #include <iostream>
 
 #define IPAddress std::string
@@ -129,7 +131,12 @@ class Print {
     size_t println(unsigned long value) {
         return print(std::to_string(value).c_str()) + println();
     }
+
     virtual void flush(){};
+
+    size_t print(const String & str) {
+        return print(str.c_str());
+    }
 };
 
 class Stream : public Print {
@@ -206,6 +213,6 @@ void yield(void);
 void setup(void);
 void loop(void);
 
-#include "WString.h"
+
 
 #endif

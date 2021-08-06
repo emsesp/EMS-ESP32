@@ -6,6 +6,8 @@ import { useWindowSize } from '../components';
 
 interface LogEventConsoleProps {
   events: LogEvent[];
+  compact: boolean;
+  level: number;
 }
 
 interface Offsets {
@@ -63,7 +65,9 @@ const useStyles = makeStyles((theme: Theme) => ({
 const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
   useWindowSize();
   const classes = useStyles({ topOffset, leftOffset });
-  const { events } = props;
+  const { events, compact, level } = props;
+
+  const filter_events = events.filter((e) => e.l <= level);
 
   const styleLevel = (level: LogLevel) => {
     switch (level) {
@@ -103,23 +107,34 @@ const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
     }
   };
 
-  const paddedLevelLabel = (level: LogLevel) => {
+  const paddedLevelLabel = (level: LogLevel, compact: boolean) => {
     const label = levelLabel(level);
-    return label.padStart(8, '\xa0');
+    return compact ? ' ' + label[0] : label.padStart(8, '\xa0');
   };
 
-  const paddedNameLabel = (name: string) => {
+  const paddedNameLabel = (name: string, compact: boolean) => {
     const label = '[' + name + ']';
-    return label.padStart(8, '\xa0');
+    return compact ? label : label.padEnd(12, '\xa0');
+  };
+
+  const paddedIDLabel = (id: number, compact: boolean) => {
+    const label = id + ':';
+    return compact ? label : label.padEnd(7, '\xa0');
   };
 
   return (
     <Box id="log-window" className={classes.console}>
-      {events.map((e) => (
-        <div className={classes.entry}>
+      {filter_events.map((e) => (
+        <div className={classes.entry} key={e.i}>
           <span>{e.t}</span>
-          <span className={styleLevel(e.l)}>{paddedLevelLabel(e.l)} </span>
-          <span>{paddedNameLabel(e.n)} </span>
+          {compact && <span>{paddedLevelLabel(e.l, compact)} </span>}
+          {!compact && (
+            <span className={styleLevel(e.l)}>
+              {paddedLevelLabel(e.l, compact)}{' '}
+            </span>
+          )}
+          <span>{paddedIDLabel(e.i, compact)} </span>
+          <span>{paddedNameLabel(e.n, compact)} </span>
           <span>{e.m}</span>
         </div>
       ))}

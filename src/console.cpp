@@ -376,15 +376,8 @@ void EMSESPShell::add_console_commands() {
             DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
             JsonObject          json = doc.to<JsonObject>();
 
-            bool ok = false;
             // validate that a command is present
             if (arguments.size() < 2) {
-                // // no cmd specified, default to empty command
-                // if (Command::call(device_type, "", "", -1, json)) {
-                //     serializeJsonPretty(doc, shell);
-                //     shell.println();
-                //     return;
-                // }
                 shell.print(F("Missing command. Available commands are: "));
                 Command::show(shell, device_type, false); // non-verbose mode
                 return;
@@ -392,30 +385,36 @@ void EMSESPShell::add_console_commands() {
 
             const char * cmd = arguments[1].c_str();
 
+            uint8_t cmd_return = CommandRet::OK;
+
             if (arguments.size() == 2) {
                 // no value specified, just the cmd
-                ok = Command::call(device_type, cmd, nullptr, -1, json);
+                cmd_return = Command::call(device_type, cmd, nullptr, true, -1, json);
             } else if (arguments.size() == 3) {
                 if (strncmp(cmd, "info", 4) == 0) {
                     // info has a id but no value
-                    ok = Command::call(device_type, cmd, nullptr, atoi(arguments.back().c_str()), json);
+                    cmd_return = Command::call(device_type, cmd, nullptr, true, atoi(arguments.back().c_str()), json);
                 } else {
-                    // has a value but no id
-                    ok = Command::call(device_type, cmd, arguments.back().c_str(), -1, json);
+                    // has a value but no id so use -1
+                    cmd_return = Command::call(device_type, cmd, arguments.back().c_str(), true, -1, json);
                 }
             } else {
                 // use value, which could be an id or hc
-                ok = Command::call(device_type, cmd, arguments[2].c_str(), atoi(arguments[3].c_str()), json);
+                cmd_return = Command::call(device_type, cmd, arguments[2].c_str(), true, atoi(arguments[3].c_str()), json);
             }
 
-            if (ok && json.size()) {
+            if (cmd_return == CommandRet::OK && json.size()) {
                 serializeJsonPretty(doc, shell);
                 shell.println();
                 return;
-            } else if (!ok) {
-                shell.println(F("Unknown command, value, or id."));
+            }
+
+            if (cmd_return == CommandRet::NOT_FOUND) {
+                shell.println(F("Unknown command"));
                 shell.print(F("Available commands are: "));
                 Command::show(shell, device_type, false); // non-verbose mode
+            } else if (cmd_return != CommandRet::OK) {
+                shell.println(F("Bad syntax"));
             }
         },
         [&](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) -> std::vector<std::string> {
@@ -709,6 +708,47 @@ void Console::load_system_commands(unsigned int context) {
                                                                         });
                                                }
                                            });
+                                       });
+
+    EMSESPShell::commands->add_command(context,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(sensorname)},
+                                       flash_string_vector{F_(sensorid_optional), F_(name_optional), F_(offset_optional)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
+                                           if (arguments.size() == 0) {
+                                               EMSESP::webSettingsService.read([&](WebSettings & settings) {
+                                                   for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+                                                       if (!settings.sensor[i].id.isEmpty()) {
+                                                           shell.print(settings.sensor[i].id);
+                                                           shell.print(" : ");
+                                                           shell.print(settings.sensor[i].name);
+                                                           shell.print(" : ");
+                                                           char buf[10];
+                                                           shell.println(Helpers::render_value(buf, settings.sensor[i].offset, 10));
+                                                       }
+                                                   }
+                                               });
+                                               return;
+                                           }
+                                           if (arguments.size() == 1) {
+                                               EMSESP::dallassensor_.update(arguments.front().c_str(), "", 0);
+                                               // shell.println(EMSESP::dallassensor_.get_name(arguments.front().c_str()));
+                                               return;
+                                           }
+                                           int16_t offset = 0;
+                                           float   val;
+                                           if (arguments.size() == 2) {
+                                               if (Helpers::value2float(arguments.back().c_str(), val)) {
+                                                   offset = (10 * val);
+                                                   EMSESP::dallassensor_.update(arguments.front().c_str(), "", offset);
+                                                   return;
+                                               }
+                                           } else if (arguments.size() == 3) {
+                                               if (Helpers::value2float(arguments.back().c_str(), val)) {
+                                                   offset = (10 * val);
+                                               }
+                                           }
+                                           EMSESP::dallassensor_.update(arguments.front().c_str(), arguments[1].c_str(), offset);
                                        });
 
     EMSESPShell::commands

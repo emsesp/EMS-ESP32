@@ -41,12 +41,12 @@ void DallasSensor::start() {
         bus_.begin(dallas_gpio_);
 #endif
         // API calls
-        Command::add_with_json(
+        Command::add_json(
             EMSdevice::DeviceType::DALLASSENSOR,
             F_(info),
             [&](const char * value, const int8_t id, JsonObject & json) { return command_info(value, id, json); },
             F_(info_cmd));
-        Command::add_with_json(
+        Command::add_json(
             EMSdevice::DeviceType::DALLASSENSOR,
             F_(commands),
             [&](const char * value, const int8_t id, JsonObject & json) { return command_commands(value, id, json); },
@@ -57,8 +57,9 @@ void DallasSensor::start() {
 // load the MQTT settings
 void DallasSensor::reload() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        dallas_gpio_ = settings.dallas_gpio;
-        parasite_    = settings.dallas_parasite;
+        dallas_gpio_   = settings.dallas_gpio;
+        parasite_      = settings.dallas_parasite;
+        dallas_format_ = settings.dallas_format;
     });
 
     if (Mqtt::ha_enabled()) {
@@ -139,7 +140,11 @@ void DallasSensor::loop() {
                             bool found = false;
                             for (auto & sensor : sensors_) {
                                 if (sensor.id() == get_id(addr)) {
-                                    changed_ |= (t != sensor.temperature_c);
+                                    t += sensor.offset();
+                                    if (t != sensor.temperature_c) {
+                                        sensor.temperature_c = t;
+                                        changed_ |= true;
+                                    }
                                     sensor.temperature_c = t;
                                     sensor.read          = true;
                                     found                = true;
@@ -149,7 +154,7 @@ void DallasSensor::loop() {
                             // add new sensor
                             if (!found && (sensors_.size() < (MAX_SENSORS - 1))) {
                                 sensors_.emplace_back(addr);
-                                sensors_.back().temperature_c = t;
+                                sensors_.back().temperature_c = t + sensors_.back().offset();
                                 sensors_.back().read          = true;
                                 changed_                      = true;
                             }
@@ -183,7 +188,7 @@ void DallasSensor::loop() {
                     scancnt_ = 0;
                 } else if (scancnt_ == SCAN_START + 1) { // startup
                     firstscan_ = sensors_.size();
-                    LOG_DEBUG(F("Adding %d dallassensor(s) from first scan"), firstscan_);
+                    LOG_DEBUG(F("Adding %d dallas sensor(s) from first scan"), firstscan_);
                 } else if ((scancnt_ <= 0) && (firstscan_ != sensors_.size())) { // check 2 times for no change of sensor #
                     scancnt_ = SCAN_START;
                     sensors_.clear(); // restart scaning and clear to get correct numbering
@@ -293,7 +298,7 @@ uint64_t DallasSensor::Sensor::id() const {
     return id_;
 }
 
-std::string DallasSensor::Sensor::to_string() const {
+std::string DallasSensor::Sensor::id_string() const {
     std::string str(20, '\0');
     snprintf_P(&str[0],
                str.capacity() + 1,
@@ -303,6 +308,133 @@ std::string DallasSensor::Sensor::to_string() const {
                (unsigned int)(id_ >> 16) & 0xFFFF,
                (unsigned int)(id_)&0xFFFF);
     return str;
+}
+
+std::string DallasSensor::Sensor::to_string(const bool name) const {
+    std::string str = id_string();
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+        if (settings.dallas_format == Dallas_Format::NAME || name) {
+            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+                if (strcmp(settings.sensor[i].id.c_str(), str.c_str()) == 0) {
+                    str = settings.sensor[i].name.c_str();
+                }
+            }
+        }
+    });
+
+    return str;
+}
+
+int16_t DallasSensor::Sensor::offset() const {
+    std::string str    = id_string();
+    int16_t     offset = 0; // default value
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+        for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+            if (strcmp(settings.sensor[i].id.c_str(), str.c_str()) == 0) {
+                offset = settings.sensor[i].offset;
+            }
+        }
+    });
+
+    return offset;
+}
+
+// if HA enabled with MQTT Discovery, delete the old config entry by sending an empty topic
+// if we're using the name in the MQTT topic name (Dallas format = NAME)
+void DallasSensor::delete_ha_config(uint8_t index, const char * name) {
+    if (Mqtt::ha_enabled() && (dallas_format_ == Dallas_Format::NAME)) {
+        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        // use '_' as HA doesn't like '-' in the topic name
+        std::string topicname = name;
+        std::replace(topicname.begin(), topicname.end(), '-', '_');
+
+        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/dallassensor_%s/config"), Mqtt::base().c_str(), topicname.c_str());
+        Mqtt::publish(topic);
+        registered_ha_[index] = false; // forces a recreate of the HA config topic
+    }
+}
+
+// update dallas information like name and offset
+bool DallasSensor::update(const char * idstr, const char * name, int16_t offset) {
+    bool ok = false;
+    char id[20];
+    strlcpy(id, idstr, sizeof(id));
+
+    // check for number and convert to id
+    if (strlen(id) > 0 && strlen(id) <= 2 && id[0] >= '1' && id[0] <= '9') {
+        uint8_t no = atoi(idstr) - 1;
+        if (no < sensors_.size()) {
+            strlcpy(id, sensors_[no].id_string().c_str(), sizeof(id));
+        }
+    }
+
+    // check valid id
+    if (strlen(id) != 17 || id[2] != '-' || id[7] != '-' || id[12] != '-') {
+        LOG_WARNING(F("Invalid sensor id: %s"), id);
+        return ok;
+    }
+
+    EMSESP::webSettingsService.update(
+        [&](WebSettings & settings) {
+            // check for new name of stored id
+            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+                if (strcmp(id, settings.sensor[i].id.c_str()) == 0) {
+                    if (strlen(name) == 0 && offset == 0) { // delete entry if name and offset is empty
+                        LOG_INFO(F("Deleting entry for sensor %s"), id);
+                        delete_ha_config(i, settings.sensor[i].name.c_str());
+                        settings.sensor[i].id     = "";
+                        settings.sensor[i].name   = "";
+                        settings.sensor[i].offset = 0;
+                    } else {
+                        char result[10];
+                        LOG_INFO(F("Renaming sensor ID %s to %s with offset %s"), id, name, Helpers::render_value(result, offset, 10));
+                        delete_ha_config(i, settings.sensor[i].name.c_str()); // remove old name in HA
+                        settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
+                        settings.sensor[i].offset = offset;
+                    }
+                    ok = true;
+                    return StateUpdateResult::CHANGED;
+                }
+            }
+
+            // check for free place
+            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+                if (settings.sensor[i].id.isEmpty()) {
+                    settings.sensor[i].id     = id;
+                    settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
+                    settings.sensor[i].offset = offset;
+                    char result[10];
+                    LOG_INFO(F("Adding sensor ID %s to %s with offset %s"), id, name, Helpers::render_value(result, offset, 10));
+                    ok = true;
+                    return StateUpdateResult::CHANGED;
+                }
+            }
+
+            // check if there is a unused id and overwrite it
+            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+                bool found = false;
+                for (const auto & sensor : sensors_) {
+                    if (strcmp(sensor.id_string().c_str(), settings.sensor[i].id.c_str()) == 0) {
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    char result[10];
+                    LOG_INFO(F("Renaming sensor ID %s to %s with offset %s"), id, name, Helpers::render_value(result, offset, 10));
+                    delete_ha_config(i, settings.sensor[i].name.c_str()); // remove old name in HA
+                    settings.sensor[i].id     = id;
+                    settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
+                    settings.sensor[i].offset = offset;
+                    ok                        = true;
+                    return StateUpdateResult::CHANGED;
+                }
+            }
+
+            LOG_ERROR(F("No more empty sensor slots, remove one first"));
+            return StateUpdateResult::UNCHANGED;
+        },
+        "local");
+    return ok;
 }
 
 // check to see if values have been updated
@@ -338,10 +470,10 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
                 dataSensor["temp"] = (float)(sensor.temperature_c) / 10;
             }
         } else { // show according to format
-            if (Mqtt::dallas_format() == Mqtt::Dallas_Format::SENSORID && Helpers::hasValue(sensor.temperature_c)) {
-                json[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
-            } else if (Helpers::hasValue(sensor.temperature_c)) {
+            if (dallas_format_ == Dallas_Format::NUMBER && Helpers::hasValue(sensor.temperature_c)) {
                 json[sensorID] = (float)(sensor.temperature_c) / 10;
+            } else if (Helpers::hasValue(sensor.temperature_c)) {
+                json[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
             }
         }
     }
@@ -360,29 +492,22 @@ void DallasSensor::publish_values(const bool force) {
     DynamicJsonDocument doc(100 * num_sensors);
     uint8_t             sensor_no = 1;
 
-    // dallas format is overriden when using Home Assistant
-    // uint8_t dallas_format = Mqtt::ha_enabled() ? Mqtt::Dallas_Format::NUMBER : Mqtt::dallas_format();
-    uint8_t dallas_format = Mqtt::dallas_format();
-
     for (const auto & sensor : sensors_) {
         char sensorID[10]; // sensor{1-n}
         snprintf_P(sensorID, 10, PSTR("sensor%d"), sensor_no);
-        if (dallas_format == Mqtt::Dallas_Format::SENSORID) {
-            // e.g. dallassensor_data = {"28-EA41-9497-0E03":23.3,"28-233D-9497-0C03":24.0}
-            if (Helpers::hasValue(sensor.temperature_c)) {
-                doc[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
-            }
-        } else if (dallas_format == Mqtt::Dallas_Format::NUMBER) {
+        if (dallas_format_ == Dallas_Format::NUMBER) {
             // e.g. dallassensor_data = {"sensor1":{"id":"28-EA41-9497-0E03","temp":23.3},"sensor2":{"id":"28-233D-9497-0C03","temp":24.0}}
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = sensor.to_string();
             if (Helpers::hasValue(sensor.temperature_c)) {
                 dataSensor["temp"] = (float)(sensor.temperature_c) / 10;
             }
+        } else if (Helpers::hasValue(sensor.temperature_c)) {
+            doc[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
         }
 
         // create the HA MQTT config
-        // to e.g. homeassistant/sensor/ems-esp/dallas_28-233D-9497-0C03/config
+        // to e.g. homeassistant/sensor/ems-esp/dallassensor_28-233D-9497-0C03/config
         if (Mqtt::ha_enabled()) {
             if (!(registered_ha_[sensor_no - 1]) || force) {
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
@@ -395,7 +520,7 @@ void DallasSensor::publish_values(const bool force) {
                 config["unit_of_meas"] = FJSON("°C");
 
                 char str[50];
-                if (dallas_format == Mqtt::Dallas_Format::SENSORID) {
+                if (dallas_format_ != Dallas_Format::NUMBER) {
                     snprintf_P(str, sizeof(str), PSTR("{{value_json['%s']}}"), sensor.to_string().c_str());
                 } else {
                     snprintf_P(str, sizeof(str), PSTR("{{value_json.sensor%d.temp}}"), sensor_no);
@@ -403,14 +528,14 @@ void DallasSensor::publish_values(const bool force) {
                 config["val_tpl"] = str;
 
                 // name as sensor number not the long unique ID
-                if (dallas_format == Mqtt::Dallas_Format::SENSORID) {
+                if (dallas_format_ != Dallas_Format::NUMBER) {
                     snprintf_P(str, sizeof(str), PSTR("Dallas Sensor %s"), sensor.to_string().c_str());
                 } else {
                     snprintf_P(str, sizeof(str), PSTR("Dallas Sensor %d"), sensor_no);
                 }
                 config["name"] = str;
 
-                snprintf_P(str, sizeof(str), PSTR("dallas_%s"), sensor.to_string().c_str());
+                snprintf_P(str, sizeof(str), PSTR("dallasensor_%s"), sensor.to_string().c_str());
                 config["uniq_id"] = str;
 
                 JsonObject dev = config.createNestedObject("dev");
@@ -421,13 +546,13 @@ void DallasSensor::publish_values(const bool force) {
                 ids.add("ems-esp-dallas");                              // Different ids as the other portions of the EMS-ESP
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-                if (dallas_format == Mqtt::Dallas_Format::SENSORID) {
+                if (dallas_format_ == Dallas_Format::NUMBER) {
+                    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/dallassensor_%d/config"), Mqtt::base().c_str(), sensor_no);
+                } else {
                     // use '_' as HA doesn't like '-' in the topic name
                     std::string topicname = sensor.to_string();
                     std::replace(topicname.begin(), topicname.end(), '-', '_');
-                    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/dallas_sensor%s/config"), Mqtt::base().c_str(), topicname.c_str());
-                } else {
-                    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/dallas_sensor%d/config"), Mqtt::base().c_str(), sensor_no);
+                    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/dallassensor_%s/config"), Mqtt::base().c_str(), topicname.c_str());
                 }
                 Mqtt::publish_ha(topic, config.as<JsonObject>());
 

@@ -126,14 +126,6 @@ std::string Telegram::to_string_message() const {
 
 // checks if we have an Rx telegram that needs processing
 void RxService::loop() {
-    /*
-    while (!rx_telegrams_.empty()) {
-        auto telegram = rx_telegrams_.pop().telegram_;
-        (void)EMSESP::process_telegram(telegram); // further process the telegram
-        increment_telegram_count();               // increase rx count
-    }
-    */
-
     while (!rx_telegrams_.empty()) {
         auto telegram = rx_telegrams_.front().telegram_;
         (void)EMSESP::process_telegram(telegram); // further process the telegram
@@ -154,8 +146,12 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // validate the CRC. if it fails then increment the number of corrupt/incomplete telegrams and only report to console/syslog
     uint8_t crc = calculate_crc(data, length - 1);
     if (data[length - 1] != crc) {
-        telegram_error_count_++;
-        LOG_ERROR(F("Rx: %s (CRC %02X != %02X)"), Helpers::data_to_hex(data, length).c_str(), data[length - 1], crc);
+        if ((data[0] & 0x7F) != ems_bus_id()) { // do not count echos as errors
+            telegram_error_count_++;
+            LOG_WARNING(F("Incomplete Rx: %s"), Helpers::data_to_hex(data, length - 1).c_str()); // exclude CRC
+        } else {
+            LOG_TRACE(F("Incomplete Rx: %s"), Helpers::data_to_hex(data, length - 1).c_str()); // exclude CRC
+        }
         return;
     }
 
@@ -200,6 +196,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
     }
 
     // if we're watching and "raw" print out actual telegram as bytes to the console
+    // including the CRC at the end
     if (EMSESP::watch() == EMSESP::Watch::WATCH_RAW) {
         uint16_t trace_watch_id = EMSESP::watch_id();
         if ((trace_watch_id == WATCH_ID_NONE) || (type_id == trace_watch_id)
@@ -363,7 +360,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
               (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
               tx_telegram.id_,
-              Helpers::data_to_hex(telegram_raw, length).c_str());
+              Helpers::data_to_hex(telegram_raw, length - 1).c_str()); // exclude the last CRC byte
 
     set_post_send_query(tx_telegram.validateid_);
     // send the telegram to the UART Tx
@@ -426,6 +423,9 @@ void TxService::add(const uint8_t  operation,
         tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validateid); // add to front of queue
     } else {
         tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validateid); // add to back of queue
+    }
+    if (validateid != 0) {
+        EMSESP::wait_validate(validateid);
     }
 }
 
@@ -503,6 +503,9 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
         // tx_telegrams_.push_back(qtxt); // add to back of queue
         tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validate_id); // add to back of queue
     }
+    if (validate_id != 0) {
+        EMSESP::wait_validate(validate_id);
+    }
 }
 
 // send a Tx telegram to request data from an EMS device
@@ -566,11 +569,12 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
     if (++retry_count_ > MAXIMUM_TX_RETRIES) {
         reset_retry_count();             // give up
         increment_telegram_fail_count(); // another Tx fail
+        EMSESP::wait_validate(0);        // do not wait for validation
 
         LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request: %s"),
                   (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
-                  MAXIMUM_TX_RETRIES),
-            telegram_last_->to_string().c_str();
+                  MAXIMUM_TX_RETRIES,
+                  telegram_last_->to_string().c_str());
         return;
     }
 
@@ -579,7 +583,7 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
               (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
               retry_count_,
               telegram_last_->to_string().c_str(),
-              Helpers::data_to_hex(data, length).c_str());
+              Helpers::data_to_hex(data, length - 1).c_str());
 #endif
 
     // add to the top of the queue

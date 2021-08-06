@@ -9,7 +9,7 @@
 
 #include <uuid/common.h>
 
-#define MQTT_RECONNECTION_DELAY 1000
+#define MQTT_RECONNECTION_DELAY 2000 // 2 seconds
 
 #define MQTT_SETTINGS_FILE "/config/mqttSettings.json"
 #define MQTT_SETTINGS_SERVICE_PATH "/rest/mqttSettings"
@@ -86,8 +86,6 @@ class MqttSettings {
     uint16_t publish_time_sensor;
     uint8_t  mqtt_qos;
     bool     mqtt_retain;
-    uint8_t  dallas_format;
-    uint8_t  bool_format;
     uint8_t  ha_climate_format;
     bool     ha_enabled;
     uint8_t  nested_format;

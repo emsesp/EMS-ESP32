@@ -17,7 +17,7 @@
  */
 
 #include "helpers.h"
-#include "mqtt.h"
+#include "emsesp.h"
 
 namespace emsesp {
 
@@ -36,13 +36,13 @@ char * Helpers::hextoa(char * result, const uint8_t value) {
 #ifdef EMSESP_STANDALONE
 // special function to work outside of ESP's libraries
 char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
-    unsigned long t = 0, res = 0;
-    unsigned long tmp   = value;
-    int           count = 0;
-
     if (NULL == ptr) {
         return NULL;
     }
+
+    unsigned long t     = 0;
+    unsigned long tmp   = value;
+    int           count = 0;
 
     if (tmp == 0) {
         count++;
@@ -56,6 +56,8 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
     ptr += count;
 
     *ptr = '\0';
+
+    unsigned long res = 0;
 
     do {
         res = value - base * (t = value / base);
@@ -124,7 +126,7 @@ char * Helpers::smallitoa(char * result, const uint16_t value) {
 
 // work out how to display booleans
 char * Helpers::render_boolean(char * result, bool value) {
-    uint8_t bool_format_ = Mqtt::bool_format();
+    uint8_t bool_format_ = EMSESP::bool_format();
     if (bool_format_ == BOOL_FORMAT_ONOFF) {
         strlcpy(result, value ? uuid::read_flash_string(F_(on)).c_str() : uuid::read_flash_string(F_(off)).c_str(), 5);
     } else if (bool_format_ == BOOL_FORMAT_ONOFF_CAP) {
@@ -417,12 +419,15 @@ bool Helpers::value2number(const char * v, int & value) {
 
 // checks if we can convert a char string to a float value
 bool Helpers::value2float(const char * v, float & value) {
+    value = 0;
     if ((v == nullptr) || (strlen(v) == 0)) {
-        value = 0;
         return false;
     }
-    value = atof((char *)v);
-    return true;
+    if (v[0] == '-' || v[0] == '.' || (v[0] >= '0' && v[0] <= '9')) {
+        value = atof((char *)v);
+        return true;
+    }
+    return false;
 }
 
 // https://stackoverflow.com/questions/313970/how-to-convert-stdstring-to-lower-case

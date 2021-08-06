@@ -92,10 +92,7 @@ class Telegram {
         }
         uint8_t val = value;
         value       = (uint8_t)(((this->message_data[abs_index]) >> (bit)) & 0x01);
-        if (val != value) {
-            return true;
-        }
-        return false;
+        return (val != value);
     }
 
     // read a value from a telegram. We always store the value, regardless if its garbage
@@ -116,10 +113,16 @@ class Telegram {
         for (uint8_t i = 0; i < num_bytes; i++) {
             value = (value << 8) + this->message_data[index - this->offset + i]; // shift by byte
         }
-        if (val != value) {
-            return true;
+        return (val != value);
+    }
+
+    bool read_enumvalue(uint8_t & value, const uint8_t index, uint8_t start = 0) const {
+        if ((index < this->offset) || ((index - this->offset) >= this->message_length)) {
+            return false;
         }
-        return false;
+        uint8_t val = value;
+        value       = this->message_data[index - this->offset] - start;
+        return (val != value);
     }
 
   private:

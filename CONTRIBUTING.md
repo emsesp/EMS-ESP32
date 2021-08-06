@@ -24,17 +24,17 @@ This document describes rules that are in effect for this repository, meant for 
 
 ## Triaging of Issues/PR's
 
-1.	Any contributor to the project can participate in the triaging process, if he/she chooses to do so.
-2.	An issue that needs to be closed, either due to not complying with this policy, or for other reasons, should be closed by a contributor.
-3.	Issues that are accepted should be marked with appropriate labels.
-4.	Issues that could impact functionality for many users should be considered severe.
-5.	Issues caused by the SDK or chip should not be marked severe, as there usually isn’t much to be done. Common sense should be applied when deciding. Such issues should be documented in the documentation, for reference by users.
-6.	Issues with feature requests should be discussed for viability/desirability.
-7.	Feature requests or changes that are meant to address a very specific/limited use case, especially if at the expense of increased code complexity, may be denied, or may be required to be redesigned, generalized, or simplified.
-8.	Feature requests that are not accompanied by a PR:
-    * could be closed immediately (denied).
-    * could be closed after some predetermined period of time (left as candidate for somebody to pick up).
-9.	In some cases, feedback may be requested from the issue reporter, either as additional info for clarification, additional testing, or other. If no feedback is provided, the issue may be closed by a contributor or after 40 days by the STALE bot.
+1. Any contributor to the project can participate in the triaging process, if he/she chooses to do so.
+2. An issue that needs to be closed, either due to not complying with this policy, or for other reasons, should be closed by a contributor.
+3. Issues that are accepted should be marked with appropriate labels.
+4. Issues that could impact functionality for many users should be considered severe.
+5. Issues caused by the SDK or chip should not be marked severe, as there usually isn’t much to be done. Common sense should be applied when deciding. Such issues should be documented in the documentation, for reference by users.
+6. Issues with feature requests should be discussed for viability/desirability.
+7. Feature requests or changes that are meant to address a very specific/limited use case, especially if at the expense of increased code complexity, may be denied, or may be required to be redesigned, generalized, or simplified.
+8. Feature requests that are not accompanied by a PR:
+    - could be closed immediately (denied).
+    - could be closed after some predetermined period of time (left as candidate for somebody to pick up).
+9. In some cases, feedback may be requested from the issue reporter, either as additional info for clarification, additional testing, or other. If no feedback is provided, the issue may be closed by a contributor or after 40 days by the STALE bot.
 
 ## Pull requests
 
@@ -42,24 +42,24 @@ A Pull Request (PR) is the process where code modifications are managed in GitHu
 
 The process is straight-forward.
 
- - Read [How to get faster PR reviews](https://github.com/kubernetes/community/blob/master/contributors/guide/pull-requests.md#best-practices-for-faster-reviews) by Kubernetes (but skip step 0)
- - Fork the EMS-ESP Repository [git repository](https://github.com/emsesp/EMS-ESP32).
- - Write/Change the code in your Fork for a new feature, bug fix, new sensor, optimization, etc.
- - Ensure tests work.
- - Create a Pull Request against the [**dev**](https://github.com/emsesp/EMS-ESP32/tree/dev) branch of EMS-ESP.
+- Read [How to get faster PR reviews](https://github.com/kubernetes/community/blob/master/contributors/guide/pull-requests.md#best-practices-for-faster-reviews) by Kubernetes (but skip step 0)
+- Fork the EMS-ESP Repository [git repository](https://github.com/emsesp/EMS-ESP32).
+- Write/Change the code in your Fork for a new feature, bug fix, new sensor, optimization, etc.
+- Ensure tests work.
+- Create a Pull Request against the [**dev**](https://github.com/emsesp/EMS-ESP32/tree/dev) branch of EMS-ESP.
 
 1. All pull requests must be done against the dev branch.
-2. Make sure code is formatting per the `.clang-format`
-3. Only relevant files should be touched (Also beware if your editor has auto-formatting feature enabled).
-4. Only one feature/fix should be added per PR.
-5. PRs that don't compile (fail in CI Tests) or cause coding errors will not be merged. Please fix the issue. Same goes for PRs that are raised against older commit in dev - you might need to rebase and resolve conflicts.
-6. All pull requests should undergo peer review by at least one contributor other than the creator, excepts for the owner.
-7. All pull requests should consider updates to the documentation.
-8. Pull requests that address an outstanding issue, particularly an issue deemed to be severe, should be given priority.
-9. If a PR is accepted, then it should undergo review and updated based on the feedback provided, then merged.
-10. By submitting a PR, it is needed to use the provided PR template and check all boxes, performing the required tasks and accepting the CLA.
-11. Pull requests that don't meet the above will be denied and closed.
-
+2. Make sure code is formatting per the `.clang-format`.
+3. Make sure any new code is clearly commented explaining what the function/logic does.
+4. Only relevant files should be touched (Also beware if your editor has auto-formatting feature enabled).
+5. Only one feature/fix should be added per PR.
+6. PRs that don't compile (fail in CI Tests) or cause coding errors will not be merged. Please fix the issue. Same goes for PRs that are raised against older commit in dev - you might need to rebase and resolve conflicts.
+7. All pull requests should undergo peer review by at least one contributor other than the creator, excepts for the owner.
+8. All pull requests should consider updates to the documentation.
+9. Pull requests that address an outstanding issue, particularly an issue deemed to be severe, should be given priority.
+10. If a PR is accepted, then it should undergo review and updated based on the feedback provided, then merged.
+11. By submitting a PR, it is needed to use the provided PR template and check all boxes, performing the required tasks and accepting the CLA.
+12. Pull requests that don't meet the above will be denied and closed.
 
 ## Semantic Commit Messages
 
@@ -92,7 +92,7 @@ More Examples:
 
 References:
 
-- https://www.conventionalcommits.org/
+- <https://www.conventionalcommits.org/>
 
 --------------------------------------
 

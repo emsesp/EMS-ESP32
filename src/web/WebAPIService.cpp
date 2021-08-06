@@ -26,7 +26,7 @@ namespace emsesp {
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager)
-    , _apiHandler("/api", std::bind(&WebAPIService::webAPIService_post, this, _1, _2), 256) { // for POSTS
+    , _apiHandler("/api", std::bind(&WebAPIService::webAPIService_post, this, _1, _2), 256) { // for POSTS, must use 'Content-Type: application/json' in header
     server->on("/api", HTTP_GET, std::bind(&WebAPIService::webAPIService_get, this, _1));     // for GETS
     server->addHandler(&_apiHandler);
 }
@@ -47,7 +47,7 @@ void WebAPIService::webAPIService_get(AsyncWebServerRequest * request) {
 // HTTP_POST | HTTP_PUT | HTTP_PATCH
 // POST/PUT /{device}[/{hc}][/{name}]
 void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json) {
-    // extra the params from the json body
+    // if no body then treat it as a secure GET
     if (not json.is<JsonObject>()) {
         webAPIService_get(request);
         return;
@@ -126,7 +126,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
             id_n = Helpers::atoint(request->getParam("hc")->value().c_str());
         }
     } else {
-        // parse paths and json data
+        // parse paths and json data from the OpenAPI standard
         // /{device}[/{hc}][/{name}]
         // first param must be a valid device, which includes "system"
         device_s = p.paths().front();
@@ -158,35 +158,46 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
 
     // check that we have permissions first. We require authenticating on 1 or more of these conditions:
     //  1. any HTTP POSTs or PUTs
-    //  2. a HTTP GET which has a 'data' parameter which is not empty (to keep v2 compatibility)
-    auto method    = request->method();
-    bool have_data = !value_s.empty();
-    bool admin_allowed;
+    //  2. an HTTP GET which has a 'data' parameter which is not empty (to keep v2 compatibility)
+    auto method        = request->method();
+    bool have_data     = !value_s.empty();
+    bool authenticated = false;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         Authentication authentication = _securityManager->authenticateRequest(request);
-        admin_allowed                 = settings.notoken_api | AuthenticationPredicates::IS_ADMIN(authentication);
+        authenticated                 = settings.notoken_api | AuthenticationPredicates::IS_ADMIN(authentication);
     });
 
     if ((method != HTTP_GET) || ((method == HTTP_GET) && have_data)) {
-        if (!admin_allowed) {
+        if (!authenticated) {
             send_message_response(request, 401, "Bad credentials"); // Unauthorized
             return;
         }
     }
 
-    // now we have all the parameters go and execute the command
     PrettyAsyncJsonResponse * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
     JsonObject                json     = response->getRoot();
 
-    bool ok = Command::call(device_type, cmd_s.c_str(), (have_data ? value_s.c_str() : nullptr), id_n, json);
+    // now we have all the parameters go and execute the command
+    // the function will also determine if authentication is needed to execute its command
+    uint8_t cmd_reply = Command::call(device_type, cmd_s.c_str(), (have_data ? value_s.c_str() : nullptr), authenticated, id_n, json);
 
     // check for errors
-    if (!ok) {
+    if (cmd_reply == CommandRet::NOT_FOUND) {
+        delete response;
+        send_message_response(request, 400, "Command not found"); // Bad Request
+        return;
+    } else if (cmd_reply == CommandRet::NOT_ALLOWED) {
+        delete response;
+        send_message_response(request, 401, "Bad credentials"); // Unauthorized
+        return;
+    } else if (cmd_reply != CommandRet::OK) {
+        delete response;
         send_message_response(request, 400, "Problems parsing elements"); // Bad Request
         return;
     }
 
     if (!json.size()) {
+        delete response;
         send_message_response(request, 200, "OK"); // OK
         return;
     }

@@ -118,8 +118,11 @@ void Shower::send_mqtt_stat(bool state, bool force) {
         doc["uniq_id"] = FJSON("shower_active");
         doc["~"]       = Mqtt::base(); // default ems-esp
         doc["stat_t"]  = FJSON("~/shower_active");
-        JsonObject dev = doc.createNestedObject("dev");
-        JsonArray  ids = dev.createNestedArray("ids");
+        char result[10];
+        doc[F("payload_on")]  = Helpers::render_boolean(result, true);
+        doc[F("payload_off")] = Helpers::render_boolean(result, false);
+        JsonObject dev        = doc.createNestedObject("dev");
+        JsonArray  ids        = dev.createNestedArray("ids");
         ids.add("ems-esp");
 
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -132,7 +135,7 @@ void Shower::send_mqtt_stat(bool state, bool force) {
 void Shower::shower_alert_stop() {
     if (doing_cold_shot_) {
         LOG_DEBUG(F("Shower Alert stopped"));
-        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "true");
+        (void)Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "true", true); // no need to check authentication
         doing_cold_shot_ = false;
     }
 }
@@ -140,7 +143,7 @@ void Shower::shower_alert_stop() {
 void Shower::shower_alert_start() {
     if (shower_alert_) {
         LOG_DEBUG(F("Shower Alert started"));
-        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
+        (void)Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false", true); // no need to check authentication
         doing_cold_shot_   = true;
         alert_timer_start_ = uuid::get_uptime(); // timer starts now
     }
@@ -151,19 +154,9 @@ void Shower::shower_alert_start() {
 void Shower::publish_values() {
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
 
-    if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF) {
-        doc["shower_timer"] = shower_timer_ ? "on" : "off";
-        doc["shower_alert"] = shower_alert_ ? "on" : "off";
-    } else if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF_CAP) {
-        doc["shower_timer"] = shower_timer_ ? "ON" : "OFF";
-        doc["shower_alert"] = shower_alert_ ? "ON" : "OFF";
-    } else if (Mqtt::bool_format() == BOOL_FORMAT_TRUEFALSE) {
-        doc["shower_timer"] = shower_timer_;
-        doc["shower_alert"] = shower_alert_;
-    } else {
-        doc["shower_timer"] = shower_timer_ ? 1 : 0;
-        doc["shower_alert"] = shower_alert_ ? 1 : 0;
-    }
+    char result[10];
+    doc["shower_timer"] = Helpers::render_boolean(result, shower_timer_);
+    doc["shower_alert"] = Helpers::render_boolean(result, shower_alert_);
 
     // only publish shower duration if there is a value
     if (duration_ > SHOWER_MIN_DURATION) {

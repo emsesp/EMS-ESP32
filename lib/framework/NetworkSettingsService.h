@@ -6,7 +6,10 @@
 #include <HttpEndpoint.h>
 #include <JsonUtils.h>
 
+#ifndef EMSESP_STANDALONE
+#include <esp_wifi.h>
 #include <ETH.h>
+#endif
 
 #define NETWORK_SETTINGS_FILE "/config/networkSettings.json"
 #define NETWORK_SETTINGS_SERVICE_PATH "/rest/networkSettings"
@@ -27,10 +30,14 @@
 class NetworkSettings {
   public:
     // core wifi configuration
-    String  ssid;
-    String  password;
-    String  hostname;
-    bool    staticIPConfig;
+    String ssid;
+    String password;
+    String hostname;
+    bool   staticIPConfig;
+    bool   enableIPv6;
+    bool   bandwidth20;
+    int8_t tx_power;
+    bool   nosleep;
 
     // optional configuration for static IP address
     IPAddress localIP;
@@ -45,6 +52,10 @@ class NetworkSettings {
         root["password"]         = settings.password;
         root["hostname"]         = settings.hostname;
         root["static_ip_config"] = settings.staticIPConfig;
+        root["enableIPv6"]       = settings.enableIPv6;
+        root["bandwidth20"]      = settings.bandwidth20;
+        root["tx_power"]         = settings.tx_power;
+        root["nosleep"]          = settings.nosleep;
 
         // extended settings
         JsonUtils::writeIP(root, "local_ip", settings.localIP);
@@ -55,10 +66,14 @@ class NetworkSettings {
     }
 
     static StateUpdateResult update(JsonObject & root, NetworkSettings & settings) {
-        settings.ssid             = root["ssid"] | FACTORY_WIFI_SSID;
-        settings.password         = root["password"] | FACTORY_WIFI_PASSWORD;
-        settings.hostname         = root["hostname"] | FACTORY_WIFI_HOSTNAME;
-        settings.staticIPConfig   = root["static_ip_config"] | false;
+        settings.ssid           = root["ssid"] | FACTORY_WIFI_SSID;
+        settings.password       = root["password"] | FACTORY_WIFI_PASSWORD;
+        settings.hostname       = root["hostname"] | FACTORY_WIFI_HOSTNAME;
+        settings.staticIPConfig = root["static_ip_config"] | false;
+        settings.enableIPv6     = root["enableIPv6"] | false;
+        settings.bandwidth20    = root["bandwidth20"] | false;
+        settings.tx_power       = root["tx_power"] | 20;
+        settings.nosleep        = root["nosleep"] | false;
 
         // extended settings
         JsonUtils::readIP(root, "local_ip", settings.localIP);

@@ -45,6 +45,13 @@ class String {
         return _str == s;
     }
 
+    bool concat(const char * rhs) {
+        if (!rhs) {
+            return 0;
+        }
+        _str += rhs;
+        return 1;
+    }
 
   private:
     std::string _str;
@@ -54,6 +61,10 @@ class StringSumHelper;
 
 inline bool operator==(const std::string & lhs, const ::String & rhs) {
     return lhs == rhs.c_str();
+}
+
+inline bool operator!=(const ::String & lhs, const ::String & rhs) {
+    return lhs.c_str() != rhs.c_str();
 }
 
 size_t strlcpy(char * __restrict dst, const char * __restrict src, size_t dsize);

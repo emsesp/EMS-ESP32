@@ -36,6 +36,8 @@
 
 namespace emsesp {
 
+enum Dallas_Format : uint8_t { SENSORID = 1, NUMBER, NAME };
+
 class DallasSensor {
   public:
     class Sensor {
@@ -44,7 +46,9 @@ class DallasSensor {
         ~Sensor() = default;
 
         uint64_t    id() const;
-        std::string to_string() const;
+        std::string id_string() const;
+        std::string to_string(const bool name = false) const;
+        int16_t     offset() const;
 
         int16_t temperature_c = EMS_VALUE_SHORT_NOTSET;
         bool    read          = false;
@@ -75,6 +79,16 @@ class DallasSensor {
     bool dallas_enabled() {
         return (dallas_gpio_ != 0);
     }
+
+    uint8_t dallas_format() {
+        return dallas_format_;
+    }
+
+    void dallas_format(uint8_t dallas_format) {
+        dallas_format_ = dallas_format;
+    }
+
+    bool update(const char * idstr, const char * name, int16_t offset);
 
   private:
     static constexpr uint8_t MAX_SENSORS = 20;
@@ -119,21 +133,23 @@ class DallasSensor {
     bool command_info(const char * value, const int8_t id, JsonObject & json);
     bool command_commands(const char * value, const int8_t id, JsonObject & json);
 
+    void delete_ha_config(uint8_t index, const char * name);
+
     uint32_t            last_activity_ = uuid::get_uptime();
-    uint32_t            last_publish_  = uuid::get_uptime();
     State               state_         = State::IDLE;
     std::vector<Sensor> sensors_;
 
     bool registered_ha_[MAX_SENSORS];
 
-    int8_t   scancnt_     = SCAN_START;
-    uint8_t  firstscan_   = 0;
-    uint8_t  dallas_gpio_ = 0;
-    bool     parasite_    = false;
-    bool     changed_     = false;
-    uint32_t sensorfails_ = 0;
-    uint32_t sensorreads_ = 0;
-    int8_t   scanretry_   = 0;
+    int8_t   scancnt_       = SCAN_START;
+    uint8_t  firstscan_     = 0;
+    uint8_t  dallas_gpio_   = 0;
+    bool     parasite_      = false;
+    bool     changed_       = false;
+    uint32_t sensorfails_   = 0;
+    uint32_t sensorreads_   = 0;
+    int8_t   scanretry_     = 0;
+    uint8_t  dallas_format_ = 0;
 };
 
 } // namespace emsesp

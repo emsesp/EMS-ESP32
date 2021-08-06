@@ -51,27 +51,39 @@ class ValueForm extends React.Component<ValueFormProps> {
         >
           <DialogTitle id="user-form-dialog-title">Change Value</DialogTitle>
           <DialogContent dividers>
-            {devicevalue.u !== DeviceValueUOM.BOOLEAN && (
-              <OutlinedInput
-                id="outlined-adornment-value"
+            {devicevalue.u === DeviceValueUOM.LIST && (
+              <TextField
+                id="outlined-select-value"
+                select
                 value={devicevalue.v}
                 autoFocus
                 fullWidth
                 onChange={handleValueChange('v')}
-                endAdornment={
-                  <InputAdornment position="end">
-                    {DeviceValueUOM_s[devicevalue.u]}
-                  </InputAdornment>
-                }
-                aria-describedby="outlined-value-helper-text"
-                inputProps={{
-                  'aria-label': 'value'
-                }}
-              />
+                variant="outlined"
+              >
+                {devicevalue.l.map((val) => (
+                  <MenuItem value={val}>{val}</MenuItem>
+                ))}
+              </TextField>
             )}
+            {devicevalue.u !== DeviceValueUOM.BOOLEAN &&
+              devicevalue.u !== DeviceValueUOM.LIST && (
+                <OutlinedInput
+                  id="value"
+                  value={devicevalue.v}
+                  autoFocus
+                  fullWidth
+                  onChange={handleValueChange('v')}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      {DeviceValueUOM_s[devicevalue.u]}
+                    </InputAdornment>
+                  }
+                />
+              )}
             {devicevalue.u === DeviceValueUOM.BOOLEAN && (
               <TextField
-                id="outlined-select-value"
+                id="selected-value"
                 select
                 value={devicevalue.v}
                 autoFocus
@@ -83,9 +95,7 @@ class ValueForm extends React.Component<ValueFormProps> {
                 <MenuItem value="false">off</MenuItem>
               </TextField>
             )}
-            <FormHelperText id="outlined-value-helper-text">
-              {devicevalue.n}
-            </FormHelperText>
+            <FormHelperText>{devicevalue.n}</FormHelperText>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>
               <Typography variant="body2">
                 <i>

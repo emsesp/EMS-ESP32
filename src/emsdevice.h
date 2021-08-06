@@ -39,7 +39,8 @@ enum DeviceValueType : uint8_t {
     ULONG,
     TIME, // same as ULONG (32 bits)
     ENUM,
-    TEXT
+    TEXT,
+    CMD // special for commands only
 
 };
 
@@ -64,7 +65,8 @@ enum DeviceValueUOM : uint8_t {
     SECONDS,  // 13
     DBM,      // 14
     NUM,      // 15
-    BOOLEAN   // 16
+    BOOLEAN,  // 16
+    LIST      // 17
 
 };
 
@@ -118,9 +120,6 @@ enum DeviceValueTAG : uint8_t {
 
 };
 
-// mqtt flags for command subscriptions
-enum MqttSubFlag : uint8_t { FLAG_NORMAL = 0, FLAG_HC, FLAG_WWC, FLAG_NOSUB };
-
 // mqtt-HA flags
 enum DeviceValueHA : uint8_t { HA_NONE = 0, HA_VALUE, HA_DONE };
 
@@ -168,6 +167,7 @@ class EMSdevice {
         return ((device_id & 0x7F) == (device_id_ & 0x7F));
     }
 
+    // flags
     inline void add_flags(uint8_t flags) {
         flags_ |= flags;
     }
@@ -239,7 +239,7 @@ class EMSdevice {
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
 
-    void register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p cb);
+    void register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, const process_function_p cb);
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);
 
     std::string get_value_uom(const char * key);
@@ -263,7 +263,7 @@ class EMSdevice {
                                const __FlashStringHelper * const * options,
                                const __FlashStringHelper * const * name,
                                uint8_t                             uom,
-                               cmdfunction_p                       f,
+                               const cmd_function_p                f,
                                int32_t                             min,
                                uint32_t                            max);
     void register_device_value(uint8_t                             tag,
@@ -272,22 +272,21 @@ class EMSdevice {
                                const __FlashStringHelper * const * options,
                                const __FlashStringHelper * const * name,
                                uint8_t                             uom,
-                               cmdfunction_p                       f);
+                               const cmd_function_p                f);
     void register_device_value(uint8_t                             tag,
                                void *                              value_p,
                                uint8_t                             type,
                                const __FlashStringHelper * const * options,
                                const __FlashStringHelper * const * name,
                                uint8_t                             uom);
-    // void register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom, int32_t min, uint32_t max);
 
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value);
+
     void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0);
 
-    void register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f);
-    // void register_cmd(const __FlashStringHelper * cmd, cmdfunction_p f, uint8_t flag = 0);
+    void register_mqtt_topic(const std::string & topic, const mqtt_sub_function_p f);
 
     void publish_mqtt_ha_sensor();
 
@@ -403,7 +402,7 @@ class EMSdevice {
         bool                        fetch_;              // if this type_id be queried automatically
         process_function_p          process_function_;
 
-        TelegramFunction(uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p process_function)
+        TelegramFunction(uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, const process_function_p process_function)
             : telegram_type_id_(telegram_type_id)
             , telegram_type_name_(telegram_type_name)
             , fetch_(fetch)

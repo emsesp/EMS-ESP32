@@ -28,7 +28,12 @@
 #define EMSESP_SETTINGS_SERVICE_PATH "/rest/emsespSettings"
 #define EMSESP_BOARD_PROFILE_SERVICE_PATH "/rest/boardProfile"
 
+#define NUM_SENSOR_NAMES 10
+
 namespace emsesp {
+
+enum { BOOL_FORMAT_ONOFF = 1, BOOL_FORMAT_ONOFF_CAP, BOOL_FORMAT_TRUEFALSE, BOOL_FORMAT_10 }; // matches Web UI settings
+enum { ENUM_FORMAT_TEXT = 1, ENUM_FORMAT_NUMBER };                                            // matches Web UI settings
 
 class WebSettings {
   public:
@@ -50,11 +55,21 @@ class WebSettings {
     bool     dallas_parasite;
     uint8_t  led_gpio;
     bool     hide_led;
+    bool     low_clock;
     bool     notoken_api;
     bool     analog_enabled;
     uint8_t  pbutton_gpio;
     uint8_t  solar_maxflow;
     String   board_profile;
+    uint8_t  dallas_format;
+    uint8_t  bool_format;
+    uint8_t  enum_format;
+
+    struct {
+        String  id;
+        String  name;
+        int16_t offset;
+    } sensor[NUM_SENSOR_NAMES];
 
     static void              read(WebSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebSettings & settings);

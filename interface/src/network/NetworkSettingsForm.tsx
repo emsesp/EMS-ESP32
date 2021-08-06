@@ -51,7 +51,11 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
         ssid: selectedNetwork.ssid,
         password: '',
         hostname: props.data.hostname,
-        static_ip_config: false
+        static_ip_config: false,
+        enableIPv6: false,
+        bandwidth20: false,
+        tx_power: 20,
+        nosleep: false
       };
       props.setData(networkSettings);
     }
@@ -145,6 +149,53 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
           onChange={handleValueChange('hostname')}
           margin="normal"
         />
+        <TextValidator
+          validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:20']}
+          errorMessages={[
+            'Tx Power is required',
+            'Must be a number',
+            'Must be greater than 0dBm ',
+            'Max value is 20dBm'
+          ]}
+          name="tx_power"
+          label="WiFi Tx Power (dBm)"
+          fullWidth
+          variant="outlined"
+          value={data.tx_power}
+          type="number"
+          onChange={handleValueChange('tx_power')}
+          margin="normal"
+        />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              value="enableIPv6"
+              checked={data.enableIPv6}
+              onChange={handleValueChange('enableIPv6')}
+            />
+          }
+          label="Enable IPv6 support"
+        />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              value="bandwidth20"
+              checked={data.bandwidth20}
+              onChange={handleValueChange('bandwidth20')}
+            />
+          }
+          label="Use Lower WiFi Bandwidth"
+        />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              value="nosleep"
+              checked={data.nosleep}
+              onChange={handleValueChange('nosleep')}
+            />
+          }
+          label="Disable WiFi Sleep Mode"
+        />
         <BlockFormControlLabel
           control={
             <Checkbox
@@ -153,7 +204,7 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
               onChange={handleValueChange('static_ip_config')}
             />
           }
-          label="Static IP Config"
+          label="Use Static IPs"
         />
         {data.static_ip_config && (
           <Fragment>

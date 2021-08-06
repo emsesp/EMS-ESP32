@@ -1,22 +1,31 @@
 ; example custom platformio.ini file for EMS-ESP
 
-[env]
+[common]
+; e.g. use build_flags = -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
+debug_flags = -DEMSESP_WIFI_TWEAK -DEMSESP_DEBUG
+; debug_flags =
+
+[env:esp32]
+; if using OTA enter your details below
 upload_protocol = espota
 upload_flags = 
   --port=8266
   --auth=ems-esp-neo
 upload_port = 10.10.10.101
+; to prevent the web UI from building each time, uncomment this next line
+; extra_scripts =
 
-[common]
-; options are EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
-; plus all the settings in default_settings.h, e.g. -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
-; debug_flags = -DEMSESP_DEBUG
-
-[env:esp32]
+; pio run -e debug
+; or from Visual Studio Code do PIO -> Project Tasks -> debug -> General -> Upload and Monitor
+; options for debugging are: EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
+[env:debug]
+board = esp32dev
+platform = espressif32
+board_build.partitions = esp32_partition_debug.csv
+upload_protocol = esptool
+build_type = debug
 monitor_filters = esp32_exception_decoder
 debug_tool = esp-prog
 debug_init_break = tbreak setup
-extra_scripts =
-  ; to prevent the web UI from building each time, comment out this next line
-  ; pre:scripts/build_interface.py
-
+build_flags = ${factory_settings.build_flags} ${common.debug_flags} -DONEWIRE_CRC16=0 -DNO_GLOBAL_ARDUINOOTA -DARDUINOJSON_ENABLE_STD_STRING=1 -DESP32=1 -DARDUINO_ARCH_ESP32=1
+extra_scripts = pre:scripts/build_interface.py

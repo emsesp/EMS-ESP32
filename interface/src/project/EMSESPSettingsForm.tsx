@@ -32,7 +32,7 @@ import {
   BlockFormControlLabel
 } from '../components';
 
-import { isIP, optional } from '../validators';
+import { isIPv4, optional, isHostname, or } from '../validators';
 
 import { EMSESPSettings } from './EMSESPtypes';
 
@@ -55,7 +55,10 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
   };
 
   componentDidMount() {
-    ValidatorForm.addValidationRule('isOptionalIP', optional(isIP));
+    ValidatorForm.addValidationRule(
+      'isOptionalIPorHost',
+      optional(or(isIPv4, isHostname))
+    );
   }
 
   changeBoardProfile = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -109,15 +112,17 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
       <ValidatorForm onSubmit={saveData}>
         <Box bgcolor="info.main" p={2} mt={2} mb={2}>
           <Typography variant="body1">
-            Adjust any of the EMS-ESP settings here. For help refer to the{' '}
-            <Link
-              target="_blank"
-              href="https://emsesp.github.io/docs/#/Configure-firmware32?id=ems-esp-settings"
-              color="primary"
-            >
-              {'online documentation'}
-            </Link>
-            .
+            <i>
+              Refer to the
+              <Link
+                target="_blank"
+                href="https://emsesp.github.io/docs/#/Configure-firmware32?id=ems-esp-settings"
+                color="primary"
+              >
+                {' documentation'}
+              </Link>
+              &nbsp;for information on each setting
+            </i>
           </Typography>
         </Box>
 
@@ -202,7 +207,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
           <Typography variant="body2">
             <i>
               Select a pre-configured board layout to automatically set the GPIO
-              pins, or set your own custom configuration
+              pins. Select "Custom..." to view or manually edit the values.
             </i>
           </Typography>
         </Box>
@@ -365,7 +370,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
 
         <br></br>
         <Typography variant="h6" color="primary">
-          Options
+          General Options
         </Typography>
 
         {data.led_gpio !== 0 && (
@@ -390,20 +395,10 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                 value="dallas_parasite"
               />
             }
-            label="Enable Dallas parasite mode"
+            label="Use Dallas Sensor parasite power"
           />
         )}
 
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.notoken_api}
-              onChange={handleValueChange('notoken_api')}
-              value="notoken_api"
-            />
-          }
-          label="Bypass Access Token authorization on API calls"
-        />
         <BlockFormControlLabel
           control={
             <Checkbox
@@ -413,6 +408,26 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
             />
           }
           label="Enable ADC"
+        />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.low_clock}
+              onChange={handleValueChange('low_clock')}
+              value="low_clock"
+            />
+          }
+          label="Run at a lower CPU clock speed"
+        />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.notoken_api}
+              onChange={handleValueChange('notoken_api')}
+              value="notoken_api"
+            />
+          }
+          label="Bypass Access Token authorization on API calls"
         />
         <Grid
           container
@@ -445,6 +460,65 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
 
         <br></br>
         <Typography variant="h6" color="primary">
+          Formatting Options
+        </Typography>
+
+        <Grid
+          container
+          spacing={1}
+          direction="row"
+          justify="flex-start"
+          alignItems="flex-start"
+        >
+          <Grid item xs={4}>
+            <SelectValidator
+              name="bool_format"
+              label="Boolean Format"
+              value={data.bool_format}
+              fullWidth
+              variant="outlined"
+              onChange={handleValueChange('bool_format')}
+              margin="normal"
+            >
+              <MenuItem value={1}>"on"/"off"</MenuItem>
+              <MenuItem value={2}>"ON"/"OFF"</MenuItem>
+              <MenuItem value={3}>true/false</MenuItem>
+              <MenuItem value={4}>1/0</MenuItem>
+            </SelectValidator>
+          </Grid>
+          <Grid item xs={4}>
+            <SelectValidator
+              name="enum_format"
+              label="Enum Format"
+              value={data.enum_format}
+              fullWidth
+              variant="outlined"
+              onChange={handleValueChange('enum_format')}
+              margin="normal"
+            >
+              <MenuItem value={1}>Text</MenuItem>
+              <MenuItem value={2}>Number</MenuItem>
+            </SelectValidator>
+          </Grid>
+          <Grid item xs={4}>
+            <SelectValidator
+              name="dallas_format"
+              label="Dallas Sensor Format"
+              value={data.dallas_format}
+              fullWidth
+              variant="outlined"
+              onChange={handleValueChange('dallas_format')}
+              margin="normal"
+            >
+              <MenuItem value={1}>ID</MenuItem>
+              <MenuItem value={2}>Number</MenuItem>
+              <MenuItem value={3}>Name</MenuItem>
+            </SelectValidator>
+          </Grid>
+        </Grid>
+
+        <br></br>
+        <Typography variant="h6" color="primary">
           Syslog
         </Typography>
 
@@ -469,10 +543,10 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
           >
             <Grid item xs={5}>
               <TextValidator
-                validators={['isOptionalIP']}
-                errorMessages={['Not a valid IP address']}
+                validators={['isOptionalIPorHost']}
+                errorMessages={['Not a valid IPv4 address or hostname']}
                 name="syslog_host"
-                label="IP"
+                label="Host"
                 fullWidth
                 variant="outlined"
                 value={data.syslog_host}
@@ -537,7 +611,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                   'Max value is 10'
                 ]}
                 name="syslog_mark_interval"
-                label="Mark Interval seconds (0=off)"
+                label="Mark Interval (seconds, 0=off)"
                 fullWidth
                 variant="outlined"
                 value={data.syslog_mark_interval}
@@ -554,7 +628,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                   value="trace_raw"
                 />
               }
-              label="Output EMS telegrams in raw format"
+              label="Output EMS telegrams as hexadecimal bytes"
             />
           </Grid>
         )}

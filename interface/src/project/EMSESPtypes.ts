@@ -16,11 +16,15 @@ export interface EMSESPSettings {
   dallas_parasite: boolean;
   led_gpio: number;
   hide_led: boolean;
+  low_clock: boolean;
   notoken_api: boolean;
   analog_enabled: boolean;
   pbutton_gpio: number;
   trace_raw: boolean;
   board_profile: string;
+  bool_format: number;
+  dallas_format: number;
+  enum_format: number;
 }
 
 export enum busConnectionStatus {
@@ -50,12 +54,14 @@ export interface Device {
 export interface Sensor {
   no: number;
   id: string;
-  temp: string;
+  temp: number;
+  offset: number;
 }
 
-export interface EMSESPDevices {
+export interface EMSESPData {
   devices: Device[];
   sensors: Sensor[];
+  analog: number;
 }
 
 export interface DeviceValue {
@@ -63,6 +69,7 @@ export interface DeviceValue {
   u: number;
   n: string;
   c: string;
+  l: string[];
 }
 
 export interface EMSESPDeviceData {
@@ -87,7 +94,9 @@ export enum DeviceValueUOM {
   SECONDS,
   DBM,
   NUM,
-  BOOLEAN
+  BOOLEAN,
+  LIST,
+  MV
 }
 
 export const DeviceValueUOM_s = [
@@ -107,5 +116,7 @@ export const DeviceValueUOM_s = [
   'seconds',
   'dBm',
   'number',
-  'on/off'
+  'on/off',
+  '',
+  'mV'
 ];

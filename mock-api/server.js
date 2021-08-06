@@ -18,7 +18,7 @@ const ES_ENDPOINT_ROOT = '/es/'
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings'
 const log_settings = {
   level: 6,
-  max_messages: 30,
+  max_messages: 50,
 }
 
 const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog'
@@ -27,37 +27,43 @@ const fetch_log = {
     {
       t: '000+00:00:00.001',
       l: 3,
+      i: 1,
       n: 'system',
       m: 'this is message 3',
     },
     {
       t: '000+00:00:00.002',
       l: 4,
-      n: 'system',
+      i: 2,
+      n: 'ntp',
       m: 'this is message 4',
     },
     {
       t: '000+00:00:00.002',
       l: 5,
-      n: 'system',
+      i: 3,
+      n: 'mqtt',
       m: 'this is message 5',
     },
     {
       t: '000+00:00:00.002',
       l: 6,
-      n: 'system',
+      i: 444,
+      n: 'command',
       m: 'this is message 6',
     },
     {
       t: '000+00:00:00.002',
       l: 7,
+      i: 5555,
       n: 'emsesp',
       m: 'this is message 7',
     },
     {
       t: '000+00:00:00.002',
       l: 8,
-      n: 'mqtt',
+      i: 666666,
+      n: 'thermostat',
       m: 'this is message 8',
     },
   ],
@@ -108,6 +114,8 @@ const network_settings = {
   ssid: 'myWifi',
   password: 'myPassword',
   hostname: 'ems-esp',
+  nosleep: true,
+  tx_power: 20,
   static_ip_config: false,
 }
 const network_status = {
@@ -214,8 +222,6 @@ const mqtt_settings = {
   publish_time_sensor: 10,
   mqtt_qos: 0,
   mqtt_retain: false,
-  dallas_format: 1,
-  bool_format: 1,
   ha_climate_format: 1,
   ha_enabled: true,
   nested_format: 1,
@@ -240,7 +246,7 @@ const UPLOAD_FIRMWARE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFirmware'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn'
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken'
 const system_status = {
-  emsesp_version: '3.1 demo',
+  emsesp_version: '3.x demo',
   esp_platform: 'ESP32',
   max_alloc_heap: 113792,
   psram_size: 0,
@@ -278,12 +284,13 @@ const generate_token = { token: '1234' }
 
 // EMS-ESP Project specific
 const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'emsespSettings'
-const EMSESP_ALLDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'allDevices'
+const EMSESP_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'data'
 const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices'
 const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData'
 const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'emsespStatus'
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile'
 const WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
+const WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
 const emsesp_settings = {
   tx_mode: 1,
   tx_delay: 0,
@@ -307,8 +314,11 @@ const emsesp_settings = {
   analog_enabled: false,
   pbutton_gpio: 0,
   board_profile: 'S32',
+  dallas_format: 1,
+  bool_format: 1,
+  enum_format: 1,
 }
-const emsesp_alldevices = {
+const emsesp_data = {
   devices: [
     {
       id: 1,
@@ -339,10 +349,11 @@ const emsesp_alldevices = {
     },
   ],
   sensors: [
-    { no: 1, id: '28-233D-9497-0C03', temp: '25.7' },
-    { no: 2, id: '28-243D-7437-1E3A', temp: '26.1' },
+    { no: 1, id: '28-233D-9497-0C03', temp: 25.7, offset: 1.2 },
+    { no: 2, id: '28-243D-7437-1E3A', temp: 26.1, offset: 0 },
   ],
 }
+
 const emsesp_status = {
   status: 0,
   rx_received: 344,
@@ -759,14 +770,22 @@ app.get(FETCH_LOG_ENDPOINT, (req, res) => {
   res.end(null, 'binary')
 })
 app.get(LOG_SETTINGS_ENDPOINT, (req, res) => {
+  console.log(
+    'Fetching log settings ' +
+      log_settings.level +
+      ',' +
+      log_settings.max_messages,
+  )
   res.json(log_settings)
 })
 app.post(LOG_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('New log level is ' + req.body.level)
-  const data = {
-    level: req.body.level,
-  }
-  res.json(data)
+  console.log(
+    'Setting new level=' +
+      req.body.level +
+      ' max_messages=' +
+      req.body.max_messages,
+  )
+  res.sendStatus(200)
 })
 
 // NETWORK
@@ -869,8 +888,8 @@ app.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
 app.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
   res.json(emsesp_settings)
 })
-app.get(EMSESP_ALLDEVICES_ENDPOINT, (req, res) => {
-  res.json(emsesp_alldevices)
+app.get(EMSESP_DATA_ENDPOINT, (req, res) => {
+  res.json(emsesp_data)
 })
 app.post(EMSESP_SCANDEVICES_ENDPOINT, (req, res) => {
   res.sendStatus(200)
@@ -880,17 +899,17 @@ app.get(EMSESP_STATUS_ENDPOINT, (req, res) => {
 })
 app.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
   const id = req.body.id
-  if (id == 1) {
+  if (id === 1) {
     const encoded = msgpack.encode(emsesp_devicedata_1)
     res.write(encoded, 'binary')
     res.end(null, 'binary')
   }
-  if (id == 2) {
+  if (id === 2) {
     const encoded = msgpack.encode(emsesp_devicedata_2)
     res.write(encoded, 'binary')
     res.end(null, 'binary')
   }
-  if (id == 3) {
+  if (id === 3) {
     const encoded = msgpack.encode(emsesp_devicedata_3)
     res.write(encoded, 'binary')
     res.end(null, 'binary')
@@ -900,9 +919,15 @@ app.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
 app.post(WRITE_VALUE_ENDPOINT, (req, res) => {
   const devicevalue = req.body.devicevalue
   const id = req.body.id
-
   console.log(id)
   console.log(devicevalue)
+
+  res.sendStatus(200)
+})
+
+app.post(WRITE_SENSOR_ENDPOINT, (req, res) => {
+  const sensor = req.body.sensor
+  console.log(sensor)
 
   res.sendStatus(200)
 })

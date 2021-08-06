@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import {
   Typography,
   Box,
@@ -14,14 +14,40 @@ import CommentIcon from '@material-ui/icons/CommentTwoTone';
 import MenuBookIcon from '@material-ui/icons/MenuBookTwoTone';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import StarIcon from '@material-ui/icons/Star';
-import ImportExportIcon from '@material-ui/icons/ImportExport';
-import BugReportIcon from '@material-ui/icons/BugReportTwoTone';
+import DownloadIcon from '@material-ui/icons/GetApp';
 
-export const WebAPISystemSettings =
-  window.location.origin + '/api/system/settings';
-export const WebAPISystemInfo = window.location.origin + '/api/system/info';
+import { FormButton } from '../components';
+
+import { API_ENDPOINT_ROOT } from '../api';
+
+import { redirectingAuthorizedFetch } from '../authentication';
 
 class EMSESPHelp extends Component {
+  onDownload = (endpoint: string) => {
+    redirectingAuthorizedFetch(API_ENDPOINT_ROOT + 'system/' + endpoint)
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json();
+        }
+        throw Error(
+          'Device returned unexpected response code: ' + response.status
+        );
+      })
+      .then((json) => {
+        const a = document.createElement('a');
+        const filename = 'emsesp_system_' + endpoint + '.txt';
+        a.href = URL.createObjectURL(
+          new Blob([JSON.stringify(json, null, 2)], {
+            type: 'text/plain'
+          })
+        );
+        a.setAttribute('download', filename);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+  };
+
   render() {
     return (
       <SectionContent title="EMS-ESP Help" titleGutter>
@@ -31,9 +57,9 @@ class EMSESPHelp extends Component {
               <MenuBookIcon />
             </ListItemAvatar>
             <ListItemText>
-              For the latest news and updates go to the{' '}
+              For help and information on the latest updates visit the{' '}
               <Link href="https://emsesp.github.io/docs" color="primary">
-                {'official documentation'}&nbsp;website
+                {'online documentation'}
               </Link>
             </ListItemText>
           </ListItem>
@@ -55,40 +81,35 @@ class EMSESPHelp extends Component {
               <GitHubIcon />
             </ListItemAvatar>
             <ListItemText>
-              To report an issue or feature request go to{' '}
+              To report an issue or request a feature go to{' '}
               <Link
                 href="https://github.com/emsesp/EMS-ESP32/issues/new/choose"
                 color="primary"
               >
-                {'click here'}
-              </Link>
-            </ListItemText>
-          </ListItem>
-
-          <ListItem>
-            <ListItemAvatar>
-              <ImportExportIcon />
-            </ListItemAvatar>
-            <ListItemText>
-              To export your system settings{' '}
-              <Link target="_blank" href={WebAPISystemSettings} color="primary">
-                {'click here'}
-              </Link>
-            </ListItemText>
-          </ListItem>
-
-          <ListItem>
-            <ListItemAvatar>
-              <BugReportIcon />
-            </ListItemAvatar>
-            <ListItemText>
-              To export the current status of EMS-ESP{' '}
-              <Link target="_blank" href={WebAPISystemInfo} color="primary">
-                {'click here'}
+                {'GitHub'}
               </Link>
             </ListItemText>
           </ListItem>
         </List>
+
+        <Box flexWrap="none" padding={1} whiteSpace="nowrap">
+          <FormButton
+            startIcon={<DownloadIcon />}
+            variant="contained"
+            color="primary"
+            onClick={() => this.onDownload('info')}
+          >
+            download system info
+          </FormButton>
+          <FormButton
+            startIcon={<DownloadIcon />}
+            variant="contained"
+            color="primary"
+            onClick={() => this.onDownload('settings')}
+          >
+            download all settings
+          </FormButton>
+        </Box>
 
         <Box bgcolor="info.main" border={1} p={3} mt={1} mb={0}>
           <Typography variant="h6">

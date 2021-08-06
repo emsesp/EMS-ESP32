@@ -72,9 +72,9 @@ CPPFLAGS  += -g3
 CPPFLAGS  += -Os
 
 CFLAGS    += $(CPPFLAGS)
-# CFLAGS    += -Wall
-# CFLAGS    += -Wno-unused -Wno-restrict
-# CFLAGS    += -Wextra
+CFLAGS    += -Wall
+CFLAGS    += -Wno-unused -Wno-restrict
+CFLAGS    += -Wextra
 
 CXXFLAGS  += $(CFLAGS) -MMD
 

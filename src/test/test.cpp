@@ -194,7 +194,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     // init stuff
     Mqtt::ha_enabled(true);
-    Mqtt::dallas_format(1);
+    EMSESP::dallassensor_.dallas_format(1);
     Mqtt::ha_climate_format(1);
     EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
     EMSESP::watch(EMSESP::Watch::WATCH_RAW); // raw
@@ -352,7 +352,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
             if (emsdevice) {
                 doc.clear();
                 JsonObject json = doc.to<JsonObject>();
-                Command::call(emsdevice->device_type(), "info", nullptr, -1, json);
+                Command::call(emsdevice->device_type(), "info", nullptr, true, -1, json);
 
                 Serial.print(COLOR_YELLOW);
                 if (json.size() != 0) {
@@ -424,7 +424,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         run_test("boiler");
 
         // device type, command, data
-        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
+        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false", true);
     }
 
     if (command == "fr120") {
@@ -934,16 +934,40 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.printfln(F("Testing RESTful API..."));
         Mqtt::ha_enabled(false);
         run_test("general");
-        DynamicJsonDocument   doc(EMSESP_JSON_SIZE_XXLARGE_DYN);
-        JsonObject            json = doc.to<JsonObject>();
         AsyncWebServerRequest request;
+
+        // GET
         request.method(HTTP_GET);
         request.url("/api/thermostat/seltemp");
         EMSESP::webAPIService.webAPIService_get(&request);
 
         request.url("/api/boiler/syspress");
         EMSESP::webAPIService.webAPIService_get(&request);
+
+        request.url("/api/system/commands");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
+        request.url("/api/boiler/info");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
+        // POST
+        request.method(HTTP_POST);
+        request.url("/api/system/commands");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
 #endif
+    }
+
+    if (command == "crash") {
+        shell.printfln(F("Forcing a crash..."));
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdiv-by-zero"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+        uint8_t a = 2 / 0;
+        shell.printfln(F("Testing %s"), a);
+
+#pragma GCC diagnostic pop
     }
 }
 
