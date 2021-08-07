@@ -55,40 +55,39 @@ class Boiler : public EMSdevice {
     static constexpr uint8_t EMS_BOILER_SELFLOWTEMP_HEATING = 20; // was originally 70, changed to 30 for issue #193, then to 20 with issue #344
 
     // ww
-    uint8_t  wWSetTemp_;          // Warm Water set temperature
-    uint8_t  wWSelTemp_;          // Warm Water selected temperature
-    uint8_t  wWType_;             // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
-    uint8_t  wWComfort_;          // WW comfort mode
-    uint8_t  wWCircPump_;         // Warm Water circulation pump available
+    uint8_t  wwSetTemp_;          // Warm Water set temperature
+    uint8_t  wwSelTemp_;          // Warm Water selected temperature
+    uint8_t  wwType_;             // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
+    uint8_t  wwComfort_;          // WW comfort mode
+    uint8_t  wwCircPump_;         // Warm Water circulation pump available
     uint8_t  wWChargeType_;       // Warm Water charge type (pump or 3-way-valve)
-    uint8_t  wWDisinfectionTemp_; // Warm Water disinfection temperature to prevent infection
-    uint8_t  wWCircMode_;         // Warm Water circulation pump mode
-    uint8_t  wWCirc_;             // Circulation on/off
-    uint16_t wWCurTemp_;          // Warm Water current temperature
-    uint16_t wWCurTemp2_;         // Warm Water current temperature storage
-    uint8_t  wWCurFlow_;          // Warm Water current flow temp in l/min
-    uint16_t wWStorageTemp1_;     // warm water storage temp 1
-    uint16_t wWStorageTemp2_;     // warm water storage temp 2
-    uint8_t  wWActivated_;        // Warm Water activated
-    uint8_t  wWOneTime_;          // Warm Water one time function on/off
-    uint8_t  wWDisinfecting_;     // Warm Water disinfection on/off
-    uint8_t  wWCharging_;         // Warm Water charging on/off
-    uint8_t  wWRecharging_;       // Warm Water recharge on/off
-    uint8_t  wWTempOK_;           // Warm Water temperature ok on/off
-    uint8_t  wWActive_;           //
-    uint8_t  wWHeat_;             // 3-way valve on WW
-    uint8_t  wWSetPumpPower_;     // ww pump speed/power?
-    uint8_t  wWFlowTempOffset_;   // Boiler offset for ww heating
-    uint8_t  wWMaxPower_;         // Warm Water maximum power
+    uint8_t  wwDisinfectionTemp_; // Warm Water disinfection temperature to prevent infection
+    uint8_t  wwCircMode_;         // Warm Water circulation pump mode
+    uint8_t  wwCirc_;             // Circulation on/off
+    uint16_t wwCurTemp_;          // Warm Water current temperature
+    uint16_t wwCurTemp2_;         // Warm Water current temperature storage
+    uint8_t  wwCurFlow_;          // Warm Water current flow temp in l/min
+    uint16_t wwStorageTemp1_;     // warm water storage temp 1
+    uint16_t wwStorageTemp2_;     // warm water storage temp 2
+    uint8_t  wwActivated_;        // Warm Water activated
+    uint8_t  wwOneTime_;          // Warm Water one time function on/off
+    uint8_t  wwDisinfecting_;     // Warm Water disinfection on/off
+    uint8_t  wwCharging_;         // Warm Water charging on/off
+    uint8_t  wwRecharging_;       // Warm Water recharge on/off
+    uint8_t  wwTempOK_;           // Warm Water temperature ok on/off
+    uint8_t  wwActive_;           //
+    uint8_t  wwHeat_;             // 3-way valve on WW
+    uint8_t  wwSetPumpPower_;     // ww pump speed/power?
+    uint8_t  wwFlowTempOffset_;   // Boiler offset for ww heating
+    uint8_t  wwMaxPower_;         // Warm Water maximum power
     uint32_t wWStarts_;           // Warm Water # starts
-    uint32_t wWStarts2_;          // Warm water control starts
-    uint32_t wWWorkM_;            // Warm Water # minutes
-    int8_t   wWHystOn_;
-    int8_t   wWHystOff_;
-    uint8_t  wWTapActivated_; // maintenance-mode to switch DHW off
-
-    uint16_t mixerTemp_;      // mixing temperature
-    uint16_t tankMiddleTemp_; // Tank middle temperature (TS3)
+    uint32_t wwStarts2_;          // Warm water control starts
+    uint32_t wwWorkM_;            // Warm Water # minutes
+    int8_t   wwHystOn_;
+    int8_t   wwHystOff_;
+    uint8_t  wwTapActivated_;   // maintenance-mode to switch DHW off
+    uint16_t wwMixerTemp_;      // mixing temperature
+    uint16_t wwTankMiddleTemp_; // Tank middle temperature (TS3)
 
     // main
     uint8_t  id_;               // product id

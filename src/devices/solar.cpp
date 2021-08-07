@@ -193,7 +193,7 @@ bool Solar::publish_ha_config() {
     doc["stat_t"] = stat_t;
 
     char name_s[40];
-    snprintf_P(name_s, sizeof(name_s), PSTR("* %s Product ID"), device_type_name().c_str());
+    snprintf(name_s, sizeof(name_s), FSTR_(productid_fmt), device_type_name().c_str());
     doc["name"] = name_s;
 
     doc["val_tpl"] = FJSON("{{value_json.id}}");
