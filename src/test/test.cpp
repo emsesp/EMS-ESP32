@@ -445,7 +445,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         // Mqtt::nested_format(1);
         Mqtt::nested_format(2);
 
-        // run_test("boiler");
+        run_test("boiler");
         run_test("thermostat");
         // run_test("solar");
         // run_test("mixer");
@@ -933,6 +933,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 #if defined(EMSESP_STANDALONE)
         shell.printfln(F("Testing RESTful API..."));
         Mqtt::ha_enabled(false);
+        Mqtt::enabled(false);
         run_test("general");
         AsyncWebServerRequest request;
 
@@ -950,10 +951,38 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         request.url("/api/boiler/info");
         EMSESP::webAPIService.webAPIService_get(&request);
 
+        request.url("/api/boiler/wwcurflow");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
         // POST
         request.method(HTTP_POST);
+
         request.url("/api/system/commands");
         EMSESP::webAPIService.webAPIService_get(&request);
+
+        DynamicJsonDocument doc(2000);
+        JsonVariant         json;
+
+        // 1
+        char data1[] = "{\"name\":\"temp\",\"value\":11}";
+        deserializeJson(doc, data1);
+        json = doc.as<JsonVariant>();
+        request.url("/api/thermostat");
+        EMSESP::webAPIService.webAPIService_post(&request, json);
+
+        // 2
+        char data2[] = "{\"value\":12}";
+        deserializeJson(doc, data2);
+        json = doc.as<JsonVariant>();
+        request.url("/api/thermostat/temp");
+        EMSESP::webAPIService.webAPIService_post(&request, json);
+
+        // 3
+        char data3[] = "{\"device\":\"thermostat\", \"name\":\"temp\",\"value\":11}";
+        deserializeJson(doc, data3);
+        json = doc.as<JsonVariant>();
+        request.url("/api");
+        EMSESP::webAPIService.webAPIService_post(&request, json);
 
 #endif
     }
