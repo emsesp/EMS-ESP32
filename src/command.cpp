@@ -109,7 +109,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
 // strip prefixes, check, and find command
 Command::CmdFunction * Command::find_command(const uint8_t device_type, char * cmd, int8_t & id) {
-    // TODO special cases for id=0 and id=-1 will be removed in V3 API
+    // special cases for id=0 and id=-1 will be removed in V3 API
     // no command for id0
     if (id == 0) {
         return nullptr;
@@ -126,7 +126,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, char * c
         *p = tolower(*p);
     }
 
-    // TODO hack for commands that could have hc or wwc prefixed. will be removed in new API V3 eventually
+    // hack for commands that could have hc or wwc prefixed. will be removed in new API V3 eventually
     // scan for prefix hc.
     for (uint8_t i = DeviceValueTAG::TAG_HC1; i <= DeviceValueTAG::TAG_HC4; i++) {
         const char * tag = EMSdevice::tag_to_string(i).c_str();
