@@ -627,12 +627,11 @@ void EMSdevice::generate_values_json_web(JsonObject & json) {
                 obj["u"] = dv.uom;
 
                 // add name, prefixing the tag if it exists
-                // except if it's a BOILER which uses a tag to split the MQTT topics
-                if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty() || device_type_ == DeviceType::BOILER) {
+                if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
                     obj["n"] = dv.full_name;
                 } else {
                     char name[50];
-                    snprintf_P(name, sizeof(name), "(%s) %s", tag_to_string(dv.tag).c_str(), uuid::read_flash_string(dv.full_name).c_str());
+                    snprintf_P(name, sizeof(name), "%s %s", tag_to_string(dv.tag).c_str(), uuid::read_flash_string(dv.full_name).c_str());
                     obj["n"] = name;
                 }
 
@@ -688,10 +687,10 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
             json["name"] = dv.short_name;
             // prefix tag if it's included
             if (dv.full_name != nullptr) {
-                if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-                    json["fullname"] = tag_to_string(dv.tag) + " " + uuid::read_flash_string(dv.full_name);
-                } else {
+                if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
                     json["fullname"] = dv.full_name;
+                } else {
+                    json["fullname"] = tag_to_string(dv.tag) + " " + uuid::read_flash_string(dv.full_name);
                 }
             }
 
@@ -850,13 +849,13 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
         if (((nested) || tag_filter == DeviceValueTAG::TAG_NONE || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !console)
             && !(dv.full_name == nullptr && dv.has_cmd)) {
             // we have a tag if it matches the filter given, and that the tag name is not empty/""
-            bool have_tag = ((dv.tag != tag_filter) && !tag_to_string(dv.tag).empty()) && (device_type_ != DeviceType::BOILER);
+            bool have_tag = ((dv.tag != tag_filter) && !tag_to_string(dv.tag).empty());
 
             char name[80];
             if (console) {
                 // prefix the tag in brackets, unless it's Boiler because we're naughty and use tag for the MQTT topic
                 if (have_tag) {
-                    snprintf_P(name, 80, "(%s) %s", tag_to_string(dv.tag).c_str(), uuid::read_flash_string(dv.full_name).c_str());
+                    snprintf_P(name, 80, "%s %s", tag_to_string(dv.tag).c_str(), uuid::read_flash_string(dv.full_name).c_str());
                 } else {
                     strcpy(name, uuid::read_flash_string(dv.full_name).c_str()); // use full name
                 }
