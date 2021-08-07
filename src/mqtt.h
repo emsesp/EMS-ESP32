@@ -151,6 +151,10 @@ class Mqtt {
         return mqtt_enabled_;
     }
 
+    static void enabled(bool mqtt_enabled) {
+        mqtt_enabled_ = mqtt_enabled;
+    }
+
     static std::string base() {
         return mqtt_base_;
     }
