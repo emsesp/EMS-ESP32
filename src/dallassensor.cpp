@@ -142,7 +142,6 @@ void DallasSensor::loop() {
                                 if (sensor.id() == get_id(addr)) {
                                     t += sensor.offset();
                                     if (t != sensor.temperature_c) {
-                                        sensor.temperature_c = t;
                                         changed_ |= true;
                                     }
                                     sensor.temperature_c = t;
