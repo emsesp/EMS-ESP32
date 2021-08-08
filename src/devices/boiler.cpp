@@ -187,8 +187,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     }
 
     // warm water - boiler_data_ww topic
-    register_device_value(TAG_BOILER_DATA_WW, &wwSelTemp_, DeviceValueType::UINT, nullptr, FL_(wwSelTemp), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_BOILER_DATA_WW, &wwSetTemp_, DeviceValueType::UINT, nullptr, FL_(wwSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_warmwater_temp));
+    register_device_value(TAG_BOILER_DATA_WW, &wwSelTemp_, DeviceValueType::UINT, nullptr, FL_(wwSelTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_warmwater_temp));
+    register_device_value(TAG_BOILER_DATA_WW, &wwSetTemp_, DeviceValueType::UINT, nullptr, FL_(wwSetTemp), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA_WW, &wwType_, DeviceValueType::ENUM, FL_(enum_flow), FL_(wwType), DeviceValueUOM::NONE);
     register_device_value(
         TAG_BOILER_DATA_WW, &wwComfort_, DeviceValueType::ENUM, FL_(enum_comfort), FL_(wwComfort), DeviceValueUOM::LIST, MAKE_CF_CB(set_warmwater_mode));
@@ -430,7 +430,7 @@ void Boiler::process_UBASettingsWW(std::shared_ptr<const Telegram> telegram) {
  * Boiler(0x08) -> Me(0x0B), UBAMonitorWW(0x34), data: 30 01 BA 7D 00 21 00 00 03 00 01 22 2B 00 19 5B
 */
 void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(wwSetTemp_, 0));
+    has_update(telegram->read_value(wwSetTemp_, 0)); // hot water temperature target
     has_update(telegram->read_value(wwCurTemp_, 1));
     has_update(telegram->read_value(wwCurTemp2_, 3));
 
@@ -763,7 +763,8 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
     }
 }
 
-// Set the warm water temperature 0x33
+// Set the warm water temperature 0x33/0x35 or 0xEA
+// TODO
 bool Boiler::set_warmwater_temp(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
@@ -776,9 +777,8 @@ bool Boiler::set_warmwater_temp(const char * value, const int8_t id) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 6, v, EMS_TYPE_UBAParameterWWPlus);
     } else {
         // some boiler have it in 0x33, some in 0x35
-        write_command(EMS_TYPE_UBAFlags, 3, v, 0x34); // for i9000, see #397
-        write_command(EMS_TYPE_UBAParameterWW, 2, v,
-                      EMS_TYPE_UBAParameterWW); // read seltemp back
+        write_command(EMS_TYPE_UBAFlags, 3, v, 0x34);                          // for i9000, see #397
+        write_command(EMS_TYPE_UBAParameterWW, 2, v, EMS_TYPE_UBAParameterWW); // read seltemp back
     }
 
     return true;
