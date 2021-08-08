@@ -764,7 +764,6 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
 }
 
 // Set the warm water temperature 0x33/0x35 or 0xEA
-// TODO
 bool Boiler::set_warmwater_temp(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {

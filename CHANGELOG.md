@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [3.2.1] August 8 2021
+
+## Added
+
+- json body in API can now take device, name, cmd, hc and id
+- added example of how to use API directly to control values from Home Assistant
+- API calls are shown in debug log (For troubleshooting)
+
+## Fixed
+
+- fixed issue with Home Assistant entity naming where boiler's ww was duplicated in entity name
+- fixed issue where wwSetTemp was written too instead of wwSelTemp
+
+## Changed
+
+- fixed case on mqtt names, like 'wwtankmiddletemp'
+- renamed Product ID to 'EMS Product ID' in Home Assistant
+- removed brackets around tags, e.g. (hc1) selected room temperature" is now just "hc1 selected room temperature"
+
 # [3.2.0] August 6 2021
 
 ## Added
