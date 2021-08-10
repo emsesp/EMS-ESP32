@@ -421,7 +421,7 @@ class EMSESPDataForm extends Component<
         {this.noSensors() && (
           <Box color="warning.main" p={0} mt={0} mb={0}>
             <Typography variant="body1">
-              <i>no connected Dallas temperature sensors were detected</i>
+              <i>no Dallas temperature sensors were detected</i>
             </Typography>
           </Box>
         )}
@@ -613,7 +613,7 @@ class EMSESPDataForm extends Component<
         {this.noDeviceData() && (
           <Box color="warning.main" p={0} mt={0} mb={0}>
             <Typography variant="body1">
-              <i>No data available for this device</i>
+              <i>no data available for this device</i>
             </Typography>
           </Box>
         )}
