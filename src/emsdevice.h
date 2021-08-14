@@ -294,7 +294,7 @@ class EMSdevice {
 
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);
-    bool get_toggle_fetch(uint16_t telegram_id);
+    bool is_fetch(uint16_t telegram_id);
 
     bool ha_config_done() const {
         return ha_config_done_;
