@@ -434,11 +434,23 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
         udp_.print('-');
     }
 
-    udp_.printf_P(PSTR(" %s %s - - - \xEF\xBB\xBF"), hostname_.c_str(), uuid::read_flash_string(message.content_->name).c_str());
+    udp_.printf_P(PSTR(" %s %s - - - "), hostname_.c_str(), uuid::read_flash_string(message.content_->name).c_str());
 
-    udp_.print(uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3).c_str());
-    udp_.printf_P(PSTR(" %c %lu: "), uuid::log::format_level_char(message.content_->level), message.id_);
-    udp_.print(message.content_->text.c_str());
+    char id_c_str[15];
+    snprintf_P(id_c_str, sizeof(id_c_str), PSTR(" %lu "), message.id_);
+    std::string msgstr = uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3) +
+                         ' ' +
+                         uuid::log::format_level_char(message.content_->level) +
+                         id_c_str +
+                         message.content_->text;
+    for (uint16_t i = 0; i < msgstr.length(); i++) {
+        if (msgstr.at(i) & 0x80) {
+            udp_.print("\xEF\xBB\xBF");
+            // udp_.print("<BOM>"); // marker for testing if BOM is created for udf-8
+            break;
+        }
+    }
+    udp_.print(msgstr.c_str());
     bool ok = (udp_.endPacket() == 1);
 
     last_transmit_ = uuid::get_uptime_ms();
