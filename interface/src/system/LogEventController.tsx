@@ -206,7 +206,7 @@ class LogEventController extends Component<
       case LogLevel.DEBUG:
         return 'D';
       case LogLevel.TRACE:
-        return 'TRACE';
+        return 'T';
       default:
         return '';
     }
