@@ -556,7 +556,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
     doc["dest"]   = Helpers::hextoa(buffer, telegram->dest);
     doc["type"]   = Helpers::hextoa(buffer, telegram->type_id);
     doc["offset"] = Helpers::hextoa(buffer, telegram->offset);
-    strcpy(buffer, Helpers::data_to_hex(telegram->message_data, telegram->message_length - 1).c_str()); // exclude CRC
+    strcpy(buffer, Helpers::data_to_hex(telegram->message_data, telegram->message_length).c_str()); // telegram is without crc
     doc["data"] = buffer;
 
     if (telegram->message_length <= 4) {
