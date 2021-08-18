@@ -106,13 +106,9 @@ class System {
         ethernet_connected_ = b;
     }
 
-    void network_connected(bool b) {
-        network_connected_ = b;
-    }
-
     bool network_connected() {
 #ifndef EMSESP_STANDALONE
-        return network_connected_;
+        return (ethernet_connected() || WiFi.isConnected());
 #else
         return true;
 #endif
@@ -160,7 +156,6 @@ class System {
     uint32_t last_system_check_  = 0;
     bool     upload_status_      = false; // true if we're in the middle of a OTA firmware upload
     bool     ethernet_connected_ = false;
-    bool     network_connected_  = false;
     uint16_t analog_;
 
     // settings
