@@ -1,19 +1,22 @@
 ; example custom platformio.ini file for EMS-ESP
 
 [common]
-; e.g. use build_flags = -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
-debug_flags = -DEMSESP_WIFI_TWEAK -DEMSESP_DEBUG
-; debug_flags =
+; custom build flags
+; EMSESP_DEBUG, EMSESP_UART_DEBUG, EMSESP_DEBUG_SENSOR, EMSESP_WIFI_TWEAK, EMSESP_DEFAULT_BOARD_PROFILE
+; ;  e.g. -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
+; my_build_flags = -DEMSESP_DEBUG -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
+my_build_flags =
 
 [env:esp32]
 ; if using OTA enter your details below
-upload_protocol = espota
-upload_flags = 
-  --port=8266
-  --auth=ems-esp-neo
-upload_port = 10.10.10.101
-; to prevent the web UI from building each time, uncomment this next line
-; extra_scripts =
+; upload_protocol = espota
+; upload_flags = 
+;   --port=8266
+;   --auth=ems-esp-neo
+; upload_port = 10.10.10.101
+
+; to prevent the web UI from building each time, comment out this next line
+extra_scripts =
 
 ; pio run -e debug
 ; or from Visual Studio Code do PIO -> Project Tasks -> debug -> General -> Upload and Monitor
