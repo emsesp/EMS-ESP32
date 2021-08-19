@@ -122,6 +122,41 @@ bool System::command_publish(const char * value, const int8_t id) {
     return true;
 }
 
+// syslog level
+bool System::command_syslog_level(const char * value, const int8_t id) {
+    uint8_t s = 0xff;
+    if (Helpers::value2enum(value, s, FL_(enum_syslog_level))) {
+        EMSESP::webSettingsService.update([&](WebSettings & settings) {
+            settings.syslog_level = (int8_t)s - 1;
+            return StateUpdateResult::CHANGED;
+        }, "local");
+        EMSESP::system_.syslog_start();
+        return true;
+    }
+    return false;
+}
+
+// watch
+bool System::command_watch(const char * value, const int8_t id) {
+    uint8_t w = 0xff;
+    if (Helpers::value2enum(value, w, FL_(enum_watch))) {
+        if (w == 0 || EMSESP::watch() == EMSESP::Watch::WATCH_OFF) {
+            EMSESP::watch_id(0);
+        }
+        EMSESP::watch(w);
+        return true;
+    }
+    uint16_t i = Helpers::hextoint(value);
+    if (i) {
+        EMSESP::watch_id(i);
+        if (EMSESP::watch() == EMSESP::Watch::WATCH_OFF) {
+            EMSESP::watch(EMSESP::Watch::WATCH_ON);
+        }
+        return true;
+    }
+    return false;
+}
+
 // restart EMS-ESP
 void System::restart() {
     LOG_INFO(F("Restarting system..."));
@@ -620,6 +655,8 @@ void System::commands_init() {
 #if defined(EMSESP_DEBUG)
     Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test, F("run tests"));
 #endif
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, F("watching telegrams"), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog_level), System::command_syslog_level, F("set syslog level"), CommandFlag::ADMIN_ONLY);
 }
 
 // flashes the LED

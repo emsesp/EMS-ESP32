@@ -46,6 +46,7 @@ MAKE_PSTR_WORD(restart)
 MAKE_PSTR_WORD(format)
 MAKE_PSTR_WORD(raw)
 MAKE_PSTR_WORD(watch)
+MAKE_PSTR_WORD(syslog_level)
 MAKE_PSTR_WORD(send)
 MAKE_PSTR_WORD(telegram)
 MAKE_PSTR_WORD(bus_id)
@@ -114,6 +115,8 @@ MAKE_PSTR(log_level_fmt, "Log level: %s")
 
 MAKE_STR(productid_fmt, "%s EMS Product ID")
 
+MAKE_PSTR_LIST(enum_syslog_level, F_(off), F("emerg"), F("alert"), F("crit"), F("error"), F("warn"), F("notice"), F_(info), F_(debug), F("trace"), F("all"))
+MAKE_PSTR_LIST(enum_watch, F_(off), F_(on), F_(raw), F_(unknown))
 // strings
 MAKE_PSTR(EMSESP, "EMS-ESP")
 MAKE_PSTR(cmd_optional, "[cmd]")

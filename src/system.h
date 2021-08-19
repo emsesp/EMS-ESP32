@@ -56,6 +56,8 @@ class System {
 #if defined(EMSESP_DEBUG)
     static bool command_test(const char * value, const int8_t id);
 #endif
+    static bool command_syslog_level(const char * value, const int8_t id);
+    static bool command_watch(const char * value, const int8_t id);
 
     static bool command_info(const char * value, const int8_t id, JsonObject & json);
     static bool command_settings(const char * value, const int8_t id, JsonObject & json);
