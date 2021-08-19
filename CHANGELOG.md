@@ -62,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [3.1.1] June 26 2021
 
-## Changed
+## Added
 
 - new command called `commands` which lists all available commands. `ems-esp/api/{device}/commands`
 - More Home Assistant icons to match the UOMs
@@ -84,7 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [3.1.0] May 4 2021
 
-## Changed
+## Added
 
 - Mock API to simulate an ESP, for testing web
 - Able to write values from the Web UI
