@@ -747,6 +747,8 @@ void Thermostat::process_EasyMonitor(std::shared_ptr<const Telegram> telegram) {
 
     has_update(telegram->read_value(hc->curr_roomTemp, 8));      // is * 100
     has_update(telegram->read_value(hc->setpoint_roomTemp, 10)); // is * 100
+
+    hc->hamode = 1; // fixed to heat 
 }
 
 // Settings Parameters - 0xA5 - RC30_1
