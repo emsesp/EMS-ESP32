@@ -65,9 +65,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
   useWindowSize();
   const classes = useStyles({ topOffset, leftOffset });
-  const { events, compact, level } = props;
-
-  const filter_events = events.filter((e) => e.l <= level);
+  const { events, compact } = props;
 
   const styleLevel = (level: LogLevel) => {
     switch (level) {
@@ -109,7 +107,7 @@ const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
 
   const paddedLevelLabel = (level: LogLevel, compact: boolean) => {
     const label = levelLabel(level);
-    return compact ? ' ' + label[0] : label.padStart(8, '\xa0');
+    return compact ? ' ' + label[0] : label.padStart(7, '\xa0');
   };
 
   const paddedNameLabel = (name: string, compact: boolean) => {
@@ -124,7 +122,7 @@ const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
 
   return (
     <Box id="log-window" className={classes.console}>
-      {filter_events.map((e) => (
+      {events.map((e) => (
         <div className={classes.entry} key={e.i}>
           <span>{e.t}</span>
           {compact && <span>{paddedLevelLabel(e.l, compact)} </span>}

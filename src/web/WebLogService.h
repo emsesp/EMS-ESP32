@@ -35,7 +35,7 @@ namespace emsesp {
 class WebLogService : public uuid::log::Handler {
   public:
     static constexpr size_t MAX_LOG_MESSAGES = 50;
-    static constexpr size_t REFRESH_SYNC     = 200;
+    static constexpr size_t REFRESH_SYNC     = 50;
 
     WebLogService(AsyncWebServer * server, SecurityManager * securityManager);
 
@@ -44,6 +44,8 @@ class WebLogService : public uuid::log::Handler {
     void             log_level(uuid::log::Level level);
     size_t           maximum_log_messages() const;
     void             maximum_log_messages(size_t count);
+    bool             compact();
+    void             compact(bool compact);
     void             loop();
 
     virtual void operator<<(std::shared_ptr<uuid::log::Message> message);
@@ -77,6 +79,7 @@ class WebLogService : public uuid::log::Handler {
     unsigned long               log_message_id_tail_  = 0;                // last event shown on the screen after fetch
     std::list<QueuedLogMessage> log_messages_;                            // Queued log messages, in the order they were received
     time_t                      time_offset_ = 0;
+    bool                        compact_     = true;
 };
 
 } // namespace emsesp

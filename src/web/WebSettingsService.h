@@ -64,6 +64,9 @@ class WebSettings {
     uint8_t  dallas_format;
     uint8_t  bool_format;
     uint8_t  enum_format;
+    int8_t   weblog_level;
+    uint8_t  weblog_buffer;
+    bool     weblog_compact;
 
     struct {
         String  id;

@@ -748,7 +748,7 @@ void Thermostat::process_EasyMonitor(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(hc->curr_roomTemp, 8));      // is * 100
     has_update(telegram->read_value(hc->setpoint_roomTemp, 10)); // is * 100
 
-    hc->hamode = 1; // fixed to heat 
+    hc->hamode = 1; // fixed to heat
 }
 
 // Settings Parameters - 0xA5 - RC30_1
@@ -2265,6 +2265,7 @@ void Thermostat::register_device_values() {
         register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::TEXT, nullptr, FL_(dateTime), DeviceValueUOM::NONE, MAKE_CF_CB(set_datetime));
         break;
     case EMS_DEVICE_FLAG_EASY:
+        // Easy TC100 have no date/time, see issue #100, not sure about CT200, so leave it.
         register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::TEXT, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         break;
     default:

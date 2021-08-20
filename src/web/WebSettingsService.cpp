@@ -64,6 +64,9 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["dallas_format"]        = settings.dallas_format;
     root["bool_format"]          = settings.bool_format;
     root["enum_format"]          = settings.enum_format;
+    root["weblog_level"]         = settings.weblog_level;
+    root["weblog_buffer"]        = settings.weblog_buffer;
+    root["weblog_compact"]       = settings.weblog_compact;
 
     for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
         char buf[20];
@@ -201,6 +204,10 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     settings.enum_format = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
     EMSESP::enum_format(settings.enum_format);
+
+    settings.weblog_level   = root["weblog_level"] | EMSESP_DEFAULT_WEBLOG_LEVEL;
+    settings.weblog_buffer  = root["weblog_buffer"] | EMSESP_DEFAULT_WEBLOG_BUFFER;
+    settings.weblog_compact = root["weblog_compact"] | EMSESP_DEFAULT_WEBLOG_COMPACT;
 
     for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
         char buf[20];
