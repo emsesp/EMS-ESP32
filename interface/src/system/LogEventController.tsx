@@ -227,22 +227,20 @@ class LogEventController extends Component<
   };
 
   onDownload = () => {
-    const { events, level } = this.state;
+    const { events } = this.state;
     let result = '';
     for (const i in events) {
-      if (events[i].l <= level) {
-        result +=
-          events[i].t +
-          ' ' +
-          this.levelLabel(events[i].l) +
-          ' ' +
-          events[i].i +
-          ': [' +
-          events[i].n +
-          '] ' +
-          events[i].m +
-          '\n';
-      }
+      result +=
+        events[i].t +
+        ' ' +
+        this.levelLabel(events[i].l) +
+        ' ' +
+        events[i].i +
+        ': [' +
+        events[i].n +
+        '] ' +
+        events[i].m +
+        '\n';
     }
     const a = document.createElement('a');
     a.setAttribute(
