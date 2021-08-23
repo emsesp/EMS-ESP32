@@ -74,7 +74,6 @@ uint32_t EMSESP::last_fetch_               = 0;
 uint8_t  EMSESP::publish_all_idx_          = 0;
 uint8_t  EMSESP::unique_id_count_          = 0;
 bool     EMSESP::trace_raw_                = false;
-uint64_t EMSESP::tx_delay_                 = 0;
 uint8_t  EMSESP::bool_format_              = 1;
 uint8_t  EMSESP::enum_format_              = 1;
 uint16_t EMSESP::wait_validate_            = 0;
@@ -181,7 +180,6 @@ void EMSESP::init_uart() {
     uint8_t tx_gpio;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         tx_mode   = settings.tx_mode;
-        tx_delay_ = settings.tx_delay * 1000;
         rx_gpio   = settings.rx_gpio;
         tx_gpio   = settings.tx_gpio;
     });
@@ -1132,16 +1130,19 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 
     // check for poll
     if (length == 1) {
-        static uint64_t delayed_tx_start_ = 0;
-        if (!rxservice_.bus_connected() && (tx_delay_ > 0)) {
-            delayed_tx_start_ = uuid::get_uptime_ms();
-            LOG_DEBUG(F("Tx delay started"));
+        // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
+        uint8_t     poll_id = (first_value ^ 0x80 ^ rxservice_.ems_mask());
+        static bool waitKM  = true;
+        if (!rxservice_.bus_connected()) {
+            waitKM = true;
         }
-        if ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id()) {
+        if (poll_id == txservice_.ems_bus_id()) {
             EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
         }
-        // first send delayed after connect
-        if ((uuid::get_uptime_ms() - delayed_tx_start_) < tx_delay_) {
+        if (poll_id == 0x48) {
+            waitKM = false; // KM200 is polled, from now on it is safe to send
+        }
+        if (waitKM) {
             return;
         }
 
@@ -1156,12 +1157,11 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         }
 #endif
         // check for poll to us, if so send top message from Tx queue immediately and quit
-        // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
-        if ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id()) {
+        if (poll_id == txservice_.ems_bus_id()) {
             txservice_.send();
         }
         // send remote room temperature if active
-        Roomctrl::send(first_value ^ 0x80 ^ rxservice_.ems_mask());
+        Roomctrl::send(poll_id);
         return;
     } else {
 #ifdef EMSESP_UART_DEBUG

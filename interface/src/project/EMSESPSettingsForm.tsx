@@ -172,30 +172,6 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
               <MenuItem value={0x12}>Alarm Module (0x12)</MenuItem>
             </SelectValidator>
           </Grid>
-          <Grid item xs={6}>
-            <TextValidator
-              validators={[
-                'required',
-                'isNumber',
-                'minNumber:0',
-                'maxNumber:120'
-              ]}
-              errorMessages={[
-                'Tx delay is required',
-                'Must be a number',
-                'Must be 0 or higher',
-                'Max value is 120'
-              ]}
-              name="tx_delay"
-              label="Tx start delay (seconds)"
-              fullWidth
-              variant="outlined"
-              value={data.tx_delay}
-              type="number"
-              onChange={handleValueChange('tx_delay')}
-              margin="normal"
-            />
-          </Grid>
         </Grid>
 
         <br></br>

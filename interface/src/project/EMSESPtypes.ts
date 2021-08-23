@@ -1,6 +1,5 @@
 export interface EMSESPSettings {
   tx_mode: number;
-  tx_delay: number;
   ems_bus_id: number;
   syslog_enabled: boolean;
   syslog_level: number;

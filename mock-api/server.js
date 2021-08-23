@@ -293,7 +293,6 @@ const WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
 const WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
 const emsesp_settings = {
   tx_mode: 1,
-  tx_delay: 0,
   ems_bus_id: 11,
   syslog_enabled: false,
   syslog_level: 3,

@@ -13,3 +13,4 @@
 ## Changed
 
 - Syslog BOM only for utf-8 messages [#91](https://github.com/emsesp/EMS-ESP32/issues/91)
+- Check for KM200 by device-id 0x48, remove tx-delay[#90](https://github.com/emsesp/EMS-ESP32/issues/90)

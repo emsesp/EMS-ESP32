@@ -24,10 +24,6 @@
 #define EMSESP_DEFAULT_TX_MODE 1 // EMS1.0
 #endif
 
-#ifndef EMSESP_DEFAULT_TX_DELAY
-#define EMSESP_DEFAULT_TX_DELAY 0 // no delay
-#endif
-
 #ifndef EMSESP_DEFAULT_EMS_BUS_ID
 #define EMSESP_DEFAULT_EMS_BUS_ID 0x0B // service key
 #endif

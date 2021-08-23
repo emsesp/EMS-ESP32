@@ -38,7 +38,6 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
 
 void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["tx_mode"]              = settings.tx_mode;
-    root["tx_delay"]             = settings.tx_delay;
     root["ems_bus_id"]           = settings.ems_bus_id;
     root["syslog_enabled"]       = settings.syslog_enabled;
     root["syslog_level"]         = settings.syslog_level;
@@ -114,9 +113,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     prev             = settings.tx_mode;
     settings.tx_mode = root["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
     check_flag(prev, settings.tx_mode, ChangeFlags::UART);
-    prev              = settings.tx_delay;
-    settings.tx_delay = root["tx_delay"] | EMSESP_DEFAULT_TX_DELAY;
-    check_flag(prev, settings.tx_delay, ChangeFlags::UART);
     prev             = settings.rx_gpio;
     settings.rx_gpio = root["rx_gpio"] | default_rx_gpio;
     check_flag(prev, settings.rx_gpio, ChangeFlags::UART);

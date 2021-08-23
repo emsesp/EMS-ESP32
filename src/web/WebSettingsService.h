@@ -38,7 +38,6 @@ enum { ENUM_FORMAT_TEXT = 1, ENUM_FORMAT_NUMBER };                              
 class WebSettings {
   public:
     uint8_t  tx_mode;
-    uint8_t  tx_delay;
     uint8_t  ems_bus_id;
     uint8_t  master_thermostat;
     bool     shower_timer;
