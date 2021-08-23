@@ -57,6 +57,9 @@ class Boiler : public EMSdevice {
     // ww
     uint8_t  wwSetTemp_;          // Warm Water set temperature
     uint8_t  wwSelTemp_;          // Warm Water selected temperature
+    uint8_t  wwSelTempLow_;       // Warm Water lower selected temperature
+    uint8_t  wwSelTempOff_;       // Warm Water selected temperature for off position
+    uint8_t  wwSelTempSingle_;    // Warm Water single charge temperature
     uint8_t  wwType_;             // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
     uint8_t  wwComfort_;          // WW comfort mode
     uint8_t  wwCircPump_;         // Warm Water circulation pump available
@@ -205,6 +208,8 @@ class Boiler : public EMSdevice {
     bool set_warmwater_circulation_pump(const char * value, const int8_t id);
     bool set_warmwater_circulation_mode(const char * value, const int8_t id);
     bool set_warmwater_temp(const char * value, const int8_t id);
+    bool set_warmwater_temp_low(const char * value, const int8_t id);
+    bool set_warmwater_temp_single(const char * value, const int8_t id);
     bool set_disinfect_temp(const char * value, const int8_t id);
     bool set_warmwater_maxpower(const char * value, const int8_t id);
     bool set_wWFlowTempOffset(const char * value, const int8_t id);

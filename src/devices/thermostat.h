@@ -65,6 +65,7 @@ class Thermostat : public EMSdevice {
         uint8_t pause;
         uint8_t party;
         int8_t  noreducetemp; // signed -20°C to +10°C
+        uint8_t wwprio;
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -155,6 +156,7 @@ class Thermostat : public EMSdevice {
     int8_t  ibaMinExtTemperature_; // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
     uint8_t ibaBuildingType_;      // building type: 0 = light, 1 = medium, 2 = heavy
     uint8_t ibaClockOffset_;       // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+    uint8_t ibaDamping_;           // damping 0-off, 0xff-on
 
     int8_t   dampedoutdoortemp_;
     uint16_t tempsensor1_;
@@ -170,6 +172,14 @@ class Thermostat : public EMSdevice {
     uint8_t wwCircMode_;
     uint8_t wwSetTemp_;
     uint8_t wwSetTempLow_;
+    uint8_t wwChargeDuration_;
+    uint8_t wwDisinfect_;
+    uint8_t wwDisinfectDay_;
+    uint8_t wwDisinfectHour_;
+    uint8_t wwMaxTemp_;
+    uint8_t wwOneTimeKey_;
+    uint8_t wwProgMode_;
+    uint8_t wwCircProg_;
 
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
 
@@ -331,6 +341,7 @@ class Thermostat : public EMSdevice {
     bool set_switchtime(const char * value, const int8_t id);
     bool set_program(const char * value, const int8_t id);
     bool set_controlmode(const char * value, const int8_t id);
+    bool set_wwprio(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);
@@ -338,12 +349,22 @@ class Thermostat : public EMSdevice {
     bool set_wwtemplow(const char * value, const int8_t id);
     bool set_wwonetime(const char * value, const int8_t id);
     bool set_wwcircmode(const char * value, const int8_t id);
+    bool set_wwchargeduration(const char * value, const int8_t id);
+    bool set_wwDisinfect(const char * value, const int8_t id);
+    bool set_wwDisinfectDay(const char * value, const int8_t id);
+    bool set_wwDisinfectHour(const char * value, const int8_t id);
+    bool set_wwMaxTemp(const char * value, const int8_t id);
+    bool set_wwOneTimeKey(const char * value, const int8_t id);
+    bool set_wwProgMode(const char * value, const int8_t id);
+    bool set_wwCircProg(const char * value, const int8_t id);
+
     bool set_datetime(const char * value, const int8_t id);
     bool set_minexttemp(const char * value, const int8_t id);
     bool set_clockoffset(const char * value, const int8_t id);
     bool set_calinttemp(const char * value, const int8_t id);
     bool set_display(const char * value, const int8_t id);
     bool set_building(const char * value, const int8_t id);
+    bool set_damping(const char * value, const int8_t id);
     bool set_language(const char * value, const int8_t id);
 };
 

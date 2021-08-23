@@ -83,6 +83,7 @@ MAKE_PSTR_WORD(commands)
 MAKE_PSTR_WORD(info)
 MAKE_PSTR_WORD(settings)
 MAKE_PSTR_WORD(value)
+MAKE_PSTR_WORD(error)
 
 // devices
 MAKE_PSTR_WORD(boiler)
@@ -115,7 +116,7 @@ MAKE_PSTR(log_level_fmt, "Log level: %s")
 
 MAKE_STR(productid_fmt, "%s EMS Product ID")
 
-MAKE_PSTR_LIST(enum_syslog_level, F_(off), F("emerg"), F("alert"), F("crit"), F("error"), F("warn"), F("notice"), F_(info), F_(debug), F("trace"), F("all"))
+MAKE_PSTR_LIST(enum_syslog_level, F_(off), F("emerg"), F("alert"), F("crit"), F_(error), F("warn"), F("notice"), F_(info), F_(debug), F("trace"), F("all"))
 MAKE_PSTR_LIST(enum_watch, F_(off), F_(on), F_(raw), F_(unknown))
 // strings
 MAKE_PSTR(EMSESP, "EMS-ESP")
@@ -239,7 +240,6 @@ MAKE_PSTR_WORD(buffer)
 MAKE_PSTR(bufferedflow, "buffered flow")
 MAKE_PSTR(layeredbuffer, "layered buffer")
 MAKE_PSTR_WORD(maintenance)
-MAKE_PSTR_WORD(error)
 
 // boiler lists
 MAKE_PSTR_LIST(enum_off_time_date, F_(off), F_(time), F_(date))
@@ -329,6 +329,8 @@ MAKE_PSTR_LIST(enum_mode3, F_(night), F_(day), F_(auto))             // RC35, RC
 MAKE_PSTR_LIST(enum_mode4, F_(nofrost), F_(eco), F_(heat), F_(auto)) // JUNKERS
 MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))                        // CRF
 
+MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(heat), F_(auto), F_(auto), F_(auto), F_(auto))
+
 MAKE_PSTR_LIST(enum_modetype, F_(eco), F_(comfort))
 MAKE_PSTR_LIST(enum_modetype2, F_(day))
 MAKE_PSTR_LIST(enum_modetype3, F_(night), F_(day))
@@ -342,7 +344,9 @@ MAKE_PSTR_LIST(enum_controlmode2, F_(outdoor), F_(room))
 MAKE_PSTR_LIST(enum_controlmode3, F_(off), F_(room), F_(outdoor), F("room+outdoor"))
 MAKE_PSTR_LIST(enum_control, F_(off), F_(rc20), F_(rc3x))
 
-MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(heat), F_(auto), F_(auto), F_(auto), F_(auto))
+MAKE_PSTR_LIST(enum_wwProgMode, F("std prog"), F_(own_prog))
+MAKE_PSTR_LIST(enum_wwDisinfectDay, F("mo"), F("tu"), F("we"), F("th"), F("fr"), F("sa"), F("so"), F("every day"))
+MAKE_PSTR_LIST(enum_wwChargeDuration, F_(off), F("15min"), F("30min"), F("45min"), F("60min"), F("75min"), F("90min"), F("105min"), F("120min"))
 
 // solar list
 MAKE_PSTR_LIST(enum_solarmode, F_(constant), F("pwm"), F("analog"))
@@ -442,6 +446,9 @@ MAKE_PSTR_LIST(hpPh1, F("hpph1"), F("high pressure side temperature (PH1)"))
 
 // the following are warm water for the boiler and automatically tagged with 'ww'
 MAKE_PSTR_LIST(wwSelTemp, F("wwseltemp"), F("selected temperature"))
+MAKE_PSTR_LIST(wwSelTempLow, F("wwseltemplow"), F("selected lower temperature"))
+MAKE_PSTR_LIST(wwSelTempOff, F("wwseltempoff"), F("selected temperature for off"))
+MAKE_PSTR_LIST(wwSelTempSingle, F("wwseltempsingle"), F("single charge temperature"))
 MAKE_PSTR_LIST(wwSetTemp, F("wwsettemp"), F("set temperature"))
 MAKE_PSTR_LIST(wwType, F("wwtype"), F("type"))
 MAKE_PSTR_LIST(wwComfort, F("wwcomfort"), F("comfort"))
@@ -473,6 +480,13 @@ MAKE_PSTR_LIST(wwStarts2, F("wwstarts2"), F("# control starts"))
 MAKE_PSTR_LIST(wwWorkM, F("wwworkm"), F("active time"))
 MAKE_PSTR_LIST(wwHystOn, F("wwhyston"), F("hysteresis on temperature"))
 MAKE_PSTR_LIST(wwHystOff, F("wwhystoff"), F("hysteresis off temperature"))
+MAKE_PSTR_LIST(wwProgMode, F("wwprogmode"), F("program mode"))
+MAKE_PSTR_LIST(wwCircProg, F("wwcircprog"), F("circulation program mode"))
+MAKE_PSTR_LIST(wwDisinfect, F("wwdisinfect"), F("disinfection"))
+MAKE_PSTR_LIST(wwDisinfectDay, F("wwdisinfectday"), F("disinfection day"))
+MAKE_PSTR_LIST(wwDisinfectHour, F("wwdisinfecthour"), F("disinfection hour"))
+MAKE_PSTR_LIST(wwMaxTemp, F("wwmaxtemp"), F("maximum temperature"))
+MAKE_PSTR_LIST(wwOneTimeKey, F("wwonetimekey"), F("one time key function"))
 
 // thermostat
 // extra commands
@@ -491,20 +505,23 @@ MAKE_PSTR_LIST(ibaClockOffset, F("clockoffset"), F("clock offset"))
 MAKE_PSTR_LIST(ibaBuildingType, F("building"), F("building"))
 MAKE_PSTR_LIST(ibaCalIntTemperature, F("intoffset"), F("offset internal temperature"))
 MAKE_PSTR_LIST(ibaMinExtTemperature, F("minexttemp"), F("minimal external temperature"))
+MAKE_PSTR_LIST(damping, F("damping"), F("damping outdoor temperature"))
+
 MAKE_PSTR_LIST(tempsensor1, F("inttemp1"), F("temperature sensor 1"))
 MAKE_PSTR_LIST(tempsensor2, F("inttemp2"), F("temperature sensor 2"))
 MAKE_PSTR_LIST(dampedoutdoortemp, F("dampedoutdoortemp"), F("damped outdoor temperature"))
 MAKE_PSTR_LIST(floordrystatus, F("floordry"), F("floor drying"))
-MAKE_PSTR_LIST(dampedoutdoortemp2, F("dampedoutdoortemp"), F("damped outdoor temperature"))
 MAKE_PSTR_LIST(floordrytemp, F("floordrytemp"), F("floor drying temperature"))
 MAKE_PSTR_LIST(wwMode, F("wwmode"), F("mode"))
 MAKE_PSTR_LIST(wwSetTempLow, F("wwsettemplow"), F("set low temperature"))
+MAKE_PSTR_LIST(wwChargeDuration, F("wwchargeduration"), F("charge duration"))
 MAKE_PSTR_LIST(wwExtra1, F("wwextra1"), F("circuit 1 extra"))
 MAKE_PSTR_LIST(wwExtra2, F("wwextra2"), F("circuit 2 extra"))
 MAKE_PSTR_LIST(setpoint_roomTemp, F("seltemp"), F("selected room temperature"))
 MAKE_PSTR_LIST(curr_roomTemp, F("currtemp"), F("current room temperature"))
 MAKE_PSTR_LIST(mode, F("mode"), F("mode"))
 MAKE_PSTR_LIST(modetype, F("modetype"), F("mode type"))
+
 MAKE_PSTR_LIST(daytemp, F("daytemp"), F("day temperature"))
 MAKE_PSTR_LIST(heattemp, F("heattemp"), F("heat temperature"))
 MAKE_PSTR_LIST(nighttemp, F("nighttemp"), F("night temperature"))
@@ -527,6 +544,7 @@ MAKE_PSTR_LIST(control, F("control"), F("control device"))
 MAKE_PSTR_LIST(program, F("program"), F("program"))
 MAKE_PSTR_LIST(pause, F("pause"), F("pause time"))
 MAKE_PSTR_LIST(party, F("party"), F("party time"))
+MAKE_PSTR_LIST(wwprio, F("wwprio"), F("warm water priority"))
 
 MAKE_PSTR_LIST(holidaytemp, F("holidaytemp"), F("holiday temperature"))
 MAKE_PSTR_LIST(summermode, F("summermode"), F("summer mode"))
