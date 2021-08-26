@@ -193,9 +193,16 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     // warm water - boiler_data_ww topic
     register_device_value(TAG_BOILER_DATA_WW, &wwSelTemp_, DeviceValueType::UINT, nullptr, FL_(wwSelTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_warmwater_temp));
     register_device_value(TAG_BOILER_DATA_WW, &wwSetTemp_, DeviceValueType::UINT, nullptr, FL_(wwSetTemp), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_BOILER_DATA_WW, &wwSelTempLow_, DeviceValueType::UINT, nullptr, FL_(wwSelTempLow), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_warmwater_temp_low));
+    register_device_value(
+        TAG_BOILER_DATA_WW, &wwSelTempLow_, DeviceValueType::UINT, nullptr, FL_(wwSelTempLow), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_warmwater_temp_low));
     register_device_value(TAG_BOILER_DATA_WW, &wwSelTempOff_, DeviceValueType::UINT, nullptr, FL_(wwSelTempOff), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_BOILER_DATA_WW, &wwSelTempSingle_, DeviceValueType::UINT, nullptr, FL_(wwSelTempSingle), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_warmwater_temp_single));
+    register_device_value(TAG_BOILER_DATA_WW,
+                          &wwSelTempSingle_,
+                          DeviceValueType::UINT,
+                          nullptr,
+                          FL_(wwSelTempSingle),
+                          DeviceValueUOM::DEGREES,
+                          MAKE_CF_CB(set_warmwater_temp_single));
     register_device_value(TAG_BOILER_DATA_WW, &wwType_, DeviceValueType::ENUM, FL_(enum_flow), FL_(wwType), DeviceValueUOM::NONE);
     register_device_value(
         TAG_BOILER_DATA_WW, &wwComfort_, DeviceValueType::ENUM, FL_(enum_comfort), FL_(wwComfort), DeviceValueUOM::LIST, MAKE_CF_CB(set_warmwater_mode));

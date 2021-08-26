@@ -179,9 +179,9 @@ void EMSESP::init_uart() {
     uint8_t rx_gpio;
     uint8_t tx_gpio;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        tx_mode   = settings.tx_mode;
-        rx_gpio   = settings.rx_gpio;
-        tx_gpio   = settings.tx_gpio;
+        tx_mode = settings.tx_mode;
+        rx_gpio = settings.rx_gpio;
+        tx_gpio = settings.tx_gpio;
     });
 
     EMSuart::stop();

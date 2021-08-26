@@ -774,8 +774,8 @@ void Thermostat::process_RC35wwSettings(std::shared_ptr<const Telegram> telegram
     has_update(telegram->read_value(wwDisinfect_, 4));    // 0-off, 0xFF on
     has_update(telegram->read_value(wwDisinfectDay_, 5)); // 0-6 Day of week, 7 every day
     has_update(telegram->read_value(wwDisinfectHour_, 6));
-    has_update(telegram->read_value(wwMaxTemp_, 8));      // Limiter 60 degrees
-    has_update(telegram->read_value(wwOneTimeKey_, 9));   // 0-off, 0xFF on
+    has_update(telegram->read_value(wwMaxTemp_, 8));    // Limiter 60 degrees
+    has_update(telegram->read_value(wwOneTimeKey_, 9)); // 0-off, 0xFF on
 }
 
 // type 0x6F - FR10/FR50/FR100/FR110/FR120 Junkers
@@ -1433,7 +1433,7 @@ bool Thermostat::set_wwMaxTemp(const char * value, const int8_t id) {
         LOG_WARNING(F("Set warm water max temperature: Invalid value"));
         return false;
     }
-    if (t < 0  || t > 90) {
+    if (t < 0 || t > 90) {
         LOG_WARNING(F("Set warm water max temperature: Invalid value"));
         return false;
     }
@@ -2410,10 +2410,22 @@ void Thermostat::register_device_values() {
             TAG_THERMOSTAT_DATA, &wwCircProg_, DeviceValueType::ENUM, FL_(enum_wwProgMode), FL_(wwCircProg), DeviceValueUOM::LIST, MAKE_CF_CB(set_wwCircProg));
         register_device_value(
             TAG_THERMOSTAT_DATA, &wwDisinfect_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfect), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_wwDisinfect));
-        register_device_value(
-            TAG_THERMOSTAT_DATA, &wwDisinfectDay_, DeviceValueType::ENUM, FL_(enum_wwDisinfectDay), FL_(wwDisinfectDay), DeviceValueUOM::LIST, MAKE_CF_CB(set_wwDisinfectDay));
-        register_device_value(
-            TAG_THERMOSTAT_DATA, &wwDisinfectHour_, DeviceValueType::UINT, nullptr, FL_(wwDisinfectHour), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfectHour), 0, 23);
+        register_device_value(TAG_THERMOSTAT_DATA,
+                              &wwDisinfectDay_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_wwDisinfectDay),
+                              FL_(wwDisinfectDay),
+                              DeviceValueUOM::LIST,
+                              MAKE_CF_CB(set_wwDisinfectDay));
+        register_device_value(TAG_THERMOSTAT_DATA,
+                              &wwDisinfectHour_,
+                              DeviceValueType::UINT,
+                              nullptr,
+                              FL_(wwDisinfectHour),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_wwDisinfectHour),
+                              0,
+                              23);
         register_device_value(TAG_THERMOSTAT_DATA, &wwMaxTemp_, DeviceValueType::UINT, nullptr, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp));
         register_device_value(
             TAG_THERMOSTAT_DATA, &wwOneTimeKey_, DeviceValueType::BOOL, nullptr, FL_(wwOneTimeKey), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_wwOneTimeKey));

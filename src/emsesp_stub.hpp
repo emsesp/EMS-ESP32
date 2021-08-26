@@ -37,7 +37,7 @@ class EMSESP {
     static DallasSensor dallassensor_;
 
     static uuid::log::Logger logger();
-    static ESP8266React esp8266React;
+    static ESP8266React      esp8266React;
 };
 
 } // namespace emsesp
