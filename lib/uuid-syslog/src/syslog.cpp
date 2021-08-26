@@ -437,7 +437,7 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
     udp_.printf_P(PSTR(" %s %s - - - "), hostname_.c_str(), uuid::read_flash_string(message.content_->name).c_str());
 
     char id_c_str[15];
-    snprintf_P(id_c_str, sizeof(id_c_str), PSTR(" %lu "), message.id_);
+    snprintf_P(id_c_str, sizeof(id_c_str), PSTR(" %lu: "), message.id_);
     std::string msgstr = uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3) +
                          ' ' +
                          uuid::log::format_level_char(message.content_->level) +
