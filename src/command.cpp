@@ -363,7 +363,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
 // output list of all commands to console
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
-    shell.println(F("Available commands: "));
+    shell.println(F("Available commands (* = need authorization): "));
 
     // show system first
     shell.print(COLOR_BOLD_ON);
