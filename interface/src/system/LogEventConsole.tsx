@@ -107,7 +107,7 @@ const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
 
   const paddedLevelLabel = (level: LogLevel, compact: boolean) => {
     const label = levelLabel(level);
-    return compact ? ' ' + label[0] : label.padStart(7, '\xa0');
+    return compact ? ' ' + label[0] : label.padStart(8, '\xa0');
   };
 
   const paddedNameLabel = (name: string, compact: boolean) => {
