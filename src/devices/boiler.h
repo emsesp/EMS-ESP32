@@ -140,20 +140,26 @@ class Boiler : public EMSdevice {
     uint32_t upTimeCompHeating_;         // Operating time compressor heating
     uint32_t upTimeCompCooling_;         // Operating time compressor cooling
     uint32_t upTimeCompWw_;              // Operating time compressor warm water
+    uint32_t upTimeCompPool_;            // Operating time compressor pool
+    uint32_t totalCompStarts_;           // Total Commpressor control starts
     uint32_t heatingStarts_;             // Heating control starts
     uint32_t coolingStarts_;             // Cooling control starts
+    uint32_t poolStarts_;                // Warm water control starts
     uint32_t nrgConsTotal_;              // Energy consumption total
     uint32_t nrgConsCompTotal_;          // Energy consumption compressor total
     uint32_t nrgConsCompHeating_;        // Energy consumption compressor heating
     uint32_t nrgConsCompWw_;             // Energy consumption compressor warm water
     uint32_t nrgConsCompCooling_;        // Energy consumption compressor cooling
+    uint32_t nrgConsCompPool_;           // Energy consumption compressor pool
     uint32_t nrgSuppTotal_;              // Energy supplied total
     uint32_t nrgSuppHeating_;            // Energy supplied heating
     uint32_t nrgSuppWw_;                 // Energy supplied warm water
     uint32_t nrgSuppCooling_;            // Energy supplied cooling
+    uint32_t nrgSuppPool_;               // Energy supplied pool
     uint32_t auxElecHeatNrgConsTotal_;   // Auxiliary electrical heater energy consumption total
     uint32_t auxElecHeatNrgConsHeating_; // Auxiliary electrical heater energy consumption heating
     uint32_t auxElecHeatNrgConsWW_;      // Auxiliary electrical heater energy consumption DHW
+    uint32_t auxElecHeatNrgConsPool_;    // Auxiliary electrical heater energy consumption Pool
     char     maintenanceMessage_[4];
     char     maintenanceDate_[12];
     uint8_t  maintenanceType_;

@@ -162,20 +162,26 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(TAG_BOILER_DATA, &upTimeCompHeating_, DeviceValueType::TIME, FL_(div60), FL_(upTimeCompHeating), DeviceValueUOM::MINUTES);
         register_device_value(TAG_BOILER_DATA, &upTimeCompCooling_, DeviceValueType::TIME, FL_(div60), FL_(upTimeCompCooling), DeviceValueUOM::MINUTES);
         register_device_value(TAG_BOILER_DATA, &upTimeCompWw_, DeviceValueType::TIME, FL_(div60), FL_(upTimeCompWw), DeviceValueUOM::MINUTES);
+        register_device_value(TAG_BOILER_DATA, &upTimeCompPool_, DeviceValueType::TIME, FL_(div60), FL_(upTimeCompWw), DeviceValueUOM::MINUTES);
+        register_device_value(TAG_BOILER_DATA, &totalCompStarts_, DeviceValueType::ULONG, nullptr, FL_(heatingStarts), DeviceValueUOM::NUM);
         register_device_value(TAG_BOILER_DATA, &heatingStarts_, DeviceValueType::ULONG, nullptr, FL_(heatingStarts), DeviceValueUOM::NUM);
         register_device_value(TAG_BOILER_DATA, &coolingStarts_, DeviceValueType::ULONG, nullptr, FL_(coolingStarts), DeviceValueUOM::NUM);
+        register_device_value(TAG_BOILER_DATA, &poolStarts_, DeviceValueType::ULONG, nullptr, FL_(poolStarts), DeviceValueUOM::NUM);
         register_device_value(TAG_BOILER_DATA, &nrgConsTotal_, DeviceValueType::ULONG, nullptr, FL_(nrgConsTotal), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &nrgConsCompTotal_, DeviceValueType::ULONG, nullptr, FL_(nrgConsCompTotal), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &nrgConsCompHeating_, DeviceValueType::ULONG, nullptr, FL_(nrgConsCompHeating), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &nrgConsCompWw_, DeviceValueType::ULONG, nullptr, FL_(nrgConsCompWw), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &nrgConsCompCooling_, DeviceValueType::ULONG, nullptr, FL_(nrgConsCompCooling), DeviceValueUOM::KWH);
+        register_device_value(TAG_BOILER_DATA, &nrgConsCompPool_, DeviceValueType::ULONG, nullptr, FL_(nrgConsCompPool), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &auxElecHeatNrgConsTotal_, DeviceValueType::ULONG, nullptr, FL_(auxElecHeatNrgConsTotal), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &auxElecHeatNrgConsHeating_, DeviceValueType::ULONG, nullptr, FL_(auxElecHeatNrgConsHeating), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &auxElecHeatNrgConsWW_, DeviceValueType::ULONG, nullptr, FL_(auxElecHeatNrgConsWW), DeviceValueUOM::KWH);
+        register_device_value(TAG_BOILER_DATA, &auxElecHeatNrgConsPool_, DeviceValueType::ULONG, nullptr, FL_(auxElecHeatNrgConsPool), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &nrgSuppTotal_, DeviceValueType::ULONG, nullptr, FL_(nrgSuppTotal), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &nrgSuppHeating_, DeviceValueType::ULONG, nullptr, FL_(nrgSuppHeating), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &nrgSuppWw_, DeviceValueType::ULONG, nullptr, FL_(nrgSuppWw), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &nrgSuppCooling_, DeviceValueType::ULONG, nullptr, FL_(nrgSuppCooling), DeviceValueUOM::KWH);
+        register_device_value(TAG_BOILER_DATA, &nrgSuppPool_, DeviceValueType::ULONG, nullptr, FL_(nrgSuppPool), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &hpPower_, DeviceValueType::UINT, FL_(div10), FL_(hpPower), DeviceValueUOM::KW);
         register_device_value(TAG_BOILER_DATA, &hpTc0_, DeviceValueType::SHORT, FL_(div10), FL_(hpTc0), DeviceValueUOM::DEGREES);
         register_device_value(TAG_BOILER_DATA, &hpTc1_, DeviceValueType::SHORT, FL_(div10), FL_(hpTc1), DeviceValueUOM::DEGREES);
@@ -603,32 +609,37 @@ void Boiler::process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram) 
 /*
  * UBAInformation - type 0x495
  * all values 32 bit
- * 08 0B FF 00 03 95 01 01 AB 83 00 27 78 EB 00 84 FA 39 FF FF FF 00 00 53 7D 8D 00 00 0F 04 1C
- * 08 00 FF 00 03 95 01 01 AB 83 00 27 78 EB 00 84 FA 39 FF FF FF 00 00 53 7D 8D 00 00 0F 04 63
- * 08 00 FF 18 03 95 00 00 05 84 00 00 07 22 FF FF FF FF 00 00 02 5C 00 00 03 C0 00 00 01 98 64
- * 08 00 FF 30 03 95 00 00 00 D4 FF FF FF FF 00 00 1C 70 FF FF FF FF 00 00 20 30 00 00 0E 06 FB
- * 08 00 FF 48 03 95 00 00 06 C0 00 00 07 66 FF FF FF FF 2E
+ * 08 00 FF 00 03 95 00 0F 8E C2 00 08 39 C8 00 00 18 7A 00 07 3C 80 00 00 00 00 00 00 00 E5 F6 00 
+ * 08 00 FF 18 03 95 00 00 00 A1 00 00 00 00 00 00 00 44 00 00 00 00 00 00 00 0A 00 00 00 0A BD 00 
+ * 08 00 FF 30 03 95 00 00 00 00 00 00 00 00 00 00 02 10 00 00 00 00 00 00 02 1A 00 00 00 02 66 00 
+ * 08 00 FF 48 03 95 00 00 01 15 00 00 00 00 00 00 00 F9 29 00
+ *  
  */
 void Boiler::process_UBAInformation(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(upTimeControl_, 0));
     has_update(telegram->read_value(upTimeCompHeating_, 8));
     has_update(telegram->read_value(upTimeCompCooling_, 16));
     has_update(telegram->read_value(upTimeCompWw_, 4));
+    has_update(telegram->read_value(upTimeCompPool_, 12));
 
+    has_update(telegram->read_value(totalCompStarts_, 20));
     has_update(telegram->read_value(heatingStarts_, 28));
     has_update(telegram->read_value(coolingStarts_, 36));
     has_update(telegram->read_value(wwStarts2_, 24));
+    has_update(telegram->read_value(poolStarts_, 32));
 
     has_update(telegram->read_value(nrgConsTotal_, 64));
 
     has_update(telegram->read_value(auxElecHeatNrgConsTotal_, 40));
     has_update(telegram->read_value(auxElecHeatNrgConsHeating_, 48));
     has_update(telegram->read_value(auxElecHeatNrgConsWW_, 44));
+    has_update(telegram->read_value(auxElecHeatNrgConsPool_, 52));
 
     has_update(telegram->read_value(nrgConsCompTotal_, 56));
     has_update(telegram->read_value(nrgConsCompHeating_, 68));
     has_update(telegram->read_value(nrgConsCompWw_, 72));
     has_update(telegram->read_value(nrgConsCompCooling_, 76));
+    has_update(telegram->read_value(nrgConsCompPool_, 80));
 }
 
 /*
@@ -643,6 +654,7 @@ void Boiler::process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram)
     has_update(telegram->read_value(nrgSuppHeating_, 12));
     has_update(telegram->read_value(nrgSuppWw_, 8));
     has_update(telegram->read_value(nrgSuppCooling_, 16));
+    has_update(telegram->read_value(nrgSuppPool_, 20));
 }
 
 // Heatpump power - type 0x48D
