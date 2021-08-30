@@ -66,6 +66,7 @@ class Thermostat : public EMSdevice {
         uint8_t party;
         int8_t  noreducetemp; // signed -20°C to +10°C
         uint8_t wwprio;
+        uint8_t fastHeatupFactor;
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -172,6 +173,7 @@ class Thermostat : public EMSdevice {
     uint8_t wwCircMode_;
     uint8_t wwSetTemp_;
     uint8_t wwSetTempLow_;
+    uint8_t wwCharge_;
     uint8_t wwChargeDuration_;
     uint8_t wwDisinfect_;
     uint8_t wwDisinfectDay_;
@@ -342,6 +344,7 @@ class Thermostat : public EMSdevice {
     bool set_program(const char * value, const int8_t id);
     bool set_controlmode(const char * value, const int8_t id);
     bool set_wwprio(const char * value, const int8_t id);
+    bool set_fastheatupfactor(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);
@@ -349,6 +352,7 @@ class Thermostat : public EMSdevice {
     bool set_wwtemplow(const char * value, const int8_t id);
     bool set_wwonetime(const char * value, const int8_t id);
     bool set_wwcircmode(const char * value, const int8_t id);
+    bool set_wwcharge(const char * value, const int8_t id);
     bool set_wwchargeduration(const char * value, const int8_t id);
     bool set_wwDisinfect(const char * value, const int8_t id);
     bool set_wwDisinfectDay(const char * value, const int8_t id);
@@ -366,6 +370,7 @@ class Thermostat : public EMSdevice {
     bool set_building(const char * value, const int8_t id);
     bool set_damping(const char * value, const int8_t id);
     bool set_language(const char * value, const int8_t id);
+    bool set_heatingtype(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

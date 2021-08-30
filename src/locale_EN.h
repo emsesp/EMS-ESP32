@@ -315,7 +315,7 @@ MAKE_PSTR_LIST(enum_ibaMainDisplay,
                F_(smoke_temperature))
 MAKE_PSTR_LIST(enum_ibaLanguage, F_(german), F_(dutch), F_(french), F_(italian))
 MAKE_PSTR_LIST(enum_floordrystatus, F_(off), F_(start), F_(heat), F_(hold), F_(cool), F_(end))
-MAKE_PSTR_LIST(enum_ibaBuildingType, F_(light), F_(medium), F_(heavy)) // RC300
+MAKE_PSTR_LIST(enum_ibaBuildingType, F_(light), F_(medium), F_(heavy))
 MAKE_PSTR_LIST(enum_wwMode, F_(off), F_(low), F_(high), F_(auto), F_(own_prog))
 MAKE_PSTR_LIST(enum_wwCircMode, F_(off), F_(on), F_(auto), F_(own_prog))
 MAKE_PSTR_LIST(enum_wwMode2, F_(off), F_(on), F_(auto))
@@ -345,7 +345,7 @@ MAKE_PSTR_LIST(enum_controlmode3, F_(off), F_(room), F_(outdoor), F("room+outdoo
 MAKE_PSTR_LIST(enum_control, F_(off), F_(rc20), F_(rc3x))
 
 MAKE_PSTR_LIST(enum_wwProgMode, F("std prog"), F_(own_prog))
-MAKE_PSTR_LIST(enum_wwDisinfectDay, F("mo"), F("tu"), F("we"), F("th"), F("fr"), F("sa"), F("so"), F("every day"))
+MAKE_PSTR_LIST(enum_dayOfWeek, F("mo"), F("tu"), F("we"), F("th"), F("fr"), F("sa"), F("so"), F("all"))
 MAKE_PSTR_LIST(enum_wwChargeDuration, F_(off), F("15min"), F("30min"), F("45min"), F("60min"), F("75min"), F("90min"), F("105min"), F("120min"))
 
 // solar list
@@ -520,6 +520,7 @@ MAKE_PSTR_LIST(floordrystatus, F("floordry"), F("floor drying"))
 MAKE_PSTR_LIST(floordrytemp, F("floordrytemp"), F("floor drying temperature"))
 MAKE_PSTR_LIST(wwMode, F("wwmode"), F("mode"))
 MAKE_PSTR_LIST(wwSetTempLow, F("wwsettemplow"), F("set low temperature"))
+MAKE_PSTR_LIST(wwCharge, F("wwcharge"), F("charge"))
 MAKE_PSTR_LIST(wwChargeDuration, F("wwchargeduration"), F("charge duration"))
 MAKE_PSTR_LIST(wwExtra1, F("wwextra1"), F("circuit 1 extra"))
 MAKE_PSTR_LIST(wwExtra2, F("wwextra2"), F("circuit 2 extra"))
@@ -527,7 +528,7 @@ MAKE_PSTR_LIST(setpoint_roomTemp, F("seltemp"), F("selected room temperature"))
 MAKE_PSTR_LIST(curr_roomTemp, F("currtemp"), F("current room temperature"))
 MAKE_PSTR_LIST(mode, F("mode"), F("mode"))
 MAKE_PSTR_LIST(modetype, F("modetype"), F("mode type"))
-
+MAKE_PSTR_LIST(fastheatupfactor, F("fastheatupfactor"), F("fast heatup factor"))
 MAKE_PSTR_LIST(daytemp, F("daytemp"), F("day temperature"))
 MAKE_PSTR_LIST(heattemp, F("heattemp"), F("heat temperature"))
 MAKE_PSTR_LIST(nighttemp, F("nighttemp"), F("night temperature"))
