@@ -250,6 +250,12 @@ MAKE_PSTR_LIST(enum_flow, F_(off), F_(flow), F_(bufferedflow), F_(buffer), F_(la
 MAKE_PSTR_LIST(enum_reset, F_(maintenance), F_(error))
 MAKE_PSTR_LIST(enum_bool, F_(off), F_(on))
 
+//heatpump
+MAKE_PSTR_LIST(enum_hpactivity, F("none"), F("heating"), F("cooling"), F("warm water"), F("pool") )
+
+// mixer
+MAKE_PSTR_LIST(enum_shunt, F("stopped"), F("opening"), F("closing"), F("open"), F("close") )
+
 // thermostat
 MAKE_PSTR_WORD(light)
 MAKE_PSTR_WORD(medium)
@@ -420,6 +426,7 @@ MAKE_PSTR_LIST(upTimeCompPool, F("uptimecomppool"), F("operating time compressor
 MAKE_PSTR_LIST(totalcompStarts, F("totalcompstarts"), F("# total compressor control starts"))
 MAKE_PSTR_LIST(heatingStarts, F("heatingstarts"), F("# heating control starts"))
 MAKE_PSTR_LIST(coolingStarts, F("coolingstarts"), F("# cooling control starts"))
+MAKE_PSTR_LIST(wwStarts2, F("wwstarts2"), F("# warm water control starts"))
 MAKE_PSTR_LIST(poolStarts, F("poolstarts"), F("# pool control starts"))
 MAKE_PSTR_LIST(nrgConsTotal, F("nrgconstotal"), F("total energy consumption"))
 MAKE_PSTR_LIST(nrgConsCompTotal, F("nrgconscomptotal"), F("energy consumption compressor total"))
@@ -437,9 +444,19 @@ MAKE_PSTR_LIST(auxElecHeatNrgConsHeating, F("auxelecheatnrgconsheating"), F("aux
 MAKE_PSTR_LIST(auxElecHeatNrgConsWW, F("auxelecheatnrgconsww"), F("auxiliary electrical heater energy consumption warm water"))
 MAKE_PSTR_LIST(auxElecHeatNrgConsPool, F("auxelecheatnrgconspool"), F("auxiliary electrical heater energy consumption pool"))
 
-MAKE_PSTR_LIST(hpPower, F("hppower"), F("heatpump power"))
-MAKE_PSTR_LIST(hpTc0, F("hptc0"), F("water temperature condenser inlet (TC0)"))
-MAKE_PSTR_LIST(hpTc1, F("hptc1"), F("water temperature condenser output (TC1)"))
+MAKE_PSTR_LIST(hpPower, F("hppower"), F("Compressor power output"))
+MAKE_PSTR_LIST(hpCompRunning, F("hpcomprunning"), F("Compressor active"))
+MAKE_PSTR_LIST(hpBrinePumpSpd, F("hpbrinepumpspd"), F("Brine Pump Speed"))
+MAKE_PSTR_LIST(hpCompSpd, F("hpcompspd"), F("Compressor Speed"))
+MAKE_PSTR_LIST(hpCircSpd, F("hpcircspd"), F("Circulation pump Speed"))
+MAKE_PSTR_LIST(hpBrineIn, F("hpbrinein"), F("Brine in/Evaporator"))
+MAKE_PSTR_LIST(hpBrineOut, F("hpbrineout"), F("Brine out/Condenser"))
+MAKE_PSTR_LIST(hpSuctionGas, F("hpsuctiongas"), F("Suction gas"))
+MAKE_PSTR_LIST(hpHotGas, F("hphotgas"), F("Hot gas/Compressed"))
+MAKE_PSTR_LIST(hpSwitchValve, F("hpswitchvalve"), F("Switch Valve"))
+MAKE_PSTR_LIST(hpActivity, F("hpactivity"), F("Compressor Activity"))
+MAKE_PSTR_LIST(hpTc0, F("hptc0"), F("Heat carrier return (TC0)"))
+MAKE_PSTR_LIST(hpTc1, F("hptc1"), F("Heat carrier forward (TC1)"))
 MAKE_PSTR_LIST(hpTc3, F("hptc3"), F("condenser temperature (TC3)"))
 MAKE_PSTR_LIST(hpTr3, F("hptr3"), F("refrigerant temperature liquid side (condenser output) (TR3)"))
 MAKE_PSTR_LIST(hpTr4, F("hptr4"), F("evaporator inlet temperature (TR4)"))
@@ -449,6 +466,10 @@ MAKE_PSTR_LIST(hpTr7, F("hptr7"), F("refrigerant temperature gas side (condenser
 MAKE_PSTR_LIST(hpTl2, F("hptl2"), F("air inlet temperature (TL2)"))
 MAKE_PSTR_LIST(hpPl1, F("hppl1"), F("low pressure side temperature (PL1)"))
 MAKE_PSTR_LIST(hpPh1, F("hpph1"), F("high pressure side temperature (PH1)"))
+MAKE_PSTR_LIST(poolSetTemp, F("poolsettemp"), F("pool set temperature"))
+MAKE_PSTR_LIST(poolTemp, F("pooltemp"), F("pool temperature"))
+MAKE_PSTR_LIST(poolShuntStatus, F("poolshuntstatus"), F("pool shunt status opening/closing"))
+MAKE_PSTR_LIST(poolShunt, F("poolshunt"), F("pool shunt open/close (0% = pool / 100% = heat)"))
 
 // the following are warm water for the boiler and automatically tagged with 'ww'
 MAKE_PSTR_LIST(wwSelTemp, F("wwseltemp"), F("selected temperature"))
@@ -482,7 +503,6 @@ MAKE_PSTR_LIST(wwSetPumpPower, F("wwsetpumppower"), F("set pump power"))
 MAKE_PSTR_LIST(wwMixerTemp, F("wwMixerTemp"), F("mixer temperature"))
 MAKE_PSTR_LIST(wwTankMiddleTemp, F("wwtankmiddletemp"), F("tank middle temperature (TS3)"))
 MAKE_PSTR_LIST(wwStarts, F("wwstarts"), F("# starts"))
-MAKE_PSTR_LIST(wwStarts2, F("wwstarts2"), F("# control starts"))
 MAKE_PSTR_LIST(wwWorkM, F("wwworkm"), F("active time"))
 MAKE_PSTR_LIST(wwHystOn, F("wwhyston"), F("hysteresis on temperature"))
 MAKE_PSTR_LIST(wwHystOff, F("wwhystoff"), F("hysteresis off temperature"))

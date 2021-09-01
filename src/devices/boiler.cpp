@@ -46,7 +46,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     }
 
     // register values for master boiler/cascade module
-    reserve_telgram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
+    reserve_telgram_functions(26); // reserve some space for the telegram registries, to avoid memory fragmentation
 
     // the telegram handlers...
     // common for all boilers
@@ -86,6 +86,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x495, F("UBAInformation"), false, MAKE_PF_CB(process_UBAInformation));
         register_telegram_type(0x48D, F("HpPower"), false, MAKE_PF_CB(process_HpPower));
         register_telegram_type(0x48F, F("HpOutdoor"), false, MAKE_PF_CB(process_HpOutdoor));
+        register_telegram_type(0x48A, F("HpPool"), true, MAKE_PF_CB(process_HpPool));
     }
 
     // MQTT commands for boiler topic
@@ -162,10 +163,11 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(TAG_BOILER_DATA, &upTimeCompHeating_, DeviceValueType::TIME, FL_(div60), FL_(upTimeCompHeating), DeviceValueUOM::MINUTES);
         register_device_value(TAG_BOILER_DATA, &upTimeCompCooling_, DeviceValueType::TIME, FL_(div60), FL_(upTimeCompCooling), DeviceValueUOM::MINUTES);
         register_device_value(TAG_BOILER_DATA, &upTimeCompWw_, DeviceValueType::TIME, FL_(div60), FL_(upTimeCompWw), DeviceValueUOM::MINUTES);
-        register_device_value(TAG_BOILER_DATA, &upTimeCompPool_, DeviceValueType::TIME, FL_(div60), FL_(upTimeCompWw), DeviceValueUOM::MINUTES);
-        register_device_value(TAG_BOILER_DATA, &totalCompStarts_, DeviceValueType::ULONG, nullptr, FL_(heatingStarts), DeviceValueUOM::NUM);
+        register_device_value(TAG_BOILER_DATA, &upTimeCompPool_, DeviceValueType::TIME, FL_(div60), FL_(upTimeCompPool), DeviceValueUOM::MINUTES);
+        register_device_value(TAG_BOILER_DATA, &totalCompStarts_, DeviceValueType::ULONG, nullptr, FL_(totalcompStarts), DeviceValueUOM::NUM);
         register_device_value(TAG_BOILER_DATA, &heatingStarts_, DeviceValueType::ULONG, nullptr, FL_(heatingStarts), DeviceValueUOM::NUM);
         register_device_value(TAG_BOILER_DATA, &coolingStarts_, DeviceValueType::ULONG, nullptr, FL_(coolingStarts), DeviceValueUOM::NUM);
+        register_device_value(TAG_BOILER_DATA, &wwStarts2_, DeviceValueType::ULONG, nullptr, FL_(wwStarts2), DeviceValueUOM::NUM);
         register_device_value(TAG_BOILER_DATA, &poolStarts_, DeviceValueType::ULONG, nullptr, FL_(poolStarts), DeviceValueUOM::NUM);
         register_device_value(TAG_BOILER_DATA, &nrgConsTotal_, DeviceValueType::ULONG, nullptr, FL_(nrgConsTotal), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &nrgConsCompTotal_, DeviceValueType::ULONG, nullptr, FL_(nrgConsCompTotal), DeviceValueUOM::KWH);
@@ -183,6 +185,16 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(TAG_BOILER_DATA, &nrgSuppCooling_, DeviceValueType::ULONG, nullptr, FL_(nrgSuppCooling), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &nrgSuppPool_, DeviceValueType::ULONG, nullptr, FL_(nrgSuppPool), DeviceValueUOM::KWH);
         register_device_value(TAG_BOILER_DATA, &hpPower_, DeviceValueType::UINT, FL_(div10), FL_(hpPower), DeviceValueUOM::KW);
+        register_device_value(TAG_BOILER_DATA, &hpCompRunning_, DeviceValueType::BOOL, nullptr, FL_(hpCompRunning), DeviceValueUOM::BOOLEAN);
+        register_device_value(TAG_BOILER_DATA, &hpBrinePumpSpd_, DeviceValueType::UINT, nullptr, FL_(hpBrinePumpSpd), DeviceValueUOM::PERCENT);
+        register_device_value(TAG_BOILER_DATA, &hpSwitchValve_, DeviceValueType::BOOL, nullptr, FL_(hpSwitchValve), DeviceValueUOM::BOOLEAN);
+        register_device_value(TAG_BOILER_DATA, &hpCompSpd_, DeviceValueType::UINT, nullptr, FL_(hpCompSpd), DeviceValueUOM::PERCENT);
+        register_device_value(TAG_BOILER_DATA, &hpCircSpd_, DeviceValueType::UINT, nullptr, FL_(hpCircSpd), DeviceValueUOM::PERCENT);
+        register_device_value(TAG_BOILER_DATA, &hpActivity_, DeviceValueType::ENUM, FL_(enum_hpactivity), FL_(hpActivity), DeviceValueUOM::LIST);
+        register_device_value(TAG_BOILER_DATA, &hpBrineIn_, DeviceValueType::SHORT, FL_(div10), FL_(hpBrineIn), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_BOILER_DATA, &hpBrineOut_, DeviceValueType::SHORT, FL_(div10), FL_(hpBrineOut), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_BOILER_DATA, &hpSuctionGas_, DeviceValueType::SHORT, FL_(div10), FL_(hpSuctionGas), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_BOILER_DATA, &hpHotGas_, DeviceValueType::SHORT, FL_(div10), FL_(hpHotGas), DeviceValueUOM::DEGREES);
         register_device_value(TAG_BOILER_DATA, &hpTc0_, DeviceValueType::SHORT, FL_(div10), FL_(hpTc0), DeviceValueUOM::DEGREES);
         register_device_value(TAG_BOILER_DATA, &hpTc1_, DeviceValueType::SHORT, FL_(div10), FL_(hpTc1), DeviceValueUOM::DEGREES);
         register_device_value(TAG_BOILER_DATA, &hpTc3_, DeviceValueType::SHORT, FL_(div10), FL_(hpTc3), DeviceValueUOM::DEGREES);
@@ -194,6 +206,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(TAG_BOILER_DATA, &hpTl2_, DeviceValueType::SHORT, FL_(div10), FL_(hpTl2), DeviceValueUOM::DEGREES);
         register_device_value(TAG_BOILER_DATA, &hpPl1_, DeviceValueType::SHORT, FL_(div10), FL_(hpPl1), DeviceValueUOM::DEGREES);
         register_device_value(TAG_BOILER_DATA, &hpPh1_, DeviceValueType::SHORT, FL_(div10), FL_(hpPh1), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_BOILER_DATA, &poolSetTemp_, DeviceValueType::UINT, FL_(div2), FL_(poolSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_pool_temp));
     }
 
     // warm water - boiler_data_ww topic
@@ -241,8 +254,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA_WW, &wwCurFlow_, DeviceValueType::UINT, FL_(div10), FL_(wwCurFlow), DeviceValueUOM::LMIN);
     register_device_value(TAG_BOILER_DATA_WW, &wwStorageTemp1_, DeviceValueType::USHORT, FL_(div10), FL_(wwStorageTemp1), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA_WW, &wwStorageTemp2_, DeviceValueType::USHORT, FL_(div10), FL_(wwStorageTemp2), DeviceValueUOM::DEGREES);
-    register_device_value(
-        TAG_BOILER_DATA_WW, &wwActivated_, DeviceValueType::BOOL, nullptr, FL_(wwActivated), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_warmwater_activated));
+    register_device_value(TAG_BOILER_DATA_WW, &wwActivated_, DeviceValueType::BOOL, nullptr, FL_(wwActivated), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_warmwater_activated));
     register_device_value(TAG_BOILER_DATA_WW, &wwOneTime_, DeviceValueType::BOOL, nullptr, FL_(wwOneTime), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_warmwater_onetime));
     register_device_value(TAG_BOILER_DATA_WW, &wwDisinfecting_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfecting), DeviceValueUOM::BOOLEAN);
     register_device_value(TAG_BOILER_DATA_WW, &wwCharging_, DeviceValueType::BOOL, nullptr, FL_(wwCharging), DeviceValueUOM::BOOLEAN);
@@ -254,7 +266,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA_WW, &wwMixerTemp_, DeviceValueType::USHORT, FL_(div10), FL_(wwMixerTemp), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA_WW, &wwTankMiddleTemp_, DeviceValueType::USHORT, FL_(div10), FL_(wwTankMiddleTemp), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA_WW, &wWStarts_, DeviceValueType::ULONG, nullptr, FL_(wwStarts), DeviceValueUOM::NUM);
-    register_device_value(TAG_BOILER_DATA_WW, &wwStarts2_, DeviceValueType::ULONG, nullptr, FL_(wwStarts2), DeviceValueUOM::NUM);
     register_device_value(TAG_BOILER_DATA_WW, &wwWorkM_, DeviceValueType::TIME, nullptr, FL_(wwWorkM), DeviceValueUOM::MINUTES);
 
     // fetch some initial data
@@ -658,8 +669,19 @@ void Boiler::process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram)
 }
 
 // Heatpump power - type 0x48D
+//08 00 FF 00 03 8D 03 00 10 30 10 60 00 04 00 00 00 17 00 00 00 3C 38 0E 64 00 00 0C 33 C7 00 
+//XR1A050001   A05 Pump Heat circuit (1.0 ) 1 >> 1 & 0x01 ?
+//XR1A040001   A04 Pump Cold circuit (1.0 ) 1 & 0x1 ?
+
 void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(hpPower_, 11));
+    has_update(telegram->read_bitvalue(hpCompRunning_, 3, 4));
+    has_update(telegram->read_value(hpBrinePumpSpd_, 5));
+    has_update(telegram->read_value(hpCompSpd_, 17));
+    has_update(telegram->read_value(hpCircSpd_, 4));
+    has_update(telegram->read_bitvalue(hpSwitchValve_, 0, 4));
+    has_update(telegram->read_value(hpActivity_, 7));
+
 }
 
 // Heatpump outdoor unit - type 0x48F
@@ -675,7 +697,20 @@ void Boiler::process_HpOutdoor(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(hpTl2_, 12));
     has_update(telegram->read_value(hpPl1_, 26));
     has_update(telegram->read_value(hpPh1_, 28));
+    has_update(telegram->read_value(hpBrineIn_, 8));
+    has_update(telegram->read_value(hpBrineOut_, 10));
+    has_update(telegram->read_value(hpSuctionGas_, 20));
+    has_update(telegram->read_value(hpHotGas_, 0));
 }
+
+// Heatpump pool unit - type 0x48A
+// 08 00 FF 00 03 8A 01 4C 01 0C 00 00 0A 00 1E 00 00 01 00 04 4A 00 
+
+void Boiler::process_HpPool(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram->read_value(poolSetTemp_, 1));
+}
+
+
 
 // 0x2A - MC110Status
 // e.g. 88 00 2A 00 00 00 00 00 00 00 00 00 D2 00 00 80 00 00 01 08 80 00 02 47 00
@@ -802,6 +837,7 @@ bool Boiler::set_warmwater_temp(const char * value, const int8_t id) {
 
     return true;
 }
+
 
 // Set the lower warm water temperature 0xEA
 bool Boiler::set_warmwater_temp_low(const char * value, const int8_t id) {
@@ -1392,6 +1428,22 @@ bool Boiler::set_maintenancedate(const char * value, const int8_t id) {
 
     LOG_WARNING(F("Setting maintenance: wrong format"));
     return false;
+}
+
+// Set the pool temperature 0x48A
+bool Boiler::set_pool_temp(const char * value, const int8_t id) {
+    float v = 0;
+    uint8_t v2 = 0;
+    if (!Helpers::value2float(value, v)) {
+        LOG_WARNING(F("Set pool water temperature: Invalid value"));
+        return false;
+    }
+    v2 = (int( (v * 2) + 0.5) & 0xFF);
+
+    LOG_INFO(F("Setting pool temperature to %d C"), v2/2);
+    write_command(0x48A, 1, v2, 0x48A);
+
+    return true;
 }
 
 } // namespace emsesp

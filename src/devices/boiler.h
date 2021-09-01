@@ -167,6 +167,16 @@ class Boiler : public EMSdevice {
 
     // heatpump
     uint8_t hpPower_;
+    uint8_t hpCompRunning_;
+    uint8_t hpBrinePumpSpd_;
+    uint8_t hpCompSpd_;
+    uint8_t hpCircSpd_;
+    uint16_t hpBrineIn_;
+    uint16_t hpBrineOut_;
+    uint16_t hpSuctionGas_;
+    uint16_t hpHotGas_;
+    uint8_t hpSwitchValve_;
+    uint8_t hpActivity_;
     int16_t hpTc0_;
     int16_t hpTc1_;
     int16_t hpTc3_;
@@ -178,6 +188,9 @@ class Boiler : public EMSdevice {
     int16_t hpTl2_;
     int16_t hpPl1_;
     int16_t hpPh1_;
+
+    // Pool unit
+    int8_t  poolSetTemp_;
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
@@ -204,6 +217,7 @@ class Boiler : public EMSdevice {
     void process_UBASettingsWW(std::shared_ptr<const Telegram> telegram);
     void process_HpPower(std::shared_ptr<const Telegram> telegram);
     void process_HpOutdoor(std::shared_ptr<const Telegram> telegram);
+    void process_HpPool(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
     bool set_warmwater_mode(const char * value, const int8_t id);
@@ -237,6 +251,7 @@ class Boiler : public EMSdevice {
     bool set_maintenancedate(const char * value, const int8_t id);
     bool set_ww_hyst_on(const char * value, const int8_t id);
     bool set_ww_hyst_off(const char * value, const int8_t id);
+    bool set_pool_temp(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

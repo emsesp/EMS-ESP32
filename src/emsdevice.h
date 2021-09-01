@@ -313,7 +313,8 @@ class EMSdevice {
         BUDERUS,      // 3
         NEFIT,        // 4
         SIEGER,       // 5
-        WORCESTER     // 11
+        WORCESTER,    // 11
+        IVT           // 13
     };
 
     enum DeviceType : uint8_t {
@@ -359,6 +360,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_MMPLUS = 1;
     static constexpr uint8_t EMS_DEVICE_FLAG_MM10   = 2;
     static constexpr uint8_t EMS_DEVICE_FLAG_IPM    = 3;
+    static constexpr uint8_t EMS_DEVICE_FLAG_MP     = 4;
 
     // Thermostats
     static constexpr uint8_t EMS_DEVICE_FLAG_NO_WRITE    = (1 << 7); // last bit
