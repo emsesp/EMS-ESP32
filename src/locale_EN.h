@@ -445,7 +445,11 @@ MAKE_PSTR_LIST(auxElecHeatNrgConsWW, F("auxelecheatnrgconsww"), F("auxiliary ele
 MAKE_PSTR_LIST(auxElecHeatNrgConsPool, F("auxelecheatnrgconspool"), F("auxiliary electrical heater energy consumption pool"))
 
 MAKE_PSTR_LIST(hpPower, F("hppower"), F("Compressor power output"))
-MAKE_PSTR_LIST(hpCompRunning, F("hpcomprunning"), F("Compressor active"))
+MAKE_PSTR_LIST(hpCompOn, F("hpcompon"), F("HP Compressor"))
+MAKE_PSTR_LIST(hpHeatingOn, F("hpheatingon"), F("HP Heating"))
+MAKE_PSTR_LIST(hpCoolingOn, F("hpcoolingon"), F("HP Cooling"))
+MAKE_PSTR_LIST(hpWwOn, F("hpwwon"), F("HP Warm water"))
+MAKE_PSTR_LIST(hpPoolOn, F("hppoolon"), F("HP Pool"))
 MAKE_PSTR_LIST(hpBrinePumpSpd, F("hpbrinepumpspd"), F("Brine Pump Speed"))
 MAKE_PSTR_LIST(hpCompSpd, F("hpcompspd"), F("Compressor Speed"))
 MAKE_PSTR_LIST(hpCircSpd, F("hpcircspd"), F("Circulation pump Speed"))

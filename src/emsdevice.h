@@ -116,8 +116,7 @@ enum DeviceValueTAG : uint8_t {
     TAG_HS13,
     TAG_HS14,
     TAG_HS15,
-    TAG_HS16,
-    TAG_MP
+    TAG_HS16
 
 };
 
