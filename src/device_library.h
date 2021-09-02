@@ -36,7 +36,7 @@
 {167, DeviceType::BOILER, F("Cerapur Aero"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {170, DeviceType::BOILER, F("Logano GB212"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {172, DeviceType::BOILER, F("Enviline/Compress 6000AW/Hybrid 7000iAW/SupraEco/Geo 5xx"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
-{173, DeviceType::BOILER, F("IVT Geo 5xx"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
+{173, DeviceType::BOILER, F("Geo 5xx"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 {195, DeviceType::BOILER, F("Condens 5000i/Greenstar 8000"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {203, DeviceType::BOILER, F("Logamax U122/Cerapur"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {208, DeviceType::BOILER, F("Logamax Plus/GB192/Condens GC9000"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -83,7 +83,7 @@
 {158, DeviceType::THERMOSTAT, F("RC300/RC310/Moduline 3000/1010H/CW400/Sense II"), DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 {165, DeviceType::THERMOSTAT, F("RC100/Moduline 1000/1010"), DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18, 0x38
 {216, DeviceType::THERMOSTAT, F("CRF200S"), DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
-{172, DeviceType::THERMOSTAT, F("IVT Rego 2000/3000"), DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
+{172, DeviceType::THERMOSTAT, F("Rego 2000/3000"), DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 
 // Thermostat - Sieger - 0x10 / 0x17
 { 66, DeviceType::THERMOSTAT, F("ES72/RC20"), DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17 or remote
@@ -112,6 +112,7 @@
 {102, DeviceType::MIXER, F("IPM"), DeviceFlags::EMS_DEVICE_FLAG_IPM},
 {159, DeviceType::MIXER, F("MM50"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {160, DeviceType::MIXER, F("MM100"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
+{161, DeviceType::MIXER, F("MM200"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {204, DeviceType::MIXER, F("MP100"), DeviceFlags::EMS_DEVICE_FLAG_MP},
 
 // Heat Pumps - 0x38
