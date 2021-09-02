@@ -26,13 +26,15 @@ uuid::log::Logger Mixer::logger_{F_(mixer), uuid::log::Facility::CONSOLE};
 
 Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
+        
     LOG_DEBUG(F("Adding new Mixer with device ID 0x%02X"), device_id);
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MP) {
+        type_ = Type::MP;
         register_telegram_type(0x5BA, F("HpPoolStatus"), true, MAKE_PF_CB(process_HpPoolStatus));
-        register_device_value(TAG_NONE, &poolTemp_, DeviceValueType::SHORT, FL_(div10), FL_(poolTemp), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_NONE, &poolShuntStatus_, DeviceValueType::ENUM, FL_(enum_shunt), FL_(poolShuntStatus), DeviceValueUOM::LIST);
-        register_device_value(TAG_NONE, &poolShunt_, DeviceValueType::UINT, nullptr, FL_(poolShunt), DeviceValueUOM::PERCENT);
+        register_device_value(TAG_MP, &poolTemp_, DeviceValueType::SHORT, FL_(div10), FL_(poolTemp), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_MP, &poolShuntStatus_, DeviceValueType::ENUM, FL_(enum_shunt), FL_(poolShuntStatus), DeviceValueUOM::LIST);
+        register_device_value(TAG_MP, &poolShunt_, DeviceValueType::UINT, nullptr, FL_(poolShunt), DeviceValueUOM::PERCENT);
 
     }
     else {  
@@ -95,7 +97,8 @@ bool Mixer::publish_ha_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
     char uniq_id[20];
-    snprintf_P(uniq_id, sizeof(uniq_id), PSTR("Mixer%02X"), device_id() - 0x20 + 1);
+    if (type_ == Type::MP)  snprintf_P(uniq_id, sizeof(uniq_id), PSTR("MixerMP"));
+    else                    snprintf_P(uniq_id, sizeof(uniq_id), PSTR("Mixer%02X"), device_id() - 0x20 + 1);
     doc["uniq_id"] = uniq_id;
 
     doc["ic"] = F_(icondevice);
@@ -105,14 +108,18 @@ bool Mixer::publish_ha_config() {
     doc["stat_t"] = stat_t;
 
     char name[20];
-    snprintf_P(name, sizeof(name), PSTR("Mixer %02X"), device_id() - 0x20 + 1);
+    if (type_ == Type::MP)  snprintf_P(name, sizeof(name), PSTR("Mixer MP"));
+    else                    snprintf_P(name, sizeof(name), PSTR("Mixer %02X"), device_id() - 0x20 + 1);
+
     doc["name"] = name;
 
     char tpl[30];
     if (type_ == Type::HC) {
-        snprintf_P(tpl, sizeof(tpl), PSTR("{{value_json.hc%d.id}}"), device_id() - 0x20 + 1);
+        snprintf(tpl, sizeof(tpl), "{{value_json.hc%d.id}}", device_id() - 0x20 + 1);
+    } else if (type_ == Type::WWC) {
+        snprintf(tpl, sizeof(tpl), "{{value_json.wwc%d.id}}", device_id() - 0x28 + 1);
     } else {
-        snprintf_P(tpl, sizeof(tpl), PSTR("{{value_json.wwc%d.id}}"), device_id() - 0x28 + 1);
+        snprintf(tpl, sizeof(tpl), "{{value_json.id}}");
     }
     doc["val_tpl"] = tpl;
 
@@ -128,8 +135,11 @@ bool Mixer::publish_ha_config() {
     std::string topic(Mqtt::MQTT_TOPIC_MAX_SIZE, '\0');
     if (type_ == Type::HC) {
         snprintf_P(&topic[0], topic.capacity() + 1, PSTR("sensor/%s/mixer_hc%d/config"), Mqtt::base().c_str(), hc_);
-    } else {
+    } else if (type_ == Type::WWC) {
         snprintf_P(&topic[0], topic.capacity() + 1, PSTR("sensor/%s/mixer_wwc%d/config"), Mqtt::base().c_str(), hc_); // WWC
+    }
+    else if (type_ == Type::MP) {
+        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("sensor/%s/mixer_mp/config"), Mqtt::base().c_str());
     }
 
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag

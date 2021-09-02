@@ -46,7 +46,9 @@ class Mixer : public EMSdevice {
     enum class Type {
         NONE,
         HC, // heating circuit
-        WWC // warm water circuit
+        WWC, // warm water circuit
+        MP // pool 
+
     };
 
   private:
