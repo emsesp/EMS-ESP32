@@ -84,7 +84,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_HEATPUMP) {
         register_telegram_type(0x494, F("UBAEnergySupplied"), false, MAKE_PF_CB(process_UBAEnergySupplied));
         register_telegram_type(0x495, F("UBAInformation"), false, MAKE_PF_CB(process_UBAInformation));
-        register_telegram_type(0x48D, F("HpPower"), false, MAKE_PF_CB(process_HpPower));
+        register_telegram_type(0x48D, F("HpPower"), true, MAKE_PF_CB(process_HpPower));
         register_telegram_type(0x48F, F("HpOutdoor"), false, MAKE_PF_CB(process_HpOutdoor));
         register_telegram_type(0x48A, F("HpPool"), true, MAKE_PF_CB(process_HpPool));
     }
@@ -683,7 +683,7 @@ void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(hpBrinePumpSpd_, 5));
     has_update(telegram->read_value(hpCompSpd_, 17));
     has_update(telegram->read_value(hpCircSpd_, 4));
-    has_update(telegram->read_bitvalue(hpSwitchValve_, 0, 4));
+    has_update(telegram->read_bitvalue(hpSwitchValve_, 0, 6));
     has_update(telegram->read_value(hpActivity_, 7));
 
     hpHeatingOn_ = 0;
