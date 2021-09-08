@@ -1072,6 +1072,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     auto timeold = dateTime_;
     // render time to HH:MM:SS DD/MM/YYYY
     // had to create separate buffers because of how printf works
+    // IVT reports Year with high bit set.?
     char buf1[6];
     char buf2[6];
     char buf3[6];
@@ -1086,7 +1087,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
                Helpers::smallitoa(buf3, telegram->message_data[5]),  // second
                Helpers::smallitoa(buf4, telegram->message_data[3]),  // day
                Helpers::smallitoa(buf5, telegram->message_data[1]),  // month
-               Helpers::itoa(buf6, telegram->message_data[0] + 2000) // year
+               Helpers::itoa(buf6, (telegram->message_data[0] & 0x7F) + 2000) // year
     );
 
     has_update((strcmp(timeold, dateTime_) != 0));

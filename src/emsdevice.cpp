@@ -155,6 +155,9 @@ std::string EMSdevice::brand_to_string() const {
     case EMSdevice::Brand::WORCESTER:
         return read_flash_string(F("Worcester"));
         break;
+    case EMSdevice::Brand::IVT:
+        return read_flash_string(F("IVT"));
+        break;
     case EMSdevice::Brand::NO_BRAND:
     default:
         return read_flash_string(F(""));
@@ -284,6 +287,9 @@ uint8_t EMSdevice::decode_brand(uint8_t value) {
         break;
     case 11:
         return EMSdevice::Brand::WORCESTER;
+        break;
+    case 13:
+        return EMSdevice::Brand::IVT;
         break;
     case 0:
     default:

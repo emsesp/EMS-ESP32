@@ -78,6 +78,8 @@ class MsgpackAsyncJsonResponse : public AsyncAbstractResponse {
     }
     size_t setLength() {
         _contentLength = measureMsgPack(_root);
+        //_headers.add(new AsyncWebHeader("Json-Length", String(_jsonBuffer.memoryUsage()))); // For determening size of EMSESP_JSON_SIZE_XXLARGE_DYN (Sunbuzz) 
+                                                                                              // Json-Length: 10635
         if (_contentLength) {
             _isValid = true;
         }

@@ -40,11 +40,15 @@ class Mixer : public EMSdevice {
     void process_MMStatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_MMConfigMessage(std::shared_ptr<const Telegram> telegram);
     void process_MMSetMessage(std::shared_ptr<const Telegram> telegram);
+    void process_HpPoolStatus(std::shared_ptr<const Telegram> telegram);
+
 
     enum class Type {
         NONE,
         HC, // heating circuit
-        WWC // warm water circuit
+        WWC, // warm water circuit
+        MP // pool 
+
     };
 
   private:
@@ -53,6 +57,12 @@ class Mixer : public EMSdevice {
     uint8_t  pumpStatus_;
     int8_t   status_;
     uint8_t  flowSetTemp_;
+
+    int16_t poolTemp_;
+    int8_t  poolShuntStatus__;
+    int8_t  poolShuntStatus_;
+    int8_t  poolShunt_;
+
 
     Type     type_ = Type::NONE;
     uint16_t hc_   = EMS_VALUE_USHORT_NOTSET;

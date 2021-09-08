@@ -930,7 +930,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
                 }
                 // find the name and flags in our database
                 for (const auto & device : device_library_) {
-                    if (device.product_id == product_id) {
+                    if (device.product_id == product_id && device.device_type == emsdevice->device_type()) {
                         emsdevice->name(std::move(uuid::read_flash_string(device.name)));
                         emsdevice->add_flags(device.flags);
                     }
