@@ -26,7 +26,6 @@ uuid::log::Logger Mixer::logger_{F_(mixer), uuid::log::Facility::CONSOLE};
 
 Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-
     LOG_DEBUG(F("Adding new Mixer with device ID 0x%02X"), device_id);
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MP) {
@@ -36,9 +35,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         register_device_value(TAG_NONE, &poolShuntStatus_, DeviceValueType::ENUM, FL_(enum_shunt), FL_(poolShuntStatus), DeviceValueUOM::LIST);
         register_device_value(TAG_NONE, &poolShunt_, DeviceValueType::UINT, nullptr, FL_(poolShunt), DeviceValueUOM::PERCENT);
 
-    }
-    else {  
-
+    } else {
         if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
             if (device_id <= 0x27) {
                 // telegram handlers 0x20 - 0x27 for HC
@@ -97,8 +94,10 @@ bool Mixer::publish_ha_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
     char uniq_id[20];
-    if (type_ == Type::MP)  snprintf_P(uniq_id, sizeof(uniq_id), PSTR("MixerMP"));
-    else                    snprintf_P(uniq_id, sizeof(uniq_id), PSTR("Mixer%02X"), device_id() - 0x20 + 1);
+    if (type_ == Type::MP)
+        snprintf_P(uniq_id, sizeof(uniq_id), PSTR("MixerMP"));
+    else
+        snprintf_P(uniq_id, sizeof(uniq_id), PSTR("Mixer%02X"), device_id() - 0x20 + 1);
     doc["uniq_id"] = uniq_id;
 
     doc["ic"] = F_(icondevice);
@@ -108,8 +107,10 @@ bool Mixer::publish_ha_config() {
     doc["stat_t"] = stat_t;
 
     char name[20];
-    if (type_ == Type::MP)  snprintf_P(name, sizeof(name), PSTR("Mixer MP"));
-    else                    snprintf_P(name, sizeof(name), PSTR("Mixer %02X"), device_id() - 0x20 + 1);
+    if (type_ == Type::MP)
+        snprintf_P(name, sizeof(name), PSTR("Mixer MP"));
+    else
+        snprintf_P(name, sizeof(name), PSTR("Mixer %02X"), device_id() - 0x20 + 1);
 
     doc["name"] = name;
 
@@ -137,8 +138,7 @@ bool Mixer::publish_ha_config() {
         snprintf_P(&topic[0], topic.capacity() + 1, PSTR("sensor/%s/mixer_hc%d/config"), Mqtt::base().c_str(), hc_);
     } else if (type_ == Type::WWC) {
         snprintf_P(&topic[0], topic.capacity() + 1, PSTR("sensor/%s/mixer_wwc%d/config"), Mqtt::base().c_str(), hc_); // WWC
-    }
-    else if (type_ == Type::MP) {
+    } else if (type_ == Type::MP) {
         snprintf_P(&topic[0], topic.capacity() + 1, PSTR("sensor/%s/mixer_mp/config"), Mqtt::base().c_str());
     }
 
@@ -233,8 +233,8 @@ void Mixer::process_IPMSetMessage(std::shared_ptr<const Telegram> telegram) {
 void Mixer::process_HpPoolStatus(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(poolTemp_, 0));
     has_update(telegram->read_value(poolShuntStatus__, 2));
-    has_update(telegram->read_value(poolShunt_, 3));            // 0-100% how much is the shunt open?
-    poolShuntStatus_ = poolShunt_ == 100 ? 3 : (poolShunt_ == 0 ? 4 : poolShuntStatus__); 
+    has_update(telegram->read_value(poolShunt_, 3)); // 0-100% how much is the shunt open?
+    poolShuntStatus_ = poolShunt_ == 100 ? 3 : (poolShunt_ == 0 ? 4 : poolShuntStatus__);
 }
 
 

@@ -166,36 +166,36 @@ class Boiler : public EMSdevice {
     uint16_t maintenanceTime_;
 
     // heatpump
-    uint8_t hpPower_;
-    uint8_t hpCompOn_;
-    uint8_t hpBrinePumpSpd_;
-    uint8_t hpCompSpd_;
-    uint8_t hpCircSpd_;
+    uint8_t  hpPower_;
+    uint8_t  hpCompOn_;
+    uint8_t  hpBrinePumpSpd_;
+    uint8_t  hpCompSpd_;
+    uint8_t  hpCircSpd_;
     uint16_t hpBrineIn_;
     uint16_t hpBrineOut_;
     uint16_t hpSuctionGas_;
     uint16_t hpHotGas_;
-    uint8_t hpSwitchValve_;
-    uint8_t hpActivity_;
-    uint8_t hpHeatingOn_;
-    uint8_t hpCoolingOn_;
-    uint8_t hpWwOn_;
-    uint8_t hpPoolOn_;
-    uint8_t hpHeatingOn;
-    int16_t hpTc0_;
-    int16_t hpTc1_;
-    int16_t hpTc3_;
-    int16_t hpTr3_;
-    int16_t hpTr4_;
-    int16_t hpTr5_;
-    int16_t hpTr6_;
-    int16_t hpTr7_;
-    int16_t hpTl2_;
-    int16_t hpPl1_;
-    int16_t hpPh1_;
+    uint8_t  hpSwitchValve_;
+    uint8_t  hpActivity_;
+    uint8_t  hpHeatingOn_;
+    uint8_t  hpCoolingOn_;
+    uint8_t  hpWwOn_;
+    uint8_t  hpPoolOn_;
+    uint8_t  hpHeatingOn;
+    int16_t  hpTc0_;
+    int16_t  hpTc1_;
+    int16_t  hpTc3_;
+    int16_t  hpTr3_;
+    int16_t  hpTr4_;
+    int16_t  hpTr5_;
+    int16_t  hpTr6_;
+    int16_t  hpTr7_;
+    int16_t  hpTl2_;
+    int16_t  hpPl1_;
+    int16_t  hpPh1_;
 
     // Pool unit
-    int8_t  poolSetTemp_;
+    int8_t poolSetTemp_;
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);

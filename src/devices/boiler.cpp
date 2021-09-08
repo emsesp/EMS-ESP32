@@ -258,7 +258,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA_WW, &wwCurFlow_, DeviceValueType::UINT, FL_(div10), FL_(wwCurFlow), DeviceValueUOM::LMIN);
     register_device_value(TAG_BOILER_DATA_WW, &wwStorageTemp1_, DeviceValueType::USHORT, FL_(div10), FL_(wwStorageTemp1), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA_WW, &wwStorageTemp2_, DeviceValueType::USHORT, FL_(div10), FL_(wwStorageTemp2), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_BOILER_DATA_WW, &wwActivated_, DeviceValueType::BOOL, nullptr, FL_(wwActivated), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_warmwater_activated));
+    register_device_value(
+        TAG_BOILER_DATA_WW, &wwActivated_, DeviceValueType::BOOL, nullptr, FL_(wwActivated), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_warmwater_activated));
     register_device_value(TAG_BOILER_DATA_WW, &wwOneTime_, DeviceValueType::BOOL, nullptr, FL_(wwOneTime), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_warmwater_onetime));
     register_device_value(TAG_BOILER_DATA_WW, &wwDisinfecting_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfecting), DeviceValueUOM::BOOLEAN);
     register_device_value(TAG_BOILER_DATA_WW, &wwCharging_, DeviceValueType::BOOL, nullptr, FL_(wwCharging), DeviceValueUOM::BOOLEAN);
@@ -673,7 +674,7 @@ void Boiler::process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram)
 }
 
 // Heatpump power - type 0x48D
-//08 00 FF 00 03 8D 03 00 10 30 10 60 00 04 00 00 00 17 00 00 00 3C 38 0E 64 00 00 0C 33 C7 00 
+//08 00 FF 00 03 8D 03 00 10 30 10 60 00 04 00 00 00 17 00 00 00 3C 38 0E 64 00 00 0C 33 C7 00
 //XR1A050001   A05 Pump Heat circuit (1.0 ) 1 >> 1 & 0x01 ?
 //XR1A040001   A04 Pump Cold circuit (1.0 ) 1 & 0x1 ?
 
@@ -688,28 +689,29 @@ void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
 
     hpHeatingOn_ = 0;
     hpCoolingOn_ = 0;
-    hpWwOn_ = 0;
-    hpPoolOn_ = 0;
+    hpWwOn_      = 0;
+    hpPoolOn_    = 0;
 
     switch (hpActivity_) {
-        case 1: { 
-            hpHeatingOn_ = 0xFF;
-            break;
-        }
-        case 2: { 
-            hpCoolingOn_ = 0xFF;
-            break;
-        }
-        case 3: { 
-            hpWwOn_ = 0xFF;;
-            break;
-        }
-        case 4: { 
-            hpPoolOn_ = 0xFF;;
-            break;
-        }
-    } 
-
+    case 1: {
+        hpHeatingOn_ = 0xFF;
+        break;
+    }
+    case 2: {
+        hpCoolingOn_ = 0xFF;
+        break;
+    }
+    case 3: {
+        hpWwOn_ = 0xFF;
+        ;
+        break;
+    }
+    case 4: {
+        hpPoolOn_ = 0xFF;
+        ;
+        break;
+    }
+    }
 }
 
 // Heatpump outdoor unit - type 0x48F
@@ -732,7 +734,7 @@ void Boiler::process_HpOutdoor(std::shared_ptr<const Telegram> telegram) {
 }
 
 // Heatpump pool unit - type 0x48A
-// 08 00 FF 00 03 8A 01 4C 01 0C 00 00 0A 00 1E 00 00 01 00 04 4A 00 
+// 08 00 FF 00 03 8A 01 4C 01 0C 00 00 0A 00 1E 00 00 01 00 04 4A 00
 
 void Boiler::process_HpPool(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(poolSetTemp_, 1));
@@ -1460,15 +1462,15 @@ bool Boiler::set_maintenancedate(const char * value, const int8_t id) {
 
 // Set the pool temperature 0x48A
 bool Boiler::set_pool_temp(const char * value, const int8_t id) {
-    float v = 0;
+    float   v  = 0;
     uint8_t v2 = 0;
     if (!Helpers::value2float(value, v)) {
         LOG_WARNING(F("Set pool water temperature: Invalid value"));
         return false;
     }
-    v2 = (int( (v * 2) + 0.5) & 0xFF);
+    v2 = (int((v * 2) + 0.5) & 0xFF);
 
-    LOG_INFO(F("Setting pool temperature to %d C"), v2/2);
+    LOG_INFO(F("Setting pool temperature to %d C"), v2 / 2);
     write_command(0x48A, 1, v2, 0x48A);
 
     return true;

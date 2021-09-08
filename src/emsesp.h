@@ -55,13 +55,13 @@
 
 #define WATCH_ID_NONE 0 // no watch id set
 
-#define EMSESP_JSON_SIZE_HA_CONFIG 768    // for HA config payloads, using StaticJsonDocument
-#define EMSESP_JSON_SIZE_SMALL 256        // for smaller json docs, using StaticJsonDocument
-#define EMSESP_JSON_SIZE_MEDIUM 768       // for medium json docs from ems devices, using StaticJsonDocument
-#define EMSESP_JSON_SIZE_LARGE 1024       // for large json docs from ems devices, like boiler or thermostat data, using StaticJsonDocument
-#define EMSESP_JSON_SIZE_MEDIUM_DYN 1024  // for large json docs, using DynamicJsonDocument
-#define EMSESP_JSON_SIZE_LARGE_DYN 2048   // for very large json docs, using DynamicJsonDocument
-#define EMSESP_JSON_SIZE_XLARGE_DYN 4096  // for very very large json docs, using DynamicJsonDocument
+#define EMSESP_JSON_SIZE_HA_CONFIG 768     // for HA config payloads, using StaticJsonDocument
+#define EMSESP_JSON_SIZE_SMALL 256         // for smaller json docs, using StaticJsonDocument
+#define EMSESP_JSON_SIZE_MEDIUM 768        // for medium json docs from ems devices, using StaticJsonDocument
+#define EMSESP_JSON_SIZE_LARGE 1024        // for large json docs from ems devices, like boiler or thermostat data, using StaticJsonDocument
+#define EMSESP_JSON_SIZE_MEDIUM_DYN 1024   // for large json docs, using DynamicJsonDocument
+#define EMSESP_JSON_SIZE_LARGE_DYN 2048    // for very large json docs, using DynamicJsonDocument
+#define EMSESP_JSON_SIZE_XLARGE_DYN 4096   // for very very large json docs, using DynamicJsonDocument
 #define EMSESP_JSON_SIZE_XXLARGE_DYN 16384 // for extra very very large json docs, using DynamicJsonDocument
 
 // helpers for callback functions
