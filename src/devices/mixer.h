@@ -42,6 +42,8 @@ class Mixer : public EMSdevice {
     void process_MMSetMessage(std::shared_ptr<const Telegram> telegram);
     void process_HpPoolStatus(std::shared_ptr<const Telegram> telegram);
 
+    bool set_flowSetTemp(const char * value, const int8_t id);
+    bool set_pump(const char * value, const int8_t id);
 
     enum class Type {
         NONE,
