@@ -124,11 +124,13 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         set_typeids     = {0x02B9, 0x02BA, 0x02BB, 0x02BC};
         summer_typeids  = {0x02AF, 0x02B0, 0x02B1, 0x02B2};
         curve_typeids   = {0x029B, 0x029C, 0x029D, 0x029E};
+        summer2_typeids = {0x0471, 0x0472, 0x0473, 0x0474};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
             register_telegram_type(monitor_typeids[i], F("RC300Monitor"), false, MAKE_PF_CB(process_RC300Monitor));
             register_telegram_type(set_typeids[i], F("RC300Set"), false, MAKE_PF_CB(process_RC300Set));
             register_telegram_type(summer_typeids[i], F("RC300Summer"), false, MAKE_PF_CB(process_RC300Summer));
             register_telegram_type(curve_typeids[i], F("RC300Curves"), false, MAKE_PF_CB(process_RC300Curve));
+            register_telegram_type(summer2_typeids[i], F("RC300Summer2"), true, MAKE_PF_CB(process_RC300Summer2));
         }
         register_telegram_type(0x2F5, F("RC300WWmode"), true, MAKE_PF_CB(process_RC300WWmode));
         register_telegram_type(0x31B, F("RC300WWtemp"), true, MAKE_PF_CB(process_RC300WWtemp));
@@ -275,6 +277,16 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     if (hc_num == 0) {
         for (uint8_t i = 0; i < summer_typeids.size(); i++) {
             if (summer_typeids[i] == telegram->type_id) {
+                hc_num = i + 1;
+                break;
+            }
+        }
+    }
+
+    // not found, search summer message types
+    if (hc_num == 0) {
+        for (uint8_t i = 0; i < summer2_typeids.size(); i++) {
+            if (summer2_typeids[i] == telegram->type_id) {
                 hc_num = i + 1;
                 break;
             }
@@ -879,8 +891,11 @@ void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
 
     has_update(telegram->read_value(hc->roominfluence, 0));
     has_update(telegram->read_value(hc->offsettemp, 2));
-    has_update(telegram->read_value(hc->summertemp, 6));
-    has_update(telegram->read_value(hc->summer_setmode, 7));
+    // dont use these values if we have telegram 0x471 ff
+    if (!is_fetch(summer2_typeids[hc->hc_num() - 1])) {
+        has_update(telegram->read_value(hc->summertemp, 6));
+        has_update(telegram->read_value(hc->summer_setmode, 7));
+    }
 
     if (hc->heatingtype < 3) {
         has_update(telegram->read_value(hc->designtemp, 4));
@@ -890,6 +905,16 @@ void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
 
     has_update(telegram->read_value(hc->minflowtemp, 8));
     has_update(telegram->read_value(hc->fastHeatupFactor, 10));
+}
+
+// types 0x471 ff
+void Thermostat::process_RC300Summer2(std::shared_ptr<const Telegram> telegram) {
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    if (hc == nullptr) {
+        return;
+    }
+    has_update(telegram->read_value(hc->summer_setmode, 0));
+    has_update(telegram->read_value(hc->summertemp, 1));
 }
 
 // types 0x29B ff
@@ -1822,7 +1847,11 @@ bool Thermostat::set_summermode(const char * value, const int8_t id) {
         return false;
     }
     LOG_INFO(F("Setting summer mode to %s for heating circuit %d"), value, hc->hc_num());
-    write_command(summer_typeids[hc->hc_num() - 1], 7, set, summer_typeids[hc->hc_num() - 1]);
+    if (is_fetch(summer2_typeids[hc->hc_num() - 1])) {
+        write_command(summer2_typeids[hc->hc_num() - 1], 0, set, summer2_typeids[hc->hc_num() - 1]);
+    } else {
+        write_command(summer_typeids[hc->hc_num() - 1], 7, set, summer_typeids[hc->hc_num() - 1]);
+    }
     return true;
 }
 
