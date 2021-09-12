@@ -2050,8 +2050,13 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         validate_typeid = set_typeids[hc->hc_num() - 1];
         switch (mode) {
         case HeatingCircuit::Mode::SUMMER:
-            offset          = 0x06;
-            set_typeid      = summer_typeids[hc->hc_num() - 1];
+            if (is_fetch(summer2_typeids[hc->hc_num() - 1])) {
+                offset     = 0x01;
+                set_typeid = summer2_typeids[hc->hc_num() - 1];
+            } else {
+                offset     = 0x06;
+                set_typeid = summer_typeids[hc->hc_num() - 1];
+            }
             validate_typeid = set_typeid;
             factor          = 1;
             break;
