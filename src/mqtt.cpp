@@ -1018,6 +1018,8 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
         // normal HA sensor, not a boolean one
         snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/%s/config"), mqtt_base_.c_str(), uniq.c_str()); // topic
 
+        bool set_state_class = false;
+
         // unit of measure and map the HA icon
         if (uom != DeviceValueUOM::NONE) {
             doc["unit_of_meas"] = EMSdevice::uom_to_string(uom);
@@ -1025,10 +1027,12 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
 
         switch (uom) {
         case DeviceValueUOM::DEGREES:
-            doc["ic"] = F_(icondegrees);
+            doc["ic"]       = F_(icondegrees);
+            set_state_class = true;
             break;
         case DeviceValueUOM::PERCENT:
-            doc["ic"] = F_(iconpercent);
+            doc["ic"]       = F_(iconpercent);
+            set_state_class = true;
             break;
         case DeviceValueUOM::SECONDS:
         case DeviceValueUOM::MINUTES:
@@ -1039,21 +1043,26 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
             doc["ic"] = F_(iconkb);
             break;
         case DeviceValueUOM::LMIN:
-            doc["ic"] = F_(iconlmin);
+            doc["ic"]       = F_(iconlmin);
+            set_state_class = true;
             break;
         case DeviceValueUOM::WH:
         case DeviceValueUOM::KWH:
-            doc["ic"] = F_(iconkwh);
+            doc["ic"]       = F_(iconkwh);
+            set_state_class = true;
             break;
         case DeviceValueUOM::UA:
-            doc["ic"] = F_(iconua);
+            doc["ic"]       = F_(iconua);
+            set_state_class = true;
             break;
         case DeviceValueUOM::BAR:
-            doc["ic"] = F_(iconbar);
+            doc["ic"]       = F_(iconbar);
+            set_state_class = true;
             break;
         case DeviceValueUOM::W:
         case DeviceValueUOM::KW:
-            doc["ic"] = F_(iconkw);
+            doc["ic"]       = F_(iconkw);
+            set_state_class = true;
             break;
         case DeviceValueUOM::DBM:
             doc["ic"] = F_(icondbm);
@@ -1064,6 +1073,11 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
         case DeviceValueUOM::NONE:
         default:
             break;
+        }
+
+        // see if we need to set the state_class
+        if (set_state_class) {
+            doc["state_class"] = F("measurement");
         }
     }
 
