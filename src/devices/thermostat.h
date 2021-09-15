@@ -139,6 +139,7 @@ class Thermostat : public EMSdevice {
     std::vector<uint16_t> set_typeids;
     std::vector<uint16_t> timer_typeids;
     std::vector<uint16_t> summer_typeids;
+    std::vector<uint16_t> summer2_typeids;
     std::vector<uint16_t> curve_typeids;
 
     // standard for all thermostats
@@ -294,6 +295,7 @@ class Thermostat : public EMSdevice {
     void process_RC300Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC300Set(std::shared_ptr<const Telegram> telegram);
     void process_RC300Summer(std::shared_ptr<const Telegram> telegram);
+    void process_RC300Summer2(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWmode(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWmode2(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWtemp(std::shared_ptr<const Telegram> telegram);
