@@ -202,7 +202,7 @@ bool Thermostat::publish_ha_config() {
     doc["ic"]      = F_(icondevice);
 
     char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
+    snprintf_P(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
     doc["stat_t"] = stat_t;
 
     char name_s[40];
@@ -219,7 +219,7 @@ bool Thermostat::publish_ha_config() {
     ids.add("ems-esp-thermostat");
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/thermostat/config"), Mqtt::base().c_str());
+    snprintf_P(topic, sizeof(topic), "sensor/%s/thermostat/config", Mqtt::base().c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     return true;
@@ -385,13 +385,13 @@ void Thermostat::publish_ha_config_hc(uint8_t hc_num) {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
     char str1[20];
-    snprintf_P(str1, sizeof(str1), PSTR("Thermostat hc%d"), hc_num);
+    snprintf_P(str1, sizeof(str1), "Thermostat hc%d", hc_num);
 
     char str2[20];
-    snprintf_P(str2, sizeof(str2), PSTR("thermostat_hc%d"), hc_num);
+    snprintf_P(str2, sizeof(str2), "thermostat_hc%d", hc_num);
 
     char str3[25];
-    snprintf_P(str3, sizeof(str3), PSTR("~/%s"), str2);
+    snprintf_P(str3, sizeof(str3), "~/%s", str2);
     doc["mode_cmd_t"] = str3;
     doc["temp_cmd_t"] = str3;
     doc["name"]       = str1;
@@ -402,23 +402,23 @@ void Thermostat::publish_ha_config_hc(uint8_t hc_num) {
 
     char topic_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
     if (Mqtt::nested_format() == 1) {
-        snprintf_P(topic_t, sizeof(topic_t), PSTR("~/%s"), Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_NONE).c_str());
+        snprintf_P(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_NONE).c_str());
 
         char mode_str_tpl[40];
-        snprintf_P(mode_str_tpl, sizeof(mode_str_tpl), PSTR("{{value_json.hc%d.hamode}}"), hc_num);
+        snprintf_P(mode_str_tpl, sizeof(mode_str_tpl), "{{value_json.hc%d.hamode}}", hc_num);
         doc["mode_stat_tpl"] = mode_str_tpl;
 
         char seltemp_str[30];
-        snprintf_P(seltemp_str, sizeof(seltemp_str), PSTR("{{value_json.hc%d.seltemp}}"), hc_num);
+        snprintf_P(seltemp_str, sizeof(seltemp_str), "{{value_json.hc%d.seltemp}}", hc_num);
         doc["temp_stat_tpl"] = seltemp_str;
 
         char currtemp_str[30];
-        snprintf_P(currtemp_str, sizeof(currtemp_str), PSTR("{{value_json.hc%d.hatemp}}"), hc_num);
+        snprintf_P(currtemp_str, sizeof(currtemp_str), "{{value_json.hc%d.hatemp}}", hc_num);
         doc["curr_temp_tpl"] = currtemp_str;
 
 
     } else {
-        snprintf_P(topic_t, sizeof(topic_t), PSTR("~/%s"), Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_HC1 + hc_num - 1).c_str());
+        snprintf_P(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_HC1 + hc_num - 1).c_str());
 
         doc["mode_stat_tpl"] = FJSON("{{value_json.hamode}}");
         doc["temp_stat_tpl"] = FJSON("{{value_json.seltemp}}");
@@ -447,12 +447,12 @@ void Thermostat::publish_ha_config_hc(uint8_t hc_num) {
     ids.add("ems-esp-thermostat");
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), PSTR("climate/%s/thermostat_hc%d/config"), Mqtt::base().c_str(), hc_num);
+    snprintf_P(topic, sizeof(topic), "climate/%s/thermostat_hc%d/config", Mqtt::base().c_str(), hc_num);
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // enable the a special "thermostat_hc<n>" topic to take both mode strings and floats for each of the heating circuits
     std::string topic2(Mqtt::MQTT_TOPIC_MAX_SIZE, '\0');
-    snprintf_P(&topic2[0], topic2.capacity() + 1, PSTR("thermostat_hc%d"), hc_num);
+    snprintf_P(&topic2[0], topic2.capacity() + 1, "thermostat_hc%d", hc_num);
     register_mqtt_topic(topic2, [=](const char * m) { return thermostat_ha_cmd(m, hc_num); });
 }
 
@@ -1117,7 +1117,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     char buf6[6];
     snprintf_P(dateTime_,
                sizeof(dateTime_),
-               PSTR("%s:%s:%s %s/%s/%s"),
+               "%s:%s:%s %s/%s/%s",
                Helpers::smallitoa(buf1, telegram->message_data[2]),           // hour
                Helpers::smallitoa(buf2, telegram->message_data[4]),           // minute
                Helpers::smallitoa(buf3, telegram->message_data[5]),           // second
@@ -1143,7 +1143,7 @@ void Thermostat::process_RCError(std::shared_ptr<const Telegram> telegram) {
     buf[2] = telegram->message_data[2];
     buf[3] = 0;
     has_update(telegram->read_value(errorNumber_, 3));
-    snprintf_P(errorCode_, sizeof(errorCode_), PSTR("%s(%d)"), buf, errorNumber_);
+    snprintf_P(errorCode_, sizeof(errorCode_), "%s(%d)", buf, errorNumber_);
 }
 
 // 0x12 error log
@@ -1165,7 +1165,7 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
         uint8_t  day   = telegram->message_data[7];
         uint8_t  hour  = telegram->message_data[6];
         uint8_t  min   = telegram->message_data[8];
-        snprintf_P(lastCode_, sizeof(lastCode_), PSTR("%s(%d) %02d.%02d.%d %02d:%02d"), code, codeNo, day, month, year, hour, min);
+        snprintf_P(lastCode_, sizeof(lastCode_), "%s(%d) %02d.%02d.%d %02d:%02d", code, codeNo, day, month, year, hour, min);
     }
 }
 
@@ -2652,7 +2652,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT, nullptr, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp));
         register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT, nullptr, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp));
         register_device_value(tag, &hc->tempautotemp, DeviceValueType::UINT, FL_(div2), FL_(tempautotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_tempautotemp));
-        register_device_value(tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::LIST, MAKE_CF_CB(set_heatingtype));
+        register_device_value(
+            tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::LIST, MAKE_CF_CB(set_heatingtype));
         register_device_value(tag, &hc->summertemp, DeviceValueType::UINT, nullptr, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp));
         register_device_value(tag, &hc->summermode, DeviceValueType::BOOL, nullptr, FL_(summermode), DeviceValueUOM::BOOLEAN);
         break;

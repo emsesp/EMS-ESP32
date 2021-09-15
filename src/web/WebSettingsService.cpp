@@ -69,11 +69,11 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
 
     for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
         char buf[20];
-        snprintf_P(buf, sizeof(buf), PSTR("sensor_id%d"), i);
+        snprintf_P(buf, sizeof(buf), "sensor_id%d", i);
         root[buf] = settings.sensor[i].id;
-        snprintf_P(buf, sizeof(buf), PSTR("sensor_name%d"), i);
+        snprintf_P(buf, sizeof(buf), "sensor_name%d", i);
         root[buf] = settings.sensor[i].name;
-        snprintf_P(buf, sizeof(buf), PSTR("sensor_offset%d"), i);
+        snprintf_P(buf, sizeof(buf), "sensor_offset%d", i);
         root[buf] = settings.sensor[i].offset;
     }
 }
@@ -207,11 +207,11 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
         char buf[20];
-        snprintf_P(buf, sizeof(buf), PSTR("sensor_id%d"), i);
+        snprintf_P(buf, sizeof(buf), "sensor_id%d", i);
         settings.sensor[i].id = root[buf] | EMSESP_DEFAULT_SENSOR_NAME;
-        snprintf_P(buf, sizeof(buf), PSTR("sensor_name%d"), i);
+        snprintf_P(buf, sizeof(buf), "sensor_name%d", i);
         settings.sensor[i].name = root[buf] | EMSESP_DEFAULT_SENSOR_NAME;
-        snprintf_P(buf, sizeof(buf), PSTR("sensor_offset%d"), i);
+        snprintf_P(buf, sizeof(buf), "sensor_offset%d", i);
         settings.sensor[i].offset = root[buf] | 0;
     }
 

@@ -77,7 +77,7 @@ void EMSESPShell::display_banner() {
 
     if (console_hostname_.empty()) {
         console_hostname_.resize(16, '\0');
-        snprintf_P(&console_hostname_[0], console_hostname_.capacity() + 1, PSTR("ems-esp"));
+        snprintf_P(&console_hostname_[0], console_hostname_.capacity() + 1, "ems-esp");
     }
 
     // load the list of commands
@@ -841,7 +841,7 @@ EMSESPStreamConsole::EMSESPStreamConsole(Stream & stream, const IPAddress & addr
         ptys_[pty_] = true;
     }
 
-    snprintf_P(text.data(), text.size(), PSTR("pty%u"), pty_);
+    snprintf_P(text.data(), text.size(), "pty%u", pty_);
     name_ = text.data();
 #ifndef EMSESP_STANDALONE
     logger().info(F("Allocated console %s for connection from [%s]:%u"), name_.c_str(), uuid::printable_to_string(addr_).c_str(), port_);

@@ -109,8 +109,13 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         register_device_value(TAG_NONE, &solarPumpMinMod_, DeviceValueType::UINT, nullptr, FL_(pumpMinMod), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_PumpMinMod));
         register_device_value(
             TAG_NONE, &solarPumpTurnonDiff_, DeviceValueType::UINT, FL_(div10), FL_(solarPumpTurnonDiff), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_TurnonDiff));
-        register_device_value(
-            TAG_NONE, &solarPumpTurnoffDiff_, DeviceValueType::UINT, FL_(div10), FL_(solarPumpTurnoffDiff), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_TurnoffDiff));
+        register_device_value(TAG_NONE,
+                              &solarPumpTurnoffDiff_,
+                              DeviceValueType::UINT,
+                              FL_(div10),
+                              FL_(solarPumpTurnoffDiff),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_TurnoffDiff));
         register_device_value(TAG_NONE, &tankBottomTemp2_, DeviceValueType::SHORT, FL_(div10), FL_(tank2BottomTemp), DeviceValueUOM::DEGREES);
         register_device_value(TAG_NONE, &heatExchangerTemp_, DeviceValueType::SHORT, FL_(div10), FL_(heatExchangerTemp), DeviceValueUOM::DEGREES);
         register_device_value(TAG_NONE, &cylinderPumpModulation_, DeviceValueType::UINT, nullptr, FL_(cylinderPumpModulation), DeviceValueUOM::PERCENT);
@@ -189,7 +194,7 @@ bool Solar::publish_ha_config() {
     doc["ic"]      = F_(icondevice);
 
     char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
+    snprintf_P(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
     doc["stat_t"] = stat_t;
 
     char name_s[40];
@@ -206,7 +211,7 @@ bool Solar::publish_ha_config() {
     ids.add("ems-esp-solar");
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/solar/config"), Mqtt::base().c_str());
+    snprintf_P(topic, sizeof(topic), "sensor/%s/solar/config", Mqtt::base().c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     return true;

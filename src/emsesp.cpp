@@ -520,7 +520,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     // publish it under a single topic, only if we have data to publish
     if (need_publish) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        snprintf_P(topic, sizeof(topic), PSTR("%s_data"), EMSdevice::device_type_2_device_name(device_type).c_str());
+        snprintf_P(topic, sizeof(topic), "%s_data", EMSdevice::device_type_2_device_name(device_type).c_str());
         Mqtt::publish(topic, json);
     }
 }
@@ -580,7 +580,7 @@ bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const in
         uint8_t i = 1;
         for (const auto & sensor : EMSESP::sensor_devices()) {
             char sensorID[10];
-            snprintf_P(sensorID, 10, PSTR("sensor%d"), i++);
+            snprintf_P(sensorID, 10, "sensor%d", i++);
             if ((strcmp(cmd, sensorID) == 0) || (strcmp(cmd, Helpers::toLower(sensor.to_string()).c_str()) == 0)) {
                 root["name"] = sensor.to_string();
                 if (Helpers::hasValue(sensor.temperature_c)) {
@@ -669,7 +669,7 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     if (offset) {
         snprintf_P(&str[0],
                    str.capacity() + 1,
-                   PSTR("%s(0x%02X) %s %s(0x%02X), %s(0x%02X), data: %s (offset %d)"),
+                   "%s(0x%02X) %s %s(0x%02X), %s(0x%02X), data: %s (offset %d)",
                    src_name.c_str(),
                    src,
                    direction.c_str(),
@@ -682,7 +682,7 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     } else {
         snprintf_P(&str[0],
                    str.capacity() + 1,
-                   PSTR("%s(0x%02X) %s %s(0x%02X), %s(0x%02X), data: %s"),
+                   "%s(0x%02X) %s %s(0x%02X), %s(0x%02X), data: %s",
                    src_name.c_str(),
                    src,
                    direction.c_str(),
@@ -759,7 +759,7 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 
     // get version as XX.XX
     std::string version(6, '\0');
-    snprintf_P(&version[0], version.capacity() + 1, PSTR("%02d.%02d"), telegram->message_data[offset + 1], telegram->message_data[offset + 2]);
+    snprintf_P(&version[0], version.capacity() + 1, "%02d.%02d", telegram->message_data[offset + 1], telegram->message_data[offset + 2]);
 
     // some devices store the protocol type (HT3, Buderus) in the last byte
     uint8_t brand;

@@ -4,12 +4,14 @@
 
 ## Added
 
-- add system commands for syslog level and watch [#98](https://github.com/emsesp/EMS-ESP32/issues/98)
+- Add system commands for syslog level and watch [#98](https://github.com/emsesp/EMS-ESP32/issues/98)
 - Added pool data to telegrams 0x494 & 0x495 #102 [#102](https://github.com/emsesp/EMS-ESP32/issues/102) (@Sunbuzz)
+- Add RC300 second summermode telegram [#108](https://github.com/emsesp/EMS-ESP32/issues/108)
 
 ## Fixed
 
 - MQTT reconnecting after WiFi reconnect [#99](https://github.com/emsesp/EMS-ESP32/issues/99)
+- Manually Controlling Solar Circuit [#107](https://github.com/emsesp/EMS-ESP32/issues/107)
 
 ## Changed
 

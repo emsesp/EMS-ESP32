@@ -304,16 +304,16 @@ std::string EMSdevice::to_string() const {
 
     // for devices that haven't been lookup yet, don't show all details
     if (product_id_ == 0) {
-        snprintf_P(&str[0], str.capacity() + 1, PSTR("%s (DeviceID:0x%02X)"), name_.c_str(), device_id_);
+        snprintf_P(&str[0], str.capacity() + 1, "%s (DeviceID:0x%02X)", name_.c_str(), device_id_);
         return str;
     }
 
     if (brand_ == Brand::NO_BRAND) {
-        snprintf_P(&str[0], str.capacity() + 1, PSTR("%s (DeviceID:0x%02X, ProductID:%d, Version:%s)"), name_.c_str(), device_id_, product_id_, version_.c_str());
+        snprintf_P(&str[0], str.capacity() + 1, "%s (DeviceID:0x%02X, ProductID:%d, Version:%s)", name_.c_str(), device_id_, product_id_, version_.c_str());
     } else {
         snprintf_P(&str[0],
                    str.capacity() + 1,
-                   PSTR("%s %s (DeviceID:0x%02X ProductID:%d, Version:%s)"),
+                   "%s %s (DeviceID:0x%02X ProductID:%d, Version:%s)",
                    brand_to_string().c_str(),
                    name_.c_str(),
                    device_id_,
@@ -328,9 +328,9 @@ std::string EMSdevice::to_string() const {
 std::string EMSdevice::to_string_short() const {
     std::string str(160, '\0');
     if (brand_ == Brand::NO_BRAND) {
-        snprintf_P(&str[0], str.capacity() + 1, PSTR("%s: %s"), device_type_name().c_str(), name_.c_str());
+        snprintf_P(&str[0], str.capacity() + 1, "%s: %s", device_type_name().c_str(), name_.c_str());
     } else {
-        snprintf_P(&str[0], str.capacity() + 1, PSTR("%s: %s %s"), device_type_name().c_str(), brand_to_string().c_str(), name_.c_str());
+        snprintf_P(&str[0], str.capacity() + 1, "%s: %s %s", device_type_name().c_str(), brand_to_string().c_str(), name_.c_str());
     }
     return str;
 }
@@ -413,7 +413,7 @@ char * EMSdevice::show_telegram_handlers(char * result) {
     char    str[10];
     uint8_t i = 0;
     for (const auto & tf : telegram_functions_) {
-        snprintf_P(str, sizeof(str), PSTR("0x%02X"), tf.telegram_type_id_);
+        snprintf_P(str, sizeof(str), "0x%02X", tf.telegram_type_id_);
         strlcat(result, str, 200);
         if (++i < size) {
             strlcat(result, " ", 200);
@@ -961,7 +961,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                     time_value          = (divider) ? time_value / divider : time_value; // sometimes we need to divide by 60
                     if (console) {
                         char time_s[40];
-                        snprintf_P(time_s, sizeof(time_s), PSTR("%d days %d hours %d minutes"), (time_value / 1440), ((time_value % 1440) / 60), (time_value % 60));
+                        snprintf_P(time_s, sizeof(time_s), "%d days %d hours %d minutes", (time_value / 1440), ((time_value % 1440) / 60), (time_value % 60));
                         json[name] = time_s;
                     } else {
                         json[name] = time_value;

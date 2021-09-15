@@ -287,7 +287,7 @@ bool Boiler::publish_ha_config() {
     doc["ic"]      = F_(icondevice);
 
     char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
+    snprintf_P(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
     doc["stat_t"] = stat_t;
 
     char name_s[40];
@@ -304,7 +304,7 @@ bool Boiler::publish_ha_config() {
     ids.add("ems-esp-boiler");
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/boiler/config"), Mqtt::base().c_str());
+    snprintf_P(topic, sizeof(topic), "sensor/%s/boiler/config", Mqtt::base().c_str());
     Mqtt::publish_ha(topic,
                      doc.as<JsonObject>()); // publish the config payload with retain flag
 
@@ -791,7 +791,7 @@ void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegr
 
     // ignore if 0, which means all is ok
     if (Helpers::hasValue(message_code) && message_code > 0) {
-        snprintf_P(maintenanceMessage_, sizeof(maintenanceMessage_), PSTR("H%02d"), message_code);
+        snprintf_P(maintenanceMessage_, sizeof(maintenanceMessage_), "H%02d", message_code);
     }
 }
 
@@ -818,7 +818,7 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
         uint32_t date  = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min;
         // store only the newest code from telegrams 10 and 11
         if (date > lastCodeDate_) {
-            snprintf_P(lastCode_, sizeof(lastCode_), PSTR("%s(%d) %02d.%02d.%d %02d:%02d"), code, codeNo, day, month, year, hour, min);
+            snprintf_P(lastCode_, sizeof(lastCode_), "%s(%d) %02d.%02d.%d %02d:%02d", code, codeNo, day, month, year, hour, min);
             lastCodeDate_ = date;
         }
     }
@@ -844,7 +844,7 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
     uint8_t month = telegram->message_data[3];
     uint8_t year  = telegram->message_data[4];
     if (day > 0 && month > 0) {
-        snprintf_P(maintenanceDate_, sizeof(maintenanceDate_), PSTR("%02d.%02d.%04d"), day, month, year + 2000);
+        snprintf_P(maintenanceDate_, sizeof(maintenanceDate_), "%02d.%02d.%04d", day, month, year + 2000);
     }
 }
 

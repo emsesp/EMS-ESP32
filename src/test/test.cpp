@@ -797,8 +797,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         // fit it up, to its limit of the Json buffer (which is about 169 records)
         for (uint8_t i = 0; i < 200; i++) {
-            snprintf_P(key, 7, PSTR("key%03d"), i);
-            snprintf_P(value, 7, PSTR("val%03d"), i);
+            snprintf_P(key, 7, "key%03d", i);
+            snprintf_P(value, 7, "val%03d", i);
             doc[key] = value;
         }
         doc.shrinkToFit();

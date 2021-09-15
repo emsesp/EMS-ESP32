@@ -265,9 +265,9 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
         auto content = message.content_;
         char topic[MQTT_TOPIC_MAX_SIZE];
         if ((strncmp(content->topic.c_str(), "homeassistant/", 13) != 0)) {
-            snprintf_P(topic, sizeof(topic), PSTR("%s/%s"), Mqtt::base().c_str(), content->topic.c_str());
+            snprintf_P(topic, sizeof(topic), "%s/%s", Mqtt::base().c_str(), content->topic.c_str());
         } else {
-            snprintf_P(topic, sizeof(topic), PSTR("%s"), content->topic.c_str());
+            snprintf_P(topic, sizeof(topic), "%s", content->topic.c_str());
         }
 
         if (content->operation == Operation::PUBLISH) {
@@ -553,7 +553,7 @@ void Mqtt::start() {
 
     // create will_topic with the base prefixed. It has to be static because asyncmqttclient destroys the reference
     static char will_topic[MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(will_topic, MQTT_TOPIC_MAX_SIZE, PSTR("%s/status"), mqtt_base_.c_str());
+    snprintf_P(will_topic, MQTT_TOPIC_MAX_SIZE, "%s/status", mqtt_base_.c_str());
     mqttClient_->setWill(will_topic, 1, true, "offline"); // with qos 1, retain true
 
     mqttClient_->onMessage([this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
@@ -707,7 +707,7 @@ void Mqtt::ha_status() {
     ids.add("ems-esp");
 
     char topic[MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/system/config"), mqtt_base_.c_str());
+    snprintf_P(topic, sizeof(topic), "sensor/%s/system/config", mqtt_base_.c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors - must match the MQTT payload keys
@@ -868,7 +868,7 @@ void Mqtt::process_queue() {
         // leave topic as it is
         strcpy(topic, message->topic.c_str());
     } else {
-        snprintf_P(topic, MQTT_TOPIC_MAX_SIZE, PSTR("%s/%s"), mqtt_base_.c_str(), message->topic.c_str());
+        snprintf_P(topic, MQTT_TOPIC_MAX_SIZE, "%s/%s", mqtt_base_.c_str(), message->topic.c_str());
     }
 
     // if we're subscribing...
@@ -966,29 +966,29 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     // create entity by add the tag if present, seperating with a .
     char new_entity[50];
     if (have_tag) {
-        snprintf_P(new_entity, sizeof(new_entity), PSTR("%s.%s"), EMSdevice::tag_to_string(tag).c_str(), uuid::read_flash_string(entity).c_str());
+        snprintf_P(new_entity, sizeof(new_entity), "%s.%s", EMSdevice::tag_to_string(tag).c_str(), uuid::read_flash_string(entity).c_str());
     } else {
-        snprintf_P(new_entity, sizeof(new_entity), PSTR("%s"), uuid::read_flash_string(entity).c_str());
+        snprintf_P(new_entity, sizeof(new_entity), "%s", uuid::read_flash_string(entity).c_str());
     }
 
     // build unique identifier which will be used in the topic
     // and replacing all . with _ as not to break HA
     std::string uniq(50, '\0');
-    snprintf_P(&uniq[0], uniq.capacity() + 1, PSTR("%s_%s"), device_name, new_entity);
+    snprintf_P(&uniq[0], uniq.capacity() + 1, "%s_%s", device_name, new_entity);
     std::replace(uniq.begin(), uniq.end(), '.', '_');
     doc["uniq_id"] = uniq;
 
     // state topic
     char stat_t[MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("~/%s"), tag_to_topic(device_type, tag).c_str());
+    snprintf_P(stat_t, sizeof(stat_t), "~/%s", tag_to_topic(device_type, tag).c_str());
     doc["stat_t"] = stat_t;
 
     // name = <device> <tag> <name>
     char new_name[80];
     if (have_tag) {
-        snprintf_P(new_name, sizeof(new_name), PSTR("%s %s %s"), device_name, EMSdevice::tag_to_string(tag).c_str(), uuid::read_flash_string(name).c_str());
+        snprintf_P(new_name, sizeof(new_name), "%s %s %s", device_name, EMSdevice::tag_to_string(tag).c_str(), uuid::read_flash_string(name).c_str());
     } else {
-        snprintf_P(new_name, sizeof(new_name), PSTR("%s %s"), device_name, uuid::read_flash_string(name).c_str());
+        snprintf_P(new_name, sizeof(new_name), "%s %s", device_name, uuid::read_flash_string(name).c_str());
     }
     new_name[0] = toupper(new_name[0]); // capitalize first letter
     doc["name"] = new_name;
@@ -997,9 +997,9 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     // if its nested mqtt format then use the appended entity name, otherwise take the original
     char val_tpl[50];
     if (is_nested) {
-        snprintf_P(val_tpl, sizeof(val_tpl), PSTR("{{value_json.%s}}"), new_entity);
+        snprintf_P(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", new_entity);
     } else {
-        snprintf_P(val_tpl, sizeof(val_tpl), PSTR("{{value_json.%s}}"), uuid::read_flash_string(entity).c_str());
+        snprintf_P(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", uuid::read_flash_string(entity).c_str());
     }
     doc["val_tpl"] = val_tpl;
 
@@ -1008,7 +1008,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     // look at the device value type
     if (type == DeviceValueType::BOOL) {
         // binary sensor
-        snprintf_P(topic, sizeof(topic), PSTR("binary_sensor/%s/%s/config"), mqtt_base_.c_str(), uniq.c_str()); // topic
+        snprintf_P(topic, sizeof(topic), "binary_sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // topic
 
         // how to render boolean. HA only accepts String values
         char result[10];
@@ -1016,7 +1016,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
         doc[F("payload_off")] = Helpers::render_boolean(result, false);
     } else {
         // normal HA sensor, not a boolean one
-        snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/%s/config"), mqtt_base_.c_str(), uniq.c_str()); // topic
+        snprintf_P(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // topic
 
         bool set_state_class = false;
 
@@ -1089,7 +1089,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
         ids.add("ems-esp");
     } else {
         char ha_device[40];
-        snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), device_name);
+        snprintf_P(ha_device, sizeof(ha_device), "ems-esp-%s", device_name);
         ids.add(ha_device);
     }
 
