@@ -530,8 +530,8 @@ bool Solar::set_wwMinTemp(const char * value, const int8_t id) {
 }
 
 bool Solar::set_TurnoffDiff(const char * value, const int8_t id) {
-    int temperature;
-    if (!Helpers::value2number(value, temperature)) {
+    float temperature;
+    if (!Helpers::value2float(value, temperature)) {
         return false;
     }
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_SM10) {
@@ -543,8 +543,8 @@ bool Solar::set_TurnoffDiff(const char * value, const int8_t id) {
 }
 
 bool Solar::set_TurnonDiff(const char * value, const int8_t id) {
-    int temperature;
-    if (!Helpers::value2number(value, temperature)) {
+    float temperature;
+    if (!Helpers::value2float(value, temperature)) {
         return false;
     }
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_SM10) {
