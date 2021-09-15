@@ -7,6 +7,7 @@
 - Add system commands for syslog level and watch [#98](https://github.com/emsesp/EMS-ESP32/issues/98)
 - Added pool data to telegrams 0x494 & 0x495 #102 [#102](https://github.com/emsesp/EMS-ESP32/issues/102) (@Sunbuzz)
 - Add RC300 second summermode telegram [#108](https://github.com/emsesp/EMS-ESP32/issues/108)
+- Add support for the RC25 thermostat [#106](https://github.com/emsesp/EMS-ESP32/issues/106)
 
 ## Fixed
 
