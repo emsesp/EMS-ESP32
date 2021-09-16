@@ -84,6 +84,7 @@ std::string Telegram::to_string() const {
     uint8_t data[EMS_MAX_TELEGRAM_LENGTH];
     uint8_t length = 0;
     data[0]        = this->src ^ RxService::ems_mask();
+    data[3]        = this->offset;
     if (this->operation == Telegram::Operation::TX_READ) {
         data[1] = this->dest | 0x80;
         data[4] = this->message_data[0];
