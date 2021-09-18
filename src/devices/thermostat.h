@@ -352,7 +352,6 @@ class Thermostat : public EMSdevice {
     bool set_wwmode(const char * value, const int8_t id);
     bool set_wwtemp(const char * value, const int8_t id);
     bool set_wwtemplow(const char * value, const int8_t id);
-    bool set_wwonetime(const char * value, const int8_t id);
     bool set_wwcircmode(const char * value, const int8_t id);
     bool set_wwcharge(const char * value, const int8_t id);
     bool set_wwchargeduration(const char * value, const int8_t id);

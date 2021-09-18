@@ -1377,7 +1377,7 @@ bool Thermostat::set_wwcharge(const char * value, const int8_t id) {
         return false;
     }
     LOG_INFO(F("Setting warm water charge to %s"), b ? F_(on) : F_(off));
-    write_command(0x02F5, 11, b, 0x02F5);
+    write_command(0x02F5, 11, b ? 0xFF : 0x00, 0x02F5);
     return true;
 }
 
@@ -1412,19 +1412,6 @@ bool Thermostat::set_wwprio(const char * value, const int8_t id) {
 
     return true;
 }
-
-// Set ww onetime RC300, ems+
-bool Thermostat::set_wwonetime(const char * value, const int8_t id) {
-    bool b = false;
-    if (!Helpers::value2bool(value, b)) {
-        LOG_WARNING(F("Set warm water onetime: Invalid value"));
-        return false;
-    }
-    LOG_INFO(F("Setting warm water onetime to %s"), b ? F_(on) : F_(off));
-    write_command(0x02F5, 11, b ? 0xFF : 0x00, 0x031D);
-    return true;
-}
-
 
 // sets the thermostat ww circulation working mode, where mode is a string
 bool Thermostat::set_wwcircmode(const char * value, const int8_t id) {
