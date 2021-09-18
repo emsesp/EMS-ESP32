@@ -251,6 +251,11 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const ui
 // returns pointer to the HeatingCircuit or nullptr if it can't be found
 // if its a new one, the object will be created and also the fetch flags set
 std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::shared_ptr<const Telegram> telegram) {
+    // only do this for the current master thermostat
+    if (device_id() != EMSESP::actual_master_thermostat()) {
+        return nullptr;
+    }
+
     // look through the Monitor and Set arrays to see if there is a match
     uint8_t hc_num  = 0;
     bool    toggle_ = false;
