@@ -156,7 +156,7 @@ char * WebLogService::messagetime(char * out, const uint64_t t) {
     } else {
         time_t t1 = time_offset_ + t / 1000ULL;
         strftime(out, 25, "%F %T", localtime(&t1));
-        snprintf_P(out, 25, "%s.%03d", out, (uint16_t)(t % 1000));
+        snprintf(out, 25, "%s.%03d", out, (uint16_t)(t % 1000));
     }
     return out;
 }
@@ -184,7 +184,7 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
 
 // send the complete log buffer to the API, not filtering on log level
 void WebLogService::fetchLog(AsyncWebServerRequest * request) {
-    MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN); // 8kb buffer
+    MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN); // 16kb buffer
     JsonObject                 root     = response->getRoot();
     JsonArray                  log      = root.createNestedArray("events");
 
