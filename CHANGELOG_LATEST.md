@@ -8,11 +8,13 @@
 - Added pool data to telegrams 0x494 & 0x495 #102 [#102](https://github.com/emsesp/EMS-ESP32/issues/102) (@Sunbuzz)
 - Add RC300 second summermode telegram [#108](https://github.com/emsesp/EMS-ESP32/issues/108)
 - Add support for the RC25 thermostat [#106](https://github.com/emsesp/EMS-ESP32/issues/106)
+- Add new command 'entities' for a device, e.g. http://ems-esp/api/boiler/entities to show the shortname, description and HA Entity name (if HA enabled) [#116](https://github.com/emsesp/EMS-ESP32/issues/116)
 
 ## Fixed
 
 - MQTT reconnecting after WiFi reconnect [#99](https://github.com/emsesp/EMS-ESP32/issues/99)
 - Manually Controlling Solar Circuit [#107](https://github.com/emsesp/EMS-ESP32/issues/107)
+- Fix thermostat commands not defaulting to the master thermostat [#110](https://github.com/emsesp/EMS-ESP32/issues/110)
 
 ## Changed
 
