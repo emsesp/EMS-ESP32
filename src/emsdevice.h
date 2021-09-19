@@ -120,8 +120,13 @@ enum DeviceValueTAG : uint8_t {
 
 };
 
-// mqtt-HA flags
-enum DeviceValueHA : uint8_t { HA_NONE = 0, HA_VALUE, HA_DONE };
+// MQTT HA flags
+enum DeviceValueHA : uint8_t {
+
+    HA_NONE = 0,
+    HA_VALUE,
+    HA_DONE
+};
 
 class EMSdevice {
   public:
@@ -147,9 +152,9 @@ class EMSdevice {
         return device_id_;
     }
 
-    std::string        device_type_name() const;
-    static std::string device_type_2_device_name(const uint8_t device_type);
-    static uint8_t     device_name_2_device_type(const char * topic);
+    const std::string        device_type_name() const;
+    static const std::string device_type_2_device_name(const uint8_t device_type);
+    static uint8_t           device_name_2_device_type(const char * topic);
 
     static const std::string uom_to_string(uint8_t uom);
     static const std::string tag_to_string(uint8_t tag);
@@ -226,26 +231,26 @@ class EMSdevice {
         has_update_ |= has_update;
     }
 
-    std::string    brand_to_string() const;
-    static uint8_t decode_brand(uint8_t value);
+    const std::string brand_to_string() const;
+    static uint8_t    decode_brand(uint8_t value);
 
-    std::string to_string() const;
-    std::string to_string_short() const;
+    const std::string to_string() const;
+    const std::string to_string_short() const;
 
     void   show_telegram_handlers(uuid::console::Shell & shell);
-    void   show_device_values_debug(uuid::console::Shell & shell);
     char * show_telegram_handlers(char * result);
     void   show_mqtt_handlers(uuid::console::Shell & shell);
+    void   list_device_entries(JsonObject & json);
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
 
     void register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, const process_function_p cb);
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);
 
-    std::string get_value_uom(const char * key);
-    bool        get_value_info(JsonObject & root, const char * cmd, const int8_t id);
-    bool        generate_values_json(JsonObject & json, const uint8_t tag_filter, const bool nested, const bool console = false);
-    void        generate_values_json_web(JsonObject & json);
+    const std::string get_value_uom(const char * key);
+    bool              get_value_info(JsonObject & root, const char * cmd, const int8_t id);
+    bool              generate_values_json(JsonObject & json, const uint8_t tag_filter, const bool nested, const bool console = false);
+    void              generate_values_json_web(JsonObject & json);
 
     void register_device_value(uint8_t                             tag,
                                void *                              value_p,
@@ -290,7 +295,7 @@ class EMSdevice {
 
     void publish_mqtt_ha_sensor();
 
-    std::string telegram_type_name(std::shared_ptr<const Telegram> telegram);
+    const std::string telegram_type_name(std::shared_ptr<const Telegram> telegram);
 
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);
@@ -457,13 +462,14 @@ class EMSdevice {
     };
     const std::vector<DeviceValue> devicevalues() const;
 
+    std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
+    std::vector<DeviceValue>      devicevalues_;
+
+    const std::string device_entity_ha(DeviceValue const & dv);
+
     void init_devicevalues(uint8_t size) {
         devicevalues_.reserve(size);
     }
-
-    std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
-
-    std::vector<DeviceValue> devicevalues_;
 };
 
 } // namespace emsesp
