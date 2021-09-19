@@ -84,6 +84,7 @@ MAKE_PSTR_WORD(info)
 MAKE_PSTR_WORD(settings)
 MAKE_PSTR_WORD(value)
 MAKE_PSTR_WORD(error)
+MAKE_PSTR_WORD(entities)
 
 // devices
 MAKE_PSTR_WORD(boiler)
@@ -148,6 +149,7 @@ MAKE_PSTR(unset, "<unset>")
 // command descriptions
 MAKE_PSTR(info_cmd, "list all values")
 MAKE_PSTR(commands_cmd, "list all commands")
+MAKE_PSTR(entities_cmd, "list all entities")
 
 MAKE_PSTR_WORD(number)
 MAKE_PSTR_WORD(enum)
