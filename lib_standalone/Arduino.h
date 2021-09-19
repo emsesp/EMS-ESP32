@@ -49,6 +49,8 @@
 #define OUTPUT 1
 #define INPUT_PULLUP 2
 
+#define snprintf snprintf_P // to keep backwards compatibility
+
 void pinMode(uint8_t pin, uint8_t mode);
 void digitalWrite(uint8_t pin, uint8_t value);
 int  digitalRead(uint8_t pin);
