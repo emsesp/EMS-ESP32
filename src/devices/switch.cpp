@@ -53,11 +53,11 @@ bool Switch::publish_ha_config() {
     doc["ic"]      = F_(icondevice);
 
     char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
+    snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
     doc["stat_t"] = stat_t;
 
     char name_s[40];
-    snprintf_P(name_s, sizeof(name_s), FSTR_(productid_fmt), device_type_name().c_str());
+    snprintf(name_s, sizeof(name_s), FSTR_(productid_fmt), device_type_name().c_str());
     doc["name"] = name_s;
 
     doc["val_tpl"] = FJSON("{{value_json.id}}");
@@ -70,7 +70,7 @@ bool Switch::publish_ha_config() {
     ids.add("ems-esp-switch");
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), "sensor/%s/switch/config", Mqtt::base().c_str());
+    snprintf(topic, sizeof(topic), "sensor/%s/switch/config", Mqtt::base().c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     return true;

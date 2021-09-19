@@ -299,13 +299,13 @@ uint64_t DallasSensor::Sensor::id() const {
 
 std::string DallasSensor::Sensor::id_string() const {
     std::string str(20, '\0');
-    snprintf_P(&str[0],
-               str.capacity() + 1,
-               "%02X-%04X-%04X-%04X",
-               (unsigned int)(id_ >> 48) & 0xFF,
-               (unsigned int)(id_ >> 32) & 0xFFFF,
-               (unsigned int)(id_ >> 16) & 0xFFFF,
-               (unsigned int)(id_)&0xFFFF);
+    snprintf(&str[0],
+             str.capacity() + 1,
+             "%02X-%04X-%04X-%04X",
+             (unsigned int)(id_ >> 48) & 0xFF,
+             (unsigned int)(id_ >> 32) & 0xFFFF,
+             (unsigned int)(id_ >> 16) & 0xFFFF,
+             (unsigned int)(id_)&0xFFFF);
     return str;
 }
 
@@ -347,7 +347,7 @@ void DallasSensor::delete_ha_config(uint8_t index, const char * name) {
         std::string topicname = name;
         std::replace(topicname.begin(), topicname.end(), '-', '_');
 
-        snprintf_P(topic, sizeof(topic), "homeassistant/sensor/%s/dallassensor_%s/config", Mqtt::base().c_str(), topicname.c_str());
+        snprintf(topic, sizeof(topic), "homeassistant/sensor/%s/dallassensor_%s/config", Mqtt::base().c_str(), topicname.c_str());
         Mqtt::publish(topic);
         registered_ha_[index] = false; // forces a recreate of the HA config topic
     }
@@ -461,7 +461,7 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
     uint8_t i = 1; // sensor count
     for (const auto & sensor : sensors_) {
         char sensorID[10]; // sensor{1-n}
-        snprintf_P(sensorID, 10, "sensor%d", i++);
+        snprintf(sensorID, 10, "sensor%d", i++);
         if (id == -1) { // show number and id
             JsonObject dataSensor = json.createNestedObject(sensorID);
             dataSensor["id"]      = sensor.to_string();
@@ -493,7 +493,7 @@ void DallasSensor::publish_values(const bool force) {
 
     for (const auto & sensor : sensors_) {
         char sensorID[10]; // sensor{1-n}
-        snprintf_P(sensorID, 10, "sensor%d", sensor_no);
+        snprintf(sensorID, 10, "sensor%d", sensor_no);
         if (dallas_format_ == Dallas_Format::NUMBER) {
             // e.g. dallassensor_data = {"sensor1":{"id":"28-EA41-9497-0E03","temp":23.3},"sensor2":{"id":"28-233D-9497-0C03","temp":24.0}}
             JsonObject dataSensor = doc.createNestedObject(sensorID);
@@ -513,28 +513,28 @@ void DallasSensor::publish_values(const bool force) {
                 config["dev_cla"] = FJSON("temperature");
 
                 char stat_t[50];
-                snprintf_P(stat_t, sizeof(stat_t), "%s/dallassensor_data", Mqtt::base().c_str());
+                snprintf(stat_t, sizeof(stat_t), "%s/dallassensor_data", Mqtt::base().c_str());
                 config["stat_t"] = stat_t;
 
                 config["unit_of_meas"] = FJSON("°C");
 
                 char str[50];
                 if (dallas_format_ != Dallas_Format::NUMBER) {
-                    snprintf_P(str, sizeof(str), "{{value_json['%s']}}", sensor.to_string().c_str());
+                    snprintf(str, sizeof(str), "{{value_json['%s']}}", sensor.to_string().c_str());
                 } else {
-                    snprintf_P(str, sizeof(str), "{{value_json.sensor%d.temp}}", sensor_no);
+                    snprintf(str, sizeof(str), "{{value_json.sensor%d.temp}}", sensor_no);
                 }
                 config["val_tpl"] = str;
 
                 // name as sensor number not the long unique ID
                 if (dallas_format_ != Dallas_Format::NUMBER) {
-                    snprintf_P(str, sizeof(str), "Dallas Sensor %s", sensor.to_string().c_str());
+                    snprintf(str, sizeof(str), "Dallas Sensor %s", sensor.to_string().c_str());
                 } else {
-                    snprintf_P(str, sizeof(str), "Dallas Sensor %d", sensor_no);
+                    snprintf(str, sizeof(str), "Dallas Sensor %d", sensor_no);
                 }
                 config["name"] = str;
 
-                snprintf_P(str, sizeof(str), "dallasensor_%s", sensor.to_string().c_str());
+                snprintf(str, sizeof(str), "dallasensor_%s", sensor.to_string().c_str());
                 config["uniq_id"] = str;
 
                 JsonObject dev = config.createNestedObject("dev");
@@ -543,12 +543,12 @@ void DallasSensor::publish_values(const bool force) {
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 if (dallas_format_ == Dallas_Format::NUMBER) {
-                    snprintf_P(topic, sizeof(topic), "sensor/%s/dallassensor_%d/config", Mqtt::base().c_str(), sensor_no);
+                    snprintf(topic, sizeof(topic), "sensor/%s/dallassensor_%d/config", Mqtt::base().c_str(), sensor_no);
                 } else {
                     // use '_' as HA doesn't like '-' in the topic name
                     std::string topicname = sensor.to_string();
                     std::replace(topicname.begin(), topicname.end(), '-', '_');
-                    snprintf_P(topic, sizeof(topic), "sensor/%s/dallassensor_%s/config", Mqtt::base().c_str(), topicname.c_str());
+                    snprintf(topic, sizeof(topic), "sensor/%s/dallassensor_%s/config", Mqtt::base().c_str(), topicname.c_str());
                 }
                 Mqtt::publish_ha(topic, config.as<JsonObject>());
 
