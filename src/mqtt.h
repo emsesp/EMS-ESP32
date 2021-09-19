@@ -116,12 +116,12 @@ class Mqtt {
     static void publish_ha(const std::string & topic, const JsonObject & payload);
     static void publish_ha(const __FlashStringHelper * topic, const JsonObject & payload);
 
-    static void publish_mqtt_ha_sensor(uint8_t                     type,
-                                       uint8_t                     tag,
-                                       const __FlashStringHelper * name,
-                                       const uint8_t               device_type,
-                                       const __FlashStringHelper * entity,
-                                       const uint8_t               uom = 0);
+    static void publish_ha_sensor(uint8_t                     type,
+                                  uint8_t                     tag,
+                                  const __FlashStringHelper * name,
+                                  const uint8_t               device_type,
+                                  const __FlashStringHelper * entity,
+                                  const uint8_t               uom = 0);
     static void register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t flags = 0);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
