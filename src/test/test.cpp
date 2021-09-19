@@ -272,7 +272,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.printfln("Float test from %f to %s", test_float, result);
 
         uint16_t temp;
-        double   doub;
+        float    doub;
         temp = 0x0201;                    // decimal 513
         doub = Helpers::round2(temp, 10); // divide by 10
         shell.printfln("Round test from x%02X to %d to %f", temp, temp, doub);
@@ -463,6 +463,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
+
+        shell.invoke_command("call boiler fanwork");
+        shell.invoke_command("call thermostat seltemp"); // sensor.thermostat_hc1_selected_room_temperature
+        shell.invoke_command("call thermostat entities");
+        shell.invoke_command("call boiler entities");
     }
 
     if (command == "mqtt_nested") {
@@ -808,8 +813,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         // fit it up, to its limit of the Json buffer (which is about 169 records)
         for (uint8_t i = 0; i < 200; i++) {
-            snprintf_P(key, 7, "key%03d", i);
-            snprintf_P(value, 7, "val%03d", i);
+            snprintf(key, 7, "key%03d", i);
+            snprintf(value, 7, "val%03d", i);
             doc[key] = value;
         }
         doc.shrinkToFit();
