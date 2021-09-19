@@ -1,6 +1,14 @@
 ArduinoJson: change log
 =======================
 
+v6.18.4 (2021-09-06)
+-------
+
+* Fixed error `'dummy' may be used uninitialized` on GCC 11
+* Fixed error `expected unqualified-id before 'const'` on GCC 11 (issue #1622)
+* Filter: exact match takes precedence over wildcard (issue #1628)
+* Fixed deserialization of `\u0000` (issue #1646)
+
 v6.18.3 (2021-07-27)
 -------
 
