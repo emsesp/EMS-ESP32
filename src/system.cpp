@@ -660,6 +660,7 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, F("watch incoming telegrams"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog_level), System::command_syslog_level, F("set syslog level"), CommandFlag::ADMIN_ONLY);
 }
+
 // flashes the LED
 void System::led_monitor() {
     if (!led_gpio_) {
