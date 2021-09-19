@@ -77,7 +77,7 @@ void EMSESPShell::display_banner() {
 
     if (console_hostname_.empty()) {
         console_hostname_.resize(16, '\0');
-        snprintf_P(&console_hostname_[0], console_hostname_.capacity() + 1, "ems-esp");
+        snprintf(&console_hostname_[0], console_hostname_.capacity() + 1, "ems-esp");
     }
 
     // load the list of commands
@@ -373,8 +373,7 @@ void EMSESPShell::add_console_commands() {
                 return;
             }
 
-            DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
-            JsonObject          json = doc.to<JsonObject>();
+            DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN);
 
             // validate that a command is present
             if (arguments.size() < 2) {
@@ -386,6 +385,8 @@ void EMSESPShell::add_console_commands() {
             const char * cmd = arguments[1].c_str();
 
             uint8_t cmd_return = CommandRet::OK;
+
+            JsonObject json = doc.to<JsonObject>();
 
             if (arguments.size() == 2) {
                 // no value specified, just the cmd
@@ -402,6 +403,8 @@ void EMSESPShell::add_console_commands() {
                 // use value, which could be an id or hc
                 cmd_return = Command::call(device_type, cmd, arguments[2].c_str(), true, atoi(arguments[3].c_str()), json);
             }
+
+            shell.printfln("size=%d measure=%d overflowed=%d", doc.size(), measureJson(doc), doc.overflowed()); // TODO remove debug
 
             if (cmd_return == CommandRet::OK && json.size()) {
                 serializeJsonPretty(doc, shell);
@@ -841,7 +844,7 @@ EMSESPStreamConsole::EMSESPStreamConsole(Stream & stream, const IPAddress & addr
         ptys_[pty_] = true;
     }
 
-    snprintf_P(text.data(), text.size(), "pty%u", pty_);
+    snprintf(text.data(), text.size(), "pty%u", pty_);
     name_ = text.data();
 #ifndef EMSESP_STANDALONE
     logger().info(F("Allocated console %s for connection from [%s]:%u"), name_.c_str(), uuid::printable_to_string(addr_).c_str(), port_);
