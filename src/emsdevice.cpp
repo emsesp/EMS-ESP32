@@ -986,6 +986,7 @@ void EMSdevice::publish_mqtt_ha_sensor() {
             dv.ha |= DeviceValueHA::HA_DONE;
         }
     }
+    
     if (!ha_config_done()) {
         bool ok = publish_ha_config();
         ha_config_done(ok); // see if it worked
