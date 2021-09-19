@@ -194,7 +194,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
         }
     }
 
-    PrettyAsyncJsonResponse * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    PrettyAsyncJsonResponse * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
     JsonObject                json     = response->getRoot();
 
     // now we have all the parameters go and execute the command
