@@ -1010,7 +1010,7 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
         bool set_state_class = false;
 
         // unit of measure and map the HA icon
-        if (uom != DeviceValueUOM::NONE) {
+        if ((uom != DeviceValueUOM::NONE) && (uom != DeviceValueUOM::TEXT)) {
             doc["unit_of_meas"] = EMSdevice::uom_to_string(uom);
         }
 
@@ -1060,6 +1060,7 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
             doc["ic"] = F_(iconnum);
             break;
         case DeviceValueUOM::NONE:
+        case DeviceValueUOM::TEXT:
         default:
             break;
         }
