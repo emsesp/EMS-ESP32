@@ -404,8 +404,6 @@ void EMSESPShell::add_console_commands() {
                 cmd_return = Command::call(device_type, cmd, arguments[2].c_str(), true, atoi(arguments[3].c_str()), json);
             }
 
-            shell.printfln("size=%d measure=%d overflowed=%d", doc.size(), measureJson(doc), doc.overflowed()); // TODO remove debug
-
             if (cmd_return == CommandRet::OK && json.size()) {
                 serializeJsonPretty(doc, shell);
                 shell.println();
