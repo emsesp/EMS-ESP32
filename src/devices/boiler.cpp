@@ -261,7 +261,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(
         TAG_BOILER_DATA_WW, &wwActivated_, DeviceValueType::BOOL, nullptr, FL_(wwActivated), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_warmwater_activated));
     register_device_value(TAG_BOILER_DATA_WW, &wwOneTime_, DeviceValueType::BOOL, nullptr, FL_(wwOneTime), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_warmwater_onetime));
-    register_device_value(TAG_BOILER_DATA_WW, &wwDisinfecting_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfecting), DeviceValueUOM::BOOLEAN);
+    register_device_value(TAG_BOILER_DATA_WW, &wwDisinfect_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfect), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_warmwater_disinfect));
     register_device_value(TAG_BOILER_DATA_WW, &wwCharging_, DeviceValueType::BOOL, nullptr, FL_(wwCharging), DeviceValueUOM::BOOLEAN);
     register_device_value(TAG_BOILER_DATA_WW, &wwRecharging_, DeviceValueType::BOOL, nullptr, FL_(wwRecharging), DeviceValueUOM::BOOLEAN);
     register_device_value(TAG_BOILER_DATA_WW, &wwTempOK_, DeviceValueType::BOOL, nullptr, FL_(wwTempOK), DeviceValueUOM::BOOLEAN);
@@ -471,7 +471,7 @@ void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(wWStarts_, 13, 3)); // force to 3 bytes
 
     has_update(telegram->read_bitvalue(wwOneTime_, 5, 1));
-    has_update(telegram->read_bitvalue(wwDisinfecting_, 5, 2));
+    has_update(telegram->read_bitvalue(wwDisinfect_, 5, 2));
     has_update(telegram->read_bitvalue(wwCharging_, 5, 3));
     has_update(telegram->read_bitvalue(wwRecharging_, 5, 4));
     has_update(telegram->read_bitvalue(wwTempOK_, 5, 5));
@@ -611,7 +611,7 @@ void Boiler::process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram->read_value(wWStarts_, 17, 3)); // force to 3 bytes
 
     has_update(telegram->read_bitvalue(wwOneTime_, 12, 2));
-    has_update(telegram->read_bitvalue(wwDisinfecting_, 12, 3));
+    has_update(telegram->read_bitvalue(wwDisinfect_, 12, 3));
     has_update(telegram->read_bitvalue(wwCharging_, 12, 4));
     has_update(telegram->read_bitvalue(wwRecharging_, 13, 4));
     has_update(telegram->read_bitvalue(wwTempOK_, 13, 5));
@@ -1305,6 +1305,24 @@ bool Boiler::set_warmwater_circulation(const char * value, const int8_t id) {
         write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02), 0xE9); // not sure if this is in flags
     } else {
         write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02), 0x34);
+    }
+
+    return true;
+}
+
+// starting warm water disinfect, set to off seems not working
+bool Boiler::set_warmwater_disinfect(const char * value, const int8_t id) {
+    bool v = false;
+    if (!Helpers::value2bool(value, v)) {
+        LOG_WARNING(F("Set warm water disinfect: Invalid value"));
+        return false;
+    }
+
+    LOG_INFO(F("Setting warm water disinfect %s"), v ? "on" : "off");
+    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+        write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x44 : 0x04), 0xE9); // not sure if this is in flags
+    } else {
+        write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x44 : 0x04), 0x34);
     }
 
     return true;

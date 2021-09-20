@@ -78,6 +78,8 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
         register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_pump));
+        register_device_value(tag, &activated_, DeviceValueType::BOOL, nullptr, FL_(activated), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_activated));
+        register_device_value(tag, &setValveTime_, DeviceValueType::UINT, FL_(mul10), FL_(mixerSetTime), DeviceValueUOM::SECONDS, MAKE_CF_CB(set_setValveTime), 1, 12);
     }
 
     // HT3
@@ -231,15 +233,15 @@ void Mixer::process_HpPoolStatus(std::shared_ptr<const Telegram> telegram) {
     poolShuntStatus_ = poolShunt_ == 100 ? 3 : (poolShunt_ == 0 ? 4 : poolShuntStatus__);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 // Mixer on a MM10 - 0xAA
 // e.g. Thermostat -> Mixer Module, type 0xAA, telegram: 10 21 AA 00 FF 0C 0A 11 0A 32 xx
 void Mixer::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
-    // pos 0: active FF = on
-    // pos 1: valve runtime 0C = 120 sec in units of 10 sec
+    has_update(telegram->read_value(activated_, 0));    // on = 0xFF
+    has_update(telegram->read_value(setValveTime_, 1)); // valve runtime in 10 sec, max 120 s
 }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // Mixer on a MM10 - 0xAC
 // e.g. Thermostat -> Mixer Module, type 0xAC, telegram: 10 21 AC 00 1E 64 01 AB
@@ -295,6 +297,33 @@ bool Mixer::set_pump(const char * value, const int8_t id) {
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         uint8_t hc = device_id() - 0x20;
         write_command(0x2E1 + hc, 2, b ? 0x64 : 0, 0x2D7 + hc);
+        return true;
+    }
+    return false;
+}
+
+bool Mixer::set_activated(const char * value, const int8_t id) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
+        return false;
+    }
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_MM10) {
+        LOG_INFO(F("Setting mixer %s"), value);
+        write_command(0xAA, 0, b ? 0xFF : 0, 0xAA);
+        return true;
+    }
+    return false;
+}
+
+bool Mixer::set_setValveTime(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_MM10) {
+        v = (v + 5) / 10;
+        LOG_INFO(F("Setting mixer valve time to %ds"), v * 10);
+        write_command(0xAA, 1, v, 0xAA);
         return true;
     }
     return false;

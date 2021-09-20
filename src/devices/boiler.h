@@ -74,7 +74,7 @@ class Boiler : public EMSdevice {
     uint16_t wwStorageTemp2_;     // warm water storage temp 2
     uint8_t  wwActivated_;        // Warm Water activated
     uint8_t  wwOneTime_;          // Warm Water one time function on/off
-    uint8_t  wwDisinfecting_;     // Warm Water disinfection on/off
+    uint8_t  wwDisinfect_;        // Warm Water disinfection on/off
     uint8_t  wwCharging_;         // Warm Water charging on/off
     uint8_t  wwRecharging_;       // Warm Water recharge on/off
     uint8_t  wwTempOK_;           // Warm Water temperature ok on/off
@@ -229,6 +229,7 @@ class Boiler : public EMSdevice {
     bool set_warmwater_activated(const char * value, const int8_t id);
     bool set_tapwarmwater_activated(const char * value, const int8_t id);
     bool set_warmwater_onetime(const char * value, const int8_t id);
+    bool set_warmwater_disinfect(const char * value, const int8_t id);
     bool set_warmwater_circulation(const char * value, const int8_t id);
     bool set_warmwater_circulation_pump(const char * value, const int8_t id);
     bool set_warmwater_circulation_mode(const char * value, const int8_t id);

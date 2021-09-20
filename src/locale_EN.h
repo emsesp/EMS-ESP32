@@ -164,6 +164,8 @@ MAKE_PSTR_LIST(div2, F_(2))
 MAKE_PSTR_LIST(div10, F_(10))
 MAKE_PSTR_LIST(div100, F_(100))
 MAKE_PSTR_LIST(div60, F_(60))
+MAKE_PSTR_LIST(mul10, F("*10"))
+MAKE_PSTR_LIST(mul15, F("*15"))
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
 // uom - also used with HA see https://github.com/home-assistant/core/blob/d7ac4bd65379e11461c7ce0893d3533d8d8b8cbf/homeassistant/const.py#L384
@@ -354,7 +356,7 @@ MAKE_PSTR_LIST(enum_control, F_(off), F_(rc20), F_(rc3x))
 
 MAKE_PSTR_LIST(enum_wwProgMode, F("std prog"), F_(own_prog))
 MAKE_PSTR_LIST(enum_dayOfWeek, F("mo"), F("tu"), F("we"), F("th"), F("fr"), F("sa"), F("so"), F("all"))
-MAKE_PSTR_LIST(enum_wwChargeDuration, F_(off), F("15min"), F("30min"), F("45min"), F("60min"), F("75min"), F("90min"), F("105min"), F("120min"))
+// MAKE_PSTR_LIST(enum_wwChargeDuration, F_(off), F("15min"), F("30min"), F("45min"), F("60min"), F("75min"), F("90min"), F("105min"), F("120min"))
 
 // solar list
 MAKE_PSTR_LIST(enum_solarmode, F_(constant), F("pwm"), F("analog"))
@@ -499,7 +501,7 @@ MAKE_PSTR_LIST(wwStorageTemp1, F("wwstoragetemp1"), F("storage intern temperatur
 MAKE_PSTR_LIST(wwStorageTemp2, F("wwstoragetemp2"), F("storage extern temperature"))
 MAKE_PSTR_LIST(wwActivated, F("wwactivated"), F("activated"))
 MAKE_PSTR_LIST(wwOneTime, F("wwonetime"), F("one time charging"))
-MAKE_PSTR_LIST(wwDisinfecting, F("wwdisinfecting"), F("disinfecting"))
+MAKE_PSTR_LIST(wwDisinfect, F("wwdisinfect"), F("disinfection"))
 MAKE_PSTR_LIST(wwCharging, F("wwcharging"), F("charging"))
 MAKE_PSTR_LIST(wwRecharging, F("wwrecharging"), F("recharging"))
 MAKE_PSTR_LIST(wwTempOK, F("wwtempok"), F("temperature ok"))
@@ -514,7 +516,7 @@ MAKE_PSTR_LIST(wwHystOn, F("wwhyston"), F("hysteresis on temperature"))
 MAKE_PSTR_LIST(wwHystOff, F("wwhystoff"), F("hysteresis off temperature"))
 MAKE_PSTR_LIST(wwProgMode, F("wwprogmode"), F("program mode"))
 MAKE_PSTR_LIST(wwCircProg, F("wwcircprog"), F("circulation program mode"))
-MAKE_PSTR_LIST(wwDisinfect, F("wwdisinfect"), F("disinfection"))
+// MAKE_PSTR_LIST(wwDisinfect, F("wwdisinfect"), F("disinfection")) // same as in boiler
 MAKE_PSTR_LIST(wwDisinfectDay, F("wwdisinfectday"), F("disinfection day"))
 MAKE_PSTR_LIST(wwDisinfectHour, F("wwdisinfecthour"), F("disinfection hour"))
 MAKE_PSTR_LIST(wwMaxTemp, F("wwmaxtemp"), F("maximum temperature"))
@@ -597,6 +599,7 @@ MAKE_PSTR_LIST(flowTempHc, F("flowtemphc"), F("flow temperature in assigned hc (
 MAKE_PSTR_LIST(pumpStatus, F("pumpstatus"), F("pump status in assigned hc (PC1)"))
 MAKE_PSTR_LIST(mixerStatus, F("valvestatus"), F("mixing valve actuator in assigned hc (VC1)"))
 MAKE_PSTR_LIST(flowTempVf, F("flowtempvf"), F("flow temperature in header (T0/Vf)"))
+MAKE_PSTR_LIST(mixerSetTime, F("valvesettime"), F("time to set valve"))
 MAKE_PSTR_LIST(wwPumpStatus, F("pumpstatus"), F("pump status in assigned wwc (PC1)"))
 MAKE_PSTR_LIST(wwTempStatus, F("wwtempstatus"), F("temperature switch in assigned wwc (MC1)"))
 MAKE_PSTR_LIST(wwTemp, F("wwtemp"), F("current temperature"))
