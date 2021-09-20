@@ -37,7 +37,7 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
     register_device_value(TAG_NONE, &activated_, DeviceValueType::BOOL, nullptr, FL_(activated), DeviceValueUOM::BOOLEAN);
     register_device_value(TAG_NONE, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_NONE, &status_, DeviceValueType::INT, nullptr, FL_(status), DeviceValueUOM::NONE);
+    register_device_value(TAG_NONE, &status_, DeviceValueType::INT, nullptr, FL_(status), DeviceValueUOM::NUM);
     id_ = product_id;
 }
 
