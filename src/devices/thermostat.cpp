@@ -1383,11 +1383,12 @@ bool Thermostat::set_wwcharge(const char * value, const int8_t id) {
 
 // Set ww charge duration in steps of 15 min, ems+
 bool Thermostat::set_wwchargeduration(const char * value, const int8_t id) {
-    uint8_t t = 0xFF;
-    if (!Helpers::value2enum(value, t, FL_(enum_wwChargeDuration))) {
+    int t = 0xFF;
+    if (!Helpers::value2number(value, t)) {
         LOG_WARNING(F("Set warm water charge duration: Invalid value"));
         return false;
     }
+    t = (t + 8) / 15;
     LOG_INFO(F("Setting warm water charge duration to %d min"), t * 15);
     write_command(0x2F5, 10, t, 0x02F5);
     return true;
@@ -2420,10 +2421,10 @@ void Thermostat::register_device_values() {
             TAG_THERMOSTAT_DATA, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::LIST, MAKE_CF_CB(set_wwcircmode));
         register_device_value(TAG_THERMOSTAT_DATA,
                               &wwChargeDuration_,
-                              DeviceValueType::ENUM,
-                              FL_(enum_wwChargeDuration),
+                              DeviceValueType::UINT,
+                              FL_(mul15),
                               FL_(wwChargeDuration),
-                              DeviceValueUOM::LIST,
+                              DeviceValueUOM::MINUTES,
                               MAKE_CF_CB(set_wwchargeduration));
         register_device_value(TAG_THERMOSTAT_DATA, &wwCharge_, DeviceValueType::BOOL, nullptr, FL_(wwCharge), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_wwcharge));
         register_device_value(TAG_THERMOSTAT_DATA, &wwExtra1_, DeviceValueType::UINT, nullptr, FL_(wwExtra1), DeviceValueUOM::DEGREES);

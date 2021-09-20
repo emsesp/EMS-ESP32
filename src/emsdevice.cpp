@@ -603,27 +603,36 @@ void EMSdevice::generate_values_json_web(JsonObject & json) {
                 // If a divider is specified, do the division to 2 decimals places and send back as double/float
                 // otherwise force as an integer whole
                 // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
-                uint8_t divider = (dv.options_size == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
+                uint8_t divider = 0;
+                uint8_t factor  = 1;
+                if (dv.options_size == 1) {
+                    const char * s =  uuid::read_flash_string(dv.options[0]).c_str();
+                    if (s[0] == '*') {
+                        factor = Helpers::atoint(&s[1]);
+                    } else {
+                        divider = Helpers::atoint(s);
+                    }
+                }
 
                 if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
                     obj      = data.createNestedObject();
-                    obj["v"] = (divider) ? Helpers::round2(*(int8_t *)(dv.value_p), divider) : *(int8_t *)(dv.value_p);
+                    obj["v"] = (divider) ? Helpers::round2(*(int8_t *)(dv.value_p), divider) : *(int8_t *)(dv.value_p) * factor;
                 } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
                     obj      = data.createNestedObject();
-                    obj["v"] = (divider) ? Helpers::round2(*(uint8_t *)(dv.value_p), divider) : *(uint8_t *)(dv.value_p);
+                    obj["v"] = (divider) ? Helpers::round2(*(uint8_t *)(dv.value_p), divider) : *(uint8_t *)(dv.value_p) * factor;
                 } else if ((dv.type == DeviceValueType::SHORT) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
                     obj      = data.createNestedObject();
-                    obj["v"] = (divider) ? Helpers::round2(*(int16_t *)(dv.value_p), divider) : *(int16_t *)(dv.value_p);
+                    obj["v"] = (divider) ? Helpers::round2(*(int16_t *)(dv.value_p), divider) : *(int16_t *)(dv.value_p) * factor;
                 } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
                     obj      = data.createNestedObject();
-                    obj["v"] = (divider) ? Helpers::round2(*(uint16_t *)(dv.value_p), divider) : *(uint16_t *)(dv.value_p);
+                    obj["v"] = (divider) ? Helpers::round2(*(uint16_t *)(dv.value_p), divider) : *(uint16_t *)(dv.value_p) * factor;
                 } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     obj      = data.createNestedObject();
-                    obj["v"] = (divider) ? Helpers::round2(*(uint32_t *)(dv.value_p), divider) : *(uint32_t *)(dv.value_p);
+                    obj["v"] = divider ? Helpers::round2(*(uint32_t *)(dv.value_p), divider) : *(uint32_t *)(dv.value_p) * factor;
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     uint32_t time_value = *(uint32_t *)(dv.value_p);
                     obj                 = data.createNestedObject();
-                    obj["v"]            = (divider) ? time_value / divider : time_value; // sometimes we need to divide by 60
+                    obj["v"]            = (divider > 0) ? time_value / divider : time_value * factor; // sometimes we need to divide by 60
                 }
             }
 
@@ -684,11 +693,20 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
     // search device value with this tag
     for (auto & dv : devicevalues_) {
         if (strcmp(cmd, Helpers::toLower(uuid::read_flash_string(dv.short_name)).c_str()) == 0 && (tag <= 0 || tag == dv.tag)) {
-            uint8_t      divider = (dv.options_size == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
-            const char * type    = "type";
-            const char * min     = "min";
-            const char * max     = "max";
-            const char * value   = "value";
+            uint8_t divider = 0;
+            uint8_t factor  = 1;
+            if (dv.options_size == 1) {
+                const char * s =  uuid::read_flash_string(dv.options[0]).c_str();
+                if (s[0] == '*') {
+                    factor = Helpers::atoint(&s[1]);
+                } else {
+                    divider = Helpers::atoint(s);
+                }
+            }
+            const char * type  = "type";
+            const char * min   = "min";
+            const char * max   = "max";
+            const char * value = "value";
 
             json["name"] = dv.short_name;
             // prefix tag if it's included
@@ -726,7 +744,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
             case DeviceValueType::USHORT:
                 if (Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
-                    json[value] = Helpers::round2(*(uint16_t *)(dv.value_p), divider);
+                    json[value] = divider ? Helpers::round2(*(uint16_t *)(dv.value_p), divider) : *(uint16_t *)(dv.value_p) * factor;
                 }
                 json[type] = F_(number);
                 json[min]  = 0;
@@ -735,7 +753,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
             case DeviceValueType::UINT:
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                    json[value] = Helpers::round2(*(uint8_t *)(dv.value_p), divider);
+                    json[value] = divider ? Helpers::round2(*(uint8_t *)(dv.value_p), divider) : *(uint8_t *)(dv.value_p) * factor;
                 }
                 json[type] = F_(number);
                 json[min]  = 0;
@@ -748,7 +766,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
             case DeviceValueType::SHORT:
                 if (Helpers::hasValue(*(int16_t *)(dv.value_p))) {
-                    json[value] = Helpers::round2(*(int16_t *)(dv.value_p), divider);
+                    json[value] = divider ? Helpers::round2(*(int16_t *)(dv.value_p), divider) : *(int16_t *)(dv.value_p) * factor;
                 }
                 json[type] = F_(number);
                 json[min]  = divider ? -EMS_VALUE_SHORT_NOTSET / divider : -EMS_VALUE_SHORT_NOTSET;
@@ -757,7 +775,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
             case DeviceValueType::INT:
                 if (Helpers::hasValue(*(int8_t *)(dv.value_p))) {
-                    json[value] = Helpers::round2(*(int8_t *)(dv.value_p), divider);
+                    json[value] = divider ? Helpers::round2(*(int8_t *)(dv.value_p), divider) : *(int8_t *)(dv.value_p) * factor;
                 }
                 json[type] = F_(number);
                 if (dv.uom == DeviceValueUOM::PERCENT) {
@@ -771,7 +789,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
             case DeviceValueType::ULONG:
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    json[value] = Helpers::round2(*(uint32_t *)(dv.value_p), divider);
+                    json[value] = divider ? Helpers::round2(*(uint32_t *)(dv.value_p), divider) : *(uint32_t *)(dv.value_p) * factor;
                 }
                 json[type] = F_(number);
                 json[min]  = 0;
@@ -797,7 +815,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
             case DeviceValueType::TIME:
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    json[value] = (divider) ? *(uint32_t *)(dv.value_p) / divider : *(uint32_t *)(dv.value_p);
+                    json[value] = (divider) ? *(uint32_t *)(dv.value_p) / divider : *(uint32_t *)(dv.value_p) * factor;
                 }
                 json[type] = F_(number);
                 json[min]  = 0;
@@ -918,47 +936,56 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                 // If a divider is specified, do the division to 2 decimals places and send back as double/float
                 // otherwise force as an integer whole
                 // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
-                uint8_t divider = (dv.options_size == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
+                uint8_t divider = 0;
+                uint8_t factor  = 1;
+                if (dv.options_size == 1) {
+                    const char * s =  uuid::read_flash_string(dv.options[0]).c_str();
+                    if (s[0] == '*') {
+                        factor = Helpers::atoint(&s[1]);
+                    } else {
+                        divider = Helpers::atoint(s);
+                    }
+                }
 
                 // INT
                 if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
                     if (divider) {
                         json[name] = Helpers::round2(*(int8_t *)(dv.value_p), divider);
                     } else {
-                        json[name] = *(int8_t *)(dv.value_p);
+                        json[name] = *(int8_t *)(dv.value_p) * factor;
                     }
                     has_value = true;
                 } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
                     if (divider) {
                         json[name] = Helpers::round2(*(uint8_t *)(dv.value_p), divider);
                     } else {
-                        json[name] = *(uint8_t *)(dv.value_p);
+                        json[name] = *(uint8_t *)(dv.value_p) * factor;
                     }
                     has_value = true;
                 } else if ((dv.type == DeviceValueType::SHORT) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
                     if (divider) {
                         json[name] = Helpers::round2(*(int16_t *)(dv.value_p), divider);
                     } else {
-                        json[name] = *(int16_t *)(dv.value_p);
+                        json[name] = *(int16_t *)(dv.value_p) * factor;
                     }
                     has_value = true;
                 } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
                     if (divider) {
                         json[name] = Helpers::round2(*(uint16_t *)(dv.value_p), divider);
                     } else {
-                        json[name] = *(uint16_t *)(dv.value_p);
+                        json[name] = *(uint16_t *)(dv.value_p) * factor;
                     }
                     has_value = true;
                 } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     if (divider) {
                         json[name] = Helpers::round2(*(uint32_t *)(dv.value_p), divider);
                     } else {
-                        json[name] = *(uint32_t *)(dv.value_p);
+                        json[name] = *(uint32_t *)(dv.value_p) * factor;
                     }
                     has_value = true;
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     uint32_t time_value = *(uint32_t *)(dv.value_p);
-                    time_value          = (divider) ? time_value / divider : time_value; // sometimes we need to divide by 60
+                    time_value          = (divider) ? time_value / divider : time_value * factor; // sometimes we need to divide by 60
                     if (console) {
                         char time_s[40];
                         snprintf_P(time_s, sizeof(time_s), "%d days %d hours %d minutes", (time_value / 1440), ((time_value % 1440) / 60), (time_value % 60));

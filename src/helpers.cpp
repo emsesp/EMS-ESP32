@@ -350,7 +350,7 @@ uint32_t Helpers::hextoint(const char * hex) {
 // quick char to long
 uint16_t Helpers::atoint(const char * value) {
     unsigned int x = 0;
-    while (*value != '\0') {
+    while (*value >= '0' && *value <= '9') {
         x = (x * 10) + (*value - '0');
         ++value;
     }
