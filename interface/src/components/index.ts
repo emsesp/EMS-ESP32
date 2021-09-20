@@ -5,6 +5,7 @@ export { default as HighlightAvatar } from './HighlightAvatar';
 export { default as MenuAppBar } from './MenuAppBar';
 export { default as PasswordValidator } from './PasswordValidator';
 export { default as RestFormLoader } from './RestFormLoader';
+export { default as FormLoader } from './FormLoader';
 export { default as SectionContent } from './SectionContent';
 export { default as WebSocketFormLoader } from './WebSocketFormLoader';
 export { default as ErrorButton } from './ErrorButton';
