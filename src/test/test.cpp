@@ -948,10 +948,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "api") {
 #if defined(EMSESP_STANDALONE)
         shell.printfln(F("Testing RESTful API..."));
-        Mqtt::ha_enabled(false);
+        Mqtt::ha_enabled(true);
         Mqtt::enabled(false);
         run_test("general");
         AsyncWebServerRequest request;
+
+        request.url("/api/boiler/id");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
+        request.url("/api/thermostat");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
+        request.url("/api/thermostat/hamode");
+        EMSESP::webAPIService.webAPIService_get(&request);
 
         // GET
         request.method(HTTP_GET);
@@ -994,7 +1003,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::webAPIService.webAPIService_post(&request, json);
 
         // 3
-        char data3[] = "{\"device\":\"thermostat\", \"name\":\"temp\",\"value\":11}";
+        char data3[] = "{\"device\":\"thermostat\", \"name\":\"temp\",\"value\":13}";
         deserializeJson(doc, data3);
         json = doc.as<JsonVariant>();
         request.url("/api");
