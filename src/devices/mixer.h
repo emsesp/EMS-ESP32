@@ -44,6 +44,8 @@ class Mixer : public EMSdevice {
 
     bool set_flowSetTemp(const char * value, const int8_t id);
     bool set_pump(const char * value, const int8_t id);
+    bool set_activated(const char * value, const int8_t id);
+    bool set_setValveTime(const char * value, const int8_t id);
 
     enum class Type {
         NONE,
@@ -59,6 +61,8 @@ class Mixer : public EMSdevice {
     uint8_t  pumpStatus_;
     int8_t   status_;
     uint8_t  flowSetTemp_;
+    uint8_t  activated_;
+    uint8_t  setValveTime_;
 
     int16_t poolTemp_;
     int8_t  poolShuntStatus__;
