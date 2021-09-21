@@ -66,8 +66,7 @@ enum DeviceValueUOM : uint8_t {
     DBM,      // 14
     NUM,      // 15
     BOOLEAN,  // 16
-    LIST,     // 17
-    TEXT      // 18
+    LIST      // 17
 
 };
 
@@ -149,10 +148,6 @@ class EMSdevice {
         , brand_(brand) {
     }
 
-    inline uint8_t device_id() const {
-        return device_id_;
-    }
-
     const std::string        device_type_name() const;
     static const std::string device_type_2_device_name(const uint8_t device_type);
     static uint8_t           device_name_2_device_type(const char * topic);
@@ -160,6 +155,10 @@ class EMSdevice {
     static const std::string uom_to_string(uint8_t uom);
     static const std::string tag_to_string(uint8_t tag);
     static const std::string tag_to_mqtt(uint8_t tag);
+
+    inline uint8_t device_id() const {
+        return device_id_;
+    }
 
     inline uint8_t product_id() const {
         return product_id_;
@@ -187,9 +186,8 @@ class EMSdevice {
         return flags_;
     }
 
-    // see enum DeviceType below
     inline uint8_t device_type() const {
-        return device_type_;
+        return device_type_; // see enum DeviceType below
     }
 
     inline void version(std::string & version) {
@@ -250,8 +248,11 @@ class EMSdevice {
 
     const std::string get_value_uom(const char * key);
     bool              get_value_info(JsonObject & root, const char * cmd, const int8_t id);
-    bool              generate_values_json(JsonObject & json, const uint8_t tag_filter, const bool nested, const bool console = false);
-    void              generate_values_json_web(JsonObject & json);
+
+    enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API, MQTT };
+    bool generate_values_json(JsonObject & json, const uint8_t tag_filter, const bool nested, const uint8_t output_target);
+
+    void generate_values_json_web(JsonObject & json);
 
     void register_device_value(uint8_t                             tag,
                                void *                              value_p,
@@ -418,6 +419,8 @@ class EMSdevice {
         }
     };
 
+
+    // DeviceValue holds all the attributes for a device value (also a device parameter)
     struct DeviceValue {
         uint8_t                             device_type;  // EMSdevice::DeviceType
         uint8_t                             tag;          // DeviceValueTAG::*
@@ -470,6 +473,10 @@ class EMSdevice {
 
     void init_devicevalues(uint8_t size) {
         devicevalues_.reserve(size);
+    }
+
+    inline bool dv_is_visible(DeviceValue dv) {
+        return (dv.full_name);
     }
 };
 
