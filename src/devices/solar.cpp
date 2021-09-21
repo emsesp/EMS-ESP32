@@ -64,7 +64,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 
     // special case for a device_id with 0x2A where it's not actual a solar module
     if (device_id == 0x2A) {
-        register_device_value(TAG_NONE, &type_, DeviceValueType::STRING, nullptr, FL_(type), DeviceValueUOM::TEXT);
+        register_device_value(TAG_NONE, &type_, DeviceValueType::STRING, nullptr, FL_(type), DeviceValueUOM::NONE);
         strlcpy(type_, "warm water circuit", sizeof(type_));
         register_device_value(TAG_NONE, &wwTemp_1_, DeviceValueType::UINT, nullptr, FL_(wwTemp1), DeviceValueUOM::DEGREES);
         register_device_value(TAG_NONE, &wwTemp_3_, DeviceValueType::UINT, nullptr, FL_(wwTemp3), DeviceValueUOM::DEGREES);
