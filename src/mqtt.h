@@ -174,11 +174,11 @@ class Mqtt {
     }
 
     static uint8_t nested_format() {
-        return nested_format_;
+        return nested_format_; // nested_format is 1 if nested, otherwise 2 for single topics
     }
 
     static void nested_format(uint8_t nested_format) {
-        nested_format_ = nested_format;
+        nested_format_ = nested_format; // nested_format is 1 if nested, otherwise 2 for single topics
     }
 
     static bool ha_enabled() {
