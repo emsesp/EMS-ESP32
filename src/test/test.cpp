@@ -482,8 +482,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         // first with nested
         Mqtt::nested_format(1);
         shell.invoke_command("call system publish");
+        shell.invoke_command("show mqtt");
 
-        // then without nested
+        // then without nested - single mode
         Mqtt::nested_format(2);
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
@@ -829,6 +830,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "mqtt") {
         shell.printfln(F("Testing MQTT..."));
 
+        Mqtt::ha_enabled(false);
+        Mqtt::enabled(true);
+
         // add a boiler
         add_device(0x08, 123); // Nefit Trendline
 
@@ -841,6 +845,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         uart_telegram("98 00 FF 00 01 A5 00 CF 21 2E 00 00 2E 24 03 25 03 03 01 03 25 00 C8 00 00 11 01 03");            // without CRC
         uart_telegram_withCRC("98 00 FF 00 01 A5 00 CF 21 2E 00 00 2E 24 03 25 03 03 01 03 25 00 C8 00 00 11 01 03 13"); // with CRC
 
+        shell.invoke_command("call system publish");
+        shell.invoke_command("show mqtt");
         shell.loop_all();
 
         char boiler_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -853,11 +859,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         strcpy(thermostat_topic, "ems-esp/thermostat");
         strcpy(system_topic, "ems-esp/system");
 
-        EMSESP::mqtt_.incoming(boiler_topic, ""); // test if ignore empty payloads                         // invalid format
+        EMSESP::mqtt_.incoming(boiler_topic, ""); // test if ignore empty payloads
 
-        EMSESP::mqtt_.incoming(boiler_topic, "12345");                                // invalid format
-        EMSESP::mqtt_.incoming("bad_topic", "12345");                                 // no matching topic
-        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"garbage\",\"data\":22.52}"); // should report error
+        EMSESP::mqtt_.incoming(boiler_topic, "12345");                                // error: invalid format
+        EMSESP::mqtt_.incoming("bad_topic", "12345");                                 // error: no matching topic
+        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"garbage\",\"data\":22.52}"); // error: should report error
 
         EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"comfort\",\"data\":\"eco\"}");
         EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"wwactivated\",\"data\":\"1\"}"); // with quotes
@@ -948,12 +954,23 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "api") {
 #if defined(EMSESP_STANDALONE)
         shell.printfln(F("Testing RESTful API..."));
-        Mqtt::ha_enabled(false);
+        Mqtt::ha_enabled(true);
         Mqtt::enabled(false);
         run_test("general");
         AsyncWebServerRequest request;
 
         // GET
+        request.url("/api/thermostat");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/thermostat/info");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
+        // these next 2 should fail
+        request.url("/api/boiler/id");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/thermostat/hamode");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
         request.method(HTTP_GET);
         request.url("/api/thermostat/seltemp");
         EMSESP::webAPIService.webAPIService_get(&request);
@@ -994,7 +1011,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::webAPIService.webAPIService_post(&request, json);
 
         // 3
-        char data3[] = "{\"device\":\"thermostat\", \"name\":\"temp\",\"value\":11}";
+        char data3[] = "{\"device\":\"thermostat\", \"name\":\"temp\",\"value\":13}";
         deserializeJson(doc, data3);
         json = doc.as<JsonVariant>();
         request.url("/api");

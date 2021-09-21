@@ -301,9 +301,9 @@ MAKE_PSTR_WORD(design)
 MAKE_PSTR_WORD(tempauto)
 MAKE_PSTR_WORD(minflow)
 MAKE_PSTR_WORD(maxflow)
-
 MAKE_PSTR_WORD(rc3x)
 MAKE_PSTR_WORD(rc20)
+
 MAKE_PSTR(internal_temperature, "internal temperature")
 MAKE_PSTR(internal_setpoint, "internal setpoint")
 MAKE_PSTR(external_temperature, "external temperature")
@@ -365,12 +365,11 @@ MAKE_PSTR_LIST(enum_collectortype, F("flat"), F("vacuum"))
 // MQTT topics and full text for values and commands
 MAKE_PSTR(homeassistant, "homeassistant/")
 
-// id used to store the device ID, goes into MQTT payload
-// empty full name to prevent being shown in web or console
+// id used to store the device ID. empty full name so only gets displayed in the MQTT payload
 MAKE_PSTR_LIST(ID, F_(id))
 
 // Boiler
-// extra commands, no output
+// extra commands, with no json output
 MAKE_PSTR_LIST(wwtapactivated, F("wwtapactivated"), F("turn on/off DHW by going into maintenance mode"))
 MAKE_PSTR_LIST(reset, F("reset"), F("reset messages"))
 
@@ -523,14 +522,13 @@ MAKE_PSTR_LIST(wwMaxTemp, F("wwmaxtemp"), F("maximum temperature"))
 MAKE_PSTR_LIST(wwOneTimeKey, F("wwonetimekey"), F("one time key function"))
 
 // thermostat
-// extra commands
-MAKE_PSTR_LIST(switchtime, F("switchtime"), F("single program switchtime"))
-// extra commands, with no long name so they don't show up in WebUI
+// commands, with no long name so they only appear in the MQTT payloads
 MAKE_PSTR_LIST(temp, F("temp"))
 MAKE_PSTR_LIST(hatemp, F("hatemp"))
 MAKE_PSTR_LIST(hamode, F("hamode"))
 
 // mqtt values / commands
+MAKE_PSTR_LIST(switchtime, F("switchtime"), F("single program switchtime"))
 MAKE_PSTR_LIST(dateTime, F("datetime"), F("date/time"))
 MAKE_PSTR_LIST(errorCode, F("errorcode"), F("error code"))
 MAKE_PSTR_LIST(ibaMainDisplay, F("display"), F("display"))

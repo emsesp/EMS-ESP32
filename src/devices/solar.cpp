@@ -64,7 +64,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 
     // special case for a device_id with 0x2A where it's not actual a solar module
     if (device_id == 0x2A) {
-        register_device_value(TAG_NONE, &type_, DeviceValueType::TEXT, nullptr, FL_(type), DeviceValueUOM::NONE);
+        register_device_value(TAG_NONE, &type_, DeviceValueType::STRING, nullptr, FL_(type), DeviceValueUOM::NONE);
         strlcpy(type_, "warm water circuit", sizeof(type_));
         register_device_value(TAG_NONE, &wwTemp_1_, DeviceValueType::UINT, nullptr, FL_(wwTemp1), DeviceValueUOM::DEGREES);
         register_device_value(TAG_NONE, &wwTemp_3_, DeviceValueType::UINT, nullptr, FL_(wwTemp3), DeviceValueUOM::DEGREES);
@@ -169,13 +169,13 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
                               MAKE_CF_CB(set_doubleMatchFlow)); // double Match Flow, 00=off
 
         // telegram 0x380
-        register_device_value(TAG_NONE, &climateZone_, DeviceValueType::UINT, nullptr, FL_(climateZone), DeviceValueUOM::NONE, MAKE_CF_CB(set_climateZone)); // climate zone identifier
+        register_device_value(TAG_NONE, &climateZone_, DeviceValueType::UINT, nullptr, FL_(climateZone), DeviceValueUOM::NUM, MAKE_CF_CB(set_climateZone)); // climate zone identifier
         register_device_value(TAG_NONE,
                               &collector1Area_,
                               DeviceValueType::USHORT,
                               FL_(div10),
                               FL_(collector1Area),
-                              DeviceValueUOM::NONE,
+                              DeviceValueUOM::NUM,
                               MAKE_CF_CB(set_collector1Area)); // Area of collector field 1
         register_device_value(TAG_NONE,
                               &collector1Type_,

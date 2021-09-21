@@ -370,7 +370,7 @@ bool EMSdevice::is_fetch(uint16_t telegram_id) {
 // list of registered device entries, adding the HA entity if it exists
 void EMSdevice::list_device_entries(JsonObject & json) {
     for (const auto & dv : devicevalues_) {
-        if (dv.full_name && dv.type != DeviceValueType::CMD) {
+        if (dv_is_visible(dv) && dv.type != DeviceValueType::CMD) {
             // if we have a tag prefix it
             char key[50];
             if (!EMSdevice::tag_to_string(dv.tag).empty()) {
@@ -484,7 +484,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
                                       int32_t                             min,
                                       uint32_t                            max) {
     // init the value depending on it's type
-    if (type == DeviceValueType::TEXT) {
+    if (type == DeviceValueType::STRING) {
         *(char *)(value_p) = {'\0'};
     } else if (type == DeviceValueType::INT) {
         *(int8_t *)(value_p) = EMS_VALUE_INT_NOTSET;
@@ -574,7 +574,7 @@ const std::string EMSdevice::get_value_uom(const char * key) {
 
     // find the key (p) in the name
     for (const auto & dv : devicevalues_) {
-        if (dv.full_name != nullptr) {
+        if (dv_is_visible(dv)) {
             if (uuid::read_flash_string(dv.full_name) == p) {
                 // ignore TIME since "minutes" is already added to the string value
                 if ((dv.uom == DeviceValueUOM::NONE) || (dv.uom == DeviceValueUOM::MINUTES)) {
@@ -596,7 +596,7 @@ void EMSdevice::generate_values_json_web(JsonObject & json) {
 
     for (const auto & dv : devicevalues_) {
         // ignore if full_name empty and also commands
-        if ((dv.full_name != nullptr) && (dv.type != DeviceValueType::CMD)) {
+        if (dv_is_visible(dv) && dv.type != DeviceValueType::CMD) {
             JsonObject obj; // create the object, if needed
 
             // handle Booleans (true, false)
@@ -606,7 +606,7 @@ void EMSdevice::generate_values_json_web(JsonObject & json) {
             }
 
             // handle TEXT strings
-            else if ((dv.type == DeviceValueType::TEXT) && (Helpers::hasValue((char *)(dv.value_p)))) {
+            else if ((dv.type == DeviceValueType::STRING) && (Helpers::hasValue((char *)(dv.value_p)))) {
                 obj      = data.createNestedObject();
                 obj["v"] = (char *)(dv.value_p);
             }
@@ -633,7 +633,7 @@ void EMSdevice::generate_values_json_web(JsonObject & json) {
                 uint8_t divider = 0;
                 uint8_t factor  = 1;
                 if (dv.options_size == 1) {
-                    const char * s =  uuid::read_flash_string(dv.options[0]).c_str();
+                    const char * s = uuid::read_flash_string(dv.options[0]).c_str();
                     if (s[0] == '*') {
                         factor = Helpers::atoint(&s[1]);
                     } else {
@@ -719,11 +719,13 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
     // search device value with this tag
     for (auto & dv : devicevalues_) {
-        if (strcmp(cmd, Helpers::toLower(uuid::read_flash_string(dv.short_name)).c_str()) == 0 && (tag <= 0 || tag == dv.tag)) {
+        // ignore any device values which have a uom of NONE as we use this to hide them
+        if ((dv.uom != DeviceValueUOM::NONE)
+            && (strcmp(cmd, Helpers::toLower(uuid::read_flash_string(dv.short_name)).c_str()) == 0 && (tag <= 0 || tag == dv.tag))) {
             uint8_t divider = 0;
             uint8_t factor  = 1;
             if (dv.options_size == 1) {
-                const char * s =  uuid::read_flash_string(dv.options[0]).c_str();
+                const char * s = uuid::read_flash_string(dv.options[0]).c_str();
                 if (s[0] == '*') {
                     factor = Helpers::atoint(&s[1]);
                 } else {
@@ -737,7 +739,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
             json["name"] = dv.short_name;
             // prefix tag if it's included
-            if (dv.full_name != nullptr) {
+            if (dv_is_visible(dv)) {
                 if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
                     json["fullname"] = dv.full_name;
                 } else {
@@ -849,7 +851,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
                 json[max]  = divider ? EMS_VALUE_ULONG_NOTSET / divider : EMS_VALUE_ULONG_NOTSET;
                 break;
 
-            case DeviceValueType::TEXT:
+            case DeviceValueType::STRING:
                 if (Helpers::hasValue((char *)(dv.value_p))) {
                     json[value] = (char *)(dv.value_p);
                 }
@@ -896,24 +898,29 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
 // For each value in the device create the json object pair and add it to given json
 // return false if empty
-// this is used to create both the MQTT payloads and Console messages (console = true)
-bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter, const bool nested, const bool console) {
+// this is used to create both the MQTT payloads, Console messages and Web API calls
+bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter, const bool nested, const uint8_t output_target) {
     bool       has_values = false; // to see if we've added a value. it's faster than doing a json.size() at the end
     uint8_t    old_tag    = 255;   // NAN
     JsonObject json       = root;
 
     for (auto & dv : devicevalues_) {
+        // conditions
+        bool condition;
+        condition = (tag_filter == DeviceValueTAG::TAG_NONE) || (tag_filter == dv.tag); // tag must be either empty or match a tag passed to this function
+
+        if (output_target != OUTPUT_TARGET::MQTT) {
+            condition &= dv_is_visible(dv); // value must be visible if outputting to API (web or console). This is for ID, hamode, hatemp etc
+        }
+
         bool has_value = false;
-        // only show if tag is either empty (TAG_NONE) or matches a value
-        // and don't show if full_name is empty unless we're outputing for mqtt payloads
-        // for nested we use all values, dont show command only (have_cmd and no fullname)
-        if (((nested) || tag_filter == DeviceValueTAG::TAG_NONE || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !console)
-            && !(dv.full_name == nullptr && dv.has_cmd)) {
+
+        if (condition) {
             // we have a tag if it matches the filter given, and that the tag name is not empty/""
             bool have_tag = ((dv.tag != tag_filter) && !tag_to_string(dv.tag).empty());
 
             char name[80];
-            if (console) {
+            if (output_target == OUTPUT_TARGET::API_VERBOSE) {
                 // prefix the tag in brackets, unless it's Boiler because we're naughty and use tag for the MQTT topic
                 if (have_tag) {
                     snprintf(name, 80, "%s %s", tag_to_string(dv.tag).c_str(), uuid::read_flash_string(dv.full_name).c_str());
@@ -935,9 +942,8 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
             // handle Booleans (true, false)
             if ((dv.type == DeviceValueType::BOOL) && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see how to render the value depending on the setting
-                // when in console mode we always use on and off
                 uint8_t bool_format = EMSESP::bool_format();
-                if ((bool_format == BOOL_FORMAT_ONOFF) || console) {
+                if (bool_format == BOOL_FORMAT_ONOFF) {
                     json[name] = *(uint8_t *)(dv.value_p) ? F_(on) : F_(off);
                 } else if (bool_format == BOOL_FORMAT_ONOFF_CAP) {
                     json[name] = *(uint8_t *)(dv.value_p) ? F_(ON) : F_(OFF);
@@ -950,7 +956,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
             }
 
             // handle TEXT strings
-            else if ((dv.type == DeviceValueType::TEXT) && (Helpers::hasValue((char *)(dv.value_p)))) {
+            else if ((dv.type == DeviceValueType::STRING) && (Helpers::hasValue((char *)(dv.value_p)))) {
                 json[name] = (char *)(dv.value_p);
                 has_value  = true;
             }
@@ -976,7 +982,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                 uint8_t divider = 0;
                 uint8_t factor  = 1;
                 if (dv.options_size == 1) {
-                    const char * s =  uuid::read_flash_string(dv.options[0]).c_str();
+                    const char * s = uuid::read_flash_string(dv.options[0]).c_str();
                     if (s[0] == '*') {
                         factor = Helpers::atoint(&s[1]);
                     } else {
@@ -1023,7 +1029,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     uint32_t time_value = *(uint32_t *)(dv.value_p);
                     time_value          = (divider) ? time_value / divider : time_value * factor; // sometimes we need to divide by 60
-                    if (console) {
+                    if (output_target == EMSdevice::OUTPUT_TARGET::API_VERBOSE) {
                         char time_s[40];
                         snprintf(time_s, sizeof(time_s), "%d days %d hours %d minutes", (time_value / 1440), ((time_value % 1440) / 60), (time_value % 60));
                         json[name] = time_s;

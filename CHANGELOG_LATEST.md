@@ -22,3 +22,5 @@
 - Syslog BOM only for utf-8 messages [#91](https://github.com/emsesp/EMS-ESP32/issues/91)
 - Check for KM200 by device-id 0x48, remove tx-delay[#90](https://github.com/emsesp/EMS-ESP32/issues/90)
 - rename `fastheatupfactor` to `fastheatup` and add percent [#122]
+- "unit" renamed to "uom" in API call to recall a Device Value [**BREAKING CHANGE**]
+- initial backend React changes to replace the class componentns (HOCs) with React Hooks

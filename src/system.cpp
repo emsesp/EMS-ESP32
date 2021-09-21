@@ -981,7 +981,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
                 obj["type"]    = emsdevice->device_type_name();
                 obj["name"]    = emsdevice->to_string();
                 char result[200];
-                obj["handlers"] = emsdevice->show_telegram_handlers(result);
+                (void)emsdevice->show_telegram_handlers(result);
+                if (result[0] != '\0') {
+                    obj["handlers"] = result; // don't show hanlders if there aren't any
+                }
             }
         }
     }

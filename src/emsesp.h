@@ -249,7 +249,7 @@ class EMSESP {
     static void process_version(std::shared_ptr<const Telegram> telegram);
     static void publish_response(std::shared_ptr<const Telegram> telegram);
     static void publish_all_loop();
-    static bool command_info(uint8_t device_type, JsonObject & json, const int8_t id, bool verbose = true);
+    static bool command_info(uint8_t device_type, JsonObject & json, const int8_t id, const uint8_t output_target);
     static bool command_commands(uint8_t device_type, JsonObject & json, const int8_t id);
     static bool command_entities(uint8_t device_type, JsonObject & json, const int8_t id);
 
