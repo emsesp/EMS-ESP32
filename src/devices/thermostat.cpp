@@ -909,7 +909,7 @@ void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
     }
 
     has_update(telegram->read_value(hc->minflowtemp, 8));
-    has_update(telegram->read_value(hc->fastHeatupFactor, 10));
+    has_update(telegram->read_value(hc->fastHeatup, 10));
 }
 
 // types 0x471 ff
@@ -1849,19 +1849,19 @@ bool Thermostat::set_summermode(const char * value, const int8_t id) {
 }
 
 // Set fastheatupfactor, ems+
-bool Thermostat::set_fastheatupfactor(const char * value, const int8_t id) {
+bool Thermostat::set_fastheatup(const char * value, const int8_t id) {
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
     if (hc == nullptr) {
-        LOG_WARNING(F("Setfast heatup factor: Heating Circuit %d not found or activated for device ID 0x%02X"), hc_num, device_id());
+        LOG_WARNING(F("Set fast heatup: Heating Circuit %d not found or activated for device ID 0x%02X"), hc_num, device_id());
         return false;
     }
     int set = 0;
     if (!Helpers::value2number(value, set)) {
-        LOG_WARNING(F("Set fast heatup factor: Invalid value"));
+        LOG_WARNING(F("Set fast heatup: Invalid value"));
         return false;
     }
-    LOG_INFO(F("Setting fast heatup factor to %d"), set);
+    LOG_INFO(F("Setting fast heatup to %d%%"), set);
     write_command(summer_typeids[hc->hc_num() - 1], 10, set, summer_typeids[hc->hc_num() - 1]);
     return true;
 }
@@ -2625,7 +2625,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->program, DeviceValueType::UINT, nullptr, FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(tag, &hc->tempautotemp, DeviceValueType::UINT, FL_(div2), FL_(tempautotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_tempautotemp));
         register_device_value(
-            tag, &hc->fastHeatupFactor, DeviceValueType::UINT, nullptr, FL_(fastheatupfactor), DeviceValueUOM::NONE, MAKE_CF_CB(set_fastheatupfactor));
+            tag, &hc->fastHeatup, DeviceValueType::UINT, nullptr, FL_(fastheatup), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fastheatup));
         break;
     case EMS_DEVICE_FLAG_CRF:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode5), FL_(mode), DeviceValueUOM::LIST);

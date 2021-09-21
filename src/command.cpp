@@ -31,8 +31,8 @@ std::vector<Command::CmdFunction> Command::cmdfunctions_;
 // returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
 uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, bool authenticated, const int8_t id) {
     int8_t id_new      = id;
-    char   cmd_new[20] = {'\0'};
-    strlcpy(cmd_new, cmd, 20);
+    char   cmd_new[30] = {'\0'};
+    strlcpy(cmd_new, cmd, sizeof(cmd_new));
 
     // find the command
     auto cf = find_command(device_type, cmd_new, id_new);
@@ -64,8 +64,8 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 // returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
 uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, bool authenticated, const int8_t id, JsonObject & json) {
     int8_t id_new      = id;
-    char   cmd_new[20] = {'\0'};
-    strlcpy(cmd_new, cmd, 20);
+    char   cmd_new[30] = {'\0'};
+    strlcpy(cmd_new, cmd, sizeof(cmd_new));
 
     auto cf = find_command(device_type, cmd_new, id_new);
 
@@ -159,7 +159,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, char * c
 
     // empty command after processing prefix is info
     if (cmd[0] == '\0') {
-        strlcpy(cmd, "info", 20);
+        strcpy(cmd, "info");
     }
 
     return find_command(device_type, cmd);
@@ -209,7 +209,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ch
     }
 
     // convert cmd to lowercase and compare
-    char lowerCmd[20];
+    char lowerCmd[30];
     strlcpy(lowerCmd, cmd, sizeof(lowerCmd));
     for (char * p = lowerCmd; *p; p++) {
         *p = tolower(*p);

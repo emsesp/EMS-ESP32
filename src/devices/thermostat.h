@@ -66,7 +66,7 @@ class Thermostat : public EMSdevice {
         uint8_t party;
         int8_t  noreducetemp; // signed -20°C to +10°C
         uint8_t wwprio;
-        uint8_t fastHeatupFactor;
+        uint8_t fastHeatup;
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -346,7 +346,7 @@ class Thermostat : public EMSdevice {
     bool set_program(const char * value, const int8_t id);
     bool set_controlmode(const char * value, const int8_t id);
     bool set_wwprio(const char * value, const int8_t id);
-    bool set_fastheatupfactor(const char * value, const int8_t id);
+    bool set_fastheatup(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);
