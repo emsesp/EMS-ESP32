@@ -93,6 +93,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
           rx_gpio: json.rx_gpio,
           tx_gpio: json.tx_gpio,
           pbutton_gpio: json.pbutton_gpio,
+          aux_gpio: json.aux_gpio,
           board_profile: event.target.value
         });
         this.setState({ processing: false });
@@ -341,6 +342,32 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                 margin="normal"
               />
             </Grid>
+            <Grid item xs={4}>
+              <TextValidator
+                validators={[
+                  'required',
+                  'isNumber',
+                  'minNumber:0',
+                  'maxNumber:40',
+                  'matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$'
+                ]}
+                errorMessages={[
+                  'GPIO is required',
+                  'Must be a number',
+                  'Must be 0 or higher',
+                  'Max value is 40',
+                  'Not a valid GPIO'
+                ]}
+                name="aux_gpio"
+                label="Auxilary port GPIO"
+                fullWidth
+                variant="outlined"
+                value={data.pbutton_gpio}
+                type="number"
+                onChange={handleValueChange('aux_gpio')}
+                margin="normal"
+              />
+            </Grid>
           </Grid>
         )}
 
@@ -349,6 +376,24 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
           General Options
         </Typography>
 
+        {data.aux_gpio !== 0 && (
+          <BlockFormControlLabel
+            control={
+              <SelectValidator
+                name="aux_function"
+                value={data.aux_function}
+                fullWidth
+                variant="outlined"
+                onChange={handleValueChange('aux_function')}
+                margin="normal"
+              >
+                <MenuItem value={-1}>NONE</MenuItem>
+                <MenuItem value={1}>Pool circulation pump</MenuItem>
+              </SelectValidator>
+            }
+            label="Auxilary port function"
+          />
+        )}
         {data.led_gpio !== 0 && (
           <BlockFormControlLabel
             control={

@@ -66,6 +66,8 @@ class WebSettings {
     int8_t   weblog_level;
     uint8_t  weblog_buffer;
     bool     weblog_compact;
+    uint8_t  aux_gpio;
+    uint8_t  aux_function;
 
     struct {
         String  id;
@@ -85,7 +87,8 @@ class WebSettings {
         DALLAS = (1 << 3), // 8
         SHOWER = (1 << 4), // 16
         LED    = (1 << 5), // 32
-        BUTTON = (1 << 6)  // 64
+        BUTTON = (1 << 6), // 64
+        AUX    = (1 << 7)  // 128
 
     };
 

@@ -66,6 +66,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["weblog_level"]         = settings.weblog_level;
     root["weblog_buffer"]        = settings.weblog_buffer;
     root["weblog_compact"]       = settings.weblog_compact;
+    root["aux_function"]         = settings.aux_function;
 
     for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
         char buf[20];
@@ -94,6 +95,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     uint8_t default_rx_gpio      = data[2];
     uint8_t default_tx_gpio      = data[3];
     uint8_t default_pbutton_gpio = data[4];
+    uint8_t default_aux_gpio     = data[5];
 
     if (old_board_profile != settings.board_profile) {
         EMSESP::logger().info(F("EMS-ESP version %s"), EMSESP_APP_VERSION);
@@ -182,6 +184,14 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.hide_led = root["hide_led"] | EMSESP_DEFAULT_HIDE_LED;
     check_flag(prev, settings.hide_led, ChangeFlags::LED);
 
+    // aux
+    prev              = settings.aux_gpio;
+    settings.aux_gpio = root["aux_gpio"] | default_aux_gpio;
+    check_flag(prev, settings.aux_gpio, ChangeFlags::AUX);
+    prev              = settings.aux_function;
+    settings.hide_led = root["aux_function"] | EMSESP_DEFAULT_HIDE_LED;
+    check_flag(prev, settings.aux_function, ChangeFlags::AUX);
+
     // these need reboots to be applied
     settings.ems_bus_id        = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
     settings.master_thermostat = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
@@ -249,6 +259,11 @@ void WebSettingsService::onUpdate() {
         EMSESP::system_.led_init(true); // reload settings
     }
 
+    if (WebSettings::has_flags(WebSettings::ChangeFlags::AUX)) {
+        EMSESP::system_.aux_init(true); // reload settings
+    }
+
+
     WebSettings::reset_flags();
 }
 
@@ -275,6 +290,7 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request, JsonVari
                 root["rx_gpio"]      = data[2];
                 root["tx_gpio"]      = data[3];
                 root["pbutton_gpio"] = data[4];
+                root["aux_gpio"]     = data[5];
             } else {
                 delete response;
                 AsyncWebServerResponse * response = request->beginResponse(200);

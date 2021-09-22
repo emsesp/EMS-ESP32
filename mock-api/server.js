@@ -316,6 +316,8 @@ const emsesp_settings = {
   dallas_format: 1,
   bool_format: 1,
   enum_format: 1,
+  aux_gpio: 22,
+  aux_function: -1
 }
 const emsesp_data = {
   devices: [
@@ -940,6 +942,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     rx_gpio: 3,
     tx_gpio: 4,
     pbutton_gpio: 5,
+    aux_gpio: 6
   }
 
   if (board_profile == 'S32') {
@@ -949,6 +952,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 23
     data.tx_gpio = 5
     data.pbutton_gpio = 0
+    data.aux_gpio = 22
   } else if (board_profile == 'E32') {
     // BBQKees Gateway E32
     data.led_gpio = 2
@@ -956,6 +960,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 5
     data.tx_gpio = 17
     data.pbutton_gpio = 33
+    data.aux_gpio = 32
   } else if (board_profile == 'MH-ET') {
     // MH-ET Live D1 Mini
     data.led_gpio = 2
@@ -963,6 +968,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 23
     data.tx_gpio = 5
     data.pbutton_gpio = 0
+    data.aux_gpio = 0
   } else if (board_profile == 'NODEMCU') {
     // NodeMCU 32S
     data.led_gpio = 2
@@ -970,6 +976,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 23
     data.tx_gpio = 5
     data.pbutton_gpio = 0
+    data.aux_gpio = 0
   } else if (board_profile == 'LOLIN') {
     // Lolin D32
     data.led_gpio = 2
@@ -977,6 +984,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 17
     data.tx_gpio = 16
     data.pbutton_gpio = 0
+    data.aux_gpio = 0
   } else if (board_profile == 'OLIMEX') {
     // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
     data.led_gpio = 0
@@ -984,6 +992,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 36
     data.tx_gpio = 4
     data.pbutton_gpio = 34
+    data.aux_gpio = 0
     // data = { 0, 0, 36, 4, 34};
   } else if (board_profile == 'TLK110') {
     // Generic Ethernet (TLK110)
@@ -992,6 +1001,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 5
     data.tx_gpio = 17
     data.pbutton_gpio = 33
+    data.aux_gpio = 0
   } else if (board_profile == 'LAN8720') {
     // Generic Ethernet (LAN8720)
     data.led_gpio = 2
@@ -999,6 +1009,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 5
     data.tx_gpio = 17
     data.pbutton_gpio = 33
+    data.aux_gpio = 0
   }
 
   res.json(data)

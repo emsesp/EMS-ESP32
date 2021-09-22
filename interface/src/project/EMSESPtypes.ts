@@ -24,6 +24,8 @@ export interface EMSESPSettings {
   bool_format: number;
   dallas_format: number;
   enum_format: number;
+  aux_gpio: number;
+  aux_function: number;
 }
 
 export enum busConnectionStatus {

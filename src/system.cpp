@@ -242,6 +242,10 @@ void System::get_settings() {
         hide_led_ = settings.hide_led;
         led_gpio_ = settings.led_gpio;
 
+        // AUX
+        aux_gpio_ = settings.aux_gpio;
+        aux_function_ = settings.aux_function;
+
         // Board profile
         board_profile_ = settings.board_profile;
     });
@@ -402,6 +406,27 @@ void System::led_init(bool refresh) {
         digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
     }
 }
+
+// Reload Auxilary port function
+void System::aux_init(bool refresh) {
+    if (refresh) {
+        get_settings();
+    }
+
+    if ((aux_gpio_ != 0) && is_valid_gpio(aux_gpio_)) {
+        pinMode(aux_gpio_, OUTPUT); // 0 means disabled
+        switch (aux_function_) {
+            case 1: {
+                // Pool circulation pump
+                break;
+            }
+            default: {
+                
+            }
+        }    
+    }
+}
+
 
 // returns true if OTA is uploading
 bool System::upload_status() {
@@ -1005,21 +1030,21 @@ bool System::command_test(const char * value, const int8_t id) {
 // returns false if profile is not found
 bool System::load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile) {
     if (board_profile == "S32") {
-        data = {2, 18, 23, 5, 0}; // BBQKees Gateway S32
+        data = {2, 18, 23, 5, 0, 22}; // BBQKees Gateway S32
     } else if (board_profile == "E32") {
-        data = {2, 4, 5, 17, 33}; // BBQKees Gateway E32
+        data = {2, 4, 5, 17, 33, 32}; // BBQKees Gateway E32
     } else if (board_profile == "MH-ET") {
-        data = {2, 18, 23, 5, 0}; // MH-ET Live D1 Mini
+        data = {2, 18, 23, 5, 0, 0}; // MH-ET Live D1 Mini
     } else if (board_profile == "NODEMCU") {
-        data = {2, 18, 23, 5, 0}; // NodeMCU 32S
+        data = {2, 18, 23, 5, 0, 0}; // NodeMCU 32S
     } else if (board_profile == "LOLIN") {
-        data = {2, 18, 17, 16, 0}; // Lolin D32
+        data = {2, 18, 17, 16, 0, 0}; // Lolin D32
     } else if (board_profile == "OLIMEX") {
-        data = {0, 0, 36, 4, 34}; // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
+        data = {0, 0, 36, 4, 34, 0}; // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
     } else if (board_profile == "TLK110") {
-        data = {2, 4, 5, 17, 33}; // Generic Ethernet (TLK110)
+        data = {2, 4, 5, 17, 33, 0}; // Generic Ethernet (TLK110)
     } else if (board_profile == "LAN8720") {
-        data = {2, 4, 5, 17, 33}; // Generic Ethernet (LAN8720)
+        data = {2, 4, 5, 17, 33, 0}; // Generic Ethernet (LAN8720)
     } else {
         data = {EMSESP_DEFAULT_LED_GPIO, EMSESP_DEFAULT_DALLAS_GPIO, EMSESP_DEFAULT_RX_GPIO, EMSESP_DEFAULT_TX_GPIO, EMSESP_DEFAULT_PBUTTON_GPIO};
         return (board_profile == "CUSTOM");
