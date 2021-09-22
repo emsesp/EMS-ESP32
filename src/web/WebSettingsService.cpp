@@ -189,7 +189,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.aux_gpio = root["aux_gpio"] | default_aux_gpio;
     check_flag(prev, settings.aux_gpio, ChangeFlags::AUX);
     prev              = settings.aux_function;
-    settings.hide_led = root["aux_function"] | EMSESP_DEFAULT_AUX_FUNCTION;
+    settings.aux_function = root["aux_function"] | EMSESP_DEFAULT_HIDE_LED;
     check_flag(prev, settings.aux_function, ChangeFlags::AUX);
 
     // these need reboots to be applied
