@@ -737,12 +737,10 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
             json["name"] = dv.short_name;
             // prefix tag if it's included
-            if (dv_is_visible(dv)) {
-                if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
-                    json["fullname"] = dv.full_name;
-                } else {
-                    json["fullname"] = tag_to_string(dv.tag) + " " + uuid::read_flash_string(dv.full_name);
-                }
+            if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
+                json["fullname"] = dv.full_name;
+            } else {
+                json["fullname"] = tag_to_string(dv.tag) + " " + uuid::read_flash_string(dv.full_name);
             }
 
             if (!tag_to_mqtt(dv.tag).empty()) {
