@@ -359,10 +359,10 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                   'Not a valid GPIO'
                 ]}
                 name="aux_gpio"
-                label="Auxilary port GPIO"
+                label="Aux port GPIO (0=none)"
                 fullWidth
                 variant="outlined"
-                value={data.pbutton_gpio}
+                value={data.aux_gpio}
                 type="number"
                 onChange={handleValueChange('aux_gpio')}
                 margin="normal"
@@ -377,22 +377,18 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
         </Typography>
 
         {data.aux_gpio !== 0 && (
-          <BlockFormControlLabel
-            control={
-              <SelectValidator
-                name="aux_function"
-                value={data.aux_function}
-                fullWidth
-                variant="outlined"
-                onChange={handleValueChange('aux_function')}
-                margin="normal"
-              >
-                <MenuItem value={-1}>NONE</MenuItem>
-                <MenuItem value={1}>Pool circulation pump</MenuItem>
-              </SelectValidator>
-            }
+          <SelectValidator
+            name="aux_function"
+            value={data.aux_function}
+            fullWidth
+            variant="outlined"
+            onChange={handleValueChange('aux_function')}
+            margin="normal"
             label="Auxilary port function"
-          />
+          >
+            <MenuItem value={-1}>NONE</MenuItem>
+            <MenuItem value={1}>Pool circulation pump</MenuItem>
+          </SelectValidator>
         )}
         {data.led_gpio !== 0 && (
           <BlockFormControlLabel
