@@ -92,6 +92,11 @@
 #define EMSESP_DEFAULT_BOARD_PROFILE "S32" // Gateway S32
 #endif
 
+#ifndef EMSESP_DEFAULT_AUX_FUNCTION
+#define EMSESP_DEFAULT_AUX_FUNCTION -1 // None
+#endif
+
+
 // Default GPIO PIN definitions - based on Wemos/Nodemcu
 
 #ifndef EMSESP_DEFAULT_RX_GPIO
