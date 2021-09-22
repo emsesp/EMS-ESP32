@@ -377,18 +377,54 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
         </Typography>
 
         {data.aux_gpio !== 0 && (
-          <SelectValidator
-            name="aux_function"
-            value={data.aux_function}
-            fullWidth
-            variant="outlined"
-            onChange={handleValueChange('aux_function')}
-            margin="normal"
-            label="Auxilary port function"
+          <Grid
+            container
+            spacing={1}
+            direction="row"
+            justify="flex-start"
+            alignItems="flex-start"
           >
-            <MenuItem value={-1}>None</MenuItem>
-            <MenuItem value={1}>Pool circulation pump</MenuItem>
-          </SelectValidator>
+            <Grid item xs={4}>
+              <SelectValidator
+                name="aux_function"
+                value={data.aux_function}
+                fullWidth
+                variant="outlined"
+                onChange={handleValueChange('aux_function')}
+                margin="normal"
+                label="Auxilary port function"
+              >
+                <MenuItem value={-1}>None</MenuItem>
+                <MenuItem value={1}>Pool circulation pump</MenuItem>
+              </SelectValidator>
+            </Grid>
+            {data.aux_function === 1 && (
+              <Grid item xs={4}>
+                <TextValidator
+                  validators={[
+                    'required',
+                    'isNumber',
+                    'minNumber:0',
+                    'maxNumber:600'
+                  ]}
+                  errorMessages={[
+                    'Value is required',
+                    'Must be a number',
+                    'Must be 0 or higher',
+                    'Max value is 1800 (30 min)'
+                  ]}
+                  name="aux_pump_delay"
+                  label="Pool pump stop delay (seconds)"
+                  fullWidth
+                  variant="outlined"
+                  value={data.aux_pump_delay}
+                  type="number"
+                  onChange={handleValueChange('aux_pump_delay')}
+                  margin="normal"
+                />
+              </Grid>
+            )}
+          </Grid>
         )}
         {data.led_gpio !== 0 && (
           <BlockFormControlLabel

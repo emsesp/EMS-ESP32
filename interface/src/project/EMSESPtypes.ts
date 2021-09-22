@@ -26,6 +26,7 @@ export interface EMSESPSettings {
   enum_format: number;
   aux_gpio: number;
   aux_function: number;
+  aux_pump_delay: number;
 }
 
 export enum busConnectionStatus {

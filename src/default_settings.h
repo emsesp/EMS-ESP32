@@ -96,6 +96,9 @@
 #define EMSESP_DEFAULT_AUX_FUNCTION -1 // None
 #endif
 
+#ifndef EMSESP_DEFAULT_AUX_PUMP_DELAY
+#define EMSESP_DEFAULT_AUX_PUMP_DELAY 300 // run pump for 5min after normal off conditions
+#endif
 
 // Default GPIO PIN definitions - based on Wemos/Nodemcu
 

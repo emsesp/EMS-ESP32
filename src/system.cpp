@@ -245,6 +245,7 @@ void System::get_settings() {
         // AUX
         aux_gpio_ = settings.aux_gpio;
         aux_function_ = settings.aux_function;
+        aux_pump_delay_ = settings.aux_pump_delay;
 
         // Board profile
         board_profile_ = settings.board_profile;
@@ -418,6 +419,7 @@ void System::aux_init(bool refresh) {
         switch (aux_function_) {
             case 1: {
                 // Pool circulation pump
+                logger_.info("Setting poolpump to on, delay: %d seconds",aux_pump_delay_);
                 break;
             }
             default: {

@@ -68,6 +68,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["weblog_compact"]       = settings.weblog_compact;
     root["aux_gpio"]             = settings.aux_gpio;
     root["aux_function"]         = settings.aux_function;
+    root["aux_pump_delay"]       = settings.aux_pump_delay;
 
     for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
         char buf[20];
@@ -191,6 +192,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     check_flag(prev, settings.aux_gpio, ChangeFlags::AUX);
     prev              = settings.aux_function;
     settings.aux_function = root["aux_function"] | EMSESP_DEFAULT_AUX_FUNCTION;
+    if (settings.aux_function == 0 || settings.aux_function > 1) settings.aux_function = EMSESP_DEFAULT_AUX_FUNCTION;
+    prev              = settings.aux_pump_delay;
+    settings.aux_pump_delay = root["aux_pump_delay"] |  EMSESP_DEFAULT_AUX_PUMP_DELAY;
     check_flag(prev, settings.aux_function, ChangeFlags::AUX);
 
     // these need reboots to be applied

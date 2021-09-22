@@ -67,7 +67,8 @@ class WebSettings {
     uint8_t  weblog_buffer;
     bool     weblog_compact;
     uint8_t  aux_gpio;
-    int8_t  aux_function;
+    int8_t   aux_function;
+    uint16_t aux_pump_delay;
 
     struct {
         String  id;
