@@ -66,6 +66,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["weblog_level"]         = settings.weblog_level;
     root["weblog_buffer"]        = settings.weblog_buffer;
     root["weblog_compact"]       = settings.weblog_compact;
+    root["aux_gpio"]             = settings.aux_gpio;
     root["aux_function"]         = settings.aux_function;
 
     for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
@@ -189,7 +190,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.aux_gpio = root["aux_gpio"] | default_aux_gpio;
     check_flag(prev, settings.aux_gpio, ChangeFlags::AUX);
     prev              = settings.aux_function;
-    settings.aux_function = root["aux_function"] | EMSESP_DEFAULT_HIDE_LED;
+    settings.aux_function = root["aux_function"] | EMSESP_DEFAULT_AUX_FUNCTION;
     check_flag(prev, settings.aux_function, ChangeFlags::AUX);
 
     // these need reboots to be applied

@@ -175,7 +175,7 @@ class System {
     String      syslog_host_;
     uint16_t    syslog_port_;
     uint8_t     aux_gpio_;
-    uint8_t     aux_function_;
+    int8_t     aux_function_;
 };
 
 } // namespace emsesp
