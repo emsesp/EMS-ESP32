@@ -719,9 +719,7 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
     // search device value with this tag
     for (auto & dv : devicevalues_) {
-        // ignore any device values which have a uom of NONE as we use this to hide them
-        if ((dv.uom != DeviceValueUOM::NONE)
-            && (strcmp(cmd, Helpers::toLower(uuid::read_flash_string(dv.short_name)).c_str()) == 0 && (tag <= 0 || tag == dv.tag))) {
+        if (dv_is_visible(dv) && (strcmp(cmd, Helpers::toLower(uuid::read_flash_string(dv.short_name)).c_str()) == 0 && (tag <= 0 || tag == dv.tag))) {
             uint8_t divider = 0;
             uint8_t factor  = 1;
             if (dv.options_size == 1) {
