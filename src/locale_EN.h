@@ -184,9 +184,7 @@ MAKE_PSTR(w, "W")
 MAKE_PSTR(kb, "KB")
 MAKE_PSTR(seconds, "seconds")
 MAKE_PSTR(dbm, "dBm")
-MAKE_PSTR(num, " ")   // this is hack so HA renders numbers correctly
-MAKE_PSTR(bool, " ")  // this is hack so HA renders numbers correctly
-MAKE_PSTR(blank, " ") // this is hack so HA renders numbers correctly
+MAKE_PSTR(mv, "mV")
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags

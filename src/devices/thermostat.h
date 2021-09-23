@@ -157,7 +157,7 @@ class Thermostat : public EMSdevice {
     int8_t  ibaCalIntTemperature_; // offset int. temperature sensor, by * 0.1 Kelvin (-5.0 to 5.0K)
     int8_t  ibaMinExtTemperature_; // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
     uint8_t ibaBuildingType_;      // building type: 0 = light, 1 = medium, 2 = heavy
-    uint8_t ibaClockOffset_;       // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+    int8_t  ibaClockOffset_;       // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
     uint8_t ibaDamping_;           // damping 0-off, 0xff-on
 
     int8_t   dampedoutdoortemp_;

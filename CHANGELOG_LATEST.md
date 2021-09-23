@@ -15,12 +15,19 @@
 - MQTT reconnecting after WiFi reconnect [#99](https://github.com/emsesp/EMS-ESP32/issues/99)
 - Manually Controlling Solar Circuit [#107](https://github.com/emsesp/EMS-ESP32/issues/107)
 - Fix thermostat commands not defaulting to the master thermostat [#110](https://github.com/emsesp/EMS-ESP32/issues/110)
-- enlarge parse-buffer for long names like `cylinderpumpmodulation`
+- Enlarge parse-buffer for long names like `cylinderpumpmodulation`
 
 ## Changed
 
 - Syslog BOM only for utf-8 messages [#91](https://github.com/emsesp/EMS-ESP32/issues/91)
 - Check for KM200 by device-id 0x48, remove tx-delay[#90](https://github.com/emsesp/EMS-ESP32/issues/90)
 - rename `fastheatupfactor` to `fastheatup` and add percent [#122]
-- "unit" renamed to "uom" in API call to recall a Device Value [**BREAKING CHANGE**]
-- initial backend React changes to replace the class componentns (HOCs) with React Hooks
+- "unit" renamed to "uom" in API call to recall a Device Value
+- initial backend React changes to replace the class components (HOCs) with React Hooks
+
+## **BREAKING CHANGES**
+
+- API: "unit" renamed to "uom" in API call to recall a Device Value
+- HA: `sensor.boiler_boiler_temperature` renamed to `sensor.actual_boiler_temperature`
+- HA: `binary_sensor.boiler_ww_disinfecting` renamed to `binary_sensor.boiler_ww_disinfection`
+  

@@ -95,9 +95,6 @@ export enum DeviceValueUOM {
   KB,
   SECONDS,
   DBM,
-  NUM,
-  BOOLEAN,
-  LIST,
   MV
 }
 
@@ -117,8 +114,5 @@ export const DeviceValueUOM_s = [
   'KB',
   'seconds',
   'dBm',
-  'number',
-  'on/off',
-  '',
   'mV'
 ];

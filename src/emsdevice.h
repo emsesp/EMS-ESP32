@@ -64,9 +64,7 @@ enum DeviceValueUOM : uint8_t {
     KB,       // 12
     SECONDS,  // 13
     DBM,      // 14
-    NUM,      // 15
-    BOOLEAN,  // 16
-    LIST      // 17
+    MV        // 15
 
 };
 
@@ -82,7 +80,7 @@ MAKE_PSTR(iconua, "mdi:flash-circle")             // DeviceValueUOM::UA
 MAKE_PSTR(iconbar, "mdi:gauge")                   // DeviceValueUOM::BAR
 MAKE_PSTR(iconkw, "mdi:omega")                    // DeviceValueUOM::KW & W
 MAKE_PSTR(icondbm, "mdi:wifi-strength-2")         // DeviceValueUOM::DBM
-MAKE_PSTR(iconnum, "mdi:counter")                 // DeviceValueUOM::NUM
+MAKE_PSTR(iconnum, "mdi:counter")                 // DeviceValueUOM::NONE
 
 MAKE_PSTR(icondevice, "mdi:home-automation") // for devices in HA
 
