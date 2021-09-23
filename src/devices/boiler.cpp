@@ -682,8 +682,6 @@ void Boiler::process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram)
 
 // Heatpump power - type 0x48D
 //08 00 FF 00 03 8D 03 00 10 30 10 60 00 04 00 00 00 17 00 00 00 3C 38 0E 64 00 00 0C 33 C7 00
-//XR1A050001   A05 Pump Heat circuit (1.0 ) 1 >> 1 & 0x01 ?
-//XR1A040001   A04 Pump Cold circuit (1.0 ) 1 & 0x1 ?
 
 void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(hpPower_, 11));
