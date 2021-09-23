@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -87,6 +87,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x48D, F("HpPower"), true, MAKE_PF_CB(process_HpPower));
         register_telegram_type(0x48F, F("HpOutdoor"), false, MAKE_PF_CB(process_HpOutdoor));
         register_telegram_type(0x48A, F("HpPool"), true, MAKE_PF_CB(process_HpPool));
+        register_telegram_type(0x5BA, F("HpPoolStatus"), true, MAKE_PF_CB(process_HpPoolStatus));
+
     }
 
     // MQTT commands for boiler topic
@@ -211,6 +213,10 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(TAG_BOILER_DATA, &hpPl1_, DeviceValueType::SHORT, FL_(div10), FL_(hpPl1), DeviceValueUOM::DEGREES);
         register_device_value(TAG_BOILER_DATA, &hpPh1_, DeviceValueType::SHORT, FL_(div10), FL_(hpPh1), DeviceValueUOM::DEGREES);
         register_device_value(TAG_BOILER_DATA, &poolSetTemp_, DeviceValueType::UINT, FL_(div2), FL_(poolSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_pool_temp));
+        register_device_value(TAG_BOILER_DATA, &PoolPump::m_bPumpOn, DeviceValueType::BOOL, nullptr, FL_(poolPump), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_pool_pump));
+        if (EMSESP::system_.get_aux_function() == AUX_FUNCTION::AUX_PUMP) {
+            PoolPump::m_bPumpOn = 0x00;
+        }
     }
 
     // warm water - boiler_data_ww topic
@@ -525,7 +531,7 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
  * UBAMonitorSlow - type 0x19 - central heating monitor part 2 (27 bytes long)
  * received every 60 seconds
  * e.g. 08 00 19 00 80 00 02 41 80 00 00 00 00 00 03 91 7B 05 B8 40 00 00 00 04 92 AD 00 5E EE 80 00
- *      08 0B 19 00 FF EA 02 47 80 00 00 00 00 62 03 CA 24 2C D6 23 00 00 00 27 4A B6 03 6E 43 
+ *      08 0B 19 00 FF EA 02 47 80 00 00 00 00 62 03 CA 24 2C D6 23 00 00 00 27 4A B6 03 6E 43
  *                  00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 17 19 20 21 22 23 24
  */
 void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
@@ -626,11 +632,11 @@ void Boiler::process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram) 
 /*
  * UBAInformation - type 0x495
  * all values 32 bit
- * 08 00 FF 00 03 95 00 0F 8E C2 00 08 39 C8 00 00 18 7A 00 07 3C 80 00 00 00 00 00 00 00 E5 F6 00 
- * 08 00 FF 18 03 95 00 00 00 A1 00 00 00 00 00 00 00 44 00 00 00 00 00 00 00 0A 00 00 00 0A BD 00 
- * 08 00 FF 30 03 95 00 00 00 00 00 00 00 00 00 00 02 10 00 00 00 00 00 00 02 1A 00 00 00 02 66 00 
+ * 08 00 FF 00 03 95 00 0F 8E C2 00 08 39 C8 00 00 18 7A 00 07 3C 80 00 00 00 00 00 00 00 E5 F6 00
+ * 08 00 FF 18 03 95 00 00 00 A1 00 00 00 00 00 00 00 44 00 00 00 00 00 00 00 0A 00 00 00 0A BD 00
+ * 08 00 FF 30 03 95 00 00 00 00 00 00 00 00 00 00 02 10 00 00 00 00 00 00 02 1A 00 00 00 02 66 00
  * 08 00 FF 48 03 95 00 00 01 15 00 00 00 00 00 00 00 F9 29 00
- *  
+ *
  */
 void Boiler::process_UBAInformation(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(upTimeControl_, 0));
@@ -688,31 +694,46 @@ void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_bitvalue(hpSwitchValve_, 0, 6));
     has_update(telegram->read_value(hpActivity_, 7));
 
+  if (hpCompOn_ == 0) hpActivity_ = 0;
+
+    uint8_t savePool = hpPoolOn_;
+
     hpHeatingOn_ = 0;
     hpCoolingOn_ = 0;
     hpWwOn_      = 0;
     hpPoolOn_    = 0;
 
     switch (hpActivity_) {
-    case 1: {
-        hpHeatingOn_ = 0xFF;
-        break;
+        case 1: {
+            hpHeatingOn_ = 0xFF;
+            break;
+        }
+        case 2: {
+            hpCoolingOn_ = 0xFF;
+            break;
+        }
+        case 3: {
+            hpWwOn_ = 0xFF;
+            break;
+        }
+        case 4: {
+            hpPoolOn_ = 0xFF;
+            break;
+        }
+        case 5: {
+            // Mixing (heating both pool and heatcircuit)
+            if (poolShunt_ < 100) hpPoolOn_ = 0xFF;
+            if (poolShunt_ > 0) hpHeatingOn_ = 0xFF;
+            break;
+        }
     }
-    case 2: {
-        hpCoolingOn_ = 0xFF;
-        break;
+    
+    // Pool pump
+    if (EMSESP::system_.get_aux_function() == AUX_FUNCTION::AUX_PUMP && savePool != hpPoolOn_) {
+        LOG_INFO(F("Setting pool pump to %s"), hpPoolOn_ ? "on" : "off");
+        PoolPump::setPump(hpPoolOn_ ? true : false);
     }
-    case 3: {
-        hpWwOn_ = 0xFF;
-        ;
-        break;
-    }
-    case 4: {
-        hpPoolOn_ = 0xFF;
-        ;
-        break;
-    }
-    }
+
 }
 
 // Heatpump outdoor unit - type 0x48F
@@ -741,6 +762,10 @@ void Boiler::process_HpPool(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(poolSetTemp_, 1));
 }
 
+// pool status (mirror of mixer, we don't need to pubish these)
+void Boiler::process_HpPoolStatus(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram->read_value(poolShunt_, 3));            // 0-100% how much is the shunt open?
+}
 
 
 // 0x2A - MC110Status
@@ -1494,5 +1519,20 @@ bool Boiler::set_pool_temp(const char * value, const int8_t id) {
 
     return true;
 }
+
+// Force pool pump on/off
+bool Boiler::set_pool_pump(const char * value, const int8_t id) {
+    bool v = 0;
+    if (!Helpers::value2bool(value, v)) {
+        LOG_WARNING(F("Set pool pump activated: Invalid value"));
+        return false;
+    }
+
+    LOG_INFO(F("Forcing pool pump to %s"), v ? "on" : "off");
+    PoolPump::setPump(v,true);
+
+    return true;
+}
+
 
 } // namespace emsesp
