@@ -52,6 +52,7 @@
 #include "roomcontrol.h"
 #include "command.h"
 #include "version.h"
+#include "poolpump.h"
 
 #define WATCH_ID_NONE 0 // no watch id set
 

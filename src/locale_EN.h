@@ -478,6 +478,8 @@ MAKE_PSTR_LIST(poolSetTemp, F("poolsettemp"), F("pool set temperature"))
 MAKE_PSTR_LIST(poolTemp, F("pooltemp"), F("pool temperature"))
 MAKE_PSTR_LIST(poolShuntStatus, F("poolshuntstatus"), F("pool shunt status opening/closing"))
 MAKE_PSTR_LIST(poolShunt, F("poolshunt"), F("pool shunt open/close (0% = pool / 100% = heat)"))
+MAKE_PSTR_LIST(poolPump, F("poolpump"), F("pool circulation pump activated"))
+
 
 // the following are warm water for the boiler and automatically tagged with 'ww'
 MAKE_PSTR_LIST(wwSelTemp, F("wwseltemp"), F("selected temperature"))

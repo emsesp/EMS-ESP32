@@ -44,6 +44,15 @@ using uuid::console::Shell;
 
 namespace emsesp {
 
+
+// Aux port functions
+enum AUX_FUNCTION : int8_t {
+
+    AUX_NONE = -1,
+    AUX_ILLEGAL = 0,
+    AUX_PUMP = 1
+};
+
 class System {
   public:
     void start(uint32_t heap_start);
@@ -83,6 +92,7 @@ class System {
     void button_init(bool refresh);
     void commands_init();
     void aux_init(bool refresh);
+    inline int8_t get_aux_function() { return aux_function_; }
 
     static bool is_valid_gpio(uint8_t pin);
     static bool load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile);
@@ -179,9 +189,6 @@ class System {
     uint8_t     aux_gpio_;
     int8_t      aux_function_;
     uint16_t    aux_pump_delay_;
-
-    // Auxilary functions
-    PoolPump*    pPump = NULL;
 
 };
 

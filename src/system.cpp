@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "system.h"
 #include "emsesp.h" // for send_raw_telegram() command
 
 #if defined(EMSESP_DEBUG)
@@ -409,33 +408,27 @@ void System::led_init(bool refresh) {
     }
 }
 
-// Reload Auxilary port function
+// Reload Auxiliary port function
 void System::aux_init(bool refresh) {
     if (refresh) {
         get_settings();
     }
+    LOG_INFO("init aux, function: %d, gpio: %d, delay: %d seconds",aux_function_, aux_gpio_,aux_pump_delay_);
+
 
     if ((aux_gpio_ != 0) && is_valid_gpio(aux_gpio_)) {
-        if (aux_function_ != 1) {
-            if (pPump) {
-                delete pPump;
-                pPump = NULL;
-            }                
+        if (aux_function_ != AUX_FUNCTION::AUX_PUMP) {
+            PoolPump::Delete();
         }
         switch (aux_function_) {
-            case 1: {
-                if (pPump == NULL) {
-                    pPump = new PoolPump(aux_gpio_,aux_pump_delay_);            
-                }
-                else {
-                    pPump->SetGPIO(aux_gpio_);
-                    pPump->SetDelay(aux_pump_delay_);
-                }  
+            case AUX_FUNCTION::AUX_PUMP: {
                 // Pool circulation pump
-                logger_.info("Setting poolpump to on, delay: %d seconds",aux_pump_delay_);
+                PoolPump::SetValues(aux_gpio_,aux_pump_delay_);
+                LOG_INFO("Setting poolpump to on, gpio: %d, delay: %d seconds",aux_gpio_,aux_pump_delay_);
                 break;
             }
             default: {
+    
             }
         }    
     }

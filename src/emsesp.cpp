@@ -1234,7 +1234,7 @@ void EMSESP::start() {
 
     webSettingsService.begin(); // load EMS-ESP specific settings, like GPIO configurations
     mqtt_.start();              // mqtt init
-    system_.start(heap_start);  // starts commands, led, adc, button, network, syslog & uart
+    system_.start(heap_start);  // starts commands, led, adc, button, network, syslog, aux & uart
     shower_.start();            // initialize shower timer and shower alert
     dallassensor_.start();      // dallas external sensors
     webServer.begin();          // start web server

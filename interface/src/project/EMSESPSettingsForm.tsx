@@ -392,7 +392,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                 variant="outlined"
                 onChange={handleValueChange('aux_function')}
                 margin="normal"
-                label="Auxilary port function"
+                label="Auxiliary port function"
               >
                 <MenuItem value={-1}>None</MenuItem>
                 <MenuItem value={1}>Pool circulation pump</MenuItem>
