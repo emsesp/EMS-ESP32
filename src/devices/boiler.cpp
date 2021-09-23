@@ -214,7 +214,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(TAG_BOILER_DATA, &hpPl1_, DeviceValueType::SHORT, FL_(div10), FL_(hpPl1), DeviceValueUOM::DEGREES);
         register_device_value(TAG_BOILER_DATA, &hpPh1_, DeviceValueType::SHORT, FL_(div10), FL_(hpPh1), DeviceValueUOM::DEGREES);
         register_device_value(TAG_BOILER_DATA, &poolSetTemp_, DeviceValueType::UINT, FL_(div2), FL_(poolSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_pool_temp));
-        register_device_value(TAG_BOILER_DATA, &PoolPump::m_bPumpOn, DeviceValueType::BOOL, nullptr, FL_(poolPump), DeviceValueUOM::BOOLEAN, MAKE_CF_CB(set_pool_pump));
+        register_device_value(TAG_BOILER_DATA, &PoolPump::m_bPumpOn, DeviceValueType::BOOL, nullptr, FL_(poolPump), DeviceValueUOM::NONE, MAKE_CF_CB(set_pool_pump));
         if (EMSESP::system_.get_aux_function() == AUX_FUNCTION::AUX_PUMP) {
             PoolPump::m_bPumpOn = 0x00;
         }
