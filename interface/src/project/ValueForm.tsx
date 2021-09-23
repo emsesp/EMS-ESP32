@@ -15,7 +15,7 @@ import {
 } from '@material-ui/core';
 
 import { FormButton } from '../components';
-import { DeviceValue, DeviceValueUOM, DeviceValueUOM_s } from './EMSESPtypes';
+import { DeviceValue, DeviceValueUOM_s } from './EMSESPtypes';
 
 interface ValueFormProps {
   devicevalue: DeviceValue;
