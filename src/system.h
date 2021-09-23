@@ -37,6 +37,8 @@
 
 #include <uuid/log.h>
 #include <PButton.h>
+#include "poolpump.h"
+
 
 using uuid::console::Shell;
 
@@ -177,6 +179,10 @@ class System {
     uint8_t     aux_gpio_;
     int8_t      aux_function_;
     uint16_t    aux_pump_delay_;
+
+    // Auxilary functions
+    PoolPump*    pPump = NULL;
+
 };
 
 } // namespace emsesp

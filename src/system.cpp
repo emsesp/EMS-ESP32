@@ -324,6 +324,7 @@ void System::start(uint32_t heap_start) {
     button_init(false);  // the special button
     network_init(false); // network
     syslog_start();      // start Syslog
+    aux_init(false);     // start aux (if any)   
 
     EMSESP::init_uart(); // start UART
 }
@@ -415,15 +416,26 @@ void System::aux_init(bool refresh) {
     }
 
     if ((aux_gpio_ != 0) && is_valid_gpio(aux_gpio_)) {
-        pinMode(aux_gpio_, OUTPUT); // 0 means disabled
+        if (aux_function_ != 1) {
+            if (pPump) {
+                delete pPump;
+                pPump = NULL;
+            }                
+        }
         switch (aux_function_) {
             case 1: {
+                if (pPump == NULL) {
+                    pPump = new PoolPump(aux_gpio_,aux_pump_delay_);            
+                }
+                else {
+                    pPump->SetGPIO(aux_gpio_);
+                    pPump->SetDelay(aux_pump_delay_);
+                }  
                 // Pool circulation pump
                 logger_.info("Setting poolpump to on, delay: %d seconds",aux_pump_delay_);
                 break;
             }
             default: {
-                
             }
         }    
     }
