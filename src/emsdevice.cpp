@@ -39,9 +39,7 @@ static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__
     F_(kb),
     F_(seconds),
     F_(dbm),
-    F_(num),
-    F_(bool),
-    F_(blank)
+    F_(mv)
 
 };
 
@@ -602,7 +600,7 @@ void EMSdevice::generate_values_json_web(JsonObject & json) {
             // handle Booleans (true, false)
             if ((dv.type == DeviceValueType::BOOL) && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 obj      = data.createNestedObject();
-                obj["v"] = *(bool *)(dv.value_p);
+                obj["v"] = *(bool *)(dv.value_p) ? "on" : "off";
             }
 
             // handle TEXT strings
@@ -677,24 +675,27 @@ void EMSdevice::generate_values_json_web(JsonObject & json) {
                     obj["n"] = name;
                 }
 
-                // add the name of the Command function if it exists
+                // add commands and options
                 if (dv.has_cmd) {
+                    // add the name of the Command function
                     if (dv.tag >= DeviceValueTAG::TAG_HC1) {
                         obj["c"] = tag_to_string(dv.tag) + "/" + uuid::read_flash_string(dv.short_name);
                     } else {
                         obj["c"] = dv.short_name;
                     }
-                } else {
-                    obj["c"] = "";
-                }
-
-                // add enum and text option settings
-                if ((dv.uom == DeviceValueUOM::LIST) && dv.has_cmd) {
-                    JsonArray l = obj.createNestedArray("l");
-                    for (uint8_t i = 0; i < dv.options_size; i++) {
-                        if (!uuid::read_flash_string(dv.options[i]).empty()) {
-                            l.add(uuid::read_flash_string(dv.options[i]));
+                    // add the Command options
+                    if (dv.type == DeviceValueType::ENUM) {
+                        JsonArray l = obj.createNestedArray("l");
+                        for (uint8_t i = 0; i < dv.options_size; i++) {
+                            if (!uuid::read_flash_string(dv.options[i]).empty()) {
+                                l.add(uuid::read_flash_string(dv.options[i]));
+                            }
                         }
+                    }
+                    if (dv.type == DeviceValueType::BOOL) {
+                        JsonArray l = obj.createNestedArray("l");
+                        l.add("off");
+                        l.add("on");
                     }
                 }
             }
@@ -737,12 +738,10 @@ bool EMSdevice::get_value_info(JsonObject & root, const char * cmd, const int8_t
 
             json["name"] = dv.short_name;
             // prefix tag if it's included
-            if (dv_is_visible(dv)) {
-                if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
-                    json["fullname"] = dv.full_name;
-                } else {
-                    json["fullname"] = tag_to_string(dv.tag) + " " + uuid::read_flash_string(dv.full_name);
-                }
+            if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
+                json["fullname"] = dv.full_name;
+            } else {
+                json["fullname"] = tag_to_string(dv.tag) + " " + uuid::read_flash_string(dv.full_name);
             }
 
             if (!tag_to_mqtt(dv.tag).empty()) {

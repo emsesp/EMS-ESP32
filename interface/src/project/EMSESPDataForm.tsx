@@ -129,12 +129,10 @@ function formatValue(value: any, uom: number, digit: number) {
     case DeviceValueUOM.MINUTES:
       return value ? formatDuration(value) : '0 minutes';
     case DeviceValueUOM.NONE:
-    case DeviceValueUOM.LIST:
+      if (typeof value === 'number') {
+        return new Intl.NumberFormat().format(value);
+      }
       return value;
-    case DeviceValueUOM.NUM:
-      return new Intl.NumberFormat().format(value);
-    case DeviceValueUOM.BOOLEAN:
-      return value ? 'on' : 'off';
     case DeviceValueUOM.DEGREES:
       return (
         new Intl.NumberFormat(undefined, {
