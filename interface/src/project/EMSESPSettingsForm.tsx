@@ -394,7 +394,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                 margin="normal"
                 label="Auxiliary port function"
               >
-                <MenuItem value={-1}>None</MenuItem>
+                <MenuItem value={0}>None</MenuItem>
                 <MenuItem value={1}>Pool circulation pump</MenuItem>
               </SelectValidator>
             </Grid>

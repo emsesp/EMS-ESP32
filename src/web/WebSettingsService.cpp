@@ -192,7 +192,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     check_flag(prev, settings.aux_gpio, ChangeFlags::AUX);
     prev              = settings.aux_function;
     settings.aux_function = root["aux_function"] | EMSESP_DEFAULT_AUX_FUNCTION;
-    if (settings.aux_function == 0 || settings.aux_function > 1) settings.aux_function = EMSESP_DEFAULT_AUX_FUNCTION;
+    if (settings.aux_function >= AUX_FUNCTION::AUX_LAST) settings.aux_function = EMSESP_DEFAULT_AUX_FUNCTION;
     prev              = settings.aux_pump_delay;
     settings.aux_pump_delay = root["aux_pump_delay"] |  EMSESP_DEFAULT_AUX_PUMP_DELAY;
     check_flag(prev, settings.aux_function, ChangeFlags::AUX);
