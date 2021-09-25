@@ -938,12 +938,7 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
     bool have_tag = !EMSdevice::tag_to_string(tag).empty();
 
     // nested_format is 1 if nested, otherwise 2 for single topics
-    bool is_nested;
-    if (device_type == EMSdevice::DeviceType::BOILER) {
-        is_nested = false; // boiler never uses nested
-    } else {
-        is_nested = (nested_format_ == 1);
-    }
+    bool is_nested = (nested_format_ == 1);
 
     char device_name[50];
     strlcpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str(), sizeof(device_name));
@@ -952,9 +947,9 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
 
     doc["~"] = mqtt_base_;
 
-    // create entity by add the tag if present, seperating with a .
+    // create entity by add the hc/wwc tag if present, seperating with a .
     char new_entity[50];
-    if (have_tag) {
+    if (tag >= DeviceValueTAG::TAG_HC1) {
         snprintf(new_entity, sizeof(new_entity), "%s.%s", EMSdevice::tag_to_string(tag).c_str(), uuid::read_flash_string(entity).c_str());
     } else {
         snprintf(new_entity, sizeof(new_entity), "%s", uuid::read_flash_string(entity).c_str());
@@ -1007,7 +1002,8 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
         // normal HA sensor, not a boolean one
         snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // topic
 
-        bool set_state_class = false;
+        uint8_t set_state_class = 0;
+        enum uint8_t {MEASURE = 1, TOTAL};
 
         // unit of measure and map the HA icon
         if (uom != DeviceValueUOM::NONE) {
@@ -1017,11 +1013,11 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
         switch (uom) {
         case DeviceValueUOM::DEGREES:
             doc["ic"]       = F_(icondegrees);
-            set_state_class = true;
+            set_state_class = MEASURE;
             break;
         case DeviceValueUOM::PERCENT:
             doc["ic"]       = F_(iconpercent);
-            set_state_class = true;
+            set_state_class = MEASURE;
             break;
         case DeviceValueUOM::SECONDS:
         case DeviceValueUOM::MINUTES:
@@ -1033,25 +1029,25 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
             break;
         case DeviceValueUOM::LMIN:
             doc["ic"]       = F_(iconlmin);
-            set_state_class = true;
+            set_state_class = MEASURE;
             break;
         case DeviceValueUOM::WH:
         case DeviceValueUOM::KWH:
             doc["ic"]       = F_(iconkwh);
-            set_state_class = true;
+            set_state_class = TOTAL;
             break;
         case DeviceValueUOM::UA:
             doc["ic"]       = F_(iconua);
-            set_state_class = true;
+            set_state_class = MEASURE;
             break;
         case DeviceValueUOM::BAR:
             doc["ic"]       = F_(iconbar);
-            set_state_class = true;
+            set_state_class = MEASURE;
             break;
         case DeviceValueUOM::W:
         case DeviceValueUOM::KW:
             doc["ic"]       = F_(iconkw);
-            set_state_class = true;
+            set_state_class = MEASURE;
             break;
         case DeviceValueUOM::DBM:
             doc["ic"] = F_(icondbm);
@@ -1062,15 +1058,18 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
                 type == DeviceValueType::SHORT ||
                 type == DeviceValueType::USHORT ||
                 type == DeviceValueType::ULONG) {
-                doc["ic"] = F_(iconnum);
+                doc["ic"]       = F_(iconnum);
+                set_state_class = TOTAL;
             }
         default:
             break;
         }
 
         // see if we need to set the state_class
-        if (set_state_class) {
+        if (set_state_class == MEASURE) {
             doc["state_class"] = F("measurement");
+        } else if (set_state_class == TOTAL) {
+            doc["state_class"] = F("total_increasing");
         }
     }
 

@@ -41,7 +41,8 @@ enum CommandFlag : uint8_t {
     MQTT_SUB_FLAG_WWC    = (1 << 1), // 2
     MQTT_SUB_FLAG_NOSUB  = (1 << 2), // 4
     HIDDEN               = (1 << 3), // 8
-    ADMIN_ONLY           = (1 << 4)  // 16
+    ADMIN_ONLY           = (1 << 4), // 16
+    MQTT_SUB_FLAG_WW     = (1 << 5)  // 32
 
 };
 

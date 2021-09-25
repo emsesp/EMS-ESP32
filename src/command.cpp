@@ -298,6 +298,10 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                     shell.print(' ');
                 }
                 shell.print(COLOR_BRIGHT_CYAN);
+                if (cf.has_flags(MQTT_SUB_FLAG_WW)) {
+                    shell.print(EMSdevice::tag_to_string(TAG_DEVICE_DATA_WW));
+                    shell.print(' ');
+                }
                 shell.print(uuid::read_flash_string(cf.description_));
                 if (cf.has_flags(CommandFlag::ADMIN_ONLY)) {
                     shell.print(' ');

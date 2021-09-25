@@ -50,7 +50,7 @@ static const __FlashStringHelper * const DeviceValueTAG_s[] PROGMEM = {
     F_(tag_none),            // ""
     F_(tag_heartbeat),       // ""
     F_(tag_boiler_data),     // ""
-    F_(tag_boiler_data_ww),  // "ww"
+    F_(tag_device_data_ww),  // "ww"
     F_(tag_thermostat_data), // ""
     F_(tag_hc1),             // "hc1"
     F_(tag_hc2),             // "hc2"
@@ -85,7 +85,7 @@ static const __FlashStringHelper * const DeviceValueTAG_mqtt[] PROGMEM = {
     F_(tag_none),                // ""
     F_(heartbeat),               // "heartbeat"
     F_(tag_boiler_data_mqtt),    // ""
-    F_(tag_boiler_data_ww_mqtt), // "ww"
+    F_(tag_device_data_ww_mqtt), // "ww"
     F_(tag_thermostat_data),     // ""
     F_(tag_hc1),                 // "hc1"
     F_(tag_hc2),                 // "hc2"
@@ -532,6 +532,8 @@ void EMSdevice::register_device_value(uint8_t                             tag,
         Command::add(device_type_, name[0], f, name[1], CommandFlag::MQTT_SUB_FLAG_HC | CommandFlag::ADMIN_ONLY);
     } else if (tag >= TAG_WWC1 && tag <= TAG_WWC4) {
         Command::add(device_type_, name[0], f, name[1], CommandFlag::MQTT_SUB_FLAG_WWC | CommandFlag::ADMIN_ONLY);
+    } else if (tag == TAG_DEVICE_DATA_WW) {
+        Command::add(device_type_, name[0], f, name[1], CommandFlag::MQTT_SUB_FLAG_WW | CommandFlag::ADMIN_ONLY);
     } else {
         Command::add(device_type_, name[0], f, name[1], CommandFlag::MQTT_SUB_FLAG_NORMAL | CommandFlag::ADMIN_ONLY);
     }
