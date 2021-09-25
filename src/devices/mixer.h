@@ -65,13 +65,12 @@ class Mixer : public EMSdevice {
     uint8_t  setValveTime_;
 
     int16_t poolTemp_;
-    int8_t  poolShuntStatus__;
     int8_t  poolShuntStatus_;
     int8_t  poolShunt_;
 
-
-    Type     type_ = Type::NONE;
-    uint16_t hc_   = EMS_VALUE_USHORT_NOTSET;
+    Type     type_             = Type::NONE;
+    uint16_t hc_               = EMS_VALUE_USHORT_NOTSET;
+    int8_t   poolShuntStatus__ = EMS_VALUE_INT_NOTSET; // temp value
     uint8_t  id_;
 };
 
