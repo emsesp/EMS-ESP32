@@ -372,9 +372,9 @@ void EMSdevice::list_device_entries(JsonObject & json) {
             // if we have a tag prefix it
             char key[50];
             if (!EMSdevice::tag_to_string(dv.tag).empty()) {
-                snprintf(key, 51, "%s.%s", EMSdevice::tag_to_string(dv.tag).c_str(), uuid::read_flash_string(dv.short_name).c_str());
+                snprintf(key, 50, "%s.%s", EMSdevice::tag_to_string(dv.tag).c_str(), uuid::read_flash_string(dv.short_name).c_str());
             } else {
-                snprintf(key, 51, "%s", uuid::read_flash_string(dv.short_name).c_str());
+                snprintf(key, 50, "%s", uuid::read_flash_string(dv.short_name).c_str());
             }
 
             JsonArray details = json.createNestedArray(key);
