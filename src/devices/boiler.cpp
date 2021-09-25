@@ -832,9 +832,9 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
     if (telegram->offset > 0 || telegram->message_length < 14) {
         return;
     }
-    char            code[4];
-    uint16_t        codeNo;
-    uint32_t        timecode;
+    char     code[4];
+    uint16_t codeNo;
+    uint32_t timecode;
     code[0] = telegram->message_data[5];
     code[1] = telegram->message_data[6];
     code[2] = telegram->message_data[7];

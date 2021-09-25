@@ -1003,7 +1003,7 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
         snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // topic
 
         uint8_t set_state_class = 0;
-        enum uint8_t {MEASURE = 1, TOTAL};
+        enum uint8_t { MEASURE = 1, TOTAL };
 
         // unit of measure and map the HA icon
         if (uom != DeviceValueUOM::NONE) {
@@ -1053,11 +1053,8 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
             doc["ic"] = F_(icondbm);
             break;
         case DeviceValueUOM::NONE:
-            if (type == DeviceValueType::INT ||
-                type == DeviceValueType::UINT  ||
-                type == DeviceValueType::SHORT ||
-                type == DeviceValueType::USHORT ||
-                type == DeviceValueType::ULONG) {
+            if (type == DeviceValueType::INT || type == DeviceValueType::UINT || type == DeviceValueType::SHORT || type == DeviceValueType::USHORT
+                || type == DeviceValueType::ULONG) {
                 doc["ic"]       = F_(iconnum);
                 set_state_class = TOTAL;
             }

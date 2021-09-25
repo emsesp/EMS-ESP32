@@ -2504,8 +2504,7 @@ void Thermostat::register_device_values() {
             TAG_DEVICE_DATA_WW, &wwProgMode_, DeviceValueType::ENUM, FL_(enum_wwProgMode), FL_(wwProgMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwProgMode));
         register_device_value(
             TAG_DEVICE_DATA_WW, &wwCircProg_, DeviceValueType::ENUM, FL_(enum_wwProgMode), FL_(wwCircProg), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircProg));
-        register_device_value(
-            TAG_DEVICE_DATA_WW, &wwDisinfect_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfect), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfect));
+        register_device_value(TAG_DEVICE_DATA_WW, &wwDisinfect_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfect), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfect));
         register_device_value(TAG_DEVICE_DATA_WW,
                               &wwDisinfectDay_,
                               DeviceValueType::ENUM,
