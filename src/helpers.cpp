@@ -57,13 +57,11 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
 
     *ptr = '\0';
 
-    unsigned long res = 0;
-
     do {
-        res = value - base * (t = value / base);
+        unsigned long res = value - base * (t = value / base);
         if (res < 10) {
             *--ptr = '0' + res;
-        } else if ((res >= 10) && (res < 16)) {
+        } else if (res < 16) {
             *--ptr = 'A' - 10 + res;
         }
     } while ((value = t) != 0);

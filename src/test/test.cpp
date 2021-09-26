@@ -425,6 +425,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"wwonetime\",\"id\":0,\"data\":\"off\"}");
         EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"wwonetime\",\"hc\":1,\"data\":\"on\"}");
         EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"wwonetime\",\"data\":\"on\",\"hc\":1}");
+        EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"heatingactivated\",\"data\":1}");
 
         shell.invoke_command("show mqtt");
     }

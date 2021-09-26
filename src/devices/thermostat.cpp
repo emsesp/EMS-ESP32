@@ -2413,22 +2413,22 @@ void Thermostat::register_device_values() {
                               FL_(ibaMinExtTemperature),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_minexttemp));
-        register_device_value(TAG_THERMOSTAT_DATA, &wwSetTemp_, DeviceValueType::UINT, nullptr, FL_(wwSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemp));
-        register_device_value(TAG_THERMOSTAT_DATA, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
+        register_device_value(TAG_DEVICE_DATA_WW, &wwSetTemp_, DeviceValueType::UINT, nullptr, FL_(wwSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemp));
+        register_device_value(TAG_DEVICE_DATA_WW, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         register_device_value(
-            TAG_THERMOSTAT_DATA, &wwSetTempLow_, DeviceValueType::UINT, nullptr, FL_(wwSetTempLow), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemplow));
+            TAG_DEVICE_DATA_WW, &wwSetTempLow_, DeviceValueType::UINT, nullptr, FL_(wwSetTempLow), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemplow));
         register_device_value(
-            TAG_THERMOSTAT_DATA, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
-        register_device_value(TAG_THERMOSTAT_DATA,
+            TAG_DEVICE_DATA_WW, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
+        register_device_value(TAG_DEVICE_DATA_WW,
                               &wwChargeDuration_,
                               DeviceValueType::UINT,
                               FL_(mul15),
                               FL_(wwChargeDuration),
                               DeviceValueUOM::MINUTES,
                               MAKE_CF_CB(set_wwchargeduration));
-        register_device_value(TAG_THERMOSTAT_DATA, &wwCharge_, DeviceValueType::BOOL, nullptr, FL_(wwCharge), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcharge));
-        register_device_value(TAG_THERMOSTAT_DATA, &wwExtra1_, DeviceValueType::UINT, nullptr, FL_(wwExtra1), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_THERMOSTAT_DATA, &wwExtra2_, DeviceValueType::UINT, nullptr, FL_(wwExtra2), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_DEVICE_DATA_WW, &wwCharge_, DeviceValueType::BOOL, nullptr, FL_(wwCharge), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcharge));
+        register_device_value(TAG_DEVICE_DATA_WW, &wwExtra1_, DeviceValueType::UINT, nullptr, FL_(wwExtra1), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_DEVICE_DATA_WW, &wwExtra2_, DeviceValueType::UINT, nullptr, FL_(wwExtra2), DeviceValueUOM::DEGREES);
         break;
     case EMS_DEVICE_FLAG_RC20_N:
     case EMS_DEVICE_FLAG_RC20:
@@ -2466,9 +2466,9 @@ void Thermostat::register_device_values() {
                               FL_(ibaBuildingType),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_building));
-        register_device_value(TAG_THERMOSTAT_DATA, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
+        register_device_value(TAG_DEVICE_DATA_WW, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         register_device_value(
-            TAG_THERMOSTAT_DATA, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode2), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
+            TAG_DEVICE_DATA_WW, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode2), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
         break;
     case EMS_DEVICE_FLAG_RC35:
         register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE, MAKE_CF_CB(set_datetime));
@@ -2497,23 +2497,22 @@ void Thermostat::register_device_values() {
                               FL_(ibaBuildingType),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_building));
-        register_device_value(TAG_THERMOSTAT_DATA, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
+        register_device_value(TAG_DEVICE_DATA_WW, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         register_device_value(
-            TAG_THERMOSTAT_DATA, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode2), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
+            TAG_DEVICE_DATA_WW, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode2), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
         register_device_value(
-            TAG_THERMOSTAT_DATA, &wwProgMode_, DeviceValueType::ENUM, FL_(enum_wwProgMode), FL_(wwProgMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwProgMode));
+            TAG_DEVICE_DATA_WW, &wwProgMode_, DeviceValueType::ENUM, FL_(enum_wwProgMode), FL_(wwProgMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwProgMode));
         register_device_value(
-            TAG_THERMOSTAT_DATA, &wwCircProg_, DeviceValueType::ENUM, FL_(enum_wwProgMode), FL_(wwCircProg), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircProg));
-        register_device_value(
-            TAG_THERMOSTAT_DATA, &wwDisinfect_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfect), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfect));
-        register_device_value(TAG_THERMOSTAT_DATA,
+            TAG_DEVICE_DATA_WW, &wwCircProg_, DeviceValueType::ENUM, FL_(enum_wwProgMode), FL_(wwCircProg), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircProg));
+        register_device_value(TAG_DEVICE_DATA_WW, &wwDisinfect_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfect), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfect));
+        register_device_value(TAG_DEVICE_DATA_WW,
                               &wwDisinfectDay_,
                               DeviceValueType::ENUM,
                               FL_(enum_dayOfWeek),
                               FL_(wwDisinfectDay),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_wwDisinfectDay));
-        register_device_value(TAG_THERMOSTAT_DATA,
+        register_device_value(TAG_DEVICE_DATA_WW,
                               &wwDisinfectHour_,
                               DeviceValueType::UINT,
                               nullptr,
@@ -2522,9 +2521,9 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwDisinfectHour),
                               0,
                               23);
-        register_device_value(TAG_THERMOSTAT_DATA, &wwMaxTemp_, DeviceValueType::UINT, nullptr, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp));
+        register_device_value(TAG_DEVICE_DATA_WW, &wwMaxTemp_, DeviceValueType::UINT, nullptr, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp));
         register_device_value(
-            TAG_THERMOSTAT_DATA, &wwOneTimeKey_, DeviceValueType::BOOL, nullptr, FL_(wwOneTimeKey), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwOneTimeKey));
+            TAG_DEVICE_DATA_WW, &wwOneTimeKey_, DeviceValueType::BOOL, nullptr, FL_(wwOneTimeKey), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwOneTimeKey));
         break;
     case EMS_DEVICE_FLAG_JUNKERS:
         register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE, MAKE_CF_CB(set_datetime));
