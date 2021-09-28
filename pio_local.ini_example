@@ -16,7 +16,7 @@ my_build_flags =
 ; upload_port = 10.10.10.101
 
 ; to prevent the web UI from building each time, comment out this next line
-extra_scripts =
+extra_scripts = scripts/rename_fw.py ; don't build WebUI
 
 ; pio run -e debug
 ; or from Visual Studio Code do PIO -> Project Tasks -> debug -> General -> Upload and Monitor
