@@ -351,10 +351,14 @@ MAKE_PSTR_LIST(enum_controlmode, F_(off), F_(optimized), F_(simple), F_(mpc), F_
 MAKE_PSTR_LIST(enum_controlmode2, F_(outdoor), F_(room))
 MAKE_PSTR_LIST(enum_controlmode3, F_(off), F_(room), F_(outdoor), F("room+outdoor"))
 MAKE_PSTR_LIST(enum_control, F_(off), F_(rc20), F_(rc3x))
+MAKE_PSTR_LIST(enum_j_control, F_(off), F("fb10"), F("fb110"))
 
-MAKE_PSTR_LIST(enum_wwProgMode, F("std prog"), F_(own_prog))
+MAKE_PSTR_LIST(enum_wwProgMode, F("std_prog"), F_(own_prog))
 MAKE_PSTR_LIST(enum_dayOfWeek, F("mo"), F("tu"), F("we"), F("th"), F("fr"), F("sa"), F("so"), F("all"))
-// MAKE_PSTR_LIST(enum_wwChargeDuration, F_(off), F("15min"), F("30min"), F("45min"), F("60min"), F("75min"), F("90min"), F("105min"), F("120min"))
+MAKE_PSTR_LIST(enum_progMode, F("prog_1"), F("prog_2"))
+MAKE_PSTR_LIST(enum_progMode2, F("own_1"), F("family"), F("morning"), F("evening"), F("am"), F("pm"), F("midday"), F("singles"), F("seniors"), F("own_2"))
+MAKE_PSTR_LIST(enum_progMode3, F("family"), F("morning"), F("evening"), F("am"), F("pm"), F("midday"), F("singles"), F("seniors"))
+MAKE_PSTR_LIST(enum_progMode4, F("prog_a"), F("prog_b"), F("prog_c"), F("prog_d"), F("prog_e"), F("prog_f"))
 
 // solar list
 MAKE_PSTR_LIST(enum_solarmode, F_(constant), F("pwm"), F("analog"))
