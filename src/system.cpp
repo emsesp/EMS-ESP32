@@ -69,16 +69,16 @@ bool System::command_fetch(const char * value, const int8_t id) {
             LOG_INFO(F("Requesting data from EMS devices"));
             EMSESP::fetch_device_values();
             return true;
-        } else if (value_s == "boiler") {
+        } else if (value_s == read_flash_string(F_(boiler))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::BOILER);
             return true;
-        } else if (value_s == "thermostat") {
+        } else if (value_s == read_flash_string(F_(thermostat))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::THERMOSTAT);
             return true;
-        } else if (value_s == "solar") {
+        } else if (value_s == read_flash_string(F_(solar))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::SOLAR);
             return true;
-        } else if (value_s == "mixer") {
+        } else if (value_s == read_flash_string(F_(mixer))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::MIXER);
             return true;
         }
@@ -96,22 +96,22 @@ bool System::command_publish(const char * value, const int8_t id) {
             EMSESP::publish_all(true); // includes HA
             LOG_INFO(F("Publishing all data to MQTT, including HA configs"));
             return true;
-        } else if (value_s == "boiler") {
+        } else if (value_s == read_flash_string(F_(boiler))) {
             EMSESP::publish_device_values(EMSdevice::DeviceType::BOILER);
             return true;
-        } else if (value_s == "thermostat") {
+        } else if (value_s == read_flash_string(F_(thermostat))) {
             EMSESP::publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
             return true;
-        } else if (value_s == "solar") {
+        } else if (value_s == read_flash_string(F_(solar))) {
             EMSESP::publish_device_values(EMSdevice::DeviceType::SOLAR);
             return true;
-        } else if (value_s == "mixer") {
+        } else if (value_s == read_flash_string(F_(mixer))) {
             EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
             return true;
         } else if (value_s == "other") {
             EMSESP::publish_other_values();
             return true;
-        } else if (value_s == "dallassensor") {
+        } else if (value_s == read_flash_string(F_(dallassensor))) {
             EMSESP::publish_sensor_values(true);
             return true;
         }
