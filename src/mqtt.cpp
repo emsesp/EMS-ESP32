@@ -721,7 +721,7 @@ void Mqtt::ha_status() {
                           DeviceValueUOM::PERCENT);
     }
 
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"));
+    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"), DeviceValueUOM::NONE);
     publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime (sec)"), EMSdevice::DeviceType::SYSTEM, F("uptime_sec"), DeviceValueUOM::SECONDS);
     publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Free memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"), DeviceValueUOM::KB);
     publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# MQTT fails"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"), DeviceValueUOM::NONE);
@@ -929,7 +929,8 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
                              const __FlashStringHelper * name,
                              const uint8_t               device_type, // EMSdevice::DeviceType
                              const __FlashStringHelper * entity,
-                             const uint8_t               uom) { // EMSdevice::DeviceValueUOM (0=NONE)
+                             const uint8_t               uom, // EMSdevice::DeviceValueUOM (0=NONE)
+                             const bool                  has_cmd) {
     // ignore if name (fullname) is empty
     if (name == nullptr) {
         return;
@@ -1002,8 +1003,8 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
         // normal HA sensor, not a boolean one
         snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // topic
 
-        uint8_t set_state_class = 0;
-        enum uint8_t { MEASURE = 1, TOTAL };
+        enum uint8_t { STATE_CLASS_NONE, STATE_CLASS_MEASUREMENT, STATE_CLASS_TOTAL_INCREASING };
+        uint8_t set_state_class = STATE_CLASS_NONE; // default
 
         // unit of measure and map the HA icon
         if (uom != DeviceValueUOM::NONE) {
@@ -1012,12 +1013,10 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
 
         switch (uom) {
         case DeviceValueUOM::DEGREES:
-            doc["ic"]       = F_(icondegrees);
-            set_state_class = MEASURE;
+            doc["ic"] = F_(icondegrees);
             break;
         case DeviceValueUOM::PERCENT:
-            doc["ic"]       = F_(iconpercent);
-            set_state_class = MEASURE;
+            doc["ic"] = F_(iconpercent);
             break;
         case DeviceValueUOM::SECONDS:
         case DeviceValueUOM::MINUTES:
@@ -1028,26 +1027,23 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
             doc["ic"] = F_(iconkb);
             break;
         case DeviceValueUOM::LMIN:
-            doc["ic"]       = F_(iconlmin);
-            set_state_class = MEASURE;
+            doc["ic"] = F_(iconlmin);
             break;
         case DeviceValueUOM::WH:
         case DeviceValueUOM::KWH:
             doc["ic"]       = F_(iconkwh);
-            set_state_class = TOTAL;
+            set_state_class = STATE_CLASS_TOTAL_INCREASING;
             break;
         case DeviceValueUOM::UA:
-            doc["ic"]       = F_(iconua);
-            set_state_class = MEASURE;
+            doc["ic"] = F_(iconua);
             break;
         case DeviceValueUOM::BAR:
-            doc["ic"]       = F_(iconbar);
-            set_state_class = MEASURE;
+            doc["ic"] = F_(iconbar);
             break;
         case DeviceValueUOM::W:
         case DeviceValueUOM::KW:
             doc["ic"]       = F_(iconkw);
-            set_state_class = MEASURE;
+            set_state_class = STATE_CLASS_MEASUREMENT;
             break;
         case DeviceValueUOM::DBM:
             doc["ic"] = F_(icondbm);
@@ -1055,18 +1051,20 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
         case DeviceValueUOM::NONE:
             if (type == DeviceValueType::INT || type == DeviceValueType::UINT || type == DeviceValueType::SHORT || type == DeviceValueType::USHORT
                 || type == DeviceValueType::ULONG) {
-                doc["ic"]       = F_(iconnum);
-                set_state_class = TOTAL;
+                doc["ic"] = F_(iconnum);
             }
         default:
             break;
         }
 
         // see if we need to set the state_class
-        if (set_state_class == MEASURE) {
-            doc["state_class"] = F("measurement");
-        } else if (set_state_class == TOTAL) {
-            doc["state_class"] = F("total_increasing");
+        // ignore any commands
+        if (!has_cmd) {
+            if (set_state_class == STATE_CLASS_MEASUREMENT) {
+                doc["state_class"] = F("measurement");
+            } else if (set_state_class == STATE_CLASS_TOTAL_INCREASING) {
+                doc["state_class"] = F("total_increasing");
+            }
         }
     }
 
