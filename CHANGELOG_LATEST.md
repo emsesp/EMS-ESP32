@@ -9,7 +9,8 @@
 - Add RC300 second summermode telegram [#108](https://github.com/emsesp/EMS-ESP32/issues/108)
 - Add support for the RC25 thermostat [#106](https://github.com/emsesp/EMS-ESP32/issues/106)
 - Add new command 'entities' for a device, e.g. http://ems-esp/api/boiler/entities to show the shortname, description and HA Entity name (if HA enabled) [#116](https://github.com/emsesp/EMS-ESP32/issues/116)
-- Junkers program and remote (fb10/fb110) temperature
+- Support for Junkers program and remote (fb10/fb110) temperature
+- Home Assistant `state_class` attribute for Wh, kWh, W and KW [#129](https://github.com/emsesp/EMS-ESP32/issues/129)
 
 ## Fixed
 
@@ -25,7 +26,7 @@
 - rename `fastheatupfactor` to `fastheatup` and add percent [#122]
 - "unit" renamed to "uom" in API call to recall a Device Value
 - initial backend React changes to replace the class components (HOCs) with React Hooks
-- program-names instead of numbers
+- Use program-names instead of numbers
 
 ## **BREAKING CHANGES**
 

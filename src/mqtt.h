@@ -121,7 +121,8 @@ class Mqtt {
                                   const __FlashStringHelper * name,
                                   const uint8_t               device_type,
                                   const __FlashStringHelper * entity,
-                                  const uint8_t               uom = 0);
+                                  const uint8_t               uom,
+                                  const bool                  has_cmd = false);
     static void register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t flags = 0);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
