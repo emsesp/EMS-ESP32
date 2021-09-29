@@ -124,6 +124,7 @@
 {171, DeviceType::CONNECT, F("OpenTherm Converter"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {205, DeviceType::CONNECT, F("Moduline Easy Connect"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {206, DeviceType::CONNECT, F("Easy Connect"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{236, DeviceType::CONNECT, F("Wireless sensor base"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Switches - 0x11
 { 71, DeviceType::SWITCH, F("WM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
