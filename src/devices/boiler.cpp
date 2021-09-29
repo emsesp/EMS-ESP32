@@ -594,8 +594,8 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram->read_value(wwActivated_, 5)); // 0x01 means on
     has_update(telegram->read_value(wwCircPump_, 10)); // 0x01 means yes
     has_update(telegram->read_value(wwCircMode_, 11)); // 1=1x3min... 6=6x3min, 7=continuous
-    // has_update(telegram->read_value(wWDisinfectTemp_, 12)); // settings, status in E9
-    // has_update(telegram->read_value(wWSelTemp_, 6));        // settings, status in E9
+    has_update(telegram->read_value(wWDisinfectTemp_, 12));
+    has_update(telegram->read_value(wWSelTemp_, 6));
     has_update(telegram->read_value(wwHystOn_, 7));
     has_update(telegram->read_value(wwHystOff_, 8));
     has_update(telegram->read_value(wwSelTempOff_, 0)); // confusing description in #96, hopefully this is right
@@ -621,8 +621,8 @@ void Boiler::process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram->read_bitvalue(wwCirc_, 13, 2));
 
     // has_update(telegram->read_value(wWActivated_, 20)); // Activated is in 0xEA, this is something other 0/100%
-    has_update(telegram->read_value(wwSelTemp_, 10));
-    has_update(telegram->read_value(wwDisinfectionTemp_, 9));
+    // has_update(telegram->read_value(wwSelTemp_, 10));   // see #96, this is not wwSelTemp (set in EA)
+    // has_update(telegram->read_value(wwDisinfectionTemp_, 9));
 }
 
 /*
