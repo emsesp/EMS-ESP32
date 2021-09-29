@@ -594,7 +594,7 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram->read_value(wwActivated_, 5)); // 0x01 means on
     has_update(telegram->read_value(wwCircPump_, 10)); // 0x01 means yes
     has_update(telegram->read_value(wwCircMode_, 11)); // 1=1x3min... 6=6x3min, 7=continuous
-    has_update(telegram->read_value(wwDisinfectTemp_, 12));
+    has_update(telegram->read_value(wwDisinfectionTemp_, 12));
     has_update(telegram->read_value(wwSelTemp_, 6));
     has_update(telegram->read_value(wwHystOn_, 7));
     has_update(telegram->read_value(wwHystOff_, 8));
