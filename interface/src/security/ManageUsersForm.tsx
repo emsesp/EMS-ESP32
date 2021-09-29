@@ -129,13 +129,12 @@ class ManageUsersForm extends React.Component<
     }
   };
 
-  handleUserValueChange = (name: keyof User) => (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    this.setState({
-      user: { ...this.state.user!, [name]: extractEventValue(event) }
-    });
-  };
+  handleUserValueChange =
+    (name: keyof User) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      this.setState({
+        user: { ...this.state.user!, [name]: extractEventValue(event) }
+      });
+    };
 
   onSubmit = () => {
     this.props.saveData();

@@ -885,6 +885,7 @@ app.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
   res.json(emsesp_settings)
 })
 app.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
+  console.log(req.body)
   res.json(emsesp_settings)
 })
 app.get(EMSESP_DATA_ENDPOINT, (req, res) => {

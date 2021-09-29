@@ -1,0 +1,5 @@
+{
+  // TODO not sure what this does
+  "loadLocalesAsync": false,
+  "adapter": "react"
+}

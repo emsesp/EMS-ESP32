@@ -2,7 +2,6 @@
 .vscode
 
 # build
-build/
 .clang_complete
 .gcc-flags.json
 cppcheck.out.xml
@@ -16,6 +15,15 @@ pio_local.ini
 # OS specific
 .DS_Store
 *Thumbs.db
+
+# production
+/build
+
+# misc
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # project specfic
 /scripts/stackdmp.txt

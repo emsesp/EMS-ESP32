@@ -115,7 +115,7 @@ class AuthenticationWrapper extends React.Component<
         initialized: true,
         context: { ...this.state.context, me: undefined }
       });
-      throw new Error('Failed to parse JWT ' + err.message);
+      throw new Error('Failed to parse JWT');
     }
   };
 

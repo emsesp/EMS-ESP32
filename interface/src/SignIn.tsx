@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useContext } from 'react';
 import { withSnackbar, WithSnackbarProps } from 'notistack';
 import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
 
@@ -15,8 +15,14 @@ import {
   withAuthenticationContext,
   AuthenticationContextProps
 } from './authentication/AuthenticationContext';
+
 import { PasswordValidator } from './components';
 import { PROJECT_NAME, SIGN_IN_ENDPOINT } from './api';
+
+import { locales } from './i18n/i18n-util';
+import { Locales } from './i18n/i18n-types';
+import { I18nContext } from './i18n/i18n-react';
+import { LogLevel } from './system/types';
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -48,7 +54,8 @@ const styles = (theme: Theme) =>
     }
   });
 
-type SignInProps = WithSnackbarProps &
+type SignInProps = typeof I18nContext &
+  WithSnackbarProps &
   WithStyles<typeof styles> &
   AuthenticationContextProps;
 
@@ -56,6 +63,12 @@ interface SignInState {
   username: string;
   password: string;
   processing: boolean;
+}
+
+function ProjectOverview(props: any) {
+  const { LL } = useContext(I18nContext);
+
+  return LL.SELECTED_LOCALE();
 }
 
 class SignIn extends Component<SignInProps, SignInState> {
@@ -110,6 +123,8 @@ class SignIn extends Component<SignInProps, SignInState> {
   render() {
     const { username, password, processing } = this.state;
     const { classes } = this.props;
+    // const poep = useContext(I18nContext);
+    // TODO
     return (
       <div className={classes.signInPage}>
         <Paper className={classes.signInPanel}>
@@ -121,6 +136,7 @@ class SignIn extends Component<SignInProps, SignInState> {
               errorMessages={['Username is required']}
               name="username"
               label="Username"
+              // label={LL.SELECTED_LOCALE()}
               fullWidth
               variant="outlined"
               value={username}
@@ -159,6 +175,11 @@ class SignIn extends Component<SignInProps, SignInState> {
     );
   }
 }
+
+// TODO
+// export default I18nContext(
+//   withAuthenticationContext(withSnackbar(withStyles(styles)(SignIn)))
+// );
 
 export default withAuthenticationContext(
   withSnackbar(withStyles(styles)(SignIn))

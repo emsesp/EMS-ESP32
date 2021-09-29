@@ -3,12 +3,12 @@ import { Component } from 'react';
 import { CssBaseline } from '@material-ui/core';
 import {
   MuiThemeProvider,
-  createMuiTheme,
+  createTheme,
   StylesProvider
 } from '@material-ui/core/styles';
 import { blueGrey, orange, red, green } from '@material-ui/core/colors';
 
-const theme = createMuiTheme({
+const theme = createTheme({
   palette: {
     type: 'dark',
     primary: {

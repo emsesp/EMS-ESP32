@@ -27,12 +27,8 @@ class SensorForm extends React.Component<SensorFormProps> {
   };
 
   render() {
-    const {
-      sensor,
-      handleSensorChange,
-      onDoneEditing,
-      onCancelEditing
-    } = this.props;
+    const { sensor, handleSensorChange, onDoneEditing, onCancelEditing } =
+      this.props;
 
     return (
       <ValidatorForm onSubmit={onDoneEditing} ref={this.formRef}>

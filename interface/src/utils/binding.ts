@@ -13,21 +13,20 @@ export const extractEventValue = (
   }
 };
 
-export const updateValue = <S>(updateEntity: UpdateEntity<S>) => (
-  event: React.ChangeEvent<HTMLInputElement>
-) => {
-  updateEntity((prevState) => ({
-    ...prevState,
-    [event.target.name]: extractEventValue(event)
-  }));
-};
+export const updateValue =
+  <S>(updateEntity: UpdateEntity<S>) =>
+  (event: React.ChangeEvent<HTMLInputElement>) => {
+    updateEntity((prevState) => ({
+      ...prevState,
+      [event.target.name]: extractEventValue(event)
+    }));
+  };
 
-export const updateBooleanValue = <S>(updateEntity: UpdateEntity<S>) => (
-  name: string,
-  value?: boolean
-) => {
-  updateEntity((prevState) => ({
-    ...prevState,
-    [name]: value
-  }));
-};
+export const updateBooleanValue =
+  <S>(updateEntity: UpdateEntity<S>) =>
+  (name: string, value?: boolean) => {
+    updateEntity((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
+  };

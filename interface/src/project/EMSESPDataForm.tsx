@@ -159,16 +159,16 @@ class EMSESPDataForm extends Component<
     processing: false
   };
 
-  handleDeviceValueChange = (name: keyof DeviceValue) => (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    this.setState({
-      edit_devicevalue: {
-        ...this.state.edit_devicevalue!,
-        [name]: extractEventValue(event)
-      }
-    });
-  };
+  handleDeviceValueChange =
+    (name: keyof DeviceValue) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      this.setState({
+        edit_devicevalue: {
+          ...this.state.edit_devicevalue!,
+          [name]: extractEventValue(event)
+        }
+      });
+    };
 
   cancelEditingDeviceValue = () => {
     this.setState({ edit_devicevalue: undefined });
@@ -220,16 +220,15 @@ class EMSESPDataForm extends Component<
     this.setState({ edit_devicevalue: dv });
   };
 
-  handleSensorChange = (name: keyof Sensor) => (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    this.setState({
-      edit_Sensor: {
-        ...this.state.edit_Sensor!,
-        [name]: extractEventValue(event)
-      }
-    });
-  };
+  handleSensorChange =
+    (name: keyof Sensor) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      this.setState({
+        edit_Sensor: {
+          ...this.state.edit_Sensor!,
+          [name]: extractEventValue(event)
+        }
+      });
+    };
 
   cancelEditingSensor = () => {
     this.setState({ edit_Sensor: undefined });

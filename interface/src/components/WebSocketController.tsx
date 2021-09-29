@@ -133,12 +133,14 @@ export function webSocketController<D, P extends WebSocketControllerProps<D>>(
         }
       }, wsThrottle);
 
-      handleValueChange = (name: keyof D) => (
-        event: React.ChangeEvent<HTMLInputElement>
-      ) => {
-        const data = { ...this.state.data!, [name]: extractEventValue(event) };
-        this.setState({ data });
-      };
+      handleValueChange =
+        (name: keyof D) => (event: React.ChangeEvent<HTMLInputElement>) => {
+          const data = {
+            ...this.state.data!,
+            [name]: extractEventValue(event)
+          };
+          this.setState({ data });
+        };
 
       render() {
         return (

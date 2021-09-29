@@ -1,4 +1,9 @@
-import React, { RefObject, Fragment } from 'react';
+import React, {
+  RefObject,
+  Fragment,
+  useContext,
+  ChangeEventHandler
+} from 'react';
 import { Link, withRouter, RouteComponentProps } from 'react-router-dom';
 
 import {
@@ -9,7 +14,9 @@ import {
   Divider,
   Button,
   Box,
-  IconButton
+  IconButton,
+  MenuItem,
+  Select
 } from '@material-ui/core';
 import {
   ClickAwayListener,
@@ -51,6 +58,10 @@ import {
   AuthenticatedContextProps
 } from '../authentication';
 import { withFeatures, WithFeaturesProps } from '../features/FeaturesContext';
+
+import { locales } from '../i18n/i18n-util';
+import { Locales } from '../i18n/i18n-types';
+import { I18nContext } from '../i18n/i18n-react';
 
 const drawerWidth = 290;
 
@@ -152,6 +163,18 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
     this.setState({ mobileOpen: !this.state.mobileOpen });
   };
 
+  onLocaleSelected = () => {
+    // TODO
+    console.log('hi');
+  };
+
+  onLocaleSelected2: ChangeEventHandler<HTMLSelectElement> = ({ target }) => {
+    // TODO
+    // const locale = target.value as Locales;
+    // localStorage.setItem('lang', locale);
+    // setLocale(locale);
+  };
+
   render() {
     const {
       classes,
@@ -163,6 +186,10 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
     } = this.props;
     const { mobileOpen, authMenuOpen } = this.state;
     const path = this.props.match.url;
+
+    // TODO
+    // const { setLocale, LL, locale } = useContext(I18nContext);
+
     const drawer = (
       <div>
         <Toolbar>
@@ -342,6 +369,28 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
             >
               {sectionTitle}
             </Typography>
+
+            {/* <Select name="language"
+              label="Language"
+              value="en"
+              variant="outlined"
+              <MenuItem value="en">English</MenuItem>
+            </Select> */}
+            {/* 
+            <label>
+              {LL.SELECTED_LOCALE()}
+              <select value={locale || ''} onChange={this.onLocaleSelected}>
+                <option value="" disabled>
+                  {LL.CHOOSE_LOCALE()}
+                </option>
+                {locales.map((locale) => (
+                  <option key={locale} value={locale}>
+                    {locale}
+                  </option>
+                ))}
+              </select>
+            </label> */}
+
             {features.security && userMenu}
           </Toolbar>
         </AppBar>
