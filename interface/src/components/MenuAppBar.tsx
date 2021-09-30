@@ -16,22 +16,20 @@ import {
   Box,
   IconButton,
   MenuItem,
-  Select
-} from '@material-ui/core';
-import {
+  Select,
   ClickAwayListener,
   Popper,
   Hidden,
-  Typography
-} from '@material-ui/core';
-import {
+  Typography,
+  Card,
+  CardContent,
+  CardActions,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   ListItemAvatar
 } from '@material-ui/core';
-import { Card, CardContent, CardActions } from '@material-ui/core';
 
 import {
   withStyles,
@@ -134,6 +132,16 @@ interface MenuAppBarProps
   sectionTitle: string;
 }
 
+// TODO fix this function
+const onLocaleSelected = (event: any) => {
+  const { setLocale } = useContext(I18nContext);
+
+  console.log(event.target.value);
+  const new_locale = event.target.value as Locales;
+  localStorage.setItem('lang', new_locale);
+  setLocale(new_locale);
+};
+
 class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
   constructor(props: MenuAppBarProps) {
     super(props);
@@ -163,18 +171,6 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
     this.setState({ mobileOpen: !this.state.mobileOpen });
   };
 
-  onLocaleSelected = () => {
-    // TODO
-    console.log('hi');
-  };
-
-  onLocaleSelected2: ChangeEventHandler<HTMLSelectElement> = ({ target }) => {
-    // TODO
-    // const locale = target.value as Locales;
-    // localStorage.setItem('lang', locale);
-    // setLocale(locale);
-  };
-
   render() {
     const {
       classes,
@@ -186,9 +182,6 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
     } = this.props;
     const { mobileOpen, authMenuOpen } = this.state;
     const path = this.props.match.url;
-
-    // TODO
-    // const { setLocale, LL, locale } = useContext(I18nContext);
 
     const drawer = (
       <div>
@@ -295,6 +288,16 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
 
     const userMenu = (
       <div>
+        {/* TODO select locale here
+         */}
+        {/* <Select value={locales || ''} onChange={setLocale('en')}> */}
+        <Select value={locales || ''} onChange={onLocaleSelected}>
+          {locales.map((locale) => (
+            <MenuItem value={locale} key={locale}>
+              {locale}
+            </MenuItem>
+          ))}
+        </Select>
         <IconButton
           ref={this.anchorRef}
           aria-owns={authMenuOpen ? 'menu-list-grow' : undefined}
@@ -369,28 +372,6 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
             >
               {sectionTitle}
             </Typography>
-
-            {/* <Select name="language"
-              label="Language"
-              value="en"
-              variant="outlined"
-              <MenuItem value="en">English</MenuItem>
-            </Select> */}
-            {/* 
-            <label>
-              {LL.SELECTED_LOCALE()}
-              <select value={locale || ''} onChange={this.onLocaleSelected}>
-                <option value="" disabled>
-                  {LL.CHOOSE_LOCALE()}
-                </option>
-                {locales.map((locale) => (
-                  <option key={locale} value={locale}>
-                    {locale}
-                  </option>
-                ))}
-              </select>
-            </label> */}
-
             {features.security && userMenu}
           </Toolbar>
         </AppBar>

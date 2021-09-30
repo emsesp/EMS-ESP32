@@ -5,6 +5,10 @@
   "dependencies": {
     "@material-ui/core": "^4.12.3",
     "@material-ui/icons": "^4.11.2",
+    "material-ui-country-flags": "3.0.1",
+    "material-ui-flags": "1.0.8",
+    "react-country-flag": "2.3.1",
+    "react-world-flags": "1.4.0",
     "@msgpack/msgpack": "^2.7.1",
     "@types/lodash": "^4.14.175",
     "@types/node": "^16.10.2",
@@ -16,6 +20,7 @@
     "compression-webpack-plugin": "^5.0.2",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
+    "material-ui-flags": "^1.2.4",
     "mime-types": "^2.1.32",
     "notistack": "^1.0.10",
     "parse-ms": "^3.0.0",
@@ -40,7 +45,7 @@
     "build-localhost": "PUBLIC_URL=/ react-app-rewired build",
     "mock-api": "nodemon --watch ../mock-api ../mock-api/server.js",
     "standalone": "npm-run-all -p start mock-api",
-    "dev": "npm-run-all --parallel start typesafe-i18n-generator",
+    "dev": "npm-run-all --parallel start typesafe-i18n-generator mock-api",
     "typesafe-i18n-generator": "typesafe-i18n",
     "lint": "eslint . --ext .ts,.tsx"
   },

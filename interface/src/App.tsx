@@ -10,7 +10,7 @@ import CustomMuiTheme from './CustomMuiTheme';
 import { PROJECT_NAME } from './api';
 import FeaturesWrapper from './features/FeaturesWrapper';
 
-import LanguageWrapper from './i18n/LanguageWrapper';
+import LanguageWrapper from './i18n/LanguageWrapper'; // TODO probably don't need a wrapper
 
 // this redirect forces a call to authenticationContext.refresh() which invalidates the JWT if it is invalid.
 const unauthorizedRedirect = () => <Redirect to="/" />;

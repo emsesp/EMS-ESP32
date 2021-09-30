@@ -20,15 +20,16 @@ class LanguageWrapper extends Component<{}, LanguageWrapperState> {
   componentDidMount = () => {
     const detectedLocale = detectLocale(localStorageDetector);
     // this.setState({ "en" });
+    // TODO remove this line
   };
 
-  selectLocale = (locale: Locales) => {
-    this.setState({ locale });
-    // i18n.activate(language);
-    // TODO add
-    localStorage.setItem('lang', locale);
-    // setLocale(locale);
-  };
+  // TODO this can be removed
+  // selectLocale = (locale: Locales) => {
+  //   this.setState({ locale });
+  //   i18n.activate(language);
+  //   localStorage.setItem('lang', locale);
+  //   setLocale(locale);
+  // };
 
   render() {
     const { locale } = this.state;

@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, ChangeEventHandler, useContext } from 'react';
 
 import {
   ValidatorForm,
@@ -21,16 +21,18 @@ import {
 
 import { useAuthorizedRest } from '../hooks';
 import { updateValue } from '../utils';
+import { isIPv4, optional, isHostname, or } from '../validators';
+
+import { locales } from '../i18n/i18n-util';
+import { Locales } from '../i18n/i18n-types';
+import { I18nContext } from '../i18n/i18n-react';
 
 import { EMSESPSettings } from './EMSESPtypes';
+import { boardProfileSelectItems } from './EMSESPBoardProfiles';
 
 import { ENDPOINT_ROOT } from '../api';
 export const EMSESP_SETTINGS_ENDPOINT = ENDPOINT_ROOT + 'emsespSettings';
 export const BOARD_PROFILE_ENDPOINT = ENDPOINT_ROOT + 'boardProfile';
-
-import { isIPv4, optional, isHostname, or } from '../validators';
-
-import { boardProfileSelectItems } from './EMSESPBoardProfiles';
 
 const EMSESPSettingsController: FC = () => {
   const { loadData, saveData, saving, setData, data, errorMessage } =
@@ -42,6 +44,8 @@ const EMSESPSettingsController: FC = () => {
     'isOptionalIPorHost',
     optional(or(isIPv4, isHostname))
   );
+
+  const { setLocale, LL, locale } = useContext(I18nContext);
 
   const content = () => {
     if (!data) {
@@ -61,7 +65,9 @@ const EMSESPSettingsController: FC = () => {
               >
                 {' documentation'}
               </Link>
-              &nbsp;for information on each setting
+              {/* TODO test locale here
+               */}
+              &nbsp;for information on each setting &nbsp;{LL.SELECTED_LOCALE()}
             </i>
           </Typography>
         </Box>
@@ -601,7 +607,7 @@ const EMSESPSettingsController: FC = () => {
   };
 
   return (
-    <SectionContent title="REST Controller" titleGutter>
+    <SectionContent title="" titleGutter>
       {content()}
     </SectionContent>
   );
