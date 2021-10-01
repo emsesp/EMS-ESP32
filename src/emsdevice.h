@@ -64,7 +64,8 @@ enum DeviceValueUOM : uint8_t {
     KB,       // 12
     SECONDS,  // 13
     DBM,      // 14
-    MV        // 15
+    MV,       // 15
+    OCLOCK    // 16
 
 };
 

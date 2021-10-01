@@ -184,6 +184,7 @@ MAKE_PSTR(kb, "KB")
 MAKE_PSTR(seconds, "seconds")
 MAKE_PSTR(dbm, "dBm")
 MAKE_PSTR(mv, "mV")
+MAKE_PSTR(oclock, "o'clock")
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
@@ -327,7 +328,6 @@ MAKE_PSTR_LIST(enum_ibaBuildingType, F_(light), F_(medium), F_(heavy))
 MAKE_PSTR_LIST(enum_wwMode, F_(off), F_(low), F_(high), F_(auto), F_(own_prog))
 MAKE_PSTR_LIST(enum_wwCircMode, F_(off), F_(on), F_(auto), F_(own_prog))
 MAKE_PSTR_LIST(enum_wwMode2, F_(off), F_(on), F_(auto))
-MAKE_PSTR_LIST(enum_wwCircMode2, F_(off), F_(on), F_(auto))
 MAKE_PSTR_LIST(enum_heatingtype, F_(off), F_(radiator), F_(convector), F_(floor))
 MAKE_PSTR_LIST(enum_summermode, F_(summer), F_(auto), F_(winter))
 
