@@ -11,6 +11,7 @@
 - Add new command 'entities' for a device, e.g. http://ems-esp/api/boiler/entities to show the shortname, description and HA Entity name (if HA enabled) [#116](https://github.com/emsesp/EMS-ESP32/issues/116)
 - Support for Junkers program and remote (fb10/fb110) temperature
 - Home Assistant `state_class` attribute for Wh, kWh, W and KW [#129](https://github.com/emsesp/EMS-ESP32/issues/129)
+- Add current room influence for RC300[#136]
 
 ## Fixed
 

@@ -867,6 +867,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram->read_value(hc->setpoint_roomTemp, 3, 1)); // is * 2, force as single byte
     has_update(telegram->read_bitvalue(hc->summermode, 2, 4));
     has_update(telegram->read_value(hc->targetflowtemp, 4));
+    has_update(telegram->read_value(hc->curroominfl, 27));
 }
 
 // type 0x02B9 EMS+ for reading from RC300/RC310 thermostat
@@ -2661,6 +2662,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT, nullptr, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp));
         register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT, nullptr, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp));
         register_device_value(tag, &hc->roominfluence, DeviceValueType::UINT, nullptr, FL_(roominfluence), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_roominfluence));
+        register_device_value(tag, &hc->curroominfl, DeviceValueType::SHORT, nullptr, FL_(curroominfl), DeviceValueUOM::DEGREES);
         register_device_value(tag, &hc->nofrosttemp, DeviceValueType::INT, nullptr, FL_(nofrosttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nofrosttemp));
         register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT, nullptr, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
         register_device_value(tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE);

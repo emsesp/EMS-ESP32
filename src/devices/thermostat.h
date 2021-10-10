@@ -55,6 +55,7 @@ class Thermostat : public EMSdevice {
         uint8_t manualtemp;
         uint8_t summer_setmode;
         uint8_t roominfluence;
+        int16_t curroominfl;
         uint8_t flowtempoffset;
         uint8_t minflowtemp;
         uint8_t maxflowtemp;
