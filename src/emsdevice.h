@@ -77,7 +77,7 @@ MAKE_PSTR(icontime, "mdi:clock-outline")          // DeviceValueUOM::SECONDS MIN
 MAKE_PSTR(iconkb, "mdi:memory")                   // DeviceValueUOM::KB
 MAKE_PSTR(iconlmin, "mdi:water-boiler")           // DeviceValueUOM::LMIN
 MAKE_PSTR(iconkwh, "mdi:transmission-tower")      // DeviceValueUOM::KWH & WH
-MAKE_PSTR(iconua, "mdi:flash-circle")             // DeviceValueUOM::UA
+MAKE_PSTR(iconua, "mdi:lightning-bolt-circle")    // DeviceValueUOM::UA
 MAKE_PSTR(iconbar, "mdi:gauge")                   // DeviceValueUOM::BAR
 MAKE_PSTR(iconkw, "mdi:omega")                    // DeviceValueUOM::KW & W
 MAKE_PSTR(icondbm, "mdi:wifi-strength-2")         // DeviceValueUOM::DBM
