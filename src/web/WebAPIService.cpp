@@ -162,14 +162,13 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
         }
     }
 
-    // now go and verify the values
-
-    // device check
+    // device checks
     if (device_s.empty()) {
         // see if we have a device embedded in the json body, then use that
         send_message_response(request, 422, "Missing device"); // Unprocessable Entity
         return;
     }
+
     device_type = EMSdevice::device_name_2_device_type(device_s.c_str());
     if (device_type == EMSdevice::DeviceType::UNKNOWN) {
         send_message_response(request, 422, "Invalid call"); // Unprocessable Entity
@@ -182,6 +181,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
     auto method        = request->method();
     bool have_data     = !value_s.empty();
     bool authenticated = false;
+
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         Authentication authentication = _securityManager->authenticateRequest(request);
         authenticated                 = settings.notoken_api | AuthenticationPredicates::IS_ADMIN(authentication);
@@ -252,7 +252,7 @@ void WebAPIService::send_message_response(AsyncWebServerRequest * request, uint1
         request->send(response);
     }
 
-    EMSESP::logger().debug(F("API returns, code: %d, message: %s"), error_code, error_message);
+    EMSESP::logger().debug(F("API return code: %d, message: %s"), error_code, error_message);
 }
 
 /**
