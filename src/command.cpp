@@ -43,7 +43,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // check if we're allowed to call it
     if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !authenticated) {
-        LOG_WARNING(F("Command %s on %s not permitted. requires admin."), cmd, EMSdevice::device_type_2_device_name(device_type).c_str());
+        LOG_WARNING(F("Command %s on %s requires valid authorization"), cmd, EMSdevice::device_type_2_device_name(device_type).c_str());
         return CommandRet::NOT_ALLOWED;
     }
 
@@ -71,8 +71,8 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // check if we're allowed to call it
     if (cf != nullptr) {
-        if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !authenticated && value != nullptr) {
-            LOG_WARNING(F("Command %s on %s not permitted. requires admin."), cmd, EMSdevice::device_type_2_device_name(device_type).c_str());
+        if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !authenticated) {
+            LOG_WARNING(F("Command %s on %s requires valid authorization"), cmd, EMSdevice::device_type_2_device_name(device_type).c_str());
             return CommandRet::NOT_ALLOWED; // command not allowed
         }
     }
@@ -83,7 +83,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     } else if (id == -1) {
         LOG_INFO(F("Calling %s command '%s', value %s, id is default"), dname.c_str(), cmd, value);
     } else {
-        LOG_INFO(F("Calling %s command '%s', value %s, id is %d"), dname.c_str(), cmd, value, id);
+        LOG_INFO(F("Calling %s command '%s', value %s, id is %d"), dname.c_str(), cmd, value, id_new);
     }
 
     // check if json object is empty, if so quit
@@ -306,7 +306,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                 if (cf.has_flags(CommandFlag::ADMIN_ONLY)) {
                     shell.print(' ');
                     shell.print(COLOR_BRIGHT_RED);
-                    shell.print('*');
+                    shell.print('!');
                 }
                 shell.print(COLOR_RESET);
             }
@@ -367,7 +367,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
 // output list of all commands to console
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
-    shell.println(F("Available commands (* = need authorization): "));
+    shell.println(F("Available commands (!=requires authorization): "));
 
     // show system first
     shell.print(COLOR_BOLD_ON);
