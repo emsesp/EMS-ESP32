@@ -597,7 +597,7 @@ void Console::load_system_commands(unsigned int context) {
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(restart)},
                                        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           EMSESP::system_.restart();
+                                           EMSESP::system_.system_restart();
                                        });
 
     EMSESPShell::commands->add_command(context,

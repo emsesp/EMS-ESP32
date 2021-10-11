@@ -34,6 +34,7 @@ uuid::syslog::SyslogService System::syslog_;
 // init statics
 uint32_t System::heap_start_ = 1; // avoid using 0 to divide-by-zero later
 PButton  System::myPButton_;
+bool     System::restart_requested_ = false;
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
@@ -160,8 +161,8 @@ bool System::command_watch(const char * value, const int8_t id) {
 }
 
 // restart EMS-ESP
-void System::restart() {
-    LOG_INFO(F("Restarting system..."));
+void System::system_restart() {
+    LOG_INFO(F("Restarting EMS-ESP..."));
     Shell::loop_all();
     delay(1000); // wait a second
 #ifndef EMSESP_STANDALONE
@@ -192,7 +193,7 @@ void System::format(uuid::console::Shell & shell) {
     LITTLEFS.format();
 #endif
 
-    System::restart();
+    System::system_restart();
 }
 
 void System::syslog_start() {
@@ -422,6 +423,11 @@ void System::upload_status(bool in_progress) {
 
 // checks system health and handles LED flashing wizardry
 void System::loop() {
+    // check if we're supposed to do a reset/restart
+    if (restart_requested()) {
+        this->system_restart();
+    }
+
 #ifndef EMSESP_STANDALONE
     myPButton_.check(); // check button press
 
@@ -441,8 +447,8 @@ void System::loop() {
         last_heartbeat_ = currentMillis;
         send_heartbeat();
     }
-
 #ifndef EMSESP_STANDALONE
+
 #if defined(EMSESP_DEBUG)
 /*
     static uint32_t last_memcheck_ = 0;
@@ -452,6 +458,7 @@ void System::loop() {
     }
     */
 #endif
+
 #endif
 
 #endif
@@ -1028,11 +1035,9 @@ bool System::load_board_profile(std::vector<uint8_t> & data, const std::string &
     return true;
 }
 
-// restart command - perform a hard reset
+// restart command - perform a hard reset by setting flag
 bool System::command_restart(const char * value, const int8_t id) {
-#ifndef EMSESP_STANDALONE
-    ESP.restart();
-#endif
+    restart_requested(true);
     return true;
 }
 

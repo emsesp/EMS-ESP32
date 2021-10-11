@@ -63,7 +63,7 @@ class System {
     static bool command_settings(const char * value, const int8_t id, JsonObject & json);
     static bool command_commands(const char * value, const int8_t id, JsonObject & json);
 
-    void restart();
+    void system_restart();
     void format(uuid::console::Shell & shell);
     void upload_status(bool in_progress);
     bool upload_status();
@@ -83,6 +83,14 @@ class System {
 
     static bool is_valid_gpio(uint8_t pin);
     static bool load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile);
+
+    static void restart_requested(bool restart_requested) {
+        restart_requested_ = restart_requested;
+    }
+
+    static bool restart_requested() {
+        return restart_requested_;
+    }
 
     bool analog_enabled() {
         return analog_enabled_;
@@ -122,6 +130,7 @@ class System {
   private:
     static uuid::log::Logger logger_;
     static uint32_t          heap_start_;
+    static bool              restart_requested_;
 
     // button
     static PButton            myPButton_; // PButton instance
