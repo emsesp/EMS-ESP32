@@ -61,7 +61,7 @@ void NetworkSettingsService::manageSTA() {
             WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE); // configure for DHCP
         }
 
-        WiFi.setHostname(_state.hostname.c_str());                // set hostname
+        WiFi.setHostname(_state.hostname.c_str()); // set hostname
         // www.esp32.com/viewtopic.php?t=12055
         read([&](NetworkSettings & networkSettings) {
             if (networkSettings.bandwidth20) {
@@ -73,7 +73,6 @@ void NetworkSettingsService::manageSTA() {
             if (networkSettings.nosleep) {
                 WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
             }
-
         });
         WiFi.begin(_state.ssid.c_str(), _state.password.c_str()); // attempt to connect to the network
     }

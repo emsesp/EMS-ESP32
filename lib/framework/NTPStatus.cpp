@@ -3,7 +3,9 @@
 using namespace std::placeholders; // for `_1` etc
 
 NTPStatus::NTPStatus(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(NTP_STATUS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&NTPStatus::ntpStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+    server->on(NTP_STATUS_SERVICE_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest(std::bind(&NTPStatus::ntpStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 /*

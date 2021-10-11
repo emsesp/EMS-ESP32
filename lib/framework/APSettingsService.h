@@ -57,7 +57,8 @@ class APSettings {
     IPAddress subnetMask;
 
     bool operator==(const APSettings & settings) const {
-        return provisionMode == settings.provisionMode && ssid == settings.ssid && password == settings.password && localIP == settings.localIP && gatewayIP == settings.gatewayIP && subnetMask == settings.subnetMask;
+        return provisionMode == settings.provisionMode && ssid == settings.ssid && password == settings.password && localIP == settings.localIP
+               && gatewayIP == settings.gatewayIP && subnetMask == settings.subnetMask;
     }
 
     static void read(APSettings & settings, JsonObject & root) {

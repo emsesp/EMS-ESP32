@@ -130,7 +130,8 @@ bool PButton::check(void) {
     }
 
     // Test for normal click event: DblClickDelay expired
-    if (state_ == pullMode_ && (millisRes - upTime_) >= DblClickDelay_ && dblClickWaiting_ == true && dblClickOnNextUp_ == false && singleClickOK_ == true && resultEvent != 2) {
+    if (state_ == pullMode_ && (millisRes - upTime_) >= DblClickDelay_ && dblClickWaiting_ == true && dblClickOnNextUp_ == false && singleClickOK_ == true
+        && resultEvent != 2) {
         // Serial.println("*single click pressed*");
         resultEvent      = 1;
         dblClickWaiting_ = false;

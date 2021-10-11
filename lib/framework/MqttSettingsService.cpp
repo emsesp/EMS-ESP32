@@ -146,7 +146,7 @@ void MqttSettingsService::configureMqtt() {
         _mqttClient.setCleanSession(_state.cleanSession);
         _mqttClient.setMaxTopicLength(_state.maxTopicLength);
         _mqttClient.connect();
-    // } else {
+        // } else {
         // emsesp::EMSESP::logger().info(F("Error configuring Mqtt client"));
     }
 }
