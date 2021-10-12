@@ -426,7 +426,7 @@ class EMSdevice {
         void *                              value_p;      // pointer to variable of any type
         uint8_t                             type;         // DeviceValueType::*
         const __FlashStringHelper * const * options;      // options as a flash char array
-        uint8_t                             options_size; // # options in the char array, calculated
+        uint8_t                             options_size; // number of options in the char array, calculated
         const __FlashStringHelper *         short_name;   // used in MQTT
         const __FlashStringHelper *         full_name;    // used in Web and Console
         uint8_t                             uom;          // DeviceValueUOM::*
