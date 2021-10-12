@@ -104,6 +104,9 @@ type EMSESPDataFormProps = RestFormProps<EMSESPData> &
   AuthenticatedContextProps &
   WithWidthProps;
 
+const pluralize = (count: number, noun: string, suffix = 's') =>
+  ` ${Intl.NumberFormat().format(count)} ${noun}${count !== 1 ? suffix : ''} `;
+
 export const formatDuration = (duration_min: number) => {
   const { days, hours, minutes } = parseMilliseconds(duration_min * 60000);
   let formatted = '';
@@ -118,9 +121,6 @@ export const formatDuration = (duration_min: number) => {
   }
   return formatted;
 };
-
-const pluralize = (count: number, noun: string, suffix = 's') =>
-  ` ${count} ${noun}${count !== 1 ? suffix : ''} `;
 
 function formatValue(value: any, uom: number, digit: number) {
   switch (uom) {
@@ -141,6 +141,9 @@ function formatValue(value: any, uom: number, digit: number) {
         ' ' +
         DeviceValueUOM_s[uom]
       );
+    case DeviceValueUOM.TIMES:
+    case DeviceValueUOM.SECONDS:
+      return pluralize(value, DeviceValueUOM_s[uom]);
     default:
       return (
         new Intl.NumberFormat().format(value) + ' ' + DeviceValueUOM_s[uom]
