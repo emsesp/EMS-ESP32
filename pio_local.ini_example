@@ -15,8 +15,7 @@ my_build_flags =
 ;   --auth=ems-esp-neo
 ; upload_port = 10.10.10.101
 
-; to prevent the web UI from building each time, comment out this next line
-extra_scripts = scripts/rename_fw.py ; don't build WebUI
+extra_scripts = scripts/rename_fw.py ; don't build WebUI just firmware
 
 ; pio run -e debug
 ; or from Visual Studio Code do PIO -> Project Tasks -> debug -> General -> Upload and Monitor
