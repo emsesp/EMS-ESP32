@@ -83,9 +83,9 @@ class Boiler : public EMSdevice {
     uint8_t  wwSetPumpPower_;     // ww pump speed/power?
     uint8_t  wwFlowTempOffset_;   // Boiler offset for ww heating
     uint8_t  wwMaxPower_;         // Warm Water maximum power
-    uint32_t wwStarts_;           // Warm Water # starts
+    uint32_t wwStarts_;           // Warm Water starts
     uint32_t wwStarts2_;          // Warm water control starts
-    uint32_t wwWorkM_;            // Warm Water # minutes
+    uint32_t wwWorkM_;            // Warm Water minutes
     int8_t   wwHystOn_;
     int8_t   wwHystOff_;
     uint8_t  wwTapActivated_;   // maintenance-mode to switch DHW off
@@ -127,7 +127,7 @@ class Boiler : public EMSdevice {
     uint8_t  setFlowTemp_;       // boiler setpoint temp
     uint8_t  curBurnPow_;        // Burner current power %
     uint8_t  setBurnPow_;        // max output power in %
-    uint32_t burnStarts_;        // # burner restarts
+    uint32_t burnStarts_;        // burner restarts
     uint32_t burnWorkMin_;       // Total burner operating time
     uint32_t heatWorkMin_;       // Total heat operating time
     uint32_t UBAuptime_;         // Total UBA working hours
