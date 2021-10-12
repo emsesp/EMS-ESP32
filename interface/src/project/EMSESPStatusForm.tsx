@@ -62,14 +62,14 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
             >
               <TableBody>
                 <TableRow>
-                  <TableCell># Telegrams Received</TableCell>
+                  <TableCell>Telegrams Received</TableCell>
                   <TableCell align="right">
                     {formatNumber(data.rx_received)}&nbsp;(quality{' '}
                     {data.rx_quality}%)
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell># Telegrams Sent</TableCell>
+                  <TableCell>Telegrams Sent</TableCell>
                   <TableCell align="right">
                     {formatNumber(data.tx_sent)}&nbsp;(quality {data.tx_quality}
                     %)
