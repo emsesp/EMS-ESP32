@@ -489,8 +489,8 @@ bool System::heartbeat_json(JsonObject & doc) {
     doc["uptime_sec"] = uuid::get_uptime_sec();
     doc["rxreceived"] = EMSESP::rxservice_.telegram_count();
     doc["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
-    doc["txread"]     = EMSESP::txservice_.telegram_read_count();
-    doc["txwrite"]    = EMSESP::txservice_.telegram_write_count();
+    doc["txreads"]    = EMSESP::txservice_.telegram_read_count();
+    doc["txwrites"]   = EMSESP::txservice_.telegram_write_count();
     doc["txfails"]    = EMSESP::txservice_.telegram_fail_count();
     if (Mqtt::enabled()) {
         doc["mqttfails"] = Mqtt::publish_fails();
