@@ -184,6 +184,7 @@ MAKE_PSTR(kb, "KB")
 MAKE_PSTR(seconds, "seconds")
 MAKE_PSTR(dbm, "dBm")
 MAKE_PSTR(mv, "mV")
+MAKE_PSTR(times, "times")
 MAKE_PSTR(oclock, "o'clock")
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp

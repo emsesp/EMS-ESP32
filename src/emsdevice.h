@@ -44,9 +44,8 @@ enum DeviceValueType : uint8_t {
 
 };
 
-// Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
-// uom - also used with HA
-// sequence is important!
+// Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp. Sequence is important!!
+// also used with HA as uom
 enum DeviceValueUOM : uint8_t {
 
     NONE = 0, // 0
@@ -65,7 +64,8 @@ enum DeviceValueUOM : uint8_t {
     SECONDS,  // 13
     DBM,      // 14
     MV,       // 15
-    OCLOCK    // 16
+    TIMES,    // 16
+    OCLOCK    // 17
 
 };
 

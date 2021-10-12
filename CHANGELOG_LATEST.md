@@ -12,6 +12,7 @@
 - Support for Junkers program and remote (fb10/fb110) temperature
 - Home Assistant `state_class` attribute for Wh, kWh, W and KW [#129](https://github.com/emsesp/EMS-ESP32/issues/129)
 - Add current room influence for RC300[#136]
+- Added Home Assistant device_class to sensor entities
 
 ## Fixed
 
@@ -28,10 +29,13 @@
 - "unit" renamed to "uom" in API call to recall a Device Value
 - initial backend React changes to replace the class components (HOCs) with React Hooks
 - Use program-names instead of numbers
+- Boiler's maintenancemessage always published in MQTT (to prevent HA missing entity)
+- Unit of Measure 'times' added to MQTT Fails, Rx fails, Rx received, Tx fails, Tx reads & Tx writes
 
 ## **BREAKING CHANGES**
 
 - API: "unit" renamed to "uom" in API call to recall a Device Value
 - HA: `sensor.boiler_boiler_temperature` renamed to `sensor.actual_boiler_temperature`
 - HA: `binary_sensor.boiler_ww_disinfecting` renamed to `binary_sensor.boiler_ww_disinfection`
-  
+- HA: # removed from counts in MQTT Fails, Rx fails, Rx received, Tx fails, Tx reads & Tx writes
+- `txread` renamed to `txreads` and `txwrite` renamed to `txwrites` in MQTT heartbeat payload
