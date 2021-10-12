@@ -724,12 +724,12 @@ void Mqtt::ha_status() {
     publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"), DeviceValueUOM::NONE);
     publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime (sec)"), EMSdevice::DeviceType::SYSTEM, F("uptime_sec"), DeviceValueUOM::SECONDS);
     publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Free memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"), DeviceValueUOM::KB);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# MQTT fails"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"), DeviceValueUOM::NONE);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Rx received"), EMSdevice::DeviceType::SYSTEM, F("rxreceived"), DeviceValueUOM::NONE);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Rx fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"), DeviceValueUOM::NONE);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx reads"), EMSdevice::DeviceType::SYSTEM, F("txread"), DeviceValueUOM::NONE);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx writes"), EMSdevice::DeviceType::SYSTEM, F("txwrite"), DeviceValueUOM::NONE);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"), DeviceValueUOM::NONE);
+    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("MQTT fails"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"), DeviceValueUOM::TIMES);
+    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Rx received"), EMSdevice::DeviceType::SYSTEM, F("rxreceived"), DeviceValueUOM::TIMES);
+    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Rx fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"), DeviceValueUOM::TIMES);
+    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx reads"), EMSdevice::DeviceType::SYSTEM, F("txreads"), DeviceValueUOM::TIMES);
+    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx writes"), EMSdevice::DeviceType::SYSTEM, F("txwrites"), DeviceValueUOM::TIMES);
+    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"), DeviceValueUOM::TIMES);
 }
 
 // add sub or pub task to the queue.
@@ -1003,8 +1003,9 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
         // normal HA sensor, not a boolean one
         snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // topic
 
-        enum uint8_t { STATE_CLASS_NONE, STATE_CLASS_MEASUREMENT, STATE_CLASS_TOTAL_INCREASING };
-        uint8_t set_state_class = STATE_CLASS_NONE; // default
+        // set default state and device class for HA
+        auto set_state_class  = State_class::NONE;
+        auto set_device_class = Device_class::NONE;
 
         // unit of measure and map the HA icon
         if (uom != DeviceValueUOM::NONE) {
@@ -1013,10 +1014,12 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
 
         switch (uom) {
         case DeviceValueUOM::DEGREES:
-            doc["ic"] = F_(icondegrees);
+            doc["ic"]        = F_(icondegrees);
+            set_device_class = Device_class::TEMPERATURE;
             break;
         case DeviceValueUOM::PERCENT:
-            doc["ic"] = F_(iconpercent);
+            doc["ic"]        = F_(iconpercent);
+            set_device_class = Device_class::POWER_FACTOR;
             break;
         case DeviceValueUOM::SECONDS:
         case DeviceValueUOM::MINUTES:
@@ -1031,39 +1034,71 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
             break;
         case DeviceValueUOM::WH:
         case DeviceValueUOM::KWH:
-            doc["ic"]       = F_(iconkwh);
-            set_state_class = STATE_CLASS_TOTAL_INCREASING;
+            doc["ic"]        = F_(iconkwh);
+            set_state_class  = State_class::TOTAL_INCREASING;
+            set_device_class = Device_class::ENERGY;
             break;
         case DeviceValueUOM::UA:
             doc["ic"] = F_(iconua);
             break;
         case DeviceValueUOM::BAR:
-            doc["ic"] = F_(iconbar);
+            doc["ic"]        = F_(iconbar);
+            set_device_class = Device_class::PRESSURE;
             break;
         case DeviceValueUOM::W:
         case DeviceValueUOM::KW:
-            doc["ic"]       = F_(iconkw);
-            set_state_class = STATE_CLASS_MEASUREMENT;
+            doc["ic"]        = F_(iconkw);
+            set_state_class  = State_class::MEASUREMENT;
+            set_device_class = Device_class::POWER;
             break;
         case DeviceValueUOM::DBM:
-            doc["ic"] = F_(icondbm);
+            doc["ic"]        = F_(icondbm);
+            set_device_class = Device_class::SIGNAL_STRENGTH;
             break;
         case DeviceValueUOM::NONE:
             if (type == DeviceValueType::INT || type == DeviceValueType::UINT || type == DeviceValueType::SHORT || type == DeviceValueType::USHORT
                 || type == DeviceValueType::ULONG) {
                 doc["ic"] = F_(iconnum);
             }
+        case DeviceValueUOM::TIMES:
+            set_state_class = State_class::TOTAL_INCREASING;
+            doc["ic"]       = F_(iconnum);
         default:
             break;
         }
 
-        // see if we need to set the state_class
+        // see if we need to set the state_class and device_class
         // ignore any commands
         if (!has_cmd) {
-            if (set_state_class == STATE_CLASS_MEASUREMENT) {
+            // state class
+            if (set_state_class == State_class::MEASUREMENT) {
                 doc["state_class"] = F("measurement");
-            } else if (set_state_class == STATE_CLASS_TOTAL_INCREASING) {
+            } else if (set_state_class == State_class::TOTAL_INCREASING) {
                 doc["state_class"] = F("total_increasing");
+            }
+
+            // device class
+            switch (set_device_class) {
+            case Device_class::ENERGY:
+                doc["device_class"] = F("energy");
+                break;
+            case Device_class::POWER:
+                doc["device_class"] = F("power");
+                break;
+            case Device_class::POWER_FACTOR:
+                doc["device_class"] = F("power_factor");
+                break;
+            case Device_class::PRESSURE:
+                doc["device_class"] = F("pressure");
+                break;
+            case Device_class::SIGNAL_STRENGTH:
+                doc["device_class"] = F("signal_strength");
+                break;
+            case Device_class::TEMPERATURE:
+                doc["device_class"] = F("temperature");
+                break;
+            default:
+                break;
             }
         }
     }
