@@ -718,7 +718,7 @@ void Console::load_system_commands(unsigned int context) {
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            if (arguments.size() == 0) {
                                                EMSESP::webSettingsService.read([&](WebSettings & settings) {
-                                                   for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+                                                   for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
                                                        if (!settings.sensor[i].id.isEmpty()) {
                                                            shell.print(settings.sensor[i].id);
                                                            shell.print(" : ");

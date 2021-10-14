@@ -313,7 +313,7 @@ std::string DallasSensor::Sensor::to_string(const bool name) const {
     std::string str = id_string();
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         if (settings.dallas_format == Dallas_Format::NAME || name) {
-            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+            for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
                 if (strcmp(settings.sensor[i].id.c_str(), str.c_str()) == 0) {
                     str = settings.sensor[i].name.c_str();
                 }
@@ -328,7 +328,7 @@ int16_t DallasSensor::Sensor::offset() const {
     std::string str    = id_string();
     int16_t     offset = 0; // default value
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+        for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
             if (strcmp(settings.sensor[i].id.c_str(), str.c_str()) == 0) {
                 offset = settings.sensor[i].offset;
             }
@@ -376,7 +376,7 @@ bool DallasSensor::update(const char * idstr, const char * name, int16_t offset)
     EMSESP::webSettingsService.update(
         [&](WebSettings & settings) {
             // check for new name of stored id
-            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+            for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
                 if (strcmp(id, settings.sensor[i].id.c_str()) == 0) {
                     if (strlen(name) == 0 && offset == 0) { // delete entry if name and offset is empty
                         LOG_INFO(F("Deleting entry for sensor %s"), id);
@@ -397,7 +397,7 @@ bool DallasSensor::update(const char * idstr, const char * name, int16_t offset)
             }
 
             // check for free place
-            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+            for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
                 if (settings.sensor[i].id.isEmpty()) {
                     settings.sensor[i].id     = id;
                     settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
@@ -410,7 +410,7 @@ bool DallasSensor::update(const char * idstr, const char * name, int16_t offset)
             }
 
             // check if there is a unused id and overwrite it
-            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+            for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
                 bool found = false;
                 for (const auto & sensor : sensors_) {
                     if (strcmp(sensor.id_string().c_str(), settings.sensor[i].id.c_str()) == 0) {

@@ -67,7 +67,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["weblog_buffer"]        = settings.weblog_buffer;
     root["weblog_compact"]       = settings.weblog_compact;
 
-    for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+    for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
         char buf[20];
         snprintf(buf, sizeof(buf), "sensor_id%d", i);
         root[buf] = settings.sensor[i].id;
@@ -205,7 +205,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.weblog_buffer  = root["weblog_buffer"] | EMSESP_DEFAULT_WEBLOG_BUFFER;
     settings.weblog_compact = root["weblog_compact"] | EMSESP_DEFAULT_WEBLOG_COMPACT;
 
-    for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+    for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
         char buf[20];
         snprintf(buf, sizeof(buf), "sensor_id%d", i);
         settings.sensor[i].id = root[buf] | EMSESP_DEFAULT_SENSOR_NAME;

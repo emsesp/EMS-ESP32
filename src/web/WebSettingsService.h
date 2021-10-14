@@ -28,7 +28,7 @@
 #define EMSESP_SETTINGS_SERVICE_PATH "/rest/emsespSettings"
 #define EMSESP_BOARD_PROFILE_SERVICE_PATH "/rest/boardProfile"
 
-#define NUM_SENSOR_NAMES 10
+#define MAX_NUM_SENSOR_NAMES 20
 
 namespace emsesp {
 
@@ -71,7 +71,7 @@ class WebSettings {
         String  id;
         String  name;
         int16_t offset;
-    } sensor[NUM_SENSOR_NAMES];
+    } sensor[MAX_NUM_SENSOR_NAMES];
 
     static void              read(WebSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebSettings & settings);
