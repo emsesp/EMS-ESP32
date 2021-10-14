@@ -41,20 +41,20 @@ export interface EMSESPStatus {
 }
 
 export interface Device {
-  id: number;
-  type: string;
-  brand: string;
-  name: string;
-  deviceid: number;
-  productid: number;
-  version: string;
+  i: number; // id
+  t: string; // type
+  b: string; // brand
+  n: string; // name
+  d: number; // deviceid
+  p: number; // productid
+  v: string; // version
 }
 
 export interface Sensor {
-  no: number;
-  id: string;
-  temp: number;
-  offset: number;
+  n: number; // np
+  i: string; // id
+  t: number; // temp
+  o: number; // offset
 }
 
 export interface EMSESPData {

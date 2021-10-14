@@ -82,10 +82,10 @@ const CustomTooltip = withStyles((theme: Theme) => ({
 }))(Tooltip);
 
 function compareDevices(a: Device, b: Device) {
-  if (a.type < b.type) {
+  if (a.t < b.t) {
     return -1;
   }
-  if (a.type > b.type) {
+  if (a.t > b.t) {
     return 1;
   }
   return 0;
@@ -244,10 +244,10 @@ class EMSESPDataForm extends Component<
       body: JSON.stringify({
         // because input field with type=number doens't like negative values, force it here
         sensor: {
-          no: edit_Sensor?.no,
-          id: edit_Sensor?.id,
-          temp: edit_Sensor?.temp,
-          offset: Number(edit_Sensor?.offset)
+          no: edit_Sensor?.n, // no
+          id: edit_Sensor?.i, // id
+          temp: edit_Sensor?.t, // temp
+          offset: Number(edit_Sensor?.o) // offset
         }
       }),
       headers: {
@@ -316,20 +316,18 @@ class EMSESPDataForm extends Component<
               {data.devices.sort(compareDevices).map((device) => (
                 <TableRow
                   hover
-                  key={device.id}
-                  onClick={() => this.handleRowClick(device.id)}
+                  key={device.i}
+                  onClick={() => this.handleRowClick(device.i)}
                 >
                   <TableCell>
                     <CustomTooltip
                       title={
                         'DeviceID:0x' +
-                        (
-                          '00' + device.deviceid.toString(16).toUpperCase()
-                        ).slice(-2) +
+                        ('00' + device.d.toString(16).toUpperCase()).slice(-2) +
                         ' ProductID:' +
-                        device.productid +
+                        device.p +
                         ' Version:' +
-                        device.version
+                        device.v
                       }
                       placement="right-end"
                     >
@@ -338,12 +336,12 @@ class EMSESPDataForm extends Component<
                         size="small"
                         variant="outlined"
                       >
-                        {device.type}
+                        {device.t}
                       </Button>
                     </CustomTooltip>
                   </TableCell>
                   <TableCell align="right">
-                    {device.brand + ' ' + device.name}{' '}
+                    {device.b + ' ' + device.n}{' '}
                   </TableCell>
                 </TableRow>
               ))}
@@ -392,7 +390,7 @@ class EMSESPDataForm extends Component<
             </TableHead>
             <TableBody>
               {data.sensors.map((sensorData) => (
-                <TableRow key={sensorData.no} hover>
+                <TableRow key={sensorData.n} hover>
                   <TableCell padding="checkbox" style={{ width: 18 }}>
                     {me.admin && (
                       <CustomTooltip title="edit" placement="left-end">
@@ -408,11 +406,11 @@ class EMSESPDataForm extends Component<
                     )}
                   </TableCell>
                   <TableCell component="th" scope="row">
-                    {sensorData.no}
+                    {sensorData.n}
                   </TableCell>
-                  <TableCell align="left">{sensorData.id}</TableCell>
+                  <TableCell align="left">{sensorData.i}</TableCell>
                   <TableCell align="right">
-                    {formatValue(sensorData.temp, DeviceValueUOM.DEGREES, 1)}
+                    {formatValue(sensorData.t, DeviceValueUOM.DEGREES, 1)}
                   </TableCell>
                 </TableRow>
               ))}

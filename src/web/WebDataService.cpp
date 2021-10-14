@@ -55,20 +55,20 @@ void WebDataService::scan_devices(AsyncWebServerRequest * request) {
 }
 
 void WebDataService::all_devices(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN);
+    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
     JsonObject          root     = response->getRoot();
 
     JsonArray devices = root.createNestedArray("devices");
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice) {
-            JsonObject obj   = devices.createNestedObject();
-            obj["id"]        = emsdevice->unique_id();
-            obj["type"]      = emsdevice->device_type_name();
-            obj["brand"]     = emsdevice->brand_to_string();
-            obj["name"]      = emsdevice->name();
-            obj["deviceid"]  = emsdevice->device_id();
-            obj["productid"] = emsdevice->product_id();
-            obj["version"]   = emsdevice->version();
+            JsonObject obj = devices.createNestedObject();
+            obj["i"]       = emsdevice->unique_id();        // id
+            obj["t"]       = emsdevice->device_type_name(); // type
+            obj["b"]       = emsdevice->brand_to_string();  // brand
+            obj["n"]       = emsdevice->name();             // name
+            obj["d"]       = emsdevice->device_id();        // deviceid
+            obj["p"]       = emsdevice->product_id();       // productid
+            obj["v"]       = emsdevice->version();          // version
         }
     }
 
@@ -77,10 +77,10 @@ void WebDataService::all_devices(AsyncWebServerRequest * request) {
         uint8_t i = 1;
         for (const auto & sensor : EMSESP::sensor_devices()) {
             JsonObject obj = sensors.createNestedObject();
-            obj["no"]      = i++;
-            obj["id"]      = sensor.to_string(true);
-            obj["temp"]    = (float)(sensor.temperature_c) / 10;
-            obj["offset"]  = (float)(sensor.offset()) / 10;
+            obj["n"]       = i++;                                // no
+            obj["i"]       = sensor.to_string(true);             // id
+            obj["t"]       = (float)(sensor.temperature_c) / 10; // temp
+            obj["o"]       = (float)(sensor.offset()) / 10;      // offset
         }
     }
 
