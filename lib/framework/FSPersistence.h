@@ -12,7 +12,7 @@ class FSPersistence {
                   StatefulService<T> * statefulService,
                   FS *                 fs,
                   const char *         filePath,
-                  size_t               bufferSize = DEFAULT_BUFFER_SIZE)
+                  size_t               bufferSize = FS_BUFFER_SIZE)
         : _stateReader(stateReader)
         , _stateUpdater(stateUpdater)
         , _statefulService(statefulService)

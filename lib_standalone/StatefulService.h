@@ -11,6 +11,10 @@
 #define DEFAULT_BUFFER_SIZE 2048
 #endif
 
+#ifndef FS_BUFFER_SIZE
+#define FS_BUFFER_SIZE 4096
+#endif
+
 enum class StateUpdateResult {
     CHANGED = 0, // The update changed the state and propagation should take place if required
     UNCHANGED,   // The state was unchanged, propagation should not take place
