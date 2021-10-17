@@ -13,6 +13,7 @@
 - Home Assistant `state_class` attribute for Wh, kWh, W and KW [#129](https://github.com/emsesp/EMS-ESP32/issues/129)
 - Add current room influence for RC300[#136]
 - Added Home Assistant device_class to sensor entities
+- Added another Buderus RC10 thermostat with Product ID 65 [#160](https://github.com/emsesp/EMS-ESP32/issues/160)
 
 ## Fixed
 
