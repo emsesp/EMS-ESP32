@@ -35,6 +35,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     switch (event) {
     case SYSTEM_EVENT_STA_DISCONNECTED:
         EMSESP::logger().info(F("WiFi Disconnected. Reason code=%d"), info.disconnected.reason);
+        WiFi.disconnect(true);
         break;
 
     case SYSTEM_EVENT_STA_GOT_IP:
@@ -47,11 +48,20 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
                 EMSESP::system_.syslog_start();
             }
         });
+        mDNS_start();
         break;
 
     case SYSTEM_EVENT_ETH_START:
         EMSESP::logger().info(F("Ethernet initialized"));
         ETH.setHostname(EMSESP::system_.hostname().c_str());
+
+        // configure for static IP
+        EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+            if (networkSettings.staticIPConfig) {
+                ETH.config(networkSettings.localIP, networkSettings.gatewayIP, networkSettings.subnetMask, networkSettings.dnsIP1, networkSettings.dnsIP2);
+            }
+        });
+
         break;
 
     case SYSTEM_EVENT_ETH_GOT_IP:
@@ -67,6 +77,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
                 }
             });
             EMSESP::system_.ethernet_connected(true);
+            mDNS_start();
         }
         break;
 
@@ -105,6 +116,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         }
         EMSESP::system_.send_heartbeat();
         EMSESP::system_.syslog_start();
+        mDNS_start();
         break;
 #endif
 
@@ -125,6 +137,24 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
 
     response->setLength();
     request->send(response);
+}
+
+// start the multicast UDP service so EMS-ESP is discoverable via .local
+void WebStatusService::mDNS_start() {
+    if (!MDNS.begin(EMSESP::system_.hostname().c_str())) {
+        EMSESP::logger().warning(F("Failed to start mDNS responder service"));
+        return;
+    }
+
+    std::string address_s = EMSESP::system_.hostname() + ".local";
+
+    MDNS.addService("http", "tcp", 80);   // add our web server and rest API
+    MDNS.addService("telnet", "tcp", 23); // add our telnet console
+
+    MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
+    MDNS.addServiceTxt("http", "tcp", "address", address_s.c_str());
+
+    EMSESP::logger().info(F("mDNS responder service started"));
 }
 
 } // namespace emsesp
