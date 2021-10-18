@@ -543,11 +543,11 @@ uint8_t Thermostat::HeatingCircuit::get_mode_type() const {
     uint8_t model = get_model();
 
     if (model == EMS_DEVICE_FLAG_JUNKERS) {
-        if (modetype == 3) {
+        if (modetype == 2) {
             return HeatingCircuit::Mode::HEAT;
-        } else if (modetype == 2) {
-            return HeatingCircuit::Mode::ECO;
         } else if (modetype == 1) {
+            return HeatingCircuit::Mode::ECO;
+        } else if (modetype == 0) {
             return HeatingCircuit::Mode::NOFROST;
         }
     } else if ((model == EMS_DEVICE_FLAG_RC35) || (model == EMS_DEVICE_FLAG_RC30_N)) {
