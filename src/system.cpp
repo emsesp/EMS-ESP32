@@ -23,6 +23,20 @@
 #include "test/test.h"
 #endif
 
+#ifdef ESP_IDF_VERSION_MAJOR // IDF 4+
+#if CONFIG_IDF_TARGET_ESP32 // ESP32/PICO-D4
+#include "../esp32/rom/rtc.h"
+#elif CONFIG_IDF_TARGET_ESP32S2
+#include "../esp32s2/rom/rtc.h"
+#elif CONFIG_IDF_TARGET_ESP32C3
+#include "../esp32c3/rom/rtc.h"
+#else
+#error Target CONFIG_IDF_TARGET is not supported
+#endif
+#else // ESP32 Before IDF 4.0
+#include "../rom/rtc.h"
+#endif
+
 namespace emsesp {
 
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
@@ -937,6 +951,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
 #ifndef EMSESP_STANDALONE
     node["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes
 #endif
+    node["reset_reason"] = EMSESP::system_.reset_reason(0) + " / " +  EMSESP::system_.reset_reason(1);
 
     node = json.createNestedObject("Status");
 
@@ -1039,6 +1054,29 @@ bool System::load_board_profile(std::vector<uint8_t> & data, const std::string &
 bool System::command_restart(const char * value, const int8_t id) {
     restart_requested(true);
     return true;
+}
+
+const std::string System::reset_reason(uint8_t cpu) {
+    switch (rtc_get_reset_reason(cpu)) {
+    case 1:  return ("Power on reset");
+    // case 2 :reset pin not on esp32
+    case 3:  return ("Software reset");
+    case 4:  return ("Legacy watch dog reset");
+    case 5:  return ("Deep sleep reset");
+    case 6:  return ("Reset by SDIO");
+    case 7:  return ("Timer group0 watch dog reset");
+    case 8:  return ("Timer group1 watch dog reset");
+    case 9:  return ("RTC watch dog reset");
+    case 10: return ("Intrusion reset CPU");
+    case 11: return ("Timer group reset CPU");
+    case 12: return ("Software reset CPU");
+    case 13: return ("RTC watch dog reset: CPU");
+    case 14: return ("APP CPU reseted by PRO CPU");
+    case 15: return ("Brownout reset");
+    case 16: return ("RTC watch dog reset: CPU+RTC");
+    default: break;
+    }
+    return ("Unkonwn");
 }
 
 } // namespace emsesp

@@ -63,6 +63,8 @@ class System {
     static bool command_settings(const char * value, const int8_t id, JsonObject & json);
     static bool command_commands(const char * value, const int8_t id, JsonObject & json);
 
+    const std::string reset_reason(uint8_t cpu);
+
     void system_restart();
     void format(uuid::console::Shell & shell);
     void upload_status(bool in_progress);
