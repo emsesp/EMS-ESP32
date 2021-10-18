@@ -1160,19 +1160,21 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     // check for poll
     if (length == 1) {
         // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
-        uint8_t     poll_id = (first_value ^ 0x80 ^ rxservice_.ems_mask());
-        static bool waitKM  = true;
+        uint8_t         poll_id      = (first_value ^ 0x80 ^ rxservice_.ems_mask());
+        static bool     waitKM       = true;
+        static uint32_t connect_time = 0;
         if (!rxservice_.bus_connected()) {
-            waitKM = true;
+            waitKM       = true;
+            connect_time = uuid::get_uptime_sec();
         }
         if (poll_id == txservice_.ems_bus_id()) {
             EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
         }
-        if (poll_id == 0x48) {
-            waitKM = false; // KM200 is polled, from now on it is safe to send
-        }
         if (waitKM) {
-            return;
+            if (poll_id != 0x48 && uuid::get_uptime_sec() - connect_time < 60) {
+                return;
+            }
+            waitKM = false; // KM200 is polled, from now on it is safe to send
         }
 
 #ifdef EMSESP_UART_DEBUG
@@ -1242,6 +1244,7 @@ void EMSESP::start() {
 
     emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
 
+    LOG_INFO(F("Last system reset reason Core0: %s, Core1: %s"), system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
     LOG_INFO(F("EMS Device library loaded with %d records"), device_library_.size());
 
 #if defined(EMSESP_STANDALONE)
