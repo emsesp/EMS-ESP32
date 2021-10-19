@@ -1060,9 +1060,11 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
                 || type == DeviceValueType::ULONG) {
                 doc["ic"] = F_(iconnum);
             }
+            break;
         case DeviceValueUOM::TIMES:
             set_state_class = State_class::TOTAL_INCREASING;
             doc["ic"]       = F_(iconnum);
+            break;
         default:
             break;
         }
