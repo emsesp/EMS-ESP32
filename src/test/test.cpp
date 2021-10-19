@@ -471,6 +471,18 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("call boiler entities");
     }
 
+    if (command == "mqtt_individual") {
+        shell.printfln(F("Testing individual MQTT"));
+        Mqtt::ha_enabled(false); // turn off HA Discovery to stop the chatter
+        Mqtt::subscribe_format(1); // individual topics
+
+        run_test("boiler");
+        run_test("thermostat");
+
+        shell.invoke_command("show mqtt");
+        EMSESP::mqtt_.incoming("ems-esp/boiler/wwcircpump", "off");
+    }
+
     if (command == "mqtt_nested") {
         shell.printfln(F("Testing nested MQTT"));
         Mqtt::ha_enabled(false); // turn off HA Discovery to stop the chatter

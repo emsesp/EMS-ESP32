@@ -33,7 +33,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "general"
 // #define EMSESP_DEBUG_DEFAULT "boiler"
 // #define EMSESP_DEBUG_DEFAULT "mqtt2"
-#define EMSESP_DEBUG_DEFAULT "mqtt_nested"
+// #define EMSESP_DEBUG_DEFAULT "mqtt_nested"
 // #define EMSESP_DEBUG_DEFAULT "ha"
 // #define EMSESP_DEBUG_DEFAULT "board_profile"
 // #define EMSESP_DEBUG_DEFAULT "shower_alert"
@@ -41,6 +41,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "render"
 // #define EMSESP_DEBUG_DEFAULT "api"
 // #define EMSESP_DEBUG_DEFAULT "crash"
+#define EMSESP_DEBUG_DEFAULT "mqtt_individual"
 
 class Test {
   public:
