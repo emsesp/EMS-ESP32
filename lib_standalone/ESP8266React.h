@@ -48,7 +48,7 @@ class DummySettings {
     String   localIP                 = "";
     String   gatewayIP               = "";
     String   subnetMask              = "";
-    String   staticIPConfig          = "";
+    bool     staticIPConfig          = false;
     String   dnsIP1                  = "";
     String   dnsIP2                  = "";
     String   board_profile           = "CUSTOM";

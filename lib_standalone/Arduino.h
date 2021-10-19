@@ -30,7 +30,9 @@
 
 #include <iostream>
 
-#define IPAddress std::string
+// #define IPAddress std::string
+#define IPAddress String
+
 #define ICACHE_FLASH_ATTR
 #define ICACHE_RAM_ATTR
 #define os_event_t void

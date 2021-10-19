@@ -158,9 +158,12 @@ class WiFiClass {
         return 0;
     };
 
+    void disconnect(bool v){};
+
     char * getHostname() {
         return nullptr;
     }
+
     char * localIP() {
         return nullptr;
     }
@@ -172,15 +175,22 @@ class ETHClass {
         return false;
     };
 
-    void   setHostname(const char * s){};
+    void setHostname(const char * s){};
+
     char * getHostname() {
         return nullptr;
     }
+
     char * localIP() {
         return nullptr;
     }
+
     int linkSpeed() {
         return 100;
+    }
+
+    bool config(IPAddress local_ip, IPAddress gateway, IPAddress subnet, IPAddress dns1, IPAddress dns2) {
+        return false;
     }
 };
 

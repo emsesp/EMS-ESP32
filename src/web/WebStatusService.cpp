@@ -141,6 +141,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
 
 // start the multicast UDP service so EMS-ESP is discoverable via .local
 void WebStatusService::mDNS_start() {
+#ifndef EMSESP_STANDALONE
     if (!MDNS.begin(EMSESP::system_.hostname().c_str())) {
         EMSESP::logger().warning(F("Failed to start mDNS responder service"));
         return;
@@ -153,6 +154,7 @@ void WebStatusService::mDNS_start() {
 
     MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
     MDNS.addServiceTxt("http", "tcp", "address", address_s.c_str());
+#endif
 
     EMSESP::logger().info(F("mDNS responder service started"));
 }
