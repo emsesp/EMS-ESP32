@@ -473,7 +473,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     if (command == "mqtt_individual") {
         shell.printfln(F("Testing individual MQTT"));
-        Mqtt::ha_enabled(false); // turn off HA Discovery to stop the chatter
+        Mqtt::ha_enabled(false);   // turn off HA Discovery to stop the chatter
         Mqtt::subscribe_format(1); // individual topics
 
         run_test("boiler");
@@ -1028,6 +1028,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         deserializeJson(doc, data3);
         json = doc.as<JsonVariant>();
         request.url("/api");
+        EMSESP::webAPIService.webAPIService_post(&request, json);
+
+        // 4 - system call
+        char data4[] = "{\"value\":\"0B 88 19 19 02\"}";
+        deserializeJson(doc, data4);
+        json = doc.as<JsonVariant>();
+        request.url("/api/system/send");
         EMSESP::webAPIService.webAPIService_post(&request, json);
 
 #endif
