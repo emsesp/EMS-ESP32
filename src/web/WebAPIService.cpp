@@ -237,22 +237,22 @@ void WebAPIService::parse(AsyncWebServerRequest * request, std::string & device_
 }
 
 // send a HTTP error back, with optional JSON body data
-void WebAPIService::send_message_response(AsyncWebServerRequest * request, uint16_t error_code, const char * error_message) {
-    if (error_message == nullptr) {
+void WebAPIService::send_message_response(AsyncWebServerRequest * request, uint16_t error_code, const char * message) {
+    if (message == nullptr) {
         AsyncWebServerResponse * response = request->beginResponse(error_code); // just send the code
         request->send(response);
     } else {
         // build a return message and send it
         PrettyAsyncJsonResponse * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
         JsonObject                json     = response->getRoot();
-        json["message"]                    = error_message;
+        json["message"]                    = message;
         response->setCode(error_code);
         response->setLength();
         response->setContentType("application/json");
         request->send(response);
     }
 
-    EMSESP::logger().debug(F("API return code: %d, message: %s"), error_code, error_message);
+    EMSESP::logger().debug(F("API return code: %d, message: %s"), error_code, message);
 }
 
 /**

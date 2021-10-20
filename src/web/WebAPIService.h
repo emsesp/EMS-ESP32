@@ -68,7 +68,7 @@ class WebAPIService {
     AsyncCallbackJsonWebHandler _apiHandler; // for POSTs
 
     void parse(AsyncWebServerRequest * request, std::string & device, std::string & cmd, int id, std::string & value);
-    void send_message_response(AsyncWebServerRequest * request, uint16_t error_code, const char * error_message = nullptr);
+    void send_message_response(AsyncWebServerRequest * request, uint16_t error_code, const char * message = nullptr);
 };
 
 } // namespace emsesp
