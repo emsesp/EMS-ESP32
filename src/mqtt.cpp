@@ -225,8 +225,10 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
         shell.printfln(F(" %s/%s"), mqtt_base_.c_str(), mqtt_subfunction.topic_.c_str());
     }
+
+    // now show the commands...
     for (const auto & cf : Command::commands()) {
-        if (subscribe_format_ == 2 && cf.has_flags(CommandFlag::MQTT_SUB_FLAG_HC)) {
+        if (subscribe_format_ == Subscribe_Format::INDIVIDUAL_ALL_HC && cf.has_flags(CommandFlag::MQTT_SUB_FLAG_HC)) {
             shell.printfln(F(" %s/%s/hc1/%s"),
                            mqtt_base_.c_str(),
                            EMSdevice::device_type_2_device_name(cf.device_type_).c_str(),
@@ -243,7 +245,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
                            mqtt_base_.c_str(),
                            EMSdevice::device_type_2_device_name(cf.device_type_).c_str(),
                            uuid::read_flash_string(cf.cmd_).c_str());
-        } else if (subscribe_format_ == 1 && !cf.has_flags(CommandFlag::MQTT_SUB_FLAG_NOSUB)) {
+        } else if (subscribe_format_ != Subscribe_Format::GENERAL && !cf.has_flags(CommandFlag::MQTT_SUB_FLAG_NOSUB)) {
             shell.printfln(F(" %s/%s/%s"),
                            mqtt_base_.c_str(),
                            EMSdevice::device_type_2_device_name(cf.device_type_).c_str(),
