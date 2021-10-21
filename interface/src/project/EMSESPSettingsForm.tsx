@@ -116,7 +116,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
               Refer to the
               <Link
                 target="_blank"
-                href="https://emsesp.github.io/docs/#/Configure-firmware32?id=ems-esp-settings"
+                href="https://emsesp.github.io/docs/#/Configure-firmware?id=ems-esp-settings"
                 color="primary"
               >
                 {' documentation'}
