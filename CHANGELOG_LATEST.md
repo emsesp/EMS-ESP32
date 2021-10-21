@@ -23,6 +23,7 @@
 - Manually Controlling Solar Circuit [#107](https://github.com/emsesp/EMS-ESP32/issues/107)
 - Fix thermostat commands not defaulting to the master thermostat [#110](https://github.com/emsesp/EMS-ESP32/issues/110)
 - Enlarge parse-buffer for long names like `cylinderpumpmodulation`
+- MQTT not subscribing to all device entities [#166](https://github.com/emsesp/EMS-ESP32/issues/166)
 
 ## Changed
 

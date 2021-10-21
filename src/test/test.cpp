@@ -473,15 +473,16 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     if (command == "mqtt_individual") {
         shell.printfln(F("Testing individual MQTT"));
-        Mqtt::ha_enabled(false);   // turn off HA Discovery to stop the chatter
-        Mqtt::subscribe_format(2); // individual topics, all HC
-        // Mqtt::subscribe_format(1); // individual topics, only main HC
+        Mqtt::ha_enabled(false); // turn off HA Discovery to stop the chatter
+        Mqtt::nested_format(1);
+        // Mqtt::subscribe_format(2); // individual topics, all HC
+        Mqtt::subscribe_format(1); // individual topics, only main HC
 
         run_test("boiler");
         run_test("thermostat");
 
-        shell.invoke_command("show mqtt");
-        EMSESP::mqtt_.incoming("ems-esp/boiler/wwcircpump", "off");
+        // shell.invoke_command("show mqtt");
+        // EMSESP::mqtt_.incoming("ems-esp/boiler/wwcircpump", "off");
     }
 
     if (command == "mqtt_nested") {
