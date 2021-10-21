@@ -36,23 +36,23 @@ namespace emsesp {
 
 // mqtt flags for command subscriptions
 enum CommandFlag : uint8_t {
-    MQTT_SUB_FLAG_NORMAL = 0,        // 0
-    MQTT_SUB_FLAG_HC     = (1 << 0), // 1
-    MQTT_SUB_FLAG_WWC    = (1 << 1), // 2
-    MQTT_SUB_FLAG_NOSUB  = (1 << 2), // 4
-    HIDDEN               = (1 << 3), // 8
-    ADMIN_ONLY           = (1 << 4), // 16
-    MQTT_SUB_FLAG_WW     = (1 << 5)  // 32
+    MQTT_SUB_FLAG_DEFAULT = 0,        // 0 no flags set, always subscribe to MQTT
+    MQTT_SUB_FLAG_HC      = (1 << 0), // 1 TAG_HC1 - TAG_HC4
+    MQTT_SUB_FLAG_WWC     = (1 << 1), // 2 TAG_WWC1 - TAG_WWC4
+    MQTT_SUB_FLAG_NOSUB   = (1 << 2), // 4
+    MQTT_SUB_FLAG_WW      = (1 << 3), // 8 TAG_DEVICE_DATA_WW
+    HIDDEN                = (1 << 4), // 16 do not show in API or Web
+    ADMIN_ONLY            = (1 << 5)  // 32 requires authentication
 
 };
 
 // return status after calling a Command
 enum CommandRet : uint8_t {
-    ERRORED = 0,
-    OK,         // 1 or TRUE
-    NOT_FOUND,  // 2
-    ERROR,      // 3
-    NOT_ALLOWED // needs authentication
+    ERRORED = 0, // 0 or FALSE
+    OK,          // 1 or TRUE
+    NOT_FOUND,   // 2
+    ERROR,       // 3
+    NOT_ALLOWED  // needs authentication
 
 };
 
@@ -108,13 +108,13 @@ class Command {
                     const __FlashStringHelper * cmd,
                     const cmd_function_p        cb,
                     const __FlashStringHelper * description,
-                    uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_NORMAL);
+                    uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
 
     static void add_json(const uint8_t               device_type,
                          const __FlashStringHelper * cmd,
                          const cmd_json_function_p   cb,
                          const __FlashStringHelper * description,
-                         uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_NORMAL);
+                         uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
 
     static void                   show_all(uuid::console::Shell & shell);
     static Command::CmdFunction * find_command(const uint8_t device_type, const char * cmd);

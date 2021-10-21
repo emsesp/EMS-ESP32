@@ -232,6 +232,10 @@ void System::syslog_start() {
         syslog_.mark_interval(syslog_mark_interval_);
         syslog_.destination(syslog_host_.c_str(), syslog_port_);
         syslog_.hostname(hostname().c_str());
+
+        // register the command
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog_level), System::command_syslog_level, F("change syslog level"), CommandFlag::ADMIN_ONLY);
+
     } else if (was_enabled) {
         // in case service is still running, this flushes the queue
         // https://github.com/emsesp/EMS-ESP/issues/496
@@ -287,7 +291,9 @@ void System::wifi_tweak() {
     bool         s1 = WiFi.getSleep();
     WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
     bool s2 = WiFi.getSleep();
+#if defined(EMSESP_DEBUG)
     LOG_DEBUG(F("[DEBUG] Adjusting WiFi - Tx power %d->%d, Sleep %d->%d"), p1, p2, s1, s2);
+#endif
 #endif
 }
 
@@ -669,14 +675,18 @@ void System::system_check() {
 // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
 // no individual subscribe for pin command because id is needed
 void System::commands_init() {
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin, F("set GPIO"), CommandFlag::MQTT_SUB_FLAG_NOSUB | CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM,
+                 F_(pin),
+                 System::command_pin,
+                 F("set GPIO"),
+                 CommandFlag::MQTT_SUB_FLAG_NOSUB | CommandFlag::ADMIN_ONLY); // dont create a MQTT topic for this
+
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, F("send a telegram"), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, F("force a MQTT publish"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, F("refresh all EMS values"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, F("restarts EMS-ESP"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, F("watch incoming telegrams"), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog_level), System::command_syslog_level, F("set syslog level"), CommandFlag::ADMIN_ONLY);
 
+    // these commands will return data in JSON format
     Command::add_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, F("system status"));
     Command::add_json(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("list system settings"));
     Command::add_json(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("list system commands"));

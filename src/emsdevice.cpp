@@ -537,7 +537,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
     } else if (tag == TAG_DEVICE_DATA_WW) {
         Command::add(device_type_, name[0], f, name[1], CommandFlag::MQTT_SUB_FLAG_WW | CommandFlag::ADMIN_ONLY);
     } else {
-        Command::add(device_type_, name[0], f, name[1], CommandFlag::MQTT_SUB_FLAG_NORMAL | CommandFlag::ADMIN_ONLY);
+        Command::add(device_type_, name[0], f, name[1], CommandFlag::ADMIN_ONLY);
     }
 }
 

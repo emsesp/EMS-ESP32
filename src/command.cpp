@@ -166,7 +166,6 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, char * c
 }
 
 // add a command to the list, which does not return json
-// these commands are not callable directly via MQTT subscriptions either
 void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, const cmd_function_p cb, const __FlashStringHelper * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
     if (find_command(device_type, uuid::read_flash_string(cmd).c_str()) != nullptr) {
@@ -180,14 +179,11 @@ void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, co
 
     cmdfunctions_.emplace_back(device_type, flags, cmd, cb, nullptr, description); // callback for json is nullptr
 
-    // see if we need to subscribe
-    if (Mqtt::enabled()) {
-        Mqtt::register_command(device_type, cmd, cb, flags);
-    }
+    Mqtt::sub_command(device_type, cmd, cb, flags);
 }
 
 // add a command to the list, which does return a json object as output
-// flag is fixed to MqttSubFlag::FLAG_NOSUB
+// flag is fixed to MqttSubFlag::MQTT_SUB_FLAG_NOSUB so there will be no topic subscribed to this
 void Command::add_json(const uint8_t               device_type,
                        const __FlashStringHelper * cmd,
                        const cmd_json_function_p   cb,
