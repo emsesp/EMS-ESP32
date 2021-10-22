@@ -262,7 +262,7 @@ class LogEventController extends Component<
             container
             spacing={3}
             direction="row"
-            justify="flex-start"
+            justifyContent="flex-start"
             alignItems="center"
           >
             <Grid item xs={2}>

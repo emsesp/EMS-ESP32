@@ -310,7 +310,7 @@ class EMSESPDataForm extends Component<
         {!this.noDevices() && (
           <Table
             size="small"
-            padding={isWidthDown('xs', width!) ? 'none' : 'default'}
+            padding={isWidthDown('xs', width!) ? 'none' : 'normal'}
           >
             <TableBody>
               {data.devices.sort(compareDevices).map((device) => (
@@ -376,7 +376,7 @@ class EMSESPDataForm extends Component<
           Sensors
         </Typography>
         {!this.noSensors() && (
-          <Table size="small" padding="default">
+          <Table size="small" padding="normal">
             <TableHead>
               <TableRow>
                 <StyledTableCell
@@ -433,7 +433,7 @@ class EMSESPDataForm extends Component<
     return (
       <TableContainer>
         {data.analog > 0 && (
-          <Table size="small" padding="default">
+          <Table size="small" padding="normal">
             <TableHead>
               <TableRow>
                 <StyledTableCell>Sensortype</StyledTableCell>
@@ -574,7 +574,7 @@ class EMSESPDataForm extends Component<
           <TableContainer>
             <Table
               size="small"
-              padding={isWidthDown('xs', width!) ? 'none' : 'default'}
+              padding={isWidthDown('xs', width!) ? 'none' : 'normal'}
             >
               <TableHead></TableHead>
               <TableBody>

@@ -58,7 +58,7 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
           <TableContainer>
             <Table
               size="small"
-              padding={isWidthDown('xs', width!) ? 'none' : 'default'}
+              padding={isWidthDown('xs', width!) ? 'none' : 'normal'}
             >
               <TableBody>
                 <TableRow>
