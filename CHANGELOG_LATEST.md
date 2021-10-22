@@ -16,6 +16,7 @@
 - Added another Buderus RC10 thermostat with Product ID 65 [#160](https://github.com/emsesp/EMS-ESP32/issues/160)
 - Added support for mDNS [#161](https://github.com/emsesp/EMS-ESP32/issues/161)
 - Added last system ESP32 reset code to log (and `system info` output)
+- Firmware Checker in WebUI [#168](https://github.com/emsesp/EMS-ESP32/issues/168)
 
 ## Fixed
 
