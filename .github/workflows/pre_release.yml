@@ -48,7 +48,7 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          title: ESP32 Development Build v${{steps.build_info.outputs.version}}
+          title: Development Build v${{steps.build_info.outputs.version}}
           automatic_release_tag: "latest"
           prerelease: true
           files: |

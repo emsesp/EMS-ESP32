@@ -19,6 +19,8 @@ export const VERSIONCHECK_ENDPOINT =
 export const VERSIONCHECK_DEV_ENDPOINT =
   'https://api.github.com/repos/emsesp/EMS-ESP32/releases/tags/latest';
 
+export const uploadURL = window.location.origin + '/system/upload';
+
 interface VersionCheckProps extends WithSnackbarProps {
   currentVersion: string;
   onClose: () => void;
@@ -27,8 +29,10 @@ interface VersionCheckProps extends WithSnackbarProps {
 interface VersionCheckState {
   latestVersion?: string;
   latestVersionUrl?: string;
+  latestVersionChangelog?: string;
   latestDevVersion?: string;
   latestDevVersionUrl?: string;
+  latestDevVersionChangelog?: string;
 }
 
 class VersionCheck extends React.Component<
@@ -51,9 +55,10 @@ class VersionCheck extends React.Component<
         }
       })
       .then((data) => {
-        this.setState({ latestVersion: data.name });
         this.setState({
-          latestVersionUrl: data.assets[1].browser_download_url
+          latestVersion: data.name,
+          latestVersionUrl: data.assets[1].browser_download_url,
+          latestVersionChangelog: data.html_url
         });
       })
       .catch((error) => {
@@ -78,9 +83,10 @@ class VersionCheck extends React.Component<
         }
       })
       .then((data) => {
-        this.setState({ latestDevVersion: data.name.split(/\s+/).splice(-1) });
         this.setState({
-          latestDevVersionUrl: data.assets[1].browser_download_url
+          latestDevVersion: data.name.split(/\s+/).splice(-1),
+          latestDevVersionUrl: data.assets[1].browser_download_url,
+          latestDevVersionChangelog: data.assets[0].browser_download_url
         });
       })
       .catch((error) => {
@@ -99,7 +105,9 @@ class VersionCheck extends React.Component<
       latestVersion,
       latestVersionUrl,
       latestDevVersion,
-      latestDevVersionUrl
+      latestDevVersionUrl,
+      latestVersionChangelog,
+      latestDevVersionChangelog
     } = this.state;
     return (
       <Dialog
@@ -123,32 +131,55 @@ class VersionCheck extends React.Component<
                 mb={2}
               >
                 <Typography variant="body1">
-                  You are currently on version <b>v{currentVersion}</b>
+                  You are currently running EMS-ESP version{' '}
+                  <b>v{currentVersion}</b>
                 </Typography>
               </Box>
               <Box mt={2} mb={2}>
-                The latest stable version is <b>{latestVersion}</b>.
-                Download&nbsp;
-                <Link target="_blank" href={latestVersionUrl} color="primary">
-                  {'here'}.
+                The latest <u>stable</u> version is <b>{latestVersion}</b>
+                &nbsp;(
+                <Link
+                  target="_blank"
+                  href={latestVersionChangelog}
+                  color="primary"
+                >
+                  {'release notes'}
                 </Link>
+                )&nbsp;(
+                <Link target="_blank" href={latestVersionUrl} color="primary">
+                  {'download'}
+                </Link>
+                )
               </Box>
               <Box mt={2} mb={2}>
-                The latest development (beta) version is{' '}
-                <b>{latestDevVersion}</b>. Download&nbsp;
+                The latest <u>development</u> version is&nbsp;
+                <b>{latestDevVersion}</b>
+                &nbsp;(
+                <Link
+                  target="_blank"
+                  href={latestDevVersionChangelog}
+                  color="primary"
+                >
+                  {'release notes'}
+                </Link>
+                )&nbsp;(
                 <Link
                   target="_blank"
                   href={latestDevVersionUrl}
                   color="primary"
                 >
-                  {'here'}.
+                  {'download'}
                 </Link>
+                )
               </Box>
               <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>
                 <Typography variant="body2">
                   <i>
-                    After downloading the firmware, go to UPLOAD FIRMWARE to
-                    install the new version
+                    Use&nbsp;
+                    <Link target="_blank" href={uploadURL} color="primary">
+                      {'UPLOAD FIRMWARE'}
+                    </Link>
+                    &nbsp;to install any new firmware versions.
                   </i>
                 </Typography>
               </Box>
