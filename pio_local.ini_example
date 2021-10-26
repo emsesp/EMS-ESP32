@@ -7,13 +7,16 @@
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
 my_build_flags =
 
+; 5=verbose, 4=debug, 3=info
+debug_flags = DCORE_DEBUG_LEVEL=5
+
 [env:esp32]
 ; if using OTA enter your details below
-; upload_protocol = espota
-; upload_flags = 
-;   --port=8266
-;   --auth=ems-esp-neo
-; upload_port = 10.10.10.101
+upload_protocol = espota
+upload_flags = 
+  --port=8266
+  --auth=ems-esp-neo
+upload_port = ems-esp.local
 
 extra_scripts = scripts/rename_fw.py ; don't build WebUI just firmware
 
