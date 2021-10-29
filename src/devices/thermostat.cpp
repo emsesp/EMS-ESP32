@@ -493,7 +493,15 @@ uint8_t Thermostat::HeatingCircuit::get_mode() const {
         return HeatingCircuit::Mode::UNKNOWN;
     }
 
-    if (model == EMSdevice::EMS_DEVICE_FLAG_RC20) {
+    if (model == EMSdevice::EMS_DEVICE_FLAG_RC10) {
+        if (mode == 1) {
+            return HeatingCircuit::Mode::OFF;
+        } else if (mode == 2) {
+            return HeatingCircuit::Mode::NIGHT;
+        } else if (mode == 4) {
+            return HeatingCircuit::Mode::ON;
+        }
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC20) {
         if (mode == 0) {
             return HeatingCircuit::Mode::OFF;
         } else if (mode == 1) {
@@ -703,7 +711,8 @@ void Thermostat::process_RC10Monitor(std::shared_ptr<const Telegram> telegram) {
     if (hc == nullptr) {
         return;
     }
-
+    has_update(telegram->read_value(hc->mode, 0));
+    hc->hamode = hc->mode == 4 ? 1 : 0;                            // set special HA mode: off, on, auto
     has_update(telegram->read_value(hc->setpoint_roomTemp, 1, 1)); // is * 2, force as single byte
     has_update(telegram->read_value(hc->curr_roomTemp, 2));        // is * 10
 }
