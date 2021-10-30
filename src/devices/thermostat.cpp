@@ -115,7 +115,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         monitor_typeids = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
         set_typeids     = {};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("CRFMonitor"), true, MAKE_PF_CB(process_CRFMonitor));
+            register_telegram_type(monitor_typeids[i], F("CRFMonitor"), false, MAKE_PF_CB(process_CRFMonitor));
         }
 
         // RC300/RC100
