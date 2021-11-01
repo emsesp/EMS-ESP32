@@ -115,7 +115,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         monitor_typeids = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
         set_typeids     = {};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("CRFMonitor"), true, MAKE_PF_CB(process_CRFMonitor));
+            register_telegram_type(monitor_typeids[i], F("CRFMonitor"), false, MAKE_PF_CB(process_CRFMonitor));
         }
 
         // RC300/RC100
@@ -161,18 +161,14 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         }
     }
 
-    // reserve some memory for the heating circuits (max 4 to start with)
-    heating_circuits_.reserve(4);
-
     if (actual_master_thermostat != device_id) {
-        LOG_DEBUG(F("Adding new thermostat with device ID 0x%02X"), device_id);
         return; // don't fetch data if more than 1 thermostat
     }
 
     //
     // this next section is only for the master thermostat....
     //
-    LOG_DEBUG(F("Adding new thermostat with device ID 0x%02X (as master)"), device_id);
+    LOG_DEBUG(F("Setting this thermostat (device ID 0x%02X) to be the master"), device_id);
 
     // register device values for common values (not heating circuit)
     register_device_values();
@@ -340,6 +336,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     if (!toggle_) {
         return nullptr;
     }
+
     /*
      * at this point we have discovered a new heating circuit
      */
@@ -458,7 +455,7 @@ void Thermostat::publish_ha_config_hc(uint8_t hc_num) {
     // enable the a special "thermostat_hc<n>" topic to take both mode strings and floats for each of the heating circuits
     std::string topic2(Mqtt::MQTT_TOPIC_MAX_SIZE, '\0');
     snprintf(&topic2[0], topic2.capacity() + 1, "thermostat_hc%d", hc_num);
-    register_mqtt_topic(topic2, [=](const char * m) { return thermostat_ha_cmd(m, hc_num); });
+    Mqtt::subscribe(EMSdevice::DeviceType::THERMOSTAT, topic2, [=](const char * m) { return thermostat_ha_cmd(m, hc_num); });
 }
 
 // for HA specifically when receiving over MQTT in the thermostat topic

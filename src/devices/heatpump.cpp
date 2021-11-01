@@ -26,8 +26,6 @@ uuid::log::Logger Heatpump::logger_{F_(heatpump), uuid::log::Facility::CONSOLE};
 
 Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    LOG_DEBUG(F("Adding new Heat Pump module with device ID 0x%02X"), device_id);
-
     // telegram handlers
     register_telegram_type(0x042B, F("HP1"), true, MAKE_PF_CB(process_HPMonitor1));
     register_telegram_type(0x047B, F("HP2"), true, MAKE_PF_CB(process_HPMonitor2));

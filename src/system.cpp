@@ -496,44 +496,44 @@ void System::show_mem(const char * note) {
 }
 
 // create the json for heartbeat
-bool System::heartbeat_json(JsonObject & doc) {
+bool System::heartbeat_json(JsonObject & output) {
     uint8_t ems_status = EMSESP::bus_status();
     if (ems_status == EMSESP::BUS_STATUS_TX_ERRORS) {
-        doc["status"] = FJSON("txerror");
+        output["status"] = FJSON("txerror");
     } else if (ems_status == EMSESP::BUS_STATUS_CONNECTED) {
-        doc["status"] = FJSON("connected");
+        output["status"] = FJSON("connected");
     } else {
-        doc["status"] = FJSON("disconnected");
+        output["status"] = FJSON("disconnected");
     }
 
-    doc["uptime"] = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+    output["uptime"] = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
 
-    doc["uptime_sec"] = uuid::get_uptime_sec();
-    doc["rxreceived"] = EMSESP::rxservice_.telegram_count();
-    doc["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
-    doc["txreads"]    = EMSESP::txservice_.telegram_read_count();
-    doc["txwrites"]   = EMSESP::txservice_.telegram_write_count();
-    doc["txfails"]    = EMSESP::txservice_.telegram_fail_count();
+    output["uptime_sec"] = uuid::get_uptime_sec();
+    output["rxreceived"] = EMSESP::rxservice_.telegram_count();
+    output["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
+    output["txreads"]    = EMSESP::txservice_.telegram_read_count();
+    output["txwrites"]   = EMSESP::txservice_.telegram_write_count();
+    output["txfails"]    = EMSESP::txservice_.telegram_fail_count();
     if (Mqtt::enabled()) {
-        doc["mqttfails"] = Mqtt::publish_fails();
+        output["mqttfails"] = Mqtt::publish_fails();
     }
     if (EMSESP::dallas_enabled()) {
-        doc["dallasfails"] = EMSESP::sensor_fails();
+        output["dallasfails"] = EMSESP::sensor_fails();
     }
 
 #ifndef EMSESP_STANDALONE
-    doc["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes
+    output["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes
 #endif
 
     if (analog_enabled_) {
-        doc["adc"] = analog_;
+        output["adc"] = analog_;
     }
 
 #ifndef EMSESP_STANDALONE
     if (!ethernet_connected_) {
-        int8_t rssi         = WiFi.RSSI();
-        doc["rssi"]         = rssi;
-        doc["wifistrength"] = wifi_quality(rssi);
+        int8_t rssi            = WiFi.RSSI();
+        output["rssi"]         = rssi;
+        output["wifistrength"] = wifi_quality(rssi);
     }
 #endif
 
@@ -684,16 +684,23 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, F("send a telegram"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, F("refresh all EMS values"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, F("restarts EMS-ESP"), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, F("watch incoming telegrams"), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, F("watch incoming telegrams"));
+
+    if (Mqtt::enabled()) {
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, F("forces a MQTT publish"));
+    }
 
     // these commands will return data in JSON format
-    Command::add_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, F("system status"));
-    Command::add_json(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("list system settings"));
-    Command::add_json(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("list system commands"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, F("system status"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("list system settings"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("list system commands"));
 
 #if defined(EMSESP_DEBUG)
     Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test, F("run tests"));
 #endif
+
+    // MQTT subscribe "ems-esp/system/#"
+    Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system/#", nullptr); // use empty function callback
 }
 
 // flashes the LED
@@ -844,22 +851,22 @@ bool System::check_upgrade() {
 }
 
 // list commands
-bool System::command_commands(const char * value, const int8_t id, JsonObject & json) {
-    return Command::list(EMSdevice::DeviceType::SYSTEM, json);
+bool System::command_commands(const char * value, const int8_t id, JsonObject & output) {
+    return Command::list(EMSdevice::DeviceType::SYSTEM, output);
 }
 
 // export all settings to JSON text
 // http://ems-esp/api/system/settings
 // value and id are ignored
-bool System::command_settings(const char * value, const int8_t id, JsonObject & json) {
+bool System::command_settings(const char * value, const int8_t id, JsonObject & output) {
     JsonObject node;
 
-    node            = json.createNestedObject("System");
+    node            = output.createNestedObject("System");
     node["version"] = EMSESP_APP_VERSION;
 
     // hide ssid from this list
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
-        node                     = json.createNestedObject("Network");
+        node                     = output.createNestedObject("Network");
         node["hostname"]         = settings.hostname;
         node["static_ip_config"] = settings.staticIPConfig;
         node["enableIPv6"]       = settings.enableIPv6;
@@ -872,7 +879,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 
 #ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getAPSettingsService()->read([&](APSettings & settings) {
-        node                   = json.createNestedObject("AP");
+        node                   = output.createNestedObject("AP");
         node["provision_mode"] = settings.provisionMode;
         node["ssid"]           = settings.ssid;
         node["local_ip"]       = settings.localIP.toString();
@@ -882,7 +889,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 #endif
 
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
-        node            = json.createNestedObject("MQTT");
+        node            = output.createNestedObject("MQTT");
         node["enabled"] = settings.enabled;
 #ifndef EMSESP_STANDALONE
         node["host"]          = settings.host;
@@ -902,12 +909,12 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["ha_enabled"]              = settings.ha_enabled;
         node["mqtt_qos"]                = settings.mqtt_qos;
         node["mqtt_retain"]             = settings.mqtt_retain;
-        node["subscribe_format"]        = settings.subscribe_format;
+        node["send_response"]           = settings.send_response;
     });
 
 #ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
-        node              = json.createNestedObject("NTP");
+        node              = output.createNestedObject("NTP");
         node["enabled"]   = settings.enabled;
         node["server"]    = settings.server;
         node["tz_label"]  = settings.tzLabel;
@@ -915,14 +922,14 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
     });
 
     EMSESP::esp8266React.getOTASettingsService()->read([&](OTASettings & settings) {
-        node            = json.createNestedObject("OTA");
+        node            = output.createNestedObject("OTA");
         node["enabled"] = settings.enabled;
         node["port"]    = settings.port;
     });
 #endif
 
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        node                         = json.createNestedObject("Settings");
+        node                         = output.createNestedObject("Settings");
         node["tx_mode"]              = settings.tx_mode;
         node["ems_bus_id"]           = settings.ems_bus_id;
         node["syslog_enabled"]       = settings.syslog_enabled;
@@ -953,10 +960,10 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 
 // export status information including the device information
 // http://ems-esp/api/system/info
-bool System::command_info(const char * value, const int8_t id, JsonObject & json) {
+bool System::command_info(const char * value, const int8_t id, JsonObject & output) {
     JsonObject node;
 
-    node = json.createNestedObject("System");
+    node = output.createNestedObject("System");
 
     node["version"]    = EMSESP_APP_VERSION;
     node["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
@@ -967,7 +974,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
 #endif
     node["reset_reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
-    node = json.createNestedObject("Status");
+    node = output.createNestedObject("Status");
 
     switch (EMSESP::bus_status()) {
     case EMSESP::BUS_STATUS_OFFLINE:
@@ -1009,7 +1016,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
     }
 
     // show EMS devices
-    JsonArray devices = json.createNestedArray("Devices");
+    JsonArray devices = output.createNestedArray("Devices");
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {

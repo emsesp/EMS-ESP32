@@ -276,7 +276,6 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request, JsonVari
                 root["tx_gpio"]      = data[3];
                 root["pbutton_gpio"] = data[4];
             } else {
-                delete response;
                 AsyncWebServerResponse * response = request->beginResponse(200);
                 request->send(response);
                 return;

@@ -374,6 +374,7 @@ class TxService : public EMSbus {
 #else
     static constexpr uint8_t MAXIMUM_TX_RETRIES = 3;
 #endif
+
     static constexpr uint32_t POST_SEND_DELAY = 2000;
 
   private:

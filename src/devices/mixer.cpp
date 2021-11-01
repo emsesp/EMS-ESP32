@@ -26,8 +26,6 @@ uuid::log::Logger Mixer::logger_{F_(mixer), uuid::log::Facility::CONSOLE};
 
 Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    LOG_DEBUG(F("Adding new Mixer with device ID 0x%02X"), device_id);
-
     // Pool module
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MP) {
         register_telegram_type(0x5BA, F("HpPoolStatus"), true, MAKE_PF_CB(process_HpPoolStatus));

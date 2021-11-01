@@ -39,9 +39,8 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "shower_alert"
 // #define EMSESP_DEBUG_DEFAULT "310"
 // #define EMSESP_DEBUG_DEFAULT "render"
-// #define EMSESP_DEBUG_DEFAULT "api"
+#define EMSESP_DEBUG_DEFAULT "api"
 // #define EMSESP_DEBUG_DEFAULT "crash"
-#define EMSESP_DEBUG_DEFAULT "mqtt_individual"
 
 class Test {
   public:

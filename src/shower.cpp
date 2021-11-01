@@ -135,7 +135,7 @@ void Shower::send_mqtt_stat(bool state, bool force) {
 void Shower::shower_alert_stop() {
     if (doing_cold_shot_) {
         LOG_DEBUG(F("Shower Alert stopped"));
-        (void)Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "true", true); // no need to check authentication
+        (void)Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "true");
         doing_cold_shot_ = false;
     }
 }
@@ -143,7 +143,7 @@ void Shower::shower_alert_stop() {
 void Shower::shower_alert_start() {
     if (shower_alert_) {
         LOG_DEBUG(F("Shower Alert started"));
-        (void)Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false", true); // no need to check authentication
+        (void)Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
         doing_cold_shot_   = true;
         alert_timer_start_ = uuid::get_uptime(); // timer starts now
     }

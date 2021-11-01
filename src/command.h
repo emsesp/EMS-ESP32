@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <unordered_map>
 
 #include "console.h"
 
@@ -57,7 +58,7 @@ enum CommandRet : uint8_t {
 };
 
 using cmd_function_p      = std::function<bool(const char * data, const int8_t id)>;
-using cmd_json_function_p = std::function<bool(const char * data, const int8_t id, JsonObject & json)>;
+using cmd_json_function_p = std::function<bool(const char * data, const int8_t id, JsonObject & output)>;
 
 class Command {
   public:
@@ -101,35 +102,67 @@ class Command {
         return cmdfunctions_;
     }
 
-    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, bool authenticated, const int8_t id, JsonObject & json);
-    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, bool authenticated, const int8_t id = -1);
+#define add_
 
+    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, bool authenticated, const int8_t id, JsonObject & output);
+    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value);
+
+    // with normal call back function taking a value and id
     static void add(const uint8_t               device_type,
                     const __FlashStringHelper * cmd,
                     const cmd_function_p        cb,
                     const __FlashStringHelper * description,
                     uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
 
-    static void add_json(const uint8_t               device_type,
-                         const __FlashStringHelper * cmd,
-                         const cmd_json_function_p   cb,
-                         const __FlashStringHelper * description,
-                         uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
+    // callback function taking value, id and a json object for its output
+    static void add(const uint8_t               device_type,
+                    const __FlashStringHelper * cmd,
+                    const cmd_json_function_p   cb,
+                    const __FlashStringHelper * description,
+                    uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
 
     static void                   show_all(uuid::console::Shell & shell);
     static Command::CmdFunction * find_command(const uint8_t device_type, const char * cmd);
-    static Command::CmdFunction * find_command(const uint8_t device_type, char * cmd, int8_t & id);
 
     static void show(uuid::console::Shell & shell, uint8_t device_type, bool verbose);
     static void show_devices(uuid::console::Shell & shell);
     static bool device_has_commands(const uint8_t device_type);
 
-    static bool list(const uint8_t device_type, JsonObject & json);
+    static bool list(const uint8_t device_type, JsonObject & output);
+
+    static uint8_t process(const char * path, const bool authenticated, const JsonObject & input, JsonObject & output);
+
+    static const char * parse_command_string(const char * command, int8_t & id);
 
   private:
     static uuid::log::Logger logger_;
 
     static std::vector<CmdFunction> cmdfunctions_; // list of commands
+};
+
+typedef std::unordered_map<std::string, std::string> KeyValueMap_t;
+typedef std::vector<std::string>                     Folder_t;
+
+class SUrlParser {
+  private:
+    KeyValueMap_t m_keysvalues;
+    Folder_t      m_folders;
+
+  public:
+    SUrlParser(){};
+    SUrlParser(const char * url);
+
+    bool parse(const char * url);
+
+    Folder_t & paths() {
+        return m_folders;
+    };
+
+    KeyValueMap_t & params() {
+        return m_keysvalues;
+    };
+
+    std::string path();
 };
 
 } // namespace emsesp

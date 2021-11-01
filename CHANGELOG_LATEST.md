@@ -17,6 +17,7 @@
 - Added support for mDNS [#161](https://github.com/emsesp/EMS-ESP32/issues/161)
 - Added last system ESP32 reset code to log (and `system info` output)
 - Firmware Checker in WebUI [#168](https://github.com/emsesp/EMS-ESP32/issues/168)
+- Added new MQTT setting for 'response' topic
 
 ## Fixed
 
@@ -29,13 +30,15 @@
 ## Changed
 
 - Syslog BOM only for utf-8 messages [#91](https://github.com/emsesp/EMS-ESP32/issues/91)
-- Check for KM200 by device-id 0x48, remove tx-delay[#90](https://github.com/emsesp/EMS-ESP32/issues/90)
+- Check for KM200 by device-id 0x48, remove tx-delay [#90](https://github.com/emsesp/EMS-ESP32/issues/90)
 - rename `fastheatupfactor` to `fastheatup` and add percent [#122]
 - "unit" renamed to "uom" in API call to recall a Device Value
 - initial backend React changes to replace the class components (HOCs) with React Hooks
 - Use program-names instead of numbers
 - Boiler's maintenancemessage always published in MQTT (to prevent HA missing entity)
 - Unit of Measure 'times' added to MQTT Fails, Rx fails, Rx received, Tx fails, Tx reads & Tx writes
+- Improved API. Restful HTTP API works in the same way as MQTT calls
+- Removed settings for MQTT subscribe format [#173](https://github.com/emsesp/EMS-ESP32/issues/173)
 
 ## **BREAKING CHANGES**
 

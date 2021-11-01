@@ -175,7 +175,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["ha_climate_format"]       = settings.ha_climate_format;
     root["ha_enabled"]              = settings.ha_enabled;
     root["nested_format"]           = settings.nested_format;
-    root["subscribe_format"]        = settings.subscribe_format;
+    root["send_response"]           = settings.send_response;
 }
 
 StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & settings) {
@@ -205,7 +205,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.ha_climate_format = root["ha_climate_format"] | EMSESP_DEFAULT_HA_CLIMATE_FORMAT;
     newSettings.ha_enabled        = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
     newSettings.nested_format     = root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT;
-    newSettings.subscribe_format  = root["subscribe_format"] | EMSESP_DEFAULT_SUBSCRIBE_FORMAT;
+    newSettings.send_response     = root["send_response"] | EMSESP_DEFAULT_SEND_RESPONSE;
 
     if (newSettings.enabled != settings.enabled) {
         changed = true;
@@ -220,7 +220,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
         changed = true;
     }
 
-    if (newSettings.subscribe_format != settings.subscribe_format) {
+    if (newSettings.send_response != settings.send_response) {
         changed = true;
     }
 

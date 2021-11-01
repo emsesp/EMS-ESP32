@@ -101,7 +101,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
             if (emsdevice) {
                 if (emsdevice->unique_id() == json["id"]) {
                     // wait max 2.5 sec for updated data (post_send_delay is 2 sec)
-                    for (uint16_t i = 0; i < 2500 && EMSESP::wait_validate(); i++) {
+                    for (uint16_t i = 0; i < (emsesp::TxService::POST_SEND_DELAY + 500) && EMSESP::wait_validate(); i++) {
                         delay(1);
                     }
                     EMSESP::wait_validate(0); // reset in case of timeout
@@ -126,31 +126,49 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
 // assumes the service has been checked for admin authentication
 void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        JsonObject dv = json["devicevalue"];
-        uint8_t    id = json["id"];
+        JsonObject dv        = json["devicevalue"];
+        uint8_t    unique_id = json["id"];
 
         // using the unique ID from the web find the real device type
+        // id is the selected device
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
-                if (emsdevice->unique_id() == id) {
-                    const char * cmd         = dv["c"];
-                    uint8_t      device_type = emsdevice->device_type();
-                    uint8_t      cmd_return  = CommandRet::OK;
-                    char         s[10];
+                if (emsdevice->unique_id() == unique_id) {
+                    // parse the command as it could have a hc or wwc prefixed, e.g. hc2/seltemp
+                    const char * cmd = dv["c"];                                // the command
+                    int8_t       id  = -1;                                     // default
+                    cmd              = Command::parse_command_string(cmd, id); // extract hc or wwc
+
+                    // create JSON for output
+                    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
+                    JsonObject          output   = response->getRoot();
+
                     // the data could be in any format, but we need string
-                    JsonVariant data = dv["v"];
+                    // authenticated is always true
+                    JsonVariant data        = dv["v"]; // the value in any format
+                    uint8_t     command_ret = CommandRet::OK;
+                    uint8_t     device_type = emsdevice->device_type();
                     if (data.is<const char *>()) {
-                        cmd_return = Command::call(device_type, cmd, data.as<const char *>(), true);
+                        command_ret = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
                     } else if (data.is<int>()) {
-                        cmd_return = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0), true);
+                        char s[10];
+                        command_ret = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0), true, id, output);
                     } else if (data.is<float>()) {
-                        cmd_return = Command::call(device_type, cmd, Helpers::render_value(s, (float)data.as<float>(), 1), true);
+                        char s[10];
+                        command_ret = Command::call(device_type, cmd, Helpers::render_value(s, (float)data.as<float>(), 1), true, id, output);
                     } else if (data.is<bool>()) {
-                        cmd_return = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true);
+                        command_ret = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true, id, output);
                     }
 
-                    // send "Write command sent to device" or "Write command failed"
-                    AsyncWebServerResponse * response = request->beginResponse((cmd_return == CommandRet::OK) ? 200 : 204);
+                    // write debug
+                    if (command_ret != CommandRet::OK) {
+                        EMSESP::logger().err(F("Write command failed %s (%d)"), (const char *)output["message"], command_ret);
+                    } else {
+                        EMSESP::logger().debug(F("Write command successful"));
+                    }
+
+                    response->setCode((command_ret == CommandRet::OK) ? 200 : 204);
+                    response->setLength();
                     request->send(response);
                     return;
                 }

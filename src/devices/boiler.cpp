@@ -26,8 +26,6 @@ uuid::log::Logger Boiler::logger_{F_(boiler), uuid::log::Facility::CONSOLE};
 
 Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    LOG_DEBUG(F("Adding new Boiler with device ID 0x%02X"), device_id);
-
     // cascaded heatingsources, only some values per individual heatsource (hs)
     if (device_id != EMSdevice::EMS_DEVICE_ID_BOILER) {
         uint8_t hs = device_id - EMSdevice::EMS_DEVICE_ID_BOILER_1; // heating source id, count from 0

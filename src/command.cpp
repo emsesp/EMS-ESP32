@@ -26,143 +26,250 @@ uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
 
 std::vector<Command::CmdFunction> Command::cmdfunctions_;
 
-// calls a command
-// id may be used to represent a heating circuit for example, it's optional
-// returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
-uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, bool authenticated, const int8_t id) {
-    int8_t id_new      = id;
-    char   cmd_new[30] = {'\0'};
-    strlcpy(cmd_new, cmd, sizeof(cmd_new));
+// takes a path and a json body, parses the data and calls the command
+// the path is leading so if duplicate keys are in the input JSON it will be ignored
+// returns a return code and json output
+uint8_t Command::process(const char * path, const bool authenticated, const JsonObject & input, JsonObject & output) {
+    SUrlParser p; // parse URL for the path names
+    p.parse(path);
+    size_t num_paths = p.paths().size();
 
-    // find the command
-    auto cf = find_command(device_type, cmd_new, id_new);
-    if ((cf == nullptr) || (cf->cmdfunction_json_)) {
-        LOG_WARNING(F("Command %s on %s not found"), cmd, EMSdevice::device_type_2_device_name(device_type).c_str());
+    if (!num_paths) {
+        output.clear();
+        output["message"] = "error: invalid path";
+        return CommandRet::ERROR;
+    }
+
+    // dump paths, for debugging
+    // for (auto & folder : p.paths()) {
+    //     Serial.print(folder.c_str());
+    // }
+
+    // must start with either "api" or the hostname
+    if ((p.paths().front() != "api") && (p.paths().front() != Mqtt::base())) {
+        output.clear();
+        output["message"] = "error: invalid path";
+        return CommandRet::ERRORED;
+    } else {
+        p.paths().erase(p.paths().begin()); // remove it
+        num_paths--;
+    }
+
+    std::string cmd_s;
+    int8_t      id_n = -1; // default hc
+
+    // check for a device
+    // if its not a known device (thermostat, boiler etc) look for any special MQTT subscriptions
+    const char * device_s = nullptr;
+    if (!p.paths().size()) {
+        // we must look for the device in the JSON body
+        if (input.containsKey("device")) {
+            device_s = input["device"];
+        }
+    } else {
+        // extract it from the path
+        device_s = p.paths().front().c_str(); // get the device (boiler, thermostat, system etc)
+    }
+
+    // validate the device
+    uint8_t device_type = EMSdevice::device_name_2_device_type(device_s);
+    if (device_type == EMSdevice::DeviceType::UNKNOWN) {
+        output.clear();
+        char error[100];
+        snprintf(error, sizeof(error), "error: unknown device %s", device_s);
+        output["message"] = error;
         return CommandRet::NOT_FOUND;
     }
 
-    // check if we're allowed to call it
-    if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !authenticated) {
-        LOG_WARNING(F("Command %s on %s requires valid authorization"), cmd, EMSdevice::device_type_2_device_name(device_type).c_str());
-        return CommandRet::NOT_ALLOWED;
-    }
-
-    std::string dname = EMSdevice::device_type_2_device_name(device_type);
-    if (value == nullptr) {
-        LOG_INFO(F("Calling %s command '%s'"), dname.c_str(), cmd);
-    } else if (id == -1) {
-        LOG_INFO(F("Calling %s command '%s', value %s, id is default"), dname.c_str(), cmd, value);
+    const char * command_p = nullptr;
+    if (num_paths == 2) {
+        command_p = p.paths()[1].c_str();
+    } else if (num_paths >= 3) {
+        // concatenate the path into one string
+        char command[50];
+        snprintf(command, sizeof(command), "%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str());
+        command_p = command;
     } else {
-        LOG_INFO(F("Calling %s command '%s', value %s, id is %d"), dname.c_str(), cmd, value, id);
+        // take it from the JSON. Support both name and cmd to keep backwards compatibility
+        if (input.containsKey("name")) {
+            command_p = input["name"];
+        } else if (input.containsKey("cmd")) {
+            command_p = input["cmd"];
+        }
     }
 
-    return ((cf->cmdfunction_)(value, id_new)) ? CommandRet::OK : CommandRet::ERROR;
+    // some commands may be prefixed with hc. or wwc. so extract these
+    // exit if we don't have a command
+    command_p = parse_command_string(command_p, id_n);
+    if (command_p == nullptr) {
+        output.clear();
+        output["message"] = "error: missing command";
+        return CommandRet::NOT_FOUND;
+    }
+
+    // if we don't have an id/hc/wwc try and get it from the JSON input
+    // it's allowed to have no id, and then keep the default to -1
+    if (id_n == -1) {
+        if (input.containsKey("hc")) {
+            id_n = input["hc"];
+        } else if (input.containsKey("wwc")) {
+            id_n = input["wwc"];
+        } else if (input.containsKey("id")) {
+            id_n = input["id"];
+        }
+    }
+
+    // the value must always come from the input JSON. It's allowed to be empty.
+    JsonVariant data;
+    if (input.containsKey("data")) {
+        data = input["data"];
+    } else if (input.containsKey("value")) {
+        data = input["value"];
+    }
+
+    // call the command based on the type
+    uint8_t cmd_return = CommandRet::ERROR;
+    if (data.is<const char *>()) {
+        cmd_return = Command::call(device_type, command_p, data.as<const char *>(), authenticated, id_n, output);
+    } else if (data.is<int>()) {
+        char data_str[10];
+        cmd_return = Command::call(device_type, command_p, Helpers::itoa(data_str, (int16_t)data.as<int>()), authenticated, id_n, output);
+    } else if (data.is<float>()) {
+        char data_str[10];
+        cmd_return = Command::call(device_type, command_p, Helpers::render_value(data_str, (float)data.as<float>(), 2), authenticated, id_n, output);
+    } else if (data.isNull()) {
+        // empty
+        cmd_return = Command::call(device_type, command_p, "", authenticated, id_n, output);
+    } else {
+        // can't process
+        LOG_ERROR(F("Cannot parse command"));
+        return CommandRet::ERROR;
+    }
+
+    // write debug to log
+    if (cmd_return == CommandRet::OK) {
+        LOG_DEBUG(F("Command %s was executed successfully"), command_p);
+    } else {
+        if (!output.isNull()) {
+            LOG_ERROR(F("Command failed with %s (%d)"), (const char *)output["message"], cmd_return);
+        } else {
+            LOG_ERROR(F("Command failed with code %d"), cmd_return);
+        }
+    }
+
+    return cmd_return;
+}
+
+// takes a string like "hc1/seltemp" or "seltemp" or "wwc2.seltemp" and tries to get the id and cmd
+// returns start position of the command string
+const char * Command::parse_command_string(const char * command, int8_t & id) {
+    if (command == nullptr) {
+        return nullptr;
+    }
+
+    // make a copy of the string command for parsing
+    char command_s[100];
+    strncpy(command_s, command, sizeof(command_s));
+
+    char * p;
+    char * breakp;
+    // look for a delimeter and split the string
+    p      = command_s;
+    breakp = strchr(p, '.');
+    if (!breakp) {
+        p      = command_s; // reset and look for /
+        breakp = strchr(p, '/');
+        if (!breakp) {
+            p      = command_s; // reset and look for _
+            breakp = strchr(p, '_');
+            if (!breakp) {
+                return command;
+            }
+        }
+    }
+
+    uint8_t start_pos = breakp - p + 1;
+
+    // extra the hc or wwc number
+    if (!strncmp(command, "hc", 2) && start_pos == 4) {
+        id = command[start_pos - 2] - '0';
+    } else if (!strncmp(command, "wwc", 3) && start_pos == 5) {
+        id = command[start_pos - 2] - '0';
+    } else {
+#if defined(EMSESP_DEBUG)
+        LOG_DEBUG(F("command parse error, unknown hc/wwc in %s"), command_s);
+#endif
+    }
+
+    return (command + start_pos);
+}
+
+// calls a command directly
+uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value) {
+    // create a temporary buffer
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> output_doc;
+    JsonObject                                 output = output_doc.to<JsonObject>();
+
+    // authenticated is always true and ID is the default value
+    return call(device_type, cmd, value, true, -1, output);
 }
 
 // calls a command. Takes a json object for output.
 // id may be used to represent a heating circuit for example
 // returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
-uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, bool authenticated, const int8_t id, JsonObject & json) {
-    int8_t id_new      = id;
-    char   cmd_new[30] = {'\0'};
-    strlcpy(cmd_new, cmd, sizeof(cmd_new));
+uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, bool authenticated, const int8_t id, JsonObject & output) {
+    uint8_t return_code = CommandRet::OK;
 
-    auto cf = find_command(device_type, cmd_new, id_new);
+    // see if there is a command registered
+    auto cf = find_command(device_type, cmd);
 
-    // check if we're allowed to call it
-    if (cf != nullptr) {
+    // check if its a call to and end-point to a device, i.e. has no value
+    // except for system commands as this is a special device without any queryable entities (device values)
+    if ((device_type != EMSdevice::DeviceType::SYSTEM) && (!value || !strlen(value))) {
+        if (!cf || (cf && !cf->cmdfunction_json_)) {
+            return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
+        }
+    }
+
+    if (cf) {
+        // we have a matching command
+        std::string dname = EMSdevice::device_type_2_device_name(device_type);
+        if ((value == nullptr) || !strlen(value)) {
+            LOG_INFO(F("Calling %s command '%s'"), dname.c_str(), cmd);
+        } else if (id == -1) {
+            LOG_INFO(F("Calling %s command '%s', value %s, id is default"), dname.c_str(), cmd, value);
+        } else {
+            LOG_INFO(F("Calling %s command '%s', value %s, id is %d"), dname.c_str(), cmd, value, id);
+        }
+
+        // check permissions
         if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !authenticated) {
-            LOG_WARNING(F("Command %s on %s requires valid authorization"), cmd, EMSdevice::device_type_2_device_name(device_type).c_str());
+            output["message"] = "error: authentication failed";
             return CommandRet::NOT_ALLOWED; // command not allowed
         }
-    }
 
-    std::string dname = EMSdevice::device_type_2_device_name(device_type);
-    if (value == nullptr) {
-        LOG_INFO(F("Calling %s command '%s'"), dname.c_str(), cmd);
-    } else if (id == -1) {
-        LOG_INFO(F("Calling %s command '%s', value %s, id is default"), dname.c_str(), cmd, value);
-    } else {
-        LOG_INFO(F("Calling %s command '%s', value %s, id is %d"), dname.c_str(), cmd, value, id_new);
-    }
-
-    // check if json object is empty, if so quit
-    if (json.isNull()) {
-        LOG_WARNING(F("Ignore call for command %s in %s because it has no json body"), cmd, EMSdevice::device_type_2_device_name(device_type).c_str());
-        return CommandRet::ERROR;
-    }
-
-    // this is for endpoints that don't have commands, i.e not writable (e.g. boiler/syspress)
-    if (cf == nullptr) {
-        return EMSESP::get_device_value_info(json, cmd_new, id_new, device_type) ? CommandRet::OK : CommandRet::ERROR;
-    }
-
-    if (cf->cmdfunction_json_) {
-        return ((cf->cmdfunction_json_)(value, id_new, json)) ? CommandRet::OK : CommandRet::ERROR;
-    } else {
-        if ((device_type != EMSdevice::DeviceType::SYSTEM) && (value == nullptr || strlen(value) == 0 || strcmp(value, "?") == 0 || strcmp(value, "*") == 0)) {
-            return EMSESP::get_device_value_info(json, cmd_new, id_new, device_type) ? CommandRet::OK : CommandRet::ERROR;
+        // call the function
+        if (cf->cmdfunction_json_) {
+            return_code = ((cf->cmdfunction_json_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
         }
-        return ((cf->cmdfunction_)(value, id_new)) ? CommandRet::OK : CommandRet::ERROR;
-    }
-}
-
-// strip prefixes, check, and find command
-Command::CmdFunction * Command::find_command(const uint8_t device_type, char * cmd, int8_t & id) {
-    // special cases for id=0 and id=-1 will be removed in V3 API
-    // no command for id0
-    if (id == 0) {
-        return nullptr;
-    }
-
-    // empty command is info with id0
-    if (cmd[0] == '\0') {
-        strcpy(cmd, "info");
-        id = 0;
-    }
-
-    // convert cmd to lowercase
-    for (char * p = cmd; *p; p++) {
-        *p = tolower(*p);
-    }
-
-    // hack for commands that could have hc or wwc prefixed. will be removed in new API V3 eventually
-    // scan for prefix hc.
-    for (uint8_t i = DeviceValueTAG::TAG_HC1; i <= DeviceValueTAG::TAG_HC4; i++) {
-        const char * tag = EMSdevice::tag_to_string(i).c_str();
-        uint8_t      len = strlen(tag);
-        if (strncmp(cmd, tag, len) == 0) {
-            if (cmd[len] != '\0') {
-                strcpy(cmd, &cmd[len + 1]);
-            } else {
-                strcpy(cmd, &cmd[len]);
-            }
-            id = 1 + i - DeviceValueTAG::TAG_HC1;
-            break;
+        if (cf->cmdfunction_) {
+            return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;
         }
-    }
 
-    // scan for prefix wwc.
-    for (uint8_t i = DeviceValueTAG::TAG_WWC1; i <= DeviceValueTAG::TAG_WWC4; i++) {
-        const char * tag = EMSdevice::tag_to_string(i).c_str();
-        uint8_t      len = strlen(tag);
-        if (strncmp(cmd, tag, len) == 0) {
-            if (cmd[len] != '\0') {
-                strcpy(cmd, &cmd[len + 1]);
-            } else {
-                strcpy(cmd, &cmd[len]);
-            }
-            id = 8 + i - DeviceValueTAG::TAG_WWC1;
-            break;
+        // report error if call failed
+        if (return_code != CommandRet::OK) {
+            output.clear();
+            output["message"] = "error: function failed";
         }
+
+        return return_code;
     }
 
-    // empty command after processing prefix is info
-    if (cmd[0] == '\0') {
-        strcpy(cmd, "info");
-    }
-
-    return find_command(device_type, cmd);
+    // we didn't find the command and its not an endpoint, report error
+    char error[100];
+    snprintf(error, sizeof(error), "error: invalid command %s", cmd);
+    output["message"] = error;
+    return CommandRet::NOT_FOUND;
 }
 
 // add a command to the list, which does not return json
@@ -178,23 +285,17 @@ void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, co
     }
 
     cmdfunctions_.emplace_back(device_type, flags, cmd, cb, nullptr, description); // callback for json is nullptr
-
-    Mqtt::sub_command(device_type, cmd, cb, flags);
 }
 
 // add a command to the list, which does return a json object as output
 // flag is fixed to MqttSubFlag::MQTT_SUB_FLAG_NOSUB so there will be no topic subscribed to this
-void Command::add_json(const uint8_t               device_type,
-                       const __FlashStringHelper * cmd,
-                       const cmd_json_function_p   cb,
-                       const __FlashStringHelper * description,
-                       uint8_t                     flags) {
+void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, const cmd_json_function_p cb, const __FlashStringHelper * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
     if (find_command(device_type, uuid::read_flash_string(cmd).c_str()) != nullptr) {
         return;
     }
 
-    cmdfunctions_.emplace_back(device_type, CommandFlag::MQTT_SUB_FLAG_NOSUB | flags, cmd, nullptr, cb, description); // callback for json is included
+    cmdfunctions_.emplace_back(device_type, (CommandFlag::MQTT_SUB_FLAG_NOSUB | flags), cmd, nullptr, cb, description); // callback for json is included
 }
 
 // see if a command exists for that device type
@@ -221,9 +322,9 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ch
 }
 
 // list all commands for a specific device, output as json
-bool Command::list(const uint8_t device_type, JsonObject & json) {
+bool Command::list(const uint8_t device_type, JsonObject & output) {
     if (cmdfunctions_.empty()) {
-        json["message"] = "no commands available";
+        output["message"] = "no commands available";
         return false;
     }
 
@@ -239,7 +340,7 @@ bool Command::list(const uint8_t device_type, JsonObject & json) {
     for (auto & cl : sorted_cmds) {
         for (const auto & cf : cmdfunctions_) {
             if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == uuid::read_flash_string(cf.cmd_))) {
-                json[cl] = cf.description_;
+                output[cl] = cf.description_;
             }
         }
     }
@@ -282,11 +383,11 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                 uint8_t i = cl.length();
                 shell.print("  ");
                 if (cf.has_flags(MQTT_SUB_FLAG_HC)) {
-                    shell.print("[hc] ");
-                    i += 5;
+                    shell.print("[hc<n>.]");
+                    i += 8;
                 } else if (cf.has_flags(MQTT_SUB_FLAG_WWC)) {
-                    shell.print("[wwc] ");
-                    i += 6;
+                    shell.print("[wwc<n>.]");
+                    i += 9;
                 }
                 shell.print(cl);
                 // pad with spaces
@@ -299,10 +400,10 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                     shell.print(' ');
                 }
                 shell.print(uuid::read_flash_string(cf.description_));
-                if (cf.has_flags(CommandFlag::ADMIN_ONLY)) {
+                if (!cf.has_flags(CommandFlag::ADMIN_ONLY)) {
                     shell.print(' ');
                     shell.print(COLOR_BRIGHT_RED);
-                    shell.print('!');
+                    shell.print('*');
                 }
                 shell.print(COLOR_RESET);
             }
@@ -325,7 +426,7 @@ bool Command::device_has_commands(const uint8_t device_type) {
     }
 
     if (device_type == EMSdevice::DeviceType::DALLASSENSOR) {
-        return true; // we always have Sensor, but should check if there are actual sensors attached!
+        return (EMSESP::sensor_devices().size() != 0);
     }
 
     for (const auto & emsdevice : EMSESP::emsdevices) {
@@ -363,10 +464,11 @@ void Command::show_devices(uuid::console::Shell & shell) {
 // output list of all commands to console
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
-    shell.println(F("Available commands (!=requires authorization): "));
+    shell.println(F("Available commands (*=do not need authorization): "));
 
     // show system first
     shell.print(COLOR_BOLD_ON);
+    shell.print(COLOR_YELLOW);
     shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM).c_str());
     shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::SYSTEM, true);
@@ -374,6 +476,7 @@ void Command::show_all(uuid::console::Shell & shell) {
     // show sensor
     if (EMSESP::have_sensors()) {
         shell.print(COLOR_BOLD_ON);
+        shell.print(COLOR_YELLOW);
         shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR).c_str());
         shell.print(COLOR_RESET);
         show(shell, EMSdevice::DeviceType::DALLASSENSOR, true);
@@ -383,11 +486,92 @@ void Command::show_all(uuid::console::Shell & shell) {
     for (const auto & device_class : EMSFactory::device_handlers()) {
         if (Command::device_has_commands(device_class.first)) {
             shell.print(COLOR_BOLD_ON);
+            shell.print(COLOR_YELLOW);
             shell.printf(" %s: ", EMSdevice::device_type_2_device_name(device_class.first).c_str());
             shell.print(COLOR_RESET);
             show(shell, device_class.first, true);
         }
     }
 }
+
+/**
+ * Extract only the path component from the passed URI and normalized it.
+ * Ex. //one/two////three/// becomes /one/two/three
+ */
+std::string SUrlParser::path() {
+    std::string s = "/"; // set up the beginning slash
+    for (std::string & f : m_folders) {
+        s += f;
+        s += "/";
+    }
+    s.pop_back(); // deleting last letter, that is slash '/'
+    return std::string(s);
+}
+
+SUrlParser::SUrlParser(const char * uri) {
+    parse(uri);
+}
+
+bool SUrlParser::parse(const char * uri) {
+    m_folders.clear();
+    m_keysvalues.clear();
+    enum Type { begin, folder, param, value };
+    std::string s;
+
+    const char * c = uri;
+    enum Type    t = Type::begin;
+    std::string  last_param;
+
+    if (c != NULL || *c != '\0') {
+        do {
+            if (*c == '/') {
+                if (s.length() > 0) {
+                    m_folders.push_back(s);
+                    s.clear();
+                }
+                t = Type::folder;
+            } else if (*c == '?' && (t == Type::folder || t == Type::begin)) {
+                if (s.length() > 0) {
+                    m_folders.push_back(s);
+                    s.clear();
+                }
+                t = Type::param;
+            } else if (*c == '=' && (t == Type::param || t == Type::begin)) {
+                m_keysvalues[s] = "";
+                last_param      = s;
+                s.clear();
+                t = Type::value;
+            } else if (*c == '&' && (t == Type::value || t == Type::param || t == Type::begin)) {
+                if (t == Type::value) {
+                    m_keysvalues[last_param] = s;
+                } else if ((t == Type::param || t == Type::begin) && (s.length() > 0)) {
+                    m_keysvalues[s] = "";
+                    last_param      = s;
+                }
+                t = Type::param;
+                s.clear();
+            } else if (*c == '\0' && s.length() > 0) {
+                if (t == Type::value) {
+                    m_keysvalues[last_param] = s;
+                } else if (t == Type::folder || t == Type::begin) {
+                    m_folders.push_back(s);
+                } else if (t == Type::param) {
+                    m_keysvalues[s] = "";
+                    last_param      = s;
+                }
+                s.clear();
+            } else if (*c == '\0' && s.length() == 0) {
+                if (t == Type::param && last_param.length() > 0) {
+                    m_keysvalues[last_param] = "";
+                }
+                s.clear();
+            } else {
+                s += *c;
+            }
+        } while (*c++ != '\0');
+    }
+    return true;
+}
+
 
 } // namespace emsesp

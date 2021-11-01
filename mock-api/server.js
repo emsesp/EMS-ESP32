@@ -225,7 +225,7 @@ const mqtt_settings = {
   ha_climate_format: 1,
   ha_enabled: true,
   nested_format: 1,
-  subscribe_format: 0,
+  send_response: true,
 }
 const mqtt_status = {
   enabled: true,

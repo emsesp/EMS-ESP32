@@ -238,7 +238,7 @@ class EMSdevice {
     void   show_telegram_handlers(uuid::console::Shell & shell);
     char * show_telegram_handlers(char * result);
     void   show_mqtt_handlers(uuid::console::Shell & shell);
-    void   list_device_entries(JsonObject & json);
+    void   list_device_entries(JsonObject & output);
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
 
@@ -249,9 +249,8 @@ class EMSdevice {
     bool              get_value_info(JsonObject & root, const char * cmd, const int8_t id);
 
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API, MQTT };
-    bool generate_values_json(JsonObject & json, const uint8_t tag_filter, const bool nested, const uint8_t output_target);
-
-    void generate_values_json_web(JsonObject & json);
+    bool generate_values_json(JsonObject & output, const uint8_t tag_filter, const bool nested, const uint8_t output_target);
+    void generate_values_json_web(JsonObject & output);
 
     void register_device_value(uint8_t                             tag,
                                void *                              value_p,
@@ -291,8 +290,6 @@ class EMSdevice {
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value);
 
     void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0);
-
-    void register_mqtt_topic(const std::string & topic, const mqtt_sub_function_p f);
 
     void publish_mqtt_ha_sensor();
 

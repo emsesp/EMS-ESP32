@@ -41,15 +41,15 @@ void DallasSensor::start() {
         bus_.begin(dallas_gpio_);
 #endif
         // API calls
-        Command::add_json(
+        Command::add(
             EMSdevice::DeviceType::DALLASSENSOR,
             F_(info),
-            [&](const char * value, const int8_t id, JsonObject & json) { return command_info(value, id, json); },
+            [&](const char * value, const int8_t id, JsonObject & output) { return command_info(value, id, output); },
             F_(info_cmd));
-        Command::add_json(
+        Command::add(
             EMSdevice::DeviceType::DALLASSENSOR,
             F_(commands),
-            [&](const char * value, const int8_t id, JsonObject & json) { return command_commands(value, id, json); },
+            [&](const char * value, const int8_t id, JsonObject & output) { return command_commands(value, id, output); },
             F_(commands_cmd));
     }
 }
@@ -79,7 +79,7 @@ void DallasSensor::loop() {
     if (state_ == State::IDLE) {
         if (time_now - last_activity_ >= READ_INTERVAL_MS) {
 #ifdef EMSESP_DEBUG_SENSOR
-            LOG_DEBUG(F("Read sensor temperature"));
+            LOG_DEBUG(F("[DEBUG] Read sensor temperature"));
 #endif
             if (bus_.reset() || parasite_) {
                 YIELD;
@@ -446,14 +446,14 @@ bool DallasSensor::updated_values() {
 }
 
 // list commands
-bool DallasSensor::command_commands(const char * value, const int8_t id, JsonObject & json) {
-    return Command::list(EMSdevice::DeviceType::DALLASSENSOR, json);
+bool DallasSensor::command_commands(const char * value, const int8_t id, JsonObject & output) {
+    return Command::list(EMSdevice::DeviceType::DALLASSENSOR, output);
 }
 
 // creates JSON doc from values
 // returns false if empty
 // e.g. dallassensor_data = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":23.30},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":24.0}}
-bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject & json) {
+bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject & output) {
     if (sensors_.size() == 0) {
         return false;
     }
@@ -463,21 +463,21 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
         char sensorID[10]; // sensor{1-n}
         snprintf(sensorID, 10, "sensor%d", i++);
         if (id == -1) { // show number and id
-            JsonObject dataSensor = json.createNestedObject(sensorID);
+            JsonObject dataSensor = output.createNestedObject(sensorID);
             dataSensor["id"]      = sensor.to_string();
             if (Helpers::hasValue(sensor.temperature_c)) {
                 dataSensor["temp"] = (float)(sensor.temperature_c) / 10;
             }
         } else { // show according to format
             if (dallas_format_ == Dallas_Format::NUMBER && Helpers::hasValue(sensor.temperature_c)) {
-                json[sensorID] = (float)(sensor.temperature_c) / 10;
+                output[sensorID] = (float)(sensor.temperature_c) / 10;
             } else if (Helpers::hasValue(sensor.temperature_c)) {
-                json[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
+                output[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
             }
         }
     }
 
-    return (json.size() > 0);
+    return (output.size() > 0);
 }
 
 // send all dallas sensor values as a JSON package to MQTT

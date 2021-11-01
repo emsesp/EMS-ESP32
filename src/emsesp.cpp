@@ -541,12 +541,8 @@ void EMSESP::publish_sensor_values(const bool time, const bool force) {
     }
 }
 
-// MQTT publish a telegram as raw data
+// MQTT publish a telegram as raw data to the topic 'response'
 void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
-    if (!Mqtt::connected()) {
-        return;
-    }
-
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
 
     char buffer[100];
@@ -576,6 +572,7 @@ bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const in
         }
     }
 
+    // specific for the dallassensor
     if (devicetype == DeviceType::DALLASSENSOR) {
         uint8_t i = 1;
         for (const auto & sensor : EMSESP::sensor_devices()) {
@@ -781,7 +778,10 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // if watching or reading...
     if ((telegram->type_id == read_id_) && (telegram->dest == txservice_.ems_bus_id())) {
         LOG_NOTICE(F("%s"), pretty_telegram(telegram).c_str());
-        publish_response(telegram);
+        if (Mqtt::send_response()) {
+            publish_response(telegram);
+        }
+
         if (!read_next_) {
             read_id_ = WATCH_ID_NONE;
         }
@@ -989,40 +989,47 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         return true;
     }
 
-    Command::add_json(
+    Command::add(
         device_type,
         F_(info),
-        [device_type](const char * value, const int8_t id, JsonObject & json) {
-            return command_info(device_type, json, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
+        [device_type](const char * value, const int8_t id, JsonObject & output) {
+            return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
         },
         F_(info_cmd));
-    Command::add_json(
+    Command::add(
         device_type,
-        F("info_short"),
-        [device_type](const char * value, const int8_t id, JsonObject & json) { return command_info(device_type, json, id, EMSdevice::OUTPUT_TARGET::API); },
+        F("list"),
+        [device_type](const char * value, const int8_t id, JsonObject & output) { return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API); },
         nullptr,
         CommandFlag::HIDDEN); // this command is hidden
-    Command::add_json(
+    Command::add(
         device_type,
         F_(commands),
-        [device_type](const char * value, const int8_t id, JsonObject & json) { return command_commands(device_type, json, id); },
+        [device_type](const char * value, const int8_t id, JsonObject & output) { return command_commands(device_type, output, id); },
         F_(commands_cmd));
-    Command::add_json(
+    Command::add(
         device_type,
         F_(entities),
-        [device_type](const char * value, const int8_t id, JsonObject & json) { return command_entities(device_type, json, id); },
+        [device_type](const char * value, const int8_t id, JsonObject & output) { return command_entities(device_type, output, id); },
         F_(entities_cmd));
+
+    // MQTT subscribe to the device top-level, e.g. "ems-esp/boiler/#"
+    std::string topic = EMSdevice::device_type_2_device_name(device_type) + "/#";
+    Mqtt::subscribe(device_type, topic, nullptr); // use empty function callback
+
+    // Print to LOG showing we've added a new device
+    LOG_INFO(F("Recognized new %s with device ID 0x%02X"), EMSdevice::device_type_2_device_name(device_type).c_str(), device_id);
 
     return true;
 }
 
 // list device entities
-bool EMSESP::command_entities(uint8_t device_type, JsonObject & json, const int8_t id) {
+bool EMSESP::command_entities(uint8_t device_type, JsonObject & output, const int8_t id) {
     JsonObject node;
 
     for (const auto & emsdevice : emsdevices) {
         if ((emsdevice) && (emsdevice->device_type() == device_type)) {
-            emsdevice->list_device_entries(json);
+            emsdevice->list_device_entries(output);
             return true;
         }
     }
@@ -1031,14 +1038,14 @@ bool EMSESP::command_entities(uint8_t device_type, JsonObject & json, const int8
 }
 
 // list all available commands, return as json
-bool EMSESP::command_commands(uint8_t device_type, JsonObject & json, const int8_t id) {
-    return Command::list(device_type, json);
+bool EMSESP::command_commands(uint8_t device_type, JsonObject & output, const int8_t id) {
+    return Command::list(device_type, output);
 }
 
-// export all values to info command
+// export all values
 // value is ignored here
 // info command always shows in verbose mode, so full names are displayed
-bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t id, const uint8_t output_target) {
+bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
     bool    has_value = false;
     uint8_t tag;
     if (id >= 1 && id <= 4) {
@@ -1051,13 +1058,10 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t i
         return false;
     }
 
-    // if id=-1 it means we have no endpoint so default to API
-    uint8_t target = (id == -1) ? EMSdevice::OUTPUT_TARGET::API_VERBOSE : EMSdevice::OUTPUT_TARGET::API;
-
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)
             && ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat()))) {
-            has_value |= emsdevice->generate_values_json(json, tag, (id < 1), target); // nested for id -1 and 0
+            has_value |= emsdevice->generate_values_json(output, tag, (id < 1), output_target); // nested for id -1 and 0
         }
     }
 

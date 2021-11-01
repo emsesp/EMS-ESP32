@@ -59,9 +59,9 @@ class System {
     static bool command_syslog_level(const char * value, const int8_t id);
     static bool command_watch(const char * value, const int8_t id);
 
-    static bool command_info(const char * value, const int8_t id, JsonObject & json);
-    static bool command_settings(const char * value, const int8_t id, JsonObject & json);
-    static bool command_commands(const char * value, const int8_t id, JsonObject & json);
+    static bool command_info(const char * value, const int8_t id, JsonObject & output);
+    static bool command_settings(const char * value, const int8_t id, JsonObject & output);
+    static bool command_commands(const char * value, const int8_t id, JsonObject & output);
 
     const std::string reset_reason(uint8_t cpu);
 
@@ -74,7 +74,7 @@ class System {
     void wifi_tweak();
     void syslog_start();
     bool check_upgrade();
-    bool heartbeat_json(JsonObject & json);
+    bool heartbeat_json(JsonObject & output);
     void send_heartbeat();
 
     void led_init(bool refresh);

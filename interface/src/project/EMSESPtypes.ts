@@ -64,11 +64,11 @@ export interface EMSESPData {
 }
 
 export interface DeviceValue {
-  v: any;
-  u: number;
-  n: string;
-  c: string;
-  l: string[];
+  v: any; // value, in any format
+  u: number; // uom
+  n: string; // name
+  c: string; // command
+  l: string[]; // list
 }
 
 export interface EMSESPDeviceData {
