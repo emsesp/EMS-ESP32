@@ -77,31 +77,6 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     // call command
     uint8_t return_code = Command::process(request->url().c_str(), authenticated, input, output);
 
-    // handle response codes
-    // the output will be populated with a message key if an error occurred
-    int ret_code;
-    if (return_code == CommandRet::NOT_ALLOWED) {
-        ret_code = 401; // Unauthorized
-    } else if (return_code == CommandRet::NOT_FOUND) {
-        ret_code = 400; // Bad request
-    } else if (return_code == CommandRet::OK) {
-        ret_code = 200; // OK
-        // if there was not json output from the call, default to the message 'OK'.
-        // this will be used for example when calling endpoints e.g. /api/thermostat/temp
-        if (!output.size()) {
-            output["message"] = "OK";
-        }
-    } else {
-        ret_code = 400; // Bad request
-    }
-
-    // send the json that came back from the command call
-    response->setCode(ret_code);
-    response->setLength();
-    response->setContentType("application/json");
-    request->send(response); // send json response
-
-    // do a log entry if there is an error
     if (return_code != CommandRet::OK) {
         char error[100];
         if (output.size()) {
@@ -110,12 +85,27 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
             snprintf(error, sizeof(error), "Call failed with error code (%s)", Command::return_code_string(return_code).c_str());
         }
         emsesp::EMSESP::logger().err(error);
+    } else {
+        emsesp::EMSESP::logger().info(F("Command called"));
+        // if there was not json output from the call, default to the message 'OK'.
+        // this will be used for example when calling endpoints e.g. /api/thermostat/temp
+        if (!output.size()) {
+            output["message"] = "OK";
+        }
     }
+
+    // send the json that came back from the command call
+    // FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED = 400 (bad request), 200 (OK), 400 (not found), 400 (bad request), 401 (unauthorized)
+    int ret_codes[5] = {400, 200, 400, 400, 401};
+    response->setCode(ret_codes[return_code]);
+    response->setLength();
+    response->setContentType("application/json");
+    request->send(response);
 
 #if defined(EMSESP_STANDALONE)
     Serial.print(COLOR_YELLOW);
     Serial.print("web response code: ");
-    Serial.println(ret_code);
+    Serial.println(ret_codes[return_code]);
     if (output.size()) {
         serializeJsonPretty(output, Serial);
     }

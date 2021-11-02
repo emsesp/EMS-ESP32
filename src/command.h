@@ -49,7 +49,7 @@ enum CommandFlag : uint8_t {
 
 // return status after calling a Command
 enum CommandRet : uint8_t {
-    ERRORED = 0, // 0 or FALSE
+    FAIL = 0, // 0 or FALSE
     OK,          // 1 or TRUE
     NOT_FOUND,   // 2
     ERROR,       // 3

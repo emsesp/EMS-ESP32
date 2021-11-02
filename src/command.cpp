@@ -53,7 +53,7 @@ uint8_t Command::process(const char * path, const bool authenticated, const Json
             // error
             output.clear();
             output["message"] = "unrecognized path";
-            return CommandRet::ERRORED;
+            return CommandRet::ERROR;
         }
     }
 
@@ -76,12 +76,12 @@ uint8_t Command::process(const char * path, const bool authenticated, const Json
         device_s = p.paths().front().c_str(); // get the device (boiler, thermostat, system etc)
     }
 
-    // validate the device
+    // validate the device, make sure it exists
     uint8_t device_type = EMSdevice::device_name_2_device_type(device_s);
-    if (device_type == EMSdevice::DeviceType::UNKNOWN) {
+    if (!device_has_commands(device_type)) {
         output.clear();
         char error[100];
-        snprintf(error, sizeof(error), "unknown device %s", device_s);
+        snprintf(error, sizeof(error), "no device called %s", device_s);
         output["message"] = error;
         return CommandRet::NOT_FOUND;
     }
@@ -108,9 +108,10 @@ uint8_t Command::process(const char * path, const bool authenticated, const Json
     // parse_command_string returns the extracted command
     command_p = parse_command_string(command_p, id_n);
     if (command_p == nullptr) {
-        // default to info or values, only for device endpoints like api/system or api/boiler
+        // handle dead endpoints like api/system or api/boiler
+        // default to 'info' for SYSTEM and DALLASENSOR, the other devices to 'values' for shortname version
         if (num_paths < 3) {
-            if (device_type == EMSdevice::DeviceType::SYSTEM) {
+            if (device_type < EMSdevice::DeviceType::BOILER) {
                 command_p = "info";
             } else {
                 command_p = "values";
@@ -179,8 +180,8 @@ const std::string Command::return_code_string(const uint8_t return_code) {
     case CommandRet::NOT_ALLOWED:
         return read_flash_string(F("Not authorized"));
         break;
-    case CommandRet::ERRORED:
-        return read_flash_string(F("Critical error"));
+    case CommandRet::FAIL:
+        return read_flash_string(F("Failed"));
         break;
     }
     char s[4];
@@ -252,9 +253,12 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // check if its a call to and end-point to a device, i.e. has no value
     // except for system commands as this is a special device without any queryable entities (device values)
-    if ((device_type != EMSdevice::DeviceType::SYSTEM) && (!value || !strlen(value))) {
+    // exclude SYSTEM and DALLASSENSOR
+    if ((device_type >= EMSdevice::DeviceType::BOILER) && (!value || !strlen(value))) {
         if (!cf || !cf->cmdfunction_json_) {
-            LOG_INFO(F("Calling %s command '%s' to retrieve values"), dname.c_str(), cmd);
+#if defined(EMSESP_DEBUG)
+            LOG_INFO(F("[DEBUG] Calling %s command '%s' to retrieve values"), dname.c_str(), cmd);
+#endif
             return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
         }
     }

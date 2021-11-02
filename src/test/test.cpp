@@ -513,7 +513,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::webAPIService.webAPIService_get(&request2);
         request2.url("/api/thermostat/info");
         EMSESP::webAPIService.webAPIService_get(&request2);
-        request2.url("/api/thermostat/list");
+        request2.url("/api/thermostat/values");
         EMSESP::webAPIService.webAPIService_get(&request2);
         return;
 
@@ -522,6 +522,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         return;
         */
 
+        /*
         request2.url("/api/system"); // check if defaults to info
         EMSESP::webAPIService.webAPIService_get(&request2);
         emsesp::EMSESP::logger().notice("*");
@@ -540,13 +541,15 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         request2.url("/api/thermostat/seltemp");
         EMSESP::webAPIService.webAPIService_get(&request2);
+        return;
 
-        emsesp::EMSESP::logger().notice("****");
+        */
+
         request2.url("/api/dallassensor/fdfd");
         EMSESP::webAPIService.webAPIService_get(&request2);
+        emsesp::EMSESP::logger().notice("****");
         request2.url("/api/dallassensor/info");
         EMSESP::webAPIService.webAPIService_get(&request2);
-        return;
 
         /*
         AsyncWebServerRequest request2;
@@ -632,7 +635,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::webAPIService.webAPIService_get(&request);
         request.url("/api/thermostat/info");
         EMSESP::webAPIService.webAPIService_get(&request);
-        request.url("/api/thermostat/list");
+        request.url("/api/thermostat/values");
         EMSESP::webAPIService.webAPIService_get(&request);
         request.url("/api/thermostat/seltemp");
         EMSESP::webAPIService.webAPIService_get(&request);
