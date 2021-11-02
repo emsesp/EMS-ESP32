@@ -63,9 +63,9 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     bool authenticated = false;
 
     if (method == HTTP_GET) {
-        // special case if there is no command, then default to 'info'
+        // special case if there is no command, then default to 'list' which is like info but showing short names
         if (!input.size()) {
-            input["cmd"] = "info";
+            input["cmd"] = "list";
         }
     } else {
         // if its a POST then check authentication

@@ -495,13 +495,18 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         return;
         */
 
-        /*
         AsyncWebServerRequest request2;
         request2.method(HTTP_GET);
 
-        request2.url("/api/thermostat/mode/auto"); // check if defaults to info
+        // request2.url("/api/thermostat/seltemp"); 
+        // EMSESP::webAPIService.webAPIService_get(&request2);
+        // return;
+
+        /*
+        request2.url("/api/thermostat/mode/auto"); 
         EMSESP::webAPIService.webAPIService_get(&request2);
         return;
+        */
 
         request2.url("/api/thermostat"); // check if defaults to info
         EMSESP::webAPIService.webAPIService_get(&request2);
@@ -509,10 +514,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::webAPIService.webAPIService_get(&request2);
         request2.url("/api/thermostat/list");
         EMSESP::webAPIService.webAPIService_get(&request2);
+        return;
+
         request2.url("/api/thermostat/mode");
         EMSESP::webAPIService.webAPIService_get(&request2);
         return;
-        */
 
         /*
         AsyncWebServerRequest request2;

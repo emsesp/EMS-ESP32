@@ -999,7 +999,9 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     Command::add(
         device_type,
         F("list"),
-        [device_type](const char * value, const int8_t id, JsonObject & output) { return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API); },
+        [device_type](const char * value, const int8_t id, JsonObject & output) {
+            return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_SHORT); // HIDDEN command showing short names, used in e.g. /api/boiler
+        },
         nullptr,
         CommandFlag::HIDDEN); // this command is hidden
     Command::add(
@@ -1042,9 +1044,7 @@ bool EMSESP::command_commands(uint8_t device_type, JsonObject & output, const in
     return Command::list(device_type, output);
 }
 
-// export all values
-// value is ignored here
-// info command always shows in verbose mode, so full names are displayed
+// export all values for a specific device
 bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
     bool    has_value = false;
     uint8_t tag;
@@ -1061,7 +1061,7 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)
             && ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat()))) {
-            has_value |= emsdevice->generate_values_json(output, tag, (id < 1), output_target); // nested for id -1 and 0
+            has_value |= emsdevice->generate_values_json(output, tag, (id < 1), output_target); // use nested for id -1 and 0
         }
     }
 
