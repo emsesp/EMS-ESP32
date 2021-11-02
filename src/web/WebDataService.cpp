@@ -146,28 +146,28 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
                     // the data could be in any format, but we need string
                     // authenticated is always true
                     JsonVariant data        = dv["v"]; // the value in any format
-                    uint8_t     command_ret = CommandRet::OK;
+                    uint8_t     return_code = CommandRet::OK;
                     uint8_t     device_type = emsdevice->device_type();
                     if (data.is<const char *>()) {
-                        command_ret = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
+                        return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
                     } else if (data.is<int>()) {
                         char s[10];
-                        command_ret = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0), true, id, output);
+                        return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0), true, id, output);
                     } else if (data.is<float>()) {
                         char s[10];
-                        command_ret = Command::call(device_type, cmd, Helpers::render_value(s, (float)data.as<float>(), 1), true, id, output);
+                        return_code = Command::call(device_type, cmd, Helpers::render_value(s, (float)data.as<float>(), 1), true, id, output);
                     } else if (data.is<bool>()) {
-                        command_ret = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true, id, output);
+                        return_code = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true, id, output);
                     }
 
                     // write debug
-                    if (command_ret != CommandRet::OK) {
-                        EMSESP::logger().err(F("Write command failed %s (%d)"), (const char *)output["message"], command_ret);
+                    if (return_code != CommandRet::OK) {
+                        EMSESP::logger().err(F("Write command failed %s (%s)"), (const char *)output["message"], Command::return_code_string(return_code).c_str());
                     } else {
                         EMSESP::logger().debug(F("Write command successful"));
                     }
 
-                    response->setCode((command_ret == CommandRet::OK) ? 200 : 204);
+                    response->setCode((return_code == CommandRet::OK) ? 200 : 204);
                     response->setLength();
                     request->send(response);
                     return;

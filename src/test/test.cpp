@@ -498,6 +498,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         /*
         AsyncWebServerRequest request2;
         request2.method(HTTP_GET);
+
+        request2.url("/api/thermostat/mode/auto"); // check if defaults to info
+        EMSESP::webAPIService.webAPIService_get(&request2);
+        return;
+
         request2.url("/api/thermostat"); // check if defaults to info
         EMSESP::webAPIService.webAPIService_get(&request2);
         request2.url("/api/thermostat/info");
@@ -522,6 +527,18 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         request2.url("/api/thermostat");
         EMSESP::webAPIService.webAPIService_post(&request2, jsonX);
         return;
+        */
+
+        /*
+        AsyncWebServerRequest request3;
+        request3.method(HTTP_POST);
+        DynamicJsonDocument docX(2000);
+        JsonVariant         jsonX;
+        char dataX[] = "{}";
+        deserializeJson(docX, dataX);
+        jsonX = docX.as<JsonVariant>();
+        request3.url("/api/thermostat/mode/auto"); // should fail
+        EMSESP::webAPIService.webAPIService_post(&request3, jsonX);
         */
 
         // test command parse
@@ -564,8 +581,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::mqtt_.incoming("ems-esp/system/send", "11 12 13");
 
         // MQTT bad tests
-        EMSESP::mqtt_.incoming("ems-esp/thermostate/mode", "auto"); // unknown device
-        EMSESP::mqtt_.incoming("ems-esp/thermostat/modee", "auto"); // unknown command
+        EMSESP::mqtt_.incoming("ems-esp/thermostate/mode", "auto");     // unknown device
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/modee", "auto");     // unknown command
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode/auto", "auto"); // invalid
 
         // check long base
         Mqtt::base("home/cellar/heating");
@@ -648,6 +666,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         json = doc.as<JsonVariant>();
         request.url("/rest/writeValue");
         EMSESP::webDataService.write_value(&request, json);
+
+        // should fail
+        char data8[] = "{}";
+        deserializeJson(doc, data8);
+        json = doc.as<JsonVariant>();
+        request.url("/api/thermostat/mode/auto");
+        EMSESP::webAPIService.webAPIService_post(&request, json);
 
 #endif
     }

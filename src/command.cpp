@@ -36,7 +36,7 @@ uint8_t Command::process(const char * path, const bool authenticated, const Json
 
     if (!p.paths().size()) {
         output.clear();
-        output["message"] = "error: invalid path"; // path is empty
+        output["message"] = "invalid path"; // path is empty
         return CommandRet::ERROR;
     }
 
@@ -52,7 +52,7 @@ uint8_t Command::process(const char * path, const bool authenticated, const Json
         } else {
             // error
             output.clear();
-            output["message"] = "error: unrecognized path";
+            output["message"] = "unrecognized path";
             return CommandRet::ERRORED;
         }
     }
@@ -63,7 +63,7 @@ uint8_t Command::process(const char * path, const bool authenticated, const Json
     std::string cmd_s;
     int8_t      id_n = -1; // default hc
 
-    // check for a device
+    // check for a device as first item in the path
     // if its not a known device (thermostat, boiler etc) look for any special MQTT subscriptions
     const char * device_s = nullptr;
     if (!num_paths) {
@@ -81,16 +81,17 @@ uint8_t Command::process(const char * path, const bool authenticated, const Json
     if (device_type == EMSdevice::DeviceType::UNKNOWN) {
         output.clear();
         char error[100];
-        snprintf(error, sizeof(error), "error: unknown device %s", device_s);
+        snprintf(error, sizeof(error), "unknown device %s", device_s);
         output["message"] = error;
         return CommandRet::NOT_FOUND;
     }
 
+    // the next value on the path should be the command
     const char * command_p = nullptr;
     if (num_paths == 2) {
         command_p = p.paths()[1].c_str();
     } else if (num_paths >= 3) {
-        // concatenate the path into one string
+        // concatenate the path into one string as it could be in the format 'hc/XXX'
         char command[50];
         snprintf(command, sizeof(command), "%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str());
         command_p = command;
@@ -103,12 +104,13 @@ uint8_t Command::process(const char * path, const bool authenticated, const Json
         }
     }
 
-    // some commands may be prefixed with hc. or wwc. so extract these
+    // some commands may be prefixed with hc. or wwc. so extract these if they exist
+    // parse_command_string returns the extracted command
     // exit if we don't have a command
     command_p = parse_command_string(command_p, id_n);
     if (command_p == nullptr) {
         output.clear();
-        output["message"] = "error: missing command";
+        output["message"] = "missing or bad command";
         return CommandRet::NOT_FOUND;
     }
 
@@ -133,36 +135,48 @@ uint8_t Command::process(const char * path, const bool authenticated, const Json
     }
 
     // call the command based on the type
-    uint8_t cmd_return = CommandRet::ERROR;
+    uint8_t return_code = CommandRet::ERROR;
     if (data.is<const char *>()) {
-        cmd_return = Command::call(device_type, command_p, data.as<const char *>(), authenticated, id_n, output);
+        return_code = Command::call(device_type, command_p, data.as<const char *>(), authenticated, id_n, output);
     } else if (data.is<int>()) {
         char data_str[10];
-        cmd_return = Command::call(device_type, command_p, Helpers::itoa(data_str, (int16_t)data.as<int>()), authenticated, id_n, output);
+        return_code = Command::call(device_type, command_p, Helpers::itoa(data_str, (int16_t)data.as<int>()), authenticated, id_n, output);
     } else if (data.is<float>()) {
         char data_str[10];
-        cmd_return = Command::call(device_type, command_p, Helpers::render_value(data_str, (float)data.as<float>(), 2), authenticated, id_n, output);
+        return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, (float)data.as<float>(), 2), authenticated, id_n, output);
     } else if (data.isNull()) {
         // empty
-        cmd_return = Command::call(device_type, command_p, "", authenticated, id_n, output);
+        return_code = Command::call(device_type, command_p, "", authenticated, id_n, output);
     } else {
         // can't process
-        LOG_ERROR(F("Cannot parse command"));
+        output.clear();
+        output["message"] = "cannot parse command";
         return CommandRet::ERROR;
     }
 
-    // write debug to log
-    if (cmd_return == CommandRet::OK) {
-        LOG_DEBUG(F("Command %s was executed successfully"), command_p);
-    } else {
-        if (!output.isNull()) {
-            LOG_ERROR(F("Command failed with %s (%d)"), (const char *)output["message"], cmd_return);
-        } else {
-            LOG_ERROR(F("Command failed with code %d"), cmd_return);
-        }
-    }
+    return return_code;
+}
 
-    return cmd_return;
+const std::string Command::return_code_string(const uint8_t return_code) {
+    switch (return_code) {
+    case CommandRet::ERROR:
+        return read_flash_string(F("Error"));
+        break;
+    case CommandRet::OK:
+        return read_flash_string(F("OK"));
+        break;
+    case CommandRet::NOT_FOUND:
+        return read_flash_string(F("Not found"));
+        break;
+    case CommandRet::NOT_ALLOWED:
+        return read_flash_string(F("Not authorized"));
+        break;
+    case CommandRet::ERRORED:
+        return read_flash_string(F("Critical error"));
+        break;
+    }
+    char s[4];
+    return Helpers::smallitoa(s, return_code);
 }
 
 // takes a string like "hc1/seltemp" or "seltemp" or "wwc2.seltemp" and tries to get the id and cmd
@@ -176,11 +190,9 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     char command_s[100];
     strncpy(command_s, command, sizeof(command_s));
 
-    char * p;
-    char * breakp;
     // look for a delimeter and split the string
-    p      = command_s;
-    breakp = strchr(p, '.');
+    char * p      = command_s;
+    char * breakp = strchr(p, '.');
     if (!breakp) {
         p      = command_s; // reset and look for /
         breakp = strchr(p, '/');
@@ -193,17 +205,17 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         }
     }
 
+    // extract the hc or wwc number
     uint8_t start_pos = breakp - p + 1;
-
-    // extra the hc or wwc number
     if (!strncmp(command, "hc", 2) && start_pos == 4) {
         id = command[start_pos - 2] - '0';
     } else if (!strncmp(command, "wwc", 3) && start_pos == 5) {
         id = command[start_pos - 2] - '0';
     } else {
 #if defined(EMSESP_DEBUG)
-        LOG_DEBUG(F("command parse error, unknown hc/wwc in %s"), command_s);
+        LOG_DEBUG(F("[DEBUG] Command parse error, unknown hc/wwc in %s"), command_s);
 #endif
+        return nullptr;
     }
 
     return (command + start_pos);
@@ -249,7 +261,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
         // check permissions
         if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !authenticated) {
-            output["message"] = "error: authentication failed";
+            output["message"] = "authentication failed";
             return CommandRet::NOT_ALLOWED; // command not allowed
         }
 
@@ -264,7 +276,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         // report error if call failed
         if (return_code != CommandRet::OK) {
             output.clear();
-            output["message"] = "error: function failed";
+            output["message"] = "callback function failed";
         }
 
         return return_code;
@@ -272,7 +284,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // we didn't find the command and its not an endpoint, report error
     char error[100];
-    snprintf(error, sizeof(error), "error: invalid command %s", cmd);
+    snprintf(error, sizeof(error), "invalid command '%s'", cmd);
     output["message"] = error;
     return CommandRet::NOT_FOUND;
 }

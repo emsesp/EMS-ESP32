@@ -80,16 +80,16 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     JsonObject                output   = response->getRoot();
 
     // call command
-    uint8_t command_ret = Command::process(request->url().c_str(), authenticated, input, output);
+    uint8_t return_code = Command::process(request->url().c_str(), authenticated, input, output);
 
     // handle response codes
     // the output will be populated with a message key if an error occurred
     int ret_code;
-    if (command_ret == CommandRet::NOT_ALLOWED) {
+    if (return_code == CommandRet::NOT_ALLOWED) {
         ret_code = 401; // Unauthorized
-    } else if (command_ret == CommandRet::NOT_FOUND) {
+    } else if (return_code == CommandRet::NOT_FOUND) {
         ret_code = 400; // Bad request
-    } else if (command_ret == CommandRet::OK) {
+    } else if (return_code == CommandRet::OK) {
         ret_code = 200; // OK
         // if there was not json output from the call, default to the message 'OK'.
         // this will be used for example when calling endpoints e.g. /api/thermostat/temp
@@ -106,9 +106,20 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     response->setContentType("application/json");
     request->send(response); // send json response
 
+    // do a log entry if there is an error
+    if (return_code != CommandRet::OK) {
+        char error[100];
+        if (output.size()) {
+            snprintf(error, sizeof(error), "Call failed with error: %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
+        } else {
+            snprintf(error, sizeof(error), "Call failed with error code (%s)", Command::return_code_string(return_code).c_str());
+        }
+        emsesp::EMSESP::logger().err(error);
+    }
+
 #if defined(EMSESP_STANDALONE)
     Serial.print(COLOR_YELLOW);
-    Serial.print("return code: ");
+    Serial.print("web response code: ");
     Serial.println(ret_code);
     if (output.size()) {
         serializeJsonPretty(output, Serial);

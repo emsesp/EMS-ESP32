@@ -905,7 +905,9 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
         }
     }
 
-    emsesp::EMSESP::logger().err(F("Can't get values for entity '%s'"), cmd);
+    char error[100];
+    snprintf(error, sizeof(error), "cannot find values for entity '%s'", cmd);
+    json["message"] = error;
 
     return false;
 }

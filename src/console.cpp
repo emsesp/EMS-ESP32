@@ -384,37 +384,37 @@ void EMSESPShell::add_console_commands() {
 
             const char * cmd = arguments[1].c_str();
 
-            uint8_t cmd_return = CommandRet::OK;
+            uint8_t return_code = CommandRet::OK;
 
             JsonObject json = doc.to<JsonObject>();
 
             if (arguments.size() == 2) {
                 // no value specified, just the cmd
-                cmd_return = Command::call(device_type, cmd, nullptr, true, -1, json);
+                return_code = Command::call(device_type, cmd, nullptr, true, -1, json);
             } else if (arguments.size() == 3) {
                 if (strncmp(cmd, "info", 4) == 0) {
                     // info has a id but no value
-                    cmd_return = Command::call(device_type, cmd, nullptr, true, atoi(arguments.back().c_str()), json);
+                    return_code = Command::call(device_type, cmd, nullptr, true, atoi(arguments.back().c_str()), json);
                 } else {
                     // has a value but no id so use -1
-                    cmd_return = Command::call(device_type, cmd, arguments.back().c_str(), true, -1, json);
+                    return_code = Command::call(device_type, cmd, arguments.back().c_str(), true, -1, json);
                 }
             } else {
                 // use value, which could be an id or hc
-                cmd_return = Command::call(device_type, cmd, arguments[2].c_str(), true, atoi(arguments[3].c_str()), json);
+                return_code = Command::call(device_type, cmd, arguments[2].c_str(), true, atoi(arguments[3].c_str()), json);
             }
 
-            if (cmd_return == CommandRet::OK && json.size()) {
+            if (return_code == CommandRet::OK && json.size()) {
                 serializeJsonPretty(doc, shell);
                 shell.println();
                 return;
             }
 
-            if (cmd_return == CommandRet::NOT_FOUND) {
+            if (return_code == CommandRet::NOT_FOUND) {
                 shell.println(F("Unknown command"));
                 shell.print(F("Available commands are: "));
                 Command::show(shell, device_type, false); // non-verbose mode
-            } else if (cmd_return != CommandRet::OK) {
+            } else if (return_code != CommandRet::OK) {
                 shell.println(F("Bad syntax"));
             }
         },

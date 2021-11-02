@@ -134,6 +134,8 @@ class Command {
 
     static const char * parse_command_string(const char * command, int8_t & id);
 
+    static const std::string return_code_string(const uint8_t return_code);
+
   private:
     static uuid::log::Logger logger_;
 

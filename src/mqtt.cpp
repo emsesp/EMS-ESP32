@@ -270,16 +270,22 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
     JsonObject                                     output      = output_doc.to<JsonObject>();
     uint8_t                                        return_code = Command::process(topic, true, input.as<JsonObject>(), output); // mqtt is always authenticated
 
-
-    // send MQTT response if enabled
-    if (!send_response_ || output.isNull()) {
-        return;
-    }
-
     if (return_code != CommandRet::OK) {
-        Mqtt::publish(F_(response), (const char *)output["message"]);
+        char error[100];
+        if (output.size()) {
+            snprintf(error, sizeof(error), "Call failed with error: %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
+        } else {
+            snprintf(error, sizeof(error), "Call failed with error code (%s)", Command::return_code_string(return_code).c_str());
+        }
+        LOG_ERROR(error);
+        if (send_response_) {
+            Mqtt::publish(F_(response), error);
+        }
     } else {
-        Mqtt::publish(F_(response), output); // output response from call
+        // all good, send back json output from call
+        if (send_response_) {
+            Mqtt::publish(F_(response), output);
+        }
     }
 }
 
