@@ -527,7 +527,7 @@ bool SUrlParser::parse(const char * uri) {
     enum Type    t = Type::begin;
     std::string  last_param;
 
-    if (c != NULL || *c != '\0') {
+    if (c != nullptr || *c != '\0') {
         do {
             if (*c == '/') {
                 if (s.length() > 0) {
