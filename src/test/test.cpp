@@ -484,12 +484,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         run_test("thermostat");
 
         /*
-
-        AsyncWebServerRequest request2;
-        request2.method(HTTP_GET);
-        request2.url("/system/sensors"); // check if defaults to info
-        EMSESP::webAPIService.webAPIService_get(&request2);
-
         EMSESP::mqtt_.incoming("ems-esp/thermostat/mode");         // empty payload, sends reponse
         EMSESP::mqtt_.incoming("ems-esp/boiler/syspress"); // empty payload, sends reponse
         EMSESP::mqtt_.incoming("ems-esp/thermostat/mode", "auto"); // set mode
@@ -498,7 +492,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::mqtt_.incoming("ems-esp/system/publish");
         EMSESP::mqtt_.incoming("ems-esp/thermostat/seltemp"); // empty payload, sends reponse
         EMSESP::mqtt_.incoming("ems-esp/system/send", "11 12 13");
+        return;
+        */
 
+        /*
         AsyncWebServerRequest request2;
         request2.method(HTTP_GET);
         request2.url("/api/thermostat"); // check if defaults to info
@@ -509,14 +506,20 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::webAPIService.webAPIService_get(&request2);
         request2.url("/api/thermostat/mode");
         EMSESP::webAPIService.webAPIService_get(&request2);
+        return;
+        */
 
+        /*
+        AsyncWebServerRequest request2;
         request2.method(HTTP_POST);
         DynamicJsonDocument docX(2000);
         JsonVariant         jsonX;
-        char                dataX[] = "{\"value\":\"0B 88 19 19 02\"}";
+        // char                dataX[] = "{\"value\":\"0B 88 19 19 02\"}";
+        char dataX[] = "{\"name\":\"temp\",\"value\":11}";
         deserializeJson(docX, dataX);
         jsonX = docX.as<JsonVariant>();
-        request2.url("/api/system/send");
+        // request2.url("/api/system/send");
+        request2.url("/api/thermostat");
         EMSESP::webAPIService.webAPIService_post(&request2, jsonX);
         return;
         */
@@ -563,6 +566,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         // MQTT bad tests
         EMSESP::mqtt_.incoming("ems-esp/thermostate/mode", "auto"); // unknown device
         EMSESP::mqtt_.incoming("ems-esp/thermostat/modee", "auto"); // unknown command
+
+        // check long base
+        Mqtt::base("home/cellar/heating");
+        EMSESP::mqtt_.incoming("home/cellar/heating/thermostat/mode"); // empty payload, sends reponse
+
 
 #if defined(EMSESP_STANDALONE)
         // Web API TESTS
