@@ -28,40 +28,45 @@ std::vector<Command::CmdFunction> Command::cmdfunctions_;
 
 // takes a path and a json body, parses the data and calls the command
 // the path is leading so if duplicate keys are in the input JSON it will be ignored
+// the entry point will be either via the Web API (api/) or MQTT (<base>/)
 // returns a return code and json output
 uint8_t Command::process(const char * path, const bool authenticated, const JsonObject & input, JsonObject & output) {
     SUrlParser p; // parse URL for the path names
     p.parse(path);
-    size_t num_paths = p.paths().size();
 
-    if (!num_paths) {
+    if (!p.paths().size()) {
         output.clear();
-        output["message"] = "error: invalid path";
+        output["message"] = "error: invalid path"; // path is empty
         return CommandRet::ERROR;
     }
 
-    // dump paths, for debugging
-    // for (auto & folder : p.paths()) {
-    //     Serial.print(folder.c_str());
-    // }
-
-    // must start with either "api" or the hostname
-    if ((p.paths().front() != "api") && (p.paths().front() != Mqtt::base())) {
-        output.clear();
-        output["message"] = "error: invalid path";
-        return CommandRet::ERRORED;
+    // check first if it's from API, if so strip the "api/"
+    if ((p.paths().front() == "api")) {
+        p.paths().erase(p.paths().begin());
     } else {
-        p.paths().erase(p.paths().begin()); // remove it
-        num_paths--;
+        // not /api, so must be MQTT path. Check for base and remove it.
+        if (!strncmp(path, Mqtt::base().c_str(), Mqtt::base().length())) {
+            char new_path[Mqtt::MQTT_TOPIC_MAX_SIZE];
+            strncpy(new_path, path, sizeof(new_path));
+            p.parse(new_path + Mqtt::base().length() + 1); // re-parse the stripped path
+        } else {
+            // error
+            output.clear();
+            output["message"] = "error: unrecognized path";
+            return CommandRet::ERRORED;
+        }
     }
 
+    // Serial.println(p.path().c_str()); // dump paths, for debugging
+
+    size_t      num_paths = p.paths().size(); // re-calculate new path
     std::string cmd_s;
     int8_t      id_n = -1; // default hc
 
     // check for a device
     // if its not a known device (thermostat, boiler etc) look for any special MQTT subscriptions
     const char * device_s = nullptr;
-    if (!p.paths().size()) {
+    if (!num_paths) {
         // we must look for the device in the JSON body
         if (input.containsKey("device")) {
             device_s = input["device"];
@@ -572,6 +577,5 @@ bool SUrlParser::parse(const char * uri) {
     }
     return true;
 }
-
 
 } // namespace emsesp
