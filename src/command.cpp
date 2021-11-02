@@ -231,7 +231,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // check if its a call to and end-point to a device, i.e. has no value
     // except for system commands as this is a special device without any queryable entities (device values)
     if ((device_type != EMSdevice::DeviceType::SYSTEM) && (!value || !strlen(value))) {
-        if (!cf || (cf && !cf->cmdfunction_json_)) {
+        if (!cf || !cf->cmdfunction_json_) {
             return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
         }
     }
