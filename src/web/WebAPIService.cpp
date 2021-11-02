@@ -90,9 +90,11 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     } else if (command_ret == CommandRet::NOT_FOUND) {
         ret_code = 400; // Bad request
     } else if (command_ret == CommandRet::OK) {
-        ret_code = 200; //OK
-        if (output.isNull()) {
-            output["message"] = "OK"; // only add if there is no json output already
+        ret_code = 200; // OK
+        // if there was not json output from the call, default to the message 'OK'.
+        // this will be used for example when calling endpoints e.g. /api/thermostat/temp
+        if (!output.size()) {
+            output["message"] = "OK";
         }
     } else {
         ret_code = 400; // Bad request
@@ -108,7 +110,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     Serial.print(COLOR_YELLOW);
     Serial.print("return code: ");
     Serial.println(ret_code);
-    if (output.size() != 0) {
+    if (output.size()) {
         serializeJsonPretty(output, Serial);
     }
     Serial.println();
