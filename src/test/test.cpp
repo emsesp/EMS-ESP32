@@ -498,7 +498,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         AsyncWebServerRequest request2;
         request2.method(HTTP_GET);
 
-        // request2.url("/api/thermostat/seltemp"); 
+        // request2.url("/api/thermostat/seltemp");
         // EMSESP::webAPIService.webAPIService_get(&request2);
         // return;
 
@@ -508,6 +508,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         return;
         */
 
+        /*
         request2.url("/api/thermostat"); // check if defaults to info
         EMSESP::webAPIService.webAPIService_get(&request2);
         request2.url("/api/thermostat/info");
@@ -517,6 +518,33 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         return;
 
         request2.url("/api/thermostat/mode");
+        EMSESP::webAPIService.webAPIService_get(&request2);
+        return;
+        */
+
+        request2.url("/api/system"); // check if defaults to info
+        EMSESP::webAPIService.webAPIService_get(&request2);
+        emsesp::EMSESP::logger().notice("*");
+
+        request2.url("/api/system/info");
+        EMSESP::webAPIService.webAPIService_get(&request2);
+        emsesp::EMSESP::logger().notice("*");
+
+        request2.url("/api/thermostat"); // check if defaults to values
+        EMSESP::webAPIService.webAPIService_get(&request2);
+        emsesp::EMSESP::logger().notice("*");
+
+        request2.url("/api/thermostat/info");
+        EMSESP::webAPIService.webAPIService_get(&request2);
+        emsesp::EMSESP::logger().notice("*");
+
+        request2.url("/api/thermostat/seltemp");
+        EMSESP::webAPIService.webAPIService_get(&request2);
+
+        emsesp::EMSESP::logger().notice("****");
+        request2.url("/api/dallassensor/fdfd");
+        EMSESP::webAPIService.webAPIService_get(&request2);
+        request2.url("/api/dallassensor/info");
         EMSESP::webAPIService.webAPIService_get(&request2);
         return;
 
@@ -595,7 +623,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         Mqtt::base("home/cellar/heating");
         EMSESP::mqtt_.incoming("home/cellar/heating/thermostat/mode"); // empty payload, sends reponse
 
-
 #if defined(EMSESP_STANDALONE)
         // Web API TESTS
         AsyncWebServerRequest request;
@@ -672,6 +699,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         json = doc.as<JsonVariant>();
         request.url("/rest/writeValue");
         EMSESP::webDataService.write_value(&request, json);
+
+        emsesp::EMSESP::logger().notice("*");
 
         // should fail
         char data8[] = "{}";

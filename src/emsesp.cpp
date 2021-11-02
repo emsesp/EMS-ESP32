@@ -998,9 +998,9 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         F_(info_cmd));
     Command::add(
         device_type,
-        F("list"),
+        F("values"),
         [device_type](const char * value, const int8_t id, JsonObject & output) {
-            return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_SHORT); // HIDDEN command showing short names, used in e.g. /api/boiler
+            return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_SHORTNAMES); // HIDDEN command showing short names, used in e.g. /api/boiler
         },
         nullptr,
         CommandFlag::HIDDEN); // this command is hidden

@@ -18,7 +18,10 @@ upload_flags =
   --auth=ems-esp-neo
 upload_port = ems-esp.local
 
-extra_scripts = scripts/rename_fw.py ; don't build WebUI just firmware
+; use this when you don't want to re-build the WebUI
+extra_scripts = 
+  scripts/rename_fw.py
+  scripts/upload_fw.py 
 
 ; pio run -e debug
 ; or from Visual Studio Code do PIO -> Project Tasks -> debug -> General -> Upload and Monitor

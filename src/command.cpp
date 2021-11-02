@@ -106,12 +106,20 @@ uint8_t Command::process(const char * path, const bool authenticated, const Json
 
     // some commands may be prefixed with hc. or wwc. so extract these if they exist
     // parse_command_string returns the extracted command
-    // exit if we don't have a command
     command_p = parse_command_string(command_p, id_n);
     if (command_p == nullptr) {
-        output.clear();
-        output["message"] = "missing or bad command";
-        return CommandRet::NOT_FOUND;
+        // default to info or values, only for device endpoints like api/system or api/boiler
+        if (num_paths < 3) {
+            if (device_type == EMSdevice::DeviceType::SYSTEM) {
+                command_p = "info";
+            } else {
+                command_p = "values";
+            }
+        } else {
+            output.clear();
+            output["message"] = "missing or bad command";
+            return CommandRet::NOT_FOUND;
+        }
     }
 
     // if we don't have an id/hc/wwc try and get it from the JSON input
@@ -237,6 +245,8 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, bool authenticated, const int8_t id, JsonObject & output) {
     uint8_t return_code = CommandRet::OK;
 
+    std::string dname = EMSdevice::device_type_2_device_name(device_type);
+
     // see if there is a command registered
     auto cf = find_command(device_type, cmd);
 
@@ -244,13 +254,13 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // except for system commands as this is a special device without any queryable entities (device values)
     if ((device_type != EMSdevice::DeviceType::SYSTEM) && (!value || !strlen(value))) {
         if (!cf || !cf->cmdfunction_json_) {
+            LOG_INFO(F("Calling %s command '%s' to retrieve values"), dname.c_str(), cmd);
             return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
         }
     }
 
     if (cf) {
         // we have a matching command
-        std::string dname = EMSdevice::device_type_2_device_name(device_type);
         if ((value == nullptr) || !strlen(value)) {
             LOG_INFO(F("Calling %s command '%s'"), dname.c_str(), cmd);
         } else if (id == -1) {
