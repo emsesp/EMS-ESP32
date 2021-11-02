@@ -156,6 +156,10 @@ class Mqtt {
         return mqtt_base_;
     }
 
+    static void base(const char * base) {
+        mqtt_base_ = base;
+    }
+
     static uint16_t publish_count() {
         return mqtt_message_id_;
     }
