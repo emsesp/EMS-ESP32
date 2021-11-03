@@ -985,10 +985,10 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     auto flags       = device_p->flags;
 
     // empty reply to version, read a generic device from database
-     if (product_id == 0) {
+    if (product_id == 0) {
         // check for known device IDs
         if (device_id == 0x40) {
-            name        = "rf room temperature sensor";
+            name = "rf room temperature sensor";
         } else if (device_id == 0x17) {
             name        = "generic thermostat";
             device_type = DeviceType::THERMOSTAT;
@@ -1006,7 +1006,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
             name        = "modem";
             device_type = DeviceType::CONNECT;
         } else if (device_id == 0x0E) {
-            name        = "converter";
+            name = "converter";
         } else {
             return false;
         }
@@ -1049,9 +1049,10 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         [device_type](const char * value, const int8_t id, JsonObject & output) { return command_entities(device_type, output, id); },
         F_(entities_cmd));
 
-    // MQTT subscribe to the device top-level, e.g. "ems-esp/boiler" and subs
+    // MQTT subscribe to the device
+    Mqtt::subscribe(device_type, EMSdevice::device_type_2_device_name(device_type), nullptr); // e.g. "ems-esp/boiler"
     std::string topic = EMSdevice::device_type_2_device_name(device_type) + "/#";
-    Mqtt::subscribe(device_type, topic, nullptr); // use empty function callback
+    Mqtt::subscribe(device_type, topic, nullptr); // e.g. "ems-esp/boiler/#"
 
     // Print to LOG showing we've added a new device
     LOG_INFO(F("Recognized new %s with device ID 0x%02X"), EMSdevice::device_type_2_device_name(device_type).c_str(), device_id);
