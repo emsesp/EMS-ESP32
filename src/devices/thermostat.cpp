@@ -961,6 +961,10 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(wwCircMode_, 3));        // 0=off, 1=on, 2=auto, 4=own?
     has_update(telegram->read_value(wwChargeDuration_, 10)); // value in steps of 15 min
     has_update(telegram->read_value(wwCharge_, 11));
+
+    has_update(telegram->read_value(wwDisinfect_, 5));     // 0-off, 0xFF on
+    has_update(telegram->read_value(wwDisinfectHour_, 6)); // value in steps of 15 min
+    has_update(telegram->read_value(wwDisinfectDay_, 7));  // 0-6 Day of week, 7 every day
 }
 
 // types 0x31D and 0x31E
@@ -1452,9 +1456,14 @@ bool Thermostat::set_wwDisinfect(const char * value, const int8_t id) {
         return false;
     }
     LOG_INFO(F("Setting ww disinfect to %s"), b ? F_(on) : F_(off));
-    write_command(0x37, 4, b ? 0xFF : 0x00, 0x37);
+    if ((model() == EMS_DEVICE_FLAG_RC300) || (model() == EMS_DEVICE_FLAG_RC100)) {
+        write_command(0x2F5, 5, b ? 0xFF : 0x00, 0x2F5);
+    } else {
+        write_command(0x37, 4, b ? 0xFF : 0x00, 0x37);
+    }
     return true;
 }
+
 bool Thermostat::set_wwDisinfectDay(const char * value, const int8_t id) {
     uint8_t set = 0xFF;
     if (!Helpers::value2enum(value, set, FL_(enum_dayOfWeek))) {
@@ -1462,22 +1471,36 @@ bool Thermostat::set_wwDisinfectDay(const char * value, const int8_t id) {
         return false;
     }
     LOG_INFO(F("Setting ww disinfection day to %s"), value);
-    write_command(0x37, 5, set, 0x37);
+    if ((model() == EMS_DEVICE_FLAG_RC300) || (model() == EMS_DEVICE_FLAG_RC100)) {
+        write_command(0x2F5, 7, set, 0x2F5);
+    } else {
+        write_command(0x37, 5, set, 0x37);
+    }
     return true;
 }
 
 bool Thermostat::set_wwDisinfectHour(const char * value, const int8_t id) {
     int set;
     if (!Helpers::value2number(value, set)) {
-        LOG_WARNING(F("Set ww disinfection hour: Invalid"));
+        LOG_WARNING(F("Set ww disinfection time: Invalid"));
         return false;
     }
-    if (set < 0 || set > 23) {
-        LOG_WARNING(F("Set ww disinfection hour: Invalid"));
-        return false;
+    if ((model() == EMS_DEVICE_FLAG_RC300) || (model() == EMS_DEVICE_FLAG_RC100)) {
+        uint8_t t = (set + 8) / 15;
+        if (t > 95) {
+            LOG_WARNING(F("Set ww disinfection time: Invalid"));
+            return false;
+        }
+        LOG_INFO(F("Setting ww disinfection time to %s minutes"), value);
+        write_command(0x2F5, 6, t, 0x2F5);
+    } else {
+        if (set < 0 || set > 23) {
+            LOG_WARNING(F("Set ww disinfection hour: Invalid"));
+            return false;
+        }
+        LOG_INFO(F("Setting ww disinfection hour to %s"), value);
+        write_command(0x37, 6, set, 0x37);
     }
-    LOG_INFO(F("Setting ww disinfection hour to %s"), value);
-    write_command(0x37, 6, set, 0x37);
     return true;
 }
 
@@ -2449,6 +2472,23 @@ void Thermostat::register_device_values() {
         register_device_value(TAG_DEVICE_DATA_WW, &wwCharge_, DeviceValueType::BOOL, nullptr, FL_(wwCharge), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcharge));
         register_device_value(TAG_DEVICE_DATA_WW, &wwExtra1_, DeviceValueType::UINT, nullptr, FL_(wwExtra1), DeviceValueUOM::DEGREES);
         register_device_value(TAG_DEVICE_DATA_WW, &wwExtra2_, DeviceValueType::UINT, nullptr, FL_(wwExtra2), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_DEVICE_DATA_WW, &wwDisinfect_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfect), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfect));
+        register_device_value(TAG_DEVICE_DATA_WW,
+                              &wwDisinfectDay_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_dayOfWeek),
+                              FL_(wwDisinfectDay),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_wwDisinfectDay));
+        register_device_value(TAG_DEVICE_DATA_WW,
+                              &wwDisinfectHour_,
+                              DeviceValueType::UINT,
+                              FL_(mul15),
+                              FL_(wwDisinfectTime),
+                              DeviceValueUOM::MINUTES,
+                              MAKE_CF_CB(set_wwDisinfectHour),
+                              0,
+                              1431);
         break;
     case EMS_DEVICE_FLAG_RC20_N:
     case EMS_DEVICE_FLAG_RC20:

@@ -521,6 +521,7 @@ MAKE_PSTR_LIST(wwCircProg, F("wwcircprog"), F("circulation program mode"))
 // MAKE_PSTR_LIST(wwDisinfect, F("wwdisinfect"), F("disinfection")) // same as in boiler
 MAKE_PSTR_LIST(wwDisinfectDay, F("wwdisinfectday"), F("disinfection day"))
 MAKE_PSTR_LIST(wwDisinfectHour, F("wwdisinfecthour"), F("disinfection hour"))
+MAKE_PSTR_LIST(wwDisinfectTime, F("wwdisinfecttime"), F("disinfection time"))
 MAKE_PSTR_LIST(wwMaxTemp, F("wwmaxtemp"), F("maximum temperature"))
 MAKE_PSTR_LIST(wwOneTimeKey, F("wwonetimekey"), F("one time key function"))
 
