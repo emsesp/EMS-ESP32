@@ -1016,7 +1016,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         F_(entities_cmd));
 
     // MQTT subscribe to the device top-level, e.g. "ems-esp/boiler" and subs
-    std::string topic = EMSdevice::device_type_2_device_name(device_type) + "#";
+    std::string topic = EMSdevice::device_type_2_device_name(device_type) + "/#";
     Mqtt::subscribe(device_type, topic, nullptr); // use empty function callback
 
     // Print to LOG showing we've added a new device
