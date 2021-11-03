@@ -736,6 +736,11 @@ void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
 void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
     // check for valid telegram, just in case
     if (telegram->message_length < 3) {
+        // for empty telegram add device with empty product, version and brand
+        if (!telegram->message_length) {
+            std::string version = "00.00";
+            (void)add_device(telegram->src, 0, version, 0);
+        }
         return;
     }
 
@@ -852,7 +857,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
             LOG_NOTICE(F("%s"), pretty_telegram(telegram).c_str());
         }
         if (first_scan_done_ && !knowndevice && (telegram->src != EMSbus::ems_bus_id()) && (telegram->src != 0x0B) && (telegram->src != 0x0C)
-            && (telegram->src != 0x0D)) {
+            && (telegram->src != 0x0D) && (telegram->message_length > 0)) {
             send_read_request(EMSdevice::EMS_TYPE_VERSION, telegram->src);
         }
     }
@@ -978,6 +983,35 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     auto name        = uuid::read_flash_string(device_p->name);
     auto device_type = device_p->device_type;
     auto flags       = device_p->flags;
+
+    // empty reply to version, read a generic device from database
+     if (product_id == 0) {
+        // check for known device IDs
+        if (device_id == 0x40) {
+            name        = "rf room temperature sensor";
+        } else if (device_id == 0x17) {
+            name        = "generic thermostat";
+            device_type = DeviceType::THERMOSTAT;
+            flags       = DeviceFlags::EMS_DEVICE_FLAG_RC10 | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE;
+        } else if (device_id == 0x04) {
+            name        = "RS232";
+            device_type = DeviceType::CONNECT;
+        } else if (device_id == 0x0A) {
+            name        = "terminal";
+            device_type = DeviceType::CONNECT;
+        } else if (device_id == 0x0B) {
+            name        = "service key";
+            device_type = DeviceType::CONNECT;
+        } else if (device_id == 0x0D) {
+            name        = "modem";
+            device_type = DeviceType::CONNECT;
+        } else if (device_id == 0x0E) {
+            name        = "converter";
+        } else {
+            return false;
+        }
+    }
+
     LOG_DEBUG(F("Adding new device %s (device ID 0x%02X, product ID %d, version %s)"), name.c_str(), device_id, product_id, version.c_str());
     emsdevices.push_back(EMSFactory::add(device_type, device_id, product_id, version, name, flags, brand));
     emsdevices.back()->unique_id(++unique_id_count_);

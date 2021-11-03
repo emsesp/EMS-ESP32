@@ -210,6 +210,7 @@ class RxService : public EMSbus {
 
     void loop();
     void add(uint8_t * data, uint8_t length);
+    void add_empty(const uint8_t src, const uint8_t dst, const uint16_t type_id);
 
     uint32_t telegram_count() const {
         return telegram_count_;
