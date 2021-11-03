@@ -17,7 +17,8 @@
 - Added support for mDNS [#161](https://github.com/emsesp/EMS-ESP32/issues/161)
 - Added last system ESP32 reset code to log (and `system info` output)
 - Firmware Checker in WebUI [#168](https://github.com/emsesp/EMS-ESP32/issues/168)
-- Added new MQTT setting for 'response' topic
+- Added new MQTT setting for enabling 'response' topic
+- Support for non-standard Thermostats like Tado [#174](https://github.com/emsesp/EMS-ESP32/issues/174)
 
 ## Fixed
 
