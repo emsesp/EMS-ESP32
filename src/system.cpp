@@ -699,9 +699,8 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test, F("run tests"));
 #endif
 
-    // MQTT subscribe "ems-esp/system/#" and "ems-esp/system"
+    // MQTT subscribe "ems-esp/system/#"
     Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system/#", nullptr); // use empty function callback
-    Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system", nullptr);   // use empty function callback
 }
 
 // flashes the LED
