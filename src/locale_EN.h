@@ -659,3 +659,6 @@ MAKE_PSTR_LIST(collector1Type, F("collector1type"), F("collector 1 type"))
 // switch
 MAKE_PSTR_LIST(activated, F("activated"), F("activated"))
 MAKE_PSTR_LIST(status, F("status"), F("status"))
+
+// RF sensor, id 0x40, telegram 0x435
+MAKE_PSTR_LIST(RFTemp, F("rftemp"), F("RF room temperature sensor"));
