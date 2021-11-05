@@ -1192,7 +1192,9 @@ bool Thermostat::set_minexttemp(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting min external temperature to %d C"), mt);
-    if ((model() == EMS_DEVICE_FLAG_RC300) || (model() == EMS_DEVICE_FLAG_RC100)) {
+    if (model() == EMS_DEVICE_FLAG_RC20_N) {
+        write_command(0xAD, 14, mt, 0xAD);
+    } else if ((model() == EMS_DEVICE_FLAG_RC300) || (model() == EMS_DEVICE_FLAG_RC100)) {
         write_command(0x240, 10, mt, 0x240);
     } else {
         write_command(EMS_TYPE_IBASettings, 5, mt, EMS_TYPE_IBASettings);
@@ -2508,6 +2510,7 @@ void Thermostat::register_device_values() {
                               1431);
         break;
     case EMS_DEVICE_FLAG_RC20_N:
+        register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         register_device_value(TAG_THERMOSTAT_DATA,
                               &ibaMinExtTemperature_,
                               DeviceValueType::INT,
@@ -2515,6 +2518,7 @@ void Thermostat::register_device_values() {
                               FL_(ibaMinExtTemperature),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_minexttemp));
+        break;
     case EMS_DEVICE_FLAG_RC20:
         register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         break;
