@@ -27,6 +27,7 @@
 - Fix thermostat commands not defaulting to the master thermostat [#110](https://github.com/emsesp/EMS-ESP32/issues/110)
 - Enlarge parse-buffer for long names like `cylinderpumpmodulation`
 - MQTT not subscribing to all device entities [#166](https://github.com/emsesp/EMS-ESP32/issues/166)
+- Help fix issues with WebUI unable to fully load UI over Ethernet [#177](https://github.com/emsesp/EMS-ESP32/issues/177)
 
 ## Changed
 
