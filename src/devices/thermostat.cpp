@@ -1927,7 +1927,9 @@ bool Thermostat::set_heatingtype(const char * value, const int8_t id) {
     uint8_t set = 0xFF;
     if (Helpers::value2enum(value, set, FL_(enum_heatingtype))) {
         LOG_INFO(F("Setting heating type to %d for heating circuit %d"), set, hc->hc_num());
-        if (model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N) {
+        if (model() == EMS_DEVICE_FLAG_RC20_N) {
+            write_command(set_typeids[hc->hc_num() - 1], 0, set, set_typeids[hc->hc_num() - 1]);
+        } else if (model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N) {
             write_command(set_typeids[hc->hc_num() - 1], 0, set, set_typeids[hc->hc_num() - 1]);
         } else {
             write_command(curve_typeids[hc->hc_num() - 1], 1, set, curve_typeids[hc->hc_num() - 1]);
@@ -2173,6 +2175,21 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
 
     } else if (model == EMS_DEVICE_FLAG_RC20_N) {
         switch (mode) {
+        case HeatingCircuit::Mode::MINFLOW:
+            offset = 15;
+            factor = 1;
+            break;
+        case HeatingCircuit::Mode::MAXFLOW:
+            offset = 16;
+            factor = 1;
+            break;
+        case HeatingCircuit::Mode::SUMMER:
+            offset = 17;
+            factor = 1;
+            break;
+        case HeatingCircuit::Mode::TEMPAUTO:
+            offset = 13;
+            break;
         case HeatingCircuit::Mode::NIGHT: // change the night temp
             offset = EMS_OFFSET_RC20_2_Set_temp_night;
             break;
@@ -2491,6 +2508,13 @@ void Thermostat::register_device_values() {
                               1431);
         break;
     case EMS_DEVICE_FLAG_RC20_N:
+        register_device_value(TAG_THERMOSTAT_DATA,
+                              &ibaMinExtTemperature_,
+                              DeviceValueType::INT,
+                              nullptr,
+                              FL_(ibaMinExtTemperature),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_minexttemp));
     case EMS_DEVICE_FLAG_RC20:
         register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         break;
@@ -2616,6 +2640,7 @@ void Thermostat::register_device_values() {
         // Easy TC100 have no date/time, see issue #100, not sure about CT200, so leave it.
         register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         break;
+    case EMS_DEVICE_FLAG_CRF:
     default:
         register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         break;
