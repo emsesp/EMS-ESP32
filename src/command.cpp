@@ -96,9 +96,9 @@ uint8_t Command::process(const char * path, const bool authenticated, const Json
         snprintf(command, sizeof(command), "%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str());
         command_p = command;
     } else {
-        // take it from the JSON. Support both name and cmd to keep backwards compatibility
-        if (input.containsKey("name")) {
-            command_p = input["name"];
+        // take it from the JSON
+        if (input.containsKey("entity")) {
+            command_p = input["entity"];
         } else if (input.containsKey("cmd")) {
             command_p = input["cmd"];
         }
