@@ -277,6 +277,9 @@ class EMSESP {
     static uint8_t  bool_format_;
     static uint8_t  enum_format_;
     static uint16_t wait_validate_;
+    static bool     wait_km_;
+
+    static constexpr uint8_t EMS_WAIT_KM_TIMEOUT = 60; // wait one minute
 };
 
 } // namespace emsesp

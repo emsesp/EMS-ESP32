@@ -77,6 +77,7 @@ bool     EMSESP::trace_raw_                = false;
 uint8_t  EMSESP::bool_format_              = 1;
 uint8_t  EMSESP::enum_format_              = 1;
 uint16_t EMSESP::wait_validate_            = 0;
+bool     EMSESP::wait_km_                  = true;
 
 // for a specific EMS device go and request data values
 // or if device_id is 0 it will fetch from all our known and active devices
@@ -718,9 +719,7 @@ void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
                     uint8_t device_id = ((data_byte + 1) * 8) + bit;
                     // if we haven't already detected this device, request it's version details, unless its us (EMS-ESP)
                     // when the version info is received, it will automagically add the device
-                    // always skip modem device 0x0D, it does not reply to version request
-                    // see https://github.com/emsesp/EMS-ESP/issues/460#issuecomment-709553012
-                    if ((device_id != EMSbus::ems_bus_id()) && !(EMSESP::device_exists(device_id)) && (device_id != 0x0D) && (device_id != 0x0C)) {
+                    if ((device_id != EMSbus::ems_bus_id()) && !(EMSESP::device_exists(device_id))) {
                         LOG_DEBUG(F("New EMS device detected with ID 0x%02X. Requesting version information."), device_id);
                         send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
                     }
@@ -807,16 +806,14 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         return false;
     }
 
-    // remember if we first get scan results from UBADevices
-    static bool first_scan_done_ = false;
     // check for common types, like the Version(0x02)
     if (telegram->type_id == EMSdevice::EMS_TYPE_VERSION) {
         process_version(telegram);
         return true;
     } else if (telegram->type_id == EMSdevice::EMS_TYPE_UBADevices) {
-        process_UBADevices(telegram);
-        if (telegram->dest == EMSbus::ems_bus_id()) {
-            first_scan_done_ = true;
+        // do not flood tx-queue with version requests while waiting for km200
+        if (!wait_km_) {
+            process_UBADevices(telegram);
         }
         return true;
     }
@@ -856,8 +853,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         if (watch() == WATCH_UNKNOWN) {
             LOG_NOTICE(F("%s"), pretty_telegram(telegram).c_str());
         }
-        if (first_scan_done_ && !knowndevice && (telegram->src != EMSbus::ems_bus_id()) && (telegram->src != 0x0B) && (telegram->src != 0x0C)
-            && (telegram->src != 0x0D) && (telegram->message_length > 0)) {
+        if (!wait_km_ && !knowndevice && (telegram->src != EMSbus::ems_bus_id()) && (telegram->message_length > 0)) {
             send_read_request(EMSdevice::EMS_TYPE_VERSION, telegram->src);
         }
     }
@@ -988,7 +984,8 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     if (product_id == 0) {
         // check for known device IDs
         if (device_id == 0x40) {
-            name = "rf room temperature sensor";
+            // see: https://github.com/emsesp/EMS-ESP32/issues/103#issuecomment-911717342
+            name = "rf room temperature sensor"; // generic
         } else if (device_id == 0x17) {
             name        = "generic thermostat";
             device_type = DeviceType::THERMOSTAT;
@@ -1002,12 +999,17 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         } else if (device_id == 0x0B) {
             name        = "service key";
             device_type = DeviceType::CONNECT;
+        } else if (device_id == 0x0C) {
+            name        = "cascade";
+            device_type = DeviceType::CONNECT;
         } else if (device_id == 0x0D) {
+            // see https://github.com/emsesp/EMS-ESP/issues/460#issuecomment-709553012
             name        = "modem";
             device_type = DeviceType::CONNECT;
         } else if (device_id == 0x0E) {
-            name = "converter";
+            name = "converter"; // generic
         } else {
+            LOG_WARNING(F("Unrecognized EMS device (device ID 0x%02X, no product ID). Please report on GitHub."), device_id);
             return false;
         }
     }
@@ -1198,20 +1200,19 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     if (length == 1) {
         // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
         uint8_t         poll_id      = (first_value ^ 0x80 ^ rxservice_.ems_mask());
-        static bool     waitKM       = true;
         static uint32_t connect_time = 0;
         if (!rxservice_.bus_connected()) {
-            waitKM       = true;
+            wait_km_     = true;
             connect_time = uuid::get_uptime_sec();
         }
         if (poll_id == txservice_.ems_bus_id()) {
             EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
         }
-        if (waitKM) {
-            if (poll_id != 0x48 && uuid::get_uptime_sec() - connect_time < 60) {
+        if (wait_km_) {
+            if (poll_id != 0x48 && (uuid::get_uptime_sec() - connect_time) < EMS_WAIT_KM_TIMEOUT) {
                 return;
             }
-            waitKM = false; // KM200 is polled, from now on it is safe to send
+            wait_km_ = false; // KM200 is polled, from now on it is safe to send
         }
 
 #ifdef EMSESP_UART_DEBUG
