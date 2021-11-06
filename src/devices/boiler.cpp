@@ -51,7 +51,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_telegram_type(0x10, F("UBAErrorMessage1"), false, MAKE_PF_CB(process_UBAErrorMessage));
     register_telegram_type(0x11, F("UBAErrorMessage2"), false, MAKE_PF_CB(process_UBAErrorMessage));
     register_telegram_type(0xC2, F("UBAErrorMessage3"), false, MAKE_PF_CB(process_UBAErrorMessage2));
-    register_telegram_type(0x14, F("UBATotalUptime"), false, MAKE_PF_CB(process_UBATotalUptime));
+    register_telegram_type(0x14, F("UBATotalUptime"), true, MAKE_PF_CB(process_UBATotalUptime));
     register_telegram_type(0x15, F("UBAMaintenanceData"), false, MAKE_PF_CB(process_UBAMaintenanceData));
     register_telegram_type(0x1C, F("UBAMaintenanceStatus"), false, MAKE_PF_CB(process_UBAMaintenanceStatus));
     // EMS1.0 and maybe EMS+?
