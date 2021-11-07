@@ -28,6 +28,7 @@
 - Enlarge parse-buffer for long names like `cylinderpumpmodulation`
 - MQTT not subscribing to all device entities [#166](https://github.com/emsesp/EMS-ESP32/issues/166)
 - Help fix issues with WebUI unable to fully load UI over Ethernet [#177](https://github.com/emsesp/EMS-ESP32/issues/177)
+- Shower alert never reset after limit reached when enabled [(PR #185)](https://github.com/emsesp/EMS-ESP32/pull/185)
 
 ## Changed
 
