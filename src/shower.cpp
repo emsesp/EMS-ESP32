@@ -60,7 +60,7 @@ void Shower::loop() {
                     LOG_DEBUG(F("[Shower] hot water still running, starting shower timer"));
                 }
                 // check if the shower has been on too long
-                else if ((((time_now - timer_start_) > SHOWER_MAX_DURATION) && !doing_cold_shot_) && shower_alert_) {
+                else if ((time_now - timer_start_) > SHOWER_MAX_DURATION) {
                     shower_alert_start();
                 }
             }
@@ -97,6 +97,7 @@ void Shower::loop() {
     // at this point we're in the shower cold shot (doing_cold_shot_ == true)
     // keep repeating until the time is up
     if ((time_now - alert_timer_start_) > SHOWER_COLDSHOT_DURATION) {
+        shower_alert_stop();
     }
 }
 
