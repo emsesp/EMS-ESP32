@@ -103,7 +103,7 @@ static uint32_t   _closed_index = []() {
 
 static inline bool _init_async_event_queue() {
     if (!_async_queue) {
-        _async_queue = xQueueCreate(64, sizeof(lwip_event_packet_t *)); // double queue see https://github.com/emsesp/EMS-ESP32/issues/177
+        _async_queue = xQueueCreate(128, sizeof(lwip_event_packet_t *)); // double queue see https://github.com/emsesp/EMS-ESP32/issues/177
         if (!_async_queue) {
             return false;
         }
