@@ -242,12 +242,18 @@ void EMSESPShell::add_console_commands() {
                           });
 
     commands->add_command(ShellContext::MAIN,
-                          CommandFlags::ADMIN,
+                          CommandFlags::USER,
                           flash_string_vector{F_(read)},
                           flash_string_vector{F_(deviceid_mandatory), F_(typeid_mandatory), F_(offset_optional)},
                           [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                              uint8_t  device_id = Helpers::hextoint(arguments.front().c_str());
-                              uint16_t type_id   = Helpers::hextoint(arguments[1].c_str());
+                              uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
+
+                              if (!EMSESP::valid_device(device_id)) {
+                                  shell.printfln(F("Invalid device ID"));
+                                  return;
+                              }
+
+                              uint16_t type_id = Helpers::hextoint(arguments[1].c_str());
                               if (arguments.size() == 4) {
                                   uint16_t offset = Helpers::hextoint(arguments[2].c_str());
                                   uint8_t  length = Helpers::hextoint(arguments.back().c_str());

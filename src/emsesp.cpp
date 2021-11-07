@@ -94,6 +94,18 @@ void EMSESP::fetch_device_values(const uint8_t device_id) {
     }
 }
 
+// see if the device ID exists
+bool EMSESP::valid_device(const uint8_t device_id) {
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice) {
+            if (emsdevice->is_device_id(device_id)) {
+                return true;
+            }
+        }
+    }
+    return false; // can't find it
+}
+
 // for a specific EMS device type go and request data values
 void EMSESP::fetch_device_values_type(const uint8_t device_type) {
     for (const auto & emsdevice : emsdevices) {
