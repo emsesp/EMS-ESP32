@@ -68,6 +68,11 @@ class Thermostat : public EMSdevice {
         int8_t  noreducetemp; // signed -20°C to +10°C
         uint8_t wwprio;
         uint8_t fastHeatup;
+        char    holiday[22];
+        char    vacation[22];
+        // RC 10
+        uint8_t  reducehours;   // night reduce duration
+        uint16_t reduceminutes; // remaining minutes to night->day
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -160,6 +165,7 @@ class Thermostat : public EMSdevice {
     uint8_t ibaBuildingType_;      // building type: 0 = light, 1 = medium, 2 = heavy
     int8_t  ibaClockOffset_;       // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
     uint8_t ibaDamping_;           // damping 0-off, 0xff-on
+    uint8_t backlight_;
 
     int8_t   dampedoutdoortemp_;
     uint16_t tempsensor1_;
@@ -318,7 +324,10 @@ class Thermostat : public EMSdevice {
     // set functions - these use the id/hc
     bool set_mode(const char * value, const int8_t id);
     bool set_control(const char * value, const int8_t id);
-    bool set_holiday(const char * value, const int8_t id);
+    bool set_holiday(const char * value, const int8_t id, const bool vacation = false);
+    bool set_vacation(const char * value, const int8_t id) {
+        return set_holiday(value, id, true);
+    }
     bool set_pause(const char * value, const int8_t id);
     bool set_party(const char * value, const int8_t id);
     bool set_summermode(const char * value, const int8_t id);
@@ -373,6 +382,8 @@ class Thermostat : public EMSdevice {
     bool set_damping(const char * value, const int8_t id);
     bool set_language(const char * value, const int8_t id);
     bool set_heatingtype(const char * value, const int8_t id);
+    bool set_reducehours(const char * value, const int8_t id);
+    bool set_backlight(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

@@ -329,6 +329,7 @@ MAKE_PSTR_LIST(enum_ibaBuildingType, F_(light), F_(medium), F_(heavy))
 MAKE_PSTR_LIST(enum_wwMode, F_(off), F_(low), F_(high), F_(auto), F_(own_prog))
 MAKE_PSTR_LIST(enum_wwCircMode, F_(off), F_(on), F_(auto), F_(own_prog))
 MAKE_PSTR_LIST(enum_wwMode2, F_(off), F_(on), F_(auto))
+MAKE_PSTR_LIST(enum_wwMode3, F_(on), F_(off), F_(auto))
 MAKE_PSTR_LIST(enum_heatingtype, F_(off), F_(radiator), F_(convector), F_(floor))
 MAKE_PSTR_LIST(enum_summermode, F_(summer), F_(auto), F_(winter))
 
@@ -337,6 +338,7 @@ MAKE_PSTR_LIST(enum_mode2, F_(off), F_(manual), F_(auto))            // RC20
 MAKE_PSTR_LIST(enum_mode3, F_(night), F_(day), F_(auto))             // RC35, RC30
 MAKE_PSTR_LIST(enum_mode4, F_(nofrost), F_(eco), F_(heat), F_(auto)) // JUNKERS
 MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))                        // CRF
+MAKE_PSTR_LIST(enum_mode6, F_(nofrost), F_(night), F_(day))          // RC10
 
 MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(heat), F_(auto), F_(auto), F_(auto), F_(auto))
 
@@ -541,6 +543,7 @@ MAKE_PSTR_LIST(ibaClockOffset, F("clockoffset"), F("clock offset"))
 MAKE_PSTR_LIST(ibaBuildingType, F("building"), F("building"))
 MAKE_PSTR_LIST(ibaCalIntTemperature, F("intoffset"), F("offset internal temperature"))
 MAKE_PSTR_LIST(ibaMinExtTemperature, F("minexttemp"), F("minimal external temperature"))
+MAKE_PSTR_LIST(backlight, F("backlight"), F("key backlight"))
 MAKE_PSTR_LIST(damping, F("damping"), F("damping outdoor temperature"))
 
 MAKE_PSTR_LIST(tempsensor1, F("inttemp1"), F("temperature sensor 1"))
@@ -579,6 +582,8 @@ MAKE_PSTR_LIST(heatingtype, F("heatingtype"), F("heating type"))
 MAKE_PSTR_LIST(summersetmode, F("summersetmode"), F("set summer mode"))
 MAKE_PSTR_LIST(controlmode, F("controlmode"), F("control mode"))
 MAKE_PSTR_LIST(control, F("control"), F("control device"))
+MAKE_PSTR_LIST(holidays, F("holidays"), F("holiday dates"))
+MAKE_PSTR_LIST(vacations, F("vacations"), F("vacation dates"))
 MAKE_PSTR_LIST(program, F("program"), F("program"))
 MAKE_PSTR_LIST(pause, F("pause"), F("pause time"))
 MAKE_PSTR_LIST(party, F("party"), F("party time"))
@@ -591,6 +596,8 @@ MAKE_PSTR_LIST(flowtempoffset, F("flowtempoffset"), F("flow temperature offset")
 MAKE_PSTR_LIST(reducemode, F("reducemode"), F("reduce mode"))
 MAKE_PSTR_LIST(noreducetemp, F("noreducetemp"), F("no reduce below temperature"))
 MAKE_PSTR_LIST(remotetemp, F("remotetemp"), F("room temperature from remote"))
+MAKE_PSTR_LIST(reducehours, F("reducehours"), F("duration for nighttemp"))
+MAKE_PSTR_LIST(reduceminutes, F("reduceminutes"), F("remaining time for nightmode"))
 
 // heatpump
 MAKE_PSTR_LIST(airHumidity, F("airhumidity"), F("relative air humidity"))
