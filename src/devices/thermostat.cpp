@@ -2051,6 +2051,7 @@ bool Thermostat::set_reducehours(const char * value, const int8_t id) {
 
 // sets a single switchtime in the thermostat program for RC35
 // format "01:0,1,15:30" Number, day, on, time
+// format "1:01:0,1,15:30" Prog, number, day, on, time
 bool Thermostat::set_switchtime(const char * value, const int8_t id) {
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
@@ -2060,15 +2061,28 @@ bool Thermostat::set_switchtime(const char * value, const int8_t id) {
     }
     if (value == nullptr) {
         return false;
-    } else if (strlen(value) == 2) { // query point 01?
+    }
+    uint8_t prog = 0;
+    // check for program 1 or 2
+    if (strlen(value) == 4 || strlen(value) == 14) {
+        prog = value[0] - '1';
+        value += 2;
+        if (prog > 1) {
+            return false;
+        }
+        prog *= 3; // offset
+    }
+    // only setpoint number returns data in response
+    if (strlen(value) == 2) {
         uint8_t no = (value[0] - '0') * 10 + (value[1] - '0');
         if (no < 42) {
-            read_command(timer_typeids[hc->hc_num() - 1], 2 * no, 2);
+            read_command(timer_typeids[hc->hc_num() - 1] + prog, 2 * no, 2);
             return true;
         }
         return false;
-
-    } else if (strlen(value) != 12) {
+    }
+    // write dataset
+    if (strlen(value) != 12) {
         LOG_WARNING(F("Setting switchtime: Invalid data"));
         return false;
     }
@@ -2089,7 +2103,7 @@ bool Thermostat::set_switchtime(const char * value, const int8_t id) {
     }
 
     if ((model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N)) {
-        write_command(timer_typeids[hc->hc_num() - 1], no * 2, (uint8_t *)&data, 2, timer_typeids[hc->hc_num() - 1]);
+        write_command(timer_typeids[hc->hc_num() - 1] + prog, no * 2, (uint8_t *)&data, 2, timer_typeids[hc->hc_num() - 1]);
     } else {
         LOG_WARNING(F("Setting switchtime: thermostat not supported"));
         return false;
