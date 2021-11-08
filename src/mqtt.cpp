@@ -225,8 +225,10 @@ void Mqtt::incoming(const char * topic, const char * payload) {
 void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
     // sometimes the payload is not terminated correctly, so make a copy
     // convert payload to a null-terminated char string
-    char message[len + 2];
-    strlcpy(message, payload, len + 1);
+    char message[len + 2] = {'\0'};
+    if (payload != nullptr) {
+        strlcpy(message, payload, len + 1);
+    }
 
 #if defined(EMSESP_DEBUG)
     if (len) {
