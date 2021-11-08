@@ -2612,9 +2612,6 @@ void Thermostat::register_device_values() {
                               FL_(ibaCalIntTemperature),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_calinttemp));
-        register_device_value(TAG_DEVICE_DATA_WW, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode3), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
-        register_device_value(
-            TAG_DEVICE_DATA_WW, &backlight_, DeviceValueType::BOOL, nullptr, FL_(backlight), DeviceValueUOM::NONE, MAKE_CF_CB(set_backlight));
         register_device_value(TAG_THERMOSTAT_DATA,
                               &ibaBuildingType_,
                               DeviceValueType::ENUM,
@@ -2622,6 +2619,8 @@ void Thermostat::register_device_values() {
                               FL_(ibaBuildingType),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_building));
+        register_device_value(TAG_THERMOSTAT_DATA, &backlight_, DeviceValueType::BOOL, nullptr, FL_(backlight), DeviceValueUOM::NONE, MAKE_CF_CB(set_backlight));
+        register_device_value(TAG_DEVICE_DATA_WW, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode3), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         break;
     case EMS_DEVICE_FLAG_RC20_N:
         register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
