@@ -30,7 +30,7 @@ std::vector<Command::CmdFunction> Command::cmdfunctions_;
 // the path is leading so if duplicate keys are in the input JSON it will be ignored
 // the entry point will be either via the Web API (api/) or MQTT (<base>/)
 // returns a return code and json output
-uint8_t Command::process(const char * path, const bool authenticated, const JsonObject & input, JsonObject & output) {
+uint8_t Command::process(const char * path, const bool is_admin, const JsonObject & input, JsonObject & output) {
     SUrlParser p; // parse URL for the path names
     p.parse(path);
 
@@ -146,16 +146,16 @@ uint8_t Command::process(const char * path, const bool authenticated, const Json
     // call the command based on the type
     uint8_t return_code = CommandRet::ERROR;
     if (data.is<const char *>()) {
-        return_code = Command::call(device_type, command_p, data.as<const char *>(), authenticated, id_n, output);
+        return_code = Command::call(device_type, command_p, data.as<const char *>(), is_admin, id_n, output);
     } else if (data.is<int>()) {
         char data_str[10];
-        return_code = Command::call(device_type, command_p, Helpers::itoa(data_str, (int16_t)data.as<int>()), authenticated, id_n, output);
+        return_code = Command::call(device_type, command_p, Helpers::itoa(data_str, (int16_t)data.as<int>()), is_admin, id_n, output);
     } else if (data.is<float>()) {
         char data_str[10];
-        return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, (float)data.as<float>(), 2), authenticated, id_n, output);
+        return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, (float)data.as<float>(), 2), is_admin, id_n, output);
     } else if (data.isNull()) {
         // empty
-        return_code = Command::call(device_type, command_p, "", authenticated, id_n, output);
+        return_code = Command::call(device_type, command_p, "", is_admin, id_n, output);
     } else {
         // can't process
         output.clear();
@@ -243,7 +243,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 // calls a command. Takes a json object for output.
 // id may be used to represent a heating circuit for example
 // returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
-uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, bool authenticated, const int8_t id, JsonObject & output) {
+uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject & output) {
     uint8_t return_code = CommandRet::OK;
 
     std::string dname = EMSdevice::device_type_2_device_name(device_type);
@@ -274,7 +274,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         }
 
         // check permissions
-        if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !authenticated) {
+        if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin) {
             output["message"] = "authentication failed";
             return CommandRet::NOT_ALLOWED; // command not allowed
         }

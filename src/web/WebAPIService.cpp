@@ -31,17 +31,17 @@ WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * security
     server->addHandler(&_apiHandler);
 }
 
+// HTTP GET
 // GET /{device}
-// GET /{device}/{name}
-// GET /device={device}?cmd={name}?data={value}[?id={hc}]
+// GET /{device}/{entity}
 void WebAPIService::webAPIService_get(AsyncWebServerRequest * request) {
-    // has no body JSON so create dummy as empty object
+    // has no body JSON so create dummy as empty input object
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> input_doc;
     JsonObject                                 input = input_doc.to<JsonObject>();
     parse(request, input);
 }
 
-// For POSTS with an optional JSON body
+// For HTTP POSTS with an optional JSON body
 // HTTP_POST | HTTP_PUT | HTTP_PATCH
 // POST /{device}[/{hc|id}][/{name}]
 void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json) {
@@ -59,23 +59,21 @@ void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVari
 // parse the URL looking for query or path parameters
 // reporting back any errors
 void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
-    auto method        = request->method();
-    bool authenticated = false;
+    auto method = request->method();
 
-    // if its a POST then check authentication
-    if (method != HTTP_GET) {
-        EMSESP::webSettingsService.read([&](WebSettings & settings) {
-            Authentication authentication = _securityManager->authenticateRequest(request);
-            authenticated                 = settings.notoken_api | AuthenticationPredicates::IS_ADMIN(authentication);
-        });
-    }
+    // see if the user has admin privelegs
+    bool is_admin;
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+        Authentication authentication = _securityManager->authenticateRequest(request);
+        is_admin                      = settings.notoken_api | AuthenticationPredicates::IS_ADMIN(authentication);
+    });
 
     // output json buffer
     PrettyAsyncJsonResponse * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
     JsonObject                output   = response->getRoot();
 
     // call command
-    uint8_t return_code = Command::process(request->url().c_str(), authenticated, input, output);
+    uint8_t return_code = Command::process(request->url().c_str(), is_admin, input, output);
 
     if (return_code != CommandRet::OK) {
         char error[100];

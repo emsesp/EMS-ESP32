@@ -49,11 +49,11 @@ enum CommandFlag : uint8_t {
 
 // return status after calling a Command
 enum CommandRet : uint8_t {
-    FAIL = 0, // 0 or FALSE
-    OK,          // 1 or TRUE
-    NOT_FOUND,   // 2
-    ERROR,       // 3
-    NOT_ALLOWED  // needs authentication
+    FAIL = 0,   // 0 or FALSE
+    OK,         // 1 or TRUE
+    NOT_FOUND,  // 2
+    ERROR,      // 3
+    NOT_ALLOWED // needs authentication
 
 };
 
@@ -104,7 +104,7 @@ class Command {
 
 #define add_
 
-    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, bool authenticated, const int8_t id, JsonObject & output);
+    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject & output);
     static uint8_t call(const uint8_t device_type, const char * cmd, const char * value);
 
     // with normal call back function taking a value and id
@@ -130,7 +130,7 @@ class Command {
 
     static bool list(const uint8_t device_type, JsonObject & output);
 
-    static uint8_t process(const char * path, const bool authenticated, const JsonObject & input, JsonObject & output);
+    static uint8_t process(const char * path, const bool is_admin, const JsonObject & input, JsonObject & output);
 
     static const char * parse_command_string(const char * command, int8_t & id);
 

@@ -472,7 +472,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     }
 
     if (command == "api") {
-        shell.printfln(F("Testing API with MQTT and REST"));
+        shell.printfln(F("Testing API with MQTT and REST, standalone"));
+
 
         Mqtt::ha_enabled(true);
         // Mqtt::ha_enabled(false);
@@ -483,17 +484,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         run_test("boiler");
         run_test("thermostat");
 
-        /*
-        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode");         // empty payload, sends reponse
-        EMSESP::mqtt_.incoming("ems-esp/boiler/syspress"); // empty payload, sends reponse
-        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode", "auto"); // set mode
-        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode");         // empty payload, sends reponse
-        EMSESP::mqtt_.incoming("ems-esp/system/send", "11 12 13");
-        EMSESP::mqtt_.incoming("ems-esp/system/publish");
-        EMSESP::mqtt_.incoming("ems-esp/thermostat/seltemp"); // empty payload, sends reponse
-        EMSESP::mqtt_.incoming("ems-esp/system/send", "11 12 13");
-        return;
-        */
+#if defined(EMSESP_STANDALONE)
 
         AsyncWebServerRequest request2;
         request2.method(HTTP_GET);
@@ -545,11 +536,20 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         */
 
+        /*
+        request2.url("/api/system/restart");
+        EMSESP::webAPIService.webAPIService_get(&request2);
+        return;
+        */
+
+        /*
         request2.url("/api/dallassensor/fdfd");
         EMSESP::webAPIService.webAPIService_get(&request2);
         emsesp::EMSESP::logger().notice("****");
         request2.url("/api/dallassensor/info");
         EMSESP::webAPIService.webAPIService_get(&request2);
+        return;
+        */
 
         /*
         AsyncWebServerRequest request2;
@@ -603,6 +603,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         cmd = Command::parse_command_string(command_s, id_n);
         shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
 
+#endif
+
         // Console tests
         shell.invoke_command("call thermostat entities");
         shell.invoke_command("call thermostat mode auto");
@@ -621,6 +623,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::mqtt_.incoming("ems-esp/thermostate/mode", "auto");     // unknown device
         EMSESP::mqtt_.incoming("ems-esp/thermostat/modee", "auto");     // unknown command
         EMSESP::mqtt_.incoming("ems-esp/thermostat/mode/auto", "auto"); // invalid
+
+        // various MQTT checks
+        /*
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode");         // empty payload, sends reponse
+        EMSESP::mqtt_.incoming("ems-esp/boiler/syspress"); // empty payload, sends reponse
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode", "auto"); // set mode
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode");         // empty payload, sends reponse
+        EMSESP::mqtt_.incoming("ems-esp/system/send", "11 12 13");
+        EMSESP::mqtt_.incoming("ems-esp/system/publish");
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/seltemp"); // empty payload, sends reponse
+        EMSESP::mqtt_.incoming("ems-esp/system/send", "11 12 13");
+        return;
+        */
 
         // check long base
         Mqtt::base("home/cellar/heating");
