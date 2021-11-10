@@ -976,11 +976,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
     if (EMSESP::dallas_enabled()) {
-        node["dallas sensors"] = EMSESP::sensor_devices().size();
-    }
-
-    if (Mqtt::enabled()) {
-        node["MQTT"] = Mqtt::connected() ? F_(connected) : F_(disconnected);
+        node["Dallas sensors"] = EMSESP::sensor_devices().size();
     }
 
     // Status
@@ -1009,22 +1005,23 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["rx line quality"]      = EMSESP::rxservice_.quality();
         node["tx line quality"]      = EMSESP::txservice_.quality();
         if (Mqtt::enabled()) {
+            node["MQTT"]               = Mqtt::connected() ? F_(connected) : F_(disconnected);
             node["MQTT publishes"]     = Mqtt::publish_count();
             node["MQTT publish fails"] = Mqtt::publish_fails();
         }
         if (EMSESP::dallas_enabled()) {
-            node["dallas reads"] = EMSESP::sensor_reads();
-            node["dallas fails"] = EMSESP::sensor_fails();
+            node["Dallas reads"] = EMSESP::sensor_reads();
+            node["Dallas fails"] = EMSESP::sensor_fails();
         }
 #ifndef EMSESP_STANDALONE
         if (EMSESP::system_.syslog_enabled_) {
-            node["syslog_ip"]      = syslog_.ip();
-            node["syslog_started"] = syslog_.started();
+            node["syslog IP"]     = syslog_.ip();
+            node["syslog active"] = syslog_.started();
         }
 #endif
     }
 
-    // show EMS devices
+    // Devices - show EMS devices
     JsonArray devices = output.createNestedArray("Devices");
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
