@@ -963,17 +963,27 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 bool System::command_info(const char * value, const int8_t id, JsonObject & output) {
     JsonObject node;
 
+    // System
     node = output.createNestedObject("System");
 
-    node["version"]    = EMSESP_APP_VERSION;
-    node["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
-    node["uptime_sec"] = uuid::get_uptime_sec();
+    node["version"]          = EMSESP_APP_VERSION;
+    node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+    node["uptime (seconds)"] = uuid::get_uptime_sec();
 
 #ifndef EMSESP_STANDALONE
     node["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes
 #endif
-    node["reset_reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
+    node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
+    if (EMSESP::dallas_enabled()) {
+        node["dallas sensors"] = EMSESP::sensor_devices().size();
+    }
+
+    if (Mqtt::enabled()) {
+        node["MQTT"] = Mqtt::connected() ? F_(connected) : F_(disconnected);
+    }
+
+    // Status
     node = output.createNestedObject("Status");
 
     switch (EMSESP::bus_status()) {
@@ -1003,9 +1013,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["MQTT publish fails"] = Mqtt::publish_fails();
         }
         if (EMSESP::dallas_enabled()) {
-            node["dallas sensors"] = EMSESP::sensor_devices().size();
-            node["dallas reads"]   = EMSESP::sensor_reads();
-            node["dallas fails"]   = EMSESP::sensor_fails();
+            node["dallas reads"] = EMSESP::sensor_reads();
+            node["dallas fails"] = EMSESP::sensor_fails();
         }
 #ifndef EMSESP_STANDALONE
         if (EMSESP::system_.syslog_enabled_) {
