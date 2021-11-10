@@ -659,11 +659,11 @@ void Thermostat::process_RC10Monitor(std::shared_ptr<const Telegram> telegram) {
 
     uint8_t mode = hc->mode * 2;
     has_update(telegram->read_value(mode, 0));                     // 1: nofrost, 2: night, 4: day
-	hc->mode = mode / 2;                                           // for enum 0, 1, 2
+    hc->mode = mode / 2;                                           // for enum 0, 1, 2
     has_update(telegram->read_value(hc->setpoint_roomTemp, 1, 1)); // is * 2, force as single byte
     has_update(telegram->read_value(hc->curr_roomTemp, 2));        // is * 10
     has_update(telegram->read_value(hc->reduceminutes, 5));
-    hc->hamode = hc->mode == 2 ? 1 : 0;  // set special HA mode
+    hc->hamode = hc->mode == 2 ? 1 : 0; // set special HA mode
 }
 
 // type 0xB0 - for reading the mode from the RC10 thermostat (0x17)
@@ -680,7 +680,7 @@ void Thermostat::process_RC10Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(hc->nighttemp, 3));
     has_update(telegram->read_value(hc->daytemp, 4));
     has_update(telegram->read_value(hc->reducehours, 5));
-    has_update(telegram->read_value(ibaBuildingType_ ,6));
+    has_update(telegram->read_value(ibaBuildingType_, 6));
 }
 
 // 0xA8 - for reading the mode from the RC20 thermostat (0x17)

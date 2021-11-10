@@ -160,7 +160,7 @@ void Mqtt::loop() {
 void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     shell.printfln(F("MQTT is %s"), connected() ? uuid::read_flash_string(F_(connected)).c_str() : uuid::read_flash_string(F_(disconnected)).c_str());
 
-    shell.printfln(F("MQTT publish fails count: %lu"), mqtt_publish_fails_);
+    shell.printfln(F("MQTT publish errors: %lu"), mqtt_publish_fails_);
     shell.println();
 
     // show subscriptions

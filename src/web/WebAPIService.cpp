@@ -59,9 +59,7 @@ void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVari
 // parse the URL looking for query or path parameters
 // reporting back any errors
 void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
-    auto method = request->method();
-
-    // see if the user has admin privelegs
+    // check if the user has admin privileges (token is included and authorized)
     bool is_admin;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         Authentication authentication = _securityManager->authenticateRequest(request);
@@ -84,9 +82,8 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         }
         emsesp::EMSESP::logger().err(error);
     } else {
-        emsesp::EMSESP::logger().info(F("Command called"));
-        // if there was not json output from the call, default to the message 'OK'.
-        // this will be used for example when calling endpoints e.g. /api/thermostat/temp
+        emsesp::EMSESP::logger().debug(F("API command called successfully"));
+        // if there was no json output from the call, default to the output message 'OK'.
         if (!output.size()) {
             output["message"] = "OK";
         }
