@@ -35,9 +35,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     p.parse(path);
 
     if (!p.paths().size()) {
-        output.clear();
-        output["message"] = "invalid path"; // path is empty
-        return CommandRet::ERROR;
+        return message(CommandRet::ERROR, "invalid path", output);
     }
 
     // check first if it's from API, if so strip the "api/"
@@ -50,16 +48,19 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
             strncpy(new_path, path, sizeof(new_path));
             p.parse(new_path + Mqtt::base().length() + 1); // re-parse the stripped path
         } else {
-            // error
-            output.clear();
-            output["message"] = "unrecognized path";
-            return CommandRet::ERROR;
+            return message(CommandRet::ERROR, "unrecognized path", output); // error
         }
     }
 
     // Serial.println(p.path().c_str()); // dump paths, for debugging
 
-    size_t      num_paths = p.paths().size(); // re-calculate new path
+    // re-calculate new path
+    // if there is only a path (URL) and no body then error!
+    size_t num_paths = p.paths().size();
+    if (!num_paths && !input.size()) {
+        return message(CommandRet::ERROR, "missing command in path", output);
+    }
+
     std::string cmd_s;
     int8_t      id_n = -1; // default hc
 
@@ -79,11 +80,8 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     // validate the device, make sure it exists
     uint8_t device_type = EMSdevice::device_name_2_device_type(device_s);
     if (!device_has_commands(device_type)) {
-        output.clear();
-        char error[100];
-        snprintf(error, sizeof(error), "no device called %s", device_s);
-        output["message"] = error;
-        return CommandRet::NOT_FOUND;
+        LOG_DEBUG(F("Command failed: unknown device '%s'"), device_s);
+        return message(CommandRet::ERROR, "unknown device", output);
     }
 
     // the next value on the path should be the command
@@ -117,9 +115,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 command_p = "values";
             }
         } else {
-            output.clear();
-            output["message"] = "missing or bad command";
-            return CommandRet::NOT_FOUND;
+            return message(CommandRet::NOT_FOUND, "missing or bad command", output);
         }
     }
 
@@ -154,15 +150,10 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         char data_str[10];
         return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, (float)data.as<float>(), 2), is_admin, id_n, output);
     } else if (data.isNull()) {
-        // empty
-        return_code = Command::call(device_type, command_p, "", is_admin, id_n, output);
+        return_code = Command::call(device_type, command_p, "", is_admin, id_n, output); // empty
     } else {
-        // can't process
-        output.clear();
-        output["message"] = "cannot parse command";
-        return CommandRet::ERROR;
+        return message(CommandRet::ERROR, "cannot parse command", output); // can't process
     }
-
     return return_code;
 }
 
@@ -175,10 +166,10 @@ const std::string Command::return_code_string(const uint8_t return_code) {
         return read_flash_string(F("OK"));
         break;
     case CommandRet::NOT_FOUND:
-        return read_flash_string(F("Not found"));
+        return read_flash_string(F("Not Found"));
         break;
     case CommandRet::NOT_ALLOWED:
-        return read_flash_string(F("Not authorized"));
+        return read_flash_string(F("Not Authorized"));
         break;
     case CommandRet::FAIL:
         return read_flash_string(F("Failed"));
@@ -289,18 +280,15 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
         // report error if call failed
         if (return_code != CommandRet::OK) {
-            output.clear();
-            output["message"] = "callback function failed";
+            return message(return_code, "callback function failed", output);
         }
 
         return return_code;
     }
 
     // we didn't find the command and its not an endpoint, report error
-    char error[100];
-    snprintf(error, sizeof(error), "invalid command '%s'", cmd);
-    output["message"] = error;
-    return CommandRet::NOT_FOUND;
+    LOG_DEBUG(F("Command failed: invalid command '%s'"), cmd);
+    return message(CommandRet::NOT_FOUND, "invalid command", output);
 }
 
 // add a command to the list, which does not return json
@@ -525,10 +513,8 @@ void Command::show_all(uuid::console::Shell & shell) {
     }
 }
 
-/**
- * Extract only the path component from the passed URI and normalized it.
- * Ex. //one/two////three/// becomes /one/two/three
- */
+// Extract only the path component from the passed URI and normalized it
+// e.g. //one/two////three/// becomes /one/two/three
 std::string SUrlParser::path() {
     std::string s = "/"; // set up the beginning slash
     for (std::string & f : m_folders) {

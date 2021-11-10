@@ -139,7 +139,13 @@ class Command {
   private:
     static uuid::log::Logger logger_;
 
-    static std::vector<CmdFunction> cmdfunctions_; // list of commands
+    static std::vector<CmdFunction> cmdfunctions_; // the list of commands
+
+    inline static uint8_t message(uint8_t error_code, const char * message, JsonObject & output) {
+        output.clear();
+        output["message"] = (const char *)message;
+        return error_code;
+    }
 };
 
 typedef std::unordered_map<std::string, std::string> KeyValueMap_t;
