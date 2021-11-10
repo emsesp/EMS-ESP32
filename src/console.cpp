@@ -379,7 +379,6 @@ void EMSESPShell::add_console_commands() {
                 return;
             }
 
-            DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN);
 
             // validate that a command is present
             if (arguments.size() < 2) {
@@ -388,26 +387,32 @@ void EMSESPShell::add_console_commands() {
                 return;
             }
 
-            const char * cmd = arguments[1].c_str();
-
-            uint8_t return_code = CommandRet::OK;
-
-            JsonObject json = doc.to<JsonObject>();
+            DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN);
+            int8_t              id          = -1;
+            const char *        cmd         = Command::parse_command_string(arguments[1].c_str(), id);
+            uint8_t             return_code = CommandRet::OK;
+            JsonObject          json        = doc.to<JsonObject>();
 
             if (arguments.size() == 2) {
                 // no value specified, just the cmd
-                return_code = Command::call(device_type, cmd, nullptr, true, -1, json);
+                return_code = Command::call(device_type, cmd, nullptr, true, id, json);
             } else if (arguments.size() == 3) {
                 if (strncmp(cmd, "info", 4) == 0) {
                     // info has a id but no value
                     return_code = Command::call(device_type, cmd, nullptr, true, atoi(arguments.back().c_str()), json);
+                } else if (arguments[2] == "?") {
+                    return_code = Command::call(device_type, cmd, nullptr, true, id, json);
                 } else {
                     // has a value but no id so use -1
-                    return_code = Command::call(device_type, cmd, arguments.back().c_str(), true, -1, json);
+                    return_code = Command::call(device_type, cmd, arguments.back().c_str(), true, id, json);
                 }
             } else {
                 // use value, which could be an id or hc
-                return_code = Command::call(device_type, cmd, arguments[2].c_str(), true, atoi(arguments[3].c_str()), json);
+                if (arguments[2] == "?") {
+                    return_code = Command::call(device_type, cmd, nullptr, true, atoi(arguments[3].c_str()), json);
+                } else {
+                    return_code = Command::call(device_type, cmd, arguments[2].c_str(), true, atoi(arguments[3].c_str()), json);
+                }
             }
 
             if (return_code == CommandRet::OK && json.size()) {
