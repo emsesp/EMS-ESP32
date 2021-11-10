@@ -19,6 +19,7 @@
 - Firmware Checker in WebUI [#168](https://github.com/emsesp/EMS-ESP32/issues/168)
 - Added new MQTT setting for enabling 'response' topic
 - Support for non-standard Thermostats like Tado [#174](https://github.com/emsesp/EMS-ESP32/issues/174)
+- Include MQTT connection status in 'api/system/info'
 
 ## Fixed
 
@@ -50,3 +51,4 @@
 - HA: `binary_sensor.boiler_ww_disinfecting` renamed to `binary_sensor.boiler_ww_disinfection`
 - HA: # removed from counts in MQTT Fails, Rx fails, Rx received, Tx fails, Tx reads & Tx writes
 - `txread` renamed to `txreads` and `txwrite` renamed to `txwrites` in MQTT heartbeat payload
+- 'dallas sensors' in api/system/info moved to the "System" section. Renamed "uptime (seconds)" and "reset reason"
