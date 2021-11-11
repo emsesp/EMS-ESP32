@@ -166,6 +166,7 @@ class Thermostat : public EMSdevice {
     int8_t  ibaClockOffset_;       // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
     uint8_t ibaDamping_;           // damping 0-off, 0xff-on
     uint8_t backlight_;
+    uint8_t heatingpid_;
 
     int8_t   dampedoutdoortemp_;
     uint16_t tempsensor1_;
@@ -298,6 +299,7 @@ class Thermostat : public EMSdevice {
     void process_RC20Set_2(std::shared_ptr<const Telegram> telegram);
     void process_RC10Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC10Set(std::shared_ptr<const Telegram> telegram);
+    void process_RC10Set_2(std::shared_ptr<const Telegram> telegram);
     void process_CRFMonitor(std::shared_ptr<const Telegram> telegram);
     void process_RC300Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC300Set(std::shared_ptr<const Telegram> telegram);
@@ -384,6 +386,7 @@ class Thermostat : public EMSdevice {
     bool set_heatingtype(const char * value, const int8_t id);
     bool set_reducehours(const char * value, const int8_t id);
     bool set_backlight(const char * value, const int8_t id);
+    bool set_heatingpid(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

@@ -657,9 +657,9 @@ void Thermostat::process_RC10Monitor(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
-    uint8_t mode = hc->mode * 2;
+    uint8_t mode = 1 << hc->mode;
     has_update(telegram->read_value(mode, 0));                     // 1: nofrost, 2: night, 4: day
-    hc->mode = mode / 2;                                           // for enum 0, 1, 2
+    hc->mode = mode >> 1;                                          // for enum 0, 1, 2
     has_update(telegram->read_value(hc->setpoint_roomTemp, 1, 1)); // is * 2, force as single byte
     has_update(telegram->read_value(hc->curr_roomTemp, 2));        // is * 10
     has_update(telegram->read_value(hc->reduceminutes, 5));
@@ -680,8 +680,25 @@ void Thermostat::process_RC10Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(hc->nighttemp, 3));
     has_update(telegram->read_value(hc->daytemp, 4));
     has_update(telegram->read_value(hc->reducehours, 5));
-    has_update(telegram->read_value(ibaBuildingType_, 6));
+    has_update(telegram->read_value(heatingpid_, 6));
 }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+// type 0xB2, mode setting Data: 04 00
+// not used, we read mode from monitor 0xB1
+void Thermostat::process_RC10Set_2(std::shared_ptr<const Telegram> telegram) {
+    // std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    // if (hc == nullptr) {
+    //     return;
+    // }
+    // uint8_t mode = 1 << hc->mode;
+    // has_update(telegram->read_value(mode, 0));                     // 1: nofrost, 2: night, 4: day
+    // hc->mode = mode >> 1;                                          // for enum 0, 1, 2
+}
+
+#pragma GCC diagnostic pop
 
 // 0xA8 - for reading the mode from the RC20 thermostat (0x17)
 void Thermostat::process_RC20Set(std::shared_ptr<const Telegram> telegram) {
@@ -1326,12 +1343,24 @@ bool Thermostat::set_building(const char * value, const int8_t id) {
         return false;
     }
     LOG_INFO(F("Setting building to %s"), value);
-    if (model() == EMS_DEVICE_FLAG_RC10) {
-        write_command(0xB0, 6, bd, 0xB0);
-    } else if ((model() == EMS_DEVICE_FLAG_RC300) || (model() == EMS_DEVICE_FLAG_RC100)) {
+    if ((model() == EMS_DEVICE_FLAG_RC300) || (model() == EMS_DEVICE_FLAG_RC100)) {
         write_command(0x240, 9, bd + 1, 0x240);
     } else {
         write_command(EMS_TYPE_IBASettings, 6, bd, EMS_TYPE_IBASettings);
+    }
+    return true;
+}
+
+// 0xB0 - Set RC10 heating pid
+bool Thermostat::set_heatingpid(const char * value, const int8_t id) {
+    uint8_t pid = 0;
+    if (!Helpers::value2enum(value, pid, FL_(enum_PID))) {
+        LOG_WARNING(F("Set heating pid: Invalid value"));
+        return false;
+    }
+    LOG_INFO(F("Setting heating pid to %s"), value);
+    if (model() == EMS_DEVICE_FLAG_RC10) {
+        write_command(0xB0, 6, pid, 0xB0);
     }
     return true;
 }
@@ -1765,6 +1794,9 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
     if (value[0] >= '0' && value[0] <= '9') {
         uint8_t num = value[0] - '0';
         switch (model()) {
+        case EMSdevice::EMS_DEVICE_FLAG_RC10:
+            mode = uuid::read_flash_string(FL_(enum_mode6)[num]);
+            break;
         case EMSdevice::EMS_DEVICE_FLAG_RC20:
         case EMSdevice::EMS_DEVICE_FLAG_RC20_N:
             mode = uuid::read_flash_string(FL_(enum_mode2)[num]);
@@ -1842,6 +1874,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
     uint8_t  set_mode_value, offset;
     uint16_t validate_typeid = 0;
     uint8_t  hc_p            = hc->hc_num() - 1;
+    uint16_t set_typeid      = set_typeids[hc->hc_num() - 1];
 
     // set the value to send via EMS depending on the mode type
     switch (mode) {
@@ -1865,6 +1898,18 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
     }
 
     switch (model()) {
+    case EMSdevice::EMS_DEVICE_FLAG_RC10:
+        offset          = 0;
+        validate_typeid = 0xB1;
+        set_typeid      = 0xB2;
+        if (mode == HeatingCircuit::Mode::NOFROST) {
+            set_mode_value = 1;
+        } else if (mode == HeatingCircuit::Mode::NIGHT) {
+            set_mode_value = 2;
+        } else { // DAY
+            set_mode_value = 4;
+        }
+        break;
     case EMSdevice::EMS_DEVICE_FLAG_RC20:
         offset          = EMS_OFFSET_RC20Set_mode;
         validate_typeid = set_typeids[hc_p];
@@ -1918,7 +1963,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
 
     // add the write command to the Tx queue
     // post validate is the corresponding monitor or set type IDs as they can differ per model
-    write_command(set_typeids[hc->hc_num() - 1], offset, set_mode_value, validate_typeid);
+    write_command(set_typeid, offset, set_mode_value, validate_typeid);
 
     return true;
 }
@@ -2627,12 +2672,12 @@ void Thermostat::register_device_values() {
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_calinttemp));
         register_device_value(TAG_THERMOSTAT_DATA,
-                              &ibaBuildingType_,
+                              &heatingpid_,
                               DeviceValueType::ENUM,
-                              FL_(enum_ibaBuildingType),
-                              FL_(ibaBuildingType),
+                              FL_(enum_PID),
+                              FL_(heatingPID),
                               DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_building));
+                              MAKE_CF_CB(set_heatingpid));
         register_device_value(TAG_THERMOSTAT_DATA, &backlight_, DeviceValueType::BOOL, nullptr, FL_(backlight), DeviceValueUOM::NONE, MAKE_CF_CB(set_backlight));
         register_device_value(TAG_DEVICE_DATA_WW, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode3), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         break;
@@ -2843,7 +2888,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
 
     switch (model) {
     case EMS_DEVICE_FLAG_RC10:
-        register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode6), FL_(mode), DeviceValueUOM::NONE);
+        register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode6), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         register_device_value(tag, &hc->daytemp, DeviceValueType::UINT, FL_(div2), FL_(daytemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
         register_device_value(tag, &hc->nighttemp, DeviceValueType::UINT, FL_(div2), FL_(nighttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nighttemp));
         register_device_value(tag, &hc->reducehours, DeviceValueType::UINT, nullptr, FL_(reducehours), DeviceValueUOM::HOURS, MAKE_CF_CB(set_reducehours));
