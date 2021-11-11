@@ -45,6 +45,7 @@ interface LogEventControllerState {
   compact: boolean;
   level: number;
   max_messages: number;
+  last_id: number;
 }
 
 type LogEventControllerProps = RestControllerProps<LogSettings>;
@@ -62,7 +63,8 @@ class LogEventController extends Component<
       events: [],
       compact: false,
       level: 6,
-      max_messages: 25
+      max_messages: 25,
+      last_id: 0
     };
   }
 
@@ -157,7 +159,10 @@ class LogEventController extends Component<
     const rawData = event.data;
     if (typeof rawData === 'string' || rawData instanceof String) {
       const event = JSON.parse(rawData as string) as LogEvent;
-      this.setState((state) => ({ events: [...state.events, event] }));
+      if (event.i > this.state.last_id) {
+        this.setState({ last_id: event.i });
+        this.setState((state) => ({ events: [...state.events, event] }));
+      }
     }
   };
 
