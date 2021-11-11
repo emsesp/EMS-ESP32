@@ -210,9 +210,6 @@ bool DallasSensor::temperature_convert_complete() {
 #endif
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 int16_t DallasSensor::get_temperature_c(const uint8_t addr[]) {
 #ifndef EMSESP_STANDALONE
     if (!bus_.reset()) {
@@ -275,8 +272,6 @@ int16_t DallasSensor::get_temperature_c(const uint8_t addr[]) {
     return EMS_VALUE_SHORT_NOTSET;
 #endif
 }
-
-#pragma GCC diagnostic pop
 
 const std::vector<DallasSensor::Sensor> DallasSensor::sensors() const {
     return sensors_;
