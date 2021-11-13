@@ -151,7 +151,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         char data_str[10];
         return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, (float)data.as<float>(), 2), is_admin, id_n, output);
     } else if (data.isNull()) {
-        return_code = Command::call(device_type, command_p, "", is_admin, id_n, output); // empty
+        return_code = Command::call(device_type, command_p, "", is_admin, id_n, output); // empty, will do a query instead
     } else {
         return message(CommandRet::ERROR, "cannot parse command", output); // can't process
     }
@@ -246,6 +246,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // check if its a call to and end-point to a device, i.e. has no value
     // except for system commands as this is a special device without any queryable entities (device values)
     // exclude SYSTEM and DALLASSENSOR
+
     if ((device_type >= EMSdevice::DeviceType::BOILER) && (!value || !strlen(value))) {
         if (!cf || !cf->cmdfunction_json_) {
 #if defined(EMSESP_DEBUG)
