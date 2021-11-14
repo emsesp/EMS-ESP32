@@ -43,6 +43,7 @@
 - Unit of Measure 'times' added to MQTT Fails, Rx fails, Rx received, Tx fails, Tx reads & Tx writes
 - Improved API. Restful HTTP API works in the same way as MQTT calls
 - Removed settings for MQTT subscribe format [#173](https://github.com/emsesp/EMS-ESP32/issues/173)
+- Improve moduline 200 functionality [#183](https://github.com/emsesp/EMS-ESP32/issues/183)
 
 ## **BREAKING CHANGES**
 
