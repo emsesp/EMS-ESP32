@@ -2228,8 +2228,14 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         case HeatingCircuit::Mode::DAY:
             offset = 4;
             break;
+        case HeatingCircuit::Mode::AUTO:
+            if (hc->get_mode() == HeatingCircuit::Mode::NIGHT) {
+                offset = 3;
+            } else {
+                offset = 4;
+            }
+            break;
         }
-
     } else if (model == EMS_DEVICE_FLAG_RC20) {
         offset = EMS_OFFSET_RC20Set_temp;
 
