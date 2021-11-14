@@ -139,6 +139,7 @@ char * Helpers::render_boolean(char * result, bool value) {
 }
 
 // render for native char strings
+// format is not used
 char * Helpers::render_value(char * result, const char * value, uint8_t format __attribute__((unused))) {
     strcpy(result, value);
     return result;
@@ -251,6 +252,7 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
 }
 
 // uint16: convert unsigned short (two bytes) to text string and prints it
+// format: 0=no division, other divide by the value given and render with a decimal point
 char * Helpers::render_value(char * result, const uint16_t value, const uint8_t format) {
     if (!hasValue(value)) {
         return nullptr;
@@ -260,6 +262,7 @@ char * Helpers::render_value(char * result, const uint16_t value, const uint8_t 
 }
 
 // int8: convert signed byte to text string and prints it
+// format: 0=no division, other divide by the value given and render with a decimal point
 char * Helpers::render_value(char * result, const int8_t value, const uint8_t format) {
     if (!hasValue(value)) {
         return nullptr;
@@ -269,6 +272,7 @@ char * Helpers::render_value(char * result, const int8_t value, const uint8_t fo
 }
 
 // uint32: render long (4 byte) unsigned values
+// format: 0=no division, other divide by the value given and render with a decimal point
 char * Helpers::render_value(char * result, const uint32_t value, const uint8_t format) {
     if (!hasValue(value)) {
         return nullptr;
