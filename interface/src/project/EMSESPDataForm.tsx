@@ -122,7 +122,7 @@ export const formatDuration = (duration_min: number) => {
   return formatted;
 };
 
-function formatValue(value: any, uom: number, digit: number) {
+function formatValue(value: any, uom: number) {
   switch (uom) {
     case DeviceValueUOM.HOURS:
       return value ? formatDuration(value * 60) : '0 hours';
@@ -134,9 +134,10 @@ function formatValue(value: any, uom: number, digit: number) {
       }
       return value;
     case DeviceValueUOM.DEGREES:
+      // always show with one decimal place
       return (
         new Intl.NumberFormat(undefined, {
-          minimumFractionDigits: digit
+          minimumFractionDigits: 1
         }).format(value) +
         ' ' +
         DeviceValueUOM_s[uom]
@@ -410,7 +411,7 @@ class EMSESPDataForm extends Component<
                   </TableCell>
                   <TableCell align="left">{sensorData.i}</TableCell>
                   <TableCell align="right">
-                    {formatValue(sensorData.t, DeviceValueUOM.DEGREES, 1)}
+                    {formatValue(sensorData.t, DeviceValueUOM.DEGREES)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -446,7 +447,7 @@ class EMSESPDataForm extends Component<
                   Analog Input
                 </TableCell>
                 <TableCell align="right">
-                  {formatValue(data.analog, DeviceValueUOM.MV, 0)}
+                  {formatValue(data.analog, DeviceValueUOM.MV)}
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -601,7 +602,7 @@ class EMSESPDataForm extends Component<
                       {item.n}
                     </TableCell>
                     <TableCell padding="none" align="right">
-                      {formatValue(item.v, item.u, 0)}
+                      {formatValue(item.v, item.u)}
                     </TableCell>
                   </TableRow>
                 ))}
