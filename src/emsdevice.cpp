@@ -572,22 +572,29 @@ void EMSdevice::register_device_value(uint8_t                             tag,
     register_device_value(tag, value_p, type, options, name, uom, nullptr, 0, 0);
 }
 
-// looks up the uom (suffix) for a given key from the device value table
+// looks up the UOM for a given key from the device value table
 const std::string EMSdevice::get_value_uom(const char * key) {
-    // the key may have a suffix at the start which is between brackets. remove it.
+    // the key may have a TAG string prefixed at the beginning. If so, remove it
     char new_key[80];
     strlcpy(new_key, key, sizeof(new_key));
-    char * p = new_key;
-    if (key[0] == '(') {
-        while ((*p++ != ')') && (*p != '\0'))
-            ;
-        p++;
+    char * key_p = new_key;
+
+    size_t sz = sizeof(DeviceValueTAG_s) / sizeof(__FlashStringHelper *);
+    for (uint8_t i = 0; i < sz; i++) {
+        auto tag = uuid::read_flash_string(DeviceValueTAG_s[i]);
+        if (!tag.empty()) {
+            std::string key2 = key; // copy char to a std::string
+            if ((key2.find(tag) != std::string::npos) && (key[tag.length()] == ' ')) {
+                key_p += tag.length() + 1; // remove the tag
+                break;
+            }
+        }
     }
 
-    // find the key (p) in the name
+    // look up key in our device value list
     for (const auto & dv : devicevalues_) {
         if (dv_is_visible(dv)) {
-            if (uuid::read_flash_string(dv.full_name) == p) {
+            if (uuid::read_flash_string(dv.full_name) == key_p) {
                 // ignore TIME since "minutes" is already added to the string value
                 if ((dv.uom == DeviceValueUOM::NONE) || (dv.uom == DeviceValueUOM::MINUTES)) {
                     break;
@@ -715,6 +722,10 @@ void EMSdevice::generate_values_json_web(JsonObject & output) {
             }
         }
     }
+
+#if defined(EMSESP_DEBUG)
+    // serializeJson(data, Serial); // debug only
+#endif
 }
 
 // builds json with specific single device value information
@@ -1006,37 +1017,40 @@ bool EMSdevice::generate_values_json(JsonObject & output, const uint8_t tag_filt
                     }
                 }
 
+                // always convert temperatures to floats
+                bool make_float = (divider || (dv.uom == DeviceValueUOM::DEGREES));
+
                 // INT
                 if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
-                    if (divider) {
+                    if (make_float) {
                         json[name] = Helpers::round2(*(int8_t *)(dv.value_p), divider);
                     } else {
                         json[name] = *(int8_t *)(dv.value_p) * factor;
                     }
                     has_value = true;
                 } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                    if (divider) {
+                    if (make_float) {
                         json[name] = Helpers::round2(*(uint8_t *)(dv.value_p), divider);
                     } else {
                         json[name] = *(uint8_t *)(dv.value_p) * factor;
                     }
                     has_value = true;
                 } else if ((dv.type == DeviceValueType::SHORT) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
-                    if (divider) {
+                    if (make_float) {
                         json[name] = Helpers::round2(*(int16_t *)(dv.value_p), divider);
                     } else {
                         json[name] = *(int16_t *)(dv.value_p) * factor;
                     }
                     has_value = true;
                 } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
-                    if (divider) {
+                    if (make_float) {
                         json[name] = Helpers::round2(*(uint16_t *)(dv.value_p), divider);
                     } else {
                         json[name] = *(uint16_t *)(dv.value_p) * factor;
                     }
                     has_value = true;
                 } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    if (divider) {
+                    if (make_float) {
                         json[name] = Helpers::round2(*(uint32_t *)(dv.value_p), divider);
                     } else {
                         json[name] = *(uint32_t *)(dv.value_p) * factor;
