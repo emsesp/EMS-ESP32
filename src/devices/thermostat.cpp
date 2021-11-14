@@ -359,7 +359,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 
     // now create the HA topics to send to MQTT for each sensor
     if (Mqtt::ha_enabled()) {
-        publish_ha_config_hc(hc_num);
+        publish_ha_config_hc(new_hc);
     }
 
     // set the flag saying we want its data during the next auto fetch
@@ -383,7 +383,8 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 
 // publish config topic for HA MQTT Discovery for each of the heating circuit
 // e.g. homeassistant/climate/ems-esp/thermostat_hc1/config
-void Thermostat::publish_ha_config_hc(uint8_t hc_num) {
+void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc) {
+    uint8_t hc_num = hc->hc_num();
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
     char str1[20];
@@ -436,7 +437,9 @@ void Thermostat::publish_ha_config_hc(uint8_t hc_num) {
 
     // the HA climate component only responds to auto, heat and off
     JsonArray modes = doc.createNestedArray("modes");
-    modes.add("auto");
+    if (hc->get_model() != EMSdevice::EMS_DEVICE_FLAG_RC10){
+        modes.add("auto");
+    }
     modes.add("heat");
     modes.add("off");
 
@@ -499,7 +502,7 @@ uint8_t Thermostat::HeatingCircuit::get_mode() const {
         } else if (mode == 1) {
             return HeatingCircuit::Mode::NIGHT;
         } else if (mode == 0) {
-            return HeatingCircuit::Mode::NOFROST;
+            return HeatingCircuit::Mode::OFF;
         }
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC20) {
         if (mode == 0) {
@@ -658,7 +661,7 @@ void Thermostat::process_RC10Monitor(std::shared_ptr<const Telegram> telegram) {
     }
 
     uint8_t mode = 1 << hc->mode;
-    has_update(telegram->read_value(mode, 0));                     // 1: nofrost, 2: night, 4: day
+    has_update(telegram->read_value(mode, 0));                     // 1: off, 2: night, 4: day
     hc->mode = mode >> 1;                                          // for enum 0, 1, 2
     has_update(telegram->read_value(hc->setpoint_roomTemp, 1, 1)); // is * 2, force as single byte
     has_update(telegram->read_value(hc->curr_roomTemp, 2));        // is * 10
@@ -694,7 +697,7 @@ void Thermostat::process_RC10Set_2(std::shared_ptr<const Telegram> telegram) {
     //     return;
     // }
     // uint8_t mode = 1 << hc->mode;
-    // has_update(telegram->read_value(mode, 0));                     // 1: nofrost, 2: night, 4: day
+    // has_update(telegram->read_value(mode, 0));                     // 1: off, 2: night, 4: day
     // hc->mode = mode >> 1;                                          // for enum 0, 1, 2
 }
 
@@ -1902,7 +1905,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         offset          = 0;
         validate_typeid = 0xB1;
         set_typeid      = 0xB2;
-        if (mode == HeatingCircuit::Mode::NOFROST) {
+        if (mode == HeatingCircuit::Mode::OFF) {
             set_mode_value = 1;
         } else if (mode == HeatingCircuit::Mode::NIGHT) {
             set_mode_value = 2;
@@ -2224,13 +2227,6 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             break;
         case HeatingCircuit::Mode::DAY:
             offset = 4;
-            break;
-        case HeatingCircuit::Mode::AUTO:
-            if (hc->get_mode() == HeatingCircuit::Mode::NIGHT) {
-                offset = 3;
-            } else {
-                offset = 4;
-            }
             break;
         }
 

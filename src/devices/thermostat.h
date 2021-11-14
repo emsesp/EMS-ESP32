@@ -276,7 +276,7 @@ class Thermostat : public EMSdevice {
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
 
-    void publish_ha_config_hc(uint8_t hc_num);
+    void publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc);
     void register_device_values_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc);
 
     bool thermostat_ha_cmd(const char * message, uint8_t hc_num);

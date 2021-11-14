@@ -339,7 +339,7 @@ MAKE_PSTR_LIST(enum_mode2, F_(off), F_(manual), F_(auto))            // RC20
 MAKE_PSTR_LIST(enum_mode3, F_(night), F_(day), F_(auto))             // RC35, RC30
 MAKE_PSTR_LIST(enum_mode4, F_(nofrost), F_(eco), F_(heat), F_(auto)) // JUNKERS
 MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))                        // CRF
-MAKE_PSTR_LIST(enum_mode6, F_(nofrost), F_(night), F_(day))          // RC10
+MAKE_PSTR_LIST(enum_mode6, F_(off), F_(night), F_(day))              // RC10
 
 MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(heat), F_(auto), F_(auto), F_(auto), F_(auto))
 
