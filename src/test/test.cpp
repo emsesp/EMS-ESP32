@@ -640,6 +640,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::mqtt_.incoming("ems-esp/system/publish");
         EMSESP::mqtt_.incoming("ems-esp/thermostat/seltemp"); // empty payload, sends reponse
 
+        EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp", "59");
+        EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp");
+
         // MQTT bad tests
         EMSESP::mqtt_.incoming("ems-esp/thermostate/mode", "auto");     // unknown device
         EMSESP::mqtt_.incoming("ems-esp/thermostat/modee", "auto");     // unknown command

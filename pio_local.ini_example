@@ -8,7 +8,7 @@
 my_build_flags =
 
 ; 5=verbose, 4=debug, 3=info
-debug_flags = DCORE_DEBUG_LEVEL=5
+debug_flags = -DCORE_DEBUG_LEVEL=5
 
 [env:esp32]
 ; if using OTA enter your details below
@@ -19,9 +19,7 @@ upload_flags =
 upload_port = ems-esp.local
 
 ; use this when you don't want to re-build the WebUI
-extra_scripts = 
-  scripts/rename_fw.py
-  scripts/upload_fw.py 
+extra_scripts = scripts/rename_fw.py
 
 ; pio run -e debug
 ; or from Visual Studio Code do PIO -> Project Tasks -> debug -> General -> Upload and Monitor

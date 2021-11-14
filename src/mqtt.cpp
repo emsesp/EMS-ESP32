@@ -256,21 +256,24 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
         }
     }
 
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL>     input_doc;
+    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE_DYN> output_doc;
+    JsonObject                                     input, output;
+
     // convert payload into a json doc, if it's not empty
     // if the payload is a single parameter (not JSON) create a JSON with the key 'value'
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> input;
     if (len != 0) {
-        DeserializationError error = deserializeJson(input, message);
-        if (error == DeserializationError::Code::InvalidInput) {
-            input.clear();                          // this is important to clear first
-            input["value"] = (const char *)message; // always a string
+        DeserializationError error = deserializeJson(input_doc, message);
+        if (!input_doc.containsKey("value") || error) {
+            input_doc.clear();
+            input_doc["value"] = (const char *)message; // always a string
         }
     }
 
     // parse and call the command
-    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE_DYN> output_doc;
-    JsonObject                                     output      = output_doc.to<JsonObject>();
-    uint8_t                                        return_code = Command::process(topic, true, input.as<JsonObject>(), output); // mqtt is always authenticated
+    input               = input_doc.as<JsonObject>();
+    output              = output_doc.to<JsonObject>();
+    uint8_t return_code = Command::process(topic, true, input, output); // mqtt is always authenticated
 
     if (return_code != CommandRet::OK) {
         char error[100];
