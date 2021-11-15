@@ -612,44 +612,43 @@ const std::string EMSdevice::get_value_uom(const char * key) {
 }
 
 // prepare array of device values used for the WebUI
+// this is loosely based of the function generate_values_json used for the MQTT and Console
+// except additional data is stored in the JSON document needed for the Web UI like the UOM and command
 // v = value, u=uom, n=name, c=cmd
 void EMSdevice::generate_values_json_web(JsonObject & output) {
     output["name"] = to_string_short();
     JsonArray data = output.createNestedArray("data");
 
     for (const auto & dv : devicevalues_) {
+        // check conditions:
+        //  1. full_name cannot be empty
+        //  2. it can't be a command (like publish)
+        //  3. it must have a valid value
+
         // ignore if full_name empty and also commands
-        if (dv.has_state(DeviceValueState::DV_VISIBLE) && dv.type != DeviceValueType::CMD) {
+        if (dv.has_state(DeviceValueState::DV_VISIBLE) && (dv.type != DeviceValueType::CMD) && check_dv_hasvalue(dv)) {
             JsonObject obj; // create the object, if needed
 
             // handle Booleans (true, false)
-            if ((dv.type == DeviceValueType::BOOL) && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
+            if (dv.type == DeviceValueType::BOOL) {
                 obj      = data.createNestedObject();
                 obj["v"] = *(bool *)(dv.value_p) ? "on" : "off";
             }
 
             // handle TEXT strings
-            else if ((dv.type == DeviceValueType::STRING) && (Helpers::hasValue((char *)(dv.value_p)))) {
+            else if (dv.type == DeviceValueType::STRING) {
                 obj      = data.createNestedObject();
                 obj["v"] = (char *)(dv.value_p);
             }
 
             // handle ENUMs
-            else if ((dv.type == DeviceValueType::ENUM) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                if (*(uint8_t *)(dv.value_p) < dv.options_size) {
-                    obj      = data.createNestedObject();
-                    obj["v"] = dv.options[*(uint8_t *)(dv.value_p)];
-                }
+            else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
+                obj      = data.createNestedObject();
+                obj["v"] = dv.options[*(uint8_t *)(dv.value_p)];
             }
 
-            // // handle commands without value
-            // else if (dv.type == DeviceValueType::CMD) {
-            //     obj      = data.createNestedObject();
-            //     obj["v"] = "";
-            // }
-
+            // handle Integers and Floats
             else {
-                // handle Integers and Floats
                 // If a divider is specified, do the division to 2 decimals places and send back as double/float
                 // otherwise force as an integer whole
                 // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
@@ -664,22 +663,22 @@ void EMSdevice::generate_values_json_web(JsonObject & output) {
                     }
                 }
 
-                if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
+                if (dv.type == DeviceValueType::INT) {
                     obj      = data.createNestedObject();
                     obj["v"] = (divider) ? Helpers::round2(*(int8_t *)(dv.value_p), divider) : *(int8_t *)(dv.value_p) * factor;
-                } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
+                } else if (dv.type == DeviceValueType::UINT) {
                     obj      = data.createNestedObject();
                     obj["v"] = (divider) ? Helpers::round2(*(uint8_t *)(dv.value_p), divider) : *(uint8_t *)(dv.value_p) * factor;
-                } else if ((dv.type == DeviceValueType::SHORT) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
+                } else if (dv.type == DeviceValueType::SHORT) {
                     obj      = data.createNestedObject();
                     obj["v"] = (divider) ? Helpers::round2(*(int16_t *)(dv.value_p), divider) : *(int16_t *)(dv.value_p) * factor;
-                } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
+                } else if (dv.type == DeviceValueType::USHORT) {
                     obj      = data.createNestedObject();
                     obj["v"] = (divider) ? Helpers::round2(*(uint16_t *)(dv.value_p), divider) : *(uint16_t *)(dv.value_p) * factor;
-                } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+                } else if (dv.type == DeviceValueType::ULONG) {
                     obj      = data.createNestedObject();
                     obj["v"] = divider ? Helpers::round2(*(uint32_t *)(dv.value_p), divider) : *(uint32_t *)(dv.value_p) * factor;
-                } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+                } else if (dv.type == DeviceValueType::TIME) {
                     uint32_t time_value = *(uint32_t *)(dv.value_p);
                     obj                 = data.createNestedObject();
                     obj["v"]            = (divider > 0) ? time_value / divider : time_value * factor; // sometimes we need to divide by 60
@@ -688,8 +687,7 @@ void EMSdevice::generate_values_json_web(JsonObject & output) {
 
             // check if we've added a data element then add the remaining elements
             if (obj.containsKey("v")) {
-                // add the unit of measure (uom)
-                obj["u"] = dv.uom;
+                obj["u"] = dv.uom; // add the unit of measure (uom)
 
                 // add name, prefixing the tag if it exists
                 if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
@@ -728,7 +726,7 @@ void EMSdevice::generate_values_json_web(JsonObject & output) {
     }
 
 #if defined(EMSESP_DEBUG)
-    // serializeJson(data, Serial); // debug only
+// serializeJson(data, Serial); // debug only
 #endif
 }
 
@@ -941,7 +939,16 @@ bool EMSdevice::generate_values_json(JsonObject & output, const uint8_t tag_filt
         //  1. it must have a valid value
         //  2. it must be visible, unless our output destination is MQTT
         //  3. it must match the given tag filter or have an empty tag
-        bool conditions = ((tag_filter == DeviceValueTAG::TAG_NONE) || (tag_filter == dv.tag)) && check_dv_hasvalue(dv);
+
+        // check if it exists. We set the value activated once here
+        bool has_value = check_dv_hasvalue(dv);
+        if (has_value) {
+            dv.add_state(DeviceValueState::DV_ACTIVE);
+        } else {
+            dv.remove_state(DeviceValueState::DV_ACTIVE);
+        }
+
+        bool conditions = ((tag_filter == DeviceValueTAG::TAG_NONE) || (tag_filter == dv.tag)) && has_value;
         if (output_target != OUTPUT_TARGET::MQTT) {
             conditions &=
                 dv.has_state(DeviceValueState::DV_VISIBLE); // value must be visible if outputting to API (web or console). This is for ID, hamode, hatemp etc
@@ -1192,7 +1199,7 @@ void EMSdevice::read_command(const uint16_t type_id, const uint8_t offset, const
 // checks whether the device value has an actual value
 // returns true if its valid
 // state is stored in the dv object
-bool EMSdevice::check_dv_hasvalue(DeviceValue & dv) {
+bool EMSdevice::check_dv_hasvalue(const DeviceValue & dv) {
     bool has_value = false;
     switch (dv.type) {
     case DeviceValueType::BOOL:
@@ -1233,14 +1240,7 @@ bool EMSdevice::check_dv_hasvalue(DeviceValue & dv) {
     }
 #endif
 
-    // set the value state to active
-    if (has_value) {
-        dv.add_state(DeviceValueState::DV_ACTIVE);
-        return true;
-    }
-
-    dv.remove_state(DeviceValueState::DV_ACTIVE);
-    return false;
+    return has_value;
 }
 
 } // namespace emsesp

@@ -485,7 +485,7 @@ class EMSdevice {
 
     const std::string device_entity_ha(DeviceValue const & dv);
 
-    bool check_dv_hasvalue(DeviceValue & dv);
+    bool check_dv_hasvalue(const DeviceValue & dv);
 
     void init_devicevalues(uint8_t size) {
         devicevalues_.reserve(size);
