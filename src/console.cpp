@@ -235,7 +235,7 @@ void EMSESPShell::add_console_commands() {
                                   shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
                                   char buffer[4];
                                   shell.printfln(F_(master_thermostat_fmt),
-                                                 settings.master_thermostat == 0 ? uuid::read_flash_string(F_(auto)).c_str()
+                                                 settings.master_thermostat == 0 ? read_flash_string(F_(auto)).c_str()
                                                                                  : Helpers::hextoa(buffer, settings.master_thermostat));
                                   shell.printfln(F_(board_profile_fmt), settings.board_profile.c_str());
                               });
@@ -278,8 +278,7 @@ void EMSESPShell::add_console_commands() {
                                       settings.master_thermostat = value;
                                       EMSESP::actual_master_thermostat(value); // set the internal value too
                                       char buffer[5];
-                                      shell.printfln(F_(master_thermostat_fmt),
-                                                     !value ? uuid::read_flash_string(F_(auto)).c_str() : Helpers::hextoa(buffer, value));
+                                      shell.printfln(F_(master_thermostat_fmt), !value ? read_flash_string(F_(auto)).c_str() : Helpers::hextoa(buffer, value));
                                       return StateUpdateResult::CHANGED;
                                   },
                                   "local");
@@ -446,7 +445,7 @@ void EMSESPShell::add_console_commands() {
                 if (Command::device_has_commands(device_type)) {
                     for (const auto & cf : Command::commands()) {
                         if (cf.device_type_ == device_type) {
-                            command_list.emplace_back(uuid::read_flash_string(cf.cmd_));
+                            command_list.emplace_back(read_flash_string(cf.cmd_));
                         }
                     }
                     return command_list;
@@ -823,14 +822,14 @@ std::string EMSESPShell::prompt_suffix() {
 }
 
 void EMSESPShell::end_of_transmission() {
-    invoke_command(uuid::read_flash_string(F_(exit)));
+    invoke_command(read_flash_string(F_(exit)));
 }
 
 EMSESPStreamConsole::EMSESPStreamConsole(Stream & stream, bool local)
     : uuid::console::Shell(commands, ShellContext::MAIN, local ? (CommandFlags::USER | CommandFlags::LOCAL) : CommandFlags::USER)
     , uuid::console::StreamConsole(stream)
     , EMSESPShell()
-    , name_(uuid::read_flash_string(F("Serial")))
+    , name_(read_flash_string(F("Serial")))
     , pty_(SIZE_MAX)
     , addr_()
     , port_(0) {

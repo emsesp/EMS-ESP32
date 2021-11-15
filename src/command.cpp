@@ -296,7 +296,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 // add a command to the list, which does not return json
 void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, const cmd_function_p cb, const __FlashStringHelper * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
-    if (find_command(device_type, uuid::read_flash_string(cmd).c_str()) != nullptr) {
+    if (find_command(device_type, read_flash_string(cmd).c_str()) != nullptr) {
         return;
     }
 
@@ -312,7 +312,7 @@ void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, co
 // flag is fixed to MqttSubFlag::MQTT_SUB_FLAG_NOSUB so there will be no topic subscribed to this
 void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, const cmd_json_function_p cb, const __FlashStringHelper * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
-    if (find_command(device_type, uuid::read_flash_string(cmd).c_str()) != nullptr) {
+    if (find_command(device_type, read_flash_string(cmd).c_str()) != nullptr) {
         return;
     }
 
@@ -334,7 +334,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ch
     }
 
     for (auto & cf : cmdfunctions_) {
-        if (!strcmp(lowerCmd, Helpers::toLower(uuid::read_flash_string(cf.cmd_)).c_str()) && (cf.device_type_ == device_type)) {
+        if (!strcmp(lowerCmd, Helpers::toLower(read_flash_string(cf.cmd_)).c_str()) && (cf.device_type_ == device_type)) {
             return &cf;
         }
     }
@@ -353,14 +353,14 @@ bool Command::list(const uint8_t device_type, JsonObject & output) {
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
         if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN)) {
-            sorted_cmds.push_back(uuid::read_flash_string(cf.cmd_));
+            sorted_cmds.push_back(read_flash_string(cf.cmd_));
         }
     }
     sorted_cmds.sort();
 
     for (auto & cl : sorted_cmds) {
         for (const auto & cf : cmdfunctions_) {
-            if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == uuid::read_flash_string(cf.cmd_))) {
+            if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == read_flash_string(cf.cmd_))) {
                 output[cl] = cf.description_;
             }
         }
@@ -380,7 +380,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
         if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN)) {
-            sorted_cmds.push_back(uuid::read_flash_string(cf.cmd_));
+            sorted_cmds.push_back(read_flash_string(cf.cmd_));
         }
     }
     sorted_cmds.sort();
@@ -400,7 +400,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     for (auto & cl : sorted_cmds) {
         // find and print the description
         for (const auto & cf : cmdfunctions_) {
-            if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == uuid::read_flash_string(cf.cmd_))) {
+            if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == read_flash_string(cf.cmd_))) {
                 uint8_t i = cl.length();
                 shell.print("  ");
                 if (cf.has_flags(MQTT_SUB_FLAG_HC)) {
@@ -420,7 +420,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                     shell.print(EMSdevice::tag_to_string(TAG_DEVICE_DATA_WW));
                     shell.print(' ');
                 }
-                shell.print(uuid::read_flash_string(cf.description_));
+                shell.print(read_flash_string(cf.description_));
                 if (!cf.has_flags(CommandFlag::ADMIN_ONLY)) {
                     shell.print(' ');
                     shell.print(COLOR_BRIGHT_RED);

@@ -126,9 +126,9 @@ char * Helpers::smallitoa(char * result, const uint16_t value) {
 char * Helpers::render_boolean(char * result, bool value) {
     uint8_t bool_format_ = EMSESP::bool_format();
     if (bool_format_ == BOOL_FORMAT_ONOFF) {
-        strlcpy(result, value ? uuid::read_flash_string(F_(on)).c_str() : uuid::read_flash_string(F_(off)).c_str(), 5);
+        strlcpy(result, value ? read_flash_string(F_(on)).c_str() : read_flash_string(F_(off)).c_str(), 5);
     } else if (bool_format_ == BOOL_FORMAT_ONOFF_CAP) {
-        strlcpy(result, value ? uuid::read_flash_string(F_(ON)).c_str() : uuid::read_flash_string(F_(OFF)).c_str(), 5);
+        strlcpy(result, value ? read_flash_string(F_(ON)).c_str() : read_flash_string(F_(OFF)).c_str(), 5);
     } else if (bool_format_ == BOOL_FORMAT_TRUEFALSE) {
         strlcpy(result, value ? "true" : "false", 7);
     } else {
@@ -306,7 +306,7 @@ char * Helpers::render_value(char * result, const uint32_t value, const uint8_t 
 // creates string of hex values from an arrray of bytes
 std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     if (length == 0) {
-        return uuid::read_flash_string(F("<empty>"));
+        return read_flash_string(F("<empty>"));
     }
 
     std::string str(160, '\0');
@@ -464,12 +464,12 @@ bool Helpers::value2bool(const char * v, bool & value) {
 
     std::string bool_str = toLower(v); // convert to lower case
 
-    if ((bool_str == uuid::read_flash_string(F_(on))) || (bool_str == "1") or (bool_str == "true")) {
+    if ((bool_str == read_flash_string(F_(on))) || (bool_str == "1") or (bool_str == "true")) {
         value = true;
         return true; // is a bool
     }
 
-    if ((bool_str == uuid::read_flash_string(F_(off))) || (bool_str == "0") or (bool_str == "false")) {
+    if ((bool_str == read_flash_string(F_(off))) || (bool_str == "0") or (bool_str == "false")) {
         value = false;
         return true; // is a bool
     }
@@ -484,8 +484,8 @@ bool Helpers::value2enum(const char * v, uint8_t & value, const __FlashStringHel
     }
     std::string str = toLower(v);
     for (value = 0; strs[value]; value++) {
-        std::string str1 = toLower(uuid::read_flash_string(strs[value]));
-        if ((str1 == uuid::read_flash_string(F_(off)) && str == "false") || (str1 == uuid::read_flash_string(F_(on)) && str == "true") || (str == str1)
+        std::string str1 = toLower(read_flash_string(strs[value]));
+        if ((str1 == read_flash_string(F_(off)) && str == "false") || (str1 == read_flash_string(F_(on)) && str == "true") || (str == str1)
             || (v[0] == ('0' + value) && v[1] == '\0')) {
             return true;
         }
