@@ -187,6 +187,8 @@ MAKE_PSTR(mv, "mV")
 MAKE_PSTR(times, "times")
 MAKE_PSTR(oclock, "o'clock")
 
+MAKE_PSTR(days, "days")
+
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
 // tags must not have spaces
