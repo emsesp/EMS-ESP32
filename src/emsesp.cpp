@@ -458,7 +458,7 @@ void EMSESP::reset_mqtt_ha() {
 }
 
 // create json doc for the devices values and add to MQTT publish queue
-// generate_values_json is called without verbose mode (defaults to false)
+// generate_values_json is called to build the device value (dv) object array
 void EMSESP::publish_device_values(uint8_t device_type) {
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN); // use max size
     JsonObject          json         = doc.to<JsonObject>();
@@ -469,11 +469,6 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     // group by device type
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
-            // if we're using HA, done is checked for each sensor in devices
-            if (Mqtt::ha_enabled()) {
-                emsdevice->publish_mqtt_ha_sensor(); // create the configs for each value as a sensor
-            }
-
             // if its a boiler, generate json for each group and publish it directly. not nested
             if (device_type == DeviceType::BOILER) {
                 if (emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA, false, EMSdevice::OUTPUT_TARGET::MQTT)) {
@@ -527,6 +522,11 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 // for all other devices add the values to the json
                 need_publish |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::MQTT); // nested
             }
+        }
+
+        // if we're using HA, done is checked for each sensor in devices
+        if (Mqtt::ha_enabled()) {
+            emsdevice->publish_mqtt_ha_entity_config(); // create the configs for each value as a sensor
         }
     }
 
@@ -949,7 +949,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
                 // find the name and flags in our database
                 for (const auto & device : device_library_) {
                     if (device.product_id == product_id && device.device_type == emsdevice->device_type()) {
-                        emsdevice->name(std::move(uuid::read_flash_string(device.name)));
+                        emsdevice->name(std::move(read_flash_string(device.name)));
                         emsdevice->add_flags(device.flags);
                     }
                 }
@@ -988,7 +988,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         return false; // not found
     }
 
-    auto name        = uuid::read_flash_string(device_p->name);
+    auto name        = read_flash_string(device_p->name);
     auto device_type = device_p->device_type;
     auto flags       = device_p->flags;
 
