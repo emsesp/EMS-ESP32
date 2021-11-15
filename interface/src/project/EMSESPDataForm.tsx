@@ -219,7 +219,9 @@ class EMSESPDataForm extends Component<
   };
 
   sendCommand = (dv: DeviceValue) => {
-    this.setState({ edit_devicevalue: dv });
+    if (dv.c && this.props.authenticatedContext.me.admin) {
+      this.setState({ edit_devicevalue: dv });
+    }
   };
 
   handleSensorChange = (name: keyof Sensor) => (
@@ -285,7 +287,9 @@ class EMSESPDataForm extends Component<
   };
 
   sendSensor = (sn: Sensor) => {
-    this.setState({ edit_Sensor: sn });
+    if (this.props.authenticatedContext.me.admin) {
+      this.setState({ edit_Sensor: sn });
+    }
   };
 
   noDevices = () => {
@@ -391,7 +395,11 @@ class EMSESPDataForm extends Component<
             </TableHead>
             <TableBody>
               {data.sensors.map((sensorData) => (
-                <TableRow key={sensorData.n} hover>
+                <TableRow
+                  key={sensorData.n}
+                  hover
+                  onClick={() => this.sendSensor(sensorData)}
+                >
                   <TableCell padding="checkbox" style={{ width: 18 }}>
                     {me.admin && (
                       <CustomTooltip title="edit" placement="left-end">
@@ -553,7 +561,6 @@ class EMSESPDataForm extends Component<
   renderDeviceData() {
     const { deviceData } = this.state;
     const { width } = this.props;
-    const me = this.props.authenticatedContext.me;
 
     if (this.noDevices()) {
       return;
@@ -580,9 +587,13 @@ class EMSESPDataForm extends Component<
               <TableHead></TableHead>
               <TableBody>
                 {deviceData.data.map((item, i) => (
-                  <TableRow hover key={i}>
+                  <TableRow
+                    hover
+                    key={i}
+                    onClick={() => this.sendCommand(item)}
+                  >
                     <TableCell padding="checkbox" style={{ width: 18 }}>
-                      {item.c && me.admin && (
+                      {item.c && this.props.authenticatedContext.me.admin && (
                         <CustomTooltip
                           title="change value"
                           placement="left-end"
