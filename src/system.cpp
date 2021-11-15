@@ -830,7 +830,7 @@ void System::show_system(uuid::console::Shell & shell) {
     } else {
         shell.printfln(F("Syslog: %s"), syslog_.started() ? "started" : "stopped");
         shell.print(F(" "));
-        shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : uuid::read_flash_string(F_(unset)).c_str());
+        shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : read_flash_string(F_(unset)).c_str());
         shell.printfln(F(" IP: %s"), uuid::printable_to_string(syslog_.ip()).c_str());
         shell.print(F(" "));
         shell.printfln(F_(port_fmt), syslog_port_);
