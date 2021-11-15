@@ -471,9 +471,37 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("call boiler entities");
     }
 
+    if (command == "dv") {
+        shell.printfln(F("Testing device value rendering"));
+
+        Mqtt::ha_enabled(true);
+        // Mqtt::ha_enabled(false);
+
+        Mqtt::nested_format(1);
+        Mqtt::send_response(false);
+
+        run_test("boiler");
+        run_test("thermostat");
+
+        // shell.invoke_command("show");
+
+        // change a value to null/bogus/dormant
+        // homeassistant/sensor/ems-esp/boiler_wwseltemp/config
+        shell.invoke_command("call boiler wwseltemp");
+        shell.invoke_command("call system publish");
+
+        // Boiler -> Me, UBAParameterWW(0x33)
+        // wwseltemp = goes from 52 degrees (0x34) to void (0xFF)
+        uart_telegram({0x08, 0x0B, 0x33, 0x00, 0x08, 0xFF, 0xFF, 0xFB, 0x00, 0x28, 0x00, 0x00, 0x46, 0x00, 0xFF, 0xFF, 0x00});
+
+        shell.invoke_command("call boiler wwseltemp");
+        shell.invoke_command("call system publish");
+
+        // shell.invoke_command("show mqtt");
+    }
+
     if (command == "api") {
         shell.printfln(F("Testing API with MQTT and REST, standalone"));
-
 
         Mqtt::ha_enabled(true);
         // Mqtt::ha_enabled(false);
