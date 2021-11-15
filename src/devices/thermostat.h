@@ -127,7 +127,7 @@ class Thermostat : public EMSdevice {
 
     static std::string mode_tostring(uint8_t mode);
 
-    virtual bool publish_ha_config();
+    virtual bool publish_ha_device_config();
 
   private:
     static uuid::log::Logger logger_;

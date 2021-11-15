@@ -180,7 +180,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 }
 
 // publish HA config
-bool Solar::publish_ha_config() {
+bool Solar::publish_ha_device_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
     doc["uniq_id"] = F_(solar);
     doc["ic"]      = F_(icondevice);

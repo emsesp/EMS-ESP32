@@ -119,12 +119,14 @@ enum DeviceValueTAG : uint8_t {
 
 };
 
-// MQTT HA flags
-enum DeviceValueHA : uint8_t {
+// states of a device value
+enum DeviceValueState : uint8_t {
 
-    HA_NONE = 0,
-    HA_VALUE,
-    HA_DONE
+    DV_DEFAULT           = 0,        // 0 - does not yet have a value
+    DV_ACTIVE            = (1 << 0), // 1 - has a value
+    DV_VISIBLE           = (1 << 1), // 2 - shown on web and console
+    DV_HA_CONFIG_CREATED = (1 << 2)  // 4 - set if the HA config has been created
+
 };
 
 class EMSdevice {
@@ -134,7 +136,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICES_MAX_TELEGRAMS = 20;
 
     // virtual functions overrules by derived classes
-    virtual bool publish_ha_config() = 0;
+    virtual bool publish_ha_device_config() = 0;
 
     // device_type defines which derived class to use, e.g. BOILER, THERMOSTAT etc..
     EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
@@ -291,7 +293,7 @@ class EMSdevice {
 
     void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0);
 
-    void publish_mqtt_ha_sensor();
+    void publish_mqtt_ha_entity_config();
 
     const std::string telegram_type_name(std::shared_ptr<const Telegram> telegram);
 
@@ -415,7 +417,6 @@ class EMSdevice {
         }
     };
 
-
     // DeviceValue holds all the attributes for a device value (also a device parameter)
     struct DeviceValue {
         uint8_t                             device_type;  // EMSdevice::DeviceType
@@ -431,6 +432,7 @@ class EMSdevice {
         bool                                has_cmd;      // true if there is a Console/MQTT command which matches the short_name
         int32_t                             min;
         uint32_t                            max;
+        uint8_t                             state; // DeviceValueState::*
 
         DeviceValue(uint8_t                             device_type,
                     uint8_t                             tag,
@@ -444,7 +446,8 @@ class EMSdevice {
                     uint8_t                             ha,
                     bool                                has_cmd,
                     int32_t                             min,
-                    uint32_t                            max)
+                    uint32_t                            max,
+                    uint8_t                             state)
             : device_type(device_type)
             , tag(tag)
             , value_p(value_p)
@@ -457,7 +460,22 @@ class EMSdevice {
             , ha(ha)
             , has_cmd(has_cmd)
             , min(min)
-            , max(max) {
+            , max(max)
+            , state(state) {
+        }
+
+        // state flags
+        inline void add_state(uint8_t s) {
+            state |= s;
+        }
+        inline bool has_state(uint8_t s) const {
+            return (state & s) == s;
+        }
+        inline void remove_state(uint8_t s) {
+            state &= ~s;
+        }
+        inline uint8_t get_state() const {
+            return state;
         }
     };
     const std::vector<DeviceValue> devicevalues() const;
@@ -467,12 +485,10 @@ class EMSdevice {
 
     const std::string device_entity_ha(DeviceValue const & dv);
 
+    bool check_dv_hasvalue(const DeviceValue & dv);
+
     void init_devicevalues(uint8_t size) {
         devicevalues_.reserve(size);
-    }
-
-    inline bool dv_is_visible(DeviceValue dv) {
-        return (dv.full_name);
     }
 };
 

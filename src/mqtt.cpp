@@ -158,7 +158,7 @@ void Mqtt::loop() {
 
 // print MQTT log and other stuff to console
 void Mqtt::show_mqtt(uuid::console::Shell & shell) {
-    shell.printfln(F("MQTT is %s"), connected() ? uuid::read_flash_string(F_(connected)).c_str() : uuid::read_flash_string(F_(disconnected)).c_str());
+    shell.printfln(F("MQTT is %s"), connected() ? read_flash_string(F_(connected)).c_str() : read_flash_string(F_(disconnected)).c_str());
 
     shell.printfln(F("MQTT publish errors: %lu"), mqtt_publish_fails_);
     shell.println();
@@ -583,24 +583,39 @@ void Mqtt::ha_status() {
 
     // create the sensors - must match the MQTT payload keys
     if (!EMSESP::system_.ethernet_connected()) {
-        publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("WiFi RSSI"), EMSdevice::DeviceType::SYSTEM, F("rssi"), DeviceValueUOM::DBM);
-        publish_ha_sensor(DeviceValueType::INT,
-                          DeviceValueTAG::TAG_HEARTBEAT,
-                          F("WiFi strength"),
-                          EMSdevice::DeviceType::SYSTEM,
-                          F("wifistrength"),
-                          DeviceValueUOM::PERCENT);
+        publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("WiFi RSSI"), EMSdevice::DeviceType::SYSTEM, F("rssi"), DeviceValueUOM::DBM);
+        publish_ha_sensor_config(DeviceValueType::INT,
+                                 DeviceValueTAG::TAG_HEARTBEAT,
+                                 F("WiFi strength"),
+                                 EMSdevice::DeviceType::SYSTEM,
+                                 F("wifistrength"),
+                                 DeviceValueUOM::PERCENT);
     }
 
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"), DeviceValueUOM::NONE);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime (sec)"), EMSdevice::DeviceType::SYSTEM, F("uptime_sec"), DeviceValueUOM::SECONDS);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Free memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"), DeviceValueUOM::KB);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("MQTT fails"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"), DeviceValueUOM::TIMES);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Rx received"), EMSdevice::DeviceType::SYSTEM, F("rxreceived"), DeviceValueUOM::TIMES);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Rx fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"), DeviceValueUOM::TIMES);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx reads"), EMSdevice::DeviceType::SYSTEM, F("txreads"), DeviceValueUOM::TIMES);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx writes"), EMSdevice::DeviceType::SYSTEM, F("txwrites"), DeviceValueUOM::TIMES);
-    publish_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"), DeviceValueUOM::TIMES);
+    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"), DeviceValueUOM::NONE);
+    publish_ha_sensor_config(DeviceValueType::INT,
+                             DeviceValueTAG::TAG_HEARTBEAT,
+                             F("Uptime (sec)"),
+                             EMSdevice::DeviceType::SYSTEM,
+                             F("uptime_sec"),
+                             DeviceValueUOM::SECONDS);
+    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Free memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"), DeviceValueUOM::KB);
+    publish_ha_sensor_config(DeviceValueType::INT,
+                             DeviceValueTAG::TAG_HEARTBEAT,
+                             F("MQTT fails"),
+                             EMSdevice::DeviceType::SYSTEM,
+                             F("mqttfails"),
+                             DeviceValueUOM::TIMES);
+    publish_ha_sensor_config(DeviceValueType::INT,
+                             DeviceValueTAG::TAG_HEARTBEAT,
+                             F("Rx received"),
+                             EMSdevice::DeviceType::SYSTEM,
+                             F("rxreceived"),
+                             DeviceValueUOM::TIMES);
+    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Rx fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"), DeviceValueUOM::TIMES);
+    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx reads"), EMSdevice::DeviceType::SYSTEM, F("txreads"), DeviceValueUOM::TIMES);
+    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx writes"), EMSdevice::DeviceType::SYSTEM, F("txwrites"), DeviceValueUOM::TIMES);
+    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"), DeviceValueUOM::TIMES);
 }
 
 // add sub or pub task to the queue.
@@ -612,9 +627,14 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
     }
 
     // if it's a publish and the payload is empty, stop
+    /*
     if ((operation == Operation::PUBLISH) && (payload.empty())) {
+#ifdef EMSESP_DEBUG
+        LOG_WARNING("[DEBUG] Publish empty payload - quitting");
+#endif
         return nullptr;
     }
+    */
 
     // take the topic and prefix the base, unless its for HA
     std::shared_ptr<MqttMessage> message;
@@ -622,7 +642,11 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
 
 #ifdef EMSESP_DEBUG
     if (operation == Operation::PUBLISH) {
-        LOG_INFO("[DEBUG] Adding to queue: (Publish) topic='%s' payload=%s", message->topic.c_str(), message->payload.c_str());
+        if (message->payload.empty()) {
+            LOG_INFO("[DEBUG] Adding to queue: (Publish) topic='%s' empty payload", message->topic.c_str());
+        } else {
+            LOG_INFO("[DEBUG] Adding to queue: (Publish) topic='%s' payload=%s", message->topic.c_str(), message->payload.c_str());
+        }
     } else {
         LOG_INFO("[DEBUG] Adding to queue: (Subscribe) topic='%s'", message->topic.c_str());
     }
@@ -657,16 +681,16 @@ void Mqtt::publish(const std::string & topic, const std::string & payload) {
 
 // MQTT Publish, using a user's retain flag - except for char * strings
 void Mqtt::publish(const __FlashStringHelper * topic, const char * payload) {
-    queue_publish_message(uuid::read_flash_string(topic), payload, mqtt_retain_);
+    queue_publish_message(read_flash_string(topic), payload, mqtt_retain_);
 }
 
 // MQTT Publish, using a specific retain flag, topic is a flash string
 void Mqtt::publish(const __FlashStringHelper * topic, const std::string & payload) {
-    queue_publish_message(uuid::read_flash_string(topic), payload, mqtt_retain_);
+    queue_publish_message(read_flash_string(topic), payload, mqtt_retain_);
 }
 
 void Mqtt::publish(const __FlashStringHelper * topic, const JsonObject & payload) {
-    publish(uuid::read_flash_string(topic), payload);
+    publish(read_flash_string(topic), payload);
 }
 
 // publish json doc, only if its not empty
@@ -681,7 +705,7 @@ void Mqtt::publish(const std::string & topic) {
 
 // MQTT Publish, using a specific retain flag, topic is a flash string, forcing retain flag
 void Mqtt::publish_retain(const __FlashStringHelper * topic, const std::string & payload, bool retain) {
-    queue_publish_message(uuid::read_flash_string(topic), payload, retain);
+    queue_publish_message(read_flash_string(topic), payload, retain);
 }
 
 // publish json doc, only if its not empty, using the retain flag
@@ -694,11 +718,25 @@ void Mqtt::publish_retain(const std::string & topic, const JsonObject & payload,
 }
 
 void Mqtt::publish_retain(const __FlashStringHelper * topic, const JsonObject & payload, bool retain) {
-    publish_retain(uuid::read_flash_string(topic), payload, retain);
+    publish_retain(read_flash_string(topic), payload, retain);
 }
 
 void Mqtt::publish_ha(const __FlashStringHelper * topic, const JsonObject & payload) {
-    publish_ha(uuid::read_flash_string(topic), payload);
+    publish_ha(read_flash_string(topic), payload);
+}
+
+// publish empty payload to remove the topic
+void Mqtt::publish_ha(const std::string & topic) {
+    if (!enabled()) {
+        return;
+    }
+
+    std::string fulltopic = read_flash_string(F_(homeassistant)) + topic;
+#if defined(EMSESP_DEBUG)
+    LOG_DEBUG(F("[DEBUG] Publishing empty HA topic=%s"), fulltopic.c_str());
+#endif
+
+    publish(topic); // call it immediately, don't queue it
 }
 
 // publish a Home Assistant config topic and payload, with retain flag off.
@@ -714,7 +752,7 @@ void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
     payload_text.reserve(measureJson(payload) + 1);
     serializeJson(payload, payload_text); // convert json to string
 
-    std::string fulltopic = uuid::read_flash_string(F_(homeassistant)) + topic;
+    std::string fulltopic = read_flash_string(F_(homeassistant)) + topic;
 #if defined(EMSESP_STANDALONE)
     LOG_DEBUG(F("Publishing HA topic=%s, payload=%s"), fulltopic.c_str(), payload_text.c_str());
 #elif defined(EMSESP_DEBUG)
@@ -737,7 +775,7 @@ void Mqtt::process_queue() {
     auto message      = mqtt_message.content_;
     char topic[MQTT_TOPIC_MAX_SIZE];
 
-    if (message->topic.find(uuid::read_flash_string(F_(homeassistant))) == 0) {
+    if (message->topic.find(read_flash_string(F_(homeassistant))) == 0) {
         strcpy(topic, message->topic.c_str()); // leave topic as it is
     } else {
         snprintf(topic, MQTT_TOPIC_MAX_SIZE, "%s/%s", mqtt_base_.c_str(), message->topic.c_str());
@@ -803,18 +841,62 @@ void Mqtt::process_queue() {
     mqtt_messages_.pop_front(); // remove the message from the queue
 }
 
+void Mqtt::publish_ha_sensor_config(uint8_t                     type, // EMSdevice::DeviceValueType
+                                    uint8_t                     tag,  // EMSdevice::DeviceValueTAG
+                                    const __FlashStringHelper * name,
+                                    const uint8_t               device_type, // EMSdevice::DeviceType
+                                    const __FlashStringHelper * entity,
+                                    const uint8_t               uom) { // EMSdevice::DeviceValueUOM (0=NONE)
+    publish_ha_sensor_config(type, tag, name, device_type, entity, uom, false, false);
+}
+
+
 // HA config for a sensor and binary_sensor entity
 // entity must match the key/value pair in the *_data topic
 // note: some string copying here into chars, it looks messy but does help with heap fragmentation issues
-void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::DeviceValueType
-                             uint8_t                     tag,  // EMSdevice::DeviceValueTAG
-                             const __FlashStringHelper * name,
-                             const uint8_t               device_type, // EMSdevice::DeviceType
-                             const __FlashStringHelper * entity,
-                             const uint8_t               uom, // EMSdevice::DeviceValueUOM (0=NONE)
-                             const bool                  has_cmd) {
+void Mqtt::publish_ha_sensor_config(uint8_t                     type, // EMSdevice::DeviceValueType
+                                    uint8_t                     tag,  // EMSdevice::DeviceValueTAG
+                                    const __FlashStringHelper * name,
+                                    const uint8_t               device_type, // EMSdevice::DeviceType
+                                    const __FlashStringHelper * entity,
+                                    const uint8_t               uom,    // EMSdevice::DeviceValueUOM (0=NONE)
+                                    const bool                  remove, // true if we want to remove this topic
+                                    const bool                  has_cmd) {
     // ignore if name (fullname) is empty
     if (name == nullptr) {
+        return;
+    }
+
+    // create the device name
+    char device_name[50];
+    strlcpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str(), sizeof(device_name));
+
+    // create entity by add the hc/wwc tag if present, seperating with a .
+    char new_entity[50];
+    if (tag >= DeviceValueTAG::TAG_HC1) {
+        snprintf(new_entity, sizeof(new_entity), "%s.%s", EMSdevice::tag_to_string(tag).c_str(), read_flash_string(entity).c_str());
+    } else {
+        snprintf(new_entity, sizeof(new_entity), "%s", read_flash_string(entity).c_str());
+    }
+
+    // build unique identifier which will be used in the topic, replacing all . with _ as not to break HA
+    std::string uniq(50, '\0');
+    snprintf(&uniq[0], uniq.capacity() + 1, "%s_%s", device_name, new_entity);
+    std::replace(uniq.begin(), uniq.end(), '.', '_');
+
+    // create the topic
+    char topic[MQTT_TOPIC_MAX_SIZE];
+    if (type == DeviceValueType::BOOL) {
+        snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // binary sensor
+    } else {
+        snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // normal HA sensor, not a boolean one
+    }
+
+    // if we're asking to remove this topic, send an empty payload
+    // https://github.com/emsesp/EMS-ESP32/issues/196
+    if (remove) {
+        LOG_WARNING(F("Device value %s gone silent. Removing HA config topic %s"), uniq.c_str(), topic);
+        publish_ha(topic);
         return;
     }
 
@@ -823,26 +905,8 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
     // nested_format is 1 if nested, otherwise 2 for single topics
     bool is_nested = (nested_format_ == 1);
 
-    char device_name[50];
-    strlcpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str(), sizeof(device_name));
-
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
-
-    doc["~"] = mqtt_base_;
-
-    // create entity by add the hc/wwc tag if present, seperating with a .
-    char new_entity[50];
-    if (tag >= DeviceValueTAG::TAG_HC1) {
-        snprintf(new_entity, sizeof(new_entity), "%s.%s", EMSdevice::tag_to_string(tag).c_str(), uuid::read_flash_string(entity).c_str());
-    } else {
-        snprintf(new_entity, sizeof(new_entity), "%s", uuid::read_flash_string(entity).c_str());
-    }
-
-    // build unique identifier which will be used in the topic
-    // and replacing all . with _ as not to break HA
-    std::string uniq(50, '\0');
-    snprintf(&uniq[0], uniq.capacity() + 1, "%s_%s", device_name, new_entity);
-    std::replace(uniq.begin(), uniq.end(), '.', '_');
+    doc["~"]       = mqtt_base_;
     doc["uniq_id"] = uniq;
 
     // state topic
@@ -853,9 +917,9 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
     // name = <device> <tag> <name>
     char new_name[80];
     if (have_tag) {
-        snprintf(new_name, sizeof(new_name), "%s %s %s", device_name, EMSdevice::tag_to_string(tag).c_str(), uuid::read_flash_string(name).c_str());
+        snprintf(new_name, sizeof(new_name), "%s %s %s", device_name, EMSdevice::tag_to_string(tag).c_str(), read_flash_string(name).c_str());
     } else {
-        snprintf(new_name, sizeof(new_name), "%s %s", device_name, uuid::read_flash_string(name).c_str());
+        snprintf(new_name, sizeof(new_name), "%s %s", device_name, read_flash_string(name).c_str());
     }
     new_name[0] = toupper(new_name[0]); // capitalize first letter
     doc["name"] = new_name;
@@ -866,25 +930,17 @@ void Mqtt::publish_ha_sensor(uint8_t                     type, // EMSdevice::Dev
     if (is_nested) {
         snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", new_entity);
     } else {
-        snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", uuid::read_flash_string(entity).c_str());
+        snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", read_flash_string(entity).c_str());
     }
     doc["val_tpl"] = val_tpl;
 
-    char topic[MQTT_TOPIC_MAX_SIZE];
-
     // look at the device value type
     if (type == DeviceValueType::BOOL) {
-        // binary sensor
-        snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // topic
-
         // how to render boolean. HA only accepts String values
         char result[10];
         doc[F("payload_on")]  = Helpers::render_boolean(result, true);
         doc[F("payload_off")] = Helpers::render_boolean(result, false);
     } else {
-        // normal HA sensor, not a boolean one
-        snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // topic
-
         // set default state and device class for HA
         auto set_state_class  = State_class::NONE;
         auto set_device_class = Device_class::NONE;

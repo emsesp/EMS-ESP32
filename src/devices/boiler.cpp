@@ -267,7 +267,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 }
 
 // publish HA config
-bool Boiler::publish_ha_config() {
+bool Boiler::publish_ha_device_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
     doc["uniq_id"] = F_(boiler);
     doc["ic"]      = F_(icondevice);
@@ -1407,7 +1407,7 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
 bool Boiler::set_maintenance(const char * value, const int8_t id) {
     std::string s(12, '\0');
     if (Helpers::value2string(value, s)) {
-        if (s == Helpers::toLower(uuid::read_flash_string(F_(reset)))) {
+        if (s == Helpers::toLower(read_flash_string(F_(reset)))) {
             LOG_INFO(F("Reset boiler maintenance message"));
             write_command(0x05, 0x08, 0xFF, 0x1C);
             return true;

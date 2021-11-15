@@ -39,7 +39,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
 }
 
 // publish HA config
-bool Heatpump::publish_ha_config() {
+bool Heatpump::publish_ha_device_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
     doc["uniq_id"] = F_(heatpump);
     doc["ic"]      = F_(icondevice);
