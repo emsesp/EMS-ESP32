@@ -40,7 +40,7 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
 }
 
 // publish HA config
-bool Switch::publish_ha_config() {
+bool Switch::publish_ha_device_config() {
     // if we don't have valid values don't add it ever again
     if (!Helpers::hasValue(flowTempHc_)) {
         return false;

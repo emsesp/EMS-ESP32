@@ -29,7 +29,7 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
 }
 
 // publish HA config
-bool Connect::publish_ha_config() {
+bool Connect::publish_ha_device_config() {
     return true;
 }
 

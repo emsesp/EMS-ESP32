@@ -192,7 +192,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 }
 
 // publish HA config
-bool Thermostat::publish_ha_config() {
+bool Thermostat::publish_ha_device_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
     doc["uniq_id"] = F_(thermostat);
     doc["ic"]      = F_(icondevice);
@@ -384,7 +384,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 // publish config topic for HA MQTT Discovery for each of the heating circuit
 // e.g. homeassistant/climate/ems-esp/thermostat_hc1/config
 void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc) {
-    uint8_t hc_num = hc->hc_num();
+    uint8_t                                        hc_num = hc->hc_num();
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
     char str1[20];
@@ -437,7 +437,7 @@ void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit
 
     // the HA climate component only responds to auto, heat and off
     JsonArray modes = doc.createNestedArray("modes");
-    if (hc->get_model() != EMSdevice::EMS_DEVICE_FLAG_RC10){
+    if (hc->get_model() != EMSdevice::EMS_DEVICE_FLAG_RC10) {
         modes.add("auto");
     }
     modes.add("heat");
@@ -1798,26 +1798,26 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
         uint8_t num = value[0] - '0';
         switch (model()) {
         case EMSdevice::EMS_DEVICE_FLAG_RC10:
-            mode = uuid::read_flash_string(FL_(enum_mode6)[num]);
+            mode = read_flash_string(FL_(enum_mode6)[num]);
             break;
         case EMSdevice::EMS_DEVICE_FLAG_RC20:
         case EMSdevice::EMS_DEVICE_FLAG_RC20_N:
-            mode = uuid::read_flash_string(FL_(enum_mode2)[num]);
+            mode = read_flash_string(FL_(enum_mode2)[num]);
             break;
         case EMSdevice::EMS_DEVICE_FLAG_RC30:
         case EMSdevice::EMS_DEVICE_FLAG_RC35:
         case EMSdevice::EMS_DEVICE_FLAG_RC30_N:
-            mode = uuid::read_flash_string(FL_(enum_mode3)[num]);
+            mode = read_flash_string(FL_(enum_mode3)[num]);
             break;
         case EMSdevice::EMS_DEVICE_FLAG_RC300:
         case EMSdevice::EMS_DEVICE_FLAG_RC100:
-            mode = uuid::read_flash_string(FL_(enum_mode)[num]);
+            mode = read_flash_string(FL_(enum_mode)[num]);
             break;
         case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
-            mode = uuid::read_flash_string(FL_(enum_mode4)[num]);
+            mode = read_flash_string(FL_(enum_mode4)[num]);
             break;
         case EMSdevice::EMS_DEVICE_FLAG_CRF:
-            mode = uuid::read_flash_string(FL_(enum_mode5)[num]);
+            mode = read_flash_string(FL_(enum_mode5)[num]);
             break;
         default:
             LOG_WARNING(F("Set mode: Invalid mode"));
@@ -2673,13 +2673,8 @@ void Thermostat::register_device_values() {
                               FL_(ibaCalIntTemperature),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_calinttemp));
-        register_device_value(TAG_THERMOSTAT_DATA,
-                              &heatingpid_,
-                              DeviceValueType::ENUM,
-                              FL_(enum_PID),
-                              FL_(heatingPID),
-                              DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_heatingpid));
+        register_device_value(
+            TAG_THERMOSTAT_DATA, &heatingpid_, DeviceValueType::ENUM, FL_(enum_PID), FL_(heatingPID), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingpid));
         register_device_value(TAG_THERMOSTAT_DATA, &backlight_, DeviceValueType::BOOL, nullptr, FL_(backlight), DeviceValueUOM::NONE, MAKE_CF_CB(set_backlight));
         register_device_value(TAG_DEVICE_DATA_WW, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode3), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         break;

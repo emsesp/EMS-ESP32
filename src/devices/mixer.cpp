@@ -100,7 +100,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 }
 
 // publish HA config
-bool Mixer::publish_ha_config() {
+bool Mixer::publish_ha_device_config() {
     // if we don't have valid values for this HC don't add it ever again
     if (!Helpers::hasValue(pumpStatus_)) {
         return false;
