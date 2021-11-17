@@ -15,7 +15,7 @@ import {
 } from '@material-ui/core';
 
 import { FormButton } from '../components';
-import { DeviceValue, DeviceValueUOM, DeviceValueUOM_s } from './EMSESPtypes';
+import { DeviceValue, DeviceValueUOM_s } from './EMSESPtypes';
 
 interface ValueFormProps {
   devicevalue: DeviceValue;
@@ -25,17 +25,6 @@ interface ValueFormProps {
     data: keyof DeviceValue
   ) => (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
-
-function formatValue(value: any, uom: number) {
-  if (uom === DeviceValueUOM.DEGREES) {
-    return new Intl.NumberFormat(undefined, {
-      minimumFractionDigits: 1
-    }).format(value);
-  }
-
-  return value;
-}
-
 class ValueForm extends React.Component<ValueFormProps> {
   formRef: RefObject<any> = React.createRef();
 
@@ -79,7 +68,7 @@ class ValueForm extends React.Component<ValueFormProps> {
             {!devicevalue.l && (
               <OutlinedInput
                 id="value"
-                value={formatValue(devicevalue.v, devicevalue.u)}
+                value={devicevalue.v}
                 autoFocus
                 fullWidth
                 onChange={handleValueChange('v')}
