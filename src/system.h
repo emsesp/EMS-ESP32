@@ -125,6 +125,7 @@ class System {
         return true;
 #endif
     }
+
     void show_system(uuid::console::Shell & shell);
     void wifi_reconnect();
     void show_users(uuid::console::Shell & shell);
