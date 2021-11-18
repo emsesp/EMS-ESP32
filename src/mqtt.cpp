@@ -502,7 +502,7 @@ void Mqtt::on_connect() {
     load_settings(); // reload MQTT settings - in case they have changes
 
     // send info topic appended with the version information as JSON
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
+    StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> doc;
     // first time to connect
     if (connectcount_ == 1) {
         doc["event"] = FJSON("start");
@@ -512,15 +512,28 @@ void Mqtt::on_connect() {
 
     doc["version"] = EMSESP_APP_VERSION;
 #ifndef EMSESP_STANDALONE
-    if (EMSESP::system_.ethernet_connected()) {
-        doc["ip"] = ETH.localIP().toString();
-        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            doc["ipv6"] = ETH.localIPv6().toString();
-        }
-    } else {
-        doc["ip"] = WiFi.localIP().toString();
+    if (WiFi.status() == WL_CONNECTED) {
+        doc["connection"]      = F("WiFi");
+        doc["hostname"]        = WiFi.getHostname();
+        doc["SSID"]            = WiFi.SSID();
+        doc["BSSID"]           = WiFi.BSSIDstr();
+        doc["RSSI"]            = WiFi.RSSI();
+        doc["MAC"]             = WiFi.macAddress();
+        doc["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
+        doc["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
+        doc["IPv4 nameserver"] = uuid::printable_to_string(WiFi.dnsIP());
         if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            doc["ipv6"] = WiFi.localIPv6().toString();
+            doc["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
+        }
+    } else if (EMSESP::system_.ethernet_connected()) {
+        doc["connection"]      = F("Ethernet");
+        doc["hostname"]        = ETH.getHostname();
+        doc["MAC"]             = ETH.macAddress();
+        doc["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
+        doc["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
+        doc["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
+        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+            doc["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
         }
     }
 #endif

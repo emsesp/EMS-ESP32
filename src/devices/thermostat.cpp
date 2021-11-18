@@ -34,11 +34,11 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
     uint8_t model = this->model();
 
-    // if we're on auto mode, register this thermostat if it has a device id of 0x10, 0x17 or 0x18
+    // if we're on auto mode, register this thermostat if it has a device id of 0x10, 0x17 or 0x18->0x1A
     // or if its the master thermostat we defined
     // see https://github.com/emsesp/EMS-ESP/issues/362#issuecomment-629628161
     if ((master_thermostat == device_id)
-        || ((master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) && (device_id < 0x19)
+        || ((master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) && (device_id <= 0x1A) // https://github.com/emsesp/EMS-ESP32/issues/200
             && ((actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) || (device_id < actual_master_thermostat)))) {
         EMSESP::actual_master_thermostat(device_id);
         actual_master_thermostat = device_id;
