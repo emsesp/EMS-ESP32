@@ -260,11 +260,11 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
     StaticJsonDocument<EMSESP_JSON_SIZE_LARGE_DYN> output_doc;
     JsonObject                                     input, output;
 
-    // convert payload into a json doc, if it's not empty
-    // if the payload is a single parameter (not JSON) create a JSON with the key 'value'
+    // convert payload into a json doc
+    // if the payload doesn't not contain the key 'value' or 'data', treat the whole payload as the 'value'
     if (len != 0) {
         DeserializationError error = deserializeJson(input_doc, message);
-        if (!input_doc.containsKey("value") || error) {
+        if ((!input_doc.containsKey("value") && !input_doc.containsKey("data")) || error) {
             input_doc.clear();
             input_doc["value"] = (const char *)message; // always a string
         }
