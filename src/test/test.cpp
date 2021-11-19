@@ -671,6 +671,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp", "59");
         EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp");
 
+        EMSESP::mqtt_.incoming("ems-esp/thermostat", "{\"cmd\":\"mode\",\"data\":\"heat\",\"id\":1}");
+
         // MQTT bad tests
         EMSESP::mqtt_.incoming("ems-esp/thermostate/mode", "auto");     // unknown device
         EMSESP::mqtt_.incoming("ems-esp/thermostat/modee", "auto");     // unknown command
@@ -757,7 +759,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         request.url("/rest/writeValue");
         EMSESP::webDataService.write_value(&request, json);
 
-        emsesp::EMSESP::logger().notice("*");
+        // emsesp::EMSESP::logger().notice("*");
 
         // should fail
         char data8[] = "{}";
