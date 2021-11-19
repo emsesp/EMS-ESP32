@@ -812,8 +812,8 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
         }
     }
 }
-// 0xC2
 
+// 0xC2
 void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) {
     if (telegram->offset > 0 || telegram->message_length < 14) {
         return;
