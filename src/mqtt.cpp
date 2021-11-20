@@ -545,8 +545,8 @@ void Mqtt::on_connect() {
     }
 
     // send initial MQTT messages for some of our services
-    EMSESP::shower_.send_mqtt_stat(false); // Send shower_activated as false
-    EMSESP::system_.send_heartbeat();      // send heatbeat
+    EMSESP::shower_.set_shower_state(false, true); // Send shower_activated as false
+    EMSESP::system_.send_heartbeat();              // send heatbeat
 
     // re-subscribe to all custom registered MQTT topics
     resubscribe();
@@ -749,7 +749,7 @@ void Mqtt::publish_ha(const std::string & topic) {
     LOG_DEBUG(F("[DEBUG] Publishing empty HA topic=%s"), fulltopic.c_str());
 #endif
 
-    publish(topic); // call it immediately, don't queue it
+    publish(fulltopic); // call it immediately, don't queue it
 }
 
 // publish a Home Assistant config topic and payload, with retain flag off.
@@ -757,9 +757,6 @@ void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
     if (!enabled()) {
         return;
     }
-
-    // empty payload will remove the previous config
-    // publish(topic);
 
     std::string payload_text;
     payload_text.reserve(measureJson(payload) + 1);
@@ -908,7 +905,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                     type, // EMSdevi
     // if we're asking to remove this topic, send an empty payload
     // https://github.com/emsesp/EMS-ESP32/issues/196
     if (remove) {
-        LOG_WARNING(F("Device value %s gone silent. Removing HA config topic %s"), uniq.c_str(), topic);
+        LOG_WARNING(F("Lost device value for %s. Removing HA config"), uniq.c_str());
         publish_ha(topic);
         return;
     }

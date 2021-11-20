@@ -370,7 +370,7 @@ MAKE_PSTR_LIST(enum_progMode4, F("prog_a"), F("prog_b"), F("prog_c"), F("prog_d"
 MAKE_PSTR_LIST(enum_solarmode, F_(constant), F("pwm"), F("analog"))
 MAKE_PSTR_LIST(enum_collectortype, F("flat"), F("vacuum"))
 
-// MQTT topics and full text for values and commands
+// MQTT topic for homeassistant. Must include /
 MAKE_PSTR(homeassistant, "homeassistant/")
 
 // id used to store the device ID. empty full name so only gets displayed in the MQTT payload

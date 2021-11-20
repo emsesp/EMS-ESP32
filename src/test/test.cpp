@@ -30,7 +30,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "general") == 0) {
-        EMSESP::logger().info(F("Testing general..."));
+        EMSESP::logger().info(F("Testing general. Adding a Boiler and Thermostat"));
 
         add_device(0x08, 123); // Nefit Trendline
         add_device(0x18, 157); // Bosch CR100
@@ -54,7 +54,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "310") == 0) {
-        EMSESP::logger().info(F("Testing GB072/RC310..."));
+        EMSESP::logger().info(F("Adding a GB072/RC310 combo..."));
 
         add_device(0x08, 123); // GB072
         add_device(0x10, 158); // RC310
@@ -81,7 +81,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "gateway") == 0) {
-        EMSESP::logger().info(F("Testing gateway..."));
+        EMSESP::logger().info(F("Adding a Gateway..."));
 
         // add 0x48 KM200, via a version command
         rx_telegram({0x48, 0x0B, 0x02, 0x00, 0xBD, 0x04, 0x06, 00, 00, 00, 00, 00, 00, 00});
@@ -101,7 +101,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "mixer") == 0) {
-        EMSESP::logger().info(F("Testing mixer..."));
+        EMSESP::logger().info(F("Adding a mixer..."));
 
         // add controller
         add_device(0x09, 114);
@@ -123,7 +123,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "boiler") == 0) {
-        EMSESP::logger().info(F("Testing boiler..."));
+        EMSESP::logger().info(F("Adding boiler..."));
         add_device(0x08, 123); // Nefit Trendline
 
         // UBAuptime
@@ -140,7 +140,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "thermostat") == 0) {
-        EMSESP::logger().info(F("Testing thermostat..."));
+        EMSESP::logger().info(F("Adding thermostat..."));
 
         add_device(0x10, 192); // FW120
 
@@ -153,7 +153,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "solar") == 0) {
-        EMSESP::logger().info(F("Testing solar..."));
+        EMSESP::logger().info(F("Adding solar..."));
 
         add_device(0x30, 163); // SM100
 
@@ -172,7 +172,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "heatpump") == 0) {
-        EMSESP::logger().info(F("Testing heatpump..."));
+        EMSESP::logger().info(F("Adding heatpump..."));
 
         add_device(0x38, 200); // Enviline module
         add_device(0x10, 192); // FW120 thermostat
@@ -187,7 +187,8 @@ bool Test::run_test(const char * command, int8_t id) {
     return false;
 }
 
-// used with the 'test' command, under su/admin
+// These next tests are run from the Console
+// using the test command
 void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     // switch to su
     shell.add_flags(CommandFlags::ADMIN);
@@ -475,29 +476,27 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.printfln(F("Testing device value rendering"));
 
         Mqtt::ha_enabled(true);
-        // Mqtt::ha_enabled(false);
-
         Mqtt::nested_format(1);
         Mqtt::send_response(false);
 
         run_test("boiler");
         run_test("thermostat");
 
-        // shell.invoke_command("show");
-
         // change a value to null/bogus/dormant
-        // homeassistant/sensor/ems-esp/boiler_wwseltemp/config
         shell.invoke_command("call boiler wwseltemp");
         shell.invoke_command("call system publish");
+    }
+
+    if (command == "dv2") {
+        shell.printfln(F("Testing device value lost"));
 
         // Boiler -> Me, UBAParameterWW(0x33)
         // wwseltemp = goes from 52 degrees (0x34) to void (0xFF)
+        // it should delete the HA config topic homeassistant/sensor/ems-esp/boiler_wwseltemp/config
         uart_telegram({0x08, 0x0B, 0x33, 0x00, 0x08, 0xFF, 0xFF, 0xFB, 0x00, 0x28, 0x00, 0x00, 0x46, 0x00, 0xFF, 0xFF, 0x00});
 
         shell.invoke_command("call boiler wwseltemp");
         shell.invoke_command("call system publish");
-
-        // shell.invoke_command("show mqtt");
     }
 
     if (command == "api") {

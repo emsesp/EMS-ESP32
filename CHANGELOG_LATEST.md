@@ -46,6 +46,7 @@
 - Improved API. Restful HTTP API works in the same way as MQTT calls
 - Removed settings for MQTT subscribe format [#173](https://github.com/emsesp/EMS-ESP32/issues/173)
 - Improve Nefit Moduline 200 functionality [#183](https://github.com/emsesp/EMS-ESP32/issues/183)
+- `status` in the MQTT heartbeat renamed to `bus_status`
 
 ## **BREAKING CHANGES**
 
@@ -55,3 +56,5 @@
 - HA: # removed from counts in MQTT Fails, Rx fails, Rx received, Tx fails, Tx reads & Tx writes
 - `txread` renamed to `txreads` and `txwrite` renamed to `txwrites` in MQTT heartbeat payload
 - 'dallas sensors' in api/system/info moved to the "System" section. Renamed "uptime (seconds)" and "reset reason"
+- `status` in the MQTT heartbeat renamed to `bus_status`
+
