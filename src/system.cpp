@@ -497,13 +497,13 @@ void System::show_mem(const char * note) {
 
 // create the json for heartbeat
 bool System::heartbeat_json(JsonObject & output) {
-    uint8_t ems_status = EMSESP::bus_status();
-    if (ems_status == EMSESP::BUS_STATUS_TX_ERRORS) {
-        output["status"] = FJSON("txerror");
-    } else if (ems_status == EMSESP::BUS_STATUS_CONNECTED) {
-        output["status"] = FJSON("connected");
+    uint8_t bus_status = EMSESP::bus_status();
+    if (bus_status == EMSESP::BUS_STATUS_TX_ERRORS) {
+        output["bus_status"] = FJSON("txerror");
+    } else if (bus_status == EMSESP::BUS_STATUS_CONNECTED) {
+        output["bus_status"] = FJSON("connected");
     } else {
-        output["status"] = FJSON("disconnected");
+        output["bus_status"] = FJSON("disconnected");
     }
 
     output["uptime"] = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
