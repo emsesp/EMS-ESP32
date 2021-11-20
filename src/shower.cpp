@@ -28,7 +28,7 @@ void Shower::start() {
         shower_alert_ = settings.shower_alert;
     });
 
-    send_mqtt_stat(false);
+    set_shower_state(false, true); // turns shower to off and creates HA topic if not already done
 }
 
 void Shower::loop() {
@@ -49,14 +49,13 @@ void Shower::loop() {
                 timer_pause_     = 0; // remove any last pauses
                 doing_cold_shot_ = false;
                 duration_        = 0;
-                shower_on_       = false;
+                shower_state_    = false;
             } else {
                 // hot water has been  on for a while
                 // first check to see if hot water has been on long enough to be recognized as a Shower/Bath
-                if (!shower_on_ && (time_now - timer_start_) > SHOWER_MIN_DURATION) {
-                    shower_on_ = true;
-                    send_mqtt_stat(true);
-                    publish_values();
+                if (!shower_state_ && (time_now - timer_start_) > SHOWER_MIN_DURATION) {
+                    set_shower_state(true);
+                    publish_shower_data();
                     LOG_DEBUG(F("[Shower] hot water still running, starting shower timer"));
                 }
                 // check if the shower has been on too long
@@ -77,18 +76,27 @@ void Shower::loop() {
                 if ((timer_pause_ - timer_start_) > SHOWER_OFFSET_TIME) {
                     duration_ = (timer_pause_ - timer_start_ - SHOWER_OFFSET_TIME);
                     if (duration_ > SHOWER_MIN_DURATION) {
-                        send_mqtt_stat(false);
+                        publish_shower_data();
                         LOG_DEBUG(F("[Shower] finished with duration %d"), duration_);
-                        publish_values();
                     }
                 }
+#if defined(EMSESP_DEBUG)
+                else {
+                    if (shower_state_) {
+                        Mqtt::publish("message", "shower state is ON");
+                    } else {
+                        Mqtt::publish("message", "shower state is OFF");
+                    }
+                }
+#endif
 
                 // reset everything
                 timer_start_       = 0;
                 timer_pause_       = 0;
-                shower_on_         = false;
                 doing_cold_shot_   = false;
                 alert_timer_start_ = 0;
+
+                set_shower_state(false);
             }
         }
         return;
@@ -98,37 +106,6 @@ void Shower::loop() {
     // keep repeating until the time is up
     if ((time_now - alert_timer_start_) > SHOWER_COLDSHOT_DURATION) {
         shower_alert_stop();
-    }
-}
-
-// send status of shower to MQTT
-void Shower::send_mqtt_stat(bool state, bool force) {
-    if (!shower_timer_ && !shower_alert_) {
-        return;
-    }
-
-    char s[7];
-    Mqtt::publish(F("shower_active"), Helpers::render_boolean(s, state)); // https://github.com/emsesp/EMS-ESP/issues/369
-
-    // if we're in HA mode make sure we've first sent out the HA MQTT Discovery config topic
-    if ((Mqtt::ha_enabled()) && (!ha_configdone_ || force)) {
-        ha_configdone_ = true;
-
-        StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
-        doc["name"]    = FJSON("Shower Active");
-        doc["uniq_id"] = FJSON("shower_active");
-        doc["~"]       = Mqtt::base(); // default ems-esp
-        doc["stat_t"]  = FJSON("~/shower_active");
-        char result[10];
-        doc[F("payload_on")]  = Helpers::render_boolean(result, true);
-        doc[F("payload_off")] = Helpers::render_boolean(result, false);
-        JsonObject dev        = doc.createNestedObject("dev");
-        JsonArray  ids        = dev.createNestedArray("ids");
-        ids.add("ems-esp");
-
-        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::base().c_str());
-        Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
     }
 }
 
@@ -150,9 +127,10 @@ void Shower::shower_alert_start() {
     }
 }
 
-// Publish shower data
-// returns true if added to MQTT queue went ok
-void Shower::publish_values() {
+// Publish to the shower_data topic
+// showing whether the shower timer and alert are enabled or disabled
+// and the duration of the last shower
+void Shower::publish_shower_data() {
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
 
     char result[10];
@@ -167,6 +145,49 @@ void Shower::publish_values() {
     }
 
     Mqtt::publish(F("shower_data"), doc.as<JsonObject>());
+}
+
+// send status of shower to MQTT topic called shower_active - which is determined by the state parameter
+// and creates the HA config topic if HA enabled
+// force is used by EMSESP::publish_all_loop()
+void Shower::set_shower_state(bool state, bool force) {
+    if (!shower_timer_ && !shower_alert_) {
+        return;
+    }
+
+    // sets the state
+    shower_state_ = state;
+
+    // only publish if that state has changed
+    static bool old_shower_state_;
+    if ((shower_state_ == old_shower_state_) && !force) {
+        return;
+    }
+    old_shower_state_ = shower_state_; // copy current state
+
+    char s[7];
+    Mqtt::publish(F("shower_active"), Helpers::render_boolean(s, shower_state_)); // https://github.com/emsesp/EMS-ESP/issues/369
+
+    // send out HA MQTT Discovery config topic
+    if ((Mqtt::ha_enabled()) && (!ha_configdone_ || force)) {
+        ha_configdone_ = true;
+
+        StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
+        doc["name"]    = FJSON("Shower Active");
+        doc["uniq_id"] = FJSON("shower_active");
+        doc["~"]       = Mqtt::base(); // default ems-esp
+        doc["stat_t"]  = FJSON("~/shower_active");
+        char result[10];
+        doc[F("payload_on")]  = Helpers::render_boolean(result, true);
+        doc[F("payload_off")] = Helpers::render_boolean(result, false);
+        JsonObject dev        = doc.createNestedObject("dev");
+        JsonArray  ids        = dev.createNestedArray("ids");
+        ids.add("ems-esp");
+
+        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::base().c_str());
+        Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+    }
 }
 
 } // namespace emsesp

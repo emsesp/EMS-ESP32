@@ -437,7 +437,6 @@ void EMSESP::publish_all_loop() {
             Mqtt::ha_status();
         }
         system_.send_heartbeat();
-        shower_.send_mqtt_stat(false, true);
         break;
     default:
         // all finished

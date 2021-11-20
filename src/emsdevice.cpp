@@ -1101,7 +1101,7 @@ void EMSdevice::publish_mqtt_ha_entity_config() {
 #if defined(EMSESP_STANDALONE)
         // debug messages to go with the test called 'dv'
         if (strcmp(read_flash_string(dv.short_name).c_str(), "wwseltemp") == 0) {
-            EMSESP::logger().warning(F("! init: wwseltemp state=%d, active=%d config_created=%d"),
+            EMSESP::logger().warning(F("publish_mqtt_ha_entity_config: wwseltemp state=%d, active=%d config_created=%d"),
                                      dv.get_state(),
                                      dv.has_state(DV_ACTIVE),
                                      dv.has_state(DV_HA_CONFIG_CREATED));
