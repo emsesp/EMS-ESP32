@@ -28,7 +28,7 @@ class Shower {
     void start();
     void loop();
 
-    void send_mqtt_stat(bool state, bool force = false);
+    void set_shower_state(bool state, bool force = false);
 
     bool shower_alert() const {
         return shower_alert_;
@@ -55,14 +55,14 @@ class Shower {
     static constexpr uint32_t SHOWER_COLDSHOT_DURATION = 10000;  // 10 seconds for cold water before turning back hot water
     static constexpr uint32_t SHOWER_MAX_DURATION      = 420000; // in ms. 7 minutes, before trigger a shot of cold water
 
-    void publish_values();
+    void publish_shower_data();
     void shower_alert_start();
     void shower_alert_stop();
 
     bool     shower_timer_;          // true if we want to report back on shower times
     bool     shower_alert_;          // true if we want the alert of cold water
     bool     ha_configdone_ = false; // for HA MQTT Discovery
-    bool     shower_on_;
+    bool     shower_state_;
     uint32_t timer_start_; // ms
     uint32_t timer_pause_; // ms
     uint32_t duration_;    // ms
