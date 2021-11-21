@@ -291,7 +291,8 @@ const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'emsespStatus'
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile'
 const WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
 const WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
-const emsesp_settings = {
+
+emsesp_settings = {
   tx_mode: 1,
   ems_bus_id: 11,
   syslog_enabled: false,
@@ -305,6 +306,7 @@ const emsesp_settings = {
   shower_alert: false,
   rx_gpio: 23,
   tx_gpio: 5,
+  phy_type: 0,
   dallas_gpio: 3,
   dallas_parasite: false,
   led_gpio: 2,
@@ -650,6 +652,8 @@ app.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
   res.json(emsesp_settings)
 })
 app.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
+  console.log(req.body)
+  emsesp_settings = req.body
   res.json(emsesp_settings)
 })
 app.get(EMSESP_DATA_ENDPOINT, (req, res) => {
@@ -705,6 +709,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     rx_gpio: 3,
     tx_gpio: 4,
     pbutton_gpio: 5,
+    phy_type: 0,
   }
 
   if (board_profile == 'S32') {
@@ -714,6 +719,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 23
     data.tx_gpio = 5
     data.pbutton_gpio = 0
+    data.phy_type = 0
   } else if (board_profile == 'E32') {
     // BBQKees Gateway E32
     data.led_gpio = 2
@@ -721,6 +727,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 5
     data.tx_gpio = 17
     data.pbutton_gpio = 33
+    data.phy_type = 1
   } else if (board_profile == 'MH-ET') {
     // MH-ET Live D1 Mini
     data.led_gpio = 2
@@ -728,6 +735,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 23
     data.tx_gpio = 5
     data.pbutton_gpio = 0
+    data.phy_type = 0
   } else if (board_profile == 'NODEMCU') {
     // NodeMCU 32S
     data.led_gpio = 2
@@ -735,6 +743,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 23
     data.tx_gpio = 5
     data.pbutton_gpio = 0
+    data.phy_type = 0
   } else if (board_profile == 'LOLIN') {
     // Lolin D32
     data.led_gpio = 2
@@ -742,6 +751,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 17
     data.tx_gpio = 16
     data.pbutton_gpio = 0
+    data.phy_type = 0
   } else if (board_profile == 'OLIMEX') {
     // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
     data.led_gpio = 0
@@ -749,21 +759,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 36
     data.tx_gpio = 4
     data.pbutton_gpio = 34
-    // data = { 0, 0, 36, 4, 34};
-  } else if (board_profile == 'TLK110') {
-    // Generic Ethernet (TLK110)
-    data.led_gpio = 2
-    data.dallas_gpio = 4
-    data.rx_gpio = 5
-    data.tx_gpio = 17
-    data.pbutton_gpio = 33
-  } else if (board_profile == 'LAN8720') {
-    // Generic Ethernet (LAN8720)
-    data.led_gpio = 2
-    data.dallas_gpio = 4
-    data.rx_gpio = 5
-    data.tx_gpio = 17
-    data.pbutton_gpio = 33
+    data.phy_type = 1
   }
 
   res.json(data)

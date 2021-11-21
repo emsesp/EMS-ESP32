@@ -60,6 +60,7 @@ class WebSettings {
     uint8_t  pbutton_gpio;
     uint8_t  solar_maxflow;
     String   board_profile;
+    uint8_t  phy_type;
     uint8_t  dallas_format;
     uint8_t  bool_format;
     uint8_t  enum_format;

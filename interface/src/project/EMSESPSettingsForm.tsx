@@ -93,6 +93,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
           rx_gpio: json.rx_gpio,
           tx_gpio: json.tx_gpio,
           pbutton_gpio: json.pbutton_gpio,
+          phy_type: json.phy_type,
           board_profile: event.target.value
         });
         this.setState({ processing: false });
@@ -306,7 +307,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                   'Not a valid GPIO'
                 ]}
                 name="dallas_gpio"
-                label="Dallas GPIO (0=none)"
+                label="Dallas GPIO (0=disabled)"
                 fullWidth
                 variant="outlined"
                 value={data.dallas_gpio}
@@ -332,7 +333,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                   'Not a valid GPIO'
                 ]}
                 name="led_gpio"
-                label="LED GPIO (0=none)"
+                label="LED GPIO (0=disabled)"
                 fullWidth
                 variant="outlined"
                 value={data.led_gpio}
@@ -340,6 +341,21 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                 onChange={handleValueChange('led_gpio')}
                 margin="normal"
               />
+            </Grid>
+            <Grid item xs={4}>
+              <SelectValidator
+                name="phy_type"
+                label="PHY Module Type"
+                value={data.phy_type}
+                fullWidth
+                variant="outlined"
+                onChange={handleValueChange('phy_type')}
+                margin="normal"
+              >
+                <MenuItem value={0}>No Ethernet</MenuItem>
+                <MenuItem value={1}>LAN8720</MenuItem>
+                <MenuItem value={2}>TLK110</MenuItem>
+              </SelectValidator>
             </Grid>
           </Grid>
         )}

@@ -147,9 +147,9 @@ MAKE_PSTR(password_prompt, "Password: ")
 MAKE_PSTR(unset, "<unset>")
 
 // command descriptions
-MAKE_PSTR(info_cmd, "list all values")
-MAKE_PSTR(commands_cmd, "list all commands")
-MAKE_PSTR(entities_cmd, "list all entities")
+MAKE_PSTR(info_cmd, "lists all values")
+MAKE_PSTR(commands_cmd, "lists all commands")
+MAKE_PSTR(entities_cmd, "lists all entities")
 
 MAKE_PSTR_WORD(number)
 MAKE_PSTR_WORD(enum)

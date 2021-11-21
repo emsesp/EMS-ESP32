@@ -234,7 +234,7 @@ void System::syslog_start() {
         syslog_.hostname(hostname().c_str());
 
         // register the command
-        Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog_level), System::command_syslog_level, F("change syslog level"), CommandFlag::ADMIN_ONLY);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog_level), System::command_syslog_level, F("changes syslog level"), CommandFlag::ADMIN_ONLY);
 
     } else if (was_enabled) {
         // in case service is still running, this flushes the queue
@@ -265,6 +265,9 @@ void System::get_settings() {
 
         // Board profile
         board_profile_ = settings.board_profile;
+
+        // Ethernet PHY
+        phy_type_ = settings.phy_type;
     });
 }
 
@@ -593,9 +596,7 @@ void System::network_init(bool refresh) {
     last_system_check_ = 0; // force the LED to go from fast flash to pulse
     send_heartbeat();
 
-    // check board profile for those which use ethernet
-    // ethernet uses lots of additional memory so we only start it when it's explicitly set in the config
-    if (!board_profile_.equals("E32") && !board_profile_.equals("TLK110") && !board_profile_.equals("LAN8720") && !board_profile_.equals("OLIMEX")) {
+    if (phy_type_ == PHY_type::PHY_TYPE_NONE) {
         return;
     }
 
@@ -606,24 +607,14 @@ void System::network_init(bool refresh) {
     eth_phy_type_t   type;       // Type of the Ethernet PHY (LAN8720 or TLK110)
     eth_clock_mode_t clock_mode; // ETH_CLOCK_GPIO0_IN or ETH_CLOCK_GPIO0_OUT, ETH_CLOCK_GPIO16_OUT, ETH_CLOCK_GPIO17_OUT for 50Hz inverted clock
 
-    if (board_profile_.equals("E32") || board_profile_.equals("LAN8720")) {
-        // BBQKees Gateway E32 (LAN8720)
+    if (phy_type_ == PHY_type::PHY_TYPE_LAN8720) {
         phy_addr   = 1;
         power      = 16;
         mdc        = 23;
         mdio       = 18;
         type       = ETH_PHY_LAN8720;
         clock_mode = ETH_CLOCK_GPIO0_IN;
-    } else if (board_profile_.equals("OLIMEX")) {
-        // Olimex ESP32-EVB (LAN8720)
-        phy_addr   = 0;
-        power      = -1;
-        mdc        = 23;
-        mdio       = 18;
-        type       = ETH_PHY_LAN8720;
-        clock_mode = ETH_CLOCK_GPIO0_IN;
-    } else if (board_profile_.equals("TLK110")) {
-        // Ethernet (TLK110)
+    } else if (phy_type_ == PHY_type::PHY_TYPE_TLK110) {
         phy_addr   = 31;
         power      = -1;
         mdc        = 23;
@@ -631,11 +622,20 @@ void System::network_init(bool refresh) {
         type       = ETH_PHY_TLK110;
         clock_mode = ETH_CLOCK_GPIO0_IN;
     } else {
-        return; // invalid combi
+        return; // no valid profile
     }
 
-    // bool have_ethernet = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
-    (void)ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
+    // special case for Olimex ESP32-EVB (LAN8720) (different power and phy_addr)
+    if (board_profile_.equals("OLIMEX")) {
+        phy_addr   = 0;
+        power      = -1;
+        mdc        = 23;
+        mdio       = 18;
+        type       = ETH_PHY_LAN8720;
+        clock_mode = ETH_CLOCK_GPIO0_IN;
+    }
+
+    ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
 }
 
 // check health of system, done every few seconds
@@ -672,17 +672,15 @@ void System::system_check() {
 }
 
 // commands - takes static function pointers
-// these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
-// no individual subscribe for pin command because id is needed
 void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM,
                  F_(pin),
                  System::command_pin,
-                 F("set GPIO"),
+                 F("sets a GPIO on/off"),
                  CommandFlag::MQTT_SUB_FLAG_NOSUB | CommandFlag::ADMIN_ONLY); // dont create a MQTT topic for this
 
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, F("send a telegram"), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, F("refresh all EMS values"), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, F("sends a telegram"), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, F("refreshes all EMS values"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, F("restarts EMS-ESP"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, F("watch incoming telegrams"));
 
@@ -691,12 +689,12 @@ void System::commands_init() {
     }
 
     // these commands will return data in JSON format
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, F("system status"));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("list system settings"));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("list system commands"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, F("show system status"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("shows system settings"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("shows system commands"));
 
 #if defined(EMSESP_DEBUG)
-    Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test, F("run tests"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test, F("runs a specific test"));
 #endif
 
     // MQTT subscribe "ems-esp/system/#"
@@ -929,30 +927,37 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 #endif
 
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        node                         = output.createNestedObject("Settings");
-        node["tx_mode"]              = settings.tx_mode;
-        node["ems_bus_id"]           = settings.ems_bus_id;
+        node = output.createNestedObject("Settings");
+
+        node["board_profile"] = settings.board_profile;
+        node["tx_mode"]       = settings.tx_mode;
+        node["ems_bus_id"]    = settings.ems_bus_id;
+
         node["syslog_enabled"]       = settings.syslog_enabled;
         node["syslog_level"]         = settings.syslog_level;
         node["syslog_mark_interval"] = settings.syslog_mark_interval;
         node["syslog_host"]          = settings.syslog_host;
         node["syslog_port"]          = settings.syslog_port;
-        node["master_thermostat"]    = settings.master_thermostat;
-        node["shower_timer"]         = settings.shower_timer;
-        node["shower_alert"]         = settings.shower_alert;
-        node["rx_gpio"]              = settings.rx_gpio;
-        node["tx_gpio"]              = settings.tx_gpio;
-        node["dallas_gpio"]          = settings.dallas_gpio;
-        node["dallas_parasite"]      = settings.dallas_parasite;
-        node["led_gpio"]             = settings.led_gpio;
-        node["hide_led"]             = settings.hide_led;
-        node["notoken_api"]          = settings.notoken_api;
-        node["dallas_format"]        = settings.dallas_format;
-        node["bool_format"]          = settings.bool_format;
-        node["enum_format"]          = settings.enum_format;
-        node["analog_enabled"]       = settings.analog_enabled;
-        node["pbutton_gpio"]         = settings.pbutton_gpio;
-        node["board_profile"]        = settings.board_profile;
+
+        node["master_thermostat"] = settings.master_thermostat;
+
+        node["shower_timer"] = settings.shower_timer;
+        node["shower_alert"] = settings.shower_alert;
+
+        node["rx_gpio"]      = settings.rx_gpio;
+        node["tx_gpio"]      = settings.tx_gpio;
+        node["dallas_gpio"]  = settings.dallas_gpio;
+        node["pbutton_gpio"] = settings.pbutton_gpio;
+        node["led_gpio"]     = settings.led_gpio;
+        node["phy_type"]     = settings.phy_type;
+
+        node["hide_led"]        = settings.hide_led;
+        node["notoken_api"]     = settings.notoken_api;
+        node["dallas_parasite"] = settings.dallas_parasite;
+        node["dallas_format"]   = settings.dallas_format;
+        node["bool_format"]     = settings.bool_format;
+        node["enum_format"]     = settings.enum_format;
+        node["analog_enabled"]  = settings.analog_enabled;
     });
 
     return true;
@@ -1079,27 +1084,28 @@ bool System::command_test(const char * value, const int8_t id) {
 #endif
 
 // takes a board profile and populates a data array with GPIO configurations
-// data = led, dallas, rx, tx, button
+// data = led, dallas, rx, tx, button, phy_type
 // returns false if profile is not found
 bool System::load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile) {
     if (board_profile == "S32") {
-        data = {2, 18, 23, 5, 0}; // BBQKees Gateway S32
+        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE}; // BBQKees Gateway S32
     } else if (board_profile == "E32") {
-        data = {2, 4, 5, 17, 33}; // BBQKees Gateway E32
+        data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720}; // BBQKees Gateway E32
     } else if (board_profile == "MH-ET") {
-        data = {2, 18, 23, 5, 0}; // MH-ET Live D1 Mini
+        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE}; // MH-ET Live D1 Mini
     } else if (board_profile == "NODEMCU") {
-        data = {2, 18, 23, 5, 0}; // NodeMCU 32S
+        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE}; // NodeMCU 32S
     } else if (board_profile == "LOLIN") {
-        data = {2, 18, 17, 16, 0}; // Lolin D32
+        data = {2, 18, 17, 16, 0, PHY_type::PHY_TYPE_NONE}; // Lolin D32
     } else if (board_profile == "OLIMEX") {
-        data = {0, 0, 36, 4, 34}; // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
-    } else if (board_profile == "TLK110") {
-        data = {2, 4, 5, 17, 33}; // Generic Ethernet (TLK110)
-    } else if (board_profile == "LAN8720") {
-        data = {2, 4, 5, 17, 33}; // Generic Ethernet (LAN8720)
+        data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720}; // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
     } else {
-        data = {EMSESP_DEFAULT_LED_GPIO, EMSESP_DEFAULT_DALLAS_GPIO, EMSESP_DEFAULT_RX_GPIO, EMSESP_DEFAULT_TX_GPIO, EMSESP_DEFAULT_PBUTTON_GPIO};
+        data = {EMSESP_DEFAULT_LED_GPIO,
+                EMSESP_DEFAULT_DALLAS_GPIO,
+                EMSESP_DEFAULT_RX_GPIO,
+                EMSESP_DEFAULT_TX_GPIO,
+                EMSESP_DEFAULT_PBUTTON_GPIO,
+                EMSESP_DEFAULT_PHY_TYPE};
         return (board_profile == "CUSTOM");
     }
 

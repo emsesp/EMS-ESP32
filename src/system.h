@@ -42,6 +42,8 @@ using uuid::console::Shell;
 
 namespace emsesp {
 
+enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110 };
+
 class System {
   public:
     void start(uint32_t heap_start);
@@ -181,6 +183,7 @@ class System {
     bool        low_clock_;
     String      board_profile_;
     uint8_t     pbutton_gpio_;
+    uint8_t     phy_type_;
     int8_t      syslog_level_;
     uint32_t    syslog_mark_interval_;
     String      syslog_host_;

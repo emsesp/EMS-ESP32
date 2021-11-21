@@ -21,6 +21,7 @@
 - Support for non-standard Thermostats like Tado [#174](https://github.com/emsesp/EMS-ESP32/issues/174)
 - Include MQTT connection status in 'api/system/info'
 - Include Network status in 'api/system/info' and also the MQTT topic `info` [#202](https://github.com/emsesp/EMS-ESP32/issues/202)
+- Added Ethernet PHY module as an option in the Board Profile [#210](https://github.com/emsesp/EMS-ESP32/issues/210)
 
 ## Fixed
 
@@ -57,4 +58,3 @@
 - `txread` renamed to `txreads` and `txwrite` renamed to `txwrites` in MQTT heartbeat payload
 - 'dallas sensors' in api/system/info moved to the "System" section. Renamed "uptime (seconds)" and "reset reason"
 - `status` in the MQTT heartbeat renamed to `bus_status`
-
