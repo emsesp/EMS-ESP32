@@ -48,6 +48,7 @@
 - Removed settings for MQTT subscribe format [#173](https://github.com/emsesp/EMS-ESP32/issues/173)
 - Improve Nefit Moduline 200 functionality [#183](https://github.com/emsesp/EMS-ESP32/issues/183)
 - `status` in the MQTT heartbeat renamed to `bus_status`
+- Layout changes in the WebUI, showing stripped table rows in Dashboard
 
 ## **BREAKING CHANGES**
 

@@ -353,6 +353,7 @@ const emsesp_data = {
     { n: 1, i: '28-233D-9497-0C03', t: 25.7, o: 1.2 },
     { n: 2, i: '28-243D-7437-1E3A', t: 26.1, o: 0 },
   ],
+  analog: 12,
 }
 
 const emsesp_status = {
@@ -364,7 +365,7 @@ const emsesp_status = {
 }
 
 const emsesp_devicedata_1 = {
-  name: 'Thermostat: RC20/Moduline 300',
+  type: 'Thermostat',
   data: [
     {
       v: '(0)',
@@ -400,7 +401,7 @@ const emsesp_devicedata_1 = {
 }
 
 const emsesp_devicedata_2 = {
-  name: 'Boiler: Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i',
+  type: 'Boiler',
   data: [
     { v: 'off', u: 0, n: 'heating active' },
     { v: 'off', u: 0, n: 'warm water active' },
@@ -525,7 +526,7 @@ const emsesp_devicedata_2 = {
 }
 
 const emsesp_devicedata_3 = {
-  name: 'Controller: BC1',
+  type: 'Controller',
   data: [],
 }
 
