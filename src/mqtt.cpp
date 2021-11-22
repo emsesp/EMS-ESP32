@@ -580,7 +580,7 @@ void Mqtt::ha_status() {
     doc["stat_t"]  = FJSON("~/heartbeat");
     doc["name"]    = FJSON("EMS-ESP status");
     doc["ic"]      = F_(icondevice);
-    doc["val_tpl"] = FJSON("{{value_json['status']}}");
+    doc["val_tpl"] = FJSON("{{value_json['bus_status']}}");
 
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = F_(EMSESP); // "EMS-ESP"
