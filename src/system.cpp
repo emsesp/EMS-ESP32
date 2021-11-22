@@ -1018,14 +1018,14 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 
     switch (EMSESP::bus_status()) {
     case EMSESP::BUS_STATUS_OFFLINE:
-        node["bus"] = (F("disconnected"));
+        node["bus status"] = (F("disconnected"));
         break;
     case EMSESP::BUS_STATUS_TX_ERRORS:
-        node["bus"] = (F("connected, instable tx"));
+        node["bus status"] = (F("connected, instable tx"));
         break;
     case EMSESP::BUS_STATUS_CONNECTED:
     default:
-        node["bus"] = (F("connected"));
+        node["bus status"] = (F("connected"));
         break;
     }
 
