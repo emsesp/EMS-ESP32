@@ -11,6 +11,7 @@ export interface EMSESPSettings {
   shower_alert: boolean;
   rx_gpio: number;
   tx_gpio: number;
+  phy_type: number;
   dallas_gpio: number;
   dallas_parasite: boolean;
   led_gpio: number;
@@ -72,7 +73,7 @@ export interface DeviceValue {
 }
 
 export interface EMSESPDeviceData {
-  name: string;
+  type: string;
   data: DeviceValue[];
 }
 

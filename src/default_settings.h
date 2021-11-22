@@ -92,7 +92,7 @@
 #define EMSESP_DEFAULT_BOARD_PROFILE "S32" // Gateway S32
 #endif
 
-// Default GPIO PIN definitions - based on Wemos/Nodemcu
+// Default GPIO PIN definitions
 
 #ifndef EMSESP_DEFAULT_RX_GPIO
 #define EMSESP_DEFAULT_RX_GPIO 23 // D7
@@ -112,6 +112,10 @@
 
 #ifndef EMSESP_DEFAULT_PBUTTON_GPIO
 #define EMSESP_DEFAULT_PBUTTON_GPIO 0
+#endif
+
+#ifndef EMSESP_DEFAULT_PHY_TYPE
+#define EMSESP_DEFAULT_PHY_TYPE 0 // No Ethernet, just Wifi
 #endif
 
 // MQTT

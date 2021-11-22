@@ -59,19 +59,32 @@ export const DEVICE_DATA_ENDPOINT = ENDPOINT_ROOT + 'deviceData';
 export const WRITE_VALUE_ENDPOINT = ENDPOINT_ROOT + 'writeValue';
 export const WRITE_SENSOR_ENDPOINT = ENDPOINT_ROOT + 'writeSensor';
 
-const StyledTableCell = withStyles((theme: Theme) =>
+const StyledTableRow = withStyles((theme: Theme) =>
   createStyles({
-    head: {
-      backgroundColor: theme.palette.common.black,
-      color: theme.palette.common.white
+    root: {
+      '&:nth-child(even)': {
+        backgroundColor: '#4e4e4e'
+      },
+      '&:hover': {
+        backgroundColor: theme.palette.info.light
+      }
     },
-    body: {
-      fontSize: 14
+
+    selected: {
+      backgroundColor: theme.palette.common.white
     }
   })
-)(TableCell);
+)(TableRow);
 
-const CustomTooltip = withStyles((theme: Theme) => ({
+const StyledTableRowHeader = withStyles((theme: Theme) =>
+  createStyles({
+    head: {
+      backgroundColor: theme.palette.common.black
+    }
+  })
+)(TableRow);
+
+const StyledTooltip = withStyles((theme: Theme) => ({
   tooltip: {
     backgroundColor: theme.palette.secondary.main,
     color: 'white',
@@ -304,7 +317,7 @@ class EMSESPDataForm extends Component<
     return (this.state.deviceData?.data || []).length === 0;
   };
 
-  renderDeviceItems() {
+  renderDevices() {
     const { width, data } = this.props;
     return (
       <TableContainer>
@@ -325,7 +338,7 @@ class EMSESPDataForm extends Component<
                   onClick={() => this.handleRowClick(device.i)}
                 >
                   <TableCell>
-                    <CustomTooltip
+                    <StyledTooltip
                       title={
                         'DeviceID:0x' +
                         ('00' + device.d.toString(16).toUpperCase()).slice(-2) +
@@ -343,7 +356,7 @@ class EMSESPDataForm extends Component<
                       >
                         {device.t}
                       </Button>
-                    </CustomTooltip>
+                    </StyledTooltip>
                   </TableCell>
                   <TableCell align="right">
                     {device.b + ' ' + device.n}{' '}
@@ -371,7 +384,7 @@ class EMSESPDataForm extends Component<
     );
   }
 
-  renderSensorItems() {
+  renderSensorData() {
     const { data } = this.props;
     const me = this.props.authenticatedContext.me;
     return (
@@ -383,26 +396,22 @@ class EMSESPDataForm extends Component<
         {!this.noSensors() && (
           <Table size="small" padding="normal">
             <TableHead>
-              <TableRow>
-                <StyledTableCell
-                  padding="checkbox"
-                  style={{ width: 18 }}
-                ></StyledTableCell>
-                <StyledTableCell>Sensor #</StyledTableCell>
-                <StyledTableCell align="left">ID / Name</StyledTableCell>
-                <StyledTableCell align="right">Temperature</StyledTableCell>
-              </TableRow>
+              <StyledTableRowHeader>
+                <TableCell padding="checkbox" style={{ width: 18 }}></TableCell>
+                <TableCell>Dallas Sensor #</TableCell>
+                <TableCell align="left">ID / Name</TableCell>
+                <TableCell align="right">Temperature</TableCell>
+              </StyledTableRowHeader>
             </TableHead>
             <TableBody>
               {data.sensors.map((sensorData) => (
-                <TableRow
+                <StyledTableRow
                   key={sensorData.n}
-                  hover
                   onClick={() => this.sendSensor(sensorData)}
                 >
-                  <TableCell padding="checkbox" style={{ width: 18 }}>
+                  <TableCell padding="checkbox">
                     {me.admin && (
-                      <CustomTooltip title="edit" placement="left-end">
+                      <StyledTooltip title="edit" placement="left-end">
                         <IconButton
                           edge="start"
                           size="small"
@@ -411,7 +420,7 @@ class EMSESPDataForm extends Component<
                         >
                           <EditIcon color="primary" fontSize="small" />
                         </IconButton>
-                      </CustomTooltip>
+                      </StyledTooltip>
                     )}
                   </TableCell>
                   <TableCell component="th" scope="row">
@@ -421,7 +430,7 @@ class EMSESPDataForm extends Component<
                   <TableCell align="right">
                     {formatValue(sensorData.t, DeviceValueUOM.DEGREES)}
                   </TableCell>
-                </TableRow>
+                </StyledTableRow>
               ))}
             </TableBody>
           </Table>
@@ -437,20 +446,23 @@ class EMSESPDataForm extends Component<
     );
   }
 
-  renderAnalog() {
+  renderAnalogData() {
     const { data } = this.props;
     return (
       <TableContainer>
+        <p></p>
         {data.analog > 0 && (
           <Table size="small" padding="normal">
             <TableHead>
-              <TableRow>
-                <StyledTableCell>Sensortype</StyledTableCell>
-                <StyledTableCell align="right">Value</StyledTableCell>
-              </TableRow>
+              <StyledTableRowHeader>
+                <TableCell padding="normal" style={{ width: 18 }}></TableCell>
+                <TableCell>Sensor Type</TableCell>
+                <TableCell align="right">Value</TableCell>
+              </StyledTableRowHeader>
             </TableHead>
             <TableBody>
               <TableRow>
+                <TableCell padding="normal">&nbsp;&nbsp;</TableCell>
                 <TableCell component="th" scope="row">
                   Analog Input
                 </TableCell>
@@ -575,7 +587,7 @@ class EMSESPDataForm extends Component<
         <p></p>
         <Box bgcolor="info.main" p={1} mt={1} mb={1}>
           <Typography variant="body1" color="initial">
-            {deviceData.name}
+            {deviceData.type}&nbsp;Data
           </Typography>
         </Box>
         {!this.noDeviceData() && (
@@ -584,17 +596,15 @@ class EMSESPDataForm extends Component<
               size="small"
               padding={isWidthDown('xs', width!) ? 'none' : 'normal'}
             >
-              <TableHead></TableHead>
               <TableBody>
                 {deviceData.data.map((item, i) => (
-                  <TableRow
-                    hover
+                  <StyledTableRow
                     key={i}
                     onClick={() => this.sendCommand(item)}
                   >
                     <TableCell padding="checkbox" style={{ width: 18 }}>
                       {item.c && this.props.authenticatedContext.me.admin && (
-                        <CustomTooltip
+                        <StyledTooltip
                           title="change value"
                           placement="left-end"
                         >
@@ -606,7 +616,7 @@ class EMSESPDataForm extends Component<
                           >
                             <EditIcon color="primary" fontSize="small" />
                           </IconButton>
-                        </CustomTooltip>
+                        </StyledTooltip>
                       )}
                     </TableCell>
                     <TableCell padding="none" component="th" scope="row">
@@ -615,7 +625,7 @@ class EMSESPDataForm extends Component<
                     <TableCell padding="none" align="right">
                       {formatValue(item.v, item.u)}
                     </TableCell>
-                  </TableRow>
+                  </StyledTableRow>
                 ))}
               </TableBody>
             </Table>
@@ -637,10 +647,10 @@ class EMSESPDataForm extends Component<
     return (
       <Fragment>
         <br></br>
-        {this.renderDeviceItems()}
+        {this.renderDevices()}
         {this.renderDeviceData()}
-        {this.renderSensorItems()}
-        {this.renderAnalog()}
+        {this.renderSensorData()}
+        {this.renderAnalogData()}
         <br></br>
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} padding={1}>

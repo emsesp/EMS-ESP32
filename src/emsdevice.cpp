@@ -616,7 +616,7 @@ const std::string EMSdevice::get_value_uom(const char * key) {
 // except additional data is stored in the JSON document needed for the Web UI like the UOM and command
 // v = value, u=uom, n=name, c=cmd
 void EMSdevice::generate_values_json_web(JsonObject & output) {
-    output["name"] = to_string_short();
+    output["type"] = device_type_name();
     JsonArray data = output.createNestedArray("data");
 
     for (const auto & dv : devicevalues_) {
