@@ -131,7 +131,7 @@ class Boiler : public EMSdevice {
     uint32_t burnWorkMin_;       // Total burner operating time
     uint32_t heatWorkMin_;       // Total heat operating time
     uint32_t UBAuptime_;         // Total UBA working hours
-    char     lastCode_[60];      // last error code
+    char     lastCode_[30];      // last error code
     char     serviceCode_[4];    // 3 character status/service code
     uint16_t serviceCodeNumber_; // error/service code
 
