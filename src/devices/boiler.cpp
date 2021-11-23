@@ -820,14 +820,40 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
     }
     char     code[4];
     uint16_t codeNo;
-    uint32_t timecode;
+    char     start_time[17];
+    char     end_time[17];
+
+    if (!(telegram->message_data[10] & 0x80)) { // no valid start date means no error?
+        return;
+    }
+
     code[0] = telegram->message_data[5];
     code[1] = telegram->message_data[6];
     code[2] = telegram->message_data[7];
     code[3] = 0;
     telegram->read_value(codeNo, 8);
-    telegram->read_value(timecode, 11, 3);
-    snprintf(lastCode_, sizeof(lastCode_), "%s(%d) uptime:%d min", code, codeNo, timecode);
+
+    uint16_t start_year  = (telegram->message_data[10] & 0x7F) + 2000;
+    uint8_t  start_month = telegram->message_data[11];
+    uint8_t  start_day   = telegram->message_data[13];
+    uint8_t  start_hour  = telegram->message_data[12];
+    uint8_t  start_min   = telegram->message_data[14] +1;   //to be consistent with controller's indication
+    snprintf(start_time, sizeof(start_time), "%d.%02d.%02d %02d:%02d", start_year, start_month, start_day, start_hour, start_min);
+
+    uint16_t end_year  = (telegram->message_data[15] & 0x7F) + 2000;
+    uint8_t  end_month = telegram->message_data[16];
+    uint8_t  end_day   = telegram->message_data[18];
+    uint8_t  end_hour  = telegram->message_data[17];
+    uint8_t  end_min   = telegram->message_data[19] +1;   //to be consistent with controller's indication
+
+    if (telegram->message_data[15] & 0x80) { //valid end date
+        snprintf(end_time, sizeof(end_time), "%d.%02d.%02d %02d:%02d", end_year, end_month, end_day, end_hour, end_min); 
+    } 
+    else { // no valid end date means error still persists
+        snprintf(end_time, sizeof(end_time), "%s", "none");
+    }
+
+    snprintf(lastCode_, sizeof(lastCode_), "%s/%d start: %s, end: %s", code, codeNo, start_time, end_time);
 }
 
 
