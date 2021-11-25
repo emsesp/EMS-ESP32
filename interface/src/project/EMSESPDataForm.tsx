@@ -412,12 +412,7 @@ class EMSESPDataForm extends Component<
                   <TableCell padding="checkbox">
                     {me.admin && (
                       <StyledTooltip title="edit" placement="left-end">
-                        <IconButton
-                          edge="start"
-                          size="small"
-                          aria-label="Edit"
-                          onClick={() => this.sendSensor(sensorData)}
-                        >
+                        <IconButton edge="start" size="small" aria-label="Edit">
                           <EditIcon color="primary" fontSize="small" />
                         </IconButton>
                       </StyledTooltip>
@@ -612,7 +607,6 @@ class EMSESPDataForm extends Component<
                             edge="start"
                             size="small"
                             aria-label="Edit"
-                            onClick={() => this.sendCommand(item)}
                           >
                             <EditIcon color="primary" fontSize="small" />
                           </IconButton>
