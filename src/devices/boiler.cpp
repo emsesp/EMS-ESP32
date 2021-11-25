@@ -815,12 +815,13 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
 
 // 0xC2
 void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) {
-    if (telegram->offset > 0 || telegram->message_length < 14) {
-        return;
-    }
+    // not sure why this test is in , so removing
+    // if (telegram->offset > 0 || telegram->message_length < 14) {
+    //     return;
+    // }
     char     code[4];
     uint16_t codeNo;
-        char     start_time[17];
+    char     start_time[17];
     char     end_time[17];
 
     if (!(telegram->message_data[10] & 0x80)) { // no valid start date means no error?
@@ -846,10 +847,9 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
     uint8_t  end_hour  = telegram->message_data[17];
     uint8_t  end_min   = telegram->message_data[19];
 
-    if (telegram->message_data[15] & 0x80) { //valid end date
-        snprintf(end_time, sizeof(end_time), "%d.%02d.%02d %02d:%02d", end_year, end_month, end_day, end_hour, end_min); 
-    } 
-    else { // no valid end date means error still persists
+    if (telegram->message_data[15] & 0x80) { // valid end date
+        snprintf(end_time, sizeof(end_time), "%d.%02d.%02d %02d:%02d", end_year, end_month, end_day, end_hour, end_min);
+    } else { // no valid end date means error still persists
         snprintf(end_time, sizeof(end_time), "%s", "none");
     }
 
