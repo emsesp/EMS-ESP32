@@ -33,6 +33,7 @@
 - Help fix issues with WebUI unable to fully load UI over Ethernet [#177](https://github.com/emsesp/EMS-ESP32/issues/177)
 - Shower alert never reset after limit reached when enabled [(PR #185)]
 - Remove HA entity entries when a device value goes dormant [#196](https://github.com/emsesp/EMS-ESP32/issues/196)
+- deciphering last error code dates on 0xC2 telegram [#204](https://github.com/emsesp/EMS-ESP32/issues/204)
 
 ## Changed
 
@@ -49,6 +50,7 @@
 - Improve Nefit Moduline 200 functionality [#183](https://github.com/emsesp/EMS-ESP32/issues/183)
 - `status` in the MQTT heartbeat renamed to `bus_status`
 - Layout changes in the WebUI, showing stripped table rows in Dashboard
+- Alternative font for log window [#219](https://github.com/emsesp/EMS-ESP32/issues/219)
 
 ## **BREAKING CHANGES**
 

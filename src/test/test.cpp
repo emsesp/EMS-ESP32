@@ -487,6 +487,24 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("call system publish");
     }
 
+    if (command == "lastcode") {
+        shell.printfln(F("Testing lastcode"));
+
+        Mqtt::ha_enabled(false);
+        Mqtt::nested_format(1);
+        Mqtt::send_response(false);
+
+        run_test("boiler");
+        // run_test("thermostat");
+
+        // 0xC2
+        //  [emsesp] Boiler(0x08) -> Me(0x0B), UBAErrorMessage3(0xC2), data: 08 AC 00 10 31 48 30 31 15 80 95 0B 0E 10 38 00 7F FF FF FF 08 AC 00 10 09 41 30
+        uart_telegram(
+            {0x08, 0x0B, 0xC2, 0, 0x08, 0xAC, 00, 0x10, 0x31, 0x48, 0x30, 0x31, 0x15, 0x80, 0x95, 0x0B, 0x0E, 0x10, 0x38, 00, 0x7F, 0xFF, 0xFF, 0xFF});
+
+        // shell.invoke_command("show");
+    }
+
     if (command == "dv2") {
         shell.printfln(F("Testing device value lost"));
 
