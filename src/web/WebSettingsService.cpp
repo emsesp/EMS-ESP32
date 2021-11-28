@@ -50,6 +50,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["shower_alert"]         = settings.shower_alert;
     root["rx_gpio"]              = settings.rx_gpio;
     root["tx_gpio"]              = settings.tx_gpio;
+    root["phy_type"]             = settings.phy_type;
     root["dallas_gpio"]          = settings.dallas_gpio;
     root["dallas_parasite"]      = settings.dallas_parasite;
     root["led_gpio"]             = settings.led_gpio;
@@ -67,7 +68,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["weblog_buffer"]        = settings.weblog_buffer;
     root["weblog_compact"]       = settings.weblog_compact;
 
-    for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+    for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
         char buf[20];
         snprintf(buf, sizeof(buf), "sensor_id%d", i);
         root[buf] = settings.sensor[i].id;
@@ -81,7 +82,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
 // call on initialization and also when settings are updated via web or console
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
     // load default GPIO configuration based on board profile
-    std::vector<uint8_t> data; // led, dallas, rx, tx, button
+    std::vector<uint8_t> data; // led, dallas, rx, tx, button, phy_type
 
     String old_board_profile = settings.board_profile;
     settings.board_profile   = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
@@ -94,6 +95,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     uint8_t default_rx_gpio      = data[2];
     uint8_t default_tx_gpio      = data[3];
     uint8_t default_pbutton_gpio = data[4];
+    uint8_t default_phy_type     = data[5];
 
     if (old_board_profile != settings.board_profile) {
         EMSESP::logger().info(F("EMS-ESP version %s"), EMSESP_APP_VERSION);
@@ -145,9 +147,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.syslog_port = root["syslog_port"] | EMSESP_DEFAULT_SYSLOG_PORT;
     check_flag(prev, settings.syslog_port, ChangeFlags::SYSLOG);
 
-    settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
-    EMSESP::trace_raw(settings.trace_raw);
-
     // adc
     prev                    = settings.analog_enabled;
     settings.analog_enabled = root["analog_enabled"] | EMSESP_DEFAULT_ANALOG_ENABLED;
@@ -182,13 +181,19 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.hide_led = root["hide_led"] | EMSESP_DEFAULT_HIDE_LED;
     check_flag(prev, settings.hide_led, ChangeFlags::LED);
 
+    //
+    // next ones are settings that don't need any follow-up actions
+    //
+
     // these need reboots to be applied
     settings.ems_bus_id        = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
     settings.master_thermostat = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
     settings.low_clock         = root["low_clock"] | false;
-    ;
+    settings.phy_type          = root["phy_type"] | default_phy_type; // use whatever came from the board profile
 
-    // doesn't need any follow-up actions
+    settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
+    EMSESP::trace_raw(settings.trace_raw);
+
     settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
     settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
 
@@ -205,7 +210,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.weblog_buffer  = root["weblog_buffer"] | EMSESP_DEFAULT_WEBLOG_BUFFER;
     settings.weblog_compact = root["weblog_compact"] | EMSESP_DEFAULT_WEBLOG_COMPACT;
 
-    for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+    for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
         char buf[20];
         snprintf(buf, sizeof(buf), "sensor_id%d", i);
         settings.sensor[i].id = root[buf] | EMSESP_DEFAULT_SENSOR_NAME;
@@ -265,18 +270,18 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request, JsonVari
     if (json.is<JsonObject>()) {
         AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM);
         JsonObject          root     = response->getRoot();
-        if (json.containsKey("code")) {
-            String               board_profile = json["code"];
-            std::vector<uint8_t> data; // led, dallas, rx, tx, button
+        if (json.containsKey("board_profile")) {
+            String               board_profile = json["board_profile"];
+            std::vector<uint8_t> data; // led, dallas, rx, tx, button, phy_type
             // check for valid board
             if (System::load_board_profile(data, board_profile.c_str())) {
-                root["led_gpio"]     = data[0];
-                root["dallas_gpio"]  = data[1];
-                root["rx_gpio"]      = data[2];
-                root["tx_gpio"]      = data[3];
-                root["pbutton_gpio"] = data[4];
+                root["led_gpio"]      = data[0];
+                root["dallas_gpio"]   = data[1];
+                root["rx_gpio"]       = data[2];
+                root["tx_gpio"]       = data[3];
+                root["pbutton_gpio"]  = data[4];
+                root["phy_type"]      = data[5];
             } else {
-                delete response;
                 AsyncWebServerResponse * response = request->beginResponse(200);
                 request->send(response);
                 return;

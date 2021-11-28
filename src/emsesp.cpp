@@ -77,6 +77,7 @@ bool     EMSESP::trace_raw_                = false;
 uint8_t  EMSESP::bool_format_              = 1;
 uint8_t  EMSESP::enum_format_              = 1;
 uint16_t EMSESP::wait_validate_            = 0;
+bool     EMSESP::wait_km_                  = true;
 
 // for a specific EMS device go and request data values
 // or if device_id is 0 it will fetch from all our known and active devices
@@ -91,6 +92,18 @@ void EMSESP::fetch_device_values(const uint8_t device_id) {
             }
         }
     }
+}
+
+// see if the device ID exists
+bool EMSESP::valid_device(const uint8_t device_id) {
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice) {
+            if (emsdevice->is_device_id(device_id)) {
+                return true;
+            }
+        }
+    }
+    return false; // can't find it
 }
 
 // for a specific EMS device type go and request data values
@@ -252,6 +265,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
         shell.printfln(F("EMS Bus info:"));
         EMSESP::webSettingsService.read([&](WebSettings & settings) { shell.printfln(F("  Tx mode: %d"), settings.tx_mode); });
         shell.printfln(F("  Bus protocol: %s"), EMSbus::is_ht3() ? F("HT3") : F("Buderus"));
+        shell.printfln(F("  #recognized EMS devices: %d"), (EMSESP::emsdevices).size());
         shell.printfln(F("  #telegrams received: %d"), rxservice_.telegram_count());
         shell.printfln(F("  #read requests sent: %d"), txservice_.telegram_read_count());
         shell.printfln(F("  #write requests sent: %d"), txservice_.telegram_write_count());
@@ -424,7 +438,6 @@ void EMSESP::publish_all_loop() {
             Mqtt::ha_status();
         }
         system_.send_heartbeat();
-        shower_.send_mqtt_stat(false, true);
         break;
     default:
         // all finished
@@ -445,7 +458,7 @@ void EMSESP::reset_mqtt_ha() {
 }
 
 // create json doc for the devices values and add to MQTT publish queue
-// generate_values_json is called without verbose mode (defaults to false)
+// generate_values_json is called to build the device value (dv) object array
 void EMSESP::publish_device_values(uint8_t device_type) {
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN); // use max size
     JsonObject          json         = doc.to<JsonObject>();
@@ -456,19 +469,14 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     // group by device type
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
-            // if we're using HA, done is checked for each sensor in devices
-            if (Mqtt::ha_enabled()) {
-                emsdevice->publish_mqtt_ha_sensor(); // create the configs for each value as a sensor
-            }
-
             // if its a boiler, generate json for each group and publish it directly. not nested
             if (device_type == DeviceType::BOILER) {
                 if (emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA, false, EMSdevice::OUTPUT_TARGET::MQTT)) {
                     Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_BOILER_DATA), json);
                 }
                 doc.clear();
-                if (emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA_WW, false, EMSdevice::OUTPUT_TARGET::MQTT)) {
-                    Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_BOILER_DATA_WW), json);
+                if (emsdevice->generate_values_json(json, DeviceValueTAG::TAG_DEVICE_DATA_WW, false, EMSdevice::OUTPUT_TARGET::MQTT)) {
+                    Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_DEVICE_DATA_WW), json);
                 }
                 need_publish = false;
             }
@@ -515,6 +523,11 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 need_publish |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::MQTT); // nested
             }
         }
+
+        // if we're using HA, done is checked for each sensor in devices
+        if (Mqtt::ha_enabled()) {
+            emsdevice->publish_mqtt_ha_entity_config(); // create the configs for each value as a sensor
+        }
     }
 
     // publish it under a single topic, only if we have data to publish
@@ -541,12 +554,8 @@ void EMSESP::publish_sensor_values(const bool time, const bool force) {
     }
 }
 
-// MQTT publish a telegram as raw data
+// MQTT publish a telegram as raw data to the topic 'response'
 void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
-    if (!Mqtt::connected()) {
-        return;
-    }
-
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
 
     char buffer[100];
@@ -576,6 +585,7 @@ bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const in
         }
     }
 
+    // specific for the dallassensor
     if (devicetype == DeviceType::DALLASSENSOR) {
         uint8_t i = 1;
         for (const auto & sensor : EMSESP::sensor_devices()) {
@@ -721,9 +731,7 @@ void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
                     uint8_t device_id = ((data_byte + 1) * 8) + bit;
                     // if we haven't already detected this device, request it's version details, unless its us (EMS-ESP)
                     // when the version info is received, it will automagically add the device
-                    // always skip modem device 0x0D, it does not reply to version request
-                    // see https://github.com/emsesp/EMS-ESP/issues/460#issuecomment-709553012
-                    if ((device_id != EMSbus::ems_bus_id()) && !(EMSESP::device_exists(device_id)) && (device_id != 0x0D) && (device_id != 0x0C)) {
+                    if ((device_id != EMSbus::ems_bus_id()) && !(EMSESP::device_exists(device_id))) {
                         LOG_DEBUG(F("New EMS device detected with ID 0x%02X. Requesting version information."), device_id);
                         send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
                     }
@@ -739,6 +747,11 @@ void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
 void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
     // check for valid telegram, just in case
     if (telegram->message_length < 3) {
+        // for empty telegram add device with empty product, version and brand
+        if (!telegram->message_length) {
+            std::string version = "00.00";
+            (void)add_device(telegram->src, 0, version, 0);
+        }
         return;
     }
 
@@ -781,7 +794,10 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // if watching or reading...
     if ((telegram->type_id == read_id_) && (telegram->dest == txservice_.ems_bus_id())) {
         LOG_NOTICE(F("%s"), pretty_telegram(telegram).c_str());
-        publish_response(telegram);
+        if (Mqtt::send_response()) {
+            publish_response(telegram);
+        }
+
         if (!read_next_) {
             read_id_ = WATCH_ID_NONE;
         }
@@ -802,16 +818,14 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         return false;
     }
 
-    // remember if we first get scan results from UBADevices
-    static bool first_scan_done_ = false;
     // check for common types, like the Version(0x02)
     if (telegram->type_id == EMSdevice::EMS_TYPE_VERSION) {
         process_version(telegram);
         return true;
     } else if (telegram->type_id == EMSdevice::EMS_TYPE_UBADevices) {
-        process_UBADevices(telegram);
-        if (telegram->dest == EMSbus::ems_bus_id()) {
-            first_scan_done_ = true;
+        // do not flood tx-queue with version requests while waiting for km200
+        if (!wait_km_) {
+            process_UBADevices(telegram);
         }
         return true;
     }
@@ -851,8 +865,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         if (watch() == WATCH_UNKNOWN) {
             LOG_NOTICE(F("%s"), pretty_telegram(telegram).c_str());
         }
-        if (first_scan_done_ && !knowndevice && (telegram->src != EMSbus::ems_bus_id()) && (telegram->src != 0x0B) && (telegram->src != 0x0C)
-            && (telegram->src != 0x0D)) {
+        if (!wait_km_ && !knowndevice && (telegram->src != EMSbus::ems_bus_id()) && (telegram->message_length > 0)) {
             send_read_request(EMSdevice::EMS_TYPE_VERSION, telegram->src);
         }
     }
@@ -936,7 +949,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
                 // find the name and flags in our database
                 for (const auto & device : device_library_) {
                     if (device.product_id == product_id && device.device_type == emsdevice->device_type()) {
-                        emsdevice->name(std::move(uuid::read_flash_string(device.name)));
+                        emsdevice->name(std::move(read_flash_string(device.name)));
                         emsdevice->add_flags(device.flags);
                     }
                 }
@@ -975,9 +988,44 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         return false; // not found
     }
 
-    auto name        = uuid::read_flash_string(device_p->name);
+    auto name        = read_flash_string(device_p->name);
     auto device_type = device_p->device_type;
     auto flags       = device_p->flags;
+
+    // empty reply to version, read a generic device from database
+    if (product_id == 0) {
+        // check for known device IDs
+        if (device_id == 0x40) {
+            // see: https://github.com/emsesp/EMS-ESP32/issues/103#issuecomment-911717342
+            name = "rf room temperature sensor"; // generic
+        } else if (device_id == 0x17) {
+            name        = "generic thermostat";
+            device_type = DeviceType::THERMOSTAT;
+            flags       = DeviceFlags::EMS_DEVICE_FLAG_RC10 | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE;
+        } else if (device_id == 0x04) {
+            name        = "RS232";
+            device_type = DeviceType::CONNECT;
+        } else if (device_id == 0x0A) {
+            name        = "terminal";
+            device_type = DeviceType::CONNECT;
+        } else if (device_id == 0x0B) {
+            name        = "service key";
+            device_type = DeviceType::CONNECT;
+        } else if (device_id == 0x0C) {
+            name        = "cascade";
+            device_type = DeviceType::CONNECT;
+        } else if (device_id == 0x0D) {
+            // see https://github.com/emsesp/EMS-ESP/issues/460#issuecomment-709553012
+            name        = "modem";
+            device_type = DeviceType::CONNECT;
+        } else if (device_id == 0x0E) {
+            name = "converter"; // generic
+        } else {
+            LOG_WARNING(F("Unrecognized EMS device (device ID 0x%02X, no product ID). Please report on GitHub."), device_id);
+            return false;
+        }
+    }
+
     LOG_DEBUG(F("Adding new device %s (device ID 0x%02X, product ID %d, version %s)"), name.c_str(), device_id, product_id, version.c_str());
     emsdevices.push_back(EMSFactory::add(device_type, device_id, product_id, version, name, flags, brand));
     emsdevices.back()->unique_id(++unique_id_count_);
@@ -989,40 +1037,48 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         return true;
     }
 
-    Command::add_json(
+    Command::add(
         device_type,
         F_(info),
-        [device_type](const char * value, const int8_t id, JsonObject & json) {
-            return command_info(device_type, json, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
+        [device_type](const char * value, const int8_t id, JsonObject & output) {
+            return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
         },
         F_(info_cmd));
-    Command::add_json(
+    Command::add(
         device_type,
-        F("info_short"),
-        [device_type](const char * value, const int8_t id, JsonObject & json) { return command_info(device_type, json, id, EMSdevice::OUTPUT_TARGET::API); },
+        F("values"),
+        [device_type](const char * value, const int8_t id, JsonObject & output) {
+            return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_SHORTNAMES); // HIDDEN command showing short names, used in e.g. /api/boiler
+        },
         nullptr,
         CommandFlag::HIDDEN); // this command is hidden
-    Command::add_json(
+    Command::add(
         device_type,
         F_(commands),
-        [device_type](const char * value, const int8_t id, JsonObject & json) { return command_commands(device_type, json, id); },
+        [device_type](const char * value, const int8_t id, JsonObject & output) { return command_commands(device_type, output, id); },
         F_(commands_cmd));
-    Command::add_json(
+    Command::add(
         device_type,
         F_(entities),
-        [device_type](const char * value, const int8_t id, JsonObject & json) { return command_entities(device_type, json, id); },
+        [device_type](const char * value, const int8_t id, JsonObject & output) { return command_entities(device_type, output, id); },
         F_(entities_cmd));
+
+    // MQTT subscribe to the device e.g. "ems-esp/boiler/#"
+    Mqtt::subscribe(device_type, EMSdevice::device_type_2_device_name(device_type) + "/#", nullptr);
+
+    // Print to LOG showing we've added a new device
+    LOG_INFO(F("Recognized new %s with device ID 0x%02X"), EMSdevice::device_type_2_device_name(device_type).c_str(), device_id);
 
     return true;
 }
 
 // list device entities
-bool EMSESP::command_entities(uint8_t device_type, JsonObject & json, const int8_t id) {
+bool EMSESP::command_entities(uint8_t device_type, JsonObject & output, const int8_t id) {
     JsonObject node;
 
     for (const auto & emsdevice : emsdevices) {
         if ((emsdevice) && (emsdevice->device_type() == device_type)) {
-            emsdevice->list_device_entries(json);
+            emsdevice->list_device_entries(output);
             return true;
         }
     }
@@ -1031,14 +1087,12 @@ bool EMSESP::command_entities(uint8_t device_type, JsonObject & json, const int8
 }
 
 // list all available commands, return as json
-bool EMSESP::command_commands(uint8_t device_type, JsonObject & json, const int8_t id) {
-    return Command::list(device_type, json);
+bool EMSESP::command_commands(uint8_t device_type, JsonObject & output, const int8_t id) {
+    return Command::list(device_type, output);
 }
 
-// export all values to info command
-// value is ignored here
-// info command always shows in verbose mode, so full names are displayed
-bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t id, const uint8_t output_target) {
+// export all values for a specific device
+bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
     bool    has_value = false;
     uint8_t tag;
     if (id >= 1 && id <= 4) {
@@ -1051,13 +1105,10 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t i
         return false;
     }
 
-    // if id=-1 it means we have no endpoint so default to API
-    uint8_t target = (id == -1) ? EMSdevice::OUTPUT_TARGET::API_VERBOSE : EMSdevice::OUTPUT_TARGET::API;
-
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)
             && ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat()))) {
-            has_value |= emsdevice->generate_values_json(json, tag, (id < 1), target); // nested for id -1 and 0
+            has_value |= emsdevice->generate_values_json(output, tag, (id < 1), output_target); // use nested for id -1 and 0
         }
     }
 
@@ -1160,19 +1211,20 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     // check for poll
     if (length == 1) {
         // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
-        uint8_t     poll_id = (first_value ^ 0x80 ^ rxservice_.ems_mask());
-        static bool waitKM  = true;
+        uint8_t         poll_id      = (first_value ^ 0x80 ^ rxservice_.ems_mask());
+        static uint32_t connect_time = 0;
         if (!rxservice_.bus_connected()) {
-            waitKM = true;
+            wait_km_     = true;
+            connect_time = uuid::get_uptime_sec();
         }
         if (poll_id == txservice_.ems_bus_id()) {
             EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
         }
-        if (poll_id == 0x48) {
-            waitKM = false; // KM200 is polled, from now on it is safe to send
-        }
-        if (waitKM) {
-            return;
+        if (wait_km_) {
+            if (poll_id != 0x48 && (uuid::get_uptime_sec() - connect_time) < EMS_WAIT_KM_TIMEOUT) {
+                return;
+            }
+            wait_km_ = false; // KM200 is polled, from now on it is safe to send
         }
 
 #ifdef EMSESP_UART_DEBUG
@@ -1242,6 +1294,7 @@ void EMSESP::start() {
 
     emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
 
+    LOG_INFO(F("Last system reset reason Core0: %s, Core1: %s"), system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
     LOG_INFO(F("EMS Device library loaded with %d records"), device_library_.size());
 
 #if defined(EMSESP_STANDALONE)
@@ -1273,7 +1326,7 @@ void EMSESP::loop() {
     console_.loop(); // telnet/serial console
 
     // https://github.com/emsesp/EMS-ESP32/issues/78#issuecomment-877599145
-    delay(1); // helps telnet catch up. don't think its needed in ESP32 3.1.0
+    // delay(1); // helps telnet catch up. don't think its needed in ESP32 >3.1.0?
 }
 
 } // namespace emsesp

@@ -28,7 +28,11 @@ class HttpGetEndpoint {
         server->on(servicePath.c_str(), HTTP_GET, securityManager->wrapRequest(std::bind(&HttpGetEndpoint::fetchSettings, this, _1), authenticationPredicate));
     }
 
-    HttpGetEndpoint(JsonStateReader<T> stateReader, StatefulService<T> * statefulService, AsyncWebServer * server, const String & servicePath, size_t bufferSize = DEFAULT_BUFFER_SIZE)
+    HttpGetEndpoint(JsonStateReader<T>   stateReader,
+                    StatefulService<T> * statefulService,
+                    AsyncWebServer *     server,
+                    const String &       servicePath,
+                    size_t               bufferSize = DEFAULT_BUFFER_SIZE)
         : _stateReader(stateReader)
         , _statefulService(statefulService)
         , _bufferSize(bufferSize) {
@@ -70,7 +74,12 @@ class HttpPostEndpoint {
         server->addHandler(&_updateHandler);
     }
 
-    HttpPostEndpoint(JsonStateReader<T> stateReader, JsonStateUpdater<T> stateUpdater, StatefulService<T> * statefulService, AsyncWebServer * server, const String & servicePath, size_t bufferSize = DEFAULT_BUFFER_SIZE)
+    HttpPostEndpoint(JsonStateReader<T>   stateReader,
+                     JsonStateUpdater<T>  stateUpdater,
+                     StatefulService<T> * statefulService,
+                     AsyncWebServer *     server,
+                     const String &       servicePath,
+                     size_t               bufferSize = DEFAULT_BUFFER_SIZE)
         : _stateReader(stateReader)
         , _stateUpdater(stateUpdater)
         , _statefulService(statefulService)
@@ -124,7 +133,12 @@ class HttpEndpoint : public HttpGetEndpoint<T>, public HttpPostEndpoint<T> {
         , HttpPostEndpoint<T>(stateReader, stateUpdater, statefulService, server, servicePath, securityManager, authenticationPredicate, bufferSize) {
     }
 
-    HttpEndpoint(JsonStateReader<T> stateReader, JsonStateUpdater<T> stateUpdater, StatefulService<T> * statefulService, AsyncWebServer * server, const String & servicePath, size_t bufferSize = DEFAULT_BUFFER_SIZE)
+    HttpEndpoint(JsonStateReader<T>   stateReader,
+                 JsonStateUpdater<T>  stateUpdater,
+                 StatefulService<T> * statefulService,
+                 AsyncWebServer *     server,
+                 const String &       servicePath,
+                 size_t               bufferSize = DEFAULT_BUFFER_SIZE)
         : HttpGetEndpoint<T>(stateReader, statefulService, server, servicePath, bufferSize)
         , HttpPostEndpoint<T>(stateReader, stateUpdater, statefulService, server, servicePath, bufferSize) {
     }

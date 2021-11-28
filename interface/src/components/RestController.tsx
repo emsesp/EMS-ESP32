@@ -117,14 +117,12 @@ export function restController<D, P extends RestControllerProps<D>>(
           });
       };
 
-      handleValueChange =
-        (name: keyof D) => (event: React.ChangeEvent<HTMLInputElement>) => {
-          const data = {
-            ...this.state.data!,
-            [name]: extractEventValue(event)
-          };
-          this.setState({ data });
-        };
+      handleValueChange = (name: keyof D) => (
+        event: React.ChangeEvent<HTMLInputElement>
+      ) => {
+        const data = { ...this.state.data!, [name]: extractEventValue(event) };
+        this.setState({ data });
+      };
 
       render() {
         return (

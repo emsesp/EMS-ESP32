@@ -187,19 +187,16 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           <MenuItem value={1}>Nested on a single topic</MenuItem>
           <MenuItem value={2}>As individual topics</MenuItem>
         </SelectValidator>
-        <SelectValidator
-          name="subscribe_format"
-          label="Subscribe Format"
-          value={data.subscribe_format}
-          fullWidth
-          variant="outlined"
-          onChange={handleValueChange('subscribe_format')}
-          margin="normal"
-        >
-          <MenuItem value={0}>General device topic</MenuItem>
-          <MenuItem value={1}>Individual topics, main heating circuit</MenuItem>
-          <MenuItem value={2}>Individual topics, all heating circuits</MenuItem>
-        </SelectValidator>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.send_response}
+              onChange={handleValueChange('send_response')}
+              value="send_response"
+            />
+          }
+          label="Publish command output to a 'response' topic"
+        />
         <BlockFormControlLabel
           control={
             <Checkbox

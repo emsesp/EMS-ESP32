@@ -25,7 +25,9 @@
 #include <SecurityManager.h>
 #include <AsyncMqttClient.h>
 
-#define EMSESP_STATUS_SERVICE_PATH "/rest/emsespStatus"
+#include <ESPmDNS.h>
+
+#define EMSESP_STATUS_SERVICE_PATH "/rest/status"
 
 namespace emsesp {
 
@@ -36,6 +38,7 @@ class WebStatusService {
   private:
     void webStatusService(AsyncWebServerRequest * request);
     void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
+    void mDNS_start();
 };
 
 } // namespace emsesp

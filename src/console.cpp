@@ -235,19 +235,25 @@ void EMSESPShell::add_console_commands() {
                                   shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
                                   char buffer[4];
                                   shell.printfln(F_(master_thermostat_fmt),
-                                                 settings.master_thermostat == 0 ? uuid::read_flash_string(F_(auto)).c_str()
+                                                 settings.master_thermostat == 0 ? read_flash_string(F_(auto)).c_str()
                                                                                  : Helpers::hextoa(buffer, settings.master_thermostat));
                                   shell.printfln(F_(board_profile_fmt), settings.board_profile.c_str());
                               });
                           });
 
     commands->add_command(ShellContext::MAIN,
-                          CommandFlags::ADMIN,
+                          CommandFlags::USER,
                           flash_string_vector{F_(read)},
                           flash_string_vector{F_(deviceid_mandatory), F_(typeid_mandatory), F_(offset_optional)},
                           [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                              uint8_t  device_id = Helpers::hextoint(arguments.front().c_str());
-                              uint16_t type_id   = Helpers::hextoint(arguments[1].c_str());
+                              uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
+
+                              if (!EMSESP::valid_device(device_id)) {
+                                  shell.printfln(F("Invalid device ID"));
+                                  return;
+                              }
+
+                              uint16_t type_id = Helpers::hextoint(arguments[1].c_str());
                               if (arguments.size() == 4) {
                                   uint16_t offset = Helpers::hextoint(arguments[2].c_str());
                                   uint8_t  length = Helpers::hextoint(arguments.back().c_str());
@@ -272,8 +278,7 @@ void EMSESPShell::add_console_commands() {
                                       settings.master_thermostat = value;
                                       EMSESP::actual_master_thermostat(value); // set the internal value too
                                       char buffer[5];
-                                      shell.printfln(F_(master_thermostat_fmt),
-                                                     !value ? uuid::read_flash_string(F_(auto)).c_str() : Helpers::hextoa(buffer, value));
+                                      shell.printfln(F_(master_thermostat_fmt), !value ? read_flash_string(F_(auto)).c_str() : Helpers::hextoa(buffer, value));
                                       return StateUpdateResult::CHANGED;
                                   },
                                   "local");
@@ -373,7 +378,6 @@ void EMSESPShell::add_console_commands() {
                 return;
             }
 
-            DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN);
 
             // validate that a command is present
             if (arguments.size() < 2) {
@@ -382,39 +386,45 @@ void EMSESPShell::add_console_commands() {
                 return;
             }
 
-            const char * cmd = arguments[1].c_str();
-
-            uint8_t cmd_return = CommandRet::OK;
-
-            JsonObject json = doc.to<JsonObject>();
+            DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN);
+            int8_t              id          = -1;
+            const char *        cmd         = Command::parse_command_string(arguments[1].c_str(), id);
+            uint8_t             return_code = CommandRet::OK;
+            JsonObject          json        = doc.to<JsonObject>();
 
             if (arguments.size() == 2) {
                 // no value specified, just the cmd
-                cmd_return = Command::call(device_type, cmd, nullptr, true, -1, json);
+                return_code = Command::call(device_type, cmd, nullptr, true, id, json);
             } else if (arguments.size() == 3) {
                 if (strncmp(cmd, "info", 4) == 0) {
                     // info has a id but no value
-                    cmd_return = Command::call(device_type, cmd, nullptr, true, atoi(arguments.back().c_str()), json);
+                    return_code = Command::call(device_type, cmd, nullptr, true, atoi(arguments.back().c_str()), json);
+                } else if (arguments[2] == "?") {
+                    return_code = Command::call(device_type, cmd, nullptr, true, id, json);
                 } else {
                     // has a value but no id so use -1
-                    cmd_return = Command::call(device_type, cmd, arguments.back().c_str(), true, -1, json);
+                    return_code = Command::call(device_type, cmd, arguments.back().c_str(), true, id, json);
                 }
             } else {
                 // use value, which could be an id or hc
-                cmd_return = Command::call(device_type, cmd, arguments[2].c_str(), true, atoi(arguments[3].c_str()), json);
+                if (arguments[2] == "?") {
+                    return_code = Command::call(device_type, cmd, nullptr, true, atoi(arguments[3].c_str()), json);
+                } else {
+                    return_code = Command::call(device_type, cmd, arguments[2].c_str(), true, atoi(arguments[3].c_str()), json);
+                }
             }
 
-            if (cmd_return == CommandRet::OK && json.size()) {
+            if (return_code == CommandRet::OK && json.size()) {
                 serializeJsonPretty(doc, shell);
                 shell.println();
                 return;
             }
 
-            if (cmd_return == CommandRet::NOT_FOUND) {
+            if (return_code == CommandRet::NOT_FOUND) {
                 shell.println(F("Unknown command"));
                 shell.print(F("Available commands are: "));
                 Command::show(shell, device_type, false); // non-verbose mode
-            } else if (cmd_return != CommandRet::OK) {
+            } else if (return_code != CommandRet::OK) {
                 shell.println(F("Bad syntax"));
             }
         },
@@ -435,7 +445,7 @@ void EMSESPShell::add_console_commands() {
                 if (Command::device_has_commands(device_type)) {
                     for (const auto & cf : Command::commands()) {
                         if (cf.device_type_ == device_type) {
-                            command_list.emplace_back(uuid::read_flash_string(cf.cmd_));
+                            command_list.emplace_back(read_flash_string(cf.cmd_));
                         }
                     }
                     return command_list;
@@ -597,7 +607,7 @@ void Console::load_system_commands(unsigned int context) {
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(restart)},
                                        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           EMSESP::system_.restart();
+                                           EMSESP::system_.system_restart();
                                        });
 
     EMSESPShell::commands->add_command(context,
@@ -718,7 +728,7 @@ void Console::load_system_commands(unsigned int context) {
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            if (arguments.size() == 0) {
                                                EMSESP::webSettingsService.read([&](WebSettings & settings) {
-                                                   for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+                                                   for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
                                                        if (!settings.sensor[i].id.isEmpty()) {
                                                            shell.print(settings.sensor[i].id);
                                                            shell.print(" : ");
@@ -752,32 +762,33 @@ void Console::load_system_commands(unsigned int context) {
                                            EMSESP::dallassensor_.update(arguments.front().c_str(), arguments[1].c_str(), offset);
                                        });
 
-    EMSESPShell::commands
-        ->add_command(context,
-                      CommandFlags::ADMIN,
-                      flash_string_vector{F_(set), F_(board_profile)},
-                      flash_string_vector{F_(name_mandatory)},
-                      [](Shell & shell, const std::vector<std::string> & arguments) {
-                          std::vector<uint8_t> data; // led, dallas, rx, tx, button
-                          std::string          board_profile = Helpers::toUpper(arguments.front());
-                          if (!EMSESP::system_.load_board_profile(data, board_profile)) {
-                              shell.println(F("Invalid board profile (S32, E32, MH-ET, NODEMCU, OLIMEX, TLK110, LAN8720, CUSTOM)"));
-                              return;
-                          }
-                          EMSESP::webSettingsService.update(
-                              [&](WebSettings & settings) {
-                                  settings.board_profile = board_profile.c_str();
-                                  settings.led_gpio      = data[0];
-                                  settings.dallas_gpio   = data[1];
-                                  settings.rx_gpio       = data[2];
-                                  settings.tx_gpio       = data[3];
-                                  settings.pbutton_gpio  = data[4];
-                                  return StateUpdateResult::CHANGED;
-                              },
-                              "local");
-                          shell.printfln("Loaded board profile %s (%d,%d,%d,%d,%d)", board_profile.c_str(), data[0], data[1], data[2], data[3], data[4]);
-                          EMSESP::system_.network_init(true);
-                      });
+    EMSESPShell::commands->add_command(
+        context,
+        CommandFlags::ADMIN,
+        flash_string_vector{F_(set), F_(board_profile)},
+        flash_string_vector{F_(name_mandatory)},
+        [](Shell & shell, const std::vector<std::string> & arguments) {
+            std::vector<uint8_t> data; // led, dallas, rx, tx, button
+            std::string          board_profile = Helpers::toUpper(arguments.front());
+            if (!EMSESP::system_.load_board_profile(data, board_profile)) {
+                shell.println(F("Invalid board profile (S32, E32, MH-ET, NODEMCU, OLIMEX, CUSTOM)"));
+                return;
+            }
+            EMSESP::webSettingsService.update(
+                [&](WebSettings & settings) {
+                    settings.board_profile = board_profile.c_str();
+                    settings.led_gpio      = data[0];
+                    settings.dallas_gpio   = data[1];
+                    settings.rx_gpio       = data[2];
+                    settings.tx_gpio       = data[3];
+                    settings.pbutton_gpio  = data[4];
+                    settings.phy_type      = data[5];
+                    return StateUpdateResult::CHANGED;
+                },
+                "local");
+            shell.printfln("Loaded board profile %s (%d,%d,%d,%d,%d,%d)", board_profile.c_str(), data[0], data[1], data[2], data[3], data[4], data[5]);
+            EMSESP::system_.network_init(true);
+        });
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(show), F_(users)},
@@ -812,14 +823,14 @@ std::string EMSESPShell::prompt_suffix() {
 }
 
 void EMSESPShell::end_of_transmission() {
-    invoke_command(uuid::read_flash_string(F_(exit)));
+    invoke_command(read_flash_string(F_(exit)));
 }
 
 EMSESPStreamConsole::EMSESPStreamConsole(Stream & stream, bool local)
     : uuid::console::Shell(commands, ShellContext::MAIN, local ? (CommandFlags::USER | CommandFlags::LOCAL) : CommandFlags::USER)
     , uuid::console::StreamConsole(stream)
     , EMSESPShell()
-    , name_(uuid::read_flash_string(F("Serial")))
+    , name_(read_flash_string(F("Serial")))
     , pty_(SIZE_MAX)
     , addr_()
     , port_(0) {

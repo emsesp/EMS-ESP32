@@ -59,6 +59,7 @@ void OTASettingsService::configureArduinoOTA() {
                 Serial.println(F("End Failed"));
         });
 
+        _arduinoOTA->setMdnsEnabled(false); // disable as handled in NetworkSettingsService.cpp. https://github.com/emsesp/EMS-ESP32/issues/161
         _arduinoOTA->begin();
     }
 }

@@ -234,6 +234,15 @@ void RxService::add(uint8_t * data, uint8_t length) {
     rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
 }
 
+// add empty telegram to rx-queue
+void RxService::add_empty(const uint8_t src, const uint8_t dest, const uint16_t type_id) {
+    auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, 0, nullptr, 0);
+    // only if queue is  not full
+    if (rx_telegrams_.size() < MAX_RX_TELEGRAMS) {
+        rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
+    }
+}
+
 // start and initialize Tx
 // send out request to EMS bus for all devices
 void TxService::start() {
@@ -543,14 +552,14 @@ void TxService::send_raw(const char * telegram_data) {
 
     // get first value, which should be the src
     if ((p = strtok(telegram, " ,"))) { // delimiter
-        strlcpy(value, p, 10);
+        strlcpy(value, p, sizeof(value));
         data[0] = (uint8_t)strtol(value, 0, 16);
     }
 
     // and iterate until end
     while (p != 0) {
         if ((p = strtok(nullptr, " ,"))) {
-            strlcpy(value, p, 10);
+            strlcpy(value, p, sizeof(value));
             uint8_t val   = (uint8_t)strtol(value, 0, 16);
             data[++count] = val;
         }
@@ -576,6 +585,9 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
                   (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
                   MAXIMUM_TX_RETRIES,
                   telegram_last_->to_string().c_str());
+        if (operation == Telegram::Operation::TX_READ) {
+            EMSESP::rxservice_.add_empty(telegram_last_->dest, telegram_last_->src, telegram_last_->type_id);
+        }
         return;
     }
 

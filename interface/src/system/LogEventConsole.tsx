@@ -34,8 +34,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   entry: {
     color: '#bbbbbb',
-    fontFamily: 'Courier New, monospace',
-    fontSize: '13px',
+    fontFamily: 'monospace',
+    fontSize: '14px',
     letterSpacing: 'normal',
     whiteSpace: 'nowrap'
   },

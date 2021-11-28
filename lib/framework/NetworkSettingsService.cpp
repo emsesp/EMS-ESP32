@@ -61,7 +61,8 @@ void NetworkSettingsService::manageSTA() {
             WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE); // configure for DHCP
         }
 
-        WiFi.setHostname(_state.hostname.c_str());                // set hostname
+        WiFi.setHostname(_state.hostname.c_str()); // set hostname
+
         // www.esp32.com/viewtopic.php?t=12055
         read([&](NetworkSettings & networkSettings) {
             if (networkSettings.bandwidth20) {
@@ -73,33 +74,18 @@ void NetworkSettingsService::manageSTA() {
             if (networkSettings.nosleep) {
                 WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
             }
-
         });
+
         WiFi.begin(_state.ssid.c_str(), _state.password.c_str()); // attempt to connect to the network
     }
 }
 
-// handles both WiFI and Ethernet
+// handles if wifi stopped
 void NetworkSettingsService::WiFiEvent(WiFiEvent_t event) {
-    switch (event) {
-    case SYSTEM_EVENT_STA_DISCONNECTED:
-        WiFi.disconnect(true);
-        break;
-
-    case SYSTEM_EVENT_STA_STOP:
+    if (event == SYSTEM_EVENT_STA_STOP) {
         if (_stopping) {
             _lastConnectionAttempt = 0;
             _stopping              = false;
         }
-        break;
-
-    case SYSTEM_EVENT_ETH_START:
-        if (_state.staticIPConfig) {
-            ETH.config(_state.localIP, _state.gatewayIP, _state.subnetMask, _state.dnsIP1, _state.dnsIP2); // configure for static IP
-        }
-        break;
-
-    default:
-        break;
     }
 }

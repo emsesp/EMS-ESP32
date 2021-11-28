@@ -24,8 +24,6 @@
 #include <NetworkSettingsService.h>
 #include <NetworkStatus.h>
 
-#include <WWWData.h>
-
 class ESP8266React {
   public:
     ESP8266React(AsyncWebServer * server, FS * fs);

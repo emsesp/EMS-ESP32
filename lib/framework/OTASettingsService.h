@@ -4,8 +4,6 @@
 #include <HttpEndpoint.h>
 #include <FSPersistence.h>
 
-#include <ESPmDNS.h>
-
 #include <ArduinoOTA.h>
 #include <WiFiUdp.h>
 
@@ -14,7 +12,7 @@
 #endif
 
 #ifndef FACTORY_OTA_PASSWORD
-#define FACTORY_OTA_PASSWORD "esp-react"
+#define FACTORY_OTA_PASSWORD "ems-esp-neo"
 #endif
 
 #ifndef FACTORY_OTA_ENABLED

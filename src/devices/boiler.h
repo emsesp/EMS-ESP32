@@ -27,7 +27,7 @@ class Boiler : public EMSdevice {
   public:
     Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
 
-    virtual bool publish_ha_config();
+    virtual bool publish_ha_device_config();
 
   private:
     static uuid::log::Logger logger_;
@@ -63,7 +63,7 @@ class Boiler : public EMSdevice {
     uint8_t  wwType_;             // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
     uint8_t  wwComfort_;          // WW comfort mode
     uint8_t  wwCircPump_;         // Warm Water circulation pump available
-    uint8_t  wWChargeType_;       // Warm Water charge type (pump or 3-way-valve)
+    uint8_t  wwChargeType_;       // Warm Water charge type (pump or 3-way-valve)
     uint8_t  wwDisinfectionTemp_; // Warm Water disinfection temperature to prevent infection
     uint8_t  wwCircMode_;         // Warm Water circulation pump mode
     uint8_t  wwCirc_;             // Circulation on/off
@@ -83,9 +83,9 @@ class Boiler : public EMSdevice {
     uint8_t  wwSetPumpPower_;     // ww pump speed/power?
     uint8_t  wwFlowTempOffset_;   // Boiler offset for ww heating
     uint8_t  wwMaxPower_;         // Warm Water maximum power
-    uint32_t wWStarts_;           // Warm Water # starts
+    uint32_t wwStarts_;           // Warm Water starts
     uint32_t wwStarts2_;          // Warm water control starts
-    uint32_t wwWorkM_;            // Warm Water # minutes
+    uint32_t wwWorkM_;            // Warm Water minutes
     int8_t   wwHystOn_;
     int8_t   wwHystOff_;
     uint8_t  wwTapActivated_;   // maintenance-mode to switch DHW off
@@ -127,11 +127,11 @@ class Boiler : public EMSdevice {
     uint8_t  setFlowTemp_;       // boiler setpoint temp
     uint8_t  curBurnPow_;        // Burner current power %
     uint8_t  setBurnPow_;        // max output power in %
-    uint32_t burnStarts_;        // # burner restarts
+    uint32_t burnStarts_;        // burner restarts
     uint32_t burnWorkMin_;       // Total burner operating time
     uint32_t heatWorkMin_;       // Total heat operating time
     uint32_t UBAuptime_;         // Total UBA working hours
-    char     lastCode_[30];      // last error code
+    char     lastCode_[60];      // last error code
     char     serviceCode_[4];    // 3 character status/service code
     uint16_t serviceCodeNumber_; // error/service code
 
@@ -215,6 +215,7 @@ class Boiler : public EMSdevice {
     void process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram);
     void process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram);
     void process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram);
+    void process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram);
     void process_UBAInformation(std::shared_ptr<const Telegram> telegram);
     void process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram);
@@ -225,20 +226,20 @@ class Boiler : public EMSdevice {
     void process_HpPool(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
-    bool set_warmwater_mode(const char * value, const int8_t id);
-    bool set_warmwater_activated(const char * value, const int8_t id);
+    bool set_ww_mode(const char * value, const int8_t id);
+    bool set_ww_activated(const char * value, const int8_t id);
     bool set_tapwarmwater_activated(const char * value, const int8_t id);
-    bool set_warmwater_onetime(const char * value, const int8_t id);
-    bool set_warmwater_disinfect(const char * value, const int8_t id);
-    bool set_warmwater_circulation(const char * value, const int8_t id);
-    bool set_warmwater_circulation_pump(const char * value, const int8_t id);
-    bool set_warmwater_circulation_mode(const char * value, const int8_t id);
-    bool set_warmwater_temp(const char * value, const int8_t id);
-    bool set_warmwater_temp_low(const char * value, const int8_t id);
-    bool set_warmwater_temp_single(const char * value, const int8_t id);
-    bool set_disinfect_temp(const char * value, const int8_t id);
-    bool set_warmwater_maxpower(const char * value, const int8_t id);
-    bool set_wWFlowTempOffset(const char * value, const int8_t id);
+    bool set_ww_onetime(const char * value, const int8_t id);
+    bool set_ww_disinfect(const char * value, const int8_t id);
+    bool set_ww_circulation(const char * value, const int8_t id);
+    bool set_ww_circulation_pump(const char * value, const int8_t id);
+    bool set_ww_circulation_mode(const char * value, const int8_t id);
+    bool set_ww_temp(const char * value, const int8_t id);
+    bool set_ww_temp_low(const char * value, const int8_t id);
+    bool set_ww_temp_single(const char * value, const int8_t id);
+    bool set_ww_disinfect_temp(const char * value, const int8_t id);
+    bool set_ww_maxpower(const char * value, const int8_t id);
+    bool set_ww_flowTempOffset(const char * value, const int8_t id);
     bool set_flow_temp(const char * value, const int8_t id);
     bool set_burn_power(const char * value, const int8_t id);
     bool set_heating_activated(const char * value, const int8_t id);

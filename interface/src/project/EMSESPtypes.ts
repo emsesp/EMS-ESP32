@@ -11,6 +11,7 @@ export interface EMSESPSettings {
   shower_alert: boolean;
   rx_gpio: number;
   tx_gpio: number;
+  phy_type: number;
   dallas_gpio: number;
   dallas_parasite: boolean;
   led_gpio: number;
@@ -41,20 +42,20 @@ export interface EMSESPStatus {
 }
 
 export interface Device {
-  id: number;
-  type: string;
-  brand: string;
-  name: string;
-  deviceid: number;
-  productid: number;
-  version: string;
+  i: number; // id
+  t: string; // type
+  b: string; // brand
+  n: string; // name
+  d: number; // deviceid
+  p: number; // productid
+  v: string; // version
 }
 
 export interface Sensor {
-  no: number;
-  id: string;
-  temp: number;
-  offset: number;
+  n: number; // np
+  i: string; // id
+  t: number; // temp
+  o: number; // offset
 }
 
 export interface EMSESPData {
@@ -64,15 +65,15 @@ export interface EMSESPData {
 }
 
 export interface DeviceValue {
-  v: any;
-  u: number;
-  n: string;
-  c: string;
-  l: string[];
+  v: any; // value, in any format
+  u: number; // uom
+  n: string; // name
+  c: string; // command
+  l: string[]; // list
 }
 
 export interface EMSESPDeviceData {
-  name: string;
+  type: string;
   data: DeviceValue[];
 }
 
@@ -92,10 +93,9 @@ export enum DeviceValueUOM {
   KB,
   SECONDS,
   DBM,
-  NUM,
-  BOOLEAN,
-  LIST,
-  MV
+  MV,
+  TIMES,
+  OCLOCK
 }
 
 export const DeviceValueUOM_s = [
@@ -112,10 +112,9 @@ export const DeviceValueUOM_s = [
   'kW',
   'W',
   'KB',
-  'seconds',
+  'second',
   'dBm',
-  'number',
-  'on/off',
-  '',
-  'mV'
+  'mV',
+  'time',
+  "o'clock"
 ];

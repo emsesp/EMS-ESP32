@@ -42,6 +42,8 @@ using uuid::console::Shell;
 
 namespace emsesp {
 
+enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110 };
+
 class System {
   public:
     void start(uint32_t heap_start);
@@ -59,11 +61,13 @@ class System {
     static bool command_syslog_level(const char * value, const int8_t id);
     static bool command_watch(const char * value, const int8_t id);
 
-    static bool command_info(const char * value, const int8_t id, JsonObject & json);
-    static bool command_settings(const char * value, const int8_t id, JsonObject & json);
-    static bool command_commands(const char * value, const int8_t id, JsonObject & json);
+    static bool command_info(const char * value, const int8_t id, JsonObject & output);
+    static bool command_settings(const char * value, const int8_t id, JsonObject & output);
+    static bool command_commands(const char * value, const int8_t id, JsonObject & output);
 
-    void restart();
+    const std::string reset_reason(uint8_t cpu);
+
+    void system_restart();
     void format(uuid::console::Shell & shell);
     void upload_status(bool in_progress);
     bool upload_status();
@@ -72,7 +76,7 @@ class System {
     void wifi_tweak();
     void syslog_start();
     bool check_upgrade();
-    bool heartbeat_json(JsonObject & json);
+    bool heartbeat_json(JsonObject & output);
     void send_heartbeat();
 
     void led_init(bool refresh);
@@ -83,6 +87,14 @@ class System {
 
     static bool is_valid_gpio(uint8_t pin);
     static bool load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile);
+
+    static void restart_requested(bool restart_requested) {
+        restart_requested_ = restart_requested;
+    }
+
+    static bool restart_requested() {
+        return restart_requested_;
+    }
 
     bool analog_enabled() {
         return analog_enabled_;
@@ -115,6 +127,7 @@ class System {
         return true;
 #endif
     }
+
     void show_system(uuid::console::Shell & shell);
     void wifi_reconnect();
     void show_users(uuid::console::Shell & shell);
@@ -122,6 +135,7 @@ class System {
   private:
     static uuid::log::Logger logger_;
     static uint32_t          heap_start_;
+    static bool              restart_requested_;
 
     // button
     static PButton            myPButton_; // PButton instance
@@ -145,11 +159,10 @@ class System {
     static uuid::syslog::SyslogService syslog_;
 #endif
 
-    void led_monitor();
-    void set_led_speed(uint32_t speed);
-    void system_check();
-    void measure_analog();
-
+    void   led_monitor();
+    void   set_led_speed(uint32_t speed);
+    void   system_check();
+    void   measure_analog();
     int8_t wifi_quality(int8_t dBm);
 
     bool     system_healthy_     = false;
@@ -160,19 +173,26 @@ class System {
     bool     ethernet_connected_ = false;
     uint16_t analog_;
 
-    // settings
-    std::string hostname_ = "ems-esp";
-    bool        hide_led_;
-    uint8_t     led_gpio_;
-    bool        syslog_enabled_ = false;
-    bool        analog_enabled_;
-    bool        low_clock_;
-    String      board_profile_;
-    uint8_t     pbutton_gpio_;
-    int8_t      syslog_level_;
-    uint32_t    syslog_mark_interval_;
-    String      syslog_host_;
-    uint16_t    syslog_port_;
+    // settings, copies from WebSettings class in WebSettingsService.h
+    std::string hostname_ = FACTORY_WIFI_HOSTNAME;
+
+    bool    hide_led_;
+    uint8_t led_gpio_;
+
+    bool    analog_enabled_;
+    bool    low_clock_;
+    String  board_profile_;
+    uint8_t phy_type_;
+    uint8_t pbutton_gpio_;
+    uint8_t rx_gpio_;
+    uint8_t tx_gpio_;
+    uint8_t dallas_gpio_;
+
+    bool     syslog_enabled_ = false;
+    int8_t   syslog_level_;
+    uint32_t syslog_mark_interval_;
+    String   syslog_host_;
+    uint16_t syslog_port_;
 };
 
 } // namespace emsesp

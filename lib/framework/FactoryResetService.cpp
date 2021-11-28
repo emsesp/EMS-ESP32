@@ -4,7 +4,9 @@ using namespace std::placeholders;
 
 FactoryResetService::FactoryResetService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : fs(fs) {
-    server->on(FACTORY_RESET_SERVICE_PATH, HTTP_POST, securityManager->wrapRequest(std::bind(&FactoryResetService::handleRequest, this, _1), AuthenticationPredicates::IS_ADMIN));
+    server->on(FACTORY_RESET_SERVICE_PATH,
+               HTTP_POST,
+               securityManager->wrapRequest(std::bind(&FactoryResetService::handleRequest, this, _1), AuthenticationPredicates::IS_ADMIN));
 }
 
 void FactoryResetService::handleRequest(AsyncWebServerRequest * request) {

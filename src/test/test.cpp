@@ -30,7 +30,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "general") == 0) {
-        EMSESP::logger().info(F("Testing general..."));
+        EMSESP::logger().info(F("Testing general. Adding a Boiler and Thermostat"));
 
         add_device(0x08, 123); // Nefit Trendline
         add_device(0x18, 157); // Bosch CR100
@@ -54,7 +54,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "310") == 0) {
-        EMSESP::logger().info(F("Testing GB072/RC310..."));
+        EMSESP::logger().info(F("Adding a GB072/RC310 combo..."));
 
         add_device(0x08, 123); // GB072
         add_device(0x10, 158); // RC310
@@ -81,7 +81,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "gateway") == 0) {
-        EMSESP::logger().info(F("Testing gateway..."));
+        EMSESP::logger().info(F("Adding a Gateway..."));
 
         // add 0x48 KM200, via a version command
         rx_telegram({0x48, 0x0B, 0x02, 0x00, 0xBD, 0x04, 0x06, 00, 00, 00, 00, 00, 00, 00});
@@ -101,7 +101,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "mixer") == 0) {
-        EMSESP::logger().info(F("Testing mixer..."));
+        EMSESP::logger().info(F("Adding a mixer..."));
 
         // add controller
         add_device(0x09, 114);
@@ -123,7 +123,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "boiler") == 0) {
-        EMSESP::logger().info(F("Testing boiler..."));
+        EMSESP::logger().info(F("Adding boiler..."));
         add_device(0x08, 123); // Nefit Trendline
 
         // UBAuptime
@@ -140,7 +140,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "thermostat") == 0) {
-        EMSESP::logger().info(F("Testing thermostat..."));
+        EMSESP::logger().info(F("Adding thermostat..."));
 
         add_device(0x10, 192); // FW120
 
@@ -153,7 +153,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "solar") == 0) {
-        EMSESP::logger().info(F("Testing solar..."));
+        EMSESP::logger().info(F("Adding solar..."));
 
         add_device(0x30, 163); // SM100
 
@@ -172,7 +172,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "heatpump") == 0) {
-        EMSESP::logger().info(F("Testing heatpump..."));
+        EMSESP::logger().info(F("Adding heatpump..."));
 
         add_device(0x38, 200); // Enviline module
         add_device(0x10, 192); // FW120 thermostat
@@ -187,7 +187,8 @@ bool Test::run_test(const char * command, int8_t id) {
     return false;
 }
 
-// used with the 'test' command, under su/admin
+// These next tests are run from the Console
+// using the test command
 void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     // switch to su
     shell.add_flags(CommandFlags::ADMIN);
@@ -425,6 +426,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"wwonetime\",\"id\":0,\"data\":\"off\"}");
         EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"wwonetime\",\"hc\":1,\"data\":\"on\"}");
         EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"wwonetime\",\"data\":\"on\",\"hc\":1}");
+        EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"heatingactivated\",\"data\":1}");
 
         shell.invoke_command("show mqtt");
     }
@@ -435,7 +437,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         run_test("boiler");
 
         // device type, command, data
-        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false", true);
+        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
     }
 
     if (command == "fr120") {
@@ -468,6 +470,324 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("call thermostat seltemp"); // sensor.thermostat_hc1_selected_room_temperature
         shell.invoke_command("call thermostat entities");
         shell.invoke_command("call boiler entities");
+    }
+
+    if (command == "lastcode") {
+        shell.printfln(F("Testing lastcode"));
+
+        Mqtt::ha_enabled(false);
+        Mqtt::nested_format(1);
+        Mqtt::send_response(false);
+
+        run_test("boiler");
+        // run_test("thermostat");
+
+        // 0xC2
+        //  [emsesp] Boiler(0x08) -> Me(0x0B), UBAErrorMessage3(0xC2), data: 08 AC 00 10 31 48 30 31 15 80 95 0B 0E 10 38 00 7F FF FF FF 08 AC 00 10 09 41 30
+        uart_telegram(
+            {0x08, 0x0B, 0xC2, 0, 0x08, 0xAC, 00, 0x10, 0x31, 0x48, 0x30, 0x31, 0x15, 0x80, 0x95, 0x0B, 0x0E, 0x10, 0x38, 00, 0x7F, 0xFF, 0xFF, 0xFF});
+
+        // shell.invoke_command("show");
+    }
+
+    if (command == "dv") {
+        shell.printfln(F("Testing device value rendering"));
+
+        Mqtt::ha_enabled(true);
+        Mqtt::nested_format(1);
+        Mqtt::send_response(false);
+
+        run_test("boiler");
+        run_test("thermostat");
+
+        shell.invoke_command("call boiler wwseltemp");
+        shell.invoke_command("call system publish");
+    }
+
+    if (command == "dv2") {
+        shell.printfln(F("Testing device value lost"));
+
+        // Boiler -> Me, UBAParameterWW(0x33)
+        // wwseltemp = goes from 52 degrees (0x34) to void (0xFF)
+        // it should delete the HA config topic homeassistant/sensor/ems-esp/boiler_wwseltemp/config
+        uart_telegram({0x08, 0x0B, 0x33, 0x00, 0x08, 0xFF, 0xFF, 0xFB, 0x00, 0x28, 0x00, 0x00, 0x46, 0x00, 0xFF, 0xFF, 0x00});
+
+        shell.invoke_command("call boiler wwseltemp");
+        shell.invoke_command("call system publish");
+    }
+
+    if (command == "api") {
+        shell.printfln(F("Testing API with MQTT and REST, standalone"));
+
+        Mqtt::ha_enabled(true);
+        // Mqtt::ha_enabled(false);
+
+        Mqtt::nested_format(1);
+        Mqtt::send_response(true);
+
+        run_test("boiler");
+        run_test("thermostat");
+
+#if defined(EMSESP_STANDALONE)
+
+        AsyncWebServerRequest requestX;
+        DynamicJsonDocument   docX(2000);
+        JsonVariant           jsonX;
+
+        requestX.method(HTTP_GET);
+
+        /*
+        requestX.url("/api"); // should fail
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        return;
+        */
+
+        /*
+        requestX.url("/api/thermostat/seltemp");
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        return;
+        */
+
+        /*
+        requestX.url("/api/thermostat/mode/auto"); 
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        return;
+        */
+
+        /*
+        requestX.url("/api/thermostat"); // check if defaults to info
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        requestX.url("/api/thermostat/info");
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        requestX.url("/api/thermostat/values");
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        return;
+
+        requestX.url("/api/thermostat/mode");
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        return;
+        */
+
+        /*
+        requestX.url("/api/system"); // check if defaults to info
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        emsesp::EMSESP::logger().notice("*");
+
+        requestX.url("/api/system/info");
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        emsesp::EMSESP::logger().notice("*");
+
+        requestX.url("/api/thermostat"); // check if defaults to values
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        emsesp::EMSESP::logger().notice("*");
+
+        requestX.url("/api/thermostat/info");
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        emsesp::EMSESP::logger().notice("*");
+
+        requestX.url("/api/thermostat/seltemp");
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        return;
+        */
+
+        /*
+        requestX.url("/api/system/restart");
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        return;
+        */
+
+        /*
+        requestX.url("/api/dallassensor/xxxx");
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        emsesp::EMSESP::logger().notice("****");
+        requestX.url("/api/dallassensor/info");
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        return;
+        */
+
+        /*
+        requestX.url("/api"); // should fail
+        EMSESP::webAPIService.webAPIService_get(&requestX);
+        */
+
+        requestX.method(HTTP_POST);
+
+        /*
+        char dataX[] = "{\"device\":\"system\", \"entity\":\"settings\"}";
+        deserializeJson(docX, dataX);
+        jsonX = docX.as<JsonVariant>();
+        requestX.url("/api");
+        EMSESP::webAPIService.webAPIService_post(&requestX, jsonX);
+        return;
+        */
+
+
+        /*
+        // char                dataX[] = "{\"value\":\"0B 88 19 19 02\"}";
+        char dataX[] = "{\"name\":\"temp\",\"value\":11}";
+        deserializeJson(docX, dataX);
+        jsonX = docX.as<JsonVariant>();
+        // requestX.url("/api/system/send");
+        requestX.url("/api/thermostat");
+        EMSESP::webAPIService.webAPIService_post(&requestX, jsonX);
+        return;
+        */
+
+        /*
+        char dataX[] = "{}";
+        deserializeJson(docX, dataX);
+        jsonX = docX.as<JsonVariant>();
+        requestX.url("/api/thermostat/mode/auto"); // should fail
+        EMSESP::webAPIService.webAPIService_post(&requestX, jsonX);
+        return;
+        */
+
+        // test command parse
+        int8_t       id_n;
+        const char * cmd;
+        char         command_s[100];
+        id_n = -1;
+        strcpy(command_s, "hc2/seltemp");
+        cmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        id_n = -1;
+        strcpy(command_s, "seltemp");
+        cmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        id_n = -1;
+        strcpy(command_s, "xyz/seltemp");
+        cmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        id_n = -1;
+        strcpy(command_s, "wwc4/seltemp");
+        cmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        id_n = -1;
+        strcpy(command_s, "hc3_seltemp");
+        cmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+
+#endif
+
+        // Console tests
+        shell.invoke_command("call thermostat entities");
+        shell.invoke_command("call thermostat mode auto");
+
+        // MQTT good tests
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode", "auto");
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/hc2/mode", "auto");
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/wwc3/mode", "auto");
+        EMSESP::mqtt_.incoming("ems-esp/boiler/wwcircpump", "off");
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/seltemp");    // empty payload, sends reponse
+        EMSESP::mqtt_.incoming("ems-esp/thermostat_hc1", "22");  // HA only
+        EMSESP::mqtt_.incoming("ems-esp/thermostat_hc1", "off"); // HA only
+        EMSESP::mqtt_.incoming("ems-esp/system/send", "11 12 13");
+        EMSESP::mqtt_.incoming("ems-esp/boiler/syspress"); // empty payload, sends reponse
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode"); // empty payload, sends reponse
+        EMSESP::mqtt_.incoming("ems-esp/system/publish");
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/seltemp"); // empty payload, sends reponse
+
+        EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp", "59");
+        EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp");
+
+        EMSESP::mqtt_.incoming("ems-esp/thermostat", "{\"cmd\":\"mode\",\"data\":\"heat\",\"id\":1}");
+
+        // MQTT bad tests
+        EMSESP::mqtt_.incoming("ems-esp/thermostate/mode", "auto");     // unknown device
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/modee", "auto");     // unknown command
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode/auto", "auto"); // invalid, not allowed
+
+        // check extended MQTT base
+        Mqtt::base("home/cellar/heating");
+        EMSESP::mqtt_.incoming("home/cellar/heating/thermostat/mode"); // empty payload, sends reponse
+
+#if defined(EMSESP_STANDALONE)
+        // Web API TESTS
+        AsyncWebServerRequest request;
+        request.method(HTTP_GET);
+
+        request.url("/api/thermostat"); // check if defaults to info
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/thermostat/info");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/thermostat/values");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/thermostat/seltemp");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/system/commands");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/system/info");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/boiler/syspress");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/boiler/wwcurflow");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
+        // POST tests
+        request.method(HTTP_POST);
+        DynamicJsonDocument doc(2000);
+        JsonVariant         json;
+
+        // 1
+        char data1[] = "{\"name\":\"temp\",\"value\":11}";
+        deserializeJson(doc, data1);
+        json = doc.as<JsonVariant>();
+        request.url("/api/thermostat");
+        EMSESP::webAPIService.webAPIService_post(&request, json);
+
+        // 2
+        char data2[] = "{\"value\":12}";
+        deserializeJson(doc, data2);
+        json = doc.as<JsonVariant>();
+        request.url("/api/thermostat/temp");
+        EMSESP::webAPIService.webAPIService_post(&request, json);
+
+        // 3
+        char data3[] = "{\"device\":\"thermostat\", \"name\":\"seltemp\",\"value\":13}";
+        deserializeJson(doc, data3);
+        json = doc.as<JsonVariant>();
+        request.url("/api");
+        EMSESP::webAPIService.webAPIService_post(&request, json);
+
+        // 4 - system call
+        char data4[] = "{\"value\":\"0B 88 19 19 02\"}";
+        deserializeJson(doc, data4);
+        json = doc.as<JsonVariant>();
+        request.url("/api/system/send");
+        EMSESP::webAPIService.webAPIService_post(&request, json);
+
+        // 5 - test write value
+        //  device=3 cmd=hc2/seltemp value=44
+        char data5[] = "{\"device\":\"thermostat\", \"cmd\":\"hc2.seltemp\",\"value\":14}";
+        deserializeJson(doc, data5);
+        json = doc.as<JsonVariant>();
+        request.url("/api");
+        EMSESP::webAPIService.webAPIService_post(&request, json);
+
+        // write value from web - testing hc2/seltemp
+        char data6[] = "{\"id\":2,\"devicevalue\":{\"v\":\"44\",\"u\":1,\"n\":\"hc2 selected room temperature\",\"c\":\"hc2/seltemp\"}";
+        deserializeJson(doc, data6);
+        json = doc.as<JsonVariant>();
+        request.url("/rest/writeValue");
+        EMSESP::webDataService.write_value(&request, json);
+
+        // write value from web - testing hc9/seltemp - should fail!
+        char data7[] = "{\"id\":2,\"devicevalue\":{\"v\":\"55\",\"u\":1,\"n\":\"hc2 selected room temperature\",\"c\":\"hc9/seltemp\"}";
+        deserializeJson(doc, data7);
+        json = doc.as<JsonVariant>();
+        request.url("/rest/writeValue");
+        EMSESP::webDataService.write_value(&request, json);
+
+        // emsesp::EMSESP::logger().notice("*");
+
+        // should fail
+        char data8[] = "{}";
+        deserializeJson(doc, data8);
+        json = doc.as<JsonVariant>();
+        request.url("/api/thermostat/mode/auto");
+        EMSESP::webAPIService.webAPIService_post(&request, json);
+
+#endif
     }
 
     if (command == "mqtt_nested") {
@@ -875,7 +1195,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"wwmode\",\"data\":\"auto\"}");
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"control\",\"data\":\"1\"}");          // RC35 only, should error
-        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"poep\",\"id\":2}"); // invalid mode
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"typo\",\"id\":2}"); // invalid mode
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"auto\",\"id\":2}");
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"auto\",\"hc\":2}");     // hc as number
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"temp\",\"data\":19.5,\"hc\":1}");         // data as number
@@ -949,75 +1269,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("call mixer info");
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
-    }
-
-    if (command == "api") {
-#if defined(EMSESP_STANDALONE)
-        shell.printfln(F("Testing RESTful API..."));
-        Mqtt::ha_enabled(true);
-        Mqtt::enabled(false);
-        run_test("general");
-        AsyncWebServerRequest request;
-
-        // GET
-        request.url("/api/thermostat");
-        EMSESP::webAPIService.webAPIService_get(&request);
-        request.url("/api/thermostat/info");
-        EMSESP::webAPIService.webAPIService_get(&request);
-
-        // these next 2 should fail
-        request.url("/api/boiler/id");
-        EMSESP::webAPIService.webAPIService_get(&request);
-        request.url("/api/thermostat/hamode");
-        EMSESP::webAPIService.webAPIService_get(&request);
-
-        request.method(HTTP_GET);
-        request.url("/api/thermostat/seltemp");
-        EMSESP::webAPIService.webAPIService_get(&request);
-
-        request.url("/api/boiler/syspress");
-        EMSESP::webAPIService.webAPIService_get(&request);
-
-        request.url("/api/system/commands");
-        EMSESP::webAPIService.webAPIService_get(&request);
-
-        request.url("/api/boiler/info");
-        EMSESP::webAPIService.webAPIService_get(&request);
-
-        request.url("/api/boiler/wwcurflow");
-        EMSESP::webAPIService.webAPIService_get(&request);
-
-        // POST
-        request.method(HTTP_POST);
-
-        request.url("/api/system/commands");
-        EMSESP::webAPIService.webAPIService_get(&request);
-
-        DynamicJsonDocument doc(2000);
-        JsonVariant         json;
-
-        // 1
-        char data1[] = "{\"name\":\"temp\",\"value\":11}";
-        deserializeJson(doc, data1);
-        json = doc.as<JsonVariant>();
-        request.url("/api/thermostat");
-        EMSESP::webAPIService.webAPIService_post(&request, json);
-
-        // 2
-        char data2[] = "{\"value\":12}";
-        deserializeJson(doc, data2);
-        json = doc.as<JsonVariant>();
-        request.url("/api/thermostat/temp");
-        EMSESP::webAPIService.webAPIService_post(&request, json);
-
-        // 3
-        char data3[] = "{\"device\":\"thermostat\", \"name\":\"temp\",\"value\":13}";
-        deserializeJson(doc, data3);
-        json = doc.as<JsonVariant>();
-        request.url("/api");
-        EMSESP::webAPIService.webAPIService_post(&request, json);
-
-#endif
     }
 
     if (command == "crash") {

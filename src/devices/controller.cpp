@@ -29,7 +29,7 @@ Controller::Controller(uint8_t device_type, uint8_t device_id, uint8_t product_i
 }
 
 // publish HA config
-bool Controller::publish_ha_config() {
+bool Controller::publish_ha_device_config() {
     return true;
 }
 

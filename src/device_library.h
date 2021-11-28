@@ -69,7 +69,8 @@
 {202, DeviceType::THERMOSTAT, F("Logamatic TC100/Moduline Easy"), DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
 {203, DeviceType::THERMOSTAT, F("EasyControl CT200"), DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
 
-// Thermostat - Buderus/Nefit/Bosch specific - 0x17 / 0x10 / 0x18 / 0x19 / 0x38
+// Thermostat - Buderus/Nefit/Bosch specific - 0x17 / 0x10 / 0x18 / 0x19-0x1B for hc2-4 / 0x38
+{ 65, DeviceType::THERMOSTAT, F("RC10"), DeviceFlags::EMS_DEVICE_FLAG_RC20_N},// 0x17
 { 67, DeviceType::THERMOSTAT, F("RC30"), DeviceFlags::EMS_DEVICE_FLAG_RC30_N},// 0x10 - based on RC35
 { 77, DeviceType::THERMOSTAT, F("RC20/Moduline 300"), DeviceFlags::EMS_DEVICE_FLAG_RC20},// 0x17
 { 78, DeviceType::THERMOSTAT, F("Moduline 400"), DeviceFlags::EMS_DEVICE_FLAG_RC30}, // 0x10
@@ -83,12 +84,12 @@
 {157, DeviceType::THERMOSTAT, F("RC200/CW100"), DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18
 {158, DeviceType::THERMOSTAT, F("RC300/RC310/Moduline 3000/1010H/CW400/Sense II"), DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 {165, DeviceType::THERMOSTAT, F("RC100/Moduline 1000/1010"), DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18, 0x38
-{216, DeviceType::THERMOSTAT, F("CRF200S"), DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {172, DeviceType::THERMOSTAT, F("Rego 2000/3000"), DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
+{216, DeviceType::THERMOSTAT, F("CRF200S"), DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 
 // Thermostat - Sieger - 0x10 / 0x17
 { 66, DeviceType::THERMOSTAT, F("ES72/RC20"), DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17 or remote
-{ 76, DeviceType::THERMOSTAT, F("ES73"), DeviceFlags::EMS_DEVICE_FLAG_RC35}, // 0x10
+{ 76, DeviceType::THERMOSTAT, F("ES73"), DeviceFlags::EMS_DEVICE_FLAG_RC30_N}, // 0x10
 {113, DeviceType::THERMOSTAT, F("ES72/RC20"), DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17
 
 // Thermostat - Junkers - 0x10
@@ -96,7 +97,7 @@
 {106, DeviceType::THERMOSTAT, F("FW200"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},
 {107, DeviceType::THERMOSTAT, F("FR100"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS | DeviceFlags::EMS_DEVICE_FLAG_JUNKERS_OLD}, // older model
 {108, DeviceType::THERMOSTAT, F("FR110"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS | DeviceFlags::EMS_DEVICE_FLAG_JUNKERS_OLD}, // older model
-{111, DeviceType::THERMOSTAT, F("FR10"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},  
+{111, DeviceType::THERMOSTAT, F("FR10"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS | DeviceFlags::EMS_DEVICE_FLAG_JUNKERS_OLD}, // older model
 {147, DeviceType::THERMOSTAT, F("FR50"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS | DeviceFlags::EMS_DEVICE_FLAG_JUNKERS_OLD},
 {191, DeviceType::THERMOSTAT, F("FR120"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS | DeviceFlags::EMS_DEVICE_FLAG_JUNKERS_OLD}, // older model
 {192, DeviceType::THERMOSTAT, F("FW120"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},
@@ -125,10 +126,16 @@
 {205, DeviceType::CONNECT, F("Moduline Easy Connect"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {206, DeviceType::CONNECT, F("Easy Connect"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
+// wireless sensor base- 0x50
+{236, DeviceType::CONNECT, F("Wireless sensor base"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
 // Switches - 0x11
 { 71, DeviceType::SWITCH, F("WM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Gateways - 0x48
-{189, DeviceType::GATEWAY, F("KM200/MB LAN 2"), DeviceFlags::EMS_DEVICE_FLAG_NONE}
+{189, DeviceType::GATEWAY, F("KM200/MB LAN 2"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
+// generic - 0x40 or other with no product-id and no version
+{0, DeviceType::GENERIC, F("unknown"), DeviceFlags::EMS_DEVICE_FLAG_NONE}
 
 // clang-format on

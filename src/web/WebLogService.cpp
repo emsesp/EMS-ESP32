@@ -27,6 +27,7 @@ WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * security
     , setValues_(LOG_SETTINGS_PATH, std::bind(&WebLogService::setValues, this, _1, _2), 256) { // for POSTS
 
     events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
+
     server->addHandler(&events_);
     server->on(EVENT_SOURCE_LOG_PATH, HTTP_GET, std::bind(&WebLogService::forbidden, this, _1));
 

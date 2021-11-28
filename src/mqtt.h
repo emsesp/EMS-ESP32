@@ -42,7 +42,7 @@ using uuid::console::Shell;
 #define MQTT_HA_PUBLISH_DELAY 50
 
 // size of queue
-#define MAX_MQTT_MESSAGES 200
+#define MAX_MQTT_MESSAGES 300
 
 namespace emsesp {
 
@@ -88,20 +88,15 @@ class Mqtt {
 
     };
 
-    // subscribe_format
-    enum Subscribe_Format : uint8_t {
-        GENERAL = 0,        // 0
-        INDIVIDUAL_MAIN_HC, // 1
-        INDIVIDUAL_ALL_HC   // 2
-
-    };
+    // for Home Assistant
+    enum class State_class { NONE, MEASUREMENT, TOTAL_INCREASING };
+    enum class Device_class { NONE, TEMPERATURE, POWER_FACTOR, ENERGY, PRESSURE, POWER, SIGNAL_STRENGTH };
 
     static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // note this should really match the user setting in mqttSettings.maxTopicLength
 
     static void on_connect();
 
     static void subscribe(const uint8_t device_type, const std::string & topic, mqtt_sub_function_p cb);
-    static void subscribe(const std::string & topic, mqtt_sub_function_p cb);
     static void resubscribe();
 
     static void publish(const std::string & topic, const std::string & payload);
@@ -115,14 +110,23 @@ class Mqtt {
     static void publish_retain(const __FlashStringHelper * topic, const JsonObject & payload, bool retain);
     static void publish_ha(const std::string & topic, const JsonObject & payload);
     static void publish_ha(const __FlashStringHelper * topic, const JsonObject & payload);
+    static void publish_ha(const std::string & topic);
 
-    static void publish_ha_sensor(uint8_t                     type,
-                                  uint8_t                     tag,
-                                  const __FlashStringHelper * name,
-                                  const uint8_t               device_type,
-                                  const __FlashStringHelper * entity,
-                                  const uint8_t               uom = 0);
-    static void register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t flags = 0);
+    static void publish_ha_sensor_config(uint8_t                     type,
+                                         uint8_t                     tag,
+                                         const __FlashStringHelper * name,
+                                         const uint8_t               device_type,
+                                         const __FlashStringHelper * entity,
+                                         const uint8_t               uom,
+                                         const bool                  remove,
+                                         const bool                  has_cmd);
+
+    static void publish_ha_sensor_config(uint8_t                     type,
+                                         uint8_t                     tag,
+                                         const __FlashStringHelper * name,
+                                         const uint8_t               device_type,
+                                         const __FlashStringHelper * entity,
+                                         const uint8_t               uom);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -133,7 +137,9 @@ class Mqtt {
         mqttClient_->disconnect();
     }
 
-    void incoming(const char * topic, const char * payload); // for testing only
+#if defined(EMSESP_DEBUG)
+    void incoming(const char * topic, const char * payload = ""); // for testing only
+#endif
 
     static bool connected() {
 #if defined(EMSESP_STANDALONE)
@@ -159,6 +165,10 @@ class Mqtt {
         return mqtt_base_;
     }
 
+    static void base(const char * base) {
+        mqtt_base_ = base;
+    }
+
     static uint16_t publish_count() {
         return mqtt_message_id_;
     }
@@ -173,24 +183,33 @@ class Mqtt {
         return ha_climate_format_;
     }
 
+    // nested_format is 1 if nested, otherwise 2 for single topics
     static uint8_t nested_format() {
-        return nested_format_; // nested_format is 1 if nested, otherwise 2 for single topics
+        return nested_format_;
     }
 
     static void nested_format(uint8_t nested_format) {
-        nested_format_ = nested_format; // nested_format is 1 if nested, otherwise 2 for single topics
-    }
-
-    static bool ha_enabled() {
-        return ha_enabled_;
+        nested_format_ = nested_format;
     }
 
     static void ha_climate_format(uint8_t ha_climate_format) {
         ha_climate_format_ = ha_climate_format;
     }
 
+    static bool ha_enabled() {
+        return ha_enabled_;
+    }
+
     static void ha_enabled(bool ha_enabled) {
         ha_enabled_ = ha_enabled;
+    }
+
+    static bool send_response() {
+        return send_response_;
+    }
+
+    static void send_response(bool send_response) {
+        send_response_ = send_response;
     }
 
     void set_qos(uint8_t mqtt_qos) {
@@ -284,7 +303,7 @@ class Mqtt {
     static uint8_t     ha_climate_format_;
     static bool        ha_enabled_;
     static uint8_t     nested_format_;
-    static uint8_t     subscribe_format_;
+    static bool        send_response_;
 };
 
 } // namespace emsesp

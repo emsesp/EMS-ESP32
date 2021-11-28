@@ -33,15 +33,19 @@ import {
   AuthenticatedContextProps,
   withAuthenticatedContext
 } from '../authentication';
+
 import { RestFormProps, FormButton, ErrorButton } from '../components';
 import { FACTORY_RESET_ENDPOINT, RESTART_ENDPOINT } from '../api';
 
 import { SystemStatus, EspPlatform } from './types';
 
+import VersionCheck from './VersionCheck';
+
 interface SystemStatusFormState {
   confirmRestart: boolean;
   confirmFactoryReset: boolean;
   processing: boolean;
+  currentVersion?: string;
 }
 
 type SystemStatusFormProps = AuthenticatedContextProps &
@@ -61,6 +65,16 @@ class SystemStatusForm extends Component<
     processing: false
   };
 
+  onVersionCheck = (version: string) => {
+    this.setState({ currentVersion: version });
+  };
+
+  closeVersionCheck = () => {
+    this.setState({
+      currentVersion: undefined
+    });
+  };
+
   createListItems() {
     const { data } = this.props;
     return (
@@ -75,7 +89,14 @@ class SystemStatusForm extends Component<
             primary="EMS-ESP Version"
             secondary={'v' + data.emsesp_version}
           />
+          <Button
+            color="primary"
+            onClick={() => this.onVersionCheck(data.emsesp_version)}
+          >
+            Check for updates
+          </Button>
         </ListItem>
+        <Divider variant="inset" component="li" />
         <ListItem>
           <ListItemAvatar>
             <Avatar>
@@ -304,9 +325,16 @@ class SystemStatusForm extends Component<
 
   render() {
     const me = this.props.authenticatedContext.me;
+    const { currentVersion } = this.state;
     return (
       <Fragment>
         <List>{this.createListItems()}</List>
+        {currentVersion && (
+          <VersionCheck
+            currentVersion={currentVersion}
+            onClose={this.closeVersionCheck}
+          />
+        )}
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} padding={1}>
             <FormButton

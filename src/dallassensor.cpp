@@ -41,15 +41,15 @@ void DallasSensor::start() {
         bus_.begin(dallas_gpio_);
 #endif
         // API calls
-        Command::add_json(
+        Command::add(
             EMSdevice::DeviceType::DALLASSENSOR,
             F_(info),
-            [&](const char * value, const int8_t id, JsonObject & json) { return command_info(value, id, json); },
+            [&](const char * value, const int8_t id, JsonObject & output) { return command_info(value, id, output); },
             F_(info_cmd));
-        Command::add_json(
+        Command::add(
             EMSdevice::DeviceType::DALLASSENSOR,
             F_(commands),
-            [&](const char * value, const int8_t id, JsonObject & json) { return command_commands(value, id, json); },
+            [&](const char * value, const int8_t id, JsonObject & output) { return command_commands(value, id, output); },
             F_(commands_cmd));
     }
 }
@@ -79,7 +79,7 @@ void DallasSensor::loop() {
     if (state_ == State::IDLE) {
         if (time_now - last_activity_ >= READ_INTERVAL_MS) {
 #ifdef EMSESP_DEBUG_SENSOR
-            LOG_DEBUG(F("Read sensor temperature"));
+            LOG_DEBUG(F("[DEBUG] Read sensor temperature"));
 #endif
             if (bus_.reset() || parasite_) {
                 YIELD;
@@ -210,9 +210,6 @@ bool DallasSensor::temperature_convert_complete() {
 #endif
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 int16_t DallasSensor::get_temperature_c(const uint8_t addr[]) {
 #ifndef EMSESP_STANDALONE
     if (!bus_.reset()) {
@@ -276,8 +273,6 @@ int16_t DallasSensor::get_temperature_c(const uint8_t addr[]) {
 #endif
 }
 
-#pragma GCC diagnostic pop
-
 const std::vector<DallasSensor::Sensor> DallasSensor::sensors() const {
     return sensors_;
 }
@@ -313,7 +308,7 @@ std::string DallasSensor::Sensor::to_string(const bool name) const {
     std::string str = id_string();
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         if (settings.dallas_format == Dallas_Format::NAME || name) {
-            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+            for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
                 if (strcmp(settings.sensor[i].id.c_str(), str.c_str()) == 0) {
                     str = settings.sensor[i].name.c_str();
                 }
@@ -328,7 +323,7 @@ int16_t DallasSensor::Sensor::offset() const {
     std::string str    = id_string();
     int16_t     offset = 0; // default value
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+        for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
             if (strcmp(settings.sensor[i].id.c_str(), str.c_str()) == 0) {
                 offset = settings.sensor[i].offset;
             }
@@ -376,7 +371,7 @@ bool DallasSensor::update(const char * idstr, const char * name, int16_t offset)
     EMSESP::webSettingsService.update(
         [&](WebSettings & settings) {
             // check for new name of stored id
-            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+            for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
                 if (strcmp(id, settings.sensor[i].id.c_str()) == 0) {
                     if (strlen(name) == 0 && offset == 0) { // delete entry if name and offset is empty
                         LOG_INFO(F("Deleting entry for sensor %s"), id);
@@ -397,7 +392,7 @@ bool DallasSensor::update(const char * idstr, const char * name, int16_t offset)
             }
 
             // check for free place
-            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+            for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
                 if (settings.sensor[i].id.isEmpty()) {
                     settings.sensor[i].id     = id;
                     settings.sensor[i].name   = (strlen(name) == 0) ? id : name;
@@ -410,7 +405,7 @@ bool DallasSensor::update(const char * idstr, const char * name, int16_t offset)
             }
 
             // check if there is a unused id and overwrite it
-            for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+            for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
                 bool found = false;
                 for (const auto & sensor : sensors_) {
                     if (strcmp(sensor.id_string().c_str(), settings.sensor[i].id.c_str()) == 0) {
@@ -446,14 +441,14 @@ bool DallasSensor::updated_values() {
 }
 
 // list commands
-bool DallasSensor::command_commands(const char * value, const int8_t id, JsonObject & json) {
-    return Command::list(EMSdevice::DeviceType::DALLASSENSOR, json);
+bool DallasSensor::command_commands(const char * value, const int8_t id, JsonObject & output) {
+    return Command::list(EMSdevice::DeviceType::DALLASSENSOR, output);
 }
 
 // creates JSON doc from values
 // returns false if empty
 // e.g. dallassensor_data = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":23.30},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":24.0}}
-bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject & json) {
+bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject & output) {
     if (sensors_.size() == 0) {
         return false;
     }
@@ -463,21 +458,21 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
         char sensorID[10]; // sensor{1-n}
         snprintf(sensorID, 10, "sensor%d", i++);
         if (id == -1) { // show number and id
-            JsonObject dataSensor = json.createNestedObject(sensorID);
+            JsonObject dataSensor = output.createNestedObject(sensorID);
             dataSensor["id"]      = sensor.to_string();
             if (Helpers::hasValue(sensor.temperature_c)) {
                 dataSensor["temp"] = (float)(sensor.temperature_c) / 10;
             }
         } else { // show according to format
             if (dallas_format_ == Dallas_Format::NUMBER && Helpers::hasValue(sensor.temperature_c)) {
-                json[sensorID] = (float)(sensor.temperature_c) / 10;
+                output[sensorID] = (float)(sensor.temperature_c) / 10;
             } else if (Helpers::hasValue(sensor.temperature_c)) {
-                json[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
+                output[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
             }
         }
     }
 
-    return (json.size() > 0);
+    return (output.size() > 0);
 }
 
 // send all dallas sensor values as a JSON package to MQTT

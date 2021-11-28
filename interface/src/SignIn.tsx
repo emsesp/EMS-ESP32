@@ -15,7 +15,6 @@ import {
   withAuthenticationContext,
   AuthenticationContextProps
 } from './authentication/AuthenticationContext';
-
 import { PasswordValidator } from './components';
 import { PROJECT_NAME, SIGN_IN_ENDPOINT } from './api';
 

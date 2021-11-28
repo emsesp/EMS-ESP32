@@ -27,8 +27,12 @@ class SensorForm extends React.Component<SensorFormProps> {
   };
 
   render() {
-    const { sensor, handleSensorChange, onDoneEditing, onCancelEditing } =
-      this.props;
+    const {
+      sensor,
+      handleSensorChange,
+      onDoneEditing,
+      onCancelEditing
+    } = this.props;
 
     return (
       <ValidatorForm onSubmit={onDoneEditing} ref={this.formRef}>
@@ -39,7 +43,7 @@ class SensorForm extends React.Component<SensorFormProps> {
           open
         >
           <DialogTitle id="user-form-dialog-title">
-            Editing Sensor #{sensor.no}
+            Editing Sensor #{sensor.n}
           </DialogTitle>
           <DialogContent dividers>
             <TextValidator
@@ -47,8 +51,8 @@ class SensorForm extends React.Component<SensorFormProps> {
               errorMessages={['Not a valid name']}
               fullWidth
               variant="outlined"
-              value={sensor.id}
-              onChange={handleSensorChange('id')}
+              value={sensor.i}
+              onChange={handleSensorChange('i')}
               margin="normal"
               label="Name"
               name="id"
@@ -63,12 +67,12 @@ class SensorForm extends React.Component<SensorFormProps> {
               label="Custom Offset (°C)"
               name="offset"
               type="number"
-              value={sensor.offset}
+              value={sensor.o}
               fullWidth
               variant="outlined"
               InputProps={{ inputProps: { min: '-5', max: '5', step: '0.1' } }}
               margin="normal"
-              onChange={handleSensorChange('offset')}
+              onChange={handleSensorChange('o')}
             />
           </DialogContent>
           <DialogActions>

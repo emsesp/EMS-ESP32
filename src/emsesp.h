@@ -212,6 +212,7 @@ class EMSESP {
 
     static void fetch_device_values(const uint8_t device_id = 0);
     static void fetch_device_values_type(const uint8_t device_type);
+    static bool valid_device(const uint8_t device_id);
 
     static bool add_device(const uint8_t device_id, const uint8_t product_id, std::string & version, const uint8_t brand);
     static void scan_devices();
@@ -249,9 +250,9 @@ class EMSESP {
     static void process_version(std::shared_ptr<const Telegram> telegram);
     static void publish_response(std::shared_ptr<const Telegram> telegram);
     static void publish_all_loop();
-    static bool command_info(uint8_t device_type, JsonObject & json, const int8_t id, const uint8_t output_target);
-    static bool command_commands(uint8_t device_type, JsonObject & json, const int8_t id);
-    static bool command_entities(uint8_t device_type, JsonObject & json, const int8_t id);
+    static bool command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target);
+    static bool command_commands(uint8_t device_type, JsonObject & output, const int8_t id);
+    static bool command_entities(uint8_t device_type, JsonObject & output, const int8_t id);
 
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
     static uint32_t           last_fetch_;
@@ -277,6 +278,9 @@ class EMSESP {
     static uint8_t  bool_format_;
     static uint8_t  enum_format_;
     static uint16_t wait_validate_;
+    static bool     wait_km_;
+
+    static constexpr uint8_t EMS_WAIT_KM_TIMEOUT = 60; // wait one minute
 };
 
 } // namespace emsesp
