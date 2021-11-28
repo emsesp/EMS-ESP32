@@ -28,7 +28,7 @@
 #define EMSESP_SETTINGS_SERVICE_PATH "/rest/emsespSettings"
 #define EMSESP_BOARD_PROFILE_SERVICE_PATH "/rest/boardProfile"
 
-#define NUM_SENSOR_NAMES 10
+#define MAX_NUM_SENSOR_NAMES 20
 
 namespace emsesp {
 
@@ -38,7 +38,6 @@ enum { ENUM_FORMAT_TEXT = 1, ENUM_FORMAT_NUMBER };                              
 class WebSettings {
   public:
     uint8_t  tx_mode;
-    uint8_t  tx_delay;
     uint8_t  ems_bus_id;
     uint8_t  master_thermostat;
     bool     shower_timer;
@@ -61,15 +60,19 @@ class WebSettings {
     uint8_t  pbutton_gpio;
     uint8_t  solar_maxflow;
     String   board_profile;
+    uint8_t  phy_type;
     uint8_t  dallas_format;
     uint8_t  bool_format;
     uint8_t  enum_format;
+    int8_t   weblog_level;
+    uint8_t  weblog_buffer;
+    bool     weblog_compact;
 
     struct {
         String  id;
         String  name;
         int16_t offset;
-    } sensor[NUM_SENSOR_NAMES];
+    } sensor[MAX_NUM_SENSOR_NAMES];
 
     static void              read(WebSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebSettings & settings);

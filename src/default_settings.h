@@ -24,10 +24,6 @@
 #define EMSESP_DEFAULT_TX_MODE 1 // EMS1.0
 #endif
 
-#ifndef EMSESP_DEFAULT_TX_DELAY
-#define EMSESP_DEFAULT_TX_DELAY 0 // no delay
-#endif
-
 #ifndef EMSESP_DEFAULT_EMS_BUS_ID
 #define EMSESP_DEFAULT_EMS_BUS_ID 0x0B // service key
 #endif
@@ -96,7 +92,7 @@
 #define EMSESP_DEFAULT_BOARD_PROFILE "S32" // Gateway S32
 #endif
 
-// Default GPIO PIN definitions - based on Wemos/Nodemcu
+// Default GPIO PIN definitions
 
 #ifndef EMSESP_DEFAULT_RX_GPIO
 #define EMSESP_DEFAULT_RX_GPIO 23 // D7
@@ -116,6 +112,10 @@
 
 #ifndef EMSESP_DEFAULT_PBUTTON_GPIO
 #define EMSESP_DEFAULT_PBUTTON_GPIO 0
+#endif
+
+#ifndef EMSESP_DEFAULT_PHY_TYPE
+#define EMSESP_DEFAULT_PHY_TYPE 0 // No Ethernet, just Wifi
 #endif
 
 // MQTT
@@ -152,8 +152,8 @@
 #define EMSESP_DEFAULT_NESTED_FORMAT 1
 #endif
 
-#ifndef EMSESP_DEFAULT_SUBSCRIBE_FORMAT
-#define EMSESP_DEFAULT_SUBSCRIBE_FORMAT 0
+#ifndef EMSESP_DEFAULT_SEND_RESPONSE
+#define EMSESP_DEFAULT_SEND_RESPONSE false
 #endif
 
 #ifndef EMSESP_DEFAULT_SOLAR_MAXFLOW
@@ -162,6 +162,18 @@
 
 #ifndef EMSESP_DEFAULT_SENSOR_NAME
 #define EMSESP_DEFAULT_SENSOR_NAME ""
+#endif
+
+#ifndef EMSESP_DEFAULT_WEBLOG_LEVEL
+#define EMSESP_DEFAULT_WEBLOG_LEVEL 6 // INFO
+#endif
+
+#ifndef EMSESP_DEFAULT_WEBLOG_BUFFER
+#define EMSESP_DEFAULT_WEBLOG_BUFFER 50
+#endif
+
+#ifndef EMSESP_DEFAULT_WEBLOG_COMPACT
+#define EMSESP_DEFAULT_WEBLOG_COMPACT true
 #endif
 
 #endif

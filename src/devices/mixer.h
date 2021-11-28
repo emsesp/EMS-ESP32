@@ -27,7 +27,7 @@ class Mixer : public EMSdevice {
   public:
     Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
 
-    virtual bool publish_ha_config();
+    virtual bool publish_ha_device_config();
 
   private:
     static uuid::log::Logger logger_;
@@ -40,11 +40,19 @@ class Mixer : public EMSdevice {
     void process_MMStatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_MMConfigMessage(std::shared_ptr<const Telegram> telegram);
     void process_MMSetMessage(std::shared_ptr<const Telegram> telegram);
+    void process_HpPoolStatus(std::shared_ptr<const Telegram> telegram);
+
+    bool set_flowSetTemp(const char * value, const int8_t id);
+    bool set_pump(const char * value, const int8_t id);
+    bool set_activated(const char * value, const int8_t id);
+    bool set_setValveTime(const char * value, const int8_t id);
 
     enum class Type {
         NONE,
-        HC, // heating circuit
-        WWC // warm water circuit
+        HC,  // heating circuit
+        WWC, // warm water circuit
+        MP   // pool
+
     };
 
   private:
@@ -53,9 +61,16 @@ class Mixer : public EMSdevice {
     uint8_t  pumpStatus_;
     int8_t   status_;
     uint8_t  flowSetTemp_;
+    uint8_t  activated_;
+    uint8_t  setValveTime_;
 
-    Type     type_ = Type::NONE;
-    uint16_t hc_   = EMS_VALUE_USHORT_NOTSET;
+    int16_t poolTemp_;
+    int8_t  poolShuntStatus_;
+    int8_t  poolShunt_;
+
+    Type     type_             = Type::NONE;
+    uint16_t hc_               = EMS_VALUE_USHORT_NOTSET;
+    int8_t   poolShuntStatus__ = EMS_VALUE_INT_NOTSET; // temp value
     uint8_t  id_;
 };
 

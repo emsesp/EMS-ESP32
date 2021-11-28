@@ -59,19 +59,32 @@ export const DEVICE_DATA_ENDPOINT = ENDPOINT_ROOT + 'deviceData';
 export const WRITE_VALUE_ENDPOINT = ENDPOINT_ROOT + 'writeValue';
 export const WRITE_SENSOR_ENDPOINT = ENDPOINT_ROOT + 'writeSensor';
 
-const StyledTableCell = withStyles((theme: Theme) =>
+const StyledTableRow = withStyles((theme: Theme) =>
   createStyles({
-    head: {
-      backgroundColor: theme.palette.common.black,
-      color: theme.palette.common.white
+    root: {
+      '&:nth-child(even)': {
+        backgroundColor: '#4e4e4e'
+      },
+      '&:hover': {
+        backgroundColor: theme.palette.info.light
+      }
     },
-    body: {
-      fontSize: 14
+
+    selected: {
+      backgroundColor: theme.palette.common.white
     }
   })
-)(TableCell);
+)(TableRow);
 
-const CustomTooltip = withStyles((theme: Theme) => ({
+const StyledTableRowHeader = withStyles((theme: Theme) =>
+  createStyles({
+    head: {
+      backgroundColor: theme.palette.common.black
+    }
+  })
+)(TableRow);
+
+const StyledTooltip = withStyles((theme: Theme) => ({
   tooltip: {
     backgroundColor: theme.palette.secondary.main,
     color: 'white',
@@ -82,10 +95,10 @@ const CustomTooltip = withStyles((theme: Theme) => ({
 }))(Tooltip);
 
 function compareDevices(a: Device, b: Device) {
-  if (a.type < b.type) {
+  if (a.t < b.t) {
     return -1;
   }
-  if (a.type > b.type) {
+  if (a.t > b.t) {
     return 1;
   }
   return 0;
@@ -104,6 +117,9 @@ type EMSESPDataFormProps = RestFormProps<EMSESPData> &
   AuthenticatedContextProps &
   WithWidthProps;
 
+const pluralize = (count: number, noun: string, suffix = 's') =>
+  ` ${Intl.NumberFormat().format(count)} ${noun}${count !== 1 ? suffix : ''} `;
+
 export const formatDuration = (duration_min: number) => {
   const { days, hours, minutes } = parseMilliseconds(duration_min * 60000);
   let formatted = '';
@@ -119,30 +135,29 @@ export const formatDuration = (duration_min: number) => {
   return formatted;
 };
 
-const pluralize = (count: number, noun: string, suffix = 's') =>
-  ` ${count} ${noun}${count !== 1 ? suffix : ''} `;
-
-function formatValue(value: any, uom: number, digit: number) {
+function formatValue(value: any, uom: number) {
   switch (uom) {
     case DeviceValueUOM.HOURS:
       return value ? formatDuration(value * 60) : '0 hours';
     case DeviceValueUOM.MINUTES:
       return value ? formatDuration(value) : '0 minutes';
     case DeviceValueUOM.NONE:
-    case DeviceValueUOM.LIST:
+      if (typeof value === 'number') {
+        return new Intl.NumberFormat().format(value);
+      }
       return value;
-    case DeviceValueUOM.NUM:
-      return new Intl.NumberFormat().format(value);
-    case DeviceValueUOM.BOOLEAN:
-      return value ? 'on' : 'off';
     case DeviceValueUOM.DEGREES:
+      // always show with one decimal place
       return (
         new Intl.NumberFormat(undefined, {
-          minimumFractionDigits: digit
+          minimumFractionDigits: 1
         }).format(value) +
         ' ' +
         DeviceValueUOM_s[uom]
       );
+    case DeviceValueUOM.TIMES:
+    case DeviceValueUOM.SECONDS:
+      return pluralize(value, DeviceValueUOM_s[uom]);
     default:
       return (
         new Intl.NumberFormat().format(value) + ' ' + DeviceValueUOM_s[uom]
@@ -217,7 +232,9 @@ class EMSESPDataForm extends Component<
   };
 
   sendCommand = (dv: DeviceValue) => {
-    this.setState({ edit_devicevalue: dv });
+    if (dv.c && this.props.authenticatedContext.me.admin) {
+      this.setState({ edit_devicevalue: dv });
+    }
   };
 
   handleSensorChange = (name: keyof Sensor) => (
@@ -243,10 +260,10 @@ class EMSESPDataForm extends Component<
       body: JSON.stringify({
         // because input field with type=number doens't like negative values, force it here
         sensor: {
-          no: edit_Sensor?.no,
-          id: edit_Sensor?.id,
-          temp: edit_Sensor?.temp,
-          offset: Number(edit_Sensor?.offset)
+          no: edit_Sensor?.n, // no
+          id: edit_Sensor?.i, // id
+          temp: edit_Sensor?.t, // temp
+          offset: Number(edit_Sensor?.o) // offset
         }
       }),
       headers: {
@@ -283,7 +300,9 @@ class EMSESPDataForm extends Component<
   };
 
   sendSensor = (sn: Sensor) => {
-    this.setState({ edit_Sensor: sn });
+    if (this.props.authenticatedContext.me.admin) {
+      this.setState({ edit_Sensor: sn });
+    }
   };
 
   noDevices = () => {
@@ -298,7 +317,7 @@ class EMSESPDataForm extends Component<
     return (this.state.deviceData?.data || []).length === 0;
   };
 
-  renderDeviceItems() {
+  renderDevices() {
     const { width, data } = this.props;
     return (
       <TableContainer>
@@ -309,26 +328,24 @@ class EMSESPDataForm extends Component<
         {!this.noDevices() && (
           <Table
             size="small"
-            padding={isWidthDown('xs', width!) ? 'none' : 'default'}
+            padding={isWidthDown('xs', width!) ? 'none' : 'normal'}
           >
             <TableBody>
               {data.devices.sort(compareDevices).map((device) => (
                 <TableRow
                   hover
-                  key={device.id}
-                  onClick={() => this.handleRowClick(device.id)}
+                  key={device.i}
+                  onClick={() => this.handleRowClick(device.i)}
                 >
                   <TableCell>
-                    <CustomTooltip
+                    <StyledTooltip
                       title={
                         'DeviceID:0x' +
-                        (
-                          '00' + device.deviceid.toString(16).toUpperCase()
-                        ).slice(-2) +
+                        ('00' + device.d.toString(16).toUpperCase()).slice(-2) +
                         ' ProductID:' +
-                        device.productid +
+                        device.p +
                         ' Version:' +
-                        device.version
+                        device.v
                       }
                       placement="right-end"
                     >
@@ -337,12 +354,12 @@ class EMSESPDataForm extends Component<
                         size="small"
                         variant="outlined"
                       >
-                        {device.type}
+                        {device.t}
                       </Button>
-                    </CustomTooltip>
+                    </StyledTooltip>
                   </TableCell>
                   <TableCell align="right">
-                    {device.brand + ' ' + device.name}{' '}
+                    {device.b + ' ' + device.n}{' '}
                   </TableCell>
                 </TableRow>
               ))}
@@ -367,7 +384,7 @@ class EMSESPDataForm extends Component<
     );
   }
 
-  renderSensorItems() {
+  renderSensorData() {
     const { data } = this.props;
     const me = this.props.authenticatedContext.me;
     return (
@@ -377,43 +394,38 @@ class EMSESPDataForm extends Component<
           Sensors
         </Typography>
         {!this.noSensors() && (
-          <Table size="small" padding="default">
+          <Table size="small" padding="normal">
             <TableHead>
-              <TableRow>
-                <StyledTableCell
-                  padding="checkbox"
-                  style={{ width: 18 }}
-                ></StyledTableCell>
-                <StyledTableCell>Sensor #</StyledTableCell>
-                <StyledTableCell align="left">ID / Name</StyledTableCell>
-                <StyledTableCell align="right">Temperature</StyledTableCell>
-              </TableRow>
+              <StyledTableRowHeader>
+                <TableCell padding="checkbox" style={{ width: 18 }}></TableCell>
+                <TableCell>Dallas Sensor #</TableCell>
+                <TableCell align="left">ID / Name</TableCell>
+                <TableCell align="right">Temperature</TableCell>
+              </StyledTableRowHeader>
             </TableHead>
             <TableBody>
               {data.sensors.map((sensorData) => (
-                <TableRow key={sensorData.no} hover>
-                  <TableCell padding="checkbox" style={{ width: 18 }}>
+                <StyledTableRow
+                  key={sensorData.n}
+                  onClick={() => this.sendSensor(sensorData)}
+                >
+                  <TableCell padding="checkbox">
                     {me.admin && (
-                      <CustomTooltip title="edit" placement="left-end">
-                        <IconButton
-                          edge="start"
-                          size="small"
-                          aria-label="Edit"
-                          onClick={() => this.sendSensor(sensorData)}
-                        >
+                      <StyledTooltip title="edit" placement="left-end">
+                        <IconButton edge="start" size="small" aria-label="Edit">
                           <EditIcon color="primary" fontSize="small" />
                         </IconButton>
-                      </CustomTooltip>
+                      </StyledTooltip>
                     )}
                   </TableCell>
                   <TableCell component="th" scope="row">
-                    {sensorData.no}
+                    {sensorData.n}
                   </TableCell>
-                  <TableCell align="left">{sensorData.id}</TableCell>
+                  <TableCell align="left">{sensorData.i}</TableCell>
                   <TableCell align="right">
-                    {formatValue(sensorData.temp, DeviceValueUOM.DEGREES, 1)}
+                    {formatValue(sensorData.t, DeviceValueUOM.DEGREES)}
                   </TableCell>
-                </TableRow>
+                </StyledTableRow>
               ))}
             </TableBody>
           </Table>
@@ -421,7 +433,7 @@ class EMSESPDataForm extends Component<
         {this.noSensors() && (
           <Box color="warning.main" p={0} mt={0} mb={0}>
             <Typography variant="body1">
-              <i>no connected Dallas temperature sensors were detected</i>
+              <i>no Dallas temperature sensors were detected</i>
             </Typography>
           </Box>
         )}
@@ -429,25 +441,28 @@ class EMSESPDataForm extends Component<
     );
   }
 
-  renderAnalog() {
+  renderAnalogData() {
     const { data } = this.props;
     return (
       <TableContainer>
+        <p></p>
         {data.analog > 0 && (
-          <Table size="small" padding="default">
+          <Table size="small" padding="normal">
             <TableHead>
-              <TableRow>
-                <StyledTableCell>Sensortype</StyledTableCell>
-                <StyledTableCell align="right">Value</StyledTableCell>
-              </TableRow>
+              <StyledTableRowHeader>
+                <TableCell padding="normal" style={{ width: 18 }}></TableCell>
+                <TableCell>Sensor Type</TableCell>
+                <TableCell align="right">Value</TableCell>
+              </StyledTableRowHeader>
             </TableHead>
             <TableBody>
               <TableRow>
+                <TableCell padding="normal">&nbsp;&nbsp;</TableCell>
                 <TableCell component="th" scope="row">
                   Analog Input
                 </TableCell>
                 <TableCell align="right">
-                  {formatValue(data.analog, DeviceValueUOM.MV, 0)}
+                  {formatValue(data.analog, DeviceValueUOM.MV)}
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -553,7 +568,6 @@ class EMSESPDataForm extends Component<
   renderDeviceData() {
     const { deviceData } = this.state;
     const { width } = this.props;
-    const me = this.props.authenticatedContext.me;
 
     if (this.noDevices()) {
       return;
@@ -568,22 +582,24 @@ class EMSESPDataForm extends Component<
         <p></p>
         <Box bgcolor="info.main" p={1} mt={1} mb={1}>
           <Typography variant="body1" color="initial">
-            {deviceData.name}
+            {deviceData.type}&nbsp;Data
           </Typography>
         </Box>
         {!this.noDeviceData() && (
           <TableContainer>
             <Table
               size="small"
-              padding={isWidthDown('xs', width!) ? 'none' : 'default'}
+              padding={isWidthDown('xs', width!) ? 'none' : 'normal'}
             >
-              <TableHead></TableHead>
               <TableBody>
                 {deviceData.data.map((item, i) => (
-                  <TableRow hover key={i}>
+                  <StyledTableRow
+                    key={i}
+                    onClick={() => this.sendCommand(item)}
+                  >
                     <TableCell padding="checkbox" style={{ width: 18 }}>
-                      {item.c && me.admin && (
-                        <CustomTooltip
+                      {item.c && this.props.authenticatedContext.me.admin && (
+                        <StyledTooltip
                           title="change value"
                           placement="left-end"
                         >
@@ -591,20 +607,19 @@ class EMSESPDataForm extends Component<
                             edge="start"
                             size="small"
                             aria-label="Edit"
-                            onClick={() => this.sendCommand(item)}
                           >
                             <EditIcon color="primary" fontSize="small" />
                           </IconButton>
-                        </CustomTooltip>
+                        </StyledTooltip>
                       )}
                     </TableCell>
                     <TableCell padding="none" component="th" scope="row">
                       {item.n}
                     </TableCell>
                     <TableCell padding="none" align="right">
-                      {formatValue(item.v, item.u, 0)}
+                      {formatValue(item.v, item.u)}
                     </TableCell>
-                  </TableRow>
+                  </StyledTableRow>
                 ))}
               </TableBody>
             </Table>
@@ -613,7 +628,7 @@ class EMSESPDataForm extends Component<
         {this.noDeviceData() && (
           <Box color="warning.main" p={0} mt={0} mb={0}>
             <Typography variant="body1">
-              <i>No data available for this device</i>
+              <i>no data available for this device</i>
             </Typography>
           </Box>
         )}
@@ -626,10 +641,10 @@ class EMSESPDataForm extends Component<
     return (
       <Fragment>
         <br></br>
-        {this.renderDeviceItems()}
+        {this.renderDevices()}
         {this.renderDeviceData()}
-        {this.renderSensorItems()}
-        {this.renderAnalog()}
+        {this.renderSensorData()}
+        {this.renderAnalogData()}
         <br></br>
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} padding={1}>

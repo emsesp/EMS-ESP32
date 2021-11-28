@@ -45,6 +45,7 @@ interface LogEventControllerState {
   compact: boolean;
   level: number;
   max_messages: number;
+  last_id: number;
 }
 
 type LogEventControllerProps = RestControllerProps<LogSettings>;
@@ -62,7 +63,8 @@ class LogEventController extends Component<
       events: [],
       compact: false,
       level: 6,
-      max_messages: 25
+      max_messages: 25,
+      last_id: 0
     };
   }
 
@@ -88,6 +90,11 @@ class LogEventController extends Component<
     this.setState({
       compact: checked
     });
+    this.send_data(
+      this.state.level,
+      this.state.max_messages,
+      checked as boolean
+    );
   };
 
   fetchLog = () => {
@@ -118,7 +125,11 @@ class LogEventController extends Component<
         throw Error('Unexpected status code: ' + response.status);
       })
       .then((json) => {
-        this.setState({ level: json.level, max_messages: json.max_messages });
+        this.setState({
+          level: json.level,
+          max_messages: json.max_messages,
+          compact: json.compact
+        });
       })
       .catch((error) => {
         const errorMessage = error.message || 'Unknown error';
@@ -148,7 +159,10 @@ class LogEventController extends Component<
     const rawData = event.data;
     if (typeof rawData === 'string' || rawData instanceof String) {
       const event = JSON.parse(rawData as string) as LogEvent;
-      this.setState((state) => ({ events: [...state.events, event] }));
+      if (event.i > this.state.last_id) {
+        this.setState({ last_id: event.i });
+        this.setState((state) => ({ events: [...state.events, event] }));
+      }
     }
   };
 
@@ -159,22 +173,27 @@ class LogEventController extends Component<
     this.setState({
       max_messages: value as number
     });
-    this.send_data(this.state.level, value as number);
+    this.send_data(this.state.level, value as number, this.state.compact);
   };
 
   changeLevel = (event: React.ChangeEvent<HTMLSelectElement>) => {
     this.setState({
       level: parseInt(event.target.value)
     });
-    this.send_data(parseInt(event.target.value), this.state.max_messages);
+    this.send_data(
+      parseInt(event.target.value),
+      this.state.max_messages,
+      this.state.compact
+    );
   };
 
-  send_data = (level: number, max_messages: number) => {
+  send_data = (level: number, max_messages: number, compact: boolean) => {
     redirectingAuthorizedFetch(LOG_SETTINGS_ENDPOINT, {
       method: 'POST',
       body: JSON.stringify({
         level: level,
-        max_messages: max_messages
+        max_messages: max_messages,
+        compact: compact
       }),
       headers: {
         'Content-Type': 'application/json'
@@ -206,29 +225,27 @@ class LogEventController extends Component<
       case LogLevel.DEBUG:
         return 'D';
       case LogLevel.TRACE:
-        return 'TRACE';
+        return 'T';
       default:
         return '';
     }
   };
 
   onDownload = () => {
-    const { events, level } = this.state;
+    const { events } = this.state;
     let result = '';
     for (const i in events) {
-      if (events[i].l <= level) {
-        result +=
-          events[i].t +
-          ' ' +
-          this.levelLabel(events[i].l) +
-          ' ' +
-          events[i].i +
-          ': [' +
-          events[i].n +
-          '] ' +
-          events[i].m +
-          '\n';
-      }
+      result +=
+        events[i].t +
+        ' ' +
+        this.levelLabel(events[i].l) +
+        ' ' +
+        events[i].i +
+        ': [' +
+        events[i].n +
+        '] ' +
+        events[i].m +
+        '\n';
     }
     const a = document.createElement('a');
     a.setAttribute(
@@ -250,7 +267,7 @@ class LogEventController extends Component<
             container
             spacing={3}
             direction="row"
-            justify="flex-start"
+            justifyContent="flex-start"
             alignItems="center"
           >
             <Grid item xs={2}>
@@ -280,11 +297,12 @@ class LogEventController extends Component<
                 marks={[
                   { value: 25, label: '25' },
                   { value: 50, label: '50' },
-                  { value: 75, label: '75' }
+                  { value: 75, label: '75' },
+                  { value: 100, label: '100' }
                 ]}
                 step={25}
                 min={25}
-                max={75}
+                max={100}
                 onChange={this.changeMaxMessages}
               />
             </Grid>

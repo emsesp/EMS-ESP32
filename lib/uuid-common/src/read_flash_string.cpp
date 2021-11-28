@@ -25,6 +25,10 @@
 namespace uuid {
 
 std::string read_flash_string(const __FlashStringHelper * flash_str) {
+    if (flash_str == nullptr) {
+        return std::string(""); // prevent crash
+    }
+
     std::string str(::strlen_P(reinterpret_cast<PGM_P>(flash_str)), '\0');
 
     ::strncpy_P(&str[0], reinterpret_cast<PGM_P>(flash_str), str.capacity() + 1);

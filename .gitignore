@@ -28,3 +28,5 @@ emsesp
 node_modules
 /interface/.eslintcache
 test.sh
+scripts/__pycache__
+.temp

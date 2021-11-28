@@ -225,7 +225,7 @@ const mqtt_settings = {
   ha_climate_format: 1,
   ha_enabled: true,
   nested_format: 1,
-  subscribe_format: 0,
+  send_response: true,
 }
 const mqtt_status = {
   enabled: true,
@@ -291,9 +291,9 @@ const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'emsespStatus'
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile'
 const WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
 const WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
-const emsesp_settings = {
+
+emsesp_settings = {
   tx_mode: 1,
-  tx_delay: 0,
   ems_bus_id: 11,
   syslog_enabled: false,
   syslog_level: 3,
@@ -306,6 +306,7 @@ const emsesp_settings = {
   shower_alert: false,
   rx_gpio: 23,
   tx_gpio: 5,
+  phy_type: 0,
   dallas_gpio: 3,
   dallas_parasite: false,
   led_gpio: 2,
@@ -321,37 +322,38 @@ const emsesp_settings = {
 const emsesp_data = {
   devices: [
     {
-      id: 1,
-      type: 'Thermostat',
-      brand: '',
-      name: 'RC20/Moduline 300',
-      deviceid: 23,
-      productid: 77,
-      version: '03.03',
+      i: 1,
+      t: 'Thermostat',
+      b: '',
+      n: 'RC20/Moduline 300',
+      d: 23,
+      p: 77,
+      v: '03.03',
     },
     {
-      id: 2,
-      type: 'Boiler',
-      brand: 'Nefit',
-      name: 'GBx72/Trendline/Cerapur/Greenstar Si/27i',
-      deviceid: 8,
-      productid: 123,
-      version: '06.01',
+      i: 2,
+      t: 'Boiler',
+      b: 'Nefit',
+      n: 'GBx72/Trendline/Cerapur/Greenstar Si/27i',
+      d: 8,
+      p: 123,
+      v: '06.01',
     },
     {
-      id: 3,
-      type: 'Controller',
-      brand: '',
-      name: 'BC10',
-      deviceid: 9,
-      productid: 190,
-      version: '01.03',
+      i: 3,
+      t: 'Controller',
+      b: '',
+      n: 'BC10',
+      d: 9,
+      p: 190,
+      v: '01.03',
     },
   ],
   sensors: [
-    { no: 1, id: '28-233D-9497-0C03', temp: 25.7, offset: 1.2 },
-    { no: 2, id: '28-243D-7437-1E3A', temp: 26.1, offset: 0 },
+    { n: 1, i: '28-233D-9497-0C03', t: 25.7, o: 1.2 },
+    { n: 2, i: '28-243D-7437-1E3A', t: 26.1, o: 0 },
   ],
+  analog: 12,
 }
 
 const emsesp_status = {
@@ -363,7 +365,7 @@ const emsesp_status = {
 }
 
 const emsesp_devicedata_1 = {
-  name: 'Thermostat: RC20/Moduline 300',
+  type: 'Thermostat',
   data: [
     {
       v: '(0)',
@@ -380,386 +382,151 @@ const emsesp_devicedata_1 = {
     {
       v: 18,
       u: 1,
-      n: '(hc1) selected room temperature',
+      n: 'hc1 selected room temperature',
       c: 'hc1/seltemp',
     },
     {
       v: 22.6,
       u: 1,
-      n: '(hc1) current room temperature',
+      n: 'hc1 current room temperature',
       c: '',
     },
     {
       v: 'auto',
       u: 0,
-      n: '(hc1) mode',
+      n: 'hc1 mode',
       c: 'hc1/mode',
     },
   ],
 }
 
 const emsesp_devicedata_2 = {
-  name: 'Boiler: Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i',
+  type: 'Boiler',
   data: [
+    { v: 'off', u: 0, n: 'heating active' },
+    { v: 'off', u: 0, n: 'warm water active' },
+    { v: 5, u: 1, n: 'selected flow temperature', c: 'selflowtemp' },
+    { v: 0, u: 2, n: 'burner selected max power', c: 'selburnpow' },
+    { v: 0, u: 2, n: 'heating pump modulation' },
+    { v: 42.9, u: 1, n: 'current flow temperature' },
+    { v: 41.8, u: 1, n: 'return temperature' },
+    { v: 1.6, u: 9, n: 'system pressure' },
+    { v: 45, u: 1, n: 'actual boiler temperature' },
+    { v: 'off', u: 0, n: 'gas' },
+    { v: 0, u: 8, n: 'flame current' },
+    { v: 'off', u: 0, n: 'heating pump' },
+    { v: 'off', u: 0, n: 'fan' },
+    { v: 'off', u: 0, n: 'ignition' },
     {
-      v: false,
-      u: 16,
-      n: 'heating active',
-      c: '',
-    },
-    {
-      v: false,
-      u: 16,
-      n: 'warm water active',
-      c: '',
-    },
-    {
-      v: 5,
-      u: 1,
-      n: 'selected flow temperature',
-      c: 'selflowtemp',
-    },
-    {
-      v: 0,
-      u: 2,
-      n: 'burner selected max power',
-      c: 'selburnpow',
-    },
-    {
-      v: 0,
-      u: 2,
-      n: 'heating pump modulation',
-      c: '',
-    },
-    {
-      v: 51,
-      u: 1,
-      n: 'current flow temperature',
-      c: '',
-    },
-    {
-      v: 49.8,
-      u: 1,
-      n: 'return temperature',
-      c: '',
-    },
-    {
-      v: 1.1,
-      u: 9,
-      n: 'system pressure',
-      c: '',
-    },
-    {
-      v: 52.7,
-      u: 1,
-      n: 'boiler temperature',
-      c: '',
-    },
-    {
-      v: false,
-      u: 16,
-      n: 'gas',
-      c: '',
-    },
-    {
-      v: 0,
-      u: 8,
-      n: 'flame current',
-      c: '',
-    },
-    {
-      v: false,
-      u: 16,
-      n: 'heating pump',
-      c: '',
-    },
-    {
-      v: false,
-      u: 16,
-      n: 'fan',
-      c: '',
-    },
-    {
-      v: false,
-      u: 16,
-      n: 'ignition',
-      c: '',
-    },
-    {
-      v: true,
-      u: 16,
+      v: 'on',
+      u: 0,
       n: 'heating activated',
       c: 'heatingactivated',
+      l: ['off', 'on'],
     },
-    {
-      v: 75,
-      u: 1,
-      n: 'heating temperature',
-      c: 'heatingtemp',
-    },
-    {
-      v: 90,
-      u: 2,
-      n: 'burner pump max power',
-      c: 'pumpmodmax',
-    },
-    {
-      v: 55,
-      u: 2,
-      n: 'burner pump min power',
-      c: 'pumpmodmin',
-    },
-    {
-      v: 1,
-      u: 7,
-      n: 'pump delay',
-      c: 'pumpdelay',
-    },
-    {
-      v: 10,
-      u: 7,
-      n: 'burner min period',
-      c: 'burnminperiod',
-    },
-    {
-      v: 0,
-      u: 2,
-      n: 'burner min power',
-      c: 'burnminpower',
-    },
-    {
-      v: 75,
-      u: 2,
-      n: 'burner max power',
-      c: 'burnmaxpower',
-    },
-    {
-      v: -6,
-      u: 1,
-      n: 'hysteresis on temperature',
-      c: 'boilhyston',
-    },
-    {
-      v: 6,
-      u: 1,
-      n: 'hysteresis off temperature',
-      c: 'boilhystoff',
-    },
-    {
-      v: 0,
-      u: 2,
-      n: 'burner current power',
-      c: '',
-    },
-    {
-      v: 303226,
-      u: 15,
-      n: '# burner starts',
-      c: '',
-    },
-    {
-      v: 510634,
-      u: 7,
-      n: 'total burner operating time',
-      c: '',
-    },
-    {
-      v: 415235,
-      u: 7,
-      n: 'total heat operating time',
-      c: '',
-    },
-    {
-      v: 4338730,
-      u: 7,
-      n: 'total UBA operating time',
-      c: '',
-    },
-    {
-      v: '1C(210) 06.06.2020 12:07',
-      u: 0,
-      n: 'last error code',
-      c: '',
-    },
-    {
-      v: '0H',
-      u: 0,
-      n: 'service code',
-      c: '',
-    },
-    {
-      v: 203,
-      u: 0,
-      n: 'service code number',
-      c: '',
-    },
-    {
-      v: '01.01.2012',
-      u: 0,
-      n: 'maintenance set date',
-      c: '',
-    },
+    { v: 75, u: 1, n: 'heating temperature', c: 'heatingtemp' },
+    { v: 90, u: 2, n: 'burner pump max power', c: 'pumpmodmax' },
+    { v: 55, u: 2, n: 'burner pump min power', c: 'pumpmodmin' },
+    { v: 1, u: 7, n: 'pump delay', c: 'pumpdelay' },
+    { v: 10, u: 7, n: 'burner min period', c: 'burnminperiod' },
+    { v: 0, u: 2, n: 'burner min power', c: 'burnminpower' },
+    { v: 77, u: 2, n: 'burner max power', c: 'burnmaxpower' },
+    { v: -6, u: 1, n: 'hysteresis on temperature', c: 'boilhyston' },
+    { v: 6, u: 1, n: 'hysteresis off temperature', c: 'boilhystoff' },
+    { v: 0, u: 2, n: 'burner current power' },
+    { v: 317694, u: 16, n: 'burner starts' },
+    { v: 524115, u: 7, n: 'total burner operating time' },
+    { v: 424286, u: 7, n: 'total heat operating time' },
+    { v: 4571225, u: 7, n: 'total UBA operating time' },
+    { v: '1C(210) 06.06.2020 12:07', u: 0, n: 'last error code' },
+    { v: '0H', u: 0, n: 'service code' },
+    { v: 203, u: 0, n: 'service code number' },
+    { v: ' ', u: 0, n: 'maintenance message' },
     {
       v: 'off',
       u: 0,
       n: 'maintenance scheduled',
       c: 'maintenance',
+      l: ['off', 'time', 'date'],
     },
+    { v: 6000, u: 6, n: 'maintenance set time', c: 'maintenancetime' },
+    { v: '01.01.2012', u: 0, n: 'maintenance set date', c: 'maintenancedate' },
+    { v: 60, u: 1, n: 'ww selected temperature', c: 'wwseltemp' },
+    { v: 62, u: 1, n: 'ww set temperature' },
+    { v: 'flow', u: 0, n: 'ww type' },
     {
-      v: 6000,
-      u: 6,
-      n: 'maintenance set time',
-      c: '',
-    },
-    {
-      v: 60,
-      u: 1,
-      n: '(ww) selected temperature',
-      c: '',
-    },
-    {
-      v: 62,
-      u: 1,
-      n: '(ww) set temperature',
-      c: 'wwsettemp',
-    },
-    {
-      v: 'flow',
+      v: 'eco',
       u: 0,
-      n: '(ww) type',
-      c: '',
-    },
-    {
-      v: 'hot',
-      u: 0,
-      n: '(ww) comfort',
+      n: 'ww comfort',
       c: 'wwcomfort',
+      l: ['hot', 'eco', 'intelligent'],
     },
+    { v: 40, u: 0, n: 'ww flow temperature offset', c: 'wwflowtempoffset' },
+    { v: 100, u: 2, n: 'ww max power', c: 'wwmaxpower' },
     {
-      v: 40,
+      v: 'off',
       u: 0,
-      n: '(ww) flow temperature offset',
-      c: 'wwflowtempoffset',
-    },
-    {
-      v: 100,
-      u: 2,
-      n: '(ww) max power',
-      c: 'wwmaxpower',
-    },
-    {
-      v: false,
-      u: 16,
-      n: '(ww) circulation pump available',
+      n: 'ww circulation pump available',
       c: 'wwcircpump',
+      l: ['off', 'on'],
     },
+    { v: '3-way valve', u: 0, n: 'ww charging type' },
+    { v: -5, u: 1, n: 'ww hysteresis on temperature', c: 'wwhyston' },
+    { v: 0, u: 1, n: 'ww hysteresis off temperature', c: 'wwhystoff' },
+    { v: 70, u: 1, n: 'ww disinfection temperature', c: 'wwdisinfectiontemp' },
     {
-      v: 'charge pump',
+      v: 'off',
       u: 0,
-      n: '(ww) charging type',
-      c: '',
-    },
-    {
-      v: 70,
-      u: 1,
-      n: '(ww) disinfection temperature',
-      c: 'wwdisinfectiontemp',
+      n: 'ww circulation pump frequency',
+      c: 'wwcircmode',
+      l: [
+        'off',
+        '1x3min',
+        '2x3min',
+        '3x3min',
+        '4x3min',
+        '5x3min',
+        '6x3min',
+        'continuous',
+      ],
     },
     {
       v: 'off',
       u: 0,
-      n: '(ww) circulation pump frequency',
-      c: 'wwcircmode',
-    },
-    {
-      v: false,
-      u: 16,
-      n: '(ww) circulation active',
+      n: 'ww circulation active',
       c: 'wwcirc',
+      l: ['off', 'on'],
     },
+    { v: 37.1, u: 1, n: 'ww current intern temperature' },
+    { v: 0, u: 3, n: 'ww current tap water flow' },
+    { v: 37.2, u: 1, n: 'ww storage intern temperature' },
+    { v: 'on', u: 0, n: 'ww activated', c: 'wwactivated', l: ['off', 'on'] },
     {
-      v: 44.4,
-      u: 1,
-      n: '(ww) current intern temperature',
-      c: '',
-    },
-    {
-      v: 0,
-      u: 3,
-      n: '(ww) current tap water flow',
-      c: '',
-    },
-    {
-      v: 44.4,
-      u: 1,
-      n: '(ww) storage intern temperature',
-      c: '',
-    },
-    {
-      v: true,
-      u: 16,
-      n: '(ww) activated',
-      c: 'wwactivated',
-    },
-    {
-      v: false,
-      u: 16,
-      n: '(ww) one time charging',
+      v: 'off',
+      u: 0,
+      n: 'ww one time charging',
       c: 'wwonetime',
+      l: ['off', 'on'],
     },
     {
-      v: false,
-      u: 16,
-      n: '(ww) disinfecting',
-      c: '',
+      v: 'off',
+      u: 0,
+      n: 'ww disinfection',
+      c: 'wwdisinfect',
+      l: ['off', 'on'],
     },
-    {
-      v: false,
-      u: 16,
-      n: '(ww) charging',
-      c: '',
-    },
-    {
-      v: false,
-      u: 16,
-      n: '(ww) recharging',
-      c: '',
-    },
-    {
-      v: true,
-      u: 16,
-      n: '(ww) temperature ok',
-      c: '',
-    },
-    {
-      v: false,
-      u: 16,
-      n: '(ww) active',
-      c: '',
-    },
-    {
-      v: true,
-      u: 16,
-      n: '(ww) heating',
-      c: '',
-    },
-    {
-      v: 268671,
-      u: 15,
-      n: '(ww) # starts',
-      c: '',
-    },
-    {
-      v: 95399,
-      u: 7,
-      n: '(ww) active time',
-      c: '',
-    },
+    { v: 'off', u: 0, n: 'ww charging' },
+    { v: 'off', u: 0, n: 'ww recharging' },
+    { v: 'on', u: 0, n: 'ww temperature ok' },
+    { v: 'off', u: 0, n: 'ww active' },
+    { v: 'on', u: 0, n: 'ww heating' },
+    { v: 282323, u: 16, n: 'ww starts' },
+    { v: 99829, u: 7, n: 'ww active time' },
   ],
 }
 
 const emsesp_devicedata_3 = {
-  name: 'Controller: BC1',
+  type: 'Controller',
   data: [],
 }
 
@@ -886,6 +653,8 @@ app.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
   res.json(emsesp_settings)
 })
 app.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
+  console.log(req.body)
+  emsesp_settings = req.body
   res.json(emsesp_settings)
 })
 app.get(EMSESP_DATA_ENDPOINT, (req, res) => {
@@ -941,6 +710,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     rx_gpio: 3,
     tx_gpio: 4,
     pbutton_gpio: 5,
+    phy_type: 0,
   }
 
   if (board_profile == 'S32') {
@@ -950,6 +720,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 23
     data.tx_gpio = 5
     data.pbutton_gpio = 0
+    data.phy_type = 0
   } else if (board_profile == 'E32') {
     // BBQKees Gateway E32
     data.led_gpio = 2
@@ -957,6 +728,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 5
     data.tx_gpio = 17
     data.pbutton_gpio = 33
+    data.phy_type = 1
   } else if (board_profile == 'MH-ET') {
     // MH-ET Live D1 Mini
     data.led_gpio = 2
@@ -964,6 +736,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 23
     data.tx_gpio = 5
     data.pbutton_gpio = 0
+    data.phy_type = 0
   } else if (board_profile == 'NODEMCU') {
     // NodeMCU 32S
     data.led_gpio = 2
@@ -971,6 +744,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 23
     data.tx_gpio = 5
     data.pbutton_gpio = 0
+    data.phy_type = 0
   } else if (board_profile == 'LOLIN') {
     // Lolin D32
     data.led_gpio = 2
@@ -978,6 +752,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 17
     data.tx_gpio = 16
     data.pbutton_gpio = 0
+    data.phy_type = 0
   } else if (board_profile == 'OLIMEX') {
     // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
     data.led_gpio = 0
@@ -985,21 +760,7 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.rx_gpio = 36
     data.tx_gpio = 4
     data.pbutton_gpio = 34
-    // data = { 0, 0, 36, 4, 34};
-  } else if (board_profile == 'TLK110') {
-    // Generic Ethernet (TLK110)
-    data.led_gpio = 2
-    data.dallas_gpio = 4
-    data.rx_gpio = 5
-    data.tx_gpio = 17
-    data.pbutton_gpio = 33
-  } else if (board_profile == 'LAN8720') {
-    // Generic Ethernet (LAN8720)
-    data.led_gpio = 2
-    data.dallas_gpio = 4
-    data.rx_gpio = 5
-    data.tx_gpio = 17
-    data.pbutton_gpio = 33
+    data.phy_type = 1
   }
 
   res.json(data)

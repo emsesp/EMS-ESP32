@@ -34,8 +34,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   entry: {
     color: '#bbbbbb',
-    fontFamily: 'Courier New, monospace',
-    fontSize: '13px',
+    fontFamily: 'monospace',
+    fontSize: '14px',
     letterSpacing: 'normal',
     whiteSpace: 'nowrap'
   },
@@ -65,9 +65,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
   useWindowSize();
   const classes = useStyles({ topOffset, leftOffset });
-  const { events, compact, level } = props;
-
-  const filter_events = events.filter((e) => e.l <= level);
+  const { events, compact } = props;
 
   const styleLevel = (level: LogLevel) => {
     switch (level) {
@@ -124,7 +122,7 @@ const LogEventConsole: FC<LogEventConsoleProps> = (props) => {
 
   return (
     <Box id="log-window" className={classes.console}>
-      {filter_events.map((e) => (
+      {events.map((e) => (
         <div className={classes.entry} key={e.i}>
           <span>{e.t}</span>
           {compact && <span>{paddedLevelLabel(e.l, compact)} </span>}

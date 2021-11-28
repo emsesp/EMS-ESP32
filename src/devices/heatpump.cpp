@@ -26,8 +26,6 @@ uuid::log::Logger Heatpump::logger_{F_(heatpump), uuid::log::Facility::CONSOLE};
 
 Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    LOG_DEBUG(F("Adding new Heat Pump module with device ID 0x%02X"), device_id);
-
     // telegram handlers
     register_telegram_type(0x042B, F("HP1"), true, MAKE_PF_CB(process_HPMonitor1));
     register_telegram_type(0x047B, F("HP2"), true, MAKE_PF_CB(process_HPMonitor2));
@@ -41,13 +39,13 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
 }
 
 // publish HA config
-bool Heatpump::publish_ha_config() {
+bool Heatpump::publish_ha_device_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
     doc["uniq_id"] = F_(heatpump);
     doc["ic"]      = F_(icondevice);
 
     char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
+    snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
     doc["stat_t"] = stat_t;
 
     char name_s[40];
@@ -64,7 +62,7 @@ bool Heatpump::publish_ha_config() {
     ids.add("ems-esp-heatpump");
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/heatpump/config"), Mqtt::base().c_str());
+    snprintf(topic, sizeof(topic), "sensor/%s/heatpump/config", Mqtt::base().c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     return true;

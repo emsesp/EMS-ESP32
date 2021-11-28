@@ -35,11 +35,11 @@ class DummySettings {
     uint8_t  mqtt_qos          = 0;
     bool     mqtt_retain       = false;
     bool     enabled           = true;
-    uint8_t  nested_format     = 1;
+    uint8_t  nested_format     = 1; // 1=nested 2=single
     uint8_t  ha_climate_format = 1;
     bool     ha_enabled        = true;
     String   base              = "ems-esp";
-    uint8_t  subscribe_format  = 0;
+    bool     send_response     = true;
 
     String   hostname                = "ems-esp";
     String   jwtSecret               = "ems-esp";
@@ -48,7 +48,7 @@ class DummySettings {
     String   localIP                 = "";
     String   gatewayIP               = "";
     String   subnetMask              = "";
-    String   staticIPConfig          = "";
+    bool     staticIPConfig          = false;
     String   dnsIP1                  = "";
     String   dnsIP2                  = "";
     String   board_profile           = "CUSTOM";

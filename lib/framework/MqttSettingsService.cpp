@@ -101,18 +101,25 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     switch (event) {
     case SYSTEM_EVENT_STA_GOT_IP:
     case SYSTEM_EVENT_ETH_GOT_IP:
+        emsesp::EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+            if (!networkSettings.enableIPv6 && _state.enabled) {
+                // emsesp::EMSESP::logger().info(F("IPv4 Network connection found, starting MQTT client"));
+                onConfigUpdated();
+            }
+        });
+        break;
     case SYSTEM_EVENT_GOT_IP6:
         if (_state.enabled) {
-            // emsesp::EMSESP::logger().info(F("Network connection found, starting MQTT client"));
+            // emsesp::EMSESP::logger().info(F("IPv6 Network connection found, starting MQTT client"));
             onConfigUpdated();
         }
         break;
-
     case SYSTEM_EVENT_STA_DISCONNECTED:
     case SYSTEM_EVENT_ETH_DISCONNECTED:
         if (_state.enabled) {
             // emsesp::EMSESP::logger().info(F("Network connection dropped, stopping MQTT client"));
-            onConfigUpdated();
+            _mqttClient.disconnect();
+            // onConfigUpdated();
         }
         break;
 
@@ -122,9 +129,11 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 void MqttSettingsService::configureMqtt() {
+    // disconnect if connected
+    _mqttClient.disconnect();
     // only connect if WiFi is connected and MQTT is enabled
     if (_state.enabled && emsesp::EMSESP::system_.network_connected()) {
-        _mqttClient.disconnect();
+        // emsesp::EMSESP::logger().info(F("Configuring Mqtt client"));
         _mqttClient.setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
         if (_state.username.length() > 0) {
             _mqttClient.setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername),
@@ -137,6 +146,8 @@ void MqttSettingsService::configureMqtt() {
         _mqttClient.setCleanSession(_state.cleanSession);
         _mqttClient.setMaxTopicLength(_state.maxTopicLength);
         _mqttClient.connect();
+        // } else {
+        // emsesp::EMSESP::logger().info(F("Error configuring Mqtt client"));
     }
 }
 
@@ -164,7 +175,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["ha_climate_format"]       = settings.ha_climate_format;
     root["ha_enabled"]              = settings.ha_enabled;
     root["nested_format"]           = settings.nested_format;
-    root["subscribe_format"]        = settings.subscribe_format;
+    root["send_response"]           = settings.send_response;
 }
 
 StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & settings) {
@@ -194,7 +205,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.ha_climate_format = root["ha_climate_format"] | EMSESP_DEFAULT_HA_CLIMATE_FORMAT;
     newSettings.ha_enabled        = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
     newSettings.nested_format     = root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT;
-    newSettings.subscribe_format  = root["subscribe_format"] | EMSESP_DEFAULT_SUBSCRIBE_FORMAT;
+    newSettings.send_response     = root["send_response"] | EMSESP_DEFAULT_SEND_RESPONSE;
 
     if (newSettings.enabled != settings.enabled) {
         changed = true;
@@ -209,7 +220,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
         changed = true;
     }
 
-    if (newSettings.subscribe_format != settings.subscribe_format) {
+    if (newSettings.send_response != settings.send_response) {
         changed = true;
     }
 

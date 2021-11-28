@@ -93,6 +93,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
           rx_gpio: json.rx_gpio,
           tx_gpio: json.tx_gpio,
           pbutton_gpio: json.pbutton_gpio,
+          phy_type: json.phy_type,
           board_profile: event.target.value
         });
         this.setState({ processing: false });
@@ -113,15 +114,15 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
         <Box bgcolor="info.main" p={2} mt={2} mb={2}>
           <Typography variant="body1">
             <i>
-              Refer to the
+              visit the&nbsp;
               <Link
                 target="_blank"
-                href="https://emsesp.github.io/docs/#/Configure-firmware32?id=ems-esp-settings"
+                href="https://emsesp.github.io/docs/#/Configure-firmware?id=ems-esp-settings"
                 color="primary"
               >
-                {' documentation'}
+                {'online documentation'}
               </Link>
-              &nbsp;for information on each setting
+              &nbsp;for details explaining each setting
             </i>
           </Typography>
         </Box>
@@ -135,7 +136,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
           container
           spacing={1}
           direction="row"
-          justify="flex-start"
+          justifyContent="flex-start"
           alignItems="flex-start"
         >
           <Grid item xs={5}>
@@ -171,30 +172,6 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
               <MenuItem value={0x0f}>Time Module (0x0F)</MenuItem>
               <MenuItem value={0x12}>Alarm Module (0x12)</MenuItem>
             </SelectValidator>
-          </Grid>
-          <Grid item xs={6}>
-            <TextValidator
-              validators={[
-                'required',
-                'isNumber',
-                'minNumber:0',
-                'maxNumber:120'
-              ]}
-              errorMessages={[
-                'Tx delay is required',
-                'Must be a number',
-                'Must be 0 or higher',
-                'Max value is 120'
-              ]}
-              name="tx_delay"
-              label="Tx start delay (seconds)"
-              fullWidth
-              variant="outlined"
-              value={data.tx_delay}
-              type="number"
-              onChange={handleValueChange('tx_delay')}
-              margin="normal"
-            />
           </Grid>
         </Grid>
 
@@ -232,7 +209,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
             container
             spacing={1}
             direction="row"
-            justify="flex-start"
+            justifyContent="flex-start"
             alignItems="flex-start"
           >
             <Grid item xs={4}>
@@ -330,7 +307,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                   'Not a valid GPIO'
                 ]}
                 name="dallas_gpio"
-                label="Dallas GPIO (0=none)"
+                label="Dallas GPIO (0=disabled)"
                 fullWidth
                 variant="outlined"
                 value={data.dallas_gpio}
@@ -356,7 +333,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                   'Not a valid GPIO'
                 ]}
                 name="led_gpio"
-                label="LED GPIO (0=none)"
+                label="LED GPIO (0=disabled)"
                 fullWidth
                 variant="outlined"
                 value={data.led_gpio}
@@ -364,6 +341,21 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
                 onChange={handleValueChange('led_gpio')}
                 margin="normal"
               />
+            </Grid>
+            <Grid item xs={4}>
+              <SelectValidator
+                name="phy_type"
+                label="PHY Module Type"
+                value={data.phy_type}
+                fullWidth
+                variant="outlined"
+                onChange={handleValueChange('phy_type')}
+                margin="normal"
+              >
+                <MenuItem value={0}>No Ethernet</MenuItem>
+                <MenuItem value={1}>LAN8720</MenuItem>
+                <MenuItem value={2}>TLK110</MenuItem>
+              </SelectValidator>
             </Grid>
           </Grid>
         )}
@@ -433,7 +425,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
           container
           spacing={0}
           direction="row"
-          justify="flex-start"
+          justifyContent="flex-start"
           alignItems="flex-start"
         >
           <BlockFormControlLabel
@@ -467,7 +459,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
           container
           spacing={1}
           direction="row"
-          justify="flex-start"
+          justifyContent="flex-start"
           alignItems="flex-start"
         >
           <Grid item xs={4}>
@@ -538,7 +530,7 @@ class EMSESPSettingsForm extends Component<EMSESPSettingsFormProps> {
             container
             spacing={1}
             direction="row"
-            justify="flex-start"
+            justifyContent="flex-start"
             alignItems="flex-start"
           >
             <Grid item xs={5}>

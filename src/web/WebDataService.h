@@ -36,7 +36,11 @@ class WebDataService {
   public:
     WebDataService(AsyncWebServer * server, SecurityManager * securityManager);
 
+// make all functions public so we can test in the debug and standalone mode
+#ifndef EMSESP_STANDALONE
   private:
+#endif
+
     // GET
     void all_devices(AsyncWebServerRequest * request);
     void scan_devices(AsyncWebServerRequest * request);

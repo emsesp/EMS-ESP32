@@ -15,7 +15,7 @@ import {
 } from '@material-ui/core';
 
 import { FormButton } from '../components';
-import { DeviceValue, DeviceValueUOM, DeviceValueUOM_s } from './EMSESPtypes';
+import { DeviceValue, DeviceValueUOM_s } from './EMSESPtypes';
 
 interface ValueFormProps {
   devicevalue: DeviceValue;
@@ -25,7 +25,6 @@ interface ValueFormProps {
     data: keyof DeviceValue
   ) => (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
-
 class ValueForm extends React.Component<ValueFormProps> {
   formRef: RefObject<any> = React.createRef();
 
@@ -51,7 +50,7 @@ class ValueForm extends React.Component<ValueFormProps> {
         >
           <DialogTitle id="user-form-dialog-title">Change Value</DialogTitle>
           <DialogContent dividers>
-            {devicevalue.u === DeviceValueUOM.LIST && (
+            {devicevalue.l && (
               <TextField
                 id="outlined-select-value"
                 select
@@ -66,34 +65,19 @@ class ValueForm extends React.Component<ValueFormProps> {
                 ))}
               </TextField>
             )}
-            {devicevalue.u !== DeviceValueUOM.BOOLEAN &&
-              devicevalue.u !== DeviceValueUOM.LIST && (
-                <OutlinedInput
-                  id="value"
-                  value={devicevalue.v}
-                  autoFocus
-                  fullWidth
-                  onChange={handleValueChange('v')}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      {DeviceValueUOM_s[devicevalue.u]}
-                    </InputAdornment>
-                  }
-                />
-              )}
-            {devicevalue.u === DeviceValueUOM.BOOLEAN && (
-              <TextField
-                id="selected-value"
-                select
+            {!devicevalue.l && (
+              <OutlinedInput
+                id="value"
                 value={devicevalue.v}
                 autoFocus
                 fullWidth
                 onChange={handleValueChange('v')}
-                variant="outlined"
-              >
-                <MenuItem value="true">on</MenuItem>
-                <MenuItem value="false">off</MenuItem>
-              </TextField>
+                endAdornment={
+                  <InputAdornment position="end">
+                    {DeviceValueUOM_s[devicevalue.u]}
+                  </InputAdornment>
+                }
+              />
             )}
             <FormHelperText>{devicevalue.n}</FormHelperText>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>

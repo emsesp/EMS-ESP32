@@ -38,7 +38,6 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
 
 void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["tx_mode"]              = settings.tx_mode;
-    root["tx_delay"]             = settings.tx_delay;
     root["ems_bus_id"]           = settings.ems_bus_id;
     root["syslog_enabled"]       = settings.syslog_enabled;
     root["syslog_level"]         = settings.syslog_level;
@@ -51,6 +50,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["shower_alert"]         = settings.shower_alert;
     root["rx_gpio"]              = settings.rx_gpio;
     root["tx_gpio"]              = settings.tx_gpio;
+    root["phy_type"]             = settings.phy_type;
     root["dallas_gpio"]          = settings.dallas_gpio;
     root["dallas_parasite"]      = settings.dallas_parasite;
     root["led_gpio"]             = settings.led_gpio;
@@ -64,14 +64,17 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["dallas_format"]        = settings.dallas_format;
     root["bool_format"]          = settings.bool_format;
     root["enum_format"]          = settings.enum_format;
+    root["weblog_level"]         = settings.weblog_level;
+    root["weblog_buffer"]        = settings.weblog_buffer;
+    root["weblog_compact"]       = settings.weblog_compact;
 
-    for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+    for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
         char buf[20];
-        snprintf_P(buf, sizeof(buf), PSTR("sensor_id%d"), i);
+        snprintf(buf, sizeof(buf), "sensor_id%d", i);
         root[buf] = settings.sensor[i].id;
-        snprintf_P(buf, sizeof(buf), PSTR("sensor_name%d"), i);
+        snprintf(buf, sizeof(buf), "sensor_name%d", i);
         root[buf] = settings.sensor[i].name;
-        snprintf_P(buf, sizeof(buf), PSTR("sensor_offset%d"), i);
+        snprintf(buf, sizeof(buf), "sensor_offset%d", i);
         root[buf] = settings.sensor[i].offset;
     }
 }
@@ -79,7 +82,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
 // call on initialization and also when settings are updated via web or console
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
     // load default GPIO configuration based on board profile
-    std::vector<uint8_t> data; // led, dallas, rx, tx, button
+    std::vector<uint8_t> data; // led, dallas, rx, tx, button, phy_type
 
     String old_board_profile = settings.board_profile;
     settings.board_profile   = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
@@ -92,6 +95,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     uint8_t default_rx_gpio      = data[2];
     uint8_t default_tx_gpio      = data[3];
     uint8_t default_pbutton_gpio = data[4];
+    uint8_t default_phy_type     = data[5];
 
     if (old_board_profile != settings.board_profile) {
         EMSESP::logger().info(F("EMS-ESP version %s"), EMSESP_APP_VERSION);
@@ -111,9 +115,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     prev             = settings.tx_mode;
     settings.tx_mode = root["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
     check_flag(prev, settings.tx_mode, ChangeFlags::UART);
-    prev              = settings.tx_delay;
-    settings.tx_delay = root["tx_delay"] | EMSESP_DEFAULT_TX_DELAY;
-    check_flag(prev, settings.tx_delay, ChangeFlags::UART);
     prev             = settings.rx_gpio;
     settings.rx_gpio = root["rx_gpio"] | default_rx_gpio;
     check_flag(prev, settings.rx_gpio, ChangeFlags::UART);
@@ -145,9 +146,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     prev                 = settings.syslog_port;
     settings.syslog_port = root["syslog_port"] | EMSESP_DEFAULT_SYSLOG_PORT;
     check_flag(prev, settings.syslog_port, ChangeFlags::SYSLOG);
-
-    settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
-    EMSESP::trace_raw(settings.trace_raw);
 
     // adc
     prev                    = settings.analog_enabled;
@@ -183,13 +181,19 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.hide_led = root["hide_led"] | EMSESP_DEFAULT_HIDE_LED;
     check_flag(prev, settings.hide_led, ChangeFlags::LED);
 
+    //
+    // next ones are settings that don't need any follow-up actions
+    //
+
     // these need reboots to be applied
     settings.ems_bus_id        = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
     settings.master_thermostat = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
     settings.low_clock         = root["low_clock"] | false;
-    ;
+    settings.phy_type          = root["phy_type"] | default_phy_type; // use whatever came from the board profile
 
-    // doesn't need any follow-up actions
+    settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
+    EMSESP::trace_raw(settings.trace_raw);
+
     settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
     settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
 
@@ -202,13 +206,17 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.enum_format = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
     EMSESP::enum_format(settings.enum_format);
 
-    for (uint8_t i = 0; i < NUM_SENSOR_NAMES; i++) {
+    settings.weblog_level   = root["weblog_level"] | EMSESP_DEFAULT_WEBLOG_LEVEL;
+    settings.weblog_buffer  = root["weblog_buffer"] | EMSESP_DEFAULT_WEBLOG_BUFFER;
+    settings.weblog_compact = root["weblog_compact"] | EMSESP_DEFAULT_WEBLOG_COMPACT;
+
+    for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
         char buf[20];
-        snprintf_P(buf, sizeof(buf), PSTR("sensor_id%d"), i);
+        snprintf(buf, sizeof(buf), "sensor_id%d", i);
         settings.sensor[i].id = root[buf] | EMSESP_DEFAULT_SENSOR_NAME;
-        snprintf_P(buf, sizeof(buf), PSTR("sensor_name%d"), i);
+        snprintf(buf, sizeof(buf), "sensor_name%d", i);
         settings.sensor[i].name = root[buf] | EMSESP_DEFAULT_SENSOR_NAME;
-        snprintf_P(buf, sizeof(buf), PSTR("sensor_offset%d"), i);
+        snprintf(buf, sizeof(buf), "sensor_offset%d", i);
         settings.sensor[i].offset = root[buf] | 0;
     }
 
@@ -272,8 +280,8 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request, JsonVari
                 root["rx_gpio"]      = data[2];
                 root["tx_gpio"]      = data[3];
                 root["pbutton_gpio"] = data[4];
+                root["phy_type"]     = data[5];
             } else {
-                delete response;
                 AsyncWebServerResponse * response = request->beginResponse(200);
                 request->send(response);
                 return;

@@ -23,6 +23,7 @@
 #include "dallassensor.h"
 #include "version.h"
 #include "default_settings.h"
+#include <ESP8266React.h>
 
 #include <uuid/log.h>
 
@@ -36,6 +37,7 @@ class EMSESP {
     static DallasSensor dallassensor_;
 
     static uuid::log::Logger logger();
+    static ESP8266React      esp8266React;
 };
 
 } // namespace emsesp

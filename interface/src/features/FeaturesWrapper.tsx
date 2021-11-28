@@ -1,58 +1,31 @@
-import { Component } from 'react';
+import { FC } from 'react';
 
-import { Features } from './types';
-import { FeaturesContext } from './FeaturesContext';
 import FullScreenLoading from '../components/FullScreenLoading';
 import ApplicationError from '../components/ApplicationError';
 import { FEATURES_ENDPOINT } from '../api';
+import { useRest } from '../hooks';
 
-interface FeaturesWrapperState {
-  features?: Features;
-  error?: string;
-}
+import { Features } from './types';
+import { FeaturesContext } from './FeaturesContext';
 
-class FeaturesWrapper extends Component<{}, FeaturesWrapperState> {
-  state: FeaturesWrapperState = {};
+const FeaturesWrapper: FC = ({ children }) => {
+  const { data: features, errorMessage: error } = useRest<Features>({
+    endpoint: FEATURES_ENDPOINT
+  });
 
-  componentDidMount() {
-    this.fetchFeaturesDetails();
+  if (features) {
+    return (
+      <FeaturesContext.Provider value={{ features }}>
+        {children}
+      </FeaturesContext.Provider>
+    );
   }
 
-  fetchFeaturesDetails = () => {
-    fetch(FEATURES_ENDPOINT)
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          throw Error('Unexpected status code: ' + response.status);
-        }
-      })
-      .then((features) => {
-        this.setState({ features });
-      })
-      .catch((error) => {
-        this.setState({ error: error.message });
-      });
-  };
-
-  render() {
-    const { features, error } = this.state;
-    if (features) {
-      return (
-        <FeaturesContext.Provider
-          value={{
-            features
-          }}
-        >
-          {this.props.children}
-        </FeaturesContext.Provider>
-      );
-    }
-    if (error) {
-      return <ApplicationError error={error} />;
-    }
-    return <FullScreenLoading />;
+  if (error) {
+    return <ApplicationError error={error} />;
   }
-}
+
+  return <FullScreenLoading />;
+};
 
 export default FeaturesWrapper;

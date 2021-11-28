@@ -150,7 +150,7 @@ class ManageUsersForm extends React.Component<
         <ValidatorForm onSubmit={this.onSubmit}>
           <Table
             size="small"
-            padding={isWidthDown('xs', width!) ? 'none' : 'default'}
+            padding={isWidthDown('xs', width!) ? 'none' : 'normal'}
           >
             <TableHead>
               <TableRow>
@@ -197,7 +197,7 @@ class ManageUsersForm extends React.Component<
             <TableFooter>
               <TableRow>
                 <TableCell colSpan={2} />
-                <TableCell align="center" padding="default">
+                <TableCell align="center" padding="normal">
                   <Button
                     startIcon={<PersonAddIcon />}
                     variant="contained"

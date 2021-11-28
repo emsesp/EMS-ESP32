@@ -210,6 +210,7 @@ class RxService : public EMSbus {
 
     void loop();
     void add(uint8_t * data, uint8_t length);
+    void add_empty(const uint8_t src, const uint8_t dst, const uint16_t type_id);
 
     uint32_t telegram_count() const {
         return telegram_count_;
@@ -374,6 +375,7 @@ class TxService : public EMSbus {
 #else
     static constexpr uint8_t MAXIMUM_TX_RETRIES = 3;
 #endif
+
     static constexpr uint32_t POST_SEND_DELAY = 2000;
 
   private:

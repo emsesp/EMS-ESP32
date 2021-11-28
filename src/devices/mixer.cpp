@@ -26,58 +26,81 @@ uuid::log::Logger Mixer::logger_{F_(mixer), uuid::log::Facility::CONSOLE};
 
 Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    LOG_DEBUG(F("Adding new Mixer with device ID 0x%02X"), device_id);
+    // Pool module
+    if (flags == EMSdevice::EMS_DEVICE_FLAG_MP) {
+        register_telegram_type(0x5BA, F("HpPoolStatus"), true, MAKE_PF_CB(process_HpPoolStatus));
+        type_ = Type::MP;
+        register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
+        register_device_value(TAG_NONE, &poolTemp_, DeviceValueType::SHORT, FL_(div10), FL_(poolTemp), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_NONE, &poolShuntStatus_, DeviceValueType::ENUM, FL_(enum_shunt), FL_(poolShuntStatus), DeviceValueUOM::NONE);
+        register_device_value(TAG_NONE, &poolShunt_, DeviceValueType::UINT, nullptr, FL_(poolShunt), DeviceValueUOM::PERCENT);
+    }
 
+    // EMS+
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
-        if (device_id <= 0x27) {
-            // telegram handlers 0x20 - 0x27 for HC
+        if (device_id >= 0x20 && device_id <= 0x27) {
             register_telegram_type(device_id - 0x20 + 0x02D7, F("MMPLUSStatusMessage_HC"), true, MAKE_PF_CB(process_MMPLUSStatusMessage_HC));
-        } else {
-            // telegram handlers for warm water/DHW 0x28, 0x29
+            // register_telegram_type(device_id - 0x20 + 0x02E1, F("MMPLUSStetMessage_HC"), true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
+            type_       = Type::HC;
+            hc_         = device_id - 0x20 + 1;
+            uint8_t tag = TAG_HC1 + hc_ - 1;
+            register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
+            register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
+            register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
+            register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
+            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
+        } else if (device_id >= 0x28 && device_id <= 0x29) {
             register_telegram_type(device_id - 0x28 + 0x0331, F("MMPLUSStatusMessage_WWC"), true, MAKE_PF_CB(process_MMPLUSStatusMessage_WWC));
+            // register_telegram_type(device_id - 0x28 + 0x033B, F("MMPLUSSetMessage_WWC"), true, MAKE_PF_CB(process_MMPLUSSetMessage_WWC));
+            type_       = Type::WWC;
+            hc_         = device_id - 0x28 + 1;
+            uint8_t tag = TAG_WWC1 + hc_ - 1;
+            register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
+            register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(wwTemp), DeviceValueUOM::DEGREES);
+            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(wwPumpStatus), DeviceValueUOM::NONE);
+            register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(wwTempStatus), DeviceValueUOM::NONE);
         }
     }
 
     // EMS 1.0
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MM10) {
-        register_telegram_type(0x00AA, F("MMConfigMessage"), false, MAKE_PF_CB(process_MMConfigMessage));
-        register_telegram_type(0x00AB, F("MMStatusMessage"), true, MAKE_PF_CB(process_MMStatusMessage));
+        register_telegram_type(0x00AA, F("MMConfigMessage"), true, MAKE_PF_CB(process_MMConfigMessage));
+        register_telegram_type(0x00AB, F("MMStatusMessage"), false, MAKE_PF_CB(process_MMStatusMessage));
         register_telegram_type(0x00AC, F("MMSetMessage"), false, MAKE_PF_CB(process_MMSetMessage));
+        // EMSESP::send_read_request(0xAA, device_id);
+        type_       = Type::HC;
+        hc_         = device_id - 0x20 + 1;
+        uint8_t tag = TAG_HC1 + hc_ - 1;
+        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
+        register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
+        register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
+        register_device_value(tag, &activated_, DeviceValueType::BOOL, nullptr, FL_(activated), DeviceValueUOM::NONE, MAKE_CF_CB(set_activated));
+        register_device_value(tag, &setValveTime_, DeviceValueType::UINT, FL_(mul10), FL_(mixerSetTime), DeviceValueUOM::SECONDS, MAKE_CF_CB(set_setValveTime), 1, 12);
     }
 
     // HT3
     if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         register_telegram_type(0x010C, F("IPMStatusMessage"), false, MAKE_PF_CB(process_IPMStatusMessage));
-        register_telegram_type(0x001E, F("IPMTempMessage"), false, MAKE_PF_CB(process_IPMTempMessage));
-        // register_telegram_type(0x0023, F("IPMSetMessage"), false, MAKE_PF_CB(process_IPMSetMessage));
-    }
-
-    // register the device values and set hc_ and type_
-    if (device_id <= 0x27) {
+        register_telegram_type(0x011E, F("IPMTempMessage"), false, MAKE_PF_CB(process_IPMTempMessage));
+        // register_telegram_type(0x0123, F("IPMSetMessage"), false, MAKE_PF_CB(process_IPMSetMessage));
         type_       = Type::HC;
         hc_         = device_id - 0x20 + 1;
         uint8_t tag = TAG_HC1 + hc_ - 1;
         register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
-        register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES);
         register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::BOOLEAN);
         register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
+        register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
         register_device_value(tag, &flowTempVf_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempVf), DeviceValueUOM::DEGREES);
-    } else {
-        type_       = Type::WWC;
-        hc_         = device_id - 0x28 + 1;
-        uint8_t tag = TAG_WWC1 + hc_ - 1;
-        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
-        register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(wwTemp), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(wwPumpStatus), DeviceValueUOM::BOOLEAN);
-        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(wwTempStatus), DeviceValueUOM::NONE);
     }
 
     id_ = product_id;
 }
 
 // publish HA config
-bool Mixer::publish_ha_config() {
+bool Mixer::publish_ha_device_config() {
     // if we don't have valid values for this HC don't add it ever again
     if (!Helpers::hasValue(pumpStatus_)) {
         return false;
@@ -86,24 +109,34 @@ bool Mixer::publish_ha_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
     char uniq_id[20];
-    snprintf_P(uniq_id, sizeof(uniq_id), PSTR("Mixer%02X"), device_id() - 0x20 + 1);
+    if (type_ == Type::MP) {
+        snprintf(uniq_id, sizeof(uniq_id), "MixerMP");
+    } else {
+        snprintf(uniq_id, sizeof(uniq_id), "Mixer%02X", device_id() - 0x20 + 1);
+    }
     doc["uniq_id"] = uniq_id;
 
     doc["ic"] = F_(icondevice);
 
     char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
+    snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
     doc["stat_t"] = stat_t;
 
     char name[20];
-    snprintf_P(name, sizeof(name), PSTR("Mixer %02X"), device_id() - 0x20 + 1);
+    if (type_ == Type::MP) {
+        snprintf(name, sizeof(name), "Mixer MP");
+    } else {
+        snprintf(name, sizeof(name), "Mixer %02X", device_id() - 0x20 + 1);
+    }
     doc["name"] = name;
 
     char tpl[30];
     if (type_ == Type::HC) {
-        snprintf_P(tpl, sizeof(tpl), PSTR("{{value_json.hc%d.id}}"), device_id() - 0x20 + 1);
+        snprintf(tpl, sizeof(tpl), "{{value_json.hc%d.id}}", device_id() - 0x20 + 1);
+    } else if (type_ == Type::WWC) {
+        snprintf(tpl, sizeof(tpl), "{{value_json.wwc%d.id}}", device_id() - 0x28 + 1);
     } else {
-        snprintf_P(tpl, sizeof(tpl), PSTR("{{value_json.wwc%d.id}}"), device_id() - 0x28 + 1);
+        snprintf(tpl, sizeof(tpl), "{{value_json.id}}");
     }
     doc["val_tpl"] = tpl;
 
@@ -118,9 +151,11 @@ bool Mixer::publish_ha_config() {
     // determine the topic, if its HC and WWC. This is determined by the incoming telegram types.
     std::string topic(Mqtt::MQTT_TOPIC_MAX_SIZE, '\0');
     if (type_ == Type::HC) {
-        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("sensor/%s/mixer_hc%d/config"), Mqtt::base().c_str(), hc_);
-    } else {
-        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("sensor/%s/mixer_wwc%d/config"), Mqtt::base().c_str(), hc_); // WWC
+        snprintf(&topic[0], topic.capacity() + 1, "sensor/%s/mixer_hc%d/config", Mqtt::base().c_str(), hc_);
+    } else if (type_ == Type::WWC) {
+        snprintf(&topic[0], topic.capacity() + 1, "sensor/%s/mixer_wwc%d/config", Mqtt::base().c_str(), hc_); // WWC
+    } else if (type_ == Type::MP) {
+        snprintf(&topic[0], topic.capacity() + 1, "sensor/%s/mixer_mp/config", Mqtt::base().c_str());
     }
 
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
@@ -188,15 +223,23 @@ void Mixer::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(status_, 4)); // valve status -100 to 100
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+// Pool mixer MP100, - 0x5BA
+void Mixer::process_HpPoolStatus(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram->read_value(poolTemp_, 0));
+    has_update(telegram->read_value(poolShuntStatus__, 2));
+    has_update(telegram->read_value(poolShunt_, 3)); // 0-100% how much is the shunt open?
+    poolShuntStatus_ = poolShunt_ == 100 ? 3 : (poolShunt_ == 0 ? 4 : poolShuntStatus__);
+}
 
 // Mixer on a MM10 - 0xAA
 // e.g. Thermostat -> Mixer Module, type 0xAA, telegram: 10 21 AA 00 FF 0C 0A 11 0A 32 xx
 void Mixer::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
-    // pos 0: active FF = on
-    // pos 1: valve runtime 0C = 120 sec in units of 10 sec
+    has_update(telegram->read_value(activated_, 0));    // on = 0xFF
+    has_update(telegram->read_value(setValveTime_, 1)); // valve runtime in 10 sec, max 120 s
 }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // Mixer on a MM10 - 0xAC
 // e.g. Thermostat -> Mixer Module, type 0xAC, telegram: 10 21 AC 00 1E 64 01 AB
@@ -212,5 +255,76 @@ void Mixer::process_IPMSetMessage(std::shared_ptr<const Telegram> telegram) {
 }
 
 #pragma GCC diagnostic pop
+
+bool Mixer::set_flowSetTemp(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    LOG_INFO(F("Setting mixer flow set temperature to %d"), v);
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_MM10) {
+        write_command(0xAC, 0, v, 0xAB);
+        return true;
+    }
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
+        write_command(0x123, 0, v, 0x10C);
+        return true;
+    }
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
+        uint8_t hc = device_id() - 0x20;
+        write_command(0x2E1 + hc, 1, v, 0x2D7 + hc);
+        return true;
+    }
+    return false;
+}
+
+bool Mixer::set_pump(const char * value, const int8_t id) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
+        return false;
+    }
+    LOG_INFO(F("Setting mixer pump %s"), b ? "on" : "off");
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_MM10) {
+        write_command(0xAC, 1, b ? 0x64 : 0, 0xAB);
+        return true;
+    }
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
+        write_command(0x123, 1, b ? 0x64 : 0, 0x10C);
+        return true;
+    }
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
+        uint8_t hc = device_id() - 0x20;
+        write_command(0x2E1 + hc, 2, b ? 0x64 : 0, 0x2D7 + hc);
+        return true;
+    }
+    return false;
+}
+
+bool Mixer::set_activated(const char * value, const int8_t id) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
+        return false;
+    }
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_MM10) {
+        LOG_INFO(F("Setting mixer %s"), value);
+        write_command(0xAA, 0, b ? 0xFF : 0, 0xAA);
+        return true;
+    }
+    return false;
+}
+
+bool Mixer::set_setValveTime(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_MM10) {
+        v = (v + 5) / 10;
+        LOG_INFO(F("Setting mixer valve time to %ds"), v * 10);
+        write_command(0xAA, 1, v, 0xAA);
+        return true;
+    }
+    return false;
+}
 
 } // namespace emsesp

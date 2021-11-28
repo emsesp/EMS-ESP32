@@ -28,21 +28,19 @@ uuid::log::Logger Switch::logger_ {
 
 Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    LOG_DEBUG(F("Adding new Switch with device ID 0x%02X"), device_id);
-
     register_telegram_type(0x9C, F("WM10MonitorMessage"), false, MAKE_PF_CB(process_WM10MonitorMessage));
     register_telegram_type(0x9D, F("WM10SetMessage"), false, MAKE_PF_CB(process_WM10SetMessage));
     register_telegram_type(0x1E, F("WM10TempMessage"), false, MAKE_PF_CB(process_WM10TempMessage));
 
     register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
-    register_device_value(TAG_NONE, &activated_, DeviceValueType::BOOL, nullptr, FL_(activated), DeviceValueUOM::BOOLEAN);
+    register_device_value(TAG_NONE, &activated_, DeviceValueType::BOOL, nullptr, FL_(activated), DeviceValueUOM::NONE);
     register_device_value(TAG_NONE, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
     register_device_value(TAG_NONE, &status_, DeviceValueType::INT, nullptr, FL_(status), DeviceValueUOM::NONE);
     id_ = product_id;
 }
 
 // publish HA config
-bool Switch::publish_ha_config() {
+bool Switch::publish_ha_device_config() {
     // if we don't have valid values don't add it ever again
     if (!Helpers::hasValue(flowTempHc_)) {
         return false;
@@ -53,11 +51,11 @@ bool Switch::publish_ha_config() {
     doc["ic"]      = F_(icondevice);
 
     char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
+    snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
     doc["stat_t"] = stat_t;
 
     char name_s[40];
-    snprintf_P(name_s, sizeof(name_s), FSTR_(productid_fmt), device_type_name().c_str());
+    snprintf(name_s, sizeof(name_s), FSTR_(productid_fmt), device_type_name().c_str());
     doc["name"] = name_s;
 
     doc["val_tpl"] = FJSON("{{value_json.id}}");
@@ -70,7 +68,7 @@ bool Switch::publish_ha_config() {
     ids.add("ems-esp-switch");
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), PSTR("sensor/%s/switch/config"), Mqtt::base().c_str());
+    snprintf(topic, sizeof(topic), "sensor/%s/switch/config", Mqtt::base().c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     return true;

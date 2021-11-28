@@ -20,7 +20,12 @@ class WebSocketConnector {
     AsyncWebSocket       _webSocket;
     size_t               _bufferSize;
 
-    WebSocketConnector(StatefulService<T> * statefulService, AsyncWebServer * server, const char * webSocketPath, SecurityManager * securityManager, AuthenticationPredicate authenticationPredicate, size_t bufferSize)
+    WebSocketConnector(StatefulService<T> *    statefulService,
+                       AsyncWebServer *        server,
+                       const char *            webSocketPath,
+                       SecurityManager *       securityManager,
+                       AuthenticationPredicate authenticationPredicate,
+                       size_t                  bufferSize)
         : _statefulService(statefulService)
         , _server(server)
         , _webSocket(webSocketPath)
@@ -67,7 +72,11 @@ class WebSocketTx : virtual public WebSocketConnector<T> {
         WebSocketConnector<T>::_statefulService->addUpdateHandler([&](const String & originId) { transmitData(nullptr, originId); }, false);
     }
 
-    WebSocketTx(JsonStateReader<T> stateReader, StatefulService<T> * statefulService, AsyncWebServer * server, const char * webSocketPath, size_t bufferSize = DEFAULT_BUFFER_SIZE)
+    WebSocketTx(JsonStateReader<T>   stateReader,
+                StatefulService<T> * statefulService,
+                AsyncWebServer *     server,
+                const char *         webSocketPath,
+                size_t               bufferSize = DEFAULT_BUFFER_SIZE)
         : WebSocketConnector<T>(statefulService, server, webSocketPath, bufferSize)
         , _stateReader(stateReader) {
         WebSocketConnector<T>::_statefulService->addUpdateHandler([&](const String & originId) { transmitData(nullptr, originId); }, false);
@@ -140,7 +149,11 @@ class WebSocketRx : virtual public WebSocketConnector<T> {
         , _stateUpdater(stateUpdater) {
     }
 
-    WebSocketRx(JsonStateUpdater<T> stateUpdater, StatefulService<T> * statefulService, AsyncWebServer * server, const char * webSocketPath, size_t bufferSize = DEFAULT_BUFFER_SIZE)
+    WebSocketRx(JsonStateUpdater<T>  stateUpdater,
+                StatefulService<T> * statefulService,
+                AsyncWebServer *     server,
+                const char *         webSocketPath,
+                size_t               bufferSize = DEFAULT_BUFFER_SIZE)
         : WebSocketConnector<T>(statefulService, server, webSocketPath, bufferSize)
         , _stateUpdater(stateUpdater) {
     }
@@ -182,7 +195,12 @@ class WebSocketTxRx : public WebSocketTx<T>, public WebSocketRx<T> {
         , WebSocketRx<T>(stateUpdater, statefulService, server, webSocketPath, securityManager, authenticationPredicate, bufferSize) {
     }
 
-    WebSocketTxRx(JsonStateReader<T> stateReader, JsonStateUpdater<T> stateUpdater, StatefulService<T> * statefulService, AsyncWebServer * server, const char * webSocketPath, size_t bufferSize = DEFAULT_BUFFER_SIZE)
+    WebSocketTxRx(JsonStateReader<T>   stateReader,
+                  JsonStateUpdater<T>  stateUpdater,
+                  StatefulService<T> * statefulService,
+                  AsyncWebServer *     server,
+                  const char *         webSocketPath,
+                  size_t               bufferSize = DEFAULT_BUFFER_SIZE)
         : WebSocketConnector<T>(statefulService, server, webSocketPath, bufferSize)
         , WebSocketTx<T>(stateReader, statefulService, server, webSocketPath, bufferSize)
         , WebSocketRx<T>(stateUpdater, statefulService, server, webSocketPath, bufferSize) {

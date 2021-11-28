@@ -33,7 +33,11 @@ class MqttConnector {
 template <class T>
 class MqttPub : virtual public MqttConnector<T> {
   public:
-    MqttPub(JsonStateReader<T> stateReader, StatefulService<T> * statefulService, AsyncMqttClient * mqttClient, const String & pubTopic = "", size_t bufferSize = DEFAULT_BUFFER_SIZE)
+    MqttPub(JsonStateReader<T>   stateReader,
+            StatefulService<T> * statefulService,
+            AsyncMqttClient *    mqttClient,
+            const String &       pubTopic   = "",
+            size_t               bufferSize = DEFAULT_BUFFER_SIZE)
         : MqttConnector<T>(statefulService, mqttClient, bufferSize)
         , _stateReader(stateReader)
         , _pubTopic(pubTopic) {
@@ -74,7 +78,11 @@ class MqttPub : virtual public MqttConnector<T> {
 template <class T>
 class MqttSub : virtual public MqttConnector<T> {
   public:
-    MqttSub(JsonStateUpdater<T> stateUpdater, StatefulService<T> * statefulService, AsyncMqttClient * mqttClient, const String & subTopic = "", size_t bufferSize = DEFAULT_BUFFER_SIZE)
+    MqttSub(JsonStateUpdater<T>  stateUpdater,
+            StatefulService<T> * statefulService,
+            AsyncMqttClient *    mqttClient,
+            const String &       subTopic   = "",
+            size_t               bufferSize = DEFAULT_BUFFER_SIZE)
         : MqttConnector<T>(statefulService, mqttClient, bufferSize)
         , _stateUpdater(stateUpdater)
         , _subTopic(subTopic) {

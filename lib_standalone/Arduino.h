@@ -30,7 +30,9 @@
 
 #include <iostream>
 
-#define IPAddress std::string
+// #define IPAddress std::string
+#define IPAddress String
+
 #define ICACHE_FLASH_ATTR
 #define ICACHE_RAM_ATTR
 #define os_event_t void
@@ -48,6 +50,8 @@
 #define INPUT 0
 #define OUTPUT 1
 #define INPUT_PULLUP 2
+
+#define snprintf snprintf_P // to keep backwards compatibility
 
 void pinMode(uint8_t pin, uint8_t mode);
 void digitalWrite(uint8_t pin, uint8_t value);

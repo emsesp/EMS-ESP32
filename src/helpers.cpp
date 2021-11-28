@@ -57,13 +57,11 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
 
     *ptr = '\0';
 
-    unsigned long res = 0;
-
     do {
-        res = value - base * (t = value / base);
+        unsigned long res = value - base * (t = value / base);
         if (res < 10) {
             *--ptr = '0' + res;
-        } else if ((res >= 10) && (res < 16)) {
+        } else if (res < 16) {
             *--ptr = 'A' - 10 + res;
         }
     } while ((value = t) != 0);
@@ -128,9 +126,9 @@ char * Helpers::smallitoa(char * result, const uint16_t value) {
 char * Helpers::render_boolean(char * result, bool value) {
     uint8_t bool_format_ = EMSESP::bool_format();
     if (bool_format_ == BOOL_FORMAT_ONOFF) {
-        strlcpy(result, value ? uuid::read_flash_string(F_(on)).c_str() : uuid::read_flash_string(F_(off)).c_str(), 5);
+        strlcpy(result, value ? read_flash_string(F_(on)).c_str() : read_flash_string(F_(off)).c_str(), 5);
     } else if (bool_format_ == BOOL_FORMAT_ONOFF_CAP) {
-        strlcpy(result, value ? uuid::read_flash_string(F_(ON)).c_str() : uuid::read_flash_string(F_(OFF)).c_str(), 5);
+        strlcpy(result, value ? read_flash_string(F_(ON)).c_str() : read_flash_string(F_(OFF)).c_str(), 5);
     } else if (bool_format_ == BOOL_FORMAT_TRUEFALSE) {
         strlcpy(result, value ? "true" : "false", 7);
     } else {
@@ -141,6 +139,7 @@ char * Helpers::render_boolean(char * result, bool value) {
 }
 
 // render for native char strings
+// format is not used
 char * Helpers::render_value(char * result, const char * value, uint8_t format __attribute__((unused))) {
     strcpy(result, value);
     return result;
@@ -253,6 +252,7 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
 }
 
 // uint16: convert unsigned short (two bytes) to text string and prints it
+// format: 0=no division, other divide by the value given and render with a decimal point
 char * Helpers::render_value(char * result, const uint16_t value, const uint8_t format) {
     if (!hasValue(value)) {
         return nullptr;
@@ -262,6 +262,7 @@ char * Helpers::render_value(char * result, const uint16_t value, const uint8_t 
 }
 
 // int8: convert signed byte to text string and prints it
+// format: 0=no division, other divide by the value given and render with a decimal point
 char * Helpers::render_value(char * result, const int8_t value, const uint8_t format) {
     if (!hasValue(value)) {
         return nullptr;
@@ -271,6 +272,7 @@ char * Helpers::render_value(char * result, const int8_t value, const uint8_t fo
 }
 
 // uint32: render long (4 byte) unsigned values
+// format: 0=no division, other divide by the value given and render with a decimal point
 char * Helpers::render_value(char * result, const uint32_t value, const uint8_t format) {
     if (!hasValue(value)) {
         return nullptr;
@@ -304,7 +306,7 @@ char * Helpers::render_value(char * result, const uint32_t value, const uint8_t 
 // creates string of hex values from an arrray of bytes
 std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     if (length == 0) {
-        return uuid::read_flash_string(F("<empty>"));
+        return read_flash_string(F("<empty>"));
     }
 
     std::string str(160, '\0');
@@ -350,7 +352,7 @@ uint32_t Helpers::hextoint(const char * hex) {
 // quick char to long
 uint16_t Helpers::atoint(const char * value) {
     unsigned int x = 0;
-    while (*value != '\0') {
+    while (*value >= '0' && *value <= '9') {
         x = (x * 10) + (*value - '0');
         ++value;
     }
@@ -359,7 +361,7 @@ uint16_t Helpers::atoint(const char * value) {
 
 // rounds a number to 2 decimal places
 // example: round2(3.14159) -> 3.14
-double Helpers::round2(double value, const uint8_t divider) {
+float Helpers::round2(float value, const uint8_t divider) {
     uint8_t div = (divider ? divider : 1); // prevent div-by-zero
 
     if (value >= 0) {
@@ -462,12 +464,12 @@ bool Helpers::value2bool(const char * v, bool & value) {
 
     std::string bool_str = toLower(v); // convert to lower case
 
-    if ((bool_str == uuid::read_flash_string(F_(on))) || (bool_str == "1") or (bool_str == "true")) {
+    if ((bool_str == read_flash_string(F_(on))) || (bool_str == "1") or (bool_str == "true")) {
         value = true;
         return true; // is a bool
     }
 
-    if ((bool_str == uuid::read_flash_string(F_(off))) || (bool_str == "0") or (bool_str == "false")) {
+    if ((bool_str == read_flash_string(F_(off))) || (bool_str == "0") or (bool_str == "false")) {
         value = false;
         return true; // is a bool
     }
@@ -482,8 +484,8 @@ bool Helpers::value2enum(const char * v, uint8_t & value, const __FlashStringHel
     }
     std::string str = toLower(v);
     for (value = 0; strs[value]; value++) {
-        std::string str1 = toLower(uuid::read_flash_string(strs[value]));
-        if ((str1 == uuid::read_flash_string(F_(off)) && str == "false") || (str1 == uuid::read_flash_string(F_(on)) && str == "true") || (str == str1)
+        std::string str1 = toLower(read_flash_string(strs[value]));
+        if ((str1 == read_flash_string(F_(off)) && str == "false") || (str1 == read_flash_string(F_(on)) && str == "true") || (str == str1)
             || (v[0] == ('0' + value) && v[1] == '\0')) {
             return true;
         }

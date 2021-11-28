@@ -50,7 +50,7 @@ class Helpers {
     static uint16_t    atoint(const char * value);
     static bool        check_abs(const int32_t i);
     static uint32_t    abs(const int32_t i);
-    static double      round2(double value, const uint8_t divider);
+    static float       round2(float value, const uint8_t divider);
     static std::string toLower(std::string const & s);
     static std::string toUpper(std::string const & s);
 

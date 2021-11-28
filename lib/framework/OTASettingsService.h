@@ -4,8 +4,6 @@
 #include <HttpEndpoint.h>
 #include <FSPersistence.h>
 
-#include <ESPmDNS.h>
-
 #include <ArduinoOTA.h>
 #include <WiFiUdp.h>
 
