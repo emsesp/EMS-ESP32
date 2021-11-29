@@ -1,6 +1,4 @@
-import { useRef, useEffect, useContext } from 'react';
-
-import React from 'react';
+import { useRef, useEffect, createContext, useContext } from 'react';
 
 export interface LayoutContextValue {
   title: string;
@@ -8,7 +6,7 @@ export interface LayoutContextValue {
 }
 
 const LayoutContextDefaultValue = {} as LayoutContextValue;
-export const LayoutContext = React.createContext(LayoutContextDefaultValue);
+export const LayoutContext = createContext(LayoutContextDefaultValue);
 
 export const useLayoutTitle = (myTitle: string) => {
   const { title, setTitle } = useContext(LayoutContext);

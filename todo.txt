@@ -29,7 +29,6 @@ files changed in interface
 
  src/components/ButtonRow.tsx - added top padding (mt) to give space
  src/components/SectionContext.tsx - added divider with title in center. Added a new props 'id' needed in SystemLog.tsx
- src/components/loading/FormLoader.tsx - remove the word "Loading..."
 
  src/validators/network.ts - added the extra fields I needed for Ethernet
  src/validators/shared.ts - added validator for IPv6 and IPv4
@@ -66,11 +65,11 @@ Platform/Interface related:
  - Enhancement: Can the Upload form refreshed itself automatically after a successful upload?
  - Enhancement: Web Socket ping back to the server (ESP32) to see if it's still alive and try and reconnect
  - Enhancement: Show flashing up of "Loading..." only if it takes too long to refresh?
- - Enhancement: Create an useEs.ts for Event Source (I use it in my System Log)
+ - Enhancement: Create an useEs.ts for Event Source (I use a custom one in my SystemLog.tsx)
 
 EMS-ESP project things to finish
 --------------------------------
 - add ethernet params to the EMS-ESP settings, change phy_type
 - reload sensor in Dashboard after rename, same with thermostat
-- fix big when system log crashes with too many messages in eventlog array
+- fix bug in SystemLog where eventLog[] grows and crashes - see previous implementation
 - system log - find out how to make the Box autoscroll

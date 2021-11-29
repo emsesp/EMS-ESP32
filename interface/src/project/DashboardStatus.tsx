@@ -104,77 +104,73 @@ const DashboardStatus: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
-    const renderTraffic = () => {
-      return (
-        <>
-          <TableContainer>
-            <Table size="small">
-              <TableBody>
-                <TableRow>
-                  <TableCell># Recognized devices</TableCell>
-                  <TableCell align="right">{data.num_devices}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Telegrams Received</TableCell>
-                  <TableCell align="right">
-                    {Intl.NumberFormat().format(data.rx_received)}&nbsp;(quality {data.rx_quality}%)
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Telegrams Sent</TableCell>
-                  <TableCell align="right">
-                    {Intl.NumberFormat().format(data.tx_sent)}&nbsp;(quality {data.tx_quality}%)
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </>
-      );
-    };
-
     return (
-      <List>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar sx={{ bgcolor: busStatusHighlight(data, theme) }}>
-              <DeviceHubIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="EMS Bus Connection Status" secondary={busStatus(data)} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        {data.status !== busConnectionStatus.BUS_STATUS_OFFLINE && renderTraffic()}
-      </List>
+      <>
+        <List>
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: busStatusHighlight(data, theme) }}>
+                <DeviceHubIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="EMS Bus Connection Status" secondary={busStatus(data)} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          {data.status !== busConnectionStatus.BUS_STATUS_OFFLINE && (
+            <TableContainer>
+              <Table size="small">
+                <TableBody>
+                  <TableRow>
+                    <TableCell># Recognized devices</TableCell>
+                    <TableCell align="right">{data.num_devices}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Telegrams Received</TableCell>
+                    <TableCell align="right">
+                      {Intl.NumberFormat().format(data.rx_received)}&nbsp;(quality {data.rx_quality}%)
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Telegrams Sent</TableCell>
+                    <TableCell align="right">
+                      {Intl.NumberFormat().format(data.tx_sent)}&nbsp;(quality {data.tx_quality}%)
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </List>
+        {renderScanDialog()}
+        <Box display="flex" flexWrap="wrap">
+          <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
+            <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+              Refresh
+            </Button>
+          </Box>
+          <Box flexWrap="nowrap" whiteSpace="nowrap">
+            <ButtonRow>
+              <Button
+                startIcon={<PermScanWifiIcon />}
+                variant="outlined"
+                color="primary"
+                onClick={() => setConfirmScan(true)}
+              >
+                Scan for new devices
+              </Button>
+            </ButtonRow>
+          </Box>
+        </Box>
+      </>
     );
   };
 
   return (
     <SectionContent title="EMS Bus Status" titleGutter>
       {content()}
-      {renderScanDialog()}
-      <Box display="flex" flexWrap="wrap">
-        <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
-            Refresh
-          </Button>
-        </Box>
-        <Box flexWrap="nowrap" whiteSpace="nowrap">
-          <ButtonRow>
-            <Button
-              startIcon={<PermScanWifiIcon />}
-              variant="outlined"
-              color="primary"
-              onClick={() => setConfirmScan(true)}
-            >
-              Scan for new devices
-            </Button>
-          </ButtonRow>
-        </Box>
-      </Box>
     </SectionContent>
   );
 };

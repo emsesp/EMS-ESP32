@@ -1,13 +1,13 @@
 import { useEffect, FC, useState, useCallback, useRef } from 'react';
 import { useSnackbar } from 'notistack';
 
-import { Box, Button, LinearProgress, Typography } from '@mui/material';
+import { Button } from '@mui/material';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 
-import { ButtonRow, SectionContent } from '../../components';
-import { WiFiNetwork, WiFiNetworkList } from '../../types';
-import { extractErrorMessage } from '../../utils';
 import * as NetworkApi from '../../api/network';
+import { WiFiNetwork, WiFiNetworkList } from '../../types';
+import { ButtonRow, FormLoader, SectionContent } from '../../components';
+import { extractErrorMessage } from '../../utils';
 
 import WiFiNetworkSelector from './WiFiNetworkSelector';
 
@@ -74,32 +74,16 @@ const WiFiNetworkScanner: FC = () => {
   }, [startNetworkScan]);
 
   const renderNetworkScanner = () => {
-    if (errorMessage) {
-      return (
-        <Box p={0.5}>
-          <Typography variant="h6" textAlign="center">
-            {errorMessage}
-          </Typography>
-        </Box>
-      );
-    }
     if (!networkList) {
-      return (
-        <Box p={0.5}>
-          <LinearProgress sx={{ m: 4 }} />
-          <Typography variant="h6" textAlign="center">
-            Scanning&hellip;
-          </Typography>
-        </Box>
-      );
+      return <FormLoader message="Scanning&hellip;" errorMessage={errorMessage} />;
     }
     return <WiFiNetworkSelector networkList={networkList} />;
   };
 
   return (
-    <SectionContent title="WiFi Network Scanner">
+    <SectionContent title="Network Scanner">
       {renderNetworkScanner()}
-      <ButtonRow>
+      <ButtonRow pt={2}>
         <Button
           startIcon={<PermScanWifiIcon />}
           variant="outlined"

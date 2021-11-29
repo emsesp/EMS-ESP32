@@ -1,4 +1,4 @@
-import React, { FC, useContext, useEffect, useState } from 'react';
+import { FC, useContext, useEffect, useState } from 'react';
 
 import {
   Avatar,
@@ -70,7 +70,7 @@ const WiFiSettingsForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
     const validateAndSubmit = async () => {

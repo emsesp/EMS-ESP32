@@ -1,4 +1,4 @@
-import React, { FC, RefObject } from 'react';
+import { FC, createRef, createContext, useContext, RefObject } from 'react';
 import { SnackbarProvider } from 'notistack';
 
 import { IconButton } from '@mui/material';
@@ -10,15 +10,15 @@ import CustomTheme from './CustomTheme';
 import AppRouting from './AppRouting';
 
 const App: FC = () => {
-  const notistackRef: RefObject<any> = React.createRef();
+  const notistackRef: RefObject<any> = createRef();
 
   const onClickDismiss = (key: string | number | undefined) => () => {
     notistackRef.current.closeSnackbar(key);
   };
 
-  const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
+  const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
-  const colorMode = React.useContext(ColorModeContext);
+  const colorMode = useContext(ColorModeContext);
 
   return (
     <ColorModeContext.Provider value={colorMode}>

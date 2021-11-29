@@ -1,4 +1,4 @@
-import React, { FC, useContext } from 'react';
+import { FC, useState, useContext } from 'react';
 
 import { Box, Button, Divider, IconButton, Popover, Typography, Avatar, styled, TypographyProps } from '@mui/material';
 
@@ -17,7 +17,7 @@ const ItemTypography = styled(Typography)<TypographyProps>({
 const LayoutAuthMenu: FC = () => {
   const { me, signOut } = useContext(AuthenticatedContext);
 
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);

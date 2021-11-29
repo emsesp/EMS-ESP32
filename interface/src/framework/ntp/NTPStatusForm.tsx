@@ -18,7 +18,6 @@ import {
   Theme,
   useTheme
 } from '@mui/material';
-
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
@@ -26,10 +25,10 @@ import UpdateIcon from '@mui/icons-material/Update';
 import DnsIcon from '@mui/icons-material/Dns';
 import AvTimerIcon from '@mui/icons-material/AvTimer';
 
-import { FormLoader, SectionContent } from '../../components';
 import * as NTPApi from '../../api/ntp';
-import { extractErrorMessage, formatDateTime, formatDuration, formatLocalDateTime, useRest } from '../../utils';
 import { NTPStatus, NTPSyncStatus } from '../../types';
+import { FormLoader, SectionContent } from '../../components';
+import { extractErrorMessage, formatDateTime, formatDuration, formatLocalDateTime, useRest } from '../../utils';
 import { AuthenticatedContext } from '../../contexts/authentication';
 
 export const isNtpActive = ({ status }: NTPStatus) => status === NTPSyncStatus.NTP_ACTIVE;
@@ -129,82 +128,84 @@ const NTPStatusForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
     return (
-      <List>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar sx={{ bgcolor: ntpStatusHighlight(data, theme) }}>
-              <UpdateIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="Status" secondary={ntpStatus(data)} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        {isNtpActive(data) && (
-          <>
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar>
-                  <DnsIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary="NTP Server" secondary={data.server} />
-            </ListItem>
-            <Divider variant="inset" component="li" />
-          </>
-        )}
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <AccessTimeIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="Local Time" secondary={formatDateTime(data.local_time)} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <SwapVerticalCircleIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="UTC Time" secondary={formatDateTime(data.utc_time)} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <AvTimerIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="Uptime" secondary={formatDuration(data.uptime)} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-      </List>
+      <>
+        <List>
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: ntpStatusHighlight(data, theme) }}>
+                <UpdateIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="Status" secondary={ntpStatus(data)} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          {isNtpActive(data) && (
+            <>
+              <ListItem>
+                <ListItemAvatar>
+                  <Avatar>
+                    <DnsIcon />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary="NTP Server" secondary={data.server} />
+              </ListItem>
+              <Divider variant="inset" component="li" />
+            </>
+          )}
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <AccessTimeIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="Local Time" secondary={formatDateTime(data.local_time)} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <SwapVerticalCircleIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="UTC Time" secondary={formatDateTime(data.utc_time)} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <AvTimerIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="Uptime" secondary={formatDuration(data.uptime)} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+        </List>
+        <Box display="flex" flexWrap="wrap">
+          <Box flexGrow={1}>
+            <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+              Refresh
+            </Button>
+          </Box>
+          {me.admin && data && !isNtpActive(data) && (
+            <Box flexWrap="nowrap" whiteSpace="nowrap">
+              <Button onClick={openSetTime} variant="outlined" color="primary" startIcon={<AccessTimeIcon />}>
+                Set Time
+              </Button>
+            </Box>
+          )}
+        </Box>
+        {renderSetTimeDialog()}.
+      </>
     );
   };
 
   return (
     <SectionContent title="NTP Status" titleGutter>
       {content()}
-      <Box display="flex" flexWrap="wrap">
-        <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
-            Refresh
-          </Button>
-        </Box>
-        {me.admin && data && !isNtpActive(data) && (
-          <Box flexWrap="nowrap" whiteSpace="nowrap">
-            <Button onClick={openSetTime} variant="outlined" color="primary" startIcon={<AccessTimeIcon />}>
-              Set Time
-            </Button>
-          </Box>
-        )}
-      </Box>
-      {renderSetTimeDialog()}
     </SectionContent>
   );
 };

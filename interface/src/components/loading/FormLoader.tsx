@@ -1,32 +1,34 @@
 import { FC } from 'react';
 
-import { Box, Button, LinearProgress, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Typography } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+
+import { MessageBox } from '..';
 
 interface FormLoaderProps {
   message?: string;
   errorMessage?: string;
-  loadData?: () => void;
+  onRetry?: () => void;
 }
 
-const FormLoader: FC<FormLoaderProps> = ({ errorMessage, loadData, message = '' }) => {
+const FormLoader: FC<FormLoaderProps> = ({ errorMessage, onRetry, message = 'Loading…' }) => {
   if (errorMessage) {
     return (
-      <Box m={1} display="flex" flexDirection="column">
-        <Typography variant="h6" textAlign="center">
-          {errorMessage}
-        </Typography>
-        {loadData && (
-          <Button variant="outlined" color="secondary" onClick={loadData}>
+      <MessageBox my={2} level="error" message={errorMessage}>
+        {onRetry && (
+          <Button startIcon={<RefreshIcon />} variant="outlined" color="error" onClick={onRetry}>
             Retry
           </Button>
         )}
-      </Box>
+      </MessageBox>
     );
   }
   return (
-    <Box m={1} display="flex" flexDirection="column">
-      <LinearProgress />
-      <Typography variant="h6" textAlign="center">
+    <Box m={2} py={2} display="flex" alignItems="center" flexDirection="column">
+      <Box py={2}>
+        <CircularProgress size={100} />
+      </Box>
+      <Typography variant="h6" fontWeight={400} textAlign="center">
         {message}
       </Typography>
     </Box>

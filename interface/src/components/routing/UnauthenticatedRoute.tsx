@@ -1,4 +1,4 @@
-import React, { FC, useContext } from 'react';
+import { FC, useContext } from 'react';
 import { Redirect, Route, RouteProps } from 'react-router-dom';
 
 import * as AuthenticationApi from '../../api/authentication';

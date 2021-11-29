@@ -1,14 +1,14 @@
 import { FC } from 'react';
-import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, Theme, useTheme } from '@mui/material';
 
+import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, Theme, useTheme } from '@mui/material';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import ComputerIcon from '@mui/icons-material/Computer';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
-import { ButtonRow, FormLoader, SectionContent } from '../../components';
-import { APNetworkStatus, APStatus } from '../../types';
 import * as APApi from '../../api/ap';
+import { APNetworkStatus, APStatus } from '../../types';
+import { ButtonRow, FormLoader, SectionContent } from '../../components';
 import { useRest } from '../../utils';
 
 // TODO - Move some of the below to 'types' as required
@@ -46,57 +46,59 @@ const APStatusForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
     return (
-      <List>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar sx={{ bgcolor: apStatusHighlight(data, theme) }}>
-              <SettingsInputAntennaIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="Status" secondary={apStatus(data)} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>IP</Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="IP Address" secondary={data.ip_address} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <DeviceHubIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="MAC Address" secondary={data.mac_address} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <ComputerIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="AP Clients" secondary={data.station_num} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-      </List>
+      <>
+        <List>
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: apStatusHighlight(data, theme) }}>
+                <SettingsInputAntennaIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="Status" secondary={apStatus(data)} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>IP</Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="IP Address" secondary={data.ip_address} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <DeviceHubIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="MAC Address" secondary={data.mac_address} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <ComputerIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="AP Clients" secondary={data.station_num} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+        </List>
+        <ButtonRow pt={2}>
+          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+            Refresh
+          </Button>
+        </ButtonRow>
+      </>
     );
   };
 
   return (
     <SectionContent title="Access Point Status" titleGutter>
       {content()}
-      <ButtonRow>
-        <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
-          Refresh
-        </Button>
-      </ButtonRow>
     </SectionContent>
   );
 };

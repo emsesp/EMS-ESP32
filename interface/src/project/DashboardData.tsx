@@ -299,7 +299,7 @@ const DashboardData: FC = () => {
 
   const renderData = () => {
     if (!data) {
-      return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
     const noDevices = () => {
@@ -506,8 +506,8 @@ const DashboardData: FC = () => {
     </>
   );
 
-  return (
-    <SectionContent title="Device and Sensor Data" titleGutter>
+  const content = () => (
+    <>
       {renderData()}
       {renderDeviceData()}
       {data?.sensors.length !== 0 && renderSensorData()}
@@ -519,6 +519,13 @@ const DashboardData: FC = () => {
           Refresh
         </Button>
       </ButtonRow>
+      ;
+    </>
+  );
+
+  return (
+    <SectionContent title="Device and Sensor Data" titleGutter>
+      {content()}
     </SectionContent>
   );
 };

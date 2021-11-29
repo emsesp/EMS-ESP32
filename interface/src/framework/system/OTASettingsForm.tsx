@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import { FC, useState } from 'react';
 
 import { Button, Checkbox } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
@@ -31,7 +31,7 @@ const OTASettingsForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
     const validateAndSubmit = async () => {

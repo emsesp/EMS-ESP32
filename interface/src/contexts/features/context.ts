@@ -1,4 +1,4 @@
-import React from 'react';
+import { createContext} from 'react';
 
 import { Features } from '../../types';
 
@@ -7,4 +7,4 @@ export interface FeaturesContextValue {
 }
 
 const FeaturesContextDefaultValue = {} as FeaturesContextValue;
-export const FeaturesContext = React.createContext(FeaturesContextDefaultValue);
+export const FeaturesContext = createContext(FeaturesContextDefaultValue);

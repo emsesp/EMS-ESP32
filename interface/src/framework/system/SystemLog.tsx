@@ -165,9 +165,9 @@ const SystemLog: FC = () => {
     };
   }, [onMessage, reconnectTimeout]);
 
-  const renderSettings = () => {
+  const content = () => {
     if (!data) {
-      return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
     return (
@@ -235,13 +235,6 @@ const SystemLog: FC = () => {
             </ButtonRow>
           </Grid>
         </Grid>
-      </>
-    );
-  };
-
-  const renderLog = () => {
-    if (data) {
-      return (
         <Box
           sx={{
             backgroundColor: 'black',
@@ -266,14 +259,13 @@ const SystemLog: FC = () => {
               </LogEntryLine>
             ))}
         </Box>
-      );
-    }
+      </>
+    );
   };
 
   return (
     <SectionContent title="System Log" titleGutter id="log-window">
-      {renderSettings()}
-      {renderLog()}
+      {content()}
     </SectionContent>
   );
 };

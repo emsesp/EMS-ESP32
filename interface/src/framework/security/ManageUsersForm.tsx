@@ -1,7 +1,6 @@
-import React, { FC, useContext, useState } from 'react';
+import { FC, useContext, useState } from 'react';
 
 import {
-  Box,
   Button,
   IconButton,
   Table,
@@ -10,11 +9,9 @@ import {
   TableFooter,
   TableHead,
   TableRow,
-  Typography,
   useTheme,
   useMediaQuery
 } from '@mui/material';
-
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -23,10 +20,10 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 
 import * as SecurityApi from '../../api/security';
-import { ButtonRow, FormLoader, SectionContent } from '../../components';
+import { SecuritySettings, User } from '../../types';
+import { ButtonRow, FormLoader, MessageBox, SectionContent } from '../../components';
 import { createUserValidator } from '../../validators';
 import { useRest } from '../../utils';
-import { SecuritySettings, User } from '../../types';
 import { AuthenticatedContext } from '../../contexts/authentication';
 
 import UserForm from './UserForm';
@@ -56,7 +53,7 @@ const SecuritySettingsForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
     const noAdminConfigured = () => !data.users.find((u) => u.admin);
@@ -137,9 +134,7 @@ const SecuritySettingsForm: FC = () => {
           </TableFooter>
         </Table>
         {noAdminConfigured() && (
-          <Box bgcolor="error.main" color="error.contrastText" p={2} mt={2} mb={2}>
-            <Typography variant="body1">You must have at least one admin user configured.</Typography>
-          </Box>
+          <MessageBox level="warning" message="You must have at least one admin user configured." my={2} />
         )}
         <ButtonRow>
           <Button

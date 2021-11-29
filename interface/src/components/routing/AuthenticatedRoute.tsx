@@ -1,4 +1,4 @@
-import React, { FC, useContext, useEffect } from 'react';
+import { FC, useContext, useEffect } from 'react';
 import { RouteProps, Redirect, Route } from 'react-router-dom';
 
 import {

@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { ListItem, ListItemButton, ListItemIcon, ListItemText, SvgIconProps } from '@mui/material';

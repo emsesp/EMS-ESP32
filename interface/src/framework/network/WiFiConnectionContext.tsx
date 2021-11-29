@@ -1,4 +1,4 @@
-import React from 'react';
+import { createContext} from 'react';
 import { WiFiNetwork } from '../../types';
 
 export interface WiFiConnectionContextValue {
@@ -8,4 +8,4 @@ export interface WiFiConnectionContextValue {
 }
 
 const WiFiConnectionContextDefaultValue = {} as WiFiConnectionContextValue;
-export const WiFiConnectionContext = React.createContext(WiFiConnectionContextDefaultValue);
+export const WiFiConnectionContext = createContext(WiFiConnectionContextDefaultValue);

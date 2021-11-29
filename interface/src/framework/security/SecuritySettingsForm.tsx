@@ -1,17 +1,18 @@
-import React, { FC, useContext, useState } from 'react';
+import { FC, useContext, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
 
-import { Box, Button, Typography } from '@mui/material';
+import { Button } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 
 import * as SecurityApi from '../../api/security';
-import { ButtonRow, FormLoader, SectionContent, ValidatedPasswordField } from '../../components';
+import { SecuritySettings } from '../../types';
+import { ButtonRow, FormLoader, MessageBox, SectionContent, ValidatedPasswordField } from '../../components';
 import { SECURITY_SETTINGS_VALIDATOR, validate } from '../../validators';
 import { updateValue, useRest } from '../../utils';
-import { SecuritySettings } from '../../types';
 import { AuthenticatedContext } from '../../contexts/authentication';
 
 const SecuritySettingsForm: FC = () => {
+  const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
   const { loadData, saving, data, setData, saveData, errorMessage } = useRest<SecuritySettings>({
     read: SecurityApi.readSecuritySettings,
     update: SecurityApi.updateSecuritySettings
@@ -20,11 +21,9 @@ const SecuritySettingsForm: FC = () => {
   const authenticatedContext = useContext(AuthenticatedContext);
   const updateFormValue = updateValue(setData);
 
-  const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-
   const content = () => {
     if (!data) {
-      return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
     const validateAndSubmit = async () => {
@@ -50,12 +49,11 @@ const SecuritySettingsForm: FC = () => {
           onChange={updateFormValue}
           margin="normal"
         />
-        <Box bgcolor="primary.main" color="primary.contrastText" p={2} mt={2} mb={2}>
-          <Typography variant="body1">
-            The JWT secret is used to sign authentication tokens. If you modify the JWT Secret, all users will be signed
-            out.
-          </Typography>
-        </Box>
+        <MessageBox
+          level="info"
+          message="The JWT secret is used to sign authentication tokens. If you modify the JWT Secret, all users will be signed out."
+          my={2}
+        />
         <ButtonRow>
           <Button
             startIcon={<SaveIcon />}

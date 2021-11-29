@@ -1,4 +1,4 @@
-import React from 'react';
+import { FC } from 'react';
 
 import { Paper, Divider } from '@mui/material';
 
@@ -8,7 +8,7 @@ interface SectionContentProps {
   id?: string;
 }
 
-const SectionContent: React.FC<SectionContentProps> = (props) => {
+const SectionContent: FC<SectionContentProps> = (props) => {
   const { children, title, id } = props;
   return (
     <Paper id={id} sx={{ p: 2, m: 3 }}>

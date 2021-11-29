@@ -204,158 +204,160 @@ const SystemStatusForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
     return (
-      <List>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <BuildIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="EMS-ESP Version" secondary={'v' + data.emsesp_version} />
-          {latestVersion && (
-            <Button color="primary" onClick={() => setShowingVersion(true)}>
-              Version Information&hellip;
-            </Button>
+      <>
+        <List>
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <BuildIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="EMS-ESP Version" secondary={'v' + data.emsesp_version} />
+            {latestVersion && (
+              <Button color="primary" onClick={() => setShowingVersion(true)}>
+                Version Information&hellip;
+              </Button>
+            )}
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <DevicesIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="Device (Platform / SDK)" secondary={data.esp_platform + ' / ' + data.sdk_version} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <TimerIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="System Uptime" secondary={data.uptime} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <ShowChartIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="CPU Frequency" secondary={data.cpu_freq_mhz + ' MHz'} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <MemoryIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary="Heap (Free / Max Alloc)"
+              secondary={
+                formatNumber(data.free_heap) +
+                ' / ' +
+                formatNumber(data.max_alloc_heap) +
+                ' bytes ' +
+                (data.esp_platform === EspPlatform.ESP8266 ? '(' + data.heap_fragmentation + '% fragmentation)' : '')
+              }
+            />
+          </ListItem>
+          {data.esp_platform === EspPlatform.ESP32 && data.psram_size > 0 && (
+            <>
+              <Divider variant="inset" component="li" />
+              <ListItem>
+                <ListItemAvatar>
+                  <Avatar>
+                    <AppsIcon />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary="PSRAM (Size / Free)"
+                  secondary={formatNumber(data.psram_size) + ' / ' + formatNumber(data.free_psram) + ' bytes'}
+                />
+              </ListItem>
+            </>
           )}
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <DevicesIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="Device (Platform / SDK)" secondary={data.esp_platform + ' / ' + data.sdk_version} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <TimerIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="System Uptime" secondary={data.uptime} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <ShowChartIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="CPU Frequency" secondary={data.cpu_freq_mhz + ' MHz'} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <MemoryIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary="Heap (Free / Max Alloc)"
-            secondary={
-              formatNumber(data.free_heap) +
-              ' / ' +
-              formatNumber(data.max_alloc_heap) +
-              ' bytes ' +
-              (data.esp_platform === EspPlatform.ESP8266 ? '(' + data.heap_fragmentation + '% fragmentation)' : '')
-            }
-          />
-        </ListItem>
-        {data.esp_platform === EspPlatform.ESP32 && data.psram_size > 0 && (
-          <>
-            <Divider variant="inset" component="li" />
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar>
-                  <AppsIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary="PSRAM (Size / Free)"
-                secondary={formatNumber(data.psram_size) + ' / ' + formatNumber(data.free_psram) + ' bytes'}
-              />
-            </ListItem>
-          </>
-        )}
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <SdStorageIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary="Flash Chip (Size / Speed)"
-            secondary={
-              formatNumber(data.flash_chip_size) + ' bytes / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'
-            }
-          />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <FolderIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary="File System (Used / Total)"
-            secondary={
-              formatNumber(data.fs_used) +
-              ' / ' +
-              formatNumber(data.fs_total) +
-              ' bytes (' +
-              formatNumber(data.fs_total - data.fs_used) +
-              '\xa0bytes free)'
-            }
-          />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-      </List>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <SdStorageIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary="Flash Chip (Size / Speed)"
+              secondary={
+                formatNumber(data.flash_chip_size) + ' bytes / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'
+              }
+            />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <FolderIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary="File System (Used / Total)"
+              secondary={
+                formatNumber(data.fs_used) +
+                ' / ' +
+                formatNumber(data.fs_total) +
+                ' bytes (' +
+                formatNumber(data.fs_total - data.fs_used) +
+                '\xa0bytes free)'
+              }
+            />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+        </List>
+        <Box display="flex" flexWrap="wrap">
+          <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
+            <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+              Refresh
+            </Button>
+          </Box>
+          {me.admin && (
+            <Box flexWrap="nowrap" whiteSpace="nowrap">
+              <ButtonRow>
+                <Button
+                  startIcon={<PowerSettingsNewIcon />}
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => setConfirmRestart(true)}
+                >
+                  Restart
+                </Button>
+                <Button
+                  startIcon={<SettingsBackupRestoreIcon />}
+                  variant="outlined"
+                  onClick={() => setConfirmFactoryReset(true)}
+                  color="error"
+                >
+                  Factory reset
+                </Button>
+              </ButtonRow>
+            </Box>
+          )}
+        </Box>
+        {renderVersionDialog()}
+        {renderRestartDialog()}
+        {renderFactoryResetDialog()}
+      </>
     );
   };
 
   return (
     <SectionContent title="System Status" titleGutter>
       {content()}
-      <Box display="flex" flexWrap="wrap">
-        <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
-            Refresh
-          </Button>
-        </Box>
-        {me.admin && (
-          <Box flexWrap="nowrap" whiteSpace="nowrap">
-            <ButtonRow>
-              <Button
-                startIcon={<PowerSettingsNewIcon />}
-                variant="outlined"
-                color="primary"
-                onClick={() => setConfirmRestart(true)}
-              >
-                Restart
-              </Button>
-              <Button
-                startIcon={<SettingsBackupRestoreIcon />}
-                variant="outlined"
-                onClick={() => setConfirmFactoryReset(true)}
-                color="error"
-              >
-                Factory reset
-              </Button>
-            </ButtonRow>
-          </Box>
-        )}
-      </Box>
-      {renderVersionDialog()}
-      {renderRestartDialog()}
-      {renderFactoryResetDialog()}
     </SectionContent>
   );
 };

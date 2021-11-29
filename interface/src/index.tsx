@@ -1,4 +1,4 @@
-import React from 'react';
+import { StrictMode } from 'react';
 import ReactDOM from 'react-dom';
 
 import '@fontsource/roboto/latin-400.css';
@@ -15,10 +15,10 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 
 ReactDOM.render(
-  <React.StrictMode>
+  <StrictMode>
     <BrowserRouter>
       <App />
     </BrowserRouter>
-  </React.StrictMode>,
+  </StrictMode>,
   document.getElementById('root')
 );
