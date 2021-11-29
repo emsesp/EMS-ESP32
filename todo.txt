@@ -1,3 +1,6 @@
+These are the customized changes I made to esp8266-react for my EMS-ESP project (ESP32) only
+based off https://github.com/rjwats/esp8266-react/compare/%23251-NewUI
+
 to test locally using static data
 ---------------------------------
  % cd mock-api; npm install
@@ -18,7 +21,7 @@ files changed in interface
 
  src/api/env.ts - changed default project name
  src/api/endpoints.ts - added a AXIOS_API for /api and also AXIOS_BIN using msgpack decoding, also ES
- src/api/Env.ts - add Event Source
+ src/api/Env.ts - added Event Source
  
  src/components/layout/Layout.tsx - changed DRAWER_WIDTH to 230
  src/components/layout/LayoutAppBar.tsx - changed DRAWER_WIDTH to 230, set backgroundColor and color to the sx
@@ -28,16 +31,14 @@ files changed in interface
  src/components/SectionContext.tsx - added divider with title in center. Added a new props 'id' needed in SystemLog.tsx
  src/components/loading/FormLoader.tsx - remove the word "Loading..."
 
- src/validators/network.ts - added the extra fields
- src/validators/shared.ts - added validator for IPv6
+ src/validators/network.ts - added the extra fields I needed for Ethernet
+ src/validators/shared.ts - added validator for IPv6 and IPv4
 
- src/setupProxy.hs - added Event Source
-
- src/Project/ProjectRouting.tsx - had to add fixed and wildcards for nav to work
+ src/Project/ProjectRouting.tsx - had to add fixed and wildcards for nav to work - need to double check if this is ok now
  src/AppRouting.tsx - renamed 'log in' to 'sign in' to be consistent
 
- * changed all <Button> variant="contained" to variant="outlined"
- * removed pt={2} from all ButtonRow's and added it to the actual ButtonRow component
+ src/* changed all <Button> variant="contained" to variant="outlined"
+ src/* removed pt={2} from all ButtonRow's and added it to the ButtonRow component
 
 new files added in interface
 ----------------------------
@@ -49,8 +50,8 @@ new files added in interface
 customized the features
 -----------------------
  - MQTT - additional fields for my EMS-ESP project
- - Wifi/Network - renamed wifi to network everywhere, including the api endpoints to allow for Ethernet
- - System - added system log and version check. plus other params like uptime.
+ - Wifi/Network - renamed "wifi" to "network" everywhere, including the api endpoints to allow for Ethernet
+ - System - added system log and version check, plus other params like uptime.
 
 still to do
 -----------
