@@ -3,7 +3,6 @@ import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router
 
 import { Tab, Tabs } from '@mui/material';
 
-import { useLayoutTitle } from '../../components/layout';
 import { AuthenticatedContext } from '../../contexts/authentication';
 import { WiFiNetwork } from '../../types';
 
@@ -11,7 +10,7 @@ import { WiFiConnectionContext } from './WiFiConnectionContext';
 import NetworkStatusForm from './NetworkStatusForm';
 import WiFiNetworkScanner from './WiFiNetworkScanner';
 import NetworkSettingsForm from './NetworkSettingsForm';
-import { AdminRoute } from '../../components';
+import { AdminRoute, useLayoutTitle } from '../../components';
 
 const NetworkConnectionRouting: FC = () => {
   useLayoutTitle('Network Connection');

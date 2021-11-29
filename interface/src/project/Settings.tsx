@@ -4,9 +4,8 @@ import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router
 import { Tab, Tabs } from '@mui/material';
 
 import { PROJECT_PATH } from '../api/env';
-import { useLayoutTitle } from '../components/layout';
 
-import { AdminRoute } from '../components';
+import { AdminRoute, useLayoutTitle } from '../components';
 
 import SettingsApplication from './SettingsApplication';
 import SettingsEntities from './SettingsEntities';

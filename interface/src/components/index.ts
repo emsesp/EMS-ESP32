@@ -1,4 +1,5 @@
 export * from './inputs';
+export * from './layout';
 export * from './loading';
 export * from './routing';
 export * from './upload';

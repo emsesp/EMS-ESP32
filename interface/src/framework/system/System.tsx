@@ -3,7 +3,6 @@ import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router
 
 import { Tab, Tabs } from '@mui/material';
 
-import { useLayoutTitle } from '../../components/layout';
 import { AuthenticatedContext } from '../../contexts/authentication';
 import { FeaturesContext } from '../../contexts/features';
 
@@ -11,7 +10,7 @@ import SystemStatusForm from './SystemStatusForm';
 import SystemLog from './SystemLog';
 import OTASettingsForm from './OTASettingsForm';
 import UploadFirmwareForm from './UploadFirmwareForm';
-import { AdminRoute } from '../../components';
+import { AdminRoute, useLayoutTitle } from '../../components';
 
 const SystemRouting: FC = () => {
   useLayoutTitle('System');

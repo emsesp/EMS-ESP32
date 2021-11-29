@@ -4,7 +4,7 @@ import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router
 import { Tab, Tabs } from '@mui/material';
 
 import { PROJECT_PATH } from '../api/env';
-import { useLayoutTitle } from '../components/layout';
+import { useLayoutTitle } from '../components';
 
 import DashboardStatus from './DashboardStatus';
 import DashboardData from './DashboardData';
