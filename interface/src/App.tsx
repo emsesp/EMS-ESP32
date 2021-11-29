@@ -1,57 +1,45 @@
-import React, { Component, RefObject } from 'react';
-import { Redirect, Route, Switch } from 'react-router';
+import React, { FC, RefObject } from 'react';
 import { SnackbarProvider } from 'notistack';
 
-import { IconButton } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
+import { IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
+import { FeaturesLoader } from './contexts/features';
+
+import CustomTheme from './CustomTheme';
 import AppRouting from './AppRouting';
-import CustomMuiTheme from './CustomMuiTheme';
-import { PROJECT_NAME } from './api';
-import FeaturesWrapper from './features/FeaturesWrapper';
 
-// this redirect forces a call to authenticationContext.refresh() which invalidates the JWT if it is invalid.
-const unauthorizedRedirect = () => <Redirect to="/" />;
+const App: FC = () => {
+  const notistackRef: RefObject<any> = React.createRef();
 
-class App extends Component {
-  notistackRef: RefObject<any> = React.createRef();
-
-  componentDidMount() {
-    document.title = PROJECT_NAME;
-  }
-
-  onClickDismiss = (key: string | number | undefined) => () => {
-    this.notistackRef.current.closeSnackbar(key);
+  const onClickDismiss = (key: string | number | undefined) => () => {
+    notistackRef.current.closeSnackbar(key);
   };
 
-  render() {
-    return (
-      <CustomMuiTheme>
+  const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
+
+  const colorMode = React.useContext(ColorModeContext);
+
+  return (
+    <ColorModeContext.Provider value={colorMode}>
+      <CustomTheme>
         <SnackbarProvider
-          autoHideDuration={3000}
           maxSnack={3}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-          ref={this.notistackRef}
+          ref={notistackRef}
           action={(key) => (
-            <IconButton onClick={this.onClickDismiss(key)} size="small">
+            <IconButton onClick={onClickDismiss(key)} size="small">
               <CloseIcon />
             </IconButton>
           )}
         >
-          <FeaturesWrapper>
-            <Switch>
-              <Route
-                exact
-                path="/unauthorized"
-                component={unauthorizedRedirect}
-              />
-              <Route component={AppRouting} />
-            </Switch>
-          </FeaturesWrapper>
+          <FeaturesLoader>
+            <AppRouting />
+          </FeaturesLoader>
         </SnackbarProvider>
-      </CustomMuiTheme>
-    );
-  }
-}
+      </CustomTheme>
+    </ColorModeContext.Provider>
+  );
+};
 
 export default App;

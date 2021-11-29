@@ -1,38 +1,34 @@
-import { Component } from 'react';
+import { FC } from 'react';
 import { Redirect, Switch } from 'react-router';
+import { Route } from 'react-router-dom';
 
-import { AuthenticatedRoute } from '../authentication';
+import { PROJECT_PATH } from '../api/env';
 
-import EMSESPDashboard from './EMSESPDashboard';
-import EMSESPSettings from './EMSESPSettings';
+import Dashboard from './Dashboard';
+import Settings from './Settings';
 
-class ProjectRouting extends Component {
-  render() {
-    return (
-      <Switch>
-        <AuthenticatedRoute
-          exact
-          path="/ems-esp/status/*"
-          component={EMSESPDashboard}
-        />
-        <AuthenticatedRoute
-          exact
-          path="/ems-esp/settings"
-          component={EMSESPSettings}
-        />
-        <AuthenticatedRoute
-          exact
-          path="/ems-esp/*"
-          component={EMSESPDashboard}
-        />
-        {/*
-         * The redirect below caters for the default project route and redirecting invalid paths.
-         * The "to" property must match one of the routes above for this to work correctly.
-         */}
-        <Redirect to={`/ems-esp/status`} />
-      </Switch>
-    );
-  }
-}
+const ProjectRouting: FC = () => {
+  return (
+    <Switch>
+      <Route exact path={`/${PROJECT_PATH}/dashboard/*`}>
+        <Dashboard />
+      </Route>
+      <Route exact path={`/${PROJECT_PATH}/dashboard`}>
+        <Dashboard />
+      </Route>
+      <Route exact path={`/${PROJECT_PATH}/settings/*`}>
+        <Settings />
+      </Route>
+      <Route exact path={`/${PROJECT_PATH}/settings`}>
+        <Settings />
+      </Route>
+      {/*
+       * The redirect below caters for the default project route and redirecting invalid paths.
+       * The "to" property must match one of the routes above for this to work correctly.
+       */}
+      <Redirect to={`/${PROJECT_PATH}/dashboard/`} />
+    </Switch>
+  );
+};
 
 export default ProjectRouting;

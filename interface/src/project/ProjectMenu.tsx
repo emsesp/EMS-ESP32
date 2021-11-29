@@ -1,54 +1,18 @@
-import { Component } from 'react';
-import { Link, withRouter, RouteComponentProps } from 'react-router-dom';
+import { FC } from 'react';
 
-import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import { List } from '@mui/material';
 
-import TuneIcon from '@material-ui/icons/Tune';
-import DashboardIcon from '@material-ui/icons/Dashboard';
+import { PROJECT_PATH } from '../api/env';
 
-import {
-  withAuthenticatedContext,
-  AuthenticatedContextProps
-} from '../authentication';
+import TuneIcon from '@mui/icons-material/Tune';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import LayoutMenuItem from '../components/layout/LayoutMenuItem';
 
-type ProjectProps = AuthenticatedContextProps & RouteComponentProps;
+const ProjectMenu: FC = () => (
+  <List>
+    <LayoutMenuItem icon={DashboardIcon} label="Dashboard" to={`/${PROJECT_PATH}/dashboard`} />
+    <LayoutMenuItem icon={TuneIcon} label="Settings" to={`/${PROJECT_PATH}/settings`} />
+  </List>
+);
 
-class ProjectMenu extends Component<ProjectProps> {
-  render() {
-    const { authenticatedContext } = this.props;
-    const path = this.props.match.url;
-    return (
-      <List>
-        <ListItem
-          to="/ems-esp/"
-          selected={
-            path.startsWith('/ems-esp/status') ||
-            path.startsWith('/ems-esp/data') ||
-            path.startsWith('/ems-esp/help')
-          }
-          button
-          component={Link}
-        >
-          <ListItemIcon>
-            <DashboardIcon />
-          </ListItemIcon>
-          <ListItemText primary="Dashboard" />
-        </ListItem>
-        <ListItem
-          to="/ems-esp/settings"
-          selected={path.startsWith('/ems-esp/settings')}
-          button
-          component={Link}
-          disabled={!authenticatedContext.me.admin}
-        >
-          <ListItemIcon>
-            <TuneIcon />
-          </ListItemIcon>
-          <ListItemText primary="Settings" />
-        </ListItem>
-      </List>
-    );
-  }
-}
-
-export default withRouter(withAuthenticatedContext(ProjectMenu));
+export default ProjectMenu;

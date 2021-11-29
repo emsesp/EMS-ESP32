@@ -112,7 +112,7 @@ const SettingsHelp: FC = () => {
             color="primary"
             onClick={() => onDownload('settings')}
           >
-            download all settings
+            download settings
           </Button>
         </ButtonRow>
       </Box>

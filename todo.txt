@@ -1,5 +1,10 @@
-files changed
--------------
+to test locally
+---------------
+cd mock-api; npm install
+cd interface; npm run standalone
+
+files changed in interface
+--------------------------
  .env - changed project names
  config-overrides.js - added conditional for hosted
  package.json - added new scripts, changed proxy, added dev, added "@msgpack/msgpack"
@@ -20,7 +25,7 @@ files changed
  src/components/layout/LayoutMenuItem.tsx - changed color of icons to grey
 
  src/components/ButtonRow.tsx - added top padding (mt) to give space
- src/components/SectionContext.tsx - added divider with title in center
+ src/components/SectionContext.tsx - added divider with title in center. Added a new props 'id' needed in SystemLog.tsx
  src/components/loading/FormLoader.tsx - remove the word "Loading..."
 
  src/validators/network.ts - added the extra fields
@@ -31,45 +36,39 @@ files changed
  src/Project/ProjectRouting.tsx - had to add fixed and wildcards for nav to work
  src/AppRouting.tsx - renamed 'log in' to 'sign in' to be consistent
 
-customized the features
------------------------
- - MQTT
- - Wifi/Network (renamed wifi to network everywhere, including the api endpoints)
- - Access Point - in AccessPointStatus removed additional spacing in ButtonRow
- - System - added system log and version check. plus other params like uptime.
+ * changed all <Button> variant="contained" to variant="outlined"
+ * removed pt={2} from all ButtonRow's and added it to the actual ButtonRow component
 
-other significant changes
--------------------------
- - changed all <Button> variant="contained" to variant="outlined"
- - removed pt={2} from all ButtonRow and added it to the ButtonRow component
-
-new files added
----------------
+new files added in interface
+----------------------------
  .env.hosted
  .env.production
  .env.development was removed
  .prettierrc
-  
-to do
-=====
 
-Platform/Interface:
- - To Fix: TextField validating numbers when empty giving warning "The specified value "NaN" cannot be parsed, or is out of range."
+customized the features
+-----------------------
+ - MQTT - additional fields for my EMS-ESP project
+ - Wifi/Network - renamed wifi to network everywhere, including the api endpoints to allow for Ethernet
+ - System - added system log and version check. plus other params like uptime.
 
+still to do
+-----------
+
+Platform/Interface related:
+ - Question: TextField validating numbers when empty giving warning "The specified value "NaN" cannot be parsed, or is out of range."
  - Question: AccessPoint - noticed there is Preferred Channel, Hide SSID options, Max Clients. back-end code needed?
- - Question: build is bigger than pre-hooks?
+ - Question: build is bigger than pre-hooks. Is that expected, even with out all the fonts?
  - Question: why using react-router-dom v5.3 instead of v6?
+ - Question: GitHub complains about security vulnerabilities from create-react-app. Can be fixed by https://www.npmjs.com/package/npm-force-resolutions. See https://github.com/facebook/create-react-app/issues/10411#issuecomment-948600254
 
- - Enhancement: Can the screen be refreshed after an upload?
- - Enhancement: Web Socket ping back to the server (ESP) to see if it's still alive and try and reconnect
- - Enhancement: Flashing of "Loading..." only if it takes too long to refresh?
+ - Enhancement: Can the Upload form refreshed itself automatically after a successful upload?
+ - Enhancement: Web Socket ping back to the server (ESP32) to see if it's still alive and try and reconnect
+ - Enhancement: Show flashing up of "Loading..." only if it takes too long to refresh?
+ - Enhancement: Create an useEs.ts for Event Source (I use it in my System Log)
 
-EMS-ESP:
- - Enhancement: reload sensor in Dashboard after rename, same with thermostat
- - Finish System Log - Get formatting/styling working, add form settings
-
-to do later
-===========
-- EMS-ESP: add ethernet params to the EMS-ESP settings, change phy_type
-- create an useEs.ts (like useWs.ts)
-
+EMS-ESP project things to finish
+--------------------------------
+- add ethernet params to the EMS-ESP settings, change phy_type
+- reload sensor in Dashboard after rename, same with thermostat
+- fix big when system log crashes with too many messages

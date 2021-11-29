@@ -1,16 +1,6 @@
 import React from 'react';
 
-import { Typography, Paper } from '@material-ui/core';
-import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    content: {
-      padding: theme.spacing(2),
-      margin: theme.spacing(3)
-    }
-  })
-);
+import { Paper, Divider } from '@mui/material';
 
 interface SectionContentProps {
   title: string;
@@ -19,13 +9,12 @@ interface SectionContentProps {
 }
 
 const SectionContent: React.FC<SectionContentProps> = (props) => {
-  const { children, title, titleGutter, id } = props;
-  const classes = useStyles();
+  const { children, title, id } = props;
   return (
-    <Paper id={id} className={classes.content}>
-      <Typography variant="h6" gutterBottom={titleGutter}>
+    <Paper id={id} sx={{ p: 2, m: 3 }}>
+      <Divider sx={{ pb: 2, borderColor: 'primary.main', color: 'primary.main', fontSize: 20, fontWeight: 'medium' }}>
         {title}
-      </Typography>
+      </Divider>
       {children}
     </Paper>
   );

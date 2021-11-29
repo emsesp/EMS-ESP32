@@ -62,7 +62,6 @@ export interface LogEntries {
 export interface LogSettings {
   level: LogLevel;
   max_messages: number;
-  compact: boolean;
 }
 
 export interface Version {

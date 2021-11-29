@@ -1,21 +1,18 @@
+const pkg = require('../package.json');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const target = process.env.PROXY || pkg.proxy;
 
 module.exports = function (app) {
   app.use(
-    '/rest/*',
-    createProxyMiddleware({
-      target: 'http://localhost:3080',
-      secure: false,
-      changeOrigin: true
+    createProxyMiddleware('/api', {
+      target
     })
   );
 
   app.use(
-    '/es/*',
-    createProxyMiddleware({
-      target: 'http://localhost:3090',
-      secure: false,
-      changeOrigin: true
+    createProxyMiddleware('/ws', {
+      target: target.replace(/^http(s?):\/\//, 'ws$1://'),
+      ws: true
     })
   );
 };
