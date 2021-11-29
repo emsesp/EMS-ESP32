@@ -18,7 +18,7 @@ const ES_ENDPOINT_ROOT = '/es/'
 
 // LOG
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings'
-const log_settings = {
+log_settings = {
   level: 6,
   max_messages: 50,
 }
@@ -75,7 +75,7 @@ const fetch_log = {
 const NTP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpStatus'
 const NTP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpSettings'
 const TIME_ENDPOINT = REST_ENDPOINT_ROOT + 'time'
-const ntp_settings = {
+ntp_settings = {
   enabled: true,
   server: 'time.google.com',
   tz_label: 'Europe/Amsterdam',
@@ -92,13 +92,16 @@ const ntp_status = {
 // AP
 const AP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'apSettings'
 const AP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'apStatus'
-const ap_settings = {
+ap_settings = {
   provision_mode: 1,
   ssid: 'ems-esp',
   password: 'ems-esp-neo',
   local_ip: '192.168.4.1',
   gateway_ip: '192.168.4.1',
   subnet_mask: '255.255.255.0',
+  channel: 1,
+  ssid_hidden: true,
+  max_clients: 4,
 }
 const ap_status = {
   status: 1,
@@ -112,7 +115,7 @@ const NETWORK_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'networkSettings'
 const NETWORK_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'networkStatus'
 const SCAN_NETWORKS_ENDPOINT = REST_ENDPOINT_ROOT + 'scanNetworks'
 const LIST_NETWORKS_ENDPOINT = REST_ENDPOINT_ROOT + 'listNetworks'
-const network_settings = {
+network_settings = {
   ssid: 'myWifi',
   password: 'myPassword',
   hostname: 'ems-esp',
@@ -196,7 +199,7 @@ const list_networks = {
 
 // OTA
 const OTA_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'otaSettings'
-const ota_settings = {
+ota_settings = {
   enabled: true,
   port: 8266,
   password: 'ems-esp-neo',
@@ -205,7 +208,7 @@ const ota_settings = {
 // MQTT
 const MQTT_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttSettings'
 const MQTT_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttStatus'
-const mqtt_settings = {
+mqtt_settings = {
   enabled: true,
   host: '192.168.1.4',
   port: 1883,
@@ -262,7 +265,7 @@ const system_status = {
   fs_used: 16384,
   uptime: '000+00:15:42.707',
 }
-const security_settings = {
+security_settings = {
   jwt_secret: 'naughty!',
   users: [
     { username: 'admin', password: 'admin', admin: true },
@@ -533,18 +536,17 @@ const emsesp_devicedata_3 = {
 
 // LOG
 rest_server.get(FETCH_LOG_ENDPOINT, (req, res) => {
-  console.log('sending log in binary...')
   const encoded = msgpack.encode(fetch_log)
   res.write(encoded, 'binary')
   res.end(null, 'binary')
 })
 rest_server.get(LOG_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('Fetching log settings ' + log_settings.level + ',' + log_settings.max_messages)
   res.json(log_settings)
 })
 rest_server.post(LOG_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('Setting new level=' + req.body.level + ' max_messages=' + req.body.max_messages)
-  res.sendStatus(200)
+  log_settings = req.body
+  console.log(JSON.stringify(log_settings))
+  res.json(log_settings)
 })
 
 // NETWORK
@@ -555,6 +557,8 @@ rest_server.get(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
   res.json(network_settings)
 })
 rest_server.post(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
+  network_settings = req.body
+  console.log(JSON.stringify(network_settings))
   res.json(network_settings)
 })
 rest_server.get(LIST_NETWORKS_ENDPOINT, (req, res) => {
@@ -572,6 +576,8 @@ rest_server.get(AP_STATUS_ENDPOINT, (req, res) => {
   res.json(ap_status)
 })
 rest_server.post(AP_SETTINGS_ENDPOINT, (req, res) => {
+  ap_status = req.body
+  console.log(JSON.stringify(ap_settings))
   res.json(ap_settings)
 })
 
@@ -580,6 +586,8 @@ rest_server.get(OTA_SETTINGS_ENDPOINT, (req, res) => {
   res.json(ota_settings)
 })
 rest_server.post(OTA_SETTINGS_ENDPOINT, (req, res) => {
+  ota_settings = req.body
+  console.log(JSON.stringify(ota_settings))
   res.json(ota_settings)
 })
 
@@ -588,6 +596,8 @@ rest_server.get(MQTT_SETTINGS_ENDPOINT, (req, res) => {
   res.json(mqtt_settings)
 })
 rest_server.post(MQTT_SETTINGS_ENDPOINT, (req, res) => {
+  mqtt_settings = req.body
+  console.log(JSON.stringify(mqtt_settings))
   res.json(mqtt_settings)
 })
 rest_server.get(MQTT_STATUS_ENDPOINT, (req, res) => {
@@ -599,6 +609,8 @@ rest_server.get(NTP_SETTINGS_ENDPOINT, (req, res) => {
   res.json(ntp_settings)
 })
 rest_server.post(NTP_SETTINGS_ENDPOINT, (req, res) => {
+  ntp_settings = req.body
+  console.log(JSON.stringify(ntp_settings))
   res.json(ntp_settings)
 })
 rest_server.get(NTP_STATUS_ENDPOINT, (req, res) => {
@@ -616,6 +628,8 @@ rest_server.get(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
   res.json(security_settings)
 })
 rest_server.post(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
+  security_settings = req.body
+  console.log(JSON.stringify(security_settings))
   res.json(security_settings)
 })
 rest_server.get(FEATURES_ENDPOINT, (req, res) => {
@@ -642,19 +656,17 @@ rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
 
 // EMS-ESP Project stuff
 rest_server.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('Sending back settings: ' + JSON.stringify(settings))
   res.json(settings)
 })
 rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('Changing settings to: ' + JSON.stringify(req.body))
   settings = req.body
+  console.log(JSON.stringify(settings))
   res.json(settings)
 })
 rest_server.get(EMSESP_DATA_ENDPOINT, (req, res) => {
   res.json(emsesp_data)
 })
 rest_server.post(EMSESP_SCANDEVICES_ENDPOINT, (req, res) => {
-  console.log('scan devices called')
   res.sendStatus(200)
 })
 rest_server.get(EMSESP_STATUS_ENDPOINT, (req, res) => {
@@ -682,17 +694,13 @@ rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
 
 rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
   const devicevalue = req.body.devicevalue
-  console.log('Write value for id ' + req.body.id)
-  console.log(devicevalue)
-
+  console.log('Write value for id ' + req.body.id + ' : ' + JSON.stringify(devicevalue))
   res.sendStatus(200)
 })
 
 rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
   const sensor = req.body
-  console.log('Write sensor:')
-  console.log(sensor)
-
+  console.log('Write sensor: ' + JSON.stringify(sensor))
   res.sendStatus(200)
 })
 
@@ -768,9 +776,7 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
   settings.pbutton_gpio = data.pbutton_gpio
   settings.phy_type = data.phy_type
 
-  console.log(
-    'API boardProfile POST req.body.board_profile=' + board_profile + ' with data changed:' + JSON.stringify(data),
-  )
+  console.log('boardProfile POST =' + board_profile + ' with data: ' + JSON.stringify(data))
 
   res.sendStatus(200)
 })
@@ -833,10 +839,9 @@ rest_server.post(API_ENDPOINT_ROOT, (req, res) => {
   console.log(req.body)
   if (req.body.device === 'system') {
     if (req.body.entity === 'info') {
-      console.log('sending system info')
-      res.json(emsesp_info)
+      console.log('sending system info: ' + JSON.stringify(emsesp_info))
     } else if (req.body.entity === 'settings') {
-      console.log('sending system settings')
+      console.log('sending system settings: ' + JSON.stringify(settings))
       res.json(settings)
     } else {
       res.sendStatus(200)
@@ -852,8 +857,7 @@ rest_server.get(API_ENDPOINT_ROOT, (req, res) => {
 
 const SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info'
 rest_server.post(SYSTEM_INFO_ENDPOINT, (req, res) => {
-  console.log('System Info POST')
-  console.log(req.body)
+  console.log('System Info POST: ' + JSON.stringify(req.body))
   res.sendStatus(200)
 })
 rest_server.get(SYSTEM_INFO_ENDPOINT, (req, res) => {
@@ -863,8 +867,7 @@ rest_server.get(SYSTEM_INFO_ENDPOINT, (req, res) => {
 
 const SYSTEM_SETTINGS_ENDPOINT = API_ENDPOINT_ROOT + 'system/settings'
 rest_server.post(SYSTEM_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('System Settings POST')
-  console.log(req.body)
+  console.log('System Settings POST: ' + JSON.stringify(req.body))
   res.sendStatus(200)
 })
 rest_server.get(SYSTEM_SETTINGS_ENDPOINT, (req, res) => {
@@ -899,10 +902,11 @@ rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
       m: 'incoming message #' + count,
     }
     const sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`
-    console.log('sending log #' + count)
+    // console.log('sending log #' + count)
     res.write(sseFormattedResponse)
+    res.flush() // this is important
 
-    // !!! this is the important part
-    res.flush()
-  }, 5000)
+    // add it to buffer
+    fetch_log.events.push(data)
+  }, 100)
 })

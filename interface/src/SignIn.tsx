@@ -1,165 +1,113 @@
-import React, { Component } from 'react';
-import { withSnackbar, WithSnackbarProps } from 'notistack';
-import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
+import { FC, useContext, useState } from 'react';
+import { ValidateFieldsError } from 'async-validator';
+import { useSnackbar } from 'notistack';
 
-import {
-  withStyles,
-  createStyles,
-  Theme,
-  WithStyles
-} from '@material-ui/core/styles';
-import { Paper, Typography, Fab } from '@material-ui/core';
-import ForwardIcon from '@material-ui/icons/Forward';
+import { Box, Fab, Paper, Typography } from '@mui/material';
+import ForwardIcon from '@mui/icons-material/Forward';
 
-import {
-  withAuthenticationContext,
-  AuthenticationContextProps
-} from './authentication/AuthenticationContext';
-import { PasswordValidator } from './components';
-import { PROJECT_NAME, SIGN_IN_ENDPOINT } from './api';
+import * as AuthenticationApi from './api/authentication';
+import { PROJECT_NAME } from './api/env';
+import { AuthenticationContext } from './contexts/authentication';
 
-const styles = (theme: Theme) =>
-  createStyles({
-    signInPage: {
-      display: 'flex',
-      height: '100vh',
-      margin: 'auto',
-      padding: theme.spacing(2),
-      justifyContent: 'center',
-      flexDirection: 'column',
-      maxWidth: theme.breakpoints.values.sm
-    },
-    signInPanel: {
-      textAlign: 'center',
-      padding: theme.spacing(2),
-      paddingTop: '200px',
-      backgroundImage: 'url("/app/icon.png")',
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: '50% ' + theme.spacing(2) + 'px',
-      backgroundSize: 'auto 150px',
-      width: '100%'
-    },
-    extendedIcon: {
-      marginRight: theme.spacing(0.5)
-    },
-    button: {
-      marginRight: theme.spacing(2),
-      marginTop: theme.spacing(2)
-    }
+import { extractErrorMessage, onEnterCallback, updateValue } from './utils';
+import { SignInRequest } from './types';
+import { ValidatedTextField } from './components';
+import { SIGN_IN_REQUEST_VALIDATOR, validate } from './validators';
+
+const SignIn: FC = () => {
+  const authenticationContext = useContext(AuthenticationContext);
+  const { enqueueSnackbar } = useSnackbar();
+
+  const [signInRequest, setSignInRequest] = useState<SignInRequest>({
+    username: '',
+    password: ''
   });
+  const [processing, setProcessing] = useState<boolean>(false);
+  const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-type SignInProps = WithSnackbarProps &
-  WithStyles<typeof styles> &
-  AuthenticationContextProps;
+  const updateLoginRequestValue = updateValue(setSignInRequest);
 
-interface SignInState {
-  username: string;
-  password: string;
-  processing: boolean;
-}
-
-class SignIn extends Component<SignInProps, SignInState> {
-  constructor(props: SignInProps) {
-    super(props);
-    this.state = {
-      username: '',
-      password: '',
-      processing: false
-    };
-  }
-
-  updateInputElement = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const { name, value } = event.currentTarget;
-    this.setState((prevState) => ({
-      ...prevState,
-      [name]: value
-    }));
+  const validateAndSignIn = async () => {
+    setProcessing(true);
+    try {
+      await validate(SIGN_IN_REQUEST_VALIDATOR, signInRequest);
+      signIn();
+    } catch (errors: any) {
+      setFieldErrors(errors);
+      setProcessing(false);
+    }
   };
 
-  onSubmit = () => {
-    const { username, password } = this.state;
-    const { authenticationContext } = this.props;
-    this.setState({ processing: true });
-    fetch(SIGN_IN_ENDPOINT, {
-      method: 'POST',
-      body: JSON.stringify({ username, password }),
-      headers: new Headers({
-        'Content-Type': 'application/json'
-      })
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else if (response.status === 401) {
-          throw Error('Invalid credentials.');
-        } else {
-          throw Error('Invalid status code: ' + response.status);
-        }
-      })
-      .then((json) => {
-        authenticationContext.signIn(json.access_token);
-      })
-      .catch((error) => {
-        this.props.enqueueSnackbar(error.message, {
-          variant: 'warning'
-        });
-        this.setState({ processing: false });
-      });
+  const signIn = async () => {
+    try {
+      const { data: loginResponse } = await AuthenticationApi.signIn(signInRequest);
+      authenticationContext.signIn(loginResponse.access_token);
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        enqueueSnackbar('Invalid login details', { variant: 'warning' });
+      } else {
+        enqueueSnackbar(extractErrorMessage(error, 'Unexpected error, please try again'), { variant: 'error' });
+      }
+      setProcessing(false);
+    }
   };
 
-  render() {
-    const { username, password, processing } = this.state;
-    const { classes } = this.props;
-    return (
-      <div className={classes.signInPage}>
-        <Paper className={classes.signInPanel}>
-          <Typography variant="h4">{PROJECT_NAME}</Typography>
-          <ValidatorForm onSubmit={this.onSubmit}>
-            <TextValidator
-              disabled={processing}
-              validators={['required']}
-              errorMessages={['Username is required']}
-              name="username"
-              label="Username"
-              fullWidth
-              variant="outlined"
-              value={username}
-              onChange={this.updateInputElement}
-              margin="normal"
-              inputProps={{
-                autoCapitalize: 'none',
-                autoCorrect: 'off'
-              }}
-            />
-            <PasswordValidator
-              disabled={processing}
-              validators={['required']}
-              errorMessages={['Password is required']}
-              name="password"
-              label="Password"
-              fullWidth
-              variant="outlined"
-              value={password}
-              onChange={this.updateInputElement}
-              margin="normal"
-            />
-            <Fab
-              variant="extended"
-              color="primary"
-              className={classes.button}
-              type="submit"
-              disabled={processing}
-            >
-              <ForwardIcon className={classes.extendedIcon} />
-              Sign In
-            </Fab>
-          </ValidatorForm>
-        </Paper>
-      </div>
-    );
-  }
-}
+  const submitOnEnter = onEnterCallback(signIn);
 
-export default withAuthenticationContext(
-  withSnackbar(withStyles(styles)(SignIn))
-);
+  return (
+    <Box
+      display="flex"
+      height="100vh"
+      margin="auto"
+      padding={2}
+      justifyContent="center"
+      flexDirection="column"
+      maxWidth={(theme) => theme.breakpoints.values.sm}
+    >
+      <Paper
+        sx={(theme) => ({
+          textAlign: 'center',
+          padding: theme.spacing(2),
+          paddingTop: '200px',
+          backgroundImage: 'url("/app/icon.png")',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: '50% ' + theme.spacing(2),
+          backgroundSize: 'auto 150px',
+          width: '100%'
+        })}
+      >
+        <Typography variant="h4">{PROJECT_NAME}</Typography>
+        <ValidatedTextField
+          fieldErrors={fieldErrors}
+          disabled={processing}
+          name="username"
+          label="Username"
+          value={signInRequest.username}
+          onChange={updateLoginRequestValue}
+          margin="normal"
+          variant="outlined"
+          fullWidth
+        />
+        <ValidatedTextField
+          fieldErrors={fieldErrors}
+          disabled={processing}
+          type="password"
+          name="password"
+          label="Password"
+          value={signInRequest.password}
+          onChange={updateLoginRequestValue}
+          onKeyDown={submitOnEnter}
+          margin="normal"
+          variant="outlined"
+          fullWidth
+        />
+        <Fab variant="extended" color="primary" sx={{ mt: 2 }} onClick={validateAndSignIn} disabled={processing}>
+          <ForwardIcon sx={{ mr: 1 }} />
+          Sign In
+        </Fab>
+      </Paper>
+    </Box>
+  );
+};
+
+export default SignIn;
