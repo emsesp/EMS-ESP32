@@ -39,9 +39,9 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, accept, uploadi
       if (progress?.lengthComputable) {
         return `Uploading: ${progressPercentage(progress)}%`;
       }
-      return "Uploading\u2026";
+      return 'Uploading\u2026';
     }
-    return "Drop file or click here";
+    return 'Drop file or click here';
   };
 
   return (
@@ -63,15 +63,13 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, accept, uploadi
     >
       <input {...getInputProps()} />
       <Box flexDirection="column" display="flex" alignItems="center">
-        <CloudUploadIcon fontSize='large' />
-        <Typography variant="h6">
-          {progressText()}
-        </Typography>
+        <CloudUploadIcon fontSize="large" />
+        <Typography variant="h6">{progressText()}</Typography>
         {uploading && (
           <Fragment>
             <Box width="100%" p={2}>
               <LinearProgress
-                variant={!progress || progress.lengthComputable ? "determinate" : "indeterminate"}
+                variant={!progress || progress.lengthComputable ? 'determinate' : 'indeterminate'}
                 value={!progress ? 0 : progress.lengthComputable ? progressPercentage(progress) : 0}
               />
             </Box>
@@ -81,7 +79,7 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, accept, uploadi
           </Fragment>
         )}
       </Box>
-    </Box >
+    </Box>
   );
 };
 

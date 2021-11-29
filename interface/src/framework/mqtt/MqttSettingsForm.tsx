@@ -23,15 +23,16 @@ const MqttSettingsForm: FC = () => {
     update: MqttApi.updateMqttSettings
   });
 
-  const updateFormValue = updateValue(setData);
-
-  // TODO - extend the above hook to validate the input on submit and only save to the backend if valid.
-  // NB: Saving must be asserted while validation takes place
-  // NB: Must also set saving to true while validating
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const validateAndSubmit = async () => {
-    if (data) {
+  const updateFormValue = updateValue(setData);
+
+  const content = () => {
+    if (!data) {
+      return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
+    }
+
+    const validateAndSubmit = async () => {
       try {
         setFieldErrors(undefined);
         await validate(MQTT_SETTINGS_VALIDATOR, data);
@@ -39,13 +40,7 @@ const MqttSettingsForm: FC = () => {
       } catch (errors: any) {
         setFieldErrors(errors);
       }
-    }
-  };
-
-  const content = () => {
-    if (!data) {
-      return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
-    }
+    };
 
     return (
       <>

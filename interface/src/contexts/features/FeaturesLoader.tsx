@@ -4,12 +4,11 @@ import * as FeaturesApi from '../../api/features';
 
 import { extractErrorMessage } from '../../utils';
 import { Features } from '../../types';
-import {ApplicationError, LoadingSpinner} from '../../components';
+import { ApplicationError, LoadingSpinner } from '../../components';
 
 import { FeaturesContext } from '.';
 
 const FeaturesLoader: FC = (props) => {
-
   const [errorMessage, setErrorMessage] = useState<string>();
   const [features, setFeatures] = useState<Features>();
 
@@ -39,15 +38,10 @@ const FeaturesLoader: FC = (props) => {
   }
 
   if (errorMessage) {
-    return (
-      <ApplicationError message={errorMessage} />
-    );
+    return <ApplicationError message={errorMessage} />;
   }
 
-  return (
-    <LoadingSpinner height="100vh" />
-  );
-
+  return <LoadingSpinner height="100vh" />;
 };
 
 export default FeaturesLoader;

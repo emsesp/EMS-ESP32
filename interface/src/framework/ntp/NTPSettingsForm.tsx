@@ -8,25 +8,26 @@ import { validate } from '../../validators';
 import { BlockFormControlLabel, ButtonRow, FormLoader, SectionContent, ValidatedTextField } from '../../components';
 import { NTPSettings } from '../../types';
 import { updateValue, useRest } from '../../utils';
-import * as NTPApi from "../../api/ntp";
+import * as NTPApi from '../../api/ntp';
 import { selectedTimeZone, timeZoneSelectItems, TIME_ZONES } from './TZ';
 import { NTP_SETTINGS_VALIDATOR } from '../../validators/ntp';
 
 const NTPSettingsForm: FC = () => {
-
-  const {
-    loadData, saving, data, setData, saveData, errorMessage
-  } = useRest<NTPSettings>({ read: NTPApi.readNTPSettings, update: NTPApi.updateNTPSettings });
+  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<NTPSettings>({
+    read: NTPApi.readNTPSettings,
+    update: NTPApi.updateNTPSettings
+  });
 
   const updateFormValue = updateValue(setData);
 
-  // TODO - extend the above hook to validate the input on submit and only save to the backend if valid.
-  // NB: Saving must be asserted while validation takes place
-  // NB: Must also set saving to true while validating
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const validateAndSubmit = async () => {
-    if (data) {
+  const content = () => {
+    if (!data) {
+      return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
+    }
+
+    const validateAndSubmit = async () => {
       try {
         setFieldErrors(undefined);
         await validate(NTP_SETTINGS_VALIDATOR, data);
@@ -34,13 +35,7 @@ const NTPSettingsForm: FC = () => {
       } catch (errors: any) {
         setFieldErrors(errors);
       }
-    }
-  };
-
-  const content = () => {
-    if (!data) {
-      return (<FormLoader loadData={loadData} errorMessage={errorMessage} />);
-    }
+    };
 
     const changeTimeZone = (event: React.ChangeEvent<HTMLInputElement>) => {
       setData({
@@ -53,13 +48,7 @@ const NTPSettingsForm: FC = () => {
     return (
       <>
         <BlockFormControlLabel
-          control={
-            <Checkbox
-              name="enabled"
-              checked={data.enabled}
-              onChange={updateFormValue}
-            />
-          }
+          control={<Checkbox name="enabled" checked={data.enabled} onChange={updateFormValue} />}
           label="Enable NTP?"
         />
         <ValidatedTextField
@@ -87,7 +76,14 @@ const NTPSettingsForm: FC = () => {
           {timeZoneSelectItems()}
         </ValidatedTextField>
         <ButtonRow>
-          <Button startIcon={<SaveIcon />} disabled={saving} variant="outlined" color="primary" type="submit" onClick={validateAndSubmit}>
+          <Button
+            startIcon={<SaveIcon />}
+            disabled={saving}
+            variant="outlined"
+            color="primary"
+            type="submit"
+            onClick={validateAndSubmit}
+          >
             Save
           </Button>
         </ButtonRow>
@@ -96,11 +92,10 @@ const NTPSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title='NTP Settings' titleGutter>
+    <SectionContent title="NTP Settings" titleGutter>
       {content()}
     </SectionContent>
   );
-
 };
 
 export default NTPSettingsForm;

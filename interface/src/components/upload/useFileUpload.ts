@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios, { AxiosPromise, CancelTokenSource } from 'axios';
-import { useSnackbar } from "notistack";
+import { useSnackbar } from 'notistack';
 import { extractErrorMessage } from '../../utils';
 import { FileUploadConfig } from '../../api/endpoints';
 

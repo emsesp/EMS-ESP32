@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
-import { AxiosPromise } from "axios";
+import { AxiosPromise } from 'axios';
 
-import { extractErrorMessage } from ".";
+import { extractErrorMessage } from '.';
 
 export interface RestRequestOptions<D> {
   read: () => AxiosPromise<D>;
@@ -28,23 +28,26 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     }
   }, [read, enqueueSnackbar]);
 
-  const save = useCallback(async (toSave: D) => {
-    if (!update) {
-      return;
-    }
-    setSaving(true);
-    setErrorMessage(undefined);
-    try {
-      setData((await update(toSave)).data);
-      enqueueSnackbar("Update successful", { variant: 'success' });
-    } catch (error: any) {
-      const message = extractErrorMessage(error, 'Problem saving data');
-      enqueueSnackbar(message, { variant: 'error' });
-      setErrorMessage(message);
-    } finally {
-      setSaving(false);
-    }
-  }, [update, enqueueSnackbar]);
+  const save = useCallback(
+    async (toSave: D) => {
+      if (!update) {
+        return;
+      }
+      setSaving(true);
+      setErrorMessage(undefined);
+      try {
+        setData((await update(toSave)).data);
+        enqueueSnackbar('Update successful', { variant: 'success' });
+      } catch (error: any) {
+        const message = extractErrorMessage(error, 'Problem saving data');
+        enqueueSnackbar(message, { variant: 'error' });
+        setErrorMessage(message);
+      } finally {
+        setSaving(false);
+      }
+    },
+    [update, enqueueSnackbar]
+  );
 
   const saveData = () => data && save(data);
 

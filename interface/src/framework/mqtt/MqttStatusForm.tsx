@@ -21,10 +21,7 @@ export const mqttStatusHighlight = ({ enabled, connected }: MqttStatus, theme: T
   return theme.palette.error.main;
 };
 
-export const mqttPublishHighlight = (
-  { mqtt_fails }: MqttStatus,
-  theme: Theme
-) => {
+export const mqttPublishHighlight = ({ mqtt_fails }: MqttStatus, theme: Theme) => {
   if (mqtt_fails === 0) return theme.palette.success.main;
 
   if (mqtt_fails < 10) return theme.palette.warning.main;

@@ -33,22 +33,7 @@ const SettingsApplication: FC = () => {
 
   const updateFormValue = updateValue(setData);
 
-  // TODO - extend the above hook to validate the input on submit and only save to the backend if valid.
-  // NB: Saving must be asserted while validation takes place
-  // NB: Must also set saving to true while validating
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-
-  const validateAndSubmit = async () => {
-    if (data) {
-      try {
-        setFieldErrors(undefined);
-        await validate(createSettingsValidator(data), data);
-        saveData();
-      } catch (errors: any) {
-        setFieldErrors(errors);
-      }
-    }
-  };
 
   const updateBoardProfile = async (board_profile: string) => {
     try {
@@ -65,6 +50,16 @@ const SettingsApplication: FC = () => {
       return <FormLoader loadData={loadData} errorMessage={errorMessage} />;
     }
 
+    const validateAndSubmit = async () => {
+      try {
+        setFieldErrors(undefined);
+        await validate(createSettingsValidator(data), data);
+        saveData();
+      } catch (errors: any) {
+        setFieldErrors(errors);
+      }
+    };
+
     const changeBoardProfile = (event: React.ChangeEvent<HTMLInputElement>) => {
       const board_profile = event.target.value;
       if (board_profile === 'CUSTOM') {
@@ -79,51 +74,6 @@ const SettingsApplication: FC = () => {
 
     return (
       <>
-        <Typography variant="h6" color="primary">
-          EMS Bus
-        </Typography>
-
-        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-          <Grid item xs={5}>
-            <ValidatedTextField
-              name="tx_mode"
-              label="Tx Mode"
-              disabled={saving}
-              value={data.tx_mode}
-              fullWidth
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              <MenuItem value={0}>Off</MenuItem>
-              <MenuItem value={1}>EMS</MenuItem>
-              <MenuItem value={2}>EMS+</MenuItem>
-              <MenuItem value={3}>HT3</MenuItem>
-              <MenuItem value={4}>Hardware</MenuItem>
-            </ValidatedTextField>
-          </Grid>
-          <Grid item xs={6}>
-            <ValidatedTextField
-              name="ems_bus_id"
-              label="Bus ID"
-              disabled={saving}
-              value={data.ems_bus_id}
-              fullWidth
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              <MenuItem value={0x0b}>Service Key (0x0B)</MenuItem>
-              <MenuItem value={0x0d}>Modem (0x0D)</MenuItem>
-              <MenuItem value={0x0a}>Terminal (0x0A)</MenuItem>
-              <MenuItem value={0x0f}>Time Module (0x0F)</MenuItem>
-              <MenuItem value={0x12}>Alarm Module (0x12)</MenuItem>
-            </ValidatedTextField>
-          </Grid>
-        </Grid>
-
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           Board Profile
         </Typography>
@@ -242,8 +192,53 @@ const SettingsApplication: FC = () => {
           </Grid>
         )}
 
+        <Typography variant="h6" color="primary">
+          EMS Bus
+        </Typography>
+
+        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+          <Grid item xs={5}>
+            <ValidatedTextField
+              name="tx_mode"
+              label="Tx Mode"
+              disabled={saving}
+              value={data.tx_mode}
+              fullWidth
+              variant="outlined"
+              onChange={updateFormValue}
+              margin="normal"
+              select
+            >
+              <MenuItem value={0}>Off</MenuItem>
+              <MenuItem value={1}>EMS</MenuItem>
+              <MenuItem value={2}>EMS+</MenuItem>
+              <MenuItem value={3}>HT3</MenuItem>
+              <MenuItem value={4}>Hardware</MenuItem>
+            </ValidatedTextField>
+          </Grid>
+          <Grid item xs={6}>
+            <ValidatedTextField
+              name="ems_bus_id"
+              label="Bus ID"
+              disabled={saving}
+              value={data.ems_bus_id}
+              fullWidth
+              variant="outlined"
+              onChange={updateFormValue}
+              margin="normal"
+              select
+            >
+              <MenuItem value={0x0b}>Service Key (0x0B)</MenuItem>
+              <MenuItem value={0x0d}>Modem (0x0D)</MenuItem>
+              <MenuItem value={0x0a}>Terminal (0x0A)</MenuItem>
+              <MenuItem value={0x0f}>Time Module (0x0F)</MenuItem>
+              <MenuItem value={0x12}>Alarm Module (0x12)</MenuItem>
+            </ValidatedTextField>
+          </Grid>
+        </Grid>
+
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          Options &amp; Features
+          General Options
         </Typography>
 
         {data.led_gpio !== 0 && (
@@ -452,7 +447,7 @@ const SettingsApplication: FC = () => {
   };
 
   return (
-    <SectionContent title="General Application Settings" titleGutter>
+    <SectionContent title="EMS-ESP Application Settings" titleGutter>
       {content()}
     </SectionContent>
   );

@@ -10,7 +10,7 @@ import MqttSettingsForm from './MqttSettingsForm';
 import { AdminRoute } from '../../components';
 
 const MqttRouting: FC = () => {
-  useLayoutTitle("MQTT");
+  useLayoutTitle('MQTT');
 
   const history = useHistory();
   const { url } = useRouteMatch();
@@ -37,7 +37,6 @@ const MqttRouting: FC = () => {
       </Switch>
     </>
   );
-
 };
 
 const Mqtt: FC = () => (

@@ -7,6 +7,4 @@ export interface FeaturesContextValue {
 }
 
 const FeaturesContextDefaultValue = {} as FeaturesContextValue;
-export const FeaturesContext = React.createContext(
-  FeaturesContextDefaultValue
-);
+export const FeaturesContext = React.createContext(FeaturesContextDefaultValue);

@@ -19,7 +19,7 @@ const LayoutAppBar: FC<LayoutAppBarProps> = ({ title, onToggleDrawer }) => (
       width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
       ml: { md: `${DRAWER_WIDTH}px` },
       boxShadow: 'none',
-      backgroundColor: "#2e586a",
+      backgroundColor: '#2e586a'
       // color: "#2196f3",
     }}
   >

@@ -1,6 +1,6 @@
 export enum EspPlatform {
-  ESP8266 = "esp8266",
-  ESP32 = "esp32"
+  ESP8266 = 'esp8266',
+  ESP32 = 'esp32'
 }
 
 interface ESPSystemStatus {

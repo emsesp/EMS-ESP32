@@ -8,19 +8,18 @@ interface FormLoaderProps {
   loadData?: () => void;
 }
 
-const FormLoader: FC<FormLoaderProps> = ({ errorMessage, loadData, message = "" }) => {
+const FormLoader: FC<FormLoaderProps> = ({ errorMessage, loadData, message = '' }) => {
   if (errorMessage) {
     return (
       <Box m={1} display="flex" flexDirection="column">
         <Typography variant="h6" textAlign="center">
           {errorMessage}
         </Typography>
-        {
-          loadData &&
+        {loadData && (
           <Button variant="outlined" color="secondary" onClick={loadData}>
             Retry
           </Button>
-        }
+        )}
       </Box>
     );
   }

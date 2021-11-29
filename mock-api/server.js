@@ -99,6 +99,9 @@ ap_settings = {
   local_ip: '192.168.4.1',
   gateway_ip: '192.168.4.1',
   subnet_mask: '255.255.255.0',
+  channel: 1,
+  ssid_hidden: true,
+  max_clients: 4,
 }
 const ap_status = {
   status: 1,
@@ -533,18 +536,16 @@ const emsesp_devicedata_3 = {
 
 // LOG
 rest_server.get(FETCH_LOG_ENDPOINT, (req, res) => {
-  // console.log('sending log as binary...')
   const encoded = msgpack.encode(fetch_log)
   res.write(encoded, 'binary')
   res.end(null, 'binary')
 })
 rest_server.get(LOG_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('Fetching log settings ' + log_settings.level + ',' + log_settings.max_messages)
   res.json(log_settings)
 })
 rest_server.post(LOG_SETTINGS_ENDPOINT, (req, res) => {
   log_settings = req.body
-  console.log(log_settings)
+  console.log(JSON.stringify(log_settings))
   res.json(log_settings)
 })
 
@@ -557,7 +558,7 @@ rest_server.get(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
 })
 rest_server.post(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
   network_settings = req.body
-  console.log(network_settings)
+  console.log(JSON.stringify(network_settings))
   res.json(network_settings)
 })
 rest_server.get(LIST_NETWORKS_ENDPOINT, (req, res) => {
@@ -576,7 +577,7 @@ rest_server.get(AP_STATUS_ENDPOINT, (req, res) => {
 })
 rest_server.post(AP_SETTINGS_ENDPOINT, (req, res) => {
   ap_status = req.body
-  console.log(ap_status)
+  console.log(JSON.stringify(ap_settings))
   res.json(ap_settings)
 })
 
@@ -586,18 +587,17 @@ rest_server.get(OTA_SETTINGS_ENDPOINT, (req, res) => {
 })
 rest_server.post(OTA_SETTINGS_ENDPOINT, (req, res) => {
   ota_settings = req.body
-  console.log(ota_settings)
+  console.log(JSON.stringify(ota_settings))
   res.json(ota_settings)
 })
 
 // MQTT
 rest_server.get(MQTT_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('getting mqtt settings')
   res.json(mqtt_settings)
 })
 rest_server.post(MQTT_SETTINGS_ENDPOINT, (req, res) => {
-  console.log(req.body)
   mqtt_settings = req.body
+  console.log(JSON.stringify(mqtt_settings))
   res.json(mqtt_settings)
 })
 rest_server.get(MQTT_STATUS_ENDPOINT, (req, res) => {
@@ -609,8 +609,8 @@ rest_server.get(NTP_SETTINGS_ENDPOINT, (req, res) => {
   res.json(ntp_settings)
 })
 rest_server.post(NTP_SETTINGS_ENDPOINT, (req, res) => {
-  console.log(ntp_settings.body)
   ntp_settings = req.body
+  console.log(JSON.stringify(ntp_settings))
   res.json(ntp_settings)
 })
 rest_server.get(NTP_STATUS_ENDPOINT, (req, res) => {
@@ -629,7 +629,7 @@ rest_server.get(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
 })
 rest_server.post(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
   security_settings = req.body
-  console.log(security_settings)
+  console.log(JSON.stringify(security_settings))
   res.json(security_settings)
 })
 rest_server.get(FEATURES_ENDPOINT, (req, res) => {
@@ -656,19 +656,17 @@ rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
 
 // EMS-ESP Project stuff
 rest_server.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('Sending back settings: ' + JSON.stringify(settings))
   res.json(settings)
 })
 rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('Changing settings to: ' + JSON.stringify(req.body))
   settings = req.body
+  console.log(JSON.stringify(settings))
   res.json(settings)
 })
 rest_server.get(EMSESP_DATA_ENDPOINT, (req, res) => {
   res.json(emsesp_data)
 })
 rest_server.post(EMSESP_SCANDEVICES_ENDPOINT, (req, res) => {
-  console.log('scan devices called')
   res.sendStatus(200)
 })
 rest_server.get(EMSESP_STATUS_ENDPOINT, (req, res) => {
@@ -696,17 +694,13 @@ rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
 
 rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
   const devicevalue = req.body.devicevalue
-  console.log('Write value for id ' + req.body.id)
-  console.log(devicevalue)
-
+  console.log('Write value for id ' + req.body.id + ' : ' + JSON.stringify(devicevalue))
   res.sendStatus(200)
 })
 
 rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
   const sensor = req.body
-  console.log('Write sensor:')
-  console.log(sensor)
-
+  console.log('Write sensor: ' + JSON.stringify(sensor))
   res.sendStatus(200)
 })
 
@@ -782,9 +776,7 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
   settings.pbutton_gpio = data.pbutton_gpio
   settings.phy_type = data.phy_type
 
-  console.log(
-    'API boardProfile POST req.body.board_profile=' + board_profile + ' with data changed:' + JSON.stringify(data),
-  )
+  console.log('boardProfile POST =' + board_profile + ' with data: ' + JSON.stringify(data))
 
   res.sendStatus(200)
 })
@@ -847,10 +839,9 @@ rest_server.post(API_ENDPOINT_ROOT, (req, res) => {
   console.log(req.body)
   if (req.body.device === 'system') {
     if (req.body.entity === 'info') {
-      console.log('sending system info')
-      res.json(emsesp_info)
+      console.log('sending system info: ' + JSON.stringify(emsesp_info))
     } else if (req.body.entity === 'settings') {
-      console.log('sending system settings')
+      console.log('sending system settings: ' + JSON.stringify(settings))
       res.json(settings)
     } else {
       res.sendStatus(200)
@@ -866,8 +857,7 @@ rest_server.get(API_ENDPOINT_ROOT, (req, res) => {
 
 const SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info'
 rest_server.post(SYSTEM_INFO_ENDPOINT, (req, res) => {
-  console.log('System Info POST')
-  console.log(req.body)
+  console.log('System Info POST: ' + JSON.stringify(req.body))
   res.sendStatus(200)
 })
 rest_server.get(SYSTEM_INFO_ENDPOINT, (req, res) => {
@@ -877,8 +867,7 @@ rest_server.get(SYSTEM_INFO_ENDPOINT, (req, res) => {
 
 const SYSTEM_SETTINGS_ENDPOINT = API_ENDPOINT_ROOT + 'system/settings'
 rest_server.post(SYSTEM_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('System Settings POST')
-  console.log(req.body)
+  console.log('System Settings POST: ' + JSON.stringify(req.body))
   res.sendStatus(200)
 })
 rest_server.get(SYSTEM_SETTINGS_ENDPOINT, (req, res) => {
@@ -919,5 +908,5 @@ rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
 
     // add it to buffer
     fetch_log.events.push(data)
-  }, 5000)
+  }, 100)
 })

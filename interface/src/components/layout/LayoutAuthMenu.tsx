@@ -1,17 +1,17 @@
-import React, { FC, useContext } from "react";
+import React, { FC, useContext } from 'react';
 
 import { Box, Button, Divider, IconButton, Popover, Typography, Avatar, styled, TypographyProps } from '@mui/material';
 
-import PersonIcon from "@mui/icons-material/Person";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import PersonIcon from '@mui/icons-material/Person';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
-import { AuthenticatedContext } from "../../contexts/authentication";
+import { AuthenticatedContext } from '../../contexts/authentication';
 
 const ItemTypography = styled(Typography)<TypographyProps>({
   maxWidth: '250px',
   whiteSpace: 'nowrap',
   overflow: 'hidden',
-  textOverflow: 'ellipsis',
+  textOverflow: 'ellipsis'
 });
 
 const LayoutAuthMenu: FC = () => {
@@ -32,13 +32,7 @@ const LayoutAuthMenu: FC = () => {
 
   return (
     <>
-      <IconButton
-        id="open-auth-menu"
-        sx={{ padding: 0 }}
-        aria-describedby={id}
-        color="inherit"
-        onClick={handleClick}
-      >
+      <IconButton id="open-auth-menu" sx={{ padding: 0 }} aria-describedby={id} color="inherit" onClick={handleClick}>
         <AccountCircleIcon />
       </IconButton>
       <Popover
@@ -49,11 +43,11 @@ const LayoutAuthMenu: FC = () => {
         onClose={handleClose}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'center',
+          horizontal: 'center'
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'center',
+          horizontal: 'center'
         }}
       >
         <Box display="flex" flexDirection="row" alignItems="center" p={2}>
@@ -61,17 +55,15 @@ const LayoutAuthMenu: FC = () => {
             <PersonIcon fontSize="large" />
           </Avatar>
           <Box pl={2}>
-            <ItemTypography variant="h6">
-              {me.username}
-            </ItemTypography>
-            <ItemTypography variant="body1">
-              {me.admin ? "Admin User" : "Guest User"}
-            </ItemTypography>
+            <ItemTypography variant="h6">{me.username}</ItemTypography>
+            <ItemTypography variant="body1">{me.admin ? 'Admin User' : 'Guest User'}</ItemTypography>
           </Box>
         </Box>
         <Divider />
         <Box p={1.5}>
-          <Button variant="outlined" fullWidth color="primary" onClick={() => signOut(true)}>Sign Out</Button>
+          <Button variant="outlined" fullWidth color="primary" onClick={() => signOut(true)}>
+            Sign Out
+          </Button>
         </Box>
       </Popover>
     </>

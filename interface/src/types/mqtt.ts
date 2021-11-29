@@ -41,4 +41,3 @@ export interface MqttSettings {
   nested_format: number;
   send_response: boolean;
 }
-

@@ -1,8 +1,5 @@
 import React, { FC, useContext } from 'react';
-import {
-  Redirect, Route,
-  RouteProps
-} from "react-router-dom";
+import { Redirect, Route, RouteProps } from 'react-router-dom';
 
 import * as AuthenticationApi from '../../api/authentication';
 import { AuthenticationContext } from '../../contexts/authentication';
@@ -18,9 +15,9 @@ const UnauthenticatedRoute: FC<UnauthenticatedRouteProps> = ({ children, ...rest
       {...rest}
       render={() => {
         if (!authenticationContext.me) {
-          return (<>{children}</>);
+          return <>{children}</>;
         }
-        return (<Redirect to={AuthenticationApi.fetchLoginRedirect(features)} />);
+        return <Redirect to={AuthenticationApi.fetchLoginRedirect(features)} />;
       }}
     />
   );

@@ -48,7 +48,7 @@ const AuthenticatedRouting: FC = () => {
             <ProjectRouting />
           </Route>
         )}
-        <Route path="/wifi">
+        <Route path="/network">
           <NetworkConnection />
         </Route>
         <Route path="/ap">

@@ -1,4 +1,3 @@
-
 import { FC, useState } from 'react';
 
 import { IconButton, InputAdornment } from '@mui/material';
@@ -7,7 +6,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 import ValidatedTextField, { ValidatedTextFieldProps } from './ValidatedTextField';
 
-type ValidatedPasswordFieldProps = Omit<ValidatedTextFieldProps, 'type'>
+type ValidatedPasswordFieldProps = Omit<ValidatedTextFieldProps, 'type'>;
 
 const ValidatedPasswordField: FC<ValidatedPasswordFieldProps> = ({ InputProps, ...props }) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);

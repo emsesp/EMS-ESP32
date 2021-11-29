@@ -1,18 +1,18 @@
-to test locally
----------------
-cd mock-api; npm install
-cd interface; npm run standalone
+to test locally using static data
+---------------------------------
+ % cd mock-api; npm install
+ % cd interface; npm run standalone
 
 files changed in interface
 --------------------------
  .env - changed project names
- config-overrides.js - added conditional for hosted
- package.json - added new scripts, changed proxy, added dev, added "@msgpack/msgpack"
+ config-overrides.js - added conditional for hosted (https://ems-esp.derbyshire.nl/)
+ package.json - added new scripts, changed proxy, added dev, added "@msgpack/msgpack" and some other things
  
  public/index.html - my own project name
- public/favicon.ico - my own icon
  public/app/manifest.json - my own project name
  public/app/icon.png - my own icon
+ public/favicon.ico - my own icon
 
  src/CustomTheme.tsx (mode: dark) added background, made font size smaller to 13
 
@@ -57,7 +57,7 @@ still to do
 
 Platform/Interface related:
  - Question: TextField validating numbers when empty giving warning "The specified value "NaN" cannot be parsed, or is out of range."
- - Question: AccessPoint - noticed there is Preferred Channel, Hide SSID options, Max Clients. back-end code needed?
+ - Question: AccessPoint - need to add referred Channel, Hide SSID options & Max Clients to backend framework library
  - Question: build is bigger than pre-hooks. Is that expected, even with out all the fonts?
  - Question: why using react-router-dom v5.3 instead of v6?
  - Question: GitHub complains about security vulnerabilities from create-react-app. Can be fixed by https://www.npmjs.com/package/npm-force-resolutions. See https://github.com/facebook/create-react-app/issues/10411#issuecomment-948600254
@@ -71,4 +71,5 @@ EMS-ESP project things to finish
 --------------------------------
 - add ethernet params to the EMS-ESP settings, change phy_type
 - reload sensor in Dashboard after rename, same with thermostat
-- fix big when system log crashes with too many messages
+- fix big when system log crashes with too many messages in eventlog array
+- system log - find out how to make the Box autoscroll

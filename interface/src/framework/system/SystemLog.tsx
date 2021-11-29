@@ -245,7 +245,7 @@ const SystemLog: FC = () => {
         <Box
           sx={{
             backgroundColor: 'black',
-            overflow: 'auto',
+            overflow: 'scroll',
             position: 'absolute',
             right: 24,
             bottom: 24,
