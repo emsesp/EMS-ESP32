@@ -160,7 +160,7 @@ const DashboardData: FC = () => {
     if (deviceValue && deviceData) {
       try {
         const response = await EMSESP.writeValue({
-          id: deviceData?.id,
+          id: deviceData.id,
           devicevalue: deviceValue
         });
         if (response.status === 204) {
@@ -175,6 +175,8 @@ const DashboardData: FC = () => {
         enqueueSnackbar(extractErrorMessage(error, 'Problem writing value'), { variant: 'error' });
       } finally {
         setDeviceValue(undefined);
+        fetchDeviceData(deviceData.id);
+        loadData();
       }
     }
   };
@@ -249,6 +251,7 @@ const DashboardData: FC = () => {
         enqueueSnackbar(extractErrorMessage(error, 'Problem updating sensor'), { variant: 'error' });
       } finally {
         setSensor(undefined);
+        loadData();
       }
     }
   };
@@ -382,7 +385,7 @@ const DashboardData: FC = () => {
     if (noDeviceData()) {
       return (
         <Fragment>
-          <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+          <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
             {deviceData.type}&nbsp;Data{' '}
           </Typography>
           <Box color="warning.main" p={0} mt={0} mb={0}>
@@ -396,15 +399,14 @@ const DashboardData: FC = () => {
 
     return (
       <TableContainer>
-        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+        <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
           {deviceData.type}&nbsp;Data{' '}
         </Typography>
-
-        <Table size="small" padding="normal">
+        <Table size="small">
           <TableHead>
             <TableRow>
               <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
-              <StyledTableCell align="left"> Name</StyledTableCell>
+              <StyledTableCell align="left">Entity Name</StyledTableCell>
               <StyledTableCell align="right">Value</StyledTableCell>
             </TableRow>
           </TableHead>
@@ -440,11 +442,11 @@ const DashboardData: FC = () => {
 
   const renderSensorData = () => (
     <>
-      <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+      <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
         Dallas Sensors
       </Typography>
       <TableContainer>
-        <Table size="small" padding="normal">
+        <Table size="small">
           <TableHead>
             <TableRow>
               <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
@@ -480,21 +482,21 @@ const DashboardData: FC = () => {
 
   const renderAnalogData = () => (
     <>
-      <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+      <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
         Analog Sensors
       </Typography>
       <TableContainer>
-        <Table size="small" padding="normal">
+        <Table size="small">
           <TableHead>
             <TableRow>
-              <StyledTableCell padding="normal" style={{ width: 18 }}></StyledTableCell>
+              <StyledTableCell style={{ width: 18 }}></StyledTableCell>
               <StyledTableCell>Sensor Type</StyledTableCell>
               <StyledTableCell align="right">Value</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             <StyledTableRow>
-              <StyledTableCell padding="normal">&nbsp;&nbsp;</StyledTableCell>
+              <StyledTableCell>&nbsp;&nbsp;</StyledTableCell>
               <StyledTableCell component="th" scope="row">
                 Analog Input
               </StyledTableCell>
@@ -519,7 +521,6 @@ const DashboardData: FC = () => {
           Refresh
         </Button>
       </ButtonRow>
-      ;
     </>
   );
 
