@@ -1,17 +1,6 @@
 import { FC, useContext, useState } from 'react';
 
-import {
-  Button,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableRow,
-  useTheme,
-  useMediaQuery
-} from '@mui/material';
+import { Button, IconButton, Table, TableBody, TableCell, TableFooter, TableHead, TableRow } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -43,9 +32,6 @@ const SecuritySettingsForm: FC = () => {
     read: SecurityApi.readSecuritySettings,
     update: SecurityApi.updateSecuritySettings
   });
-
-  const theme = useTheme();
-  const narrow = useMediaQuery(theme.breakpoints.down('xs'));
 
   const [user, setUser] = useState<User>();
   const [creating, setCreating] = useState<boolean>(false);
@@ -96,7 +82,7 @@ const SecuritySettingsForm: FC = () => {
 
     return (
       <>
-        <Table size="small" padding={narrow ? 'none' : 'normal'}>
+        <Table size="small">
           <TableHead>
             <TableRow>
               <TableCell>Username</TableCell>
@@ -125,7 +111,7 @@ const SecuritySettingsForm: FC = () => {
           <TableFooter>
             <TableRow>
               <TableCell colSpan={2} />
-              <TableCell align="center" padding="normal">
+              <TableCell align="center">
                 <Button startIcon={<PersonAddIcon />} variant="outlined" color="secondary" onClick={createUser}>
                   Add
                 </Button>

@@ -80,4 +80,4 @@ class SecurityManager {
     virtual ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate) = 0;
 };
 
-#endif // end SecurityManager_h
+#endif

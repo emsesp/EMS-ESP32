@@ -6,7 +6,6 @@
   "dependencies": {
     "@emotion/react": "^11.7.0",
     "@emotion/styled": "^11.6.0",
-    "@fontsource/roboto": "^4.5.1",
     "@mui/icons-material": "^5.2.0",
     "@mui/material": "^5.2.1",
     "@types/lodash": "^4.14.177",

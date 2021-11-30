@@ -6,6 +6,8 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import LockIcon from '@mui/icons-material/Lock';
 import WifiIcon from '@mui/icons-material/Wifi';
 
+import { MessageBox } from '../../components';
+
 import { WiFiEncryptionType, WiFiNetwork, WiFiNetworkList } from '../../types';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
@@ -56,6 +58,10 @@ const WiFiNetworkSelector: FC<WiFiNetworkSelectorProps> = ({ networkList }) => {
       </ListItem>
     );
   };
+
+  if (networkList.networks.length === 0) {
+    return <MessageBox mt={2} mb={1} message="No WiFi networks found" level="info" />;
+  }
 
   return <List>{networkList.networks.map(renderNetwork)}</List>;
 };

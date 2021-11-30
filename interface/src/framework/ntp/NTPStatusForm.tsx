@@ -27,7 +27,7 @@ import AvTimerIcon from '@mui/icons-material/AvTimer';
 
 import * as NTPApi from '../../api/ntp';
 import { NTPStatus, NTPSyncStatus } from '../../types';
-import { FormLoader, SectionContent } from '../../components';
+import { ButtonRow, FormLoader, SectionContent } from '../../components';
 import { extractErrorMessage, formatDateTime, formatDuration, formatLocalDateTime, useRest } from '../../utils';
 import { AuthenticatedContext } from '../../contexts/authentication';
 
@@ -186,19 +186,23 @@ const NTPStatusForm: FC = () => {
         </List>
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1}>
-            <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
-              Refresh
-            </Button>
+            <ButtonRow>
+              <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+                Refresh
+              </Button>
+            </ButtonRow>
           </Box>
           {me.admin && data && !isNtpActive(data) && (
             <Box flexWrap="nowrap" whiteSpace="nowrap">
-              <Button onClick={openSetTime} variant="outlined" color="primary" startIcon={<AccessTimeIcon />}>
-                Set Time
-              </Button>
+              <ButtonRow>
+                <Button onClick={openSetTime} variant="outlined" color="primary" startIcon={<AccessTimeIcon />}>
+                  Set Time
+                </Button>
+              </ButtonRow>
             </Box>
           )}
         </Box>
-        {renderSetTimeDialog()}.
+        {renderSetTimeDialog()}
       </>
     );
   };

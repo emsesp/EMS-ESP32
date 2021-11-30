@@ -12,15 +12,15 @@ rest_server.use(compression())
 rest_server.use(express.static(path.join(__dirname, '../interface/build')))
 rest_server.use(express.json())
 
-// endpoints
+// endpoint
 const API_ENDPOINT_ROOT = '/api/'
-const ES_ENDPOINT_ROOT = '/es/'
 
 // LOG
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings'
 log_settings = {
   level: 6,
   max_messages: 50,
+  compact: false,
 }
 
 const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog'
@@ -674,7 +674,6 @@ rest_server.get(EMSESP_STATUS_ENDPOINT, (req, res) => {
 })
 rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
   const id = req.body.id
-
   if (id === 1) {
     const encoded = msgpack.encode(emsesp_devicedata_1)
     res.write(encoded, 'binary')
@@ -694,13 +693,27 @@ rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
 
 rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
   const devicevalue = req.body.devicevalue
-  console.log('Write value for id ' + req.body.id + ' : ' + JSON.stringify(devicevalue))
+  const id = req.body.id
+  if (id === 1) {
+    console.log('Write device value for Thermostat: ' + JSON.stringify(devicevalue))
+    objIndex = emsesp_devicedata_1.data.findIndex((obj) => obj.c == devicevalue.c)
+    emsesp_devicedata_1.data[objIndex] = devicevalue
+  }
+  if (id === 2) {
+    console.log('Write device value for Boiler: ' + JSON.stringify(devicevalue))
+    objIndex = emsesp_devicedata_2.data.findIndex((obj) => obj.c == devicevalue.c)
+    emsesp_devicedata_2.data[objIndex] = devicevalue
+  }
+
   res.sendStatus(200)
 })
 
 rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
   const sensor = req.body
   console.log('Write sensor: ' + JSON.stringify(sensor))
+  objIndex = emsesp_data.sensors.findIndex((obj) => obj.n == sensor.no)
+  emsesp_data.sensors[objIndex].i = sensor.id
+  emsesp_data.sensors[objIndex].o = sensor.offset
   res.sendStatus(200)
 })
 
@@ -881,6 +894,8 @@ rest_server.listen(port, () =>
 )
 
 var count = 8
+var log_index = 0
+const ES_ENDPOINT_ROOT = '/es/'
 const ES_LOG_ENDPOINT = ES_ENDPOINT_ROOT + 'log'
 rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
   res.setHeader('Content-Type', 'text/event-stream')
@@ -891,22 +906,26 @@ rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
   // res.setHeader('X-Accel-Buffering', 'no')
   res.flushHeaders()
 
-  // send a ping approx every 2 seconds
   var timer = setInterval(function () {
-    count = count + 1
+    count += 1
+    log_index += 1
     const data = {
       t: '000+00:00:00.000',
       l: 3, // error
       i: count,
       n: 'system',
-      m: 'incoming message #' + count,
+      m: 'incoming message #' + count + '/' + log_index,
     }
     const sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`
     // console.log('sending log #' + count)
     res.write(sseFormattedResponse)
     res.flush() // this is important
 
-    // add it to buffer
-    fetch_log.events.push(data)
-  }, 100)
+    // if buffer full start over
+    if (log_index > 50) {
+      fetch_log.events = []
+      log_index = 0
+    }
+    fetch_log.events.push(data) // append to buffer
+  }, 1000)
 })

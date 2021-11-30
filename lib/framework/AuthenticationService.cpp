@@ -44,4 +44,4 @@ void AuthenticationService::signIn(AsyncWebServerRequest * request, JsonVariant 
     request->send(response);
 }
 
-#endif // end FT_ENABLED(FT_SECURITY)
+#endif

@@ -11,8 +11,6 @@ import { APNetworkStatus, APStatus } from '../../types';
 import { ButtonRow, FormLoader, SectionContent } from '../../components';
 import { useRest } from '../../utils';
 
-// TODO - Move some of the below to 'types' as required
-
 export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
   switch (status) {
     case APNetworkStatus.ACTIVE:
@@ -87,7 +85,7 @@ const APStatusForm: FC = () => {
           </ListItem>
           <Divider variant="inset" component="li" />
         </List>
-        <ButtonRow pt={2}>
+        <ButtonRow>
           <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
             Refresh
           </Button>

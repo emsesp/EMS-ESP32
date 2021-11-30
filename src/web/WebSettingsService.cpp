@@ -275,12 +275,12 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request, JsonVari
             std::vector<uint8_t> data; // led, dallas, rx, tx, button, phy_type
             // check for valid board
             if (System::load_board_profile(data, board_profile.c_str())) {
-                root["led_gpio"]      = data[0];
-                root["dallas_gpio"]   = data[1];
-                root["rx_gpio"]       = data[2];
-                root["tx_gpio"]       = data[3];
-                root["pbutton_gpio"]  = data[4];
-                root["phy_type"]      = data[5];
+                root["led_gpio"]     = data[0];
+                root["dallas_gpio"]  = data[1];
+                root["rx_gpio"]      = data[2];
+                root["tx_gpio"]      = data[3];
+                root["pbutton_gpio"] = data[4];
+                root["phy_type"]     = data[5];
             } else {
                 AsyncWebServerResponse * response = request->beginResponse(200);
                 request->send(response);

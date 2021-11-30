@@ -139,4 +139,4 @@ class StatefulService {
     std::list<StateUpdateHandlerInfo_t> _updateHandlers;
 };
 
-#endif // end StatefulService_h
+#endif

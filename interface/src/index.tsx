@@ -1,24 +1,23 @@
-import { StrictMode } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 
-import '@fontsource/roboto/latin-400.css';
-import '@fontsource/roboto/latin-500.css';
-
-// These fonts are not used by the framework by default, they are omitted to reduce the artefact size.
-// If using light or strong font variants these can be re-enabled as required.
-//
-// import '@fontsource/roboto/latin-300.css';
-// import '@fontsource/roboto/latin-700.css';
+// Note: Not importing from @fontsource in order only bundle woff2 fonts
+// This reduces the bundle size by ~40k
+import './fonts/roboto/latin-400.css';
+import './fonts/roboto/latin-500.css';
+// Uncomment if using strong or light typography variants.
+// import './fonts/roboto/latin-300.css';
+// import './fonts/roboto/latin-700.css';
 
 import { BrowserRouter } from 'react-router-dom';
 
 import App from './App';
 
 ReactDOM.render(
-  <StrictMode>
+  <React.StrictMode>
     <BrowserRouter>
       <App />
     </BrowserRouter>
-  </StrictMode>,
+  </React.StrictMode>,
   document.getElementById('root')
 );

@@ -11,7 +11,7 @@ import { LogSettings, LogEntry, LogEntries, LogLevel } from '../../types';
 import { updateValue, useRest, extractErrorMessage } from '../../utils';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
-import SaveIcon from '@mui/icons-material/Save';
+import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 
 import { EVENT_SOURCE_ROOT } from '../../api/endpoints';
 export const LOG_EVENTSOURCE_URL = EVENT_SOURCE_ROOT + 'log';
@@ -70,22 +70,21 @@ const SystemLog: FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [reconnectTimeout, setReconnectTimeout] = useState<NodeJS.Timeout>();
   const [logEntries, setLogEntries] = useState<LogEntries>({ events: [] });
-  const [compact, setCompact] = useState<boolean>(false);
   const [lastIndex, setLastIndex] = useState<number>(0);
 
   const paddedLevelLabel = (level: LogLevel) => {
     const label = levelLabel(level);
-    return compact ? ' ' + label[0] : label.padStart(8, '\xa0');
+    return data?.compact ? ' ' + label[0] : label.padStart(8, '\xa0');
   };
 
   const paddedNameLabel = (name: string) => {
     const label = '[' + name + ']';
-    return compact ? label : label.padEnd(12, '\xa0');
+    return data?.compact ? label : label.padEnd(12, '\xa0');
   };
 
   const paddedIDLabel = (id: number) => {
     const label = id + ':';
-    return compact ? label : label.padEnd(7, '\xa0');
+    return data?.compact ? label : label.padEnd(7, '\xa0');
   };
 
   const updateFormValue = updateValue(setData);
@@ -112,19 +111,30 @@ const SystemLog: FC = () => {
     document.body.removeChild(a);
   };
 
-  const onMessage = useCallback(
-    (event: MessageEvent) => {
-      const rawData = event.data;
-      if (typeof rawData === 'string' || rawData instanceof String) {
-        const logentry = JSON.parse(rawData as string) as LogEntry;
-        if (logentry.i > lastIndex) {
-          setLastIndex(logentry.i);
-          setLogEntries((old) => ({ events: [...old.events, logentry] }));
-        }
+  // const onMessage = useCallback(
+  //   (event: MessageEvent) => {
+  //     const rawData = event.data;
+  //     if (typeof rawData === 'string' || rawData instanceof String) {
+  //       const logentry = JSON.parse(rawData as string) as LogEntry;
+  //       if (logentry.i > lastIndex) {
+  //         setLastIndex(logentry.i);
+  //         setLogEntries((old) => ({ events: [...old.events, logentry] }));
+  //       }
+  //     }
+  //   },
+  //   [lastIndex]
+  // );
+
+  const onMessage = (event: MessageEvent) => {
+    const rawData = event.data;
+    if (typeof rawData === 'string' || rawData instanceof String) {
+      const logentry = JSON.parse(rawData as string) as LogEntry;
+      if (logentry.i > lastIndex) {
+        setLastIndex(logentry.i);
+        setLogEntries((old) => ({ events: [...old.events, logentry] }));
       }
-    },
-    [lastIndex]
-  );
+    }
+  };
 
   const fetchLog = useCallback(async () => {
     // console.log('fetching data');
@@ -163,7 +173,7 @@ const SystemLog: FC = () => {
         clearTimeout(reconnectTimeout);
       }
     };
-  }, [onMessage, reconnectTimeout]);
+  }, [reconnectTimeout]);
 
   const content = () => {
     if (!data) {
@@ -213,21 +223,21 @@ const SystemLog: FC = () => {
           </Grid>
           <Grid item xs={2}>
             <BlockFormControlLabel
-              control={<Checkbox checked={compact} onChange={() => setCompact(!compact)} value="compact" />}
+              control={<Checkbox checked={data.compact} onChange={updateFormValue} name="compact" />}
               label="Compact"
             />
           </Grid>
           <Grid item md>
             <ButtonRow>
               <Button
-                startIcon={<SaveIcon />}
+                startIcon={<ChangeCircleIcon />}
                 disabled={saving}
                 variant="outlined"
                 color="primary"
                 type="submit"
                 onClick={saveData}
               >
-                Save
+                Apply
               </Button>
               <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={onDownload}>
                 Export
@@ -251,8 +261,8 @@ const SystemLog: FC = () => {
             logEntries.events.map((e) => (
               <LogEntryLine key={e.i}>
                 <span>{e.t}</span>
-                {compact && <span>{paddedLevelLabel(e.l)} </span>}
-                {!compact && <span>{paddedLevelLabel(e.l)}&nbsp;</span>}
+                {data.compact && <span>{paddedLevelLabel(e.l)} </span>}
+                {!data.compact && <span>{paddedLevelLabel(e.l)}&nbsp;</span>}
                 <span>{paddedIDLabel(e.i)} </span>
                 <span>{paddedNameLabel(e.n)} </span>
                 <span>{e.m}</span>

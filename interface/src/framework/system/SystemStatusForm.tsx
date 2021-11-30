@@ -321,9 +321,11 @@ const SystemStatusForm: FC = () => {
         </List>
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
-            <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
-              Refresh
-            </Button>
+            <ButtonRow>
+              <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+                Refresh
+              </Button>
+            </ButtonRow>
           </Box>
           {me.admin && (
             <Box flexWrap="nowrap" whiteSpace="nowrap">

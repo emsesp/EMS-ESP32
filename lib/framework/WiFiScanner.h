@@ -22,4 +22,4 @@ class WiFiScanner {
     void listNetworks(AsyncWebServerRequest * request);
 };
 
-#endif // end WiFiScanner_h
+#endif
