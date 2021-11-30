@@ -111,19 +111,30 @@ const SystemLog: FC = () => {
     document.body.removeChild(a);
   };
 
-  const onMessage = useCallback(
-    (event: MessageEvent) => {
-      const rawData = event.data;
-      if (typeof rawData === 'string' || rawData instanceof String) {
-        const logentry = JSON.parse(rawData as string) as LogEntry;
-        if (logentry.i > lastIndex) {
-          setLastIndex(logentry.i);
-          setLogEntries((old) => ({ events: [...old.events, logentry] }));
-        }
+  // const onMessage = useCallback(
+  //   (event: MessageEvent) => {
+  //     const rawData = event.data;
+  //     if (typeof rawData === 'string' || rawData instanceof String) {
+  //       const logentry = JSON.parse(rawData as string) as LogEntry;
+  //       if (logentry.i > lastIndex) {
+  //         setLastIndex(logentry.i);
+  //         setLogEntries((old) => ({ events: [...old.events, logentry] }));
+  //       }
+  //     }
+  //   },
+  //   [lastIndex]
+  // );
+
+  const onMessage = (event: MessageEvent) => {
+    const rawData = event.data;
+    if (typeof rawData === 'string' || rawData instanceof String) {
+      const logentry = JSON.parse(rawData as string) as LogEntry;
+      if (logentry.i > lastIndex) {
+        setLastIndex(logentry.i);
+        setLogEntries((old) => ({ events: [...old.events, logentry] }));
       }
-    },
-    [lastIndex]
-  );
+    }
+  };
 
   const fetchLog = useCallback(async () => {
     // console.log('fetching data');
@@ -162,7 +173,7 @@ const SystemLog: FC = () => {
         clearTimeout(reconnectTimeout);
       }
     };
-  }, [onMessage, reconnectTimeout]);
+  }, [reconnectTimeout]);
 
   const content = () => {
     if (!data) {
