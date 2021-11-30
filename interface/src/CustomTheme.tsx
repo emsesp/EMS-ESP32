@@ -7,11 +7,7 @@ import { blueGrey, blue } from '@mui/material/colors';
 const theme = responsiveFontSizes(
   createTheme({
     typography: {
-      fontFamily: `"Roboto", "Helvetica", "Arial", sans-serif`,
-      fontSize: 13,
-      fontWeightLight: 300,
-      fontWeightRegular: 400,
-      fontWeightMedium: 500
+      fontSize: 13
     },
     palette: {
       mode: 'dark',

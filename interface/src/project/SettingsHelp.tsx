@@ -2,7 +2,7 @@ import { FC } from 'react';
 
 import { Typography, Button, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@mui/material';
 
-import { SectionContent, ButtonRow } from '../components';
+import { SectionContent, ButtonRow, MessageBox } from '../components';
 
 import { useSnackbar } from 'notistack';
 
@@ -117,7 +117,7 @@ const SettingsHelp: FC = () => {
         </ButtonRow>
       </Box>
 
-      <Box bgcolor="info.main" border={1} p={2} mt={4} mb={1}>
+      <MessageBox my={5} level="info" message="">
         <Typography variant="body1">
           EMS-ESP is a free and open-source project. Please consider supporting us by giving it a&nbsp;
           <StarIcon style={{ color: '#fdff3a' }} /> on&nbsp;
@@ -126,7 +126,7 @@ const SettingsHelp: FC = () => {
           </Link>
           &nbsp;!
         </Typography>
-      </Box>
+      </MessageBox>
     </SectionContent>
   );
 };

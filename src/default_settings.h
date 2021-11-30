@@ -125,7 +125,7 @@
 #endif
 
 #ifndef EMSESP_DEFAULT_DALLAS_FORMAT
-#define EMSESP_DEFAULT_DALLAS_FORMAT 1 // sensorid
+#define EMSESP_DEFAULT_DALLAS_FORMAT 1 // sensorid (number is 2, name is 3)
 #endif
 
 #ifndef EMSESP_DEFAULT_HA_CLIMATE_FORMAT

@@ -108,12 +108,12 @@ const NTPStatusForm: FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" onClick={() => setSettingTime(false)} color="secondary">
+          <Button variant="outlined" onClick={() => setSettingTime(false)} color="secondary">
             Cancel
           </Button>
           <Button
             startIcon={<AccessTimeIcon />}
-            variant="contained"
+            variant="outlined"
             onClick={configureTime}
             disabled={processing}
             color="primary"

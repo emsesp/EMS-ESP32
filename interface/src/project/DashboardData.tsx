@@ -33,7 +33,7 @@ import EditIcon from '@mui/icons-material/Edit';
 
 import { AuthenticatedContext } from '../contexts/authentication';
 
-import { ButtonRow, FormLoader, ValidatedTextField, SectionContent } from '../components';
+import { ButtonRow, FormLoader, ValidatedTextField, SectionContent, MessageBox } from '../components';
 
 import * as EMSESP from './api';
 
@@ -357,11 +357,11 @@ const DashboardData: FC = () => {
           </Table>
         )}
         {noDevices() && (
-          <Box bgcolor="error.main" color="error.contrastText" p={2} mt={2} mb={2}>
-            <Typography variant="body1">
-              No EMS devices found. Check the connections and for possible Tx errors.
-            </Typography>
-          </Box>
+          <MessageBox
+            my={2}
+            level="error"
+            message="No EMS devices found. Check the connections and for possible Rx and Tx errors."
+          />
         )}
       </TableContainer>
     );
