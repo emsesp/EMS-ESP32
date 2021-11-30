@@ -63,13 +63,6 @@ Platform/Interface related:
  - Question: GitHub complains about security vulnerabilities from create-react-app. Can be fixed by https://www.npmjs.com/package/npm-force-resolutions. See https://github.com/facebook/create-react-app/issues/10411#issuecomment-948600254
 
  - Enhancement: Can the Upload form refreshed itself automatically after a successful upload?
- - Enhancement: Web Socket ping back to the server (ESP32) to see if it's still alive and try and reconnect
+ - Enhancement: Web Socket heartbeat ping back to the server (ESP32) to see if it's still alive and try and reconnect
  - Enhancement: Show flashing up of "Loading..." only if it takes too long to refresh?
  - Enhancement: Create an useEs.ts for Event Source (I use a custom one in my SystemLog.tsx)
-
-EMS-ESP project things to finish
---------------------------------
-- add ethernet params to the EMS-ESP settings, change phy_type
-- reload sensor in Dashboard after rename, same with thermostat
-- fix bug in SystemLog where eventLog[] grows and crashes - see previous implementation
-- system log - find out how to make the Box autoscroll
