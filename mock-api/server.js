@@ -674,7 +674,6 @@ rest_server.get(EMSESP_STATUS_ENDPOINT, (req, res) => {
 })
 rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
   const id = req.body.id
-
   if (id === 1) {
     const encoded = msgpack.encode(emsesp_devicedata_1)
     res.write(encoded, 'binary')
@@ -694,13 +693,27 @@ rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
 
 rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
   const devicevalue = req.body.devicevalue
-  console.log('Write value for id ' + req.body.id + ' : ' + JSON.stringify(devicevalue))
+  const id = req.body.id
+  if (id === 1) {
+    console.log('Write device value for Thermostat: ' + JSON.stringify(devicevalue))
+    objIndex = emsesp_devicedata_1.data.findIndex((obj) => obj.c == devicevalue.c)
+    emsesp_devicedata_1.data[objIndex] = devicevalue
+  }
+  if (id === 2) {
+    console.log('Write device value for Boiler: ' + JSON.stringify(devicevalue))
+    objIndex = emsesp_devicedata_2.data.findIndex((obj) => obj.c == devicevalue.c)
+    emsesp_devicedata_2.data[objIndex] = devicevalue
+  }
+
   res.sendStatus(200)
 })
 
 rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
   const sensor = req.body
   console.log('Write sensor: ' + JSON.stringify(sensor))
+  objIndex = emsesp_data.sensors.findIndex((obj) => obj.n == sensor.no)
+  emsesp_data.sensors[objIndex].i = sensor.id
+  emsesp_data.sensors[objIndex].o = sensor.offset
   res.sendStatus(200)
 })
 
