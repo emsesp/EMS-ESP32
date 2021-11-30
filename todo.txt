@@ -55,14 +55,8 @@ customized the features
 still to do
 -----------
 
-Platform/Interface related:
- - Question: TextField validating numbers when empty giving warning "The specified value "NaN" cannot be parsed, or is out of range."
- - Question: AccessPoint - need to add referred Channel, Hide SSID options & Max Clients to backend framework library
- - Question: build is bigger than pre-hooks. Is that expected, even with out all the fonts?
- - Question: why using react-router-dom v5.3 instead of v6?
- - Question: GitHub complains about security vulnerabilities from create-react-app. Can be fixed by https://www.npmjs.com/package/npm-force-resolutions. See https://github.com/facebook/create-react-app/issues/10411#issuecomment-948600254
+ - esp8266-react: Web Socket heartbeat ping back to the server (ESP32) to see if it's still alive and try and reconnect, and then refresh. Will work after upload
+ - smaller font size goes into effect after first paint - you see it flashing
+ - add auto scroll to SystemLog.tsx
 
- - Enhancement: Can the Upload form refreshed itself automatically after a successful upload?
- - Enhancement: Web Socket heartbeat ping back to the server (ESP32) to see if it's still alive and try and reconnect
- - Enhancement: Show flashing up of "Loading..." only if it takes too long to refresh?
- - Enhancement: Create an useEs.ts for Event Source (I use a custom one in my SystemLog.tsx)
+
