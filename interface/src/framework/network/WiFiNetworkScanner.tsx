@@ -83,7 +83,7 @@ const WiFiNetworkScanner: FC = () => {
   return (
     <SectionContent title="Network Scanner">
       {renderNetworkScanner()}
-      <ButtonRow pt={2}>
+      <ButtonRow>
         <Button
           startIcon={<PermScanWifiIcon />}
           variant="outlined"
