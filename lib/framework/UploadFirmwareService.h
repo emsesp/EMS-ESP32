@@ -24,4 +24,4 @@ class UploadFirmwareService {
     static void       handleEarlyDisconnect();
 };
 
-#endif // end UploadFirmwareService_h
+#endif

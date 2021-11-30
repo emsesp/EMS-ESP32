@@ -58,4 +58,4 @@ class OTASettingsService : public StatefulService<OTASettings> {
     void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
 };
 
-#endif // end OTASettingsService_h
+#endif

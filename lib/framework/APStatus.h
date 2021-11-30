@@ -22,4 +22,4 @@ class APStatus {
     void                apStatus(AsyncWebServerRequest * request);
 };
 
-#endif // end APStatus_h
+#endif

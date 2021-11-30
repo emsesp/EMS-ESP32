@@ -160,4 +160,4 @@ class MqttPubSub : public MqttPub<T>, public MqttSub<T> {
     }
 };
 
-#endif // end MqttPubSub
+#endif
