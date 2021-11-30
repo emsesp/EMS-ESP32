@@ -55,8 +55,7 @@ customized the features
 still to do
 -----------
 
- - esp8266-react: Web Socket heartbeat ping back to the server (ESP32) to see if it's still alive and try and reconnect, and then refresh. Will work after upload
- - smaller font size goes into effect after first paint - you see it flashing
+ - esp8266-react: Add a Web Socket heartbeat ping back to the server (ESP32) to see if it's still alive and try and reconnect, and then refresh. Will work after upload
  - add auto scroll to SystemLog.tsx
-
+ - Fix "Flash Of Unstyled Text (FOUT)" on reload, noticeable in Tab names
 
