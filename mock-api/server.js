@@ -12,15 +12,15 @@ rest_server.use(compression())
 rest_server.use(express.static(path.join(__dirname, '../interface/build')))
 rest_server.use(express.json())
 
-// endpoints
+// endpoint
 const API_ENDPOINT_ROOT = '/api/'
-const ES_ENDPOINT_ROOT = '/es/'
 
 // LOG
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings'
 log_settings = {
   level: 6,
   max_messages: 50,
+  compact: false,
 }
 
 const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog'
@@ -894,6 +894,8 @@ rest_server.listen(port, () =>
 )
 
 var count = 8
+var log_index = 0
+const ES_ENDPOINT_ROOT = '/es/'
 const ES_LOG_ENDPOINT = ES_ENDPOINT_ROOT + 'log'
 rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
   res.setHeader('Content-Type', 'text/event-stream')
@@ -904,22 +906,26 @@ rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
   // res.setHeader('X-Accel-Buffering', 'no')
   res.flushHeaders()
 
-  // send a ping approx every 2 seconds
   var timer = setInterval(function () {
-    count = count + 1
+    count += 1
+    log_index += 1
     const data = {
       t: '000+00:00:00.000',
       l: 3, // error
       i: count,
       n: 'system',
-      m: 'incoming message #' + count,
+      m: 'incoming message #' + count + '/' + log_index,
     }
     const sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`
     // console.log('sending log #' + count)
     res.write(sseFormattedResponse)
     res.flush() // this is important
 
-    // add it to buffer
-    fetch_log.events.push(data)
-  }, 100)
+    // if buffer full start over
+    if (log_index > 50) {
+      fetch_log.events = []
+      log_index = 0
+    }
+    fetch_log.events.push(data) // append to buffer
+  }, 1000)
 })
