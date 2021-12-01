@@ -57,7 +57,7 @@ const SystemRouting: FC = () => {
 
 const System: FC = () => (
   <Switch>
-    <Route exact path={`/system/*`}>
+    <Route exact path="/system/*">
       <SystemRouting />
     </Route>
     <Redirect to="/system/status" />

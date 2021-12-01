@@ -38,7 +38,7 @@ const SecurityRouting: FC = () => {
 
 const Security: FC = () => (
   <Switch>
-    <Route exact path={`/security/*`}>
+    <Route exact path="/security/*">
       <SecurityRouting />
     </Route>
     <Redirect to="/security/users" />

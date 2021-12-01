@@ -40,7 +40,7 @@ const MqttRouting: FC = () => {
 
 const Mqtt: FC = () => (
   <Switch>
-    <Route exact path={`/mqtt/*`}>
+    <Route exact path="/mqtt/*">
       <MqttRouting />
     </Route>
     <Redirect to="/mqtt/status" />

@@ -40,7 +40,7 @@ const NetworkTimeRouting: FC = () => {
 
 const NetworkTime: FC = () => (
   <Switch>
-    <Route exact path={`/ntp/*`}>
+    <Route exact path="/ntp/*">
       <NetworkTimeRouting />
     </Route>
     <Redirect to="/ntp/status" />

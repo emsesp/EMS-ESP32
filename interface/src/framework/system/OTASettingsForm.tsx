@@ -13,7 +13,7 @@ import {
   ValidatedTextField
 } from '../../components';
 import { OTASettings } from '../../types';
-import { updateValue, useRest } from '../../utils';
+import { numberValue, updateValue, useRest } from '../../utils';
 
 import { ValidateFieldsError } from 'async-validator';
 import { validate } from '../../validators';
@@ -56,7 +56,7 @@ const OTASettingsForm: FC = () => {
           label="Port"
           fullWidth
           variant="outlined"
-          value={data.port}
+          value={numberValue(data.port)}
           type="number"
           onChange={updateFormValue}
           margin="normal"
