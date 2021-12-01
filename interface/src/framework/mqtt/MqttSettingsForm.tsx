@@ -14,7 +14,7 @@ import {
   ValidatedTextField
 } from '../../components';
 import { MqttSettings } from '../../types';
-import { updateValue, useRest } from '../../utils';
+import { numberValue, updateValue, useRest } from '../../utils';
 import * as MqttApi from '../../api/mqtt';
 
 const MqttSettingsForm: FC = () => {
@@ -64,7 +64,7 @@ const MqttSettingsForm: FC = () => {
           label="Port"
           fullWidth
           variant="outlined"
-          value={data.port}
+          value={numberValue(data.port)}
           type="number"
           onChange={updateFormValue}
           margin="normal"
@@ -112,7 +112,7 @@ const MqttSettingsForm: FC = () => {
           label="Keep Alive (seconds)"
           fullWidth
           variant="outlined"
-          value={data.keep_alive}
+          value={numberValue(data.keep_alive)}
           type="number"
           onChange={updateFormValue}
           margin="normal"
@@ -194,7 +194,7 @@ const MqttSettingsForm: FC = () => {
               label="Boilers and Heat Pumps"
               fullWidth
               variant="outlined"
-              value={data.publish_time_boiler}
+              value={numberValue(data.publish_time_boiler)}
               type="number"
               onChange={updateFormValue}
               margin="normal"
@@ -208,7 +208,7 @@ const MqttSettingsForm: FC = () => {
               label="Thermostats"
               fullWidth
               variant="outlined"
-              value={data.publish_time_thermostat}
+              value={numberValue(data.publish_time_thermostat)}
               type="number"
               onChange={updateFormValue}
               margin="normal"
@@ -222,7 +222,7 @@ const MqttSettingsForm: FC = () => {
               label="Solar Modules"
               fullWidth
               variant="outlined"
-              value={data.publish_time_solar}
+              value={numberValue(data.publish_time_solar)}
               type="number"
               onChange={updateFormValue}
               margin="normal"
@@ -236,7 +236,7 @@ const MqttSettingsForm: FC = () => {
               label="Mixer Modules"
               fullWidth
               variant="outlined"
-              value={data.publish_time_mixer}
+              value={numberValue(data.publish_time_mixer)}
               type="number"
               onChange={updateFormValue}
               margin="normal"
@@ -250,7 +250,7 @@ const MqttSettingsForm: FC = () => {
               label="Dallas Sensors"
               fullWidth
               variant="outlined"
-              value={data.publish_time_sensor}
+              value={numberValue(data.publish_time_sensor)}
               type="number"
               onChange={updateFormValue}
               margin="normal"
@@ -264,7 +264,7 @@ const MqttSettingsForm: FC = () => {
               label="Default"
               fullWidth
               variant="outlined"
-              value={data.publish_time_other}
+              value={numberValue(data.publish_time_other)}
               type="number"
               onChange={updateFormValue}
               margin="normal"

@@ -27,7 +27,7 @@ import {
 } from '../../components';
 import { NetworkSettings } from '../../types';
 import * as NetworkApi from '../../api/network';
-import { updateValue, useRest } from '../../utils';
+import { numberValue, updateValue, useRest } from '../../utils';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
@@ -142,7 +142,7 @@ const WiFiSettingsForm: FC = () => {
           label="WiFi Tx Power (dBm)"
           fullWidth
           variant="outlined"
-          value={data.tx_power}
+          value={numberValue(data.tx_power)}
           onChange={updateFormValue}
           type="number"
           margin="normal"

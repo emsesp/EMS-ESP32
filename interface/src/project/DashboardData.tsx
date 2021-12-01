@@ -37,7 +37,7 @@ import { ButtonRow, FormLoader, ValidatedTextField, SectionContent, MessageBox }
 
 import * as EMSESP from './api';
 
-import { updateValue, extractErrorMessage, useRest } from '../utils';
+import { numberValue, updateValue, extractErrorMessage, useRest } from '../utils';
 
 import { Data, DeviceData, Device, DeviceValue, DeviceValueUOM, DeviceValueUOM_s, Sensor } from './types';
 
@@ -276,7 +276,7 @@ const DashboardData: FC = () => {
             <ValidatedTextField
               name="o"
               label="Offset"
-              value={sensor.o}
+              value={numberValue(sensor.o)}
               sx={{ width: '12ch' }}
               type="number"
               variant="outlined"
