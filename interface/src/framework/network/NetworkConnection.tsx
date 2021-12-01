@@ -67,7 +67,7 @@ const NetworkConnectionRouting: FC = () => {
 
 const WiFiConnection: FC = () => (
   <Switch>
-    <Route exact path={`/network/*`}>
+    <Route exact path="/network/*">
       <NetworkConnectionRouting />
     </Route>
     <Redirect to="/network/status" />

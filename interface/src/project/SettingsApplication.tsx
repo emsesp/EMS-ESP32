@@ -10,7 +10,7 @@ import { validate } from '../validators';
 import { createSettingsValidator } from './validators';
 
 import { SectionContent, FormLoader, BlockFormControlLabel, ValidatedTextField, ButtonRow } from '../components';
-import { extractErrorMessage, updateValue, useRest } from '../utils';
+import { numberValue, extractErrorMessage, updateValue, useRest } from '../utils';
 
 import * as EMSESP from './api';
 import { Settings, BOARD_PROFILES } from './types';
@@ -109,7 +109,7 @@ const SettingsApplication: FC = () => {
                 label="Rx GPIO"
                 fullWidth
                 variant="outlined"
-                value={data.rx_gpio}
+                value={numberValue(data.rx_gpio)}
                 type="number"
                 onChange={updateFormValue}
                 margin="normal"
@@ -123,7 +123,7 @@ const SettingsApplication: FC = () => {
                 label="Tx GPIO"
                 fullWidth
                 variant="outlined"
-                value={data.tx_gpio}
+                value={numberValue(data.tx_gpio)}
                 type="number"
                 onChange={updateFormValue}
                 margin="normal"
@@ -137,7 +137,7 @@ const SettingsApplication: FC = () => {
                 label="Button GPIO"
                 fullWidth
                 variant="outlined"
-                value={data.pbutton_gpio}
+                value={numberValue(data.pbutton_gpio)}
                 type="number"
                 onChange={updateFormValue}
                 margin="normal"
@@ -151,7 +151,7 @@ const SettingsApplication: FC = () => {
                 label="Dallas GPIO (0=disabled)"
                 fullWidth
                 variant="outlined"
-                value={data.dallas_gpio}
+                value={numberValue(data.dallas_gpio)}
                 type="number"
                 onChange={updateFormValue}
                 margin="normal"
@@ -165,7 +165,7 @@ const SettingsApplication: FC = () => {
                 label="LED GPIO (0=disabled)"
                 fullWidth
                 variant="outlined"
-                value={data.led_gpio}
+                value={numberValue(data.led_gpio)}
                 type="number"
                 onChange={updateFormValue}
                 margin="normal"

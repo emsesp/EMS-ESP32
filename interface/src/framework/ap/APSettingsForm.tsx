@@ -15,7 +15,7 @@ import {
   ValidatedTextField
 } from '../../components';
 import { APProvisionMode, APSettings } from '../../types';
-import { updateValue, useRest } from '../../utils';
+import { numberValue, updateValue, useRest } from '../../utils';
 import * as APApi from '../../api/ap';
 
 export const isAPEnabled = ({ provision_mode }: APSettings) => {
@@ -90,7 +90,7 @@ const APSettingsForm: FC = () => {
               fieldErrors={fieldErrors}
               name="channel"
               label="Preferred Channel"
-              value={data.channel}
+              value={numberValue(data.channel)}
               fullWidth
               select
               type="number"
@@ -112,7 +112,7 @@ const APSettingsForm: FC = () => {
               fieldErrors={fieldErrors}
               name="max_clients"
               label="Max Clients"
-              value={data.max_clients}
+              value={numberValue(data.max_clients)}
               fullWidth
               select
               type="number"

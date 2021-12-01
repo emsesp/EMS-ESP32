@@ -151,7 +151,7 @@ const SystemStatusForm: FC = () => {
 
           <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>
             <Typography variant="body2">
-              Install a firmware versions using&nbsp;
+              Upgrade to a new version using&nbsp;
               <Link target="_blank" href={uploadURL} color="primary">
                 {'UPLOAD FIRMWARE'}
               </Link>

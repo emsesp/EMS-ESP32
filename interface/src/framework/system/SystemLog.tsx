@@ -5,13 +5,14 @@ import { Box, styled, Button, Checkbox, MenuItem, Grid, Slider, FormLabel } from
 import * as SystemApi from '../../api/system';
 import { addAccessTokenParameter } from '../../api/authentication';
 
-import { SectionContent, ButtonRow, FormLoader, BlockFormControlLabel, ValidatedTextField } from '../../components';
+import { SectionContent, FormLoader, BlockFormControlLabel, ValidatedTextField } from '../../components';
 
 import { LogSettings, LogEntry, LogEntries, LogLevel } from '../../types';
 import { updateValue, useRest, extractErrorMessage } from '../../utils';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
-import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
+
+import { useSnackbar } from 'notistack';
 
 import { EVENT_SOURCE_ROOT } from '../../api/endpoints';
 export const LOG_EVENTSOURCE_URL = EVENT_SOURCE_ROOT + 'log';
@@ -62,9 +63,8 @@ const levelLabel = (level: LogLevel) => {
 const SystemLog: FC = () => {
   useWindowSize();
 
-  const { loadData, data, setData, saving, saveData } = useRest<LogSettings>({
-    read: SystemApi.readLogSettings,
-    update: SystemApi.updateLogSettings
+  const { loadData, data, setData } = useRest<LogSettings>({
+    read: SystemApi.readLogSettings
   });
 
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -88,6 +88,39 @@ const SystemLog: FC = () => {
   };
 
   const updateFormValue = updateValue(setData);
+
+  const { enqueueSnackbar } = useSnackbar();
+
+  const reloadPage = () => {
+    window.location.reload();
+  };
+
+  const sendSettings = async (new_max_messages: number, new_level: number) => {
+    if (data) {
+      try {
+        const response = await SystemApi.updateLogSettings({
+          level: new_level,
+          max_messages: new_max_messages,
+          compact: data.compact
+        });
+        if (response.status !== 200) {
+          enqueueSnackbar('Problem applying log settings', { variant: 'error' });
+        }
+      } catch (error: any) {
+        enqueueSnackbar(extractErrorMessage(error, 'Problem applying log settings'), { variant: 'error' });
+      }
+    }
+  };
+
+  const changeLevel = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (data) {
+      setData({
+        ...data,
+        level: parseInt(event.target.value)
+      });
+      sendSettings(data.max_messages, parseInt(event.target.value));
+    }
+  };
 
   const changeMaxMessages = (event: Event, value: number | number[]) => {
     if (data) {
@@ -137,7 +170,6 @@ const SystemLog: FC = () => {
   };
 
   const fetchLog = useCallback(async () => {
-    // console.log('fetching data');
     try {
       setLogEntries((await SystemApi.readLogEntries()).data);
     } catch (error: any) {
@@ -149,13 +181,8 @@ const SystemLog: FC = () => {
     fetchLog();
   }, [fetchLog]);
 
-  const reloadPage = () => {
-    window.location.reload();
-  };
-
   useEffect(() => {
     // console.log('es creating instance');
-
     const es = new EventSource(addAccessTokenParameter(LOG_EVENTSOURCE_URL));
     es.onmessage = onMessage;
     es.onerror = () => {
@@ -187,11 +214,10 @@ const SystemLog: FC = () => {
             <ValidatedTextField
               name="level"
               label="Log Level"
-              disabled={saving}
               value={data.level}
               fullWidth
               variant="outlined"
-              onChange={updateFormValue}
+              onChange={changeLevel}
               margin="normal"
               select
             >
@@ -219,6 +245,7 @@ const SystemLog: FC = () => {
               min={25}
               max={100}
               onChange={changeMaxMessages}
+              onChangeCommitted={() => sendSettings(data.max_messages, data.level)}
             />
           </Grid>
           <Grid item xs={2}>
@@ -228,21 +255,9 @@ const SystemLog: FC = () => {
             />
           </Grid>
           <Grid item md>
-            <ButtonRow>
-              <Button
-                startIcon={<ChangeCircleIcon />}
-                disabled={saving}
-                variant="outlined"
-                color="primary"
-                type="submit"
-                onClick={saveData}
-              >
-                Apply
-              </Button>
-              <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={onDownload}>
-                Export
-              </Button>
-            </ButtonRow>
+            <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={onDownload}>
+              Export
+            </Button>
           </Grid>
         </Grid>
         <Box
