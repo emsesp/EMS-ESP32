@@ -1,7 +1,6 @@
 const ManifestPlugin = require('webpack-manifest-plugin');
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CompressionPlugin = require('compression-webpack-plugin');
 const ProgmemGenerator = require('./progmem-generator.js');
 
 module.exports = function override(config, env) {
@@ -23,16 +22,6 @@ module.exports = function override(config, env) {
 
     // build progmem data files
     config.plugins.push(new ProgmemGenerator({ outputPath: '../lib/framework/WWWData.h', bytesPerLine: 20 }));
-
-    // add compression plugin, compress javascript
-    config.plugins.push(
-      new CompressionPlugin({
-        filename: '[path].gz[query]',
-        algorithm: 'gzip',
-        test: /\.(js)$/,
-        deleteOriginalAssets: true
-      })
-    );
   }
   return config;
 };
