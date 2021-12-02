@@ -37,7 +37,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
       setErrorMessage(undefined);
       try {
         setData((await update(toSave)).data);
-        enqueueSnackbar('Update successful', { variant: 'success' });
+        enqueueSnackbar('Settings saved', { variant: 'success' });
       } catch (error: any) {
         const message = extractErrorMessage(error, 'Problem saving data');
         enqueueSnackbar(message, { variant: 'error' });
