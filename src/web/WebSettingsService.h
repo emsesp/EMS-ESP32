@@ -32,8 +32,25 @@
 
 namespace emsesp {
 
-enum { BOOL_FORMAT_ONOFF = 1, BOOL_FORMAT_ONOFF_CAP, BOOL_FORMAT_TRUEFALSE, BOOL_FORMAT_10 }; // matches Web UI settings
-enum { ENUM_FORMAT_TEXT = 1, ENUM_FORMAT_NUMBER };                                            // matches Web UI settings
+// matches Web UI settings
+enum {
+
+    BOOL_FORMAT_ONOFF_STR = 1,
+    BOOL_FORMAT_ONOFF_STR_CAP,
+    BOOL_FORMAT_TRUEFALSE_STR,
+    BOOL_FORMAT_TRUEFALSE,
+    BOOL_FORMAT_10_STR,
+    BOOL_FORMAT_10
+
+};
+
+// matches Web UI settings
+enum {
+
+    ENUM_FORMAT_VALUE = 1,
+    ENUM_FORMAT_INDEX
+
+};
 
 class WebSettings {
   public:

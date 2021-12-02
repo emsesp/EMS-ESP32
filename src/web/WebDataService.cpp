@@ -108,7 +108,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
                     EMSESP::wait_validate(0); // reset in case of timeout
 #ifndef EMSESP_STANDALONE
                     JsonObject root = response->getRoot();
-                    emsdevice->generate_values_json_web(root);
+                    emsdevice->generate_values_web(root);
 #endif
                     response->setLength();
                     request->send(response);

@@ -306,8 +306,10 @@ const SettingsApplication: FC = () => {
             >
               <MenuItem value={1}>"on"/"off"</MenuItem>
               <MenuItem value={2}>"ON"/"OFF"</MenuItem>
-              <MenuItem value={3}>true/false</MenuItem>
-              <MenuItem value={4}>1/0</MenuItem>
+              <MenuItem value={3}>"true"/"false"</MenuItem>
+              <MenuItem value={4}>true/false</MenuItem>
+              <MenuItem value={5}>"1"/"0"</MenuItem>
+              <MenuItem value={6}>1/0</MenuItem>
             </ValidatedTextField>
           </Grid>
           <Grid item xs={4}>
@@ -321,8 +323,8 @@ const SettingsApplication: FC = () => {
               margin="normal"
               select
             >
-              <MenuItem value={1}>Text</MenuItem>
-              <MenuItem value={2}>Number</MenuItem>
+              <MenuItem value={1}>Value</MenuItem>
+              <MenuItem value={2}>Index</MenuItem>
             </ValidatedTextField>
           </Grid>
           <Grid item xs={4}>
@@ -337,7 +339,7 @@ const SettingsApplication: FC = () => {
               select
             >
               <MenuItem value={1}>ID</MenuItem>
-              <MenuItem value={2}>Number</MenuItem>
+              <MenuItem value={2}>Sensor #</MenuItem>
               <MenuItem value={3}>Name</MenuItem>
             </ValidatedTextField>
           </Grid>

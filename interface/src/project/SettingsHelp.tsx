@@ -2,7 +2,7 @@ import { FC } from 'react';
 
 import { Typography, Button, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@mui/material';
 
-import { SectionContent, ButtonRow, MessageBox } from '../components';
+import { SectionContent, ButtonRow } from '../components';
 
 import { useSnackbar } from 'notistack';
 
@@ -57,10 +57,11 @@ const SettingsHelp: FC = () => {
             <TuneIcon />
           </ListItemAvatar>
           <ListItemText>
-            For a description of each of the Application Settings click&nbsp;
+            For a help on each of the Application Settings see the&nbsp;
             <Link href="https://emsesp.github.io/docs/#/Configure-firmware?id=ems-esp-settings" color="primary">
-              {'here'}
+              {'Configuring'}
             </Link>
+            &nbsp;section on the documentation site.
           </ListItemText>
         </ListItem>
 
@@ -69,10 +70,11 @@ const SettingsHelp: FC = () => {
             <MenuBookIcon />
           </ListItemAvatar>
           <ListItemText>
-            For general information about EMS-ESP visit the online&nbsp;
+            For general information about EMS-ESP browse through the online&nbsp;
             <Link href="https://emsesp.github.io/docs" color="primary">
               {'documentation'}
             </Link>
+            .
           </ListItemText>
         </ListItem>
 
@@ -83,8 +85,9 @@ const SettingsHelp: FC = () => {
           <ListItemText>
             For live community chat join our&nbsp;
             <Link href="https://discord.gg/3J3GgnzpyT" color="primary">
-              {'Discord'}&nbsp;server
+              {'Discord'}
             </Link>
+            &nbsp;server.
           </ListItemText>
         </ListItem>
 
@@ -93,17 +96,18 @@ const SettingsHelp: FC = () => {
             <GitHubIcon />
           </ListItemAvatar>
           <ListItemText>
-            To report an issue or request a feature, please do so via&nbsp;
+            To report an issue or request a feature, please do via&nbsp;
             <Link href="https://github.com/emsesp/EMS-ESP32/issues/new/choose" color="primary">
               {'GitHub'}
             </Link>
+            .
           </ListItemText>
         </ListItem>
       </List>
 
-      <Box sx={{ display: 'flex', flexWrap: 'nowrap' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <ButtonRow>
-          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => onDownload('info')}>
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={() => onDownload('info')}>
             download system info
           </Button>
           <Button
@@ -117,16 +121,17 @@ const SettingsHelp: FC = () => {
         </ButtonRow>
       </Box>
 
-      <MessageBox my={5} level="info" message="">
-        <Typography variant="body1">
-          EMS-ESP is a free and open-source project. Please consider supporting us by giving it a&nbsp;
+      <Box bgcolor="secondary.info" border={1} p={1} mt={3}>
+        <Typography align="center" variant="h6">
+          EMS-ESP is a free and open-source project.
+          <br></br>Please consider supporting us by giving it a&nbsp;
           <StarIcon style={{ color: '#fdff3a' }} /> on&nbsp;
           <Link href="https://github.com/emsesp/EMS-ESP32" color="primary">
             {'GitHub'}
           </Link>
           &nbsp;!
         </Typography>
-      </MessageBox>
+      </Box>
     </SectionContent>
   );
 };

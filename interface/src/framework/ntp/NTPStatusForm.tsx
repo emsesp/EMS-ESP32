@@ -78,7 +78,7 @@ const NTPStatusForm: FC = () => {
       await NTPApi.updateTime({
         local_time: formatLocalDateTime(new Date(localTime))
       });
-      enqueueSnackbar('Time set successfully', { variant: 'success' });
+      enqueueSnackbar('Time set', { variant: 'success' });
       setSettingTime(false);
       loadData();
     } catch (error: any) {

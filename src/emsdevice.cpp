@@ -612,10 +612,10 @@ const std::string EMSdevice::get_value_uom(const char * key) {
 }
 
 // prepare array of device values used for the WebUI
-// this is loosely based of the function generate_values_json used for the MQTT and Console
+// this is loosely based of the function generate_values() used for the MQTT and Console
 // except additional data is stored in the JSON document needed for the Web UI like the UOM and command
 // v = value, u=uom, n=name, c=cmd
-void EMSdevice::generate_values_json_web(JsonObject & output) {
+void EMSdevice::generate_values_web(JsonObject & output) {
     output["id"]   = device_type();
     output["type"] = device_type_name();
     JsonArray data = output.createNestedArray("data");
@@ -632,8 +632,16 @@ void EMSdevice::generate_values_json_web(JsonObject & output) {
 
             // handle Booleans (true, false)
             if (dv.type == DeviceValueType::BOOL) {
-                obj      = data.createNestedObject();
-                obj["v"] = *(bool *)(dv.value_p) ? "on" : "off";
+                obj          = data.createNestedObject();
+                bool value_b = *(bool *)(dv.value_p);
+                if ((EMSESP::bool_format() == BOOL_FORMAT_TRUEFALSE)) {
+                    obj["v"] = value_b;
+                } else if ((EMSESP::bool_format() == BOOL_FORMAT_10)) {
+                    obj["v"] = value_b ? 1 : 0;
+                } else {
+                    char s[7];
+                    obj["v"] = Helpers::render_boolean(s, value_b);
+                }
             }
 
             // handle TEXT strings
@@ -781,7 +789,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             switch (dv.type) {
             case DeviceValueType::ENUM: {
                 if (*(uint8_t *)(dv.value_p) < dv.options_size) {
-                    if (EMSESP::enum_format() == ENUM_FORMAT_NUMBER) {
+                    if (EMSESP::enum_format() == ENUM_FORMAT_INDEX) {
                         json[value] = (uint8_t)(*(uint8_t *)(dv.value_p));
                     } else {
                         json[value] = dv.options[*(uint8_t *)(dv.value_p)]; // text
@@ -854,15 +862,14 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
 
             case DeviceValueType::BOOL: {
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
-                    uint8_t bool_format = EMSESP::bool_format();
-                    if (bool_format == BOOL_FORMAT_ONOFF) {
-                        json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? F_(on) : F_(off);
-                    } else if (bool_format == BOOL_FORMAT_ONOFF_CAP) {
-                        json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? F_(ON) : F_(OFF);
-                    } else if (bool_format == BOOL_FORMAT_TRUEFALSE) {
-                        json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? true : false;
+                    bool value_b = (bool)(*(uint8_t *)(dv.value_p));
+                    if ((EMSESP::bool_format() == BOOL_FORMAT_TRUEFALSE)) {
+                        json[value] = value_b;
+                    } else if ((EMSESP::bool_format() == BOOL_FORMAT_10)) {
+                        json[value] = value_b ? 1 : 0;
                     } else {
-                        json[value] = (bool)(*(uint8_t *)(dv.value_p)) ? 1 : 0;
+                        char s[7];
+                        json[value] = Helpers::render_boolean(s, value_b);
                     }
                 }
                 json[type] = F("boolean");
@@ -930,7 +937,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
 // For each value in the device create the json object pair and add it to given json
 // return false if empty
 // this is used to create both the MQTT payloads, Console messages and Web API calls
-bool EMSdevice::generate_values_json(JsonObject & output, const uint8_t tag_filter, const bool nested, const uint8_t output_target) {
+bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, const bool nested, const uint8_t output_target) {
     bool       has_values = false; // to see if we've added a value. it's faster than doing a json.size() at the end
     uint8_t    old_tag    = 255;   // NAN
     JsonObject json       = output;
@@ -981,18 +988,22 @@ bool EMSdevice::generate_values_json(JsonObject & output, const uint8_t tag_filt
                 }
             }
 
-            // handle Booleans (true, false)
+            // handle Booleans
             if (dv.type == DeviceValueType::BOOL) {
                 // see how to render the value depending on the setting
-                uint8_t bool_format = EMSESP::bool_format();
-                if (bool_format == BOOL_FORMAT_ONOFF) {
-                    json[name] = *(uint8_t *)(dv.value_p) ? F_(on) : F_(off);
-                } else if (bool_format == BOOL_FORMAT_ONOFF_CAP) {
-                    json[name] = *(uint8_t *)(dv.value_p) ? F_(ON) : F_(OFF);
-                } else if (bool_format == BOOL_FORMAT_TRUEFALSE) {
-                    json[name] = (bool)(*(uint8_t *)(dv.value_p)) ? true : false;
+                bool value_b = *(uint8_t *)(dv.value_p);
+                if (Mqtt::ha_enabled()) {
+                    char s[7];
+                    json[name] = Helpers::render_boolean(s, value_b); // for HA always render as string
                 } else {
-                    json[name] = (uint8_t)(*(uint8_t *)(dv.value_p)) ? 1 : 0;
+                    if ((EMSESP::bool_format() == BOOL_FORMAT_TRUEFALSE)) {
+                        json[name] = value_b;
+                    } else if ((EMSESP::bool_format() == BOOL_FORMAT_10)) {
+                        json[name] = value_b ? 1 : 0;
+                    } else {
+                        char s[7];
+                        json[name] = Helpers::render_boolean(s, value_b);
+                    }
                 }
             }
 
@@ -1002,14 +1013,12 @@ bool EMSdevice::generate_values_json(JsonObject & output, const uint8_t tag_filt
             }
 
             // handle ENUMs
-            else if (dv.type == DeviceValueType::ENUM) {
-                if (*(uint8_t *)(dv.value_p) < dv.options_size) {
-                    // check for numeric enum-format, but "hamode" always as text
-                    if ((EMSESP::enum_format() == ENUM_FORMAT_NUMBER) && (dv.short_name != FL_(hamode)[0])) {
-                        json[name] = (uint8_t)(*(uint8_t *)(dv.value_p));
-                    } else {
-                        json[name] = dv.options[*(uint8_t *)(dv.value_p)];
-                    }
+            else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
+                // check for numeric enum-format, but "hamode" always as text
+                if ((EMSESP::enum_format() == ENUM_FORMAT_VALUE) && (dv.short_name != FL_(hamode)[0])) {
+                    json[name] = (uint8_t)(*(uint8_t *)(dv.value_p));
+                } else {
+                    json[name] = dv.options[*(uint8_t *)(dv.value_p)];
                 }
             }
 
@@ -1099,16 +1108,6 @@ void EMSdevice::publish_mqtt_ha_entity_config() {
     }
 
     for (auto & dv : devicevalues_) {
-#if defined(EMSESP_STANDALONE)
-        // debug messages to go with the test called 'dv'
-        if (strcmp(read_flash_string(dv.short_name).c_str(), "wwseltemp") == 0) {
-            EMSESP::logger().warning(F("publish_mqtt_ha_entity_config: wwseltemp state=%d, active=%d config_created=%d"),
-                                     dv.get_state(),
-                                     dv.has_state(DV_ACTIVE),
-                                     dv.has_state(DV_HA_CONFIG_CREATED));
-        }
-#endif
-
         // if the HA config has already been created and now the value has gone dormant, delete the config
         // https://github.com/emsesp/EMS-ESP32/issues/196
         if (dv.has_state(DV_ACTIVE)) {
