@@ -639,16 +639,6 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
         return nullptr;
     }
 
-    // if it's a publish and the payload is empty, stop
-    /*
-    if ((operation == Operation::PUBLISH) && (payload.empty())) {
-#ifdef EMSESP_DEBUG
-        LOG_WARNING("[DEBUG] Publish empty payload - quitting");
-#endif
-        return nullptr;
-    }
-    */
-
     // take the topic and prefix the base, unless its for HA
     std::shared_ptr<MqttMessage> message;
     message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
@@ -749,7 +739,7 @@ void Mqtt::publish_ha(const std::string & topic) {
     LOG_DEBUG(F("[DEBUG] Publishing empty HA topic=%s"), fulltopic.c_str());
 #endif
 
-    publish(fulltopic); // call it immediately, don't queue it
+    publish(fulltopic);
 }
 
 // publish a Home Assistant config topic and payload, with retain flag off.
@@ -946,8 +936,8 @@ void Mqtt::publish_ha_sensor_config(uint8_t                     type, // EMSdevi
 
     // look at the device value type
     if (type == DeviceValueType::BOOL) {
-        // how to render boolean. HA only accepts String values
         char result[10];
+        // render booleans always as a string for HA
         doc[F("payload_on")]  = Helpers::render_boolean(result, true);
         doc[F("payload_off")] = Helpers::render_boolean(result, false);
     } else {
