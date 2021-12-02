@@ -36,8 +36,12 @@ files changed in interface
  src/Project/ProjectRouting.tsx - had to add fixed and wildcards for nav to work - need to double check if this is ok now
  src/AppRouting.tsx - renamed 'log in' to 'sign in' to be consistent
 
+ src/utils/useRest.ts - changed 'Update successful' to 'Settings saved'.
+
  src/* changed all <Button> variant="contained" to variant="outlined"
  src/* removed pt={2} from all ButtonRow's and added it to the ButtonRow component
+
+ added roboto fonts back to package.json and removed index.tsx - to prevent "Flash Of Unstyled Text (FOUT)" on Tab names and SectionContext titles
 
 new files added in interface
 ----------------------------
@@ -57,5 +61,5 @@ still to do
 
  - esp8266-react: Add a Web Socket heartbeat ping back to the server (ESP32) to see if it's still alive and try and reconnect, and then refresh. Will work after upload
  - add auto scroll to SystemLog.tsx
- - Fix "Flash Of Unstyled Text (FOUT)" on reload, noticeable in Tab names
+ - fix warning in SystemLog.tsx "React Hook useEffect has a missing dependency: 'onMessage'"
 
