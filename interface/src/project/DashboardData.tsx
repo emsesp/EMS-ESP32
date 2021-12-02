@@ -292,7 +292,7 @@ const DashboardData: FC = () => {
               Cancel
             </Button>
             <Button variant="outlined" type="submit" onClick={() => sendSensor()} color="warning">
-              Change
+              Update
             </Button>
           </DialogActions>
         </Dialog>
