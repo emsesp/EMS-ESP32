@@ -5,6 +5,7 @@
 ## Added
 
 ## Fixed
+- lastcode broke MQTT JSON structure [#228]
 
 ## Changed
 
