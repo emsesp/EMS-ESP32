@@ -816,7 +816,7 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
 // 0xC2
 void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) {
     // for decoding "last error code" we need telegram starting with offset 0
-    if (telegram->offset != 0 || telegram->message_length < 14) {
+    if (telegram->offset != 0 || telegram->message_length < 20) {
          return;
     }
 
