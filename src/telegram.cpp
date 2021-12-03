@@ -613,7 +613,19 @@ uint16_t TxService::read_next_tx(uint8_t offset) {
     if (telegram_last_->offset != offset) {
         return 0;
     }
-    add(Telegram::Operation::TX_READ, telegram_last_->dest, telegram_last_->type_id, telegram_last_->offset + 25, message_data, 1, 0, true);
+
+    uint8_t add_offset;
+    if (telegram_last_->dest == 0x08 && telegram_last_->type_id == 0xC2) {  //fix for overlapping 0xC2 telegrams from Boiler. Are other telegrams also affected?
+        add_offset = 27;
+    } else {
+        add_offset = 25;
+    }
+
+    if (UINT8_MAX - telegram_last_->offset < add_offset) {   //stop if new offset would overflow
+        return 0;
+    }
+
+    add(Telegram::Operation::TX_READ, telegram_last_->dest, telegram_last_->type_id, telegram_last_->offset + add_offset, message_data, 1, 0, true);
     return telegram_last_->type_id;
 }
 
