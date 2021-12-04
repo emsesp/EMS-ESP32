@@ -69,6 +69,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["weblog_buffer"]        = settings.weblog_buffer;
     root["weblog_compact"]       = settings.weblog_compact;
 
+    // TODO move this to customization screen in v3.4
     for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
         char buf[20];
         snprintf(buf, sizeof(buf), "sensor_id%d", i);
@@ -289,22 +290,19 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request, JsonVari
     if (json.is<JsonObject>()) {
         AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM);
         JsonObject          root     = response->getRoot();
+
         if (json.containsKey("board_profile")) {
             String               board_profile = json["board_profile"];
             std::vector<uint8_t> data; // led, dallas, rx, tx, button, phy_type
             // check for valid board
-            if (System::load_board_profile(data, board_profile.c_str())) {
-                root["led_gpio"]     = data[0];
-                root["dallas_gpio"]  = data[1];
-                root["rx_gpio"]      = data[2];
-                root["tx_gpio"]      = data[3];
-                root["pbutton_gpio"] = data[4];
-                root["phy_type"]     = data[5];
-            } else {
-                AsyncWebServerResponse * response = request->beginResponse(200);
-                request->send(response);
-                return;
-            }
+            (void)System::load_board_profile(data, board_profile.c_str());
+
+            root["led_gpio"]     = data[0];
+            root["dallas_gpio"]  = data[1];
+            root["rx_gpio"]      = data[2];
+            root["tx_gpio"]      = data[3];
+            root["pbutton_gpio"] = data[4];
+            root["phy_type"]     = data[5];
 
             response->setLength();
             request->send(response);

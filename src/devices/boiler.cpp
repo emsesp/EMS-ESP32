@@ -44,7 +44,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     }
 
     // register values for master boiler/cascade module
-    reserve_telgram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
+    // reserve_telegram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
 
     // the telegram handlers...
     // common for all boilers

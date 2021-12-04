@@ -350,7 +350,7 @@ const DashboardData: FC = () => {
                   color={selectedDevice === device.i ? 'secondary' : 'inherit'}
                   onClick={() => fetchDeviceData(device.i)}
                 >
-                  {device.sn}
+                  {device.sn}&nbsp;({device.e})
                 </Button>
               </StyledTooltip>
             ))}

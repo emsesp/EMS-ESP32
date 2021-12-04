@@ -1,7 +1,18 @@
 import { AxiosPromise } from 'axios';
 import { AXIOS, AXIOS_API, AXIOS_BIN } from '../api/endpoints';
 
-import { BoardProfile, APIcall, Settings, Status, Data, DeviceData, DeviceID, WriteValue, WriteSensor } from './types';
+import {
+  BoardProfile,
+  BoardProfileName,
+  APIcall,
+  Settings,
+  Status,
+  Data,
+  DeviceData,
+  DeviceID,
+  WriteValue,
+  WriteSensor
+} from './types';
 
 export function restart(): AxiosPromise<void> {
   return AXIOS.post('/restart');
@@ -15,7 +26,7 @@ export function updateSettings(settings: Settings): AxiosPromise<Settings> {
   return AXIOS.post('/settings', settings);
 }
 
-export function updateBoardProfile(boardProfile: BoardProfile): AxiosPromise<void> {
+export function getBoardProfile(boardProfile: BoardProfileName): AxiosPromise<BoardProfile> {
   return AXIOS.post('/boardProfile', boardProfile);
 }
 

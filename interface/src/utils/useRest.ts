@@ -42,8 +42,9 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
         setData(response.data);
         if (response.status === 202) {
           setRestartNeeded(true);
+        } else {
+          enqueueSnackbar('Settings saved', { variant: 'success' });
         }
-        enqueueSnackbar('Settings saved', { variant: 'success' });
       } catch (error: any) {
         const message = extractErrorMessage(error, 'Problem saving data');
         enqueueSnackbar(message, { variant: 'error' });

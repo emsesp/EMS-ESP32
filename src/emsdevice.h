@@ -386,9 +386,11 @@ class EMSdevice {
         devicevalues_.reserve(elements);
     }
 
-    void reserve_telgram_functions(uint8_t elements) {
+    void reserve_telegram_functions(uint8_t elements) {
         telegram_functions_.reserve(elements);
     }
+
+    uint8_t count_entries();
 
   private:
     uint8_t     unique_id_;
@@ -416,6 +418,7 @@ class EMSdevice {
             , process_function_(process_function) {
         }
     };
+    std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 
     // DeviceValue holds all the attributes for a device value (also a device parameter)
     struct DeviceValue {
@@ -480,8 +483,7 @@ class EMSdevice {
     };
     const std::vector<DeviceValue> devicevalues() const;
 
-    std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
-    std::vector<DeviceValue>      devicevalues_;
+    std::vector<DeviceValue> devicevalues_;
 
     const std::string device_entity_ha(DeviceValue const & dv);
 

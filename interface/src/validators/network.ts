@@ -4,10 +4,7 @@ import { HOSTNAME_VALIDATOR, IP_ADDRESS_VALIDATOR } from './shared';
 
 export const createNetworkSettingsValidator = (networkSettings: NetworkSettings) =>
   new Schema({
-    ssid: [
-      { required: true, message: 'SSID is required' },
-      { type: 'string', max: 32, message: 'SSID must be 32 characters or less' }
-    ],
+    ssid: [{ type: 'string', max: 32, message: 'SSID must be 32 characters or less' }],
     password: { type: 'string', max: 64, message: 'Password must be 64 characters or less' },
     hostname: [{ required: true, message: 'Hostname is required' }, HOSTNAME_VALIDATOR],
     ...(networkSettings.static_ip_config && {

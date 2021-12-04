@@ -116,6 +116,17 @@ static const __FlashStringHelper * const DeviceValueTAG_mqtt[] PROGMEM = {
 
 };
 
+// returns number of visible device values (entries) for this device
+uint8_t EMSdevice::count_entries() {
+    uint8_t count = 0;
+    for (const auto & dv : devicevalues_) {
+        if (dv.has_state(DeviceValueState::DV_VISIBLE) && (dv.type != DeviceValueType::CMD) && check_dv_hasvalue(dv)) {
+            count++;
+        }
+    }
+    return count;
+}
+
 const std::string EMSdevice::tag_to_string(uint8_t tag) {
     return read_flash_string(DeviceValueTAG_s[tag]);
 }
@@ -131,9 +142,9 @@ const std::string EMSdevice::uom_to_string(uint8_t uom) {
     return read_flash_string(DeviceValueUOM_s[uom - 1]); // offset by 1 to account for NONE
 }
 
-const std::vector<EMSdevice::DeviceValue> EMSdevice::devicevalues() const {
-    return devicevalues_;
-}
+// const std::vector<EMSdevice::DeviceValue> EMSdevice::devicevalues() const {
+//     return devicevalues_;
+// }
 
 const std::string EMSdevice::brand_to_string() const {
     switch (brand_) {
