@@ -15,6 +15,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
   const [saving, setSaving] = useState<boolean>(false);
   const [data, setData] = useState<D>();
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
 
   const loadData = useCallback(async () => {
     setData(undefined);
@@ -34,9 +35,14 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
         return;
       }
       setSaving(true);
+      setRestartNeeded(false);
       setErrorMessage(undefined);
       try {
-        setData((await update(toSave)).data);
+        const response = await update(toSave);
+        setData(response.data);
+        if (response.status === 202) {
+          setRestartNeeded(true);
+        }
         enqueueSnackbar('Settings saved', { variant: 'success' });
       } catch (error: any) {
         const message = extractErrorMessage(error, 'Problem saving data');
@@ -55,5 +61,5 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     loadData();
   }, [loadData]);
 
-  return { loadData, saveData, saving, setData, data, errorMessage } as const;
+  return { loadData, saveData, saving, setData, data, errorMessage, restartNeeded } as const;
 };
