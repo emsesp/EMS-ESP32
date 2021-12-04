@@ -7,7 +7,7 @@ const ButtonRow: FC<BoxProps> = ({ children, ...rest }) => {
       sx={{
         '& button, & a, & .MuiCard-root': {
           mt: 2,
-          mx: 0.5,
+          mx: 0.6,
           '&:last-child': {
             mr: 0
           },
