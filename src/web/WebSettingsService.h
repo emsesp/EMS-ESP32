@@ -72,6 +72,7 @@ class WebSettings {
     uint8_t  led_gpio;
     bool     hide_led;
     bool     low_clock;
+    bool     disable_telnet;
     bool     notoken_api;
     bool     analog_enabled;
     uint8_t  pbutton_gpio;
@@ -96,14 +97,15 @@ class WebSettings {
 
     enum ChangeFlags : uint8_t {
 
-        NONE   = 0,
-        UART   = (1 << 0), // 1
-        SYSLOG = (1 << 1), // 2
-        ADC    = (1 << 2), // 4
-        DALLAS = (1 << 3), // 8
-        SHOWER = (1 << 4), // 16
-        LED    = (1 << 5), // 32
-        BUTTON = (1 << 6)  // 64
+        NONE    = 0,
+        UART    = (1 << 0), // 1
+        SYSLOG  = (1 << 1), // 2
+        ADC     = (1 << 2), // 4
+        DALLAS  = (1 << 3), // 8
+        SHOWER  = (1 << 4), // 16
+        LED     = (1 << 5), // 32
+        BUTTON  = (1 << 6), // 64
+        RESTART = 0xFF
 
     };
 
