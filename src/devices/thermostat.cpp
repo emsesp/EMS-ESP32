@@ -42,7 +42,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             && ((actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) || (device_id < actual_master_thermostat)))) {
         EMSESP::actual_master_thermostat(device_id);
         actual_master_thermostat = device_id;
-        reserve_telgram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
+        reserve_telegram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
 
         // common telegram handlers
         register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, MAKE_PF_CB(process_RCOutdoorTemp));
