@@ -75,10 +75,11 @@ void WebDataService::all_devices(AsyncWebServerRequest * request) {
                 obj["sn"] = emsdevice->device_type_name();
             }
 
-            obj["n"] = emsdevice->name();       // name
-            obj["d"] = emsdevice->device_id();  // deviceid
-            obj["p"] = emsdevice->product_id(); // productid
-            obj["v"] = emsdevice->version();    // version
+            obj["n"] = emsdevice->name();          // name
+            obj["d"] = emsdevice->device_id();     // deviceid
+            obj["p"] = emsdevice->product_id();    // productid
+            obj["v"] = emsdevice->version();       // version
+            obj["e"] = emsdevice->count_entries(); // number of entities (device values)
         }
     }
 
