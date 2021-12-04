@@ -257,6 +257,7 @@ void System::get_settings() {
         led_gpio_       = settings.led_gpio;
         board_profile_  = settings.board_profile;
         phy_type_       = settings.phy_type;
+        disable_telnet_ = settings.disable_telnet;
 
         rx_gpio_     = settings.rx_gpio;
         tx_gpio_     = settings.tx_gpio;
@@ -402,9 +403,9 @@ void System::button_init(bool refresh) {
 
     if (is_valid_gpio(pbutton_gpio_)) {
         if (!myPButton_.init(pbutton_gpio_, HIGH)) {
-            LOG_INFO(F("Multi-functional button not detected"));
+            LOG_DEBUG(F("Multi-functional button not detected"));
         } else {
-            LOG_INFO(F("Multi-functional button enabled"));
+            LOG_DEBUG(F("Multi-functional button enabled"));
         }
     } else {
         LOG_WARNING(F("Invalid button GPIO. Check config."));

@@ -96,6 +96,10 @@ class System {
         return restart_requested_;
     }
 
+    bool disable_telnet() {
+        return disable_telnet_;
+    }
+
     bool analog_enabled() {
         return analog_enabled_;
     }
@@ -181,6 +185,7 @@ class System {
 
     bool    analog_enabled_;
     bool    low_clock_;
+    bool    disable_telnet_;
     String  board_profile_;
     uint8_t phy_type_;
     uint8_t pbutton_gpio_;
