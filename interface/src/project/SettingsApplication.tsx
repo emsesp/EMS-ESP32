@@ -22,7 +22,7 @@ import {
 import { numberValue, extractErrorMessage, updateValue, useRest } from '../utils';
 
 import * as EMSESP from './api';
-import { Settings, BOARD_PROFILES } from './types';
+import { Settings, BOARD_PROFILES, BoardProfile } from './types';
 
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
@@ -43,14 +43,28 @@ const SettingsApplication: FC = () => {
   const updateFormValue = updateValue(setData);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
+  const [processingBoard, setProcessingBoard] = useState<boolean>(false);
 
   const updateBoardProfile = async (board_profile: string) => {
+    setProcessingBoard(true);
     try {
-      await EMSESP.updateBoardProfile({ board_profile: board_profile });
-      loadData();
+      const response = await EMSESP.getBoardProfile({ board_profile: board_profile });
+      if (data) {
+        setData({
+          ...data,
+          board_profile: board_profile,
+          led_gpio: response.data.led_gpio,
+          dallas_gpio: response.data.dallas_gpio,
+          rx_gpio: response.data.rx_gpio,
+          tx_gpio: response.data.tx_gpio,
+          pbutton_gpio: response.data.pbutton_gpio,
+          phy_type: response.data.phy_type
+        });
+      }
     } catch (error: any) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem fetching board profile'), { variant: 'error' });
     } finally {
+      setProcessingBoard(false);
     }
   };
 
@@ -105,6 +119,7 @@ const SettingsApplication: FC = () => {
           name="board_profile"
           label="Board Profile"
           value={data.board_profile}
+          disabled={processingBoard}
           variant="outlined"
           onChange={changeBoardProfile}
           margin="normal"
@@ -437,11 +452,10 @@ const SettingsApplication: FC = () => {
             />
           </Grid>
         )}
-
         {restartNeeded && (
           <MessageBox my={2} level="warning" message="EMS-ESP needs to be restarted to apply changed system settings">
             <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
-              Save&nbsp;&amp;&nbsp;Restart
+              Restart
             </Button>
           </MessageBox>
         )}
