@@ -338,6 +338,7 @@ const emsesp_data = {
       d: 23,
       p: 77,
       v: '03.03',
+      e: 5,
     },
     {
       i: 2,
@@ -348,6 +349,7 @@ const emsesp_data = {
       d: 8,
       p: 123,
       v: '06.01',
+      e: 62,
     },
     {
       i: 3,
@@ -358,6 +360,7 @@ const emsesp_data = {
       d: 9,
       p: 190,
       v: '01.03',
+      e: 0,
     },
     {
       i: 4,
@@ -368,6 +371,7 @@ const emsesp_data = {
       d: 16,
       p: 165,
       v: '04.01',
+      e: 3,
     },
   ],
   sensors: [
@@ -695,6 +699,7 @@ rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
 
 // EMS-ESP Project stuff
 rest_server.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
+  console.log('Get settings: ' + JSON.stringify(settings))
   res.json(settings)
 })
 rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
@@ -766,12 +771,12 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
   const board_profile = req.body.board_profile
 
   const data = {
-    led_gpio: 1,
-    dallas_gpio: 2,
-    rx_gpio: 3,
-    tx_gpio: 4,
-    pbutton_gpio: 5,
-    phy_type: 0,
+    led_gpio: settings.led_gpio,
+    dallas_gpio: settings.dallas_gpio,
+    rx_gpio: settings.rx_gpio,
+    tx_gpio: settings.tx_gpio,
+    pbutton_gpio: settings.pbutton_gpio,
+    phy_type: settings.phy_type,
   }
 
   if (board_profile == 'S32') {
@@ -822,27 +827,17 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.tx_gpio = 4
     data.pbutton_gpio = 34
     data.phy_type = 1
-  } else {
-    res.sendStatus(200)
   }
 
-  settings.board_profile = board_profile
-  settings.led_gpio = data.led_gpio
-  settings.dallas_gpio = data.dallas_gpio
-  settings.rx_gpio = data.rx_gpio
-  settings.tx_gpio = data.tx_gpio
-  settings.pbutton_gpio = data.pbutton_gpio
-  settings.phy_type = data.phy_type
+  console.log('boardProfile POST. Sending back, profile: ' + board_profile + ', ' + 'data: ' + JSON.stringify(data))
 
-  console.log('boardProfile POST =' + board_profile + ' with data: ' + JSON.stringify(data))
-
-  res.sendStatus(200)
+  res.send(data)
 })
 
 // EMS-ESP API specific
 const emsesp_info = {
   System: {
-    version: '3.3.0b10',
+    version: '3.x.x',
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,

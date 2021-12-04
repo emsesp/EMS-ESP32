@@ -52,6 +52,7 @@ export interface Device {
   d: number; // deviceid
   p: number; // productid
   v: string; // version
+  e: number; // number of entries
 }
 
 export interface Sensor {
@@ -140,8 +141,18 @@ export const BOARD_PROFILES: BoardProfiles = {
   OLIMEX: 'Olimex ESP32-EVB'
 };
 
+export interface BoardProfileName {
+  board_profile: string;
+}
+
 export interface BoardProfile {
   board_profile: string;
+  led_gpio: number;
+  dallas_gpio: number;
+  rx_gpio: number;
+  tx_gpio: number;
+  pbutton_gpio: number;
+  phy_type: number;
 }
 
 export interface APIcall {

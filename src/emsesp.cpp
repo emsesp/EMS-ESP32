@@ -335,7 +335,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 // generate_values_json is called in verbose mode
 void EMSESP::show_device_values(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
-        shell.printfln(F("No EMS devices detected. Try using 'scan devices' from the ems menu."));
+        shell.printfln(F("No EMS devices detected."));
         shell.println();
         return;
     }
@@ -345,10 +345,11 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
                 // print header
-                shell.printfln(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
+                shell.printfln(F("%s: %s (%d)"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str(), emsdevice->count_entries());
 
                 DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN); // use max size
                 JsonObject          json = doc.to<JsonObject>();
+
                 emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::API_VERBOSE); // verbose mode and nested
 
                 // print line
