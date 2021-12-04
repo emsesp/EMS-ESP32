@@ -357,7 +357,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     // register the device values
     register_device_values_hc(new_hc);
 
-    // now create the HA topics to send to MQTT for each sensor
+    // now create the HA climate entity for this heating circuit
     if (Mqtt::ha_enabled()) {
         publish_ha_config_hc(new_hc);
     }
@@ -381,7 +381,8 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     return heating_circuits_.back(); // even after sorting, this should still point back to the newly created HC
 }
 
-// publish config topic for HA MQTT Discovery for each of the heating circuit
+// publish config topic for HA MQTT Discovery for a heating circuit
+// using the climate type
 // e.g. homeassistant/climate/ems-esp/thermostat_hc1/config
 void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc) {
     uint8_t                                        hc_num = hc->hc_num();

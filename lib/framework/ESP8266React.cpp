@@ -42,11 +42,6 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
             });
         }
     });
-
-    // only added for local testing (CORS)
-    // DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Accept, Content-Type, Authorization");
-    // DefaultHeaders::Instance().addHeader("Access-Control-Allow-Credentials", "true");
-    // DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
 }
 
 void ESP8266React::begin() {
