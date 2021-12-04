@@ -53,6 +53,38 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
+    if (strcmp(command, "2thermostats") == 0) {
+        EMSESP::logger().info(F("Testing with multiple thermostats..."));
+
+        add_device(0x08, 123); // GB072
+        add_device(0x10, 158); // RC310
+        add_device(0x18, 157); // Bosch CR100
+
+        // Boiler -> Me, UBAMonitorFast(0x18), telegram: 08 00 18 00 00 02 5A 73 3D 0A 10 65 40 02 1A 80 00 01 E1 01 76 0E 3D 48 00 C9 44 02 00 (#data=25)
+        uart_telegram({0x08, 0x00, 0x18, 0x00, 0x00, 0x02, 0x5A, 0x73, 0x3D, 0x0A, 0x10, 0x65, 0x40, 0x02, 0x1A,
+                       0x80, 0x00, 0x01, 0xE1, 0x01, 0x76, 0x0E, 0x3D, 0x48, 0x00, 0xC9, 0x44, 0x02, 0x00});
+
+        // Boiler -> Thermostat, UBAParameterWW(0x33), telegram: 08 97 33 00 23 24 (#data=2)
+        uart_telegram({0x08, 0x90, 0x33, 0x00, 0x23, 0x24});
+
+        // Boiler -> Me, UBAParameterWW(0x33), telegram: 08 0B 33 00 08 FF 34 FB 00 28 00 00 46 00 FF FF 00 (#data=13)
+        uart_telegram({0x08, 0x0B, 0x33, 0x00, 0x08, 0xFF, 0x34, 0xFB, 0x00, 0x28, 0x00, 0x00, 0x46, 0x00, 0xFF, 0xFF, 0x00});
+
+        // Thermostat 0x2A5 for HC1
+        uart_telegram({0x10, 00, 0xFF, 00, 01,   0xA5, 0x80, 00, 01, 0x30, 0x28, 00, 0x30, 0x28, 01, 0x54,
+                       03,   03, 01,   01, 0x54, 02,   0xA8, 00, 00, 0x11, 01,   03, 0xFF, 0xFF, 00});
+
+        // RC300WWmode2(0x31D), data: 00 00 09 07
+        uart_telegram({0x10, 00, 0xFF, 00, 02, 0x1D, 00, 00, 0x09, 0x07});
+
+        // 2nd thermostat
+        // Thermostat RCPLUSStatusMessage_HC2(0x01A6)
+        uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA6, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
+                       0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
+
+        return true;
+    }
+
     if (strcmp(command, "310") == 0) {
         EMSESP::logger().info(F("Adding a GB072/RC310 combo..."));
 
@@ -349,6 +381,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("show");
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
+    }
+
+    if (command == "2thermostats") {
+        shell.printfln(F("Testing multiple thermostats..."));
+        run_test("2thermostats");
+        shell.invoke_command("show");
+        shell.invoke_command("show devices");
     }
 
     if (command == "web") {
