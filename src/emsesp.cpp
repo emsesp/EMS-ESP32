@@ -132,6 +132,25 @@ uint8_t EMSESP::count_devices(const uint8_t device_type) {
     return count;
 }
 
+// returns the index of a device if there are more of the same type
+// or 0 if there is only one
+uint8_t EMSESP::device_index(const uint8_t device_type, const uint8_t unique_id) {
+    if (count_devices(device_type) <= 1) {
+        return 0; // none or only 1 device exists
+    }
+    uint8_t index = 1;
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice->device_type() == device_type) {
+            // did we find it?
+            if (emsdevice->unique_id() == unique_id) {
+                return index;
+            }
+            index++;
+        }
+    }
+    return 0; // didn't find it
+}
+
 // scans for new devices
 void EMSESP::scan_devices() {
     EMSESP::clear_all_devices();
@@ -1273,7 +1292,7 @@ void EMSESP::start() {
     }
 #endif
 
-    esp8266React.begin(); // loads system settings (network, mqtt, etc)
+    esp8266React.begin(); // loads core system services settings (network, mqtt, ap, ntp etc)
 
     system_.check_upgrade(); // do any system upgrades
 
@@ -1282,15 +1301,17 @@ void EMSESP::start() {
 #include "device_library.h"
     };
 
-    console_.start(); // telnet and serial console
+    // load EMS-ESP Application settings and store some of the settings locally for future reference
+    webSettingsService.begin();
+    system_.get_settings();
 
-    webSettingsService.begin(); // load EMS-ESP specific settings, like GPIO configurations
-    mqtt_.start();              // mqtt init
-    system_.start(heap_start);  // starts commands, led, adc, button, network, syslog & uart
-    shower_.start();            // initialize shower timer and shower alert
-    dallassensor_.start();      // dallas external sensors
-    webServer.begin();          // start web server
-    webLogService.start();      // start web log service
+    console_.start(system_.disable_telnet()); // telnet and serial console
+    mqtt_.start();                            // mqtt init
+    system_.start(heap_start);                // starts commands, led, adc, button, network, syslog & uart
+    shower_.start();                          // initialize shower timer and shower alert
+    dallassensor_.start();                    // dallas external sensors
+    webServer.begin();                        // start web server
+    webLogService.start();                    // start web log service
 
     emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
 

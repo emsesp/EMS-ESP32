@@ -3,6 +3,10 @@ import { AXIOS, AXIOS_API, AXIOS_BIN } from '../api/endpoints';
 
 import { BoardProfile, APIcall, Settings, Status, Data, DeviceData, DeviceID, WriteValue, WriteSensor } from './types';
 
+export function restart(): AxiosPromise<void> {
+  return AXIOS.post('/restart');
+}
+
 export function readSettings(): AxiosPromise<Settings> {
   return AXIOS.get('/settings');
 }

@@ -318,6 +318,7 @@ settings = {
   hide_led: false,
   notoken_api: false,
   low_clock: false,
+  disable_telnet: false,
   analog_enabled: false,
   pbutton_gpio: 0,
   board_profile: 'S32',
@@ -331,6 +332,7 @@ const emsesp_data = {
     {
       i: 1,
       t: 'Thermostat',
+      sn: 'Thermostat1',
       b: '',
       n: 'RC20/Moduline 300',
       d: 23,
@@ -340,6 +342,7 @@ const emsesp_data = {
     {
       i: 2,
       t: 'Boiler',
+      sn: 'Boiler',
       b: 'Nefit',
       n: 'GBx72/Trendline/Cerapur/Greenstar Si/27i',
       d: 8,
@@ -349,11 +352,22 @@ const emsesp_data = {
     {
       i: 3,
       t: 'Controller',
+      sn: 'Controller',
       b: '',
       n: 'BC10',
       d: 9,
       p: 190,
       v: '01.03',
+    },
+    {
+      i: 4,
+      t: 'Thermostat',
+      sn: 'Thermostat2',
+      b: 'Buderus',
+      n: 'RC100/Moduline 1000/1010',
+      d: 16,
+      p: 165,
+      v: '04.01',
     },
   ],
   sensors: [
@@ -534,6 +548,31 @@ const emsesp_devicedata_3 = {
   data: [],
 }
 
+const emsesp_devicedata_4 = {
+  id: 4,
+  type: 'Thermostat',
+  data: [
+    {
+      v: 16,
+      u: 1,
+      n: 'hc2 selected room temperature',
+      c: 'hc2/seltemp',
+    },
+    {
+      v: 18.6,
+      u: 1,
+      n: 'hc2 current room temperature',
+      c: '',
+    },
+    {
+      v: 'off',
+      u: 0,
+      n: 'hc2 mode',
+      c: 'hc2/mode',
+    },
+  ],
+}
+
 // LOG
 rest_server.get(FETCH_LOG_ENDPOINT, (req, res) => {
   const encoded = msgpack.encode(fetch_log)
@@ -661,7 +700,8 @@ rest_server.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
   settings = req.body
   console.log(JSON.stringify(settings))
-  res.json(settings)
+  res.status(202).json(settings)
+  // res.status(200).json(settings)
 })
 rest_server.get(EMSESP_DATA_ENDPOINT, (req, res) => {
   res.json(emsesp_data)
@@ -686,6 +726,11 @@ rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
   }
   if (id === 3) {
     const encoded = msgpack.encode(emsesp_devicedata_3)
+    res.write(encoded, 'binary')
+    res.end(null, 'binary')
+  }
+  if (id === 4) {
+    const encoded = msgpack.encode(emsesp_devicedata_4)
     res.write(encoded, 'binary')
     res.end(null, 'binary')
   }

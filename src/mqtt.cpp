@@ -303,12 +303,12 @@ void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t devic
         return;
     }
 
-    shell.print(F(" Subscribed MQTT topics: "));
-    for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-        if (mqtt_subfunction.device_type_ == device_type) {
-            shell.printf(F("%s "), mqtt_subfunction.topic_.c_str());
-        }
-    }
+    // shell.print(F(" Subscribed MQTT topics: "));
+    // for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
+    //     if (mqtt_subfunction.device_type_ == device_type) {
+    //         shell.printf(F("%s "), mqtt_subfunction.topic_.c_str());
+    //     }
+    // }
     shell.println();
 }
 

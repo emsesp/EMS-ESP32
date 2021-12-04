@@ -59,16 +59,26 @@ void WebDataService::all_devices(AsyncWebServerRequest * request) {
     JsonObject          root     = response->getRoot();
 
     JsonArray devices = root.createNestedArray("devices");
-    for (const auto & emsdevice : EMSESP::emsdevices) {
+    for (auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice) {
             JsonObject obj = devices.createNestedObject();
             obj["i"]       = emsdevice->unique_id();        // id
             obj["t"]       = emsdevice->device_type_name(); // type
             obj["b"]       = emsdevice->brand_to_string();  // brand
-            obj["n"]       = emsdevice->name();             // name
-            obj["d"]       = emsdevice->device_id();        // deviceid
-            obj["p"]       = emsdevice->product_id();       // productid
-            obj["v"]       = emsdevice->version();          // version
+
+            // shortname - we prefix the count to make it unique
+            uint8_t device_index = EMSESP::device_index(emsdevice->device_type(), emsdevice->unique_id());
+            if (device_index) {
+                char s[10];
+                obj["sn"] = emsdevice->device_type_name() + Helpers::smallitoa(s, device_index);
+            } else {
+                obj["sn"] = emsdevice->device_type_name();
+            }
+
+            obj["n"] = emsdevice->name();       // name
+            obj["d"] = emsdevice->device_id();  // deviceid
+            obj["p"] = emsdevice->product_id(); // productid
+            obj["v"] = emsdevice->version();    // version
         }
     }
 

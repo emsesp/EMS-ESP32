@@ -11,6 +11,7 @@ export interface Settings {
   shower_alert: boolean;
   rx_gpio: number;
   tx_gpio: number;
+  disable_telnet: boolean;
   phy_type: number;
   dallas_gpio: number;
   dallas_parasite: boolean;
@@ -45,6 +46,7 @@ export interface Status {
 export interface Device {
   i: number; // id
   t: string; // type
+  sn: string; // shortname
   b: string; // brand
   n: string; // name
   d: number; // deviceid

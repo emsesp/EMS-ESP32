@@ -91,7 +91,7 @@ const SystemStatusForm: FC = () => {
   const renderRestartDialog = () => (
     <Dialog open={confirmRestart} onClose={() => setConfirmRestart(false)}>
       <DialogTitle>Confirm Restart</DialogTitle>
-      <DialogContent dividers>Are you sure you want to restart the device?</DialogContent>
+      <DialogContent dividers>Are you sure you want to restart EMS-ESP?</DialogContent>
       <DialogActions>
         <Button variant="outlined" onClick={() => setConfirmRestart(false)} color="secondary">
           Cancel

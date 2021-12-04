@@ -56,6 +56,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["led_gpio"]             = settings.led_gpio;
     root["hide_led"]             = settings.hide_led;
     root["low_clock"]            = settings.low_clock;
+    root["disable_telnet"]       = settings.disable_telnet;
     root["notoken_api"]          = settings.notoken_api;
     root["analog_enabled"]       = settings.analog_enabled;
     root["pbutton_gpio"]         = settings.pbutton_gpio;
@@ -135,6 +136,10 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.syslog_mark_interval = root["syslog_mark_interval"] | EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL;
     check_flag(prev, settings.syslog_mark_interval, ChangeFlags::SYSLOG);
 
+    prev                 = settings.syslog_port;
+    settings.syslog_port = root["syslog_port"] | EMSESP_DEFAULT_SYSLOG_PORT;
+    check_flag(prev, settings.syslog_port, ChangeFlags::SYSLOG);
+
 #ifndef EMSESP_STANDALONE
     String old_syslog_host = settings.syslog_host;
     settings.syslog_host   = root["syslog_host"] | EMSESP_DEFAULT_SYSLOG_HOST;
@@ -142,10 +147,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
         add_flags(ChangeFlags::SYSLOG);
     }
 #endif
-
-    prev                 = settings.syslog_port;
-    settings.syslog_port = root["syslog_port"] | EMSESP_DEFAULT_SYSLOG_PORT;
-    check_flag(prev, settings.syslog_port, ChangeFlags::SYSLOG);
 
     // adc
     prev                    = settings.analog_enabled;
@@ -181,15 +182,29 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.hide_led = root["hide_led"] | EMSESP_DEFAULT_HIDE_LED;
     check_flag(prev, settings.hide_led, ChangeFlags::LED);
 
-    //
-    // next ones are settings that don't need any follow-up actions
-    //
+    // these need reboots to be applied...
 
-    // these need reboots to be applied
-    settings.ems_bus_id        = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
+    prev                    = settings.disable_telnet;
+    settings.disable_telnet = root["disable_telnet"] | false;
+    check_flag(prev, settings.disable_telnet, ChangeFlags::RESTART);
+
+    prev                = settings.ems_bus_id;
+    settings.ems_bus_id = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
+    check_flag(prev, settings.ems_bus_id, ChangeFlags::RESTART);
+
+    prev               = settings.low_clock;
+    settings.low_clock = root["low_clock"] | false;
+    check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
+
+    prev                       = settings.master_thermostat;
     settings.master_thermostat = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
-    settings.low_clock         = root["low_clock"] | false;
-    settings.phy_type          = root["phy_type"] | default_phy_type; // use whatever came from the board profile
+    check_flag(prev, settings.master_thermostat, ChangeFlags::RESTART);
+
+    prev              = settings.phy_type;
+    settings.phy_type = root["phy_type"] | default_phy_type; // use whatever came from the board profile
+    check_flag(prev, settings.phy_type, ChangeFlags::RESTART);
+
+    // without checks...
 
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
@@ -218,6 +233,10 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
         settings.sensor[i].name = root[buf] | EMSESP_DEFAULT_SENSOR_NAME;
         snprintf(buf, sizeof(buf), "sensor_offset%d", i);
         settings.sensor[i].offset = root[buf] | 0;
+    }
+
+    if (flags_ == WebSettings::ChangeFlags::RESTART) {
+        return StateUpdateResult::CHANGED_RESTART;
     }
 
     return StateUpdateResult::CHANGED;

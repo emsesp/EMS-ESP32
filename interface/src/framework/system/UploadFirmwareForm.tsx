@@ -9,7 +9,7 @@ const UploadFirmwareForm: FC = () => {
   return (
     <SectionContent title="Upload Firmware" titleGutter>
       <MessageBox
-        message="Upload a new firmware (.bin) file below to replace the existing firmware."
+        message="Upload a new firmware (.bin) file below to replace the existing firmware"
         level="warning"
         my={2}
       />

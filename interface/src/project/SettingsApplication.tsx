@@ -4,12 +4,21 @@ import { ValidateFieldsError } from 'async-validator';
 import { useSnackbar } from 'notistack';
 
 import { Box, Button, Checkbox, MenuItem, Grid, Typography } from '@mui/material';
+
 import SaveIcon from '@mui/icons-material/Save';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
 import { validate } from '../validators';
 import { createSettingsValidator } from './validators';
 
-import { SectionContent, FormLoader, BlockFormControlLabel, ValidatedTextField, ButtonRow } from '../components';
+import {
+  SectionContent,
+  FormLoader,
+  BlockFormControlLabel,
+  ValidatedTextField,
+  ButtonRow,
+  MessageBox
+} from '../components';
 import { numberValue, extractErrorMessage, updateValue, useRest } from '../utils';
 
 import * as EMSESP from './api';
@@ -24,7 +33,7 @@ export function boardProfileSelectItems() {
 }
 
 const SettingsApplication: FC = () => {
-  const { loadData, saveData, saving, setData, data, errorMessage } = useRest<Settings>({
+  const { loadData, saveData, saving, setData, data, errorMessage, restartNeeded } = useRest<Settings>({
     read: EMSESP.readSettings,
     update: EMSESP.updateSettings
   });
@@ -72,23 +81,30 @@ const SettingsApplication: FC = () => {
       }
     };
 
+    const restart = async () => {
+      validateAndSubmit();
+      try {
+        await EMSESP.restart();
+        enqueueSnackbar('Device is restarting', { variant: 'info' });
+      } catch (error: any) {
+        enqueueSnackbar(extractErrorMessage(error, 'Problem restarting device'), { variant: 'error' });
+      }
+    };
+
     return (
       <>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           Board Profile
         </Typography>
-
         <Box color="warning.main" p={0} mt={0} mb={0}>
           <Typography variant="body2">
             <i>Select a pre-configured board profile or use "Custom" to customize your own hardware settings</i>
           </Typography>
         </Box>
-
         <ValidatedTextField
           name="board_profile"
           label="Board Profile"
           value={data.board_profile}
-          fullWidth
           variant="outlined"
           onChange={changeBoardProfile}
           margin="normal"
@@ -99,7 +115,6 @@ const SettingsApplication: FC = () => {
             Custom...
           </MenuItem>
         </ValidatedTextField>
-
         {data.board_profile === 'CUSTOM' && (
           <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
             <Grid item xs={4}>
@@ -191,13 +206,11 @@ const SettingsApplication: FC = () => {
             </Grid>
           </Grid>
         )}
-
         <Typography variant="h6" color="primary">
           EMS Bus
         </Typography>
-
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-          <Grid item xs={5}>
+          <Grid item xs={4}>
             <ValidatedTextField
               name="tx_mode"
               label="Tx Mode"
@@ -216,7 +229,7 @@ const SettingsApplication: FC = () => {
               <MenuItem value={4}>Hardware</MenuItem>
             </ValidatedTextField>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={4}>
             <ValidatedTextField
               name="ems_bus_id"
               label="Bus ID"
@@ -236,11 +249,9 @@ const SettingsApplication: FC = () => {
             </ValidatedTextField>
           </Grid>
         </Grid>
-
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           General Options
         </Typography>
-
         {data.led_gpio !== 0 && (
           <BlockFormControlLabel
             control={<Checkbox checked={data.hide_led} onChange={updateFormValue} name="hide_led" />}
@@ -248,7 +259,11 @@ const SettingsApplication: FC = () => {
             disabled={saving}
           />
         )}
-
+        <BlockFormControlLabel
+          control={<Checkbox checked={data.disable_telnet} onChange={updateFormValue} name="disable_telnet" />}
+          label="Disable Telnet Console"
+          disabled={saving}
+        />
         {data.dallas_gpio !== 0 && (
           <BlockFormControlLabel
             control={<Checkbox checked={data.dallas_parasite} onChange={updateFormValue} name="dallas_parasite" />}
@@ -256,25 +271,21 @@ const SettingsApplication: FC = () => {
             disabled={saving}
           />
         )}
-
         <BlockFormControlLabel
           control={<Checkbox checked={data.analog_enabled} onChange={updateFormValue} name="analog_enabled" />}
           label="Enable ADC"
           disabled={saving}
         />
-
         <BlockFormControlLabel
           control={<Checkbox checked={data.low_clock} onChange={updateFormValue} name="low_clock" />}
           label="Run at a lower CPU clock speed"
           disabled={saving}
         />
-
         <BlockFormControlLabel
           control={<Checkbox checked={data.notoken_api} onChange={updateFormValue} name="notoken_api" />}
           label="Bypass Access Token authorization on API calls"
           disabled={saving}
         />
-
         <Grid container spacing={0} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <BlockFormControlLabel
             control={<Checkbox checked={data.shower_timer} onChange={updateFormValue} name="shower_timer" />}
@@ -287,11 +298,9 @@ const SettingsApplication: FC = () => {
             disabled={saving}
           />
         </Grid>
-
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           Formatting Options
         </Typography>
-
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <Grid item xs={4}>
             <ValidatedTextField
@@ -344,11 +353,9 @@ const SettingsApplication: FC = () => {
             </ValidatedTextField>
           </Grid>
         </Grid>
-
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           Syslog
         </Typography>
-
         <BlockFormControlLabel
           control={
             <Checkbox
@@ -360,7 +367,6 @@ const SettingsApplication: FC = () => {
           }
           label="Enable Syslog"
         />
-
         {data.syslog_enabled && (
           <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
             <Grid item xs={5}>
@@ -432,18 +438,27 @@ const SettingsApplication: FC = () => {
           </Grid>
         )}
 
-        <ButtonRow>
-          <Button
-            startIcon={<SaveIcon />}
-            disabled={saving}
-            variant="outlined"
-            color="primary"
-            type="submit"
-            onClick={validateAndSubmit}
-          >
-            Save
-          </Button>
-        </ButtonRow>
+        {restartNeeded && (
+          <MessageBox my={2} level="warning" message="EMS-ESP needs to be restarted to apply changed system settings">
+            <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
+              Save&nbsp;&amp;&nbsp;Restart
+            </Button>
+          </MessageBox>
+        )}
+        {!restartNeeded && (
+          <ButtonRow>
+            <Button
+              startIcon={<SaveIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={validateAndSubmit}
+            >
+              Save
+            </Button>
+          </ButtonRow>
+        )}
       </>
     );
   };

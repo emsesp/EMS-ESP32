@@ -120,7 +120,7 @@ const SecuritySettingsForm: FC = () => {
           </TableFooter>
         </Table>
         {noAdminConfigured() && (
-          <MessageBox level="warning" message="You must have at least one admin user configured." my={2} />
+          <MessageBox level="warning" message="You must have at least one admin user configured" my={2} />
         )}
         <ButtonRow>
           <Button

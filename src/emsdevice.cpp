@@ -424,7 +424,7 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) {
         return;
     }
 
-    shell.printf(F(" This %s will respond to telegram type IDs: "), device_type_name().c_str());
+    shell.printf(F(" This %s will listen to telegram type IDs: "), device_type_name().c_str());
     for (const auto & tf : telegram_functions_) {
         shell.printf(F("0x%02X "), tf.telegram_type_id_);
     }
@@ -618,6 +618,7 @@ const std::string EMSdevice::get_value_uom(const char * key) {
 void EMSdevice::generate_values_web(JsonObject & output) {
     output["id"]   = device_type();
     output["type"] = device_type_name();
+
     JsonArray data = output.createNestedArray("data");
 
     for (const auto & dv : devicevalues_) {
