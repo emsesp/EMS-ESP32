@@ -3,7 +3,6 @@ import { FC, Fragment, useState, useContext } from 'react';
 import {
   Button,
   Table,
-  TableContainer,
   TableBody,
   TableHead,
   TableRow,
@@ -14,7 +13,8 @@ import {
   DialogContent,
   DialogActions,
   MenuItem,
-  InputAdornment
+  InputAdornment,
+  Grid
 } from '@mui/material';
 
 import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
@@ -74,19 +74,6 @@ const StyledTooltip = styled(({ className, ...props }: TooltipProps) => (
   [`& .${tooltipClasses.tooltip}`]: {
     backgroundColor: theme.palette.secondary.dark,
     color: 'white',
-    fontSize: 11,
-    border: '1px solid #dadde9'
-  }
-}));
-
-const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.secondary.dark,
-    color: 'white',
-    maxWidth: 220,
-    fontSize: theme.typography.pxToRem(12),
     border: '1px solid #dadde9'
   }
 }));
@@ -101,10 +88,12 @@ const DashboardData: FC = () => {
   const [deviceData, setDeviceData] = useState<DeviceData>();
   const [deviceValue, setDeviceValue] = useState<DeviceValue>();
   const [sensor, setSensor] = useState<Sensor>();
+  const [selectedDevice, setSelectedDevice] = useState<number>(0);
 
-  const fetchDeviceData = async (device: number) => {
+  const fetchDeviceData = async (device_id: number) => {
+    setSelectedDevice(device_id);
     try {
-      setDeviceData((await EMSESP.readDeviceData({ id: device })).data);
+      setDeviceData((await EMSESP.readDeviceData({ id: device_id })).data);
     } catch (error: any) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem fetching device data'), { variant: 'error' });
     }
@@ -263,29 +252,35 @@ const DashboardData: FC = () => {
           <DialogTitle>Edit Sensor</DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
-              <Typography variant="body2">Changing Sensor #{sensor.n}</Typography>
+              <Typography variant="body2">Sensor #{sensor.n}</Typography>
             </Box>
-            <ValidatedTextField
-              name="i"
-              label="ID / Name"
-              value={sensor.i}
-              autoFocus
-              sx={{ width: '30ch' }}
-              onChange={updateValue(setSensor)}
-            />
-            <ValidatedTextField
-              name="o"
-              label="Offset"
-              value={numberValue(sensor.o)}
-              sx={{ width: '12ch' }}
-              type="number"
-              variant="outlined"
-              onChange={updateValue(setSensor)}
-              inputProps={{ min: '-5', max: '5', step: '0.1' }}
-              InputProps={{
-                startAdornment: <InputAdornment position="start">°C</InputAdornment>
-              }}
-            />
+            <Grid container spacing={1}>
+              <Grid item>
+                <ValidatedTextField
+                  name="i"
+                  label="ID / Name"
+                  value={sensor.i}
+                  autoFocus
+                  sx={{ width: '30ch' }}
+                  onChange={updateValue(setSensor)}
+                />
+              </Grid>
+              <Grid item>
+                <ValidatedTextField
+                  name="o"
+                  label="Offset"
+                  value={numberValue(sensor.o)}
+                  sx={{ width: '12ch' }}
+                  type="number"
+                  variant="outlined"
+                  onChange={updateValue(setSensor)}
+                  inputProps={{ min: '-5', max: '5', step: '0.1' }}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">°C</InputAdornment>
+                  }}
+                />
+              </Grid>
+            </Grid>
           </DialogContent>
           <DialogActions>
             <Button variant="outlined" onClick={() => setSensor(undefined)} color="secondary">
@@ -320,41 +315,46 @@ const DashboardData: FC = () => {
     }
 
     return (
-      <TableContainer>
+      <>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           EMS Devices
         </Typography>
         {!noDevices() && (
-          <Table size="small">
-            <TableBody>
-              {data.devices.sort(compareDevices).map((device) => (
-                <TableRow hover key={device.i} onClick={() => fetchDeviceData(device.i)}>
-                  <TableCell>
-                    <HtmlTooltip
-                      title={
-                        <Fragment>
-                          <Typography color="inherit">
-                            <b>Device Details</b>
-                          </Typography>
-                          {'DeviceID: 0x' + ('00' + device.d.toString(16).toUpperCase()).slice(-2)}
-                          <br />
-                          {'ProductID: ' + device.p}
-                          <br />
-                          {'Version: ' + device.v}
-                        </Fragment>
-                      }
-                      placement="left-end"
-                    >
-                      <Button startIcon={<ListIcon />} size="small" variant="outlined" color="inherit">
-                        {device.t}
-                      </Button>
-                    </HtmlTooltip>
-                  </TableCell>
-                  <TableCell align="right">{device.b + ' ' + device.n} </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <ButtonRow>
+            {data.devices.sort(compareDevices).map((device) => (
+              <StyledTooltip
+                title={
+                  <Fragment>
+                    <Typography variant="h6" color="primary">
+                      Device Details
+                    </Typography>
+                    {'Type: ' + device.t}
+                    <br />
+                    {'Name: ' + device.n}
+                    <br />
+                    {'Brand: ' + device.b}
+                    <br />
+                    {'DeviceID: 0x' + ('00' + device.d.toString(16).toUpperCase()).slice(-2)}
+                    <br />
+                    {'ProductID: ' + device.p}
+                    <br />
+                    {'Version: ' + device.v}
+                  </Fragment>
+                }
+                placement="left-end"
+              >
+                <Button
+                  startIcon={<ListIcon />}
+                  size="small"
+                  variant={selectedDevice === device.i ? 'contained' : 'outlined'}
+                  color={selectedDevice === device.i ? 'secondary' : 'inherit'}
+                  onClick={() => fetchDeviceData(device.i)}
+                >
+                  {device.sn}
+                </Button>
+              </StyledTooltip>
+            ))}
+          </ButtonRow>
         )}
         {noDevices() && (
           <MessageBox
@@ -363,7 +363,7 @@ const DashboardData: FC = () => {
             message="No EMS devices found. Check the connections and for possible Rx and Tx errors."
           />
         )}
-      </TableContainer>
+      </>
     );
   };
 
@@ -398,7 +398,7 @@ const DashboardData: FC = () => {
     }
 
     return (
-      <TableContainer>
+      <>
         <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
           {deviceData.type}&nbsp;Data{' '}
         </Typography>
@@ -406,7 +406,7 @@ const DashboardData: FC = () => {
           <TableHead>
             <TableRow>
               <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
-              <StyledTableCell align="left">Entity Name</StyledTableCell>
+              <StyledTableCell align="left">Entity</StyledTableCell>
               <StyledTableCell align="right">Value</StyledTableCell>
             </TableRow>
           </TableHead>
@@ -430,7 +430,7 @@ const DashboardData: FC = () => {
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
+      </>
     );
   };
 
@@ -445,38 +445,36 @@ const DashboardData: FC = () => {
       <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
         Dallas Sensors
       </Typography>
-      <TableContainer>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
-              <StyledTableCell>Dallas Sensor #</StyledTableCell>
-              <StyledTableCell align="left">ID / Name</StyledTableCell>
-              <StyledTableCell align="right">Temperature</StyledTableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data?.sensors.map((sensorData) => (
-              <StyledTableRow key={sensorData.n} onClick={() => updateSensor(sensorData)}>
-                <StyledTableCell padding="checkbox">
-                  {me.admin && (
-                    <StyledTooltip title="edit" placement="left-end">
-                      <IconButton edge="start" size="small" aria-label="Edit">
-                        <EditIcon color="primary" fontSize="small" />
-                      </IconButton>
-                    </StyledTooltip>
-                  )}
-                </StyledTableCell>
-                <StyledTableCell component="th" scope="row">
-                  {sensorData.n}
-                </StyledTableCell>
-                <StyledTableCell align="left">{sensorData.i}</StyledTableCell>
-                <StyledTableCell align="right">{formatValue(sensorData.t, DeviceValueUOM.DEGREES)}</StyledTableCell>
-              </StyledTableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Table size="small">
+        <TableHead>
+          <TableRow>
+            <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
+            <StyledTableCell>Dallas Sensor #</StyledTableCell>
+            <StyledTableCell align="left">ID / Name</StyledTableCell>
+            <StyledTableCell align="right">Temperature</StyledTableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data?.sensors.map((sensorData) => (
+            <StyledTableRow key={sensorData.n} onClick={() => updateSensor(sensorData)}>
+              <StyledTableCell padding="checkbox">
+                {me.admin && (
+                  <StyledTooltip title="edit" placement="left-end">
+                    <IconButton edge="start" size="small" aria-label="Edit">
+                      <EditIcon color="primary" fontSize="small" />
+                    </IconButton>
+                  </StyledTooltip>
+                )}
+              </StyledTableCell>
+              <StyledTableCell component="th" scope="row">
+                {sensorData.n}
+              </StyledTableCell>
+              <StyledTableCell align="left">{sensorData.i}</StyledTableCell>
+              <StyledTableCell align="right">{formatValue(sensorData.t, DeviceValueUOM.DEGREES)}</StyledTableCell>
+            </StyledTableRow>
+          ))}
+        </TableBody>
+      </Table>
     </>
   );
 
@@ -485,26 +483,24 @@ const DashboardData: FC = () => {
       <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
         Analog Sensors
       </Typography>
-      <TableContainer>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell style={{ width: 18 }}></StyledTableCell>
-              <StyledTableCell>Sensor Type</StyledTableCell>
-              <StyledTableCell align="right">Value</StyledTableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <StyledTableRow>
-              <StyledTableCell>&nbsp;&nbsp;</StyledTableCell>
-              <StyledTableCell component="th" scope="row">
-                Analog Input
-              </StyledTableCell>
-              <StyledTableCell align="right">{formatValue(data?.analog, DeviceValueUOM.MV)}</StyledTableCell>
-            </StyledTableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Table size="small">
+        <TableHead>
+          <TableRow>
+            <StyledTableCell style={{ width: 18 }}></StyledTableCell>
+            <StyledTableCell>Sensor Type</StyledTableCell>
+            <StyledTableCell align="right">Value</StyledTableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <StyledTableRow>
+            <StyledTableCell>&nbsp;&nbsp;</StyledTableCell>
+            <StyledTableCell component="th" scope="row">
+              Analog Input
+            </StyledTableCell>
+            <StyledTableCell align="right">{formatValue(data?.analog, DeviceValueUOM.MV)}</StyledTableCell>
+          </StyledTableRow>
+        </TableBody>
+      </Table>
     </>
   );
 
