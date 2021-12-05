@@ -90,7 +90,7 @@ const SystemStatusForm: FC = () => {
 
   const renderRestartDialog = () => (
     <Dialog open={confirmRestart} onClose={() => setConfirmRestart(false)}>
-      <DialogTitle>Confirm Restart</DialogTitle>
+      <DialogTitle>Restart</DialogTitle>
       <DialogContent dividers>Are you sure you want to restart EMS-ESP?</DialogContent>
       <DialogActions>
         <Button variant="outlined" onClick={() => setConfirmRestart(false)} color="secondary">
@@ -182,7 +182,7 @@ const SystemStatusForm: FC = () => {
 
   const renderFactoryResetDialog = () => (
     <Dialog open={confirmFactoryReset} onClose={() => setConfirmFactoryReset(false)}>
-      <DialogTitle>Confirm Factory Reset</DialogTitle>
+      <DialogTitle>Factory Reset</DialogTitle>
       <DialogContent dividers>Are you sure you want to reset the device to its factory defaults?</DialogContent>
       <DialogActions>
         <Button variant="outlined" onClick={() => setConfirmFactoryReset(false)} color="secondary">

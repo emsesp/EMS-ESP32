@@ -210,7 +210,7 @@ const SystemLog: FC = () => {
     return (
       <>
         <Grid container spacing={3} direction="row" justifyContent="flex-start" alignItems="center">
-          <Grid item xs={2}>
+          <Grid item xs={4}>
             <ValidatedTextField
               name="level"
               label="Log Level"
@@ -229,7 +229,7 @@ const SystemLog: FC = () => {
               <MenuItem value={8}>ALL</MenuItem>
             </ValidatedTextField>
           </Grid>
-          <Grid item xs={2}>
+          <Grid item xs={3}>
             <FormLabel>Buffer size</FormLabel>
             <Slider
               value={data.max_messages}
@@ -248,13 +248,13 @@ const SystemLog: FC = () => {
               onChangeCommitted={() => sendSettings(data.max_messages, data.level)}
             />
           </Grid>
-          <Grid item xs={2}>
+          <Grid item>
             <BlockFormControlLabel
               control={<Checkbox checked={data.compact} onChange={updateFormValue} name="compact" />}
               label="Compact"
             />
           </Grid>
-          <Grid item md>
+          <Grid item>
             <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={onDownload}>
               Export
             </Button>

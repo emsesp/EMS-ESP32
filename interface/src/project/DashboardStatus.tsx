@@ -89,8 +89,8 @@ const DashboardStatus: FC = () => {
 
   const renderScanDialog = () => (
     <Dialog open={confirmScan} onClose={() => setConfirmScan(false)}>
-      <DialogTitle>Confirm Scan Devices</DialogTitle>
-      <DialogContent dividers>Are you sure you want to start a new scan on the EMS bus?</DialogContent>
+      <DialogTitle>EMS Device Scan</DialogTitle>
+      <DialogContent dividers>Are you sure you want to initiate a full device scan of the EMS bus?</DialogContent>
       <DialogActions>
         <Button variant="outlined" onClick={() => setConfirmScan(false)} color="secondary">
           Cancel
@@ -159,7 +159,7 @@ const DashboardStatus: FC = () => {
                 color="primary"
                 onClick={() => setConfirmScan(true)}
               >
-                Scan for new devices
+                Detect new devices
               </Button>
             </ButtonRow>
           </Box>
