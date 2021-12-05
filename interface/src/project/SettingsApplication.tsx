@@ -22,7 +22,7 @@ import {
 import { numberValue, extractErrorMessage, updateValue, useRest } from '../utils';
 
 import * as EMSESP from './api';
-import { Settings, BOARD_PROFILES, BoardProfile } from './types';
+import { Settings, BOARD_PROFILES } from './types';
 
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
@@ -244,7 +244,7 @@ const SettingsApplication: FC = () => {
               <MenuItem value={4}>Hardware</MenuItem>
             </ValidatedTextField>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item>
             <ValidatedTextField
               name="ems_bus_id"
               label="Bus ID"

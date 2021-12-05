@@ -42,7 +42,7 @@ const SecuritySettingsForm: FC = () => {
         <ValidatedPasswordField
           fieldErrors={fieldErrors}
           name="jwt_secret"
-          label="JWT Secret"
+          label="su Password"
           fullWidth
           variant="outlined"
           value={data.jwt_secret}
@@ -51,7 +51,7 @@ const SecuritySettingsForm: FC = () => {
         />
         <MessageBox
           level="info"
-          message="The JWT secret is used to sign authentication tokens. If you modify the JWT Secret, all users will be signed out."
+          message="The su (super user) password is used to sign authentication tokens and also enable admin privileges when in the Console."
           mt={1}
         />
         <ButtonRow>

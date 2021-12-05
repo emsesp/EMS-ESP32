@@ -165,7 +165,7 @@ const WiFiSettingsForm: FC = () => {
 
         <BlockFormControlLabel
           control={<Checkbox name="static_ip_config" checked={data.static_ip_config} onChange={updateFormValue} />}
-          label="Static IP Config?"
+          label="Use Fixed IP address"
         />
         {data.static_ip_config && (
           <>
