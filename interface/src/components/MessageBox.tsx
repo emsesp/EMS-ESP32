@@ -1,6 +1,7 @@
 import { FC } from 'react';
 
 import { Box, BoxProps, SvgIconProps, Theme, Typography, useTheme } from '@mui/material';
+
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined';
@@ -31,7 +32,8 @@ const MessageBox: FC<MessageBoxProps> = ({ level, message, sx, children, ...rest
   const theme = useTheme();
   const Icon = LEVEL_ICONS[level];
   const backgroundColor = LEVEL_BACKGROUNDS[level](theme);
-  const color = theme.palette.getContrastText(backgroundColor);
+  // const color = theme.palette.getContrastText(backgroundColor);
+  const color = 'white';
   return (
     <Box p={2} display="flex" alignItems="center" borderRadius={1} sx={{ backgroundColor, color, ...sx }} {...rest}>
       <Icon />
