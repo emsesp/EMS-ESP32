@@ -71,7 +71,7 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
             />
             <BlockFormControlLabel
               control={<Checkbox name="admin" checked={user.admin} onChange={updateFormValue} />}
-              label="Admin?"
+              label="is Admin?"
             />
           </DialogContent>
           <DialogActions>

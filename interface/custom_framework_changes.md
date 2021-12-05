@@ -27,6 +27,7 @@ These are the customized changes I made to esp8266-react Web interface for this 
 - `src/utils/useRest.ts` - changed 'Update successful' to 'Settings saved'. Added bool restartNeeded which is set when return from save is status code 201. Matches changes in the backend code, in HttpEndpoint.h and StatefulService.h
 - `src/*` changed all Button variant="contained" to variant="outlined"
 - `src/*` removed pt={2} from all ButtonRow's and added it to the ButtonRow component
+- `src/*` removed ? from labels, e.g. "Enable MQTT?" to "Enable MQTT". Also made sure each command started with a verb
 
 ## new files added in interface
 

@@ -46,7 +46,7 @@ const MqttSettingsForm: FC = () => {
       <>
         <BlockFormControlLabel
           control={<Checkbox name="enabled" checked={data.enabled} onChange={updateFormValue} />}
-          label="Enable MQTT?"
+          label="Enable MQTT"
         />
         <ValidatedTextField
           fieldErrors={fieldErrors}
