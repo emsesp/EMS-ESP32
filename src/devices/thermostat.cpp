@@ -2691,6 +2691,17 @@ void Thermostat::register_device_values() {
     case EMS_DEVICE_FLAG_RC20:
         register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         break;
+    case EMS_DEVICE_FLAG_RC30:
+        register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
+        register_device_value(TAG_THERMOSTAT_DATA, &ibaMainDisplay_, DeviceValueType::ENUM, FL_(enum_ibaMainDisplay), FL_(ibaMainDisplay), DeviceValueUOM::NONE);
+        register_device_value(TAG_THERMOSTAT_DATA, &ibaLanguage_, DeviceValueType::ENUM, FL_(enum_ibaLanguage), FL_(ibaLanguage), DeviceValueUOM::NONE);
+        register_device_value(TAG_THERMOSTAT_DATA,
+                              &ibaClockOffset_,
+                              DeviceValueType::INT,
+                              nullptr,
+                              FL_(ibaClockOffset),
+                              DeviceValueUOM::SECONDS); // offset (in sec) to clock, 0xff=-1s, 0x02=2s
+        break;
     case EMS_DEVICE_FLAG_RC30_N:
         register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         register_device_value(TAG_THERMOSTAT_DATA, &ibaMainDisplay_, DeviceValueType::ENUM, FL_(enum_ibaMainDisplay), FL_(ibaMainDisplay), DeviceValueUOM::NONE);
@@ -2939,6 +2950,9 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
         register_device_value(tag, &hc->summertemp, DeviceValueType::UINT, nullptr, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp));
         register_device_value(tag, &hc->summermode, DeviceValueType::BOOL, nullptr, FL_(summermode), DeviceValueUOM::NONE);
+        break;
+    case EMS_DEVICE_FLAG_RC30:
+        register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode3), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         break;
     case EMS_DEVICE_FLAG_RC30_N:
     case EMS_DEVICE_FLAG_RC35:
