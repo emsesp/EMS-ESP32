@@ -613,7 +613,17 @@ uint16_t TxService::read_next_tx(uint8_t offset) {
     if (telegram_last_->offset != offset) {
         return 0;
     }
-    add(Telegram::Operation::TX_READ, telegram_last_->dest, telegram_last_->type_id, telegram_last_->offset + 25, message_data, 1, 0, true);
+    
+    uint8_t add_offset = 25;                //for EMS+ telegram increase offset by 25
+    if (telegram_last_->type_id < 0x100) {  //but for EMS1.0 by 27
+        add_offset = 27;
+    }
+
+    if (UINT8_MAX - telegram_last_->offset < add_offset) {   //stop if new offset would overflow
+        return 0;
+    }
+
+    add(Telegram::Operation::TX_READ, telegram_last_->dest, telegram_last_->type_id, telegram_last_->offset + add_offset, message_data, 1, 0, true);
     return telegram_last_->type_id;
 }
 
