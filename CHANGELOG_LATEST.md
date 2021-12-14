@@ -6,7 +6,7 @@
 
 ## Fixed
 - lastcode broke MQTT JSON structure [#228]
-- overlapping while reading 0xC2 from Boiler
+- overlapping while reading sequence of EMS1.0 telegrams
 - redundant telegram readings (because of offset overflow)
 
 ## Changed
