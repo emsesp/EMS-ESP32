@@ -613,19 +613,10 @@ uint16_t TxService::read_next_tx(uint8_t offset) {
     if (telegram_last_->offset != offset) {
         return 0;
     }
-<<<<<<< Updated upstream
-
-    uint8_t add_offset;
-    if (telegram_last_->dest == 0x08 && telegram_last_->type_id == 0xC2) {  //fix for overlapping 0xC2 telegrams from Boiler. Are other telegrams also affected?
-        add_offset = 27;
-    } else {
-        add_offset = 25;
-=======
     
     uint8_t add_offset = 25;                //for EMS+ telegram increase offset by 25
     if (telegram_last_->type_id < 0x100) {  //but for EMS1.0 by 27
         add_offset = 27;
->>>>>>> Stashed changes
     }
 
     if (UINT8_MAX - telegram_last_->offset < add_offset) {   //stop if new offset would overflow
