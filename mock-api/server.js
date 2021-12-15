@@ -322,7 +322,6 @@ settings = {
   analog_enabled: false,
   pbutton_gpio: 0,
   board_profile: 'S32',
-  dallas_format: 1,
   bool_format: 1,
   enum_format: 1,
 }
@@ -375,9 +374,9 @@ const emsesp_data = {
     },
   ],
   sensors: [
-    { n: 1, i: '28-233D-9497-0C03', t: 25.7, o: 1.2 },
-    { n: 2, i: '28-243D-7437-1E3A', t: 26.1, o: 0 },
-    { n: 3, i: '28-243E-7437-1E3A', t: 27.1, o: 0 },
+    { is: '28-233D-9497-0C03', n: 'name1', t: 25.7, o: 1.2 },
+    { is: '28-243D-7437-1E3A', n: 'name2', t: 26.1, o: 0 },
+    { is: '28-243E-7437-1E3B', n: 'name3', t: 27.1, o: 0 },
   ],
   // sensors: [],
   analog: 12,
@@ -704,9 +703,9 @@ rest_server.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
 })
 rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
   settings = req.body
-  console.log(JSON.stringify(settings))
-  res.status(202).json(settings)
-  // res.status(200).json(settings)
+  console.log('Write settings: ' + JSON.stringify(settings))
+  res.status(202).json(settings) // restart needed
+  // res.status(200).json(settings); // no restart needed
 })
 rest_server.get(EMSESP_DATA_ENDPOINT, (req, res) => {
   res.json(emsesp_data)
@@ -761,8 +760,8 @@ rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
   const sensor = req.body
   console.log('Write sensor: ' + JSON.stringify(sensor))
-  objIndex = emsesp_data.sensors.findIndex((obj) => obj.n == sensor.no)
-  emsesp_data.sensors[objIndex].i = sensor.id
+  objIndex = emsesp_data.sensors.findIndex((obj) => obj.is == sensor.id_str)
+  emsesp_data.sensors[objIndex].n = sensor.name
   emsesp_data.sensors[objIndex].o = sensor.offset
   res.sendStatus(200)
 })
@@ -842,10 +841,10 @@ const emsesp_info = {
     'uptime (seconds)': 110434,
     freemem: 131,
     'reset reason': 'Software reset CPU / Software reset CPU',
-    'Dallas sensors': 1,
+    'Dallas sensors': 3,
   },
   Network: {
-    connection: 'Ethernet',
+    connection: 'Wired',
     hostname: 'ems-esp',
     MAC: 'A8:03:2A:62:64:CF',
     'IPv4 address': '192.168.1.134/255.255.255.0',

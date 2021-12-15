@@ -249,7 +249,7 @@ void EMSESPShell::add_console_commands() {
                               uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
 
                               if (!EMSESP::valid_device(device_id)) {
-                                  shell.printfln(F("Invalid device ID"));
+                                  shell.printfln(F("Invalid deviceID"));
                                   return;
                               }
 
@@ -355,7 +355,7 @@ void EMSESPShell::add_console_commands() {
                               if (watch_id > 0x80) {
                                   shell.printfln(F("Filtering only telegrams that match a telegram type of 0x%02X"), watch_id);
                               } else if (watch_id != WATCH_ID_NONE) {
-                                  shell.printfln(F("Filtering only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
+                                  shell.printfln(F("Filtering only telegrams that match a deviceID or telegram type of 0x%02X"), watch_id);
                               }
                           });
 
@@ -491,6 +491,7 @@ void Console::enter_custom_context(Shell & shell, unsigned int context) {
 // each custom context has the common commands like log, help, exit, su etc
 void Console::load_standard_commands(unsigned int context) {
 #if defined(EMSESP_DEBUG)
+    // create commands test and t
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
                                        flash_string_vector{F("test")},
@@ -502,9 +503,6 @@ void Console::load_standard_commands(unsigned int context) {
                                                Test::run_test(shell, arguments.front());
                                            }
                                        });
-#endif
-
-#if defined(EMSESP_STANDALONE)
     EMSESPShell::commands->add_command(context, CommandFlags::USER, flash_string_vector{F("t")}, [](Shell & shell, const std::vector<std::string> & arguments) {
         Test::run_test(shell, "default");
     });
@@ -719,47 +717,6 @@ void Console::load_system_commands(unsigned int context) {
                                                                         });
                                                }
                                            });
-                                       });
-
-    EMSESPShell::commands->add_command(context,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(sensorname)},
-                                       flash_string_vector{F_(sensorid_optional), F_(name_optional), F_(offset_optional)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           if (arguments.size() == 0) {
-                                               EMSESP::webSettingsService.read([&](WebSettings & settings) {
-                                                   for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
-                                                       if (!settings.sensor[i].id.isEmpty()) {
-                                                           shell.print(settings.sensor[i].id);
-                                                           shell.print(" : ");
-                                                           shell.print(settings.sensor[i].name);
-                                                           shell.print(" : ");
-                                                           char buf[10];
-                                                           shell.println(Helpers::render_value(buf, settings.sensor[i].offset, 10));
-                                                       }
-                                                   }
-                                               });
-                                               return;
-                                           }
-                                           if (arguments.size() == 1) {
-                                               EMSESP::dallassensor_.update(arguments.front().c_str(), "", 0);
-                                               // shell.println(EMSESP::dallassensor_.get_name(arguments.front().c_str()));
-                                               return;
-                                           }
-                                           int16_t offset = 0;
-                                           float   val;
-                                           if (arguments.size() == 2) {
-                                               if (Helpers::value2float(arguments.back().c_str(), val)) {
-                                                   offset = (10 * val);
-                                                   EMSESP::dallassensor_.update(arguments.front().c_str(), "", offset);
-                                                   return;
-                                               }
-                                           } else if (arguments.size() == 3) {
-                                               if (Helpers::value2float(arguments.back().c_str(), val)) {
-                                                   offset = (10 * val);
-                                               }
-                                           }
-                                           EMSESP::dallassensor_.update(arguments.front().c_str(), arguments[1].c_str(), offset);
                                        });
 
     EMSESPShell::commands->add_command(

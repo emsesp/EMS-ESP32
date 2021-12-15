@@ -24,7 +24,6 @@ export interface Settings {
   trace_raw: boolean;
   board_profile: string;
   bool_format: number;
-  dallas_format: number;
   enum_format: number;
 }
 
@@ -56,10 +55,16 @@ export interface Device {
 }
 
 export interface Sensor {
-  n: number; // np
-  i: string; // id
+  is: string; // id string
+  n: string; // name/alias
   t: number; // temp
   o: number; // offset
+}
+
+export interface WriteSensor {
+  id_str: string;
+  name: string;
+  offset: number;
 }
 
 export interface Data {
@@ -164,11 +169,4 @@ export interface APIcall {
 export interface WriteValue {
   id: number;
   devicevalue: DeviceValue;
-}
-
-export interface WriteSensor {
-  no: number;
-  id: string;
-  temp: number;
-  offset: number;
 }

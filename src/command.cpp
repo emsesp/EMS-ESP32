@@ -447,7 +447,7 @@ bool Command::device_has_commands(const uint8_t device_type) {
     }
 
     if (device_type == EMSdevice::DeviceType::DALLASSENSOR) {
-        return (EMSESP::sensor_devices().size() != 0);
+        return (EMSESP::have_sensors());
     }
 
     for (const auto & emsdevice : EMSESP::emsdevices) {

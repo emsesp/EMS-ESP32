@@ -1,40 +1,36 @@
-import { FC, useCallback, useContext, useState } from 'react';
-import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import React, { FC, useCallback, useContext, useState } from 'react';
+import { Navigate, Routes, Route, useNavigate } from 'react-router-dom';
 
-import { Tab, Tabs } from '@mui/material';
+import { Tab } from '@mui/material';
 
-import { AuthenticatedContext } from '../../contexts/authentication';
+import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from '../../components';
 import { WiFiNetwork } from '../../types';
-
+import { AuthenticatedContext } from '../../contexts/authentication';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import NetworkStatusForm from './NetworkStatusForm';
 import WiFiNetworkScanner from './WiFiNetworkScanner';
 import NetworkSettingsForm from './NetworkSettingsForm';
-import { AdminRoute, useLayoutTitle } from '../../components';
 
-const NetworkConnectionRouting: FC = () => {
+const NetworkConnection: FC = () => {
   useLayoutTitle('Network Connection');
 
-  const history = useHistory();
-  const { url } = useRouteMatch();
   const authenticatedContext = useContext(AuthenticatedContext);
+  const navigate = useNavigate();
+  const { routerTab } = useRouterTab();
+
   const [selectedNetwork, setSelectedNetwork] = useState<WiFiNetwork>();
 
   const selectNetwork = useCallback(
     (network: WiFiNetwork) => {
       setSelectedNetwork(network);
-      history.push('/network/settings');
+      navigate('settings');
     },
-    [history]
+    [navigate]
   );
 
   const deselectNetwork = useCallback(() => {
     setSelectedNetwork(undefined);
   }, []);
-
-  const handleTabChange = (event: React.ChangeEvent<{}>, path: string) => {
-    history.push(path);
-  };
 
   return (
     <WiFiConnectionContext.Provider
@@ -44,34 +40,33 @@ const NetworkConnectionRouting: FC = () => {
         deselectNetwork
       }}
     >
-      <Tabs value={url} onChange={handleTabChange} variant="fullWidth">
-        <Tab value="/network/status" label="Network Status" />
-        <Tab value="/network/scan" label="Scan WiFi Networks" disabled={!authenticatedContext.me.admin} />
-        <Tab value="/network/settings" label="Network Settings" disabled={!authenticatedContext.me.admin} />
-      </Tabs>
-      <Switch>
-        <Route exact path="/network/status">
-          <NetworkStatusForm />
-        </Route>
-        <AdminRoute exact path="/network/scan">
-          <WiFiNetworkScanner />
-        </AdminRoute>
-        <AdminRoute exact path="/network/settings">
-          <NetworkSettingsForm />
-        </AdminRoute>
-        <Redirect to="/network/status" />
-      </Switch>
+      <RouterTabs value={routerTab}>
+        <Tab value="status" label="Network Status" />
+        <Tab value="scan" label="Scan WiFi Networks" disabled={!authenticatedContext.me.admin} />
+        <Tab value="settings" label="Network Settings" disabled={!authenticatedContext.me.admin} />
+      </RouterTabs>
+      <Routes>
+        <Route path="status" element={<NetworkStatusForm />} />
+        <Route
+          path="scan"
+          element={
+            <RequireAdmin>
+              <WiFiNetworkScanner />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <RequireAdmin>
+              <NetworkSettingsForm />
+            </RequireAdmin>
+          }
+        />
+        <Route path="/*" element={<Navigate replace to="status" />} />
+      </Routes>
     </WiFiConnectionContext.Provider>
   );
 };
 
-const WiFiConnection: FC = () => (
-  <Switch>
-    <Route exact path="/network/*">
-      <NetworkConnectionRouting />
-    </Route>
-    <Redirect to="/network/status" />
-  </Switch>
-);
-
-export default WiFiConnection;
+export default NetworkConnection;

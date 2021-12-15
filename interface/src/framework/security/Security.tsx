@@ -1,48 +1,31 @@
 import { FC } from 'react';
-import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import { Navigate, Routes, Route } from 'react-router-dom';
 
-import { Tab, Tabs } from '@mui/material';
+import { Tab } from '@mui/material';
 
-import { useLayoutTitle } from '../../components';
+import { RouterTabs, useRouterTab, useLayoutTitle } from '../../components';
+
 import SecuritySettingsForm from './SecuritySettingsForm';
 import ManageUsersForm from './ManageUsersForm';
 
-const SecurityRouting: FC = () => {
+const Security: FC = () => {
   useLayoutTitle('Security');
 
-  const history = useHistory();
-  const { url } = useRouteMatch();
-
-  const handleTabChange = (event: React.ChangeEvent<{}>, path: string) => {
-    history.push(path);
-  };
+  const { routerTab } = useRouterTab();
 
   return (
     <>
-      <Tabs value={url} onChange={handleTabChange} variant="fullWidth">
-        <Tab value="/security/users" label="Manage Users" />
-        <Tab value="/security/settings" label="Security Settings" />
-      </Tabs>
-      <Switch>
-        <Route exact path="/security/users">
-          <ManageUsersForm />
-        </Route>
-        <Route exact path="/security/settings">
-          <SecuritySettingsForm />
-        </Route>
-        <Redirect to="/security/users" />
-      </Switch>
+      <RouterTabs value={routerTab}>
+        <Tab value="users" label="Manage Users" />
+        <Tab value="settings" label="Security Settings" />
+      </RouterTabs>
+      <Routes>
+        <Route path="users" element={<ManageUsersForm />} />
+        <Route path="settings" element={<SecuritySettingsForm />} />
+        <Route path="/*" element={<Navigate replace to="users" />} />
+      </Routes>
     </>
   );
 };
-
-const Security: FC = () => (
-  <Switch>
-    <Route exact path="/security/*">
-      <SecurityRouting />
-    </Route>
-    <Redirect to="/security/users" />
-  </Switch>
-);
 
 export default Security;

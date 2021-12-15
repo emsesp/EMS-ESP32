@@ -1,3 +1,6 @@
-export { default as AdminRoute } from './AdminRoute';
-export { default as AuthenticatedRoute } from './AuthenticatedRoute';
-export { default as UnauthenticatedRoute } from './UnauthenticatedRoute';
+export { default as RouterTabs } from './RouterTabs';
+export { default as RequireAdmin } from './RequireAdmin';
+export { default as RequireAuthenticated } from './RequireAuthenticated';
+export { default as RequireUnauthenticated } from './RequireUnauthenticated';
+
+export * from './useRouterTab';

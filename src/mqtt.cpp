@@ -526,7 +526,7 @@ void Mqtt::on_connect() {
             doc["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
         }
     } else if (EMSESP::system_.ethernet_connected()) {
-        doc["connection"]      = F("Ethernet");
+        doc["connection"]      = F("Wired");
         doc["hostname"]        = ETH.getHostname();
         doc["MAC"]             = ETH.macAddress();
         doc["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());

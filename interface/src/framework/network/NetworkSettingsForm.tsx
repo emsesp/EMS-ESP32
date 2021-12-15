@@ -6,10 +6,12 @@ import {
   Checkbox,
   IconButton,
   List,
+  Box,
   ListItem,
   ListItemAvatar,
   ListItemSecondaryAction,
-  ListItemText
+  ListItemText,
+  Typography
 } from '@mui/material';
 
 import LockOpenIcon from '@mui/icons-material/LockOpen';
@@ -85,6 +87,14 @@ const WiFiSettingsForm: FC = () => {
 
     return (
       <>
+        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+          WiFi
+        </Typography>
+        <Box color="warning.main" p={0} mt={0} mb={0}>
+          <Typography variant="body2">
+            <i>Leave SSID empty to disable WiFi</i>
+          </Typography>
+        </Box>
         {selectedNetwork ? (
           <List>
             <ListItem>
@@ -126,16 +136,7 @@ const WiFiSettingsForm: FC = () => {
             margin="normal"
           />
         )}
-        <ValidatedTextField
-          fieldErrors={fieldErrors}
-          name="hostname"
-          label="Hostname"
-          fullWidth
-          variant="outlined"
-          value={data.hostname}
-          onChange={updateFormValue}
-          margin="normal"
-        />
+
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="tx_power"
@@ -149,8 +150,8 @@ const WiFiSettingsForm: FC = () => {
         />
 
         <BlockFormControlLabel
-          control={<Checkbox name="enableIPv6" checked={data.enableIPv6} onChange={updateFormValue} />}
-          label="Enable IPv6 support"
+          control={<Checkbox name="nosleep" checked={data.nosleep} onChange={updateFormValue} />}
+          label="Disable WiFi Sleep Mode"
         />
 
         <BlockFormControlLabel
@@ -158,9 +159,24 @@ const WiFiSettingsForm: FC = () => {
           label="Use Lower WiFi Bandwidth"
         />
 
+        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+          General
+        </Typography>
+
+        <ValidatedTextField
+          fieldErrors={fieldErrors}
+          name="hostname"
+          label="Hostname"
+          fullWidth
+          variant="outlined"
+          value={data.hostname}
+          onChange={updateFormValue}
+          margin="normal"
+        />
+
         <BlockFormControlLabel
-          control={<Checkbox name="nosleep" checked={data.nosleep} onChange={updateFormValue} />}
-          label="Disable WiFi Sleep Mode"
+          control={<Checkbox name="enableIPv6" checked={data.enableIPv6} onChange={updateFormValue} />}
+          label="Enable IPv6 support"
         />
 
         <BlockFormControlLabel
@@ -238,7 +254,7 @@ const WiFiSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title="WiFi Settings" titleGutter>
+    <SectionContent title="Network Settings" titleGutter>
       {content()}
     </SectionContent>
   );

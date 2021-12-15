@@ -1,67 +1,60 @@
-import { FC, useContext } from 'react';
-import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import React, { FC, useContext } from 'react';
+import { Navigate, Routes, Route } from 'react-router-dom';
 
-import { Tab, Tabs } from '@mui/material';
+import { Tab } from '@mui/material';
 
+import { useRouterTab, RouterTabs, useLayoutTitle, RequireAdmin } from '../../components';
 import { AuthenticatedContext } from '../../contexts/authentication';
 import { FeaturesContext } from '../../contexts/features';
-
-import SystemStatusForm from './SystemStatusForm';
-import SystemLog from './SystemLog';
-import OTASettingsForm from './OTASettingsForm';
 import UploadFirmwareForm from './UploadFirmwareForm';
-import { AdminRoute, useLayoutTitle } from '../../components';
+import SystemStatusForm from './SystemStatusForm';
+import OTASettingsForm from './OTASettingsForm';
 
-const SystemRouting: FC = () => {
+import SystemLog from './SystemLog';
+
+const System: FC = () => {
   useLayoutTitle('System');
 
-  const history = useHistory();
-  const { url } = useRouteMatch();
   const { me } = useContext(AuthenticatedContext);
   const { features } = useContext(FeaturesContext);
-
-  const handleTabChange = (event: React.ChangeEvent<{}>, path: string) => {
-    history.push(path);
-  };
+  const { routerTab } = useRouterTab();
 
   return (
     <>
-      <Tabs value={url} onChange={handleTabChange} variant="fullWidth">
-        <Tab value="/system/status" label="System Status" />
-        <Tab value="/system/log" label="System Log" />
-        {features.ota && <Tab value="/system/ota" label="OTA Settings" disabled={!me.admin} />}
-        {features.upload_firmware && <Tab value="/system/upload" label="Upload Firmware" disabled={!me.admin} />}
-      </Tabs>
-      <Switch>
-        <Route exact path="/system/status">
-          <SystemStatusForm />
-        </Route>
-        <Route exact path="/system/log">
-          <SystemLog />
-        </Route>
+      <RouterTabs value={routerTab}>
+        <Tab value="status" label="System Status" />
+        <Tab value="log" label="System Log" />
+
+        {features.ota && <Tab value="ota" label="OTA Settings" disabled={!me.admin} />}
+        {features.upload_firmware && <Tab value="upload" label="Upload Firmware" disabled={!me.admin} />}
+      </RouterTabs>
+      <Routes>
+        <Route path="status" element={<SystemStatusForm />} />
+        <Route path="log" element={<SystemLog />} />
         {features.ota && (
-          <AdminRoute exact path="/system/ota">
-            <OTASettingsForm />
-          </AdminRoute>
+          <Route
+            path="ota"
+            element={
+              <RequireAdmin>
+                <OTASettingsForm />
+              </RequireAdmin>
+            }
+          />
         )}
         {features.upload_firmware && (
-          <AdminRoute exact path="/system/upload">
-            <UploadFirmwareForm />
-          </AdminRoute>
+          <Route
+            path="upload"
+            element={
+              <RequireAdmin>
+                <UploadFirmwareForm />
+              </RequireAdmin>
+            }
+          />
         )}
-        <Redirect to="/system/status" />
-      </Switch>
+        <Route path="/*" element={<Navigate replace to="status" />} />
+      </Routes>
     </>
   );
 };
-
-const System: FC = () => (
-  <Switch>
-    <Route exact path="/system/*">
-      <SystemRouting />
-    </Route>
-    <Redirect to="/system/status" />
-  </Switch>
-);
 
 export default System;

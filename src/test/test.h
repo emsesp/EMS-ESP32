@@ -43,7 +43,9 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "crash"
 // #define EMSESP_DEBUG_DEFAULT "dv"
 // #define EMSESP_DEBUG_DEFAULT "lastcode"
-#define EMSESP_DEBUG_DEFAULT "2thermostats"
+// #define EMSESP_DEBUG_DEFAULT "2thermostats"
+#define EMSESP_DEBUG_DEFAULT "dallas"
+
 
 class Test {
   public:

@@ -108,6 +108,10 @@ class System {
         return analog_;
     }
 
+    std::string board_profile() {
+        return std::string(board_profile_.c_str());
+    }
+
     std::string hostname() {
         return hostname_;
     }

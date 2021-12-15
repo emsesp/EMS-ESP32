@@ -99,7 +99,7 @@ const SettingsApplication: FC = () => {
       validateAndSubmit();
       try {
         await EMSESP.restart();
-        enqueueSnackbar('Device is restarting', { variant: 'info' });
+        enqueueSnackbar('EMS-ESP is restarting', { variant: 'info' });
       } catch (error: any) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem restarting device'), { variant: 'error' });
       }
@@ -108,11 +108,13 @@ const SettingsApplication: FC = () => {
     return (
       <>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          Board Profile
+          Interface Board Profile
         </Typography>
-        <Box color="warning.main" p={0} mt={0} mb={0}>
+        <Box color="warning.main">
           <Typography variant="body2">
-            <i>Select a pre-configured board profile or use "Custom" to customize your own hardware settings</i>
+            <i>
+              Select a pre-configured interface board profile or use "Custom" to configure your own hardware settings
+            </i>
           </Typography>
         </Box>
         <ValidatedTextField
@@ -214,7 +216,7 @@ const SettingsApplication: FC = () => {
                 margin="normal"
                 select
               >
-                <MenuItem value={0}>No Ethernet</MenuItem>
+                <MenuItem value={0}>No Ethernet Module</MenuItem>
                 <MenuItem value={1}>LAN8720</MenuItem>
                 <MenuItem value={2}>TLK110</MenuItem>
               </ValidatedTextField>
@@ -351,22 +353,6 @@ const SettingsApplication: FC = () => {
               <MenuItem value={2}>Index</MenuItem>
             </ValidatedTextField>
           </Grid>
-          <Grid item xs={4}>
-            <ValidatedTextField
-              name="dallas_format"
-              label="Dallas Sensor Format"
-              value={data.dallas_format}
-              fullWidth
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              <MenuItem value={1}>ID</MenuItem>
-              <MenuItem value={2}>Sensor #</MenuItem>
-              <MenuItem value={3}>Name</MenuItem>
-            </ValidatedTextField>
-          </Grid>
         </Grid>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           Syslog
@@ -447,7 +433,7 @@ const SettingsApplication: FC = () => {
             </Grid>
             <BlockFormControlLabel
               control={<Checkbox checked={data.trace_raw} onChange={updateFormValue} name="trace_raw" />}
-              label="Output EMS telegrams as hexadecimal bytes"
+              label="Log EMS telegrams in hexadecimal"
               disabled={saving}
             />
           </Grid>
@@ -478,7 +464,7 @@ const SettingsApplication: FC = () => {
   };
 
   return (
-    <SectionContent title="EMS-ESP Application Settings" titleGutter>
+    <SectionContent title="Application Settings" titleGutter>
       {content()}
     </SectionContent>
   );

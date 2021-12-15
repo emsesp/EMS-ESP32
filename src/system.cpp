@@ -57,7 +57,7 @@ bool     System::restart_requested_ = false;
 // e.g. http://ems-esp/api?device=system&cmd=pin&data=1&id=2
 bool System::command_pin(const char * value, const int8_t id) {
     if (!is_valid_gpio(id)) {
-        LOG_INFO(F("invalid GPIO number"));
+        LOG_INFO(F("Invalid GPIO number"));
         return false;
     }
 
@@ -188,7 +188,7 @@ void System::system_restart() {
 
 // saves all settings
 void System::wifi_reconnect() {
-    LOG_INFO(F("Wifi reconnecting..."));
+    LOG_INFO(F("WiFi reconnecting..."));
     Shell::loop_all();
     EMSESP::console_.loop();
     delay(1000);                                                                   // wait a second
@@ -336,7 +336,6 @@ void System::start(uint32_t heap_start) {
 
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
         hostname(networkSettings.hostname.c_str()); // sets the hostname
-        LOG_INFO(F("System name: %s"), hostname().c_str());
     });
 
     commands_init();     // console & api commands
@@ -761,19 +760,19 @@ void System::show_system(uuid::console::Shell & shell) {
 
     switch (WiFi.status()) {
     case WL_IDLE_STATUS:
-        shell.printfln(F("WiFi: Idle"));
+        shell.printfln(F("Network: Idle"));
         break;
 
     case WL_NO_SSID_AVAIL:
-        shell.printfln(F("WiFi: Network not found"));
+        shell.printfln(F("Network: Network not found"));
         break;
 
     case WL_SCAN_COMPLETED:
-        shell.printfln(F("WiFi: Network scan complete"));
+        shell.printfln(F("Network: Network scan complete"));
         break;
 
     case WL_CONNECTED:
-        shell.printfln(F("WiFi: Connected"));
+        shell.printfln(F("Network: connected"));
         shell.printfln(F("SSID: %s"), WiFi.SSID().c_str());
         shell.printfln(F("BSSID: %s"), WiFi.BSSIDstr().c_str());
         shell.printfln(F("RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
@@ -788,28 +787,28 @@ void System::show_system(uuid::console::Shell & shell) {
         break;
 
     case WL_CONNECT_FAILED:
-        shell.printfln(F("WiFi: Connection failed"));
+        shell.printfln(F("WiFi Network: Connection failed"));
         break;
 
     case WL_CONNECTION_LOST:
-        shell.printfln(F("WiFi: Connection lost"));
+        shell.printfln(F("WiFi Network: Connection lost"));
         break;
 
     case WL_DISCONNECTED:
-        shell.printfln(F("WiFi: Disconnected"));
+        shell.printfln(F("WiFi Network: Disconnected"));
         break;
 
     case WL_NO_SHIELD:
     default:
-        shell.printfln(F("WiFi: Unknown"));
+        shell.printfln(F("WiFi Network: Unknown"));
         break;
     }
 
     shell.println();
 
-    // show Ethernet
+    // show Ethernet if connected
     if (ethernet_connected_) {
-        shell.printfln(F("Ethernet: Connected"));
+        shell.printfln(F("Wired Network: connected"));
         shell.printfln(F("MAC address: %s"), ETH.macAddress().c_str());
         shell.printfln(F("Hostname: %s"), ETH.getHostname());
         shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
@@ -818,8 +817,6 @@ void System::show_system(uuid::console::Shell & shell) {
         if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
             shell.printfln(F("IPv6 address: %s"), uuid::printable_to_string(ETH.localIPv6()).c_str());
         }
-    } else {
-        shell.printfln(F("Ethernet: disconnected"));
     }
 
     shell.println();
@@ -954,7 +951,6 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["hide_led"]        = settings.hide_led;
         node["notoken_api"]     = settings.notoken_api;
         node["dallas_parasite"] = settings.dallas_parasite;
-        node["dallas_format"]   = settings.dallas_format;
         node["bool_format"]     = settings.bool_format;
         node["enum_format"]     = settings.enum_format;
         node["analog_enabled"]  = settings.analog_enabled;
@@ -981,7 +977,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
     if (EMSESP::dallas_enabled()) {
-        node["Dallas sensors"] = EMSESP::sensor_devices().size();
+        node["Dallas sensors"] = EMSESP::dallassensor_.no_sensors();
     }
 
 #ifndef EMSESP_STANDALONE
@@ -1001,7 +997,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
         }
     } else if (EMSESP::system_.ethernet_connected()) {
-        node["connection"]      = F("Ethernet");
+        node["connection"]      = F("Wired");
         node["hostname"]        = ETH.getHostname();
         node["MAC"]             = ETH.macAddress();
         node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
@@ -1043,6 +1039,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["MQTT publishes"]     = Mqtt::publish_count();
             node["MQTT publish fails"] = Mqtt::publish_fails();
         }
+        node["Dallas sensors"] = EMSESP::dallassensor_.no_sensors();
         if (EMSESP::dallas_enabled()) {
             node["Dallas reads"] = EMSESP::sensor_reads();
             node["Dallas fails"] = EMSESP::sensor_fails();
@@ -1109,7 +1106,7 @@ bool System::load_board_profile(std::vector<uint8_t> & data, const std::string &
                 EMSESP::system_.pbutton_gpio_,
                 EMSESP::system_.phy_type_};
     } else {
-        // unknown
+        // unknown, use defaults
         data = {EMSESP_DEFAULT_LED_GPIO,
                 EMSESP_DEFAULT_DALLAS_GPIO,
                 EMSESP_DEFAULT_RX_GPIO,

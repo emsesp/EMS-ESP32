@@ -110,12 +110,11 @@ MAKE_PSTR(board_profile_fmt, "Board Profile: %s")
 MAKE_PSTR(mark_interval_fmt, "Mark interval: %lus")
 MAKE_PSTR(wifi_ssid_fmt, "WiFi SSID: %s")
 MAKE_PSTR(wifi_password_fmt, "WiFi Password: %S")
-MAKE_PSTR(ethernet_option_fmt, "Ethernet option: %d")
 MAKE_PSTR(tx_mode_fmt, "Tx mode: %d")
 MAKE_PSTR(bus_id_fmt, "Bus ID: %02X")
 MAKE_PSTR(log_level_fmt, "Log level: %s")
 
-MAKE_STR(productid_fmt, "%s EMS Product ID")
+MAKE_STR(productid_fmt, "%s EMS ProductID")
 
 MAKE_PSTR_LIST(enum_syslog_level, F_(off), F("emerg"), F("alert"), F("crit"), F_(error), F("warn"), F("notice"), F_(info), F_(debug), F("trace"), F("all"))
 MAKE_PSTR_LIST(enum_watch, F_(off), F_(on), F_(raw), F_(unknown))

@@ -14,7 +14,9 @@ import { NetworkConnectionStatus, NetworkStatus } from '../../types';
 import * as NetworkApi from '../../api/network';
 import { useRest } from '../../utils';
 
-const isConnected = ({ status }: NetworkStatus) => status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED;
+const isConnected = ({ status }: NetworkStatus) =>
+  status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED ||
+  status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED;
 
 const networkStatusHighlight = ({ status }: NetworkStatus, theme: Theme) => {
   switch (status) {
@@ -44,7 +46,7 @@ const networkStatus = ({ status }: NetworkStatus) => {
     case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
       return 'Connected (WiFi)';
     case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
-      return 'Connected (Ethernet)';
+      return 'Connected (Wired)';
     case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
       return 'Connection Failed';
     case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:

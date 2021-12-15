@@ -169,7 +169,7 @@ const DashboardStatus: FC = () => {
   };
 
   return (
-    <SectionContent title="EMS Bus Status" titleGutter>
+    <SectionContent title="EMS-ESP Status" titleGutter>
       {content()}
     </SectionContent>
   );

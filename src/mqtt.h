@@ -188,6 +188,10 @@ class Mqtt {
         return nested_format_;
     }
 
+    static bool is_nested() {
+        return nested_format_ == 1;
+    }
+
     static void nested_format(uint8_t nested_format) {
         nested_format_ = nested_format;
     }

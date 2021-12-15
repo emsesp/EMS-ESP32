@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WebSettingsConfig_h
-#define WebSettingsConfig_h
+#ifndef WebSettingsService_h
+#define WebSettingsService_h
 
 #include <HttpEndpoint.h>
 #include <FSPersistence.h>
@@ -27,8 +27,6 @@
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
 #define EMSESP_SETTINGS_SERVICE_PATH "/rest/settings"
 #define EMSESP_BOARD_PROFILE_SERVICE_PATH "/rest/boardProfile"
-
-#define MAX_NUM_SENSOR_NAMES 20
 
 namespace emsesp {
 
@@ -48,7 +46,7 @@ enum {
 enum {
 
     ENUM_FORMAT_VALUE = 1,
-    ENUM_FORMAT_INDEX
+    ENUM_FORMAT_INDEX // 2
 
 };
 
@@ -79,18 +77,11 @@ class WebSettings {
     uint8_t  solar_maxflow;
     String   board_profile;
     uint8_t  phy_type;
-    uint8_t  dallas_format;
     uint8_t  bool_format;
     uint8_t  enum_format;
     int8_t   weblog_level;
     uint8_t  weblog_buffer;
     bool     weblog_compact;
-
-    struct {
-        String  id;
-        String  name;
-        int16_t offset;
-    } sensor[MAX_NUM_SENSOR_NAMES];
 
     static void              read(WebSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebSettings & settings);

@@ -93,7 +93,7 @@ class Boiler : public EMSdevice {
     uint16_t wwTankMiddleTemp_; // Tank middle temperature (TS3)
 
     // main
-    uint8_t  id_;               // product id
+    uint8_t  id_;               // productID
     uint8_t  dummy8u_;          // for commands with no output
     uint8_t  dummybool_;        // for commands with no output
     uint8_t  heatingActive_;    // Central heating is on/off

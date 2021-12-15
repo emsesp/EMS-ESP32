@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
 
-import { Button, Checkbox, MenuItem, Grid, Typography } from '@mui/material';
+import { Button, Box, Checkbox, MenuItem, Grid, Typography } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 
 import { MQTT_SETTINGS_VALIDATOR, validate } from '../../validators';
@@ -161,14 +161,26 @@ const MqttSettingsForm: FC = () => {
           control={<Checkbox name="send_response" checked={data.send_response} onChange={updateFormValue} />}
           label="Publish command output to a 'response' topic"
         />
-        <BlockFormControlLabel
-          control={<Checkbox name="ha_enabled" checked={data.ha_enabled} onChange={updateFormValue} />}
-          label="Enable Home Assistant integration"
-        />
+        <Grid container alignItems="center">
+          <Grid item>
+            <BlockFormControlLabel
+              control={<Checkbox name="ha_enabled" checked={data.ha_enabled} onChange={updateFormValue} />}
+              label="Enable Home Assistant integration"
+            />
+          </Grid>
+          <Grid item>
+            <Box color="warning.main">
+              <Typography variant="body2">
+                <i>(restart required)</i>
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
+
         {data.ha_enabled && (
           <ValidatedTextField
             name="ha_climate_format"
-            label="Thermostat Room Temperature"
+            label="HA Thermostat Room Temperature"
             value={data.ha_climate_format}
             fullWidth
             variant="outlined"

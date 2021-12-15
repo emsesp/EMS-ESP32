@@ -38,6 +38,7 @@
 #include "web/WebStatusService.h"
 #include "web/WebDataService.h"
 #include "web/WebSettingsService.h"
+#include "web/WebCustomizationService.h"
 #include "web/WebAPIService.h"
 #include "web/WebLogService.h"
 
@@ -131,12 +132,8 @@ class EMSESP {
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
-    static const std::vector<DallasSensor::Sensor> sensor_devices() {
-        return dallassensor_.sensors();
-    }
-
     static bool have_sensors() {
-        return (!(dallassensor_.sensors().empty()));
+        return (dallassensor_.have_sensors());
     }
 
     static uint32_t sensor_reads() {
@@ -185,6 +182,7 @@ class EMSESP {
     static void set_read_id(uint16_t id) {
         read_id_ = id;
     }
+
     static bool wait_validate() {
         return (wait_validate_ != 0);
     }
@@ -231,12 +229,13 @@ class EMSESP {
     static TxService    txservice_;
 
     // web controllers
-    static ESP8266React       esp8266React;
-    static WebSettingsService webSettingsService;
-    static WebStatusService   webStatusService;
-    static WebDataService     webDataService;
-    static WebAPIService      webAPIService;
-    static WebLogService      webLogService;
+    static ESP8266React            esp8266React;
+    static WebSettingsService      webSettingsService;
+    static WebStatusService        webStatusService;
+    static WebDataService          webDataService;
+    static WebAPIService           webAPIService;
+    static WebLogService           webLogService;
+    static WebCustomizationService webCustomizationService;
 
     static uuid::log::Logger logger();
 

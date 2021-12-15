@@ -1,19 +1,17 @@
-import { useSnackbar } from 'notistack';
 import { FC, useCallback, useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 
 import * as AuthenticationApi from '../../api/authentication';
 import { ACCESS_TOKEN } from '../../api/endpoints';
-
 import { LoadingSpinner } from '../../components';
 import { Me } from '../../types';
 import { FeaturesContext } from '../features';
-
 import { AuthenticationContext } from './context';
 
 const Authentication: FC = ({ children }) => {
   const { features } = useContext(FeaturesContext);
-  const history = useHistory();
+  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
   const [initialized, setInitialized] = useState<boolean>(false);
@@ -35,7 +33,7 @@ const Authentication: FC = ({ children }) => {
     AuthenticationApi.clearAccessToken();
     setMe(undefined);
     if (redirect) {
-      history.push('/');
+      navigate('/');
     }
   };
 

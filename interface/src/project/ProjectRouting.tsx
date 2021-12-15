@@ -1,33 +1,27 @@
 import { FC } from 'react';
-import { Redirect, Switch } from 'react-router';
-import { Route } from 'react-router-dom';
+import { Navigate, Routes, Route } from 'react-router-dom';
 
-import { PROJECT_PATH } from '../api/env';
+import { RequireAdmin } from '../components';
 
 import Dashboard from './Dashboard';
 import Settings from './Settings';
+import Help from './Help';
 
 const ProjectRouting: FC = () => {
   return (
-    <Switch>
-      <Route exact path={`/${PROJECT_PATH}/dashboard/*`}>
-        <Dashboard />
-      </Route>
-      <Route exact path={`/${PROJECT_PATH}/dashboard`}>
-        <Dashboard />
-      </Route>
-      <Route exact path={`/${PROJECT_PATH}/settings/*`}>
-        <Settings />
-      </Route>
-      <Route exact path={`/${PROJECT_PATH}/settings`}>
-        <Settings />
-      </Route>
-      {/*
-       * The redirect below caters for the default project route and redirecting invalid paths.
-       * The "to" property must match one of the routes above for this to work correctly.
-       */}
-      <Redirect to={`/${PROJECT_PATH}/dashboard/`} />
-    </Switch>
+    <Routes>
+      <Route path="dashboard/*" element={<Dashboard />} />
+      <Route
+        path="settings/*"
+        element={
+          <RequireAdmin>
+            <Settings />
+          </RequireAdmin>
+        }
+      />
+      <Route path="help/*" element={<Help />} />
+      <Route path="/*" element={<Navigate to="dashboard/data" />} />
+    </Routes>
   );
 };
 

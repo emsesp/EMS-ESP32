@@ -405,7 +405,7 @@ void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit
     doc["~"]          = Mqtt::base(); // ems-esp
 
     char topic_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    if (Mqtt::nested_format() == 1) {
+    if (Mqtt::is_nested()) {
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_NONE).c_str());
 
         char mode_str_tpl[40];
