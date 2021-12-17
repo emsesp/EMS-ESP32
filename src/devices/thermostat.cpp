@@ -42,7 +42,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             && ((actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) || (device_id < actual_master_thermostat)))) {
         EMSESP::actual_master_thermostat(device_id);
         actual_master_thermostat = device_id;
-        reserve_telegram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
+        // reserve_telgram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
 
         // common telegram handlers
         register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, MAKE_PF_CB(process_RCOutdoorTemp));
@@ -844,7 +844,7 @@ void Thermostat::process_RC35wwSettings(std::shared_ptr<const Telegram> telegram
     has_update(telegram->read_value(wwCircProg_, 1));     // 0-like hc, 0xFF own prog
     has_update(telegram->read_value(wwMode_, 2));         // 0 off, 1-on, 2-auto
     has_update(telegram->read_value(wwCircMode_, 3));     // 0 off, 1-on, 2-auto
-    has_update(telegram->read_value(wwDisinfect_, 4));    // 0-off, 0xFF on
+    has_update(telegram->read_value(wwDisinfecting_, 4)); // 0-off, 0xFF on
     has_update(telegram->read_value(wwDisinfectDay_, 5)); // 0-6 Day of week, 7 every day
     has_update(telegram->read_value(wwDisinfectHour_, 6));
     has_update(telegram->read_value(wwMaxTemp_, 8));    // Limiter 60 degrees
@@ -1007,7 +1007,7 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(wwChargeDuration_, 10)); // value in steps of 15 min
     has_update(telegram->read_value(wwCharge_, 11));
 
-    has_update(telegram->read_value(wwDisinfect_, 5));     // 0-off, 0xFF on
+    has_update(telegram->read_value(wwDisinfecting_, 5));  // 0-off, 0xFF on
     has_update(telegram->read_value(wwDisinfectHour_, 6)); // value in steps of 15 min
     has_update(telegram->read_value(wwDisinfectDay_, 7));  // 0-6 Day of week, 7 every day
 }
@@ -2648,7 +2648,8 @@ void Thermostat::register_device_values() {
         register_device_value(TAG_DEVICE_DATA_WW, &wwCharge_, DeviceValueType::BOOL, nullptr, FL_(wwCharge), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcharge));
         register_device_value(TAG_DEVICE_DATA_WW, &wwExtra1_, DeviceValueType::UINT, nullptr, FL_(wwExtra1), DeviceValueUOM::DEGREES);
         register_device_value(TAG_DEVICE_DATA_WW, &wwExtra2_, DeviceValueType::UINT, nullptr, FL_(wwExtra2), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_DEVICE_DATA_WW, &wwDisinfect_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfect), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfect));
+        register_device_value(
+            TAG_DEVICE_DATA_WW, &wwDisinfecting_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfecting), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfect));
         register_device_value(TAG_DEVICE_DATA_WW,
                               &wwDisinfectDay_,
                               DeviceValueType::ENUM,
@@ -2692,6 +2693,17 @@ void Thermostat::register_device_values() {
     case EMS_DEVICE_FLAG_RC20:
         register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         break;
+    case EMS_DEVICE_FLAG_RC30:
+        register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
+        register_device_value(TAG_THERMOSTAT_DATA, &ibaMainDisplay_, DeviceValueType::ENUM, FL_(enum_ibaMainDisplay), FL_(ibaMainDisplay), DeviceValueUOM::NONE);
+        register_device_value(TAG_THERMOSTAT_DATA, &ibaLanguage_, DeviceValueType::ENUM, FL_(enum_ibaLanguage), FL_(ibaLanguage), DeviceValueUOM::NONE);
+        register_device_value(TAG_THERMOSTAT_DATA,
+                              &ibaClockOffset_,
+                              DeviceValueType::INT,
+                              nullptr,
+                              FL_(ibaClockOffset),
+                              DeviceValueUOM::SECONDS); // offset (in sec) to clock, 0xff=-1s, 0x02=2s
+        break;
     case EMS_DEVICE_FLAG_RC30_N:
         register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         register_device_value(TAG_THERMOSTAT_DATA, &ibaMainDisplay_, DeviceValueType::ENUM, FL_(enum_ibaMainDisplay), FL_(ibaMainDisplay), DeviceValueUOM::NONE);
@@ -2731,7 +2743,8 @@ void Thermostat::register_device_values() {
             TAG_DEVICE_DATA_WW, &wwProgMode_, DeviceValueType::ENUM, FL_(enum_wwProgMode), FL_(wwProgMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwProgMode));
         register_device_value(
             TAG_DEVICE_DATA_WW, &wwCircProg_, DeviceValueType::ENUM, FL_(enum_wwProgMode), FL_(wwCircProg), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircProg));
-        register_device_value(TAG_DEVICE_DATA_WW, &wwDisinfect_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfect), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfect));
+        register_device_value(
+            TAG_DEVICE_DATA_WW, &wwDisinfecting_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfecting), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfect));
         register_device_value(TAG_DEVICE_DATA_WW,
                               &wwDisinfectDay_,
                               DeviceValueType::ENUM,
@@ -2786,7 +2799,8 @@ void Thermostat::register_device_values() {
             TAG_DEVICE_DATA_WW, &wwProgMode_, DeviceValueType::ENUM, FL_(enum_wwProgMode), FL_(wwProgMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwProgMode));
         register_device_value(
             TAG_DEVICE_DATA_WW, &wwCircProg_, DeviceValueType::ENUM, FL_(enum_wwProgMode), FL_(wwCircProg), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircProg));
-        register_device_value(TAG_DEVICE_DATA_WW, &wwDisinfect_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfect), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfect));
+        register_device_value(
+            TAG_DEVICE_DATA_WW, &wwDisinfecting_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfecting), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfect));
         register_device_value(TAG_DEVICE_DATA_WW,
                               &wwDisinfectDay_,
                               DeviceValueType::ENUM,
@@ -2940,6 +2954,9 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
         register_device_value(tag, &hc->summertemp, DeviceValueType::UINT, nullptr, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp));
         register_device_value(tag, &hc->summermode, DeviceValueType::BOOL, nullptr, FL_(summermode), DeviceValueUOM::NONE);
+        break;
+    case EMS_DEVICE_FLAG_RC30:
+        register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode3), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         break;
     case EMS_DEVICE_FLAG_RC30_N:
     case EMS_DEVICE_FLAG_RC35:

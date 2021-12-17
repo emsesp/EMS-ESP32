@@ -246,12 +246,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_DEVICE_DATA_WW, &wwStorageTemp2_, DeviceValueType::USHORT, FL_(div10), FL_(wwStorageTemp2), DeviceValueUOM::DEGREES);
     register_device_value(TAG_DEVICE_DATA_WW, &wwActivated_, DeviceValueType::BOOL, nullptr, FL_(wwActivated), DeviceValueUOM::NONE, MAKE_CF_CB(set_ww_activated));
     register_device_value(TAG_DEVICE_DATA_WW, &wwOneTime_, DeviceValueType::BOOL, nullptr, FL_(wwOneTime), DeviceValueUOM::NONE, MAKE_CF_CB(set_ww_onetime));
-    register_device_value(TAG_DEVICE_DATA_WW, &wwDisinfect_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfect), DeviceValueUOM::NONE, MAKE_CF_CB(set_ww_disinfect));
+    register_device_value(
+        TAG_DEVICE_DATA_WW, &wwDisinfecting_, DeviceValueType::BOOL, nullptr, FL_(wwDisinfecting), DeviceValueUOM::NONE, MAKE_CF_CB(set_ww_disinfect));
     register_device_value(TAG_DEVICE_DATA_WW, &wwCharging_, DeviceValueType::BOOL, nullptr, FL_(wwCharging), DeviceValueUOM::NONE);
     register_device_value(TAG_DEVICE_DATA_WW, &wwRecharging_, DeviceValueType::BOOL, nullptr, FL_(wwRecharging), DeviceValueUOM::NONE);
     register_device_value(TAG_DEVICE_DATA_WW, &wwTempOK_, DeviceValueType::BOOL, nullptr, FL_(wwTempOK), DeviceValueUOM::NONE);
     register_device_value(TAG_DEVICE_DATA_WW, &wwActive_, DeviceValueType::BOOL, nullptr, FL_(wwActive), DeviceValueUOM::NONE);
-    register_device_value(TAG_DEVICE_DATA_WW, &wwHeat_, DeviceValueType::BOOL, nullptr, FL_(wwHeat), DeviceValueUOM::NONE);
+    register_device_value(TAG_DEVICE_DATA_WW, &ww3wayon_, DeviceValueType::BOOL, nullptr, FL_(ww3wayon), DeviceValueUOM::NONE);
     register_device_value(TAG_DEVICE_DATA_WW, &wwSetPumpPower_, DeviceValueType::UINT, nullptr, FL_(wwSetPumpPower), DeviceValueUOM::PERCENT);
     register_device_value(TAG_DEVICE_DATA_WW, &wwMixerTemp_, DeviceValueType::USHORT, FL_(div10), FL_(wwMixerTemp), DeviceValueUOM::DEGREES);
     register_device_value(TAG_DEVICE_DATA_WW, &wwTankMiddleTemp_, DeviceValueType::USHORT, FL_(div10), FL_(wwTankMiddleTemp), DeviceValueUOM::DEGREES);
@@ -378,7 +379,7 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_bitvalue(fanWork_, 7, 2));
     has_update(telegram->read_bitvalue(ignWork_, 7, 3));
     has_update(telegram->read_bitvalue(heatingPump_, 7, 5));
-    has_update(telegram->read_bitvalue(wwHeat_, 7, 6));
+    has_update(telegram->read_bitvalue(ww3wayon_, 7, 6));
     has_update(telegram->read_bitvalue(wwCirc_, 7, 7));
 
     // warm water storage sensors (if present)
@@ -456,7 +457,7 @@ void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(wwStarts_, 13, 3)); // force to 3 bytes
 
     has_update(telegram->read_bitvalue(wwOneTime_, 5, 1));
-    has_update(telegram->read_bitvalue(wwDisinfect_, 5, 2));
+    has_update(telegram->read_bitvalue(wwDisinfecting_, 5, 2));
     has_update(telegram->read_bitvalue(wwCharging_, 5, 3));
     has_update(telegram->read_bitvalue(wwRecharging_, 5, 4));
     has_update(telegram->read_bitvalue(wwTempOK_, 5, 5));
@@ -475,7 +476,7 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram->read_value(selFlowTemp_, 6));
     has_update(telegram->read_bitvalue(burnGas_, 11, 0));
     // has_update(telegram->read_bitvalue(heatingPump_, 11, 1)); // heating active? see SlowPlus
-    has_update(telegram->read_bitvalue(wwHeat_, 11, 2));
+    has_update(telegram->read_bitvalue(ww3wayon_, 11, 2));
     has_update(telegram->read_value(curBurnPow_, 10));
     has_update(telegram->read_value(selBurnPow_, 9));
     has_update(telegram->read_value(curFlowTemp_, 7));
@@ -596,7 +597,7 @@ void Boiler::process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram->read_value(wwStarts_, 17, 3)); // force to 3 bytes
 
     has_update(telegram->read_bitvalue(wwOneTime_, 12, 2));
-    has_update(telegram->read_bitvalue(wwDisinfect_, 12, 3));
+    has_update(telegram->read_bitvalue(wwDisinfecting_, 12, 3));
     has_update(telegram->read_bitvalue(wwCharging_, 12, 4));
     has_update(telegram->read_bitvalue(wwRecharging_, 13, 4));
     has_update(telegram->read_bitvalue(wwTempOK_, 13, 5));

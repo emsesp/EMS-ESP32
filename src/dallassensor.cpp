@@ -197,7 +197,7 @@ void DallasSensor::loop() {
                     scancnt_ = 0;
                 } else if (scancnt_ == SCAN_START + 1) { // startup
                     firstscan_ = sensors_.size();
-                    LOG_DEBUG(F("Adding %d dallas sensor(s) from first scan"), firstscan_);
+                    // LOG_DEBUG(F("Adding %d dallas sensor(s) from first scan"), firstscan_);
                 } else if ((scancnt_ <= 0) && (firstscan_ != sensors_.size())) { // check 2 times for no change of sensor #
                     scancnt_ = SCAN_START;
                     sensors_.clear(); // restart scaning and clear to get correct numbering
@@ -283,69 +283,49 @@ int16_t DallasSensor::get_temperature_c(const uint8_t addr[]) {
 #endif
 }
 
-// if HA enabled with MQTT Discovery, delete the old config entry by sending an empty topic
-void DallasSensor::delete_ha_config(uint8_t index, const char * name) {
-    if (!Mqtt::ha_enabled()) {
-        return;
-    }
-
-    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-
-    // use '_' as HA doesn't like '-' in the topic name
-    std::string topicname = name;
-    std::replace(topicname.begin(), topicname.end(), '-', '_');
-
-    snprintf(topic, sizeof(topic), "homeassistant/sensor/%s/dallassensor_%s/config", Mqtt::base().c_str(), topicname.c_str());
-    Mqtt::publish(topic);
-
-    // TODO fix removing ha
-    //    registered_ha_[index] = false; // forces a recreate of the HA config topic
-}
-
 // update dallas information name and offset
 bool DallasSensor::update(const std::string & id_str, const std::string & name, int16_t offset) {
     // find the sensor
-    uint8_t i = 0;
     for (auto & sensor : sensors_) {
         if (sensor.id_str() == id_str) {
             // found a match, update the sensor object
+
+            // if HA is enabled then delete the old record
+            if (Mqtt::ha_enabled()) {
+                remove_ha_topic(id_str);
+            }
+
             sensor.set_name(name);
             sensor.set_offset(offset);
 
             // store the new name and offset in our configuration
             EMSESP::webCustomizationService.update(
                 [&](WebCustomization & settings) {
-                    // update if it exists
+                    // look it up to see if it exists
                     bool found = false;
                     for (auto & SensorCustomization : settings.sensorCustomizations) {
                         if (SensorCustomization.id_str == id_str) {
                             SensorCustomization.name   = name;
                             SensorCustomization.offset = offset;
-#ifdef EMSESP_DEBUG
-                            LOG_INFO("updated existing sensor"); // TODO remove debug
-#endif
-                            found = true;
+                            found                      = true;
+                            LOG_DEBUG(F("Customizing existing sensor ID %s"), id_str.c_str());
                             break;
                         }
                     }
                     if (!found) {
-#ifdef EMSESP_DEBUG
-                        LOG_INFO("adding new sensor"); // TODO remove debug
-#endif
                         SensorCustomization newSensor = SensorCustomization();
                         newSensor.id_str              = id_str;
                         newSensor.name                = name;
                         newSensor.offset              = offset;
                         settings.sensorCustomizations.push_back(newSensor);
+                        LOG_DEBUG(F("Adding new customization for sensor ID %s"), id_str.c_str());
                     }
-                    // check if reached end and add a new one to the list
+                    sensor.ha_registered = false; // it's changed so we may need to recreate the HA config
                     return StateUpdateResult::CHANGED;
                 },
                 "local");
-
             return true;
         }
-        i++;
     }
 
     return true; // not found, nothing updated
@@ -407,6 +387,22 @@ bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const i
     return false;
 }
 
+// send empty config topic to remove the entry from HA
+void DallasSensor::remove_ha_topic(const std::string & id_str) {
+    if (!Mqtt::ha_enabled()) {
+        return;
+    }
+#ifdef EMSESP_DEBUG
+    LOG_DEBUG(F("Removing HA config for sensor ID %s"), id_str.c_str());
+#endif
+    // use '_' as HA doesn't like '-' in the topic name
+    std::string sensorid = id_str;
+    std::replace(sensorid.begin(), sensorid.end(), '-', '_');
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf(topic, sizeof(topic), "sensor/%s/dallassensor_%s/config", Mqtt::base().c_str(), sensorid.c_str());
+    Mqtt::publish_ha(topic);
+}
+
 // send all dallas sensor values as a JSON package to MQTT
 void DallasSensor::publish_values(const bool force) {
     uint8_t num_sensors = sensors_.size();
@@ -415,17 +411,17 @@ void DallasSensor::publish_values(const bool force) {
         return;
     }
 
-    DynamicJsonDocument doc(100 * num_sensors);
+    DynamicJsonDocument doc(120 * num_sensors);
 
     for (auto & sensor : sensors_) {
-        // TODO check if MQTT HA works
-        if (Mqtt::is_nested()) {
-            JsonObject dataSensor = doc.createNestedObject(sensor.name());
-            dataSensor["id_str"]  = sensor.id_str();
-            if (Helpers::hasValue(sensor.temperature_c)) {
+        bool has_value = Helpers::hasValue(sensor.temperature_c);
+        if (Mqtt::is_nested() || Mqtt::ha_enabled()) {
+            JsonObject dataSensor = doc.createNestedObject(sensor.id_str());
+            dataSensor["name"]    = sensor.name();
+            if (has_value) {
                 dataSensor["temp"] = (float)(sensor.temperature_c) / 10;
             }
-        } else if (Helpers::hasValue(sensor.temperature_c)) {
+        } else if (has_value) {
             doc[sensor.name()] = (float)(sensor.temperature_c) / 10;
         }
 
@@ -433,6 +429,8 @@ void DallasSensor::publish_values(const bool force) {
         // to e.g. homeassistant/sensor/ems-esp/dallassensor_28-233D-9497-0C03/config
         if (Mqtt::ha_enabled()) {
             if (!sensor.ha_registered || force) {
+                LOG_DEBUG(F("Recreating HA config for sensor ID %s"), sensor.id_str().c_str());
+
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
                 config["dev_cla"] = FJSON("temperature");
 
@@ -443,16 +441,14 @@ void DallasSensor::publish_values(const bool force) {
                 config["unit_of_meas"] = FJSON("°C");
 
                 char str[50];
-                // TODO fix dallasensor_data, remove hardcoded value
-                // snprintf(str, sizeof(str), "{{value_json.sensor%d.temp}}", sensor_no);
-                snprintf(str, sizeof(str), "{{value_json.sensor%d.temp}}", 1);
+                snprintf(str, sizeof(str), "{{value_json.%s.temp}}", sensor.id_str().c_str());
 
                 config["val_tpl"] = str;
 
                 snprintf(str, sizeof(str), "Dallas Sensor %s", sensor.name().c_str());
                 config["name"] = str;
 
-                snprintf(str, sizeof(str), "dallasensor_%s", sensor.name().c_str());
+                snprintf(str, sizeof(str), "dallasensor_%s", sensor.id_str().c_str());
                 config["uniq_id"] = str;
 
                 JsonObject dev = config.createNestedObject("dev");
@@ -461,10 +457,10 @@ void DallasSensor::publish_values(const bool force) {
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 // use '_' as HA doesn't like '-' in the topic name
-                std::string sensorname = sensor.name();
-                std::replace(sensorname.begin(), sensorname.end(), '-', '_');
+                std::string sensorid = sensor.id_str();
+                std::replace(sensorid.begin(), sensorid.end(), '-', '_');
 
-                snprintf(topic, sizeof(topic), "sensor/%s/dallassensor_%s/config", Mqtt::base().c_str(), sensorname.c_str());
+                snprintf(topic, sizeof(topic), "sensor/%s/dallassensor_%s/config", Mqtt::base().c_str(), sensorid.c_str());
 
                 Mqtt::publish_ha(topic, config.as<JsonObject>());
 

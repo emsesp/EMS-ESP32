@@ -211,7 +211,7 @@ const DashboardData: FC = () => {
               Cancel
             </Button>
             <Button variant="outlined" type="submit" onClick={() => sendDeviceValue()} color="warning">
-              Change
+              Send
             </Button>
           </DialogActions>
         </Dialog>
@@ -286,7 +286,7 @@ const DashboardData: FC = () => {
               Cancel
             </Button>
             <Button variant="outlined" type="submit" onClick={() => sendSensor()} color="warning">
-              Update
+              Save
             </Button>
           </DialogActions>
         </Dialog>
@@ -322,6 +322,7 @@ const DashboardData: FC = () => {
           <ButtonRow>
             {data.devices.sort(compareDevices).map((device) => (
               <StyledTooltip
+                key={device.i}
                 title={
                   <Fragment>
                     <Typography variant="h6" color="primary">
@@ -385,11 +386,11 @@ const DashboardData: FC = () => {
       return (
         <Fragment>
           <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
-            {deviceData.type}&nbsp;Data{' '}
+            {deviceData.type}&nbsp;Data
           </Typography>
           <Box color="warning.main" p={0} mt={0} mb={0}>
             <Typography variant="body1">
-              <i>no data available for this device</i>
+              <i>no data available</i>
             </Typography>
           </Box>
         </Fragment>
@@ -399,7 +400,7 @@ const DashboardData: FC = () => {
     return (
       <>
         <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
-          {deviceData.type}&nbsp;Data{' '}
+          {deviceData.type}&nbsp;Data
         </Typography>
         <Table size="small">
           <TableHead>
@@ -448,7 +449,7 @@ const DashboardData: FC = () => {
         <TableHead>
           <TableRow>
             <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
-            <StyledTableCell align="left">Sensor Name</StyledTableCell>
+            <StyledTableCell align="left">Name</StyledTableCell>
             <StyledTableCell align="right">Temperature</StyledTableCell>
           </TableRow>
         </TableHead>
@@ -484,7 +485,7 @@ const DashboardData: FC = () => {
         <TableHead>
           <TableRow>
             <StyledTableCell style={{ width: 18 }}></StyledTableCell>
-            <StyledTableCell>Sensor Type</StyledTableCell>
+            <StyledTableCell>Type</StyledTableCell>
             <StyledTableCell align="right">Value</StyledTableCell>
           </TableRow>
         </TableHead>

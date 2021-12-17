@@ -544,8 +544,18 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     if (command == "dallas") {
         shell.printfln(F("Testing adding Dallas sensor"));
+        Mqtt::ha_enabled(true);
+        Mqtt::nested_format(1);
+        // Mqtt::nested_format(0);
+
         emsesp::EMSESP::dallassensor_.test();
         shell.invoke_command("show");
+        shell.invoke_command("call system publish");
+
+        // rename
+        EMSESP::dallassensor_.update("01-0203-0405-0607", "poep", 2);
+        shell.invoke_command("show");
+        shell.invoke_command("call system publish");
     }
 
     if (command == "dv2") {

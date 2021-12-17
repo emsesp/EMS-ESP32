@@ -74,12 +74,12 @@ class Boiler : public EMSdevice {
     uint16_t wwStorageTemp2_;     // warm water storage temp 2
     uint8_t  wwActivated_;        // Warm Water activated
     uint8_t  wwOneTime_;          // Warm Water one time function on/off
-    uint8_t  wwDisinfect_;        // Warm Water disinfection on/off
+    uint8_t  wwDisinfecting_;     // Warm Water disinfection on/off
     uint8_t  wwCharging_;         // Warm Water charging on/off
     uint8_t  wwRecharging_;       // Warm Water recharge on/off
     uint8_t  wwTempOK_;           // Warm Water temperature ok on/off
     uint8_t  wwActive_;           //
-    uint8_t  wwHeat_;             // 3-way valve on WW
+    uint8_t  ww3wayon_;           // 3-way valve on WW
     uint8_t  wwSetPumpPower_;     // ww pump speed/power?
     uint8_t  wwFlowTempOffset_;   // Boiler offset for ww heating
     uint8_t  wwMaxPower_;         // Warm Water maximum power

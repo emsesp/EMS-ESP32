@@ -184,7 +184,7 @@ class Thermostat : public EMSdevice {
     uint8_t wwSetTempLow_;
     uint8_t wwCharge_;
     uint8_t wwChargeDuration_;
-    uint8_t wwDisinfect_;
+    uint8_t wwDisinfecting_;
     uint8_t wwDisinfectDay_;
     uint8_t wwDisinfectHour_;
     uint8_t wwMaxTemp_;

@@ -158,11 +158,10 @@ class DallasSensor {
     bool     temperature_convert_complete();
     int16_t  get_temperature_c(const uint8_t addr[]);
     uint64_t get_id(const uint8_t addr[]);
+    void     remove_ha_topic(const std::string & id_str);
 
     bool command_info(const char * value, const int8_t id, JsonObject & output);
     bool command_commands(const char * value, const int8_t id, JsonObject & output);
-
-    void delete_ha_config(uint8_t index, const char * name);
 
     uint32_t last_activity_ = uuid::get_uptime();
     State    state_         = State::IDLE;

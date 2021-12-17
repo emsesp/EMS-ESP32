@@ -12,15 +12,16 @@ import AuthenticatedRouting from './AuthenticatedRouting';
 interface SecurityRedirectProps {
   message: string;
   variant?: VariantType;
+  signOut?: boolean;
 }
 
-const SecurityRedirect: FC<SecurityRedirectProps> = ({ message, variant }) => {
+const RootRedirect: FC<SecurityRedirectProps> = ({ message, variant, signOut }) => {
   const authenticationContext = useContext(AuthenticationContext);
   const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
-    authenticationContext.signOut(false);
+    signOut && authenticationContext.signOut(false);
     enqueueSnackbar(message, { variant });
-  }, [message, variant, authenticationContext, enqueueSnackbar]);
+  }, [message, variant, signOut, authenticationContext, enqueueSnackbar]);
   return <Navigate to="/" />;
 };
 
@@ -45,7 +46,11 @@ const AppRouting: FC = () => {
     <Authentication>
       <RemoveTrailingSlashes />
       <Routes>
-        <Route path="/unauthorized" element={<SecurityRedirect message="Please log in to continue" />} />
+        <Route path="/unauthorized" element={<RootRedirect message="Please sign in to continue" signOut />} />
+        <Route
+          path="/firmwareUpdated"
+          element={<RootRedirect message="Firmware update successful" variant="success" />}
+        />
         {features.security && (
           <Route
             path="/"
