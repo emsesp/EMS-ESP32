@@ -1,45 +1,28 @@
 import { FC } from 'react';
-import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { Tab, Tabs } from '@mui/material';
+import { Tab } from '@mui/material';
 
-import { PROJECT_PATH } from '../api/env';
-
-import { AdminRoute, useLayoutTitle } from '../components';
+import { RouterTabs, useRouterTab, useLayoutTitle } from '../components';
 
 import SettingsApplication from './SettingsApplication';
-import SettingsEntities from './SettingsEntities';
-import SettingsHelp from './SettingsHelp';
+import SettingsCustomize from './SettingsCustomize';
 
 const Settings: FC = () => {
-  const history = useHistory();
-  const { url } = useRouteMatch();
-
   useLayoutTitle('Settings');
-
-  const handleTabChange = (event: React.ChangeEvent<{}>, path: string) => {
-    history.push(path);
-  };
+  const { routerTab } = useRouterTab();
 
   return (
     <>
-      <Tabs value={url} onChange={handleTabChange} variant="fullWidth">
-        <Tab value={`/${PROJECT_PATH}/settings/application`} label="Application Settings" />
-        <Tab value={`/${PROJECT_PATH}/settings/entities`} label="Device Entities" />
-        <Tab value={`/${PROJECT_PATH}/settings/help`} label="Information" />
-      </Tabs>
-      <Switch>
-        <AdminRoute exact path={`/${PROJECT_PATH}/settings/application`}>
-          <SettingsApplication />
-        </AdminRoute>
-        <AdminRoute exact path={`/${PROJECT_PATH}/settings/entities`}>
-          <SettingsEntities />
-        </AdminRoute>
-        <Route exact path={`/${PROJECT_PATH}/settings/help`}>
-          <SettingsHelp />
-        </Route>
-        <Redirect to={`/${PROJECT_PATH}/settings/application`} />
-      </Switch>
+      <RouterTabs value={routerTab}>
+        <Tab value="application" label="Application Settings" />
+        <Tab value="customize" label="Device Customization" />
+      </RouterTabs>
+      <Routes>
+        <Route path="application" element={<SettingsApplication />} />
+        <Route path="customize" element={<SettingsCustomize />} />
+        <Route path="/*" element={<Navigate replace to="application" />} />
+      </Routes>
     </>
   );
 };

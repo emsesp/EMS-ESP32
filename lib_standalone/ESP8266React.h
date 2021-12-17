@@ -2,10 +2,15 @@
 #define ESP8266React_h
 
 #include <Arduino.h>
+
 #include <ArduinoJson.h>
 #include <AsyncJson.h>
+
 #include <AsyncMqttClient.h>
 #include <ESPAsyncWebServer.h>
+
+#include <list>
+
 #include <FS.h>
 #include <SecurityManager.h>
 #include <SecuritySettingsService.h>
@@ -28,7 +33,6 @@ class DummySettings {
     bool     notoken_api          = false;
     uint8_t  bool_format          = 1; // on off
     uint8_t  enum_format          = 1;
-    uint8_t  dallas_format        = 1;
 
     // MQTT
     uint16_t publish_time      = 10; // seconds

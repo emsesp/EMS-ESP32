@@ -211,7 +211,7 @@ const DashboardData: FC = () => {
               Cancel
             </Button>
             <Button variant="outlined" type="submit" onClick={() => sendDeviceValue()} color="warning">
-              Change
+              Send
             </Button>
           </DialogActions>
         </Dialog>
@@ -223,9 +223,8 @@ const DashboardData: FC = () => {
     if (sensor) {
       try {
         const response = await EMSESP.writeSensor({
-          no: sensor.n,
-          id: sensor.i,
-          temp: sensor.t,
+          id_str: sensor.is,
+          name: sensor.n,
           offset: sensor.o
         });
         if (response.status === 204) {
@@ -252,14 +251,14 @@ const DashboardData: FC = () => {
           <DialogTitle>Edit Sensor</DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
-              <Typography variant="body2">Sensor #{sensor.n}</Typography>
+              <Typography variant="body2">Sensor ID {sensor.is}</Typography>
             </Box>
             <Grid container spacing={1}>
               <Grid item>
                 <ValidatedTextField
-                  name="i"
-                  label="ID / Name"
-                  value={sensor.i}
+                  name="n"
+                  label="Name"
+                  value={sensor.n}
                   autoFocus
                   sx={{ width: '30ch' }}
                   onChange={updateValue(setSensor)}
@@ -287,7 +286,7 @@ const DashboardData: FC = () => {
               Cancel
             </Button>
             <Button variant="outlined" type="submit" onClick={() => sendSensor()} color="warning">
-              Update
+              Save
             </Button>
           </DialogActions>
         </Dialog>
@@ -323,6 +322,7 @@ const DashboardData: FC = () => {
           <ButtonRow>
             {data.devices.sort(compareDevices).map((device) => (
               <StyledTooltip
+                key={device.i}
                 title={
                   <Fragment>
                     <Typography variant="h6" color="primary">
@@ -341,7 +341,7 @@ const DashboardData: FC = () => {
                     {'Version: ' + device.v}
                   </Fragment>
                 }
-                placement="left-end"
+                placement="top"
               >
                 <Button
                   startIcon={<ListIcon />}
@@ -360,7 +360,7 @@ const DashboardData: FC = () => {
           <MessageBox
             my={2}
             level="error"
-            message="No EMS devices found. Check the connections and for possible Rx and Tx errors."
+            message="No EMS devices found. Check the interface's hardware connections and for possible Rx and Tx errors in the System Log"
           />
         )}
       </>
@@ -386,11 +386,11 @@ const DashboardData: FC = () => {
       return (
         <Fragment>
           <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
-            {deviceData.type}&nbsp;Data{' '}
+            {deviceData.type}&nbsp;Data
           </Typography>
           <Box color="warning.main" p={0} mt={0} mb={0}>
             <Typography variant="body1">
-              <i>no data available for this device</i>
+              <i>no data available</i>
             </Typography>
           </Box>
         </Fragment>
@@ -400,7 +400,7 @@ const DashboardData: FC = () => {
     return (
       <>
         <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
-          {deviceData.type}&nbsp;Data{' '}
+          {deviceData.type}&nbsp;Data
         </Typography>
         <Table size="small">
           <TableHead>
@@ -449,8 +449,7 @@ const DashboardData: FC = () => {
         <TableHead>
           <TableRow>
             <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
-            <StyledTableCell>Dallas Sensor #</StyledTableCell>
-            <StyledTableCell align="left">ID / Name</StyledTableCell>
+            <StyledTableCell align="left">Name</StyledTableCell>
             <StyledTableCell align="right">Temperature</StyledTableCell>
           </TableRow>
         </TableHead>
@@ -469,7 +468,6 @@ const DashboardData: FC = () => {
               <StyledTableCell component="th" scope="row">
                 {sensorData.n}
               </StyledTableCell>
-              <StyledTableCell align="left">{sensorData.i}</StyledTableCell>
               <StyledTableCell align="right">{formatValue(sensorData.t, DeviceValueUOM.DEGREES)}</StyledTableCell>
             </StyledTableRow>
           ))}
@@ -487,7 +485,7 @@ const DashboardData: FC = () => {
         <TableHead>
           <TableRow>
             <StyledTableCell style={{ width: 18 }}></StyledTableCell>
-            <StyledTableCell>Sensor Type</StyledTableCell>
+            <StyledTableCell>Type</StyledTableCell>
             <StyledTableCell align="right">Value</StyledTableCell>
           </TableRow>
         </TableHead>
@@ -495,7 +493,7 @@ const DashboardData: FC = () => {
           <StyledTableRow>
             <StyledTableCell>&nbsp;&nbsp;</StyledTableCell>
             <StyledTableCell component="th" scope="row">
-              Analog Input
+              Analog Input (ADC0)
             </StyledTableCell>
             <StyledTableCell align="right">{formatValue(data?.analog, DeviceValueUOM.MV)}</StyledTableCell>
           </StyledTableRow>
@@ -504,21 +502,27 @@ const DashboardData: FC = () => {
     </>
   );
 
-  const content = () => (
-    <>
-      {renderData()}
-      {renderDeviceData()}
-      {data?.sensors.length !== 0 && renderSensorData()}
-      {data?.analog && renderAnalogData()}
-      {renderDeviceValueDialog()}
-      {renderSensorDialog()}
-      <ButtonRow>
-        <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
-          Refresh
-        </Button>
-      </ButtonRow>
-    </>
-  );
+  const content = () => {
+    if (!data) {
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+    }
+
+    return (
+      <>
+        {renderData()}
+        {renderDeviceData()}
+        {data.sensors.length !== 0 && renderSensorData()}
+        {data.analog && renderAnalogData()}
+        {renderDeviceValueDialog()}
+        {renderSensorDialog()}
+        <ButtonRow>
+          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+            Refresh
+          </Button>
+        </ButtonRow>
+      </>
+    );
+  };
 
   return (
     <SectionContent title="Device and Sensor Data" titleGutter>

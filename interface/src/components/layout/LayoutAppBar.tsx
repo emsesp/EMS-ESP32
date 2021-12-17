@@ -7,7 +7,7 @@ import LayoutAuthMenu from './LayoutAuthMenu';
 
 import { FeaturesContext } from '../../contexts/features';
 
-export const DRAWER_WIDTH = 230;
+export const DRAWER_WIDTH = 240;
 
 interface LayoutAppBarProps {
   title: string;

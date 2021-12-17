@@ -17,7 +17,7 @@ import { extractErrorMessage } from '../utils';
 
 import * as EMSESP from './api';
 
-const SettingsHelp: FC = () => {
+const HelpInformation: FC = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   const onDownload = async (endpoint: string) => {
@@ -50,18 +50,21 @@ const SettingsHelp: FC = () => {
   };
 
   return (
-    <SectionContent title="Help and Information" titleGutter>
+    <SectionContent title="Application Information &amp; Support" titleGutter>
       <List>
         <ListItem>
           <ListItemAvatar>
             <TuneIcon />
           </ListItemAvatar>
           <ListItemText>
-            For a help on each of the Application Settings see the&nbsp;
-            <Link href="https://emsesp.github.io/docs/#/Configure-firmware?id=ems-esp-settings" color="primary">
-              {'Configuring'}
+            For a help on each of the Application Settings see&nbsp;
+            <Link
+              target="_blank"
+              href="https://emsesp.github.io/docs/#/Configure-firmware?id=ems-esp-settings"
+              color="primary"
+            >
+              {'Configuring EMS-ESP'}
             </Link>
-            &nbsp;section on the documentation site.
           </ListItemText>
         </ListItem>
 
@@ -70,11 +73,10 @@ const SettingsHelp: FC = () => {
             <MenuBookIcon />
           </ListItemAvatar>
           <ListItemText>
-            For general information about EMS-ESP browse through the online&nbsp;
-            <Link href="https://emsesp.github.io/docs" color="primary">
-              {'documentation'}
+            For general information about EMS-ESP visit the online&nbsp;
+            <Link target="_blank" href="https://emsesp.github.io/docs" color="primary">
+              {'Documentation'}
             </Link>
-            .
           </ListItemText>
         </ListItem>
 
@@ -84,10 +86,10 @@ const SettingsHelp: FC = () => {
           </ListItemAvatar>
           <ListItemText>
             For live community chat join our&nbsp;
-            <Link href="https://discord.gg/3J3GgnzpyT" color="primary">
+            <Link target="_blank" href="https://discord.gg/3J3GgnzpyT" color="primary">
               {'Discord'}
             </Link>
-            &nbsp;server.
+            &nbsp;server
           </ListItemText>
         </ListItem>
 
@@ -97,10 +99,9 @@ const SettingsHelp: FC = () => {
           </ListItemAvatar>
           <ListItemText>
             To report an issue or request a feature, please do via&nbsp;
-            <Link href="https://github.com/emsesp/EMS-ESP32/issues/new/choose" color="primary">
+            <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32/issues/new/choose" color="primary">
               {'GitHub'}
             </Link>
-            .
           </ListItemText>
         </ListItem>
       </List>
@@ -136,4 +137,4 @@ const SettingsHelp: FC = () => {
   );
 };
 
-export default SettingsHelp;
+export default HelpInformation;

@@ -62,23 +62,11 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["pbutton_gpio"]         = settings.pbutton_gpio;
     root["solar_maxflow"]        = settings.solar_maxflow;
     root["board_profile"]        = settings.board_profile;
-    root["dallas_format"]        = settings.dallas_format;
     root["bool_format"]          = settings.bool_format;
     root["enum_format"]          = settings.enum_format;
     root["weblog_level"]         = settings.weblog_level;
     root["weblog_buffer"]        = settings.weblog_buffer;
     root["weblog_compact"]       = settings.weblog_compact;
-
-    // TODO move this to customization screen in v3.4
-    for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
-        char buf[20];
-        snprintf(buf, sizeof(buf), "sensor_id%d", i);
-        root[buf] = settings.sensor[i].id;
-        snprintf(buf, sizeof(buf), "sensor_name%d", i);
-        root[buf] = settings.sensor[i].name;
-        snprintf(buf, sizeof(buf), "sensor_offset%d", i);
-        root[buf] = settings.sensor[i].offset;
-    }
 }
 
 // call on initialization and also when settings are updated via web or console
@@ -98,17 +86,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     uint8_t default_tx_gpio      = data[3];
     uint8_t default_pbutton_gpio = data[4];
     uint8_t default_phy_type     = data[5];
-
-    if (old_board_profile != settings.board_profile) {
-        EMSESP::logger().info(F("EMS-ESP version %s"), EMSESP_APP_VERSION);
-
-        // check to see if we have a settings file, if not it's a fresh install
-        if (!root.size()) {
-            EMSESP::logger().info(F("Initializing configuration with board profile %s"), settings.board_profile.c_str());
-        } else {
-            EMSESP::logger().info(F("Using configuration from board profile %s"), settings.board_profile.c_str());
-        }
-    }
 
     int prev;
     reset_flags();
@@ -213,9 +190,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
     settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
 
-    settings.dallas_format = root["dallas_format"] | EMSESP_DEFAULT_DALLAS_FORMAT;
-    EMSESP::dallassensor_.dallas_format(settings.dallas_format);
-
     settings.bool_format = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
     EMSESP::bool_format(settings.bool_format);
 
@@ -226,18 +200,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.weblog_buffer  = root["weblog_buffer"] | EMSESP_DEFAULT_WEBLOG_BUFFER;
     settings.weblog_compact = root["weblog_compact"] | EMSESP_DEFAULT_WEBLOG_COMPACT;
 
-    for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
-        char buf[20];
-        snprintf(buf, sizeof(buf), "sensor_id%d", i);
-        settings.sensor[i].id = root[buf] | EMSESP_DEFAULT_SENSOR_NAME;
-        snprintf(buf, sizeof(buf), "sensor_name%d", i);
-        settings.sensor[i].name = root[buf] | EMSESP_DEFAULT_SENSOR_NAME;
-        snprintf(buf, sizeof(buf), "sensor_offset%d", i);
-        settings.sensor[i].offset = root[buf] | 0;
-    }
-
+    // save the settings
     if (flags_ == WebSettings::ChangeFlags::RESTART) {
-        return StateUpdateResult::CHANGED_RESTART;
+        return StateUpdateResult::CHANGED_RESTART; // tell WebUI that a restart is needed
     }
 
     return StateUpdateResult::CHANGED;

@@ -265,8 +265,8 @@ const SystemLog: FC = () => {
             backgroundColor: 'black',
             overflow: 'scroll',
             position: 'absolute',
-            right: 24,
-            bottom: 24,
+            right: 18,
+            bottom: 18,
             left: () => leftOffset(),
             top: () => topOffset(),
             p: 1

@@ -86,11 +86,10 @@ void WebDataService::all_devices(AsyncWebServerRequest * request) {
     // always create sensors, even if it's empty
     JsonArray sensors = root.createNestedArray("sensors");
     if (EMSESP::have_sensors()) {
-        uint8_t i = 1;
-        for (const auto & sensor : EMSESP::sensor_devices()) {
+        for (const auto & sensor : EMSESP::dallassensor_.sensors()) {
             JsonObject obj = sensors.createNestedObject();
-            obj["n"]       = i++;                                // no
-            obj["i"]       = sensor.to_string(true);             // id
+            obj["is"]      = sensor.id_str();                    // id
+            obj["n"]       = sensor.name();                      // name
             obj["t"]       = (float)(sensor.temperature_c) / 10; // temp
             obj["o"]       = (float)(sensor.offset()) / 10;      // offset
         }
@@ -134,7 +133,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
     request->send(response);
 }
 
-// takes a command and its data value from a specific Device, from the Web
+// takes a command and its data value from a specific EMS Device, from the Web
 // assumes the service has been checked for admin authentication
 void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
@@ -192,23 +191,21 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
     request->send(response);
 }
 
-// takes a sensorname and optional offset from the Web
+// takes a sensor name and optional offset from the WebUI and update the customization settings
+// via the Dallas service
 void WebDataService::write_sensor(AsyncWebServerRequest * request, JsonVariant & json) {
     bool ok = false;
     if (json.is<JsonObject>()) {
         JsonObject sensor = json;
 
-        // if valid add.
-        uint8_t no = sensor["no"];
-        if (no > 0 && no < 100) {
-            char        name[20];
-            std::string id = sensor["id"];
-            strlcpy(name, id.c_str(), sizeof(name));
-            float   offset   = sensor["offset"]; // this will be a float value. We'll convert it to int and * 10 it
-            int16_t offset10 = offset * 10;
-            char    idstr[3];
-            ok = EMSESP::dallassensor_.update(Helpers::itoa(idstr, no, 10), name, offset10);
-        }
+        std::string id_str = sensor["id_str"]; // this is the key
+        std::string name   = sensor["name"];
+
+        // calculate offset. We'll convert it to an int and * 10
+        float   offset   = sensor["offset"];
+        int16_t offset10 = offset * 10;
+
+        ok = EMSESP::dallassensor_.update(id_str, name, offset10);
     }
 
     AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);

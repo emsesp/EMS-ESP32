@@ -106,7 +106,7 @@ const APSettingsForm: FC = () => {
             </ValidatedTextField>
             <BlockFormControlLabel
               control={<Checkbox name="ssid_hidden" checked={data.ssid_hidden} onChange={updateFormValue} />}
-              label="Hide SSID?"
+              label="Hide SSID"
             />
             <ValidatedTextField
               fieldErrors={fieldErrors}

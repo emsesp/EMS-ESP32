@@ -49,7 +49,7 @@ const NTPSettingsForm: FC = () => {
       <>
         <BlockFormControlLabel
           control={<Checkbox name="enabled" checked={data.enabled} onChange={updateFormValue} />}
-          label="Enable NTP?"
+          label="Enable NTP"
         />
         <ValidatedTextField
           fieldErrors={fieldErrors}

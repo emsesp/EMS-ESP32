@@ -352,7 +352,7 @@ const std::string EMSdevice::to_string_short() const {
 
 // for each telegram that has the fetch value set (true) do a read request
 void EMSdevice::fetch_values() {
-    EMSESP::logger().debug(F("Fetching values for device ID 0x%02X"), device_id());
+    EMSESP::logger().debug(F("Fetching values for deviceID 0x%02X"), device_id());
 
     for (const auto & tf : telegram_functions_) {
         if (tf.fetch_) {
@@ -361,9 +361,9 @@ void EMSdevice::fetch_values() {
     }
 }
 
-// toggle on/off automatic fetch for a telegram id
+// toggle on/off automatic fetch for a telegramID
 void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
-    EMSESP::logger().debug(F("Toggling fetch for device ID 0x%02X, telegram ID 0x%02X to %d"), device_id(), telegram_id, toggle);
+    EMSESP::logger().debug(F("Toggling fetch for deviceID 0x%02X, telegramID 0x%02X to %d"), device_id(), telegram_id, toggle);
 
     for (auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram_id) {
@@ -372,7 +372,7 @@ void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
     }
 }
 
-// get status of automatic fetch for a telegram id
+// get status of automatic fetch for a telegramID
 bool EMSdevice::is_fetch(uint16_t telegram_id) {
     for (auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram_id) {
@@ -1027,7 +1027,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             // handle ENUMs
             else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
                 // check for numeric enum-format, but "hamode" always as text
-                if ((EMSESP::enum_format() == ENUM_FORMAT_VALUE) && (dv.short_name != FL_(hamode)[0])) {
+                if ((EMSESP::enum_format() == ENUM_FORMAT_INDEX) && (dv.short_name != FL_(hamode)[0])) {
                     json[name] = (uint8_t)(*(uint8_t *)(dv.value_p));
                 } else {
                     json[name] = dv.options[*(uint8_t *)(dv.value_p)];

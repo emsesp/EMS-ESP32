@@ -36,8 +36,6 @@
 
 namespace emsesp {
 
-enum Dallas_Format : uint8_t { SENSORID = 1, NUMBER, NAME };
-
 class DallasSensor {
   public:
     class Sensor {
@@ -45,16 +43,39 @@ class DallasSensor {
         Sensor(const uint8_t addr[]);
         ~Sensor() = default;
 
-        uint64_t    id() const;
-        std::string id_string() const;
-        std::string to_string(const bool name = false) const;
-        int16_t     offset() const;
+        uint64_t id() const {
+            return id_;
+        }
+
+        std::string id_str() const {
+            return id_str_;
+        }
+
+        int16_t offset() const {
+            return offset_;
+        }
+        void set_offset(const int16_t offset) {
+            offset_ = offset;
+        }
+
+        std::string name() const;
+        void        set_name(const std::string & name) {
+            name_ = name;
+        }
+
+        bool apply_customization();
 
         int16_t temperature_c = EMS_VALUE_SHORT_NOTSET;
         bool    read          = false;
+        bool    ha_registered = false;
 
       private:
+        std::string to_string() const;
+
         const uint64_t id_;
+        std::string    id_str_;
+        std::string    name_;
+        int16_t        offset_;
     };
 
     DallasSensor()  = default;
@@ -65,8 +86,12 @@ class DallasSensor {
     void publish_values(const bool force);
     void reload();
     bool updated_values();
+    bool get_value_info(JsonObject & output, const char * cmd, const int8_t id);
 
-    const std::vector<Sensor> sensors() const;
+    // return back reference to the sensor list, used by other classes
+    const std::vector<Sensor> sensors() const {
+        return sensors_;
+    }
 
     uint32_t reads() {
         return sensorreads_;
@@ -80,15 +105,19 @@ class DallasSensor {
         return (dallas_gpio_ != 0);
     }
 
-    uint8_t dallas_format() {
-        return dallas_format_;
+    bool have_sensors() {
+        return (sensors_.size() > 0);
     }
 
-    void dallas_format(uint8_t dallas_format) {
-        dallas_format_ = dallas_format;
+    size_t no_sensors() {
+        return sensors_.size();
     }
 
-    bool update(const char * idstr, const char * name, int16_t offset);
+    bool update(const std::string & id_str, const std::string & name, int16_t offset);
+
+#ifdef EMSESP_DEBUG
+    void test();
+#endif
 
   private:
     static constexpr uint8_t MAX_SENSORS = 20;
@@ -129,27 +158,24 @@ class DallasSensor {
     bool     temperature_convert_complete();
     int16_t  get_temperature_c(const uint8_t addr[]);
     uint64_t get_id(const uint8_t addr[]);
+    void     remove_ha_topic(const std::string & id_str);
 
     bool command_info(const char * value, const int8_t id, JsonObject & output);
     bool command_commands(const char * value, const int8_t id, JsonObject & output);
 
-    void delete_ha_config(uint8_t index, const char * name);
+    uint32_t last_activity_ = uuid::get_uptime();
+    State    state_         = State::IDLE;
 
-    uint32_t            last_activity_ = uuid::get_uptime();
-    State               state_         = State::IDLE;
-    std::vector<Sensor> sensors_;
+    std::vector<Sensor> sensors_; // our list of actice sensors
 
-    bool registered_ha_[MAX_SENSORS];
-
-    int8_t   scancnt_       = SCAN_START;
-    uint8_t  firstscan_     = 0;
-    uint8_t  dallas_gpio_   = 0;
-    bool     parasite_      = false;
-    bool     changed_       = false;
-    uint32_t sensorfails_   = 0;
-    uint32_t sensorreads_   = 0;
-    int8_t   scanretry_     = 0;
-    uint8_t  dallas_format_ = 0;
+    int8_t   scancnt_     = SCAN_START;
+    uint8_t  firstscan_   = 0;
+    uint8_t  dallas_gpio_ = 0;
+    bool     parasite_    = false;
+    bool     changed_     = false;
+    uint32_t sensorfails_ = 0;
+    uint32_t sensorreads_ = 0;
+    int8_t   scanretry_   = 0;
 };
 
 } // namespace emsesp

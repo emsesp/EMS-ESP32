@@ -1,50 +1,40 @@
-import { FC, useContext } from 'react';
-import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import React, { FC, useContext } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { Tab, Tabs } from '@mui/material';
+import { Tab } from '@mui/material';
 
+import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from '../../components';
 import { AuthenticatedContext } from '../../contexts/authentication';
+
 import MqttStatusForm from './MqttStatusForm';
 import MqttSettingsForm from './MqttSettingsForm';
-import { AdminRoute, useLayoutTitle } from '../../components';
 
-const MqttRouting: FC = () => {
+const Mqtt: FC = () => {
   useLayoutTitle('MQTT');
 
-  const history = useHistory();
-  const { url } = useRouteMatch();
   const authenticatedContext = useContext(AuthenticatedContext);
-
-  const handleTabChange = (event: React.ChangeEvent<{}>, path: string) => {
-    history.push(path);
-  };
+  const { routerTab } = useRouterTab();
 
   return (
     <>
-      <Tabs value={url} onChange={handleTabChange} variant="fullWidth">
-        <Tab value="/mqtt/status" label="MQTT Status" />
-        <Tab value="/mqtt/settings" label="MQTT Settings" disabled={!authenticatedContext.me.admin} />
-      </Tabs>
-      <Switch>
-        <AdminRoute exact path="/mqtt/status">
-          <MqttStatusForm />
-        </AdminRoute>
-        <Route exact path="/mqtt/settings">
-          <MqttSettingsForm />
-        </Route>
-        <Redirect to="/mqtt/status" />
-      </Switch>
+      <RouterTabs value={routerTab}>
+        <Tab value="status" label="MQTT Status" />
+        <Tab value="settings" label="MQTT Settings" disabled={!authenticatedContext.me.admin} />
+      </RouterTabs>
+      <Routes>
+        <Route path="status" element={<MqttStatusForm />} />
+        <Route
+          path="settings"
+          element={
+            <RequireAdmin>
+              <MqttSettingsForm />
+            </RequireAdmin>
+          }
+        />
+        <Route path="/*" element={<Navigate replace to="status" />} />
+      </Routes>
     </>
   );
 };
-
-const Mqtt: FC = () => (
-  <Switch>
-    <Route exact path="/mqtt/*">
-      <MqttRouting />
-    </Route>
-    <Redirect to="/mqtt/status" />
-  </Switch>
-);
 
 export default Mqtt;

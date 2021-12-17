@@ -1,50 +1,40 @@
 import { FC, useContext } from 'react';
-import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import { Navigate, Routes, Route } from 'react-router-dom';
 
-import { Tab, Tabs } from '@mui/material';
+import { Tab } from '@mui/material';
 
 import { AuthenticatedContext } from '../../contexts/authentication';
 import APStatusForm from './APStatusForm';
 import APSettingsForm from './APSettingsForm';
-import { AdminRoute, useLayoutTitle } from '../../components';
+import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from '../../components';
 
-const AccessPointRouting: FC = () => {
+const AccessPoint: FC = () => {
   useLayoutTitle('Access Point');
 
-  const history = useHistory();
-  const { url } = useRouteMatch();
   const authenticatedContext = useContext(AuthenticatedContext);
 
-  const handleTabChange = (event: React.ChangeEvent<{}>, path: string) => {
-    history.push(path);
-  };
+  const { routerTab } = useRouterTab();
 
   return (
     <>
-      <Tabs value={url} onChange={handleTabChange} variant="fullWidth">
-        <Tab value="/ap/status" label="Access Point Status" />
-        <Tab value="/ap/settings" label="Access Point Settings" disabled={!authenticatedContext.me.admin} />
-      </Tabs>
-      <Switch>
-        <Route exact path="/ap/status">
-          <APStatusForm />
-        </Route>
-        <AdminRoute exact path="/ap/settings">
-          <APSettingsForm />
-        </AdminRoute>
-        <Redirect to="/ap/status" />
-      </Switch>
+      <RouterTabs value={routerTab}>
+        <Tab value="status" label="Access Point Status" />
+        <Tab value="settings" label="Access Point Settings" disabled={!authenticatedContext.me.admin} />
+      </RouterTabs>
+      <Routes>
+        <Route path="status" element={<APStatusForm />} />
+        <Route
+          path="settings"
+          element={
+            <RequireAdmin>
+              <APSettingsForm />
+            </RequireAdmin>
+          }
+        />
+        <Route path="/*" element={<Navigate replace to="status" />} />
+      </Routes>
     </>
   );
 };
-
-const AccessPoint: FC = () => (
-  <Switch>
-    <Route exact path="/ap/*">
-      <AccessPointRouting />
-    </Route>
-    <Redirect to="/ap/status" />
-  </Switch>
-);
 
 export default AccessPoint;

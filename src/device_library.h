@@ -42,7 +42,7 @@
 {208, DeviceType::BOILER, F("Logamax Plus/GB192/Condens GC9000"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {210, DeviceType::BOILER, F("Cascade MC400"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {211, DeviceType::BOILER, F("EasyControl Adapter"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{234, DeviceType::BOILER, F("Logamax Plus GB122"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{234, DeviceType::BOILER, F("Logamax Plus GB122/Condense 2300"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {206, DeviceType::BOILER, F("Ecomline Excellent"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Controllers - 0x09 / 0x10 / 0x50

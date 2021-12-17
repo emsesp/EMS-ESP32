@@ -227,7 +227,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     // init stuff
     Mqtt::ha_enabled(true);
-    EMSESP::dallassensor_.dallas_format(1);
     Mqtt::ha_climate_format(1);
     EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
     EMSESP::watch(EMSESP::Watch::WATCH_RAW); // raw
@@ -366,7 +365,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.printfln(F("Testing unknown2..."));
 
         // simulate getting version information back from an unknown device
-        rx_telegram({0x09, 0x0B, 0x02, 0x00, 0x5A, 0x01, 0x02}); // product id is 90 which doesn't exist
+        rx_telegram({0x09, 0x0B, 0x02, 0x00, 0x5A, 0x01, 0x02}); // productID is 90 which doesn't exist
     }
 
     if (command == "gateway") {
@@ -540,6 +539,22 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         run_test("thermostat");
 
         shell.invoke_command("call boiler wwseltemp");
+        shell.invoke_command("call system publish");
+    }
+
+    if (command == "dallas") {
+        shell.printfln(F("Testing adding Dallas sensor"));
+        Mqtt::ha_enabled(true);
+        Mqtt::nested_format(1);
+        // Mqtt::nested_format(0);
+
+        emsesp::EMSESP::dallassensor_.test();
+        shell.invoke_command("show");
+        shell.invoke_command("call system publish");
+
+        // rename
+        EMSESP::dallassensor_.update("01-0203-0405-0607", "poep", 2);
+        shell.invoke_command("show");
         shell.invoke_command("call system publish");
     }
 

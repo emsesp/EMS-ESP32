@@ -48,7 +48,7 @@ const OTASettingsForm: FC = () => {
       <>
         <BlockFormControlLabel
           control={<Checkbox name="enabled" checked={data.enabled} onChange={updateFormValue} />}
-          label="Enable OTA Updates?"
+          label="Enable OTA Updates"
         />
         <ValidatedTextField
           fieldErrors={fieldErrors}

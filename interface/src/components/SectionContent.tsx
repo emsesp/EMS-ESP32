@@ -11,7 +11,7 @@ interface SectionContentProps {
 const SectionContent: FC<SectionContentProps> = (props) => {
   const { children, title, id } = props;
   return (
-    <Paper id={id} sx={{ p: 2, m: 3 }}>
+    <Paper id={id} sx={{ p: 2, m: 2 }}>
       <Divider sx={{ pb: 2, borderColor: 'primary.main', fontSize: 20, color: 'primary.main' }}>{title}</Divider>
       {children}
     </Paper>

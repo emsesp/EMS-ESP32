@@ -124,10 +124,6 @@
 #define EMSESP_DEFAULT_BOOL_FORMAT 1 // on/off
 #endif
 
-#ifndef EMSESP_DEFAULT_DALLAS_FORMAT
-#define EMSESP_DEFAULT_DALLAS_FORMAT 1 // sensorid (number is 2, name is 3)
-#endif
-
 #ifndef EMSESP_DEFAULT_HA_CLIMATE_FORMAT
 #define EMSESP_DEFAULT_HA_CLIMATE_FORMAT 1 // current temp
 #endif

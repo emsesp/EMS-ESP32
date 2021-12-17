@@ -1,25 +1,24 @@
-import { FC } from 'react';
+import { FC, useRef, useState } from 'react';
 
 import * as SystemApi from '../../api/system';
-import { MessageBox, SectionContent, SingleUpload, useFileUpload } from '../../components';
+import { SectionContent } from '../../components';
+import { FileUploadConfig } from '../../api/endpoints';
+
+import FirmwareFileUpload from './FirmwareFileUpload';
+import FirmwareRestartMonitor from './FirmwareRestartMonitor';
 
 const UploadFirmwareForm: FC = () => {
-  const [uploadFile, cancelUpload, uploading, uploadProgress] = useFileUpload({ upload: SystemApi.uploadFirmware });
+  const [restarting, setRestarting] = useState<boolean>();
+
+  const uploadFirmware = useRef(async (file: File, config?: FileUploadConfig) => {
+    const response = await SystemApi.uploadFirmware(file, config);
+    setRestarting(true);
+    return response;
+  });
 
   return (
     <SectionContent title="Upload Firmware" titleGutter>
-      <MessageBox
-        message="Upload a new firmware (.bin) file below to replace the existing firmware"
-        level="warning"
-        my={2}
-      />
-      <SingleUpload
-        accept="application/octet-stream"
-        onDrop={uploadFile}
-        onCancel={cancelUpload}
-        uploading={uploading}
-        progress={uploadProgress}
-      />
+      {restarting ? <FirmwareRestartMonitor /> : <FirmwareFileUpload uploadFirmware={uploadFirmware.current} />}
     </SectionContent>
   );
 };
