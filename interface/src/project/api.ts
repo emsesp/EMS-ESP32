@@ -8,8 +8,12 @@ import {
   Settings,
   Status,
   Data,
+  Device,
+  Devices,
   DeviceData,
+  DeviceEntity,
   DeviceID,
+  ExcludeEntities,
   WriteValue,
   WriteSensor
 } from './types';
@@ -38,12 +42,24 @@ export function readData(): AxiosPromise<Data> {
   return AXIOS.get('/data');
 }
 
+export function readDevices(): AxiosPromise<Devices> {
+  return AXIOS.get('/devices');
+}
+
 export function scanDevices(): AxiosPromise<void> {
   return AXIOS.post('/scanDevices');
 }
 
 export function readDeviceData(deviceid: DeviceID): AxiosPromise<DeviceData> {
   return AXIOS_BIN.post('/deviceData', deviceid);
+}
+
+export function readDeviceEntities(deviceid: DeviceID): AxiosPromise<DeviceEntity[]> {
+  return AXIOS_BIN.post('/deviceEntities', deviceid);
+}
+
+export function sendExcludeEntities(excludeEntities: ExcludeEntities): AxiosPromise<void> {
+  return AXIOS.post('/excludeEntities', excludeEntities);
 }
 
 export function writeValue(writevalue: WriteValue): AxiosPromise<void> {

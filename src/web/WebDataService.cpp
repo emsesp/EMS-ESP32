@@ -62,7 +62,7 @@ void WebDataService::all_devices(AsyncWebServerRequest * request) {
     for (auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice) {
             JsonObject obj = devices.createNestedObject();
-            obj["i"]       = emsdevice->unique_id();        // id
+            obj["i"]       = emsdevice->unique_id();        // a unique id
             obj["t"]       = emsdevice->device_type_name(); // type
             obj["b"]       = emsdevice->brand_to_string();  // brand
 

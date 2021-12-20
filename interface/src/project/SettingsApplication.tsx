@@ -112,9 +112,7 @@ const SettingsApplication: FC = () => {
         </Typography>
         <Box color="warning.main">
           <Typography variant="body2">
-            <i>
-              Select a pre-configured interface board profile or use "Custom" to configure your own hardware settings
-            </i>
+            Select a pre-configured interface board profile from the list or "Custom" to configure your own hardware settings.
           </Typography>
         </Box>
         <ValidatedTextField
@@ -129,7 +127,7 @@ const SettingsApplication: FC = () => {
         >
           {boardProfileSelectItems()}
           <MenuItem key={'CUSTOM'} value={'CUSTOM'}>
-            Custom...
+            Custom&hellip;
           </MenuItem>
         </ValidatedTextField>
         {data.board_profile === 'CUSTOM' && (
@@ -224,7 +222,7 @@ const SettingsApplication: FC = () => {
           </Grid>
         )}
         <Typography variant="h6" color="primary">
-          EMS Bus
+          EMS Bus Settings
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <Grid item xs={4}>

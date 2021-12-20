@@ -14,6 +14,7 @@ import {
   DialogActions,
   MenuItem,
   InputAdornment,
+  IconButton,
   Grid
 } from '@mui/material';
 
@@ -28,7 +29,6 @@ import { useSnackbar } from 'notistack';
 
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ListIcon from '@mui/icons-material/List';
-import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 
 import { AuthenticatedContext } from '../contexts/authentication';
@@ -62,9 +62,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
   '&:hover': {
     backgroundColor: theme.palette.info.light
-  },
-  '&.Mui-selected, &.Mui-selected:hover': {
-    backgroundColor: 'purple'
   }
 }));
 
@@ -348,7 +345,7 @@ const DashboardData: FC = () => {
                   size="small"
                   variant={selectedDevice === device.i ? 'contained' : 'outlined'}
                   color={selectedDevice === device.i ? 'secondary' : 'inherit'}
-                  onClick={() => fetchDeviceData(device.i)}
+                  onClick={() => device.e && fetchDeviceData(device.i)}
                 >
                   {device.sn}&nbsp;({device.e})
                 </Button>
@@ -372,30 +369,11 @@ const DashboardData: FC = () => {
       return;
     }
 
-    const noDeviceData = () => {
-      return (deviceData?.data || []).length === 0;
-    };
-
     const sendCommand = (dv: DeviceValue) => {
       if (dv.c && me.admin) {
         setDeviceValue(dv);
       }
     };
-
-    if (noDeviceData()) {
-      return (
-        <Fragment>
-          <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
-            {deviceData.type}&nbsp;Data
-          </Typography>
-          <Box color="warning.main" p={0} mt={0} mb={0}>
-            <Typography variant="body1">
-              <i>no data available</i>
-            </Typography>
-          </Box>
-        </Fragment>
-      );
-    }
 
     return (
       <>

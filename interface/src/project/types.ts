@@ -73,6 +73,10 @@ export interface Data {
   analog?: number; // is optional
 }
 
+export interface Devices {
+  devices: Device[];
+}
+
 export interface DeviceValue {
   v: any; // value, in any format
   u: number; // uom
@@ -85,6 +89,18 @@ export interface DeviceData {
   id: number;
   type: string;
   data: DeviceValue[];
+}
+
+export interface DeviceEntity {
+  v: any; // value, in any format
+  n: string; // name
+  sn: string; // shortname
+  x: boolean; // excluded flag
+}
+
+export interface ExcludeEntities {
+  id: number;
+  entities: string[];
 }
 
 export interface DeviceID {

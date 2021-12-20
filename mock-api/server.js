@@ -3,6 +3,7 @@ const compression = require('compression')
 const SSE = require('express-sse')
 const path = require('path')
 const msgpack = require('@msgpack/msgpack')
+const WebSocket = require('ws')
 
 // REST API
 const rest_server = express()
@@ -12,7 +13,7 @@ rest_server.use(compression())
 rest_server.use(express.static(path.join(__dirname, '../interface/build')))
 rest_server.use(express.json())
 
-// endpoint
+// API endpoint
 const API_ENDPOINT_ROOT = '/api/'
 
 // LOG
@@ -290,12 +291,15 @@ const generate_token = { token: '1234' }
 // EMS-ESP Project specific
 const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'settings'
 const EMSESP_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'data'
+const EMSESP_DEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'devices'
 const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices'
 const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData'
+const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities'
 const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'status'
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile'
 const EMSESP_WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
 const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
+const EMSESP_EXCLUDE_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'excludeEntities'
 
 settings = {
   tx_mode: 1,
@@ -324,6 +328,44 @@ settings = {
   board_profile: 'S32',
   bool_format: 1,
   enum_format: 1,
+}
+
+const emsesp_devices = {
+  devices: [
+    {
+      i: 1,
+      t: 'Thermostat',
+      sn: 'Thermostat1',
+      b: '',
+      n: 'RC20/Moduline 300',
+      d: 23,
+      p: 77,
+      v: '03.03',
+      e: 5,
+    },
+    {
+      i: 2,
+      t: 'Boiler',
+      sn: 'Boiler',
+      b: 'Nefit',
+      n: 'GBx72/Trendline/Cerapur/Greenstar Si/27i',
+      d: 8,
+      p: 123,
+      v: '06.01',
+      e: 5,
+    },
+    {
+      i: 4,
+      t: 'Thermostat',
+      sn: 'Thermostat2',
+      b: 'Buderus',
+      n: 'RC100/Moduline 1000/1010',
+      d: 16,
+      p: 165,
+      v: '04.01',
+      e: 5,
+    },
+  ],
 }
 
 const emsesp_data = {
@@ -391,6 +433,7 @@ const status = {
   num_devices: 3,
 }
 
+// Dashboard data
 const emsesp_devicedata_1 = {
   id: 1,
   type: 'Thermostat',
@@ -560,21 +603,184 @@ const emsesp_devicedata_4 = {
       u: 1,
       n: 'hc2 selected room temperature',
       c: 'hc2/seltemp',
+      x: false,
     },
     {
       v: 18.6,
       u: 1,
       n: 'hc2 current room temperature',
       c: '',
+      x: true,
     },
     {
       v: 'off',
       u: 0,
       n: 'hc2 mode',
       c: 'hc2/mode',
+      x: true,
     },
   ],
 }
+
+// Device Entities
+const emsesp_deviceentities_1 = [
+  {
+    v: '(0)',
+    n: 'error code',
+    sn: 'errorcode',
+    x: false,
+  },
+  {
+    v: '14:54:39 06/06/2021',
+    n: 'date/time',
+    sn: 'datetime',
+    x: false,
+  },
+  {
+    v: 18,
+    n: 'hc1 selected room temperature',
+    sn: 'hc1/seltemp',
+    x: false,
+  },
+  {
+    v: 22.6,
+    n: 'hc1 current room temperature',
+    sn: 'hc1/curtemp',
+    x: false,
+  },
+  {
+    v: 'auto',
+    n: 'hc1 mode',
+    sn: 'hc1/mode',
+    x: false,
+  },
+]
+
+const emsesp_deviceentities_2 = [
+  { v: 'off', n: 'heating active', sn: 'heatingactive', x: false },
+  { v: 'off', n: 'warm water active', sn: 'wwactive', x: false },
+  { v: 5, n: 'selected flow temperature', sn: 'selflowtemp', x: false },
+  { v: 0, n: 'burner selected max power', sn: 'selburnpow', x: false },
+  { v: 0, n: 'heating pump modulation', sn: 'heatingpumpmod', x: false },
+  { v: 42.9, n: 'current flow temperature', sn: 'curflowtemp', x: false },
+  { v: 41.8, n: 'return temperature', sn: 'returntemp', x: false },
+  { v: 1.6, n: 'system pressure', sn: 'systempressure', x: false },
+  { v: 45, n: 'actual boiler temperature', sn: 'actboilertemp', x: false },
+  { v: 'off', n: 'gas', sn: 'gas', x: false },
+  { v: 0, n: 'flame current', sn: 'flamecur', x: false },
+  { v: 'off', n: 'heating pump', sn: 'heatingpump', x: false },
+  { v: 'off', n: 'fan', sn: 'fan', x: false },
+  { v: 'off', n: 'ignition', sn: 'ignition', x: false },
+  {
+    v: 'on',
+    n: 'heating activated',
+    sn: 'heatingactivated',
+    x: false,
+  },
+  { v: 75, n: 'heating temperature', sn: 'heatingtemp', x: false },
+  { v: 90, n: 'burner pump max power', sn: 'pumpmodmax', x: false },
+  { v: 55, n: 'burner pump min power', sn: 'pumpmodmin', x: false },
+  { v: 1, n: 'pump delay', sn: 'pumpdelay', x: false },
+  { v: 10, n: 'burner min period', sn: 'burnminperiod', x: false },
+  { v: 0, n: 'burner min power', sn: 'burnminpower', x: false },
+  { v: 77, n: 'burner max power', sn: 'burnmaxpower', x: false },
+  { v: -6, n: 'hysteresis on temperature', sn: 'boilhyston', x: false },
+  { v: 6, n: 'hysteresis off temperature', sn: 'boilhystoff', x: false },
+  { v: 0, n: 'burner current power', sn: 'burncurpower', x: false },
+  { v: 317694, n: 'burner starts', sn: 'burnstarts', x: false },
+  { v: 524115, n: 'total burner operating time', sn: 'burnoptime', x: false },
+  { v: 424286, n: 'total heat operating time', sn: 'heatoptime', x: false },
+  { v: 4571225, n: 'total UBA operating time', sn: 'ubaoptime', x: false },
+  { v: '1C(210) 06.06.2020 12:07', n: 'last error code', sn: 'lasterror', x: false },
+  { v: '0H', n: 'service code', sn: 'servicecode', x: false },
+  { v: 203, n: 'service code number', sn: 'servicecodenumber', x: false },
+  { v: ' ', n: 'maintenance message', sn: 'maintenancemessage', x: false },
+  {
+    v: 'off',
+    n: 'maintenance scheduled',
+    sn: 'maintenance',
+    x: false,
+  },
+  { v: 6000, n: 'maintenance set time', sn: 'maintenancetime', x: false },
+  { v: '01.01.2012', n: 'maintenance set date', sn: 'maintenancedate', x: false },
+  { v: 60, n: 'ww selected temperature', sn: 'wwseltemp', x: false },
+  { v: 62, n: 'ww set temperature', sn: 'wwsettemp', x: false },
+  { v: 'flow', n: 'ww type', sn: 'wwtype', x: false },
+  {
+    v: 'eco',
+    n: 'ww comfort',
+    sn: 'wwcomfort',
+    x: false,
+  },
+  { v: 40, n: 'ww flow temperature offset', sn: 'wwflowtempoffset', x: false },
+  { v: 100, n: 'ww max power', sn: 'wwmaxpower', x: false },
+  {
+    v: 'off',
+    n: 'ww circulation pump available',
+    sn: 'wwcircpump',
+    x: false,
+  },
+  { v: '3-way valve', n: 'ww charging type', sn: 'wwchargingtype', x: false },
+  { v: -5, n: 'ww hysteresis on temperature', sn: 'wwhyston', x: false },
+  { v: 0, n: 'ww hysteresis off temperature', sn: 'wwhystoff', x: false },
+  { v: 70, n: 'ww disinfection temperature', sn: 'wwdisinfectiontemp', x: false },
+  {
+    v: 'off',
+    n: 'ww circulation pump frequency',
+    sn: 'wwcircmode',
+    x: false,
+  },
+  {
+    v: 'off',
+    n: 'ww circulation active',
+    sn: 'wwcirc',
+    x: false,
+  },
+  { v: 37.1, n: 'ww current intern temperature', sn: 'wwcurtemp', x: false },
+  { v: 0, n: 'ww current tap water flow', sn: 'wwtapwaterflow', x: false },
+  { v: 37.2, n: 'ww storage intern temperature', sn: 'wwstorageintemp', x: false },
+  { v: 'on', n: 'ww activated', sn: 'wwactivated', x: false },
+  {
+    v: 'off',
+    n: 'ww one time charging',
+    sn: 'wwonetime',
+    x: false,
+  },
+  {
+    v: 'off',
+    n: 'ww disinfection',
+    sn: 'wwdisinfect',
+    x: false,
+  },
+  { v: 'off', n: 'ww charging', sn: 'wwcharging', x: false },
+  { v: 'off', n: 'ww recharging', sn: 'wwrecharging', x: false },
+  { v: 'on', n: 'ww temperature ok', sn: 'wwtempok', x: false },
+  { v: 'off', n: 'ww active', sn: 'wwactive', x: false },
+  { v: 'on', n: 'ww heating', sn: 'wwheating', x: false },
+  { v: 282323, n: 'ww starts', sn: 'wwstarts', x: false },
+  { v: 99829, n: 'ww active time', sn: 'wwactivetime', x: false },
+]
+
+const emsesp_deviceentities_4 = [
+  {
+    v: 16,
+    n: 'hc2 selected room temperature',
+    sn: 'hc2/seltemp',
+    x: false,
+  },
+  {
+    v: 18.6,
+    n: 'hc2 current room temperature',
+    sn: 'hc2/curtemp',
+    x: true,
+  },
+  {
+    v: 'off',
+    n: 'hc2 mode',
+    sn: 'hc2/mode',
+    x: true,
+  },
+]
 
 // LOG
 rest_server.get(FETCH_LOG_ENDPOINT, (req, res) => {
@@ -710,6 +916,9 @@ rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.get(EMSESP_DATA_ENDPOINT, (req, res) => {
   res.json(emsesp_data)
 })
+rest_server.get(EMSESP_DEVICES_ENDPOINT, (req, res) => {
+  res.json(emsesp_devices)
+})
 rest_server.post(EMSESP_SCANDEVICES_ENDPOINT, (req, res) => {
   res.sendStatus(200)
 })
@@ -738,6 +947,30 @@ rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
     res.write(encoded, 'binary')
     res.end(null, 'binary')
   }
+})
+
+rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
+  const id = req.body.id
+  if (id === 1) {
+    const encoded = msgpack.encode(emsesp_deviceentities_1)
+    res.write(encoded, 'binary')
+    res.end(null, 'binary')
+  }
+  if (id === 2) {
+    const encoded = msgpack.encode(emsesp_deviceentities_2)
+    res.write(encoded, 'binary')
+    res.end(null, 'binary')
+  }
+  if (id === 4) {
+    const encoded = msgpack.encode(emsesp_deviceentities_4)
+    res.write(encoded, 'binary')
+    res.end(null, 'binary')
+  }
+})
+
+rest_server.post(EMSESP_EXCLUDE_ENTITIES_ENDPOINT, (req, res) => {
+  console.log('exclude list for id ' + req.body.id + ' entities=' + req.body.entities)
+  res.sendStatus(200)
 })
 
 rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
@@ -927,10 +1160,34 @@ rest_server.get(SYSTEM_SETTINGS_ENDPOINT, (req, res) => {
   res.json(settings)
 })
 
-// rest API
-rest_server.listen(port, () =>
-  console.log(`Mock RESTful API server for EMS-ESP is up and running at http://localhost:${port}`),
+// start server
+const expressServer = rest_server.listen(port, () =>
+  console.log(`Mock server for EMS-ESP is up and running at http://localhost:${port}`),
 )
+console.log(`EMS-ESP Rest API listening to http://localhost:${port}/api`)
+
+// start websocket server
+const websocketServer = new WebSocket.Server({
+  noServer: true,
+  path: '/ws',
+})
+console.log('WebSocket server is listening to /ws')
+
+expressServer.on('upgrade', (request, socket, head) => {
+  websocketServer.handleUpgrade(request, socket, head, (websocket) => {
+    websocketServer.emit('connection', websocket, request)
+  })
+})
+
+websocketServer.on('connection', function connection(websocketConnection, connectionRequest) {
+  const [_path, params] = connectionRequest?.url?.split('?')
+  console.log(params)
+
+  websocketConnection.on('message', (message) => {
+    const parsedMessage = JSON.parse(message)
+    console.log(parsedMessage)
+  })
+})
 
 var count = 8
 var log_index = 0

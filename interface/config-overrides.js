@@ -1,4 +1,4 @@
-const ManifestPlugin = require('webpack-manifest-plugin');
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ProgmemGenerator = require('./progmem-generator.js');
@@ -12,7 +12,7 @@ module.exports = function override(config, env) {
     config.output.chunkFilename = 'js/[id].[chunkhash:4].js';
 
     // take out the manifest and service worker plugins
-    config.plugins = config.plugins.filter((plugin) => !(plugin instanceof ManifestPlugin));
+    config.plugins = config.plugins.filter((plugin) => !(plugin instanceof WebpackManifestPlugin));
     config.plugins = config.plugins.filter((plugin) => !(plugin instanceof WorkboxWebpackPlugin.GenerateSW));
 
     // shorten css filenames

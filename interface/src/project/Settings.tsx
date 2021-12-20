@@ -6,7 +6,7 @@ import { Tab } from '@mui/material';
 import { RouterTabs, useRouterTab, useLayoutTitle } from '../components';
 
 import SettingsApplication from './SettingsApplication';
-import SettingsCustomize from './SettingsCustomize';
+import SettingsCustomization from './SettingsCustomization';
 
 const Settings: FC = () => {
   useLayoutTitle('Settings');
@@ -16,11 +16,11 @@ const Settings: FC = () => {
     <>
       <RouterTabs value={routerTab}>
         <Tab value="application" label="Application Settings" />
-        <Tab value="customize" label="Device Customization" />
+        <Tab value="customization" label="Device Customization" />
       </RouterTabs>
       <Routes>
         <Route path="application" element={<SettingsApplication />} />
-        <Route path="customize" element={<SettingsCustomize />} />
+        <Route path="customization" element={<SettingsCustomization />} />
         <Route path="/*" element={<Navigate replace to="application" />} />
       </Routes>
     </>

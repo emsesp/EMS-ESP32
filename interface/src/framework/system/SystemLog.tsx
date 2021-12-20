@@ -144,20 +144,6 @@ const SystemLog: FC = () => {
     document.body.removeChild(a);
   };
 
-  // const onMessage = useCallback(
-  //   (event: MessageEvent) => {
-  //     const rawData = event.data;
-  //     if (typeof rawData === 'string' || rawData instanceof String) {
-  //       const logentry = JSON.parse(rawData as string) as LogEntry;
-  //       if (logentry.i > lastIndex) {
-  //         setLastIndex(logentry.i);
-  //         setLogEntries((old) => ({ events: [...old.events, logentry] }));
-  //       }
-  //     }
-  //   },
-  //   [lastIndex]
-  // );
-
   const onMessage = (event: MessageEvent) => {
     const rawData = event.data;
     if (typeof rawData === 'string' || rawData instanceof String) {
@@ -182,24 +168,23 @@ const SystemLog: FC = () => {
   }, [fetchLog]);
 
   useEffect(() => {
-    // console.log('es creating instance');
     const es = new EventSource(addAccessTokenParameter(LOG_EVENTSOURCE_URL));
     es.onmessage = onMessage;
     es.onerror = () => {
       if (reconnectTimeout) {
-        // console.log('es reconnecting');
         es.close();
         setReconnectTimeout(setTimeout(reloadPage, 1000));
       }
     };
 
     return () => {
-      // console.log('es closing');
       es.close();
       if (reconnectTimeout) {
         clearTimeout(reconnectTimeout);
       }
     };
+    // TODO fix dependency warning
+    // eslint-disable-next-line
   }, [reconnectTimeout]);
 
   const content = () => {
