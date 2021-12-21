@@ -833,8 +833,8 @@ std::string EMSESPStreamConsole::console_name() {
 
 // Start up telnet and logging
 // Log order is off, err, warning, notice, info, debug, trace, all
-void Console::start(bool disable_telnet) {
-    disable_telnet_ = disable_telnet;
+void Console::start(bool enable_telnet) {
+    enable_telnet_ = enable_telnet;
 
     shell = std::make_shared<EMSESPStreamConsole>(Serial, true);
     shell->maximum_log_messages(100); // default was 50
@@ -852,7 +852,7 @@ void Console::start(bool disable_telnet) {
 // default idle is 10 minutes, default write timeout is 0 (automatic)
 // note, this must be started after the network/wifi for ESP32 otherwise it'll crash
 #ifndef EMSESP_STANDALONE
-    if (!disable_telnet_) {
+    if (enable_telnet_) {
         telnet_.start();
         telnet_.initial_idle_timeout(3600);  // in sec, one hour idle timeout
         telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
@@ -868,7 +868,7 @@ void Console::loop() {
     uuid::loop();
 
 #ifndef EMSESP_STANDALONE
-    if (!disable_telnet_) {
+    if (enable_telnet_) {
         telnet_.loop();
     }
 #endif

@@ -123,8 +123,8 @@ enum DeviceValueTAG : uint8_t {
 enum DeviceValueState : uint8_t {
 
     DV_DEFAULT           = 0,        // 0 - does not yet have a value
-    DV_ACTIVE            = (1 << 0), // 1 - has a value
-    DV_VISIBLE           = (1 << 1), // 2 - shown on web and console
+    DV_ACTIVE            = (1 << 0), // 1 - has a valid value
+    DV_VISIBLE           = (1 << 1), // 2 - shown on web and console, otherwise hidden
     DV_HA_CONFIG_CREATED = (1 << 2)  // 4 - set if the HA config has been created
 
 };
@@ -242,6 +242,8 @@ class EMSdevice {
     void   show_mqtt_handlers(uuid::console::Shell & shell);
     void   list_device_entries(JsonObject & output);
 
+    void exclude_entity(uint8_t entity_id);
+
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
 
     void register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, const process_function_p cb);
@@ -253,6 +255,7 @@ class EMSdevice {
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT };
     bool generate_values(JsonObject & output, const uint8_t tag_filter, const bool nested, const uint8_t output_target);
     void generate_values_web(JsonObject & output);
+    void generate_values_web_all(JsonArray & output);
 
     void register_device_value(uint8_t                             tag,
                                void *                              value_p,
@@ -382,15 +385,16 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS     = 10;
     static constexpr uint8_t EMS_DEVICE_FLAG_CRF         = 11; // CRF200 only monitor
 
-    void reserve_device_values(uint8_t elements) {
-        devicevalues_.reserve(elements);
-    }
+    // void reserve_device_values(uint8_t elements) {
+    //     devicevalues_.reserve(elements);
+    // }
 
-    void reserve_telegram_functions(uint8_t elements) {
-        telegram_functions_.reserve(elements);
-    }
+    // void reserve_telegram_functions(uint8_t elements) {
+    //     telegram_functions_.reserve(elements);
+    // }
 
-    uint8_t count_entries();
+    uint8_t count_entities();
+    bool    has_entities();
 
   private:
     uint8_t     unique_id_;
@@ -420,6 +424,8 @@ class EMSdevice {
     };
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 
+    static uint8_t dv_counter_; // unique counter for each added device value
+
     // DeviceValue holds all the attributes for a device value (also a device parameter)
     struct DeviceValue {
         uint8_t                             device_type;  // EMSdevice::DeviceType
@@ -433,9 +439,10 @@ class EMSdevice {
         uint8_t                             uom;          // DeviceValueUOM::*
         uint8_t                             ha;           // DevcieValueHA::
         bool                                has_cmd;      // true if there is a Console/MQTT command which matches the short_name
-        int32_t                             min;
-        uint32_t                            max;
-        uint8_t                             state; // DeviceValueState::*
+        int32_t                             min;          // min range
+        uint32_t                            max;          // max range
+        uint8_t                             state;        // DeviceValueState::*
+        uint8_t                             id_;          // internal unique counter
 
         DeviceValue(uint8_t                             device_type,
                     uint8_t                             tag,
@@ -465,6 +472,7 @@ class EMSdevice {
             , min(min)
             , max(max)
             , state(state) {
+            id_ = EMSdevice::dv_counter_++; // unique counter
         }
 
         // state flags

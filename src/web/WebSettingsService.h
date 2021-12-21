@@ -70,7 +70,7 @@ class WebSettings {
     uint8_t  led_gpio;
     bool     hide_led;
     bool     low_clock;
-    bool     disable_telnet;
+    bool     enable_telnet;
     bool     notoken_api;
     bool     analog_enabled;
     uint8_t  pbutton_gpio;

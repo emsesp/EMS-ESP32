@@ -40,7 +40,8 @@ class SensorCustomization {
 
 class WebCustomization {
   public:
-    std::list<SensorCustomization> sensorCustomizations;
+    std::list<SensorCustomization> sensorCustomizations; // for sensor names and offsets
+    std::vector<uint8_t>           device_entities;      // for a list of entities that should be excluded from the device list
 
     static void              read(WebCustomization & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebCustomization & settings);

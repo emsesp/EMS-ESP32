@@ -346,7 +346,7 @@ bool DallasSensor::command_commands(const char * value, const int8_t id, JsonObj
 }
 
 // creates JSON doc from values
-// returns false if empty
+// returns false if there are no sensors
 bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject & output) {
     if (sensors_.size() == 0) {
         return false;

@@ -250,7 +250,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     if ((device_type >= EMSdevice::DeviceType::BOILER) && (!value || !strlen(value))) {
         if (!cf || !cf->cmdfunction_json_) {
 #if defined(EMSESP_DEBUG)
-            LOG_INFO(F("[DEBUG] Calling %s command '%s' to retrieve values"), dname.c_str(), cmd);
+            LOG_DEBUG(F("[DEBUG] Calling %s command '%s' to retrieve values"), dname.c_str(), cmd);
 #endif
             return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
         }
@@ -259,11 +259,11 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     if (cf) {
         // we have a matching command
         if ((value == nullptr) || !strlen(value)) {
-            LOG_INFO(F("Calling %s command '%s'"), dname.c_str(), cmd);
+            LOG_DEBUG(F("Calling %s command '%s'"), dname.c_str(), cmd);
         } else if (id == -1) {
-            LOG_INFO(F("Calling %s command '%s', value %s, id is default"), dname.c_str(), cmd, value);
+            LOG_DEBUG(F("Calling %s command '%s', value %s, id is default"), dname.c_str(), cmd, value);
         } else {
-            LOG_INFO(F("Calling %s command '%s', value %s, id is %d"), dname.c_str(), cmd, value, id);
+            LOG_DEBUG(F("Calling %s command '%s', value %s, id is %d"), dname.c_str(), cmd, value, id);
         }
 
         // check permissions

@@ -39,7 +39,7 @@ import * as EMSESP from './api';
 
 import { numberValue, updateValue, extractErrorMessage, useRest } from '../utils';
 
-import { Data, DeviceData, Device, DeviceValue, DeviceValueUOM, DeviceValueUOM_s, Sensor } from './types';
+import { CoreData, DeviceData, Device, DeviceValue, DeviceValueUOM, DeviceValueUOM_s, Sensor } from './types';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -76,7 +76,7 @@ const StyledTooltip = styled(({ className, ...props }: TooltipProps) => (
 }));
 
 const DashboardData: FC = () => {
-  const { loadData, data, errorMessage } = useRest<Data>({ read: EMSESP.readData });
+  const { loadData, data, errorMessage } = useRest<CoreData>({ read: EMSESP.readData });
 
   const { me } = useContext(AuthenticatedContext);
 
@@ -87,10 +87,10 @@ const DashboardData: FC = () => {
   const [sensor, setSensor] = useState<Sensor>();
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
 
-  const fetchDeviceData = async (device_id: number) => {
-    setSelectedDevice(device_id);
+  const fetchDeviceData = async (unique_id: number) => {
+    setSelectedDevice(unique_id);
     try {
-      setDeviceData((await EMSESP.readDeviceData({ id: device_id })).data);
+      setDeviceData((await EMSESP.readDeviceData({ id: unique_id })).data);
     } catch (error: any) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem fetching device data'), { variant: 'error' });
     }
@@ -115,6 +115,9 @@ const DashboardData: FC = () => {
   };
 
   function formatValue(value: any, uom: number) {
+    if (!value) {
+      return 'offline';
+    }
     switch (uom) {
       case DeviceValueUOM.HOURS:
         return value ? formatDuration(value * 60) : '0 hours';
@@ -126,7 +129,6 @@ const DashboardData: FC = () => {
         }
         return value;
       case DeviceValueUOM.DEGREES:
-        // always show with one decimal place
         return (
           new Intl.NumberFormat(undefined, {
             minimumFractionDigits: 1
@@ -347,7 +349,7 @@ const DashboardData: FC = () => {
                   color={selectedDevice === device.i ? 'secondary' : 'inherit'}
                   onClick={() => device.e && fetchDeviceData(device.i)}
                 >
-                  {device.sn}&nbsp;({device.e})
+                  {device.s}&nbsp;({device.e})
                 </Button>
               </StyledTooltip>
             ))}

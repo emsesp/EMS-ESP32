@@ -11,7 +11,7 @@ export interface Settings {
   shower_alert: boolean;
   rx_gpio: number;
   tx_gpio: number;
-  disable_telnet: boolean;
+  enable_telnet: boolean;
   phy_type: number;
   dallas_gpio: number;
   dallas_parasite: boolean;
@@ -45,7 +45,7 @@ export interface Status {
 export interface Device {
   i: number; // id
   t: string; // type
-  sn: string; // shortname
+  s: string; // shortname
   b: string; // brand
   n: string; // name
   d: number; // deviceid
@@ -57,7 +57,7 @@ export interface Device {
 export interface Sensor {
   is: string; // id string
   n: string; // name/alias
-  t: number; // temp
+  t?: number; // temp
   o: number; // offset
 }
 
@@ -67,14 +67,19 @@ export interface WriteSensor {
   offset: number;
 }
 
-export interface Data {
+export interface CoreData {
   devices: Device[];
   sensors: Sensor[];
   analog?: number; // is optional
 }
 
+export interface DeviceShort {
+  i: number; // id
+  s: string; // shortname
+}
+
 export interface Devices {
-  devices: Device[];
+  devices: DeviceShort[];
 }
 
 export interface DeviceValue {
@@ -94,16 +99,17 @@ export interface DeviceData {
 export interface DeviceEntity {
   v: any; // value, in any format
   n: string; // name
-  sn: string; // shortname
+  s: string; // shortname
   x: boolean; // excluded flag
+  i: number; // unique id
 }
 
 export interface ExcludeEntities {
   id: number;
-  entities: string[];
+  entity_ids: number[];
 }
 
-export interface DeviceID {
+export interface UniqueID {
   id: number;
 }
 

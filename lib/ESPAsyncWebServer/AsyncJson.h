@@ -50,6 +50,7 @@ class ChunkPrint : public Print {
     }
 };
 
+// added by Proddy
 class MsgpackAsyncJsonResponse : public AsyncAbstractResponse {
   protected:
     DynamicJsonDocument _jsonBuffer;
@@ -78,8 +79,8 @@ class MsgpackAsyncJsonResponse : public AsyncAbstractResponse {
     }
     size_t setLength() {
         _contentLength = measureMsgPack(_root);
-        //_headers.add(new AsyncWebHeader("Json-Length", String(_jsonBuffer.memoryUsage()))); // For determening size of EMSESP_JSON_SIZE_XXLARGE_DYN (Sunbuzz) 
-                                                                                              // Json-Length: 10635
+        //_headers.add(new AsyncWebHeader("Json-Length", String(_jsonBuffer.memoryUsage()))); // For determening size of EMSESP_JSON_SIZE_XXLARGE_DYN (Sunbuzz)
+        // Json-Length: 10635
         if (_contentLength) {
             _isValid = true;
         }
@@ -93,8 +94,6 @@ class MsgpackAsyncJsonResponse : public AsyncAbstractResponse {
     size_t _fillBuffer(uint8_t * data, size_t len) {
         ChunkPrint dest(data, _sentLength, len);
         serializeMsgPack(_root, dest);
-        // serializeJson(_root, Serial); // for testing proddy
-        // Serial.println();
         return len;
     }
 };
@@ -160,8 +159,6 @@ class PrettyAsyncJsonResponse : public AsyncJsonResponse {
     size_t _fillBuffer(uint8_t * data, size_t len) {
         ChunkPrint dest(data, _sentLength, len);
         serializeJsonPretty(_root, dest);
-        // serializeJson(_root, Serial); // for testing proddy
-        // Serial.println();
         return len;
     }
 };

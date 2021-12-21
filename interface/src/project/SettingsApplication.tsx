@@ -35,7 +35,7 @@ export function boardProfileSelectItems() {
 const SettingsApplication: FC = () => {
   const { loadData, saveData, saving, setData, data, errorMessage, restartNeeded } = useRest<Settings>({
     read: EMSESP.readSettings,
-    update: EMSESP.updateSettings
+    update: EMSESP.writeSettings
   });
 
   const { enqueueSnackbar } = useSnackbar();
@@ -112,7 +112,8 @@ const SettingsApplication: FC = () => {
         </Typography>
         <Box color="warning.main">
           <Typography variant="body2">
-            Select a pre-configured interface board profile from the list or "Custom" to configure your own hardware settings.
+            Select a pre-configured interface board profile from the list or "Custom" to configure your own hardware
+            settings.
           </Typography>
         </Box>
         <ValidatedTextField
@@ -275,8 +276,8 @@ const SettingsApplication: FC = () => {
           />
         )}
         <BlockFormControlLabel
-          control={<Checkbox checked={data.disable_telnet} onChange={updateFormValue} name="disable_telnet" />}
-          label="Disable Telnet Console"
+          control={<Checkbox checked={data.enable_telnet} onChange={updateFormValue} name="enable_telnet" />}
+          label="Enable Telnet Console"
           disabled={saving}
         />
         {data.dallas_gpio !== 0 && (

@@ -347,7 +347,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
                 // print header
-                shell.printfln(F("%s: %s (%d)"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str(), emsdevice->count_entries());
+                shell.printfln(F("%s: %s (%d)"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str(), emsdevice->count_entities());
 
                 DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN); // use max size
                 JsonObject          json = doc.to<JsonObject>();
@@ -1286,8 +1286,8 @@ void EMSESP::start() {
     webSettingsService.begin();
     system_.get_settings();
 
-    console_.start(system_.disable_telnet()); // telnet and serial console, from here we can start logging events
-    webLogService.start();                    // start web log service
+    console_.start(system_.enable_telnet()); // telnet and serial console, from here we can start logging events
+    webLogService.start();                   // start web log service
 
     // load the customizations for Dallas and EMS Devices
     webCustomizationService.begin();

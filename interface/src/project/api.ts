@@ -7,12 +7,11 @@ import {
   APIcall,
   Settings,
   Status,
-  Data,
-  Device,
+  CoreData,
   Devices,
   DeviceData,
   DeviceEntity,
-  DeviceID,
+  UniqueID,
   ExcludeEntities,
   WriteValue,
   WriteSensor
@@ -26,7 +25,7 @@ export function readSettings(): AxiosPromise<Settings> {
   return AXIOS.get('/settings');
 }
 
-export function updateSettings(settings: Settings): AxiosPromise<Settings> {
+export function writeSettings(settings: Settings): AxiosPromise<Settings> {
   return AXIOS.post('/settings', settings);
 }
 
@@ -38,8 +37,8 @@ export function readStatus(): AxiosPromise<Status> {
   return AXIOS.get('/status');
 }
 
-export function readData(): AxiosPromise<Data> {
-  return AXIOS.get('/data');
+export function readData(): AxiosPromise<CoreData> {
+  return AXIOS.get('/coreData');
 }
 
 export function readDevices(): AxiosPromise<Devices> {
@@ -50,15 +49,15 @@ export function scanDevices(): AxiosPromise<void> {
   return AXIOS.post('/scanDevices');
 }
 
-export function readDeviceData(deviceid: DeviceID): AxiosPromise<DeviceData> {
-  return AXIOS_BIN.post('/deviceData', deviceid);
+export function readDeviceData(unique_id: UniqueID): AxiosPromise<DeviceData> {
+  return AXIOS_BIN.post('/deviceData', unique_id);
 }
 
-export function readDeviceEntities(deviceid: DeviceID): AxiosPromise<DeviceEntity[]> {
-  return AXIOS_BIN.post('/deviceEntities', deviceid);
+export function readDeviceEntities(unique_id: UniqueID): AxiosPromise<DeviceEntity[]> {
+  return AXIOS_BIN.post('/deviceEntities', unique_id);
 }
 
-export function sendExcludeEntities(excludeEntities: ExcludeEntities): AxiosPromise<void> {
+export function writeExcludeEntities(excludeEntities: ExcludeEntities): AxiosPromise<void> {
   return AXIOS.post('/excludeEntities', excludeEntities);
 }
 

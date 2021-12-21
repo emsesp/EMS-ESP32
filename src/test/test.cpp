@@ -392,6 +392,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "web") {
         shell.printfln(F("Testing Web..."));
 
+        Mqtt::ha_enabled(false); // turn off ha
+
         run_test("boiler");
         run_test("thermostat");
 
@@ -411,10 +413,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
                 shell.println();
                 Serial.print(COLOR_RESET);
 
-
                 doc.clear();
-                JsonObject root = doc.to<JsonObject>();
-                emsdevice->generate_values_web(root);
+                // JsonObject root = doc.to<JsonObject>();
+                // emsdevice->generate_values_web(root);
+
+                JsonArray output = doc.to<JsonArray>();
+                emsdevice->generate_values_web_all(output);
 
                 Serial.print(COLOR_BRIGHT_MAGENTA);
                 serializeJson(doc, Serial);

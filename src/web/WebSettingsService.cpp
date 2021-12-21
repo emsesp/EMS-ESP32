@@ -56,7 +56,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["led_gpio"]             = settings.led_gpio;
     root["hide_led"]             = settings.hide_led;
     root["low_clock"]            = settings.low_clock;
-    root["disable_telnet"]       = settings.disable_telnet;
+    root["enable_telnet"]        = settings.enable_telnet;
     root["notoken_api"]          = settings.notoken_api;
     root["analog_enabled"]       = settings.analog_enabled;
     root["pbutton_gpio"]         = settings.pbutton_gpio;
@@ -162,9 +162,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     // these need reboots to be applied...
 
-    prev                    = settings.disable_telnet;
-    settings.disable_telnet = root["disable_telnet"] | false;
-    check_flag(prev, settings.disable_telnet, ChangeFlags::RESTART);
+    prev                   = settings.enable_telnet;
+    settings.enable_telnet = root["enable_telnet"] | true;
+    check_flag(prev, settings.enable_telnet, ChangeFlags::RESTART);
 
     prev                = settings.ems_bus_id;
     settings.ems_bus_id = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;

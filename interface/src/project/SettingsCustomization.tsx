@@ -17,7 +17,7 @@ import * as EMSESP from './api';
 
 import { extractErrorMessage } from '../utils';
 
-import { Device, Devices, DeviceEntity } from './types';
+import { DeviceShort, Devices, DeviceEntity } from './types';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -36,7 +36,7 @@ const SettingsCustomization: FC = () => {
   const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>();
   const [devices, setDevices] = useState<Devices>();
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [selectedDevice, setSelectedDevice] = useState<number>();
+  const [selectedDevice, setSelectedDevice] = useState<number>(0);
 
   const fetchDevices = useCallback(async () => {
     try {
@@ -46,9 +46,9 @@ const SettingsCustomization: FC = () => {
     }
   }, []);
 
-  const fetchDeviceEntities = async (device_id: number) => {
+  const fetchDeviceEntities = async (unique_id: number) => {
     try {
-      setDeviceEntities((await EMSESP.readDeviceEntities({ id: device_id })).data);
+      setDeviceEntities((await EMSESP.readDeviceEntities({ id: unique_id })).data);
     } catch (error: any) {
       setErrorMessage(extractErrorMessage(error, 'Problem fetching device entities'));
     }
@@ -58,16 +58,23 @@ const SettingsCustomization: FC = () => {
     fetchDevices();
   }, [fetchDevices]);
 
+  function formatValue(value: any) {
+    if (typeof value === 'number') {
+      return new Intl.NumberFormat().format(value);
+    }
+    return value;
+  }
+
   const renderDeviceList = () => {
     if (!devices) {
       return <FormLoader errorMessage={errorMessage} />;
     }
 
-    function compareDevices(a: Device, b: Device) {
-      if (a.t < b.t) {
+    function compareDevices(a: DeviceShort, b: DeviceShort) {
+      if (a.s < b.s) {
         return -1;
       }
-      if (a.t > b.t) {
+      if (a.s > b.s) {
         return 1;
       }
       return 0;
@@ -83,22 +90,27 @@ const SettingsCustomization: FC = () => {
       <>
         <Box color="warning.main">
           <Typography variant="body2">
-            Select an EMS device below and toggle which entities are to be excluded from the output.
+            Select an EMS device below and pick which of it's entities are to be excluded from all output streams (API,
+            MQTT and Console). Entities that have no Value are automatically excluded.
           </Typography>
         </Box>
 
         <ValidatedTextField
           name="device"
-          label="Select Device"
+          label="EMS Device"
           variant="outlined"
           fullWidth
+          value={selectedDevice}
           onChange={changeSelectedDevice}
           margin="normal"
           select
         >
-          {devices.devices.sort(compareDevices).map((device: Device) => (
+          <MenuItem disabled key={0} value={0}>
+            Select a device...
+          </MenuItem>
+          {devices.devices.sort(compareDevices).map((device: DeviceShort) => (
             <MenuItem key={device.i} value={device.i}>
-              {device.sn}
+              {device.s}
             </MenuItem>
           ))}
         </ValidatedTextField>
@@ -108,11 +120,11 @@ const SettingsCustomization: FC = () => {
 
   const saveCustomization = async () => {
     if (deviceEntities && selectedDevice) {
-      const exclude_entities = deviceEntities.filter((de) => de.x).map((new_de) => new_de.sn);
+      const exclude_entities = deviceEntities.filter((de) => de.x).map((new_de) => new_de.i);
       try {
-        const response = await EMSESP.sendExcludeEntities({
+        const response = await EMSESP.writeExcludeEntities({
           id: selectedDevice,
-          entities: exclude_entities
+          entity_ids: exclude_entities
         });
         if (response.status === 200) {
           enqueueSnackbar('Customization saved', { variant: 'success' });
@@ -146,12 +158,12 @@ const SettingsCustomization: FC = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <StyledTableCell padding="checkbox" style={{ width: 18 }}>
-                Excluded?
+              <StyledTableCell padding="checkbox" style={{ width: 28 }}>
+                Ignore
               </StyledTableCell>
-              <StyledTableCell align="left">Name</StyledTableCell>
+              <StyledTableCell align="left">Entity</StyledTableCell>
               <StyledTableCell>Code</StyledTableCell>
-              <StyledTableCell align="right">Sample Value</StyledTableCell>
+              <StyledTableCell align="right">Value</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -161,19 +173,17 @@ const SettingsCustomization: FC = () => {
                 onClick={() => toggleDeviceEntity(i)}
                 sx={de.x ? { backgroundColor: '#f88e86' } : { backgroundColor: 'black' }}
               >
-                <StyledTableCell padding="checkbox">{de.x && <CloseIcon />}</StyledTableCell>
+                <StyledTableCell padding="checkbox">{de.x && <CloseIcon fontSize="small" />}</StyledTableCell>
                 <StyledTableCell component="th" scope="row">
                   {de.n}
                 </StyledTableCell>
-                <StyledTableCell component="th" scope="row">
-                  {de.sn}
-                </StyledTableCell>
-                <StyledTableCell align="right">{de.v}</StyledTableCell>
+                <StyledTableCell>{de.s}</StyledTableCell>
+                <StyledTableCell align="right">{formatValue(de.v)}</StyledTableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-        <Box color="warning.main" mt={1}>
+        <Box color="error.main" mt={1}>
           <Typography variant="body2">
             (excluding {deviceEntities.reduce((a, v) => (v.x ? a + 1 : a), 0)} entities from {deviceEntities.length})
           </Typography>

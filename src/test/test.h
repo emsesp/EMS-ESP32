@@ -29,7 +29,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "thermostat"
 // #define EMSESP_DEBUG_DEFAULT "solar"
 // #define EMSESP_DEBUG_DEFAULT "mixer"
-// #define EMSESP_DEBUG_DEFAULT "web"
+#define EMSESP_DEBUG_DEFAULT "web"
 // #define EMSESP_DEBUG_DEFAULT "general"
 // #define EMSESP_DEBUG_DEFAULT "boiler"
 // #define EMSESP_DEBUG_DEFAULT "mqtt2"
@@ -44,7 +44,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "dv"
 // #define EMSESP_DEBUG_DEFAULT "lastcode"
 // #define EMSESP_DEBUG_DEFAULT "2thermostats"
-#define EMSESP_DEBUG_DEFAULT "dallas"
+// #define EMSESP_DEBUG_DEFAULT "dallas"
 
 
 class Test {
