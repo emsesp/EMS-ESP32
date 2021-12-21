@@ -4,13 +4,8 @@ import { FC, useRef, useState } from 'react';
 import * as SystemApi from '../../api/system';
 import { FormLoader } from '../../components';
 
-// Two minute timeout
 const RESTART_TIMEOUT = 2 * 60 * 1000;
-
-// Two second poll timeout
 const POLL_TIMEOUT = 2000;
-
-// Five second poll interval
 const POLL_INTERVAL = 5000;
 
 const FirmwareRestartMonitor: FC = () => {

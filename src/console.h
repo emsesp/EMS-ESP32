@@ -133,7 +133,7 @@ class EMSESPStreamConsole : public uuid::console::StreamConsole, public EMSESPSh
 class Console {
   public:
     void loop();
-    void start(bool disable_telnet = false);
+    void start(bool enable_telnet = true);
 
     uuid::log::Level log_level();
 
@@ -142,7 +142,7 @@ class Console {
     static void load_system_commands(unsigned int context);
 
   private:
-    bool disable_telnet_;
+    bool enable_telnet_;
 };
 
 } // namespace emsesp

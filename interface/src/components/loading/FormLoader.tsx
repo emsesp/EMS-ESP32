@@ -16,7 +16,7 @@ const FormLoader: FC<FormLoaderProps> = ({ errorMessage, onRetry, message = 'Loa
     return (
       <MessageBox my={2} level="error" message={errorMessage}>
         {onRetry && (
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="error" onClick={onRetry}>
+          <Button startIcon={<RefreshIcon />} variant="contained" color="error" onClick={onRetry}>
             Retry
           </Button>
         )}

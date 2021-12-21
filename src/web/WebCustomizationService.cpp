@@ -33,19 +33,26 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
     , _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE) {
 }
 
+// this creates the settings file
 void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
     // Sensor customization
-    // It's an array or id, name and offset
     JsonArray sensorsJson = root.createNestedArray("sensors");
     for (SensorCustomization sensor : settings.sensorCustomizations) {
         JsonObject sensorJson = sensorsJson.createNestedObject();
-        sensorJson["id_str"]  = sensor.id_str; // key
-        sensorJson["name"]    = sensor.name;
-        sensorJson["offset"]  = sensor.offset;
+        sensorJson["id_str"]  = sensor.id_str; // key, is
+        sensorJson["name"]    = sensor.name;   // n
+        sensorJson["offset"]  = sensor.offset; // o
+    }
+
+    // write back the array of excluded entity id's as an array
+    JsonArray entitiesJson = root.createNestedArray("exclude_entities");
+    for (uint8_t entity_id : settings.device_entities) {
+        entitiesJson.add(entity_id);
     }
 }
 
 // call on initialization and also when settings are updated via web or console
+// this loads the data into the internal class
 StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization & settings) {
     // Sensor customization
     settings.sensorCustomizations.clear();
@@ -60,6 +67,14 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
         }
     }
 
+    // load array of entities id's to exclude
+    settings.device_entities.clear();
+    if (root["exclude_entities"].is<JsonArray>()) {
+        for (JsonVariant entity_id : root["exclude_entities"].as<JsonArray>()) {
+            settings.device_entities.push_back(entity_id.as<uint8_t>());
+        }
+    }
+
     return StateUpdateResult::CHANGED;
 }
 
@@ -68,6 +83,7 @@ void WebCustomizationService::begin() {
 }
 
 void WebCustomizationService::save() {
+    // take the array and save it!
     _fsPersistence.writeToFS();
 }
 

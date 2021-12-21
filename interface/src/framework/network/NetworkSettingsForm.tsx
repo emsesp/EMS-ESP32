@@ -6,7 +6,6 @@ import {
   Checkbox,
   IconButton,
   List,
-  Box,
   ListItem,
   ListItemAvatar,
   ListItemSecondaryAction,
@@ -90,11 +89,6 @@ const WiFiSettingsForm: FC = () => {
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           WiFi
         </Typography>
-        <Box color="warning.main" p={0} mt={0} mb={0}>
-          <Typography variant="body2">
-            <i>Leave SSID empty to disable WiFi</i>
-          </Typography>
-        </Box>
         {selectedNetwork ? (
           <List>
             <ListItem>
@@ -116,7 +110,7 @@ const WiFiSettingsForm: FC = () => {
           <ValidatedTextField
             fieldErrors={fieldErrors}
             name="ssid"
-            label="SSID"
+            label="SSID (leave blank to disable WiFi)"
             fullWidth
             variant="outlined"
             value={data.ssid}

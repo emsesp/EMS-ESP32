@@ -29,7 +29,7 @@ import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore
 import BuildIcon from '@mui/icons-material/Build';
 import TimerIcon from '@mui/icons-material/Timer';
 
-import { ButtonRow, FormLoader, SectionContent } from '../../components';
+import { ButtonRow, FormLoader, SectionContent, MessageBox } from '../../components';
 import { EspPlatform, SystemStatus, Version } from '../../types';
 import * as SystemApi from '../../api/system';
 import { extractErrorMessage, useRest } from '../../utils';
@@ -115,14 +115,14 @@ const SystemStatusForm: FC = () => {
       <Dialog open={showingVersion} onClose={() => setShowingVersion(false)}>
         <DialogTitle>Version Information</DialogTitle>
         <DialogContent dividers>
-          <Box bgcolor="primary.main" color="primary.contrastText" p={2} mt={2} mb={2}>
-            <Typography variant="body1">
-              You are currently running EMS-ESP version <b>v{data?.emsesp_version}</b>
-            </Typography>
-          </Box>
+          <MessageBox
+            my={0}
+            level="info"
+            message={'You are currently running EMS-ESP version ' + data?.emsesp_version}
+          />
           {latestVersion && (
             <Box mt={2} mb={2}>
-              The latest <u>stable</u> version is <b>{latestVersion.version}</b>&nbsp;(
+              The latest <u>official</u> version is <b>{latestVersion.version}</b>&nbsp;(
               <Link target="_blank" href={latestVersion.changelog} color="primary">
                 {'release notes'}
               </Link>
@@ -151,10 +151,11 @@ const SystemStatusForm: FC = () => {
 
           <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>
             <Typography variant="body2">
-              Upgrade to a new version using&nbsp;
+              After downloading a firmware image go to&nbsp;
               <Link target="_blank" href={uploadURL} color="primary">
                 {'UPLOAD FIRMWARE'}
               </Link>
+              &nbsp;to update EMS-ESP
             </Typography>
           </Box>
         </DialogContent>

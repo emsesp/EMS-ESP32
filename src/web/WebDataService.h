@@ -24,11 +24,18 @@
 #include <ESPAsyncWebServer.h>
 #include <SecurityManager.h>
 
-#define EMSESP_DATA_SERVICE_PATH "/rest/data"
+// GET
+#define CORE_DATA_SERVICE_PATH "/rest/coreData"
+#define DEVICES_SERVICE_PATH "/rest/devices"
 #define SCAN_DEVICES_SERVICE_PATH "/rest/scanDevices"
 #define DEVICE_DATA_SERVICE_PATH "/rest/deviceData"
+
+// POST
 #define WRITE_VALUE_SERVICE_PATH "/rest/writeValue"
 #define WRITE_SENSOR_SERVICE_PATH "/rest/writeSensor"
+#define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
+#define EXCLUDE_ENTITIES_PATH "/rest/excludeEntities"
+
 
 namespace emsesp {
 
@@ -42,15 +49,18 @@ class WebDataService {
 #endif
 
     // GET
-    void all_devices(AsyncWebServerRequest * request);
-    void scan_devices(AsyncWebServerRequest * request);
+    void core_data(AsyncWebServerRequest * request);
+    void devices(AsyncWebServerRequest * request);
 
     // POST
     void device_data(AsyncWebServerRequest * request, JsonVariant & json);
     void write_value(AsyncWebServerRequest * request, JsonVariant & json);
     void write_sensor(AsyncWebServerRequest * request, JsonVariant & json);
+    void exclude_entities(AsyncWebServerRequest * request, JsonVariant & json);
+    void device_entities(AsyncWebServerRequest * request, JsonVariant & json);
+    void scan_devices(AsyncWebServerRequest * request);
 
-    AsyncCallbackJsonWebHandler _device_dataHandler, _writevalue_dataHandler, _writesensor_dataHandler;
+    AsyncCallbackJsonWebHandler _device_dataHandler, _excludeentities_dataHandler, _deviceentities_dataHandler, _writevalue_dataHandler, _writesensor_dataHandler;
 };
 
 } // namespace emsesp

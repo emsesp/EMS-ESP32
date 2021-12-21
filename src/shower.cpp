@@ -80,15 +80,6 @@ void Shower::loop() {
                         LOG_DEBUG(F("[Shower] finished with duration %d"), duration_);
                     }
                 }
-#if defined(EMSESP_DEBUG)
-                else {
-                    if (shower_state_) {
-                        Mqtt::publish("message", "shower state is ON");
-                    } else {
-                        Mqtt::publish("message", "shower state is OFF");
-                    }
-                }
-#endif
 
                 // reset everything
                 timer_start_       = 0;

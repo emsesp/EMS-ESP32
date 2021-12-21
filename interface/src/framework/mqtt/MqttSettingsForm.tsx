@@ -171,7 +171,7 @@ const MqttSettingsForm: FC = () => {
           <Grid item>
             <Box color="warning.main">
               <Typography variant="body2">
-                <i>(restart required)</i>
+                <i>(requires a restart)</i>
               </Typography>
             </Box>
           </Grid>

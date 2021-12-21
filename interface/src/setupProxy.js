@@ -9,10 +9,11 @@ module.exports = function (app) {
     })
   );
 
-  app.use(
-    createProxyMiddleware('/ws', {
-      target: target.replace(/^http(s?):\/\//, 'ws$1://'),
-      ws: true
-    })
-  );
+  // app.use(
+  //   createProxyMiddleware('/ws', {
+  //     target: target,
+  //     // target: target.replace(/^http(s?):\/\//, 'ws$1://'),
+  //     ws: true
+  //   })
+  // );
 };

@@ -257,7 +257,7 @@ void System::get_settings() {
         led_gpio_       = settings.led_gpio;
         board_profile_  = settings.board_profile;
         phy_type_       = settings.phy_type;
-        disable_telnet_ = settings.disable_telnet;
+        enable_telnet_  = settings.enable_telnet;
 
         rx_gpio_     = settings.rx_gpio;
         tx_gpio_     = settings.tx_gpio;

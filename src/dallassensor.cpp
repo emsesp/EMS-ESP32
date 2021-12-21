@@ -346,7 +346,7 @@ bool DallasSensor::command_commands(const char * value, const int8_t id, JsonObj
 }
 
 // creates JSON doc from values
-// returns false if empty
+// returns false if there are no sensors
 bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject & output) {
     if (sensors_.size() == 0) {
         return false;
@@ -441,8 +441,7 @@ void DallasSensor::publish_values(const bool force) {
                 config["unit_of_meas"] = FJSON("°C");
 
                 char str[50];
-                snprintf(str, sizeof(str), "{{value_json.%s.temp}}", sensor.id_str().c_str());
-
+                snprintf(str, sizeof(str), "{{value_json['%s'].temp}}", sensor.id_str().c_str());
                 config["val_tpl"] = str;
 
                 snprintf(str, sizeof(str), "Dallas Sensor %s", sensor.name().c_str());
