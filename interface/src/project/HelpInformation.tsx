@@ -132,7 +132,7 @@ const HelpInformation: FC = () => {
             startIcon={<DownloadIcon />}
             variant="outlined"
             color="primary"
-            onClick={() => onDownload('customization')}
+            onClick={() => onDownload('customizations')}
           >
             customization
           </Button>
