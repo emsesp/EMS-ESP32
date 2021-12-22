@@ -392,6 +392,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "web") {
         shell.printfln(F("Testing Web..."));
 
+        Mqtt::enabled(false);    // turn off mqtt
         Mqtt::ha_enabled(false); // turn off ha
 
         run_test("boiler");

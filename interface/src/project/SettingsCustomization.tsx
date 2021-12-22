@@ -90,11 +90,10 @@ const SettingsCustomization: FC = () => {
       <>
         <Box color="warning.main">
           <Typography variant="body2">
-            Select an EMS device below and pick which of it's entities are to be excluded from all output streams (API,
-            MQTT and Console). Entities that have no Value are automatically excluded.
+            For each EMS device select which of its device entities are to be excluded. This will have immediate affect
+            across all services. Note, entities that don't have a Value are automatically excluded.
           </Typography>
         </Box>
-
         <ValidatedTextField
           name="device"
           label="EMS Device"
@@ -142,10 +141,10 @@ const SettingsCustomization: FC = () => {
       return;
     }
 
-    const toggleDeviceEntity = (index: number) => {
+    const toggleDeviceEntity = (id: number) => {
       setDeviceEntities(
-        deviceEntities.map((o, i) => {
-          if (i === index) {
+        deviceEntities.map((o) => {
+          if (o.i === id) {
             return { ...o, x: !o.x };
           }
           return o;
@@ -158,20 +157,20 @@ const SettingsCustomization: FC = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <StyledTableCell padding="checkbox" style={{ width: 28 }}>
-                Ignore
+              <StyledTableCell>
+                ({deviceEntities.reduce((a, v) => (v.x ? a + 1 : a), 0)}/{deviceEntities.length})
               </StyledTableCell>
-              <StyledTableCell align="left">Entity</StyledTableCell>
+              <StyledTableCell align="left">Entity Name</StyledTableCell>
               <StyledTableCell>Code</StyledTableCell>
               <StyledTableCell align="right">Value</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {deviceEntities.map((de, i) => (
+            {deviceEntities.map((de) => (
               <TableRow
-                key={i}
-                onClick={() => toggleDeviceEntity(i)}
-                sx={de.x ? { backgroundColor: '#f88e86' } : { backgroundColor: 'black' }}
+                key={de.i}
+                onClick={() => toggleDeviceEntity(de.i)}
+                sx={de.x ? { backgroundColor: '#f8696b' } : { backgroundColor: 'black' }}
               >
                 <StyledTableCell padding="checkbox">{de.x && <CloseIcon fontSize="small" />}</StyledTableCell>
                 <StyledTableCell component="th" scope="row">
@@ -183,11 +182,6 @@ const SettingsCustomization: FC = () => {
             ))}
           </TableBody>
         </Table>
-        <Box color="error.main" mt={1}>
-          <Typography variant="body2">
-            (excluding {deviceEntities.reduce((a, v) => (v.x ? a + 1 : a), 0)} entities from {deviceEntities.length})
-          </Typography>
-        </Box>
       </>
     );
   };

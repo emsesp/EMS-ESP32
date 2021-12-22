@@ -21,8 +21,6 @@
 
 namespace emsesp {
 
-uint8_t EMSdevice::dv_counter_; // incremental counter for each device value added
-
 // mapping of UOM, to match order in DeviceValueUOM enum emsdevice.h
 // must be an int of 4 bytes, 32bit aligned
 static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = {
@@ -535,11 +533,31 @@ void EMSdevice::register_device_value(uint8_t                             tag,
         };
     }
 
-    // set state
-    // if the fullname is empty don't set the flag to visible (used for internal hamode and hatemp for HA)
-    uint8_t state = (full_name) ? DeviceValueState::DV_VISIBLE : DeviceValueState::DV_DEFAULT;
+    // this is the unique id set for the device entity
+    uint8_t dv_id = get_next_dv_id();
 
-    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, 0, has_cmd, min, max, state);
+    uint8_t state = DeviceValueState::DV_VISIBLE; // default to visible
+    if (!full_name) {
+        state = DeviceValueState::DV_DEFAULT; // don't show if the full_name is empty, used for hamode, hatemp etc
+    } else {
+        // scan through customizations to see if it's on the exclusion list
+        EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
+            for (EntityCustomization entityCustomization : settings.entityCustomizations) {
+                if (entityCustomization.id == unique_id()) {
+                    for (uint8_t entity_id : entityCustomization.entity_ids) {
+                        if (entity_id == dv_id) {
+                            // it's on the list, exclude
+                            state = DeviceValueState::DV_DEFAULT; // not visible
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // add the device
+    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, 0, has_cmd, min, max, state, dv_id);
 }
 
 // function with min and max values
@@ -762,7 +780,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 // disable/exclude a device entity based on its unique id
 void EMSdevice::exclude_entity(uint8_t id) {
     for (auto & dv : devicevalues_) {
-        if (dv.id_ == id) {
+        if (dv.id == id) {
             dv.remove_state(DeviceValueState::DV_VISIBLE); // this will remove from MQTT and Web
             dv.remove_state(DeviceValueState::DV_ACTIVE);  // this will remove any HA MQTT configs
             return;
@@ -773,6 +791,7 @@ void EMSdevice::exclude_entity(uint8_t id) {
 // as generate_values_web() but stripped down to show all entities and their state
 void EMSdevice::generate_values_web_all(JsonArray & output) {
     for (const auto & dv : devicevalues_) {
+        // ignore commands and entities that have an empty full name
         if ((dv.type != DeviceValueType::CMD) && (dv.full_name)) {
             JsonObject obj = output.createNestedObject();
 
@@ -851,7 +870,7 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
             obj["x"] = !dv.has_state(DeviceValueState::DV_VISIBLE);
 
             // add the unique ID
-            obj["i"] = dv.id_;
+            obj["i"] = dv.id;
         }
     }
 }

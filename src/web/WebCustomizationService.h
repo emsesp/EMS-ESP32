@@ -38,10 +38,16 @@ class SensorCustomization {
     uint16_t    offset;
 };
 
+class EntityCustomization {
+  public:
+    uint8_t              id;         // the unique id of the device
+    std::vector<uint8_t> entity_ids; // array of entity ids to exclude
+};
+
 class WebCustomization {
   public:
     std::list<SensorCustomization> sensorCustomizations; // for sensor names and offsets
-    std::vector<uint8_t>           device_entities;      // for a list of entities that should be excluded from the device list
+    std::list<EntityCustomization> entityCustomizations; // for a list of entities that should be excluded from the device list
 
     static void              read(WebCustomization & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebCustomization & settings);
@@ -52,7 +58,6 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
     WebCustomizationService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
 
     void begin();
-    void save();
 
   private:
     HttpEndpoint<WebCustomization>  _httpEndpoint;

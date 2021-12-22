@@ -689,8 +689,9 @@ void System::commands_init() {
 
     // these commands will return data in JSON format
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, F("show system status"));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("shows system settings"));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("shows system commands"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("fetch system settings"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(customizations), System::command_customizations, F("fetch system customizations"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("fetch system commands"));
 
 #if defined(EMSESP_DEBUG)
     Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test, F("runs a specific test"));
@@ -954,6 +955,39 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["bool_format"]     = settings.bool_format;
         node["enum_format"]     = settings.enum_format;
         node["analog_enabled"]  = settings.analog_enabled;
+    });
+
+    return true;
+}
+
+
+// http://ems-esp/api/system/customizations
+bool System::command_customizations(const char * value, const int8_t id, JsonObject & output) {
+    JsonObject node;
+
+    node = output.createNestedObject("Customizations");
+
+    // hide ssid from this list
+    EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
+        // sensors
+        JsonArray sensorsJson = node.createNestedArray("sensors");
+        for (auto & sensor : settings.sensorCustomizations) {
+            JsonObject sensorJson = sensorsJson.createNestedObject();
+            sensorJson["id_str"]  = sensor.id_str; // key, is
+            sensorJson["name"]    = sensor.name;   // n
+            sensorJson["offset"]  = sensor.offset; // o
+        }
+
+        // exclude entities
+        JsonObject exclude_entitiesJson = node.createNestedObject("exclude_entities");
+        char       s[3];
+        for (auto & entityCustomization : settings.entityCustomizations) {
+            // array key must be a string
+            JsonArray exclude_entityJson = exclude_entitiesJson.createNestedArray(Helpers::smallitoa(s, entityCustomization.id));
+            for (uint8_t entity_id : entityCustomization.entity_ids) {
+                exclude_entityJson.add(entity_id);
+            }
+        }
     });
 
     return true;

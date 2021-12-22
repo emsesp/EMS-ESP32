@@ -332,6 +332,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
             return heating_circuit;
         }
     }
+
     // register new heatingcircuits only on active monitor telegrams
     if (!toggle_) {
         return nullptr;
