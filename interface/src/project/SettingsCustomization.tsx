@@ -61,6 +61,8 @@ const SettingsCustomization: FC = () => {
   function formatValue(value: any) {
     if (typeof value === 'number') {
       return new Intl.NumberFormat().format(value);
+    } else if (value === undefined) {
+      return '';
     }
     return value;
   }
@@ -91,7 +93,7 @@ const SettingsCustomization: FC = () => {
         <Box color="warning.main">
           <Typography variant="body2">
             For each EMS device select which of its device entities are to be excluded. This will have immediate affect
-            across all services. Note, entities that don't have a Value are automatically excluded.
+            across all services.
           </Typography>
         </Box>
         <ValidatedTextField
@@ -162,7 +164,7 @@ const SettingsCustomization: FC = () => {
               </StyledTableCell>
               <StyledTableCell align="left">Entity Name</StyledTableCell>
               <StyledTableCell>Code</StyledTableCell>
-              <StyledTableCell align="right">Value</StyledTableCell>
+              <StyledTableCell align="right">Data Value</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>

@@ -115,7 +115,7 @@ const DashboardData: FC = () => {
   };
 
   function formatValue(value: any, uom: number) {
-    if (!value) {
+    if (value === undefined) {
       return 'offline';
     }
     switch (uom) {

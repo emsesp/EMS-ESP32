@@ -795,58 +795,61 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
         if ((dv.type != DeviceValueType::CMD) && (dv.full_name)) {
             JsonObject obj = output.createNestedObject();
 
-            // handle Booleans (true, false)
-            if (dv.type == DeviceValueType::BOOL) {
-                bool value_b = *(bool *)(dv.value_p);
-                if ((EMSESP::bool_format() == BOOL_FORMAT_TRUEFALSE)) {
-                    obj["v"] = value_b;
-                } else if ((EMSESP::bool_format() == BOOL_FORMAT_10)) {
-                    obj["v"] = value_b ? 1 : 0;
-                } else {
-                    char s[7];
-                    obj["v"] = Helpers::render_boolean(s, value_b);
-                }
-            }
-
-            // handle TEXT strings
-            else if (dv.type == DeviceValueType::STRING) {
-                obj["v"] = (char *)(dv.value_p);
-            }
-
-            // handle ENUMs
-            else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
-                obj["v"] = dv.options[*(uint8_t *)(dv.value_p)];
-            }
-
-            // handle Integers and Floats
-            else {
-                // If a divider is specified, do the division to 2 decimals places and send back as double/float
-                // otherwise force as an integer whole
-                // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
-                uint8_t divider = 0;
-                uint8_t factor  = 1;
-                if (dv.options_size == 1) {
-                    const char * s = read_flash_string(dv.options[0]).c_str();
-                    if (s[0] == '*') {
-                        factor = Helpers::atoint(&s[1]);
+            // create the value
+            if (check_dv_hasvalue(dv)) {
+                // handle Booleans (true, false)
+                if (dv.type == DeviceValueType::BOOL) {
+                    bool value_b = *(bool *)(dv.value_p);
+                    if ((EMSESP::bool_format() == BOOL_FORMAT_TRUEFALSE)) {
+                        obj["v"] = value_b;
+                    } else if ((EMSESP::bool_format() == BOOL_FORMAT_10)) {
+                        obj["v"] = value_b ? 1 : 0;
                     } else {
-                        divider = Helpers::atoint(s);
+                        char s[7];
+                        obj["v"] = Helpers::render_boolean(s, value_b);
                     }
                 }
 
-                if (dv.type == DeviceValueType::INT) {
-                    obj["v"] = (divider) ? Helpers::round2(*(int8_t *)(dv.value_p), divider) : *(int8_t *)(dv.value_p) * factor;
-                } else if (dv.type == DeviceValueType::UINT) {
-                    obj["v"] = (divider) ? Helpers::round2(*(uint8_t *)(dv.value_p), divider) : *(uint8_t *)(dv.value_p) * factor;
-                } else if (dv.type == DeviceValueType::SHORT) {
-                    obj["v"] = (divider) ? Helpers::round2(*(int16_t *)(dv.value_p), divider) : *(int16_t *)(dv.value_p) * factor;
-                } else if (dv.type == DeviceValueType::USHORT) {
-                    obj["v"] = (divider) ? Helpers::round2(*(uint16_t *)(dv.value_p), divider) : *(uint16_t *)(dv.value_p) * factor;
-                } else if (dv.type == DeviceValueType::ULONG) {
-                    obj["v"] = divider ? Helpers::round2(*(uint32_t *)(dv.value_p), divider) : *(uint32_t *)(dv.value_p) * factor;
-                } else if (dv.type == DeviceValueType::TIME) {
-                    uint32_t time_value = *(uint32_t *)(dv.value_p);
-                    obj["v"]            = (divider > 0) ? time_value / divider : time_value * factor; // sometimes we need to divide by 60
+                // handle TEXT strings
+                else if (dv.type == DeviceValueType::STRING) {
+                    obj["v"] = (char *)(dv.value_p);
+                }
+
+                // handle ENUMs
+                else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
+                    obj["v"] = dv.options[*(uint8_t *)(dv.value_p)];
+                }
+
+                // handle Integers and Floats
+                else {
+                    // If a divider is specified, do the division to 2 decimals places and send back as double/float
+                    // otherwise force as an integer whole
+                    // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
+                    uint8_t divider = 0;
+                    uint8_t factor  = 1;
+                    if (dv.options_size == 1) {
+                        const char * s = read_flash_string(dv.options[0]).c_str();
+                        if (s[0] == '*') {
+                            factor = Helpers::atoint(&s[1]);
+                        } else {
+                            divider = Helpers::atoint(s);
+                        }
+                    }
+
+                    if (dv.type == DeviceValueType::INT) {
+                        obj["v"] = (divider) ? Helpers::round2(*(int8_t *)(dv.value_p), divider) : *(int8_t *)(dv.value_p) * factor;
+                    } else if (dv.type == DeviceValueType::UINT) {
+                        obj["v"] = (divider) ? Helpers::round2(*(uint8_t *)(dv.value_p), divider) : *(uint8_t *)(dv.value_p) * factor;
+                    } else if (dv.type == DeviceValueType::SHORT) {
+                        obj["v"] = (divider) ? Helpers::round2(*(int16_t *)(dv.value_p), divider) : *(int16_t *)(dv.value_p) * factor;
+                    } else if (dv.type == DeviceValueType::USHORT) {
+                        obj["v"] = (divider) ? Helpers::round2(*(uint16_t *)(dv.value_p), divider) : *(uint16_t *)(dv.value_p) * factor;
+                    } else if (dv.type == DeviceValueType::ULONG) {
+                        obj["v"] = divider ? Helpers::round2(*(uint32_t *)(dv.value_p), divider) : *(uint32_t *)(dv.value_p) * factor;
+                    } else if (dv.type == DeviceValueType::TIME) {
+                        uint32_t time_value = *(uint32_t *)(dv.value_p);
+                        obj["v"]            = (divider > 0) ? time_value / divider : time_value * factor; // sometimes we need to divide by 60
+                    }
                 }
             }
 
