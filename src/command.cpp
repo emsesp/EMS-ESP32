@@ -52,7 +52,9 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
+#if defined(EMSESP_USE_SERIAL)
     // Serial.println(p.path().c_str()); // dump paths, for debugging
+#endif
 
     // re-calculate new path
     // if there is only a path (URL) and no body then error!
