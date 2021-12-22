@@ -386,7 +386,7 @@ const DashboardData: FC = () => {
           <TableHead>
             <TableRow>
               <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
-              <StyledTableCell align="left">Entity</StyledTableCell>
+              <StyledTableCell align="left">Entity Name</StyledTableCell>
               <StyledTableCell align="right">Value</StyledTableCell>
             </TableRow>
           </TableHead>
