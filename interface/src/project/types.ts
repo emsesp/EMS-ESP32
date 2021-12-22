@@ -75,6 +75,8 @@ export interface CoreData {
 
 export interface DeviceShort {
   i: number; // id
+  d: number; // deviceid
+  p: number; // productid
   s: string; // shortname
 }
 
@@ -97,7 +99,7 @@ export interface DeviceData {
 }
 
 export interface DeviceEntity {
-  v: any; // value, in any format
+  v?: any; // value, in any format
   n: string; // name
   s: string; // shortname
   x: boolean; // excluded flag

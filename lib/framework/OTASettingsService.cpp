@@ -35,17 +35,16 @@ void OTASettingsService::configureArduinoOTA() {
         _arduinoOTA->setPort(_state.port);
         _arduinoOTA->setPassword(_state.password.c_str());
 
-        _arduinoOTA->onStart([]() {
-            Serial.println(F("Starting"));
-            emsesp::EMSESP::system_.upload_status(true);
-        });
-        _arduinoOTA->onEnd([]() {
-            Serial.println(F("\r\nEnd"));
-            emsesp::EMSESP::system_.upload_status(false);
-        });
+        _arduinoOTA->onStart([]() { emsesp::EMSESP::system_.upload_status(true); });
+        _arduinoOTA->onEnd([]() { emsesp::EMSESP::system_.upload_status(false); });
 
-        _arduinoOTA->onProgress([](unsigned int progress, unsigned int total) { Serial.printf_P(PSTR("Progress: %u%%\r\n"), (progress / (total / 100))); });
+        _arduinoOTA->onProgress([](unsigned int progress, unsigned int total) {
+#if defined(EMSESP_USE_SERIAL)
+            Serial.printf("Progress: %u%%\r\n", (progress / (total / 100)));
+#endif
+        });
         _arduinoOTA->onError([](ota_error_t error) {
+#if defined(EMSESP_USE_SERIAL)
             Serial.printf("Error[%u]: ", error);
             if (error == OTA_AUTH_ERROR)
                 Serial.println(F("Auth Failed"));
@@ -57,6 +56,7 @@ void OTASettingsService::configureArduinoOTA() {
                 Serial.println(F("Receive Failed"));
             else if (error == OTA_END_ERROR)
                 Serial.println(F("End Failed"));
+#endif
         });
 
         _arduinoOTA->setMdnsEnabled(false); // disable as handled in NetworkSettingsService.cpp. https://github.com/emsesp/EMS-ESP32/issues/161

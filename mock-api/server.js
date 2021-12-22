@@ -334,14 +334,20 @@ const emsesp_devices = {
   devices: [
     {
       i: 1,
+      d: 23,
+      p: 77,
       s: 'Thermostat1',
     },
     {
       i: 2,
+      d: 8,
+      p: 123,
       s: 'Boiler',
     },
     {
       i: 4,
+      d: 16,
+      p: 165,
       s: 'Thermostat2',
     },
   ],
@@ -398,7 +404,7 @@ const emsesp_coredata = {
     { is: '28-233D-9497-0C03', n: 'name1', t: 25.7, o: 1.2 },
     { is: '28-243D-7437-1E3A', n: 'name2', t: 26.1, o: 0 },
     { is: '28-243E-7437-1E3B', n: 'name3', t: 27.1, o: 0 },
-    { is: '28-183D-1892-0C33', n: 'name4', o: 2 }
+    { is: '28-183D-1892-0C33', n: 'name4', o: 2 },
   ],
   // sensors: [],
   analog: 12,
@@ -642,7 +648,7 @@ const emsesp_deviceentities_1 = [
 ]
 
 const emsesp_deviceentities_2 = [
-  { v: 'off', n: 'heating active', s: 'heatingactive', x: false, i: 101 },
+  { n: 'heating active', s: 'heatingactive', x: false, i: 1 },
   { v: 'off', n: 'warm water active', s: 'wwactive', x: false, i: 2 },
   { v: 5, n: 'selected flow temperature', s: 'selflowtemp', x: false, i: 3 },
   { v: 0, n: 'burner selected max power', s: 'selburnpow', x: false, i: 4 },
@@ -965,7 +971,7 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
 })
 
 rest_server.post(EMSESP_EXCLUDE_ENTITIES_ENDPOINT, (req, res) => {
-  console.log('exclude list for id ' + req.body.id + ' entities:')
+  console.log('exclude list for productid ' + req.body.product_id + ' device_id ' + req.body.device_id + ' entities:')
   console.log(req.body.entity_ids)
   res.sendStatus(200)
 })
