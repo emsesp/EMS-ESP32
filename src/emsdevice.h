@@ -215,6 +215,7 @@ class EMSdevice {
         return name_;
     }
 
+    // unique id of a device
     inline uint8_t unique_id() const {
         return unique_id_;
     }
@@ -424,7 +425,10 @@ class EMSdevice {
     };
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 
-    static uint8_t dv_counter_; // unique counter for each added device value
+    uint8_t dv_index_ = 0; // unique counter for each added device value
+    uint8_t get_next_dv_id() {
+        return (dv_index_++);
+    }
 
     // DeviceValue holds all the attributes for a device value (also a device parameter)
     struct DeviceValue {
@@ -442,7 +446,7 @@ class EMSdevice {
         int32_t                             min;          // min range
         uint32_t                            max;          // max range
         uint8_t                             state;        // DeviceValueState::*
-        uint8_t                             id_;          // internal unique counter
+        uint8_t                             id;           // internal unique counter
 
         DeviceValue(uint8_t                             device_type,
                     uint8_t                             tag,
@@ -457,7 +461,8 @@ class EMSdevice {
                     bool                                has_cmd,
                     int32_t                             min,
                     uint32_t                            max,
-                    uint8_t                             state)
+                    uint8_t                             state,
+                    uint8_t                             id)
             : device_type(device_type)
             , tag(tag)
             , value_p(value_p)
@@ -471,8 +476,8 @@ class EMSdevice {
             , has_cmd(has_cmd)
             , min(min)
             , max(max)
-            , state(state) {
-            id_ = EMSdevice::dv_counter_++; // unique counter
+            , state(state)
+            , id(id) {
         }
 
         // state flags

@@ -45,9 +45,14 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
     }
 
     // write back the array of excluded entity id's as an array
-    JsonArray entitiesJson = root.createNestedArray("exclude_entities");
-    for (uint8_t entity_id : settings.device_entities) {
-        entitiesJson.add(entity_id);
+    JsonObject exclude_entitiesJson = root.createNestedObject("exclude_entities");
+    char       s[3];
+    for (EntityCustomization entityCustomization : settings.entityCustomizations) {
+        // array key must be a string
+        JsonArray exclude_entityJson = exclude_entitiesJson.createNestedArray(Helpers::smallitoa(s, entityCustomization.id));
+        for (uint8_t entity_id : entityCustomization.entity_ids) {
+            exclude_entityJson.add(entity_id);
+        }
     }
 }
 
@@ -57,8 +62,8 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
     // Sensor customization
     settings.sensorCustomizations.clear();
     if (root["sensors"].is<JsonArray>()) {
-        for (JsonObject sensorJson : root["sensors"].as<JsonArray>()) {
-            // create the sensor
+        for (const JsonObject sensorJson : root["sensors"].as<JsonArray>()) {
+            // create each of the sensor, overwritting any previous settings
             SensorCustomization sensor = SensorCustomization();
             sensor.id_str              = sensorJson["id_str"].as<std::string>();
             sensor.name                = sensorJson["name"].as<std::string>();
@@ -67,25 +72,27 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
         }
     }
 
-    // load array of entities id's to exclude
-    settings.device_entities.clear();
-    if (root["exclude_entities"].is<JsonArray>()) {
-        for (JsonVariant entity_id : root["exclude_entities"].as<JsonArray>()) {
-            settings.device_entities.push_back(entity_id.as<uint8_t>());
+    // load array of entities id's to exclude, building up the object class
+    settings.entityCustomizations.clear();
+    if (root["exclude_entities"].is<JsonObject>()) {
+        JsonObject exclude_entities = root["exclude_entities"].as<JsonObject>();
+        for (JsonPair p : exclude_entities) {
+            auto                key = p.key();
+            EntityCustomization new_entry;
+            new_entry.id = Helpers::atoint(key.c_str());
+            for (const JsonVariant exclude_entity_id : p.value().as<JsonArray>()) {
+                new_entry.entity_ids.push_back(exclude_entity_id);  // add entity list
+                settings.entityCustomizations.push_back(new_entry); // save it back
+            }
         }
     }
 
     return StateUpdateResult::CHANGED;
 }
 
+// load the settings when the service starts
 void WebCustomizationService::begin() {
     _fsPersistence.readFromFS();
 }
-
-void WebCustomizationService::save() {
-    // take the array and save it!
-    _fsPersistence.writeToFS();
-}
-
 
 } // namespace emsesp

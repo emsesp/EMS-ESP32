@@ -112,7 +112,7 @@ const SettingsApplication: FC = () => {
         </Typography>
         <Box color="warning.main">
           <Typography variant="body2">
-            Select a pre-configured interface board profile from the list or "Custom" to configure your own hardware
+            Select a pre-configured interface board profile from the list below or choose "Custom" to configure your own hardware
             settings.
           </Typography>
         </Box>

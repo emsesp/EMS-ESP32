@@ -205,13 +205,16 @@ void WebDataService::device_entities(AsyncWebServerRequest * request, JsonVarian
     request->send(response);
 }
 
-// takes a list of excluded shortnames
+// takes a list of excluded shortnames from the webUI
+// saves it in the customization service
+// and updates the entity list real-time
 void WebDataService::exclude_entities(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
         // find the device using the unique_id
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
-                if (emsdevice->unique_id() == json["id"]) {
+                uint8_t unique_device_id = json["id"];
+                if (emsdevice->unique_id() == unique_device_id) {
                     JsonArray entity_ids = json["entity_ids"];
 
                     std::vector<uint8_t> temp;
@@ -224,10 +227,24 @@ void WebDataService::exclude_entities(AsyncWebServerRequest * request, JsonVaria
                     // Save the list to the customization file
                     EMSESP::webCustomizationService.update(
                         [&](WebCustomization & settings) {
-                            settings.device_entities.clear();
-                            for (uint8_t i = 0; i < temp.size(); i++) {
-                                settings.device_entities.push_back(temp[i]);
+                            // if it exists overwrite it
+                            for (auto & entityCustomization : settings.entityCustomizations) {
+                                if (entityCustomization.id == unique_device_id) {
+                                    entityCustomization.entity_ids.clear();
+                                    for (uint8_t i = 0; i < temp.size(); i++) {
+                                        entityCustomization.entity_ids.push_back(temp[i]);
+                                        settings.entityCustomizations.push_back(entityCustomization);
+                                    }
+                                    return StateUpdateResult::CHANGED;
+                                }
                             }
+                            // create a new entry in the list
+                            EntityCustomization new_entry;
+                            new_entry.id = unique_device_id;
+                            for (uint8_t i = 0; i < temp.size(); i++) {
+                                new_entry.entity_ids.push_back(temp[i]);
+                            }
+                            settings.entityCustomizations.push_back(new_entry);
                             return StateUpdateResult::CHANGED;
                         },
                         "local");

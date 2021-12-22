@@ -32,7 +32,7 @@ const HelpInformation: FC = () => {
       } else {
         const json = response.data;
         const a = document.createElement('a');
-        const filename = 'emsesp_system_' + endpoint + '.txt';
+        const filename = 'emsesp_' + endpoint + '.txt';
         a.href = URL.createObjectURL(
           new Blob([JSON.stringify(json, null, 2)], {
             type: 'text/plain'
@@ -106,10 +106,19 @@ const HelpInformation: FC = () => {
         </ListItem>
       </List>
 
-      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+        Export Configuration
+      </Typography>
+      <Box color="warning.main">
+        <Typography variant="body2">
+          Download the current system details, application settings and customizations.
+        </Typography>
+      </Box>
+
+      <Box sx={{ display: 'flex' }}>
         <ButtonRow>
           <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={() => onDownload('info')}>
-            download system info
+            system info
           </Button>
           <Button
             startIcon={<DownloadIcon />}
@@ -117,12 +126,20 @@ const HelpInformation: FC = () => {
             color="primary"
             onClick={() => onDownload('settings')}
           >
-            download settings
+            settings
+          </Button>
+          <Button
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={() => onDownload('customization')}
+          >
+            customization
           </Button>
         </ButtonRow>
       </Box>
 
-      <Box bgcolor="secondary.info" border={1} p={1} mt={3}>
+      <Box bgcolor="secondary.info" border={1} p={1} mt={4}>
         <Typography align="center" variant="h6">
           EMS-ESP is a free and open-source project.
           <br></br>Please consider supporting us by giving it a&nbsp;

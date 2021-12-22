@@ -57,7 +57,7 @@ export interface Device {
 export interface Sensor {
   is: string; // id string
   n: string; // name/alias
-  t?: number; // temp
+  t?: number; // temp, optional
   o: number; // offset
 }
 
