@@ -111,7 +111,7 @@ const HelpInformation: FC = () => {
       </Typography>
       <Box color="warning.main">
         <Typography variant="body2">
-          Download the current system details, application settings and customizations.
+          Download the current system information, application settings and any customizations.
         </Typography>
       </Box>
 
@@ -134,7 +134,7 @@ const HelpInformation: FC = () => {
             color="primary"
             onClick={() => onDownload('customizations')}
           >
-            customization
+            customizations
           </Button>
         </ButtonRow>
       </Box>
