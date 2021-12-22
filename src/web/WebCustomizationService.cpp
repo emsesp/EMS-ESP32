@@ -33,23 +33,25 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
     , _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE) {
 }
 
-// this creates the settings file
+// this creates the customization file
 void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
     // Sensor customization
     JsonArray sensorsJson = root.createNestedArray("sensors");
-    for (SensorCustomization sensor : settings.sensorCustomizations) {
+    for (const SensorCustomization & sensor : settings.sensorCustomizations) {
         JsonObject sensorJson = sensorsJson.createNestedObject();
         sensorJson["id_str"]  = sensor.id_str; // key, is
         sensorJson["name"]    = sensor.name;   // n
         sensorJson["offset"]  = sensor.offset; // o
     }
 
-    // write back the array of excluded entity id's as an array
-    JsonObject exclude_entitiesJson = root.createNestedObject("exclude_entities");
-    char       s[3];
-    for (EntityCustomization entityCustomization : settings.entityCustomizations) {
-        // array key must be a string
-        JsonArray exclude_entityJson = exclude_entitiesJson.createNestedArray(Helpers::smallitoa(s, entityCustomization.id));
+    // Exclude entities customization
+    JsonArray exclude_entitiesJson = root.createNestedArray("exclude_entities");
+    for (const EntityCustomization & entityCustomization : settings.entityCustomizations) {
+        JsonObject entityJson    = exclude_entitiesJson.createNestedObject();
+        entityJson["product_id"] = entityCustomization.product_id;
+        entityJson["device_id"]  = entityCustomization.device_id;
+
+        JsonArray exclude_entityJson = entityJson.createNestedArray("entity_ids");
         for (uint8_t entity_id : entityCustomization.entity_ids) {
             exclude_entityJson.add(entity_id);
         }
@@ -74,16 +76,16 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
 
     // load array of entities id's to exclude, building up the object class
     settings.entityCustomizations.clear();
-    if (root["exclude_entities"].is<JsonObject>()) {
-        JsonObject exclude_entities = root["exclude_entities"].as<JsonObject>();
-        for (JsonPair p : exclude_entities) {
-            auto                key = p.key();
-            EntityCustomization new_entry;
-            new_entry.id = Helpers::atoint(key.c_str());
-            for (const JsonVariant exclude_entity_id : p.value().as<JsonArray>()) {
-                new_entry.entity_ids.push_back(exclude_entity_id);  // add entity list
-                settings.entityCustomizations.push_back(new_entry); // save it back
+    if (root["exclude_entities"].is<JsonArray>()) {
+        for (const JsonObject exclude_entities : root["exclude_entities"].as<JsonArray>()) {
+            EntityCustomization new_entry = EntityCustomization();
+            new_entry.product_id          = exclude_entities["product_id"];
+            new_entry.device_id           = exclude_entities["device_id"];
+
+            for (const JsonVariant exclude_entity_id : exclude_entities["entity_ids"].as<JsonArray>()) {
+                new_entry.entity_ids.push_back(exclude_entity_id.as<uint8_t>()); // add entity list
             }
+            settings.entityCustomizations.push_back(new_entry); // save the new object
         }
     }
 

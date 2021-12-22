@@ -109,8 +109,8 @@ const SettingsCustomization: FC = () => {
           <MenuItem disabled key={0} value={0}>
             Select a device...
           </MenuItem>
-          {devices.devices.sort(compareDevices).map((device: DeviceShort) => (
-            <MenuItem key={device.i} value={device.i}>
+          {devices.devices.sort(compareDevices).map((device: DeviceShort, index) => (
+            <MenuItem key={index} value={device.i}>
               {device.s}
             </MenuItem>
           ))}

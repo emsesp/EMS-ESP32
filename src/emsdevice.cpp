@@ -541,13 +541,14 @@ void EMSdevice::register_device_value(uint8_t                             tag,
         state = DeviceValueState::DV_DEFAULT; // don't show if the full_name is empty, used for hamode, hatemp etc
     } else {
         // scan through customizations to see if it's on the exclusion list
+        // we match the productID and deviceID. It's not perfect and will not work
+        // with multiple devices of the same type, but it's good enough for now
         EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
             for (EntityCustomization entityCustomization : settings.entityCustomizations) {
-                if (entityCustomization.id == unique_id()) {
+                if ((entityCustomization.product_id == product_id()) && (entityCustomization.device_id == device_id())) {
                     for (uint8_t entity_id : entityCustomization.entity_ids) {
                         if (entity_id == dv_id) {
-                            // it's on the list, exclude
-                            state = DeviceValueState::DV_DEFAULT; // not visible
+                            state = DeviceValueState::DV_DEFAULT; // it's on the list, exclude it by making it not visible
                             break;
                         }
                     }

@@ -334,14 +334,20 @@ const emsesp_devices = {
   devices: [
     {
       i: 1,
+      d: 23,
+      p: 77,
       s: 'Thermostat1',
     },
     {
       i: 2,
+      d: 8,
+      p: 123,
       s: 'Boiler',
     },
     {
       i: 4,
+      d: 16,
+      p: 165,
       s: 'Thermostat2',
     },
   ],
@@ -965,7 +971,7 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
 })
 
 rest_server.post(EMSESP_EXCLUDE_ENTITIES_ENDPOINT, (req, res) => {
-  console.log('exclude list for id ' + req.body.id + ' entities:')
+  console.log('exclude list for productid ' + req.body.product_id + ' device_id ' + req.body.device_id + ' entities:')
   console.log(req.body.entity_ids)
   res.sendStatus(200)
 })

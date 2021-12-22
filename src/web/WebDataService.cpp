@@ -66,11 +66,13 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
     server->addHandler(&_deviceentities_dataHandler);
 }
 
+// scan devices service
 void WebDataService::scan_devices(AsyncWebServerRequest * request) {
     EMSESP::scan_devices();
     request->send(200);
 }
 
+// send back a short list devices used in the customization page
 void WebDataService::devices(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN);
     JsonObject          root     = response->getRoot();
@@ -96,6 +98,7 @@ void WebDataService::devices(AsyncWebServerRequest * request) {
     request->send(response);
 }
 
+// this is used in the dashboard and contains all the device information, sensors and analog values
 void WebDataService::core_data(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
     JsonObject          root     = response->getRoot();
@@ -205,7 +208,7 @@ void WebDataService::device_entities(AsyncWebServerRequest * request, JsonVarian
     request->send(response);
 }
 
-// takes a list of excluded shortnames from the webUI
+// takes a list of excluded ids send from the webUI
 // saves it in the customization service
 // and updates the entity list real-time
 void WebDataService::exclude_entities(AsyncWebServerRequest * request, JsonVariant & json) {
@@ -225,22 +228,26 @@ void WebDataService::exclude_entities(AsyncWebServerRequest * request, JsonVaria
                     }
 
                     // Save the list to the customization file
+                    uint8_t product_id = emsdevice->product_id();
+                    uint8_t device_id  = emsdevice->device_id();
+
                     EMSESP::webCustomizationService.update(
                         [&](WebCustomization & settings) {
-                            // if it exists overwrite it
+                            // if it exists (productid and deviceid match) overwrite it
                             for (auto & entityCustomization : settings.entityCustomizations) {
-                                if (entityCustomization.id == unique_device_id) {
+                                if ((entityCustomization.product_id == product_id) && (entityCustomization.device_id == device_id)) {
+                                    // already exists, clear the list and add the new values
                                     entityCustomization.entity_ids.clear();
                                     for (uint8_t i = 0; i < temp.size(); i++) {
                                         entityCustomization.entity_ids.push_back(temp[i]);
-                                        settings.entityCustomizations.push_back(entityCustomization);
                                     }
                                     return StateUpdateResult::CHANGED;
                                 }
                             }
                             // create a new entry in the list
                             EntityCustomization new_entry;
-                            new_entry.id = unique_device_id;
+                            new_entry.product_id = product_id;
+                            new_entry.device_id  = device_id;
                             for (uint8_t i = 0; i < temp.size(); i++) {
                                 new_entry.entity_ids.push_back(temp[i]);
                             }

@@ -971,7 +971,7 @@ bool System::command_customizations(const char * value, const int8_t id, JsonObj
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         // sensors
         JsonArray sensorsJson = node.createNestedArray("sensors");
-        for (auto & sensor : settings.sensorCustomizations) {
+        for (const auto & sensor : settings.sensorCustomizations) {
             JsonObject sensorJson = sensorsJson.createNestedObject();
             sensorJson["id_str"]  = sensor.id_str; // key, is
             sensorJson["name"]    = sensor.name;   // n
@@ -979,11 +979,13 @@ bool System::command_customizations(const char * value, const int8_t id, JsonObj
         }
 
         // exclude entities
-        JsonObject exclude_entitiesJson = node.createNestedObject("exclude_entities");
-        char       s[3];
-        for (auto & entityCustomization : settings.entityCustomizations) {
-            // array key must be a string
-            JsonArray exclude_entityJson = exclude_entitiesJson.createNestedArray(Helpers::smallitoa(s, entityCustomization.id));
+        JsonArray exclude_entitiesJson = node.createNestedArray("exclude_entities");
+        for (const auto & entityCustomization : settings.entityCustomizations) {
+            JsonObject entityJson    = exclude_entitiesJson.createNestedObject();
+            entityJson["product_id"] = entityCustomization.product_id;
+            entityJson["device_id"]  = entityCustomization.device_id;
+
+            JsonArray exclude_entityJson = entityJson.createNestedArray("entity_ids");
             for (uint8_t entity_id : entityCustomization.entity_ids) {
                 exclude_entityJson.add(entity_id);
             }

@@ -38,9 +38,11 @@ class SensorCustomization {
     uint16_t    offset;
 };
 
+// we use product_id and device_id to make the device unique
 class EntityCustomization {
   public:
-    uint8_t              id;         // the unique id of the device
+    uint8_t              product_id; // device's product id
+    uint8_t              device_id;  // device's device id
     std::vector<uint8_t> entity_ids; // array of entity ids to exclude
 };
 

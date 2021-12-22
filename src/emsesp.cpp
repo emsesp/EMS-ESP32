@@ -135,7 +135,7 @@ uint8_t EMSESP::count_devices(const uint8_t device_type) {
 }
 
 // returns the index of a device if there are more of the same type
-// or 0 if there is only one
+// or 0 if there is only one or none
 uint8_t EMSESP::device_index(const uint8_t device_type, const uint8_t unique_id) {
     if (count_devices(device_type) <= 1) {
         return 0; // none or only 1 device exists
@@ -915,7 +915,7 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
-                shell.printf(F("(%d) %s: %s"), emsdevice->unique_id(), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
+                shell.printf(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
                 if ((num_thermostats > 1) && (emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT)
                     && (emsdevice->device_id() == actual_master_thermostat())) {
                     shell.printf(F(" **master device**"));
@@ -1033,6 +1033,8 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
 
     LOG_DEBUG(F("Adding new device %s (deviceID 0x%02X, productID %d, version %s)"), name.c_str(), device_id, product_id, version.c_str());
     emsdevices.push_back(EMSFactory::add(device_type, device_id, product_id, version, name, flags, brand));
+
+    // assign a unique ID. Note that this is not actual unique after a restart as it's dependent on the order that devices are found
     emsdevices.back()->unique_id(++unique_id_count_);
 
     fetch_device_values(device_id); // go and fetch its data
@@ -1268,7 +1270,6 @@ void EMSESP::send_raw_telegram(const char * data) {
 // the services must be loaded in the correct order
 void EMSESP::start() {
     Serial.begin(115200);
-    Serial.println();
 
 // start the file system
 #ifndef EMSESP_STANDALONE
