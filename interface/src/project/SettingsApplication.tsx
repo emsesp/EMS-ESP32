@@ -226,7 +226,7 @@ const SettingsApplication: FC = () => {
           EMS Bus Settings
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-          <Grid item xs={4}>
+          <Grid item xs={6}>
             <ValidatedTextField
               name="tx_mode"
               label="Tx Mode"
@@ -245,7 +245,7 @@ const SettingsApplication: FC = () => {
               <MenuItem value={4}>Hardware</MenuItem>
             </ValidatedTextField>
           </Grid>
-          <Grid item>
+          <Grid item xs={6}>
             <ValidatedTextField
               name="ems_bus_id"
               label="Bus ID"
@@ -318,7 +318,7 @@ const SettingsApplication: FC = () => {
           Formatting Options
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-          <Grid item xs={4}>
+          <Grid item xs={6}>
             <ValidatedTextField
               name="bool_format"
               label="Boolean Format"
@@ -337,7 +337,7 @@ const SettingsApplication: FC = () => {
               <MenuItem value={6}>1/0</MenuItem>
             </ValidatedTextField>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6}>
             <ValidatedTextField
               name="enum_format"
               label="Enum Format"

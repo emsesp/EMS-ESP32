@@ -1,8 +1,10 @@
-import { FC } from 'react';
+import { FC, useContext } from 'react';
 
 import { Typography, Button, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@mui/material';
 
 import { SectionContent, ButtonRow } from '../components';
+
+import { AuthenticatedContext } from '../contexts/authentication';
 
 import { useSnackbar } from 'notistack';
 
@@ -19,6 +21,8 @@ import * as EMSESP from './api';
 
 const HelpInformation: FC = () => {
   const { enqueueSnackbar } = useSnackbar();
+
+  const { me } = useContext(AuthenticatedContext);
 
   const onDownload = async (endpoint: string) => {
     try {
@@ -42,7 +46,7 @@ const HelpInformation: FC = () => {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        enqueueSnackbar('Downloaded file', { variant: 'info' });
+        enqueueSnackbar('File downloaded', { variant: 'info' });
       }
     } catch (error: any) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
@@ -106,38 +110,48 @@ const HelpInformation: FC = () => {
         </ListItem>
       </List>
 
-      <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-        Export Configuration
-      </Typography>
-      <Box color="warning.main">
-        <Typography variant="body2">
-          Download the current system information, application settings and any customizations.
-        </Typography>
-      </Box>
+      {me.admin && (
+        <>
+          <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+            Export Data
+          </Typography>
+          <Box color="warning.main">
+            <Typography variant="body2">
+              Download the current system information, application settings and any customizations using the buttons
+              below.
+            </Typography>
+          </Box>
 
-      <Box sx={{ display: 'flex' }}>
-        <ButtonRow>
-          <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={() => onDownload('info')}>
-            system info
-          </Button>
-          <Button
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => onDownload('settings')}
-          >
-            settings
-          </Button>
-          <Button
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => onDownload('customizations')}
-          >
-            customizations
-          </Button>
-        </ButtonRow>
-      </Box>
+          <Box sx={{ display: 'flex' }}>
+            <ButtonRow>
+              <Button
+                startIcon={<DownloadIcon />}
+                variant="outlined"
+                color="secondary"
+                onClick={() => onDownload('info')}
+              >
+                system info
+              </Button>
+              <Button
+                startIcon={<DownloadIcon />}
+                variant="outlined"
+                color="primary"
+                onClick={() => onDownload('settings')}
+              >
+                settings
+              </Button>
+              <Button
+                startIcon={<DownloadIcon />}
+                variant="outlined"
+                color="primary"
+                onClick={() => onDownload('customizations')}
+              >
+                customizations
+              </Button>
+            </ButtonRow>
+          </Box>
+        </>
+      )}
 
       <Box bgcolor="secondary.info" border={1} p={1} mt={4}>
         <Typography align="center" variant="h6">

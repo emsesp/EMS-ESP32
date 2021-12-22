@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, useContext } from 'react';
 import { useSnackbar } from 'notistack';
 import {
   Avatar,
@@ -25,6 +25,8 @@ import {
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
+
+import { AuthenticatedContext } from '../contexts/authentication';
 
 import { ButtonRow, FormLoader, SectionContent } from '../components';
 
@@ -76,6 +78,8 @@ const DashboardStatus: FC = () => {
   const [confirmScan, setConfirmScan] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
 
+  const { me } = useContext(AuthenticatedContext);
+
   const scan = async () => {
     try {
       await EMSESP.scanDevices();
@@ -116,7 +120,7 @@ const DashboardStatus: FC = () => {
                 <DeviceHubIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="EMS Bus Connection Status" secondary={busStatus(data)} />
+            <ListItemText primary="EMS Bus Connection" secondary={busStatus(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
           {data.status !== busConnectionStatus.BUS_STATUS_OFFLINE && (
@@ -124,17 +128,17 @@ const DashboardStatus: FC = () => {
               <Table size="small">
                 <TableBody>
                   <TableRow>
-                    <TableCell># Recognized devices</TableCell>
+                    <TableCell>Recognized EMS devices</TableCell>
                     <TableCell align="right">{data.num_devices}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Telegrams Received</TableCell>
+                    <TableCell>EMS Telegrams Received</TableCell>
                     <TableCell align="right">
                       {Intl.NumberFormat().format(data.rx_received)}&nbsp;(quality {data.rx_quality}%)
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Telegrams Sent</TableCell>
+                    <TableCell>EMS Telegrams Sent</TableCell>
                     <TableCell align="right">
                       {Intl.NumberFormat().format(data.tx_sent)}&nbsp;(quality {data.tx_quality}%)
                     </TableCell>
@@ -157,9 +161,10 @@ const DashboardStatus: FC = () => {
                 startIcon={<PermScanWifiIcon />}
                 variant="outlined"
                 color="primary"
+                disabled={!me.admin}
                 onClick={() => setConfirmScan(true)}
               >
-                Detect new devices
+                Scan for new devices
               </Button>
             </ButtonRow>
           </Box>
