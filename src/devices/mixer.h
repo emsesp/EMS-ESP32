@@ -33,7 +33,9 @@ class Mixer : public EMSdevice {
     static uuid::log::Logger logger_;
 
     void process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram);
+    void process_MMPLUSSetMessage_HC(std::shared_ptr<const Telegram> telegram);
     void process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram);
+    void process_MMPLUSSetMessage_WWC(std::shared_ptr<const Telegram> telegram);
     void process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_IPMTempMessage(std::shared_ptr<const Telegram> telegram);
     void process_IPMSetMessage(std::shared_ptr<const Telegram> telegram);
@@ -52,7 +54,6 @@ class Mixer : public EMSdevice {
         HC,  // heating circuit
         WWC, // warm water circuit
         MP   // pool
-
     };
 
   private:
@@ -65,12 +66,12 @@ class Mixer : public EMSdevice {
     uint8_t  setValveTime_;
 
     int16_t poolTemp_;
-    int8_t  poolShuntStatus_;
-    int8_t  poolShunt_;
+    uint8_t poolShuntStatus_;
+    uint8_t poolShunt_;
 
     Type     type_             = Type::NONE;
     uint16_t hc_               = EMS_VALUE_USHORT_NOTSET;
-    int8_t   poolShuntStatus__ = EMS_VALUE_INT_NOTSET; // temp value
+    uint8_t  poolShuntStatus__ = EMS_VALUE_UINT_NOTSET; // temp value
     uint8_t  id_;
 };
 

@@ -8,6 +8,7 @@
 - Customization Service, including exclusion lists for device entities [#206](https://github.com/emsesp/EMS-ESP32/issues/206)
 - Option to disable Telnet Console
 - Added Hide SSID, Max Clients and Preferred Channel to Access Point
+- Merged in MichaelDvP's changes like dallas fahrenheit support and publish single
 
 ## Fixed
 

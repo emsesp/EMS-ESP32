@@ -11,7 +11,7 @@ export interface Settings {
   shower_alert: boolean;
   rx_gpio: number;
   tx_gpio: number;
-  enable_telnet: boolean;
+  telnet_enabled: boolean;
   phy_type: number;
   dallas_gpio: number;
   dallas_parasite: boolean;
@@ -25,6 +25,7 @@ export interface Settings {
   board_profile: string;
   bool_format: number;
   enum_format: number;
+  fahrenheit: boolean;
 }
 
 export enum busConnectionStatus {
@@ -35,11 +36,24 @@ export enum busConnectionStatus {
 
 export interface Status {
   status: busConnectionStatus;
+  tx_mode: number;
   rx_received: number;
   tx_sent: number;
   rx_quality: number;
   tx_quality: number;
+  tx_fails: number;
+  rx_fails: number;
+  sensor_fails: number;
+  sensor_reads: number;
+  sensor_quality: number;
+  mqtt_count: number;
+  mqtt_fails: number;
+  mqtt_quality: number;
+  api_calls: number;
+  api_fails: number;
+  api_quality: number;
   num_devices: number;
+  num_sensors: number;
 }
 
 export interface Device {
@@ -61,6 +75,14 @@ export interface Sensor {
   o: number; // offset
 }
 
+export interface Analog {
+  n: string;
+  v: number;
+  u: string;
+  o: number;
+  f: number;
+}
+
 export interface WriteSensor {
   id_str: string;
   name: string;
@@ -70,7 +92,7 @@ export interface WriteSensor {
 export interface CoreData {
   devices: Device[];
   sensors: Sensor[];
-  analog?: number; // is optional
+  analog: Analog[];
 }
 
 export interface DeviceShort {
@@ -85,7 +107,7 @@ export interface Devices {
 }
 
 export interface DeviceValue {
-  v: any; // value, in any format
+  v?: any; // value, in any format
   u: number; // uom
   n: string; // name
   c: string; // command
@@ -93,7 +115,6 @@ export interface DeviceValue {
 }
 
 export interface DeviceData {
-  id: number;
   type: string;
   data: DeviceValue[];
 }
@@ -118,6 +139,7 @@ export interface UniqueID {
 export enum DeviceValueUOM {
   NONE = 0,
   DEGREES,
+  DEGREES_R,
   PERCENT,
   LMIN,
   KWH,
@@ -131,13 +153,16 @@ export enum DeviceValueUOM {
   KB,
   SECONDS,
   DBM,
+  FAHRENHEIT,
   MV,
+  SQM,
   TIMES,
   OCLOCK
 }
 
 export const DeviceValueUOM_s = [
   '',
+  '°C',
   '°C',
   '%',
   'l/min',
@@ -152,7 +177,9 @@ export const DeviceValueUOM_s = [
   'KB',
   'second',
   'dBm',
+  '°F',
   'mV',
+  'sqm',
   'time',
   "o'clock"
 ];
@@ -193,4 +220,11 @@ export interface APIcall {
 export interface WriteValue {
   id: number;
   devicevalue: DeviceValue;
+}
+
+export interface WriteAnalog {
+  name: string;
+  factor: number;
+  offset: number;
+  uom: string;
 }

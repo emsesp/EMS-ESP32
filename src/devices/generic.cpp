@@ -40,7 +40,8 @@ bool Generic::publish_ha_device_config() {
 
 // type 0x435 rf remote sensor
 void Generic::process_RFSensorMessage(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(rfTemp_, 0)); // is * 10
+    has_update(telegram, rfTemp_, 0); // is * 10
 }
+
 
 } // namespace emsesp

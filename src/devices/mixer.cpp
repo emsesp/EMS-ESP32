@@ -67,7 +67,6 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         register_telegram_type(0x00AA, F("MMConfigMessage"), true, MAKE_PF_CB(process_MMConfigMessage));
         register_telegram_type(0x00AB, F("MMStatusMessage"), false, MAKE_PF_CB(process_MMStatusMessage));
         register_telegram_type(0x00AC, F("MMSetMessage"), false, MAKE_PF_CB(process_MMSetMessage));
-        // EMSESP::send_read_request(0xAA, device_id);
         type_       = Type::HC;
         hc_         = device_id - 0x20 + 1;
         uint8_t tag = TAG_HC1 + hc_ - 1;
@@ -167,19 +166,19 @@ bool Mixer::publish_ha_device_config() {
 // e.g.  A0 00 FF 00 01 D7 00 00 00 80 00 00 00 00 03 C5
 //       A0 0B FF 00 01 D7 00 00 00 80 00 00 00 00 03 80
 void Mixer::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(flowTempHc_, 3)); // is * 10
-    has_update(telegram->read_value(flowSetTemp_, 5));
-    has_update(telegram->read_bitvalue(pumpStatus_, 0, 0));
-    has_update(telegram->read_value(status_, 2)); // valve status
+    has_update(telegram, flowTempHc_, 3); // is * 10
+    has_update(telegram, flowSetTemp_, 5);
+    has_bitupdate(telegram, pumpStatus_, 0, 0);
+    has_update(telegram, status_, 2); // valve status
 }
 
 // Mixer warm water loading/DHW - 0x0331, 0x0332
 // e.g. A9 00 FF 00 02 32 02 6C 00 3C 00 3C 3C 46 02 03 03 00 3C // on 0x28
 //      A8 00 FF 00 02 31 02 35 00 3C 00 3C 3C 46 02 03 03 00 3C // in 0x29
 void Mixer::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(flowTempHc_, 0)); // is * 10
-    has_update(telegram->read_bitvalue(pumpStatus_, 2, 0));
-    has_update(telegram->read_value(status_, 11)); // temp status
+    has_update(telegram, flowTempHc_, 0); // is * 10
+    has_bitupdate(telegram, pumpStatus_, 2, 0);
+    has_update(telegram, status_, 11); // temp status
 }
 
 // Mixer IPM - 0x010C
@@ -195,18 +194,27 @@ void Mixer::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
 
     // do we have a mixed circuit
     if (ismixed == 2) {
-        has_update(telegram->read_value(flowTempHc_, 3)); // is * 10
-        has_update(telegram->read_value(status_, 2));     // valve status
+        has_update(telegram, flowTempHc_, 3); // is * 10
+        has_update(telegram, status_, 2);     // valve status
     }
 
-    has_update(telegram->read_bitvalue(pumpStatus_, 1, 0)); // pump is also in unmixed circuits
-    has_update(telegram->read_value(flowSetTemp_, 5));      // flowSettemp is also in unmixed circuits, see #711
+    has_bitupdate(telegram, pumpStatus_, 1, 0); // pump is also in unmixed circuits
+    has_update(telegram, flowSetTemp_, 5);      // flowSettemp is also in unmixed circuits, see #711
 }
 
 // Mixer IPM - 0x001E Temperature Message in unmixed circuits
 // in unmixed circuits FlowTemp in 10C is zero, this is the measured flowtemp in header
 void Mixer::process_IPMTempMessage(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(flowTempVf_, 0)); // TC1, is * 10
+    has_update(telegram, flowTempVf_, 0); // TC1, is * 10
+}
+
+// Mixer MP100 for pools - 0x5BA
+void Mixer::process_HpPoolStatus(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, poolTemp_, 0);
+    has_update(telegram, poolShunt_, 3); // 0-100% how much is the shunt open?
+    telegram->read_value(poolShuntStatus__, 2);
+    uint8_t pss = poolShunt_ == 100 ? 3 : (poolShunt_ == 0 ? 4 : poolShuntStatus__);
+    has_update(poolShuntStatus_, pss);
 }
 
 // Mixer on a MM10 - 0xAB
@@ -217,41 +225,58 @@ void Mixer::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     // 0x21 is position 2. 0x20 is typically reserved for the WM10 switch module
     // see https://github.com/emsesp/EMS-ESP/issues/270 and https://github.com/emsesp/EMS-ESP/issues/386#issuecomment-629610918
 
-    has_update(telegram->read_value(flowTempHc_, 1));       // is * 10
-    has_update(telegram->read_bitvalue(pumpStatus_, 3, 2)); // is 0 or 0x64 (100%), check only bit 2
-    has_update(telegram->read_value(flowSetTemp_, 0));
-    has_update(telegram->read_value(status_, 4)); // valve status -100 to 100
+    has_update(telegram, flowTempHc_, 1);       // is * 10
+    has_bitupdate(telegram, pumpStatus_, 3, 2); // is 0 or 0x64 (100%), check only bit 2
+    has_update(telegram, flowSetTemp_, 0);
+    has_update(telegram, status_, 4); // valve status -100 to 100
 }
 
-// Pool mixer MP100, - 0x5BA
-void Mixer::process_HpPoolStatus(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(poolTemp_, 0));
-    has_update(telegram->read_value(poolShuntStatus__, 2));
-    has_update(telegram->read_value(poolShunt_, 3)); // 0-100% how much is the shunt open?
-    poolShuntStatus_ = poolShunt_ == 100 ? 3 : (poolShunt_ == 0 ? 4 : poolShuntStatus__);
-}
+/*
+* The set-messages are not broadcasted and send from thermostat to mixer,
+* we have to fetch for processing
+*/
 
 // Mixer on a MM10 - 0xAA
 // e.g. Thermostat -> Mixer Module, type 0xAA, telegram: 10 21 AA 00 FF 0C 0A 11 0A 32 xx
 void Mixer::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(activated_, 0));    // on = 0xFF
-    has_update(telegram->read_value(setValveTime_, 1)); // valve runtime in 10 sec, max 120 s
+    has_update(telegram, activated_, 0);    // on = 0xFF
+    has_update(telegram, setValveTime_, 1); // valve runtime in 10 sec, max 120 s
 }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+// Thermostat(0x10) -> Mixer(0x20), ?(0x2E1), data: 01 1C 64 00 01
+// Thermostat(0x10) -> Mixing Module(0x20), (0x2E1), data: 01 00 00 00 01
+// Thermostat(0x10) -> Mixing Module(0x20), (0x2EB), data: 00
+void Mixer::process_MMPLUSSetMessage_HC(std::shared_ptr<const Telegram> telegram) {
+    // pos 1: setpoint
+    // pos2: pump
+}
+
+// unknown, 2 examples from older threads
+// Thermostat(0x10) -> Mixer(0x28), ?(0x33B), data: 01 01 00
+// Thermostat -> Mixing Module, type 0x023B, telegram: 90 28 FF 00 02 3B 00 02 00 (CRC=68)
+void Mixer::process_MMPLUSSetMessage_WWC(std::shared_ptr<const Telegram> telegram) {
+}
+
+// MMPLUS telegram 0x345 unknown
+// Solar Module -> Mixing Module, type 0x0245, telegram: B0 28 FF 00 02 45 64 01 01 (CRC=36)
+// ?
+
 // Mixer on a MM10 - 0xAC
 // e.g. Thermostat -> Mixer Module, type 0xAC, telegram: 10 21 AC 00 1E 64 01 AB
 void Mixer::process_MMSetMessage(std::shared_ptr<const Telegram> telegram) {
     // pos 0: flowtemp setpoint 1E = 30°C
-    // pos 1: position in %
+    // pos 1: pump in %
+    // pos 2 flags (mostly 01)
+    // LOG_INFO("MM10 SetMessage received");
 }
 
 // Thermostat(0x10) -> Mixer(0x21), ?(0x23), data: 1A 64 00 90 21 23 00 1A 64 00 89
 void Mixer::process_IPMSetMessage(std::shared_ptr<const Telegram> telegram) {
     // pos 0: flowtemp setpoint 1A = 26°C
-    // pos 1: position in %?
+    // pos 1: pump in %?
 }
 
 #pragma GCC diagnostic pop

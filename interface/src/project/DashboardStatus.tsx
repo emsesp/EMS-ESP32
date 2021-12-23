@@ -1,4 +1,4 @@
-import { FC, useState, useContext } from 'react';
+import { FC, useState, useContext, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 import {
   Avatar,
@@ -80,6 +80,14 @@ const DashboardStatus: FC = () => {
 
   const { me } = useContext(AuthenticatedContext);
 
+  useEffect(() => {
+    const timer = setInterval(() => loadData(), 30000);
+    return () => {
+      clearInterval(timer);
+    };
+    // eslint-disable-next-line
+  }, []);
+
   const scan = async () => {
     try {
       await EMSESP.scanDevices();
@@ -120,33 +128,57 @@ const DashboardStatus: FC = () => {
                 <DeviceHubIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="EMS Bus Connection" secondary={busStatus(data)} />
+            <ListItemText primary="EMS Bus Connection Status" secondary={busStatus(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
-          {data.status !== busConnectionStatus.BUS_STATUS_OFFLINE && (
-            <TableContainer>
-              <Table size="small">
-                <TableBody>
-                  <TableRow>
-                    <TableCell>Recognized EMS devices</TableCell>
-                    <TableCell align="right">{data.num_devices}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>EMS Telegrams Received</TableCell>
-                    <TableCell align="right">
-                      {Intl.NumberFormat().format(data.rx_received)}&nbsp;(quality {data.rx_quality}%)
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>EMS Telegrams Sent</TableCell>
-                    <TableCell align="right">
-                      {Intl.NumberFormat().format(data.tx_sent)}&nbsp;(quality {data.tx_quality}%)
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+          <TableContainer>
+            <Table size="small">
+              <TableBody>
+                <TableRow>
+                  <TableCell>Recognized Devices / Sensors</TableCell>
+                  <TableCell align="right">
+                    {data.num_devices}&nbsp;/&nbsp;
+                    {data.num_sensors}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Telegrams Received / Failed (Quality)</TableCell>
+                  <TableCell align="right">
+                    {Intl.NumberFormat().format(data.rx_received)}&nbsp;/&nbsp;
+                    {Intl.NumberFormat().format(data.rx_fails)}&nbsp;({data.rx_quality}%)
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Telegrams Sent / Failed (Quality)</TableCell>
+                  <TableCell align="right">
+                    {Intl.NumberFormat().format(data.tx_sent)}&nbsp;/&nbsp;
+                    {Intl.NumberFormat().format(data.tx_fails)}&nbsp;({data.tx_quality}%)
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Sensors Reads / Fails (Quality)</TableCell>
+                  <TableCell align="right">
+                    {Intl.NumberFormat().format(data.sensor_reads)}&nbsp;/&nbsp;
+                    {Intl.NumberFormat().format(data.sensor_fails)}&nbsp;({data.sensor_quality}%)
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>MQTT Publishes / Fails (Quality)</TableCell>
+                  <TableCell align="right">
+                    {Intl.NumberFormat().format(data.mqtt_count)}&nbsp;/&nbsp;
+                    {Intl.NumberFormat().format(data.mqtt_fails)}&nbsp;({data.mqtt_quality}%)
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>API Calls / Fails (Quality)</TableCell>
+                  <TableCell align="right">
+                    {Intl.NumberFormat().format(data.api_calls)}&nbsp;/&nbsp;
+                    {Intl.NumberFormat().format(data.api_fails)}&nbsp;({data.api_quality}%)
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
         </List>
         {renderScanDialog()}
         <Box display="flex" flexWrap="wrap">
@@ -174,7 +206,7 @@ const DashboardStatus: FC = () => {
   };
 
   return (
-    <SectionContent title="EMS-ESP Status" titleGutter>
+    <SectionContent title="EMS Bus &amp; Activity Status" titleGutter>
       {content()}
     </SectionContent>
   );

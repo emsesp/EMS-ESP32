@@ -34,7 +34,9 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
     , _writevalue_dataHandler(WRITE_VALUE_SERVICE_PATH,
                               securityManager->wrapCallback(std::bind(&WebDataService::write_value, this, _1, _2), AuthenticationPredicates::IS_ADMIN))
     , _writesensor_dataHandler(WRITE_SENSOR_SERVICE_PATH,
-                               securityManager->wrapCallback(std::bind(&WebDataService::write_sensor, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
+                               securityManager->wrapCallback(std::bind(&WebDataService::write_sensor, this, _1, _2), AuthenticationPredicates::IS_ADMIN))
+    , _writeanalog_dataHandler(WRITE_ANALOG_SERVICE_PATH,
+                               securityManager->wrapCallback(std::bind(&WebDataService::write_analog, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
     server->on(CORE_DATA_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&WebDataService::core_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
@@ -57,6 +59,10 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
     _writesensor_dataHandler.setMaxContentLength(256);
     server->addHandler(&_writesensor_dataHandler);
 
+    _writeanalog_dataHandler.setMethod(HTTP_POST);
+    _writeanalog_dataHandler.setMaxContentLength(256);
+    server->addHandler(&_writeanalog_dataHandler);
+
     _excludeentities_dataHandler.setMethod(HTTP_POST);
     _excludeentities_dataHandler.setMaxContentLength(256);
     server->addHandler(&_excludeentities_dataHandler);
@@ -68,6 +74,7 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
 
 // scan devices service
 void WebDataService::scan_devices(AsyncWebServerRequest * request) {
+    EMSESP::logger().info(F("scanning devices"));
     EMSESP::scan_devices();
     request->send(200);
 }
@@ -112,11 +119,11 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
             obj["t"]       = emsdevice->device_type_name(); // type
             obj["b"]       = emsdevice->brand_to_string();  // brand
 
-            // shortname - we prefix the count to make it unique
+            // shortname - we postfix the count to make it unique
             uint8_t device_index = EMSESP::device_index(emsdevice->device_type(), emsdevice->unique_id());
             if (device_index) {
                 char s[10];
-                obj["s"] = emsdevice->device_type_name() + Helpers::smallitoa(s, device_index);
+                obj["s"] = emsdevice->device_type_name() + "_" + Helpers::smallitoa(s, device_index);
             } else {
                 obj["s"] = emsdevice->device_type_name();
             }
@@ -136,18 +143,31 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
             JsonObject obj = sensors.createNestedObject();
             obj["is"]      = sensor.id_str(); // id
             obj["n"]       = sensor.name();   // name
-
-            // only send temp if it has a value
-            if (Helpers::hasValue(sensor.temperature_c)) {
-                obj["t"] = (float)(sensor.temperature_c) / 10; // temperature
+            if (EMSESP::system_.fahrenheit()) {
+                if (Helpers::hasValue(sensor.temperature_c)) {
+                    obj["t"] = (float)sensor.temperature_c * 0.18 + 32;
+                }
+                obj["u"] = DeviceValueUOM::FAHRENHEIT;
+                obj["o"] = (float)sensor.offset() * 0.18;
+            } else {
+                if (Helpers::hasValue(sensor.temperature_c)) {
+                    obj["t"] = (float)sensor.temperature_c / 10;
+                }
+                obj["u"] = DeviceValueUOM::DEGREES;
+                obj["o"] = (float)(sensor.offset()) / 10;
             }
-
-            obj["o"] = (float)(sensor.offset()) / 10; // offset
         }
     }
 
     if (EMSESP::system_.analog_enabled()) {
-        root["analog"] = EMSESP::system_.analog();
+        // root["analog"] = EMSESP::system_.analog();
+        JsonArray  analog = root.createNestedArray("analog");
+        JsonObject obj    = analog.createNestedObject();
+        obj["n"]          = EMSESP::system_.analog_name();
+        obj["v"]          = EMSESP::system_.analog_value();
+        obj["u"]          = EMSESP::system_.analog_uom();
+        obj["o"]          = EMSESP::system_.analog_offset();
+        obj["f"]          = EMSESP::system_.analog_factor();
     }
 
     response->setLength();
@@ -158,7 +178,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
 // Compresses the JSON using MsgPack https://msgpack.org/index.html
 void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
+        MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXXLARGE_DYN);
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
                 if (emsdevice->unique_id() == json["id"]) {
@@ -337,10 +357,28 @@ void WebDataService::write_sensor(AsyncWebServerRequest * request, JsonVariant &
         // calculate offset. We'll convert it to an int and * 10
         float   offset   = sensor["offset"];
         int16_t offset10 = offset * 10;
-
+        if (EMSESP::system_.fahrenheit()) {
+            offset10 = offset / 0.18;
+        }
         ok = EMSESP::dallassensor_.update(id_str, name, offset10);
     }
 
+    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);
+    request->send(response);
+}
+
+// takes a analog calibration an name from the Web
+void WebDataService::write_analog(AsyncWebServerRequest * request, JsonVariant & json) {
+    bool ok = false;
+    if (json.is<JsonObject>()) {
+        JsonObject analog = json;
+
+        std::string name   = analog["name"];
+        float       factor = analog["factor"];
+        int16_t     offset = analog["offset"];
+        std::string uom    = analog["uom"];
+        ok                 = EMSESP::system_.analogupdate(name.c_str(), offset, factor, uom.c_str());
+    }
     AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);
     request->send(response);
 }

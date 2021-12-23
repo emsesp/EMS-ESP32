@@ -39,6 +39,7 @@ uint8_t     Mqtt::ha_climate_format_;
 bool        Mqtt::ha_enabled_;
 uint8_t     Mqtt::nested_format_;
 bool        Mqtt::send_response_;
+bool        Mqtt::publish_single_;
 
 std::deque<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 std::vector<Mqtt::MQTTSubFunction>  Mqtt::mqtt_subfunctions_;
@@ -77,6 +78,12 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
         return;
     }
 
+    // add to MQTT queue as a subscribe operation
+    queue_subscribe_message(topic);
+}
+
+// subscribe without storing to subfunctions
+void Mqtt::subscribe(const std::string & topic) {
     // add to MQTT queue as a subscribe operation
     queue_subscribe_message(topic);
 }
@@ -367,6 +374,7 @@ void Mqtt::load_settings() {
         ha_enabled_        = mqttSettings.ha_enabled;
         ha_climate_format_ = mqttSettings.ha_climate_format;
         nested_format_     = mqttSettings.nested_format;
+        publish_single_    = mqttSettings.publish_single;
         send_response_     = mqttSettings.send_response;
 
         // convert to milliseconds
@@ -465,6 +473,9 @@ void Mqtt::set_publish_time_sensor(uint16_t publish_time) {
 }
 
 bool Mqtt::get_publish_onchange(uint8_t device_type) {
+    if (publish_single_ && !ha_enabled_) {
+        return false;
+    }
     if (device_type == EMSdevice::DeviceType::BOILER) {
         if (!publish_time_boiler_) {
             return true;
@@ -952,6 +963,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                     type, // EMSdevi
 
         switch (uom) {
         case DeviceValueUOM::DEGREES:
+        case DeviceValueUOM::DEGREES_R:
             doc["ic"]        = F_(icondegrees);
             set_device_class = Device_class::TEMPERATURE;
             break;

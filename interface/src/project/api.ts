@@ -14,7 +14,8 @@ import {
   UniqueID,
   ExcludeEntities,
   WriteValue,
-  WriteSensor
+  WriteSensor,
+  WriteAnalog
 } from './types';
 
 export function restart(): AxiosPromise<void> {
@@ -67,6 +68,10 @@ export function writeValue(writevalue: WriteValue): AxiosPromise<void> {
 
 export function writeSensor(writesensor: WriteSensor): AxiosPromise<void> {
   return AXIOS.post('/writeSensor', writesensor);
+}
+
+export function writeAnalog(writeanalog: WriteAnalog): AxiosPromise<void> {
+  return AXIOS.post('/writeAnalog', writeanalog);
 }
 
 // EMS-ESP API calls

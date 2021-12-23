@@ -48,89 +48,114 @@ const MqttSettingsForm: FC = () => {
           control={<Checkbox name="enabled" checked={data.enabled} onChange={updateFormValue} />}
           label="Enable MQTT"
         />
-        <ValidatedTextField
-          fieldErrors={fieldErrors}
-          name="host"
-          label="Host"
-          fullWidth
-          variant="outlined"
-          value={data.host}
-          onChange={updateFormValue}
-          margin="normal"
-        />
-        <ValidatedTextField
-          fieldErrors={fieldErrors}
-          name="port"
-          label="Port"
-          fullWidth
-          variant="outlined"
-          value={numberValue(data.port)}
-          type="number"
-          onChange={updateFormValue}
-          margin="normal"
-        />
-        <ValidatedTextField
-          fieldErrors={fieldErrors}
-          name="base"
-          label="Bsse"
-          fullWidth
-          variant="outlined"
-          value={data.base}
-          onChange={updateFormValue}
-          margin="normal"
-        />
-        <ValidatedTextField
-          name="username"
-          label="Username"
-          fullWidth
-          variant="outlined"
-          value={data.username}
-          onChange={updateFormValue}
-          margin="normal"
-        />
-        <ValidatedPasswordField
-          name="password"
-          label="Password"
-          fullWidth
-          variant="outlined"
-          value={data.password}
-          onChange={updateFormValue}
-          margin="normal"
-        />
-        <ValidatedTextField
-          name="client_id"
-          label="Client ID (optional)"
-          fullWidth
-          variant="outlined"
-          value={data.client_id}
-          onChange={updateFormValue}
-          margin="normal"
-        />
-        <ValidatedTextField
-          fieldErrors={fieldErrors}
-          name="keep_alive"
-          label="Keep Alive (seconds)"
-          fullWidth
-          variant="outlined"
-          value={numberValue(data.keep_alive)}
-          type="number"
-          onChange={updateFormValue}
-          margin="normal"
-        />
-        <ValidatedTextField
-          name="mqtt_qos"
-          label="QoS"
-          value={data.mqtt_qos}
-          fullWidth
-          variant="outlined"
-          onChange={updateFormValue}
-          margin="normal"
-          select
-        >
-          <MenuItem value={0}>0 (default)</MenuItem>
-          <MenuItem value={1}>1</MenuItem>
-          <MenuItem value={2}>2</MenuItem>
-        </ValidatedTextField>
+        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+          <Grid item xs={6}>
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="host"
+              label="Host"
+              fullWidth
+              variant="outlined"
+              value={data.host}
+              onChange={updateFormValue}
+              margin="normal"
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="port"
+              label="Port"
+              fullWidth
+              variant="outlined"
+              value={numberValue(data.port)}
+              type="number"
+              onChange={updateFormValue}
+              margin="normal"
+            />
+          </Grid>
+        </Grid>
+        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+          <Grid item xs={6}>
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="base"
+              label="Bsse"
+              fullWidth
+              variant="outlined"
+              value={data.base}
+              onChange={updateFormValue}
+              margin="normal"
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <ValidatedTextField
+              name="client_id"
+              label="Client ID (optional)"
+              fullWidth
+              variant="outlined"
+              value={data.client_id}
+              onChange={updateFormValue}
+              margin="normal"
+            />
+          </Grid>
+        </Grid>
+        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+          <Grid item xs={6}>
+            <ValidatedTextField
+              name="username"
+              label="Username"
+              fullWidth
+              variant="outlined"
+              value={data.username}
+              onChange={updateFormValue}
+              margin="normal"
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <ValidatedPasswordField
+              name="password"
+              label="Password"
+              fullWidth
+              variant="outlined"
+              value={data.password}
+              onChange={updateFormValue}
+              margin="normal"
+            />
+          </Grid>
+        </Grid>
+        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+          <Grid item xs={6}>
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="keep_alive"
+              label="Keep Alive (seconds)"
+              fullWidth
+              variant="outlined"
+              value={numberValue(data.keep_alive)}
+              type="number"
+              onChange={updateFormValue}
+              margin="normal"
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <ValidatedTextField
+              name="mqtt_qos"
+              label="QoS"
+              value={data.mqtt_qos}
+              fullWidth
+              variant="outlined"
+              onChange={updateFormValue}
+              margin="normal"
+              select
+            >
+              <MenuItem value={0}>0 (default)</MenuItem>
+              <MenuItem value={1}>1</MenuItem>
+              <MenuItem value={2}>2</MenuItem>
+            </ValidatedTextField>
+          </Grid>
+        </Grid>
+
         <BlockFormControlLabel
           control={<Checkbox name="clean_session" checked={data.clean_session} onChange={updateFormValue} />}
           label="Set Clean Session"
@@ -160,6 +185,10 @@ const MqttSettingsForm: FC = () => {
         <BlockFormControlLabel
           control={<Checkbox name="send_response" checked={data.send_response} onChange={updateFormValue} />}
           label="Publish command output to a 'response' topic"
+        />
+        <BlockFormControlLabel
+          control={<Checkbox name="publish_single" checked={data.publish_single} onChange={updateFormValue} />}
+          label="Publish single value topics on change"
         />
         <Grid container alignItems="center">
           <Grid item>

@@ -694,6 +694,16 @@ void Console::load_system_commands(unsigned int context) {
                                            shell.println("Use `wifi reconnect` to save and apply the new settings");
                                        });
 
+    // added by mvdp
+    EMSESPShell::commands->add_command(context,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F("mqtt"), F("subscribe")},
+                                       flash_string_vector{F("<topic>")},
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
+                                           Mqtt::subscribe(arguments.front());
+                                           shell.println("subscribing");
+                                       });
+
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(set), F_(wifi), F_(password)},
@@ -833,11 +843,12 @@ std::string EMSESPStreamConsole::console_name() {
 
 // Start up telnet and logging
 // Log order is off, err, warning, notice, info, debug, trace, all
-void Console::start(bool enable_telnet) {
-    enable_telnet_ = enable_telnet;
+void Console::start(bool telnet_enabled) {
+    telnet_enabled_ = telnet_enabled;
 
+    // Serial Console
     shell = std::make_shared<EMSESPStreamConsole>(Serial, true);
-    shell->maximum_log_messages(100); // default was 50
+    shell->maximum_log_messages(100);
     shell->start();
 
 #if defined(EMSESP_DEBUG)
@@ -848,11 +859,11 @@ void Console::start(bool enable_telnet) {
     shell->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when running tests
 #endif
 
-// start the telnet service
-// default idle is 10 minutes, default write timeout is 0 (automatic)
-// note, this must be started after the network/wifi for ESP32 otherwise it'll crash
+    // start the telnet service
+    // default idle is 10 minutes, default write timeout is 0 (automatic)
+    // note, this must be started after the network/wifi for ESP32 otherwise it'll crash
 #ifndef EMSESP_STANDALONE
-    if (enable_telnet_) {
+    if (telnet_enabled) {
         telnet_.start();
         telnet_.initial_idle_timeout(3600);  // in sec, one hour idle timeout
         telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
@@ -868,7 +879,7 @@ void Console::loop() {
     uuid::loop();
 
 #ifndef EMSESP_STANDALONE
-    if (enable_telnet_) {
+    if (telnet_enabled_) {
         telnet_.loop();
     }
 #endif

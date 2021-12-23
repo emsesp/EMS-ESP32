@@ -48,24 +48,27 @@ enum DeviceValueType : uint8_t {
 // also used with HA as uom
 enum DeviceValueUOM : uint8_t {
 
-    NONE = 0, // 0
-    DEGREES,  // 1
-    PERCENT,  // 2
-    LMIN,     // 3
-    KWH,      // 4
-    WH,       // 5
-    HOURS,    // 6
-    MINUTES,  // 7
-    UA,       // 8
-    BAR,      // 9
-    KW,       // 10
-    W,        // 11
-    KB,       // 12
-    SECONDS,  // 13
-    DBM,      // 14
-    MV,       // 15
-    TIMES,    // 16
-    OCLOCK    // 17
+    NONE = 0,   // 0
+    DEGREES,    // 1
+    DEGREES_R,  // 2
+    PERCENT,    // 3
+    LMIN,       // 4
+    KWH,        // 5
+    WH,         // 6
+    HOURS,      // 7
+    MINUTES,    // 8
+    UA,         // 9
+    BAR,        // 10
+    KW,         // 11
+    W,          // 12
+    KB,         // 13
+    SECONDS,    // 14
+    DBM,        // 15
+    FAHRENHEIT, // 16
+    MV,         // 17
+    SQM,        // 18
+    TIMES,      // 19
+    OCLOCK      // 20
 
 };
 
@@ -84,6 +87,9 @@ MAKE_PSTR(icondbm, "mdi:wifi-strength-2")         // DeviceValueUOM::DBM
 MAKE_PSTR(iconnum, "mdi:counter")                 // DeviceValueUOM::NONE
 
 MAKE_PSTR(icondevice, "mdi:home-automation") // for devices in HA
+
+MAKE_PSTR_WORD(measurement)
+MAKE_PSTR_WORD(total_increasing)
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 enum DeviceValueTAG : uint8_t {
@@ -228,8 +234,62 @@ class EMSdevice {
         return has_update_;
     }
 
-    inline void has_update(bool has_update) {
-        has_update_ |= has_update;
+    inline void has_update(bool flag) {
+        has_update_ = flag;
+    }
+
+    inline void has_update(void * value) {
+        has_update_ = true;
+        publish_value(value);
+    }
+
+    inline void has_update(char * value, char * newvalue, size_t len) {
+        if (strcmp(value, newvalue) != 0) {
+            strlcpy(value, newvalue, len);
+            has_update_ = true;
+            publish_value(value);
+        }
+    }
+
+    inline void has_update(uint8_t & value, uint8_t newvalue) {
+        if (value != newvalue) {
+            value       = newvalue;
+            has_update_ = true;
+            publish_value((void *)&value);
+        }
+    }
+
+    /*
+    inline void has_update(int16_t & value, int16_t newvalue) {
+        if (value != newvalue) {
+            value = newvalue;
+            has_update_ = true;
+            publish_value((void *) &value);
+        }
+    }
+    */
+
+    inline void has_enumupdate(std::shared_ptr<const Telegram> telegram, uint8_t & value, const uint8_t index, uint8_t s = 0) {
+        if (telegram->read_enumvalue(value, index, s)) {
+            has_update_ = true;
+            publish_value((void *)&value);
+        }
+    }
+
+    template <typename Value>
+    inline void has_update(std::shared_ptr<const Telegram> telegram, Value & value, const uint8_t index, uint8_t s = 0) {
+        if (telegram->read_value(value, index, s)) {
+            has_update_ = true;
+            publish_value((void *)&value);
+        }
+    }
+
+    template <typename BitValue>
+    inline void has_bitupdate(std::shared_ptr<const Telegram> telegram, BitValue & value, const uint8_t index, uint8_t b) {
+        if (telegram->read_bitvalue(value, index, b)) {
+            has_update_ = true;
+            publish_value((void *)&value);
+        }
     }
 
     const std::string brand_to_string() const;
@@ -242,8 +302,7 @@ class EMSdevice {
     char * show_telegram_handlers(char * result);
     void   show_mqtt_handlers(uuid::console::Shell & shell);
     void   list_device_entries(JsonObject & output);
-
-    void exclude_entity(uint8_t entity_id);
+    void   exclude_entity(uint8_t entity_id);
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
 
@@ -297,6 +356,9 @@ class EMSdevice {
 
     void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0);
 
+    void publish_value(void * value);
+    void publish_all_values();
+
     void publish_mqtt_ha_entity_config();
 
     const std::string telegram_type_name(std::shared_ptr<const Telegram> telegram);
@@ -304,6 +366,7 @@ class EMSdevice {
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);
     bool is_fetch(uint16_t telegram_id);
+    bool has_telegram_id(uint16_t id);
 
     bool ha_config_done() const {
         return ha_config_done_;

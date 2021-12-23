@@ -105,6 +105,12 @@ WebLogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_
 }
 
 void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
+    // special case for trace, show trace and notice messages only
+    // added by mvdp
+    if (log_level() == uuid::log::Level::TRACE && message->level != uuid::log::Level::TRACE && message->level != uuid::log::Level::NOTICE) {
+        return;
+    }
+
     if (log_messages_.size() >= maximum_log_messages_) {
         log_messages_.pop_front();
     }
