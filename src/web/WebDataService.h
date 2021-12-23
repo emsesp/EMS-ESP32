@@ -33,6 +33,7 @@
 // POST
 #define WRITE_VALUE_SERVICE_PATH "/rest/writeValue"
 #define WRITE_SENSOR_SERVICE_PATH "/rest/writeSensor"
+#define WRITE_ANALOG_SERVICE_PATH "/rest/writeAnalog"
 #define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
 #define EXCLUDE_ENTITIES_PATH "/rest/excludeEntities"
 
@@ -54,13 +55,18 @@ class WebDataService {
 
     // POST
     void device_data(AsyncWebServerRequest * request, JsonVariant & json);
+
     void write_value(AsyncWebServerRequest * request, JsonVariant & json);
     void write_sensor(AsyncWebServerRequest * request, JsonVariant & json);
+    void write_analog(AsyncWebServerRequest * request, JsonVariant & json);
+
     void exclude_entities(AsyncWebServerRequest * request, JsonVariant & json);
     void device_entities(AsyncWebServerRequest * request, JsonVariant & json);
+
     void scan_devices(AsyncWebServerRequest * request);
 
-    AsyncCallbackJsonWebHandler _device_dataHandler, _excludeentities_dataHandler, _deviceentities_dataHandler, _writevalue_dataHandler, _writesensor_dataHandler;
+    AsyncCallbackJsonWebHandler _device_dataHandler, _excludeentities_dataHandler, _deviceentities_dataHandler, _writevalue_dataHandler,
+        _writesensor_dataHandler, _writeanalog_dataHandler;
 };
 
 } // namespace emsesp

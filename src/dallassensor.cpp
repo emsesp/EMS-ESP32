@@ -29,7 +29,7 @@
 
 namespace emsesp {
 
-uuid::log::Logger DallasSensor::logger_{F_(dallassensor), uuid::log::Facility::DAEMON};
+uuid::log::Logger DallasSensor::logger_{F_(sensor), uuid::log::Facility::DAEMON};
 
 // start the 1-wire
 void DallasSensor::start() {
@@ -150,6 +150,7 @@ void DallasSensor::loop() {
                                 if (sensor.id() == get_id(addr)) {
                                     t += sensor.offset();
                                     if (t != sensor.temperature_c) {
+                                        publish_sensor(sensor);
                                         changed_ |= true;
                                     }
                                     sensor.temperature_c = t;
@@ -166,6 +167,7 @@ void DallasSensor::loop() {
                                 changed_                      = true;
                                 // look in the customization service for an optional alias or offset
                                 sensors_.back().apply_customization();
+                                publish_sensor(sensors_.back());
                             }
                         } else {
                             sensorfails_++;
@@ -387,6 +389,16 @@ bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const i
     return false;
 }
 
+// publish a single sensor to MQTT
+void DallasSensor::publish_sensor(Sensor sensor) {
+    if (Mqtt::publish_single()) {
+        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        snprintf(topic, sizeof(topic), "%s/%s", read_flash_string(F_(dallassensor)).c_str(), sensor.name().c_str());
+        char payload[10];
+        Mqtt::publish(topic, Helpers::render_value(payload, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
+    }
+}
+
 // send empty config topic to remove the entry from HA
 void DallasSensor::remove_ha_topic(const std::string & id_str) {
     if (!Mqtt::ha_enabled()) {
@@ -409,6 +421,13 @@ void DallasSensor::publish_values(const bool force) {
 
     if (num_sensors == 0) {
         return;
+    }
+
+    if (force && Mqtt::publish_single()) {
+        for (const auto & sensor : sensors_) {
+            publish_sensor(sensor);
+        }
+        // return;
     }
 
     DynamicJsonDocument doc(120 * num_sensors);
@@ -438,7 +457,11 @@ void DallasSensor::publish_values(const bool force) {
                 snprintf(stat_t, sizeof(stat_t), "%s/dallassensor_data", Mqtt::base().c_str());
                 config["stat_t"] = stat_t;
 
-                config["unit_of_meas"] = FJSON("°C");
+                if (EMSESP::system_.fahrenheit()) {
+                    config["unit_of_meas"] = FJSON("°F");
+                } else {
+                    config["unit_of_meas"] = FJSON("°C");
+                }
 
                 char str[50];
                 snprintf(str, sizeof(str), "{{value_json['%s'].temp}}", sensor.id_str().c_str());

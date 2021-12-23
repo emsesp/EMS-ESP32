@@ -10,8 +10,8 @@
     "@mui/icons-material": "^5.2.5",
     "@mui/material": "^5.2.5",
     "@types/lodash": "^4.14.178",
-    "@types/node": "^17.0.2",
-    "@types/react": "^17.0.37",
+    "@types/node": "^17.0.4",
+    "@types/react": "^17.0.38",
     "@types/react-dom": "^17.0.11",
     "@types/react-router-dom": "^5.3.2",
     "async-validator": "^4.0.7",
@@ -76,7 +76,7 @@
       "max-len": [
         1,
         {
-          "code": 140
+          "code": 150
         }
       ],
       "arrow-parens": 1

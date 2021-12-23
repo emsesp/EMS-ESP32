@@ -40,4 +40,5 @@ export interface MqttSettings {
   ha_climate_format: number;
   nested_format: number;
   send_response: boolean;
+  publish_single: boolean;
 }

@@ -63,6 +63,7 @@ class System {
 
     static bool command_info(const char * value, const int8_t id, JsonObject & output);
     static bool command_settings(const char * value, const int8_t id, JsonObject & output);
+    static bool command_counter(const char * value, const int8_t id);
     static bool command_customizations(const char * value, const int8_t id, JsonObject & output);
     static bool command_commands(const char * value, const int8_t id, JsonObject & output);
 
@@ -97,8 +98,8 @@ class System {
         return restart_requested_;
     }
 
-    bool enable_telnet() {
-        return enable_telnet_;
+    bool telnet_enabled() {
+        return telnet_enabled_;
     }
 
     bool analog_enabled() {
@@ -111,6 +112,10 @@ class System {
 
     std::string board_profile() {
         return std::string(board_profile_.c_str());
+    }
+
+    uint32_t get_io_counter() {
+        return io_counter_;
     }
 
     std::string hostname() {
@@ -136,6 +141,36 @@ class System {
         return true;
 #endif
     }
+
+    void fahrenheit(bool b) {
+        fahrenheit_ = b;
+    }
+
+    bool fahrenheit() {
+        return fahrenheit_;
+    }
+
+    char * analog_name() {
+        return analogdata_.name;
+    }
+
+    float analog_value() {
+        return analogdata_.value;
+    }
+
+    float analog_factor() {
+        return analogdata_.factor;
+    }
+
+    uint16_t analog_offset() {
+        return analogdata_.offset;
+    }
+
+    char * analog_uom() {
+        return analogdata_.uom;
+    }
+
+    bool analogupdate(const char * name, const uint16_t offset, const float factor, const char * uom);
 
     void show_system(uuid::console::Shell & shell);
     void wifi_reconnect();
@@ -172,6 +207,7 @@ class System {
     void   set_led_speed(uint32_t speed);
     void   system_check();
     void   measure_analog();
+    void   io_counter();
     int8_t wifi_quality(int8_t dBm);
 
     bool     system_healthy_     = false;
@@ -180,29 +216,39 @@ class System {
     uint32_t last_system_check_  = 0;
     bool     upload_status_      = false; // true if we're in the middle of a OTA firmware upload
     bool     ethernet_connected_ = false;
-    uint16_t analog_;
+    uint16_t analog_             = 0;
+    uint32_t io_counter_         = 0;
 
     // settings, copies from WebSettings class in WebSettingsService.h
     std::string hostname_ = FACTORY_WIFI_HOSTNAME;
 
     bool    hide_led_;
     uint8_t led_gpio_;
-
     bool    analog_enabled_;
     bool    low_clock_;
-    bool    enable_telnet_;
     String  board_profile_;
     uint8_t phy_type_;
     uint8_t pbutton_gpio_;
     uint8_t rx_gpio_;
     uint8_t tx_gpio_;
     uint8_t dallas_gpio_;
+    bool    telnet_enabled_;
 
     bool     syslog_enabled_ = false;
     int8_t   syslog_level_;
     uint32_t syslog_mark_interval_;
     String   syslog_host_;
     uint16_t syslog_port_;
+
+    bool fahrenheit_;
+
+    struct {
+        char     name[20];
+        uint16_t offset;
+        float    factor;
+        char     uom[10];
+        float    value;
+    } analogdata_;
 };
 
 } // namespace emsesp

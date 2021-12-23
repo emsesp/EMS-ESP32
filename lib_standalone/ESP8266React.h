@@ -33,6 +33,10 @@ class DummySettings {
     bool     notoken_api          = false;
     uint8_t  bool_format          = 1; // on off
     uint8_t  enum_format          = 1;
+    bool     nosleep              = false;
+    bool     fahrenheit           = false;
+    bool     bandwidth20          = false;
+    bool     telnet_enabled       = false;
 
     // MQTT
     uint16_t publish_time      = 10; // seconds
@@ -43,6 +47,7 @@ class DummySettings {
     uint8_t  ha_climate_format = 1;
     bool     ha_enabled        = true;
     String   base              = "ems-esp";
+    bool     publish_single    = false;
     bool     send_response     = true;
 
     String   hostname                = "ems-esp";

@@ -56,17 +56,24 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["led_gpio"]             = settings.led_gpio;
     root["hide_led"]             = settings.hide_led;
     root["low_clock"]            = settings.low_clock;
-    root["enable_telnet"]        = settings.enable_telnet;
+    root["telnet_enabled"]       = settings.telnet_enabled;
     root["notoken_api"]          = settings.notoken_api;
     root["analog_enabled"]       = settings.analog_enabled;
     root["pbutton_gpio"]         = settings.pbutton_gpio;
     root["solar_maxflow"]        = settings.solar_maxflow;
     root["board_profile"]        = settings.board_profile;
+    root["fahrenheit"]           = settings.fahrenheit;
     root["bool_format"]          = settings.bool_format;
     root["enum_format"]          = settings.enum_format;
     root["weblog_level"]         = settings.weblog_level;
     root["weblog_buffer"]        = settings.weblog_buffer;
     root["weblog_compact"]       = settings.weblog_compact;
+
+    // TODO move to customization service
+    root["analog_name"]   = settings.analog_name;
+    root["analog_offset"] = settings.analog_offset;
+    root["analog_factor"] = settings.analog_factor;
+    root["analog_uom"]    = settings.analog_uom;
 }
 
 // call on initialization and also when settings are updated via web or console
@@ -127,9 +134,23 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 #endif
 
     // adc
-    prev                    = settings.analog_enabled;
-    settings.analog_enabled = root["analog_enabled"] | EMSESP_DEFAULT_ANALOG_ENABLED;
-    check_flag(prev, settings.analog_enabled, ChangeFlags::ADC);
+    // TODO move to customization service
+    String old_analog_name = settings.analog_name;
+    settings.analog_name   = root["analog_name"] | EMSESP_DEFAULT_ANALOG_NAME;
+    if (old_analog_name != settings.analog_name) {
+        add_flags(ChangeFlags::ADC);
+    }
+    prev                   = settings.analog_offset;
+    settings.analog_offset = root["analog_offset"] | 0;
+    check_flag(prev, settings.analog_offset, ChangeFlags::ADC);
+    prev                   = settings.analog_factor;
+    settings.analog_factor = root["analog_factor"] | 1.000;
+    check_flag(prev, settings.analog_factor, ChangeFlags::ADC);
+    String old_analog_uom = settings.analog_uom;
+    settings.analog_uom   = root["analog_uom"] | EMSESP_DEFAULT_ANALOG_UOM;
+    if (old_analog_uom != settings.analog_uom) {
+        add_flags(ChangeFlags::ADC);
+    }
 
     // button
     prev                  = settings.pbutton_gpio;
@@ -162,9 +183,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     // these need reboots to be applied...
 
-    prev                   = settings.enable_telnet;
-    settings.enable_telnet = root["enable_telnet"] | true;
-    check_flag(prev, settings.enable_telnet, ChangeFlags::RESTART);
+    prev                    = settings.telnet_enabled;
+    settings.telnet_enabled = root["telnet_enabled"] | true;
+    check_flag(prev, settings.telnet_enabled, ChangeFlags::RESTART);
 
     prev                = settings.ems_bus_id;
     settings.ems_bus_id = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
@@ -189,6 +210,8 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
     settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
+    settings.fahrenheit    = root["fahrenheit"] | false;
+    EMSESP::system_.fahrenheit(settings.fahrenheit);
 
     settings.bool_format = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
     EMSESP::bool_format(settings.bool_format);

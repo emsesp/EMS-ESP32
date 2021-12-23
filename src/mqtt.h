@@ -97,6 +97,7 @@ class Mqtt {
     static void on_connect();
 
     static void subscribe(const uint8_t device_type, const std::string & topic, mqtt_sub_function_p cb);
+    static void subscribe(const std::string & topic);
     static void resubscribe();
 
     static void publish(const std::string & topic, const std::string & payload);
@@ -190,6 +191,14 @@ class Mqtt {
 
     static bool is_nested() {
         return nested_format_ == 1;
+    }
+
+    static bool publish_single() {
+        return publish_single_;
+    }
+
+    static void publish_single(bool publish_single) {
+        publish_single_ = publish_single;
     }
 
     static void nested_format(uint8_t nested_format) {
@@ -307,6 +316,7 @@ class Mqtt {
     static uint8_t     ha_climate_format_;
     static bool        ha_enabled_;
     static uint8_t     nested_format_;
+    static bool        publish_single_;
     static bool        send_response_;
 };
 

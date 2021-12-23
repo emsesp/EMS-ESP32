@@ -148,7 +148,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         return_code = Command::call(device_type, command_p, data.as<const char *>(), is_admin, id_n, output);
     } else if (data.is<int>()) {
         char data_str[10];
-        return_code = Command::call(device_type, command_p, Helpers::itoa(data_str, (int16_t)data.as<int>()), is_admin, id_n, output);
+        return_code = Command::call(device_type, command_p, Helpers::itoa((int16_t)data.as<int>(), data_str), is_admin, id_n, output);
     } else if (data.is<float>()) {
         char data_str[10];
         return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, (float)data.as<float>(), 2), is_admin, id_n, output);

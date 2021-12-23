@@ -89,6 +89,7 @@ class MqttSettings {
     uint8_t  ha_climate_format;
     bool     ha_enabled;
     uint8_t  nested_format;
+    bool     publish_single;
     bool     send_response;
 
     static void              read(MqttSettings & settings, JsonObject & root);

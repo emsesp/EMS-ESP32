@@ -112,8 +112,8 @@ const SettingsApplication: FC = () => {
         </Typography>
         <Box color="warning.main">
           <Typography variant="body2">
-            Select a pre-configured interface board profile from the list below or choose "Custom" to configure your own hardware
-            settings.
+            Select a pre-configured interface board profile from the list below or choose "Custom" to configure your own
+            hardware settings.
           </Typography>
         </Box>
         <ValidatedTextField
@@ -276,20 +276,19 @@ const SettingsApplication: FC = () => {
           />
         )}
         <BlockFormControlLabel
-          control={<Checkbox checked={data.enable_telnet} onChange={updateFormValue} name="enable_telnet" />}
+          control={<Checkbox checked={data.telnet_enabled} onChange={updateFormValue} name="telnet_enabled" />}
           label="Enable Telnet Console"
           disabled={saving}
         />
-        {data.dallas_gpio !== 0 && (
-          <BlockFormControlLabel
-            control={<Checkbox checked={data.dallas_parasite} onChange={updateFormValue} name="dallas_parasite" />}
-            label="Use Dallas Sensor parasite power"
-            disabled={saving}
-          />
-        )}
+
         <BlockFormControlLabel
           control={<Checkbox checked={data.analog_enabled} onChange={updateFormValue} name="analog_enabled" />}
           label="Enable ADC"
+          disabled={saving}
+        />
+        <BlockFormControlLabel
+          control={<Checkbox checked={data.fahrenheit} onChange={updateFormValue} name="fahrenheit" />}
+          label="Convert all temperatures to Fahrenheit"
           disabled={saving}
         />
         <BlockFormControlLabel
@@ -314,6 +313,7 @@ const SettingsApplication: FC = () => {
             disabled={saving}
           />
         </Grid>
+
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           Formatting Options
         </Typography>
@@ -353,9 +353,27 @@ const SettingsApplication: FC = () => {
             </ValidatedTextField>
           </Grid>
         </Grid>
+
+        {data.dallas_gpio !== 0 && (
+          <>
+            <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+              Dallas Sensors
+            </Typography>
+            <BlockFormControlLabel
+              control={<Checkbox checked={data.dallas_parasite} onChange={updateFormValue} name="dallas_parasite" />}
+              label="Enable parasite power"
+              disabled={saving}
+            />
+          </>
+        )}
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          Syslog
+          Logging
         </Typography>
+        <BlockFormControlLabel
+          control={<Checkbox checked={data.trace_raw} onChange={updateFormValue} name="trace_raw" />}
+          label="Log EMS telegrams in hexadecimal"
+          disabled={saving}
+        />
         <BlockFormControlLabel
           control={
             <Checkbox
@@ -430,11 +448,6 @@ const SettingsApplication: FC = () => {
                 disabled={saving}
               />
             </Grid>
-            <BlockFormControlLabel
-              control={<Checkbox checked={data.trace_raw} onChange={updateFormValue} name="trace_raw" />}
-              label="Log EMS telegrams in hexadecimal"
-              disabled={saving}
-            />
           </Grid>
         )}
         {restartNeeded && (

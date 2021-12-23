@@ -70,7 +70,7 @@ class WebSettings {
     uint8_t  led_gpio;
     bool     hide_led;
     bool     low_clock;
-    bool     enable_telnet;
+    bool     telnet_enabled;
     bool     notoken_api;
     bool     analog_enabled;
     uint8_t  pbutton_gpio;
@@ -82,6 +82,13 @@ class WebSettings {
     int8_t   weblog_level;
     uint8_t  weblog_buffer;
     bool     weblog_compact;
+    bool     fahrenheit;
+
+    // TODO move to customization service
+    String  analog_name;
+    int16_t analog_offset;
+    float   analog_factor;
+    String  analog_uom;
 
     static void              read(WebSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebSettings & settings);

@@ -73,8 +73,8 @@ bool Heatpump::publish_ha_device_config() {
  * e.g. "38 10 FF 00 03 7B 08 24 00 4B"
  */
 void Heatpump::process_HPMonitor2(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(dewTemperature_, 0));
-    has_update(telegram->read_value(airHumidity_, 1));
+    has_update(telegram, dewTemperature_, 0);
+    has_update(telegram, airHumidity_, 1);
 }
 
 #pragma GCC diagnostic push

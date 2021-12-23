@@ -38,9 +38,20 @@ class WebAPIService {
     void webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json); // for POSTs
     void webAPIService_get(AsyncWebServerRequest * request);                      // for GETs
 
+    static uint32_t api_count() {
+        return api_count_;
+    }
+
+    static uint32_t api_fails() {
+        return api_fails_;
+    }
+
   private:
     SecurityManager *           _securityManager;
     AsyncCallbackJsonWebHandler _apiHandler; // for POSTs
+
+    static uint32_t api_count_;
+    static uint32_t api_fails_;
 
     void parse(AsyncWebServerRequest * request, JsonObject & input);
 };

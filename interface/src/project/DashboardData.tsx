@@ -39,7 +39,7 @@ import * as EMSESP from './api';
 
 import { numberValue, updateValue, extractErrorMessage, useRest } from '../utils';
 
-import { CoreData, DeviceData, Device, DeviceValue, DeviceValueUOM, DeviceValueUOM_s, Sensor } from './types';
+import { CoreData, DeviceData, Device, DeviceValue, DeviceValueUOM, DeviceValueUOM_s, Sensor, Analog } from './types';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -47,16 +47,12 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     color: theme.palette.common.white,
     fontSize: 14
   }
-  // [`&.${tableCellClasses.body}`]: {
-  //   fontSize: 12
-  // }
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
     backgroundColor: theme.palette.action.hover
   },
-  // hide last border
   '&:last-child td, &:last-child th': {
     border: 0
   },
@@ -85,6 +81,7 @@ const DashboardData: FC = () => {
   const [deviceData, setDeviceData] = useState<DeviceData>();
   const [deviceValue, setDeviceValue] = useState<DeviceValue>();
   const [sensor, setSensor] = useState<Sensor>();
+  const [analog, setAnalog] = useState<Analog>();
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
 
   const fetchDeviceData = async (unique_id: number) => {
@@ -116,7 +113,7 @@ const DashboardData: FC = () => {
 
   function formatValue(value: any, uom: number) {
     if (value === undefined) {
-      return 'offline';
+      return '';
     }
     switch (uom) {
       case DeviceValueUOM.HOURS:
@@ -129,6 +126,8 @@ const DashboardData: FC = () => {
         }
         return value;
       case DeviceValueUOM.DEGREES:
+      case DeviceValueUOM.DEGREES_R:
+      case DeviceValueUOM.FAHRENHEIT:
         return (
           new Intl.NumberFormat(undefined, {
             minimumFractionDigits: 1
@@ -145,10 +144,10 @@ const DashboardData: FC = () => {
   }
 
   const sendDeviceValue = async () => {
-    if (deviceValue && deviceData) {
+    if (deviceValue) {
       try {
         const response = await EMSESP.writeValue({
-          id: deviceData.id,
+          id: selectedDevice,
           devicevalue: deviceValue
         });
         if (response.status === 204) {
@@ -163,7 +162,7 @@ const DashboardData: FC = () => {
         enqueueSnackbar(extractErrorMessage(error, 'Problem writing value'), { variant: 'error' });
       } finally {
         setDeviceValue(undefined);
-        fetchDeviceData(deviceData.id);
+        fetchDeviceData(selectedDevice);
         loadData();
       }
     }
@@ -194,7 +193,7 @@ const DashboardData: FC = () => {
               <ValidatedTextField
                 name="v"
                 label={deviceValue.n}
-                value={deviceValue.v}
+                value={deviceValue.u ? Intl.NumberFormat().format(deviceValue.v) : deviceValue.v}
                 autoFocus
                 sx={{ width: '30ch' }}
                 type={deviceValue.u ? 'number' : 'text'}
@@ -359,7 +358,7 @@ const DashboardData: FC = () => {
           <MessageBox
             my={2}
             level="error"
-            message="No EMS devices found. Check the interface's hardware connections and for possible Rx and Tx errors in the System Log"
+            message="No EMS devices found. If this message persists then check the interface board and look for any errors in the System Log"
           />
         )}
       </>
@@ -377,16 +376,31 @@ const DashboardData: FC = () => {
       }
     };
 
+    const renderNameCell = (dv: DeviceValue) => {
+      if (dv.v === undefined && dv.c) {
+        return (
+          <StyledTableCell component="th" scope="row" sx={{ color: 'yellow' }}>
+            call command:&nbsp;{dv.n}
+          </StyledTableCell>
+        );
+      }
+      return (
+        <StyledTableCell component="th" scope="row">
+          {dv.n}
+        </StyledTableCell>
+      );
+    };
+
     return (
       <>
         <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
-          {deviceData.type}&nbsp;Data
+          {deviceData.type}
         </Typography>
         <Table size="small">
           <TableHead>
             <TableRow>
               <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
-              <StyledTableCell align="left">Entity Name</StyledTableCell>
+              <StyledTableCell align="left">Entity Name/Command</StyledTableCell>
               <StyledTableCell align="right">Value</StyledTableCell>
             </TableRow>
           </TableHead>
@@ -402,9 +416,7 @@ const DashboardData: FC = () => {
                     </StyledTooltip>
                   )}
                 </StyledTableCell>
-                <StyledTableCell component="th" scope="row">
-                  {dv.n}
-                </StyledTableCell>
+                {renderNameCell(dv)}
                 <StyledTableCell align="right">{formatValue(dv.v, dv.u)}</StyledTableCell>
               </StyledTableRow>
             ))}
@@ -417,6 +429,12 @@ const DashboardData: FC = () => {
   const updateSensor = (sensordata: Sensor) => {
     if (sensordata && me.admin) {
       setSensor(sensordata);
+    }
+  };
+
+  const updateAnalog = (analogdata: Analog) => {
+    if (me.admin) {
+      setAnalog(analogdata);
     }
   };
 
@@ -456,27 +474,131 @@ const DashboardData: FC = () => {
     </>
   );
 
+  const sendAnalog = async () => {
+    if (analog) {
+      try {
+        const response = await EMSESP.writeAnalog({
+          name: analog.n,
+          offset: analog.o,
+          factor: analog.f,
+          uom: analog.u
+        });
+        if (response.status === 204) {
+          enqueueSnackbar('Analog calibration failed', { variant: 'error' });
+        } else if (response.status === 403) {
+          enqueueSnackbar('Access denied', { variant: 'error' });
+        } else {
+          enqueueSnackbar('Analog calibration updated', { variant: 'success' });
+        }
+        setAnalog(undefined);
+      } catch (error: any) {
+        enqueueSnackbar(extractErrorMessage(error, 'Problem updating analog'), { variant: 'error' });
+      } finally {
+        setAnalog(undefined);
+        loadData();
+      }
+    }
+  };
+
+  const renderAnalogDialog = () => {
+    if (analog) {
+      return (
+        <Dialog open={analog !== undefined} onClose={() => setAnalog(undefined)}>
+          <DialogTitle>Edit Analog</DialogTitle>
+          <DialogContent dividers>
+            <Grid container spacing={1}>
+              <Grid item>
+                <ValidatedTextField
+                  name="n"
+                  label="Name"
+                  value={analog.n}
+                  autoFocus
+                  sx={{ width: '30ch' }}
+                  variant="outlined"
+                  onChange={updateValue(setAnalog)}
+                />
+              </Grid>
+              <Grid item>
+                <ValidatedTextField
+                  name="u"
+                  label="Unit"
+                  value={analog.u}
+                  sx={{ width: '10ch' }}
+                  variant="outlined"
+                  onChange={updateValue(setAnalog)}
+                />
+              </Grid>
+            </Grid>
+            <p></p>
+            <Grid container spacing={1}>
+              <Grid item>
+                <ValidatedTextField
+                  name="o"
+                  label="Offset"
+                  value={numberValue(analog.o)}
+                  sx={{ width: '20ch' }}
+                  type="number"
+                  variant="outlined"
+                  onChange={updateValue(setAnalog)}
+                  inputProps={{ min: '0', max: '3300', step: '1' }}
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">mV</InputAdornment>
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <ValidatedTextField
+                  name="f"
+                  label="Factor"
+                  value={numberValue(analog.f)}
+                  sx={{ width: '20ch' }}
+                  type="number"
+                  variant="outlined"
+                  onChange={updateValue(setAnalog)}
+                  inputProps={{ min: '-100', max: '100', step: '0.1' }}
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button variant="outlined" onClick={() => setAnalog(undefined)} color="secondary">
+              Cancel
+            </Button>
+            <Button variant="outlined" type="submit" onClick={() => sendAnalog()} color="warning">
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      );
+    }
+  };
+
   const renderAnalogData = () => (
     <>
       <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
         Analog Sensors
       </Typography>
       <Table size="small">
-        <TableHead>
-          <TableRow>
-            <StyledTableCell style={{ width: 18 }}></StyledTableCell>
-            <StyledTableCell>Type</StyledTableCell>
-            <StyledTableCell align="right">Value</StyledTableCell>
-          </TableRow>
-        </TableHead>
         <TableBody>
-          <StyledTableRow>
-            <StyledTableCell>&nbsp;&nbsp;</StyledTableCell>
-            <StyledTableCell component="th" scope="row">
-              Analog Input (ADC0)
-            </StyledTableCell>
-            <StyledTableCell align="right">{formatValue(data?.analog, DeviceValueUOM.MV)}</StyledTableCell>
-          </StyledTableRow>
+          {data?.analog.map((analogData) => (
+            <StyledTableRow key={analogData.n} onClick={() => updateAnalog(analogData)}>
+              <StyledTableCell padding="checkbox">
+                {me.admin && (
+                  <StyledTooltip title="edit" placement="left-end">
+                    <IconButton edge="start" size="small" aria-label="Edit">
+                      <EditIcon color="primary" fontSize="small" />
+                    </IconButton>
+                  </StyledTooltip>
+                )}
+              </StyledTableCell>
+              <StyledTableCell component="th" scope="row">
+                {analogData.n}
+              </StyledTableCell>
+              <StyledTableCell align="right">
+                {Intl.NumberFormat().format(analogData.v)}&nbsp;{analogData.u}{' '}
+              </StyledTableCell>
+            </StyledTableRow>
+          ))}
         </TableBody>
       </Table>
     </>
@@ -495,6 +617,7 @@ const DashboardData: FC = () => {
         {data.analog && renderAnalogData()}
         {renderDeviceValueDialog()}
         {renderSensorDialog()}
+        {renderAnalogDialog()}
         <ButtonRow>
           <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
             Refresh

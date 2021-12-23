@@ -24,6 +24,9 @@ using namespace std::placeholders; // for `_1` etc
 
 namespace emsesp {
 
+uint32_t WebAPIService::api_count_ = 0;
+uint32_t WebAPIService::api_fails_ = 0;
+
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager)
     , _apiHandler("/api", std::bind(&WebAPIService::webAPIService_post, this, _1, _2), 256) { // for POSTS, must use 'Content-Type: application/json' in header
@@ -65,6 +68,33 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         Authentication authentication = _securityManager->authenticateRequest(request);
         is_admin                      = settings.notoken_api | AuthenticationPredicates::IS_ADMIN(authentication);
     });
+
+    // check for query parameters first, the old style from v2
+    // api?device={device}&cmd={name}&data={value}&id={hc}
+    if (request->url() == "/api") {
+        // get the device
+        if (request->hasParam(F_(device))) {
+            input["device"] = request->getParam(F_(device))->value().c_str();
+        }
+        if (request->hasParam(F_(cmd))) {
+            input["cmd"] = request->getParam(F_(cmd))->value().c_str();
+        }
+        if (request->hasParam(F_(data))) {
+            input["data"] = request->getParam(F_(data))->value().c_str();
+        }
+        if (request->hasParam(F_(value))) {
+            input["value"] = request->getParam(F_(value))->value().c_str();
+        }
+        if (request->hasParam(F_(id))) {
+            input["id"] = Helpers::atoint(request->getParam(F_(id))->value().c_str());
+        }
+        if (request->hasParam(F_(hc))) {
+            input["hc"] = Helpers::atoint(request->getParam(F_(hc))->value().c_str());
+        }
+        if (request->hasParam(F_(wwc))) {
+            input["wwc"] = Helpers::atoint(request->getParam(F_(wwc))->value().c_str());
+        }
+    }
 
     // output json buffer
     PrettyAsyncJsonResponse * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
