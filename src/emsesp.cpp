@@ -1321,7 +1321,7 @@ void EMSESP::start() {
     console_.start(system_.telnet_enabled()); // telnet and serial console, from here we can start logging events
     webLogService.start();                    // start web log service
 
-    // load the customizations for Dallas and EMS Devices
+    // load the customizations
     webCustomizationService.begin();
 
     // welcome message

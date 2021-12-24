@@ -292,6 +292,7 @@ const generate_token = { token: '1234' }
 // EMS-ESP Project specific
 const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'settings'
 const EMSESP_CORE_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'coreData'
+const EMSESP_SENSOR_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'sensorData'
 const EMSESP_DEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'devices'
 const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices'
 const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData'
@@ -300,6 +301,7 @@ const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'status'
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile'
 const EMSESP_WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
 const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
+const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalog'
 const EMSESP_EXCLUDE_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'excludeEntities'
 
 settings = {
@@ -401,18 +403,24 @@ const emsesp_coredata = {
       e: 3,
     },
   ],
+  dallassensor_count: 0,
+  analogsensor_count: 0,
+}
+
+const emsesp_sensordata = {
   sensors: [
-    { is: '28-233D-9497-0C03', n: 'name1', t: 25.7, o: 1.2 },
-    { is: '28-243D-7437-1E3A', n: 'name2', t: 26.1, o: 0 },
-    { is: '28-243E-7437-1E3B', n: 'name3', t: 27.1, o: 0 },
-    { is: '28-183D-1892-0C33', n: 'name4', o: 2 },
+    { is: '28-233D-9497-0C03', n: 'name1', t: 25.7, o: 1.2, u: 1 },
+    { is: '28-243D-7437-1E3A', n: 'name2', t: 26.1, o: 0, u: 1 },
+    { is: '28-243E-7437-1E3B', n: 'name3', t: 27.1, o: 0, u: 16 },
+    { is: '28-183D-1892-0C33', n: 'name4', o: 2, u: 1 },
   ],
   // sensors: [],
-  analog: [
-    { n: 'name1', v: 12, u: 0, o: 0, f: 0 },
-    { n: 'name2', v: 13, u: 0, o: 0, f: 0 },
-    { n: 'name3', v: 14, u: 0, o: 0, f: 0 },
+  analogs: [
+    { i: 1, n: 'name1', v: 12, u: 0, o: 0, f: 0 },
+    { i: 2, n: 'name2', v: 13, u: 0, o: 0, f: 0 },
+    { i: 3, n: 'name3', v: 14, u: 0, o: 0, f: 0 },
   ],
+  // analogs: [],
 }
 
 const status = {
@@ -439,8 +447,7 @@ const status = {
 
 // Dashboard data
 const emsesp_devicedata_1 = {
-  id: 1,
-  type: 'Thermostat',
+  label: 'RC20/Moduline 300',
   data: [
     {
       v: '(0)',
@@ -476,8 +483,7 @@ const emsesp_devicedata_1 = {
 }
 
 const emsesp_devicedata_2 = {
-  id: 2,
-  type: 'Boiler',
+  label: 'GBx72/Trendline/Cerapur/Greenstar Si/27i',
   data: [
     { u: 0, n: 'reset message', c: 'testcommand' },
     { v: 'off', u: 0, n: 'heating active' },
@@ -594,14 +600,12 @@ const emsesp_devicedata_2 = {
 }
 
 const emsesp_devicedata_3 = {
-  id: 3,
-  type: 'Controller',
+  label: 'Controller',
   data: [],
 }
 
 const emsesp_devicedata_4 = {
-  id: 4,
-  type: 'Thermostat',
+  label: 'RC100/Moduline 1000/1010',
   data: [
     {
       v: 16,
@@ -936,6 +940,9 @@ rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.get(EMSESP_CORE_DATA_ENDPOINT, (req, res) => {
   res.json(emsesp_coredata)
 })
+rest_server.get(EMSESP_SENSOR_DATA_ENDPOINT, (req, res) => {
+  res.json(emsesp_sensordata)
+})
 rest_server.get(EMSESP_DEVICES_ENDPOINT, (req, res) => {
   res.json(emsesp_devices)
 })
@@ -1008,6 +1015,11 @@ rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
     objIndex = emsesp_devicedata_2.data.findIndex((obj) => obj.c == devicevalue.c)
     emsesp_devicedata_2.data[objIndex] = devicevalue
   }
+  if (id === 4) {
+    console.log('Write device value for Thermostat2: ' + JSON.stringify(devicevalue))
+    objIndex = emsesp_devicedata_4.data.findIndex((obj) => obj.c == devicevalue.c)
+    emsesp_devicedata_4.data[objIndex] = devicevalue
+  }
 
   res.sendStatus(200)
 })
@@ -1015,9 +1027,20 @@ rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
   const sensor = req.body
   console.log('Write sensor: ' + JSON.stringify(sensor))
-  objIndex = emsesp_coredata.sensors.findIndex((obj) => obj.is == sensor.id_str)
-  emsesp_coredata.sensors[objIndex].n = sensor.name
-  emsesp_coredata.sensors[objIndex].o = sensor.offset
+  objIndex = emsesp_sensordata.sensors.findIndex((obj) => obj.is == sensor.id_str)
+  emsesp_sensordata.sensors[objIndex].n = sensor.name
+  emsesp_sensordata.sensors[objIndex].o = sensor.offset
+  res.sendStatus(200)
+})
+
+rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
+  const analog = req.body
+  console.log('Write analog: ' + JSON.stringify(analog))
+  objIndex = emsesp_sensordata.analogs.findIndex((obj) => obj.i == analog.id)
+  emsesp_sensordata.analogs[objIndex].n = analog.name
+  emsesp_sensordata.analogs[objIndex].o = analog.offset
+  emsesp_sensordata.analogs[objIndex].f = analog.factor
+  emsesp_sensordata.analogs[objIndex].u = analog.uom
   res.sendStatus(200)
 })
 

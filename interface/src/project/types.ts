@@ -59,7 +59,6 @@ export interface Status {
 export interface Device {
   i: number; // id
   t: string; // type
-  s: string; // shortname
   b: string; // brand
   n: string; // name
   d: number; // deviceid
@@ -73,9 +72,11 @@ export interface Sensor {
   n: string; // name/alias
   t?: number; // temp, optional
   o: number; // offset
+  u: number; // uom
 }
 
 export interface Analog {
+  i: number;
   n: string;
   v: number;
   u: string;
@@ -89,10 +90,15 @@ export interface WriteSensor {
   offset: number;
 }
 
+export interface SensorData {
+  sensors: Sensor[];
+  analogs: Analog[];
+}
+
 export interface CoreData {
   devices: Device[];
-  sensors: Sensor[];
-  analog: Analog[];
+  dallassensor_count: number;
+  analogsensor_count: number;
 }
 
 export interface DeviceShort {
@@ -115,7 +121,7 @@ export interface DeviceValue {
 }
 
 export interface DeviceData {
-  type: string;
+  label: string;
   data: DeviceValue[];
 }
 
@@ -223,6 +229,7 @@ export interface WriteValue {
 }
 
 export interface WriteAnalog {
+  id: number;
   name: string;
   factor: number;
   offset: number;

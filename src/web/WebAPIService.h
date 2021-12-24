@@ -19,14 +19,6 @@
 #ifndef WebAPIService_h
 #define WebAPIService_h
 
-#include <ArduinoJson.h>
-#include <AsyncJson.h>
-#include <ESPAsyncWebServer.h>
-
-#include <string>
-#include <unordered_map>
-#include <vector>
-
 #define EMSESP_API_SERVICE_PATH "/api"
 
 namespace emsesp {

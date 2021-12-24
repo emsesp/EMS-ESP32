@@ -15,7 +15,8 @@ import {
   ExcludeEntities,
   WriteValue,
   WriteSensor,
-  WriteAnalog
+  WriteAnalog,
+  SensorData
 } from './types';
 
 export function restart(): AxiosPromise<void> {
@@ -38,7 +39,7 @@ export function readStatus(): AxiosPromise<Status> {
   return AXIOS.get('/status');
 }
 
-export function readData(): AxiosPromise<CoreData> {
+export function readCoreData(): AxiosPromise<CoreData> {
   return AXIOS.get('/coreData');
 }
 
@@ -52,6 +53,10 @@ export function scanDevices(): AxiosPromise<void> {
 
 export function readDeviceData(unique_id: UniqueID): AxiosPromise<DeviceData> {
   return AXIOS_BIN.post('/deviceData', unique_id);
+}
+
+export function readSensorData(): AxiosPromise<SensorData> {
+  return AXIOS.get('/sensorData');
 }
 
 export function readDeviceEntities(unique_id: UniqueID): AxiosPromise<DeviceEntity[]> {

@@ -30,7 +30,24 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
                     EMSESP_CUSTOMIZATION_SERVICE_PATH,
                     securityManager,
                     AuthenticationPredicates::IS_AUTHENTICATED)
-    , _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE) {
+    , _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE)
+    , _exclude_entities_handler(EXCLUDE_ENTITIES_PATH,
+                                securityManager->wrapCallback(std::bind(&WebCustomizationService::exclude_entities, this, _1, _2),
+                                                              AuthenticationPredicates::IS_AUTHENTICATED))
+    , _device_entities_handler(DEVICE_ENTITIES_PATH,
+                               securityManager->wrapCallback(std::bind(&WebCustomizationService::device_entities, this, _1, _2),
+                                                             AuthenticationPredicates::IS_AUTHENTICATED)) {
+    server->on(DEVICES_SERVICE_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest(std::bind(&WebCustomizationService::devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+
+    _exclude_entities_handler.setMethod(HTTP_POST);
+    _exclude_entities_handler.setMaxContentLength(256);
+    server->addHandler(&_exclude_entities_handler);
+
+    _device_entities_handler.setMethod(HTTP_POST);
+    _device_entities_handler.setMaxContentLength(256);
+    server->addHandler(&_device_entities_handler);
 }
 
 // this creates the customization file
@@ -58,7 +75,7 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
     }
 }
 
-// call on initialization and also when settings are updated via web or console
+// call on initialization and also when the page is saved via web
 // this loads the data into the internal class
 StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization & settings) {
     // Sensor customization
@@ -90,6 +107,114 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
     }
 
     return StateUpdateResult::CHANGED;
+}
+
+// send back a short list devices used in the customization page
+void WebCustomizationService::devices(AsyncWebServerRequest * request) {
+    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN);
+    JsonObject          root     = response->getRoot();
+
+    JsonArray devices = root.createNestedArray("devices");
+    for (auto & emsdevice : EMSESP::emsdevices) {
+        if (emsdevice->has_entities()) {
+            JsonObject obj = devices.createNestedObject();
+            obj["i"]       = emsdevice->unique_id(); // a unique id
+
+            // shortname - we prefix the count to make it unique
+            uint8_t device_index = EMSESP::device_index(emsdevice->device_type(), emsdevice->unique_id());
+            if (device_index) {
+                char s[10];
+                obj["s"] = emsdevice->device_type_name() + Helpers::smallitoa(s, device_index);
+            } else {
+                obj["s"] = emsdevice->device_type_name();
+            }
+        }
+    }
+
+    response->setLength();
+    request->send(response);
+}
+
+// send back filtered list of device entities
+void WebCustomizationService::device_entities(AsyncWebServerRequest * request, JsonVariant & json) {
+    if (json.is<JsonObject>()) {
+        MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(true, EMSESP_JSON_SIZE_XXLARGE_DYN);
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice) {
+                if (emsdevice->unique_id() == json["id"]) {
+#ifndef EMSESP_STANDALONE
+                    JsonArray output = response->getRoot();
+                    emsdevice->generate_values_web_all(output);
+#endif
+                    response->setLength();
+                    request->send(response);
+                    return;
+                }
+            }
+        }
+    }
+
+    // invalid, but send OK anyway
+    AsyncWebServerResponse * response = request->beginResponse(200);
+    request->send(response);
+}
+
+// takes a list of excluded ids send from the webUI
+// saves it in the customization service
+// and updates the entity list real-time
+void WebCustomizationService::exclude_entities(AsyncWebServerRequest * request, JsonVariant & json) {
+    if (json.is<JsonObject>()) {
+        // find the device using the unique_id
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice) {
+                uint8_t unique_device_id = json["id"];
+                if (emsdevice->unique_id() == unique_device_id) {
+                    JsonArray entity_ids = json["entity_ids"];
+
+                    std::vector<uint8_t> temp;
+                    for (JsonVariant id : entity_ids) {
+                        uint8_t entity_id = id.as<int>();
+                        emsdevice->exclude_entity(entity_id); // this will have immediate affect
+                        temp.push_back(entity_id);
+                    }
+
+                    // Save the list to the customization file
+                    uint8_t product_id = emsdevice->product_id();
+                    uint8_t device_id  = emsdevice->device_id();
+
+                    EMSESP::webCustomizationService.update(
+                        [&](WebCustomization & settings) {
+                            // if it exists (productid and deviceid match) overwrite it
+                            for (auto & entityCustomization : settings.entityCustomizations) {
+                                if ((entityCustomization.product_id == product_id) && (entityCustomization.device_id == device_id)) {
+                                    // already exists, clear the list and add the new values
+                                    entityCustomization.entity_ids.clear();
+                                    for (uint8_t i = 0; i < temp.size(); i++) {
+                                        entityCustomization.entity_ids.push_back(temp[i]);
+                                    }
+                                    return StateUpdateResult::CHANGED;
+                                }
+                            }
+                            // create a new entry in the list
+                            EntityCustomization new_entry;
+                            new_entry.product_id = product_id;
+                            new_entry.device_id  = device_id;
+                            for (uint8_t i = 0; i < temp.size(); i++) {
+                                new_entry.entity_ids.push_back(temp[i]);
+                            }
+                            settings.entityCustomizations.push_back(new_entry);
+                            return StateUpdateResult::CHANGED;
+                        },
+                        "local");
+
+                    break;
+                }
+            }
+        }
+    }
+
+    AsyncWebServerResponse * response = request->beginResponse(200); // OK
+    request->send(response);
 }
 
 // load the settings when the service starts

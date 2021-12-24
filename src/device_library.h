@@ -126,7 +126,7 @@
 {205, DeviceType::CONNECT, F("Moduline Easy Connect"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {206, DeviceType::CONNECT, F("Easy Connect"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
-// wireless sensor base- 0x50
+// Wireless sensor base - 0x50
 {236, DeviceType::CONNECT, F("Wireless sensor base"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Switches - 0x11
@@ -135,7 +135,7 @@
 // Gateways - 0x48
 {189, DeviceType::GATEWAY, F("KM200/MB LAN 2"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
-// generic - 0x40 or other with no product-id and no version
+// Generic - 0x40 or other with no product-id and no version
 {0, DeviceType::GENERIC, F("unknown"), DeviceFlags::EMS_DEVICE_FLAG_NONE}
 
 // clang-format on

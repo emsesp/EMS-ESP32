@@ -19,22 +19,12 @@
 #ifndef EMSESP_MQTT_H_
 #define EMSESP_MQTT_H_
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
-
-#include <string>
-#include <vector>
-#include <deque>
-#include <functional>
-
 #include <AsyncMqttClient.h>
 
 #include "helpers.h"
 #include "system.h"
 #include "console.h"
 #include "command.h"
-
-#include <uuid/log.h>
 
 using uuid::console::Shell;
 

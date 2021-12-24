@@ -21,9 +21,6 @@
 #ifndef EMSESP_DALLASSENSOR_H
 #define EMSESP_DALLASSENSOR_H
 
-#include <string>
-#include <vector>
-
 #include "helpers.h"
 #include "mqtt.h"
 #include "console.h"

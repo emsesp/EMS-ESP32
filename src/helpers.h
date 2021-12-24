@@ -19,8 +19,6 @@
 #ifndef EMSESP_HELPERS_H
 #define EMSESP_HELPERS_H
 
-#include <Arduino.h>
-
 #include "telegram.h" // for EMS_VALUE_* settings
 
 #define FJSON(x) x
