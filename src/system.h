@@ -150,6 +150,10 @@ class System {
         return fahrenheit_;
     }
 
+    uint8_t analog_id() {
+        return analogdata_.id;
+    }
+
     char * analog_name() {
         return analogdata_.name;
     }
@@ -170,7 +174,7 @@ class System {
         return analogdata_.uom;
     }
 
-    bool analogupdate(const char * name, const uint16_t offset, const float factor, const char * uom);
+    bool analogupdate(const char * name, const uint16_t offset, const float factor, const char * uom, uint8_t id);
 
     void show_system(uuid::console::Shell & shell);
     void wifi_reconnect();
@@ -243,6 +247,7 @@ class System {
     bool fahrenheit_;
 
     struct {
+        uint8_t  id;
         char     name[20];
         uint16_t offset;
         float    factor;

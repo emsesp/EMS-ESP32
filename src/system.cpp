@@ -332,6 +332,7 @@ void System::get_settings() {
         syslog_port_          = settings.syslog_port;
 
         // TODO move to customizations service
+        analogdata_.id = settings.analog_id;
         strlcpy(analogdata_.name, settings.analog_name.c_str(), sizeof(analogdata_.name));
         analogdata_.offset = settings.analog_offset;
         analogdata_.factor = settings.analog_factor;
@@ -701,9 +702,10 @@ void System::measure_analog() {
 }
 
 // TODO move to customizations service
-bool System::analogupdate(const char * name, const uint16_t offset, const float factor, const char * uom) {
+bool System::analogupdate(const char * name, const uint16_t offset, const float factor, const char * uom, uint8_t id) {
     EMSESP::webSettingsService.update(
         [&](WebSettings & settings) {
+            settings.analog_id     = id;
             settings.analog_name   = name;
             settings.analog_offset = offset;
             settings.analog_factor = factor;
@@ -711,10 +713,13 @@ bool System::analogupdate(const char * name, const uint16_t offset, const float 
             return StateUpdateResult::CHANGED;
         },
         "local");
+
     strlcpy(analogdata_.name, name, sizeof(analogdata_.name));
     analogdata_.offset = offset;
     analogdata_.factor = factor;
     strlcpy(analogdata_.uom, uom, sizeof(analogdata_.uom));
+    analogdata_.id = id;
+
     return true;
 }
 
@@ -1160,7 +1165,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
     if (EMSESP::dallas_enabled()) {
-        node["Dallas sensors"] = EMSESP::dallassensor_.no_sensors();
+        node["Temperature sensors"] = EMSESP::dallassensor_.no_sensors();
+    }
+    if (EMSESP::system_.analog_enabled()) {
+        node["Analog sensors"] = 0; // TODO fix analog count
     }
 
 #ifndef EMSESP_STANDALONE
@@ -1222,10 +1230,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["MQTT publishes"]     = Mqtt::publish_count();
             node["MQTT publish fails"] = Mqtt::publish_fails();
         }
-        node["Dallas sensors"] = EMSESP::dallassensor_.no_sensors();
+        node["Temperature sensors"] = EMSESP::dallassensor_.no_sensors();
         if (EMSESP::dallas_enabled()) {
-            node["Dallas reads"] = EMSESP::sensor_reads();
-            node["Dallas fails"] = EMSESP::sensor_fails();
+            node["Temperature sensor reads"] = EMSESP::sensor_reads();
+            node["Temperature sensor fails"] = EMSESP::sensor_fails();
         }
         node["API calls"] = WebAPIService::api_count();
         node["API fails"] = WebAPIService::api_fails();

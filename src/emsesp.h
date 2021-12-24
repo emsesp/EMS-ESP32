@@ -22,6 +22,10 @@
 
 #include <vector>
 #include <string>
+#include <functional>
+#include <deque>
+#include <unordered_map>
+#include <list>
 
 #include <ArduinoJson.h>
 

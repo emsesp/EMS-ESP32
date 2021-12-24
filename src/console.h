@@ -19,11 +19,6 @@
 #ifndef EMSESP_CONSOLE_H
 #define EMSESP_CONSOLE_H
 
-#include <Arduino.h>
-
-#include <string>
-#include <vector>
-
 #include <uuid/console.h>
 #include <uuid/log.h>
 

@@ -19,17 +19,9 @@
 #ifndef EMSESP_COMMAND_H_
 #define EMSESP_COMMAND_H_
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
-
-#include <string>
-#include <vector>
-#include <functional>
 #include <unordered_map>
 
 #include "console.h"
-
-#include <uuid/log.h>
 
 using uuid::console::Shell;
 

@@ -19,14 +19,16 @@
 #ifndef WebCustomizationService_h
 #define WebCustomizationService_h
 
-#include <HttpEndpoint.h>
-#include <FSPersistence.h>
-#include <list>
-
-#include "../default_settings.h"
-
 #define EMSESP_CUSTOMIZATION_FILE "/config/emsespCustomization.json"
 #define EMSESP_CUSTOMIZATION_SERVICE_PATH "/rest/customization"
+
+// GET
+#define DEVICES_SERVICE_PATH "/rest/devices"
+
+// POST
+#define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
+#define EXCLUDE_ENTITIES_PATH "/rest/excludeEntities"
+
 
 namespace emsesp {
 
@@ -61,9 +63,22 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
 
     void begin();
 
+// make all functions public so we can test in the debug and standalone mode
+#ifndef EMSESP_STANDALONE
   private:
+#endif
+
     HttpEndpoint<WebCustomization>  _httpEndpoint;
     FSPersistence<WebCustomization> _fsPersistence;
+
+    // GET
+    void devices(AsyncWebServerRequest * request);
+
+    // POST
+    void exclude_entities(AsyncWebServerRequest * request, JsonVariant & json);
+    void device_entities(AsyncWebServerRequest * request, JsonVariant & json);
+
+    AsyncCallbackJsonWebHandler _exclude_entities_handler, _device_entities_handler;
 };
 
 } // namespace emsesp

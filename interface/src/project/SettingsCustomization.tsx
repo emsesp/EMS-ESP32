@@ -164,7 +164,7 @@ const SettingsCustomization: FC = () => {
               </StyledTableCell>
               <StyledTableCell align="left">Entity Name</StyledTableCell>
               <StyledTableCell>Code</StyledTableCell>
-              <StyledTableCell align="right">Data Value</StyledTableCell>
+              <StyledTableCell align="right">Current Value</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>

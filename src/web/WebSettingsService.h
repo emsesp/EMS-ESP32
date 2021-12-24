@@ -19,9 +19,6 @@
 #ifndef WebSettingsService_h
 #define WebSettingsService_h
 
-#include <HttpEndpoint.h>
-#include <FSPersistence.h>
-
 #include "../default_settings.h"
 
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
@@ -85,6 +82,7 @@ class WebSettings {
     bool     fahrenheit;
 
     // TODO move to customization service
+    uint8_t analog_id;
     String  analog_name;
     int16_t analog_offset;
     float   analog_factor;

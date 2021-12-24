@@ -70,6 +70,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["weblog_compact"]       = settings.weblog_compact;
 
     // TODO move to customization service
+    root["analog_id"]     = settings.analog_id;
     root["analog_name"]   = settings.analog_name;
     root["analog_offset"] = settings.analog_offset;
     root["analog_factor"] = settings.analog_factor;
@@ -151,6 +152,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     if (old_analog_uom != settings.analog_uom) {
         add_flags(ChangeFlags::ADC);
     }
+    settings.analog_id = root["analog_id"] | 1; // TODO sequence this analog id
 
     // button
     prev                  = settings.pbutton_gpio;

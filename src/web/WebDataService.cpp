@@ -23,53 +23,41 @@ namespace emsesp {
 using namespace std::placeholders; // for `_1` etc
 
 WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager)
-    : _device_dataHandler(DEVICE_DATA_SERVICE_PATH,
-                          securityManager->wrapCallback(std::bind(&WebDataService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED))
-    , _excludeentities_dataHandler(EXCLUDE_ENTITIES_PATH,
-                                   securityManager->wrapCallback(std::bind(&WebDataService::exclude_entities, this, _1, _2),
-                                                                 AuthenticationPredicates::IS_AUTHENTICATED))
-    , _deviceentities_dataHandler(DEVICE_ENTITIES_PATH,
-                                  securityManager->wrapCallback(std::bind(&WebDataService::device_entities, this, _1, _2),
-                                                                AuthenticationPredicates::IS_AUTHENTICATED))
-    , _writevalue_dataHandler(WRITE_VALUE_SERVICE_PATH,
-                              securityManager->wrapCallback(std::bind(&WebDataService::write_value, this, _1, _2), AuthenticationPredicates::IS_ADMIN))
-    , _writesensor_dataHandler(WRITE_SENSOR_SERVICE_PATH,
-                               securityManager->wrapCallback(std::bind(&WebDataService::write_sensor, this, _1, _2), AuthenticationPredicates::IS_ADMIN))
-    , _writeanalog_dataHandler(WRITE_ANALOG_SERVICE_PATH,
-                               securityManager->wrapCallback(std::bind(&WebDataService::write_analog, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
+    : _device_data_handler(DEVICE_DATA_SERVICE_PATH,
+                           securityManager->wrapCallback(std::bind(&WebDataService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED))
+    , _write_value_handler(WRITE_VALUE_SERVICE_PATH,
+                           securityManager->wrapCallback(std::bind(&WebDataService::write_value, this, _1, _2), AuthenticationPredicates::IS_ADMIN))
+    , _write_sensor_handler(WRITE_SENSOR_SERVICE_PATH,
+                            securityManager->wrapCallback(std::bind(&WebDataService::write_sensor, this, _1, _2), AuthenticationPredicates::IS_ADMIN))
+    , _write_analog_handler(WRITE_ANALOG_SERVICE_PATH,
+                            securityManager->wrapCallback(std::bind(&WebDataService::write_analog, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
     server->on(CORE_DATA_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&WebDataService::core_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
-    server->on(DEVICES_SERVICE_PATH,
+
+    server->on(SENSOR_DATA_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebDataService::devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest(std::bind(&WebDataService::sensor_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+
     server->on(SCAN_DEVICES_SERVICE_PATH,
                HTTP_POST,
                securityManager->wrapRequest(std::bind(&WebDataService::scan_devices, this, _1), AuthenticationPredicates::IS_ADMIN));
 
-    _device_dataHandler.setMethod(HTTP_POST);
-    _device_dataHandler.setMaxContentLength(256);
-    server->addHandler(&_device_dataHandler);
+    _device_data_handler.setMethod(HTTP_POST);
+    _device_data_handler.setMaxContentLength(256);
+    server->addHandler(&_device_data_handler);
 
-    _writevalue_dataHandler.setMethod(HTTP_POST);
-    _writevalue_dataHandler.setMaxContentLength(256);
-    server->addHandler(&_writevalue_dataHandler);
+    _write_value_handler.setMethod(HTTP_POST);
+    _write_value_handler.setMaxContentLength(256);
+    server->addHandler(&_write_value_handler);
 
-    _writesensor_dataHandler.setMethod(HTTP_POST);
-    _writesensor_dataHandler.setMaxContentLength(256);
-    server->addHandler(&_writesensor_dataHandler);
+    _write_sensor_handler.setMethod(HTTP_POST);
+    _write_sensor_handler.setMaxContentLength(256);
+    server->addHandler(&_write_sensor_handler);
 
-    _writeanalog_dataHandler.setMethod(HTTP_POST);
-    _writeanalog_dataHandler.setMaxContentLength(256);
-    server->addHandler(&_writeanalog_dataHandler);
-
-    _excludeentities_dataHandler.setMethod(HTTP_POST);
-    _excludeentities_dataHandler.setMaxContentLength(256);
-    server->addHandler(&_excludeentities_dataHandler);
-
-    _deviceentities_dataHandler.setMethod(HTTP_POST);
-    _deviceentities_dataHandler.setMaxContentLength(256);
-    server->addHandler(&_deviceentities_dataHandler);
+    _write_analog_handler.setMethod(HTTP_POST);
+    _write_analog_handler.setMaxContentLength(256);
+    server->addHandler(&_write_analog_handler);
 }
 
 // scan devices service
@@ -79,33 +67,8 @@ void WebDataService::scan_devices(AsyncWebServerRequest * request) {
     request->send(200);
 }
 
-// send back a short list devices used in the customization page
-void WebDataService::devices(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN);
-    JsonObject          root     = response->getRoot();
-
-    JsonArray devices = root.createNestedArray("devices");
-    for (auto & emsdevice : EMSESP::emsdevices) {
-        if (emsdevice->has_entities()) {
-            JsonObject obj = devices.createNestedObject();
-            obj["i"]       = emsdevice->unique_id(); // a unique id
-
-            // shortname - we prefix the count to make it unique
-            uint8_t device_index = EMSESP::device_index(emsdevice->device_type(), emsdevice->unique_id());
-            if (device_index) {
-                char s[10];
-                obj["s"] = emsdevice->device_type_name() + Helpers::smallitoa(s, device_index);
-            } else {
-                obj["s"] = emsdevice->device_type_name();
-            }
-        }
-    }
-
-    response->setLength();
-    request->send(response);
-}
-
-// this is used in the dashboard and contains all the device information, sensors and analog values
+// this is used in the dashboard and contains all ems device information
+// /coreData
 void WebDataService::core_data(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
     JsonObject          root     = response->getRoot();
@@ -118,23 +81,27 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
             obj["i"]       = emsdevice->unique_id();        // a unique id
             obj["t"]       = emsdevice->device_type_name(); // type
             obj["b"]       = emsdevice->brand_to_string();  // brand
-
-            // shortname - we postfix the count to make it unique
-            uint8_t device_index = EMSESP::device_index(emsdevice->device_type(), emsdevice->unique_id());
-            if (device_index) {
-                char s[10];
-                obj["s"] = emsdevice->device_type_name() + "_" + Helpers::smallitoa(s, device_index);
-            } else {
-                obj["s"] = emsdevice->device_type_name();
-            }
-
-            obj["n"] = emsdevice->name();           // name
-            obj["d"] = emsdevice->device_id();      // deviceid
-            obj["p"] = emsdevice->product_id();     // productid
-            obj["v"] = emsdevice->version();        // version
-            obj["e"] = emsdevice->count_entities(); // number of entities (device values)
+            obj["n"]       = emsdevice->name();             // name
+            obj["d"]       = emsdevice->device_id();        // deviceid
+            obj["p"]       = emsdevice->product_id();       // productid
+            obj["v"]       = emsdevice->version();          // version
+            obj["e"]       = emsdevice->count_entities();   // number of entities (device values)
         }
     }
+
+    // the number of sensors
+    root["dallassensor_count"] = EMSESP::dallassensor_.no_sensors();
+    root["analogsensor_count"] = 0; // TODO fix counts
+
+    response->setLength();
+    request->send(response);
+}
+
+// sensor data
+// /sensorData
+void WebDataService::sensor_data(AsyncWebServerRequest * request) {
+    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    JsonObject          root     = response->getRoot();
 
     // always create sensors, even if it's empty
     JsonArray sensors = root.createNestedArray("sensors");
@@ -159,15 +126,15 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
         }
     }
 
+    JsonArray analog = root.createNestedArray("analogs");
     if (EMSESP::system_.analog_enabled()) {
-        // root["analog"] = EMSESP::system_.analog();
-        JsonArray  analog = root.createNestedArray("analog");
-        JsonObject obj    = analog.createNestedObject();
-        obj["n"]          = EMSESP::system_.analog_name();
-        obj["v"]          = EMSESP::system_.analog_value();
-        obj["u"]          = EMSESP::system_.analog_uom();
-        obj["o"]          = EMSESP::system_.analog_offset();
-        obj["f"]          = EMSESP::system_.analog_factor();
+        JsonObject obj = analog.createNestedObject();
+        obj["i"]       = EMSESP::system_.analog_id();
+        obj["n"]       = EMSESP::system_.analog_name();
+        obj["v"]       = EMSESP::system_.analog_value();
+        obj["u"]       = EMSESP::system_.analog_uom();
+        obj["o"]       = EMSESP::system_.analog_offset();
+        obj["f"]       = EMSESP::system_.analog_factor();
     }
 
     response->setLength();
@@ -204,87 +171,6 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
     request->send(response);
 }
 
-// send back filtered list of device entities
-void WebDataService::device_entities(AsyncWebServerRequest * request, JsonVariant & json) {
-    if (json.is<JsonObject>()) {
-        MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(true, EMSESP_JSON_SIZE_XXLARGE_DYN);
-        for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice) {
-                if (emsdevice->unique_id() == json["id"]) {
-#ifndef EMSESP_STANDALONE
-                    JsonArray output = response->getRoot();
-                    emsdevice->generate_values_web_all(output);
-#endif
-                    response->setLength();
-                    request->send(response);
-                    return;
-                }
-            }
-        }
-    }
-
-    // invalid, but send OK anyway
-    AsyncWebServerResponse * response = request->beginResponse(200);
-    request->send(response);
-}
-
-// takes a list of excluded ids send from the webUI
-// saves it in the customization service
-// and updates the entity list real-time
-void WebDataService::exclude_entities(AsyncWebServerRequest * request, JsonVariant & json) {
-    if (json.is<JsonObject>()) {
-        // find the device using the unique_id
-        for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice) {
-                uint8_t unique_device_id = json["id"];
-                if (emsdevice->unique_id() == unique_device_id) {
-                    JsonArray entity_ids = json["entity_ids"];
-
-                    std::vector<uint8_t> temp;
-                    for (JsonVariant id : entity_ids) {
-                        uint8_t entity_id = id.as<int>();
-                        emsdevice->exclude_entity(entity_id); // this will have immediate affect
-                        temp.push_back(entity_id);
-                    }
-
-                    // Save the list to the customization file
-                    uint8_t product_id = emsdevice->product_id();
-                    uint8_t device_id  = emsdevice->device_id();
-
-                    EMSESP::webCustomizationService.update(
-                        [&](WebCustomization & settings) {
-                            // if it exists (productid and deviceid match) overwrite it
-                            for (auto & entityCustomization : settings.entityCustomizations) {
-                                if ((entityCustomization.product_id == product_id) && (entityCustomization.device_id == device_id)) {
-                                    // already exists, clear the list and add the new values
-                                    entityCustomization.entity_ids.clear();
-                                    for (uint8_t i = 0; i < temp.size(); i++) {
-                                        entityCustomization.entity_ids.push_back(temp[i]);
-                                    }
-                                    return StateUpdateResult::CHANGED;
-                                }
-                            }
-                            // create a new entry in the list
-                            EntityCustomization new_entry;
-                            new_entry.product_id = product_id;
-                            new_entry.device_id  = device_id;
-                            for (uint8_t i = 0; i < temp.size(); i++) {
-                                new_entry.entity_ids.push_back(temp[i]);
-                            }
-                            settings.entityCustomizations.push_back(new_entry);
-                            return StateUpdateResult::CHANGED;
-                        },
-                        "local");
-
-                    break;
-                }
-            }
-        }
-    }
-
-    AsyncWebServerResponse * response = request->beginResponse(200); // OK
-    request->send(response);
-}
 
 // takes a command and its data value from a specific EMS Device, from the Web
 // assumes the service has been checked for admin authentication
@@ -367,17 +253,18 @@ void WebDataService::write_sensor(AsyncWebServerRequest * request, JsonVariant &
     request->send(response);
 }
 
-// takes a analog calibration an name from the Web
+// update the analog record
 void WebDataService::write_analog(AsyncWebServerRequest * request, JsonVariant & json) {
     bool ok = false;
     if (json.is<JsonObject>()) {
         JsonObject analog = json;
 
+        uint8_t     id     = analog["id"]; // this is the unique key
         std::string name   = analog["name"];
         float       factor = analog["factor"];
         int16_t     offset = analog["offset"];
         std::string uom    = analog["uom"];
-        ok                 = EMSESP::system_.analogupdate(name.c_str(), offset, factor, uom.c_str());
+        ok                 = EMSESP::system_.analogupdate(name.c_str(), offset, factor, uom.c_str(), id);
     }
     AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);
     request->send(response);

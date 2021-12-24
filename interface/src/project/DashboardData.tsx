@@ -1,4 +1,4 @@
-import { FC, Fragment, useState, useContext } from 'react';
+import { FC, Fragment, useState, useContext, useEffect } from 'react';
 
 import {
   Button,
@@ -28,8 +28,9 @@ import parseMilliseconds from 'parse-ms';
 import { useSnackbar } from 'notistack';
 
 import RefreshIcon from '@mui/icons-material/Refresh';
-import ListIcon from '@mui/icons-material/List';
 import EditIcon from '@mui/icons-material/Edit';
+import SensorsIcon from '@mui/icons-material/Sensors';
+import CategoryIcon from '@mui/icons-material/Category';
 
 import { AuthenticatedContext } from '../contexts/authentication';
 
@@ -39,7 +40,17 @@ import * as EMSESP from './api';
 
 import { numberValue, updateValue, extractErrorMessage, useRest } from '../utils';
 
-import { CoreData, DeviceData, Device, DeviceValue, DeviceValueUOM, DeviceValueUOM_s, Sensor, Analog } from './types';
+import {
+  SensorData,
+  CoreData,
+  DeviceData,
+  Device,
+  DeviceValue,
+  DeviceValueUOM,
+  DeviceValueUOM_s,
+  Sensor,
+  Analog
+} from './types';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -52,9 +63,6 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
     backgroundColor: theme.palette.action.hover
-  },
-  '&:last-child td, &:last-child th': {
-    border: 0
   },
   '&:hover': {
     backgroundColor: theme.palette.info.light
@@ -72,24 +80,58 @@ const StyledTooltip = styled(({ className, ...props }: TooltipProps) => (
 }));
 
 const DashboardData: FC = () => {
-  const { loadData, data, errorMessage } = useRest<CoreData>({ read: EMSESP.readData });
+  const { loadData, data, errorMessage } = useRest<CoreData>({ read: EMSESP.readCoreData });
 
   const { me } = useContext(AuthenticatedContext);
 
   const { enqueueSnackbar } = useSnackbar();
 
   const [deviceData, setDeviceData] = useState<DeviceData>();
+  const [sensorData, setSensorData] = useState<SensorData>();
   const [deviceValue, setDeviceValue] = useState<DeviceValue>();
   const [sensor, setSensor] = useState<Sensor>();
   const [analog, setAnalog] = useState<Analog>();
-  const [selectedDevice, setSelectedDevice] = useState<number>(0);
+  const [selectedDevice, setSelectedDevice] = useState<number>();
+
+  const refreshData = () => {
+    if (analog || sensor || deviceValue) {
+      return;
+    }
+    loadData();
+
+    if (selectedDevice === 0) {
+      fetchSensorData();
+    } else if (selectedDevice) {
+      fetchDeviceData(selectedDevice);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => refreshData(), 30000);
+    return () => {
+      clearInterval(timer);
+    };
+    // eslint-disable-next-line
+  }, [analog, sensor, deviceValue, selectedDevice]);
 
   const fetchDeviceData = async (unique_id: number) => {
-    setSelectedDevice(unique_id);
     try {
       setDeviceData((await EMSESP.readDeviceData({ id: unique_id })).data);
     } catch (error: any) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem fetching device data'), { variant: 'error' });
+    } finally {
+      setSelectedDevice(unique_id);
+      setSensorData(undefined);
+    }
+  };
+
+  const fetchSensorData = async () => {
+    try {
+      setSensorData((await EMSESP.readSensorData()).data);
+    } catch (error: any) {
+      enqueueSnackbar(extractErrorMessage(error, 'Problem fetching sensor data'), { variant: 'error' });
+    } finally {
+      setSelectedDevice(0);
     }
   };
 
@@ -144,7 +186,7 @@ const DashboardData: FC = () => {
   }
 
   const sendDeviceValue = async () => {
-    if (deviceValue) {
+    if (selectedDevice && deviceValue) {
       try {
         const response = await EMSESP.writeValue({
           id: selectedDevice,
@@ -237,7 +279,7 @@ const DashboardData: FC = () => {
         enqueueSnackbar(extractErrorMessage(error, 'Problem updating sensor'), { variant: 'error' });
       } finally {
         setSensor(undefined);
-        loadData();
+        fetchSensorData();
       }
     }
   };
@@ -246,7 +288,7 @@ const DashboardData: FC = () => {
     if (sensor) {
       return (
         <Dialog open={sensor !== undefined} onClose={() => setSensor(undefined)}>
-          <DialogTitle>Edit Sensor</DialogTitle>
+          <DialogTitle>Edit Temperature Sensor</DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
               <Typography variant="body2">Sensor ID {sensor.is}</Typography>
@@ -292,13 +334,17 @@ const DashboardData: FC = () => {
     }
   };
 
-  const renderData = () => {
+  const renderCoreData = () => {
     if (!data) {
       return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
     const noDevices = () => {
       return data.devices.length === 0;
+    };
+
+    const haveSensors = () => {
+      return data.dallassensor_count + data.analogsensor_count !== 0;
     };
 
     function compareDevices(a: Device, b: Device) {
@@ -313,47 +359,66 @@ const DashboardData: FC = () => {
 
     return (
       <>
-        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          EMS Devices
-        </Typography>
-        {!noDevices() && (
-          <ButtonRow>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <StyledTableCell align="left" padding="checkbox"></StyledTableCell>
+              <StyledTableCell>Type</StyledTableCell>
+              <StyledTableCell>Name</StyledTableCell>
+              <StyledTableCell align="right"># Entities</StyledTableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {data.devices.sort(compareDevices).map((device) => (
-              <StyledTooltip
+              <TableRow
+                hover
+                selected={device.i === selectedDevice}
                 key={device.i}
-                title={
-                  <Fragment>
-                    <Typography variant="h6" color="primary">
-                      Device Details
-                    </Typography>
-                    {'Type: ' + device.t}
-                    <br />
-                    {'Name: ' + device.n}
-                    <br />
-                    {'Brand: ' + device.b}
-                    <br />
-                    {'DeviceID: 0x' + ('00' + device.d.toString(16).toUpperCase()).slice(-2)}
-                    <br />
-                    {'ProductID: ' + device.p}
-                    <br />
-                    {'Version: ' + device.v}
-                  </Fragment>
-                }
-                placement="top"
+                onClick={() => device.e && fetchDeviceData(device.i)}
               >
-                <Button
-                  startIcon={<ListIcon />}
-                  size="small"
-                  variant={selectedDevice === device.i ? 'contained' : 'outlined'}
-                  color={selectedDevice === device.i ? 'secondary' : 'inherit'}
-                  onClick={() => device.e && fetchDeviceData(device.i)}
-                >
-                  {device.s}&nbsp;({device.e})
-                </Button>
-              </StyledTooltip>
+                <TableCell>
+                  <StyledTooltip
+                    title={
+                      <Fragment>
+                        <Typography variant="h6" color="primary">
+                          Device Details
+                        </Typography>
+                        {'Type: ' + device.t}
+                        <br />
+                        {'Name: ' + device.n}
+                        <br />
+                        {'Brand: ' + device.b}
+                        <br />
+                        {'DeviceID: 0x' + ('00' + device.d.toString(16).toUpperCase()).slice(-2)}
+                        <br />
+                        {'ProductID: ' + device.p}
+                        <br />
+                        {'Version: ' + device.v}
+                      </Fragment>
+                    }
+                    placement="top"
+                  >
+                    <CategoryIcon color="primary" fontSize="large" />
+                  </StyledTooltip>
+                </TableCell>
+                <TableCell>{device.t}</TableCell>
+                <TableCell>{device.n}</TableCell>
+                <TableCell align="right">{device.e}</TableCell>
+              </TableRow>
             ))}
-          </ButtonRow>
-        )}
+            {haveSensors() && (
+              <TableRow hover selected={selectedDevice === 0} onClick={() => fetchSensorData()}>
+                <TableCell>
+                  <SensorsIcon color="primary" fontSize="large" />
+                </TableCell>
+                <TableCell>Sensors</TableCell>
+                <TableCell>Temperature and Analog Sensors</TableCell>
+                <TableCell align="right">{data.dallassensor_count + data.analogsensor_count}</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+
         {noDevices() && (
           <MessageBox
             my={2}
@@ -366,7 +431,7 @@ const DashboardData: FC = () => {
   };
 
   const renderDeviceData = () => {
-    if (data?.devices.length === 0 || !deviceData) {
+    if (data?.devices.length === 0 || !deviceData || !selectedDevice) {
       return;
     }
 
@@ -394,7 +459,7 @@ const DashboardData: FC = () => {
     return (
       <>
         <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
-          {deviceData.type}
+          {deviceData.label}
         </Typography>
         <Table size="small">
           <TableHead>
@@ -438,10 +503,10 @@ const DashboardData: FC = () => {
     }
   };
 
-  const renderSensorData = () => (
+  const renderDallasData = () => (
     <>
       <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
-        Dallas Sensors
+        Temperature Sensors
       </Typography>
       <Table size="small">
         <TableHead>
@@ -452,8 +517,8 @@ const DashboardData: FC = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {data?.sensors.map((sensorData) => (
-            <StyledTableRow key={sensorData.n} onClick={() => updateSensor(sensorData)}>
+          {sensorData?.sensors.map((sensor_data) => (
+            <StyledTableRow key={sensor_data.n} onClick={() => updateSensor(sensor_data)}>
               <StyledTableCell padding="checkbox">
                 {me.admin && (
                   <StyledTooltip title="edit" placement="left-end">
@@ -464,9 +529,40 @@ const DashboardData: FC = () => {
                 )}
               </StyledTableCell>
               <StyledTableCell component="th" scope="row">
-                {sensorData.n}
+                {sensor_data.n}
               </StyledTableCell>
-              <StyledTableCell align="right">{formatValue(sensorData.t, DeviceValueUOM.DEGREES)}</StyledTableCell>
+              <StyledTableCell align="right">{formatValue(sensor_data.t, sensor_data.u)}</StyledTableCell>
+            </StyledTableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </>
+  );
+
+  const renderAnalogData = () => (
+    <>
+      <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
+        Analog Sensors
+      </Typography>
+      <Table size="small">
+        <TableBody>
+          {sensorData?.analogs.map((analog_data) => (
+            <StyledTableRow key={analog_data.n} onClick={() => updateAnalog(analog_data)}>
+              <StyledTableCell padding="checkbox">
+                {me.admin && (
+                  <StyledTooltip title="edit" placement="left-end">
+                    <IconButton edge="start" size="small" aria-label="Edit">
+                      <EditIcon color="primary" fontSize="small" />
+                    </IconButton>
+                  </StyledTooltip>
+                )}
+              </StyledTableCell>
+              <StyledTableCell component="th" scope="row">
+                {analog_data.n}
+              </StyledTableCell>
+              <StyledTableCell align="right">
+                {Intl.NumberFormat().format(analog_data.v)}&nbsp;{analog_data.u}{' '}
+              </StyledTableCell>
             </StyledTableRow>
           ))}
         </TableBody>
@@ -478,6 +574,7 @@ const DashboardData: FC = () => {
     if (analog) {
       try {
         const response = await EMSESP.writeAnalog({
+          id: analog.i,
           name: analog.n,
           offset: analog.o,
           factor: analog.f,
@@ -490,12 +587,12 @@ const DashboardData: FC = () => {
         } else {
           enqueueSnackbar('Analog calibration updated', { variant: 'success' });
         }
-        setAnalog(undefined);
+        // setAnalog(undefined);
       } catch (error: any) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem updating analog'), { variant: 'error' });
       } finally {
         setAnalog(undefined);
-        loadData();
+        fetchSensorData();
       }
     }
   };
@@ -504,7 +601,7 @@ const DashboardData: FC = () => {
     if (analog) {
       return (
         <Dialog open={analog !== undefined} onClose={() => setAnalog(undefined)}>
-          <DialogTitle>Edit Analog</DialogTitle>
+          <DialogTitle>Edit Analog Sensor</DialogTitle>
           <DialogContent dividers>
             <Grid container spacing={1}>
               <Grid item>
@@ -573,37 +670,6 @@ const DashboardData: FC = () => {
     }
   };
 
-  const renderAnalogData = () => (
-    <>
-      <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
-        Analog Sensors
-      </Typography>
-      <Table size="small">
-        <TableBody>
-          {data?.analog.map((analogData) => (
-            <StyledTableRow key={analogData.n} onClick={() => updateAnalog(analogData)}>
-              <StyledTableCell padding="checkbox">
-                {me.admin && (
-                  <StyledTooltip title="edit" placement="left-end">
-                    <IconButton edge="start" size="small" aria-label="Edit">
-                      <EditIcon color="primary" fontSize="small" />
-                    </IconButton>
-                  </StyledTooltip>
-                )}
-              </StyledTableCell>
-              <StyledTableCell component="th" scope="row">
-                {analogData.n}
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                {Intl.NumberFormat().format(analogData.v)}&nbsp;{analogData.u}{' '}
-              </StyledTableCell>
-            </StyledTableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </>
-  );
-
   const content = () => {
     if (!data) {
       return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
@@ -611,10 +677,10 @@ const DashboardData: FC = () => {
 
     return (
       <>
-        {renderData()}
+        {renderCoreData()}
         {renderDeviceData()}
-        {data.sensors.length !== 0 && renderSensorData()}
-        {data.analog && renderAnalogData()}
+        {sensorData && sensorData.sensors.length > 0 && renderDallasData()}
+        {sensorData && sensorData.analogs.length > 0 && renderAnalogData()}
         {renderDeviceValueDialog()}
         {renderSensorDialog()}
         {renderAnalogDialog()}

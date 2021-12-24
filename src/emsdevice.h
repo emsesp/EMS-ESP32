@@ -19,10 +19,6 @@
 #ifndef EMSESP_EMSDEVICE_H_
 #define EMSESP_EMSDEVICE_H_
 
-#include <string>
-#include <vector>
-#include <functional>
-
 #include "emsfactory.h"
 #include "telegram.h"
 #include "mqtt.h"
