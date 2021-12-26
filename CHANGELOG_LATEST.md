@@ -5,7 +5,7 @@
 ## Added
 
 - Auto reload of WebUI after successful firmware upload [#178](https://github.com/emsesp/EMS-ESP32/issues/178)
-- Customization Service, including exclusion lists for device entities [#206](https://github.com/emsesp/EMS-ESP32/issues/206)
+- Customization Service. First is the Entity Exclusion for devices [#206](https://github.com/emsesp/EMS-ESP32/issues/206)
 - Option to disable Telnet Console
 - Added Hide SSID, Max Clients and Preferred Channel to Access Point
 - Merged in MichaelDvP's changes like dallas fahrenheit support and publish single
@@ -22,6 +22,7 @@
 - Refactor WebUI to use ReactHooks. New theme, increased performance, better mobile responsiveness [#124](https://github.com/emsesp/EMS-ESP32/issues/124)
 - Boiler and Thermostat entity "wwdisinfect" renamed to "wwdisinfecting" [#211](https://github.com/emsesp/EMS-ESP32/issues/211)
 - Boiler "wwheat" renamed to "ww3wayon" [#211](https://github.com/emsesp/EMS-ESP32/issues/211)
+- Boiler ww tag renamed to dhw
 
 ## **BREAKING CHANGES**
 
@@ -29,3 +30,4 @@
 - Dallas Format removed. Use the name to give each sensor an alias
 - Boiler and Thermostat entity "wwdisinfect" renamed to "wwdisinfecting"
 - Boiler "wwheat" renamed to "ww3wayon"
+- Boiler tag in entity names for warm water renamed from ww to dhw. HA dashboards will need updating
