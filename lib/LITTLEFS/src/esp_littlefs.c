@@ -34,7 +34,7 @@
 
 //#define CONFIG_LITTLEFS_USE_ONLY_HASH
 #define CONFIG_LITTLEFS_HUMAN_READABLE 0   /* Use 1 for verbose errors */
-#define CONFIG_LITTLEFS_SPIFFS_COMPAT 1    /* Use 1 for better drop-in replacement of SPIFFS */
+#define CONFIG_LITTLEFS_SPIFFS_COMPAT 0    /* Use 1 for better drop-in replacement of SPIFFS */
 #define CONFIG_LITTLEFS_MAX_PARTITIONS 3
 #define CONFIG_LITTLEFS_PAGE_SIZE 256
 #define CONFIG_LITTLEFS_OBJ_NAME_LEN 64
@@ -1043,6 +1043,7 @@ static ssize_t vfs_littlefs_read(void* ctx, int fd, void * dst, size_t size) {
 }
 
 static int vfs_littlefs_close(void* ctx, int fd) {
+    // TODO update mtime on close? SPIFFS doesn't do this
     esp_littlefs_t * efs = (esp_littlefs_t *)ctx;
     int res;
     vfs_littlefs_file_t *file = NULL;
