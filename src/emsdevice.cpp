@@ -22,7 +22,7 @@
 namespace emsesp {
 
 // mapping of UOM, to match order in DeviceValueUOM enum emsdevice.h
-// also maps interface/src/project/types.ts for the Web UI
+// also maps to DeviceValueUOM in interface/src/project/types.ts for the Web UI
 // must be an int of 4 bytes, 32bit aligned
 static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = {
 
@@ -132,10 +132,7 @@ const std::string EMSdevice::tag_to_mqtt(uint8_t tag) {
 }
 
 const std::string EMSdevice::uom_to_string(uint8_t uom) {
-    if (uom == DeviceValueUOM::NONE) {
-        return std::string{};
-    }
-    return read_flash_string(DeviceValueUOM_s[uom - 1]); // offset by 1 to account for NONE
+    return read_flash_string(DeviceValueUOM_s[uom]);
 }
 
 const std::string EMSdevice::brand_to_string() const {
@@ -519,16 +516,15 @@ void EMSdevice::register_device_value(uint8_t                             tag,
         };
     }
 
-    // this is the unique id set for the device entity
+    // this is the unique id set for the device entity. it's a simple sequence number
     uint8_t dv_id = get_next_dv_id();
 
+    // determine state
     uint8_t state = DeviceValueState::DV_VISIBLE; // default to visible
     if (!full_name) {
-        state = DeviceValueState::DV_DEFAULT; // don't show if the full_name is empty, used for hamode, hatemp etc
+        state = DeviceValueState::DV_DEFAULT; // don't show if the full_name is empty. Used for hamode, hatemp etc
     } else {
-        // scan through customizations to see if it's on the exclusion list
-        // we match the productID and deviceID. It's not perfect and will not work
-        // with multiple devices of the same type, but it's good enough for now
+        // scan through customizations to see if it's on the exclusion list by matching the productID and deviceID
         EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
             for (EntityCustomization entityCustomization : settings.entityCustomizations) {
                 if ((entityCustomization.product_id == product_id()) && (entityCustomization.device_id == device_id())) {
@@ -622,9 +618,11 @@ void EMSdevice::publish_value(void * value_p) {
             } else {
                 snprintf(topic, sizeof(topic), "%s/%s", device_type_2_device_name(device_type_).c_str(), read_flash_string(dv.short_name).c_str());
             }
+
             int8_t  divider     = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
             char    payload[30] = {'\0'};
             uint8_t fahrenheit  = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
+
             switch (dv.type) {
             case DeviceValueType::CMD: // publish a dummy value to show subscription in mqtt
                 strlcpy(payload, "-", 2);
@@ -639,6 +637,7 @@ void EMSdevice::publish_value(void * value_p) {
                 }
                 break;
             }
+
             case DeviceValueType::USHORT:
                 Helpers::render_value(payload, *(uint16_t *)(value_p), divider, fahrenheit);
                 break;
@@ -668,6 +667,7 @@ void EMSdevice::publish_value(void * value_p) {
                 }
                 break;
             }
+
             if (payload != nullptr && payload[0] != '\0') {
                 Mqtt::publish(topic, payload);
             }
@@ -811,18 +811,14 @@ void EMSdevice::generate_values_web(JsonObject & output) {
             }
         }
     }
-
-#if defined(EMSESP_DEBUG)
-// serializeJson(data, Serial); // debug only
-#endif
 }
 
 // disable/exclude a device entity based on its unique id
 void EMSdevice::exclude_entity(uint8_t id) {
     for (auto & dv : devicevalues_) {
         if (dv.id == id) {
-            dv.remove_state(DeviceValueState::DV_VISIBLE); // this will remove from MQTT and Web
-            dv.remove_state(DeviceValueState::DV_ACTIVE);  // this will remove any HA MQTT configs
+            dv.remove_state(DeviceValueState::DV_VISIBLE); // this will remove from MQTT payloads and showing in web & console
+            dv.remove_state(DeviceValueState::DV_ACTIVE);  // this will ensure it'll be removed from any HA MQTT /config topics
             return;
         }
     }
@@ -975,6 +971,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                 }
                 break;
             }
+
             case DeviceValueType::USHORT:
                 if (Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
                     json[value] = Helpers::round2(*(uint16_t *)(dv.value_p), divider, fahrenheit);
@@ -983,6 +980,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                 json[min]  = 0;
                 json[max]  = Helpers::round2(EMS_VALUE_USHORT_NOTSET, divider);
                 break;
+
             case DeviceValueType::UINT:
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
                     json[value] = Helpers::round2(*(uint8_t *)(dv.value_p), divider, fahrenheit);
@@ -995,6 +993,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                     json[max] = Helpers::round2(EMS_VALUE_UINT_NOTSET, divider);
                 }
                 break;
+
             case DeviceValueType::SHORT:
                 if (Helpers::hasValue(*(int16_t *)(dv.value_p))) {
                     json[value] = Helpers::round2(*(int16_t *)(dv.value_p), divider, fahrenheit);
@@ -1003,6 +1002,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                 json[min]  = Helpers::round2(-EMS_VALUE_SHORT_NOTSET, divider);
                 json[max]  = Helpers::round2(EMS_VALUE_SHORT_NOTSET, divider);
                 break;
+
             case DeviceValueType::INT:
                 if (Helpers::hasValue(*(int8_t *)(dv.value_p))) {
                     json[value] = Helpers::round2(*(int8_t *)(dv.value_p), divider, fahrenheit);
@@ -1016,6 +1016,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                     json[max] = Helpers::round2(EMS_VALUE_INT_NOTSET, divider);
                 }
                 break;
+
             case DeviceValueType::ULONG:
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     json[value] = Helpers::round2(*(uint32_t *)(dv.value_p), divider, fahrenheit);
@@ -1024,6 +1025,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                 json[min]  = 0;
                 json[max]  = Helpers::round2(EMS_VALUE_ULONG_NOTSET, divider);
                 break;
+
             case DeviceValueType::BOOL:
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                     bool value_b = (bool)(*(uint8_t *)(dv.value_p));
@@ -1038,6 +1040,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                 }
                 json[type] = F("boolean");
                 break;
+
             case DeviceValueType::TIME:
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     json[value] = Helpers::round2(*(uint32_t *)(dv.value_p), divider);
@@ -1053,6 +1056,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                 }
                 json[type] = F("string");
                 break;
+
             case DeviceValueType::CMD:
                 json[type] = F_(command);
                 if (dv.options_size > 1) {
@@ -1072,12 +1076,15 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             if (!uom_to_string(dv.uom).empty() && uom_to_string(dv.uom) != " ") {
                 json["uom"] = fahrenheit ? "°F" : uom_to_string(dv.uom);
             }
+
             json["writeable"] = dv.has_cmd;
             // if we have individual limits, overwrite the common limits
             if (dv.min != 0 || dv.max != 0) {
                 json[min] = dv.min;
                 json[max] = dv.max;
             }
+
+            json["visible"] = dv.has_state(DV_VISIBLE);
 
             // show the HA entity name if available
             if (Mqtt::ha_enabled() && dv.full_name != nullptr) {
@@ -1116,7 +1123,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
     JsonObject json       = output;
 
     for (auto & dv : devicevalues_) {
-        // check if it exists, there is a value for the entity. We set the flag.
+        // check if it exists, there is a value for the entity. Set the flag to ACTIVE
         bool has_value = check_dv_hasvalue(dv);
         if (has_value) {
             dv.add_state(DeviceValueState::DV_ACTIVE);
@@ -1129,7 +1136,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
         //  2. it must be visible
         //  3. it must match the given tag filter or have an empty tag
         bool conditions = ((tag_filter == DeviceValueTAG::TAG_NONE) || (tag_filter == dv.tag)) && has_value;
-        //  4. for MQTT we want to show the special HA entities (they have an empty fullname)
+        //  4. for MQTT we want to always show the special HA entities (they have an empty fullname)
         bool visible = ((dv.has_state(DeviceValueState::DV_VISIBLE)) || ((output_target == OUTPUT_TARGET::MQTT) && (!dv.full_name)));
         conditions &= visible;
 
@@ -1257,18 +1264,18 @@ void EMSdevice::publish_mqtt_ha_entity_config() {
     }
 
     for (auto & dv : devicevalues_) {
-        // if the HA config has already been created and now the value has gone dormant, delete the config
-        // https://github.com/emsesp/EMS-ESP32/issues/196
         if (dv.has_state(DV_ACTIVE)) {
-            if (!dv.has_state(DV_HA_CONFIG_CREATED)) {
-                // add it
+            // add it if not already done and if it's visible (not on the exclusion list)
+            // don't do this for commands (like reset)
+            if (!dv.has_state(DV_HA_CONFIG_CREATED) && dv.has_state(DV_VISIBLE) && dv.type != DeviceValueType::CMD) {
                 Mqtt::publish_ha_sensor_config(dv.type, dv.tag, dv.full_name, dv.device_type, dv.short_name, dv.uom, false, dv.has_cmd);
                 dv.add_state(DV_HA_CONFIG_CREATED);
             }
         } else {
             if (dv.has_state(DV_HA_CONFIG_CREATED)) {
-                // remove it
-                Mqtt::publish_ha_sensor_config(dv.type, dv.tag, dv.full_name, dv.device_type, dv.short_name, dv.uom, true, dv.has_cmd);
+                // if the HA config has already been created and now the value has gone dormant, delete the config
+                // https://github.com/emsesp/EMS-ESP32/issues/196
+                Mqtt::publish_ha_sensor_config(dv.type, dv.tag, dv.full_name, dv.device_type, dv.short_name, dv.uom, true, dv.has_cmd); // remove /config
                 dv.remove_state(DV_HA_CONFIG_CREATED);
             }
         }

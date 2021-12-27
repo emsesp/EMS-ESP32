@@ -79,7 +79,7 @@ const SystemStatusForm: FC = () => {
     setProcessing(true);
     try {
       await SystemApi.restart();
-      enqueueSnackbar('EMS-ESP is restarting', { variant: 'info' });
+      enqueueSnackbar('EMS-ESP is restarting...', { variant: 'info' });
     } catch (error: any) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem restarting device'), { variant: 'error' });
     } finally {

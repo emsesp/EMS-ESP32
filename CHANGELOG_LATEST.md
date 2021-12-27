@@ -20,14 +20,12 @@
 ## Changed
 
 - Refactor WebUI to use ReactHooks. New theme, increased performance, better mobile responsiveness [#124](https://github.com/emsesp/EMS-ESP32/issues/124)
-- Boiler and Thermostat entity "wwdisinfect" renamed to "wwdisinfecting" [#211](https://github.com/emsesp/EMS-ESP32/issues/211)
-- Boiler "wwheat" renamed to "ww3wayon" [#211](https://github.com/emsesp/EMS-ESP32/issues/211)
-- Boiler ww tag renamed to dhw
 
-## **BREAKING CHANGES**
+**Breaking changes:**
 
 - Settings: order of Boolean Format has changed in Application Settings
+- Boiler and Thermostat entity "wwdisinfect" renamed to "wwdisinfecting" [#211](https://github.com/emsesp/EMS-ESP32/issues/211)
+- Boiler "wwheat" renamed to "ww3wayon" [#211](https://github.com/emsesp/EMS-ESP32/issues/211)
+- Boiler ww tag renamed to dhw. Any custom HA dashboards will need updating.
+- Renamed Dallas Sensor to Temperature Sensor
 - Dallas Format removed. Use the name to give each sensor an alias
-- Boiler and Thermostat entity "wwdisinfect" renamed to "wwdisinfecting"
-- Boiler "wwheat" renamed to "ww3wayon"
-- Boiler tag in entity names for warm water renamed from ww to dhw. HA dashboards will need updating

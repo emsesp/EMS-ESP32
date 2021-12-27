@@ -999,13 +999,13 @@ bool System::command_commands(const char * value, const int8_t id, JsonObject & 
 // export all settings to JSON text
 // http://ems-esp/api/system/settings
 // value and id are ignored
+// note: ssid and passwords are excluded
 bool System::command_settings(const char * value, const int8_t id, JsonObject & output) {
     JsonObject node;
 
     node            = output.createNestedObject("System");
     node["version"] = EMSESP_APP_VERSION;
 
-    // hide ssid from this list
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
         node                     = output.createNestedObject("Network");
         node["hostname"]         = settings.hostname;
@@ -1030,6 +1030,9 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["local_ip"]       = settings.localIP.toString();
         node["gateway_ip"]     = settings.gatewayIP.toString();
         node["subnet_mask"]    = settings.subnetMask.toString();
+        node["channel"]        = settings.channel;
+        node["ssid_hidden"]    = settings.ssidHidden;
+        node["max_clients"]    = settings.maxClients;
     });
 #endif
 

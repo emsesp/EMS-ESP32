@@ -288,7 +288,7 @@ const MqttSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_sensor"
-              label="Dallas Sensors"
+              label="Temperature Sensors"
               fullWidth
               variant="outlined"
               value={numberValue(data.publish_time_sensor)}

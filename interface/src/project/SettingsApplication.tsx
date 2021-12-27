@@ -99,7 +99,7 @@ const SettingsApplication: FC = () => {
       validateAndSubmit();
       try {
         await EMSESP.restart();
-        enqueueSnackbar('EMS-ESP is restarting', { variant: 'info' });
+        enqueueSnackbar('EMS-ESP is restarting...', { variant: 'info' });
       } catch (error: any) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem restarting device'), { variant: 'error' });
       }
@@ -288,7 +288,7 @@ const SettingsApplication: FC = () => {
         />
         <BlockFormControlLabel
           control={<Checkbox checked={data.fahrenheit} onChange={updateFormValue} name="fahrenheit" />}
-          label="Convert all temperatures to Fahrenheit"
+          label="Convert temperature values to Fahrenheit"
           disabled={saving}
         />
         <BlockFormControlLabel
@@ -357,7 +357,7 @@ const SettingsApplication: FC = () => {
         {data.dallas_gpio !== 0 && (
           <>
             <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-              Dallas Sensors
+              Temperature Sensors
             </Typography>
             <BlockFormControlLabel
               control={<Checkbox checked={data.dallas_parasite} onChange={updateFormValue} name="dallas_parasite" />}

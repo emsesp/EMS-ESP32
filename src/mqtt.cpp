@@ -852,26 +852,26 @@ void Mqtt::process_queue() {
     mqtt_messages_.pop_front(); // remove the message from the queue
 }
 
-void Mqtt::publish_ha_sensor_config(uint8_t                     type, // EMSdevice::DeviceValueType
-                                    uint8_t                     tag,  // EMSdevice::DeviceValueTAG
+void Mqtt::publish_ha_sensor_config(uint8_t                     type,
+                                    uint8_t                     tag,
                                     const __FlashStringHelper * name,
-                                    const uint8_t               device_type, // EMSdevice::DeviceType
+                                    const uint8_t               device_type,
                                     const __FlashStringHelper * entity,
-                                    const uint8_t               uom) { // EMSdevice::DeviceValueUOM (0=NONE)
+                                    const uint8_t               uom) {
     publish_ha_sensor_config(type, tag, name, device_type, entity, uom, false, false);
 }
 
 
 // HA config for a sensor and binary_sensor entity
 // entity must match the key/value pair in the *_data topic
-// note: some string copying here into chars, it looks messy but does help with heap fragmentation issues
-void Mqtt::publish_ha_sensor_config(uint8_t                     type, // EMSdevice::DeviceValueType
-                                    uint8_t                     tag,  // EMSdevice::DeviceValueTAG
-                                    const __FlashStringHelper * name,
+// note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
+void Mqtt::publish_ha_sensor_config(uint8_t                     type,        // EMSdevice::DeviceValueType
+                                    uint8_t                     tag,         // EMSdevice::DeviceValueTAG
+                                    const __FlashStringHelper * name,        // fullname
                                     const uint8_t               device_type, // EMSdevice::DeviceType
-                                    const __FlashStringHelper * entity,
-                                    const uint8_t               uom,    // EMSdevice::DeviceValueUOM (0=NONE)
-                                    const bool                  remove, // true if we want to remove this topic
+                                    const __FlashStringHelper * entity,      // shortname
+                                    const uint8_t               uom,         // EMSdevice::DeviceValueUOM (0=NONE)
+                                    const bool                  remove,      // true if we want to remove this topic
                                     const bool                  has_cmd) {
     // ignore if name (fullname) is empty
     if (name == nullptr) {
@@ -951,107 +951,97 @@ void Mqtt::publish_ha_sensor_config(uint8_t                     type, // EMSdevi
         // render booleans always as a string for HA
         doc[F("payload_on")]  = Helpers::render_boolean(result, true);
         doc[F("payload_off")] = Helpers::render_boolean(result, false);
-    } else {
-        // set default state and device class for HA
-        auto set_state_class  = State_class::NONE;
-        auto set_device_class = Device_class::NONE;
+        if (EMSESP::bool_format() == BOOL_FORMAT_10) {
+            doc["state_class"] = F_(measurement);
+        }
 
+    } else {
         // unit of measure and map the HA icon
         if (uom != DeviceValueUOM::NONE) {
             doc["unit_of_meas"] = EMSdevice::uom_to_string(uom);
         }
+        const char * ic = "ic";
+        const char * sc = "state_class";
+        const char * dc = "device_class";
 
         switch (uom) {
         case DeviceValueUOM::DEGREES:
         case DeviceValueUOM::DEGREES_R:
-            doc["ic"]        = F_(icondegrees);
-            set_device_class = Device_class::TEMPERATURE;
+            doc[ic] = F_(icondegrees);
+            doc[sc] = F_(measurement);
+            doc[dc] = F("temperature");
             break;
         case DeviceValueUOM::PERCENT:
-            doc["ic"]        = F_(iconpercent);
-            set_device_class = Device_class::POWER_FACTOR;
+            doc[ic] = F_(iconpercent);
+            doc[sc] = F_(measurement);
+            doc[dc] = F("power_factor");
             break;
         case DeviceValueUOM::SECONDS:
         case DeviceValueUOM::MINUTES:
         case DeviceValueUOM::HOURS:
-            doc["ic"] = F_(icontime);
+            doc[ic] = F_(icontime);
+            if (type == DeviceValueType::TIME) {
+                doc[sc] = F_(total_increasing);
+            } else {
+                doc[sc] = F_(measurement);
+            }
             break;
         case DeviceValueUOM::KB:
-            doc["ic"] = F_(iconkb);
+            doc[ic] = F_(iconkb);
             break;
         case DeviceValueUOM::LMIN:
-            doc["ic"] = F_(iconlmin);
+            doc[ic] = F_(iconlmin);
+            doc[sc] = F_(measurement);
             break;
         case DeviceValueUOM::WH:
+            doc[ic] = F_(iconkwh);
+            if (entity == FL_(energyToday)[0]) {
+                doc[sc] = F_(total_increasing);
+            } else {
+                doc[sc] = F_(measurement);
+            }
+            doc[dc] = F("energy");
+            break;
         case DeviceValueUOM::KWH:
-            doc["ic"]        = F_(iconkwh);
-            set_state_class  = State_class::TOTAL_INCREASING;
-            set_device_class = Device_class::ENERGY;
+            doc[ic] = F_(iconkwh);
+            doc[sc] = F_(total_increasing);
+            doc[dc] = F("energy");
             break;
         case DeviceValueUOM::UA:
-            doc["ic"] = F_(iconua);
+            doc[ic] = F_(iconua);
+            doc[sc] = F_(measurement);
             break;
         case DeviceValueUOM::BAR:
-            doc["ic"]        = F_(iconbar);
-            set_device_class = Device_class::PRESSURE;
+            doc[ic] = F_(iconbar);
+            doc[sc] = F_(measurement);
+            doc[dc] = F("pressure");
             break;
         case DeviceValueUOM::W:
         case DeviceValueUOM::KW:
-            doc["ic"]        = F_(iconkw);
-            set_state_class  = State_class::MEASUREMENT;
-            set_device_class = Device_class::POWER;
+            doc[ic] = F_(iconkw);
+            doc[sc] = F_(measurement);
+            doc[dc] = F("power");
             break;
         case DeviceValueUOM::DBM:
-            doc["ic"]        = F_(icondbm);
-            set_device_class = Device_class::SIGNAL_STRENGTH;
+            doc[ic] = F_(icondbm);
+            doc[sc] = F_(measurement);
+            doc[dc] = F("signal_strength");
             break;
         case DeviceValueUOM::NONE:
-            if (type == DeviceValueType::INT || type == DeviceValueType::UINT || type == DeviceValueType::SHORT || type == DeviceValueType::USHORT
-                || type == DeviceValueType::ULONG) {
-                doc["ic"] = F_(iconnum);
+            if ((type == DeviceValueType::INT || type == DeviceValueType::UINT || type == DeviceValueType::SHORT || type == DeviceValueType::USHORT
+                 || type == DeviceValueType::ULONG)
+                && entity != FL_(ID)[0] && entity != FL_(hatemp)[0]) {
+                doc[ic] = F_(iconnum);
+                doc[sc] = F_(total_increasing);
+            } else if (entity != FL_(hamode)[0]) {
+                doc[sc] = F_(measurement);
             }
             break;
         case DeviceValueUOM::TIMES:
-            set_state_class = State_class::TOTAL_INCREASING;
-            doc["ic"]       = F_(iconnum);
-            break;
+            doc[sc] = F_(total_increasing);
+            doc[ic] = F_(iconnum);
         default:
             break;
-        }
-
-        // see if we need to set the state_class and device_class
-        // ignore any commands
-        if (!has_cmd) {
-            // state class
-            if (set_state_class == State_class::MEASUREMENT) {
-                doc["state_class"] = F("measurement");
-            } else if (set_state_class == State_class::TOTAL_INCREASING) {
-                doc["state_class"] = F("total_increasing");
-            }
-
-            // device class
-            switch (set_device_class) {
-            case Device_class::ENERGY:
-                doc["device_class"] = F("energy");
-                break;
-            case Device_class::POWER:
-                doc["device_class"] = F("power");
-                break;
-            case Device_class::POWER_FACTOR:
-                doc["device_class"] = F("power_factor");
-                break;
-            case Device_class::PRESSURE:
-                doc["device_class"] = F("pressure");
-                break;
-            case Device_class::SIGNAL_STRENGTH:
-                doc["device_class"] = F("signal_strength");
-                break;
-            case Device_class::TEMPERATURE:
-                doc["device_class"] = F("temperature");
-                break;
-            default:
-                break;
-            }
         }
     }
 

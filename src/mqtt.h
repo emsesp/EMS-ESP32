@@ -78,10 +78,6 @@ class Mqtt {
 
     };
 
-    // for Home Assistant
-    enum class State_class { NONE, MEASUREMENT, TOTAL_INCREASING };
-    enum class Device_class { NONE, TEMPERATURE, POWER_FACTOR, ENERGY, PRESSURE, POWER, SIGNAL_STRENGTH };
-
     static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // note this should really match the user setting in mqttSettings.maxTopicLength
 
     static void on_connect();

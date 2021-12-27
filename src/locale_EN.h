@@ -399,8 +399,8 @@ MAKE_PSTR_LIST(ID, F_(id))
 
 // Boiler
 // extra commands, with no json output
-MAKE_PSTR_LIST(wwtapactivated, F("wwtapactivated"), F("turn on/off DHW by going into maintenance mode"))
-MAKE_PSTR_LIST(reset, F("reset"), F("send 'reset' message"))
+MAKE_PSTR_LIST(wwtapactivated, F("wwtapactivated"), F("turn on/off DHW"))
+MAKE_PSTR_LIST(reset, F("reset"), F("send reset command"))
 
 // single mqtt topics
 MAKE_PSTR_WORD(heating_active)

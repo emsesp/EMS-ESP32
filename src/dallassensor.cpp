@@ -467,7 +467,7 @@ void DallasSensor::publish_values(const bool force) {
                 snprintf(str, sizeof(str), "{{value_json['%s'].temp}}", sensor.id_str().c_str());
                 config["val_tpl"] = str;
 
-                snprintf(str, sizeof(str), "Dallas Sensor %s", sensor.name().c_str());
+                snprintf(str, sizeof(str), "Temperature Sensor %s", sensor.name().c_str());
                 config["name"] = str;
 
                 snprintf(str, sizeof(str), "dallasensor_%s", sensor.id_str().c_str());
