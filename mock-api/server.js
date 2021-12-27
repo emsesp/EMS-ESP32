@@ -403,8 +403,8 @@ const emsesp_coredata = {
       e: 3,
     },
   ],
-  dallassensor_count: 0,
-  analogsensor_count: 0,
+  dallassensor_count: 3,
+  analogsensor_count: 3,
 }
 
 const emsesp_sensordata = {

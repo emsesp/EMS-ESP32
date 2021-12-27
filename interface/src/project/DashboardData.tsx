@@ -29,8 +29,11 @@ import { useSnackbar } from 'notistack';
 
 import RefreshIcon from '@mui/icons-material/Refresh';
 import EditIcon from '@mui/icons-material/Edit';
-import SensorsIcon from '@mui/icons-material/Sensors';
-import CategoryIcon from '@mui/icons-material/Category';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+
+import DeviceIcon from './DeviceIcon';
+
+import { IconContext } from 'react-icons';
 
 import { AuthenticatedContext } from '../contexts/authentication';
 
@@ -359,65 +362,74 @@ const DashboardData: FC = () => {
 
     return (
       <>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell align="left" padding="checkbox"></StyledTableCell>
-              <StyledTableCell>Type</StyledTableCell>
-              <StyledTableCell>Name</StyledTableCell>
-              <StyledTableCell align="right"># Entities</StyledTableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.devices.sort(compareDevices).map((device) => (
-              <TableRow
-                hover
-                selected={device.i === selectedDevice}
-                key={device.i}
-                onClick={() => device.e && fetchDeviceData(device.i)}
-              >
-                <TableCell>
-                  <StyledTooltip
-                    title={
-                      <Fragment>
-                        <Typography variant="h6" color="primary">
-                          Device Details
-                        </Typography>
-                        {'Type: ' + device.t}
-                        <br />
-                        {'Name: ' + device.n}
-                        <br />
-                        {'Brand: ' + device.b}
-                        <br />
-                        {'DeviceID: 0x' + ('00' + device.d.toString(16).toUpperCase()).slice(-2)}
-                        <br />
-                        {'ProductID: ' + device.p}
-                        <br />
-                        {'Version: ' + device.v}
-                      </Fragment>
-                    }
-                    placement="top"
-                  >
-                    <CategoryIcon color="primary" fontSize="large" />
-                  </StyledTooltip>
-                </TableCell>
-                <TableCell>{device.t}</TableCell>
-                <TableCell>{device.n}</TableCell>
-                <TableCell align="right">{device.e}</TableCell>
+        <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                {/* <StyledTableCell padding="checkbox"></StyledTableCell> */}
+                <StyledTableCell padding="checkbox" align="left" colSpan={2}>
+                  Type
+                </StyledTableCell>
+                <StyledTableCell>Name</StyledTableCell>
+                <StyledTableCell align="center"># Entities</StyledTableCell>
+                <StyledTableCell />
               </TableRow>
-            ))}
-            {haveSensors() && (
-              <TableRow hover selected={selectedDevice === 0} onClick={() => fetchSensorData()}>
-                <TableCell>
-                  <SensorsIcon color="primary" fontSize="large" />
-                </TableCell>
-                <TableCell>Sensors</TableCell>
-                <TableCell>Temperature and Analog Sensors</TableCell>
-                <TableCell align="right">{data.dallassensor_count + data.analogsensor_count}</TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {data.devices.sort(compareDevices).map((device) => (
+                <TableRow
+                  hover
+                  selected={device.i === selectedDevice}
+                  key={device.i}
+                  onClick={() => device.e && fetchDeviceData(device.i)}
+                >
+                  <TableCell padding="checkbox">
+                    <DeviceIcon type={device.t} />
+                  </TableCell>
+                  <TableCell>{device.t}</TableCell>
+                  <TableCell>{device.n}</TableCell>
+                  <TableCell align="center">{device.e}</TableCell>
+                  <TableCell align="right">
+                    <StyledTooltip
+                      title={
+                        <Fragment>
+                          <Typography variant="h6" color="primary">
+                            Device Details
+                          </Typography>
+                          {'Type: ' + device.t}
+                          <br />
+                          {'Name: ' + device.n}
+                          <br />
+                          {'Brand: ' + device.b}
+                          <br />
+                          {'DeviceID: 0x' + ('00' + device.d.toString(16).toUpperCase()).slice(-2)}
+                          <br />
+                          {'ProductID: ' + device.p}
+                          <br />
+                          {'Version: ' + device.v}
+                        </Fragment>
+                      }
+                      placement="top"
+                    >
+                      <InfoOutlinedIcon color="info" fontSize="small" sx={{ verticalAlign: 'middle' }} />
+                    </StyledTooltip>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {haveSensors() && (
+                <TableRow hover selected={selectedDevice === 0} onClick={() => fetchSensorData()}>
+                  <TableCell>
+                    <DeviceIcon type="Sensor" />
+                  </TableCell>
+                  <TableCell>Sensors</TableCell>
+                  <TableCell>Temperature and Analog Sensors</TableCell>
+                  <TableCell align="center">{data.dallassensor_count + data.analogsensor_count}</TableCell>
+                  <TableCell />
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </IconContext.Provider>
 
         {noDevices() && (
           <MessageBox
