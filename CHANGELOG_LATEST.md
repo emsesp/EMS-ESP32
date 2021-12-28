@@ -8,7 +8,8 @@
 - Customization Service. First is the Entity Exclusion for devices [#206](https://github.com/emsesp/EMS-ESP32/issues/206)
 - Option to disable Telnet Console
 - Added Hide SSID, Max Clients and Preferred Channel to Access Point
-- Merged in MichaelDvP's changes like dallas fahrenheit support and publish single
+- Merged in MichaelDvP's changes like fahrenheit conversion, publish single (for iobroker) and a few other changes
+- Extended support for Home Assistant to write back values [#265](https://github.com/emsesp/EMS-ESP32/issues/265)
 
 ## Fixed
 
@@ -16,6 +17,7 @@
 - overlapping while reading sequence of EMS1.0 telegrams
 - redundant telegram readings (because of offset overflow)
 - added missing RC30/Moduline400 [#243](https://github.com/emsesp/EMS-ESP32/issues/243)
+- Correct modes for RC25 [#106](https://github.com/emsesp/EMS-ESP32/issues/106)
 
 ## Changed
 

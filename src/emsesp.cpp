@@ -530,7 +530,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                         }
                         doc.clear();
 
-                        for (uint8_t hc_tag = TAG_HC1; hc_tag <= DeviceValueTAG::TAG_HC4; hc_tag++) {
+                        for (uint8_t hc_tag = DeviceValueTAG::TAG_HC1; hc_tag <= DeviceValueTAG::TAG_HC4; hc_tag++) {
                             if (emsdevice->generate_values(json, hc_tag, false, EMSdevice::OUTPUT_TARGET::MQTT)) { // not nested
                                 Mqtt::publish(Mqtt::tag_to_topic(device_type, hc_tag), json);
                             }
@@ -546,7 +546,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 if (nested) {
                     need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::MQTT); // nested
                 } else {
-                    for (uint8_t hc_tag = TAG_HC1; hc_tag <= DeviceValueTAG::TAG_WWC4; hc_tag++) {
+                    for (uint8_t hc_tag = DeviceValueTAG::TAG_HC1; hc_tag <= DeviceValueTAG::TAG_WWC4; hc_tag++) {
                         if (emsdevice->generate_values(json, hc_tag, false, EMSdevice::OUTPUT_TARGET::MQTT)) { // not nested
                             Mqtt::publish(Mqtt::tag_to_topic(device_type, hc_tag), json);
                         }

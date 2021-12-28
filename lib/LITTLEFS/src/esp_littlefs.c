@@ -1043,7 +1043,6 @@ static ssize_t vfs_littlefs_read(void* ctx, int fd, void * dst, size_t size) {
 }
 
 static int vfs_littlefs_close(void* ctx, int fd) {
-    // TODO update mtime on close? SPIFFS doesn't do this
     esp_littlefs_t * efs = (esp_littlefs_t *)ctx;
     int res;
     vfs_littlefs_file_t *file = NULL;

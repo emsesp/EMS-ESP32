@@ -1231,23 +1231,29 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         char boiler_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         char thermostat_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         char system_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        EMSESP::EMSESP::mqtt_.publish("boiler", "test me");
         Mqtt::show_mqtt(shell); // show queue
 
         strcpy(boiler_topic, "ems-esp/boiler");
         strcpy(thermostat_topic, "ems-esp/thermostat");
         strcpy(system_topic, "ems-esp/system");
 
-        EMSESP::mqtt_.incoming(boiler_topic, ""); // test if ignore empty payloads
+        // test publishing
+        EMSESP::EMSESP::mqtt_.publish(boiler_topic, "test me");
+
+        // test receiving
+        EMSESP::mqtt_.incoming(boiler_topic, ""); // test if ignore empty payloads, should return values
 
         EMSESP::mqtt_.incoming(boiler_topic, "12345");                                // error: invalid format
-        EMSESP::mqtt_.incoming("bad_topic", "12345");                                 // error: no matching topic
+        EMSESP::mqtt_.incoming("bad_topic", "123456");                                // error: no matching topic
         EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"garbage\",\"data\":22.52}"); // error: should report error
 
         EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"comfort\",\"data\":\"eco\"}");
         EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"wwactivated\",\"data\":\"1\"}"); // with quotes
         EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"wwactivated\",\"data\":1}");     // without quotes
-        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"flowtemp\",\"data\":55}");
+        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"selflowtemp\",\"data\":55}");
+
+        // test direct commands
+        EMSESP::mqtt_.incoming("ems-esp/boiler/selflowtemp", "56");
 
         EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"send\",\"data\":\"01 02 03 04 05\"}");
         EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"pin\",\"id\":12,\"data\":\"1\"}");

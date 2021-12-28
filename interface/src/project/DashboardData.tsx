@@ -180,7 +180,6 @@ const DashboardData: FC = () => {
           ' ' +
           DeviceValueUOM_s[uom]
         );
-      case DeviceValueUOM.TIMES:
       case DeviceValueUOM.SECONDS:
         return pluralize(value, DeviceValueUOM_s[uom]);
       default:

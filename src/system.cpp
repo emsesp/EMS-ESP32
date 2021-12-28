@@ -1001,9 +1001,9 @@ bool System::command_commands(const char * value, const int8_t id, JsonObject & 
 // value and id are ignored
 // note: ssid and passwords are excluded
 bool System::command_settings(const char * value, const int8_t id, JsonObject & output) {
-    JsonObject node;
+    output["label"] = "settings";
 
-    node            = output.createNestedObject("System");
+    JsonObject node = output.createNestedObject("System");
     node["version"] = EMSESP_APP_VERSION;
 
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
@@ -1118,9 +1118,9 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 
 // http://ems-esp/api/system/customizations
 bool System::command_customizations(const char * value, const int8_t id, JsonObject & output) {
-    JsonObject node;
+    output["label"] = "customizations";
 
-    node = output.createNestedObject("Customizations");
+    JsonObject node = output.createNestedObject("Customizations");
 
     // hide ssid from this list
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {

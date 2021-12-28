@@ -258,31 +258,26 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         }
     }
 
+    // check if we have a matching command
     if (cf) {
-        // we have a matching command
-        if ((value == nullptr) || !strlen(value)) {
-            LOG_DEBUG(F("Calling %s command '%s'"), dname.c_str(), cmd);
-        } else if (id == -1) {
-            LOG_DEBUG(F("Calling %s command '%s', value %s, id is default"), dname.c_str(), cmd, value);
-        } else {
-            LOG_DEBUG(F("Calling %s command '%s', value %s, id is %d"), dname.c_str(), cmd, value, id);
-        }
-
         // check permissions
         if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin) {
             output["message"] = "authentication failed";
             return CommandRet::NOT_ALLOWED; // command not allowed
         }
 
-        // call the function
+        LOG_DEBUG(F("Calling command '%s/%s' (%s) with value %s"), dname.c_str(), cmd, read_flash_string(cf->description_).c_str(), value);
+
+        // call the function baesed on type
         if (cf->cmdfunction_json_) {
             return_code = ((cf->cmdfunction_json_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
         }
+
         if (cf->cmdfunction_) {
             return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;
         }
 
-        // report error if call failed
+        // report back
         if (return_code != CommandRet::OK) {
             return message(return_code, "callback function failed", output);
         }
@@ -419,7 +414,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                 }
                 shell.print(COLOR_BRIGHT_CYAN);
                 if (cf.has_flags(MQTT_SUB_FLAG_WW)) {
-                    shell.print(EMSdevice::tag_to_string(TAG_DEVICE_DATA_WW));
+                    shell.print(EMSdevice::tag_to_string(DeviceValueTAG::TAG_DEVICE_DATA_WW));
                     shell.print(' ');
                 }
                 shell.print(read_flash_string(cf.description_));

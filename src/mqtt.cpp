@@ -629,17 +629,17 @@ void Mqtt::ha_status() {
                              F("MQTT fails"),
                              EMSdevice::DeviceType::SYSTEM,
                              F("mqttfails"),
-                             DeviceValueUOM::TIMES);
+                             DeviceValueUOM::NONE);
     publish_ha_sensor_config(DeviceValueType::INT,
                              DeviceValueTAG::TAG_HEARTBEAT,
                              F("Rx received"),
                              EMSdevice::DeviceType::SYSTEM,
                              F("rxreceived"),
-                             DeviceValueUOM::TIMES);
-    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Rx fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"), DeviceValueUOM::TIMES);
-    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx reads"), EMSdevice::DeviceType::SYSTEM, F("txreads"), DeviceValueUOM::TIMES);
-    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx writes"), EMSdevice::DeviceType::SYSTEM, F("txwrites"), DeviceValueUOM::TIMES);
-    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"), DeviceValueUOM::TIMES);
+                             DeviceValueUOM::NONE);
+    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Rx fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"), DeviceValueUOM::NONE);
+    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx reads"), EMSdevice::DeviceType::SYSTEM, F("txreads"), DeviceValueUOM::NONE);
+    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx writes"), EMSdevice::DeviceType::SYSTEM, F("txwrites"), DeviceValueUOM::NONE);
+    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"), DeviceValueUOM::NONE);
 }
 
 // add sub or pub task to the queue.
@@ -858,21 +858,27 @@ void Mqtt::publish_ha_sensor_config(uint8_t                     type,
                                     const uint8_t               device_type,
                                     const __FlashStringHelper * entity,
                                     const uint8_t               uom) {
-    publish_ha_sensor_config(type, tag, name, device_type, entity, uom, false, false);
+    publish_ha_sensor_config(type, tag, name, device_type, entity, uom, false, false, nullptr, 0);
+}
+
+void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const bool remove) {
+    publish_ha_sensor_config(dv.type, dv.tag, dv.full_name, dv.device_type, dv.short_name, dv.uom, remove, dv.has_cmd, dv.options, dv.options_size);
 }
 
 
 // HA config for a sensor and binary_sensor entity
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
-void Mqtt::publish_ha_sensor_config(uint8_t                     type,        // EMSdevice::DeviceValueType
-                                    uint8_t                     tag,         // EMSdevice::DeviceValueTAG
-                                    const __FlashStringHelper * name,        // fullname
-                                    const uint8_t               device_type, // EMSdevice::DeviceType
-                                    const __FlashStringHelper * entity,      // shortname
-                                    const uint8_t               uom,         // EMSdevice::DeviceValueUOM (0=NONE)
-                                    const bool                  remove,      // true if we want to remove this topic
-                                    const bool                  has_cmd) {
+void Mqtt::publish_ha_sensor_config(uint8_t                             type,        // EMSdevice::DeviceValueType
+                                    uint8_t                             tag,         // EMSdevice::DeviceValueTAG
+                                    const __FlashStringHelper *         name,        // fullname
+                                    const uint8_t                       device_type, // EMSdevice::DeviceType
+                                    const __FlashStringHelper *         entity,      // shortname
+                                    const uint8_t                       uom,         // EMSdevice::DeviceValueUOM (0=NONE)
+                                    const bool                          remove,      // true if we want to remove this topic
+                                    const bool                          has_cmd,
+                                    const __FlashStringHelper * const * options,
+                                    uint8_t                             options_size) {
     // ignore if name (fullname) is empty
     if (name == nullptr) {
         return;
@@ -895,15 +901,42 @@ void Mqtt::publish_ha_sensor_config(uint8_t                     type,        // 
     snprintf(&uniq[0], uniq.capacity() + 1, "%s_%s", device_name, new_entity);
     std::replace(uniq.begin(), uniq.end(), '.', '_');
 
-    // create the topic
     char topic[MQTT_TOPIC_MAX_SIZE];
-    if (type == DeviceValueType::BOOL) {
-        snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // binary sensor
+
+    // if it's a command then we can use Number, Switch. Otherwise stick to sensor
+    if (has_cmd) {
+        switch (type) {
+        case DeviceValueType::INT:
+        case DeviceValueType::UINT:
+        case DeviceValueType::SHORT:
+        case DeviceValueType::USHORT:
+        case DeviceValueType::ULONG:
+            // number - https://www.home-assistant.io/integrations/number.mqtt/
+            snprintf(topic, sizeof(topic), "number/%s/%s/config", mqtt_base_.c_str(), uniq.c_str());
+            break;
+        case DeviceValueType::BOOL:
+            // switch - https://www.home-assistant.io/integrations/switch.mqtt/
+            snprintf(topic, sizeof(topic), "switch/%s/%s/config", mqtt_base_.c_str(), uniq.c_str());
+            break;
+        case DeviceValueType::ENUM:
+            // select - https://www.home-assistant.io/integrations/select.mqtt
+            snprintf(topic, sizeof(topic), "select/%s/%s/config", mqtt_base_.c_str(), uniq.c_str());
+            break;
+        default:
+            // plain old sensor
+            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str());
+            break;
+        }
     } else {
-        snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // normal HA sensor, not a boolean one
+        // plain old read only sensor or binary sensor
+        if (type == DeviceValueType::BOOL) {
+            snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // binary sensor
+        } else {
+            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // normal HA sensor, not a boolean one
+        }
     }
 
-    // if we're asking to remove this topic, send an empty payload
+    // if we're asking to remove this topic, send an empty payload and exit
     // https://github.com/emsesp/EMS-ESP32/issues/196
     if (remove) {
         LOG_WARNING(F("Lost device value for %s. Removing HA config"), uniq.c_str());
@@ -919,6 +952,46 @@ void Mqtt::publish_ha_sensor_config(uint8_t                     type,        // 
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
     doc["~"]       = mqtt_base_;
     doc["uniq_id"] = uniq;
+
+    // handle bi-directional commands
+    // note: there is no way to handle strings so datetimes (e.g. set_datetime, set_holiday, set_wwswitchtime etc) are not supported
+    if (has_cmd) {
+        // command topic back to EMS-ESP
+        std::string command_topic = uniq; // copy
+        std::replace(command_topic.begin(), command_topic.end(), '_', '/');
+        doc["command_topic"] = "~/" + command_topic;
+
+        // enums
+        if (type == DeviceValueType::ENUM) {
+            JsonArray option_list = doc.createNestedArray("options");
+            for (uint8_t i = 0; i < options_size; i++) {
+                option_list.add(options[i]);
+            }
+        }
+
+        // set min and max based on type
+        switch (uom) {
+        case DeviceValueUOM::DEGREES:
+        case DeviceValueUOM::DEGREES_R:
+            if ((type == DeviceValueType::UINT) || (type == DeviceValueType::USHORT)) {
+                doc["min"] = 0;
+                doc["max"] = 120;
+            } else {
+                // can have negative values
+                // just guessing the numbers
+                doc["min"] = -20;
+                doc["max"] = 120;
+            }
+            doc["step"] = 0.5;
+            break;
+        case DeviceValueUOM::PERCENT:
+            doc["min"] = 0;
+            doc["max"] = 127; // e.g. boiler selected max power
+            break;
+        default:
+            break;
+        }
+    }
 
     // state topic
     char stat_t[MQTT_TOPIC_MAX_SIZE];
@@ -956,11 +1029,12 @@ void Mqtt::publish_ha_sensor_config(uint8_t                     type,        // 
         }
 
     } else {
-        // unit of measure and map the HA icon
+        // unit of measure
         if (uom != DeviceValueUOM::NONE) {
             doc["unit_of_meas"] = EMSdevice::uom_to_string(uom);
         }
-        const char * ic = "ic";
+
+        const char * ic = "ic"; // icon
         const char * sc = "state_class";
         const char * dc = "device_class";
 
@@ -1014,7 +1088,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                     type,        // 
         case DeviceValueUOM::BAR:
             doc[ic] = F_(iconbar);
             doc[sc] = F_(measurement);
-            doc[dc] = F("pressure");
+            // doc[dc] = F("pressure"); // HA only supports mbar and hPA, not bar
             break;
         case DeviceValueUOM::W:
         case DeviceValueUOM::KW:
@@ -1030,16 +1104,14 @@ void Mqtt::publish_ha_sensor_config(uint8_t                     type,        // 
         case DeviceValueUOM::NONE:
             if ((type == DeviceValueType::INT || type == DeviceValueType::UINT || type == DeviceValueType::SHORT || type == DeviceValueType::USHORT
                  || type == DeviceValueType::ULONG)
-                && entity != FL_(ID)[0] && entity != FL_(hatemp)[0]) {
+                // some entities are not linear, like service code number which cause HA to complain
+                && (entity != FL_(ID)[0]) && (entity != FL_(hatemp)[0]) && (entity != FL_(serviceCodeNumber)[0])) {
                 doc[ic] = F_(iconnum);
                 doc[sc] = F_(total_increasing);
             } else if (entity != FL_(hamode)[0]) {
                 doc[sc] = F_(measurement);
             }
             break;
-        case DeviceValueUOM::TIMES:
-            doc[sc] = F_(total_increasing);
-            doc[ic] = F_(iconnum);
         default:
             break;
         }

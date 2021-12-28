@@ -25,6 +25,7 @@
 #include "system.h"
 #include "console.h"
 #include "command.h"
+#include "emsdevicevalue.h"
 
 using uuid::console::Shell;
 
@@ -99,14 +100,18 @@ class Mqtt {
     static void publish_ha(const __FlashStringHelper * topic, const JsonObject & payload);
     static void publish_ha(const std::string & topic);
 
-    static void publish_ha_sensor_config(uint8_t                     type,
-                                         uint8_t                     tag,
-                                         const __FlashStringHelper * name,
-                                         const uint8_t               device_type,
-                                         const __FlashStringHelper * entity,
-                                         const uint8_t               uom,
-                                         const bool                  remove,
-                                         const bool                  has_cmd);
+    static void publish_ha_sensor_config(DeviceValue & dv, const bool remove = false);
+
+    static void publish_ha_sensor_config(uint8_t                             type,
+                                         uint8_t                             tag,
+                                         const __FlashStringHelper *         name,
+                                         const uint8_t                       device_type,
+                                         const __FlashStringHelper *         entity,
+                                         const uint8_t                       uom,
+                                         const bool                          remove,
+                                         const bool                          has_cmd,
+                                         const __FlashStringHelper * const * options,
+                                         uint8_t                             options_size);
 
     static void publish_ha_sensor_config(uint8_t                     type,
                                          uint8_t                     tag,

@@ -46,6 +46,7 @@
 #include "web/WebAPIService.h"
 #include "web/WebLogService.h"
 
+#include "emsdevicevalue.h"
 #include "emsdevice.h"
 #include "emsfactory.h"
 #include "telegram.h"
@@ -81,6 +82,11 @@
 #define MAKE_CF_CB(__f) [&](const char * value, const int8_t id) { return __f(value, id); } // for Command Function callbacks Command::cmd_function_p
 
 namespace emsesp {
+
+using DeviceValueUOM   = emsesp::DeviceValue::DeviceValueUOM;
+using DeviceValueType  = emsesp::DeviceValue::DeviceValueType;
+using DeviceValueState = emsesp::DeviceValue::DeviceValueState;
+using DeviceValueTAG   = emsesp::DeviceValue::DeviceValueTAG;
 
 class Shower; // forward declaration for compiler
 

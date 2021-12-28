@@ -161,9 +161,7 @@ export enum DeviceValueUOM {
   DBM,
   FAHRENHEIT,
   MV,
-  SQM,
-  TIMES,
-  OCLOCK
+  SQM
 }
 
 export const DeviceValueUOM_s = [
@@ -186,7 +184,6 @@ export const DeviceValueUOM_s = [
   '°F',
   'mV',
   'sqm',
-  'time',
   "o'clock"
 ];
 
