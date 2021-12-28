@@ -61,13 +61,6 @@ class WebSettings {
     bool     weblog_compact;
     bool     fahrenheit;
 
-    // TODO move to customization service
-    uint8_t analog_id;
-    String  analog_name;
-    int16_t analog_offset;
-    float   analog_factor;
-    String  analog_uom;
-
     static void              read(WebSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebSettings & settings);
 
@@ -76,7 +69,7 @@ class WebSettings {
         NONE    = 0,
         UART    = (1 << 0), // 1
         SYSLOG  = (1 << 1), // 2
-        ADC     = (1 << 2), // 4
+        ADC     = (1 << 2), // 4 - analog
         DALLAS  = (1 << 3), // 8
         SHOWER  = (1 << 4), // 16
         LED     = (1 << 5), // 32

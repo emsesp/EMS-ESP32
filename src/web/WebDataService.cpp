@@ -91,21 +91,21 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
 
     // the number of sensors
     root["dallassensor_count"] = EMSESP::dallassensor_.no_sensors();
-    root["analogsensor_count"] = 0; // TODO fix counts
+    root["analogsensor_count"] = EMSESP::analogsensor_.no_sensors();
 
     response->setLength();
     request->send(response);
 }
 
-// sensor data
-// /sensorData
+// sensor data - sends to web
+// /sensorData endpoint
 void WebDataService::sensor_data(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
     JsonObject          root     = response->getRoot();
 
     // always create sensors, even if it's empty
     JsonArray sensors = root.createNestedArray("sensors");
-    if (EMSESP::have_sensors()) {
+    if (EMSESP::dallassensor_.have_sensors()) {
         for (const auto & sensor : EMSESP::dallassensor_.sensors()) {
             JsonObject obj = sensors.createNestedObject();
             obj["is"]      = sensor.id_str(); // id
@@ -126,15 +126,21 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
         }
     }
 
-    JsonArray analog = root.createNestedArray("analogs");
-    if (EMSESP::system_.analog_enabled()) {
-        JsonObject obj = analog.createNestedObject();
-        obj["i"]       = EMSESP::system_.analog_id();
-        obj["n"]       = EMSESP::system_.analog_name();
-        obj["v"]       = EMSESP::system_.analog_value();
-        obj["u"]       = EMSESP::system_.analog_uom();
-        obj["o"]       = EMSESP::system_.analog_offset();
-        obj["f"]       = EMSESP::system_.analog_factor();
+    JsonArray analogs = root.createNestedArray("analogs");
+    if (EMSESP::analogsensor_.have_sensors()) {
+        for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
+            // don't send if it's marked for removal
+            if (sensor.type() != -1) {
+                JsonObject obj = analogs.createNestedObject();
+                obj["i"]       = sensor.id();
+                obj["n"]       = sensor.name();
+                obj["v"]       = sensor.value();
+                obj["u"]       = sensor.uom();
+                obj["o"]       = sensor.offset();
+                obj["f"]       = sensor.factor();
+                obj["t"]       = sensor.type();
+            }
+        }
     }
 
     response->setLength();
@@ -230,7 +236,7 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
     request->send(response);
 }
 
-// takes a sensor name and optional offset from the WebUI and update the customization settings
+// takes a dallas sensor name and optional offset from the WebUI and update the customization settings
 // via the Dallas service
 void WebDataService::write_sensor(AsyncWebServerRequest * request, JsonVariant & json) {
     bool ok = false;
@@ -263,9 +269,11 @@ void WebDataService::write_analog(AsyncWebServerRequest * request, JsonVariant &
         std::string name   = analog["name"];
         float       factor = analog["factor"];
         int16_t     offset = analog["offset"];
-        std::string uom    = analog["uom"];
-        ok                 = EMSESP::system_.analogupdate(name.c_str(), offset, factor, uom.c_str(), id);
+        uint8_t     uom    = analog["uom"];
+        int8_t      type   = analog["type"];
+        ok                 = EMSESP::analogsensor_.update(id, name, offset, factor, uom, type);
     }
+
     AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);
     request->send(response);
 }

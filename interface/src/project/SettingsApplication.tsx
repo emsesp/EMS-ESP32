@@ -283,7 +283,7 @@ const SettingsApplication: FC = () => {
 
         <BlockFormControlLabel
           control={<Checkbox checked={data.analog_enabled} onChange={updateFormValue} name="analog_enabled" />}
-          label="Enable ADC"
+          label="Enable Analog Sensors"
           disabled={saving}
         />
         <BlockFormControlLabel

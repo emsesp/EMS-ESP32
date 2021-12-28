@@ -111,16 +111,6 @@ bool System::command_send(const char * value, const int8_t id) {
     return true;
 }
 
-// send set / reset counter
-bool System::command_counter(const char * value, const int8_t id) {
-    int v;
-    if (Helpers::value2number(value, v)) {
-        EMSESP::system_.io_counter_ = v;
-        return true;
-    }
-    return false;
-}
-
 // fetch device values
 bool System::command_fetch(const char * value, const int8_t id) {
     std::string value_s(14, '\0');
@@ -330,13 +320,6 @@ void System::get_settings() {
         syslog_mark_interval_ = settings.syslog_mark_interval;
         syslog_host_          = settings.syslog_host;
         syslog_port_          = settings.syslog_port;
-
-        // TODO move to customizations service
-        analogdata_.id = settings.analog_id;
-        strlcpy(analogdata_.name, settings.analog_name.c_str(), sizeof(analogdata_.name));
-        analogdata_.offset = settings.analog_offset;
-        analogdata_.factor = settings.analog_factor;
-        strlcpy(analogdata_.uom, settings.analog_uom.c_str(), sizeof(analogdata_.uom));
     });
 }
 
@@ -409,27 +392,11 @@ void System::start(uint32_t heap_start) {
 
     commands_init();     // console & api commands
     led_init(false);     // init LED
-    adc_init(false);     // analog ADC
     button_init(false);  // the special button
     network_init(false); // network
     syslog_start();      // start Syslog
 
     EMSESP::init_uart(); // start UART
-}
-
-// adc
-void System::adc_init(bool refresh) {
-    if (refresh) {
-        get_settings();
-    }
-#ifndef EMSESP_STANDALONE
-    if (analog_enabled_) {
-        analogSetAttenuation(ADC_2_5db);
-        analogSetPinAttenuation(ADC1_CHANNEL_0_GPIO_NUM, ADC_2_5db); // 1500mV
-        // setting attentuator to 0 = 1100, 1500, 2200, 3900 mV
-        // analogSetAttenuation(ADC1_CHANNEL_0_GPIO_NUM, analog_enabled_ - 1);
-    }
-#endif
 }
 
 // button single click
@@ -530,9 +497,6 @@ void System::loop() {
 
     led_monitor();  // check status and report back using the LED
     system_check(); // check system health
-    if (analog_enabled_) {
-        measure_analog();
-    }
 
     // send out heartbeat
     uint32_t currentMillis = uuid::get_uptime();
@@ -591,27 +555,14 @@ bool System::heartbeat_json(JsonObject & output) {
     output["apicalls"] = WebAPIService::api_count(); // + WebAPIService::api_fails();
     output["apifails"] = WebAPIService::api_fails();
 
-    if (EMSESP::dallas_enabled()) {
-        output["sensorreads"] = EMSESP::sensor_reads();
-        output["sensorfails"] = EMSESP::sensor_fails();
+    if (EMSESP::dallas_enabled() || EMSESP::analog_enabled()) {
+        output["sensorreads"] = EMSESP::dallassensor_.reads() + EMSESP::analogsensor_.reads();
+        output["sensorfails"] = EMSESP::dallassensor_.fails() + EMSESP::analogsensor_.fails();
     }
 
 #ifndef EMSESP_STANDALONE
     output["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes
 #endif
-
-    if (analog_enabled_) {
-        output["adc"]            = analog_;
-        output[analogdata_.name] = analogdata_.value;
-        output["count"]          = io_counter_;
-        output["io17"]           = digitalRead(17);
-        output["io19"]           = digitalRead(19);
-        output["io21"]           = digitalRead(21);
-        output["io22"]           = digitalRead(22);
-        output["io26"]           = digitalRead(26);
-        output["io32"]           = digitalRead(32);
-        output["io33"]           = digitalRead(33);
-    }
 
 #ifndef EMSESP_STANDALONE
     if (!ethernet_connected_) {
@@ -637,90 +588,6 @@ void System::send_heartbeat() {
     if (heartbeat_json(json)) {
         Mqtt::publish(F_(heartbeat), doc.as<JsonObject>()); // send to MQTT with retain off. This will add to MQTT queue.
     }
-}
-
-void System::io_counter() {
-    static uint32_t pinchange = 0;
-    static uint8_t  pin_old   = 1;
-    static uint8_t  pin       = 1;
-    if (pin != digitalRead(27)) {
-        pinchange = uuid::get_uptime();
-        pin       = digitalRead(27);
-    }
-    if (uuid::get_uptime() - pinchange >= 15) { // debounce
-        if (pin_old != pin) {                   // remember new state
-            pin_old = pin;
-            if (!pin) { // count on active (low) signal
-                io_counter_++;
-                char payload[8];
-                Mqtt::publish(F("system/counter"), Helpers::render_value(payload, io_counter_, 0));
-            }
-        }
-    }
-}
-
-// measure and moving average adc
-void System::measure_analog() {
-#ifndef EMSESP_STANDALONE
-    static uint32_t measure_last_ = 0;
-
-    if (!measure_last_ || (uint32_t)(uuid::get_uptime() - measure_last_) >= SYSTEM_MEASURE_ANALOG_INTERVAL) {
-        measure_last_ = uuid::get_uptime();
-#if defined(EMSESP_STANDALONE)
-        uint16_t a = 0;
-#else
-        uint16_t a = analogReadMilliVolts(ADC1_CHANNEL_0_GPIO_NUM);
-#endif
-        static uint32_t sum_       = 0;
-        static uint16_t analog_old = 0xFFF0;
-
-        if (!analog_) { // init first time
-            analog_ = a;
-            sum_    = a * 512;
-        } else { // simple moving average filter
-            sum_    = (sum_ * 511) / 512 + a;
-            analog_ = sum_ / 512;
-        }
-        analogdata_.value = (analog_ - analogdata_.offset) * analogdata_.factor;
-        // publish on change with 1 digit hysteresis and maximal every 10 sec
-        static uint8_t delay_publish = 0;
-        if ((++delay_publish > 9) && (analog_ > analog_old + 1 || analog_ + 1 < analog_old) && (Mqtt::publish_single())) {
-            analog_old    = analog_;
-            delay_publish = 0;
-            char payload[8];
-            Mqtt::publish(F("system/adc"), Helpers::render_value(payload, analog_, 0));
-            char topic[128] = {"system/"};
-            strncat(topic, analogdata_.name, sizeof(topic));
-            Mqtt::publish(topic, Helpers::render_value(payload, analogdata_.value, 2));
-        }
-        // prevent counter roll over
-        if (delay_publish == 0xFF) {
-            delay_publish--;
-        }
-    }
-#endif
-}
-
-// TODO move to customizations service
-bool System::analogupdate(const char * name, const uint16_t offset, const float factor, const char * uom, uint8_t id) {
-    EMSESP::webSettingsService.update(
-        [&](WebSettings & settings) {
-            settings.analog_id     = id;
-            settings.analog_name   = name;
-            settings.analog_offset = offset;
-            settings.analog_factor = factor;
-            settings.analog_uom    = uom;
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
-
-    strlcpy(analogdata_.name, name, sizeof(analogdata_.name));
-    analogdata_.offset = offset;
-    analogdata_.factor = factor;
-    strlcpy(analogdata_.uom, uom, sizeof(analogdata_.uom));
-    analogdata_.id = id;
-
-    return true;
 }
 
 // sets rate of led flash
@@ -824,7 +691,6 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, F("sends a telegram"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, F("refreshes all EMS values"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, F("restarts EMS-ESP"), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(counter), System::command_counter, F("set counter"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, F("watch incoming telegrams"));
     // Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, F("set syslog level"), CommandFlag::ADMIN_ONLY);
 
@@ -1115,7 +981,6 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
     return true;
 }
 
-
 // http://ems-esp/api/system/customizations
 bool System::command_customizations(const char * value, const int8_t id, JsonObject & output) {
     output["label"] = "customizations";
@@ -1170,8 +1035,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     if (EMSESP::dallas_enabled()) {
         node["Temperature sensors"] = EMSESP::dallassensor_.no_sensors();
     }
-    if (EMSESP::system_.analog_enabled()) {
-        node["Analog sensors"] = 0; // TODO fix analog count
+
+    if (EMSESP::analog_enabled()) {
+        node["Analog sensors"] = EMSESP::analogsensor_.no_sensors();
     }
 
 #ifndef EMSESP_STANDALONE
@@ -1235,15 +1101,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         }
         node["Temperature sensors"] = EMSESP::dallassensor_.no_sensors();
         if (EMSESP::dallas_enabled()) {
-            node["Temperature sensor reads"] = EMSESP::sensor_reads();
-            node["Temperature sensor fails"] = EMSESP::sensor_fails();
+            node["Temperature sensor reads"] = EMSESP::dallassensor_.reads();
+            node["Temperature sensor fails"] = EMSESP::dallassensor_.fails();
         }
         node["API calls"] = WebAPIService::api_count();
         node["API fails"] = WebAPIService::api_fails();
-
-        if (EMSESP::system_.analog_enabled()) {
-            node["analog"] = EMSESP::system_.analog();
-        }
 
 #ifndef EMSESP_STANDALONE
         if (EMSESP::system_.syslog_enabled_) {

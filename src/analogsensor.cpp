@@ -1,0 +1,386 @@
+/*
+ * EMS-ESP - https://github.com/emsesp/EMS-ESP
+ * Copyright 2020  Paul Derbyshire
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+#include "analogsensor.h"
+#include "emsesp.h"
+
+namespace emsesp {
+
+uuid::log::Logger AnalogSensor::logger_{F_(analogsensor), uuid::log::Facility::DAEMON};
+
+void AnalogSensor::start() {
+    reload();
+
+#ifndef EMSESP_STANDALONE
+    if (analog_enabled_) {
+        analogSetAttenuation(ADC_2_5db);
+    }
+#endif
+
+    // Add API calls
+    Command::add(
+        EMSdevice::DeviceType::ANALOGSENSOR,
+        F_(info),
+        [&](const char * value, const int8_t id, JsonObject & output) { return command_info(value, id, output); },
+        F_(info_cmd));
+}
+
+// load settings
+void AnalogSensor::reload() {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) { analog_enabled_ = settings.analog_enabled; });
+
+    // load the list of analog sensors from the customization service
+    // and store them locally and then activate them
+    EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
+        auto sensors = settings.analogCustomizations;
+        sensors_.clear(); // start with an empty list
+        if (sensors.size() != 0) {
+            for (auto & sensor : sensors) {
+#if defined(EMSESP_DEBUG)
+                LOG_DEBUG("Loading customization for analog sensor %d", sensor.id);
+#endif
+                sensors_.emplace_back(sensor.id, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type);
+            }
+        }
+        return true;
+    });
+
+    // init each sensor
+    for (auto & sensor : sensors_) {
+        sensor.ha_registered = false; // force HA configs to be re-created
+        if (sensor.type() == AnalogType::ADC) {
+// sensor.id is the GPIO
+#ifndef EMSESP_STANDALONE
+            analogSetPinAttenuation(sensor.id(), ADC_2_5db); // 1500mV
+// setting attentuator to 0 = 1100, 1500, 2200, 3900 mV
+// analogSetAttenuation(sensor.id(), analog_enabled_ - 1);
+#endif
+        } else if (sensor.type() == AnalogType::IOCOUNTER) {
+            sensor.iocounter_ = 0; // reset count
+            sensor.set_uom(0);     // no uom, just for safe measures
+        }
+    }
+}
+
+// measure and moving average adc
+void AnalogSensor::measure_analog() {
+    static uint32_t measure_last_ = 0;
+
+    if (!measure_last_ || (uint32_t)(uuid::get_uptime() - measure_last_) >= MEASURE_ANALOG_INTERVAL) {
+        measure_last_ = uuid::get_uptime();
+
+        // go through the list of sensors
+        for (auto & sensor : sensors_) {
+            // determine the type
+            // either we're measuring ADC or just looking at pin changes
+            if (sensor.type() == AnalogType::ADC) {
+#if defined(EMSESP_STANDALONE)
+                uint16_t a = 0;
+#else
+                uint16_t a = analogReadMilliVolts(sensor.id()); // e.g. ADC1_CHANNEL_0_GPIO_NUM
+#endif
+                if (!sensor.analog_) { // init first time
+                    sensor.analog_ = a;
+                    sensor.sum_    = a * 512;
+                } else { // simple moving average filter
+                    sensor.sum_    = (sensor.sum_ * 511) / 512 + a;
+                    sensor.analog_ = sensor.sum_ / 512;
+                }
+
+                auto old_value = sensor.value();
+                sensor.set_value((sensor.analog_ - sensor.offset()) * sensor.factor());
+                if (old_value != sensor.value()) {
+                    sensorreads_++; // increment counter
+                    changed_ = true;
+                }
+
+            } else {
+#if defined(EMSESP_STANDALONE)
+                uint16_t a = 0;
+#else
+                uint16_t a = digitalRead(sensor.id());
+#endif
+                auto old_value = sensor.value();
+                // count on active (low) signal, and on changed state
+                // TODO add back the debounce uuid::get_uptime() diff > 15
+                if (!a && a != old_value) {
+                    sensor.iocounter_++;
+                    sensorreads_++; // increment counter
+                    changed_ = true;
+                }
+            }
+        }
+    }
+}
+
+void AnalogSensor::loop() {
+    if (!analog_enabled_) {
+        return;
+    }
+
+    measure_analog(); // take the measurements
+}
+
+// update analog information name and offset
+bool AnalogSensor::update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, int8_t type) {
+    // find the sensor
+    for (auto & sensor : sensors_) {
+        if (sensor.id() == id) {
+            // found a match, update the sensor object
+
+            // if HA is enabled then delete the old record
+            if (Mqtt::ha_enabled()) {
+                remove_ha_topic(id);
+            }
+
+            sensor.set_name(name);
+            sensor.set_offset(offset);
+            sensor.set_factor(factor);
+            sensor.set_uom(uom);
+            sensor.set_type(type); // if -1 then it's marked for deletion
+
+            // store the new name and offset in our configuration
+            EMSESP::webCustomizationService.update(
+                [&](WebCustomization & settings) {
+                    // if it's marked for remove, just erase it
+                    if (type == -1) {
+                        LOG_DEBUG(F("Removing existing analog sensor ID %d"), id);
+                        // TODO finish code to add new sensor
+                    } else {
+                        // add or update existing
+                        bool found = false;
+                        for (auto & AnalogCustomization : settings.analogCustomizations) {
+                            if (AnalogCustomization.id == id) {
+                                // update it
+                                LOG_DEBUG(F("Customizing existing analog sensor ID %d"), id);
+                                AnalogCustomization.name   = name;
+                                AnalogCustomization.offset = offset;
+                                AnalogCustomization.factor = factor;
+                                AnalogCustomization.uom    = uom;
+                                AnalogCustomization.type   = type;
+                            }
+                            found = true;
+                            break; // stop for loop
+                        }
+
+                        // it's a new entry
+                        if (!found) {
+                            LOG_DEBUG(F("Adding new customization for analog sensor ID %d"), id);
+                            AnalogCustomization newSensor = AnalogCustomization();
+                            newSensor.id                  = id;
+                            newSensor.name                = name;
+                            newSensor.offset              = offset;
+                            newSensor.factor              = factor;
+                            newSensor.uom                 = uom;
+                            newSensor.type                = type;
+                            settings.analogCustomizations.push_back(newSensor);
+                        }
+                        sensor.ha_registered = false; // it's changed so we may need to recreate the HA config
+                    }
+                    return StateUpdateResult::CHANGED;
+                },
+                "local");
+            return true;
+        }
+    }
+
+    return true; // not found, nothing updated
+}
+
+// check to see if values have been updated
+bool AnalogSensor::updated_values() {
+    if (changed_) {
+        changed_ = false;
+        return true;
+    }
+    return false;
+}
+
+// publish a single sensor to MQTT
+void AnalogSensor::publish_sensor(Sensor sensor) {
+    if (Mqtt::publish_single()) {
+        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        snprintf(topic, sizeof(topic), "%s/%s", read_flash_string(F_(analogsensor)).c_str(), sensor.name().c_str());
+        char payload[10];
+        Mqtt::publish(topic, Helpers::render_value(payload, sensor.value(), 10));
+    }
+}
+
+// send empty config topic to remove the entry from HA
+void AnalogSensor::remove_ha_topic(const uint8_t id) {
+    if (!Mqtt::ha_enabled()) {
+        return;
+    }
+#ifdef EMSESP_DEBUG
+    LOG_DEBUG(F("Removing HA config for analog sensor ID %d"), id);
+#endif
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%d/config", Mqtt::base().c_str(), id);
+    Mqtt::publish_ha(topic);
+}
+
+// send all sensor values as a JSON package to MQTT
+void AnalogSensor::publish_values(const bool force) {
+    uint8_t num_sensors = sensors_.size();
+
+    if (num_sensors == 0) {
+        return;
+    }
+
+    if (force && Mqtt::publish_single()) {
+        for (const auto & sensor : sensors_) {
+            publish_sensor(sensor);
+        }
+        // return;
+    }
+
+    DynamicJsonDocument doc(120 * num_sensors);
+
+    for (auto & sensor : sensors_) {
+        if (sensor.type() != AnalogType::NOTUSED) {
+            if (Mqtt::is_nested() || Mqtt::ha_enabled()) {
+                char       s[10];
+                JsonObject dataSensor = doc.createNestedObject(Helpers::smallitoa(s, sensor.id()));
+                if (sensor.type() == AnalogType::ADC) {
+                    dataSensor["value"] = (float)sensor.value();
+                } else {
+                    dataSensor["count"] = sensor.iocounter_;
+                }
+            } else {
+                if (sensor.type() == AnalogType::ADC) {
+                    doc[sensor.name()] = (float)sensor.value();
+                } else {
+                    doc[sensor.name()] = sensor.iocounter_;
+                }
+            }
+
+            // create the HA MQTT config
+            if (Mqtt::ha_enabled()) {
+                if (!sensor.ha_registered || force) {
+                    LOG_DEBUG(F("Recreating HA config for analog sensor ID %d"), sensor.id());
+
+                    StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
+
+                    char stat_t[50];
+                    snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::base().c_str());
+                    config["stat_t"] = stat_t;
+
+                    char str[50];
+                    snprintf(str, sizeof(str), "{{value_json['%d'].temp}}", sensor.id());
+                    config["val_tpl"] = str;
+
+                    snprintf(str, sizeof(str), "Analog Sensor %s", sensor.name().c_str());
+                    config["name"] = str;
+
+                    snprintf(str, sizeof(str), "analogsensor_%d", sensor.id());
+                    config["uniq_id"] = str;
+
+                    JsonObject dev = config.createNestedObject("dev");
+                    JsonArray  ids = dev.createNestedArray("ids");
+                    ids.add("ems-esp");
+
+                    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+                    snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%d/config", Mqtt::base().c_str(), sensor.id());
+
+                    Mqtt::publish_ha(topic, config.as<JsonObject>());
+
+                    sensor.ha_registered = true;
+                }
+            }
+        }
+    }
+
+    Mqtt::publish(F("analogsensor_data"), doc.as<JsonObject>());
+}
+
+// this creates the sensor, initializing everything
+AnalogSensor::Sensor::Sensor(const uint8_t id, const std::string & name, const uint16_t offset, const float factor, const uint8_t uom, const int8_t type)
+    : id_(id)
+    , name_(name)
+    , offset_(offset)
+    , factor_(factor)
+    , uom_(uom)
+    , type_(type) {
+    value_ = 0; // init value to 0
+}
+
+// find the name from the customization service
+// if empty, return the ID as a string
+std::string AnalogSensor::Sensor::name() const {
+    if (name_.empty()) {
+        char name[50];
+        snprintf(name, sizeof(name), "analogsensor_%d", id_);
+        return name;
+    }
+    return name_;
+}
+
+// called from emsesp.cpp, similar to the emsdevice->get_value_info
+// searches by name
+bool AnalogSensor::get_value_info(JsonObject & output, const char * cmd, const int8_t id) {
+    for (const auto & sensor : sensors_) {
+        if (strcmp(cmd, sensor.name().c_str()) == 0) {
+            output["id"]     = sensor.id();
+            output["name"]   = sensor.name();
+            output["type"]   = sensor.type();
+            output["uom"]    = sensor.uom();
+            output["offset"] = sensor.offset();
+            output["factor"] = sensor.factor();
+            output["value"]  = sensor.value();
+            return true;
+        }
+    }
+    return false;
+}
+
+// creates JSON doc from values
+// returns false if there are no sensors
+bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject & output) {
+    if (sensors_.size() == 0) {
+        return false;
+    }
+
+    for (const auto & sensor : sensors_) {
+        if (id == -1) { // show number and id
+            JsonObject dataSensor = output.createNestedObject(sensor.name());
+            dataSensor["id"]      = sensor.id();
+            dataSensor["name"]    = sensor.name();
+            dataSensor["type"]    = sensor.type();
+            dataSensor["uom"]     = sensor.uom();
+            dataSensor["offset"]  = sensor.offset();
+            dataSensor["factor"]  = sensor.factor();
+            dataSensor["value"]   = sensor.value();
+        } else {
+            output[sensor.name()] = sensor.value();
+        }
+    }
+
+    return (output.size() > 0);
+}
+
+// hard coded tests
+#ifdef EMSESP_DEBUG
+void AnalogSensor::test() {
+    sensors_.emplace_back(36, "test1", 0, 1, 0, AnalogType::ADC);
+    sensors_.back().set_value(12);
+    // how to add?
+}
+#endif
+
+} // namespace emsesp

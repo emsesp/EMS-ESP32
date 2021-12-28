@@ -29,7 +29,6 @@
 #define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
 #define EXCLUDE_ENTITIES_PATH "/rest/excludeEntities"
 
-
 namespace emsesp {
 
 // Customization for dallas sensor
@@ -38,6 +37,16 @@ class SensorCustomization {
     std::string id_str;
     std::string name;
     uint16_t    offset;
+};
+
+class AnalogCustomization {
+  public:
+    uint8_t     id;
+    std::string name;
+    uint16_t    offset;
+    float       factor;
+    uint8_t     uom;
+    int8_t      type; // -1 for deletion
 };
 
 // we use product_id and device_id to make the device unique
@@ -51,6 +60,7 @@ class EntityCustomization {
 class WebCustomization {
   public:
     std::list<SensorCustomization> sensorCustomizations; // for sensor names and offsets
+    std::list<AnalogCustomization> analogCustomizations; // for analog sensors
     std::list<EntityCustomization> entityCustomizations; // for a list of entities that should be excluded from the device list
 
     static void              read(WebCustomization & settings, JsonObject & root);

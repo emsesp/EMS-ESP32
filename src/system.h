@@ -28,7 +28,6 @@
 #include "telegram.h"
 
 #ifndef EMSESP_STANDALONE
-#include "driver/adc.h"
 #include <esp_wifi.h>
 #include <esp_bt.h>
 #include <ETH.h>
@@ -63,7 +62,6 @@ class System {
 
     static bool command_info(const char * value, const int8_t id, JsonObject & output);
     static bool command_settings(const char * value, const int8_t id, JsonObject & output);
-    static bool command_counter(const char * value, const int8_t id);
     static bool command_customizations(const char * value, const int8_t id, JsonObject & output);
     static bool command_commands(const char * value, const int8_t id, JsonObject & output);
 
@@ -82,7 +80,6 @@ class System {
     void send_heartbeat();
 
     void led_init(bool refresh);
-    void adc_init(bool refresh);
     void network_init(bool refresh);
     void button_init(bool refresh);
     void commands_init();
@@ -106,16 +103,8 @@ class System {
         return analog_enabled_;
     }
 
-    uint16_t analog() {
-        return analog_;
-    }
-
     std::string board_profile() {
         return std::string(board_profile_.c_str());
-    }
-
-    uint32_t get_io_counter() {
-        return io_counter_;
     }
 
     std::string hostname() {
@@ -150,32 +139,6 @@ class System {
         return fahrenheit_;
     }
 
-    uint8_t analog_id() {
-        return analogdata_.id;
-    }
-
-    char * analog_name() {
-        return analogdata_.name;
-    }
-
-    float analog_value() {
-        return analogdata_.value;
-    }
-
-    float analog_factor() {
-        return analogdata_.factor;
-    }
-
-    uint16_t analog_offset() {
-        return analogdata_.offset;
-    }
-
-    char * analog_uom() {
-        return analogdata_.uom;
-    }
-
-    bool analogupdate(const char * name, const uint16_t offset, const float factor, const char * uom, uint8_t id);
-
     void show_system(uuid::console::Shell & shell);
     void wifi_reconnect();
     void show_users(uuid::console::Shell & shell);
@@ -196,12 +159,11 @@ class System {
     static constexpr uint32_t BUTTON_LongPressDelay  = 750;  // Hold period for a long press event (in ms)
     static constexpr uint32_t BUTTON_VLongPressDelay = 9000; // Hold period for a very long press event (in ms)
 
-    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY         = 5000;  // check every 5 seconds
-    static constexpr uint32_t LED_WARNING_BLINK              = 1000;  // pulse to show no connection, 1 sec
-    static constexpr uint32_t LED_WARNING_BLINK_FAST         = 100;   // flash quickly for boot up sequence
-    static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL      = 60000; // in milliseconds, how often the MQTT heartbeat is sent (1 min)
-    static constexpr uint32_t SYSTEM_MEASURE_ANALOG_INTERVAL = 500;
-    static constexpr uint8_t  LED_ON                         = HIGH; // LED
+    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY    = 5000;  // check every 5 seconds
+    static constexpr uint32_t LED_WARNING_BLINK         = 1000;  // pulse to show no connection, 1 sec
+    static constexpr uint32_t LED_WARNING_BLINK_FAST    = 100;   // flash quickly for boot up sequence
+    static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL = 60000; // in milliseconds, how often the MQTT heartbeat is sent (1 min)
+    static constexpr uint8_t  LED_ON                    = HIGH;  // LED
 
 #ifndef EMSESP_STANDALONE
     static uuid::syslog::SyslogService syslog_;
@@ -210,8 +172,6 @@ class System {
     void   led_monitor();
     void   set_led_speed(uint32_t speed);
     void   system_check();
-    void   measure_analog();
-    void   io_counter();
     int8_t wifi_quality(int8_t dBm);
 
     bool     system_healthy_     = false;
@@ -220,8 +180,6 @@ class System {
     uint32_t last_system_check_  = 0;
     bool     upload_status_      = false; // true if we're in the middle of a OTA firmware upload
     bool     ethernet_connected_ = false;
-    uint16_t analog_             = 0;
-    uint32_t io_counter_         = 0;
 
     // settings, copies from WebSettings class in WebSettingsService.h
     std::string hostname_ = FACTORY_WIFI_HOSTNAME;
@@ -245,15 +203,6 @@ class System {
     uint16_t syslog_port_;
 
     bool fahrenheit_;
-
-    struct {
-        uint8_t  id;
-        char     name[20];
-        uint16_t offset;
-        float    factor;
-        char     uom[10];
-        float    value;
-    } analogdata_;
 };
 
 } // namespace emsesp

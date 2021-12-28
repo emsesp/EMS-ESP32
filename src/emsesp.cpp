@@ -62,6 +62,7 @@ Mqtt         EMSESP::mqtt_;         // mqtt handler
 System       EMSESP::system_;       // core system services
 Console      EMSESP::console_;      // telnet and serial console
 DallasSensor EMSESP::dallassensor_; // Dallas sensors
+AnalogSensor EMSESP::analogsensor_; // Analog sensors
 Shower       EMSESP::shower_;       // Shower logic
 
 // static/common variables
@@ -392,7 +393,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
     }
 }
 
-// show Dallas temperature sensors
+// show Dallas temperature sensors and Analog sensors
 void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     if (!have_sensors()) {
         return;
@@ -404,23 +405,37 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     char    s2[7];
     uint8_t fahrenheit = EMSESP::system_.fahrenheit() ? 2 : 0;
 
-    for (const auto & device : dallassensor_.sensors()) {
-        if (Helpers::hasValue(device.temperature_c)) {
+    for (const auto & sensor : dallassensor_.sensors()) {
+        if (Helpers::hasValue(sensor.temperature_c)) {
             shell.printfln(F("  Sensor %d, ID: %s, Name: %s, Temperature: %s °%c (offset %s)"),
                            i++,
-                           device.id_str().c_str(),
-                           device.name().c_str(),
-                           Helpers::render_value(s, device.temperature_c, 10, fahrenheit),
+                           sensor.id_str().c_str(),
+                           sensor.name().c_str(),
+                           Helpers::render_value(s, sensor.temperature_c, 10, fahrenheit),
                            (fahrenheit == 0) ? 'C' : 'F',
-                           Helpers::render_value(s2, device.offset(), 10, fahrenheit));
+                           Helpers::render_value(s2, sensor.offset(), 10, fahrenheit));
         } else {
             shell.printfln(F("  Sensor %d, ID: %s, Name: %s, (offset %s)"),
                            i++,
-                           device.id_str().c_str(),
-                           device.name().c_str(),
-                           Helpers::render_value(s2, device.offset(), 10, fahrenheit));
+                           sensor.id_str().c_str(),
+                           sensor.name().c_str(),
+                           Helpers::render_value(s2, sensor.offset(), 10, fahrenheit));
         }
     }
+    shell.println();
+
+    shell.printfln(F("Analog sensors:"));
+    char s3[10];
+    for (const auto & sensor : analogsensor_.sensors()) {
+        shell.printfln(F("  Sensor ID %d, Name: %s, Value: %d, Factor: %s, Offset: %d, UOM: %s"),
+                       sensor.id(),
+                       sensor.name().c_str(),
+                       sensor.value(),
+                       Helpers::render_value(s3, sensor.factor(), 2),
+                       sensor.offset(),
+                       EMSdevice::uom_to_string(sensor.uom()).c_str());
+    }
+
     shell.println();
 }
 
@@ -492,6 +507,7 @@ void EMSESP::reset_mqtt_ha() {
         emsdevice->ha_config_clear();
     }
     dallassensor_.reload();
+    analogsensor_.reload();
 }
 
 // create json doc for the devices values and add to MQTT publish queue
@@ -582,12 +598,16 @@ void EMSESP::publish_other_values() {
 }
 
 void EMSESP::publish_sensor_values(const bool time, const bool force) {
-    if (!dallas_enabled()) {
+    if (!dallas_enabled() || !analog_enabled()) {
         return;
     }
 
     if (dallassensor_.updated_values() || time || force) {
         dallassensor_.publish_values(force);
+    }
+
+    if (analogsensor_.updated_values() || time || force) {
+        analogsensor_.publish_values(force);
     }
 }
 
@@ -625,6 +645,12 @@ bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const in
     // specific for the dallassensor
     if (devicetype == DeviceType::DALLASSENSOR) {
         EMSESP::dallassensor_.get_value_info(root, cmd, id);
+        return true;
+    }
+
+    // analog sensor
+    if (devicetype == DeviceType::ANALOGSENSOR) {
+        EMSESP::analogsensor_.get_value_info(root, cmd, id);
         return true;
     }
 
@@ -1333,6 +1359,7 @@ void EMSESP::start() {
     system_.start(heap_start); // starts commands, led, adc, button, network, syslog & uart
     shower_.start();           // initialize shower timer and shower alert
     dallassensor_.start();     // Dallas external sensors
+    analogsensor_.start();     // Analog external sensors
 
     // start the web server
     webServer.begin();
@@ -1363,6 +1390,7 @@ void EMSESP::loop() {
         rxservice_.loop();    // process any incoming Rx telegrams
         shower_.loop();       // check for shower on/off
         dallassensor_.loop(); // read dallas sensor temperatures
+        analogsensor_.loop(); // read analog sensor values
         publish_all_loop();   // with HA messages in parts to avoid flooding the mqtt queue
         mqtt_.loop();         // sends out anything in the MQTT queue
 

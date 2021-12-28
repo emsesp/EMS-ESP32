@@ -53,6 +53,7 @@
 #include "mqtt.h"
 #include "system.h"
 #include "dallassensor.h"
+#include "analogsensor.h"
 #include "console.h"
 #include "shower.h"
 #include "roomcontrol.h"
@@ -144,19 +145,23 @@ class EMSESP {
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
     static bool have_sensors() {
-        return (dallassensor_.have_sensors());
+        return (dallassensor_.have_sensors() || analogsensor_.have_sensors());
     }
 
     static uint32_t sensor_reads() {
-        return dallassensor_.reads();
+        return dallassensor_.reads() + analogsensor_.reads();
     }
 
     static uint32_t sensor_fails() {
-        return dallassensor_.fails();
+        return dallassensor_.fails() + analogsensor_.fails();
     }
 
     static bool dallas_enabled() {
         return (dallassensor_.dallas_enabled());
+    }
+
+    static bool analog_enabled() {
+        return (analogsensor_.analog_enabled());
     }
 
     static uint8_t bool_format() {
@@ -234,6 +239,7 @@ class EMSESP {
     static Mqtt         mqtt_;
     static System       system_;
     static DallasSensor dallassensor_;
+    static AnalogSensor analogsensor_;
     static Console      console_;
     static Shower       shower_;
     static RxService    rxservice_;

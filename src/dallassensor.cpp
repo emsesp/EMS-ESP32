@@ -29,7 +29,7 @@
 
 namespace emsesp {
 
-uuid::log::Logger DallasSensor::logger_{F_(sensor), uuid::log::Facility::DAEMON};
+uuid::log::Logger DallasSensor::logger_{F_(dallassensor), uuid::log::Facility::DAEMON};
 
 // start the 1-wire
 void DallasSensor::start() {
@@ -538,6 +538,9 @@ bool DallasSensor::Sensor::apply_customization() {
         auto sensors = settings.sensorCustomizations;
         if (sensors.size() != 0) {
             for (auto & sensor : sensors) {
+#if defined(EMSESP_DEBUG)
+                LOG_DEBUG("Loading customization for dallas sensor %s", sensor.id_str.c_str());
+#endif
                 if (id_str_ == sensor.id_str) {
                     set_name(sensor.name);
                     set_offset(sensor.offset);

@@ -30,6 +30,7 @@ import { useSnackbar } from 'notistack';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import EditIcon from '@mui/icons-material/Edit';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 
 import DeviceIcon from './DeviceIcon';
 
@@ -51,6 +52,7 @@ import {
   DeviceValue,
   DeviceValueUOM,
   DeviceValueUOM_s,
+  AnalogTypes,
   Sensor,
   Analog
 } from './types';
@@ -110,7 +112,7 @@ const DashboardData: FC = () => {
   };
 
   useEffect(() => {
-    const timer = setInterval(() => refreshData(), 30000);
+    const timer = setInterval(() => refreshData(), 60000);
     return () => {
       clearInterval(timer);
     };
@@ -259,6 +261,10 @@ const DashboardData: FC = () => {
         </Dialog>
       );
     }
+  };
+
+  const addAnalogSensor = () => {
+    setAnalog({ i: 0, n: '', u: 0, v: 0, o: 0, t: 0, f: 0 });
   };
 
   const sendSensor = async () => {
@@ -410,7 +416,9 @@ const DashboardData: FC = () => {
                       }
                       placement="top"
                     >
-                      <InfoOutlinedIcon color="info" fontSize="small" sx={{ verticalAlign: 'middle' }} />
+                      <IconButton size="small">
+                        <InfoOutlinedIcon color="info" fontSize="small" sx={{ verticalAlign: 'middle' }} />
+                      </IconButton>
                     </StyledTooltip>
                   </TableCell>
                 </TableRow>
@@ -423,7 +431,11 @@ const DashboardData: FC = () => {
                   <TableCell>Sensors</TableCell>
                   <TableCell>Temperature and Analog Sensors</TableCell>
                   <TableCell align="center">{data.dallassensor_count + data.analogsensor_count}</TableCell>
-                  <TableCell />
+                  <TableCell align="right">
+                    <IconButton size="small" aria-label="add" onClick={() => addAnalogSensor()}>
+                      <AddCircleOutlineOutlinedIcon fontSize="small" sx={{ verticalAlign: 'middle' }} />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -486,7 +498,7 @@ const DashboardData: FC = () => {
                 <StyledTableCell padding="checkbox">
                   {dv.c && me.admin && (
                     <StyledTooltip title="change value" placement="left-end">
-                      <IconButton edge="start" size="small" aria-label="Edit">
+                      <IconButton size="small" aria-label="Edit">
                         <EditIcon color="primary" fontSize="small" />
                       </IconButton>
                     </StyledTooltip>
@@ -556,9 +568,18 @@ const DashboardData: FC = () => {
         Analog Sensors
       </Typography>
       <Table size="small">
+        <TableHead>
+          <TableRow>
+            <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
+            <StyledTableCell>GPIO</StyledTableCell>
+            <StyledTableCell>Name</StyledTableCell>
+            <StyledTableCell>Type</StyledTableCell>
+            <StyledTableCell align="right">Value</StyledTableCell>
+          </TableRow>
+        </TableHead>
         <TableBody>
           {sensorData?.analogs.map((analog_data) => (
-            <StyledTableRow key={analog_data.n} onClick={() => updateAnalog(analog_data)}>
+            <StyledTableRow key={analog_data.i} onClick={() => updateAnalog(analog_data)}>
               <StyledTableCell padding="checkbox">
                 {me.admin && (
                   <StyledTooltip title="edit" placement="left-end">
@@ -569,17 +590,45 @@ const DashboardData: FC = () => {
                 )}
               </StyledTableCell>
               <StyledTableCell component="th" scope="row">
-                {analog_data.n}
+                {analog_data.i}
               </StyledTableCell>
-              <StyledTableCell align="right">
-                {Intl.NumberFormat().format(analog_data.v)}&nbsp;{analog_data.u}{' '}
-              </StyledTableCell>
+              <StyledTableCell>{analog_data.n}</StyledTableCell>
+              <StyledTableCell>{AnalogTypes[analog_data.t]}</StyledTableCell>
+              <StyledTableCell align="right">{formatValue(analog_data.v, analog_data.u)}</StyledTableCell>
             </StyledTableRow>
           ))}
         </TableBody>
       </Table>
     </>
   );
+
+  const sendRemoveAnalog = async () => {
+    if (analog) {
+      try {
+        const response = await EMSESP.writeAnalog({
+          id: analog.i,
+          name: analog.n,
+          offset: analog.o,
+          factor: analog.f,
+          uom: analog.u,
+          type: -1
+        });
+
+        if (response.status === 204) {
+          enqueueSnackbar('Analog deletion failed', { variant: 'error' });
+        } else if (response.status === 403) {
+          enqueueSnackbar('Access denied', { variant: 'error' });
+        } else {
+          enqueueSnackbar('Analog sensor removed', { variant: 'success' });
+        }
+      } catch (error: any) {
+        enqueueSnackbar(extractErrorMessage(error, 'Problem updating analog sensor'), { variant: 'error' });
+      } finally {
+        setAnalog(undefined);
+        fetchSensorData();
+      }
+    }
+  };
 
   const sendAnalog = async () => {
     if (analog) {
@@ -589,8 +638,10 @@ const DashboardData: FC = () => {
           name: analog.n,
           offset: analog.o,
           factor: analog.f,
-          uom: analog.u
+          uom: analog.u,
+          type: analog.t
         });
+
         if (response.status === 204) {
           enqueueSnackbar('Analog calibration failed', { variant: 'error' });
         } else if (response.status === 403) {
@@ -598,7 +649,6 @@ const DashboardData: FC = () => {
         } else {
           enqueueSnackbar('Analog calibration updated', { variant: 'success' });
         }
-        // setAnalog(undefined);
       } catch (error: any) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem updating analog'), { variant: 'error' });
       } finally {
@@ -614,61 +664,86 @@ const DashboardData: FC = () => {
         <Dialog open={analog !== undefined} onClose={() => setAnalog(undefined)}>
           <DialogTitle>Edit Analog Sensor</DialogTitle>
           <DialogContent dividers>
-            <Grid container spacing={1}>
+            <Grid container spacing={2}>
+              <Grid item>
+                <ValidatedTextField
+                  name="i"
+                  label="GPIO"
+                  value={numberValue(analog.i)}
+                  type="number"
+                  variant="outlined"
+                  autoFocus
+                  // sx={{ width: '20ch' }}
+                  onChange={updateValue(setAnalog)}
+                />
+              </Grid>
               <Grid item>
                 <ValidatedTextField
                   name="n"
                   label="Name"
                   value={analog.n}
-                  autoFocus
-                  sx={{ width: '30ch' }}
-                  variant="outlined"
-                  onChange={updateValue(setAnalog)}
-                />
-              </Grid>
-              <Grid item>
-                <ValidatedTextField
-                  name="u"
-                  label="Unit"
-                  value={analog.u}
-                  sx={{ width: '10ch' }}
-                  variant="outlined"
-                  onChange={updateValue(setAnalog)}
-                />
-              </Grid>
-            </Grid>
-            <p></p>
-            <Grid container spacing={1}>
-              <Grid item>
-                <ValidatedTextField
-                  name="o"
-                  label="Offset"
-                  value={numberValue(analog.o)}
                   sx={{ width: '20ch' }}
-                  type="number"
                   variant="outlined"
                   onChange={updateValue(setAnalog)}
-                  inputProps={{ min: '0', max: '3300', step: '1' }}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">mV</InputAdornment>
-                  }}
                 />
               </Grid>
               <Grid item>
-                <ValidatedTextField
-                  name="f"
-                  label="Factor"
-                  value={numberValue(analog.f)}
-                  sx={{ width: '20ch' }}
-                  type="number"
-                  variant="outlined"
-                  onChange={updateValue(setAnalog)}
-                  inputProps={{ min: '-100', max: '100', step: '0.1' }}
-                />
+                <ValidatedTextField name="t" label="Type" value={analog.t} select onChange={updateValue(setAnalog)}>
+                  {AnalogTypes.map((val, i) => (
+                    <MenuItem key={i} value={i}>
+                      {val}
+                    </MenuItem>
+                  ))}
+                </ValidatedTextField>
               </Grid>
+              {analog.t === 2 && (
+                <>
+                  <Grid item>
+                    <ValidatedTextField name="u" label="UoM" value={analog.u} select onChange={updateValue(setAnalog)}>
+                      {DeviceValueUOM_s.map((val, i) => (
+                        <MenuItem key={i} value={i}>
+                          {val}
+                        </MenuItem>
+                      ))}
+                    </ValidatedTextField>
+                  </Grid>
+                  <Grid item>
+                    <ValidatedTextField
+                      name="o"
+                      label="Offset"
+                      value={numberValue(analog.o)}
+                      sx={{ width: '20ch' }}
+                      type="number"
+                      variant="outlined"
+                      onChange={updateValue(setAnalog)}
+                      inputProps={{ min: '0', max: '3300', step: '1' }}
+                      InputProps={{
+                        endAdornment: <InputAdornment position="end">mV</InputAdornment>
+                      }}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <ValidatedTextField
+                      name="f"
+                      label="Factor"
+                      value={numberValue(analog.f)}
+                      sx={{ width: '20ch' }}
+                      type="number"
+                      variant="outlined"
+                      onChange={updateValue(setAnalog)}
+                      inputProps={{ min: '-100', max: '100', step: '0.1' }}
+                    />
+                  </Grid>
+                </>
+              )}
             </Grid>
           </DialogContent>
           <DialogActions>
+            <Box flexGrow={1} sx={{ '& button': { mt: 0 } }}>
+              <Button variant="outlined" color="error" onClick={() => sendRemoveAnalog()}>
+                Delete
+              </Button>
+            </Box>
             <Button variant="outlined" onClick={() => setAnalog(undefined)} color="secondary">
               Cancel
             </Button>

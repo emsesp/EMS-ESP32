@@ -433,6 +433,7 @@ void EMSESPShell::add_console_commands() {
                 std::vector<std::string> devices_list;
                 devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
                 devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR));
+                devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
                 for (const auto & device_class : EMSFactory::device_handlers()) {
                     if (Command::device_has_commands(device_class.first)) {
                         devices_list.emplace_back(EMSdevice::device_type_2_device_name(device_class.first));

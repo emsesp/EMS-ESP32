@@ -101,7 +101,7 @@ MAKE_PSTR_WORD(controller)
 MAKE_PSTR_WORD(connect)
 MAKE_PSTR_WORD(heatpump)
 MAKE_PSTR_WORD(generic)
-MAKE_PSTR_WORD(sensor)
+MAKE_PSTR_WORD(analogsensor)
 MAKE_PSTR_WORD(unknown)
 MAKE_PSTR_WORD(dallassensor)
 

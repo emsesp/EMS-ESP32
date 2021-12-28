@@ -50,15 +50,27 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
     server->addHandler(&_device_entities_handler);
 }
 
-// this creates the customization file
+// this creates the customization file, saving to the FS
 void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
-    // Sensor customization
+    // Dallas Sensor customization
     JsonArray sensorsJson = root.createNestedArray("sensors");
     for (const SensorCustomization & sensor : settings.sensorCustomizations) {
         JsonObject sensorJson = sensorsJson.createNestedObject();
-        sensorJson["id_str"]  = sensor.id_str; // key, is
+        sensorJson["id_str"]  = sensor.id_str; // is
         sensorJson["name"]    = sensor.name;   // n
         sensorJson["offset"]  = sensor.offset; // o
+    }
+
+    // Analog Sensor customization
+    JsonArray analogJson = root.createNestedArray("analogs");
+    for (const AnalogCustomization & sensor : settings.analogCustomizations) {
+        JsonObject sensorJson = analogJson.createNestedObject();
+        sensorJson["id"]      = sensor.id;     // i
+        sensorJson["name"]    = sensor.name;   // n
+        sensorJson["offset"]  = sensor.offset; // o
+        sensorJson["factor"]  = sensor.factor; // f
+        sensorJson["uom"]     = sensor.uom;    // u
+        sensorJson["type"]    = sensor.type;   // t
     }
 
     // Exclude entities customization
@@ -78,7 +90,7 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
 // call on initialization and also when the page is saved via web
 // this loads the data into the internal class
 StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization & settings) {
-    // Sensor customization
+    // Dallas Sensor customization
     settings.sensorCustomizations.clear();
     if (root["sensors"].is<JsonArray>()) {
         for (const JsonObject sensorJson : root["sensors"].as<JsonArray>()) {
@@ -88,6 +100,22 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
             sensor.name                = sensorJson["name"].as<std::string>();
             sensor.offset              = sensorJson["offset"];
             settings.sensorCustomizations.push_back(sensor); // add to list
+        }
+    }
+
+    // Analog Sensor customization
+    settings.analogCustomizations.clear();
+    if (root["analogs"].is<JsonArray>()) {
+        for (const JsonObject analogJson : root["analogs"].as<JsonArray>()) {
+            // create each of the sensor, overwritting any previous settings
+            AnalogCustomization sensor = AnalogCustomization();
+            sensor.id                  = analogJson["id"];
+            sensor.name                = analogJson["name"].as<std::string>();
+            sensor.offset              = analogJson["offset"];
+            sensor.factor              = analogJson["factor"];
+            sensor.uom                 = analogJson["uom"];
+            sensor.type                = analogJson["type"];
+            settings.analogCustomizations.push_back(sensor); // add to list
         }
     }
 

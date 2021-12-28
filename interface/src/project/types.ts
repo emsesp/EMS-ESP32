@@ -79,9 +79,10 @@ export interface Analog {
   i: number;
   n: string;
   v: number;
-  u: string;
+  u: number;
   o: number;
   f: number;
+  t: number;
 }
 
 export interface WriteSensor {
@@ -187,6 +188,8 @@ export const DeviceValueUOM_s = [
   "o'clock"
 ];
 
+export const AnalogTypes = ['(disabled)', 'I/O Counter', 'ADC'];
+
 type BoardProfiles = {
   [name: string]: string;
 };
@@ -230,5 +233,6 @@ export interface WriteAnalog {
   name: string;
   factor: number;
   offset: number;
-  uom: string;
+  uom: number;
+  type: number;
 }

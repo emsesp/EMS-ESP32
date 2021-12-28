@@ -68,13 +68,6 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["weblog_level"]         = settings.weblog_level;
     root["weblog_buffer"]        = settings.weblog_buffer;
     root["weblog_compact"]       = settings.weblog_compact;
-
-    // TODO move to customization service
-    root["analog_id"]     = settings.analog_id;
-    root["analog_name"]   = settings.analog_name;
-    root["analog_offset"] = settings.analog_offset;
-    root["analog_factor"] = settings.analog_factor;
-    root["analog_uom"]    = settings.analog_uom;
 }
 
 // call on initialization and also when settings are updated via web or console
@@ -133,26 +126,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
         add_flags(ChangeFlags::SYSLOG);
     }
 #endif
-
-    // adc
-    // TODO move to customization service
-    String old_analog_name = settings.analog_name;
-    settings.analog_name   = root["analog_name"] | EMSESP_DEFAULT_ANALOG_NAME;
-    if (old_analog_name != settings.analog_name) {
-        add_flags(ChangeFlags::ADC);
-    }
-    prev                   = settings.analog_offset;
-    settings.analog_offset = root["analog_offset"] | 0;
-    check_flag(prev, settings.analog_offset, ChangeFlags::ADC);
-    prev                   = settings.analog_factor;
-    settings.analog_factor = root["analog_factor"] | 1.000;
-    check_flag(prev, settings.analog_factor, ChangeFlags::ADC);
-    String old_analog_uom = settings.analog_uom;
-    settings.analog_uom   = root["analog_uom"] | EMSESP_DEFAULT_ANALOG_UOM;
-    if (old_analog_uom != settings.analog_uom) {
-        add_flags(ChangeFlags::ADC);
-    }
-    settings.analog_id = root["analog_id"] | 1; // TODO sequence this analog id
 
     // button
     prev                  = settings.pbutton_gpio;
@@ -253,7 +226,7 @@ void WebSettingsService::onUpdate() {
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::ADC)) {
-        EMSESP::system_.adc_init(true); // reload settings
+        EMSESP::analogsensor_.start();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::BUTTON)) {

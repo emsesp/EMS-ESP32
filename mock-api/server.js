@@ -416,9 +416,9 @@ const emsesp_sensordata = {
   ],
   // sensors: [],
   analogs: [
-    { i: 1, n: 'name1', v: 12, u: 0, o: 0, f: 0 },
-    { i: 2, n: 'name2', v: 13, u: 0, o: 0, f: 0 },
-    { i: 3, n: 'name3', v: 14, u: 0, o: 0, f: 0 },
+    { i: 36, n: 'name1', v: 12, u: 17, o: 17, f: 0, t: 0 },
+    { i: 37, n: 'name2', v: 13, u: 17, o: 17, f: 0, t: 1 },
+    { i: 38, n: 'name3', v: 14, u: 0, o: 0, f: 0, t: 2 },
   ],
   // analogs: [],
 }
@@ -1037,10 +1037,30 @@ rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
   const analog = req.body
   console.log('Write analog: ' + JSON.stringify(analog))
   objIndex = emsesp_sensordata.analogs.findIndex((obj) => obj.i == analog.id)
-  emsesp_sensordata.analogs[objIndex].n = analog.name
-  emsesp_sensordata.analogs[objIndex].o = analog.offset
-  emsesp_sensordata.analogs[objIndex].f = analog.factor
-  emsesp_sensordata.analogs[objIndex].u = analog.uom
+
+  if (objIndex === -1) {
+    console.log('new analog')
+    emsesp_sensordata.analogs.push({
+      i: analog.id,
+      n: analog.name,
+      f: analog.factor,
+      o: analog.offset,
+      u: analog.uom,
+      t: analog.type,
+    })
+  } else {
+    if (analog.type === -1) {
+      console.log('removing analog ' + analog.id)
+      emsesp_sensordata.analogs[objIndex].t = -1
+    } else {
+      emsesp_sensordata.analogs[objIndex].n = analog.name
+      emsesp_sensordata.analogs[objIndex].o = analog.offset
+      emsesp_sensordata.analogs[objIndex].f = analog.factor
+      emsesp_sensordata.analogs[objIndex].u = analog.uom
+      emsesp_sensordata.analogs[objIndex].t = analog.type
+    }
+  }
+
   res.sendStatus(200)
 })
 

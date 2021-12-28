@@ -202,6 +202,10 @@ const std::string EMSdevice::device_type_2_device_name(const uint8_t device_type
         return read_flash_string(F_(dallassensor));
         break;
 
+    case DeviceType::ANALOGSENSOR:
+        return read_flash_string(F_(analogsensor));
+        break;
+
     case DeviceType::CONTROLLER:
         return read_flash_string(F_(controller));
         break;
@@ -259,6 +263,10 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
 
     if (!strcmp(lowtopic, reinterpret_cast<PGM_P>(F_(dallassensor)))) {
         return DeviceType::DALLASSENSOR;
+    }
+
+    if (!strcmp(lowtopic, reinterpret_cast<PGM_P>(F_(analogsensor)))) {
+        return DeviceType::ANALOGSENSOR;
     }
 
     return DeviceType::UNKNOWN;

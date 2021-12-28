@@ -109,7 +109,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     command_p = parse_command_string(command_p, id_n);
     if (command_p == nullptr) {
         // handle dead endpoints like api/system or api/boiler
-        // default to 'info' for SYSTEM and DALLASENSOR, the other devices to 'values' for shortname version
+        // default to 'info' for SYSTEM, DALLASENSOR and ANALOGSENSOR, the other devices to 'values' for shortname version
         if (num_paths < 3) {
             if (device_type < EMSdevice::DeviceType::BOILER) {
                 command_p = "info";
@@ -247,9 +247,8 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // check if its a call to and end-point to a device, i.e. has no value
     // except for system commands as this is a special device without any queryable entities (device values)
-    // exclude SYSTEM and DALLASSENSOR
-
-    if ((device_type >= EMSdevice::DeviceType::BOILER) && (!value || !strlen(value))) {
+    // exclude SYSTEM
+    if ((device_type > EMSdevice::DeviceType::SYSTEM) && (!value || !strlen(value))) {
         if (!cf || !cf->cmdfunction_json_) {
 #if defined(EMSESP_DEBUG)
             LOG_DEBUG(F("[DEBUG] Calling %s command '%s' to retrieve values"), dname.c_str(), cmd);
@@ -444,7 +443,11 @@ bool Command::device_has_commands(const uint8_t device_type) {
     }
 
     if (device_type == EMSdevice::DeviceType::DALLASSENSOR) {
-        return (EMSESP::have_sensors());
+        return (EMSESP::dallassensor_.have_sensors());
+    }
+
+    if (device_type == EMSdevice::DeviceType::ANALOGSENSOR) {
+        return (EMSESP::analogsensor_.have_sensors());
     }
 
     for (const auto & emsdevice : EMSESP::emsdevices) {
@@ -461,11 +464,15 @@ bool Command::device_has_commands(const uint8_t device_type) {
     return false;
 }
 
+// list sensors and EMS devices
 void Command::show_devices(uuid::console::Shell & shell) {
     shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM).c_str());
 
-    if (EMSESP::have_sensors()) {
+    if (EMSESP::dallassensor_.have_sensors()) {
         shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR).c_str());
+    }
+    if (EMSESP::analogsensor_.have_sensors()) {
+        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR).c_str());
     }
 
     for (const auto & device_class : EMSFactory::device_handlers()) {
@@ -491,13 +498,20 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::SYSTEM, true);
 
-    // show sensor
-    if (EMSESP::have_sensors()) {
+    // show sensors
+    if (EMSESP::dallassensor_.have_sensors()) {
         shell.print(COLOR_BOLD_ON);
         shell.print(COLOR_YELLOW);
         shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR).c_str());
         shell.print(COLOR_RESET);
         show(shell, EMSdevice::DeviceType::DALLASSENSOR, true);
+    }
+    if (EMSESP::analogsensor_.have_sensors()) {
+        shell.print(COLOR_BOLD_ON);
+        shell.print(COLOR_YELLOW);
+        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR).c_str());
+        shell.print(COLOR_RESET);
+        show(shell, EMSdevice::DeviceType::ANALOGSENSOR, true);
     }
 
     // do this in the order of factory classes to keep a consistent order when displaying
