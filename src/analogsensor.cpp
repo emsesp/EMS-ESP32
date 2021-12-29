@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include "analogsensor.h"
 #include "emsesp.h"
 
@@ -27,13 +26,11 @@ uuid::log::Logger AnalogSensor::logger_{F_(analogsensor), uuid::log::Facility::D
 void AnalogSensor::start() {
     reload();
 
-#ifndef EMSESP_STANDALONE
     if (analog_enabled_) {
-        analogSetAttenuation(ADC_2_5db);
+        analogSetAttenuation(ADC_2_5db); // for all channels
     }
-#endif
 
-    // Add API calls
+    // Add API call for /info
     Command::add(
         EMSdevice::DeviceType::ANALOGSENSOR,
         F_(info),
@@ -44,6 +41,10 @@ void AnalogSensor::start() {
 // load settings
 void AnalogSensor::reload() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) { analog_enabled_ = settings.analog_enabled; });
+
+#if defined(EMSESP_STANDALONE)
+    analog_enabled_ = true;
+#endif
 
     // load the list of analog sensors from the customization service
     // and store them locally and then activate them
@@ -65,21 +66,26 @@ void AnalogSensor::reload() {
     for (auto & sensor : sensors_) {
         sensor.ha_registered = false; // force HA configs to be re-created
         if (sensor.type() == AnalogType::ADC) {
-// sensor.id is the GPIO
-#ifndef EMSESP_STANDALONE
+            // sensor.id is the GPIO
             analogSetPinAttenuation(sensor.id(), ADC_2_5db); // 1500mV
-// setting attentuator to 0 = 1100, 1500, 2200, 3900 mV
-// analogSetAttenuation(sensor.id(), analog_enabled_ - 1);
-#endif
+
+            // MichaelDvP's comments:
+            // setting attenuator to 0 = 1100, 1500, 2200, 3900 mV
+            // analogSetAttenuation(sensor.id(), analog_enabled_ - 1);
         } else if (sensor.type() == AnalogType::IOCOUNTER) {
-            sensor.iocounter_ = 0; // reset count
-            sensor.set_uom(0);     // no uom, just for safe measures
+            pinMode(sensor.id(), INPUT_PULLUP);
+            sensor.set_value(0); // reset count
+            sensor.set_uom(0);   // no uom, just for safe measures
+        } else if (sensor.type() == AnalogType::READ) {
+            // pinMode(sensor.id(), INPUT_PULLUP);
+            sensor.set_value(0); // initial value
+            sensor.set_uom(0);   // no uom, just for safe measures
         }
     }
 }
 
 // measure and moving average adc
-void AnalogSensor::measure_analog() {
+void AnalogSensor::measure() {
     static uint32_t measure_last_ = 0;
 
     if (!measure_last_ || (uint32_t)(uuid::get_uptime() - measure_last_) >= MEASURE_ANALOG_INTERVAL) {
@@ -87,43 +93,34 @@ void AnalogSensor::measure_analog() {
 
         // go through the list of sensors
         for (auto & sensor : sensors_) {
-            // determine the type
-            // either we're measuring ADC or just looking at pin changes
+            auto old_value = sensor.value(); // remember current value before reading
+
             if (sensor.type() == AnalogType::ADC) {
-#if defined(EMSESP_STANDALONE)
-                uint16_t a = 0;
-#else
                 uint16_t a = analogReadMilliVolts(sensor.id()); // e.g. ADC1_CHANNEL_0_GPIO_NUM
-#endif
-                if (!sensor.analog_) { // init first time
+                if (!sensor.analog_) {                          // init first time
                     sensor.analog_ = a;
                     sensor.sum_    = a * 512;
                 } else { // simple moving average filter
                     sensor.sum_    = (sensor.sum_ * 511) / 512 + a;
                     sensor.analog_ = sensor.sum_ / 512;
                 }
-
-                auto old_value = sensor.value();
                 sensor.set_value((sensor.analog_ - sensor.offset()) * sensor.factor());
-                if (old_value != sensor.value()) {
-                    sensorreads_++; // increment counter
-                    changed_ = true;
-                }
-
-            } else {
-#if defined(EMSESP_STANDALONE)
-                uint16_t a = 0;
-#else
-                uint16_t a = digitalRead(sensor.id());
-#endif
-                auto old_value = sensor.value();
-                // count on active (low) signal, and on changed state
+            } else if (sensor.type() == AnalogType::READ) {
+                sensor.set_value(digitalRead(sensor.id()));
+            } else if (sensor.type() == AnalogType::IOCOUNTER) {
+                // capture reading and compare with the last one to see if there is high/low change
                 // TODO add back the debounce uuid::get_uptime() diff > 15
-                if (!a && a != old_value) {
-                    sensor.iocounter_++;
-                    sensorreads_++; // increment counter
-                    changed_ = true;
+                uint16_t current_reading = digitalRead(sensor.id());
+                if (!current_reading && current_reading != sensor.last_reading_) {
+                    sensor.set_value(old_value + 1);
+                    sensor.last_reading_ = current_reading;
                 }
+            }
+
+            // see if there is a change and increment # reads
+            if (old_value != sensor.value()) {
+                sensorreads_++;
+                changed_ = true;
             }
         }
     }
@@ -134,7 +131,7 @@ void AnalogSensor::loop() {
         return;
     }
 
-    measure_analog(); // take the measurements
+    measure(); // take the measurements
 }
 
 // update analog information name and offset
@@ -255,58 +252,63 @@ void AnalogSensor::publish_values(const bool force) {
     for (auto & sensor : sensors_) {
         if (sensor.type() != AnalogType::NOTUSED) {
             if (Mqtt::is_nested() || Mqtt::ha_enabled()) {
+                // nested
                 char       s[10];
                 JsonObject dataSensor = doc.createNestedObject(Helpers::smallitoa(s, sensor.id()));
-                if (sensor.type() == AnalogType::ADC) {
-                    dataSensor["value"] = (float)sensor.value();
-                } else {
-                    dataSensor["count"] = sensor.iocounter_;
+                dataSensor["name"]    = sensor.name();
+                switch (sensor.type()) {
+                case AnalogType::IOCOUNTER:
+                    dataSensor["count"] = sensor.value();
+                    break;
+                case AnalogType::ADC:
+                case AnalogType::READ:
+                default:
+                    dataSensor["value"] = sensor.value();
+                    break;
                 }
+
+                // create HA config
+                if (Mqtt::ha_enabled()) {
+                    if (!sensor.ha_registered || force) {
+                        LOG_DEBUG(F("Recreating HA config for analog sensor ID %d"), sensor.id());
+
+                        StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
+
+                        char stat_t[50];
+                        snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::base().c_str());
+                        config["stat_t"] = stat_t;
+
+                        char str[50];
+                        snprintf(str, sizeof(str), "{{value_json['%d'].value}}", sensor.id());
+                        config["val_tpl"] = str;
+
+                        snprintf(str, sizeof(str), "Analog Sensor %s", sensor.name().c_str());
+                        config["name"] = str;
+
+                        snprintf(str, sizeof(str), "analogsensor_%d", sensor.id());
+                        config["uniq_id"] = str;
+
+                        JsonObject dev = config.createNestedObject("dev");
+                        JsonArray  ids = dev.createNestedArray("ids");
+                        ids.add("ems-esp");
+
+                        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+                        snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%d/config", Mqtt::base().c_str(), sensor.id());
+
+                        Mqtt::publish_ha(topic, config.as<JsonObject>());
+
+                        sensor.ha_registered = true;
+                    }
+                }
+
             } else {
-                if (sensor.type() == AnalogType::ADC) {
-                    doc[sensor.name()] = (float)sensor.value();
-                } else {
-                    doc[sensor.name()] = sensor.iocounter_;
-                }
-            }
-
-            // create the HA MQTT config
-            if (Mqtt::ha_enabled()) {
-                if (!sensor.ha_registered || force) {
-                    LOG_DEBUG(F("Recreating HA config for analog sensor ID %d"), sensor.id());
-
-                    StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
-
-                    char stat_t[50];
-                    snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::base().c_str());
-                    config["stat_t"] = stat_t;
-
-                    char str[50];
-                    snprintf(str, sizeof(str), "{{value_json['%d'].temp}}", sensor.id());
-                    config["val_tpl"] = str;
-
-                    snprintf(str, sizeof(str), "Analog Sensor %s", sensor.name().c_str());
-                    config["name"] = str;
-
-                    snprintf(str, sizeof(str), "analogsensor_%d", sensor.id());
-                    config["uniq_id"] = str;
-
-                    JsonObject dev = config.createNestedObject("dev");
-                    JsonArray  ids = dev.createNestedArray("ids");
-                    ids.add("ems-esp");
-
-                    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-                    snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%d/config", Mqtt::base().c_str(), sensor.id());
-
-                    Mqtt::publish_ha(topic, config.as<JsonObject>());
-
-                    sensor.ha_registered = true;
-                }
+                // not nested
+                doc[sensor.name()] = sensor.value();
             }
         }
-    }
 
-    Mqtt::publish(F("analogsensor_data"), doc.as<JsonObject>());
+        Mqtt::publish(F("analogsensor_data"), doc.as<JsonObject>());
+    }
 }
 
 // this creates the sensor, initializing everything
@@ -317,7 +319,7 @@ AnalogSensor::Sensor::Sensor(const uint8_t id, const std::string & name, const u
     , factor_(factor)
     , uom_(uom)
     , type_(type) {
-    value_ = 0; // init value to 0
+    value_ = 0; // init value to 0 always
 }
 
 // find the name from the customization service
@@ -377,9 +379,12 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
 // hard coded tests
 #ifdef EMSESP_DEBUG
 void AnalogSensor::test() {
-    sensors_.emplace_back(36, "test1", 0, 1, 0, AnalogType::ADC);
+    // Sensor(const uint8_t id, const std::string & name, const uint16_t offset, const float factor, const uint8_t uom, const int8_t type);
+    sensors_.emplace_back(36, "test12", 0, 0.1, 17, AnalogType::ADC);
     sensors_.back().set_value(12);
-    // how to add?
+
+    sensors_.emplace_back(37, "test13", 0, 0, 0, AnalogType::READ);
+    sensors_.back().set_value(13);
 }
 #endif
 

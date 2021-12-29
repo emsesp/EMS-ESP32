@@ -53,9 +53,14 @@
 
 #define snprintf snprintf_P // to keep backwards compatibility
 
-void pinMode(uint8_t pin, uint8_t mode);
-void digitalWrite(uint8_t pin, uint8_t value);
-int  digitalRead(uint8_t pin);
+void     pinMode(uint8_t pin, uint8_t mode);
+void     digitalWrite(uint8_t pin, uint8_t value);
+int      digitalRead(uint8_t pin);
+uint32_t analogReadMilliVolts(uint8_t pin);
+
+typedef enum { ADC_0db, ADC_2_5db, ADC_6db, ADC_11db } adc_attenuation_t;
+void analogSetPinAttenuation(uint8_t pin, adc_attenuation_t attenuation);
+void analogSetAttenuation(adc_attenuation_t attenuation);
 
 #define PROGMEM
 #define PGM_P const char *

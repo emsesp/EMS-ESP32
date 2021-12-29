@@ -10,6 +10,7 @@
 - Added Hide SSID, Max Clients and Preferred Channel to Access Point
 - Merged in MichaelDvP's changes like fahrenheit conversion, publish single (for iobroker) and a few other changes
 - Extended support for Home Assistant to write back values [#265](https://github.com/emsesp/EMS-ESP32/issues/265)
+- Added GC7000F [#270](https://github.com/emsesp/EMS-ESP32/issues/270)
 
 ## Fixed
 

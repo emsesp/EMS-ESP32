@@ -403,8 +403,9 @@ const emsesp_coredata = {
       e: 3,
     },
   ],
-  dallassensor_count: 3,
-  analogsensor_count: 3,
+  dallassensor_count: 4,
+  analogsensor_count: 4,
+  analog_enabled: false
 }
 
 const emsesp_sensordata = {
@@ -416,9 +417,10 @@ const emsesp_sensordata = {
   ],
   // sensors: [],
   analogs: [
-    { i: 36, n: 'name1', v: 12, u: 17, o: 17, f: 0, t: 0 },
+    { i: 36, n: 'name1', u: 17, o: 17, f: 0, t: 0 },
     { i: 37, n: 'name2', v: 13, u: 17, o: 17, f: 0, t: 1 },
-    { i: 38, n: 'name3', v: 14, u: 0, o: 0, f: 0, t: 2 },
+    { i: 39, n: 'name4', v: 14, u: 0, o: 0, f: 0, t: 2 },
+    { i: 40, n: 'name5', v: 16, u: 0, o: 0, f: 0, t: 3 },
   ],
   // analogs: [],
 }

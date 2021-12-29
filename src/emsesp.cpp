@@ -446,6 +446,7 @@ void EMSESP::publish_all(bool force) {
         reset_mqtt_ha();
         return;
     }
+
     if (Mqtt::connected()) {
         publish_device_values(EMSdevice::DeviceType::BOILER);
         publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
@@ -597,17 +598,18 @@ void EMSESP::publish_other_values() {
     publish_device_values(EMSdevice::DeviceType::HEATPUMP);
 }
 
+// publish both the dallas and analog sensor values
 void EMSESP::publish_sensor_values(const bool time, const bool force) {
-    if (!dallas_enabled() || !analog_enabled()) {
-        return;
+    if (dallas_enabled()) {
+        if (dallassensor_.updated_values() || time || force) {
+            dallassensor_.publish_values(force);
+        }
     }
 
-    if (dallassensor_.updated_values() || time || force) {
-        dallassensor_.publish_values(force);
-    }
-
-    if (analogsensor_.updated_values() || time || force) {
-        analogsensor_.publish_values(force);
+    if (analog_enabled()) {
+        if (analogsensor_.updated_values() || time || force) {
+            analogsensor_.publish_values(force);
+        }
     }
 }
 

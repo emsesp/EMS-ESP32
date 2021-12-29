@@ -994,7 +994,7 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // comfort is position 2, there are 3 levels in pos 3, 2, 1
     // eco is position 4
     // auto is position 8, temporary until next switch
-    // actual setpoint taken from RC300Monitor (Michael 12.06.2020)
+    // actual setpoint taken from RC300Monitor (MichaelDvP 12.06.2020)
     // has_update(telegram, hc->selTemp, 8, 1);  // single byte conversion, value is * 2 - auto?
     // has_update(telegram, hc->selTemp, 10, 1); // single byte conversion, value is * 2 - manual
 

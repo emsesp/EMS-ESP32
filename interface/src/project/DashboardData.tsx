@@ -429,10 +429,15 @@ const DashboardData: FC = () => {
                     <DeviceIcon type="Sensor" />
                   </TableCell>
                   <TableCell>Sensors</TableCell>
-                  <TableCell>Temperature and Analog Sensors</TableCell>
+                  <TableCell>Attached EMS-ESP Sensors</TableCell>
                   <TableCell align="center">{data.dallassensor_count + data.analogsensor_count}</TableCell>
                   <TableCell align="right">
-                    <IconButton size="small" aria-label="add" onClick={() => addAnalogSensor()}>
+                    <IconButton
+                      size="small"
+                      aria-label="add"
+                      onClick={() => addAnalogSensor()}
+                      disabled={!data.analog_enabled}
+                    >
                       <AddCircleOutlineOutlinedIcon fontSize="small" sx={{ verticalAlign: 'middle' }} />
                     </IconButton>
                   </TableCell>
@@ -696,7 +701,7 @@ const DashboardData: FC = () => {
                   ))}
                 </ValidatedTextField>
               </Grid>
-              {analog.t === 2 && (
+              {analog.t === 3 && (
                 <>
                   <Grid item>
                     <ValidatedTextField name="u" label="UoM" value={analog.u} select onChange={updateValue(setAnalog)}>

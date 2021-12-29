@@ -89,9 +89,10 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
         }
     }
 
-    // the number of sensors
+    // sensors stuff
     root["dallassensor_count"] = EMSESP::dallassensor_.no_sensors();
     root["analogsensor_count"] = EMSESP::analogsensor_.no_sensors();
+    root["analog_enabled"]     = EMSESP::analogsensor_.analog_enabled();
 
     response->setLength();
     request->send(response);
@@ -134,11 +135,14 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
                 JsonObject obj = analogs.createNestedObject();
                 obj["i"]       = sensor.id();
                 obj["n"]       = sensor.name();
-                obj["v"]       = sensor.value();
                 obj["u"]       = sensor.uom();
                 obj["o"]       = sensor.offset();
-                obj["f"]       = sensor.factor();
+                obj["f"]       = sensor.factor(); // float
                 obj["t"]       = sensor.type();
+
+                if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
+                    obj["v"] = sensor.value(); // optional. unsigned long
+                }
             }
         }
     }

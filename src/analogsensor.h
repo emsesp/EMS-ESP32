@@ -52,11 +52,11 @@ class AnalogSensor {
             return id_;
         }
 
-        uint16_t value() const {
+        uint32_t value() const {
             return value_;
         }
 
-        void set_value(float value) {
+        void set_value(uint32_t value) {
             value_ = value;
         }
 
@@ -90,9 +90,9 @@ class AnalogSensor {
 
         bool ha_registered = false;
 
-        uint16_t analog_    = 0; // uninitialized
-        uint32_t sum_       = 0; // rolling sum
-        uint32_t iocounter_ = 0; // for internal counting
+        uint16_t analog_       = 0; // ADC - uninitialized
+        uint32_t sum_          = 0; // ADC - rolling sum
+        int      last_reading_ = 0; // IO COUNTER - last reading
 
       private:
         const uint8_t id_;
@@ -100,7 +100,7 @@ class AnalogSensor {
         uint16_t      offset_;
         float         factor_;
         uint8_t       uom_;
-        uint16_t      value_;
+        uint32_t      value_;
         int8_t        type_;
     };
 
@@ -109,8 +109,9 @@ class AnalogSensor {
 
     enum AnalogType : uint8_t {
         NOTUSED = 0, // 0 - disabled
-        IOCOUNTER,   // 1
-        ADC          // 2
+        READ,        // 1
+        IOCOUNTER,   // 2
+        ADC          // 3
     };
 
     void start();
@@ -160,7 +161,7 @@ class AnalogSensor {
 
     void remove_ha_topic(const uint8_t id);
     bool command_counter(const char * value, const int8_t id);
-    void measure_analog();
+    void measure();
     bool command_info(const char * value, const int8_t id, JsonObject & output);
 
     std::vector<Sensor> sensors_; // our list of actice sensors

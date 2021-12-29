@@ -32,6 +32,7 @@
 {122, DeviceType::BOILER, F("Proline"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {123, DeviceType::BOILER, F("GBx72/Trendline/Cerapur/Greenstar Si/27i"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {131, DeviceType::BOILER, F("GB212"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{132, DeviceType::BOILER, F("GC7000F"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {133, DeviceType::BOILER, F("Logano GB125/KB195i/Logamatic MC110"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {167, DeviceType::BOILER, F("Cerapur Aero"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {170, DeviceType::BOILER, F("Logano GB212"), DeviceFlags::EMS_DEVICE_FLAG_NONE},

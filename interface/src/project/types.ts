@@ -78,7 +78,7 @@ export interface Sensor {
 export interface Analog {
   i: number;
   n: string;
-  v: number;
+  v?: number;
   u: number;
   o: number;
   f: number;
@@ -100,6 +100,7 @@ export interface CoreData {
   devices: Device[];
   dallassensor_count: number;
   analogsensor_count: number;
+  analog_enabled: boolean;
 }
 
 export interface DeviceShort {
@@ -188,7 +189,7 @@ export const DeviceValueUOM_s = [
   "o'clock"
 ];
 
-export const AnalogTypes = ['(disabled)', 'I/O Counter', 'ADC'];
+export const AnalogTypes = ['(disabled)', 'Read', 'Counter', 'ADC'];
 
 type BoardProfiles = {
   [name: string]: string;
