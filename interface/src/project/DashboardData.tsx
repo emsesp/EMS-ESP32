@@ -352,7 +352,7 @@ const DashboardData: FC = () => {
     };
 
     const haveSensors = () => {
-      return data.dallassensor_count + data.analogsensor_count !== 0;
+      return data.active_sensors > 0;
     };
 
     function compareDevices(a: Device, b: Device) {
@@ -430,7 +430,7 @@ const DashboardData: FC = () => {
                   </TableCell>
                   <TableCell>Sensors</TableCell>
                   <TableCell>Attached EMS-ESP Sensors</TableCell>
-                  <TableCell align="center">{data.dallassensor_count + data.analogsensor_count}</TableCell>
+                  <TableCell align="center">{data.active_sensors}</TableCell>
                   <TableCell align="right">
                     <IconButton
                       size="small"
@@ -776,7 +776,7 @@ const DashboardData: FC = () => {
         {renderSensorDialog()}
         {renderAnalogDialog()}
         <ButtonRow>
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
             Refresh
           </Button>
         </ButtonRow>

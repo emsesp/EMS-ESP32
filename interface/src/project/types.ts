@@ -98,8 +98,7 @@ export interface SensorData {
 
 export interface CoreData {
   devices: Device[];
-  dallassensor_count: number;
-  analogsensor_count: number;
+  active_sensors: number;
   analog_enabled: boolean;
 }
 

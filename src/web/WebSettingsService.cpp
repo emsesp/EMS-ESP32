@@ -156,8 +156,14 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.hide_led = root["hide_led"] | EMSESP_DEFAULT_HIDE_LED;
     check_flag(prev, settings.hide_led, ChangeFlags::LED);
 
-    // these need reboots to be applied...
+    // adc
+    prev                    = settings.analog_enabled;
+    settings.analog_enabled = root["analog_enabled"] | true;
+    check_flag(prev, settings.analog_enabled, ChangeFlags::ADC);
 
+    //
+    // these need reboots to be applied...
+    //
     prev                    = settings.telnet_enabled;
     settings.telnet_enabled = root["telnet_enabled"] | true;
     check_flag(prev, settings.telnet_enabled, ChangeFlags::RESTART);

@@ -303,6 +303,7 @@ const EMSESP_WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
 const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
 const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalog'
 const EMSESP_EXCLUDE_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'excludeEntities'
+const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations'
 
 settings = {
   tx_mode: 1,
@@ -403,9 +404,8 @@ const emsesp_coredata = {
       e: 3,
     },
   ],
-  dallassensor_count: 4,
-  analogsensor_count: 4,
-  analog_enabled: false
+  active_sensors: 8,
+  analog_enabled: false,
 }
 
 const emsesp_sensordata = {
@@ -417,7 +417,7 @@ const emsesp_sensordata = {
   ],
   // sensors: [],
   analogs: [
-    { i: 36, n: 'name1', u: 17, o: 17, f: 0, t: 0 },
+    { i: 36, n: 'name1', v: 12, u: 17, o: 17, f: 0, t: 0 },
     { i: 37, n: 'name2', v: 13, u: 17, o: 17, f: 0, t: 1 },
     { i: 39, n: 'name4', v: 14, u: 0, o: 0, f: 0, t: 2 },
     { i: 40, n: 'name5', v: 16, u: 0, o: 0, f: 0, t: 3 },
@@ -929,6 +929,10 @@ rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
 })
 
 // EMS-ESP Project stuff
+rest_server.post(EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
+  console.log('Removing all customizations...')
+  res.sendStatus(200)
+})
 rest_server.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
   console.log('Get settings: ' + JSON.stringify(settings))
   res.json(settings)

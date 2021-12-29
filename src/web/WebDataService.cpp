@@ -90,9 +90,8 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     }
 
     // sensors stuff
-    root["dallassensor_count"] = EMSESP::dallassensor_.no_sensors();
-    root["analogsensor_count"] = EMSESP::analogsensor_.no_sensors();
-    root["analog_enabled"]     = EMSESP::analogsensor_.analog_enabled();
+    root["active_sensors"] = EMSESP::dallassensor_.no_sensors() + (EMSESP::analogsensor_.analog_enabled() ? EMSESP::analogsensor_.no_sensors() : 0);
+    root["analog_enabled"] = EMSESP::analogsensor_.analog_enabled();
 
     response->setLength();
     request->send(response);
@@ -128,10 +127,10 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
     }
 
     JsonArray analogs = root.createNestedArray("analogs");
-    if (EMSESP::analogsensor_.have_sensors()) {
+    if (EMSESP::analog_enabled() && EMSESP::analogsensor_.have_sensors()) {
         for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
             // don't send if it's marked for removal
-            if (sensor.type() != -1) {
+            if (sensor.type() != AnalogSensor::AnalogType::MARK_DELETED) {
                 JsonObject obj = analogs.createNestedObject();
                 obj["i"]       = sensor.id();
                 obj["n"]       = sensor.name();

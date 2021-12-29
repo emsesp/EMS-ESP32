@@ -79,6 +79,10 @@ export function writeAnalog(writeanalog: WriteAnalog): AxiosPromise<void> {
   return AXIOS.post('/writeAnalog', writeanalog);
 }
 
+export function resetCustomizations(): AxiosPromise<void> {
+  return AXIOS.post('/resetCustomizations');
+}
+
 // EMS-ESP API calls
 export function API(apiCall: APIcall): AxiosPromise<void> {
   return AXIOS_API.post('/', apiCall);

@@ -1,6 +1,19 @@
 import { FC, useState, useEffect, useCallback } from 'react';
 
-import { Button, Table, TableBody, TableHead, TableRow, Typography, Box, MenuItem } from '@mui/material';
+import {
+  Button,
+  Table,
+  TableBody,
+  TableHead,
+  TableRow,
+  Typography,
+  Box,
+  MenuItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle
+} from '@mui/material';
 
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 
@@ -10,6 +23,7 @@ import { useSnackbar } from 'notistack';
 
 import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 
 import { ButtonRow, FormLoader, ValidatedTextField, SectionContent } from '../components';
 
@@ -37,6 +51,7 @@ const SettingsCustomization: FC = () => {
   const [devices, setDevices] = useState<Devices>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
+  const [confirmReset, setConfirmReset] = useState<boolean>(false);
 
   const fetchDevices = useCallback(async () => {
     try {
@@ -92,8 +107,7 @@ const SettingsCustomization: FC = () => {
       <>
         <Box color="warning.main">
           <Typography variant="body2">
-            For each EMS device select which of its device entities are to be excluded. This will have immediate affect
-            across all services.
+            You can choose for each EMS device which of it's entities (values) are to be excluded from all services.
           </Typography>
         </Box>
         <ValidatedTextField
@@ -188,22 +202,75 @@ const SettingsCustomization: FC = () => {
     );
   };
 
+  const resetCustomization = async () => {
+    try {
+      await EMSESP.resetCustomizations();
+      enqueueSnackbar('All customizations have been removed. Restarting...', { variant: 'info' });
+    } catch (error: any) {
+      enqueueSnackbar(extractErrorMessage(error, 'Problem resetting customizations'), { variant: 'error' });
+    } finally {
+      setConfirmReset(false);
+    }
+  };
+
+  const renderResetDialog = () => (
+    <Dialog open={confirmReset} onClose={() => setConfirmReset(false)}>
+      <DialogTitle>Reset</DialogTitle>
+      <DialogContent dividers>
+        Are you sure you want remove all customizations? EMS-ESP will then restart.
+      </DialogContent>
+      <DialogActions>
+        <Button variant="outlined" onClick={() => setConfirmReset(false)} color="secondary">
+          Cancel
+        </Button>
+        <Button
+          startIcon={<SettingsBackupRestoreIcon />}
+          variant="outlined"
+          onClick={resetCustomization}
+          autoFocus
+          color="error"
+        >
+          Reset
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
   const content = () => {
     return (
       <>
+        <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+          Device Entities
+        </Typography>
         {renderDeviceList()}
         {renderDeviceData()}
-        <ButtonRow>
-          <Button startIcon={<SaveIcon />} variant="outlined" color="primary" onClick={() => saveCustomization()}>
-            Save
-          </Button>
-        </ButtonRow>
+
+        <Box display="flex" flexWrap="wrap">
+          <Box flexGrow={1}>
+            <ButtonRow>
+              <Button startIcon={<SaveIcon />} variant="outlined" color="primary" onClick={() => saveCustomization()}>
+                Save
+              </Button>
+            </ButtonRow>
+          </Box>
+          <ButtonRow>
+            <Button
+              startIcon={<SettingsBackupRestoreIcon />}
+              variant="outlined"
+              color="error"
+              onClick={() => setConfirmReset(true)}
+            >
+              Reset
+            </Button>
+          </ButtonRow>
+        </Box>
+        {renderResetDialog()}
       </>
     );
   };
 
   return (
-    <SectionContent title="Device Entity Customization" titleGutter>
+    <SectionContent title="User Customization" titleGutter>
       {content()}
     </SectionContent>
   );

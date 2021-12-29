@@ -107,11 +107,12 @@ class AnalogSensor {
     AnalogSensor()  = default;
     ~AnalogSensor() = default;
 
-    enum AnalogType : uint8_t {
-        NOTUSED = 0, // 0 - disabled
-        READ,        // 1
-        IOCOUNTER,   // 2
-        ADC          // 3
+    enum AnalogType : int8_t {
+        MARK_DELETED = -1, // mark for deletion
+        NOTUSED,           // 0 - disabled
+        READ,              // 1
+        IOCOUNTER,         // 2
+        ADC                // 3
     };
 
     void start();

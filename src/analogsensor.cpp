@@ -136,11 +136,9 @@ void AnalogSensor::loop() {
 
 // update analog information name and offset
 bool AnalogSensor::update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, int8_t type) {
-    // find the sensor
+    // find the sensor and update its record
     for (auto & sensor : sensors_) {
         if (sensor.id() == id) {
-            // found a match, update the sensor object
-
             // if HA is enabled then delete the old record
             if (Mqtt::ha_enabled()) {
                 remove_ha_topic(id);
@@ -150,13 +148,18 @@ bool AnalogSensor::update(uint8_t id, const std::string & name, int16_t offset, 
             sensor.set_offset(offset);
             sensor.set_factor(factor);
             sensor.set_uom(uom);
-            sensor.set_type(type); // if -1 then it's marked for deletion
+            sensor.set_type(type);
+
+            // note if its -1 then it's marked for deletion
+            if (type == AnalogType::MARK_DELETED) {
+                sensor.set_value(0); // reset the value
+            }
 
             // store the new name and offset in our configuration
             EMSESP::webCustomizationService.update(
                 [&](WebCustomization & settings) {
                     // if it's marked for remove, just erase it
-                    if (type == -1) {
+                    if (type == AnalogType::MARK_DELETED) {
                         LOG_DEBUG(F("Removing existing analog sensor ID %d"), id);
                         // TODO finish code to add new sensor
                     } else {

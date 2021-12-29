@@ -20,14 +20,15 @@
 #define WebCustomizationService_h
 
 #define EMSESP_CUSTOMIZATION_FILE "/config/emsespCustomization.json"
-#define EMSESP_CUSTOMIZATION_SERVICE_PATH "/rest/customization"
 
 // GET
 #define DEVICES_SERVICE_PATH "/rest/devices"
+#define EMSESP_CUSTOMIZATION_SERVICE_PATH "/rest/customization"
 
 // POST
 #define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
 #define EXCLUDE_ENTITIES_PATH "/rest/excludeEntities"
+#define RESET_CUSTOMIZATION_SERVICE_PATH "/rest/resetCustomizations"
 
 namespace emsesp {
 
@@ -87,6 +88,7 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
     // POST
     void exclude_entities(AsyncWebServerRequest * request, JsonVariant & json);
     void device_entities(AsyncWebServerRequest * request, JsonVariant & json);
+    void reset_customization(AsyncWebServerRequest * request);
 
     AsyncCallbackJsonWebHandler _exclude_entities_handler, _device_entities_handler;
 };

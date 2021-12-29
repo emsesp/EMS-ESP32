@@ -41,6 +41,10 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&WebCustomizationService::devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 
+    server->on(RESET_CUSTOMIZATION_SERVICE_PATH,
+               HTTP_POST,
+               securityManager->wrapRequest(std::bind(&WebCustomizationService::reset_customization, this, _1), AuthenticationPredicates::IS_ADMIN));
+
     _exclude_entities_handler.setMethod(HTTP_POST);
     _exclude_entities_handler.setMaxContentLength(256);
     server->addHandler(&_exclude_entities_handler);
@@ -135,6 +139,21 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
     }
 
     return StateUpdateResult::CHANGED;
+}
+
+// deletes the customization file
+void WebCustomizationService::reset_customization(AsyncWebServerRequest * request) {
+#ifndef EMSESP_STANDALONE
+    if (LITTLEFS.remove(EMSESP_CUSTOMIZATION_FILE)) {
+        AsyncWebServerResponse * response = request->beginResponse(200); // OK
+        request->send(response);
+        EMSESP::system_.restart_requested(true);
+        return;
+    }
+    // failed
+    AsyncWebServerResponse * response = request->beginResponse(204); // no content error
+    request->send(response);
+#endif
 }
 
 // send back a short list devices used in the customization page

@@ -50,7 +50,7 @@ class DummySettings {
     uint8_t  led_gpio             = 0;
     bool     low_clock            = false;
     uint8_t  pbutton_gpio         = false;
-    uint8_t  solar_maxflow        = 0; // ?
+    uint8_t  solar_maxflow        = 30;
 
     // MQTT
     uint16_t publish_time            = 10; // seconds
