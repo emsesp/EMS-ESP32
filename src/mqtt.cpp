@@ -970,6 +970,8 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
         }
 
         // set min and max based on type
+        // really at some point we should add the min and max to the device value
+        // see also emsdevice.cpp:get_value_info()
         switch (uom) {
         case DeviceValueUOM::DEGREES:
         case DeviceValueUOM::DEGREES_R:
@@ -978,7 +980,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
                 doc["max"] = 120;
             } else {
                 // can have negative values
-                // just guessing the numbers
+                // just guessing the numbers here
                 doc["min"] = -20;
                 doc["max"] = 120;
             }
@@ -986,7 +988,15 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
             break;
         case DeviceValueUOM::PERCENT:
             doc["min"] = 0;
-            doc["max"] = 127; // e.g. boiler selected max power
+            doc["max"] = EMS_VALUE_UINT_NOTSET; // e.g. boiler selected max power
+            break;
+        case DeviceValueUOM::MINUTES:
+            doc["min"] = 0;
+            doc["max"] = EMS_VALUE_UINT_NOTSET; // e.g. wwDisinfectTime (uint)
+            break;
+        case DeviceValueUOM::HOURS:
+            doc["min"] = 0;
+            doc["max"] = EMS_VALUE_USHORT_NOTSET; // e.g. maintenanceTime (USHORT)
             break;
         default:
             break;

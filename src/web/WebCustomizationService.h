@@ -48,6 +48,13 @@ class AnalogCustomization {
     float       factor;
     uint8_t     uom;
     int8_t      type; // -1 for deletion
+
+    bool operator==(const AnalogCustomization & s) const {
+        return id == s.id;
+    }
+    bool operator!=(const AnalogCustomization & s) const {
+        return !operator==(s);
+    }
 };
 
 // we use product_id and device_id to make the device unique

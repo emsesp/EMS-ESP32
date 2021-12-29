@@ -371,11 +371,10 @@ const DashboardData: FC = () => {
           <Table size="small">
             <TableHead>
               <TableRow>
-                {/* <StyledTableCell padding="checkbox"></StyledTableCell> */}
                 <StyledTableCell padding="checkbox" align="left" colSpan={2}>
                   Type
                 </StyledTableCell>
-                <StyledTableCell>Name</StyledTableCell>
+                <StyledTableCell>Compatible Model</StyledTableCell>
                 <StyledTableCell align="center"># Entities</StyledTableCell>
                 <StyledTableCell />
               </TableRow>
@@ -742,6 +741,9 @@ const DashboardData: FC = () => {
                 </>
               )}
             </Grid>
+            <Box color="warning.main" mt={2}>
+              <Typography variant="body2">Warning: Be careful when assigning a GPIO!</Typography>
+            </Box>
           </DialogContent>
           <DialogActions>
             <Box flexGrow={1} sx={{ '& button': { mt: 0 } }}>

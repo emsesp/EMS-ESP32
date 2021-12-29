@@ -38,7 +38,7 @@ void AnalogSensor::start() {
         F_(info_cmd));
 }
 
-// load settings
+// load settings and initializes the GPIOs
 void AnalogSensor::reload() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) { analog_enabled_ = settings.analog_enabled; });
 
@@ -53,30 +53,31 @@ void AnalogSensor::reload() {
         sensors_.clear(); // start with an empty list
         if (sensors.size() != 0) {
             for (auto & sensor : sensors) {
-#if defined(EMSESP_DEBUG)
-                LOG_DEBUG("Loading customization for analog sensor %d", sensor.id);
-#endif
                 sensors_.emplace_back(sensor.id, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type);
+                sensors_.back().ha_registered = false; // this will trigger recrate of the HA config
             }
         }
         return true;
     });
 
-    // init each sensor
+    // activate each sensor
     for (auto & sensor : sensors_) {
         sensor.ha_registered = false; // force HA configs to be re-created
         if (sensor.type() == AnalogType::ADC) {
-            // sensor.id is the GPIO
+            LOG_DEBUG(F("Adding analog ADC sensor on GPIO%d"), sensor.id());
+            // note sensor.id is the GPIO
             analogSetPinAttenuation(sensor.id(), ADC_2_5db); // 1500mV
 
             // MichaelDvP's comments:
             // setting attenuator to 0 = 1100, 1500, 2200, 3900 mV
             // analogSetAttenuation(sensor.id(), analog_enabled_ - 1);
         } else if (sensor.type() == AnalogType::IOCOUNTER) {
+            LOG_DEBUG(F("Adding analog I/O Counter sensor on GPIO%d"), sensor.id());
             pinMode(sensor.id(), INPUT_PULLUP);
             sensor.set_value(0); // reset count
             sensor.set_uom(0);   // no uom, just for safe measures
         } else if (sensor.type() == AnalogType::READ) {
+            LOG_DEBUG(F("Adding analog Read sensor on GPIO%d"), sensor.id());
             // pinMode(sensor.id(), INPUT_PULLUP);
             sensor.set_value(0); // initial value
             sensor.set_uom(0);   // no uom, just for safe measures
@@ -109,7 +110,7 @@ void AnalogSensor::measure() {
                 sensor.set_value(digitalRead(sensor.id()));
             } else if (sensor.type() == AnalogType::IOCOUNTER) {
                 // capture reading and compare with the last one to see if there is high/low change
-                // TODO add back the debounce uuid::get_uptime() diff > 15
+                // add back the debounce uuid::get_uptime() diff > 15
                 uint16_t current_reading = digitalRead(sensor.id());
                 if (!current_reading && current_reading != sensor.last_reading_) {
                     sensor.set_value(old_value + 1);
@@ -136,71 +137,61 @@ void AnalogSensor::loop() {
 
 // update analog information name and offset
 bool AnalogSensor::update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, int8_t type) {
-    // find the sensor and update its record
-    for (auto & sensor : sensors_) {
-        if (sensor.id() == id) {
-            // if HA is enabled then delete the old record
-            if (Mqtt::ha_enabled()) {
-                remove_ha_topic(id);
-            }
+    // see if we can find the sensor in our customization list
 
-            sensor.set_name(name);
-            sensor.set_offset(offset);
-            sensor.set_factor(factor);
-            sensor.set_uom(uom);
-            sensor.set_type(type);
+    boolean found_sensor = false;
 
-            // note if its -1 then it's marked for deletion
-            if (type == AnalogType::MARK_DELETED) {
-                sensor.set_value(0); // reset the value
-            }
-
-            // store the new name and offset in our configuration
-            EMSESP::webCustomizationService.update(
-                [&](WebCustomization & settings) {
-                    // if it's marked for remove, just erase it
+    EMSESP::webCustomizationService.update(
+        [&](WebCustomization & settings) {
+            for (auto & AnalogCustomization : settings.analogCustomizations) {
+                if (AnalogCustomization.id == id) {
+                    found_sensor = true; // found the record
+                    // see if it's marked for deletion
                     if (type == AnalogType::MARK_DELETED) {
-                        LOG_DEBUG(F("Removing existing analog sensor ID %d"), id);
-                        // TODO finish code to add new sensor
+                        LOG_DEBUG(F("Removing analog sensor ID %d"), id);
+                        settings.analogCustomizations.remove(AnalogCustomization);
                     } else {
-                        // add or update existing
-                        bool found = false;
-                        for (auto & AnalogCustomization : settings.analogCustomizations) {
-                            if (AnalogCustomization.id == id) {
-                                // update it
-                                LOG_DEBUG(F("Customizing existing analog sensor ID %d"), id);
-                                AnalogCustomization.name   = name;
-                                AnalogCustomization.offset = offset;
-                                AnalogCustomization.factor = factor;
-                                AnalogCustomization.uom    = uom;
-                                AnalogCustomization.type   = type;
-                            }
-                            found = true;
-                            break; // stop for loop
-                        }
-
-                        // it's a new entry
-                        if (!found) {
-                            LOG_DEBUG(F("Adding new customization for analog sensor ID %d"), id);
-                            AnalogCustomization newSensor = AnalogCustomization();
-                            newSensor.id                  = id;
-                            newSensor.name                = name;
-                            newSensor.offset              = offset;
-                            newSensor.factor              = factor;
-                            newSensor.uom                 = uom;
-                            newSensor.type                = type;
-                            settings.analogCustomizations.push_back(newSensor);
-                        }
-                        sensor.ha_registered = false; // it's changed so we may need to recreate the HA config
+                        // update existing record
+                        AnalogCustomization.name   = name;
+                        AnalogCustomization.offset = offset;
+                        AnalogCustomization.factor = factor;
+                        AnalogCustomization.uom    = uom;
+                        AnalogCustomization.type   = type;
+                        LOG_DEBUG(F("Customizing existing analog sensor ID %d"), id);
                     }
-                    return StateUpdateResult::CHANGED;
-                },
-                "local");
-            return true;
-        }
+                    return StateUpdateResult::CHANGED; // persist the change
+                }
+            }
+            return StateUpdateResult::UNCHANGED;
+        },
+        "local");
+
+    // if the sensor exists and we're using HA, delete the old HA record
+    if (found_sensor && Mqtt::ha_enabled()) {
+        remove_ha_topic(id); // id is the GPIO
     }
 
-    return true; // not found, nothing updated
+    // if we didn't find it, its new so create it
+    if (!found_sensor) {
+        EMSESP::webCustomizationService.update(
+            [&](WebCustomization & settings) {
+                AnalogCustomization newSensor = AnalogCustomization();
+                newSensor.id                  = id;
+                newSensor.name                = name;
+                newSensor.offset              = offset;
+                newSensor.factor              = factor;
+                newSensor.uom                 = uom;
+                newSensor.type                = type;
+                settings.analogCustomizations.push_back(newSensor);
+                LOG_DEBUG(F("Adding new customization for analog sensor ID %d"), id);
+                return StateUpdateResult::CHANGED; // persist the change
+            },
+            "local");
+    }
+
+    reload();
+
+    return true;
 }
 
 // check to see if values have been updated
@@ -314,28 +305,6 @@ void AnalogSensor::publish_values(const bool force) {
     }
 }
 
-// this creates the sensor, initializing everything
-AnalogSensor::Sensor::Sensor(const uint8_t id, const std::string & name, const uint16_t offset, const float factor, const uint8_t uom, const int8_t type)
-    : id_(id)
-    , name_(name)
-    , offset_(offset)
-    , factor_(factor)
-    , uom_(uom)
-    , type_(type) {
-    value_ = 0; // init value to 0 always
-}
-
-// find the name from the customization service
-// if empty, return the ID as a string
-std::string AnalogSensor::Sensor::name() const {
-    if (name_.empty()) {
-        char name[50];
-        snprintf(name, sizeof(name), "analogsensor_%d", id_);
-        return name;
-    }
-    return name_;
-}
-
 // called from emsesp.cpp, similar to the emsdevice->get_value_info
 // searches by name
 bool AnalogSensor::get_value_info(JsonObject & output, const char * cmd, const int8_t id) {
@@ -377,6 +346,28 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
     }
 
     return (output.size() > 0);
+}
+
+// this creates the sensor, initializing everything
+AnalogSensor::Sensor::Sensor(const uint8_t id, const std::string & name, const uint16_t offset, const float factor, const uint8_t uom, const int8_t type)
+    : id_(id)
+    , name_(name)
+    , offset_(offset)
+    , factor_(factor)
+    , uom_(uom)
+    , type_(type) {
+    value_ = 0; // init value to 0 always
+}
+
+// find the name from the customization service
+// if empty, return the ID as a string
+std::string AnalogSensor::Sensor::name() const {
+    if (name_.empty()) {
+        char name[50];
+        snprintf(name, sizeof(name), "analogsensor_%d", id_);
+        return name;
+    }
+    return name_;
 }
 
 // hard coded tests

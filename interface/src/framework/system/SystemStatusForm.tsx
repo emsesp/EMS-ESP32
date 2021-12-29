@@ -113,7 +113,7 @@ const SystemStatusForm: FC = () => {
   const renderVersionDialog = () => {
     return (
       <Dialog open={showingVersion} onClose={() => setShowingVersion(false)}>
-        <DialogTitle>Version Information</DialogTitle>
+        <DialogTitle>Version Check</DialogTitle>
         <DialogContent dividers>
           <MessageBox
             my={0}
@@ -151,11 +151,11 @@ const SystemStatusForm: FC = () => {
 
           <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>
             <Typography variant="body2">
-              After downloading a firmware image go to&nbsp;
+              Use&nbsp;
               <Link target="_blank" href={uploadURL} color="primary">
                 {'UPLOAD FIRMWARE'}
               </Link>
-              &nbsp;to update EMS-ESP
+              &nbsp;to apply the new firmware
             </Typography>
           </Box>
         </DialogContent>
@@ -220,7 +220,7 @@ const SystemStatusForm: FC = () => {
             <ListItemText primary="EMS-ESP Version" secondary={'v' + data.emsesp_version} />
             {latestVersion && (
               <Button color="primary" onClick={() => setShowingVersion(true)}>
-                Version Information&hellip;
+                Version Check
               </Button>
             )}
           </ListItem>

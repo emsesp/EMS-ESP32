@@ -262,7 +262,7 @@ void WebDataService::write_sensor(AsyncWebServerRequest * request, JsonVariant &
     request->send(response);
 }
 
-// update the analog record
+// update the analog record, or create a new one
 void WebDataService::write_analog(AsyncWebServerRequest * request, JsonVariant & json) {
     bool ok = false;
     if (json.is<JsonObject>()) {

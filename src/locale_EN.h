@@ -452,6 +452,7 @@ MAKE_PSTR_LIST(maintenanceMessage, F("maintenancemessage"), F("maintenance messa
 MAKE_PSTR_LIST(maintenanceDate, F("maintenancedate"), F("next maintenance date"))
 MAKE_PSTR_LIST(maintenanceType, F_(maintenance), F("maintenance scheduled"))
 MAKE_PSTR_LIST(maintenanceTime, F("maintenancetime"), F("time to next maintenance"))
+
 // heatpump/compress specific
 MAKE_PSTR_LIST(upTimeControl, F("uptimecontrol"), F("operating time total heat"))
 MAKE_PSTR_LIST(upTimeCompHeating, F("uptimecompheating"), F("operating time compressor heating"))

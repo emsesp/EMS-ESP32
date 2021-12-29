@@ -183,7 +183,6 @@ const SystemLog: FC = () => {
         clearTimeout(reconnectTimeout);
       }
     };
-    // TODO fix dependency warning
     // eslint-disable-next-line
   }, [reconnectTimeout]);
 
