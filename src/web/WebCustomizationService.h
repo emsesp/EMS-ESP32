@@ -49,11 +49,12 @@ class AnalogCustomization {
     uint8_t     uom;
     int8_t      type; // -1 for deletion
 
-    bool operator==(const AnalogCustomization & s) const {
-        return id == s.id;
+    // used for removing from a list
+    bool operator==(const AnalogCustomization & a) const {
+        return id == a.id;
     }
-    bool operator!=(const AnalogCustomization & s) const {
-        return !operator==(s);
+    bool operator!=(const AnalogCustomization & a) const {
+        return !operator==(a);
     }
 };
 

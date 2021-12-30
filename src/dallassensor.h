@@ -69,10 +69,10 @@ class DallasSensor {
       private:
         std::string to_string() const;
 
-        const uint64_t id_;
-        std::string    id_str_;
-        std::string    name_;
-        int16_t        offset_;
+        uint64_t    id_;
+        std::string id_str_;
+        std::string name_;
+        int16_t     offset_;
     };
 
     DallasSensor()  = default;
@@ -164,7 +164,7 @@ class DallasSensor {
     uint32_t last_activity_ = uuid::get_uptime();
     State    state_         = State::IDLE;
 
-    std::vector<Sensor> sensors_; // our list of actice sensors
+    std::vector<Sensor> sensors_; // our list of active sensors
 
     int8_t   scancnt_     = SCAN_START;
     uint8_t  firstscan_   = 0;

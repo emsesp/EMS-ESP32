@@ -120,7 +120,7 @@ void EMSESP::fetch_device_values_type(const uint8_t device_type) {
 
 // clears list of recognized devices
 void EMSESP::clear_all_devices() {
-    // temporary removed: clearing the list causes a crash, the associated commands and mqtt should also be removed.
+    // temporarily removed: clearing the list causes a crash, the associated commands and mqtt should also be removed.
     // emsdevices.clear(); // remove entries, but doesn't delete actual devices
 }
 
@@ -1095,6 +1095,11 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
 
     // assign a unique ID. Note that this is not actual unique after a restart as it's dependent on the order that devices are found
     emsdevices.back()->unique_id(++unique_id_count_);
+
+    // sort devices based on type
+    std::sort(emsdevices.begin(), emsdevices.end(), [](const std::unique_ptr<emsesp::EMSdevice> & a, const std::unique_ptr<emsesp::EMSdevice> & b) {
+        return a->device_type() < b->device_type();
+    });
 
     fetch_device_values(device_id); // go and fetch its data
 

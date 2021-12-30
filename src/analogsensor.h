@@ -95,13 +95,13 @@ class AnalogSensor {
         int      last_reading_ = 0; // IO COUNTER - last reading
 
       private:
-        const uint8_t id_;
-        std::string   name_;
-        uint16_t      offset_;
-        float         factor_;
-        uint8_t       uom_;
-        uint32_t      value_;
-        int8_t        type_;
+        uint8_t     id_;
+        std::string name_;
+        uint16_t    offset_;
+        float       factor_;
+        uint8_t     uom_;
+        uint32_t    value_;
+        int8_t      type_;
     };
 
     AnalogSensor()  = default;
@@ -165,7 +165,7 @@ class AnalogSensor {
     void measure();
     bool command_info(const char * value, const int8_t id, JsonObject & output);
 
-    std::vector<Sensor> sensors_; // our list of actice sensors
+    std::vector<Sensor> sensors_; // our list of sensors
 
     bool     analog_enabled_;
     bool     changed_     = false;

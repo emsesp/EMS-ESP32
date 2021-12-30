@@ -68,12 +68,12 @@ void WebDataService::scan_devices(AsyncWebServerRequest * request) {
 }
 
 // this is used in the dashboard and contains all ems device information
-// /coreData
+// /coreData endpoint
 void WebDataService::core_data(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
     JsonObject          root     = response->getRoot();
 
-    // devices
+    // list is already sorted by device type so the Web code doesn't need to do the sorting
     JsonArray devices = root.createNestedArray("devices");
     for (auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice) {
@@ -97,13 +97,14 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     request->send(response);
 }
 
-// sensor data - sends to web
+// sensor data - sends back to web
 // /sensorData endpoint
+// the "sensors" and "analogs" are arrays and must exist
 void WebDataService::sensor_data(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
     JsonObject          root     = response->getRoot();
 
-    // always create sensors, even if it's empty
+    // dallas sensors
     JsonArray sensors = root.createNestedArray("sensors");
     if (EMSESP::dallassensor_.have_sensors()) {
         for (const auto & sensor : EMSESP::dallassensor_.sensors()) {
@@ -126,6 +127,8 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
         }
     }
 
+    // analog sensors
+    // assume list is already sorted by id
     JsonArray analogs = root.createNestedArray("analogs");
     if (EMSESP::analog_enabled() && EMSESP::analogsensor_.have_sensors()) {
         for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
@@ -136,11 +139,11 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
                 obj["n"]       = sensor.name();
                 obj["u"]       = sensor.uom();
                 obj["o"]       = sensor.offset();
-                obj["f"]       = sensor.factor(); // float
+                obj["f"]       = sensor.factor();
                 obj["t"]       = sensor.type();
 
                 if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
-                    obj["v"] = sensor.value(); // optional. unsigned long
+                    obj["v"] = sensor.value(); // is optional and an unsigned long
                 }
             }
         }

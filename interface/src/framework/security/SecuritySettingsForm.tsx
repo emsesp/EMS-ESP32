@@ -51,7 +51,7 @@ const SecuritySettingsForm: FC = () => {
         />
         <MessageBox
           level="info"
-          message="The su (super user) password is used to sign authentication tokens and also enable admin privileges when in the Console."
+          message="The su (super user) password is used to sign authentication tokens and also enable admin privileges within the Console."
           mt={1}
         />
         <ButtonRow>

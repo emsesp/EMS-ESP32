@@ -123,8 +123,8 @@ class Thermostat : public EMSdevice {
         };
 
         // for sorting based on hc number
-        friend inline bool operator<(const std::shared_ptr<HeatingCircuit> & lhs, const std::shared_ptr<HeatingCircuit> & rhs) {
-            return (lhs->hc_num_ < rhs->hc_num_);
+        friend inline bool operator<(const std::shared_ptr<HeatingCircuit> & a, const std::shared_ptr<HeatingCircuit> & b) {
+            return (a->hc_num_ < b->hc_num_);
         }
 
       private:

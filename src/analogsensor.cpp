@@ -24,7 +24,7 @@ namespace emsesp {
 uuid::log::Logger AnalogSensor::logger_{F_(analogsensor), uuid::log::Facility::DAEMON};
 
 void AnalogSensor::start() {
-    reload();
+    reload(); // fetch the list of sensors from our customization service
 
     if (analog_enabled_) {
         analogSetAttenuation(ADC_2_5db); // for all channels
@@ -38,12 +38,12 @@ void AnalogSensor::start() {
         F_(info_cmd));
 }
 
-// load settings and initializes the GPIOs
+// load settings from the customization file, sorts them and initializes the GPIOs
 void AnalogSensor::reload() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) { analog_enabled_ = settings.analog_enabled; });
 
 #if defined(EMSESP_STANDALONE)
-    analog_enabled_ = true;
+    analog_enabled_ = true; // for local offline testing
 #endif
 
     // load the list of analog sensors from the customization service
@@ -59,6 +59,9 @@ void AnalogSensor::reload() {
         }
         return true;
     });
+
+    // sort the list based on GPIO (id)
+    std::sort(sensors_.begin(), sensors_.end(), [](const Sensor & a, const Sensor & b) { return a.id() < b.id(); });
 
     // activate each sensor
     for (auto & sensor : sensors_) {
@@ -137,9 +140,7 @@ void AnalogSensor::loop() {
 
 // update analog information name and offset
 bool AnalogSensor::update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, int8_t type) {
-    // see if we can find the sensor in our customization list
-
-    boolean found_sensor = false;
+    boolean found_sensor = false; // see if we can find the sensor in our customization list
 
     EMSESP::webCustomizationService.update(
         [&](WebCustomization & settings) {
@@ -171,7 +172,7 @@ bool AnalogSensor::update(uint8_t id, const std::string & name, int16_t offset, 
         remove_ha_topic(id); // id is the GPIO
     }
 
-    // if we didn't find it, its new so create it
+    // we didn't find it, it's new, so create and store it
     if (!found_sensor) {
         EMSESP::webCustomizationService.update(
             [&](WebCustomization & settings) {
@@ -189,6 +190,7 @@ bool AnalogSensor::update(uint8_t id, const std::string & name, int16_t offset, 
             "local");
     }
 
+    // reloads the sensors in the customizations file into the sensors list
     reload();
 
     return true;
@@ -359,12 +361,11 @@ AnalogSensor::Sensor::Sensor(const uint8_t id, const std::string & name, const u
     value_ = 0; // init value to 0 always
 }
 
-// find the name from the customization service
-// if empty, return the ID as a string
+// returns name of the analog sensor or creates one if its empty
 std::string AnalogSensor::Sensor::name() const {
     if (name_.empty()) {
         char name[50];
-        snprintf(name, sizeof(name), "analogsensor_%d", id_);
+        snprintf(name, sizeof(name), "Analog Sensor GPIO%d", id_);
         return name;
     }
     return name_;

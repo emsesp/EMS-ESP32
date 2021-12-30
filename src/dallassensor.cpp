@@ -165,9 +165,13 @@ void DallasSensor::loop() {
                                 sensors_.back().temperature_c = t + sensors_.back().offset();
                                 sensors_.back().read          = true;
                                 changed_                      = true;
-                                // look in the customization service for an optional alias or offset
+                                // look in the customization service for an optional alias or offset for that particular sensor
                                 sensors_.back().apply_customization();
-                                publish_sensor(sensors_.back());
+                                publish_sensor(sensors_.back()); // call publish single
+                                // sort the sensors based on name
+                                std::sort(sensors_.begin(), sensors_.end(), [](const Sensor & a, const Sensor & b) {
+                                    return a.name() < b.name();
+                                });
                             }
                         } else {
                             sensorfails_++;

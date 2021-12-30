@@ -405,7 +405,7 @@ const emsesp_coredata = {
     },
   ],
   active_sensors: 8,
-  analog_enabled: false,
+  analog_enabled: true,
 }
 
 const emsesp_sensordata = {

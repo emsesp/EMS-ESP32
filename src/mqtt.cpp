@@ -979,8 +979,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
                 doc["min"] = 0;
                 doc["max"] = 120;
             } else {
-                // can have negative values
-                // just guessing the numbers here
+                // can have negative values, so just guessing the numbers here
                 doc["min"] = -20;
                 doc["max"] = 120;
             }

@@ -107,7 +107,8 @@ const SettingsCustomization: FC = () => {
       <>
         <Box color="warning.main">
           <Typography variant="body2">
-            You can choose for each EMS device which of it's entities (values) are to be excluded from all services.
+            You can choose for each EMS device which entities and their values are to be excluded. This applies
+            immediately to all services.
           </Typography>
         </Box>
         <ValidatedTextField
@@ -176,9 +177,9 @@ const SettingsCustomization: FC = () => {
               <StyledTableCell>
                 ({deviceEntities.reduce((a, v) => (v.x ? a + 1 : a), 0)}/{deviceEntities.length})
               </StyledTableCell>
-              <StyledTableCell align="left">Entity Name</StyledTableCell>
-              <StyledTableCell>Code</StyledTableCell>
-              <StyledTableCell align="right">Current Value</StyledTableCell>
+              <StyledTableCell align="left">ENTITY NAME</StyledTableCell>
+              <StyledTableCell>CODE</StyledTableCell>
+              <StyledTableCell align="right">VALUE</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -244,7 +245,6 @@ const SettingsCustomization: FC = () => {
         </Typography>
         {renderDeviceList()}
         {renderDeviceData()}
-
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1}>
             <ButtonRow>
