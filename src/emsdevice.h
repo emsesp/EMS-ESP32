@@ -272,16 +272,21 @@ class EMSdevice {
     void toggle_fetch(uint16_t telegram_id, bool toggle);
     bool is_fetch(uint16_t telegram_id);
     bool has_telegram_id(uint16_t id);
+    void ha_config_clear();
 
     bool ha_config_done() const {
         return ha_config_done_;
     }
-
     void ha_config_done(const bool v) {
         ha_config_done_ = v;
     }
 
-    void ha_config_clear();
+    bool ha_config_firsttime() const {
+        return ha_config_firsttime_;
+    }
+    void ha_config_firsttime(const bool v) {
+        ha_config_firsttime_ = v;
+    }
 
     enum Brand : uint8_t {
         NO_BRAND = 0, // 0
@@ -369,8 +374,9 @@ class EMSdevice {
     uint8_t     flags_ = 0;
     uint8_t     brand_ = Brand::NO_BRAND;
 
-    bool ha_config_done_ = false;
-    bool has_update_     = false;
+    bool ha_config_done_      = false;
+    bool has_update_          = false;
+    bool ha_config_firsttime_ = true; // this means a first setup of HA is needed after a restart
 
     struct TelegramFunction {
         uint16_t                    telegram_type_id_;   // it's type_id

@@ -270,7 +270,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         } else {
             LOG_DEBUG(F("Calling command '%s/%s' (%s) with value %s"), dname.c_str(), cmd, read_flash_string(cf->description_).c_str(), value);
         }
-        
+
         // call the function baesed on type
         if (cf->cmdfunction_json_) {
             return_code = ((cf->cmdfunction_json_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;

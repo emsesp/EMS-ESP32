@@ -159,7 +159,7 @@ bool System::command_publish(const char * value, const int8_t id) {
             EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
             return true;
         } else if (value_s == "other") {
-            EMSESP::publish_other_values();
+            EMSESP::publish_other_values(); // switch and heat pump
             return true;
         } else if ((value_s == read_flash_string(F_(dallassensor))) || (value_s == read_flash_string(F_(analogsensor)))) {
             EMSESP::publish_sensor_values(true);
@@ -167,8 +167,9 @@ bool System::command_publish(const char * value, const int8_t id) {
         }
     }
 
-    EMSESP::publish_all(); // ignore value and id
+    EMSESP::publish_all();
     LOG_INFO(F("Publishing all data to MQTT"));
+
     return true;
 }
 

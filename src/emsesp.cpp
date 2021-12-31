@@ -452,8 +452,8 @@ void EMSESP::publish_all(bool force) {
         publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
         publish_device_values(EMSdevice::DeviceType::SOLAR);
         publish_device_values(EMSdevice::DeviceType::MIXER);
-        publish_other_values();
-        publish_sensor_values(true);
+        publish_other_values();      // switch and heat pump
+        publish_sensor_values(true); // includes dallas and analog sensors
         system_.send_heartbeat();
     }
 }
@@ -463,10 +463,12 @@ void EMSESP::publish_all_loop() {
     if (!Mqtt::connected() || !publish_all_idx_) {
         return;
     }
-    // wait for free queue before sending next message, v3 queues HA-messages
+
+    // wait for free queue before sending next message, HA-messages are also queued
     if (!Mqtt::is_empty()) {
         return;
     }
+
     switch (publish_all_idx_++) {
     case 1:
         publish_device_values(EMSdevice::DeviceType::BOILER);
@@ -481,7 +483,7 @@ void EMSESP::publish_all_loop() {
         publish_device_values(EMSdevice::DeviceType::MIXER);
         break;
     case 5:
-        publish_other_values();
+        publish_other_values(); // switch and heat pump
         break;
     case 6:
         publish_sensor_values(true, true);
@@ -498,7 +500,8 @@ void EMSESP::publish_all_loop() {
     }
 }
 
-// force HA to re-create all the devices
+// force HA to re-create all the devices next time they are detected
+// also removes the old HA topics
 void EMSESP::reset_mqtt_ha() {
     if (!Mqtt::ha_enabled()) {
         return;
@@ -512,6 +515,7 @@ void EMSESP::reset_mqtt_ha() {
 }
 
 // create json doc for the devices values and add to MQTT publish queue
+// this will also create the HA /config topic
 // generate_values_json is called to build the device value (dv) object array
 void EMSESP::publish_device_values(uint8_t device_type) {
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN); // use max size
@@ -523,6 +527,15 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     // group by device type
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
+            // specially for HA
+            // we may have some RETAINED /config topics that reference fields in the data payloads that no longer exist
+            // remove them immediately to prevent HA from complaining
+            // we need to do this first before the data payload is published, and only done once!
+            if (Mqtt::ha_enabled() && emsdevice->ha_config_firsttime()) {
+                emsdevice->ha_config_clear();
+                emsdevice->ha_config_firsttime(false);
+            }
+
             // if its a boiler, generate json for each group and publish it directly. not nested
             if (device_type == DeviceType::BOILER) {
                 if (emsdevice->generate_values(json, DeviceValueTAG::TAG_BOILER_DATA, false, EMSdevice::OUTPUT_TARGET::MQTT)) {
@@ -578,9 +591,9 @@ void EMSESP::publish_device_values(uint8_t device_type) {
             }
         }
 
-        // if we're using HA, done is checked for each sensor in devices
+        // we want to create the /config topic after the data payload to prevent HA from throwing up a warning
         if (Mqtt::ha_enabled()) {
-            emsdevice->publish_mqtt_ha_entity_config(); // create the configs for each value as a sensor
+            emsdevice->publish_mqtt_ha_entity_config();
         }
     }
 
@@ -866,7 +879,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // only process broadcast telegrams or ones sent to us on request
     // if ((telegram->dest != 0x00) && (telegram->dest != rxservice_.ems_bus_id())) {
     if (telegram->operation == Telegram::Operation::RX_READ) {
-        // LOG_DEBUG("read telegram received, not processing");
+        // LOG_DEBUG(F("read telegram received, not processing"));
         return false;
     }
 
@@ -894,9 +907,9 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
                 knowndevice = true;
                 found       = emsdevice->handle_telegram(telegram);
                 if (found && emsdevice->is_device_id(telegram->dest)) {
-                    LOG_DEBUG("process setting 0x%02X for device 0x%02X", telegram->type_id, telegram->dest);
+                    LOG_DEBUG(F("Process setting 0x%02X for device 0x%02X"), telegram->type_id, telegram->dest);
                 }
-                // if we correctly processes the telegram follow up with sending it via MQTT if needed
+                // if we correctly processed the telegram then follow up with sending it via MQTT (if enabled)
                 if (found && Mqtt::connected()) {
                     if ((mqtt_.get_publish_onchange(emsdevice->device_type()) && emsdevice->has_update())
                         || (telegram->type_id == publish_id_ && telegram->dest == txservice_.ems_bus_id())) {

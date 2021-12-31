@@ -41,7 +41,7 @@ void DallasSensor::start() {
 
 #ifndef EMSESP_STANDALONE
     bus_.begin(dallas_gpio_);
-    LOG_INFO("Starting Dallas service");
+    LOG_INFO(F("Starting Dallas service"));
 #endif
 
     // Add API calls
@@ -169,9 +169,7 @@ void DallasSensor::loop() {
                                 sensors_.back().apply_customization();
                                 publish_sensor(sensors_.back()); // call publish single
                                 // sort the sensors based on name
-                                std::sort(sensors_.begin(), sensors_.end(), [](const Sensor & a, const Sensor & b) {
-                                    return a.name() < b.name();
-                                });
+                                std::sort(sensors_.begin(), sensors_.end(), [](const Sensor & a, const Sensor & b) { return a.name() < b.name(); });
                             }
                         } else {
                             sensorfails_++;
@@ -543,7 +541,7 @@ bool DallasSensor::Sensor::apply_customization() {
         if (sensors.size() != 0) {
             for (auto & sensor : sensors) {
 #if defined(EMSESP_DEBUG)
-                LOG_DEBUG("Loading customization for dallas sensor %s", sensor.id_str.c_str());
+                LOG_DEBUG(F("Loading customization for dallas sensor %s"), sensor.id_str.c_str());
 #endif
                 if (id_str_ == sensor.id_str) {
                     set_name(sensor.name);

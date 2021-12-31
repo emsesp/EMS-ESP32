@@ -1235,14 +1235,12 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
     return has_values;
 }
 
-// create the Home Assistant configs for each value
+// create the Home Assistant configs for each device value / entity
 // this is called when an MQTT publish is done via an EMS Device in emsesp.cpp
-// if the main Device Entity config for the device hasn't been setup its also done here
 void EMSdevice::publish_mqtt_ha_entity_config() {
-    // create the main device config if not doing already
+    // create the main device config if not already done
     if (!ha_config_done()) {
-        bool ok = publish_ha_device_config();
-        ha_config_done(ok);
+        ha_config_done(publish_ha_device_config());
     }
 
     for (auto & dv : devicevalues_) {
@@ -1267,9 +1265,10 @@ void EMSdevice::publish_mqtt_ha_entity_config() {
 // remove all config topics in HA
 void EMSdevice::ha_config_clear() {
     for (auto & dv : devicevalues_) {
-        Mqtt::publish_ha_sensor_config(dv, true); // delete topic
+        Mqtt::publish_ha_sensor_config(dv, true); // delete topic using 'true'
         dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
     }
+
     ha_config_done(false);
 }
 
