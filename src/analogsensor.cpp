@@ -211,7 +211,7 @@ void AnalogSensor::publish_sensor(Sensor sensor) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf(topic, sizeof(topic), "%s/%s", read_flash_string(F_(analogsensor)).c_str(), sensor.name().c_str());
         char payload[10];
-        Mqtt::publish(topic, Helpers::render_value(payload, sensor.value(), 10));
+        Mqtt::publish(topic, Helpers::render_value(payload, sensor.value(), 2)); // always publish as floats
     }
 }
 
@@ -254,12 +254,14 @@ void AnalogSensor::publish_values(const bool force) {
                 dataSensor["name"]    = sensor.name();
                 switch (sensor.type()) {
                 case AnalogType::IOCOUNTER:
-                    dataSensor["count"] = sensor.value();
+                    dataSensor["count"] = (uint16_t)sensor.value(); // convert to integer
                     break;
                 case AnalogType::ADC:
+                    dataSensor["value"] = (float)sensor.value(); // float
+                    break;
                 case AnalogType::READ:
                 default:
-                    dataSensor["value"] = sensor.value();
+                    dataSensor["value"] = (uint8_t)sensor.value(); // convert to char for 1 or 0
                     break;
                 }
 
@@ -376,7 +378,7 @@ std::string AnalogSensor::Sensor::name() const {
 void AnalogSensor::test() {
     // Sensor(const uint8_t id, const std::string & name, const uint16_t offset, const float factor, const uint8_t uom, const int8_t type);
     sensors_.emplace_back(36, "test12", 0, 0.1, 17, AnalogType::ADC);
-    sensors_.back().set_value(12);
+    sensors_.back().set_value(12.4);
 
     sensors_.emplace_back(37, "test13", 0, 0, 0, AnalogType::READ);
     sensors_.back().set_value(13);

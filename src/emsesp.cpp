@@ -427,13 +427,27 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     shell.printfln(F("Analog sensors:"));
     char s3[10];
     for (const auto & sensor : analogsensor_.sensors()) {
-        shell.printfln(F("  Sensor ID %d, Name: %s, Value: %d, Factor: %s, Offset: %d, UOM: %s"),
-                       sensor.id(),
-                       sensor.name().c_str(),
-                       sensor.value(),
-                       Helpers::render_value(s3, sensor.factor(), 2),
-                       sensor.offset(),
-                       EMSdevice::uom_to_string(sensor.uom()).c_str());
+        switch (sensor.type()) {
+        case AnalogSensor::AnalogType::ADC:
+            shell.printfln(F("  Sensor ID %d, Type: %s, Name: %s, Value: %s, Factor: %s, Offset: %d, UOM: %s"),
+                           sensor.id(),
+                           "ADC",
+                           sensor.name().c_str(),
+                           Helpers::render_value(s3, sensor.value(), 2),
+                           Helpers::render_value(s3, sensor.factor(), 2),
+                           sensor.offset(),
+                           EMSdevice::uom_to_string(sensor.uom()).c_str());
+            break;
+        default:
+        case AnalogSensor::AnalogType::READ:
+        case AnalogSensor::AnalogType::IOCOUNTER:
+            shell.printfln(F("  Sensor ID %d, Type: %s, Name: %s, Value: %d"),
+                           sensor.id(),
+                           sensor.type() == AnalogSensor::AnalogType::IOCOUNTER ? "IOCOUNTER" : "READ",
+                           sensor.name().c_str(),
+                           (uint16_t)sensor.value()); // as int
+            break;
+        }
     }
 
     shell.println();

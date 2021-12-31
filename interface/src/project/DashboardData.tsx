@@ -379,14 +379,6 @@ const DashboardData: FC = () => {
       return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
-    const noDevices = () => {
-      return data.devices.length === 0;
-    };
-
-    const haveSensors = () => {
-      return data.active_sensors > 0;
-    };
-
     return (
       <>
         <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
@@ -422,7 +414,7 @@ const DashboardData: FC = () => {
                   </TableCell>
                 </TableRow>
               ))}
-              {haveSensors() && (
+              {(data.active_sensors > 0 || data.analog_enabled) && (
                 <TableRow hover selected={selectedDevice === 0} onClick={() => fetchSensorData()}>
                   <TableCell>
                     <DeviceIcon type="Sensor" />
@@ -441,7 +433,7 @@ const DashboardData: FC = () => {
           </Table>
         </IconContext.Provider>
 
-        {noDevices() && (
+        {data.devices.length === 0 && (
           <MessageBox
             my={2}
             level="error"

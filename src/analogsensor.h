@@ -52,11 +52,11 @@ class AnalogSensor {
             return id_;
         }
 
-        uint32_t value() const {
+        float value() const {
             return value_;
         }
 
-        void set_value(uint32_t value) {
+        void set_value(float value) {
             value_ = value;
         }
 
@@ -100,7 +100,7 @@ class AnalogSensor {
         uint16_t    offset_;
         float       factor_;
         uint8_t     uom_;
-        uint32_t    value_;
+        float       value_; // float because of the factor is a float
         int8_t      type_;
     };
 

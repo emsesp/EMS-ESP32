@@ -143,7 +143,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
                 obj["t"]       = sensor.type();
 
                 if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
-                    obj["v"] = sensor.value(); // is optional and an unsigned long
+                    obj["v"] = (float)sensor.value(); // is optional and is a float
                 }
             }
         }

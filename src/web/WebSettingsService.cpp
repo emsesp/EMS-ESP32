@@ -158,14 +158,14 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     // adc
     prev                    = settings.analog_enabled;
-    settings.analog_enabled = root["analog_enabled"] | true;
+    settings.analog_enabled = root["analog_enabled"] | EMSESP_DEFAULT_ANALOG_ENABLED;
     check_flag(prev, settings.analog_enabled, ChangeFlags::ADC);
 
     //
     // these need reboots to be applied...
     //
     prev                    = settings.telnet_enabled;
-    settings.telnet_enabled = root["telnet_enabled"] | true;
+    settings.telnet_enabled = root["telnet_enabled"] | EMSESP_DEFAULT_TELNET_ENABLED;
     check_flag(prev, settings.telnet_enabled, ChangeFlags::RESTART);
 
     prev                = settings.ems_bus_id;
