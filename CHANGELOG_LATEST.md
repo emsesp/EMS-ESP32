@@ -25,7 +25,6 @@
 ## Changed
 
 - Refactor WebUI to use ReactHooks. New theme, increased performance, better mobile responsiveness [#124](https://github.com/emsesp/EMS-ESP32/issues/124)
-- Upgraded LittleFS to the latest version
 
 **Breaking changes:**
 

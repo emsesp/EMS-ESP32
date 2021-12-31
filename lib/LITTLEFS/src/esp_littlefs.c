@@ -34,7 +34,7 @@
 
 //#define CONFIG_LITTLEFS_USE_ONLY_HASH
 #define CONFIG_LITTLEFS_HUMAN_READABLE 0   /* Use 1 for verbose errors */
-#define CONFIG_LITTLEFS_SPIFFS_COMPAT 0    /* Use 1 for better drop-in replacement of SPIFFS */
+#define CONFIG_LITTLEFS_SPIFFS_COMPAT 1    /* Use 1 for better drop-in replacement of SPIFFS */
 #define CONFIG_LITTLEFS_MAX_PARTITIONS 3
 #define CONFIG_LITTLEFS_PAGE_SIZE 256
 #define CONFIG_LITTLEFS_OBJ_NAME_LEN 64

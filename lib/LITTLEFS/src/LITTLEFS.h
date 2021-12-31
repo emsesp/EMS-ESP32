@@ -16,23 +16,21 @@
 
 #include "FS.h"
 
-namespace fs {
+namespace fs
+{
 
-class LITTLEFSFS : public FS {
-  public:
+class LITTLEFSFS : public FS
+{
+public:
     LITTLEFSFS();
-    ~LITTLEFSFS();
-    bool   begin(bool formatOnFail = false, const char * basePath = "/littlefs", uint8_t maxOpenFiles = 10, const char * partitionLabel = "spiffs");
-    bool   format();
+    bool begin(bool formatOnFail=false, const char * basePath="/littlefs", uint8_t maxOpenFiles=5);
+    bool format();
     size_t totalBytes();
     size_t usedBytes();
-    void   end();
-
-  private:
-    char * partitionLabel_;
+    void end();
 };
 
-} // namespace fs
+}
 
 extern fs::LITTLEFSFS LITTLEFS;
 
