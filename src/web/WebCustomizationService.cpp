@@ -73,7 +73,6 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
         sensorJson["name"]    = sensor.name;   // n
         sensorJson["offset"]  = sensor.offset; // o
         sensorJson["factor"]  = sensor.factor; // f
-        sensorJson["uom"]     = sensor.uom;    // u
         sensorJson["type"]    = sensor.type;   // t
     }
 
@@ -117,7 +116,6 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
             sensor.name                = analogJson["name"].as<std::string>();
             sensor.offset              = analogJson["offset"];
             sensor.factor              = analogJson["factor"];
-            sensor.uom                 = analogJson["uom"];
             sensor.type                = analogJson["type"];
             settings.analogCustomizations.push_back(sensor); // add to list
         }

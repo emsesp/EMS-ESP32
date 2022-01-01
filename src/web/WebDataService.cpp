@@ -137,7 +137,6 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
                 JsonObject obj = analogs.createNestedObject();
                 obj["i"]       = sensor.id();
                 obj["n"]       = sensor.name();
-                obj["u"]       = sensor.uom();
                 obj["o"]       = sensor.offset();
                 obj["f"]       = sensor.factor();
                 obj["t"]       = sensor.type();
@@ -275,9 +274,8 @@ void WebDataService::write_analog(AsyncWebServerRequest * request, JsonVariant &
         std::string name   = analog["name"];
         float       factor = analog["factor"];
         int16_t     offset = analog["offset"];
-        uint8_t     uom    = analog["uom"];
         int8_t      type   = analog["type"];
-        ok                 = EMSESP::analogsensor_.update(id, name, offset, factor, uom, type);
+        ok                 = EMSESP::analogsensor_.update(id, name, offset, factor, type);
     }
 
     AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);

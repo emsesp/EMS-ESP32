@@ -36,7 +36,7 @@ class AnalogSensor {
   public:
     class Sensor {
       public:
-        Sensor(const uint8_t id, const std::string & name, const uint16_t offset, const float factor, const uint8_t uom, const int8_t type);
+        Sensor(const uint8_t id, const std::string & name, const uint16_t offset, const float factor, const int8_t type);
         ~Sensor() = default;
 
         void set_offset(const int16_t offset) {
@@ -68,16 +68,8 @@ class AnalogSensor {
             factor_ = factor;
         }
 
-        void set_uom(const uint8_t uom) {
-            uom_ = uom;
-        }
-
         uint16_t offset() const {
             return offset_;
-        }
-
-        uint8_t uom() const {
-            return uom_;
         }
 
         int8_t type() const {
@@ -99,7 +91,6 @@ class AnalogSensor {
         std::string name_;
         uint16_t    offset_;
         float       factor_;
-        uint8_t     uom_;
         float       value_; // float because of the factor is a float
         int8_t      type_;
     };
@@ -147,7 +138,7 @@ class AnalogSensor {
         return sensors_.size();
     }
 
-    bool update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, int8_t type);
+    bool update(uint8_t id, const std::string & name, int16_t offset, float factor, int8_t type);
     bool get_value_info(JsonObject & output, const char * cmd, const int8_t id);
 
 #ifdef EMSESP_DEBUG

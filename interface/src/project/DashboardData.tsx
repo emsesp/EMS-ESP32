@@ -256,7 +256,7 @@ const DashboardData: FC = () => {
   };
 
   const addAnalogSensor = () => {
-    setAnalog({ i: 0, n: '', u: 0, v: 0, o: 0, t: 0, f: 0 });
+    setAnalog({ i: 0, n: '', v: 0, o: 0, t: 0, f: 1 });
   };
 
   const sendSensor = async () => {
@@ -579,7 +579,9 @@ const DashboardData: FC = () => {
               </StyledTableCell>
               <StyledTableCell>{analog_data.n}</StyledTableCell>
               <StyledTableCell>{AnalogTypes[analog_data.t]}</StyledTableCell>
-              <StyledTableCell align="right">{formatValue(analog_data.v, analog_data.u)}</StyledTableCell>
+              <StyledTableCell align="right">
+                {formatValue(analog_data.v, analog_data.t === 3 ? 17 : 0)}
+              </StyledTableCell>
             </StyledTableRow>
           ))}
         </TableBody>
@@ -595,7 +597,6 @@ const DashboardData: FC = () => {
           name: analog.n,
           offset: analog.o,
           factor: analog.f,
-          uom: analog.u,
           type: -1
         });
 
@@ -623,7 +624,6 @@ const DashboardData: FC = () => {
           name: analog.n,
           offset: analog.o,
           factor: analog.f,
-          uom: analog.u,
           type: analog.t
         });
 
@@ -682,15 +682,6 @@ const DashboardData: FC = () => {
               </Grid>
               {analog.t === 3 && (
                 <>
-                  <Grid item>
-                    <ValidatedTextField name="u" label="UoM" value={analog.u} select onChange={updateValue(setAnalog)}>
-                      {DeviceValueUOM_s.map((val, i) => (
-                        <MenuItem key={i} value={i}>
-                          {val}
-                        </MenuItem>
-                      ))}
-                    </ValidatedTextField>
-                  </Grid>
                   <Grid item>
                     <ValidatedTextField
                       name="o"

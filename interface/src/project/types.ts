@@ -79,7 +79,6 @@ export interface Analog {
   i: number;
   n: string;
   v?: number;
-  u: number;
   o: number;
   f: number;
   t: number;
@@ -233,6 +232,5 @@ export interface WriteAnalog {
   name: string;
   factor: number;
   offset: number;
-  uom: number;
   type: number;
 }

@@ -429,14 +429,13 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     for (const auto & sensor : analogsensor_.sensors()) {
         switch (sensor.type()) {
         case AnalogSensor::AnalogType::ADC:
-            shell.printfln(F("  Sensor ID %d, Type: %s, Name: %s, Value: %s, Factor: %s, Offset: %d, UOM: %s"),
+            shell.printfln(F("  Sensor ID %d, Type: %s, Name: %s, Value: %s, Factor: %s, Offset: %d"),
                            sensor.id(),
                            "ADC",
                            sensor.name().c_str(),
                            Helpers::render_value(s3, sensor.value(), 2),
                            Helpers::render_value(s3, sensor.factor(), 2),
-                           sensor.offset(),
-                           EMSdevice::uom_to_string(sensor.uom()).c_str());
+                           sensor.offset());
             break;
         default:
         case AnalogSensor::AnalogType::READ:

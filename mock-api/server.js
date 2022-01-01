@@ -417,10 +417,10 @@ const emsesp_sensordata = {
   ],
   // sensors: [],
   analogs: [
-    { i: 36, n: 'name1', v: 12, u: 17, o: 17, f: 0, t: 0 },
-    { i: 37, n: 'name2', v: 13, u: 17, o: 17, f: 0, t: 1 },
-    { i: 39, n: 'name4', v: 14, u: 0, o: 0, f: 0, t: 2 },
-    { i: 40, n: 'name5', v: 16, u: 0, o: 0, f: 0, t: 3 },
+    { i: 36, n: 'name1', v: 12, o: 17, f: 0, t: 0 },
+    { i: 37, n: 'name2', v: 13, o: 17, f: 0, t: 1 },
+    { i: 39, n: 'name4', v: 14, o: 0, f: 0, t: 2 },
+    { i: 40, n: 'name5', v: 16, o: 0, f: 0, t: 3 },
   ],
   // analogs: [],
 }
@@ -1051,7 +1051,6 @@ rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
       n: analog.name,
       f: analog.factor,
       o: analog.offset,
-      u: analog.uom,
       t: analog.type,
     })
   } else {
@@ -1062,7 +1061,6 @@ rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
       emsesp_sensordata.analogs[objIndex].n = analog.name
       emsesp_sensordata.analogs[objIndex].o = analog.offset
       emsesp_sensordata.analogs[objIndex].f = analog.factor
-      emsesp_sensordata.analogs[objIndex].u = analog.uom
       emsesp_sensordata.analogs[objIndex].t = analog.type
     }
   }

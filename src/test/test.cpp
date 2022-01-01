@@ -577,7 +577,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         // rename
         // bool update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, uint8_t type);
-        EMSESP::analogsensor_.update(36, "analogtest", 1, 3.4, 17, 1);
+        EMSESP::analogsensor_.update(36, "analogtest", 1, 3.4, 1);
         shell.invoke_command("show");
         // shell.invoke_command("call system publish");
     }

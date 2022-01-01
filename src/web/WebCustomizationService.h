@@ -46,8 +46,7 @@ class AnalogCustomization {
     std::string name;
     uint16_t    offset;
     float       factor;
-    uint8_t     uom;
-    int8_t      type; // -1 for deletion
+    int8_t      type; // -1 is for deletion
 
     // used for removing from a list
     bool operator==(const AnalogCustomization & a) const {
