@@ -385,6 +385,7 @@ int Helpers::atoint(const char * value) {
 
 // rounds a number to 2 decimal places
 // example: round2(3.14159) -> 3.14
+// TODO document here what fahrenheit really does here. If 0 then no conversion. if 1 then always 0?
 float Helpers::round2(float value, const int8_t divider, const uint8_t fahrenheit) {
     float val = (value * 100 + 0.5);
     if (divider > 0) {
