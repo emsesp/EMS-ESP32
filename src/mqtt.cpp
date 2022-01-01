@@ -901,9 +901,13 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     snprintf(&uniq[0], uniq.capacity() + 1, "%s_%s", device_name, new_entity);
     std::replace(uniq.begin(), uniq.end(), '.', '_');
 
-    char topic[MQTT_TOPIC_MAX_SIZE];
+    // use_ha_sensor is true if we're using the Sensor Entity https://developers.home-assistant.io/docs/core/entity/sensor
+    bool use_ha_sensor = false;
 
-    // if it's a command then we can use Number, Switch. Otherwise stick to sensor
+    // create the topic, depending on the type and whether the device entity is writable (a command)
+    // https://developers.home-assistant.io/docs/core/entity
+    char topic[MQTT_TOPIC_MAX_SIZE];
+    // if it's a command then we can use Number, Switch. Otherwise stick to Sensor
     if (has_cmd) {
         switch (type) {
         case DeviceValueType::INT:
@@ -912,6 +916,8 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
         case DeviceValueType::USHORT:
         case DeviceValueType::ULONG:
             // number - https://www.home-assistant.io/integrations/number.mqtt/
+            // https://developers.home-assistant.io/docs/core/entity/number
+            // mode is auto, but we could later fix to slider or box (preferred) to avoid accidentally changing the value from HA
             snprintf(topic, sizeof(topic), "number/%s/%s/config", mqtt_base_.c_str(), uniq.c_str());
             break;
         case DeviceValueType::BOOL:
@@ -928,10 +934,11 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
             break;
         }
     } else {
-        // plain old read only sensor or binary sensor
+        // plain old read only device entity
         if (type == DeviceValueType::BOOL) {
             snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // binary sensor
         } else {
+            use_ha_sensor = true;
             snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // normal HA sensor, not a boolean one
         }
     }
@@ -939,29 +946,35 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     // if we're asking to remove this topic, send an empty payload and exit
     // https://github.com/emsesp/EMS-ESP32/issues/196
     if (remove) {
-        LOG_WARNING(F("Lost device value for %s. Removing HA config"), uniq.c_str());
+        LOG_DEBUG(F("Removing HA config for %s"), uniq.c_str());
         publish_ha(topic);
         return;
     }
 
-    bool have_tag = !EMSdevice::tag_to_string(tag).empty();
+    bool have_tag  = !EMSdevice::tag_to_string(tag).empty();
+    bool is_nested = (nested_format_ == 1); // nested_format is 1 if nested, otherwise 2 for single topics
 
-    // nested_format is 1 if nested, otherwise 2 for single topics
-    bool is_nested = (nested_format_ == 1);
-
+    // build the payload
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
     doc["~"]       = mqtt_base_;
     doc["uniq_id"] = uniq;
 
-    // handle bi-directional commands
-    // note: there is no way to handle strings so datetimes (e.g. set_datetime, set_holiday, set_wwswitchtime etc) are not supported
+    const char * ic_ha  = "ic";           // icon - only set this if there is no device class
+    const char * sc_ha  = "state_class";  // state class
+    const char * dc_ha  = "device_class"; // device class
+    const char * uom_ha = "unit_of_meas"; // unit of measure
+
+    // handle commands, which are device entities that are writable
+    // we add the command topic
+    // and since these don't have a device class we need to add the icon ourselves
+    // note: there is no way to handle strings in HA so datetimes (e.g. set_datetime, set_holiday, set_wwswitchtime etc) are excluded
     if (has_cmd) {
         // command topic back to EMS-ESP
-        std::string command_topic = uniq; // copy
+        std::string command_topic = uniq;
         std::replace(command_topic.begin(), command_topic.end(), '_', '/');
         doc["command_topic"] = "~/" + command_topic;
 
-        // enums
+        // enums, add options
         if (type == DeviceValueType::ENUM) {
             JsonArray option_list = doc.createNestedArray("options");
             for (uint8_t i = 0; i < options_size; i++) {
@@ -984,10 +997,12 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
                 doc["max"] = 120;
             }
             doc["step"] = 0.5;
+            doc[ic_ha]  = F_(icondegrees);
             break;
         case DeviceValueUOM::PERCENT:
             doc["min"] = 0;
             doc["max"] = EMS_VALUE_UINT_NOTSET; // e.g. boiler selected max power
+            doc[ic_ha] = F_(iconpercent);
             break;
         case DeviceValueUOM::MINUTES:
             doc["min"] = 0;
@@ -1027,98 +1042,97 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     }
     doc["val_tpl"] = val_tpl;
 
-    // look at the device value type
+    // special case to handle booleans
+    // applies to both Binary Sensor (read only) and a Switch (for a command)
+    // always render boolean as strings true & false
+    // and has no unit of measure or icon
     if (type == DeviceValueType::BOOL) {
         char result[10];
-        // render booleans always as a string for HA
         doc[F("payload_on")]  = Helpers::render_boolean(result, true);
         doc[F("payload_off")] = Helpers::render_boolean(result, false);
-        if (EMSESP::bool_format() == BOOL_FORMAT_10) {
-            doc["state_class"] = F_(measurement);
-        }
-
+        doc[sc_ha]            = F_(measurement);
     } else {
-        // unit of measure
+        // always set the uom
         if (uom != DeviceValueUOM::NONE) {
-            doc["unit_of_meas"] = EMSdevice::uom_to_string(uom);
+            doc[uom_ha] = EMSdevice::uom_to_string(uom);
         }
+    }
 
-        const char * ic = "ic"; // icon
-        const char * sc = "state_class";
-        const char * dc = "device_class";
-
+    // this next section is building using the Sensor Entity
+    // https://developers.home-assistant.io/docs/core/entity/sensor
+    // for read only sensors. It uses a device class to determine icon
+    // and state class
+    if (use_ha_sensor) {
         switch (uom) {
         case DeviceValueUOM::DEGREES:
         case DeviceValueUOM::DEGREES_R:
-            doc[ic] = F_(icondegrees);
-            doc[sc] = F_(measurement);
-            doc[dc] = F("temperature");
+            doc[sc_ha] = F_(measurement);
+            doc[dc_ha] = F("temperature"); // no icon needed
             break;
         case DeviceValueUOM::PERCENT:
-            doc[ic] = F_(iconpercent);
-            doc[sc] = F_(measurement);
-            doc[dc] = F("power_factor");
+            doc[sc_ha] = F_(measurement);
+            doc[dc_ha] = F("power_factor"); // no icon needed
             break;
         case DeviceValueUOM::SECONDS:
         case DeviceValueUOM::MINUTES:
         case DeviceValueUOM::HOURS:
-            doc[ic] = F_(icontime);
+            doc[ic_ha] = F_(icontime);
             if (type == DeviceValueType::TIME) {
-                doc[sc] = F_(total_increasing);
+                doc[sc_ha] = F_(total_increasing);
             } else {
-                doc[sc] = F_(measurement);
+                doc[sc_ha] = F_(measurement);
             }
             break;
         case DeviceValueUOM::KB:
-            doc[ic] = F_(iconkb);
+            doc[ic_ha] = F_(iconkb);
             break;
         case DeviceValueUOM::LMIN:
-            doc[ic] = F_(iconlmin);
-            doc[sc] = F_(measurement);
+            doc[ic_ha] = F_(iconlmin);
+            doc[sc_ha] = F_(measurement);
             break;
         case DeviceValueUOM::WH:
-            doc[ic] = F_(iconkwh);
             if (entity == FL_(energyToday)[0]) {
-                doc[sc] = F_(total_increasing);
+                doc[sc_ha] = F_(total_increasing);
             } else {
-                doc[sc] = F_(measurement);
+                doc[sc_ha] = F_(measurement);
             }
-            doc[dc] = F("energy");
+            doc[dc_ha] = F("energy"); // no icon needed
             break;
         case DeviceValueUOM::KWH:
-            doc[ic] = F_(iconkwh);
-            doc[sc] = F_(total_increasing);
-            doc[dc] = F("energy");
+            doc[sc_ha] = F_(total_increasing);
+            doc[dc_ha] = F("energy"); // no icon needed
             break;
         case DeviceValueUOM::UA:
-            doc[ic] = F_(iconua);
-            doc[sc] = F_(measurement);
+            doc[ic_ha] = F_(iconua);
+            doc[sc_ha] = F_(measurement);
             break;
         case DeviceValueUOM::BAR:
-            doc[ic] = F_(iconbar);
-            doc[sc] = F_(measurement);
-            // doc[dc] = F("pressure"); // HA only supports mbar and hPA, not bar
+            doc[sc_ha] = F_(measurement);
+            doc[dc_ha] = F("pressure");
             break;
         case DeviceValueUOM::W:
         case DeviceValueUOM::KW:
-            doc[ic] = F_(iconkw);
-            doc[sc] = F_(measurement);
-            doc[dc] = F("power");
+            doc[sc_ha] = F_(measurement);
+            doc[dc_ha] = F("power");
             break;
         case DeviceValueUOM::DBM:
-            doc[ic] = F_(icondbm);
-            doc[sc] = F_(measurement);
-            doc[dc] = F("signal_strength");
+            doc[sc_ha] = F_(measurement);
+            doc[dc_ha] = F("signal_strength");
             break;
         case DeviceValueUOM::NONE:
-            if ((type == DeviceValueType::INT || type == DeviceValueType::UINT || type == DeviceValueType::SHORT || type == DeviceValueType::USHORT
-                 || type == DeviceValueType::ULONG)
-                // some entities are not linear, like service code number which cause HA to complain
-                && (entity != FL_(ID)[0]) && (entity != FL_(hatemp)[0]) && (entity != FL_(serviceCodeNumber)[0])) {
-                doc[ic] = F_(iconnum);
-                doc[sc] = F_(total_increasing);
-            } else if (entity != FL_(hamode)[0]) {
-                doc[sc] = F_(measurement);
+            // for device entities which have numerical values, with no UOM
+            if ((type != DeviceValueType::STRING)
+                && (type == DeviceValueType::INT || type == DeviceValueType::UINT || type == DeviceValueType::SHORT || type == DeviceValueType::USHORT
+                    || type == DeviceValueType::ULONG)) {
+                doc[ic_ha] = F_(iconnum); // set icon
+                // determine if its a measurement or total increasing
+                // most of the values are measurement. for example Tx Reads will increment but can be reset to 0 after a restart
+                // all the starts are increasing, and they are ULONGs
+                if (type == DeviceValueType::ULONG) {
+                    doc[sc_ha] = F_(total_increasing);
+                } else {
+                    doc[sc_ha] = F_(measurement); // default to measurement
+                }
             }
             break;
         default:
