@@ -170,7 +170,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           FL_(maintenanceType),
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_maintenance));
-    maintenanceType_ = 0; // TODO test
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
                           &maintenanceTime_,
                           DeviceValueType::USHORT,
