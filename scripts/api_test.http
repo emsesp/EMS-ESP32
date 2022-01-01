@@ -1,0 +1,31 @@
+# testing EMS-ESP API
+# use with https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg
+
+GET http://ems-esp.local/api/system/info
+
+###
+
+GET http://ems-esp.local/api/thermostat/seltemp
+
+###
+
+POST http://ems-esp.local/api/thermostat/seltemp
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : 21.0
+}
+
+###
+
+POST http://ems-esp.local/api/thermostat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "entity" : "seltemp",
+    "value" : 21.0
+}

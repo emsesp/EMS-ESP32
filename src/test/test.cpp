@@ -782,6 +782,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 #if defined(EMSESP_STANDALONE)
         // Web API TESTS
         AsyncWebServerRequest request;
+
         request.method(HTTP_GET);
 
         request.url("/api/thermostat"); // check if defaults to info
@@ -807,7 +808,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         JsonVariant         json;
 
         // 1
-        char data1[] = "{\"name\":\"temp\",\"value\":11}";
+        char data1[] = "{\"entity\":\"seltemp\",\"value\":11}";
         deserializeJson(doc, data1);
         json = doc.as<JsonVariant>();
         request.url("/api/thermostat");
@@ -817,11 +818,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         char data2[] = "{\"value\":12}";
         deserializeJson(doc, data2);
         json = doc.as<JsonVariant>();
-        request.url("/api/thermostat/temp");
+        request.url("/api/thermostat/seltemp");
         EMSESP::webAPIService.webAPIService_post(&request, json);
 
         // 3
-        char data3[] = "{\"device\":\"thermostat\", \"name\":\"seltemp\",\"value\":13}";
+        char data3[] = "{\"device\":\"thermostat\", \"cmd\":\"seltemp\",\"value\":13}";
         deserializeJson(doc, data3);
         json = doc.as<JsonVariant>();
         request.url("/api");
