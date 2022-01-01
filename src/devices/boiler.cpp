@@ -166,10 +166,11 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
                           &maintenanceType_,
                           DeviceValueType::ENUM,
-                          FL_(enum_off_time_date),
+                          FL_(enum_off_time_date_manual),
                           FL_(maintenanceType),
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_maintenance));
+    maintenanceType_ = 0; // TODO test
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
                           &maintenanceTime_,
                           DeviceValueType::USHORT,
@@ -977,7 +978,8 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
         return;
     }
 
-    has_update(telegram, maintenanceType_, 0); // 0 = none, 1 = by operating hours, 2 = by date
+    // added additional type 3 (for Nefit TrendLine HRC 30/CW5)
+    has_update(telegram, maintenanceType_, 0); // 0 = off, 1 = by operating hours, 2 = by date, 3 = manual
 
     uint8_t time = (maintenanceTime_ == EMS_VALUE_USHORT_NOTSET) ? EMS_VALUE_UINT_NOTSET : maintenanceTime_ / 100;
     telegram->read_value(time, 1);
@@ -1537,7 +1539,7 @@ bool Boiler::set_maintenance(const char * value, const int8_t id) {
     }
 
     uint8_t num;
-    if (Helpers::value2enum(value, num, FL_(enum_off_time_date))) {
+    if (Helpers::value2enum(value, num, FL_(enum_off_time_date_manual))) {
         LOG_INFO(F("Setting maintenance type to %s"), value);
         write_command(0x15, 0, num, 0x15);
         return true;
