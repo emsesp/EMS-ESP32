@@ -54,7 +54,7 @@ bool DeviceValue::hasvalue() {
         has_value = Helpers::hasValue(*(uint32_t *)(value_p));
         break;
     case DeviceValueType::CMD:
-        has_value = true;
+        has_value = false; // commands don't have values!
         break;
     default:
         break;
