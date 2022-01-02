@@ -33,6 +33,10 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import EditIcon from '@mui/icons-material/Edit';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
+import CancelIcon from '@mui/icons-material/Cancel';
+import SendIcon from '@mui/icons-material/TrendingFlat';
+import SaveIcon from '@mui/icons-material/Save';
+import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 
 import DeviceIcon from './DeviceIcon';
 
@@ -243,10 +247,21 @@ const DashboardData: FC = () => {
             )}
           </DialogContent>
           <DialogActions>
-            <Button variant="outlined" onClick={() => setDeviceValue(undefined)} color="secondary">
+            <Button
+              startIcon={<CancelIcon />}
+              variant="outlined"
+              onClick={() => setDeviceValue(undefined)}
+              color="secondary"
+            >
               Cancel
             </Button>
-            <Button variant="outlined" type="submit" onClick={() => sendDeviceValue()} color="warning">
+            <Button
+              startIcon={<SendIcon />}
+              variant="outlined"
+              type="submit"
+              onClick={() => sendDeviceValue()}
+              color="warning"
+            >
               Send
             </Button>
           </DialogActions>
@@ -322,10 +337,21 @@ const DashboardData: FC = () => {
             </Grid>
           </DialogContent>
           <DialogActions>
-            <Button variant="outlined" onClick={() => setSensor(undefined)} color="secondary">
+            <Button
+              startIcon={<CancelIcon />}
+              variant="outlined"
+              onClick={() => setSensor(undefined)}
+              color="secondary"
+            >
               Cancel
             </Button>
-            <Button variant="outlined" type="submit" onClick={() => sendSensor()} color="warning">
+            <Button
+              startIcon={<SaveIcon />}
+              variant="outlined"
+              type="submit"
+              onClick={() => sendSensor()}
+              color="warning"
+            >
               Save
             </Button>
           </DialogActions>
@@ -713,19 +739,30 @@ const DashboardData: FC = () => {
               )}
             </Grid>
             <Box color="warning.main" mt={2}>
-              <Typography variant="body2">Warning: Be careful when assigning a GPIO!</Typography>
+              <Typography variant="body2">Warning: be careful when assigning a GPIO!</Typography>
             </Box>
           </DialogContent>
           <DialogActions>
             <Box flexGrow={1} sx={{ '& button': { mt: 0 } }}>
-              <Button variant="outlined" color="error" onClick={() => sendRemoveAnalog()}>
-                Delete
+              <Button startIcon={<RemoveIcon />} variant="outlined" color="error" onClick={() => sendRemoveAnalog()}>
+                Remove
               </Button>
             </Box>
-            <Button variant="outlined" onClick={() => setAnalog(undefined)} color="secondary">
+            <Button
+              startIcon={<CancelIcon />}
+              variant="outlined"
+              onClick={() => setAnalog(undefined)}
+              color="secondary"
+            >
               Cancel
             </Button>
-            <Button variant="outlined" type="submit" onClick={() => sendAnalog()} color="warning">
+            <Button
+              startIcon={<SaveIcon />}
+              variant="outlined"
+              type="submit"
+              onClick={() => sendAnalog()}
+              color="warning"
+            >
               Save
             </Button>
           </DialogActions>
