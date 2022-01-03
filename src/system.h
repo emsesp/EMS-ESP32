@@ -139,6 +139,10 @@ class System {
         return fahrenheit_;
     }
 
+    void healthcheck(uint8_t healthcheck) {
+        healthcheck_ = healthcheck;
+    }
+
     void show_system(uuid::console::Shell & shell);
     void wifi_reconnect();
     void show_users(uuid::console::Shell & shell);
@@ -159,27 +163,30 @@ class System {
     static constexpr uint32_t BUTTON_LongPressDelay  = 750;  // Hold period for a long press event (in ms)
     static constexpr uint32_t BUTTON_VLongPressDelay = 9000; // Hold period for a very long press event (in ms)
 
-    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY    = 5000;  // check every 5 seconds
-    static constexpr uint32_t LED_WARNING_BLINK         = 1000;  // pulse to show no connection, 1 sec
-    static constexpr uint32_t LED_WARNING_BLINK_FAST    = 100;   // flash quickly for boot up sequence
-    static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL = 60000; // in milliseconds, how often the MQTT heartbeat is sent (1 min)
-    static constexpr uint8_t  LED_ON                    = HIGH;  // LED
+    // healthcheck
+    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY          = 5000; // do a system check every 5 seconds
+    static constexpr uint32_t HEALTHCHECK_LED_LONG_DUARATION  = 1500;
+    static constexpr uint32_t HEALTHCHECK_LED_FLASH_DUARATION = 150;
+    static constexpr uint8_t  HEALTHCHECK_NO_BUS              = (1 << 0); // 1
+    static constexpr uint8_t  HEALTHCHECK_NO_NETWORK          = (1 << 1); // 2
+    static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL       = 60000;    // in milliseconds, how often the MQTT heartbeat is sent (1 min)
+    static constexpr uint8_t  LED_ON                          = HIGH;     // LED on
 
 #ifndef EMSESP_STANDALONE
     static uuid::syslog::SyslogService syslog_;
 #endif
 
-    void   led_monitor();
-    void   set_led_speed(uint32_t speed);
-    void   system_check();
+    void led_monitor();
+    void system_check();
+
     int8_t wifi_quality(int8_t dBm);
 
-    bool     system_healthy_     = false;
-    uint32_t led_flash_speed_    = LED_WARNING_BLINK_FAST; // default boot flashes quickly
-    uint32_t last_heartbeat_     = 0;
-    uint32_t last_system_check_  = 0;
-    bool     upload_status_      = false; // true if we're in the middle of a OTA firmware upload
-    bool     ethernet_connected_ = false;
+    uint8_t  healthcheck_       = HEALTHCHECK_NO_NETWORK | HEALTHCHECK_NO_BUS; // start with all flags set, no wifi and no ems bus connection
+    uint32_t last_heartbeat_    = 0;
+    uint32_t last_system_check_ = 0;
+
+    bool upload_status_      = false; // true if we're in the middle of a OTA firmware upload
+    bool ethernet_connected_ = false;
 
     // settings, copies from WebSettings class in WebSettingsService.h
     std::string hostname_ = FACTORY_WIFI_HOSTNAME;

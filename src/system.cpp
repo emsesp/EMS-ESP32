@@ -460,8 +460,8 @@ void System::led_init(bool refresh) {
     }
 
     if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
-        pinMode(led_gpio_, OUTPUT); // 0 means disabled
-        digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
+        pinMode(led_gpio_, OUTPUT);       // 0 means disabled
+        digitalWrite(led_gpio_, !LED_ON); // start with LED off
     }
 }
 
@@ -591,12 +591,6 @@ void System::send_heartbeat() {
     }
 }
 
-// sets rate of led flash
-void System::set_led_speed(uint32_t speed) {
-    led_flash_speed_ = speed;
-    led_monitor();
-}
-
 // initializes network
 void System::network_init(bool refresh) {
     if (refresh) {
@@ -648,33 +642,41 @@ void System::network_init(bool refresh) {
     ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
 }
 
-// check health of system, done every few seconds
+// check health of system, done every 5 seconds
 void System::system_check() {
+    static uint8_t last_healthcheck_ = 0;
+
     if (!last_system_check_ || ((uint32_t)(uuid::get_uptime() - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
         last_system_check_ = uuid::get_uptime();
 
-#ifndef EMSESP_STANDALONE
+        // check if we have a valid network connection
         if (!ethernet_connected() && (WiFi.status() != WL_CONNECTED)) {
-            set_led_speed(LED_WARNING_BLINK_FAST);
-            system_healthy_ = false;
-            return;
-        }
-#endif
-
-        // not healthy if bus not connected
-        if (!EMSbus::bus_connected()) {
-            if (system_healthy_) {
-                LOG_ERROR(F("Error: No connection to the EMS bus"));
-            }
-            system_healthy_ = false;
-            set_led_speed(LED_WARNING_BLINK); // flash every 1/2 second from now on
+            healthcheck_ |= HEALTHCHECK_NO_NETWORK;
         } else {
-            // if it was unhealthy but now we're better, make sure the LED is solid again cos we've been healed
-            if (!system_healthy_) {
-                system_healthy_ = true;
-                send_heartbeat();
+            healthcheck_ &= ~HEALTHCHECK_NO_NETWORK;
+        }
+
+        // check if we have a bus connection
+        if (!EMSbus::bus_connected()) {
+            healthcheck_ |= HEALTHCHECK_NO_BUS;
+        } else {
+            healthcheck_ &= ~HEALTHCHECK_NO_BUS;
+        }
+
+        // see if he healthcheck state has changed
+        if (healthcheck_ != last_healthcheck_) {
+            last_healthcheck_ = healthcheck_;
+            // see if we're better now
+            if (healthcheck_ == 0) {
+                // everything is healthy, show LED permanently on or off depending on setting
                 if (led_gpio_) {
                     digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
+                }
+                send_heartbeat();
+            } else {
+                // turn off LED so we're ready to the flashes
+                if (led_gpio_) {
+                    digitalWrite(led_gpio_, !LED_ON);
                 }
             }
         }
@@ -713,20 +715,67 @@ void System::commands_init() {
     Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system/#", nullptr); // use empty function callback
 }
 
-// flashes the LED
+// uses LED to show system health
 void System::led_monitor() {
-    if (!led_gpio_) {
-        return;
+    // we only need to run the LED healthcheck if there are errors
+    if (!healthcheck_) {
+        return; // all good
     }
 
-    static uint32_t led_last_blink_ = 0;
+    static uint32_t led_long_timer_  = 1; // 1 will kick it off immediately
+    static uint32_t led_short_timer_ = 0;
+    static uint8_t  led_flash_step_  = 0; // 0 means we're not in the short flash timer
+    auto            current_time     = uuid::get_uptime();
+    static bool     led_on_          = false;
 
-    if (!led_last_blink_ || (uint32_t)(uuid::get_uptime() - led_last_blink_) >= led_flash_speed_) {
-        led_last_blink_ = uuid::get_uptime();
+    // first long pause before we start flashing
+    if (led_long_timer_ && (uint32_t)(current_time - led_long_timer_) >= HEALTHCHECK_LED_LONG_DUARATION) {
+        // Serial.println("starting the flash check");
+        led_short_timer_ = current_time; // start the short timer
+        led_long_timer_  = 0;            // stop long timer
+        led_flash_step_  = 1;            // enable the short flash timer
+    }
 
-        // if bus_not_connected or network not connected, start flashing
-        if (!system_healthy_) {
-            digitalWrite(led_gpio_, !digitalRead(led_gpio_));
+    // the flash timer which starts after the long pause
+    if (led_flash_step_ && (uint32_t)(current_time - led_short_timer_) >= HEALTHCHECK_LED_FLASH_DUARATION) {
+        led_long_timer_  = 0; // stop the long timer
+        led_short_timer_ = current_time;
+
+        if (++led_flash_step_ == 8) {
+            // reset the whole sequence
+            // Serial.println("resetting flash check");
+            led_long_timer_ = uuid::get_uptime();
+            led_flash_step_ = 0;
+            digitalWrite(led_gpio_, !LED_ON); // LED off
+        } else if (led_flash_step_ % 2) {
+            // handle the step events (on odd numbers 3,5,7,etc). see if we need to turn on a LED
+            //  1 flash is the EMS bus is not connected
+            //  2 flashes if the network (wifi or ethernet) is not connected
+            //  3 flashes is both the bus and the network are not connected. Then you know you're truly f*cked.
+
+            if ((led_flash_step_ == 3)
+                && (((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) || ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS))) {
+                led_on_ = true;
+            }
+
+            if ((led_flash_step_ == 5) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)) {
+                led_on_ = true;
+            }
+
+            if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
+                && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
+                led_on_ = true;
+            }
+
+            if (led_on_ && led_gpio_) {
+                digitalWrite(led_gpio_, LED_ON);
+            }
+        } else {
+            // turn the led off after the flash, on even number count
+            if (led_on_ && led_gpio_) {
+                digitalWrite(led_gpio_, !LED_ON);
+                led_on_ = false;
+            }
         }
     }
 }

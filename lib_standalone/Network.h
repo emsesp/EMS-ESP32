@@ -167,6 +167,10 @@ class WiFiClass {
     char * localIP() {
         return nullptr;
     }
+
+    wl_status_t status() {
+        return WL_CONNECTED;
+    }
 };
 
 class ETHClass {

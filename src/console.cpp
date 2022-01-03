@@ -496,14 +496,17 @@ void Console::load_standard_commands(unsigned int context) {
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
                                        flash_string_vector{F("test")},
-                                       flash_string_vector{F_(name_optional)},
+                                       flash_string_vector{F_(name_optional), F_(data_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            if (arguments.size() == 0) {
                                                Test::run_test(shell, "default");
-                                           } else {
+                                           } else if (arguments.size() == 1) {
                                                Test::run_test(shell, arguments.front());
+                                           } else {
+                                               Test::run_test(shell, arguments[0].c_str(), arguments[1].c_str());
                                            }
                                        });
+
     EMSESPShell::commands->add_command(context, CommandFlags::USER, flash_string_vector{F("t")}, [](Shell & shell, const std::vector<std::string> & arguments) {
         Test::run_test(shell, "default");
     });

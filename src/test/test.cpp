@@ -221,7 +221,7 @@ bool Test::run_test(const char * command, int8_t id) {
 
 // These next tests are run from the Console
 // using the test command
-void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
+void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const std::string & data) {
     // switch to su
     shell.add_flags(CommandFlags::ADMIN);
 
@@ -580,6 +580,18 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::analogsensor_.update(36, "analogtest", 1, 3.4, 1);
         shell.invoke_command("show");
         // shell.invoke_command("call system publish");
+    }
+
+    if (command == "healthcheck") {
+        uint8_t n = 0;
+        if (!data.empty()) {
+            n = Helpers::atoint(data.c_str());
+        }
+
+        // n=1 = EMSESP::system_.HEALTHCHECK_NO_BUS
+        // n=2 = EMSESP::system_.HEALTHCHECK_NO_NETWORK
+        shell.printfln(F("Testing healthcheck with %d"), n);
+        EMSESP::system_.healthcheck(n);
     }
 
     if (command == "dv2") {
