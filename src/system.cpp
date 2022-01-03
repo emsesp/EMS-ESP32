@@ -644,8 +644,6 @@ void System::network_init(bool refresh) {
 
 // check health of system, done every 5 seconds
 void System::system_check() {
-    static uint8_t last_healthcheck_ = 0;
-
     if (!last_system_check_ || ((uint32_t)(uuid::get_uptime() - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
         last_system_check_ = uuid::get_uptime();
 
@@ -664,6 +662,7 @@ void System::system_check() {
         }
 
         // see if he healthcheck state has changed
+        static uint8_t last_healthcheck_ = 0;
         if (healthcheck_ != last_healthcheck_) {
             last_healthcheck_ = healthcheck_;
             // see if we're better now
@@ -726,7 +725,6 @@ void System::led_monitor() {
     static uint32_t led_short_timer_ = 0;
     static uint8_t  led_flash_step_  = 0; // 0 means we're not in the short flash timer
     auto            current_time     = uuid::get_uptime();
-    static bool     led_on_          = false;
 
     // first long pause before we start flashing
     if (led_long_timer_ && (uint32_t)(current_time - led_long_timer_) >= HEALTHCHECK_LED_LONG_DUARATION) {
@@ -738,8 +736,9 @@ void System::led_monitor() {
 
     // the flash timer which starts after the long pause
     if (led_flash_step_ && (uint32_t)(current_time - led_short_timer_) >= HEALTHCHECK_LED_FLASH_DUARATION) {
-        led_long_timer_  = 0; // stop the long timer
-        led_short_timer_ = current_time;
+        led_long_timer_     = 0; // stop the long timer
+        led_short_timer_    = current_time;
+        static bool led_on_ = false;
 
         if (++led_flash_step_ == 8) {
             // reset the whole sequence
