@@ -4,7 +4,7 @@
 
 ## Added
 
-- New WebUI upgrade
+- New WebUI
 - Auto reload of WebUI after successful firmware upload [#178](https://github.com/emsesp/EMS-ESP32/issues/178)
 - Customization Service. First is the Entity Exclusion for devices [#206](https://github.com/emsesp/EMS-ESP32/issues/206)
 - Option to disable Telnet Console
@@ -20,11 +20,12 @@
 - redundant telegram readings (because of offset overflow)
 - added missing RC30/Moduline400 [#243](https://github.com/emsesp/EMS-ESP32/issues/243)
 - Correct modes for RC25 [#106](https://github.com/emsesp/EMS-ESP32/issues/106)
-- Clean up old HA config's in MQTT before publishing data. This will prevent HA giving the 'dict' warnings
+- Clean up old HA config's in MQTT before publishing data. This will prevent HA giving the 'dict' warnings [#229](https://github.com/emsesp/EMS-ESP32/issues/229)
 
 ## Changed
 
 - Refactor WebUI to use ReactHooks. New theme, increased performance, better mobile responsiveness [#124](https://github.com/emsesp/EMS-ESP32/issues/124)
+- Use flash system to show system health (1 flash=no ems, 2 flashes=no wifi) [#224](https://github.com/emsesp/EMS-ESP32/issues/224)
 
 **Breaking changes:**
 
