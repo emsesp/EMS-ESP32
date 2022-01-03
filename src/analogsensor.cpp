@@ -53,7 +53,7 @@ void AnalogSensor::reload() {
         sensors_.clear(); // start with an empty list
         if (sensors.size() != 0) {
             for (auto & sensor : sensors) {
-                sensors_.emplace_back(sensor.id, sensor.name, sensor.offset, sensor.factor, sensor.type);
+                sensors_.emplace_back(sensor.id, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type);
                 sensors_.back().ha_registered = false; // this will trigger recrate of the HA config
             }
         }
@@ -78,10 +78,12 @@ void AnalogSensor::reload() {
             LOG_DEBUG(F("Adding analog I/O Counter sensor on GPIO%d"), sensor.id());
             pinMode(sensor.id(), INPUT_PULLUP);
             sensor.set_value(0); // reset count
+            sensor.set_uom(0);   // no uom, just for safe measures
         } else if (sensor.type() == AnalogType::READ) {
             LOG_DEBUG(F("Adding analog Read sensor on GPIO%d"), sensor.id());
             // pinMode(sensor.id(), INPUT_PULLUP);
             sensor.set_value(0); // initial value
+            sensor.set_uom(0);   // no uom, just for safe measures
         }
     }
 }
@@ -137,7 +139,7 @@ void AnalogSensor::loop() {
 }
 
 // update analog information name and offset
-bool AnalogSensor::update(uint8_t id, const std::string & name, int16_t offset, float factor, int8_t type) {
+bool AnalogSensor::update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, int8_t type) {
     boolean found_sensor = false; // see if we can find the sensor in our customization list
 
     EMSESP::webCustomizationService.update(
@@ -154,6 +156,7 @@ bool AnalogSensor::update(uint8_t id, const std::string & name, int16_t offset, 
                         AnalogCustomization.name   = name;
                         AnalogCustomization.offset = offset;
                         AnalogCustomization.factor = factor;
+                        AnalogCustomization.uom    = uom;
                         AnalogCustomization.type   = type;
                         LOG_DEBUG(F("Customizing existing analog sensor ID %d"), id);
                     }
@@ -178,6 +181,7 @@ bool AnalogSensor::update(uint8_t id, const std::string & name, int16_t offset, 
                 newSensor.name                = name;
                 newSensor.offset              = offset;
                 newSensor.factor              = factor;
+                newSensor.uom                 = uom;
                 newSensor.type                = type;
                 settings.analogCustomizations.push_back(newSensor);
                 LOG_DEBUG(F("Adding new customization for analog sensor ID %d"), id);
@@ -313,6 +317,7 @@ bool AnalogSensor::get_value_info(JsonObject & output, const char * cmd, const i
             output["id"]     = sensor.id();
             output["name"]   = sensor.name();
             output["type"]   = sensor.type();
+            output["uom"]    = sensor.uom();
             output["offset"] = sensor.offset();
             output["factor"] = sensor.factor();
             output["value"]  = sensor.value();
@@ -335,6 +340,7 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
             dataSensor["id"]      = sensor.id();
             dataSensor["name"]    = sensor.name();
             dataSensor["type"]    = sensor.type();
+            dataSensor["uom"]     = sensor.uom();
             dataSensor["offset"]  = sensor.offset();
             dataSensor["factor"]  = sensor.factor();
             dataSensor["value"]   = sensor.value();
@@ -347,11 +353,12 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
 }
 
 // this creates the sensor, initializing everything
-AnalogSensor::Sensor::Sensor(const uint8_t id, const std::string & name, const uint16_t offset, const float factor, const int8_t type)
+AnalogSensor::Sensor::Sensor(const uint8_t id, const std::string & name, const uint16_t offset, const float factor, const uint8_t uom, const int8_t type)
     : id_(id)
     , name_(name)
     , offset_(offset)
     , factor_(factor)
+    , uom_(uom)
     , type_(type) {
     value_ = 0; // init value to 0 always
 }
@@ -369,11 +376,11 @@ std::string AnalogSensor::Sensor::name() const {
 // hard coded tests
 #ifdef EMSESP_DEBUG
 void AnalogSensor::test() {
-    // Sensor(const uint8_t id, const std::string & name, const uint16_t offset, const float factor, const int8_t type);
-    sensors_.emplace_back(36, "test12", 0, 0.1, AnalogType::ADC);
+    // Sensor(const uint8_t id, const std::string & name, const uint16_t offset, const float factor, const uint8_t uom, const int8_t type);
+    sensors_.emplace_back(36, "test12", 0, 0.1, 17, AnalogType::ADC);
     sensors_.back().set_value(12.4);
 
-    sensors_.emplace_back(37, "test13", 0, 0, AnalogType::READ);
+    sensors_.emplace_back(37, "test13", 0, 0, 0, AnalogType::READ);
     sensors_.back().set_value(13);
 }
 #endif

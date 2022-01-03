@@ -46,6 +46,7 @@ class AnalogCustomization {
     std::string name;
     uint16_t    offset;
     float       factor;
+    uint8_t     uom;  // 0 is none
     int8_t      type; // -1 is for deletion
 
     // used for removing from a list
