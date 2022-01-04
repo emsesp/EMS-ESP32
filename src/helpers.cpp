@@ -83,7 +83,7 @@ char * Helpers::itoa(int32_t value, char * result, const uint8_t base) {
     }
 
     char *  ptr = result, *ptr1 = result;
-    int16_t tmp_value;
+    int32_t tmp_value;
 
     do {
         tmp_value = value;
