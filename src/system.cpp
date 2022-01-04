@@ -1047,6 +1047,23 @@ bool System::command_customizations(const char * value, const int8_t id, JsonObj
             sensorJson["offset"]  = sensor.offset; // o
         }
 
+        JsonArray analogJson = node.createNestedArray("analogs");
+        for (const AnalogCustomization & sensor : settings.analogCustomizations) {
+            JsonObject sensorJson = analogJson.createNestedObject();
+            sensorJson["gpio"]    = sensor.id;
+            sensorJson["name"]    = sensor.name;
+            if (sensor.type == AnalogSensor::AnalogType::ADC) {
+                sensorJson["type"]   = "adc";
+                sensorJson["offset"] = sensor.offset;
+                sensorJson["factor"] = sensor.factor;
+                sensorJson["uom"]    = EMSdevice::uom_to_string(sensor.uom);
+            } else if (sensor.type == AnalogSensor::AnalogType::IOCOUNTER) {
+                sensorJson["type"] = "counter";
+            } else if (sensor.type == AnalogSensor::AnalogType::READ) {
+                sensorJson["type"] = "gpio";
+            }
+        }
+
         // exclude entities
         JsonArray exclude_entitiesJson = node.createNestedArray("exclude_entities");
         for (const auto & entityCustomization : settings.entityCustomizations) {

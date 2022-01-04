@@ -400,51 +400,51 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     }
 
     shell.printfln(F("Temperature sensors:"));
-    uint8_t i = 1;
-    char    s[7];
-    char    s2[7];
+    char    s[10];
+    char    s2[10];
     uint8_t fahrenheit = EMSESP::system_.fahrenheit() ? 2 : 0;
 
     for (const auto & sensor : dallassensor_.sensors()) {
         if (Helpers::hasValue(sensor.temperature_c)) {
-            shell.printfln(F("  Sensor %d, ID: %s, Name: %s, Temperature: %s °%c (offset %s)"),
-                           i++,
-                           sensor.id_str().c_str(),
+            shell.printfln(F("  %s: %s%s °%c%s (offset %s, ID: %s)"),
                            sensor.name().c_str(),
+                           COLOR_BRIGHT_GREEN,
                            Helpers::render_value(s, sensor.temperature_c, 10, fahrenheit),
                            (fahrenheit == 0) ? 'C' : 'F',
-                           Helpers::render_value(s2, sensor.offset(), 10, fahrenheit));
+                           COLOR_RESET,
+                           Helpers::render_value(s2, sensor.offset(), 10, fahrenheit),
+                           sensor.id_str().c_str());
         } else {
-            shell.printfln(F("  Sensor %d, ID: %s, Name: %s, (offset %s)"),
-                           i++,
-                           sensor.id_str().c_str(),
+            shell.printfln(F("  %s (offset %s, ID: %s)"),
                            sensor.name().c_str(),
-                           Helpers::render_value(s2, sensor.offset(), 10, fahrenheit));
+                           Helpers::render_value(s, sensor.offset(), 10, fahrenheit),
+                           sensor.id_str().c_str());
         }
     }
     shell.println();
 
     shell.printfln(F("Analog sensors:"));
-    char s3[10];
     for (const auto & sensor : analogsensor_.sensors()) {
         switch (sensor.type()) {
         case AnalogSensor::AnalogType::ADC:
-            shell.printfln(F("  Sensor ID %d, Type: %s, Name: %s, Value: %s, Factor: %s, Offset: %d"),
-                           sensor.id(),
-                           "ADC",
+            shell.printfln(F("  %s: %s%s %s%s (Type: ADC, Factor: %s, Offset: %d)"),
                            sensor.name().c_str(),
-                           Helpers::render_value(s3, sensor.value(), 2),
-                           Helpers::render_value(s3, sensor.factor(), 2),
+                           COLOR_BRIGHT_GREEN,
+                           Helpers::render_value(s, sensor.value(), 2),
+                           EMSdevice::uom_to_string(sensor.uom()).c_str(),
+                           COLOR_RESET,
+                           Helpers::render_value(s2, sensor.factor(), 4),
                            sensor.offset());
             break;
         default:
         case AnalogSensor::AnalogType::READ:
         case AnalogSensor::AnalogType::IOCOUNTER:
-            shell.printfln(F("  Sensor ID %d, Type: %s, Name: %s, Value: %d"),
-                           sensor.id(),
-                           sensor.type() == AnalogSensor::AnalogType::IOCOUNTER ? "IOCOUNTER" : "READ",
+            shell.printfln(F("  %s: %s%d%s (Type: %s)"),
                            sensor.name().c_str(),
-                           (uint16_t)sensor.value()); // as int
+                           COLOR_BRIGHT_GREEN,
+                           (uint16_t)sensor.value(), // as int
+                           COLOR_RESET,
+                           sensor.type() == AnalogSensor::AnalogType::IOCOUNTER ? "IOCOUNTER" : "READ");
             break;
         }
     }

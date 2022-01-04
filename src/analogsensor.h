@@ -39,7 +39,7 @@ class AnalogSensor {
         Sensor(const uint8_t id, const std::string & name, const uint16_t offset, const float factor, const uint8_t uom, const int8_t type);
         ~Sensor() = default;
 
-        void set_offset(const int16_t offset) {
+        void set_offset(const uint16_t offset) {
             offset_ = offset;
         }
 
@@ -90,9 +90,11 @@ class AnalogSensor {
 
         bool ha_registered = false;
 
-        uint16_t analog_       = 0; // ADC - uninitialized
+        uint16_t analog_       = 0; // ADC - average value
         uint32_t sum_          = 0; // ADC - rolling sum
-        int      last_reading_ = 0; // IO COUNTER - last reading
+        uint16_t last_reading_ = 0; // IO COUNTER & ADC - last reading
+        uint32_t polltime_     = 0; // digital IO & COUNTER debounce time
+        int      poll_         = 0;
 
       private:
         uint8_t     id_;
@@ -147,7 +149,7 @@ class AnalogSensor {
         return sensors_.size();
     }
 
-    bool update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, int8_t type);
+    bool update(uint8_t id, const std::string & name, uint16_t offset, float factor, uint8_t uom, int8_t type);
     bool get_value_info(JsonObject & output, const char * cmd, const int8_t id);
 
 #ifdef EMSESP_DEBUG

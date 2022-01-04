@@ -68,22 +68,25 @@ void AnalogSensor::reload() {
         sensor.ha_registered = false; // force HA configs to be re-created
         if (sensor.type() == AnalogType::ADC) {
             LOG_DEBUG(F("Adding analog ADC sensor on GPIO%d"), sensor.id());
-            // note sensor.id is the GPIO
-            analogSetPinAttenuation(sensor.id(), ADC_2_5db); // 1500mV
-
-            // MichaelDvP's comments:
-            // setting attenuator to 0 = 1100, 1500, 2200, 3900 mV
-            // analogSetAttenuation(sensor.id(), analog_enabled_ - 1);
+            // analogSetPinAttenuation does not work with analogReadMilliVolts
+            sensor.analog_       = 0; // initialize
+            sensor.last_reading_ = 0;
         } else if (sensor.type() == AnalogType::IOCOUNTER) {
             LOG_DEBUG(F("Adding analog I/O Counter sensor on GPIO%d"), sensor.id());
             pinMode(sensor.id(), INPUT_PULLUP);
             sensor.set_value(0); // reset count
-            sensor.set_uom(0);   // no uom, just for safe measures
+            sensor.set_uom(0); // no uom, just for safe measures
+            sensor.polltime_ = 0;
+            sensor.poll_     = digitalRead(sensor.id());
+            publish_sensor(sensor);
         } else if (sensor.type() == AnalogType::READ) {
             LOG_DEBUG(F("Adding analog Read sensor on GPIO%d"), sensor.id());
-            // pinMode(sensor.id(), INPUT_PULLUP);
-            sensor.set_value(0); // initial value
-            sensor.set_uom(0);   // no uom, just for safe measures
+            pinMode(sensor.id(), INPUT_PULLUP);
+            sensor.set_value(digitalRead(sensor.id())); // initial value
+            sensor.set_uom(0);                          // no uom, just for safe measures
+            sensor.polltime_ = 0;
+            sensor.poll_     = digitalRead(sensor.id());
+            publish_sensor(sensor);
         }
     }
 }
@@ -92,13 +95,11 @@ void AnalogSensor::reload() {
 void AnalogSensor::measure() {
     static uint32_t measure_last_ = 0;
 
-    if (!measure_last_ || (uint32_t)(uuid::get_uptime() - measure_last_) >= MEASURE_ANALOG_INTERVAL) {
+    // measure interval 500ms for analog sensors
+    if (!measure_last_ || (uuid::get_uptime() - measure_last_) >= MEASURE_ANALOG_INTERVAL) {
         measure_last_ = uuid::get_uptime();
-
-        // go through the list of sensors
+        // go through the list of ADC sensors
         for (auto & sensor : sensors_) {
-            auto old_value = sensor.value(); // remember current value before reading
-
             if (sensor.type() == AnalogType::ADC) {
                 uint16_t a = analogReadMilliVolts(sensor.id()); // e.g. ADC1_CHANNEL_0_GPIO_NUM
                 if (!sensor.analog_) {                          // init first time
@@ -108,23 +109,45 @@ void AnalogSensor::measure() {
                     sensor.sum_    = (sensor.sum_ * 511) / 512 + a;
                     sensor.analog_ = sensor.sum_ / 512;
                 }
-                sensor.set_value((sensor.analog_ - sensor.offset()) * sensor.factor());
-            } else if (sensor.type() == AnalogType::READ) {
-                sensor.set_value(digitalRead(sensor.id()));
-            } else if (sensor.type() == AnalogType::IOCOUNTER) {
-                // capture reading and compare with the last one to see if there is high/low change
-                // add back the debounce uuid::get_uptime() diff > 15
-                uint16_t current_reading = digitalRead(sensor.id());
-                if (!current_reading && current_reading != sensor.last_reading_) {
-                    sensor.set_value(old_value + 1);
-                    sensor.last_reading_ = current_reading;
+                // detect change with little hysteresis on raw mV value
+                if (sensor.last_reading_ + 1 < sensor.analog_ || sensor.last_reading_ > sensor.analog_ + 1) {
+                    sensor.set_value(((int32_t)sensor.analog_ - sensor.offset()) * sensor.factor());
+                    sensor.last_reading_ = sensor.analog_;
+                    sensorreads_++;
+                    changed_ = true;
+                    publish_sensor(sensor);
                 }
             }
-
-            // see if there is a change and increment # reads
-            if (old_value != sensor.value()) {
-                sensorreads_++;
-                changed_ = true;
+        }
+    }
+    // poll digital io every time
+    // go through the list of digital sensors
+    for (auto & sensor : sensors_) {
+        if (sensor.type() == AnalogType::READ || sensor.type() == AnalogType::IOCOUNTER) {
+            auto old_value       = sensor.value(); // remember current value before reading
+            auto current_reading = digitalRead(sensor.id());
+            if (sensor.poll_ != current_reading) { // check for pinchange
+                sensor.polltime_ = uuid::get_uptime();
+                sensor.poll_     = current_reading;
+            }
+            if (uuid::get_uptime() - sensor.polltime_ >= 15) { // debounce
+                if (sensor.type() == AnalogType::READ) {
+                    sensor.set_value(sensor.poll_);
+                } else if (sensor.type() == AnalogType::IOCOUNTER) {
+                    // capture reading and compare with the last one to see if there is high/low change
+                    if (sensor.poll_ != sensor.last_reading_) {
+                        sensor.last_reading_ = sensor.poll_;
+                        if (!sensor.poll_) {
+                            sensor.set_value(old_value + 1);
+                        }
+                    }
+                }
+                // see if there is a change and increment # reads
+                if (old_value != sensor.value()) {
+                    sensorreads_++;
+                    changed_ = true;
+                    publish_sensor(sensor);
+                }
             }
         }
     }
@@ -139,7 +162,7 @@ void AnalogSensor::loop() {
 }
 
 // update analog information name and offset
-bool AnalogSensor::update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, int8_t type) {
+bool AnalogSensor::update(uint8_t id, const std::string & name, uint16_t offset, float factor, uint8_t uom, int8_t type) {
     boolean found_sensor = false; // see if we can find the sensor in our customization list
 
     EMSESP::webCustomizationService.update(
