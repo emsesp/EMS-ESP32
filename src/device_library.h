@@ -110,13 +110,13 @@
 {163, DeviceType::SOLAR, F("SM100/MS100"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
 {164, DeviceType::SOLAR, F("SM200/MS200"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
 
-// Mixer Modules - 0x20-0x27 for HC, 0x28-0x29 for WWC
+// Mixer Modules - 0x20-0x27 for HC, 0x28-0x29 for WWC and 0x11 for the MP100
 { 69, DeviceType::MIXER, F("MM10"), DeviceFlags::EMS_DEVICE_FLAG_MM10},
 {102, DeviceType::MIXER, F("IPM"), DeviceFlags::EMS_DEVICE_FLAG_IPM},
 {159, DeviceType::MIXER, F("MM50"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {160, DeviceType::MIXER, F("MM100"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {161, DeviceType::MIXER, F("MM200"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
-{204, DeviceType::MIXER, F("MP100"), DeviceFlags::EMS_DEVICE_FLAG_MP},
+{204, DeviceType::MIXER, F("MP100"), DeviceFlags::EMS_DEVICE_FLAG_MP}, // pool
 
 // Heat Pumps - 0x38
 {200, DeviceType::HEATPUMP, F("HP Module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},

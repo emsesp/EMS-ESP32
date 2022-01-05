@@ -100,7 +100,8 @@ class Mqtt {
     static void publish_ha(const __FlashStringHelper * topic, const JsonObject & payload);
     static void publish_ha(const std::string & topic);
 
-    static void publish_ha_sensor_config(DeviceValue & dv, const bool remove = false);
+    static void
+    publish_ha_sensor_config(DeviceValue & dv, const std::string & model, const std::string & brand, const bool remove, const bool create_device_config = false);
 
     static void publish_ha_sensor_config(uint8_t                             type,
                                          uint8_t                             tag,
@@ -109,16 +110,13 @@ class Mqtt {
                                          const __FlashStringHelper *         entity,
                                          const uint8_t                       uom,
                                          const bool                          remove,
+                                         const bool                          create_device_config,
                                          const bool                          has_cmd,
                                          const __FlashStringHelper * const * options,
-                                         uint8_t                             options_size);
+                                         uint8_t                             options_size,
+                                         const JsonObject &                  dev_json);
 
-    static void publish_ha_sensor_config(uint8_t                     type,
-                                         uint8_t                     tag,
-                                         const __FlashStringHelper * name,
-                                         const uint8_t               device_type,
-                                         const __FlashStringHelper * entity,
-                                         const uint8_t               uom);
+    static void publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelper * name, const __FlashStringHelper * entity, const uint8_t uom);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);

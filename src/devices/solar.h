@@ -27,8 +27,6 @@ class Solar : public EMSdevice {
   public:
     Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
 
-    virtual bool publish_ha_device_config();
-
   private:
     static uuid::log::Logger logger_;
 
@@ -73,7 +71,7 @@ class Solar : public EMSdevice {
     uint8_t heatTransferSystem_; // Umladesystem, 00=no
     uint8_t externalCyl_;        // Heat exchanger, 00=no
     uint8_t thermalDisinfect_;   // Daily heatup for disinfection, 00=no
-    uint8_t heatMetering_;       // Wärmemengenzählung, 00=no
+    uint8_t heatMetering_;       // Heat quantity metering, 00=no
     uint8_t solarIsEnabled_;     // System enable, 00=no
 
     // telegram 0x035A
@@ -152,8 +150,6 @@ class Solar : public EMSdevice {
     uint8_t setting4_;
 
     std::deque<int16_t> energy;
-
-    uint8_t id_;
 
     void process_SM10Monitor(std::shared_ptr<const Telegram> telegram);
     void process_SM10Config(std::shared_ptr<const Telegram> telegram);

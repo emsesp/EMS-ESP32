@@ -27,14 +27,9 @@ class Heatpump : public EMSdevice {
   public:
     Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
 
-    virtual bool publish_ha_device_config();
-
   private:
-    static uuid::log::Logger logger_;
-
     uint8_t airHumidity_;
     uint8_t dewTemperature_;
-    uint8_t id_;
 
     void process_HPMonitor1(std::shared_ptr<const Telegram> telegram);
     void process_HPMonitor2(std::shared_ptr<const Telegram> telegram);

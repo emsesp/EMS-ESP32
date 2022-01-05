@@ -553,5 +553,4 @@ bool Helpers::value2enum(const char * v, uint8_t & value, const __FlashStringHel
     return false;
 }
 
-
 } // namespace emsesp

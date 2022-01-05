@@ -67,8 +67,6 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     }
 
     // device values...
-    register_device_value(DeviceValueTAG::TAG_NONE, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
-    id_ = product_id;
 
     // special case for a device_id with 0x2A where it's not actual a solar module
     if (device_id == 0x2A) {
@@ -376,36 +374,6 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     }
 }
 
-// publish HA config
-bool Solar::publish_ha_device_config() {
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
-    doc["uniq_id"] = F_(solar);
-    doc["ic"]      = F_(icondevice);
-
-    char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
-    doc["stat_t"] = stat_t;
-
-    char name_s[40];
-    snprintf(name_s, sizeof(name_s), FSTR_(productid_fmt), device_type_name().c_str());
-    doc["name"] = name_s;
-
-    doc["val_tpl"] = FJSON("{{value_json.id}}");
-    JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = FJSON("EMS-ESP Solar");
-    dev["sw"]      = EMSESP_APP_VERSION;
-    dev["mf"]      = brand_to_string();
-    dev["mdl"]     = name();
-    JsonArray ids  = dev.createNestedArray("ids");
-    ids.add("ems-esp-solar");
-
-    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf(topic, sizeof(topic), "sensor/%s/solar/config", Mqtt::base().c_str());
-    Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
-
-    return true;
-}
-
 // SM10Monitor - type 0x96
 // Solar(0x30) -> All(0x00), (0x96), data: FF 18 19 0A 02 5A 27 0A 05 2D 1E 0F 64 28 0A
 void Solar::process_SM10Config(std::shared_ptr<const Telegram> telegram) {
@@ -584,7 +552,7 @@ void Solar::process_SM100Monitor(std::shared_ptr<const Telegram> telegram) {
 
     has_update(telegram, collector2Temp_, 6); // is *10 - TS7: Temperature sensor for collector array 2
     has_update(telegram, cylMiddleTemp_, 8);  // is *10 - TS14: cylinder middle temperature
-    has_update(telegram, retHeatAssist_, 10); // is *10 - TS15: return temperature heating assisctance
+    has_update(telegram, retHeatAssist_, 10); // is *10 - TS15: return temperature heating assistance
 }
 
 // SM100wwTemperature - 0x07D6

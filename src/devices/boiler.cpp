@@ -88,9 +88,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x48A, F("HpPool"), true, MAKE_PF_CB(process_HpPool));
     }
 
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
-    id_ = product_id; // note, must set the value after it has been initialized to have affect
-
     // reset is a command uses a dummy variable which is always zero, shown as blank, but provides command enum options
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &reset_, DeviceValueType::CMD, FL_(enum_reset), FL_(reset), DeviceValueUOM::NONE, MAKE_CF_CB(set_reset));
     has_update(reset_, 0);
@@ -381,36 +378,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     EMSESP::send_read_request(0x15, device_id); // read maintenace data on start (only published on change)
     EMSESP::send_read_request(0x1C, device_id); // read maintenace status on start (only published on change)
     EMSESP::send_read_request(0xC2, device_id); // read last errorcode on start (only published on errors)
-}
-
-// publish HA config
-bool Boiler::publish_ha_device_config() {
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
-    doc["uniq_id"] = F_(boiler);
-    doc["ic"]      = F_(icondevice);
-
-    char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
-    doc["stat_t"] = stat_t;
-
-    char name_s[40];
-    snprintf(name_s, sizeof(name_s), FSTR_(productid_fmt), device_type_name().c_str());
-    doc["name"] = name_s;
-
-    doc["val_tpl"] = FJSON("{{value_json.id}}");
-    JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = FJSON("EMS-ESP Boiler");
-    dev["sw"]      = EMSESP_APP_VERSION;
-    dev["mf"]      = brand_to_string();
-    dev["mdl"]     = name();
-    JsonArray ids  = dev.createNestedArray("ids");
-    ids.add("ems-esp-boiler");
-
-    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf(topic, sizeof(topic), "sensor/%s/boiler/config", Mqtt::base().c_str());
-    Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
-
-    return true;
 }
 
 // Check if hot tap water or heating is active

@@ -22,15 +22,8 @@ namespace emsesp {
 
 REGISTER_FACTORY(Gateway, EMSdevice::DeviceType::GATEWAY);
 
-uuid::log::Logger Gateway::logger_{F_(gateway), uuid::log::Facility::CONSOLE};
-
 Gateway::Gateway(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-}
-
-// publish HA config
-bool Gateway::publish_ha_device_config() {
-    return true;
 }
 
 } // namespace emsesp

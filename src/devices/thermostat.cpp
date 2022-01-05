@@ -197,36 +197,6 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     EMSESP::send_read_request(0xA2, device_id); // read errorCode (only published on errors)
 }
 
-// publish HA config
-bool Thermostat::publish_ha_device_config() {
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
-    doc["uniq_id"] = F_(thermostat);
-    doc["ic"]      = F_(icondevice);
-
-    char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
-    doc["stat_t"] = stat_t;
-
-    char name_s[40];
-    snprintf(name_s, sizeof(name_s), FSTR_(productid_fmt), device_type_name().c_str());
-    doc["name"] = name_s;
-
-    doc["val_tpl"] = FJSON("{{value_json.id}}");
-    JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = FJSON("EMS-ESP Thermostat");
-    dev["sw"]      = EMSESP_APP_VERSION;
-    dev["mf"]      = brand_to_string();
-    dev["mdl"]     = name();
-    JsonArray ids  = dev.createNestedArray("ids");
-    ids.add("ems-esp-thermostat");
-
-    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf(topic, sizeof(topic), "sensor/%s/thermostat/config", Mqtt::base().c_str());
-    Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
-
-    return true;
-}
-
 // returns the heating circuit object based on the hc number
 // of nullptr if it doesn't exist yet
 std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const uint8_t hc_num) {
@@ -355,7 +325,6 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     // if it's the first set the status flag
     if (heating_circuits_.size() == 0) {
         strlcpy(status_, "online", sizeof(status_));
-        id_ = this->product_id();
     }
 
     // create a new heating circuit object
@@ -463,11 +432,7 @@ void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit
     modes.add("off");
 
     JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = FJSON("EMS-ESP Thermostat");
-    dev["sw"]      = EMSESP_APP_VERSION;
-    dev["mf"]      = brand_to_string();
-    dev["mdl"]     = name();
-    JsonArray ids  = dev.createNestedArray("ids");
+    JsonArray  ids = dev.createNestedArray("ids");
     ids.add("ems-esp-thermostat");
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -2794,7 +2759,6 @@ bool Thermostat::set_roominfluence(const char * value, const int8_t id) {
 // as these are done in void Thermostat::register_device_values_hc()
 void Thermostat::register_device_values() {
     // Common for all thermostats
-    register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA, &errorCode_, DeviceValueType::STRING, nullptr, FL_(errorCode), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA, &lastCode_, DeviceValueType::STRING, nullptr, FL_(lastCode), DeviceValueUOM::NONE);
 

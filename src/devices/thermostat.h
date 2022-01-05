@@ -134,8 +134,6 @@ class Thermostat : public EMSdevice {
 
     static std::string mode_tostring(uint8_t mode);
 
-    virtual bool publish_ha_device_config();
-
   private:
     static uuid::log::Logger logger_;
 
@@ -157,7 +155,6 @@ class Thermostat : public EMSdevice {
     std::vector<uint16_t> curve_typeids;
 
     // standard for all thermostats
-    uint8_t  id_;            // productID
     char     status_[20];    // online or offline
     char     dateTime_[25];  // date and time stamp
     char     errorCode_[15]; // code from 0xA2 as string i.e. "A22(816)"

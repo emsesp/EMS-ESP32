@@ -496,7 +496,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "ha") {
-        shell.printfln(F("Testing HA discovery"));
+        shell.printfln(F("Testing HA mqtt discovery"));
         Mqtt::ha_enabled(true);
         // Mqtt::nested_format(1);
         Mqtt::nested_format(2);
@@ -509,10 +509,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
 
-        shell.invoke_command("call boiler fanwork");
-        shell.invoke_command("call thermostat seltemp"); // sensor.thermostat_hc1_selected_room_temperature
-        shell.invoke_command("call thermostat entities");
-        shell.invoke_command("call boiler entities");
+        // shell.invoke_command("call boiler fanwork");
+        // shell.invoke_command("call thermostat seltemp"); // sensor.thermostat_hc1_selected_room_temperature
+        // shell.invoke_command("call thermostat entities");
+        // shell.invoke_command("call boiler entities");
     }
 
     if (command == "lastcode") {

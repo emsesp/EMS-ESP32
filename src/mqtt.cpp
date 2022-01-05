@@ -19,6 +19,7 @@
 #include "mqtt.h"
 #include "emsesp.h"
 #include "version.h"
+#include "emsdevice.h"
 
 namespace emsesp {
 
@@ -595,7 +596,7 @@ void Mqtt::ha_status() {
 
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = F_(EMSESP); // "EMS-ESP"
-    dev["sw"]      = EMSESP_APP_VERSION;
+    dev["sw"]      = "v" + std::string(EMSESP_APP_VERSION);
     dev["mf"]      = FJSON("proddy");
     dev["mdl"]     = F_(EMSESP); // "EMS-ESP"
     JsonArray ids  = dev.createNestedArray("ids");
@@ -607,39 +608,18 @@ void Mqtt::ha_status() {
 
     // create the sensors - must match the MQTT payload keys
     if (!EMSESP::system_.ethernet_connected()) {
-        publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("WiFi RSSI"), EMSdevice::DeviceType::SYSTEM, F("rssi"), DeviceValueUOM::DBM);
-        publish_ha_sensor_config(DeviceValueType::INT,
-                                 DeviceValueTAG::TAG_HEARTBEAT,
-                                 F("WiFi strength"),
-                                 EMSdevice::DeviceType::SYSTEM,
-                                 F("wifistrength"),
-                                 DeviceValueUOM::PERCENT);
+        publish_system_ha_sensor_config(DeviceValueType::INT, F("WiFi RSSI"), F("rssi"), DeviceValueUOM::DBM);
+        publish_system_ha_sensor_config(DeviceValueType::INT, F("WiFi strength"), F("wifistrength"), DeviceValueUOM::PERCENT);
     }
-
-    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"), DeviceValueUOM::NONE);
-    publish_ha_sensor_config(DeviceValueType::INT,
-                             DeviceValueTAG::TAG_HEARTBEAT,
-                             F("Uptime (sec)"),
-                             EMSdevice::DeviceType::SYSTEM,
-                             F("uptime_sec"),
-                             DeviceValueUOM::SECONDS);
-    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Free memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"), DeviceValueUOM::KB);
-    publish_ha_sensor_config(DeviceValueType::INT,
-                             DeviceValueTAG::TAG_HEARTBEAT,
-                             F("MQTT fails"),
-                             EMSdevice::DeviceType::SYSTEM,
-                             F("mqttfails"),
-                             DeviceValueUOM::NONE);
-    publish_ha_sensor_config(DeviceValueType::INT,
-                             DeviceValueTAG::TAG_HEARTBEAT,
-                             F("Rx received"),
-                             EMSdevice::DeviceType::SYSTEM,
-                             F("rxreceived"),
-                             DeviceValueUOM::NONE);
-    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Rx fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"), DeviceValueUOM::NONE);
-    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx reads"), EMSdevice::DeviceType::SYSTEM, F("txreads"), DeviceValueUOM::NONE);
-    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx writes"), EMSdevice::DeviceType::SYSTEM, F("txwrites"), DeviceValueUOM::NONE);
-    publish_ha_sensor_config(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Tx fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"), DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, F("Uptime"), F("uptime"), DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, F("Uptime (sec)"), F("uptime_sec"), DeviceValueUOM::SECONDS);
+    publish_system_ha_sensor_config(DeviceValueType::INT, F("Free memory"), F("freemem"), DeviceValueUOM::KB);
+    publish_system_ha_sensor_config(DeviceValueType::INT, F("MQTT fails"), F("mqttfails"), DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, F("Rx received"), F("rxreceived"), DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, F("Rx fails"), F("rxfails"), DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, F("Tx reads"), F("txreads"), DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, F("Tx writes"), F("txwrites"), DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, F("Tx fails"), F("txfails"), DeviceValueUOM::NONE);
 }
 
 // add sub or pub task to the queue.
@@ -852,33 +832,66 @@ void Mqtt::process_queue() {
     mqtt_messages_.pop_front(); // remove the message from the queue
 }
 
-void Mqtt::publish_ha_sensor_config(uint8_t                     type,
-                                    uint8_t                     tag,
-                                    const __FlashStringHelper * name,
-                                    const uint8_t               device_type,
-                                    const __FlashStringHelper * entity,
-                                    const uint8_t               uom) {
-    publish_ha_sensor_config(type, tag, name, device_type, entity, uom, false, false, nullptr, 0);
+// publish HA sensor for System using the heartbeat tag
+void Mqtt::publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelper * name, const __FlashStringHelper * entity, const uint8_t uom) {
+    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
+    JsonObject                                     dev_json = doc.createNestedObject("dev");
+
+    JsonArray ids = dev_json.createNestedArray("ids");
+    ids.add("ems-esp");
+
+    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, false, nullptr, 0, dev_json);
 }
 
-void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const bool remove) {
-    publish_ha_sensor_config(dv.type, dv.tag, dv.full_name, dv.device_type, dv.short_name, dv.uom, remove, dv.has_cmd, dv.options, dv.options_size);
-}
+// create's a ha sensor config topic from a device value object
+// and also takes a flag to see whether it will also create the main HA device config
+void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model, const std::string & brand, const bool remove, const bool create_device_config) {
+    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> dev_json;
 
+    // always create the ids
+    JsonArray   ids = dev_json.createNestedArray("ids");
+    char        ha_device[40];
+    std::string device_type_name = EMSdevice::device_type_2_device_name(dv.device_type);
+    snprintf(ha_device, sizeof(ha_device), "ems-esp-%s", device_type_name.c_str());
+    ids.add(ha_device);
+
+    if (create_device_config) {
+        device_type_name[0]    = toupper(device_type_name[0]); // capitalize
+        dev_json["name"]       = "EMS-ESP " + device_type_name;
+        dev_json["mf"]         = brand;
+        dev_json["mdl"]        = model;
+        dev_json["via_device"] = "ems-esp";
+    }
+
+    publish_ha_sensor_config(dv.type,
+                             dv.tag,
+                             dv.full_name,
+                             dv.device_type,
+                             dv.short_name,
+                             dv.uom,
+                             remove,
+                             create_device_config,
+                             dv.has_cmd,
+                             dv.options,
+                             dv.options_size,
+                             dev_json.as<JsonObject>());
+}
 
 // HA config for a sensor and binary_sensor entity
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
-void Mqtt::publish_ha_sensor_config(uint8_t                             type,        // EMSdevice::DeviceValueType
-                                    uint8_t                             tag,         // EMSdevice::DeviceValueTAG
-                                    const __FlashStringHelper *         name,        // fullname
-                                    const uint8_t                       device_type, // EMSdevice::DeviceType
-                                    const __FlashStringHelper *         entity,      // shortname
-                                    const uint8_t                       uom,         // EMSdevice::DeviceValueUOM (0=NONE)
-                                    const bool                          remove,      // true if we want to remove this topic
+void Mqtt::publish_ha_sensor_config(uint8_t                             type,                 // EMSdevice::DeviceValueType
+                                    uint8_t                             tag,                  // EMSdevice::DeviceValueTAG
+                                    const __FlashStringHelper *         name,                 // fullname
+                                    const uint8_t                       device_type,          // EMSdevice::DeviceType
+                                    const __FlashStringHelper *         entity,               // shortname
+                                    const uint8_t                       uom,                  // EMSdevice::DeviceValueUOM (0=NONE)
+                                    const bool                          remove,               // true if we want to remove this topic
+                                    const bool                          create_device_config, // true if need to create main device config
                                     const bool                          has_cmd,
                                     const __FlashStringHelper * const * options,
-                                    uint8_t                             options_size) {
+                                    uint8_t                             options_size,
+                                    const JsonObject &                  dev_json) {
     // ignore if name (fullname) is empty
     if (name == nullptr) {
         return;
@@ -1140,17 +1153,8 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
         }
     }
 
-    JsonObject dev = doc.createNestedObject("dev");
-    JsonArray  ids = dev.createNestedArray("ids");
-
-    // for System commands we'll use the ID EMS-ESP
-    if (device_type == EMSdevice::DeviceType::SYSTEM) {
-        ids.add("ems-esp");
-    } else {
-        char ha_device[40];
-        snprintf(ha_device, sizeof(ha_device), "ems-esp-%s", device_name);
-        ids.add(ha_device);
-    }
+    // add the dev json object to the end
+    doc["dev"] = dev_json;
 
     publish_ha(topic, doc.as<JsonObject>());
 }

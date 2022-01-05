@@ -1268,7 +1268,7 @@ const std::string System::reset_reason(uint8_t cpu) {
     case 13:
         return ("RTC watch dog reset: CPU");
     case 14:
-        return ("APP CPU reseted by PRO CPU");
+        return ("APP CPU reset by PRO CPU");
     case 15:
         return ("Brownout reset");
     case 16:

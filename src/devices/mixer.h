@@ -27,8 +27,6 @@ class Mixer : public EMSdevice {
   public:
     Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
 
-    virtual bool publish_ha_device_config();
-
   private:
     static uuid::log::Logger logger_;
 
@@ -72,7 +70,6 @@ class Mixer : public EMSdevice {
     Type     type_             = Type::NONE;
     uint16_t hc_               = EMS_VALUE_USHORT_NOTSET;
     uint8_t  poolShuntStatus__ = EMS_VALUE_UINT_NOTSET; // temp value
-    uint8_t  id_;
 };
 
 } // namespace emsesp

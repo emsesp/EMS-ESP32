@@ -30,7 +30,6 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MP) {
         register_telegram_type(0x5BA, F("HpPoolStatus"), true, MAKE_PF_CB(process_HpPoolStatus));
         type_ = Type::MP;
-        register_device_value(DeviceValueTAG::TAG_NONE, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_NONE, &poolTemp_, DeviceValueType::SHORT, FL_(div10), FL_(poolTemp), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_NONE, &poolShuntStatus_, DeviceValueType::ENUM, FL_(enum_shunt), FL_(poolShuntStatus), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_NONE, &poolShunt_, DeviceValueType::UINT, nullptr, FL_(poolShunt), DeviceValueUOM::PERCENT);
@@ -44,7 +43,6 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
             type_       = Type::HC;
             hc_         = device_id - 0x20 + 1;
             uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
-            register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
             register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
             register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
             register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
@@ -55,7 +53,6 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
             type_       = Type::WWC;
             hc_         = device_id - 0x28 + 1;
             uint8_t tag = DeviceValueTAG::TAG_WWC1 + hc_ - 1;
-            register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
             register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(wwTemp), DeviceValueUOM::DEGREES);
             register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(wwPumpStatus), DeviceValueUOM::NONE);
             register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(wwTempStatus), DeviceValueUOM::NONE);
@@ -70,7 +67,6 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         type_       = Type::HC;
         hc_         = device_id - 0x20 + 1;
         uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
-        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
         register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
         register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
@@ -87,79 +83,12 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         type_       = Type::HC;
         hc_         = device_id - 0x20 + 1;
         uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
-        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, FL_(ID), DeviceValueUOM::NONE);
         register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
         register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
         register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
         register_device_value(tag, &flowTempVf_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempVf), DeviceValueUOM::DEGREES);
     }
-
-    id_ = product_id;
-}
-
-// publish HA config
-bool Mixer::publish_ha_device_config() {
-    // if we don't have valid values for this HC don't add it ever again
-    if (!Helpers::hasValue(pumpStatus_)) {
-        return false;
-    }
-
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
-
-    char uniq_id[20];
-    if (type_ == Type::MP) {
-        snprintf(uniq_id, sizeof(uniq_id), "MixerMP");
-    } else {
-        snprintf(uniq_id, sizeof(uniq_id), "Mixer%02X", device_id() - 0x20 + 1);
-    }
-    doc["uniq_id"] = uniq_id;
-
-    doc["ic"] = F_(icondevice);
-
-    char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
-    doc["stat_t"] = stat_t;
-
-    char name[20];
-    if (type_ == Type::MP) {
-        snprintf(name, sizeof(name), "Mixer MP");
-    } else {
-        snprintf(name, sizeof(name), "Mixer %02X", device_id() - 0x20 + 1);
-    }
-    doc["name"] = name;
-
-    char tpl[30];
-    if (type_ == Type::HC) {
-        snprintf(tpl, sizeof(tpl), "{{value_json.hc%d.id}}", device_id() - 0x20 + 1);
-    } else if (type_ == Type::WWC) {
-        snprintf(tpl, sizeof(tpl), "{{value_json.wwc%d.id}}", device_id() - 0x28 + 1);
-    } else {
-        snprintf(tpl, sizeof(tpl), "{{value_json.id}}");
-    }
-    doc["val_tpl"] = tpl;
-
-    JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = FJSON("EMS-ESP Mixer");
-    dev["sw"]      = EMSESP_APP_VERSION;
-    dev["mf"]      = brand_to_string();
-    dev["mdl"]     = this->name();
-    JsonArray ids  = dev.createNestedArray("ids");
-    ids.add("ems-esp-mixer");
-
-    // determine the topic, if its HC and WWC. This is determined by the incoming telegram types.
-    std::string topic(Mqtt::MQTT_TOPIC_MAX_SIZE, '\0');
-    if (type_ == Type::HC) {
-        snprintf(&topic[0], topic.capacity() + 1, "sensor/%s/mixer_hc%d/config", Mqtt::base().c_str(), hc_);
-    } else if (type_ == Type::WWC) {
-        snprintf(&topic[0], topic.capacity() + 1, "sensor/%s/mixer_wwc%d/config", Mqtt::base().c_str(), hc_); // WWC
-    } else if (type_ == Type::MP) {
-        snprintf(&topic[0], topic.capacity() + 1, "sensor/%s/mixer_mp/config", Mqtt::base().c_str());
-    }
-
-    Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
-
-    return true;
 }
 
 // heating circuits 0x02D7, 0x02D8 etc...

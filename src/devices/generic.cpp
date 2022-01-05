@@ -33,15 +33,9 @@ Generic::Generic(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
     }
 }
 
-// publish HA config
-bool Generic::publish_ha_device_config() {
-    return true;
-}
-
 // type 0x435 rf remote sensor
 void Generic::process_RFSensorMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, rfTemp_, 0); // is * 10
 }
-
 
 } // namespace emsesp

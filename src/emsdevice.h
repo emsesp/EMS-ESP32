@@ -52,9 +52,6 @@ class EMSdevice {
 
     static constexpr uint8_t EMS_DEVICES_MAX_TELEGRAMS = 20;
 
-    // virtual functions overrules by derived classes
-    virtual bool publish_ha_device_config() = 0;
-
     // device_type defines which derived class to use, e.g. BOILER, THERMOSTAT etc..
     EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
         : device_type_(device_type)
@@ -66,10 +63,10 @@ class EMSdevice {
         , brand_(brand) {
     }
 
-    const std::string        device_type_name() const;
+    const std::string device_type_name() const;
+
     static const std::string device_type_2_device_name(const uint8_t device_type);
     static uint8_t           device_name_2_device_type(const char * topic);
-
     static const std::string uom_to_string(uint8_t uom);
     static const std::string tag_to_string(uint8_t tag);
     static const std::string tag_to_mqtt(uint8_t tag);
@@ -281,11 +278,11 @@ class EMSdevice {
         ha_config_done_ = v;
     }
 
-    bool ha_config_firsttime() const {
-        return ha_config_firsttime_;
+    bool ha_config_firstrun() const {
+        return ha_config_firstrun_;
     }
-    void ha_config_firsttime(const bool v) {
-        ha_config_firsttime_ = v;
+    void ha_config_firstrun(const bool v) {
+        ha_config_firstrun_ = v;
     }
 
     enum Brand : uint8_t {
@@ -374,9 +371,9 @@ class EMSdevice {
     uint8_t     flags_ = 0;
     uint8_t     brand_ = Brand::NO_BRAND;
 
-    bool ha_config_done_      = false;
-    bool has_update_          = false;
-    bool ha_config_firsttime_ = true; // this means a first setup of HA is needed after a restart
+    bool ha_config_done_     = false;
+    bool has_update_         = false;
+    bool ha_config_firstrun_ = true; // this means a first setup of HA is needed after a restart
 
     struct TelegramFunction {
         uint16_t                    telegram_type_id_;   // it's type_id

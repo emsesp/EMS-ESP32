@@ -1272,38 +1272,41 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
 // create the Home Assistant configs for each device value / entity
 // this is called when an MQTT publish is done via an EMS Device in emsesp.cpp
 void EMSdevice::publish_mqtt_ha_entity_config() {
-    // create the main device config if not already done
-    if (!ha_config_done()) {
-        ha_config_done(publish_ha_device_config());
-    }
+    // create the main device config if not already done, per device type
+    bool create_device_config = !ha_config_done();
 
     for (auto & dv : devicevalues_) {
         if (dv.has_state(DeviceValueState::DV_ACTIVE)) {
             // add it if not already done and if it's visible (not on the exclusion list)
             // don't do this for commands (like reset)
             if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && dv.has_state(DeviceValueState::DV_VISIBLE) && dv.type != DeviceValueType::CMD) {
-                Mqtt::publish_ha_sensor_config(dv, false);
+                Mqtt::publish_ha_sensor_config(dv, name(), brand_to_string(), false, create_device_config);
                 dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                if (create_device_config) {
+                    create_device_config = false;
+                }
             }
         } else {
             if (dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED)) {
                 // if the HA config has already been created and now the value has gone dormant, delete the config
                 // https://github.com/emsesp/EMS-ESP32/issues/196
-                Mqtt::publish_ha_sensor_config(dv, true); // remove /config
+                Mqtt::publish_ha_sensor_config(dv, name(), brand_to_string(), true, create_device_config); // remove /config
                 dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
             }
         }
     }
+
+    ha_config_done(true); // assume we've created the config
 }
 
 // remove all config topics in HA
 void EMSdevice::ha_config_clear() {
     for (auto & dv : devicevalues_) {
-        Mqtt::publish_ha_sensor_config(dv, true); // delete topic using 'true'
+        Mqtt::publish_ha_sensor_config(dv, "", "", true); // delete topic (remove = true)
         dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
     }
 
-    ha_config_done(false);
+    ha_config_done(false); // this will force the recreation of the main HA device config
 }
 
 bool EMSdevice::has_telegram_id(uint16_t id) {
