@@ -1052,15 +1052,15 @@ bool System::command_customizations(const char * value, const int8_t id, JsonObj
             JsonObject sensorJson = analogJson.createNestedObject();
             sensorJson["gpio"]    = sensor.id;
             sensorJson["name"]    = sensor.name;
+            if (EMSESP::enum_format() == ENUM_FORMAT_INDEX) {
+                sensorJson["type"] = sensor.type;
+            } else {
+                sensorJson["type"] = FL_(enum_sensortype)[sensor.type];
+            }
             if (sensor.type == AnalogSensor::AnalogType::ADC) {
-                sensorJson["type"]   = "adc";
                 sensorJson["offset"] = sensor.offset;
                 sensorJson["factor"] = sensor.factor;
                 sensorJson["uom"]    = EMSdevice::uom_to_string(sensor.uom);
-            } else if (sensor.type == AnalogSensor::AnalogType::IOCOUNTER) {
-                sensorJson["type"] = "counter";
-            } else if (sensor.type == AnalogSensor::AnalogType::READ) {
-                sensorJson["type"] = "gpio";
             }
         }
 
