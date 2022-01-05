@@ -25,6 +25,7 @@ import {
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 import { AuthenticatedContext } from '../contexts/authentication';
 
@@ -104,7 +105,7 @@ const DashboardStatus: FC = () => {
       <DialogTitle>EMS Device Scan</DialogTitle>
       <DialogContent dividers>Are you sure you want to initiate a full device scan of the EMS bus?</DialogContent>
       <DialogActions>
-        <Button variant="outlined" onClick={() => setConfirmScan(false)} color="secondary">
+        <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmScan(false)} color="secondary">
           Cancel
         </Button>
         <Button startIcon={<PermScanWifiIcon />} variant="outlined" onClick={scan} color="primary" autoFocus>

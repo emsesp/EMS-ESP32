@@ -23,6 +23,7 @@ import { useSnackbar } from 'notistack';
 
 import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
+import CancelIcon from '@mui/icons-material/Cancel';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 
 import { ButtonRow, FormLoader, ValidatedTextField, SectionContent } from '../components';
@@ -221,7 +222,7 @@ const SettingsCustomization: FC = () => {
         Are you sure you want remove all customizations? EMS-ESP will then restart.
       </DialogContent>
       <DialogActions>
-        <Button variant="outlined" onClick={() => setConfirmReset(false)} color="secondary">
+        <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmReset(false)} color="secondary">
           Cancel
         </Button>
         <Button

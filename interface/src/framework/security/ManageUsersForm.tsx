@@ -86,7 +86,7 @@ const SecuritySettingsForm: FC = () => {
           <TableHead>
             <TableRow>
               <TableCell>Username</TableCell>
-              <TableCell align="center">Admin?</TableCell>
+              <TableCell align="center">is Admin?</TableCell>
               <TableCell />
             </TableRow>
           </TableHead>

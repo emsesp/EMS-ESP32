@@ -28,6 +28,7 @@ import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import BuildIcon from '@mui/icons-material/Build';
 import TimerIcon from '@mui/icons-material/Timer';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 import { ButtonRow, FormLoader, SectionContent, MessageBox } from '../../components';
 import { EspPlatform, SystemStatus, Version } from '../../types';
@@ -93,7 +94,12 @@ const SystemStatusForm: FC = () => {
       <DialogTitle>Restart</DialogTitle>
       <DialogContent dividers>Are you sure you want to restart EMS-ESP?</DialogContent>
       <DialogActions>
-        <Button variant="outlined" onClick={() => setConfirmRestart(false)} color="secondary">
+        <Button
+          startIcon={<CancelIcon />}
+          variant="outlined"
+          onClick={() => setConfirmRestart(false)}
+          color="secondary"
+        >
           Cancel
         </Button>
         <Button
@@ -186,7 +192,12 @@ const SystemStatusForm: FC = () => {
       <DialogTitle>Factory Reset</DialogTitle>
       <DialogContent dividers>Are you sure you want to reset the device to its factory defaults?</DialogContent>
       <DialogActions>
-        <Button variant="outlined" onClick={() => setConfirmFactoryReset(false)} color="secondary">
+        <Button
+          startIcon={<CancelIcon />}
+          variant="outlined"
+          onClick={() => setConfirmFactoryReset(false)}
+          color="secondary"
+        >
           Cancel
         </Button>
         <Button

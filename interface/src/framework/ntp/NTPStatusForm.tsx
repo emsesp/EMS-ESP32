@@ -24,6 +24,7 @@ import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
 import UpdateIcon from '@mui/icons-material/Update';
 import DnsIcon from '@mui/icons-material/Dns';
 import AvTimerIcon from '@mui/icons-material/AvTimer';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 import * as NTPApi from '../../api/ntp';
 import { NTPStatus, NTPSyncStatus } from '../../types';
@@ -108,7 +109,7 @@ const NTPStatusForm: FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button variant="outlined" onClick={() => setSettingTime(false)} color="secondary">
+          <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setSettingTime(false)} color="secondary">
             Cancel
           </Button>
           <Button

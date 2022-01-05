@@ -1,6 +1,9 @@
 import { FC, useState, useEffect } from 'react';
 import Schema, { ValidateFieldsError } from 'async-validator';
 
+import CancelIcon from '@mui/icons-material/Cancel';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
 import { BlockFormControlLabel, ValidatedPasswordField, ValidatedTextField } from '../../components';
@@ -75,11 +78,17 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
             />
           </DialogContent>
           <DialogActions>
-            <Button variant="outlined" onClick={onCancelEditing} color="secondary">
+            <Button startIcon={<CancelIcon />} variant="outlined" onClick={onCancelEditing} color="secondary">
               Cancel
             </Button>
-            <Button variant="outlined" onClick={validateAndDone} color="primary" autoFocus>
-              Done
+            <Button
+              startIcon={<PersonAddIcon />}
+              variant="outlined"
+              onClick={validateAndDone}
+              color="primary"
+              autoFocus
+            >
+              Add
             </Button>
           </DialogActions>
         </>
