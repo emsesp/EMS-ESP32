@@ -71,7 +71,7 @@ void AnalogSensor::reload() {
             // analogSetPinAttenuation does not work with analogReadMilliVolts
             sensor.analog_       = 0; // initialize
             sensor.last_reading_ = 0;
-        } else if (sensor.type() == AnalogType::IOCOUNTER) {
+        } else if (sensor.type() == AnalogType::COUNTER) {
             LOG_DEBUG(F("Adding analog I/O Counter sensor on GPIO%d"), sensor.id());
             pinMode(sensor.id(), INPUT_PULLUP);
             sensor.set_value(0); // reset count
@@ -79,7 +79,7 @@ void AnalogSensor::reload() {
             sensor.polltime_ = 0;
             sensor.poll_     = digitalRead(sensor.id());
             publish_sensor(sensor);
-        } else if (sensor.type() == AnalogType::READ) {
+        } else if (sensor.type() == AnalogType::DIGITAL_IN) {
             LOG_DEBUG(F("Adding analog Read sensor on GPIO%d"), sensor.id());
             pinMode(sensor.id(), INPUT_PULLUP);
             sensor.set_value(digitalRead(sensor.id())); // initial value
@@ -123,7 +123,7 @@ void AnalogSensor::measure() {
     // poll digital io every time
     // go through the list of digital sensors
     for (auto & sensor : sensors_) {
-        if (sensor.type() == AnalogType::READ || sensor.type() == AnalogType::IOCOUNTER) {
+        if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::COUNTER) {
             auto old_value       = sensor.value(); // remember current value before reading
             auto current_reading = digitalRead(sensor.id());
             if (sensor.poll_ != current_reading) { // check for pinchange
@@ -131,9 +131,9 @@ void AnalogSensor::measure() {
                 sensor.poll_     = current_reading;
             }
             if (uuid::get_uptime() - sensor.polltime_ >= 15) { // debounce
-                if (sensor.type() == AnalogType::READ) {
+                if (sensor.type() == AnalogType::DIGITAL_IN) {
                     sensor.set_value(sensor.poll_);
-                } else if (sensor.type() == AnalogType::IOCOUNTER) {
+                } else if (sensor.type() == AnalogType::COUNTER) {
                     // capture reading and compare with the last one to see if there is high/low change
                     if (sensor.poll_ != sensor.last_reading_) {
                         sensor.last_reading_ = sensor.poll_;
@@ -276,13 +276,13 @@ void AnalogSensor::publish_values(const bool force) {
                 JsonObject dataSensor = doc.createNestedObject(Helpers::smallitoa(s, sensor.id()));
                 dataSensor["name"]    = sensor.name();
                 switch (sensor.type()) {
-                case AnalogType::IOCOUNTER:
+                case AnalogType::COUNTER:
                     dataSensor["count"] = (uint16_t)sensor.value(); // convert to integer
                     break;
                 case AnalogType::ADC:
                     dataSensor["value"] = (float)sensor.value(); // float
                     break;
-                case AnalogType::READ:
+                case AnalogType::DIGITAL_IN:
                 default:
                     dataSensor["value"] = (uint8_t)sensor.value(); // convert to char for 1 or 0
                     break;
@@ -403,7 +403,7 @@ void AnalogSensor::test() {
     sensors_.emplace_back(36, "test12", 0, 0.1, 17, AnalogType::ADC);
     sensors_.back().set_value(12.4);
 
-    sensors_.emplace_back(37, "test13", 0, 0, 0, AnalogType::READ);
+    sensors_.emplace_back(37, "test13", 0, 0, 0, AnalogType::DIGITAL_IN);
     sensors_.back().set_value(13);
 }
 #endif

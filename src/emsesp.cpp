@@ -437,14 +437,14 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
                            sensor.offset());
             break;
         default:
-        case AnalogSensor::AnalogType::READ:
-        case AnalogSensor::AnalogType::IOCOUNTER:
+        case AnalogSensor::AnalogType::DIGITAL_IN:
+        case AnalogSensor::AnalogType::COUNTER:
             shell.printfln(F("  %s: %s%d%s (Type: %s)"),
                            sensor.name().c_str(),
                            COLOR_BRIGHT_GREEN,
                            (uint16_t)sensor.value(), // as int
                            COLOR_RESET,
-                           sensor.type() == AnalogSensor::AnalogType::IOCOUNTER ? "IOCOUNTER" : "READ");
+                           sensor.type() == AnalogSensor::AnalogType::COUNTER ? "Counter" : "Digital in");
             break;
         }
     }

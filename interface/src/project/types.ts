@@ -188,7 +188,7 @@ export const DeviceValueUOM_s = [
   "o'clock"
 ];
 
-export const AnalogTypes = ['(disabled)', 'Read', 'Counter', 'ADC'];
+export const AnalogTypes = ['(disabled)', 'Digital in', 'Counter', 'ADC'];
 
 type BoardProfiles = {
   [name: string]: string;

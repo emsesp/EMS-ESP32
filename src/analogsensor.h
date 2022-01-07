@@ -112,8 +112,8 @@ class AnalogSensor {
     enum AnalogType : int8_t {
         MARK_DELETED = -1, // mark for deletion
         NOTUSED,           // 0 - disabled
-        READ,              // 1
-        IOCOUNTER,         // 2
+        DIGITAL_IN,        // 1
+        COUNTER,           // 2
         ADC                // 3
     };
 
