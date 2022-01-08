@@ -2,9 +2,10 @@
 
 [common]
 ; custom build flags
-; options are: EMSESP_DEBUG, EMSESP_UART_DEBUG, EMSESP_DEBUG_SENSOR, EMSESP_WIFI_TWEAK, EMSESP_DEFAULT_BOARD_PROFILE EMSESP_USE_SERIAL
+; options are: EMSESP_DEBUG, EMSESP_UART_DEBUG, EMSESP_DEBUG_SENSOR, EMSESP_WIFI_TWEAK, EMSESP_DEFAULT_BOARD_PROFILE
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
-; my_build_flags = -DEMSESP_DEBUG
+; my_build_flags = -DEMSESP_DEBUG_SENSOR
+; my_build_flags = -DEMSESP_DEBUG -DEMSESP_USE_SERIAL
 ; my_build_flags = -DEMSESP_DEBUG -DCORE_DEBUG_LEVEL=5 ; 5=verbose, 4=debug, 3=info
 
 [env:esp32]
@@ -16,7 +17,7 @@
 ; upload_port = ems-esp.local
 
 extra_scripts =
-  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
 
 ; pio run -e debug
