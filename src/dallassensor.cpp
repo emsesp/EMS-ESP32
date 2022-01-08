@@ -41,7 +41,7 @@ void DallasSensor::start() {
 
 #ifndef EMSESP_STANDALONE
     bus_.begin(dallas_gpio_);
-    LOG_INFO(F("Starting Dallas service"));
+    LOG_INFO(F("Starting Dallas sensor service"));
 #endif
 
     // Add API calls

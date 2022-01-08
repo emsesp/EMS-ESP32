@@ -30,6 +30,8 @@ void AnalogSensor::start() {
         analogSetAttenuation(ADC_2_5db); // for all channels
     }
 
+    LOG_INFO(F("Starting Analog sensor service"));
+
     // Add API call for /info
     Command::add(
         EMSdevice::DeviceType::ANALOGSENSOR,
@@ -75,7 +77,7 @@ void AnalogSensor::reload() {
             LOG_DEBUG(F("Adding analog I/O Counter sensor on GPIO%d"), sensor.id());
             pinMode(sensor.id(), INPUT_PULLUP);
             sensor.set_value(0); // reset count
-            sensor.set_uom(0); // no uom, just for safe measures
+            sensor.set_uom(0);   // no uom, just for safe measures
             sensor.polltime_ = 0;
             sensor.poll_     = digitalRead(sensor.id());
             publish_sensor(sensor);
