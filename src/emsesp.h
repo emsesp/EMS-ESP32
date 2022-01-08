@@ -144,10 +144,6 @@ class EMSESP {
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
-    static bool have_sensors() {
-        return (dallassensor_.have_sensors() || analogsensor_.have_sensors());
-    }
-
     static uint32_t sensor_reads() {
         return dallassensor_.reads() + analogsensor_.reads();
     }
