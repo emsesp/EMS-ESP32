@@ -2525,8 +2525,14 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             break;
         default:
         case HeatingCircuit::Mode::AUTO: // automatic selection, if no type is defined, we use the standard code
-            uint8_t modetype = hc->get_mode_type();
-            offset           = (modetype == HeatingCircuit::Mode::NIGHT) ? EMS_OFFSET_RC20_2_Set_temp_night : EMS_OFFSET_RC20_2_Set_temp_day;
+            uint8_t mode_ = hc->get_mode();
+            if (mode_ == HeatingCircuit::Mode::NIGHT) {
+                offset = EMS_OFFSET_RC20_2_Set_temp_night;
+            } else if (mode_ == HeatingCircuit::Mode::DAY) {
+                offset = EMS_OFFSET_RC20_2_Set_temp_day;
+            } else {
+                offset = 13; // tempautotemp
+            }
             break;
         }
 

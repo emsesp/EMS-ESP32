@@ -321,9 +321,9 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           MAKE_CF_CB(set_ww_circulation_pump));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwChargeType_, DeviceValueType::ENUM, FL_(enum_charge), FL_(wwChargeType), DeviceValueUOM::NONE);
     register_device_value(
-        DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwHystOn_, DeviceValueType::INT, nullptr, FL_(wwHystOn), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_ww_hyst_on));
+        DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwHystOn_, DeviceValueType::INT, nullptr, FL_(wwHystOn), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_ww_hyst_on));
     register_device_value(
-        DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwHystOff_, DeviceValueType::INT, nullptr, FL_(wwHystOff), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_ww_hyst_off));
+        DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwHystOff_, DeviceValueType::INT, nullptr, FL_(wwHystOff), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_ww_hyst_off));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                           &wwDisinfectionTemp_,
                           DeviceValueType::UINT,

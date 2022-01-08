@@ -122,6 +122,7 @@ MAKE_STR(productid_fmt, "%s EMS ProductID")
 
 MAKE_PSTR_LIST(enum_syslog_level, F_(off), F("emerg"), F("alert"), F("crit"), F_(error), F("warn"), F("notice"), F_(info), F_(debug), F("trace"), F("all"))
 MAKE_PSTR_LIST(enum_watch, F_(off), F_(on), F_(raw), F_(unknown))
+MAKE_PSTR_LIST(enum_sensortype, F("none"), F("digital in"), F("counter"), F("adc"))
 
 // strings
 MAKE_PSTR(show_optional, "[devices | users | ems | mqtt | system | commands]")
