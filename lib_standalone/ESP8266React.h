@@ -58,7 +58,6 @@ class DummySettings {
     bool     mqtt_retain             = false;
     bool     enabled                 = true;
     uint8_t  nested_format           = 1; // 1=nested 2=single
-    uint8_t  ha_climate_format       = 1;
     bool     ha_enabled              = true;
     String   base                    = "ems-esp";
     bool     publish_single          = false;

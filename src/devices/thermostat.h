@@ -39,8 +39,6 @@ class Thermostat : public EMSdevice {
         int16_t remotetemp; // for readback
         uint8_t tempautotemp;
         uint8_t mode;
-        uint8_t hamode; // special mode for HA. See https://github.com/emsesp/EMS-ESP32/issues/66
-        int16_t hatemp; // roomTemp with fallback to selTemp
         uint8_t modetype;
         uint8_t summermode;
         uint8_t holidaymode;
@@ -73,6 +71,7 @@ class Thermostat : public EMSdevice {
         char    vacation[22];
         char    switchtime1[16];
         char    switchtime2[16];
+
         // RC 10
         uint8_t  reducehours;   // night reduce duration
         uint16_t reduceminutes; // remaining minutes to night->day
@@ -92,6 +91,14 @@ class Thermostat : public EMSdevice {
         // determines if the heating circuit is actually present and has data
         bool is_active() {
             return Helpers::hasValue(selTemp);
+        }
+
+        bool ha_climate_created() {
+            return ha_climate_created_;
+        }
+
+        void ha_climate_created(bool ha_climate_created) {
+            ha_climate_created_ = ha_climate_created;
         }
 
         uint8_t get_mode() const;
@@ -128,8 +135,9 @@ class Thermostat : public EMSdevice {
         }
 
       private:
-        uint8_t hc_num_; // heating circuit number 1..10
-        uint8_t model_;  // the model type
+        uint8_t hc_num_;                     // heating circuit number 1..10
+        uint8_t model_;                      // the model type
+        bool    ha_climate_created_ = false; // if we need to create the HA climate control
     };
 
     static std::string mode_tostring(uint8_t mode);
@@ -160,7 +168,6 @@ class Thermostat : public EMSdevice {
     char     errorCode_[15]; // code from 0xA2 as string i.e. "A22(816)"
     uint16_t errorNumber_;   // used internally to build error code
     char     lastCode_[50];  // error log
-    uint8_t  dummy_;         // for commands with no output
 
     // Installation parameters
     uint8_t ibaMainDisplay_; // display on Thermostat: 0 int temp, 1 int setpoint, 2 ext temp, 3 burner temp, 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
@@ -289,6 +296,7 @@ class Thermostat : public EMSdevice {
     void register_device_values_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc);
 
     bool thermostat_ha_cmd(const char * message, uint8_t hc_num);
+    void add_ha_climate(std::shared_ptr<HeatingCircuit> hc);
 
     void process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_IBASettings(std::shared_ptr<const Telegram> telegram);

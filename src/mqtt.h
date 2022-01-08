@@ -169,10 +169,6 @@ class Mqtt {
 
     static void reset_mqtt();
 
-    static uint8_t ha_climate_format() {
-        return ha_climate_format_;
-    }
-
     // nested_format is 1 if nested, otherwise 2 for single topics
     static uint8_t nested_format() {
         return nested_format_;
@@ -192,10 +188,6 @@ class Mqtt {
 
     static void nested_format(uint8_t nested_format) {
         nested_format_ = nested_format;
-    }
-
-    static void ha_climate_format(uint8_t ha_climate_format) {
-        ha_climate_format_ = ha_climate_format;
     }
 
     static bool ha_enabled() {
@@ -302,7 +294,6 @@ class Mqtt {
     static uint32_t    publish_time_other_;
     static uint32_t    publish_time_sensor_;
     static bool        mqtt_enabled_;
-    static uint8_t     ha_climate_format_;
     static bool        ha_enabled_;
     static uint8_t     nested_format_;
     static bool        publish_single_;

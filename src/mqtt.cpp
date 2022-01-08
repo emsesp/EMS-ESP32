@@ -36,7 +36,6 @@ uint32_t    Mqtt::publish_time_mixer_;
 uint32_t    Mqtt::publish_time_sensor_;
 uint32_t    Mqtt::publish_time_other_;
 bool        Mqtt::mqtt_enabled_;
-uint8_t     Mqtt::ha_climate_format_;
 bool        Mqtt::ha_enabled_;
 uint8_t     Mqtt::nested_format_;
 bool        Mqtt::send_response_;
@@ -368,15 +367,14 @@ void Mqtt::reset_mqtt() {
 
 void Mqtt::load_settings() {
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
-        mqtt_base_         = mqttSettings.base.c_str(); // Convert String to std::string
-        mqtt_qos_          = mqttSettings.mqtt_qos;
-        mqtt_retain_       = mqttSettings.mqtt_retain;
-        mqtt_enabled_      = mqttSettings.enabled;
-        ha_enabled_        = mqttSettings.ha_enabled;
-        ha_climate_format_ = mqttSettings.ha_climate_format;
-        nested_format_     = mqttSettings.nested_format;
-        publish_single_    = mqttSettings.publish_single;
-        send_response_     = mqttSettings.send_response;
+        mqtt_base_      = mqttSettings.base.c_str(); // Convert String to std::string
+        mqtt_qos_       = mqttSettings.mqtt_qos;
+        mqtt_retain_    = mqttSettings.mqtt_retain;
+        mqtt_enabled_   = mqttSettings.enabled;
+        ha_enabled_     = mqttSettings.ha_enabled;
+        nested_format_  = mqttSettings.nested_format;
+        publish_single_ = mqttSettings.publish_single;
+        send_response_  = mqttSettings.send_response;
 
         // convert to milliseconds
         publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000;

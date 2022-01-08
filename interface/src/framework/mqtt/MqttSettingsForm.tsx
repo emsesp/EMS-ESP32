@@ -155,7 +155,6 @@ const MqttSettingsForm: FC = () => {
             </ValidatedTextField>
           </Grid>
         </Grid>
-
         <BlockFormControlLabel
           control={<Checkbox name="clean_session" checked={data.clean_session} onChange={updateFormValue} />}
           label="Set Clean Session"
@@ -164,11 +163,9 @@ const MqttSettingsForm: FC = () => {
           control={<Checkbox name="mqtt_retain" checked={data.mqtt_retain} onChange={updateFormValue} />}
           label="Always use Retain Flag"
         />
-
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           Formatting
         </Typography>
-
         <ValidatedTextField
           name="nested_format"
           label="Topic/Payload Format"
@@ -205,28 +202,9 @@ const MqttSettingsForm: FC = () => {
             </Box>
           </Grid>
         </Grid>
-
-        {data.ha_enabled && (
-          <ValidatedTextField
-            name="ha_climate_format"
-            label="HA Thermostat Room Temperature"
-            value={data.ha_climate_format}
-            fullWidth
-            variant="outlined"
-            onChange={updateFormValue}
-            margin="normal"
-            select
-          >
-            <MenuItem value={1}>Use Current temperature</MenuItem>
-            <MenuItem value={2}>Use Setpoint temperature</MenuItem>
-            <MenuItem value={3}>Always set to 0</MenuItem>
-          </ValidatedTextField>
-        )}
-
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           Publish Intervals (in seconds, 0=automatic)
         </Typography>
-
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <Grid item xs={4}>
             <ValidatedTextField
@@ -241,7 +219,6 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-
           <Grid item xs={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
@@ -255,7 +232,6 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-
           <Grid item xs={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
@@ -269,7 +245,6 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-
           <Grid item xs={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
@@ -283,7 +258,6 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-
           <Grid item xs={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
@@ -297,7 +271,6 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-
           <Grid item xs={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
@@ -312,7 +285,6 @@ const MqttSettingsForm: FC = () => {
             />
           </Grid>
         </Grid>
-
         <ButtonRow>
           <Button
             startIcon={<SaveIcon />}

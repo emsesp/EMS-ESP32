@@ -342,11 +342,6 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
         return heating_circuits_.back();
     }
 
-    // now create the HA topics to send to MQTT for each sensor
-    if (Mqtt::ha_enabled()) {
-        publish_ha_config_hc(new_hc);
-    }
-
     // set the flag saying we want its data during the next auto fetch
     toggle_fetch(monitor_typeids[hc_num - 1], toggle_);
 
@@ -392,36 +387,46 @@ void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit
     doc["~"]          = Mqtt::base(); // ems-esp
 
     char topic_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
+
+    char hc_str[2];
     if (Mqtt::nested_format() == 1) {
+        hc_str[0] = '1' + hc_num - 1;
+        hc_str[1] = '\0';
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_NONE).c_str());
-
-        char mode_str_tpl[40];
-        snprintf(mode_str_tpl, sizeof(mode_str_tpl), "{{value_json.hc%d.hamode}}", hc_num);
-        doc["mode_stat_tpl"] = mode_str_tpl;
-
-        char seltemp_str[30];
-        snprintf(seltemp_str, sizeof(seltemp_str), "{{value_json.hc%d.seltemp}}", hc_num);
-        doc["temp_stat_tpl"] = seltemp_str;
-
-        char currtemp_str[30];
-        snprintf(currtemp_str, sizeof(currtemp_str), "{{value_json.hc%d.hatemp}}", hc_num);
-        doc["curr_temp_tpl"] = currtemp_str;
-
-
     } else {
+        hc_str[0] = '\0'; // empty string
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_HC1 + hc_num - 1).c_str());
-
-        doc["mode_stat_tpl"] = FJSON("{{value_json.hamode}}");
-        doc["temp_stat_tpl"] = FJSON("{{value_json.seltemp}}");
-        doc["curr_temp_tpl"] = FJSON("{{value_json.hatemp}}");
     }
+
+    // create mode json id
+    char hc_mode_str[30];
+    snprintf(hc_mode_str, sizeof(hc_mode_str), "value_json.hc%s.mode", hc_str);
+
+    char mode_str_tpl[400];
+    snprintf(mode_str_tpl,
+             sizeof(mode_str_tpl),
+             "{%%if %s=='manual'%%}heat{%%elif %s=='day'%%}heat{%%elif %s=='night'%%}off{%%elif %s=='off'%%}off{%%else%%}auto{%%endif%%}",
+             hc_mode_str,
+             hc_mode_str,
+             hc_mode_str,
+             hc_mode_str);
+    doc["mode_stat_tpl"] = mode_str_tpl;
+
+    char seltemp_str[30];
+    snprintf(seltemp_str, sizeof(seltemp_str), "{{value_json.hc%s.seltemp}}", hc_str);
+    doc["temp_stat_tpl"] = seltemp_str;
+
+    char currtemp_str[30];
+    snprintf(currtemp_str, sizeof(currtemp_str), "{{value_json.hc%s.currtemp}}", hc_str);
+    doc["curr_temp_tpl"] = currtemp_str;
+
     doc["mode_stat_t"] = topic_t;
     doc["temp_stat_t"] = topic_t;
     doc["curr_temp_t"] = topic_t;
 
-    doc["min_temp"]  = FJSON("5");
-    doc["max_temp"]  = FJSON("30");
-    doc["temp_step"] = FJSON("0.5");
+    doc["min_temp"]  = "5";
+    doc["max_temp"]  = "30";
+    doc["temp_step"] = "0.5";
 
     // the HA climate component only responds to auto, heat and off
     JsonArray modes = doc.createNestedArray("modes");
@@ -648,8 +653,20 @@ void Thermostat::process_RC10Monitor(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->selTemp, 1, 1); // is * 2, force as single byte
     has_update(telegram, hc->roomTemp, 2);   // is * 10
     has_update(telegram, hc->reduceminutes, 5);
-    hc->hamode = hc->mode == 2 ? 1 : 0; // set special HA mode
-    hc->hatemp = Helpers::hasValue(hc->roomTemp) ? hc->roomTemp : hc->selTemp;
+    add_ha_climate(hc);
+}
+
+// add the HVAC HA component for the HC only if it has a valid seltemp and currtemp
+void Thermostat::add_ha_climate(std::shared_ptr<HeatingCircuit> hc) {
+    if (!Mqtt::ha_enabled() || (hc->ha_climate_created())) {
+        return;
+    }
+
+    if (Helpers::hasValue(hc->roomTemp) && Helpers::hasValue(hc->selTemp)) {
+        publish_ha_config_hc(hc);
+    }
+
+    hc->ha_climate_created(true); // only create it once
 }
 
 // type 0xB0 - for reading the mode from the RC10 thermostat (0x17)
@@ -692,7 +709,6 @@ void Thermostat::process_RC20Set(std::shared_ptr<const Telegram> telegram) {
         return;
     }
     has_update(telegram, hc->mode, 23);
-    hc->hamode = hc->mode; // set special HA mode
 }
 
 // type 0xAE - data from the RC20 thermostat (0x17) - not for RC20's
@@ -708,7 +724,7 @@ void Thermostat::process_RC20Monitor_2(std::shared_ptr<const Telegram> telegram)
     has_update(telegram, hc->selTemp, 2, 1);     // is * 2, force as single byte
     has_update(telegram, hc->roomTemp, 3);       // is * 10
     has_bitupdate(telegram, hc->summermode, 1, 0);
-    hc->hatemp = Helpers::hasValue(hc->roomTemp) ? hc->roomTemp : hc->selTemp;
+    add_ha_climate(hc);
 }
 
 // 0xAD - for reading the mode from the RC20/ES72 thermostat (0x17)
@@ -725,9 +741,9 @@ void Thermostat::process_RC20Set_2(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->nighttemp, 1); // is * 2,
     has_update(telegram, hc->daytemp, 2);   // is * 2,
     has_update(telegram, hc->mode, 3);
-    hc->hamode = hc->mode;                        // set special HA mode
     has_enumupdate(telegram, hc->program, 11, 1); // 1 .. 9 predefined programs
     has_update(telegram, hc->tempautotemp, 13);
+
     // RC25 extension:
     has_update(telegram, ibaMinExtTemperature_, 14);
     has_update(telegram, hc->minflowtemp, 15);
@@ -742,7 +758,7 @@ void Thermostat::process_RC20Remote(std::shared_ptr<const Telegram> telegram) {
         return;
     }
     has_update(telegram, hc->roomTemp, 0);
-    hc->hatemp = hc->roomTemp;
+    add_ha_climate(hc);
 }
 
 // type 0x0165, ff
@@ -758,7 +774,6 @@ void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->control, 1);         // remote: 0-off, 1-FB10, 2-FB100
     has_enumupdate(telegram, hc->program, 13, 1); // 1-6: 1 = A, 2 = B,...
     has_enumupdate(telegram, hc->mode, 14, 1);    // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
-    hc->hamode = hc->mode ? hc->mode - 1 : 0;     // set special HA mode: off, on, auto
 }
 
 // type 0x0179, ff
@@ -773,7 +788,6 @@ void Thermostat::process_JunkersSet2(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->nofrosttemp, 5);     // is * 2
     has_enumupdate(telegram, hc->program, 10, 1); // 1-6: 1 = A, 2 = B,...
     has_enumupdate(telegram, hc->mode, 4, 1);     // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
-    hc->hamode = hc->mode ? hc->mode - 1 : 0;     // set special HA mode: off, on, auto
 }
 
 // type 0x123 - FR10/FR110 Junkers as remote
@@ -783,7 +797,7 @@ void Thermostat::process_JunkersRemoteMonitor(std::shared_ptr<const Telegram> te
         return;
     }
     has_update(telegram, hc->roomTemp, 0); // roomTemp from remote
-    hc->hatemp = hc->roomTemp;
+    add_ha_climate(hc);
 }
 
 // type 0xA3 - for external temp settings from the the RC* thermostats (e.g. RC35)
@@ -802,7 +816,7 @@ void Thermostat::process_RC20Monitor(std::shared_ptr<const Telegram> telegram) {
 
     has_update(telegram, hc->selTemp, 1, 1); // is * 2, force as single byte
     has_update(telegram, hc->roomTemp, 2);   // is * 10
-    hc->hatemp = Helpers::hasValue(hc->roomTemp) ? hc->roomTemp : hc->selTemp;
+    add_ha_climate(hc);
 }
 
 // type 0x0A - data from the Nefit Easy/TC100 thermostat (0x18) - 31 bytes long
@@ -814,8 +828,7 @@ void Thermostat::process_EasyMonitor(std::shared_ptr<const Telegram> telegram) {
 
     has_update(telegram, hc->roomTemp, 8); // is * 100
     has_update(telegram, hc->selTemp, 10); // is * 100
-    hc->hatemp = Helpers::hasValue(hc->roomTemp) ? hc->roomTemp : hc->selTemp;
-    hc->hamode = 1; // fixed to heat
+    add_ha_climate(hc);
 }
 
 // Settings Parameters - 0xA5 - RC30_1
@@ -895,15 +908,8 @@ void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram
     } else {
         has_update(telegram, hc->roomTemp, 4); // value is * 10
     }
-    hc->hatemp = Helpers::hasValue(hc->roomTemp) ? hc->roomTemp : hc->selTemp;
 
-    /* mode handled in set
-    uint8_t mode = hc->mode == 3 ? 2 : 1;
-    telegram->read_value(mode, 1); // 1 = manual, 2 = auto
-    mode = mode == 2 ? 3 : hc->modetype; // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
-    has_update(hc->mode, mode);
-    hc->hamode = hc->mode ? hc->mode - 1 : 0; // set special HA mode: off, on, auto
-    */
+    add_ha_climate(hc);
 }
 
 // type 0x02A5 - data from Worchester CRF200
@@ -915,10 +921,8 @@ void Thermostat::process_CRFMonitor(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->roomTemp, 0);       // is * 10
     has_bitupdate(telegram, hc->modetype, 2, 0); // bit 0, modetype (off=0 , on=1)
     has_bitupdate(telegram, hc->mode, 2, 4);     // bit 4, mode (auto=0, off=1)
-    hc->hamode = 2 - 2 * hc->mode;               // set special HA mode
     has_update(telegram, hc->selTemp, 6, 1);     // is * 2, force as single byte
     has_update(telegram, hc->targetflowtemp, 4);
-    hc->hatemp = hc->roomTemp;
 }
 
 // type 0x02A5 - data from the Nefit RC1010/3000 thermostat (0x18) and RC300/310s on 0x10
@@ -931,7 +935,6 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram, hc->roomTemp, 0); // is * 10
     has_bitupdate(telegram, hc->modetype, 10, 1);
     has_bitupdate(telegram, hc->mode, 10, 0); // bit 1, mode (auto=1 or manual=0)
-    hc->hamode = hc->mode + 1;                // set special HA mode
 
     // if manual, take the current setpoint temp at pos 6
     // if auto, take the next setpoint temp at pos 7
@@ -944,7 +947,8 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     has_bitupdate(telegram, hc->summermode, 2, 4);
     has_update(telegram, hc->targetflowtemp, 4);
     has_update(telegram, hc->curroominfl, 27);
-    hc->hatemp = Helpers::hasValue(hc->roomTemp) ? hc->roomTemp : hc->selTemp;
+
+    add_ha_climate(hc);
 }
 
 // type 0x02B9 EMS+ for reading from RC300/RC310 thermostat
@@ -1094,7 +1098,8 @@ void Thermostat::process_RC30Monitor(std::shared_ptr<const Telegram> telegram) {
 
     has_update(telegram, hc->selTemp, 1, 1); // is * 2, force as single byte
     has_update(telegram, hc->roomTemp, 2);
-    hc->hatemp = Helpers::hasValue(hc->roomTemp) ? hc->roomTemp : hc->selTemp;
+
+    add_ha_climate(hc);
 }
 
 // type 0xA7 - for reading the mode from the RC30 thermostat (0x10)
@@ -1104,7 +1109,6 @@ void Thermostat::process_RC30Set(std::shared_ptr<const Telegram> telegram) {
         return;
     }
     has_update(telegram, hc->mode, 23);
-    hc->hamode = hc->mode; // set special HA mode
 }
 
 // type 0x3E (HC1), 0x48 (HC2), 0x52 (HC3), 0x5C (HC4) - data from the RC35 thermostat (0x10) - 16 bytes
@@ -1141,7 +1145,8 @@ void Thermostat::process_RC35Monitor(std::shared_ptr<const Telegram> telegram) {
     has_bitupdate(telegram, hc->holidaymode, 0, 5);
 
     has_update(telegram, hc->targetflowtemp, 14);
-    hc->hatemp = Helpers::hasValue(hc->roomTemp) ? hc->roomTemp : hc->selTemp;
+
+    add_ha_climate(hc);
 }
 
 // type 0x3D (HC1), 0x47 (HC2), 0x51 (HC3), 0x5B (HC4) - Working Mode Heating - for reading the mode from the RC35 thermostat (0x10)
@@ -1163,7 +1168,6 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->roominfluence, 4); // is * 1
     has_update(telegram, hc->offsettemp, 6);    // is * 2
     has_update(telegram, hc->mode, 7);          // night, day, auto
-    hc->hamode = hc->mode;                      // set special HA mode
 
     has_update(telegram, hc->wwprio, 21);         // 0xFF for on
     has_update(telegram, hc->summertemp, 22);     // is * 1
@@ -3178,31 +3182,11 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES);
     } else {
         register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_temp), 5, 29);
-        // register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, setpoint_temp_divider, FL_(temp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_temp), 5, 29);
     }
     register_device_value(tag, &hc->roomTemp, DeviceValueType::SHORT, roomtemp_divider, FL_(roomTemp), DeviceValueUOM::DEGREES);
 
     if (device_id() != EMSESP::actual_master_thermostat()) {
         return;
-    }
-
-    // special handling for Home Assistant
-    // we create special values called hatemp and hamode, which have empty fullnames so not shown in the web or console
-    if (Mqtt::ha_enabled()) {
-        uint8_t option = Mqtt::ha_climate_format();
-        if (option == Mqtt::HA_Climate_Format::CURRENT) {
-            register_device_value(tag, &hc->hatemp, DeviceValueType::SHORT, roomtemp_divider, FL_(hatemp), DeviceValueUOM::NONE);
-        } else if (option == Mqtt::HA_Climate_Format::SETPOINT) {
-            register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(hatemp), DeviceValueUOM::NONE);
-        } else if (option == Mqtt::HA_Climate_Format::ZERO) {
-            register_device_value(tag, &zero_value_, DeviceValueType::UINT, nullptr, FL_(hatemp), DeviceValueUOM::NONE);
-        }
-
-        // if we're sending to HA the only valid mode types are heat, auto and off
-        // manual & day = heat
-        // night & off = off
-        // everything else auto
-        register_device_value(tag, &hc->hamode, DeviceValueType::ENUM, FL_(enum_hamode), FL_(hamode), DeviceValueUOM::NONE);
     }
 
     switch (model) {

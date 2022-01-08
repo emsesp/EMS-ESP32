@@ -342,8 +342,6 @@ MAKE_PSTR_LIST(enum_mode3, F_(night), F_(day), F_(auto))
 MAKE_PSTR_LIST(enum_mode4, F_(nofrost), F_(eco), F_(heat), F_(auto)) // JUNKERS
 MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))
 
-MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(off))
-
 MAKE_PSTR_LIST(enum_modetype, F_(eco), F_(comfort))
 MAKE_PSTR_LIST(enum_modetype2, F_(day))
 MAKE_PSTR_LIST(enum_modetype3, F_(night), F_(day))
@@ -501,14 +499,7 @@ MAKE_PSTR_LIST(wwDisinfectDay, F("wwdisinfectday"), F("Desinfizierung Tag"))
 MAKE_PSTR_LIST(wwDisinfectHour, F("wwdisinfecthour"), F("Desinfizierung Stunde"))
 MAKE_PSTR_LIST(wwMaxTemp, F("wwmaxtemp"), F("Maximale Temperatur"))
 MAKE_PSTR_LIST(wwOneTimeKey, F("wwonetimekey"), F("Einmalladungstaste"))
-
-// thermostat
-// extra commands
 MAKE_PSTR_LIST(switchtime, F("switchtime"), F("einzelne Programmschaltzeit"))
-// extra commands, no long name, does not show on web
-MAKE_PSTR_LIST(temp, F("temp"))
-MAKE_PSTR_LIST(hatemp, F("hatemp"))
-MAKE_PSTR_LIST(hamode, F("hamode"))
 
 // mqtt values / commands
 MAKE_PSTR_LIST(dateTime, F("datetime"), F("Datum/Zeit"))

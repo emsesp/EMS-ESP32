@@ -228,7 +228,6 @@ mqtt_settings = {
   publish_time_sensor: 10,
   mqtt_qos: 0,
   mqtt_retain: false,
-  ha_climate_format: 1,
   ha_enabled: true,
   nested_format: 1,
   send_response: true,

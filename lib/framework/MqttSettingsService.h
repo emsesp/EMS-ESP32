@@ -86,7 +86,6 @@ class MqttSettings {
     uint16_t publish_time_sensor;
     uint8_t  mqtt_qos;
     bool     mqtt_retain;
-    uint8_t  ha_climate_format;
     bool     ha_enabled;
     uint8_t  nested_format;
     bool     publish_single;

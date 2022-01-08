@@ -361,8 +361,6 @@ MAKE_PSTR_LIST(enum_mode4, F_(nofrost), F_(eco), F_(heat), F_(auto)) // JUNKERS
 MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))                        // CRF
 MAKE_PSTR_LIST(enum_mode6, F_(nofrost), F_(night), F_(day))          // RC10
 
-MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(off))
-
 MAKE_PSTR_LIST(enum_modetype, F_(eco), F_(comfort))
 MAKE_PSTR_LIST(enum_modetype2, F_(day))
 MAKE_PSTR_LIST(enum_modetype3, F_(night), F_(day))
@@ -546,12 +544,6 @@ MAKE_PSTR_LIST(wwProgMode, F("wwprogmode"), F("program"))
 MAKE_PSTR_LIST(wwCircProg, F("wwcircprog"), F("circulation program"))
 MAKE_PSTR_LIST(wwMaxTemp, F("wwmaxtemp"), F("maximum temperature"))
 MAKE_PSTR_LIST(wwOneTimeKey, F("wwonetimekey"), F("one time key function"))
-
-// thermostat
-// commands, with no long name so they only appear in the MQTT payloads
-MAKE_PSTR_LIST(temp, F("temp"))
-MAKE_PSTR_LIST(hatemp, F("hatemp"))
-MAKE_PSTR_LIST(hamode, F("hamode"))
 
 // mqtt values / commands
 MAKE_PSTR_LIST(switchtime1, F("switchtime1"), F("own1 program switchtime"))

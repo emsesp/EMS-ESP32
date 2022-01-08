@@ -509,7 +509,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
     // determine state
     uint8_t state = DeviceValueState::DV_VISIBLE; // default to visible
     if (!full_name) {
-        state = DeviceValueState::DV_DEFAULT; // don't show if the full_name is empty. Used for hamode, hatemp etc
+        state = DeviceValueState::DV_DEFAULT; // don't show if the full_name is empty
     } else {
         // scan through customizations to see if it's on the exclusion list by matching the productID and deviceID
         EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
@@ -1174,8 +1174,8 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
 
             // handle ENUMs
             else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
-                // check for numeric enum-format, but "hamode" always as text
-                if ((EMSESP::enum_format() == ENUM_FORMAT_INDEX) && (dv.short_name != FL_(hamode)[0])) {
+                // check for numeric enum-format
+                if ((EMSESP::enum_format() == ENUM_FORMAT_INDEX)) {
                     json[name] = (uint8_t)(*(uint8_t *)(dv.value_p));
                 } else {
                     json[name] = dv.options[*(uint8_t *)(dv.value_p)];
