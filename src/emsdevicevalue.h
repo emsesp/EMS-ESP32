@@ -122,8 +122,8 @@ class DeviceValue {
     uint8_t                             uom;          // DeviceValueUOM::*
     uint8_t                             ha;           // DevcieValueHA::
     bool                                has_cmd;      // true if there is a Console/MQTT command which matches the short_name
-    int32_t                             min;          // min range
-    uint32_t                            max;          // max range
+    int16_t                             min;          // min range
+    uint16_t                            max;          // max range
     uint8_t                             state;        // DeviceValueState::*
     uint8_t                             id;           // internal unique counter
 
@@ -138,8 +138,8 @@ class DeviceValue {
                 uint8_t                             uom,
                 uint8_t                             ha,
                 bool                                has_cmd,
-                int32_t                             min,
-                uint32_t                            max,
+                int16_t                             min,
+                uint16_t                            max,
                 uint8_t                             state,
                 uint8_t                             id)
         : device_type(device_type)

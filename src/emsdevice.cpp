@@ -475,8 +475,8 @@ void EMSdevice::register_device_value(uint8_t                             tag,
                                       const __FlashStringHelper *         full_name,
                                       uint8_t                             uom,
                                       bool                                has_cmd,
-                                      int32_t                             min,
-                                      uint32_t                            max) {
+                                      int16_t                             min,
+                                      uint16_t                            max) {
     // initialize the device value depending on it's type
     if (type == DeviceValueType::STRING) {
         *(char *)(value_p) = {'\0'};
@@ -539,8 +539,8 @@ void EMSdevice::register_device_value(uint8_t                             tag,
                                       const __FlashStringHelper * const * name,
                                       uint8_t                             uom,
                                       const cmd_function_p                f,
-                                      int32_t                             min,
-                                      uint32_t                            max) {
+                                      int16_t                             min,
+                                      uint16_t                            max) {
     auto short_name = name[0];
     auto full_name  = name[1];
 
@@ -617,7 +617,7 @@ void EMSdevice::publish_value(void * value_p) {
                 break;
             case DeviceValueType::ENUM: {
                 if ((*(uint8_t *)(value_p)) < dv.options_size) {
-                    if (EMSESP::enum_format() == ENUM_FORMAT_INDEX) {
+                    if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
                         Helpers::render_value(payload, *(uint8_t *)(value_p), 0);
                     } else {
                         strlcpy(payload, read_flash_string(dv.options[*(uint8_t *)(value_p)]).c_str(), sizeof(payload));
@@ -824,9 +824,9 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
                 // handle Booleans (true, false)
                 if (dv.type == DeviceValueType::BOOL) {
                     bool value_b = *(bool *)(dv.value_p);
-                    if ((EMSESP::bool_format() == BOOL_FORMAT_TRUEFALSE)) {
+                    if ((EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE)) {
                         obj["v"] = value_b;
-                    } else if ((EMSESP::bool_format() == BOOL_FORMAT_10)) {
+                    } else if ((EMSESP::system_.bool_format() == BOOL_FORMAT_10)) {
                         obj["v"] = value_b ? 1 : 0;
                     } else {
                         char s[7];
@@ -902,7 +902,7 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
     }
 }
 
-// builds json with specific single device value information
+// builds json for a specific device value / entity
 // cmd is the endpoint or name of the device entity
 // returns false if failed, otherwise true
 bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8_t id) {
@@ -946,7 +946,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             switch (dv.type) {
             case DeviceValueType::ENUM: {
                 if (*(uint8_t *)(dv.value_p) < dv.options_size) {
-                    if (EMSESP::enum_format() == ENUM_FORMAT_INDEX) {
+                    if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
                         json[value] = (uint8_t)(*(uint8_t *)(dv.value_p));
                     } else {
                         json[value] = dv.options[*(uint8_t *)(dv.value_p)]; // text
@@ -1017,9 +1017,9 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             case DeviceValueType::BOOL:
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                     bool value_b = (bool)(*(uint8_t *)(dv.value_p));
-                    if ((EMSESP::bool_format() == BOOL_FORMAT_TRUEFALSE)) {
+                    if ((EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE)) {
                         json[value] = value_b;
-                    } else if ((EMSESP::bool_format() == BOOL_FORMAT_10)) {
+                    } else if ((EMSESP::system_.bool_format() == BOOL_FORMAT_10)) {
                         json[value] = value_b ? 1 : 0;
                     } else {
                         char s[7];
@@ -1151,14 +1151,14 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             // handle Booleans
             if (dv.type == DeviceValueType::BOOL && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see how to render the value depending on the setting
-                bool value_b = *(uint8_t *)(dv.value_p);
+                bool value_b = (bool)*(uint8_t *)(dv.value_p);
                 if (Mqtt::ha_enabled()) {
                     char s[7];
                     json[name] = Helpers::render_boolean(s, value_b); // for HA always render as string
                 } else {
-                    if ((EMSESP::bool_format() == BOOL_FORMAT_TRUEFALSE)) {
+                    if ((EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE)) {
                         json[name] = value_b;
-                    } else if ((EMSESP::bool_format() == BOOL_FORMAT_10)) {
+                    } else if ((EMSESP::system_.bool_format() == BOOL_FORMAT_10)) {
                         json[name] = value_b ? 1 : 0;
                     } else {
                         char s[7];
@@ -1175,7 +1175,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             // handle ENUMs
             else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
                 // check for numeric enum-format
-                if ((EMSESP::enum_format() == ENUM_FORMAT_INDEX)) {
+                if ((EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX)) {
                     json[name] = (uint8_t)(*(uint8_t *)(dv.value_p));
                 } else {
                     json[name] = dv.options[*(uint8_t *)(dv.value_p)];

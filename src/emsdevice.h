@@ -224,8 +224,8 @@ class EMSdevice {
                                const __FlashStringHelper *         full_name,
                                uint8_t                             uom,
                                bool                                has_cmd,
-                               int32_t                             min,
-                               uint32_t                            max);
+                               int16_t                             min,
+                               uint16_t                            max);
 
     void register_device_value(uint8_t                             tag,
                                void *                              value_p,
@@ -234,8 +234,8 @@ class EMSdevice {
                                const __FlashStringHelper * const * name,
                                uint8_t                             uom,
                                const cmd_function_p                f,
-                               int32_t                             min,
-                               uint32_t                            max);
+                               int16_t                             min,
+                               uint16_t                            max);
 
     void register_device_value(uint8_t                             tag,
                                void *                              value_p,

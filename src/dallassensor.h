@@ -91,11 +91,11 @@ class DallasSensor {
         return sensors_;
     }
 
-    uint32_t reads() {
+    uint16_t reads() {
         return sensorreads_;
     }
 
-    uint32_t fails() {
+    uint16_t fails() {
         return sensorfails_;
     }
 
@@ -171,8 +171,8 @@ class DallasSensor {
     uint8_t  dallas_gpio_ = 0;
     bool     parasite_    = false;
     bool     changed_     = false;
-    uint32_t sensorfails_ = 0;
-    uint32_t sensorreads_ = 0;
+    uint16_t sensorfails_ = 0;
+    uint16_t sensorreads_ = 0;
     int8_t   scanretry_   = 0;
 };
 

@@ -129,11 +129,11 @@ class AnalogSensor {
         return sensors_;
     }
 
-    uint32_t reads() {
+    uint16_t reads() {
         return sensorreads_;
     }
 
-    uint32_t fails() {
+    uint16_t fails() {
         return sensorfails_;
     }
 
@@ -171,8 +171,8 @@ class AnalogSensor {
 
     bool     analog_enabled_;
     bool     changed_     = false;
-    uint32_t sensorfails_ = 0; // this is always zero for now
-    uint32_t sensorreads_ = 0;
+    uint16_t sensorfails_ = 0; // this is always zero for now
+    uint16_t sensorreads_ = 0;
 };
 
 } // namespace emsesp
