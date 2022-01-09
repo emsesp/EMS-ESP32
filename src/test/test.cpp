@@ -173,6 +173,8 @@ bool Test::run_test(const char * command, int8_t id) {
 
     if (strcmp(command, "thermostat") == 0) {
         EMSESP::logger().info(F("Adding thermostat..."));
+        Mqtt::nested_format(1); // use nested
+        // Mqtt::nested_format(2); // single
 
         add_device(0x10, 192); // FW120
 
@@ -603,6 +605,41 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         shell.invoke_command("call boiler wwseltemp");
         shell.invoke_command("call system publish");
+    }
+
+    if (command == "api_values") {
+        shell.printfln(F("Testing API getting values"));
+        Mqtt::ha_enabled(false);
+        Mqtt::nested_format(1);
+        Mqtt::send_response(false);
+        // EMSESP::bool_format(BOOL_FORMAT_10); // BOOL_FORMAT_10_STR
+        EMSESP::system_.bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
+
+        run_test("boiler");
+        run_test("thermostat");
+
+        AsyncWebServerRequest request;
+        DynamicJsonDocument   doc(2000);
+        JsonVariant           json;
+        request.method(HTTP_GET);
+        request.url("/api/boiler/wwcirc");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/boiler/values");
+        EMSESP::webAPIService.webAPIService_get(&request);
+    }
+
+    if (command == "mqtt_post") {
+        shell.printfln(F("Testing MQTT incoming changes"));
+        Mqtt::ha_enabled(false);
+        Mqtt::nested_format(1);
+        Mqtt::send_response(false);
+        EMSESP::system_.bool_format(BOOL_FORMAT_10); // BOOL_FORMAT_10_STR
+        // EMSESP::bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
+
+        run_test("boiler");
+        run_test("thermostat");
+
+        EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp", "59");
     }
 
     if (command == "api") {
