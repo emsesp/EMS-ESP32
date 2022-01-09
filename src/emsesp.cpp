@@ -77,8 +77,6 @@ uint32_t EMSESP::last_fetch_               = 0;
 uint8_t  EMSESP::publish_all_idx_          = 0;
 uint8_t  EMSESP::unique_id_count_          = 0;
 bool     EMSESP::trace_raw_                = false;
-uint8_t  EMSESP::bool_format_              = 1;
-uint8_t  EMSESP::enum_format_              = 1;
 uint16_t EMSESP::wait_validate_            = 0;
 bool     EMSESP::wait_km_                  = true;
 
@@ -243,7 +241,7 @@ uint8_t EMSESP::bus_status() {
     }
 
     // check if we have Tx issues.
-    uint32_t total_sent = txservice_.telegram_read_count() + txservice_.telegram_write_count();
+    uint16_t total_sent = txservice_.telegram_read_count() + txservice_.telegram_write_count();
 
     // nothing sent and also no errors - must be ok
     if ((total_sent == 0) && (txservice_.telegram_fail_count() == 0)) {
@@ -1370,34 +1368,25 @@ void EMSESP::start() {
     }
 #endif
 
-    esp8266React.begin(); // loads core system services settings (network, mqtt, ap, ntp etc)
-
-    system_.check_upgrade(); // do any system upgrades
-
-    // load EMS-ESP Application settings and store some of the settings locally for future reference
-    webSettingsService.begin();
-    system_.get_settings();
-
+    esp8266React.begin();                     // loads core system services settings (network, mqtt, ap, ntp etc)
+    system_.check_upgrade();                  // do any system upgrades
+    webSettingsService.begin();               // load EMS-ESP Application settings...
+    system_.get_settings();                   // ...and store some of the settings locally for future reference
     console_.start(system_.telnet_enabled()); // telnet and serial console, from here we can start logging events
     webLogService.start();                    // start web log service
-
-    // load the customizations
-    webCustomizationService.begin();
+    webCustomizationService.begin();          // load the customizations
 
     // welcome message
     LOG_INFO(F("Starting EMS-ESP version %s (hostname: %s)"), EMSESP_APP_VERSION, system_.hostname().c_str());
     LOG_INFO(F("Configuring for interface board profile %s"), system_.board_profile().c_str());
 
-    // start EMS-ESP services
+    // start all the EMS-ESP services
     mqtt_.start();             // mqtt init
     system_.start(heap_start); // starts commands, led, adc, button, network, syslog & uart
     shower_.start();           // initialize shower timer and shower alert
     dallassensor_.start();     // Dallas external sensors
     analogsensor_.start();     // Analog external sensors
-
-    // start the web server
-    webServer.begin();
-
+    webServer.begin();         // start the web server
     // emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
 
     LOG_INFO(F("Last system reset reason Core0: %s, Core1: %s"), system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
@@ -1406,7 +1395,7 @@ void EMSESP::start() {
     device_library_ = {
 #include "device_library.h"
     };
-    LOG_INFO(F("EMS Device library loaded with %d records"), device_library_.size());
+    LOG_INFO(F("EMS device library loaded with %d records"), device_library_.size());
 
 #if defined(EMSESP_STANDALONE)
     Mqtt::on_connect(); // simulate an MQTT connection

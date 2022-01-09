@@ -300,7 +300,7 @@ void System::syslog_start() {
 #endif
 }
 
-// read some specific settings to store loccaly for faster access
+// read some specific system settings to store locally for faster access
 void System::get_settings() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         pbutton_gpio_   = settings.pbutton_gpio;
@@ -321,6 +321,11 @@ void System::get_settings() {
         syslog_mark_interval_ = settings.syslog_mark_interval;
         syslog_host_          = settings.syslog_host;
         syslog_port_          = settings.syslog_port;
+
+        fahrenheit_    = settings.fahrenheit;
+        bool_format_   = settings.bool_format;
+        enum_format_   = settings.enum_format;
+        readonly_mode_ = settings.readonly_mode;
     });
 }
 
@@ -549,6 +554,7 @@ bool System::heartbeat_json(JsonObject & output) {
     output["txreads"]    = EMSESP::txservice_.telegram_read_count();
     output["txwrites"]   = EMSESP::txservice_.telegram_write_count();
     output["txfails"]    = EMSESP::txservice_.telegram_fail_count();
+
     if (Mqtt::enabled()) {
         output["mqttfails"] = Mqtt::publish_fails();
         output["mqttfails"] = Mqtt::publish_fails();
@@ -583,11 +589,11 @@ void System::send_heartbeat() {
         return;
     }
 
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
-    JsonObject                                 json = doc.to<JsonObject>();
+    StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> doc;
+    JsonObject                                  json = doc.to<JsonObject>();
 
     if (heartbeat_json(json)) {
-        Mqtt::publish(F_(heartbeat), doc.as<JsonObject>()); // send to MQTT with retain off. This will add to MQTT queue.
+        Mqtt::publish(F_(heartbeat), json); // send to MQTT with retain off. This will add to MQTT queue.
     }
 }
 
@@ -1016,8 +1022,10 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["led_gpio"]     = settings.led_gpio;
         node["phy_type"]     = settings.phy_type;
 
-        node["hide_led"]        = settings.hide_led;
-        node["notoken_api"]     = settings.notoken_api;
+        node["hide_led"]      = settings.hide_led;
+        node["notoken_api"]   = settings.notoken_api;
+        node["readonly_mode"] = settings.readonly_mode;
+
         node["fahrenheit"]      = settings.fahrenheit;
         node["dallas_parasite"] = settings.dallas_parasite;
         node["bool_format"]     = settings.bool_format;
@@ -1051,7 +1059,7 @@ bool System::command_customizations(const char * value, const int8_t id, JsonObj
             JsonObject sensorJson = analogJson.createNestedObject();
             sensorJson["gpio"]    = sensor.id;
             sensorJson["name"]    = sensor.name;
-            if (EMSESP::enum_format() == ENUM_FORMAT_INDEX) {
+            if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
                 sensorJson["type"] = sensor.type;
             } else {
                 sensorJson["type"] = FL_(enum_sensortype)[sensor.type];

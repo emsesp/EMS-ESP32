@@ -103,6 +103,37 @@ class System {
         return analog_enabled_;
     }
 
+    bool readonly_mode() {
+        return readonly_mode_;
+    }
+
+    void readonly_mode(bool readonly_mode) {
+        readonly_mode_ = readonly_mode;
+    }
+
+    uint8_t bool_format() {
+        return bool_format_;
+    }
+
+    // see default_settings.h
+    // BOOL_FORMAT_ONOFF_STR = 1,
+    // BOOL_FORMAT_ONOFF_STR_CAP = 2
+    // BOOL_FORMAT_TRUEFALSE_STR = 3
+    // BOOL_FORMAT_TRUEFALSE = 4
+    // BOOL_FORMAT_10_STR = 5
+    // BOOL_FORMAT_10 = 6
+    void bool_format(uint8_t format) {
+        bool_format_ = format;
+    }
+
+    uint8_t enum_format() {
+        return enum_format_;
+    }
+
+    void enum_format(uint8_t format) {
+        enum_format_ = format;
+    }
+
     std::string board_profile() {
         return std::string(board_profile_.c_str());
     }
@@ -188,28 +219,29 @@ class System {
     bool upload_status_      = false; // true if we're in the middle of a OTA firmware upload
     bool ethernet_connected_ = false;
 
-    // settings, copies from WebSettings class in WebSettingsService.h
+    // EMS-ESP settings
+    // copies from WebSettings class in WebSettingsService.h
     std::string hostname_ = FACTORY_WIFI_HOSTNAME;
-
-    bool    hide_led_;
-    uint8_t led_gpio_;
-    bool    analog_enabled_;
-    bool    low_clock_;
-    String  board_profile_;
-    uint8_t phy_type_;
-    uint8_t pbutton_gpio_;
-    uint8_t rx_gpio_;
-    uint8_t tx_gpio_;
-    uint8_t dallas_gpio_;
-    bool    telnet_enabled_;
-
-    bool     syslog_enabled_ = false;
-    int8_t   syslog_level_;
-    uint32_t syslog_mark_interval_;
-    String   syslog_host_;
-    uint16_t syslog_port_;
-
-    bool fahrenheit_;
+    bool        hide_led_;
+    uint8_t     led_gpio_;
+    bool        analog_enabled_;
+    bool        low_clock_;
+    String      board_profile_;
+    uint8_t     phy_type_;
+    uint8_t     pbutton_gpio_;
+    uint8_t     rx_gpio_;
+    uint8_t     tx_gpio_;
+    uint8_t     dallas_gpio_;
+    bool        telnet_enabled_;
+    bool        syslog_enabled_;
+    int8_t      syslog_level_;
+    uint32_t    syslog_mark_interval_;
+    String      syslog_host_;
+    uint16_t    syslog_port_;
+    bool        fahrenheit_;
+    uint8_t     bool_format_;
+    uint8_t     enum_format_;
+    bool        readonly_mode_;
 };
 
 } // namespace emsesp
