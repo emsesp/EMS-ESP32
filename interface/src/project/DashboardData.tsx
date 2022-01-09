@@ -406,67 +406,58 @@ const DashboardData: FC = () => {
     }
 
     return (
-      <>
-        <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <StyledTableCell padding="checkbox" align="left" colSpan={2}>
-                  TYPE
-                </StyledTableCell>
-                <StyledTableCell>DESCRIPTION</StyledTableCell>
-                <StyledTableCell align="center">ENTITIES</StyledTableCell>
-                <StyledTableCell />
+      <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
+        {data.devices.length === 0 && <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />}
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <StyledTableCell padding="checkbox" align="left" colSpan={2}>
+                TYPE
+              </StyledTableCell>
+              <StyledTableCell>DESCRIPTION</StyledTableCell>
+              <StyledTableCell align="center">ENTITIES</StyledTableCell>
+              <StyledTableCell />
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {data.devices.map((device, index) => (
+              <TableRow
+                hover
+                selected={device.i === selectedDevice}
+                key={index}
+                onClick={() => device.e && fetchDeviceData(device.i)}
+              >
+                <TableCell padding="checkbox">
+                  <DeviceIcon type={device.t} />
+                </TableCell>
+                <TableCell>{device.t}</TableCell>
+                <TableCell>{device.n}</TableCell>
+                <TableCell align="center">{device.e}</TableCell>
+                <TableCell align="right">
+                  <IconButton size="small" onClick={() => setDeviceDialog(index)}>
+                    <InfoOutlinedIcon color="info" fontSize="small" sx={{ verticalAlign: 'middle' }} />
+                  </IconButton>
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.devices.map((device, index) => (
-                <TableRow
-                  hover
-                  selected={device.i === selectedDevice}
-                  key={index}
-                  onClick={() => device.e && fetchDeviceData(device.i)}
-                >
-                  <TableCell padding="checkbox">
-                    <DeviceIcon type={device.t} />
-                  </TableCell>
-                  <TableCell>{device.t}</TableCell>
-                  <TableCell>{device.n}</TableCell>
-                  <TableCell align="center">{device.e}</TableCell>
-                  <TableCell align="right">
-                    <IconButton size="small" onClick={() => setDeviceDialog(index)}>
-                      <InfoOutlinedIcon color="info" fontSize="small" sx={{ verticalAlign: 'middle' }} />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {(data.active_sensors > 0 || data.analog_enabled) && (
-                <TableRow hover selected={selectedDevice === 0} onClick={() => fetchSensorData()}>
-                  <TableCell>
-                    <DeviceIcon type="Sensor" />
-                  </TableCell>
-                  <TableCell>Sensors</TableCell>
-                  <TableCell>Attached EMS-ESP Sensors</TableCell>
-                  <TableCell align="center">{data.active_sensors}</TableCell>
-                  <TableCell align="right">
-                    <IconButton size="small" onClick={() => addAnalogSensor()} disabled={!data.analog_enabled}>
-                      <AddCircleOutlineOutlinedIcon fontSize="small" sx={{ verticalAlign: 'middle' }} />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </IconContext.Provider>
-
-        {data.devices.length === 0 && (
-          <MessageBox
-            my={2}
-            level="error"
-            message="No EMS devices found. If this message persists then check the interface board and look for any errors in the System Log"
-          />
-        )}
-      </>
+            ))}
+            {(data.active_sensors > 0 || data.analog_enabled) && (
+              <TableRow hover selected={selectedDevice === 0} onClick={() => fetchSensorData()}>
+                <TableCell>
+                  <DeviceIcon type="Sensor" />
+                </TableCell>
+                <TableCell>Sensors</TableCell>
+                <TableCell>Attached EMS-ESP Sensors</TableCell>
+                <TableCell align="center">{data.active_sensors}</TableCell>
+                <TableCell align="right">
+                  <IconButton size="small" onClick={() => addAnalogSensor()} disabled={!data.analog_enabled}>
+                    <AddCircleOutlineOutlinedIcon fontSize="small" sx={{ verticalAlign: 'middle' }} />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </IconContext.Provider>
     );
   };
 
