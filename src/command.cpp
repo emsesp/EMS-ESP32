@@ -266,9 +266,17 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         }
 
         if (value == nullptr) {
-            LOG_DEBUG(F("Calling command '%s/%s' (%s)"), dname.c_str(), cmd, read_flash_string(cf->description_).c_str());
+            if (EMSESP::system_.readonly_mode()) {
+                LOG_INFO(F("[readonly] Calling command '%s/%s' (%s)"), dname.c_str(), cmd, read_flash_string(cf->description_).c_str());
+            } else {
+                LOG_DEBUG(F("Calling command '%s/%s' (%s)"), dname.c_str(), cmd, read_flash_string(cf->description_).c_str());
+            }
         } else {
-            LOG_DEBUG(F("Calling command '%s/%s' (%s) with value %s"), dname.c_str(), cmd, read_flash_string(cf->description_).c_str(), value);
+            if (EMSESP::system_.readonly_mode()) {
+                LOG_INFO(F("[readonly] Calling command '%s/%s' (%s) with value %s"), dname.c_str(), cmd, read_flash_string(cf->description_).c_str(), value);
+            } else {
+                LOG_DEBUG(F("Calling command '%s/%s' (%s) with value %s"), dname.c_str(), cmd, read_flash_string(cf->description_).c_str(), value);
+            }
         }
 
         // call the function baesed on type
