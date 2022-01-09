@@ -52,6 +52,7 @@ class Helpers {
     static float       round2(float value, const int8_t divider, const uint8_t fahrenheit = 0);
     static std::string toLower(std::string const & s);
     static std::string toUpper(std::string const & s);
+    static void        replace_char(char * str, char find, char replace);
 
     static bool hasValue(const uint8_t & v, const uint8_t isBool = 0);
     static bool hasValue(const int8_t & v);
@@ -67,6 +68,7 @@ class Helpers {
     static bool value2enum(const char * v, uint8_t & value, const __FlashStringHelper * const * strs);
     static bool value2temperature(const char * v, float & value, bool relative = false);
     static bool value2temperature(const char * v, int & value, const bool relative = false, const int min = -2147483648, const int max = 2147483647);
+
 
 #ifdef EMSESP_STANDALONE
     static char * ultostr(char * ptr, uint32_t value, const uint8_t base);
