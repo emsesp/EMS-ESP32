@@ -58,6 +58,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["low_clock"]            = settings.low_clock;
     root["telnet_enabled"]       = settings.telnet_enabled;
     root["notoken_api"]          = settings.notoken_api;
+    root["readonly_mode"]        = settings.readonly_mode;
     root["analog_enabled"]       = settings.analog_enabled;
     root["pbutton_gpio"]         = settings.pbutton_gpio;
     root["solar_maxflow"]        = settings.solar_maxflow;
@@ -191,14 +192,18 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
     settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
-    settings.fahrenheit    = root["fahrenheit"] | false;
+
+    settings.fahrenheit = root["fahrenheit"] | false;
     EMSESP::system_.fahrenheit(settings.fahrenheit);
 
+    settings.readonly_mode = root["readonly_mode"] | false;
+    EMSESP::system_.readonly_mode(settings.readonly_mode);
+
     settings.bool_format = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
-    EMSESP::bool_format(settings.bool_format);
+    EMSESP::system_.bool_format(settings.bool_format);
 
     settings.enum_format = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
-    EMSESP::enum_format(settings.enum_format);
+    EMSESP::system_.enum_format(settings.enum_format);
 
     settings.weblog_level   = root["weblog_level"] | EMSESP_DEFAULT_WEBLOG_LEVEL;
     settings.weblog_buffer  = root["weblog_buffer"] | EMSESP_DEFAULT_WEBLOG_BUFFER;

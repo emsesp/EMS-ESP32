@@ -49,6 +49,7 @@ class WebSettings {
     bool     low_clock;
     bool     telnet_enabled;
     bool     notoken_api;
+    bool     readonly_mode;
     bool     analog_enabled;
     uint8_t  pbutton_gpio;
     uint8_t  solar_maxflow;
