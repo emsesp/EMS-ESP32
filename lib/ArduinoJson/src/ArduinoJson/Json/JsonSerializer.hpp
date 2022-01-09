@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -8,6 +8,7 @@
 #include <ArduinoJson/Misc/Visitable.hpp>
 #include <ArduinoJson/Serialization/measure.hpp>
 #include <ArduinoJson/Serialization/serialize.hpp>
+#include <ArduinoJson/Variant/Visitor.hpp>
 
 namespace ARDUINOJSON_NAMESPACE {
 
@@ -65,6 +66,11 @@ class JsonSerializer : public Visitor<size_t> {
 
   size_t visitString(const char *value) {
     _formatter.writeString(value);
+    return bytesWritten();
+  }
+
+  size_t visitString(const char *value, size_t n) {
+    _formatter.writeString(value, n);
     return bytesWritten();
   }
 

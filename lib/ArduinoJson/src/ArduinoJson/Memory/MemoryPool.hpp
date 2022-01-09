@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -60,24 +60,24 @@ class MemoryPool {
   }
 
   template <typename TAdaptedString>
-  const char* saveString(const TAdaptedString& str) {
+  const char* saveString(TAdaptedString str) {
     if (str.isNull())
-      return 0;
+      return CopiedString();
 
 #if ARDUINOJSON_ENABLE_STRING_DEDUPLICATION
     const char* existingCopy = findString(str);
     if (existingCopy)
-      return existingCopy;
+      return CopiedString(existingCopy, str.size());
 #endif
 
     size_t n = str.size();
 
     char* newCopy = allocString(n + 1);
     if (newCopy) {
-      str.copyTo(newCopy, n);
+      stringGetChars(str, newCopy, n);
       newCopy[n] = 0;  // force null-terminator
     }
-    return newCopy;
+    return CopiedString(newCopy, n);
   }
 
   void getFreeZone(char** zoneStart, size_t* zoneSize) const {
@@ -87,15 +87,16 @@ class MemoryPool {
 
   const char* saveStringFromFreeZone(size_t len) {
 #if ARDUINOJSON_ENABLE_STRING_DEDUPLICATION
-    const char* dup = findString(adaptString(_left));
+    const char* dup = findString(adaptString(_left, len));
     if (dup)
-      return dup;
+      return CopiedString(dup, len);
 #endif
 
     const char* str = _left;
     _left += len;
+    *_left++ = 0;
     checkInvariants();
-    return str;
+    return CopiedString(str, len);
   }
 
   void markAsOverflowed() {
@@ -165,9 +166,10 @@ class MemoryPool {
 
 #if ARDUINOJSON_ENABLE_STRING_DEDUPLICATION
   template <typename TAdaptedString>
-  const char* findString(const TAdaptedString& str) {
-    for (char* next = _begin; next < _left; ++next) {
-      if (str.compare(next) == 0)
+  const char* findString(const TAdaptedString& str) const {
+    size_t n = str.size();
+    for (char* next = _begin; next + n < _left; ++next) {
+      if (next[n] == '\0' && stringEquals(str, adaptString(next, n)))
         return next;
 
       // jump to next terminator

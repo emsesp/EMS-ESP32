@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -49,10 +49,9 @@ union VariantContent {
   UInt asUnsignedInteger;
   Integer asSignedInteger;
   CollectionData asCollection;
-  const char *asString;
   struct {
     const char *data;
     size_t size;
-  } asRaw;
+  } asString;
 };
 }  // namespace ARDUINOJSON_NAMESPACE
