@@ -908,9 +908,9 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     }
 
     // build unique identifier which will be used in the topic, replacing all . with _ as not to break HA
-    std::string uniq(50, '\0');
-    snprintf(&uniq[0], uniq.capacity() + 1, "%s_%s", device_name, new_entity);
-    std::replace(uniq.begin(), uniq.end(), '.', '_');
+    char uniq[50];
+    snprintf(uniq, sizeof(uniq), "%s_%s", device_name, new_entity);
+    Helpers::replace_char(uniq, '.', '_');
 
     // use_ha_sensor is true if we're using the Sensor Entity https://developers.home-assistant.io/docs/core/entity/sensor
     bool use_ha_sensor = false;
@@ -928,36 +928,36 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
         case DeviceValueType::ULONG:
             // number - https://www.home-assistant.io/integrations/number.mqtt/
             // https://developers.home-assistant.io/docs/core/entity/number
-            // mode is auto, but we could later fix to slider or box (preferred) to avoid accidentally changing the value from HA
-            snprintf(topic, sizeof(topic), "number/%s/%s/config", mqtt_base_.c_str(), uniq.c_str());
+
+            snprintf(topic, sizeof(topic), "number/%s/%s/config", mqtt_base_.c_str(), uniq);
             break;
         case DeviceValueType::BOOL:
             // switch - https://www.home-assistant.io/integrations/switch.mqtt/
-            snprintf(topic, sizeof(topic), "switch/%s/%s/config", mqtt_base_.c_str(), uniq.c_str());
+            snprintf(topic, sizeof(topic), "switch/%s/%s/config", mqtt_base_.c_str(), uniq);
             break;
         case DeviceValueType::ENUM:
             // select - https://www.home-assistant.io/integrations/select.mqtt
-            snprintf(topic, sizeof(topic), "select/%s/%s/config", mqtt_base_.c_str(), uniq.c_str());
+            snprintf(topic, sizeof(topic), "select/%s/%s/config", mqtt_base_.c_str(), uniq);
             break;
         default:
             // plain old sensor
-            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str());
+            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq);
             break;
         }
     } else {
         // plain old read only device entity
         if (type == DeviceValueType::BOOL) {
-            snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // binary sensor
+            snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", mqtt_base_.c_str(), uniq); // binary sensor
         } else {
             use_ha_sensor = true;
-            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq.c_str()); // normal HA sensor, not a boolean one
+            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq); // normal HA sensor, not a boolean one
         }
     }
 
     // if we're asking to remove this topic, send an empty payload and exit
     // https://github.com/emsesp/EMS-ESP32/issues/196
     if (remove) {
-        LOG_DEBUG(F("Removing HA config for %s"), uniq.c_str());
+        LOG_DEBUG(F("Removing HA config for %s"), uniq);
         publish_ha(topic);
         return;
     }
@@ -981,16 +981,23 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     // note: there is no way to handle strings in HA so datetimes (e.g. set_datetime, set_holiday, set_wwswitchtime etc) are excluded
     if (has_cmd) {
         // command topic back to EMS-ESP
-        std::string command_topic = uniq;
-        std::replace(command_topic.begin(), command_topic.end(), '_', '/');
-        doc["command_topic"] = "~/" + command_topic;
+        char command_topic[100];
+        snprintf(command_topic, sizeof(command_topic), "~/%s", uniq);
+        Helpers::replace_char(command_topic, '_', '/');
+        doc["command_topic"] = command_topic;
 
-        // enums, add options
+        // for enums, add options
         if (type == DeviceValueType::ENUM) {
             JsonArray option_list = doc.createNestedArray("options");
             for (uint8_t i = 0; i < options_size; i++) {
                 option_list.add(options[i]);
             }
+        } else if ((type != DeviceValueType::ENUM) && (type != DeviceValueType::STRING)) {
+            // Must be Numeric....
+            // mode can be auto, slider or box
+            // because its fiddly and error prone, force conversion to box
+            // but this is not currently supported in HA MQTT Number
+            // doc["mode"] = "box";
         }
 
         // set min and max based on type
