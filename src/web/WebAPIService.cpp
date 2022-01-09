@@ -24,8 +24,8 @@ using namespace std::placeholders; // for `_1` etc
 
 namespace emsesp {
 
-uint32_t WebAPIService::api_count_ = 0;
-uint32_t WebAPIService::api_fails_ = 0;
+uint16_t WebAPIService::api_count_ = 0;
+uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager)
