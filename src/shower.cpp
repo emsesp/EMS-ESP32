@@ -124,10 +124,10 @@ void Shower::shower_alert_start() {
 void Shower::publish_shower_data() {
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
 
-    if (EMSESP::bool_format() == BOOL_FORMAT_TRUEFALSE) {
+    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
         doc["shower_timer"] = shower_timer_;
         doc["shower_alert"] = shower_alert_;
-    } else if (EMSESP::bool_format() == BOOL_FORMAT_10) {
+    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
         doc["shower_timer"] = shower_timer_ ? 1 : 0;
         doc["shower_alert"] = shower_alert_ ? 1 : 0;
     } else {
