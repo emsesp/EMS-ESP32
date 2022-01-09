@@ -31,6 +31,7 @@ class DummySettings {
     bool     shower_alert         = false;
     bool     hide_led             = false;
     bool     notoken_api          = false;
+    bool     readonly_mode        = false;
     uint8_t  bool_format          = 1; // on off
     uint8_t  enum_format          = 1;
     bool     nosleep              = false;

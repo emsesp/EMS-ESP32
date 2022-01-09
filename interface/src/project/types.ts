@@ -19,6 +19,7 @@ export interface Settings {
   hide_led: boolean;
   low_clock: boolean;
   notoken_api: boolean;
+  readonly_mode: boolean;
   analog_enabled: boolean;
   pbutton_gpio: number;
   trace_raw: boolean;

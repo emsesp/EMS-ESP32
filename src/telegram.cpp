@@ -359,13 +359,18 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
         }
     }
 
-    uint8_t length = message_p;
-
     telegram_last_ = std::make_shared<Telegram>(*telegram); // make a copy of the telegram
 
+    uint8_t length       = message_p;
     telegram_raw[length] = calculate_crc(telegram_raw, length); // generate and append CRC to the end
+    length++;                                                   // add one since we want to now include the CRC
 
-    length++; // add one since we want to now include the CRC
+    // if we're in simulation mode, don't send anything, just quit
+    if (EMSESP::system_.readonly_mode() && (telegram->operation == Telegram::Operation::TX_WRITE)) {
+        LOG_INFO(F("[readonly] Sending write Tx telegram: %s"), Helpers::data_to_hex(telegram_raw, length - 1).c_str());
+        tx_state(Telegram::Operation::NONE);
+        return;
+    }
 
     LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
               (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
@@ -373,7 +378,10 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
               Helpers::data_to_hex(telegram_raw, length - 1).c_str()); // exclude the last CRC byte
 
     set_post_send_query(tx_telegram.validateid_);
-    // send the telegram to the UART Tx
+
+    //
+    // this is the core send command to the UART
+    //
     uint16_t status = EMSuart::transmit(telegram_raw, length);
 
     if (status == EMS_TX_STATUS_ERR) {

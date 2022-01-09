@@ -280,7 +280,6 @@ const SettingsApplication: FC = () => {
           label="Enable Telnet Console"
           disabled={saving}
         />
-
         <BlockFormControlLabel
           control={<Checkbox checked={data.analog_enabled} onChange={updateFormValue} name="analog_enabled" />}
           label="Enable Analog Sensors"
@@ -293,12 +292,17 @@ const SettingsApplication: FC = () => {
         />
         <BlockFormControlLabel
           control={<Checkbox checked={data.low_clock} onChange={updateFormValue} name="low_clock" />}
-          label="Run at a lower CPU clock speed"
+          label="Underclock CPU speed"
           disabled={saving}
         />
         <BlockFormControlLabel
           control={<Checkbox checked={data.notoken_api} onChange={updateFormValue} name="notoken_api" />}
           label="Bypass Access Token authorization on API calls"
+          disabled={saving}
+        />
+        <BlockFormControlLabel
+          control={<Checkbox checked={data.readonly_mode} onChange={updateFormValue} name="readonly_mode" />}
+          label="Enable Read only mode (blocks all outgoing EMS Tx write commands)"
           disabled={saving}
         />
         <Grid container spacing={0} direction="row" justifyContent="flex-start" alignItems="flex-start">
@@ -313,7 +317,6 @@ const SettingsApplication: FC = () => {
             disabled={saving}
           />
         </Grid>
-
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           Formatting Options
         </Typography>
@@ -353,7 +356,6 @@ const SettingsApplication: FC = () => {
             </ValidatedTextField>
           </Grid>
         </Grid>
-
         {data.dallas_gpio !== 0 && (
           <>
             <Typography sx={{ pt: 2 }} variant="h6" color="primary">

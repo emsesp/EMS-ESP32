@@ -324,6 +324,7 @@ settings = {
   led_gpio: 2,
   hide_led: false,
   notoken_api: false,
+  readonly_mode: false,
   low_clock: false,
   telnet_enabled: true,
   analog_enabled: false,
