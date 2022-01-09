@@ -18,7 +18,7 @@ MAKEFLAGS+="j "
 TARGET    := emsesp
 BUILD     := build
 SOURCES   := src src/* lib_standalone lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src src/devices lib/ArduinoJson/src lib/PButton
-INCLUDES  := src lib_standalone lib/ArduinoJson/src  lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src lib/uuid-telnet/src lib/uuid-syslog/src lib/* src/devices
+INCLUDES  := src lib_standalone lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src lib/uuid-telnet/src lib/uuid-syslog/src lib/* src/devices
 LIBRARIES := 
 
 CPPCHECK = cppcheck
@@ -33,7 +33,7 @@ CXX_STANDARD := -std=c++11
 #----------------------------------------------------------------------
 # Defined Symbols
 #----------------------------------------------------------------------
-DEFINES += -DFACTORY_WIFI_HOSTNAME=\"ems-esp\" -DARDUINOJSON_ENABLE_STD_STRING=1 -DARDUINOJSON_ENABLE_ARDUINO_STRING -DARDUINOJSON_USE_DOUBLE -DEMSESP_DEBUG -DEMSESP_STANDALONE -DEMSESP_DEFAULT_BOARD_PROFILE=\"LOLIN\"
+DEFINES += -DFACTORY_WIFI_HOSTNAME=\"ems-esp\" -DARDUINOJSON_ENABLE_STD_STRING=1 -DARDUINOJSON_ENABLE_PROGMEM=1 -DARDUINOJSON_ENABLE_ARDUINO_STRING -DARDUINOJSON_USE_DOUBLE=0 -DEMSESP_DEBUG -DEMSESP_STANDALONE -DEMSESP_DEFAULT_BOARD_PROFILE=\"LOLIN\"
 
 #----------------------------------------------------------------------
 # Sources & Files
