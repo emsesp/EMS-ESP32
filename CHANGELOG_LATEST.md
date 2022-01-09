@@ -15,6 +15,7 @@
 - Revised LED flash sequence on boot up to show system health (1 flash=no ems, 2 flashes=no wifi) [#224](https://github.com/emsesp/EMS-ESP32/issues/224)
 - Analog Sensor support [#271](https://github.com/emsesp/EMS-ESP32/issues/271)
 - Solar cylinder priority [#247](https://github.com/emsesp/EMS-ESP32/issues/247)
+- Read only mode in Settings, where EMS Tx/Write commands are blocked [#286](https://github.com/emsesp/EMS-ESP32/issues/286)
 
 ## Fixed
 
