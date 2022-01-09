@@ -62,7 +62,11 @@
 
 #define WATCH_ID_NONE 0 // no watch id set
 
-#define EMSESP_JSON_SIZE_HA_CONFIG 768   // for HA config payloads, using StaticJsonDocument
+#ifndef EMSESP_STANDALONE
+#define EMSESP_JSON_SIZE_HA_CONFIG 1024 // for HA config payloads, using StaticJsonDocument
+#else
+#define EMSESP_JSON_SIZE_HA_CONFIG 2024 // for HA config payloads, using StaticJsonDocument
+#endif
 #define EMSESP_JSON_SIZE_SMALL 256       // for smaller json docs, using StaticJsonDocument
 #define EMSESP_JSON_SIZE_MEDIUM 768      // for medium json docs from ems devices, using StaticJsonDocument
 #define EMSESP_JSON_SIZE_LARGE 1024      // for large json docs from ems devices, like boiler or thermostat data, using StaticJsonDocument
@@ -144,11 +148,11 @@ class EMSESP {
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
-    static uint32_t sensor_reads() {
+    static uint16_t sensor_reads() {
         return dallassensor_.reads() + analogsensor_.reads();
     }
 
-    static uint32_t sensor_fails() {
+    static uint16_t sensor_fails() {
         return dallassensor_.fails() + analogsensor_.fails();
     }
 
@@ -158,22 +162,6 @@ class EMSESP {
 
     static bool analog_enabled() {
         return (analogsensor_.analog_enabled());
-    }
-
-    static uint8_t bool_format() {
-        return bool_format_;
-    }
-
-    static void bool_format(uint8_t format) {
-        bool_format_ = format;
-    }
-
-    static uint8_t enum_format() {
-        return enum_format_;
-    }
-
-    static void enum_format(uint8_t format) {
-        enum_format_ = format;
     }
 
     enum Watch : uint8_t { WATCH_OFF, WATCH_ON, WATCH_RAW, WATCH_UNKNOWN };
@@ -188,6 +176,7 @@ class EMSESP {
             watch_id_ = 0; // reset watch id if watch is disabled
         }
     }
+
     static uint8_t watch() {
         return watch_;
     }
@@ -258,17 +247,16 @@ class EMSESP {
     static uuid::log::Logger logger_;
 
     static std::string device_tostring(const uint8_t device_id);
-
-    static void process_UBADevices(std::shared_ptr<const Telegram> telegram);
-    static void process_version(std::shared_ptr<const Telegram> telegram);
-    static void publish_response(std::shared_ptr<const Telegram> telegram);
-    static void publish_all_loop();
-    static bool command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target);
-    static bool command_commands(uint8_t device_type, JsonObject & output, const int8_t id);
-    static bool command_entities(uint8_t device_type, JsonObject & output, const int8_t id);
+    static void        process_UBADevices(std::shared_ptr<const Telegram> telegram);
+    static void        process_version(std::shared_ptr<const Telegram> telegram);
+    static void        publish_response(std::shared_ptr<const Telegram> telegram);
+    static void        publish_all_loop();
+    static bool        command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target);
+    static bool        command_commands(uint8_t device_type, JsonObject & output, const int8_t id);
+    static bool        command_entities(uint8_t device_type, JsonObject & output, const int8_t id);
 
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
-    static uint32_t           last_fetch_;
+    static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute
 
     struct Device_record {
         uint8_t                     product_id;
@@ -288,12 +276,9 @@ class EMSESP {
     static uint8_t  publish_all_idx_;
     static uint8_t  unique_id_count_;
     static bool     trace_raw_;
-    static uint8_t  bool_format_;
-    static uint8_t  enum_format_;
     static uint16_t wait_validate_;
     static bool     wait_km_;
-
-    static constexpr uint8_t EMS_WAIT_KM_TIMEOUT = 60; // wait one minute
+    static uint32_t last_fetch_;
 };
 
 } // namespace emsesp
