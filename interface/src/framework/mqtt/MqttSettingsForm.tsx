@@ -194,13 +194,6 @@ const MqttSettingsForm: FC = () => {
               label="Enable Home Assistant integration"
             />
           </Grid>
-          <Grid item>
-            <Box color="warning.main">
-              <Typography variant="body2">
-                <i>(requires a restart)</i>
-              </Typography>
-            </Box>
-          </Grid>
         </Grid>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           Publish Intervals (in seconds, 0=automatic)
