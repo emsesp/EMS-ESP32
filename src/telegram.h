@@ -212,7 +212,7 @@ class RxService : public EMSbus {
     void add(uint8_t * data, uint8_t length);
     void add_empty(const uint8_t src, const uint8_t dst, const uint16_t type_id);
 
-    uint16_t telegram_count() const {
+    uint32_t telegram_count() const {
         return telegram_count_;
     }
 
@@ -220,10 +220,11 @@ class RxService : public EMSbus {
         telegram_count_++;
     }
 
-    uint16_t telegram_error_count() const {
+    uint32_t telegram_error_count() const {
         return telegram_error_count_;
     }
 
+    // returns a %
     uint8_t quality() const {
         if (telegram_error_count_ == 0) {
             return 100; // all good, 100%
@@ -256,8 +257,8 @@ class RxService : public EMSbus {
     static constexpr uint8_t EMS_BUS_QUALITY_RX_THRESHOLD = 5; // % threshold before reporting quality issues
 
     uint8_t                         rx_telegram_id_       = 0; // queue counter
-    uint16_t                        telegram_count_       = 0; // # Rx received
-    uint16_t                        telegram_error_count_ = 0; // # Rx CRC errors
+    uint32_t                        telegram_count_       = 0; // # Rx received
+    uint32_t                        telegram_error_count_ = 0; // # Rx CRC errors
     std::shared_ptr<const Telegram> rx_telegram;               // the incoming Rx telegram
     std::deque<QueuedRxTelegram>    rx_telegrams_;             // the Rx Queue
 };
@@ -305,11 +306,11 @@ class TxService : public EMSbus {
         return telegram_last_post_send_query_;
     }
 
-    uint16_t telegram_read_count() const {
+    uint32_t telegram_read_count() const {
         return telegram_read_count_;
     }
 
-    void telegram_read_count(uint8_t telegram_read_count) {
+    void telegram_read_count(uint32_t telegram_read_count) {
         telegram_read_count_ = telegram_read_count;
     }
 
@@ -317,11 +318,11 @@ class TxService : public EMSbus {
         telegram_read_count_++;
     }
 
-    uint16_t telegram_fail_count() const {
+    uint32_t telegram_fail_count() const {
         return telegram_fail_count_;
     }
 
-    void telegram_fail_count(uint8_t telegram_fail_count) {
+    void telegram_fail_count(uint32_t telegram_fail_count) {
         telegram_fail_count_ = telegram_fail_count;
     }
 
@@ -339,7 +340,7 @@ class TxService : public EMSbus {
         telegram_fail_count_++;
     }
 
-    uint16_t telegram_write_count() const {
+    uint32_t telegram_write_count() const {
         return telegram_write_count_;
     }
 
@@ -381,9 +382,9 @@ class TxService : public EMSbus {
   private:
     std::deque<QueuedTxTelegram> tx_telegrams_; // the Tx queue
 
-    uint16_t telegram_read_count_  = 0; // # Tx successful reads
-    uint16_t telegram_write_count_ = 0; // # Tx successful writes
-    uint16_t telegram_fail_count_  = 0; // # Tx unsuccessful transmits
+    uint32_t telegram_read_count_  = 0; // # Tx successful reads
+    uint32_t telegram_write_count_ = 0; // # Tx successful writes
+    uint32_t telegram_fail_count_  = 0; // # Tx unsuccessful transmits
 
     std::shared_ptr<Telegram> telegram_last_;
     uint16_t                  telegram_last_post_send_query_; // which type ID to query after a successful send, to read back the values just written

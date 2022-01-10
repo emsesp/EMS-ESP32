@@ -44,11 +44,11 @@ bool        Mqtt::publish_single_;
 std::deque<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 std::vector<Mqtt::MQTTSubFunction>  Mqtt::mqtt_subfunctions_;
 
-uint16_t Mqtt::mqtt_publish_fails_ = 0;
+uint32_t Mqtt::mqtt_publish_fails_ = 0;
 bool     Mqtt::connecting_         = false;
 bool     Mqtt::initialized_        = false;
 uint8_t  Mqtt::connectcount_       = 0;
-uint16_t Mqtt::mqtt_message_id_    = 0;
+uint32_t Mqtt::mqtt_message_id_    = 0;
 char     will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
 uuid::log::Logger Mqtt::logger_{F_(mqtt), uuid::log::Facility::DAEMON};
