@@ -441,10 +441,12 @@ void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit
 
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
+    /*
     // enable the a special "thermostat_hc<n>" topic to take both mode strings and floats for each of the heating circuits
     std::string topic2(Mqtt::MQTT_TOPIC_MAX_SIZE, '\0');
     snprintf(&topic2[0], topic2.capacity() + 1, "thermostat_hc%d", hc_num);
     Mqtt::subscribe(EMSdevice::DeviceType::THERMOSTAT, topic2, [=](const char * m) { return thermostat_ha_cmd(m, hc_num); });
+    */
 }
 
 // for HA specifically when receiving over MQTT in the thermostat topic
