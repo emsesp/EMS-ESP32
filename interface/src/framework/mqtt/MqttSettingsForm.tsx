@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
 
-import { Button, Box, Checkbox, MenuItem, Grid, Typography } from '@mui/material';
+import { Button, Checkbox, MenuItem, Grid, Typography } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 
 import { MQTT_SETTINGS_VALIDATOR, validate } from '../../validators';
