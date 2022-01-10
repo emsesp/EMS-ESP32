@@ -159,11 +159,11 @@ class Mqtt {
         mqtt_base_ = base;
     }
 
-    static uint16_t publish_count() {
+    static uint32_t publish_count() {
         return mqtt_message_id_;
     }
 
-    static uint16_t publish_fails() {
+    static uint32_t publish_fails() {
         return mqtt_publish_fails_;
     }
 
@@ -221,7 +221,7 @@ class Mqtt {
     static const std::string tag_to_topic(uint8_t device_type, uint8_t tag);
 
     struct QueuedMqttMessage {
-        const uint16_t                           id_;
+        const uint32_t                           id_;
         const std::shared_ptr<const MqttMessage> content_;
         uint8_t                                  retry_count_;
         uint16_t                                 packet_id_;
@@ -241,7 +241,7 @@ class Mqtt {
     static uuid::log::Logger logger_;
 
     static AsyncMqttClient * mqttClient_;
-    static uint16_t          mqtt_message_id_;
+    static uint32_t          mqtt_message_id_;
 
     static constexpr uint32_t MQTT_PUBLISH_WAIT      = 100; // delay between sending publishes, to account for large payloads
     static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY = 3;   // max retries for giving up on publishing
@@ -279,7 +279,7 @@ class Mqtt {
 
     static bool     connecting_;
     static bool     initialized_;
-    static uint16_t mqtt_publish_fails_;
+    static uint32_t mqtt_publish_fails_;
     static uint8_t  connectcount_;
 
     // settings, copied over
