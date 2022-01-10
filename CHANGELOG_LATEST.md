@@ -26,12 +26,15 @@
 - Correct modes for RC25 [#106](https://github.com/emsesp/EMS-ESP32/issues/106)
 - Clean up old HA config's in MQTT before publishing data. This will prevent HA giving the 'dict' warnings [#229](https://github.com/emsesp/EMS-ESP32/issues/229)
 - RC25 temperature setting [#272](https://github.com/emsesp/EMS-ESP32/issues/272)
+- Buderus RC25 - "hc1 mode type" incorrect value [#273](https://github.com/emsesp/EMS-ESP32/issues/273)
+- Missing values for damped outdoor temperature [#282](https://github.com/emsesp/EMS-ESP32/issues/282)
 
 ## Changed
 
 - Use flash system to show system health (1 flash=no ems, 2 flashes=no wifi) [#224](https://github.com/emsesp/EMS-ESP32/issues/224)
 - Renamed Dallas Sensor to Temperature Sensor in UI
 - Dallas Format removed. Use the name to give each sensor an alias
+- No longer MQTT subscribes to topic `/thermostat_hc<n>` as it supports a path similar to the API endpoint construct
 
 **BREAKING CHANGES:**
 
