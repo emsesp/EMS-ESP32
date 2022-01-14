@@ -65,6 +65,21 @@ export const busStatus = ({ status }: Status) => {
   }
 };
 
+export const txMode = ({ tx_mode }: Status) => {
+  switch (tx_mode) {
+    case 1:
+      return ', Tx-Mode: EMS';
+    case 2:
+      return ', Tx-Mode: EMS+';
+    case 3:
+      return ', Tx-Mode: HT3';
+    case 4:
+      return ', Tx-Mode: Hardware';
+    default:
+      return ', Tx-Mode: Off';
+  }
+};
+
 export const qualityHighlight = (value: number, theme: Theme) => {
   if (value >= 95) {
     return theme.palette.success.main;
@@ -129,7 +144,7 @@ const DashboardStatus: FC = () => {
                 <DeviceHubIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="EMS Bus Connection Status" secondary={busStatus(data)} />
+            <ListItemText primary="EMS Bus Connection Status" secondary={busStatus(data) + txMode(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <TableContainer>
@@ -139,7 +154,8 @@ const DashboardStatus: FC = () => {
                   <TableCell>Recognized Devices / Sensors</TableCell>
                   <TableCell align="right">
                     {data.num_devices}&nbsp;/&nbsp;
-                    {data.num_sensors}
+                    {data.num_sensors}&nbsp;+&nbsp;
+                    {data.num_analogs}
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -161,6 +177,13 @@ const DashboardStatus: FC = () => {
                   <TableCell align="right">
                     {Intl.NumberFormat().format(data.sensor_reads)}&nbsp;/&nbsp;
                     {Intl.NumberFormat().format(data.sensor_fails)}&nbsp;({data.sensor_quality}%)
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Analog Reads / Fails (Quality)</TableCell>
+                  <TableCell align="right">
+                    {Intl.NumberFormat().format(data.analog_reads)}&nbsp;/&nbsp;
+                    {Intl.NumberFormat().format(data.analog_fails)}&nbsp;({data.analog_quality}%)
                   </TableCell>
                 </TableRow>
                 <TableRow>

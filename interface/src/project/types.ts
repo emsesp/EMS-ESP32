@@ -47,6 +47,9 @@ export interface Status {
   sensor_fails: number;
   sensor_reads: number;
   sensor_quality: number;
+  analog_fails: number;
+  analog_reads: number;
+  analog_quality: number;
   mqtt_count: number;
   mqtt_fails: number;
   mqtt_quality: number;
@@ -55,6 +58,7 @@ export interface Status {
   api_quality: number;
   num_devices: number;
   num_sensors: number;
+  num_analogs: number;
 }
 
 export interface Device {

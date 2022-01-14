@@ -132,6 +132,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     root["status"]         = EMSESP::bus_status(); // 0, 1 or 2
     root["num_devices"]    = EMSESP::emsdevices.size();
     root["num_sensors"]    = EMSESP::dallassensor_.no_sensors();
+    root["num_analogs"]    = EMSESP::analogsensor_.no_sensors();
     root["tx_mode"]        = EMSESP::txservice_.tx_mode();
     root["rx_received"]    = EMSESP::rxservice_.telegram_count();
     root["tx_sent"]        = EMSESP::txservice_.telegram_read_count() + EMSESP::txservice_.telegram_write_count();
@@ -139,9 +140,12 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     root["tx_quality"]     = EMSESP::txservice_.quality();
     root["rx_fails"]       = EMSESP::rxservice_.telegram_error_count();
     root["tx_fails"]       = EMSESP::txservice_.telegram_fail_count();
-    root["sensor_fails"]   = EMSESP::sensor_fails();
-    root["sensor_reads"]   = EMSESP::sensor_reads();
-    root["sensor_quality"] = EMSESP::sensor_reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::sensor_fails()) / EMSESP::sensor_reads());
+    root["sensor_fails"]   = EMSESP::dallassensor_.fails();
+    root["sensor_reads"]   = EMSESP::dallassensor_.reads();
+    root["sensor_quality"] = EMSESP::dallassensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::dallassensor_.fails()) / EMSESP::dallassensor_.reads());
+    root["analog_fails"]   = EMSESP::analogsensor_.fails();
+    root["analog_reads"]   = EMSESP::analogsensor_.reads();
+    root["analog_quality"] = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
     root["mqtt_fails"]     = Mqtt::publish_fails();
     root["mqtt_count"]     = Mqtt::publish_count();
     root["mqtt_quality"]   = Mqtt::publish_count() == 0 ? 100 : 100 - (Mqtt::publish_fails() * 100) / (Mqtt::publish_count() + Mqtt::publish_fails());
