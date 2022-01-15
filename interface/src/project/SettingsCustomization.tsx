@@ -108,8 +108,7 @@ const SettingsCustomization: FC = () => {
       <>
         <Box color="warning.main">
           <Typography variant="body2">
-            You can choose for each EMS device which entities and their values are to be excluded. This applies
-            immediately to all services.
+            Customize which entities to exclude from all all services (MQTT, API). This will have immediate effect.
           </Typography>
         </Box>
         <ValidatedTextField
