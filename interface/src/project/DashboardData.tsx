@@ -18,7 +18,8 @@ import {
   List,
   ListItem,
   ListItemText,
-  Grid
+  Grid,
+  useMediaQuery
 } from '@mui/material';
 
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -93,6 +94,8 @@ const DashboardData: FC = () => {
   const [analog, setAnalog] = useState<Analog>();
   const [selectedDevice, setSelectedDevice] = useState<number>();
   const [deviceDialog, setDeviceDialog] = useState<number>(-1);
+
+  const desktopWindow = useMediaQuery('(min-width:600px)');
 
   const refreshData = () => {
     if (analog || sensor || deviceValue) {
@@ -414,7 +417,7 @@ const DashboardData: FC = () => {
               <StyledTableCell padding="checkbox" align="left" colSpan={2}>
                 TYPE
               </StyledTableCell>
-              <StyledTableCell>DESCRIPTION</StyledTableCell>
+              {desktopWindow && <StyledTableCell>DESCRIPTION</StyledTableCell>}
               <StyledTableCell align="center">ENTITIES</StyledTableCell>
               <StyledTableCell />
             </TableRow>
@@ -431,7 +434,7 @@ const DashboardData: FC = () => {
                   <DeviceIcon type={device.t} />
                 </TableCell>
                 <TableCell>{device.t}</TableCell>
-                <TableCell>{device.n}</TableCell>
+                {desktopWindow && <TableCell>{device.n}</TableCell>}
                 <TableCell align="center">{device.e}</TableCell>
                 <TableCell align="right">
                   <IconButton size="small" onClick={() => setDeviceDialog(index)}>
@@ -446,7 +449,7 @@ const DashboardData: FC = () => {
                   <DeviceIcon type="Sensor" />
                 </TableCell>
                 <TableCell>Sensors</TableCell>
-                <TableCell>Attached EMS-ESP Sensors</TableCell>
+                {desktopWindow && <TableCell>Attached EMS-ESP Sensors</TableCell>}
                 <TableCell align="center">{data.active_sensors}</TableCell>
                 <TableCell align="right">
                   <IconButton size="small" onClick={() => addAnalogSensor()} disabled={!data.analog_enabled}>
