@@ -43,6 +43,10 @@ static const __FlashStringHelper * const DeviceValueTAG_s[] PROGMEM = {
     F_(tag_hc2),             // "hc2"
     F_(tag_hc3),             // "hc3"
     F_(tag_hc4),             // "hc4"
+    F_(tag_hc5),             // "hc5"
+    F_(tag_hc6),             // "hc6"
+    F_(tag_hc7),             // "hc7"
+    F_(tag_hc8),             // "hc8"
     F_(tag_wwc1),            // "wwc1"
     F_(tag_wwc2),            // "Wwc2"
     F_(tag_wwc3),            // "wwc3"
@@ -78,6 +82,10 @@ static const __FlashStringHelper * const DeviceValueTAG_mqtt[] PROGMEM = {
     F_(tag_hc2),                 // "hc2"
     F_(tag_hc3),                 // "hc3"
     F_(tag_hc4),                 // "hc4"
+    F_(tag_hc5),                 // "hc5"
+    F_(tag_hc6),                 // "hc6"
+    F_(tag_hc7),                 // "hc7"
+    F_(tag_hc8),                 // "hc8"
     F_(tag_wwc1),                // "wwc1"
     F_(tag_wwc2),                // "Wwc2"
     F_(tag_wwc3),                // "wwc3"
@@ -540,7 +548,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
 
     uint8_t flags = CommandFlag::ADMIN_ONLY; // executing commands require admin privileges
 
-    if (tag >= DeviceValueTAG::TAG_HC1 && tag <= DeviceValueTAG::TAG_HC4) {
+    if (tag >= DeviceValueTAG::TAG_HC1 && tag <= DeviceValueTAG::TAG_HC8) {
         flags |= CommandFlag::MQTT_SUB_FLAG_HC;
     } else if (tag >= DeviceValueTAG::TAG_WWC1 && tag <= DeviceValueTAG::TAG_WWC4) {
         flags |= CommandFlag::MQTT_SUB_FLAG_WWC;
@@ -582,7 +590,7 @@ void EMSdevice::publish_value(void * value_p) {
     for (auto & dv : devicevalues_) {
         if (dv.value_p == value_p) {
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-            if ((dv.tag >= DeviceValueTAG::TAG_HC1 && dv.tag <= DeviceValueTAG::TAG_HC4)
+            if ((dv.tag >= DeviceValueTAG::TAG_HC1 && dv.tag <= DeviceValueTAG::TAG_HC8)
                 || (dv.tag >= DeviceValueTAG::TAG_WWC1 && dv.tag <= DeviceValueTAG::TAG_WWC4)) {
                 snprintf(topic,
                          sizeof(topic),
@@ -897,10 +905,10 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
     int8_t     tag  = id;
 
     // check if we have hc or wwc
-    if (id >= 1 && id <= 4) {
+    if (id >= 1 && id <= 8) {
         tag = DeviceValueTAG::TAG_HC1 + id - 1;
-    } else if (id >= 8 && id <= 11) {
-        tag = DeviceValueTAG::TAG_WWC1 + id - 8;
+    } else if (id >= 9 && id <= 12) {
+        tag = DeviceValueTAG::TAG_WWC1 + id - 9;
     } else if (id != -1) {
         return false; // error
     }

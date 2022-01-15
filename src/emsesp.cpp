@@ -582,7 +582,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                             Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE), json);
                         }
                         doc.clear();
-
+                        // thermostat only have hc1-4
                         for (uint8_t hc_tag = DeviceValueTAG::TAG_HC1; hc_tag <= DeviceValueTAG::TAG_HC4; hc_tag++) {
                             if (emsdevice->generate_values(json, hc_tag, false, EMSdevice::OUTPUT_TARGET::MQTT)) { // not nested
                                 Mqtt::publish(Mqtt::tag_to_topic(device_type, hc_tag), json);
@@ -1183,9 +1183,9 @@ bool EMSESP::command_commands(uint8_t device_type, JsonObject & output, const in
 bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
     bool    has_value = false;
     uint8_t tag;
-    if (id >= 1 && id <= 4) {
+    if (id >= 1 && id <= 8) {
         tag = DeviceValueTAG::TAG_HC1 + id - 1;
-    } else if (id >= 9 && id <= 10) {
+    } else if (id >= 9 && id <= 12) {
         tag = DeviceValueTAG::TAG_WWC1 + id - 9;
     } else if (id == -1 || id == 0) {
         tag = DeviceValueTAG::TAG_NONE;
