@@ -1163,6 +1163,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["Temperature sensor reads"] = EMSESP::dallassensor_.reads();
             node["Temperature sensor fails"] = EMSESP::dallassensor_.fails();
         }
+        node["Analog sensors"] = EMSESP::analogsensor_.no_sensors();
+        if (EMSESP::analog_enabled()) {
+            node["Analog sensor reads"] = EMSESP::analogsensor_.reads();
+            node["Analog sensor fails"] = EMSESP::analogsensor_.fails();
+        }
         node["API calls"] = WebAPIService::api_count();
         node["API fails"] = WebAPIService::api_fails();
 

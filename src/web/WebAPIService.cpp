@@ -24,7 +24,7 @@ using namespace std::placeholders; // for `_1` etc
 
 namespace emsesp {
 
-uint16_t WebAPIService::api_count_ = 0;
+uint32_t WebAPIService::api_count_ = 0;
 uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
@@ -111,6 +111,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
             snprintf(error, sizeof(error), "Call failed with error code (%s)", Command::return_code_string(return_code).c_str());
         }
         emsesp::EMSESP::logger().err(error);
+        api_fails_++;
     } else {
         // emsesp::EMSESP::logger().debug(F("API command called successfully"));
         // if there was no json output from the call, default to the output message 'OK'.
@@ -126,6 +127,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     response->setLength();
     response->setContentType("application/json");
     request->send(response);
+    api_count_++;
 
 #if defined(EMSESP_STANDALONE)
     Serial.print(COLOR_YELLOW);
