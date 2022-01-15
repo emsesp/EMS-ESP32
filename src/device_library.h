@@ -64,6 +64,7 @@
 {209, DeviceType::CONTROLLER, F("ErP"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {218, DeviceType::CONTROLLER, F("M200/RFM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x50
 {224, DeviceType::CONTROLLER, F("9000i"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{229, DeviceType::CONTROLLER, F("8700i"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {230, DeviceType::CONTROLLER, F("BC Base"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {240, DeviceType::CONTROLLER, F("Rego 3000"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {241, DeviceType::CONTROLLER, F("Condens 5000i"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
