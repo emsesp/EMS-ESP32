@@ -5,23 +5,20 @@
 #pragma once
 
 #include <ArduinoJson/Namespace.hpp>
-#include <ArduinoJson/Strings/StoredString.hpp>
+#include <ArduinoJson/Strings/String.hpp>
 
 namespace ARDUINOJSON_NAMESPACE {
 
 class StringMover {
  public:
-  typedef LinkedString string_type;
-
   StringMover(char* ptr) : _writePtr(ptr) {}
 
   void startString() {
     _startPtr = _writePtr;
   }
 
-  FORCE_INLINE string_type save() {
-    _writePtr[0] = 0;  // terminator
-    string_type s = str();
+  FORCE_INLINE String save() {
+    String s = str();
     _writePtr++;
     return s;
   }
@@ -34,8 +31,9 @@ class StringMover {
     return true;
   }
 
-  string_type str() const {
-    return string_type(_startPtr, size());
+  String str() const {
+    _writePtr[0] = 0;  // terminator
+    return String(_startPtr, size(), true);
   }
 
   size_t size() const {

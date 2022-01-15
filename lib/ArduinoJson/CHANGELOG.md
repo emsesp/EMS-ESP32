@@ -1,6 +1,12 @@
 ArduinoJson: change log
 =======================
 
+v6.19.1 (2022-01-14)
+-------
+
+* Fix crash when adding an object member in a too small `JsonDocument`
+* Fix filter not working in zero-copy mode (issue #1697)
+
 v6.19.0 (2022-01-08)
 -------
 
@@ -23,7 +29,6 @@ v6.19.0 (2022-01-08)
 * Avoid pool reallocation in `BasicJsonDocument`'s copy assignment if capacity is the same
 * Avoid including `Arduino.h` when all its features are disabled (issue #1692, PR #1693 by @paulocsanz)
 * Assume `PROGMEM` is available as soon as `ARDUINO` is defined (consequence of #1693)
-
 
 v6.18.5 (2021-09-28)
 -------
