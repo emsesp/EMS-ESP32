@@ -392,7 +392,7 @@ bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const i
 }
 
 // publish a single sensor to MQTT
-void DallasSensor::publish_sensor(Sensor sensor) {
+void DallasSensor::publish_sensor(const Sensor & sensor) {
     if (Mqtt::publish_single()) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf(topic, sizeof(topic), "%s/%s", read_flash_string(F_(dallassensor)).c_str(), sensor.name().c_str());
@@ -502,15 +502,15 @@ DallasSensor::Sensor::Sensor(const uint8_t addr[])
     : id_(((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16)
           | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6])) {
     // create ID string
-    id_str_.reserve(20);
-    snprintf(&id_str_[0],
-             id_str_.capacity() + 1,
+    char id[20];
+    snprintf(id,
+             sizeof(id),
              "%02X-%04X-%04X-%04X",
              (unsigned int)(id_ >> 48) & 0xFF,
              (unsigned int)(id_ >> 32) & 0xFFFF,
              (unsigned int)(id_ >> 16) & 0xFFFF,
              (unsigned int)(id_)&0xFFFF);
-
+    id_str_ = std::string(id);
     name_   = std::string{}; // name (alias) is empty
     offset_ = 0;             // 0 degrees offset
 }
