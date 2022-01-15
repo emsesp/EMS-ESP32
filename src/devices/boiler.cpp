@@ -24,7 +24,7 @@ REGISTER_FACTORY(Boiler, EMSdevice::DeviceType::BOILER)
 
 uuid::log::Logger Boiler::logger_{F_(boiler), uuid::log::Facility::CONSOLE};
 
-Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
+Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // cascaded heatingsources, only some values per individual heatsource (hs)
     if (device_id != EMSdevice::EMS_DEVICE_ID_BOILER) {
@@ -847,7 +847,7 @@ void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegr
     telegram->read_value(message_code, 5);
 
     if (Helpers::hasValue(message_code)) {
-        char message[4];
+        char message[5];
         snprintf(message, sizeof(message), "H%02d", message_code);
         has_update(maintenanceMessage_, message, sizeof(maintenanceMessage_));
     }
@@ -891,6 +891,7 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
     if (telegram->offset > 0 || telegram->message_length < 20) {
         return;
     }
+
     char     code[sizeof(lastCode_)];
     uint16_t codeNo;
     code[0] = telegram->message_data[5];
@@ -898,6 +899,7 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
     code[2] = telegram->message_data[7];
     code[3] = 0;
     telegram->read_value(codeNo, 8);
+
     // check for valid date, https://github.com/emsesp/EMS-ESP32/issues/204
     if (telegram->message_data[10] & 0x80) {
         uint16_t start_year  = (telegram->message_data[10] & 0x7F) + 2000;
@@ -1470,7 +1472,7 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
 
 //maintenance
 bool Boiler::set_maintenance(const char * value, const int8_t id) {
-    std::string s(12, '\0');
+    std::string s;
     if (Helpers::value2string(value, s)) {
         if (s == Helpers::toLower(read_flash_string(F_(reset)))) {
             // LOG_INFO(F("Reset boiler maintenance message"));

@@ -76,8 +76,9 @@ void EMSESPShell::display_banner() {
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) { console_hostname_ = networkSettings.hostname.c_str(); });
 
     if (console_hostname_.empty()) {
-        console_hostname_.resize(16, '\0');
-        snprintf(&console_hostname_[0], console_hostname_.capacity() + 1, "ems-esp");
+        console_hostname_ = "ems-esp";
+        // console_hostname_.resize(16, '\0');
+        // snprintf(&console_hostname_[0], console_hostname_.capacity() + 1, "ems-esp");
     }
 
     // load the list of commands
@@ -824,7 +825,7 @@ EMSESPStreamConsole::EMSESPStreamConsole(Stream & stream, const IPAddress & addr
         ptys_[pty_] = true;
     }
 
-    snprintf(text.data(), text.size(), "pty%u", pty_);
+    snprintf(text.data(), text.size(), "pty%u", (uint16_t)pty_);
     name_ = text.data();
 #ifndef EMSESP_STANDALONE
     logger().info(F("Allocated console %s for connection from [%s]:%u"), name_.c_str(), uuid::printable_to_string(addr_).c_str(), port_);

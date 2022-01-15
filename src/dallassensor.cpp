@@ -501,7 +501,16 @@ void DallasSensor::publish_values(const bool force) {
 DallasSensor::Sensor::Sensor(const uint8_t addr[])
     : id_(((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16)
           | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6])) {
-    id_str_ = to_string();   // create ID string
+    // create ID string
+    id_str_.reserve(20);
+    snprintf(&id_str_[0],
+             id_str_.capacity() + 1,
+             "%02X-%04X-%04X-%04X",
+             (unsigned int)(id_ >> 48) & 0xFF,
+             (unsigned int)(id_ >> 32) & 0xFFFF,
+             (unsigned int)(id_ >> 16) & 0xFFFF,
+             (unsigned int)(id_)&0xFFFF);
+
     name_   = std::string{}; // name (alias) is empty
     offset_ = 0;             // 0 degrees offset
 }
@@ -509,19 +518,6 @@ DallasSensor::Sensor::Sensor(const uint8_t addr[])
 uint64_t DallasSensor::get_id(const uint8_t addr[]) {
     return (((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16)
             | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6]));
-}
-
-// create's the ID string
-std::string DallasSensor::Sensor::to_string() const {
-    std::string str(17, '\0');
-    snprintf(&str[0],
-             str.capacity() + 1,
-             "%02X-%04X-%04X-%04X",
-             (unsigned int)(id_ >> 48) & 0xFF,
-             (unsigned int)(id_ >> 32) & 0xFFFF,
-             (unsigned int)(id_ >> 16) & 0xFFFF,
-             (unsigned int)(id_)&0xFFFF);
-    return str;
 }
 
 // find the name from the customization service

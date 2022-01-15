@@ -67,8 +67,6 @@ class DallasSensor {
         bool    ha_registered = false;
 
       private:
-        std::string to_string() const;
-
         uint64_t    id_;
         std::string id_str_;
         std::string name_;

@@ -41,10 +41,12 @@ class Helpers {
     static char * render_boolean(char * result, bool value);
 
     static char *      hextoa(char * result, const uint8_t value);
+    static std::string hextoa(const uint8_t value, bool prefix = true); // default prefix with 0x
     static std::string data_to_hex(const uint8_t * data, const uint8_t length);
     static char *      smallitoa(char * result, const uint8_t value);
     static char *      smallitoa(char * result, const uint16_t value);
     static char *      itoa(int32_t value, char * result, const uint8_t base = 10);
+    static std::string itoa(int16_t value);
     static uint32_t    hextoint(const char * hex);
     static int         atoint(const char * value);
     static bool        check_abs(const int32_t i);
@@ -68,7 +70,6 @@ class Helpers {
     static bool value2enum(const char * v, uint8_t & value, const __FlashStringHelper * const * strs);
     static bool value2temperature(const char * v, float & value, bool relative = false);
     static bool value2temperature(const char * v, int & value, const bool relative = false, const int min = -2147483648, const int max = 2147483647);
-
 
 #ifdef EMSESP_STANDALONE
     static char * ultostr(char * ptr, uint32_t value, const uint8_t base);

@@ -25,7 +25,7 @@ namespace emsesp {
 
 class Boiler : public EMSdevice {
   public:
-    Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
+    Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand);
 
   private:
     static uuid::log::Logger logger_;
@@ -127,7 +127,7 @@ class Boiler : public EMSdevice {
     uint32_t burnWorkMin_;       // Total burner operating time
     uint32_t heatWorkMin_;       // Total heat operating time
     uint32_t UBAuptime_;         // Total UBA working hours
-    char     lastCode_[50];      // last error code
+    char     lastCode_[75];      // last error code
     char     serviceCode_[4];    // 3 character status/service code
     uint16_t serviceCodeNumber_; // error/service code
 

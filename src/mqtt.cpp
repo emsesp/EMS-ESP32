@@ -51,6 +51,23 @@ uint8_t  Mqtt::connectcount_       = 0;
 uint32_t Mqtt::mqtt_message_id_    = 0;
 char     will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
+// Home Assistant specific
+// icons from https://materialdesignicons.com used with the UOMs (unit of measurements)
+MAKE_PSTR_WORD(measurement)
+MAKE_PSTR_WORD(total_increasing)
+MAKE_PSTR(icondegrees, "mdi:coolant-temperature") // DeviceValueUOM::DEGREES
+MAKE_PSTR(iconpercent, "mdi:percent-outline")     // DeviceValueUOM::PERCENT
+MAKE_PSTR(icontime, "mdi:clock-outline")          // DeviceValueUOM::SECONDS MINUTES & HOURS
+MAKE_PSTR(iconkb, "mdi:memory")                   // DeviceValueUOM::KB
+MAKE_PSTR(iconlmin, "mdi:water-boiler")           // DeviceValueUOM::LMIN
+MAKE_PSTR(iconkwh, "mdi:transmission-tower")      // DeviceValueUOM::KWH & WH
+MAKE_PSTR(iconua, "mdi:lightning-bolt-circle")    // DeviceValueUOM::UA
+MAKE_PSTR(iconbar, "mdi:gauge")                   // DeviceValueUOM::BAR
+MAKE_PSTR(iconkw, "mdi:omega")                    // DeviceValueUOM::KW & W
+MAKE_PSTR(icondbm, "mdi:wifi-strength-2")         // DeviceValueUOM::DBM
+MAKE_PSTR(iconnum, "mdi:counter")                 // DeviceValueUOM::NONE
+MAKE_PSTR(icondevice, "mdi:home-automation")      // for devices in HA
+
 uuid::log::Logger Mqtt::logger_{F_(mqtt), uuid::log::Facility::DAEMON};
 
 // subscribe to an MQTT topic, and store the associated callback function
@@ -908,7 +925,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     }
 
     // build unique identifier which will be used in the topic, replacing all . with _ as not to break HA
-    char uniq[50];
+    char uniq[101];
     snprintf(uniq, sizeof(uniq), "%s_%s", device_name, new_entity);
     Helpers::replace_char(uniq, '.', '_');
 
@@ -981,7 +998,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     // note: there is no way to handle strings in HA so datetimes (e.g. set_datetime, set_holiday, set_wwswitchtime etc) are excluded
     if (has_cmd) {
         // command topic back to EMS-ESP
-        char command_topic[100];
+        char command_topic[105];
         snprintf(command_topic, sizeof(command_topic), "~/%s", uniq);
         Helpers::replace_char(command_topic, '_', '/');
         doc["command_topic"] = command_topic;
@@ -1052,7 +1069,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
 
     // value template
     // if its nested mqtt format then use the appended entity name, otherwise take the original
-    char val_tpl[50];
+    char val_tpl[75];
     if (is_nested) {
         snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", new_entity);
     } else {

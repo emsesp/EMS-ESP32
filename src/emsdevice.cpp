@@ -312,39 +312,26 @@ uint8_t EMSdevice::decode_brand(uint8_t value) {
 
 // returns string of a human friendly description of the EMS device
 const std::string EMSdevice::to_string() const {
-    std::string str(160, '\0');
-
     // for devices that haven't been lookup yet, don't show all details
     if (product_id_ == 0) {
-        snprintf(&str[0], str.capacity() + 1, "%s (DeviceID:0x%02X)", name_.c_str(), device_id_);
-        return str;
+        return name_ + " (DeviceID:" + Helpers::hextoa(device_id_) + ")";
     }
 
     if (brand_ == Brand::NO_BRAND) {
-        snprintf(&str[0], str.capacity() + 1, "%s (DeviceID:0x%02X, ProductID:%d, Version:%s)", name_.c_str(), device_id_, product_id_, version_.c_str());
-    } else {
-        snprintf(&str[0],
-                 str.capacity() + 1,
-                 "%s %s (DeviceID:0x%02X ProductID:%d, Version:%s)",
-                 brand_to_string().c_str(),
-                 name_.c_str(),
-                 device_id_,
-                 product_id_,
-                 version_.c_str());
+        return name_ + " (DeviceID:" + Helpers::hextoa(device_id_) + ", ProductID:" + Helpers::itoa(product_id_) + ", Version:" + version_ + ")";
     }
 
-    return str;
+    return brand_to_string() + " " + name_ + " (DeviceID:" + Helpers::hextoa(device_id_) + ", ProductID:" + Helpers::itoa(product_id_) + ", Version:" + version_
+           + ")";
 }
 
 // returns out brand + device name
 const std::string EMSdevice::to_string_short() const {
-    std::string str(160, '\0');
     if (brand_ == Brand::NO_BRAND) {
-        snprintf(&str[0], str.capacity() + 1, "%s: %s", device_type_name().c_str(), name_.c_str());
-    } else {
-        snprintf(&str[0], str.capacity() + 1, "%s: %s %s", device_type_name().c_str(), brand_to_string().c_str(), name_.c_str());
+        return device_type_name() + ": " + name_;
     }
-    return str;
+
+    return device_type_name() + ": " + brand_to_string() + " " + name_;
 }
 
 // for each telegram that has the fetch value set (true) do a read request
@@ -703,7 +690,7 @@ const std::string EMSdevice::get_value_uom(const char * key) {
 // except additional data is stored in the JSON document needed for the Web UI like the UOM and command
 // v = value, u=uom, n=name, c=cmd
 void EMSdevice::generate_values_web(JsonObject & output) {
-    output["label"] = to_string_short(); // device_type_name();
+    output["label"] = to_string_short();
     JsonArray data  = output.createNestedArray("data");
 
     for (auto & dv : devicevalues_) {

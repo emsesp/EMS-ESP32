@@ -33,6 +33,15 @@ char * Helpers::hextoa(char * result, const uint8_t value) {
     return result;
 }
 
+// sane as above but to a hex string
+std::string Helpers::hextoa(const uint8_t value, bool prefix) {
+    char buf[3];
+    if (prefix) {
+        return std::string("0x") + hextoa(buf, value);
+    }
+    return std::string(hextoa(buf, value));
+}
+
 #ifdef EMSESP_STANDALONE
 // special function to work outside of ESP's libraries
 char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
@@ -70,9 +79,31 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
 }
 #endif
 
+/**
+ * fast atoi returning a std::string
+ * http://www.strudel.org.uk/itoa/
+ * 
+ */
+std::string Helpers::itoa(int16_t value) {
+    std::string buf;
+    buf.reserve(25); // Pre-allocate enough space.
+    int quotient = value;
+
+    do {
+        buf += "0123456789abcdef"[std::abs(quotient % 10)];
+        quotient /= 10;
+    } while (quotient);
+
+    // Append the negative sign
+    if (value < 0)
+        buf += '-';
+
+    std::reverse(buf.begin(), buf.end());
+    return buf;
+}
+
 /*
- * itoa for 2 byte signed (short) integers
- * fast and optimized for ESP32
+ * fast itoa and optimized for ESP32
  * written by Lukás Chmela, Released under GPLv3. http://www.strudel.org.uk/itoa/ version 0.4
  */
 char * Helpers::itoa(int32_t value, char * result, const uint8_t base) {
@@ -323,12 +354,12 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
 // creates string of hex values from an arrray of bytes
 std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     if (length == 0) {
-        return read_flash_string(F("<empty>"));
+        return "<empty>";
     }
 
-    std::string str(160, '\0');
-    char        buffer[4];
-    char *      p = &str[0];
+    char   str[160] = {0};
+    char   buffer[4];
+    char * p = &str[0];
     for (uint8_t i = 0; i < length; i++) {
         Helpers::hextoa(buffer, data[i]);
         *p++ = buffer[0];
@@ -337,7 +368,7 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     }
     *--p = '\0'; // null terminate just in case, loosing the trailing space
 
-    return str;
+    return std::string(str);
 }
 
 // takes a hex string and convert it to an unsigned 32bit number (max 8 hex digits)

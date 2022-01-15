@@ -27,25 +27,6 @@
 
 namespace emsesp {
 
-// Home Assistant icons (https://materialdesignicons.com)
-// the following are used with the UOMs (unit of measurements)
-MAKE_PSTR(icondegrees, "mdi:coolant-temperature") // DeviceValueUOM::DEGREES
-MAKE_PSTR(iconpercent, "mdi:percent-outline")     // DeviceValueUOM::PERCENT
-MAKE_PSTR(icontime, "mdi:clock-outline")          // DeviceValueUOM::SECONDS MINUTES & HOURS
-MAKE_PSTR(iconkb, "mdi:memory")                   // DeviceValueUOM::KB
-MAKE_PSTR(iconlmin, "mdi:water-boiler")           // DeviceValueUOM::LMIN
-MAKE_PSTR(iconkwh, "mdi:transmission-tower")      // DeviceValueUOM::KWH & WH
-MAKE_PSTR(iconua, "mdi:lightning-bolt-circle")    // DeviceValueUOM::UA
-MAKE_PSTR(iconbar, "mdi:gauge")                   // DeviceValueUOM::BAR
-MAKE_PSTR(iconkw, "mdi:omega")                    // DeviceValueUOM::KW & W
-MAKE_PSTR(icondbm, "mdi:wifi-strength-2")         // DeviceValueUOM::DBM
-MAKE_PSTR(iconnum, "mdi:counter")                 // DeviceValueUOM::NONE
-
-MAKE_PSTR(icondevice, "mdi:home-automation") // for devices in HA
-
-MAKE_PSTR_WORD(measurement)
-MAKE_PSTR_WORD(total_increasing)
-
 class EMSdevice {
   public:
     virtual ~EMSdevice() = default; // destructor of base class must always be virtual because it's a polymorphic class
@@ -53,14 +34,14 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICES_MAX_TELEGRAMS = 20;
 
     // device_type defines which derived class to use, e.g. BOILER, THERMOSTAT etc..
-    EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
+    EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
         : device_type_(device_type)
         , device_id_(device_id)
         , product_id_(product_id)
-        , version_(version)
         , name_(name)
         , flags_(flags)
         , brand_(brand) {
+        strlcpy(version_, version, sizeof(version_));
     }
 
     const std::string device_type_name() const;
@@ -105,11 +86,11 @@ class EMSdevice {
         return device_type_; // see enum DeviceType below
     }
 
-    inline void version(std::string & version) {
-        version_ = version;
+    inline void version(const char * version) {
+        strlcpy(version_, version, sizeof(version_));
     }
 
-    inline std::string version() const {
+    inline const char * version() {
         return version_;
     }
 
@@ -366,7 +347,7 @@ class EMSdevice {
     uint8_t     device_type_ = DeviceType::SYSTEM;
     uint8_t     device_id_   = 0;
     uint8_t     product_id_  = 0;
-    std::string version_;
+    char        version_[6];
     std::string name_; // the long name for the EMS model
     uint8_t     flags_ = 0;
     uint8_t     brand_ = Brand::NO_BRAND;

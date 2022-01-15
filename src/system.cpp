@@ -54,26 +54,9 @@ bool     System::restart_requested_ = false;
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
-// e.g. http://ems-esp/api?device=system&cmd=pin&data=1&id=2
 bool System::command_pin(const char * value, const int8_t id) {
 #ifndef EMSESP_STANDALONE
-    /*
-    if (value[0] == '{') {
-        int id_n = -1;
-        StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
-        if (deserializeJson(doc, value)) {
-            LOG_ERROR(F("error: payload %s"), value);
-            return false;
-        }
-        if (doc.containsKey("gpio")) {
-            id_n = doc["gpio"];
-        }
-        if (doc.containsKey("state")) {
-            id_n = doc["gpio"];
-        }
-        return false;
-    }
-    */
+
     if (!is_valid_gpio(id)) {
         LOG_INFO(F("Invalid GPIO number"));
         return false;
@@ -82,6 +65,7 @@ bool System::command_pin(const char * value, const int8_t id) {
     bool        v  = false;
     std::string v1 = {7, '\0'};
     int         v2 = 0;
+
     if (id == 25 && Helpers::value2number(value, v2)) {
         if (v2 >= 0 && v2 <= 255) {
             dacWrite(id, v2);
@@ -100,8 +84,10 @@ bool System::command_pin(const char * value, const int8_t id) {
             return true;
         }
     }
+
     LOG_INFO(F("GPIO %d: invalid value"), id);
 #endif
+
     return false;
 }
 
@@ -113,7 +99,7 @@ bool System::command_send(const char * value, const int8_t id) {
 
 // fetch device values
 bool System::command_fetch(const char * value, const int8_t id) {
-    std::string value_s(14, '\0');
+    std::string value_s;
     if (Helpers::value2string(value, value_s)) {
         if (value_s == "all") {
             LOG_INFO(F("Requesting data from EMS devices"));
@@ -140,7 +126,7 @@ bool System::command_fetch(const char * value, const int8_t id) {
 
 // mqtt publish
 bool System::command_publish(const char * value, const int8_t id) {
-    std::string value_s(14, '\0');
+    std::string value_s;
     if (Helpers::value2string(value, value_s)) {
         if (value_s == "ha") {
             EMSESP::publish_all(true); // includes HA
@@ -386,7 +372,7 @@ void System::start(uint32_t heap_start) {
 
 #ifndef EMSESP_STANDALONE
     // disable bluetooth module
-    periph_module_disable(PERIPH_BT_MODULE);
+    // periph_module_disable(PERIPH_BT_MODULE);
     if (low_clock_) {
         setCpuFrequencyMhz(160);
     }
@@ -1201,7 +1187,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
                 char result[200];
                 (void)emsdevice->show_telegram_handlers(result);
                 if (result[0] != '\0') {
-                    obj["handlers"] = result; // don't show hanlders if there aren't any
+                    obj["handlers"] = result; // don't show handlers if there aren't any
                 }
             }
         }

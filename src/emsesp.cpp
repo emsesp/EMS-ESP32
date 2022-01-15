@@ -704,6 +704,7 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     uint8_t offset = telegram->offset;
 
     // find name for src and dest by looking up known devices
+
     std::string src_name("");
     std::string dest_name("");
     std::string type_name("");
@@ -750,32 +751,13 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         direction = read_flash_string(F("->"));
     }
 
-    std::string str(200, '\0');
+    std::string str;
+    str.reserve(200);
+    str = src_name + "(" + Helpers::hextoa(src) + ") " + direction + " " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+          + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
+
     if (offset) {
-        snprintf(&str[0],
-                 str.capacity() + 1,
-                 "%s(0x%02X) %s %s(0x%02X), %s(0x%02X), data: %s (offset %d)",
-                 src_name.c_str(),
-                 src,
-                 direction.c_str(),
-                 dest_name.c_str(),
-                 dest,
-                 type_name.c_str(),
-                 telegram->type_id,
-                 telegram->to_string_message().c_str(),
-                 offset);
-    } else {
-        snprintf(&str[0],
-                 str.capacity() + 1,
-                 "%s(0x%02X) %s %s(0x%02X), %s(0x%02X), data: %s",
-                 src_name.c_str(),
-                 src,
-                 direction.c_str(),
-                 dest_name.c_str(),
-                 dest,
-                 type_name.c_str(),
-                 telegram->type_id,
-                 telegram->to_string_message().c_str());
+        str += " (offset " + Helpers::itoa(offset) + ")";
     }
 
     return str;
@@ -824,8 +806,7 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
     if (telegram->message_length < 3) {
         // for empty telegram add device with empty product, version and brand
         if (!telegram->message_length) {
-            std::string version = "00.00";
-            (void)add_device(telegram->src, 0, version, 0);
+            (void)add_device(telegram->src, 0, "00.00", 0);
         }
         return;
     }
@@ -846,8 +827,8 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
     uint8_t product_id = telegram->message_data[offset]; // productID
 
     // get version as XX.XX
-    std::string version(6, '\0');
-    snprintf(&version[0], version.capacity() + 1, "%02d.%02d", telegram->message_data[offset + 1], telegram->message_data[offset + 2]);
+    char version[8];
+    snprintf(version, sizeof(version), "%02d.%02d", telegram->message_data[offset + 1], telegram->message_data[offset + 2]);
 
     // some devices store the protocol type (HT3, Buderus) in the last byte
     uint8_t brand;
@@ -1011,7 +992,7 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
 
 // add a new or update existing EMS device to our list of active EMS devices
 // if its not in our database, we don't add it
-bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::string & version, const uint8_t brand) {
+bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const char * version, const uint8_t brand) {
     // don't add ourselves!
     if (device_id == rxservice_.ems_bus_id()) {
         return false;
@@ -1115,7 +1096,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         }
     }
 
-    LOG_DEBUG(F("Adding new device %s (deviceID 0x%02X, productID %d, version %s)"), name.c_str(), device_id, product_id, version.c_str());
+    LOG_DEBUG(F("Adding new device %s (deviceID 0x%02X, productID %d, version %s)"), name.c_str(), device_id, product_id, version);
     emsdevices.push_back(EMSFactory::add(device_type, device_id, product_id, version, name, flags, brand));
 
     // assign a unique ID. Note that this is not actual unique after a restart as it's dependent on the order that devices are found

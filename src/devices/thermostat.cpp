@@ -24,7 +24,7 @@ REGISTER_FACTORY(Thermostat, EMSdevice::DeviceType::THERMOSTAT);
 
 uuid::log::Logger Thermostat::logger_{F_(thermostat), uuid::log::Facility::CONSOLE};
 
-Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
+Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     uint8_t actual_master_thermostat = EMSESP::actual_master_thermostat(); // what we're actually using
     uint8_t master_thermostat        = EMSESP_DEFAULT_MASTER_THERMOSTAT;
@@ -375,10 +375,10 @@ void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit
     char seltemp_s[30];
     char currtemp_s[30];
     char mode_str_tpl[400];
-    char name_s[20];
-    char uniq_id_s[20];
-    char temp_cmd_s[25];
-    char mode_cmd_s[25];
+    char name_s[30];
+    char uniq_id_s[30];
+    char temp_cmd_s[30];
+    char mode_cmd_s[30];
 
     if (Mqtt::nested_format() == 1) {
         // nested format
@@ -1209,6 +1209,7 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
     if (hc == nullptr) {
         return;
     }
+
     uint8_t prog = telegram->type_id == timer_typeids[hc->hc()] ? 0 : 1;
     if ((telegram->message_length == 2 && telegram->offset < 83 && !(telegram->offset & 1))
         || (!telegram->offset && telegram->message_length > 1 && !prog && !strlen(hc->switchtime1))
@@ -1236,9 +1237,11 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
             }
         }
     }
+
     has_update(telegram, hc->program, 84); // 0 .. 10, 0-userprogram 1, 10-userprogram 2
     has_update(telegram, hc->pause, 85);   // time in hours
     has_update(telegram, hc->party, 86);   // time in hours
+
     if (telegram->message_length + telegram->offset >= 92 && telegram->offset <= 87) {
         char data[sizeof(hc->vacation)];
         snprintf(data,
@@ -1252,6 +1255,7 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
                  telegram->message_data[92 - telegram->offset] + 2000);
         has_update(hc->vacation, data, sizeof(hc->vacation));
     }
+
     if (telegram->message_length + telegram->offset >= 98 && telegram->offset <= 93) {
         char data[sizeof(hc->holiday)];
         snprintf(data,
@@ -1835,7 +1839,7 @@ bool Thermostat::set_party(const char * value, const int8_t id) {
 // dw - day of week (0..6), dst- summertime (0/1)
 // id is ignored
 bool Thermostat::set_datetime(const char * value, const int8_t id) {
-    std::string dt(30, '\0');
+    std::string dt;
     if (!Helpers::value2string(value, dt)) {
         return false;
     }
@@ -1888,10 +1892,11 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
 // sets the thermostat working mode, where mode is a string
 // converts string mode to HeatingCircuit::Mode
 bool Thermostat::set_mode(const char * value, const int8_t id) {
-    std::string mode(20, '\0');
     if (strlen(value) >= 20) {
         return false;
     }
+
+    std::string mode;
 
     if (value[0] >= '0' && value[0] <= '9') {
         uint8_t num = value[0] - '0';

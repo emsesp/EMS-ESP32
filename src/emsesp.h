@@ -214,7 +214,7 @@ class EMSESP {
     static void fetch_device_values_type(const uint8_t device_type);
     static bool valid_device(const uint8_t device_id);
 
-    static bool add_device(const uint8_t device_id, const uint8_t product_id, std::string & version, const uint8_t brand);
+    static bool add_device(const uint8_t device_id, const uint8_t product_id, const char * version, const uint8_t brand);
     static void scan_devices();
     static void clear_all_devices();
 

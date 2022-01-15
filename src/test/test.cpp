@@ -1256,8 +1256,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN);
 
-        char key[6];
-        char value[6];
+        char key[8];
+        char value[8];
 
         // fit it up, to its limit of the Json buffer (which is about 169 records)
         for (uint8_t i = 0; i < 200; i++) {
