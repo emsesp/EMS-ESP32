@@ -130,6 +130,7 @@ class EMSESP {
     static bool device_exists(const uint8_t device_id);
 
     static uint8_t count_devices(const uint8_t device_type);
+    static uint8_t count_devices();
     static uint8_t device_index(const uint8_t device_type, const uint8_t unique_id);
 
     static uint8_t actual_master_thermostat();

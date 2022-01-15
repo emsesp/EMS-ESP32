@@ -129,8 +129,8 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM_DYN);
     JsonObject          root     = response->getRoot();
 
-    root["status"]         = EMSESP::bus_status(); // 0, 1 or 2
-    root["num_devices"]    = EMSESP::emsdevices.size();
+    root["status"]         = EMSESP::bus_status();    // 0, 1 or 2
+    root["num_devices"]    = EMSESP::count_devices(); // excluding Controller
     root["num_sensors"]    = EMSESP::dallassensor_.no_sensors();
     root["num_analogs"]    = EMSESP::analogsensor_.no_sensors();
     root["tx_mode"]        = EMSESP::txservice_.tx_mode();

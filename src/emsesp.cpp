@@ -133,6 +133,17 @@ uint8_t EMSESP::count_devices(const uint8_t device_type) {
     return count;
 }
 
+// return total number of devices excluding the Controller
+uint8_t EMSESP::count_devices() {
+    uint8_t count = 0;
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice) {
+            count += (emsdevice->device_type() != EMSdevice::DeviceType::CONTROLLER);
+        }
+    }
+    return count;
+}
+
 // returns the index of a device if there are more of the same type
 // or 0 if there is only one or none
 uint8_t EMSESP::device_index(const uint8_t device_type, const uint8_t unique_id) {

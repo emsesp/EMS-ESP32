@@ -382,17 +382,6 @@ const emsesp_coredata = {
       e: 62,
     },
     {
-      i: 3,
-      t: 'Controller',
-      s: 'Controller',
-      b: '',
-      n: 'BC10',
-      d: 9,
-      p: 190,
-      v: '01.03',
-      e: 0,
-    },
-    {
       i: 4,
       t: 'Thermostat',
       s: 'Thermostat2',
@@ -427,24 +416,28 @@ const emsesp_sensordata = {
 
 const status = {
   status: 0,
+  num_devices: 2,
+  num_sensors: 1,
+  num_analogs: 1,
   tx_mode: 1,
-  rx_received: 344,
-  tx_sent: 104,
+  rx_received: 240,
+  tx_sent: 60,
   rx_quality: 100,
   tx_quality: 100,
-  tx_fails: 0,
   rx_fails: 0,
+  tx_fails: 0,
   sensor_fails: 0,
-  sensor_reads: 222,
+  sensor_reads: 51,
   sensor_quality: 100,
-  mqtt_count: 50,
-  mqtt_fails: 12,
-  mqtt_quality: 1,
-  api_calls: 50,
+  analog_fails: 0,
+  analog_reads: 0,
+  analog_quality: 100,
+  mqtt_fails: 0,
+  mqtt_count: 307,
+  mqtt_quality: 100,
+  api_calls: 0,
   api_fails: 0,
   api_quality: 100,
-  num_devices: 3,
-  num_sensors: 1,
 }
 
 // Dashboard data
@@ -599,11 +592,6 @@ const emsesp_devicedata_2 = {
     { v: 282323, u: 17, n: 'ww starts' },
     { v: 99829, u: 8, n: 'ww active time' },
   ],
-}
-
-const emsesp_devicedata_3 = {
-  label: 'Controller',
-  data: [],
 }
 
 const emsesp_devicedata_4 = {
@@ -971,11 +959,6 @@ rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
     res.write(encoded, 'binary')
     res.end(null, 'binary')
   }
-  if (id === 3) {
-    const encoded = msgpack.encode(emsesp_devicedata_3)
-    res.write(encoded, 'binary')
-    res.end(null, 'binary')
-  }
   if (id === 4) {
     const encoded = msgpack.encode(emsesp_devicedata_4)
     res.write(encoded, 'binary')
@@ -1182,10 +1165,6 @@ const emsesp_info = {
       type: 'Thermostat',
       name: 'RC20/Moduline 300 (DeviceID:0x17, ProductID:77, Version:03.03)',
       handlers: '0xA3 0x06 0xA2 0x12 0x91 0xA8',
-    },
-    {
-      type: 'Controller',
-      name: 'BC10 (DeviceID:0x09, ProductID:190, Version:01.03)',
     },
   ],
 }

@@ -62,7 +62,7 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
 
 // scan devices service
 void WebDataService::scan_devices(AsyncWebServerRequest * request) {
-    EMSESP::logger().info(F("scanning devices"));
+    EMSESP::logger().info(F("Scanning devices..."));
     EMSESP::scan_devices();
     request->send(200);
 }
@@ -73,10 +73,11 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
     JsonObject          root     = response->getRoot();
 
-    // list is already sorted by device type so the Web code doesn't need to do the sorting
+    // list is already sorted by device type
+    // Ignore Contoller
     JsonArray devices = root.createNestedArray("devices");
     for (auto & emsdevice : EMSESP::emsdevices) {
-        if (emsdevice) {
+        if (emsdevice && emsdevice->device_type() != EMSdevice::DeviceType::CONTROLLER) {
             JsonObject obj = devices.createNestedObject();
             obj["i"]       = emsdevice->unique_id();        // a unique id
             obj["t"]       = emsdevice->device_type_name(); // type
