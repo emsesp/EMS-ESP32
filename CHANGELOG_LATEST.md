@@ -16,6 +16,8 @@
 - Analog Sensor support [#271](https://github.com/emsesp/EMS-ESP32/issues/271)
 - Solar cylinder priority [#247](https://github.com/emsesp/EMS-ESP32/issues/247)
 - Read only mode in Settings, where EMS Tx/Write commands are blocked [#286](https://github.com/emsesp/EMS-ESP32/issues/286)
+- Added Boiler 8700i
+- Added Cascade CM10
 
 ## Fixed
 
@@ -35,6 +37,8 @@
 - Renamed Dallas Sensor to Temperature Sensor in UI
 - Dallas Format removed. Use the name to give each sensor an alias
 - No longer MQTT subscribes to topic `/thermostat_hc<n>` as it supports a path similar to the API endpoint construct
+- Show Sensors quality in WebUI
+- Contoller not shown in WebUI (has no data anyway)
 
 **BREAKING CHANGES:**
 
