@@ -643,7 +643,7 @@ void EMSdevice::publish_value(void * value_p) {
                 break;
             }
 
-            if (payload != nullptr && payload[0] != '\0') {
+            if (payload[0] != '\0') {
                 Mqtt::publish(topic, payload);
             }
         }
@@ -694,13 +694,13 @@ void EMSdevice::generate_values_web(JsonObject & output) {
     JsonArray data  = output.createNestedArray("data");
 
     for (auto & dv : devicevalues_) {
-        uint8_t fahrenheit = 0;
         // check conditions:
         //  1. full_name cannot be empty
         //  2. it must have a valid value, if it is not a command like 'reset'
 
         if (dv.has_state(DeviceValueState::DV_VISIBLE) && (dv.hasvalue() || (dv.type == DeviceValueType::CMD))) {
-            JsonObject obj = data.createNestedObject(); // create the object, we know there is a value
+            JsonObject obj        = data.createNestedObject(); // create the object, we know there is a value
+            uint8_t    fahrenheit = 0;
 
             // handle Booleans (true, false)
             if (dv.type == DeviceValueType::BOOL) {
@@ -908,17 +908,17 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
     // search device value with this tag
     for (auto & dv : devicevalues_) {
         if (strcmp(cmd, Helpers::toLower(read_flash_string(dv.short_name)).c_str()) == 0 && (tag <= 0 || tag == dv.tag)) {
-            int8_t       divider  = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
-            const char * type     = "type";
-            const char * min      = "min";
-            const char * max      = "max";
-            const char * value    = "value";
-            const char * fullname = "fullname";
-            uint8_t fahrenheit    = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
+            int8_t       divider = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
+            const char * type    = "type";
+            const char * min     = "min";
+            const char * max     = "max";
+            const char * value   = "value";
+            uint8_t fahrenheit   = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
             json["name"] = dv.short_name;
 
             if (dv.full_name != nullptr) {
+                const char * fullname = "fullname";
                 if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
                     json[fullname] = dv.full_name;
                 } else {

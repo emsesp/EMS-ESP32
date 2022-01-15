@@ -989,7 +989,6 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
 
     const char * ic_ha  = "ic";           // icon - only set this if there is no device class
     const char * sc_ha  = "state_class";  // state class
-    const char * dc_ha  = "device_class"; // device class
     const char * uom_ha = "unit_of_meas"; // unit of measure
 
     // handle commands, which are device entities that are writable
@@ -1009,7 +1008,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
             for (uint8_t i = 0; i < options_size; i++) {
                 option_list.add(options[i]);
             }
-        } else if ((type != DeviceValueType::ENUM) && (type != DeviceValueType::STRING)) {
+        } else if (type != DeviceValueType::STRING) {
             // Must be Numeric....
             // mode can be auto, slider or box
             // because its fiddly and error prone, force conversion to box
@@ -1097,7 +1096,10 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     // https://developers.home-assistant.io/docs/core/entity/sensor
     // for read only sensors. It uses a device class to determine icon
     // and state class
+
     if (use_ha_sensor) {
+        const char * dc_ha = "device_class"; // device class
+
         switch (uom) {
         case DeviceValueUOM::DEGREES:
         case DeviceValueUOM::DEGREES_R:
