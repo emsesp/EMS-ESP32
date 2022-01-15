@@ -19,7 +19,8 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle
+  DialogTitle,
+  Typography
 } from '@mui/material';
 
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
@@ -147,6 +148,11 @@ const DashboardStatus: FC = () => {
             <ListItemText primary="EMS Bus Connection Status" secondary={busStatus(data) + txMode(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
+          <Box mt={2} mb={2} color="warning.main">
+            <Typography variant="body2">
+              All statistics below are recorded from when EMS-ESP was last restarted.
+            </Typography>
+          </Box>
           <TableContainer>
             <Table size="small">
               <TableBody>
