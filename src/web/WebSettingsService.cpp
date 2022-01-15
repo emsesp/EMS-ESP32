@@ -76,8 +76,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     // load default GPIO configuration based on board profile
     std::vector<uint8_t> data; // led, dallas, rx, tx, button, phy_type
 
-    String old_board_profile = settings.board_profile;
-    settings.board_profile   = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
+    settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
         settings.board_profile = EMSESP_DEFAULT_BOARD_PROFILE; // invalid board configuration, override the default in case it has been misspelled
     }
