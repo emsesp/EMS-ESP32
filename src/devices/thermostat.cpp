@@ -343,7 +343,9 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     }
 
     // set the flag saying we want its data during the next auto fetch
-    toggle_fetch(monitor_typeids[hc_num - 1], toggle_);
+
+    // monitor_typeids are published frequently, no need to fetch
+    // toggle_fetch(monitor_typeids[hc_num - 1], toggle_);
 
     if (set_typeids.size()) {
         toggle_fetch(set_typeids[hc_num - 1], toggle_);
