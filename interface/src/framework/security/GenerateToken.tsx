@@ -51,7 +51,7 @@ const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
         {token ? (
           <>
             <MessageBox
-              message="The token below is used with API calls that require authorization. It can be passed either as a Bearer token in the
+              message="The token below is used with REST API calls that require authorization. It can be passed either as a Bearer token in the
         'Authorization' header or in the 'access_token' URL query parameter."
               level="info"
               my={2}
