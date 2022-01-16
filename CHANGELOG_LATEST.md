@@ -16,20 +16,21 @@
 - Analog Sensor support [#271](https://github.com/emsesp/EMS-ESP32/issues/271)
 - Solar cylinder priority [#247](https://github.com/emsesp/EMS-ESP32/issues/247)
 - Read only mode in Settings, where EMS Tx/Write commands are blocked [#286](https://github.com/emsesp/EMS-ESP32/issues/286)
-- Added Boiler 8700i
-- Added Cascade CM10
+- Added 8700i Boiler device
+- Added Cascade CM10 Controller device
 
 ## Fixed
 
 - lastcode broke MQTT JSON structure [#228](https://github.com/emsesp/EMS-ESP32/issues/228)
 - fixed issue with overlapping while reading sequence of EMS1.0 telegrams
 - fixed redundant telegram readings (because of offset overflow)
-- added missing RC30/Moduline400 [#243](https://github.com/emsesp/EMS-ESP32/issues/243)
+- added missing RC30/Moduline 400 [#243](https://github.com/emsesp/EMS-ESP32/issues/243)
 - Correct modes for RC25 [#106](https://github.com/emsesp/EMS-ESP32/issues/106)
 - Clean up old HA config's in MQTT before publishing data. This will prevent HA giving the 'dict' warnings [#229](https://github.com/emsesp/EMS-ESP32/issues/229)
 - RC25 temperature setting [#272](https://github.com/emsesp/EMS-ESP32/issues/272)
 - Buderus RC25 - "hc1 mode type" incorrect value [#273](https://github.com/emsesp/EMS-ESP32/issues/273)
 - Missing values for damped outdoor temperature [#282](https://github.com/emsesp/EMS-ESP32/issues/282)
+- Increased number of Mixers and Heating Circuits [#294](https://github.com/emsesp/EMS-ESP32/issues/294)
 
 ## Changed
 
@@ -38,7 +39,8 @@
 - Dallas Format removed. Use the name to give each sensor an alias
 - No longer MQTT subscribes to topic `/thermostat_hc<n>` as it supports a path similar to the API endpoint construct
 - Show Sensors quality in WebUI
-- Contoller not shown in WebUI (has no data anyway)
+- Controller not shown in WebUI dashboard
+- renamed "Home Assistant Integration" to "MQTT Discovery" in MQTT Settings [#290](https://github.com/emsesp/EMS-ESP32/issues/290)
 
 **BREAKING CHANGES:**
 

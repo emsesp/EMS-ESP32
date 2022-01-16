@@ -230,6 +230,7 @@ mqtt_settings = {
   mqtt_retain: false,
   ha_enabled: true,
   nested_format: 1,
+  discovery_prefix: 'homeassistant',
   send_response: true,
   publish_single: false,
 }

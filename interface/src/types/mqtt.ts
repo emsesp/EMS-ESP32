@@ -40,4 +40,5 @@ export interface MqttSettings {
   nested_format: number;
   send_response: boolean;
   publish_single: boolean;
+  discovery_prefix: string;
 }

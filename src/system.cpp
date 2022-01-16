@@ -944,16 +944,20 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 #endif
 
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
-        node            = output.createNestedObject("MQTT");
-        node["enabled"] = settings.enabled;
-#ifndef EMSESP_STANDALONE
-        node["host"]          = settings.host;
-        node["port"]          = settings.port;
-        node["username"]      = settings.username;
-        node["client_id"]     = settings.clientId;
-        node["keep_alive"]    = settings.keepAlive;
-        node["clean_session"] = settings.cleanSession;
-#endif
+        node                            = output.createNestedObject("MQTT");
+        node["enabled"]                 = settings.enabled;
+        node["host"]                    = settings.host;
+        node["port"]                    = settings.port;
+        node["username"]                = settings.username;
+        node["client_id"]               = settings.clientId;
+        node["keep_alive"]              = settings.keepAlive;
+        node["clean_session"]           = settings.cleanSession;
+        node["base"]                    = settings.base;
+        node["discovery_prefix"]        = settings.discovery_prefix;
+        node["nested_format"]           = settings.nested_format;
+        node["ha_enabled"]              = settings.ha_enabled;
+        node["mqtt_qos"]                = settings.mqtt_qos;
+        node["mqtt_retain"]             = settings.mqtt_retain;
         node["publish_time_boiler"]     = settings.publish_time_boiler;
         node["publish_time_thermostat"] = settings.publish_time_thermostat;
         node["publish_time_solar"]      = settings.publish_time_solar;
@@ -961,9 +965,6 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["publish_time_other"]      = settings.publish_time_other;
         node["publish_time_sensor"]     = settings.publish_time_sensor;
         node["publish_single"]          = settings.publish_single;
-        node["ha_enabled"]              = settings.ha_enabled;
-        node["mqtt_qos"]                = settings.mqtt_qos;
-        node["mqtt_retain"]             = settings.mqtt_retain;
         node["send_response"]           = settings.send_response;
     });
 

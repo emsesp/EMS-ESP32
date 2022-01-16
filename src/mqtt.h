@@ -155,6 +155,14 @@ class Mqtt {
         return mqtt_base_;
     }
 
+    // returns the discovery MQTT topic prefix and adds a /
+    static std::string discovery_prefix() {
+        if (discovery_prefix_.empty()) {
+            return std::string{};
+        }
+        return discovery_prefix_ + "/";
+    }
+
     static void base(const char * base) {
         mqtt_base_ = base;
     }
@@ -296,6 +304,7 @@ class Mqtt {
     static bool        mqtt_enabled_;
     static bool        ha_enabled_;
     static uint8_t     nested_format_;
+    static std::string discovery_prefix_;
     static bool        publish_single_;
     static bool        send_response_;
 };

@@ -38,6 +38,7 @@ uint32_t    Mqtt::publish_time_other_;
 bool        Mqtt::mqtt_enabled_;
 bool        Mqtt::ha_enabled_;
 uint8_t     Mqtt::nested_format_;
+std::string Mqtt::discovery_prefix_;
 bool        Mqtt::send_response_;
 bool        Mqtt::publish_single_;
 
@@ -206,7 +207,9 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     for (const auto & message : mqtt_messages_) {
         auto content = message.content_;
         char topic[MQTT_TOPIC_MAX_SIZE];
-        if ((strncmp(content->topic.c_str(), "homeassistant/", 13) != 0)) {
+
+        // prefix base, only if it's not a discovery topic
+        if (content->topic.compare(0, discovery_prefix().size(), discovery_prefix()) == 0) {
             snprintf(topic, sizeof(topic), "%s/%s", Mqtt::base().c_str(), content->topic.c_str());
         } else {
             snprintf(topic, sizeof(topic), "%s", content->topic.c_str());
@@ -384,14 +387,15 @@ void Mqtt::reset_mqtt() {
 
 void Mqtt::load_settings() {
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
-        mqtt_base_      = mqttSettings.base.c_str(); // Convert String to std::string
-        mqtt_qos_       = mqttSettings.mqtt_qos;
-        mqtt_retain_    = mqttSettings.mqtt_retain;
-        mqtt_enabled_   = mqttSettings.enabled;
-        ha_enabled_     = mqttSettings.ha_enabled;
-        nested_format_  = mqttSettings.nested_format;
-        publish_single_ = mqttSettings.publish_single;
-        send_response_  = mqttSettings.send_response;
+        mqtt_base_        = mqttSettings.base.c_str(); // Convert String to std::string
+        mqtt_qos_         = mqttSettings.mqtt_qos;
+        mqtt_retain_      = mqttSettings.mqtt_retain;
+        mqtt_enabled_     = mqttSettings.enabled;
+        ha_enabled_       = mqttSettings.ha_enabled;
+        nested_format_    = mqttSettings.nested_format;
+        publish_single_   = mqttSettings.publish_single;
+        send_response_    = mqttSettings.send_response;
+        discovery_prefix_ = mqttSettings.discovery_prefix.c_str();
 
         // convert to milliseconds
         publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000;
@@ -740,7 +744,7 @@ void Mqtt::publish_ha(const std::string & topic) {
         return;
     }
 
-    std::string fulltopic = read_flash_string(F_(homeassistant)) + topic;
+    std::string fulltopic = Mqtt::discovery_prefix() + topic;
 #if defined(EMSESP_DEBUG)
     LOG_DEBUG(F("[DEBUG] Publishing empty HA topic=%s"), fulltopic.c_str());
 #endif
@@ -758,7 +762,7 @@ void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
     payload_text.reserve(measureJson(payload) + 1);
     serializeJson(payload, payload_text); // convert json to string
 
-    std::string fulltopic = read_flash_string(F_(homeassistant)) + topic;
+    std::string fulltopic = Mqtt::discovery_prefix() + topic;
 #if defined(EMSESP_STANDALONE)
     LOG_DEBUG(F("Publishing HA topic=%s, payload=%s"), fulltopic.c_str(), payload_text.c_str());
 #elif defined(EMSESP_DEBUG)
@@ -781,7 +785,7 @@ void Mqtt::process_queue() {
     auto message      = mqtt_message.content_;
     char topic[MQTT_TOPIC_MAX_SIZE];
 
-    if (message->topic.find(read_flash_string(F_(homeassistant))) == 0) {
+    if (message->topic.find(discovery_prefix_) == 0) {
         strcpy(topic, message->topic.c_str()); // leave topic as it is
     } else {
         snprintf(topic, MQTT_TOPIC_MAX_SIZE, "%s/%s", mqtt_base_.c_str(), message->topic.c_str());
@@ -892,7 +896,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
                              dev_json.as<JsonObject>());
 }
 
-// HA config for a sensor and binary_sensor entity
+// MQTT discovery configs
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
 void Mqtt::publish_ha_sensor_config(uint8_t                             type,                 // EMSdevice::DeviceValueType

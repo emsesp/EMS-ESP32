@@ -394,9 +394,6 @@ MAKE_PSTR_LIST(enum_solarmode, F_(constant), F("pwm"), F("analog"))
 MAKE_PSTR_LIST(enum_collectortype, F("flat"), F("vacuum"))
 MAKE_PSTR_LIST(enum_cylprio, F("cyl_1"), F("cyl_2"))
 
-// MQTT topic for homeassistant. Must include /
-MAKE_PSTR(homeassistant, "homeassistant/")
-
 // id used to store the device ID. empty full name so only gets displayed in the MQTT payload
 MAKE_PSTR_LIST(ID, F_(id))
 
