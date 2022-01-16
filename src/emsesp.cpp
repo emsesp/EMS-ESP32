@@ -170,19 +170,20 @@ void EMSESP::scan_devices() {
 }
 
 /**
-* if thermostat master is 0x18 it handles only ww and hc1, hc2..hc4 handled by devices 0x19..0x1B
+* if thermostat master is 0x18 it handles only ww and hc1, hc2..hc8 handled by devices 0x19..0x1F
 * we send to right device and match all reads to 0x18
 */
 uint8_t EMSESP::check_master_device(const uint8_t device_id, const uint16_t type_id, const bool read) {
     if (actual_master_thermostat_ == 0x18) {
-        uint16_t mon_ids[4]    = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
-        uint16_t set_ids[4]    = {0x02B9, 0x02BA, 0x02BB, 0x02BC};
-        uint16_t summer_ids[4] = {0x02AF, 0x02B0, 0x02B1, 0x02B2};
-        uint16_t curve_ids[4]  = {0x029B, 0x029C, 0x029D, 0x029E};
+        uint16_t mon_ids[]     = {0x02A5, 0x02A6, 0x02A7, 0x02A8, 0x02A9, 0x02AA, 0x02AB, 0x02AC};
+        uint16_t set_ids[]     = {0x02B9, 0x02BA, 0x02BB, 0x02BC, 0x02BD, 0x02BE, 0x02BF, 0x02C0};
+        uint16_t summer_ids[]  = {0x02AF, 0x02B0, 0x02B1, 0x02B2, 0x02B3, 0x02B4, 0x02B5, 0x02B6};
+        uint16_t curve_ids[]   = {0x029B, 0x029C, 0x029D, 0x029E, 0x029F, 0x02A0, 0x02A1, 0x02A2};
+        uint16_t summer2_ids[] = {0x0471, 0x0472, 0x0473, 0x0474, 0x0475, 0x0476, 0x0477, 0x0478};
         uint16_t master_ids[]  = {0x02F5, 0x031B, 0x031D, 0x031E, 0x023A, 0x0267, 0x0240};
         // look for heating circuits
-        for (uint8_t i = 0; i < 4; i++) {
-            if (type_id == mon_ids[i] || type_id == set_ids[i] || type_id == summer_ids[i] || type_id == curve_ids[i]) {
+        for (uint8_t i = 0; i < sizeof(mon_ids) / 2; i++) {
+            if (type_id == mon_ids[i] || type_id == set_ids[i] || type_id == summer_ids[i] || type_id == curve_ids[i] || type_id == summer2_ids[i]) {
                 if (read) {
                     // receiving telegrams and map all to master thermostat at 0x18 (src manipulated)
                     return 0x18;
@@ -582,8 +583,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                             Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE), json);
                         }
                         doc.clear();
-                        // thermostat only have hc1-4
-                        for (uint8_t hc_tag = DeviceValueTAG::TAG_HC1; hc_tag <= DeviceValueTAG::TAG_HC4; hc_tag++) {
+                        for (uint8_t hc_tag = DeviceValueTAG::TAG_HC1; hc_tag <= DeviceValueTAG::TAG_HC8; hc_tag++) {
                             if (emsdevice->generate_values(json, hc_tag, false, EMSdevice::OUTPUT_TARGET::MQTT)) { // not nested
                                 Mqtt::publish(Mqtt::tag_to_topic(device_type, hc_tag), json);
                             }

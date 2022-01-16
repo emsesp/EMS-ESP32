@@ -123,11 +123,11 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
         // RC300/RC100
     } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
-        monitor_typeids = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
-        set_typeids     = {0x02B9, 0x02BA, 0x02BB, 0x02BC};
-        summer_typeids  = {0x02AF, 0x02B0, 0x02B1, 0x02B2};
-        curve_typeids   = {0x029B, 0x029C, 0x029D, 0x029E};
-        summer2_typeids = {0x0471, 0x0472, 0x0473, 0x0474};
+        monitor_typeids = {0x02A5, 0x02A6, 0x02A7, 0x02A8, 0x02A9, 0x02AA, 0x02AB, 0x02AC};
+        set_typeids     = {0x02B9, 0x02BA, 0x02BB, 0x02BC, 0x02BD, 0x02BE, 0x02BF, 0x02C0};
+        summer_typeids  = {0x02AF, 0x02B0, 0x02B1, 0x02B2, 0x02B3, 0x02B4, 0x02B5, 0x02B6};
+        curve_typeids   = {0x029B, 0x029C, 0x029D, 0x029E, 0x029F, 0x02A0, 0x02A1, 0x02A2};
+        summer2_typeids = {0x0471, 0x0472, 0x0473, 0x0474, 0x0475, 0x0476, 0x0477, 0x0478};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
             register_telegram_type(monitor_typeids[i], F("RC300Monitor"), false, MAKE_PF_CB(process_RC300Monitor));
             register_telegram_type(set_typeids[i], F("RC300Set"), false, MAKE_PF_CB(process_RC300Set));
