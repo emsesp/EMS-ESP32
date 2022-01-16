@@ -7,6 +7,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 
 import * as SecurityApi from '../../api/security';
 import { SecuritySettings, User } from '../../types';
@@ -15,6 +16,7 @@ import { createUserValidator } from '../../validators';
 import { useRest } from '../../utils';
 import { AuthenticatedContext } from '../../contexts/authentication';
 
+import GenerateToken from './GenerateToken';
 import UserForm from './UserForm';
 
 function compareUsers(a: User, b: User) {
@@ -27,7 +29,7 @@ function compareUsers(a: User, b: User) {
   return 0;
 }
 
-const SecuritySettingsForm: FC = () => {
+const ManageUsersForm: FC = () => {
   const { loadData, saving, data, setData, saveData, errorMessage } = useRest<SecuritySettings>({
     read: SecurityApi.readSecuritySettings,
     update: SecurityApi.updateSecuritySettings
@@ -35,6 +37,7 @@ const SecuritySettingsForm: FC = () => {
 
   const [user, setUser] = useState<User>();
   const [creating, setCreating] = useState<boolean>(false);
+  const [generatingToken, setGeneratingToken] = useState<string>();
   const authenticatedContext = useContext(AuthenticatedContext);
 
   const content = () => {
@@ -75,6 +78,14 @@ const SecuritySettingsForm: FC = () => {
       }
     };
 
+    const closeGenerateToken = () => {
+      setGeneratingToken(undefined);
+    };
+
+    const generateToken = (username: string) => {
+      setGeneratingToken(username);
+    };
+
     const onSubmit = async () => {
       await saveData();
       authenticatedContext.refresh();
@@ -98,6 +109,14 @@ const SecuritySettingsForm: FC = () => {
                 </TableCell>
                 <TableCell align="center">{u.admin ? <CheckIcon /> : <CloseIcon />}</TableCell>
                 <TableCell align="center">
+                  <IconButton
+                    size="small"
+                    disabled={!authenticatedContext.me.admin}
+                    aria-label="Generate Token"
+                    onClick={() => generateToken(u.username)}
+                  >
+                    <VpnKeyIcon />
+                  </IconButton>
                   <IconButton size="small" aria-label="Delete" onClick={() => removeUser(u)}>
                     <DeleteIcon />
                   </IconButton>
@@ -134,6 +153,7 @@ const SecuritySettingsForm: FC = () => {
             Save
           </Button>
         </ButtonRow>
+        <GenerateToken username={generatingToken} onClose={closeGenerateToken} />
         <UserForm
           user={user}
           setUser={setUser}
@@ -153,4 +173,4 @@ const SecuritySettingsForm: FC = () => {
   );
 };
 
-export default SecuritySettingsForm;
+export default ManageUsersForm;
