@@ -33,9 +33,29 @@ char * Helpers::hextoa(char * result, const uint8_t value) {
     return result;
 }
 
-// sane as above but to a hex string
+// same as above but to a hex string
 std::string Helpers::hextoa(const uint8_t value, bool prefix) {
     char buf[3];
+    if (prefix) {
+        return std::string("0x") + hextoa(buf, value);
+    }
+    return std::string(hextoa(buf, value));
+}
+
+// same for 16 bit values
+char * Helpers::hextoa(char * result, const uint16_t value) {
+    if (value <= 0xFF) {
+        return hextoa(result, (uint8_t)value);
+    }
+    hextoa(result, (uint8_t)(value >> 8));
+    hextoa(&result[2], (uint8_t)(value & 0xFF));
+    return result;
+}
+
+
+// same as above but to a hex string
+std::string Helpers::hextoa(const uint16_t value, bool prefix) {
+    char buf[5];
     if (prefix) {
         return std::string("0x") + hextoa(buf, value);
     }

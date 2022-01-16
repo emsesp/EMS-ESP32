@@ -41,7 +41,9 @@ class Helpers {
     static char * render_boolean(char * result, bool value);
 
     static char *      hextoa(char * result, const uint8_t value);
-    static std::string hextoa(const uint8_t value, bool prefix = true); // default prefix with 0x
+    static char *      hextoa(char * result, const uint16_t value);
+    static std::string hextoa(const uint8_t value, bool prefix = true);  // default prefix with 0x
+    static std::string hextoa(const uint16_t value, bool prefix = true); // default prefix with 0x
     static std::string data_to_hex(const uint8_t * data, const uint8_t length);
     static char *      smallitoa(char * result, const uint8_t value);
     static char *      smallitoa(char * result, const uint16_t value);
