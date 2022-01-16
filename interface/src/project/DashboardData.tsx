@@ -135,7 +135,7 @@ const DashboardData: FC = () => {
     } catch (error: any) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem fetching sensor data'), { variant: 'error' });
     } finally {
-      setSelectedDevice(0);
+      setSelectedDevice(undefined);
     }
   };
 
@@ -403,6 +403,22 @@ const DashboardData: FC = () => {
     }
   };
 
+  const toggleDeviceData = (index: number) => {
+    if (selectedDevice === index) {
+      setSelectedDevice(undefined);
+    } else {
+      fetchDeviceData(index);
+    }
+  };
+
+  const toggleSensorData = () => {
+    if (sensorData) {
+      setSensorData(undefined);
+    } else {
+      fetchSensorData();
+    }
+  };
+
   const renderCoreData = () => {
     if (!data) {
       return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
@@ -428,7 +444,7 @@ const DashboardData: FC = () => {
                 hover
                 selected={device.i === selectedDevice}
                 key={index}
-                onClick={() => device.e && fetchDeviceData(device.i)}
+                onClick={() => device.e && toggleDeviceData(device.i)}
               >
                 <TableCell padding="checkbox">
                   <DeviceIcon type={device.t} />
@@ -444,7 +460,7 @@ const DashboardData: FC = () => {
               </TableRow>
             ))}
             {(data.active_sensors > 0 || data.analog_enabled) && (
-              <TableRow hover selected={selectedDevice === 0} onClick={() => fetchSensorData()}>
+              <TableRow hover selected={selectedDevice === 0} onClick={() => toggleSensorData()}>
                 <TableCell>
                   <DeviceIcon type="Sensor" />
                 </TableCell>
