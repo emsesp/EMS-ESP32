@@ -30,7 +30,7 @@ namespace emsesp {
 // mqtt flags for command subscriptions
 enum CommandFlag : uint8_t {
     MQTT_SUB_FLAG_DEFAULT = 0,        // 0 no flags set, always subscribe to MQTT
-    MQTT_SUB_FLAG_HC      = (1 << 0), // 1 TAG_HC1 - TAG_HC4
+    MQTT_SUB_FLAG_HC      = (1 << 0), // 1 TAG_HC1 - TAG_HC8
     MQTT_SUB_FLAG_WWC     = (1 << 1), // 2 TAG_WWC1 - TAG_WWC4
     MQTT_SUB_FLAG_NOSUB   = (1 << 2), // 4
     MQTT_SUB_FLAG_WW      = (1 << 3), // 8 TAG_DEVICE_DATA_WW
