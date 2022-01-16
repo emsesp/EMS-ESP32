@@ -360,7 +360,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                 // print header
                 shell.printfln(F("%s: %s (%d)"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str(), emsdevice->count_entities());
 
-                DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN); // use max size
+                DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN); // use max size
                 JsonObject          json = doc.to<JsonObject>();
 
                 emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::API_VERBOSE); // verbose mode and nested
@@ -622,6 +622,9 @@ void EMSESP::publish_device_values(uint8_t device_type) {
 
     // publish it under a single topic, only if we have data to publish
     if (need_publish) {
+        if (doc.overflowed()) {
+            LOG_WARNING(F("MQTT buffer overflow, please use individual topics"));
+        }
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf(topic, sizeof(topic), "%s_data", EMSdevice::device_type_2_device_name(device_type).c_str());
         Mqtt::publish(topic, json);
