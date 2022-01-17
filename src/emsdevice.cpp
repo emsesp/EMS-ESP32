@@ -712,7 +712,15 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 
             // handle Booleans (true, false)
             if (dv.type == DeviceValueType::BOOL) {
-                obj["v"] = *(bool *)(dv.value_p) ? "on" : "off";
+                bool value_b = *(bool *)(dv.value_p);
+                if ((EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE)) {
+                    obj["v"] = value_b ? "true" : "false";
+                } else if ((EMSESP::system_.bool_format() == BOOL_FORMAT_10)) {
+                    obj["v"] = value_b ? 1 : 0;
+                } else {
+                    char s[7];
+                    obj["v"] = Helpers::render_boolean(s, value_b);
+                }
             }
 
             // handle TEXT strings
