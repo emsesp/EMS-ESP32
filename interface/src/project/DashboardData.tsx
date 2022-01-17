@@ -460,7 +460,7 @@ const DashboardData: FC = () => {
               </TableRow>
             ))}
             {(data.active_sensors > 0 || data.analog_enabled) && (
-              <TableRow hover selected={selectedDevice === 0} onClick={() => toggleSensorData()}>
+              <TableRow hover selected={sensorData !== undefined} onClick={() => toggleSensorData()}>
                 <TableCell>
                   <DeviceIcon type="Sensor" />
                 </TableCell>
