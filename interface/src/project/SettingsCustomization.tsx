@@ -79,6 +79,8 @@ const SettingsCustomization: FC = () => {
       return new Intl.NumberFormat().format(value);
     } else if (value === undefined) {
       return '';
+    } else if (typeof value === 'boolean') {
+      return value ? 'true' : 'false';
     }
     return value;
   }

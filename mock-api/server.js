@@ -663,7 +663,7 @@ const emsesp_deviceentities_1 = [
 
 const emsesp_deviceentities_2 = [
   { n: 'heating active', s: 'heatingactive', x: false, i: 1 },
-  { v: 'off', n: 'warm water active', s: 'wwactive', x: false, i: 2 },
+  { v: true, n: 'warm water active', s: 'wwactive', x: false, i: 2 },
   { v: 5, n: 'selected flow temperature', s: 'selflowtemp', x: false, i: 3 },
   { v: 0, n: 'burner selected max power', s: 'selburnpow', x: false, i: 4 },
   { v: 0, n: 'heating pump modulation', s: 'heatingpumpmod', x: false, i: 5 },
