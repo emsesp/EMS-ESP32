@@ -422,11 +422,11 @@ const status = {
   num_analogs: 1,
   tx_mode: 1,
   rx_received: 240,
-  tx_sent: 60,
-  rx_quality: 80,
-  tx_quality: 95,
   rx_fails: 0,
-  tx_fails: 0,
+  rx_quality: 80,
+  tx_sent: 0,
+  tx_fails: 5,
+  tx_quality: 95,
   sensor_fails: 0,
   sensor_reads: 51,
   sensor_quality: 60,
@@ -438,8 +438,9 @@ const status = {
   mqtt_quality: 100,
   api_calls: 0,
   api_fails: 0,
-  api_quality: 100,
-  uptime: 1234567,
+  api_quality: 0,
+  uptime: 0,
+  // uptime: 123467,
 }
 
 // Dashboard data

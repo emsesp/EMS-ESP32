@@ -85,8 +85,12 @@ const pluralize = (count: number, noun: string) =>
   `${Intl.NumberFormat().format(count)} ${noun}${count !== 1 ? 's' : ''}`;
 
 const formatDuration = (duration_sec: number) => {
+  if (duration_sec === 0) {
+    return ' ';
+  }
   const roundTowardsZero = duration_sec > 0 ? Math.floor : Math.ceil;
   return (
+    ', ' +
     roundTowardsZero(duration_sec / 8640) +
     'd ' +
     (roundTowardsZero(duration_sec / 360) % 24) +
@@ -98,7 +102,33 @@ const formatDuration = (duration_sec: number) => {
   );
 };
 
+const formatRow = (name: string, success: number, fail: number, quality: number) => {
+  if (success === 0 && fail === 0) {
+    return (
+      <TableRow>
+        <TableCell sx={{ color: 'gray' }}>{name}</TableCell>
+        <TableCell />
+        <TableCell />
+        <TableCell />
+      </TableRow>
+    );
+  }
+
+  return (
+    <TableRow>
+      <TableCell>{name}</TableCell>
+      <TableCell>{Intl.NumberFormat().format(success)}</TableCell>
+      <TableCell>{Intl.NumberFormat().format(fail)}</TableCell>
+      {showQuality(quality)}
+    </TableRow>
+  );
+};
+
 const showQuality = (quality: number) => {
+  if (quality === 0) {
+    return <TableCell />;
+  }
+
   if (quality === 100) {
     return <TableCell sx={{ color: '#00FF7F' }}>{quality}%</TableCell>;
   }
@@ -167,14 +197,11 @@ const DashboardStatus: FC = () => {
                 <DirectionsBusIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText
-              primary="EMS Bus Connection Status"
-              secondary={busStatus(data) + ', ' + formatDuration(data.uptime)}
-            />
+            <ListItemText primary="EMS Bus Status" secondary={busStatus(data) + formatDuration(data.uptime)} />
           </ListItem>
           <ListItem>
             <ListItemAvatar>
-              <Avatar sx={{ bgcolor: busStatusHighlight(data, theme) }}>
+              <Avatar>
                 <DeviceHubIcon />
               </Avatar>
             </ListItemAvatar>
@@ -201,36 +228,11 @@ const DashboardStatus: FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                <TableRow>
-                  <TableCell>Telegrams Received (Rx)</TableCell>
-                  <TableCell>{Intl.NumberFormat().format(data.rx_received)}</TableCell>
-                  <TableCell>{Intl.NumberFormat().format(data.rx_fails)}</TableCell>
-                  {showQuality(data.rx_quality)}
-                </TableRow>
-                <TableRow>
-                  <TableCell>Telegrams Sent (Tx)</TableCell>
-                  <TableCell>{Intl.NumberFormat().format(data.tx_sent)}</TableCell>
-                  <TableCell>{Intl.NumberFormat().format(data.tx_fails)}</TableCell>
-                  {showQuality(data.tx_quality)}
-                </TableRow>
-                <TableRow>
-                  <TableCell>Analog Sensor Reads</TableCell>
-                  <TableCell>{Intl.NumberFormat().format(data.analog_reads)}</TableCell>
-                  <TableCell>{Intl.NumberFormat().format(data.analog_fails)}</TableCell>
-                  {showQuality(data.analog_quality)}
-                </TableRow>
-                <TableRow>
-                  <TableCell>MQTT Publishes</TableCell>
-                  <TableCell>{Intl.NumberFormat().format(data.mqtt_count)}</TableCell>
-                  <TableCell>{Intl.NumberFormat().format(data.mqtt_fails)}</TableCell>
-                  {showQuality(data.mqtt_quality)}
-                </TableRow>
-                <TableRow>
-                  <TableCell>API Calls</TableCell>
-                  <TableCell>{Intl.NumberFormat().format(data.api_calls)}</TableCell>
-                  <TableCell>{Intl.NumberFormat().format(data.api_fails)}</TableCell>
-                  {showQuality(data.api_quality)}
-                </TableRow>
+                {formatRow('Telegrams Received (Rx)', data.rx_received, data.rx_fails, data.rx_quality)}
+                {formatRow('Telegrams Sent (Tx)', data.tx_sent, data.tx_fails, data.tx_quality)}
+                {formatRow('Analog Sensor Reads', data.analog_reads, data.analog_fails, data.analog_quality)}
+                {formatRow('MQTT Publishes', data.mqtt_count, data.mqtt_fails, data.mqtt_quality)}
+                {formatRow('API Calls', data.api_calls, data.api_fails, data.api_quality)}
               </TableBody>
             </Table>
           </TableContainer>

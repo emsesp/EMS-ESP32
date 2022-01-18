@@ -350,6 +350,7 @@ void System::wifi_tweak() {
 // See https://diyprojects.io/esp32-how-to-use-gpio-digital-io-arduino-code/#.YFpVEq9KhjG
 // and https://nodemcu.readthedocs.io/en/dev-esp32/modules/gpio/
 bool System::is_valid_gpio(uint8_t pin) {
+    // TODO check if still valid
     if ((pin == 1) || (pin >= 6 && pin <= 12) || (pin >= 14 && pin <= 15) || (pin == 20) || (pin == 24) || (pin >= 28 && pin <= 31) || (pin > 40)) {
         return false; // bad pin
     }
@@ -653,7 +654,7 @@ void System::system_check() {
             healthcheck_ &= ~HEALTHCHECK_NO_BUS;
         }
 
-        // see if he healthcheck state has changed
+        // see if the healthcheck state has changed
         static uint8_t last_healthcheck_ = 0;
         if (healthcheck_ != last_healthcheck_) {
             last_healthcheck_ = healthcheck_;

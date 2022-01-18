@@ -37,6 +37,7 @@ const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,
                                  0xF9, 0xFB, 0xFD, 0xFF, 0xF1, 0xF3, 0xF5, 0xF7, 0xE9, 0xEB, 0xED, 0xEF, 0xE1, 0xE3, 0xE5, 0xE7};
 
 uint32_t EMSbus::last_bus_activity_ = 0;              // timestamp of last time a valid Rx came in
+uint32_t EMSbus::bus_uptime_start_  = 0;              // timestamp of when the bus was started
 bool     EMSbus::bus_connected_     = false;          // start assuming the bus hasn't been connected
 uint8_t  EMSbus::ems_mask_          = EMS_MASK_UNSET; // unset so its triggered when booting, the its 0x00=buderus, 0x80=junker/ht3
 uint8_t  EMSbus::ems_bus_id_        = EMSESP_DEFAULT_EMS_BUS_ID;

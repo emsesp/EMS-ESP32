@@ -166,6 +166,7 @@ class EMSbus {
         ems_bus_id_ = ems_bus_id;
     }
 
+    // checks every 30 seconds if the EMS bus is still alive
     static bool bus_connected() {
 #ifndef EMSESP_STANDALONE
         if ((uuid::get_uptime() - last_bus_activity_) > EMS_BUS_TIMEOUT) {
@@ -179,8 +180,22 @@ class EMSbus {
 
     // sets the flag for EMS bus connected
     static void last_bus_activity(uint32_t timestamp) {
+        // record the first time we connected to the BUS, as this will be our uptime
+        if (!last_bus_activity_) {
+            bus_uptime_start_ = timestamp;
+        }
+
         last_bus_activity_ = timestamp;
-        bus_connected_     = true;
+
+        bus_connected_ = true;
+    }
+
+    // return bus uptime in seconds
+    static uint32_t bus_uptime() {
+        if (!bus_uptime_start_) {
+            return 0; // not yet initialized
+        }
+        return (uint32_t)((uuid::get_uptime() - bus_uptime_start_) / 1000ULL);
     }
 
     static uint8_t tx_state() {
@@ -196,6 +211,7 @@ class EMSbus {
     static constexpr uint32_t EMS_BUS_TIMEOUT = 30000; // timeout in ms before recognizing the ems bus is offline (30 seconds)
 
     static uint32_t last_bus_activity_; // timestamp of last time a valid Rx came in
+    static uint32_t bus_uptime_start_;  // timestamp of first time we connected to the bus
     static bool     bus_connected_;     // start assuming the bus hasn't been connected
     static uint8_t  ems_mask_;          // unset=0xFF, buderus=0x00, junkers/ht3=0x80
     static uint8_t  ems_bus_id_;        // the bus id, which configurable and stored in settings
