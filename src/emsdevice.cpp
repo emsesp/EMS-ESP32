@@ -745,7 +745,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 int8_t divider = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
                 fahrenheit     = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
-                if (dv.type == DeviceValueType::INT) {
+                if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
                     obj["v"] = Helpers::round2(*(int8_t *)(dv.value_p), divider, fahrenheit);
                 } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
                     obj["v"] = Helpers::round2(*(uint8_t *)(dv.value_p), divider, fahrenheit);
@@ -930,6 +930,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             const char * max     = "max";
             const char * value   = "value";
             uint8_t fahrenheit   = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
+            bool    limits_set   = (dv.min != 0 || dv.max != 0);
 
             json["name"] = dv.short_name;
 
@@ -968,8 +969,10 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                     json[value] = Helpers::round2(*(uint16_t *)(dv.value_p), divider, fahrenheit);
                 }
                 json[type] = F_(number);
-                json[min]  = 0;
-                json[max]  = Helpers::round2(EMS_VALUE_USHORT_NOTSET, divider);
+                if (!limits_set) {
+                    json[min] = Helpers::round2(0, divider, fahrenheit);
+                    json[max] = Helpers::round2(EMS_VALUE_USHORT_NOTSET, divider, fahrenheit);
+                }
                 break;
 
             case DeviceValueType::UINT:
@@ -977,11 +980,15 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                     json[value] = Helpers::round2(*(uint8_t *)(dv.value_p), divider, fahrenheit);
                 }
                 json[type] = F_(number);
-                json[min]  = 0;
-                if (dv.uom == DeviceValueUOM::PERCENT) {
-                    json[max] = 100;
-                } else {
-                    json[max] = Helpers::round2(EMS_VALUE_UINT_NOTSET, divider);
+                if (!limits_set) {
+                    if (dv.uom == DeviceValueUOM::PERCENT) {
+                        json[min] = 0;
+                        json[max] = 100;
+                    } else {
+                        json[min] = Helpers::round2(0, divider, fahrenheit);
+                        ;
+                        json[max] = Helpers::round2(EMS_VALUE_UINT_NOTSET, divider, fahrenheit);
+                    }
                 }
                 break;
 
@@ -990,8 +997,10 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                     json[value] = Helpers::round2(*(int16_t *)(dv.value_p), divider, fahrenheit);
                 }
                 json[type] = F_(number);
-                json[min]  = Helpers::round2(-EMS_VALUE_SHORT_NOTSET, divider);
-                json[max]  = Helpers::round2(EMS_VALUE_SHORT_NOTSET, divider);
+                if (!limits_set) {
+                    json[min] = Helpers::round2(-EMS_VALUE_SHORT_NOTSET, divider, fahrenheit);
+                    json[max] = Helpers::round2(EMS_VALUE_SHORT_NOTSET, divider, fahrenheit);
+                }
                 break;
 
             case DeviceValueType::INT:
@@ -999,22 +1008,26 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                     json[value] = Helpers::round2(*(int8_t *)(dv.value_p), divider, fahrenheit);
                 }
                 json[type] = F_(number);
-                if (dv.uom == DeviceValueUOM::PERCENT) {
-                    json[min] = -100;
-                    json[max] = 100;
-                } else {
-                    json[min] = Helpers::round2(-EMS_VALUE_INT_NOTSET, divider);
-                    json[max] = Helpers::round2(EMS_VALUE_INT_NOTSET, divider);
+                if (!limits_set) {
+                    if (dv.uom == DeviceValueUOM::PERCENT) {
+                        json[min] = -100;
+                        json[max] = 100;
+                    } else {
+                        json[min] = Helpers::round2(-EMS_VALUE_INT_NOTSET, divider, fahrenheit);
+                        json[max] = Helpers::round2(EMS_VALUE_INT_NOTSET, divider, fahrenheit);
+                    }
                 }
                 break;
 
             case DeviceValueType::ULONG:
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    json[value] = Helpers::round2(*(uint32_t *)(dv.value_p), divider, fahrenheit);
+                    json[value] = Helpers::round2(*(uint32_t *)(dv.value_p), divider);
                 }
                 json[type] = F_(number);
-                json[min]  = 0;
-                json[max]  = Helpers::round2(EMS_VALUE_ULONG_NOTSET, divider);
+                if (!limits_set) {
+                    json[min] = 0;
+                    json[max] = Helpers::round2(EMS_VALUE_ULONG_NOTSET, divider);
+                }
                 break;
 
             case DeviceValueType::BOOL:
@@ -1037,8 +1050,10 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                     json[value] = Helpers::round2(*(uint32_t *)(dv.value_p), divider);
                 }
                 json[type] = F_(number);
-                json[min]  = 0;
-                json[max]  = Helpers::round2(EMS_VALUE_ULONG_NOTSET, divider);
+                if (!limits_set) {
+                    json[min] = 0;
+                    json[max] = Helpers::round2(EMS_VALUE_ULONG_NOTSET, divider);
+                }
                 break;
 
             case DeviceValueType::STRING:
@@ -1069,10 +1084,11 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             }
 
             json["writeable"] = dv.has_cmd;
-            // if we have individual limits, overwrite the common limits
-            if (dv.min != 0 || dv.max != 0) {
-                json[min] = Helpers::round2(dv.min, divider, fahrenheit);
-                json[max] = Helpers::round2(dv.max, divider, fahrenheit);
+            // if we have individual limits
+            // limits are not scaled with divider and temperatures are °C
+            if (limits_set) {
+                json[min] = Helpers::round2(dv.min, 0, fahrenheit);
+                json[max] = Helpers::round2(dv.max, 0, fahrenheit);
             }
 
             json["visible"] = dv.has_state(DeviceValue::DV_VISIBLE);
