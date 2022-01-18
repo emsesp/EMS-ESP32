@@ -72,7 +72,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
         register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
         register_device_value(tag, &activated_, DeviceValueType::BOOL, nullptr, FL_(activated), DeviceValueUOM::NONE, MAKE_CF_CB(set_activated));
-        register_device_value(tag, &setValveTime_, DeviceValueType::UINT, FL_(mul10), FL_(mixerSetTime), DeviceValueUOM::SECONDS, MAKE_CF_CB(set_setValveTime), 1, 12);
+        register_device_value(tag, &setValveTime_, DeviceValueType::UINT, FL_(mul10), FL_(mixerSetTime), DeviceValueUOM::SECONDS, MAKE_CF_CB(set_setValveTime), 10, 120);
     }
 
     // HT3

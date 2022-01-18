@@ -1070,9 +1070,10 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
 
             json["writeable"] = dv.has_cmd;
             // if we have individual limits, overwrite the common limits
+            // limits are not scaled with divider and temperatures are °C
             if (dv.min != 0 || dv.max != 0) {
-                json[min] = Helpers::round2(dv.min, divider, fahrenheit);
-                json[max] = Helpers::round2(dv.max, divider, fahrenheit);
+                json[min] = Helpers::round2(dv.min, 0, fahrenheit);
+                json[max] = Helpers::round2(dv.max, 0, fahrenheit);
             }
 
             json["visible"] = dv.has_state(DeviceValue::DV_VISIBLE);
