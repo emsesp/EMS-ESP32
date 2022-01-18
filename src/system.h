@@ -85,7 +85,7 @@ class System {
     void commands_init();
 
     static bool is_valid_gpio(uint8_t pin);
-    static bool load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile);
+    static bool load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
 
     static void restart_requested(bool restart_requested) {
         restart_requested_ = restart_requested;
@@ -227,7 +227,6 @@ class System {
     bool        analog_enabled_;
     bool        low_clock_;
     String      board_profile_;
-    uint8_t     phy_type_;
     uint8_t     pbutton_gpio_;
     uint8_t     rx_gpio_;
     uint8_t     tx_gpio_;
@@ -242,6 +241,12 @@ class System {
     uint8_t     bool_format_;
     uint8_t     enum_format_;
     bool        readonly_mode_;
+
+    // ethernet
+    uint8_t phy_type_;
+    int8_t  eth_power_;
+    uint8_t eth_phy_addr_;
+    uint8_t eth_clock_mode_;
 };
 
 } // namespace emsesp

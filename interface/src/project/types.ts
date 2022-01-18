@@ -12,7 +12,6 @@ export interface Settings {
   rx_gpio: number;
   tx_gpio: number;
   telnet_enabled: boolean;
-  phy_type: number;
   dallas_gpio: number;
   dallas_parasite: boolean;
   led_gpio: number;
@@ -27,6 +26,10 @@ export interface Settings {
   bool_format: number;
   enum_format: number;
   fahrenheit: boolean;
+  phy_type: number;
+  eth_power: number;
+  eth_phy_addr: number;
+  eth_clock_mode: number;
 }
 
 export enum busConnectionStatus {
@@ -206,7 +209,8 @@ export const BOARD_PROFILES: BoardProfiles = {
   NODEMCU: 'NodeMCU 32S',
   'MH-ET': 'MH-ET Live D1 Mini',
   LOLIN: 'Lolin D32',
-  OLIMEX: 'Olimex ESP32-EVB'
+  OLIMEX: 'Olimex ESP32-EVB',
+  OLIMEXPOE: 'Olimex ESP32-POE'
 };
 
 export interface BoardProfileName {
@@ -221,6 +225,9 @@ export interface BoardProfile {
   tx_gpio: number;
   pbutton_gpio: number;
   phy_type: number;
+  eth_power: number;
+  eth_phy_addr: number;
+  eth_clock_mode: number;
 }
 
 export interface APIcall {

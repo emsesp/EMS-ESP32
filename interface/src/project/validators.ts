@@ -25,7 +25,7 @@ export const createSettingsValidator = (settings: Settings) =>
   new Schema({
     ...(settings.board_profile === 'CUSTOM' && {
       led_gpio: [{ required: true, message: 'LED GPIO is required' }, GPIO_VALIDATOR],
-      dallas_gpio: [{ required: true, message: 'Dallas GPIO is required' }, GPIO_VALIDATOR],
+      dallas_gpio: [{ required: true, message: 'GPIO is required' }, GPIO_VALIDATOR],
       pbutton_gpio: [{ required: true, message: 'Button GPIO is required' }, GPIO_VALIDATOR],
       tx_gpio: [{ required: true, message: 'Tx GPIO is required' }, GPIO_VALIDATOR],
       rx_gpio: [{ required: true, message: 'Rx GPIO is required' }, GPIO_VALIDATOR]

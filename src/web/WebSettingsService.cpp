@@ -50,7 +50,6 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["shower_alert"]         = settings.shower_alert;
     root["rx_gpio"]              = settings.rx_gpio;
     root["tx_gpio"]              = settings.tx_gpio;
-    root["phy_type"]             = settings.phy_type;
     root["dallas_gpio"]          = settings.dallas_gpio;
     root["dallas_parasite"]      = settings.dallas_parasite;
     root["led_gpio"]             = settings.led_gpio;
@@ -69,24 +68,31 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["weblog_level"]         = settings.weblog_level;
     root["weblog_buffer"]        = settings.weblog_buffer;
     root["weblog_compact"]       = settings.weblog_compact;
+    root["phy_type"]             = settings.phy_type;
+    root["eth_power"]            = settings.eth_power;
+    root["eth_phy_addr"]         = settings.eth_phy_addr;
+    root["eth_clock_mode"]       = settings.eth_clock_mode;
 }
 
 // call on initialization and also when settings are updated via web or console
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
     // load default GPIO configuration based on board profile
-    std::vector<uint8_t> data; // led, dallas, rx, tx, button, phy_type
+    std::vector<int8_t> data; //  // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
 
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
         settings.board_profile = EMSESP_DEFAULT_BOARD_PROFILE; // invalid board configuration, override the default in case it has been misspelled
     }
 
-    uint8_t default_led_gpio     = data[0];
-    uint8_t default_dallas_gpio  = data[1];
-    uint8_t default_rx_gpio      = data[2];
-    uint8_t default_tx_gpio      = data[3];
-    uint8_t default_pbutton_gpio = data[4];
-    uint8_t default_phy_type     = data[5];
+    uint8_t default_led_gpio       = data[0];
+    uint8_t default_dallas_gpio    = data[1];
+    uint8_t default_rx_gpio        = data[2];
+    uint8_t default_tx_gpio        = data[3];
+    uint8_t default_pbutton_gpio   = data[4];
+    uint8_t default_phy_type       = data[5];
+    uint8_t default_eth_power      = data[6];
+    uint8_t default_eth_phy_addr   = data[7];
+    uint8_t default_eth_clock_mode = data[8];
 
     int prev;
     reset_flags();
@@ -180,9 +186,22 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.master_thermostat = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
     check_flag(prev, settings.master_thermostat, ChangeFlags::RESTART);
 
+    // use whatever came from the board profile
     prev              = settings.phy_type;
-    settings.phy_type = root["phy_type"] | default_phy_type; // use whatever came from the board profile
+    settings.phy_type = root["phy_type"] | default_phy_type;
     check_flag(prev, settings.phy_type, ChangeFlags::RESTART);
+
+    prev               = settings.eth_power;
+    settings.eth_power = root["eth_power"] | default_eth_power;
+    check_flag(prev, settings.eth_power, ChangeFlags::RESTART);
+
+    prev                  = settings.eth_phy_addr;
+    settings.eth_phy_addr = root["eth_phy_addr"] | default_eth_phy_addr;
+    check_flag(prev, settings.eth_phy_addr, ChangeFlags::RESTART);
+
+    prev                    = settings.eth_clock_mode;
+    settings.eth_clock_mode = root["eth_clock_mode"] | default_eth_clock_mode;
+    check_flag(prev, settings.eth_clock_mode, ChangeFlags::RESTART);
 
     // without checks...
 
@@ -265,17 +284,18 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request, JsonVari
         JsonObject          root     = response->getRoot();
 
         if (json.containsKey("board_profile")) {
-            String               board_profile = json["board_profile"];
-            std::vector<uint8_t> data; // led, dallas, rx, tx, button, phy_type
-            // check for valid board
+            String              board_profile = json["board_profile"];
+            std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
             (void)System::load_board_profile(data, board_profile.c_str());
-
-            root["led_gpio"]     = data[0];
-            root["dallas_gpio"]  = data[1];
-            root["rx_gpio"]      = data[2];
-            root["tx_gpio"]      = data[3];
-            root["pbutton_gpio"] = data[4];
-            root["phy_type"]     = data[5];
+            root["led_gpio"]       = data[0];
+            root["dallas_gpio"]    = data[1];
+            root["rx_gpio"]        = data[2];
+            root["tx_gpio"]        = data[3];
+            root["pbutton_gpio"]   = data[4];
+            root["phy_type"]       = data[5];
+            root["eth_power"]      = data[6];
+            root["eth_phy_addr"]   = data[7];
+            root["eth_clock_mode"] = data[8];
 
             response->setLength();
             request->send(response);

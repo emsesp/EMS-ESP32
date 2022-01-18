@@ -295,7 +295,6 @@ void System::get_settings() {
         hide_led_       = settings.hide_led;
         led_gpio_       = settings.led_gpio;
         board_profile_  = settings.board_profile;
-        phy_type_       = settings.phy_type;
         telnet_enabled_ = settings.telnet_enabled;
 
         rx_gpio_     = settings.rx_gpio;
@@ -312,6 +311,11 @@ void System::get_settings() {
         bool_format_   = settings.bool_format;
         enum_format_   = settings.enum_format;
         readonly_mode_ = settings.readonly_mode;
+
+        phy_type_       = settings.phy_type;
+        eth_power_      = settings.eth_power;
+        eth_phy_addr_   = settings.eth_phy_addr;
+        eth_clock_mode_ = settings.eth_clock_mode;
     });
 }
 
@@ -350,7 +354,6 @@ void System::wifi_tweak() {
 // See https://diyprojects.io/esp32-how-to-use-gpio-digital-io-arduino-code/#.YFpVEq9KhjG
 // and https://nodemcu.readthedocs.io/en/dev-esp32/modules/gpio/
 bool System::is_valid_gpio(uint8_t pin) {
-    // TODO check if still valid
     if ((pin == 1) || (pin >= 6 && pin <= 12) || (pin >= 14 && pin <= 15) || (pin == 20) || (pin == 24) || (pin >= 28 && pin <= 31) || (pin > 40)) {
         return false; // bad pin
     }
@@ -597,40 +600,18 @@ void System::network_init(bool refresh) {
         return;
     }
 
-    uint8_t          phy_addr;   // I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
-    int              power;      // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-    int              mdc;        // Pin# of the I²C clock signal for the Ethernet PHY
-    int              mdio;       // Pin# of the I²C IO signal for the Ethernet PHY
-    eth_phy_type_t   type;       // Type of the Ethernet PHY (LAN8720 or TLK110)
-    eth_clock_mode_t clock_mode; // ETH_CLOCK_GPIO0_IN or ETH_CLOCK_GPIO0_OUT, ETH_CLOCK_GPIO16_OUT, ETH_CLOCK_GPIO17_OUT for 50Hz inverted clock
-
-    if (phy_type_ == PHY_type::PHY_TYPE_LAN8720) {
-        phy_addr   = 1;
-        power      = 16;
-        mdc        = 23;
-        mdio       = 18;
-        type       = ETH_PHY_LAN8720;
-        clock_mode = ETH_CLOCK_GPIO0_IN;
-    } else if (phy_type_ == PHY_type::PHY_TYPE_TLK110) {
-        phy_addr   = 31;
-        power      = -1;
-        mdc        = 23;
-        mdio       = 18;
-        type       = ETH_PHY_TLK110;
-        clock_mode = ETH_CLOCK_GPIO0_IN;
-    } else {
-        return; // no valid profile
-    }
-
-    // special case for Olimex ESP32-EVB (LAN8720) (different power and phy_addr)
-    if (board_profile_.equals("OLIMEX")) {
-        phy_addr   = 0;
-        power      = -1;
-        mdc        = 23;
-        mdio       = 18;
-        type       = ETH_PHY_LAN8720;
-        clock_mode = ETH_CLOCK_GPIO0_IN;
-    }
+    // configure Ethernet
+    int            mdc      = 23;            // Pin# of the I²C clock signal for the Ethernet PHY - hardcoded
+    int            mdio     = 18;            // Pin# of the I²C IO signal for the Ethernet PHY - hardcoded
+    uint8_t        phy_addr = eth_phy_addr_; // I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
+    int8_t         power    = eth_power_;    // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
+    eth_phy_type_t type     = (phy_type_ == PHY_type::PHY_TYPE_LAN8720) ? ETH_PHY_LAN8720 : ETH_PHY_TLK110; // Type of the Ethernet PHY (LAN8720 or TLK110)
+    // clock mode
+    // ETH_CLOCK_GPIO0_IN   = 0  RMII clock input to GPIO0
+    // ETH_CLOCK_GPIO0_OUT  = 1  RMII clock output from GPIO0
+    // ETH_CLOCK_GPIO16_OUT = 2  RMII clock output from GPIO16
+    // ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted clock
+    eth_clock_mode_t clock_mode = (eth_clock_mode_t)eth_clock_mode_;
 
     ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
 }
@@ -1008,7 +989,6 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["dallas_gpio"]  = settings.dallas_gpio;
         node["pbutton_gpio"] = settings.pbutton_gpio;
         node["led_gpio"]     = settings.led_gpio;
-        node["phy_type"]     = settings.phy_type;
 
         node["hide_led"]      = settings.hide_led;
         node["notoken_api"]   = settings.notoken_api;
@@ -1020,6 +1000,11 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["enum_format"]     = settings.enum_format;
         node["analog_enabled"]  = settings.analog_enabled;
         node["telnet_enabled"]  = settings.telnet_enabled;
+
+        node["phy_type"]       = settings.phy_type;
+        node["eth_power"]      = settings.eth_power;
+        node["eth_phy_addr"]   = settings.eth_phy_addr;
+        node["eth_clock_mode"] = settings.eth_clock_mode;
     });
 
     return true;
@@ -1212,38 +1197,54 @@ bool System::command_test(const char * value, const int8_t id) {
 #endif
 
 // takes a board profile and populates a data array with GPIO configurations
-// data = led, dallas, rx, tx, button, phy_type
-// e.g. "led_gpio":2,"dallas_gpio":18,"rx_gpio":23,"tx_gpio":5,"pbutton_gpio":0,"phy_type":0
 // returns false if profile is not found
-bool System::load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile) {
+//
+// data = led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+//
+// clock modes:
+//  ETH_CLOCK_GPIO0_IN   = 0  RMII clock input to GPIO0
+//  ETH_CLOCK_GPIO0_OUT  = 1  RMII clock output from GPIO0
+//  ETH_CLOCK_GPIO16_OUT = 2  RMII clock output from GPIO16
+//  ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted cloc
+bool System::load_board_profile(std::vector<int8_t> & data, const std::string & board_profile) {
     if (board_profile == "S32") {
-        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE}; // BBQKees Gateway S32
+        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // BBQKees Gateway S32
     } else if (board_profile == "E32") {
-        data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720}; // BBQKees Gateway E32
+        data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0}; // BBQKees Gateway E32
     } else if (board_profile == "MH-ET") {
-        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE}; // MH-ET Live D1 Mini
+        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // MH-ET Live D1 Mini
     } else if (board_profile == "NODEMCU") {
-        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE}; // NodeMCU 32S
+        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // NodeMCU 32S
     } else if (board_profile == "LOLIN") {
-        data = {2, 18, 17, 16, 0, PHY_type::PHY_TYPE_NONE}; // Lolin D32
+        data = {2, 18, 17, 16, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // Lolin D32
     } else if (board_profile == "OLIMEX") {
-        data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720}; // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
+        data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, -1, 0, 0}; // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
+    } else if (board_profile == "OLIMEXPOE") {
+        data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, 12, 0, 3}; // Olimex ESP32-POE
     } else if (board_profile == "CUSTOM") {
         // send back current values
-        data = {EMSESP::system_.led_gpio_,
-                EMSESP::system_.dallas_gpio_,
-                EMSESP::system_.rx_gpio_,
-                EMSESP::system_.tx_gpio_,
-                EMSESP::system_.pbutton_gpio_,
-                EMSESP::system_.phy_type_};
+        data = {(int8_t)EMSESP::system_.led_gpio_,
+                (int8_t)EMSESP::system_.dallas_gpio_,
+                (int8_t)EMSESP::system_.rx_gpio_,
+                (int8_t)EMSESP::system_.tx_gpio_,
+                (int8_t)EMSESP::system_.pbutton_gpio_,
+                (int8_t)EMSESP::system_.phy_type_,
+                EMSESP::system_.eth_power_,
+                (int8_t)EMSESP::system_.eth_phy_addr_,
+                (int8_t)EMSESP::system_.eth_clock_mode_};
     } else {
         // unknown, use defaults
-        data = {EMSESP_DEFAULT_LED_GPIO,
-                EMSESP_DEFAULT_DALLAS_GPIO,
-                EMSESP_DEFAULT_RX_GPIO,
-                EMSESP_DEFAULT_TX_GPIO,
-                EMSESP_DEFAULT_PBUTTON_GPIO,
-                EMSESP_DEFAULT_PHY_TYPE};
+        data = {
+            EMSESP_DEFAULT_LED_GPIO,
+            EMSESP_DEFAULT_DALLAS_GPIO,
+            EMSESP_DEFAULT_RX_GPIO,
+            EMSESP_DEFAULT_TX_GPIO,
+            EMSESP_DEFAULT_PBUTTON_GPIO,
+            EMSESP_DEFAULT_PHY_TYPE,
+            -1, // power
+            0,  // phy_addr,
+            0   // clock_mode
+        };
         return false;
     }
 

@@ -734,33 +734,35 @@ void Console::load_system_commands(unsigned int context) {
                                            });
                                        });
 
-    EMSESPShell::commands->add_command(
-        context,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(board_profile)},
-        flash_string_vector{F_(name_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            std::vector<uint8_t> data; // led, dallas, rx, tx, button
-            std::string          board_profile = Helpers::toUpper(arguments.front());
-            if (!EMSESP::system_.load_board_profile(data, board_profile)) {
-                shell.println(F("Invalid board profile (S32, E32, MH-ET, NODEMCU, OLIMEX, CUSTOM)"));
-                return;
-            }
-            EMSESP::webSettingsService.update(
-                [&](WebSettings & settings) {
-                    settings.board_profile = board_profile.c_str();
-                    settings.led_gpio      = data[0];
-                    settings.dallas_gpio   = data[1];
-                    settings.rx_gpio       = data[2];
-                    settings.tx_gpio       = data[3];
-                    settings.pbutton_gpio  = data[4];
-                    settings.phy_type      = data[5];
-                    return StateUpdateResult::CHANGED;
-                },
-                "local");
-            shell.printfln("Loaded board profile %s (%d,%d,%d,%d,%d,%d)", board_profile.c_str(), data[0], data[1], data[2], data[3], data[4], data[5]);
-            EMSESP::system_.network_init(true);
-        });
+    EMSESPShell::commands->add_command(context,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(set), F_(board_profile)},
+                                       flash_string_vector{F_(name_mandatory)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
+                                           std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+                                           std::string         board_profile = Helpers::toUpper(arguments.front());
+                                           if (!EMSESP::system_.load_board_profile(data, board_profile)) {
+                                               shell.println(F("Invalid board profile (S32, E32, MH-ET, NODEMCU, OLIMEX, OLIMEXPOE, CUSTOM)"));
+                                               return;
+                                           }
+                                           EMSESP::webSettingsService.update(
+                                               [&](WebSettings & settings) {
+                                                   settings.board_profile  = board_profile.c_str();
+                                                   settings.led_gpio       = data[0];
+                                                   settings.dallas_gpio    = data[1];
+                                                   settings.rx_gpio        = data[2];
+                                                   settings.tx_gpio        = data[3];
+                                                   settings.pbutton_gpio   = data[4];
+                                                   settings.phy_type       = data[5];
+                                                   settings.eth_power      = data[6]; // can be -1
+                                                   settings.eth_phy_addr   = data[7];
+                                                   settings.eth_clock_mode = data[8];
+                                                   return StateUpdateResult::CHANGED;
+                                               },
+                                               "local");
+                                           shell.printfln("Loaded board profile %s", board_profile.c_str());
+                                           EMSESP::system_.network_init(true);
+                                       });
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(show), F_(users)},

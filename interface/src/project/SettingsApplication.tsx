@@ -3,7 +3,7 @@ import { ValidateFieldsError } from 'async-validator';
 
 import { useSnackbar } from 'notistack';
 
-import { Box, Button, Checkbox, MenuItem, Grid, Typography } from '@mui/material';
+import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider } from '@mui/material';
 
 import SaveIcon from '@mui/icons-material/Save';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
@@ -58,7 +58,10 @@ const SettingsApplication: FC = () => {
           rx_gpio: response.data.rx_gpio,
           tx_gpio: response.data.tx_gpio,
           pbutton_gpio: response.data.pbutton_gpio,
-          phy_type: response.data.phy_type
+          phy_type: response.data.phy_type,
+          eth_power: response.data.eth_power,
+          eth_phy_addr: response.data.eth_phy_addr,
+          eth_clock_mode: response.data.eth_clock_mode
         });
       }
     } catch (error: any) {
@@ -127,86 +130,89 @@ const SettingsApplication: FC = () => {
           select
         >
           {boardProfileSelectItems()}
+          <Divider />
           <MenuItem key={'CUSTOM'} value={'CUSTOM'}>
             Custom&hellip;
           </MenuItem>
         </ValidatedTextField>
         {data.board_profile === 'CUSTOM' && (
-          <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-            <Grid item xs={4}>
-              <ValidatedTextField
-                fieldErrors={fieldErrors}
-                name="rx_gpio"
-                label="Rx GPIO"
-                fullWidth
-                variant="outlined"
-                value={numberValue(data.rx_gpio)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-                disabled={saving}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <ValidatedTextField
-                fieldErrors={fieldErrors}
-                name="tx_gpio"
-                label="Tx GPIO"
-                fullWidth
-                variant="outlined"
-                value={numberValue(data.tx_gpio)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-                disabled={saving}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <ValidatedTextField
-                fieldErrors={fieldErrors}
-                name="pbutton_gpio"
-                label="Button GPIO"
-                fullWidth
-                variant="outlined"
-                value={numberValue(data.pbutton_gpio)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-                disabled={saving}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <ValidatedTextField
-                fieldErrors={fieldErrors}
-                name="dallas_gpio"
-                label="Dallas GPIO (0=disabled)"
-                fullWidth
-                variant="outlined"
-                value={numberValue(data.dallas_gpio)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-                disabled={saving}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <ValidatedTextField
-                fieldErrors={fieldErrors}
-                name="led_gpio"
-                label="LED GPIO (0=disabled)"
-                fullWidth
-                variant="outlined"
-                value={numberValue(data.led_gpio)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-                disabled={saving}
-              />
+          <>
+            <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+              <Grid item xs={4}>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors}
+                  name="rx_gpio"
+                  label="Rx GPIO"
+                  fullWidth
+                  variant="outlined"
+                  value={numberValue(data.rx_gpio)}
+                  type="number"
+                  onChange={updateFormValue}
+                  margin="normal"
+                  disabled={saving}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors}
+                  name="tx_gpio"
+                  label="Tx GPIO"
+                  fullWidth
+                  variant="outlined"
+                  value={numberValue(data.tx_gpio)}
+                  type="number"
+                  onChange={updateFormValue}
+                  margin="normal"
+                  disabled={saving}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors}
+                  name="pbutton_gpio"
+                  label="Button GPIO"
+                  fullWidth
+                  variant="outlined"
+                  value={numberValue(data.pbutton_gpio)}
+                  type="number"
+                  onChange={updateFormValue}
+                  margin="normal"
+                  disabled={saving}
+                />
+              </Grid>
+              <Grid item>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors}
+                  name="dallas_gpio"
+                  label="Temperature GPIO (0=disabled)"
+                  fullWidth
+                  variant="outlined"
+                  value={numberValue(data.dallas_gpio)}
+                  type="number"
+                  onChange={updateFormValue}
+                  margin="normal"
+                  disabled={saving}
+                />
+              </Grid>
+              <Grid item>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors}
+                  name="led_gpio"
+                  label="LED GPIO (0=disabled)"
+                  fullWidth
+                  variant="outlined"
+                  value={numberValue(data.led_gpio)}
+                  type="number"
+                  onChange={updateFormValue}
+                  margin="normal"
+                  disabled={saving}
+                />
+              </Grid>
             </Grid>
             <Grid item xs={4}>
               <ValidatedTextField
                 name="phy_type"
-                label="PHY Module Type"
+                label="PHY Type"
                 disabled={saving}
                 value={data.phy_type}
                 fullWidth
@@ -220,7 +226,55 @@ const SettingsApplication: FC = () => {
                 <MenuItem value={2}>TLK110</MenuItem>
               </ValidatedTextField>
             </Grid>
-          </Grid>
+            {data.phy_type !== 0 && (
+              <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+                <Grid item>
+                  <ValidatedTextField
+                    name="eth_power"
+                    label="Power GPIO (-1=disabled)"
+                    fullWidth
+                    variant="outlined"
+                    value={numberValue(data.eth_power)}
+                    type="number"
+                    onChange={updateFormValue}
+                    margin="normal"
+                    disabled={saving}
+                  />
+                </Grid>
+                <Grid item>
+                  <ValidatedTextField
+                    name="eth_phy_addr"
+                    label="I²C-address"
+                    fullWidth
+                    variant="outlined"
+                    value={numberValue(data.eth_phy_addr)}
+                    type="number"
+                    onChange={updateFormValue}
+                    margin="normal"
+                    disabled={saving}
+                  />
+                </Grid>
+                <Grid item>
+                  <ValidatedTextField
+                    name="eth_clock_mode"
+                    label="Clock Mode"
+                    disabled={saving}
+                    value={data.eth_clock_mode}
+                    fullWidth
+                    variant="outlined"
+                    onChange={updateFormValue}
+                    margin="normal"
+                    select
+                  >
+                    <MenuItem value={0}>GPIO0_IN</MenuItem>
+                    <MenuItem value={1}>GPIO0_OUT</MenuItem>
+                    <MenuItem value={2}>GPIO16_OUT</MenuItem>
+                    <MenuItem value={3}>GPIO17_OUT</MenuItem>
+                  </ValidatedTextField>
+                </Grid>
+              </Grid>
+            )}
+          </>
         )}
         <Typography variant="h6" color="primary">
           EMS Bus Settings

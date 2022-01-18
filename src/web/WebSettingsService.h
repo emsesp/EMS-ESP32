@@ -54,13 +54,17 @@ class WebSettings {
     uint8_t  pbutton_gpio;
     uint8_t  solar_maxflow;
     String   board_profile;
-    uint8_t  phy_type;
     uint8_t  bool_format;
     uint8_t  enum_format;
     int8_t   weblog_level;
     uint8_t  weblog_buffer;
     bool     weblog_compact;
     bool     fahrenheit;
+
+    uint8_t phy_type;
+    int8_t  eth_power; // -1 means disabled
+    uint8_t eth_phy_addr;
+    uint8_t eth_clock_mode;
 
     static void              read(WebSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebSettings & settings);

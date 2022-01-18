@@ -78,18 +78,22 @@ class DummySettings {
     uint16_t publish_time_other      = 10;
     uint16_t publish_time_sensor     = 10;
 
-    String  hostname       = "ems-esp";
-    String  jwtSecret      = "ems-esp";
-    String  ssid           = "ems-esp";
-    String  password       = "ems-esp";
-    String  localIP        = "";
-    String  gatewayIP      = "";
-    String  subnetMask     = "";
-    bool    staticIPConfig = false;
-    String  dnsIP1         = "";
-    String  dnsIP2         = "";
-    bool    enableIPv6     = false;
+    String hostname       = "ems-esp";
+    String jwtSecret      = "ems-esp";
+    String ssid           = "ems-esp";
+    String password       = "ems-esp";
+    String localIP        = "";
+    String gatewayIP      = "";
+    String subnetMask     = "";
+    bool   staticIPConfig = false;
+    String dnsIP1         = "";
+    String dnsIP2         = "";
+    bool   enableIPv6     = false;
+
     uint8_t phy_type       = 0;
+    uint8_t eth_power      = 0; // 0 means -1
+    uint8_t eth_phy_addr   = 0;
+    uint8_t eth_clock_mode = 0;
 
 #define FACTORY_MQTT_MAX_TOPIC_LENGTH 128
 
