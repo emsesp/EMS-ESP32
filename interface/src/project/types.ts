@@ -59,6 +59,7 @@ export interface Status {
   num_devices: number;
   num_sensors: number;
   num_analogs: number;
+  uptime: number;
 }
 
 export interface Device {

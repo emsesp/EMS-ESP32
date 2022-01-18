@@ -153,6 +153,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     root["api_fails"]      = WebAPIService::api_fails();
     root["api_quality"] =
         WebAPIService::api_count() == 0 ? 100 : 100 - (WebAPIService::api_fails() * 100) / (WebAPIService::api_count() + WebAPIService::api_fails());
+    root["uptime"] = uuid::get_uptime_sec();
 
     response->setLength();
     request->send(response);

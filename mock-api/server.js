@@ -423,13 +423,13 @@ const status = {
   tx_mode: 1,
   rx_received: 240,
   tx_sent: 60,
-  rx_quality: 100,
-  tx_quality: 100,
+  rx_quality: 80,
+  tx_quality: 95,
   rx_fails: 0,
   tx_fails: 0,
   sensor_fails: 0,
   sensor_reads: 51,
-  sensor_quality: 100,
+  sensor_quality: 60,
   analog_fails: 0,
   analog_reads: 0,
   analog_quality: 100,
@@ -439,6 +439,7 @@ const status = {
   api_calls: 0,
   api_fails: 0,
   api_quality: 100,
+  uptime: 1234567,
 }
 
 // Dashboard data

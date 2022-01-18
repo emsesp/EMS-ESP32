@@ -3,11 +3,11 @@ import { useSnackbar } from 'notistack';
 import {
   Avatar,
   Button,
-  Divider,
   Table,
   TableContainer,
   TableBody,
   TableCell,
+  TableHead,
   TableRow,
   List,
   ListItem,
@@ -19,14 +19,14 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
-  Typography
+  DialogTitle
 } from '@mui/material';
 
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import CancelIcon from '@mui/icons-material/Cancel';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 
 import { AuthenticatedContext } from '../contexts/authentication';
 
@@ -81,11 +81,33 @@ export const txMode = ({ tx_mode }: Status) => {
   }
 };
 
-export const qualityHighlight = (value: number, theme: Theme) => {
-  if (value >= 95) {
-    return theme.palette.success.main;
+const pluralize = (count: number, noun: string) =>
+  `${Intl.NumberFormat().format(count)} ${noun}${count !== 1 ? 's' : ''}`;
+
+const formatDuration = (duration_sec: number) => {
+  const roundTowardsZero = duration_sec > 0 ? Math.floor : Math.ceil;
+  return (
+    roundTowardsZero(duration_sec / 8640) +
+    'd ' +
+    (roundTowardsZero(duration_sec / 360) % 24) +
+    'h ' +
+    (roundTowardsZero(duration_sec / 60) % 60) +
+    'm ' +
+    (roundTowardsZero(duration_sec) % 60) +
+    's'
+  );
+};
+
+const showQuality = (quality: number) => {
+  if (quality === 100) {
+    return <TableCell sx={{ color: '#00FF7F' }}>{quality}%</TableCell>;
   }
-  return theme.palette.error.main;
+
+  if (quality >= 95) {
+    return <TableCell sx={{ color: 'orange' }}>{quality}%</TableCell>;
+  } else {
+    return <TableCell sx={{ color: 'red' }}>{quality}%</TableCell>;
+  }
 };
 
 const DashboardStatus: FC = () => {
@@ -142,69 +164,72 @@ const DashboardStatus: FC = () => {
           <ListItem>
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: busStatusHighlight(data, theme) }}>
+                <DirectionsBusIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary="EMS Bus Connection Status"
+              secondary={busStatus(data) + ', ' + formatDuration(data.uptime)}
+            />
+          </ListItem>
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: busStatusHighlight(data, theme) }}>
                 <DeviceHubIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="EMS Bus Connection Status" secondary={busStatus(data) + txMode(data)} />
+            <ListItemText
+              primary="Active Devices &amp; Sensors"
+              secondary={
+                pluralize(data.num_devices, 'device') +
+                ', ' +
+                pluralize(data.num_sensors, 'temperature sensor') +
+                ', ' +
+                pluralize(data.num_analogs, 'analog sensor')
+              }
+            />
           </ListItem>
-          <Divider variant="inset" component="li" />
-          <Box mt={2} mb={2} color="warning.main">
-            <Typography variant="body2">
-              All statistics below are recorded from when EMS-ESP was last restarted.
-            </Typography>
-          </Box>
+          <Box m={3}></Box>
           <TableContainer>
             <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell></TableCell>
+                  <TableCell>SUCCESS</TableCell>
+                  <TableCell>FAIL</TableCell>
+                  <TableCell>QUALITY</TableCell>
+                </TableRow>
+              </TableHead>
               <TableBody>
                 <TableRow>
-                  <TableCell>Recognized Devices / Sensors</TableCell>
-                  <TableCell align="right">
-                    {data.num_devices}&nbsp;/&nbsp;
-                    {data.num_sensors}&nbsp;+&nbsp;
-                    {data.num_analogs}
-                  </TableCell>
+                  <TableCell>Telegrams Received (Rx)</TableCell>
+                  <TableCell>{Intl.NumberFormat().format(data.rx_received)}</TableCell>
+                  <TableCell>{Intl.NumberFormat().format(data.rx_fails)}</TableCell>
+                  {showQuality(data.rx_quality)}
                 </TableRow>
                 <TableRow>
-                  <TableCell>Telegrams Received / Failed (Quality)</TableCell>
-                  <TableCell align="right">
-                    {Intl.NumberFormat().format(data.rx_received)}&nbsp;/&nbsp;
-                    {Intl.NumberFormat().format(data.rx_fails)}&nbsp;({data.rx_quality}%)
-                  </TableCell>
+                  <TableCell>Telegrams Sent (Tx)</TableCell>
+                  <TableCell>{Intl.NumberFormat().format(data.tx_sent)}</TableCell>
+                  <TableCell>{Intl.NumberFormat().format(data.tx_fails)}</TableCell>
+                  {showQuality(data.tx_quality)}
                 </TableRow>
                 <TableRow>
-                  <TableCell>Telegrams Sent / Failed (Quality)</TableCell>
-                  <TableCell align="right">
-                    {Intl.NumberFormat().format(data.tx_sent)}&nbsp;/&nbsp;
-                    {Intl.NumberFormat().format(data.tx_fails)}&nbsp;({data.tx_quality}%)
-                  </TableCell>
+                  <TableCell>Analog Sensor Reads</TableCell>
+                  <TableCell>{Intl.NumberFormat().format(data.analog_reads)}</TableCell>
+                  <TableCell>{Intl.NumberFormat().format(data.analog_fails)}</TableCell>
+                  {showQuality(data.analog_quality)}
                 </TableRow>
                 <TableRow>
-                  <TableCell>Sensors Reads / Fails (Quality)</TableCell>
-                  <TableCell align="right">
-                    {Intl.NumberFormat().format(data.sensor_reads)}&nbsp;/&nbsp;
-                    {Intl.NumberFormat().format(data.sensor_fails)}&nbsp;({data.sensor_quality}%)
-                  </TableCell>
+                  <TableCell>MQTT Publishes</TableCell>
+                  <TableCell>{Intl.NumberFormat().format(data.mqtt_count)}</TableCell>
+                  <TableCell>{Intl.NumberFormat().format(data.mqtt_fails)}</TableCell>
+                  {showQuality(data.mqtt_quality)}
                 </TableRow>
                 <TableRow>
-                  <TableCell>Analog Reads / Fails (Quality)</TableCell>
-                  <TableCell align="right">
-                    {Intl.NumberFormat().format(data.analog_reads)}&nbsp;/&nbsp;
-                    {Intl.NumberFormat().format(data.analog_fails)}&nbsp;({data.analog_quality}%)
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>MQTT Publishes / Fails (Quality)</TableCell>
-                  <TableCell align="right">
-                    {Intl.NumberFormat().format(data.mqtt_count)}&nbsp;/&nbsp;
-                    {Intl.NumberFormat().format(data.mqtt_fails)}&nbsp;({data.mqtt_quality}%)
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>API Calls / Fails (Quality)</TableCell>
-                  <TableCell align="right">
-                    {Intl.NumberFormat().format(data.api_calls)}&nbsp;/&nbsp;
-                    {Intl.NumberFormat().format(data.api_fails)}&nbsp;({data.api_quality}%)
-                  </TableCell>
+                  <TableCell>API Calls</TableCell>
+                  <TableCell>{Intl.NumberFormat().format(data.api_calls)}</TableCell>
+                  <TableCell>{Intl.NumberFormat().format(data.api_fails)}</TableCell>
+                  {showQuality(data.api_quality)}
                 </TableRow>
               </TableBody>
             </Table>
