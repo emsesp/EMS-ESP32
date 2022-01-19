@@ -212,7 +212,7 @@ const SettingsApplication: FC = () => {
             <Grid item xs={4}>
               <ValidatedTextField
                 name="phy_type"
-                label="PHY Type"
+                label="Eth PHY Type"
                 disabled={saving}
                 value={data.phy_type}
                 fullWidth
@@ -231,7 +231,7 @@ const SettingsApplication: FC = () => {
                 <Grid item>
                   <ValidatedTextField
                     name="eth_power"
-                    label="Power GPIO (-1=disabled)"
+                    label="Eth Power GPIO (-1=disabled)"
                     fullWidth
                     variant="outlined"
                     value={numberValue(data.eth_power)}
@@ -244,7 +244,7 @@ const SettingsApplication: FC = () => {
                 <Grid item>
                   <ValidatedTextField
                     name="eth_phy_addr"
-                    label="I²C-address"
+                    label="Eth I²C-address"
                     fullWidth
                     variant="outlined"
                     value={numberValue(data.eth_phy_addr)}
@@ -257,7 +257,7 @@ const SettingsApplication: FC = () => {
                 <Grid item>
                   <ValidatedTextField
                     name="eth_clock_mode"
-                    label="Clock Mode"
+                    label="Eth Clock Mode"
                     disabled={saving}
                     value={data.eth_clock_mode}
                     fullWidth

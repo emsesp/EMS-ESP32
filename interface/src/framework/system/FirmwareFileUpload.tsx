@@ -14,7 +14,7 @@ const FirmwareFileUpload: FC<UploadFirmwareProps> = ({ uploadFirmware }) => {
   return (
     <>
       <MessageBox
-        message="Upload a new firmware (.bin) file below to replace the existing firmware."
+        message="Upload a new firmware (.bin) file below to replace the existing firmware"
         level="warning"
         my={2}
       />
