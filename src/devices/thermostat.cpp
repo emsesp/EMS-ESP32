@@ -2428,7 +2428,11 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             break;
         }
     } else if (model == EMS_DEVICE_FLAG_RC20) {
-        offset = EMS_OFFSET_RC20Set_temp;
+        if (mode == HeatingCircuit::Mode::MANUAL) {
+            offset = EMS_OFFSET_RC20Set_temp_manual;
+        } else {
+            offset = EMS_OFFSET_RC20Set_temp_auto;
+        }
 
     } else if (model == EMS_DEVICE_FLAG_RC30) {
         offset = EMS_OFFSET_RC30Set_temp;

@@ -224,7 +224,8 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC20StatusMessage_setpoint = 1;  // setpoint temp
     static constexpr uint8_t EMS_OFFSET_RC20StatusMessage_curr     = 2;  // current temp
     static constexpr uint8_t EMS_OFFSET_RC20Set_mode               = 23; // position of thermostat mode
-    static constexpr uint8_t EMS_OFFSET_RC20Set_temp               = 28; // position of thermostat setpoint temperature
+    static constexpr uint8_t EMS_OFFSET_RC20Set_temp_auto          = 28; // position of thermostat setpoint temperature
+    static constexpr uint8_t EMS_OFFSET_RC20Set_temp_manual        = 29; // position of thermostat setpoint temperature
 
     static constexpr uint8_t EMS_OFFSET_RC20_2_Set_mode       = 3; // ES72 - see https://github.com/emsesp/EMS-ESP/issues/334
     static constexpr uint8_t EMS_OFFSET_RC20_2_Set_temp_night = 1; // ES72
