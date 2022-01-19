@@ -230,6 +230,7 @@ const DashboardStatus: FC = () => {
               <TableBody>
                 {formatRow('Telegrams Received (Rx)', data.rx_received, data.rx_fails, data.rx_quality)}
                 {formatRow('Telegrams Sent (Tx)', data.tx_sent, data.tx_fails, data.tx_quality)}
+                {formatRow('Temperature Sensor Reads', data.sensor_reads, data.sensor_fails, data.sensor_quality)}
                 {formatRow('Analog Sensor Reads', data.analog_reads, data.analog_fails, data.analog_quality)}
                 {formatRow('MQTT Publishes', data.mqtt_count, data.mqtt_fails, data.mqtt_quality)}
                 {formatRow('API Calls', data.api_calls, data.api_fails, data.api_quality)}
