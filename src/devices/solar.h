@@ -137,6 +137,11 @@ class Solar : public EMSdevice {
     uint8_t wwCirc_;
     uint8_t wwCircMode_;
 
+    // SM100wwStatus2 - 0x07E0
+    uint8_t wwFlow_;
+    uint8_t wwPumpMod_;
+    uint8_t wwStatus2_;
+
     // SM10Config - 0x96
     uint8_t wwMinTemp_;
     uint8_t maxFlow_;    // set this to calculate power
@@ -174,6 +179,7 @@ class Solar : public EMSdevice {
 
     void process_SM100wwTemperature(std::shared_ptr<const Telegram> telegram);
     void process_SM100wwStatus(std::shared_ptr<const Telegram> telegram);
+    void process_SM100wwStatus2(std::shared_ptr<const Telegram> telegram);
     void process_SM100wwCommand(std::shared_ptr<const Telegram> telegram);
     void process_SM100wwCirc(std::shared_ptr<const Telegram> telegram);
     void process_SM100wwParam(std::shared_ptr<const Telegram> telegram);

@@ -689,10 +689,18 @@ MAKE_PSTR_LIST(wwTemp4, F("wwtemp4"), F("temperature 4"))
 MAKE_PSTR_LIST(wwTemp5, F("wwtemp5"), F("temperature 5"))
 MAKE_PSTR_LIST(wwTemp7, F("wwtemp7"), F("temperature 7"))
 MAKE_PSTR_LIST(wwPump, F("wwpump"), F("pump"))
+// solar ww and mixer wwc
 MAKE_PSTR_LIST(wwMinTemp, F("wwmintemp"), F("minimum temperature"))
 MAKE_PSTR_LIST(wwRedTemp, F("wwredtemp"), F("reduced temperature"))
 MAKE_PSTR_LIST(wwDailyTemp, F("wwdailytemp"), F("daily temperature"))
 MAKE_PSTR_LIST(wwKeepWarm, F("wwkeepwarm"), F("keep warm"))
+MAKE_PSTR_LIST(wwStatus2, F("wwstatus2"), F("status 2"))
+MAKE_PSTR_LIST(enum_wwStatus2, F(""), F(""), F(""), F("no_heat"), F(""), F(""), F("heatrequest"), F(""), F("disinfecting"), F("hold"))
+MAKE_PSTR_LIST(wwPumpMod, F("wwpumpmod"), F("pump modulation"))
+MAKE_PSTR_LIST(wwFlow, F("wwflow"), F("flow rate"))
+// extra mixer ww
+MAKE_PSTR_LIST(wwRequiredTemp, F("wwrequiredtemp"), F("required temperature"))
+MAKE_PSTR_LIST(wwDiffTemp, F("wwdifftemp"), F("start differential temperature"))
 
 //SM100
 MAKE_PSTR_LIST(heatTransferSystem, F("heattransfersystem"), F("heattransfer system"))

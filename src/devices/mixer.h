@@ -34,6 +34,7 @@ class Mixer : public EMSdevice {
     void process_MMPLUSSetMessage_HC(std::shared_ptr<const Telegram> telegram);
     void process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram);
     void process_MMPLUSSetMessage_WWC(std::shared_ptr<const Telegram> telegram);
+    void process_MMPLUSConfigMessage_WWC(std::shared_ptr<const Telegram> telegram);
     void process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_IPMTempMessage(std::shared_ptr<const Telegram> telegram);
     void process_IPMSetMessage(std::shared_ptr<const Telegram> telegram);
@@ -46,6 +47,15 @@ class Mixer : public EMSdevice {
     bool set_pump(const char * value, const int8_t id);
     bool set_activated(const char * value, const int8_t id);
     bool set_setValveTime(const char * value, const int8_t id);
+
+    bool set_wwMaxTemp(const char * value, const int8_t id);
+    bool set_wwDiffTemp(const char * value, const int8_t id);
+    bool set_wwReducedTemp(const char * value, const int8_t id);
+    bool set_wwRequiredTemp(const char * value, const int8_t id);
+    bool set_wwDisinfectionTemp(const char * value, const int8_t id);
+    bool set_wwCircPump(const char * value, const int8_t id);
+    bool set_wwCircMode(const char * value, const int8_t id);
+
 
     enum class Type {
         NONE,
@@ -63,6 +73,16 @@ class Mixer : public EMSdevice {
     uint8_t  activated_;
     uint8_t  setValveTime_;
 
+    // MM100wwParam - 0x0313, 0x033B
+    uint8_t wwMaxTemp_;
+    uint8_t wwRequiredTemp_;
+    uint8_t wwReducedTemp_;
+    uint8_t wwDiffTemp_;
+    uint8_t wwDisinfectionTemp_;
+    uint8_t wwCircPump_;
+    uint8_t wwCircMode_;
+
+    // MP100 pool
     int16_t poolTemp_;
     uint8_t poolShuntStatus_;
     uint8_t poolShunt_;
