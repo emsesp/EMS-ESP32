@@ -18,7 +18,7 @@
 - Read only mode in Settings, where EMS Tx/Write commands are blocked [#286](https://github.com/emsesp/EMS-ESP32/issues/286)
 - Added 8700i Boiler device
 - Added Cascade CM10 Controller device
-- Add Olimex ESP32-POE-ISO to board profiles [#301](https://github.com/emsesp/EMS-ESP32/issues/301)
+- Add Olimex ESP32-POE-ISO to board profiles plus settings to customize Ethernet modules [#301](https://github.com/emsesp/EMS-ESP32/issues/301)
 
 ## Fixed
 
