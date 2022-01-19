@@ -394,11 +394,17 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
 // takes a hex string and convert it to an unsigned 32bit number (max 8 hex digits)
 // works with only positive numbers
 uint32_t Helpers::hextoint(const char * hex) {
+    if (hex == nullptr) {
+        return 0;
+    }
+
     uint32_t val = 0;
+
     // skip leading '0x'
     if (hex[0] == '0' && hex[1] == 'x') {
         hex += 2;
     }
+
     while (*hex) {
         // get current character then increment
         char byte = *hex++;
@@ -414,6 +420,7 @@ uint32_t Helpers::hextoint(const char * hex) {
         // shift 4 to make space for new digit, and add the 4 bits of the new digit
         val = (val << 4) | (byte & 0xF);
     }
+
     return val;
 }
 
