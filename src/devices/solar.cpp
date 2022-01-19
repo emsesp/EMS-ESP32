@@ -41,6 +41,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
             register_telegram_type(0x07A5, F("SM100wwCirc"), true, MAKE_PF_CB(process_SM100wwCirc));
             register_telegram_type(0x07A6, F("SM100wwParam"), true, MAKE_PF_CB(process_SM100wwParam));
             register_telegram_type(0x07AE, F("SM100wwKeepWarm"), true, MAKE_PF_CB(process_SM100wwKeepWarm));
+            register_telegram_type(0x07E0, F("SM100wwStatus2"), true, MAKE_PF_CB(process_SM100wwStatus2));
         } else {
             // F9 is not a telegram type, it's a flag for configure
             // register_telegram_type(0xF9, F("ParamCfg"), false, MAKE_PF_CB(process_SM100ParamCfg));
@@ -121,6 +122,9 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               FL_(wwKeepWarm),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_wwKeepWarm));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwStatus2_, DeviceValueType::ENUM, FL_(enum_wwStatus2), FL_(wwStatus2), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwPumpMod_, DeviceValueType::UINT, nullptr, FL_(wwPumpMod), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwFlow_, DeviceValueType::UINT, FL_(div10), FL_(wwFlow), DeviceValueUOM::LMIN);
         return;
     }
 
@@ -599,7 +603,13 @@ void Solar::process_SM100wwKeepWarm(std::shared_ptr<const Telegram> telegram) {
 // SM100ww? - 0x7E0, some kind of status
 // data: 00 00 46 00 00 01 06 0E 06 0E 00 00 00 00 00 03 03 03 03
 // publishes single values offset 1/2(16bit), offset 5, offset 6, offset 7, offset 8, offset 9,
+// status2 = 03:"no heat", 06:"heat request", 08:"disinfecting", 09:"hold"
 */
+void Solar::process_SM100wwStatus2(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, wwFlow_, 7);
+    has_update(telegram, wwStatus2_, 8);
+    has_update(telegram, wwPumpMod_, 9);
+}
 
 // SM100Monitor2 - 0x0363 Heatcounter
 // e.g. B0 00 FF 00 02 63 80 00 80 00 00 00 80 00 80 00 80 00 00 80 00 5A
