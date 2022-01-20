@@ -1191,7 +1191,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 txservice_.send_poll(); // close the bus
                 txservice_.reset_retry_count();
                 tx_successful = true;
-                // if telegram is longer read next part with offset + 25 for ems+
+                // if telegram is longer read next part with offset +25 for ems+ or +27 for ems1.0
                 if (length == 32) {
                     if (txservice_.read_next_tx(data[3]) == read_id_) {
                         read_next_ = true;

@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# Changelog
+# [3.3.1] January 20 2022
+
+- lastcode broke MQTT JSON structure [#228](https://github.com/emsesp/EMS-ESP32/issues/228)
+- overlapping while reading sequence of EMS1.0 telegrams
+- redundant telegram readings (because of offset overflow)
+- added missing RC30/Moduline400 [#243](https://github.com/emsesp/EMS-ESP32/issues/243)
+- check received status before toggling fetch on empty telegram [#268][#282]
 
 # [3.3.0] November 28 2021
 

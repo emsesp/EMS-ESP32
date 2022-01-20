@@ -815,10 +815,11 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
 
 // 0xC2
 void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) {
-    // not sure why this test is in , so removing
-    // if (telegram->offset > 0 || telegram->message_length < 14) {
-    //     return;
-    // }
+    // for decoding "last error code" we need telegram starting with offset 0
+    if (telegram->offset != 0 || telegram->message_length < 20) {
+         return;
+    }
+
     char     code[4];
     uint16_t codeNo;
     char     start_time[17];
