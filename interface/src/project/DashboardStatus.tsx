@@ -91,9 +91,9 @@ const formatDuration = (duration_sec: number) => {
   const roundTowardsZero = duration_sec > 0 ? Math.floor : Math.ceil;
   return (
     ', ' +
-    roundTowardsZero(duration_sec / 8640) +
+    roundTowardsZero(duration_sec / 86400) +
     'd ' +
-    (roundTowardsZero(duration_sec / 360) % 24) +
+    (roundTowardsZero(duration_sec / 3600) % 24) +
     'h ' +
     (roundTowardsZero(duration_sec / 60) % 60) +
     'm ' +
