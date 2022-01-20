@@ -461,7 +461,7 @@ void EMSdevice::show_mqtt_handlers(uuid::console::Shell & shell) {
 
 // register a callback function for a specific telegram type
 void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, const process_function_p f) {
-    telegram_functions_.emplace_back(telegram_type_id, telegram_type_name, fetch, f);
+    telegram_functions_.emplace_back(telegram_type_id, telegram_type_name, fetch, false, f);
 }
 
 // add to device value library, also know now as a "device entity"
@@ -1156,17 +1156,18 @@ const std::string EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> 
 // take a telegram_type_id and call the matching handler
 // return true if match found
 bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
-    for (const auto & tf : telegram_functions_) {
+    for (auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram->type_id) {
-            // if the data block is empty, assume that this telegram is not recognized by the bus master
-            // so remove it from the automatic fetch list
-            if (telegram->message_length == 0 && telegram->offset == 0) {
+            // if the data block is empty and we have not received data before, assume that this telegram
+            // is not recognized by the bus master. So remove it from the automatic fetch list
+            if (telegram->message_length == 0 && telegram->offset == 0 && !tf.received_) {
                 EMSESP::logger().debug(F("This telegram (%s) is not recognized by the EMS bus"), read_flash_string(tf.telegram_type_name_).c_str());
-                toggle_fetch(tf.telegram_type_id_, false);
+                tf.fetch_ = false;
                 return false;
             }
 
             if (telegram->message_length > 0) {
+                tf.received_ = true;
                 tf.process_function_(telegram);
             }
 
