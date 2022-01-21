@@ -543,7 +543,7 @@ bool System::heartbeat_json(JsonObject & output) {
     output["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
     output["txreads"]    = EMSESP::txservice_.telegram_read_count();
     output["txwrites"]   = EMSESP::txservice_.telegram_write_count();
-    output["txfails"]    = EMSESP::txservice_.telegram_fail_count();
+    output["txfails"]    = EMSESP::txservice_.telegram_read_fail_count() + EMSESP::txservice_.telegram_write_fail_count();
 
     if (Mqtt::enabled()) {
         output["mqttfails"] = Mqtt::publish_fails();
@@ -1123,7 +1123,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["bus status"] = (F("disconnected"));
         break;
     case EMSESP::BUS_STATUS_TX_ERRORS:
-        node["bus status"] = (F("connected, instable tx"));
+        node["bus status"] = (F("connected, tx issues - try a different tx-mode"));
         break;
     case EMSESP::BUS_STATUS_CONNECTED:
     default:
@@ -1132,16 +1132,17 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     }
 
     if (EMSESP::bus_status() != EMSESP::BUS_STATUS_OFFLINE) {
-        node["bus protocol"]         = EMSbus::is_ht3() ? F("HT3") : F("Buderus");
-        node["telegrams received"]   = EMSESP::rxservice_.telegram_count();
-        node["read requests sent"]   = EMSESP::txservice_.telegram_read_count();
-        node["write requests sent"]  = EMSESP::txservice_.telegram_write_count();
-        node["incomplete telegrams"] = EMSESP::rxservice_.telegram_error_count();
-        node["tx fails"]             = EMSESP::txservice_.telegram_fail_count();
-        node["rx line quality"]      = EMSESP::rxservice_.quality();
-        node["tx line quality"]      = EMSESP::txservice_.quality();
+        node["bus protocol"]                = EMSbus::is_ht3() ? F("HT3") : F("Buderus");
+        node["bus telegrams received (rx)"] = EMSESP::rxservice_.telegram_count();
+        node["bus reads (tx)"]              = EMSESP::txservice_.telegram_read_count();
+        node["bus writes (tx)"]             = EMSESP::txservice_.telegram_write_count();
+        node["bus incomplete telegrams"]    = EMSESP::rxservice_.telegram_error_count();
+        node["bus reads failed"]            = EMSESP::txservice_.telegram_read_fail_count();
+        node["bus writes failed"]           = EMSESP::txservice_.telegram_write_fail_count();
+        node["bus rx line quality"]         = EMSESP::rxservice_.quality();
+        node["bus tx line quality"]         = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.read_quality()) / 2;
         if (Mqtt::enabled()) {
-            node["MQTT"]               = Mqtt::connected() ? F_(connected) : F_(disconnected);
+            node["MQTT status"]        = Mqtt::connected() ? F_(connected) : F_(disconnected);
             node["MQTT publishes"]     = Mqtt::publish_count();
             node["MQTT publish fails"] = Mqtt::publish_fails();
         }
@@ -1177,9 +1178,17 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
                 obj["type"]    = emsdevice->device_type_name();
                 obj["name"]    = emsdevice->to_string();
                 char result[200];
-                (void)emsdevice->show_telegram_handlers(result);
+                (void)emsdevice->show_telegram_handlers(result, EMSdevice::Handlers::RECEIVED);
                 if (result[0] != '\0') {
-                    obj["handlers"] = result; // don't show handlers if there aren't any
+                    obj["handlers_received"] = result; // don't show handlers if there aren't any
+                }
+                (void)emsdevice->show_telegram_handlers(result, EMSdevice::Handlers::FETCHED);
+                if (result[0] != '\0') {
+                    obj["handlers_fetched"] = result;
+                }
+                (void)emsdevice->show_telegram_handlers(result, EMSdevice::Handlers::PENDING);
+                if (result[0] != '\0') {
+                    obj["handlers_pending"] = result;
                 }
             }
         }

@@ -387,7 +387,11 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     if (status == EMS_TX_STATUS_ERR) {
         LOG_ERROR(F("Failed to transmit Tx via UART."));
-        increment_telegram_fail_count();     // another Tx fail
+        if (telegram->operation == Telegram::Operation::TX_READ) {
+            increment_telegram_read_fail_count(); // another Tx fail
+        } else {
+            increment_telegram_write_fail_count(); // another Tx fail
+        }
         tx_state(Telegram::Operation::NONE); // nothing send, tx not in wait state
         return;
     }
@@ -586,9 +590,13 @@ void TxService::send_raw(const char * telegram_data) {
 void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const uint8_t length) {
     // have we reached the limit? if so, reset count and give up
     if (++retry_count_ > MAXIMUM_TX_RETRIES) {
-        reset_retry_count();             // give up
-        increment_telegram_fail_count(); // another Tx fail
-        EMSESP::wait_validate(0);        // do not wait for validation
+        reset_retry_count(); // give up
+        if (operation == Telegram::Operation::TX_READ) {
+            increment_telegram_read_fail_count(); // another Tx fail
+        } else {
+            increment_telegram_write_fail_count(); // another Tx fail
+        }
+        EMSESP::wait_validate(0); // do not wait for validation
 
         LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request: %s"),
                   (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),

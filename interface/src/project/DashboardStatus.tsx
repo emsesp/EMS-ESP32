@@ -40,7 +40,7 @@ import { extractErrorMessage, useRest } from '../utils';
 
 export const isConnected = ({ status }: Status) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
 
-export const busStatusHighlight = ({ status }: Status, theme: Theme) => {
+const busStatusHighlight = ({ status }: Status, theme: Theme) => {
   switch (status) {
     case busConnectionStatus.BUS_STATUS_TX_ERRORS:
       return theme.palette.warning.main;
@@ -53,31 +53,16 @@ export const busStatusHighlight = ({ status }: Status, theme: Theme) => {
   }
 };
 
-export const busStatus = ({ status }: Status) => {
+const busStatus = ({ status }: Status) => {
   switch (status) {
     case busConnectionStatus.BUS_STATUS_CONNECTED:
       return 'Connected';
     case busConnectionStatus.BUS_STATUS_TX_ERRORS:
-      return 'Tx Errors';
+      return 'Tx issues - try a different Tx-Mode';
     case busConnectionStatus.BUS_STATUS_OFFLINE:
       return 'Disconnected';
     default:
       return 'Unknown';
-  }
-};
-
-export const txMode = ({ tx_mode }: Status) => {
-  switch (tx_mode) {
-    case 1:
-      return ', Tx-Mode: EMS';
-    case 2:
-      return ', Tx-Mode: EMS+';
-    case 3:
-      return ', Tx-Mode: HT3';
-    case 4:
-      return ', Tx-Mode: Hardware';
-    default:
-      return ', Tx-Mode: Off';
   }
 };
 
@@ -208,11 +193,11 @@ const DashboardStatus: FC = () => {
             <ListItemText
               primary="Active Devices &amp; Sensors"
               secondary={
-                pluralize(data.num_devices, 'device') +
+                pluralize(data.num_devices, 'EMS Device') +
                 ', ' +
-                pluralize(data.num_sensors, 'temperature sensor') +
+                pluralize(data.num_sensors, 'Temperature Sensor') +
                 ', ' +
-                pluralize(data.num_analogs, 'analog sensor')
+                pluralize(data.num_analogs, 'Analog Sensor')
               }
             />
           </ListItem>
@@ -228,8 +213,9 @@ const DashboardStatus: FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {formatRow('Telegrams Received (Rx)', data.rx_received, data.rx_fails, data.rx_quality)}
-                {formatRow('Telegrams Sent (Tx)', data.tx_sent, data.tx_fails, data.tx_quality)}
+                {formatRow('EMS Telegrams Received (Rx)', data.rx_received, data.rx_fails, data.rx_quality)}
+                {formatRow('EMS Reads(Tx)', data.tx_reads, data.tx_read_fails, data.tx_read_quality)}
+                {formatRow('EMS Writes (Tx)', data.tx_writes, data.tx_write_fails, data.tx_write_quality)}
                 {formatRow('Temperature Sensor Reads', data.sensor_reads, data.sensor_fails, data.sensor_quality)}
                 {formatRow('Analog Sensor Reads', data.analog_reads, data.analog_fails, data.analog_quality)}
                 {formatRow('MQTT Publishes', data.mqtt_count, data.mqtt_fails, data.mqtt_quality)}

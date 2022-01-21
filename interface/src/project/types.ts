@@ -42,10 +42,13 @@ export interface Status {
   status: busConnectionStatus;
   tx_mode: number;
   rx_received: number;
-  tx_sent: number;
+  tx_reads: number;
+  tx_writes: number;
   rx_quality: number;
-  tx_quality: number;
-  tx_fails: number;
+  tx_read_quality: number;
+  tx_write_quality: number;
+  tx_read_fails: number;
+  tx_write_fails: number;
   rx_fails: number;
   sensor_fails: number;
   sensor_reads: number;

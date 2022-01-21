@@ -177,8 +177,10 @@ class EMSdevice {
     const std::string to_string() const;
     const std::string to_string_short() const;
 
+    enum Handlers : uint8_t { ALL, RECEIVED, FETCHED, PENDING };
+
     void   show_telegram_handlers(uuid::console::Shell & shell);
-    char * show_telegram_handlers(char * result);
+    char * show_telegram_handlers(char * result, uint8_t handlers);
     void   show_mqtt_handlers(uuid::console::Shell & shell);
     void   list_device_entries(JsonObject & output);
     void   exclude_entity(uint8_t entity_id);

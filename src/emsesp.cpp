@@ -253,21 +253,22 @@ uint8_t EMSESP::bus_status() {
     }
 
     // check if we have Tx issues.
-    uint16_t total_sent = txservice_.telegram_read_count() + txservice_.telegram_write_count();
+    uint32_t total_sent = txservice_.telegram_read_count() + txservice_.telegram_write_count();
+    uint32_t total_fail = txservice_.telegram_read_fail_count() + txservice_.telegram_write_fail_count();
 
     // nothing sent and also no errors - must be ok
-    if ((total_sent == 0) && (txservice_.telegram_fail_count() == 0)) {
+    if ((total_sent == 0) && (total_fail == 0)) {
         return BUS_STATUS_CONNECTED;
     }
 
     // nothing sent, but have Tx errors
-    if ((total_sent == 0) && (txservice_.telegram_fail_count() != 0)) {
+    if ((total_sent == 0) && (total_fail != 0)) {
         return BUS_STATUS_TX_ERRORS;
     }
 
     // Tx Failure rate > 10%
-    if (txservice_.telegram_fail_count() < total_sent) {
-        if (((txservice_.telegram_fail_count() * 100) / total_sent) > EMSbus::EMS_TX_ERROR_LIMIT) {
+    if (total_fail < total_sent) {
+        if (((total_fail * 100) / total_sent) > EMSbus::EMS_TX_ERROR_LIMIT) {
             return BUS_STATUS_TX_ERRORS;
         }
     }
@@ -302,9 +303,10 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
         shell.printfln(F("  #read requests sent: %d"), txservice_.telegram_read_count());
         shell.printfln(F("  #write requests sent: %d"), txservice_.telegram_write_count());
         shell.printfln(F("  #incomplete telegrams: %d"), rxservice_.telegram_error_count());
-        shell.printfln(F("  #tx fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_fail_count());
+        shell.printfln(F("  #read fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_read_fail_count());
+        shell.printfln(F("  #write fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_write_fail_count());
         shell.printfln(F("  Rx line quality: %d%%"), rxservice_.quality());
-        shell.printfln(F("  Tx line quality: %d%%"), txservice_.quality());
+        shell.printfln(F("  Tx line quality: %d%%"), (txservice_.read_quality() + txservice_.read_quality()) / 2);
         shell.println();
     }
 

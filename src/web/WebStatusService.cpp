@@ -129,19 +129,22 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM_DYN);
     JsonObject          root     = response->getRoot();
 
-    root["status"]         = EMSESP::bus_status();    // 0, 1 or 2
-    root["num_devices"]    = EMSESP::count_devices(); // excluding Controller
-    root["num_sensors"]    = EMSESP::dallassensor_.no_sensors();
-    root["num_analogs"]    = EMSESP::analogsensor_.no_sensors();
-    root["tx_mode"]        = EMSESP::txservice_.tx_mode();
-    root["rx_received"]    = EMSESP::rxservice_.telegram_count();
-    root["tx_sent"]        = EMSESP::txservice_.telegram_read_count() + EMSESP::txservice_.telegram_write_count();
-    root["rx_quality"]     = EMSESP::rxservice_.quality();
-    root["tx_quality"]     = EMSESP::txservice_.quality();
-    root["rx_fails"]       = EMSESP::rxservice_.telegram_error_count();
-    root["tx_fails"]       = EMSESP::txservice_.telegram_fail_count();
-    root["sensor_fails"]   = EMSESP::dallassensor_.fails();
-    root["sensor_reads"]   = EMSESP::dallassensor_.reads();
+    root["status"]           = EMSESP::bus_status();    // 0, 1 or 2
+    root["num_devices"]      = EMSESP::count_devices(); // excluding Controller
+    root["num_sensors"]      = EMSESP::dallassensor_.no_sensors();
+    root["num_analogs"]      = EMSESP::analogsensor_.no_sensors();
+    root["tx_mode"]          = EMSESP::txservice_.tx_mode();
+    root["rx_received"]      = EMSESP::rxservice_.telegram_count();
+    root["tx_reads"]         = EMSESP::txservice_.telegram_read_count();
+    root["tx_writes"]        = EMSESP::txservice_.telegram_write_count();
+    root["rx_quality"]       = EMSESP::rxservice_.quality();
+    root["tx_read_quality"]  = EMSESP::txservice_.read_quality();
+    root["tx_write_quality"] = EMSESP::txservice_.write_quality();
+    root["rx_fails"]         = EMSESP::rxservice_.telegram_error_count();
+    root["tx_read_fails"]    = EMSESP::txservice_.telegram_read_fail_count();
+    root["tx_write_fails"]   = EMSESP::txservice_.telegram_write_fail_count();
+    root["sensor_fails"]     = EMSESP::dallassensor_.fails();
+    root["sensor_reads"]     = EMSESP::dallassensor_.reads();
     root["sensor_quality"] = EMSESP::dallassensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::dallassensor_.fails()) / EMSESP::dallassensor_.reads());
     root["analog_fails"]   = EMSESP::analogsensor_.fails();
     root["analog_reads"]   = EMSESP::analogsensor_.reads();

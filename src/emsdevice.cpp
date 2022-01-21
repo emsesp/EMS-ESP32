@@ -26,8 +26,27 @@ namespace emsesp {
 // must be an int of 4 bytes, 32bit aligned
 static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = {
 
-    F_(blank), F_(degrees), F_(degrees), F_(percent), F_(lmin),    F_(kwh), F_(wh),         F_(hours), F_(minutes), F_(ua),
-    F_(bar),   F_(kw),      F_(w),       F_(kb),      F_(seconds), F_(dbm), F_(fahrenheit), F_(mv),    F_(sqm),     F_(oclock)};
+    F_(blank),
+    F_(degrees),
+    F_(degrees),
+    F_(percent),
+    F_(lmin),
+    F_(kwh),
+    F_(wh),
+    F_(hours),
+    F_(minutes),
+    F_(ua),
+    F_(bar),
+    F_(kw),
+    F_(w),
+    F_(kb),
+    F_(seconds),
+    F_(dbm),
+    F_(fahrenheit),
+    F_(mv),
+    F_(sqm)
+
+};
 
 
 // mapping of TAGs, to match order in DeviceValueTAG enum in emsdevice.h
@@ -409,16 +428,46 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) {
     if (telegram_functions_.size() == 0) {
         return;
     }
-
+    /*
+	// colored list of type-ids
     shell.printf(F(" This %s will listen to telegram type IDs: "), device_type_name().c_str());
     for (const auto & tf : telegram_functions_) {
+        if (tf.received_ && !tf.fetch_) {
+            shell.printf(COLOR_BRIGHT_GREEN);
+        } else if (tf.received_) {
+            shell.printf(COLOR_YELLOW);
+        } else {
+            shell.printf(COLOR_BRIGHT_RED);
+        }
         shell.printf(F("0x%02X "), tf.telegram_type_id_);
+    }
+    shell.printf(COLOR_RESET);
+    */
+    shell.printf(F(" Received telegram type IDs: "));
+    for (const auto & tf : telegram_functions_) {
+        if (tf.received_ && !tf.fetch_) {
+            shell.printf(F("0x%02X "), tf.telegram_type_id_);
+        }
+    }
+    shell.println();
+    shell.printf(F(" Fetched telegram type IDs: "));
+    for (const auto & tf : telegram_functions_) {
+        if (tf.fetch_) {
+            shell.printf(F("0x%02X "), tf.telegram_type_id_);
+        }
+    }
+    shell.println();
+    shell.printf(F(" Pending telegram type IDs: "));
+    for (const auto & tf : telegram_functions_) {
+        if (!tf.received_ && !tf.fetch_) {
+            shell.printf(F("0x%02X "), tf.telegram_type_id_);
+        }
     }
     shell.println();
 }
 
 // list all the telegram type IDs for this device, outputting to a string (max size 200)
-char * EMSdevice::show_telegram_handlers(char * result) {
+char * EMSdevice::show_telegram_handlers(char * result, uint8_t handlers) {
     uint8_t size = telegram_functions_.size();
 
     strlcpy(result, "", 200);
@@ -427,13 +476,14 @@ char * EMSdevice::show_telegram_handlers(char * result) {
         return result;
     }
 
-    char    str[10];
     uint8_t i = 0;
     for (const auto & tf : telegram_functions_) {
-        snprintf(str, sizeof(str), "0x%02X", tf.telegram_type_id_);
-        strlcat(result, str, 200);
-        if (++i < size) {
-            strlcat(result, " ", 200);
+        if (handlers == Handlers::ALL || (handlers == Handlers::RECEIVED && tf.received_ && !tf.fetch_)
+            || (handlers == Handlers::FETCHED && tf.received_ && tf.fetch_) || (handlers == Handlers::PENDING && !tf.received_ && !tf.fetch_)) {
+            if (i++ > 0) {
+                strlcat(result, " ", 200);
+            }
+            strlcat(result, Helpers::hextoa(tf.telegram_type_id_, true).c_str(), 200);
         }
     }
 
@@ -588,7 +638,7 @@ void EMSdevice::publish_value(void * value_p) {
         return;
     }
     for (auto & dv : devicevalues_) {
-        if (dv.value_p == value_p) {
+        if (dv.value_p == value_p && dv.has_state(DeviceValueState::DV_VISIBLE)) {
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
             if ((dv.tag >= DeviceValueTAG::TAG_HC1 && dv.tag <= DeviceValueTAG::TAG_HC8)
                 || (dv.tag >= DeviceValueTAG::TAG_WWC1 && dv.tag <= DeviceValueTAG::TAG_WWC4)) {
@@ -1171,7 +1221,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             if (dv.type == DeviceValueType::BOOL && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see how to render the value depending on the setting
                 bool value_b = (bool)*(uint8_t *)(dv.value_p);
-                if (Mqtt::ha_enabled()) {
+                if (Mqtt::ha_enabled() && (output_target == OUTPUT_TARGET::MQTT)) {
                     char s[7];
                     json[name] = Helpers::render_boolean(s, value_b); // for HA always render as string
                 } else {
