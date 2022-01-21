@@ -30,8 +30,8 @@
 - Clean up old HA config's in MQTT before publishing data. This will prevent HA giving the 'dict' warnings [#229](https://github.com/emsesp/EMS-ESP32/issues/229)
 - RC25 temperature setting [#272](https://github.com/emsesp/EMS-ESP32/issues/272)
 - Buderus RC25 - "hc1 mode type" incorrect value [#273](https://github.com/emsesp/EMS-ESP32/issues/273)
-- Missing values for damped outdoor temperature [#282](https://github.com/emsesp/EMS-ESP32/issues/282)
 - Increased number of Mixers and Heating Circuits [#294](https://github.com/emsesp/EMS-ESP32/issues/294)
+- Check receive status before removing a telegram fetch [#268](https://github.com/emsesp/EMS-ESP32/issues/268), [#282](https://github.com/emsesp/EMS-ESP32/issues/282)
 
 ## Changed
 
@@ -42,6 +42,8 @@
 - Show Sensors quality in WebUI
 - Controller not shown in WebUI dashboard
 - renamed "Home Assistant Integration" to "MQTT Discovery" in MQTT Settings [#290](https://github.com/emsesp/EMS-ESP32/issues/290)
+- Show ems tx reads and writes separatly
+- Show ems device handlers separated for received, fetched and pending handlers.
 
 **BREAKING CHANGES:**
 
