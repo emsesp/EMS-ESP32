@@ -128,7 +128,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
             id_n = input["hc"];
         } else if (input.containsKey("wwc")) {
             id_n = input["wwc"];
-            id_n += 7; // wwc1 has id 8
+            id_n += 8; // wwc1 has id 9
         } else if (input.containsKey("id")) {
             id_n = input["id"];
         }
@@ -213,7 +213,7 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     if (!strncmp(command, "hc", 2) && start_pos == 4) {
         id = command[start_pos - 2] - '0';
     } else if (!strncmp(command, "wwc", 3) && start_pos == 5) {
-        id = command[start_pos - 2] - '0' + 7; // wwc1 has id 8
+        id = command[start_pos - 2] - '0' + 8; // wwc1 has id 9
     } else {
 #if defined(EMSESP_DEBUG)
         LOG_DEBUG(F("[DEBUG] Command parse error, unknown hc/wwc in %s"), command_s);
