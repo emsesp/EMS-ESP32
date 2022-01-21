@@ -668,6 +668,7 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
     // if the queue is full, make room but removing the last one
     if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES) {
         mqtt_messages_.pop_front();
+        LOG_WARNING(F("Queue overflow, removing one message"));
     }
     mqtt_messages_.emplace_back(mqtt_message_id_++, std::move(message));
 
