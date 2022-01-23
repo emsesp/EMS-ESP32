@@ -24,6 +24,9 @@ using namespace std::placeholders; // for `_1` etc
 
 namespace emsesp {
 
+uint32_t WebAPIService::api_count_ = 0;
+uint16_t WebAPIService::api_fails_ = 0;
+
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager)
     , _apiHandler("/api", std::bind(&WebAPIService::webAPIService_post, this, _1, _2), 256) { // for POSTS, must use 'Content-Type: application/json' in header
@@ -66,6 +69,33 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         is_admin                      = settings.notoken_api | AuthenticationPredicates::IS_ADMIN(authentication);
     });
 
+    // check for query parameters first, the old style from v2
+    // api?device={device}&cmd={name}&data={value}&id={hc}
+    if (request->url() == "/api") {
+        // get the device
+        if (request->hasParam(F_(device))) {
+            input["device"] = request->getParam(F_(device))->value().c_str();
+        }
+        if (request->hasParam(F_(cmd))) {
+            input["cmd"] = request->getParam(F_(cmd))->value().c_str();
+        }
+        if (request->hasParam(F_(data))) {
+            input["data"] = request->getParam(F_(data))->value().c_str();
+        }
+        if (request->hasParam(F_(value))) {
+            input["value"] = request->getParam(F_(value))->value().c_str();
+        }
+        if (request->hasParam(F_(id))) {
+            input["id"] = Helpers::atoint(request->getParam(F_(id))->value().c_str());
+        }
+        if (request->hasParam(F_(hc))) {
+            input["hc"] = Helpers::atoint(request->getParam(F_(hc))->value().c_str());
+        }
+        if (request->hasParam(F_(wwc))) {
+            input["wwc"] = Helpers::atoint(request->getParam(F_(wwc))->value().c_str());
+        }
+    }
+
     // output json buffer
     PrettyAsyncJsonResponse * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
     JsonObject                output   = response->getRoot();
@@ -81,8 +111,9 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
             snprintf(error, sizeof(error), "Call failed with error code (%s)", Command::return_code_string(return_code).c_str());
         }
         emsesp::EMSESP::logger().err(error);
+        api_fails_++;
     } else {
-        emsesp::EMSESP::logger().debug(F("API command called successfully"));
+        // emsesp::EMSESP::logger().debug(F("API command called successfully"));
         // if there was no json output from the call, default to the output message 'OK'.
         if (!output.size()) {
             output["message"] = "OK";
@@ -96,6 +127,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     response->setLength();
     response->setContentType("application/json");
     request->send(response);
+    api_count_++;
 
 #if defined(EMSESP_STANDALONE)
     Serial.print(COLOR_YELLOW);

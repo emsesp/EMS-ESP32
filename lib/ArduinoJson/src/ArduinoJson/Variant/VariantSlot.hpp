@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -7,7 +7,6 @@
 #include <ArduinoJson/Polyfills/integer.hpp>
 #include <ArduinoJson/Polyfills/limits.hpp>
 #include <ArduinoJson/Polyfills/type_traits.hpp>
-#include <ArduinoJson/Strings/StoragePolicy.hpp>
 #include <ArduinoJson/Variant/VariantContent.hpp>
 
 namespace ARDUINOJSON_NAMESPACE {
@@ -77,16 +76,13 @@ class VariantSlot {
     _next = VariantSlotDiff(slot - this);
   }
 
-  void setKey(const char* k, storage_policies::store_by_copy) {
-    ARDUINOJSON_ASSERT(k != NULL);
-    _flags |= OWNED_KEY_BIT;
-    _key = k;
-  }
-
-  void setKey(const char* k, storage_policies::store_by_address) {
-    ARDUINOJSON_ASSERT(k != NULL);
-    _flags &= VALUE_MASK;
-    _key = k;
+  void setKey(String k) {
+    ARDUINOJSON_ASSERT(k);
+    if (k.isStatic())
+      _flags &= VALUE_MASK;
+    else
+      _flags |= OWNED_KEY_BIT;
+    _key = k.c_str();
   }
 
   const char* key() const {
@@ -107,7 +103,7 @@ class VariantSlot {
     if (_flags & OWNED_KEY_BIT)
       _key += stringDistance;
     if (_flags & OWNED_VALUE_BIT)
-      _content.asString += stringDistance;
+      _content.asString.data += stringDistance;
     if (_flags & COLLECTION_MASK)
       _content.asCollection.movePointers(stringDistance, variantDistance);
   }

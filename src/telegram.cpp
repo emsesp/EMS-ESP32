@@ -37,6 +37,7 @@ const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,
                                  0xF9, 0xFB, 0xFD, 0xFF, 0xF1, 0xF3, 0xF5, 0xF7, 0xE9, 0xEB, 0xED, 0xEF, 0xE1, 0xE3, 0xE5, 0xE7};
 
 uint32_t EMSbus::last_bus_activity_ = 0;              // timestamp of last time a valid Rx came in
+uint32_t EMSbus::bus_uptime_start_  = 0;              // timestamp of when the bus was started
 bool     EMSbus::bus_connected_     = false;          // start assuming the bus hasn't been connected
 uint8_t  EMSbus::ems_mask_          = EMS_MASK_UNSET; // unset so its triggered when booting, the its 0x00=buderus, 0x80=junker/ht3
 uint8_t  EMSbus::ems_bus_id_        = EMSESP_DEFAULT_EMS_BUS_ID;
@@ -262,7 +263,7 @@ void TxService::start() {
     read_request(EMSdevice::EMS_TYPE_UBADevices, EMSdevice::EMS_DEVICE_ID_BOILER);
 }
 
-// sends a 1 byte poll which is our own device ID
+// sends a 1 byte poll which is our own deviceID
 void TxService::send_poll() {
     //LOG_DEBUG(F("Ack %02X"),ems_bus_id() ^ ems_mask());
     if (tx_mode()) {
@@ -359,13 +360,18 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
         }
     }
 
-    uint8_t length = message_p;
-
     telegram_last_ = std::make_shared<Telegram>(*telegram); // make a copy of the telegram
 
+    uint8_t length       = message_p;
     telegram_raw[length] = calculate_crc(telegram_raw, length); // generate and append CRC to the end
+    length++;                                                   // add one since we want to now include the CRC
 
-    length++; // add one since we want to now include the CRC
+    // if we're in simulation mode, don't send anything, just quit
+    if (EMSESP::system_.readonly_mode() && (telegram->operation == Telegram::Operation::TX_WRITE)) {
+        LOG_INFO(F("[readonly] Sending write Tx telegram: %s"), Helpers::data_to_hex(telegram_raw, length - 1).c_str());
+        tx_state(Telegram::Operation::NONE);
+        return;
+    }
 
     LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
               (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
@@ -373,12 +379,19 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
               Helpers::data_to_hex(telegram_raw, length - 1).c_str()); // exclude the last CRC byte
 
     set_post_send_query(tx_telegram.validateid_);
-    // send the telegram to the UART Tx
+
+    //
+    // this is the core send command to the UART
+    //
     uint16_t status = EMSuart::transmit(telegram_raw, length);
 
     if (status == EMS_TX_STATUS_ERR) {
         LOG_ERROR(F("Failed to transmit Tx via UART."));
-        increment_telegram_fail_count();     // another Tx fail
+        if (telegram->operation == Telegram::Operation::TX_READ) {
+            increment_telegram_read_fail_count(); // another Tx fail
+        } else {
+            increment_telegram_write_fail_count(); // another Tx fail
+        }
         tx_state(Telegram::Operation::NONE); // nothing send, tx not in wait state
         return;
     }
@@ -577,9 +590,13 @@ void TxService::send_raw(const char * telegram_data) {
 void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const uint8_t length) {
     // have we reached the limit? if so, reset count and give up
     if (++retry_count_ > MAXIMUM_TX_RETRIES) {
-        reset_retry_count();             // give up
-        increment_telegram_fail_count(); // another Tx fail
-        EMSESP::wait_validate(0);        // do not wait for validation
+        reset_retry_count(); // give up
+        if (operation == Telegram::Operation::TX_READ) {
+            increment_telegram_read_fail_count(); // another Tx fail
+        } else {
+            increment_telegram_write_fail_count(); // another Tx fail
+        }
+        EMSESP::wait_validate(0); // do not wait for validation
 
         LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request: %s"),
                   (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),

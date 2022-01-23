@@ -21,4 +21,4 @@ class SystemStatus {
     void systemStatus(AsyncWebServerRequest * request);
 };
 
-#endif // end SystemStatus_h
+#endif

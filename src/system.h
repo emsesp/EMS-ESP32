@@ -28,7 +28,6 @@
 #include "telegram.h"
 
 #ifndef EMSESP_STANDALONE
-#include "driver/adc.h"
 #include <esp_wifi.h>
 #include <esp_bt.h>
 #include <ETH.h>
@@ -63,6 +62,7 @@ class System {
 
     static bool command_info(const char * value, const int8_t id, JsonObject & output);
     static bool command_settings(const char * value, const int8_t id, JsonObject & output);
+    static bool command_customizations(const char * value, const int8_t id, JsonObject & output);
     static bool command_commands(const char * value, const int8_t id, JsonObject & output);
 
     const std::string reset_reason(uint8_t cpu);
@@ -80,13 +80,12 @@ class System {
     void send_heartbeat();
 
     void led_init(bool refresh);
-    void adc_init(bool refresh);
     void network_init(bool refresh);
     void button_init(bool refresh);
     void commands_init();
 
     static bool is_valid_gpio(uint8_t pin);
-    static bool load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile);
+    static bool load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
 
     static void restart_requested(bool restart_requested) {
         restart_requested_ = restart_requested;
@@ -96,12 +95,47 @@ class System {
         return restart_requested_;
     }
 
+    bool telnet_enabled() {
+        return telnet_enabled_;
+    }
+
     bool analog_enabled() {
         return analog_enabled_;
     }
 
-    uint16_t analog() {
-        return analog_;
+    bool readonly_mode() {
+        return readonly_mode_;
+    }
+
+    void readonly_mode(bool readonly_mode) {
+        readonly_mode_ = readonly_mode;
+    }
+
+    uint8_t bool_format() {
+        return bool_format_;
+    }
+
+    // see default_settings.h
+    // BOOL_FORMAT_ONOFF_STR = 1,
+    // BOOL_FORMAT_ONOFF_STR_CAP = 2
+    // BOOL_FORMAT_TRUEFALSE_STR = 3
+    // BOOL_FORMAT_TRUEFALSE = 4
+    // BOOL_FORMAT_10_STR = 5
+    // BOOL_FORMAT_10 = 6
+    void bool_format(uint8_t format) {
+        bool_format_ = format;
+    }
+
+    uint8_t enum_format() {
+        return enum_format_;
+    }
+
+    void enum_format(uint8_t format) {
+        enum_format_ = format;
+    }
+
+    std::string board_profile() {
+        return std::string(board_profile_.c_str());
     }
 
     std::string hostname() {
@@ -128,6 +162,18 @@ class System {
 #endif
     }
 
+    void fahrenheit(bool b) {
+        fahrenheit_ = b;
+    }
+
+    bool fahrenheit() {
+        return fahrenheit_;
+    }
+
+    void healthcheck(uint8_t healthcheck) {
+        healthcheck_ = healthcheck;
+    }
+
     void show_system(uuid::console::Shell & shell);
     void wifi_reconnect();
     void show_users(uuid::console::Shell & shell);
@@ -148,46 +194,59 @@ class System {
     static constexpr uint32_t BUTTON_LongPressDelay  = 750;  // Hold period for a long press event (in ms)
     static constexpr uint32_t BUTTON_VLongPressDelay = 9000; // Hold period for a very long press event (in ms)
 
-    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY         = 5000;  // check every 5 seconds
-    static constexpr uint32_t LED_WARNING_BLINK              = 1000;  // pulse to show no connection, 1 sec
-    static constexpr uint32_t LED_WARNING_BLINK_FAST         = 100;   // flash quickly for boot up sequence
-    static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL      = 60000; // in milliseconds, how often the MQTT heartbeat is sent (1 min)
-    static constexpr uint32_t SYSTEM_MEASURE_ANALOG_INTERVAL = 500;
-    static constexpr uint8_t  LED_ON                         = HIGH; // LED
+    // healthcheck
+    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY          = 5000; // do a system check every 5 seconds
+    static constexpr uint32_t HEALTHCHECK_LED_LONG_DUARATION  = 1500;
+    static constexpr uint32_t HEALTHCHECK_LED_FLASH_DUARATION = 150;
+    static constexpr uint8_t  HEALTHCHECK_NO_BUS              = (1 << 0); // 1
+    static constexpr uint8_t  HEALTHCHECK_NO_NETWORK          = (1 << 1); // 2
+    static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL       = 60000;    // in milliseconds, how often the MQTT heartbeat is sent (1 min)
+    static constexpr uint8_t  LED_ON                          = HIGH;     // LED on
 
 #ifndef EMSESP_STANDALONE
     static uuid::syslog::SyslogService syslog_;
 #endif
 
     void led_monitor();
-    void set_led_speed(uint32_t speed);
     void system_check();
-    void measure_analog();
 
     int8_t wifi_quality(int8_t dBm);
 
-    bool     system_healthy_     = false;
-    uint32_t led_flash_speed_    = LED_WARNING_BLINK_FAST; // default boot flashes quickly
-    uint32_t last_heartbeat_     = 0;
-    uint32_t last_system_check_  = 0;
-    bool     upload_status_      = false; // true if we're in the middle of a OTA firmware upload
-    bool     ethernet_connected_ = false;
-    uint16_t analog_;
+    uint8_t  healthcheck_       = HEALTHCHECK_NO_NETWORK | HEALTHCHECK_NO_BUS; // start with all flags set, no wifi and no ems bus connection
+    uint32_t last_heartbeat_    = 0;
+    uint32_t last_system_check_ = 0;
 
-    // settings
-    std::string hostname_ = "ems-esp";
+    bool upload_status_      = false; // true if we're in the middle of a OTA firmware upload
+    bool ethernet_connected_ = false;
+
+    // EMS-ESP settings
+    // copies from WebSettings class in WebSettingsService.h
+    std::string hostname_ = FACTORY_WIFI_HOSTNAME;
     bool        hide_led_;
     uint8_t     led_gpio_;
-    bool        syslog_enabled_ = false;
     bool        analog_enabled_;
     bool        low_clock_;
     String      board_profile_;
     uint8_t     pbutton_gpio_;
-    uint8_t     phy_type_;
+    uint8_t     rx_gpio_;
+    uint8_t     tx_gpio_;
+    uint8_t     dallas_gpio_;
+    bool        telnet_enabled_;
+    bool        syslog_enabled_;
     int8_t      syslog_level_;
     uint32_t    syslog_mark_interval_;
     String      syslog_host_;
     uint16_t    syslog_port_;
+    bool        fahrenheit_;
+    uint8_t     bool_format_;
+    uint8_t     enum_format_;
+    bool        readonly_mode_;
+
+    // ethernet
+    uint8_t phy_type_;
+    int8_t  eth_power_;
+    uint8_t eth_phy_addr_;
+    uint8_t eth_clock_mode_;
 };
 
 } // namespace emsesp

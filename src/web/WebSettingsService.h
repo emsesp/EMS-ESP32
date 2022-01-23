@@ -16,24 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WebSettingsConfig_h
-#define WebSettingsConfig_h
-
-#include <HttpEndpoint.h>
-#include <FSPersistence.h>
+#ifndef WebSettingsService_h
+#define WebSettingsService_h
 
 #include "../default_settings.h"
 
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
-#define EMSESP_SETTINGS_SERVICE_PATH "/rest/emsespSettings"
+#define EMSESP_SETTINGS_SERVICE_PATH "/rest/settings"
 #define EMSESP_BOARD_PROFILE_SERVICE_PATH "/rest/boardProfile"
 
-#define MAX_NUM_SENSOR_NAMES 20
-
 namespace emsesp {
-
-enum { BOOL_FORMAT_ONOFF = 1, BOOL_FORMAT_ONOFF_CAP, BOOL_FORMAT_TRUEFALSE, BOOL_FORMAT_10 }; // matches Web UI settings
-enum { ENUM_FORMAT_TEXT = 1, ENUM_FORMAT_NUMBER };                                            // matches Web UI settings
 
 class WebSettings {
   public:
@@ -55,38 +47,39 @@ class WebSettings {
     uint8_t  led_gpio;
     bool     hide_led;
     bool     low_clock;
+    bool     telnet_enabled;
     bool     notoken_api;
+    bool     readonly_mode;
     bool     analog_enabled;
     uint8_t  pbutton_gpio;
     uint8_t  solar_maxflow;
     String   board_profile;
-    uint8_t  phy_type;
-    uint8_t  dallas_format;
     uint8_t  bool_format;
     uint8_t  enum_format;
     int8_t   weblog_level;
     uint8_t  weblog_buffer;
     bool     weblog_compact;
+    bool     fahrenheit;
 
-    struct {
-        String  id;
-        String  name;
-        int16_t offset;
-    } sensor[MAX_NUM_SENSOR_NAMES];
+    uint8_t phy_type;
+    int8_t  eth_power; // -1 means disabled
+    uint8_t eth_phy_addr;
+    uint8_t eth_clock_mode;
 
     static void              read(WebSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebSettings & settings);
 
     enum ChangeFlags : uint8_t {
 
-        NONE   = 0,
-        UART   = (1 << 0), // 1
-        SYSLOG = (1 << 1), // 2
-        ADC    = (1 << 2), // 4
-        DALLAS = (1 << 3), // 8
-        SHOWER = (1 << 4), // 16
-        LED    = (1 << 5), // 32
-        BUTTON = (1 << 6)  // 64
+        NONE    = 0,
+        UART    = (1 << 0), // 1
+        SYSLOG  = (1 << 1), // 2
+        ADC     = (1 << 2), // 4 - analog
+        DALLAS  = (1 << 3), // 8
+        SHOWER  = (1 << 4), // 16
+        LED     = (1 << 5), // 32
+        BUTTON  = (1 << 6), // 64
+        RESTART = 0xFF
 
     };
 

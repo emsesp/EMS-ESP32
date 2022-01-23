@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -231,12 +231,12 @@ class JsonDeserializer {
         return false;
       }
 
-      const char *key = _stringStorage.c_str();
+      String key = _stringStorage.str();
 
-      TFilter memberFilter = filter[key];
+      TFilter memberFilter = filter[key.c_str()];
 
       if (memberFilter.allow()) {
-        VariantData *variant = object.getMember(adaptString(key));
+        VariantData *variant = object.getMember(adaptString(key.c_str()));
         if (!variant) {
           // Save key in memory pool.
           // This MUST be done before adding the slot.
@@ -249,7 +249,7 @@ class JsonDeserializer {
             return false;
           }
 
-          slot->setKey(key, typename TStringStorage::storage_policy());
+          slot->setKey(key);
 
           variant = slot->data();
         }
@@ -345,8 +345,7 @@ class JsonDeserializer {
     _stringStorage.startString();
     if (!parseQuotedString())
       return false;
-    const char *value = _stringStorage.save();
-    variant.setStringPointer(value, typename TStringStorage::storage_policy());
+    variant.setString(_stringStorage.save());
     return true;
   }
 
@@ -402,8 +401,6 @@ class JsonDeserializer {
       _stringStorage.append(c);
     }
 
-    _stringStorage.append('\0');
-
     if (!_stringStorage.isValid()) {
       _error = DeserializationError::NoMemory;
       return false;
@@ -426,8 +423,6 @@ class JsonDeserializer {
       _error = DeserializationError::InvalidInput;
       return false;
     }
-
-    _stringStorage.append('\0');
 
     if (!_stringStorage.isValid()) {
       _error = DeserializationError::NoMemory;

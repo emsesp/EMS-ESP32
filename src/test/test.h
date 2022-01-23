@@ -30,22 +30,29 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "solar"
 // #define EMSESP_DEBUG_DEFAULT "mixer"
 // #define EMSESP_DEBUG_DEFAULT "web"
+// #define EMSESP_DEBUG_DEFAULT "mqtt"
 // #define EMSESP_DEBUG_DEFAULT "general"
 // #define EMSESP_DEBUG_DEFAULT "boiler"
 // #define EMSESP_DEBUG_DEFAULT "mqtt2"
 // #define EMSESP_DEBUG_DEFAULT "mqtt_nested"
-// #define EMSESP_DEBUG_DEFAULT "ha"
+#define EMSESP_DEBUG_DEFAULT "ha"
 // #define EMSESP_DEBUG_DEFAULT "board_profile"
 // #define EMSESP_DEBUG_DEFAULT "shower_alert"
 // #define EMSESP_DEBUG_DEFAULT "310"
 // #define EMSESP_DEBUG_DEFAULT "render"
-#define EMSESP_DEBUG_DEFAULT "api"
+// #define EMSESP_DEBUG_DEFAULT "api"
 // #define EMSESP_DEBUG_DEFAULT "crash"
 // #define EMSESP_DEBUG_DEFAULT "dv"
+// #define EMSESP_DEBUG_DEFAULT "lastcode"
+// #define EMSESP_DEBUG_DEFAULT "2thermostats"
+// #define EMSESP_DEBUG_DEFAULT "dallas"
+// #define EMSESP_DEBUG_DEFAULT "analog"
+// #define EMSESP_DEBUG_DEFAULT "api_values"
+// #define EMSESP_DEBUG_DEFAULT "mqtt_post"
 
 class Test {
   public:
-    static void run_test(uuid::console::Shell & shell, const std::string & command);
+    static void run_test(uuid::console::Shell & shell, const std::string & command, const std::string & data = "");
     static bool run_test(const char * command, int8_t id = 0);
     static void dummy_mqtt_commands(const char * message);
     static void rx_telegram(const std::vector<uint8_t> & data);

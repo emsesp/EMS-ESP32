@@ -1,38 +1,28 @@
-import { Component } from 'react';
-import { Redirect, Switch } from 'react-router';
+import { FC } from 'react';
+import { Navigate, Routes, Route } from 'react-router-dom';
 
-import { AuthenticatedRoute } from '../authentication';
+import { RequireAdmin } from '../components';
 
-import EMSESPDashboard from './EMSESPDashboard';
-import EMSESPSettings from './EMSESPSettings';
+import Dashboard from './Dashboard';
+import Settings from './Settings';
+import Help from './Help';
 
-class ProjectRouting extends Component {
-  render() {
-    return (
-      <Switch>
-        <AuthenticatedRoute
-          exact
-          path="/ems-esp/status/*"
-          component={EMSESPDashboard}
-        />
-        <AuthenticatedRoute
-          exact
-          path="/ems-esp/settings"
-          component={EMSESPSettings}
-        />
-        <AuthenticatedRoute
-          exact
-          path="/ems-esp/*"
-          component={EMSESPDashboard}
-        />
-        {/*
-         * The redirect below caters for the default project route and redirecting invalid paths.
-         * The "to" property must match one of the routes above for this to work correctly.
-         */}
-        <Redirect to={`/ems-esp/status`} />
-      </Switch>
-    );
-  }
-}
+const ProjectRouting: FC = () => {
+  return (
+    <Routes>
+      <Route path="dashboard/*" element={<Dashboard />} />
+      <Route
+        path="settings/*"
+        element={
+          <RequireAdmin>
+            <Settings />
+          </RequireAdmin>
+        }
+      />
+      <Route path="help/*" element={<Help />} />
+      <Route path="/*" element={<Navigate to="dashboard/data" />} />
+    </Routes>
+  );
+};
 
 export default ProjectRouting;

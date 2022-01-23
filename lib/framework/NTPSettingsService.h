@@ -69,4 +69,4 @@ class NTPSettingsService : public StatefulService<NTPSettings> {
     void configureTime(AsyncWebServerRequest * request, JsonVariant & json);
 };
 
-#endif // end NTPSettingsService_h
+#endif

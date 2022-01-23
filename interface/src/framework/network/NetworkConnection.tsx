@@ -1,0 +1,72 @@
+import React, { FC, useCallback, useContext, useState } from 'react';
+import { Navigate, Routes, Route, useNavigate } from 'react-router-dom';
+
+import { Tab } from '@mui/material';
+
+import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from '../../components';
+import { WiFiNetwork } from '../../types';
+import { AuthenticatedContext } from '../../contexts/authentication';
+import { WiFiConnectionContext } from './WiFiConnectionContext';
+import NetworkStatusForm from './NetworkStatusForm';
+import WiFiNetworkScanner from './WiFiNetworkScanner';
+import NetworkSettingsForm from './NetworkSettingsForm';
+
+const NetworkConnection: FC = () => {
+  useLayoutTitle('Network Connection');
+
+  const authenticatedContext = useContext(AuthenticatedContext);
+  const navigate = useNavigate();
+  const { routerTab } = useRouterTab();
+
+  const [selectedNetwork, setSelectedNetwork] = useState<WiFiNetwork>();
+
+  const selectNetwork = useCallback(
+    (network: WiFiNetwork) => {
+      setSelectedNetwork(network);
+      navigate('settings');
+    },
+    [navigate]
+  );
+
+  const deselectNetwork = useCallback(() => {
+    setSelectedNetwork(undefined);
+  }, []);
+
+  return (
+    <WiFiConnectionContext.Provider
+      value={{
+        selectedNetwork,
+        selectNetwork,
+        deselectNetwork
+      }}
+    >
+      <RouterTabs value={routerTab}>
+        <Tab value="status" label="Network Status" />
+        <Tab value="scan" label="Scan WiFi Networks" disabled={!authenticatedContext.me.admin} />
+        <Tab value="settings" label="Network Settings" disabled={!authenticatedContext.me.admin} />
+      </RouterTabs>
+      <Routes>
+        <Route path="status" element={<NetworkStatusForm />} />
+        <Route
+          path="scan"
+          element={
+            <RequireAdmin>
+              <WiFiNetworkScanner />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <RequireAdmin>
+              <NetworkSettingsForm />
+            </RequireAdmin>
+          }
+        />
+        <Route path="/*" element={<Navigate replace to="status" />} />
+      </Routes>
+    </WiFiConnectionContext.Provider>
+  );
+};
+
+export default NetworkConnection;

@@ -33,6 +33,35 @@ char * Helpers::hextoa(char * result, const uint8_t value) {
     return result;
 }
 
+// same as above but to a hex string
+std::string Helpers::hextoa(const uint8_t value, bool prefix) {
+    char buf[3];
+    if (prefix) {
+        return std::string("0x") + hextoa(buf, value);
+    }
+    return std::string(hextoa(buf, value));
+}
+
+// same for 16 bit values
+char * Helpers::hextoa(char * result, const uint16_t value) {
+    if (value <= 0xFF) {
+        return hextoa(result, (uint8_t)value);
+    }
+    hextoa(result, (uint8_t)(value >> 8));
+    hextoa(&result[2], (uint8_t)(value & 0xFF));
+    return result;
+}
+
+
+// same as above but to a hex string
+std::string Helpers::hextoa(const uint16_t value, bool prefix) {
+    char buf[5];
+    if (prefix) {
+        return std::string("0x") + hextoa(buf, value);
+    }
+    return std::string(hextoa(buf, value));
+}
+
 #ifdef EMSESP_STANDALONE
 // special function to work outside of ESP's libraries
 char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
@@ -70,11 +99,34 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
 }
 #endif
 
+/**
+ * fast atoi returning a std::string
+ * http://www.strudel.org.uk/itoa/
+ * 
+ */
+std::string Helpers::itoa(int16_t value) {
+    std::string buf;
+    buf.reserve(25); // Pre-allocate enough space.
+    int quotient = value;
+
+    do {
+        buf += "0123456789abcdef"[std::abs(quotient % 10)];
+        quotient /= 10;
+    } while (quotient);
+
+    // Append the negative sign
+    if (value < 0)
+        buf += '-';
+
+    std::reverse(buf.begin(), buf.end());
+    return buf;
+}
+
 /*
- * itoa for 2 byte signed (short) integers
+ * fast itoa and optimized for ESP32
  * written by Lukás Chmela, Released under GPLv3. http://www.strudel.org.uk/itoa/ version 0.4
  */
-char * Helpers::itoa(char * result, int32_t value, const uint8_t base) {
+char * Helpers::itoa(int32_t value, char * result, const uint8_t base) {
     // check that the base if valid
     if (base < 2 || base > 36) {
         *result = '\0';
@@ -82,7 +134,7 @@ char * Helpers::itoa(char * result, int32_t value, const uint8_t base) {
     }
 
     char *  ptr = result, *ptr1 = result;
-    int16_t tmp_value;
+    int32_t tmp_value;
 
     do {
         tmp_value = value;
@@ -123,31 +175,30 @@ char * Helpers::smallitoa(char * result, const uint16_t value) {
 }
 
 // work out how to display booleans
+// for strings only
 char * Helpers::render_boolean(char * result, bool value) {
-    uint8_t bool_format_ = EMSESP::bool_format();
-    if (bool_format_ == BOOL_FORMAT_ONOFF) {
+    uint8_t bool_format_ = EMSESP::system_.bool_format();
+    if (bool_format_ == BOOL_FORMAT_ONOFF_STR) {
         strlcpy(result, value ? read_flash_string(F_(on)).c_str() : read_flash_string(F_(off)).c_str(), 5);
-    } else if (bool_format_ == BOOL_FORMAT_ONOFF_CAP) {
+    } else if (bool_format_ == BOOL_FORMAT_ONOFF_STR_CAP) {
         strlcpy(result, value ? read_flash_string(F_(ON)).c_str() : read_flash_string(F_(OFF)).c_str(), 5);
-    } else if (bool_format_ == BOOL_FORMAT_TRUEFALSE) {
-        strlcpy(result, value ? "true" : "false", 7);
-    } else {
+    } else if ((bool_format_ == BOOL_FORMAT_10) || (bool_format_ == BOOL_FORMAT_10_STR)) {
         strlcpy(result, value ? "1" : "0", 2);
+    } else {
+        strlcpy(result, value ? "true" : "false", 7); // default
     }
-
     return result;
 }
 
 // render for native char strings
-// format is not used
-char * Helpers::render_value(char * result, const char * value, uint8_t format __attribute__((unused))) {
+char * Helpers::render_value(char * result, const char * value, const int8_t format __attribute__((unused))) {
     strcpy(result, value);
     return result;
 }
 
 // convert unsigned int (single byte) to text value and returns it
 // format: 255(0xFF)=boolean, 0=no formatting, otherwise divide by format
-char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
+char * Helpers::render_value(char * result, uint8_t value, int8_t format, const uint8_t fahrenheit) {
     // special check if its a boolean
     if (format == EMS_VALUE_BOOL) {
         if (value == EMS_VALUE_BOOL_OFF) {
@@ -164,8 +215,10 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
         return nullptr;
     }
 
+    int16_t new_value = fahrenheit ? format ? value * 1.8 + 32 * format * (fahrenheit - 1) : value * 1.8 + 32 * (fahrenheit - 1) : value;
+
     if (!format) {
-        itoa(result, value, 10); // format = 0
+        itoa(new_value, result, 10); // format = 0
         return result;
     }
 
@@ -173,22 +226,31 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
 
     // special case for / 2
     if (format == 2) {
-        strlcpy(result, itoa(s2, value >> 1, 10), 5);
+        strlcpy(result, itoa(new_value >> 1, s2, 10), 5);
         strlcat(result, ".", 5);
-        strlcat(result, ((value & 0x01) ? "5" : "0"), 5);
+        strlcat(result, ((new_value & 0x01) ? "5" : "0"), 7);
         return result;
-    }
+    } else if (format == 4) {
+        strlcpy(result, itoa(new_value >> 2, s2, 10), 5);
+        strlcat(result, ".", 5);
+        new_value = (new_value & 0x03) * 25;
+        strlcat(result, itoa(new_value, s2, 10), 7);
+        return result;
 
-    strlcpy(result, itoa(s2, value / format, 10), 5);
-    strlcat(result, ".", 5);
-    strlcat(result, itoa(s2, value % format, 10), 5);
+    } else if (format > 0) {
+        strlcpy(result, itoa(new_value / format, s2, 10), 5);
+        strlcat(result, ".", 5);
+        strlcat(result, itoa(new_value % format, s2, 10), 7);
+    } else {
+        strlcpy(result, itoa(new_value * format * -1, s2, 10), 5);
+    }
 
     return result;
 }
 
 // float: convert float to char
 // format is the precision, 0 to 8
-char * Helpers::render_value(char * result, const float value, const uint8_t format) {
+char * Helpers::render_value(char * result, const float value, const int8_t format) {
     if (format > 8) {
         return nullptr;
     }
@@ -198,7 +260,7 @@ char * Helpers::render_value(char * result, const float value, const uint8_t for
     char *  ret   = result;
     int32_t whole = (int32_t)value;
 
-    itoa(result, whole, 10);
+    itoa(whole, result, 10);
 
     while (*result != '\0') {
         result++;
@@ -206,97 +268,103 @@ char * Helpers::render_value(char * result, const float value, const uint8_t for
 
     *result++       = '.';
     int32_t decimal = abs((int32_t)((value - whole) * p[format]));
-    itoa(result, decimal, 10);
+    itoa(decimal, result, 10);
 
     return ret;
 }
 
-// int16: convert short (two bytes) to text string and returns string
+// int32: convert signed 32bit to text string and returns string
 // format: 0=no division, other divide by the value given and render with a decimal point
-char * Helpers::render_value(char * result, const int16_t value, const uint8_t format) {
-    if (!hasValue(value)) {
-        return nullptr;
-    }
-
+char * Helpers::render_value(char * result, const int32_t value, const int8_t format, const uint8_t fahrenheit) {
+    int32_t new_value = fahrenheit ? format ? value * 1.8 + 32 * format * (fahrenheit - 1) : value * 1.8 + 32 * (fahrenheit - 1) : value;
+    char    s[10]     = {0};
     // just print it if no conversion required (format = 0)
     if (!format) {
-        itoa(result, value, 10);
+        strlcpy(result, itoa(new_value, s, 10), sizeof(s)); // format is 0
         return result;
     }
 
-    int16_t new_value = value;
-    result[0]         = '\0';
+    result[0] = '\0';
 
     // check for negative values
     if (new_value < 0) {
-        strlcpy(result, "-", 10);
+        strlcpy(result, "-", sizeof(s));
         new_value *= -1; // convert to positive
     } else {
-        strlcpy(result, "", 10);
+        strlcpy(result, "", sizeof(s));
     }
 
     // do floating point
-    char s2[10] = {0};
     if (format == 2) {
         // divide by 2
-        strlcat(result, itoa(s2, new_value / 2, 10), 10);
-        strlcat(result, ".", 10);
-        strlcat(result, ((new_value & 0x01) ? "5" : "0"), 10);
+        strlcat(result, itoa(new_value / 2, s, 10), sizeof(s));
+        strlcat(result, ".", sizeof(s));
+        strlcat(result, ((new_value & 0x01) ? "5" : "0"), sizeof(s));
+    } else if (format > 0) {
+        strlcat(result, itoa(new_value / format, s, 10), sizeof(s));
+        strlcat(result, ".", sizeof(s));
+        strlcat(result, itoa(new_value % format, s, 10), sizeof(s));
     } else {
-        strlcat(result, itoa(s2, new_value / format, 10), 10);
-        strlcat(result, ".", 10);
-        strlcat(result, itoa(s2, new_value % format, 10), 10);
+        strlcat(result, itoa(new_value * format * -1, s, 10), sizeof(s));
     }
 
     return result;
 }
 
-// uint16: convert unsigned short (two bytes) to text string and prints it
-// format: 0=no division, other divide by the value given and render with a decimal point
-char * Helpers::render_value(char * result, const uint16_t value, const uint8_t format) {
+// int16: convert short (two bytes) to text string and prints it
+char * Helpers::render_value(char * result, const int16_t value, const int8_t format, const uint8_t fahrenheit) {
     if (!hasValue(value)) {
         return nullptr;
     }
 
-    return (render_value(result, (int16_t)value, format)); // use same code, force it to a signed int
+    return (render_value(result, (int32_t)value, format, fahrenheit)); // use same code, force it to a signed int
+}
+
+// uint16: convert unsigned short (two bytes) to text string and prints it
+char * Helpers::render_value(char * result, const uint16_t value, const int8_t format, const uint8_t fahrenheit) {
+    if (!hasValue(value)) {
+        return nullptr;
+    }
+
+    return (render_value(result, (int32_t)value, format, fahrenheit)); // use same code, force it to a signed int
 }
 
 // int8: convert signed byte to text string and prints it
-// format: 0=no division, other divide by the value given and render with a decimal point
-char * Helpers::render_value(char * result, const int8_t value, const uint8_t format) {
+char * Helpers::render_value(char * result, const int8_t value, const int8_t format, const uint8_t fahrenheit) {
     if (!hasValue(value)) {
         return nullptr;
     }
 
-    return (render_value(result, (int16_t)value, format)); // use same code, force it to a signed int
+    return (render_value(result, (int32_t)value, format, fahrenheit)); // use same code, force it to a signed int
 }
 
 // uint32: render long (4 byte) unsigned values
-// format: 0=no division, other divide by the value given and render with a decimal point
-char * Helpers::render_value(char * result, const uint32_t value, const uint8_t format) {
+char * Helpers::render_value(char * result, const uint32_t value, const int8_t format, const uint8_t fahrenheit) {
     if (!hasValue(value)) {
         return nullptr;
     }
-
-    result[0] = '\0';
-    char s[20];
+    result[0]         = '\0';
+    int32_t new_value = fahrenheit ? format ? value * 1.8 + 32 * format * (fahrenheit - 1) : value * 1.8 + 32 * (fahrenheit - 1) : value;
+    char    s[10]     = {0};
 
 #ifndef EMSESP_STANDALONE
     if (!format) {
-        strlcpy(result, ltoa(value, s, 10), 20); // format is 0
+        strlcpy(result, ltoa(new_value, s, 10), sizeof(s)); // format is 0
+    } else if (format > 0) {
+        strlcpy(result, ltoa(new_value / format, s, 10), sizeof(s));
+        strlcat(result, ".", sizeof(s));
+        strlcat(result, ltoa(new_value % format, s, 10), sizeof(s));
     } else {
-        strlcpy(result, ltoa(value / format, s, 10), 20);
-        strlcat(result, ".", 20);
-        strlcat(result, ltoa(value % format, s, 10), 20);
+        strlcpy(result, ltoa(new_value * format * -1, s, 10), sizeof(s));
     }
 
 #else
     if (!format) {
-        strlcpy(result, ultostr(s, value, 10), 20); // format is 0
+        strlcpy(result, ultostr(s, new_value, 10), sizeof(s)); // format is 0
     } else {
-        strncpy(result, ultostr(s, value / format, 10), 20);
-        strlcat(result, ".", 20);
-        strncat(result, ultostr(s, value % format, 10), 20);
+        strncpy(result, ultostr(s, new_value / format, 10), sizeof(s));
+        strlcat(result, ".", sizeof(s));
+        strncat(result, ultostr(s, new_value % format, 10), sizeof(s));
     }
 #endif
 
@@ -306,12 +374,12 @@ char * Helpers::render_value(char * result, const uint32_t value, const uint8_t 
 // creates string of hex values from an arrray of bytes
 std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     if (length == 0) {
-        return read_flash_string(F("<empty>"));
+        return "<empty>";
     }
 
-    std::string str(160, '\0');
-    char        buffer[4];
-    char *      p = &str[0];
+    char   str[160] = {0};
+    char   buffer[4];
+    char * p = &str[0];
     for (uint8_t i = 0; i < length; i++) {
         Helpers::hextoa(buffer, data[i]);
         *p++ = buffer[0];
@@ -320,17 +388,23 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     }
     *--p = '\0'; // null terminate just in case, loosing the trailing space
 
-    return str;
+    return std::string(str);
 }
 
 // takes a hex string and convert it to an unsigned 32bit number (max 8 hex digits)
 // works with only positive numbers
 uint32_t Helpers::hextoint(const char * hex) {
+    if (hex == nullptr) {
+        return 0;
+    }
+
     uint32_t val = 0;
+
     // skip leading '0x'
     if (hex[0] == '0' && hex[1] == 'x') {
         hex += 2;
     }
+
     while (*hex) {
         // get current character then increment
         char byte = *hex++;
@@ -346,29 +420,49 @@ uint32_t Helpers::hextoint(const char * hex) {
         // shift 4 to make space for new digit, and add the 4 bits of the new digit
         val = (val << 4) | (byte & 0xF);
     }
+
     return val;
 }
 
 // quick char to long
-uint16_t Helpers::atoint(const char * value) {
-    unsigned int x = 0;
+int Helpers::atoint(const char * value) {
+    int  x = 0;
+    char s = value[0];
+    if (s == '-') {
+        ++value;
+    }
     while (*value >= '0' && *value <= '9') {
         x = (x * 10) + (*value - '0');
         ++value;
+    }
+    if (s == '-') {
+        return (-x);
     }
     return x;
 }
 
 // rounds a number to 2 decimal places
 // example: round2(3.14159) -> 3.14
-float Helpers::round2(float value, const uint8_t divider) {
-    uint8_t div = (divider ? divider : 1); // prevent div-by-zero
-
-    if (value >= 0) {
-        return (int)((value / div) * 100 + 0.5) / 100.0;
+// From mvdp:
+//  The conversion to Fahrenheit is different for absolute temperatures and relative temperatures like hysteresis.
+//  fahrenheit=0 - off, no conversion
+//  fahrenheit=1 - relative, 1.8t
+//  fahrenheit=2 - absolute, 1.8t + 32(fahrenheit-1).
+float Helpers::round2(float value, const int8_t divider, const uint8_t fahrenheit) {
+    float val = (value * 100 + 0.5);
+    if (divider > 0) {
+        val = ((value / divider) * 100 + 0.5);
+    } else if (divider < 0) {
+        val = value * -100 * divider;
+    }
+    if (value < 0) { // negative rounding
+        val = val - 1;
+    }
+    if (fahrenheit) {
+        val = val * 1.8 + 3200 * (fahrenheit - 1);
     }
 
-    return (int)((value / div) * 100 - 0.5) / 100.0; // negative values
+    return ((int32_t)val) / 100.0;
 }
 
 // abs of a signed 32-bit integer
@@ -410,13 +504,16 @@ bool Helpers::hasValue(const uint32_t & v) {
 }
 
 // checks if we can convert a char string to an int value
-bool Helpers::value2number(const char * v, int & value) {
+bool Helpers::value2number(const char * v, int & value, const int min, const int max) {
     if ((v == nullptr) || (strlen(v) == 0)) {
         value = 0;
         return false;
     }
     value = atoi((char *)v);
-    return true;
+    if (value >= min && value <= max) {
+        return true;
+    }
+    return false;
 }
 
 // checks if we can convert a char string to a float value
@@ -427,6 +524,26 @@ bool Helpers::value2float(const char * v, float & value) {
     }
     if (v[0] == '-' || v[0] == '.' || (v[0] >= '0' && v[0] <= '9')) {
         value = atof((char *)v);
+        return true;
+    }
+    return false;
+}
+
+bool Helpers::value2temperature(const char * v, float & value, bool relative) {
+    if (value2float(v, value)) {
+        if (EMSESP::system_.fahrenheit()) {
+            value = relative ? (value / 1.8) : (value - 32) / 1.8;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool Helpers::value2temperature(const char * v, int & value, const bool relative, const int min, const int max) {
+    if (value2number(v, value, min, max)) {
+        if (EMSESP::system_.fahrenheit()) {
+            value = relative ? (value / 1.8) : (value - 32) / 1.8;
+        }
         return true;
     }
     return false;
@@ -485,13 +602,26 @@ bool Helpers::value2enum(const char * v, uint8_t & value, const __FlashStringHel
     std::string str = toLower(v);
     for (value = 0; strs[value]; value++) {
         std::string str1 = toLower(read_flash_string(strs[value]));
-        if ((str1 == read_flash_string(F_(off)) && str == "false") || (str1 == read_flash_string(F_(on)) && str == "true") || (str == str1)
-            || (v[0] == ('0' + value) && v[1] == '\0')) {
+        if ((str1 != "")
+            && ((str1 == read_flash_string(F_(off)) && str == "false") || (str1 == read_flash_string(F_(on)) && str == "true") || (str == str1)
+                || (v[0] == ('0' + value) && v[1] == '\0'))) {
             return true;
         }
     }
     return false;
 }
 
+// replace char in char string
+void Helpers::replace_char(char * str, char find, char replace) {
+    int i = 0;
+
+    while (str[i] != '\0') {
+        /*Replace the matched character...*/
+        if (str[i] == find)
+            str[i] = replace;
+
+        i++;
+    }
+}
 
 } // namespace emsesp

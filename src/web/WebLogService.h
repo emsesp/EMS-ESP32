@@ -19,13 +19,6 @@
 #ifndef WebLogService_h
 #define WebLogService_h
 
-#include <ArduinoJson.h>
-#include <AsyncJson.h>
-#include <ESPAsyncWebServer.h>
-#include <SecurityManager.h>
-
-#include <uuid/log.h>
-
 #define EVENT_SOURCE_LOG_PATH "/es/log"
 #define FETCH_LOG_PATH "/rest/fetchLog"
 #define LOG_SETTINGS_PATH "/rest/logSettings"

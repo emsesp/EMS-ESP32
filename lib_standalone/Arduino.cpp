@@ -120,3 +120,13 @@ int digitalRead(uint8_t pin) {
         return LOW;
     }
 }
+
+uint32_t analogReadMilliVolts(uint8_t pin) {
+    return 0;
+}
+
+void analogSetPinAttenuation(uint8_t pin, adc_attenuation_t attenuation) {
+}
+
+void analogSetAttenuation(adc_attenuation_t attenuation) {
+}

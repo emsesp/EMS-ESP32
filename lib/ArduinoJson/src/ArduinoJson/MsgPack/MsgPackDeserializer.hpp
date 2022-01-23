@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -47,6 +47,11 @@ class MsgPackDeserializer {
     _foundSomething = true;
 
     bool allowValue = filter.allowValue();
+
+    if (allowValue) {
+      // callers pass a null pointer only when value must be ignored
+      ARDUINOJSON_ASSERT(variant != 0);
+    }
 
     switch (code) {
       case 0xc0:
@@ -331,8 +336,7 @@ class MsgPackDeserializer {
   bool readString(VariantData *variant, size_t n) {
     if (!readString(n))
       return false;
-    variant->setStringPointer(_stringStorage.save(),
-                              typename TStringStorage::storage_policy());
+    variant->setString(_stringStorage.save());
     return true;
   }
 
@@ -344,7 +348,6 @@ class MsgPackDeserializer {
         return false;
       _stringStorage.append(static_cast<char>(c));
     }
-    _stringStorage.append('\0');
     if (!_stringStorage.isValid()) {
       _error = DeserializationError::NoMemory;
       return false;
@@ -419,11 +422,13 @@ class MsgPackDeserializer {
       if (!readKey())
         return false;
 
-      const char *key = _stringStorage.c_str();
-      TFilter memberFilter = filter[key];
+      String key = _stringStorage.str();
+      TFilter memberFilter = filter[key.c_str()];
       VariantData *member;
 
       if (memberFilter.allow()) {
+        ARDUINOJSON_ASSERT(object);
+
         // Save key in memory pool.
         // This MUST be done before adding the slot.
         key = _stringStorage.save();
@@ -434,7 +439,7 @@ class MsgPackDeserializer {
           return false;
         }
 
-        slot->setKey(key, typename TStringStorage::storage_policy());
+        slot->setKey(key);
 
         member = slot->data();
       } else {

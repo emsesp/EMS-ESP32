@@ -33,16 +33,16 @@ Note, EMS-ESP requires a small hardware circuit that can convert the EMS bus dat
 
 # **Features**
 
-- A multi-user secure web interface to change settings and monitor the data
-- A console, accessible via Serial and Telnet for more monitoring
-- Native support for Home Assistant via [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/)
+- A multi-user secure web interface to change settings and monitor incoming data
+- A console, accessible via Serial and Telnet for more advanced monitoring
+- Native support for Home Assistant and Domoticz via [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/)
 - Can run standalone as an independent WiFi Access Point or join an existing WiFi network
 - Easy first-time configuration via a web Captive Portal
 - Support for more than [80 EMS devices](https://emsesp.github.io/docs/#/Supported-EMS-Devices) (boilers, thermostats, solar modules, mixer modules, heat pumps, gateways)
 
 ## **Demo**
 
-See a live demo [here](https://ems-esp.derbyshire.nl) using fake data. Log in with any username/password.
+See a demo [here](https://ems-esp.derbyshire.nl). Log in with any username/password.
 
 # **Screenshots**
 

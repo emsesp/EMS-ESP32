@@ -106,14 +106,17 @@ class HttpPostEndpoint {
         if (outcome == StateUpdateResult::ERROR) {
             request->send(400);
             return;
-        }
-        if (outcome == StateUpdateResult::CHANGED) {
+        } else if ((outcome == StateUpdateResult::CHANGED) || (outcome == StateUpdateResult::CHANGED_RESTART)) {
             request->onDisconnect([this]() { _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); });
         }
         AsyncJsonResponse * response = new AsyncJsonResponse(false, _bufferSize);
         jsonObject                   = response->getRoot().to<JsonObject>();
         _statefulService->read(jsonObject, _stateReader);
         response->setLength();
+
+        if (outcome == StateUpdateResult::CHANGED_RESTART) {
+            response->setCode(202); // added by proddy
+        }
         request->send(response);
     }
 };
@@ -144,4 +147,4 @@ class HttpEndpoint : public HttpGetEndpoint<T>, public HttpPostEndpoint<T> {
     }
 };
 
-#endif // end HttpEndpoint
+#endif

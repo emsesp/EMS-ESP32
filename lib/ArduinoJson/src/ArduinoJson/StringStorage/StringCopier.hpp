@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -15,11 +15,14 @@ class StringCopier {
   void startString() {
     _pool->getFreeZone(&_ptr, &_capacity);
     _size = 0;
+    if (_capacity == 0)
+      _pool->markAsOverflowed();
   }
 
-  const char* save() {
+  String save() {
     ARDUINOJSON_ASSERT(_ptr);
-    return _pool->saveStringFromFreeZone(_size);
+    ARDUINOJSON_ASSERT(_size < _capacity);  // needs room for the terminator
+    return String(_pool->saveStringFromFreeZone(_size), _size, false);
   }
 
   void append(const char* s) {
@@ -31,27 +34,26 @@ class StringCopier {
   }
 
   void append(char c) {
-    if (!_ptr)
-      return;
-
-    if (_size >= _capacity) {
-      _ptr = 0;
+    if (_size + 1 < _capacity)
+      _ptr[_size++] = c;
+    else
       _pool->markAsOverflowed();
-      return;
-    }
-
-    _ptr[_size++] = c;
   }
 
-  bool isValid() {
-    return _ptr != 0;
+  bool isValid() const {
+    return !_pool->overflowed();
   }
 
-  const char* c_str() {
-    return _ptr;
+  size_t size() const {
+    return _size;
   }
 
-  typedef storage_policies::store_by_copy storage_policy;
+  String str() const {
+    ARDUINOJSON_ASSERT(_ptr);
+    ARDUINOJSON_ASSERT(_size < _capacity);
+    _ptr[_size] = 0;
+    return String(_ptr, _size, false);
+  }
 
  private:
   MemoryPool* _pool;

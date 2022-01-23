@@ -1,5 +1,3 @@
-<img src="/media/EMS-ESP_logo_dark.png" alt="Logo" align="right" height="76"/>
-
 # Contributing
 
 **Any contribution helps EMS-ESP get better for the entire community!**
@@ -32,8 +30,8 @@ This document describes rules that are in effect for this repository, meant for 
 6. Issues with feature requests should be discussed for viability/desirability.
 7. Feature requests or changes that are meant to address a very specific/limited use case, especially if at the expense of increased code complexity, may be denied, or may be required to be redesigned, generalized, or simplified.
 8. Feature requests that are not accompanied by a PR:
-    - could be closed immediately (denied).
-    - could be closed after some predetermined period of time (left as candidate for somebody to pick up).
+   - could be closed immediately (denied).
+   - could be closed after some predetermined period of time (left as candidate for somebody to pick up).
 9. In some cases, feedback may be requested from the issue reporter, either as additional info for clarification, additional testing, or other. If no feedback is provided, the issue may be closed by a contributor or after 40 days by the STALE bot.
 
 ## Pull requests
@@ -94,7 +92,7 @@ References:
 
 - <https://www.conventionalcommits.org/>
 
---------------------------------------
+---
 
 ## Contributor License Agreement (CLA)
 
@@ -123,7 +121,7 @@ By making a contribution to this project, I certify that:
 
 This Contributor License Agreement (CLA) was adopted on April 1st, 2019.
 
-The text of this license is available under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](http://creativecommons.org/licenses/by-sa/3.0/).  It is based on the Linux [Developer Certificate Of Origin](http://elinux.org/Developer_Certificate_Of_Origin), but is modified to explicitly use the GPL-3.0 license and not mention sign-off (due to GitHub.com keeps an historial, with your user name, of PRs' commits and all editions on PR's comments).
+The text of this license is available under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](http://creativecommons.org/licenses/by-sa/3.0/). It is based on the Linux [Developer Certificate Of Origin](http://elinux.org/Developer_Certificate_Of_Origin), but is modified to explicitly use the GPL-3.0 license and not mention sign-off (due to GitHub.com keeps an historial, with your user name, of PRs' commits and all editions on PR's comments).
 
 **Why a CLA ?**
 
@@ -133,9 +131,9 @@ A CLA is a legal document in which you state _you are entitled to contribute the
 
 CLA is a safety because it also ensures that once you have provided a contribution, you cannot try to withdraw permission for its use at a later date. People can therefore use that software, confident that they will not be asked to stop using pieces of the code at a later date.
 
-A __license__ grants "outbound" rights to the user of project.
+A **license** grants "outbound" rights to the user of project.
 
-A __CLA__ enables a contributor to grant "inbound" rights to a project.
+A **CLA** enables a contributor to grant "inbound" rights to a project.
 
 <Other>
 <A table should be maintained for relating maintainers and components. When triaging, this is essential to figure out if someone in particular should be consulted about specific changes.>

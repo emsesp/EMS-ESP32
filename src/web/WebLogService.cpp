@@ -27,6 +27,7 @@ WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * security
     , setValues_(LOG_SETTINGS_PATH, std::bind(&WebLogService::setValues, this, _1, _2), 256) { // for POSTS
 
     events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
+
     server->addHandler(&events_);
     server->on(EVENT_SOURCE_LOG_PATH, HTTP_GET, std::bind(&WebLogService::forbidden, this, _1));
 
@@ -104,6 +105,14 @@ WebLogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_
 }
 
 void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
+    /*
+    // special case for trace, show trace and notice messages only
+    // added by mvdp
+    if (log_level() == uuid::log::Level::TRACE && message->level != uuid::log::Level::TRACE && message->level != uuid::log::Level::NOTICE) {
+        return;
+    }
+    */
+
     if (log_messages_.size() >= maximum_log_messages_) {
         log_messages_.pop_front();
     }
@@ -184,7 +193,7 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
 
 // send the complete log buffer to the API, not filtering on log level
 void WebLogService::fetchLog(AsyncWebServerRequest * request) {
-    MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN); // 16kb buffer
+    MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN + 192 * log_messages_.size());
     JsonObject                 root     = response->getRoot();
     JsonArray                  log      = root.createNestedArray("events");
 

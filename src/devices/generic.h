@@ -25,9 +25,7 @@ namespace emsesp {
 
 class Generic : public EMSdevice {
   public:
-    Generic(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
-
-    virtual bool publish_ha_device_config();
+    Generic(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand);
 
   private:
     static uuid::log::Logger logger_;

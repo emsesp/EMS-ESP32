@@ -172,9 +172,10 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["publish_time_sensor"]     = settings.publish_time_sensor;
     root["mqtt_qos"]                = settings.mqtt_qos;
     root["mqtt_retain"]             = settings.mqtt_retain;
-    root["ha_climate_format"]       = settings.ha_climate_format;
     root["ha_enabled"]              = settings.ha_enabled;
     root["nested_format"]           = settings.nested_format;
+    root["discovery_prefix"]        = settings.discovery_prefix;
+    root["publish_single"]          = settings.publish_single;
     root["send_response"]           = settings.send_response;
 }
 
@@ -202,10 +203,11 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_time_other      = root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
 
-    newSettings.ha_climate_format = root["ha_climate_format"] | EMSESP_DEFAULT_HA_CLIMATE_FORMAT;
-    newSettings.ha_enabled        = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
-    newSettings.nested_format     = root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT;
-    newSettings.send_response     = root["send_response"] | EMSESP_DEFAULT_SEND_RESPONSE;
+    newSettings.ha_enabled       = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
+    newSettings.nested_format    = root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT;
+    newSettings.discovery_prefix = root["discovery_prefix"] | EMSESP_DEFAULT_DISCOVERY_PREFIX;
+    newSettings.publish_single   = root["publish_single"] | EMSESP_DEFAULT_PUBLISH_SINGLE;
+    newSettings.send_response    = root["send_response"] | EMSESP_DEFAULT_SEND_RESPONSE;
 
     if (newSettings.enabled != settings.enabled) {
         changed = true;
@@ -220,12 +222,15 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
         changed = true;
     }
 
-    if (newSettings.send_response != settings.send_response) {
+    if (newSettings.discovery_prefix != settings.discovery_prefix) {
         changed = true;
     }
 
-    if (newSettings.ha_climate_format != settings.ha_climate_format) {
-        emsesp::EMSESP::mqtt_.ha_climate_format(newSettings.ha_climate_format);
+    if (newSettings.publish_single != settings.publish_single) {
+        changed = true;
+    }
+
+    if (newSettings.send_response != settings.send_response) {
         changed = true;
     }
 

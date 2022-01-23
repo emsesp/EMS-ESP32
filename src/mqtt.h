@@ -19,22 +19,13 @@
 #ifndef EMSESP_MQTT_H_
 #define EMSESP_MQTT_H_
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
-
-#include <string>
-#include <vector>
-#include <deque>
-#include <functional>
-
 #include <AsyncMqttClient.h>
 
 #include "helpers.h"
 #include "system.h"
 #include "console.h"
 #include "command.h"
-
-#include <uuid/log.h>
+#include "emsdevicevalue.h"
 
 using uuid::console::Shell;
 
@@ -88,15 +79,12 @@ class Mqtt {
 
     };
 
-    // for Home Assistant
-    enum class State_class { NONE, MEASUREMENT, TOTAL_INCREASING };
-    enum class Device_class { NONE, TEMPERATURE, POWER_FACTOR, ENERGY, PRESSURE, POWER, SIGNAL_STRENGTH };
-
     static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // note this should really match the user setting in mqttSettings.maxTopicLength
 
     static void on_connect();
 
     static void subscribe(const uint8_t device_type, const std::string & topic, mqtt_sub_function_p cb);
+    static void subscribe(const std::string & topic);
     static void resubscribe();
 
     static void publish(const std::string & topic, const std::string & payload);
@@ -112,21 +100,25 @@ class Mqtt {
     static void publish_ha(const __FlashStringHelper * topic, const JsonObject & payload);
     static void publish_ha(const std::string & topic);
 
-    static void publish_ha_sensor_config(uint8_t                     type,
-                                         uint8_t                     tag,
-                                         const __FlashStringHelper * name,
-                                         const uint8_t               device_type,
-                                         const __FlashStringHelper * entity,
-                                         const uint8_t               uom,
-                                         const bool                  remove,
-                                         const bool                  has_cmd);
+    static void
+    publish_ha_sensor_config(DeviceValue & dv, const std::string & model, const std::string & brand, const bool remove, const bool create_device_config = false);
 
-    static void publish_ha_sensor_config(uint8_t                     type,
-                                         uint8_t                     tag,
-                                         const __FlashStringHelper * name,
-                                         const uint8_t               device_type,
-                                         const __FlashStringHelper * entity,
-                                         const uint8_t               uom);
+    static void publish_ha_sensor_config(uint8_t                             type,
+                                         uint8_t                             tag,
+                                         const __FlashStringHelper *         name,
+                                         const uint8_t                       device_type,
+                                         const __FlashStringHelper *         entity,
+                                         const uint8_t                       uom,
+                                         const bool                          remove,
+                                         const bool                          create_device_config,
+                                         const bool                          has_cmd,
+                                         const __FlashStringHelper * const * options,
+                                         uint8_t                             options_size,
+                                         const int16_t                       dv_set_min,
+                                         const int16_t                       dv_set_max,
+                                         const JsonObject &                  dev_json);
+
+    static void publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelper * name, const __FlashStringHelper * entity, const uint8_t uom);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -165,11 +157,19 @@ class Mqtt {
         return mqtt_base_;
     }
 
+    // returns the discovery MQTT topic prefix and adds a /
+    static std::string discovery_prefix() {
+        if (discovery_prefix_.empty()) {
+            return std::string{};
+        }
+        return discovery_prefix_ + "/";
+    }
+
     static void base(const char * base) {
         mqtt_base_ = base;
     }
 
-    static uint16_t publish_count() {
+    static uint32_t publish_count() {
         return mqtt_message_id_;
     }
 
@@ -179,21 +179,25 @@ class Mqtt {
 
     static void reset_mqtt();
 
-    static uint8_t ha_climate_format() {
-        return ha_climate_format_;
-    }
-
     // nested_format is 1 if nested, otherwise 2 for single topics
     static uint8_t nested_format() {
         return nested_format_;
     }
 
-    static void nested_format(uint8_t nested_format) {
-        nested_format_ = nested_format;
+    static bool is_nested() {
+        return nested_format_ == 1;
     }
 
-    static void ha_climate_format(uint8_t ha_climate_format) {
-        ha_climate_format_ = ha_climate_format;
+    static bool publish_single() {
+        return publish_single_;
+    }
+
+    static void publish_single(bool publish_single) {
+        publish_single_ = publish_single;
+    }
+
+    static void nested_format(uint8_t nested_format) {
+        nested_format_ = nested_format;
     }
 
     static bool ha_enabled() {
@@ -227,7 +231,7 @@ class Mqtt {
     static const std::string tag_to_topic(uint8_t device_type, uint8_t tag);
 
     struct QueuedMqttMessage {
-        const uint16_t                           id_;
+        const uint32_t                           id_;
         const std::shared_ptr<const MqttMessage> content_;
         uint8_t                                  retry_count_;
         uint16_t                                 packet_id_;
@@ -247,7 +251,7 @@ class Mqtt {
     static uuid::log::Logger logger_;
 
     static AsyncMqttClient * mqttClient_;
-    static uint16_t          mqtt_message_id_;
+    static uint32_t          mqtt_message_id_;
 
     static constexpr uint32_t MQTT_PUBLISH_WAIT      = 100; // delay between sending publishes, to account for large payloads
     static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY = 3;   // max retries for giving up on publishing
@@ -285,7 +289,7 @@ class Mqtt {
 
     static bool     connecting_;
     static bool     initialized_;
-    static uint16_t mqtt_publish_fails_;
+    static uint32_t mqtt_publish_fails_;
     static uint8_t  connectcount_;
 
     // settings, copied over
@@ -300,9 +304,10 @@ class Mqtt {
     static uint32_t    publish_time_other_;
     static uint32_t    publish_time_sensor_;
     static bool        mqtt_enabled_;
-    static uint8_t     ha_climate_format_;
     static bool        ha_enabled_;
     static uint8_t     nested_format_;
+    static std::string discovery_prefix_;
+    static bool        publish_single_;
     static bool        send_response_;
 };
 

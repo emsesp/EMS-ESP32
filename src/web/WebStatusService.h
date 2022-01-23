@@ -19,15 +19,9 @@
 #ifndef WebStatusService_h
 #define WebStatusService_h
 
-#include <ArduinoJson.h>
-#include <AsyncJson.h>
-#include <ESPAsyncWebServer.h>
-#include <SecurityManager.h>
-#include <AsyncMqttClient.h>
-
 #include <ESPmDNS.h>
 
-#define EMSESP_STATUS_SERVICE_PATH "/rest/emsespStatus"
+#define EMSESP_STATUS_SERVICE_PATH "/rest/status"
 
 namespace emsesp {
 

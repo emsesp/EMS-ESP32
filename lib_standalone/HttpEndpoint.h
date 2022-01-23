@@ -129,4 +129,4 @@ class HttpEndpoint : public HttpGetEndpoint<T>, public HttpPostEndpoint<T> {
   }
 };
 
-#endif  // end HttpEndpoint
+#endif

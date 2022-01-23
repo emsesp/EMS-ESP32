@@ -22,4 +22,4 @@ class NTPStatus {
     void ntpStatus(AsyncWebServerRequest * request);
 };
 
-#endif // end NTPStatus_h
+#endif

@@ -128,13 +128,11 @@ void SyslogService::log_level(uuid::log::Level level) {
     bool        level_changed = !level_set || (level != log_level());
     level_set                 = true;
 
-    if (level_changed && level < uuid::log::Level::NOTICE) {
+    if (level_changed) {
         logger_.info(F("Log level set to %S"), uuid::log::format_level_uppercase(level));
     }
+
     uuid::log::Logger::register_handler(this, level);
-    if (level_changed && level >= uuid::log::Level::NOTICE) {
-        logger_.info(F("Log level set to %S"), uuid::log::format_level_uppercase(level));
-    }
 }
 
 size_t SyslogService::maximum_log_messages() const {
@@ -154,7 +152,7 @@ std::pair<IPAddress, uint16_t> SyslogService::destination() const {
 }
 
 void SyslogService::destination(IPAddress host, uint16_t port) {
-    ip_ = host;
+    ip_   = host;
     port_ = port;
 
     if ((uint32_t)ip_ == (uint32_t)0) {
@@ -429,7 +427,16 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
 
     udp_.printf_P(PSTR("<%u>1 "), ((unsigned int)message.content_->facility * 8) + std::min(7U, (unsigned int)message.content_->level));
     if (tm.tm_year != 0) {
-        udp_.printf_P(PSTR("%04u-%02u-%02uT%02u:%02u:%02u.%06u%+02d:%02d"), tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, (uint32_t)message.time_.tv_usec, tzh, tzm);
+        udp_.printf_P(PSTR("%04u-%02u-%02uT%02u:%02u:%02u.%06u%+02d:%02d"),
+                      tm.tm_year + 1900,
+                      tm.tm_mon + 1,
+                      tm.tm_mday,
+                      tm.tm_hour,
+                      tm.tm_min,
+                      tm.tm_sec,
+                      (uint32_t)message.time_.tv_usec,
+                      tzh,
+                      tzm);
     } else {
         udp_.print('-');
     }
@@ -438,11 +445,8 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
 
     char id_c_str[15];
     snprintf_P(id_c_str, sizeof(id_c_str), PSTR(" %lu: "), message.id_);
-    std::string msgstr = uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3) +
-                         ' ' +
-                         uuid::log::format_level_char(message.content_->level) +
-                         id_c_str +
-                         message.content_->text;
+    std::string msgstr = uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3) + ' ' + uuid::log::format_level_char(message.content_->level) + id_c_str
+                         + message.content_->text;
     for (uint16_t i = 0; i < msgstr.length(); i++) {
         if (msgstr.at(i) & 0x80) {
             udp_.print("\xEF\xBB\xBF");

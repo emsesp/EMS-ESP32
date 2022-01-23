@@ -80,15 +80,6 @@ void Shower::loop() {
                         LOG_DEBUG(F("[Shower] finished with duration %d"), duration_);
                     }
                 }
-#if defined(EMSESP_DEBUG)
-                else {
-                    if (shower_state_) {
-                        Mqtt::publish("message", "shower state is ON");
-                    } else {
-                        Mqtt::publish("message", "shower state is OFF");
-                    }
-                }
-#endif
 
                 // reset everything
                 timer_start_       = 0;
@@ -133,9 +124,17 @@ void Shower::shower_alert_start() {
 void Shower::publish_shower_data() {
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
 
-    char result[10];
-    doc["shower_timer"] = Helpers::render_boolean(result, shower_timer_);
-    doc["shower_alert"] = Helpers::render_boolean(result, shower_alert_);
+    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+        doc["shower_timer"] = shower_timer_;
+        doc["shower_alert"] = shower_alert_;
+    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+        doc["shower_timer"] = shower_timer_ ? 1 : 0;
+        doc["shower_alert"] = shower_alert_ ? 1 : 0;
+    } else {
+        char result[10];
+        doc["shower_timer"] = Helpers::render_boolean(result, shower_timer_);
+        doc["shower_alert"] = Helpers::render_boolean(result, shower_alert_);
+    }
 
     // only publish shower duration if there is a value
     if (duration_ > SHOWER_MIN_DURATION) {
@@ -165,6 +164,7 @@ void Shower::set_shower_state(bool state, bool force) {
     }
     old_shower_state_ = shower_state_; // copy current state
 
+    // always publish as a string
     char s[7];
     Mqtt::publish(F("shower_active"), Helpers::render_boolean(s, shower_state_)); // https://github.com/emsesp/EMS-ESP/issues/369
 
@@ -175,13 +175,16 @@ void Shower::set_shower_state(bool state, bool force) {
         StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
         doc["name"]    = FJSON("Shower Active");
         doc["uniq_id"] = FJSON("shower_active");
-        doc["~"]       = Mqtt::base(); // default ems-esp
+        doc["~"]       = Mqtt::base();
         doc["stat_t"]  = FJSON("~/shower_active");
+
+        // always render boolean as strings for HA
         char result[10];
         doc[F("payload_on")]  = Helpers::render_boolean(result, true);
         doc[F("payload_off")] = Helpers::render_boolean(result, false);
-        JsonObject dev        = doc.createNestedObject("dev");
-        JsonArray  ids        = dev.createNestedArray("ids");
+
+        JsonObject dev = doc.createNestedObject("dev");
+        JsonArray  ids = dev.createNestedArray("ids");
         ids.add("ems-esp");
 
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];

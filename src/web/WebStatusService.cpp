@@ -34,13 +34,13 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     switch (event) {
     case SYSTEM_EVENT_STA_DISCONNECTED:
-        EMSESP::logger().info(F("WiFi Disconnected. Reason code=%d"), info.disconnected.reason);
+        EMSESP::logger().info(F("WiFi disconnected. Reason code=%d"), info.disconnected.reason);
         WiFi.disconnect(true);
         break;
 
     case SYSTEM_EVENT_STA_GOT_IP:
 #ifndef EMSESP_STANDALONE
-        EMSESP::logger().info(F("WiFi Connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
+        EMSESP::logger().info(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
 #endif
         EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
             if (!networkSettings.enableIPv6) {
@@ -52,7 +52,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         break;
 
     case SYSTEM_EVENT_ETH_START:
-        EMSESP::logger().info(F("Ethernet initialized"));
+        // EMSESP::logger().info(F("Ethernet initialized"));
         ETH.setHostname(EMSESP::system_.hostname().c_str());
 
         // configure for static IP
@@ -68,7 +68,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         // prevent double calls
         if (!EMSESP::system_.ethernet_connected()) {
 #ifndef EMSESP_STANDALONE
-            EMSESP::logger().info(F("Ethernet Connected with IP=%s, speed %d Mbps"), ETH.localIP().toString().c_str(), ETH.linkSpeed());
+            EMSESP::logger().info(F("Ethernet connected with IP=%s, speed %d Mbps"), ETH.localIP().toString().c_str(), ETH.linkSpeed());
 #endif
             EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
                 if (!networkSettings.enableIPv6) {
@@ -82,12 +82,12 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         break;
 
     case SYSTEM_EVENT_ETH_DISCONNECTED:
-        EMSESP::logger().info(F("Ethernet Disconnected"));
+        EMSESP::logger().info(F("Ethernet disconnected"));
         EMSESP::system_.ethernet_connected(false);
         break;
 
     case SYSTEM_EVENT_ETH_STOP:
-        EMSESP::logger().info(F("Ethernet Stopped"));
+        EMSESP::logger().info(F("Ethernet stopped"));
         EMSESP::system_.ethernet_connected(false);
         break;
 
@@ -110,9 +110,9 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 
     case SYSTEM_EVENT_GOT_IP6:
         if (EMSESP::system_.ethernet_connected()) {
-            EMSESP::logger().info(F("Ethernet Connected with IP=%s, speed %d Mbps"), ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
+            EMSESP::logger().info(F("Ethernet connected with IP=%s, speed %d Mbps"), ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
         } else {
-            EMSESP::logger().info(F("WiFi Connected with IP=%s, hostname=%s"), WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
+            EMSESP::logger().info(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
         }
         EMSESP::system_.send_heartbeat();
         EMSESP::system_.syslog_start();
@@ -129,11 +129,34 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM_DYN);
     JsonObject          root     = response->getRoot();
 
-    root["status"]      = EMSESP::bus_status(); // 0, 1 or 2
-    root["rx_received"] = EMSESP::rxservice_.telegram_count();
-    root["tx_sent"]     = EMSESP::txservice_.telegram_read_count() + EMSESP::txservice_.telegram_write_count();
-    root["rx_quality"]  = EMSESP::rxservice_.quality();
-    root["tx_quality"]  = EMSESP::txservice_.quality();
+    root["status"]           = EMSESP::bus_status();    // 0, 1 or 2
+    root["num_devices"]      = EMSESP::count_devices(); // excluding Controller
+    root["num_sensors"]      = EMSESP::dallassensor_.no_sensors();
+    root["num_analogs"]      = EMSESP::analogsensor_.no_sensors();
+    root["tx_mode"]          = EMSESP::txservice_.tx_mode();
+    root["rx_received"]      = EMSESP::rxservice_.telegram_count();
+    root["tx_reads"]         = EMSESP::txservice_.telegram_read_count();
+    root["tx_writes"]        = EMSESP::txservice_.telegram_write_count();
+    root["rx_quality"]       = EMSESP::rxservice_.quality();
+    root["tx_read_quality"]  = EMSESP::txservice_.read_quality();
+    root["tx_write_quality"] = EMSESP::txservice_.write_quality();
+    root["rx_fails"]         = EMSESP::rxservice_.telegram_error_count();
+    root["tx_read_fails"]    = EMSESP::txservice_.telegram_read_fail_count();
+    root["tx_write_fails"]   = EMSESP::txservice_.telegram_write_fail_count();
+    root["sensor_fails"]     = EMSESP::dallassensor_.fails();
+    root["sensor_reads"]     = EMSESP::dallassensor_.reads();
+    root["sensor_quality"] = EMSESP::dallassensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::dallassensor_.fails()) / EMSESP::dallassensor_.reads());
+    root["analog_fails"]   = EMSESP::analogsensor_.fails();
+    root["analog_reads"]   = EMSESP::analogsensor_.reads();
+    root["analog_quality"] = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
+    root["mqtt_fails"]     = Mqtt::publish_fails();
+    root["mqtt_count"]     = Mqtt::publish_count();
+    root["mqtt_quality"]   = Mqtt::publish_count() == 0 ? 100 : 100 - (Mqtt::publish_fails() * 100) / (Mqtt::publish_count() + Mqtt::publish_fails());
+    root["api_calls"]      = WebAPIService::api_count(); // + WebAPIService::api_fails();
+    root["api_fails"]      = WebAPIService::api_fails();
+    root["api_quality"] =
+        WebAPIService::api_count() == 0 ? 100 : 100 - (WebAPIService::api_fails() * 100) / (WebAPIService::api_count() + WebAPIService::api_fails());
+    root["uptime"] = EMSbus::bus_uptime();
 
     response->setLength();
     request->send(response);

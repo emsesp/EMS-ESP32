@@ -1,54 +1,31 @@
-import { Component } from 'react';
-import { Link, withRouter, RouteComponentProps } from 'react-router-dom';
+import { FC, useContext } from 'react';
 
-import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import { List } from '@mui/material';
 
-import TuneIcon from '@material-ui/icons/Tune';
-import DashboardIcon from '@material-ui/icons/Dashboard';
+import { AuthenticatedContext } from '../contexts/authentication';
 
-import {
-  withAuthenticatedContext,
-  AuthenticatedContextProps
-} from '../authentication';
+import { PROJECT_PATH } from '../api/env';
 
-type ProjectProps = AuthenticatedContextProps & RouteComponentProps;
+import TuneIcon from '@mui/icons-material/Tune';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import LayoutMenuItem from '../components/layout/LayoutMenuItem';
+import InfoIcon from '@mui/icons-material/Info';
 
-class ProjectMenu extends Component<ProjectProps> {
-  render() {
-    const { authenticatedContext } = this.props;
-    const path = this.props.match.url;
-    return (
-      <List>
-        <ListItem
-          to="/ems-esp/"
-          selected={
-            path.startsWith('/ems-esp/status') ||
-            path.startsWith('/ems-esp/data') ||
-            path.startsWith('/ems-esp/help')
-          }
-          button
-          component={Link}
-        >
-          <ListItemIcon>
-            <DashboardIcon />
-          </ListItemIcon>
-          <ListItemText primary="Dashboard" />
-        </ListItem>
-        <ListItem
-          to="/ems-esp/settings"
-          selected={path.startsWith('/ems-esp/settings')}
-          button
-          component={Link}
-          disabled={!authenticatedContext.me.admin}
-        >
-          <ListItemIcon>
-            <TuneIcon />
-          </ListItemIcon>
-          <ListItemText primary="Settings" />
-        </ListItem>
-      </List>
-    );
-  }
-}
+const ProjectMenu: FC = () => {
+  const authenticatedContext = useContext(AuthenticatedContext);
 
-export default withRouter(withAuthenticatedContext(ProjectMenu));
+  return (
+    <List>
+      <LayoutMenuItem icon={DashboardIcon} label="Dashboard" to={`/${PROJECT_PATH}/dashboard`} />
+      <LayoutMenuItem
+        icon={TuneIcon}
+        label="Settings"
+        to={`/${PROJECT_PATH}/settings`}
+        disabled={!authenticatedContext.me.admin}
+      />
+      <LayoutMenuItem icon={InfoIcon} label="Help" to={`/${PROJECT_PATH}/help`} />
+    </List>
+  );
+};
+
+export default ProjectMenu;
