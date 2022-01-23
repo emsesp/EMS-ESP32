@@ -231,7 +231,7 @@ bool AnalogSensor::updated_values() {
 }
 
 // publish a single sensor to MQTT
-void AnalogSensor::publish_sensor(Sensor sensor) {
+void AnalogSensor::publish_sensor(const Sensor & sensor) {
     if (Mqtt::publish_single()) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf(topic, sizeof(topic), "%s/%s", read_flash_string(F_(analogsensor)).c_str(), sensor.name().c_str());
