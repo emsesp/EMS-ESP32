@@ -46,7 +46,7 @@ const networkStatus = ({ status }: NetworkStatus) => {
     case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
       return 'Connected (WiFi)';
     case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
-      return 'Connected (Wired)';
+      return 'Connected (Ethernet)';
     case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
       return 'Connection Failed';
     case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
@@ -65,7 +65,7 @@ const dnsServers = ({ dns_ip_1, dns_ip_2 }: NetworkStatus) => {
   if (!dns_ip_1) {
     return 'none';
   }
-  return dns_ip_1 + (dns_ip_2 ? ',' + dns_ip_2 : '');
+  return dns_ip_1 + (dns_ip_2 === '0.0.0.0' ? '' : ',' + dns_ip_2);
 };
 
 const IPs = (status: NetworkStatus) => {
