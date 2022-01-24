@@ -131,6 +131,7 @@ export interface DeviceValue {
   n: string; // name
   c: string; // command
   l: string[]; // list
+  h?: string; // help text
 }
 
 export interface DeviceData {

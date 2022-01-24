@@ -737,9 +737,9 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                     l.add("off");
                     l.add("on");
                 }
-                // add command template
+                // add command help template
                 if ((dv.type == DeviceValueType::STRING || dv.type == DeviceValueType::CMD) && dv.options_size == 1) {
-                    obj["o"] = dv.options[0];
+                    obj["h"] = dv.options[0];
                 }
             }
         }
