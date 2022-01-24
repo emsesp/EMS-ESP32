@@ -71,7 +71,6 @@ MAKE_PSTR_WORD(publish)
 MAKE_PSTR_WORD(timeout)
 MAKE_PSTR_WORD(board_profile)
 MAKE_PSTR_WORD(counter)
-MAKE_PSTR_WORD(sensorname)
 
 // for commands
 MAKE_PSTR_WORD(call)
@@ -125,7 +124,6 @@ MAKE_PSTR_LIST(enum_watch, F_(off), F_(on), F_(raw), F_(unknown))
 MAKE_PSTR_LIST(enum_sensortype, F("none"), F("digital in"), F("counter"), F("adc"))
 
 // strings
-MAKE_PSTR(show_optional, "[devices | users | ems | mqtt | system | commands]")
 MAKE_PSTR(EMSESP, "EMS-ESP")
 MAKE_PSTR(cmd_optional, "[cmd]")
 MAKE_PSTR(ha_optional, "[ha]")
@@ -198,8 +196,8 @@ MAKE_PSTR(dbm, "dBm")
 MAKE_PSTR(fahrenheit, "°F")
 MAKE_PSTR(mv, "mV")
 MAKE_PSTR(sqm, "sqm")
-MAKE_PSTR(times, "times")
-MAKE_PSTR(oclock, "o'clock")
+// MAKE_PSTR(times, "times")
+// MAKE_PSTR(oclock, "o'clock")
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
@@ -334,7 +332,6 @@ MAKE_PSTR(smoke_temperature, "smoke temperature")
 
 // thermostat lists
 MAKE_PSTR_LIST(tpl_datetime, F("Format: < NTP | hh:mm:ss dd.mm.yyyy-dw-dst >"))
-// MAKE_PSTR_LIST(tpl_switchtime, F("Format: < p:nn.d.o.hh:mm > prog, no, day, on, time"))
 MAKE_PSTR_LIST(tpl_switchtime, F("Format: <nn> [ not_set | day hh:mm on|off ]"))
 MAKE_PSTR_LIST(tpl_holidays, F("format: < dd.mm.yyyy-dd.mm.yyyy >"))
 MAKE_PSTR_LIST(enum_ibaMainDisplay,
@@ -367,7 +364,7 @@ MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))                        // CRF
 MAKE_PSTR_LIST(enum_mode6, F_(nofrost), F_(night), F_(day))          // RC10
 
 MAKE_PSTR_LIST(enum_modetype, F_(eco), F_(comfort))
-MAKE_PSTR_LIST(enum_modetype2, F_(day))
+// MAKE_PSTR_LIST(enum_modetype2, F_(day))
 MAKE_PSTR_LIST(enum_modetype3, F_(night), F_(day))
 MAKE_PSTR_LIST(enum_modetype4, F_(nofrost), F_(eco), F_(heat))
 MAKE_PSTR_LIST(enum_modetype5, F_(off), F_(on))
@@ -376,7 +373,7 @@ MAKE_PSTR_LIST(enum_reducemode, F_(nofrost), F_(reduce), F_(room), F_(outdoor))
 
 MAKE_PSTR_LIST(enum_controlmode, F_(off), F_(optimized), F_(simple), F_(mpc), F_(room), F_(power), F_(constant))
 MAKE_PSTR_LIST(enum_controlmode2, F_(outdoor), F_(room))
-MAKE_PSTR_LIST(enum_controlmode3, F_(off), F_(room), F_(outdoor), F("room+outdoor"))
+// MAKE_PSTR_LIST(enum_controlmode3, F_(off), F_(room), F_(outdoor), F("room+outdoor"))
 MAKE_PSTR_LIST(enum_control, F_(off), F_(rc20), F_(rc3x))
 MAKE_PSTR_LIST(enum_j_control, F_(off), F("fb10"), F("fb110"))
 
