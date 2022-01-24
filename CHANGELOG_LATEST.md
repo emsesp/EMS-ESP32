@@ -1,8 +1,8 @@
 # Changelog
 
-# [3.4.0]
+## [3.4.0]
 
-## Added
+### Added
 
 - WebUI optimizations, updated look&feel and better performance [#124](https://github.com/emsesp/EMS-ESP32/issues/124)
 - Auto refresh of WebUI after successful firmware upload [#178](https://github.com/emsesp/EMS-ESP32/issues/178)
@@ -19,8 +19,11 @@
 - Added 8700i Boiler device
 - Added Cascade CM10 Controller device
 - Add Olimex ESP32-POE-ISO to board profiles plus settings to customize Ethernet modules [#301](https://github.com/emsesp/EMS-ESP32/issues/301)
+- helptext for string commands in WebUI [#320](https://github.com/emsesp/EMS-ESP32/issues/320)
+- Germany translations (at compile time)
+- #entities added to system/info` endpoint [#322](https://github.com/emsesp/EMS-ESP32/issues/322)
 
-## Fixed
+### Fixed
 
 - lastcode broke MQTT JSON structure [#228](https://github.com/emsesp/EMS-ESP32/issues/228)
 - fixed issue with overlapping while reading sequence of EMS1.0 telegrams
@@ -33,7 +36,7 @@
 - Increased number of Mixers and Heating Circuits [#294](https://github.com/emsesp/EMS-ESP32/issues/294)
 - Check receive status before removing a telegram fetch [#268](https://github.com/emsesp/EMS-ESP32/issues/268), [#282](https://github.com/emsesp/EMS-ESP32/issues/282)
 
-## Changed
+### Changed
 
 - Use flash system to show system health (1 flash=no ems, 2 flashes=no wifi) [#224](https://github.com/emsesp/EMS-ESP32/issues/224)
 - Renamed Dallas Sensor to Temperature Sensor in UI
@@ -44,6 +47,7 @@
 - renamed "Home Assistant Integration" to "MQTT Discovery" in MQTT Settings [#290](https://github.com/emsesp/EMS-ESP32/issues/290)
 - Show ems tx reads and writes separatly
 - Show ems device handlers separated for received, fetched and pending handlers.
+- Wired renamed to Ethernet
 
 ## **BREAKING CHANGES:**
 
@@ -54,3 +58,4 @@
   - Boiler `wwheat` renamed to `ww3wayon` [#211](https://github.com/emsesp/EMS-ESP32/issues/211)
   - Boiler `ww` tag renamed to `dhw`. Any custom Home Assistant lovelace dashboards will need updating.
   - Renamed description of `wwtapactivated` to "turn on/off DHW". Otherwise would have looked like "boiler_dhw_turn_on_off_dhw" in HA.
+  - `/api/system/info` endpoint has updated keys. Now lowercase, no underscores and not capitalized. Replace "handlers" with "handlers received", "handlers fetched" and "handlers pending".
