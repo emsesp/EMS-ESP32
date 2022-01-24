@@ -1079,11 +1079,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
     if (EMSESP::dallas_enabled()) {
-        node["Temperature sensors"] = EMSESP::dallassensor_.no_sensors();
+        node["temperature sensors"] = EMSESP::dallassensor_.no_sensors();
     }
 
     if (EMSESP::analog_enabled()) {
-        node["Analog sensors"] = EMSESP::analogsensor_.no_sensors();
+        node["analog sensors"] = EMSESP::analogsensor_.no_sensors();
     }
 
 #ifndef EMSESP_STANDALONE
@@ -1103,7 +1103,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
         }
     } else if (EMSESP::system_.ethernet_connected()) {
-        node["connection"]      = F("Wired");
+        node["connection"]      = F("Ethernet");
         node["hostname"]        = ETH.getHostname();
         node["MAC"]             = ETH.macAddress();
         node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
@@ -1146,25 +1146,25 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["MQTT publishes"]     = Mqtt::publish_count();
             node["MQTT publish fails"] = Mqtt::publish_fails();
         }
-        node["Temperature sensors"] = EMSESP::dallassensor_.no_sensors();
+        node["temperature sensors"] = EMSESP::dallassensor_.no_sensors();
         if (EMSESP::dallas_enabled()) {
-            node["Temperature sensor reads"] = EMSESP::dallassensor_.reads();
-            node["Temperature sensor fails"] = EMSESP::dallassensor_.fails();
+            node["temperature sensor reads"] = EMSESP::dallassensor_.reads();
+            node["temperature sensor fails"] = EMSESP::dallassensor_.fails();
         }
-        node["Analog sensors"] = EMSESP::analogsensor_.no_sensors();
+        node["analog sensors"] = EMSESP::analogsensor_.no_sensors();
         if (EMSESP::analog_enabled()) {
-            node["Analog sensor reads"] = EMSESP::analogsensor_.reads();
-            node["Analog sensor fails"] = EMSESP::analogsensor_.fails();
+            node["analog sensor reads"] = EMSESP::analogsensor_.reads();
+            node["analog sensor fails"] = EMSESP::analogsensor_.fails();
         }
         node["API calls"] = WebAPIService::api_count();
         node["API fails"] = WebAPIService::api_fails();
 
 #ifndef EMSESP_STANDALONE
         if (EMSESP::system_.syslog_enabled_) {
-            node["syslog_started"] = syslog_.started();
-            node["syslog_level"]   = FL_(enum_syslog_level)[syslog_.log_level() + 1];
-            node["syslog_ip"]      = syslog_.ip();
-            node["syslog_queue"]   = syslog_.queued();
+            node["syslog started"] = syslog_.started();
+            node["syslog level"]   = FL_(enum_syslog_level)[syslog_.log_level() + 1];
+            node["syslog ip"]      = syslog_.ip();
+            node["syslog queue"]   = syslog_.queued();
         }
 #endif
     }
@@ -1180,15 +1180,15 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
                 char result[200];
                 (void)emsdevice->show_telegram_handlers(result, EMSdevice::Handlers::RECEIVED);
                 if (result[0] != '\0') {
-                    obj["handlers_received"] = result; // don't show handlers if there aren't any
+                    obj["handlers received"] = result; // don't show handlers if there aren't any
                 }
                 (void)emsdevice->show_telegram_handlers(result, EMSdevice::Handlers::FETCHED);
                 if (result[0] != '\0') {
-                    obj["handlers_fetched"] = result;
+                    obj["handlers fetched"] = result;
                 }
                 (void)emsdevice->show_telegram_handlers(result, EMSdevice::Handlers::PENDING);
                 if (result[0] != '\0') {
-                    obj["handlers_pending"] = result;
+                    obj["handlers pending"] = result;
                 }
             }
         }

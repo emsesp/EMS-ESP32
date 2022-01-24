@@ -103,7 +103,7 @@ const DashboardData: FC = () => {
     }
     loadData();
 
-    if (selectedDevice === 0) {
+    if (sensorData) {
       fetchSensorData();
     } else if (selectedDevice) {
       fetchDeviceData(selectedDevice);
@@ -116,7 +116,7 @@ const DashboardData: FC = () => {
       clearInterval(timer);
     };
     // eslint-disable-next-line
-  }, [analog, sensor, deviceValue, selectedDevice]);
+  }, [analog, sensor, deviceValue, sensorData, selectedDevice]);
 
   const fetchDeviceData = async (unique_id: number) => {
     try {

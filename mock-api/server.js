@@ -1103,7 +1103,7 @@ const emsesp_info = {
     'Dallas sensors': 3,
   },
   Network: {
-    connection: 'Wired',
+    connection: 'Ethernet',
     hostname: 'ems-esp',
     MAC: 'A8:03:2A:62:64:CF',
     'IPv4 address': '192.168.1.134/255.255.255.0',
