@@ -1174,9 +1174,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
-                JsonObject obj = devices.createNestedObject();
-                obj["type"]    = emsdevice->device_type_name();
-                obj["name"]    = emsdevice->to_string();
+                JsonObject obj  = devices.createNestedObject();
+                obj["type"]     = emsdevice->device_type_name();
+                obj["name"]     = emsdevice->to_string();
+                obj["entities"] = emsdevice->count_entities();
                 char result[200];
                 (void)emsdevice->show_telegram_handlers(result, EMSdevice::Handlers::RECEIVED);
                 if (result[0] != '\0') {
