@@ -14,6 +14,7 @@ import {
   DialogActions,
   MenuItem,
   InputAdornment,
+  FormHelperText,
   IconButton,
   List,
   ListItem,
@@ -247,6 +248,9 @@ const DashboardData: FC = () => {
                   startAdornment: <InputAdornment position="start">{DeviceValueUOM_s[deviceValue.u]}</InputAdornment>
                 }}
               />
+            )}
+            {deviceValue.h && (
+              <FormHelperText>{deviceValue.h}</FormHelperText>
             )}
           </DialogContent>
           <DialogActions>
