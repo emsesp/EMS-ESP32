@@ -249,9 +249,7 @@ const DashboardData: FC = () => {
                 }}
               />
             )}
-            {deviceValue.h && (
-              <FormHelperText>{deviceValue.h}</FormHelperText>
-            )}
+            {deviceValue.h && <FormHelperText>{deviceValue.h}</FormHelperText>}
           </DialogContent>
           <DialogActions>
             <Button
