@@ -245,7 +245,7 @@ void EMSESPShell::add_console_commands() {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           flash_string_vector{F_(read)},
-                          flash_string_vector{F_(deviceid_mandatory), F_(typeid_mandatory), F_(offset_optional)},
+                          flash_string_vector{F_(deviceid_mandatory), F_(typeid_mandatory), F_(offset_optional), F_(length_optional)},
                           [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
                               uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
 
