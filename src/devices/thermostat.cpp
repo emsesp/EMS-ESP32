@@ -704,12 +704,16 @@ void Thermostat::process_RC10Set_2(std::shared_ptr<const Telegram> telegram) {
 #pragma GCC diagnostic pop
 
 // 0xA8 - for reading the mode from the RC20 thermostat (0x17)
+// RC20Set(0xA8), data: 01 00 FF F6 01 06 00 01 0D 01 00 FF FF 01 02 02 02 00 00 05 1E 05 1E 02 1C 00 FF 00 00 26 02
 void Thermostat::process_RC20Set(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
-    has_update(telegram, hc->mode, 23);
+    has_update(telegram, hc->mode, 23); // 0:off, 1:manual, 2:auto
+    // has_update(telegram, hc->nofrosttemp, 24); // guess, not confirmed yet, maybe nighttemp?
+    // has_update(telegram, hc->tempautotemp, 28); // no need to read this
+    has_update(telegram, hc->manualtemp, 29);
 }
 
 // type 0xAE - data from the RC20 thermostat (0x17) - not for RC20's
@@ -816,6 +820,8 @@ void Thermostat::process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram)
 }
 
 // 0x91 - data from the RC20 thermostat (0x17) - 15 bytes long
+// RC20Monitor(0x91), data: 90 2A 00 D5 1A 00 00 05 00 5A 04 00 D6 00
+// offset 8: setburnpower to boiler, offset 9: setflowtemp to boiler (thermostat: targetflowtemp) send via 0x1A
 void Thermostat::process_RC20Monitor(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
     if (hc == nullptr) {
@@ -2427,10 +2433,17 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             break;
         }
     } else if (model == EMS_DEVICE_FLAG_RC20) {
-        if (mode == HeatingCircuit::Mode::MANUAL) {
+        switch (mode) {
+        case HeatingCircuit::Mode::MANUAL:
             offset = EMS_OFFSET_RC20Set_temp_manual;
-        } else {
-            offset = EMS_OFFSET_RC20Set_temp_auto;
+            break;
+        case HeatingCircuit::Mode::AUTO:
+            if (hc->get_mode() == HeatingCircuit::Mode::MANUAL) {
+                offset = EMS_OFFSET_RC20Set_temp_manual;
+            } else {
+                offset = EMS_OFFSET_RC20Set_temp_auto;
+            }
+            break;
         }
 
     } else if (model == EMS_DEVICE_FLAG_RC30) {
@@ -3263,6 +3276,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         break;
     case EMS_DEVICE_FLAG_RC20:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
+        register_device_value(tag, &hc->manualtemp, DeviceValueType::UINT, FL_(div2), FL_(manualtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_manualtemp));
         break;
     case EMS_DEVICE_FLAG_RC20_N:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
