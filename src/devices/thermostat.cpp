@@ -380,17 +380,25 @@ void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit
     char temp_cmd_s[30];
     char mode_cmd_s[30];
 
+    // https://github.com/emsesp/EMS-ESP32/issues/325#issuecomment-1022249093
+    // before you had to have a seltemp and roomtemp for the HA to work, now its optional
+    bool have_current_room_temp = Helpers::hasValue(hc->roomTemp);
+
     if (Mqtt::nested_format() == 1) {
         // nested format
         snprintf(hc_mode_s, sizeof(hc_mode_s), "value_json.hc%d.mode", hc_num);
         snprintf(seltemp_s, sizeof(seltemp_s), "{{value_json.hc%d.seltemp}}", hc_num);
-        snprintf(currtemp_s, sizeof(currtemp_s), "{{value_json.hc%d.currtemp}}", hc_num);
+        if (have_current_room_temp) {
+            snprintf(currtemp_s, sizeof(currtemp_s), "{{value_json.hc%d.currtemp}}", hc_num);
+        }
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_NONE).c_str());
     } else {
         // single format
         snprintf(hc_mode_s, sizeof(hc_mode_s), "value_json.mode");
         snprintf(seltemp_s, sizeof(seltemp_s), "{{value_json.seltemp}}");
-        snprintf(currtemp_s, sizeof(currtemp_s), "{{value_json.currtemp}}");
+        if (have_current_room_temp) {
+            snprintf(currtemp_s, sizeof(currtemp_s), "{{value_json.currtemp}}");
+        }
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_HC1 + hc_num - 1).c_str());
     }
 
@@ -416,11 +424,15 @@ void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit
     doc["temp_stat_t"]   = topic_t;
     doc["temp_stat_tpl"] = seltemp_s;
     doc["mode_cmd_t"]    = mode_cmd_s;
-    doc["curr_temp_t"]   = topic_t;
-    doc["curr_temp_tpl"] = currtemp_s;
-    doc["min_temp"]      = "5";
-    doc["max_temp"]      = "30";
-    doc["temp_step"]     = "0.5";
+
+    if (have_current_room_temp) {
+        doc["curr_temp_t"]   = topic_t;
+        doc["curr_temp_tpl"] = currtemp_s;
+    }
+
+    doc["min_temp"]  = "5";
+    doc["max_temp"]  = "30";
+    doc["temp_step"] = "0.5";
 
     // the HA climate component only responds to auto, heat and off
     JsonArray modes = doc.createNestedArray("modes");
@@ -662,9 +674,8 @@ void Thermostat::add_ha_climate(std::shared_ptr<HeatingCircuit> hc) {
         return;
     }
 
-    // only if it has a valid seltemp and currtemp
-    // mode always defaults to auto
-    if (Helpers::hasValue(hc->roomTemp) && Helpers::hasValue(hc->selTemp)) {
+    // only if it has a valid seltemp (roomtemp is optional)
+    if (Helpers::hasValue(hc->selTemp)) {
         publish_ha_config_hc(hc);
         hc->ha_climate_created(true); // only create it once
     }
