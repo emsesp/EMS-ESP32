@@ -132,6 +132,7 @@ export interface DeviceValue {
   c: string; // command
   l: string[]; // list
   h?: string; // help text
+  s?: string; // steps for up/down
 }
 
 export interface DeviceData {

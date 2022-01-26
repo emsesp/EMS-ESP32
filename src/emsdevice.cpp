@@ -731,15 +731,26 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                             l.add(read_flash_string(dv.options[i]));
                         }
                     }
-                }
-                if (dv.type == DeviceValueType::BOOL) {
+                } else if (dv.type == DeviceValueType::BOOL) {
                     JsonArray l = obj.createNestedArray("l");
                     l.add("off");
                     l.add("on");
                 }
                 // add command help template
-                if ((dv.type == DeviceValueType::STRING || dv.type == DeviceValueType::CMD) && dv.options_size == 1) {
-                    obj["h"] = dv.options[0];
+                else if (dv.type == DeviceValueType::STRING || dv.type == DeviceValueType::CMD) {
+                    if (dv.options_size == 1) {
+                        obj["h"] = dv.options[0];
+                    }
+                }
+                // add steps to numeric values with divider/multiplier
+                else {
+                    int8_t divider = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
+                    char   s[10];
+                    if (divider > 0) {
+                        obj["s"] = Helpers::render_value(s, (float)1 / divider, 1);
+                    } else if (divider < 0) {
+                        obj["s"] = Helpers::render_value(s, (-1) * divider, 0);
+                    }
                 }
             }
         }
