@@ -38,6 +38,12 @@ void AnalogSensor::start() {
         F_(info),
         [&](const char * value, const int8_t id, JsonObject & output) { return command_info(value, id, output); },
         F_(info_cmd));
+    Command::add(
+        EMSdevice::DeviceType::ANALOGSENSOR,
+        F_(counter),
+        [&](const char * value, const int8_t id) { return command_counter(value, id); },
+        F("set counter value"),
+        CommandFlag::ADMIN_ONLY);
 }
 
 // load settings from the customization file, sorts them and initializes the GPIOs
@@ -279,7 +285,7 @@ void AnalogSensor::publish_values(const bool force) {
                 dataSensor["name"]    = sensor.name();
                 switch (sensor.type()) {
                 case AnalogType::COUNTER:
-                    dataSensor["count"] = (uint16_t)sensor.value(); // convert to integer
+                    dataSensor["value"] = (uint16_t)sensor.value(); // convert to integer
                     break;
                 case AnalogType::ADC:
                     dataSensor["value"] = (float)sensor.value(); // float
@@ -363,12 +369,13 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
         if (id == -1) { // show number and id
             JsonObject dataSensor = output.createNestedObject(sensor.name());
             dataSensor["id"]      = sensor.id();
-            dataSensor["name"]    = sensor.name();
-            dataSensor["type"]    = sensor.type();
-            dataSensor["uom"]     = sensor.uom();
-            dataSensor["offset"]  = sensor.offset();
-            dataSensor["factor"]  = sensor.factor();
-            dataSensor["value"]   = sensor.value();
+            dataSensor["type"] = FL_(enum_sensortype)[sensor.type()];
+            if (sensor.type() == AnalogType::ADC) {
+                dataSensor["uom"]    = EMSdevice::uom_to_string(sensor.uom());
+                dataSensor["offset"] = sensor.offset();
+                dataSensor["factor"] = sensor.factor();
+            }
+            dataSensor["value"] = sensor.value();
         } else {
             output[sensor.name()] = sensor.value();
         }
@@ -396,6 +403,25 @@ std::string AnalogSensor::Sensor::name() const {
         return name;
     }
     return name_;
+}
+
+// set the counter value, id is gpio-no
+bool AnalogSensor::command_counter(const char * value, const int8_t id) {
+    int val;
+    if (!Helpers::value2number(value, val)) {
+        return false;
+    }
+    for (auto & sensor : sensors_) {
+        if (sensor.type() == AnalogType::COUNTER && sensor.id() == id) {
+            if (val < 0) { // negative values corrects
+                sensor.set_value(sensor.value() + val);
+            } else { // positive values are set
+                sensor.set_value(val);
+            }
+            return true;
+        }
+    }
+    return false;
 }
 
 // hard coded tests
