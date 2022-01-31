@@ -174,6 +174,9 @@ void EMSESP::scan_devices() {
 * we send to right device and match all reads to 0x18
 */
 uint8_t EMSESP::check_master_device(const uint8_t device_id, const uint16_t type_id, const bool read) {
+    if (device_id != 0x10 && (device_id < 0x18 || device_id > 0x1F)) {
+        return device_id;
+    }
     if (actual_master_thermostat_ == 0x18) {
         uint16_t mon_ids[]     = {0x02A5, 0x02A6, 0x02A7, 0x02A8, 0x02A9, 0x02AA, 0x02AB, 0x02AC};
         uint16_t set_ids[]     = {0x02B9, 0x02BA, 0x02BB, 0x02BC, 0x02BD, 0x02BE, 0x02BF, 0x02C0};
@@ -197,6 +200,17 @@ uint8_t EMSESP::check_master_device(const uint8_t device_id, const uint16_t type
         for (uint8_t i = 0; i < sizeof(master_ids) / 2; i++) {
             if (type_id == master_ids[i]) {
                 return 0x18;
+            }
+        }
+    } else if (actual_master_thermostat_ == 0x10) {
+        // Junkers FW200 supports hc1/hc2, hc3/hc4 handled by devices 0x1A...
+        // see https://github.com/emsesp/EMS-ESP32/issues/336
+        uint16_t mon_ids[] = {0x0171, 0x0172};
+        uint16_t set_ids[] = {0x0167, 0x0168};
+        for (uint8_t i = 0; i < sizeof(mon_ids) / 2; i++) {
+            if (type_id == mon_ids[i] || type_id == set_ids[i]) {
+                // reads to master thermostat, writes to remote thermostats
+                return (read ? actual_master_thermostat_ : 0x1A + i);
             }
         }
     }
