@@ -335,9 +335,8 @@ void AnalogSensor::publish_values(const bool force) {
                 doc[sensor.name()] = sensor.value();
             }
         }
-
-        Mqtt::publish(F("analogsensor_data"), doc.as<JsonObject>());
     }
+    Mqtt::publish(F("analogsensor_data"), doc.as<JsonObject>());
 }
 
 // called from emsesp.cpp, similar to the emsdevice->get_value_info
@@ -369,7 +368,7 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
         if (id == -1) { // show number and id
             JsonObject dataSensor = output.createNestedObject(sensor.name());
             dataSensor["id"]      = sensor.id();
-            dataSensor["type"] = FL_(enum_sensortype)[sensor.type()];
+            dataSensor["type"]    = FL_(enum_sensortype)[sensor.type()];
             if (sensor.type() == AnalogType::ADC) {
                 dataSensor["uom"]    = EMSdevice::uom_to_string(sensor.uom());
                 dataSensor["offset"] = sensor.offset();
