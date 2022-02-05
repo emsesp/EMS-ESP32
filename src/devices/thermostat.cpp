@@ -999,13 +999,17 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // has_update(telegram, hc->mode, 0); // Auto = xFF, Manual = x00 eg. 10 00 FF 08 01 B9 FF
     has_update(telegram, hc->daytemp, 2);   // is * 2
     has_update(telegram, hc->nighttemp, 4); // is * 2
-    has_update(telegram, hc->tempautotemp, 8);
-    // uint8_t tat = hc->tempautotemp;
-    // telegram->read_value(tat, 8);
-    // if (tat == 0xFF) {
-    //     tat = 0;
-    // }
-    // has_update(hc->tempautotemp, tat);
+
+    // has_update(telegram, hc->tempautotemp, 8); // is * 2
+    // manipulate tempautotemp to show -1°C (with scale 0.5°C) if value is 0xFF
+    // see https://github.com/emsesp/EMS-ESP32/issues/321
+    int8_t tat = hc->tempautotemp;
+    telegram->read_value(tat, 8);
+    if (tat == 0xFF) {
+        tat = -2;
+    }
+    has_update(hc->tempautotemp, tat);
+
     has_update(telegram, hc->manualtemp, 10);     // is * 2
     has_enumupdate(telegram, hc->program, 11, 1); // timer program 1 or 2
 }
@@ -3277,7 +3281,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(
-            tag, &hc->tempautotemp, DeviceValueType::UINT, FL_(div2), FL_(tempautotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_tempautotemp), 5, 30);
+            tag, &hc->tempautotemp, DeviceValueType::INT, FL_(div2), FL_(tempautotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_tempautotemp), -1, 30);
         register_device_value(tag, &hc->fastHeatup, DeviceValueType::UINT, nullptr, FL_(fastheatup), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fastheatup));
         break;
     case EMS_DEVICE_FLAG_CRF:
