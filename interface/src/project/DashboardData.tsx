@@ -98,16 +98,28 @@ const DashboardData: FC = () => {
 
   const desktopWindow = useMediaQuery('(min-width:600px)');
 
-  const refreshData = () => {
+  const refreshAllData = () => {
     if (analog || sensor || deviceValue) {
       return;
     }
     loadData();
-
     if (sensorData) {
       fetchSensorData();
     } else if (selectedDevice) {
       fetchDeviceData(selectedDevice);
+    }
+  };
+
+  const refreshData = () => {
+    if (analog || sensor || deviceValue) {
+      return;
+    }
+    if (sensorData) {
+      fetchSensorData();
+    } else if (selectedDevice) {
+      fetchDeviceData(selectedDevice);
+    } else {
+      loadData();
     }
   };
 
@@ -407,6 +419,7 @@ const DashboardData: FC = () => {
   };
 
   const toggleDeviceData = (index: number) => {
+    loadData();
     if (selectedDevice === index) {
       setSelectedDevice(undefined);
     } else {
@@ -415,6 +428,7 @@ const DashboardData: FC = () => {
   };
 
   const toggleSensorData = () => {
+    loadData();
     if (sensorData) {
       setSensorData(undefined);
     } else {
@@ -810,7 +824,7 @@ const DashboardData: FC = () => {
         {renderSensorDialog()}
         {renderAnalogDialog()}
         <ButtonRow>
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
+          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshAllData}>
             Refresh
           </Button>
         </ButtonRow>
