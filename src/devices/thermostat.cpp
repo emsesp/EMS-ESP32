@@ -1005,7 +1005,7 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // see https://github.com/emsesp/EMS-ESP32/issues/321
     int8_t tat = hc->tempautotemp;
     telegram->read_value(tat, 8);
-    if (tat == 0xFF) {
+    if ((uint8_t)tat == 0xFF) {
         tat = -2;
     }
     has_update(hc->tempautotemp, tat);
