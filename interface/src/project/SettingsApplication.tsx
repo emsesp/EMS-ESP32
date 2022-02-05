@@ -292,7 +292,6 @@ const SettingsApplication: FC = () => {
               margin="normal"
               select
             >
-              <MenuItem value={0}>Off</MenuItem>
               <MenuItem value={1}>EMS</MenuItem>
               <MenuItem value={2}>EMS+</MenuItem>
               <MenuItem value={3}>HT3</MenuItem>
