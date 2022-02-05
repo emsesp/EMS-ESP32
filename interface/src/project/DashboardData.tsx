@@ -251,7 +251,7 @@ const DashboardData: FC = () => {
               <ValidatedTextField
                 name="v"
                 label={deviceValue.n}
-                value={deviceValue.u ? Intl.NumberFormat().format(deviceValue.v) : deviceValue.v}
+                value={deviceValue.u ? numberValue(deviceValue.v) : deviceValue.v}
                 autoFocus
                 sx={{ width: '30ch' }}
                 type={deviceValue.u ? 'number' : 'text'}
