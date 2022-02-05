@@ -608,6 +608,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "api_values") {
+#if defined(EMSESP_STANDALONE)
         shell.printfln(F("Testing API getting values"));
         Mqtt::ha_enabled(false);
         Mqtt::nested_format(1);
@@ -626,6 +627,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::webAPIService.webAPIService_get(&request);
         request.url("/api/boiler/values");
         EMSESP::webAPIService.webAPIService_get(&request);
+#endif
     }
 
     if (command == "mqtt_post") {
