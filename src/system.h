@@ -45,7 +45,7 @@ enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110 }
 
 class System {
   public:
-    void start(uint32_t heap_start);
+    void start();
     void loop();
 
     // commands
@@ -72,9 +72,9 @@ class System {
     void upload_status(bool in_progress);
     bool upload_status();
     void show_mem(const char * note);
-    void get_settings();
+    void reload_settings();
     void wifi_tweak();
-    void syslog_start();
+    void syslog_init();
     bool check_upgrade();
     bool heartbeat_json(JsonObject & output);
     void send_heartbeat();
@@ -180,7 +180,6 @@ class System {
 
   private:
     static uuid::log::Logger logger_;
-    static uint32_t          heap_start_;
     static bool              restart_requested_;
 
     // button
@@ -220,7 +219,7 @@ class System {
     bool ethernet_connected_ = false;
 
     // EMS-ESP settings
-    // copies from WebSettings class in WebSettingsService.h
+    // copies from WebSettings class in WebSettingsService.h and loaded with reload_settings()
     std::string hostname_ = FACTORY_WIFI_HOSTNAME;
     bool        hide_led_;
     uint8_t     led_gpio_;

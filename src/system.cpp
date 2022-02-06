@@ -48,9 +48,8 @@ uuid::syslog::SyslogService System::syslog_;
 #endif
 
 // init statics
-uint32_t System::heap_start_ = 1; // avoid using 0 to divide-by-zero later
-PButton  System::myPButton_;
-bool     System::restart_requested_ = false;
+PButton System::myPButton_;
+bool    System::restart_requested_ = false;
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
@@ -169,7 +168,7 @@ bool System::command_syslog_level(const char * value, const int8_t id) {
                 return StateUpdateResult::CHANGED;
             },
             "local");
-        EMSESP::system_.syslog_start();
+        EMSESP::system_.syslog_init();
         return true;
     }
     return false;
@@ -240,7 +239,7 @@ void System::format(uuid::console::Shell & shell) {
     System::system_restart();
 }
 
-void System::syslog_start() {
+void System::syslog_init() {
     bool was_enabled = syslog_enabled_;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         syslog_enabled_       = settings.syslog_enabled;
@@ -287,7 +286,7 @@ void System::syslog_start() {
 }
 
 // read some specific system settings to store locally for faster access
-void System::get_settings() {
+void System::reload_settings() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         pbutton_gpio_   = settings.pbutton_gpio;
         analog_enabled_ = settings.analog_enabled;
@@ -360,20 +359,8 @@ bool System::is_valid_gpio(uint8_t pin) {
     return true;
 }
 
-// first call. Sets memory and starts up the UART Serial bridge
-void System::start(uint32_t heap_start) {
-#if defined(EMSESP_DEBUG)
-    show_mem("Startup");
-#endif
-
-    // set the inital free mem, only on first boot
-    if (heap_start_ < 2) {
-        heap_start_ = heap_start;
-    }
-
-    // load in all the settings first
-    get_settings();
-
+// Starts up the UART Serial bridge
+void System::start() {
 #ifndef EMSESP_STANDALONE
     // disable bluetooth module
     // periph_module_disable(PERIPH_BT_MODULE);
@@ -390,9 +377,9 @@ void System::start(uint32_t heap_start) {
     led_init(false);     // init LED
     button_init(false);  // the special button
     network_init(false); // network
-    syslog_start();      // start Syslog
+    syslog_init();       // start Syslog
 
-    EMSESP::init_uart(); // start UART
+    EMSESP::uart_init(); // start UART
 }
 
 // button single click
@@ -429,7 +416,7 @@ void System::button_OnVLongPress(PButton & b) {
 // push button
 void System::button_init(bool refresh) {
     if (refresh) {
-        get_settings();
+        reload_settings();
     }
 
     if (is_valid_gpio(pbutton_gpio_)) {
@@ -451,7 +438,7 @@ void System::button_init(bool refresh) {
 // set the LED to on or off when in normal operating mode
 void System::led_init(bool refresh) {
     if (refresh) {
-        get_settings();
+        reload_settings();
     }
 
     if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
@@ -514,15 +501,6 @@ void System::loop() {
 
 #endif
 
-#endif
-}
-
-void System::show_mem(const char * note) {
-#ifndef EMSESP_STANDALONE
-    static uint32_t old_free_heap = 0;
-    uint32_t        free_heap     = ESP.getFreeHeap();
-    LOG_INFO(F("(%s) Free heap: %lu (~%lu)"), note, free_heap, (uint32_t)Helpers::abs(free_heap - old_free_heap));
-    old_free_heap = free_heap;
 #endif
 }
 
@@ -590,7 +568,7 @@ void System::send_heartbeat() {
 // initializes network
 void System::network_init(bool refresh) {
     if (refresh) {
-        get_settings();
+        reload_settings();
     }
 
     last_system_check_ = 0; // force the LED to go from fast flash to pulse
@@ -785,80 +763,82 @@ void System::show_users(uuid::console::Shell & shell) {
 }
 
 void System::show_system(uuid::console::Shell & shell) {
-    shell.printfln(F("Uptime: %s"), uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
-
+    shell.println("System:");
+    shell.printfln(F(" Board profile: %s"), board_profile().c_str());
+    shell.printfln(F(" Uptime: %s"), uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
 #ifndef EMSESP_STANDALONE
-    shell.printfln(F("SDK version: %s"), ESP.getSdkVersion());
-    shell.printfln(F("CPU frequency: %lu MHz"), ESP.getCpuFreqMHz());
-    shell.printfln(F("Free heap: %lu bytes"), (uint32_t)ESP.getFreeHeap());
+    shell.printfln(F(" SDK version: %s"), ESP.getSdkVersion());
+    shell.printfln(F(" CPU frequency: %lu MHz"), ESP.getCpuFreqMHz());
+    shell.printfln(F(" Free heap: %lu bytes"), (uint32_t)ESP.getFreeHeap());
     shell.println();
 
+    shell.println("Network:");
     switch (WiFi.status()) {
     case WL_IDLE_STATUS:
-        shell.printfln(F("Network: Idle"));
+        shell.printfln(F(" Network: Idle"));
         break;
 
     case WL_NO_SSID_AVAIL:
-        shell.printfln(F("Network: Network not found"));
+        shell.printfln(F(" Network: Network not found"));
         break;
 
     case WL_SCAN_COMPLETED:
-        shell.printfln(F("Network: Network scan complete"));
+        shell.printfln(F(" Network: Network scan complete"));
         break;
 
     case WL_CONNECTED:
-        shell.printfln(F("Network: connected"));
-        shell.printfln(F("SSID: %s"), WiFi.SSID().c_str());
-        shell.printfln(F("BSSID: %s"), WiFi.BSSIDstr().c_str());
-        shell.printfln(F("RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
-        shell.printfln(F("MAC address: %s"), WiFi.macAddress().c_str());
-        shell.printfln(F("Hostname: %s"), WiFi.getHostname());
-        shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
-        shell.printfln(F("IPv4 gateway: %s"), uuid::printable_to_string(WiFi.gatewayIP()).c_str());
-        shell.printfln(F("IPv4 nameserver: %s"), uuid::printable_to_string(WiFi.dnsIP()).c_str());
+        shell.printfln(F(" Network: connected"));
+        shell.printfln(F(" SSID: %s"), WiFi.SSID().c_str());
+        shell.printfln(F(" BSSID: %s"), WiFi.BSSIDstr().c_str());
+        shell.printfln(F(" RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
+        shell.printfln(F(" MAC address: %s"), WiFi.macAddress().c_str());
+        shell.printfln(F(" Hostname: %s"), WiFi.getHostname());
+        shell.printfln(F(" IPv4 address: %s/%s"), uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
+        shell.printfln(F(" IPv4 gateway: %s"), uuid::printable_to_string(WiFi.gatewayIP()).c_str());
+        shell.printfln(F(" IPv4 nameserver: %s"), uuid::printable_to_string(WiFi.dnsIP()).c_str());
         if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            shell.printfln(F("IPv6 address: %s"), uuid::printable_to_string(WiFi.localIPv6()).c_str());
+            shell.printfln(F(" IPv6 address: %s"), uuid::printable_to_string(WiFi.localIPv6()).c_str());
         }
         break;
 
     case WL_CONNECT_FAILED:
-        shell.printfln(F("WiFi Network: Connection failed"));
+        shell.printfln(F(" WiFi Network: Connection failed"));
         break;
 
     case WL_CONNECTION_LOST:
-        shell.printfln(F("WiFi Network: Connection lost"));
+        shell.printfln(F(" WiFi Network: Connection lost"));
         break;
 
     case WL_DISCONNECTED:
-        shell.printfln(F("WiFi Network: Disconnected"));
+        shell.printfln(F(" WiFi Network: Disconnected"));
         break;
 
     case WL_NO_SHIELD:
     default:
-        shell.printfln(F("WiFi Network: Unknown"));
+        shell.printfln(F(" WiFi Network: Unknown"));
         break;
     }
 
-    shell.println();
-
     // show Ethernet if connected
     if (ethernet_connected_) {
-        shell.printfln(F("Wired Network: connected"));
-        shell.printfln(F("MAC address: %s"), ETH.macAddress().c_str());
-        shell.printfln(F("Hostname: %s"), ETH.getHostname());
-        shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
-        shell.printfln(F("IPv4 gateway: %s"), uuid::printable_to_string(ETH.gatewayIP()).c_str());
-        shell.printfln(F("IPv4 nameserver: %s"), uuid::printable_to_string(ETH.dnsIP()).c_str());
+        shell.println();
+        shell.printfln(F(" Wired Network: connected"));
+        shell.printfln(F(" MAC address: %s"), ETH.macAddress().c_str());
+        shell.printfln(F(" Hostname: %s"), ETH.getHostname());
+        shell.printfln(F(" IPv4 address: %s/%s"), uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
+        shell.printfln(F(" IPv4 gateway: %s"), uuid::printable_to_string(ETH.gatewayIP()).c_str());
+        shell.printfln(F(" IPv4 nameserver: %s"), uuid::printable_to_string(ETH.dnsIP()).c_str());
         if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            shell.printfln(F("IPv6 address: %s"), uuid::printable_to_string(ETH.localIPv6()).c_str());
+            shell.printfln(F(" IPv6 address: %s"), uuid::printable_to_string(ETH.localIPv6()).c_str());
         }
     }
-
     shell.println();
+
+    shell.println("Syslog:");
     if (!syslog_enabled_) {
-        shell.printfln(F("Syslog: disabled"));
+        shell.printfln(F(" Syslog: disabled"));
     } else {
-        shell.printfln(F("Syslog: %s"), syslog_.started() ? "started" : "stopped");
+        shell.printfln(F(" Syslog: %s"), syslog_.started() ? "started" : "stopped");
         shell.print(F(" "));
         shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : read_flash_string(F_(unset)).c_str());
         shell.printfln(F(" IP: %s"), uuid::printable_to_string(syslog_.ip()).c_str());
@@ -1207,15 +1187,15 @@ bool System::command_test(const char * value, const int8_t id) {
 #endif
 
 // takes a board profile and populates a data array with GPIO configurations
-// returns false if profile is not found
+// returns false if profile is unknown
 //
 // data = led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
 //
 // clock modes:
-//  ETH_CLOCK_GPIO0_IN   = 0  RMII clock input to GPIO0
-//  ETH_CLOCK_GPIO0_OUT  = 1  RMII clock output from GPIO0
-//  ETH_CLOCK_GPIO16_OUT = 2  RMII clock output from GPIO16
-//  ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted cloc
+//  0 = RMII clock input to GPIO0
+//  1 = RMII clock output from GPIO0
+//  2 = RMII clock output from GPIO16
+//  3 = RMII clock output from GPIO17, for 50hz inverted clock
 bool System::load_board_profile(std::vector<int8_t> & data, const std::string & board_profile) {
     if (board_profile == "S32") {
         data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // BBQKees Gateway S32
@@ -1243,7 +1223,7 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
                 (int8_t)EMSESP::system_.eth_phy_addr_,
                 (int8_t)EMSESP::system_.eth_clock_mode_};
     } else {
-        // unknown, use defaults
+        // unknown, use defaults and return false
         data = {
             EMSESP_DEFAULT_LED_GPIO,
             EMSESP_DEFAULT_DALLAS_GPIO,

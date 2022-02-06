@@ -20,12 +20,6 @@
 
 namespace emsesp {
 
-#if defined(EMSESP_STANDALONE)
-uint32_t heap_start = 0;
-#else
-uint32_t                heap_start = ESP.getFreeHeap(); // get initial available heap memory
-#endif
-
 AsyncWebServer webServer(80);
 
 #if defined(EMSESP_STANDALONE)
@@ -233,7 +227,7 @@ void EMSESP::watch_id(uint16_t watch_id) {
 
 // resets all counters and bumps the UART
 // this is called when the tx_mode is persisted in the FS either via Web UI or the console
-void EMSESP::init_uart() {
+void EMSESP::uart_init() {
     uint8_t tx_mode;
     uint8_t rx_gpio;
     uint8_t tx_gpio;
@@ -1369,7 +1363,7 @@ void EMSESP::send_raw_telegram(const char * data) {
 // start all the core services
 // the services must be loaded in the correct order
 void EMSESP::start() {
-    Serial.begin(115200);
+    console_.start_serial();
 
 // start the file system
 #ifndef EMSESP_STANDALONE
@@ -1379,38 +1373,41 @@ void EMSESP::start() {
     }
 #endif
 
-    esp8266React.begin();                     // loads core system services settings (network, mqtt, ap, ntp etc)
-    system_.check_upgrade();                  // do any system upgrades
-    webSettingsService.begin();               // load EMS-ESP Application settings...
-    system_.get_settings();                   // ...and store some of the settings locally for future reference
-    console_.start(system_.telnet_enabled()); // telnet and serial console, from here we can start logging events
-    webLogService.start();                    // start web log service
-    webCustomizationService.begin();          // load the customizations
-
-    // welcome message
-    LOG_INFO(F("Starting EMS-ESP version %s (hostname: %s)"), EMSESP_APP_VERSION, system_.hostname().c_str());
-    LOG_INFO(F("Configuring for interface board profile %s"), system_.board_profile().c_str());
-
-    // start all the EMS-ESP services
-    mqtt_.start();             // mqtt init
-    system_.start(heap_start); // starts commands, led, adc, button, network, syslog & uart
-    shower_.start();           // initialize shower timer and shower alert
-    dallassensor_.start();     // Dallas external sensors
-    analogsensor_.start();     // Analog external sensors
-    webServer.begin();         // start the web server
-    // emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
-
+    esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
+    webLogService.begin(); // start web log service. now we can start capturing logs to the web log
+    LOG_INFO(F("Starting EMS-ESP version %s (hostname: %s)"), EMSESP_APP_VERSION, system_.hostname().c_str()); // welcome message
     LOG_INFO(F("Last system reset reason Core0: %s, Core1: %s"), system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
-    // Load our library of known devices into stack mem. Names are stored in Flash memory (takes up about 1kb)
+    webSettingsService.begin();      // load EMS-ESP Application settings...
+    system_.reload_settings();       // ... and store some of the settings locally
+    webCustomizationService.begin(); // load the customizations
+
+    // start telnet service if it's enabled
+    if (system_.telnet_enabled()) {
+        console_.start_telnet();
+    }
+
+    system_.check_upgrade(); // do any system upgrades
+
+    // start all the EMS-ESP services
+    mqtt_.start();         // mqtt init
+    system_.start();       // starts commands, led, adc, button, network, syslog & uart
+    shower_.start();       // initialize shower timer and shower alert
+    dallassensor_.start(); // Dallas external sensors
+    analogsensor_.start(); // Analog external sensors
+    webLogService.start(); // apply settings to weblog service
+
+    // Load our library of known devices into stack mem. Names are stored in Flash memory
     device_library_ = {
 #include "device_library.h"
     };
-    LOG_INFO(F("EMS device library loaded with %d records"), device_library_.size());
+    LOG_INFO(F("Loaded EMS device library (%d records)"), device_library_.size());
 
 #if defined(EMSESP_STANDALONE)
     Mqtt::on_connect(); // simulate an MQTT connection
 #endif
+
+    webServer.begin(); // start the web server
 }
 
 // main loop calling all services

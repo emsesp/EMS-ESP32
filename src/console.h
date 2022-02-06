@@ -99,8 +99,6 @@ class EMSESPShell : virtual public uuid::console::Shell {
     std::string prompt_suffix() override;
     void        end_of_transmission() override;
 
-    // std::string context_text() override;
-    // bool        exit_context() override;
 
   private:
     void        add_console_commands();
@@ -128,16 +126,16 @@ class EMSESPStreamConsole : public uuid::console::StreamConsole, public EMSESPSh
 class Console {
   public:
     void loop();
-    void start(bool telnet_enabled = true);
+    void start_serial();
+    void start_telnet();
 
     uuid::log::Level log_level();
 
-    // static void enter_custom_context(Shell & shell, unsigned int context);
     static void load_standard_commands(unsigned int context);
     static void load_system_commands(unsigned int context);
 
   private:
-    bool telnet_enabled_;
+    bool telnet_enabled_ = false; // telnet is default off
 };
 
 } // namespace emsesp

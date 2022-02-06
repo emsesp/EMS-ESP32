@@ -54,10 +54,6 @@ void EMSESPShell::stopped() {
         logger().log(LogLevel::DEBUG, LogFacility::AUTH, F("su session closed on console %s"), console_name().c_str());
     }
     logger().log(LogLevel::DEBUG, LogFacility::CONSOLE, F("User session closed on console %s"), console_name().c_str());
-
-    // remove all custom contexts
-    // commands->remove_all_commands();
-    // console_commands_loaded_ = false; // make sure they get reloaded next time a console is opened
 }
 
 // show welcome banner
@@ -77,8 +73,6 @@ void EMSESPShell::display_banner() {
 
     if (console_hostname_.empty()) {
         console_hostname_ = "ems-esp";
-        // console_hostname_.resize(16, '\0');
-        // snprintf(&console_hostname_[0], console_hostname_.capacity() + 1, "ems-esp");
     }
 
     // load the list of commands
@@ -465,31 +459,6 @@ std::string EMSESPShell::hostname_text() {
     return console_hostname_;
 }
 
-/*
-// remove commands from the current context to save memory before exiting
-bool EMSESPShell::exit_context() {
-    unsigned int current_context = context();
-
-    if (current_context == ShellContext::MAIN) {
-        Shell::stop();
-        return true;
-    }
-    // commands->remove_context_commands(current_context);
-    // return Shell::exit_context();
-    return false;
-}
-
-// enter a custom context (sub-menu)
-void Console::enter_custom_context(Shell & shell, unsigned int context) {
-    // load_standard_commands(context);
-
-    // don't go into the new context if it's already the root (to prevent double loading)
-    if (context != ShellContext::MAIN) {
-        shell.enter_context(context);
-    }
-}
-*/
-
 // each custom context has the common commands like log, help, exit, su etc
 void Console::load_standard_commands(unsigned int context) {
 #if defined(EMSESP_DEBUG)
@@ -771,22 +740,6 @@ void Console::load_system_commands(unsigned int context) {
                                        });
 }
 
-/*
-// prompt, change per context
-std::string EMSESPShell::context_text() {
-    switch (static_cast<ShellContext>(context())) {
-    case ShellContext::MAIN:
-        return std::string{'/'};
-
-    case ShellContext::SYSTEM:
-        return std::string{"/system"};
-
-    default:
-        return std::string{};
-    }
-}
-*/
-
 // when in su (admin) show # as the prompt suffix
 std::string EMSESPShell::prompt_suffix() {
     if (has_flags(CommandFlags::ADMIN)) {
@@ -848,12 +801,11 @@ std::string EMSESPStreamConsole::console_name() {
     return name_;
 }
 
-// Start up telnet and logging
-// Log order is off, err, warning, notice, info, debug, trace, all
-void Console::start(bool telnet_enabled) {
-    telnet_enabled_ = telnet_enabled;
+// Start serial console
+void Console::start_serial() {
+    Serial.begin(115200);
 
-    // Serial Console
+    // Serial Console - is always active
     shell = std::make_shared<EMSESPStreamConsole>(Serial, true);
     shell->maximum_log_messages(100);
     shell->start();
@@ -865,20 +817,20 @@ void Console::start(bool telnet_enabled) {
 #if defined(EMSESP_STANDALONE)
     shell->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when running tests
 #endif
+}
+
+// Start up telnet
+void Console::start_telnet() {
+    telnet_enabled_ = true; // telnet is enabled when calling this function
 
     // start the telnet service
     // default idle is 10 minutes, default write timeout is 0 (automatic)
     // note, this must be started after the network/wifi for ESP32 otherwise it'll crash
 #ifndef EMSESP_STANDALONE
-    if (telnet_enabled) {
-        telnet_.start();
-        telnet_.initial_idle_timeout(3600);  // in sec, one hour idle timeout
-        telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
-    }
+    telnet_.start();
+    telnet_.initial_idle_timeout(3600);  // in sec, one hour idle timeout
+    telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
 #endif
-
-    // turn watch off in case it was still set in the last session
-    // EMSESP::watch(EMSESP::WATCH_OFF);
 }
 
 // handles telnet sync and logging to console
