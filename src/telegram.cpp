@@ -359,9 +359,9 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
             telegram_raw[message_p++] = telegram->message_data[i];
         }
     }
-    // make a copy of the telegram with new dest
-    telegram_last_ =
-        std::make_shared<Telegram>(telegram->operation, telegram->src, dest, telegram->type_id, telegram->offset, telegram->message_data, telegram->message_length);
+    // make a copy of the telegram with new dest (without read-flag)
+    telegram_last_ = std::make_shared<Telegram>(
+        telegram->operation, telegram->src, dest & 0x7F, telegram->type_id, telegram->offset, telegram->message_data, telegram->message_length);
 
     uint8_t length       = message_p;
     telegram_raw[length] = calculate_crc(telegram_raw, length); // generate and append CRC to the end
