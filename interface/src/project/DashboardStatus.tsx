@@ -34,6 +34,8 @@ import { ButtonRow, FormLoader, SectionContent } from '../components';
 
 import { Status, busConnectionStatus } from './types';
 
+import { formatDurationSec, pluralize } from '../utils';
+
 import * as EMSESP from './api';
 
 import { extractErrorMessage, useRest } from '../utils';
@@ -64,27 +66,6 @@ const busStatus = ({ status }: Status) => {
     default:
       return 'Unknown';
   }
-};
-
-const pluralize = (count: number, noun: string) =>
-  `${Intl.NumberFormat().format(count)} ${noun}${count !== 1 ? 's' : ''}`;
-
-const formatDuration = (duration_sec: number) => {
-  if (duration_sec === 0) {
-    return ' ';
-  }
-  const roundTowardsZero = duration_sec > 0 ? Math.floor : Math.ceil;
-  return (
-    ', ' +
-    roundTowardsZero(duration_sec / 86400) +
-    'd ' +
-    (roundTowardsZero(duration_sec / 3600) % 24) +
-    'h ' +
-    (roundTowardsZero(duration_sec / 60) % 60) +
-    'm ' +
-    (roundTowardsZero(duration_sec) % 60) +
-    's'
-  );
 };
 
 const formatRow = (name: string, success: number, fail: number, quality: number) => {
@@ -182,7 +163,7 @@ const DashboardStatus: FC = () => {
                 <DirectionsBusIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="EMS Bus Status" secondary={busStatus(data) + formatDuration(data.uptime)} />
+            <ListItemText primary="EMS Bus Status" secondary={busStatus(data) + formatDurationSec(data.uptime)} />
           </ListItem>
           <ListItem>
             <ListItemAvatar>
