@@ -23,13 +23,12 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
 import UpdateIcon from '@mui/icons-material/Update';
 import DnsIcon from '@mui/icons-material/Dns';
-import AvTimerIcon from '@mui/icons-material/AvTimer';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 import * as NTPApi from '../../api/ntp';
 import { NTPStatus, NTPSyncStatus } from '../../types';
 import { ButtonRow, FormLoader, SectionContent } from '../../components';
-import { extractErrorMessage, formatDateTime, formatDuration, formatLocalDateTime, useRest } from '../../utils';
+import { extractErrorMessage, formatDateTime, formatLocalDateTime, useRest } from '../../utils';
 import { AuthenticatedContext } from '../../contexts/authentication';
 
 export const isNtpActive = ({ status }: NTPStatus) => status === NTPSyncStatus.NTP_ACTIVE;
@@ -173,15 +172,6 @@ const NTPStatusForm: FC = () => {
               </Avatar>
             </ListItemAvatar>
             <ListItemText primary="UTC Time" secondary={formatDateTime(data.utc_time)} />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar>
-                <AvTimerIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary="Uptime" secondary={formatDuration(data.uptime)} />
           </ListItem>
           <Divider variant="inset" component="li" />
         </List>
