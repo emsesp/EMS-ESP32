@@ -93,7 +93,7 @@
 #endif
 
 #ifndef EMSESP_DEFAULT_BOARD_PROFILE
-#define EMSESP_DEFAULT_BOARD_PROFILE "S32" // Gateway S32
+#define EMSESP_DEFAULT_BOARD_PROFILE "default"
 #endif
 
 // Default GPIO PIN definitions

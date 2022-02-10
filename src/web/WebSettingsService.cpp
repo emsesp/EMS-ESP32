@@ -78,10 +78,12 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
     // load default GPIO configuration based on board profile
     std::vector<int8_t> data; //  // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
-
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
-        settings.board_profile = EMSESP_DEFAULT_BOARD_PROFILE; // invalid board configuration, override the default in case it has been misspelled
+        settings.board_profile = "CUSTOM";
+        EMSESP::logger().info("No board profile found. Re-setting to %s", settings.board_profile.c_str());
+    } else {
+        EMSESP::logger().info("Loading board profile %s", settings.board_profile.c_str());
     }
 
     uint8_t default_led_gpio       = data[0];
@@ -112,15 +114,12 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     prev                    = settings.syslog_enabled;
     settings.syslog_enabled = root["syslog_enabled"] | EMSESP_DEFAULT_SYSLOG_ENABLED;
     check_flag(prev, settings.syslog_enabled, ChangeFlags::SYSLOG);
-
     prev                  = settings.syslog_level;
     settings.syslog_level = root["syslog_level"] | EMSESP_DEFAULT_SYSLOG_LEVEL;
     check_flag(prev, settings.syslog_level, ChangeFlags::SYSLOG);
-
     prev                          = settings.syslog_mark_interval;
     settings.syslog_mark_interval = root["syslog_mark_interval"] | EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL;
     check_flag(prev, settings.syslog_mark_interval, ChangeFlags::SYSLOG);
-
     prev                 = settings.syslog_port;
     settings.syslog_port = root["syslog_port"] | EMSESP_DEFAULT_SYSLOG_PORT;
     check_flag(prev, settings.syslog_port, ChangeFlags::SYSLOG);
@@ -167,8 +166,22 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.analog_enabled = root["analog_enabled"] | EMSESP_DEFAULT_ANALOG_ENABLED;
     check_flag(prev, settings.analog_enabled, ChangeFlags::ADC);
 
+    // ethernet
+    prev              = settings.phy_type;
+    settings.phy_type = root["phy_type"] | default_phy_type;
+    check_flag(prev, settings.phy_type, ChangeFlags::RESTART);
+    prev               = settings.eth_power;
+    settings.eth_power = root["eth_power"] | default_eth_power;
+    check_flag(prev, settings.eth_power, ChangeFlags::RESTART);
+    prev                  = settings.eth_phy_addr;
+    settings.eth_phy_addr = root["eth_phy_addr"] | default_eth_phy_addr;
+    check_flag(prev, settings.eth_phy_addr, ChangeFlags::RESTART);
+    prev                    = settings.eth_clock_mode;
+    settings.eth_clock_mode = root["eth_clock_mode"] | default_eth_clock_mode;
+    check_flag(prev, settings.eth_clock_mode, ChangeFlags::RESTART);
+
     //
-    // these need reboots to be applied...
+    // these need system restarts first before settings are activated...
     //
     prev                    = settings.telnet_enabled;
     settings.telnet_enabled = root["telnet_enabled"] | EMSESP_DEFAULT_TELNET_ENABLED;
@@ -186,25 +199,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.master_thermostat = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
     check_flag(prev, settings.master_thermostat, ChangeFlags::RESTART);
 
-    // use whatever came from the board profile
-    prev              = settings.phy_type;
-    settings.phy_type = root["phy_type"] | default_phy_type;
-    check_flag(prev, settings.phy_type, ChangeFlags::RESTART);
-
-    prev               = settings.eth_power;
-    settings.eth_power = root["eth_power"] | default_eth_power;
-    check_flag(prev, settings.eth_power, ChangeFlags::RESTART);
-
-    prev                  = settings.eth_phy_addr;
-    settings.eth_phy_addr = root["eth_phy_addr"] | default_eth_phy_addr;
-    check_flag(prev, settings.eth_phy_addr, ChangeFlags::RESTART);
-
-    prev                    = settings.eth_clock_mode;
-    settings.eth_clock_mode = root["eth_clock_mode"] | default_eth_clock_mode;
-    check_flag(prev, settings.eth_clock_mode, ChangeFlags::RESTART);
-
+    //
     // without checks...
-
+    //
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
 
@@ -231,7 +228,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     if (flags_ == WebSettings::ChangeFlags::RESTART) {
         return StateUpdateResult::CHANGED_RESTART; // tell WebUI that a restart is needed
     }
-
     return StateUpdateResult::CHANGED;
 }
 
@@ -247,11 +243,11 @@ void WebSettingsService::onUpdate() {
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::UART)) {
-        EMSESP::init_uart();
+        EMSESP::uart_init();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::SYSLOG)) {
-        EMSESP::system_.syslog_start(); // re-start (or stop)
+        EMSESP::system_.syslog_init(); // re-start (or stop)
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::ADC)) {

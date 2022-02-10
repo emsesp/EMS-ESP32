@@ -35,6 +35,7 @@
 - Buderus RC25 - "hc1 mode type" incorrect value [#273](https://github.com/emsesp/EMS-ESP32/issues/273)
 - Increased number of Mixers and Heating Circuits [#294](https://github.com/emsesp/EMS-ESP32/issues/294)
 - Check receive status before removing a telegram fetch [#268](https://github.com/emsesp/EMS-ESP32/issues/268), [#282](https://github.com/emsesp/EMS-ESP32/issues/282)
+- Fix uploading firmware on OSX [#345](https://github.com/emsesp/EMS-ESP32/issues/345)
 
 ### Changed
 

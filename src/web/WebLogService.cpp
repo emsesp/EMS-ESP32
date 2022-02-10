@@ -45,7 +45,12 @@ void WebLogService::forbidden(AsyncWebServerRequest * request) {
     request->send(403);
 }
 
-// start event source service
+// start the log service with INFO level
+void WebLogService::begin() {
+    uuid::log::Logger::register_handler(this, uuid::log::Level::INFO);
+}
+
+// apply the user settings
 void WebLogService::start() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         maximum_log_messages_ = settings.weblog_buffer;
@@ -105,14 +110,6 @@ WebLogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_
 }
 
 void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
-    /*
-    // special case for trace, show trace and notice messages only
-    // added by mvdp
-    if (log_level() == uuid::log::Level::TRACE && message->level != uuid::log::Level::TRACE && message->level != uuid::log::Level::NOTICE) {
-        return;
-    }
-    */
-
     if (log_messages_.size() >= maximum_log_messages_) {
         log_messages_.pop_front();
     }

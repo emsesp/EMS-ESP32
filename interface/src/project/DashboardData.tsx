@@ -27,8 +27,6 @@ import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 
 import { styled } from '@mui/material/styles';
 
-import parseMilliseconds from 'parse-ms';
-
 import { useSnackbar } from 'notistack';
 
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -43,6 +41,8 @@ import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import DeviceIcon from './DeviceIcon';
 
 import { IconContext } from 'react-icons';
+
+import { formatDurationMin, pluralize } from '../utils';
 
 import { AuthenticatedContext } from '../contexts/authentication';
 
@@ -98,16 +98,28 @@ const DashboardData: FC = () => {
 
   const desktopWindow = useMediaQuery('(min-width:600px)');
 
-  const refreshData = () => {
+  const refreshAllData = () => {
     if (analog || sensor || deviceValue) {
       return;
     }
     loadData();
-
     if (sensorData) {
       fetchSensorData();
     } else if (selectedDevice) {
       fetchDeviceData(selectedDevice);
+    }
+  };
+
+  const refreshData = () => {
+    if (analog || sensor || deviceValue) {
+      return;
+    }
+    if (sensorData) {
+      fetchSensorData();
+    } else if (selectedDevice) {
+      fetchDeviceData(selectedDevice);
+    } else {
+      loadData();
     }
   };
 
@@ -140,33 +152,15 @@ const DashboardData: FC = () => {
     }
   };
 
-  const pluralize = (count: number, noun: string, suffix = 's') =>
-    ` ${Intl.NumberFormat().format(count)} ${noun}${count !== 1 ? suffix : ''} `;
-
-  const formatDuration = (duration_min: number) => {
-    const { days, hours, minutes } = parseMilliseconds(duration_min * 60000);
-    let formatted = '';
-    if (days) {
-      formatted += pluralize(days, 'day');
-    }
-    if (hours) {
-      formatted += pluralize(hours, 'hour');
-    }
-    if (minutes) {
-      formatted += pluralize(minutes, 'minute');
-    }
-    return formatted;
-  };
-
   function formatValue(value: any, uom: number) {
     if (value === undefined) {
       return '';
     }
     switch (uom) {
       case DeviceValueUOM.HOURS:
-        return value ? formatDuration(value * 60) : '0 hours';
+        return value ? formatDurationMin(value * 60) : '0 hours';
       case DeviceValueUOM.MINUTES:
-        return value ? formatDuration(value) : '0 minutes';
+        return value ? formatDurationMin(value) : '0 minutes';
       case DeviceValueUOM.NONE:
         if (typeof value === 'number') {
           return new Intl.NumberFormat().format(value);
@@ -239,7 +233,7 @@ const DashboardData: FC = () => {
               <ValidatedTextField
                 name="v"
                 label={deviceValue.n}
-                value={deviceValue.u ? Intl.NumberFormat().format(deviceValue.v) : deviceValue.v}
+                value={deviceValue.u ? numberValue(deviceValue.v) : deviceValue.v}
                 autoFocus
                 sx={{ width: '30ch' }}
                 type={deviceValue.u ? 'number' : 'text'}
@@ -407,6 +401,7 @@ const DashboardData: FC = () => {
   };
 
   const toggleDeviceData = (index: number) => {
+    loadData();
     if (selectedDevice === index) {
       setSelectedDevice(undefined);
     } else {
@@ -415,6 +410,7 @@ const DashboardData: FC = () => {
   };
 
   const toggleSensorData = () => {
+    loadData();
     if (sensorData) {
       setSensorData(undefined);
     } else {
@@ -810,7 +806,7 @@ const DashboardData: FC = () => {
         {renderSensorDialog()}
         {renderAnalogDialog()}
         <ButtonRow>
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
+          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshAllData}>
             Refresh
           </Button>
         </ButtonRow>

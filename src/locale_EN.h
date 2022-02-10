@@ -375,7 +375,7 @@ MAKE_PSTR_LIST(enum_controlmode, F_(off), F_(optimized), F_(simple), F_(mpc), F_
 MAKE_PSTR_LIST(enum_controlmode2, F_(outdoor), F_(room))
 // MAKE_PSTR_LIST(enum_controlmode3, F_(off), F_(room), F_(outdoor), F("room+outdoor"))
 MAKE_PSTR_LIST(enum_control, F_(off), F_(rc20), F_(rc3x))
-MAKE_PSTR_LIST(enum_j_control, F_(off), F("fb10"), F("fb110"))
+MAKE_PSTR_LIST(enum_j_control, F_(off), F("fb10"), F("fb100"))
 
 MAKE_PSTR_LIST(enum_wwProgMode, F("std_prog"), F_(own_prog))
 MAKE_PSTR_LIST(enum_dayOfWeek, F("mo"), F("tu"), F("we"), F("th"), F("fr"), F("sa"), F("so"), F("all"))

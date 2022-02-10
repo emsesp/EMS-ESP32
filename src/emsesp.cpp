@@ -20,12 +20,6 @@
 
 namespace emsesp {
 
-#if defined(EMSESP_STANDALONE)
-uint32_t heap_start = 0;
-#else
-uint32_t                heap_start = ESP.getFreeHeap(); // get initial available heap memory
-#endif
-
 AsyncWebServer webServer(80);
 
 #if defined(EMSESP_STANDALONE)
@@ -174,6 +168,9 @@ void EMSESP::scan_devices() {
 * we send to right device and match all reads to 0x18
 */
 uint8_t EMSESP::check_master_device(const uint8_t device_id, const uint16_t type_id, const bool read) {
+    if (device_id != 0x10 && (device_id < 0x18 || device_id > 0x1F)) {
+        return device_id;
+    }
     if (actual_master_thermostat_ == 0x18) {
         uint16_t mon_ids[]     = {0x02A5, 0x02A6, 0x02A7, 0x02A8, 0x02A9, 0x02AA, 0x02AB, 0x02AC};
         uint16_t set_ids[]     = {0x02B9, 0x02BA, 0x02BB, 0x02BC, 0x02BD, 0x02BE, 0x02BF, 0x02C0};
@@ -199,6 +196,17 @@ uint8_t EMSESP::check_master_device(const uint8_t device_id, const uint16_t type
                 return 0x18;
             }
         }
+    } else if (actual_master_thermostat_ == 0x10) {
+        // Junkers FW200 supports hc1/hc2, hc3/hc4 handled by devices 0x1A...
+        // see https://github.com/emsesp/EMS-ESP32/issues/336
+        uint16_t mon_ids[] = {0x0171, 0x0172};
+        uint16_t set_ids[] = {0x0167, 0x0168};
+        for (uint8_t i = 0; i < sizeof(mon_ids) / 2; i++) {
+            if (type_id == mon_ids[i] || type_id == set_ids[i]) {
+                // reads to master thermostat, writes to remote thermostats
+                return (read ? actual_master_thermostat_ : 0x1A + i);
+            }
+        }
     }
 
     return device_id;
@@ -219,7 +227,7 @@ void EMSESP::watch_id(uint16_t watch_id) {
 
 // resets all counters and bumps the UART
 // this is called when the tx_mode is persisted in the FS either via Web UI or the console
-void EMSESP::init_uart() {
+void EMSESP::uart_init() {
     uint8_t tx_mode;
     uint8_t rx_gpio;
     uint8_t tx_gpio;
@@ -1355,7 +1363,7 @@ void EMSESP::send_raw_telegram(const char * data) {
 // start all the core services
 // the services must be loaded in the correct order
 void EMSESP::start() {
-    Serial.begin(115200);
+    console_.start_serial();
 
 // start the file system
 #ifndef EMSESP_STANDALONE
@@ -1365,38 +1373,41 @@ void EMSESP::start() {
     }
 #endif
 
-    esp8266React.begin();                     // loads core system services settings (network, mqtt, ap, ntp etc)
-    system_.check_upgrade();                  // do any system upgrades
-    webSettingsService.begin();               // load EMS-ESP Application settings...
-    system_.get_settings();                   // ...and store some of the settings locally for future reference
-    console_.start(system_.telnet_enabled()); // telnet and serial console, from here we can start logging events
-    webLogService.start();                    // start web log service
-    webCustomizationService.begin();          // load the customizations
-
-    // welcome message
-    LOG_INFO(F("Starting EMS-ESP version %s (hostname: %s)"), EMSESP_APP_VERSION, system_.hostname().c_str());
-    LOG_INFO(F("Configuring for interface board profile %s"), system_.board_profile().c_str());
-
-    // start all the EMS-ESP services
-    mqtt_.start();             // mqtt init
-    system_.start(heap_start); // starts commands, led, adc, button, network, syslog & uart
-    shower_.start();           // initialize shower timer and shower alert
-    dallassensor_.start();     // Dallas external sensors
-    analogsensor_.start();     // Analog external sensors
-    webServer.begin();         // start the web server
-    // emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
-
+    esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
+    webLogService.begin(); // start web log service. now we can start capturing logs to the web log
+    LOG_INFO(F("Starting EMS-ESP version %s (hostname: %s)"), EMSESP_APP_VERSION, system_.hostname().c_str()); // welcome message
     LOG_INFO(F("Last system reset reason Core0: %s, Core1: %s"), system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
-    // Load our library of known devices into stack mem. Names are stored in Flash memory (takes up about 1kb)
+    webSettingsService.begin();      // load EMS-ESP Application settings...
+    system_.reload_settings();       // ... and store some of the settings locally
+    webCustomizationService.begin(); // load the customizations
+
+    // start telnet service if it's enabled
+    if (system_.telnet_enabled()) {
+        console_.start_telnet();
+    }
+
+    system_.check_upgrade(); // do any system upgrades
+
+    // start all the EMS-ESP services
+    mqtt_.start();         // mqtt init
+    system_.start();       // starts commands, led, adc, button, network, syslog & uart
+    shower_.start();       // initialize shower timer and shower alert
+    dallassensor_.start(); // Dallas external sensors
+    analogsensor_.start(); // Analog external sensors
+    webLogService.start(); // apply settings to weblog service
+
+    // Load our library of known devices into stack mem. Names are stored in Flash memory
     device_library_ = {
 #include "device_library.h"
     };
-    LOG_INFO(F("EMS device library loaded with %d records"), device_library_.size());
+    LOG_INFO(F("Loaded EMS device library (%d records)"), device_library_.size());
 
 #if defined(EMSESP_STANDALONE)
     Mqtt::on_connect(); // simulate an MQTT connection
 #endif
+
+    webServer.begin(); // start the web server
 }
 
 // main loop calling all services

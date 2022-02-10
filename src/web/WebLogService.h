@@ -32,6 +32,7 @@ class WebLogService : public uuid::log::Handler {
 
     WebLogService(AsyncWebServer * server, SecurityManager * securityManager);
 
+    void             begin();
     void             start();
     uuid::log::Level log_level() const;
     void             log_level(uuid::log::Level level);

@@ -145,7 +145,7 @@ class EMSESP {
     static void show_devices(uuid::console::Shell & shell);
     static void show_ems(uuid::console::Shell & shell);
 
-    static void init_uart();
+    static void uart_init();
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 

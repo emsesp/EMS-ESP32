@@ -45,7 +45,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
             if (!networkSettings.enableIPv6) {
                 EMSESP::system_.send_heartbeat();
-                EMSESP::system_.syslog_start();
+                EMSESP::system_.syslog_init();
             }
         });
         mDNS_start();
@@ -73,7 +73,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
             EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
                 if (!networkSettings.enableIPv6) {
                     EMSESP::system_.send_heartbeat();
-                    EMSESP::system_.syslog_start();
+                    EMSESP::system_.syslog_init();
                 }
             });
             EMSESP::system_.ethernet_connected(true);
@@ -115,7 +115,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
             EMSESP::logger().info(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
         }
         EMSESP::system_.send_heartbeat();
-        EMSESP::system_.syslog_start();
+        EMSESP::system_.syslog_init();
         mDNS_start();
         break;
 #endif

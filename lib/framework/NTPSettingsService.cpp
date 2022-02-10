@@ -44,6 +44,7 @@ void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
     }
 }
 
+// https://werner.rothschopf.net/microcontroller/202103_arduino_esp32_ntp_en.htm
 void NTPSettingsService::configureNTP() {
     if (connected_ && _state.enabled) {
         emsesp::EMSESP::logger().info(F("Starting NTP"));
@@ -69,6 +70,7 @@ void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVari
             return;
         }
     }
+
     AsyncWebServerResponse * response = request->beginResponse(400);
     request->send(response);
 }
