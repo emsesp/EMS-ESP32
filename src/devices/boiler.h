@@ -93,7 +93,7 @@ class Boiler : public EMSdevice {
     uint8_t  heatingActive_;    // Central heating is on/off
     uint8_t  tapwaterActive_;   // Hot tap water is on/off
     uint8_t  selFlowTemp_;      // Selected flow temperature
-    uint8_t  selBurnPow_;       // Burner max power %
+    uint8_t  selBurnPow_;       // Burner max power % (can be > 100%)
     uint8_t  heatingPump2Mod_;  // heatpump modulation from 0xE3 (heatpumps)
     uint8_t  heatingPumpMod_;   // Pump modulation %
     int16_t  outdoorTemp_;      // Outside temperature
