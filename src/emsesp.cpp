@@ -552,11 +552,10 @@ void EMSESP::reset_mqtt_ha() {
 // this will also create the HA /config topic
 // generate_values_json is called to build the device value (dv) object array
 void EMSESP::publish_device_values(uint8_t device_type) {
-    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN); // use max size
-    JsonObject          json         = doc.to<JsonObject>();
+    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
+    JsonObject          json;
     bool                need_publish = false;
-
-    bool nested = (Mqtt::is_nested());
+    bool                nested       = (Mqtt::is_nested());
 
     // group by device type
     for (const auto & emsdevice : emsdevices) {
@@ -572,10 +571,11 @@ void EMSESP::publish_device_values(uint8_t device_type) {
 
             // if its a boiler, generate json for each group and publish it directly. not nested
             if (device_type == DeviceType::BOILER) {
+                json = doc.to<JsonObject>();
                 if (emsdevice->generate_values(json, DeviceValueTAG::TAG_BOILER_DATA, false, EMSdevice::OUTPUT_TARGET::MQTT)) {
                     Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_BOILER_DATA), json);
                 }
-                doc.clear();
+                json = doc.to<JsonObject>();
                 if (emsdevice->generate_values(json, DeviceValueTAG::TAG_DEVICE_DATA_WW, false, EMSdevice::OUTPUT_TARGET::MQTT)) {
                     Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_DEVICE_DATA_WW), json);
                 }
@@ -587,39 +587,42 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 // only publish the single master thermostat
                 if (emsdevice->device_id() == EMSESP::actual_master_thermostat()) {
                     if (nested) {
+                        json = doc.to<JsonObject>();
                         need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::MQTT); // nested
                     } else {
+                        json = doc.to<JsonObject>();
                         if (emsdevice->generate_values(json, DeviceValueTAG::TAG_THERMOSTAT_DATA, false, EMSdevice::OUTPUT_TARGET::MQTT)) { // not nested
                             Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE), json);
                         }
-                        doc.clear();
                         for (uint8_t hc_tag = DeviceValueTAG::TAG_HC1; hc_tag <= DeviceValueTAG::TAG_HC8; hc_tag++) {
+                            json = doc.to<JsonObject>();
                             if (emsdevice->generate_values(json, hc_tag, false, EMSdevice::OUTPUT_TARGET::MQTT)) { // not nested
                                 Mqtt::publish(Mqtt::tag_to_topic(device_type, hc_tag), json);
                             }
-                            doc.clear();
                         }
-                        need_publish = false;
                     }
+                    need_publish = false;
                 }
             }
 
             // Mixer
             else if (device_type == DeviceType::MIXER) {
                 if (nested) {
+                    json = doc.to<JsonObject>();
                     need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::MQTT); // nested
                 } else {
                     for (uint8_t hc_tag = DeviceValueTAG::TAG_HC1; hc_tag <= DeviceValueTAG::TAG_WWC4; hc_tag++) {
+                        json = doc.to<JsonObject>();
                         if (emsdevice->generate_values(json, hc_tag, false, EMSdevice::OUTPUT_TARGET::MQTT)) { // not nested
                             Mqtt::publish(Mqtt::tag_to_topic(device_type, hc_tag), json);
                         }
-                        doc.clear();
                     }
                     need_publish = false;
                 }
 
             } else {
                 // for all other devices add the values to the json
+                json = doc.to<JsonObject>();
                 need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::MQTT); // nested
             }
         }

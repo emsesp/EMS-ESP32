@@ -183,27 +183,23 @@ class Mqtt {
     static uint8_t nested_format() {
         return nested_format_;
     }
-
     static bool is_nested() {
         return nested_format_ == 1;
+    }
+    static void nested_format(uint8_t nested_format) {
+        nested_format_ = nested_format;
     }
 
     static bool publish_single() {
         return publish_single_;
     }
-
     static void publish_single(bool publish_single) {
         publish_single_ = publish_single;
-    }
-
-    static void nested_format(uint8_t nested_format) {
-        nested_format_ = nested_format;
     }
 
     static bool ha_enabled() {
         return ha_enabled_;
     }
-
     static void ha_enabled(bool ha_enabled) {
         ha_enabled_ = ha_enabled;
     }
@@ -211,7 +207,6 @@ class Mqtt {
     static bool send_response() {
         return send_response_;
     }
-
     static void send_response(bool send_response) {
         send_response_ = send_response;
     }
