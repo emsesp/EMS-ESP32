@@ -19,7 +19,7 @@
 - Added 8700i Boiler device
 - Added Cascade CM10 Controller device
 - Add Olimex ESP32-POE-ISO to board profiles plus settings to customize Ethernet modules [#301](https://github.com/emsesp/EMS-ESP32/issues/301)
-- helptext for string commands in WebUI [#320](https://github.com/emsesp/EMS-ESP32/issues/320)
+- Help text for string commands in WebUI [#320](https://github.com/emsesp/EMS-ESP32/issues/320)
 - Germany translations (at compile time)
 - #entities added to system/info` endpoint [#322](https://github.com/emsesp/EMS-ESP32/issues/322)
 
@@ -36,6 +36,8 @@
 - Increased number of Mixers and Heating Circuits [#294](https://github.com/emsesp/EMS-ESP32/issues/294)
 - Check receive status before removing a telegram fetch [#268](https://github.com/emsesp/EMS-ESP32/issues/268), [#282](https://github.com/emsesp/EMS-ESP32/issues/282)
 - Fix uploading firmware on OSX [#345](https://github.com/emsesp/EMS-ESP32/issues/345)
+- Non-nested MQTT would corrupt the json [#354](https://github.com/emsesp/EMS-ESP32/issues/354)
+- Burner selected max power can have a value higher than 100% [#314](https://github.com/emsesp/EMS-ESP32/issues/314)
 
 ### Changed
 
