@@ -173,8 +173,6 @@ bool Test::run_test(const char * command, int8_t id) {
 
     if (strcmp(command, "thermostat") == 0) {
         EMSESP::logger().info(F("Adding thermostat..."));
-        Mqtt::nested_format(1); // use nested
-        // Mqtt::nested_format(2); // single
 
         add_device(0x10, 192); // FW120
 
@@ -498,17 +496,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "ha") {
         shell.printfln(F("Testing HA mqtt discovery"));
-        Mqtt::ha_enabled(true);
-        // Mqtt::nested_format(1);
-        Mqtt::nested_format(2);
+        // Mqtt::ha_enabled(true);
+        Mqtt::ha_enabled(false);
 
-        run_test("boiler");
+        // Mqtt::nested_format(1); // is nested
+        Mqtt::nested_format(2); // not nested
+
+        // run_test("boiler");
         run_test("thermostat");
         // run_test("solar");
         // run_test("mixer");
 
         shell.invoke_command("call system publish");
-        shell.invoke_command("show mqtt");
+        // shell.invoke_command("show mqtt");
 
         // shell.invoke_command("call boiler fanwork");
         // shell.invoke_command("call thermostat seltemp"); // sensor.thermostat_hc1_selected_room_temperature
