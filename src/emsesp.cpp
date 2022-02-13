@@ -625,11 +625,11 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 json = doc.to<JsonObject>();
                 need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::MQTT); // nested
             }
-        }
 
-        // we want to create the /config topic after the data payload to prevent HA from throwing up a warning
-        if (Mqtt::ha_enabled()) {
-            emsdevice->publish_mqtt_ha_entity_config();
+            // we want to create the /config topic after the data payload to prevent HA from throwing up a warning
+            if (Mqtt::ha_enabled()) {
+                emsdevice->publish_mqtt_ha_entity_config();
+            }
         }
     }
 

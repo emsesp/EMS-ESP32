@@ -455,7 +455,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
                 if ((entityCustomization.product_id == product_id()) && (entityCustomization.device_id == device_id())) {
                     for (uint8_t entity_id : entityCustomization.entity_ids) {
                         if (entity_id == dv_id) {
-                            state = DeviceValueState::DV_DEFAULT; // it's on the list, exclude it by making it not visible
+                            state = DeviceValueState::DV_DEFAULT; // it's on the exclude list, turn off active and visible flags
                             break;
                         }
                     }
@@ -757,12 +757,23 @@ void EMSdevice::generate_values_web(JsonObject & output) {
     }
 }
 
+// reset all entities to being visible
+// this is called before loading in the exclude entities list from the customization service
+void EMSdevice::reset_exclude_entities() {
+    for (auto & dv : devicevalues_) {
+        dv.add_state(DeviceValueState::DV_VISIBLE);
+    }
+}
+
 // disable/exclude a device entity based on its unique id
 void EMSdevice::exclude_entity(uint8_t id) {
     for (auto & dv : devicevalues_) {
         if (dv.id == id) {
+#if defined(EMSESP_USE_SERIAL)
+            Serial.print("exclude_entity() Removing state for device value: ");
+            Serial.println(read_flash_string(dv.full_name).c_str());
+#endif
             dv.remove_state(DeviceValueState::DV_VISIBLE); // this will remove from MQTT payloads and showing in web & console
-            dv.remove_state(DeviceValueState::DV_ACTIVE);  // this will ensure it'll be removed from any HA MQTT /config topics
             return;
         }
     }
@@ -1007,7 +1018,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             }
 
             json["writeable"] = dv.has_cmd;
-            json["visible"]   = dv.has_state(DeviceValue::DeviceValueState::DV_VISIBLE);
+            json["visible"]   = dv.has_state(DeviceValueState::DV_VISIBLE);
 
             // if there is no value, mention it
             if (!json.containsKey(value)) {
@@ -1042,6 +1053,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
 
     for (auto & dv : devicevalues_) {
         // check if it exists, there is a value for the entity. Set the flag to ACTIVE
+        // not that this will override any previously removed states
         if (dv.hasValue()) {
             dv.add_state(DeviceValueState::DV_ACTIVE);
         } else {
@@ -1210,21 +1222,34 @@ void EMSdevice::publish_mqtt_ha_entity_config() {
     // create the main device config if not already done, per device type
     bool create_device_config = !ha_config_done();
 
+    // check the state of each of the device values
     for (auto & dv : devicevalues_) {
         if (dv.has_state(DeviceValueState::DV_ACTIVE)) {
-            // add it if not already done and if it's visible (not on the exclusion list)
-            // don't do this for commands (like reset)
-            if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && dv.has_state(DeviceValueState::DV_VISIBLE) && dv.type != DeviceValueType::CMD) {
-                Mqtt::publish_ha_sensor_config(dv, name(), brand_to_string(), false, create_device_config);
-                dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                if (create_device_config) {
-                    create_device_config = false;
+            // entity has an active value (it means it contains a valid value)
+
+            if (dv.has_state(DeviceValueState::DV_VISIBLE)) {
+                // visible
+                // if the HA config topic hasn't been created it, do it now (unless its a command like reset)
+                if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && dv.type != DeviceValueType::CMD) {
+                    Mqtt::publish_ha_sensor_config(dv, name(), brand_to_string(), false, create_device_config);
+                    dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                    if (create_device_config) {
+                        create_device_config = false;
+                    }
+                }
+            } else {
+                // not visible. It must be on the entity exclusion list defined in the Customizations service
+                // if a HA config topic was created then remove it. This entity has become 'lost'
+                if (dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED)) {
+                    Mqtt::publish_ha_sensor_config(dv, name(), brand_to_string(), true, create_device_config); // remove /config
+                    dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                 }
             }
         } else {
+            // entity does not have an active value
+            // if a HA config topic was created then remove it. This entity has become 'lost'
+            // https://github.com/emsesp/EMS-ESP32/issues/196
             if (dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED)) {
-                // if the HA config has already been created and now the value has gone dormant, delete the config
-                // https://github.com/emsesp/EMS-ESP32/issues/196
                 Mqtt::publish_ha_sensor_config(dv, name(), brand_to_string(), true, create_device_config); // remove /config
                 dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
             }

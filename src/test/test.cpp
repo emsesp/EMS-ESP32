@@ -595,8 +595,40 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::system_.healthcheck(n);
     }
 
+    if (command == "exclude") {
+        shell.printfln(F("Testing exclude entities"));
+
+        Mqtt::ha_enabled(true);
+        Mqtt::send_response(false);
+
+        run_test("boiler");
+
+        shell.invoke_command("call boiler wwseltemp");
+        shell.invoke_command("call system publish");
+
+        // toggle mode
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice->unique_id() == 1) { // boiler
+                uint8_t entity_id = 47;        // wwseltemp
+                emsdevice->exclude_entity(entity_id);
+                break;
+            }
+        }
+
+        shell.invoke_command("call boiler wwseltemp");
+        shell.invoke_command("call system publish");
+    }
+
     if (command == "dv2") {
         shell.printfln(F("Testing device value lost"));
+
+        Mqtt::ha_enabled(true);
+        Mqtt::send_response(false);
+
+        run_test("boiler");
+
+        shell.invoke_command("call boiler wwseltemp");
+        shell.invoke_command("call system publish");
 
         // Boiler -> Me, UBAParameterWW(0x33)
         // wwseltemp = goes from 52 degrees (0x34) to void (0xFF)
@@ -608,6 +640,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "api_values") {
+#ifndef EMSESP_DEBUG
         shell.printfln(F("Testing API getting values"));
         Mqtt::ha_enabled(false);
         Mqtt::nested_format(1);
@@ -626,6 +659,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::webAPIService.webAPIService_get(&request);
         request.url("/api/boiler/values");
         EMSESP::webAPIService.webAPIService_get(&request);
+#endif
     }
 
     if (command == "mqtt_post") {

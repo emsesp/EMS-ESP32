@@ -216,13 +216,16 @@ void WebCustomizationService::exclude_entities(AsyncWebServerRequest * request, 
             if (emsdevice) {
                 uint8_t unique_device_id = json["id"];
                 if (emsdevice->unique_id() == unique_device_id) {
-                    JsonArray entity_ids = json["entity_ids"];
+                    // first reset all the entity ids
+                    emsdevice->reset_exclude_entities();
 
-                    std::vector<uint8_t> temp;
-                    for (JsonVariant id : entity_ids) {
+                    // build a list of entities to exclude and then set the flag to non-visible
+                    JsonArray            entity_ids_json = json["entity_ids"];
+                    std::vector<uint8_t> entity_ids;
+                    for (JsonVariant id : entity_ids_json) {
                         uint8_t entity_id = id.as<int>();
                         emsdevice->exclude_entity(entity_id); // this will have immediate affect
-                        temp.push_back(entity_id);
+                        entity_ids.push_back(entity_id);
                     }
 
                     // Save the list to the customization file
@@ -236,8 +239,8 @@ void WebCustomizationService::exclude_entities(AsyncWebServerRequest * request, 
                                 if ((entityCustomization.product_id == product_id) && (entityCustomization.device_id == device_id)) {
                                     // already exists, clear the list and add the new values
                                     entityCustomization.entity_ids.clear();
-                                    for (uint8_t i = 0; i < temp.size(); i++) {
-                                        entityCustomization.entity_ids.push_back(temp[i]);
+                                    for (uint8_t i = 0; i < entity_ids.size(); i++) {
+                                        entityCustomization.entity_ids.push_back(entity_ids[i]);
                                     }
                                     return StateUpdateResult::CHANGED;
                                 }
@@ -246,8 +249,8 @@ void WebCustomizationService::exclude_entities(AsyncWebServerRequest * request, 
                             EntityCustomization new_entry;
                             new_entry.product_id = product_id;
                             new_entry.device_id  = device_id;
-                            for (uint8_t i = 0; i < temp.size(); i++) {
-                                new_entry.entity_ids.push_back(temp[i]);
+                            for (uint8_t i = 0; i < entity_ids.size(); i++) {
+                                new_entry.entity_ids.push_back(entity_ids[i]);
                             }
                             settings.entityCustomizations.push_back(new_entry);
                             return StateUpdateResult::CHANGED;

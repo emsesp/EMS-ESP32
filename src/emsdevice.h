@@ -184,6 +184,7 @@ class EMSdevice {
     void   show_mqtt_handlers(uuid::console::Shell & shell);
     void   list_device_entries(JsonObject & output);
     void   exclude_entity(uint8_t entity_id);
+    void   reset_exclude_entities();
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
 

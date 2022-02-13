@@ -171,13 +171,6 @@ bool DeviceValue::hasValue() {
         break;
     }
 
-#if defined(EMSESP_DEBUG)
-    // https://github.com/emsesp/EMS-ESP32/issues/196
-    // if (has_state(DeviceValueState::DV_ACTIVE) && !has_value) {
-    //     emsesp::EMSESP::logger().warning(F("[DEBUG] Lost device value %s"), short_name);
-    // }
-#endif
-
     return has_value;
 }
 
