@@ -407,7 +407,7 @@ void DallasSensor::remove_ha_topic(const std::string & id_str) {
         return;
     }
 #ifdef EMSESP_DEBUG
-    LOG_DEBUG(F("Removing HA config for sensor ID %s"), id_str.c_str());
+    LOG_DEBUG(F("Removing HA config for temperature sensor ID %s"), id_str.c_str());
 #endif
     // use '_' as HA doesn't like '-' in the topic name
     std::string sensorid = id_str;
