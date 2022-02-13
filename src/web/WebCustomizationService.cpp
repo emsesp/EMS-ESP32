@@ -46,7 +46,7 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
                securityManager->wrapRequest(std::bind(&WebCustomizationService::reset_customization, this, _1), AuthenticationPredicates::IS_ADMIN));
 
     _exclude_entities_handler.setMethod(HTTP_POST);
-    _exclude_entities_handler.setMaxContentLength(256);
+    _exclude_entities_handler.setMaxContentLength(1024);
     server->addHandler(&_exclude_entities_handler);
 
     _device_entities_handler.setMethod(HTTP_POST);
