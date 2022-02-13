@@ -600,8 +600,8 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                                 Mqtt::publish(Mqtt::tag_to_topic(device_type, hc_tag), json);
                             }
                         }
+                        need_publish = false;
                     }
-                    need_publish = false;
                 }
             }
 
