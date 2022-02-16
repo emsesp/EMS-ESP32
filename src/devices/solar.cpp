@@ -155,10 +155,6 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               FL_(solarPumpTurnoffDiff),
                               DeviceValueUOM::DEGREES_R,
                               MAKE_CF_CB(set_TurnoffDiff));
-        register_device_value(
-            DeviceValueTAG::TAG_NONE, &setting3_, DeviceValueType::UINT, nullptr, FL_(setting3), DeviceValueUOM::NONE, MAKE_CF_CB(set_CollectorMaxTemp));
-        register_device_value(
-            DeviceValueTAG::TAG_NONE, &setting4_, DeviceValueType::UINT, nullptr, FL_(setting4), DeviceValueUOM::NONE, MAKE_CF_CB(set_CollectorMinTemp));
         register_device_value(DeviceValueTAG::TAG_NONE, &solarPower_, DeviceValueType::SHORT, nullptr, FL_(solarPower), DeviceValueUOM::W);
         register_device_value(DeviceValueTAG::TAG_NONE, &energyLastHour_, DeviceValueType::ULONG, FL_(div10), FL_(energyLastHour), DeviceValueUOM::WH);
         register_device_value(DeviceValueTAG::TAG_NONE, &maxFlow_, DeviceValueType::UINT, FL_(div10), FL_(maxFlow), DeviceValueUOM::LMIN, MAKE_CF_CB(set_SM10MaxFlow));
@@ -177,10 +173,16 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_solarEnabled));
 
+        /* unknown values for testing and logging. Used by MichaelDvP
+        register_device_value(
+            DeviceValueTAG::TAG_NONE, &setting3_, DeviceValueType::UINT, nullptr, FL_(setting3), DeviceValueUOM::NONE, MAKE_CF_CB(set_CollectorMaxTemp));
+        register_device_value(
+            DeviceValueTAG::TAG_NONE, &setting4_, DeviceValueType::UINT, nullptr, FL_(setting4), DeviceValueUOM::NONE, MAKE_CF_CB(set_CollectorMinTemp));
         register_device_value(DeviceValueTAG::TAG_NONE, &data11_, DeviceValueType::UINT, nullptr, FL_(data11), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_NONE, &data12_, DeviceValueType::UINT, nullptr, FL_(data12), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_NONE, &data1_, DeviceValueType::UINT, nullptr, FL_(data1), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_NONE, &data0_, DeviceValueType::UINT, nullptr, FL_(data0), DeviceValueUOM::NONE);
+		*/
     }
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
         register_device_value(DeviceValueTAG::TAG_NONE, &energyLastHour_, DeviceValueType::ULONG, FL_(div10), FL_(energyLastHour), DeviceValueUOM::WH);
@@ -400,6 +402,7 @@ void Solar::process_SM10Config(std::shared_ptr<const Telegram> telegram) {
 }
 
 // SM10Monitor - type 0x97
+//  Solar(0x30) -> All(0x00), SM10Monitor(0x97), data: 00 00 00 22 00 00 D2 01 00 F6 2A 00 00
 void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
     uint8_t solarpumpmod = solarPumpMod_;
 
@@ -436,11 +439,11 @@ void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
             energy.pop_front();
         }
         energy.push_back(solarPower_);
-        uint32_t sum = 0;
+        int32_t sum = 0;
         for (auto e : energy) {
             sum += e;
         }
-        energyLastHour_ = sum / 6; // counts in 0.1 Wh
+        energyLastHour_ = sum > 0 ? sum / 6 : 0; // counts in 0.1 Wh
         has_update(&solarPower_);
         has_update(&energyLastHour_);
     }
