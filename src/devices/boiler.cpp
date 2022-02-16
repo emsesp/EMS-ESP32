@@ -150,8 +150,15 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           MAKE_CF_CB(set_burn_period));
     register_device_value(
         DeviceValueTAG::TAG_BOILER_DATA, &burnMinPower_, DeviceValueType::UINT, nullptr, FL_(burnMinPower), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_min_power));
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &burnMaxPower_, DeviceValueType::UINT, nullptr, FL_(burnMaxPower), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_max_power));
+    register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
+                          &burnMaxPower_,
+                          DeviceValueType::UINT,
+                          nullptr,
+                          FL_(burnMaxPower),
+                          DeviceValueUOM::PERCENT,
+                          MAKE_CF_CB(set_max_power),
+                          0,
+                          130);
     register_device_value(
         DeviceValueTAG::TAG_BOILER_DATA, &boilHystOn_, DeviceValueType::INT, nullptr, FL_(boilHystOn), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst_on));
     register_device_value(
@@ -318,7 +325,9 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           nullptr,
                           FL_(wwMaxPower),
                           DeviceValueUOM::PERCENT,
-                          MAKE_CF_CB(set_ww_maxpower));
+                          MAKE_CF_CB(set_ww_maxpower),
+                          0,
+                          130);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                           &wwCircPump_,
                           DeviceValueType::BOOL,
