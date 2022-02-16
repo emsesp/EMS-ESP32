@@ -43,6 +43,8 @@ class Thermostat : public EMSdevice {
         uint8_t summermode;
         uint8_t holidaymode;
         uint8_t daytemp;
+        uint8_t daylowtemp;
+        uint8_t daymidtemp;
         uint8_t nighttemp;
         uint8_t holidaytemp;
         uint8_t heatingtype; // type of heating: 1 radiator, 2 convectors, 3 floors, 4 room supply
@@ -54,6 +56,7 @@ class Thermostat : public EMSdevice {
         uint8_t manualtemp;
         uint8_t summer_setmode;
         uint8_t roominfluence;
+        uint8_t roominfl_factor;
         int16_t curroominfl;
         uint8_t flowtempoffset;
         uint8_t minflowtemp;
@@ -125,6 +128,8 @@ class Thermostat : public EMSdevice {
             TEMPAUTO,
             NOREDUCE,
             ON,
+            DAYLOW,
+            DAYMID,
             UNKNOWN
 
         };
@@ -313,6 +318,8 @@ class Thermostat : public EMSdevice {
     void process_RC30Set(std::shared_ptr<const Telegram> telegram);
     void process_RC20Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC20Set(std::shared_ptr<const Telegram> telegram);
+    void process_RC20Temp(std::shared_ptr<const Telegram> telegram);
+    void process_RC20Timer(std::shared_ptr<const Telegram> telegram);
     void process_RC20Remote(std::shared_ptr<const Telegram> telegram);
     void process_RC20Monitor_2(std::shared_ptr<const Telegram> telegram);
     void process_RC20Set_2(std::shared_ptr<const Telegram> telegram);
@@ -358,6 +365,8 @@ class Thermostat : public EMSdevice {
     bool set_temp(const char * value, const int8_t id);
     bool set_nighttemp(const char * value, const int8_t id);
     bool set_daytemp(const char * value, const int8_t id);
+    bool set_daylowtemp(const char * value, const int8_t id);
+    bool set_daymidtemp(const char * value, const int8_t id);
     bool set_comforttemp(const char * value, const int8_t id);
     bool set_nofrosttemp(const char * value, const int8_t id);
     bool set_ecotemp(const char * value, const int8_t id);
@@ -371,6 +380,7 @@ class Thermostat : public EMSdevice {
     bool set_noreducetemp(const char * value, const int8_t id);
     bool set_remotetemp(const char * value, const int8_t id);
     bool set_roominfluence(const char * value, const int8_t id);
+    bool set_roominfl_factor(const char * value, const int8_t id);
     bool set_flowtempoffset(const char * value, const int8_t id);
     bool set_minflowtemp(const char * value, const int8_t id);
     bool set_maxflowtemp(const char * value, const int8_t id);
