@@ -614,7 +614,7 @@ const DashboardData: FC = () => {
                 {analog_data.i}
               </StyledTableCell>
               <StyledTableCell>{analog_data.n}</StyledTableCell>
-              <StyledTableCell>{AnalogTypes[analog_data.t]}</StyledTableCell>
+              <StyledTableCell>{AnalogTypeNames[analog_data.t]}</StyledTableCell>
               <StyledTableCell align="right">{formatValue(analog_data.v, analog_data.u)}</StyledTableCell>
             </StyledTableRow>
           ))}
@@ -709,7 +709,7 @@ const DashboardData: FC = () => {
               </Grid>
               <Grid item>
                 <ValidatedTextField name="t" label="Type" value={analog.t} select onChange={updateValue(setAnalog)}>
-                  {AnalogTypes.map((val, i) => (
+                  {AnalogTypeNames.map((val, i) => (
                     <MenuItem key={i} value={i}>
                       {val}
                     </MenuItem>
