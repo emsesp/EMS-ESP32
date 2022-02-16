@@ -89,7 +89,7 @@ void AnalogSensor::reload() {
             it++;
         }
         // add new sensors from list
-        for (auto & sensor : sensors) { 
+        for (auto & sensor : sensors) {
             bool found = false;
             for (auto & sensor_ : sensors_) {
                 if (sensor_.id() == sensor.id) {
@@ -229,7 +229,7 @@ void AnalogSensor::measure() {
                 } else if (!sensor.poll_) { // falling edge
                     if (sensor.type() == AnalogType::COUNTER) {
                         sensor.set_value(old_value + sensor.factor());
-                    } else if (sensor.type() == AnalogType::RATE) { // dafault uom: Hz (1/sec) with factor 1 
+                    } else if (sensor.type() == AnalogType::RATE) { // dafault uom: Hz (1/sec) with factor 1
                         sensor.set_value(sensor.factor() * 1000 / (sensor.polltime_ - sensor.last_polltime_));
                     } else if (sensor.type() == AnalogType::TIMER) { // default seconds with factor 1
                         sensor.set_value(sensor.factor() * (sensor.polltime_ - sensor.last_polltime_) / 1000);

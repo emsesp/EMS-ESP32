@@ -361,10 +361,10 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
             JsonObject dataSensor = output.createNestedObject(sensor.name());
             dataSensor["id_str"]  = sensor.id_str();
             if (Helpers::hasValue(sensor.temperature_c)) {
-                dataSensor["temp"] = (float)(sensor.temperature_c) / 10;
+                dataSensor["temp"] = Helpers::round2((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
             }
         } else if (Helpers::hasValue(sensor.temperature_c)) {
-            output[sensor.name()] = (float)(sensor.temperature_c) / 10;
+            output[sensor.name()] = Helpers::round2((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
         }
     }
 
@@ -378,11 +378,11 @@ bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const i
             output["id_str"] = sensor.id_str();
             output["name"]   = sensor.name();
             if (Helpers::hasValue(sensor.temperature_c)) {
-                output["value"] = (float)(sensor.temperature_c) / 10;
+                output["value"] = Helpers::round2((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
             }
             output["type"]      = F_(number);
-            output["min"]       = -55;
-            output["max"]       = 125;
+            output["min"]       = Helpers::round2(-55, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+            output["max"]       = Helpers::round2(125, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
             output["unit"]      = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
             output["writeable"] = false;
             return true;
@@ -444,10 +444,10 @@ void DallasSensor::publish_values(const bool force) {
             JsonObject dataSensor = doc.createNestedObject(sensor.id_str());
             dataSensor["name"]    = sensor.name();
             if (has_value) {
-                dataSensor["temp"] = (float)(sensor.temperature_c) / 10;
+                dataSensor["temp"] = Helpers::round2((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
             }
         } else if (has_value) {
-            doc[sensor.name()] = (float)(sensor.temperature_c) / 10;
+            doc[sensor.name()] = Helpers::round2((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
         }
 
         // create the HA MQTT config
@@ -463,11 +463,7 @@ void DallasSensor::publish_values(const bool force) {
                 snprintf(stat_t, sizeof(stat_t), "%s/dallassensor_data", Mqtt::base().c_str());
                 config["stat_t"] = stat_t;
 
-                if (EMSESP::system_.fahrenheit()) {
-                    config["unit_of_meas"] = FJSON("°F");
-                } else {
-                    config["unit_of_meas"] = FJSON("°C");
-                }
+                config["unit_of_meas"] = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
 
                 char str[50];
                 snprintf(str, sizeof(str), "{{value_json['%s'].temp}}", sensor.id_str().c_str());

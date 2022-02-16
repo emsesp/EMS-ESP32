@@ -52,6 +52,9 @@ const std::string EMSdevice::tag_to_mqtt(uint8_t tag) {
 }
 
 const std::string EMSdevice::uom_to_string(uint8_t uom) {
+    if (EMSESP::system_.fahrenheit() && (uom == DeviceValueUOM::DEGREES || uom == DeviceValueUOM::DEGREES_R)) {
+        return read_flash_string(DeviceValue::DeviceValueUOM_s[DeviceValueUOM::FAHRENHEIT]);
+    }
     return read_flash_string(DeviceValue::DeviceValueUOM_s[uom]);
 }
 
@@ -306,11 +309,7 @@ void EMSdevice::list_device_entries(JsonObject & output) {
 
             // add uom
             if (!uom_to_string(dv.uom).empty() && uom_to_string(dv.uom) != " ") {
-                if (EMSESP::system_.fahrenheit() && (dv.uom == DeviceValueUOM::DEGREES || dv.uom == DeviceValueUOM::DEGREES_R)) {
-                    details.add(EMSdevice::uom_to_string(DeviceValueUOM::FAHRENHEIT));
-                } else {
-                    details.add(EMSdevice::uom_to_string(dv.uom));
-                }
+                details.add(EMSdevice::uom_to_string(dv.uom));
             }
         }
     }
@@ -1024,7 +1023,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
 
             // add uom if it's not a " " (single space)
             if (!uom_to_string(dv.uom).empty() && uom_to_string(dv.uom) != " ") {
-                json["uom"] = fahrenheit ? "°F" : uom_to_string(dv.uom);
+                json["uom"] = uom_to_string(dv.uom);
             }
 
             json["writeable"] = dv.has_cmd;
