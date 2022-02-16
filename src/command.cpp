@@ -317,14 +317,13 @@ void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, co
 }
 
 // add a command to the list, which does return a json object as output
-// flag is fixed to MqttSubFlag::MQTT_SUB_FLAG_NOSUB so there will be no topic subscribed to this
 void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, const cmd_json_function_p cb, const __FlashStringHelper * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
     if (find_command(device_type, read_flash_string(cmd).c_str()) != nullptr) {
         return;
     }
 
-    cmdfunctions_.emplace_back(device_type, (CommandFlag::MQTT_SUB_FLAG_NOSUB | flags), cmd, nullptr, cb, description); // callback for json is included
+    cmdfunctions_.emplace_back(device_type, flags, cmd, nullptr, cb, description); // callback for json is included
 }
 
 // see if a command exists for that device type
