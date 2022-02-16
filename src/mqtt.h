@@ -29,9 +29,6 @@
 
 using uuid::console::Shell;
 
-// time between HA publishes
-#define MQTT_HA_PUBLISH_DELAY 50
-
 // size of queue
 #define MAX_MQTT_MESSAGES 300
 
@@ -70,16 +67,10 @@ class Mqtt {
     void set_publish_time_sensor(uint16_t publish_time);
     bool get_publish_onchange(uint8_t device_type);
 
-    enum Operation { PUBLISH, SUBSCRIBE };
+    enum Operation : uint8_t { PUBLISH, SUBSCRIBE, UNSUBSCRIBE };
+    enum NestedFormat : uint8_t { NESTED = 1, SINGLE };
 
-    enum HA_Climate_Format : uint8_t {
-        CURRENT = 1, // 1
-        SETPOINT,    // 2
-        ZERO         // 3
-
-    };
-
-    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // note this should really match the user setting in mqttSettings.maxTopicLength
+    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = FACTORY_MQTT_MAX_TOPIC_LENGTH; // fixed, not a user setting anymore
 
     static void on_connect();
 
@@ -92,7 +83,6 @@ class Mqtt {
     static void publish(const std::string & topic, const JsonObject & payload);
     static void publish(const __FlashStringHelper * topic, const JsonObject & payload);
     static void publish(const __FlashStringHelper * topic, const std::string & payload);
-    static void publish(const std::string & topic);
     static void publish_retain(const std::string & topic, const JsonObject & payload, bool retain);
     static void publish_retain(const __FlashStringHelper * topic, const std::string & payload, bool retain);
     static void publish_retain(const __FlashStringHelper * topic, const JsonObject & payload, bool retain);
@@ -124,10 +114,6 @@ class Mqtt {
     static void show_mqtt(uuid::console::Shell & shell);
 
     static void ha_status();
-
-    void disconnect() {
-        mqttClient_->disconnect();
-    }
 
 #if defined(EMSESP_DEBUG)
     void incoming(const char * topic, const char * payload = ""); // for testing only
@@ -179,13 +165,10 @@ class Mqtt {
 
     static void reset_mqtt();
 
-    // nested_format is 1 if nested, otherwise 2 for single topics
-    static uint8_t nested_format() {
-        return nested_format_;
-    }
     static bool is_nested() {
-        return nested_format_ == 1;
+        return nested_format_ == NestedFormat::NESTED;
     }
+
     static void nested_format(uint8_t nested_format) {
         nested_format_ = nested_format;
     }
@@ -193,6 +176,11 @@ class Mqtt {
     static bool publish_single() {
         return publish_single_;
     }
+
+    static bool publish_single2cmd() {
+        return publish_single2cmd_;
+    }
+
     static void publish_single(bool publish_single) {
         publish_single_ = publish_single;
     }
@@ -200,6 +188,7 @@ class Mqtt {
     static bool ha_enabled() {
         return ha_enabled_;
     }
+
     static void ha_enabled(bool ha_enabled) {
         ha_enabled_ = ha_enabled;
     }
@@ -207,6 +196,7 @@ class Mqtt {
     static bool send_response() {
         return send_response_;
     }
+
     static void send_response(bool send_response) {
         send_response_ = send_response;
     }
@@ -232,7 +222,7 @@ class Mqtt {
         uint16_t                                 packet_id_;
 
         ~QueuedMqttMessage() = default;
-        QueuedMqttMessage(uint16_t id, std::shared_ptr<MqttMessage> && content)
+        QueuedMqttMessage(uint32_t id, std::shared_ptr<MqttMessage> && content)
             : id_(id)
             , content_(std::move(content)) {
             retry_count_ = 0;
@@ -254,6 +244,7 @@ class Mqtt {
     static std::shared_ptr<const MqttMessage> queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain);
     static std::shared_ptr<const MqttMessage> queue_publish_message(const std::string & topic, const std::string & payload, bool retain);
     static std::shared_ptr<const MqttMessage> queue_subscribe_message(const std::string & topic);
+    static std::shared_ptr<const MqttMessage> queue_unsubscribe_message(const std::string & topic);
 
     void on_publish(uint16_t packetId);
     void on_message(const char * topic, const char * payload, size_t len);
@@ -281,6 +272,7 @@ class Mqtt {
     uint32_t last_publish_mixer_      = 0;
     uint32_t last_publish_other_      = 0;
     uint32_t last_publish_sensor_     = 0;
+    uint32_t last_publish_queue_      = 0;
 
     static bool     connecting_;
     static bool     initialized_;
@@ -303,6 +295,7 @@ class Mqtt {
     static uint8_t     nested_format_;
     static std::string discovery_prefix_;
     static bool        publish_single_;
+    static bool        publish_single2cmd_;
     static bool        send_response_;
 };
 

@@ -395,7 +395,11 @@ bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const i
 void DallasSensor::publish_sensor(const Sensor & sensor) {
     if (Mqtt::publish_single()) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        snprintf(topic, sizeof(topic), "%s/%s", read_flash_string(F_(dallassensor)).c_str(), sensor.name().c_str());
+        if (Mqtt::publish_single2cmd()) {
+            snprintf(topic, sizeof(topic), "%s/%s", read_flash_string(F_(dallassensor)).c_str(), sensor.name().c_str());
+        } else {
+            snprintf(topic, sizeof(topic), "%s%s/%s", read_flash_string(F_(dallassensor)).c_str(), "_data", sensor.name().c_str());
+        }
         char payload[10];
         Mqtt::publish(topic, Helpers::render_value(payload, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
     }

@@ -533,16 +533,26 @@ void EMSdevice::publish_value(void * value_p) {
     for (auto & dv : devicevalues_) {
         if (dv.value_p == value_p && dv.has_state(DeviceValueState::DV_VISIBLE)) {
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-            if ((dv.tag >= DeviceValueTAG::TAG_HC1 && dv.tag <= DeviceValueTAG::TAG_HC8)
-                || (dv.tag >= DeviceValueTAG::TAG_WWC1 && dv.tag <= DeviceValueTAG::TAG_WWC4)) {
+            if (Mqtt::publish_single2cmd()) {
+                if ((dv.tag >= DeviceValueTAG::TAG_HC1 && dv.tag <= DeviceValueTAG::TAG_WWC4)) {
+                    snprintf(topic,
+                             sizeof(topic),
+                             "%s/%s/%s",
+                             device_type_2_device_name(device_type_).c_str(),
+                             tag_to_mqtt(dv.tag).c_str(),
+                             read_flash_string(dv.short_name).c_str());
+                } else {
+                    snprintf(topic, sizeof(topic), "%s/%s", device_type_2_device_name(device_type_).c_str(), read_flash_string(dv.short_name).c_str());
+                }
+            } else if (Mqtt::is_nested() && dv.tag >= DeviceValueTAG::TAG_HC1) {
                 snprintf(topic,
                          sizeof(topic),
                          "%s/%s/%s",
-                         device_type_2_device_name(device_type_).c_str(),
+                         Mqtt::tag_to_topic(device_type_, dv.tag).c_str(),
                          tag_to_mqtt(dv.tag).c_str(),
                          read_flash_string(dv.short_name).c_str());
             } else {
-                snprintf(topic, sizeof(topic), "%s/%s", device_type_2_device_name(device_type_).c_str(), read_flash_string(dv.short_name).c_str());
+                snprintf(topic, sizeof(topic), "%s/%s", Mqtt::tag_to_topic(device_type_, dv.tag).c_str(), read_flash_string(dv.short_name).c_str());
             }
 
             int8_t  divider     = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
