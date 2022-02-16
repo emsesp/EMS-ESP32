@@ -1413,6 +1413,28 @@ void EMSESP::start() {
     webServer.begin(); // start the web server
 }
 
+// fetch devices one by one
+void EMSESP::scheduled_fetch_values() {
+    static uint8_t no = 0;
+    if (no || (uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
+        if (!no) {
+            last_fetch_ = uuid::get_uptime();
+            no          = 1;
+        }
+        if (txservice_.tx_queue_empty()) {
+            uint8_t i = 0;
+            for (const auto & emsdevice : emsdevices) {
+                if (emsdevice && ++i >= no) {
+                    emsdevice->fetch_values();
+                    no++;
+                    return;
+                }
+            }
+            no = 0;
+        }
+    }
+}
+
 // main loop calling all services
 void EMSESP::loop() {
     esp8266React.loop(); // web services
@@ -1429,10 +1451,7 @@ void EMSESP::loop() {
         mqtt_.loop();         // sends out anything in the MQTT queue
 
         // force a query on the EMS devices to fetch latest data at a set interval (1 min)
-        if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
-            last_fetch_ = uuid::get_uptime();
-            fetch_device_values();
-        }
+        scheduled_fetch_values();
     }
 
     console_.loop(); // telnet/serial console
