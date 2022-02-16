@@ -70,7 +70,7 @@ MAKE_PSTR_WORD(pin)
 MAKE_PSTR_WORD(publish)
 MAKE_PSTR_WORD(timeout)
 MAKE_PSTR_WORD(board_profile)
-MAKE_PSTR_WORD(counter)
+MAKE_PSTR_WORD(setvalue)
 
 // for commands
 MAKE_PSTR_WORD(call)
@@ -121,7 +121,7 @@ MAKE_STR(productid_fmt, "%s EMS ProductID")
 
 MAKE_PSTR_LIST(enum_syslog_level, F_(off), F("emerg"), F("alert"), F("crit"), F_(error), F("warn"), F("notice"), F_(info), F_(debug), F("trace"), F("all"))
 MAKE_PSTR_LIST(enum_watch, F_(off), F_(on), F_(raw), F_(unknown))
-MAKE_PSTR_LIST(enum_sensortype, F("none"), F("digital in"), F("counter"), F("adc"))
+MAKE_PSTR_LIST(enum_sensortype, F("none"), F("digital in"), F("counter"), F("adc"), F("timer"), F("rate"), F("digital out"), F("pwm 0"), F("pwm 1"), F("pwm 2"))
 
 // strings
 MAKE_PSTR(EMSESP, "EMS-ESP")
@@ -196,6 +196,8 @@ MAKE_PSTR(dbm, "dBm")
 MAKE_PSTR(fahrenheit, "°F")
 MAKE_PSTR(mv, "mV")
 MAKE_PSTR(sqm, "sqm")
+MAKE_PSTR(m3, "m3")
+MAKE_PSTR(l, "l")
 // MAKE_PSTR(times, "times")
 // MAKE_PSTR(oclock, "o'clock")
 

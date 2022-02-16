@@ -66,7 +66,9 @@ class DeviceValue {
         DBM,        // 15
         FAHRENHEIT, // 16
         MV,         // 17
-        SQM         // 18
+        SQM,        // 18 squaremeter
+        M3,         // 19 cubic meter
+        L           // 20
     };
 
     // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp

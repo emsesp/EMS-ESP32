@@ -526,6 +526,10 @@ bool Helpers::value2float(const char * v, float & value) {
         value = atof((char *)v);
         return true;
     }
+    if (v[0] == '+' && (v[1] == '.' || (v[1] >= '0' && v[1] <= '9'))) {
+        value = atof((char *)(v + 1));
+        return true;
+    }
     return false;
 }
 

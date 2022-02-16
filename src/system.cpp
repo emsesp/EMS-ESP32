@@ -73,18 +73,18 @@ bool System::command_pin(const char * value, const int8_t id) {
     } else if (Helpers::value2bool(value, v)) {
         pinMode(id, OUTPUT);
         digitalWrite(id, v);
-        LOG_INFO(F("GPIO %d set to %s"), id, v ? "HIGH" : "LOW");
+        // LOG_INFO(F("GPIO %d set to %s"), id, v ? "HIGH" : "LOW");
         return true;
     } else if (Helpers::value2string(value, v1)) {
         if (v1 == "input" || v1 == "in" || v1 == "-1") {
             pinMode(id, INPUT);
             v = digitalRead(id);
-            LOG_INFO(F("GPIO %d set input, state %s"), id, v ? "HIGH" : "LOW");
+            // LOG_INFO(F("GPIO %d set input, state %s"), id, v ? "HIGH" : "LOW");
             return true;
         }
     }
 
-    LOG_INFO(F("GPIO %d: invalid value"), id);
+    // LOG_INFO(F("GPIO %d: invalid value"), id);
 #endif
 
     return false;
@@ -162,13 +162,19 @@ bool System::command_publish(const char * value, const int8_t id) {
 bool System::command_syslog_level(const char * value, const int8_t id) {
     uint8_t s = 0xff;
     if (Helpers::value2enum(value, s, FL_(enum_syslog_level))) {
+        bool changed = false;
         EMSESP::webSettingsService.update(
             [&](WebSettings & settings) {
-                settings.syslog_level = (int8_t)s - 1;
+                if (settings.syslog_level != (int8_t)s - 1) {
+                    settings.syslog_level = (int8_t)s - 1;
+                    changed               = true;
+                }
                 return StateUpdateResult::CHANGED;
             },
             "local");
-        EMSESP::system_.syslog_init();
+        if (changed) {
+            EMSESP::system_.syslog_init();
+        }
         return true;
     }
     return false;
@@ -176,28 +182,34 @@ bool System::command_syslog_level(const char * value, const int8_t id) {
 
 // watch
 bool System::command_watch(const char * value, const int8_t id) {
-    uint8_t w = 0xff;
+    uint8_t  w = 0xff;
+    uint16_t i = Helpers::hextoint(value);
     if (Helpers::value2enum(value, w, FL_(enum_watch))) {
         if (w == 0 || EMSESP::watch() == EMSESP::Watch::WATCH_OFF) {
             EMSESP::watch_id(0);
         }
-        EMSESP::watch(w);
-        if (Mqtt::publish_single()) {
-            Mqtt::publish(F("system/watch"), read_flash_string(FL_(enum_watch)[w]).c_str());
+        if (Mqtt::publish_single() && w != EMSESP::watch()) {
+            if (Mqtt::publish_single2cmd()) {
+                Mqtt::publish(F("system/watch"),
+                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : read_flash_string(FL_(enum_watch)[w]).c_str());
+            } else {
+                Mqtt::publish(F("system_data/watch"),
+                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : read_flash_string(FL_(enum_watch)[w]).c_str());
+            }
         }
+        EMSESP::watch(w);
         return true;
-    }
-    uint16_t i = Helpers::hextoint(value);
-    if (i) {
+    } else if (i) {
+        if (Mqtt::publish_single() && i != EMSESP::watch_id()) {
+            if (Mqtt::publish_single2cmd()) {
+                Mqtt::publish(F("system/watch"), Helpers::hextoa(i));
+            } else {
+                Mqtt::publish(F("system_data/watch"), Helpers::hextoa(i));
+            }
+        }
         EMSESP::watch_id(i);
         if (EMSESP::watch() == EMSESP::Watch::WATCH_OFF) {
             EMSESP::watch(EMSESP::Watch::WATCH_ON);
-        }
-        if (Mqtt::publish_single()) {
-            char s[10];
-            snprintf(s, sizeof(s), "0x%04X", i);
-            Mqtt::publish(F("system/watch"), s);
-            // Mqtt::publish(F("system/watch"), read_flash_string(FL_(enum_watch)[EMSESP::watch()]).c_str());
         }
         return true;
     }
@@ -273,13 +285,25 @@ void System::syslog_init() {
     }
 
     if (Mqtt::publish_single()) {
-        Mqtt::publish(F("system/syslog"), syslog_enabled_ ? read_flash_string(FL_(enum_syslog_level)[syslog_level_ + 1]).c_str() : "off");
-        if (EMSESP::watch_id() == 0 || EMSESP::watch() == 0) {
-            Mqtt::publish(F("system/watch"), read_flash_string(FL_(enum_watch)[EMSESP::watch()]).c_str());
+        if (Mqtt::publish_single2cmd()) {
+            Mqtt::publish(F("system/syslog"), syslog_enabled_ ? read_flash_string(FL_(enum_syslog_level)[syslog_level_ + 1]).c_str() : "off");
+            if (EMSESP::watch_id() == 0 || EMSESP::watch() == 0) {
+                Mqtt::publish(F("system/watch"),
+                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch())
+                                                                                 : read_flash_string(FL_(enum_watch)[EMSESP::watch()]).c_str());
+            } else {
+                Mqtt::publish(F("system/watch"), Helpers::hextoa(EMSESP::watch_id()));
+            }
+
         } else {
-            char s[10];
-            snprintf(s, sizeof(s), "0x%04X", EMSESP::watch_id());
-            Mqtt::publish(F("system/watch"), s);
+            Mqtt::publish(F("system_data/syslog"), syslog_enabled_ ? read_flash_string(FL_(enum_syslog_level)[syslog_level_ + 1]).c_str() : "off");
+            if (EMSESP::watch_id() == 0 || EMSESP::watch() == 0) {
+                Mqtt::publish(F("system_data/watch"),
+                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch())
+                                                                                 : read_flash_string(FL_(enum_watch)[EMSESP::watch()]).c_str());
+            } else {
+                Mqtt::publish(F("system_data/watch"), Helpers::hextoa(EMSESP::watch_id()));
+            }
         }
     }
 #endif
@@ -524,7 +548,7 @@ bool System::heartbeat_json(JsonObject & output) {
     output["txfails"]    = EMSESP::txservice_.telegram_read_fail_count() + EMSESP::txservice_.telegram_write_fail_count();
 
     if (Mqtt::enabled()) {
-        output["mqttfails"] = Mqtt::publish_fails();
+        output["mqttcount"] = Mqtt::publish_count();
         output["mqttfails"] = Mqtt::publish_fails();
     }
     output["apicalls"] = WebAPIService::api_count(); // + WebAPIService::api_fails();
@@ -636,16 +660,12 @@ void System::system_check() {
 
 // commands - takes static function pointers
 void System::commands_init() {
-    Command::add(EMSdevice::DeviceType::SYSTEM,
-                 F_(pin),
-                 System::command_pin,
-                 F("set a GPIO on/off"),
-                 CommandFlag::MQTT_SUB_FLAG_NOSUB | CommandFlag::ADMIN_ONLY); // dont create a MQTT topic for this
-
+    // Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin, F("set a GPIO on/off"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, F("send a telegram"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, F("refresh all EMS values"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, F("restart EMS-ESP"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, F("watch incoming telegrams"));
+    // register syslog command in syslog init
     // Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, F("set syslog level"), CommandFlag::ADMIN_ONLY);
 
     if (Mqtt::enabled()) {
@@ -822,7 +842,7 @@ void System::show_system(uuid::console::Shell & shell) {
     // show Ethernet if connected
     if (ethernet_connected_) {
         shell.println();
-        shell.printfln(F(" Wired Network: connected"));
+        shell.printfln(F(" Ethernet Network: connected"));
         shell.printfln(F(" MAC address: %s"), ETH.macAddress().c_str());
         shell.printfln(F(" Hostname: %s"), ETH.getHostname());
         shell.printfln(F(" IPv4 address: %s/%s"), uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
@@ -1021,6 +1041,13 @@ bool System::command_customizations(const char * value, const int8_t id, JsonObj
                 sensorJson["offset"] = sensor.offset;
                 sensorJson["factor"] = sensor.factor;
                 sensorJson["uom"]    = EMSdevice::uom_to_string(sensor.uom);
+            } else if (sensor.type == AnalogSensor::AnalogType::COUNTER || sensor.type == AnalogSensor::AnalogType::TIMER
+                       || sensor.type == AnalogSensor::AnalogType::RATE) {
+                sensorJson["factor"] = sensor.factor;
+                sensorJson["uom"]    = EMSdevice::uom_to_string(sensor.uom);
+            } else if (sensor.type >= AnalogSensor::AnalogType::PWM_0) {
+                sensorJson["frequency"] = sensor.factor;
+                sensorJson["factor"]    = sensor.factor;
             }
         }
 
@@ -1154,10 +1181,14 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
-                JsonObject obj  = devices.createNestedObject();
-                obj["type"]     = emsdevice->device_type_name();
-                obj["name"]     = emsdevice->to_string();
-                obj["entities"] = emsdevice->count_entities();
+                JsonObject obj = devices.createNestedObject();
+                obj["type"]    = emsdevice->device_type_name();
+                // obj["name"]     = emsdevice->to_string();
+                obj["name"]       = emsdevice->name();
+                obj["device id"]  = Helpers::hextoa(emsdevice->device_id());
+                obj["product id"] = emsdevice->product_id();
+                obj["version"]    = emsdevice->version();
+                obj["entities"]   = emsdevice->count_entities();
                 char result[200];
                 (void)emsdevice->show_telegram_handlers(result, EMSdevice::Handlers::RECEIVED);
                 if (result[0] != '\0') {

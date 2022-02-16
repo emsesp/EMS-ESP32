@@ -59,7 +59,8 @@ import {
   DeviceValue,
   DeviceValueUOM,
   DeviceValueUOM_s,
-  AnalogTypes,
+  AnalogType,
+  AnalogTypeNames,
   Sensor,
   Analog
 } from './types';
@@ -715,7 +716,7 @@ const DashboardData: FC = () => {
                   ))}
                 </ValidatedTextField>
               </Grid>
-              {analog.t === 3 && (
+              {analog.t >= AnalogType.COUNTER && analog.t <= AnalogType.RATE && (
                 <>
                   <Grid item>
                     <ValidatedTextField name="u" label="UoM" value={analog.u} select onChange={updateValue(setAnalog)}>
@@ -726,22 +727,37 @@ const DashboardData: FC = () => {
                       ))}
                     </ValidatedTextField>
                   </Grid>
-                  <Grid item></Grid>
-                  <Grid item>
-                    <ValidatedTextField
-                      name="o"
-                      label="Offset"
-                      value={numberValue(analog.o)}
-                      sx={{ width: '20ch' }}
-                      type="number"
-                      variant="outlined"
-                      onChange={updateValue(setAnalog)}
-                      inputProps={{ min: '0', max: '3300', step: '1' }}
-                      InputProps={{
-                        endAdornment: <InputAdornment position="end">mV</InputAdornment>
-                      }}
-                    />
-                  </Grid>
+                  {analog.t === AnalogType.ADC && (
+                    <Grid item>
+                      <ValidatedTextField
+                        name="o"
+                        label="Offset"
+                        value={numberValue(analog.o)}
+                        sx={{ width: '20ch' }}
+                        type="number"
+                        variant="outlined"
+                        onChange={updateValue(setAnalog)}
+                        inputProps={{ min: '0', max: '3300', step: '1' }}
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">mV</InputAdornment>
+                        }}
+                      />
+                    </Grid>
+                  )}
+                  {analog.t === AnalogType.COUNTER && (
+                    <Grid item>
+                      <ValidatedTextField
+                        name="o"
+                        label="Start Value"
+                        value={numberValue(analog.o)}
+                        sx={{ width: '20ch' }}
+                        type="number"
+                        variant="outlined"
+                        onChange={updateValue(setAnalog)}
+                        inputProps={{ min: '0', step: '1' }}
+                      />
+                    </Grid>
+                  )}
                   <Grid item>
                     <ValidatedTextField
                       name="f"
@@ -752,6 +768,73 @@ const DashboardData: FC = () => {
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
                       inputProps={{ min: '-100', max: '100', step: '0.1' }}
+                    />
+                  </Grid>
+                </>
+              )}
+              {analog.t === AnalogType.DIGITAL_OUT && (analog.i === 25 || analog.i === 26) && (
+                <>
+                  <Grid item>
+                    <ValidatedTextField
+                      name="o"
+                      label="DAC Value"
+                      value={numberValue(analog.o)}
+                      sx={{ width: '20ch' }}
+                      type="number"
+                      variant="outlined"
+                      onChange={updateValue(setAnalog)}
+                      inputProps={{ min: '0', max: '255', step: '1' }}
+                    />
+                  </Grid>
+                </>
+              )}
+              {analog.t === AnalogType.DIGITAL_OUT && analog.i !== 25 && analog.i !== 26 && (
+                <>
+                  <Grid item>
+                    <ValidatedTextField
+                      name="o"
+                      label="Value"
+                      value={numberValue(analog.o)}
+                      sx={{ width: '20ch' }}
+                      type="number"
+                      variant="outlined"
+                      onChange={updateValue(setAnalog)}
+                      inputProps={{ min: '0', max: '1', step: '1' }}
+                    />
+                  </Grid>
+                </>
+              )}
+              {analog.t >= AnalogType.PWM_0 && (
+                <>
+                  <Grid item>
+                    <ValidatedTextField
+                      name="f"
+                      label="Frequency"
+                      value={numberValue(analog.f)}
+                      sx={{ width: '20ch' }}
+                      type="number"
+                      variant="outlined"
+                      onChange={updateValue(setAnalog)}
+                      inputProps={{ min: '1', max: '5000', step: '1' }}
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">Hz</InputAdornment>
+                      }}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <ValidatedTextField
+                      name="o"
+                      label="Dutycycle"
+                      value={numberValue(analog.o)}
+                      sx={{ width: '20ch' }}
+                      type="number"
+                      variant="outlined"
+                      onChange={updateValue(setAnalog)}
+                      inputProps={{ min: '0', max: '100', step: '0.1' }}
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">%</InputAdornment>
+                      }}
+
                     />
                   </Grid>
                 </>

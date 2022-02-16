@@ -275,7 +275,7 @@ void WebDataService::write_analog(AsyncWebServerRequest * request, JsonVariant &
         uint8_t     id     = analog["id"]; // this is the unique key
         std::string name   = analog["name"];
         float       factor = analog["factor"];
-        int16_t     offset = analog["offset"];
+        float       offset = analog["offset"];
         uint8_t     uom    = analog["uom"];
         int8_t      type   = analog["type"];
         ok                 = EMSESP::analogsensor_.update(id, name, offset, factor, uom, type);
