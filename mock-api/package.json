@@ -11,11 +11,11 @@
     "author": "proddy",
     "license": "ISC",
     "dependencies": {
-        "@msgpack/msgpack": "^2.7.1",
+        "@msgpack/msgpack": "^2.7.2",
         "compression": "^1.7.4",
-        "express": "^4.17.2",
+        "express": "^4.17.3",
         "express-sse": "^0.5.3",
         "nodemon": "^2.0.15",
-        "ws": "^8.4.2"
+        "ws": "^8.5.0"
     }
 }
