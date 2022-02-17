@@ -90,6 +90,7 @@ class MqttSettings {
     uint8_t  nested_format;
     String   discovery_prefix;
     bool     publish_single;
+    bool     publish_single2cmd;
     bool     send_response;
 
     static void              read(MqttSettings & settings, JsonObject & root);

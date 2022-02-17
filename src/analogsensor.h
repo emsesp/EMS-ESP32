@@ -36,10 +36,10 @@ class AnalogSensor {
   public:
     class Sensor {
       public:
-        Sensor(const uint8_t id, const std::string & name, const uint16_t offset, const float factor, const uint8_t uom, const int8_t type);
+        Sensor(const uint8_t id, const std::string & name, const float offset, const float factor, const uint8_t uom, const int8_t type);
         ~Sensor() = default;
 
-        void set_offset(const uint16_t offset) {
+        void set_offset(const float offset) {
             offset_ = offset;
         }
 
@@ -68,7 +68,7 @@ class AnalogSensor {
             factor_ = factor;
         }
 
-        uint16_t offset() const {
+        float offset() const {
             return offset_;
         }
 
@@ -90,16 +90,18 @@ class AnalogSensor {
 
         bool ha_registered = false;
 
-        uint16_t analog_       = 0; // ADC - average value
-        uint32_t sum_          = 0; // ADC - rolling sum
-        uint16_t last_reading_ = 0; // IO COUNTER & ADC - last reading
-        uint32_t polltime_     = 0; // digital IO & COUNTER debounce time
-        int      poll_         = 0;
+        uint16_t analog_        = 0; // ADC - average value
+        uint32_t sum_           = 0; // ADC - rolling sum
+        uint16_t last_reading_  = 0; // IO COUNTER & ADC - last reading
+        uint16_t count_         = 0; // counter raw counts
+        uint32_t polltime_      = 0; // digital IO & COUNTER debounce time
+        int      poll_          = 0;
+        uint32_t last_polltime_ = 0; // for timer
 
       private:
         uint8_t     id_;
         std::string name_;
-        uint16_t    offset_;
+        float       offset_;
         float       factor_;
         uint8_t     uom_;
         float       value_; // float because of the factor is a float
@@ -112,9 +114,15 @@ class AnalogSensor {
     enum AnalogType : int8_t {
         MARK_DELETED = -1, // mark for deletion
         NOTUSED,           // 0 - disabled
-        DIGITAL_IN,        // 1
-        COUNTER,           // 2
-        ADC                // 3
+        DIGITAL_IN,
+        COUNTER,
+        ADC,
+        TIMER,
+        RATE,
+        DIGITAL_OUT,
+        PWM_0,
+        PWM_1,
+        PWM_2
     };
 
     void start();
@@ -149,7 +157,7 @@ class AnalogSensor {
         return sensors_.size();
     }
 
-    bool update(uint8_t id, const std::string & name, uint16_t offset, float factor, uint8_t uom, int8_t type);
+    bool update(uint8_t id, const std::string & name, float offset, float factor, uint8_t uom, int8_t type);
     bool get_value_info(JsonObject & output, const char * cmd, const int8_t id);
 
 #ifdef EMSESP_DEBUG
@@ -163,9 +171,10 @@ class AnalogSensor {
     static uuid::log::Logger logger_;
 
     void remove_ha_topic(const uint8_t id);
-    bool command_counter(const char * value, const int8_t id);
+    bool command_setvalue(const char * value, const int8_t id);
     void measure();
     bool command_info(const char * value, const int8_t id, JsonObject & output);
+    bool command_commands(const char * value, const int8_t id, JsonObject & output);
 
     std::vector<Sensor> sensors_; // our list of sensors
 

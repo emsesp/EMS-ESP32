@@ -22,6 +22,10 @@
 - Help text for string commands in WebUI [#320](https://github.com/emsesp/EMS-ESP32/issues/320)
 - Germany translations (at compile time)
 - #entities added to system/info` endpoint [#322](https://github.com/emsesp/EMS-ESP32/issues/322)
+- analog outputs digital/pwm/dac
+- remove MQTT retained configs if discovery is disabled
+- timeout 10 min for MQTT-QoS wait
+- Moduline 300 auto-temperatures T1-T4, RC300 romminfluencefactor
 
 ### Fixed
 
@@ -38,6 +42,7 @@
 - Fix uploading firmware on OSX [#345](https://github.com/emsesp/EMS-ESP32/issues/345)
 - Non-nested MQTT would corrupt the json [#354](https://github.com/emsesp/EMS-ESP32/issues/354)
 - Burner selected max power can have a value higher than 100% [#314](https://github.com/emsesp/EMS-ESP32/issues/314)
+- some missing fahrenheit calculations
 
 ### Changed
 
@@ -51,6 +56,8 @@
 - Show ems tx reads and writes separatly
 - Show ems device handlers separated for received, fetched and pending handlers.
 - Wired renamed to Ethernet
+- removed system/pin command, new commands in analogsensors
+- system/info device-info split to name/version/brand
 
 ## **BREAKING CHANGES:**
 

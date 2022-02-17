@@ -183,29 +183,43 @@ const MqttSettingsForm: FC = () => {
           control={<Checkbox name="send_response" checked={data.send_response} onChange={updateFormValue} />}
           label="Publish command output to a 'response' topic"
         />
-        <BlockFormControlLabel
-          control={<Checkbox name="publish_single" checked={data.publish_single} onChange={updateFormValue} />}
-          label="Publish single value topics on change"
-        />
-        <Grid item>
-          <BlockFormControlLabel
-            control={<Checkbox name="ha_enabled" checked={data.ha_enabled} onChange={updateFormValue} />}
-            label="Enable MQTT Discovery (for Home Assistant, Domoticz)"
-          />
-        </Grid>
-        {data.ha_enabled && (
-          <Grid item xs={6}>
-            <ValidatedTextField
-              name="discovery_prefix"
-              label="Prefix for the Discovery topic"
-              fullWidth
-              variant="outlined"
-              value={data.discovery_prefix}
-              onChange={updateFormValue}
-              margin="normal"
+        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+          <Grid item>
+            <BlockFormControlLabel
+              control={<Checkbox name="publish_single" checked={data.publish_single} onChange={updateFormValue} />}
+              label="Publish single value topics on change"
             />
           </Grid>
-        )}
+          {data.publish_single && (
+            <Grid item>
+              <BlockFormControlLabel
+                control={<Checkbox name="publish_single2cmd" checked={data.publish_single2cmd} onChange={updateFormValue} />}
+                label="publish to command topics (ioBroker)"
+              />
+            </Grid>
+          )}
+        </Grid>
+        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+          <Grid item>
+            <BlockFormControlLabel
+              control={<Checkbox name="ha_enabled" checked={data.ha_enabled} onChange={updateFormValue} />}
+              label="Enable MQTT Discovery (for Home Assistant, Domoticz)"
+            />
+          </Grid>
+          {data.ha_enabled && (
+            <Grid item xs={6}>
+              <ValidatedTextField
+                name="discovery_prefix"
+                label="Prefix for the Discovery topic"
+                fullWidth
+                variant="outlined"
+                value={data.discovery_prefix}
+                onChange={updateFormValue}
+                margin="normal"
+              />
+            </Grid>
+          )}
+        </Grid>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           Publish Intervals (in seconds, 0=automatic)
         </Typography>

@@ -399,6 +399,10 @@ class TxService : public EMSbus {
         return tx_telegrams_;
     }
 
+    bool tx_queue_empty() {
+        return tx_telegrams_.size() == 0;
+    }
+
 #if defined(EMSESP_DEBUG)
     static constexpr uint8_t MAXIMUM_TX_RETRIES = 0; // when compiled with EMSESP_DEBUG don't retry
 #else

@@ -176,7 +176,9 @@ export enum DeviceValueUOM {
   DBM,
   FAHRENHEIT,
   MV,
-  SQM
+  SQM,
+  M3,
+  L
 }
 
 export const DeviceValueUOM_s = [
@@ -199,10 +201,36 @@ export const DeviceValueUOM_s = [
   '°F',
   'mV',
   'sqm',
-  "o'clock"
+  "m3",
+  "l"
 ];
 
-export const AnalogTypes = ['(disabled)', 'Digital in', 'Counter', 'ADC'];
+export enum AnalogType {
+  NOTUSED = 0,
+  DIGITAL_IN,
+  COUNTER,
+  ADC,
+  TIMER,
+  RATE,
+  DIGITAL_OUT,
+  PWM_0,
+  PWM_1,
+  PWM_2
+}
+
+export const AnalogTypeNames = [
+  '(disabled)',
+  'Digital in',
+  'Counter',
+  'ADC',
+  'Timer',
+  'Rate',
+  'Digital out',
+  'PWM 0',
+  'PWM 1',
+  'PWM 2'
+];
+
 
 type BoardProfiles = {
   [name: string]: string;

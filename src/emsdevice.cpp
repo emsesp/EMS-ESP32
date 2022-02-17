@@ -52,6 +52,9 @@ const std::string EMSdevice::tag_to_mqtt(uint8_t tag) {
 }
 
 const std::string EMSdevice::uom_to_string(uint8_t uom) {
+    if (EMSESP::system_.fahrenheit() && (uom == DeviceValueUOM::DEGREES || uom == DeviceValueUOM::DEGREES_R)) {
+        return read_flash_string(DeviceValue::DeviceValueUOM_s[DeviceValueUOM::FAHRENHEIT]);
+    }
     return read_flash_string(DeviceValue::DeviceValueUOM_s[uom]);
 }
 
@@ -306,11 +309,7 @@ void EMSdevice::list_device_entries(JsonObject & output) {
 
             // add uom
             if (!uom_to_string(dv.uom).empty() && uom_to_string(dv.uom) != " ") {
-                if (EMSESP::system_.fahrenheit() && (dv.uom == DeviceValueUOM::DEGREES || dv.uom == DeviceValueUOM::DEGREES_R)) {
-                    details.add(EMSdevice::uom_to_string(DeviceValueUOM::FAHRENHEIT));
-                } else {
-                    details.add(EMSdevice::uom_to_string(dv.uom));
-                }
+                details.add(EMSdevice::uom_to_string(dv.uom));
             }
         }
     }
@@ -533,16 +532,26 @@ void EMSdevice::publish_value(void * value_p) {
     for (auto & dv : devicevalues_) {
         if (dv.value_p == value_p && dv.has_state(DeviceValueState::DV_VISIBLE)) {
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-            if ((dv.tag >= DeviceValueTAG::TAG_HC1 && dv.tag <= DeviceValueTAG::TAG_HC8)
-                || (dv.tag >= DeviceValueTAG::TAG_WWC1 && dv.tag <= DeviceValueTAG::TAG_WWC4)) {
+            if (Mqtt::publish_single2cmd()) {
+                if ((dv.tag >= DeviceValueTAG::TAG_HC1 && dv.tag <= DeviceValueTAG::TAG_WWC4)) {
+                    snprintf(topic,
+                             sizeof(topic),
+                             "%s/%s/%s",
+                             device_type_2_device_name(device_type_).c_str(),
+                             tag_to_mqtt(dv.tag).c_str(),
+                             read_flash_string(dv.short_name).c_str());
+                } else {
+                    snprintf(topic, sizeof(topic), "%s/%s", device_type_2_device_name(device_type_).c_str(), read_flash_string(dv.short_name).c_str());
+                }
+            } else if (Mqtt::is_nested() && dv.tag >= DeviceValueTAG::TAG_HC1) {
                 snprintf(topic,
                          sizeof(topic),
                          "%s/%s/%s",
-                         device_type_2_device_name(device_type_).c_str(),
+                         Mqtt::tag_to_topic(device_type_, dv.tag).c_str(),
                          tag_to_mqtt(dv.tag).c_str(),
                          read_flash_string(dv.short_name).c_str());
             } else {
-                snprintf(topic, sizeof(topic), "%s/%s", device_type_2_device_name(device_type_).c_str(), read_flash_string(dv.short_name).c_str());
+                snprintf(topic, sizeof(topic), "%s/%s", Mqtt::tag_to_topic(device_type_, dv.tag).c_str(), read_flash_string(dv.short_name).c_str());
             }
 
             int8_t  divider     = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
@@ -1014,7 +1023,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
 
             // add uom if it's not a " " (single space)
             if (!uom_to_string(dv.uom).empty() && uom_to_string(dv.uom) != " ") {
-                json["uom"] = fahrenheit ? "°F" : uom_to_string(dv.uom);
+                json["uom"] = uom_to_string(dv.uom);
             }
 
             json["writeable"] = dv.has_cmd;
