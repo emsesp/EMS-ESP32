@@ -54,22 +54,23 @@ class DummySettings {
     uint8_t  solar_maxflow        = 30;
 
     // MQTT
-    uint16_t publish_time     = 10;
-    uint8_t  mqtt_qos         = 0;
-    bool     mqtt_retain      = false;
-    bool     enabled          = true;
-    uint8_t  nested_format    = 1; // 1=nested 2=single
-    String   discovery_prefix = "homeassistant";
-    bool     ha_enabled       = true;
-    String   base             = "ems-esp";
-    bool     publish_single   = false;
-    bool     send_response    = true;
-    String   host             = "192.168.1.4";
-    uint16_t port             = 1883;
-    String   clientId         = "ems-esp";
-    String   username         = "";
-    uint16_t keepAlive        = 60;
-    bool     cleanSession     = false;
+    uint16_t publish_time       = 10;
+    uint8_t  mqtt_qos           = 0;
+    bool     mqtt_retain        = false;
+    bool     enabled            = true;
+    uint8_t  nested_format      = 1; // 1=nested 2=single
+    String   discovery_prefix   = "homeassistant";
+    bool     ha_enabled         = true;
+    String   base               = "ems-esp";
+    bool     publish_single     = false;
+    bool     publish_single2cmd = false;
+    bool     send_response      = true;
+    String   host               = "192.168.1.4";
+    uint16_t port               = 1883;
+    String   clientId           = "ems-esp";
+    String   username           = "";
+    uint16_t keepAlive          = 60;
+    bool     cleanSession       = false;
 
     uint16_t publish_time_boiler     = 10;
     uint16_t publish_time_thermostat = 10;

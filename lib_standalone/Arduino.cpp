@@ -125,8 +125,11 @@ uint32_t analogReadMilliVolts(uint8_t pin) {
     return 0;
 }
 
-void analogSetPinAttenuation(uint8_t pin, adc_attenuation_t attenuation) {
-}
-
-void analogSetAttenuation(adc_attenuation_t attenuation) {
-}
+void   analogSetPinAttenuation(uint8_t pin, adc_attenuation_t attenuation){};
+void   analogSetAttenuation(adc_attenuation_t attenuation){};
+void   dacWrite(uint8_t pin, uint8_t value){};
+double ledcSetup(uint8_t chan, double freq, uint8_t bit_num) {
+    return 0;
+};
+void ledcAttachPin(uint8_t pin, uint8_t chan){};
+void ledcWrite(uint8_t chan, uint32_t duty){};
