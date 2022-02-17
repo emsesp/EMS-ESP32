@@ -386,6 +386,8 @@ void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit
     char uniq_id_s[30];
     char temp_cmd_s[30];
     char mode_cmd_s[30];
+    char min_s[10];
+    char max_s[10];
 
     // https://github.com/emsesp/EMS-ESP32/issues/325#issuecomment-1022249093
     // before you had to have a seltemp and roomtemp for the HA to work, now its optional
@@ -437,8 +439,8 @@ void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit
         doc["curr_temp_tpl"] = currtemp_s;
     }
 
-    doc["min_temp"]  = "5";
-    doc["max_temp"]  = "30";
+    doc["min_temp"]  = Helpers::render_value(min_s, 5, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+    doc["max_temp"]  = Helpers::render_value(max_s, 30, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
     doc["temp_step"] = "0.5";
 
     // the HA climate component only responds to auto, heat and off
