@@ -530,7 +530,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t id) {
                 return true;
             } else if (sensor.type() == AnalogType::DIGITAL_OUT) {
                 uint8_t v = val;
-                if ((sensor.id() == 25 || sensor.id() == 26) && v <= 255) {
+                if ((sensor.id() == 25 || sensor.id() == 26)) {
                     sensor.set_offset(v);
                     sensor.set_value(v);
                     pinMode(sensor.id(), OUTPUT);
