@@ -70,7 +70,7 @@ class Mqtt {
     enum Operation : uint8_t { PUBLISH, SUBSCRIBE, UNSUBSCRIBE };
     enum NestedFormat : uint8_t { NESTED = 1, SINGLE };
 
-    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = FACTORY_MQTT_MAX_TOPIC_LENGTH; // fixed, not a user setting anymore
+    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // fixed, not a user setting anymore
 
     static void on_connect();
 
