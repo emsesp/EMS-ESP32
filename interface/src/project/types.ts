@@ -201,8 +201,8 @@ export const DeviceValueUOM_s = [
   '°F',
   'mV',
   'sqm',
-  "m3",
-  "l"
+  'm3',
+  'l'
 ];
 
 export enum AnalogType {
@@ -230,7 +230,6 @@ export const AnalogTypeNames = [
   'PWM 1',
   'PWM 2'
 ];
-
 
 type BoardProfiles = {
   [name: string]: string;
