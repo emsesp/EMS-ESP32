@@ -147,10 +147,6 @@ class DallasSensor {
 
     static uuid::log::Logger logger_;
 
-#ifndef EMSESP_STANDALONE
-    OneWire bus_;
-#endif
-
     bool     temperature_convert_complete();
     int16_t  get_temperature_c(const uint8_t addr[]);
     uint64_t get_id(const uint8_t addr[]);
@@ -159,19 +155,22 @@ class DallasSensor {
     bool command_info(const char * value, const int8_t id, JsonObject & output);
     bool command_commands(const char * value, const int8_t id, JsonObject & output);
 
-    uint32_t last_activity_ = uuid::get_uptime();
-    State    state_         = State::IDLE;
-
     std::vector<Sensor> sensors_; // our list of active sensors
 
-    int8_t   scancnt_     = SCAN_START;
-    uint8_t  firstscan_   = 0;
+#ifndef EMSESP_STANDALONE
+    OneWire  bus_;
+    uint32_t last_activity_ = uuid::get_uptime();
+    State    state_         = State::IDLE;
+    int8_t   scancnt_       = SCAN_START;
+    uint8_t  firstscan_     = 0;
+    int8_t   scanretry_     = 0;
+#endif
+
     uint8_t  dallas_gpio_ = 0;
     bool     parasite_    = false;
     bool     changed_     = false;
     uint32_t sensorfails_ = 0;
     uint32_t sensorreads_ = 0;
-    int8_t   scanretry_   = 0;
 };
 
 } // namespace emsesp
