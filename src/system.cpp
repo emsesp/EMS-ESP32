@@ -252,7 +252,9 @@ void System::format(uuid::console::Shell & shell) {
 }
 
 void System::syslog_init() {
+#ifndef EMSESP_STANDALONE
     bool was_enabled = syslog_enabled_;
+#endif
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         syslog_enabled_       = settings.syslog_enabled;
         syslog_level_         = settings.syslog_level;

@@ -62,11 +62,11 @@ MAKE_PSTR(iconpercent, "mdi:percent-outline")     // DeviceValueUOM::PERCENT
 MAKE_PSTR(icontime, "mdi:clock-outline")          // DeviceValueUOM::SECONDS MINUTES & HOURS
 MAKE_PSTR(iconkb, "mdi:memory")                   // DeviceValueUOM::KB
 MAKE_PSTR(iconlmin, "mdi:water-boiler")           // DeviceValueUOM::LMIN
-MAKE_PSTR(iconkwh, "mdi:transmission-tower")      // DeviceValueUOM::KWH & WH
+// MAKE_PSTR(iconkwh, "mdi:transmission-tower")      // DeviceValueUOM::KWH & WH
 MAKE_PSTR(iconua, "mdi:lightning-bolt-circle")    // DeviceValueUOM::UA
-MAKE_PSTR(iconbar, "mdi:gauge")                   // DeviceValueUOM::BAR
-MAKE_PSTR(iconkw, "mdi:omega")                    // DeviceValueUOM::KW & W
-MAKE_PSTR(icondbm, "mdi:wifi-strength-2")         // DeviceValueUOM::DBM
+// MAKE_PSTR(iconbar, "mdi:gauge")                   // DeviceValueUOM::BAR
+// MAKE_PSTR(iconkw, "mdi:omega")                    // DeviceValueUOM::KW & W
+// MAKE_PSTR(icondbm, "mdi:wifi-strength-2")         // DeviceValueUOM::DBM
 MAKE_PSTR(iconnum, "mdi:counter")                 // DeviceValueUOM::NONE
 MAKE_PSTR(icondevice, "mdi:home-automation")      // for devices in HA
 
@@ -253,7 +253,7 @@ void Mqtt::incoming(const char * topic, const char * payload) {
 void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
     // sometimes the payload is not terminated correctly, so make a copy
     // convert payload to a null-terminated char string
-    char message[len + 2] = {'\0'};
+    char message[len + 2];
     if (payload != nullptr) {
         strlcpy(message, payload, len + 1);
     }

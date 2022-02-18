@@ -177,7 +177,6 @@ class Boiler : public EMSdevice {
     uint8_t  hpCoolingOn_;
     uint8_t  hpWwOn_;
     uint8_t  hpPoolOn_;
-    uint8_t  hpHeatingOn;
     int16_t  hpTc0_;
     int16_t  hpTc1_;
     int16_t  hpTc3_;

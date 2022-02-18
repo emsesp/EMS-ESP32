@@ -200,7 +200,7 @@ char * Helpers::render_value(char * result, const char * value, const int8_t for
 // format: 255(0xFF)=boolean, 0=no formatting, otherwise divide by format
 char * Helpers::render_value(char * result, uint8_t value, int8_t format, const uint8_t fahrenheit) {
     // special check if its a boolean
-    if (format == EMS_VALUE_BOOL) {
+    if ((uint8_t)format == EMS_VALUE_BOOL) {
         if (value == EMS_VALUE_BOOL_OFF) {
             render_boolean(result, false);
         } else if (value == EMS_VALUE_BOOL_NOTSET) {
