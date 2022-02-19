@@ -49,6 +49,8 @@ void AnalogSensor::start() {
         F_(commands),
         [&](const char * value, const int8_t id, JsonObject & output) { return command_commands(value, id, output); },
         F_(commands_cmd));
+
+    Mqtt::subscribe(EMSdevice::DeviceType::ANALOGSENSOR, "analogsensor/#", nullptr); // use empty function callback
 }
 
 // load settings from the customization file, sorts them and initializes the GPIOs
