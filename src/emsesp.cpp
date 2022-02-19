@@ -553,7 +553,7 @@ void EMSESP::reset_mqtt_ha() {
 // generate_values_json is called to build the device value (dv) object array
 void EMSESP::publish_device_values(uint8_t device_type) {
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
-    JsonObject          json;
+    JsonObject          json         = doc.to<JsonObject>();
     bool                need_publish = false;
     bool                nested       = (Mqtt::is_nested());
 
@@ -608,7 +608,6 @@ void EMSESP::publish_device_values(uint8_t device_type) {
             // Mixer
             else if (device_type == DeviceType::MIXER) {
                 if (nested) {
-                    json = doc.to<JsonObject>();
                     need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::MQTT); // nested
                 } else {
                     for (uint8_t hc_tag = DeviceValueTAG::TAG_HC1; hc_tag <= DeviceValueTAG::TAG_WWC4; hc_tag++) {
