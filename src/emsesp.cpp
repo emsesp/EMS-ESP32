@@ -591,7 +591,9 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                         need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::MQTT); // nested
                     } else {
                         json = doc.to<JsonObject>();
-                        if (emsdevice->generate_values(json, DeviceValueTAG::TAG_THERMOSTAT_DATA, false, EMSdevice::OUTPUT_TARGET::MQTT)) { // not nested
+                        need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_THERMOSTAT_DATA, false, EMSdevice::OUTPUT_TARGET::MQTT); // not nested
+                        need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_DEVICE_DATA_WW, false, EMSdevice::OUTPUT_TARGET::MQTT);
+                        if (need_publish) {
                             Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE), json);
                         }
                         for (uint8_t hc_tag = DeviceValueTAG::TAG_HC1; hc_tag <= DeviceValueTAG::TAG_HC8; hc_tag++) {
