@@ -459,15 +459,7 @@ void Thermostat::publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "climate/%s/thermostat_hc%d/config", Mqtt::base().c_str(), hc_num);
-
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
-
-    /*
-    // enable the a special "thermostat_hc<n>" topic to take both mode strings and floats for each of the heating circuits
-    std::string topic2(Mqtt::MQTT_TOPIC_MAX_SIZE, '\0');
-    snprintf(&topic2[0], topic2.capacity() + 1, "thermostat_hc%d", hc_num);
-    Mqtt::subscribe(EMSdevice::DeviceType::THERMOSTAT, topic2, [=](const char * m) { return thermostat_ha_cmd(m, hc_num); });
-    */
 }
 
 // for HA specifically when receiving over MQTT in the thermostat topic
@@ -679,12 +671,21 @@ void Thermostat::process_RC10Monitor(std::shared_ptr<const Telegram> telegram) {
 
 // add the HVAC/Climate HA component for the HC
 void Thermostat::add_ha_climate(std::shared_ptr<HeatingCircuit> hc) {
-    if (!Mqtt::ha_enabled() || (hc->ha_climate_created())) {
+    if (!Mqtt::ha_enabled()) {
         return;
     }
 
-    // only if it has a valid seltemp (roomtemp is optional)
-    if (Helpers::hasValue(hc->selTemp)) {
+    bool has_values = Helpers::hasValue(hc->selTemp) && Helpers::hasValue(hc->roomTemp);
+
+    // see if we need to remove the HA climate component because some of the values have been lost
+    // note, this doesn't account for whether any of the device values have been excluded
+    if (hc->ha_climate_created() && !has_values) {
+        // remove the whole climate component
+        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        snprintf(topic, sizeof(topic), "climate/%s/thermostat_hc%d/config", Mqtt::base().c_str(), hc->hc_num());
+        Mqtt::publish_ha(topic);
+    } else {
+        // create
         publish_ha_config_hc(hc);
         hc->ha_climate_created(true); // only create it once
     }
