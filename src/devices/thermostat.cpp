@@ -675,19 +675,18 @@ void Thermostat::add_ha_climate(std::shared_ptr<HeatingCircuit> hc) {
         return;
     }
 
-    bool has_values = Helpers::hasValue(hc->selTemp) && Helpers::hasValue(hc->roomTemp);
-
-    // see if we need to remove the HA climate component because some of the values have been lost
     // note, this doesn't account for whether any of the device values have been excluded
-    if (hc->ha_climate_created() && !has_values) {
-        // remove the whole climate component
-        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        snprintf(topic, sizeof(topic), "climate/%s/thermostat_hc%d/config", Mqtt::base().c_str(), hc->hc_num());
-        Mqtt::publish_ha(topic);
+    if (hc->ha_climate_created()) {
+        // see if we've lost the selTemp (roomTemp/currTemp is optional and checked in the publish_ha_config_hc() function)
+        if (!Helpers::hasValue(hc->selTemp)) {
+            char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+            snprintf(topic, sizeof(topic), "climate/%s/thermostat_hc%d/config", Mqtt::base().c_str(), hc->hc_num());
+            Mqtt::publish_ha(topic);
+        }
     } else {
-        // create
+        // create the climate component, only once
         publish_ha_config_hc(hc);
-        hc->ha_climate_created(true); // only create it once
+        hc->ha_climate_created(true);
     }
 }
 
