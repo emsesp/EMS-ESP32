@@ -193,8 +193,10 @@ const MqttSettingsForm: FC = () => {
           {data.publish_single && (
             <Grid item>
               <BlockFormControlLabel
-                control={<Checkbox name="publish_single2cmd" checked={data.publish_single2cmd} onChange={updateFormValue} />}
-                label="publish to command topics (ioBroker)"
+                control={
+                  <Checkbox name="publish_single2cmd" checked={data.publish_single2cmd} onChange={updateFormValue} />
+                }
+                label="Publish to command topics (ioBroker)"
               />
             </Grid>
           )}
@@ -203,14 +205,14 @@ const MqttSettingsForm: FC = () => {
           <Grid item>
             <BlockFormControlLabel
               control={<Checkbox name="ha_enabled" checked={data.ha_enabled} onChange={updateFormValue} />}
-              label="Enable MQTT Discovery (for Home Assistant, Domoticz)"
+              label="Enable MQTT Discovery (Home Assistant, Domoticz)"
             />
           </Grid>
           {data.ha_enabled && (
             <Grid item xs={6}>
               <ValidatedTextField
                 name="discovery_prefix"
-                label="Prefix for the Discovery topic"
+                label="Prefix for the Discovery topics"
                 fullWidth
                 variant="outlined"
                 value={data.discovery_prefix}

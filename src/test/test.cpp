@@ -496,19 +496,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "ha") {
         shell.printfln(F("Testing HA mqtt discovery"));
-        // Mqtt::ha_enabled(true);
-        Mqtt::ha_enabled(false);
+        Mqtt::ha_enabled(true);
+        // Mqtt::ha_enabled(false);
 
-        // Mqtt::nested_format(1); // is nested
-        Mqtt::nested_format(2); // not nested
+        Mqtt::nested_format(1); // is nested
+        // Mqtt::nested_format(2); // not nested
 
-        // run_test("boiler");
+        run_test("boiler");
         run_test("thermostat");
-        // run_test("solar");
-        // run_test("mixer");
+        run_test("solar");
+        run_test("mixer");
 
         shell.invoke_command("call system publish");
-        // shell.invoke_command("show mqtt");
+        shell.invoke_command("show mqtt");
 
         // shell.invoke_command("call boiler fanwork");
         // shell.invoke_command("call thermostat seltemp"); // sensor.thermostat_hc1_selected_room_temperature

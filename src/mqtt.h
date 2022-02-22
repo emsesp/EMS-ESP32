@@ -92,7 +92,6 @@ class Mqtt {
 
     static void
     publish_ha_sensor_config(DeviceValue & dv, const std::string & model, const std::string & brand, const bool remove, const bool create_device_config = false);
-
     static void publish_ha_sensor_config(uint8_t                             type,
                                          uint8_t                             tag,
                                          const __FlashStringHelper *         name,
@@ -100,7 +99,6 @@ class Mqtt {
                                          const __FlashStringHelper *         entity,
                                          const uint8_t                       uom,
                                          const bool                          remove,
-                                         const bool                          create_device_config,
                                          const bool                          has_cmd,
                                          const __FlashStringHelper * const * options,
                                          uint8_t                             options_size,

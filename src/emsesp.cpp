@@ -560,13 +560,18 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     // group by device type
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
-            // specially for HA
+            // specially for MQTT Discovery
             // we may have some RETAINED /config topics that reference fields in the data payloads that no longer exist
             // remove them immediately to prevent HA from complaining
             // we need to do this first before the data payload is published, and only done once!
-            if (Mqtt::ha_enabled() && emsdevice->ha_config_firstrun()) {
-                emsdevice->ha_config_clear();
-                emsdevice->ha_config_firstrun(false);
+            if (Mqtt::ha_enabled()) {
+                if (emsdevice->ha_config_firstrun()) {
+                    emsdevice->ha_config_clear();
+                    emsdevice->ha_config_firstrun(false);
+                } else {
+                    // see if we need to delete and /config topics before adding the payloads
+                    emsdevice->mqtt_ha_entity_config_remove();
+                }
             }
 
             // if its a boiler, generate json for each group and publish it directly. not nested
@@ -629,7 +634,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
 
             // we want to create the /config topic after the data payload to prevent HA from throwing up a warning
             if (Mqtt::ha_enabled()) {
-                emsdevice->publish_mqtt_ha_entity_config();
+                emsdevice->mqtt_ha_entity_config_create();
             }
         }
     }

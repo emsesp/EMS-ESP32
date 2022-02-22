@@ -63,12 +63,12 @@ MAKE_PSTR(icontime, "mdi:clock-outline")          // DeviceValueUOM::SECONDS MIN
 MAKE_PSTR(iconkb, "mdi:memory")                   // DeviceValueUOM::KB
 MAKE_PSTR(iconlmin, "mdi:water-boiler")           // DeviceValueUOM::LMIN
 // MAKE_PSTR(iconkwh, "mdi:transmission-tower")      // DeviceValueUOM::KWH & WH
-MAKE_PSTR(iconua, "mdi:lightning-bolt-circle")    // DeviceValueUOM::UA
+MAKE_PSTR(iconua, "mdi:lightning-bolt-circle") // DeviceValueUOM::UA
 // MAKE_PSTR(iconbar, "mdi:gauge")                   // DeviceValueUOM::BAR
 // MAKE_PSTR(iconkw, "mdi:omega")                    // DeviceValueUOM::KW & W
 // MAKE_PSTR(icondbm, "mdi:wifi-strength-2")         // DeviceValueUOM::DBM
-MAKE_PSTR(iconnum, "mdi:counter")                 // DeviceValueUOM::NONE
-MAKE_PSTR(icondevice, "mdi:home-automation")      // for devices in HA
+MAKE_PSTR(iconnum, "mdi:counter")            // DeviceValueUOM::NONE
+MAKE_PSTR(icondevice, "mdi:home-automation") // for devices in HA
 
 uuid::log::Logger Mqtt::logger_{F_(mqtt), uuid::log::Facility::DAEMON};
 
@@ -892,19 +892,8 @@ void Mqtt::process_queue() {
     mqtt_messages_.pop_front(); // remove the message from the queue
 }
 
-// publish HA sensor for System using the heartbeat tag
-void Mqtt::publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelper * name, const __FlashStringHelper * entity, const uint8_t uom) {
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
-    JsonObject                                     dev_json = doc.createNestedObject("dev");
-
-    JsonArray ids = dev_json.createNestedArray("ids");
-    ids.add("ems-esp");
-
-    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, false, nullptr, 0, 0, 0, dev_json);
-}
-
 // create's a ha sensor config topic from a device value object
-// and also takes a flag to see whether it will also create the main HA device config
+// and also takes a flag (create_device_config) used to also create the main HA device config. This is only needed for one entity
 void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model, const std::string & brand, const bool remove, const bool create_device_config) {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> dev_json;
 
@@ -934,7 +923,6 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
                              dv.short_name,
                              dv.uom,
                              remove,
-                             create_device_config,
                              dv.has_cmd,
                              dv.options,
                              dv.options_size,
@@ -943,17 +931,27 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
                              dev_json.as<JsonObject>());
 }
 
+// publish HA sensor for System using the heartbeat tag
+void Mqtt::publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelper * name, const __FlashStringHelper * entity, const uint8_t uom) {
+    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
+    JsonObject                                     dev_json = doc.createNestedObject("dev");
+
+    JsonArray ids = dev_json.createNestedArray("ids");
+    ids.add("ems-esp");
+
+    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
+}
+
 // MQTT discovery configs
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
-void Mqtt::publish_ha_sensor_config(uint8_t                             type,                 // EMSdevice::DeviceValueType
-                                    uint8_t                             tag,                  // EMSdevice::DeviceValueTAG
-                                    const __FlashStringHelper *         name,                 // fullname
-                                    const uint8_t                       device_type,          // EMSdevice::DeviceType
-                                    const __FlashStringHelper *         entity,               // shortname
-                                    const uint8_t                       uom,                  // EMSdevice::DeviceValueUOM (0=NONE)
-                                    const bool                          remove,               // true if we want to remove this topic
-                                    const bool                          create_device_config, // true if need to create main device config
+void Mqtt::publish_ha_sensor_config(uint8_t                             type,        // EMSdevice::DeviceValueType
+                                    uint8_t                             tag,         // EMSdevice::DeviceValueTAG
+                                    const __FlashStringHelper *         name,        // fullname
+                                    const uint8_t                       device_type, // EMSdevice::DeviceType
+                                    const __FlashStringHelper *         entity,      // shortname
+                                    const uint8_t                       uom,         // EMSdevice::DeviceValueUOM (0=NONE)
+                                    const bool                          remove,      // true if we want to remove this topic
                                     const bool                          has_cmd,
                                     const __FlashStringHelper * const * options,
                                     uint8_t                             options_size,

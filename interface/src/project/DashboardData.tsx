@@ -834,7 +834,6 @@ const DashboardData: FC = () => {
                       InputProps={{
                         startAdornment: <InputAdornment position="start">%</InputAdornment>
                       }}
-
                     />
                   </Grid>
                 </>

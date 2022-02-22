@@ -245,7 +245,8 @@ class EMSdevice {
     void publish_value(void * value);
     void publish_all_values();
 
-    void publish_mqtt_ha_entity_config();
+    void mqtt_ha_entity_config_create();
+    void mqtt_ha_entity_config_remove();
 
     const std::string telegram_type_name(std::shared_ptr<const Telegram> telegram);
 
