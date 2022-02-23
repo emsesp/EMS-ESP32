@@ -107,6 +107,7 @@ class Mqtt {
                                          const JsonObject &                  dev_json);
 
     static void publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelper * name, const __FlashStringHelper * entity, const uint8_t uom);
+    static void publish_ha_climate_config(uint8_t tag, bool has_roomtemp, bool remove = false);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -189,6 +190,14 @@ class Mqtt {
 
     static void ha_enabled(bool ha_enabled) {
         ha_enabled_ = ha_enabled;
+    }
+
+    static bool ha_climate_reset() {
+        return ha_climate_reset_;
+    }
+
+    static void ha_climate_reset(bool reset) {
+        ha_climate_reset_ = reset;;
     }
 
     static bool send_response() {
@@ -276,6 +285,7 @@ class Mqtt {
     static bool     initialized_;
     static uint32_t mqtt_publish_fails_;
     static uint8_t  connectcount_;
+    static bool     ha_climate_reset_;
 
     // settings, copied over
     static std::string mqtt_base_;

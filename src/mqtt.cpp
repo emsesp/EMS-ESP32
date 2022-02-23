@@ -49,6 +49,7 @@ std::vector<Mqtt::MQTTSubFunction>  Mqtt::mqtt_subfunctions_;
 uint32_t Mqtt::mqtt_publish_fails_ = 0;
 bool     Mqtt::connecting_         = false;
 bool     Mqtt::initialized_        = false;
+bool     Mqtt::ha_climate_reset_   = false;
 uint8_t  Mqtt::connectcount_       = 0;
 uint32_t Mqtt::mqtt_message_id_    = 0;
 char     will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
@@ -581,6 +582,7 @@ void Mqtt::on_connect() {
         queue_unsubscribe_message(discovery_prefix_ + "/switch/" + mqtt_base_ + "/#");
         EMSESP::reset_mqtt_ha(); // re-create all HA devices if there are any
         ha_status();             // create the EMS-ESP device in HA, which is MQTT retained
+        ha_climate_reset(true);
     } else {
         queue_subscribe_message(discovery_prefix_ + "/climate/" + mqtt_base_ + "/#");
         queue_subscribe_message(discovery_prefix_ + "/sensor/" + mqtt_base_ + "/#");
@@ -1218,6 +1220,94 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     doc["dev"] = dev_json;
 
     publish_ha(topic, doc.as<JsonObject>());
+}
+
+void Mqtt::publish_ha_climate_config(uint8_t tag, bool has_roomtemp, bool remove) {
+    uint8_t hc_num = tag - DeviceValueTAG::TAG_HC1 + 1;
+
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    char topic_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    char hc_mode_s[30];
+    char seltemp_s[30];
+    char currtemp_s[30];
+    char mode_str_tpl[400];
+    char name_s[30];
+    char uniq_id_s[30];
+    char temp_cmd_s[30];
+    char mode_cmd_s[30];
+    char min_s[10];
+    char max_s[10];
+
+    snprintf(topic, sizeof(topic), "climate/%s/thermostat_hc%d/config", Mqtt::base().c_str(), hc_num);
+    if (remove) {
+        publish_ha(topic); // publish empty payload with retain flag
+        return;
+    }
+
+    if (Mqtt::is_nested()) {
+        // nested format
+        snprintf(hc_mode_s, sizeof(hc_mode_s), "value_json.hc%d.mode", hc_num);
+        snprintf(seltemp_s, sizeof(seltemp_s), "{{value_json.hc%d.seltemp}}", hc_num);
+        if (has_roomtemp) {
+            snprintf(currtemp_s, sizeof(currtemp_s), "{{value_json.hc%d.currtemp}}", hc_num);
+        }
+        snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_NONE).c_str());
+    } else {
+        // single format
+        snprintf(hc_mode_s, sizeof(hc_mode_s), "value_json.mode");
+        snprintf(seltemp_s, sizeof(seltemp_s), "{{value_json.seltemp}}");
+        if (has_roomtemp) {
+            snprintf(currtemp_s, sizeof(currtemp_s), "{{value_json.currtemp}}");
+        }
+        snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_HC1 + hc_num - 1).c_str());
+    }
+
+    snprintf(mode_str_tpl,
+             sizeof(mode_str_tpl),
+             "{%%if %s=='manual'%%}heat{%%elif %s=='day'%%}heat{%%elif %s=='night'%%}off{%%elif %s=='off'%%}off{%%else%%}auto{%%endif%%}",
+             hc_mode_s,
+             hc_mode_s,
+             hc_mode_s,
+             hc_mode_s);
+
+    snprintf(name_s, sizeof(name_s), "Thermostat hc%d", hc_num);
+    snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num);
+    snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/seltemp", hc_num);
+    snprintf(mode_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/mode", hc_num);
+
+    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
+
+    doc["~"]             = base();
+    doc["name"]          = name_s;
+    doc["uniq_id"]       = uniq_id_s;
+    doc["mode_stat_t"]   = topic_t;
+    doc["mode_stat_tpl"] = mode_str_tpl;
+    doc["temp_cmd_t"]    = temp_cmd_s;
+    doc["temp_stat_t"]   = topic_t;
+    doc["temp_stat_tpl"] = seltemp_s;
+    doc["mode_cmd_t"]    = mode_cmd_s;
+
+    if (has_roomtemp) {
+        doc["curr_temp_t"]   = topic_t;
+        doc["curr_temp_tpl"] = currtemp_s;
+    }
+
+    doc["min_temp"]  = Helpers::render_value(min_s, 5, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+    doc["max_temp"]  = Helpers::render_value(max_s, 30, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+    doc["temp_step"] = "0.5";
+
+    // the HA climate component only responds to auto, heat and off
+    JsonArray modes = doc.createNestedArray("modes");
+
+    modes.add("auto");
+    modes.add("heat");
+    modes.add("off");
+
+    JsonObject dev = doc.createNestedObject("dev");
+    JsonArray  ids = dev.createNestedArray("ids");
+    ids.add("ems-esp-thermostat");
+
+    publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 }
 
 // based on the device and tag, create the MQTT topic name (without the basename)
