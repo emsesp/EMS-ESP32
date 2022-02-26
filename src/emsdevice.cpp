@@ -524,7 +524,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
     register_device_value(tag, value_p, type, options, name, uom, nullptr, 0, 0);
 }
 
-// check if value is visiible
+// check if value is visible
 bool EMSdevice::is_visible(void * value_p) {
     for (auto & dv : devicevalues_) {
         if (dv.value_p == value_p && dv.has_state(DeviceValueState::DV_VISIBLE)) {
@@ -1263,7 +1263,8 @@ void EMSdevice::mqtt_ha_entity_config_create() {
             if (*(int8_t *)(dv.value_p) == 1 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
                 dv.remove_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
                 Mqtt::publish_ha_climate_config(dv.tag, true);
-            } else if (*(int8_t *)(dv.value_p) == 0 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || !dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
+            } else if (*(int8_t *)(dv.value_p) == 0
+                       && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || !dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
                 dv.add_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
                 Mqtt::publish_ha_climate_config(dv.tag, false);
             }

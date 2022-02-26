@@ -133,8 +133,8 @@ class Thermostat : public EMSdevice {
         }
 
       private:
-        uint8_t hc_num_;             // heating circuit number 1..10
-        uint8_t model_;              // the model type
+        uint8_t hc_num_; // heating circuit number 1..10
+        uint8_t model_;  // the model type
     };
 
     static std::string mode_tostring(uint8_t mode);

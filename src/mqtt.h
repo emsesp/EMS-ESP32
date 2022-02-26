@@ -197,7 +197,7 @@ class Mqtt {
     }
 
     static void ha_climate_reset(bool reset) {
-        ha_climate_reset_ = reset;;
+        ha_climate_reset_ = reset;
     }
 
     static bool send_response() {
