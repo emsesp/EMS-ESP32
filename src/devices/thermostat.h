@@ -74,6 +74,7 @@ class Thermostat : public EMSdevice {
         char    vacation[26];
         char    switchtime1[16];
         char    switchtime2[16];
+        uint8_t climate;
 
         // RC 10
         uint8_t  reducehours;   // night reduce duration
@@ -94,14 +95,6 @@ class Thermostat : public EMSdevice {
         // determines if the heating circuit is actually present and has data
         bool is_active() {
             return Helpers::hasValue(selTemp);
-        }
-
-        bool ha_climate_created() {
-            return ha_climate_created_;
-        }
-
-        void ha_climate_created(bool ha_climate_created) {
-            ha_climate_created_ = ha_climate_created;
         }
 
         uint8_t get_mode() const;
@@ -142,7 +135,6 @@ class Thermostat : public EMSdevice {
       private:
         uint8_t hc_num_;             // heating circuit number 1..10
         uint8_t model_;              // the model type
-        bool    ha_climate_created_; // if we need to create the HA climate control
     };
 
     static std::string mode_tostring(uint8_t mode);
@@ -298,10 +290,8 @@ class Thermostat : public EMSdevice {
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
 
-    void publish_ha_config_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc);
     void register_device_values_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc);
 
-    bool thermostat_ha_cmd(const char * message, uint8_t hc_num);
     void add_ha_climate(std::shared_ptr<HeatingCircuit> hc);
 
     void process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram);

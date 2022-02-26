@@ -113,7 +113,8 @@ class DeviceValue {
         DV_DEFAULT           = 0,        // 0 - does not yet have a value
         DV_ACTIVE            = (1 << 0), // 1 - has a validated real value
         DV_VISIBLE           = (1 << 1), // 2 - shown on web, console and on MQTT payload. Otherwise hidden
-        DV_HA_CONFIG_CREATED = (1 << 2)  // 4 - set if the HA config topic has been created
+        DV_HA_CONFIG_CREATED = (1 << 2), // 4 - set if the HA config topic has been created
+        DV_HA_CLIMATE_NO_RT  = (1 << 3)  // 8 - climate created without roomTemp
     };
 
     uint8_t                             device_type;  // EMSdevice::DeviceType

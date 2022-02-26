@@ -1233,6 +1233,9 @@ void EMSdevice::mqtt_ha_entity_config_remove() {
             && ((!dv.has_state(DeviceValueState::DV_VISIBLE)) || (!dv.has_state(DeviceValueState::DV_ACTIVE)))) {
             Mqtt::publish_ha_sensor_config(dv, "", "", true); // delete topic (remove = true)
             dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+            if (dv.short_name == FL_(climate)[0]) {
+                Mqtt::publish_ha_climate_config(dv.tag, false, true); // delete topic (remove = true)
+            }
         }
     }
 }
@@ -1243,9 +1246,19 @@ void EMSdevice::mqtt_ha_entity_config_create() {
     bool create_device_config = !ha_config_done(); // do we need to create the main Discovery device config with this entity?
 
     // check the state of each of the device values
+    // create climate if roomtemp is visible
     // create the discovery topic if if hasn't already been created, not a command (like reset) and is active and visible
     for (auto & dv : devicevalues_) {
-        if ((!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && dv.type != DeviceValueType::CMD) && dv.has_state(DeviceValueState::DV_ACTIVE)
+        if ((dv.short_name == FL_(climate)[0]) && dv.has_state(DeviceValueState::DV_VISIBLE) && dv.has_state(DeviceValueState::DV_ACTIVE)) {
+            if (*(int8_t *)(dv.value_p) == 1 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
+                dv.remove_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
+                Mqtt::publish_ha_climate_config(dv.tag, true);
+            } else if (*(int8_t *)(dv.value_p) == 0 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || !dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
+                dv.add_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
+                Mqtt::publish_ha_climate_config(dv.tag, false);
+            }
+        }
+        if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && (dv.type != DeviceValueType::CMD) && dv.has_state(DeviceValueState::DV_ACTIVE)
             && dv.has_state(DeviceValueState::DV_VISIBLE)) {
             // create_device_config is only done once for the EMS device. It can added to any entity, so we take the first
             Mqtt::publish_ha_sensor_config(dv, name(), brand_to_string(), false, create_device_config);

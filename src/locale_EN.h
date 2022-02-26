@@ -387,6 +387,7 @@ MAKE_PSTR_LIST(enum_progMode3, F("family"), F("morning"), F("evening"), F("am"),
 MAKE_PSTR_LIST(enum_progMode4, F("prog_a"), F("prog_b"), F("prog_c"), F("prog_d"), F("prog_e"), F("prog_f"))
 
 MAKE_PSTR_LIST(enum_switchmode, F_(off), F_(eco), F_(comfort), F_(heat))
+MAKE_PSTR_LIST(enum_climate, F("selTemp"), F("roomTemp"))
 
 // solar list
 MAKE_PSTR_LIST(enum_solarmode, F_(constant), F("pwm"), F("analog"))
@@ -582,6 +583,7 @@ MAKE_PSTR_LIST(wwExtra2, F("wwextra2"), F("circuit 2 extra"))
 MAKE_PSTR_LIST(wwDailyHeating, F("wwdailyheating"), F("daily heating"))
 MAKE_PSTR_LIST(wwDailyHeatTime, F("wwdailyheattime"), F("daily heating time"))
 // thermostat hc
+MAKE_PSTR_LIST(climate, F("climate"), F("climate entity"))
 MAKE_PSTR_LIST(selRoomTemp, F("seltemp"), F("selected room temperature"))
 MAKE_PSTR_LIST(roomTemp, F("currtemp"), F("current room temperature"))
 MAKE_PSTR_LIST(mode, F("mode"), F("mode"))
