@@ -1229,15 +1229,13 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
 // this is called when an MQTT publish is done via an EMS Device in emsesp.cpp::publish_device_values()
 void EMSdevice::mqtt_ha_entity_config_remove() {
     for (auto & dv : devicevalues_) {
-        if ((dv.short_name == FL_(roomTemp)[0]) && (!dv.has_state(DeviceValueState::DV_VISIBLE))
-            && (dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
-            Mqtt::publish_ha_climate_config(dv.tag, false, true); // delete topic (remove = true)
-            dv.remove_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
-        }
         if (dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED)
             && ((!dv.has_state(DeviceValueState::DV_VISIBLE)) || (!dv.has_state(DeviceValueState::DV_ACTIVE)))) {
             Mqtt::publish_ha_sensor_config(dv, "", "", true); // delete topic (remove = true)
             dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+            if (dv.short_name == FL_(climate)[0]) {
+                Mqtt::publish_ha_climate_config(dv.tag, false, true); // delete topic (remove = true)
+            }
         }
     }
 }
@@ -1251,12 +1249,11 @@ void EMSdevice::mqtt_ha_entity_config_create() {
     // create climate if roomtemp is visible
     // create the discovery topic if if hasn't already been created, not a command (like reset) and is active and visible
     for (auto & dv : devicevalues_) {
-        if ((dv.short_name == FL_(roomTemp)[0]) && dv.has_state(DeviceValueState::DV_VISIBLE)) {
-            if (dv.has_state(DeviceValueState::DV_ACTIVE)
-                && (dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT) || !dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED))) {
+        if ((dv.short_name == FL_(climate)[0]) && dv.has_state(DeviceValueState::DV_VISIBLE) && dv.has_state(DeviceValueState::DV_ACTIVE)) {
+            if (*(int8_t *)(dv.value_p) == 1 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
                 dv.remove_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
                 Mqtt::publish_ha_climate_config(dv.tag, true);
-            } else if (!dv.has_state(DeviceValueState::DV_ACTIVE) && !dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT)) {
+            } else if (*(int8_t *)(dv.value_p) == 0 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || !dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
                 dv.add_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
                 Mqtt::publish_ha_climate_config(dv.tag, false);
             }

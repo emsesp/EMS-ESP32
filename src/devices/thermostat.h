@@ -74,6 +74,7 @@ class Thermostat : public EMSdevice {
         char    vacation[26];
         char    switchtime1[16];
         char    switchtime2[16];
+        uint8_t climate;
 
         // RC 10
         uint8_t  reducehours;   // night reduce duration
@@ -290,6 +291,8 @@ class Thermostat : public EMSdevice {
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
 
     void register_device_values_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc);
+
+    void add_ha_climate(std::shared_ptr<HeatingCircuit> hc);
 
     void process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_IBASettings(std::shared_ptr<const Telegram> telegram);
