@@ -524,6 +524,16 @@ void EMSdevice::register_device_value(uint8_t                             tag,
     register_device_value(tag, value_p, type, options, name, uom, nullptr, 0, 0);
 }
 
+// check if value is visiible
+bool EMSdevice::is_visible(void * value_p) {
+    for (auto & dv : devicevalues_) {
+        if (dv.value_p == value_p && dv.has_state(DeviceValueState::DV_VISIBLE)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // publish a single value on change
 void EMSdevice::publish_value(void * value_p) {
     if (!Mqtt::publish_single() || value_p == nullptr) {

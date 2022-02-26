@@ -375,7 +375,16 @@ void Thermostat::add_ha_climate(std::shared_ptr<HeatingCircuit> hc) {
         hc->climate = EMS_VALUE_UINT_NOTSET;
         return;
     }
-    hc->climate = Helpers::hasValue(hc->roomTemp) ? 1 : Helpers::hasValue(hc->selTemp) ? 0 : EMS_VALUE_UINT_NOTSET;
+
+    if (Helpers::hasValue(hc->selTemp) && is_visible(&hc->selTemp)) {
+        if (Helpers::hasValue(hc->roomTemp) && is_visible(&hc->roomTemp)) {
+            hc->climate = 1;
+        } else {
+            hc->climate = 0;
+        }
+    } else {
+        hc->climate = EMS_VALUE_UINT_NOTSET;
+    }
 }
 
 // decodes the thermostat mode for the heating circuit based on the thermostat type

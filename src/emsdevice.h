@@ -242,7 +242,8 @@ class EMSdevice {
 
     void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0);
 
-    void publish_value(void * value);
+    bool is_visible(void * value_p);
+    void publish_value(void * value_p);
     void publish_all_values();
 
     void mqtt_ha_entity_config_create();
