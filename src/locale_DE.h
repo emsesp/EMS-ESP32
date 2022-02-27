@@ -582,7 +582,7 @@ MAKE_PSTR_LIST(wwExtra2, F("wwextra2"), F("Kreis 2 Extra"))
 MAKE_PSTR_LIST(wwDailyHeating, F("wwdailyheating"), F("daily heating"))
 MAKE_PSTR_LIST(wwDailyHeatTime, F("wwdailyheattime"), F("daily heating time"))
 // thermostat hc
-MAKE_PSTR_LIST(climate, F("climate"), F("Klima Anzeige"))
+MAKE_PSTR_LIST(climate, F("climate"))
 MAKE_PSTR_LIST(selRoomTemp, F("seltemp"), F("Sollwert Raumtemperatur"))
 MAKE_PSTR_LIST(roomTemp, F("currtemp"), F("aktuelle Raumtemperatur"))
 MAKE_PSTR_LIST(mode, F("mode"), F("modus"))
