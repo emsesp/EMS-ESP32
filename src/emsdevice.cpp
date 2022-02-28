@@ -289,6 +289,15 @@ bool EMSdevice::is_fetch(uint16_t telegram_id) {
     return false;
 }
 
+bool EMSdevice::has_tag(const uint8_t tag) {
+    for (const auto & dv : devicevalues_) {
+        if (dv.tag == tag) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // list of registered device entries
 // called from the command 'entities'
 void EMSdevice::list_device_entries(JsonObject & output) {

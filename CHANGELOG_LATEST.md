@@ -58,6 +58,7 @@
 - Wired renamed to Ethernet
 - removed system/pin command, new commands in analogsensors
 - system/info device-info split to name/version/brand
+- remove master-thermostat
 
 ## **BREAKING CHANGES:**
 

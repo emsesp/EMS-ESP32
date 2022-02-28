@@ -45,7 +45,6 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["syslog_mark_interval"] = settings.syslog_mark_interval;
     root["syslog_host"]          = settings.syslog_host;
     root["syslog_port"]          = settings.syslog_port;
-    root["master_thermostat"]    = settings.master_thermostat;
     root["shower_timer"]         = settings.shower_timer;
     root["shower_alert"]         = settings.shower_alert;
     root["rx_gpio"]              = settings.rx_gpio;
@@ -194,10 +193,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     prev               = settings.low_clock;
     settings.low_clock = root["low_clock"] | false;
     check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
-
-    prev                       = settings.master_thermostat;
-    settings.master_thermostat = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
-    check_flag(prev, settings.master_thermostat, ChangeFlags::RESTART);
 
     //
     // without checks...

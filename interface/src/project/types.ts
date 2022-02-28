@@ -6,7 +6,6 @@ export interface Settings {
   syslog_mark_interval: number;
   syslog_host: string;
   syslog_port: number;
-  master_thermostat: number;
   shower_timer: boolean;
   shower_alert: boolean;
   rx_gpio: number;

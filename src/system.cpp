@@ -981,8 +981,6 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["syslog_host"]          = settings.syslog_host;
         node["syslog_port"]          = settings.syslog_port;
 
-        node["master_thermostat"] = settings.master_thermostat;
-
         node["shower_timer"] = settings.shower_timer;
         node["shower_alert"] = settings.shower_alert;
 

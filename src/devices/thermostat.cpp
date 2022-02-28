@@ -26,30 +26,13 @@ uuid::log::Logger Thermostat::logger_{F_(thermostat), uuid::log::Facility::CONSO
 
 Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    uint8_t actual_master_thermostat = EMSESP::actual_master_thermostat(); // what we're actually using
-    uint8_t master_thermostat        = EMSESP_DEFAULT_MASTER_THERMOSTAT;
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        master_thermostat = settings.master_thermostat; // what the user has defined
-    });
-
     uint8_t model = this->model();
 
-    // if we're on auto mode, register this thermostat if it has a device id of 0x10, 0x17 or 0x18
-    // or if its the master thermostat we defined
-    // see https://github.com/emsesp/EMS-ESP/issues/362#issuecomment-629628161
-    if ((master_thermostat == device_id)
-        || ((master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) && (device_id < 0x19)
-            && ((actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) || (device_id < actual_master_thermostat)))) {
-        EMSESP::actual_master_thermostat(device_id);
-        actual_master_thermostat = device_id;
-        // reserve_telegram_functions(20); // reserve some space for the telegram registries, to avoid memory fragmentation
-
-        // common telegram handlers
-        register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, MAKE_PF_CB(process_RCOutdoorTemp));
-        register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), false, MAKE_PF_CB(process_RCTime));
-        register_telegram_type(0xA2, F("RCError"), false, MAKE_PF_CB(process_RCError));
-        register_telegram_type(0x12, F("RCErrorMessage"), false, MAKE_PF_CB(process_RCErrorMessage));
-    }
+    // common telegram handlers
+    register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, MAKE_PF_CB(process_RCOutdoorTemp));
+    register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), false, MAKE_PF_CB(process_RCTime));
+    register_telegram_type(0xA2, F("RCError"), false, MAKE_PF_CB(process_RCError));
+    register_telegram_type(0x12, F("RCErrorMessage"), false, MAKE_PF_CB(process_RCErrorMessage));
     // RC10
     if (model == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         monitor_typeids = {0xB1};
@@ -82,25 +65,21 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         set_typeids     = {0xA8};
         curve_typeids   = {0x90};
         timer_typeids   = {0x8F};
-        if (actual_master_thermostat == device_id) {
-            for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-                register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, MAKE_PF_CB(process_RC20Monitor));
-                register_telegram_type(set_typeids[i], F("RC20Set"), false, MAKE_PF_CB(process_RC20Set));
-                register_telegram_type(curve_typeids[i], F("RC20Temp"), false, MAKE_PF_CB(process_RC20Temp));
-                register_telegram_type(timer_typeids[i], F("RC20Timer"), false, MAKE_PF_CB(process_RC20Timer));
-            }
+        for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+            register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, MAKE_PF_CB(process_RC20Monitor));
+            register_telegram_type(set_typeids[i], F("RC20Set"), false, MAKE_PF_CB(process_RC20Set));
+            register_telegram_type(curve_typeids[i], F("RC20Temp"), false, MAKE_PF_CB(process_RC20Temp));
+            register_telegram_type(timer_typeids[i], F("RC20Timer"), false, MAKE_PF_CB(process_RC20Timer));
         }
-        // remote thermostat uses only 0xAF, register it also for master (in case of early detect)
+        // remote thermostat uses only 0xAF
         register_telegram_type(0xAF, F("RC20Remote"), false, MAKE_PF_CB(process_RC20Remote));
         // RC20 newer
     } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC20_N) || (model == EMSdevice::EMS_DEVICE_FLAG_RC25)) {
         monitor_typeids = {0xAE};
         set_typeids     = {0xAD};
-        if (actual_master_thermostat == device_id) {
-            for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-                register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, MAKE_PF_CB(process_RC20Monitor_2));
-                register_telegram_type(set_typeids[i], F("RC20Set"), false, MAKE_PF_CB(process_RC20Set_2));
-            }
+        for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+            register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, MAKE_PF_CB(process_RC20Monitor_2));
+            register_telegram_type(set_typeids[i], F("RC20Set"), false, MAKE_PF_CB(process_RC20Set_2));
         }
         register_telegram_type(0xAF, F("RC20Remote"), false, MAKE_PF_CB(process_RC20Remote));
         // RC30
@@ -150,41 +129,30 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
-        if (actual_master_thermostat == device_id) {
-            monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
-            for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-                register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), false, MAKE_PF_CB(process_JunkersMonitor));
-            }
+        monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
+        for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+            register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), false, MAKE_PF_CB(process_JunkersMonitor));
+        }
 
-            if (has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {
-                // FR120, FR100
-                set_typeids = {0x0179, 0x017A, 0x017B, 0x017C};
-                for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-                    register_telegram_type(set_typeids[i], F("JunkersSet"), false, MAKE_PF_CB(process_JunkersSet2));
-                }
-            } else {
-                set_typeids = {0x0165, 0x0166, 0x0167, 0x0168};
-                for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-                    register_telegram_type(set_typeids[i], F("JunkersSet"), false, MAKE_PF_CB(process_JunkersSet));
-                }
+        if (has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {
+            // FR120, FR100
+            set_typeids = {0x0179, 0x017A, 0x017B, 0x017C};
+            for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+                register_telegram_type(set_typeids[i], F("JunkersSet"), false, MAKE_PF_CB(process_JunkersSet2));
+            }
+        } else {
+            set_typeids = {0x0165, 0x0166, 0x0167, 0x0168};
+            for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+                register_telegram_type(set_typeids[i], F("JunkersSet"), false, MAKE_PF_CB(process_JunkersSet));
             }
         }
         register_telegram_type(0x123, F("JunkersRemote"), false, MAKE_PF_CB(process_JunkersRemoteMonitor));
     }
 
-    if (actual_master_thermostat != device_id) {
-        return; // don't fetch data if more than 1 thermostat
-    }
-
-    //
-    // this next section is only for the master thermostat....
-    //
-    LOG_DEBUG(F("Setting this thermostat (device ID 0x%02X) to be the master"), device_id);
-
     // register device values for common values (not heating circuit)
     register_device_values();
 
-    // only for for the master-thermostat, go a query all the heating circuits. This is only done once.
+    // query all the heating circuits. This is only done once.
     // The automatic fetch will from now on only update the active heating circuits
     for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
         EMSESP::send_read_request(monitor_typeids[i], device_id);
@@ -340,11 +308,6 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 
     // register the device values
     register_device_values_hc(new_hc);
-
-    // don't fetch telegrams if not the master
-    if (device_id() != EMSESP::actual_master_thermostat()) {
-        return new_hc;
-    }
 
     // set the flag saying we want its data during the next auto fetch
     // monitor is broadcasted, but not frequently in some thermostats (IVT, #356)
@@ -1372,7 +1335,6 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
     }
 
     Roomctrl::set_remotetemp(hc->hc(), hc->remotetemp);
-    has_update(hc->remotetemp);
 
     return true;
 }
@@ -3207,16 +3169,12 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         seltemp_divider  = FL_(div2);
         roomtemp_divider = FL_(div10);
     }
-    if (has_flags(EMS_DEVICE_FLAG_NO_WRITE) || device_id() != EMSESP::actual_master_thermostat()) {
+    if (has_flags(EMS_DEVICE_FLAG_NO_WRITE)) {
         register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES);
     } else {
         register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_temp), 5, 29);
     }
     register_device_value(tag, &hc->roomTemp, DeviceValueType::SHORT, roomtemp_divider, FL_(roomTemp), DeviceValueUOM::DEGREES);
-
-    if (device_id() != EMSESP::actual_master_thermostat()) {
-        return;
-    }
     register_device_value(tag, &hc->climate, DeviceValueType::ENUM, FL_(enum_climate), FL_(climate), DeviceValueUOM::NONE);
 
     switch (model) {

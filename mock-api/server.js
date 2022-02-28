@@ -314,7 +314,6 @@ settings = {
   syslog_mark_interval: 0,
   syslog_host: '192.168.1.4',
   syslog_port: 514,
-  master_thermostat: 0,
   shower_timer: true,
   shower_alert: false,
   rx_gpio: 23,

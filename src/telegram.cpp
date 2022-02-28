@@ -221,9 +221,6 @@ void RxService::add(uint8_t * data, uint8_t length) {
         return;
     }
 
-    // if we receive a hc2.. telegram from 0x19.. match it to master_thermostat if master is 0x18
-    src = EMSESP::check_master_device(src, type_id, true);
-
     // create the telegram
     auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length);
 
@@ -311,9 +308,6 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     // dest - for READ the MSB must be set
     // fix the READ or WRITE depending on the operation
     uint8_t dest = telegram->dest;
-
-    // check if we have to manipulate the id for thermostats > 0x18
-    dest = EMSESP::check_master_device(dest, telegram->type_id, false);
 
     if (telegram->operation == Telegram::Operation::TX_READ) {
         dest |= 0x80; // read has 8th bit set for the destination

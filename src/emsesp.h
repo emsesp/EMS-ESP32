@@ -133,10 +133,6 @@ class EMSESP {
     static uint8_t count_devices();
     static uint8_t device_index(const uint8_t device_type, const uint8_t unique_id);
 
-    static uint8_t actual_master_thermostat();
-    static void    actual_master_thermostat(const uint8_t device_id);
-    static uint8_t check_master_device(const uint8_t device_id, const uint16_t type_id, const bool read);
-
     static bool get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype);
 
     static void show_device_values(uuid::console::Shell & shell);
@@ -260,7 +256,6 @@ class EMSESP {
     };
     static std::vector<Device_record> device_library_;
 
-    static uint8_t  actual_master_thermostat_;
     static uint16_t watch_id_;
     static uint8_t  watch_;
     static uint16_t read_id_;
