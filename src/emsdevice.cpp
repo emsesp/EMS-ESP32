@@ -289,10 +289,11 @@ bool EMSdevice::is_fetch(uint16_t telegram_id) {
     return false;
 }
 
+// check for a tag to create a nest
 bool EMSdevice::has_tag(const uint8_t tag) {
     for (const auto & dv : devicevalues_) {
-        if (dv.tag == tag) {
-            return true;
+        if (dv.tag == tag && tag >= DeviceValueTAG::TAG_HC1) {
+            return  true;
         }
     }
     return false;
