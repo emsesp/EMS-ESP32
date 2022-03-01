@@ -517,45 +517,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
             }
         }
     }
-    /*
-    // collect all data tagged for device, add to ww-data from before
-    for (const auto & emsdevice : emsdevices) {
-        if (emsdevice && (emsdevice->device_type() == device_type)) {
-            need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_DEVICE_DATA, false, EMSdevice::OUTPUT_TARGET::MQTT);
-        }
-    }
-    if ((!nested || device_type == DeviceType::BOILER) && need_publish) {
-        Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_DEVICE_DATA), json);
-        json         = doc.to<JsonObject>();
-        need_publish = false;
-    }
-    for (const auto & emsdevice : emsdevices) {
-        if (emsdevice && (emsdevice->device_type() == device_type)) {
-            // collect all data tagged with WW
-            need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_DEVICE_DATA_WW, false, EMSdevice::OUTPUT_TARGET::MQTT);
-        }
-    }
-    // for boiler WW is an extra topic, publish now
-    if (need_publish && device_type == DeviceType::BOILER) {
-        Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_DEVICE_DATA_WW), json);
-        json         = doc.to<JsonObject>();
-        need_publish = false;
-    }
-*/
-    // boiler have ww always extra
-    if (device_type == DeviceType::BOILER) {
-        for (const auto & emsdevice : emsdevices) {
-            if (emsdevice && (emsdevice->device_type() == device_type)) {
-                need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_DEVICE_DATA_WW, false, EMSdevice::OUTPUT_TARGET::MQTT);
-            }
-        }
-        if (need_publish) {
-            Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_DEVICE_DATA_WW), json);
-            json         = doc.to<JsonObject>();
-            need_publish = false;
-        }
-    }
-    for (uint8_t tag = DeviceValueTAG::TAG_DEVICE_DATA; tag <= DeviceValueTAG::TAG_HS16; tag++) {
+    for (uint8_t tag = DeviceValueTAG::TAG_BOILER_DATA_WW; tag <= DeviceValueTAG::TAG_HS16; tag++) {
         JsonObject json_hc      = json;
         bool       nest_created = false;
         for (const auto & emsdevice : emsdevices) {
@@ -564,13 +526,10 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                     json_hc      = doc.createNestedObject(EMSdevice::tag_to_string(tag));
                     nest_created = true;
                 }
-                // exclude boiler ww
-                if (device_type != DeviceType::BOILER || tag != DeviceValueTAG::TAG_DEVICE_DATA_WW) {
-                    need_publish |= emsdevice->generate_values(json_hc, tag, false, EMSdevice::OUTPUT_TARGET::MQTT);
-                }
+                need_publish |= emsdevice->generate_values(json_hc, tag, false, EMSdevice::OUTPUT_TARGET::MQTT);
             }
         }
-        if (need_publish && !nested && (tag >= DeviceValueTAG::TAG_DEVICE_DATA_WW || device_type == DeviceType::BOILER)) { // data and ww in one topic
+        if (need_publish && ((!nested && tag >= DeviceValueTAG::TAG_DEVICE_DATA_WW) || (tag == DeviceValueTAG::TAG_BOILER_DATA_WW))) {
             Mqtt::publish(Mqtt::tag_to_topic(device_type, tag), json);
             json         = doc.to<JsonObject>();
             need_publish = false;
@@ -1163,7 +1122,7 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t
         return has_value;
     }
     // for nested output add for each tag
-    for (tag = DeviceValueTAG::TAG_DEVICE_DATA; tag <= DeviceValueTAG::TAG_HS16; tag++) {
+    for (tag = DeviceValueTAG::TAG_BOILER_DATA_WW; tag <= DeviceValueTAG::TAG_HS16; tag++) {
         JsonObject output_hc    = output;
         bool       nest_created = false;
         for (const auto & emsdevice : emsdevices) {

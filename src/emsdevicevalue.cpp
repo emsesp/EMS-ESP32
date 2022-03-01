@@ -55,8 +55,9 @@ const __FlashStringHelper * const DeviceValue::DeviceValueTAG_s[] PROGMEM = {
 
     F_(tag_none),            // ""
     F_(tag_heartbeat),       // ""
+    F_(tag_boiler_data_ww),  // "dhw"
     F_(tag_device_data),     // ""
-    F_(tag_device_data_ww),  // "ww"
+    F_(tag_device_data_ww),  // "dhw"
     F_(tag_hc1),             // "hc1"
     F_(tag_hc2),             // "hc2"
     F_(tag_hc3),             // "hc3"
@@ -93,8 +94,9 @@ const __FlashStringHelper * const DeviceValue::DeviceValueTAG_mqtt[] PROGMEM = {
 
     F_(tag_none),                // ""
     F_(heartbeat),               // "heartbeat"
+    F_(tag_boiler_data_ww_mqtt), // "ww"
     F_(tag_device_data),         // ""
-    F_(tag_device_data_ww_mqtt), // "ww"
+    F_(tag_device_data_ww_mqtt), // ""
     F_(tag_hc1),                 // "hc1"
     F_(tag_hc2),                 // "hc2"
     F_(tag_hc3),                 // "hc3"
