@@ -52,7 +52,6 @@ char * Helpers::hextoa(char * result, const uint16_t value) {
     return result;
 }
 
-
 // same as above but to a hex string
 std::string Helpers::hextoa(const uint16_t value, bool prefix) {
     char buf[5];

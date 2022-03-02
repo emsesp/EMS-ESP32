@@ -2887,12 +2887,7 @@ void Thermostat::register_device_values() {
                               FL_(enum_ibaMainDisplay),
                               FL_(ibaMainDisplay),
                               DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &ibaLanguage_,
-                              DeviceValueType::ENUM,
-                              FL_(enum_ibaLanguage),
-                              FL_(ibaLanguage),
-                              DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ibaLanguage_, DeviceValueType::ENUM, FL_(enum_ibaLanguage), FL_(ibaLanguage), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaClockOffset_,
                               DeviceValueType::INT,
@@ -2908,12 +2903,7 @@ void Thermostat::register_device_values() {
                               FL_(enum_ibaMainDisplay),
                               FL_(ibaMainDisplay),
                               DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &ibaLanguage_,
-                              DeviceValueType::ENUM,
-                              FL_(enum_ibaLanguage),
-                              FL_(ibaLanguage),
-                              DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ibaLanguage_, DeviceValueType::ENUM, FL_(enum_ibaLanguage), FL_(ibaLanguage), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaClockOffset_,
                               DeviceValueType::INT,
