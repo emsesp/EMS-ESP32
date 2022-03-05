@@ -484,7 +484,7 @@ bool System::upload_status() {
 
 void System::upload_status(bool in_progress) {
     // if we've just started an upload
-    if ((!upload_status_) && (in_progress)) {
+    if (!upload_status_ && in_progress) {
         EMSuart::stop();
     }
     upload_status_ = in_progress;
@@ -615,7 +615,7 @@ void System::network_init(bool refresh) {
     // ETH_CLOCK_GPIO0_OUT  = 1  RMII clock output from GPIO0
     // ETH_CLOCK_GPIO16_OUT = 2  RMII clock output from GPIO16
     // ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted clock
-    eth_clock_mode_t clock_mode = (eth_clock_mode_t)eth_clock_mode_;
+    auto clock_mode = (eth_clock_mode_t)eth_clock_mode_;
 
     ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
 }
@@ -1182,7 +1182,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     JsonArray devices = output.createNestedArray("Devices");
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
+            if (emsdevice && (emsdevice->device_type() == device_class.first)) {
                 JsonObject obj = devices.createNestedObject();
                 obj["type"]    = emsdevice->device_type_name();
                 // obj["name"]     = emsdevice->to_string();

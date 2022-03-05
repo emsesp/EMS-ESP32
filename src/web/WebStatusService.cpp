@@ -126,8 +126,8 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM_DYN);
-    JsonObject          root     = response->getRoot();
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM_DYN);
+    JsonObject root     = response->getRoot();
 
     root["status"]           = EMSESP::bus_status();    // 0, 1 or 2
     root["num_devices"]      = EMSESP::count_devices(); // excluding Controller
@@ -163,7 +163,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
 }
 
 // start the multicast UDP service so EMS-ESP is discoverable via .local
-void WebStatusService::mDNS_start() {
+void WebStatusService::mDNS_start() const {
 #ifndef EMSESP_STANDALONE
     if (!MDNS.begin(EMSESP::system_.hostname().c_str())) {
         EMSESP::logger().warning(F("Failed to start mDNS responder service"));

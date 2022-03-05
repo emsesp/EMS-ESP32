@@ -90,7 +90,7 @@ void WebLogService::maximum_log_messages(size_t count) {
         "local");
 }
 
-bool WebLogService::compact() {
+bool WebLogService::compact() const {
     return compact_;
 }
 
@@ -158,7 +158,7 @@ void WebLogService::loop() {
 // convert time to real offset
 char * WebLogService::messagetime(char * out, const uint64_t t) {
     if (!time_offset_) {
-        strcpy(out, uuid::log::format_timestamp_ms(t, 3).c_str());
+        strlcpy(out, uuid::log::format_timestamp_ms(t, 3).c_str(), sizeof(out));
     } else {
         time_t t1 = time_offset_ + t / 1000ULL;
         strftime(out, 25, "%F %T", localtime(&t1));
@@ -169,9 +169,9 @@ char * WebLogService::messagetime(char * out, const uint64_t t) {
 
 // send to web eventsource
 void WebLogService::transmit(const QueuedLogMessage & message) {
-    DynamicJsonDocument jsonDocument = DynamicJsonDocument(EMSESP_JSON_SIZE_MEDIUM);
-    JsonObject          logEvent     = jsonDocument.to<JsonObject>();
-    char                time_string[25];
+    auto       jsonDocument = DynamicJsonDocument(EMSESP_JSON_SIZE_MEDIUM);
+    JsonObject logEvent     = jsonDocument.to<JsonObject>();
+    char       time_string[25];
 
     logEvent["t"] = messagetime(time_string, message.content_->uptime_ms);
     logEvent["l"] = message.content_->level;
@@ -190,9 +190,9 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
 
 // send the complete log buffer to the API, not filtering on log level
 void WebLogService::fetchLog(AsyncWebServerRequest * request) {
-    MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN + 192 * log_messages_.size());
-    JsonObject                 root     = response->getRoot();
-    JsonArray                  log      = root.createNestedArray("events");
+    auto *     response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN + 192 * log_messages_.size());
+    JsonObject root     = response->getRoot();
+    JsonArray  log      = root.createNestedArray("events");
 
     log_message_id_tail_ = log_messages_.back().id_;
     last_transmit_       = uuid::get_uptime_ms();
@@ -233,11 +233,11 @@ void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant & jso
 
 // return the current value settings after a GET
 void WebLogService::getValues(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
-    JsonObject          root     = response->getRoot();
-    root["level"]                = log_level();
-    root["max_messages"]         = maximum_log_messages();
-    root["compact"]              = compact();
+    auto *     response  = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
+    JsonObject root      = response->getRoot();
+    root["level"]        = log_level();
+    root["max_messages"] = maximum_log_messages();
+    root["compact"]      = compact();
     response->setLength();
     request->send(response);
 }

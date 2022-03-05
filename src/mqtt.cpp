@@ -244,14 +244,16 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
 #if defined(EMSESP_DEBUG)
 // simulate receiving a MQTT message, used only for testing
 void Mqtt::incoming(const char * topic, const char * payload) {
-    on_message(topic, payload, strlen(payload));
+    if (payload != nullptr) {
+        on_message(topic, payload, strlen(payload));
+    }
 }
 #endif
 
 // received an MQTT message that we subscribed too
 // topic is the full path
 // payload is json or a single string and converted to a json with key 'value'
-void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
+void Mqtt::on_message(const char * topic, const char * payload, size_t len) const {
     // sometimes the payload is not terminated correctly, so make a copy
     // convert payload to a null-terminated char string
     char message[len + 2];
@@ -280,16 +282,14 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
         // add the base back
         char full_topic[MQTT_TOPIC_MAX_SIZE];
         snprintf(full_topic, sizeof(full_topic), "%s/%s", mqtt_base_.c_str(), mf.topic_.c_str());
-        if (!strcmp(topic, full_topic)) {
-            if (mf.mqtt_subfunction_) {
-                if (!(mf.mqtt_subfunction_)(message)) {
-                    LOG_ERROR(F("error: invalid payload %s for this topic %s"), message, topic);
-                    if (send_response_) {
-                        Mqtt::publish(F_(response), "error: invalid data");
-                    }
+        if ((!strcmp(topic, full_topic)) && (mf.mqtt_subfunction_)) {
+            if (!(mf.mqtt_subfunction_)(message)) {
+                LOG_ERROR(F("error: invalid payload %s for this topic %s"), message, topic);
+                if (send_response_) {
+                    Mqtt::publish(F_(response), "error: invalid data");
                 }
-                return;
             }
+            return;
         }
     }
 
@@ -353,7 +353,7 @@ void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t devic
 // its a poor man's QOS we assume the ACK represents the last Publish sent
 // check if ACK matches the last Publish we sent, if not report an error. Only if qos is 1 or 2
 // and always remove from queue
-void Mqtt::on_publish(uint16_t packetId) {
+void Mqtt::on_publish(uint16_t packetId) const {
     // find the MQTT message in the queue and remove it
     if (mqtt_messages_.empty()) {
 #if defined(EMSESP_DEBUG)
@@ -462,7 +462,7 @@ void Mqtt::start() {
     snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "%s/status", mqtt_base_.c_str());
     mqttClient_->setWill(will_topic, 1, true, "offline"); // with qos 1, retain true
 
-    mqttClient_->onMessage([this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+    mqttClient_->onMessage([this](const char * topic, const char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
         on_message(topic, payload, len); // receiving mqtt
     });
 
@@ -804,7 +804,7 @@ void Mqtt::process_queue() {
     char topic[MQTT_TOPIC_MAX_SIZE];
 
     if (message->topic.find(discovery_prefix_) == 0) {
-        strcpy(topic, message->topic.c_str()); // leave topic as it is
+        strlcpy(topic, message->topic.c_str(), sizeof(topic)); // leave topic as it is
     } else {
         snprintf(topic, MQTT_TOPIC_MAX_SIZE, "%s/%s", mqtt_base_.c_str(), message->topic.c_str());
     }

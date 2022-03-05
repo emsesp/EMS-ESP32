@@ -132,7 +132,7 @@ class Command {
 
     static std::vector<CmdFunction> cmdfunctions_; // the list of commands
 
-    inline static uint8_t message(uint8_t error_code, const char * message, JsonObject & output) {
+    inline static uint8_t message(uint8_t error_code, const char * message, const JsonObject & output) {
         output.clear();
         output["message"] = (const char *)message;
         return error_code;
@@ -148,7 +148,7 @@ class SUrlParser {
     Folder_t      m_folders;
 
   public:
-    SUrlParser(){};
+    SUrlParser() = default;
     SUrlParser(const char * url);
 
     bool parse(const char * url);

@@ -435,7 +435,6 @@ void DallasSensor::publish_values(const bool force) {
         for (const auto & sensor : sensors_) {
             publish_sensor(sensor);
         }
-        // return;
     }
 
     DynamicJsonDocument doc(120 * num_sensors);

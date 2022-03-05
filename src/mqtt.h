@@ -30,7 +30,7 @@
 using uuid::console::Shell;
 
 // size of queue
-#define MAX_MQTT_MESSAGES 300
+static constexpr uint16_t MAX_MQTT_MESSAGES = 300;
 
 namespace emsesp {
 
@@ -208,11 +208,11 @@ class Mqtt {
         send_response_ = send_response;
     }
 
-    void set_qos(uint8_t mqtt_qos) {
+    void set_qos(uint8_t mqtt_qos) const {
         mqtt_qos_ = mqtt_qos;
     }
 
-    void set_retain(bool mqtt_retain) {
+    void set_retain(bool mqtt_retain) const {
         mqtt_retain_ = mqtt_retain;
     }
 
@@ -225,15 +225,13 @@ class Mqtt {
     struct QueuedMqttMessage {
         const uint32_t                           id_;
         const std::shared_ptr<const MqttMessage> content_;
-        uint8_t                                  retry_count_;
-        uint16_t                                 packet_id_;
+        uint8_t                                  retry_count_ = 0;
+        uint16_t                                 packet_id_   = 0;
 
         ~QueuedMqttMessage() = default;
         QueuedMqttMessage(uint32_t id, std::shared_ptr<MqttMessage> && content)
             : id_(id)
             , content_(std::move(content)) {
-            retry_count_ = 0;
-            packet_id_   = 0;
         }
     };
     static std::deque<QueuedMqttMessage> mqtt_messages_;
@@ -253,8 +251,8 @@ class Mqtt {
     static std::shared_ptr<const MqttMessage> queue_subscribe_message(const std::string & topic);
     static std::shared_ptr<const MqttMessage> queue_unsubscribe_message(const std::string & topic);
 
-    void on_publish(uint16_t packetId);
-    void on_message(const char * topic, const char * payload, size_t len);
+    void on_publish(uint16_t packetId) const;
+    void on_message(const char * topic, const char * payload, size_t len) const;
     void process_queue();
 
     // function handlers for MQTT subscriptions

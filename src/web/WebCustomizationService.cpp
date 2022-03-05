@@ -99,10 +99,10 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
     if (root["sensors"].is<JsonArray>()) {
         for (const JsonObject sensorJson : root["sensors"].as<JsonArray>()) {
             // create each of the sensor, overwritting any previous settings
-            SensorCustomization sensor = SensorCustomization();
-            sensor.id_str              = sensorJson["id_str"].as<std::string>();
-            sensor.name                = sensorJson["name"].as<std::string>();
-            sensor.offset              = sensorJson["offset"];
+            auto sensor   = SensorCustomization();
+            sensor.id_str = sensorJson["id_str"].as<std::string>();
+            sensor.name   = sensorJson["name"].as<std::string>();
+            sensor.offset = sensorJson["offset"];
             settings.sensorCustomizations.push_back(sensor); // add to list
         }
     }
@@ -112,13 +112,13 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
     if (root["analogs"].is<JsonArray>()) {
         for (const JsonObject analogJson : root["analogs"].as<JsonArray>()) {
             // create each of the sensor, overwritting any previous settings
-            AnalogCustomization sensor = AnalogCustomization();
-            sensor.id                  = analogJson["id"];
-            sensor.name                = analogJson["name"].as<std::string>();
-            sensor.offset              = analogJson["offset"];
-            sensor.factor              = analogJson["factor"];
-            sensor.uom                 = analogJson["uom"];
-            sensor.type                = analogJson["type"];
+            auto sensor   = AnalogCustomization();
+            sensor.id     = analogJson["id"];
+            sensor.name   = analogJson["name"].as<std::string>();
+            sensor.offset = analogJson["offset"];
+            sensor.factor = analogJson["factor"];
+            sensor.uom    = analogJson["uom"];
+            sensor.type   = analogJson["type"];
             settings.analogCustomizations.push_back(sensor); // add to list
         }
     }
@@ -127,9 +127,9 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
     settings.entityCustomizations.clear();
     if (root["exclude_entities"].is<JsonArray>()) {
         for (const JsonObject exclude_entities : root["exclude_entities"].as<JsonArray>()) {
-            EntityCustomization new_entry = EntityCustomization();
-            new_entry.product_id          = exclude_entities["product_id"];
-            new_entry.device_id           = exclude_entities["device_id"];
+            auto new_entry       = EntityCustomization();
+            new_entry.product_id = exclude_entities["product_id"];
+            new_entry.device_id  = exclude_entities["device_id"];
 
             for (const JsonVariant exclude_entity_id : exclude_entities["entity_ids"].as<JsonArray>()) {
                 new_entry.entity_ids.push_back(exclude_entity_id.as<uint8_t>()); // add entity list
@@ -158,8 +158,8 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
 
 // send back a short list devices used in the customization page
 void WebCustomizationService::devices(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN);
-    JsonObject          root     = response->getRoot();
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN);
+    JsonObject root     = response->getRoot();
 
     JsonArray devices = root.createNestedArray("devices");
     for (auto & emsdevice : EMSESP::emsdevices) {
@@ -185,18 +185,16 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
 // send back list device entities
 void WebCustomizationService::device_entities(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(true, EMSESP_JSON_SIZE_XXLARGE_DYN);
+        auto * response = new MsgpackAsyncJsonResponse(true, EMSESP_JSON_SIZE_XXLARGE_DYN);
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice) {
-                if (emsdevice->unique_id() == json["id"]) {
+            if (emsdevice->unique_id() == json["id"]) {
 #ifndef EMSESP_STANDALONE
-                    JsonArray output = response->getRoot();
-                    emsdevice->generate_values_web_all(output);
+                JsonArray output = response->getRoot();
+                emsdevice->generate_values_web_all(output);
 #endif
-                    response->setLength();
-                    request->send(response);
-                    return;
-                }
+                response->setLength();
+                request->send(response);
+                return;
             }
         }
     }

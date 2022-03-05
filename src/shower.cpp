@@ -65,12 +65,12 @@ void Shower::loop() {
             }
         } else { // hot water is off
             // if it just turned off, record the time as it could be a short pause
-            if ((timer_start_) && (timer_pause_ == 0)) {
+            if (timer_start_ && (timer_pause_ == 0)) {
                 timer_pause_ = time_now;
             }
 
             // if shower has been off for longer than the wait time
-            if ((timer_pause_) && ((time_now - timer_pause_) > SHOWER_PAUSE_TIME)) {
+            if (timer_pause_ && ((time_now - timer_pause_) > SHOWER_PAUSE_TIME)) {
                 // it is over the wait period, so assume that the shower has finished and calculate the total time and publish
                 // because its unsigned long, can't have negative so check if length is less than OFFSET_TIME
                 if ((timer_pause_ - timer_start_) > SHOWER_OFFSET_TIME) {
@@ -121,7 +121,7 @@ void Shower::shower_alert_start() {
 // Publish to the shower_data topic
 // showing whether the shower timer and alert are enabled or disabled
 // and the duration of the last shower
-void Shower::publish_shower_data() {
+void Shower::publish_shower_data() const {
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
 
     if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {

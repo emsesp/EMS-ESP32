@@ -31,9 +31,8 @@ std::shared_ptr<Commands> EMSESPShell::commands = [] {
     return commands;
 }();
 
-static std::shared_ptr<EMSESPShell> shell;
-
-std::vector<bool> EMSESPStreamConsole::ptys_;
+std::shared_ptr<EMSESPShell> shell;
+std::vector<bool>            EMSESPStreamConsole::ptys_;
 
 #ifndef EMSESP_STANDALONE
 uuid::telnet::TelnetService telnet_([](Stream & stream, const IPAddress & addr, uint16_t port) -> std::shared_ptr<uuid::console::Shell> {
@@ -536,10 +535,7 @@ void Console::load_standard_commands(unsigned int context) {
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
                                        flash_string_vector{F_(exit)},
-                                       [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           shell.stop();
-                                           // shell.exit_context();
-                                       });
+                                       [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { shell.stop(); });
 
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,

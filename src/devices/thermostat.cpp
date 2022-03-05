@@ -370,7 +370,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 }
 
 // add the HVAC/Climate HA component for the HC
-void Thermostat::add_ha_climate(std::shared_ptr<HeatingCircuit> hc) {
+void Thermostat::add_ha_climate(std::shared_ptr<HeatingCircuit> hc) const {
     if (!Mqtt::ha_enabled()) {
         hc->climate = EMS_VALUE_UINT_NOTSET;
         return;
@@ -1274,18 +1274,18 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
 
     // data: displaycode(2), errornumber(2), year, month, hour, day, minute, duration(2), src-addr
     if (telegram->message_data[4] & 0x80) { // valid date
-        char     code[sizeof(lastCode_)];
-        uint16_t codeNo = EMS_VALUE_USHORT_NOTSET;
-        code[0]         = telegram->message_data[0];
-        code[1]         = telegram->message_data[1];
-        code[2]         = 0;
+        char     code[sizeof(lastCode_)] = {0};
+        uint16_t codeNo                  = EMS_VALUE_USHORT_NOTSET;
+        code[0]                          = telegram->message_data[0];
+        code[1]                          = telegram->message_data[1];
+        code[2]                          = 0;
         telegram->read_value(codeNo, 2);
-        uint16_t year  = (telegram->message_data[4] & 0x7F) + 2000;
-        uint8_t  month = telegram->message_data[5];
-        uint8_t  day   = telegram->message_data[7];
-        uint8_t  hour  = telegram->message_data[6];
-        uint8_t  min   = telegram->message_data[8];
-        uint16_t duration;
+        uint16_t year     = (telegram->message_data[4] & 0x7F) + 2000;
+        uint8_t  month    = telegram->message_data[5];
+        uint8_t  day      = telegram->message_data[7];
+        uint8_t  hour     = telegram->message_data[6];
+        uint8_t  min      = telegram->message_data[8];
+        uint16_t duration = EMS_VALUE_SHORT_NOTSET;
         telegram->read_value(duration, 9);
         snprintf(&code[2], sizeof(code) - 2, "(%d) %02d.%02d.%d %02d:%02d (%d min)", codeNo, day, month, year, hour, min, duration);
         has_update(lastCode_, code, sizeof(lastCode_));
@@ -1329,7 +1329,7 @@ bool Thermostat::set_calinttemp(const char * value, const int8_t id) {
         return false;
     }
 
-    int8_t t = (int8_t)(ct * 10);
+    auto t = (int8_t)(ct * 10);
     LOG_DEBUG(F("Calibrating internal temperature to %d.%d C"), t / 10, t < 0 ? -t % 10 : t % 10);
 
     if (model() == EMS_DEVICE_FLAG_RC10) {
@@ -1696,9 +1696,11 @@ bool Thermostat::set_wwCircProg(const char * value, const int8_t id) {
 bool Thermostat::set_holiday(const char * value, const int8_t id, const bool vacation) {
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
-    if (hc == nullptr) {
+
+    if ((hc == nullptr) || (value == nullptr)) {
         return false;
     }
+
     if (strlen(value) != 21) {
         return false;
     }
@@ -1843,7 +1845,7 @@ bool Thermostat::set_roominfl_factor(const char * value, const int8_t id) {
 // sets the thermostat working mode, where mode is a string
 // converts string mode to HeatingCircuit::Mode
 bool Thermostat::set_mode(const char * value, const int8_t id) {
-    if (strlen(value) >= 20) {
+    if ((value == nullptr) || (strlen(value) >= 20)) {
         return false;
     }
 
@@ -2171,7 +2173,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         }
         const char * s_mode = doc["mode"];
         const char * s_time = doc["time"];
-        if ((model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N)) {
+        if (model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N) {
             bool b;
             if (Helpers::value2bool(s_mode, b)) {
                 on = b ? 1 : 0;
@@ -2386,6 +2388,8 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                 offset = 4;
             }
             break;
+        default:
+            break;
         }
     } else if (model == EMS_DEVICE_FLAG_RC20) {
         switch (mode) {
@@ -2418,6 +2422,8 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             } else {
                 offset = EMS_OFFSET_RC20Set_temp_auto;
             }
+            break;
+        default:
             break;
         }
 
@@ -3351,6 +3357,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_j_control), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode4), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(tag, &hc->remotetemp, DeviceValueType::SHORT, FL_(div10), FL_(remotetemp), DeviceValueUOM::DEGREES);
+        break;
+    default:
         break;
     }
 }

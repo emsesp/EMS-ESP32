@@ -38,7 +38,7 @@ class WebLogService : public uuid::log::Handler {
     void             log_level(uuid::log::Level level);
     size_t           maximum_log_messages() const;
     void             maximum_log_messages(size_t count);
-    bool             compact();
+    bool             compact() const;
     void             compact(bool compact);
     void             loop();
 

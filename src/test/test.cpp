@@ -804,28 +804,28 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         // test command parse
         int8_t       id_n;
-        const char * cmd;
+        const char * ncmd;
         char         command_s[100];
         id_n = -1;
-        strcpy(command_s, "hc2/seltemp");
-        cmd = Command::parse_command_string(command_s, id_n);
-        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        strlcpy(command_s, "hc2/seltemp", sizeof(command_s));
+        ncmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", ncmd, id_n);
         id_n = -1;
-        strcpy(command_s, "seltemp");
-        cmd = Command::parse_command_string(command_s, id_n);
-        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        strlcpy(command_s, "seltemp", sizeof(command_s));
+        ncmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", ncmd, id_n);
         id_n = -1;
-        strcpy(command_s, "xyz/seltemp");
-        cmd = Command::parse_command_string(command_s, id_n);
-        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        strlcpy(command_s, "xyz/seltemp", sizeof(command_s));
+        ncmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", ncmd, id_n);
         id_n = -1;
-        strcpy(command_s, "wwc4/seltemp");
-        cmd = Command::parse_command_string(command_s, id_n);
-        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        strlcpy(command_s, "wwc4/seltemp", sizeof(command_s));
+        ncmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", ncmd, id_n);
         id_n = -1;
-        strcpy(command_s, "hc3_seltemp");
-        cmd = Command::parse_command_string(command_s, id_n);
-        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        strlcpy(command_s, "hc3_seltemp", sizeof(command_s));
+        ncmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", ncmd, id_n);
 
 #endif
 
@@ -1335,12 +1335,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         char system_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         Mqtt::show_mqtt(shell); // show queue
 
-        strcpy(boiler_topic, "ems-esp/boiler");
-        strcpy(thermostat_topic, "ems-esp/thermostat");
-        strcpy(system_topic, "ems-esp/system");
+        strlcpy(boiler_topic, "ems-esp/boiler", sizeof(boiler_topic));
+        strlcpy(thermostat_topic, "ems-esp/thermostat", sizeof(thermostat_topic));
+        strlcpy(system_topic, "ems-esp/system", sizeof(system_topic));
 
         // test publishing
-        EMSESP::EMSESP::mqtt_.publish(boiler_topic, "test me");
+        EMSESP::mqtt_.publish(boiler_topic, "test me");
 
         // test receiving
         EMSESP::mqtt_.incoming(boiler_topic, ""); // test if ignore empty payloads, should return values

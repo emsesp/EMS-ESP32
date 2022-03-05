@@ -39,13 +39,13 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     }
 
     // check first if it's from API, if so strip the "api/"
-    if ((p.paths().front() == "api")) {
+    if (p.paths().front() == "api") {
         p.paths().erase(p.paths().begin());
     } else {
         // not /api, so must be MQTT path. Check for base and remove it.
         if (!strncmp(path, Mqtt::base().c_str(), Mqtt::base().length())) {
             char new_path[Mqtt::MQTT_TOPIC_MAX_SIZE];
-            strncpy(new_path, path, sizeof(new_path));
+            strlcpy(new_path, path, sizeof(new_path));
             p.parse(new_path + Mqtt::base().length() + 1); // re-parse the stripped path
         } else {
             return message(CommandRet::ERROR, "unrecognized path", output); // error
@@ -177,6 +177,8 @@ const std::string Command::return_code_string(const uint8_t return_code) {
     case CommandRet::FAIL:
         return read_flash_string(F("Failed"));
         break;
+    default:
+        break;
     }
     char s[4];
     return Helpers::smallitoa(s, return_code);
@@ -191,7 +193,7 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
 
     // make a copy of the string command for parsing
     char command_s[100];
-    strncpy(command_s, command, sizeof(command_s));
+    strlcpy(command_s, command, sizeof(command_s));
 
     // look for a delimeter and split the string
     char * p      = command_s;
@@ -462,7 +464,7 @@ bool Command::device_has_commands(const uint8_t device_type) {
     }
 
     for (const auto & emsdevice : EMSESP::emsdevices) {
-        if ((emsdevice) && (emsdevice->device_type() == device_type)) {
+        if (emsdevice && (emsdevice->device_type() == device_type)) {
             // device found, now see if it has any commands
             for (const auto & cf : cmdfunctions_) {
                 if (cf.device_type_ == device_type) {
@@ -488,7 +490,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
 
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if ((emsdevice) && (emsdevice->device_type() == device_class.first) && (device_has_commands(device_class.first))) {
+            if (emsdevice && (emsdevice->device_type() == device_class.first) && (device_has_commands(device_class.first))) {
                 shell.printf("%s ", EMSdevice::device_type_2_device_name(device_class.first).c_str());
                 break; // we only want to show one (not multiple of the same device types)
             }
@@ -554,6 +556,14 @@ SUrlParser::SUrlParser(const char * uri) {
 }
 
 bool SUrlParser::parse(const char * uri) {
+    if (uri == nullptr) {
+        return false;
+    }
+
+    if (*uri == '\0') {
+        return false;
+    }
+
     m_folders.clear();
     m_keysvalues.clear();
     enum Type { begin, folder, param, value };
@@ -563,54 +573,53 @@ bool SUrlParser::parse(const char * uri) {
     enum Type    t = Type::begin;
     std::string  last_param;
 
-    if (c != nullptr || *c != '\0') {
-        do {
-            if (*c == '/') {
-                if (s.length() > 0) {
-                    m_folders.push_back(s);
-                    s.clear();
-                }
-                t = Type::folder;
-            } else if (*c == '?' && (t == Type::folder || t == Type::begin)) {
-                if (s.length() > 0) {
-                    m_folders.push_back(s);
-                    s.clear();
-                }
-                t = Type::param;
-            } else if (*c == '=' && (t == Type::param || t == Type::begin)) {
+    do {
+        if (*c == '/') {
+            if (s.length() > 0) {
+                m_folders.push_back(s);
+                s.clear();
+            }
+            t = Type::folder;
+        } else if (*c == '?' && (t == Type::folder || t == Type::begin)) {
+            if (s.length() > 0) {
+                m_folders.push_back(s);
+                s.clear();
+            }
+            t = Type::param;
+        } else if (*c == '=' && (t == Type::param || t == Type::begin)) {
+            m_keysvalues[s] = "";
+            last_param      = s;
+            s.clear();
+            t = Type::value;
+        } else if (*c == '&' && (t == Type::value || t == Type::param || t == Type::begin)) {
+            if (t == Type::value) {
+                m_keysvalues[last_param] = s;
+            } else if ((t == Type::param || t == Type::begin) && (s.length() > 0)) {
                 m_keysvalues[s] = "";
                 last_param      = s;
-                s.clear();
-                t = Type::value;
-            } else if (*c == '&' && (t == Type::value || t == Type::param || t == Type::begin)) {
-                if (t == Type::value) {
-                    m_keysvalues[last_param] = s;
-                } else if ((t == Type::param || t == Type::begin) && (s.length() > 0)) {
-                    m_keysvalues[s] = "";
-                    last_param      = s;
-                }
-                t = Type::param;
-                s.clear();
-            } else if (*c == '\0' && s.length() > 0) {
-                if (t == Type::value) {
-                    m_keysvalues[last_param] = s;
-                } else if (t == Type::folder || t == Type::begin) {
-                    m_folders.push_back(s);
-                } else if (t == Type::param) {
-                    m_keysvalues[s] = "";
-                    last_param      = s;
-                }
-                s.clear();
-            } else if (*c == '\0' && s.length() == 0) {
-                if (t == Type::param && last_param.length() > 0) {
-                    m_keysvalues[last_param] = "";
-                }
-                s.clear();
-            } else {
-                s += *c;
             }
-        } while (*c++ != '\0');
-    }
+            t = Type::param;
+            s.clear();
+        } else if (*c == '\0' && s.length() > 0) {
+            if (t == Type::value) {
+                m_keysvalues[last_param] = s;
+            } else if (t == Type::folder || t == Type::begin) {
+                m_folders.push_back(s);
+            } else if (t == Type::param) {
+                m_keysvalues[s] = "";
+                last_param      = s;
+            }
+            s.clear();
+        } else if (*c == '\0' && s.length() == 0) {
+            if (t == Type::param && last_param.length() > 0) {
+                m_keysvalues[last_param] = "";
+            }
+            s.clear();
+        } else {
+            s += *c;
+        }
+    } while (*c++ != '\0');
+
     return true;
 }
 
