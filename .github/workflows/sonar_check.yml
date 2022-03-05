@@ -5,8 +5,6 @@ on:
       - dev
   pull_request:
     types: [opened, synchronize, reopened]
-  schedule:                # This trigger is here only to make sure
-    - cron: '17 0 * * SUN' # the example itself doesn't become stale
 jobs:
   build:
     name: Build
@@ -16,7 +14,7 @@ jobs:
       # SONAR_SCANNER_VERSION: 4.6.1.2450
       SONAR_SCANNER_VERSION: 4.7.0.2747                                
       SONAR_SERVER_URL: "https://sonarcloud.io"
-      BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
+      BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
     steps:
       - uses: actions/checkout@v2
         with:
