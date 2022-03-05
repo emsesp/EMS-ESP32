@@ -325,7 +325,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
      */
 
     // if it's the first set the status flag
-    if (heating_circuits_.size() == 0) {
+    if (heating_circuits_.empty()) {
         strlcpy(status_, "online", sizeof(status_));
     }
 
@@ -489,65 +489,44 @@ std::string Thermostat::mode_tostring(uint8_t mode) {
     switch (mode) {
     case HeatingCircuit::Mode::OFF:
         return read_flash_string(F_(off));
-        break;
     case HeatingCircuit::Mode::MANUAL:
         return read_flash_string(F_(manual));
-        break;
     case HeatingCircuit::Mode::DAY:
         return read_flash_string(F_(day));
-        break;
     case HeatingCircuit::Mode::NIGHT:
         return read_flash_string(F_(night));
-        break;
     case HeatingCircuit::Mode::ECO:
         return read_flash_string(F_(eco));
-        break;
     case HeatingCircuit::Mode::COMFORT:
         return read_flash_string(F_(comfort));
-        break;
     case HeatingCircuit::Mode::HEAT:
         return read_flash_string(F_(heat));
-        break;
     case HeatingCircuit::Mode::HOLIDAY:
         return read_flash_string(F_(holiday));
-        break;
     case HeatingCircuit::Mode::NOFROST:
         return read_flash_string(F_(nofrost));
-        break;
     case HeatingCircuit::Mode::AUTO:
         return read_flash_string(F_(auto));
-        break;
     case HeatingCircuit::Mode::SUMMER:
         return read_flash_string(F_(summer));
-        break;
     case HeatingCircuit::Mode::OFFSET:
         return read_flash_string(F_(offset));
-        break;
     case HeatingCircuit::Mode::DESIGN:
         return read_flash_string(F_(design));
-        break;
     case HeatingCircuit::Mode::MINFLOW:
         return read_flash_string(F_(minflow));
-        break;
     case HeatingCircuit::Mode::MAXFLOW:
         return read_flash_string(F_(maxflow));
-        break;
     case HeatingCircuit::Mode::ROOMINFLUENCE:
         return read_flash_string(F_(roominfluence[0]));
-        break;
     case HeatingCircuit::Mode::FLOWOFFSET:
         return read_flash_string(F_(flowtempoffset[0]));
-        break;
     case HeatingCircuit::Mode::TEMPAUTO:
         return read_flash_string(F_(tempauto));
-        break;
     case HeatingCircuit::Mode::NOREDUCE:
         return read_flash_string(F_(noreduce));
-        break;
     default:
-    case HeatingCircuit::Mode::UNKNOWN:
         return read_flash_string(F_(unknown));
-        break;
     }
 }
 
@@ -1947,9 +1926,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         set_mode_value = 1;
         break;
 
-    default:
-    case HeatingCircuit::Mode::AUTO:
-    case HeatingCircuit::Mode::ECO:
+    default: // AUTO & ECO
         set_mode_value = 2;
         break;
     }
@@ -2504,7 +2481,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             factor          = 1;
             break;
         default:
-        case HeatingCircuit::Mode::AUTO:
+            // HeatingCircuit::Mode::AUTO:
             uint8_t mode_ = hc->get_mode();
             if (mode_ == HeatingCircuit::Mode::MANUAL) {
                 offset = 0x0A; // manual offset
@@ -2543,7 +2520,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             offset = EMS_OFFSET_RC20_2_Set_temp_day;
             break;
         default:
-        case HeatingCircuit::Mode::AUTO: // automatic selection, if no type is defined, we use the standard code
+            // automatic selection, if no type is defined, we use the standard code
             uint8_t mode_ = hc->get_mode();
             if (mode_ == HeatingCircuit::Mode::NIGHT) {
                 offset = EMS_OFFSET_RC20_2_Set_temp_night;
@@ -2614,7 +2591,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             factor = 1;
             break;
         default:
-        case HeatingCircuit::Mode::AUTO:                 // automatic selection, if no type is defined, we use the standard code
+            // automatic selection, if no type is defined, we use the standard code
             validate_typeid = monitor_typeids[hc->hc()]; //get setpoint roomtemp back
             if (model == EMS_DEVICE_FLAG_RC35) {
                 uint8_t mode_ = hc->get_mode();
@@ -2650,7 +2627,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                 offset = EMS_OFFSET_JunkersSetMessage_day_temp;
                 break;
             default:
-            case HeatingCircuit::Mode::AUTO: // automatic selection, if no type is defined, we use the standard code
+                // automatic selection, if no type is defined, we use the standard code
                 uint8_t modetype = hc->get_mode_type();
                 if (modetype == HeatingCircuit::Mode::NIGHT || modetype == HeatingCircuit::Mode::ECO) {
                     offset = EMS_OFFSET_JunkersSetMessage_night_temp;
@@ -2677,7 +2654,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                 offset = EMS_OFFSET_JunkersSetMessage2_heat_temp;
                 break;
             default:
-            case HeatingCircuit::Mode::AUTO: // automatic selection, if no type is defined, we use the standard code
+                // automatic selection, if no type is defined, we use the standard code
                 uint8_t modetype = hc->get_mode_type();
                 if (modetype == HeatingCircuit::Mode::NIGHT || modetype == HeatingCircuit::Mode::ECO) {
                     offset = EMS_OFFSET_JunkersSetMessage2_eco_temp;
@@ -2695,7 +2672,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
     if (offset != -1) {
         // add the write command to the Tx queue. value is *2
         // post validate is the corresponding monitor or set type IDs as they can differ per model
-        write_command(set_typeid, offset, (uint8_t)((float)temperature * (float)factor), validate_typeid);
+        write_command(set_typeid, offset, (uint8_t)(temperature * (float)factor), validate_typeid);
         return true;
     }
 

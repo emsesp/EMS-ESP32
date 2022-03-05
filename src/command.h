@@ -125,7 +125,7 @@ class Command {
 
     static const char * parse_command_string(const char * command, int8_t & id);
 
-    static const std::string return_code_string(const uint8_t return_code);
+    static std::string return_code_string(const uint8_t return_code);
 
   private:
     static uuid::log::Logger logger_;
@@ -134,13 +134,13 @@ class Command {
 
     inline static uint8_t message(uint8_t error_code, const char * message, const JsonObject & output) {
         output.clear();
-        output["message"] = (const char *)message;
+        output["message"] = message;
         return error_code;
     }
 };
 
-typedef std::unordered_map<std::string, std::string> KeyValueMap_t;
-typedef std::vector<std::string>                     Folder_t;
+using KeyValueMap_t = std::unordered_map<std::string, std::string>;
+using Folder_t      = std::vector<std::string>;
 
 class SUrlParser {
   private:

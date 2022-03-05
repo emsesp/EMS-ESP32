@@ -151,7 +151,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         return_code = Command::call(device_type, command_p, Helpers::itoa((int16_t)data.as<int>(), data_str), is_admin, id_n, output);
     } else if (data.is<float>()) {
         char data_str[10];
-        return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, (float)data.as<float>(), 2), is_admin, id_n, output);
+        return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, data.as<float>(), 2), is_admin, id_n, output);
     } else if (data.isNull()) {
         return_code = Command::call(device_type, command_p, "", is_admin, id_n, output); // empty, will do a query instead
     } else {
@@ -160,23 +160,18 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     return return_code;
 }
 
-const std::string Command::return_code_string(const uint8_t return_code) {
+std::string Command::return_code_string(const uint8_t return_code) {
     switch (return_code) {
     case CommandRet::ERROR:
         return read_flash_string(F("Error"));
-        break;
     case CommandRet::OK:
         return read_flash_string(F("OK"));
-        break;
     case CommandRet::NOT_FOUND:
         return read_flash_string(F("Not Found"));
-        break;
     case CommandRet::NOT_ALLOWED:
         return read_flash_string(F("Not Authorized"));
-        break;
     case CommandRet::FAIL:
         return read_flash_string(F("Failed"));
-        break;
     default:
         break;
     }
@@ -367,7 +362,7 @@ bool Command::list(const uint8_t device_type, JsonObject & output) {
     }
     sorted_cmds.sort();
 
-    for (auto & cl : sorted_cmds) {
+    for (const auto & cl : sorted_cmds) {
         for (const auto & cf : cmdfunctions_) {
             if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == read_flash_string(cf.cmd_))) {
                 output[cl] = cf.description_;
@@ -396,7 +391,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
 
     // if not in verbose mode, just print them on a single line
     if (!verbose) {
-        for (auto & cl : sorted_cmds) {
+        for (const auto & cl : sorted_cmds) {
             shell.print(cl);
             shell.print(" ");
         }
@@ -406,7 +401,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
 
     // verbose mode
     shell.println();
-    for (auto & cl : sorted_cmds) {
+    for (const auto & cl : sorted_cmds) {
         // find and print the description
         for (const auto & cf : cmdfunctions_) {
             if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == read_flash_string(cf.cmd_))) {
@@ -543,7 +538,7 @@ void Command::show_all(uuid::console::Shell & shell) {
 // e.g. //one/two////three/// becomes /one/two/three
 std::string SUrlParser::path() {
     std::string s = "/"; // set up the beginning slash
-    for (std::string & f : m_folders) {
+    for (const std::string & f : m_folders) {
         s += f;
         s += "/";
     }

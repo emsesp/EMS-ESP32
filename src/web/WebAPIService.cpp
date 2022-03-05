@@ -49,7 +49,7 @@ void WebAPIService::webAPIService_get(AsyncWebServerRequest * request) {
 // POST /{device}[/{hc|id}][/{name}]
 void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json) {
     // if no body then treat it as a secure GET
-    if (not json.is<JsonObject>()) {
+    if (!json.is<JsonObject>()) {
         webAPIService_get(request);
         return;
     }

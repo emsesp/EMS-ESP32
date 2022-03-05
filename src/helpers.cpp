@@ -587,12 +587,12 @@ bool Helpers::value2bool(const char * v, bool & value) {
 
     std::string bool_str = toLower(v); // convert to lower case
 
-    if ((bool_str == read_flash_string(F_(on))) || (bool_str == "1") or (bool_str == "true")) {
+    if ((bool_str == read_flash_string(F_(on))) || (bool_str == "1") || (bool_str == "true")) {
         value = true;
         return true; // is a bool
     }
 
-    if ((bool_str == read_flash_string(F_(off))) || (bool_str == "0") or (bool_str == "false")) {
+    if ((bool_str == read_flash_string(F_(off))) || (bool_str == "0") || (bool_str == "false")) {
         value = false;
         return true; // is a bool
     }

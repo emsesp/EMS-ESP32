@@ -62,32 +62,21 @@ std::string EMSdevice::brand_to_string() const {
     switch (brand_) {
     case EMSdevice::Brand::BOSCH:
         return read_flash_string(F("Bosch"));
-        break;
     case EMSdevice::Brand::JUNKERS:
         return read_flash_string(F("Junkers"));
-        break;
     case EMSdevice::Brand::BUDERUS:
         return read_flash_string(F("Buderus"));
-        break;
     case EMSdevice::Brand::NEFIT:
         return read_flash_string(F("Nefit"));
-        break;
     case EMSdevice::Brand::SIEGER:
         return read_flash_string(F("Sieger"));
-        break;
     case EMSdevice::Brand::WORCESTER:
         return read_flash_string(F("Worcester"));
-        break;
     case EMSdevice::Brand::IVT:
         return read_flash_string(F("IVT"));
-        break;
-    case EMSdevice::Brand::NO_BRAND:
     default:
         return read_flash_string(F(""));
-        break;
     }
-
-    return std::string{};
 }
 
 // returns the name of the MQTT topic to use for a specific device, without the base
@@ -95,55 +84,30 @@ std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     switch (device_type) {
     case DeviceType::SYSTEM:
         return read_flash_string(F_(system));
-        break;
-
     case DeviceType::BOILER:
         return read_flash_string(F_(boiler));
-        break;
-
     case DeviceType::THERMOSTAT:
         return read_flash_string(F_(thermostat));
-        break;
-
     case DeviceType::HEATPUMP:
         return read_flash_string(F_(heatpump));
-        break;
-
     case DeviceType::SOLAR:
         return read_flash_string(F_(solar));
-        break;
-
     case DeviceType::CONNECT:
         return read_flash_string(F_(connect));
-        break;
-
     case DeviceType::MIXER:
         return read_flash_string(F_(mixer));
-        break;
-
     case DeviceType::DALLASSENSOR:
         return read_flash_string(F_(dallassensor));
-        break;
-
     case DeviceType::ANALOGSENSOR:
         return read_flash_string(F_(analogsensor));
-        break;
-
     case DeviceType::CONTROLLER:
         return read_flash_string(F_(controller));
-        break;
-
     case DeviceType::SWITCH:
         return read_flash_string(F_(switch));
-        break;
-
     case DeviceType::GATEWAY:
         return read_flash_string(F_(gateway));
-        break;
-
     default:
         return read_flash_string(F_(unknown));
-        break;
     }
 }
 
@@ -207,28 +171,20 @@ uint8_t EMSdevice::decode_brand(uint8_t value) {
     switch (value) {
     case 1:
         return EMSdevice::Brand::BOSCH;
-        break;
     case 2:
         return EMSdevice::Brand::JUNKERS;
-        break;
     case 3:
         return EMSdevice::Brand::BUDERUS;
-        break;
     case 4:
         return EMSdevice::Brand::NEFIT;
-        break;
     case 5:
         return EMSdevice::Brand::SIEGER;
-        break;
     case 11:
         return EMSdevice::Brand::WORCESTER;
-        break;
     case 13:
         return EMSdevice::Brand::IVT;
-        break;
     default:
         return EMSdevice::Brand::NO_BRAND;
-        break;
     }
 }
 
@@ -579,7 +535,6 @@ void EMSdevice::publish_value(void * value_p) const {
                 }
                 break;
             }
-
             case DeviceValueType::USHORT:
                 Helpers::render_value(payload, *(uint16_t *)(value_p), divider, fahrenheit);
                 break;
@@ -603,10 +558,11 @@ void EMSdevice::publish_value(void * value_p) const {
                 Helpers::render_value(payload, *(uint32_t *)(value_p), divider);
                 break;
             case DeviceValueType::STRING:
-            default:
                 if (Helpers::hasValue((char *)(value_p))) {
                     strlcpy(payload, (char *)(value_p), sizeof(payload));
                 }
+                break;
+            default:
                 break;
             }
 

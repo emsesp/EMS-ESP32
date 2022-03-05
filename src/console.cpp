@@ -467,7 +467,7 @@ void Console::load_standard_commands(unsigned int context) {
                                        flash_string_vector{F("test")},
                                        flash_string_vector{F_(name_optional), F_(data_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           if (arguments.size() == 0) {
+                                           if (arguments.empty()) {
                                                Test::run_test(shell, "default");
                                            } else if (arguments.size() == 1) {
                                                Test::run_test(shell, arguments.front());
@@ -487,7 +487,7 @@ void Console::load_standard_commands(unsigned int context) {
                                        flash_string_vector{F_(debug)},
                                        flash_string_vector{F_(name_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           if (arguments.size() == 0) {
+                                           if (arguments.empty()) {
                                                Test::debug(shell, "default");
                                            } else {
                                                Test::debug(shell, arguments.front());

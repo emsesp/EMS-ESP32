@@ -1313,7 +1313,7 @@ void Mqtt::publish_ha_climate_config(uint8_t tag, bool has_roomtemp, bool remove
 // based on the device and tag, create the MQTT topic name (without the basename)
 // differs based on whether MQTT nested is enabled
 // tag = EMSdevice::DeviceValueTAG
-const std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
+std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
     // the system device is treated differently. The topic is 'heartbeat' and doesn't follow the usual convention
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
         return EMSdevice::tag_to_mqtt(tag);

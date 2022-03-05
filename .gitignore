@@ -32,3 +32,4 @@ scripts/__pycache__
 # sonar
 .scannerwork/
 sonar/
+build_wrapper_output_directory/

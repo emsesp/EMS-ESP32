@@ -64,12 +64,11 @@ void AnalogSensor::reload() {
     // load the list of analog sensors from the customization service
     // and store them locally and then activate them
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
-        auto sensors = settings.analogCustomizations;
-        auto it      = sensors_.begin();
+        auto it = sensors_.begin();
         for (auto & sensor_ : sensors_) {
             // update existing sensors
             bool found = false;
-            for (auto & sensor : sensors) { //search customlist
+            for (const auto & sensor : settings.analogCustomizations) { //search customlist
                 if (sensor_.id() == sensor.id) {
                     // for output sensors set value to new start-value
                     if ((sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT)
@@ -90,10 +89,11 @@ void AnalogSensor::reload() {
             }
             it++;
         }
+
         // add new sensors from list
-        for (auto & sensor : sensors) {
+        for (const auto & sensor : settings.analogCustomizations) {
             bool found = false;
-            for (auto & sensor_ : sensors_) {
+            for (const auto & sensor_ : sensors_) {
                 if (sensor_.id() == sensor.id) {
                     found = true;
                 }

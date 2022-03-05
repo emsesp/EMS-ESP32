@@ -85,7 +85,7 @@ class DallasSensor {
     bool get_value_info(JsonObject & output, const char * cmd, const int8_t id);
 
     // return back reference to the sensor list, used by other classes
-    const std::vector<Sensor> sensors() const {
+    std::vector<Sensor> sensors() const {
         return sensors_;
     }
 
@@ -102,7 +102,7 @@ class DallasSensor {
     }
 
     bool have_sensors() {
-        return (sensors_.size() > 0);
+        return (!sensors_.empty());
     }
 
     size_t no_sensors() {

@@ -162,7 +162,7 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
     JsonObject root     = response->getRoot();
 
     JsonArray devices = root.createNestedArray("devices");
-    for (auto & emsdevice : EMSESP::emsdevices) {
+    for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice->has_entities()) {
             JsonObject obj = devices.createNestedObject();
             obj["i"]       = emsdevice->unique_id(); // a unique id

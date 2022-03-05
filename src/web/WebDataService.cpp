@@ -76,7 +76,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     // list is already sorted by device type
     // Ignore Contoller
     JsonArray devices = root.createNestedArray("devices");
-    for (auto & emsdevice : EMSESP::emsdevices) {
+    for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice && emsdevice->device_type() != EMSdevice::DeviceType::CONTROLLER) {
             JsonObject obj = devices.createNestedObject();
             obj["i"]       = emsdevice->unique_id();        // a unique id
@@ -215,7 +215,7 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
                     return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0), true, id, output);
                 } else if (data.is<float>()) {
                     char s[10];
-                    return_code = Command::call(device_type, cmd, Helpers::render_value(s, (float)data.as<float>(), 1), true, id, output);
+                    return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<float>(), 1), true, id, output);
                 } else if (data.is<bool>()) {
                     return_code = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true, id, output);
                 }

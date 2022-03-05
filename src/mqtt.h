@@ -220,7 +220,7 @@ class Mqtt {
         return mqtt_messages_.empty();
     }
 
-    static const std::string tag_to_topic(uint8_t device_type, uint8_t tag);
+    static std::string tag_to_topic(uint8_t device_type, uint8_t tag);
 
     struct QueuedMqttMessage {
         const uint32_t                           id_;

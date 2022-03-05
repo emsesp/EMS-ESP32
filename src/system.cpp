@@ -1135,8 +1135,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["bus status"] = (F("connected, tx issues - try a different tx-mode"));
         break;
     case EMSESP::BUS_STATUS_CONNECTED:
-    default:
         node["bus status"] = (F("connected"));
+        break;
+    default:
+        node["bus status"] = (F("unknown"));
         break;
     }
 
@@ -1280,7 +1282,7 @@ bool System::command_restart(const char * value, const int8_t id) {
     return true;
 }
 
-const std::string System::reset_reason(uint8_t cpu) {
+std::string System::reset_reason(uint8_t cpu) const {
 #ifndef EMSESP_STANDALONE
     switch (rtc_get_reset_reason(cpu)) {
     case 1:

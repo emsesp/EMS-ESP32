@@ -4,5 +4,5 @@
 # export SONAR_TOKEN=""
 
 make clean
-build-wrapper-linux-x86-64 --out-dir sonar/build_wrapper_output_directory make all
+build-wrapper-linux-x86-64 --out-dir build_wrapper_output_directory make all
 sonar-scanner

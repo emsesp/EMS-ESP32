@@ -270,7 +270,7 @@ class RxService : public EMSbus {
         }
     };
 
-    const std::deque<QueuedRxTelegram> queue() const {
+    std::deque<QueuedRxTelegram> queue() const {
         return rx_telegrams_;
     }
 
@@ -400,12 +400,12 @@ class TxService : public EMSbus {
         }
     };
 
-    const std::deque<QueuedTxTelegram> queue() const {
+    std::deque<QueuedTxTelegram> queue() const {
         return tx_telegrams_;
     }
 
     bool tx_queue_empty() const {
-        return tx_telegrams_.size() == 0;
+        return tx_telegrams_.empty();
     }
 
 #if defined(EMSESP_DEBUG)
