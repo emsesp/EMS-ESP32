@@ -192,7 +192,7 @@ char * Helpers::render_boolean(char * result, bool value) {
 
 // render for native char strings
 char * Helpers::render_value(char * result, const char * value, const int8_t format __attribute__((unused))) {
-    strlcpy(result, value, sizeof(result));
+    strcpy(result, value); // un-safe but we don't care
     return result;
 }
 
