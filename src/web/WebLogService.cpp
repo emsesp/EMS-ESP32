@@ -156,9 +156,9 @@ void WebLogService::loop() {
 }
 
 // convert time to real offset
-char * WebLogService::messagetime(char * out, const uint64_t t) {
+char * WebLogService::messagetime(char * out, const uint64_t t, size_t bufsize) {
     if (!time_offset_) {
-        strlcpy(out, uuid::log::format_timestamp_ms(t, 3).c_str(), sizeof(out));
+        strlcpy(out, uuid::log::format_timestamp_ms(t, 3).c_str(), bufsize);
     } else {
         time_t t1 = time_offset_ + t / 1000ULL;
         strftime(out, 25, "%F %T", localtime(&t1));
@@ -173,7 +173,7 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
     JsonObject logEvent     = jsonDocument.to<JsonObject>();
     char       time_string[25];
 
-    logEvent["t"] = messagetime(time_string, message.content_->uptime_ms);
+    logEvent["t"] = messagetime(time_string, message.content_->uptime_ms, sizeof(time_string));
     logEvent["l"] = message.content_->level;
     logEvent["i"] = message.id_;
     logEvent["n"] = message.content_->name;
@@ -200,7 +200,7 @@ void WebLogService::fetchLog(AsyncWebServerRequest * request) {
         JsonObject logEvent = log.createNestedObject();
         char       time_string[25];
 
-        logEvent["t"] = messagetime(time_string, message.content_->uptime_ms);
+        logEvent["t"] = messagetime(time_string, message.content_->uptime_ms, sizeof(time_string));
         logEvent["l"] = message.content_->level;
         logEvent["i"] = message.id_;
         logEvent["n"] = message.content_->name;
