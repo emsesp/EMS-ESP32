@@ -156,13 +156,13 @@ void WebLogService::loop() {
 }
 
 // convert time to real offset
-char * WebLogService::messagetime(char * out, const uint64_t t, size_t bufsize) {
+char * WebLogService::messagetime(char * out, const uint64_t t, const size_t bufsize) {
     if (!time_offset_) {
         strlcpy(out, uuid::log::format_timestamp_ms(t, 3).c_str(), bufsize);
     } else {
         time_t t1 = time_offset_ + t / 1000ULL;
-        strftime(out, 25, "%F %T", localtime(&t1));
-        snprintf(out, 25, "%s.%03d", out, (uint16_t)(t % 1000));
+        strftime(out, bufsize, "%F %T", localtime(&t1));
+        snprintf(out, bufsize, "%s.%03d", out, (uint16_t)(t % 1000));
     }
     return out;
 }

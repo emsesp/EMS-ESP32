@@ -62,9 +62,10 @@ class WebLogService : public uuid::log::Handler {
     void fetchLog(AsyncWebServerRequest * request);
     void getValues(AsyncWebServerRequest * request);
 
-    char * messagetime(char * out, const uint64_t t, size_t bufsize);
+    char * messagetime(char * out, const uint64_t t, const size_t bufsize);
 
-    void                        setValues(AsyncWebServerRequest * request, JsonVariant & json);
+    void setValues(AsyncWebServerRequest * request, JsonVariant & json);
+
     AsyncCallbackJsonWebHandler setValues_; // for POSTs
 
     uint64_t                    last_transmit_        = 0;                // Last transmit time
