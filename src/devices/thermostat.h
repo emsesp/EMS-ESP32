@@ -93,7 +93,7 @@ class Thermostat : public EMSdevice {
         }
 
         // determines if the heating circuit is actually present and has data
-        bool is_active() {
+        bool is_active() const {
             return Helpers::hasValue(selTemp);
         }
 
@@ -292,7 +292,7 @@ class Thermostat : public EMSdevice {
 
     void register_device_values_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc);
 
-    void add_ha_climate(std::shared_ptr<HeatingCircuit> hc);
+    void add_ha_climate(std::shared_ptr<HeatingCircuit> hc) const;
 
     void process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_IBASettings(std::shared_ptr<const Telegram> telegram);

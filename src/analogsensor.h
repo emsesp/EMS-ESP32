@@ -127,38 +127,38 @@ class AnalogSensor {
 
     void start();
     void loop();
-    void publish_sensor(const Sensor & sensor);
+    void publish_sensor(const Sensor & sensor) const;
     void publish_values(const bool force);
     void reload();
     bool updated_values();
 
     // return back reference to the sensor list, used by other classes
-    const std::vector<Sensor> sensors() const {
+    std::vector<Sensor> sensors() const {
         return sensors_;
     }
 
-    uint32_t reads() {
+    uint32_t reads() const {
         return sensorreads_;
     }
 
-    uint32_t fails() {
+    uint32_t fails() const {
         return sensorfails_;
     }
 
-    bool analog_enabled() {
+    bool analog_enabled() const {
         return (analog_enabled_);
     }
 
-    bool have_sensors() {
-        return (sensors_.size() > 0);
+    bool have_sensors() const {
+        return (!sensors_.empty());
     }
 
-    size_t no_sensors() {
+    size_t no_sensors() const {
         return sensors_.size();
     }
 
     bool update(uint8_t id, const std::string & name, float offset, float factor, uint8_t uom, int8_t type);
-    bool get_value_info(JsonObject & output, const char * cmd, const int8_t id);
+    bool get_value_info(JsonObject & output, const char * cmd, const int8_t id) const;
 
 #ifdef EMSESP_DEBUG
     void test();
@@ -170,10 +170,10 @@ class AnalogSensor {
 
     static uuid::log::Logger logger_;
 
-    void remove_ha_topic(const uint8_t id);
+    void remove_ha_topic(const uint8_t id) const;
     bool command_setvalue(const char * value, const int8_t id);
     void measure();
-    bool command_info(const char * value, const int8_t id, JsonObject & output);
+    bool command_info(const char * value, const int8_t id, JsonObject & output) const;
     bool command_commands(const char * value, const int8_t id, JsonObject & output);
 
     std::vector<Sensor> sensors_; // our list of sensors

@@ -44,13 +44,13 @@ class EMSdevice {
         strlcpy(version_, version, sizeof(version_));
     }
 
-    const std::string device_type_name() const;
+    std::string device_type_name() const;
 
-    static const std::string device_type_2_device_name(const uint8_t device_type);
-    static uint8_t           device_name_2_device_type(const char * topic);
-    static const std::string uom_to_string(uint8_t uom);
-    static const std::string tag_to_string(uint8_t tag);
-    static const std::string tag_to_mqtt(uint8_t tag);
+    static std::string device_type_2_device_name(const uint8_t device_type);
+    static uint8_t     device_name_2_device_type(const char * topic);
+    static std::string uom_to_string(uint8_t uom);
+    static std::string tag_to_string(uint8_t tag);
+    static std::string tag_to_mqtt(uint8_t tag);
 
     inline uint8_t device_id() const {
         return device_id_;
@@ -64,7 +64,7 @@ class EMSdevice {
         product_id_ = product_id;
     }
 
-    inline bool is_device_id(uint8_t device_id) {
+    inline bool is_device_id(uint8_t device_id) const {
         return ((device_id & 0x7F) == (device_id_ & 0x7F));
     }
 
@@ -90,7 +90,7 @@ class EMSdevice {
         strlcpy(version_, version, sizeof(version_));
     }
 
-    inline const char * version() {
+    inline const char * version() const {
         return version_;
     }
 
@@ -132,7 +132,7 @@ class EMSdevice {
         publish_value(value);
     }
 
-    inline void has_update(char * value, char * newvalue, size_t len) {
+    inline void has_update(char * value, const char * newvalue, size_t len) {
         if (strcmp(value, newvalue) != 0) {
             strlcpy(value, newvalue, len);
             has_update_ = true;
@@ -171,18 +171,18 @@ class EMSdevice {
         }
     }
 
-    const std::string brand_to_string() const;
-    static uint8_t    decode_brand(uint8_t value);
+    std::string    brand_to_string() const;
+    static uint8_t decode_brand(uint8_t value);
 
-    const std::string to_string() const;
-    const std::string to_string_short() const;
+    std::string to_string() const;
+    std::string to_string_short() const;
 
     enum Handlers : uint8_t { ALL, RECEIVED, FETCHED, PENDING };
 
-    void   show_telegram_handlers(uuid::console::Shell & shell);
+    void   show_telegram_handlers(uuid::console::Shell & shell) const;
     char * show_telegram_handlers(char * result, uint8_t handlers);
-    void   show_mqtt_handlers(uuid::console::Shell & shell);
-    void   list_device_entries(JsonObject & output);
+    void   show_mqtt_handlers(uuid::console::Shell & shell) const;
+    void   list_device_entries(JsonObject & output) const;
     void   exclude_entity(uint8_t entity_id);
     void   reset_exclude_entities();
 
@@ -191,9 +191,9 @@ class EMSdevice {
     void register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, const process_function_p cb);
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);
 
-    const std::string get_value_uom(const char * key);
-    bool              get_value_info(JsonObject & root, const char * cmd, const int8_t id);
-    void              get_dv_info(JsonObject & json);
+    std::string get_value_uom(const char * key) const;
+    bool        get_value_info(JsonObject & root, const char * cmd, const int8_t id);
+    void        get_dv_info(JsonObject & json);
 
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT };
     bool generate_values(JsonObject & output, const uint8_t tag_filter, const bool nested, const uint8_t output_target);
@@ -236,25 +236,25 @@ class EMSdevice {
                                const __FlashStringHelper * const * name,
                                uint8_t                             uom);
 
-    void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
-    void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
-    void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value);
+    void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid) const;
+    void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid) const;
+    void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value) const;
 
-    void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0);
+    void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0) const;
 
-    bool is_visible(void * value_p);
-    void publish_value(void * value_p);
+    bool is_visible(const void * value_p) const;
+    void publish_value(void * value_p) const;
     void publish_all_values();
 
     void mqtt_ha_entity_config_create();
     void mqtt_ha_entity_config_remove();
 
-    const std::string telegram_type_name(std::shared_ptr<const Telegram> telegram);
+    std::string telegram_type_name(std::shared_ptr<const Telegram> telegram) const;
 
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);
-    bool is_fetch(uint16_t telegram_id);
-    bool has_telegram_id(uint16_t id);
+    bool is_fetch(uint16_t telegram_id) const;
+    bool has_telegram_id(uint16_t id) const;
     void ha_config_clear();
 
     bool ha_config_done() const {
@@ -345,7 +345,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_CRF         = 12; // CRF200 only monitor
 
     uint8_t count_entities();
-    bool    has_entities();
+    bool    has_entities() const;
 
   private:
     uint8_t     unique_id_;

@@ -113,6 +113,7 @@ COMPILE.cpp = $(CXX) $(CXX_STANDARD) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
 #----------------------------------------------------------------------
 # Targets
 #----------------------------------------------------------------------
+.PHONY: all
 all: $(OUTPUT)
 
 $(OUTPUT): $(OBJS)
@@ -138,6 +139,7 @@ cppcheck: $(SOURCES)
 run: $(OUTPUT)
 	@$<
 
+.PHONY: clean
 clean:
 	@$(RM) -r $(BUILD) $(OUTPUT)
 
