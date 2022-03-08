@@ -90,7 +90,7 @@ void WebLogService::maximum_log_messages(size_t count) {
         "local");
 }
 
-bool WebLogService::compact() {
+bool WebLogService::compact() const {
     return compact_;
 }
 
@@ -156,24 +156,24 @@ void WebLogService::loop() {
 }
 
 // convert time to real offset
-char * WebLogService::messagetime(char * out, const uint64_t t) {
+char * WebLogService::messagetime(char * out, const uint64_t t, const size_t bufsize) {
     if (!time_offset_) {
-        strcpy(out, uuid::log::format_timestamp_ms(t, 3).c_str());
+        strlcpy(out, uuid::log::format_timestamp_ms(t, 3).c_str(), bufsize);
     } else {
         time_t t1 = time_offset_ + t / 1000ULL;
-        strftime(out, 25, "%F %T", localtime(&t1));
-        snprintf(out, 25, "%s.%03d", out, (uint16_t)(t % 1000));
+        strftime(out, bufsize, "%F %T", localtime(&t1));
+        snprintf(out, bufsize, "%s.%03d", out, (uint16_t)(t % 1000));
     }
     return out;
 }
 
 // send to web eventsource
 void WebLogService::transmit(const QueuedLogMessage & message) {
-    DynamicJsonDocument jsonDocument = DynamicJsonDocument(EMSESP_JSON_SIZE_MEDIUM);
-    JsonObject          logEvent     = jsonDocument.to<JsonObject>();
-    char                time_string[25];
+    auto       jsonDocument = DynamicJsonDocument(EMSESP_JSON_SIZE_MEDIUM);
+    JsonObject logEvent     = jsonDocument.to<JsonObject>();
+    char       time_string[25];
 
-    logEvent["t"] = messagetime(time_string, message.content_->uptime_ms);
+    logEvent["t"] = messagetime(time_string, message.content_->uptime_ms, sizeof(time_string));
     logEvent["l"] = message.content_->level;
     logEvent["i"] = message.id_;
     logEvent["n"] = message.content_->name;
@@ -190,9 +190,9 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
 
 // send the complete log buffer to the API, not filtering on log level
 void WebLogService::fetchLog(AsyncWebServerRequest * request) {
-    MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN + 192 * log_messages_.size());
-    JsonObject                 root     = response->getRoot();
-    JsonArray                  log      = root.createNestedArray("events");
+    auto *     response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN + 192 * log_messages_.size());
+    JsonObject root     = response->getRoot();
+    JsonArray  log      = root.createNestedArray("events");
 
     log_message_id_tail_ = log_messages_.back().id_;
     last_transmit_       = uuid::get_uptime_ms();
@@ -200,7 +200,7 @@ void WebLogService::fetchLog(AsyncWebServerRequest * request) {
         JsonObject logEvent = log.createNestedObject();
         char       time_string[25];
 
-        logEvent["t"] = messagetime(time_string, message.content_->uptime_ms);
+        logEvent["t"] = messagetime(time_string, message.content_->uptime_ms, sizeof(time_string));
         logEvent["l"] = message.content_->level;
         logEvent["i"] = message.id_;
         logEvent["n"] = message.content_->name;
@@ -213,7 +213,7 @@ void WebLogService::fetchLog(AsyncWebServerRequest * request) {
 
 // sets the values like level after a POST
 void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant & json) {
-    if (not json.is<JsonObject>()) {
+    if (!json.is<JsonObject>()) {
         return;
     }
 
@@ -233,11 +233,11 @@ void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant & jso
 
 // return the current value settings after a GET
 void WebLogService::getValues(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
-    JsonObject          root     = response->getRoot();
-    root["level"]                = log_level();
-    root["max_messages"]         = maximum_log_messages();
-    root["compact"]              = compact();
+    auto *     response  = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
+    JsonObject root      = response->getRoot();
+    root["level"]        = log_level();
+    root["max_messages"] = maximum_log_messages();
+    root["compact"]      = compact();
     response->setLength();
     request->send(response);
 }

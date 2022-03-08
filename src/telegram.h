@@ -87,11 +87,12 @@ class Telegram {
     // reads a bit value from a given telegram position
     bool read_bitvalue(uint8_t & value, const uint8_t index, const uint8_t bit) const {
         uint8_t abs_index = (index - this->offset);
-        if (abs_index >= this->message_length) {
+        if ((abs_index >= this->message_length) || (abs_index > EMS_MAX_TELEGRAM_MESSAGE_LENGTH)) {
             return false; // out of bounds
         }
+
         uint8_t val = value;
-        value       = (uint8_t)(((this->message_data[abs_index]) >> (bit)) & 0x01);
+        value       = (uint8_t)(((this->message_data[abs_index]) >> bit) & 0x01);
         return (val != value);
     }
 
@@ -105,14 +106,17 @@ class Telegram {
     bool read_value(Value & value, const uint8_t index, uint8_t s = 0) const {
         uint8_t num_bytes = (!s) ? sizeof(Value) : s;
         // check for out of bounds, if so don't modify the value
-        if ((index < this->offset) || ((index - this->offset + num_bytes - 1) >= this->message_length)) {
+        auto msg_size = (index - this->offset + num_bytes - 1);
+        if ((index < this->offset) || (msg_size >= this->message_length) || (msg_size > EMS_MAX_TELEGRAM_MESSAGE_LENGTH)) {
             return false;
         }
-        auto val = value;
-        value    = 0;
+
+        Value val = value;
+        value     = 0;
         for (uint8_t i = 0; i < num_bytes; i++) {
             value = (value << 8) + this->message_data[index - this->offset + i]; // shift by byte
         }
+
         return (val != value);
     }
 
@@ -120,6 +124,7 @@ class Telegram {
         if ((index < this->offset) || ((index - this->offset) >= this->message_length)) {
             return false;
         }
+
         uint8_t val = value;
         value       = this->message_data[index - this->offset] - start;
         return (val != value);
@@ -265,7 +270,7 @@ class RxService : public EMSbus {
         }
     };
 
-    const std::deque<QueuedRxTelegram> queue() const {
+    std::deque<QueuedRxTelegram> queue() const {
         return rx_telegrams_;
     }
 
@@ -300,7 +305,7 @@ class TxService : public EMSbus {
     void     add(const uint8_t operation, const uint8_t * data, const uint8_t length, const uint16_t validateid, const bool front = false);
     void     read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0, const uint8_t length = 0);
     void     send_raw(const char * telegram_data);
-    void     send_poll();
+    void     send_poll() const;
     void     retry_tx(const uint8_t operation, const uint8_t * data, const uint8_t length);
     bool     is_last_tx(const uint8_t src, const uint8_t dest) const;
     uint16_t post_send_query();
@@ -318,7 +323,7 @@ class TxService : public EMSbus {
         telegram_last_post_send_query_ = type_id;
     }
 
-    uint16_t get_post_send_query() {
+    uint16_t get_post_send_query() const {
         return telegram_last_post_send_query_;
     }
 
@@ -362,14 +367,14 @@ class TxService : public EMSbus {
         if (telegram_read_fail_count_ == 0) {
             return 100; // all good, 100%
         }
-        return (100 - (uint8_t)((telegram_read_fail_count_ * 100 / (telegram_read_fail_count_ + telegram_read_count_))));
+        return (100 - (uint8_t)(telegram_read_fail_count_ * 100 / (telegram_read_fail_count_ + telegram_read_count_)));
     }
 
     uint8_t write_quality() const {
         if (telegram_write_fail_count_ == 0) {
             return 100; // all good, 100%
         }
-        return (100 - (uint8_t)((telegram_write_fail_count_ * 100 / (telegram_write_fail_count_ + telegram_write_count_))));
+        return (100 - (uint8_t)(telegram_write_fail_count_ * 100 / (telegram_write_fail_count_ + telegram_write_count_)));
     }
 
     void increment_telegram_read_fail_count() {
@@ -395,12 +400,12 @@ class TxService : public EMSbus {
         }
     };
 
-    const std::deque<QueuedTxTelegram> queue() const {
+    std::deque<QueuedTxTelegram> queue() const {
         return tx_telegrams_;
     }
 
-    bool tx_queue_empty() {
-        return tx_telegrams_.size() == 0;
+    bool tx_queue_empty() const {
+        return tx_telegrams_.empty();
     }
 
 #if defined(EMSESP_DEBUG)

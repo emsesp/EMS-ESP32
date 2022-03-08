@@ -354,7 +354,7 @@ bool DallasSensor::command_commands(const char * value, const int8_t id, JsonObj
 // creates JSON doc from values
 // returns false if there are no sensors
 bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject & output) {
-    if (sensors_.size() == 0) {
+    if (sensors_.empty()) {
         return false;
     }
 
@@ -435,7 +435,6 @@ void DallasSensor::publish_values(const bool force) {
         for (const auto & sensor : sensors_) {
             publish_sensor(sensor);
         }
-        // return;
     }
 
     DynamicJsonDocument doc(120 * num_sensors);
@@ -536,8 +535,8 @@ std::string DallasSensor::Sensor::name() const {
 bool DallasSensor::Sensor::apply_customization() {
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         auto sensors = settings.sensorCustomizations;
-        if (sensors.size() != 0) {
-            for (auto & sensor : sensors) {
+        if (sensors.empty()) {
+            for (const auto & sensor : sensors) {
 #if defined(EMSESP_DEBUG)
                 LOG_DEBUG(F("Loading customization for dallas sensor %s"), sensor.id_str.c_str());
 #endif

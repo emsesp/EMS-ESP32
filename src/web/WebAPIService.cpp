@@ -49,7 +49,7 @@ void WebAPIService::webAPIService_get(AsyncWebServerRequest * request) {
 // POST /{device}[/{hc|id}][/{name}]
 void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json) {
     // if no body then treat it as a secure GET
-    if (not json.is<JsonObject>()) {
+    if (!json.is<JsonObject>()) {
         webAPIService_get(request);
         return;
     }
@@ -63,10 +63,10 @@ void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVari
 // reporting back any errors
 void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     // check if the user has admin privileges (token is included and authorized)
-    bool is_admin;
+    bool is_admin = false;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         Authentication authentication = _securityManager->authenticateRequest(request);
-        is_admin                      = settings.notoken_api | AuthenticationPredicates::IS_ADMIN(authentication);
+        is_admin                      = settings.notoken_api || AuthenticationPredicates::IS_ADMIN(authentication);
     });
 
     // check for query parameters first, the old style from v2
@@ -97,8 +97,8 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     }
 
     // output json buffer
-    PrettyAsyncJsonResponse * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
-    JsonObject                output   = response->getRoot();
+    auto *     response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
+    JsonObject output   = response->getRoot();
 
     // call command
     uint8_t return_code = Command::process(request->url().c_str(), is_admin, input, output);

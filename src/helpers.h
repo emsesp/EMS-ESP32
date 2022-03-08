@@ -63,7 +63,7 @@ class Helpers {
     static bool hasValue(const int16_t & v);
     static bool hasValue(const uint16_t & v);
     static bool hasValue(const uint32_t & v);
-    static bool hasValue(char * v);
+    static bool hasValue(const char * v);
 
     static bool value2number(const char * v, int & value, const int min = -2147483648, const int max = 2147483647);
     static bool value2float(const char * v, float & value);

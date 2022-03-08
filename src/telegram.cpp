@@ -261,7 +261,7 @@ void TxService::start() {
 }
 
 // sends a 1 byte poll which is our own deviceID
-void TxService::send_poll() {
+void TxService::send_poll() const {
     //LOG_DEBUG(F("Ack %02X"),ems_bus_id() ^ ems_mask());
     if (tx_mode()) {
         EMSuart::send_poll(ems_bus_id() ^ ems_mask());
@@ -568,7 +568,7 @@ void TxService::send_raw(const char * telegram_data) {
     while (p != 0) {
         if ((p = strtok(nullptr, " ,"))) {
             strlcpy(value, p, sizeof(value));
-            uint8_t val   = (uint8_t)strtol(value, 0, 16);
+            auto val      = (uint8_t)strtol(value, 0, 16);
             data[++count] = val;
         }
     }

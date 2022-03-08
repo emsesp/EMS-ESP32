@@ -64,8 +64,8 @@ std::string Helpers::hextoa(const uint16_t value, bool prefix) {
 #ifdef EMSESP_STANDALONE
 // special function to work outside of ESP's libraries
 char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
-    if (NULL == ptr) {
-        return NULL;
+    if (nullptr == ptr) {
+        return nullptr;
     }
 
     unsigned long t     = 0;
@@ -191,7 +191,7 @@ char * Helpers::render_boolean(char * result, bool value) {
 
 // render for native char strings
 char * Helpers::render_value(char * result, const char * value, const int8_t format __attribute__((unused))) {
-    strcpy(result, value);
+    strcpy(result, value); // un-safe but we don't care
     return result;
 }
 
@@ -256,8 +256,8 @@ char * Helpers::render_value(char * result, const float value, const int8_t form
 
     uint32_t p[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
 
-    char *  ret   = result;
-    int32_t whole = (int32_t)value;
+    char * ret   = result;
+    auto   whole = (int32_t)value;
 
     itoa(whole, result, 10);
 
@@ -356,12 +356,11 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
     } else {
         strlcpy(result, ltoa(new_value * format * -1, s, 10), sizeof(s));
     }
-
 #else
     if (!format) {
         strlcpy(result, ultostr(s, new_value, 10), sizeof(s)); // format is 0
     } else {
-        strncpy(result, ultostr(s, new_value / format, 10), sizeof(s));
+        strlcpy(result, ultostr(s, new_value / format, 10), sizeof(s));
         strlcat(result, ".", sizeof(s));
         strncat(result, ultostr(s, new_value % format, 10), sizeof(s));
     }
@@ -481,7 +480,7 @@ bool Helpers::hasValue(const int8_t & v) {
     return (v != EMS_VALUE_INT_NOTSET);
 }
 
-bool Helpers::hasValue(char * v) {
+bool Helpers::hasValue(const char * v) {
     if ((v == nullptr) || (strlen(v) == 0)) {
         return false;
     }
@@ -508,7 +507,8 @@ bool Helpers::value2number(const char * v, int & value, const int min, const int
         value = 0;
         return false;
     }
-    value = atoi((char *)v);
+
+    value = atoi(v);
     if (value >= min && value <= max) {
         return true;
     }
@@ -521,12 +521,14 @@ bool Helpers::value2float(const char * v, float & value) {
     if ((v == nullptr) || (strlen(v) == 0)) {
         return false;
     }
+
     if (v[0] == '-' || v[0] == '.' || (v[0] >= '0' && v[0] <= '9')) {
-        value = atof((char *)v);
+        value = atof(v);
         return true;
     }
+
     if (v[0] == '+' && (v[1] == '.' || (v[1] >= '0' && v[1] <= '9'))) {
-        value = atof((char *)(v + 1));
+        value = atof(v + 1);
         return true;
     }
     return false;
@@ -584,12 +586,12 @@ bool Helpers::value2bool(const char * v, bool & value) {
 
     std::string bool_str = toLower(v); // convert to lower case
 
-    if ((bool_str == read_flash_string(F_(on))) || (bool_str == "1") or (bool_str == "true")) {
+    if ((bool_str == read_flash_string(F_(on))) || (bool_str == "1") || (bool_str == "true")) {
         value = true;
         return true; // is a bool
     }
 
-    if ((bool_str == read_flash_string(F_(off))) || (bool_str == "0") or (bool_str == "false")) {
+    if ((bool_str == read_flash_string(F_(off))) || (bool_str == "0") || (bool_str == "false")) {
         value = false;
         return true; // is a bool
     }

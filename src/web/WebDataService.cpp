@@ -70,13 +70,13 @@ void WebDataService::scan_devices(AsyncWebServerRequest * request) {
 // this is used in the dashboard and contains all ems device information
 // /coreData endpoint
 void WebDataService::core_data(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
-    JsonObject          root     = response->getRoot();
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    JsonObject root     = response->getRoot();
 
     // list is already sorted by device type
     // Ignore Contoller
     JsonArray devices = root.createNestedArray("devices");
-    for (auto & emsdevice : EMSESP::emsdevices) {
+    for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice && emsdevice->device_type() != EMSdevice::DeviceType::CONTROLLER) {
             JsonObject obj = devices.createNestedObject();
             obj["i"]       = emsdevice->unique_id();        // a unique id
@@ -102,8 +102,8 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
 // /sensorData endpoint
 // the "sensors" and "analogs" are arrays and must exist
 void WebDataService::sensor_data(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
-    JsonObject          root     = response->getRoot();
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    JsonObject root     = response->getRoot();
 
     // dallas sensors
     JsonArray sensors = root.createNestedArray("sensors");
@@ -158,23 +158,21 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
 // Compresses the JSON using MsgPack https://msgpack.org/index.html
 void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        MsgpackAsyncJsonResponse * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXXLARGE_DYN);
+        auto * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXXLARGE_DYN);
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice) {
-                if (emsdevice->unique_id() == json["id"]) {
-                    // wait max 2.5 sec for updated data (post_send_delay is 2 sec)
-                    for (uint16_t i = 0; i < (emsesp::TxService::POST_SEND_DELAY + 500) && EMSESP::wait_validate(); i++) {
-                        delay(1);
-                    }
-                    EMSESP::wait_validate(0); // reset in case of timeout
-#ifndef EMSESP_STANDALONE
-                    JsonObject output = response->getRoot();
-                    emsdevice->generate_values_web(output);
-#endif
-                    response->setLength();
-                    request->send(response);
-                    return;
+            if (emsdevice->unique_id() == json["id"]) {
+                // wait max 2.5 sec for updated data (post_send_delay is 2 sec)
+                for (uint16_t i = 0; i < (emsesp::TxService::POST_SEND_DELAY + 500) && EMSESP::wait_validate(); i++) {
+                    delay(1);
                 }
+                EMSESP::wait_validate(0); // reset in case of timeout
+#ifndef EMSESP_STANDALONE
+                JsonObject output = response->getRoot();
+                emsdevice->generate_values_web(output);
+#endif
+                response->setLength();
+                request->send(response);
+                return;
             }
         }
     }
@@ -195,46 +193,44 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
         // using the unique ID from the web find the real device type
         // id is the selected device
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice) {
-                if (emsdevice->unique_id() == unique_id) {
-                    // parse the command as it could have a hc or wwc prefixed, e.g. hc2/seltemp
-                    const char * cmd = dv["c"];                                // the command
-                    int8_t       id  = -1;                                     // default
-                    cmd              = Command::parse_command_string(cmd, id); // extract hc or wwc
+            if (emsdevice->unique_id() == unique_id) {
+                // parse the command as it could have a hc or wwc prefixed, e.g. hc2/seltemp
+                const char * cmd = dv["c"];                                // the command
+                int8_t       id  = -1;                                     // default
+                cmd              = Command::parse_command_string(cmd, id); // extract hc or wwc
 
-                    // create JSON for output
-                    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
-                    JsonObject          output   = response->getRoot();
+                // create JSON for output
+                auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
+                JsonObject output   = response->getRoot();
 
-                    // the data could be in any format, but we need string
-                    // authenticated is always true
-                    JsonVariant data        = dv["v"]; // the value in any format
-                    uint8_t     return_code = CommandRet::OK;
-                    uint8_t     device_type = emsdevice->device_type();
-                    if (data.is<const char *>()) {
-                        return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
-                    } else if (data.is<int>()) {
-                        char s[10];
-                        return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0), true, id, output);
-                    } else if (data.is<float>()) {
-                        char s[10];
-                        return_code = Command::call(device_type, cmd, Helpers::render_value(s, (float)data.as<float>(), 1), true, id, output);
-                    } else if (data.is<bool>()) {
-                        return_code = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true, id, output);
-                    }
-
-                    // write debug
-                    if (return_code != CommandRet::OK) {
-                        EMSESP::logger().err(F("Write command failed %s (%s)"), (const char *)output["message"], Command::return_code_string(return_code).c_str());
-                    } else {
-                        EMSESP::logger().debug(F("Write command successful"));
-                    }
-
-                    response->setCode((return_code == CommandRet::OK) ? 200 : 204);
-                    response->setLength();
-                    request->send(response);
-                    return;
+                // the data could be in any format, but we need string
+                // authenticated is always true
+                JsonVariant data        = dv["v"]; // the value in any format
+                uint8_t     return_code = CommandRet::OK;
+                uint8_t     device_type = emsdevice->device_type();
+                if (data.is<const char *>()) {
+                    return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
+                } else if (data.is<int>()) {
+                    char s[10];
+                    return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0), true, id, output);
+                } else if (data.is<float>()) {
+                    char s[10];
+                    return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<float>(), 1), true, id, output);
+                } else if (data.is<bool>()) {
+                    return_code = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true, id, output);
                 }
+
+                // write debug
+                if (return_code != CommandRet::OK) {
+                    EMSESP::logger().err(F("Write command failed %s (%s)"), (const char *)output["message"], Command::return_code_string(return_code).c_str());
+                } else {
+                    EMSESP::logger().debug(F("Write command successful"));
+                }
+
+                response->setCode((return_code == CommandRet::OK) ? 200 : 204);
+                response->setLength();
+                request->send(response);
+                return;
             }
         }
     }

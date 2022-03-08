@@ -32,7 +32,7 @@ class WebStatusService {
   private:
     void webStatusService(AsyncWebServerRequest * request);
     void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
-    void mDNS_start();
+    void mDNS_start() const;
 };
 
 } // namespace emsesp

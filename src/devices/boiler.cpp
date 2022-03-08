@@ -532,7 +532,7 @@ void Boiler::process_UBAParameterWW(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwDisinfectionTemp_, 8);
     has_bitupdate(telegram, wwChargeType_, 10, 0); // 0 = charge pump, 0xff = 3-way valve
 
-    uint8_t wwComfort;
+    uint8_t wwComfort = EMS_VALUE_UINT_NOTSET;
     telegram->read_value(wwComfort, 9);
     if (wwComfort == 0) {
         wwComfort = 0; // Hot
@@ -594,7 +594,7 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
 
     // read 3 char service code / installation status as appears on the display
     if ((telegram->message_length > 3) && (telegram->offset == 0)) {
-        char serviceCode[4];
+        char serviceCode[4] = {0};
         telegram->read_value(serviceCode[0], 1);
         serviceCode[0] = (serviceCode[0] == (char)0xF0) ? '~' : serviceCode[0];
         telegram->read_value(serviceCode[1], 2);
@@ -878,19 +878,19 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
     if (telegram->message_data[4] & 0x80) { // valid date
 
         static uint32_t lastCodeDate_ = 0; // last code date
-        char            code[3];
-        uint16_t        codeNo;
-        code[0] = telegram->message_data[0];
-        code[1] = telegram->message_data[1];
-        code[2] = 0;
+        char            code[3]       = {0};
+        uint16_t        codeNo        = EMS_VALUE_SHORT_NOTSET;
+        code[0]                       = telegram->message_data[0];
+        code[1]                       = telegram->message_data[1];
+        code[2]                       = 0;
         telegram->read_value(codeNo, 2);
-        uint16_t year  = (telegram->message_data[4] & 0x7F) + 2000;
-        uint8_t  month = telegram->message_data[5];
-        uint8_t  day   = telegram->message_data[7];
-        uint8_t  hour  = telegram->message_data[6];
-        uint8_t  min   = telegram->message_data[8];
-        uint32_t date  = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min;
-        uint16_t duration;
+        uint16_t year     = (telegram->message_data[4] & 0x7F) + 2000;
+        uint8_t  month    = telegram->message_data[5];
+        uint8_t  day      = telegram->message_data[7];
+        uint8_t  hour     = telegram->message_data[6];
+        uint8_t  min      = telegram->message_data[8];
+        uint32_t date     = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min;
+        uint16_t duration = EMS_VALUE_SHORT_NOTSET;
         telegram->read_value(duration, 9);
         // store only the newest code from telegrams 10 and 11
         if (date > lastCodeDate_) {
@@ -908,12 +908,12 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
         return;
     }
 
-    char     code[sizeof(lastCode_)];
-    uint16_t codeNo;
-    code[0] = telegram->message_data[5];
-    code[1] = telegram->message_data[6];
-    code[2] = telegram->message_data[7];
-    code[3] = 0;
+    char     code[sizeof(lastCode_)] = {0};
+    uint16_t codeNo                  = EMS_VALUE_SHORT_NOTSET;
+    code[0]                          = telegram->message_data[5];
+    code[1]                          = telegram->message_data[6];
+    code[2]                          = telegram->message_data[7];
+    code[3]                          = 0;
     telegram->read_value(codeNo, 8);
 
     // check for valid date, https://github.com/emsesp/EMS-ESP32/issues/204
@@ -1486,8 +1486,12 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
     return false;
 }
 
-//maintenance
+// maintenance
 bool Boiler::set_maintenance(const char * value, const int8_t id) {
+    if (value == nullptr) {
+        return false;
+    }
+
     std::string s;
     if (Helpers::value2string(value, s)) {
         if (s == Helpers::toLower(read_flash_string(F_(reset)))) {
@@ -1549,7 +1553,7 @@ bool Boiler::set_maintenancetime(const char * value, const int8_t id) {
 
 //maintenance
 bool Boiler::set_maintenancedate(const char * value, const int8_t id) {
-    if (strlen(value) == 10) { // date
+    if ((value != nullptr) && strlen(value) == 10) { // date
         uint8_t day   = (value[0] - '0') * 10 + (value[1] - '0');
         uint8_t month = (value[3] - '0') * 10 + (value[4] - '0');
         uint8_t year  = (uint8_t)(Helpers::atoint(&value[6]) - 2000);

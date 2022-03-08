@@ -38,7 +38,7 @@ class WebLogService : public uuid::log::Handler {
     void             log_level(uuid::log::Level level);
     size_t           maximum_log_messages() const;
     void             maximum_log_messages(size_t count);
-    bool             compact();
+    bool             compact() const;
     void             compact(bool compact);
     void             loop();
 
@@ -62,9 +62,10 @@ class WebLogService : public uuid::log::Handler {
     void fetchLog(AsyncWebServerRequest * request);
     void getValues(AsyncWebServerRequest * request);
 
-    char * messagetime(char * out, const uint64_t t);
+    char * messagetime(char * out, const uint64_t t, const size_t bufsize);
 
-    void                        setValues(AsyncWebServerRequest * request, JsonVariant & json);
+    void setValues(AsyncWebServerRequest * request, JsonVariant & json);
+
     AsyncCallbackJsonWebHandler setValues_; // for POSTs
 
     uint64_t                    last_transmit_        = 0;                // Last transmit time

@@ -271,8 +271,8 @@ void WebSettingsService::save() {
 // build the json profile to send back
 void WebSettingsService::board_profile(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM);
-        JsonObject          root     = response->getRoot();
+        auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM);
+        JsonObject root     = response->getRoot();
 
         if (json.containsKey("board_profile")) {
             String              board_profile = json["board_profile"];
