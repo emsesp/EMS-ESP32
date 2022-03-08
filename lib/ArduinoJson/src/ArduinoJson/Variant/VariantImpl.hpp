@@ -73,9 +73,11 @@ inline T VariantData::asFloat() const {
 inline String VariantData::asString() const {
   switch (type()) {
     case VALUE_IS_LINKED_STRING:
-      return String(_content.asString.data, _content.asString.size, true);
+      return String(_content.asString.data, _content.asString.size,
+                    String::Linked);
     case VALUE_IS_OWNED_STRING:
-      return String(_content.asString.data, _content.asString.size, false);
+      return String(_content.asString.data, _content.asString.size,
+                    String::Copied);
     default:
       return String();
   }
@@ -166,14 +168,15 @@ inline VariantConstRef operator|(VariantConstRef preferedValue,
 
 // Out of class definition to avoid #1560
 inline bool VariantRef::set(char value) const {
-  return set<signed char>(value);
+  return set(static_cast<signed char>(value));
 }
 
+// TODO: move somewhere else
 template <typename TAdaptedString, typename TCallback>
 bool CopyStringStoragePolicy::store(TAdaptedString str, MemoryPool *pool,
                                     TCallback callback) {
   const char *copy = pool->saveString(str);
-  String storedString(copy, str.size(), false);
+  String storedString(copy, str.size(), String::Copied);
   callback(storedString);
   return copy != 0;
 }

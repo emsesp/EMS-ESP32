@@ -40,7 +40,7 @@ class MsgPackDeserializer {
   template <typename TFilter>
   bool parseVariant(VariantData *variant, TFilter filter,
                     NestingLimit nestingLimit) {
-    uint8_t code = 0;
+    uint8_t code = 0;  // TODO: why do we need to initialize this variable?
     if (!readByte(code))
       return false;
 
@@ -481,7 +481,7 @@ class MsgPackDeserializer {
     T size;
     if (!readInteger(size))
       return false;
-    return skipBytes(size + 1);
+    return skipBytes(size + 1U);
   }
 
   MemoryPool *_pool;
