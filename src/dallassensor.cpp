@@ -535,7 +535,7 @@ std::string DallasSensor::Sensor::name() const {
 bool DallasSensor::Sensor::apply_customization() {
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         auto sensors = settings.sensorCustomizations;
-        if (sensors.empty()) {
+        if (!sensors.empty()) {
             for (const auto & sensor : sensors) {
 #if defined(EMSESP_DEBUG)
                 LOG_DEBUG(F("Loading customization for dallas sensor %s"), sensor.id_str.c_str());
