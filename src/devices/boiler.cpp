@@ -168,6 +168,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &curBurnPow_, DeviceValueType::UINT, nullptr, FL_(curBurnPow), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &burnStarts_, DeviceValueType::ULONG, nullptr, FL_(burnStarts), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &burnWorkMin_, DeviceValueType::TIME, nullptr, FL_(burnWorkMin), DeviceValueUOM::MINUTES);
+    register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &burn2WorkMin_, DeviceValueType::TIME, nullptr, FL_(burn2WorkMin), DeviceValueUOM::MINUTES);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &heatWorkMin_, DeviceValueType::TIME, nullptr, FL_(heatWorkMin), DeviceValueUOM::MINUTES);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &UBAuptime_, DeviceValueType::TIME, nullptr, FL_(UBAuptime), DeviceValueUOM::MINUTES);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &lastCode_, DeviceValueType::STRING, nullptr, FL_(lastCode), DeviceValueUOM::NONE);
@@ -629,9 +630,10 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, exhaustTemp_, 4);
     has_update(telegram, switchTemp_, 25); // only if there is a mixer module present
     has_update(telegram, heatingPumpMod_, 9);
-    has_update(telegram, burnStarts_, 10, 3);  // force to 3 bytes
-    has_update(telegram, burnWorkMin_, 13, 3); // force to 3 bytes
-    has_update(telegram, heatWorkMin_, 19, 3); // force to 3 bytes
+    has_update(telegram, burnStarts_, 10, 3);   // force to 3 bytes
+    has_update(telegram, burnWorkMin_, 13, 3);  // force to 3 bytes
+    has_update(telegram, burn2WorkMin_, 16, 3); // force to 3 bytes
+    has_update(telegram, heatWorkMin_, 19, 3);  // force to 3 bytes
 }
 
 /*
@@ -653,9 +655,10 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     has_bitupdate(telegram, heatingPump_, 2, 5);
     has_bitupdate(telegram, wwCirc_, 2, 7);
     has_update(telegram, exhaustTemp_, 6);
-    has_update(telegram, burnStarts_, 10, 3);  // force to 3 bytes
-    has_update(telegram, burnWorkMin_, 13, 3); // force to 3 bytes
-    has_update(telegram, heatWorkMin_, 19, 3); // force to 3 bytes
+    has_update(telegram, burnStarts_, 10, 3);   // force to 3 bytes
+    has_update(telegram, burnWorkMin_, 13, 3);  // force to 3 bytes
+    has_update(telegram, burn2WorkMin_, 16, 3); // force to 3 bytes
+    has_update(telegram, heatWorkMin_, 19, 3);  // force to 3 bytes
     has_update(telegram, heatingPumpMod_, 25);
     // temperature measurements at 4, see #620
 }
