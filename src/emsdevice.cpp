@@ -314,10 +314,10 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) const {
 }
 
 // list all the telegram type IDs for this device, outputting to a string (max size 200)
-char * EMSdevice::show_telegram_handlers(char * result, uint8_t handlers) {
+char * EMSdevice::show_telegram_handlers(char * result, const size_t len, const uint8_t handlers) {
     uint8_t size = telegram_functions_.size();
 
-    strlcpy(result, "", 200);
+    strlcpy(result, "", len);
 
     if (!size) {
         return result;
@@ -328,9 +328,9 @@ char * EMSdevice::show_telegram_handlers(char * result, uint8_t handlers) {
         if (handlers == Handlers::ALL || (handlers == Handlers::RECEIVED && tf.received_ && !tf.fetch_)
             || (handlers == Handlers::FETCHED && tf.received_ && tf.fetch_) || (handlers == Handlers::PENDING && !tf.received_ && !tf.fetch_)) {
             if (i++ > 0) {
-                strlcat(result, " ", 200);
+                strlcat(result, " ", len);
             }
-            strlcat(result, Helpers::hextoa(tf.telegram_type_id_, true).c_str(), 200);
+            strlcat(result, Helpers::hextoa(tf.telegram_type_id_, true).c_str(), len);
         }
     }
 

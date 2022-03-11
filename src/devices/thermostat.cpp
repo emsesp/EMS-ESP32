@@ -138,7 +138,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(set_typeids[i], F("RC300Set"), false, MAKE_PF_CB(process_RC300Set));
             register_telegram_type(summer_typeids[i], F("RC300Summer"), false, MAKE_PF_CB(process_RC300Summer));
             register_telegram_type(curve_typeids[i], F("RC300Curves"), false, MAKE_PF_CB(process_RC300Curve));
-            register_telegram_type(summer2_typeids[i], F("RC300Summer2"), true, MAKE_PF_CB(process_RC300Summer2));
+            register_telegram_type(summer2_typeids[i], F("RC300Summer2"), false, MAKE_PF_CB(process_RC300Summer2));
         }
         register_telegram_type(0x2F5, F("RC300WWmode"), true, MAKE_PF_CB(process_RC300WWmode));
         register_telegram_type(0x31B, F("RC300WWtemp"), true, MAKE_PF_CB(process_RC300WWtemp));
@@ -364,6 +364,9 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     }
     if (timer2_typeids.size()) {
         toggle_fetch(timer2_typeids[hc_num - 1], toggle_);
+    }
+    if (summer2_typeids.size()) {
+        toggle_fetch(summer2_typeids[hc_num - 1], toggle_);
     }
 
     return new_hc; // return back point to new HC object

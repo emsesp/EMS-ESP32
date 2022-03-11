@@ -1193,16 +1193,16 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
                 obj["product id"] = emsdevice->product_id();
                 obj["version"]    = emsdevice->version();
                 obj["entities"]   = emsdevice->count_entities();
-                char result[200];
-                (void)emsdevice->show_telegram_handlers(result, EMSdevice::Handlers::RECEIVED);
+                char result[250];
+                (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
                 if (result[0] != '\0') {
                     obj["handlers received"] = result; // don't show handlers if there aren't any
                 }
-                (void)emsdevice->show_telegram_handlers(result, EMSdevice::Handlers::FETCHED);
+                (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::FETCHED);
                 if (result[0] != '\0') {
                     obj["handlers fetched"] = result;
                 }
-                (void)emsdevice->show_telegram_handlers(result, EMSdevice::Handlers::PENDING);
+                (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::PENDING);
                 if (result[0] != '\0') {
                     obj["handlers pending"] = result;
                 }
