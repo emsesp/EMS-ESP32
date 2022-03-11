@@ -1281,7 +1281,6 @@ void EMSESP::start() {
 
     esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
-    LOG_INFO(F("Starting EMS-ESP version %s (hostname: %s)"), EMSESP_APP_VERSION, system_.hostname().c_str()); // welcome message
     LOG_INFO(F("Last system reset reason Core0: %s, Core1: %s"), system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
     webSettingsService.begin();      // load EMS-ESP Application settings...
@@ -1296,8 +1295,10 @@ void EMSESP::start() {
     system_.check_upgrade(); // do any system upgrades
 
     // start all the EMS-ESP services
-    mqtt_.start();         // mqtt init
-    system_.start();       // starts commands, led, adc, button, network, syslog & uart
+    mqtt_.start();   // mqtt init
+    system_.start(); // starts commands, led, adc, button, network, syslog & uart
+    LOG_INFO(F("Starting EMS-ESP version %s (hostname: %s)"), EMSESP_APP_VERSION, system_.hostname().c_str()); // welcome message
+
     shower_.start();       // initialize shower timer and shower alert
     dallassensor_.start(); // Dallas external sensors
     analogsensor_.start(); // Analog external sensors
