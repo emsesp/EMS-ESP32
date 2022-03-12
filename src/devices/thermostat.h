@@ -29,7 +29,7 @@ class Thermostat : public EMSdevice {
     class HeatingCircuit {
       public:
         HeatingCircuit(const uint8_t hc_num, const uint8_t model)
-            : hc_num_(hc_num)
+            : rc30n_wantedmode(0xff), hc_num_(hc_num)
             , model_(model) {
         }
         ~HeatingCircuit() = default;
@@ -73,6 +73,8 @@ class Thermostat : public EMSdevice {
         // RC 10
         uint8_t  reducehours;   // night reduce duration
         uint16_t reduceminutes; // remaining minutes to night->day
+	// RC30_N
+	uint8_t rc30n_wantedmode;
 
         uint8_t hc_num() const {
             return hc_num_;

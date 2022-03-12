@@ -1110,8 +1110,12 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(hc->holidaytemp, 3));   // is * 2
     has_update(telegram->read_value(hc->roominfluence, 4)); // is * 1
     has_update(telegram->read_value(hc->offsettemp, 6));    // is * 2
-    has_update(telegram->read_value(hc->mode, 7));          // night, day, auto
-    hc->hamode = hc->mode;                                  // set special HA mode
+
+    bool m=telegram->read_value(hc->mode, 7);
+    has_update(m);          // night, day, auto
+    if (m)
+        hc->rc30n_wantedmode=0xff;
+    hc->hamode = hc->mode;                                    // set special HA mode
 
     has_update(telegram->read_value(hc->wwprio, 21));         // 0xFF for on
     has_update(telegram->read_value(hc->summertemp, 22));     // is * 1
@@ -1874,6 +1878,8 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         return false;
     }
 
+    hc->rc30n_wantedmode=0xff;
+
     uint8_t  set_mode_value, offset;
     uint16_t validate_typeid = 0;
     uint8_t  hc_p            = hc->hc_num() - 1;
@@ -1884,6 +1890,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
     case HeatingCircuit::Mode::NIGHT:
     case HeatingCircuit::Mode::OFF:
         set_mode_value = 0;
+        hc->rc30n_wantedmode=HeatingCircuit::Mode::NIGHT;
         break;
 
     case HeatingCircuit::Mode::DAY:
@@ -1891,6 +1898,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
     case HeatingCircuit::Mode::MANUAL:
     case HeatingCircuit::Mode::NOFROST:
         set_mode_value = 1;
+        hc->rc30n_wantedmode=HeatingCircuit::Mode::DAY;
         break;
 
     default:
@@ -2433,7 +2441,12 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                 }
             } else {
                 uint8_t modetype = hc->get_mode_type();
-                offset           = (modetype == HeatingCircuit::Mode::NIGHT) ? EMS_OFFSET_RC35Set_temp_night : EMS_OFFSET_RC35Set_temp_day;
+		if (hc->rc30n_wantedmode==HeatingCircuit::Mode::NIGHT)
+			offset = EMS_OFFSET_RC35Set_temp_night;
+		else if (hc->rc30n_wantedmode==HeatingCircuit::Mode::DAY)
+			offset = EMS_OFFSET_RC35Set_temp_day;
+		else 
+			offset = (modetype == HeatingCircuit::Mode::NIGHT) ? EMS_OFFSET_RC35Set_temp_night : EMS_OFFSET_RC35Set_temp_day;
             }
             break;
         }
