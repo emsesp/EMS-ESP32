@@ -37,7 +37,6 @@ class Helpers {
     static char * render_value(char * result, const uint32_t value, const int8_t format, const uint8_t fahrenheit = 0);
     static char * render_value(char * result, const int16_t value, const int8_t format, const uint8_t fahrenheit = 0);
     static char * render_value(char * result, const int32_t value, const int8_t format, const uint8_t fahrenheit = 0);
-    // static char * render_value(char * result, const char * value, const int8_t format);
     static char * render_boolean(char * result, bool value);
 
     static char *      hextoa(char * result, const uint8_t value);
