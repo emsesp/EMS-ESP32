@@ -26,6 +26,7 @@
 - remove MQTT retained configs if discovery is disabled
 - timeout 10 min for MQTT-QoS wait
 - Moduline 300 auto-temperatures T1-T4, RC300 romminfluencefactor
+- RC35 parameters [#392](https://github.com/emsesp/EMS-ESP32/issues/392)[#398](https://github.com/emsesp/EMS-ESP32/issues/398)
 
 ### Fixed
 

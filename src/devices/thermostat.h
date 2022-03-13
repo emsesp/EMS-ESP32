@@ -62,12 +62,16 @@ class Thermostat : public EMSdevice {
         uint8_t minflowtemp;
         uint8_t maxflowtemp;
         uint8_t reducemode;
+        uint8_t nofrostmode;
         uint8_t program;
         uint8_t controlmode;
         uint8_t control;
         uint8_t pause;
         uint8_t party;
         int8_t  noreducetemp; // signed -20°C to +10°C
+        int8_t  reducetemp;
+        int8_t  vacreducetemp;
+        uint8_t vacreducemode;
         uint8_t wwprio;
         uint8_t fastHeatup;
         char    holiday[26];
@@ -120,6 +124,8 @@ class Thermostat : public EMSdevice {
             ROOMINFLUENCE,
             TEMPAUTO,
             NOREDUCE,
+            REDUCE,
+            VACREDUCE,
             ON,
             DAYLOW,
             DAYMID,
@@ -245,6 +251,12 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC35Set_targetflowtemp     = 14; // target flow temperature
     static constexpr uint8_t EMS_OFFSET_RC35Set_seltemp            = 37; // selected temp
     static constexpr uint8_t EMS_OFFSET_RC35Set_noreducetemp       = 38; // temp to stop reducing
+    static constexpr uint8_t EMS_OFFSET_RC35Set_reducetemp         = 39; // temp reducing/hold
+    static constexpr uint8_t EMS_OFFSET_RC35Set_vacreducetemp      = 40; // temp reducing/hold in vacations
+    static constexpr uint8_t EMS_OFFSET_RC35Set_vacreducemode      = 41; // reduce mode in vacations
+    static constexpr uint8_t EMS_OFFSET_RC35Set_reducemode         = 25; // reduce mode in normal operation
+    static constexpr uint8_t EMS_OFFSET_RC35Set_nofrostmode        = 28; // 0-off, 1-room, 2-outdoor
+    static constexpr uint8_t EMS_OFFSET_RC35Set_control            = 26; // 0-off, 1-RC20, 2-RC3x
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_offset        = 6;
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_flowoffset    = 24;
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_design        = 17;
@@ -368,6 +380,11 @@ class Thermostat : public EMSdevice {
     bool set_manualtemp(const char * value, const int8_t id);
     bool set_tempautotemp(const char * value, const int8_t id);
     bool set_noreducetemp(const char * value, const int8_t id);
+    bool set_reducetemp(const char * value, const int8_t id);
+    bool set_vacreducetemp(const char * value, const int8_t id);
+    bool set_vacreducemode(const char * value, const int8_t id);
+    bool set_nofrostmode(const char * value, const int8_t id);
+
     bool set_remotetemp(const char * value, const int8_t id);
     bool set_roominfluence(const char * value, const int8_t id);
     bool set_roominfl_factor(const char * value, const int8_t id);
