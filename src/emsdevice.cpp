@@ -1034,10 +1034,8 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
         //  3. it must match the given tag filter or have an empty tag
         bool conditions = ((tag_filter == DeviceValueTAG::TAG_NONE) || (tag_filter == dv.tag)) && dv.has_state(DeviceValueState::DV_ACTIVE);
         //  4. for MQTT we want to always show the special HA entities (they have an empty fullname)
-        bool visible = ((dv.has_state(DeviceValueState::DV_VISIBLE)) || ((output_target == OUTPUT_TARGET::MQTT) && (!dv.full_name)));
-        conditions &= visible;
-
-        if (conditions) {
+        bool visible = ((dv.has_state(DeviceValueState::DV_VISIBLE) && dv.full_name) || ((output_target == OUTPUT_TARGET::MQTT) && (!dv.full_name)));
+        if (conditions && visible) {
             has_values = true; // flagged if we actually have data
 
             // we have a tag if it matches the filter given, and that the tag name is not empty/""
