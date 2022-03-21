@@ -1478,12 +1478,12 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
     if (num == 1) {
         // LOG_INFO(F("Reset boiler maintenance message"));
         write_command(0x05, 0x08, 0xFF, 0x1C);
-        has_update(reset_);
+        has_update(&reset_);
         return true;
     } else if (num == 2) {
         // LOG_INFO(F("Reset boiler error message"));
         write_command(0x05, 0x00, 0x5A); // error reset
-        has_update(reset_);
+        has_update(&reset_);
         return true;
     }
     return false;
