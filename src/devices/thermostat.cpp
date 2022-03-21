@@ -2001,6 +2001,14 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
     // post validate is the corresponding monitor or set type IDs as they can differ per model
     write_command(set_typeid, offset, set_mode_value, validate_typeid);
 
+    // set hc->mode temporary until validate is received
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_RC10) {
+        hc->mode = set_mode_value >> 1;
+    } else {
+        hc->mode = set_mode_value;
+    }
+    has_update(&hc->mode);
+
     return true;
 }
 
