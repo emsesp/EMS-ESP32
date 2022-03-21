@@ -128,6 +128,7 @@ class EMSESP {
 
     static void send_raw_telegram(const char * data);
     static bool device_exists(const uint8_t device_id);
+    static bool cmd_is_readonly(const uint8_t device_type, const char * cmd, const int8_t id);
 
     static uint8_t count_devices(const uint8_t device_type);
     static uint8_t count_devices();

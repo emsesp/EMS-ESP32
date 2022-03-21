@@ -379,8 +379,8 @@ void Thermostat::add_ha_climate(std::shared_ptr<HeatingCircuit> hc) const {
         return;
     }
 
-    if (Helpers::hasValue(hc->selTemp) && is_visible(&hc->selTemp)) {
-        if (Helpers::hasValue(hc->roomTemp) && is_visible(&hc->roomTemp)) {
+    if (Helpers::hasValue(hc->selTemp) && is_readable(&hc->selTemp)) {
+        if (Helpers::hasValue(hc->roomTemp) && is_readable(&hc->roomTemp)) {
             hc->climate = 1;
         } else {
             hc->climate = 0;

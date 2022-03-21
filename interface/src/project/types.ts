@@ -150,7 +150,7 @@ export interface DeviceEntity {
 
 export interface ExcludeEntities {
   id: number;
-  entity_ids: number[];
+  entity_ids: string[];
 }
 
 export interface UniqueID {
