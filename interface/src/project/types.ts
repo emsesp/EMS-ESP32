@@ -133,6 +133,8 @@ export interface DeviceValue {
   l: string[]; // list
   h?: string; // help text
   s?: string; // steps for up/down
+  m?: string; // min
+  x?: string; // max
 }
 
 export interface DeviceData {

@@ -239,7 +239,7 @@ const DashboardData: FC = () => {
                 sx={{ width: '30ch' }}
                 type={deviceValue.u ? 'number' : 'text'}
                 onChange={updateValue(setDeviceValue)}
-                inputProps={{ step: deviceValue.s }}
+                inputProps={deviceValue.u ? { min: deviceValue.m, max: deviceValue.x, step: deviceValue.s } : {}}
                 InputProps={{
                   startAdornment: <InputAdornment position="start">{DeviceValueUOM_s[deviceValue.u]}</InputAdornment>
                 }}

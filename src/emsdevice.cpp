@@ -741,6 +741,11 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                     } else if (divider < 0) {
                         obj["s"] = Helpers::render_value(s, (-1) * divider, 0);
                     }
+                    int16_t dv_set_min, dv_set_max;
+                    if (dv.get_min_max(dv_set_min, dv_set_max)) {
+                        obj["m"] = Helpers::render_value(s, dv_set_min, 0);
+                        obj["x"] = Helpers::render_value(s, dv_set_max, 0);
+                    }
                 }
             }
         }
