@@ -1205,14 +1205,14 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
-    if (telegram->message_data[7] & 0x0C) { // date and time not valid
-        set_datetime("ntp", -1);            // set from NTP
+    if ((telegram->message_data[7] & 0x0C) && has_command(&dateTime_)) { // date and time not valid
+        set_datetime("ntp", -1);                                         // set from NTP
         return;
     }
 
     // render date to HH:MM:SS DD/MM/YYYY
     // had to create separate buffers because of how printf works
-    char date[25];
+    char date[sizeof(dateTime_)];
     char buf1[6];
     char buf2[6];
     char buf3[6];
@@ -1231,6 +1231,31 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
              Helpers::itoa((telegram->message_data[0] & 0x7F) + 2000, buf6) // year
     );
     has_update(dateTime_, date, sizeof(dateTime_));
+
+    // check clock
+    time_t now    = time(nullptr);
+    tm *   tm_    = localtime(&now);
+    bool   ntp_   = tm_->tm_year > 110; // year 2010 and up, time is valid
+    tm_->tm_year  = telegram->message_data[0] + 100;
+    tm_->tm_mon   = telegram->message_data[1] - 1;
+    tm_->tm_mday  = telegram->message_data[3];
+    tm_->tm_hour  = telegram->message_data[2];
+    tm_->tm_min   = telegram->message_data[4];
+    tm_->tm_sec   = telegram->message_data[5];
+    tm_->tm_isdst = telegram->message_data[7] & 0x01;
+    time_t ttime  = mktime(tm_);           // thermostat time
+    if (ntp_ && has_command(&dateTime_)) { // have NTP time and command
+        double difference = difftime(now, ttime);
+        if (difference > 15 || difference < -15) {
+            set_datetime("ntp", -1); // set from NTP
+            LOG_INFO(F("thermostat time correction from ntp"));
+        }
+    }
+    if (!ntp_ && tm_->tm_year > 110) { // emsesp clock not set, but thermostat clock
+        struct timeval newnow = {.tv_sec = ttime};
+        settimeofday(&newnow, nullptr);
+        LOG_INFO(F("ems-esp time set from thermostat"));
+    }
 }
 
 // process_RCError - type 0xA2 - error message - 14 bytes long
