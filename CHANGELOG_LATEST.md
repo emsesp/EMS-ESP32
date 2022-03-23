@@ -26,7 +26,10 @@
 - remove MQTT retained configs if discovery is disabled
 - timeout 10 min for MQTT-QoS wait
 - Moduline 300 auto-temperatures T1-T4, RC300 romminfluencefactor
-- RC35 parameters [#392](https://github.com/emsesp/EMS-ESP32/issues/392)[#398](https://github.com/emsesp/EMS-ESP32/issues/398)
+- RC35 parameters [#392](https://github.com/emsesp/EMS-ESP32/issues/392), [#398](https://github.com/emsesp/EMS-ESP32/issues/398)
+- sync time with thermostat [#386](https://github.com/emsesp/EMS-ESP32/issues/386), [#408](https://github.com/emsesp/EMS-ESP32/issues/408)
+- set mode has immediate effect [#395](https://github.com/emsesp/EMS-ESP32/issues/395)
+- min/max in web value setting
 
 ### Fixed
 
@@ -44,6 +47,7 @@
 - Non-nested MQTT would corrupt the json [#354](https://github.com/emsesp/EMS-ESP32/issues/354)
 - Burner selected max power can have a value higher than 100% [#314](https://github.com/emsesp/EMS-ESP32/issues/314)
 - some missing fahrenheit calculations
+- limited number of exclusions [#339](https://github.com/emsesp/EMS-ESP32/issues/339)
 
 ### Changed
 
@@ -59,6 +63,7 @@
 - Wired renamed to Ethernet
 - removed system/pin command, new commands in analogsensors
 - system/info device-info split to name/version/brand
+- exclude list uses short-names, possible flags for web/api/mqtt excludes, readonly and favorite (selection not yet implemented)
 
 ## **BREAKING CHANGES:**
 
@@ -70,3 +75,4 @@
   - Boiler `ww` tag renamed to `dhw`. Any custom Home Assistant lovelace dashboards will need updating.
   - Renamed description of `wwtapactivated` to "turn on/off DHW". Otherwise would have looked like "boiler_dhw_turn_on_off_dhw" in HA.
   - `/api/system/info` endpoint has updated keys. Now lowercase, no underscores and not capitalized. Replace "handlers" with "handlers received", "handlers fetched" and "handlers pending".
+  - exclude list changed from 3.4.0b8 to 3.4.0b9 and has to be updated by user.
