@@ -1253,7 +1253,9 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     }
     if (!ntp_ && tm_->tm_year > 110) { // emsesp clock not set, but thermostat clock
         struct timeval newnow = {.tv_sec = ttime};
+#ifndef EMSESP_STANDALONE
         settimeofday(&newnow, nullptr);
+#endif
         LOG_INFO(F("ems-esp time set from thermostat"));
     }
 }

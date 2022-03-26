@@ -609,8 +609,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // toggle mode
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == 1) { // boiler
-                uint8_t entity_id = 47;        // wwseltemp
-                emsdevice->exclude_entity(entity_id);
+                emsdevice->mask_entity("07wwseltemp");
                 break;
             }
         }

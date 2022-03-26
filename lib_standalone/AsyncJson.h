@@ -90,8 +90,8 @@ class PrettyAsyncJsonResponse {
 class MsgpackAsyncJsonResponse {
   protected:
     DynamicJsonDocument _jsonBuffer;
-    JsonVariant _root;
-    bool        _isValid;
+    JsonVariant         _root;
+    bool                _isValid;
 
   public:
     MsgpackAsyncJsonResponse(bool isArray = false, size_t maxJsonBufferSize = DYNAMIC_JSON_DOCUMENT_SIZE)
@@ -187,6 +187,7 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
     ArJsonRequestHandlerFunction _onRequest;
     size_t                       _contentLength;
     size_t                       _maxContentLength;
+    size_t                       _maxJsonBufferSize;
 
   public:
     AsyncCallbackJsonWebHandler(const String & uri, ArJsonRequestHandlerFunction onRequest, size_t maxJsonBufferSize = DYNAMIC_JSON_DOCUMENT_SIZE)
@@ -201,6 +202,9 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
     }
     void setMaxContentLength(int maxContentLength) {
         _maxContentLength = maxContentLength;
+    }
+    void setMaxJsonBufferSize(int maxJsonBufferSize) {
+        _maxJsonBufferSize = maxJsonBufferSize;
     }
     void onRequest(ArJsonRequestHandlerFunction fn) {
         _onRequest = fn;

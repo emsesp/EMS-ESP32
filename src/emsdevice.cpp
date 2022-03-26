@@ -768,7 +768,7 @@ void EMSdevice::mask_entity(std::string entity_id) {
         std::string entity = dv.tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(dv.short_name) : tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
         if (entity == entity_id.substr(2)) {
 #if defined(EMSESP_USE_SERIAL)
-            Serial.print("exclude_entity() Removing Visible for device value: ");
+            Serial.print("mask_entity() Removing Visible for device value: ");
             Serial.println(read_flash_string(dv.full_name).c_str());
 #endif
             dv.state = (dv.state & 0x0F) | (flag << 4); // set state high bits to flag, turn off active and ha flags
