@@ -112,9 +112,13 @@ class DeviceValue {
     enum DeviceValueState : uint8_t {
         DV_DEFAULT           = 0,        // 0 - does not yet have a value
         DV_ACTIVE            = (1 << 0), // 1 - has a validated real value
-        DV_VISIBLE           = (1 << 1), // 2 - shown on web, console and on MQTT payload. Otherwise hidden
-        DV_HA_CONFIG_CREATED = (1 << 2), // 4 - set if the HA config topic has been created
-        DV_HA_CLIMATE_NO_RT  = (1 << 3)  // 8 - climate created without roomTemp
+        DV_HA_CONFIG_CREATED = (1 << 1), // 2 - set if the HA config topic has been created
+        DV_HA_CLIMATE_NO_RT  = (1 << 2), // 3 - climate created without roomTemp
+                                         // high nibble as mask for exclusions
+        DV_WEB_EXCLUDE      = (1 << 4),  // 16 - not shown on web
+        DV_API_MQTT_EXCLUDE = (1 << 5),  // 32 - not shown on mqtt, API
+        DV_READONLY         = (1 << 6),  // 64 - read only
+        DV_FAVORITE         = (1 << 7)   // 128 - sort to front
     };
 
     uint8_t                             device_type;  // EMSdevice::DeviceType

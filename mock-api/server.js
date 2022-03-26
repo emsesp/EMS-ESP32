@@ -926,7 +926,7 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
 })
 
 rest_server.post(EMSESP_EXCLUDE_ENTITIES_ENDPOINT, (req, res) => {
-  console.log('exclude list for productid ' + req.body.product_id + ' device_id ' + req.body.device_id + ' entities:')
+  console.log('exclude list for unique id ' + req.body.id + ' and entities:')
   console.log(req.body.entity_ids)
   res.sendStatus(200)
 })

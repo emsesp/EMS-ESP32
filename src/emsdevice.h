@@ -183,8 +183,8 @@ class EMSdevice {
     char * show_telegram_handlers(char * result, const size_t len, const uint8_t handlers);
     void   show_mqtt_handlers(uuid::console::Shell & shell) const;
     void   list_device_entries(JsonObject & output) const;
-    void   exclude_entity(uint8_t entity_id);
-    void   reset_exclude_entities();
+    void   mask_entity(std::string entity_id);
+    void   reset_entity_masks();
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
 
@@ -195,7 +195,7 @@ class EMSdevice {
     bool        get_value_info(JsonObject & root, const char * cmd, const int8_t id);
     void        get_dv_info(JsonObject & json);
 
-    enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT };
+    enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT, CONSOLE };
     bool generate_values(JsonObject & output, const uint8_t tag_filter, const bool nested, const uint8_t output_target);
     void generate_values_web(JsonObject & output);
     void generate_values_web_all(JsonArray & output);
@@ -242,7 +242,9 @@ class EMSdevice {
 
     void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0) const;
 
-    bool is_visible(const void * value_p) const;
+    bool is_readable(const void * value_p) const;
+    bool is_readonly(const std::string & cmd, const int8_t id) const;
+    bool has_command(const void * value_p) const;
     void publish_value(void * value_p) const;
     void publish_all_values();
 

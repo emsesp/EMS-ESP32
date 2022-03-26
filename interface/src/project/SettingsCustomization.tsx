@@ -138,7 +138,7 @@ const SettingsCustomization: FC = () => {
 
   const saveCustomization = async () => {
     if (deviceEntities && selectedDevice) {
-      const exclude_entities = deviceEntities.filter((de) => de.x).map((new_de) => new_de.i);
+      const exclude_entities = deviceEntities.filter((de) => de.x).map((new_de) => "07" + new_de.s);
       try {
         const response = await EMSESP.writeExcludeEntities({
           id: selectedDevice,

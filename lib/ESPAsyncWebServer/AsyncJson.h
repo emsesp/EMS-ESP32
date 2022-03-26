@@ -173,7 +173,7 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
     ArJsonRequestHandlerFunction _onRequest;
     size_t                       _contentLength;
 #ifndef ARDUINOJSON_5_COMPATIBILITY
-    const size_t maxJsonBufferSize;
+    size_t _maxJsonBufferSize;
 #endif
     size_t _maxContentLength;
 
@@ -182,7 +182,7 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
         : _uri(uri)
         , _method(HTTP_POST | HTTP_PUT | HTTP_PATCH)
         , _onRequest(onRequest)
-        , maxJsonBufferSize(maxJsonBufferSize)
+        , _maxJsonBufferSize(maxJsonBufferSize)
         , _maxContentLength(16384) {
     }
 
@@ -191,6 +191,9 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
     }
     void setMaxContentLength(int maxContentLength) {
         _maxContentLength = maxContentLength;
+    }
+    void setMaxJsonBufferSize(size_t maxJsonBufferSize) {
+        _maxJsonBufferSize = maxJsonBufferSize;
     }
     void onRequest(ArJsonRequestHandlerFunction fn) {
         _onRequest = fn;
@@ -216,7 +219,7 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
     virtual void handleRequest(AsyncWebServerRequest * request) override final {
         if (_onRequest) {
             if (request->_tempObject != NULL) {
-                DynamicJsonDocument  jsonBuffer(this->maxJsonBufferSize);
+                DynamicJsonDocument  jsonBuffer(this->_maxJsonBufferSize);
                 DeserializationError error = deserializeJson(jsonBuffer, (uint8_t *)(request->_tempObject));
                 if (!error) {
                     JsonVariant json = jsonBuffer.as<JsonVariant>();

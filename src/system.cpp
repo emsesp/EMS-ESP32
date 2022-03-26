@@ -1054,15 +1054,15 @@ bool System::command_customizations(const char * value, const int8_t id, JsonObj
         }
 
         // exclude entities
-        JsonArray exclude_entitiesJson = node.createNestedArray("exclude_entities");
+        JsonArray mask_entitiesJson = node.createNestedArray("masked_entities");
         for (const auto & entityCustomization : settings.entityCustomizations) {
-            JsonObject entityJson    = exclude_entitiesJson.createNestedObject();
+            JsonObject entityJson    = mask_entitiesJson.createNestedObject();
             entityJson["product_id"] = entityCustomization.product_id;
             entityJson["device_id"]  = entityCustomization.device_id;
 
-            JsonArray exclude_entityJson = entityJson.createNestedArray("entity_ids");
-            for (uint8_t entity_id : entityCustomization.entity_ids) {
-                exclude_entityJson.add(entity_id);
+            JsonArray mask_entityJson = entityJson.createNestedArray("entities");
+            for (std::string entity_id : entityCustomization.entity_ids) {
+                mask_entityJson.add(entity_id);
             }
         }
     });

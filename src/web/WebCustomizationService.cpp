@@ -46,7 +46,8 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
                securityManager->wrapRequest(std::bind(&WebCustomizationService::reset_customization, this, _1), AuthenticationPredicates::IS_ADMIN));
 
     _exclude_entities_handler.setMethod(HTTP_POST);
-    _exclude_entities_handler.setMaxContentLength(1024);
+    _exclude_entities_handler.setMaxContentLength(2048);
+    _exclude_entities_handler.setMaxJsonBufferSize(2048);
     server->addHandler(&_exclude_entities_handler);
 
     _device_entities_handler.setMethod(HTTP_POST);
@@ -85,7 +86,7 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
         entityJson["device_id"]  = entityCustomization.device_id;
 
         JsonArray exclude_entityJson = entityJson.createNestedArray("entity_ids");
-        for (uint8_t entity_id : entityCustomization.entity_ids) {
+        for (std::string entity_id : entityCustomization.entity_ids) {
             exclude_entityJson.add(entity_id);
         }
     }
@@ -132,7 +133,7 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
             new_entry.device_id  = exclude_entities["device_id"];
 
             for (const JsonVariant exclude_entity_id : exclude_entities["entity_ids"].as<JsonArray>()) {
-                new_entry.entity_ids.push_back(exclude_entity_id.as<uint8_t>()); // add entity list
+                new_entry.entity_ids.push_back(exclude_entity_id.as<std::string>()); // add entity list
             }
             settings.entityCustomizations.push_back(new_entry); // save the new object
         }
@@ -215,14 +216,14 @@ void WebCustomizationService::exclude_entities(AsyncWebServerRequest * request, 
                 uint8_t unique_device_id = json["id"];
                 if (emsdevice->unique_id() == unique_device_id) {
                     // first reset all the entity ids
-                    emsdevice->reset_exclude_entities();
+                    emsdevice->reset_entity_masks();
 
                     // build a list of entities to exclude and then set the flag to non-visible
-                    JsonArray            entity_ids_json = json["entity_ids"];
-                    std::vector<uint8_t> entity_ids;
+                    JsonArray                entity_ids_json = json["entity_ids"];
+                    std::vector<std::string> entity_ids;
                     for (JsonVariant id : entity_ids_json) {
-                        uint8_t entity_id = id.as<int>();
-                        emsdevice->exclude_entity(entity_id); // this will have immediate affect
+                        std::string entity_id = id.as<std::string>();
+                        emsdevice->mask_entity(entity_id); // this will have immediate affect
                         entity_ids.push_back(entity_id);
                     }
 
