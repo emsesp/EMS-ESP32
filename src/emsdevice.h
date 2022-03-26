@@ -243,7 +243,7 @@ class EMSdevice {
     void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0) const;
 
     bool is_readable(const void * value_p) const;
-    bool is_readonly(const std::string cmd, const int8_t id) const;
+    bool is_readonly(const std::string & cmd, const int8_t id) const;
     bool has_command(const void * value_p) const;
     void publish_value(void * value_p) const;
     void publish_all_values();
