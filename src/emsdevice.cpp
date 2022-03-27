@@ -638,7 +638,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
     JsonArray data  = output.createNestedArray("data");
 
     // sort the device values
-    std::sort(devicevalues_.begin(), devicevalues_.end(), [](const emsesp::DeviceValue & a, const emsesp::DeviceValue & b) {
+    std::sort(devicevalues_.begin(), devicevalues_.end(), [](const emsesp::DeviceValue & a, const emsesp::DeviceValue & b __attribute__((unused))) {
         return a.has_state(DeviceValueState::DV_FAVORITE);
     });
 
@@ -858,7 +858,7 @@ void EMSdevice::reset_entity_masks() {
 }
 
 // disable/exclude/mask_out a device entity based on the id
-void EMSdevice::mask_entity(std::string entity_id) {
+void EMSdevice::mask_entity(std::string & entity_id) {
     // first character contains mask flags
     uint8_t flag = Helpers::hextoint(entity_id.substr(0, 2).c_str());
     for (auto & dv : devicevalues_) {
