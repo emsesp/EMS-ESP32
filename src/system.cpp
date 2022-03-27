@@ -1018,7 +1018,6 @@ bool System::command_customizations(const char * value, const int8_t id, JsonObj
 
     JsonObject node = output.createNestedObject("Customizations");
 
-    // hide ssid from this list
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         // sensors
         JsonArray sensorsJson = node.createNestedArray("sensors");
@@ -1053,7 +1052,7 @@ bool System::command_customizations(const char * value, const int8_t id, JsonObj
             }
         }
 
-        // exclude entities
+        // masked entities
         JsonArray mask_entitiesJson = node.createNestedArray("masked_entities");
         for (const auto & entityCustomization : settings.entityCustomizations) {
             JsonObject entityJson    = mask_entitiesJson.createNestedObject();

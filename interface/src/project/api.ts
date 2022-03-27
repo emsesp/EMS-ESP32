@@ -12,7 +12,7 @@ import {
   DeviceData,
   DeviceEntity,
   UniqueID,
-  ExcludeEntities,
+  MaskedEntities,
   WriteValue,
   WriteSensor,
   WriteAnalog,
@@ -63,8 +63,8 @@ export function readDeviceEntities(unique_id: UniqueID): AxiosPromise<DeviceEnti
   return AXIOS_BIN.post('/deviceEntities', unique_id);
 }
 
-export function writeExcludeEntities(excludeEntities: ExcludeEntities): AxiosPromise<void> {
-  return AXIOS.post('/excludeEntities', excludeEntities);
+export function writeMaskedEntities(maskedEntities: MaskedEntities): AxiosPromise<void> {
+  return AXIOS.post('/maskedEntities', maskedEntities);
 }
 
 export function writeValue(writevalue: WriteValue): AxiosPromise<void> {

@@ -31,9 +31,9 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
                     securityManager,
                     AuthenticationPredicates::IS_AUTHENTICATED)
     , _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE)
-    , _exclude_entities_handler(EXCLUDE_ENTITIES_PATH,
-                                securityManager->wrapCallback(std::bind(&WebCustomizationService::exclude_entities, this, _1, _2),
-                                                              AuthenticationPredicates::IS_AUTHENTICATED))
+    , _masked_entities_handler(MASKED_ENTITIES_PATH,
+                               securityManager->wrapCallback(std::bind(&WebCustomizationService::masked_entities, this, _1, _2),
+                                                             AuthenticationPredicates::IS_AUTHENTICATED))
     , _device_entities_handler(DEVICE_ENTITIES_PATH,
                                securityManager->wrapCallback(std::bind(&WebCustomizationService::device_entities, this, _1, _2),
                                                              AuthenticationPredicates::IS_AUTHENTICATED)) {
@@ -45,17 +45,17 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
                HTTP_POST,
                securityManager->wrapRequest(std::bind(&WebCustomizationService::reset_customization, this, _1), AuthenticationPredicates::IS_ADMIN));
 
-    _exclude_entities_handler.setMethod(HTTP_POST);
-    _exclude_entities_handler.setMaxContentLength(2048);
-    _exclude_entities_handler.setMaxJsonBufferSize(2048);
-    server->addHandler(&_exclude_entities_handler);
+    _masked_entities_handler.setMethod(HTTP_POST);
+    _masked_entities_handler.setMaxContentLength(2048);
+    _masked_entities_handler.setMaxJsonBufferSize(2048);
+    server->addHandler(&_masked_entities_handler);
 
     _device_entities_handler.setMethod(HTTP_POST);
     _device_entities_handler.setMaxContentLength(256);
     server->addHandler(&_device_entities_handler);
 }
 
-// this creates the customization file, saving to the FS
+// this creates the customization file, saving it to the FS
 void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
     // Dallas Sensor customization
     JsonArray sensorsJson = root.createNestedArray("sensors");
@@ -78,21 +78,21 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
         sensorJson["type"]    = sensor.type;   // t
     }
 
-    // Exclude entities customization
-    JsonArray exclude_entitiesJson = root.createNestedArray("exclude_entities");
+    // Masked entities customization
+    JsonArray masked_entitiesJson = root.createNestedArray("masked_entities");
     for (const EntityCustomization & entityCustomization : settings.entityCustomizations) {
-        JsonObject entityJson    = exclude_entitiesJson.createNestedObject();
+        JsonObject entityJson    = masked_entitiesJson.createNestedObject();
         entityJson["product_id"] = entityCustomization.product_id;
         entityJson["device_id"]  = entityCustomization.device_id;
 
-        JsonArray exclude_entityJson = entityJson.createNestedArray("entity_ids");
+        JsonArray masked_entityJson = entityJson.createNestedArray("entity_ids");
         for (std::string entity_id : entityCustomization.entity_ids) {
-            exclude_entityJson.add(entity_id);
+            masked_entityJson.add(entity_id);
         }
     }
 }
 
-// call on initialization and also when the page is saved via web
+// call on initialization and also when the page is saved via web UI
 // this loads the data into the internal class
 StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization & settings) {
     // Dallas Sensor customization
@@ -124,17 +124,20 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
         }
     }
 
-    // load array of entities id's to exclude, building up the object class
+    // load array of entities id's with masks, building up the object class
     settings.entityCustomizations.clear();
-    if (root["exclude_entities"].is<JsonArray>()) {
-        for (const JsonObject exclude_entities : root["exclude_entities"].as<JsonArray>()) {
+    if (root["masked_entities"].is<JsonArray>()) {
+        for (const JsonObject masked_entities : root["masked_entities"].as<JsonArray>()) {
             auto new_entry       = EntityCustomization();
-            new_entry.product_id = exclude_entities["product_id"];
-            new_entry.device_id  = exclude_entities["device_id"];
+            new_entry.product_id = masked_entities["product_id"];
+            new_entry.device_id  = masked_entities["device_id"];
 
-            for (const JsonVariant exclude_entity_id : exclude_entities["entity_ids"].as<JsonArray>()) {
-                new_entry.entity_ids.push_back(exclude_entity_id.as<std::string>()); // add entity list
+            for (const JsonVariant masked_entity_id : masked_entities["entity_ids"].as<JsonArray>()) {
+                if (masked_entity_id.is<std::string>()) {
+                    new_entry.entity_ids.push_back(masked_entity_id.as<std::string>()); // add entity list
+                }
             }
+
             settings.entityCustomizations.push_back(new_entry); // save the new object
         }
     }
@@ -157,7 +160,7 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
 #endif
 }
 
-// send back a short list devices used in the customization page
+// send back a list of devices used to the customization web page
 void WebCustomizationService::devices(AsyncWebServerRequest * request) {
     auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN);
     JsonObject root     = response->getRoot();
@@ -183,10 +186,10 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
     request->send(response);
 }
 
-// send back list device entities
+// send back list of device entities
 void WebCustomizationService::device_entities(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        auto * response = new MsgpackAsyncJsonResponse(true, EMSESP_JSON_SIZE_XXLARGE_DYN);
+        auto * response = new MsgpackAsyncJsonResponse(true, EMSESP_JSON_SIZE_XXXLARGE_DYN);
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == json["id"]) {
 #ifndef EMSESP_STANDALONE
@@ -205,10 +208,10 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request, J
     request->send(response);
 }
 
-// takes a list of excluded ids send from the webUI
+// takes a list of masked ids send from the webUI
 // saves it in the customization service
 // and updates the entity list real-time
-void WebCustomizationService::exclude_entities(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebCustomizationService::masked_entities(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
         // find the device using the unique_id
         for (const auto & emsdevice : EMSESP::emsdevices) {
@@ -218,7 +221,7 @@ void WebCustomizationService::exclude_entities(AsyncWebServerRequest * request, 
                     // first reset all the entity ids
                     emsdevice->reset_entity_masks();
 
-                    // build a list of entities to exclude and then set the flag to non-visible
+                    // build a list of entities
                     JsonArray                entity_ids_json = json["entity_ids"];
                     std::vector<std::string> entity_ids;
                     for (JsonVariant id : entity_ids_json) {

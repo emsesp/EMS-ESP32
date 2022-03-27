@@ -146,11 +146,11 @@ export interface DeviceEntity {
   v?: any; // value, in any format
   n: string; // name
   s: string; // shortname
-  x: boolean; // excluded flag
+  m: number; // mask
   i: number; // unique id
 }
 
-export interface ExcludeEntities {
+export interface MaskedEntities {
   id: number;
   entity_ids: string[];
 }
