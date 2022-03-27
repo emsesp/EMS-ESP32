@@ -12,7 +12,9 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle
+  DialogTitle,
+  ToggleButton,
+  ToggleButtonGroup
 } from '@mui/material';
 
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -22,8 +24,12 @@ import { styled } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 
 import SaveIcon from '@mui/icons-material/Save';
-import CloseIcon from '@mui/icons-material/Close';
 import CancelIcon from '@mui/icons-material/Cancel';
+import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
+import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
+
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 
 import { ButtonRow, FormLoader, ValidatedTextField, SectionContent } from '../components';
@@ -53,6 +59,7 @@ const SettingsCustomization: FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
+  const [masks, setMasks] = useState(() => ['fav', 'readonly', 'exclude_mqtt', 'exclude_web']);
 
   const fetchDevices = useCallback(async () => {
     try {
@@ -162,48 +169,86 @@ const SettingsCustomization: FC = () => {
       return;
     }
 
-    const toggleDeviceEntity = (id: number, mask: number) => {
-      setDeviceEntities(
-        deviceEntities.map((o) => {
-          if (o.i === id) {
-            return { ...o, m: mask ^ o.m };
-          }
-          return o;
-        })
-      );
+    const setMask = (de: DeviceEntity, newMask: string[]) => {
+      var new_mask = 0;
+      if (newMask.includes('exclude_web')) {
+        new_mask |= 1;
+      }
+      if (newMask.includes('exclude_mqtt')) {
+        new_mask |= 2;
+      }
+      if (newMask.includes('readonly')) {
+        new_mask |= 4;
+      }
+      if (newMask.includes('fav')) {
+        new_mask |= 8;
+      }
+
+      de.m = new_mask;
+      setMasks(newMask);
+    };
+
+    const getValue = (de: DeviceEntity) => {
+      var new_masks = [];
+      if ((de.m & 1) === 1) {
+        new_masks.push('exclude_web');
+      }
+      if ((de.m & 2) === 2) {
+        new_masks.push('exclude_mqtt');
+      }
+      if ((de.m & 4) === 4) {
+        new_masks.push('readonly');
+      }
+      if ((de.m & 8) === 8) {
+        new_masks.push('fav');
+      }
+
+      return new_masks;
     };
 
     return (
-      <>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell>
-                ({deviceEntities.reduce((a, de) => (de.m === 7 ? a + 1 : a), 0)}/{deviceEntities.length})
+      <Table size="small">
+        <TableHead>
+          <TableRow>
+            <StyledTableCell align="center">OPTIONS</StyledTableCell>
+            <StyledTableCell align="left">ENTITY NAME (CODE)</StyledTableCell>
+            <StyledTableCell align="right">VALUE</StyledTableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {deviceEntities.map((de) => (
+            <TableRow key={de.i}>
+              <StyledTableCell padding="checkbox">
+                <ToggleButtonGroup
+                  size="small"
+                  color="error"
+                  value={getValue(de)}
+                  onChange={(event, mask) => {
+                    setMask(de, mask);
+                  }}
+                >
+                  <ToggleButton value="fav" color="success">
+                    <FavoriteBorderOutlinedIcon fontSize="small" />
+                  </ToggleButton>
+                  <ToggleButton value="readonly">
+                    <EditOffOutlinedIcon fontSize="small" />
+                  </ToggleButton>
+                  <ToggleButton value="exclude_mqtt">
+                    <CommentsDisabledOutlinedIcon fontSize="small" />
+                  </ToggleButton>
+                  <ToggleButton value="exclude_web">
+                    <VisibilityOffOutlinedIcon fontSize="small" />
+                  </ToggleButton>
+                </ToggleButtonGroup>
               </StyledTableCell>
-              <StyledTableCell align="left">ENTITY NAME</StyledTableCell>
-              <StyledTableCell>CODE</StyledTableCell>
-              <StyledTableCell align="right">VALUE</StyledTableCell>
+              <StyledTableCell>
+                {de.n}&nbsp;({de.s})
+              </StyledTableCell>
+              <StyledTableCell align="right">{formatValue(de.v)}</StyledTableCell>
             </TableRow>
-          </TableHead>
-          <TableBody>
-            {deviceEntities.map((de) => (
-              <TableRow
-                key={de.i}
-                onClick={() => toggleDeviceEntity(de.i, 7)}
-                sx={de.m === 7 ? { backgroundColor: '#f8696b' } : { backgroundColor: 'black' }}
-              >
-                <StyledTableCell padding="checkbox">{de.m === 7 && <CloseIcon fontSize="small" />}</StyledTableCell>
-                <StyledTableCell component="th" scope="row">
-                  {de.n}
-                </StyledTableCell>
-                <StyledTableCell>{de.s}</StyledTableCell>
-                <StyledTableCell align="right">{formatValue(de.v)}</StyledTableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </>
+          ))}
+        </TableBody>
+      </Table>
     );
   };
 
