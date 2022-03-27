@@ -858,7 +858,7 @@ void EMSdevice::reset_entity_masks() {
 }
 
 // disable/exclude/mask_out a device entity based on the id
-void EMSdevice::mask_entity(std::string & entity_id) {
+void EMSdevice::mask_entity(const std::string & entity_id) {
     // first character contains mask flags
     uint8_t flag = Helpers::hextoint(entity_id.substr(0, 2).c_str());
     for (auto & dv : devicevalues_) {
