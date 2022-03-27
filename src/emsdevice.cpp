@@ -632,10 +632,15 @@ std::string EMSdevice::get_value_uom(const char * key) const {
 // prepare array of device values used for the WebUI
 // this is loosely based of the function generate_values used for the MQTT and Console
 // except additional data is stored in the JSON document needed for the Web UI like the UOM and command
-// v = value, u=uom, n=name, c=cmd
+// v=value, u=uom, n=name, c=cmd, h=help string, s=step, m=min, x=max
 void EMSdevice::generate_values_web(JsonObject & output) {
     output["label"] = to_string_short();
     JsonArray data  = output.createNestedArray("data");
+
+    // sort the device values
+    std::sort(devicevalues_.begin(), devicevalues_.end(), [](const emsesp::DeviceValue & a, const emsesp::DeviceValue & b) {
+        return a.has_state(DeviceValueState::DV_FAVORITE);
+    });
 
     for (auto & dv : devicevalues_) {
         // check conditions:
@@ -752,32 +757,8 @@ void EMSdevice::generate_values_web(JsonObject & output) {
     }
 }
 
-// reset all entities to being visible
-// this is called before loading in the exclude entities list from the customization service
-void EMSdevice::reset_entity_masks() {
-    for (auto & dv : devicevalues_) {
-        dv.state &= 0x0F;
-    }
-}
-
-// disable/exclude/mask_out a device entity based on the id
-void EMSdevice::mask_entity(std::string entity_id) {
-    // first character contains mask flags
-    uint8_t flag = Helpers::hextoint(entity_id.substr(0, 2).c_str());
-    for (auto & dv : devicevalues_) {
-        std::string entity = dv.tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(dv.short_name) : tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
-        if (entity == entity_id.substr(2)) {
-#if defined(EMSESP_USE_SERIAL)
-            Serial.print("mask_entity() Removing Visible for device value: ");
-            Serial.println(read_flash_string(dv.full_name).c_str());
-#endif
-            dv.state = (dv.state & 0x0F) | (flag << 4); // set state high bits to flag, turn off active and ha flags
-            return;
-        }
-    }
-}
-
 // as generate_values_web() but stripped down to only show all entities and their state
+// this is used only for WebCustomizationService::device_entities()
 void EMSdevice::generate_values_web_all(JsonArray & output) {
     for (auto & dv : devicevalues_) {
         // also show commands and entities that have an empty full name
@@ -854,6 +835,7 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
         } else {
             obj["n"] = "(hidden)";
         }
+
         // shortname
         if (dv.tag >= DeviceValueTAG::TAG_HC1) {
             obj["s"] = tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
@@ -861,11 +843,34 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
             obj["s"] = dv.short_name;
         }
 
-        // is it marked as excluded?
-        obj["x"] = dv.has_state(DeviceValueState::DV_WEB_EXCLUDE);
+        obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble
+        obj["w"] = dv.has_cmd;    // if writable
+        obj["i"] = dv.id;         // add the unique ID
+    }
+}
 
-        // add the unique ID
-        obj["i"] = dv.id;
+// reset all entities to being visible
+// this is called before loading in the exclude entities list from the customization service
+void EMSdevice::reset_entity_masks() {
+    for (auto & dv : devicevalues_) {
+        dv.state &= 0x0F;
+    }
+}
+
+// disable/exclude/mask_out a device entity based on the id
+void EMSdevice::mask_entity(std::string entity_id) {
+    // first character contains mask flags
+    uint8_t flag = Helpers::hextoint(entity_id.substr(0, 2).c_str());
+    for (auto & dv : devicevalues_) {
+        std::string entity = dv.tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(dv.short_name) : tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
+        if (entity == entity_id.substr(2)) {
+#if defined(EMSESP_USE_SERIAL)
+            Serial.print("mask_entity() Removing Visible for device value: ");
+            Serial.println(read_flash_string(dv.full_name).c_str());
+#endif
+            dv.state = (dv.state & 0x0F) | (flag << 4); // set state high bits to flag, turn off active and ha flags
+            return;
+        }
     }
 }
 

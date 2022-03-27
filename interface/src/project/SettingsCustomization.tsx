@@ -12,7 +12,10 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle
+  DialogTitle,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip
 } from '@mui/material';
 
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -22,8 +25,11 @@ import { styled } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 
 import SaveIcon from '@mui/icons-material/Save';
-import CloseIcon from '@mui/icons-material/Close';
 import CancelIcon from '@mui/icons-material/Cancel';
+import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
+import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 
 import { ButtonRow, FormLoader, ValidatedTextField, SectionContent } from '../components';
@@ -53,6 +59,7 @@ const SettingsCustomization: FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
+  const [masks, setMasks] = useState(() => ['1']);
 
   const fetchDevices = useCallback(async () => {
     try {
@@ -110,7 +117,8 @@ const SettingsCustomization: FC = () => {
       <>
         <Box color="warning.main">
           <Typography variant="body2">
-            Customize which entities to exclude from all all services (MQTT, API). This will have immediate effect.
+            You can mark an entity as a favorite to be listed first in the Web Dashboard, or remove it from the
+            Dashboard, or disable it's write operation or exclude it from the MQTT and API outputs.
           </Typography>
         </Box>
         <ValidatedTextField
@@ -138,11 +146,13 @@ const SettingsCustomization: FC = () => {
 
   const saveCustomization = async () => {
     if (deviceEntities && selectedDevice) {
-      const exclude_entities = deviceEntities.filter((de) => de.x).map((new_de) => "07" + new_de.s);
+      const masked_entities = deviceEntities
+        .filter((de) => de.m)
+        .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.s);
       try {
-        const response = await EMSESP.writeExcludeEntities({
+        const response = await EMSESP.writeMaskedEntities({
           id: selectedDevice,
-          entity_ids: exclude_entities
+          entity_ids: masked_entities
         });
         if (response.status === 200) {
           enqueueSnackbar('Customization saved', { variant: 'success' });
@@ -160,48 +170,94 @@ const SettingsCustomization: FC = () => {
       return;
     }
 
-    const toggleDeviceEntity = (id: number) => {
-      setDeviceEntities(
-        deviceEntities.map((o) => {
-          if (o.i === id) {
-            return { ...o, x: !o.x };
-          }
-          return o;
-        })
-      );
+    const setMask = (de: DeviceEntity, newMask: string[]) => {
+      var new_mask = 0;
+      if (newMask.includes('1')) {
+        new_mask |= 1;
+      }
+      if (newMask.includes('2')) {
+        new_mask |= 2;
+      }
+      if (newMask.includes('4')) {
+        new_mask |= 4;
+      }
+      if (newMask.includes('8')) {
+        new_mask |= 8;
+      }
+
+      de.m = new_mask;
+      setMasks(newMask);
+    };
+
+    const getMask = (de: DeviceEntity) => {
+      var new_masks = [];
+      if ((de.m & 1) === 1) {
+        new_masks.push('1');
+      }
+      if ((de.m & 2) === 2) {
+        new_masks.push('2');
+      }
+      if ((de.m & 4) === 4) {
+        new_masks.push('4');
+      }
+      if ((de.m & 8) === 8) {
+        new_masks.push('8');
+      }
+
+      return new_masks;
     };
 
     return (
-      <>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell>
-                ({deviceEntities.reduce((a, v) => (v.x ? a + 1 : a), 0)}/{deviceEntities.length})
+      <Table size="small">
+        <TableHead>
+          <TableRow>
+            <StyledTableCell align="center">OPTIONS</StyledTableCell>
+            <StyledTableCell align="left">ENTITY NAME (CODE)</StyledTableCell>
+            <StyledTableCell align="right">VALUE</StyledTableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {deviceEntities.map((de) => (
+            <TableRow key={de.i}>
+              <StyledTableCell padding="checkbox">
+                <ToggleButtonGroup
+                  size="small"
+                  color="error"
+                  value={getMask(de)}
+                  onChange={(event, mask) => {
+                    setMask(de, mask);
+                  }}
+                >
+                  <ToggleButton value="8" color="success" disabled={(de.m & 1) !== 0}>
+                    <Tooltip title="Favorite">
+                      <FavoriteBorderOutlinedIcon fontSize="small" />
+                    </Tooltip>
+                  </ToggleButton>
+                  <ToggleButton value="4" disabled={!de.w}>
+                    <Tooltip title="Force read-only">
+                      <EditOffOutlinedIcon fontSize="small" />
+                    </Tooltip>
+                  </ToggleButton>
+                  <ToggleButton value="2">
+                    <Tooltip title="Exclude in MQTT and API">
+                      <CommentsDisabledOutlinedIcon fontSize="small" />
+                    </Tooltip>
+                  </ToggleButton>
+                  <ToggleButton value="1">
+                    <Tooltip title="Don't show Web Dashboard">
+                      <VisibilityOffOutlinedIcon fontSize="small" />
+                    </Tooltip>
+                  </ToggleButton>
+                </ToggleButtonGroup>
               </StyledTableCell>
-              <StyledTableCell align="left">ENTITY NAME</StyledTableCell>
-              <StyledTableCell>CODE</StyledTableCell>
-              <StyledTableCell align="right">VALUE</StyledTableCell>
+              <StyledTableCell>
+                {de.n}&nbsp;({de.s})
+              </StyledTableCell>
+              <StyledTableCell align="right">{formatValue(de.v)}</StyledTableCell>
             </TableRow>
-          </TableHead>
-          <TableBody>
-            {deviceEntities.map((de) => (
-              <TableRow
-                key={de.i}
-                onClick={() => toggleDeviceEntity(de.i)}
-                sx={de.x ? { backgroundColor: '#f8696b' } : { backgroundColor: 'black' }}
-              >
-                <StyledTableCell padding="checkbox">{de.x && <CloseIcon fontSize="small" />}</StyledTableCell>
-                <StyledTableCell component="th" scope="row">
-                  {de.n}
-                </StyledTableCell>
-                <StyledTableCell>{de.s}</StyledTableCell>
-                <StyledTableCell align="right">{formatValue(de.v)}</StyledTableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </>
+          ))}
+        </TableBody>
+      </Table>
     );
   };
 

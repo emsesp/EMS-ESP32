@@ -595,8 +595,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::system_.healthcheck(n);
     }
 
-    if (command == "exclude") {
-        shell.printfln(F("Testing exclude entities"));
+    if (command == "masked") {
+        shell.printfln(F("Testing masked entities"));
 
         Mqtt::ha_enabled(true);
         Mqtt::send_response(false);

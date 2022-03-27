@@ -20,7 +20,8 @@ import {
   ListItem,
   ListItemText,
   Grid,
-  useMediaQuery
+  useMediaQuery,
+  Tooltip
 } from '@mui/material';
 
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -524,8 +525,10 @@ const DashboardData: FC = () => {
               <StyledTableRow key={i} onClick={() => sendCommand(dv)}>
                 <StyledTableCell padding="checkbox">
                   {dv.c && me.admin && (
-                    <IconButton size="small" aria-label="Edit">
-                      <EditIcon color="primary" fontSize="small" />
+                    <IconButton size="small">
+                      <Tooltip title="Change value...">
+                        <EditIcon color="primary" fontSize="small" />
+                      </Tooltip>
                     </IconButton>
                   )}
                 </StyledTableCell>
@@ -569,7 +572,7 @@ const DashboardData: FC = () => {
             <StyledTableRow key={sensor_data.n} onClick={() => updateSensor(sensor_data)}>
               <StyledTableCell padding="checkbox">
                 {me.admin && (
-                  <IconButton edge="start" size="small" aria-label="Edit">
+                  <IconButton edge="start" size="small">
                     <EditIcon color="primary" fontSize="small" />
                   </IconButton>
                 )}
@@ -605,7 +608,7 @@ const DashboardData: FC = () => {
             <StyledTableRow key={analog_data.i} onClick={() => updateAnalog(analog_data)}>
               <StyledTableCell padding="checkbox">
                 {me.admin && (
-                  <IconButton edge="start" size="small" aria-label="Edit">
+                  <IconButton edge="start" size="small">
                     <EditIcon color="primary" fontSize="small" />
                   </IconButton>
                 )}

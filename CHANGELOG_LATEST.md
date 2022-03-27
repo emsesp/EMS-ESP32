@@ -30,6 +30,7 @@
 - sync time with thermostat [#386](https://github.com/emsesp/EMS-ESP32/issues/386), [#408](https://github.com/emsesp/EMS-ESP32/issues/408)
 - set mode has immediate effect [#395](https://github.com/emsesp/EMS-ESP32/issues/395)
 - min/max in web value setting
+- Extend customization to select if an entity is to be shown in the WebUI or forced as read-only [#317](https://github.com/emsesp/EMS-ESP32/issues/317)
 
 ### Fixed
 
