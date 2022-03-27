@@ -147,6 +147,7 @@ export interface DeviceEntity {
   n: string; // name
   s: string; // shortname
   m: number; // mask
+  w?: boolean; // writeable
   i: number; // unique id
 }
 

@@ -344,19 +344,19 @@ const emsesp_devices = {
       i: 1,
       d: 23,
       p: 77,
-      s: 'Thermostat1',
+      s: 'Thermostat1 (RC20/Moduline 300)',
     },
     {
       i: 2,
       d: 8,
       p: 123,
-      s: 'Boiler',
+      s: 'Boiler (Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i)',
     },
     {
       i: 4,
       d: 16,
       p: 165,
-      s: 'Thermostat2',
+      s: 'Thermostat2 (RC100/Moduline 1000/1010)',
     },
   ],
 }
@@ -450,7 +450,7 @@ const status = {
 
 // Dashboard data
 const emsesp_devicedata_1 = {
-  label: 'RC20/Moduline 300',
+  label: 'Thermostat: RC20/Moduline 300',
   data: [
     {
       v: '(0)',
@@ -567,7 +567,7 @@ const emsesp_devicedata_2 = {
 }
 
 const emsesp_devicedata_4 = {
-  label: 'RC100/Moduline 1000/1010',
+  label: 'Thermostat: RC100/Moduline 1000/1010',
   data: [
     {
       v: 16,
@@ -610,6 +610,7 @@ const emsesp_deviceentities_1 = [
     n: 'hc1 selected room temperature',
     s: 'hc1/seltemp',
     m: 0,
+    w: true,
     i: 3,
   },
   {
@@ -624,6 +625,7 @@ const emsesp_deviceentities_1 = [
     n: 'hc1 mode',
     s: 'hc1/mode',
     m: 0,
+    w: true,
     i: 5,
   },
 ]
