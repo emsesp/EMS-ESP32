@@ -1251,13 +1251,13 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
             LOG_INFO(F("thermostat time correction from ntp"));
         }
     }
+#ifndef EMSESP_STANDALONE
     if (!ntp_ && tm_->tm_year > 110) { // emsesp clock not set, but thermostat clock
         struct timeval newnow = {.tv_sec = ttime};
-#ifndef EMSESP_STANDALONE
         settimeofday(&newnow, nullptr);
-#endif
         LOG_INFO(F("ems-esp time set from thermostat"));
     }
+#endif
 }
 
 // process_RCError - type 0xA2 - error message - 14 bytes long
