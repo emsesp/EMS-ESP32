@@ -110,7 +110,7 @@ const SettingsCustomization: FC = () => {
       <>
         <Box color="warning.main">
           <Typography variant="body2">
-            Customize which entities to exclude from all all services (MQTT, API). This will have immediate effect.
+            Customize which entities to exclude. This will have immediate effect on all services including MQTT and API.
           </Typography>
         </Box>
         <ValidatedTextField
@@ -138,11 +138,13 @@ const SettingsCustomization: FC = () => {
 
   const saveCustomization = async () => {
     if (deviceEntities && selectedDevice) {
-      const exclude_entities = deviceEntities.filter((de) => de.x).map((new_de) => "07" + new_de.s);
+      const masked_entities = deviceEntities
+        .filter((de) => de.m)
+        .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.s);
       try {
-        const response = await EMSESP.writeExcludeEntities({
+        const response = await EMSESP.writeMaskedEntities({
           id: selectedDevice,
-          entity_ids: exclude_entities
+          entity_ids: masked_entities
         });
         if (response.status === 200) {
           enqueueSnackbar('Customization saved', { variant: 'success' });
@@ -160,11 +162,11 @@ const SettingsCustomization: FC = () => {
       return;
     }
 
-    const toggleDeviceEntity = (id: number) => {
+    const toggleDeviceEntity = (id: number, mask: number) => {
       setDeviceEntities(
         deviceEntities.map((o) => {
           if (o.i === id) {
-            return { ...o, x: !o.x };
+            return { ...o, m: mask ^ o.m };
           }
           return o;
         })
@@ -177,7 +179,7 @@ const SettingsCustomization: FC = () => {
           <TableHead>
             <TableRow>
               <StyledTableCell>
-                ({deviceEntities.reduce((a, v) => (v.x ? a + 1 : a), 0)}/{deviceEntities.length})
+                ({deviceEntities.reduce((a, de) => (de.m === 7 ? a + 1 : a), 0)}/{deviceEntities.length})
               </StyledTableCell>
               <StyledTableCell align="left">ENTITY NAME</StyledTableCell>
               <StyledTableCell>CODE</StyledTableCell>
@@ -188,10 +190,10 @@ const SettingsCustomization: FC = () => {
             {deviceEntities.map((de) => (
               <TableRow
                 key={de.i}
-                onClick={() => toggleDeviceEntity(de.i)}
-                sx={de.x ? { backgroundColor: '#f8696b' } : { backgroundColor: 'black' }}
+                onClick={() => toggleDeviceEntity(de.i, 7)}
+                sx={de.m === 7 ? { backgroundColor: '#f8696b' } : { backgroundColor: 'black' }}
               >
-                <StyledTableCell padding="checkbox">{de.x && <CloseIcon fontSize="small" />}</StyledTableCell>
+                <StyledTableCell padding="checkbox">{de.m === 7 && <CloseIcon fontSize="small" />}</StyledTableCell>
                 <StyledTableCell component="th" scope="row">
                   {de.n}
                 </StyledTableCell>
