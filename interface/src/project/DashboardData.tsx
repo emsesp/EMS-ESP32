@@ -524,7 +524,7 @@ const DashboardData: FC = () => {
               <StyledTableRow key={i} onClick={() => sendCommand(dv)}>
                 <StyledTableCell padding="checkbox">
                   {dv.c && me.admin && (
-                    <IconButton size="small" aria-label="Edit">
+                    <IconButton size="small">
                       <EditIcon color="primary" fontSize="small" />
                     </IconButton>
                   )}
@@ -569,7 +569,7 @@ const DashboardData: FC = () => {
             <StyledTableRow key={sensor_data.n} onClick={() => updateSensor(sensor_data)}>
               <StyledTableCell padding="checkbox">
                 {me.admin && (
-                  <IconButton edge="start" size="small" aria-label="Edit">
+                  <IconButton edge="start" size="small">
                     <EditIcon color="primary" fontSize="small" />
                   </IconButton>
                 )}
@@ -605,7 +605,7 @@ const DashboardData: FC = () => {
             <StyledTableRow key={analog_data.i} onClick={() => updateAnalog(analog_data)}>
               <StyledTableCell padding="checkbox">
                 {me.admin && (
-                  <IconButton edge="start" size="small" aria-label="Edit">
+                  <IconButton edge="start" size="small">
                     <EditIcon color="primary" fontSize="small" />
                   </IconButton>
                 )}
