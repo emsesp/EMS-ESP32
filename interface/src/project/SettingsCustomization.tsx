@@ -14,7 +14,8 @@ import {
   DialogContent,
   DialogTitle,
   ToggleButton,
-  ToggleButtonGroup
+  ToggleButtonGroup,
+  Tooltip
 } from '@mui/material';
 
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -29,7 +30,6 @@ import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
-
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 
 import { ButtonRow, FormLoader, ValidatedTextField, SectionContent } from '../components';
@@ -59,7 +59,7 @@ const SettingsCustomization: FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
-  const [masks, setMasks] = useState(() => ['fav', 'readonly', 'exclude_mqtt', 'exclude_web']);
+  const [masks, setMasks] = useState(() => ['1']);
 
   const fetchDevices = useCallback(async () => {
     try {
@@ -117,7 +117,8 @@ const SettingsCustomization: FC = () => {
       <>
         <Box color="warning.main">
           <Typography variant="body2">
-            Customize which entities to exclude. This will have immediate effect on all services including MQTT and API.
+            You can mark an entity as a favorite to be listed first in the Web Dashboard, or remove it from the
+            Dashboard, or disable it's write operation or exclude it from the MQTT and API outputs.
           </Typography>
         </Box>
         <ValidatedTextField
@@ -171,16 +172,16 @@ const SettingsCustomization: FC = () => {
 
     const setMask = (de: DeviceEntity, newMask: string[]) => {
       var new_mask = 0;
-      if (newMask.includes('exclude_web')) {
+      if (newMask.includes('1')) {
         new_mask |= 1;
       }
-      if (newMask.includes('exclude_mqtt')) {
+      if (newMask.includes('2')) {
         new_mask |= 2;
       }
-      if (newMask.includes('readonly')) {
+      if (newMask.includes('4')) {
         new_mask |= 4;
       }
-      if (newMask.includes('fav')) {
+      if (newMask.includes('8')) {
         new_mask |= 8;
       }
 
@@ -188,19 +189,19 @@ const SettingsCustomization: FC = () => {
       setMasks(newMask);
     };
 
-    const getValue = (de: DeviceEntity) => {
+    const getMask = (de: DeviceEntity) => {
       var new_masks = [];
       if ((de.m & 1) === 1) {
-        new_masks.push('exclude_web');
+        new_masks.push('1');
       }
       if ((de.m & 2) === 2) {
-        new_masks.push('exclude_mqtt');
+        new_masks.push('2');
       }
       if ((de.m & 4) === 4) {
-        new_masks.push('readonly');
+        new_masks.push('4');
       }
       if ((de.m & 8) === 8) {
-        new_masks.push('fav');
+        new_masks.push('8');
       }
 
       return new_masks;
@@ -222,22 +223,30 @@ const SettingsCustomization: FC = () => {
                 <ToggleButtonGroup
                   size="small"
                   color="error"
-                  value={getValue(de)}
+                  value={getMask(de)}
                   onChange={(event, mask) => {
                     setMask(de, mask);
                   }}
                 >
-                  <ToggleButton value="fav" color="success">
-                    <FavoriteBorderOutlinedIcon fontSize="small" />
+                  <ToggleButton value="8" color="success" disabled={(de.m & 1) !== 0}>
+                    <Tooltip title="Favorite">
+                      <FavoriteBorderOutlinedIcon fontSize="small" />
+                    </Tooltip>
                   </ToggleButton>
-                  <ToggleButton value="readonly">
-                    <EditOffOutlinedIcon fontSize="small" />
+                  <ToggleButton value="4" disabled={!de.w}>
+                    <Tooltip title="Force read-only">
+                      <EditOffOutlinedIcon fontSize="small" />
+                    </Tooltip>
                   </ToggleButton>
-                  <ToggleButton value="exclude_mqtt">
-                    <CommentsDisabledOutlinedIcon fontSize="small" />
+                  <ToggleButton value="2">
+                    <Tooltip title="Exclude in MQTT and API">
+                      <CommentsDisabledOutlinedIcon fontSize="small" />
+                    </Tooltip>
                   </ToggleButton>
-                  <ToggleButton value="exclude_web">
-                    <VisibilityOffOutlinedIcon fontSize="small" />
+                  <ToggleButton value="1">
+                    <Tooltip title="Don't show Web Dashboard">
+                      <VisibilityOffOutlinedIcon fontSize="small" />
+                    </Tooltip>
                   </ToggleButton>
                 </ToggleButtonGroup>
               </StyledTableCell>
