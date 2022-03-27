@@ -20,7 +20,8 @@ import {
   ListItem,
   ListItemText,
   Grid,
-  useMediaQuery
+  useMediaQuery,
+  Tooltip
 } from '@mui/material';
 
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -525,7 +526,9 @@ const DashboardData: FC = () => {
                 <StyledTableCell padding="checkbox">
                   {dv.c && me.admin && (
                     <IconButton size="small">
-                      <EditIcon color="primary" fontSize="small" />
+                      <Tooltip title="Change value...">
+                        <EditIcon color="primary" fontSize="small" />
+                      </Tooltip>
                     </IconButton>
                   )}
                 </StyledTableCell>
