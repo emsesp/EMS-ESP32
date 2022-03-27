@@ -175,9 +175,9 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
             uint8_t device_index = EMSESP::device_index(emsdevice->device_type(), emsdevice->unique_id());
             if (device_index) {
                 char s[10];
-                obj["s"] = emsdevice->device_type_name() + Helpers::smallitoa(s, device_index);
+                obj["s"] = emsdevice->device_type_name() + Helpers::smallitoa(s, device_index) + " (" + emsdevice->name() + ")";
             } else {
-                obj["s"] = emsdevice->device_type_name();
+                obj["s"] = emsdevice->device_type_name() + " (" + emsdevice->name() + ")";
             }
         }
     }
