@@ -861,8 +861,8 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
             obj["s"] = dv.short_name;
         }
 
-        // is it marked as excluded?
-        obj["x"] = dv.has_state(DeviceValueState::DV_WEB_EXCLUDE);
+        // send back the mask state. We're only interested in the high nibble
+        obj["m"] = dv.state >> 4;
 
         // add the unique ID
         obj["i"] = dv.id;
