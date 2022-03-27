@@ -59,6 +59,8 @@ const SettingsCustomization: FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
+
+  // eslint-disable-next-line
   const [masks, setMasks] = useState(() => ['1']);
 
   const fetchDevices = useCallback(async () => {
