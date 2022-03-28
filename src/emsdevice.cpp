@@ -637,119 +637,116 @@ void EMSdevice::generate_values_web(JsonObject & output) {
     output["label"] = to_string_short();
     JsonArray data  = output.createNestedArray("data");
 
-    // sort the device values
-    std::sort(devicevalues_.begin(), devicevalues_.end(), [](const emsesp::DeviceValue & a, const emsesp::DeviceValue & b __attribute__((unused))) {
-        return a.has_state(DeviceValueState::DV_FAVORITE);
-    });
+    // do two passes. First for all entities marked as favourites, then for all others. This sorts the list.
+    for (uint8_t i = 0; i < 2; i++) {
+        for (auto & dv : devicevalues_) {
+            bool state = (!i && dv.has_state(DeviceValueState::DV_FAVORITE)) || (i && !dv.has_state(DeviceValueState::DV_FAVORITE));
+            if (state && (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.full_name && (dv.hasValue() || (dv.type == DeviceValueType::CMD)))) {
+                JsonObject obj        = data.createNestedObject(); // create the object, we know there is a value
+                uint8_t    fahrenheit = 0;
 
-    for (auto & dv : devicevalues_) {
-        // check conditions:
-        //  1. full_name cannot be empty
-        //  2. it must have a valid value, if it is not a command like 'reset'
+                // handle Booleans (true, false)
+                if (dv.type == DeviceValueType::BOOL) {
+                    bool value_b = *(bool *)(dv.value_p);
+                    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                        obj["v"] = value_b ? "true" : "false";
+                    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                        obj["v"] = value_b ? 1 : 0;
+                    } else {
+                        char s[7];
+                        obj["v"] = Helpers::render_boolean(s, value_b);
+                    }
+                }
 
-        if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.full_name && (dv.hasValue() || (dv.type == DeviceValueType::CMD))) {
-            JsonObject obj        = data.createNestedObject(); // create the object, we know there is a value
-            uint8_t    fahrenheit = 0;
+                // handle TEXT strings
+                else if (dv.type == DeviceValueType::STRING) {
+                    obj["v"] = (char *)(dv.value_p);
+                }
 
-            // handle Booleans (true, false)
-            if (dv.type == DeviceValueType::BOOL) {
-                bool value_b = *(bool *)(dv.value_p);
-                if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                    obj["v"] = value_b ? "true" : "false";
-                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                    obj["v"] = value_b ? 1 : 0;
+                // handle ENUMs
+                else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
+                    obj["v"] = dv.options[*(uint8_t *)(dv.value_p)];
+                }
+
+                // handle numbers
+                else {
+                    // If a divider is specified, do the division to 2 decimals places and send back as double/float
+                    // otherwise force as an integer whole
+                    // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
+                    int8_t divider = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
+                    fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
+
+                    if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
+                        obj["v"] = Helpers::round2(*(int8_t *)(dv.value_p), divider, fahrenheit);
+                    } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
+                        obj["v"] = Helpers::round2(*(uint8_t *)(dv.value_p), divider, fahrenheit);
+                    } else if ((dv.type == DeviceValueType::SHORT) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
+                        obj["v"] = Helpers::round2(*(int16_t *)(dv.value_p), divider, fahrenheit);
+                    } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
+                        obj["v"] = Helpers::round2(*(uint16_t *)(dv.value_p), divider, fahrenheit);
+                    } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+                        obj["v"] = Helpers::round2(*(uint32_t *)(dv.value_p), divider, fahrenheit);
+                    } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+                        uint32_t time_value = *(uint32_t *)(dv.value_p);
+                        obj["v"]            = (divider > 0) ? time_value / divider : time_value; // sometimes we need to divide by 60
+                    }
+                }
+
+                // add the unit of measure (uom)
+                obj["u"] = fahrenheit ? (uint8_t)DeviceValueUOM::FAHRENHEIT : dv.uom;
+
+                auto mask = Helpers::hextoa((uint8_t)(dv.state >> 4), false); // create mask to a 2-char string
+
+                // add name, prefixing the tag if it exists
+                if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
+                    obj["n"] = mask + read_flash_string(dv.full_name);
+                } else if (dv.tag < DeviceValueTAG::TAG_HC1) {
+                    obj["n"] = mask + tag_to_string(dv.tag) + " " + read_flash_string(dv.full_name);
                 } else {
-                    char s[7];
-                    obj["v"] = Helpers::render_boolean(s, value_b);
+                    obj["n"] = mask + tag_to_string(dv.tag) + " " + read_flash_string(dv.full_name);
                 }
-            }
 
-            // handle TEXT strings
-            else if (dv.type == DeviceValueType::STRING) {
-                obj["v"] = (char *)(dv.value_p);
-            }
-
-            // handle ENUMs
-            else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
-                obj["v"] = dv.options[*(uint8_t *)(dv.value_p)];
-            }
-
-            // handle numbers
-            else {
-                // If a divider is specified, do the division to 2 decimals places and send back as double/float
-                // otherwise force as an integer whole
-                // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
-                int8_t divider = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
-                fahrenheit     = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
-
-                if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(int8_t *)(dv.value_p), divider, fahrenheit);
-                } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(uint8_t *)(dv.value_p), divider, fahrenheit);
-                } else if ((dv.type == DeviceValueType::SHORT) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(int16_t *)(dv.value_p), divider, fahrenheit);
-                } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(uint16_t *)(dv.value_p), divider, fahrenheit);
-                } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(uint32_t *)(dv.value_p), divider, fahrenheit);
-                } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    uint32_t time_value = *(uint32_t *)(dv.value_p);
-                    obj["v"]            = (divider > 0) ? time_value / divider : time_value; // sometimes we need to divide by 60
-                }
-            }
-
-            // add the unit of measure (uom)
-            obj["u"] = fahrenheit ? (uint8_t)DeviceValueUOM::FAHRENHEIT : dv.uom;
-
-            // add name, prefixing the tag if it exists
-            if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
-                obj["n"] = dv.full_name;
-            } else if (dv.tag < DeviceValueTAG::TAG_HC1) {
-                obj["n"] = tag_to_string(dv.tag) + " " + read_flash_string(dv.full_name);
-            } else {
-                obj["n"] = tag_to_string(dv.tag) + " " + read_flash_string(dv.full_name);
-            }
-
-            // add commands and options
-            if (dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY)) {
-                // add the name of the Command function
-                if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-                    obj["c"] = tag_to_mqtt(dv.tag) + "/" + read_flash_string(dv.short_name);
-                } else {
-                    obj["c"] = dv.short_name;
-                }
-                // add the Command options
-                if (dv.type == DeviceValueType::ENUM || (dv.type == DeviceValueType::CMD && dv.options_size > 1)) {
-                    JsonArray l = obj.createNestedArray("l");
-                    for (uint8_t i = 0; i < dv.options_size; i++) {
-                        if (!read_flash_string(dv.options[i]).empty()) {
-                            l.add(read_flash_string(dv.options[i]));
+                // add commands and options
+                if (dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY)) {
+                    // add the name of the Command function
+                    if (dv.tag >= DeviceValueTAG::TAG_HC1) {
+                        obj["c"] = tag_to_mqtt(dv.tag) + "/" + read_flash_string(dv.short_name);
+                    } else {
+                        obj["c"] = dv.short_name;
+                    }
+                    // add the Command options
+                    if (dv.type == DeviceValueType::ENUM || (dv.type == DeviceValueType::CMD && dv.options_size > 1)) {
+                        JsonArray l = obj.createNestedArray("l");
+                        for (uint8_t i = 0; i < dv.options_size; i++) {
+                            if (!read_flash_string(dv.options[i]).empty()) {
+                                l.add(read_flash_string(dv.options[i]));
+                            }
+                        }
+                    } else if (dv.type == DeviceValueType::BOOL) {
+                        JsonArray l = obj.createNestedArray("l");
+                        l.add("off");
+                        l.add("on");
+                    }
+                    // add command help template
+                    else if (dv.type == DeviceValueType::STRING || dv.type == DeviceValueType::CMD) {
+                        if (dv.options_size == 1) {
+                            obj["h"] = dv.options[0];
                         }
                     }
-                } else if (dv.type == DeviceValueType::BOOL) {
-                    JsonArray l = obj.createNestedArray("l");
-                    l.add("off");
-                    l.add("on");
-                }
-                // add command help template
-                else if (dv.type == DeviceValueType::STRING || dv.type == DeviceValueType::CMD) {
-                    if (dv.options_size == 1) {
-                        obj["h"] = dv.options[0];
-                    }
-                }
-                // add steps to numeric values with divider/multiplier
-                else {
-                    int8_t divider = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
-                    char   s[10];
-                    if (divider > 0) {
-                        obj["s"] = Helpers::render_value(s, (float)1 / divider, 1);
-                    } else if (divider < 0) {
-                        obj["s"] = Helpers::render_value(s, (-1) * divider, 0);
-                    }
-                    int16_t dv_set_min, dv_set_max;
-                    if (dv.get_min_max(dv_set_min, dv_set_max)) {
-                        obj["m"] = Helpers::render_value(s, dv_set_min, 0);
-                        obj["x"] = Helpers::render_value(s, dv_set_max, 0);
+                    // add steps to numeric values with divider/multiplier
+                    else {
+                        int8_t divider = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
+                        char   s[10];
+                        if (divider > 0) {
+                            obj["s"] = Helpers::render_value(s, (float)1 / divider, 1);
+                        } else if (divider < 0) {
+                            obj["s"] = Helpers::render_value(s, (-1) * divider, 0);
+                        }
+                        int16_t dv_set_min, dv_set_max;
+                        if (dv.get_min_max(dv_set_min, dv_set_max)) {
+                            obj["m"] = Helpers::render_value(s, dv_set_min, 0);
+                            obj["x"] = Helpers::render_value(s, dv_set_max, 0);
+                        }
                     }
                 }
             }
@@ -853,7 +850,7 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
 // this is called before loading in the exclude entities list from the customization service
 void EMSdevice::reset_entity_masks() {
     for (auto & dv : devicevalues_) {
-        dv.state &= 0x0F;
+        dv.state &= 0x0F; // clear high nibble
     }
 }
 
