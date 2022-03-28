@@ -988,7 +988,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     // create the topic, depending on the type and whether the device entity is writable (a command)
     // https://developers.home-assistant.io/docs/core/entity
     char topic[MQTT_TOPIC_MAX_SIZE];
-    // if it's a command then we can use Number, Switch. Otherwise stick to Sensor
+    // if it's a command then we can use Number, Switch, Select. Otherwise stick to Sensor
     if (has_cmd) {
         switch (type) {
         case DeviceValueType::INT:
@@ -996,13 +996,13 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
         case DeviceValueType::SHORT:
         case DeviceValueType::USHORT:
         case DeviceValueType::ULONG:
-            // number - https://www.home-assistant.io/integrations/number.mqtt/
+            // number - https://www.home-assistant.io/integrations/number.mqtt
             // https://developers.home-assistant.io/docs/core/entity/number
 
             snprintf(topic, sizeof(topic), "number/%s/%s/config", mqtt_base_.c_str(), uniq);
             break;
         case DeviceValueType::BOOL:
-            // switch - https://www.home-assistant.io/integrations/switch.mqtt/
+            // switch - https://www.home-assistant.io/integrations/switch.mqtt
             snprintf(topic, sizeof(topic), "switch/%s/%s/config", mqtt_base_.c_str(), uniq);
             break;
         case DeviceValueType::ENUM:

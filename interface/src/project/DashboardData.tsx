@@ -20,8 +20,7 @@ import {
   ListItem,
   ListItemText,
   Grid,
-  useMediaQuery,
-  Tooltip
+  useMediaQuery
 } from '@mui/material';
 
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -38,6 +37,8 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SendIcon from '@mui/icons-material/TrendingFlat';
 import SaveIcon from '@mui/icons-material/Save';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 import DeviceIcon from './DeviceIcon';
 
@@ -219,7 +220,7 @@ const DashboardData: FC = () => {
             {deviceValue.l && (
               <ValidatedTextField
                 name="v"
-                label={deviceValue.n}
+                label={deviceValue.n.slice(2)}
                 value={deviceValue.v}
                 autoFocus
                 sx={{ width: '30ch' }}
@@ -234,7 +235,7 @@ const DashboardData: FC = () => {
             {!deviceValue.l && (
               <ValidatedTextField
                 name="v"
-                label={deviceValue.n}
+                label={deviceValue.n.slice(2)}
                 value={deviceValue.u ? numberValue(deviceValue.v) : deviceValue.v}
                 autoFocus
                 sx={{ width: '30ch' }}
@@ -493,16 +494,29 @@ const DashboardData: FC = () => {
     };
 
     const renderNameCell = (dv: DeviceValue) => {
+      var mask = Number(dv.n.slice(0, 2));
+      var name = dv.n.slice(2);
       if (dv.v === undefined && dv.c) {
         return (
-          <StyledTableCell component="th" scope="row" sx={{ color: 'yellow' }}>
-            command:&nbsp;{dv.n}
+          <StyledTableCell component="th" scope="row">
+            {name}&nbsp;
+            <PlayArrowIcon color="primary" sx={{ fontSize: 10 }} />
           </StyledTableCell>
         );
       }
+
+      if ((mask & 8) === 8) {
+        return (
+          <StyledTableCell component="th" scope="row">
+            {name}&nbsp;
+            <FavoriteIcon color="error" sx={{ fontSize: 10 }} />
+          </StyledTableCell>
+        );
+      }
+
       return (
         <StyledTableCell component="th" scope="row">
-          {dv.n}
+          {name}
         </StyledTableCell>
       );
     };
@@ -526,9 +540,7 @@ const DashboardData: FC = () => {
                 <StyledTableCell padding="checkbox">
                   {dv.c && me.admin && (
                     <IconButton size="small">
-                      <Tooltip title="Change value...">
-                        <EditIcon color="primary" fontSize="small" />
-                      </Tooltip>
+                      <EditIcon color="primary" fontSize="small" />
                     </IconButton>
                   )}
                 </StyledTableCell>
