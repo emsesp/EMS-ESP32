@@ -62,6 +62,7 @@ void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVari
         String    timeLocal = json["local_time"];
         char *    s         = strptime(timeLocal.c_str(), "%Y-%m-%dT%H:%M:%S", &tm);
         if (s != nullptr) {
+            tm.tm_isdst         = -1; // not set by strptime, tells mktime to determine daylightsaving
             time_t         time = mktime(&tm);
             struct timeval now  = {.tv_sec = time};
             settimeofday(&now, nullptr);
