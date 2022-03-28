@@ -14,8 +14,7 @@ import {
   DialogContent,
   DialogTitle,
   ToggleButton,
-  ToggleButtonGroup,
-  Tooltip
+  ToggleButtonGroup
 } from '@mui/material';
 
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -117,10 +116,14 @@ const SettingsCustomization: FC = () => {
 
     return (
       <>
-        <Box color="warning.main">
+        <Box mb={2} color="warning.main">
           <Typography variant="body2">
-            You can mark an entity as a favorite to be listed first in the Web Dashboard, or remove it from the
-            Dashboard, or disable it's write operation or exclude it from the MQTT and API outputs.
+            You can mark an entity as a favorite to be listed first in the Dashboard (
+            <FavoriteBorderOutlinedIcon fontSize="small" />) ,or remove it entirely from the Dashboard (
+            <VisibilityOffOutlinedIcon fontSize="small" />) ,or disable it's write operation (
+            <EditOffOutlinedIcon fontSize="small" />) or have it excluded from the MQTT and API outputs (
+            <CommentsDisabledOutlinedIcon fontSize="small" />
+            ).
           </Typography>
         </Box>
         <ValidatedTextField
@@ -174,19 +177,9 @@ const SettingsCustomization: FC = () => {
 
     const setMask = (de: DeviceEntity, newMask: string[]) => {
       var new_mask = 0;
-      if (newMask.includes('1')) {
-        new_mask |= 1;
+      for (let entry of newMask) {
+        new_mask |= Number(entry);
       }
-      if (newMask.includes('2')) {
-        new_mask |= 2;
-      }
-      if (newMask.includes('4')) {
-        new_mask |= 4;
-      }
-      if (newMask.includes('8')) {
-        new_mask |= 8;
-      }
-
       de.m = new_mask;
       setMasks(newMask);
     };
@@ -220,35 +213,27 @@ const SettingsCustomization: FC = () => {
         </TableHead>
         <TableBody>
           {deviceEntities.map((de) => (
-            <TableRow key={de.i}>
+            <TableRow key={de.i} hover>
               <StyledTableCell padding="checkbox">
                 <ToggleButtonGroup
                   size="small"
-                  color="error"
+                  color="secondary"
                   value={getMask(de)}
                   onChange={(event, mask) => {
                     setMask(de, mask);
                   }}
                 >
                   <ToggleButton value="8" color="success" disabled={(de.m & 1) !== 0}>
-                    <Tooltip title="Favorite">
-                      <FavoriteBorderOutlinedIcon fontSize="small" />
-                    </Tooltip>
+                    <FavoriteBorderOutlinedIcon fontSize="small" />
                   </ToggleButton>
                   <ToggleButton value="4" disabled={!de.w}>
-                    <Tooltip title="Force read-only">
-                      <EditOffOutlinedIcon fontSize="small" />
-                    </Tooltip>
+                    <EditOffOutlinedIcon fontSize="small" />
                   </ToggleButton>
                   <ToggleButton value="2">
-                    <Tooltip title="Exclude in MQTT and API">
-                      <CommentsDisabledOutlinedIcon fontSize="small" />
-                    </Tooltip>
+                    <CommentsDisabledOutlinedIcon fontSize="small" />
                   </ToggleButton>
                   <ToggleButton value="1">
-                    <Tooltip title="Don't show Web Dashboard">
-                      <VisibilityOffOutlinedIcon fontSize="small" />
-                    </Tooltip>
+                    <VisibilityOffOutlinedIcon fontSize="small" />
                   </ToggleButton>
                 </ToggleButtonGroup>
               </StyledTableCell>
