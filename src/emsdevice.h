@@ -383,11 +383,6 @@ class EMSdevice {
 
     // device values
     std::vector<DeviceValue> devicevalues_;
-
-    uint8_t dv_index_ = 0; // unique counter for each added device value
-    uint8_t get_next_dv_id() {
-        return (dv_index_++);
-    }
 };
 
 } // namespace emsesp
