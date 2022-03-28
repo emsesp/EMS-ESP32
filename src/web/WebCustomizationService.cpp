@@ -208,7 +208,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request, J
     request->send(response);
 }
 
-// takes a list of masked ids send from the webUI
+// takes a list of masked ids sent from the webUI
 // saves it in the customization service
 // and updates the entity list real-time
 void WebCustomizationService::masked_entities(AsyncWebServerRequest * request, JsonVariant & json) {
