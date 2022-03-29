@@ -283,3 +283,11 @@ export interface WriteAnalog {
   uom: number;
   type: number;
 }
+
+export enum DeviceEntityMask {
+  DV_DEFAULT = 0,
+  DV_WEB_EXCLUDE = 1,
+  DV_API_MQTT_EXCLUDE = 2,
+  DV_READONLY = 4,
+  DV_FAVORITE = 8
+}
