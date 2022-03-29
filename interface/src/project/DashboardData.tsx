@@ -39,6 +39,8 @@ import SaveIcon from '@mui/icons-material/Save';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
+import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 
 import DeviceIcon from './DeviceIcon';
 
@@ -64,7 +66,8 @@ import {
   AnalogType,
   AnalogTypeNames,
   Sensor,
-  Analog
+  Analog,
+  DeviceEntityMask
 } from './types';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -487,39 +490,25 @@ const DashboardData: FC = () => {
       return;
     }
 
+    const hasMask = (entityName: string, mask: number) => (parseInt(entityName.slice(0, 2), 16) & mask) === mask;
+
     const sendCommand = (dv: DeviceValue) => {
-      if (dv.c && me.admin) {
+      if (dv.c && me.admin && !hasMask(dv.n, DeviceEntityMask.DV_READONLY)) {
         setDeviceValue(dv);
       }
     };
 
-    const renderNameCell = (dv: DeviceValue) => {
-      var mask = Number(dv.n.slice(0, 2));
-      var name = dv.n.slice(2);
-      if (dv.v === undefined && dv.c) {
-        return (
-          <StyledTableCell component="th" scope="row">
-            {name}&nbsp;
-            <PlayArrowIcon color="primary" sx={{ fontSize: 12 }} />
-          </StyledTableCell>
-        );
-      }
-
-      if ((mask & 8) === 8) {
-        return (
-          <StyledTableCell component="th" scope="row">
-            {name}&nbsp;
-            <FavoriteBorderIcon color="success" sx={{ fontSize: 10 }} />
-          </StyledTableCell>
-        );
-      }
-
-      return (
-        <StyledTableCell component="th" scope="row">
-          {name}
-        </StyledTableCell>
-      );
-    };
+    const renderNameCell = (dv: DeviceValue) => (
+      <>
+        {dv.n.slice(2)}&nbsp;
+        {hasMask(dv.n, DeviceEntityMask.DV_FAVORITE) && <FavoriteBorderIcon color="success" sx={{ fontSize: 12 }} />}
+        {hasMask(dv.n, DeviceEntityMask.DV_READONLY) && <EditOffOutlinedIcon color="primary" sx={{ fontSize: 12 }} />}
+        {hasMask(dv.n, DeviceEntityMask.DV_API_MQTT_EXCLUDE) && (
+          <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
+        )}
+        {dv.v === undefined && dv.c && <PlayArrowIcon color="primary" sx={{ fontSize: 14 }} />}
+      </>
+    );
 
     return (
       <>
@@ -536,17 +525,27 @@ const DashboardData: FC = () => {
           </TableHead>
           <TableBody>
             {deviceData.data.map((dv, i) => (
-              <StyledTableRow key={i} onClick={() => sendCommand(dv)}>
+              <TableRow
+                key={i}
+                onClick={() => sendCommand(dv)}
+                // sx={
+                //   hasMask(dv.n, DeviceEntityMask.DV_FAVORITE)
+                //     ? { backgroundColor: '#334900' }
+                //     : { backgroundColor: 'black' }
+                // }
+              >
                 <StyledTableCell padding="checkbox">
-                  {dv.c && me.admin && (
+                  {dv.c && me.admin && !hasMask(dv.n, DeviceEntityMask.DV_READONLY) && (
                     <IconButton size="small">
                       <EditIcon color="primary" fontSize="small" />
                     </IconButton>
                   )}
                 </StyledTableCell>
-                {renderNameCell(dv)}
+                <StyledTableCell component="th" scope="row">
+                  {renderNameCell(dv)}
+                </StyledTableCell>
                 <StyledTableCell align="right">{formatValue(dv.v, dv.u)}</StyledTableCell>
-              </StyledTableRow>
+              </TableRow>
             ))}
           </TableBody>
         </Table>

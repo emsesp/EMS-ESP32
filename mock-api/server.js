@@ -488,11 +488,11 @@ const emsesp_devicedata_1 = {
 const emsesp_devicedata_2 = {
   label: 'Boiler: Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i',
   data: [
+    { u: 0, n: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
     { v: 'false', u: 0, n: '08heating active' },
-    { v: 'false', u: 0, n: '08tapwater active' },
-    { u: 0, n: '00reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
-    { v: 5, u: 1, n: '00selected flow temperature', c: 'selflowtemp' },
-    { v: 0, u: 3, n: '00burner selected max power', c: 'selburnpow' },
+    { v: 'false', u: 0, n: '04tapwater active' },
+    { v: 5, u: 1, n: '04selected flow temperature', c: 'selflowtemp' },
+    { v: 0, u: 3, n: '0Eburner selected max power', c: 'selburnpow' },
     { v: 0, u: 3, n: '00heating pump modulation' },
     { v: 53.4, u: 1, n: '00current flow temperature' },
     { v: 52.7, u: 1, n: '00return temperature' },

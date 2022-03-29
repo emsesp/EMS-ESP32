@@ -46,7 +46,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     fontSize: 11
   },
   [`&.${tableCellClasses.body}`]: {
-    fontSize: 11
+    fontSize: 12
   }
 }));
 
@@ -60,7 +60,7 @@ const SettingsCustomization: FC = () => {
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
 
   // eslint-disable-next-line
-  const [masks, setMasks] = useState(() => ['1']);
+  const [masks, setMasks] = useState(() => ['']);
 
   const fetchDevices = useCallback(async () => {
     try {
@@ -119,10 +119,10 @@ const SettingsCustomization: FC = () => {
         <Box mb={2} color="warning.main">
           <Typography variant="body2">
             You can mark an entity as a favorite to be listed first in the Dashboard (
-            <FavoriteBorderOutlinedIcon fontSize="small" />) ,or remove it entirely from the Dashboard (
-            <VisibilityOffOutlinedIcon fontSize="small" />) ,or disable it's write operation (
-            <EditOffOutlinedIcon fontSize="small" />) or have it excluded from the MQTT and API outputs (
-            <CommentsDisabledOutlinedIcon fontSize="small" />
+            <FavoriteBorderOutlinedIcon color="success" fontSize="small" />) ,or remove it entirely from the Dashboard (
+            <VisibilityOffOutlinedIcon color="action" fontSize="small" />) ,or disable it's write operation (
+            <EditOffOutlinedIcon color="action" fontSize="small" />) or have it excluded from the MQTT and API outputs (
+            <CommentsDisabledOutlinedIcon color="action" fontSize="small" />
             ).
           </Typography>
         </Box>
