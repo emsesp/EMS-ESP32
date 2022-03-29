@@ -186,13 +186,13 @@ const SettingsCustomization: FC = () => {
 
     const getMask = (de: DeviceEntity) => {
       var new_masks = [];
-      if ((de.m & 1) === 1) {
+      if ((de.m & 1) === 1 || de.n === '') {
         new_masks.push('1');
       }
       if ((de.m & 2) === 2) {
         new_masks.push('2');
       }
-      if ((de.m & 4) === 4) {
+      if ((de.m & 4) === 4 && de.w) {
         new_masks.push('4');
       }
       if ((de.m & 8) === 8) {
@@ -223,7 +223,7 @@ const SettingsCustomization: FC = () => {
                     setMask(de, mask);
                   }}
                 >
-                  <ToggleButton value="8" color="success" disabled={(de.m & 1) !== 0}>
+                  <ToggleButton value="8" color="success" disabled={(de.m & 1) !== 0 || de.n === ''}>
                     <FavoriteBorderOutlinedIcon fontSize="small" />
                   </ToggleButton>
                   <ToggleButton value="4" disabled={!de.w}>
