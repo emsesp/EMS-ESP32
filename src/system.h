@@ -154,14 +154,13 @@ class System {
         ethernet_connected_ = b;
     }
 
-    void ntp_connected(bool b) {
-        ntp_connected_  = b;
-        ntp_last_check_ = b ? uuid::get_uptime_sec() : 0;
-    }
+    void ntp_connected(bool b);
 
     bool ntp_connected() {
         // timeout 2 hours, ntp sync is normally every hour.
-        ntp_connected_ = (uuid::get_uptime_sec() - ntp_last_check_ > 7201) ? false : ntp_connected_;
+        if ((uuid::get_uptime_sec() - ntp_last_check_ > 7201) && ntp_connected_) {
+            ntp_connected(false);
+        }
         return ntp_connected_;
     }
 

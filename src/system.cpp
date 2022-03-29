@@ -543,6 +543,18 @@ bool System::heartbeat_json(JsonObject & output) {
 
     output["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     output["uptime_sec"] = uuid::get_uptime_sec();
+    bool value_b         = EMSESP::system_.ntp_connected();
+    if (Mqtt::ha_enabled()) {
+        char s[7];
+        output["ntp_status"] = Helpers::render_boolean(s, value_b); // for HA always render as string
+    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+        output["ntp_status"] = value_b;
+    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+        output["ntp_status"] = value_b ? 1 : 0;
+    } else {
+        char s[7];
+        output["ntp_status"] = Helpers::render_boolean(s, value_b);
+    }
     output["rxreceived"] = EMSESP::rxservice_.telegram_count();
     output["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
     output["txreads"]    = EMSESP::txservice_.telegram_read_count();
@@ -1321,6 +1333,15 @@ std::string System::reset_reason(uint8_t cpu) const {
     }
 #endif
     return ("Unkonwn");
+}
+
+// set NTP status
+void System::ntp_connected(bool b) {
+    if (b != ntp_connected_) {
+        LOG_INFO(b ? F("NTP connected") : F("NTP disconnected"));
+    }
+    ntp_connected_  = b;
+    ntp_last_check_ = b ? uuid::get_uptime_sec() : 0;
 }
 
 } // namespace emsesp

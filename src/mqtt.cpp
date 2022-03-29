@@ -648,6 +648,7 @@ void Mqtt::ha_status() {
     }
     publish_system_ha_sensor_config(DeviceValueType::INT, F("Uptime"), F("uptime"), DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, F("Uptime (sec)"), F("uptime_sec"), DeviceValueUOM::SECONDS);
+    publish_system_ha_sensor_config(DeviceValueType::BOOL, F("NTP status"), F("ntp_status"), DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, F("Free memory"), F("freemem"), DeviceValueUOM::KB);
     publish_system_ha_sensor_config(DeviceValueType::INT, F("MQTT fails"), F("mqttfails"), DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, F("Rx received"), F("rxreceived"), DeviceValueUOM::NONE);
