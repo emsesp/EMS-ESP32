@@ -37,7 +37,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SendIcon from '@mui/icons-material/TrendingFlat';
 import SaveIcon from '@mui/icons-material/Save';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 import DeviceIcon from './DeviceIcon';
@@ -500,7 +500,7 @@ const DashboardData: FC = () => {
         return (
           <StyledTableCell component="th" scope="row">
             {name}&nbsp;
-            <PlayArrowIcon color="primary" sx={{ fontSize: 10 }} />
+            <PlayArrowIcon color="primary" sx={{ fontSize: 12 }} />
           </StyledTableCell>
         );
       }
@@ -509,7 +509,7 @@ const DashboardData: FC = () => {
         return (
           <StyledTableCell component="th" scope="row">
             {name}&nbsp;
-            <FavoriteIcon color="error" sx={{ fontSize: 10 }} />
+            <FavoriteBorderIcon color="success" sx={{ fontSize: 10 }} />
           </StyledTableCell>
         );
       }

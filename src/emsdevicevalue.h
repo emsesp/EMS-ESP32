@@ -137,7 +137,6 @@ class DeviceValue {
     int16_t                             min;          // min range
     uint16_t                            max;          // max range
     uint8_t                             state;        // DeviceValueState::*
-    uint8_t                             id;           // internal unique counter
 
     DeviceValue(uint8_t                             device_type,
                 uint8_t                             tag,
@@ -152,8 +151,7 @@ class DeviceValue {
                 bool                                has_cmd,
                 int16_t                             min,
                 uint16_t                            max,
-                uint8_t                             state,
-                uint8_t                             id)
+                uint8_t                             state)
         : device_type(device_type)
         , tag(tag)
         , value_p(value_p)
@@ -167,8 +165,7 @@ class DeviceValue {
         , has_cmd(has_cmd)
         , min(min)
         , max(max)
-        , state(state)
-        , id(id) {
+        , state(state) {
     }
 
     bool hasValue();

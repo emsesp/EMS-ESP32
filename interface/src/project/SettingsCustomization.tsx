@@ -213,7 +213,7 @@ const SettingsCustomization: FC = () => {
         </TableHead>
         <TableBody>
           {deviceEntities.map((de) => (
-            <TableRow key={de.i} hover>
+            <TableRow key={de.s} hover>
               <StyledTableCell padding="checkbox">
                 <ToggleButtonGroup
                   size="small"

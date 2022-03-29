@@ -148,7 +148,6 @@ export interface DeviceEntity {
   s: string; // shortname
   m: number; // mask
   w?: boolean; // writeable
-  i: number; // unique id
 }
 
 export interface MaskedEntities {
