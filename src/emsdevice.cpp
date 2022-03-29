@@ -831,7 +831,7 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
                 obj["n"] = name;
             }
         } else {
-            obj["n"] = "(hidden)";
+            obj["n"] = "";
         }
 
         // shortname
