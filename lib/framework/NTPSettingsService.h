@@ -57,6 +57,7 @@ class NTPSettingsService : public StatefulService<NTPSettings> {
     NTPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
 
     void begin();
+    static void ntp_received(struct timeval * tv);
 
   private:
     HttpEndpoint<NTPSettings>   _httpEndpoint;
@@ -67,6 +68,7 @@ class NTPSettingsService : public StatefulService<NTPSettings> {
     void WiFiEvent(WiFiEvent_t event);
     void configureNTP();
     void configureTime(AsyncWebServerRequest * request, JsonVariant & json);
+
 };
 
 #endif
