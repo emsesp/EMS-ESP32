@@ -1080,6 +1080,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["version"]          = EMSESP_APP_VERSION;
     node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptime (seconds)"] = uuid::get_uptime_sec();
+    node["network time"]     = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
 
 #ifndef EMSESP_STANDALONE
     node["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes

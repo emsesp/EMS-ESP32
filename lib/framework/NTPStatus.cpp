@@ -1,4 +1,5 @@
 #include <NTPStatus.h>
+#include "../../src/emsesp_stub.hpp" // proddy added
 
 using namespace std::placeholders; // for `_1` etc
 
@@ -35,7 +36,7 @@ void NTPStatus::ntpStatus(AsyncWebServerRequest * request) {
     time_t now = time(nullptr);
 
     // only provide enabled/disabled status for now
-    root["status"] = sntp_enabled() ? 1 : 0;
+    root["status"] = sntp_enabled() && emsesp::EMSESP::system_.ntp_connected() ? 1 : 0;
 
     // the current time in UTC
     root["utc_time"] = toUTCTimeString(gmtime(&now));

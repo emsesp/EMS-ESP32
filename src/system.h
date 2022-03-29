@@ -154,6 +154,17 @@ class System {
         ethernet_connected_ = b;
     }
 
+    void ntp_connected(bool b) {
+        ntp_connected_  = b;
+        ntp_last_check_ = b ? uuid::get_uptime_sec() : 0;
+    }
+
+    bool ntp_connected() {
+        // timeout 2 hours, ntp sync is normally every hour.
+        ntp_connected_ = (uuid::get_uptime_sec() - ntp_last_check_ > 7201) ? false : ntp_connected_;
+        return ntp_connected_;
+    }
+
     bool network_connected() {
 #ifndef EMSESP_STANDALONE
         return (ethernet_connected() || WiFi.isConnected());
@@ -217,6 +228,9 @@ class System {
 
     bool upload_status_      = false; // true if we're in the middle of a OTA firmware upload
     bool ethernet_connected_ = false;
+
+    bool     ntp_connected_  = false;
+    uint32_t ntp_last_check_ = 0;
 
     // EMS-ESP settings
     // copies from WebSettings class in WebSettingsService.h and loaded with reload_settings()

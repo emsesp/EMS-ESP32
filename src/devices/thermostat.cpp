@@ -1235,7 +1235,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     // check clock
     time_t now    = time(nullptr);
     tm *   tm_    = localtime(&now);
-    bool   ntp_   = tm_->tm_year > 110; // year 2010 and up, time is valid
+    bool   tset_  = tm_->tm_year > 110; // year 2010 and up, time is valid
     tm_->tm_year  = telegram->message_data[0] + 100;
     tm_->tm_mon   = telegram->message_data[1] - 1;
     tm_->tm_mday  = telegram->message_data[3];
@@ -1244,7 +1244,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     tm_->tm_sec   = telegram->message_data[5];
     tm_->tm_isdst = telegram->message_data[7] & 0x01;
     time_t ttime  = mktime(tm_);           // thermostat time
-    if (ntp_ && has_command(&dateTime_)) { // have NTP time and command
+    if (tset_ &&  EMSESP::system_.ntp_connected() && has_command(&dateTime_)) { // have NTP time and command
         double difference = difftime(now, ttime);
         if (difference > 15 || difference < -15) {
             set_datetime("ntp", -1); // set from NTP
@@ -1252,7 +1252,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
         }
     }
 #ifndef EMSESP_STANDALONE
-    if (!ntp_ && tm_->tm_year > 110) { // emsesp clock not set, but thermostat clock
+    if (!tset_ && tm_->tm_year > 110) { // emsesp clock not set, but thermostat clock
         struct timeval newnow = {.tv_sec = ttime};
         settimeofday(&newnow, nullptr);
         LOG_INFO(F("ems-esp time set from thermostat"));
@@ -1797,8 +1797,11 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
     if (dt == "ntp") {
         time_t now = time(nullptr);
         tm *   tm_ = localtime(&now);
-        if (tm_->tm_year < 110) { // no NTP time
+        if (tm_->tm_year < 110) { // no valid time
             return false;
+        }
+        if (!EMSESP::system_.ntp_connected()) {
+            LOG_WARNING(F("Set date: no valid NTP data, setting from ESP Clock"));
         }
 
         data[0] = tm_->tm_year - 100; // Bosch counts from 2000
