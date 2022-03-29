@@ -593,21 +593,21 @@ const emsesp_devicedata_4 = {
 const emsesp_deviceentities_1 = [
   {
     v: '(0)',
-    n: '00error code',
+    n: 'error code',
     s: 'errorcode',
     m: 0,
     i: 1,
   },
   {
     v: '14:54:39 06/06/2021',
-    n: '00date/time',
+    n: 'date/time',
     s: 'datetime',
     m: 0,
     i: 2,
   },
   {
     v: 18.22,
-    n: '00hc1 selected room temperature',
+    n: 'hc1 selected room temperature',
     s: 'hc1/seltemp',
     m: 0,
     w: true,
@@ -615,14 +615,14 @@ const emsesp_deviceentities_1 = [
   },
   {
     v: 22.6,
-    n: '00hc1 current room temperature',
+    n: 'hc1 current room temperature',
     s: 'hc1/curtemp',
     m: 0,
     i: 4,
   },
   {
     v: 'auto',
-    n: '00hc1 mode',
+    n: 'hc1 mode',
     s: 'hc1/mode',
     m: 0,
     w: true,

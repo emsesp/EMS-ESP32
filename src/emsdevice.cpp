@@ -395,9 +395,6 @@ void EMSdevice::register_device_value(uint8_t                             tag,
         }
     }
 
-    // this is the unique id set for the device entity. it's a simple sequence number
-    uint8_t dv_id = get_next_dv_id();
-
     // determine state
     uint8_t state = DeviceValueState::DV_DEFAULT;
 
@@ -418,7 +415,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
     });
 
     // add the device
-    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, 0, has_cmd, min, max, state, dv_id);
+    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, 0, has_cmd, min, max, state);
 }
 
 // function with min and max values
@@ -637,11 +634,15 @@ void EMSdevice::generate_values_web(JsonObject & output) {
     output["label"] = to_string_short();
     JsonArray data  = output.createNestedArray("data");
 
-    // do two passes. First for all entities marked as favourites, then for all others. This sorts the list.
-    for (uint8_t i = 0; i < 2; i++) {
+    // do two passes. First for all entities marked as favorites, then for all others. This sorts the list.
+    for (int8_t fav = 1; fav >= 0; fav--) {
         for (auto & dv : devicevalues_) {
-            bool state = (!i && dv.has_state(DeviceValueState::DV_FAVORITE)) || (i && !dv.has_state(DeviceValueState::DV_FAVORITE));
-            if (state && (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.full_name && (dv.hasValue() || (dv.type == DeviceValueType::CMD)))) {
+            // check conditions:
+            //  1. full_name cannot be empty
+            //  2. it must have a valid value, if it is not a command like 'reset'
+            //  3. show favorites first
+            bool show = (fav && dv.has_state(DeviceValueState::DV_FAVORITE)) || (!fav && !dv.has_state(DeviceValueState::DV_FAVORITE));
+            if (show && !dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.full_name && (dv.hasValue() || (dv.type == DeviceValueType::CMD))) {
                 JsonObject obj        = data.createNestedObject(); // create the object, we know there is a value
                 uint8_t    fahrenheit = 0;
 
@@ -842,7 +843,6 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
 
         obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble
         obj["w"] = dv.has_cmd;    // if writable
-        obj["i"] = dv.id;         // add the unique ID
     }
 }
 
