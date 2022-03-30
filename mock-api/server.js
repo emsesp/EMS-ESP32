@@ -344,7 +344,7 @@ const emsesp_devices = {
       i: 1,
       d: 23,
       p: 77,
-      s: 'Thermostat1 (RC20/Moduline 300)',
+      s: 'Thermostat (RC20/Moduline 300)',
     },
     {
       i: 2,
@@ -356,7 +356,7 @@ const emsesp_devices = {
       i: 4,
       d: 16,
       p: 165,
-      s: 'Thermostat2 (RC100/Moduline 1000/1010)',
+      s: 'Thermostat (RC100/Moduline 1000/1010)',
     },
   ],
 }
@@ -377,7 +377,7 @@ const emsesp_coredata = {
     {
       i: 1,
       t: 'Thermostat',
-      s: 'Thermostat1',
+      s: 'Thermostat',
       b: '',
       n: 'RC20/Moduline 300',
       d: 23,
@@ -388,7 +388,7 @@ const emsesp_coredata = {
     {
       i: 4,
       t: 'Thermostat',
-      s: 'Thermostat2',
+      s: 'Thermostat',
       b: 'Buderus',
       n: 'RC100/Moduline 1000/1010',
       d: 16,
@@ -596,29 +596,28 @@ const emsesp_deviceentities_1 = [
     n: 'error code',
     s: 'errorcode',
     m: 0,
-    i: 1,
+    w: false,
   },
   {
     v: '14:54:39 06/06/2021',
     n: 'date/time',
     s: 'datetime',
     m: 0,
-    i: 2,
+    w: false,
   },
   {
-    v: 18.22,
+    v: 18.2,
     n: 'hc1 selected room temperature',
     s: 'hc1/seltemp',
     m: 0,
     w: true,
-    i: 3,
   },
   {
     v: 22.6,
     n: 'hc1 current room temperature',
     s: 'hc1/curtemp',
     m: 0,
-    i: 4,
+    w: false,
   },
   {
     v: 'auto',
@@ -626,90 +625,89 @@ const emsesp_deviceentities_1 = [
     s: 'hc1/mode',
     m: 0,
     w: true,
-    i: 5,
   },
 ]
 
 const emsesp_deviceentities_2 = [
-  { v: false, n: 'heating active', s: 'heatingactive', m: 0, i: 1 },
-  { v: false, n: 'tapwater active', s: 'tapwateractive', m: 0, i: 2 },
-  { v: 5, n: 'selected flow temperature', s: 'selflowtemp', m: 0, i: 3 },
-  { v: 0, n: 'burner selected max power', s: 'selburnpow', m: 0, i: 4 },
-  { v: 0, n: 'heating pump modulation', s: 'heatingpumpmod', m: 0, i: 5 },
-  { n: 'heating pump 2 modulation', s: 'heatingpump2mod', m: 2, i: 6 },
-  { n: 'outside temperature', s: 'outdoortemp', m: 2, i: 7 },
-  { v: 53, n: 'current flow temperature', s: 'curflowtemp', m: 0, i: 8 },
-  { v: 51.8, n: 'return temperature', s: 'rettemp', m: 0, i: 9 },
-  { n: 'mixing switch temperature', s: 'switchtemp', m: 2, i: 10 },
-  { v: 1.3, n: 'system pressure', s: 'syspress', m: 0, i: 11 },
-  { v: 54.6, n: 'actual boiler temperature', s: 'boiltemp', m: 0, i: 12 },
-  { n: 'exhaust temperature', s: 'exhausttemp', m: 2, i: 13 },
-  { v: false, n: 'gas', s: 'burngas', m: 0, i: 14 },
-  { v: false, n: 'gas stage 2', s: 'burngas2', m: 0, i: 15 },
-  { v: 0, n: 'flame current', s: 'flamecurr', m: 0, i: 16 },
-  { v: false, n: 'heating pump', s: 'heatingpump', m: 0, i: 17 },
-  { v: false, n: 'fan', s: 'fanwork', m: 0, i: 18 },
-  { v: false, n: 'ignition', s: 'ignwork', m: 0, i: 19 },
-  { v: false, n: 'oil preheating', s: 'oilpreheat', m: 0, i: 20 },
-  { v: true, n: 'heating activated', s: 'heatingactivated', m: 0, i: 21 },
-  { v: 80, n: 'heating temperature', s: 'heatingtemp', m: 0, i: 22 },
-  { v: 70, n: 'burner pump max power', s: 'pumpmodmax', m: 0, i: 23 },
-  { v: 30, n: 'burner pump min power', s: 'pumpmodmin', m: 0, i: 24 },
-  { v: 1, n: 'pump delay', s: 'pumpdelay', m: 0, i: 25 },
-  { v: 10, n: 'burner min period', s: 'burnminperiod', m: 0, i: 26 },
-  { v: 0, n: 'burner min power', s: 'burnminpower', m: 0, i: 27 },
-  { v: 50, n: 'burner max power', s: 'burnmaxpower', m: 0, i: 28 },
-  { v: -6, n: 'hysteresis on temperature', s: 'boilhyston', m: 0, i: 29 },
-  { v: 6, n: 'hysteresis off temperature', s: 'boilhystoff', m: 0, i: 30 },
-  { v: 0, n: 'set flow temperature', s: 'setflowtemp', m: 0, i: 31 },
-  { v: 0, n: 'burner set power', s: 'setburnpow', m: 0, i: 32 },
-  { v: 0, n: 'burner current power', s: 'curburnpow', m: 0, i: 33 },
-  { v: 326323, n: 'burner starts', s: 'burnstarts', m: 0, i: 34 },
-  { v: 553437, n: 'total burner operating time', s: 'burnworkmin', m: 0, i: 35 },
-  { v: 451286, n: 'total heat operating time', s: 'heatworkmin', m: 0, i: 36 },
-  { v: 4672175, n: 'total UBA operating time', s: 'ubauptime', m: 0, i: 37 },
-  { v: '1C(210) 06.06.2020 12:07 (0 min)', n: 'last error code', s: 'lastcode', m: 0, i: 38 },
-  { v: '0H', n: 'service code', s: 'servicecode', m: 0, i: 39 },
-  { v: 203, n: 'service code number', s: 'servicecodenumber', m: 0, i: 40 },
-  { v: 'H00', n: 'maintenance message', s: 'maintenancemessage', m: 0, i: 41 },
-  { v: 'manual', n: 'maintenance scheduled', s: 'maintenance', m: 0, i: 42 },
-  { v: 6000, n: 'time to next maintenance', s: 'maintenancetime', m: 0, i: 43 },
-  { v: '01.01.2012', n: 'next maintenance date', s: 'maintenancedate', m: 0, i: 44 },
-  { v: true, n: 'dhw turn on/off', s: 'wwtapactivated', m: 0, i: 45 },
-  { v: 62, n: 'dhw set temperature', s: 'wwsettemp', m: 0, i: 46 },
-  { v: 60, n: 'dhw selected temperature', s: 'wwseltemp', m: 0, i: 47 },
-  { n: 'dhw selected lower temperature', s: 'wwseltemplow', m: 2, i: 48 },
-  { n: 'dhw selected temperature for off', s: 'wwseltempoff', m: 2, i: 49 },
-  { n: 'dhw single charge temperature', s: 'wwseltempsingle', m: 2, i: 50 },
-  { v: 'flow', n: 'dhw type', s: 'wwtype', m: 0, i: 51 },
-  { v: 'hot', n: 'dhw comfort', s: 'wwcomfort', m: 0, i: 52 },
-  { v: 40, n: 'dhw flow temperature offset', s: 'wwflowtempoffset', m: 0, i: 53 },
-  { v: 100, n: 'dhw max power', s: 'wwmaxpower', m: 0, i: 54 },
-  { v: false, n: 'dhw circulation pump available', s: 'wwcircpump', m: 0, i: 55 },
-  { v: '3-way valve', n: 'dhw charging type', s: 'wwchargetype', m: 0, i: 56 },
-  { v: -5, n: 'dhw hysteresis on temperature', s: 'wwhyston', m: 0, i: 57 },
-  { v: 0, n: 'dhw hysteresis off temperature', s: 'wwhystoff', m: 0, i: 58 },
-  { v: 70, n: 'dhw disinfection temperature', s: 'wwdisinfectiontemp', m: 0, i: 59 },
-  { v: 'off', n: 'dhw circulation pump mode', s: 'wwcircmode', m: 0, i: 60 },
-  { v: false, n: 'dhw circulation active', s: 'wwcirc', m: 0, i: 61 },
-  { v: 46.4, n: 'dhw current intern temperature', s: 'wwcurtemp', m: 0, i: 62 },
-  { n: 'dhw current extern temperature', s: 'wwcurtemp2', m: 2, i: 63 },
-  { v: 0, n: 'dhw current tap water flow', s: 'wwcurflow', m: 0, i: 64 },
-  { v: 46.3, n: 'dhw storage intern temperature', s: 'wwstoragetemp1', m: 0, i: 65 },
-  { n: 'dhw storage extern temperature', s: 'wwstoragetemp2', m: 2, i: 66 },
-  { v: true, n: 'dhw activated', s: 'wwactivated', m: 0, i: 67 },
-  { v: false, n: 'dhw one time charging', s: 'wwonetime', m: 0, i: 68 },
-  { v: false, n: 'dhw disinfecting', s: 'wwdisinfecting', m: 0, i: 69 },
-  { v: false, n: 'dhw charging', s: 'wwcharging', m: 0, i: 70 },
-  { v: false, n: 'dhw recharging', s: 'wwrecharging', m: 0, i: 71 },
-  { v: true, n: 'dhw temperature ok', s: 'wwtempok', m: 0, i: 72 },
-  { v: false, n: 'dhw active', s: 'wwactive', m: 0, i: 73 },
-  { v: true, n: 'dhw 3way valve active', s: 'ww3wayvalve', m: 0, i: 74 },
-  { v: 0, n: 'dhw set pump power', s: 'wwsetpumppower', m: 0, i: 75 },
-  { n: 'dhw mixer temperature', s: 'wwmixertemp', m: 2, i: 76 },
-  { n: 'dhw cylinder middle temperature (TS3)', s: 'wwcylmiddletemp', m: 2, i: 77 },
-  { v: 288768, n: 'dhw starts', s: 'wwstarts', m: 0, i: 78 },
-  { v: 102151, n: 'dhw active time', s: 'wwworkm', m: 0, i: 79 },
+  { v: false, n: 'heating active', s: 'heatingactive', m: 0 },
+  { v: false, n: 'tapwater active', s: 'tapwateractive', m: 0 },
+  { v: 5, n: 'selected flow temperature', s: 'selflowtemp', m: 0 },
+  { v: 0, n: 'burner selected max power', s: 'selburnpow', m: 0 },
+  { v: 0, n: 'heating pump modulation', s: 'heatingpumpmod', m: 0 },
+  { n: 'heating pump 2 modulation', s: 'heatingpump2mod', m: 2 },
+  { n: 'outside temperature', s: 'outdoortemp', m: 2 },
+  { v: 53, n: 'current flow temperature', s: 'curflowtemp', m: 0 },
+  { v: 51.8, n: 'return temperature', s: 'rettemp', m: 0 },
+  { n: 'mixing switch temperature', s: 'switchtemp', m: 2 },
+  { v: 1.3, n: 'system pressure', s: 'syspress', m: 0 },
+  { v: 54.6, n: 'actual boiler temperature', s: 'boiltemp', m: 0 },
+  { n: 'exhaust temperature', s: 'exhausttemp', m: 2 },
+  { v: false, n: 'gas', s: 'burngas', m: 0 },
+  { v: false, n: 'gas stage 2', s: 'burngas2', m: 0 },
+  { v: 0, n: 'flame current', s: 'flamecurr', m: 0 },
+  { v: false, n: 'heating pump', s: 'heatingpump', m: 0 },
+  { v: false, n: 'fan', s: 'fanwork', m: 0 },
+  { v: false, n: 'ignition', s: 'ignwork', m: 0 },
+  { v: false, n: 'oil preheating', s: 'oilpreheat', m: 0 },
+  { v: true, n: 'heating activated', s: 'heatingactivated', m: 0 },
+  { v: 80, n: 'heating temperature', s: 'heatingtemp', m: 0 },
+  { v: 70, n: 'burner pump max power', s: 'pumpmodmax', m: 0 },
+  { v: 30, n: 'burner pump min power', s: 'pumpmodmin', m: 0 },
+  { v: 1, n: 'pump delay', s: 'pumpdelay', m: 0 },
+  { v: 10, n: 'burner min period', s: 'burnminperiod', m: 0 },
+  { v: 0, n: 'burner min power', s: 'burnminpower', m: 0 },
+  { v: 50, n: 'burner max power', s: 'burnmaxpower', m: 0 },
+  { v: -6, n: 'hysteresis on temperature', s: 'boilhyston', m: 0 },
+  { v: 6, n: 'hysteresis off temperature', s: 'boilhystoff', m: 0 },
+  { v: 0, n: 'set flow temperature', s: 'setflowtemp', m: 0 },
+  { v: 0, n: 'burner set power', s: 'setburnpow', m: 0 },
+  { v: 0, n: 'burner current power', s: 'curburnpow', m: 0 },
+  { v: 326323, n: 'burner starts', s: 'burnstarts', m: 0 },
+  { v: 553437, n: 'total burner operating time', s: 'burnworkmin', m: 0 },
+  { v: 451286, n: 'total heat operating time', s: 'heatworkmin', m: 0 },
+  { v: 4672175, n: 'total UBA operating time', s: 'ubauptime', m: 0 },
+  { v: '1C(210) 06.06.2020 12:07 (0 min)', n: 'last error code', s: 'lastcode', m: 0 },
+  { v: '0H', n: 'service code', s: 'servicecode', m: 0 },
+  { v: 203, n: 'service code number', s: 'servicecodenumber', m: 0 },
+  { v: 'H00', n: 'maintenance message', s: 'maintenancemessage', m: 0 },
+  { v: 'manual', n: 'maintenance scheduled', s: 'maintenance', m: 0 },
+  { v: 6000, n: 'time to next maintenance', s: 'maintenancetime', m: 0 },
+  { v: '01.01.2012', n: 'next maintenance date', s: 'maintenancedate', m: 0 },
+  { v: true, n: 'dhw turn on/off', s: 'wwtapactivated', m: 0 },
+  { v: 62, n: 'dhw set temperature', s: 'wwsettemp', m: 0 },
+  { v: 60, n: 'dhw selected temperature', s: 'wwseltemp', m: 0 },
+  { n: 'dhw selected lower temperature', s: 'wwseltemplow', m: 2 },
+  { n: 'dhw selected temperature for off', s: 'wwseltempoff', m: 2 },
+  { n: 'dhw single charge temperature', s: 'wwseltempsingle', m: 2 },
+  { v: 'flow', n: 'dhw type', s: 'wwtype', m: 0 },
+  { v: 'hot', n: 'dhw comfort', s: 'wwcomfort', m: 0 },
+  { v: 40, n: 'dhw flow temperature offset', s: 'wwflowtempoffset', m: 0 },
+  { v: 100, n: 'dhw max power', s: 'wwmaxpower', m: 0 },
+  { v: false, n: 'dhw circulation pump available', s: 'wwcircpump', m: 0 },
+  { v: '3-way valve', n: 'dhw charging type', s: 'wwchargetype', m: 0 },
+  { v: -5, n: 'dhw hysteresis on temperature', s: 'wwhyston', m: 0 },
+  { v: 0, n: 'dhw hysteresis off temperature', s: 'wwhystoff', m: 0 },
+  { v: 70, n: 'dhw disinfection temperature', s: 'wwdisinfectiontemp', m: 0 },
+  { v: 'off', n: 'dhw circulation pump mode', s: 'wwcircmode', m: 0 },
+  { v: false, n: 'dhw circulation active', s: 'wwcirc', m: 0 },
+  { v: 46.4, n: 'dhw current intern temperature', s: 'wwcurtemp', m: 0 },
+  { n: 'dhw current extern temperature', s: 'wwcurtemp2', m: 2 },
+  { v: 0, n: 'dhw current tap water flow', s: 'wwcurflow', m: 0 },
+  { v: 46.3, n: 'dhw storage intern temperature', s: 'wwstoragetemp1', m: 0 },
+  { n: 'dhw storage extern temperature', s: 'wwstoragetemp2', m: 2 },
+  { v: true, n: 'dhw activated', s: 'wwactivated', m: 0 },
+  { v: false, n: 'dhw one time charging', s: 'wwonetime', m: 0 },
+  { v: false, n: 'dhw disinfecting', s: 'wwdisinfecting', m: 0 },
+  { v: false, n: 'dhw charging', s: 'wwcharging', m: 0 },
+  { v: false, n: 'dhw recharging', s: 'wwrecharging', m: 0 },
+  { v: true, n: 'dhw temperature ok', s: 'wwtempok', m: 0 },
+  { v: false, n: 'dhw active', s: 'wwactive', m: 0 },
+  { v: true, n: 'dhw 3way valve active', s: 'ww3wayvalve', m: 0 },
+  { v: 0, n: 'dhw set pump power', s: 'wwsetpumppower', m: 0 },
+  { n: 'dhw mixer temperature', s: 'wwmixertemp', m: 2 },
+  { n: 'dhw cylinder middle temperature (TS3)', s: 'wwcylmiddletemp', m: 2 },
+  { v: 288768, n: 'dhw starts', s: 'wwstarts', m: 0 },
+  { v: 102151, n: 'dhw active time', s: 'wwworkm', m: 0 },
 ]
 
 const emsesp_deviceentities_4 = [
@@ -718,20 +716,21 @@ const emsesp_deviceentities_4 = [
     n: 'hc2 selected room temperature',
     s: 'hc2/seltemp',
     m: 0,
-    i: 1,
+    w: true,
   },
   {
+    v: 18.5,
     n: 'hc2 current room temperature',
     s: 'hc2/curtemp',
     m: 3,
-    i: 2,
+    w: false,
   },
   {
     v: 'off',
     n: 'hc2 mode',
     s: 'hc2/mode',
     m: 3,
-    i: 3,
+    w: true,
   },
 ]
 
@@ -924,9 +923,39 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
   }
 })
 
+function myF(entity, de, dd) {
+  const name = entity.slice(2)
+  const mask = parseInt(entity.slice(0, 2), 16)
+  const mask_hex = entity.slice(0, 2)
+
+  objIndex = de.findIndex((obj) => obj.s == name)
+  if (objIndex !== -1) {
+    de[objIndex].m = mask
+    const fullname = de[objIndex].n
+    objIndex = dd.data.findIndex((obj) => obj.n.slice(2) == fullname)
+    if (objIndex !== -1) {
+      dd.data[objIndex].n = mask_hex + fullname
+      console.log('Updating: ')
+      console.log(dd.data[objIndex])
+    } else {
+      console.log("can't locate record for " + fullname)
+    }
+  } else {
+    console.log("can't locate record for id " + id)
+  }
+}
+
 rest_server.post(EMSESP_MASKED_ENTITIES_ENDPOINT, (req, res) => {
-  console.log('list for unique id ' + req.body.id + ' and entities:')
-  console.log(req.body.entity_ids)
+  const id = req.body.id
+  for (const entity of req.body.entity_ids) {
+    if (id === 1) {
+      myF(entity, emsesp_deviceentities_1, emsesp_devicedata_1)
+    } else if (id === 2) {
+      myF(entity, emsesp_deviceentities_2, emsesp_devicedata_2)
+    } else if (id === 4) {
+      myF(entity, emsesp_deviceentities_4, emsesp_devicedata_4)
+    }
+  }
   res.sendStatus(200)
 })
 
