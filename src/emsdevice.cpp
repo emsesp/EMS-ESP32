@@ -858,11 +858,16 @@ void EMSdevice::reset_entity_masks() {
 // disable/exclude/mask_out a device entity based on the id
 void EMSdevice::mask_entity(const std::string & entity_id) {
     // first character contains mask flags
-    uint8_t flag = Helpers::hextoint(entity_id.substr(0, 2).c_str());
+    uint8_t flag = (Helpers::hextoint(entity_id.substr(0, 2).c_str()) << 4);
     for (auto & dv : devicevalues_) {
         std::string entity = dv.tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(dv.short_name) : tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
         if (entity == entity_id.substr(2)) {
-            dv.state = (dv.state & 0x0F) | (flag << 4); // set state high bits to flag, turn off active and ha flags
+            // remove ha config on change of dv_readonly flag
+            if (Mqtt::ha_enabled() && ((dv.state ^ flag) & DeviceValueState::DV_READONLY)) {
+                dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                Mqtt::publish_ha_sensor_config(dv, "", "", true); // delete topic (remove = true)
+            }
+            dv.state = (dv.state & 0x0F) | flag; // set state high bits to flag
             return;
         }
     }
