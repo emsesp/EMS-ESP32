@@ -48,6 +48,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
     // the telegram handlers...
     // common for all boilers
+    register_telegram_type(0xBF, F("ErrorMessage"), false, MAKE_PF_CB(process_ErrorMessage));
     register_telegram_type(0x10, F("UBAErrorMessage1"), false, MAKE_PF_CB(process_UBAErrorMessage));
     register_telegram_type(0x11, F("UBAErrorMessage2"), false, MAKE_PF_CB(process_UBAErrorMessage));
     register_telegram_type(0xC2, F("UBAErrorMessage3"), false, MAKE_PF_CB(process_UBAErrorMessage2));
@@ -870,6 +871,11 @@ void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegr
         snprintf(message, sizeof(message), "H%02d", message_code);
         has_update(maintenanceMessage_, message, sizeof(maintenanceMessage_));
     }
+}
+
+// 0xBF
+void Boiler::process_ErrorMessage(std::shared_ptr<const Telegram> telegram) {
+    EMSESP::send_read_request(0xC2, device_id()); // read last errorcode
 }
 
 // 0x10, 0x11
