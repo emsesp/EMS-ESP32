@@ -171,6 +171,7 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
             JsonObject obj = devices.createNestedObject();
             obj["i"]       = emsdevice->unique_id(); // a unique id
 
+            /*
             // shortname - we prefix the count to make it unique
             uint8_t device_index = EMSESP::device_index(emsdevice->device_type(), emsdevice->unique_id());
             if (device_index) {
@@ -179,6 +180,8 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
             } else {
                 obj["s"] = emsdevice->device_type_name() + " (" + emsdevice->name() + ")";
             }
+            */
+            obj["s"] = emsdevice->device_type_name() + " (" + emsdevice->name() + ")";
         }
     }
 
