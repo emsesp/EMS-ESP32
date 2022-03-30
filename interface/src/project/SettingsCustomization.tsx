@@ -116,27 +116,23 @@ const SettingsCustomization: FC = () => {
 
     return (
       <>
-        <Box mb={1} color="warning.main">
-          Select a device and customize each entity using the options:
-          <Typography display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            &nbsp;
+        <Box color="warning.main">
+          <Typography variant="body2">Select a device and customize each of its entities using the options:</Typography>
+          <Typography mt={1} ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
             <FavoriteBorderOutlinedIcon color="success" fontSize="small" />
             &nbsp;mark it as favorite to be listed at the top of the Dashboard
           </Typography>
-          <Typography display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            &nbsp;
-            <VisibilityOffOutlinedIcon color="action" fontSize="small" />
-            &nbsp;hide from the Dashboard
-          </Typography>
-          <Typography display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            &nbsp;
+          <Typography ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
             <EditOffOutlinedIcon color="action" fontSize="small" />
-            &nbsp;make it read-only (if it has write operation available)
+            &nbsp;make it read-only, only if it has write operation available
           </Typography>
-          <Typography display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            &nbsp;
+          <Typography ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
             <CommentsDisabledOutlinedIcon color="action" fontSize="small" />
             &nbsp;excluded it from MQTT and API outputs
+          </Typography>
+          <Typography ml={2} mb={1} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
+            <VisibilityOffOutlinedIcon color="action" fontSize="small" />
+            &nbsp;hide it from the Dashboard
           </Typography>
         </Box>
         <ValidatedTextField
@@ -216,7 +212,7 @@ const SettingsCustomization: FC = () => {
     };
 
     return (
-      <Table size="small">
+      <Table size="small" padding="normal">
         <TableHead>
           <TableRow>
             <StyledTableCell align="center">OPTIONS</StyledTableCell>
@@ -227,7 +223,7 @@ const SettingsCustomization: FC = () => {
         <TableBody>
           {deviceEntities.map((de) => (
             <TableRow key={de.s} hover>
-              <StyledTableCell padding="checkbox">
+              <StyledTableCell padding="none">
                 <ToggleButtonGroup
                   size="small"
                   color="secondary"
