@@ -158,6 +158,8 @@ const DashboardData: FC = () => {
     }
   };
 
+  const isCmdOnly = (dv: DeviceValue) => dv.v === undefined && dv.c;
+
   function formatValue(value: any, uom: number) {
     if (value === undefined) {
       return '';
@@ -218,7 +220,7 @@ const DashboardData: FC = () => {
     if (deviceValue) {
       return (
         <Dialog open={deviceValue !== undefined} onClose={() => setDeviceValue(undefined)}>
-          <DialogTitle>Change Value</DialogTitle>
+          <DialogTitle>{isCmdOnly(deviceValue) ? 'Run Command' : 'Change Value'}</DialogTitle>
           <DialogContent dividers>
             {deviceValue.l && (
               <ValidatedTextField
@@ -506,7 +508,6 @@ const DashboardData: FC = () => {
         {hasMask(dv.n, DeviceEntityMask.DV_API_MQTT_EXCLUDE) && (
           <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
         )}
-        {dv.v === undefined && dv.c && <PlayArrowIcon color="primary" sx={{ fontSize: 14 }} />}
       </>
     );
 
@@ -519,21 +520,13 @@ const DashboardData: FC = () => {
           <TableHead>
             <TableRow>
               <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
-              <StyledTableCell align="left">ENTITY NAME/COMMAND</StyledTableCell>
+              <StyledTableCell align="left">ENTITY NAME</StyledTableCell>
               <StyledTableCell align="right">VALUE</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {deviceData.data.map((dv, i) => (
-              <TableRow
-                key={i}
-                onClick={() => sendCommand(dv)}
-                // sx={
-                //   hasMask(dv.n, DeviceEntityMask.DV_FAVORITE)
-                //     ? { backgroundColor: '#334900' }
-                //     : { backgroundColor: 'black' }
-                // }
-              >
+              <StyledTableRow key={i} onClick={() => sendCommand(dv)}>
                 <StyledTableCell padding="checkbox">
                   {dv.c && me.admin && !hasMask(dv.n, DeviceEntityMask.DV_READONLY) && (
                     <IconButton size="small">
@@ -544,8 +537,10 @@ const DashboardData: FC = () => {
                 <StyledTableCell component="th" scope="row">
                   {renderNameCell(dv)}
                 </StyledTableCell>
-                <StyledTableCell align="right">{formatValue(dv.v, dv.u)}</StyledTableCell>
-              </TableRow>
+                <StyledTableCell align="right">
+                  {isCmdOnly(dv) ? <PlayArrowIcon color="primary" sx={{ fontSize: 14 }} /> : formatValue(dv.v, dv.u)}
+                </StyledTableCell>
+              </StyledTableRow>
             ))}
           </TableBody>
         </Table>

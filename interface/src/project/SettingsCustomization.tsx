@@ -116,14 +116,27 @@ const SettingsCustomization: FC = () => {
 
     return (
       <>
-        <Box mb={2} color="warning.main">
-          <Typography variant="body2">
-            You can mark an entity as a favorite to be listed first in the Dashboard (
-            <FavoriteBorderOutlinedIcon color="success" fontSize="small" />) ,or remove it entirely from the Dashboard (
-            <VisibilityOffOutlinedIcon color="action" fontSize="small" />) ,or disable it's write operation (
-            <EditOffOutlinedIcon color="action" fontSize="small" />) or have it excluded from the MQTT and API outputs (
+        <Box mb={1} color="warning.main">
+          Select a device and customize each entity using the options:
+          <Typography display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
+            &nbsp;
+            <FavoriteBorderOutlinedIcon color="success" fontSize="small" />
+            &nbsp;mark it as favorite to be listed at the top of the Dashboard
+          </Typography>
+          <Typography display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
+            &nbsp;
+            <VisibilityOffOutlinedIcon color="action" fontSize="small" />
+            &nbsp;hide from the Dashboard
+          </Typography>
+          <Typography display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
+            &nbsp;
+            <EditOffOutlinedIcon color="action" fontSize="small" />
+            &nbsp;make it read-only (if it has write operation available)
+          </Typography>
+          <Typography display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
+            &nbsp;
             <CommentsDisabledOutlinedIcon color="action" fontSize="small" />
-            ).
+            &nbsp;excluded it from MQTT and API outputs
           </Typography>
         </Box>
         <ValidatedTextField

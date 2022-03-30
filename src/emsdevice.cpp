@@ -725,8 +725,9 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                         }
                     } else if (dv.type == DeviceValueType::BOOL) {
                         JsonArray l = obj.createNestedArray("l");
-                        l.add("off");
-                        l.add("on");
+                        char      result[10];
+                        l.add(Helpers::render_boolean(result, false));
+                        l.add(Helpers::render_boolean(result, true));
                     }
                     // add command help template
                     else if (dv.type == DeviceValueType::STRING || dv.type == DeviceValueType::CMD) {
@@ -861,10 +862,6 @@ void EMSdevice::mask_entity(const std::string & entity_id) {
     for (auto & dv : devicevalues_) {
         std::string entity = dv.tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(dv.short_name) : tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
         if (entity == entity_id.substr(2)) {
-#if defined(EMSESP_USE_SERIAL)
-            Serial.print("mask_entity() Removing Visible for device value: ");
-            Serial.println(read_flash_string(dv.full_name).c_str());
-#endif
             dv.state = (dv.state & 0x0F) | (flag << 4); // set state high bits to flag, turn off active and ha flags
             return;
         }
@@ -1217,7 +1214,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
     return has_values;
 }
 
-// remove the Home Assistant configs for each device value/entity if its not visible or active
+// remove the Home Assistant configs for each device value/entity if its not visible or active or marked as read-only
 // this is called when an MQTT publish is done via an EMS Device in emsesp.cpp::publish_device_values()
 void EMSdevice::mqtt_ha_entity_config_remove() {
     for (auto & dv : devicevalues_) {
