@@ -1968,7 +1968,8 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         break;
     }
 
-    switch (model()) {
+    uint8_t model_ = model();
+    switch (model_) {
     case EMSdevice::EMS_DEVICE_FLAG_RC10:
         offset          = 0;
         validate_typeid = 0xB1;
@@ -2032,8 +2033,12 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
     write_command(set_typeid, offset, set_mode_value, validate_typeid);
 
     // set hc->mode temporary until validate is received
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_RC10) {
+    if (model_ == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         hc->mode = set_mode_value >> 1;
+    } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_RC300 || model_ == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+        hc->mode = set_mode_value ? 1 : 0;
+    } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+        hc->mode = set_mode_value - 1;
     } else {
         hc->mode = set_mode_value;
     }
