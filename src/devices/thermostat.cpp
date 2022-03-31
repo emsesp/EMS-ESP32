@@ -1243,8 +1243,8 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     tm_->tm_min   = telegram->message_data[4];
     tm_->tm_sec   = telegram->message_data[5];
     tm_->tm_isdst = telegram->message_data[7] & 0x01;
-    time_t ttime  = mktime(tm_);           // thermostat time
-    if (tset_ &&  EMSESP::system_.ntp_connected() && has_command(&dateTime_)) { // have NTP time and command
+    time_t ttime  = mktime(tm_);                                               // thermostat time
+    if (tset_ && EMSESP::system_.ntp_connected() && has_command(&dateTime_)) { // have NTP time and command
         double difference = difftime(now, ttime);
         if (difference > 15 || difference < -15) {
             set_datetime("ntp", -1); // set from NTP
@@ -2680,16 +2680,15 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         default:
             // automatic selection, if no type is defined, we use the standard code
             validate_typeid = monitor_typeids[hc->hc()]; //get setpoint roomtemp back
-            if (model == EMS_DEVICE_FLAG_RC35) {
-                uint8_t mode_ = hc->get_mode();
-                if (mode_ == HeatingCircuit::Mode::NIGHT) {
-                    offset = EMS_OFFSET_RC35Set_temp_night;
-                } else if (mode_ == HeatingCircuit::Mode::DAY) {
-                    offset = EMS_OFFSET_RC35Set_temp_day;
-                } else {
-                    offset = EMS_OFFSET_RC35Set_seltemp; // https://github.com/emsesp/EMS-ESP/issues/310
-                }
+            uint8_t mode_   = hc->get_mode();
+            if (mode_ == HeatingCircuit::Mode::NIGHT) {
+                offset = EMS_OFFSET_RC35Set_temp_night;
+            } else if (mode_ == HeatingCircuit::Mode::DAY) {
+                offset = EMS_OFFSET_RC35Set_temp_day;
+            } else if (model == EMS_DEVICE_FLAG_RC35) {
+                offset = EMS_OFFSET_RC35Set_seltemp; // https://github.com/emsesp/EMS-ESP/issues/310
             } else {
+                // RC30_N missing temporary auto temperature https://github.com/emsesp/EMS-ESP32/issues/395
                 uint8_t modetype = hc->get_mode_type();
                 offset           = (modetype == HeatingCircuit::Mode::NIGHT) ? EMS_OFFSET_RC35Set_temp_night : EMS_OFFSET_RC35Set_temp_day;
             }
@@ -2714,14 +2713,24 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                 offset = EMS_OFFSET_JunkersSetMessage_day_temp;
                 break;
             default:
-                // automatic selection, if no type is defined, we use the standard code
-                uint8_t modetype = hc->get_mode_type();
-                if (modetype == HeatingCircuit::Mode::NIGHT || modetype == HeatingCircuit::Mode::ECO) {
+                // automatic selection, if no type is defined, we check mode and modetype
+                uint8_t mode_ = hc->get_mode();
+                if (mode_ == HeatingCircuit::Mode::NIGHT || mode_ == HeatingCircuit::Mode::ECO) {
                     offset = EMS_OFFSET_JunkersSetMessage_night_temp;
-                } else if (modetype == HeatingCircuit::Mode::DAY || modetype == HeatingCircuit::Mode::HEAT) {
+                } else if (mode_ == HeatingCircuit::Mode::DAY || mode_ == HeatingCircuit::Mode::HEAT) {
                     offset = EMS_OFFSET_JunkersSetMessage_day_temp;
-                } else {
+                } else if (mode_ == HeatingCircuit::Mode::NOFROST) {
                     offset = EMS_OFFSET_JunkersSetMessage_no_frost_temp;
+                } else {
+                    // auto mode, missing temporary parameter, use modetype https://github.com/emsesp/EMS-ESP32/issues/400
+                    uint8_t modetype = hc->get_mode_type();
+                    if (modetype == HeatingCircuit::Mode::NIGHT || modetype == HeatingCircuit::Mode::ECO) {
+                        offset = EMS_OFFSET_JunkersSetMessage_night_temp;
+                    } else if (modetype == HeatingCircuit::Mode::DAY || modetype == HeatingCircuit::Mode::HEAT) {
+                        offset = EMS_OFFSET_JunkersSetMessage_day_temp;
+                    } else {
+                        offset = EMS_OFFSET_JunkersSetMessage_no_frost_temp;
+                    }
                 }
                 break;
             }
@@ -2741,14 +2750,24 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                 offset = EMS_OFFSET_JunkersSetMessage2_heat_temp;
                 break;
             default:
-                // automatic selection, if no type is defined, we use the standard code
-                uint8_t modetype = hc->get_mode_type();
-                if (modetype == HeatingCircuit::Mode::NIGHT || modetype == HeatingCircuit::Mode::ECO) {
+                // automatic selection, if no type is defined, we check mode and modetype
+                uint8_t mode_ = hc->get_mode();
+                if (mode_ == HeatingCircuit::Mode::NIGHT || mode_ == HeatingCircuit::Mode::ECO) {
                     offset = EMS_OFFSET_JunkersSetMessage2_eco_temp;
-                } else if (modetype == HeatingCircuit::Mode::DAY || modetype == HeatingCircuit::Mode::HEAT) {
+                } else if (mode_ == HeatingCircuit::Mode::DAY || mode_ == HeatingCircuit::Mode::HEAT) {
                     offset = EMS_OFFSET_JunkersSetMessage2_heat_temp;
-                } else {
+                } else if (mode_ == HeatingCircuit::Mode::NOFROST) {
                     offset = EMS_OFFSET_JunkersSetMessage2_no_frost_temp;
+                } else {
+                    // auto mode, missing temporary parameter, use modetype https://github.com/emsesp/EMS-ESP32/issues/400
+                    uint8_t modetype = hc->get_mode_type();
+                    if (modetype == HeatingCircuit::Mode::NIGHT || modetype == HeatingCircuit::Mode::ECO) {
+                        offset = EMS_OFFSET_JunkersSetMessage2_eco_temp;
+                    } else if (modetype == HeatingCircuit::Mode::DAY || modetype == HeatingCircuit::Mode::HEAT) {
+                        offset = EMS_OFFSET_JunkersSetMessage2_heat_temp;
+                    } else {
+                        offset = EMS_OFFSET_JunkersSetMessage2_no_frost_temp;
+                    }
                 }
                 break;
             }
