@@ -41,12 +41,12 @@ import { DeviceShort, Devices, DeviceEntity } from './types';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
-    backgroundColor: '#607d8b',
-    color: theme.palette.common.white,
-    fontSize: 11
+    backgroundColor: '#607d8b'
+    // color: theme.palette.common.white,
+    // fontSize: 12
   },
   [`&.${tableCellClasses.body}`]: {
-    fontSize: 12
+    // fontSize: 12
   }
 }));
 
@@ -119,19 +119,19 @@ const SettingsCustomization: FC = () => {
         <Box color="warning.main">
           <Typography variant="body2">Select a device and customize each of its entities using the options:</Typography>
           <Typography mt={1} ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            <FavoriteBorderOutlinedIcon color="success" fontSize="small" />
+            <FavoriteBorderOutlinedIcon color="success" sx={{ fontSize: 13 }} />
             &nbsp;mark it as favorite to be listed at the top of the Dashboard
           </Typography>
           <Typography ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            <EditOffOutlinedIcon color="action" fontSize="small" />
+            <EditOffOutlinedIcon color="action" sx={{ fontSize: 13 }} />
             &nbsp;make it read-only, only if it has write operation available
           </Typography>
           <Typography ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            <CommentsDisabledOutlinedIcon color="action" fontSize="small" />
+            <CommentsDisabledOutlinedIcon color="action" sx={{ fontSize: 13 }} />
             &nbsp;excluded it from MQTT and API outputs
           </Typography>
           <Typography ml={2} mb={1} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            <VisibilityOffOutlinedIcon color="action" fontSize="small" />
+            <VisibilityOffOutlinedIcon color="action" sx={{ fontSize: 13 }} />
             &nbsp;hide it from the Dashboard
           </Typography>
         </Box>
@@ -233,16 +233,16 @@ const SettingsCustomization: FC = () => {
                   }}
                 >
                   <ToggleButton value="8" color="success" disabled={(de.m & 1) !== 0 || de.n === ''}>
-                    <FavoriteBorderOutlinedIcon fontSize="small" />
+                    <FavoriteBorderOutlinedIcon sx={{ fontSize: 14 }} />
                   </ToggleButton>
                   <ToggleButton value="4" disabled={!de.w}>
-                    <EditOffOutlinedIcon fontSize="small" />
+                    <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
                   </ToggleButton>
                   <ToggleButton value="2">
-                    <CommentsDisabledOutlinedIcon fontSize="small" />
+                    <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
                   </ToggleButton>
                   <ToggleButton value="1">
-                    <VisibilityOffOutlinedIcon fontSize="small" />
+                    <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
                   </ToggleButton>
                 </ToggleButtonGroup>
               </StyledTableCell>
