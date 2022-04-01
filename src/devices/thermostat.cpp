@@ -1243,8 +1243,9 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     tm_->tm_min   = telegram->message_data[4];
     tm_->tm_sec   = telegram->message_data[5];
     tm_->tm_isdst = telegram->message_data[7] & 0x01;
-    time_t ttime  = mktime(tm_);                                               // thermostat time
-    if (tset_ && EMSESP::system_.ntp_connected() && has_command(&dateTime_)) { // have NTP time and command
+    time_t ttime  = mktime(tm_); // thermostat time
+    // correct thermostat clock if we have valid ntp time, and could write the command
+    if (tset_ && EMSESP::system_.ntp_connected() && !EMSESP::system_.readonly_mode() && has_command(&dateTime_)) {
         double difference = difftime(now, ttime);
         if (difference > 15 || difference < -15) {
             set_datetime("ntp", -1); // set from NTP
