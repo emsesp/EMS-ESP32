@@ -65,6 +65,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
         register_telegram_type(0x0103, F("ISM1StatusMessage"), true, MAKE_PF_CB(process_ISM1StatusMessage));
         register_telegram_type(0x0101, F("ISM1Set"), true, MAKE_PF_CB(process_ISM1Set));
+        register_telegram_type(0x0104, F("ISM2StatusMessage"), false, MAKE_PF_CB(process_ISM2StatusMessage));
     }
 
     // device values...
@@ -760,6 +761,18 @@ void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram, pumpWorkTime_, 10, 3);        // force to 3 bytes
     has_bitupdate(telegram, collectorShutdown_, 9, 0); // collector shutdown on/off
     has_bitupdate(telegram, cylHeated_, 9, 2);         // cyl full
+}
+
+/*
+ * Junkers ISM12 Solar Module - type 0x0104 EMS+ for heat assist
+ * ?(0x103), data: 00 00 00 00 00 7A 01 15 00 00 05 37 F0
+ * ?(0x104), data: 01 A9 01 22 27 0F 27 0F 27 0F 27 0F 27 0F 27 0F
+ * ?(0x104), data: 01 01 00 00 00 00 00 27 0F 27 0F (offset 16)
+ */
+void Solar::process_ISM2StatusMessage(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, cylMiddleTemp_, 0);  // Temperature Middle of Solar Boiler cyl
+    has_update(telegram, retHeatAssist_, 2);  // return temperature from heating T4
+    has_bitupdate(telegram, m1Valve_, 17, 0); // return valve DUW1 (also 16,0)
 }
 
 /*

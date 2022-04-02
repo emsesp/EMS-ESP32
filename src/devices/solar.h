@@ -187,6 +187,7 @@ class Solar : public EMSdevice {
 
     void process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_ISM1Set(std::shared_ptr<const Telegram> telegram);
+    void process_ISM2StatusMessage(std::shared_ptr<const Telegram> telegram);
 
 
     bool set_CollectorMaxTemp(const char * value, const int8_t id);
