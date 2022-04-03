@@ -161,7 +161,7 @@ const SettingsCustomization: FC = () => {
   const saveCustomization = async () => {
     if (deviceEntities && selectedDevice) {
       const masked_entities = deviceEntities
-        .filter((de) => de.m)
+        // .filter((de) => de.m)
         .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.s);
       try {
         const response = await EMSESP.writeMaskedEntities({

@@ -919,6 +919,10 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
     int16_t dv_set_min, dv_set_max;
     (void)dv.get_min_max(dv_set_min, dv_set_max);
 
+    // determine if we're creating the command topics which we use special HA configs
+    // unless the entity has been marked as read-only and so it'll default to using the sensor/ type
+    bool has_cmd = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
+
     publish_ha_sensor_config(dv.type,
                              dv.tag,
                              dv.full_name,
@@ -926,7 +930,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
                              dv.short_name,
                              dv.uom,
                              remove,
-                             dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY),
+                             has_cmd,
                              dv.options,
                              dv.options_size,
                              dv_set_min,

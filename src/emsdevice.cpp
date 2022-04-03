@@ -404,9 +404,9 @@ void EMSdevice::register_device_value(uint8_t                             tag,
             if ((entityCustomization.product_id == product_id()) && (entityCustomization.device_id == device_id())) {
                 std::string entity = tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(short_name) : tag_to_string(tag) + "/" + read_flash_string(short_name);
                 for (std::string entity_id : entityCustomization.entity_ids) {
-                    uint8_t flag = Helpers::hextoint(entity_id.substr(0, 2).c_str());
                     if (entity_id.substr(2) == entity) {
-                        state = flag << 4; // set state high bits to flag, turn off active and ha flags
+                        uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
+                        state        = mask << 4; // set state high bits to flag, turn off active and ha flags
                         break;
                     }
                 }
@@ -759,7 +759,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 // as generate_values_web() but stripped down to only show all entities and their state
 // this is used only for WebCustomizationService::device_entities()
 void EMSdevice::generate_values_web_all(JsonArray & output) {
-    for (auto & dv : devicevalues_) {
+    for (const auto & dv : devicevalues_) {
         // also show commands and entities that have an empty full name
         JsonObject obj = output.createNestedObject();
 
@@ -847,30 +847,24 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
     }
 }
 
-// reset all entities to being visible
-// this is called before loading in the exclude entities list from the customization service
-void EMSdevice::reset_entity_masks() {
-    for (auto & dv : devicevalues_) {
-        dv.state &= 0x0F; // clear high nibble
-    }
-}
-
-// disable/exclude/mask_out a device entity based on the id
-void EMSdevice::mask_entity(const std::string & entity_id) {
-    // first character contains mask flags
-    uint8_t flag = (Helpers::hextoint(entity_id.substr(0, 2).c_str()) << 4);
+// set mask per device entity based on the id which is prefixed with the 2 char hex mask value
+// returns true if the entity has a mask set
+bool EMSdevice::mask_entity(const std::string & entity_id) {
     for (auto & dv : devicevalues_) {
         std::string entity = dv.tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(dv.short_name) : tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
         if (entity == entity_id.substr(2)) {
-            // remove ha config on change of dv_readonly flag
-            if (Mqtt::ha_enabled() && ((dv.state ^ flag) & DeviceValueState::DV_READONLY)) {
+            uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str()); // first character contains mask flags
+            if (Mqtt::ha_enabled() && (((dv.state >> 4) ^ mask) & (DeviceValueState::DV_READONLY >> 4))) {
+                // remove ha config on change of dv_readonly flag
                 dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                 Mqtt::publish_ha_sensor_config(dv, "", "", true); // delete topic (remove = true)
             }
-            dv.state = (dv.state & 0x0F) | flag; // set state high bits to flag
-            return;
+            dv.state = ((dv.state & 0x0F) | (mask << 4)); // set state high bits to flag
+            return mask;                                  // true if entity mask is not the deafult 0
         }
     }
+
+    return false;
 }
 
 // builds json for a specific device value / entity

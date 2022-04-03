@@ -168,20 +168,20 @@ class DeviceValue {
         , state(state) {
     }
 
-    bool hasValue();
+    bool hasValue() const;
     bool get_min_max(int16_t & dv_set_min, int16_t & dv_set_max);
 
     // state flags
-    inline void add_state(uint8_t s) {
+    void add_state(uint8_t s) {
         state |= s;
     }
-    inline bool has_state(uint8_t s) const {
+    bool has_state(uint8_t s) const {
         return (state & s) == s;
     }
-    inline void remove_state(uint8_t s) {
+    void remove_state(uint8_t s) {
         state &= ~s;
     }
-    inline uint8_t get_state() const {
+    uint8_t get_state() const {
         return state;
     }
 
