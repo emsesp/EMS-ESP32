@@ -31,28 +31,12 @@ Generic::Generic(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
         register_telegram_type(0x435, F("RFSensorMessage"), false, MAKE_PF_CB(process_RFSensorMessage));
         register_device_value(DeviceValueTAG::TAG_NONE, &rfTemp_, DeviceValueType::SHORT, FL_(div10), FL_(RFTemp), DeviceValueUOM::DEGREES);
     }
-    if (device_id == 0x41) { // DHW module
-        register_telegram_type(0x34, F("MonitorWW"), false, MAKE_PF_CB(process_MonitorWW));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwSetTemp_, DeviceValueType::UINT, nullptr, FL_(wwSetTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwCurTemp_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwCurTemp2_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp2), DeviceValueUOM::DEGREES);
-    }
 }
 
 
 // type 0x435 rf remote sensor
 void Generic::process_RFSensorMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, rfTemp_, 0); // is * 10
-}
-/*
- * MonitorWW - type 0x34 - dhw monitor. 10 bytes long
- * received every 10 seconds
- * Unknown(0x41) -> All(0x00), UBAMonitorWW(0x34), data: 37 02 25 02 25 00 00 00 00
-*/
-void Generic::process_MonitorWW(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, wwSetTemp_, 0);
-    has_update(telegram, wwCurTemp_, 1);
-    has_update(telegram, wwCurTemp2_, 3);
 }
 
 } // namespace emsesp

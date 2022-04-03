@@ -109,8 +109,9 @@
 {191, DeviceType::THERMOSTAT, F("FR120"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS | DeviceFlags::EMS_DEVICE_FLAG_JUNKERS_OLD}, // older model
 {192, DeviceType::THERMOSTAT, F("FW120"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},
 
-// Solar Modules - 0x30, 0x2A (for ww)
+// Solar Modules - 0x30 (for solar), 0x2A, 0x41 (for ww)
 { 73, DeviceType::SOLAR, F("SM10"), DeviceFlags::EMS_DEVICE_FLAG_SM10},
+{100, DeviceType::SOLAR, F("ISM DHW"), DeviceFlags::EMS_DEVICE_FLAG_ISM},
 {101, DeviceType::SOLAR, F("ISM1"), DeviceFlags::EMS_DEVICE_FLAG_ISM},
 {103, DeviceType::SOLAR, F("ISM2"), DeviceFlags::EMS_DEVICE_FLAG_ISM},
 {162, DeviceType::SOLAR, F("SM50"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
@@ -143,9 +144,6 @@
 
 // Gateways - 0x48
 {189, DeviceType::GATEWAY, F("KM200/MB LAN 2"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-
-// generic 0x41 DHW module
-{100, DeviceType::GENERIC, F("DHW module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Generic - 0x40 or other with no product-id and no version
 {0, DeviceType::GENERIC, F("unknown"), DeviceFlags::EMS_DEVICE_FLAG_NONE}

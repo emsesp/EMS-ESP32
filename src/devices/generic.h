@@ -31,12 +31,8 @@ class Generic : public EMSdevice {
     static uuid::log::Logger logger_;
 
     int16_t  rfTemp_;
-    uint8_t  wwSetTemp_;  // DHW set temperature
-    uint16_t wwCurTemp_;  // DHW current temperature
-    uint16_t wwCurTemp2_; // DHW current temperature storage
 
     void process_RFSensorMessage(std::shared_ptr<const Telegram> telegram);
-    void process_MonitorWW(std::shared_ptr<const Telegram> telegram);
 };
 
 } // namespace emsesp
