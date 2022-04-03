@@ -1205,7 +1205,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
                 obj["product id"] = emsdevice->product_id();
                 obj["version"]    = emsdevice->version();
                 obj["entities"]   = emsdevice->count_entities();
-                char result[250];
+                char result[300];
                 (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
                 if (result[0] != '\0') {
                     obj["handlers received"] = result; // don't show handlers if there aren't any

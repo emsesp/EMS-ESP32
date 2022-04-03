@@ -630,7 +630,6 @@ void EMSESP::publish_device_values(uint8_t device_type) {
 
             } else {
                 // for all other devices add the values to the json
-                json = doc.to<JsonObject>();
                 need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::MQTT); // nested
             }
 
