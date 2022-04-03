@@ -131,10 +131,10 @@ export interface DeviceValue {
   n: string; // name
   c: string; // command
   l: string[]; // list
-  h?: string; // help text
-  s?: string; // steps for up/down
-  m?: string; // min
-  x?: string; // max
+  h?: string; // help text, optional
+  s?: string; // steps for up/down, optional
+  m?: string; // min, optional
+  x?: string; // max, optional
 }
 
 export interface DeviceData {
@@ -147,7 +147,7 @@ export interface DeviceEntity {
   n: string; // name
   s: string; // shortname
   m: number; // mask
-  w?: boolean; // writeable
+  w: boolean; // writeable
 }
 
 export interface MaskedEntities {
