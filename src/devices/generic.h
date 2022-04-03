@@ -30,7 +30,7 @@ class Generic : public EMSdevice {
   private:
     static uuid::log::Logger logger_;
 
-    int16_t  rfTemp_;
+    int16_t rfTemp_;
 
     void process_RFSensorMessage(std::shared_ptr<const Telegram> telegram);
 };
