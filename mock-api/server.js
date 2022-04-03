@@ -634,14 +634,14 @@ const emsesp_deviceentities_2 = [
   { v: 5, n: 'selected flow temperature', s: 'selflowtemp', m: 0 },
   { v: 0, n: 'burner selected max power', s: 'selburnpow', m: 0 },
   { v: 0, n: 'heating pump modulation', s: 'heatingpumpmod', m: 0 },
-  { n: 'heating pump 2 modulation', s: 'heatingpump2mod', m: 2 },
-  { n: 'outside temperature', s: 'outdoortemp', m: 2 },
+  { n: 'heating pump 2 modulation', s: 'heatingpump2mod', m: 0 },
+  { n: 'outside temperature', s: 'outdoortemp', m: 0 },
   { v: 53, n: 'current flow temperature', s: 'curflowtemp', m: 0 },
   { v: 51.8, n: 'return temperature', s: 'rettemp', m: 0 },
-  { n: 'mixing switch temperature', s: 'switchtemp', m: 2 },
+  { n: 'mixing switch temperature', s: 'switchtemp', m: 0 },
   { v: 1.3, n: 'system pressure', s: 'syspress', m: 0 },
   { v: 54.6, n: 'actual boiler temperature', s: 'boiltemp', m: 0 },
-  { n: 'exhaust temperature', s: 'exhausttemp', m: 2 },
+  { n: 'exhaust temperature', s: 'exhausttemp', m: 0 },
   { v: false, n: 'gas', s: 'burngas', m: 0 },
   { v: false, n: 'gas stage 2', s: 'burngas2', m: 0 },
   { v: 0, n: 'flame current', s: 'flamecurr', m: 0 },
@@ -923,22 +923,23 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
   }
 })
 
-function myF(entity, de, dd) {
+function updateMask(entity, de, dd) {
   const name = entity.slice(2)
-  const mask = parseInt(entity.slice(0, 2), 16)
-  const mask_hex = entity.slice(0, 2)
+  const new_mask = parseInt(entity.slice(0, 2), 16)
 
   objIndex = de.findIndex((obj) => obj.s == name)
   if (objIndex !== -1) {
-    de[objIndex].m = mask
+    de[objIndex].m = new_mask
     const fullname = de[objIndex].n
     objIndex = dd.data.findIndex((obj) => obj.n.slice(2) == fullname)
     if (objIndex !== -1) {
-      dd.data[objIndex].n = mask_hex + fullname
-      console.log('Updating: ')
-      console.log(dd.data[objIndex])
-    } else {
-      console.log("can't locate record for " + fullname)
+      // see if the mask has changed
+      const old_mask = parseInt(dd.data[objIndex].n.slice(0, 2), 16)
+      if (old_mask !== new_mask) {
+        const mask_hex = entity.slice(0, 2)
+        console.log('Updating ' + dd.data[objIndex].n + ' -> ' + mask_hex + fullname)
+        dd.data[objIndex].n = mask_hex + fullname
+      }
     }
   } else {
     console.log("can't locate record for id " + id)
@@ -949,11 +950,11 @@ rest_server.post(EMSESP_MASKED_ENTITIES_ENDPOINT, (req, res) => {
   const id = req.body.id
   for (const entity of req.body.entity_ids) {
     if (id === 1) {
-      myF(entity, emsesp_deviceentities_1, emsesp_devicedata_1)
+      updateMask(entity, emsesp_deviceentities_1, emsesp_devicedata_1)
     } else if (id === 2) {
-      myF(entity, emsesp_deviceentities_2, emsesp_devicedata_2)
+      updateMask(entity, emsesp_deviceentities_2, emsesp_devicedata_2)
     } else if (id === 4) {
-      myF(entity, emsesp_deviceentities_4, emsesp_devicedata_4)
+      updateMask(entity, emsesp_deviceentities_4, emsesp_devicedata_4)
     }
   }
   res.sendStatus(200)
