@@ -1236,7 +1236,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     time_t now    = time(nullptr);
     tm *   tm_    = localtime(&now);
     bool   tset_  = tm_->tm_year > 110; // year 2010 and up, time is valid
-    tm_->tm_year  = telegram->message_data[0] + 100;
+    tm_->tm_year  = (telegram->message_data[0] & 0x7F) + 100; // IVT
     tm_->tm_mon   = telegram->message_data[1] - 1;
     tm_->tm_mday  = telegram->message_data[3];
     tm_->tm_hour  = telegram->message_data[2];
@@ -1244,8 +1244,9 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     tm_->tm_sec   = telegram->message_data[5];
     tm_->tm_isdst = telegram->message_data[7] & 0x01;
     time_t ttime  = mktime(tm_); // thermostat time
+    bool ivtclock =  (telegram->message_data[0] & 0x80) == 0x80; // dont set clock on ivt, #439
     // correct thermostat clock if we have valid ntp time, and could write the command
-    if (tset_ && EMSESP::system_.ntp_connected() && !EMSESP::system_.readonly_mode() && has_command(&dateTime_)) {
+    if (!ivtclock && tset_ && EMSESP::system_.ntp_connected() && !EMSESP::system_.readonly_mode() && has_command(&dateTime_)) {
         double difference = difftime(now, ttime);
         if (difference > 15 || difference < -15) {
             set_datetime("ntp", -1); // set from NTP
