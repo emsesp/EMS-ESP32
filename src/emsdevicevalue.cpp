@@ -134,7 +134,7 @@ size_t DeviceValue::tag_count = sizeof(DeviceValue::DeviceValueTAG_s) / sizeof(_
 // checks whether the device value has an actual value
 // returns true if its valid
 // state is stored in the dv object
-bool DeviceValue::hasValue() {
+bool DeviceValue::hasValue() const {
     bool has_value = false;
     switch (type) {
     case DeviceValueType::BOOL:

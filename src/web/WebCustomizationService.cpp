@@ -172,11 +172,10 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
             obj["i"]       = emsdevice->unique_id(); // a unique id
 
             /*
-            // shortname - we prefix the count to make it unique
             uint8_t device_index = EMSESP::device_index(emsdevice->device_type(), emsdevice->unique_id());
             if (device_index) {
                 char s[10];
-                obj["s"] = emsdevice->device_type_name() + Helpers::smallitoa(s, device_index) + " (" + emsdevice->name() + ")";
+                obj["s"] = emsdevice->device_type_name() + Helpers::smallitoa(s, device_index) + " (" + emsdevice->name() + ")";  // shortname - we prefix the count to make it unique
             } else {
                 obj["s"] = emsdevice->device_type_name() + " (" + emsdevice->name() + ")";
             }
@@ -221,16 +220,16 @@ void WebCustomizationService::masked_entities(AsyncWebServerRequest * request, J
             if (emsdevice) {
                 uint8_t unique_device_id = json["id"];
                 if (emsdevice->unique_id() == unique_device_id) {
-                    // first reset all the entity ids
-                    emsdevice->reset_entity_masks();
-
                     // build a list of entities
                     JsonArray                entity_ids_json = json["entity_ids"];
                     std::vector<std::string> entity_ids;
-                    for (JsonVariant id : entity_ids_json) {
+                    for (const JsonVariant id : entity_ids_json) {
                         std::string entity_id = id.as<std::string>();
-                        emsdevice->mask_entity(entity_id); // this will have immediate affect
-                        entity_ids.push_back(entity_id);
+                        // handle the mask change and add to the list of customized entities
+                        // if the value is different from the default (mask == 0)
+                        if (emsdevice->mask_entity(entity_id)) {
+                            entity_ids.push_back(entity_id);
+                        }
                     }
 
                     // Save the list to the customization file
