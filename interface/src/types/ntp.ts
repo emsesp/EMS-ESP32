@@ -1,6 +1,7 @@
 export enum NTPSyncStatus {
-  NTP_INACTIVE = 0,
-  NTP_ACTIVE = 1
+  NTP_DISABLED = 0,
+  NTP_INACTIVE = 1,
+  NTP_ACTIVE = 2
 }
 
 export interface NTPStatus {

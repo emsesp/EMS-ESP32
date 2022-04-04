@@ -123,15 +123,15 @@ const SettingsCustomization: FC = () => {
             &nbsp;mark it as favorite to be listed at the top of the Dashboard
           </Typography>
           <Typography ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            <EditOffOutlinedIcon color="action" sx={{ fontSize: 13 }} />
+            <EditOffOutlinedIcon color="secondary" sx={{ fontSize: 13 }} />
             &nbsp;make it read-only, only if it has write operation available
           </Typography>
           <Typography ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            <CommentsDisabledOutlinedIcon color="action" sx={{ fontSize: 13 }} />
+            <CommentsDisabledOutlinedIcon color="secondary" sx={{ fontSize: 13 }} />
             &nbsp;excluded it from MQTT and API outputs
           </Typography>
           <Typography ml={2} mb={1} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            <VisibilityOffOutlinedIcon color="action" sx={{ fontSize: 13 }} />
+            <VisibilityOffOutlinedIcon color="secondary" sx={{ fontSize: 13 }} />
             &nbsp;hide it from the Dashboard
           </Typography>
         </Box>

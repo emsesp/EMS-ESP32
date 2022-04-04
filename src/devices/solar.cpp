@@ -34,7 +34,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     }
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_SM100) {
-        if (device_id == 0x2A) {
+        if (device_id == 0x2A) { // SM100 DHW
             register_telegram_type(0x07D6, F("SM100wwTemperature"), false, MAKE_PF_CB(process_SM100wwTemperature));
             register_telegram_type(0x07AA, F("SM100wwStatus"), false, MAKE_PF_CB(process_SM100wwStatus));
             register_telegram_type(0x07AB, F("SM100wwCommand"), false, MAKE_PF_CB(process_SM100wwCommand));
@@ -63,13 +63,31 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     }
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
-        register_telegram_type(0x0103, F("ISM1StatusMessage"), true, MAKE_PF_CB(process_ISM1StatusMessage));
-        register_telegram_type(0x0101, F("ISM1Set"), true, MAKE_PF_CB(process_ISM1Set));
+        if (device_id == 0x41) { // ISM DHW module
+            register_telegram_type(0x34, F("UBAMonitorWW"), false, MAKE_PF_CB(process_MonitorWW));
+        } else {
+            register_telegram_type(0x0103, F("ISM1StatusMessage"), true, MAKE_PF_CB(process_ISM1StatusMessage));
+            register_telegram_type(0x0101, F("ISM1Set"), true, MAKE_PF_CB(process_ISM1Set));
+            register_telegram_type(0x0104, F("ISM2StatusMessage"), false, MAKE_PF_CB(process_ISM2StatusMessage));
+        }
     }
 
     // device values...
 
-    // special case for a device_id with 0x2A where it's not actual a solar module
+    // special case ISM DHW module
+    if (device_id == 0x41) { // ISM DHW module
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                              &wwSelTemp_,
+                              DeviceValueType::UINT,
+                              nullptr,
+                              FL_(wwSelTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_wwSelTemp));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwTemp_1_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwTemp_3_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp2), DeviceValueUOM::DEGREES);
+        return;
+    }
+    // special case for a SM100 DHW device_id with 0x2A where it's not actual a solar module
     if (device_id == 0x2A) {
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwTemp_1_, DeviceValueType::USHORT, FL_(div10), FL_(wwTemp1), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwTemp_3_, DeviceValueType::USHORT, FL_(div10), FL_(wwTemp3), DeviceValueUOM::DEGREES);
@@ -84,8 +102,13 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               FL_(wwMaxTemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_wwMaxTemp));
-        register_device_value(
-            DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwTemp_, DeviceValueType::UINT, nullptr, FL_(wwTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwTemp));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                              &wwSelTemp_,
+                              DeviceValueType::UINT,
+                              nullptr,
+                              FL_(wwSelTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_wwSelTemp));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                               &wwRedTemp_,
                               DeviceValueType::UINT,
@@ -128,6 +151,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         return;
     }
 
+    // common solar values for all modules (except dhw)
     register_device_value(DeviceValueTAG::TAG_NONE, &collectorTemp_, DeviceValueType::SHORT, FL_(div10), FL_(collectorTemp), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_NONE, &cylBottomTemp_, DeviceValueType::SHORT, FL_(div10), FL_(cylBottomTemp), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_NONE, &solarPump_, DeviceValueType::BOOL, nullptr, FL_(solarPump), DeviceValueUOM::NONE);
@@ -137,6 +161,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     register_device_value(DeviceValueTAG::TAG_NONE, &collectorShutdown_, DeviceValueType::BOOL, nullptr, FL_(collectorShutdown), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_NONE, &cylHeated_, DeviceValueType::BOOL, nullptr, FL_(cylHeated), DeviceValueUOM::NONE);
 
+    // values per device flag
     if (flags == EMSdevice::EMS_DEVICE_FLAG_SM10) {
         register_device_value(DeviceValueTAG::TAG_NONE, &solarPumpMod_, DeviceValueType::UINT, nullptr, FL_(solarPumpMod), DeviceValueUOM::PERCENT);
         register_device_value(
@@ -185,6 +210,9 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
 		*/
     }
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
+        register_device_value(DeviceValueTAG::TAG_NONE, &cylMiddleTemp_, DeviceValueType::SHORT, FL_(div10), FL_(cylMiddleTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_NONE, &retHeatAssist_, DeviceValueType::SHORT, FL_(div10), FL_(retHeatAssist), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_NONE, &m1Valve_, DeviceValueType::BOOL, nullptr, FL_(m1Valve), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_NONE, &energyLastHour_, DeviceValueType::ULONG, FL_(div10), FL_(energyLastHour), DeviceValueUOM::WH);
     }
 
@@ -582,7 +610,7 @@ void Solar::process_SM100wwStatus(std::shared_ptr<const Telegram> telegram) {
 // data: FF 05 0F 5F 00 01 3C 3C 3C 3C 28 12 46 01 3C 1E 03 07 3C 00 0F 00 05
 void Solar::process_SM100wwParam(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwMaxTemp_, 8);
-    has_update(telegram, wwTemp_, 9);
+    has_update(telegram, wwSelTemp_, 9);
     has_update(telegram, wwRedTemp_, 10);
     has_update(telegram, wwDailyTemp_, 6);
     has_update(telegram, wwDisinfectionTemp_, 12);
@@ -763,11 +791,33 @@ void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) 
 }
 
 /*
+ * Junkers ISM12 Solar Module - type 0x0104 EMS+ for heat assist
+ * ?(0x103), data: 00 00 00 00 00 7A 01 15 00 00 05 37 F0
+ * ?(0x104), data: 01 A9 01 22 27 0F 27 0F 27 0F 27 0F 27 0F 27 0F
+ * ?(0x104), data: 01 01 00 00 00 00 00 27 0F 27 0F (offset 16)
+ */
+void Solar::process_ISM2StatusMessage(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, cylMiddleTemp_, 0);  // Temperature Middle of Solar Boiler cyl
+    has_update(telegram, retHeatAssist_, 2);  // return temperature from heating T4
+    has_bitupdate(telegram, m1Valve_, 17, 0); // return valve DUW1 (also 16,0)
+}
+
+/*
  * Junkers ISM1 Solar Module - type 0x0101 EMS+ for setting values
  */
 void Solar::process_ISM1Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, cylMaxTemp_, 6);
 }
+
+/*
+ * Junkers ISM1 Solar DHW Module - type 0x34 ww
+ */
+void Solar::process_MonitorWW(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, wwSelTemp_, 0);
+    has_update(telegram, wwTemp_1_, 1);
+    has_update(telegram, wwTemp_3_, 3);
+}
+
 
 /*
  * Settings
@@ -917,54 +967,54 @@ bool Solar::set_SM10MaxFlow(const char * value, const int8_t id) {
 
 // switch heat transfer system on/off
 bool Solar::set_heatTransferSystem(const char * value, const int8_t id) {
-    bool v = false;
-    if (!Helpers::value2bool(value, v)) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x358, 5, v ? 0x01 : 0x00, 0x358);
+    write_command(0x358, 5, b ? 0x01 : 0x00, 0x358);
     return true;
 }
 
 // switch external cylinder on/off
 bool Solar::set_externalCyl(const char * value, const int8_t id) {
-    bool v = false;
-    if (!Helpers::value2bool(value, v)) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x358, 9, v ? 0x01 : 0x00, 0x358);
+    write_command(0x358, 9, b ? 0x01 : 0x00, 0x358);
     return true;
 }
 
 // switch thermal disinfection on/off
 bool Solar::set_thermalDisinfect(const char * value, const int8_t id) {
-    bool v = false;
-    if (!Helpers::value2bool(value, v)) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x358, 10, v ? 0x01 : 0x00, 0x358);
+    write_command(0x358, 10, b ? 0x01 : 0x00, 0x358);
     return true;
 }
 
 // switch heat metering on/off
 bool Solar::set_heatMetering(const char * value, const int8_t id) {
-    bool v = false;
-    if (!Helpers::value2bool(value, v)) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x358, 14, v ? 0x01 : 0x00, 0x358);
+    write_command(0x358, 14, b ? 0x01 : 0x00, 0x358);
     return true;
 }
 
 // switch solar system on/off
 bool Solar::set_solarEnabled(const char * value, const int8_t id) {
-    bool v = false;
-    if (!Helpers::value2bool(value, v)) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
         return false;
     }
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_SM10) {
-        write_command(0x96, 0, v ? 0xFF : 0x00, 0x96);
+        write_command(0x96, 0, b ? 0xFF : 0x00, 0x96);
     } else {
-        write_command(0x358, 19, v ? 0x01 : 0x00, 0x358);
+        write_command(0x358, 19, b ? 0x01 : 0x00, 0x358);
     }
     return true;
 }
@@ -992,71 +1042,71 @@ bool Solar::set_solarMode2(const char * value, const int8_t id) {
 
 // switch pumpkick on/off
 bool Solar::set_solarPumpKick(const char * value, const int8_t id) {
-    bool v = false;
-    if (!Helpers::value2bool(value, v)) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x35A, 9, v ? 0x01 : 0x00, 0x35A);
+    write_command(0x35A, 9, b ? 0x01 : 0x00, 0x35A);
     return true;
 }
 
 // switch pump2kick on/off
 bool Solar::set_solarPump2Kick(const char * value, const int8_t id) {
-    bool v = false;
-    if (!Helpers::value2bool(value, v)) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x35D, 0, v ? 0x01 : 0x00, 0x35D);
+    write_command(0x35D, 0, b ? 0x01 : 0x00, 0x35D);
     return true;
 }
 
 // switch plain water mode on/off
 bool Solar::set_plainWaterMode(const char * value, const int8_t id) {
-    bool v = false;
-    if (!Helpers::value2bool(value, v)) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x35A, 10, v ? 0x01 : 0x00, 0x35A);
+    write_command(0x35A, 10, b ? 0x01 : 0x00, 0x35A);
     return true;
 }
 
 // switch double match flow on/off
 bool Solar::set_doubleMatchFlow(const char * value, const int8_t id) {
-    bool v = false;
-    if (!Helpers::value2bool(value, v)) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x35A, 11, v ? 0x01 : 0x00, 0x35A);
+    write_command(0x35A, 11, b ? 0x01 : 0x00, 0x35A);
     return true;
 }
 
 // set climate zone number
 bool Solar::set_climateZone(const char * value, const int8_t id) {
-    int v = 0;
-    if (!Helpers::value2number(value, v)) {
+    int zone;
+    if (!Helpers::value2number(value, zone)) {
         return false;
     }
-    write_command(0x380, 0, v, 0x380);
+    write_command(0x380, 0, zone, 0x380);
     return true;
 }
 
 // collector area in squaremeters
 bool Solar::set_collector1Area(const char * value, const int8_t id) {
-    float v = 0;
-    if (!Helpers::value2float(value, v)) {
+    float area;
+    if (!Helpers::value2float(value, area)) {
         return false;
     }
-    write_command(0x380, 3, (uint16_t)(v * 10), 0x380);
+    write_command(0x380, 3, (uint16_t)(area * 10), 0x380);
     return true;
 }
 
 // collector area in squaremeters
 bool Solar::set_collector2Area(const char * value, const int8_t id) {
-    float v = 0;
-    if (!Helpers::value2float(value, v)) {
+    float area;
+    if (!Helpers::value2float(value, area)) {
         return false;
     }
-    write_command(0x380, 6, (uint16_t)(v * 10), 0x380);
+    write_command(0x380, 6, (uint16_t)(area * 10), 0x380);
     return true;
 }
 
@@ -1082,101 +1132,105 @@ bool Solar::set_collector2Type(const char * value, const int8_t id) {
 
 // priority of cylinders if there are 2
 bool Solar::set_cylPriority(const char * value, const int8_t id) {
-    uint8_t n;
-    if (!Helpers::value2enum(value, n, FL_(enum_cylprio))) {
+    uint8_t num;
+    if (!Helpers::value2enum(value, num, FL_(enum_cylprio))) {
         return false;
     }
-    write_command(0x35F, 3, n, 0x35F);
+    write_command(0x35F, 3, num, 0x35F);
     return true;
 }
 
 bool Solar::set_heatAssist(const char * value, const int8_t id) {
-    float v = 0;
-    if (!Helpers::value2temperature(value, v)) {
+    float temperature;
+    if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
-    write_command(0x35C, 0, (uint8_t)(v * 10), 0x35C);
+    write_command(0x35C, 0, (uint8_t)(temperature * 10), 0x35C);
     return true;
 }
 
 bool Solar::set_diffControl(const char * value, const int8_t id) {
-    float v = 0;
-    if (!Helpers::value2temperature(value, v)) {
+    float temperature;
+    if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
-    write_command(0x361, 4, (uint8_t)(v * 10), 0x361);
+    write_command(0x361, 4, (uint8_t)(temperature * 10), 0x361);
     return true;
 }
 
-bool Solar::set_wwTemp(const char * value, const int8_t id) {
-    float v = 0;
-    if (!Helpers::value2temperature(value, v)) {
+bool Solar::set_wwSelTemp(const char * value, const int8_t id) {
+    int temperature;
+    if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
-    write_command(0x7A6, 9, (uint8_t)v, 0x7A6);
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_ISM) {
+        write_command(0x35, 3, (uint8_t)temperature, 0x34);
+    } else { // SM100
+        write_command(0x7A6, 9, (uint8_t)temperature, 0x7A6);
+    }
     return true;
 }
 
 bool Solar::set_wwMaxTemp(const char * value, const int8_t id) {
-    float v = 0;
-    if (!Helpers::value2temperature(value, v)) {
+    int temperature;
+    if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
-    write_command(0x7A6, 8, (uint8_t)v, 0x7A6);
+    write_command(0x7A6, 8, (uint8_t)temperature, 0x7A6);
     return true;
 }
 
 bool Solar::set_wwRedTemp(const char * value, const int8_t id) {
-    float v = 0;
-    if (!Helpers::value2temperature(value, v)) {
+    int temperature;
+    if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
-    write_command(0x7A6, 10, (uint8_t)v, 0x7A6);
+    write_command(0x7A6, 10, (uint8_t)temperature, 0x7A6);
     return true;
 }
 
 bool Solar::set_wwDailyTemp(const char * value, const int8_t id) {
-    float v = 0;
-    if (!Helpers::value2temperature(value, v)) {
+    int temperature;
+    if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
-    write_command(0x7A6, 6, (uint8_t)v, 0x7A6);
+    write_command(0x7A6, 6, (uint8_t)temperature, 0x7A6);
     return true;
 }
 
 bool Solar::set_wwDisinfectionTemp(const char * value, const int8_t id) {
-    float v = 0;
-    if (!Helpers::value2temperature(value, v)) {
+    int temperature;
+    if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
-    write_command(0x7A6, 12, (uint8_t)v, 0x7A6);
+    write_command(0x7A6, 12, (uint8_t)temperature, 0x7A6);
     return true;
 }
 
 bool Solar::set_wwCirc(const char * value, const int8_t id) {
-    bool v = false;
-    if (!Helpers::value2bool(value, v)) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x7A5, 0, v ? 0xFF : 0x00, 0x7A5);
+    write_command(0x7A5, 0, b ? 0xFF : 0x00, 0x7A5);
     return true;
 }
 
 bool Solar::set_wwCircMode(const char * value, const int8_t id) {
-    uint8_t n;
-    if (!Helpers::value2enum(value, n, FL_(enum_wwCircMode))) {
+    uint8_t num;
+    if (!Helpers::value2enum(value, num, FL_(enum_wwCircMode))) {
         return false;
     }
-    write_command(0x7A5, 3, n, 0x7A5);
+    write_command(0x7A5, 3, num, 0x7A5);
     return true;
 }
 
 bool Solar::set_wwKeepWarm(const char * value, const int8_t id) {
-    bool v = false;
-    if (!Helpers::value2bool(value, v)) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x7AE, 0, v ? 0xFF : 0x00, 0x7AE);
+    write_command(0x7AE, 0, b ? 0xFF : 0x00, 0x7AE);
     return true;
 }
 

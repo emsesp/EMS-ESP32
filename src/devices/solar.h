@@ -125,7 +125,7 @@ class Solar : public EMSdevice {
 
     // SM100wwParam - 0x07A6
     uint8_t wwMaxTemp_;
-    uint8_t wwTemp_;
+    uint8_t wwSelTemp_;
     uint8_t wwRedTemp_;
     uint8_t wwDailyTemp_;
     uint8_t wwDisinfectionTemp_;
@@ -187,8 +187,10 @@ class Solar : public EMSdevice {
 
     void process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_ISM1Set(std::shared_ptr<const Telegram> telegram);
+    void process_ISM2StatusMessage(std::shared_ptr<const Telegram> telegram);
+    void process_MonitorWW(std::shared_ptr<const Telegram> telegram);
 
-
+    // settings
     bool set_CollectorMaxTemp(const char * value, const int8_t id);
     bool set_CollectorMinTemp(const char * value, const int8_t id);
     bool set_cylMaxTemp(const char * value, const int8_t id);
@@ -224,7 +226,7 @@ class Solar : public EMSdevice {
     bool set_heatAssist(const char * value, const int8_t id);
     bool set_diffControl(const char * value, const int8_t id);
 
-    bool set_wwTemp(const char * value, const int8_t id);
+    bool set_wwSelTemp(const char * value, const int8_t id);
     bool set_wwMaxTemp(const char * value, const int8_t id);
     bool set_wwRedTemp(const char * value, const int8_t id);
     bool set_wwCirc(const char * value, const int8_t id);
@@ -232,6 +234,7 @@ class Solar : public EMSdevice {
     bool set_wwKeepWarm(const char * value, const int8_t id);
     bool set_wwDisinfectionTemp(const char * value, const int8_t id);
     bool set_wwDailyTemp(const char * value, const int8_t id);
+
 };
 
 } // namespace emsesp

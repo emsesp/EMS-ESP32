@@ -109,9 +109,11 @@
 {191, DeviceType::THERMOSTAT, F("FR120"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS | DeviceFlags::EMS_DEVICE_FLAG_JUNKERS_OLD}, // older model
 {192, DeviceType::THERMOSTAT, F("FW120"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},
 
-// Solar Modules - 0x30, 0x2A (for ww)
+// Solar Modules - 0x30 (for solar), 0x2A, 0x41 (for ww)
 { 73, DeviceType::SOLAR, F("SM10"), DeviceFlags::EMS_DEVICE_FLAG_SM10},
+{100, DeviceType::SOLAR, F("ISM DHW"), DeviceFlags::EMS_DEVICE_FLAG_ISM},
 {101, DeviceType::SOLAR, F("ISM1"), DeviceFlags::EMS_DEVICE_FLAG_ISM},
+{103, DeviceType::SOLAR, F("ISM2"), DeviceFlags::EMS_DEVICE_FLAG_ISM},
 {162, DeviceType::SOLAR, F("SM50"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
 {163, DeviceType::SOLAR, F("SM100/MS100"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
 {164, DeviceType::SOLAR, F("SM200/MS200"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
