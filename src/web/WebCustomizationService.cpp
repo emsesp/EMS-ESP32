@@ -215,7 +215,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request, J
 // and updates the entity list real-time
 void WebCustomizationService::masked_entities(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        EMSESP::logger().debug(F("Masked entities json size: %d"), measureJson(json));
+        // EMSESP::logger().debug(F("Masked entities json size: %d"), measureJson(json));
         // find the device using the unique_id
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
@@ -226,17 +226,16 @@ void WebCustomizationService::masked_entities(AsyncWebServerRequest * request, J
                     std::vector<std::string> entity_ids;
                     for (const JsonVariant id : entity_ids_json) {
                         std::string entity_id = id.as<std::string>();
-                        // handle the mask change and add to the list of customized entities
-                        // if the value is different from the default (mask == 0)
+                        // set the new mask and add to the list of customized entities if the value is different from the default (mask == 0)
                         if (emsdevice->mask_entity(entity_id)) {
                             entity_ids.push_back(entity_id);
                         }
                     }
 
-                    // Save the list to the customization file
                     uint8_t product_id = emsdevice->product_id();
                     uint8_t device_id  = emsdevice->device_id();
 
+                    // Save the list to the customization file
                     EMSESP::webCustomizationService.update(
                         [&](WebCustomization & settings) {
                             // if it exists (productid and deviceid match) overwrite it

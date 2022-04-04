@@ -848,23 +848,26 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
 }
 
 // set mask per device entity based on the id which is prefixed with the 2 char hex mask value
-// returns true if the entity has a mask set
+// returns true if the entity has a mask set (not 0 the default)
 bool EMSdevice::mask_entity(const std::string & entity_id) {
     for (auto & dv : devicevalues_) {
-        std::string entity = dv.tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(dv.short_name) : tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
-        if (entity == entity_id.substr(2)) {
-            uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str()); // first character contains mask flags
-            if (Mqtt::ha_enabled() && (((dv.state >> 4) ^ mask) & (DeviceValueState::DV_READONLY >> 4))) {
+        std::string entity_name =
+            dv.tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(dv.short_name) : tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
+        uint8_t current_mask = dv.state >> 4;
+        if (entity_name == entity_id.substr(2)) {
+            // this entity has a new mask set
+            uint8_t new_mask = Helpers::hextoint(entity_id.substr(0, 2).c_str()); // first character contains mask flags
+            if (Mqtt::ha_enabled() && ((current_mask ^ new_mask) & (DeviceValueState::DV_READONLY >> 4))) {
                 // remove ha config on change of dv_readonly flag
                 dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                 Mqtt::publish_ha_sensor_config(dv, "", "", true); // delete topic (remove = true)
             }
-            dv.state = ((dv.state & 0x0F) | (mask << 4)); // set state high bits to flag
-            return mask;                                  // true if entity mask is not the deafult 0
+            dv.state = ((dv.state & 0x0F) | (new_mask << 4)); // set state high bits to flag
+            return new_mask;                                  // true if entity mask is not the deafult 0
         }
     }
 
-    return false;
+    return false; // we didn't find the entity
 }
 
 // builds json for a specific device value / entity

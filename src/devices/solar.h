@@ -234,7 +234,6 @@ class Solar : public EMSdevice {
     bool set_wwKeepWarm(const char * value, const int8_t id);
     bool set_wwDisinfectionTemp(const char * value, const int8_t id);
     bool set_wwDailyTemp(const char * value, const int8_t id);
-
 };
 
 } // namespace emsesp
