@@ -46,8 +46,8 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
                securityManager->wrapRequest(std::bind(&WebCustomizationService::reset_customization, this, _1), AuthenticationPredicates::IS_ADMIN));
 
     _masked_entities_handler.setMethod(HTTP_POST);
-    _masked_entities_handler.setMaxContentLength(2048);
-    _masked_entities_handler.setMaxJsonBufferSize(2048);
+    _masked_entities_handler.setMaxContentLength(4096);
+    _masked_entities_handler.setMaxJsonBufferSize(4096);
     server->addHandler(&_masked_entities_handler);
 
     _device_entities_handler.setMethod(HTTP_POST);
@@ -215,6 +215,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request, J
 // and updates the entity list real-time
 void WebCustomizationService::masked_entities(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
+        EMSESP::logger().debug(F("Masked entities json size: %d"), measureJson(json));
         // find the device using the unique_id
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
