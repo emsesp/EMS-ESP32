@@ -19,7 +19,6 @@ const FirmwareFileUpload: FC<UploadFirmwareProps> = ({ uploadFirmware }) => {
         my={2}
       />
       <SingleUpload
-        // accept="application/octet-stream"
         accept=".bin"
         onDrop={uploadFile}
         onCancel={cancelUpload}
