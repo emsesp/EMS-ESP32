@@ -948,6 +948,7 @@ function updateMask(entity, de, dd) {
 
 rest_server.post(EMSESP_MASKED_ENTITIES_ENDPOINT, (req, res) => {
   const id = req.body.id
+  console.log(req.body.entity_ids)
   for (const entity of req.body.entity_ids) {
     if (id === 1) {
       updateMask(entity, emsesp_deviceentities_1, emsesp_devicedata_1)
