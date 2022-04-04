@@ -42,11 +42,6 @@ import { DeviceShort, Devices, DeviceEntity } from './types';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: '#607d8b'
-    // color: theme.palette.common.white,
-    // fontSize: 12
-  },
-  [`&.${tableCellClasses.body}`]: {
-    // fontSize: 12
   }
 }));
 
@@ -70,9 +65,14 @@ const SettingsCustomization: FC = () => {
     }
   }, []);
 
+  const setInitialMask = (data: DeviceEntity[]) => {
+    setDeviceEntities(data.map((de) => ({ ...de, om: de.m })));
+  };
+
   const fetchDeviceEntities = async (unique_id: number) => {
     try {
-      setDeviceEntities((await EMSESP.readDeviceEntities({ id: unique_id })).data);
+      const data = (await EMSESP.readDeviceEntities({ id: unique_id })).data;
+      setInitialMask(data);
     } catch (error: any) {
       setErrorMessage(extractErrorMessage(error, 'Problem fetching device entities'));
     }
@@ -161,8 +161,17 @@ const SettingsCustomization: FC = () => {
   const saveCustomization = async () => {
     if (deviceEntities && selectedDevice) {
       const masked_entities = deviceEntities
-        // .filter((de) => de.m)
+        .filter((de) => de.m !== de.om)
         .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.s);
+
+      if (masked_entities.length > 50) {
+        enqueueSnackbar(
+          'Too many selected entities (' + masked_entities.length + '). Limit is 50. Please Save in batches',
+          { variant: 'warning' }
+        );
+        return;
+      }
+
       try {
         const response = await EMSESP.writeMaskedEntities({
           id: selectedDevice,
@@ -176,6 +185,7 @@ const SettingsCustomization: FC = () => {
       } catch (error: any) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem sending entity list'), { variant: 'error' });
       }
+      setInitialMask(deviceEntities);
     }
   };
 
