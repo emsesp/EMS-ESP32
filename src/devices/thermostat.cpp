@@ -1233,18 +1233,18 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     has_update(dateTime_, date, sizeof(dateTime_));
 
     // check clock
-    time_t now    = time(nullptr);
-    tm *   tm_    = localtime(&now);
-    bool   tset_  = tm_->tm_year > 110; // year 2010 and up, time is valid
-    tm_->tm_year  = (telegram->message_data[0] & 0x7F) + 100; // IVT
-    tm_->tm_mon   = telegram->message_data[1] - 1;
-    tm_->tm_mday  = telegram->message_data[3];
-    tm_->tm_hour  = telegram->message_data[2];
-    tm_->tm_min   = telegram->message_data[4];
-    tm_->tm_sec   = telegram->message_data[5];
-    tm_->tm_isdst = telegram->message_data[7] & 0x01;
-    time_t ttime  = mktime(tm_); // thermostat time
-    bool ivtclock =  (telegram->message_data[0] & 0x80) == 0x80; // dont set clock on ivt, #439
+    time_t now      = time(nullptr);
+    tm *   tm_      = localtime(&now);
+    bool   tset_    = tm_->tm_year > 110;                       // year 2010 and up, time is valid
+    tm_->tm_year    = (telegram->message_data[0] & 0x7F) + 100; // IVT
+    tm_->tm_mon     = telegram->message_data[1] - 1;
+    tm_->tm_mday    = telegram->message_data[3];
+    tm_->tm_hour    = telegram->message_data[2];
+    tm_->tm_min     = telegram->message_data[4];
+    tm_->tm_sec     = telegram->message_data[5];
+    tm_->tm_isdst   = telegram->message_data[7] & 0x01;
+    time_t ttime    = mktime(tm_);                                // thermostat time
+    bool   ivtclock = (telegram->message_data[0] & 0x80) == 0x80; // dont sync ivt-clock, #439
     // correct thermostat clock if we have valid ntp time, and could write the command
     if (!ivtclock && tset_ && EMSESP::system_.ntp_connected() && !EMSESP::system_.readonly_mode() && has_command(&dateTime_)) {
         double difference = difftime(now, ttime);
@@ -1255,6 +1255,10 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     }
 #ifndef EMSESP_STANDALONE
     if (!tset_ && tm_->tm_year > 110) { // emsesp clock not set, but thermostat clock
+        if (ivtclock) {
+            tm_->tm_isdst = -1;          // determine dst
+            ttime         = mktime(tm_); // thermostat time
+        }
         struct timeval newnow = {.tv_sec = ttime};
         settimeofday(&newnow, nullptr);
         LOG_INFO(F("ems-esp time set from thermostat"));
