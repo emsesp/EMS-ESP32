@@ -32,11 +32,14 @@ import { extractErrorMessage, formatDateTime, formatLocalDateTime, useRest } fro
 import { AuthenticatedContext } from '../../contexts/authentication';
 
 export const isNtpActive = ({ status }: NTPStatus) => status === NTPSyncStatus.NTP_ACTIVE;
+export const isNtpEnabled = ({ status }: NTPStatus) => status !== NTPSyncStatus.NTP_DISABLED;
 
 export const ntpStatusHighlight = ({ status }: NTPStatus, theme: Theme) => {
   switch (status) {
-    case NTPSyncStatus.NTP_INACTIVE:
+    case NTPSyncStatus.NTP_DISABLED:
       return theme.palette.info.main;
+    case NTPSyncStatus.NTP_INACTIVE:
+      return theme.palette.error.main;
     case NTPSyncStatus.NTP_ACTIVE:
       return theme.palette.success.main;
     default:
@@ -46,6 +49,8 @@ export const ntpStatusHighlight = ({ status }: NTPStatus, theme: Theme) => {
 
 export const ntpStatus = ({ status }: NTPStatus) => {
   switch (status) {
+    case NTPSyncStatus.NTP_DISABLED:
+      return 'Disabled';
     case NTPSyncStatus.NTP_INACTIVE:
       return 'Inactive';
     case NTPSyncStatus.NTP_ACTIVE:
@@ -143,7 +148,7 @@ const NTPStatusForm: FC = () => {
             <ListItemText primary="Status" secondary={ntpStatus(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
-          {isNtpActive(data) && (
+          {isNtpEnabled(data) && (
             <>
               <ListItem>
                 <ListItemAvatar>
