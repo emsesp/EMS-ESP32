@@ -183,7 +183,9 @@ class EMSdevice {
     char * show_telegram_handlers(char * result, const size_t len, const uint8_t handlers);
     void   show_mqtt_handlers(uuid::console::Shell & shell) const;
     void   list_device_entries(JsonObject & output) const;
-    bool   mask_entity(const std::string & entity_id);
+
+    void mask_entity(const std::string & entity_id);
+    void getMaskedEntities(std::vector<std::string> & entity_ids);
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
 
