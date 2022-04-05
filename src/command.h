@@ -139,13 +139,10 @@ class Command {
     }
 };
 
-using KeyValueMap_t = std::unordered_map<std::string, std::string>;
-using Folder_t      = std::vector<std::string>;
-
 class SUrlParser {
   private:
-    KeyValueMap_t m_keysvalues;
-    Folder_t      m_folders;
+    std::unordered_map<std::string, std::string> m_keysvalues;
+    std::vector<std::string>                     m_folders;
 
   public:
     SUrlParser() = default;
@@ -153,11 +150,11 @@ class SUrlParser {
 
     bool parse(const char * url);
 
-    Folder_t & paths() {
+    std::vector<std::string> & paths() {
         return m_folders;
     };
 
-    KeyValueMap_t & params() {
+    std::unordered_map<std::string, std::string> & params() {
         return m_keysvalues;
     };
 
