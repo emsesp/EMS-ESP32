@@ -210,52 +210,53 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request, J
     request->send(response);
 }
 
-// takes a list of masked ids sent from the webUI
+// takes a list of updated entities with new masks from the web UI
 // saves it in the customization service
 // and updates the entity list real-time
 void WebCustomizationService::masked_entities(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        // EMSESP::logger().debug(F("Masked entities json size: %d"), measureJson(json));
         // find the device using the unique_id
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
                 uint8_t unique_device_id = json["id"];
                 if (emsdevice->unique_id() == unique_device_id) {
-                    // build a list of entities
-                    JsonArray                entity_ids_json = json["entity_ids"];
-                    std::vector<std::string> entity_ids;
-                    for (const JsonVariant id : entity_ids_json) {
-                        std::string entity_id = id.as<std::string>();
-                        // set the new mask and add to the list of customized entities if the value is different from the default (mask == 0)
-                        if (emsdevice->mask_entity(entity_id)) {
-                            entity_ids.push_back(entity_id);
-                        }
-                    }
-
                     uint8_t product_id = emsdevice->product_id();
                     uint8_t device_id  = emsdevice->device_id();
+
+                    // and set the mask immediately for the changed entities
+                    JsonArray entity_ids_json = json["entity_ids"];
+                    for (const JsonVariant id : entity_ids_json) {
+                        emsdevice->mask_entity(id.as<std::string>());
+                    }
 
                     // Save the list to the customization file
                     EMSESP::webCustomizationService.update(
                         [&](WebCustomization & settings) {
-                            // if it exists (productid and deviceid match) overwrite it
-                            for (auto & entityCustomization : settings.entityCustomizations) {
-                                if ((entityCustomization.product_id == product_id) && (entityCustomization.device_id == device_id)) {
-                                    // already exists, clear the list and add the new values
-                                    entityCustomization.entity_ids.clear();
-                                    for (uint8_t i = 0; i < entity_ids.size(); i++) {
-                                        entityCustomization.entity_ids.push_back(entity_ids[i]);
-                                    }
-                                    return StateUpdateResult::CHANGED;
+                            // see if we already have a mask list for this device, if so remove it
+                            for (auto it = settings.entityCustomizations.begin(); it != settings.entityCustomizations.end();) {
+                                if ((*it).product_id == product_id && (*it).device_id == device_id) {
+                                    it = settings.entityCustomizations.erase(it);
+                                    break;
+                                } else {
+                                    ++it;
                                 }
                             }
-                            // create a new entry in the list
+
+                            if (!entity_ids_json.size()) {
+                                return StateUpdateResult::UNCHANGED; // nothing to add
+                            }
+
+                            // create a new entry for this device if there are values
                             EntityCustomization new_entry;
                             new_entry.product_id = product_id;
                             new_entry.device_id  = device_id;
-                            for (uint8_t i = 0; i < entity_ids.size(); i++) {
-                                new_entry.entity_ids.push_back(entity_ids[i]);
-                            }
+
+                            // get list of entities that have masks
+                            std::vector<std::string> entity_ids;
+                            emsdevice->getMaskedEntities(entity_ids);
+                            new_entry.entity_ids = entity_ids;
+
+                            // add the record and save
                             settings.entityCustomizations.push_back(new_entry);
                             return StateUpdateResult::CHANGED;
                         },
