@@ -182,6 +182,11 @@ class Thermostat : public EMSdevice {
     uint8_t ibaDamping_;           // damping 0-off, 0xff-on
     uint8_t backlight_;
     uint8_t heatingpid_;
+    int8_t  brightness_;           // Screen brightness 0F=dark F1=light
+    uint8_t preheating_;           // Preheating in the clock program: (0x00 = off, 0xFF = on)
+    uint8_t autodst_;              // Automatic change Daylight Saving time: (0x00 = off, 0xFF = on)
+    uint8_t offtemp_;              // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
+    uint8_t mixingvalves_;         // Number of Mixing Valves: (0x00=0, 0x01=1, 0x02=2)
 
     int8_t   dampedoutdoortemp_;
     uint16_t tempsensor1_;
@@ -296,6 +301,7 @@ class Thermostat : public EMSdevice {
 
     // Installation settings
     static constexpr uint8_t EMS_TYPE_IBASettings = 0xA5; // installation settings
+    static constexpr uint8_t EMS_TYPE_RC30Settings = 0xA7; // RC30 settings
     static constexpr uint8_t EMS_TYPE_wwSettings  = 0x37; // ww settings
     static constexpr uint8_t EMS_TYPE_time        = 0x06; // time
 
@@ -430,6 +436,11 @@ class Thermostat : public EMSdevice {
     bool set_reducehours(const char * value, const int8_t id);
     bool set_backlight(const char * value, const int8_t id);
     bool set_heatingpid(const char * value, const int8_t id);
+    bool set_brightness(const char * value, const int8_t id);
+    bool set_autodst(const char * value, const int8_t id);
+    bool set_preheating(const char * value, const int8_t id);
+    bool set_mixingvalves(const char * value, const int8_t id);
+    bool set_offtemp(const char * value, const int8_t id);    
 };
 
 } // namespace emsesp

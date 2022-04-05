@@ -347,6 +347,7 @@ MAKE_PSTR_LIST(enum_ibaMainDisplay,
                F_(date),
                F_(smoke_temperature))
 MAKE_PSTR_LIST(enum_ibaLanguage, F_(german), F_(dutch), F_(french), F_(italian))
+MAKE_PSTR_LIST(enum_ibaLanguage_RC30, F_(german), F_(dutch))
 MAKE_PSTR_LIST(enum_floordrystatus, F_(off), F_(start), F_(heat), F_(hold), F_(cool), F_(end))
 MAKE_PSTR_LIST(enum_ibaBuildingType, F_(light), F_(medium), F_(heavy)) // RC300
 MAKE_PSTR_LIST(enum_PID, F("fast"), F_(medium), F("slow"))
@@ -581,6 +582,11 @@ MAKE_PSTR_LIST(tempsensor2, F("inttemp2"), F("Temperatursensor 2"))
 MAKE_PSTR_LIST(dampedoutdoortemp, F("dampedoutdoortemp"), F("gedämpfte Aussentemperatur"))
 MAKE_PSTR_LIST(floordrystatus, F("floordry"), F("Estrichtrocknung"))
 MAKE_PSTR_LIST(floordrytemp, F("floordrytemp"), F("Estrichtrocknungs Temperatur"))
+MAKE_PSTR_LIST(brightness, F("brightness"), F("bildschirmhelligkeit"))
+MAKE_PSTR_LIST(autodst, F("autodst"), F("automatische sommerzeit umstellung"))
+MAKE_PSTR_LIST(preheating, F("preheating"), F("vorheizen im uhrenprogramm"))
+MAKE_PSTR_LIST(offtemp, F("offtemp"), F("temperatur bei ausgeschaltetem modus"))
+MAKE_PSTR_LIST(mixingvalves, F("mixingvalves"), F("mischventile"))
 // thermostat ww
 MAKE_PSTR_LIST(wwMode, F("wwmode"), F("modus"))
 MAKE_PSTR_LIST(wwSetTempLow, F("wwsettemplow"), F("untere Solltemperatur"))
