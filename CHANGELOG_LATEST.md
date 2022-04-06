@@ -31,6 +31,7 @@
 - set mode has immediate effect [#395](https://github.com/emsesp/EMS-ESP32/issues/395)
 - min/max in web value setting
 - Extend customization to select if an entity is to be shown in the WebUI or forced as read-only [#317](https://github.com/emsesp/EMS-ESP32/issues/317)
+- Added Moduline 400 installation parameters [PR #449 by @kwertie01](https://github.com/emsesp/EMS-ESP32/pull/449)
 
 ### Fixed
 
@@ -76,4 +77,3 @@
   - Boiler `ww` tag renamed to `dhw`. Any custom Home Assistant lovelace dashboards will need updating.
   - Renamed description of `wwtapactivated` to "turn on/off DHW". Otherwise would have looked like "boiler_dhw_turn_on_off_dhw" in HA.
   - `/api/system/info` endpoint has updated keys. Now lowercase, no underscores and not capitalized. Replace "handlers" with "handlers received", "handlers fetched" and "handlers pending".
-  - exclude list changed from 3.4.0b8 to 3.4.0b9 and has to be updated by user.
