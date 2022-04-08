@@ -36,6 +36,7 @@
 {132, DeviceType::BOILER, F("GC7000F"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {133, DeviceType::BOILER, F("Logano GB125/KB195i/Logamatic MC110"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {167, DeviceType::BOILER, F("Cerapur Aero"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{168, DeviceType::BOILER, F("Hybrid Heatpump"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 {170, DeviceType::BOILER, F("Logano GB212"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {172, DeviceType::BOILER, F("Enviline/Compress 6000AW/Hybrid 7000iAW/SupraEco/Geo 5xx"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 {173, DeviceType::BOILER, F("Geo 5xx"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
@@ -56,6 +57,7 @@
 {114, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {125, DeviceType::CONTROLLER, F("BC25"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {152, DeviceType::CONTROLLER, F("Controller"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{168, DeviceType::CONTROLLER, F("Hybrid Heatpump"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {169, DeviceType::CONTROLLER, F("BC40"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {190, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {194, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
