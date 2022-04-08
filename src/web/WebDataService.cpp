@@ -77,7 +77,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     // Ignore Contoller
     JsonArray devices = root.createNestedArray("devices");
     for (const auto & emsdevice : EMSESP::emsdevices) {
-        if (emsdevice && emsdevice->device_type() != EMSdevice::DeviceType::CONTROLLER) {
+        if (emsdevice && (emsdevice->device_type() != EMSdevice::DeviceType::CONTROLLER || emsdevice->count_entities() > 0)) {
             JsonObject obj = devices.createNestedObject();
             obj["i"]       = emsdevice->unique_id();        // a unique id
             obj["t"]       = emsdevice->device_type_name(); // type
