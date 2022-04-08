@@ -572,7 +572,7 @@ void EMSdevice::publish_value(void * value_p) const {
                 Helpers::render_value(payload, *(uint32_t *)(value_p), divider, fahrenheit);
                 break;
             case DeviceValueType::BOOL: {
-                Helpers::render_boolean(payload, (bool)(*(uint8_t *)(value_p)));
+                Helpers::render_boolean(payload, (bool)*(uint8_t *)(value_p));
                 break;
             }
             case DeviceValueType::TIME:
@@ -646,12 +646,10 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 JsonObject obj        = data.createNestedObject(); // create the object, we know there is a value
                 uint8_t    fahrenheit = 0;
 
-                // handle Booleans (true, false)
+                // handle Booleans (true, false), use strings, no native true/false)
                 if (dv.type == DeviceValueType::BOOL) {
-                    bool value_b = *(bool *)(dv.value_p);
-                    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                        obj["v"] = value_b ? "true" : "false";
-                    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                    bool value_b = (bool)*(uint8_t *)(dv.value_p);
+                    if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
                         obj["v"] = value_b ? 1 : 0;
                     } else {
                         char s[7];
@@ -765,12 +763,10 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
 
         // create the value
         if (dv.hasValue()) {
-            // handle Booleans (true, false)
+            // handle Booleans (true, false), use strings, no native true/false)
             if (dv.type == DeviceValueType::BOOL) {
-                bool value_b = *(bool *)(dv.value_p);
-                if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                    obj["v"] = value_b;
-                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                bool value_b = (bool)*(uint8_t *)(dv.value_p);
+                if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
                     obj["v"] = value_b ? 1 : 0;
                 } else {
                     char s[7];
@@ -975,7 +971,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
 
             case DeviceValueType::BOOL:
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
-                    auto value_b = (bool)(*(uint8_t *)(dv.value_p));
+                    bool value_b = (bool)*(uint8_t *)(dv.value_p);
                     if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                         json[value] = value_b;
                     } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
@@ -1108,7 +1104,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             // handle Booleans
             if (dv.type == DeviceValueType::BOOL && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see how to render the value depending on the setting
-                auto value_b = (bool)*(uint8_t *)(dv.value_p);
+                bool value_b = (bool)*(uint8_t *)(dv.value_p);
                 if (Mqtt::ha_enabled() && (output_target == OUTPUT_TARGET::MQTT)) {
                     char s[7];
                     json[name] = Helpers::render_boolean(s, value_b); // for HA always render as string

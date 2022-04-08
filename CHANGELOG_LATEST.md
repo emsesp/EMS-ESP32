@@ -66,6 +66,8 @@
 - removed system/pin command, new commands in analogsensors
 - system/info device-info split to name/version/brand
 - exclude list uses short-names, possible flags for web/api/mqtt excludes, readonly and favorite (selection not yet implemented)
+- thermostat clock formate date-time: dd.mm.yyyy hh:mm:ss
+- RC300 summermode as other thermostats `winter/summer` instead of `off/on`
 
 ## **BREAKING CHANGES:**
 
