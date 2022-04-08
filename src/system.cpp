@@ -961,6 +961,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["publish_time_other"]      = settings.publish_time_other;
         node["publish_time_sensor"]     = settings.publish_time_sensor;
         node["publish_single"]          = settings.publish_single;
+        node["publish_2_command"]       = settings.publish_single2cmd;
         node["send_response"]           = settings.send_response;
     });
 

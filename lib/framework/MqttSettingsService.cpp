@@ -228,7 +228,15 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
         changed = true;
     }
 
+    //  if both settings are stored from older version, HA has priority
+    if (newSettings.ha_enabled && newSettings.publish_single) {
+        newSettings.publish_single = false;
+    }
+
     if (newSettings.publish_single != settings.publish_single) {
+        if (newSettings.publish_single) {
+            newSettings.ha_enabled = false;
+        }
         changed = true;
     }
 
@@ -242,6 +250,9 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
 
     if (newSettings.ha_enabled != settings.ha_enabled) {
         emsesp::EMSESP::mqtt_.ha_enabled(newSettings.ha_enabled);
+        if (newSettings.ha_enabled) {
+            newSettings.publish_single = false;
+        }
         changed = true;
     }
 
