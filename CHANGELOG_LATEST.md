@@ -32,6 +32,7 @@
 - min/max in web value setting
 - Extend customization to select if an entity is to be shown in the WebUI or forced as read-only [#317](https://github.com/emsesp/EMS-ESP32/issues/317)
 - Added Moduline 400 installation parameters [PR #449 by @kwertie01](https://github.com/emsesp/EMS-ESP32/pull/449)
+- Read time from IVT-controller [#439](https://github.com/emsesp/EMS-ESP32/issues/439)
 
 ### Fixed
 
@@ -66,6 +67,8 @@
 - removed system/pin command, new commands in analogsensors
 - system/info device-info split to name/version/brand
 - exclude list uses short-names, possible flags for web/api/mqtt excludes, readonly and favorite (selection not yet implemented)
+- thermostat clock formate date-time: dd.mm.yyyy hh:mm
+- RC300 summermode as other thermostats `winter/summer` instead of `off/on`
 
 ## **BREAKING CHANGES:**
 

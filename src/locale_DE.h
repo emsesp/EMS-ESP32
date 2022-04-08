@@ -333,7 +333,7 @@ MAKE_PSTR(functioning_mode, "functioning mode")
 MAKE_PSTR(smoke_temperature, "Abgastemperatur")
 
 // thermostat lists
-MAKE_PSTR_LIST(tpl_datetime, F("Format: < hh:mm:ss dd/mm/yyyy-dw-dst | NTP >"))
+MAKE_PSTR_LIST(tpl_datetime, F("Format: < NTP | dd.mm.yyyy-hh:mm:ss-dw-dst >"))
 MAKE_PSTR_LIST(tpl_switchtime, F("Format: < nn.d.o.hh:mm >"))
 MAKE_PSTR_LIST(tpl_holidays, F("Format: < dd.mm.yyyy-dd.mm.yyyy >"))
 MAKE_PSTR_LIST(enum_ibaMainDisplay,

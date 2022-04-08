@@ -1055,9 +1055,9 @@ void Thermostat::process_RC30Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, mixingvalves_, 17);        // Number of Mixing Valves: (0x00=0, 0x01=1, 0x02=2)
     has_update(telegram, brightness_, 18);          // Screen brightness 0F=dark F1=light
     has_update(telegram, hc->mode, 23);
-    has_update(telegram, offtemp_, 24);             // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
-    has_update(telegram, heatingpid_, 25);          // PID setting 00=1 01=2 02=3
-    has_update(telegram, preheating_, 26);          // Preheating in the clock program: (0x00 = off, 0xFF = on)
+    has_update(telegram, offtemp_, 24);    // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
+    has_update(telegram, heatingpid_, 25); // PID setting 00=1 01=2 02=3
+    has_update(telegram, preheating_, 26); // Preheating in the clock program: (0x00 = off, 0xFF = on)
 }
 
 // type 0x3E (HC1), 0x48 (HC2), 0x52 (HC3), 0x5C (HC4) - data from the RC35 thermostat (0x10) - 16 bytes
@@ -1221,41 +1221,25 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
-    // render date to HH:MM:SS DD/MM/YYYY
-    // had to create separate buffers because of how printf works
-    char date[sizeof(dateTime_)];
-    char buf1[6];
-    char buf2[6];
-    char buf3[6];
-    char buf4[6];
-    char buf5[6];
-    char buf6[6];
-    snprintf(date,
-             sizeof(date),
-             "%s:%s:%s %s.%s.%s",
-             Helpers::smallitoa(buf1, telegram->message_data[2]), // hour
-             Helpers::smallitoa(buf2, telegram->message_data[4]), // minute
-             Helpers::smallitoa(buf3, telegram->message_data[5]), // second
-             Helpers::smallitoa(buf4, telegram->message_data[3]), // day
-             Helpers::smallitoa(buf5, telegram->message_data[1]), // month
-             // IVT reports Year with high bit set.?
-             Helpers::itoa((telegram->message_data[0] & 0x7F) + 2000, buf6) // year
-    );
-    has_update(dateTime_, date, sizeof(dateTime_));
-
     // check clock
-    time_t now      = time(nullptr);
-    tm *   tm_      = localtime(&now);
-    bool   tset_    = tm_->tm_year > 110;                       // year 2010 and up, time is valid
-    tm_->tm_year    = (telegram->message_data[0] & 0x7F) + 100; // IVT
-    tm_->tm_mon     = telegram->message_data[1] - 1;
-    tm_->tm_mday    = telegram->message_data[3];
-    tm_->tm_hour    = telegram->message_data[2];
-    tm_->tm_min     = telegram->message_data[4];
-    tm_->tm_sec     = telegram->message_data[5];
-    tm_->tm_isdst   = telegram->message_data[7] & 0x01;
-    time_t ttime    = mktime(tm_);                                // thermostat time
+    time_t now    = time(nullptr);
+    tm *   tm_    = localtime(&now);
+    bool   tset_  = tm_->tm_year > 110;                       // year 2010 and up, time is valid
+    tm_->tm_year  = (telegram->message_data[0] & 0x7F) + 100; // IVT
+    tm_->tm_mon   = telegram->message_data[1] - 1;
+    tm_->tm_mday  = telegram->message_data[3];
+    tm_->tm_hour  = telegram->message_data[2];
+    tm_->tm_min   = telegram->message_data[4];
+    tm_->tm_sec   = telegram->message_data[5];
+    tm_->tm_isdst = telegram->message_data[7] & 0x01;
+
+    // render date to DD.MM.YYYY HH:MM and publish
+    char newdatetime[sizeof(dateTime_)];
+    strftime(newdatetime, sizeof(dateTime_), "%d.%m.%G %H:%M", tm_);
+    has_update(dateTime_, newdatetime, sizeof(dateTime_));
+
     bool   ivtclock = (telegram->message_data[0] & 0x80) == 0x80; // dont sync ivt-clock, #439
+    time_t ttime    = mktime(tm_);                                // thermostat time
     // correct thermostat clock if we have valid ntp time, and could write the command
     if (!ivtclock && tset_ && EMSESP::system_.ntp_connected() && !EMSESP::system_.readonly_mode() && has_command(&dateTime_)) {
         double difference = difftime(now, ttime);
@@ -1477,13 +1461,13 @@ bool Thermostat::set_language(const char * value, const int8_t id) {
     if (model() == EMS_DEVICE_FLAG_RC30) {
         if (!Helpers::value2enum(value, lg, FL_(enum_ibaLanguage_RC30))) {
             return false;
-        }        
-        write_command(EMS_TYPE_RC30Settings, 0, lg, EMS_TYPE_RC30Settings); 
+        }
+        write_command(EMS_TYPE_RC30Settings, 0, lg, EMS_TYPE_RC30Settings);
     } else {
         if (!Helpers::value2enum(value, lg, FL_(enum_ibaLanguage))) {
             return false;
         }
-        write_command(EMS_TYPE_IBASettings, 1, lg, EMS_TYPE_IBASettings);     
+        write_command(EMS_TYPE_IBASettings, 1, lg, EMS_TYPE_IBASettings);
     }
 
     return true;
@@ -1879,7 +1863,7 @@ bool Thermostat::set_party(const char * value, const int8_t id) {
     return true;
 }
 
-// set date&time as string hh:mm:ss-dd.mm.yyyy-dw-dst or "NTP" for setting to internet-time
+// set date&time as string dd.mm.yyyy-hh:mm:ss-dw-dst or "NTP" for setting to internet-time
 // dw - day of week (0..6), dst- summertime (0/1)
 // id is ignored
 bool Thermostat::set_datetime(const char * value, const int8_t id) {
@@ -1907,25 +1891,20 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
         data[5] = tm_->tm_sec;
         data[6] = (tm_->tm_wday + 6) % 7; // Bosch counts from Mo, time from Su
         data[7] = tm_->tm_isdst + 2;      // set DST and flag for ext. clock
-        // char time_string[25];
-        // strftime(time_string, 25, "%FT%T%z", tm_);
-        // LOG_INFO(F("Date and time: %s"), time_string);
     } else if (dt.length() == 23) {
-        data[0] = (dt[16] - '0') * 100 + (dt[17] - '0') * 10 + (dt[18] - '0'); // year
-        data[1] = (dt[12] - '0') * 10 + (dt[13] - '0');                        // month
-        data[2] = (dt[0] - '0') * 10 + (dt[1] - '0');                          // hour
-        data[3] = (dt[9] - '0') * 10 + (dt[10] - '0');                         // day
-        data[4] = (dt[3] - '0') * 10 + (dt[4] - '0');                          // min
-        data[5] = (dt[6] - '0') * 10 + (dt[7] - '0');                          // sec
-        data[6] = (dt[20] - '0');                                              // day of week, Mo:0
-        data[7] = (dt[22] - '0') + 2;                                          // DST and flag
-        // LOG_INFO(F("Date and time: %02d.%02d.2%03d-%02d:%02d:%02d"), data[3], data[1], data[0], data[2], data[4], data[5]);
+        data[0] = (dt[7] - '0') * 100 + (dt[8] - '0') * 10 + (dt[9] - '0'); // year
+        data[1] = (dt[3] - '0') * 10 + (dt[4] - '0');                       // month
+        data[2] = (dt[11] - '0') * 10 + (dt[12] - '0');                     // hour
+        data[3] = (dt[0] - '0') * 10 + (dt[1] - '0');                       // day
+        data[4] = (dt[14] - '0') * 10 + (dt[15] - '0');                     // min
+        data[5] = (dt[17] - '0') * 10 + (dt[18] - '0');                     // sec
+        data[6] = (dt[20] - '0');                                           // day of week, Mo:0
+        data[7] = (dt[22] - '0') + 2;                                       // DST and flag
     } else {
         LOG_WARNING(F("Set date: invalid data, wrong length"));
         return false;
     }
     if (data[1] == 0 || data[1] > 12 || data[2] > 23 || data[3] == 0 || data[3] > 31 || data[4] > 59 || data[5] > 59 || data[6] > 6 || data[7] > 3) {
-        // LOG_WARNING(F("Set date: invalid data"));
         LOG_WARNING(F("Invalid date/time: %02d.%02d.2%03d-%02d:%02d:%02d-%d-%d"), data[3], data[1], data[0], data[2], data[4], data[5], data[6], data[7]);
         return false;
     }
@@ -3123,7 +3102,8 @@ void Thermostat::register_device_values() {
                               FL_(ibaClockOffset),
                               DeviceValueUOM::SECONDS,
                               MAKE_CF_CB(set_clockoffset)); // offset (in sec) to clock, 0xff=-1s, 0x02=2s
-        register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA, &autodst_, DeviceValueType::BOOL, nullptr, FL_(autodst), DeviceValueUOM::NONE, MAKE_CF_CB(set_autodst));
+        register_device_value(
+            DeviceValueTAG::TAG_THERMOSTAT_DATA, &autodst_, DeviceValueType::BOOL, nullptr, FL_(autodst), DeviceValueUOM::NONE, MAKE_CF_CB(set_autodst));
         register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
                               &ibaLanguage_,
                               DeviceValueType::ENUM,
@@ -3136,8 +3116,9 @@ void Thermostat::register_device_values() {
                               DeviceValueType::ENUM,
                               FL_(enum_ibaMainDisplay),
                               FL_(ibaMainDisplay),
-                              DeviceValueUOM::NONE);                              
-        register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA, &backlight_, DeviceValueType::BOOL, nullptr, FL_(backlight), DeviceValueUOM::NONE, MAKE_CF_CB(set_backlight));
+                              DeviceValueUOM::NONE);
+        register_device_value(
+            DeviceValueTAG::TAG_THERMOSTAT_DATA, &backlight_, DeviceValueType::BOOL, nullptr, FL_(backlight), DeviceValueUOM::NONE, MAKE_CF_CB(set_backlight));
         register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
                               &brightness_,
                               DeviceValueType::INT,
@@ -3170,14 +3151,20 @@ void Thermostat::register_device_values() {
                               FL_(heatingPID),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_heatingpid));
-        register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA, &preheating_, DeviceValueType::BOOL, nullptr, FL_(preheating), DeviceValueUOM::NONE, MAKE_CF_CB(set_preheating));
+        register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
+                              &preheating_,
+                              DeviceValueType::BOOL,
+                              nullptr,
+                              FL_(preheating),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_preheating));
         register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
                               &ibaCalIntTemperature_,
                               DeviceValueType::INT,
                               FL_(div10),
                               FL_(ibaCalIntTemperature),
                               DeviceValueUOM::DEGREES_R,
-                              MAKE_CF_CB(set_calinttemp));                              
+                              MAKE_CF_CB(set_calinttemp));
         register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
                               &offtemp_,
                               DeviceValueType::UINT,
@@ -3499,7 +3486,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
         register_device_value(
             tag, &hc->summer_setmode, DeviceValueType::ENUM, FL_(enum_summermode), FL_(summersetmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_summermode));
-        register_device_value(tag, &hc->summermode, DeviceValueType::BOOL, nullptr, FL_(summermode), DeviceValueUOM::NONE);
+        register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
         register_device_value(
             tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));

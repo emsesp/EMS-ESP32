@@ -333,7 +333,7 @@ MAKE_PSTR(functioning_mode, "functioning mode")
 MAKE_PSTR(smoke_temperature, "smoke temperature")
 
 // thermostat lists
-MAKE_PSTR_LIST(tpl_datetime, F("Format: < NTP | hh:mm:ss dd.mm.yyyy-dw-dst >"))
+MAKE_PSTR_LIST(tpl_datetime, F("Format: < NTP | dd.mm.yyyy-hh:mm:ss-dw-dst >"))
 MAKE_PSTR_LIST(tpl_switchtime, F("Format: <nn> [ not_set | day hh:mm on|off ]"))
 MAKE_PSTR_LIST(tpl_holidays, F("format: < dd.mm.yyyy-dd.mm.yyyy >"))
 MAKE_PSTR_LIST(enum_ibaMainDisplay,
@@ -541,7 +541,7 @@ MAKE_PSTR_LIST(wwSetPumpPower, F("wwsetpumppower"), F("set pump power"))
 MAKE_PSTR_LIST(wwMixerTemp, F("wwmixertemp"), F("mixer temperature"))
 MAKE_PSTR_LIST(wwCylMiddleTemp, F("wwcylmiddletemp"), F("cylinder middle temperature (TS3)"))
 MAKE_PSTR_LIST(wwStarts, F("wwstarts"), F("starts"))
-MAKE_PSTR_LIST(wwStarts2, F("wwstarts2"), F("control starts"))
+MAKE_PSTR_LIST(wwStarts2, F("wwstarts2"), F("control starts2"))
 MAKE_PSTR_LIST(wwWorkM, F("wwworkm"), F("active time"))
 MAKE_PSTR_LIST(wwHystOn, F("wwhyston"), F("hysteresis on temperature"))
 MAKE_PSTR_LIST(wwHystOff, F("wwhystoff"), F("hysteresis off temperature"))

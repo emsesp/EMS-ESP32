@@ -13,11 +13,13 @@ const FirmwareFileUpload: FC<UploadFirmwareProps> = ({ uploadFirmware }) => {
 
   return (
     <>
-      <MessageBox
-        message="Upload a new firmware (.bin) file below to replace the existing firmware"
-        level="warning"
-        my={2}
-      />
+      {!uploading && (
+        <MessageBox
+          message="Upload a new firmware (.bin) file below to replace the existing firmware"
+          level="warning"
+          my={2}
+        />
+      )}
       <SingleUpload
         accept=".bin"
         onDrop={uploadFile}
