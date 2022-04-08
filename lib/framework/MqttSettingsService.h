@@ -50,7 +50,7 @@ static String generateClientId() {
 #endif
 
 #ifndef FACTORY_MQTT_CLEAN_SESSION
-#define FACTORY_MQTT_CLEAN_SESSION true
+#define FACTORY_MQTT_CLEAN_SESSION false
 #endif
 
 #ifndef FACTORY_MQTT_MAX_TOPIC_LENGTH
