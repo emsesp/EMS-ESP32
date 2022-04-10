@@ -194,12 +194,12 @@ class Boiler : public EMSdevice {
     int8_t poolSetTemp_;
 
     // HybridHP
-    uint8_t gasPriceMode_;   // cost = 2, temperature = 3, mix = 4
+    uint8_t hybridStrategy_;   // cost = 2, temperature = 3, mix = 4
     uint8_t switchOverTemp_; // degrees
-    uint8_t gasPriceRatio_;  // is *10
+    uint8_t energyCostRatio_;  // is *10
     uint8_t fossileFactor_;  // is * 10
     uint8_t electricFactor_; // is * 10
-    uint8_t waitBoiler_;     // minutes
+    uint8_t delayBoiler_;     // minutes
     uint8_t tempDiffBoiler_; // relative temperature degrees
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
@@ -267,12 +267,12 @@ class Boiler : public EMSdevice {
     bool set_ww_hyst_off(const char * value, const int8_t id);
     bool set_pool_temp(const char * value, const int8_t id);
 
-    bool set_gasPriceMode(const char * value, const int8_t id);
+    bool set_hybridStrategy(const char * value, const int8_t id);
     bool set_switchOverTemp(const char * value, const int8_t id);
-    bool set_gasPriceRatio(const char * value, const int8_t id);
+    bool set_energyCostRatio(const char * value, const int8_t id);
     bool set_fossileFactor(const char * value, const int8_t id);
     bool set_electricFactor(const char * value, const int8_t id);
-    bool set_waitBoiler(const char * value, const int8_t id);
+    bool set_delayBoiler(const char * value, const int8_t id);
     bool set_tempDiffBoiler(const char * value, const int8_t id);
 };
 

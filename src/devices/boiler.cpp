@@ -205,12 +205,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     // Hybrid Heatpump
     if (model() == EMSdevice::EMS_DEVICE_FLAG_HYBRID) {
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
-                              &gasPriceMode_,
+                              &hybridStrategy_,
                               DeviceValueType::ENUM,
-                              FL_(enum_gasPriceMode),
-                              FL_(gasPriceMode),
+                              FL_(enum_hybridStrategy),
+                              FL_(hybridStrategy),
                               DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_gasPriceMode));
+                              MAKE_CF_CB(set_hybridStrategy));
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
                               &switchOverTemp_,
                               DeviceValueType::UINT,
@@ -219,12 +219,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_switchOverTemp));
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
-                              &gasPriceRatio_,
+                              &energyCostRatio_,
                               DeviceValueType::UINT,
                               FL_(div10),
-                              FL_(gasPriceRatio),
+                              FL_(energyCostRatio),
                               DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_gasPriceRatio));
+                              MAKE_CF_CB(set_energyCostRatio));
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
                               &fossileFactor_,
                               DeviceValueType::UINT,
@@ -240,12 +240,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_electricFactor));
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
-                              &waitBoiler_,
+                              &delayBoiler_,
                               DeviceValueType::UINT,
                               nullptr,
-                              FL_(waitBoiler),
+                              FL_(delayBoiler),
                               DeviceValueUOM::MINUTES,
-                              MAKE_CF_CB(set_waitBoiler));
+                              MAKE_CF_CB(set_delayBoiler));
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
                               &tempDiffBoiler_,
                               DeviceValueType::UINT,
@@ -1050,16 +1050,15 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
     }
 }
 
-
 // 0xBB Heatpump optimization
 // Boiler(0x08) -> Me(0x0B), ?(0xBB), data: 00 00 00 00 00 00 00 00 00 00 00 FF 02 0F 1E 0B 1A 00 14 03
 void Boiler::process_HybridHp(std::shared_ptr<const Telegram> telegram) {
-    has_enumupdate(telegram, gasPriceMode_, 12, 1); // cost = 2, temperature = 3, mix = 4
+    has_enumupdate(telegram, hybridStrategy_, 12, 1); // cost = 2, temperature = 3, mix = 4
     has_update(telegram, switchOverTemp_, 13);      // full degrees
-    has_update(telegram, gasPriceRatio_, 14);       // is *10
+    has_update(telegram, energyCostRatio_, 14);       // is *10
     has_update(telegram, fossileFactor_, 15);       // is * 10
     has_update(telegram, electricFactor_, 16);      // is * 10
-    has_update(telegram, waitBoiler_, 18);          // minutes
+    has_update(telegram, delayBoiler_, 18);          // minutes
     has_update(telegram, tempDiffBoiler_, 19);      // relative degrees
 }
 
@@ -1067,14 +1066,15 @@ void Boiler::process_HybridHp(std::shared_ptr<const Telegram> telegram) {
  * Settings
  */
 
-bool Boiler::set_gasPriceMode(const char * value, const int8_t id) {
+bool Boiler::set_hybridStrategy(const char * value, const int8_t id) {
     uint8_t v;
-    if (!Helpers::value2enum(value, v, FL_(enum_gasPriceMode))) {
+    if (!Helpers::value2enum(value, v, FL_(enum_hybridStrategy))) {
         return false;
     }
     write_command(0xBB, 12, v + 1, 0xBB);
     return true;
 }
+
 bool Boiler::set_switchOverTemp(const char * value, const int8_t id) {
     int v;
     if (!Helpers::value2temperature(value, v)) {
@@ -1083,7 +1083,8 @@ bool Boiler::set_switchOverTemp(const char * value, const int8_t id) {
     write_command(0xBB, 13, v, 0xBB);
     return true;
 }
-bool Boiler::set_gasPriceRatio(const char * value, const int8_t id) {
+
+bool Boiler::set_energyCostRatio(const char * value, const int8_t id) {
     float v;
     if (!Helpers::value2float(value, v)) {
         return false;
@@ -1091,6 +1092,7 @@ bool Boiler::set_gasPriceRatio(const char * value, const int8_t id) {
     write_command(0xBB, 14, (uint8_t)(v * 10), 0xBB);
     return true;
 }
+
 bool Boiler::set_fossileFactor(const char * value, const int8_t id) {
     float v;
     if (!Helpers::value2float(value, v)) {
@@ -1099,6 +1101,7 @@ bool Boiler::set_fossileFactor(const char * value, const int8_t id) {
     write_command(0xBB, 15, (uint8_t)(v * 10), 0xBB);
     return true;
 }
+
 bool Boiler::set_electricFactor(const char * value, const int8_t id) {
     float v;
     if (!Helpers::value2float(value, v)) {
@@ -1107,7 +1110,8 @@ bool Boiler::set_electricFactor(const char * value, const int8_t id) {
     write_command(0xBB, 16, (uint8_t)(v * 10), 0xBB);
     return true;
 }
-bool Boiler::set_waitBoiler(const char * value, const int8_t id) {
+
+bool Boiler::set_delayBoiler(const char * value, const int8_t id) {
     int v;
     if (!Helpers::value2number(value, v)) {
         return false;
@@ -1115,6 +1119,7 @@ bool Boiler::set_waitBoiler(const char * value, const int8_t id) {
     write_command(0xBB, 18, v, 0xBB);
     return true;
 }
+
 bool Boiler::set_tempDiffBoiler(const char * value, const int8_t id) {
     int v;
     if (!Helpers::value2temperature(value, v, true)) {
