@@ -89,10 +89,11 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x48A, F("HpPool"), true, MAKE_PF_CB(process_HpPool));
     }
 
+    /*
     if (model() == EMSdevice::EMS_DEVICE_FLAG_HYBRID) {
         register_telegram_type(0xBB, F("HybridHp"), true, MAKE_PF_CB(process_HybridHp));
     }
-
+    */
     // reset is a command uses a dummy variable which is always zero, shown as blank, but provides command enum options
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &reset_, DeviceValueType::CMD, FL_(enum_reset), FL_(reset), DeviceValueUOM::NONE, MAKE_CF_CB(set_reset));
     has_update(reset_, 0);
@@ -202,6 +203,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_maintenancedate));
 
+    /*
     // Hybrid Heatpump
     if (model() == EMSdevice::EMS_DEVICE_FLAG_HYBRID) {
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
@@ -254,6 +256,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::DEGREES_R,
                               MAKE_CF_CB(set_tempDiffBoiler));
     }
+    */
     // heatpump info
     if (model() == EMS_DEVICE_FLAG_HEATPUMP) {
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &upTimeControl_, DeviceValueType::TIME, FL_(div60), FL_(upTimeControl), DeviceValueUOM::MINUTES);
@@ -1049,7 +1052,7 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
         has_update(maintenanceDate_, date, sizeof(maintenanceDate_));
     }
 }
-
+/*
 // 0xBB Heatpump optimization
 // Boiler(0x08) -> Me(0x0B), ?(0xBB), data: 00 00 00 00 00 00 00 00 00 00 00 FF 02 0F 1E 0B 1A 00 14 03
 void Boiler::process_HybridHp(std::shared_ptr<const Telegram> telegram) {
@@ -1061,11 +1064,11 @@ void Boiler::process_HybridHp(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, delayBoiler_, 18);          // minutes
     has_update(telegram, tempDiffBoiler_, 19);      // relative degrees
 }
-
+*/
 /*
  * Settings
  */
-
+/*
 bool Boiler::set_hybridStrategy(const char * value, const int8_t id) {
     uint8_t v;
     if (!Helpers::value2enum(value, v, FL_(enum_hybridStrategy))) {
@@ -1128,6 +1131,7 @@ bool Boiler::set_tempDiffBoiler(const char * value, const int8_t id) {
     write_command(0xBB, 19, v, 0xBB);
     return true;
 }
+*/
 
 // Set the dhw temperature 0x33/0x35 or 0xEA
 bool Boiler::set_ww_temp(const char * value, const int8_t id) {

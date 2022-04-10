@@ -193,6 +193,7 @@ class Boiler : public EMSdevice {
     // Pool unit
     int8_t poolSetTemp_;
 
+    /*
     // HybridHP
     uint8_t hybridStrategy_;   // cost = 2, temperature = 3, mix = 4
     uint8_t switchOverTemp_; // degrees
@@ -201,6 +202,7 @@ class Boiler : public EMSdevice {
     uint8_t electricFactor_; // is * 10
     uint8_t delayBoiler_;     // minutes
     uint8_t tempDiffBoiler_; // relative temperature degrees
+    */
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
@@ -266,7 +268,7 @@ class Boiler : public EMSdevice {
     bool set_ww_hyst_on(const char * value, const int8_t id);
     bool set_ww_hyst_off(const char * value, const int8_t id);
     bool set_pool_temp(const char * value, const int8_t id);
-
+    /*
     bool set_hybridStrategy(const char * value, const int8_t id);
     bool set_switchOverTemp(const char * value, const int8_t id);
     bool set_energyCostRatio(const char * value, const int8_t id);
@@ -274,6 +276,7 @@ class Boiler : public EMSdevice {
     bool set_electricFactor(const char * value, const int8_t id);
     bool set_delayBoiler(const char * value, const int8_t id);
     bool set_tempDiffBoiler(const char * value, const int8_t id);
+    */
 };
 
 } // namespace emsesp

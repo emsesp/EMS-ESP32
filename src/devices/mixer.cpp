@@ -102,6 +102,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         if (device_id >= 0x40) { // special DHW pos 10
             register_telegram_type(0x34, F("UBAMonitorWW"), false, MAKE_PF_CB(process_MonitorWW));
             register_telegram_type(0x1E, F("HydrTemp"), false, MAKE_PF_CB(process_HydrTemp));
+            // register_telegram_type(0x10D, F("wwNTCStatus"), false, MAKE_PF_CB(process_wwNTCStatus));
             type_       = Type::WWC;
             hc_         = device_id - 0x40 + 1;
             uint8_t tag = DeviceValueTAG::TAG_WWC9 + hc_ - 1;

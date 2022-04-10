@@ -169,6 +169,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
                 }
             }
         }
+        register_telegram_type(0xBB, F("HybridSettings"), true, MAKE_PF_CB(process_JunkersHybridSettings));
+        register_telegram_type(0x23, F("JunkersSetMixer"), true, MAKE_PF_CB(process_JunkersSetMixer));
         register_telegram_type(0x123, F("JunkersRemote"), false, MAKE_PF_CB(process_JunkersRemoteMonitor));
     }
 
@@ -300,6 +302,11 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     if (telegram->src >= 0x18 && telegram->src <= 0x1B) {
         hc_num  = telegram->src - 0x17;
         toggle_ = true;
+    }
+
+    // not found, search device-id types for remote thermostats
+    if (telegram->dest >= 0x20 && telegram->dest <= 0x27) {
+        hc_num  = telegram->dest - 0x20;
     }
 
     // still didn't recognize it, ignore it
@@ -842,6 +849,27 @@ void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram
     add_ha_climate(hc);
 }
 
+// 0xBB Heatpump optimization
+// ?(0xBB), data: 00 00 00 00 00 00 00 00 00 00 00 FF 02 0F 1E 0B 1A 00 14 03
+void Thermostat::process_JunkersHybridSettings(std::shared_ptr<const Telegram> telegram) {
+    has_enumupdate(telegram, hybridStrategy_, 12, 1); // cost = 2, temperature = 3, mix = 4
+    has_update(telegram, switchOverTemp_, 13);        // full degrees
+    has_update(telegram, energyCostRatio_, 14);       // is *10
+    has_update(telegram, fossileFactor_, 15);         // is * 10
+    has_update(telegram, electricFactor_, 16);        // is * 10
+    has_update(telegram, delayBoiler_, 18);           // minutes
+    has_update(telegram, tempDiffBoiler_, 19);        // relative degrees
+}
+
+void Thermostat::process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram) {
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    if (hc == nullptr) {
+        return;
+    }
+    has_update(telegram, hc->targetflowtemp, 0);
+}
+
+
 // type 0x02A5 - data from Worchester CRF200
 void Thermostat::process_CRFMonitor(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
@@ -1313,6 +1341,70 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
  * *** settings ***
  *
  */
+
+// 0xBB Hybrid pump
+bool Thermostat::set_hybridStrategy(const char * value, const int8_t id) {
+    uint8_t v;
+    if (!Helpers::value2enum(value, v, FL_(enum_hybridStrategy))) {
+        return false;
+    }
+    write_command(0xBB, 12, v + 1, 0xBB);
+    return true;
+}
+
+bool Thermostat::set_switchOverTemp(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+    write_command(0xBB, 13, v, 0xBB);
+    return true;
+}
+
+bool Thermostat::set_energyCostRatio(const char * value, const int8_t id) {
+    float v;
+    if (!Helpers::value2float(value, v)) {
+        return false;
+    }
+    write_command(0xBB, 14, (uint8_t)(v * 10), 0xBB);
+    return true;
+}
+
+bool Thermostat::set_fossileFactor(const char * value, const int8_t id) {
+    float v;
+    if (!Helpers::value2float(value, v)) {
+        return false;
+    }
+    write_command(0xBB, 15, (uint8_t)(v * 10), 0xBB);
+    return true;
+}
+
+bool Thermostat::set_electricFactor(const char * value, const int8_t id) {
+    float v;
+    if (!Helpers::value2float(value, v)) {
+        return false;
+    }
+    write_command(0xBB, 16, (uint8_t)(v * 10), 0xBB);
+    return true;
+}
+
+bool Thermostat::set_delayBoiler(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(0xBB, 18, v, 0xBB);
+    return true;
+}
+
+bool Thermostat::set_tempDiffBoiler(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v, true)) {
+        return false;
+    }
+    write_command(0xBB, 19, v, 0xBB);
+    return true;
+}
 
 // 0xA5 - Set minimum external temperature
 bool Thermostat::set_minexttemp(const char * value, const int8_t id) {
@@ -3423,6 +3515,55 @@ void Thermostat::register_device_values() {
                               FL_(dateTime),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_datetime));
+        register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
+                              &hybridStrategy_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_hybridStrategy),
+                              FL_(hybridStrategy),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_hybridStrategy));
+        register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
+                              &switchOverTemp_,
+                              DeviceValueType::UINT,
+                              nullptr,
+                              FL_(switchOverTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_switchOverTemp));
+        register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
+                              &energyCostRatio_,
+                              DeviceValueType::UINT,
+                              FL_(div10),
+                              FL_(energyCostRatio),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_energyCostRatio));
+        register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
+                              &fossileFactor_,
+                              DeviceValueType::UINT,
+                              FL_(div10),
+                              FL_(fossileFactor),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_fossileFactor));
+        register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
+                              &electricFactor_,
+                              DeviceValueType::UINT,
+                              FL_(div10),
+                              FL_(electricFactor),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_electricFactor));
+        register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
+                              &delayBoiler_,
+                              DeviceValueType::UINT,
+                              nullptr,
+                              FL_(delayBoiler),
+                              DeviceValueUOM::MINUTES,
+                              MAKE_CF_CB(set_delayBoiler));
+        register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
+                              &tempDiffBoiler_,
+                              DeviceValueType::UINT,
+                              nullptr,
+                              FL_(tempDiffBoiler),
+                              DeviceValueUOM::DEGREES_R,
+                              MAKE_CF_CB(set_tempDiffBoiler));
         break;
     case EMS_DEVICE_FLAG_EASY:
         // Easy TC100 have no date/time, see issue #100, not sure about CT200, so leave it.
@@ -3606,6 +3747,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_j_control), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode4), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(tag, &hc->remotetemp, DeviceValueType::SHORT, FL_(div10), FL_(remotetemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT, nullptr, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
         break;
     default:
         break;

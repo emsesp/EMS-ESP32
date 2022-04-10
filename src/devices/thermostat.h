@@ -216,6 +216,15 @@ class Thermostat : public EMSdevice {
     uint8_t wwDailyHeating_;
     uint8_t wwDailyHeatTime_;
 
+    // HybridHP
+    uint8_t hybridStrategy_;   // cost = 2, temperature = 3, mix = 4
+    uint8_t switchOverTemp_; // degrees
+    uint8_t energyCostRatio_;  // is *10
+    uint8_t fossileFactor_;  // is * 10
+    uint8_t electricFactor_; // is * 10
+    uint8_t delayBoiler_;     // minutes
+    uint8_t tempDiffBoiler_; // relative temperature degrees
+
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
 
     uint8_t zero_value_ = 0; // for fixing current room temperature to 0 for HA
@@ -351,6 +360,8 @@ class Thermostat : public EMSdevice {
     void process_JunkersSet2(std::shared_ptr<const Telegram> telegram);
     void process_EasyMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersRemoteMonitor(std::shared_ptr<const Telegram> telegram);
+    void process_JunkersHybridSettings(std::shared_ptr<const Telegram> telegram);
+    void process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram);
 
     // internal helper functions
     bool set_mode_n(const uint8_t mode, const uint8_t hc_num);
@@ -441,6 +452,14 @@ class Thermostat : public EMSdevice {
     bool set_preheating(const char * value, const int8_t id);
     bool set_mixingvalves(const char * value, const int8_t id);
     bool set_offtemp(const char * value, const int8_t id);    
+
+    bool set_hybridStrategy(const char * value, const int8_t id);
+    bool set_switchOverTemp(const char * value, const int8_t id);
+    bool set_energyCostRatio(const char * value, const int8_t id);
+    bool set_fossileFactor(const char * value, const int8_t id);
+    bool set_electricFactor(const char * value, const int8_t id);
+    bool set_delayBoiler(const char * value, const int8_t id);
+    bool set_tempDiffBoiler(const char * value, const int8_t id);
 };
 
 } // namespace emsesp
