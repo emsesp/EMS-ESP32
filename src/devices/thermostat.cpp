@@ -1148,12 +1148,14 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
         char    data[sizeof(hc->switchtime1)];
         uint8_t no   = telegram->offset / 2;
         uint8_t day  = telegram->message_data[0] >> 5;
-        uint8_t on   = telegram->message_data[0] & 1;
+        uint8_t on   = telegram->message_data[0] & 0x07;
         uint8_t time = telegram->message_data[1];
 
         std::string sday = read_flash_string(FL_(enum_dayOfWeek)[day]);
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
+        } else if (model() == EMS_DEVICE_FLAG_RC30_N) {
+            snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), on);
         } else {
             snprintf(data, sizeof(data), "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
         }
@@ -1305,6 +1307,12 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
         has_update(lastCode_, code, sizeof(lastCode_));
     }
 }
+
+/*
+ *
+ * *** settings ***
+ *
+ */
 
 // 0xA5 - Set minimum external temperature
 bool Thermostat::set_minexttemp(const char * value, const int8_t id) {
@@ -2352,6 +2360,8 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         }
         if (strlen(value) > 13 && value[12] == 'o') {
             on = value[13] == 'n' ? 1 : 0;
+        } else if (strlen(value) > 13 && value[12] == 'T') {
+            on = value[13] - '0';
         } else if (strlen(value) == 13) {
             on = value[12] - '0';
         }
@@ -2369,7 +2379,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
     }
 
     uint8_t max_on = 3;
-    if ((model() == EMS_DEVICE_FLAG_RC35) || (model() == EMS_DEVICE_FLAG_RC30_N)) {
+    if (model() == EMS_DEVICE_FLAG_RC35) {
         max_on = 1;
     }
     if (no > 41 || time > 0x90 || (on > max_on && on != 7)) {
@@ -2379,8 +2389,10 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
     }
     if (data[0] != 0xE7) {
         std::string sday = read_flash_string(FL_(enum_dayOfWeek)[day]);
-        if ((model() == EMS_DEVICE_FLAG_RC35) || (model() == EMS_DEVICE_FLAG_RC30_N)) {
+        if (model() == EMS_DEVICE_FLAG_RC35) {
             snprintf(out, len, "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
+        } else if (model() == EMS_DEVICE_FLAG_RC30_N) {
+            snprintf(out, len, "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), on + 1);
         } else if (model() == EMS_DEVICE_FLAG_RC20) {
             snprintf(out, len, "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), on);
         } else {
