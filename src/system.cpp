@@ -1219,6 +1219,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
                 if (result[0] != '\0') {
                     obj["handlers pending"] = result;
                 }
+                (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::IGNORED);
+                if (result[0] != '\0') {
+                    obj["handlers ignored"] = result;
+                }
             }
         }
     }

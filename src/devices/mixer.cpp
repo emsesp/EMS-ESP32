@@ -99,17 +99,29 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
 
     // HT3
     if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
-        register_telegram_type(0x010C, F("IPMStatusMessage"), false, MAKE_PF_CB(process_IPMStatusMessage));
-        register_telegram_type(0x011E, F("IPMTempMessage"), false, MAKE_PF_CB(process_IPMTempMessage));
-        // register_telegram_type(0x0123, F("IPMSetMessage"), false, MAKE_PF_CB(process_IPMSetMessage));
-        type_       = Type::HC;
-        hc_         = device_id - 0x20 + 1;
-        uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
-        register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
-        register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
-        register_device_value(tag, &flowTempVf_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempVf), DeviceValueUOM::DEGREES);
+        if (device_id >= 0x40) { // special DHW pos 10
+            register_telegram_type(0x34, F("UBAMonitorWW"), false, MAKE_PF_CB(process_MonitorWW));
+            register_telegram_type(0x1E, F("HydrTemp"), false, MAKE_PF_CB(process_HydrTemp));
+            type_       = Type::WWC;
+            hc_         = device_id - 0x40 + 1;
+            uint8_t tag = DeviceValueTAG::TAG_WWC9 + hc_ - 1;
+            register_device_value(tag, &wwSelTemp_, DeviceValueType::UINT, nullptr, FL_(wwSelTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwSelTemp));
+            register_device_value(tag, &wwCurTemp_1_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp), DeviceValueUOM::DEGREES);
+            register_device_value(tag, &wwCurTemp_2_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp2), DeviceValueUOM::DEGREES);
+            register_device_value(tag, &HydrTemp_, DeviceValueType::USHORT, FL_(div10), FL_(hydrTemp), DeviceValueUOM::DEGREES);
+        } else {
+            register_telegram_type(0x010C, F("IPMStatusMessage"), false, MAKE_PF_CB(process_IPMStatusMessage));
+            register_telegram_type(0x011E, F("IPMTempMessage"), false, MAKE_PF_CB(process_IPMTempMessage));
+            // register_telegram_type(0x0123, F("IPMSetMessage"), false, MAKE_PF_CB(process_IPMSetMessage));
+            type_       = Type::HC;
+            hc_         = device_id - 0x20 + 1;
+            uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
+            register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
+            register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
+            register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
+            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
+            register_device_value(tag, &flowTempVf_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempVf), DeviceValueUOM::DEGREES);
+        }
     }
 }
 
@@ -203,6 +215,19 @@ void Mixer::process_MMPLUSConfigMessage_WWC(std::shared_ptr<const Telegram> tele
     has_update(telegram, wwMaxTemp_, 10);
 }
 
+// 0x34
+void Mixer::process_MonitorWW(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, wwSelTemp_, 0);
+    has_update(telegram, wwCurTemp_1_, 1);
+    has_update(telegram, wwCurTemp_2_, 3);
+}
+// 0x1E
+void Mixer::process_HydrTemp(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, HydrTemp_, 0);
+}
+
+
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
@@ -240,6 +265,16 @@ void Mixer::process_IPMSetMessage(std::shared_ptr<const Telegram> telegram) {
 }
 
 #pragma GCC diagnostic pop
+
+bool Mixer::set_wwSelTemp(const char * value, const int8_t id) {
+    int temperature;
+    if (!Helpers::value2temperature(value, temperature)) {
+        return false;
+    }
+    write_command(0x35, 3, (uint8_t)temperature, 0x34);
+    return true;
+}
+
 
 bool Mixer::set_flowSetTemp(const char * value, const int8_t id) {
     int v;

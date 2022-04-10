@@ -311,6 +311,11 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) const {
         }
     }
     shell.println();
+    shell.printf(F(" Ignored telegram type IDs: "));
+    for (auto handlers : handlers_ignored_) {
+        shell.printf(F("0x%02X "), handlers);
+    }
+    shell.println();
 }
 
 // list all the telegram type IDs for this device, outputting to a string (max size 200)
@@ -333,8 +338,25 @@ char * EMSdevice::show_telegram_handlers(char * result, const size_t len, const 
             strlcat(result, Helpers::hextoa(tf.telegram_type_id_, true).c_str(), len);
         }
     }
-
+    if (handlers == Handlers::ALL || handlers == Handlers::IGNORED) {
+        i = 0;
+        for (auto handlers : handlers_ignored_) {
+            if (i++ > 0) {
+                strlcat(result, " ", len);
+            }
+            strlcat(result, Helpers::hextoa(handlers).c_str(), len);
+        }
+    }
     return result;
+}
+
+void EMSdevice::add_handlers_ignored(const uint16_t handler) {
+    for (auto handlers : handlers_ignored_) {
+        if (handler == handlers) {
+            return;
+        }
+    }
+    handlers_ignored_.push_back(handler);
 }
 
 // list all the mqtt handlers for this device
@@ -443,7 +465,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
 
     if (tag >= DeviceValueTAG::TAG_HC1 && tag <= DeviceValueTAG::TAG_HC8) {
         flags |= CommandFlag::MQTT_SUB_FLAG_HC;
-    } else if (tag >= DeviceValueTAG::TAG_WWC1 && tag <= DeviceValueTAG::TAG_WWC4) {
+    } else if (tag >= DeviceValueTAG::TAG_WWC1 && tag <= DeviceValueTAG::TAG_WWC10) {
         flags |= CommandFlag::MQTT_SUB_FLAG_WWC;
     } else if (tag == DeviceValueTAG::TAG_DEVICE_DATA_WW) {
         flags |= CommandFlag::MQTT_SUB_FLAG_WW;
@@ -517,7 +539,7 @@ void EMSdevice::publish_value(void * value_p) const {
         if (dv.value_p == value_p && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
             if (Mqtt::publish_single2cmd()) {
-                if (dv.tag >= DeviceValueTAG::TAG_HC1 && dv.tag <= DeviceValueTAG::TAG_WWC4) {
+                if (dv.tag >= DeviceValueTAG::TAG_HC1 && dv.tag <= DeviceValueTAG::TAG_WWC10) {
                     snprintf(topic,
                              sizeof(topic),
                              "%s/%s/%s",
@@ -887,7 +909,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
     // check if we have hc or wwc
     if (id >= 1 && id <= 8) {
         tag = DeviceValueTAG::TAG_HC1 + id - 1;
-    } else if (id >= 9 && id <= 12) {
+    } else if (id >= 9 && id <= 19) {
         tag = DeviceValueTAG::TAG_WWC1 + id - 9;
     } else if (id != -1) {
         return false; // error

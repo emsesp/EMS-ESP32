@@ -63,30 +63,12 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     }
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
-        if (device_id == 0x41) { // ISM DHW module
-            register_telegram_type(0x34, F("UBAMonitorWW"), false, MAKE_PF_CB(process_MonitorWW));
-        } else {
-            register_telegram_type(0x0103, F("ISM1StatusMessage"), true, MAKE_PF_CB(process_ISM1StatusMessage));
-            register_telegram_type(0x0101, F("ISM1Set"), true, MAKE_PF_CB(process_ISM1Set));
-            register_telegram_type(0x0104, F("ISM2StatusMessage"), false, MAKE_PF_CB(process_ISM2StatusMessage));
-        }
+        register_telegram_type(0x0103, F("ISM1StatusMessage"), true, MAKE_PF_CB(process_ISM1StatusMessage));
+        register_telegram_type(0x0101, F("ISM1Set"), true, MAKE_PF_CB(process_ISM1Set));
+        register_telegram_type(0x0104, F("ISM2StatusMessage"), false, MAKE_PF_CB(process_ISM2StatusMessage));
     }
 
     // device values...
-
-    // special case ISM DHW module
-    if (device_id == 0x41) { // ISM DHW module
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
-                              &wwSelTemp_,
-                              DeviceValueType::UINT,
-                              nullptr,
-                              FL_(wwSelTemp),
-                              DeviceValueUOM::DEGREES,
-                              MAKE_CF_CB(set_wwSelTemp));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwTemp_1_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwTemp_3_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp2), DeviceValueUOM::DEGREES);
-        return;
-    }
     // special case for a SM100 DHW device_id with 0x2A where it's not actual a solar module
     if (device_id == 0x2A) {
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwTemp_1_, DeviceValueType::USHORT, FL_(div10), FL_(wwTemp1), DeviceValueUOM::DEGREES);
@@ -810,16 +792,6 @@ void Solar::process_ISM1Set(std::shared_ptr<const Telegram> telegram) {
 }
 
 /*
- * Junkers ISM1 Solar DHW Module - type 0x34 ww
- */
-void Solar::process_MonitorWW(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, wwSelTemp_, 0);
-    has_update(telegram, wwTemp_1_, 1);
-    has_update(telegram, wwTemp_3_, 3);
-}
-
-
-/*
  * Settings
  */
 
@@ -1163,11 +1135,7 @@ bool Solar::set_wwSelTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
-    if (flags() == EMSdevice::EMS_DEVICE_FLAG_ISM) {
-        write_command(0x35, 3, (uint8_t)temperature, 0x34);
-    } else { // SM100
-        write_command(0x7A6, 9, (uint8_t)temperature, 0x7A6);
-    }
+    write_command(0x7A6, 9, (uint8_t)temperature, 0x7A6);
     return true;
 }
 
