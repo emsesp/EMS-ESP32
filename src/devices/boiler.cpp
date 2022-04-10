@@ -71,7 +71,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     }
 
     // only EMS+
-    if (model() != EMSdevice::EMS_DEVICE_FLAG_EMS && model() != EMSdevice::EMS_DEVICE_FLAG_HT3) {
+    if (model() != EMSdevice::EMS_DEVICE_FLAG_EMS && model() != EMSdevice::EMS_DEVICE_FLAG_HT3 && model() != EMSdevice::EMS_DEVICE_FLAG_HYBRID) {
         register_telegram_type(0xD1, F("UBAOutdoorTemp"), false, MAKE_PF_CB(process_UBAOutdoorTemp));
         register_telegram_type(0xE3, F("UBAMonitorSlowPlus2"), false, MAKE_PF_CB(process_UBAMonitorSlowPlus2));
         register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, MAKE_PF_CB(process_UBAMonitorFastPlus));
@@ -87,6 +87,10 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x48D, F("HpPower"), true, MAKE_PF_CB(process_HpPower));
         register_telegram_type(0x48F, F("HpOutdoor"), false, MAKE_PF_CB(process_HpOutdoor));
         register_telegram_type(0x48A, F("HpPool"), true, MAKE_PF_CB(process_HpPool));
+    }
+
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_HYBRID) {
+        register_telegram_type(0xBB, F("HybridHp"), true, MAKE_PF_CB(process_HybridHp));
     }
 
     // reset is a command uses a dummy variable which is always zero, shown as blank, but provides command enum options
@@ -198,6 +202,58 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_maintenancedate));
 
+    // Hybrid Heatpump
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_HYBRID) {
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
+                              &gasPriceMode_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_gasPriceMode),
+                              FL_(gasPriceMode),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_gasPriceMode));
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
+                              &switchOverTemp_,
+                              DeviceValueType::UINT,
+                              nullptr,
+                              FL_(switchOverTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_switchOverTemp));
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
+                              &gasPriceRatio_,
+                              DeviceValueType::UINT,
+                              FL_(div10),
+                              FL_(gasPriceRatio),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_gasPriceRatio));
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
+                              &fossileFactor_,
+                              DeviceValueType::UINT,
+                              FL_(div10),
+                              FL_(fossileFactor),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_fossileFactor));
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
+                              &electricFactor_,
+                              DeviceValueType::UINT,
+                              FL_(div10),
+                              FL_(electricFactor),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_electricFactor));
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
+                              &waitBoiler_,
+                              DeviceValueType::UINT,
+                              nullptr,
+                              FL_(waitBoiler),
+                              DeviceValueUOM::MINUTES,
+                              MAKE_CF_CB(set_waitBoiler));
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
+                              &tempDiffBoiler_,
+                              DeviceValueType::UINT,
+                              nullptr,
+                              FL_(tempDiffBoiler),
+                              DeviceValueUOM::DEGREES_R,
+                              MAKE_CF_CB(set_tempDiffBoiler));
+    }
     // heatpump info
     if (model() == EMS_DEVICE_FLAG_HEATPUMP) {
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &upTimeControl_, DeviceValueType::TIME, FL_(div60), FL_(upTimeControl), DeviceValueUOM::MINUTES);
@@ -992,6 +1048,80 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
         snprintf(date, sizeof(date), "%02d.%02d.%04d", day, month, year + 2000);
         has_update(maintenanceDate_, date, sizeof(maintenanceDate_));
     }
+}
+
+
+// 0xBB Heatpump optimization
+// Boiler(0x08) -> Me(0x0B), ?(0xBB), data: 00 00 00 00 00 00 00 00 00 00 00 FF 02 0F 1E 0B 1A 00 14 03
+void Boiler::process_HybridHp(std::shared_ptr<const Telegram> telegram) {
+    has_enumupdate(telegram, gasPriceMode_, 12, 1); // cost = 2, temperature = 3, mix = 4
+    has_update(telegram, switchOverTemp_, 13);      // full degrees
+    has_update(telegram, gasPriceRatio_, 14);       // is *10
+    has_update(telegram, fossileFactor_, 15);       // is * 10
+    has_update(telegram, electricFactor_, 16);      // is * 10
+    has_update(telegram, waitBoiler_, 18);          // minutes
+    has_update(telegram, tempDiffBoiler_, 19);      // relative degrees
+}
+
+/*
+ * Settings
+ */
+
+bool Boiler::set_gasPriceMode(const char * value, const int8_t id) {
+    uint8_t v;
+    if (!Helpers::value2enum(value, v, FL_(enum_gasPriceMode))) {
+        return false;
+    }
+    write_command(0xBB, 12, v + 1, 0xBB);
+    return true;
+}
+bool Boiler::set_switchOverTemp(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+    write_command(0xBB, 13, v, 0xBB);
+    return true;
+}
+bool Boiler::set_gasPriceRatio(const char * value, const int8_t id) {
+    float v;
+    if (!Helpers::value2float(value, v)) {
+        return false;
+    }
+    write_command(0xBB, 14, (uint8_t)(v * 10), 0xBB);
+    return true;
+}
+bool Boiler::set_fossileFactor(const char * value, const int8_t id) {
+    float v;
+    if (!Helpers::value2float(value, v)) {
+        return false;
+    }
+    write_command(0xBB, 15, (uint8_t)(v * 10), 0xBB);
+    return true;
+}
+bool Boiler::set_electricFactor(const char * value, const int8_t id) {
+    float v;
+    if (!Helpers::value2float(value, v)) {
+        return false;
+    }
+    write_command(0xBB, 16, (uint8_t)(v * 10), 0xBB);
+    return true;
+}
+bool Boiler::set_waitBoiler(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(0xBB, 18, v, 0xBB);
+    return true;
+}
+bool Boiler::set_tempDiffBoiler(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v, true)) {
+        return false;
+    }
+    write_command(0xBB, 19, v, 0xBB);
+    return true;
 }
 
 // Set the dhw temperature 0x33/0x35 or 0xEA

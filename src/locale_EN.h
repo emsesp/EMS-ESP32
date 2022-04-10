@@ -509,6 +509,16 @@ MAKE_PSTR_LIST(hpTl2, F("hptl2"), F("air inlet temperature (TL2)"))
 MAKE_PSTR_LIST(hpPl1, F("hppl1"), F("low pressure side temperature (PL1)"))
 MAKE_PSTR_LIST(hpPh1, F("hpph1"), F("high pressure side temperature (PH1)"))
 
+// hybrid heatpump
+MAKE_PSTR_LIST(enum_gasPriceMode, F("co2"), F("cost"), F("temperature"), F("mix"))
+MAKE_PSTR_LIST(gasPriceMode, F("gaspricemode"), F("gas price mode"))
+MAKE_PSTR_LIST(switchOverTemp, F("switchovertemp"), F("switch over temperature"))
+MAKE_PSTR_LIST(gasPriceRatio, F("gaspriceratio"), F("gas price ratio"))
+MAKE_PSTR_LIST(fossileFactor, F("fossilefactor"), F("fossile factor"))
+MAKE_PSTR_LIST(electricFactor, F("electricfactor"), F("electric factor"))
+MAKE_PSTR_LIST(waitBoiler, F("waitboiler"), F("wait boiler"))
+MAKE_PSTR_LIST(tempDiffBoiler, F("tempdiffboiler"), F("temperature difference boiler"))
+
 // the following are dhw for the boiler and automatically tagged with 'ww'
 MAKE_PSTR_LIST(wwSelTemp, F("wwseltemp"), F("selected temperature"))
 MAKE_PSTR_LIST(wwSelTempLow, F("wwseltemplow"), F("selected lower temperature"))

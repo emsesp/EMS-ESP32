@@ -36,7 +36,7 @@
 {132, DeviceType::BOILER, F("GC7000F"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {133, DeviceType::BOILER, F("Logano GB125/KB195i/Logamatic MC110"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {167, DeviceType::BOILER, F("Cerapur Aero"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{168, DeviceType::BOILER, F("Hybrid Heatpump"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
+{168, DeviceType::BOILER, F("Hybrid Heatpump"), DeviceFlags::EMS_DEVICE_FLAG_HYBRID},
 {170, DeviceType::BOILER, F("Logano GB212"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {172, DeviceType::BOILER, F("Enviline/Compress 6000AW/Hybrid 7000iAW/SupraEco/Geo 5xx"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 {173, DeviceType::BOILER, F("Geo 5xx"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
