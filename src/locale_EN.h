@@ -382,7 +382,7 @@ MAKE_PSTR_LIST(enum_control, F_(off), F_(rc20), F_(rc3x))
 MAKE_PSTR_LIST(enum_j_control, F_(off), F("fb10"), F("fb100"))
 
 MAKE_PSTR_LIST(enum_wwProgMode, F("std_prog"), F_(own_prog))
-MAKE_PSTR_LIST(enum_dayOfWeek, F("mo"), F("tu"), F("we"), F("th"), F("fr"), F("sa"), F("so"), F("all"))
+MAKE_PSTR_LIST(enum_dayOfWeek, F("mo"), F("tu"), F("we"), F("th"), F("fr"), F("sa"), F("su"), F("all"))
 MAKE_PSTR_LIST(enum_progMode, F("prog_1"), F("prog_2"))
 MAKE_PSTR_LIST(enum_progMode2, F("own_1"), F("family"), F("morning"), F("evening"), F("am"), F("pm"), F("midday"), F("singles"), F("seniors"), F("new"), F("own_2"))
 MAKE_PSTR_LIST(enum_progMode3, F("family"), F("morning"), F("evening"), F("am"), F("pm"), F("midday"), F("singles"), F("seniors"))
