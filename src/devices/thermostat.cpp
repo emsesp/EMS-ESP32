@@ -1986,7 +1986,7 @@ bool Thermostat::set_party(const char * value, const int8_t id) {
     }
 
     if (value == nullptr) {
-        read_command(timer_typeids[hc->hc()], 85, 1);
+        read_command(timer_typeids[hc->hc()], 86, 1);
         return true;
     }
 
