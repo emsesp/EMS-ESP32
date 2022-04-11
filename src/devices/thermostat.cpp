@@ -306,7 +306,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 
     // not found, search device-id types for remote thermostats
     if (telegram->dest >= 0x20 && telegram->dest <= 0x27) {
-        hc_num  = telegram->dest - 0x20;
+        hc_num = telegram->dest - 0x20;
     }
 
     // still didn't recognize it, ignore it
@@ -3524,46 +3524,58 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_hybridStrategy));
         register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
                               &switchOverTemp_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::INT,
                               nullptr,
                               FL_(switchOverTemp),
                               DeviceValueUOM::DEGREES,
-                              MAKE_CF_CB(set_switchOverTemp));
+                              MAKE_CF_CB(set_switchOverTemp),
+                              -20,
+                              20);
         register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
                               &energyCostRatio_,
                               DeviceValueType::UINT,
                               FL_(div10),
                               FL_(energyCostRatio),
                               DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_energyCostRatio));
+                              MAKE_CF_CB(set_energyCostRatio),
+                              0,
+                              19.9);
         register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
                               &fossileFactor_,
                               DeviceValueType::UINT,
                               FL_(div10),
                               FL_(fossileFactor),
                               DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_fossileFactor));
+                              MAKE_CF_CB(set_fossileFactor),
+                              0,
+                              5);
         register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
                               &electricFactor_,
                               DeviceValueType::UINT,
                               FL_(div10),
                               FL_(electricFactor),
                               DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_electricFactor));
+                              MAKE_CF_CB(set_electricFactor),
+                              0,
+                              5);
         register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
                               &delayBoiler_,
                               DeviceValueType::UINT,
                               nullptr,
                               FL_(delayBoiler),
                               DeviceValueUOM::MINUTES,
-                              MAKE_CF_CB(set_delayBoiler));
+                              MAKE_CF_CB(set_delayBoiler),
+                              5,
+                              120);
         register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
                               &tempDiffBoiler_,
                               DeviceValueType::UINT,
                               nullptr,
                               FL_(tempDiffBoiler),
                               DeviceValueUOM::DEGREES_R,
-                              MAKE_CF_CB(set_tempDiffBoiler));
+                              MAKE_CF_CB(set_tempDiffBoiler),
+                              1,
+                              99);
         break;
     case EMS_DEVICE_FLAG_EASY:
         // Easy TC100 have no date/time, see issue #100, not sure about CT200, so leave it.

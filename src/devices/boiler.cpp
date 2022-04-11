@@ -215,46 +215,58 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               MAKE_CF_CB(set_hybridStrategy));
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
                               &switchOverTemp_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::INT,
                               nullptr,
                               FL_(switchOverTemp),
                               DeviceValueUOM::DEGREES,
-                              MAKE_CF_CB(set_switchOverTemp));
+                              MAKE_CF_CB(set_switchOverTemp),
+                              -20,
+                              20);
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
                               &energyCostRatio_,
                               DeviceValueType::UINT,
                               FL_(div10),
                               FL_(energyCostRatio),
                               DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_energyCostRatio));
+                              MAKE_CF_CB(set_energyCostRatio),
+                              0,
+                              19.9);
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
                               &fossileFactor_,
                               DeviceValueType::UINT,
                               FL_(div10),
                               FL_(fossileFactor),
                               DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_fossileFactor));
+                              MAKE_CF_CB(set_fossileFactor),
+                              0,
+                              5);
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
                               &electricFactor_,
                               DeviceValueType::UINT,
                               FL_(div10),
                               FL_(electricFactor),
                               DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_electricFactor));
+                              MAKE_CF_CB(set_electricFactor),
+                              0,
+                              5);
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
                               &delayBoiler_,
                               DeviceValueType::UINT,
                               nullptr,
                               FL_(delayBoiler),
                               DeviceValueUOM::MINUTES,
-                              MAKE_CF_CB(set_delayBoiler));
+                              MAKE_CF_CB(set_delayBoiler),
+                              5,
+                              120);
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
                               &tempDiffBoiler_,
                               DeviceValueType::UINT,
                               nullptr,
                               FL_(tempDiffBoiler),
                               DeviceValueUOM::DEGREES_R,
-                              MAKE_CF_CB(set_tempDiffBoiler));
+                              MAKE_CF_CB(set_tempDiffBoiler),
+                              1,
+                              99);
     }
     */
     // heatpump info

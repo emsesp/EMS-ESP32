@@ -561,7 +561,7 @@ void EMSdevice::publish_value(void * value_p) const {
             }
 
             int8_t  divider     = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
-            char    payload[30] = {'\0'};
+            char    payload[50] = {'\0'};
             uint8_t fahrenheit  = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
             switch (dv.type) {

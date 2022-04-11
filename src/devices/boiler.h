@@ -128,7 +128,7 @@ class Boiler : public EMSdevice {
     uint32_t burn2WorkMin_;      // burner stage 2 operating time
     uint32_t heatWorkMin_;       // Total heat operating time
     uint32_t UBAuptime_;         // Total UBA working hours
-    char     lastCode_[75];      // last error code
+    char     lastCode_[50];      // last error code
     char     serviceCode_[4];    // 3 character status/service code
     uint16_t serviceCodeNumber_; // error/service code
 
@@ -195,13 +195,13 @@ class Boiler : public EMSdevice {
 
     /*
     // HybridHP
-    uint8_t hybridStrategy_;   // cost = 2, temperature = 3, mix = 4
-    uint8_t switchOverTemp_; // degrees
-    uint8_t energyCostRatio_;  // is *10
-    uint8_t fossileFactor_;  // is * 10
-    uint8_t electricFactor_; // is * 10
+    uint8_t hybridStrategy_;  // cost = 2, temperature = 3, mix = 4
+    int8_t  switchOverTemp_;  // degrees
+    uint8_t energyCostRatio_; // is *10
+    uint8_t fossileFactor_;   // is * 10
+    uint8_t electricFactor_;  // is * 10
     uint8_t delayBoiler_;     // minutes
-    uint8_t tempDiffBoiler_; // relative temperature degrees
+    uint8_t tempDiffBoiler_;  // relative temperature degrees
     */
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);

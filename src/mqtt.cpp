@@ -386,6 +386,10 @@ void Mqtt::on_publish(uint16_t packetId) const {
 
 // called when MQTT settings have changed via the Web forms
 void Mqtt::reset_mqtt() {
+    if (!mqtt_enabled_) {
+        mqtt_messages_.clear();
+    }
+
     if (!mqttClient_) {
         return;
     }

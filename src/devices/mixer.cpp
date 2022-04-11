@@ -110,6 +110,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
             register_device_value(tag, &wwCurTemp_1_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp), DeviceValueUOM::DEGREES);
             register_device_value(tag, &wwCurTemp_2_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp2), DeviceValueUOM::DEGREES);
             register_device_value(tag, &HydrTemp_, DeviceValueType::USHORT, FL_(div10), FL_(hydrTemp), DeviceValueUOM::DEGREES);
+            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
         } else {
             register_telegram_type(0x010C, F("IPMStatusMessage"), false, MAKE_PF_CB(process_IPMStatusMessage));
             register_telegram_type(0x011E, F("IPMTempMessage"), false, MAKE_PF_CB(process_IPMTempMessage));
@@ -216,13 +217,17 @@ void Mixer::process_MMPLUSConfigMessage_WWC(std::shared_ptr<const Telegram> tele
     has_update(telegram, wwMaxTemp_, 10);
 }
 
-// 0x34
+// 0x34 only8 bytes long
+// Mixer(0x41) -> All(0x00), UBAMonitorWW(0x34), data: 37 02 1E 02 1E 00 00 00 00
 void Mixer::process_MonitorWW(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwSelTemp_, 0);
     has_update(telegram, wwCurTemp_1_, 1);
     has_update(telegram, wwCurTemp_2_, 3);
+    has_bitupdate(telegram, pumpStatus_, 5, 0); // not sure thisisthe right value
 }
-// 0x1E
+
+// 0x1E, only16 bit temperature
+// Mixer(0x41) -> Boiler(0x08), HydrTemp(0x1E), data: 01 D8
 void Mixer::process_HydrTemp(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, HydrTemp_, 0);
 }

@@ -182,11 +182,11 @@ class Thermostat : public EMSdevice {
     uint8_t ibaDamping_;           // damping 0-off, 0xff-on
     uint8_t backlight_;
     uint8_t heatingpid_;
-    int8_t  brightness_;           // Screen brightness 0F=dark F1=light
-    uint8_t preheating_;           // Preheating in the clock program: (0x00 = off, 0xFF = on)
-    uint8_t autodst_;              // Automatic change Daylight Saving time: (0x00 = off, 0xFF = on)
-    uint8_t offtemp_;              // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
-    uint8_t mixingvalves_;         // Number of Mixing Valves: (0x00=0, 0x01=1, 0x02=2)
+    int8_t  brightness_;   // Screen brightness 0F=dark F1=light
+    uint8_t preheating_;   // Preheating in the clock program: (0x00 = off, 0xFF = on)
+    uint8_t autodst_;      // Automatic change Daylight Saving time: (0x00 = off, 0xFF = on)
+    uint8_t offtemp_;      // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
+    uint8_t mixingvalves_; // Number of Mixing Valves: (0x00=0, 0x01=1, 0x02=2)
 
     int8_t   dampedoutdoortemp_;
     uint16_t tempsensor1_;
@@ -217,13 +217,13 @@ class Thermostat : public EMSdevice {
     uint8_t wwDailyHeatTime_;
 
     // HybridHP
-    uint8_t hybridStrategy_;   // cost = 2, temperature = 3, mix = 4
-    uint8_t switchOverTemp_; // degrees
-    uint8_t energyCostRatio_;  // is *10
-    uint8_t fossileFactor_;  // is * 10
-    uint8_t electricFactor_; // is * 10
+    uint8_t hybridStrategy_;  // co2 = 1, cost = 2, temperature = 3, mix = 4
+    int8_t  switchOverTemp_;  // degrees
+    uint8_t energyCostRatio_; // is *10
+    uint8_t fossileFactor_;   // is * 10
+    uint8_t electricFactor_;  // is * 10
     uint8_t delayBoiler_;     // minutes
-    uint8_t tempDiffBoiler_; // relative temperature degrees
+    uint8_t tempDiffBoiler_;  // relative temperature degrees
 
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
 
@@ -309,10 +309,10 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t AUTO_HEATING_CIRCUIT = 0;
 
     // Installation settings
-    static constexpr uint8_t EMS_TYPE_IBASettings = 0xA5; // installation settings
+    static constexpr uint8_t EMS_TYPE_IBASettings  = 0xA5; // installation settings
     static constexpr uint8_t EMS_TYPE_RC30Settings = 0xA7; // RC30 settings
-    static constexpr uint8_t EMS_TYPE_wwSettings  = 0x37; // ww settings
-    static constexpr uint8_t EMS_TYPE_time        = 0x06; // time
+    static constexpr uint8_t EMS_TYPE_wwSettings   = 0x37; // ww settings
+    static constexpr uint8_t EMS_TYPE_time         = 0x06; // time
 
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
@@ -451,7 +451,7 @@ class Thermostat : public EMSdevice {
     bool set_autodst(const char * value, const int8_t id);
     bool set_preheating(const char * value, const int8_t id);
     bool set_mixingvalves(const char * value, const int8_t id);
-    bool set_offtemp(const char * value, const int8_t id);    
+    bool set_offtemp(const char * value, const int8_t id);
 
     bool set_hybridStrategy(const char * value, const int8_t id);
     bool set_switchOverTemp(const char * value, const int8_t id);
