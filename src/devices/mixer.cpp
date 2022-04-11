@@ -100,8 +100,9 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     // HT3
     if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         if (device_id >= 0x40) { // special DHW pos 10
-            register_telegram_type(0x34, F("UBAMonitorWW"), false, MAKE_PF_CB(process_MonitorWW));
-            register_telegram_type(0x1E, F("HydrTemp"), false, MAKE_PF_CB(process_HydrTemp));
+            register_telegram_type(0x34, F("UBAMonitorWW"), false, MAKE_PF_CB(process_IPMMonitorWW));
+            register_telegram_type(0x1E, F("HydrTemp"), false, MAKE_PF_CB(process_IPMHydrTemp));
+            register_telegram_type(0x33, F("UBAParameterWW"), true, MAKE_PF_CB(process_IPMParameterWW));
             // register_telegram_type(0x10D, F("wwNTCStatus"), false, MAKE_PF_CB(process_wwNTCStatus));
             type_       = Type::WWC;
             hc_         = device_id - 0x40 + 1;
@@ -110,7 +111,26 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
             register_device_value(tag, &wwCurTemp_1_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp), DeviceValueUOM::DEGREES);
             register_device_value(tag, &wwCurTemp_2_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp2), DeviceValueUOM::DEGREES);
             register_device_value(tag, &HydrTemp_, DeviceValueType::USHORT, FL_(div10), FL_(hydrTemp), DeviceValueUOM::DEGREES);
-            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
+            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE);
+            register_device_value(
+                tag, &wwFlowTempOffset_, DeviceValueType::UINT, nullptr, FL_(wwFlowTempOffset), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_wwFlowTempOffset));
+            register_device_value(tag, &wwHystOn_, DeviceValueType::INT, nullptr, FL_(wwHystOn), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_wwHystOn));
+            register_device_value(tag, &wwHystOff_, DeviceValueType::INT, nullptr, FL_(wwHystOff), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_wwHystOff));
+            register_device_value(tag,
+                                  &wwDisinfectionTemp_,
+                                  DeviceValueType::UINT,
+                                  nullptr,
+                                  FL_(wwDisinfectionTemp),
+                                  DeviceValueUOM::DEGREES,
+                                  MAKE_CF_CB(set_wwDisinfectionTemp));
+            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                                  &wwCircPump_,
+                                  DeviceValueType::BOOL,
+                                  nullptr,
+                                  FL_(wwCircPump),
+                                  DeviceValueUOM::NONE,
+                                  MAKE_CF_CB(set_wwCircPump));
+            register_device_value(tag, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircMode));
         } else {
             register_telegram_type(0x010C, F("IPMStatusMessage"), false, MAKE_PF_CB(process_IPMStatusMessage));
             register_telegram_type(0x011E, F("IPMTempMessage"), false, MAKE_PF_CB(process_IPMTempMessage));
@@ -217,22 +237,34 @@ void Mixer::process_MMPLUSConfigMessage_WWC(std::shared_ptr<const Telegram> tele
     has_update(telegram, wwMaxTemp_, 10);
 }
 
-// 0x34 only8 bytes long
+// 0x34 only 8 bytes long
 // Mixer(0x41) -> All(0x00), UBAMonitorWW(0x34), data: 37 02 1E 02 1E 00 00 00 00
-void Mixer::process_MonitorWW(std::shared_ptr<const Telegram> telegram) {
+void Mixer::process_IPMMonitorWW(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwSelTemp_, 0);
     has_update(telegram, wwCurTemp_1_, 1);
     has_update(telegram, wwCurTemp_2_, 3);
-    has_bitupdate(telegram, pumpStatus_, 5, 0); // not sure thisisthe right value
+    has_bitupdate(telegram, pumpStatus_, 5, 3);
 }
+
+// Mixer(0x41) -> Me(0x0B), UBAParameterWW(0x33), data: 08 FF 46 FB FF 28 FF 07 46 00 FF 00
+void Mixer::process_IPMParameterWW(std::shared_ptr<const Telegram> telegram) {
+    // has_update(telegram, wwActivated_, 1); // 0xFF means on
+    // has_update(telegram, wwSelTemp_, 2);
+    has_update(telegram, wwHystOn_, 3);         // Hyst on (default -5)
+    has_update(telegram, wwHystOff_, 4);        // Hyst off (default -1)
+    has_update(telegram, wwFlowTempOffset_, 5); // default 40
+    has_update(telegram, wwCircPump_, 6);       // 0xFF means on
+    has_update(telegram, wwCircMode_, 7);       // 1=1x3min 6=6x3min 7=continuous
+    has_update(telegram, wwDisinfectionTemp_, 8);
+    // has_bitupdate(telegram, wwChargeType_, 10, 0); // 0 = charge pump, 0xff = 3-way valve
+}
+
 
 // 0x1E, only16 bit temperature
 // Mixer(0x41) -> Boiler(0x08), HydrTemp(0x1E), data: 01 D8
-void Mixer::process_HydrTemp(std::shared_ptr<const Telegram> telegram) {
+void Mixer::process_IPMHydrTemp(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, HydrTemp_, 0);
 }
-
-
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -280,7 +312,6 @@ bool Mixer::set_wwSelTemp(const char * value, const int8_t id) {
     write_command(0x35, 3, (uint8_t)temperature, 0x34);
     return true;
 }
-
 
 bool Mixer::set_flowSetTemp(const char * value, const int8_t id) {
     int v;
@@ -390,34 +421,72 @@ bool Mixer::set_wwRequiredTemp(const char * value, const int8_t id) {
 }
 
 bool Mixer::set_wwDisinfectionTemp(const char * value, const int8_t id) {
-    uint8_t wwc = device_id() - 0x28;
-    float   v   = 0;
+    float v = 0;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
-    write_command(0x313 + wwc, 9, (uint8_t)v, 0x313 + wwc);
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
+        write_command(0x33, 8, (uint8_t)v, 0x33);
+    } else {
+        uint8_t wwc = device_id() - 0x28;
+        write_command(0x313 + wwc, 9, (uint8_t)v, 0x313 + wwc);
+    }
     return true;
 }
 
 bool Mixer::set_wwCircPump(const char * value, const int8_t id) {
-    uint8_t wwc = device_id() - 0x28;
-    bool    v   = false;
+    bool v = false;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
-    write_command(0x33B + wwc, 0, v ? 0x01 : 0x00, 0x33B + wwc);
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
+        write_command(0x33, 6, v ? 0xFF : 0x00, 0x33);
+    } else {
+        uint8_t wwc = device_id() - 0x28;
+        write_command(0x33B + wwc, 0, v ? 0x01 : 0x00, 0x33B + wwc);
+    }
     return true;
 }
 
 bool Mixer::set_wwCircMode(const char * value, const int8_t id) {
-    uint8_t wwc = device_id() - 0x28;
     uint8_t n;
     if (!Helpers::value2enum(value, n, FL_(enum_wwCircMode))) {
         return false;
     }
-    write_command(0x313 + wwc, 0, n, 0x313 + wwc);
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
+        write_command(0x33, 7, n, 0x33);
+    } else {
+        uint8_t wwc = device_id() - 0x28;
+        write_command(0x313 + wwc, 0, n, 0x313 + wwc);
+    }
     return true;
 }
 
+bool Mixer::set_wwFlowTempOffset(const char * value, const int8_t id) {
+    int n;
+    if (!Helpers::value2number(value, n)) {
+        return false;
+    }
+    write_command(0x33, 5, n, 0x33);
+    return true;
+}
+
+bool Mixer::set_wwHystOn(const char * value, const int8_t id) {
+    int n;
+    if (!Helpers::value2number(value, n)) {
+        return false;
+    }
+    write_command(0x33, 3, n, 0x33);
+    return true;
+}
+
+bool Mixer::set_wwHystOff(const char * value, const int8_t id) {
+    int n;
+    if (!Helpers::value2number(value, n)) {
+        return false;
+    }
+    write_command(0x33, 4, n, 0x33);
+    return true;
+}
 
 } // namespace emsesp
