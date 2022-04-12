@@ -1155,6 +1155,87 @@ void Thermostat::process_RC30Timer(std::shared_ptr<const Telegram> telegram) {
     }
 }
 
+// type 0x40 (HC1) - for reading the operating mode from the RC30 thermostat (0x10)
+void Thermostat::process_RC30Temp(std::shared_ptr<const Telegram> telegram) {
+    // check to see we have a valid type. heating: 1 radiator, 2 convectors, 3 floors
+    if (telegram->offset == 0 && telegram->message_data[0] == 0x00) {
+        return;
+    }
+
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    if (hc == nullptr) {
+        return;
+    }
+
+    has_update(telegram, hc->heatingtype, 0);   // 0- off, 1-radiator, 2-convector, 3-floor
+    has_update(telegram, hc->controlmode, 1);   // 0-outdoortemp, 1-roomtemp
+    has_update(telegram, hc->nighttemp, 3);     // is * 2 (T1)
+    has_update(telegram, hc->daylowtemp, 4);    // is * 2 (T2)
+    has_update(telegram, hc->daymidtemp, 5);    // is * 2 (T3)
+    has_update(telegram, hc->daytemp, 6);       // is * 2 (T4)
+    has_update(telegram, hc->holidaytemp, 7);   // is * 2
+
+}
+
+// type 0x3F (HC1) - timer setting for RC30
+void Thermostat::process_RC30Timer(std::shared_ptr<const Telegram> telegram) {
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    if (hc == nullptr) {
+        return;
+    }
+
+    if ((telegram->message_length == 2 && telegram->offset < 83 && !(telegram->offset & 1))
+        || (!telegram->offset && telegram->message_length > 1 && !strlen(hc->switchtime1))) {
+
+        char    data[sizeof(hc->switchtime1)];
+        uint8_t no   = telegram->offset / 2;
+        uint8_t day  = telegram->message_data[0] >> 5;
+        uint8_t temp = telegram->message_data[0] & 7;
+        uint8_t time = telegram->message_data[1];
+
+        std::string sday = read_flash_string(FL_(enum_dayOfWeek)[day]);
+        if (day == 7) {
+            snprintf(data, sizeof(data), "%02d not_set", no);
+        } else {
+            snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), temp);
+        }
+        strlcpy(hc->switchtime1, data, sizeof(hc->switchtime1));
+        has_update(hc->switchtime1); // always publish
+    }
+
+    has_update(telegram, hc->program, 84); // 0 .. 10, 0-userprogram 1, 10-userprogram 2
+    has_update(telegram, hc->pause, 85);   // time in hours
+    has_update(telegram, hc->party, 86);   // time in hours
+
+    if (telegram->message_length + telegram->offset >= 92 && telegram->offset <= 87) {
+        char data[sizeof(hc->vacation)];
+        snprintf(data,
+                 sizeof(data),
+                 "%02d.%02d.%04d-%02d.%02d.%04d",
+                 telegram->message_data[87 - telegram->offset],
+                 telegram->message_data[88 - telegram->offset],
+                 telegram->message_data[89 - telegram->offset] + 2000,
+                 telegram->message_data[90 - telegram->offset],
+                 telegram->message_data[91 - telegram->offset],
+                 telegram->message_data[92 - telegram->offset] + 2000);
+        has_update(hc->vacation, data, sizeof(hc->vacation));
+    }
+
+    if (telegram->message_length + telegram->offset >= 98 && telegram->offset <= 93) {
+        char data[sizeof(hc->holiday)];
+        snprintf(data,
+                 sizeof(data),
+                 "%02d.%02d.%04d-%02d.%02d.%04d",
+                 telegram->message_data[93 - telegram->offset],
+                 telegram->message_data[94 - telegram->offset],
+                 telegram->message_data[95 - telegram->offset] + 2000,
+                 telegram->message_data[96 - telegram->offset],
+                 telegram->message_data[97 - telegram->offset],
+                 telegram->message_data[98 - telegram->offset] + 2000);
+        has_update(hc->holiday, data, sizeof(hc->holiday));
+    }
+}
+
 // type 0x3E (HC1), 0x48 (HC2), 0x52 (HC3), 0x5C (HC4) - data from the RC35 thermostat (0x10) - 16 bytes
 void Thermostat::process_RC35Monitor(std::shared_ptr<const Telegram> telegram) {
     // exit if the 15th byte (second from last) is 0x00, which I think is calculated flow setpoint temperature
