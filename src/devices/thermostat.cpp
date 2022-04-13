@@ -2498,13 +2498,11 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         data[1] = time;
     }
 
-    uint8_t min_on = 0;
-    uint8_t max_on = 3;
+    uint8_t min_on = 1;
+    uint8_t max_on = 4;
     if ((model() == EMS_DEVICE_FLAG_RC35) || (model() == EMS_DEVICE_FLAG_RC30_N)) {
+        min_on = 0;
         max_on = 1;
-    } else if (model() == EMS_DEVICE_FLAG_RC30) {
-        min_on = 1;        
-        max_on = 4;
     }
     if (no > 41 || time > 0x90 || ((on < min_on || on > max_on) && on != 7)) {
         // LOG_WARNING(F("Setting switchtime: Invalid data: %s"), value);
@@ -3696,7 +3694,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->daylowtemp, DeviceValueType::UINT, FL_(div2), FL_(daylowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daylowtemp));
         register_device_value(tag, &hc->daymidtemp, DeviceValueType::UINT, FL_(div2), FL_(daymidtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daymidtemp));
         register_device_value(tag, &hc->daytemp, DeviceValueType::UINT, FL_(div2), FL_(dayhightemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
-        register_device_value(tag, &hc->nighttemp, DeviceValueType::UINT, FL_(div2), FL_(nighttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nighttemp));
+        register_device_value(tag, &hc->nighttemp, DeviceValueType::UINT, FL_(div2), FL_(nighttemp2), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nighttemp));
         register_device_value(tag, &hc->switchtime1, DeviceValueType::STRING, FL_(tpl_switchtime1), FL_(switchtime), DeviceValueUOM::NONE, MAKE_CF_CB(set_switchtime1));
         break;
     case EMS_DEVICE_FLAG_RC20_N:
