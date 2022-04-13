@@ -2498,13 +2498,15 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         data[1] = time;
     }
 
+    uint8_t min_on = 0;
     uint8_t max_on = 3;
     if ((model() == EMS_DEVICE_FLAG_RC35) || (model() == EMS_DEVICE_FLAG_RC30_N)) {
         max_on = 1;
     } else if (model() == EMS_DEVICE_FLAG_RC30) {
+        min_on = 1;        
         max_on = 4;
     }
-    if (no > 41 || time > 0x90 || (on > max_on && on != 7)) {
+    if (no > 41 || time > 0x90 || ((on < min_on || on > max_on) && on != 7)) {
         // LOG_WARNING(F("Setting switchtime: Invalid data: %s"), value);
         // LOG_WARNING(F("Setting switchtime: Invalid data: %02d.%1d.0x%02X.%1d"), no, day, time, on);
         return false;
