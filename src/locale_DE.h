@@ -335,6 +335,7 @@ MAKE_PSTR(smoke_temperature, "Abgastemperatur")
 // thermostat lists
 MAKE_PSTR_LIST(tpl_datetime, F("Format: < NTP | dd.mm.yyyy-hh:mm:ss-dw-dst >"))
 MAKE_PSTR_LIST(tpl_switchtime, F("Format: < nn.d.o.hh:mm >"))
+MAKE_PSTR_LIST(tpl_switchtime1, F("Format: <nn> [ not_set | day hh:mm Tn ]"))
 MAKE_PSTR_LIST(tpl_holidays, F("Format: < dd.mm.yyyy-dd.mm.yyyy >"))
 MAKE_PSTR_LIST(enum_ibaMainDisplay,
                F_(internal_temperature),
@@ -600,6 +601,7 @@ MAKE_PSTR_LIST(wwExtra1, F("wwextra1"), F("Kreis 1 Extra"))
 MAKE_PSTR_LIST(wwExtra2, F("wwextra2"), F("Kreis 2 Extra"))
 MAKE_PSTR_LIST(wwDailyHeating, F("wwdailyheating"), F("daily heating"))
 MAKE_PSTR_LIST(wwDailyHeatTime, F("wwdailyheattime"), F("daily heating time"))
+MAKE_PSTR_LIST(wwWhenModeOff, F("wwwhenmodeoff"), F("wenn Thermostatmodus ist aus"))
 // thermostat hc
 MAKE_PSTR_LIST(climate, F("climate"))
 MAKE_PSTR_LIST(selRoomTemp, F("seltemp"), F("Sollwert Raumtemperatur"))
@@ -613,6 +615,7 @@ MAKE_PSTR_LIST(daymidtemp, F("daytemp3"), F("Tagestemperatur T3"))
 MAKE_PSTR_LIST(dayhightemp, F("daytemp4"), F("Tagestemperatur T4"))
 MAKE_PSTR_LIST(heattemp, F("heattemp"), F("Heizen Temperatur"))
 MAKE_PSTR_LIST(nighttemp, F("nighttemp"), F("Nachttemperatur"))
+MAKE_PSTR_LIST(nighttemp2, F("nighttemp"), F("Nachttemperatur T1"))
 MAKE_PSTR_LIST(ecotemp, F("ecotemp"), F("eco Temperatur"))
 MAKE_PSTR_LIST(manualtemp, F("manualtemp"), F("manuelle Temperatur"))
 MAKE_PSTR_LIST(tempautotemp, F("tempautotemp"), F("zwischenzeitliche Solltemperatur"))
