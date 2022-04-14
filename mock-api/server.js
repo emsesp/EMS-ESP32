@@ -253,7 +253,7 @@ const UPLOAD_FIRMWARE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFirmware'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn'
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken'
 const system_status = {
-  emsesp_version: '3.4.0demo',
+  emsesp_version: '3.4demo',
   esp_platform: 'ESP32',
   max_alloc_heap: 113792,
   psram_size: 0,
@@ -364,7 +364,7 @@ const emsesp_devices = {
 const emsesp_coredata = {
   devices: [
     {
-      i: 2,
+      id: '2',
       t: 'Boiler',
       s: 'Boiler',
       b: 'Nefit',
@@ -375,7 +375,7 @@ const emsesp_coredata = {
       e: 68,
     },
     {
-      i: 1,
+      id: '1',
       t: 'Thermostat',
       s: 'Thermostat',
       b: '',
@@ -386,7 +386,7 @@ const emsesp_coredata = {
       e: 5,
     },
     {
-      i: 4,
+      id: '4',
       t: 'Thermostat',
       s: 'Thermostat',
       b: 'Buderus',
@@ -403,17 +403,17 @@ const emsesp_coredata = {
 
 const emsesp_sensordata = {
   sensors: [
-    { is: '28-233D-9497-0C03', n: 'Dallas 1', t: 25.7, o: 1.2, u: 1 },
-    { is: '28-243D-7437-1E3A', n: 'Dallas 2 outside', t: 26.1, o: 0, u: 1 },
-    { is: '28-243E-7437-1E3B', n: 'Zolder', t: 27.1, o: 0, u: 16 },
-    { is: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1 },
+    { id: '28-233D-9497-0C03', n: 'Dallas 1', t: 25.7, o: 1.2, u: 1 },
+    { id: '28-243D-7437-1E3A', n: 'Dallas 2 outside', t: 26.1, o: 0, u: 1 },
+    { id: '28-243E-7437-1E3B', n: 'Zolder', t: 27.1, o: 0, u: 16 },
+    { id: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1 },
   ],
   // sensors: [],
   analogs: [
-    { i: 36, n: 'motor', u: 0, o: 17, f: 0, t: 0 },
-    { i: 37, n: 'External switch', v: 13, u: 0, o: 17, f: 0, t: 1 },
-    { i: 39, n: 'Pulse count', v: 144, u: 0, o: 0, f: 0, t: 2 },
-    { i: 40, n: 'Pressure', v: 16, u: 17, o: 0, f: 0, t: 3 },
+    { id: '36', n: 'motor', u: 0, o: 17, f: 0, t: 0 },
+    { id: '37', n: 'External switch', v: 13, u: 0, o: 17, f: 0, t: 1 },
+    { id: '39', n: 'Pulse count', v: 144, u: 0, o: 0, f: 0, t: 2 },
+    { id: '40', n: 'Pressure', v: 16, u: 17, o: 0, f: 0, t: 3 },
   ],
   // analogs: [],
 }
@@ -455,31 +455,28 @@ const emsesp_devicedata_1 = {
     {
       v: '(0)',
       u: 0,
-      n: '00error code',
-      c: '',
+      id: '00error code',
     },
     {
       v: '14:54:39 06/06/2021',
       u: 0,
-      n: '00date/time',
-      c: '',
+      id: '00date/time',
     },
     {
       v: 18,
       u: 1,
-      n: '00hc1 selected room temperature',
+      id: '00hc1 selected room temperature',
       c: 'hc1/seltemp',
     },
     {
       v: 22.6,
       u: 1,
-      n: '00hc1 current room temperature',
-      c: '',
+      id: '00hc1 current room temperature',
     },
     {
       v: 'auto',
       u: 0,
-      n: '00hc1 mode',
+      id: '00hc1 mode',
       c: 'hc1/mode',
     },
   ],
@@ -488,81 +485,81 @@ const emsesp_devicedata_1 = {
 const emsesp_devicedata_2 = {
   label: 'Boiler: Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i',
   data: [
-    { u: 0, n: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
-    { v: 'false', u: 0, n: '08heating active' },
-    { v: 'false', u: 0, n: '04tapwater active' },
-    { v: 5, u: 1, n: '04selected flow temperature', c: 'selflowtemp' },
-    { v: 0, u: 3, n: '0Eburner selected max power', c: 'selburnpow' },
-    { v: 0, u: 3, n: '00heating pump modulation' },
-    { v: 53.4, u: 1, n: '00current flow temperature' },
-    { v: 52.7, u: 1, n: '00return temperature' },
-    { v: 1.3, u: 10, n: '00system pressure' },
-    { v: 54.9, u: 1, n: '00actual boiler temperature' },
-    { v: 'false', u: 0, n: '00gas' },
-    { v: 'false', u: 0, n: '00gas stage 2' },
-    { v: 0, u: 9, n: '00flame current' },
-    { v: 'false', u: 0, n: '00heating pump' },
-    { v: 'false', u: 0, n: '00fan' },
-    { v: 'false', u: 0, n: '00ignition' },
-    { v: 'false', u: 0, n: '00oil preheating' },
-    { v: 'true', u: 0, n: '00heating activated', c: 'heatingactivated', l: ['off', 'on'] },
-    { v: 80, u: 1, n: '00heating temperature', c: 'heatingtemp' },
-    { v: 70, u: 3, n: '00burner pump max power', c: 'pumpmodmax' },
-    { v: 30, u: 3, n: '00burner pump min power', c: 'pumpmodmin' },
-    { v: 1, u: 8, n: '00pump delay', c: 'pumpdelay' },
-    { v: 10, u: 8, n: '00burner min period', c: 'burnminperiod' },
-    { v: 0, u: 3, n: '00burner min power', c: 'burnminpower' },
-    { v: 50, u: 3, n: '00burner max power', c: 'burnmaxpower' },
-    { v: -6, u: 2, n: '00hysteresis on temperature', c: 'boilhyston' },
-    { v: 6, u: 2, n: '00hysteresis off temperature', c: 'boilhystoff' },
-    { v: 0, u: 1, n: '00set flow temperature' },
-    { v: 0, u: 3, n: '00burner set power' },
-    { v: 0, u: 3, n: '00burner current power' },
-    { v: 326323, u: 0, n: '00burner starts' },
-    { v: 553437, u: 8, n: '00total burner operating time' },
-    { v: 451286, u: 8, n: '00total heat operating time' },
-    { v: 4672173, u: 8, n: '00total UBA operating time' },
-    { v: '1C(210) 06.06.2020 12:07 (0 min)', u: 0, n: '00last error code' },
-    { v: '0H', u: 0, n: '00service code' },
-    { v: 203, u: 0, n: '00service code number' },
-    { v: 'H00', u: 0, n: '00maintenance message' },
-    { v: 'manual', u: 0, n: '00maintenance scheduled', c: 'maintenance', l: ['off', 'time', 'date', 'manual'] },
-    { v: 6000, u: 7, n: '00time to next maintenance', c: 'maintenancetime' },
-    { v: '01.01.2012', u: 0, n: '00next maintenance date', c: 'maintenancedate', o: 'Format: < dd.mm.yyyy >' },
-    { v: 'true', u: 0, n: '00dhw turn on/off', c: 'wwtapactivated', l: ['off', 'on'] },
-    { v: 62, u: 1, n: '00dhw set temperature' },
-    { v: 60, u: 1, n: '00dhw selected temperature', c: 'wwseltemp' },
-    { v: 'flow', u: 0, n: '00dhw type' },
-    { v: 'hot', u: 0, n: '00dhw comfort', c: 'wwcomfort', l: ['hot', 'eco', 'intelligent'] },
-    { v: 40, u: 2, n: '00dhw flow temperature offset', c: 'wwflowtempoffset' },
-    { v: 100, u: 3, n: '00dhw max power', c: 'wwmaxpower' },
-    { v: 'false', u: 0, n: '00dhw circulation pump available', c: 'wwcircpump', l: ['off', 'on'] },
-    { v: '3-way valve', u: 0, n: '00dhw charging type' },
-    { v: -5, u: 2, n: '00dhw hysteresis on temperature', c: 'wwhyston' },
-    { v: 0, u: 2, n: '00dhw hysteresis off temperature', c: 'wwhystoff' },
-    { v: 70, u: 1, n: '00dhw disinfection temperature', c: 'wwdisinfectiontemp' },
+    { u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
+    { v: 'false', u: 0, id: '08heating active' },
+    { v: 'false', u: 0, id: '04tapwater active' },
+    { v: 5, u: 1, id: '04selected flow temperature', c: 'selflowtemp' },
+    { v: 0, u: 3, id: '0Eburner selected max power', c: 'selburnpow' },
+    { v: 0, u: 3, id: '00heating pump modulation' },
+    { v: 53.4, u: 1, id: '00current flow temperature' },
+    { v: 52.7, u: 1, id: '00return temperature' },
+    { v: 1.3, u: 10, id: '00system pressure' },
+    { v: 54.9, u: 1, id: '00actual boiler temperature' },
+    { v: 'false', u: 0, id: '00gas' },
+    { v: 'false', u: 0, id: '00gas stage 2' },
+    { v: 0, u: 9, id: '00flame current' },
+    { v: 'false', u: 0, id: '00heating pump' },
+    { v: 'false', u: 0, id: '00fan' },
+    { v: 'false', u: 0, id: '00ignition' },
+    { v: 'false', u: 0, id: '00oil preheating' },
+    { v: 'true', u: 0, id: '00heating activated', c: 'heatingactivated', l: ['off', 'on'] },
+    { v: 80, u: 1, id: '00heating temperature', c: 'heatingtemp' },
+    { v: 70, u: 3, id: '00burner pump max power', c: 'pumpmodmax' },
+    { v: 30, u: 3, id: '00burner pump min power', c: 'pumpmodmin' },
+    { v: 1, u: 8, id: '00pump delay', c: 'pumpdelay' },
+    { v: 10, u: 8, id: '00burner min period', c: 'burnminperiod' },
+    { v: 0, u: 3, id: '00burner min power', c: 'burnminpower' },
+    { v: 50, u: 3, id: '00burner max power', c: 'burnmaxpower' },
+    { v: -6, u: 2, id: '00hysteresis on temperature', c: 'boilhyston' },
+    { v: 6, u: 2, id: '00hysteresis off temperature', c: 'boilhystoff' },
+    { v: 0, u: 1, id: '00set flow temperature' },
+    { v: 0, u: 3, id: '00burner set power' },
+    { v: 0, u: 3, id: '00burner current power' },
+    { v: 326323, u: 0, id: '00burner starts' },
+    { v: 553437, u: 8, id: '00total burner operating time' },
+    { v: 451286, u: 8, id: '00total heat operating time' },
+    { v: 4672173, u: 8, id: '00total UBA operating time' },
+    { v: '1C(210) 06.06.2020 12:07 (0 min)', u: 0, id: '00last error code' },
+    { v: '0H', u: 0, id: '00service code' },
+    { v: 203, u: 0, id: '00service code number' },
+    { v: 'H00', u: 0, id: '00maintenance message' },
+    { v: 'manual', u: 0, id: '00maintenance scheduled', c: 'maintenance', l: ['off', 'time', 'date', 'manual'] },
+    { v: 6000, u: 7, id: '00time to next maintenance', c: 'maintenancetime' },
+    { v: '01.01.2012', u: 0, id: '00next maintenance date', c: 'maintenancedate', o: 'Format: < dd.mm.yyyy >' },
+    { v: 'true', u: 0, id: '00dhw turn on/off', c: 'wwtapactivated', l: ['off', 'on'] },
+    { v: 62, u: 1, id: '00dhw set temperature' },
+    { v: 60, u: 1, id: '00dhw selected temperature', c: 'wwseltemp' },
+    { v: 'flow', u: 0, id: '00dhw type' },
+    { v: 'hot', u: 0, id: '00dhw comfort', c: 'wwcomfort', l: ['hot', 'eco', 'intelligent'] },
+    { v: 40, u: 2, id: '00dhw flow temperature offset', c: 'wwflowtempoffset' },
+    { v: 100, u: 3, id: '00dhw max power', c: 'wwmaxpower' },
+    { v: 'false', u: 0, id: '00dhw circulation pump available', c: 'wwcircpump', l: ['off', 'on'] },
+    { v: '3-way valve', u: 0, id: '00dhw charging type' },
+    { v: -5, u: 2, id: '00dhw hysteresis on temperature', c: 'wwhyston' },
+    { v: 0, u: 2, id: '00dhw hysteresis off temperature', c: 'wwhystoff' },
+    { v: 70, u: 1, id: '00dhw disinfection temperature', c: 'wwdisinfectiontemp' },
     {
       v: 'off',
       u: 0,
-      n: '00dhw circulation pump mode',
+      id: '00dhw circulation pump mode',
       c: 'wwcircmode',
       l: ['off', '1x3min', '2x3min', '3x3min', '4x3min', '5x3min', '6x3min', 'continuous'],
     },
-    { v: 'false', u: 0, n: '00dhw circulation active', c: 'wwcirc', l: ['off', 'on'] },
-    { v: 47.3, u: 1, n: '00dhw current intern temperature' },
-    { v: 0, u: 4, n: '00dhw current tap water flow' },
-    { v: 47.3, u: 1, n: '00dhw storage intern temperature' },
-    { v: 'true', u: 0, n: '00dhw activated', c: 'wwactivated', l: ['off', 'on'] },
-    { v: 'false', u: 0, n: '00dhw one time charging', c: 'wwonetime', l: ['off', 'on'] },
-    { v: 'false', u: 0, n: '00dhw disinfecting', c: 'wwdisinfecting', l: ['off', 'on'] },
-    { v: 'false', u: 0, n: '00dhw charging' },
-    { v: 'false', u: 0, n: '00dhw recharging' },
-    { v: 'true', u: 0, n: '00dhw temperature ok' },
-    { v: 'false', u: 0, n: '00dhw active' },
-    { v: 'true', u: 0, n: '00dhw 3way valve active' },
-    { v: 0, u: 3, n: '00dhw set pump power' },
-    { v: 288768, u: 0, n: '00dhw starts' },
-    { v: 102151, u: 8, n: '00dhw active time' },
+    { v: 'false', u: 0, id: '00dhw circulation active', c: 'wwcirc', l: ['off', 'on'] },
+    { v: 47.3, u: 1, id: '00dhw current intern temperature' },
+    { v: 0, u: 4, id: '00dhw current tap water flow' },
+    { v: 47.3, u: 1, id: '00dhw storage intern temperature' },
+    { v: 'true', u: 0, id: '00dhw activated', c: 'wwactivated', l: ['off', 'on'] },
+    { v: 'false', u: 0, id: '00dhw one time charging', c: 'wwonetime', l: ['off', 'on'] },
+    { v: 'false', u: 0, id: '00dhw disinfecting', c: 'wwdisinfecting', l: ['off', 'on'] },
+    { v: 'false', u: 0, id: '00dhw charging' },
+    { v: 'false', u: 0, id: '00dhw recharging' },
+    { v: 'true', u: 0, id: '00dhw temperature ok' },
+    { v: 'false', u: 0, id: '00dhw active' },
+    { v: 'true', u: 0, id: '00dhw 3way valve active' },
+    { v: 0, u: 3, id: '00dhw set pump power' },
+    { v: 288768, u: 0, id: '00dhw starts' },
+    { v: 102151, u: 8, id: '00dhw active time' },
   ],
 }
 
@@ -572,19 +569,19 @@ const emsesp_devicedata_4 = {
     {
       v: 16,
       u: 1,
-      n: '00hc2 selected room temperature',
+      id: '00hc2 selected room temperature',
       c: 'hc2/seltemp',
     },
     {
       v: 18.6,
       u: 1,
-      n: '00hc2 current room temperature',
+      id: '00hc2 current room temperature',
       c: '',
     },
     {
       v: 'off',
       u: 0,
-      n: '00hc2 mode',
+      id: '00hc2 mode',
       c: 'hc2/mode',
     },
   ],
@@ -870,9 +867,12 @@ rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
   // res.status(200).json(settings); // no restart needed
 })
 rest_server.get(EMSESP_CORE_DATA_ENDPOINT, (req, res) => {
+  console.log('send back core data...')
   res.json(emsesp_coredata)
 })
 rest_server.get(EMSESP_SENSOR_DATA_ENDPOINT, (req, res) => {
+  console.log('send back sensor data...')
+
   res.json(emsesp_sensordata)
 })
 rest_server.get(EMSESP_DEVICES_ENDPOINT, (req, res) => {
@@ -887,6 +887,7 @@ rest_server.get(EMSESP_STATUS_ENDPOINT, (req, res) => {
 })
 rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
   const id = req.body.id
+  console.log('send back device data for ' + id)
   if (id === 1) {
     const encoded = msgpack.encode(emsesp_devicedata_1)
     res.write(encoded, 'binary')
@@ -986,7 +987,7 @@ rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
   const sensor = req.body
   console.log('Write sensor: ' + JSON.stringify(sensor))
-  objIndex = emsesp_sensordata.sensors.findIndex((obj) => obj.is == sensor.id_str)
+  objIndex = emsesp_sensordata.sensors.findIndex((obj) => obj.id == sensor.id_str)
   emsesp_sensordata.sensors[objIndex].n = sensor.name
   emsesp_sensordata.sensors[objIndex].o = sensor.offset
   res.sendStatus(200)
@@ -995,12 +996,12 @@ rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
   const analog = req.body
   console.log('Write analog: ' + JSON.stringify(analog))
-  objIndex = emsesp_sensordata.analogs.findIndex((obj) => obj.i == analog.id)
+  objIndex = emsesp_sensordata.analogs.findIndex((obj) => obj.id == analog.id)
 
   if (objIndex === -1) {
     console.log('new analog')
     emsesp_sensordata.analogs.push({
-      i: analog.id,
+      id: analog.id,
       n: analog.name,
       f: analog.factor,
       o: analog.offset,

@@ -69,7 +69,7 @@ export interface Status {
 }
 
 export interface Device {
-  i: number; // id
+  id: string; // id index
   t: string; // type
   b: string; // brand
   n: string; // name
@@ -80,7 +80,7 @@ export interface Device {
 }
 
 export interface Sensor {
-  is: string; // id string
+  id: string; // id string
   n: string; // name/alias
   t?: number; // temp, optional
   o: number; // offset
@@ -88,7 +88,7 @@ export interface Sensor {
 }
 
 export interface Analog {
-  i: number;
+  id: string; // id string, is GPIO
   n: string;
   v?: number;
   u: number;
@@ -126,11 +126,11 @@ export interface Devices {
 }
 
 export interface DeviceValue {
+  id: string; // index, contains mask+name
   v?: any; // value, in any format
   u: number; // uom
-  n: string; // name
-  c: string; // command
-  l: string[]; // list
+  c?: string; // command
+  l?: string[]; // list
   h?: string; // help text, optional
   s?: string; // steps for up/down, optional
   m?: string; // min, optional
@@ -143,8 +143,8 @@ export interface DeviceData {
 }
 
 export interface DeviceEntity {
-  v?: any; // value, in any format
   n: string; // name
+  v?: any; // value, in any format
   s: string; // shortname
   m: number; // mask
   om?: number; // original mask before edits
@@ -277,7 +277,7 @@ export interface WriteValue {
 }
 
 export interface WriteAnalog {
-  id: number;
+  id: string;
   name: string;
   factor: number;
   offset: number;
