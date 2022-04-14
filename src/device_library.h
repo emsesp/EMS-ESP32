@@ -36,7 +36,7 @@
 {132, DeviceType::BOILER, F("GC7000F"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {133, DeviceType::BOILER, F("Logano GB125/KB195i/Logamatic MC110"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {167, DeviceType::BOILER, F("Cerapur Aero"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{168, DeviceType::BOILER, F("Hybrid Heatpump"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
+{168, DeviceType::BOILER, F("Hybrid Heatpump"), DeviceFlags::EMS_DEVICE_FLAG_HYBRID},
 {170, DeviceType::BOILER, F("Logano GB212"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {172, DeviceType::BOILER, F("Enviline/Compress 6000AW/Hybrid 7000iAW/SupraEco/Geo 5xx"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 {173, DeviceType::BOILER, F("Geo 5xx"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
@@ -113,7 +113,6 @@
 
 // Solar Modules - 0x30 (for solar), 0x2A, 0x41 (for ww)
 { 73, DeviceType::SOLAR, F("SM10"), DeviceFlags::EMS_DEVICE_FLAG_SM10},
-{100, DeviceType::SOLAR, F("ISM DHW"), DeviceFlags::EMS_DEVICE_FLAG_ISM},
 {101, DeviceType::SOLAR, F("ISM1"), DeviceFlags::EMS_DEVICE_FLAG_ISM},
 {103, DeviceType::SOLAR, F("ISM2"), DeviceFlags::EMS_DEVICE_FLAG_ISM},
 {162, DeviceType::SOLAR, F("SM50"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
@@ -122,6 +121,7 @@
 
 // Mixer Modules - 0x20-0x27 for HC, 0x28-0x29 for WWC and 0x11 for the MP100
 { 69, DeviceType::MIXER, F("MM10"), DeviceFlags::EMS_DEVICE_FLAG_MM10},
+{100, DeviceType::MIXER, F("IPM"), DeviceFlags::EMS_DEVICE_FLAG_IPM},
 {102, DeviceType::MIXER, F("IPM"), DeviceFlags::EMS_DEVICE_FLAG_IPM},
 {159, DeviceType::MIXER, F("MM50"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {160, DeviceType::MIXER, F("MM100"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},

@@ -177,12 +177,13 @@ class EMSdevice {
     std::string to_string() const;
     std::string to_string_short() const;
 
-    enum Handlers : uint8_t { ALL, RECEIVED, FETCHED, PENDING };
+    enum Handlers : uint8_t { ALL, RECEIVED, FETCHED, PENDING, IGNORED };
 
     void   show_telegram_handlers(uuid::console::Shell & shell) const;
     char * show_telegram_handlers(char * result, const size_t len, const uint8_t handlers);
     void   show_mqtt_handlers(uuid::console::Shell & shell) const;
     void   list_device_entries(JsonObject & output) const;
+    void   add_handlers_ignored(const uint16_t handler);
 
     void mask_entity(const std::string & entity_id);
     void getMaskedEntities(std::vector<std::string> & entity_ids);
@@ -319,6 +320,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_EMSPLUS  = 2;
     static constexpr uint8_t EMS_DEVICE_FLAG_HT3      = 3;
     static constexpr uint8_t EMS_DEVICE_FLAG_HEATPUMP = 4;
+    static constexpr uint8_t EMS_DEVICE_FLAG_HYBRID   = 5;
 
     // Solar Module
     static constexpr uint8_t EMS_DEVICE_FLAG_SM10  = 1;
@@ -384,6 +386,8 @@ class EMSdevice {
 
     // device values
     std::vector<DeviceValue> devicevalues_;
+
+    std::vector<uint16_t> handlers_ignored_;
 };
 
 } // namespace emsesp
