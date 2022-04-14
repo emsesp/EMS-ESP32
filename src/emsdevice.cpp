@@ -26,7 +26,7 @@ namespace emsesp {
 uint8_t EMSdevice::count_entities() {
     uint8_t count = 0;
     for (auto & dv : devicevalues_) {
-        if (dv.has_state(DeviceValueState::DV_VISIBLE) && dv.hasValue()) {
+        if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.hasValue()) {
             count++;
         }
     }
@@ -258,7 +258,7 @@ bool EMSdevice::has_tag(const uint8_t tag) {
 // called from the command 'entities'
 void EMSdevice::list_device_entries(JsonObject & output) const {
     for (const auto & dv : devicevalues_) {
-        if (dv.has_state(DeviceValueState::DV_VISIBLE) && dv.type != DeviceValueType::CMD && dv.full_name) {
+        if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.type != DeviceValueType::CMD && dv.full_name) {
             // if we have a tag prefix it
             char key[50];
             if (!EMSdevice::tag_to_mqtt(dv.tag).empty()) {
@@ -321,6 +321,11 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) const {
         }
     }
     shell.println();
+    shell.printf(F(" Ignored telegram type IDs: "));
+    for (auto handlers : handlers_ignored_) {
+        shell.printf(F("0x%02X "), handlers);
+    }
+    shell.println();
 }
 
 // list all the telegram type IDs for this device, outputting to a string (max size 200)
@@ -343,8 +348,25 @@ char * EMSdevice::show_telegram_handlers(char * result, const size_t len, const 
             strlcat(result, Helpers::hextoa(tf.telegram_type_id_, true).c_str(), len);
         }
     }
-
+    if (handlers == Handlers::ALL || handlers == Handlers::IGNORED) {
+        i = 0;
+        for (auto handlers : handlers_ignored_) {
+            if (i++ > 0) {
+                strlcat(result, " ", len);
+            }
+            strlcat(result, Helpers::hextoa(handlers).c_str(), len);
+        }
+    }
     return result;
+}
+
+void EMSdevice::add_handlers_ignored(const uint16_t handler) {
+    for (auto handlers : handlers_ignored_) {
+        if (handler == handlers) {
+            return;
+        }
+    }
+    handlers_ignored_.push_back(handler);
 }
 
 // list all the mqtt handlers for this device
@@ -405,19 +427,18 @@ void EMSdevice::register_device_value(uint8_t                             tag,
         }
     }
 
-    // this is the unique id set for the device entity. it's a simple sequence number
-    uint8_t dv_id = get_next_dv_id();
-
     // determine state
-    uint8_t state = DeviceValueState::DV_VISIBLE; // default to visible
+    uint8_t state = DeviceValueState::DV_DEFAULT;
 
     // scan through customizations to see if it's on the exclusion list by matching the productID and deviceID
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         for (EntityCustomization entityCustomization : settings.entityCustomizations) {
             if ((entityCustomization.product_id == product_id()) && (entityCustomization.device_id == device_id())) {
-                for (uint8_t entity_id : entityCustomization.entity_ids) {
-                    if (entity_id == dv_id) {
-                        state = DeviceValueState::DV_DEFAULT; // it's on the exclude list, turn off active and visible flags
+                std::string entity = tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(short_name) : tag_to_string(tag) + "/" + read_flash_string(short_name);
+                for (std::string entity_id : entityCustomization.entity_ids) {
+                    if (entity_id.substr(2) == entity) {
+                        uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
+                        state        = mask << 4; // set state high bits to flag, turn off active and ha flags
                         break;
                     }
                 }
@@ -426,7 +447,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
     });
 
     // add the device
-    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, 0, has_cmd, min, max, state, dv_id);
+    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, 0, has_cmd, min, max, state);
 }
 
 // function with min and max values
@@ -454,7 +475,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
 
     if (tag >= DeviceValueTAG::TAG_HC1 && tag <= DeviceValueTAG::TAG_HC8) {
         flags |= CommandFlag::MQTT_SUB_FLAG_HC;
-    } else if (tag >= DeviceValueTAG::TAG_WWC1 && tag <= DeviceValueTAG::TAG_WWC4) {
+    } else if (tag >= DeviceValueTAG::TAG_WWC1 && tag <= DeviceValueTAG::TAG_WWC10) {
         flags |= CommandFlag::MQTT_SUB_FLAG_WWC;
     } else if (tag == DeviceValueTAG::TAG_DEVICE_DATA_WW || tag == DeviceValueTAG::TAG_BOILER_DATA_WW) {
         flags |= CommandFlag::MQTT_SUB_FLAG_WW;
@@ -486,11 +507,33 @@ void EMSdevice::register_device_value(uint8_t                             tag,
     register_device_value(tag, value_p, type, options, name, uom, nullptr, 0, 0);
 }
 
-// check if value is visible
-bool EMSdevice::is_visible(const void * value_p) const {
+// check if value is readable via mqtt/api
+bool EMSdevice::is_readable(const void * value_p) const {
     for (const auto & dv : devicevalues_) {
         if (dv.value_p == value_p) {
-            return dv.has_state(DeviceValueState::DV_VISIBLE);
+            return !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE);
+        }
+    }
+    return false;
+}
+
+// check if value/command is readonly
+bool EMSdevice::is_readonly(const std::string & cmd, const int8_t id) const {
+    uint8_t tag = id > 0 ? DeviceValueTAG::TAG_HC1 + id - 1 : DeviceValueTAG::TAG_NONE;
+    for (const auto & dv : devicevalues_) {
+        // check command name and tag, id -1 is default hc and only checks name
+        if (dv.has_cmd && read_flash_string(dv.short_name) == cmd && (dv.tag < DeviceValueTAG::TAG_HC1 || dv.tag == tag || id == -1)) {
+            return dv.has_state(DeviceValueState::DV_READONLY);
+        }
+    }
+    return true; // not found, no write
+}
+
+// check if value has a registered command
+bool EMSdevice::has_command(const void * value_p) const {
+    for (const auto & dv : devicevalues_) {
+        if (dv.value_p == value_p) {
+            return dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
         }
     }
     return false;
@@ -503,7 +546,7 @@ void EMSdevice::publish_value(void * value_p) const {
     }
 
     for (const auto & dv : devicevalues_) {
-        if (dv.value_p == value_p && dv.has_state(DeviceValueState::DV_VISIBLE)) {
+        if (dv.value_p == value_p && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
             if (Mqtt::publish_single2cmd()) {
                 if (dv.tag >= DeviceValueTAG::TAG_HC1) {
@@ -528,7 +571,7 @@ void EMSdevice::publish_value(void * value_p) const {
             }
 
             int8_t  divider     = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
-            char    payload[30] = {'\0'};
+            char    payload[50] = {'\0'};
             uint8_t fahrenheit  = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
             switch (dv.type) {
@@ -561,7 +604,7 @@ void EMSdevice::publish_value(void * value_p) const {
                 Helpers::render_value(payload, *(uint32_t *)(value_p), divider, fahrenheit);
                 break;
             case DeviceValueType::BOOL: {
-                Helpers::render_boolean(payload, (bool)(*(uint8_t *)(value_p)));
+                Helpers::render_boolean(payload, (bool)*(uint8_t *)(value_p));
                 break;
             }
             case DeviceValueType::TIME:
@@ -603,7 +646,7 @@ std::string EMSdevice::get_value_uom(const char * key) const {
 
     // look up key in our device value list
     for (const auto & dv : devicevalues_) {
-        if ((dv.has_state(DeviceValueState::DV_VISIBLE) && dv.full_name) && (read_flash_string(dv.full_name) == key_p)) {
+        if ((!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.full_name) && (read_flash_string(dv.full_name) == key_p)) {
             // ignore TIME since "minutes" is already added to the string value
             if ((dv.uom == DeviceValueUOM::NONE) || (dv.uom == DeviceValueUOM::MINUTES)) {
                 break;
@@ -618,157 +661,144 @@ std::string EMSdevice::get_value_uom(const char * key) const {
 // prepare array of device values used for the WebUI
 // this is loosely based of the function generate_values used for the MQTT and Console
 // except additional data is stored in the JSON document needed for the Web UI like the UOM and command
-// v = value, u=uom, n=name, c=cmd
+// v=value, u=uom, n=name, c=cmd, h=help string, s=step, m=min, x=max
 void EMSdevice::generate_values_web(JsonObject & output) {
     output["label"] = to_string_short();
     JsonArray data  = output.createNestedArray("data");
 
-    for (auto & dv : devicevalues_) {
-        // check conditions:
-        //  1. full_name cannot be empty
-        //  2. it must have a valid value, if it is not a command like 'reset'
+    // do two passes. First for all entities marked as favorites, then for all others. This sorts the list.
+    for (int8_t fav = 1; fav >= 0; fav--) {
+        for (auto & dv : devicevalues_) {
+            // check conditions:
+            //  1. full_name cannot be empty
+            //  2. it must have a valid value, if it is not a command like 'reset'
+            //  3. show favorites first
+            bool show = (fav && dv.has_state(DeviceValueState::DV_FAVORITE)) || (!fav && !dv.has_state(DeviceValueState::DV_FAVORITE));
+            if (show && !dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.full_name && (dv.hasValue() || (dv.type == DeviceValueType::CMD))) {
+                JsonObject obj        = data.createNestedObject(); // create the object, we know there is a value
+                uint8_t    fahrenheit = 0;
 
-        if (dv.has_state(DeviceValueState::DV_VISIBLE) && dv.full_name && (dv.hasValue() || (dv.type == DeviceValueType::CMD))) {
-            JsonObject obj        = data.createNestedObject(); // create the object, we know there is a value
-            uint8_t    fahrenheit = 0;
+                // handle Booleans (true, false), use strings, no native true/false)
+                if (dv.type == DeviceValueType::BOOL) {
+                    bool value_b = (bool)*(uint8_t *)(dv.value_p);
+                    if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                        obj["v"] = value_b ? 1 : 0;
+                    } else {
+                        char s[7];
+                        obj["v"] = Helpers::render_boolean(s, value_b);
+                    }
+                }
 
-            // handle Booleans (true, false)
-            if (dv.type == DeviceValueType::BOOL) {
-                bool value_b = *(bool *)(dv.value_p);
-                if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                    obj["v"] = value_b ? "true" : "false";
-                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                    obj["v"] = value_b ? 1 : 0;
+                // handle TEXT strings
+                else if (dv.type == DeviceValueType::STRING) {
+                    obj["v"] = (char *)(dv.value_p);
+                }
+
+                // handle ENUMs
+                else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
+                    obj["v"] = dv.options[*(uint8_t *)(dv.value_p)];
+                }
+
+                // handle numbers
+                else {
+                    // If a divider is specified, do the division to 2 decimals places and send back as double/float
+                    // otherwise force as an integer whole
+                    // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
+                    int8_t divider = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
+                    fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
+
+                    if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
+                        obj["v"] = Helpers::round2(*(int8_t *)(dv.value_p), divider, fahrenheit);
+                    } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
+                        obj["v"] = Helpers::round2(*(uint8_t *)(dv.value_p), divider, fahrenheit);
+                    } else if ((dv.type == DeviceValueType::SHORT) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
+                        obj["v"] = Helpers::round2(*(int16_t *)(dv.value_p), divider, fahrenheit);
+                    } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
+                        obj["v"] = Helpers::round2(*(uint16_t *)(dv.value_p), divider, fahrenheit);
+                    } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+                        obj["v"] = Helpers::round2(*(uint32_t *)(dv.value_p), divider, fahrenheit);
+                    } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+                        uint32_t time_value = *(uint32_t *)(dv.value_p);
+                        obj["v"]            = (divider > 0) ? time_value / divider : time_value; // sometimes we need to divide by 60
+                    }
+                }
+
+                // add the unit of measure (uom)
+                obj["u"] = fahrenheit ? (uint8_t)DeviceValueUOM::FAHRENHEIT : dv.uom;
+
+                auto mask = Helpers::hextoa((uint8_t)(dv.state >> 4), false); // create mask to a 2-char string
+
+                // add name, prefixing the tag if it exists
+                if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
+                    obj["n"] = mask + read_flash_string(dv.full_name);
+                } else if (dv.tag < DeviceValueTAG::TAG_HC1) {
+                    obj["n"] = mask + tag_to_string(dv.tag) + " " + read_flash_string(dv.full_name);
                 } else {
-                    char s[7];
-                    obj["v"] = Helpers::render_boolean(s, value_b);
+                    obj["n"] = mask + tag_to_string(dv.tag) + " " + read_flash_string(dv.full_name);
                 }
-            }
 
-            // handle TEXT strings
-            else if (dv.type == DeviceValueType::STRING) {
-                obj["v"] = (char *)(dv.value_p);
-            }
-
-            // handle ENUMs
-            else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
-                obj["v"] = dv.options[*(uint8_t *)(dv.value_p)];
-            }
-
-            // handle numbers
-            else {
-                // If a divider is specified, do the division to 2 decimals places and send back as double/float
-                // otherwise force as an integer whole
-                // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
-                int8_t divider = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
-                fahrenheit     = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
-
-                if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(int8_t *)(dv.value_p), divider, fahrenheit);
-                } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(uint8_t *)(dv.value_p), divider, fahrenheit);
-                } else if ((dv.type == DeviceValueType::SHORT) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(int16_t *)(dv.value_p), divider, fahrenheit);
-                } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(uint16_t *)(dv.value_p), divider, fahrenheit);
-                } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(uint32_t *)(dv.value_p), divider, fahrenheit);
-                } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    uint32_t time_value = *(uint32_t *)(dv.value_p);
-                    obj["v"]            = (divider > 0) ? time_value / divider : time_value; // sometimes we need to divide by 60
-                }
-            }
-
-            // add the unit of measure (uom)
-            obj["u"] = fahrenheit ? (uint8_t)DeviceValueUOM::FAHRENHEIT : dv.uom;
-
-            // add name, prefixing the tag if it exists
-            if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
-                obj["n"] = dv.full_name;
-            } else if (dv.tag < DeviceValueTAG::TAG_HC1) {
-                obj["n"] = tag_to_string(dv.tag) + " " + read_flash_string(dv.full_name);
-            } else {
-                obj["n"] = tag_to_string(dv.tag) + " " + read_flash_string(dv.full_name);
-            }
-
-            // add commands and options
-            if (dv.has_cmd) {
-                // add the name of the Command function
-                if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-                    obj["c"] = tag_to_mqtt(dv.tag) + "/" + read_flash_string(dv.short_name);
-                } else {
-                    obj["c"] = dv.short_name;
-                }
-                // add the Command options
-                if (dv.type == DeviceValueType::ENUM || (dv.type == DeviceValueType::CMD && dv.options_size > 1)) {
-                    JsonArray l = obj.createNestedArray("l");
-                    for (uint8_t i = 0; i < dv.options_size; i++) {
-                        if (!read_flash_string(dv.options[i]).empty()) {
-                            l.add(read_flash_string(dv.options[i]));
+                // add commands and options
+                if (dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY)) {
+                    // add the name of the Command function
+                    if (dv.tag >= DeviceValueTAG::TAG_HC1) {
+                        obj["c"] = tag_to_mqtt(dv.tag) + "/" + read_flash_string(dv.short_name);
+                    } else {
+                        obj["c"] = dv.short_name;
+                    }
+                    // add the Command options
+                    if (dv.type == DeviceValueType::ENUM || (dv.type == DeviceValueType::CMD && dv.options_size > 1)) {
+                        JsonArray l = obj.createNestedArray("l");
+                        for (uint8_t i = 0; i < dv.options_size; i++) {
+                            if (!read_flash_string(dv.options[i]).empty()) {
+                                l.add(read_flash_string(dv.options[i]));
+                            }
+                        }
+                    } else if (dv.type == DeviceValueType::BOOL) {
+                        JsonArray l = obj.createNestedArray("l");
+                        char      result[10];
+                        l.add(Helpers::render_boolean(result, false));
+                        l.add(Helpers::render_boolean(result, true));
+                    }
+                    // add command help template
+                    else if (dv.type == DeviceValueType::STRING || dv.type == DeviceValueType::CMD) {
+                        if (dv.options_size == 1) {
+                            obj["h"] = dv.options[0];
                         }
                     }
-                } else if (dv.type == DeviceValueType::BOOL) {
-                    JsonArray l = obj.createNestedArray("l");
-                    l.add("off");
-                    l.add("on");
-                }
-                // add command help template
-                else if (dv.type == DeviceValueType::STRING || dv.type == DeviceValueType::CMD) {
-                    if (dv.options_size == 1) {
-                        obj["h"] = dv.options[0];
-                    }
-                }
-                // add steps to numeric values with divider/multiplier
-                else {
-                    int8_t divider = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
-                    char   s[10];
-                    if (divider > 0) {
-                        obj["s"] = Helpers::render_value(s, (float)1 / divider, 1);
-                    } else if (divider < 0) {
-                        obj["s"] = Helpers::render_value(s, (-1) * divider, 0);
+                    // add steps to numeric values with divider/multiplier
+                    else {
+                        int8_t divider = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
+                        char   s[10];
+                        if (divider > 0) {
+                            obj["s"] = Helpers::render_value(s, (float)1 / divider, 1);
+                        } else if (divider < 0) {
+                            obj["s"] = Helpers::render_value(s, (-1) * divider, 0);
+                        }
+                        int16_t dv_set_min, dv_set_max;
+                        if (dv.get_min_max(dv_set_min, dv_set_max)) {
+                            obj["m"] = Helpers::render_value(s, dv_set_min, 0);
+                            obj["x"] = Helpers::render_value(s, dv_set_max, 0);
+                        }
                     }
                 }
             }
-        }
-    }
-}
-
-// reset all entities to being visible
-// this is called before loading in the exclude entities list from the customization service
-void EMSdevice::reset_exclude_entities() {
-    for (auto & dv : devicevalues_) {
-        dv.add_state(DeviceValueState::DV_VISIBLE);
-    }
-}
-
-// disable/exclude a device entity based on its unique id
-void EMSdevice::exclude_entity(uint8_t id) {
-    for (auto & dv : devicevalues_) {
-        if (dv.id == id) {
-#if defined(EMSESP_USE_SERIAL)
-            Serial.print("exclude_entity() Removing Visible for device value: ");
-            Serial.println(read_flash_string(dv.full_name).c_str());
-#endif
-            dv.remove_state(DeviceValueState::DV_VISIBLE); // this will remove from MQTT payloads and showing in web & console
-            return;
         }
     }
 }
 
 // as generate_values_web() but stripped down to only show all entities and their state
+// this is used only for WebCustomizationService::device_entities()
 void EMSdevice::generate_values_web_all(JsonArray & output) {
-    for (auto & dv : devicevalues_) {
+    for (const auto & dv : devicevalues_) {
         // also show commands and entities that have an empty full name
         JsonObject obj = output.createNestedObject();
 
         // create the value
         if (dv.hasValue()) {
-            // handle Booleans (true, false)
+            // handle Booleans (true, false), use strings, no native true/false)
             if (dv.type == DeviceValueType::BOOL) {
-                bool value_b = *(bool *)(dv.value_p);
-                if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                    obj["v"] = value_b;
-                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                bool value_b = (bool)*(uint8_t *)(dv.value_p);
+                if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
                     obj["v"] = value_b ? 1 : 0;
                 } else {
                     char s[7];
@@ -830,8 +860,9 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
                 obj["n"] = name;
             }
         } else {
-            obj["n"] = "(hidden)";
+            obj["n"] = "";
         }
+
         // shortname
         if (dv.tag >= DeviceValueTAG::TAG_HC1) {
             obj["s"] = tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
@@ -839,13 +870,44 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
             obj["s"] = dv.short_name;
         }
 
-        // is it marked as excluded?
-        obj["x"] = !dv.has_state(DeviceValueState::DV_VISIBLE);
-
-        // add the unique ID
-        obj["i"] = dv.id;
+        obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble
+        obj["w"] = dv.has_cmd;    // if writable
     }
 }
+
+// set mask per device entity based on the id which is prefixed with the 2 char hex mask value
+// returns true if the entity has a mask set (not 0 the default)
+void EMSdevice::mask_entity(const std::string & entity_id) {
+    for (auto & dv : devicevalues_) {
+        std::string entity_name =
+            dv.tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(dv.short_name) : tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
+        if (entity_name == entity_id.substr(2)) {
+            // this entity has a new mask set
+            uint8_t current_mask = dv.state >> 4;
+            uint8_t new_mask     = Helpers::hextoint(entity_id.substr(0, 2).c_str()); // first character contains mask flags
+            if (Mqtt::ha_enabled() && ((current_mask ^ new_mask) & (DeviceValueState::DV_READONLY >> 4))) {
+                // remove ha config on change of dv_readonly flag
+                dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                Mqtt::publish_ha_sensor_config(dv, "", "", true); // delete topic (remove = true)
+            }
+            dv.state = ((dv.state & 0x0F) | (new_mask << 4)); // set state high bits to flag
+            return;
+        }
+    }
+}
+
+// populate a string vector with entities that have masks set
+void EMSdevice::getMaskedEntities(std::vector<std::string> & entity_ids) {
+    for (auto & dv : devicevalues_) {
+        std::string entity_name =
+            dv.tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(dv.short_name) : tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
+        uint8_t mask = dv.state >> 4;
+        if (mask) {
+            entity_ids.push_back(Helpers::hextoa(mask, false) + entity_name);
+        }
+    }
+}
+
 
 // builds json for a specific device value / entity
 // cmd is the endpoint or name of the device entity
@@ -855,7 +917,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
     int8_t     tag  = id;
 
     // check if we have hc or wwc or hs
-    if (id >= 1 && id <= 29) {
+    if (id >= 1 && id <= 34) {
         tag = DeviceValueTAG::TAG_HC1 + id - 1;
     } else if (id != -1) {
         return false; // error
@@ -939,7 +1001,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
 
             case DeviceValueType::BOOL:
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
-                    auto value_b = (bool)(*(uint8_t *)(dv.value_p));
+                    bool value_b = (bool)*(uint8_t *)(dv.value_p);
                     if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                         json[value] = value_b;
                     } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
@@ -993,8 +1055,9 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                 json["uom"] = uom_to_string(dv.uom);
             }
 
-            json["writeable"] = dv.has_cmd;
-            json["visible"]   = dv.has_state(DeviceValueState::DV_VISIBLE);
+            json["readable"]  = !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE);
+            json["writeable"] = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
+            json["visible"]   = !dv.has_state(DeviceValueState::DV_WEB_EXCLUDE);
 
             // if there is no value, mention it
             if (!json.containsKey(value)) {
@@ -1038,14 +1101,11 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
 
         // check conditions:
         //  1. it must have a valid value (state is active)
-        //  2. it must have a visible, unless the output_target is MQTT
+        //  2. it must have a visible flag
         //  3. it must match the given tag filter or have an empty tag
-        bool conditions = ((tag_filter == DeviceValueTAG::TAG_NONE) || (tag_filter == dv.tag)) && dv.has_state(DeviceValueState::DV_ACTIVE);
-        //  4. for MQTT we want to always show the special HA entities (they have an empty fullname)
-        bool visible = ((dv.has_state(DeviceValueState::DV_VISIBLE)) || ((output_target == OUTPUT_TARGET::MQTT) && (!dv.full_name)));
-        conditions &= visible;
-
-        if (conditions) {
+        //  4. it must not have the exclude flag set or outputs to console
+        if (dv.has_state(DeviceValueState::DV_ACTIVE) && dv.full_name && (tag_filter == DeviceValueTAG::TAG_NONE || tag_filter == dv.tag)
+            && (output_target == OUTPUT_TARGET::CONSOLE || !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE))) {
             has_values = true; // flagged if we actually have data
 
             // we have a tag if it matches the filter given, and that the tag name is not empty/""
@@ -1053,7 +1113,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
 
             // create the name for the JSON key
             char name[80];
-            if (output_target == OUTPUT_TARGET::API_VERBOSE) {
+            if (output_target == OUTPUT_TARGET::API_VERBOSE || output_target == OUTPUT_TARGET::CONSOLE) {
                 if (have_tag) {
                     snprintf(name, 80, "%s %s", tag_to_string(dv.tag).c_str(), read_flash_string(dv.full_name).c_str()); // prefix the tag
                 } else {
@@ -1074,7 +1134,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             // handle Booleans
             if (dv.type == DeviceValueType::BOOL && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see how to render the value depending on the setting
-                auto value_b = (bool)*(uint8_t *)(dv.value_p);
+                bool value_b = (bool)*(uint8_t *)(dv.value_p);
                 if (Mqtt::ha_enabled() && (output_target == OUTPUT_TARGET::MQTT)) {
                     char s[7];
                     json[name] = Helpers::render_boolean(s, value_b); // for HA always render as string
@@ -1166,7 +1226,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     uint32_t time_value = *(uint32_t *)(dv.value_p);
                     time_value          = Helpers::round2(time_value, divider); // sometimes we need to divide by 60
-                    if (output_target == EMSdevice::OUTPUT_TARGET::API_VERBOSE) {
+                    if (output_target == OUTPUT_TARGET::API_VERBOSE || output_target == OUTPUT_TARGET::CONSOLE) {
                         char time_s[40];
                         snprintf(time_s,
                                  sizeof(time_s),
@@ -1193,12 +1253,12 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
     return has_values;
 }
 
-// remove the Home Assistant configs for each device value/entity if its not visible or active
+// remove the Home Assistant configs for each device value/entity if its not visible or active or marked as read-only
 // this is called when an MQTT publish is done via an EMS Device in emsesp.cpp::publish_device_values()
 void EMSdevice::mqtt_ha_entity_config_remove() {
     for (auto & dv : devicevalues_) {
         if (dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED)
-            && ((!dv.has_state(DeviceValueState::DV_VISIBLE)) || (!dv.has_state(DeviceValueState::DV_ACTIVE)))) {
+            && ((dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) || (!dv.has_state(DeviceValueState::DV_ACTIVE)))) {
             dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
             if (dv.short_name == FL_(climate)[0]) {
                 Mqtt::publish_ha_climate_config(dv.tag, false, true); // delete topic (remove = true)
@@ -1218,7 +1278,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
     // create climate if roomtemp is visible
     // create the discovery topic if if hasn't already been created, not a command (like reset) and is active and visible
     for (auto & dv : devicevalues_) {
-        if ((dv.short_name == FL_(climate)[0]) && dv.has_state(DeviceValueState::DV_VISIBLE) && dv.has_state(DeviceValueState::DV_ACTIVE)) {
+        if ((dv.short_name == FL_(climate)[0]) && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE) && dv.has_state(DeviceValueState::DV_ACTIVE)) {
             if (*(int8_t *)(dv.value_p) == 1 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
                 dv.remove_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
                 dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
@@ -1231,7 +1291,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
             }
         }
         if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && (dv.type != DeviceValueType::CMD) && dv.has_state(DeviceValueState::DV_ACTIVE)
-            && dv.has_state(DeviceValueState::DV_VISIBLE)) {
+            && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             // create_device_config is only done once for the EMS device. It can added to any entity, so we take the first
             Mqtt::publish_ha_sensor_config(dv, name(), brand_to_string(), false, create_device_config);
             dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);

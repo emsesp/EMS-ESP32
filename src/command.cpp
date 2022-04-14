@@ -281,7 +281,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
             return_code = ((cf->cmdfunction_json_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
         }
 
-        if (cf->cmdfunction_) {
+        if (cf->cmdfunction_ && !EMSESP::cmd_is_readonly(device_type, cmd, id)) {
             return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;
         }
 

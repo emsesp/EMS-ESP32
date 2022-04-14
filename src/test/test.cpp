@@ -595,8 +595,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::system_.healthcheck(n);
     }
 
-    if (command == "exclude") {
-        shell.printfln(F("Testing exclude entities"));
+    if (command == "masked") {
+        shell.printfln(F("Testing masked entities"));
 
         Mqtt::ha_enabled(true);
         Mqtt::send_response(false);
@@ -609,8 +609,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // toggle mode
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == 1) { // boiler
-                uint8_t entity_id = 47;        // wwseltemp
-                emsdevice->exclude_entity(entity_id);
+                std::string a = "07wwseltemp";
+                emsdevice->mask_entity(a);
                 break;
             }
         }

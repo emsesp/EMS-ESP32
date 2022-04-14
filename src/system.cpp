@@ -543,6 +543,18 @@ bool System::heartbeat_json(JsonObject & output) {
 
     output["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     output["uptime_sec"] = uuid::get_uptime_sec();
+    bool value_b         = EMSESP::system_.ntp_connected();
+    if (Mqtt::ha_enabled()) {
+        char s[7];
+        output["ntp_status"] = Helpers::render_boolean(s, value_b); // for HA always render as string
+    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+        output["ntp_status"] = value_b;
+    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+        output["ntp_status"] = value_b ? 1 : 0;
+    } else {
+        char s[7];
+        output["ntp_status"] = Helpers::render_boolean(s, value_b);
+    }
     output["rxreceived"] = EMSESP::rxservice_.telegram_count();
     output["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
     output["txreads"]    = EMSESP::txservice_.telegram_read_count();
@@ -949,6 +961,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["publish_time_other"]      = settings.publish_time_other;
         node["publish_time_sensor"]     = settings.publish_time_sensor;
         node["publish_single"]          = settings.publish_single;
+        node["publish_2_command"]       = settings.publish_single2cmd;
         node["send_response"]           = settings.send_response;
     });
 
@@ -1016,7 +1029,6 @@ bool System::command_customizations(const char * value, const int8_t id, JsonObj
 
     JsonObject node = output.createNestedObject("Customizations");
 
-    // hide ssid from this list
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         // sensors
         JsonArray sensorsJson = node.createNestedArray("sensors");
@@ -1051,16 +1063,16 @@ bool System::command_customizations(const char * value, const int8_t id, JsonObj
             }
         }
 
-        // exclude entities
-        JsonArray exclude_entitiesJson = node.createNestedArray("exclude_entities");
+        // masked entities
+        JsonArray mask_entitiesJson = node.createNestedArray("masked_entities");
         for (const auto & entityCustomization : settings.entityCustomizations) {
-            JsonObject entityJson    = exclude_entitiesJson.createNestedObject();
+            JsonObject entityJson    = mask_entitiesJson.createNestedObject();
             entityJson["product_id"] = entityCustomization.product_id;
             entityJson["device_id"]  = entityCustomization.device_id;
 
-            JsonArray exclude_entityJson = entityJson.createNestedArray("entity_ids");
-            for (uint8_t entity_id : entityCustomization.entity_ids) {
-                exclude_entityJson.add(entity_id);
+            JsonArray mask_entityJson = entityJson.createNestedArray("entities");
+            for (std::string entity_id : entityCustomization.entity_ids) {
+                mask_entityJson.add(entity_id);
             }
         }
     });
@@ -1079,6 +1091,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["version"]          = EMSESP_APP_VERSION;
     node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptime (seconds)"] = uuid::get_uptime_sec();
+    node["network time"]     = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
 
 #ifndef EMSESP_STANDALONE
     node["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes
@@ -1191,7 +1204,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
                 obj["product id"] = emsdevice->product_id();
                 obj["version"]    = emsdevice->version();
                 obj["entities"]   = emsdevice->count_entities();
-                char result[250];
+                char result[300];
                 (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
                 if (result[0] != '\0') {
                     obj["handlers received"] = result; // don't show handlers if there aren't any
@@ -1203,6 +1216,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
                 (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::PENDING);
                 if (result[0] != '\0') {
                     obj["handlers pending"] = result;
+                }
+                (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::IGNORED);
+                if (result[0] != '\0') {
+                    obj["handlers ignored"] = result;
                 }
             }
         }
@@ -1319,6 +1336,15 @@ std::string System::reset_reason(uint8_t cpu) const {
     }
 #endif
     return ("Unkonwn");
+}
+
+// set NTP status
+void System::ntp_connected(bool b) {
+    if (b != ntp_connected_) {
+        LOG_INFO(b ? F("NTP connected") : F("NTP disconnected"));
+    }
+    ntp_connected_  = b;
+    ntp_last_check_ = b ? uuid::get_uptime_sec() : 0;
 }
 
 } // namespace emsesp

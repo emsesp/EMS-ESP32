@@ -37,6 +37,10 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SendIcon from '@mui/icons-material/TrendingFlat';
 import SaveIcon from '@mui/icons-material/Save';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
+import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 
 import DeviceIcon from './DeviceIcon';
 
@@ -62,7 +66,8 @@ import {
   AnalogType,
   AnalogTypeNames,
   Sensor,
-  Analog
+  Analog,
+  DeviceEntityMask
 } from './types';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -153,6 +158,8 @@ const DashboardData: FC = () => {
     }
   };
 
+  const isCmdOnly = (dv: DeviceValue) => dv.v === undefined && dv.c;
+
   function formatValue(value: any, uom: number) {
     if (value === undefined) {
       return '';
@@ -213,12 +220,12 @@ const DashboardData: FC = () => {
     if (deviceValue) {
       return (
         <Dialog open={deviceValue !== undefined} onClose={() => setDeviceValue(undefined)}>
-          <DialogTitle>Change Value</DialogTitle>
+          <DialogTitle>{isCmdOnly(deviceValue) ? 'Run Command' : 'Change Value'}</DialogTitle>
           <DialogContent dividers>
             {deviceValue.l && (
               <ValidatedTextField
                 name="v"
-                label={deviceValue.n}
+                label={deviceValue.n.slice(2)}
                 value={deviceValue.v}
                 autoFocus
                 sx={{ width: '30ch' }}
@@ -233,13 +240,13 @@ const DashboardData: FC = () => {
             {!deviceValue.l && (
               <ValidatedTextField
                 name="v"
-                label={deviceValue.n}
+                label={deviceValue.n.slice(2)}
                 value={deviceValue.u ? numberValue(deviceValue.v) : deviceValue.v}
                 autoFocus
                 sx={{ width: '30ch' }}
                 type={deviceValue.u ? 'number' : 'text'}
                 onChange={updateValue(setDeviceValue)}
-                inputProps={{ step: deviceValue.s }}
+                inputProps={deviceValue.u ? { min: deviceValue.m, max: deviceValue.x, step: deviceValue.s } : {}}
                 InputProps={{
                   startAdornment: <InputAdornment position="start">{DeviceValueUOM_s[deviceValue.u]}</InputAdornment>
                 }}
@@ -485,26 +492,24 @@ const DashboardData: FC = () => {
       return;
     }
 
+    const hasMask = (entityName: string, mask: number) => (parseInt(entityName.slice(0, 2), 16) & mask) === mask;
+
     const sendCommand = (dv: DeviceValue) => {
-      if (dv.c && me.admin) {
+      if (dv.c && me.admin && !hasMask(dv.n, DeviceEntityMask.DV_READONLY)) {
         setDeviceValue(dv);
       }
     };
 
-    const renderNameCell = (dv: DeviceValue) => {
-      if (dv.v === undefined && dv.c) {
-        return (
-          <StyledTableCell component="th" scope="row" sx={{ color: 'yellow' }}>
-            command:&nbsp;{dv.n}
-          </StyledTableCell>
-        );
-      }
-      return (
-        <StyledTableCell component="th" scope="row">
-          {dv.n}
-        </StyledTableCell>
-      );
-    };
+    const renderNameCell = (dv: DeviceValue) => (
+      <>
+        {dv.n.slice(2)}&nbsp;
+        {hasMask(dv.n, DeviceEntityMask.DV_FAVORITE) && <FavoriteBorderIcon color="success" sx={{ fontSize: 12 }} />}
+        {hasMask(dv.n, DeviceEntityMask.DV_READONLY) && <EditOffOutlinedIcon color="primary" sx={{ fontSize: 12 }} />}
+        {hasMask(dv.n, DeviceEntityMask.DV_API_MQTT_EXCLUDE) && (
+          <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
+        )}
+      </>
+    );
 
     return (
       <>
@@ -515,7 +520,7 @@ const DashboardData: FC = () => {
           <TableHead>
             <TableRow>
               <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
-              <StyledTableCell align="left">ENTITY NAME/COMMAND</StyledTableCell>
+              <StyledTableCell align="left">ENTITY NAME</StyledTableCell>
               <StyledTableCell align="right">VALUE</StyledTableCell>
             </TableRow>
           </TableHead>
@@ -523,14 +528,18 @@ const DashboardData: FC = () => {
             {deviceData.data.map((dv, i) => (
               <StyledTableRow key={i} onClick={() => sendCommand(dv)}>
                 <StyledTableCell padding="checkbox">
-                  {dv.c && me.admin && (
-                    <IconButton size="small" aria-label="Edit">
+                  {dv.c && me.admin && !hasMask(dv.n, DeviceEntityMask.DV_READONLY) && (
+                    <IconButton size="small">
                       <EditIcon color="primary" fontSize="small" />
                     </IconButton>
                   )}
                 </StyledTableCell>
-                {renderNameCell(dv)}
-                <StyledTableCell align="right">{formatValue(dv.v, dv.u)}</StyledTableCell>
+                <StyledTableCell component="th" scope="row">
+                  {renderNameCell(dv)}
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  {isCmdOnly(dv) ? <PlayArrowIcon color="primary" sx={{ fontSize: 14 }} /> : formatValue(dv.v, dv.u)}
+                </StyledTableCell>
               </StyledTableRow>
             ))}
           </TableBody>
@@ -569,7 +578,7 @@ const DashboardData: FC = () => {
             <StyledTableRow key={sensor_data.n} onClick={() => updateSensor(sensor_data)}>
               <StyledTableCell padding="checkbox">
                 {me.admin && (
-                  <IconButton edge="start" size="small" aria-label="Edit">
+                  <IconButton edge="start" size="small">
                     <EditIcon color="primary" fontSize="small" />
                   </IconButton>
                 )}
@@ -605,7 +614,7 @@ const DashboardData: FC = () => {
             <StyledTableRow key={analog_data.i} onClick={() => updateAnalog(analog_data)}>
               <StyledTableCell padding="checkbox">
                 {me.admin && (
-                  <IconButton edge="start" size="small" aria-label="Edit">
+                  <IconButton edge="start" size="small">
                     <EditIcon color="primary" fontSize="small" />
                   </IconButton>
                 )}

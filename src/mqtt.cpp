@@ -386,6 +386,10 @@ void Mqtt::on_publish(uint16_t packetId) const {
 
 // called when MQTT settings have changed via the Web forms
 void Mqtt::reset_mqtt() {
+    if (!mqtt_enabled_) {
+        mqtt_messages_.clear();
+    }
+
     if (!mqttClient_) {
         return;
     }
@@ -648,6 +652,7 @@ void Mqtt::ha_status() {
     }
     publish_system_ha_sensor_config(DeviceValueType::INT, F("Uptime"), F("uptime"), DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, F("Uptime (sec)"), F("uptime_sec"), DeviceValueUOM::SECONDS);
+    publish_system_ha_sensor_config(DeviceValueType::BOOL, F("NTP status"), F("ntp_status"), DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, F("Free memory"), F("freemem"), DeviceValueUOM::KB);
     publish_system_ha_sensor_config(DeviceValueType::INT, F("MQTT fails"), F("mqttfails"), DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, F("Rx received"), F("rxreceived"), DeviceValueUOM::NONE);
@@ -918,6 +923,10 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
     int16_t dv_set_min, dv_set_max;
     (void)dv.get_min_max(dv_set_min, dv_set_max);
 
+    // determine if we're creating the command topics which we use special HA configs
+    // unless the entity has been marked as read-only and so it'll default to using the sensor/ type
+    bool has_cmd = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
+
     publish_ha_sensor_config(dv.type,
                              dv.tag,
                              dv.full_name,
@@ -925,7 +934,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
                              dv.short_name,
                              dv.uom,
                              remove,
-                             dv.has_cmd,
+                             has_cmd,
                              dv.options,
                              dv.options_size,
                              dv_set_min,
@@ -988,7 +997,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     // create the topic, depending on the type and whether the device entity is writable (a command)
     // https://developers.home-assistant.io/docs/core/entity
     char topic[MQTT_TOPIC_MAX_SIZE];
-    // if it's a command then we can use Number, Switch. Otherwise stick to Sensor
+    // if it's a command then we can use Number, Switch, Select. Otherwise stick to Sensor
     if (has_cmd) {
         switch (type) {
         case DeviceValueType::INT:
@@ -996,13 +1005,13 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
         case DeviceValueType::SHORT:
         case DeviceValueType::USHORT:
         case DeviceValueType::ULONG:
-            // number - https://www.home-assistant.io/integrations/number.mqtt/
+            // number - https://www.home-assistant.io/integrations/number.mqtt
             // https://developers.home-assistant.io/docs/core/entity/number
 
             snprintf(topic, sizeof(topic), "number/%s/%s/config", mqtt_base_.c_str(), uniq);
             break;
         case DeviceValueType::BOOL:
-            // switch - https://www.home-assistant.io/integrations/switch.mqtt/
+            // switch - https://www.home-assistant.io/integrations/switch.mqtt
             snprintf(topic, sizeof(topic), "switch/%s/%s/config", mqtt_base_.c_str(), uniq);
             break;
         case DeviceValueType::ENUM:

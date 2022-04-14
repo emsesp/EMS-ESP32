@@ -105,6 +105,15 @@ void EMSESP::fetch_device_values_type(const uint8_t device_type) {
     }
 }
 
+bool EMSESP::cmd_is_readonly(const uint8_t device_type, const char * cmd, const int8_t id) {
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice && (emsdevice->device_type() == device_type)) {
+            return emsdevice->is_readonly(cmd, id);
+        }
+    }
+    return false;
+}
+
 // clears list of recognized devices
 void EMSESP::clear_all_devices() {
     // temporarily removed: clearing the list causes a crash, the associated commands and mqtt should also be removed.
@@ -308,7 +317,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                 DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN); // use max size
                 JsonObject          json = doc.to<JsonObject>();
 
-                emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::API_VERBOSE); // verbose mode and nested
+                emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::CONSOLE); // verbose mode and nested
 
                 // print line
                 uint8_t id = 0;
@@ -845,6 +854,9 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
             if (wait_validate_ == telegram->type_id) {
                 wait_validate_ = 0;
             }
+            if (!found && emsdevice->is_device_id(telegram->src) && telegram->message_length > 0) {
+                emsdevice->add_handlers_ignored(telegram->type_id);
+            }
             break;
         }
     }
@@ -1090,7 +1102,7 @@ bool EMSESP::command_commands(uint8_t device_type, JsonObject & output, const in
 bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
     bool    has_value = false;
     uint8_t tag;
-    if (id >= 1 && id <= 29) {
+    if (id >= 1 && id <= 34) {
         tag = DeviceValueTAG::TAG_HC1 + id - 1; // this sets also WWC and HS
     } else if (id == -1 || id == 0) {
         tag = DeviceValueTAG::TAG_NONE;

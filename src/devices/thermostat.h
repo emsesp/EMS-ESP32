@@ -62,12 +62,16 @@ class Thermostat : public EMSdevice {
         uint8_t minflowtemp;
         uint8_t maxflowtemp;
         uint8_t reducemode;
+        uint8_t nofrostmode;
         uint8_t program;
         uint8_t controlmode;
         uint8_t control;
         uint8_t pause;
         uint8_t party;
         int8_t  noreducetemp; // signed -20°C to +10°C
+        int8_t  reducetemp;
+        int8_t  vacreducetemp;
+        uint8_t vacreducemode;
         uint8_t wwprio;
         uint8_t fastHeatup;
         char    holiday[26];
@@ -120,6 +124,8 @@ class Thermostat : public EMSdevice {
             ROOMINFLUENCE,
             TEMPAUTO,
             NOREDUCE,
+            REDUCE,
+            VACREDUCE,
             ON,
             DAYLOW,
             DAYMID,
@@ -176,6 +182,11 @@ class Thermostat : public EMSdevice {
     uint8_t ibaDamping_;           // damping 0-off, 0xff-on
     uint8_t backlight_;
     uint8_t heatingpid_;
+    int8_t  brightness_;   // Screen brightness 0F=dark F1=light
+    uint8_t preheating_;   // Preheating in the clock program: (0x00 = off, 0xFF = on)
+    uint8_t autodst_;      // Automatic change Daylight Saving time: (0x00 = off, 0xFF = on)
+    uint8_t offtemp_;      // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
+    uint8_t mixingvalves_; // Number of Mixing Valves: (0x00=0, 0x01=1, 0x02=2)
 
     int8_t   dampedoutdoortemp_;
     uint16_t tempsensor1_;
@@ -204,6 +215,15 @@ class Thermostat : public EMSdevice {
     char    wwCircSwitchTime_[16];
     uint8_t wwDailyHeating_;
     uint8_t wwDailyHeatTime_;
+
+    // HybridHP
+    uint8_t hybridStrategy_;  // co2 = 1, cost = 2, temperature = 3, mix = 4
+    int8_t  switchOverTemp_;  // degrees
+    uint8_t energyCostRatio_; // is *10
+    uint8_t fossileFactor_;   // is * 10
+    uint8_t electricFactor_;  // is * 10
+    uint8_t delayBoiler_;     // minutes
+    uint8_t tempDiffBoiler_;  // relative temperature degrees
 
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
 
@@ -245,6 +265,12 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC35Set_targetflowtemp     = 14; // target flow temperature
     static constexpr uint8_t EMS_OFFSET_RC35Set_seltemp            = 37; // selected temp
     static constexpr uint8_t EMS_OFFSET_RC35Set_noreducetemp       = 38; // temp to stop reducing
+    static constexpr uint8_t EMS_OFFSET_RC35Set_reducetemp         = 39; // temp reducing/hold
+    static constexpr uint8_t EMS_OFFSET_RC35Set_vacreducetemp      = 40; // temp reducing/hold in vacations
+    static constexpr uint8_t EMS_OFFSET_RC35Set_vacreducemode      = 41; // reduce mode in vacations
+    static constexpr uint8_t EMS_OFFSET_RC35Set_reducemode         = 25; // reduce mode in normal operation
+    static constexpr uint8_t EMS_OFFSET_RC35Set_nofrostmode        = 28; // 0-off, 1-room, 2-outdoor
+    static constexpr uint8_t EMS_OFFSET_RC35Set_control            = 26; // 0-off, 1-RC20, 2-RC3x
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_offset        = 6;
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_flowoffset    = 24;
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_design        = 17;
@@ -283,9 +309,10 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t AUTO_HEATING_CIRCUIT = 0;
 
     // Installation settings
-    static constexpr uint8_t EMS_TYPE_IBASettings = 0xA5; // installation settings
-    static constexpr uint8_t EMS_TYPE_wwSettings  = 0x37; // ww settings
-    static constexpr uint8_t EMS_TYPE_time        = 0x06; // time
+    static constexpr uint8_t EMS_TYPE_IBASettings  = 0xA5; // installation settings
+    static constexpr uint8_t EMS_TYPE_RC30Settings = 0xA7; // RC30 settings
+    static constexpr uint8_t EMS_TYPE_wwSettings   = 0x37; // ww settings
+    static constexpr uint8_t EMS_TYPE_time         = 0x06; // time
 
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
@@ -333,6 +360,8 @@ class Thermostat : public EMSdevice {
     void process_JunkersSet2(std::shared_ptr<const Telegram> telegram);
     void process_EasyMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersRemoteMonitor(std::shared_ptr<const Telegram> telegram);
+    void process_JunkersHybridSettings(std::shared_ptr<const Telegram> telegram);
+    void process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram);
 
     // internal helper functions
     bool set_mode_n(const uint8_t mode, const uint8_t hc_num);
@@ -368,6 +397,11 @@ class Thermostat : public EMSdevice {
     bool set_manualtemp(const char * value, const int8_t id);
     bool set_tempautotemp(const char * value, const int8_t id);
     bool set_noreducetemp(const char * value, const int8_t id);
+    bool set_reducetemp(const char * value, const int8_t id);
+    bool set_vacreducetemp(const char * value, const int8_t id);
+    bool set_vacreducemode(const char * value, const int8_t id);
+    bool set_nofrostmode(const char * value, const int8_t id);
+
     bool set_remotetemp(const char * value, const int8_t id);
     bool set_roominfluence(const char * value, const int8_t id);
     bool set_roominfl_factor(const char * value, const int8_t id);
@@ -413,6 +447,19 @@ class Thermostat : public EMSdevice {
     bool set_reducehours(const char * value, const int8_t id);
     bool set_backlight(const char * value, const int8_t id);
     bool set_heatingpid(const char * value, const int8_t id);
+    bool set_brightness(const char * value, const int8_t id);
+    bool set_autodst(const char * value, const int8_t id);
+    bool set_preheating(const char * value, const int8_t id);
+    bool set_mixingvalves(const char * value, const int8_t id);
+    bool set_offtemp(const char * value, const int8_t id);
+
+    bool set_hybridStrategy(const char * value, const int8_t id);
+    bool set_switchOverTemp(const char * value, const int8_t id);
+    bool set_energyCostRatio(const char * value, const int8_t id);
+    bool set_fossileFactor(const char * value, const int8_t id);
+    bool set_electricFactor(const char * value, const int8_t id);
+    bool set_delayBoiler(const char * value, const int8_t id);
+    bool set_tempDiffBoiler(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

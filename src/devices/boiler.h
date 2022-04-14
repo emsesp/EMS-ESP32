@@ -125,9 +125,10 @@ class Boiler : public EMSdevice {
     uint8_t  setBurnPow_;        // max output power in %
     uint32_t burnStarts_;        // burner restarts
     uint32_t burnWorkMin_;       // Total burner operating time
+    uint32_t burn2WorkMin_;      // burner stage 2 operating time
     uint32_t heatWorkMin_;       // Total heat operating time
     uint32_t UBAuptime_;         // Total UBA working hours
-    char     lastCode_[75];      // last error code
+    char     lastCode_[50];      // last error code
     char     serviceCode_[4];    // 3 character status/service code
     uint16_t serviceCodeNumber_; // error/service code
 
@@ -192,6 +193,17 @@ class Boiler : public EMSdevice {
     // Pool unit
     int8_t poolSetTemp_;
 
+    /*
+    // HybridHP
+    uint8_t hybridStrategy_;  // cost = 2, temperature = 3, mix = 4
+    int8_t  switchOverTemp_;  // degrees
+    uint8_t energyCostRatio_; // is *10
+    uint8_t fossileFactor_;   // is * 10
+    uint8_t electricFactor_;  // is * 10
+    uint8_t delayBoiler_;     // minutes
+    uint8_t tempDiffBoiler_;  // relative temperature degrees
+    */
+
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
     void process_UBATotalUptime(std::shared_ptr<const Telegram> telegram);
@@ -209,6 +221,7 @@ class Boiler : public EMSdevice {
     void process_MC110Status(std::shared_ptr<const Telegram> telegram);
     void process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram);
     void process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram);
+    void process_ErrorMessage(std::shared_ptr<const Telegram> telegram);
     void process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram);
     void process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram);
@@ -219,6 +232,7 @@ class Boiler : public EMSdevice {
     void process_HpPower(std::shared_ptr<const Telegram> telegram);
     void process_HpOutdoor(std::shared_ptr<const Telegram> telegram);
     void process_HpPool(std::shared_ptr<const Telegram> telegram);
+    void process_HybridHp(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
     bool set_ww_mode(const char * value, const int8_t id);
@@ -254,6 +268,15 @@ class Boiler : public EMSdevice {
     bool set_ww_hyst_on(const char * value, const int8_t id);
     bool set_ww_hyst_off(const char * value, const int8_t id);
     bool set_pool_temp(const char * value, const int8_t id);
+    /*
+    bool set_hybridStrategy(const char * value, const int8_t id);
+    bool set_switchOverTemp(const char * value, const int8_t id);
+    bool set_energyCostRatio(const char * value, const int8_t id);
+    bool set_fossileFactor(const char * value, const int8_t id);
+    bool set_electricFactor(const char * value, const int8_t id);
+    bool set_delayBoiler(const char * value, const int8_t id);
+    bool set_tempDiffBoiler(const char * value, const int8_t id);
+    */
 };
 
 } // namespace emsesp

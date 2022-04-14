@@ -189,12 +189,6 @@ char * Helpers::render_boolean(char * result, bool value) {
     return result;
 }
 
-// // render for native char strings
-// char * Helpers::render_value(char * result, const char * value, const int8_t format __attribute__((unused))) {
-//     strcpy(result, value); // un-safe but we don't care
-//     return result;
-// }
-
 // convert unsigned int (single byte) to text value and returns it
 // format: 255(0xFF)=boolean, 0=no formatting, otherwise divide by format
 char * Helpers::render_value(char * result, uint8_t value, int8_t format, const uint8_t fahrenheit) {

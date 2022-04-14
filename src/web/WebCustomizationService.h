@@ -27,7 +27,7 @@
 
 // POST
 #define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
-#define EXCLUDE_ENTITIES_PATH "/rest/excludeEntities"
+#define MASKED_ENTITIES_PATH "/rest/maskedEntities"
 #define RESET_CUSTOMIZATION_SERVICE_PATH "/rest/resetCustomizations"
 
 namespace emsesp {
@@ -61,19 +61,18 @@ class AnalogCustomization {
 // we use product_id and device_id to make the device unique
 class EntityCustomization {
   public:
-    uint8_t              product_id; // device's product id
-    uint8_t              device_id;  // device's device id
-    std::vector<uint8_t> entity_ids; // array of entity ids to exclude
+    uint8_t                  product_id; // device's product id
+    uint8_t                  device_id;  // device's device id
+    std::vector<std::string> entity_ids; // array of entity ids with masks
 };
 
 class WebCustomization {
   public:
     std::list<SensorCustomization> sensorCustomizations; // for sensor names and offsets
     std::list<AnalogCustomization> analogCustomizations; // for analog sensors
-    std::list<EntityCustomization> entityCustomizations; // for a list of entities that should be excluded from the device list
-
-    static void              read(WebCustomization & settings, JsonObject & root);
-    static StateUpdateResult update(JsonObject & root, WebCustomization & settings);
+    std::list<EntityCustomization> entityCustomizations; // for a list of entities that have a special mask set
+    static void                    read(WebCustomization & settings, JsonObject & root);
+    static StateUpdateResult       update(JsonObject & root, WebCustomization & settings);
 };
 
 class WebCustomizationService : public StatefulService<WebCustomization> {
@@ -94,11 +93,11 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
     void devices(AsyncWebServerRequest * request);
 
     // POST
-    void exclude_entities(AsyncWebServerRequest * request, JsonVariant & json);
+    void masked_entities(AsyncWebServerRequest * request, JsonVariant & json);
     void device_entities(AsyncWebServerRequest * request, JsonVariant & json);
     void reset_customization(AsyncWebServerRequest * request);
 
-    AsyncCallbackJsonWebHandler _exclude_entities_handler, _device_entities_handler;
+    AsyncCallbackJsonWebHandler _masked_entities_handler, _device_entities_handler;
 };
 
 } // namespace emsesp

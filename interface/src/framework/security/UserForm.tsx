@@ -46,7 +46,7 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
   };
 
   return (
-    <Dialog onClose={onCancelEditing} aria-labelledby="user-form-dialog-title" open={!!user} fullWidth maxWidth="sm">
+    <Dialog onClose={onCancelEditing} open={!!user} fullWidth maxWidth="sm">
       {user && (
         <>
           <DialogTitle id="user-form-dialog-title">{creating ? 'Add' : 'Modify'} User</DialogTitle>

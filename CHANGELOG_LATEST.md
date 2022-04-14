@@ -26,6 +26,15 @@
 - remove MQTT retained configs if discovery is disabled
 - timeout 10 min for MQTT-QoS wait
 - Moduline 300 auto-temperatures T1-T4, RC300 romminfluencefactor
+- RC35 parameters [#392](https://github.com/emsesp/EMS-ESP32/issues/392), [#398](https://github.com/emsesp/EMS-ESP32/issues/398)
+- sync time with thermostat [#386](https://github.com/emsesp/EMS-ESP32/issues/386), [#408](https://github.com/emsesp/EMS-ESP32/issues/408)
+- set mode has immediate effect [#395](https://github.com/emsesp/EMS-ESP32/issues/395)
+- min/max in web value setting
+- Extend customization to select if an entity is to be shown in the WebUI or forced as read-only [#317](https://github.com/emsesp/EMS-ESP32/issues/317)
+- Added Moduline 400 installation parameters [PR #449 by @kwertie01](https://github.com/emsesp/EMS-ESP32/pull/449)
+- Read time from IVT-controller [#439](https://github.com/emsesp/EMS-ESP32/issues/439)
+- Hybrid Heatpump product-id 168 [#459](https://github.com/emsesp/EMS-ESP32/issues/459), thermostat settings
+- Junkers ISM2 and IPM in warm water mode [#437](https://github.com/emsesp/EMS-ESP32/issues/437)
 
 ### Fixed
 
@@ -43,6 +52,7 @@
 - Non-nested MQTT would corrupt the json [#354](https://github.com/emsesp/EMS-ESP32/issues/354)
 - Burner selected max power can have a value higher than 100% [#314](https://github.com/emsesp/EMS-ESP32/issues/314)
 - some missing fahrenheit calculations
+- limited number of exclusions [#339](https://github.com/emsesp/EMS-ESP32/issues/339)
 
 ### Changed
 
@@ -59,6 +69,9 @@
 - removed system/pin command, new commands in analogsensors
 - system/info device-info split to name/version/brand
 - remove master-thermostat
+- exclude list uses short-names, possible flags for web/api/mqtt excludes, readonly and favorite (selection not yet implemented)
+- thermostat clock formate date-time: dd.mm.yyyy hh:mm
+- RC300 summermode as other thermostats `winter/summer` instead of `off/on`
 
 ## **BREAKING CHANGES:**
 

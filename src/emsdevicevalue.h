@@ -90,6 +90,12 @@ class DeviceValue {
         TAG_WWC2,
         TAG_WWC3,
         TAG_WWC4,
+        TAG_WWC5,
+        TAG_WWC6,
+        TAG_WWC7,
+        TAG_WWC8,
+        TAG_WWC9,
+        TAG_WWC10,
         TAG_HS1,
         TAG_HS2,
         TAG_HS3,
@@ -110,11 +116,17 @@ class DeviceValue {
 
     // states of a device value
     enum DeviceValueState : uint8_t {
+        // low nibble active state of the device value
         DV_DEFAULT           = 0,        // 0 - does not yet have a value
         DV_ACTIVE            = (1 << 0), // 1 - has a validated real value
-        DV_VISIBLE           = (1 << 1), // 2 - shown on web, console and on MQTT payload. Otherwise hidden
-        DV_HA_CONFIG_CREATED = (1 << 2), // 4 - set if the HA config topic has been created
-        DV_HA_CLIMATE_NO_RT  = (1 << 3)  // 8 - climate created without roomTemp
+        DV_HA_CONFIG_CREATED = (1 << 1), // 2 - set if the HA config topic has been created
+        DV_HA_CLIMATE_NO_RT  = (1 << 2), // 4 - climate created without roomTemp
+
+        // high nibble as mask for exclusions & special functions
+        DV_WEB_EXCLUDE      = (1 << 4), // 16 - not shown on web
+        DV_API_MQTT_EXCLUDE = (1 << 5), // 32 - not shown on mqtt, API
+        DV_READONLY         = (1 << 6), // 64 - read only
+        DV_FAVORITE         = (1 << 7)  // 128 - sort to front
     };
 
     uint8_t                             device_type;  // EMSdevice::DeviceType
@@ -131,7 +143,6 @@ class DeviceValue {
     int16_t                             min;          // min range
     uint16_t                            max;          // max range
     uint8_t                             state;        // DeviceValueState::*
-    uint8_t                             id;           // internal unique counter
 
     DeviceValue(uint8_t                             device_type,
                 uint8_t                             tag,
@@ -146,8 +157,7 @@ class DeviceValue {
                 bool                                has_cmd,
                 int16_t                             min,
                 uint16_t                            max,
-                uint8_t                             state,
-                uint8_t                             id)
+                uint8_t                             state)
         : device_type(device_type)
         , tag(tag)
         , value_p(value_p)
@@ -161,24 +171,23 @@ class DeviceValue {
         , has_cmd(has_cmd)
         , min(min)
         , max(max)
-        , state(state)
-        , id(id) {
+        , state(state) {
     }
 
-    bool hasValue();
+    bool hasValue() const;
     bool get_min_max(int16_t & dv_set_min, int16_t & dv_set_max);
 
     // state flags
-    inline void add_state(uint8_t s) {
+    void add_state(uint8_t s) {
         state |= s;
     }
-    inline bool has_state(uint8_t s) const {
+    bool has_state(uint8_t s) const {
         return (state & s) == s;
     }
-    inline void remove_state(uint8_t s) {
+    void remove_state(uint8_t s) {
         state &= ~s;
     }
-    inline uint8_t get_state() const {
+    uint8_t get_state() const {
         return state;
     }
 

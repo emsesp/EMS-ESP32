@@ -130,8 +130,10 @@ export interface DeviceValue {
   n: string; // name
   c: string; // command
   l: string[]; // list
-  h?: string; // help text
-  s?: string; // steps for up/down
+  h?: string; // help text, optional
+  s?: string; // steps for up/down, optional
+  m?: string; // min, optional
+  x?: string; // max, optional
 }
 
 export interface DeviceData {
@@ -143,13 +145,14 @@ export interface DeviceEntity {
   v?: any; // value, in any format
   n: string; // name
   s: string; // shortname
-  x: boolean; // excluded flag
-  i: number; // unique id
+  m: number; // mask
+  om?: number; // original mask before edits
+  w: boolean; // writeable
 }
 
-export interface ExcludeEntities {
+export interface MaskedEntities {
   id: number;
-  entity_ids: number[];
+  entity_ids: string[];
 }
 
 export interface UniqueID {
@@ -279,4 +282,12 @@ export interface WriteAnalog {
   offset: number;
   uom: number;
   type: number;
+}
+
+export enum DeviceEntityMask {
+  DV_DEFAULT = 0,
+  DV_WEB_EXCLUDE = 1,
+  DV_API_MQTT_EXCLUDE = 2,
+  DV_READONLY = 4,
+  DV_FAVORITE = 8
 }
