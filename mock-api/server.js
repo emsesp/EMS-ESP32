@@ -410,10 +410,10 @@ const emsesp_sensordata = {
   ],
   // sensors: [],
   analogs: [
-    { id: '36', n: 'motor', u: 0, o: 17, f: 0, t: 0 },
-    { id: '37', n: 'External switch', v: 13, u: 0, o: 17, f: 0, t: 1 },
-    { id: '39', n: 'Pulse count', v: 144, u: 0, o: 0, f: 0, t: 2 },
-    { id: '40', n: 'Pressure', v: 16, u: 17, o: 0, f: 0, t: 3 },
+    { id: '36', i: 36, n: 'motor', v: 0, u: 0, o: 17, f: 0, t: 0 },
+    { id: '37', i: 37, n: 'External switch', v: 13, u: 0, o: 17, f: 0, t: 1 },
+    { id: '39', i: 39, n: 'Pulse count', v: 144, u: 0, o: 0, f: 0, t: 2 },
+    { id: '40', i: 40, n: 'Pressure', v: 16, u: 17, o: 0, f: 0, t: 3 },
   ],
   // analogs: [],
 }
@@ -485,7 +485,7 @@ const emsesp_devicedata_1 = {
 const emsesp_devicedata_2 = {
   label: 'Boiler: Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i',
   data: [
-    { u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
+    { v: 0, u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
     { v: 'false', u: 0, id: '08heating active' },
     { v: 'false', u: 0, id: '04tapwater active' },
     { v: 5, u: 1, id: '04selected flow temperature', c: 'selflowtemp' },
@@ -872,7 +872,6 @@ rest_server.get(EMSESP_CORE_DATA_ENDPOINT, (req, res) => {
 })
 rest_server.get(EMSESP_SENSOR_DATA_ENDPOINT, (req, res) => {
   console.log('send back sensor data...')
-
   res.json(emsesp_sensordata)
 })
 rest_server.get(EMSESP_DEVICES_ENDPOINT, (req, res) => {
@@ -996,12 +995,13 @@ rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
   const analog = req.body
   console.log('Write analog: ' + JSON.stringify(analog))
-  objIndex = emsesp_sensordata.analogs.findIndex((obj) => obj.id == analog.id)
+  objIndex = emsesp_sensordata.analogs.findIndex((obj) => obj.i == analog.i)
 
   if (objIndex === -1) {
     console.log('new analog')
     emsesp_sensordata.analogs.push({
-      id: analog.id,
+      id: analog.i.toString(),
+      i: analog.i,
       n: analog.name,
       f: analog.factor,
       o: analog.offset,
@@ -1010,9 +1010,10 @@ rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
     })
   } else {
     if (analog.type === -1) {
-      console.log('removing analog ' + analog.id)
+      console.log('removing analog ' + analog.i)
       emsesp_sensordata.analogs[objIndex].t = -1
     } else {
+      console.log('updating analog ' + analog.i)
       emsesp_sensordata.analogs[objIndex].n = analog.name
       emsesp_sensordata.analogs[objIndex].o = analog.offset
       emsesp_sensordata.analogs[objIndex].f = analog.factor

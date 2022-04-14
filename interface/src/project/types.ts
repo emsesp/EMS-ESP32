@@ -88,9 +88,10 @@ export interface Sensor {
 }
 
 export interface Analog {
-  id: string; // id string, is GPIO
+  id: string; // id string
+  i: number; // GPIO
   n: string;
-  v?: number;
+  v: number; // is optional
   u: number;
   o: number;
   f: number;
@@ -127,10 +128,10 @@ export interface Devices {
 
 export interface DeviceValue {
   id: string; // index, contains mask+name
-  v?: any; // value, in any format
+  v: any; // value, in any format
   u: number; // uom
-  c?: string; // command
-  l?: string[]; // list
+  c?: string; // command, optional
+  l?: string[]; // list, optional
   h?: string; // help text, optional
   s?: string; // steps for up/down, optional
   m?: string; // min, optional
@@ -277,7 +278,7 @@ export interface WriteValue {
 }
 
 export interface WriteAnalog {
-  id: string;
+  i: number;
   name: string;
   factor: number;
   offset: number;

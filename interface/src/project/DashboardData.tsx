@@ -24,10 +24,11 @@ import { useSnackbar } from 'notistack';
 
 import { Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { useSort, HeaderCellSort } from '@table-library/react-table-library/sort';
+import { useSort } from '@table-library/react-table-library/sort';
 import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useRowSelect } from '@table-library/react-table-library/select';
 
+import DownloadIcon from '@mui/icons-material/GetApp';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import EditIcon from '@mui/icons-material/Edit';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -98,8 +99,8 @@ const DashboardData: FC = () => {
       }
   `,
     HeaderRow: `
+      text-transform: uppercase;
       background-color: black;
-      font-size: 14px;
       border-bottom: 1px solid #e0e0e0;
     `,
     Row: `
@@ -165,8 +166,9 @@ const DashboardData: FC = () => {
       height: 32px;
   `,
     HeaderRow: `
+      text-transform: uppercase;
       background-color: black;
-      font-size: 14px;
+      color: #90CAF9;
       border-bottom: 1px solid #e0e0e0;
     `,
     Row: `
@@ -195,6 +197,7 @@ const DashboardData: FC = () => {
       }
       `,
     BaseCell: `
+      padding-left: 8px;
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
@@ -202,8 +205,21 @@ const DashboardData: FC = () => {
         text-align: right;
         min-width: 64px;
       }
+    `,
+    HeaderCell: `
+      padding-left: 0px;
     `
   });
+
+  const getSortIcon = (state: any, sortKey: any) => {
+    if (state.sortKey === sortKey && state.reverse) {
+      return <KeyboardArrowDownOutlinedIcon />;
+    }
+
+    if (state.sortKey === sortKey && !state.reverse) {
+      return <KeyboardArrowUpOutlinedIcon />;
+    }
+  };
 
   const analog_sort = useSort(
     { nodes: sensorData.analogs },
@@ -222,7 +238,8 @@ const DashboardData: FC = () => {
       sortFns: {
         GPIO: (array) => array.sort((a, b) => a.i - b.i),
         NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
-        TYPE: (array) => array.sort((a, b) => a.t - b.t)
+        TYPE: (array) => array.sort((a, b) => a.t - b.t),
+        VALUE: (array) => array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
       }
     }
   );
@@ -250,16 +267,21 @@ const DashboardData: FC = () => {
 
   const dv_sort = useSort(
     { nodes: deviceData.data },
-    {},
+    {
+      state: {
+        sortKey: 'NAME',
+        reverse: false
+      }
+    },
     {
       sortIcon: {
-        margin: '0px',
         iconDefault: null,
         iconUp: <KeyboardArrowUpOutlinedIcon />,
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
       sortFns: {
-        NAME: (array) => array.sort((a, b) => a.id.slice(2).localeCompare(b.id.slice(2)))
+        NAME: (array) => array.sort((a, b) => a.id.slice(2).localeCompare(b.id.slice(2))),
+        VALUE: (array) => array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
       }
     }
   );
@@ -278,6 +300,52 @@ const DashboardData: FC = () => {
       setSensorData({ sensors: [], analogs: [] });
     }
   }
+
+  const escapeCsvCell = (cell: any) => {
+    if (cell == null) {
+      return '';
+    }
+    const sc = cell.toString().trim();
+    if (sc === '' || sc === '""') {
+      return sc;
+    }
+    if (sc.includes('"') || sc.includes(',') || sc.includes('\n') || sc.includes('\r')) {
+      return '"' + sc.replace(/"/g, '""') + '"';
+    }
+    return sc;
+  };
+
+  const makeCsvData = (columns: any, data: any) => {
+    return data.reduce((csvString: any, rowItem: any) => {
+      return csvString + columns.map(({ accessor }: any) => escapeCsvCell(accessor(rowItem))).join(',') + '\r\n';
+    }, columns.map(({ name }: any) => escapeCsvCell(name)).join(',') + '\r\n');
+  };
+
+  const downloadAsCsv = (columns: any, data: any, filename: string) => {
+    const csvData = makeCsvData(columns, data);
+    const csvFile = new Blob([csvData], { type: 'text/csv' });
+    const downloadLink = document.createElement('a');
+
+    downloadLink.download = filename;
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  };
+
+  const hasMask = (id: string, mask: number) => (parseInt(id.slice(0, 2), 16) & mask) === mask;
+
+  const handleDownloadCsv = () => {
+    const columns = [
+      { accessor: (dv: any) => dv.id.slice(2), name: 'Entity' },
+      { accessor: (dv: any) => formatValue(dv.v, dv.u), name: 'Value' }
+    ];
+    downloadAsCsv(
+      columns,
+      onlyFav ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE)) : deviceData.data,
+      'device_entities'
+    );
+  };
 
   const refreshData = () => {
     const selectedDevice = device_select.state.id;
@@ -451,7 +519,7 @@ const DashboardData: FC = () => {
   };
 
   const addAnalogSensor = () => {
-    setAnalog({ id: '0', n: '', u: 0, v: 0, o: 0, t: 0, f: 1 });
+    setAnalog({ id: '0', i: 0, n: '', u: 0, v: 0, o: 0, t: 0, f: 1 });
   };
 
   const sendSensor = async () => {
@@ -585,8 +653,6 @@ const DashboardData: FC = () => {
       return <FormLoader errorMessage={errorMessage} />;
     }
 
-    console.log('** Rendering main data');
-
     return (
       <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
         {coreData.devices.length === 0 && <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />}
@@ -647,8 +713,6 @@ const DashboardData: FC = () => {
       return;
     }
 
-    const hasMask = (id: string, mask: number) => (parseInt(id.slice(0, 2), 16) & mask) === mask;
-
     const sendCommand = (dv: DeviceValue) => {
       if (dv.c && me.admin && !hasMask(dv.id, DeviceEntityMask.DV_READONLY)) {
         setDeviceValue(dv);
@@ -672,8 +736,8 @@ const DashboardData: FC = () => {
         </Typography>
 
         <FormControlLabel
-          control={<Checkbox name="onlyFav" checked={onlyFav} onChange={() => setOnlyFav(!onlyFav)} />}
-          label="show favorites only"
+          control={<Checkbox size="small" name="onlyFav" checked={onlyFav} onChange={() => setOnlyFav(!onlyFav)} />}
+          label={<span style={{ fontSize: '12px' }}>favorites only</span>}
         />
 
         <Table
@@ -689,10 +753,26 @@ const DashboardData: FC = () => {
             <>
               <Header>
                 <HeaderRow>
-                  <HeaderCellSort resize sortKey="NAME">
-                    ENTITY NAME
-                  </HeaderCellSort>
-                  <HeaderCell>VALUE</HeaderCell>
+                  <HeaderCell resize>
+                    <Button
+                      fullWidth
+                      style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                      endIcon={getSortIcon(dv_sort.state, 'NAME')}
+                      onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'NAME' })}
+                    >
+                      ENTITY NAME
+                    </Button>
+                  </HeaderCell>
+                  <HeaderCell>
+                    <Button
+                      fullWidth
+                      style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                      endIcon={getSortIcon(dv_sort.state, 'VALUE')}
+                      onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
+                    >
+                      VALUE
+                    </Button>
+                  </HeaderCell>
                   <HeaderCell />
                 </HeaderRow>
               </Header>
@@ -745,10 +825,26 @@ const DashboardData: FC = () => {
           <>
             <Header>
               <HeaderRow>
-                <HeaderCellSort resize sortKey="NAME">
-                  NAME
-                </HeaderCellSort>
-                <HeaderCellSort sortKey="TEMPERATURE">TEMPERATURE</HeaderCellSort>
+                <HeaderCell resize>
+                  <Button
+                    fullWidth
+                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    endIcon={getSortIcon(sensor_sort.state, 'NAME')}
+                    onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'NAME' })}
+                  >
+                    NAME
+                  </Button>
+                </HeaderCell>
+                <HeaderCell>
+                  <Button
+                    fullWidth
+                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    endIcon={getSortIcon(sensor_sort.state, 'TEMPERATURE')}
+                    onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'TEMPERATURE' })}
+                  >
+                    TEMPERATURE
+                  </Button>
+                </HeaderCell>
                 <HeaderCell />
               </HeaderRow>
             </Header>
@@ -784,16 +880,46 @@ const DashboardData: FC = () => {
           <>
             <Header>
               <HeaderRow>
-                <HeaderCellSort resize sortKey="GPIO">
-                  GPIO
-                </HeaderCellSort>
-                <HeaderCellSort resize sortKey="NAME">
-                  NAME
-                </HeaderCellSort>
-                <HeaderCellSort resize sortKey="TYPE">
-                  TYPE
-                </HeaderCellSort>
-                <HeaderCell>VALUE</HeaderCell>
+                <HeaderCell resize>
+                  <Button
+                    fullWidth
+                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    endIcon={getSortIcon(analog_sort.state, 'GPIO')}
+                    onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'GPIO' })}
+                  >
+                    GPIO
+                  </Button>
+                </HeaderCell>
+                <HeaderCell resize>
+                  <Button
+                    fullWidth
+                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    endIcon={getSortIcon(analog_sort.state, 'NAME')}
+                    onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'NAME' })}
+                  >
+                    NAME
+                  </Button>
+                </HeaderCell>
+                <HeaderCell resize>
+                  <Button
+                    fullWidth
+                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    endIcon={getSortIcon(analog_sort.state, 'TYPE')}
+                    onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'TYPE' })}
+                  >
+                    TYPE
+                  </Button>
+                </HeaderCell>
+                <HeaderCell>
+                  <Button
+                    fullWidth
+                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    endIcon={getSortIcon(analog_sort.state, 'VALUE')}
+                    onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
+                  >
+                    VALUE
+                  </Button>
+                </HeaderCell>
                 <HeaderCell />
               </HeaderRow>
             </Header>
@@ -803,7 +929,7 @@ const DashboardData: FC = () => {
                   <Cell>{a.id}</Cell>
                   <Cell>{a.n}</Cell>
                   <Cell>{AnalogTypeNames[a.t]} </Cell>
-                  <Cell>{formatValue(a.v, a.u)}</Cell>
+                  <Cell>{a.t ? formatValue(a.v, a.u) : ''}</Cell>
                   <Cell>
                     {me.admin && (
                       <IconButton onClick={() => updateAnalog(a)}>
@@ -824,7 +950,7 @@ const DashboardData: FC = () => {
     if (analog) {
       try {
         const response = await EMSESP.writeAnalog({
-          id: analog.id,
+          i: analog.i,
           name: analog.n,
           offset: analog.o,
           factor: analog.f,
@@ -852,7 +978,7 @@ const DashboardData: FC = () => {
     if (analog) {
       try {
         const response = await EMSESP.writeAnalog({
-          id: analog.id,
+          i: analog.i,
           name: analog.n,
           offset: analog.o,
           factor: analog.f,
@@ -885,11 +1011,10 @@ const DashboardData: FC = () => {
             <Grid container spacing={2}>
               <Grid item>
                 <ValidatedTextField
-                  name="id"
+                  name="i"
                   label="GPIO"
-                  value={analog.id}
-                  // TODO add validation
-                  // type="number"
+                  value={analog.i}
+                  type="number"
                   variant="outlined"
                   autoFocus
                   onChange={updateValue(setAnalog)}
@@ -1084,6 +1209,11 @@ const DashboardData: FC = () => {
         <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
           Refresh
         </Button>
+        {device_select.state.id && device_select.state.id !== 'sensor' && (
+          <Button startIcon={<DownloadIcon />} variant="outlined" onClick={handleDownloadCsv}>
+            Export
+          </Button>
+        )}
       </ButtonRow>
     </SectionContent>
   );
