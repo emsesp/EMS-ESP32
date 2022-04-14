@@ -90,6 +90,10 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     }
 
     /*
+    * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
+    * thermostat always overwrites settings in boiler
+    * enable settings here if no thermostat is used in system
+    *
     if (model() == EMSdevice::EMS_DEVICE_FLAG_HYBRID) {
         register_telegram_type(0xBB, F("HybridHp"), true, MAKE_PF_CB(process_HybridHp));
     }
@@ -204,6 +208,10 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           MAKE_CF_CB(set_maintenancedate));
 
     /*
+    * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
+    * thermostat always overwrites settings in boiler
+    * enable settings here if no thermostat is used in system
+    *
     // Hybrid Heatpump
     if (model() == EMSdevice::EMS_DEVICE_FLAG_HYBRID) {
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
@@ -1065,6 +1073,10 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
     }
 }
 /*
+ * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
+ * thermostat always overwrites settings in boiler
+ * enable settings here if no thermostat is used in system
+ *
 // 0xBB Heatpump optimization
 // Boiler(0x08) -> Me(0x0B), ?(0xBB), data: 00 00 00 00 00 00 00 00 00 00 00 FF 02 0F 1E 0B 1A 00 14 03
 void Boiler::process_HybridHp(std::shared_ptr<const Telegram> telegram) {
