@@ -619,7 +619,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 if (nested) {
                     need_publish |= emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::MQTT); // nested
                 } else {
-                    for (uint8_t hc_tag = DeviceValueTAG::TAG_HC1; hc_tag <= DeviceValueTAG::TAG_WWC4; hc_tag++) {
+                    for (uint8_t hc_tag = DeviceValueTAG::TAG_HC1; hc_tag <= DeviceValueTAG::TAG_WWC10; hc_tag++) {
                         json = doc.to<JsonObject>();
                         if (emsdevice->generate_values(json, hc_tag, false, EMSdevice::OUTPUT_TARGET::MQTT)) { // not nested
                             Mqtt::publish(Mqtt::tag_to_topic(device_type, hc_tag), json);
@@ -951,6 +951,9 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
             if (wait_validate_ == telegram->type_id) {
                 wait_validate_ = 0;
             }
+            if (!found && emsdevice->is_device_id(telegram->src) && telegram->message_length > 0) {
+                emsdevice->add_handlers_ignored(telegram->type_id);
+            }
             break;
         }
     }
@@ -1202,7 +1205,7 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t
     uint8_t tag;
     if (id >= 1 && id <= 8) {
         tag = DeviceValueTAG::TAG_HC1 + id - 1;
-    } else if (id >= 9 && id <= 12) {
+    } else if (id >= 9 && id <= 19) {
         tag = DeviceValueTAG::TAG_WWC1 + id - 9;
     } else if (id == -1 || id == 0) {
         tag = DeviceValueTAG::TAG_NONE;

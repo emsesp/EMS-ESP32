@@ -43,6 +43,10 @@ class Mixer : public EMSdevice {
     void process_MMSetMessage(std::shared_ptr<const Telegram> telegram);
     void process_HpPoolStatus(std::shared_ptr<const Telegram> telegram);
 
+    void process_IPMMonitorWW(std::shared_ptr<const Telegram> telegram);
+    void process_IPMHydrTemp(std::shared_ptr<const Telegram> telegram);
+    void process_IPMParameterWW(std::shared_ptr<const Telegram> telegram);
+
     bool set_flowSetTemp(const char * value, const int8_t id);
     bool set_pump(const char * value, const int8_t id);
     bool set_activated(const char * value, const int8_t id);
@@ -56,6 +60,10 @@ class Mixer : public EMSdevice {
     bool set_wwCircPump(const char * value, const int8_t id);
     bool set_wwCircMode(const char * value, const int8_t id);
 
+    bool set_wwSelTemp(const char * value, const int8_t id);
+    bool set_wwFlowTempOffset(const char * value, const int8_t id);
+    bool set_wwHystOn(const char * value, const int8_t id);
+    bool set_wwHystOff(const char * value, const int8_t id);
 
     enum class Type {
         NONE,
@@ -90,6 +98,14 @@ class Mixer : public EMSdevice {
     Type     type_             = Type::NONE;
     uint16_t hc_               = EMS_VALUE_USHORT_NOTSET;
     uint8_t  poolShuntStatus__ = EMS_VALUE_UINT_NOTSET; // temp value
+
+    uint8_t  wwSelTemp_;
+    uint16_t wwCurTemp_1_;
+    uint16_t wwCurTemp_2_;
+    uint16_t HydrTemp_;
+    int8_t   wwHystOn_;         // Hyst on (default -5)
+    int8_t   wwHystOff_;        // Hyst off (default -1)
+    uint8_t  wwFlowTempOffset_; // default 40
 };
 
 } // namespace emsesp
