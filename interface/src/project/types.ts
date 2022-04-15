@@ -38,36 +38,21 @@ export enum busConnectionStatus {
   BUS_STATUS_OFFLINE = 2
 }
 
+export interface Stat {
+  id: string; // name
+  s: number; // success
+  f: number;  // fail
+  q: number;  // quality
+}
 export interface Status {
   status: busConnectionStatus;
   tx_mode: number;
-  rx_received: number;
-  tx_reads: number;
-  tx_writes: number;
-  rx_quality: number;
-  tx_read_quality: number;
-  tx_write_quality: number;
-  tx_read_fails: number;
-  tx_write_fails: number;
-  rx_fails: number;
-  sensor_fails: number;
-  sensor_reads: number;
-  sensor_quality: number;
-  analog_fails: number;
-  analog_reads: number;
-  analog_quality: number;
-  mqtt_count: number;
-  mqtt_fails: number;
-  mqtt_quality: number;
-  api_calls: number;
-  api_fails: number;
-  api_quality: number;
+  uptime: number;
   num_devices: number;
   num_sensors: number;
   num_analogs: number;
-  uptime: number;
+  stats: Stat[];
 }
-
 export interface Device {
   id: string; // id index
   t: string; // type

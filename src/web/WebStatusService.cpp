@@ -129,34 +129,57 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM_DYN);
     JsonObject root     = response->getRoot();
 
-    root["status"]           = EMSESP::bus_status();    // 0, 1 or 2
-    root["num_devices"]      = EMSESP::count_devices(); // excluding Controller
-    root["num_sensors"]      = EMSESP::dallassensor_.no_sensors();
-    root["num_analogs"]      = EMSESP::analogsensor_.no_sensors();
-    root["tx_mode"]          = EMSESP::txservice_.tx_mode();
-    root["rx_received"]      = EMSESP::rxservice_.telegram_count();
-    root["tx_reads"]         = EMSESP::txservice_.telegram_read_count();
-    root["tx_writes"]        = EMSESP::txservice_.telegram_write_count();
-    root["rx_quality"]       = EMSESP::rxservice_.quality();
-    root["tx_read_quality"]  = EMSESP::txservice_.read_quality();
-    root["tx_write_quality"] = EMSESP::txservice_.write_quality();
-    root["rx_fails"]         = EMSESP::rxservice_.telegram_error_count();
-    root["tx_read_fails"]    = EMSESP::txservice_.telegram_read_fail_count();
-    root["tx_write_fails"]   = EMSESP::txservice_.telegram_write_fail_count();
-    root["sensor_fails"]     = EMSESP::dallassensor_.fails();
-    root["sensor_reads"]     = EMSESP::dallassensor_.reads();
-    root["sensor_quality"] = EMSESP::dallassensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::dallassensor_.fails()) / EMSESP::dallassensor_.reads());
-    root["analog_fails"]   = EMSESP::analogsensor_.fails();
-    root["analog_reads"]   = EMSESP::analogsensor_.reads();
-    root["analog_quality"] = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
-    root["mqtt_fails"]     = Mqtt::publish_fails();
-    root["mqtt_count"]     = Mqtt::publish_count();
-    root["mqtt_quality"]   = Mqtt::publish_count() == 0 ? 100 : 100 - (Mqtt::publish_fails() * 100) / (Mqtt::publish_count() + Mqtt::publish_fails());
-    root["api_calls"]      = WebAPIService::api_count(); // + WebAPIService::api_fails();
-    root["api_fails"]      = WebAPIService::api_fails();
-    root["api_quality"] =
-        WebAPIService::api_count() == 0 ? 100 : 100 - (WebAPIService::api_fails() * 100) / (WebAPIService::api_count() + WebAPIService::api_fails());
-    root["uptime"] = EMSbus::bus_uptime();
+    root["status"]      = EMSESP::bus_status(); // 0, 1 or 2
+    root["tx_mode"]     = EMSESP::txservice_.tx_mode();
+    root["uptime"]      = EMSbus::bus_uptime();
+    root["num_devices"] = EMSESP::count_devices(); // excluding Controller
+    root["num_sensors"] = EMSESP::dallassensor_.no_sensors();
+    root["num_analogs"] = EMSESP::analogsensor_.no_sensors();
+
+    JsonArray  statsJson = root.createNestedArray("stats");
+    JsonObject statJson;
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "EMS Telegrams Received (Rx)";
+    statJson["s"]  = EMSESP::rxservice_.telegram_count();
+    statJson["f"]  = EMSESP::rxservice_.telegram_error_count();
+    statJson["q"]  = EMSESP::rxservice_.quality();
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "EMS Reads (Tx)";
+    statJson["s"]  = EMSESP::txservice_.telegram_read_count();
+    statJson["f"]  = EMSESP::txservice_.telegram_read_fail_count();
+    statJson["q"]  = EMSESP::txservice_.read_quality();
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "EMS Writes (Tx)";
+    statJson["s"]  = EMSESP::txservice_.telegram_write_count();
+    statJson["f"]  = EMSESP::txservice_.telegram_write_fail_count();
+    statJson["q"]  = EMSESP::txservice_.write_quality();
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "Temperature Sensor Reads";
+    statJson["s"]  = EMSESP::dallassensor_.reads();
+    statJson["f"]  = EMSESP::dallassensor_.fails();
+    statJson["q"]  = EMSESP::dallassensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::dallassensor_.fails()) / EMSESP::dallassensor_.reads());
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "Analog Sensor Reads";
+    statJson["s"]  = EMSESP::analogsensor_.reads();
+    statJson["f"]  = EMSESP::analogsensor_.fails();
+    statJson["q"]  = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "MQTT Publishes";
+    statJson["s"]  = Mqtt::publish_count();
+    statJson["f"]  = Mqtt::publish_fails();
+    statJson["q"]  = Mqtt::publish_count() == 0 ? 100 : 100 - (Mqtt::publish_fails() * 100) / (Mqtt::publish_count() + Mqtt::publish_fails());
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "API Calls";
+    statJson["s"]  = WebAPIService::api_count(); // + WebAPIService::api_fails();
+    statJson["f"]  = WebAPIService::api_fails();
+    statJson["q"] = WebAPIService::api_count() == 0 ? 100 : 100 - (WebAPIService::api_fails() * 100) / (WebAPIService::api_count() + WebAPIService::api_fails());
 
     response->setLength();
     request->send(response);

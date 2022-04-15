@@ -176,11 +176,12 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
                 emsdevice->generate_values_web(output);
 #endif
 
-#ifdef EMSESP_USE_SERIAL
-#ifdef EMSESP_DEBUG
-                serializeJson(output, Serial);
-#endif
-#endif
+                // #ifdef EMSESP_USE_SERIAL
+                // #ifdef EMSESP_DEBUG
+                //                 serializeJson(output, Serial);
+                // #endif
+                // #endif
+
                 response->setLength();
                 request->send(response);
                 return;

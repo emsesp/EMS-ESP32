@@ -270,8 +270,8 @@ const system_status = {
 security_settings = {
   jwt_secret: 'naughty!',
   users: [
-    { username: 'admin', password: 'admin', admin: true },
-    { username: 'guest', password: 'guest', admin: false },
+    { id: 'admin', username: 'admin', password: 'admin', admin: true },
+    { id: 'guest', username: 'guest', password: 'guest', admin: false },
   ],
 }
 const features = {
@@ -417,33 +417,21 @@ const emsesp_sensordata = {
 }
 
 const status = {
-  analog_fails: 0,
-  analog_quality: 100,
-  analog_reads: 203,
-  api_calls: 4,
-  api_fails: 0,
-  api_quality: 100,
-  mqtt_count: 40243,
-  mqtt_fails: 0,
-  mqtt_quality: 100,
-  num_analogs: 1,
-  num_devices: 2,
-  num_sensors: 1,
-  rx_fails: 11,
-  rx_quality: 100,
-  rx_received: 56506,
-  sensor_fails: 0,
-  sensor_quality: 100,
-  sensor_reads: 15438,
   status: 0,
   tx_mode: 1,
-  tx_read_fails: 0,
-  tx_read_quality: 100,
-  tx_reads: 9026,
-  tx_write_fails: 2,
-  tx_write_quality: 95,
-  tx_writes: 33,
   uptime: 77186,
+  num_devices: 2,
+  num_sensors: 1,
+  num_analogs: 1,
+  stats: [
+    { id: 'EMS Telegrams Received (Rx)', s: 56506, f: 11, q: 100 },
+    { id: 'EMS Reads (Tx)', s: 9026, f: 0, q: 100 },
+    { id: 'EMS Writes (Tx)', s: 33, f: 2, q: 95 },
+    { id: 'Temperature Sensor Reads', s: 56506, f: 11, q: 100 },
+    { id: 'Analog Sensor Reads', s: 0, f: 0, q: 100 },
+    { id: 'MQTT Publishes', s: 12, f: 10, q: 20 },
+    { id: 'API Calls', s: 0, f: 0, q: 0 },
+  ],
 }
 
 // Dashboard data
