@@ -84,7 +84,7 @@ export interface Analog {
 }
 
 export interface WriteSensor {
-  id_str: string;
+  id: string;
   name: string;
   offset: number;
 }

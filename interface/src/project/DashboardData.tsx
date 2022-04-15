@@ -235,7 +235,7 @@ const DashboardData: FC = () => {
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
       sortFns: {
-        GPIO: (array) => array.sort((a, b) => a.i - b.i),
+        GPIO: (array) => array.sort((a, b) => a.g - b.g),
         NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
         TYPE: (array) => array.sort((a, b) => a.t - b.t),
         VALUE: (array) => array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
@@ -531,7 +531,7 @@ const DashboardData: FC = () => {
     if (sensor) {
       try {
         const response = await EMSESP.writeSensor({
-          id_str: sensor.id,
+          id: sensor.id,
           name: sensor.n,
           offset: sensor.o
         });
@@ -926,7 +926,7 @@ const DashboardData: FC = () => {
             <Body>
               {tableList.map((a: Analog) => (
                 <Row key={a.id} item={a} onClick={() => updateAnalog(a)}>
-                  <Cell>{a.id}</Cell>
+                  <Cell>{a.g}</Cell>
                   <Cell>{a.n}</Cell>
                   <Cell>{AnalogTypeNames[a.t]} </Cell>
                   <Cell>{a.t ? formatValue(a.v, a.u) : ''}</Cell>

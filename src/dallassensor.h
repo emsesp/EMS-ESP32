@@ -150,7 +150,7 @@ class DallasSensor {
     bool     temperature_convert_complete();
     int16_t  get_temperature_c(const uint8_t addr[]);
     uint64_t get_id(const uint8_t addr[]);
-    void     remove_ha_topic(const std::string & id_str);
+    void     remove_ha_topic(const std::string & id);
 
     bool command_info(const char * value, const int8_t id, JsonObject & output);
     bool command_commands(const char * value, const int8_t id, JsonObject & output);

@@ -972,7 +972,7 @@ rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
   const sensor = req.body
   console.log('Write sensor: ' + JSON.stringify(sensor))
-  objIndex = emsesp_sensordata.sensors.findIndex((obj) => obj.id == sensor.id_str)
+  objIndex = emsesp_sensordata.sensors.findIndex((obj) => obj.id == sensor.id)
   emsesp_sensordata.sensors[objIndex].n = sensor.name
   emsesp_sensordata.sensors[objIndex].o = sensor.offset
   res.sendStatus(200)

@@ -503,15 +503,15 @@ DallasSensor::Sensor::Sensor(const uint8_t addr[])
     : internal_id_(((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16)
                    | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6])) {
     // create ID string
-    char id_str[20];
-    snprintf(id_str,
-             sizeof(id_str),
+    char id_s[20];
+    snprintf(id_s,
+             sizeof(id_s),
              "%02X-%04X-%04X-%04X",
              (unsigned int)(internal_id_ >> 48) & 0xFF,
              (unsigned int)(internal_id_ >> 32) & 0xFFFF,
              (unsigned int)(internal_id_ >> 16) & 0xFFFF,
              (unsigned int)(internal_id_)&0xFFFF);
-    id_     = std::string(id_str);
+    id_     = std::string(id_s);
     name_   = std::string{}; // name (alias) is empty
     offset_ = 0;             // 0 degrees offset
 }
