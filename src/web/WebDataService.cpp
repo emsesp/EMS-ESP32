@@ -76,17 +76,18 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     // list is already sorted by device type
     // Ignore Contoller
     JsonArray devices = root.createNestedArray("devices");
+    char      buffer[3];
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice && (emsdevice->device_type() != EMSdevice::DeviceType::CONTROLLER || emsdevice->count_entities() > 0)) {
             JsonObject obj = devices.createNestedObject();
-            obj["i"]       = emsdevice->unique_id();        // a unique id
-            obj["t"]       = emsdevice->device_type_name(); // type
-            obj["b"]       = emsdevice->brand_to_string();  // brand
-            obj["n"]       = emsdevice->name();             // name
-            obj["d"]       = emsdevice->device_id();        // deviceid
-            obj["p"]       = emsdevice->product_id();       // productid
-            obj["v"]       = emsdevice->version();          // version
-            obj["e"]       = emsdevice->count_entities();   // number of entities (device values)
+            obj["id"]      = Helpers::smallitoa(buffer, emsdevice->unique_id()); // a unique id as a string
+            obj["t"]       = emsdevice->device_type_name();                      // type
+            obj["b"]       = emsdevice->brand_to_string();                       // brand
+            obj["n"]       = emsdevice->name();                                  // name
+            obj["d"]       = emsdevice->device_id();                             // deviceid
+            obj["p"]       = emsdevice->product_id();                            // productid
+            obj["v"]       = emsdevice->version();                               // version
+            obj["e"]       = emsdevice->count_entities();                        // number of entities (device values)
         }
     }
 
@@ -110,8 +111,8 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
     if (EMSESP::dallassensor_.have_sensors()) {
         for (const auto & sensor : EMSESP::dallassensor_.sensors()) {
             JsonObject obj = sensors.createNestedObject();
-            obj["is"]      = sensor.id_str(); // id
-            obj["n"]       = sensor.name();   // name
+            obj["id"]      = sensor.id();   // id as string
+            obj["n"]       = sensor.name(); // name
             if (EMSESP::system_.fahrenheit()) {
                 if (Helpers::hasValue(sensor.temperature_c)) {
                     obj["t"] = (float)sensor.temperature_c * 0.18 + 32;
@@ -129,14 +130,16 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
     }
 
     // analog sensors
-    // assume list is already sorted by id
     JsonArray analogs = root.createNestedArray("analogs");
     if (EMSESP::analog_enabled() && EMSESP::analogsensor_.have_sensors()) {
+        uint8_t count = 0;
+        char    buffer[3];
         for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
             // don't send if it's marked for removal
             if (sensor.type() != AnalogSensor::AnalogType::MARK_DELETED) {
                 JsonObject obj = analogs.createNestedObject();
-                obj["i"]       = sensor.id();
+                obj["id"]      = Helpers::smallitoa(buffer, ++count); // needed for sorting table
+                obj["g"]       = sensor.gpio();
                 obj["n"]       = sensor.name();
                 obj["u"]       = sensor.uom();
                 obj["o"]       = sensor.offset();
@@ -145,6 +148,8 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
 
                 if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
                     obj["v"] = Helpers::round2(sensor.value(), 0); // is optional and is a float
+                } else {
+                    obj["v"] = 0; // must have a value for web sorting to work
                 }
             }
         }
@@ -169,6 +174,12 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
 #ifndef EMSESP_STANDALONE
                 JsonObject output = response->getRoot();
                 emsdevice->generate_values_web(output);
+#endif
+
+#ifdef EMSESP_USE_SERIAL
+#ifdef EMSESP_DEBUG
+                serializeJson(output, Serial);
+#endif
 #endif
                 response->setLength();
                 request->send(response);
@@ -246,8 +257,8 @@ void WebDataService::write_sensor(AsyncWebServerRequest * request, JsonVariant &
     if (json.is<JsonObject>()) {
         JsonObject sensor = json;
 
-        std::string id_str = sensor["id_str"]; // this is the key
-        std::string name   = sensor["name"];
+        std::string id   = sensor["id"]; // this is the key
+        std::string name = sensor["name"];
 
         // calculate offset. We'll convert it to an int and * 10
         float   offset   = sensor["offset"];
@@ -255,7 +266,7 @@ void WebDataService::write_sensor(AsyncWebServerRequest * request, JsonVariant &
         if (EMSESP::system_.fahrenheit()) {
             offset10 = offset / 0.18;
         }
-        ok = EMSESP::dallassensor_.update(id_str, name, offset10);
+        ok = EMSESP::dallassensor_.update(id, name, offset10);
     }
 
     AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);
@@ -268,13 +279,13 @@ void WebDataService::write_analog(AsyncWebServerRequest * request, JsonVariant &
     if (json.is<JsonObject>()) {
         JsonObject analog = json;
 
-        uint8_t     id     = analog["id"]; // this is the unique key
+        uint8_t     gpio   = analog["gpio"]; // this is the unique key, the GPIO
         std::string name   = analog["name"];
         float       factor = analog["factor"];
         float       offset = analog["offset"];
         uint8_t     uom    = analog["uom"];
         int8_t      type   = analog["type"];
-        ok                 = EMSESP::analogsensor_.update(id, name, offset, factor, uom, type);
+        ok                 = EMSESP::analogsensor_.update(gpio, name, offset, factor, uom, type);
     }
 
     AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);

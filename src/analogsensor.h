@@ -36,7 +36,7 @@ class AnalogSensor {
   public:
     class Sensor {
       public:
-        Sensor(const uint8_t id, const std::string & name, const float offset, const float factor, const uint8_t uom, const int8_t type);
+        Sensor(const uint8_t gpio, const std::string & name, const float offset, const float factor, const uint8_t uom, const int8_t type);
         ~Sensor() = default;
 
         void set_offset(const float offset) {
@@ -48,8 +48,8 @@ class AnalogSensor {
             name_ = name;
         }
 
-        uint8_t id() const {
-            return id_;
+        uint8_t gpio() const {
+            return gpio_;
         }
 
         float value() const {
@@ -99,7 +99,7 @@ class AnalogSensor {
         uint32_t last_polltime_ = 0; // for timer
 
       private:
-        uint8_t     id_;
+        uint8_t     gpio_;
         std::string name_;
         float       offset_;
         float       factor_;
@@ -157,7 +157,7 @@ class AnalogSensor {
         return sensors_.size();
     }
 
-    bool update(uint8_t id, const std::string & name, float offset, float factor, uint8_t uom, int8_t type);
+    bool update(uint8_t gpio, const std::string & name, float offset, float factor, uint8_t uom, int8_t type);
     bool get_value_info(JsonObject & output, const char * cmd, const int8_t id) const;
 
 #ifdef EMSESP_DEBUG
@@ -171,7 +171,7 @@ class AnalogSensor {
     static uuid::log::Logger logger_;
 
     void remove_ha_topic(const uint8_t id) const;
-    bool command_setvalue(const char * value, const int8_t id);
+    bool command_setvalue(const char * value, const int8_t gpio);
     void measure();
     bool command_info(const char * value, const int8_t id, JsonObject & output) const;
     bool command_commands(const char * value, const int8_t id, JsonObject & output);

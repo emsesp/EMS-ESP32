@@ -40,12 +40,12 @@ class DallasSensor {
         Sensor(const uint8_t addr[]);
         ~Sensor() = default;
 
-        uint64_t id() const {
-            return id_;
+        uint64_t internal_id() const {
+            return internal_id_;
         }
 
-        std::string id_str() const {
-            return id_str_;
+        std::string id() const {
+            return id_;
         }
 
         int16_t offset() const {
@@ -67,8 +67,8 @@ class DallasSensor {
         bool    ha_registered = false;
 
       private:
-        uint64_t    id_;
-        std::string id_str_;
+        uint64_t    internal_id_;
+        std::string id_;
         std::string name_;
         int16_t     offset_;
     };
@@ -109,7 +109,7 @@ class DallasSensor {
         return sensors_.size();
     }
 
-    bool update(const std::string & id_str, const std::string & name, int16_t offset);
+    bool update(const std::string & id, const std::string & name, int16_t offset);
 
 #ifdef EMSESP_DEBUG
     void test();

@@ -89,7 +89,7 @@ export interface Sensor {
 
 export interface Analog {
   id: string; // id string
-  i: number; // GPIO
+  g: number; // GPIO
   n: string;
   v: number; // is optional
   u: number;
@@ -145,7 +145,7 @@ export interface DeviceData {
 
 export interface DeviceEntity {
   n: string; // name
-  v?: any; // value, in any format
+  v: any; // value, in any format
   s: string; // shortname
   m: number; // mask
   om?: number; // original mask before edits
@@ -278,7 +278,7 @@ export interface WriteValue {
 }
 
 export interface WriteAnalog {
-  i: number;
+  gpio: number;
   name: string;
   factor: number;
   offset: number;

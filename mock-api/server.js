@@ -362,11 +362,11 @@ const emsesp_devices = {
 }
 
 const emsesp_coredata = {
+  // devices: [],
   devices: [
     {
       id: '2',
       t: 'Boiler',
-      s: 'Boiler',
       b: 'Nefit',
       n: 'GBx72/Trendline/Cerapur/Greenstar Si/27i',
       d: 8,
@@ -377,7 +377,6 @@ const emsesp_coredata = {
     {
       id: '1',
       t: 'Thermostat',
-      s: 'Thermostat',
       b: '',
       n: 'RC20/Moduline 300',
       d: 23,
@@ -388,7 +387,6 @@ const emsesp_coredata = {
     {
       id: '4',
       t: 'Thermostat',
-      s: 'Thermostat',
       b: 'Buderus',
       n: 'RC100/Moduline 1000/1010',
       d: 16,
@@ -410,10 +408,10 @@ const emsesp_sensordata = {
   ],
   // sensors: [],
   analogs: [
-    { id: '36', i: 36, n: 'motor', v: 0, u: 0, o: 17, f: 0, t: 0 },
-    { id: '37', i: 37, n: 'External switch', v: 13, u: 0, o: 17, f: 0, t: 1 },
-    { id: '39', i: 39, n: 'Pulse count', v: 144, u: 0, o: 0, f: 0, t: 2 },
-    { id: '40', i: 40, n: 'Pressure', v: 16, u: 17, o: 0, f: 0, t: 3 },
+    { id: '1', g: 36, n: 'motor', v: 0, u: 0, o: 17, f: 0, t: 0 },
+    { id: '2', g: 37, n: 'External switch', v: 13, u: 0, o: 17, f: 0, t: 1 },
+    { id: '3', g: 39, n: 'Pulse count', v: 144, u: 0, o: 0, f: 0, t: 2 },
+    { id: '4', g: 40, n: 'Pressure', v: 16, u: 17, o: 0, f: 0, t: 3 },
   ],
   // analogs: [],
 }

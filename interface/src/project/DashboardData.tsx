@@ -51,7 +51,7 @@ import { formatDurationMin, pluralize } from '../utils';
 
 import { AuthenticatedContext } from '../contexts/authentication';
 
-import { ButtonRow, FormLoader, ValidatedTextField, SectionContent, MessageBox } from '../components';
+import { ButtonRow, ValidatedTextField, SectionContent, MessageBox } from '../components';
 
 import * as EMSESP from './api';
 
@@ -77,7 +77,6 @@ const DashboardData: FC = () => {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const [errorMessage, setErrorMessage] = useState<string>();
   const [coreData, setCoreData] = useState<CoreData>({ devices: [], active_sensors: 0, analog_enabled: false });
   const [deviceData, setDeviceData] = useState<DeviceData>({ label: '', data: [] });
   const [sensorData, setSensorData] = useState<SensorData>({ sensors: [], analogs: [] });
@@ -286,6 +285,11 @@ const DashboardData: FC = () => {
     }
   );
 
+  const paul = () => {
+    console.log('paul');
+    sensor_sort.fns.onToggleSort({ sortKey: 'NAME' });
+  };
+
   const device_select = useRowSelect(
     { nodes: coreData.devices },
     {
@@ -338,7 +342,8 @@ const DashboardData: FC = () => {
   const handleDownloadCsv = () => {
     const columns = [
       { accessor: (dv: any) => dv.id.slice(2), name: 'Entity' },
-      { accessor: (dv: any) => formatValue(dv.v, dv.u), name: 'Value' }
+      { accessor: (dv: any) => dv.v, name: 'Value' },
+      { accessor: (dv: any) => (dv.u >= 1 && dv.u <= 2 ? 'C' : DeviceValueUOM_s[dv.u]), name: 'UoM' }
     ];
     downloadAsCsv(
       columns,
@@ -366,9 +371,9 @@ const DashboardData: FC = () => {
     try {
       setCoreData((await EMSESP.readCoreData()).data);
     } catch (error: any) {
-      setErrorMessage(extractErrorMessage(error, 'Failed to fetch core data'));
+      enqueueSnackbar(extractErrorMessage(error, 'Failed to fetch core data'), { variant: 'error' });
     }
-  }, []);
+  }, [enqueueSnackbar]);
 
   useEffect(() => {
     fetchCoreData();
@@ -387,7 +392,7 @@ const DashboardData: FC = () => {
     try {
       setDeviceData((await EMSESP.readDeviceData({ id: unique_id })).data);
     } catch (error: any) {
-      setErrorMessage(extractErrorMessage(error, 'Problem fetching device data'));
+      enqueueSnackbar(extractErrorMessage(error, 'Problem fetching device data'), { variant: 'error' });
     }
   };
 
@@ -395,7 +400,7 @@ const DashboardData: FC = () => {
     try {
       setSensorData((await EMSESP.readSensorData()).data);
     } catch (error: any) {
-      setErrorMessage(extractErrorMessage(error, 'Problem fetching sensor data'));
+      enqueueSnackbar(extractErrorMessage(error, 'Problem fetching sensor data'), { variant: 'error' });
     }
   };
 
@@ -448,7 +453,7 @@ const DashboardData: FC = () => {
         }
         setDeviceValue(undefined);
       } catch (error: any) {
-        setErrorMessage(extractErrorMessage(error, 'Problem writing value'));
+        enqueueSnackbar(extractErrorMessage(error, 'Problem writing value'), { variant: 'error' });
       } finally {
         refreshData();
         setDeviceValue(undefined);
@@ -519,7 +524,7 @@ const DashboardData: FC = () => {
   };
 
   const addAnalogSensor = () => {
-    setAnalog({ id: '0', i: 0, n: '', u: 0, v: 0, o: 0, t: 0, f: 1 });
+    setAnalog({ id: '0', g: 0, n: '', u: 0, v: 0, o: 0, t: 0, f: 1 });
   };
 
   const sendSensor = async () => {
@@ -539,7 +544,7 @@ const DashboardData: FC = () => {
         }
         setSensor(undefined);
       } catch (error: any) {
-        setErrorMessage(extractErrorMessage(error, 'Problem updating sensor'));
+        enqueueSnackbar(extractErrorMessage(error, 'Problem updating sensor'), { variant: 'error' });
       } finally {
         setSensor(undefined);
         fetchSensorData();
@@ -648,65 +653,59 @@ const DashboardData: FC = () => {
     }
   };
 
-  const renderCoreData = () => {
-    if (!coreData) {
-      return <FormLoader errorMessage={errorMessage} />;
-    }
+  const renderCoreData = () => (
+    <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
+      {coreData.devices.length === 0 && <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />}
 
-    return (
-      <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
-        {coreData.devices.length === 0 && <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />}
-
-        <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
-          {(tableList: any) => (
-            <>
-              <Header>
-                <HeaderRow>
-                  <HeaderCell />
-                  <HeaderCell resize>TYPE</HeaderCell>
-                  <HeaderCell resize>DESCRIPTION</HeaderCell>
-                  <HeaderCell>ENTITIES</HeaderCell>
-                  <HeaderCell />
-                </HeaderRow>
-              </Header>
-              <Body>
-                {tableList.map((device: Device, index: number) => (
-                  <Row key={device.id} item={device}>
-                    <Cell>
-                      <DeviceIcon type={device.t} />
-                    </Cell>
-                    <Cell>{device.t}</Cell>
-                    <Cell>{device.n}</Cell>
-                    <Cell>{device.e}</Cell>
-                    <Cell>
-                      <IconButton size="small" onClick={() => setDeviceDialog(index)}>
-                        <InfoOutlinedIcon color="info" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
-                      </IconButton>
-                    </Cell>
-                  </Row>
-                ))}
-                {(coreData.active_sensors > 0 || coreData.analog_enabled) && (
-                  <Row key="sensor" item={{ id: 'sensor' }}>
-                    <Cell>
-                      <DeviceIcon type="Sensor" />
-                    </Cell>
-                    <Cell>Sensors</Cell>
-                    <Cell>Attached EMS-ESP Sensors</Cell>
-                    <Cell>{coreData.active_sensors}</Cell>
-                    <Cell>
-                      <IconButton size="small" onClick={() => addAnalogSensor()}>
-                        <AddCircleOutlineOutlinedIcon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
-                      </IconButton>
-                    </Cell>
-                  </Row>
-                )}
-              </Body>
-            </>
-          )}
-        </Table>
-      </IconContext.Provider>
-    );
-  };
+      <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
+        {(tableList: any) => (
+          <>
+            <Header>
+              <HeaderRow>
+                <HeaderCell />
+                <HeaderCell resize>TYPE</HeaderCell>
+                <HeaderCell resize>DESCRIPTION</HeaderCell>
+                <HeaderCell>ENTITIES</HeaderCell>
+                <HeaderCell />
+              </HeaderRow>
+            </Header>
+            <Body>
+              {tableList.map((device: Device, index: number) => (
+                <Row key={device.id} item={device}>
+                  <Cell>
+                    <DeviceIcon type={device.t} />
+                  </Cell>
+                  <Cell>{device.t}</Cell>
+                  <Cell>{device.n}</Cell>
+                  <Cell>{device.e}</Cell>
+                  <Cell>
+                    <IconButton size="small" onClick={() => setDeviceDialog(index)}>
+                      <InfoOutlinedIcon color="info" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+                    </IconButton>
+                  </Cell>
+                </Row>
+              ))}
+              {(coreData.active_sensors > 0 || coreData.analog_enabled) && (
+                <Row key="sensor" item={{ id: 'sensor' }}>
+                  <Cell>
+                    <DeviceIcon type="Sensor" />
+                  </Cell>
+                  <Cell>Sensors</Cell>
+                  <Cell>Attached EMS-ESP Sensors</Cell>
+                  <Cell>{coreData.active_sensors}</Cell>
+                  <Cell>
+                    <IconButton size="small" onClick={() => addAnalogSensor()}>
+                      <AddCircleOutlineOutlinedIcon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+                    </IconButton>
+                  </Cell>
+                </Row>
+              )}
+            </Body>
+          </>
+        )}
+      </Table>
+    </IconContext.Provider>
+  );
 
   const renderDeviceData = () => {
     if (!device_select.state.id || device_select.state.id === 'sensor') {
@@ -830,7 +829,8 @@ const DashboardData: FC = () => {
                     fullWidth
                     style={{ fontSize: '14px', justifyContent: 'flex-start' }}
                     endIcon={getSortIcon(sensor_sort.state, 'NAME')}
-                    onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'NAME' })}
+                    // onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'NAME' })}
+                    onClick={() => paul()}
                   >
                     NAME
                   </Button>
@@ -950,7 +950,7 @@ const DashboardData: FC = () => {
     if (analog) {
       try {
         const response = await EMSESP.writeAnalog({
-          i: analog.i,
+          gpio: analog.g,
           name: analog.n,
           offset: analog.o,
           factor: analog.f,
@@ -978,7 +978,7 @@ const DashboardData: FC = () => {
     if (analog) {
       try {
         const response = await EMSESP.writeAnalog({
-          i: analog.i,
+          gpio: analog.g,
           name: analog.n,
           offset: analog.o,
           factor: analog.f,
@@ -1011,9 +1011,9 @@ const DashboardData: FC = () => {
             <Grid container spacing={2}>
               <Grid item>
                 <ValidatedTextField
-                  name="i"
+                  name="g"
                   label="GPIO"
-                  value={analog.i}
+                  value={analog.g}
                   type="number"
                   variant="outlined"
                   autoFocus
