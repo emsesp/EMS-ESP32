@@ -47,7 +47,7 @@ const SettingsCustomization: FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
-  const [selectedFilters, setSelectedFilters] = useState<number>(15);
+  const [selectedFilters, setSelectedFilters] = useState<number>(0);
 
   // eslint-disable-next-line
   const [masks, setMasks] = useState(() => ['']);
@@ -288,7 +288,7 @@ const SettingsCustomization: FC = () => {
 
     return (
       <>
-        <Box ml={2} mt={1} mb={1}>
+        <Typography sx={{ pt: 1, pb: 1 }} variant="subtitle2" color="primary">
           Apply filter:&nbsp;
           <ToggleButtonGroup
             size="small"
@@ -319,8 +319,7 @@ const SettingsCustomization: FC = () => {
               </Tooltip>
             </ToggleButton>
           </ToggleButtonGroup>
-        </Box>
-
+        </Typography>
         <Table
           data={{ nodes: deviceEntities.filter((de) => de.m & selectedFilters || !selectedFilters) }}
           theme={entities_theme}
