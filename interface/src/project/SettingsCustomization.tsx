@@ -10,8 +10,8 @@ import {
   DialogContent,
   DialogTitle,
   ToggleButton,
-  IconButton,
-  ToggleButtonGroup
+  ToggleButtonGroup,
+  Tooltip
 } from '@mui/material';
 
 import { Table } from '@table-library/react-table-library/table';
@@ -37,7 +37,7 @@ import * as EMSESP from './api';
 
 import { extractErrorMessage } from '../utils';
 
-import { DeviceShort, Devices, DeviceEntity, DeviceEntityMask } from './types';
+import { DeviceShort, Devices, DeviceEntity } from './types';
 
 const SettingsCustomization: FC = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -47,7 +47,7 @@ const SettingsCustomization: FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
-  const [selectedFilters, setSelectedFilters] = useState<number>(DeviceEntityMask.DV_FAVORITE);
+  const [selectedFilters, setSelectedFilters] = useState<number>(15);
 
   // eslint-disable-next-line
   const [masks, setMasks] = useState(() => ['']);
@@ -200,23 +200,7 @@ const SettingsCustomization: FC = () => {
     return (
       <>
         <Box color="warning.main">
-          <Typography variant="body2">Select a device and customize each of its entities using the options:</Typography>
-          <Typography mt={1} ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            <StarIcon color="secondary" sx={{ fontSize: 13 }} />
-            &nbsp;mark it as favorite to be listed at the top of the Dashboard
-          </Typography>
-          <Typography ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            <EditOffOutlinedIcon color="secondary" sx={{ fontSize: 13 }} />
-            &nbsp;make it read-only, only if it has write operation available
-          </Typography>
-          <Typography ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            <CommentsDisabledOutlinedIcon color="secondary" sx={{ fontSize: 13 }} />
-            &nbsp;excluded it from MQTT and API outputs
-          </Typography>
-          <Typography ml={2} mb={1} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            <VisibilityOffOutlinedIcon color="secondary" sx={{ fontSize: 13 }} />
-            &nbsp;hide it from the Dashboard
-          </Typography>
+          <Typography variant="body2">Select a device and customize each of its entities using the options.</Typography>
         </Box>
         <ValidatedTextField
           name="device"
@@ -277,71 +261,71 @@ const SettingsCustomization: FC = () => {
       return;
     }
 
-    const hasMask = (de: DeviceEntity) => {
-      return de.m & selectedFilters;
-      return (de.m & DeviceEntityMask.DV_FAVORITE) === DeviceEntityMask.DV_FAVORITE;
-    };
-
-    const setMask = (de: DeviceEntity, newMask: string[]) => {
+    const getMaskNumber = (newMask: string[]) => {
       var new_mask = 0;
       for (let entry of newMask) {
         new_mask |= Number(entry);
       }
-      de.m = new_mask;
-      setMasks(newMask);
+      return new_mask;
     };
 
-    const getMask = (de: DeviceEntity) => {
+    const getMaskString = (m: number) => {
       var new_masks = [];
-      if ((de.m & 1) === 1 || de.id === '') {
+      if ((m & 1) === 1) {
         new_masks.push('1');
       }
-      if ((de.m & 2) === 2) {
+      if ((m & 2) === 2) {
         new_masks.push('2');
       }
-      if ((de.m & 4) === 4 && de.w) {
+      if ((m & 4) === 4) {
         new_masks.push('4');
       }
-      if ((de.m & 8) === 8) {
+      if ((m & 8) === 8) {
         new_masks.push('8');
       }
-
       return new_masks;
     };
 
     return (
       <>
-        <IconButton size="small" onClick={() => setSelectedDevice(8)}>
-          <StarIcon color="info" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
-        </IconButton>
-
-        <ToggleButtonGroup
-          size="small"
-          color="secondary"
-          // value={getMask(selectedFilters)}
-          onChange={(event, mask) => {
-            // setMask(de, mask);
-          }}
-        >
-          <ToggleButton value="8">
-            <StarIcon sx={{ fontSize: 14 }} />
-          </ToggleButton>
-          <ToggleButton value="4">
-            <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
-          </ToggleButton>
-          <ToggleButton value="2">
-            <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
-          </ToggleButton>
-          <ToggleButton value="1">
-            <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
-          </ToggleButton>
-        </ToggleButtonGroup>
+        <Box ml={2} mt={1} mb={1}>
+          Apply filter:&nbsp;
+          <ToggleButtonGroup
+            size="small"
+            color="secondary"
+            value={getMaskString(selectedFilters)}
+            onChange={(event, mask) => {
+              setSelectedFilters(getMaskNumber(mask));
+            }}
+          >
+            <ToggleButton value="8">
+              <Tooltip arrow placement="top" title="mark it as favorite to be listed at the top of the Dashboard">
+                <StarIcon sx={{ fontSize: 14 }} />
+              </Tooltip>
+            </ToggleButton>
+            <ToggleButton value="4">
+              <Tooltip arrow placement="top" title="make it read-only, only if it has write operation available">
+                <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
+              </Tooltip>
+            </ToggleButton>
+            <ToggleButton value="2">
+              <Tooltip arrow placement="top" title="excluded it from MQTT and API outputs">
+                <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
+              </Tooltip>
+            </ToggleButton>
+            <ToggleButton value="1">
+              <Tooltip arrow placement="top" title="hide it from the Dashboard">
+                <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
+              </Tooltip>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
 
         <Table
-          data={{ nodes: deviceEntities.filter((de) => hasMask(de)) }}
+          data={{ nodes: deviceEntities.filter((de) => de.m & selectedFilters || !selectedFilters) }}
           theme={entities_theme}
           sort={entity_sort}
-          layout={{ custom: true, horizontalScroll: true }}
+          layout={{ custom: true }}
         >
           {(tableList: any) => (
             <>
@@ -369,9 +353,10 @@ const SettingsCustomization: FC = () => {
                       <ToggleButtonGroup
                         size="small"
                         color="secondary"
-                        value={getMask(de)}
+                        value={getMaskString(de.m)}
                         onChange={(event, mask) => {
-                          setMask(de, mask);
+                          de.m = getMaskNumber(mask);
+                          setMasks(['']);
                         }}
                       >
                         <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.id === ''}>
@@ -438,18 +423,12 @@ const SettingsCustomization: FC = () => {
 
   const content = () => {
     return (
-      <div style={{ height: '100vh' }}>
+      <>
         <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
           Device Entities
         </Typography>
         {renderDeviceList()}
-        <div
-          style={{
-            height: '80%'
-          }}
-        >
-          {renderDeviceData()}
-        </div>
+        {renderDeviceData()}
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1}>
             <ButtonRow>
@@ -470,7 +449,7 @@ const SettingsCustomization: FC = () => {
           </ButtonRow>
         </Box>
         {renderResetDialog()}
-      </div>
+      </>
     );
   };
 
