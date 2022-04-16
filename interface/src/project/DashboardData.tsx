@@ -285,11 +285,6 @@ const DashboardData: FC = () => {
     }
   );
 
-  const paul = () => {
-    console.log('paul');
-    sensor_sort.fns.onToggleSort({ sortKey: 'NAME' });
-  };
-
   const device_select = useRowSelect(
     { nodes: coreData.devices },
     {
@@ -829,8 +824,7 @@ const DashboardData: FC = () => {
                     fullWidth
                     style={{ fontSize: '14px', justifyContent: 'flex-start' }}
                     endIcon={getSortIcon(sensor_sort.state, 'NAME')}
-                    // onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'NAME' })}
-                    onClick={() => paul()}
+                    onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'NAME' })}
                   >
                     NAME
                   </Button>

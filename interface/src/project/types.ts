@@ -129,7 +129,7 @@ export interface DeviceData {
 }
 
 export interface DeviceEntity {
-  n: string; // name
+  id: string; // name
   v: any; // value, in any format
   s: string; // shortname
   m: number; // mask

@@ -2,10 +2,6 @@ import { FC, useState, useEffect, useCallback } from 'react';
 
 import {
   Button,
-  Table,
-  TableBody,
-  TableHead,
-  TableRow,
   Typography,
   Box,
   MenuItem,
@@ -17,19 +13,22 @@ import {
   ToggleButtonGroup
 } from '@mui/material';
 
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-
-import { styled } from '@mui/material/styles';
+import { Table } from '@table-library/react-table-library/table';
+import { useTheme } from '@table-library/react-table-library/theme';
+import { useSort } from '@table-library/react-table-library/sort';
+import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 
 import { useSnackbar } from 'notistack';
 
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
-import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
+import StarIcon from '@mui/icons-material/Star';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
+import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
+import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 
 import { ButtonRow, FormLoader, ValidatedTextField, SectionContent } from '../components';
 
@@ -39,16 +38,10 @@ import { extractErrorMessage } from '../utils';
 
 import { DeviceShort, Devices, DeviceEntity } from './types';
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: '#607d8b'
-  }
-}));
-
 const SettingsCustomization: FC = () => {
   const { enqueueSnackbar } = useSnackbar();
 
-  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>();
+  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([{ id: '', v: 0, s: '', m: 0, w: false }]);
   const [devices, setDevices] = useState<Devices>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
@@ -56,6 +49,86 @@ const SettingsCustomization: FC = () => {
 
   // eslint-disable-next-line
   const [masks, setMasks] = useState(() => ['']);
+
+  const entities_theme = useTheme({
+    BaseRow: `
+      font-size: 14px;
+      color: white;
+      height: 32px;
+  `,
+    HeaderRow: `
+      text-transform: uppercase;
+      background-color: black;
+      border-bottom: 1px solid #e0e0e0;
+      color: #90CAF9;
+    `,
+    Row: `
+      background-color: #1e1e1e;
+      border-top: 1px solid #565656;
+      border-bottom: 1px solid #565656;
+      position: relative;
+      z-index: 1;
+      &:not(:last-of-type) {
+        margin-bottom: -1px;
+      }
+      &:not(:first-of-type) {
+        margin-top: -1px;
+      }
+      &:hover {
+        z-index: 2;
+        color: white;
+        border-top: 1px solid #177ac9;
+        border-bottom: 1px solid #177ac9;
+      },
+      &.tr.tr-body.row-select.row-select-single-selected, &.tr.tr-body.row-select.row-select-selected {
+        background-color: #3d4752;
+        color: white;
+        font-weight: normal;
+        z-index: 2;
+        border-top: 1px solid #177ac9;
+        border-bottom: 1px solid #177ac9;
+      }
+      `,
+    BaseCell: `
+      border-top: 1px solid transparent;
+      border-right: 1px solid transparent;
+      border-bottom: 1px solid transparent;
+      &:nth-of-type(1) {
+        min-width: 128px;
+        width: 128px;
+      }
+    `
+  });
+
+  const getSortIcon = (state: any, sortKey: any) => {
+    if (state.sortKey === sortKey && state.reverse) {
+      return <KeyboardArrowDownOutlinedIcon />;
+    }
+
+    if (state.sortKey === sortKey && !state.reverse) {
+      return <KeyboardArrowUpOutlinedIcon />;
+    }
+  };
+
+  const entity_sort = useSort(
+    { nodes: deviceEntities },
+    {
+      state: {
+        sortKey: 'NAME',
+        reverse: false
+      }
+    },
+    {
+      sortIcon: {
+        iconDefault: null,
+        iconUp: <KeyboardArrowUpOutlinedIcon />,
+        iconDown: <KeyboardArrowDownOutlinedIcon />
+      },
+      sortFns: {
+        NAME: (array) => array.sort((a, b) => a.id.localeCompare(b.id))
+      }
+    }
+  );
 
   const fetchDevices = useCallback(async () => {
     try {
@@ -119,7 +192,7 @@ const SettingsCustomization: FC = () => {
         <Box color="warning.main">
           <Typography variant="body2">Select a device and customize each of its entities using the options:</Typography>
           <Typography mt={1} ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            <FavoriteBorderOutlinedIcon color="success" sx={{ fontSize: 13 }} />
+            <StarIcon color="warning" sx={{ fontSize: 13 }} />
             &nbsp;mark it as favorite to be listed at the top of the Dashboard
           </Typography>
           <Typography ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
@@ -205,7 +278,7 @@ const SettingsCustomization: FC = () => {
 
     const getMask = (de: DeviceEntity) => {
       var new_masks = [];
-      if ((de.m & 1) === 1 || de.n === '') {
+      if ((de.m & 1) === 1 || de.id === '') {
         new_masks.push('1');
       }
       if ((de.m & 2) === 2) {
@@ -222,47 +295,61 @@ const SettingsCustomization: FC = () => {
     };
 
     return (
-      <Table size="small" padding="normal">
-        <TableHead>
-          <TableRow>
-            <StyledTableCell align="center">OPTIONS</StyledTableCell>
-            <StyledTableCell align="left">ENTITY NAME (CODE)</StyledTableCell>
-            <StyledTableCell align="right">VALUE</StyledTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {deviceEntities.map((de) => (
-            <TableRow key={de.s} hover>
-              <StyledTableCell padding="none">
-                <ToggleButtonGroup
-                  size="small"
-                  color="secondary"
-                  value={getMask(de)}
-                  onChange={(event, mask) => {
-                    setMask(de, mask);
-                  }}
-                >
-                  <ToggleButton value="8" color="success" disabled={(de.m & 1) !== 0 || de.n === ''}>
-                    <FavoriteBorderOutlinedIcon sx={{ fontSize: 14 }} />
-                  </ToggleButton>
-                  <ToggleButton value="4" disabled={!de.w}>
-                    <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
-                  </ToggleButton>
-                  <ToggleButton value="2">
-                    <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
-                  </ToggleButton>
-                  <ToggleButton value="1">
-                    <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </StyledTableCell>
-              <StyledTableCell>
-                {de.n}&nbsp;({de.s})
-              </StyledTableCell>
-              <StyledTableCell align="right">{formatValue(de.v)}</StyledTableCell>
-            </TableRow>
-          ))}
-        </TableBody>
+      <Table data={{ nodes: deviceEntities }} theme={entities_theme} sort={entity_sort} layout={{ custom: true }}>
+        {(tableList: any) => (
+          <>
+            <Header>
+              <HeaderRow>
+                <HeaderCell>OPTIONS</HeaderCell>
+                <HeaderCell resize>
+                  <Button
+                    fullWidth
+                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    endIcon={getSortIcon(entity_sort.state, 'NAME')}
+                    onClick={() => entity_sort.fns.onToggleSort({ sortKey: 'NAME' })}
+                  >
+                    NAME
+                  </Button>
+                </HeaderCell>
+                <HeaderCell>VALUE</HeaderCell>
+                <HeaderCell />
+              </HeaderRow>
+            </Header>
+            <Body>
+              {tableList.map((de: DeviceEntity) => (
+                <Row key={de.id} item={de}>
+                  <Cell>
+                    <ToggleButtonGroup
+                      size="small"
+                      color="secondary"
+                      value={getMask(de)}
+                      onChange={(event, mask) => {
+                        setMask(de, mask);
+                      }}
+                    >
+                      <ToggleButton value="8" color="warning" disabled={(de.m & 1) !== 0 || de.id === ''}>
+                        <StarIcon sx={{ fontSize: 14 }} />
+                      </ToggleButton>
+                      <ToggleButton value="4" disabled={!de.w}>
+                        <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
+                      </ToggleButton>
+                      <ToggleButton value="2">
+                        <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
+                      </ToggleButton>
+                      <ToggleButton value="1">
+                        <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                  </Cell>
+                  <Cell>
+                    {de.id}&nbsp;({de.s})
+                  </Cell>
+                  <Cell>{formatValue(de.v)}</Cell>
+                </Row>
+              ))}
+            </Body>
+          </>
+        )}
       </Table>
     );
   };
