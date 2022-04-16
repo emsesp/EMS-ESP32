@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogTitle,
   ToggleButton,
+  IconButton,
   ToggleButtonGroup
 } from '@mui/material';
 
@@ -36,7 +37,7 @@ import * as EMSESP from './api';
 
 import { extractErrorMessage } from '../utils';
 
-import { DeviceShort, Devices, DeviceEntity } from './types';
+import { DeviceShort, Devices, DeviceEntity, DeviceEntityMask } from './types';
 
 const SettingsCustomization: FC = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -46,16 +47,20 @@ const SettingsCustomization: FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
+  const [selectedFilters, setSelectedFilters] = useState<number>(DeviceEntityMask.DV_FAVORITE);
 
   // eslint-disable-next-line
   const [masks, setMasks] = useState(() => ['']);
 
   const entities_theme = useTheme({
+    Table: `
+      height: 100%;
+    `,
     BaseRow: `
       font-size: 14px;
       color: white;
       height: 32px;
-  `,
+    `,
     HeaderRow: `
       text-transform: uppercase;
       background-color: black;
@@ -88,14 +93,19 @@ const SettingsCustomization: FC = () => {
         border-top: 1px solid #177ac9;
         border-bottom: 1px solid #177ac9;
       }
-      `,
+    `,
     BaseCell: `
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
       &:nth-of-type(1) {
-        min-width: 128px;
-        width: 128px;
+        width: 130px;
+      }
+      &:nth-of-type(2) {
+        flex: 1;
+      }
+      &:last-of-type {
+        text-align: right;
       }
     `
   });
@@ -192,7 +202,7 @@ const SettingsCustomization: FC = () => {
         <Box color="warning.main">
           <Typography variant="body2">Select a device and customize each of its entities using the options:</Typography>
           <Typography mt={1} ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
-            <StarIcon color="warning" sx={{ fontSize: 13 }} />
+            <StarIcon color="secondary" sx={{ fontSize: 13 }} />
             &nbsp;mark it as favorite to be listed at the top of the Dashboard
           </Typography>
           <Typography ml={2} display="block" variant="body2" sx={{ alignItems: 'center', display: 'flex' }}>
@@ -263,9 +273,14 @@ const SettingsCustomization: FC = () => {
   };
 
   const renderDeviceData = () => {
-    if (devices?.devices.length === 0 || !deviceEntities) {
+    if (devices?.devices.length === 0 || deviceEntities[0].id === '') {
       return;
     }
+
+    const hasMask = (de: DeviceEntity) => {
+      return de.m & selectedFilters;
+      return (de.m & DeviceEntityMask.DV_FAVORITE) === DeviceEntityMask.DV_FAVORITE;
+    };
 
     const setMask = (de: DeviceEntity, newMask: string[]) => {
       var new_mask = 0;
@@ -295,62 +310,95 @@ const SettingsCustomization: FC = () => {
     };
 
     return (
-      <Table data={{ nodes: deviceEntities }} theme={entities_theme} sort={entity_sort} layout={{ custom: true }}>
-        {(tableList: any) => (
-          <>
-            <Header>
-              <HeaderRow>
-                <HeaderCell>OPTIONS</HeaderCell>
-                <HeaderCell resize>
-                  <Button
-                    fullWidth
-                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
-                    endIcon={getSortIcon(entity_sort.state, 'NAME')}
-                    onClick={() => entity_sort.fns.onToggleSort({ sortKey: 'NAME' })}
-                  >
-                    NAME
-                  </Button>
-                </HeaderCell>
-                <HeaderCell>VALUE</HeaderCell>
-                <HeaderCell />
-              </HeaderRow>
-            </Header>
-            <Body>
-              {tableList.map((de: DeviceEntity) => (
-                <Row key={de.id} item={de}>
-                  <Cell>
-                    <ToggleButtonGroup
-                      size="small"
-                      color="secondary"
-                      value={getMask(de)}
-                      onChange={(event, mask) => {
-                        setMask(de, mask);
-                      }}
+      <>
+        <IconButton size="small" onClick={() => setSelectedDevice(8)}>
+          <StarIcon color="info" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+        </IconButton>
+
+        <ToggleButtonGroup
+          size="small"
+          color="secondary"
+          // value={getMask(selectedFilters)}
+          onChange={(event, mask) => {
+            // setMask(de, mask);
+          }}
+        >
+          <ToggleButton value="8">
+            <StarIcon sx={{ fontSize: 14 }} />
+          </ToggleButton>
+          <ToggleButton value="4">
+            <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
+          </ToggleButton>
+          <ToggleButton value="2">
+            <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
+          </ToggleButton>
+          <ToggleButton value="1">
+            <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
+          </ToggleButton>
+        </ToggleButtonGroup>
+
+        <Table
+          data={{ nodes: deviceEntities.filter((de) => hasMask(de)) }}
+          theme={entities_theme}
+          sort={entity_sort}
+          layout={{ custom: true, horizontalScroll: true }}
+        >
+          {(tableList: any) => (
+            <>
+              <Header>
+                <HeaderRow>
+                  <HeaderCell>OPTIONS</HeaderCell>
+                  <HeaderCell resize>
+                    <Button
+                      fullWidth
+                      style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                      endIcon={getSortIcon(entity_sort.state, 'NAME')}
+                      onClick={() => entity_sort.fns.onToggleSort({ sortKey: 'NAME' })}
                     >
-                      <ToggleButton value="8" color="warning" disabled={(de.m & 1) !== 0 || de.id === ''}>
-                        <StarIcon sx={{ fontSize: 14 }} />
-                      </ToggleButton>
-                      <ToggleButton value="4" disabled={!de.w}>
-                        <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
-                      </ToggleButton>
-                      <ToggleButton value="2">
-                        <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
-                      </ToggleButton>
-                      <ToggleButton value="1">
-                        <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
-                      </ToggleButton>
-                    </ToggleButtonGroup>
-                  </Cell>
-                  <Cell>
-                    {de.id}&nbsp;({de.s})
-                  </Cell>
-                  <Cell>{formatValue(de.v)}</Cell>
-                </Row>
-              ))}
-            </Body>
-          </>
-        )}
-      </Table>
+                      NAME
+                    </Button>
+                  </HeaderCell>
+                  <HeaderCell pinRight={true}>VALUE</HeaderCell>
+                  <HeaderCell />
+                </HeaderRow>
+              </Header>
+              <Body>
+                {tableList.map((de: DeviceEntity) => (
+                  <Row key={de.id} item={de}>
+                    <Cell>
+                      <ToggleButtonGroup
+                        size="small"
+                        color="secondary"
+                        value={getMask(de)}
+                        onChange={(event, mask) => {
+                          setMask(de, mask);
+                        }}
+                      >
+                        <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.id === ''}>
+                          <StarIcon sx={{ fontSize: 14 }} />
+                        </ToggleButton>
+                        <ToggleButton value="4" disabled={!de.w}>
+                          <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
+                        </ToggleButton>
+                        <ToggleButton value="2">
+                          <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
+                        </ToggleButton>
+                        <ToggleButton value="1">
+                          <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+                    </Cell>
+                    <Cell>
+                      {de.id}&nbsp;({de.s})
+                    </Cell>
+                    <Cell>{formatValue(de.v)}</Cell>
+                  </Row>
+                ))}
+              </Body>
+            </>
+          )}
+        </Table>
+      </>
     );
   };
 
@@ -390,12 +438,18 @@ const SettingsCustomization: FC = () => {
 
   const content = () => {
     return (
-      <>
+      <div style={{ height: '100vh' }}>
         <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
           Device Entities
         </Typography>
         {renderDeviceList()}
-        {renderDeviceData()}
+        <div
+          style={{
+            height: '80%'
+          }}
+        >
+          {renderDeviceData()}
+        </div>
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1}>
             <ButtonRow>
@@ -416,7 +470,7 @@ const SettingsCustomization: FC = () => {
           </ButtonRow>
         </Box>
         {renderResetDialog()}
-      </>
+      </div>
     );
   };
 

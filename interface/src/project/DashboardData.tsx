@@ -661,7 +661,7 @@ const DashboardData: FC = () => {
                 <HeaderCell resize>TYPE</HeaderCell>
                 <HeaderCell resize>DESCRIPTION</HeaderCell>
                 <HeaderCell>ENTITIES</HeaderCell>
-                <HeaderCell />
+                <HeaderCell/>
               </HeaderRow>
             </Header>
             <Body>
@@ -767,7 +767,7 @@ const DashboardData: FC = () => {
                       VALUE
                     </Button>
                   </HeaderCell>
-                  <HeaderCell />
+                  <HeaderCell/>
                 </HeaderRow>
               </Header>
               <Body>

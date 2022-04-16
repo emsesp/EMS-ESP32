@@ -698,7 +698,7 @@ const emsesp_deviceentities_4 = [
     v: 16,
     id: 'hc2 selected room temperature',
     s: 'hc2/seltemp',
-    m: 0,
+    m: 8,
     w: true,
   },
   {
@@ -916,15 +916,15 @@ function updateMask(entity, de, dd) {
   objIndex = de.findIndex((obj) => obj.s == name)
   if (objIndex !== -1) {
     de[objIndex].m = new_mask
-    const fullname = de[objIndex].n
-    objIndex = dd.data.findIndex((obj) => obj.n.slice(2) == fullname)
+    const fullname = de[objIndex].id
+    objIndex = dd.data.findIndex((obj) => obj.id.slice(2) == fullname)
     if (objIndex !== -1) {
       // see if the mask has changed
-      const old_mask = parseInt(dd.data[objIndex].n.slice(0, 2), 16)
+      const old_mask = parseInt(dd.data[objIndex].id.slice(0, 2), 16)
       if (old_mask !== new_mask) {
         const mask_hex = entity.slice(0, 2)
-        console.log('Updating ' + dd.data[objIndex].n + ' -> ' + mask_hex + fullname)
-        dd.data[objIndex].n = mask_hex + fullname
+        console.log('Updating ' + dd.data[objIndex].id + ' -> ' + mask_hex + fullname)
+        dd.data[objIndex].id = mask_hex + fullname
       }
     }
   } else {
@@ -934,6 +934,7 @@ function updateMask(entity, de, dd) {
 
 rest_server.post(EMSESP_MASKED_ENTITIES_ENDPOINT, (req, res) => {
   const id = req.body.id
+  console.log('customization id = ' + id)
   console.log(req.body.entity_ids)
   for (const entity of req.body.entity_ids) {
     if (id === 1) {
