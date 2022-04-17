@@ -11,7 +11,8 @@ import {
   DialogTitle,
   ToggleButton,
   ToggleButtonGroup,
-  Tooltip
+  Tooltip,
+  Grid
 } from '@mui/material';
 
 import { Table } from '@table-library/react-table-library/table';
@@ -37,7 +38,7 @@ import * as EMSESP from './api';
 
 import { extractErrorMessage } from '../utils';
 
-import { DeviceShort, Devices, DeviceEntity } from './types';
+import { DeviceShort, Devices, DeviceEntity, DeviceEntityMask } from './types';
 
 const SettingsCustomization: FC = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -286,40 +287,69 @@ const SettingsCustomization: FC = () => {
       return new_masks;
     };
 
+    const maskDisabled = (set: boolean) => {
+      setDeviceEntities(
+        deviceEntities
+          .filter((de) => de.m & selectedFilters || !selectedFilters)
+          .map(({ m, ...entities }) => ({
+            ...entities,
+            m: set
+              ? m | (DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE)
+              : m & ~(DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE)
+          }))
+      );
+    };
+
     return (
       <>
-        <Typography sx={{ pt: 1, pb: 1 }} variant="subtitle2" color="primary">
-          Apply filter:&nbsp;
-          <ToggleButtonGroup
-            size="small"
-            color="secondary"
-            value={getMaskString(selectedFilters)}
-            onChange={(event, mask) => {
-              setSelectedFilters(getMaskNumber(mask));
-            }}
-          >
-            <ToggleButton value="8">
-              <Tooltip arrow placement="top" title="mark it as favorite to be listed at the top of the Dashboard">
-                <StarIcon sx={{ fontSize: 14 }} />
-              </Tooltip>
-            </ToggleButton>
-            <ToggleButton value="4">
-              <Tooltip arrow placement="top" title="make it read-only, only if it has write operation available">
-                <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
-              </Tooltip>
-            </ToggleButton>
-            <ToggleButton value="2">
-              <Tooltip arrow placement="top" title="excluded it from MQTT and API outputs">
-                <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
-              </Tooltip>
-            </ToggleButton>
-            <ToggleButton value="1">
-              <Tooltip arrow placement="top" title="hide it from the Dashboard">
-                <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
-              </Tooltip>
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Typography>
+        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="center">
+          <Grid item>
+            <Typography sx={{ pt: 1, pb: 1 }} variant="subtitle2" color="primary">
+              Apply filter:&nbsp;
+            </Typography>
+          </Grid>
+          <Grid item>
+            <ToggleButtonGroup
+              size="small"
+              color="secondary"
+              value={getMaskString(selectedFilters)}
+              onChange={(event, mask) => {
+                setSelectedFilters(getMaskNumber(mask));
+              }}
+            >
+              <ToggleButton value="8">
+                <Tooltip arrow placement="top" title="mark it as favorite to be listed at the top of the Dashboard">
+                  <StarIcon sx={{ fontSize: 14 }} />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="4">
+                <Tooltip arrow placement="top" title="make it read-only, only if it has write operation available">
+                  <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="2">
+                <Tooltip arrow placement="top" title="excluded it from MQTT and API outputs">
+                  <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="1">
+                <Tooltip arrow placement="top" title="hide it from the Dashboard">
+                  <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
+                </Tooltip>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Grid>
+          <Grid item>
+            <Button size="small" variant="contained" color="primary" onClick={() => maskDisabled(true)}>
+              set all disabled
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button size="small" variant="contained" color="primary" onClick={() => maskDisabled(false)}>
+              set all enabled
+            </Button>
+          </Grid>
+        </Grid>
         <Table
           data={{ nodes: deviceEntities.filter((de) => de.m & selectedFilters || !selectedFilters) }}
           theme={entities_theme}
@@ -401,7 +431,7 @@ const SettingsCustomization: FC = () => {
     <Dialog open={confirmReset} onClose={() => setConfirmReset(false)}>
       <DialogTitle>Reset</DialogTitle>
       <DialogContent dividers>
-        Are you sure you want remove all customizations? EMS-ESP will then restart.
+        Are you sure you want remove all customizations including the settings of Temperature and Analog sensors?
       </DialogContent>
       <DialogActions>
         <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmReset(false)} color="secondary">
