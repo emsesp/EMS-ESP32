@@ -550,6 +550,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "dallas") {
         shell.printfln(F("Testing adding Dallas sensor"));
+        emsesp::EMSESP::dallassensor_.test();
+    }
+
+    if (command == "dallas_full") {
+        shell.printfln(F("Testing adding and changing Dallas sensor"));
         Mqtt::ha_enabled(true);
         Mqtt::nested_format(1);
         // Mqtt::nested_format(0);

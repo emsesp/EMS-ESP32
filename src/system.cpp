@@ -1036,7 +1036,7 @@ bool System::command_customizations(const char * value, const int8_t id, JsonObj
         JsonArray sensorsJson = node.createNestedArray("sensors");
         for (const auto & sensor : settings.sensorCustomizations) {
             JsonObject sensorJson = sensorsJson.createNestedObject();
-            sensorJson["id_str"]  = sensor.id_str; // key, is
+            sensorJson["id"]      = sensor.id;     // key
             sensorJson["name"]    = sensor.name;   // n
             sensorJson["offset"]  = sensor.offset; // o
         }
@@ -1044,7 +1044,7 @@ bool System::command_customizations(const char * value, const int8_t id, JsonObj
         JsonArray analogJson = node.createNestedArray("analogs");
         for (const AnalogCustomization & sensor : settings.analogCustomizations) {
             JsonObject sensorJson = analogJson.createNestedObject();
-            sensorJson["gpio"]    = sensor.id;
+            sensorJson["gpio"]    = sensor.gpio;
             sensorJson["name"]    = sensor.name;
             if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
                 sensorJson["type"] = sensor.type;

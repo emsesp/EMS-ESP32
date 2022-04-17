@@ -1,11 +1,7 @@
-import { FC, useState, useContext, useEffect } from 'react';
+import { FC, useState, useContext, useCallback, useEffect } from 'react';
 
 import {
   Button,
-  Table,
-  TableBody,
-  TableHead,
-  TableRow,
   Typography,
   Box,
   Dialog,
@@ -20,15 +16,19 @@ import {
   ListItem,
   ListItemText,
   Grid,
-  useMediaQuery
+  FormControlLabel,
+  Checkbox
 } from '@mui/material';
-
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-
-import { styled } from '@mui/material/styles';
 
 import { useSnackbar } from 'notistack';
 
+import { Table } from '@table-library/react-table-library/table';
+import { useTheme } from '@table-library/react-table-library/theme';
+import { useSort } from '@table-library/react-table-library/sort';
+import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import { useRowSelect } from '@table-library/react-table-library/select';
+
+import DownloadIcon from '@mui/icons-material/GetApp';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import EditIcon from '@mui/icons-material/Edit';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -37,10 +37,11 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SendIcon from '@mui/icons-material/TrendingFlat';
 import SaveIcon from '@mui/icons-material/Save';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
+import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
+import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 
 import DeviceIcon from './DeviceIcon';
 
@@ -50,14 +51,15 @@ import { formatDurationMin, pluralize } from '../utils';
 
 import { AuthenticatedContext } from '../contexts/authentication';
 
-import { ButtonRow, FormLoader, ValidatedTextField, SectionContent, MessageBox } from '../components';
+import { ButtonRow, ValidatedTextField, SectionContent, MessageBox } from '../components';
 
 import * as EMSESP from './api';
 
-import { numberValue, updateValue, extractErrorMessage, useRest } from '../utils';
+import { numberValue, updateValue, extractErrorMessage } from '../utils';
 
 import {
   SensorData,
+  Device,
   CoreData,
   DeviceData,
   DeviceValue,
@@ -70,64 +72,307 @@ import {
   DeviceEntityMask
 } from './types';
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
-    fontSize: 14
-  }
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  '&:nth-of-type(odd)': {
-    backgroundColor: theme.palette.action.hover
-  },
-  '&:hover': {
-    backgroundColor: theme.palette.info.light
-  }
-}));
-
 const DashboardData: FC = () => {
-  const { loadData, data, errorMessage } = useRest<CoreData>({ read: EMSESP.readCoreData });
-
   const { me } = useContext(AuthenticatedContext);
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const [deviceData, setDeviceData] = useState<DeviceData>();
-  const [sensorData, setSensorData] = useState<SensorData>();
+  const [coreData, setCoreData] = useState<CoreData>({ devices: [], active_sensors: 0, analog_enabled: false });
+  const [deviceData, setDeviceData] = useState<DeviceData>({ label: '', data: [] });
+  const [sensorData, setSensorData] = useState<SensorData>({ sensors: [], analogs: [] });
   const [deviceValue, setDeviceValue] = useState<DeviceValue>();
   const [sensor, setSensor] = useState<Sensor>();
   const [analog, setAnalog] = useState<Analog>();
-  const [selectedDevice, setSelectedDevice] = useState<number>();
   const [deviceDialog, setDeviceDialog] = useState<number>(-1);
+  const [onlyFav, setOnlyFav] = useState(false);
 
-  const desktopWindow = useMediaQuery('(min-width:600px)');
+  const device_theme = useTheme({
+    BaseRow: `
+      font-size: 14px;
+      color: white;
+      height: 46px;
+      &:focus {
+        z-index: 2;
+        border-top: 1px solid #177ac9;
+        border-bottom: 1px solid #177ac9;
+      }
+  `,
+    HeaderRow: `
+      text-transform: uppercase;
+      background-color: black;
+      border-bottom: 1px solid #e0e0e0;
+    `,
+    Row: `
+      background-color: #1e1e1e;
+      border-top: 1px solid #565656;
+      border-bottom: 1px solid #565656;
+      position: relative;
+      z-index: 1;
+      &:not(:last-of-type) {
+        margin-bottom: -1px;
+      }
+      &:not(:first-of-type) {
+        margin-top: -1px;
+      }
+      &:hover {
+        z-index: 2;
+        color: white;
+        border-top: 1px solid #177ac9;
+        border-bottom: 1px solid #177ac9;
+      },
+      &.tr.tr-body.row-select.row-select-single-selected, &.tr.tr-body.row-select.row-select-selected {
+        background-color: #3d4752;
+        color: white;
+        font-weight: normal;
+        z-index: 2;
+        border-top: 1px solid #177ac9;
+        border-bottom: 1px solid #177ac9;
+      }
+      `,
+    BaseCell: `
+      border-top: 1px solid transparent;
+      border-right: 1px solid transparent;
+      border-bottom: 1px solid transparent;
+      &:nth-of-type(1) {
+        min-width: 42px;
+        width: 42px;
+        div {
+          width: 100%;
+        }
+      }
+      &:nth-of-type(2) {
+        min-width: 120px;
+        width: 120px;
+      }
+      &:nth-of-type(3) {
+        flex: 1;
+      }
+      &:nth-of-type(4) {
+        text-align: center;
+        max-width: 100px;
+      }
+      &:last-of-type {
+        text-align: right;
+        min-width: 64px;
+      }
+    `
+  });
 
-  const refreshAllData = () => {
-    if (analog || sensor || deviceValue) {
-      return;
+  const data_theme = useTheme({
+    BaseRow: `
+      font-size: 14px;
+      color: white;
+      height: 32px;
+  `,
+    HeaderRow: `
+      text-transform: uppercase;
+      background-color: black;
+      color: #90CAF9;
+      border-bottom: 1px solid #e0e0e0;
+    `,
+    Row: `
+      &:nth-of-type(odd) {
+        background-color: #303030;
+      }
+      &:nth-of-type(even) {
+        background-color: #1e1e1e;
+      }
+      border-top: 1px solid #565656;
+      border-bottom: 1px solid #565656;
+      position: relative;
+      z-index: 1;
+      &:not(:last-of-type) {
+        margin-bottom: -1px;
+      }
+      &:not(:first-of-type) {
+        margin-top: -1px;
+      }
+      &:hover {
+        z-index: 2;
+        border-top: 1px solid #177ac9;
+        border-bottom: 1px solid #177ac9;
+        color: white;
+        cursor: 'pointer',
+      }
+      `,
+    BaseCell: `
+      padding-left: 8px;
+      border-top: 1px solid transparent;
+      border-right: 1px solid transparent;
+      border-bottom: 1px solid transparent;
+      &:last-of-type {
+        text-align: right;
+        min-width: 64px;
+      }
+    `,
+    HeaderCell: `
+      padding-left: 0px;
+    `
+  });
+
+  const getSortIcon = (state: any, sortKey: any) => {
+    if (state.sortKey === sortKey && state.reverse) {
+      return <KeyboardArrowDownOutlinedIcon />;
     }
-    loadData();
-    if (sensorData) {
-      fetchSensorData();
-    } else if (selectedDevice) {
-      fetchDeviceData(selectedDevice);
+
+    if (state.sortKey === sortKey && !state.reverse) {
+      return <KeyboardArrowUpOutlinedIcon />;
     }
+  };
+
+  const analog_sort = useSort(
+    { nodes: sensorData.analogs },
+    {
+      state: {
+        sortKey: 'GPIO',
+        reverse: false
+      }
+    },
+    {
+      sortIcon: {
+        iconDefault: null,
+        iconUp: <KeyboardArrowUpOutlinedIcon />,
+        iconDown: <KeyboardArrowDownOutlinedIcon />
+      },
+      sortFns: {
+        GPIO: (array) => array.sort((a, b) => a.g - b.g),
+        NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
+        TYPE: (array) => array.sort((a, b) => a.t - b.t),
+        VALUE: (array) => array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
+      }
+    }
+  );
+
+  const sensor_sort = useSort(
+    { nodes: sensorData.sensors },
+    {
+      state: {
+        sortKey: 'NAME',
+        reverse: false
+      }
+    },
+    {
+      sortIcon: {
+        iconDefault: null,
+        iconUp: <KeyboardArrowUpOutlinedIcon />,
+        iconDown: <KeyboardArrowDownOutlinedIcon />
+      },
+      sortFns: {
+        NAME: (array) => array.sort((a, b) => a.id.localeCompare(b.id)),
+        TEMPERATURE: (array) => array.sort((a, b) => a.id.localeCompare(b.id))
+      }
+    }
+  );
+
+  const dv_sort = useSort(
+    { nodes: deviceData.data },
+    {
+      state: {
+        sortKey: 'NAME',
+        reverse: false
+      }
+    },
+    {
+      sortIcon: {
+        iconDefault: null,
+        iconUp: <KeyboardArrowUpOutlinedIcon />,
+        iconDown: <KeyboardArrowDownOutlinedIcon />
+      },
+      sortFns: {
+        NAME: (array) => array.sort((a, b) => a.id.slice(2).localeCompare(b.id.slice(2))),
+        VALUE: (array) => array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
+      }
+    }
+  );
+
+  const device_select = useRowSelect(
+    { nodes: coreData.devices },
+    {
+      onChange: onSelectChange
+    }
+  );
+
+  function onSelectChange(action: any, state: any) {
+    if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
+      refreshData();
+    } else {
+      setSensorData({ sensors: [], analogs: [] });
+    }
+  }
+
+  const escapeCsvCell = (cell: any) => {
+    if (cell == null) {
+      return '';
+    }
+    const sc = cell.toString().trim();
+    if (sc === '' || sc === '""') {
+      return sc;
+    }
+    if (sc.includes('"') || sc.includes(',') || sc.includes('\n') || sc.includes('\r')) {
+      return '"' + sc.replace(/"/g, '""') + '"';
+    }
+    return sc;
+  };
+
+  const makeCsvData = (columns: any, data: any) => {
+    return data.reduce((csvString: any, rowItem: any) => {
+      return csvString + columns.map(({ accessor }: any) => escapeCsvCell(accessor(rowItem))).join(',') + '\r\n';
+    }, columns.map(({ name }: any) => escapeCsvCell(name)).join(',') + '\r\n');
+  };
+
+  const downloadAsCsv = (columns: any, data: any, filename: string) => {
+    const csvData = makeCsvData(columns, data);
+    const csvFile = new Blob([csvData], { type: 'text/csv' });
+    const downloadLink = document.createElement('a');
+
+    downloadLink.download = filename;
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  };
+
+  const hasMask = (id: string, mask: number) => (parseInt(id.slice(0, 2), 16) & mask) === mask;
+
+  const handleDownloadCsv = () => {
+    const columns = [
+      { accessor: (dv: any) => dv.id.slice(2), name: 'Entity' },
+      { accessor: (dv: any) => dv.v, name: 'Value' },
+      { accessor: (dv: any) => (dv.u >= 1 && dv.u <= 2 ? 'C' : DeviceValueUOM_s[dv.u]), name: 'UoM' }
+    ];
+    downloadAsCsv(
+      columns,
+      onlyFav ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE)) : deviceData.data,
+      'device_entities'
+    );
   };
 
   const refreshData = () => {
-    if (analog || sensor || deviceValue) {
+    const selectedDevice = device_select.state.id;
+    if (selectedDevice === 'sensor') {
+      fetchSensorData();
       return;
     }
-    if (sensorData) {
-      fetchSensorData();
-    } else if (selectedDevice) {
+
+    setSensorData({ sensors: [], analogs: [] });
+    if (selectedDevice) {
       fetchDeviceData(selectedDevice);
     } else {
-      loadData();
+      fetchCoreData();
     }
   };
+
+  const fetchCoreData = useCallback(async () => {
+    try {
+      setCoreData((await EMSESP.readCoreData()).data);
+    } catch (error: any) {
+      enqueueSnackbar(extractErrorMessage(error, 'Failed to fetch core data'), { variant: 'error' });
+    }
+  }, [enqueueSnackbar]);
+
+  useEffect(() => {
+    fetchCoreData();
+  }, [fetchCoreData]);
 
   useEffect(() => {
     const timer = setInterval(() => refreshData(), 60000);
@@ -135,16 +380,14 @@ const DashboardData: FC = () => {
       clearInterval(timer);
     };
     // eslint-disable-next-line
-  }, [analog, sensor, deviceValue, sensorData, selectedDevice]);
+  }, [analog, sensor, deviceValue, sensorData]);
 
-  const fetchDeviceData = async (unique_id: number) => {
+  const fetchDeviceData = async (id: string) => {
+    const unique_id = parseInt(id);
     try {
       setDeviceData((await EMSESP.readDeviceData({ id: unique_id })).data);
     } catch (error: any) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem fetching device data'), { variant: 'error' });
-    } finally {
-      setSelectedDevice(unique_id);
-      setSensorData(undefined);
     }
   };
 
@@ -153,8 +396,6 @@ const DashboardData: FC = () => {
       setSensorData((await EMSESP.readSensorData()).data);
     } catch (error: any) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem fetching sensor data'), { variant: 'error' });
-    } finally {
-      setSelectedDevice(undefined);
     }
   };
 
@@ -192,10 +433,10 @@ const DashboardData: FC = () => {
   }
 
   const sendDeviceValue = async () => {
-    if (selectedDevice && deviceValue) {
+    if (deviceValue) {
       try {
         const response = await EMSESP.writeValue({
-          id: selectedDevice,
+          id: Number(device_select.state.id),
           devicevalue: deviceValue
         });
         if (response.status === 204) {
@@ -209,9 +450,8 @@ const DashboardData: FC = () => {
       } catch (error: any) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem writing value'), { variant: 'error' });
       } finally {
+        refreshData();
         setDeviceValue(undefined);
-        fetchDeviceData(selectedDevice);
-        loadData();
       }
     }
   };
@@ -225,7 +465,7 @@ const DashboardData: FC = () => {
             {deviceValue.l && (
               <ValidatedTextField
                 name="v"
-                label={deviceValue.n.slice(2)}
+                label={deviceValue.id.slice(2)}
                 value={deviceValue.v}
                 autoFocus
                 sx={{ width: '30ch' }}
@@ -240,7 +480,7 @@ const DashboardData: FC = () => {
             {!deviceValue.l && (
               <ValidatedTextField
                 name="v"
-                label={deviceValue.n.slice(2)}
+                label={deviceValue.id.slice(2)}
                 value={deviceValue.u ? numberValue(deviceValue.v) : deviceValue.v}
                 autoFocus
                 sx={{ width: '30ch' }}
@@ -279,14 +519,14 @@ const DashboardData: FC = () => {
   };
 
   const addAnalogSensor = () => {
-    setAnalog({ i: 0, n: '', u: 0, v: 0, o: 0, t: 0, f: 1 });
+    setAnalog({ id: '0', g: 0, n: '', u: 0, v: 0, o: 0, t: 0, f: 1 });
   };
 
   const sendSensor = async () => {
     if (sensor) {
       try {
         const response = await EMSESP.writeSensor({
-          id_str: sensor.is,
+          id: sensor.id,
           name: sensor.n,
           offset: sensor.o
         });
@@ -314,7 +554,7 @@ const DashboardData: FC = () => {
           <DialogTitle>Edit Temperature Sensor</DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
-              <Typography variant="body2">Sensor ID {sensor.is}</Typography>
+              <Typography variant="body2">Sensor ID {sensor.id}</Typography>
             </Box>
             <Grid container spacing={1}>
               <Grid item>
@@ -369,32 +609,32 @@ const DashboardData: FC = () => {
   };
 
   const renderDeviceDialog = () => {
-    if (data && data.devices.length > 0 && deviceDialog !== -1) {
+    if (coreData && coreData.devices.length > 0 && deviceDialog !== -1) {
       return (
         <Dialog open={deviceDialog !== -1} onClose={() => setDeviceDialog(-1)}>
           <DialogTitle>Device Details</DialogTitle>
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
-                <ListItemText primary="Type" secondary={data.devices[deviceDialog].t} />
+                <ListItemText primary="Type" secondary={coreData.devices[deviceDialog].t} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Name" secondary={data.devices[deviceDialog].n} />
+                <ListItemText primary="Name" secondary={coreData.devices[deviceDialog].n} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Brand" secondary={data.devices[deviceDialog].b} />
+                <ListItemText primary="Brand" secondary={coreData.devices[deviceDialog].b} />
               </ListItem>
               <ListItem>
                 <ListItemText
                   primary="Device ID"
-                  secondary={'0x' + ('00' + data.devices[deviceDialog].d.toString(16).toUpperCase()).slice(-2)}
+                  secondary={'0x' + ('00' + coreData.devices[deviceDialog].d.toString(16).toUpperCase()).slice(-2)}
                 />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Product ID" secondary={data.devices[deviceDialog].p} />
+                <ListItemText primary="Product ID" secondary={coreData.devices[deviceDialog].p} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Version" secondary={data.devices[deviceDialog].v} />
+                <ListItemText primary="Version" secondary={coreData.devices[deviceDialog].v} />
               </ListItem>
             </List>
           </DialogContent>
@@ -408,104 +648,76 @@ const DashboardData: FC = () => {
     }
   };
 
-  const toggleDeviceData = (index: number) => {
-    loadData();
-    if (selectedDevice === index) {
-      setSelectedDevice(undefined);
-    } else {
-      fetchDeviceData(index);
-    }
-  };
+  const renderCoreData = () => (
+    <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
+      {coreData.devices.length === 0 && <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />}
 
-  const toggleSensorData = () => {
-    loadData();
-    if (sensorData) {
-      setSensorData(undefined);
-    } else {
-      fetchSensorData();
-    }
-  };
-
-  const renderCoreData = () => {
-    if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
-    }
-
-    return (
-      <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
-        {data.devices.length === 0 && <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />}
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell padding="checkbox" align="left" colSpan={2}>
-                TYPE
-              </StyledTableCell>
-              {desktopWindow && <StyledTableCell>DESCRIPTION</StyledTableCell>}
-              <StyledTableCell align="center">ENTITIES</StyledTableCell>
-              <StyledTableCell />
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.devices.map((device, index) => (
-              <TableRow
-                hover
-                selected={device.i === selectedDevice}
-                key={index}
-                onClick={() => device.e && toggleDeviceData(device.i)}
-              >
-                <TableCell padding="checkbox">
-                  <DeviceIcon type={device.t} />
-                </TableCell>
-                <TableCell>{device.t}</TableCell>
-                {desktopWindow && <TableCell>{device.n}</TableCell>}
-                <TableCell align="center">{device.e}</TableCell>
-                <TableCell align="right">
-                  <IconButton size="small" onClick={() => setDeviceDialog(index)}>
-                    <InfoOutlinedIcon color="info" fontSize="small" sx={{ verticalAlign: 'middle' }} />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-            {(data.active_sensors > 0 || data.analog_enabled) && (
-              <TableRow hover selected={sensorData !== undefined} onClick={() => toggleSensorData()}>
-                <TableCell>
-                  <DeviceIcon type="Sensor" />
-                </TableCell>
-                <TableCell>Sensors</TableCell>
-                {desktopWindow && <TableCell>Attached EMS-ESP Sensors</TableCell>}
-                <TableCell align="center">{data.active_sensors}</TableCell>
-                <TableCell align="right">
-                  <IconButton size="small" onClick={() => addAnalogSensor()} disabled={!data.analog_enabled}>
-                    <AddCircleOutlineOutlinedIcon fontSize="small" sx={{ verticalAlign: 'middle' }} />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </IconContext.Provider>
-    );
-  };
+      <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
+        {(tableList: any) => (
+          <>
+            <Header>
+              <HeaderRow>
+                <HeaderCell />
+                <HeaderCell resize>TYPE</HeaderCell>
+                <HeaderCell resize>DESCRIPTION</HeaderCell>
+                <HeaderCell>ENTITIES</HeaderCell>
+                <HeaderCell/>
+              </HeaderRow>
+            </Header>
+            <Body>
+              {tableList.map((device: Device, index: number) => (
+                <Row key={device.id} item={device}>
+                  <Cell>
+                    <DeviceIcon type={device.t} />
+                  </Cell>
+                  <Cell>{device.t}</Cell>
+                  <Cell>{device.n}</Cell>
+                  <Cell>{device.e}</Cell>
+                  <Cell>
+                    <IconButton size="small" onClick={() => setDeviceDialog(index)}>
+                      <InfoOutlinedIcon color="info" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+                    </IconButton>
+                  </Cell>
+                </Row>
+              ))}
+              {(coreData.active_sensors > 0 || coreData.analog_enabled) && (
+                <Row key="sensor" item={{ id: 'sensor' }}>
+                  <Cell>
+                    <DeviceIcon type="Sensor" />
+                  </Cell>
+                  <Cell>Sensors</Cell>
+                  <Cell>Attached EMS-ESP Sensors</Cell>
+                  <Cell>{coreData.active_sensors}</Cell>
+                  <Cell>
+                    <IconButton size="small" onClick={() => addAnalogSensor()}>
+                      <AddCircleOutlineOutlinedIcon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+                    </IconButton>
+                  </Cell>
+                </Row>
+              )}
+            </Body>
+          </>
+        )}
+      </Table>
+    </IconContext.Provider>
+  );
 
   const renderDeviceData = () => {
-    if (data?.devices.length === 0 || !deviceData || !selectedDevice) {
+    if (!device_select.state.id || device_select.state.id === 'sensor') {
       return;
     }
 
-    const hasMask = (entityName: string, mask: number) => (parseInt(entityName.slice(0, 2), 16) & mask) === mask;
-
     const sendCommand = (dv: DeviceValue) => {
-      if (dv.c && me.admin && !hasMask(dv.n, DeviceEntityMask.DV_READONLY)) {
+      if (dv.c && me.admin && !hasMask(dv.id, DeviceEntityMask.DV_READONLY)) {
         setDeviceValue(dv);
       }
     };
 
     const renderNameCell = (dv: DeviceValue) => (
       <>
-        {dv.n.slice(2)}&nbsp;
-        {hasMask(dv.n, DeviceEntityMask.DV_FAVORITE) && <FavoriteBorderIcon color="success" sx={{ fontSize: 12 }} />}
-        {hasMask(dv.n, DeviceEntityMask.DV_READONLY) && <EditOffOutlinedIcon color="primary" sx={{ fontSize: 12 }} />}
-        {hasMask(dv.n, DeviceEntityMask.DV_API_MQTT_EXCLUDE) && (
+        {dv.id.slice(2)}&nbsp;
+        {hasMask(dv.id, DeviceEntityMask.DV_READONLY) && <EditOffOutlinedIcon color="primary" sx={{ fontSize: 12 }} />}
+        {hasMask(dv.id, DeviceEntityMask.DV_API_MQTT_EXCLUDE) && (
           <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
         )}
       </>
@@ -516,47 +728,83 @@ const DashboardData: FC = () => {
         <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
           {deviceData.label}
         </Typography>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
-              <StyledTableCell align="left">ENTITY NAME</StyledTableCell>
-              <StyledTableCell align="right">VALUE</StyledTableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {deviceData.data.map((dv, i) => (
-              <StyledTableRow key={i} onClick={() => sendCommand(dv)}>
-                <StyledTableCell padding="checkbox">
-                  {dv.c && me.admin && !hasMask(dv.n, DeviceEntityMask.DV_READONLY) && (
-                    <IconButton size="small">
-                      <EditIcon color="primary" fontSize="small" />
-                    </IconButton>
-                  )}
-                </StyledTableCell>
-                <StyledTableCell component="th" scope="row">
-                  {renderNameCell(dv)}
-                </StyledTableCell>
-                <StyledTableCell align="right">
-                  {isCmdOnly(dv) ? <PlayArrowIcon color="primary" sx={{ fontSize: 14 }} /> : formatValue(dv.v, dv.u)}
-                </StyledTableCell>
-              </StyledTableRow>
-            ))}
-          </TableBody>
+
+        <FormControlLabel
+          control={<Checkbox size="small" name="onlyFav" checked={onlyFav} onChange={() => setOnlyFav(!onlyFav)} />}
+          label={<span style={{ fontSize: '12px' }}>favorites only</span>}
+        />
+
+        <Table
+          data={{
+            nodes: onlyFav
+              ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
+              : deviceData.data
+          }}
+          theme={data_theme}
+          sort={dv_sort}
+        >
+          {(tableList: any) => (
+            <>
+              <Header>
+                <HeaderRow>
+                  <HeaderCell resize>
+                    <Button
+                      fullWidth
+                      style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                      endIcon={getSortIcon(dv_sort.state, 'NAME')}
+                      onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'NAME' })}
+                    >
+                      ENTITY NAME
+                    </Button>
+                  </HeaderCell>
+                  <HeaderCell>
+                    <Button
+                      fullWidth
+                      style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                      endIcon={getSortIcon(dv_sort.state, 'VALUE')}
+                      onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
+                    >
+                      VALUE
+                    </Button>
+                  </HeaderCell>
+                  <HeaderCell/>
+                </HeaderRow>
+              </Header>
+              <Body>
+                {tableList.map((dv: DeviceValue) => (
+                  <Row key={dv.id} item={dv} onClick={() => sendCommand(dv)}>
+                    <Cell>{renderNameCell(dv)}</Cell>
+                    <Cell>{formatValue(dv.v, dv.u)}</Cell>
+                    <Cell>
+                      {dv.c && me.admin && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
+                        <IconButton size="small" onClick={() => sendCommand(dv)}>
+                          {isCmdOnly(dv) ? (
+                            <PlayArrowIcon color="primary" sx={{ fontSize: 16 }} />
+                          ) : (
+                            <EditIcon color="primary" sx={{ fontSize: 16 }} />
+                          )}
+                        </IconButton>
+                      )}
+                    </Cell>
+                  </Row>
+                ))}
+              </Body>
+            </>
+          )}
         </Table>
       </>
     );
   };
 
-  const updateSensor = (sensordata: Sensor) => {
-    if (sensordata && me.admin) {
-      setSensor(sensordata);
+  const updateSensor = (s: Sensor) => {
+    if (s && me.admin) {
+      setSensor(s);
     }
   };
 
-  const updateAnalog = (analogdata: Analog) => {
+  const updateAnalog = (a: Analog) => {
     if (me.admin) {
-      setAnalog(analogdata);
+      setAnalog(a);
     }
   };
 
@@ -565,31 +813,52 @@ const DashboardData: FC = () => {
       <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
         Temperature Sensors
       </Typography>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
-            <StyledTableCell align="left">NAME</StyledTableCell>
-            <StyledTableCell align="right">TEMPERATURE</StyledTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sensorData?.sensors.map((sensor_data) => (
-            <StyledTableRow key={sensor_data.n} onClick={() => updateSensor(sensor_data)}>
-              <StyledTableCell padding="checkbox">
-                {me.admin && (
-                  <IconButton edge="start" size="small">
-                    <EditIcon color="primary" fontSize="small" />
-                  </IconButton>
-                )}
-              </StyledTableCell>
-              <StyledTableCell component="th" scope="row">
-                {sensor_data.n}
-              </StyledTableCell>
-              <StyledTableCell align="right">{formatValue(sensor_data.t, sensor_data.u)}</StyledTableCell>
-            </StyledTableRow>
-          ))}
-        </TableBody>
+
+      <Table data={{ nodes: sensorData.sensors }} theme={data_theme} sort={sensor_sort}>
+        {(tableList: any) => (
+          <>
+            <Header>
+              <HeaderRow>
+                <HeaderCell resize>
+                  <Button
+                    fullWidth
+                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    endIcon={getSortIcon(sensor_sort.state, 'NAME')}
+                    onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'NAME' })}
+                  >
+                    NAME
+                  </Button>
+                </HeaderCell>
+                <HeaderCell>
+                  <Button
+                    fullWidth
+                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    endIcon={getSortIcon(sensor_sort.state, 'TEMPERATURE')}
+                    onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'TEMPERATURE' })}
+                  >
+                    TEMPERATURE
+                  </Button>
+                </HeaderCell>
+                <HeaderCell />
+              </HeaderRow>
+            </Header>
+            <Body>
+              {tableList.map((s: Sensor) => (
+                <Row key={s.id} item={s} onClick={() => updateSensor(s)}>
+                  <Cell>{s.n}</Cell>
+                  <Cell>{formatValue(s.t, s.u)}</Cell>
+                  <Cell>
+                    {me.admin && (
+                      <IconButton onClick={() => updateSensor(s)}>
+                        <EditIcon color="primary" sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    )}
+                  </Cell>
+                </Row>
+              ))}
+            </Body>
+          </>
+        )}
       </Table>
     </>
   );
@@ -599,35 +868,74 @@ const DashboardData: FC = () => {
       <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
         Analog Sensors
       </Typography>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <StyledTableCell padding="checkbox" style={{ width: 18 }}></StyledTableCell>
-            <StyledTableCell>GPIO</StyledTableCell>
-            <StyledTableCell>NAME</StyledTableCell>
-            <StyledTableCell>TYPE</StyledTableCell>
-            <StyledTableCell align="right">VALUE</StyledTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sensorData?.analogs.map((analog_data) => (
-            <StyledTableRow key={analog_data.i} onClick={() => updateAnalog(analog_data)}>
-              <StyledTableCell padding="checkbox">
-                {me.admin && (
-                  <IconButton edge="start" size="small">
-                    <EditIcon color="primary" fontSize="small" />
-                  </IconButton>
-                )}
-              </StyledTableCell>
-              <StyledTableCell component="th" scope="row">
-                {analog_data.i}
-              </StyledTableCell>
-              <StyledTableCell>{analog_data.n}</StyledTableCell>
-              <StyledTableCell>{AnalogTypeNames[analog_data.t]}</StyledTableCell>
-              <StyledTableCell align="right">{formatValue(analog_data.v, analog_data.u)}</StyledTableCell>
-            </StyledTableRow>
-          ))}
-        </TableBody>
+
+      <Table data={{ nodes: sensorData.analogs }} theme={data_theme} sort={analog_sort}>
+        {(tableList: any) => (
+          <>
+            <Header>
+              <HeaderRow>
+                <HeaderCell resize>
+                  <Button
+                    fullWidth
+                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    endIcon={getSortIcon(analog_sort.state, 'GPIO')}
+                    onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'GPIO' })}
+                  >
+                    GPIO
+                  </Button>
+                </HeaderCell>
+                <HeaderCell resize>
+                  <Button
+                    fullWidth
+                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    endIcon={getSortIcon(analog_sort.state, 'NAME')}
+                    onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'NAME' })}
+                  >
+                    NAME
+                  </Button>
+                </HeaderCell>
+                <HeaderCell resize>
+                  <Button
+                    fullWidth
+                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    endIcon={getSortIcon(analog_sort.state, 'TYPE')}
+                    onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'TYPE' })}
+                  >
+                    TYPE
+                  </Button>
+                </HeaderCell>
+                <HeaderCell>
+                  <Button
+                    fullWidth
+                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    endIcon={getSortIcon(analog_sort.state, 'VALUE')}
+                    onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
+                  >
+                    VALUE
+                  </Button>
+                </HeaderCell>
+                <HeaderCell />
+              </HeaderRow>
+            </Header>
+            <Body>
+              {tableList.map((a: Analog) => (
+                <Row key={a.id} item={a} onClick={() => updateAnalog(a)}>
+                  <Cell>{a.g}</Cell>
+                  <Cell>{a.n}</Cell>
+                  <Cell>{AnalogTypeNames[a.t]} </Cell>
+                  <Cell>{a.t ? formatValue(a.v, a.u) : ''}</Cell>
+                  <Cell>
+                    {me.admin && (
+                      <IconButton onClick={() => updateAnalog(a)}>
+                        <EditIcon color="primary" sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    )}
+                  </Cell>
+                </Row>
+              ))}
+            </Body>
+          </>
+        )}
       </Table>
     </>
   );
@@ -636,7 +944,7 @@ const DashboardData: FC = () => {
     if (analog) {
       try {
         const response = await EMSESP.writeAnalog({
-          id: analog.i,
+          gpio: analog.g,
           name: analog.n,
           offset: analog.o,
           factor: analog.f,
@@ -664,7 +972,7 @@ const DashboardData: FC = () => {
     if (analog) {
       try {
         const response = await EMSESP.writeAnalog({
-          id: analog.i,
+          gpio: analog.g,
           name: analog.n,
           offset: analog.o,
           factor: analog.f,
@@ -697,9 +1005,9 @@ const DashboardData: FC = () => {
             <Grid container spacing={2}>
               <Grid item>
                 <ValidatedTextField
-                  name="i"
+                  name="g"
                   label="GPIO"
-                  value={numberValue(analog.i)}
+                  value={analog.g}
                   type="number"
                   variant="outlined"
                   autoFocus
@@ -781,7 +1089,7 @@ const DashboardData: FC = () => {
                   </Grid>
                 </>
               )}
-              {analog.t === AnalogType.DIGITAL_OUT && (analog.i === 25 || analog.i === 26) && (
+              {analog.t === AnalogType.DIGITAL_OUT && (analog.id === '25' || analog.id === '26') && (
                 <>
                   <Grid item>
                     <ValidatedTextField
@@ -797,7 +1105,7 @@ const DashboardData: FC = () => {
                   </Grid>
                 </>
               )}
-              {analog.t === AnalogType.DIGITAL_OUT && analog.i !== 25 && analog.i !== 26 && (
+              {analog.t === AnalogType.DIGITAL_OUT && analog.id !== '25' && analog.id !== '26' && (
                 <>
                   <Grid item>
                     <ValidatedTextField
@@ -881,33 +1189,26 @@ const DashboardData: FC = () => {
     }
   };
 
-  const content = () => {
-    if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
-    }
-
-    return (
-      <>
-        {renderCoreData()}
-        {renderDeviceData()}
-        {renderDeviceDialog()}
-        {sensorData && sensorData.sensors.length > 0 && renderDallasData()}
-        {sensorData && sensorData.analogs.length > 0 && renderAnalogData()}
-        {renderDeviceValueDialog()}
-        {renderSensorDialog()}
-        {renderAnalogDialog()}
-        <ButtonRow>
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshAllData}>
-            Refresh
-          </Button>
-        </ButtonRow>
-      </>
-    );
-  };
-
   return (
     <SectionContent title="Device and Sensor Data" titleGutter>
-      {content()}
+      {renderCoreData()}
+      {renderDeviceData()}
+      {renderDeviceDialog()}
+      {sensorData.sensors.length !== 0 && renderDallasData()}
+      {sensorData.analogs.length !== 0 && renderAnalogData()}
+      {renderDeviceValueDialog()}
+      {renderSensorDialog()}
+      {renderAnalogDialog()}
+      <ButtonRow>
+        <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
+          Refresh
+        </Button>
+        {device_select.state.id && device_select.state.id !== 'sensor' && (
+          <Button startIcon={<DownloadIcon />} variant="outlined" onClick={handleDownloadCsv}>
+            Export
+          </Button>
+        )}
+      </ButtonRow>
     </SectionContent>
   );
 };

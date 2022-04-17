@@ -35,14 +35,14 @@ namespace emsesp {
 // Customization for dallas sensor
 class SensorCustomization {
   public:
-    std::string id_str;
+    std::string id;
     std::string name;
     uint16_t    offset;
 };
 
 class AnalogCustomization {
   public:
-    uint8_t     id;
+    uint8_t     gpio;
     std::string name;
     float       offset;
     float       factor;
@@ -51,7 +51,7 @@ class AnalogCustomization {
 
     // used for removing from a list
     bool operator==(const AnalogCustomization & a) const {
-        return id == a.id;
+        return gpio == a.gpio;
     }
     bool operator!=(const AnalogCustomization & a) const {
         return !operator==(a);

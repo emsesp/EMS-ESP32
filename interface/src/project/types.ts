@@ -38,38 +38,23 @@ export enum busConnectionStatus {
   BUS_STATUS_OFFLINE = 2
 }
 
+export interface Stat {
+  id: string; // name
+  s: number; // success
+  f: number;  // fail
+  q: number;  // quality
+}
 export interface Status {
   status: busConnectionStatus;
   tx_mode: number;
-  rx_received: number;
-  tx_reads: number;
-  tx_writes: number;
-  rx_quality: number;
-  tx_read_quality: number;
-  tx_write_quality: number;
-  tx_read_fails: number;
-  tx_write_fails: number;
-  rx_fails: number;
-  sensor_fails: number;
-  sensor_reads: number;
-  sensor_quality: number;
-  analog_fails: number;
-  analog_reads: number;
-  analog_quality: number;
-  mqtt_count: number;
-  mqtt_fails: number;
-  mqtt_quality: number;
-  api_calls: number;
-  api_fails: number;
-  api_quality: number;
+  uptime: number;
   num_devices: number;
   num_sensors: number;
   num_analogs: number;
-  uptime: number;
+  stats: Stat[];
 }
-
 export interface Device {
-  i: number; // id
+  id: string; // id index
   t: string; // type
   b: string; // brand
   n: string; // name
@@ -80,7 +65,7 @@ export interface Device {
 }
 
 export interface Sensor {
-  is: string; // id string
+  id: string; // id string
   n: string; // name/alias
   t?: number; // temp, optional
   o: number; // offset
@@ -88,9 +73,10 @@ export interface Sensor {
 }
 
 export interface Analog {
-  i: number;
+  id: string; // id string
+  g: number; // GPIO
   n: string;
-  v?: number;
+  v: number; // is optional
   u: number;
   o: number;
   f: number;
@@ -98,7 +84,7 @@ export interface Analog {
 }
 
 export interface WriteSensor {
-  id_str: string;
+  id: string;
   name: string;
   offset: number;
 }
@@ -126,11 +112,11 @@ export interface Devices {
 }
 
 export interface DeviceValue {
-  v?: any; // value, in any format
+  id: string; // index, contains mask+name
+  v: any; // value, in any format
   u: number; // uom
-  n: string; // name
-  c: string; // command
-  l: string[]; // list
+  c?: string; // command, optional
+  l?: string[]; // list, optional
   h?: string; // help text, optional
   s?: string; // steps for up/down, optional
   m?: string; // min, optional
@@ -143,8 +129,8 @@ export interface DeviceData {
 }
 
 export interface DeviceEntity {
-  v?: any; // value, in any format
-  n: string; // name
+  id: string; // name
+  v: any; // value, in any format
   s: string; // shortname
   m: number; // mask
   om?: number; // original mask before edits
@@ -277,7 +263,7 @@ export interface WriteValue {
 }
 
 export interface WriteAnalog {
-  id: number;
+  gpio: number;
   name: string;
   factor: number;
   offset: number;
