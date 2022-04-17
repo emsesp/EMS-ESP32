@@ -431,7 +431,8 @@ const SettingsCustomization: FC = () => {
     <Dialog open={confirmReset} onClose={() => setConfirmReset(false)}>
       <DialogTitle>Reset</DialogTitle>
       <DialogContent dividers>
-        Are you sure you want remove all customizations including the settings of Temperature and Analog sensors?
+        Are you sure you want remove all customizations including the custom settings of the Temperature and Analog
+        sensors?
       </DialogContent>
       <DialogActions>
         <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmReset(false)} color="secondary">
