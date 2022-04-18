@@ -42,6 +42,7 @@ import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
+import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
 import StarIcon from '@mui/icons-material/Star';
 
 import DeviceIcon from './DeviceIcon';
@@ -208,6 +209,9 @@ const DashboardData: FC = () => {
     `,
     HeaderCell: `
       padding-left: 0px;
+      &:not(:last-of-type) {
+        border-right: 1px solid #565656;
+      }
     `
   });
 
@@ -215,23 +219,18 @@ const DashboardData: FC = () => {
     if (state.sortKey === sortKey && state.reverse) {
       return <KeyboardArrowDownOutlinedIcon />;
     }
-
     if (state.sortKey === sortKey && !state.reverse) {
       return <KeyboardArrowUpOutlinedIcon />;
     }
+    return <UnfoldMoreOutlinedIcon />;
   };
 
   const analog_sort = useSort(
     { nodes: sensorData.analogs },
-    {
-      state: {
-        sortKey: 'GPIO',
-        reverse: false
-      }
-    },
+    {},
     {
       sortIcon: {
-        iconDefault: null,
+        iconDefault: <UnfoldMoreOutlinedIcon />,
         iconUp: <KeyboardArrowUpOutlinedIcon />,
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
@@ -246,15 +245,10 @@ const DashboardData: FC = () => {
 
   const sensor_sort = useSort(
     { nodes: sensorData.sensors },
-    {
-      state: {
-        sortKey: 'NAME',
-        reverse: false
-      }
-    },
+    {},
     {
       sortIcon: {
-        iconDefault: null,
+        iconDefault: <UnfoldMoreOutlinedIcon />,
         iconUp: <KeyboardArrowUpOutlinedIcon />,
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
@@ -267,15 +261,10 @@ const DashboardData: FC = () => {
 
   const dv_sort = useSort(
     { nodes: deviceData.data },
-    {
-      state: {
-        sortKey: 'NAME',
-        reverse: false
-      }
-    },
+    {},
     {
       sortIcon: {
-        iconDefault: null,
+        iconDefault: <UnfoldMoreOutlinedIcon />,
         iconUp: <KeyboardArrowUpOutlinedIcon />,
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
@@ -759,7 +748,7 @@ const DashboardData: FC = () => {
                       ENTITY NAME
                     </Button>
                   </HeaderCell>
-                  <HeaderCell>
+                  <HeaderCell resize>
                     <Button
                       fullWidth
                       style={{ fontSize: '14px', justifyContent: 'flex-start' }}
@@ -831,7 +820,7 @@ const DashboardData: FC = () => {
                     NAME
                   </Button>
                 </HeaderCell>
-                <HeaderCell>
+                <HeaderCell resize>
                   <Button
                     fullWidth
                     style={{ fontSize: '14px', justifyContent: 'flex-start' }}
@@ -906,7 +895,7 @@ const DashboardData: FC = () => {
                     TYPE
                   </Button>
                 </HeaderCell>
-                <HeaderCell>
+                <HeaderCell resize>
                   <Button
                     fullWidth
                     style={{ fontSize: '14px', justifyContent: 'flex-start' }}

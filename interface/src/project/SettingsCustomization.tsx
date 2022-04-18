@@ -31,6 +31,7 @@ import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOu
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
+import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
 
 import { ButtonRow, FormLoader, ValidatedTextField, SectionContent } from '../components';
 
@@ -105,6 +106,12 @@ const SettingsCustomization: FC = () => {
         min-width: 70%;
         width: 70%;
       }
+    `,
+    HeaderCell: `
+    padding-left: 0px;
+    &:nth-of-type(2) {
+      border-right: 1px solid #565656;
+    }
     `
   });
 
@@ -112,23 +119,18 @@ const SettingsCustomization: FC = () => {
     if (state.sortKey === sortKey && state.reverse) {
       return <KeyboardArrowDownOutlinedIcon />;
     }
-
     if (state.sortKey === sortKey && !state.reverse) {
       return <KeyboardArrowUpOutlinedIcon />;
     }
+    return <UnfoldMoreOutlinedIcon />;
   };
 
   const entity_sort = useSort(
     { nodes: deviceEntities },
-    {
-      state: {
-        sortKey: 'NAME',
-        reverse: false
-      }
-    },
+    {},
     {
       sortIcon: {
-        iconDefault: null,
+        iconDefault: <UnfoldMoreOutlinedIcon />,
         iconUp: <KeyboardArrowUpOutlinedIcon />,
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
