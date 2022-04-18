@@ -91,7 +91,7 @@ const DashboardStatus: FC = () => {
     BaseRow: `
       font-size: 14px;
       color: white;
-  `,
+    `,
     HeaderRow: `
       text-transform: uppercase;
       background-color: black;
@@ -118,7 +118,7 @@ const DashboardStatus: FC = () => {
       &:hover {
         color: white;
       }
-      `,
+    `,
     BaseCell: `
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;

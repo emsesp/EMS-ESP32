@@ -460,7 +460,7 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
     for (const auto & sensor : sensors_) {
         if (id == -1) { // show number and id
             JsonObject dataSensor = output.createNestedObject(sensor.name());
-            dataSensor["gpio"]      = sensor.gpio();
+            dataSensor["gpio"]    = sensor.gpio();
             dataSensor["type"]    = FL_(enum_sensortype)[sensor.type()];
             if (sensor.type() == AnalogType::ADC) {
                 dataSensor["uom"]    = EMSdevice::uom_to_string(sensor.uom());

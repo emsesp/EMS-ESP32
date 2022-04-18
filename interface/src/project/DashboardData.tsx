@@ -42,6 +42,7 @@ import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
+import StarIcon from '@mui/icons-material/Star';
 
 import DeviceIcon from './DeviceIcon';
 
@@ -96,7 +97,7 @@ const DashboardData: FC = () => {
         border-top: 1px solid #177ac9;
         border-bottom: 1px solid #177ac9;
       }
-  `,
+    `,
     HeaderRow: `
       text-transform: uppercase;
       background-color: black;
@@ -128,7 +129,7 @@ const DashboardData: FC = () => {
         border-top: 1px solid #177ac9;
         border-bottom: 1px solid #177ac9;
       }
-      `,
+    `,
     BaseCell: `
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
@@ -163,7 +164,7 @@ const DashboardData: FC = () => {
       font-size: 14px;
       color: white;
       height: 32px;
-  `,
+    `,
     HeaderRow: `
       text-transform: uppercase;
       background-color: black;
@@ -194,7 +195,7 @@ const DashboardData: FC = () => {
         color: white;
         cursor: 'pointer',
       }
-      `,
+    `,
     BaseCell: `
       padding-left: 8px;
       border-top: 1px solid transparent;
@@ -661,7 +662,7 @@ const DashboardData: FC = () => {
                 <HeaderCell resize>TYPE</HeaderCell>
                 <HeaderCell resize>DESCRIPTION</HeaderCell>
                 <HeaderCell>ENTITIES</HeaderCell>
-                <HeaderCell/>
+                <HeaderCell />
               </HeaderRow>
             </Header>
             <Body>
@@ -716,6 +717,7 @@ const DashboardData: FC = () => {
     const renderNameCell = (dv: DeviceValue) => (
       <>
         {dv.id.slice(2)}&nbsp;
+        {hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) && <StarIcon color="primary" sx={{ fontSize: 12 }} />}
         {hasMask(dv.id, DeviceEntityMask.DV_READONLY) && <EditOffOutlinedIcon color="primary" sx={{ fontSize: 12 }} />}
         {hasMask(dv.id, DeviceEntityMask.DV_API_MQTT_EXCLUDE) && (
           <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
@@ -767,7 +769,7 @@ const DashboardData: FC = () => {
                       VALUE
                     </Button>
                   </HeaderCell>
-                  <HeaderCell/>
+                  <HeaderCell />
                 </HeaderRow>
               </Header>
               <Body>

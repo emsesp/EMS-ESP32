@@ -61,7 +61,7 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
     JsonArray sensorsJson = root.createNestedArray("sensors");
     for (const SensorCustomization & sensor : settings.sensorCustomizations) {
         JsonObject sensorJson = sensorsJson.createNestedObject();
-        sensorJson["id"]  = sensor.id; // is
+        sensorJson["id"]      = sensor.id;     // is
         sensorJson["name"]    = sensor.name;   // n
         sensorJson["offset"]  = sensor.offset; // o
     }
@@ -101,7 +101,7 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
         for (const JsonObject sensorJson : root["sensors"].as<JsonArray>()) {
             // create each of the sensor, overwritting any previous settings
             auto sensor   = SensorCustomization();
-            sensor.id = sensorJson["id"].as<std::string>();
+            sensor.id     = sensorJson["id"].as<std::string>();
             sensor.name   = sensorJson["name"].as<std::string>();
             sensor.offset = sensorJson["offset"];
             settings.sensorCustomizations.push_back(sensor); // add to list

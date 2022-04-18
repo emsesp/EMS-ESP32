@@ -54,9 +54,6 @@ const SettingsCustomization: FC = () => {
   const [masks, setMasks] = useState(() => ['']);
 
   const entities_theme = useTheme({
-    Table: `
-      height: 100%;
-    `,
     BaseRow: `
       font-size: 14px;
       color: white;
@@ -100,13 +97,13 @@ const SettingsCustomization: FC = () => {
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
       &:nth-of-type(1) {
-        width: 130px;
+        left: 0px;
+        min-width: 124px;
+        width: 124px;
       }
       &:nth-of-type(2) {
-        flex: 1;
-      }
-      &:last-of-type {
-        text-align: right;
+        min-width: 70%;
+        width: 70%;
       }
     `
   });
@@ -302,10 +299,19 @@ const SettingsCustomization: FC = () => {
 
     return (
       <>
-        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="center">
+        <Grid
+          container
+          ml={1}
+          mb={1}
+          mt={1}
+          spacing={1}
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="center"
+        >
           <Grid item>
-            <Typography sx={{ pt: 1, pb: 1 }} variant="subtitle2" color="primary">
-              Apply filter:&nbsp;
+            <Typography align="right" variant="subtitle2" color="primary">
+              Set filter:&nbsp;
             </Typography>
           </Grid>
           <Grid item>
@@ -354,13 +360,13 @@ const SettingsCustomization: FC = () => {
           data={{ nodes: deviceEntities.filter((de) => de.m & selectedFilters || !selectedFilters) }}
           theme={entities_theme}
           sort={entity_sort}
-          layout={{ custom: true }}
+          layout={{ custom: true, horizontalScroll: true }}
         >
           {(tableList: any) => (
             <>
               <Header>
                 <HeaderRow>
-                  <HeaderCell>OPTIONS</HeaderCell>
+                  <HeaderCell pinLeft>OPTIONS</HeaderCell>
                   <HeaderCell resize>
                     <Button
                       fullWidth
@@ -371,7 +377,7 @@ const SettingsCustomization: FC = () => {
                       NAME
                     </Button>
                   </HeaderCell>
-                  <HeaderCell pinRight={true}>VALUE</HeaderCell>
+                  <HeaderCell>VALUE</HeaderCell>
                   <HeaderCell />
                 </HeaderRow>
               </Header>
