@@ -3792,7 +3792,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
     if (has_flags(EMS_DEVICE_FLAG_NO_WRITE) || device_id() != EMSESP::actual_master_thermostat()) {
         register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES);
     } else {
-        register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_temp), 5, 29);
+        register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_temp), 0, 29);
     }
     register_device_value(tag, &hc->roomTemp, DeviceValueType::SHORT, roomtemp_divider, FL_(roomTemp), DeviceValueUOM::DEGREES);
 
