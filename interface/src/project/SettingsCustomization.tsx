@@ -12,7 +12,8 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
-  Grid
+  Grid,
+  TextField
 } from '@mui/material';
 
 import { Table } from '@table-library/react-table-library/table';
@@ -32,6 +33,7 @@ import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
+import SearchIcon from '@mui/icons-material/Search';
 
 import { ButtonRow, FormLoader, ValidatedTextField, SectionContent } from '../components';
 
@@ -50,6 +52,7 @@ const SettingsCustomization: FC = () => {
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
   const [selectedFilters, setSelectedFilters] = useState<number>(0);
+  const [search, setSearch] = useState('');
 
   // eslint-disable-next-line
   const [masks, setMasks] = useState(() => ['']);
@@ -231,11 +234,8 @@ const SettingsCustomization: FC = () => {
         .filter((de) => de.m !== de.om)
         .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.s);
 
-      if (masked_entities.length > 50) {
-        enqueueSnackbar(
-          'Too many selected entities (' + masked_entities.length + '). Limit is 50. Please Save in batches',
-          { variant: 'warning' }
-        );
+      if (masked_entities.length > 60) {
+        enqueueSnackbar('Selected entities exceeded limit of 60. Please Save in batches', { variant: 'warning' });
         return;
       }
 
@@ -313,7 +313,7 @@ const SettingsCustomization: FC = () => {
         >
           <Grid item>
             <Typography align="right" variant="subtitle2" color="primary">
-              Set filter:&nbsp;
+              Filter:&nbsp;
             </Typography>
           </Grid>
           <Grid item>
@@ -348,18 +348,33 @@ const SettingsCustomization: FC = () => {
             </ToggleButtonGroup>
           </Grid>
           <Grid item>
-            <Button size="small" variant="contained" color="primary" onClick={() => maskDisabled(true)}>
-              set all disabled
+            <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
+              <SearchIcon color="primary" sx={{ fontSize: 16, mr: 1, my: 0.5 }} />
+              <TextField
+                variant="standard"
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                }}
+              />
+            </Box>
+          </Grid>
+          <Grid item>
+            <Button size="small" variant="outlined" color="primary" onClick={() => maskDisabled(true)}>
+              disable MQTT+WEB
             </Button>
           </Grid>
           <Grid item>
-            <Button size="small" variant="contained" color="primary" onClick={() => maskDisabled(false)}>
-              set all enabled
+            <Button size="small" variant="outlined" color="primary" onClick={() => maskDisabled(false)}>
+              enable MQTT+WEB
             </Button>
           </Grid>
         </Grid>
         <Table
-          data={{ nodes: deviceEntities.filter((de) => de.m & selectedFilters || !selectedFilters) }}
+          data={{
+            nodes: deviceEntities.filter(
+              (de) => (de.m & selectedFilters || !selectedFilters) && de.id.toLowerCase().includes(search.toLowerCase())
+            )
+          }}
           theme={entities_theme}
           sort={entity_sort}
           layout={{ custom: true, horizontalScroll: true }}
