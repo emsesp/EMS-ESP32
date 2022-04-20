@@ -102,7 +102,9 @@ const DashboardData: FC = () => {
     HeaderRow: `
       text-transform: uppercase;
       background-color: black;
+      color: #90CAF9;
       border-bottom: 1px solid #e0e0e0;
+      font-weight: 500;
     `,
     Row: `
       background-color: #1e1e1e;
@@ -171,6 +173,7 @@ const DashboardData: FC = () => {
       background-color: black;
       color: #90CAF9;
       border-bottom: 1px solid #e0e0e0;
+      font-weight: 500;
     `,
     Row: `
       &:nth-of-type(odd) {
@@ -237,8 +240,7 @@ const DashboardData: FC = () => {
       sortFns: {
         GPIO: (array) => array.sort((a, b) => a.g - b.g),
         NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
-        TYPE: (array) => array.sort((a, b) => a.t - b.t),
-        VALUE: (array) => array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
+        TYPE: (array) => array.sort((a, b) => a.t - b.t)
       }
     }
   );
@@ -269,8 +271,7 @@ const DashboardData: FC = () => {
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
       sortFns: {
-        NAME: (array) => array.sort((a, b) => a.id.slice(2).localeCompare(b.id.slice(2))),
-        VALUE: (array) => array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
+        NAME: (array) => array.sort((a, b) => a.id.slice(2).localeCompare(b.id.slice(2)))
       }
     }
   );
@@ -337,8 +338,7 @@ const DashboardData: FC = () => {
     );
   };
 
-  const refreshData = () => {
-    const selectedDevice = device_select.state.id;
+  const refreshDataIndex = (selectedDevice: string) => {
     if (selectedDevice === 'sensor') {
       fetchSensorData();
       return;
@@ -350,6 +350,10 @@ const DashboardData: FC = () => {
     } else {
       fetchCoreData();
     }
+  };
+
+  const refreshData = () => {
+    refreshDataIndex(device_select.state.id);
   };
 
   const fetchCoreData = useCallback(async () => {
@@ -641,7 +645,6 @@ const DashboardData: FC = () => {
   const renderCoreData = () => (
     <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
       {coreData.devices.length === 0 && <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />}
-
       <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
         {(tableList: any) => (
           <>
@@ -658,7 +661,9 @@ const DashboardData: FC = () => {
               {tableList.map((device: Device, index: number) => (
                 <Row key={device.id} item={device}>
                   <Cell>
+                    {/* <IconButton onClick={() => refreshDataIndex(device.id)}> */}
                     <DeviceIcon type={device.t} />
+                    {/* </IconButton> */}
                   </Cell>
                   <Cell>{device.t}</Cell>
                   <Cell>{device.n}</Cell>
@@ -673,7 +678,9 @@ const DashboardData: FC = () => {
               {(coreData.active_sensors > 0 || coreData.analog_enabled) && (
                 <Row key="sensor" item={{ id: 'sensor' }}>
                   <Cell>
+                    {/* <IconButton onClick={() => refreshDataIndex('sensor')}> */}
                     <DeviceIcon type="Sensor" />
+                    {/* </IconButton> */}
                   </Cell>
                   <Cell>Sensors</Cell>
                   <Cell>Attached EMS-ESP Sensors</Cell>
@@ -722,7 +729,7 @@ const DashboardData: FC = () => {
 
         <FormControlLabel
           control={<Checkbox size="small" name="onlyFav" checked={onlyFav} onChange={() => setOnlyFav(!onlyFav)} />}
-          label={<span style={{ fontSize: '12px' }}>favorites only</span>}
+          label={<span style={{ fontSize: '12px' }}>show only favorites</span>}
         />
 
         <Table
@@ -748,16 +755,7 @@ const DashboardData: FC = () => {
                       ENTITY NAME
                     </Button>
                   </HeaderCell>
-                  <HeaderCell resize>
-                    <Button
-                      fullWidth
-                      style={{ fontSize: '14px', justifyContent: 'flex-start' }}
-                      endIcon={getSortIcon(dv_sort.state, 'VALUE')}
-                      onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
-                    >
-                      VALUE
-                    </Button>
-                  </HeaderCell>
+                  <HeaderCell resize>VALUE</HeaderCell>
                   <HeaderCell />
                 </HeaderRow>
               </Header>
@@ -895,16 +893,7 @@ const DashboardData: FC = () => {
                     TYPE
                   </Button>
                 </HeaderCell>
-                <HeaderCell resize>
-                  <Button
-                    fullWidth
-                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
-                    endIcon={getSortIcon(analog_sort.state, 'VALUE')}
-                    onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
-                  >
-                    VALUE
-                  </Button>
-                </HeaderCell>
+                <HeaderCell resize>VALUE</HeaderCell>
                 <HeaderCell />
               </HeaderRow>
             </Header>

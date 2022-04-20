@@ -209,7 +209,7 @@ const DashboardStatus: FC = () => {
                   </HeaderRow>
                 </Header>
                 <Body>
-                  {tableList.map((stat: Stat, index: number) => (
+                  {tableList.map((stat: Stat) => (
                     <Row key={stat.id} item={stat}>
                       <Cell>{stat.id}</Cell>
                       <Cell>{Intl.NumberFormat().format(stat.s)}</Cell>

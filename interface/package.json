@@ -17,7 +17,7 @@
     "@types/react-router-dom": "^5.3.3",
     "async-validator": "^4.0.7",
     "axios": "^0.26.1",
-    "http-proxy-middleware": "^2.0.4",
+    "http-proxy-middleware": "^2.0.6",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "notistack": "^2.0.4",

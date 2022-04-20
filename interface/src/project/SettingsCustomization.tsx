@@ -34,6 +34,7 @@ import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutl
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
 import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 import { ButtonRow, FormLoader, ValidatedTextField, SectionContent } from '../components';
 
@@ -68,6 +69,7 @@ const SettingsCustomization: FC = () => {
       background-color: black;
       border-bottom: 1px solid #e0e0e0;
       color: #90CAF9;
+      font-weight: 500;
     `,
     Row: `
       background-color: #1e1e1e;
@@ -97,6 +99,7 @@ const SettingsCustomization: FC = () => {
       }
     `,
     BaseCell: `
+      padding-left: 8px;
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
@@ -104,6 +107,8 @@ const SettingsCustomization: FC = () => {
         left: 0px;
         min-width: 124px;
         width: 124px;
+        padding-left: 0px;
+
       }
       &:nth-of-type(2) {
         min-width: 70%;
@@ -111,10 +116,13 @@ const SettingsCustomization: FC = () => {
       }
     `,
     HeaderCell: `
-    padding-left: 0px;
-    &:nth-of-type(2) {
-      border-right: 1px solid #565656;
-    }
+      padding-left: 0px;
+      &:nth-of-type(1) {
+        padding-left: 24px;
+      }
+      &:nth-of-type(2) {
+        border-right: 1px solid #565656;
+      }
     `
   });
 
@@ -288,33 +296,52 @@ const SettingsCustomization: FC = () => {
 
     const maskDisabled = (set: boolean) => {
       setDeviceEntities(
-        deviceEntities
-          .filter((de) => de.m & selectedFilters || !selectedFilters)
-          .map(({ m, ...entities }) => ({
-            ...entities,
-            m: set
-              ? m | (DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE)
-              : m & ~(DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE)
-          }))
+        deviceEntities.map(function (de) {
+          if ((de.m & selectedFilters || !selectedFilters) && de.id.toLowerCase().includes(search.toLowerCase())) {
+            return {
+              ...de,
+              m: set
+                ? de.m | (DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE)
+                : de.m & ~(DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE)
+            };
+          } else {
+            return de;
+          }
+        })
       );
     };
 
+    const shown_data = deviceEntities.filter(
+      (de) => (de.m & selectedFilters || !selectedFilters) && de.id.toLowerCase().includes(search.toLowerCase())
+    );
+
     return (
       <>
-        <Grid
-          container
-          ml={1}
-          mb={1}
-          mt={1}
-          spacing={1}
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="center"
-        >
+        <Grid container mb={1} mt={0} spacing={1} direction="row" justifyContent="flex-start" alignItems="center">
           <Grid item>
-            <Typography align="right" variant="subtitle2" color="primary">
-              Filter:&nbsp;
+            <Typography variant="subtitle2" color="primary">
+              #:
             </Typography>
+          </Grid>
+          <Grid item>
+            <Typography variant="subtitle2">
+              {shown_data.length}/{deviceEntities.length}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <SearchIcon color="primary" sx={{ fontSize: 16, verticalAlign: 'middle' }} />:
+          </Grid>
+          <Grid item xs={2}>
+            <TextField
+              size="small"
+              variant="outlined"
+              onChange={(event) => {
+                setSearch(event.target.value);
+              }}
+            />
+          </Grid>
+          <Grid item>
+            <FilterListIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />:
           </Grid>
           <Grid item>
             <ToggleButtonGroup
@@ -347,34 +374,36 @@ const SettingsCustomization: FC = () => {
               </ToggleButton>
             </ToggleButtonGroup>
           </Grid>
+
           <Grid item>
-            <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
-              <SearchIcon color="primary" sx={{ fontSize: 16, mr: 1, my: 0.5 }} />
-              <TextField
-                variant="standard"
-                onChange={(event) => {
-                  setSearch(event.target.value);
-                }}
-              />
-            </Box>
+            <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />
+            <VisibilityOffOutlinedIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />:
           </Grid>
           <Grid item>
-            <Button size="small" variant="outlined" color="primary" onClick={() => maskDisabled(true)}>
-              disable MQTT+WEB
+            <Button
+              size="small"
+              sx={{ fontSize: 10 }}
+              variant="outlined"
+              color="inherit"
+              onClick={() => maskDisabled(false)}
+            >
+              enable
             </Button>
           </Grid>
           <Grid item>
-            <Button size="small" variant="outlined" color="primary" onClick={() => maskDisabled(false)}>
-              enable MQTT+WEB
+            <Button
+              size="small"
+              sx={{ fontSize: 10 }}
+              variant="outlined"
+              color="inherit"
+              onClick={() => maskDisabled(true)}
+            >
+              disable
             </Button>
           </Grid>
         </Grid>
         <Table
-          data={{
-            nodes: deviceEntities.filter(
-              (de) => (de.m & selectedFilters || !selectedFilters) && de.id.toLowerCase().includes(search.toLowerCase())
-            )
-          }}
+          data={{ nodes: shown_data }}
           theme={entities_theme}
           sort={entity_sort}
           layout={{ custom: true, horizontalScroll: true }}
@@ -414,7 +443,7 @@ const SettingsCustomization: FC = () => {
                         <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.id === ''}>
                           <StarIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
-                        <ToggleButton value="4" disabled={!de.w}>
+                        <ToggleButton value="4" disabled={!de.w || (de.m & 3) === 3}>
                           <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
                         <ToggleButton value="2">
