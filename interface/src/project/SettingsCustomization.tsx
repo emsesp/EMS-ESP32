@@ -120,8 +120,8 @@ const SettingsCustomization: FC = () => {
       &:nth-of-type(1) {
         padding-left: 24px;
       }
-      &:nth-of-type(2) {
-        border-right: 1px solid #565656;
+      &:nth-of-type(3) {
+        border-left: 1px solid #565656;
       }
     `
   });
@@ -150,6 +150,11 @@ const SettingsCustomization: FC = () => {
       }
     }
   );
+
+  const sort_name = () => {
+    console.log(entity_sort);
+    entity_sort.fns.onToggleSort({ sortKey: 'NAME' });
+  };
 
   const fetchDevices = useCallback(async () => {
     try {
@@ -187,53 +192,73 @@ const SettingsCustomization: FC = () => {
     return value;
   }
 
-  const renderDeviceList = () => {
-    if (!devices) {
-      return <FormLoader errorMessage={errorMessage} />;
+  const getMaskNumber = (newMask: string[]) => {
+    var new_mask = 0;
+    for (let entry of newMask) {
+      new_mask |= Number(entry);
     }
+    return new_mask;
+  };
 
-    function compareDevices(a: DeviceShort, b: DeviceShort) {
-      if (a.s < b.s) {
-        return -1;
-      }
-      if (a.s > b.s) {
-        return 1;
-      }
-      return 0;
+  const getMaskString = (m: number) => {
+    var new_masks = [];
+    if ((m & 1) === 1) {
+      new_masks.push('1');
     }
+    if ((m & 2) === 2) {
+      new_masks.push('2');
+    }
+    if ((m & 4) === 4) {
+      new_masks.push('4');
+    }
+    if ((m & 8) === 8) {
+      new_masks.push('8');
+    }
+    return new_masks;
+  };
 
-    const changeSelectedDevice = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const selected_device = parseInt(event.target.value, 10);
-      setSelectedDevice(selected_device);
-      fetchDeviceEntities(selected_device);
-    };
-
-    return (
-      <>
-        <Box color="warning.main">
-          <Typography variant="body2">Select a device and customize each of its entities using the options.</Typography>
-        </Box>
-        <ValidatedTextField
-          name="device"
-          label="EMS Device"
-          variant="outlined"
-          fullWidth
-          value={selectedDevice}
-          onChange={changeSelectedDevice}
-          margin="normal"
-          select
-        >
-          <MenuItem disabled key={0} value={0}>
-            Select a device...
-          </MenuItem>
-          {devices.devices.sort(compareDevices).map((device: DeviceShort, index) => (
-            <MenuItem key={index} value={device.i}>
-              {device.s}
-            </MenuItem>
-          ))}
-        </ValidatedTextField>
-      </>
+  const maskDisabled = (set: boolean) => {
+    setDeviceEntities(
+      deviceEntities.map(function (de) {
+        if ((de.m & selectedFilters || !selectedFilters) && de.id.toLowerCase().includes(search.toLowerCase())) {
+          return {
+            ...de,
+            m: set
+              ? de.m | (DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE)
+              : de.m & ~(DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE)
+          };
+        } else {
+          return de;
+        }
+      })
     );
+  };
+
+  function compareDevices(a: DeviceShort, b: DeviceShort) {
+    if (a.s < b.s) {
+      return -1;
+    }
+    if (a.s > b.s) {
+      return 1;
+    }
+    return 0;
+  }
+
+  const changeSelectedDevice = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selected_device = parseInt(event.target.value, 10);
+    setSelectedDevice(selected_device);
+    fetchDeviceEntities(selected_device);
+  };
+
+  const resetCustomization = async () => {
+    try {
+      await EMSESP.resetCustomizations();
+      enqueueSnackbar('All customizations have been removed. Restarting...', { variant: 'info' });
+    } catch (error: any) {
+      enqueueSnackbar(extractErrorMessage(error, 'Problem resetting customizations'), { variant: 'error' });
+    } finally {
+      setConfirmReset(false);
+    }
   };
 
   const saveCustomization = async () => {
@@ -264,52 +289,43 @@ const SettingsCustomization: FC = () => {
     }
   };
 
+  const renderDeviceList = () => {
+    if (!devices) {
+      return <FormLoader errorMessage={errorMessage} />;
+    }
+
+    return (
+      <>
+        <Box color="warning.main">
+          <Typography variant="body2">Select a device and customize each of its entities using the options.</Typography>
+        </Box>
+        <ValidatedTextField
+          name="device"
+          label="EMS Device"
+          variant="outlined"
+          fullWidth
+          value={selectedDevice}
+          onChange={changeSelectedDevice}
+          margin="normal"
+          select
+        >
+          <MenuItem disabled key={0} value={0}>
+            Select a device...
+          </MenuItem>
+          {devices.devices.sort(compareDevices).map((device: DeviceShort, index) => (
+            <MenuItem key={index} value={device.i}>
+              {device.s}
+            </MenuItem>
+          ))}
+        </ValidatedTextField>
+      </>
+    );
+  };
+
   const renderDeviceData = () => {
     if (devices?.devices.length === 0 || deviceEntities[0].id === '') {
       return;
     }
-
-    const getMaskNumber = (newMask: string[]) => {
-      var new_mask = 0;
-      for (let entry of newMask) {
-        new_mask |= Number(entry);
-      }
-      return new_mask;
-    };
-
-    const getMaskString = (m: number) => {
-      var new_masks = [];
-      if ((m & 1) === 1) {
-        new_masks.push('1');
-      }
-      if ((m & 2) === 2) {
-        new_masks.push('2');
-      }
-      if ((m & 4) === 4) {
-        new_masks.push('4');
-      }
-      if ((m & 8) === 8) {
-        new_masks.push('8');
-      }
-      return new_masks;
-    };
-
-    const maskDisabled = (set: boolean) => {
-      setDeviceEntities(
-        deviceEntities.map(function (de) {
-          if ((de.m & selectedFilters || !selectedFilters) && de.id.toLowerCase().includes(search.toLowerCase())) {
-            return {
-              ...de,
-              m: set
-                ? de.m | (DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE)
-                : de.m & ~(DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE)
-            };
-          } else {
-            return de;
-          }
-        })
-      );
-    };
 
     const shown_data = deviceEntities.filter(
       (de) => (de.m & selectedFilters || !selectedFilters) && de.id.toLowerCase().includes(search.toLowerCase())
@@ -418,7 +434,7 @@ const SettingsCustomization: FC = () => {
                       fullWidth
                       style={{ fontSize: '14px', justifyContent: 'flex-start' }}
                       endIcon={getSortIcon(entity_sort.state, 'NAME')}
-                      onClick={() => entity_sort.fns.onToggleSort({ sortKey: 'NAME' })}
+                      onClick={() => sort_name()}
                     >
                       NAME
                     </Button>
@@ -437,6 +453,9 @@ const SettingsCustomization: FC = () => {
                         value={getMaskString(de.m)}
                         onChange={(event, mask) => {
                           de.m = getMaskNumber(mask);
+                          if (de.m & DeviceEntityMask.DV_WEB_EXCLUDE) {
+                            de.m = de.m & ~DeviceEntityMask.DV_FAVORITE;
+                          }
                           setMasks(['']);
                         }}
                       >
@@ -466,17 +485,6 @@ const SettingsCustomization: FC = () => {
         </Table>
       </>
     );
-  };
-
-  const resetCustomization = async () => {
-    try {
-      await EMSESP.resetCustomizations();
-      enqueueSnackbar('All customizations have been removed. Restarting...', { variant: 'info' });
-    } catch (error: any) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem resetting customizations'), { variant: 'error' });
-    } finally {
-      setConfirmReset(false);
-    }
   };
 
   const renderResetDialog = () => (
