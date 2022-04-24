@@ -255,8 +255,8 @@ const DashboardData: FC = () => {
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
       sortFns: {
-        NAME: (array) => array.sort((a, b) => a.id.localeCompare(b.id)),
-        TEMPERATURE: (array) => array.sort((a, b) => a.id.localeCompare(b.id))
+        NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
+        TEMPERATURE: (array) => array.sort((a, b) => a.t - b.t)
       }
     }
   );
