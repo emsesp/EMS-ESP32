@@ -24,7 +24,7 @@ import { useSnackbar } from 'notistack';
 
 import { Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { useSort } from '@table-library/react-table-library/sort';
+import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useRowSelect } from '@table-library/react-table-library/select';
 
@@ -270,6 +270,7 @@ const DashboardData: FC = () => {
         iconUp: <KeyboardArrowUpOutlinedIcon />,
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
+      sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
         NAME: (array) => array.sort((a, b) => a.id.slice(2).localeCompare(b.id.slice(2)))
       }

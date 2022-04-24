@@ -18,7 +18,7 @@ import {
 
 import { Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { useSort } from '@table-library/react-table-library/sort';
+import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 
 import { useSnackbar } from 'notistack';
@@ -145,16 +145,12 @@ const SettingsCustomization: FC = () => {
         iconUp: <KeyboardArrowUpOutlinedIcon />,
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
+      sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
         NAME: (array) => array.sort((a, b) => a.id.localeCompare(b.id))
       }
     }
   );
-
-  const sort_name = () => {
-    console.log(entity_sort);
-    entity_sort.fns.onToggleSort({ sortKey: 'NAME' });
-  };
 
   const fetchDevices = useCallback(async () => {
     try {
@@ -434,7 +430,7 @@ const SettingsCustomization: FC = () => {
                       fullWidth
                       style={{ fontSize: '14px', justifyContent: 'flex-start' }}
                       endIcon={getSortIcon(entity_sort.state, 'NAME')}
-                      onClick={() => sort_name()}
+                      onClick={() => entity_sort.fns.onToggleSort({ sortKey: 'NAME' })}
                     >
                       NAME
                     </Button>
