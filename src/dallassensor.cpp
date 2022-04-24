@@ -149,7 +149,7 @@ void DallasSensor::loop() {
                             // check if we already have this sensor
                             bool found = false;
                             for (auto & sensor : sensors_) {
-                                if (sensor.id() == get_id(addr)) {
+                                if (sensor.internal_id() == get_id(addr)) {
                                     t += sensor.offset();
                                     if (t != sensor.temperature_c) {
                                         publish_sensor(sensor);
@@ -171,7 +171,7 @@ void DallasSensor::loop() {
                                 sensors_.back().apply_customization();
                                 publish_sensor(sensors_.back()); // call publish single
                                 // sort the sensors based on name
-                                std::sort(sensors_.begin(), sensors_.end(), [](const Sensor & a, const Sensor & b) { return a.name() < b.name(); });
+                                // std::sort(sensors_.begin(), sensors_.end(), [](const Sensor & a, const Sensor & b) { return a.name() < b.name(); });
                             }
                         } else {
                             sensorfails_++;
@@ -180,12 +180,12 @@ void DallasSensor::loop() {
 
                     default:
                         sensorfails_++;
-                        LOG_ERROR(F("Unknown dallas sensor %s"), Sensor(addr).id_str().c_str());
+                        LOG_ERROR(F("Unknown dallas sensor %s"), Sensor(addr).id().c_str());
                         break;
                     }
                 } else {
                     sensorfails_++;
-                    LOG_ERROR(F("Invalid dallas sensor %s"), Sensor(addr).id_str().c_str());
+                    LOG_ERROR(F("Invalid dallas sensor %s"), Sensor(addr).id().c_str());
                 }
             } else {
                 if (!parasite_) {
@@ -229,7 +229,7 @@ bool DallasSensor::temperature_convert_complete() {
 int16_t DallasSensor::get_temperature_c(const uint8_t addr[]) {
 #ifndef EMSESP_STANDALONE
     if (!bus_.reset()) {
-        LOG_ERROR(F("Bus reset failed before reading scratchpad from %s"), Sensor(addr).id_str().c_str());
+        LOG_ERROR(F("Bus reset failed before reading scratchpad from %s"), Sensor(addr).id().c_str());
         return EMS_VALUE_SHORT_NOTSET;
     }
     YIELD;
@@ -241,7 +241,7 @@ int16_t DallasSensor::get_temperature_c(const uint8_t addr[]) {
     YIELD;
 
     if (!bus_.reset()) {
-        LOG_ERROR(F("Bus reset failed after reading scratchpad from %s"), Sensor(addr).id_str().c_str());
+        LOG_ERROR(F("Bus reset failed after reading scratchpad from %s"), Sensor(addr).id().c_str());
         return EMS_VALUE_SHORT_NOTSET;
     }
     YIELD;
@@ -257,7 +257,7 @@ int16_t DallasSensor::get_temperature_c(const uint8_t addr[]) {
                     scratchpad[6],
                     scratchpad[7],
                     scratchpad[8],
-                    Sensor(addr).id_str().c_str());
+                    Sensor(addr).id().c_str());
         return EMS_VALUE_SHORT_NOTSET;
     }
 
@@ -290,15 +290,15 @@ int16_t DallasSensor::get_temperature_c(const uint8_t addr[]) {
 }
 
 // update dallas information name and offset
-bool DallasSensor::update(const std::string & id_str, const std::string & name, int16_t offset) {
+bool DallasSensor::update(const std::string & id, const std::string & name, int16_t offset) {
     // find the sensor
     for (auto & sensor : sensors_) {
-        if (sensor.id_str() == id_str) {
+        if (sensor.id() == id) {
             // found a match, update the sensor object
 
             // if HA is enabled then delete the old record
             if (Mqtt::ha_enabled()) {
-                remove_ha_topic(id_str);
+                remove_ha_topic(id);
             }
 
             sensor.set_name(name);
@@ -310,21 +310,21 @@ bool DallasSensor::update(const std::string & id_str, const std::string & name, 
                     // look it up to see if it exists
                     bool found = false;
                     for (auto & SensorCustomization : settings.sensorCustomizations) {
-                        if (SensorCustomization.id_str == id_str) {
+                        if (SensorCustomization.id == id) {
                             SensorCustomization.name   = name;
                             SensorCustomization.offset = offset;
                             found                      = true;
-                            LOG_DEBUG(F("Customizing existing sensor ID %s"), id_str.c_str());
+                            LOG_DEBUG(F("Customizing existing sensor ID %s"), id.c_str());
                             break;
                         }
                     }
                     if (!found) {
                         SensorCustomization newSensor = SensorCustomization();
-                        newSensor.id_str              = id_str;
+                        newSensor.id                  = id;
                         newSensor.name                = name;
                         newSensor.offset              = offset;
                         settings.sensorCustomizations.push_back(newSensor);
-                        LOG_DEBUG(F("Adding new customization for sensor ID %s"), id_str.c_str());
+                        LOG_DEBUG(F("Adding new customization for sensor ID %s"), id.c_str());
                     }
                     sensor.ha_registered = false; // it's changed so we may need to recreate the HA config
                     return StateUpdateResult::CHANGED;
@@ -361,7 +361,7 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
     for (const auto & sensor : sensors_) {
         if (id == -1) { // show number and id
             JsonObject dataSensor = output.createNestedObject(sensor.name());
-            dataSensor["id_str"]  = sensor.id_str();
+            dataSensor["id"]      = sensor.id();
             if (Helpers::hasValue(sensor.temperature_c)) {
                 dataSensor["temp"] = Helpers::round2((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
             }
@@ -377,8 +377,8 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
 bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const int8_t id) {
     for (const auto & sensor : sensors_) {
         if (strcmp(cmd, sensor.name().c_str()) == 0) {
-            output["id_str"] = sensor.id_str();
-            output["name"]   = sensor.name();
+            output["id"]   = sensor.id();
+            output["name"] = sensor.name();
             if (Helpers::hasValue(sensor.temperature_c)) {
                 output["value"] = Helpers::round2((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
             }
@@ -408,15 +408,15 @@ void DallasSensor::publish_sensor(const Sensor & sensor) {
 }
 
 // send empty config topic to remove the entry from HA
-void DallasSensor::remove_ha_topic(const std::string & id_str) {
+void DallasSensor::remove_ha_topic(const std::string & id) {
     if (!Mqtt::ha_enabled()) {
         return;
     }
 #ifdef EMSESP_DEBUG
-    LOG_DEBUG(F("Removing HA config for temperature sensor ID %s"), id_str.c_str());
+    LOG_DEBUG(F("Removing HA config for temperature sensor ID %s"), id.c_str());
 #endif
     // use '_' as HA doesn't like '-' in the topic name
-    std::string sensorid = id_str;
+    std::string sensorid = id;
     std::replace(sensorid.begin(), sensorid.end(), '-', '_');
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "sensor/%s/dallassensor_%s/config", Mqtt::base().c_str(), sensorid.c_str());
@@ -442,7 +442,7 @@ void DallasSensor::publish_values(const bool force) {
     for (auto & sensor : sensors_) {
         bool has_value = Helpers::hasValue(sensor.temperature_c);
         if (Mqtt::is_nested() || Mqtt::ha_enabled()) {
-            JsonObject dataSensor = doc.createNestedObject(sensor.id_str());
+            JsonObject dataSensor = doc.createNestedObject(sensor.id());
             dataSensor["name"]    = sensor.name();
             if (has_value) {
                 dataSensor["temp"] = Helpers::round2((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
@@ -455,7 +455,7 @@ void DallasSensor::publish_values(const bool force) {
         // to e.g. homeassistant/sensor/ems-esp/dallassensor_28-233D-9497-0C03/config
         if (Mqtt::ha_enabled()) {
             if (!sensor.ha_registered || force) {
-                LOG_DEBUG(F("Recreating HA config for sensor ID %s"), sensor.id_str().c_str());
+                LOG_DEBUG(F("Recreating HA config for sensor ID %s"), sensor.id().c_str());
 
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
                 config["dev_cla"] = FJSON("temperature");
@@ -467,13 +467,13 @@ void DallasSensor::publish_values(const bool force) {
                 config["unit_of_meas"] = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
 
                 char str[50];
-                snprintf(str, sizeof(str), "{{value_json['%s'].temp}}", sensor.id_str().c_str());
+                snprintf(str, sizeof(str), "{{value_json['%s'].temp}}", sensor.id().c_str());
                 config["val_tpl"] = str;
 
                 snprintf(str, sizeof(str), "Temperature Sensor %s", sensor.name().c_str());
                 config["name"] = str;
 
-                snprintf(str, sizeof(str), "dallasensor_%s", sensor.id_str().c_str());
+                snprintf(str, sizeof(str), "dallasensor_%s", sensor.id().c_str());
                 config["uniq_id"] = str;
 
                 JsonObject dev = config.createNestedObject("dev");
@@ -482,7 +482,7 @@ void DallasSensor::publish_values(const bool force) {
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 // use '_' as HA doesn't like '-' in the topic name
-                std::string sensorid = sensor.id_str();
+                std::string sensorid = sensor.id();
                 std::replace(sensorid.begin(), sensorid.end(), '-', '_');
 
                 snprintf(topic, sizeof(topic), "sensor/%s/dallassensor_%s/config", Mqtt::base().c_str(), sensorid.c_str());
@@ -500,18 +500,18 @@ void DallasSensor::publish_values(const bool force) {
 
 // skip crc from id
 DallasSensor::Sensor::Sensor(const uint8_t addr[])
-    : id_(((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16)
-          | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6])) {
+    : internal_id_(((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16)
+                   | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6])) {
     // create ID string
-    char id[20];
-    snprintf(id,
-             sizeof(id),
+    char id_s[20];
+    snprintf(id_s,
+             sizeof(id_s),
              "%02X-%04X-%04X-%04X",
-             (unsigned int)(id_ >> 48) & 0xFF,
-             (unsigned int)(id_ >> 32) & 0xFFFF,
-             (unsigned int)(id_ >> 16) & 0xFFFF,
-             (unsigned int)(id_)&0xFFFF);
-    id_str_ = std::string(id);
+             (unsigned int)(internal_id_ >> 48) & 0xFF,
+             (unsigned int)(internal_id_ >> 32) & 0xFFFF,
+             (unsigned int)(internal_id_ >> 16) & 0xFFFF,
+             (unsigned int)(internal_id_)&0xFFFF);
+    id_     = std::string(id_s);
     name_   = std::string{}; // name (alias) is empty
     offset_ = 0;             // 0 degrees offset
 }
@@ -525,7 +525,7 @@ uint64_t DallasSensor::get_id(const uint8_t addr[]) {
 // if empty, return the ID as a string
 std::string DallasSensor::Sensor::name() const {
     if (name_.empty()) {
-        return id_str_;
+        return id_;
     }
     return name_;
 }
@@ -538,9 +538,9 @@ bool DallasSensor::Sensor::apply_customization() {
         if (!sensors.empty()) {
             for (const auto & sensor : sensors) {
 #if defined(EMSESP_DEBUG)
-                LOG_DEBUG(F("Loading customization for dallas sensor %s"), sensor.id_str.c_str());
+                LOG_DEBUG(F("Loading customization for dallas sensor %s"), sensor.id.c_str());
 #endif
-                if (id_str_ == sensor.id_str) {
+                if (id_ == sensor.id) {
                     set_name(sensor.name);
                     set_offset(sensor.offset);
                     return true;

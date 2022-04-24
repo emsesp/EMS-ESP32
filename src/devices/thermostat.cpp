@@ -346,7 +346,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     heating_circuits_.push_back(new_hc);
 
     // sort based on hc number so there's a nice order when displaying
-    // TODO temporarily commented out the HC sorting until I'm 100% sure the return object still references the newly created object
+    // NOTE temporarily commented out the HC sorting until I'm 100% sure the return object still references the newly created object
     // not sure if new_hc and heating_circuits_.back() will still reference the new HC after its sorted - to check!
     // std::sort(heating_circuits_.begin(), heating_circuits_.end());
 

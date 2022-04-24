@@ -61,7 +61,7 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
     JsonArray sensorsJson = root.createNestedArray("sensors");
     for (const SensorCustomization & sensor : settings.sensorCustomizations) {
         JsonObject sensorJson = sensorsJson.createNestedObject();
-        sensorJson["id_str"]  = sensor.id_str; // is
+        sensorJson["id"]      = sensor.id;     // is
         sensorJson["name"]    = sensor.name;   // n
         sensorJson["offset"]  = sensor.offset; // o
     }
@@ -70,7 +70,7 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
     JsonArray analogJson = root.createNestedArray("analogs");
     for (const AnalogCustomization & sensor : settings.analogCustomizations) {
         JsonObject sensorJson = analogJson.createNestedObject();
-        sensorJson["id"]      = sensor.id;     // i
+        sensorJson["gpio"]    = sensor.gpio;   // g
         sensorJson["name"]    = sensor.name;   // n
         sensorJson["offset"]  = sensor.offset; // o
         sensorJson["factor"]  = sensor.factor; // f
@@ -101,7 +101,7 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
         for (const JsonObject sensorJson : root["sensors"].as<JsonArray>()) {
             // create each of the sensor, overwritting any previous settings
             auto sensor   = SensorCustomization();
-            sensor.id_str = sensorJson["id_str"].as<std::string>();
+            sensor.id     = sensorJson["id"].as<std::string>();
             sensor.name   = sensorJson["name"].as<std::string>();
             sensor.offset = sensorJson["offset"];
             settings.sensorCustomizations.push_back(sensor); // add to list
@@ -114,7 +114,7 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
         for (const JsonObject analogJson : root["analogs"].as<JsonArray>()) {
             // create each of the sensor, overwritting any previous settings
             auto sensor   = AnalogCustomization();
-            sensor.id     = analogJson["id"];
+            sensor.gpio   = analogJson["gpio"];
             sensor.name   = analogJson["name"].as<std::string>();
             sensor.offset = analogJson["offset"];
             sensor.factor = analogJson["factor"];

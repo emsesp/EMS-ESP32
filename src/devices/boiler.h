@@ -193,7 +193,7 @@ class Boiler : public EMSdevice {
     // Pool unit
     int8_t poolSetTemp_;
 
-/*
+    /*
  * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
  * thermostat always overwrites settings in boiler
  * enable settings here if no thermostat is used in system

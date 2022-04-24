@@ -432,12 +432,12 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
                                (fahrenheit == 0) ? 'C' : 'F',
                                COLOR_RESET,
                                Helpers::render_value(s2, sensor.offset(), 10, fahrenheit),
-                               sensor.id_str().c_str());
+                               sensor.id().c_str());
             } else {
                 shell.printfln(F("  %s (offset %s, ID: %s)"),
                                sensor.name().c_str(),
                                Helpers::render_value(s, sensor.offset(), 10, fahrenheit),
-                               sensor.id_str().c_str());
+                               sensor.id().c_str());
             }
         }
         shell.println();

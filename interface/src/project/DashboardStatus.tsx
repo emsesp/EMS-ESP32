@@ -3,24 +3,22 @@ import { useSnackbar } from 'notistack';
 import {
   Avatar,
   Button,
-  Table,
-  TableContainer,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Theme,
-  useTheme,
   Box,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle
+  DialogTitle,
+  Theme,
+  useTheme
 } from '@mui/material';
+
+import { Table } from '@table-library/react-table-library/table';
+import { useTheme as tableTheme } from '@table-library/react-table-library/theme';
+import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -32,13 +30,11 @@ import { AuthenticatedContext } from '../contexts/authentication';
 
 import { ButtonRow, FormLoader, SectionContent } from '../components';
 
-import { Status, busConnectionStatus } from './types';
+import { Status, busConnectionStatus, Stat } from './types';
 
-import { formatDurationSec, pluralize } from '../utils';
+import { formatDurationSec, pluralize, extractErrorMessage, useRest } from '../utils';
 
 import * as EMSESP from './api';
-
-import { extractErrorMessage, useRest } from '../utils';
 
 export const isConnected = ({ status }: Status) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
 
@@ -60,7 +56,7 @@ const busStatus = ({ status }: Status) => {
     case busConnectionStatus.BUS_STATUS_CONNECTED:
       return 'Connected';
     case busConnectionStatus.BUS_STATUS_TX_ERRORS:
-      return 'Tx issues - try a different Tx-Mode';
+      return 'Tx issues - try a different Tx Mode';
     case busConnectionStatus.BUS_STATUS_OFFLINE:
       return 'Disconnected';
     default:
@@ -68,41 +64,17 @@ const busStatus = ({ status }: Status) => {
   }
 };
 
-const formatRow = (name: string, success: number, fail: number, quality: number) => {
-  if (success === 0 && fail === 0) {
-    return (
-      <TableRow>
-        <TableCell sx={{ color: 'gray' }}>{name}</TableCell>
-        <TableCell />
-        <TableCell />
-        <TableCell />
-      </TableRow>
-    );
+const showQuality = (stat: Stat) => {
+  if (stat.q === 0 || stat.s + stat.f === 0) {
+    return;
   }
-
-  return (
-    <TableRow>
-      <TableCell>{name}</TableCell>
-      <TableCell>{Intl.NumberFormat().format(success)}</TableCell>
-      <TableCell>{Intl.NumberFormat().format(fail)}</TableCell>
-      {showQuality(quality)}
-    </TableRow>
-  );
-};
-
-const showQuality = (quality: number) => {
-  if (quality === 0) {
-    return <TableCell />;
+  if (stat.q === 100) {
+    return <div style={{ color: '#00FF7F' }}>{stat.q}%</div>;
   }
-
-  if (quality === 100) {
-    return <TableCell sx={{ color: '#00FF7F' }}>{quality}%</TableCell>;
-  }
-
-  if (quality >= 95) {
-    return <TableCell sx={{ color: 'orange' }}>{quality}%</TableCell>;
+  if (stat.q >= 95) {
+    return <div style={{ color: 'orange' }}>{stat.q}%</div>;
   } else {
-    return <TableCell sx={{ color: 'red' }}>{quality}%</TableCell>;
+    return <div style={{ color: 'red' }}>{stat.q}%</div>;
   }
 };
 
@@ -114,6 +86,48 @@ const DashboardStatus: FC = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   const { me } = useContext(AuthenticatedContext);
+
+  const stats_theme = tableTheme({
+    BaseRow: `
+      font-size: 14px;
+      color: white;
+    `,
+    HeaderRow: `
+      text-transform: uppercase;
+      background-color: black;
+      color: #90CAF9;
+      border-bottom: 1px solid #e0e0e0;
+    `,
+    Row: `
+      &:nth-of-type(odd) {
+        background-color: #303030;
+      }
+      &:nth-of-type(even) {
+        background-color: #1e1e1e;
+      }
+      border-top: 1px solid #565656;
+      border-bottom: 1px solid #565656;
+      position: relative;
+      z-index: 1;
+      &:not(:last-of-type) {
+        margin-bottom: -1px;
+      }
+      &:not(:first-of-type) {
+        margin-top: -1px;
+      }
+      &:hover {
+        color: white;
+      }
+    `,
+    BaseCell: `
+      border-top: 1px solid transparent;
+      border-right: 1px solid transparent;
+      border-bottom: 1px solid transparent;
+      &:nth-of-type(1) {
+        flex: 1;
+      }
+    `
+  });
 
   useEffect(() => {
     const timer = setInterval(() => loadData(), 30000);
@@ -183,27 +197,30 @@ const DashboardStatus: FC = () => {
             />
           </ListItem>
           <Box m={3}></Box>
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell></TableCell>
-                  <TableCell>SUCCESS</TableCell>
-                  <TableCell>FAIL</TableCell>
-                  <TableCell>QUALITY</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {formatRow('EMS Telegrams Received (Rx)', data.rx_received, data.rx_fails, data.rx_quality)}
-                {formatRow('EMS Reads (Tx)', data.tx_reads, data.tx_read_fails, data.tx_read_quality)}
-                {formatRow('EMS Writes (Tx)', data.tx_writes, data.tx_write_fails, data.tx_write_quality)}
-                {formatRow('Temperature Sensor Reads', data.sensor_reads, data.sensor_fails, data.sensor_quality)}
-                {formatRow('Analog Sensor Reads', data.analog_reads, data.analog_fails, data.analog_quality)}
-                {formatRow('MQTT Publishes', data.mqtt_count, data.mqtt_fails, data.mqtt_quality)}
-                {formatRow('API Calls', data.api_calls, data.api_fails, data.api_quality)}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <Table data={{ nodes: data.stats }} theme={stats_theme} layout={{ custom: true }}>
+            {(tableList: any) => (
+              <>
+                <Header>
+                  <HeaderRow>
+                    <HeaderCell></HeaderCell>
+                    <HeaderCell>SUCCESS</HeaderCell>
+                    <HeaderCell>FAIL</HeaderCell>
+                    <HeaderCell>QUALITY</HeaderCell>
+                  </HeaderRow>
+                </Header>
+                <Body>
+                  {tableList.map((stat: Stat) => (
+                    <Row key={stat.id} item={stat}>
+                      <Cell>{stat.id}</Cell>
+                      <Cell>{Intl.NumberFormat().format(stat.s)}</Cell>
+                      <Cell>{Intl.NumberFormat().format(stat.f)}</Cell>
+                      <Cell>{showQuality(stat)}</Cell>
+                    </Row>
+                  ))}
+                </Body>
+              </>
+            )}
+          </Table>
         </List>
         {renderScanDialog()}
         <Box display="flex" flexWrap="wrap">
