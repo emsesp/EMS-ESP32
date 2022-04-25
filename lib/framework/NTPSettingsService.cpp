@@ -1,4 +1,5 @@
 #include <NTPSettingsService.h>
+#include <esp_sntp.h>
 
 #include "../../src/emsesp_stub.hpp" // proddy added
 
