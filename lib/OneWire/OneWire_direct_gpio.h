@@ -123,6 +123,12 @@
 #define IO_REG_TYPE uint32_t
 #define IO_REG_BASE_ATTR
 #define IO_REG_MASK_ATTR
+#if __has_include("esp_arduino_version.h")
+#include "esp_arduino_version.h"
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(2, 0, 0)
+#define rtc_gpio_desc rtc_io_desc
+#endif
+#endif
 
 static inline __attribute__((always_inline)) IO_REG_TYPE directRead(IO_REG_TYPE pin) {
     if (pin < 32)
