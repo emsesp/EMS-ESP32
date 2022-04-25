@@ -57,8 +57,6 @@ void NetworkSettingsService::manageSTA() {
     if ((WiFi.getMode() & WIFI_STA) == 0) {
         if (_state.staticIPConfig) {
             WiFi.config(_state.localIP, _state.gatewayIP, _state.subnetMask, _state.dnsIP1, _state.dnsIP2); // configure for static IP
-        } else {
-            WiFi.config(IPADDR_NONE, IPADDR_NONE, IPADDR_NONE); // configure for DHCP
         }
 
         WiFi.setHostname(_state.hostname.c_str()); // set hostname
