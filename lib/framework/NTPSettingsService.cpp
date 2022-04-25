@@ -25,15 +25,15 @@ void NTPSettingsService::begin() {
 // handles both WiFI and Ethernet
 void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
     switch (event) {
-    case SYSTEM_EVENT_STA_DISCONNECTED:
-    case SYSTEM_EVENT_ETH_DISCONNECTED:
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+    case ARDUINO_EVENT_ETH_DISCONNECTED:
         emsesp::EMSESP::logger().info(F("WiFi connection dropped, stopping NTP"));
         connected_ = false;
         configureNTP();
         break;
 
-    case SYSTEM_EVENT_STA_GOT_IP:
-    case SYSTEM_EVENT_ETH_GOT_IP:
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+    case ARDUINO_EVENT_ETH_GOT_IP:
         // emsesp::EMSESP::logger().info(F("Got IP address, starting NTP synchronization"));
         connected_ = true;
         configureNTP();
