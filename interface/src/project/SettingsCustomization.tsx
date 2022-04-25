@@ -62,7 +62,7 @@ const SettingsCustomization: FC = () => {
     BaseRow: `
       font-size: 14px;
       color: white;
-      height: 32px;
+      min-height: 32px;
     `,
     HeaderRow: `
       text-transform: uppercase;
@@ -435,7 +435,7 @@ const SettingsCustomization: FC = () => {
                       NAME
                     </Button>
                   </HeaderCell>
-                  <HeaderCell>VALUE</HeaderCell>
+                  <HeaderCell resize>VALUE</HeaderCell>
                   <HeaderCell />
                 </HeaderRow>
               </Header>

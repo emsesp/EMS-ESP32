@@ -166,7 +166,7 @@ const DashboardData: FC = () => {
     BaseRow: `
       font-size: 14px;
       color: white;
-      height: 32px;
+      min-height: 32px;
     `,
     HeaderRow: `
       text-transform: uppercase;
