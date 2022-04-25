@@ -245,7 +245,7 @@ void System::format(uuid::console::Shell & shell) {
     EMSuart::stop();
 
 #ifndef EMSESP_STANDALONE
-    LITTLEFS.format();
+    LittleFS.format();
 #endif
 
     System::system_restart();
@@ -432,7 +432,7 @@ void System::button_OnVLongPress(PButton & b) {
     EMSESP::console_.loop();
 
 #ifdef EMSESP_DEBUG
-    Test::listDir(LITTLEFS, FS_CONFIG_DIRECTORY, 3);
+    Test::listDir(LittleFS, FS_CONFIG_DIRECTORY, 3);
 #endif
 
     EMSESP::esp8266React.factoryReset();

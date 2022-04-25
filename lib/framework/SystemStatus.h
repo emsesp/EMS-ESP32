@@ -4,7 +4,7 @@
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include <FS.h>
-#include <LITTLEFS.h>
+#include <LittleFS.h>
 
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>

@@ -1626,7 +1626,7 @@ void Test::debug(uuid::console::Shell & shell, const std::string & cmd) {
 
 #ifndef EMSESP_STANDALONE
     if (command == "ls") {
-        listDir(LITTLEFS, "/", 3);
+        listDir(LittleFS, "/", 3);
     }
 #endif
 }

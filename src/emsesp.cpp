@@ -28,9 +28,9 @@ ESP8266React            EMSESP::esp8266React(&webServer, &dummyFS);
 WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 #else
-ESP8266React            EMSESP::esp8266React(&webServer, &LITTLEFS);
-WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &LITTLEFS, EMSESP::esp8266React.getSecurityManager());
-WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &LITTLEFS, EMSESP::esp8266React.getSecurityManager());
+ESP8266React            EMSESP::esp8266React(&webServer, &LittleFS);
+WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
+WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 #endif
 
 WebStatusService EMSESP::webStatusService = WebStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
@@ -1373,8 +1373,8 @@ void EMSESP::start() {
 
 // start the file system
 #ifndef EMSESP_STANDALONE
-    if (!LITTLEFS.begin(true)) {
-        Serial.println("LITTLEFS Mount Failed. EMS-ESP stopped.");
+    if (!LittleFS.begin(true)) {
+        Serial.println("LittleFS Mount Failed. EMS-ESP stopped.");
         return;
     }
 #endif
