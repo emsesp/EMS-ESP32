@@ -152,6 +152,8 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     } else if (data.is<float>()) {
         char data_str[10];
         return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, data.as<float>(), 2), is_admin, id_n, output);
+    } else if (data.is<bool>()) {
+        return_code = Command::call(device_type, command_p, data.as<bool>() ? "1" : "0", is_admin, id_n, output);
     } else if (data.isNull()) {
         return_code = Command::call(device_type, command_p, "", is_admin, id_n, output); // empty, will do a query instead
     } else {
