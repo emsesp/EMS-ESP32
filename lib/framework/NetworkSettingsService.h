@@ -13,7 +13,7 @@
 
 #define NETWORK_SETTINGS_FILE "/config/networkSettings.json"
 #define NETWORK_SETTINGS_SERVICE_PATH "/rest/networkSettings"
-#define WIFI_RECONNECTION_DELAY 1000 * 30
+#define WIFI_RECONNECTION_DELAY 1000 * 3
 
 #ifndef FACTORY_WIFI_SSID
 #define FACTORY_WIFI_SSID ""
