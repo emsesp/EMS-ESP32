@@ -63,6 +63,7 @@ const SettingsCustomization: FC = () => {
       font-size: 14px;
       color: white;
       height: 32px;
+      min-height: 32px;
     `,
     HeaderRow: `
       text-transform: uppercase;
@@ -103,6 +104,9 @@ const SettingsCustomization: FC = () => {
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       &:nth-of-type(1) {
         left: 0px;
         min-width: 124px;
@@ -115,12 +119,14 @@ const SettingsCustomization: FC = () => {
       }
     `,
     HeaderCell: `
-      padding-left: 0px;
       &:nth-of-type(1) {
         padding-left: 24px;
       }
-      &:nth-of-type(3) {
-        border-left: 1px solid #565656;
+      &:nth-of-type(2) {
+        padding-left: 0px;
+      }
+      &:not(:last-of-type) {
+        border-right: 1px solid #565656;
       }
     `
   });
@@ -429,7 +435,7 @@ const SettingsCustomization: FC = () => {
                       NAME
                     </Button>
                   </HeaderCell>
-                  <HeaderCell>VALUE</HeaderCell>
+                  <HeaderCell resize>VALUE</HeaderCell>
                 </HeaderRow>
               </Header>
               <Body>

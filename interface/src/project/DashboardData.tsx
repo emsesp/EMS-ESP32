@@ -197,23 +197,29 @@ const DashboardData: FC = () => {
         border-top: 1px solid #177ac9;
         border-bottom: 1px solid #177ac9;
         color: white;
-        cursor: 'pointer',
       }
     `,
     BaseCell: `
-      padding-left: 8px;
+      cursor: pointer;
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
+      padding-left: 16px;
+      width: 124px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       &:last-of-type {
         text-align: right;
       }
     `,
     HeaderCell: `
-      padding-left: 0px;
-      &:not(:last-of-type) {
-        border-right: 1px solid #565656;
-      }
+    &:nth-of-type(1) {
+      padding-left: 8px;
+    }
+    &:not(:last-of-type) {
+      border-right: 1px solid #565656;
+    }
     `
   });
 
