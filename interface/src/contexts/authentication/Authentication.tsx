@@ -23,9 +23,9 @@ const Authentication: FC = ({ children }) => {
       const decodedMe = AuthenticationApi.decodeMeJWT(accessToken);
       setMe(decodedMe);
       enqueueSnackbar(`Logged in as ${decodedMe.username}`, { variant: 'success' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       setMe(undefined);
-      throw new Error('Failed to parse JWT ' + error.message);
+      throw new Error('Failed to parse JWT');
     }
   };
 
@@ -49,7 +49,7 @@ const Authentication: FC = ({ children }) => {
         await AuthenticationApi.verifyAuthorization();
         setMe(AuthenticationApi.decodeMeJWT(accessToken));
         setInitialized(true);
-      } catch (error: any) {
+      } catch (error: unknown) {
         setMe(undefined);
         setInitialized(true);
       }

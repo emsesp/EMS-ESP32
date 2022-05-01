@@ -81,7 +81,7 @@ const SystemStatusForm: FC = () => {
     try {
       await SystemApi.restart();
       enqueueSnackbar('EMS-ESP is restarting...', { variant: 'info' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem restarting device'), { variant: 'error' });
     } finally {
       setConfirmRestart(false);
@@ -179,7 +179,7 @@ const SystemStatusForm: FC = () => {
     try {
       await SystemApi.factoryReset();
       enqueueSnackbar('Device has been factory reset and will now restart', { variant: 'info' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem factory resetting the device'), { variant: 'error' });
     } finally {
       setConfirmFactoryReset(false);

@@ -9,6 +9,8 @@ import * as AuthenticationApi from './api/authentication';
 import { PROJECT_NAME } from './api/env';
 import { AuthenticationContext } from './contexts/authentication';
 
+import { AxiosError } from 'axios';
+
 import { extractErrorMessage, onEnterCallback, updateValue } from './utils';
 import { SignInRequest } from './types';
 import { ValidatedTextField } from './components';
@@ -42,9 +44,11 @@ const SignIn: FC = () => {
     try {
       const { data: loginResponse } = await AuthenticationApi.signIn(signInRequest);
       authenticationContext.signIn(loginResponse.access_token);
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        enqueueSnackbar('Invalid login details', { variant: 'warning' });
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          enqueueSnackbar('Invalid login details', { variant: 'warning' });
+        }
       } else {
         enqueueSnackbar(extractErrorMessage(error, 'Unexpected error, please try again'), { variant: 'error' });
       }

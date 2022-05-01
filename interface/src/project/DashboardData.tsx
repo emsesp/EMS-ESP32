@@ -197,24 +197,29 @@ const DashboardData: FC = () => {
         border-top: 1px solid #177ac9;
         border-bottom: 1px solid #177ac9;
         color: white;
-        cursor: 'pointer',
       }
     `,
     BaseCell: `
-      padding-left: 8px;
+      cursor: pointer;
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
+      padding-left: 16px;
+      width: 124px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       &:last-of-type {
         text-align: right;
-        min-width: 64px;
       }
     `,
     HeaderCell: `
-      padding-left: 0px;
-      &:not(:last-of-type) {
-        border-right: 1px solid #565656;
-      }
+    &:nth-of-type(1) {
+      padding-left: 8px;
+    }
+    &:not(:last-of-type) {
+      border-right: 1px solid #565656;
+    }
     `
   });
 
@@ -360,7 +365,7 @@ const DashboardData: FC = () => {
   const fetchCoreData = useCallback(async () => {
     try {
       setCoreData((await EMSESP.readCoreData()).data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Failed to fetch core data'), { variant: 'error' });
     }
   }, [enqueueSnackbar]);
@@ -381,7 +386,7 @@ const DashboardData: FC = () => {
     const unique_id = parseInt(id);
     try {
       setDeviceData((await EMSESP.readDeviceData({ id: unique_id })).data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem fetching device data'), { variant: 'error' });
     }
   };
@@ -389,7 +394,7 @@ const DashboardData: FC = () => {
   const fetchSensorData = async () => {
     try {
       setSensorData((await EMSESP.readSensorData()).data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem fetching sensor data'), { variant: 'error' });
     }
   };
@@ -442,7 +447,7 @@ const DashboardData: FC = () => {
           enqueueSnackbar('Write command sent', { variant: 'success' });
         }
         setDeviceValue(undefined);
-      } catch (error: any) {
+      } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem writing value'), { variant: 'error' });
       } finally {
         refreshData();
@@ -533,7 +538,7 @@ const DashboardData: FC = () => {
           enqueueSnackbar('Sensor updated', { variant: 'success' });
         }
         setSensor(undefined);
-      } catch (error: any) {
+      } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem updating sensor'), { variant: 'error' });
       } finally {
         setSensor(undefined);
@@ -741,6 +746,7 @@ const DashboardData: FC = () => {
           }}
           theme={data_theme}
           sort={dv_sort}
+          // layout={{ custom: true }}
         >
           {(tableList: any) => (
             <>
@@ -940,7 +946,7 @@ const DashboardData: FC = () => {
         } else {
           enqueueSnackbar('Analog sensor removed', { variant: 'success' });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem updating analog sensor'), { variant: 'error' });
       } finally {
         setAnalog(undefined);
@@ -968,7 +974,7 @@ const DashboardData: FC = () => {
         } else {
           enqueueSnackbar('Analog sensor updated', { variant: 'success' });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem updating analog'), { variant: 'error' });
       } finally {
         setAnalog(undefined);
