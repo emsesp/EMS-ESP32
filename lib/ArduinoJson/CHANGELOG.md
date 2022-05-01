@@ -1,6 +1,14 @@
 ArduinoJson: change log
 =======================
 
+v6.19.4 (2022-04-05)
+-------
+
+* Add `ElementProxy::memoryUsage()`
+* Add `MemberProxy::memoryUsage()` (issue #1730)
+* Add implicit conversion from `JsonDocument` to `JsonVariant`
+* Fix comparisons operators with `const JsonDocument&`
+
 v6.19.3 (2022-03-08)
 -------
 
