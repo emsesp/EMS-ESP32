@@ -137,8 +137,9 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
         for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
             // don't send if it's marked for removal
             if (sensor.type() != AnalogSensor::AnalogType::MARK_DELETED) {
+                count++;
                 JsonObject obj = analogs.createNestedObject();
-                obj["id"]      = Helpers::smallitoa(buffer, ++count); // needed for sorting table
+                obj["id"]      = Helpers::smallitoa(buffer, count); // needed for sorting table
                 obj["g"]       = sensor.gpio();
                 obj["n"]       = sensor.name();
                 obj["u"]       = sensor.uom();

@@ -34,6 +34,8 @@ class WebSettings {
     uint8_t  master_thermostat;
     bool     shower_timer;
     bool     shower_alert;
+    uint8_t  shower_alert_trigger;
+    uint8_t  shower_alert_coldshot;
     bool     syslog_enabled;
     int8_t   syslog_level; // uuid::log::Level
     uint32_t syslog_mark_interval;
