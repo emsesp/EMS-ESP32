@@ -124,20 +124,28 @@ const DashboardStatus: FC = () => {
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       &:nth-of-type(1) {
+        padding-left: 8px;
         flex: 1;
       }
       &:nth-of-type(2) {
+        min-width: 15%;
+        width: 15%;
         text-align: right;
-        min-width: 64px;
       }
       &:nth-of-type(3) {
+        min-width: 15%;
+        width: 15%;
         text-align: right;
-        min-width: 64px;
       }
       &:last-of-type {
+        min-width: 15%;
+        width: 15%;
         text-align: right;
-        min-width: 96px;
+        padding-right: 8px;
       }
     `
   });
