@@ -106,7 +106,7 @@ const SystemLog: FC = () => {
         if (response.status !== 200) {
           enqueueSnackbar('Problem applying log settings', { variant: 'error' });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem applying log settings'), { variant: 'error' });
       }
     }
@@ -158,7 +158,7 @@ const SystemLog: FC = () => {
   const fetchLog = useCallback(async () => {
     try {
       setLogEntries((await SystemApi.readLogEntries()).data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrorMessage(extractErrorMessage(error, 'Failed to fetch log'));
     }
   }, []);

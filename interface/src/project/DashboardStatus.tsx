@@ -91,6 +91,7 @@ const DashboardStatus: FC = () => {
     BaseRow: `
       font-size: 14px;
       color: white;
+      height: 32px;
     `,
     HeaderRow: `
       text-transform: uppercase;
@@ -123,8 +124,28 @@ const DashboardStatus: FC = () => {
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       &:nth-of-type(1) {
+        padding-left: 8px;
         flex: 1;
+      }
+      &:nth-of-type(2) {
+        min-width: 15%;
+        width: 15%;
+        text-align: right;
+      }
+      &:nth-of-type(3) {
+        min-width: 15%;
+        width: 15%;
+        text-align: right;
+      }
+      &:last-of-type {
+        min-width: 15%;
+        width: 15%;
+        text-align: right;
+        padding-right: 8px;
       }
     `
   });
@@ -141,7 +162,7 @@ const DashboardStatus: FC = () => {
     try {
       await EMSESP.scanDevices();
       enqueueSnackbar('Scanning for devices...', { variant: 'info' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem initiating scan'), { variant: 'error' });
     } finally {
       setConfirmScan(false);

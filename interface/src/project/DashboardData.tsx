@@ -138,6 +138,7 @@ const DashboardData: FC = () => {
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
       &:nth-of-type(1) {
+        padding-left: 8px;
         min-width: 42px;
         width: 42px;
         div {
@@ -197,21 +198,36 @@ const DashboardData: FC = () => {
         border-top: 1px solid #177ac9;
         border-bottom: 1px solid #177ac9;
         color: white;
-        cursor: 'pointer',
       }
     `,
     BaseCell: `
-      padding-left: 8px;
+      padding-left: 16px;
+      cursor: pointer;
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
+      &:nth-of-type(1) {
+        padding-left: 16px;
+      }
+      &:nth-of-type(4) {
+        padding-left: 16px;
+      }
+      width: 124px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       &:last-of-type {
         text-align: right;
-        min-width: 64px;
       }
     `,
     HeaderCell: `
-      padding-left: 0px;
+      padding-left: 8px;
+      &:nth-of-type(1) {
+       padding-left: 8px;
+      }
+      &:nth-of-type(4) {
+        padding-left: 16px;
+      }
       &:not(:last-of-type) {
         border-right: 1px solid #565656;
       }
@@ -237,6 +253,7 @@ const DashboardData: FC = () => {
         iconUp: <KeyboardArrowUpOutlinedIcon />,
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
+      sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
         GPIO: (array) => array.sort((a, b) => a.g - b.g),
         NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
@@ -254,6 +271,7 @@ const DashboardData: FC = () => {
         iconUp: <KeyboardArrowUpOutlinedIcon />,
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
+      sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
         NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
         TEMPERATURE: (array) => array.sort((a, b) => a.t - b.t)
@@ -272,7 +290,8 @@ const DashboardData: FC = () => {
       },
       sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
-        NAME: (array) => array.sort((a, b) => a.id.slice(2).localeCompare(b.id.slice(2)))
+        NAME: (array) => array.sort((a, b) => a.id.slice(2).localeCompare(b.id.slice(2))),
+        VALUE: (array) => array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
       }
     }
   );
@@ -360,7 +379,7 @@ const DashboardData: FC = () => {
   const fetchCoreData = useCallback(async () => {
     try {
       setCoreData((await EMSESP.readCoreData()).data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Failed to fetch core data'), { variant: 'error' });
     }
   }, [enqueueSnackbar]);
@@ -381,7 +400,7 @@ const DashboardData: FC = () => {
     const unique_id = parseInt(id);
     try {
       setDeviceData((await EMSESP.readDeviceData({ id: unique_id })).data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem fetching device data'), { variant: 'error' });
     }
   };
@@ -389,7 +408,7 @@ const DashboardData: FC = () => {
   const fetchSensorData = async () => {
     try {
       setSensorData((await EMSESP.readSensorData()).data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem fetching sensor data'), { variant: 'error' });
     }
   };
@@ -442,7 +461,7 @@ const DashboardData: FC = () => {
           enqueueSnackbar('Write command sent', { variant: 'success' });
         }
         setDeviceValue(undefined);
-      } catch (error: any) {
+      } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem writing value'), { variant: 'error' });
       } finally {
         refreshData();
@@ -533,7 +552,7 @@ const DashboardData: FC = () => {
           enqueueSnackbar('Sensor updated', { variant: 'success' });
         }
         setSensor(undefined);
-      } catch (error: any) {
+      } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem updating sensor'), { variant: 'error' });
       } finally {
         setSensor(undefined);
@@ -741,6 +760,7 @@ const DashboardData: FC = () => {
           }}
           theme={data_theme}
           sort={dv_sort}
+          // layout={{ custom: true }}
         >
           {(tableList: any) => (
             <>
@@ -756,7 +776,16 @@ const DashboardData: FC = () => {
                       ENTITY NAME
                     </Button>
                   </HeaderCell>
-                  <HeaderCell resize>VALUE</HeaderCell>
+                  <HeaderCell resize>
+                    <Button
+                      fullWidth
+                      style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                      endIcon={getSortIcon(dv_sort.state, 'VALUE')}
+                      onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
+                    >
+                      VALUE
+                    </Button>
+                  </HeaderCell>
                   <HeaderCell />
                 </HeaderRow>
               </Header>
@@ -940,7 +969,7 @@ const DashboardData: FC = () => {
         } else {
           enqueueSnackbar('Analog sensor removed', { variant: 'success' });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem updating analog sensor'), { variant: 'error' });
       } finally {
         setAnalog(undefined);
@@ -968,7 +997,7 @@ const DashboardData: FC = () => {
         } else {
           enqueueSnackbar('Analog sensor updated', { variant: 'success' });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem updating analog'), { variant: 'error' });
       } finally {
         setAnalog(undefined);

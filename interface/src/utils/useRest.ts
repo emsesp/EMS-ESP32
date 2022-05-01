@@ -22,7 +22,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     setErrorMessage(undefined);
     try {
       setData((await read()).data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message = extractErrorMessage(error, 'Problem loading data');
       enqueueSnackbar(message, { variant: 'error' });
       setErrorMessage(message);
@@ -45,7 +45,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
         } else {
           enqueueSnackbar('Settings saved', { variant: 'success' });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         const message = extractErrorMessage(error, 'Problem saving data');
         enqueueSnackbar(message, { variant: 'error' });
         setErrorMessage(message);

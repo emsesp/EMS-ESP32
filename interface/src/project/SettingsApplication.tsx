@@ -64,7 +64,7 @@ const SettingsApplication: FC = () => {
           eth_clock_mode: response.data.eth_clock_mode
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem fetching board profile'), { variant: 'error' });
     } finally {
       setProcessingBoard(false);
@@ -103,7 +103,7 @@ const SettingsApplication: FC = () => {
       try {
         await EMSESP.restart();
         enqueueSnackbar('EMS-ESP is restarting...', { variant: 'info' });
-      } catch (error: any) {
+      } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem restarting device'), { variant: 'error' });
       }
     };
