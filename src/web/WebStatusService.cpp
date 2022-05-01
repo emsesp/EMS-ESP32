@@ -34,8 +34,7 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-        EMSESP::logger().info(F("WiFi disconnected. Reason code=%d"), info.prov_fail_reason); // IDF 4.0
-        // EMSESP::logger().info(F("WiFi disconnected. Reason code=%d"), info.disconnected.reason);
+        EMSESP::logger().info(F("WiFi disconnected. Reason code=%d"), info.wifi_sta_disconneced.reason); // IDF 4.0
         WiFi.disconnect(true);
         break;
 
