@@ -464,87 +464,138 @@ uint32_t Helpers::abs(const int32_t i) {
 }
 
 // for booleans, use isBool true (EMS_VALUE_BOOL)
-bool Helpers::hasValue(const uint8_t & v, const uint8_t isBool) {
+bool Helpers::hasValue(const uint8_t & value, const uint8_t isBool) {
     if (isBool == EMS_VALUE_BOOL) {
-        return (v != EMS_VALUE_BOOL_NOTSET);
+        return (value != EMS_VALUE_BOOL_NOTSET);
     }
-    return (v != EMS_VALUE_UINT_NOTSET);
+    return (value != EMS_VALUE_UINT_NOTSET);
 }
 
-bool Helpers::hasValue(const int8_t & v) {
-    return (v != EMS_VALUE_INT_NOTSET);
+bool Helpers::hasValue(const int8_t & value) {
+    return (value != EMS_VALUE_INT_NOTSET);
 }
 
-bool Helpers::hasValue(const char * v) {
-    if ((v == nullptr) || (strlen(v) == 0)) {
+bool Helpers::hasValue(const char * value) {
+    if ((value == nullptr) || (strlen(value) == 0)) {
         return false;
     }
 
-    return (v[0] != '\0');
+    return (value[0] != '\0');
 }
 
 // for short these are typically 0x8300, 0x7D00 and sometimes 0x8000
-bool Helpers::hasValue(const int16_t & v) {
-    return (abs(v) < EMS_VALUE_USHORT_NOTSET);
+bool Helpers::hasValue(const int16_t & value) {
+    return (abs(value) < EMS_VALUE_USHORT_NOTSET);
 }
 
-bool Helpers::hasValue(const uint16_t & v) {
-    return (v < EMS_VALUE_USHORT_NOTSET);
+bool Helpers::hasValue(const uint16_t & value) {
+    return (value < EMS_VALUE_USHORT_NOTSET);
 }
 
-bool Helpers::hasValue(const uint32_t & v) {
-    return (v != EMS_VALUE_ULONG_NOTSET);
+bool Helpers::hasValue(const uint32_t & value) {
+    return (value != EMS_VALUE_ULONG_NOTSET);
 }
 
 // checks if we can convert a char string to an int value
-bool Helpers::value2number(const char * v, int & value, const int min, const int max) {
-    if ((v == nullptr) || (strlen(v) == 0)) {
-        value = 0;
+bool Helpers::value2number(const char * value, int & value_i, const int min, const int max) {
+    if ((value == nullptr) || (strlen(value) == 0)) {
+        value_i = 0;
         return false;
     }
 
-    value = atoi(v);
-    if (value >= min && value <= max) {
+    value_i = atoi(value);
+    if (value_i >= min && value_i <= max) {
         return true;
     }
     return false;
 }
 
 // checks if we can convert a char string to a float value
-bool Helpers::value2float(const char * v, float & value) {
-    value = 0;
-    if ((v == nullptr) || (strlen(v) == 0)) {
+bool Helpers::value2float(const char * value, float & value_f) {
+    value_f = 0;
+    if ((value == nullptr) || (strlen(value) == 0)) {
         return false;
     }
 
-    if (v[0] == '-' || v[0] == '.' || (v[0] >= '0' && v[0] <= '9')) {
-        value = atof(v);
+    if (value[0] == '-' || value[0] == '.' || (value[0] >= '0' && value[0] <= '9')) {
+        value_f = atof(value);
         return true;
     }
 
-    if (v[0] == '+' && (v[1] == '.' || (v[1] >= '0' && v[1] <= '9'))) {
-        value = atof(v + 1);
+    if (value[0] == '+' && (value[1] == '.' || (value[1] >= '0' && value[1] <= '9'))) {
+        value_f = atof(value + 1);
         return true;
     }
     return false;
 }
 
-bool Helpers::value2temperature(const char * v, float & value, bool relative) {
-    if (value2float(v, value)) {
+bool Helpers::value2temperature(const char * value, float & value_f, bool relative) {
+    if (value2float(value, value_f)) {
         if (EMSESP::system_.fahrenheit()) {
-            value = relative ? (value / 1.8) : (value - 32) / 1.8;
+            value_f = relative ? (value_f / 1.8) : (value_f - 32) / 1.8;
         }
         return true;
     }
     return false;
 }
 
-bool Helpers::value2temperature(const char * v, int & value, const bool relative, const int min, const int max) {
-    if (value2number(v, value, min, max)) {
+bool Helpers::value2temperature(const char * value, int & value_i, const bool relative, const int min, const int max) {
+    if (value2number(value, value_i, min, max)) {
         if (EMSESP::system_.fahrenheit()) {
-            value = relative ? (value / 1.8) : (value - 32) / 1.8;
+            value_i = relative ? (value_i / 1.8) : (value_i - 32) / 1.8;
         }
         return true;
+    }
+    return false;
+}
+
+// checks if we can convert a char string to a lowercase string
+bool Helpers::value2string(const char * value, std::string & value_s) {
+    if ((value == nullptr) || (strlen(value) == 0)) {
+        value_s = std::string{};
+        return false;
+    }
+
+    value_s = toLower(value);
+    return true;
+}
+
+// checks to see if a string (usually a command or payload cmd) looks like a boolean
+// on, off, true, false, 1, 0
+bool Helpers::value2bool(const char * value, bool & value_b) {
+    if ((value == nullptr) || (strlen(value) == 0)) {
+        return false;
+    }
+
+    std::string bool_str = toLower(value); // convert to lower case
+
+    if ((bool_str == read_flash_string(F_(on))) || (bool_str == "1") || (bool_str == "true")) {
+        value_b = true;
+        return true; // is a bool
+    }
+
+    if ((bool_str == read_flash_string(F_(off))) || (bool_str == "0") || (bool_str == "false")) {
+        value_b = false;
+        return true; // is a bool
+    }
+
+    return false; // not a bool
+}
+
+// checks to see if a string is member of a vector and return the index, also allow true/false for on/off
+bool Helpers::value2enum(const char * value, uint8_t & value_ui, const __FlashStringHelper * const * strs) {
+    if ((value == nullptr) || (strlen(value) == 0)) {
+        return false;
+    }
+    std::string str = toLower(value);
+
+    for (value_ui = 0; strs[value_ui]; value_ui++) {
+        std::string str1 = toLower(read_flash_string(strs[value_ui]));
+        if ((str1 != "")
+            && ((str1 == read_flash_string(F_(off)) && str == "false") || (str1 == read_flash_string(F_(on)) && str == "true") || (str == str1)
+                || (value[0] == ('0' + value_ui) && value[1] == '\0'))) {
+            return true;
+        }
     }
     return false;
 }
@@ -560,55 +611,6 @@ std::string Helpers::toUpper(std::string const & s) {
     std::string lc = s;
     std::transform(lc.begin(), lc.end(), lc.begin(), [](unsigned char c) { return std::toupper(c); });
     return lc;
-}
-
-// checks if we can convert a char string to a lowercase string
-bool Helpers::value2string(const char * v, std::string & value) {
-    if ((v == nullptr) || (strlen(v) == 0)) {
-        value = std::string{};
-        return false;
-    }
-    value = toLower(v);
-    return true;
-}
-
-// checks to see if a string (usually a command or payload cmd) looks like a boolean
-// on, off, true, false, 1, 0
-bool Helpers::value2bool(const char * v, bool & value) {
-    if ((v == nullptr) || (strlen(v) == 0)) {
-        return false;
-    }
-
-    std::string bool_str = toLower(v); // convert to lower case
-
-    if ((bool_str == read_flash_string(F_(on))) || (bool_str == "1") || (bool_str == "true")) {
-        value = true;
-        return true; // is a bool
-    }
-
-    if ((bool_str == read_flash_string(F_(off))) || (bool_str == "0") || (bool_str == "false")) {
-        value = false;
-        return true; // is a bool
-    }
-
-    return false; // not a bool
-}
-
-// checks to see if a string is member of a vector and return the index, also allow true/false for on/off
-bool Helpers::value2enum(const char * v, uint8_t & value, const __FlashStringHelper * const * strs) {
-    if ((v == nullptr) || (strlen(v) == 0)) {
-        return false;
-    }
-    std::string str = toLower(v);
-    for (value = 0; strs[value]; value++) {
-        std::string str1 = toLower(read_flash_string(strs[value]));
-        if ((str1 != "")
-            && ((str1 == read_flash_string(F_(off)) && str == "false") || (str1 == read_flash_string(F_(on)) && str == "true") || (str == str1)
-                || (v[0] == ('0' + value) && v[1] == '\0'))) {
-            return true;
-        }
-    }
-    return false;
 }
 
 // replace char in char string

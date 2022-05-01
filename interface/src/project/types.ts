@@ -9,6 +9,8 @@ export interface Settings {
   master_thermostat: number;
   shower_timer: boolean;
   shower_alert: boolean;
+  shower_alert_coldshot: number;
+  shower_alert_trigger: number;
   rx_gpio: number;
   tx_gpio: number;
   telnet_enabled: boolean;
@@ -41,8 +43,8 @@ export enum busConnectionStatus {
 export interface Stat {
   id: string; // name
   s: number; // success
-  f: number;  // fail
-  q: number;  // quality
+  f: number; // fail
+  q: number; // quality
 }
 export interface Status {
   status: busConnectionStatus;

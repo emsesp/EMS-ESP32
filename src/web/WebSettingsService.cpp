@@ -37,41 +37,43 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
 }
 
 void WebSettings::read(WebSettings & settings, JsonObject & root) {
-    root["tx_mode"]              = settings.tx_mode;
-    root["ems_bus_id"]           = settings.ems_bus_id;
-    root["syslog_enabled"]       = settings.syslog_enabled;
-    root["syslog_level"]         = settings.syslog_level;
-    root["trace_raw"]            = settings.trace_raw;
-    root["syslog_mark_interval"] = settings.syslog_mark_interval;
-    root["syslog_host"]          = settings.syslog_host;
-    root["syslog_port"]          = settings.syslog_port;
-    root["master_thermostat"]    = settings.master_thermostat;
-    root["shower_timer"]         = settings.shower_timer;
-    root["shower_alert"]         = settings.shower_alert;
-    root["rx_gpio"]              = settings.rx_gpio;
-    root["tx_gpio"]              = settings.tx_gpio;
-    root["dallas_gpio"]          = settings.dallas_gpio;
-    root["dallas_parasite"]      = settings.dallas_parasite;
-    root["led_gpio"]             = settings.led_gpio;
-    root["hide_led"]             = settings.hide_led;
-    root["low_clock"]            = settings.low_clock;
-    root["telnet_enabled"]       = settings.telnet_enabled;
-    root["notoken_api"]          = settings.notoken_api;
-    root["readonly_mode"]        = settings.readonly_mode;
-    root["analog_enabled"]       = settings.analog_enabled;
-    root["pbutton_gpio"]         = settings.pbutton_gpio;
-    root["solar_maxflow"]        = settings.solar_maxflow;
-    root["board_profile"]        = settings.board_profile;
-    root["fahrenheit"]           = settings.fahrenheit;
-    root["bool_format"]          = settings.bool_format;
-    root["enum_format"]          = settings.enum_format;
-    root["weblog_level"]         = settings.weblog_level;
-    root["weblog_buffer"]        = settings.weblog_buffer;
-    root["weblog_compact"]       = settings.weblog_compact;
-    root["phy_type"]             = settings.phy_type;
-    root["eth_power"]            = settings.eth_power;
-    root["eth_phy_addr"]         = settings.eth_phy_addr;
-    root["eth_clock_mode"]       = settings.eth_clock_mode;
+    root["tx_mode"]               = settings.tx_mode;
+    root["ems_bus_id"]            = settings.ems_bus_id;
+    root["syslog_enabled"]        = settings.syslog_enabled;
+    root["syslog_level"]          = settings.syslog_level;
+    root["trace_raw"]             = settings.trace_raw;
+    root["syslog_mark_interval"]  = settings.syslog_mark_interval;
+    root["syslog_host"]           = settings.syslog_host;
+    root["syslog_port"]           = settings.syslog_port;
+    root["master_thermostat"]     = settings.master_thermostat;
+    root["shower_timer"]          = settings.shower_timer;
+    root["shower_alert"]          = settings.shower_alert;
+    root["shower_alert_coldshot"] = settings.shower_alert_coldshot;
+    root["shower_alert_trigger"]  = settings.shower_alert_trigger;
+    root["rx_gpio"]               = settings.rx_gpio;
+    root["tx_gpio"]               = settings.tx_gpio;
+    root["dallas_gpio"]           = settings.dallas_gpio;
+    root["dallas_parasite"]       = settings.dallas_parasite;
+    root["led_gpio"]              = settings.led_gpio;
+    root["hide_led"]              = settings.hide_led;
+    root["low_clock"]             = settings.low_clock;
+    root["telnet_enabled"]        = settings.telnet_enabled;
+    root["notoken_api"]           = settings.notoken_api;
+    root["readonly_mode"]         = settings.readonly_mode;
+    root["analog_enabled"]        = settings.analog_enabled;
+    root["pbutton_gpio"]          = settings.pbutton_gpio;
+    root["solar_maxflow"]         = settings.solar_maxflow;
+    root["board_profile"]         = settings.board_profile;
+    root["fahrenheit"]            = settings.fahrenheit;
+    root["bool_format"]           = settings.bool_format;
+    root["enum_format"]           = settings.enum_format;
+    root["weblog_level"]          = settings.weblog_level;
+    root["weblog_buffer"]         = settings.weblog_buffer;
+    root["weblog_compact"]        = settings.weblog_compact;
+    root["phy_type"]              = settings.phy_type;
+    root["eth_power"]             = settings.eth_power;
+    root["eth_phy_addr"]          = settings.eth_phy_addr;
+    root["eth_clock_mode"]        = settings.eth_clock_mode;
 }
 
 // call on initialization and also when settings are updated via web or console
@@ -152,6 +154,12 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     prev                  = settings.shower_alert;
     settings.shower_alert = root["shower_alert"] | EMSESP_DEFAULT_SHOWER_ALERT;
     check_flag(prev, settings.shower_alert, ChangeFlags::SHOWER);
+    prev                          = settings.shower_alert_trigger;
+    settings.shower_alert_trigger = root["shower_alert_trigger"] | EMSESP_DEFAULT_SHOWER_ALERT_TRIGGER;
+    check_flag(prev, settings.shower_alert_trigger, ChangeFlags::SHOWER);
+    prev                           = settings.shower_alert_coldshot;
+    settings.shower_alert_coldshot = root["shower_alert_coldshot"] | EMSESP_DEFAULT_SHOWER_ALERT_COLDSHOT;
+    check_flag(prev, settings.shower_alert_coldshot, ChangeFlags::SHOWER);
 
     // led
     prev              = settings.led_gpio;

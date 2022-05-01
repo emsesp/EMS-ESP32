@@ -40,5 +40,9 @@ export const createSettingsValidator = (settings: Settings) =>
         { required: true, message: 'Mark interval is required' },
         { type: 'number', min: 0, max: 10, message: 'Port must be between 0 and 10' }
       ]
+    }),
+    ...(settings.shower_alert && {
+      shower_alert_trigger: [{ type: 'number', min: 1, max: 20, message: 'Time must be between 1 and 20 minutes' }],
+      shower_alert_coldshot: [{ type: 'number', min: 1, max: 10, message: 'Time must be between 1 and 10 seconds' }]
     })
   });

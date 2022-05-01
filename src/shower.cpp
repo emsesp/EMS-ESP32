@@ -24,8 +24,10 @@ uuid::log::Logger Shower::logger_{F_(shower), uuid::log::Facility::CONSOLE};
 
 void Shower::start() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        shower_timer_ = settings.shower_timer;
-        shower_alert_ = settings.shower_alert;
+        shower_timer_          = settings.shower_timer;
+        shower_alert_          = settings.shower_alert;
+        shower_alert_trigger_  = settings.shower_alert_trigger * 60000; // convert from minutes
+        shower_alert_coldshot_ = settings.shower_alert_coldshot * 1000; // convert from seconds
     });
 
     set_shower_state(false, true); // turns shower to off and creates HA topic if not already done
@@ -59,7 +61,7 @@ void Shower::loop() {
                     LOG_DEBUG(F("[Shower] hot water still running, starting shower timer"));
                 }
                 // check if the shower has been on too long
-                else if ((time_now - timer_start_) > SHOWER_MAX_DURATION) {
+                else if ((time_now - timer_start_) > shower_alert_trigger_) {
                     shower_alert_start();
                 }
             }
@@ -95,7 +97,7 @@ void Shower::loop() {
 
     // at this point we're in the shower cold shot (doing_cold_shot_ == true)
     // keep repeating until the time is up
-    if ((time_now - alert_timer_start_) > SHOWER_COLDSHOT_DURATION) {
+    if ((time_now - alert_timer_start_) > shower_alert_coldshot_) {
         shower_alert_stop();
     }
 }
