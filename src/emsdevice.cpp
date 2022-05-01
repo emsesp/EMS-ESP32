@@ -25,7 +25,7 @@ namespace emsesp {
 // this includes commands since they can also be entities and visible in the web UI
 uint8_t EMSdevice::count_entities() {
     uint8_t count = 0;
-    for (auto & dv : devicevalues_) {
+    for (const auto & dv : devicevalues_) {
         if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.hasValue()) {
             count++;
         }
@@ -338,15 +338,17 @@ char * EMSdevice::show_telegram_handlers(char * result, const size_t len, const 
             strlcat(result, Helpers::hextoa(tf.telegram_type_id_, true).c_str(), len);
         }
     }
+
     if (handlers == Handlers::ALL || handlers == Handlers::IGNORED) {
         i = 0;
-        for (auto handlers : handlers_ignored_) {
+        for (auto h : handlers_ignored_) {
             if (i++ > 0) {
                 strlcat(result, " ", len);
             }
-            strlcat(result, Helpers::hextoa(handlers).c_str(), len);
+            strlcat(result, Helpers::hextoa(h).c_str(), len);
         }
     }
+
     return result;
 }
 
@@ -667,7 +669,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 
             // handle Booleans (true, false), use strings, no native true/false)
             if (dv.type == DeviceValueType::BOOL) {
-                bool value_b = (bool)*(uint8_t *)(dv.value_p);
+                auto value_b = (bool)*(uint8_t *)(dv.value_p);
                 if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
                     obj["v"] = value_b ? 1 : 0;
                 } else {
@@ -786,7 +788,7 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
         if (dv.hasValue()) {
             // handle Booleans (true, false), use strings, no native true/false)
             if (dv.type == DeviceValueType::BOOL) {
-                bool value_b = (bool)*(uint8_t *)(dv.value_p);
+                auto value_b = (bool)*(uint8_t *)(dv.value_p);
                 if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
                     obj["v"] = value_b ? 1 : 0;
                 } else {
@@ -890,16 +892,16 @@ void EMSdevice::mask_entity(const std::string & entity_id) {
 
 // populate a string vector with entities that have masks set
 void EMSdevice::getMaskedEntities(std::vector<std::string> & entity_ids) {
-    for (auto & dv : devicevalues_) {
+    for (const auto & dv : devicevalues_) {
         std::string entity_name =
             dv.tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(dv.short_name) : tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
         uint8_t mask = dv.state >> 4;
+
         if (mask) {
             entity_ids.push_back(Helpers::hextoa(mask, false) + entity_name);
         }
     }
 }
-
 
 // builds json for a specific device value / entity
 // cmd is the endpoint or name of the device entity
@@ -995,7 +997,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
 
             case DeviceValueType::BOOL:
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
-                    bool value_b = (bool)*(uint8_t *)(dv.value_p);
+                    auto value_b = (bool)*(uint8_t *)(dv.value_p);
                     if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                         json[value] = value_b;
                     } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
@@ -1128,7 +1130,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             // handle Booleans
             if (dv.type == DeviceValueType::BOOL && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see how to render the value depending on the setting
-                bool value_b = (bool)*(uint8_t *)(dv.value_p);
+                auto value_b = (bool)*(uint8_t *)(dv.value_p);
                 if (Mqtt::ha_enabled() && (output_target == OUTPUT_TARGET::MQTT)) {
                     char s[7];
                     json[name] = Helpers::render_boolean(s, value_b); // for HA always render as string
