@@ -86,7 +86,7 @@ const NTPStatusForm: FC = () => {
       enqueueSnackbar('Time set', { variant: 'success' });
       setSettingTime(false);
       loadData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem updating time'), { variant: 'error' });
     } finally {
       setProcessing(false);

@@ -33,7 +33,7 @@ const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
   const getToken = useCallback(async () => {
     try {
       setToken((await SecurityApi.generateToken(username)).data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem generating token'), { variant: 'error' });
     }
   }, [username, enqueueSnackbar]);

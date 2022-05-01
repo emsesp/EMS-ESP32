@@ -1,13 +1,14 @@
 import { useEffect, FC, useState, useCallback, useRef } from 'react';
 import { useSnackbar } from 'notistack';
 
+import { AxiosError } from 'axios';
+
 import { Button } from '@mui/material';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 
 import * as NetworkApi from '../../api/network';
 import { WiFiNetwork, WiFiNetworkList } from '../../types';
 import { ButtonRow, FormLoader, SectionContent } from '../../components';
-import { extractErrorMessage } from '../../utils';
 
 import WiFiNetworkSelector from './WiFiNetworkSelector';
 
@@ -52,8 +53,12 @@ const WiFiNetworkScanner: FC = () => {
         newNetworkList.networks.sort(compareNetworks);
         setNetworkList(newNetworkList);
       }
-    } catch (error: any) {
-      finishedWithError(extractErrorMessage(error, 'Problem listing WiFi networks'));
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        finishedWithError('Problem listing WiFi networks ' + error.response?.data.message);
+      } else {
+        finishedWithError('Problem listing WiFi networks');
+      }
     }
   }, [finishedWithError]);
 
@@ -64,8 +69,12 @@ const WiFiNetworkScanner: FC = () => {
     try {
       await NetworkApi.scanNetworks();
       setTimeout(pollNetworkList, POLLING_FREQUENCY);
-    } catch (error: any) {
-      finishedWithError(extractErrorMessage(error, 'Problem scanning for WiFi networks'));
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        finishedWithError('Problem scanning for WiFi networks ' + error.response?.data.message);
+      } else {
+        finishedWithError('Problem scanning for WiFi networks');
+      }
     }
   }, [finishedWithError, pollNetworkList]);
 

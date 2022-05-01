@@ -24,13 +24,19 @@ const getBorderColor = (theme: Theme, props: DropzoneState) => {
 export interface SingleUploadProps {
   onDrop: (acceptedFiles: File[]) => void;
   onCancel: () => void;
-  accept?: string | string[];
   uploading: boolean;
   progress?: ProgressEvent;
 }
 
-const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, accept, uploading, progress }) => {
-  const dropzoneState = useDropzone({ onDrop, accept, disabled: uploading, multiple: false });
+const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, progress }) => {
+  const dropzoneState = useDropzone({
+    onDrop,
+    accept: {
+      'application/octet-stream': ['.bin']
+    },
+    disabled: uploading,
+    multiple: false
+  });
   const { getRootProps, getInputProps } = dropzoneState;
   const theme = useTheme();
 

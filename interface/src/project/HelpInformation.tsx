@@ -48,7 +48,7 @@ const HelpInformation: FC = () => {
         document.body.removeChild(a);
         enqueueSnackbar('File downloaded', { variant: 'info' });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
     }
   };

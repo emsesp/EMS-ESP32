@@ -43,7 +43,7 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
       });
       resetUploadingStates();
       enqueueSnackbar('Upload successful', { variant: 'success' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (axios.isCancel(error)) {
         enqueueSnackbar('Upload aborted', { variant: 'warning' });
       } else {
