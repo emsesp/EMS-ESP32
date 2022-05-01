@@ -108,7 +108,6 @@ const SettingsCustomization: FC = () => {
         min-width: 124px;
         width: 124px;
         padding-left: 0px;
-
       }
       &:nth-of-type(2) {
         min-width: 70%;
@@ -155,7 +154,7 @@ const SettingsCustomization: FC = () => {
   const fetchDevices = useCallback(async () => {
     try {
       setDevices((await EMSESP.readDevices()).data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrorMessage(extractErrorMessage(error, 'Failed to fetch device list'));
     }
   }, []);
@@ -168,7 +167,7 @@ const SettingsCustomization: FC = () => {
     try {
       const data = (await EMSESP.readDeviceEntities({ id: unique_id })).data;
       setInitialMask(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrorMessage(extractErrorMessage(error, 'Problem fetching device entities'));
     }
   };
@@ -250,7 +249,7 @@ const SettingsCustomization: FC = () => {
     try {
       await EMSESP.resetCustomizations();
       enqueueSnackbar('All customizations have been removed. Restarting...', { variant: 'info' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem resetting customizations'), { variant: 'error' });
     } finally {
       setConfirmReset(false);
@@ -278,7 +277,7 @@ const SettingsCustomization: FC = () => {
         } else {
           enqueueSnackbar('Customization save failed', { variant: 'error' });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, 'Problem sending entity list'), { variant: 'error' });
       }
       setInitialMask(deviceEntities);
@@ -414,17 +413,12 @@ const SettingsCustomization: FC = () => {
             </Button>
           </Grid>
         </Grid>
-        <Table
-          data={{ nodes: shown_data }}
-          theme={entities_theme}
-          sort={entity_sort}
-          layout={{ custom: true, horizontalScroll: true }}
-        >
+        <Table data={{ nodes: shown_data }} theme={entities_theme} sort={entity_sort} layout={{ custom: true }}>
           {(tableList: any) => (
             <>
               <Header>
                 <HeaderRow>
-                  <HeaderCell pinLeft>OPTIONS</HeaderCell>
+                  <HeaderCell>OPTIONS</HeaderCell>
                   <HeaderCell resize>
                     <Button
                       fullWidth
@@ -436,7 +430,6 @@ const SettingsCustomization: FC = () => {
                     </Button>
                   </HeaderCell>
                   <HeaderCell>VALUE</HeaderCell>
-                  <HeaderCell />
                 </HeaderRow>
               </Header>
               <Body>
