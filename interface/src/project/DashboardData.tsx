@@ -138,6 +138,7 @@ const DashboardData: FC = () => {
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
       &:nth-of-type(1) {
+        padding-left: 8px;
         min-width: 42px;
         width: 42px;
         div {
@@ -200,11 +201,17 @@ const DashboardData: FC = () => {
       }
     `,
     BaseCell: `
+      padding-left: 16px;
       cursor: pointer;
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
-      padding-left: 16px;
+      &:nth-of-type(1) {
+        padding-left: 16px;
+      }
+      &:nth-of-type(4) {
+        padding-left: 16px;
+      }
       width: 124px;
       white-space: nowrap;
       overflow: hidden;
@@ -214,12 +221,16 @@ const DashboardData: FC = () => {
       }
     `,
     HeaderCell: `
-    &:nth-of-type(1) {
       padding-left: 8px;
-    }
-    &:not(:last-of-type) {
-      border-right: 1px solid #565656;
-    }
+      &:nth-of-type(1) {
+       padding-left: 8px;
+      }
+      &:nth-of-type(4) {
+        padding-left: 16px;
+      }
+      &:not(:last-of-type) {
+        border-right: 1px solid #565656;
+      }
     `
   });
 
@@ -242,6 +253,7 @@ const DashboardData: FC = () => {
         iconUp: <KeyboardArrowUpOutlinedIcon />,
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
+      sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
         GPIO: (array) => array.sort((a, b) => a.g - b.g),
         NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
@@ -259,6 +271,7 @@ const DashboardData: FC = () => {
         iconUp: <KeyboardArrowUpOutlinedIcon />,
         iconDown: <KeyboardArrowDownOutlinedIcon />
       },
+      sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
         NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
         TEMPERATURE: (array) => array.sort((a, b) => a.t - b.t)
@@ -277,7 +290,8 @@ const DashboardData: FC = () => {
       },
       sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
-        NAME: (array) => array.sort((a, b) => a.id.slice(2).localeCompare(b.id.slice(2)))
+        NAME: (array) => array.sort((a, b) => a.id.slice(2).localeCompare(b.id.slice(2))),
+        VALUE: (array) => array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
       }
     }
   );
@@ -762,7 +776,16 @@ const DashboardData: FC = () => {
                       ENTITY NAME
                     </Button>
                   </HeaderCell>
-                  <HeaderCell resize>VALUE</HeaderCell>
+                  <HeaderCell resize>
+                    <Button
+                      fullWidth
+                      style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                      endIcon={getSortIcon(dv_sort.state, 'VALUE')}
+                      onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
+                    >
+                      VALUE
+                    </Button>
+                  </HeaderCell>
                   <HeaderCell />
                 </HeaderRow>
               </Header>
