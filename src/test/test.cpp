@@ -660,9 +660,20 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         DynamicJsonDocument   doc(2000);
         JsonVariant           json;
         request.method(HTTP_GET);
+
+        request.url("/api/boiler/values");
+        EMSESP::webAPIService.webAPIService_get(&request);
         request.url("/api/boiler/wwcirc");
         EMSESP::webAPIService.webAPIService_get(&request);
-        request.url("/api/boiler/values");
+        request.url("/api/boiler/wwcirc/fullname");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/boiler/selburnpow/value");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/boiler/wwchargetype/writeable");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/boiler/flamecurr/value");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/boiler/flamecurr/bad");
         EMSESP::webAPIService.webAPIService_get(&request);
 #endif
     }

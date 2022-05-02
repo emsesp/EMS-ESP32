@@ -915,13 +915,26 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
         tag = DeviceValueTAG::TAG_HC1 + id - 1;
     } else if (id >= 9 && id <= 19) {
         tag = DeviceValueTAG::TAG_WWC1 + id - 9;
-    } else if (id != -1) {
-        return false; // error
+    }
+
+    // make a copy of the string command for parsing
+    char command_s[30];
+    strlcpy(command_s, cmd, sizeof(command_s));
+    char * attribute_s = command_s;
+
+    // if id=0 then we have a specific attribute to fetch instead of the complete record
+    if (id == 0) {
+        char * p      = command_s;
+        char * breakp = strchr(p, '/');
+        if (breakp) {
+            *breakp     = '\0';
+            attribute_s = breakp + 1;
+        }
     }
 
     // search device value with this tag
     for (auto & dv : devicevalues_) {
-        if (strcmp(cmd, Helpers::toLower(read_flash_string(dv.short_name)).c_str()) == 0 && (tag <= 0 || tag == dv.tag)) {
+        if (strcmp(command_s, Helpers::toLower(read_flash_string(dv.short_name)).c_str()) == 0 && (tag <= 0 || tag == dv.tag)) {
             int8_t  divider    = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
             uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
@@ -1058,6 +1071,25 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             // if there is no value, mention it
             if (!json.containsKey(value)) {
                 json[value] = "not set";
+            }
+
+            // if id is 0 then we're filtering on an attribute, go find it
+            if (id == 0) {
+#if defined(EMSESP_DEBUG)
+                EMSESP::logger().debug(F("[DEBUG] Attribute '%s'"), attribute_s);
+#endif
+                if (json.containsKey(attribute_s)) {
+                    JsonVariant data = json[attribute_s];
+                    output.clear();
+                    output["api_data"] = data;
+                    return true;
+                } else {
+                    char error[100];
+                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, command_s);
+                    output.clear();
+                    output["message"] = error;
+                    return false;
+                }
             }
 
             return true;

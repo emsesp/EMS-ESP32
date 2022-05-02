@@ -120,6 +120,15 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         }
     }
 
+    // if we're returning single values, just sent as plain text
+    // https://github.com/emsesp/EMS-ESP32/issues/462#issuecomment-1093877210
+    if (output.containsKey("api_data")) {
+        JsonVariant data = output["api_data"];
+        request->send(200, "text/plain", data.as<String>());
+        api_count_++;
+        return;
+    }
+
     // send the json that came back from the command call
     // FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED = 400 (bad request), 200 (OK), 400 (not found), 400 (bad request), 401 (unauthorized)
     int ret_codes[5] = {400, 200, 400, 400, 401};

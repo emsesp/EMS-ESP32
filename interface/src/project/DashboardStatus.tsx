@@ -97,6 +97,7 @@ const DashboardStatus: FC = () => {
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
+      font-weight: 500;
       border-bottom: 1px solid #e0e0e0;
     `,
     Row: `
