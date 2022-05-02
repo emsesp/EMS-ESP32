@@ -344,11 +344,6 @@ const SettingsApplication: FC = () => {
           disabled={saving}
         />
         <BlockFormControlLabel
-          control={<Checkbox checked={data.low_clock} onChange={updateFormValue} name="low_clock" />}
-          label="Underclock CPU speed"
-          disabled={saving}
-        />
-        <BlockFormControlLabel
           control={<Checkbox checked={data.notoken_api} onChange={updateFormValue} name="notoken_api" />}
           label="Bypass Access Token authorization on API calls"
           disabled={saving}
@@ -356,6 +351,11 @@ const SettingsApplication: FC = () => {
         <BlockFormControlLabel
           control={<Checkbox checked={data.readonly_mode} onChange={updateFormValue} name="readonly_mode" />}
           label="Enable Read only mode (blocks all outgoing EMS Tx write commands)"
+          disabled={saving}
+        />
+        <BlockFormControlLabel
+          control={<Checkbox checked={data.low_clock} onChange={updateFormValue} name="low_clock" />}
+          label="Underclock CPU speed"
           disabled={saving}
         />
         <Grid container spacing={0} direction="row" justifyContent="flex-start" alignItems="flex-start">
@@ -367,8 +367,36 @@ const SettingsApplication: FC = () => {
           <BlockFormControlLabel
             control={<Checkbox checked={data.shower_alert} onChange={updateFormValue} name="shower_alert" />}
             label="Enable Shower Alert"
-            disabled={saving}
+            disabled={!data.shower_timer}
           />
+          {data.shower_alert && (
+            <>
+              <Grid item xs={2}>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors}
+                  name="shower_alert_trigger"
+                  label="Trigger Time (minutes)"
+                  variant="outlined"
+                  value={data.shower_alert_trigger}
+                  type="number"
+                  onChange={updateFormValue}
+                  disabled={!data.shower_timer}
+                />
+              </Grid>
+              <Grid item xs={2}>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors}
+                  name="shower_alert_coldshot"
+                  label="Cold Shot Time (seconds)"
+                  variant="outlined"
+                  value={data.shower_alert_coldshot}
+                  type="number"
+                  onChange={updateFormValue}
+                  disabled={!data.shower_timer}
+                />
+              </Grid>
+            </>
+          )}
         </Grid>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           Formatting Options

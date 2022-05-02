@@ -35,6 +35,8 @@
 - Read time from IVT-controller [#439](https://github.com/emsesp/EMS-ESP32/issues/439)
 - Hybrid Heatpump product-id 168 [#459](https://github.com/emsesp/EMS-ESP32/issues/459), thermostat settings
 - Junkers ISM2 and IPM in warm water mode [#437](https://github.com/emsesp/EMS-ESP32/issues/437)
+- Added Shower Alert trigger time and cold shot time [#436](https://github.com/emsesp/EMS-ESP32/issues/436)
+- Improved Table layout in Web UI (searching, filtering, sorting, exporting to CSV)
 
 ### Fixed
 
@@ -53,6 +55,7 @@
 - Burner selected max power can have a value higher than 100% [#314](https://github.com/emsesp/EMS-ESP32/issues/314)
 - some missing fahrenheit calculations
 - limited number of exclusions [#339](https://github.com/emsesp/EMS-ESP32/issues/339)
+- MQTT sometimes would not reconnect after a WiFi outage
 
 ### Changed
 
@@ -63,7 +66,7 @@
 - Show Sensors quality in WebUI
 - Controller not shown in WebUI dashboard
 - renamed "Home Assistant Integration" to "MQTT Discovery" in MQTT Settings [#290](https://github.com/emsesp/EMS-ESP32/issues/290)
-- Show ems tx reads and writes separatly
+- Show ems tx reads and writes separately
 - Show ems device handlers separated for received, fetched and pending handlers.
 - Wired renamed to Ethernet
 - removed system/pin command, new commands in analogsensors
