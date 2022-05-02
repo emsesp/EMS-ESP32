@@ -31,7 +31,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "mixer"
 // #define EMSESP_DEBUG_DEFAULT "web"
 // #define EMSESP_DEBUG_DEFAULT "mqtt"
-#define EMSESP_DEBUG_DEFAULT "general"
+// #define EMSESP_DEBUG_DEFAULT "general"
 // #define EMSESP_DEBUG_DEFAULT "boiler"
 // #define EMSESP_DEBUG_DEFAULT "mqtt2"
 // #define EMSESP_DEBUG_DEFAULT "mqtt_nested"
@@ -48,7 +48,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "2thermostats"
 // #define EMSESP_DEBUG_DEFAULT "dallas"
 // #define EMSESP_DEBUG_DEFAULT "analog"
-// #define EMSESP_DEBUG_DEFAULT "api_values"
+#define EMSESP_DEBUG_DEFAULT "api_values"
 // #define EMSESP_DEBUG_DEFAULT "mqtt_post"
 
 class Test {

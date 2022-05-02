@@ -86,7 +86,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         return message(CommandRet::ERROR, "unknown device", output);
     }
 
-    // the next value on the path should be the command
+    // the next value on the path should be the command or entity name
     const char * command_p = nullptr;
     if (num_paths == 2) {
         command_p = p.paths()[1].c_str();
@@ -104,7 +104,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
-    // some commands may be prefixed with hc. or wwc. so extract these if they exist
+    // some commands may be prefixed with hc. wwc. or hc/ or wwc/ so extract these if they exist
     // parse_command_string returns the extracted command
     command_p = parse_command_string(command_p, id_n);
     if (command_p == nullptr) {
@@ -189,7 +189,7 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     }
 
     // make a copy of the string command for parsing
-    char command_s[100];
+    char command_s[30];
     strlcpy(command_s, command, sizeof(command_s));
 
     // look for a delimeter and split the string
@@ -202,7 +202,7 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
             p      = command_s; // reset and look for _
             breakp = strchr(p, '_');
             if (!breakp) {
-                return command;
+                return command; // no delimeter found, return the whole string
             }
         }
     }
@@ -214,10 +214,8 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     } else if (!strncmp(command, "wwc", 3) && start_pos == 5) {
         id = command[start_pos - 2] - '0' + 8; // wwc1 has id 9
     } else {
-#if defined(EMSESP_DEBUG)
-        LOG_DEBUG(F("[DEBUG] Command parse error, unknown hc/wwc in %s"), command_s);
-#endif
-        return nullptr;
+        id = 0; // special case for extracting the attributes
+        return command;
     }
 
     return (command + start_pos);
@@ -244,13 +242,12 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // see if there is a command registered
     auto cf = find_command(device_type, cmd);
 
-    // check if its a call to and end-point to a device, i.e. has no value
+    // check if its a call to and end-point to a device
     // except for system commands as this is a special device without any queryable entities (device values)
-    // exclude SYSTEM
     if ((device_type > EMSdevice::DeviceType::SYSTEM) && (!value || !strlen(value))) {
         if (!cf || !cf->cmdfunction_json_) {
 #if defined(EMSESP_DEBUG)
-            LOG_DEBUG(F("[DEBUG] Calling %s command '%s' to retrieve values"), dname.c_str(), cmd);
+            LOG_DEBUG(F("[DEBUG] Calling %s command '%s' to retrieve attributes"), dname.c_str(), cmd);
 #endif
             return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
         }
