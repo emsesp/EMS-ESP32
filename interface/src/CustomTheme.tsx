@@ -11,28 +11,12 @@ const theme = responsiveFontSizes(
     },
     palette: {
       mode: 'dark',
-      // background: {
-      //   default: grey[900], // #212121
-      //   // paper: grey[800]
-      // },
-      // primary: {
-      //   main: '#33bfff'
-      // },
       secondary: {
-        main: blue[500] // in buttons
+        main: blue[500]
       },
       info: {
-        main: blueGrey[500] // used in icons
+        main: blueGrey[500]
       }
-      // warning: {
-      //   main: orange[500]
-      // },
-      // error: {
-      //   main: red[200]
-      // },
-      // success: {
-      //   main: green[700]
-      // }
     }
   })
 );

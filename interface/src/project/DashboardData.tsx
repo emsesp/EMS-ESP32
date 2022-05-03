@@ -137,6 +137,11 @@ const DashboardData: FC = () => {
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
+      &:not(.stiff) > div {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
       &:nth-of-type(1) {
         padding-left: 8px;
         min-width: 42px;
@@ -146,8 +151,8 @@ const DashboardData: FC = () => {
         }
       }
       &:nth-of-type(2) {
-        min-width: 120px;
-        width: 120px;
+        min-width: 100px;
+        width: 100px;
       }
       &:nth-of-type(3) {
         flex: 1;
@@ -157,8 +162,11 @@ const DashboardData: FC = () => {
         max-width: 100px;
       }
       &:last-of-type {
-        text-align: right;
-        min-width: 64px;
+        padding-left: 0px;
+        text-align: center;
+        width: 32px;
+        min-width: 32px;
+        max-width: 32px;
       }
     `
   });
@@ -213,7 +221,6 @@ const DashboardData: FC = () => {
       }
       &:nth-of-type(1) {
         width: 260px;
-        min-width: 260px;
       }
       &:nth-of-type(2) {
         flex: 1;
@@ -700,8 +707,8 @@ const DashboardData: FC = () => {
             <Header>
               <HeaderRow>
                 <HeaderCell />
-                <HeaderCell resize>TYPE</HeaderCell>
-                <HeaderCell resize>DESCRIPTION</HeaderCell>
+                <HeaderCell>TYPE</HeaderCell>
+                <HeaderCell>DESCRIPTION</HeaderCell>
                 <HeaderCell>ENTITIES</HeaderCell>
                 <HeaderCell />
               </HeaderRow>
@@ -710,9 +717,7 @@ const DashboardData: FC = () => {
               {tableList.map((device: Device, index: number) => (
                 <Row key={device.id} item={device}>
                   <Cell>
-                    {/* <IconButton onClick={() => refreshDataIndex(device.id)}> */}
                     <DeviceIcon type={device.t} />
-                    {/* </IconButton> */}
                   </Cell>
                   <Cell>{device.t}</Cell>
                   <Cell>{device.n}</Cell>
@@ -727,9 +732,7 @@ const DashboardData: FC = () => {
               {(coreData.active_sensors > 0 || coreData.analog_enabled) && (
                 <Row key="sensor" item={{ id: 'sensor' }}>
                   <Cell>
-                    {/* <IconButton onClick={() => refreshDataIndex('sensor')}> */}
                     <DeviceIcon type="Sensor" />
-                    {/* </IconButton> */}
                   </Cell>
                   <Cell>Sensors</Cell>
                   <Cell>Attached EMS-ESP Sensors</Cell>

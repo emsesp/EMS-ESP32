@@ -25,7 +25,6 @@ const LayoutAppBar: FC<LayoutAppBarProps> = ({ title, onToggleDrawer }) => {
         ml: { md: `${DRAWER_WIDTH}px` },
         boxShadow: 'none',
         backgroundColor: '#2e586a'
-        // color: "#2196f3",
       }}
     >
       <Toolbar>
