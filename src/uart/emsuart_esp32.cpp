@@ -85,9 +85,6 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
         uart_param_config(EMSUART_NUM, &uart_config);
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
         uart_set_rx_full_threshold(EMSUART_NUM, 1);
-        // using own interrupt
-        // uart_isr_free(EMSUART_NUM);
-	    // uart_isr_register(EMSUART_NUM, uart_intr_handle, NULL, ESP_INTR_FLAG_IRAM, &handle_console));
         xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
     }
     tx_mode_ = tx_mode;
@@ -153,8 +150,6 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
 
     // mode 1: wait for echo after each byte
     for (uint8_t i = 0; i < len; i++) {
-        // or use 
-        // uart_get_buffered_data_len(EMSUART_NUM, size_t *size);
         uint8_t _usrxc = uxQueueMessagesWaiting(uart_queue);
         uart_write_bytes(EMSUART_NUM, &buf[i], 1);
         uint16_t timeoutcnt = EMSUART_TX_TIMEOUT;
