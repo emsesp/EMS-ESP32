@@ -137,6 +137,11 @@ const DashboardData: FC = () => {
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
+      &:not(.stiff) > div {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
       &:nth-of-type(1) {
         padding-left: 8px;
         min-width: 42px;
@@ -146,8 +151,8 @@ const DashboardData: FC = () => {
         }
       }
       &:nth-of-type(2) {
-        min-width: 120px;
-        width: 120px;
+        min-width: 100px;
+        width: 100px;
       }
       &:nth-of-type(3) {
         flex: 1;
@@ -157,8 +162,11 @@ const DashboardData: FC = () => {
         max-width: 100px;
       }
       &:last-of-type {
-        text-align: right;
-        min-width: 64px;
+        padding-left: 0px;
+        text-align: center;
+        width: 32px;
+        min-width: 32px;
+        max-width: 32px;
       }
     `
   });
@@ -206,33 +214,61 @@ const DashboardData: FC = () => {
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
+      &:not(.stiff) > div {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
       &:nth-of-type(1) {
-        padding-left: 16px;
+        width: 260px;
       }
-      &:nth-of-type(4) {
-        padding-left: 16px;
-      }
-      width: 124px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      &:last-of-type {
+      &:nth-of-type(2) {
+        flex: 1;
         text-align: right;
+      }
+      &:last-of-type {
+        padding-left: 0px;
+        text-align: center;
+        width: 32px;
+        min-width: 32px;
+        max-width: 32px;
       }
     `,
     HeaderCell: `
-      padding-left: 8px;
-      &:nth-of-type(1) {
-       padding-left: 8px;
-      }
-      &:nth-of-type(4) {
-        padding-left: 16px;
-      }
       &:not(:last-of-type) {
-        border-right: 1px solid #565656;
+        padding-left: 8px;
+        border-left: 1px solid #565656;
+      }
+      &:first-of-type {
+        border-left: 0px;
       }
     `
   });
+
+  const temperature_theme = useTheme([data_theme]);
+
+  const analog_theme = useTheme([
+    data_theme,
+    {
+      BaseCell: `
+        &:nth-of-type(1) {
+          width: 100px;
+          min-width: 100px;
+        }
+        &:nth-of-type(2) {
+          text-align: left;
+        }
+        &:nth-of-type(3) {
+          width: 100px;
+          min-width: 100px;
+        }
+        &:nth-of-type(4) {
+          text-align: right;
+          flex: 1;
+        }
+    `
+    }
+  ]);
 
   const getSortIcon = (state: any, sortKey: any) => {
     if (state.sortKey === sortKey && state.reverse) {
@@ -671,8 +707,8 @@ const DashboardData: FC = () => {
             <Header>
               <HeaderRow>
                 <HeaderCell />
-                <HeaderCell resize>TYPE</HeaderCell>
-                <HeaderCell resize>DESCRIPTION</HeaderCell>
+                <HeaderCell>TYPE</HeaderCell>
+                <HeaderCell>DESCRIPTION</HeaderCell>
                 <HeaderCell>ENTITIES</HeaderCell>
                 <HeaderCell />
               </HeaderRow>
@@ -681,9 +717,7 @@ const DashboardData: FC = () => {
               {tableList.map((device: Device, index: number) => (
                 <Row key={device.id} item={device}>
                   <Cell>
-                    {/* <IconButton onClick={() => refreshDataIndex(device.id)}> */}
                     <DeviceIcon type={device.t} />
-                    {/* </IconButton> */}
                   </Cell>
                   <Cell>{device.t}</Cell>
                   <Cell>{device.n}</Cell>
@@ -698,9 +732,7 @@ const DashboardData: FC = () => {
               {(coreData.active_sensors > 0 || coreData.analog_enabled) && (
                 <Row key="sensor" item={{ id: 'sensor' }}>
                   <Cell>
-                    {/* <IconButton onClick={() => refreshDataIndex('sensor')}> */}
                     <DeviceIcon type="Sensor" />
-                    {/* </IconButton> */}
                   </Cell>
                   <Cell>Sensors</Cell>
                   <Cell>Attached EMS-ESP Sensors</Cell>
@@ -746,12 +778,15 @@ const DashboardData: FC = () => {
         <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
           {deviceData.label}
         </Typography>
-
         <FormControlLabel
           control={<Checkbox size="small" name="onlyFav" checked={onlyFav} onChange={() => setOnlyFav(!onlyFav)} />}
-          label={<span style={{ fontSize: '12px' }}>show only favorites</span>}
+          label={
+            <span style={{ fontSize: '12px' }}>
+              only show favorites&nbsp;
+              <StarIcon color="primary" sx={{ fontSize: 12 }} />
+            </span>
+          }
         />
-
         <Table
           data={{
             nodes: onlyFav
@@ -760,7 +795,7 @@ const DashboardData: FC = () => {
           }}
           theme={data_theme}
           sort={dv_sort}
-          // layout={{ custom: true }}
+          layout={{ custom: true }}
         >
           {(tableList: any) => (
             <>
@@ -776,10 +811,10 @@ const DashboardData: FC = () => {
                       ENTITY NAME
                     </Button>
                   </HeaderCell>
-                  <HeaderCell resize>
+                  <HeaderCell>
                     <Button
                       fullWidth
-                      style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                      style={{ fontSize: '14px', justifyContent: 'flex-end' }}
                       endIcon={getSortIcon(dv_sort.state, 'VALUE')}
                       onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
                     >
@@ -832,8 +867,12 @@ const DashboardData: FC = () => {
       <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
         Temperature Sensors
       </Typography>
-
-      <Table data={{ nodes: sensorData.sensors }} theme={data_theme} sort={sensor_sort}>
+      <Table
+        data={{ nodes: sensorData.sensors }}
+        theme={temperature_theme}
+        sort={sensor_sort}
+        layout={{ custom: true }}
+      >
         {(tableList: any) => (
           <>
             <Header>
@@ -848,10 +887,10 @@ const DashboardData: FC = () => {
                     NAME
                   </Button>
                 </HeaderCell>
-                <HeaderCell resize>
+                <HeaderCell>
                   <Button
                     fullWidth
-                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    style={{ fontSize: '14px', justifyContent: 'flex-end' }}
                     endIcon={getSortIcon(sensor_sort.state, 'TEMPERATURE')}
                     onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'TEMPERATURE' })}
                   >
@@ -888,7 +927,7 @@ const DashboardData: FC = () => {
         Analog Sensors
       </Typography>
 
-      <Table data={{ nodes: sensorData.analogs }} theme={data_theme} sort={analog_sort}>
+      <Table data={{ nodes: sensorData.analogs }} theme={analog_theme} sort={analog_sort} layout={{ custom: true }}>
         {(tableList: any) => (
           <>
             <Header>
@@ -923,7 +962,7 @@ const DashboardData: FC = () => {
                     TYPE
                   </Button>
                 </HeaderCell>
-                <HeaderCell resize>VALUE</HeaderCell>
+                <HeaderCell>VALUE</HeaderCell>
                 <HeaderCell />
               </HeaderRow>
             </Header>

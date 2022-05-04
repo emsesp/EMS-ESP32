@@ -99,6 +99,7 @@ const DashboardStatus: FC = () => {
       color: #90CAF9;
       font-weight: 500;
       border-bottom: 1px solid #e0e0e0;
+      padding-left: 8px;
     `,
     Row: `
       &:nth-of-type(odd) {
@@ -125,26 +126,25 @@ const DashboardStatus: FC = () => {
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      &:not(.stiff) > div {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
       &:nth-of-type(1) {
         padding-left: 8px;
         flex: 1;
       }
       &:nth-of-type(2) {
-        min-width: 15%;
-        width: 15%;
+        width: 70px;
         text-align: right;
       }
       &:nth-of-type(3) {
-        min-width: 15%;
-        width: 15%;
+        width: 40px;
         text-align: right;
       }
       &:last-of-type {
-        min-width: 15%;
-        width: 15%;
+        width: 75px;
         text-align: right;
         padding-right: 8px;
       }

@@ -100,22 +100,28 @@ const SettingsCustomization: FC = () => {
       }
     `,
     BaseCell: `
-      padding-left: 8px;
       border-top: 1px solid transparent;
       border-right: 1px solid transparent;
       border-bottom: 1px solid transparent;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      &:not(.stiff) > div {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
       &:nth-of-type(1) {
-        left: 0px;
-        min-width: 124px;
-        width: 124px;
-        padding-left: 0px;
+        width: 120px;
+        min-width: 120px;
+        max-width: 120px;
       }
       &:nth-of-type(2) {
-        min-width: 70%;
-        width: 70%;
+        padding-left: 8px;
+        flex: 1;
+      }
+      &:nth-of-type(3) {
+        padding-right: 8px;
+        text-align: right;
+        width: 120px;
+        min-width: 120px;
       }
     `,
     HeaderCell: `
@@ -435,7 +441,7 @@ const SettingsCustomization: FC = () => {
                       NAME
                     </Button>
                   </HeaderCell>
-                  <HeaderCell resize>VALUE</HeaderCell>
+                  <HeaderCell>VALUE</HeaderCell>
                 </HeaderRow>
               </Header>
               <Body>

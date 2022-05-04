@@ -47,7 +47,7 @@ const LayoutDrawer: FC<LayoutDrawerProps> = ({ mobileOpen, onClose }) => {
         open={mobileOpen}
         onClose={onClose}
         ModalProps={{
-          keepMounted: true // Better open performance on mobile.
+          keepMounted: true
         }}
         sx={{
           display: { xs: 'block', md: 'none' },

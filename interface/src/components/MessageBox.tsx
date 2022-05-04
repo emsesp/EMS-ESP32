@@ -32,7 +32,6 @@ const MessageBox: FC<MessageBoxProps> = ({ level, message, sx, children, ...rest
   const theme = useTheme();
   const Icon = LEVEL_ICONS[level];
   const backgroundColor = LEVEL_BACKGROUNDS[level](theme);
-  // const color = theme.palette.getContrastText(backgroundColor);
   const color = 'white';
   return (
     <Box p={2} display="flex" alignItems="center" borderRadius={1} sx={{ backgroundColor, color, ...sx }} {...rest}>
