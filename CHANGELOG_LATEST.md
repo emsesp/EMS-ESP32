@@ -38,6 +38,8 @@
 - Added Shower Alert trigger time and cold shot time [#436](https://github.com/emsesp/EMS-ESP32/issues/436)
 - Improved Table layout in Web UI (searching, filtering, sorting, exporting to CSV)
 - API fetch individual attributes from an entity [#462](https://github.com/emsesp/EMS-ESP32/issues/462)
+- Option to disable mDNS
+- Option for rendering booleans on dashboard [#456](https://github.com/emsesp/EMS-ESP32/issues/456)
 
 ### Fixed
 

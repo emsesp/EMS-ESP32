@@ -47,6 +47,7 @@ export interface NetworkSettings {
   subnet_mask?: string;
   dns_ip_1?: string;
   dns_ip_2?: string;
+  enableMDNS: boolean;
 }
 
 export interface WiFiNetworkList {

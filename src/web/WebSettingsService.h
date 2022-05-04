@@ -57,6 +57,7 @@ class WebSettings {
     uint8_t  solar_maxflow;
     String   board_profile;
     uint8_t  bool_format;
+    uint8_t  bool_dashboard;
     uint8_t  enum_format;
     int8_t   weblog_level;
     uint8_t  weblog_buffer;

@@ -332,10 +332,11 @@ void System::reload_settings() {
         syslog_host_          = settings.syslog_host;
         syslog_port_          = settings.syslog_port;
 
-        fahrenheit_    = settings.fahrenheit;
-        bool_format_   = settings.bool_format;
-        enum_format_   = settings.enum_format;
-        readonly_mode_ = settings.readonly_mode;
+        fahrenheit_     = settings.fahrenheit;
+        bool_format_    = settings.bool_format;
+        bool_dashboard_ = settings.bool_dashboard;
+        enum_format_    = settings.enum_format;
+        readonly_mode_  = settings.readonly_mode;
 
         phy_type_       = settings.phy_type;
         eth_power_      = settings.eth_power;
@@ -1016,6 +1017,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["fahrenheit"]      = settings.fahrenheit;
         node["dallas_parasite"] = settings.dallas_parasite;
         node["bool_format"]     = settings.bool_format;
+        node["bool_dashboard"]  = settings.bool_dashboard;
         node["enum_format"]     = settings.enum_format;
         node["analog_enabled"]  = settings.analog_enabled;
         node["telnet_enabled"]  = settings.telnet_enabled;
