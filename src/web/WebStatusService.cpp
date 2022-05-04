@@ -190,21 +190,31 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
 void WebStatusService::mDNS_start() const {
 #ifndef EMSESP_STANDALONE
     MDNS.end();
-    if (!MDNS.begin(EMSESP::system_.hostname().c_str())) {
-        EMSESP::logger().warning(F("Failed to start mDNS responder service"));
-        return;
-    }
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+        if (networkSettings.enableMDNS) {
+            if (!MDNS.begin(EMSESP::system_.hostname().c_str())) {
+                EMSESP::logger().warning(F("Failed to start mDNS responder service"));
+                return;
+            }
 
-    std::string address_s = EMSESP::system_.hostname() + ".local";
+            std::string address_s = EMSESP::system_.hostname() + ".local";
 
-    MDNS.addService("http", "tcp", 80);   // add our web server and rest API
-    MDNS.addService("telnet", "tcp", 23); // add our telnet console
+            MDNS.addService("http", "tcp", 80);   // add our web server and rest API
+            MDNS.addService("telnet", "tcp", 23); // add our telnet console
 
-    MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
-    MDNS.addServiceTxt("http", "tcp", "address", address_s.c_str());
+            MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
+            MDNS.addServiceTxt("http", "tcp", "address", address_s.c_str());
+
+            EMSESP::logger().info(F("mDNS responder service started"));
+        }
+    });
+#else
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+        if (networkSettings.enableMDNS) {
+            EMSESP::logger().info(F("mDNS responder service started"));
+        }
+    });
 #endif
-
-    EMSESP::logger().info(F("mDNS responder service started"));
 }
 
 } // namespace emsesp

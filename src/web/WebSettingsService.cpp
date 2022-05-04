@@ -66,6 +66,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["board_profile"]         = settings.board_profile;
     root["fahrenheit"]            = settings.fahrenheit;
     root["bool_format"]           = settings.bool_format;
+    root["bool_dashboard"]        = settings.bool_dashboard;
     root["enum_format"]           = settings.enum_format;
     root["weblog_level"]          = settings.weblog_level;
     root["weblog_buffer"]         = settings.weblog_buffer;
@@ -224,6 +225,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     settings.bool_format = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
     EMSESP::system_.bool_format(settings.bool_format);
+
+    settings.bool_dashboard = root["bool_dashboard"] | EMSESP_DEFAULT_BOOL_FORMAT;
+    EMSESP::system_.bool_dashboard(settings.bool_dashboard);
 
     settings.enum_format = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
     EMSESP::system_.enum_format(settings.enum_format);

@@ -402,10 +402,27 @@ const SettingsApplication: FC = () => {
           Formatting Options
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-          <Grid item xs={6}>
+          <Grid item xs={4}>
+            <ValidatedTextField
+              name="bool_dashboard"
+              label="Boolean Format Dashboard"
+              value={data.bool_dashboard}
+              fullWidth
+              variant="outlined"
+              onChange={updateFormValue}
+              margin="normal"
+              select
+            >
+              <MenuItem value={1}>on/off</MenuItem>
+              <MenuItem value={2}>ON/OFF</MenuItem>
+              <MenuItem value={3}>true/false</MenuItem>
+              <MenuItem value={5}>1/0</MenuItem>
+            </ValidatedTextField>
+          </Grid>
+          <Grid item xs={4}>
             <ValidatedTextField
               name="bool_format"
-              label="Boolean Format"
+              label="Boolean Format API/MQTT"
               value={data.bool_format}
               fullWidth
               variant="outlined"
@@ -421,10 +438,10 @@ const SettingsApplication: FC = () => {
               <MenuItem value={6}>1/0</MenuItem>
             </ValidatedTextField>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={4}>
             <ValidatedTextField
               name="enum_format"
-              label="Enum Format"
+              label="Enum Format API/MQTT"
               value={data.enum_format}
               fullWidth
               variant="outlined"

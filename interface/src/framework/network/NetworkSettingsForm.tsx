@@ -56,7 +56,8 @@ const WiFiSettingsForm: FC = () => {
           enableIPv6: false,
           bandwidth20: false,
           tx_power: 20,
-          nosleep: false
+          nosleep: false,
+          enableMDNS: true
         });
       }
       setInitialized(true);
@@ -151,6 +152,11 @@ const WiFiSettingsForm: FC = () => {
         <BlockFormControlLabel
           control={<Checkbox name="bandwidth20" checked={data.bandwidth20} onChange={updateFormValue} />}
           label="Use Lower WiFi Bandwidth"
+        />
+
+        <BlockFormControlLabel
+          control={<Checkbox name="enableMDNS" checked={data.enableMDNS} onChange={updateFormValue} />}
+          label="Enable mDNS Service"
         />
 
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">

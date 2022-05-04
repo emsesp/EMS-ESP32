@@ -35,6 +35,7 @@ class DummySettings {
     bool     notoken_api           = false;
     bool     readonly_mode         = false;
     uint8_t  bool_format           = 1; // using "on" and "off"
+    uint8_t  bool_dashboard        = 1;
     uint8_t  enum_format           = 1;
     bool     nosleep               = false;
     bool     fahrenheit            = false;

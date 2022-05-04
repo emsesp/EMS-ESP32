@@ -38,6 +38,7 @@ class NetworkSettings {
     bool   bandwidth20;
     int8_t tx_power;
     bool   nosleep;
+    bool   enableMDNS;
 
     // optional configuration for static IP address
     IPAddress localIP;
@@ -56,6 +57,7 @@ class NetworkSettings {
         root["bandwidth20"]      = settings.bandwidth20;
         root["tx_power"]         = settings.tx_power;
         root["nosleep"]          = settings.nosleep;
+        root["enableMDNS"]       = settings.enableMDNS;
 
         // extended settings
         JsonUtils::writeIP(root, "local_ip", settings.localIP);
@@ -74,6 +76,7 @@ class NetworkSettings {
         settings.bandwidth20    = root["bandwidth20"] | false;
         settings.tx_power       = root["tx_power"] | 20;
         settings.nosleep        = root["nosleep"] | false;
+        settings.enableMDNS     = root["enableMDNS"] | true;
 
         // extended settings
         JsonUtils::readIP(root, "local_ip", settings.localIP);
