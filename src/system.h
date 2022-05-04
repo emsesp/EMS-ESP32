@@ -115,6 +115,10 @@ class System {
         return bool_format_;
     }
 
+    uint8_t bool_dashboard() {
+        return bool_dashboard_;
+    }
+
     // see default_settings.h
     // BOOL_FORMAT_ONOFF_STR = 1,
     // BOOL_FORMAT_ONOFF_STR_CAP = 2
@@ -124,6 +128,10 @@ class System {
     // BOOL_FORMAT_10 = 6
     void bool_format(uint8_t format) {
         bool_format_ = format;
+    }
+
+    void bool_dashboard(uint8_t format) {
+        bool_dashboard_ = format;
     }
 
     uint8_t enum_format() {
@@ -250,6 +258,7 @@ class System {
     String      syslog_host_;
     uint16_t    syslog_port_;
     bool        fahrenheit_;
+    uint8_t     bool_dashboard_;
     uint8_t     bool_format_;
     uint8_t     enum_format_;
     bool        readonly_mode_;

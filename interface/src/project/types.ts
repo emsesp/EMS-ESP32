@@ -26,6 +26,7 @@ export interface Settings {
   trace_raw: boolean;
   board_profile: string;
   bool_format: number;
+  bool_dashboard: number;
   enum_format: number;
   fahrenheit: boolean;
   phy_type: number;

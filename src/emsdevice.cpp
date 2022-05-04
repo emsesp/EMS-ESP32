@@ -670,12 +670,8 @@ void EMSdevice::generate_values_web(JsonObject & output) {
             // handle Booleans (true, false), use strings, no native true/false)
             if (dv.type == DeviceValueType::BOOL) {
                 auto value_b = (bool)*(uint8_t *)(dv.value_p);
-                if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                    obj["v"] = value_b ? 1 : 0;
-                } else {
-                    char s[7];
-                    obj["v"] = Helpers::render_boolean(s, value_b);
-                }
+                char s[7];
+                obj["v"] = Helpers::render_boolean(s, value_b, true);
             }
 
             // handle TEXT strings
@@ -748,8 +744,8 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 } else if (dv.type == DeviceValueType::BOOL) {
                     JsonArray l = obj.createNestedArray("l");
                     char      result[10];
-                    l.add(Helpers::render_boolean(result, false));
-                    l.add(Helpers::render_boolean(result, true));
+                    l.add(Helpers::render_boolean(result, false, true));
+                    l.add(Helpers::render_boolean(result, true, true));
                 }
                 // add command help template
                 else if (dv.type == DeviceValueType::STRING || dv.type == DeviceValueType::CMD) {
@@ -789,12 +785,8 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
             // handle Booleans (true, false), use strings, no native true/false)
             if (dv.type == DeviceValueType::BOOL) {
                 auto value_b = (bool)*(uint8_t *)(dv.value_p);
-                if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                    obj["v"] = value_b ? 1 : 0;
-                } else {
-                    char s[7];
-                    obj["v"] = Helpers::render_boolean(s, value_b);
-                }
+                char s[7];
+                obj["v"] = Helpers::render_boolean(s, value_b, true);
             }
 
             // handle TEXT strings
