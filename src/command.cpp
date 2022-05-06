@@ -90,10 +90,15 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     const char * command_p = nullptr;
     if (num_paths == 2) {
         command_p = p.paths()[1].c_str();
-    } else if (num_paths >= 3) {
+    } else if (num_paths == 3) {
         // concatenate the path into one string as it could be in the format 'hc/XXX'
         char command[50];
         snprintf(command, sizeof(command), "%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str());
+        command_p = command;
+    } else if (num_paths > 3) {
+        // concatenate the path into one string as it could be in the format 'hc/XXX/attribute'
+        char command[50];
+        snprintf(command, sizeof(command), "%s/%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str(), p.paths()[3].c_str());
         command_p = command;
     } else {
         // take it from the JSON
@@ -110,7 +115,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     if (command_p == nullptr) {
         // handle dead endpoints like api/system or api/boiler
         // default to 'info' for SYSTEM, DALLASENSOR and ANALOGSENSOR, the other devices to 'values' for shortname version
-        if (num_paths < 3) {
+        if (num_paths < (id_n > 0 ? 4 : 3)) {
             if (device_type < EMSdevice::DeviceType::BOILER) {
                 command_p = "info";
             } else {
@@ -188,37 +193,28 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         return nullptr;
     }
 
-    // make a copy of the string command for parsing
-    char command_s[30];
-    strlcpy(command_s, command, sizeof(command_s));
-
-    // look for a delimeter and split the string
-    char * p      = command_s;
-    char * breakp = strchr(p, '.');
-    if (!breakp) {
-        p      = command_s; // reset and look for /
-        breakp = strchr(p, '/');
-        if (!breakp) {
-            p      = command_s; // reset and look for _
-            breakp = strchr(p, '_');
-            if (!breakp) {
-                return command; // no delimeter found, return the whole string
-            }
+    if (!strncmp(command, "hc", 2) && strlen(command) >= 3) {
+        id = command[2] - '0';
+        command += 3;
+    } else if (!strncmp(command, "wwc", 3) && strlen(command) >= 4) {
+        if (command[3] == '1' && command[4] == '0') {
+            id = 19; // wwc10
+            command += 5;
+        } else {
+            id = command[3] - '0' + 8; // wwc1 has id 9
+            command += 4;
         }
     }
-
-    // extract the hc or wwc number
-    uint8_t start_pos = breakp - p + 1;
-    if (!strncmp(command, "hc", 2) && start_pos == 4) {
-        id = command[start_pos - 2] - '0';
-    } else if (!strncmp(command, "wwc", 3) && start_pos == 5) {
-        id = command[start_pos - 2] - '0' + 8; // wwc1 has id 9
-    } else {
-        id = 0; // special case for extracting the attributes
-        return command;
+    // remove separator
+    if (command[0] == '/' || command[0] == '.' || command[0] == '_') {
+        command++;
+    }
+    // return null for empty command
+    if (command[0] == '\0') {
+        return nullptr;
     }
 
-    return (command + start_pos);
+    return command;
 }
 
 // calls a command directly
