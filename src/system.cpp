@@ -1000,8 +1000,8 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["shower_timer"] = settings.shower_timer;
         node["shower_alert"] = settings.shower_alert;
         if (settings.shower_alert) {
-            node["shower_alert_coldshot"] = settings.shower_alert_coldshot / 1000; // seconds
-            node["shower_alert_trigger"]  = settings.shower_alert_trigger / 60000; // minutes
+            node["shower_alert_coldshot"] = settings.shower_alert_coldshot; // seconds
+            node["shower_alert_trigger"]  = settings.shower_alert_trigger;  // minutes
         }
 
         node["rx_gpio"]      = settings.rx_gpio;
