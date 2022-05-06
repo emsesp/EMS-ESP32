@@ -93,6 +93,7 @@ class DummySettings {
     String dnsIP1         = "";
     String dnsIP2         = "";
     bool   enableIPv6     = false;
+    bool   enableMDNS     = true;
 
     uint8_t phy_type       = 0;
     uint8_t eth_power      = 0; // 0 means -1
