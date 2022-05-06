@@ -96,7 +96,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         snprintf(command, sizeof(command), "%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str());
         command_p = command;
     } else if (num_paths > 3) {
-        // concatenate the path into one string as it could be in the format 'hc/XXX'
+        // concatenate the path into one string as it could be in the format 'hc/XXX/attribute'
         char command[50];
         snprintf(command, sizeof(command), "%s/%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str(), p.paths()[3].c_str());
         command_p = command;
@@ -192,37 +192,7 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     if (command == nullptr) {
         return nullptr;
     }
-    /*
-    // make a copy of the string command for parsing
-    char command_s[30];
-    strlcpy(command_s, command, sizeof(command_s));
 
-    // look for a delimeter and split the string
-    char * p      = command_s;
-    char * breakp = strchr(p, '.');
-    if (!breakp) {
-        p      = command_s; // reset and look for /
-        breakp = strchr(p, '/');
-        if (!breakp) {
-            p      = command_s; // reset and look for _
-            breakp = strchr(p, '_');
-            if (!breakp) {
-                return command; // no delimeter found, return the whole string
-            }
-        }
-    }
-
-    // extract the hc or wwc number
-    uint8_t start_pos = breakp - p + 1;
-    if (!strncmp(command, "hc", 2) && start_pos == 4) {
-        id = command[start_pos - 2] - '0';
-    } else if (!strncmp(command, "wwc", 3) && start_pos == 5) {
-        id = command[start_pos - 2] - '0' + 8; // wwc1 has id 9
-    } else {
-        // id = 0; // special case for extracting the attributes
-        return command;
-    }
-    */
     if (!strncmp(command, "hc", 2) && strlen(command) >= 3) {
         id = command[2] - '0';
         command += 3;
@@ -235,12 +205,15 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
             command += 4;
         }
     }
+    // remove separator
     if (command[0] == '/' || command[0] == '.' || command[0] == '_') {
         command++;
     }
+    // return null for empty command
     if (command[0] == '\0') {
         return nullptr;
     }
+
     return command;
 }
 

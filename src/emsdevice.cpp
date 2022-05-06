@@ -925,10 +925,8 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
     // check specific attribute to fetch instead of the complete record
     char * breakp = strchr(command_s, '/');
     if (breakp) {
-        *breakp = '\0';
-        if (strlen(breakp + 1)) {
-            attribute_s = breakp + 1;
-        }
+        *breakp     = '\0';
+        attribute_s = breakp + 1;
     }
 
     // search device value with this tag

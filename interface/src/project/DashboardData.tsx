@@ -355,7 +355,7 @@ const DashboardData: FC = () => {
     if (sc === '' || sc === '""') {
       return sc;
     }
-    if (sc.includes('"') || sc.includes(',') || sc.includes('\n') || sc.includes('\r')) {
+    if (sc.includes('"') || sc.includes(';') || sc.includes('\n') || sc.includes('\r')) {
       return '"' + sc.replace(/"/g, '""') + '"';
     }
     return sc;
@@ -363,13 +363,13 @@ const DashboardData: FC = () => {
 
   const makeCsvData = (columns: any, data: any) => {
     return data.reduce((csvString: any, rowItem: any) => {
-      return csvString + columns.map(({ accessor }: any) => escapeCsvCell(accessor(rowItem))).join(',') + '\r\n';
-    }, columns.map(({ name }: any) => escapeCsvCell(name)).join(',') + '\r\n');
+      return csvString + columns.map(({ accessor }: any) => escapeCsvCell(accessor(rowItem))).join(';') + '\r\n';
+    }, columns.map(({ name }: any) => escapeCsvCell(name)).join(';') + '\r\n');
   };
 
   const downloadAsCsv = (columns: any, data: any, filename: string) => {
     const csvData = makeCsvData(columns, data);
-    const csvFile = new Blob([csvData], { type: 'text/csv' });
+    const csvFile = new Blob([csvData], { type: 'text/csv;charset:utf-8' });
     const downloadLink = document.createElement('a');
 
     downloadLink.download = filename;
@@ -384,8 +384,8 @@ const DashboardData: FC = () => {
   const handleDownloadCsv = () => {
     const columns = [
       { accessor: (dv: any) => dv.id.slice(2), name: 'Entity' },
-      { accessor: (dv: any) => dv.v, name: 'Value' },
-      { accessor: (dv: any) => (dv.u >= 1 && dv.u <= 2 ? 'C' : DeviceValueUOM_s[dv.u]), name: 'UoM' }
+      { accessor: (dv: any) => (typeof dv.v === 'number') ? new Intl.NumberFormat().format(dv.v) : dv.v, name: 'Value' },
+      { accessor: (dv: any) => DeviceValueUOM_s[dv.u], name: 'UoM' }
     ];
     downloadAsCsv(
       columns,
