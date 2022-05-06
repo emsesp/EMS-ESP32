@@ -920,14 +920,13 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
     // make a copy of the string command for parsing
     char command_s[30];
     strlcpy(command_s, cmd, sizeof(command_s));
-    char * attribute_s = command_s;
+    char * attribute_s = nullptr;
 
-    // if id=0 then we have a specific attribute to fetch instead of the complete record
-    if (id == 0) {
-        char * p      = command_s;
-        char * breakp = strchr(p, '/');
-        if (breakp) {
-            *breakp     = '\0';
+    // check specific attribute to fetch instead of the complete record
+    char * breakp = strchr(command_s, '/');
+    if (breakp) {
+        *breakp = '\0';
+        if (strlen(breakp + 1)) {
             attribute_s = breakp + 1;
         }
     }
@@ -1073,8 +1072,8 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                 json[value] = "not set";
             }
 
-            // if id is 0 then we're filtering on an attribute, go find it
-            if (id == 0) {
+            // if we're filtering on an attribute, go find it
+            if (attribute_s) {
 #if defined(EMSESP_DEBUG)
                 EMSESP::logger().debug(F("[DEBUG] Attribute '%s'"), attribute_s);
 #endif
