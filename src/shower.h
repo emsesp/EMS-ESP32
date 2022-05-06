@@ -30,6 +30,8 @@ class Shower {
 
     void set_shower_state(bool state, bool force = false);
 
+    /* unused header
+    *
     bool shower_alert() const {
         return shower_alert_;
     }
@@ -45,6 +47,7 @@ class Shower {
     void shower_timer(const bool shower_timer) {
         shower_timer_ = shower_timer;
     }
+    */
 
   private:
     static uuid::log::Logger logger_;
