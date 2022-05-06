@@ -244,6 +244,16 @@ bool EMSdevice::is_fetch(uint16_t telegram_id) const {
     return false;
 }
 
+// check for a tag to create a nest
+bool EMSdevice::has_tag(const uint8_t tag) {
+    for (const auto & dv : devicevalues_) {
+        if (dv.tag == tag && tag >= DeviceValueTAG::TAG_HC1) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // list of registered device entries
 // called from the command 'entities'
 void EMSdevice::list_device_entries(JsonObject & output) const {
@@ -469,7 +479,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
         flags |= CommandFlag::MQTT_SUB_FLAG_HC;
     } else if (tag >= DeviceValueTAG::TAG_WWC1 && tag <= DeviceValueTAG::TAG_WWC10) {
         flags |= CommandFlag::MQTT_SUB_FLAG_WWC;
-    } else if (tag == DeviceValueTAG::TAG_DEVICE_DATA_WW) {
+    } else if (tag == DeviceValueTAG::TAG_DEVICE_DATA_WW || tag == DeviceValueTAG::TAG_BOILER_DATA_WW) {
         flags |= CommandFlag::MQTT_SUB_FLAG_WW;
     }
 
@@ -541,7 +551,7 @@ void EMSdevice::publish_value(void * value_p) const {
         if (dv.value_p == value_p && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
             if (Mqtt::publish_single2cmd()) {
-                if (dv.tag >= DeviceValueTAG::TAG_HC1 && dv.tag <= DeviceValueTAG::TAG_WWC10) {
+                if (dv.tag >= DeviceValueTAG::TAG_HC1) {
                     snprintf(topic,
                              sizeof(topic),
                              "%s/%s/%s",
@@ -902,11 +912,9 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
     JsonObject json = output;
     int8_t     tag  = id;
 
-    // check if we have hc or wwc
-    if (id >= 1 && id <= 8) {
+    // check if we have hc or wwc or hs
+    if (id >= 1 && id <= 34) {
         tag = DeviceValueTAG::TAG_HC1 + id - 1;
-    } else if (id >= 9 && id <= 19) {
-        tag = DeviceValueTAG::TAG_WWC1 + id - 9;
     }
 
     // make a copy of the string command for parsing

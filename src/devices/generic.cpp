@@ -29,7 +29,7 @@ Generic::Generic(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
     // RF-Sensor 0x40 sending temperature in telegram 0x435, see https://github.com/emsesp/EMS-ESP32/issues/103
     if (device_id == 0x40) {
         register_telegram_type(0x435, F("RFSensorMessage"), false, MAKE_PF_CB(process_RFSensorMessage));
-        register_device_value(DeviceValueTAG::TAG_NONE, &rfTemp_, DeviceValueType::SHORT, FL_(div10), FL_(RFTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &rfTemp_, DeviceValueType::SHORT, FL_(div10), FL_(RFTemp), DeviceValueUOM::DEGREES);
     }
 }
 
