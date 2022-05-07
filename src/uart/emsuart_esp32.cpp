@@ -22,7 +22,6 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/ringbuf.h"
 #include "freertos/queue.h"
 #include "driver/uart.h"
 #include "soc/uart_reg.h"
@@ -34,36 +33,27 @@ namespace emsesp {
 static QueueHandle_t uart_queue;
 uint8_t              tx_mode_;
 
+/*
+* receive task, wait for break and call incoming_telegram
+*/
 void EMSuart::uart_event_task(void * pvParameters) {
     uart_event_t event;
-    uint8_t      data[EMS_MAXBUFFERSIZE];
-    uint8_t      len    = 0;
-    bool         ignore = true; // ignore first telegram
+    uint8_t      telegram[EMS_MAXBUFFERSIZE];
+    size_t       length;
 
     while (1) {
         //Waiting for UART event.
-        if (xQueueReceive(uart_queue, (void *)&event, (portTickType)portMAX_DELAY)) {
-            switch (event.type) {
-            case UART_DATA:
-            case UART_BUFFER_FULL:
-                if ((event.size + len) <= EMS_MAXBUFFERSIZE) {
-                    uart_read_bytes(EMSUART_NUM, data + len, event.size, portMAX_DELAY);
-                    len += event.size;
-                } else { // ignore telegram
-                    uint8_t buf[event.size];
-                    uart_read_bytes(EMSUART_NUM, buf, event.size, portMAX_DELAY);
-                    ignore = true;
+        if (xQueueReceive(uart_queue, (void *)&event, portMAX_DELAY)) {
+            if (event.type == UART_BREAK) {
+                uart_get_buffered_data_len(EMSUART_NUM, &length);
+                if (length == 2 || (length >= 6 && length <= EMS_MAXBUFFERSIZE)) {
+                    uart_read_bytes(EMSUART_NUM, telegram, length, portMAX_DELAY);
+                    if (telegram[0] && !telegram[length - 1]) {
+                        EMSESP::incoming_telegram(telegram, (uint8_t)(length - 1));
+                    }
+                } else {
+                    uart_flush_input(EMSUART_NUM);
                 }
-                break;
-            case UART_BREAK:
-                if (!ignore && (len == 2 || len >= 4) && data[0] != 0) {
-                    EMSESP::incoming_telegram(data, len - 1);
-                }
-                ignore = false;
-                len    = 0;
-                break;
-            default:
-                break;
             }
         }
     }
@@ -83,17 +73,13 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
             .flow_ctrl  = UART_HW_FLOWCTRL_DISABLE,
             .source_clk = UART_SCLK_APB,
         };
-        uart_driver_install(EMSUART_NUM, 256, 0, EMS_MAXBUFFERSIZE * 3, &uart_queue, 0); // buffer 128 crash
+        uart_driver_install(EMSUART_NUM, 129, 0, EMS_MAXBUFFERSIZE * 3, &uart_queue, 0); // buffer must be > fifo
         uart_param_config(EMSUART_NUM, &uart_config);
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
         uart_set_rx_full_threshold(EMSUART_NUM, 1);
-        // using own interrupt
-        // uart_isr_free(EMSUART_NUM);
-        // uart_isr_register(EMSUART_NUM, uart_intr_handle, NULL, ESP_INTR_FLAG_IRAM, &handle_console));
         xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
     }
     tx_mode_ = tx_mode;
-    // uart_enable_intr_mask(EMSUART_NUM, 0x81);
     uart_enable_intr_mask(EMSUART_NUM, UART_BRK_DET_INT_ENA | UART_RXFIFO_FULL_INT_ENA);
 }
 
@@ -101,7 +87,6 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
  * Stop, disable interrupt
  */
 void EMSuart::stop() {
-    // uart_disable_intr_mask(EMSUART_NUM, 0xFFFFFFFF);
     uart_disable_intr_mask(EMSUART_NUM, UART_BRK_DET_INT_ENA | UART_RXFIFO_FULL_INT_ENA);
 };
 
@@ -155,14 +140,14 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
 
     // mode 1: wait for echo after each byte
     for (uint8_t i = 0; i < len; i++) {
-        // or use
-        // uart_get_buffered_data_len(EMSUART_NUM, size_t *size);
-        uint8_t _usrxc = uxQueueMessagesWaiting(uart_queue);
+        size_t rx0, rx1;
+        uart_get_buffered_data_len(EMSUART_NUM, &rx0);
         uart_write_bytes(EMSUART_NUM, &buf[i], 1);
         uint16_t timeoutcnt = EMSUART_TX_TIMEOUT;
-        while ((uxQueueMessagesWaiting(uart_queue) == _usrxc) && (--timeoutcnt > 0)) {
+        do {
             delayMicroseconds(EMSUART_TX_BUSY_WAIT); // burn CPU cycles...
-        }
+            uart_get_buffered_data_len(EMSUART_NUM, &rx1);
+        } while ((rx1 == rx0) && (--timeoutcnt));
     }
     uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV);
     delayMicroseconds(EMSUART_TX_BRK_EMS);
