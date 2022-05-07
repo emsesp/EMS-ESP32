@@ -84,6 +84,9 @@ class System {
     void button_init(bool refresh);
     void commands_init();
 
+    static void extractSettings(const char * filename, const char * section, JsonObject & output);
+    static bool saveSettings(const char * filename, const char * section, JsonObject & input);
+
     static bool is_valid_gpio(uint8_t pin);
     static bool load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
 

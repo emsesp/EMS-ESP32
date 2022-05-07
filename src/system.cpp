@@ -889,10 +889,51 @@ void System::show_system(uuid::console::Shell & shell) {
 #endif
 }
 
-// upgrade from previous versions of EMS-ESP
-// returns true if an upgrade was done
+// handle upgrades from previous versions
+// or managing an uploaded files to replace settings files
+// returns true if we need a reboot
 bool System::check_upgrade() {
-    return false;
+    bool reboot_required = false;
+
+#ifndef EMSESP_STANDALONE
+    // see if we have a temp file, if so try and read it
+    File new_file = LITTLEFS.open(TEMP_FILENAME_PATH);
+    if (new_file) {
+        DynamicJsonDocument  jsonDocument = DynamicJsonDocument(FS_BUFFER_SIZE);
+        DeserializationError error        = deserializeJson(jsonDocument, new_file);
+        if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
+            JsonObject input = jsonDocument.as<JsonObject>();
+            // see what type of file it is, either settings or customization. anything else is ignored
+            std::string settings_type = input["type"];
+            if (settings_type == "settings") {
+                // It's a settings file. Parse each section separately. If it's system related it will require a reboot
+                reboot_required = saveSettings(NETWORK_SETTINGS_FILE, "Network", input);
+                reboot_required |= saveSettings(AP_SETTINGS_FILE, "AP", input);
+                reboot_required |= saveSettings(MQTT_SETTINGS_FILE, "MQTT", input);
+                reboot_required |= saveSettings(NTP_SETTINGS_FILE, "NTP", input);
+                reboot_required |= saveSettings(SECURITY_SETTINGS_FILE, "Security", input);
+                reboot_required |= saveSettings(EMSESP_SETTINGS_FILE, "Settings", input);
+            } else if (settings_type == "customizations") {
+                // it's a customization file, just replace it and there's no need to reboot
+                LOG_INFO(F("Applying new customizations"));
+                new_file.close();
+                LITTLEFS.remove(EMSESP_CUSTOMIZATION_FILE);
+                LITTLEFS.rename(TEMP_FILENAME_PATH, EMSESP_CUSTOMIZATION_FILE);
+                return false; // no reboot required
+            } else {
+                LOG_ERROR(F("Unrecognized file uploaded"));
+            }
+        } else {
+            LOG_ERROR(F("Unrecognized file uploaded, not json"));
+        }
+
+        // close (just in case) and remove the file
+        new_file.close();
+        LITTLEFS.remove(TEMP_FILENAME_PATH);
+    }
+#endif
+
+    return reboot_required;
 }
 
 // list commands
@@ -900,191 +941,67 @@ bool System::command_commands(const char * value, const int8_t id, JsonObject & 
     return Command::list(EMSdevice::DeviceType::SYSTEM, output);
 }
 
+// convert settings file into json object
+void System::extractSettings(const char * filename, const char * section, JsonObject & output) {
+#ifndef EMSESP_STANDALONE
+    File settingsFile = LITTLEFS.open(filename);
+    if (settingsFile) {
+        DynamicJsonDocument  jsonDocument = DynamicJsonDocument(EMSESP_JSON_SIZE_XLARGE_DYN);
+        DeserializationError error        = deserializeJson(jsonDocument, settingsFile);
+        if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
+            JsonObject jsonObject = jsonDocument.as<JsonObject>();
+            JsonObject node       = output.createNestedObject(section);
+            for (JsonPair kvp : jsonObject) {
+                node[kvp.key()] = kvp.value();
+            }
+        }
+    }
+    settingsFile.close();
+#endif
+}
+
+// save settings file using input from a json object
+bool System::saveSettings(const char * filename, const char * section, JsonObject & input) {
+#ifndef EMSESP_STANDALONE
+    JsonObject section_json = input[section];
+    if (section_json) {
+        File section_file = LITTLEFS.open(filename, "w");
+        if (section_file) {
+            LOG_INFO(F("Applying new %s settings"), section);
+            serializeJson(section_json, section_file);
+            section_file.close();
+            return true; // reboot required
+        }
+    }
+#endif
+    return false; // not found
+}
+
 // export all settings to JSON text
+// we need to keep the original format so the import/upload works as we just replace files
 // http://ems-esp/api/system/settings
-// value and id are ignored
-// note: ssid and passwords are excluded
 bool System::command_settings(const char * value, const int8_t id, JsonObject & output) {
-    output["label"] = "settings";
+    output["type"] = "settings";
 
     JsonObject node = output.createNestedObject("System");
     node["version"] = EMSESP_APP_VERSION;
 
-    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
-        node                     = output.createNestedObject("Network");
-        node["hostname"]         = settings.hostname;
-        node["static_ip_config"] = settings.staticIPConfig;
-        node["enableIPv6"]       = settings.enableIPv6;
-        node["low_bandwidth"]    = settings.bandwidth20;
-        node["disable_sleep"]    = settings.nosleep;
-        JsonUtils::writeIP(node, "local_ip", settings.localIP);
-        JsonUtils::writeIP(node, "gateway_ip", settings.gatewayIP);
-        JsonUtils::writeIP(node, "subnet_mask", settings.subnetMask);
-        JsonUtils::writeIP(node, "dns_ip_1", settings.dnsIP1);
-        JsonUtils::writeIP(node, "dns_ip_2", settings.dnsIP2);
-    });
-
-#ifndef EMSESP_STANDALONE
-    EMSESP::esp8266React.getAPSettingsService()->read([&](APSettings & settings) {
-        node                   = output.createNestedObject("AP");
-        const char * pM[]      = {"always", "disconnected", "never"};
-        node["provision_mode"] = pM[settings.provisionMode];
-        node["security"]       = settings.password.length() ? "wpa2" : "open";
-        node["ssid"]           = settings.ssid;
-        node["local_ip"]       = settings.localIP.toString();
-        node["gateway_ip"]     = settings.gatewayIP.toString();
-        node["subnet_mask"]    = settings.subnetMask.toString();
-        node["channel"]        = settings.channel;
-        node["ssid_hidden"]    = settings.ssidHidden;
-        node["max_clients"]    = settings.maxClients;
-    });
-#endif
-
-    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
-        node                            = output.createNestedObject("MQTT");
-        node["enabled"]                 = settings.enabled;
-        node["host"]                    = settings.host;
-        node["port"]                    = settings.port;
-        node["username"]                = settings.username;
-        node["client_id"]               = settings.clientId;
-        node["keep_alive"]              = settings.keepAlive;
-        node["clean_session"]           = settings.cleanSession;
-        node["base"]                    = settings.base;
-        node["discovery_prefix"]        = settings.discovery_prefix;
-        node["nested_format"]           = settings.nested_format;
-        node["ha_enabled"]              = settings.ha_enabled;
-        node["mqtt_qos"]                = settings.mqtt_qos;
-        node["mqtt_retain"]             = settings.mqtt_retain;
-        node["publish_time_boiler"]     = settings.publish_time_boiler;
-        node["publish_time_thermostat"] = settings.publish_time_thermostat;
-        node["publish_time_solar"]      = settings.publish_time_solar;
-        node["publish_time_mixer"]      = settings.publish_time_mixer;
-        node["publish_time_other"]      = settings.publish_time_other;
-        node["publish_time_sensor"]     = settings.publish_time_sensor;
-        node["publish_single"]          = settings.publish_single;
-        node["publish_2_command"]       = settings.publish_single2cmd;
-        node["send_response"]           = settings.send_response;
-    });
-
-#ifndef EMSESP_STANDALONE
-    EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
-        node              = output.createNestedObject("NTP");
-        node["enabled"]   = settings.enabled;
-        node["server"]    = settings.server;
-        node["tz_label"]  = settings.tzLabel;
-        node["tz_format"] = settings.tzFormat;
-    });
-
-    EMSESP::esp8266React.getOTASettingsService()->read([&](OTASettings & settings) {
-        node            = output.createNestedObject("OTA");
-        node["enabled"] = settings.enabled;
-        node["port"]    = settings.port;
-    });
-#endif
-
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        node = output.createNestedObject("Settings");
-
-        node["board_profile"] = settings.board_profile;
-        node["tx_mode"]       = settings.tx_mode;
-        node["ems_bus_id"]    = settings.ems_bus_id;
-
-        node["syslog_enabled"]       = settings.syslog_enabled;
-        node["syslog_level"]         = settings.syslog_level;
-        node["syslog_mark_interval"] = settings.syslog_mark_interval;
-        node["syslog_host"]          = settings.syslog_host;
-        node["syslog_port"]          = settings.syslog_port;
-
-        node["master_thermostat"] = settings.master_thermostat;
-
-        node["shower_timer"] = settings.shower_timer;
-        node["shower_alert"] = settings.shower_alert;
-        if (settings.shower_alert) {
-            node["shower_alert_coldshot"] = settings.shower_alert_coldshot / 1000; // seconds
-            node["shower_alert_trigger"]  = settings.shower_alert_trigger / 60000; // minutes
-        }
-
-        node["rx_gpio"]      = settings.rx_gpio;
-        node["tx_gpio"]      = settings.tx_gpio;
-        node["dallas_gpio"]  = settings.dallas_gpio;
-        node["pbutton_gpio"] = settings.pbutton_gpio;
-        node["led_gpio"]     = settings.led_gpio;
-
-        node["hide_led"]      = settings.hide_led;
-        node["notoken_api"]   = settings.notoken_api;
-        node["readonly_mode"] = settings.readonly_mode;
-
-        node["fahrenheit"]      = settings.fahrenheit;
-        node["dallas_parasite"] = settings.dallas_parasite;
-        node["bool_format"]     = settings.bool_format;
-        node["bool_dashboard"]  = settings.bool_dashboard;
-        node["enum_format"]     = settings.enum_format;
-        node["analog_enabled"]  = settings.analog_enabled;
-        node["telnet_enabled"]  = settings.telnet_enabled;
-
-        node["phy_type"]       = settings.phy_type;
-        node["eth_power"]      = settings.eth_power;
-        node["eth_phy_addr"]   = settings.eth_phy_addr;
-        node["eth_clock_mode"] = settings.eth_clock_mode;
-    });
+    extractSettings(NETWORK_SETTINGS_FILE, "Network", output);
+    extractSettings(AP_SETTINGS_FILE, "AP", output);
+    extractSettings(MQTT_SETTINGS_FILE, "MQTT", output);
+    extractSettings(NTP_SETTINGS_FILE, "NTP", output);
+    extractSettings(OTA_SETTINGS_FILE, "OTA", output);
+    extractSettings(SECURITY_SETTINGS_FILE, "Security", output);
+    extractSettings(EMSESP_SETTINGS_FILE, "Settings", output);
 
     return true;
 }
 
 // http://ems-esp/api/system/customizations
+// we need to keep the original format so the import/upload works as we just replace file
 bool System::command_customizations(const char * value, const int8_t id, JsonObject & output) {
-    output["label"] = "customizations";
-
-    JsonObject node = output.createNestedObject("Customizations");
-
-    EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
-        // sensors
-        JsonArray sensorsJson = node.createNestedArray("sensors");
-        for (const auto & sensor : settings.sensorCustomizations) {
-            JsonObject sensorJson = sensorsJson.createNestedObject();
-            sensorJson["id"]      = sensor.id;     // key
-            sensorJson["name"]    = sensor.name;   // n
-            sensorJson["offset"]  = sensor.offset; // o
-        }
-
-        JsonArray analogJson = node.createNestedArray("analogs");
-        for (const AnalogCustomization & sensor : settings.analogCustomizations) {
-            JsonObject sensorJson = analogJson.createNestedObject();
-            sensorJson["gpio"]    = sensor.gpio;
-            sensorJson["name"]    = sensor.name;
-            if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
-                sensorJson["type"] = sensor.type;
-            } else {
-                sensorJson["type"] = FL_(enum_sensortype)[sensor.type];
-            }
-            if (sensor.type == AnalogSensor::AnalogType::ADC) {
-                sensorJson["offset"] = sensor.offset;
-                sensorJson["factor"] = sensor.factor;
-                sensorJson["uom"]    = EMSdevice::uom_to_string(sensor.uom);
-            } else if (sensor.type == AnalogSensor::AnalogType::COUNTER || sensor.type == AnalogSensor::AnalogType::TIMER
-                       || sensor.type == AnalogSensor::AnalogType::RATE) {
-                sensorJson["factor"] = sensor.factor;
-                sensorJson["uom"]    = EMSdevice::uom_to_string(sensor.uom);
-            } else if (sensor.type >= AnalogSensor::AnalogType::PWM_0) {
-                sensorJson["frequency"] = sensor.factor;
-                sensorJson["factor"]    = sensor.factor;
-            }
-        }
-
-        // masked entities
-        JsonArray mask_entitiesJson = node.createNestedArray("masked_entities");
-        for (const auto & entityCustomization : settings.entityCustomizations) {
-            JsonObject entityJson    = mask_entitiesJson.createNestedObject();
-            entityJson["product_id"] = entityCustomization.product_id;
-            entityJson["device_id"]  = entityCustomization.device_id;
-
-            JsonArray mask_entityJson = entityJson.createNestedArray("entities");
-            for (std::string entity_id : entityCustomization.entity_ids) {
-                mask_entityJson.add(entity_id);
-            }
-        }
-    });
-
+    output["type"] = "customizations";
+    extractSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", output);
     return true;
 }
 

@@ -36,7 +36,7 @@ const HelpInformation: FC = () => {
       } else {
         const json = response.data;
         const a = document.createElement('a');
-        const filename = 'emsesp_' + endpoint + '.txt';
+        const filename = 'emsesp_' + endpoint + '.json';
         a.href = URL.createObjectURL(
           new Blob([JSON.stringify(json, null, 2)], {
             type: 'text/plain'
@@ -112,26 +112,30 @@ const HelpInformation: FC = () => {
 
       {me.admin && (
         <>
-          <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+          <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
             Export Data
           </Typography>
           <Box color="warning.main">
-            <Typography variant="body2">
-              Download the current system information, application settings and any customizations using the buttons
-              below.
+            <Typography sx={{ pb: 1 }} variant="body2">
+              Download the current system information to show EMS statistics and connected devices
+            </Typography>
+          </Box>
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={() => onDownload('info')}>
+            system info
+          </Button>
+          <Box color="warning.main">
+            <Typography sx={{ pt: 2 }} variant="body2">
+              Export the application settings and any customizations to a JSON file. These files can later be uploaded
+              via the System menu.
+            </Typography>
+            <Typography sx={{ pt: 2 }} variant="body2">
+              Be careful when sharing the settings as the file contains passwords and other sensitive system
+              information.
             </Typography>
           </Box>
 
           <Box sx={{ display: 'flex' }}>
             <ButtonRow>
-              <Button
-                startIcon={<DownloadIcon />}
-                variant="outlined"
-                color="secondary"
-                onClick={() => onDownload('info')}
-              >
-                system info
-              </Button>
               <Button
                 startIcon={<DownloadIcon />}
                 variant="outlined"
@@ -157,7 +161,7 @@ const HelpInformation: FC = () => {
         <Typography align="center" variant="h6">
           EMS-ESP is a free and open-source project.
           <br></br>Please consider supporting us by giving it a&nbsp;
-          <StarIcon style={{ color: '#fdff3a' }} /> on&nbsp;
+          <StarIcon style={{ fontSize: 16, color: '#fdff3a', verticalAlign: 'middle' }} /> on&nbsp;
           <Link href="https://github.com/emsesp/EMS-ESP32" color="primary">
             {'GitHub'}
           </Link>

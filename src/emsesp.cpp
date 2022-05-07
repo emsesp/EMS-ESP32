@@ -1374,7 +1374,7 @@ void EMSESP::start() {
 // start the file system
 #ifndef EMSESP_STANDALONE
     if (!LITTLEFS.begin(true)) {
-        Serial.println("LITTLEFS Mount Failed. EMS-ESP stopped.");
+        Serial.println("LITTLEFS Mount failed. EMS-ESP stopped.");
         return;
     }
 #endif
@@ -1382,6 +1382,12 @@ void EMSESP::start() {
     esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
     LOG_INFO(F("Last system reset reason Core0: %s, Core1: %s"), system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
+
+    // do any system upgrades
+    if (system_.check_upgrade()) {
+        LOG_INFO(F("System will be restarted to apply upgrade"));
+        system_.system_restart();
+    };
 
     webSettingsService.begin();      // load EMS-ESP Application settings...
     system_.reload_settings();       // ... and store some of the settings locally
@@ -1391,8 +1397,6 @@ void EMSESP::start() {
     if (system_.telnet_enabled()) {
         console_.start_telnet();
     }
-
-    system_.check_upgrade(); // do any system upgrades
 
     // start all the EMS-ESP services
     mqtt_.start();   // mqtt init

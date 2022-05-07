@@ -17,6 +17,13 @@
 #include <StatefulService.h>
 #include <Network.h>
 
+#define AP_SETTINGS_FILE "/config/apSettings.json"
+#define MQTT_SETTINGS_FILE "/config/mqttSettings.json"
+#define NETWORK_SETTINGS_FILE "/config/networkSettings.json"
+#define NTP_SETTINGS_FILE "/config/ntpSettings.json"
+#define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
+#define OTA_SETTINGS_FILE "/config/otaSettings.json"
+
 class DummySettings {
   public:
     uint8_t  tx_mode               = 1;
@@ -26,6 +33,7 @@ class DummySettings {
     uint32_t syslog_mark_interval  = 0;
     String   syslog_host           = "192.168.1.4";
     uint16_t syslog_port           = 514;
+    bool     enableMDNS            = false;
     uint8_t  master_thermostat     = 0;
     bool     shower_timer          = true;
     bool     shower_alert          = false;

@@ -6,7 +6,7 @@ import { Tab } from '@mui/material';
 import { useRouterTab, RouterTabs, useLayoutTitle, RequireAdmin } from '../../components';
 import { AuthenticatedContext } from '../../contexts/authentication';
 import { FeaturesContext } from '../../contexts/features';
-import UploadFirmwareForm from './UploadFirmwareForm';
+import UploadFileForm from './UploadFileForm';
 import SystemStatusForm from './SystemStatusForm';
 import OTASettingsForm from './OTASettingsForm';
 
@@ -26,7 +26,7 @@ const System: FC = () => {
         <Tab value="log" label="System Log" />
 
         {features.ota && <Tab value="ota" label="OTA Settings" disabled={!me.admin} />}
-        {features.upload_firmware && <Tab value="upload" label="Upload Firmware" disabled={!me.admin} />}
+        {features.upload_firmware && <Tab value="upload" label="Upload" disabled={!me.admin} />}
       </RouterTabs>
       <Routes>
         <Route path="status" element={<SystemStatusForm />} />
@@ -46,7 +46,7 @@ const System: FC = () => {
             path="upload"
             element={
               <RequireAdmin>
-                <UploadFirmwareForm />
+                <UploadFileForm />
               </RequireAdmin>
             }
           />

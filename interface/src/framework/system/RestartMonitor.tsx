@@ -8,7 +8,7 @@ const RESTART_TIMEOUT = 2 * 60 * 1000;
 const POLL_TIMEOUT = 2000;
 const POLL_INTERVAL = 5000;
 
-const FirmwareRestartMonitor: FC = () => {
+const RestartMonitor: FC = () => {
   const [failed, setFailed] = useState<boolean>(false);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>();
 
@@ -16,7 +16,7 @@ const FirmwareRestartMonitor: FC = () => {
   const poll = useRef(async () => {
     try {
       await SystemApi.readSystemStatus(POLL_TIMEOUT);
-      document.location.href = '/firmwareUpdated';
+      document.location.href = '/fileUpdated';
     } catch (error: unknown) {
       if (new Date().getTime() < timeoutAt.current) {
         setTimeoutId(setTimeout(poll.current, POLL_INTERVAL));
@@ -40,4 +40,4 @@ const FirmwareRestartMonitor: FC = () => {
   );
 };
 
-export default FirmwareRestartMonitor;
+export default RestartMonitor;
