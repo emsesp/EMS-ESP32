@@ -43,7 +43,6 @@ class SecuritySettings {
         JsonArray users = root.createNestedArray("users");
         for (User user : settings.users) {
             JsonObject userRoot  = users.createNestedObject();
-            userRoot["id"]       = user.username; // for React Table
             userRoot["username"] = user.username;
             userRoot["password"] = user.password;
             userRoot["admin"]    = user.admin;
