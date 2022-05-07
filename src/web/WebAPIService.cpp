@@ -124,7 +124,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     // https://github.com/emsesp/EMS-ESP32/issues/462#issuecomment-1093877210
     if (output.containsKey("api_data")) {
         JsonVariant data = output["api_data"];
-        request->send(200, "text/plain", data.as<String>());
+        request->send(200, "text/plain; charset=utf-8", data.as<String>());
         api_count_++;
         return;
     }
