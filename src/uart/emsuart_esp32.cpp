@@ -39,21 +39,28 @@ uint8_t              tx_mode_;
 void EMSuart::uart_event_task(void * pvParameters) {
     uart_event_t event;
     uint8_t      telegram[EMS_MAXBUFFERSIZE];
-    size_t       length;
+    // size_t       length;
+    uint8_t length = 0;
 
     while (1) {
         //Waiting for UART event.
         if (xQueueReceive(uart_queue, (void *)&event, portMAX_DELAY)) {
-            if (event.type == UART_BREAK) {
-                uart_get_buffered_data_len(EMSUART_NUM, &length);
+            if (event.type == UART_DATA) {
+                length += event.size;
+            } else if (event.type == UART_BREAK) {
+                // uart_get_buffered_data_len(EMSUART_NUM, &length);
                 if (length == 2 || (length >= 6 && length <= EMS_MAXBUFFERSIZE)) {
                     uart_read_bytes(EMSUART_NUM, telegram, length, portMAX_DELAY);
                     if (telegram[0] && !telegram[length - 1]) {
                         EMSESP::incoming_telegram(telegram, (uint8_t)(length - 1));
                     }
                 } else {
-                    uart_flush_input(EMSUART_NUM);
+                    // flush buffer up to break
+                    uint8_t buf[length];
+                    uart_read_bytes(EMSUART_NUM, buf, length, portMAX_DELAY);
+                    // uart_flush_input(EMSUART_NUM);
                 }
+                length = 0;
             }
         }
     }
