@@ -916,7 +916,6 @@ bool System::check_upgrade() {
             } else if (settings_type == "customizations") {
                 // it's a customization file, just replace it and there's no need to reboot
                 saveSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", input);
-                return false; // no reboot required
             } else {
                 LOG_ERROR(F("Unrecognized file uploaded"));
             }
