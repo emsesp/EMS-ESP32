@@ -193,17 +193,22 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         return nullptr;
     }
 
-    if (!strncmp(command, "hc", 2) && strlen(command) >= 3) {
+    // check prefix and valid number range, also check 'id'
+    if (!strncmp(command, "hc", 2) && command[2] >= '1' && command[2] <= '8') {
         id = command[2] - '0';
         command += 3;
-    } else if (!strncmp(command, "wwc", 3) && strlen(command) >= 4) {
-        if (command[3] == '1' && command[4] == '0') {
-            id = 19; // wwc10
-            command += 5;
-        } else {
-            id = command[3] - '0' + 8; // wwc1 has id 9
-            command += 4;
-        }
+    } else if (!strncmp(command, "wwc", 3) && command[3] == '1' && command[4] == '0') {
+        id = 19;
+        command += 5;
+    } else if (!strncmp(command, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {
+        id = command[3] - '0' + 8;
+        command += 4;
+    } else if (!strncmp(command, "id", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '9') {
+        id = command[3] - '0' + 10;
+        command += 4;
+    } else if (!strncmp(command, "id", 2) && command[2] >= '1' && command[2] <= '9') {
+        id = command[2] - '0';
+        command += 3;
     }
     // remove separator
     if (command[0] == '/' || command[0] == '.' || command[0] == '_') {
