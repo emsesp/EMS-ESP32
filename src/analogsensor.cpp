@@ -435,15 +435,43 @@ void AnalogSensor::publish_values(const bool force) {
 // called from emsesp.cpp, similar to the emsdevice->get_value_info
 // searches by name
 bool AnalogSensor::get_value_info(JsonObject & output, const char * cmd, const int8_t id) const {
+    // make a copy of the string command for parsing
+    char command_s[30];
+    strlcpy(command_s, cmd, sizeof(command_s));
+    char * attribute_s = nullptr;
+
+    // check specific attribute to fetch instead of the complete record
+    char * breakp = strchr(command_s, '/');
+    if (breakp) {
+        *breakp     = '\0';
+        attribute_s = breakp + 1;
+    }
+
     for (const auto & sensor : sensors_) {
-        if (strcmp(cmd, sensor.name().c_str()) == 0) {
+        if (strcmp(command_s, sensor.name().c_str()) == 0) {
             output["gpio"]   = sensor.gpio();
             output["name"]   = sensor.name();
-            output["type"]   = sensor.type();
-            output["uom"]    = sensor.uom();
+            output["type"]   = F_(number);
+            output["analog"] = FL_(enum_sensortype)[sensor.type()];
+            output["uom"]    = EMSdevice::uom_to_string(sensor.uom());
             output["offset"] = sensor.offset();
             output["factor"] = sensor.factor();
             output["value"]  = sensor.value();
+            // if we're filtering on an attribute, go find it
+            if (attribute_s) {
+                if (output.containsKey(attribute_s)) {
+                    JsonVariant data = output[attribute_s];
+                    output.clear();
+                    output["api_data"] = data;
+                    return true;
+                } else {
+                    char error[100];
+                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, command_s);
+                    output.clear();
+                    output["message"] = error;
+                    return false;
+                }
+            }
             return true;
         }
     }
@@ -461,7 +489,8 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
         if (id == -1) { // show number and id
             JsonObject dataSensor = output.createNestedObject(sensor.name());
             dataSensor["gpio"]    = sensor.gpio();
-            dataSensor["type"]    = FL_(enum_sensortype)[sensor.type()];
+            dataSensor["type"]    = F_(number);
+            dataSensor["analog"]  = FL_(enum_sensortype)[sensor.type()];
             if (sensor.type() == AnalogType::ADC) {
                 dataSensor["uom"]    = EMSdevice::uom_to_string(sensor.uom());
                 dataSensor["offset"] = sensor.offset();

@@ -375,8 +375,20 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
 
 // called from emsesp.cpp, similar to the emsdevice->get_value_info
 bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const int8_t id) {
+    // make a copy of the string command for parsing
+    char command_s[30];
+    strlcpy(command_s, cmd, sizeof(command_s));
+    char * attribute_s = nullptr;
+
+    // check specific attribute to fetch instead of the complete record
+    char * breakp = strchr(command_s, '/');
+    if (breakp) {
+        *breakp     = '\0';
+        attribute_s = breakp + 1;
+    }
+
     for (const auto & sensor : sensors_) {
-        if (strcmp(cmd, sensor.name().c_str()) == 0) {
+        if (strcmp(command_s, sensor.name().c_str()) == 0) {
             output["id"]   = sensor.id();
             output["name"] = sensor.name();
             if (Helpers::hasValue(sensor.temperature_c)) {
@@ -385,8 +397,23 @@ bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const i
             output["type"]      = F_(number);
             output["min"]       = Helpers::round2(-55, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
             output["max"]       = Helpers::round2(125, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
-            output["unit"]      = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
+            output["uom"]       = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
             output["writeable"] = false;
+            // if we're filtering on an attribute, go find it
+            if (attribute_s) {
+                if (output.containsKey(attribute_s)) {
+                    JsonVariant data = output[attribute_s];
+                    output.clear();
+                    output["api_data"] = data;
+                    return true;
+                } else {
+                    char error[100];
+                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, command_s);
+                    output.clear();
+                    output["message"] = error;
+                    return false;
+                }
+            }
             return true;
         }
     }
