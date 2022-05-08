@@ -1614,6 +1614,7 @@ void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
             if (levels) {
                 listDir(fs, file.name(), levels - 1);
             }
+            Serial.println();
         } else {
             Serial.print("  FILE: ");
             Serial.print(file.name());
@@ -1638,6 +1639,7 @@ void Test::debug(uuid::console::Shell & shell, const std::string & cmd) {
 #ifndef EMSESP_STANDALONE
     if (command == "ls") {
         listDir(LITTLEFS, "/", 3);
+        Serial.println();
     }
 #endif
 }

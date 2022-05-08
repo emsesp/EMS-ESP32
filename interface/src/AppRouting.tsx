@@ -47,10 +47,7 @@ const AppRouting: FC = () => {
       <RemoveTrailingSlashes />
       <Routes>
         <Route path="/unauthorized" element={<RootRedirect message="Please sign in to continue" signOut />} />
-        <Route
-          path="/firmwareUpdated"
-          element={<RootRedirect message="Firmware update successful" variant="success" />}
-        />
+        <Route path="/fileUpdated" element={<RootRedirect message="Upload successful" variant="success" />} />
         {features.security && (
           <Route
             path="/"
