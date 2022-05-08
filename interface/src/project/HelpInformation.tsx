@@ -2,7 +2,7 @@ import { FC, useContext } from 'react';
 
 import { Typography, Button, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@mui/material';
 
-import { SectionContent, ButtonRow } from '../components';
+import { SectionContent, ButtonRow, MessageBox } from '../components';
 
 import { AuthenticatedContext } from '../contexts/authentication';
 
@@ -36,7 +36,7 @@ const HelpInformation: FC = () => {
       } else {
         const json = response.data;
         const a = document.createElement('a');
-        const filename = 'emsesp_' + endpoint + '.txt';
+        const filename = 'emsesp_' + endpoint + '.json';
         a.href = URL.createObjectURL(
           new Blob([JSON.stringify(json, null, 2)], {
             type: 'text/plain'
@@ -102,9 +102,13 @@ const HelpInformation: FC = () => {
             <GitHubIcon />
           </ListItemAvatar>
           <ListItemText>
-            To report an issue or request a feature, please do via&nbsp;
+            To report an issue or request a feature, please&nbsp;
+            <Link component="button" variant="body1" onClick={() => onDownload('info')}>
+              download
+            </Link>
+            &nbsp;the debug information and include in a new&nbsp;
             <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32/issues/new/choose" color="primary">
-              {'GitHub'}
+              GitHub issue
             </Link>
           </ListItemText>
         </ListItem>
@@ -112,26 +116,17 @@ const HelpInformation: FC = () => {
 
       {me.admin && (
         <>
-          <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-            Export Data
+          <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+            Download Settings
           </Typography>
           <Box color="warning.main">
             <Typography variant="body2">
-              Download the current system information, application settings and any customizations using the buttons
-              below.
+              Export the application settings and any customizations to a JSON file. These files can later be uploaded
+              via System&rarr;Upload.
             </Typography>
           </Box>
-
           <Box sx={{ display: 'flex' }}>
             <ButtonRow>
-              <Button
-                startIcon={<DownloadIcon />}
-                variant="outlined"
-                color="secondary"
-                onClick={() => onDownload('info')}
-              >
-                system info
-              </Button>
               <Button
                 startIcon={<DownloadIcon />}
                 variant="outlined"
@@ -150,6 +145,12 @@ const HelpInformation: FC = () => {
               </Button>
             </ButtonRow>
           </Box>
+          <MessageBox
+            my={2}
+            level="warning"
+            message="Be careful when sharing your Settings as the file contains passwords and other sensitive system
+              information!"
+          />
         </>
       )}
 
@@ -157,7 +158,7 @@ const HelpInformation: FC = () => {
         <Typography align="center" variant="h6">
           EMS-ESP is a free and open-source project.
           <br></br>Please consider supporting us by giving it a&nbsp;
-          <StarIcon style={{ color: '#fdff3a' }} /> on&nbsp;
+          <StarIcon style={{ fontSize: 16, color: '#fdff3a', verticalAlign: 'middle' }} /> on&nbsp;
           <Link href="https://github.com/emsesp/EMS-ESP32" color="primary">
             {'GitHub'}
           </Link>

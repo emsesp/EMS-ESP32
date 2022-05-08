@@ -249,7 +249,7 @@ const SYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'systemStatus'
 const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings'
 const RESTART_ENDPOINT = REST_ENDPOINT_ROOT + 'restart'
 const FACTORY_RESET_ENDPOINT = REST_ENDPOINT_ROOT + 'factoryReset'
-const UPLOAD_FIRMWARE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFirmware'
+const UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn'
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken'
 const system_status = {
@@ -270,8 +270,8 @@ const system_status = {
 security_settings = {
   jwt_secret: 'naughty!',
   users: [
-    { id: 'admin', username: 'admin', password: 'admin', admin: true },
-    { id: 'guest', username: 'guest', password: 'guest', admin: false },
+    { username: 'admin', password: 'admin', admin: true },
+    { username: 'guest', password: 'guest', admin: false },
   ],
 }
 const features = {
@@ -828,7 +828,7 @@ rest_server.post(RESTART_ENDPOINT, (req, res) => {
 rest_server.post(FACTORY_RESET_ENDPOINT, (req, res) => {
   res.sendStatus(200)
 })
-rest_server.post(UPLOAD_FIRMWARE_ENDPOINT, (req, res) => {
+rest_server.post(UPLOAD_FILE_ENDPOINT, (req, res) => {
   res.sendStatus(200)
 })
 rest_server.post(SIGN_IN_ENDPOINT, (req, res) => {

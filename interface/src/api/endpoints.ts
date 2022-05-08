@@ -92,7 +92,7 @@ export interface FileUploadConfig {
   onUploadProgress?: (progressEvent: ProgressEvent) => void;
 }
 
-export const uploadFile = (url: string, file: File, config?: FileUploadConfig): AxiosPromise<void> => {
+export const startUploadFile = (url: string, file: File, config?: FileUploadConfig): AxiosPromise<void> => {
   const formData = new FormData();
   formData.append('file', file);
 

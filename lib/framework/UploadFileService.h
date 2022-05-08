@@ -1,20 +1,23 @@
-#ifndef UploadFirmwareService_h
-#define UploadFirmwareService_h
+#ifndef UploadFileService_h
+#define UploadFileService_h
 
 #include <Arduino.h>
 
 #include <Update.h>
 #include <WiFi.h>
 
+#include <LittleFS.h>
+
 #include <ESPAsyncWebServer.h>
 #include <SecurityManager.h>
 #include <RestartService.h>
 
-#define UPLOAD_FIRMWARE_PATH "/rest/uploadFirmware"
+#define UPLOAD_FILE_PATH "/rest/uploadFile"
+#define TEMP_FILENAME_PATH "/tmp_upload"
 
-class UploadFirmwareService {
+class UploadFileService {
   public:
-    UploadFirmwareService(AsyncWebServer * server, SecurityManager * securityManager);
+    UploadFileService(AsyncWebServer * server, SecurityManager * securityManager);
 
   private:
     SecurityManager * _securityManager;

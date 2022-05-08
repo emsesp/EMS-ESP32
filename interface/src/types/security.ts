@@ -1,5 +1,4 @@
 export interface User {
-  id: string; // needed for Table
   username: string;
   password: string;
   admin: boolean;

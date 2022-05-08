@@ -32,7 +32,8 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, prog
   const dropzoneState = useDropzone({
     onDrop,
     accept: {
-      'application/octet-stream': ['.bin']
+      'application/octet-stream': ['.bin'],
+      'application/json': ['.json']
     },
     disabled: uploading,
     multiple: false
