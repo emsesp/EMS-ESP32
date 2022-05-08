@@ -2,7 +2,7 @@ import { FC, useContext } from 'react';
 
 import { Typography, Button, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@mui/material';
 
-import { SectionContent, ButtonRow } from '../components';
+import { SectionContent, ButtonRow, MessageBox } from '../components';
 
 import { AuthenticatedContext } from '../contexts/authentication';
 
@@ -102,9 +102,13 @@ const HelpInformation: FC = () => {
             <GitHubIcon />
           </ListItemAvatar>
           <ListItemText>
-            To report an issue or request a feature, please do via&nbsp;
+            To report an issue or request a feature, please&nbsp;
+            <Link component="button" variant="body1" onClick={() => onDownload('info')}>
+              download
+            </Link>
+            &nbsp;the debug information and include in a new&nbsp;
             <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32/issues/new/choose" color="primary">
-              {'GitHub'}
+              GitHub issue
             </Link>
           </ListItemText>
         </ListItem>
@@ -112,28 +116,15 @@ const HelpInformation: FC = () => {
 
       {me.admin && (
         <>
-          <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
-            Export Data
+          <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+            Download Settings
           </Typography>
           <Box color="warning.main">
-            <Typography sx={{ pb: 1 }} variant="body2">
-              Download the current system information to show EMS statistics and connected devices
-            </Typography>
-          </Box>
-          <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={() => onDownload('info')}>
-            system info
-          </Button>
-          <Box color="warning.main">
-            <Typography sx={{ pt: 2 }} variant="body2">
+            <Typography variant="body2">
               Export the application settings and any customizations to a JSON file. These files can later be uploaded
-              via the System menu.
-            </Typography>
-            <Typography sx={{ pt: 2 }} variant="body2">
-              Be careful when sharing the settings as the file contains passwords and other sensitive system
-              information.
+              via System&rarr;Upload.
             </Typography>
           </Box>
-
           <Box sx={{ display: 'flex' }}>
             <ButtonRow>
               <Button
@@ -154,6 +145,12 @@ const HelpInformation: FC = () => {
               </Button>
             </ButtonRow>
           </Box>
+          <MessageBox
+            my={2}
+            level="warning"
+            message="Be careful when sharing your Settings as the file contains passwords and other sensitive system
+              information!"
+          />
         </>
       )}
 
