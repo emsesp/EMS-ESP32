@@ -1017,7 +1017,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #endif
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
-
 #ifndef EMSESP_STANDALONE
     // Network Status
     node = output.createNestedObject("Network Status");
@@ -1058,15 +1057,18 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["low bandwidth"]    = settings.bandwidth20;
         node["disable sleep"]    = settings.nosleep;
     });
+#ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getAPSettingsService()->read([&](APSettings & settings) {
         const char * pM[]         = {"always", "disconnected", "never"};
         node["AP provision mode"] = pM[settings.provisionMode];
         node["AP security"]       = settings.password.length() ? "wpa2" : "open";
         node["AP ssid"]           = settings.ssid;
     });
+#endif
 
     // NTP status
-    node                 = output.createNestedObject("NTP Status");
+    node = output.createNestedObject("NTP Status");
+#ifndef EMSESP_STANDALONE
     node["network time"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
         node["enabled"]  = settings.enabled;
@@ -1081,6 +1083,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["enabled"] = settings.enabled;
         node["port"]    = settings.port;
     });
+#endif
 
     // MQTT Status
     node                = output.createNestedObject("MQTT Status");
