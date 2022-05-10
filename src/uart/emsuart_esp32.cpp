@@ -39,21 +39,28 @@ uint8_t              tx_mode_;
 void EMSuart::uart_event_task(void * pvParameters) {
     uart_event_t event;
     uint8_t      telegram[EMS_MAXBUFFERSIZE];
-    size_t       length;
+    uint8_t      length = 0;
 
     while (1) {
         //Waiting for UART event.
         if (xQueueReceive(uart_queue, (void *)&event, portMAX_DELAY)) {
-            if (event.type == UART_BREAK) {
-                uart_get_buffered_data_len(EMSUART_NUM, &length);
+            if (event.type == UART_DATA) {
+                length += event.size;
+            } else if (event.type == UART_BREAK) {
                 if (length == 2 || (length >= 6 && length <= EMS_MAXBUFFERSIZE)) {
                     uart_read_bytes(EMSUART_NUM, telegram, length, portMAX_DELAY);
-                    if (telegram[0] && !telegram[length - 1]) {
-                        EMSESP::incoming_telegram(telegram, (uint8_t)(length - 1));
-                    }
+                    // if (telegram[0] && !telegram[length - 1]) {
+                    EMSESP::incoming_telegram(telegram, (uint8_t)(length - 1));
+                    // }
                 } else {
-                    uart_flush_input(EMSUART_NUM);
+                    // flush buffer up to break
+                    uint8_t buf[length];
+                    uart_read_bytes(EMSUART_NUM, buf, length, portMAX_DELAY);
                 }
+                length = 0;
+            } else if (event.type == UART_BUFFER_FULL) { // if we miss something
+                uart_flush_input(EMSUART_NUM);
+                length = 0;
             }
         }
     }
@@ -73,10 +80,11 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
             .flow_ctrl  = UART_HW_FLOWCTRL_DISABLE,
             .source_clk = UART_SCLK_APB,
         };
-        uart_driver_install(EMSUART_NUM, 129, 0, EMS_MAXBUFFERSIZE * 3, &uart_queue, 0); // buffer must be > fifo
+        uart_driver_install(EMSUART_NUM, 129, 0, (EMS_MAXBUFFERSIZE + 1) * 2, &uart_queue, 0); // buffer must be > fifo
         uart_param_config(EMSUART_NUM, &uart_config);
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
         uart_set_rx_full_threshold(EMSUART_NUM, 1);
+        uart_set_rx_timeout(EMSUART_NUM, 0); // disable
         xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
     }
     tx_mode_ = tx_mode;
