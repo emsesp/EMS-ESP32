@@ -193,10 +193,11 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         return nullptr;
     }
 
+    // check prefix and valid number range, also check 'id'
     if (!strncmp(command, "hc", 2) && command[2] >= '1' && command[2] <= '8') {
         id = command[2] - '0';
         command += 3;
-    } else if (!strncmp(command, "wwc", 3) && command[3] >= '1' && command[4] == '0') {
+    } else if (!strncmp(command, "wwc", 3) && command[3] == '1' && command[4] == '0') {
         id = 19;
         command += 5;
     } else if (!strncmp(command, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {

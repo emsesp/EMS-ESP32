@@ -689,7 +689,7 @@ void System::commands_init() {
 
     // these commands will return data in JSON format
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, F("show system status"));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("fetch system settings"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("fetch system settings"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(customizations), System::command_customizations, F("fetch system customizations"));
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("fetch system commands"));
 
@@ -915,7 +915,7 @@ bool System::check_upgrade() {
                 reboot_required |= saveSettings(EMSESP_SETTINGS_FILE, "Settings", input);
             } else if (settings_type == "customizations") {
                 // it's a customization file, just replace it and there's no need to reboot
-                saveSettings(EMSESP_CUSTOMIZATION_FILE, "Customization", input);
+                saveSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", input);
             } else {
                 LOG_ERROR(F("Unrecognized file uploaded"));
             }
@@ -923,7 +923,7 @@ bool System::check_upgrade() {
             LOG_ERROR(F("Unrecognized file uploaded, not json"));
         }
 
-        // close (just in case) and remove the file
+        // close (just in case) and remove the temp file
         new_file.close();
         LittleFS.remove(TEMP_FILENAME_PATH);
     }
@@ -1007,36 +1007,25 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     JsonObject node;
 
     // System
-    node = output.createNestedObject("System");
-
-    node["version"]          = EMSESP_APP_VERSION;
-    node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
-    node["uptime (seconds)"] = uuid::get_uptime_sec();
-    node["network time"]     = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
-
+    node            = output.createNestedObject("System Status");
+    node["version"] = EMSESP_APP_VERSION;
+    node["uptime"]  = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+    // node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
     node["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes
 #endif
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
-    if (EMSESP::dallas_enabled()) {
-        node["temperature sensors"] = EMSESP::dallassensor_.no_sensors();
-    }
-
-    if (EMSESP::analog_enabled()) {
-        node["analog sensors"] = EMSESP::analogsensor_.no_sensors();
-    }
-
 #ifndef EMSESP_STANDALONE
-    // Network
-    node = output.createNestedObject("Network");
+    // Network Status
+    node = output.createNestedObject("Network Status");
     if (WiFi.status() == WL_CONNECTED) {
-        node["connection"]      = F("WiFi");
-        node["hostname"]        = WiFi.getHostname();
-        node["SSID"]            = WiFi.SSID();
-        node["BSSID"]           = WiFi.BSSIDstr();
-        node["RSSI"]            = WiFi.RSSI();
-        node["MAC"]             = WiFi.macAddress();
+        node["connection"] = F("WiFi");
+        node["hostname"]   = WiFi.getHostname();
+        // node["SSID"]            = WiFi.SSID();
+        // node["BSSID"]           = WiFi.BSSIDstr();
+        node["RSSI"] = WiFi.RSSI();
+        // node["MAC"]             = WiFi.macAddress();
         node["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
         node["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
         node["IPv4 nameserver"] = uuid::printable_to_string(WiFi.dnsIP());
@@ -1053,18 +1042,115 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
             node["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
         }
+        EMSESP::webSettingsService.read([&](WebSettings & settings) {
+            node["phy type"]       = settings.phy_type;
+            node["eth power"]      = settings.eth_power;
+            node["eth phy addr"]   = settings.eth_phy_addr;
+            node["eth clock mode"] = settings.eth_clock_mode;
+        });
+    }
+#endif
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
+        node["static ip config"] = settings.staticIPConfig;
+        node["enable IPv6"]      = settings.enableIPv6;
+        node["low bandwidth"]    = settings.bandwidth20;
+        node["disable sleep"]    = settings.nosleep;
+    });
+#ifndef EMSESP_STANDALONE
+    EMSESP::esp8266React.getAPSettingsService()->read([&](APSettings & settings) {
+        const char * pM[]         = {"always", "disconnected", "never"};
+        node["AP provision mode"] = pM[settings.provisionMode];
+        node["AP security"]       = settings.password.length() ? "wpa2" : "open";
+        node["AP ssid"]           = settings.ssid;
+    });
+#endif
+
+    // NTP status
+    node = output.createNestedObject("NTP Status");
+#ifndef EMSESP_STANDALONE
+    node["network time"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
+    EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
+        node["enabled"]  = settings.enabled;
+        node["server"]   = settings.server;
+        node["tz label"] = settings.tzLabel;
+        // node["tz format"] = settings.tzFormat;
+    });
+
+    // OTA status
+    node = output.createNestedObject("OTA Status");
+    EMSESP::esp8266React.getOTASettingsService()->read([&](OTASettings & settings) {
+        node["enabled"] = settings.enabled;
+        node["port"]    = settings.port;
+    });
+#endif
+
+    // MQTT Status
+    node                = output.createNestedObject("MQTT Status");
+    node["MQTT status"] = Mqtt::connected() ? F_(connected) : F_(disconnected);
+    if (Mqtt::enabled()) {
+        node["MQTT publishes"]     = Mqtt::publish_count();
+        node["MQTT publish fails"] = Mqtt::publish_fails();
+    }
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
+        node["enabled"]                 = settings.enabled;
+        node["client_id"]               = settings.clientId;
+        node["keep alive"]              = settings.keepAlive;
+        node["clean session"]           = settings.cleanSession;
+        node["base"]                    = settings.base;
+        node["discovery prefix"]        = settings.discovery_prefix;
+        node["nested format"]           = settings.nested_format;
+        node["ha enabled"]              = settings.ha_enabled;
+        node["mqtt qos"]                = settings.mqtt_qos;
+        node["mqtt retain"]             = settings.mqtt_retain;
+        node["publish time boiler"]     = settings.publish_time_boiler;
+        node["publish time thermostat"] = settings.publish_time_thermostat;
+        node["publish time solar"]      = settings.publish_time_solar;
+        node["publish time mixer"]      = settings.publish_time_mixer;
+        node["publish time other"]      = settings.publish_time_other;
+        node["publish time sensor"]     = settings.publish_time_sensor;
+        node["publish single"]          = settings.publish_single;
+        node["publish2command"]         = settings.publish_single2cmd;
+        node["send response"]           = settings.send_response;
+    });
+
+    // Syslog Status
+    node            = output.createNestedObject("Syslog Status");
+    node["enabled"] = EMSESP::system_.syslog_enabled_;
+#ifndef EMSESP_STANDALONE
+    if (EMSESP::system_.syslog_enabled_) {
+        node["syslog started"] = syslog_.started();
+        node["syslog level"]   = FL_(enum_syslog_level)[syslog_.log_level() + 1];
+        node["syslog ip"]      = syslog_.ip();
+        node["syslog queue"]   = syslog_.queued();
     }
 #endif
 
-    // Status
-    node = output.createNestedObject("Status");
+    // Sensor Status
+    node = output.createNestedObject("Sensor Status");
+    if (EMSESP::dallas_enabled()) {
+        node["temperature sensors"]      = EMSESP::dallassensor_.no_sensors();
+        node["temperature sensor reads"] = EMSESP::dallassensor_.reads();
+        node["temperature sensor fails"] = EMSESP::dallassensor_.fails();
+    }
+    if (EMSESP::analog_enabled()) {
+        node["analog sensors"]      = EMSESP::analogsensor_.no_sensors();
+        node["analog sensor reads"] = EMSESP::analogsensor_.reads();
+        node["analog sensor fails"] = EMSESP::analogsensor_.fails();
+    }
 
+    // API Status
+    node              = output.createNestedObject("API Status");
+    node["API calls"] = WebAPIService::api_count();
+    node["API fails"] = WebAPIService::api_fails();
+
+    // EMS Bus Status
+    node = output.createNestedObject("Bus Status");
     switch (EMSESP::bus_status()) {
     case EMSESP::BUS_STATUS_OFFLINE:
         node["bus status"] = (F("disconnected"));
         break;
     case EMSESP::BUS_STATUS_TX_ERRORS:
-        node["bus status"] = (F("connected, tx issues - try a different tx-mode"));
+        node["bus status"] = (F("connected, tx issues - try a different Tx Mode"));
         break;
     case EMSESP::BUS_STATUS_CONNECTED:
         node["bus status"] = (F("connected"));
@@ -1073,7 +1159,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["bus status"] = (F("unknown"));
         break;
     }
-
     if (EMSESP::bus_status() != EMSESP::BUS_STATUS_OFFLINE) {
         node["bus protocol"]                = EMSbus::is_ht3() ? F("HT3") : F("Buderus");
         node["bus telegrams received (rx)"] = EMSESP::rxservice_.telegram_count();
@@ -1084,33 +1169,36 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["bus writes failed"]           = EMSESP::txservice_.telegram_write_fail_count();
         node["bus rx line quality"]         = EMSESP::rxservice_.quality();
         node["bus tx line quality"]         = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.read_quality()) / 2;
-        if (Mqtt::enabled()) {
-            node["MQTT status"]        = Mqtt::connected() ? F_(connected) : F_(disconnected);
-            node["MQTT publishes"]     = Mqtt::publish_count();
-            node["MQTT publish fails"] = Mqtt::publish_fails();
-        }
-        node["temperature sensors"] = EMSESP::dallassensor_.no_sensors();
-        if (EMSESP::dallas_enabled()) {
-            node["temperature sensor reads"] = EMSESP::dallassensor_.reads();
-            node["temperature sensor fails"] = EMSESP::dallassensor_.fails();
-        }
-        node["analog sensors"] = EMSESP::analogsensor_.no_sensors();
-        if (EMSESP::analog_enabled()) {
-            node["analog sensor reads"] = EMSESP::analogsensor_.reads();
-            node["analog sensor fails"] = EMSESP::analogsensor_.fails();
-        }
-        node["API calls"] = WebAPIService::api_count();
-        node["API fails"] = WebAPIService::api_fails();
-
-#ifndef EMSESP_STANDALONE
-        if (EMSESP::system_.syslog_enabled_) {
-            node["syslog started"] = syslog_.started();
-            node["syslog level"]   = FL_(enum_syslog_level)[syslog_.log_level() + 1];
-            node["syslog ip"]      = syslog_.ip();
-            node["syslog queue"]   = syslog_.queued();
-        }
-#endif
     }
+
+    // Settings
+    node = output.createNestedObject("Settings");
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+        node["board profile"] = settings.board_profile;
+        node["tx mode"]       = settings.tx_mode;
+        node["ems bus id"]    = settings.ems_bus_id;
+        node["shower timer"]  = settings.shower_timer;
+        node["shower alert"]  = settings.shower_alert;
+        if (settings.shower_alert) {
+            node["shower alert coldshot"] = settings.shower_alert_coldshot; // seconds
+            node["shower alert trigger"]  = settings.shower_alert_trigger;  // minutes
+        }
+        node["rx gpio"]         = settings.rx_gpio;
+        node["tx gpio"]         = settings.tx_gpio;
+        node["dallas gpio"]     = settings.dallas_gpio;
+        node["pbutton gpio"]    = settings.pbutton_gpio;
+        node["led gpio"]        = settings.led_gpio;
+        node["hide led"]        = settings.hide_led;
+        node["notoken api"]     = settings.notoken_api;
+        node["readonly mode"]   = settings.readonly_mode;
+        node["fahrenheit"]      = settings.fahrenheit;
+        node["dallas parasite"] = settings.dallas_parasite;
+        node["bool format"]     = settings.bool_format;
+        node["bool dashboard"]  = settings.bool_dashboard;
+        node["enum format"]     = settings.enum_format;
+        node["analog enabled"]  = settings.analog_enabled;
+        node["telnet enabled"]  = settings.telnet_enabled;
+    });
 
     // Devices - show EMS devices
     JsonArray devices = output.createNestedArray("Devices");
