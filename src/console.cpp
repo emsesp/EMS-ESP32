@@ -661,7 +661,7 @@ void Console::load_system_commands(unsigned int context) {
                                                networkSettings.ssid = arguments.front().c_str();
                                                return StateUpdateResult::CHANGED;
                                            });
-                                           shell.println("Use `wifi reconnect` to save and apply the new settings");
+                                           shell.println("Use `wifi reconnect` to apply the new settings");
                                        });
 
     // added by mvdp

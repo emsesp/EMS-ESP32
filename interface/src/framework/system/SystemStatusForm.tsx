@@ -159,7 +159,7 @@ const SystemStatusForm: FC = () => {
             <Typography variant="body2">
               Use&nbsp;
               <Link target="_blank" href={uploadURL} color="primary">
-                {'UPLOAD FIRMWARE'}
+                {'UPLOAD'}
               </Link>
               &nbsp;to apply the new firmware
             </Typography>

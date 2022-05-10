@@ -261,7 +261,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
             return CommandRet::NOT_ALLOWED; // command not allowed
         }
 
-        if (value == nullptr) {
+        if ((value == nullptr) || (strlen(value) == 0)) {
             if (EMSESP::system_.readonly_mode()) {
                 LOG_INFO(F("[readonly] Calling command '%s/%s' (%s)"), dname.c_str(), cmd, read_flash_string(cf->description_).c_str());
             } else {

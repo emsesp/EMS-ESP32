@@ -42,7 +42,7 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
         cancelToken: cancelToken.token
       });
       resetUploadingStates();
-      enqueueSnackbar('Upload successful', { variant: 'success' });
+      enqueueSnackbar('File uploaded', { variant: 'success' });
     } catch (error: unknown) {
       if (axios.isCancel(error)) {
         enqueueSnackbar('Upload aborted', { variant: 'warning' });

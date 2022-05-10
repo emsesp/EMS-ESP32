@@ -83,14 +83,13 @@ const ManageUsersForm: FC = () => {
     const noAdminConfigured = () => !data.users.find((u) => u.admin);
 
     const removeUser = (toRemove: User) => {
-      const users = data.users.filter((u) => u.id !== toRemove.id);
+      const users = data.users.filter((u) => u.username !== toRemove.username);
       setData({ ...data, users });
     };
 
     const createUser = () => {
       setCreating(true);
       setUser({
-        id: '',
         username: '',
         password: '',
         admin: true
@@ -108,7 +107,7 @@ const ManageUsersForm: FC = () => {
 
     const doneEditingUser = () => {
       if (user) {
-        const users = [...data.users.filter((u) => u.id !== user.id), user];
+        const users = [...data.users.filter((u) => u.username !== user.username), user];
         setData({ ...data, users });
         setUser(undefined);
       }
@@ -118,8 +117,8 @@ const ManageUsersForm: FC = () => {
       setGeneratingToken(undefined);
     };
 
-    const generateToken = (id: string) => {
-      setGeneratingToken(id);
+    const generateToken = (username: string) => {
+      setGeneratingToken(username);
     };
 
     const onSubmit = async () => {
@@ -127,9 +126,11 @@ const ManageUsersForm: FC = () => {
       authenticatedContext.refresh();
     };
 
+    const user_table = data.users.map((u) => ({ ...u, id: u.username }));
+
     return (
       <>
-        <Table data={{ nodes: data.users }} theme={table_theme}>
+        <Table data={{ nodes: user_table }} theme={table_theme}>
           {(tableList: any) => (
             <>
               <Header>
@@ -140,16 +141,16 @@ const ManageUsersForm: FC = () => {
                 </HeaderRow>
               </Header>
               <Body>
-                {tableList.map((u: User, index: number) => (
+                {tableList.map((u: any) => (
                   <Row key={u.id} item={u}>
-                    <Cell>{u.id}</Cell>
+                    <Cell>{u.username}</Cell>
                     <Cell>{u.admin ? <CheckIcon /> : <CloseIcon />}</Cell>
                     <Cell>
                       <IconButton
                         size="small"
                         disabled={!authenticatedContext.me.admin}
                         aria-label="Generate Token"
-                        onClick={() => generateToken(u.id)}
+                        onClick={() => generateToken(u.username)}
                       >
                         <VpnKeyIcon />
                       </IconButton>

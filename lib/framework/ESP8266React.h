@@ -16,7 +16,7 @@
 #include <NTPSettingsService.h>
 #include <NTPStatus.h>
 #include <OTASettingsService.h>
-#include <UploadFirmwareService.h>
+#include <UploadFileService.h>
 #include <RestartService.h>
 #include <SecuritySettingsService.h>
 #include <SystemStatus.h>
@@ -78,7 +78,7 @@ class ESP8266React {
     NTPSettingsService      _ntpSettingsService;
     NTPStatus               _ntpStatus;
     OTASettingsService      _otaSettingsService;
-    UploadFirmwareService   _uploadFirmwareService;
+    UploadFileService       _uploadFileService;
     MqttSettingsService     _mqttSettingsService;
     MqttStatus              _mqttStatus;
     AuthenticationService   _authenticationService;

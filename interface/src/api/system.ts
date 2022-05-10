@@ -2,7 +2,7 @@ import { AxiosPromise } from 'axios';
 
 import { OTASettings, SystemStatus, LogSettings, LogEntries } from '../types';
 
-import { AXIOS, AXIOS_BIN, FileUploadConfig, uploadFile } from './endpoints';
+import { AXIOS, AXIOS_BIN, FileUploadConfig, startUploadFile } from './endpoints';
 
 export function readSystemStatus(timeout?: number): AxiosPromise<SystemStatus> {
   return AXIOS.get('/systemStatus', { timeout });
@@ -24,8 +24,8 @@ export function updateOTASettings(otaSettings: OTASettings): AxiosPromise<OTASet
   return AXIOS.post('/otaSettings', otaSettings);
 }
 
-export const uploadFirmware = (file: File, config?: FileUploadConfig): AxiosPromise<void> =>
-  uploadFile('/uploadFirmware', file, config);
+export const uploadFile = (file: File, config?: FileUploadConfig): AxiosPromise<void> =>
+  startUploadFile('/uploadFile', file, config);
 
 export function readLogSettings(): AxiosPromise<LogSettings> {
   return AXIOS.get('/logSettings');
