@@ -897,7 +897,7 @@ bool System::check_upgrade() {
 
 #ifndef EMSESP_STANDALONE
     // see if we have a temp file, if so try and read it
-    File new_file = LITTLEFS.open(TEMP_FILENAME_PATH);
+    File new_file = LittleFS.open(TEMP_FILENAME_PATH);
     if (new_file) {
         DynamicJsonDocument  jsonDocument = DynamicJsonDocument(FS_BUFFER_SIZE);
         DeserializationError error        = deserializeJson(jsonDocument, new_file);
@@ -915,11 +915,7 @@ bool System::check_upgrade() {
                 reboot_required |= saveSettings(EMSESP_SETTINGS_FILE, "Settings", input);
             } else if (settings_type == "customizations") {
                 // it's a customization file, just replace it and there's no need to reboot
-                LOG_INFO(F("Applying new customizations"));
-                new_file.close();
-                LITTLEFS.remove(EMSESP_CUSTOMIZATION_FILE);
-                LITTLEFS.rename(TEMP_FILENAME_PATH, EMSESP_CUSTOMIZATION_FILE);
-                return false; // no reboot required
+                saveSettings(EMSESP_CUSTOMIZATION_FILE, "Customization", input);
             } else {
                 LOG_ERROR(F("Unrecognized file uploaded"));
             }
@@ -929,7 +925,7 @@ bool System::check_upgrade() {
 
         // close (just in case) and remove the file
         new_file.close();
-        LITTLEFS.remove(TEMP_FILENAME_PATH);
+        LittleFS.remove(TEMP_FILENAME_PATH);
     }
 #endif
 
@@ -944,7 +940,7 @@ bool System::command_commands(const char * value, const int8_t id, JsonObject & 
 // convert settings file into json object
 void System::extractSettings(const char * filename, const char * section, JsonObject & output) {
 #ifndef EMSESP_STANDALONE
-    File settingsFile = LITTLEFS.open(filename);
+    File settingsFile = LittleFS.open(filename);
     if (settingsFile) {
         DynamicJsonDocument  jsonDocument = DynamicJsonDocument(EMSESP_JSON_SIZE_XLARGE_DYN);
         DeserializationError error        = deserializeJson(jsonDocument, settingsFile);
@@ -965,7 +961,7 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
 #ifndef EMSESP_STANDALONE
     JsonObject section_json = input[section];
     if (section_json) {
-        File section_file = LITTLEFS.open(filename, "w");
+        File section_file = LittleFS.open(filename, "w");
         if (section_file) {
             LOG_INFO(F("Applying new %s settings"), section);
             serializeJson(section_json, section_file);

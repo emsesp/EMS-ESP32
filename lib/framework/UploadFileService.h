@@ -6,7 +6,7 @@
 #include <Update.h>
 #include <WiFi.h>
 
-#include <LITTLEFS.h>
+#include <LittleFS.h>
 
 #include <ESPAsyncWebServer.h>
 #include <SecurityManager.h>
