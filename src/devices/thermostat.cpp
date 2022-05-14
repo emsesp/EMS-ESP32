@@ -1246,7 +1246,8 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->vacreducemode, 41); // vacations reduce mode
     has_update(telegram, hc->minflowtemp, 16);
 
-    if (hc->heatingtype == 3) {                    // floor heating
+    // RC35 stores values for floorheating in different position
+    if (hc->heatingtype == 3 && model() == EMS_DEVICE_FLAG_RC35) {
         has_update(telegram, hc->designtemp, 36);  // is * 1
         has_update(telegram, hc->maxflowtemp, 35); // is * 1
     } else {                                       // radiator/convector
