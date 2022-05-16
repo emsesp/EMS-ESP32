@@ -20,6 +20,8 @@
 #define WebAPIService_h
 
 #define EMSESP_API_SERVICE_PATH "/api"
+#define GET_SETTINGS_PATH "/rest/getSettings"
+#define GET_CUSTOMIZATIONS_PATH "/rest/getCustomizations"
 
 namespace emsesp {
 
@@ -46,6 +48,9 @@ class WebAPIService {
     static uint16_t api_fails_;
 
     void parse(AsyncWebServerRequest * request, JsonObject & input);
+
+    void getSettings(AsyncWebServerRequest * request);
+    void getCustomizations(AsyncWebServerRequest * request);
 };
 
 } // namespace emsesp
