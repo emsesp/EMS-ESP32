@@ -993,7 +993,7 @@ void Thermostat::process_RC300Summer2(std::shared_ptr<const Telegram> telegram) 
     if (hc == nullptr) {
         return;
     }
-    has_update(telegram, hc->hpsummersetmode, 0);
+    has_update(telegram, hc->hpoperatingmode, 0);
     has_update(telegram, hc->summertemp, 1);
 }
 
@@ -2350,7 +2350,7 @@ bool Thermostat::set_summermode(const char * value, const int8_t id) {
     uint8_t set = 0xFF;
 
     if (is_fetch(summer2_typeids[hc->hc()])) {
-        if (!Helpers::value2enum(value, set, FL_(enum_hpsummermode))) {
+        if (!Helpers::value2enum(value, set, FL_(enum_hpoperatingmode))) {
             return false;
         }
         write_command(summer2_typeids[hc->hc()], 0, set, summer2_typeids[hc->hc()]);
@@ -3836,7 +3836,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(
             tag, &hc->summersetmode, DeviceValueType::ENUM, FL_(enum_summermode), FL_(summersetmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_summermode));
         register_device_value(
-            tag, &hc->hpsummersetmode, DeviceValueType::ENUM, FL_(enum_hpsummermode), FL_(hpsummersetmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_summermode));
+            tag, &hc->hpoperatingmode, DeviceValueType::ENUM, FL_(enum_hpoperatingmode), FL_(hpoperatingmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_summermode));
         register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
         register_device_value(
             tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));

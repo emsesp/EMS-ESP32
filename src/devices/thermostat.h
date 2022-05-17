@@ -55,7 +55,7 @@ class Thermostat : public EMSdevice {
         int8_t  offsettemp;  // heating curve offest temp at roomtemp signed!
         uint8_t manualtemp;
         uint8_t summersetmode;
-        uint8_t hpsummersetmode;
+        uint8_t hpoperatingmode;
         uint8_t roominfluence;
         uint8_t roominfl_factor;
         int16_t curroominfl;
