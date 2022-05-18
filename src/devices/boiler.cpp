@@ -1164,7 +1164,7 @@ bool Boiler::set_ww_temp(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParametersPlus)) {
+    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
         // write_command(EMS_TYPE_UBAFlags, 3, v, EMS_TYPE_UBAParameterWWPlus); // test for #96
         write_command(EMS_TYPE_UBAParameterWWPlus, 6, v, EMS_TYPE_UBAParameterWWPlus);
     } else {
@@ -1206,7 +1206,7 @@ bool Boiler::set_ww_disinfect_temp(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParametersPlus)) {
+    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 12, v, EMS_TYPE_UBAParameterWWPlus);
     } else {
         write_command(EMS_TYPE_UBAParameterWW, 8, v, EMS_TYPE_UBAParameterWW);
