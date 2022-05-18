@@ -2966,7 +2966,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             factor = 1;
             break;
         case HeatingCircuit::Mode::DESIGN:
-            if (hc->heatingtype == 3) {
+            if (hc->heatingtype == 3 && model == EMS_DEVICE_FLAG_RC35) {
                 offset = EMS_OFFSET_RC35Set_temp_design_floor;
             } else {
                 offset = EMS_OFFSET_RC35Set_temp_design;
@@ -3005,7 +3005,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             factor = 1;
             break;
         case HeatingCircuit::Mode::MAXFLOW:
-            if (hc->heatingtype == 3) {
+            if (hc->heatingtype == 3 && model == EMS_DEVICE_FLAG_RC35) {
                 offset = 35;
             } else {
                 offset = 15;
