@@ -399,7 +399,9 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           nullptr,
                           FL_(wwFlowTempOffset),
                           DeviceValueUOM::DEGREES_R,
-                          MAKE_CF_CB(set_ww_flowTempOffset));
+                          MAKE_CF_CB(set_ww_flowTempOffset),
+                          0,
+                          40);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                           &wwMaxPower_,
                           DeviceValueType::UINT,
@@ -773,6 +775,7 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwSelTemp_, 6);    // setting here
     has_update(telegram, wwHystOn_, 7);
     has_update(telegram, wwHystOff_, 8);
+    has_update(telegram, wwFlowTempOffset_, 9);
     has_update(telegram, wwCircPump_, 10);         // 0x01 means yes
     has_update(telegram, wwCircMode_, 11);         // 1=1x3min... 6=6x3min, 7=continuous
     has_update(telegram, wwDisinfectionTemp_, 12); // setting here, status in E9
@@ -1249,7 +1252,11 @@ bool Boiler::set_ww_flowTempOffset(const char * value, const int8_t id) {
         return false;
     }
 
-    write_command(EMS_TYPE_UBAParameterWW, 5, v, EMS_TYPE_UBAParameterWW);
+    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+        write_command(EMS_TYPE_UBAParameterWWPlus, 9, v, EMS_TYPE_UBAParameterWWPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameterWW, 5, v, EMS_TYPE_UBAParameterWW);
+    }
 
     return true;
 }
