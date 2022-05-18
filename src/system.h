@@ -61,8 +61,6 @@ class System {
     static bool command_watch(const char * value, const int8_t id);
 
     static bool command_info(const char * value, const int8_t id, JsonObject & output);
-    static bool command_settings(const char * value, const int8_t id, JsonObject & output);
-    static bool command_customizations(const char * value, const int8_t id, JsonObject & output);
     static bool command_commands(const char * value, const int8_t id, JsonObject & output);
 
     std::string reset_reason(uint8_t cpu) const;

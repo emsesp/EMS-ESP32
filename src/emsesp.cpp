@@ -645,7 +645,6 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     std::string src_name("");
     std::string dest_name("");
     std::string type_name("");
-    std::string direction("");
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             // get src & dest
@@ -682,16 +681,15 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         type_name = read_flash_string(F("?"));
     }
 
-    if (telegram->operation == Telegram::Operation::RX_READ) {
-        direction = read_flash_string(F("<-"));
-    } else {
-        direction = read_flash_string(F("->"));
-    }
-
     std::string str;
     str.reserve(200);
-    str = src_name + "(" + Helpers::hextoa(src) + ") " + direction + " " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
-          + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
+    if (telegram->operation == Telegram::Operation::RX_READ) {
+        str = src_name + "(" + Helpers::hextoa(src) + ") <- " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+              + Helpers::hextoa(telegram->type_id) + "), length: " + Helpers::hextoa(telegram->message_data[0]);
+    } else {
+        str = src_name + "(" + Helpers::hextoa(src) + ") -> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+              + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
+    }
 
     if (offset) {
         str += " (offset " + Helpers::itoa(offset) + ")";

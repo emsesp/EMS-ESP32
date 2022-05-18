@@ -86,3 +86,11 @@ export function resetCustomizations(): AxiosPromise<void> {
 export function API(apiCall: APIcall): AxiosPromise<void> {
   return AXIOS_API.post('/', apiCall);
 }
+
+export function getSettings(): AxiosPromise<void> {
+  return AXIOS.get('/getSettings');
+}
+
+export function getCustomizations(): AxiosPromise<void> {
+  return AXIOS.get('/getCustomizations');
+}

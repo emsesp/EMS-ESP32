@@ -689,8 +689,6 @@ void System::commands_init() {
 
     // these commands will return data in JSON format
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, F("show system status"));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings, F("fetch system settings"), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(customizations), System::command_customizations, F("fetch system customizations"));
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("fetch system commands"));
 
 #if defined(EMSESP_DEBUG)
@@ -971,34 +969,6 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
     }
 #endif
     return false; // not found
-}
-
-// export all settings to JSON text
-// we need to keep the original format so the import/upload works as we just replace files
-// http://ems-esp/api/system/settings
-bool System::command_settings(const char * value, const int8_t id, JsonObject & output) {
-    output["type"] = "settings";
-
-    JsonObject node = output.createNestedObject("System");
-    node["version"] = EMSESP_APP_VERSION;
-
-    extractSettings(NETWORK_SETTINGS_FILE, "Network", output);
-    extractSettings(AP_SETTINGS_FILE, "AP", output);
-    extractSettings(MQTT_SETTINGS_FILE, "MQTT", output);
-    extractSettings(NTP_SETTINGS_FILE, "NTP", output);
-    extractSettings(OTA_SETTINGS_FILE, "OTA", output);
-    extractSettings(SECURITY_SETTINGS_FILE, "Security", output);
-    extractSettings(EMSESP_SETTINGS_FILE, "Settings", output);
-
-    return true;
-}
-
-// http://ems-esp/api/system/customizations
-// we need to keep the original format so the import/upload works as we just replace file
-bool System::command_customizations(const char * value, const int8_t id, JsonObject & output) {
-    output["type"] = "customizations";
-    extractSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", output);
-    return true;
 }
 
 // export status information including the device information

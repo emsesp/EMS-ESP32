@@ -24,7 +24,22 @@ const HelpInformation: FC = () => {
 
   const { me } = useContext(AuthenticatedContext);
 
-  const onDownload = async (endpoint: string) => {
+  const saveFile = (json: any, endpoint: string) => {
+    const a = document.createElement('a');
+    const filename = 'emsesp_' + endpoint + '.json';
+    a.href = URL.createObjectURL(
+      new Blob([JSON.stringify(json, null, 2)], {
+        type: 'text/plain'
+      })
+    );
+    a.setAttribute('download', filename);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    enqueueSnackbar('File downloaded', { variant: 'info' });
+  };
+
+  const callAPI = async (endpoint: string) => {
     try {
       const response = await EMSESP.API({
         device: 'system',
@@ -34,19 +49,33 @@ const HelpInformation: FC = () => {
       if (response.status !== 200) {
         enqueueSnackbar('API call failed', { variant: 'error' });
       } else {
-        const json = response.data;
-        const a = document.createElement('a');
-        const filename = 'emsesp_' + endpoint + '.json';
-        a.href = URL.createObjectURL(
-          new Blob([JSON.stringify(json, null, 2)], {
-            type: 'text/plain'
-          })
-        );
-        a.setAttribute('download', filename);
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        enqueueSnackbar('File downloaded', { variant: 'info' });
+        saveFile(response.data, endpoint);
+      }
+    } catch (error: unknown) {
+      enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
+    }
+  };
+
+  const downloadSettings = async () => {
+    try {
+      const response = await EMSESP.getSettings();
+      if (response.status !== 200) {
+        enqueueSnackbar('Unable to get settings', { variant: 'error' });
+      } else {
+        saveFile(response.data, 'settings');
+      }
+    } catch (error: unknown) {
+      enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
+    }
+  };
+
+  const downloadCustomizations = async () => {
+    try {
+      const response = await EMSESP.getCustomizations();
+      if (response.status !== 200) {
+        enqueueSnackbar('Unable to get customizations', { variant: 'error' });
+      } else {
+        saveFile(response.data, 'customizations');
       }
     } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
@@ -103,7 +132,7 @@ const HelpInformation: FC = () => {
           </ListItemAvatar>
           <ListItemText>
             To report an issue or request a feature, please&nbsp;
-            <Link component="button" variant="body1" onClick={() => onDownload('info')}>
+            <Link component="button" variant="body1" onClick={() => callAPI('info')}>
               download
             </Link>
             &nbsp;the debug information and include in a new&nbsp;
@@ -131,7 +160,7 @@ const HelpInformation: FC = () => {
                 startIcon={<DownloadIcon />}
                 variant="outlined"
                 color="primary"
-                onClick={() => onDownload('settings')}
+                onClick={() => downloadSettings()}
               >
                 settings
               </Button>
@@ -139,7 +168,7 @@ const HelpInformation: FC = () => {
                 startIcon={<DownloadIcon />}
                 variant="outlined"
                 color="primary"
-                onClick={() => onDownload('customizations')}
+                onClick={() => downloadCustomizations()}
               >
                 customizations
               </Button>

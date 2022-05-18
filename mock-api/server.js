@@ -1192,14 +1192,17 @@ rest_server.get(SYSTEM_INFO_ENDPOINT, (req, res) => {
   res.json(emsesp_info)
 })
 
-const SYSTEM_SETTINGS_ENDPOINT = API_ENDPOINT_ROOT + 'system/settings'
-rest_server.post(SYSTEM_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('System Settings POST: ' + JSON.stringify(req.body))
-  res.sendStatus(200)
-})
-rest_server.get(SYSTEM_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('System Settings GET')
+const GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings'
+rest_server.get(GET_SETTINGS_ENDPOINT, (req, res) => {
+  console.log('System Settings:')
   res.json(settings)
+})
+
+const GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations'
+rest_server.get(GET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
+  console.log('Customizations:')
+  // not implemented yet
+  res.sendStatus(200)
 })
 
 // start server

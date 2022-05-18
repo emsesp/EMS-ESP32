@@ -31,7 +31,7 @@
 namespace emsesp {
 
 static QueueHandle_t uart_queue;
-uint8_t              tx_mode_;
+uint8_t              tx_mode_ = 0xFF;
 
 /*
 * receive task, wait for break and call incoming_telegram
@@ -58,7 +58,7 @@ void EMSuart::uart_event_task(void * pvParameters) {
                     uart_read_bytes(EMSUART_NUM, buf, length, portMAX_DELAY);
                 }
                 length = 0;
-            } else if (event.type == UART_BUFFER_FULL) { // if we miss something
+            } else if (event.type == UART_BUFFER_FULL) {
                 uart_flush_input(EMSUART_NUM);
                 length = 0;
             }
@@ -71,7 +71,7 @@ void EMSuart::uart_event_task(void * pvParameters) {
  * init UART driver
  */
 void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t tx_gpio) {
-    if (!uart_is_driver_installed(EMSUART_NUM)) {
+    if (tx_mode_ == 0xFF) {
         uart_config_t uart_config = {
             .baud_rate  = EMSUART_BAUD,
             .data_bits  = UART_DATA_8_BITS,
@@ -85,7 +85,7 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
         uart_set_rx_full_threshold(EMSUART_NUM, 1);
         uart_set_rx_timeout(EMSUART_NUM, 0); // disable
-        xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
+        xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, configMAX_PRIORITIES - 3, NULL);
     }
     tx_mode_ = tx_mode;
     uart_enable_intr_mask(EMSUART_NUM, UART_BRK_DET_INT_ENA | UART_RXFIFO_FULL_INT_ENA);
@@ -95,7 +95,9 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
  * Stop, disable interrupt
  */
 void EMSuart::stop() {
-    uart_disable_intr_mask(EMSUART_NUM, UART_BRK_DET_INT_ENA | UART_RXFIFO_FULL_INT_ENA);
+    if (tx_mode_ != 0xFF) { // only call after driver initialisation
+        uart_disable_intr_mask(EMSUART_NUM, UART_BRK_DET_INT_ENA | UART_RXFIFO_FULL_INT_ENA);
+    }
 };
 
 /*
