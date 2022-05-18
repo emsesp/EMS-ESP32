@@ -130,6 +130,7 @@
 
 // Heat Pumps - 0x38
 {200, DeviceType::HEATPUMP, F("HP Module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{248, DeviceType::HEATPUMP, F("Hybrid Manager HM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {252, DeviceType::HEATPUMP, F("HP Module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Connect devices - 0x02

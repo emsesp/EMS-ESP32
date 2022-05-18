@@ -973,7 +973,7 @@ void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->offsettemp, 2);
     if (!is_fetch(summer2_typeids[hc->hc()])) {
         has_update(telegram, hc->summertemp, 6);
-        has_update(telegram, hc->summer_setmode, 7);
+        has_update(telegram, hc->summersetmode, 7);
     }
 
     if (hc->heatingtype < 3) {
@@ -993,7 +993,7 @@ void Thermostat::process_RC300Summer2(std::shared_ptr<const Telegram> telegram) 
     if (hc == nullptr) {
         return;
     }
-    has_update(telegram, hc->summer_setmode, 0);
+    has_update(telegram, hc->hpoperatingmode, 0);
     has_update(telegram, hc->summertemp, 1);
 }
 
@@ -1246,7 +1246,8 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->vacreducemode, 41); // vacations reduce mode
     has_update(telegram, hc->minflowtemp, 16);
 
-    if (hc->heatingtype == 3) {                    // floor heating
+    // RC35 stores values for floorheating in different position
+    if (hc->heatingtype == 3 && model() == EMS_DEVICE_FLAG_RC35) {
         has_update(telegram, hc->designtemp, 36);  // is * 1
         has_update(telegram, hc->maxflowtemp, 35); // is * 1
     } else {                                       // radiator/convector
@@ -2347,13 +2348,16 @@ bool Thermostat::set_summermode(const char * value, const int8_t id) {
     }
 
     uint8_t set = 0xFF;
-    if (!Helpers::value2enum(value, set, FL_(enum_summermode))) {
-        return false;
-    }
 
     if (is_fetch(summer2_typeids[hc->hc()])) {
+        if (!Helpers::value2enum(value, set, FL_(enum_hpoperatingmode))) {
+            return false;
+        }
         write_command(summer2_typeids[hc->hc()], 0, set, summer2_typeids[hc->hc()]);
     } else {
+        if (!Helpers::value2enum(value, set, FL_(enum_summermode))) {
+            return false;
+        }
         write_command(summer_typeids[hc->hc()], 7, set, summer_typeids[hc->hc()]);
     }
 
@@ -2962,7 +2966,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             factor = 1;
             break;
         case HeatingCircuit::Mode::DESIGN:
-            if (hc->heatingtype == 3) {
+            if (hc->heatingtype == 3 && model == EMS_DEVICE_FLAG_RC35) {
                 offset = EMS_OFFSET_RC35Set_temp_design_floor;
             } else {
                 offset = EMS_OFFSET_RC35Set_temp_design;
@@ -3001,7 +3005,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             factor = 1;
             break;
         case HeatingCircuit::Mode::MAXFLOW:
-            if (hc->heatingtype == 3) {
+            if (hc->heatingtype == 3 && model == EMS_DEVICE_FLAG_RC35) {
                 offset = 35;
             } else {
                 offset = 15;
@@ -3830,7 +3834,9 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
         register_device_value(
-            tag, &hc->summer_setmode, DeviceValueType::ENUM, FL_(enum_summermode), FL_(summersetmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_summermode));
+            tag, &hc->summersetmode, DeviceValueType::ENUM, FL_(enum_summermode), FL_(summersetmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_summermode));
+        register_device_value(
+            tag, &hc->hpoperatingmode, DeviceValueType::ENUM, FL_(enum_hpoperatingmode), FL_(hpoperatingmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_summermode));
         register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
         register_device_value(
             tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));

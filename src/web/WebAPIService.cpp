@@ -32,6 +32,12 @@ WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * security
     , _apiHandler("/api", std::bind(&WebAPIService::webAPIService_post, this, _1, _2), 256) { // for POSTS, must use 'Content-Type: application/json' in header
     server->on("/api", HTTP_GET, std::bind(&WebAPIService::webAPIService_get, this, _1));     // for GETS
     server->addHandler(&_apiHandler);
+
+    // for settings
+    server->on(GET_SETTINGS_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebAPIService::getSettings, this, _1), AuthenticationPredicates::IS_ADMIN));
+    server->on(GET_CUSTOMIZATIONS_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest(std::bind(&WebAPIService::getCustomizations, this, _1), AuthenticationPredicates::IS_ADMIN));
 }
 
 // HTTP GET
@@ -148,6 +154,39 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     Serial.println();
     Serial.print(COLOR_RESET);
 #endif
+}
+
+void WebAPIService::getSettings(AsyncWebServerRequest * request) {
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    JsonObject root     = response->getRoot();
+
+    root["type"] = "settings";
+
+    JsonObject node = root.createNestedObject("System");
+    node["version"] = EMSESP_APP_VERSION;
+
+    System::extractSettings(NETWORK_SETTINGS_FILE, "Network", root);
+    System::extractSettings(AP_SETTINGS_FILE, "AP", root);
+    System::extractSettings(MQTT_SETTINGS_FILE, "MQTT", root);
+    System::extractSettings(NTP_SETTINGS_FILE, "NTP", root);
+    System::extractSettings(OTA_SETTINGS_FILE, "OTA", root);
+    System::extractSettings(SECURITY_SETTINGS_FILE, "Security", root);
+    System::extractSettings(EMSESP_SETTINGS_FILE, "Settings", root);
+
+    response->setLength();
+    request->send(response);
+}
+
+void WebAPIService::getCustomizations(AsyncWebServerRequest * request) {
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    JsonObject root     = response->getRoot();
+
+    root["type"] = "customizations";
+
+    System::extractSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", root);
+
+    response->setLength();
+    request->send(response);
 }
 
 } // namespace emsesp
