@@ -410,6 +410,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           0,
                           40);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                          &wwChargeOptimization_,
+                          DeviceValueType::BOOL,
+                          nullptr,
+                          FL_(wwChargeOptimization),
+                          DeviceValueUOM::NONE,
+                          MAKE_CF_CB(set_ww_chargeOptimization));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                           &wwMaxPower_,
                           DeviceValueType::UINT,
                           nullptr,
@@ -788,6 +795,7 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwDisinfectionTemp_, 12); // setting here, status in E9
     has_update(telegram, wwSelTempSingle_, 16);
     has_update(telegram, wwSelTempLow_, 18);
+    has_update(telegram, wwChargeOptimization_, 25);
 
     uint8_t wwComfort1 = EMS_VALUE_UINT_NOTSET;
     telegram->read_value(wwComfort1, 13);
@@ -1376,6 +1384,23 @@ bool Boiler::set_ww_hyst_off(const char * value, const int8_t id) {
 
     return true;
 }
+
+// set ww charge optimization
+bool Boiler::set_ww_chargeOptimization(const char * value, const int8_t id) {
+    bool v = false;
+    if (!Helpers::value2bool(value, v)) {
+        return false;
+    }
+
+    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+        write_command(EMS_TYPE_UBAParameterWWPlus, 25, v ? 1 : 0, EMS_TYPE_UBAParameterWWPlus);
+    }
+
+    return true;
+}
+
+
+
 
 // set dhw max power
 bool Boiler::set_ww_maxpower(const char * value, const int8_t id) {
