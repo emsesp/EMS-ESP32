@@ -394,6 +394,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_ww_mode));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                          &wwComfort1_,
+                          DeviceValueType::ENUM,
+                          FL_(enum_comfort1),
+                          FL_(wwComfort1),
+                          DeviceValueUOM::NONE,
+                          MAKE_CF_CB(set_ww_mode1));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                           &wwFlowTempOffset_,
                           DeviceValueType::UINT,
                           nullptr,
@@ -781,6 +788,19 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwDisinfectionTemp_, 12); // setting here, status in E9
     has_update(telegram, wwSelTempSingle_, 16);
     has_update(telegram, wwSelTempLow_, 18);
+
+    uint8_t wwComfort1 = EMS_VALUE_UINT_NOTSET;
+    telegram->read_value(wwComfort1, 13);
+    if (wwComfort1 == 0) {
+        wwComfort1 = 0; // High_Comfort
+    } else if (wwComfort1 == 0xD8) {
+        wwComfort1 = 1; // Eco
+    } else {
+        wwComfort1 = EMS_VALUE_UINT_NOTSET;
+    }
+    has_update(wwComfort1_, wwComfort1);
+
+
 }
 
 // 0xE9 - WW monitor ems+
@@ -1489,6 +1509,31 @@ bool Boiler::set_ww_mode(const char * value, const int8_t id) {
     }
 
     write_command(EMS_TYPE_UBAParameterWW, 9, set, EMS_TYPE_UBAParameterWW);
+    return true;
+}
+
+// wwcomfort1 for RC310
+// on a RC310 it's 1=high, 2=eco
+bool Boiler::set_ww_mode1(const char * value, const int8_t id) {
+    uint8_t set;
+    if (!Helpers::value2enum(value, set, FL_(enum_comfort1))) {
+        return false;
+    }
+
+    if (!is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+        return false;
+    }
+
+    if (set == 0) {
+        // LOG_INFO(F("Setting boiler dhw to High"));
+    } else if (set == 1) {
+        // LOG_INFO(F("Setting boiler dhw to Eco"));
+        set = 0xD8;
+    } else {
+        return false; // do nothing
+    }
+
+    write_command(EMS_TYPE_UBAParameterWWPlus, 13, set, EMS_TYPE_UBAParameterWWPlus);
     return true;
 }
 
