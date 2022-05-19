@@ -536,7 +536,7 @@ MAKE_PSTR_LIST(wwSelTempSingle, F("wwseltempsingle"), F("single charge temperatu
 MAKE_PSTR_LIST(wwSetTemp, F("wwsettemp"), F("set temperature"))
 MAKE_PSTR_LIST(wwType, F("wwtype"), F("type"))
 MAKE_PSTR_LIST(wwComfort, F("wwcomfort"), F("comfort"))
-MAKE_PSTR_LIST(wwComfort1, F("wwcomfort1"), F("ww comfort1"))
+MAKE_PSTR_LIST(wwComfort1, F("wwcomfort1"), F("comfort1"))
 MAKE_PSTR_LIST(wwFlowTempOffset, F("wwflowtempoffset"), F("flow temperature offset"))
 MAKE_PSTR_LIST(wwMaxPower, F("wwmaxpower"), F("max power"))
 MAKE_PSTR_LIST(wwCircPump, F("wwcircpump"), F("circulation pump available"))
