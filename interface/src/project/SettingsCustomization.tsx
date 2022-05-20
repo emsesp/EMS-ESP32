@@ -376,22 +376,22 @@ const SettingsCustomization: FC = () => {
               }}
             >
               <ToggleButton value="8">
-                <Tooltip arrow placement="top" title="mark it as favorite to be listed at the top of the Dashboard">
+                <Tooltip arrow placement="top" title="filter favorites">
                   <StarIcon sx={{ fontSize: 14 }} />
                 </Tooltip>
               </ToggleButton>
               <ToggleButton value="4">
-                <Tooltip arrow placement="top" title="make it read-only, only if it has write operation available">
+                <Tooltip arrow placement="top" title="filter entities with write action disabled">
                   <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
                 </Tooltip>
               </ToggleButton>
               <ToggleButton value="2">
-                <Tooltip arrow placement="top" title="excluded it from MQTT and API outputs">
+                <Tooltip arrow placement="top" title="filter entities excluded from MQTT and API outputs">
                   <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
                 </Tooltip>
               </ToggleButton>
               <ToggleButton value="1">
-                <Tooltip arrow placement="top" title="hide it from the Dashboard">
+                <Tooltip arrow placement="top" title="filter entities hidden from Web Dashboard">
                   <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
                 </Tooltip>
               </ToggleButton>
@@ -403,26 +403,30 @@ const SettingsCustomization: FC = () => {
             <VisibilityOffOutlinedIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />:
           </Grid>
           <Grid item>
-            <Button
-              size="small"
-              sx={{ fontSize: 10 }}
-              variant="outlined"
-              color="inherit"
-              onClick={() => maskDisabled(false)}
-            >
-              enable
-            </Button>
+            <Tooltip arrow placement="top" title="mark shown entities to be all visible and output ">
+              <Button
+                size="small"
+                sx={{ fontSize: 10 }}
+                variant="outlined"
+                color="inherit"
+                onClick={() => maskDisabled(false)}
+              >
+                enable
+              </Button>
+            </Tooltip>
           </Grid>
           <Grid item>
-            <Button
-              size="small"
-              sx={{ fontSize: 10 }}
-              variant="outlined"
-              color="inherit"
-              onClick={() => maskDisabled(true)}
-            >
-              disable
-            </Button>
+            <Tooltip arrow placement="top" title="mark shown entities to be not visible or output ">
+              <Button
+                size="small"
+                sx={{ fontSize: 10 }}
+                variant="outlined"
+                color="inherit"
+                onClick={() => maskDisabled(true)}
+              >
+                disable
+              </Button>
+            </Tooltip>
           </Grid>
         </Grid>
         <Table data={{ nodes: shown_data }} theme={entities_theme} sort={entity_sort} layout={{ custom: true }}>
