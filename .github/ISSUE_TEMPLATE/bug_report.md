@@ -29,7 +29,7 @@ assignees: ''
 *If applicable, add screenshots to help explain your problem.*
 
 **Device information**
-*Copy-paste here the information as it is outputted by the device. You can get this information by from http://ems-esp.local/api?device=system&cmd=info*
+*Copy-paste here the information as it is outputted by the device. You can get this information by from http://ems-esp.local/api/system*
 
 **Additional context**
 *Add any other context about the problem here.*

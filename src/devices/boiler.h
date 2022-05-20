@@ -85,6 +85,39 @@ class Boiler : public EMSdevice {
     uint32_t wwStarts_;           // DHW starts
     uint32_t wwStarts2_;          // DHW control starts
     uint32_t wwWorkM_;            // DHW minutes
+    uint8_t  wwSetTemp_;            // DHW set temperature
+    uint8_t  wwSelTemp_;            // DHW selected temperature
+    uint8_t  wwSelTempLow_;         // DHW lower selected temperature
+    uint8_t  wwSelTempOff_;         // DHW selected temperature for off position
+    uint8_t  wwSelTempSingle_;      // DHW single charge temperature
+    uint8_t  wwType_;               // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
+    uint8_t  wwComfort_;            // WW comfort mode
+    uint8_t  wwComfort1_;           // WW comfort mode RC310
+    uint8_t  wwCircPump_;           // DHW circulation pump available
+    uint8_t  wwChargeType_;         // DHW charge type (pump or 3-way-valve)
+    uint8_t  wwChargeOptimization_; // DHW charge optimization
+    uint8_t  wwDisinfectionTemp_;   // DHW disinfection temperature to prevent infection
+    uint8_t  wwCircMode_;           // DHW circulation pump mode
+    uint8_t  wwCirc_;               // Circulation on/off
+    uint16_t wwCurTemp_;            // DHW current temperature
+    uint16_t wwCurTemp2_;           // DHW current temperature storage
+    uint8_t  wwCurFlow_;            // DHW current flow temp in l/min
+    uint16_t wwStorageTemp1_;       // DHW storage temp 1
+    uint16_t wwStorageTemp2_;       // DHW storage temp 2
+    uint8_t  wwActivated_;          // DHW activated
+    uint8_t  wwOneTime_;            // DHW one time function on/off
+    uint8_t  wwDisinfect_;          // DHW disinfection on/off
+    uint8_t  wwCharging_;           // DHW charging on/off
+    uint8_t  wwRecharging_;         // DHW recharge on/off
+    uint8_t  wwTempOK_;             // DHW temperature ok on/off
+    uint8_t  wwActive_;             //
+    uint8_t  ww3wayValve_;          // 3-way valve on WW
+    uint8_t  wwSetPumpPower_;       // ww pump speed/power?
+    uint8_t  wwFlowTempOffset_;     // Boiler offset for ww heating
+    uint8_t  wwMaxPower_;           // DHW maximum power
+    uint32_t wwStarts_;             // DHW starts
+    uint32_t wwStarts2_;            // DHW control starts
+    uint32_t wwWorkM_;              // DHW minutes
     int8_t   wwHystOn_;
     int8_t   wwHystOff_;
     uint8_t  wwTapActivated_;  // maintenance-mode to switch DHW off
