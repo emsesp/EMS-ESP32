@@ -58,8 +58,10 @@ class Boiler : public EMSdevice {
     uint8_t  wwSelTempSingle_;    // DHW single charge temperature
     uint8_t  wwType_;             // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
     uint8_t  wwComfort_;          // WW comfort mode
+    uint8_t  wwComfort1_;         // WW comfort mode RC310
     uint8_t  wwCircPump_;         // DHW circulation pump available
     uint8_t  wwChargeType_;       // DHW charge type (pump or 3-way-valve)
+    uint8_t  wwChargeOptimization_; // DHW charge optimization 
     uint8_t  wwDisinfectionTemp_; // DHW disinfection temperature to prevent infection
     uint8_t  wwCircMode_;         // DHW circulation pump mode
     uint8_t  wwCirc_;             // Circulation on/off
@@ -240,6 +242,7 @@ class Boiler : public EMSdevice {
 
     // commands - none of these use the additional id parameter
     bool set_ww_mode(const char * value, const int8_t id);
+    bool set_ww_mode1(const char * value, const int8_t id);
     bool set_ww_activated(const char * value, const int8_t id);
     bool set_tapwarmwater_activated(const char * value, const int8_t id);
     bool set_ww_onetime(const char * value, const int8_t id);
@@ -253,6 +256,7 @@ class Boiler : public EMSdevice {
     bool set_ww_disinfect_temp(const char * value, const int8_t id);
     bool set_ww_maxpower(const char * value, const int8_t id);
     bool set_ww_flowTempOffset(const char * value, const int8_t id);
+    bool set_ww_chargeOptimization(const char * value, const int8_t id);
     bool set_flow_temp(const char * value, const int8_t id);
     bool set_burn_power(const char * value, const int8_t id);
     bool set_heating_activated(const char * value, const int8_t id);

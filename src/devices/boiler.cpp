@@ -394,12 +394,28 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_ww_mode));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                          &wwComfort1_,
+                          DeviceValueType::ENUM,
+                          FL_(enum_comfort1),
+                          FL_(wwComfort1),
+                          DeviceValueUOM::NONE,
+                          MAKE_CF_CB(set_ww_mode1));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                           &wwFlowTempOffset_,
                           DeviceValueType::UINT,
                           nullptr,
                           FL_(wwFlowTempOffset),
                           DeviceValueUOM::DEGREES_R,
-                          MAKE_CF_CB(set_ww_flowTempOffset));
+                          MAKE_CF_CB(set_ww_flowTempOffset),
+                          0,
+                          40);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                          &wwChargeOptimization_,
+                          DeviceValueType::BOOL,
+                          nullptr,
+                          FL_(wwChargeOptimization),
+                          DeviceValueUOM::NONE,
+                          MAKE_CF_CB(set_ww_chargeOptimization));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                           &wwMaxPower_,
                           DeviceValueType::UINT,
@@ -773,11 +789,26 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwSelTemp_, 6);    // setting here
     has_update(telegram, wwHystOn_, 7);
     has_update(telegram, wwHystOff_, 8);
+    has_update(telegram, wwFlowTempOffset_, 9);
     has_update(telegram, wwCircPump_, 10);         // 0x01 means yes
     has_update(telegram, wwCircMode_, 11);         // 1=1x3min... 6=6x3min, 7=continuous
     has_update(telegram, wwDisinfectionTemp_, 12); // setting here, status in E9
     has_update(telegram, wwSelTempSingle_, 16);
     has_update(telegram, wwSelTempLow_, 18);
+    has_update(telegram, wwChargeOptimization_, 25);
+
+    uint8_t wwComfort1 = EMS_VALUE_UINT_NOTSET;
+    telegram->read_value(wwComfort1, 13);
+    if (wwComfort1 == 0) {
+        wwComfort1 = 0; // High_Comfort
+    } else if (wwComfort1 == 0xD8) {
+        wwComfort1 = 1; // Eco
+    } else {
+        wwComfort1 = EMS_VALUE_UINT_NOTSET;
+    }
+    has_update(wwComfort1_, wwComfort1);
+
+
 }
 
 // 0xE9 - WW monitor ems+
@@ -1249,7 +1280,11 @@ bool Boiler::set_ww_flowTempOffset(const char * value, const int8_t id) {
         return false;
     }
 
-    write_command(EMS_TYPE_UBAParameterWW, 5, v, EMS_TYPE_UBAParameterWW);
+    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+        write_command(EMS_TYPE_UBAParameterWWPlus, 9, v, EMS_TYPE_UBAParameterWWPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameterWW, 5, v, EMS_TYPE_UBAParameterWW);
+    }
 
     return true;
 }
@@ -1349,6 +1384,23 @@ bool Boiler::set_ww_hyst_off(const char * value, const int8_t id) {
 
     return true;
 }
+
+// set ww charge optimization
+bool Boiler::set_ww_chargeOptimization(const char * value, const int8_t id) {
+    bool v = false;
+    if (!Helpers::value2bool(value, v)) {
+        return false;
+    }
+
+    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+        write_command(EMS_TYPE_UBAParameterWWPlus, 25, v ? 1 : 0, EMS_TYPE_UBAParameterWWPlus);
+    }
+
+    return true;
+}
+
+
+
 
 // set dhw max power
 bool Boiler::set_ww_maxpower(const char * value, const int8_t id) {
@@ -1482,6 +1534,31 @@ bool Boiler::set_ww_mode(const char * value, const int8_t id) {
     }
 
     write_command(EMS_TYPE_UBAParameterWW, 9, set, EMS_TYPE_UBAParameterWW);
+    return true;
+}
+
+// wwcomfort1 for RC310
+// on a RC310 it's 1=high, 2=eco
+bool Boiler::set_ww_mode1(const char * value, const int8_t id) {
+    uint8_t set;
+    if (!Helpers::value2enum(value, set, FL_(enum_comfort1))) {
+        return false;
+    }
+
+    if (!is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+        return false;
+    }
+
+    if (set == 0) {
+        // LOG_INFO(F("Setting boiler dhw to High"));
+    } else if (set == 1) {
+        // LOG_INFO(F("Setting boiler dhw to Eco"));
+        set = 0xD8;
+    } else {
+        return false; // do nothing
+    }
+
+    write_command(EMS_TYPE_UBAParameterWWPlus, 13, set, EMS_TYPE_UBAParameterWWPlus);
     return true;
 }
 
