@@ -3775,8 +3775,13 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
         register_device_value(
             tag, &hc->summersetmode, DeviceValueType::ENUM, FL_(enum_summermode), FL_(summersetmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_summermode));
-        register_device_value(
-            tag, &hc->hpoperatingmode, DeviceValueType::ENUM, FL_(enum_hpoperatingmode), FL_(hpoperatingmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_summermode));
+        register_device_value(tag,
+                              &hc->hpoperatingmode,
+                              DeviceValueType::ENUM,
+                              FL_(enum_hpoperatingmode),
+                              FL_(hpoperatingmode),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_summermode));
         register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
         register_device_value(
             tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
