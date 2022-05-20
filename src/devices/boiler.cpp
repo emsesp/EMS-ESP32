@@ -238,7 +238,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_energyCostRatio),
                               0,
-                              19.9);
+                              20);
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
                               &fossileFactor_,
                               DeviceValueType::UINT,

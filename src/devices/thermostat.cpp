@@ -3720,7 +3720,7 @@ void Thermostat::register_device_values() {
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_energyCostRatio),
                               0,
-                              19.9);
+                              20);
         register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA,
                               &fossileFactor_,
                               DeviceValueType::UINT,
