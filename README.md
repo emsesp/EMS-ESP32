@@ -39,7 +39,7 @@ Note, EMS-ESP requires a small hardware circuit that can convert the EMS bus dat
 - Native support for Home Assistant and Domoticz via [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/)
 - Can run standalone as an independent WiFi Access Point or join an existing WiFi network
 - Easy first-time configuration via a web Captive Portal
-- Support for more than [80 EMS devices](https://emsesp.github.io/docs/#/Supported-EMS-Devices) (boilers, thermostats, solar modules, mixer modules, heat pumps, gateways)
+- Support for more than [100 EMS devices](https://emsesp.github.io/docs/#/Supported-EMS-Devices) (boilers, thermostats, solar modules, mixer modules, heat pumps, gateways)
 
 ## **Demo**
 
