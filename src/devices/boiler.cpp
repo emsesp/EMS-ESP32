@@ -807,8 +807,6 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
         wwComfort1 = EMS_VALUE_UINT_NOTSET;
     }
     has_update(wwComfort1_, wwComfort1);
-
-
 }
 
 // 0xE9 - WW monitor ems+
