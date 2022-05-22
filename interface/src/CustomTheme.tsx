@@ -4,6 +4,8 @@ import { CssBaseline } from '@mui/material';
 import { createTheme, responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import { blueGrey, blue } from '@mui/material/colors';
 
+import { RequiredChildrenProps } from './utils';
+
 const theme = responsiveFontSizes(
   createTheme({
     typography: {
@@ -21,7 +23,7 @@ const theme = responsiveFontSizes(
   })
 );
 
-const CustomTheme: FC = ({ children }) => (
+const CustomTheme: FC<RequiredChildrenProps> = ({ children }) => (
   <ThemeProvider theme={theme}>
     <CssBaseline />
     {children}
