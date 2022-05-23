@@ -4,13 +4,15 @@ import { useLocation } from 'react-router-dom';
 import { Box, Toolbar } from '@mui/material';
 
 import { PROJECT_NAME } from '../../api/env';
+import { RequiredChildrenProps } from '../../utils';
+
 import LayoutDrawer from './LayoutDrawer';
 import LayoutAppBar from './LayoutAppBar';
 import { LayoutContext } from './context';
 
 export const DRAWER_WIDTH = 240;
 
-const Layout: FC = ({ children }) => {
+const Layout: FC<RequiredChildrenProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [title, setTitle] = useState(PROJECT_NAME);
   const { pathname } = useLocation();

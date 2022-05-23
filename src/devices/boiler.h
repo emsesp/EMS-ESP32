@@ -134,6 +134,8 @@ class Boiler : public EMSdevice {
     char     lastCode_[50];      // last error code
     char     serviceCode_[4];    // 3 character status/service code
     uint16_t serviceCodeNumber_; // error/service code
+    uint8_t  emergencyOps_;
+    uint8_t  emergencyTemp_;
 
     // info
     uint32_t upTimeControl_;             // Operating time control
@@ -278,6 +280,8 @@ class Boiler : public EMSdevice {
     bool set_ww_hyst_on(const char * value, const int8_t id);
     bool set_ww_hyst_off(const char * value, const int8_t id);
     bool set_pool_temp(const char * value, const int8_t id);
+    bool set_emergency_temp(const char * value, const int8_t id);
+    bool set_emergency_ops(const char * value, const int8_t id);
     /*
     bool set_hybridStrategy(const char * value, const int8_t id);
     bool set_switchOverTemp(const char * value, const int8_t id);

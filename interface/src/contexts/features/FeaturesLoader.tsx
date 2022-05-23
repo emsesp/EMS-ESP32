@@ -2,13 +2,13 @@ import { FC, useCallback, useEffect, useState } from 'react';
 
 import * as FeaturesApi from '../../api/features';
 
-import { extractErrorMessage } from '../../utils';
+import { extractErrorMessage, RequiredChildrenProps } from '../../utils';
 import { Features } from '../../types';
 import { ApplicationError, LoadingSpinner } from '../../components';
 
 import { FeaturesContext } from '.';
 
-const FeaturesLoader: FC = (props) => {
+const FeaturesLoader: FC<RequiredChildrenProps> = (props) => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [features, setFeatures] = useState<Features>();
 
