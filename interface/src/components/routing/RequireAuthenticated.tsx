@@ -8,7 +8,9 @@ import {
 } from '../../contexts/authentication/context';
 import { storeLoginRedirect } from '../../api/authentication';
 
-const RequireAuthenticated: FC = ({ children }) => {
+import { RequiredChildrenProps } from '../../utils';
+
+const RequireAuthenticated: FC<RequiredChildrenProps> = ({ children }) => {
   const authenticationContext = useContext(AuthenticationContext);
   const location = useLocation();
 
