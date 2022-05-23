@@ -1,67 +1,74 @@
-import React, { Component } from 'react';
-import { Switch, Redirect } from 'react-router';
+import { FC, useContext, useEffect } from 'react';
+import { Navigate, Routes, Route, useLocation } from 'react-router-dom';
+import { useSnackbar, VariantType } from 'notistack';
 
-import * as Authentication from './authentication/Authentication';
-import AuthenticationWrapper from './authentication/AuthenticationWrapper';
-import UnauthenticatedRoute from './authentication/UnauthenticatedRoute';
-import AuthenticatedRoute from './authentication/AuthenticatedRoute';
+import { Authentication, AuthenticationContext } from './contexts/authentication';
+import { FeaturesContext } from './contexts/features';
+import { RequireAuthenticated, RequireUnauthenticated } from './components';
 
 import SignIn from './SignIn';
-import ProjectRouting from './project/ProjectRouting';
-import NetworkConnection from './network/NetworkConnection';
-import AccessPoint from './ap/AccessPoint';
-import NetworkTime from './ntp/NetworkTime';
-import Security from './security/Security';
-import System from './system/System';
+import AuthenticatedRouting from './AuthenticatedRouting';
 
-import { PROJECT_PATH } from './api';
-import Mqtt from './mqtt/Mqtt';
-import { withFeatures, WithFeaturesProps } from './features/FeaturesContext';
-import { Features } from './features/types';
-
-export const getDefaultRoute = (features: Features) =>
-  features.project ? `/${PROJECT_PATH}/` : '/network/';
-class AppRouting extends Component<WithFeaturesProps> {
-  componentDidMount() {
-    Authentication.clearLoginRedirect();
-  }
-
-  render() {
-    const { features } = this.props;
-    return (
-      <AuthenticationWrapper>
-        <Switch>
-          {features.security && (
-            <UnauthenticatedRoute exact path="/" component={SignIn} />
-          )}
-          {features.project && (
-            <AuthenticatedRoute
-              exact
-              path={`/${PROJECT_PATH}/*`}
-              component={ProjectRouting}
-            />
-          )}
-          <AuthenticatedRoute
-            exact
-            path="/network/*"
-            component={NetworkConnection}
-          />
-          <AuthenticatedRoute exact path="/ap/*" component={AccessPoint} />
-          {features.ntp && (
-            <AuthenticatedRoute exact path="/ntp/*" component={NetworkTime} />
-          )}
-          {features.mqtt && (
-            <AuthenticatedRoute exact path="/mqtt/*" component={Mqtt} />
-          )}
-          {features.security && (
-            <AuthenticatedRoute exact path="/security/*" component={Security} />
-          )}
-          <AuthenticatedRoute exact path="/system/*" component={System} />
-          <Redirect to={getDefaultRoute(features)} />
-        </Switch>
-      </AuthenticationWrapper>
-    );
-  }
+interface SecurityRedirectProps {
+  message: string;
+  variant?: VariantType;
+  signOut?: boolean;
 }
 
-export default withFeatures(AppRouting);
+const RootRedirect: FC<SecurityRedirectProps> = ({ message, variant, signOut }) => {
+  const authenticationContext = useContext(AuthenticationContext);
+  const { enqueueSnackbar } = useSnackbar();
+  useEffect(() => {
+    signOut && authenticationContext.signOut(false);
+    enqueueSnackbar(message, { variant });
+  }, [message, variant, signOut, authenticationContext, enqueueSnackbar]);
+  return <Navigate to="/" />;
+};
+
+export const RemoveTrailingSlashes = () => {
+  const location = useLocation();
+  return (
+    location.pathname.match('/.*/$') && (
+      <Navigate
+        to={{
+          pathname: location.pathname.replace(/\/+$/, ''),
+          search: location.search
+        }}
+      />
+    )
+  );
+};
+
+const AppRouting: FC = () => {
+  const { features } = useContext(FeaturesContext);
+
+  return (
+    <Authentication>
+      <RemoveTrailingSlashes />
+      <Routes>
+        <Route path="/unauthorized" element={<RootRedirect message="Please sign in to continue" signOut />} />
+        <Route path="/fileUpdated" element={<RootRedirect message="Upload successful" variant="success" />} />
+        {features.security && (
+          <Route
+            path="/"
+            element={
+              <RequireUnauthenticated>
+                <SignIn />
+              </RequireUnauthenticated>
+            }
+          />
+        )}
+        <Route
+          path="/*"
+          element={
+            <RequireAuthenticated>
+              <AuthenticatedRouting />
+            </RequireAuthenticated>
+          }
+        />
+      </Routes>
+    </Authentication>
+  );
+};
+
+export default AppRouting;

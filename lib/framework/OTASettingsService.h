@@ -12,7 +12,7 @@
 #endif
 
 #ifndef FACTORY_OTA_PASSWORD
-#define FACTORY_OTA_PASSWORD "esp-react"
+#define FACTORY_OTA_PASSWORD "ems-esp-neo"
 #endif
 
 #ifndef FACTORY_OTA_ENABLED
@@ -58,4 +58,4 @@ class OTASettingsService : public StatefulService<OTASettings> {
     void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
 };
 
-#endif // end OTASettingsService_h
+#endif

@@ -25,5 +25,6 @@ class AuthenticationService {
     void verifyAuthorization(AsyncWebServerRequest * request);
 };
 
-#endif // end FT_ENABLED(FT_SECURITY)
-#endif // end SecurityManager_h
+#endif
+
+#endif

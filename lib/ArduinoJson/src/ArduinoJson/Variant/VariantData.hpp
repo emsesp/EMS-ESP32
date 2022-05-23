@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -7,6 +7,7 @@
 #include <ArduinoJson/Memory/MemoryPool.hpp>
 #include <ArduinoJson/Misc/SerializedValue.hpp>
 #include <ArduinoJson/Numbers/convertNumber.hpp>
+#include <ArduinoJson/Strings/String.hpp>
 #include <ArduinoJson/Strings/StringAdapters.hpp>
 #include <ArduinoJson/Variant/VariantContent.hpp>
 
@@ -50,11 +51,13 @@ class VariantData {
 
       case VALUE_IS_LINKED_STRING:
       case VALUE_IS_OWNED_STRING:
-        return visitor.visitString(_content.asString);
+        return visitor.visitString(_content.asString.data,
+                                   _content.asString.size);
 
       case VALUE_IS_OWNED_RAW:
       case VALUE_IS_LINKED_RAW:
-        return visitor.visitRawJson(_content.asRaw.data, _content.asRaw.size);
+        return visitor.visitRawJson(_content.asString.data,
+                                    _content.asString.size);
 
       case VALUE_IS_SIGNED_INTEGER:
         return visitor.visitSignedInteger(_content.asSignedInteger);
@@ -76,7 +79,7 @@ class VariantData {
   template <typename T>
   T asFloat() const;
 
-  const char *asString() const;
+  String asString() const;
 
   bool asBoolean() const;
 
@@ -96,24 +99,7 @@ class VariantData {
     return const_cast<VariantData *>(this)->asObject();
   }
 
-  bool copyFrom(const VariantData &src, MemoryPool *pool) {
-    switch (src.type()) {
-      case VALUE_IS_ARRAY:
-        return toArray().copyFrom(src._content.asCollection, pool);
-      case VALUE_IS_OBJECT:
-        return toObject().copyFrom(src._content.asCollection, pool);
-      case VALUE_IS_OWNED_STRING:
-        return setString(adaptString(const_cast<char *>(src._content.asString)),
-                         pool);
-      case VALUE_IS_OWNED_RAW:
-        return setOwnedRaw(
-            serialized(src._content.asRaw.data, src._content.asRaw.size), pool);
-      default:
-        setType(src.type());
-        _content = src._content;
-        return true;
-    }
-  }
+  bool copyFrom(const VariantData &src, MemoryPool *pool);
 
   bool isArray() const {
     return (_flags & VALUE_IS_ARRAY) != 0;
@@ -185,20 +171,20 @@ class VariantData {
   void setLinkedRaw(SerializedValue<const char *> value) {
     if (value.data()) {
       setType(VALUE_IS_LINKED_RAW);
-      _content.asRaw.data = value.data();
-      _content.asRaw.size = value.size();
+      _content.asString.data = value.data();
+      _content.asString.size = value.size();
     } else {
       setType(VALUE_IS_NULL);
     }
   }
 
   template <typename T>
-  bool setOwnedRaw(SerializedValue<T> value, MemoryPool *pool) {
+  bool storeOwnedRaw(SerializedValue<T> value, MemoryPool *pool) {
     const char *dup = pool->saveString(adaptString(value.data(), value.size()));
     if (dup) {
       setType(VALUE_IS_OWNED_RAW);
-      _content.asRaw.data = dup;
-      _content.asRaw.size = value.size();
+      _content.asString.data = dup;
+      _content.asString.size = value.size();
       return true;
     } else {
       setType(VALUE_IS_NULL);
@@ -222,21 +208,14 @@ class VariantData {
     setType(VALUE_IS_NULL);
   }
 
-  void setStringPointer(const char *s, storage_policies::store_by_copy) {
-    ARDUINOJSON_ASSERT(s != 0);
-    setType(VALUE_IS_OWNED_STRING);
-    _content.asString = s;
-  }
-
-  void setStringPointer(const char *s, storage_policies::store_by_address) {
-    ARDUINOJSON_ASSERT(s != 0);
-    setType(VALUE_IS_LINKED_STRING);
-    _content.asString = s;
-  }
-
-  template <typename TAdaptedString>
-  bool setString(TAdaptedString value, MemoryPool *pool) {
-    return storeString(value, pool, typename TAdaptedString::storage_policy());
+  void setString(String s) {
+    ARDUINOJSON_ASSERT(s);
+    if (s.isLinked())
+      setType(VALUE_IS_LINKED_STRING);
+    else
+      setType(VALUE_IS_OWNED_STRING);
+    _content.asString.data = s.c_str();
+    _content.asString.size = s.size();
   }
 
   CollectionData &toArray() {
@@ -254,9 +233,10 @@ class VariantData {
   size_t memoryUsage() const {
     switch (type()) {
       case VALUE_IS_OWNED_STRING:
-        return strlen(_content.asString) + 1;
       case VALUE_IS_OWNED_RAW:
-        return _content.asRaw.size;
+        // We always add a zero at the end: the deduplication function uses it
+        // to detect the beginning of the next string.
+        return _content.asString.size + 1;
       case VALUE_IS_OBJECT:
       case VALUE_IS_ARRAY:
         return _content.asCollection.memoryUsage();
@@ -298,18 +278,19 @@ class VariantData {
     return isObject() ? _content.asCollection.getMember(key) : 0;
   }
 
-  template <typename TAdaptedString>
-  VariantData *getOrAddMember(TAdaptedString key, MemoryPool *pool) {
+  template <typename TAdaptedString, typename TStoragePolicy>
+  VariantData *getOrAddMember(TAdaptedString key, MemoryPool *pool,
+                              TStoragePolicy storage_policy) {
     if (isNull())
       toObject();
     if (!isObject())
       return 0;
-    return _content.asCollection.getOrAddMember(key, pool);
+    return _content.asCollection.getOrAddMember(key, pool, storage_policy);
   }
 
   void movePointers(ptrdiff_t stringDistance, ptrdiff_t variantDistance) {
     if (_flags & OWNED_VALUE_BIT)
-      _content.asString += stringDistance;
+      _content.asString.data += stringDistance;
     if (_flags & COLLECTION_MASK)
       _content.asCollection.movePointers(stringDistance, variantDistance);
   }
@@ -318,46 +299,36 @@ class VariantData {
     return _flags & VALUE_MASK;
   }
 
+  template <typename TAdaptedString, typename TStoragePolicy>
+  inline bool storeString(TAdaptedString value, MemoryPool *pool,
+                          TStoragePolicy storage) {
+    if (value.isNull()) {
+      setNull();
+      return true;
+    }
+
+    return storage.store(value, pool, VariantStringSetter(this));
+  }
+
  private:
   void setType(uint8_t t) {
     _flags &= OWNED_KEY_BIT;
     _flags |= t;
   }
 
-  template <typename TAdaptedString>
-  inline bool storeString(TAdaptedString value, MemoryPool *pool,
-                          storage_policies::decide_at_runtime) {
-    if (value.isStatic())
-      return storeString(value, pool, storage_policies::store_by_address());
-    else
-      return storeString(value, pool, storage_policies::store_by_copy());
-  }
+  struct VariantStringSetter {
+    VariantStringSetter(VariantData *instance) : _instance(instance) {}
 
-  template <typename TAdaptedString>
-  inline bool storeString(TAdaptedString value, MemoryPool *,
-                          storage_policies::store_by_address) {
-    if (value.isNull())
-      setNull();
-    else
-      setStringPointer(value.data(), storage_policies::store_by_address());
-    return true;
-  }
+    template <typename TStoredString>
+    void operator()(TStoredString s) {
+      if (s)
+        _instance->setString(s);
+      else
+        _instance->setNull();
+    }
 
-  template <typename TAdaptedString>
-  inline bool storeString(TAdaptedString value, MemoryPool *pool,
-                          storage_policies::store_by_copy) {
-    if (value.isNull()) {
-      setNull();
-      return true;
-    }
-    const char *copy = pool->saveString(value);
-    if (!copy) {
-      setNull();
-      return false;
-    }
-    setStringPointer(copy, storage_policies::store_by_copy());
-    return true;
-  }
+    VariantData *_instance;
+  };
 };
 
 }  // namespace ARDUINOJSON_NAMESPACE

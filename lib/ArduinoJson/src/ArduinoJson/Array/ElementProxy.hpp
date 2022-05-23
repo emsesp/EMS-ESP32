@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -116,6 +116,10 @@ class ElementProxy : public VariantOperators<ElementProxy<TArray> >,
 
   FORCE_INLINE size_t size() const {
     return getUpstreamElement().size();
+  }
+
+  FORCE_INLINE size_t memoryUsage() const {
+    return getUpstreamElement().memoryUsage();
   }
 
   template <typename TNestedKey>

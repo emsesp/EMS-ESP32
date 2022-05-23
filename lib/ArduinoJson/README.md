@@ -2,12 +2,15 @@
 
 ---
 
-[![arduino-library-badge](https://www.ardu-badge.com/badge/ArduinoJson.svg?version=6.18.4)](https://www.ardu-badge.com/ArduinoJson/6.18.4)
-[![Continuous Integration](https://github.com/bblanchon/ArduinoJson/workflows/Continuous%20Integration/badge.svg?branch=6.x)](https://github.com/bblanchon/ArduinoJson/actions?query=workflow%3A%22Continuous+Integration%22+branch%3A6.x)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/bblanchon/ArduinoJson/Continuous%20Integration?logo=github)](https://github.com/bblanchon/ArduinoJson/actions?query=workflow%3A%22Continuous+Integration%22+branch%3A6.x)
 [![Continuous Integration](https://ci.appveyor.com/api/projects/status/m7s53wav1l0abssg/branch/6.x?svg=true)](https://ci.appveyor.com/project/bblanchon/arduinojson/branch/6.x)
 [![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/arduinojson.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:arduinojson)
-[![Coverage Status](https://coveralls.io/repos/github/bblanchon/ArduinoJson/badge.svg?branch=6.x)](https://coveralls.io/github/bblanchon/ArduinoJson?branch=6.x)
-[![GitHub stars](https://img.shields.io/github/stars/bblanchon/ArduinoJson?style=flat)](https://github.com/bblanchon/ArduinoJson/stargazers)
+[![LGTM Grade](https://img.shields.io/lgtm/grade/cpp/github/bblanchon/ArduinoJson?label=quality&logo=lgtm)](https://lgtm.com/projects/g/bblanchon/ArduinoJson/)
+[![Coveralls branch](https://img.shields.io/coveralls/github/bblanchon/ArduinoJson/6.x?logo=coveralls)](https://coveralls.io/github/bblanchon/ArduinoJson?branch=6.x)  
+[![Arduino Library Manager](https://img.shields.io/static/v1?label=Arduino&message=v6.19.4&logo=arduino&logoColor=white&color=blue)](https://www.ardu-badge.com/ArduinoJson/6.19.4)
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/bblanchon/library/ArduinoJson.svg?version=6.19.4)](https://registry.platformio.org/packages/libraries/bblanchon/ArduinoJson?version=6.19.4) 
+[![GitHub stars](https://img.shields.io/github/stars/bblanchon/ArduinoJson?style=flat&logo=github)](https://github.com/bblanchon/ArduinoJson/stargazers)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/bblanchon?logo=github)](https://github.com/sponsors/bblanchon)
 
 ArduinoJson is a C++ JSON library for Arduino and IoT (Internet Of Things).
 
@@ -31,10 +34,10 @@ ArduinoJson is a C++ JSON library for Arduino and IoT (Internet Of Things).
     * [Consumes roughly 10% less RAM than the "official" Arduino_JSON library](https://arduinojson.org/2019/11/19/arduinojson-vs-arduino_json/?utm_source=github&utm_medium=readme)
     * [Fixed memory allocation, no heap fragmentation](https://arduinojson.org/v6/api/jsondocument/?utm_source=github&utm_medium=readme)
     * [Optionally works without heap memory (zero malloc)](https://arduinojson.org/v6/api/staticjsondocument/?utm_source=github&utm_medium=readme)
-    * Deduplicates strings
+    * [Deduplicates strings](https://arduinojson.org/news/2020/08/01/version-6-16-0/?utm_source=github&utm_medium=readme)
 * Versatile
     * Supports [custom allocators (to use external RAM chip, for example)](https://arduinojson.org/v6/how-to/use-external-ram-on-esp32/?utm_source=github&utm_medium=readme)
-    * Supports [`String`](https://arduinojson.org/v6/api/config/enable_arduino_string/?utm_source=github&utm_medium=readme), [`std::string`](https://arduinojson.org/v6/api/config/enable_std_string/?utm_source=github&utm_medium=readme) and [`std::string_view`](https://arduinojson.org/v6/api/config/enable_string_view/?utm_source=github&utm_medium=readme)
+    * Supports [`String`](https://arduinojson.org/v6/api/config/enable_arduino_string/?utm_source=github&utm_medium=readme), [`std::string`](https://arduinojson.org/v6/api/config/enable_std_string/?utm_source=github&utm_medium=readme), and [`std::string_view`](https://arduinojson.org/v6/api/config/enable_string_view/?utm_source=github&utm_medium=readme)
     * Supports [`Stream`](https://arduinojson.org/v6/api/config/enable_arduino_stream/?utm_source=github&utm_medium=readme) and [`std::istream`/`std::ostream`](https://arduinojson.org/v6/api/config/enable_std_stream/?utm_source=github&utm_medium=readme)
     * Supports [Flash strings](https://arduinojson.org/v6/api/config/enable_progmem/?utm_source=github&utm_medium=readme)
     * Supports [custom readers](https://arduinojson.org/v6/api/json/deserializejson/?utm_source=github&utm_medium=readme#custom-reader) and [custom writers](https://arduinojson.org/v6/api/json/serializejson/?utm_source=github&utm_medium=readme#custom-writer)
@@ -48,9 +51,10 @@ ArduinoJson is a C++ JSON library for Arduino and IoT (Internet Of Things).
         * Arduino boards: [Uno](https://amzn.to/38aL2ik), [Due](https://amzn.to/36YkWi2), [Micro](https://amzn.to/35WkdwG), [Nano](https://amzn.to/2QTvwRX), [Mega](https://amzn.to/36XWhuf), [Yun](https://amzn.to/30odURc), [Leonardo](https://amzn.to/36XWjlR)...
         * Espressif chips: [ESP8266](https://amzn.to/36YluV8), [ESP32](https://amzn.to/2G4pRCB)
         * Lolin (WeMos) boards: [D1 mini](https://amzn.to/2QUpz7q), [D1 Mini Pro](https://amzn.to/36UsGSs)...
-        * Teensy boards: [4.0](https://amzn.to/30ljXGq), [3.2](https://amzn.to/2FT0EuC), [2.0](https://amzn.to/2QXUMXj) 
+        * Teensy boards: [4.0](https://amzn.to/30ljXGq), [3.2](https://amzn.to/2FT0EuC), [2.0](https://amzn.to/2QXUMXj)
         * Particle boards: [Argon](https://amzn.to/2FQHa9X), [Boron](https://amzn.to/36WgLUd), [Electron](https://amzn.to/30vEc4k), [Photon](https://amzn.to/387F9Cd)...
         * Texas Instruments boards: [MSP430](https://amzn.to/30nJWgg)...
+        * Soft cores: [Nios II](https://en.wikipedia.org/wiki/Nios_II)...
     * Tested on all major development environments
         * [Arduino IDE](https://www.arduino.cc/en/Main/Software)
         * [Atmel Studio](http://www.atmel.com/microsite/atmel-studio/)
@@ -77,7 +81,7 @@ ArduinoJson is a C++ JSON library for Arduino and IoT (Internet Of Things).
 * Well tested
     * [Unit test coverage close to 100%](https://coveralls.io/github/bblanchon/ArduinoJson?branch=6.x)
     * Continuously tested on
-        * [Visual Studio 2010, 2012, 2013, 2015, 2017, 2019](https://ci.appveyor.com/project/bblanchon/arduinojson/branch/6.x)
+        * [Visual Studio 2010, 2012, 2013, 2015, 2017, 2019, 2022](https://ci.appveyor.com/project/bblanchon/arduinojson/branch/6.x)
         * [GCC 4.4, 4.6, 4.7, 4.8, 4.9, 5, 6, 7, 8, 9, 10, 11](https://github.com/bblanchon/ArduinoJson/actions?query=workflow%3A%22Continuous+Integration%22)
         * [Clang 3.5, 3.6, 3.7, 3.8, 3.9, 4.0, 5.0, 6.0, 7, 8, 9, 10](https://github.com/bblanchon/ArduinoJson/actions?query=workflow%3A%22Continuous+Integration%22)
     * [Continuously fuzzed with Google OSS Fuzz](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:arduinojson)
@@ -94,6 +98,7 @@ ArduinoJson is a C++ JSON library for Arduino and IoT (Internet Of Things).
     * Most popular of all Arduino libraries on [GitHub](https://github.com/search?o=desc&q=arduino+library&s=stars&type=Repositories)
     * [Used in hundreds of projects](https://www.hackster.io/search?i=projects&q=arduinojson)
     * [Responsive support](https://github.com/bblanchon/ArduinoJson/issues?q=is%3Aissue+is%3Aclosed)
+    * [Discord server](https://discord.gg/DzN6hHHD4h)
 
 ## Quickstart
 
@@ -134,11 +139,24 @@ serializeJson(doc, Serial);
 
 See the [tutorial on arduinojson.org](https://arduinojson.org/doc/encoding/?utm_source=github&utm_medium=readme)
 
-## Support the project ❤️
+## Sponsors
 
-Do you like this library?  
-Please [star this project on GitHub](https://github.com/bblanchon/ArduinoJson/stargazers)!
+ArduinoJson is thankful to its sponsors. Please give them a visit; they deserve it!
 
-What? You don't like it but you *love* it?  
-You can support the project by [purchasing my book](https://arduinojson.org/book/?utm_source=github&utm_medium=readme).
-Alternatively, you can make a recurring donation via [GitHub Sponsors](https://github.com/sponsors/bblanchon).  
+<p>
+  <a href="https://techexplorations.com/" rel="sponsored">
+    <img alt="Tech Explorations" src="https://arduinojson.org/images/2021/10/techexplorations.png" width="200">
+  </a>
+  <a href="https://www.programmingelectronics.com/" rel="sponsored">
+    <img src="https://arduinojson.org/images/2021/10/programmingeleactronicsacademy.png" alt="Programming Electronics Academy" width="200">
+  </a>
+</p>
+<p>
+  <a href="https://github.com/1technophile" rel="sponsored">
+    <img alt="1technophile" src="https://avatars.githubusercontent.com/u/12672732?s=40&v=4">
+  </a>
+</p>
+
+If you run a commercial project that embeds ArduinoJson, think about [sponsoring the library's development](https://github.com/sponsors/bblanchon): it ensures the code that your products rely on stays actively maintained. It can also give your project some exposure to the makers' community.
+
+If you are an individual user and want to support the development (or give a sign of appreciation), consider purchasing the book [Mastering ArduinoJson](https://arduinojson.org/book/)&nbsp;❤, or simply [cast a star](https://github.com/bblanchon/ArduinoJson/stargazers)&nbsp;⭐.

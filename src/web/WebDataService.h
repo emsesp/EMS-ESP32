@@ -19,16 +19,16 @@
 #ifndef WebDataService_h
 #define WebDataService_h
 
-#include <ArduinoJson.h>
-#include <AsyncJson.h>
-#include <ESPAsyncWebServer.h>
-#include <SecurityManager.h>
-
-#define EMSESP_DATA_SERVICE_PATH "/rest/data"
+// GET
+#define CORE_DATA_SERVICE_PATH "/rest/coreData"
 #define SCAN_DEVICES_SERVICE_PATH "/rest/scanDevices"
 #define DEVICE_DATA_SERVICE_PATH "/rest/deviceData"
+#define SENSOR_DATA_SERVICE_PATH "/rest/sensorData"
+
+// POST
 #define WRITE_VALUE_SERVICE_PATH "/rest/writeValue"
 #define WRITE_SENSOR_SERVICE_PATH "/rest/writeSensor"
+#define WRITE_ANALOG_SERVICE_PATH "/rest/writeAnalog"
 
 namespace emsesp {
 
@@ -42,15 +42,17 @@ class WebDataService {
 #endif
 
     // GET
-    void all_devices(AsyncWebServerRequest * request);
-    void scan_devices(AsyncWebServerRequest * request);
+    void core_data(AsyncWebServerRequest * request);
+    void sensor_data(AsyncWebServerRequest * request);
 
     // POST
     void device_data(AsyncWebServerRequest * request, JsonVariant & json);
     void write_value(AsyncWebServerRequest * request, JsonVariant & json);
     void write_sensor(AsyncWebServerRequest * request, JsonVariant & json);
+    void write_analog(AsyncWebServerRequest * request, JsonVariant & json);
+    void scan_devices(AsyncWebServerRequest * request);
 
-    AsyncCallbackJsonWebHandler _device_dataHandler, _writevalue_dataHandler, _writesensor_dataHandler;
+    AsyncCallbackJsonWebHandler _device_data_handler, _write_value_handler, _write_sensor_handler, _write_analog_handler;
 };
 
 } // namespace emsesp

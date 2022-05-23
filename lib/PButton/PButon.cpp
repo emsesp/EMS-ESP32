@@ -94,7 +94,6 @@ bool PButton::check(void) {
 
     // Button pressed down
     if (state_ != pullMode_ && lastState_ == pullMode_ && (millisRes - upTime_) > Debounce_) {
-        // Serial.println("*pressed*");
         downTime_           = millisRes;
         ignoreUP_           = false;
         waitForUP_          = false;
@@ -103,7 +102,6 @@ bool PButton::check(void) {
         vLongPressHappened_ = false;
         if ((millisRes - upTime_) < DblClickDelay_ && dblClickOnNextUp_ == false && dblClickWaiting_ == true) {
             dblClickOnNextUp_ = true;
-            // Serial.println("*double up next*");
         } else {
             dblClickOnNextUp_ = false;
         }
@@ -116,12 +114,10 @@ bool PButton::check(void) {
     else if (state_ == pullMode_ && lastState_ != pullMode_ && (millisRes - downTime_) > Debounce_) {
         if (ignoreUP_ == false) {
             upTime_ = millisRes;
-            // Serial.println("*released*");
             if (dblClickOnNextUp_ == false) {
                 dblClickWaiting_ = true;
             } else {
-                resultEvent = 2;
-                // Serial.println("*double*");
+                resultEvent       = 2;
                 dblClickOnNextUp_ = false;
                 dblClickWaiting_  = false;
                 singleClickOK_    = false;
@@ -132,7 +128,6 @@ bool PButton::check(void) {
     // Test for normal click event: DblClickDelay expired
     if (state_ == pullMode_ && (millisRes - upTime_) >= DblClickDelay_ && dblClickWaiting_ == true && dblClickOnNextUp_ == false && singleClickOK_ == true
         && resultEvent != 2) {
-        // Serial.println("*single click pressed*");
         resultEvent      = 1;
         dblClickWaiting_ = false;
     }

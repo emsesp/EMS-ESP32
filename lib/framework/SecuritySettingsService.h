@@ -115,5 +115,5 @@ class SecuritySettingsService : public SecurityManager {
     ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate);
 };
 
-#endif // end FT_ENABLED(FT_SECURITY)
-#endif // end SecuritySettingsService_h
+#endif
+#endif

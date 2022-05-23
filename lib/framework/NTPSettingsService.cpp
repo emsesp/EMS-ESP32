@@ -44,9 +44,12 @@ void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
     }
 }
 
+// https://werner.rothschopf.net/microcontroller/202103_arduino_esp32_ntp_en.htm
 void NTPSettingsService::configureNTP() {
+    emsesp::EMSESP::system_.ntp_connected(false);
     if (connected_ && _state.enabled) {
         emsesp::EMSESP::logger().info(F("Starting NTP"));
+        sntp_set_time_sync_notification_cb(ntp_received);
         configTzTime(_state.tzFormat.c_str(), _state.server.c_str());
     } else {
         setenv("TZ", _state.tzFormat.c_str(), 1);
@@ -56,11 +59,12 @@ void NTPSettingsService::configureNTP() {
 }
 
 void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVariant & json) {
-    if (!sntp_enabled() && json.is<JsonObject>()) {
+    if (json.is<JsonObject>()) {
         struct tm tm        = {0};
         String    timeLocal = json["local_time"];
         char *    s         = strptime(timeLocal.c_str(), "%Y-%m-%dT%H:%M:%S", &tm);
         if (s != nullptr) {
+            tm.tm_isdst         = -1; // not set by strptime, tells mktime to determine daylightsaving
             time_t         time = mktime(&tm);
             struct timeval now  = {.tv_sec = time};
             settimeofday(&now, nullptr);
@@ -69,6 +73,12 @@ void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVari
             return;
         }
     }
+
     AsyncWebServerResponse * response = request->beginResponse(400);
     request->send(response);
+}
+
+void NTPSettingsService::ntp_received(struct timeval * tv) {
+    // emsesp::EMSESP::logger().info(F("NTP sync to %d sec"), tv->tv_sec);
+    emsesp::EMSESP::system_.ntp_connected(true);
 }

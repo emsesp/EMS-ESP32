@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -92,6 +92,10 @@ class MemberProxy : public VariantOperators<MemberProxy<TObject, TStringRef> >,
 
   FORCE_INLINE size_t size() const {
     return getUpstreamMember().size();
+  }
+
+  FORCE_INLINE size_t memoryUsage() const {
+    return getUpstreamMember().memoryUsage();
   }
 
   FORCE_INLINE void remove(size_t index) const {

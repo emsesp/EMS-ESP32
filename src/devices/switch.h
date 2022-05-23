@@ -25,13 +25,9 @@ namespace emsesp {
 
 class Switch : public EMSdevice {
   public:
-    Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
-
-    virtual bool publish_ha_device_config();
+    Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand);
 
   private:
-    static uuid::log::Logger logger_;
-
     void process_WM10SetMessage(std::shared_ptr<const Telegram> telegram);
     void process_WM10MonitorMessage(std::shared_ptr<const Telegram> telegram);
     void process_WM10TempMessage(std::shared_ptr<const Telegram> telegram);
@@ -39,7 +35,6 @@ class Switch : public EMSdevice {
     uint16_t flowTempHc_;
     uint8_t  status_;
     uint8_t  activated_;
-    uint8_t  id_;
 };
 
 } // namespace emsesp

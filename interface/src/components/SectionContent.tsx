@@ -1,31 +1,20 @@
-import React from 'react';
+import { FC } from 'react';
 
-import { Typography, Paper } from '@material-ui/core';
-import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
+import { Paper, Divider } from '@mui/material';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    content: {
-      padding: theme.spacing(2),
-      margin: theme.spacing(3)
-    }
-  })
-);
+import { RequiredChildrenProps } from '../utils';
 
-interface SectionContentProps {
+interface SectionContentProps extends RequiredChildrenProps {
   title: string;
   titleGutter?: boolean;
   id?: string;
 }
 
-const SectionContent: React.FC<SectionContentProps> = (props) => {
-  const { children, title, titleGutter, id } = props;
-  const classes = useStyles();
+const SectionContent: FC<SectionContentProps> = (props) => {
+  const { children, title, id } = props;
   return (
-    <Paper id={id} className={classes.content}>
-      <Typography variant="h6" gutterBottom={titleGutter}>
-        {title}
-      </Typography>
+    <Paper id={id} sx={{ p: 2, m: 2 }}>
+      <Divider sx={{ pb: 2, borderColor: 'primary.main', fontSize: 20, color: 'primary.main' }}>{title}</Divider>
       {children}
     </Paper>
   );

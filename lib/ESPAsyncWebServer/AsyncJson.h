@@ -50,6 +50,7 @@ class ChunkPrint : public Print {
     }
 };
 
+// added by Proddy
 class MsgpackAsyncJsonResponse : public AsyncAbstractResponse {
   protected:
     DynamicJsonDocument _jsonBuffer;
@@ -78,8 +79,8 @@ class MsgpackAsyncJsonResponse : public AsyncAbstractResponse {
     }
     size_t setLength() {
         _contentLength = measureMsgPack(_root);
-        //_headers.add(new AsyncWebHeader("Json-Length", String(_jsonBuffer.memoryUsage()))); // For determening size of EMSESP_JSON_SIZE_XXLARGE_DYN (Sunbuzz) 
-                                                                                              // Json-Length: 10635
+        //_headers.add(new AsyncWebHeader("Json-Length", String(_jsonBuffer.memoryUsage()))); // For determening size of EMSESP_JSON_SIZE_XXLARGE_DYN (Sunbuzz)
+        // Json-Length: 10635
         if (_contentLength) {
             _isValid = true;
         }
@@ -93,8 +94,6 @@ class MsgpackAsyncJsonResponse : public AsyncAbstractResponse {
     size_t _fillBuffer(uint8_t * data, size_t len) {
         ChunkPrint dest(data, _sentLength, len);
         serializeMsgPack(_root, dest);
-        // serializeJson(_root, Serial); // for testing proddy
-        // Serial.println();
         return len;
     }
 };
@@ -160,8 +159,6 @@ class PrettyAsyncJsonResponse : public AsyncJsonResponse {
     size_t _fillBuffer(uint8_t * data, size_t len) {
         ChunkPrint dest(data, _sentLength, len);
         serializeJsonPretty(_root, dest);
-        // serializeJson(_root, Serial); // for testing proddy
-        // Serial.println();
         return len;
     }
 };
@@ -176,7 +173,7 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
     ArJsonRequestHandlerFunction _onRequest;
     size_t                       _contentLength;
 #ifndef ARDUINOJSON_5_COMPATIBILITY
-    const size_t maxJsonBufferSize;
+    size_t _maxJsonBufferSize;
 #endif
     size_t _maxContentLength;
 
@@ -185,7 +182,7 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
         : _uri(uri)
         , _method(HTTP_POST | HTTP_PUT | HTTP_PATCH)
         , _onRequest(onRequest)
-        , maxJsonBufferSize(maxJsonBufferSize)
+        , _maxJsonBufferSize(maxJsonBufferSize)
         , _maxContentLength(16384) {
     }
 
@@ -194,6 +191,9 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
     }
     void setMaxContentLength(int maxContentLength) {
         _maxContentLength = maxContentLength;
+    }
+    void setMaxJsonBufferSize(size_t maxJsonBufferSize) {
+        _maxJsonBufferSize = maxJsonBufferSize;
     }
     void onRequest(ArJsonRequestHandlerFunction fn) {
         _onRequest = fn;
@@ -219,7 +219,7 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
     virtual void handleRequest(AsyncWebServerRequest * request) override final {
         if (_onRequest) {
             if (request->_tempObject != NULL) {
-                DynamicJsonDocument  jsonBuffer(this->maxJsonBufferSize);
+                DynamicJsonDocument  jsonBuffer(this->_maxJsonBufferSize);
                 DeserializationError error = deserializeJson(jsonBuffer, (uint8_t *)(request->_tempObject));
                 if (!error) {
                     JsonVariant json = jsonBuffer.as<JsonVariant>();

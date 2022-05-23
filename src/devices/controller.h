@@ -25,12 +25,11 @@ namespace emsesp {
 
 class Controller : public EMSdevice {
   public:
-    Controller(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
+    Controller(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand);
 
-    virtual bool publish_ha_device_config();
+    void process_dateTime(std::shared_ptr<const Telegram> telegram);
 
-  private:
-    static uuid::log::Logger logger_;
+    char dateTime_[25];
 };
 
 } // namespace emsesp

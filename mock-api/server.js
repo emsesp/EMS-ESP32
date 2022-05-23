@@ -1,24 +1,27 @@
 const express = require('express')
+const compression = require('compression')
+const SSE = require('express-sse')
 const path = require('path')
 const msgpack = require('@msgpack/msgpack')
+const WebSocket = require('ws')
 
 // REST API
-const app = express()
-const port = process.env.PORT || 3080
+const rest_server = express()
+const port = 3080
 const REST_ENDPOINT_ROOT = '/rest/'
-app.use(express.static(path.join(__dirname, '../interface/build')))
-app.use(express.json())
+rest_server.use(compression())
+rest_server.use(express.static(path.join(__dirname, '../interface/build')))
+rest_server.use(express.json())
 
-// ES API
-const server = express()
-const es_port = 3090
-const ES_ENDPOINT_ROOT = '/es/'
+// API endpoint
+const API_ENDPOINT_ROOT = '/api/'
 
 // LOG
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings'
-const log_settings = {
+log_settings = {
   level: 6,
   max_messages: 50,
+  compact: false,
 }
 
 const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog'
@@ -73,7 +76,7 @@ const fetch_log = {
 const NTP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpStatus'
 const NTP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpSettings'
 const TIME_ENDPOINT = REST_ENDPOINT_ROOT + 'time'
-const ntp_settings = {
+ntp_settings = {
   enabled: true,
   server: 'time.google.com',
   tz_label: 'Europe/Amsterdam',
@@ -90,13 +93,16 @@ const ntp_status = {
 // AP
 const AP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'apSettings'
 const AP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'apStatus'
-const ap_settings = {
+ap_settings = {
   provision_mode: 1,
   ssid: 'ems-esp',
   password: 'ems-esp-neo',
   local_ip: '192.168.4.1',
   gateway_ip: '192.168.4.1',
   subnet_mask: '255.255.255.0',
+  channel: 1,
+  ssid_hidden: true,
+  max_clients: 4,
 }
 const ap_status = {
   status: 1,
@@ -110,7 +116,7 @@ const NETWORK_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'networkSettings'
 const NETWORK_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'networkStatus'
 const SCAN_NETWORKS_ENDPOINT = REST_ENDPOINT_ROOT + 'scanNetworks'
 const LIST_NETWORKS_ENDPOINT = REST_ENDPOINT_ROOT + 'listNetworks'
-const network_settings = {
+network_settings = {
   ssid: 'myWifi',
   password: 'myPassword',
   hostname: 'ems-esp',
@@ -194,7 +200,7 @@ const list_networks = {
 
 // OTA
 const OTA_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'otaSettings'
-const ota_settings = {
+ota_settings = {
   enabled: true,
   port: 8266,
   password: 'ems-esp-neo',
@@ -203,14 +209,14 @@ const ota_settings = {
 // MQTT
 const MQTT_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttSettings'
 const MQTT_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttStatus'
-const mqtt_settings = {
+mqtt_settings = {
   enabled: true,
   host: '192.168.1.4',
   port: 1883,
-  base: 'ems-esp32',
+  base: 'ems-esp',
   username: '',
   password: '',
-  client_id: 'ems-esp32',
+  client_id: 'ems-esp',
   keep_alive: 60,
   clean_session: true,
   max_topic_length: 128,
@@ -222,15 +228,16 @@ const mqtt_settings = {
   publish_time_sensor: 10,
   mqtt_qos: 0,
   mqtt_retain: false,
-  ha_climate_format: 1,
   ha_enabled: true,
   nested_format: 1,
+  discovery_prefix: 'homeassistant',
   send_response: true,
+  publish_single: false,
 }
 const mqtt_status = {
   enabled: true,
   connected: true,
-  client_id: 'ems-esp32',
+  client_id: 'ems-esp',
   disconnect_reason: 0,
   mqtt_fails: 0,
 }
@@ -242,11 +249,11 @@ const SYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'systemStatus'
 const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings'
 const RESTART_ENDPOINT = REST_ENDPOINT_ROOT + 'restart'
 const FACTORY_RESET_ENDPOINT = REST_ENDPOINT_ROOT + 'factoryReset'
-const UPLOAD_FIRMWARE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFirmware'
+const UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn'
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken'
 const system_status = {
-  emsesp_version: '3.x demo',
+  emsesp_version: '3.4demo',
   esp_platform: 'ESP32',
   max_alloc_heap: 113792,
   psram_size: 0,
@@ -260,7 +267,7 @@ const system_status = {
   fs_used: 16384,
   uptime: '000+00:15:42.707',
 }
-const security_settings = {
+security_settings = {
   jwt_secret: 'naughty!',
   users: [
     { username: 'admin', password: 'admin', admin: true },
@@ -283,16 +290,22 @@ const signin = {
 const generate_token = { token: '1234' }
 
 // EMS-ESP Project specific
-const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'emsespSettings'
-const EMSESP_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'data'
+const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'settings'
+const EMSESP_CORE_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'coreData'
+const EMSESP_SENSOR_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'sensorData'
+const EMSESP_DEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'devices'
 const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices'
 const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData'
-const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'emsespStatus'
+const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities'
+const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'status'
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile'
-const WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
-const WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
+const EMSESP_WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
+const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
+const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalog'
+const EMSESP_MASKED_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'maskedEntities'
+const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations'
 
-emsesp_settings = {
+settings = {
   tx_mode: 1,
   ems_bus_id: 11,
   syslog_enabled: false,
@@ -303,371 +316,565 @@ emsesp_settings = {
   syslog_port: 514,
   master_thermostat: 0,
   shower_timer: true,
-  shower_alert: false,
+  shower_alert: true,
+  shower_alert_trigger: 7,
+  shower_alert_coldshot: 10,
   rx_gpio: 23,
   tx_gpio: 5,
   phy_type: 0,
+  eth_power: 0,
+  eth_phy_addr: 0,
+  eth_clock_mode: 0,
   dallas_gpio: 3,
   dallas_parasite: false,
   led_gpio: 2,
   hide_led: false,
   notoken_api: false,
+  readonly_mode: false,
+  low_clock: false,
+  telnet_enabled: true,
   analog_enabled: false,
   pbutton_gpio: 0,
   board_profile: 'S32',
-  dallas_format: 1,
   bool_format: 1,
   enum_format: 1,
 }
-const emsesp_data = {
+
+const emsesp_devices = {
   devices: [
     {
       i: 1,
-      t: 'Thermostat',
-      b: '',
-      n: 'RC20/Moduline 300',
       d: 23,
       p: 77,
-      v: '03.03',
+      s: 'Thermostat (RC20/Moduline 300)',
     },
     {
       i: 2,
+      d: 8,
+      p: 123,
+      s: 'Boiler (Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i)',
+    },
+    {
+      i: 4,
+      d: 16,
+      p: 165,
+      s: 'Thermostat (RC100/Moduline 1000/1010)',
+    },
+  ],
+}
+
+const emsesp_coredata = {
+  // devices: [],
+  devices: [
+    {
+      id: '2',
       t: 'Boiler',
       b: 'Nefit',
       n: 'GBx72/Trendline/Cerapur/Greenstar Si/27i',
       d: 8,
       p: 123,
       v: '06.01',
+      e: 68,
     },
     {
-      i: 3,
-      t: 'Controller',
+      id: '1',
+      t: 'Thermostat',
       b: '',
-      n: 'BC10',
-      d: 9,
-      p: 190,
-      v: '01.03',
+      n: 'RC20/Moduline 300',
+      d: 23,
+      p: 77,
+      v: '03.03',
+      e: 5,
+    },
+    {
+      id: '4',
+      t: 'Thermostat',
+      b: 'Buderus',
+      n: 'RC100/Moduline 1000/1010',
+      d: 16,
+      p: 165,
+      v: '04.01',
+      e: 3,
     },
   ],
+  active_sensors: 8,
+  analog_enabled: true,
+}
+
+const emsesp_sensordata = {
   sensors: [
-    { n: 1, i: '28-233D-9497-0C03', t: 25.7, o: 1.2 },
-    { n: 2, i: '28-243D-7437-1E3A', t: 26.1, o: 0 },
+    { id: '28-233D-9497-0C03', n: 'Dallas 1', t: 25.7, o: 1.2, u: 1 },
+    { id: '28-243D-7437-1E3A', n: 'Dallas 2 outside', t: 26.1, o: 0, u: 1 },
+    { id: '28-243E-7437-1E3B', n: 'Zolder', t: 27.1, o: 0, u: 16 },
+    { id: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1 },
   ],
-  analog: 12,
+  // sensors: [],
+  analogs: [
+    { id: '1', g: 36, n: 'motor', v: 0, u: 0, o: 17, f: 0, t: 0 },
+    { id: '2', g: 37, n: 'External switch', v: 13, u: 0, o: 17, f: 0, t: 1 },
+    { id: '3', g: 39, n: 'Pulse count', v: 144, u: 0, o: 0, f: 0, t: 2 },
+    { id: '4', g: 40, n: 'Pressure', v: 16, u: 17, o: 0, f: 0, t: 3 },
+  ],
+  // analogs: [],
 }
 
-const emsesp_status = {
+const status = {
   status: 0,
-  rx_received: 344,
-  tx_sent: 104,
-  rx_quality: 100,
-  tx_quality: 100,
+  tx_mode: 1,
+  uptime: 77186,
+  num_devices: 2,
+  num_sensors: 1,
+  num_analogs: 1,
+  stats: [
+    { id: 'EMS Telegrams Received (Rx)', s: 56506, f: 11, q: 100 },
+    { id: 'EMS Reads (Tx)', s: 9026, f: 0, q: 100 },
+    { id: 'EMS Writes (Tx)', s: 33, f: 2, q: 95 },
+    { id: 'Temperature Sensor Reads', s: 56506, f: 11, q: 100 },
+    { id: 'Analog Sensor Reads', s: 0, f: 0, q: 100 },
+    { id: 'MQTT Publishes', s: 12, f: 10, q: 20 },
+    { id: 'API Calls', s: 0, f: 0, q: 0 },
+  ],
 }
 
+// Dashboard data
 const emsesp_devicedata_1 = {
-  type: 'Thermostat',
+  label: 'Thermostat: RC20/Moduline 300',
   data: [
     {
       v: '(0)',
       u: 0,
-      n: 'error code',
-      c: '',
+      id: '00error code',
     },
     {
       v: '14:54:39 06/06/2021',
       u: 0,
-      n: 'date/time',
-      c: '',
+      id: '00date/time',
     },
     {
       v: 18,
       u: 1,
-      n: 'hc1 selected room temperature',
+      id: '00hc1 selected room temperature',
       c: 'hc1/seltemp',
     },
     {
       v: 22.6,
       u: 1,
-      n: 'hc1 current room temperature',
-      c: '',
+      id: '00hc1 current room temperature',
     },
     {
       v: 'auto',
       u: 0,
-      n: 'hc1 mode',
+      id: '00hc1 mode',
       c: 'hc1/mode',
     },
   ],
 }
 
 const emsesp_devicedata_2 = {
-  type: 'Boiler',
+  label: 'Boiler: Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i',
   data: [
-    { v: 'off', u: 0, n: 'heating active' },
-    { v: 'off', u: 0, n: 'warm water active' },
-    { v: 5, u: 1, n: 'selected flow temperature', c: 'selflowtemp' },
-    { v: 0, u: 2, n: 'burner selected max power', c: 'selburnpow' },
-    { v: 0, u: 2, n: 'heating pump modulation' },
-    { v: 42.9, u: 1, n: 'current flow temperature' },
-    { v: 41.8, u: 1, n: 'return temperature' },
-    { v: 1.6, u: 9, n: 'system pressure' },
-    { v: 45, u: 1, n: 'actual boiler temperature' },
-    { v: 'off', u: 0, n: 'gas' },
-    { v: 0, u: 8, n: 'flame current' },
-    { v: 'off', u: 0, n: 'heating pump' },
-    { v: 'off', u: 0, n: 'fan' },
-    { v: 'off', u: 0, n: 'ignition' },
-    {
-      v: 'on',
-      u: 0,
-      n: 'heating activated',
-      c: 'heatingactivated',
-      l: ['off', 'on'],
-    },
-    { v: 75, u: 1, n: 'heating temperature', c: 'heatingtemp' },
-    { v: 90, u: 2, n: 'burner pump max power', c: 'pumpmodmax' },
-    { v: 55, u: 2, n: 'burner pump min power', c: 'pumpmodmin' },
-    { v: 1, u: 7, n: 'pump delay', c: 'pumpdelay' },
-    { v: 10, u: 7, n: 'burner min period', c: 'burnminperiod' },
-    { v: 0, u: 2, n: 'burner min power', c: 'burnminpower' },
-    { v: 77, u: 2, n: 'burner max power', c: 'burnmaxpower' },
-    { v: -6, u: 1, n: 'hysteresis on temperature', c: 'boilhyston' },
-    { v: 6, u: 1, n: 'hysteresis off temperature', c: 'boilhystoff' },
-    { v: 0, u: 2, n: 'burner current power' },
-    { v: 317694, u: 16, n: 'burner starts' },
-    { v: 524115, u: 7, n: 'total burner operating time' },
-    { v: 424286, u: 7, n: 'total heat operating time' },
-    { v: 4571225, u: 7, n: 'total UBA operating time' },
-    { v: '1C(210) 06.06.2020 12:07', u: 0, n: 'last error code' },
-    { v: '0H', u: 0, n: 'service code' },
-    { v: 203, u: 0, n: 'service code number' },
-    { v: ' ', u: 0, n: 'maintenance message' },
-    {
-      v: 'off',
-      u: 0,
-      n: 'maintenance scheduled',
-      c: 'maintenance',
-      l: ['off', 'time', 'date'],
-    },
-    { v: 6000, u: 6, n: 'maintenance set time', c: 'maintenancetime' },
-    { v: '01.01.2012', u: 0, n: 'maintenance set date', c: 'maintenancedate' },
-    { v: 60, u: 1, n: 'ww selected temperature', c: 'wwseltemp' },
-    { v: 62, u: 1, n: 'ww set temperature' },
-    { v: 'flow', u: 0, n: 'ww type' },
-    {
-      v: 'eco',
-      u: 0,
-      n: 'ww comfort',
-      c: 'wwcomfort',
-      l: ['hot', 'eco', 'intelligent'],
-    },
-    { v: 40, u: 0, n: 'ww flow temperature offset', c: 'wwflowtempoffset' },
-    { v: 100, u: 2, n: 'ww max power', c: 'wwmaxpower' },
+    { v: 0, u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
+    { v: 'false', u: 0, id: '08heating active' },
+    { v: 'false', u: 0, id: '04tapwater active' },
+    { v: 5, u: 1, id: '04selected flow temperature', c: 'selflowtemp' },
+    { v: 0, u: 3, id: '0Eburner selected max power', c: 'selburnpow' },
+    { v: 0, u: 3, id: '00heating pump modulation' },
+    { v: 53.4, u: 1, id: '00current flow temperature' },
+    { v: 52.7, u: 1, id: '00return temperature' },
+    { v: 1.3, u: 10, id: '00system pressure' },
+    { v: 54.9, u: 1, id: '00actual boiler temperature' },
+    { v: 'false', u: 0, id: '00gas' },
+    { v: 'false', u: 0, id: '00gas stage 2' },
+    { v: 0, u: 9, id: '00flame current' },
+    { v: 'false', u: 0, id: '00heating pump' },
+    { v: 'false', u: 0, id: '00fan' },
+    { v: 'false', u: 0, id: '00ignition' },
+    { v: 'false', u: 0, id: '00oil preheating' },
+    { v: 'true', u: 0, id: '00heating activated', c: 'heatingactivated', l: ['off', 'on'] },
+    { v: 80, u: 1, id: '00heating temperature', c: 'heatingtemp' },
+    { v: 70, u: 3, id: '00burner pump max power', c: 'pumpmodmax' },
+    { v: 30, u: 3, id: '00burner pump min power', c: 'pumpmodmin' },
+    { v: 1, u: 8, id: '00pump delay', c: 'pumpdelay' },
+    { v: 10, u: 8, id: '00burner min period', c: 'burnminperiod' },
+    { v: 0, u: 3, id: '00burner min power', c: 'burnminpower' },
+    { v: 50, u: 3, id: '00burner max power', c: 'burnmaxpower' },
+    { v: -6, u: 2, id: '00hysteresis on temperature', c: 'boilhyston' },
+    { v: 6, u: 2, id: '00hysteresis off temperature', c: 'boilhystoff' },
+    { v: 0, u: 1, id: '00set flow temperature' },
+    { v: 0, u: 3, id: '00burner set power' },
+    { v: 0, u: 3, id: '00burner current power' },
+    { v: 326323, u: 0, id: '00burner starts' },
+    { v: 553437, u: 8, id: '00total burner operating time' },
+    { v: 451286, u: 8, id: '00total heat operating time' },
+    { v: 4672173, u: 8, id: '00total UBA operating time' },
+    { v: '1C(210) 06.06.2020 12:07 (0 min)', u: 0, id: '00last error code' },
+    { v: '0H', u: 0, id: '00service code' },
+    { v: 203, u: 0, id: '00service code number' },
+    { v: 'H00', u: 0, id: '00maintenance message' },
+    { v: 'manual', u: 0, id: '00maintenance scheduled', c: 'maintenance', l: ['off', 'time', 'date', 'manual'] },
+    { v: 6000, u: 7, id: '00time to next maintenance', c: 'maintenancetime' },
+    { v: '01.01.2012', u: 0, id: '00next maintenance date', c: 'maintenancedate', o: 'Format: < dd.mm.yyyy >' },
+    { v: 'true', u: 0, id: '00dhw turn on/off', c: 'wwtapactivated', l: ['off', 'on'] },
+    { v: 62, u: 1, id: '00dhw set temperature' },
+    { v: 60, u: 1, id: '00dhw selected temperature', c: 'wwseltemp' },
+    { v: 'flow', u: 0, id: '00dhw type' },
+    { v: 'hot', u: 0, id: '00dhw comfort', c: 'wwcomfort', l: ['hot', 'eco', 'intelligent'] },
+    { v: 40, u: 2, id: '00dhw flow temperature offset', c: 'wwflowtempoffset' },
+    { v: 100, u: 3, id: '00dhw max power', c: 'wwmaxpower' },
+    { v: 'false', u: 0, id: '00dhw circulation pump available', c: 'wwcircpump', l: ['off', 'on'] },
+    { v: '3-way valve', u: 0, id: '00dhw charging type' },
+    { v: -5, u: 2, id: '00dhw hysteresis on temperature', c: 'wwhyston' },
+    { v: 0, u: 2, id: '00dhw hysteresis off temperature', c: 'wwhystoff' },
+    { v: 70, u: 1, id: '00dhw disinfection temperature', c: 'wwdisinfectiontemp' },
     {
       v: 'off',
       u: 0,
-      n: 'ww circulation pump available',
-      c: 'wwcircpump',
-      l: ['off', 'on'],
-    },
-    { v: '3-way valve', u: 0, n: 'ww charging type' },
-    { v: -5, u: 1, n: 'ww hysteresis on temperature', c: 'wwhyston' },
-    { v: 0, u: 1, n: 'ww hysteresis off temperature', c: 'wwhystoff' },
-    { v: 70, u: 1, n: 'ww disinfection temperature', c: 'wwdisinfectiontemp' },
-    {
-      v: 'off',
-      u: 0,
-      n: 'ww circulation pump frequency',
+      id: '00dhw circulation pump mode',
       c: 'wwcircmode',
-      l: [
-        'off',
-        '1x3min',
-        '2x3min',
-        '3x3min',
-        '4x3min',
-        '5x3min',
-        '6x3min',
-        'continuous',
-      ],
+      l: ['off', '1x3min', '2x3min', '3x3min', '4x3min', '5x3min', '6x3min', 'continuous'],
     },
-    {
-      v: 'off',
-      u: 0,
-      n: 'ww circulation active',
-      c: 'wwcirc',
-      l: ['off', 'on'],
-    },
-    { v: 37.1, u: 1, n: 'ww current intern temperature' },
-    { v: 0, u: 3, n: 'ww current tap water flow' },
-    { v: 37.2, u: 1, n: 'ww storage intern temperature' },
-    { v: 'on', u: 0, n: 'ww activated', c: 'wwactivated', l: ['off', 'on'] },
-    {
-      v: 'off',
-      u: 0,
-      n: 'ww one time charging',
-      c: 'wwonetime',
-      l: ['off', 'on'],
-    },
-    {
-      v: 'off',
-      u: 0,
-      n: 'ww disinfection',
-      c: 'wwdisinfect',
-      l: ['off', 'on'],
-    },
-    { v: 'off', u: 0, n: 'ww charging' },
-    { v: 'off', u: 0, n: 'ww recharging' },
-    { v: 'on', u: 0, n: 'ww temperature ok' },
-    { v: 'off', u: 0, n: 'ww active' },
-    { v: 'on', u: 0, n: 'ww heating' },
-    { v: 282323, u: 16, n: 'ww starts' },
-    { v: 99829, u: 7, n: 'ww active time' },
+    { v: 'false', u: 0, id: '00dhw circulation active', c: 'wwcirc', l: ['off', 'on'] },
+    { v: 47.3, u: 1, id: '00dhw current intern temperature' },
+    { v: 0, u: 4, id: '00dhw current tap water flow' },
+    { v: 47.3, u: 1, id: '00dhw storage intern temperature' },
+    { v: 'true', u: 0, id: '00dhw activated', c: 'wwactivated', l: ['off', 'on'] },
+    { v: 'false', u: 0, id: '00dhw one time charging', c: 'wwonetime', l: ['off', 'on'] },
+    { v: 'false', u: 0, id: '00dhw disinfecting', c: 'wwdisinfecting', l: ['off', 'on'] },
+    { v: 'false', u: 0, id: '00dhw charging' },
+    { v: 'false', u: 0, id: '00dhw recharging' },
+    { v: 'true', u: 0, id: '00dhw temperature ok' },
+    { v: 'false', u: 0, id: '00dhw active' },
+    { v: 'true', u: 0, id: '00dhw 3way valve active' },
+    { v: 0, u: 3, id: '00dhw set pump power' },
+    { v: 288768, u: 0, id: '00dhw starts' },
+    { v: 102151, u: 8, id: '00dhw active time' },
   ],
 }
 
-const emsesp_devicedata_3 = {
-  type: 'Controller',
-  data: [],
+const emsesp_devicedata_4 = {
+  label: 'Thermostat: RC100/Moduline 1000/1010',
+  data: [
+    {
+      v: 16,
+      u: 1,
+      id: '08hc2 selected room temperature',
+      c: 'hc2/seltemp',
+    },
+    {
+      v: 18.6,
+      u: 1,
+      id: '02hc2 current room temperature',
+      c: '',
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '02hc2 mode',
+      c: 'hc2/mode',
+    },
+  ],
 }
 
+const emsesp_deviceentities_1 = [
+  {
+    v: '(0)',
+    id: 'error code',
+    s: 'errorcode',
+    m: 0,
+    w: false,
+  },
+  {
+    v: '14:54:39 06/06/2021',
+    id: 'date/time',
+    s: 'datetime',
+    m: 0,
+    w: false,
+  },
+  {
+    v: 18.2,
+    id: 'hc1 selected room temperature',
+    s: 'hc1/seltemp',
+    m: 0,
+    w: true,
+  },
+  {
+    v: 22.6,
+    id: 'hc1 current room temperature',
+    s: 'hc1/curtemp',
+    m: 0,
+    w: false,
+  },
+  {
+    v: 'auto',
+    id: 'hc1 mode',
+    s: 'hc1/mode',
+    m: 0,
+    w: true,
+  },
+]
+
+const emsesp_deviceentities_2 = [
+  { v: false, id: 'heating active', s: 'heatingactive', m: 0, w: false },
+  { v: false, id: 'tapwater active', s: 'tapwateractive', m: 0, w: false },
+  { v: 5, id: 'selected flow temperature', s: 'selflowtemp', m: 0, w: true },
+  { v: 0, id: 'burner selected max power', s: 'selburnpow', m: 0, w: true },
+  { v: 0, id: 'heating pump modulation', s: 'heatingpumpmod', m: 0, w: false },
+  { id: 'heating pump 2 modulation', s: 'heatingpump2mod', m: 0, w: false },
+  { id: 'outside temperature', s: 'outdoortemp', m: 0, w: false },
+  { v: 53, id: 'current flow temperature', s: 'curflowtemp', m: 0, w: false },
+  { v: 51.8, id: 'return temperature', s: 'rettemp', m: 0, w: false },
+  { id: 'mixing switch temperature', s: 'switchtemp', m: 0, w: false },
+  { v: 1.3, id: 'system pressure', s: 'syspress', m: 0, w: false },
+  { v: 54.6, id: 'actual boiler temperature', s: 'boiltemp', m: 0, w: false },
+  { id: 'exhaust temperature', s: 'exhausttemp', m: 0, w: false },
+  { v: false, id: 'gas', s: 'burngas', m: 0, w: false },
+  { v: false, id: 'gas stage 2', s: 'burngas2', m: 0, w: false },
+  { v: 0, id: 'flame current', s: 'flamecurr', m: 0, w: false },
+  { v: false, id: 'heating pump', s: 'heatingpump', m: 0, w: false },
+  { v: false, id: 'fan', s: 'fanwork', m: 0, w: false },
+  { v: false, id: 'ignition', s: 'ignwork', m: 0, w: false },
+  { v: false, id: 'oil preheating', s: 'oilpreheat', m: 0, w: false },
+  { v: true, id: 'heating activated', s: 'heatingactivated', m: 0, w: false },
+  { v: 80, id: 'heating temperature', s: 'heatingtemp', m: 0, w: false },
+  { v: 70, id: 'burner pump max power', s: 'pumpmodmax', m: 0, w: false },
+  { v: 30, id: 'burner pump min power', s: 'pumpmodmin', m: 0, w: false },
+  { v: 1, id: 'pump delay', s: 'pumpdelay', m: 0, w: false },
+  { v: 10, id: 'burner min period', s: 'burnminperiod', m: 0, w: false },
+  { v: 0, id: 'burner min power', s: 'burnminpower', m: 0, w: false },
+  { v: 50, id: 'burner max power', s: 'burnmaxpower', m: 0, w: false },
+  { v: -6, id: 'hysteresis on temperature', s: 'boilhyston', m: 0, w: false },
+  { v: 6, id: 'hysteresis off temperature', s: 'boilhystoff', m: 0, w: false },
+  { v: 0, id: 'set flow temperature', s: 'setflowtemp', m: 0, w: true },
+  { v: 0, id: 'burner set power', s: 'setburnpow', m: 0, w: false },
+  { v: 0, id: 'burner current power', s: 'curburnpow', m: 0, w: false },
+  { v: 326323, id: 'burner starts', s: 'burnstarts', m: 0, w: false },
+  { v: 553437, id: 'total burner operating time', s: 'burnworkmin', m: 0, w: false },
+  { v: 451286, id: 'total heat operating time', s: 'heatworkmin', m: 0, w: false },
+  { v: 4672175, id: 'total UBA operating time', s: 'ubauptime', m: 0, w: false },
+  { v: '1C(210) 06.06.2020 12:07 (0 min)', id: 'last error code', s: 'lastcode', m: 0, w: false },
+  { v: '0H', id: 'service code', s: 'servicecode', m: 0, w: false },
+  { v: 203, id: 'service code number', s: 'servicecodenumber', m: 0, w: false },
+  { v: 'H00', id: 'maintenance message', s: 'maintenancemessage', m: 0, w: false },
+  { v: 'manual', id: 'maintenance scheduled', s: 'maintenance', m: 0, w: false },
+  { v: 6000, id: 'time to next maintenance', s: 'maintenancetime', m: 0, w: false },
+  { v: '01.01.2012', id: 'next maintenance date', s: 'maintenancedate', m: 0, w: false },
+  { v: true, id: 'dhw turn on/off', s: 'wwtapactivated', m: 0, w: false },
+  { v: 62, id: 'dhw set temperature', s: 'wwsettemp', m: 0, w: false },
+  { v: 60, id: 'dhw selected temperature', s: 'wwseltemp', m: 0, w: true },
+  { id: 'dhw selected lower temperature', s: 'wwseltemplow', m: 2 },
+  { id: 'dhw selected temperature for off', s: 'wwseltempoff', m: 2 },
+  { id: 'dhw single charge temperature', s: 'wwseltempsingle', m: 2 },
+  { v: 'flow', id: 'dhw type', s: 'wwtype', m: 0, w: false },
+  { v: 'hot', id: 'dhw comfort', s: 'wwcomfort', m: 0, w: false },
+  { v: 40, id: 'dhw flow temperature offset', s: 'wwflowtempoffset', m: 0, w: false },
+  { v: 100, id: 'dhw max power', s: 'wwmaxpower', m: 0, w: false },
+  { v: false, id: 'dhw circulation pump available', s: 'wwcircpump', m: 0, w: false },
+  { v: '3-way valve', id: 'dhw charging type', s: 'wwchargetype', m: 0, w: false },
+  { v: -5, id: 'dhw hysteresis on temperature', s: 'wwhyston', m: 0, w: false },
+  { v: 0, id: 'dhw hysteresis off temperature', s: 'wwhystoff', m: 0, w: false },
+  { v: 70, id: 'dhw disinfection temperature', s: 'wwdisinfectiontemp', m: 0, w: false },
+  { v: 'off', id: 'dhw circulation pump mode', s: 'wwcircmode', m: 0, w: false },
+  { v: false, id: 'dhw circulation active', s: 'wwcirc', m: 0, w: false },
+  { v: 46.4, id: 'dhw current intern temperature', s: 'wwcurtemp', m: 0, w: false },
+  { id: 'dhw current extern temperature', s: 'wwcurtemp2', m: 2 },
+  { v: 0, id: 'dhw current tap water flow', s: 'wwcurflow', m: 0, w: false },
+  { v: 46.3, id: 'dhw storage intern temperature', s: 'wwstoragetemp1', m: 0, w: false },
+  { id: 'dhw storage extern temperature', s: 'wwstoragetemp2', m: 2 },
+  { v: true, id: 'dhw activated', s: 'wwactivated', m: 0, w: false },
+  { v: false, id: 'dhw one time charging', s: 'wwonetime', m: 0, w: false },
+  { v: false, id: 'dhw disinfecting', s: 'wwdisinfecting', m: 0, w: false },
+  { v: false, id: 'dhw charging', s: 'wwcharging', m: 0, w: false },
+  { v: false, id: 'dhw recharging', s: 'wwrecharging', m: 0, w: false },
+  { v: true, id: 'dhw temperature ok', s: 'wwtempok', m: 0, w: false },
+  { v: false, id: 'dhw active', s: 'wwactive', m: 0, w: false },
+  { v: true, id: 'dhw 3way valve active', s: 'ww3wayvalve', m: 0, w: false },
+  { v: 0, id: 'dhw set pump power', s: 'wwsetpumppower', m: 0, w: true },
+  { id: 'dhw mixer temperature', s: 'wwmixertemp', m: 2 },
+  { id: 'dhw cylinder middle temperature (TS3)', s: 'wwcylmiddletemp', m: 2 },
+  { v: 288768, id: 'dhw starts', s: 'wwstarts', m: 0, w: false },
+  { v: 102151, id: 'dhw active time', s: 'wwworkm', m: 0, w: false },
+]
+
+const emsesp_deviceentities_4 = [
+  {
+    v: 16,
+    id: 'hc2 selected room temperature',
+    s: 'hc2/seltemp',
+    m: 8,
+    w: true,
+  },
+  {
+    v: 18.5,
+    id: 'hc2 current room temperature',
+    s: 'hc2/curtemp',
+    m: 2,
+    w: false,
+  },
+  {
+    v: 'off',
+    id: 'hc2 mode',
+    s: 'hc2/mode',
+    m: 2,
+    w: true,
+  },
+]
+
 // LOG
-app.get(FETCH_LOG_ENDPOINT, (req, res) => {
+rest_server.get(FETCH_LOG_ENDPOINT, (req, res) => {
   const encoded = msgpack.encode(fetch_log)
   res.write(encoded, 'binary')
   res.end(null, 'binary')
 })
-app.get(LOG_SETTINGS_ENDPOINT, (req, res) => {
-  console.log(
-    'Fetching log settings ' +
-      log_settings.level +
-      ',' +
-      log_settings.max_messages,
-  )
+rest_server.get(LOG_SETTINGS_ENDPOINT, (req, res) => {
   res.json(log_settings)
 })
-app.post(LOG_SETTINGS_ENDPOINT, (req, res) => {
-  console.log(
-    'Setting new level=' +
-      req.body.level +
-      ' max_messages=' +
-      req.body.max_messages,
-  )
-  res.sendStatus(200)
+rest_server.post(LOG_SETTINGS_ENDPOINT, (req, res) => {
+  log_settings = req.body
+  console.log(JSON.stringify(log_settings))
+  res.json(log_settings)
 })
 
 // NETWORK
-app.get(NETWORK_STATUS_ENDPOINT, (req, res) => {
+rest_server.get(NETWORK_STATUS_ENDPOINT, (req, res) => {
   res.json(network_status)
 })
-app.get(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
+rest_server.get(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
   res.json(network_settings)
 })
-app.post(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
+rest_server.post(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
+  network_settings = req.body
+  console.log(JSON.stringify(network_settings))
   res.json(network_settings)
 })
-app.get(LIST_NETWORKS_ENDPOINT, (req, res) => {
+rest_server.get(LIST_NETWORKS_ENDPOINT, (req, res) => {
   res.json(list_networks)
 })
-app.get(SCAN_NETWORKS_ENDPOINT, (req, res) => {
+rest_server.get(SCAN_NETWORKS_ENDPOINT, (req, res) => {
   res.sendStatus(202)
 })
 
 // AP
-app.get(AP_SETTINGS_ENDPOINT, (req, res) => {
+rest_server.get(AP_SETTINGS_ENDPOINT, (req, res) => {
   res.json(ap_settings)
 })
-app.get(AP_STATUS_ENDPOINT, (req, res) => {
+rest_server.get(AP_STATUS_ENDPOINT, (req, res) => {
   res.json(ap_status)
 })
-app.post(AP_SETTINGS_ENDPOINT, (req, res) => {
+rest_server.post(AP_SETTINGS_ENDPOINT, (req, res) => {
+  ap_status = req.body
+  console.log(JSON.stringify(ap_settings))
   res.json(ap_settings)
 })
 
 // OTA
-app.get(OTA_SETTINGS_ENDPOINT, (req, res) => {
+rest_server.get(OTA_SETTINGS_ENDPOINT, (req, res) => {
   res.json(ota_settings)
 })
-app.post(OTA_SETTINGS_ENDPOINT, (req, res) => {
+rest_server.post(OTA_SETTINGS_ENDPOINT, (req, res) => {
+  ota_settings = req.body
+  console.log(JSON.stringify(ota_settings))
   res.json(ota_settings)
 })
 
 // MQTT
-app.get(MQTT_SETTINGS_ENDPOINT, (req, res) => {
+rest_server.get(MQTT_SETTINGS_ENDPOINT, (req, res) => {
   res.json(mqtt_settings)
 })
-app.post(MQTT_SETTINGS_ENDPOINT, (req, res) => {
+rest_server.post(MQTT_SETTINGS_ENDPOINT, (req, res) => {
+  mqtt_settings = req.body
+  console.log(JSON.stringify(mqtt_settings))
   res.json(mqtt_settings)
 })
-app.get(MQTT_STATUS_ENDPOINT, (req, res) => {
+rest_server.get(MQTT_STATUS_ENDPOINT, (req, res) => {
   res.json(mqtt_status)
 })
 
 // NTP
-app.get(NTP_SETTINGS_ENDPOINT, (req, res) => {
+rest_server.get(NTP_SETTINGS_ENDPOINT, (req, res) => {
   res.json(ntp_settings)
 })
-app.post(NTP_SETTINGS_ENDPOINT, (req, res) => {
+rest_server.post(NTP_SETTINGS_ENDPOINT, (req, res) => {
+  ntp_settings = req.body
+  console.log(JSON.stringify(ntp_settings))
   res.json(ntp_settings)
 })
-app.get(NTP_STATUS_ENDPOINT, (req, res) => {
+rest_server.get(NTP_STATUS_ENDPOINT, (req, res) => {
   res.json(ntp_status)
 })
-app.post(TIME_ENDPOINT, (req, res) => {
+rest_server.post(TIME_ENDPOINT, (req, res) => {
   res.sendStatus(200)
 })
 
 // SYSTEM
-app.get(SYSTEM_STATUS_ENDPOINT, (req, res) => {
+rest_server.get(SYSTEM_STATUS_ENDPOINT, (req, res) => {
   res.json(system_status)
 })
-app.get(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
+rest_server.get(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
   res.json(security_settings)
 })
-app.post(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
+rest_server.post(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
+  security_settings = req.body
+  console.log(JSON.stringify(security_settings))
   res.json(security_settings)
 })
-app.get(FEATURES_ENDPOINT, (req, res) => {
+rest_server.get(FEATURES_ENDPOINT, (req, res) => {
   res.json(features)
 })
-app.get(VERIFY_AUTHORIZATION_ENDPOINT, (req, res) => {
+rest_server.get(VERIFY_AUTHORIZATION_ENDPOINT, (req, res) => {
   res.json(verify_authentication)
 })
-app.post(RESTART_ENDPOINT, (req, res) => {
+rest_server.post(RESTART_ENDPOINT, (req, res) => {
   res.sendStatus(200)
 })
-app.post(FACTORY_RESET_ENDPOINT, (req, res) => {
+rest_server.post(FACTORY_RESET_ENDPOINT, (req, res) => {
   res.sendStatus(200)
 })
-app.post(UPLOAD_FIRMWARE_ENDPOINT, (req, res) => {
+rest_server.post(UPLOAD_FILE_ENDPOINT, (req, res) => {
   res.sendStatus(200)
 })
-app.post(SIGN_IN_ENDPOINT, (req, res) => {
+rest_server.post(SIGN_IN_ENDPOINT, (req, res) => {
   res.json(signin)
 })
-app.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
+rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
   res.json(generate_token)
 })
 
 // EMS-ESP Project stuff
-app.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
-  res.json(emsesp_settings)
-})
-app.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
-  console.log(req.body)
-  emsesp_settings = req.body
-  res.json(emsesp_settings)
-})
-app.get(EMSESP_DATA_ENDPOINT, (req, res) => {
-  res.json(emsesp_data)
-})
-app.post(EMSESP_SCANDEVICES_ENDPOINT, (req, res) => {
+rest_server.post(EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
+  console.log('Removing all customizations...')
   res.sendStatus(200)
 })
-app.get(EMSESP_STATUS_ENDPOINT, (req, res) => {
-  res.json(emsesp_status)
+rest_server.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
+  console.log('Get settings: ' + JSON.stringify(settings))
+  res.json(settings)
 })
-app.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
+rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
+  settings = req.body
+  console.log('Write settings: ' + JSON.stringify(settings))
+  res.status(202).json(settings) // restart needed
+  // res.status(200).json(settings); // no restart needed
+})
+rest_server.get(EMSESP_CORE_DATA_ENDPOINT, (req, res) => {
+  console.log('send back core data...')
+  res.json(emsesp_coredata)
+})
+rest_server.get(EMSESP_SENSOR_DATA_ENDPOINT, (req, res) => {
+  console.log('send back sensor data...')
+  res.json(emsesp_sensordata)
+})
+rest_server.get(EMSESP_DEVICES_ENDPOINT, (req, res) => {
+  res.json(emsesp_devices)
+})
+rest_server.post(EMSESP_SCANDEVICES_ENDPOINT, (req, res) => {
+  console.log('Scan devices...')
+  res.sendStatus(200)
+})
+rest_server.get(EMSESP_STATUS_ENDPOINT, (req, res) => {
+  res.json(status)
+})
+rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
   const id = req.body.id
+  console.log('send back device data for ' + id)
   if (id === 1) {
     const encoded = msgpack.encode(emsesp_devicedata_1)
     res.write(encoded, 'binary')
@@ -678,39 +885,148 @@ app.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
     res.write(encoded, 'binary')
     res.end(null, 'binary')
   }
-  if (id === 3) {
-    const encoded = msgpack.encode(emsesp_devicedata_3)
+  if (id === 4) {
+    const encoded = msgpack.encode(emsesp_devicedata_4)
     res.write(encoded, 'binary')
     res.end(null, 'binary')
   }
 })
 
-app.post(WRITE_VALUE_ENDPOINT, (req, res) => {
+rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
+  const id = req.body.id
+  if (id === 1) {
+    const encoded = msgpack.encode(emsesp_deviceentities_1)
+    res.write(encoded, 'binary')
+    res.end(null, 'binary')
+  }
+  if (id === 2) {
+    const encoded = msgpack.encode(emsesp_deviceentities_2)
+    res.write(encoded, 'binary')
+    res.end(null, 'binary')
+  }
+  if (id === 4) {
+    const encoded = msgpack.encode(emsesp_deviceentities_4)
+    res.write(encoded, 'binary')
+    res.end(null, 'binary')
+  }
+})
+
+function updateMask(entity, de, dd) {
+  const name = entity.slice(2)
+  const new_mask = parseInt(entity.slice(0, 2), 16)
+
+  objIndex = de.findIndex((obj) => obj.s == name)
+  if (objIndex !== -1) {
+    de[objIndex].m = new_mask
+    const fullname = de[objIndex].id
+    objIndex = dd.data.findIndex((obj) => obj.id.slice(2) == fullname)
+    if (objIndex !== -1) {
+      // see if the mask has changed
+      const old_mask = parseInt(dd.data[objIndex].id.slice(0, 2), 16)
+      if (old_mask !== new_mask) {
+        const mask_hex = entity.slice(0, 2)
+        console.log('Updating ' + dd.data[objIndex].id + ' -> ' + mask_hex + fullname)
+        dd.data[objIndex].id = mask_hex + fullname
+      }
+    }
+  } else {
+    console.log("can't locate record for id " + id)
+  }
+}
+
+rest_server.post(EMSESP_MASKED_ENTITIES_ENDPOINT, (req, res) => {
+  const id = req.body.id
+  console.log('customization id = ' + id)
+  console.log(req.body.entity_ids)
+  for (const entity of req.body.entity_ids) {
+    if (id === 1) {
+      updateMask(entity, emsesp_deviceentities_1, emsesp_devicedata_1)
+    } else if (id === 2) {
+      updateMask(entity, emsesp_deviceentities_2, emsesp_devicedata_2)
+    } else if (id === 4) {
+      updateMask(entity, emsesp_deviceentities_4, emsesp_devicedata_4)
+    }
+  }
+  res.sendStatus(200)
+})
+
+rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
   const devicevalue = req.body.devicevalue
   const id = req.body.id
-  console.log(id)
-  console.log(devicevalue)
+  if (id === 1) {
+    console.log('Write device value for Thermostat: ' + JSON.stringify(devicevalue))
+    objIndex = emsesp_devicedata_1.data.findIndex((obj) => obj.c == devicevalue.c)
+    emsesp_devicedata_1.data[objIndex] = devicevalue
+  }
+  if (id === 2) {
+    console.log('Write device value for Boiler: ' + JSON.stringify(devicevalue))
+    objIndex = emsesp_devicedata_2.data.findIndex((obj) => obj.c == devicevalue.c)
+    emsesp_devicedata_2.data[objIndex] = devicevalue
+  }
+  if (id === 4) {
+    console.log('Write device value for Thermostat2: ' + JSON.stringify(devicevalue))
+    objIndex = emsesp_devicedata_4.data.findIndex((obj) => obj.c == devicevalue.c)
+    emsesp_devicedata_4.data[objIndex] = devicevalue
+  }
 
   res.sendStatus(200)
 })
 
-app.post(WRITE_SENSOR_ENDPOINT, (req, res) => {
-  const sensor = req.body.sensor
-  console.log(sensor)
+rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
+  const sensor = req.body
+  console.log('Write sensor: ' + JSON.stringify(sensor))
+  objIndex = emsesp_sensordata.sensors.findIndex((obj) => obj.id == sensor.id)
+  emsesp_sensordata.sensors[objIndex].n = sensor.name
+  emsesp_sensordata.sensors[objIndex].o = sensor.offset
+  res.sendStatus(200)
+})
+
+rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
+  const analog = req.body
+  console.log('Write analog: ' + JSON.stringify(analog))
+  objIndex = emsesp_sensordata.analogs.findIndex((obj) => obj.i == analog.i)
+
+  if (objIndex === -1) {
+    console.log('new analog')
+    emsesp_sensordata.analogs.push({
+      id: analog.i.toString(),
+      i: analog.i,
+      n: analog.name,
+      f: analog.factor,
+      o: analog.offset,
+      u: analog.uom,
+      t: analog.type,
+    })
+  } else {
+    if (analog.type === -1) {
+      console.log('removing analog ' + analog.i)
+      emsesp_sensordata.analogs[objIndex].t = -1
+    } else {
+      console.log('updating analog ' + analog.i)
+      emsesp_sensordata.analogs[objIndex].n = analog.name
+      emsesp_sensordata.analogs[objIndex].o = analog.offset
+      emsesp_sensordata.analogs[objIndex].f = analog.factor
+      emsesp_sensordata.analogs[objIndex].u = analog.uom
+      emsesp_sensordata.analogs[objIndex].t = analog.type
+    }
+  }
 
   res.sendStatus(200)
 })
 
-app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
-  const board_profile = req.body.code
+rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
+  const board_profile = req.body.board_profile
 
   const data = {
-    led_gpio: 1,
-    dallas_gpio: 2,
-    rx_gpio: 3,
-    tx_gpio: 4,
-    pbutton_gpio: 5,
-    phy_type: 0,
+    led_gpio: settings.led_gpio,
+    dallas_gpio: settings.dallas_gpio,
+    rx_gpio: settings.rx_gpio,
+    tx_gpio: settings.tx_gpio,
+    pbutton_gpio: settings.pbutton_gpio,
+    phy_type: settings.phy_type,
+    eth_power: settings.eth_power,
+    eth_phy_addr: settings.eth_phy_addr,
+    eth_clock_mode: settings.eth_clock_mode,
   }
 
   if (board_profile == 'S32') {
@@ -721,6 +1037,9 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.tx_gpio = 5
     data.pbutton_gpio = 0
     data.phy_type = 0
+    data.eth_power = 0
+    data.eth_phy_addr = 0
+    data.eth_clock_mode = 0
   } else if (board_profile == 'E32') {
     // BBQKees Gateway E32
     data.led_gpio = 2
@@ -729,6 +1048,9 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.tx_gpio = 17
     data.pbutton_gpio = 33
     data.phy_type = 1
+    data.eth_power = 16
+    data.eth_phy_addr = 1
+    data.eth_clock_mode = 0
   } else if (board_profile == 'MH-ET') {
     // MH-ET Live D1 Mini
     data.led_gpio = 2
@@ -737,6 +1059,9 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.tx_gpio = 5
     data.pbutton_gpio = 0
     data.phy_type = 0
+    data.eth_power = 0
+    data.eth_phy_addr = 0
+    data.eth_clock_mode = 0
   } else if (board_profile == 'NODEMCU') {
     // NodeMCU 32S
     data.led_gpio = 2
@@ -745,6 +1070,9 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.tx_gpio = 5
     data.pbutton_gpio = 0
     data.phy_type = 0
+    data.eth_power = 0
+    data.eth_phy_addr = 0
+    data.eth_clock_mode = 0
   } else if (board_profile == 'LOLIN') {
     // Lolin D32
     data.led_gpio = 2
@@ -753,6 +1081,9 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.tx_gpio = 16
     data.pbutton_gpio = 0
     data.phy_type = 0
+    data.eth_power = 0
+    data.eth_phy_addr = 0
+    data.eth_clock_mode = 0
   } else if (board_profile == 'OLIMEX') {
     // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
     data.led_gpio = 0
@@ -761,66 +1092,182 @@ app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.tx_gpio = 4
     data.pbutton_gpio = 34
     data.phy_type = 1
+    data.eth_power = -1
+    data.eth_phy_addr = 0
+    data.eth_clock_mode = 0
+  } else if (board_profile == 'OLIMEXPOE') {
+    // Olimex ESP32-POE
+    data.led_gpio = 0
+    data.dallas_gpio = 0
+    data.rx_gpio = 36
+    data.tx_gpio = 4
+    data.pbutton_gpio = 34
+    data.phy_type = 1
+    data.eth_power = 12
+    data.eth_phy_addr = 0
+    data.eth_clock_mode = 3
   }
 
-  res.json(data)
+  console.log('boardProfile POST. Sending back, profile: ' + board_profile + ', ' + 'data: ' + JSON.stringify(data))
+
+  res.send(data)
 })
 
-// create helper middleware so we can reuse server-sent events
-const useServerSentEventsMiddleware = (req, res, next) => {
+// EMS-ESP API specific
+const emsesp_info = {
+  System: {
+    version: '3.x.x',
+    uptime: '001+06:40:34.018',
+    'uptime (seconds)': 110434,
+    freemem: 131,
+    'reset reason': 'Software reset CPU / Software reset CPU',
+    'Dallas sensors': 3,
+  },
+  Network: {
+    connection: 'Ethernet',
+    hostname: 'ems-esp',
+    MAC: 'A8:03:2A:62:64:CF',
+    'IPv4 address': '192.168.1.134/255.255.255.0',
+    'IPv4 gateway': '192.168.1.1',
+    'IPv4 nameserver': '192.168.1.1',
+  },
+  Status: {
+    'bus status': 'connected',
+    'bus protocol': 'Buderus',
+    'telegrams received': 84986,
+    'read requests sent': 14748,
+    'write requests sent': 3,
+    'incomplete telegrams': 8,
+    'tx fails': 0,
+    'rx line quality': 100,
+    'tx line quality': 100,
+    MQTT: 'connected',
+    'MQTT publishes': 46336,
+    'MQTT publish fails': 0,
+    'Dallas reads': 22086,
+    'Dallas fails': 0,
+  },
+  Devices: [
+    {
+      type: 'Boiler',
+      name: 'Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i (DeviceID:0x08 ProductID:123, Version:06.01)',
+      handlers:
+        '0x10 0x11 0xC2 0x14 0x15 0x1C 0x18 0x19 0x1A 0x35 0x16 0x33 0x34 0x26 0x2A 0xD1 0xE3 0xE4 0xE5 0xE6 0xE9 0xEA',
+    },
+    {
+      type: 'Thermostat',
+      name: 'RC20/Moduline 300 (DeviceID:0x17, ProductID:77, Version:03.03)',
+      handlers: '0xA3 0x06 0xA2 0x12 0x91 0xA8',
+    },
+  ],
+}
+
+rest_server.post(API_ENDPOINT_ROOT, (req, res) => {
+  console.log('Generic API POST')
+  console.log(req.body)
+  if (req.body.device === 'system') {
+    if (req.body.entity === 'info') {
+      console.log('sending system info: ' + JSON.stringify(emsesp_info))
+    } else if (req.body.entity === 'settings') {
+      console.log('sending system settings: ' + JSON.stringify(settings))
+      res.json(settings)
+    } else {
+      res.sendStatus(200)
+    }
+  } else {
+    res.sendStatus(200)
+  }
+})
+rest_server.get(API_ENDPOINT_ROOT, (req, res) => {
+  console.log('Generic API GET')
+  res.sendStatus(200)
+})
+
+const SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info'
+rest_server.post(SYSTEM_INFO_ENDPOINT, (req, res) => {
+  console.log('System Info POST: ' + JSON.stringify(req.body))
+  res.sendStatus(200)
+})
+rest_server.get(SYSTEM_INFO_ENDPOINT, (req, res) => {
+  console.log('System Info GET')
+  res.json(emsesp_info)
+})
+
+const GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings'
+rest_server.get(GET_SETTINGS_ENDPOINT, (req, res) => {
+  console.log('System Settings:')
+  res.json(settings)
+})
+
+const GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations'
+rest_server.get(GET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
+  console.log('Customizations:')
+  // not implemented yet
+  res.sendStatus(200)
+})
+
+// start server
+const expressServer = rest_server.listen(port, () =>
+  console.log(`Mock server for EMS-ESP is up and running at http://localhost:${port}`),
+)
+console.log(`EMS-ESP Rest API listening to http://localhost:${port}/api`)
+
+// start websocket server
+const websocketServer = new WebSocket.Server({
+  noServer: true,
+  path: '/ws',
+})
+console.log('WebSocket server is listening to /ws')
+
+expressServer.on('upgrade', (request, socket, head) => {
+  websocketServer.handleUpgrade(request, socket, head, (websocket) => {
+    websocketServer.emit('connection', websocket, request)
+  })
+})
+
+websocketServer.on('connection', function connection(websocketConnection, connectionRequest) {
+  const [_path, params] = connectionRequest?.url?.split('?')
+  console.log(params)
+
+  websocketConnection.on('message', (message) => {
+    const parsedMessage = JSON.parse(message)
+    console.log(parsedMessage)
+  })
+})
+
+var count = 8
+var log_index = 0
+const ES_ENDPOINT_ROOT = '/es/'
+const ES_LOG_ENDPOINT = ES_ENDPOINT_ROOT + 'log'
+rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Cache-Control', 'no-cache')
-
-  // only if you want anyone to access this endpoint
   res.setHeader('Access-Control-Allow-Origin', '*')
-
+  res.setHeader('Connection', 'keep-alive')
+  // res.setHeader('Content-Encoding', 'deflate')
+  // res.setHeader('X-Accel-Buffering', 'no')
   res.flushHeaders()
 
-  const sendEventStreamData = (data) => {
-    const sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`
-    res.write(sseFormattedResponse)
-  }
-
-  // we are attaching sendEventStreamData to res, so we can use it later
-  Object.assign(res, {
-    sendEventStreamData,
-  })
-
-  next()
-}
-
-const streamLog = (req, res) => {
-  let interval = setInterval(function generateAndSendLog() {
-    count = count + 1
-
+  var timer = setInterval(function () {
+    count += 1
+    log_index += 1
     const data = {
-      time: '000+00:00:00.000',
-      level: 3,
-      name: 'system',
-      message: 'this is message #' + count,
+      t: '000+00:00:00.000',
+      l: 3, // error
+      i: count,
+      n: 'system',
+      m: 'incoming message #' + count + '/' + log_index,
     }
+    const sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`
+    // console.log('sending log #' + count)
+    res.write(sseFormattedResponse)
+    res.flush() // this is important
 
-    res.sendEventStreamData(data)
+    // if buffer full start over
+    if (log_index > 50) {
+      fetch_log.events = []
+      log_index = 0
+    }
+    fetch_log.events.push(data) // append to buffer
   }, 1000)
-
-  res.on('close', () => {
-    clearInterval(interval)
-    res.end()
-  })
-}
-
-// event source, server-sent events SSE
-const ES_LOG_ENDPOINT = ES_ENDPOINT_ROOT + 'log'
-let count = 0
-server.get(ES_LOG_ENDPOINT, useServerSentEventsMiddleware, streamLog)
-server.listen(es_port, () =>
-  console.log(
-    `Mock EventSource server for EMS-ESP listening at http://localhost:${es_port}`,
-  ),
-)
-
-// rest API
-app.listen(port)
-console.log(
-  `Mock RESTful API server for EMS-ESP is up and running at http://localhost:${port}`,
-)
+})

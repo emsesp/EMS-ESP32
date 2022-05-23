@@ -30,6 +30,8 @@ class Shower {
 
     void set_shower_state(bool state, bool force = false);
 
+    /* unused header
+    *
     bool shower_alert() const {
         return shower_alert_;
     }
@@ -45,22 +47,23 @@ class Shower {
     void shower_timer(const bool shower_timer) {
         shower_timer_ = shower_timer;
     }
+    */
 
   private:
     static uuid::log::Logger logger_;
 
-    static constexpr uint32_t SHOWER_PAUSE_TIME        = 15000;  // in ms. 15 seconds, max time if water is switched off & on during a shower
-    static constexpr uint32_t SHOWER_MIN_DURATION      = 120000; // in ms. 2 minutes, before recognizing its a shower
-    static constexpr uint32_t SHOWER_OFFSET_TIME       = 5000;   // in ms. 5 seconds grace time, to calibrate actual time under the shower
-    static constexpr uint32_t SHOWER_COLDSHOT_DURATION = 10000;  // 10 seconds for cold water before turning back hot water
-    static constexpr uint32_t SHOWER_MAX_DURATION      = 420000; // in ms. 7 minutes, before trigger a shot of cold water
+    static constexpr uint32_t SHOWER_PAUSE_TIME   = 15000;  // in ms. 15 seconds, max time if water is switched off & on during a shower
+    static constexpr uint32_t SHOWER_MIN_DURATION = 120000; // in ms. 2 minutes, before recognizing its a shower
+    static constexpr uint32_t SHOWER_OFFSET_TIME  = 5000;   // in ms. 5 seconds grace time, to calibrate actual time under the shower
 
-    void publish_shower_data();
+    void publish_shower_data() const;
     void shower_alert_start();
     void shower_alert_stop();
 
     bool     shower_timer_;          // true if we want to report back on shower times
     bool     shower_alert_;          // true if we want the alert of cold water
+    uint32_t shower_alert_trigger_;  // default 7 minutes, before trigger a shot of cold water
+    uint32_t shower_alert_coldshot_; // default 10 seconds for cold water before turning back hot water
     bool     ha_configdone_ = false; // for HA MQTT Discovery
     bool     shower_state_;
     uint32_t timer_start_; // ms

@@ -34,25 +34,25 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     switch (event) {
     case SYSTEM_EVENT_STA_DISCONNECTED:
-        EMSESP::logger().info(F("WiFi Disconnected. Reason code=%d"), info.disconnected.reason);
+        EMSESP::logger().info(F("WiFi disconnected. Reason code=%d"), info.disconnected.reason);
         WiFi.disconnect(true);
         break;
 
     case SYSTEM_EVENT_STA_GOT_IP:
 #ifndef EMSESP_STANDALONE
-        EMSESP::logger().info(F("WiFi Connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
+        EMSESP::logger().info(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
 #endif
         EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
             if (!networkSettings.enableIPv6) {
                 EMSESP::system_.send_heartbeat();
-                EMSESP::system_.syslog_start();
+                EMSESP::system_.syslog_init();
             }
         });
         mDNS_start();
         break;
 
     case SYSTEM_EVENT_ETH_START:
-        EMSESP::logger().info(F("Ethernet initialized"));
+        // EMSESP::logger().info(F("Ethernet initialized"));
         ETH.setHostname(EMSESP::system_.hostname().c_str());
 
         // configure for static IP
@@ -68,12 +68,12 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         // prevent double calls
         if (!EMSESP::system_.ethernet_connected()) {
 #ifndef EMSESP_STANDALONE
-            EMSESP::logger().info(F("Ethernet Connected with IP=%s, speed %d Mbps"), ETH.localIP().toString().c_str(), ETH.linkSpeed());
+            EMSESP::logger().info(F("Ethernet connected with IP=%s, speed %d Mbps"), ETH.localIP().toString().c_str(), ETH.linkSpeed());
 #endif
             EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
                 if (!networkSettings.enableIPv6) {
                     EMSESP::system_.send_heartbeat();
-                    EMSESP::system_.syslog_start();
+                    EMSESP::system_.syslog_init();
                 }
             });
             EMSESP::system_.ethernet_connected(true);
@@ -82,12 +82,12 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         break;
 
     case SYSTEM_EVENT_ETH_DISCONNECTED:
-        EMSESP::logger().info(F("Ethernet Disconnected"));
+        EMSESP::logger().info(F("Ethernet disconnected"));
         EMSESP::system_.ethernet_connected(false);
         break;
 
     case SYSTEM_EVENT_ETH_STOP:
-        EMSESP::logger().info(F("Ethernet Stopped"));
+        EMSESP::logger().info(F("Ethernet stopped"));
         EMSESP::system_.ethernet_connected(false);
         break;
 
@@ -110,12 +110,12 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 
     case SYSTEM_EVENT_GOT_IP6:
         if (EMSESP::system_.ethernet_connected()) {
-            EMSESP::logger().info(F("Ethernet Connected with IP=%s, speed %d Mbps"), ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
+            EMSESP::logger().info(F("Ethernet connected with IP=%s, speed %d Mbps"), ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
         } else {
-            EMSESP::logger().info(F("WiFi Connected with IP=%s, hostname=%s"), WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
+            EMSESP::logger().info(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
         }
         EMSESP::system_.send_heartbeat();
-        EMSESP::system_.syslog_start();
+        EMSESP::system_.syslog_init();
         mDNS_start();
         break;
 #endif
@@ -126,37 +126,94 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM_DYN);
-    JsonObject          root     = response->getRoot();
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM_DYN);
+    JsonObject root     = response->getRoot();
 
     root["status"]      = EMSESP::bus_status(); // 0, 1 or 2
-    root["rx_received"] = EMSESP::rxservice_.telegram_count();
-    root["tx_sent"]     = EMSESP::txservice_.telegram_read_count() + EMSESP::txservice_.telegram_write_count();
-    root["rx_quality"]  = EMSESP::rxservice_.quality();
-    root["tx_quality"]  = EMSESP::txservice_.quality();
+    root["tx_mode"]     = EMSESP::txservice_.tx_mode();
+    root["uptime"]      = EMSbus::bus_uptime();
+    root["num_devices"] = EMSESP::count_devices(); // excluding Controller
+    root["num_sensors"] = EMSESP::dallassensor_.no_sensors();
+    root["num_analogs"] = EMSESP::analogsensor_.no_sensors();
+
+    JsonArray  statsJson = root.createNestedArray("stats");
+    JsonObject statJson;
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "EMS Telegrams Received (Rx)";
+    statJson["s"]  = EMSESP::rxservice_.telegram_count();
+    statJson["f"]  = EMSESP::rxservice_.telegram_error_count();
+    statJson["q"]  = EMSESP::rxservice_.quality();
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "EMS Reads (Tx)";
+    statJson["s"]  = EMSESP::txservice_.telegram_read_count();
+    statJson["f"]  = EMSESP::txservice_.telegram_read_fail_count();
+    statJson["q"]  = EMSESP::txservice_.read_quality();
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "EMS Writes (Tx)";
+    statJson["s"]  = EMSESP::txservice_.telegram_write_count();
+    statJson["f"]  = EMSESP::txservice_.telegram_write_fail_count();
+    statJson["q"]  = EMSESP::txservice_.write_quality();
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "Temperature Sensor Reads";
+    statJson["s"]  = EMSESP::dallassensor_.reads();
+    statJson["f"]  = EMSESP::dallassensor_.fails();
+    statJson["q"]  = EMSESP::dallassensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::dallassensor_.fails()) / EMSESP::dallassensor_.reads());
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "Analog Sensor Reads";
+    statJson["s"]  = EMSESP::analogsensor_.reads();
+    statJson["f"]  = EMSESP::analogsensor_.fails();
+    statJson["q"]  = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "MQTT Publishes";
+    statJson["s"]  = Mqtt::publish_count();
+    statJson["f"]  = Mqtt::publish_fails();
+    statJson["q"]  = Mqtt::publish_count() == 0 ? 100 : 100 - (Mqtt::publish_fails() * 100) / (Mqtt::publish_count() + Mqtt::publish_fails());
+
+    statJson       = statsJson.createNestedObject();
+    statJson["id"] = "API Calls";
+    statJson["s"]  = WebAPIService::api_count(); // + WebAPIService::api_fails();
+    statJson["f"]  = WebAPIService::api_fails();
+    statJson["q"] = WebAPIService::api_count() == 0 ? 100 : 100 - (WebAPIService::api_fails() * 100) / (WebAPIService::api_count() + WebAPIService::api_fails());
 
     response->setLength();
     request->send(response);
 }
 
 // start the multicast UDP service so EMS-ESP is discoverable via .local
-void WebStatusService::mDNS_start() {
+void WebStatusService::mDNS_start() const {
 #ifndef EMSESP_STANDALONE
-    if (!MDNS.begin(EMSESP::system_.hostname().c_str())) {
-        EMSESP::logger().warning(F("Failed to start mDNS responder service"));
-        return;
-    }
+    MDNS.end();
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+        if (networkSettings.enableMDNS) {
+            if (!MDNS.begin(EMSESP::system_.hostname().c_str())) {
+                EMSESP::logger().warning(F("Failed to start mDNS responder service"));
+                return;
+            }
 
-    std::string address_s = EMSESP::system_.hostname() + ".local";
+            std::string address_s = EMSESP::system_.hostname() + ".local";
 
-    MDNS.addService("http", "tcp", 80);   // add our web server and rest API
-    MDNS.addService("telnet", "tcp", 23); // add our telnet console
+            MDNS.addService("http", "tcp", 80);   // add our web server and rest API
+            MDNS.addService("telnet", "tcp", 23); // add our telnet console
 
-    MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
-    MDNS.addServiceTxt("http", "tcp", "address", address_s.c_str());
+            MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
+            MDNS.addServiceTxt("http", "tcp", "address", address_s.c_str());
+
+            EMSESP::logger().info(F("mDNS responder service started"));
+        }
+    });
+#else
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+        if (networkSettings.enableMDNS) {
+            EMSESP::logger().info(F("mDNS responder service started"));
+        }
+    });
 #endif
-
-    EMSESP::logger().info(F("mDNS responder service started"));
 }
 
 } // namespace emsesp

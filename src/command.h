@@ -19,17 +19,9 @@
 #ifndef EMSESP_COMMAND_H_
 #define EMSESP_COMMAND_H_
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
-
-#include <string>
-#include <vector>
-#include <functional>
 #include <unordered_map>
 
 #include "console.h"
-
-#include <uuid/log.h>
 
 using uuid::console::Shell;
 
@@ -38,12 +30,11 @@ namespace emsesp {
 // mqtt flags for command subscriptions
 enum CommandFlag : uint8_t {
     MQTT_SUB_FLAG_DEFAULT = 0,        // 0 no flags set, always subscribe to MQTT
-    MQTT_SUB_FLAG_HC      = (1 << 0), // 1 TAG_HC1 - TAG_HC4
+    MQTT_SUB_FLAG_HC      = (1 << 0), // 1 TAG_HC1 - TAG_HC8
     MQTT_SUB_FLAG_WWC     = (1 << 1), // 2 TAG_WWC1 - TAG_WWC4
-    MQTT_SUB_FLAG_NOSUB   = (1 << 2), // 4
-    MQTT_SUB_FLAG_WW      = (1 << 3), // 8 TAG_DEVICE_DATA_WW
-    HIDDEN                = (1 << 4), // 16 do not show in API or Web
-    ADMIN_ONLY            = (1 << 5)  // 32 requires authentication
+    MQTT_SUB_FLAG_WW      = (1 << 2), // 4 TAG_DEVICE_DATA_WW
+    HIDDEN                = (1 << 3), // 8 do not show in API or Web
+    ADMIN_ONLY            = (1 << 4)  // 16 requires authentication
 
 };
 
@@ -134,39 +125,36 @@ class Command {
 
     static const char * parse_command_string(const char * command, int8_t & id);
 
-    static const std::string return_code_string(const uint8_t return_code);
+    static std::string return_code_string(const uint8_t return_code);
 
   private:
     static uuid::log::Logger logger_;
 
     static std::vector<CmdFunction> cmdfunctions_; // the list of commands
 
-    inline static uint8_t message(uint8_t error_code, const char * message, JsonObject & output) {
+    inline static uint8_t message(uint8_t error_code, const char * message, const JsonObject & output) {
         output.clear();
-        output["message"] = (const char *)message;
+        output["message"] = message;
         return error_code;
     }
 };
 
-typedef std::unordered_map<std::string, std::string> KeyValueMap_t;
-typedef std::vector<std::string>                     Folder_t;
-
 class SUrlParser {
   private:
-    KeyValueMap_t m_keysvalues;
-    Folder_t      m_folders;
+    std::unordered_map<std::string, std::string> m_keysvalues;
+    std::vector<std::string>                     m_folders;
 
   public:
-    SUrlParser(){};
+    SUrlParser() = default;
     SUrlParser(const char * url);
 
     bool parse(const char * url);
 
-    Folder_t & paths() {
+    std::vector<std::string> & paths() {
         return m_folders;
     };
 
-    KeyValueMap_t & params() {
+    std::unordered_map<std::string, std::string> & params() {
         return m_keysvalues;
     };
 

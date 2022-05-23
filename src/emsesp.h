@@ -22,6 +22,10 @@
 
 #include <vector>
 #include <string>
+#include <functional>
+#include <deque>
+#include <unordered_map>
+#include <list>
 
 #include <ArduinoJson.h>
 
@@ -38,15 +42,18 @@
 #include "web/WebStatusService.h"
 #include "web/WebDataService.h"
 #include "web/WebSettingsService.h"
+#include "web/WebCustomizationService.h"
 #include "web/WebAPIService.h"
 #include "web/WebLogService.h"
 
+#include "emsdevicevalue.h"
 #include "emsdevice.h"
 #include "emsfactory.h"
 #include "telegram.h"
 #include "mqtt.h"
 #include "system.h"
 #include "dallassensor.h"
+#include "analogsensor.h"
 #include "console.h"
 #include "shower.h"
 #include "roomcontrol.h"
@@ -55,7 +62,11 @@
 
 #define WATCH_ID_NONE 0 // no watch id set
 
-#define EMSESP_JSON_SIZE_HA_CONFIG 768   // for HA config payloads, using StaticJsonDocument
+#ifndef EMSESP_STANDALONE
+#define EMSESP_JSON_SIZE_HA_CONFIG 1024 // for HA config payloads, using StaticJsonDocument
+#else
+#define EMSESP_JSON_SIZE_HA_CONFIG 2024 // for HA config payloads, using StaticJsonDocument
+#endif
 #define EMSESP_JSON_SIZE_SMALL 256       // for smaller json docs, using StaticJsonDocument
 #define EMSESP_JSON_SIZE_MEDIUM 768      // for medium json docs from ems devices, using StaticJsonDocument
 #define EMSESP_JSON_SIZE_LARGE 1024      // for large json docs from ems devices, like boiler or thermostat data, using StaticJsonDocument
@@ -68,13 +79,19 @@
 #define EMSESP_JSON_SIZE_XLARGE_DYN 16384 // for very very large json docs, using DynamicJsonDocument
 #endif
 
-#define EMSESP_JSON_SIZE_XXLARGE_DYN 16384 // for extra very very large json docs, using DynamicJsonDocument
+#define EMSESP_JSON_SIZE_XXLARGE_DYN 16384  // for extra very very large json docs, using DynamicJsonDocument
+#define EMSESP_JSON_SIZE_XXXLARGE_DYN 20480 // web output (maybe for 4 hc)
 
 // helpers for callback functions
 #define MAKE_PF_CB(__f) [&](std::shared_ptr<const Telegram> t) { __f(t); }                  // for Process Function callbacks to EMSDevice::process_function_p
 #define MAKE_CF_CB(__f) [&](const char * value, const int8_t id) { return __f(value, id); } // for Command Function callbacks Command::cmd_function_p
 
 namespace emsesp {
+
+using DeviceValueUOM   = emsesp::DeviceValue::DeviceValueUOM;
+using DeviceValueType  = emsesp::DeviceValue::DeviceValueType;
+using DeviceValueState = emsesp::DeviceValue::DeviceValueState;
+using DeviceValueTAG   = emsesp::DeviceValue::DeviceValueTAG;
 
 class Shower; // forward declaration for compiler
 
@@ -111,8 +128,11 @@ class EMSESP {
 
     static void send_raw_telegram(const char * data);
     static bool device_exists(const uint8_t device_id);
+    static bool cmd_is_readonly(const uint8_t device_type, const char * cmd, const int8_t id);
 
     static uint8_t count_devices(const uint8_t device_type);
+    static uint8_t count_devices();
+    static uint8_t device_index(const uint8_t device_type, const uint8_t unique_id);
 
     static uint8_t actual_master_thermostat();
     static void    actual_master_thermostat(const uint8_t device_id);
@@ -126,44 +146,16 @@ class EMSESP {
     static void show_devices(uuid::console::Shell & shell);
     static void show_ems(uuid::console::Shell & shell);
 
-    static void init_uart();
+    static void uart_init();
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
-
-    static const std::vector<DallasSensor::Sensor> sensor_devices() {
-        return dallassensor_.sensors();
-    }
-
-    static bool have_sensors() {
-        return (!(dallassensor_.sensors().empty()));
-    }
-
-    static uint32_t sensor_reads() {
-        return dallassensor_.reads();
-    }
-
-    static uint32_t sensor_fails() {
-        return dallassensor_.fails();
-    }
 
     static bool dallas_enabled() {
         return (dallassensor_.dallas_enabled());
     }
 
-    static uint8_t bool_format() {
-        return bool_format_;
-    }
-
-    static void bool_format(uint8_t format) {
-        bool_format_ = format;
-    }
-
-    static uint8_t enum_format() {
-        return enum_format_;
-    }
-
-    static void enum_format(uint8_t format) {
-        enum_format_ = format;
+    static bool analog_enabled() {
+        return (analogsensor_.analog_enabled());
     }
 
     enum Watch : uint8_t { WATCH_OFF, WATCH_ON, WATCH_RAW, WATCH_UNKNOWN };
@@ -178,12 +170,14 @@ class EMSESP {
             watch_id_ = 0; // reset watch id if watch is disabled
         }
     }
+
     static uint8_t watch() {
         return watch_;
     }
     static void set_read_id(uint16_t id) {
         read_id_ = id;
     }
+
     static bool wait_validate() {
         return (wait_validate_ != 0);
     }
@@ -213,8 +207,9 @@ class EMSESP {
     static void fetch_device_values(const uint8_t device_id = 0);
     static void fetch_device_values_type(const uint8_t device_type);
     static bool valid_device(const uint8_t device_id);
+    static void scheduled_fetch_values();
 
-    static bool add_device(const uint8_t device_id, const uint8_t product_id, std::string & version, const uint8_t brand);
+    static bool add_device(const uint8_t device_id, const uint8_t product_id, const char * version, const uint8_t brand);
     static void scan_devices();
     static void clear_all_devices();
 
@@ -224,18 +219,20 @@ class EMSESP {
     static Mqtt         mqtt_;
     static System       system_;
     static DallasSensor dallassensor_;
+    static AnalogSensor analogsensor_;
     static Console      console_;
     static Shower       shower_;
     static RxService    rxservice_;
     static TxService    txservice_;
 
     // web controllers
-    static ESP8266React       esp8266React;
-    static WebSettingsService webSettingsService;
-    static WebStatusService   webStatusService;
-    static WebDataService     webDataService;
-    static WebAPIService      webAPIService;
-    static WebLogService      webLogService;
+    static ESP8266React            esp8266React;
+    static WebSettingsService      webSettingsService;
+    static WebStatusService        webStatusService;
+    static WebDataService          webDataService;
+    static WebAPIService           webAPIService;
+    static WebLogService           webLogService;
+    static WebCustomizationService webCustomizationService;
 
     static uuid::log::Logger logger();
 
@@ -245,17 +242,16 @@ class EMSESP {
     static uuid::log::Logger logger_;
 
     static std::string device_tostring(const uint8_t device_id);
-
-    static void process_UBADevices(std::shared_ptr<const Telegram> telegram);
-    static void process_version(std::shared_ptr<const Telegram> telegram);
-    static void publish_response(std::shared_ptr<const Telegram> telegram);
-    static void publish_all_loop();
-    static bool command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target);
-    static bool command_commands(uint8_t device_type, JsonObject & output, const int8_t id);
-    static bool command_entities(uint8_t device_type, JsonObject & output, const int8_t id);
+    static void        process_UBADevices(std::shared_ptr<const Telegram> telegram);
+    static void        process_version(std::shared_ptr<const Telegram> telegram);
+    static void        publish_response(std::shared_ptr<const Telegram> telegram);
+    static void        publish_all_loop();
+    static bool        command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target);
+    static bool        command_commands(uint8_t device_type, JsonObject & output, const int8_t id);
+    static bool        command_entities(uint8_t device_type, JsonObject & output, const int8_t id);
 
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
-    static uint32_t           last_fetch_;
+    static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute
 
     struct Device_record {
         uint8_t                     product_id;
@@ -275,12 +271,9 @@ class EMSESP {
     static uint8_t  publish_all_idx_;
     static uint8_t  unique_id_count_;
     static bool     trace_raw_;
-    static uint8_t  bool_format_;
-    static uint8_t  enum_format_;
     static uint16_t wait_validate_;
     static bool     wait_km_;
-
-    static constexpr uint8_t EMS_WAIT_KM_TIMEOUT = 60; // wait one minute
+    static uint32_t last_fetch_;
 };
 
 } // namespace emsesp

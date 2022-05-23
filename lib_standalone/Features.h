@@ -28,7 +28,7 @@
 #define FT_OTA 0
 #endif
 
-// upload firmware feature off by default
+// upload firmware/file feature off by default
 #ifndef FT_UPLOAD_FIRMWARE
 #define FT_UPLOAD_FIRMWARE 0
 #endif

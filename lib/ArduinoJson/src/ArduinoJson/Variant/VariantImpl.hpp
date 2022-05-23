@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -26,7 +26,7 @@ inline T VariantData::asIntegral() const {
       return convertNumber<T>(_content.asSignedInteger);
     case VALUE_IS_LINKED_STRING:
     case VALUE_IS_OWNED_STRING:
-      return parseNumber<T>(_content.asString);
+      return parseNumber<T>(_content.asString.data);
     case VALUE_IS_FLOAT:
       return convertNumber<T>(_content.asFloat);
     default:
@@ -62,7 +62,7 @@ inline T VariantData::asFloat() const {
       return static_cast<T>(_content.asSignedInteger);
     case VALUE_IS_LINKED_STRING:
     case VALUE_IS_OWNED_STRING:
-      return parseNumber<T>(_content.asString);
+      return parseNumber<T>(_content.asString.data);
     case VALUE_IS_FLOAT:
       return static_cast<T>(_content.asFloat);
     default:
@@ -70,13 +70,38 @@ inline T VariantData::asFloat() const {
   }
 }
 
-inline const char *VariantData::asString() const {
+inline String VariantData::asString() const {
   switch (type()) {
     case VALUE_IS_LINKED_STRING:
+      return String(_content.asString.data, _content.asString.size,
+                    String::Linked);
     case VALUE_IS_OWNED_STRING:
-      return _content.asString;
+      return String(_content.asString.data, _content.asString.size,
+                    String::Copied);
     default:
-      return 0;
+      return String();
+  }
+}
+
+inline bool VariantData::copyFrom(const VariantData &src, MemoryPool *pool) {
+  switch (src.type()) {
+    case VALUE_IS_ARRAY:
+      return toArray().copyFrom(src._content.asCollection, pool);
+    case VALUE_IS_OBJECT:
+      return toObject().copyFrom(src._content.asCollection, pool);
+    case VALUE_IS_OWNED_STRING: {
+      String value = src.asString();
+      return storeString(adaptString(value), pool,
+                         getStringStoragePolicy(value));
+    }
+    case VALUE_IS_OWNED_RAW:
+      return storeOwnedRaw(
+          serialized(src._content.asString.data, src._content.asString.size),
+          pool);
+    default:
+      setType(src.type());
+      _content = src._content;
+      return true;
   }
 }
 
@@ -143,6 +168,17 @@ inline VariantConstRef operator|(VariantConstRef preferedValue,
 
 // Out of class definition to avoid #1560
 inline bool VariantRef::set(char value) const {
-  return set<signed char>(value);
+  return set(static_cast<signed char>(value));
 }
+
+// TODO: move somewhere else
+template <typename TAdaptedString, typename TCallback>
+bool CopyStringStoragePolicy::store(TAdaptedString str, MemoryPool *pool,
+                                    TCallback callback) {
+  const char *copy = pool->saveString(str);
+  String storedString(copy, str.size(), String::Copied);
+  callback(storedString);
+  return copy != 0;
+}
+
 }  // namespace ARDUINOJSON_NAMESPACE

@@ -13,7 +13,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     , _ntpSettingsService(server, fs, &_securitySettingsService)
     , _ntpStatus(server, &_securitySettingsService)
     , _otaSettingsService(server, fs, &_securitySettingsService)
-    , _uploadFirmwareService(server, &_securitySettingsService)
+    , _uploadFileService(server, &_securitySettingsService)
     , _mqttSettingsService(server, fs, &_securitySettingsService)
     , _mqttStatus(server, &_mqttSettingsService, &_securitySettingsService)
     , _authenticationService(server, &_securitySettingsService)
@@ -42,11 +42,6 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
             });
         }
     });
-
-    // only added for local testing (CORS)
-    // DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Accept, Content-Type, Authorization");
-    // DefaultHeaders::Instance().addHeader("Access-Control-Allow-Credentials", "true");
-    // DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
 }
 
 void ESP8266React::begin() {

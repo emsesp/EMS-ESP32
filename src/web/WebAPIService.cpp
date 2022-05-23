@@ -24,11 +24,20 @@ using namespace std::placeholders; // for `_1` etc
 
 namespace emsesp {
 
+uint32_t WebAPIService::api_count_ = 0;
+uint16_t WebAPIService::api_fails_ = 0;
+
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager)
     , _apiHandler("/api", std::bind(&WebAPIService::webAPIService_post, this, _1, _2), 256) { // for POSTS, must use 'Content-Type: application/json' in header
     server->on("/api", HTTP_GET, std::bind(&WebAPIService::webAPIService_get, this, _1));     // for GETS
     server->addHandler(&_apiHandler);
+
+    // for settings
+    server->on(GET_SETTINGS_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebAPIService::getSettings, this, _1), AuthenticationPredicates::IS_ADMIN));
+    server->on(GET_CUSTOMIZATIONS_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest(std::bind(&WebAPIService::getCustomizations, this, _1), AuthenticationPredicates::IS_ADMIN));
 }
 
 // HTTP GET
@@ -46,7 +55,7 @@ void WebAPIService::webAPIService_get(AsyncWebServerRequest * request) {
 // POST /{device}[/{hc|id}][/{name}]
 void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json) {
     // if no body then treat it as a secure GET
-    if (not json.is<JsonObject>()) {
+    if (!json.is<JsonObject>()) {
         webAPIService_get(request);
         return;
     }
@@ -60,15 +69,42 @@ void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVari
 // reporting back any errors
 void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     // check if the user has admin privileges (token is included and authorized)
-    bool is_admin;
+    bool is_admin = false;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         Authentication authentication = _securityManager->authenticateRequest(request);
-        is_admin                      = settings.notoken_api | AuthenticationPredicates::IS_ADMIN(authentication);
+        is_admin                      = settings.notoken_api || AuthenticationPredicates::IS_ADMIN(authentication);
     });
 
+    // check for query parameters first, the old style from v2
+    // api?device={device}&cmd={name}&data={value}&id={hc}
+    if (request->url() == "/api") {
+        // get the device
+        if (request->hasParam(F_(device))) {
+            input["device"] = request->getParam(F_(device))->value().c_str();
+        }
+        if (request->hasParam(F_(cmd))) {
+            input["cmd"] = request->getParam(F_(cmd))->value().c_str();
+        }
+        if (request->hasParam(F_(data))) {
+            input["data"] = request->getParam(F_(data))->value().c_str();
+        }
+        if (request->hasParam(F_(value))) {
+            input["value"] = request->getParam(F_(value))->value().c_str();
+        }
+        if (request->hasParam(F_(id))) {
+            input["id"] = Helpers::atoint(request->getParam(F_(id))->value().c_str());
+        }
+        if (request->hasParam(F_(hc))) {
+            input["hc"] = Helpers::atoint(request->getParam(F_(hc))->value().c_str());
+        }
+        if (request->hasParam(F_(wwc))) {
+            input["wwc"] = Helpers::atoint(request->getParam(F_(wwc))->value().c_str());
+        }
+    }
+
     // output json buffer
-    PrettyAsyncJsonResponse * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
-    JsonObject                output   = response->getRoot();
+    auto *     response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
+    JsonObject output   = response->getRoot();
 
     // call command
     uint8_t return_code = Command::process(request->url().c_str(), is_admin, input, output);
@@ -81,12 +117,22 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
             snprintf(error, sizeof(error), "Call failed with error code (%s)", Command::return_code_string(return_code).c_str());
         }
         emsesp::EMSESP::logger().err(error);
+        api_fails_++;
     } else {
-        emsesp::EMSESP::logger().debug(F("API command called successfully"));
+        // emsesp::EMSESP::logger().debug(F("API command called successfully"));
         // if there was no json output from the call, default to the output message 'OK'.
         if (!output.size()) {
             output["message"] = "OK";
         }
+    }
+
+    // if we're returning single values, just sent as plain text
+    // https://github.com/emsesp/EMS-ESP32/issues/462#issuecomment-1093877210
+    if (output.containsKey("api_data")) {
+        JsonVariant data = output["api_data"];
+        request->send(200, "text/plain; charset=utf-8", data.as<String>());
+        api_count_++;
+        return;
     }
 
     // send the json that came back from the command call
@@ -96,6 +142,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     response->setLength();
     response->setContentType("application/json");
     request->send(response);
+    api_count_++;
 
 #if defined(EMSESP_STANDALONE)
     Serial.print(COLOR_YELLOW);
@@ -107,6 +154,39 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     Serial.println();
     Serial.print(COLOR_RESET);
 #endif
+}
+
+void WebAPIService::getSettings(AsyncWebServerRequest * request) {
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    JsonObject root     = response->getRoot();
+
+    root["type"] = "settings";
+
+    JsonObject node = root.createNestedObject("System");
+    node["version"] = EMSESP_APP_VERSION;
+
+    System::extractSettings(NETWORK_SETTINGS_FILE, "Network", root);
+    System::extractSettings(AP_SETTINGS_FILE, "AP", root);
+    System::extractSettings(MQTT_SETTINGS_FILE, "MQTT", root);
+    System::extractSettings(NTP_SETTINGS_FILE, "NTP", root);
+    System::extractSettings(OTA_SETTINGS_FILE, "OTA", root);
+    System::extractSettings(SECURITY_SETTINGS_FILE, "Security", root);
+    System::extractSettings(EMSESP_SETTINGS_FILE, "Settings", root);
+
+    response->setLength();
+    request->send(response);
+}
+
+void WebAPIService::getCustomizations(AsyncWebServerRequest * request) {
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    JsonObject root     = response->getRoot();
+
+    root["type"] = "customizations";
+
+    System::extractSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", root);
+
+    response->setLength();
+    request->send(response);
 }
 
 } // namespace emsesp

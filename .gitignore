@@ -30,3 +30,8 @@ node_modules
 test.sh
 scripts/__pycache__
 .temp
+
+# sonar
+.scannerwork/
+sonar/
+build_wrapper_output_directory/

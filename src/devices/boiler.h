@@ -25,9 +25,7 @@ namespace emsesp {
 
 class Boiler : public EMSdevice {
   public:
-    Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
-
-    virtual bool publish_ha_device_config();
+    Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand);
 
   private:
     static uuid::log::Logger logger_;
@@ -52,54 +50,53 @@ class Boiler : public EMSdevice {
     static constexpr uint16_t EMS_TYPE_UBAInformation     = 0x495;
     static constexpr uint16_t EMS_TYPE_UBAEnergySupplied  = 0x494;
 
-    static constexpr uint8_t EMS_BOILER_SELFLOWTEMP_HEATING = 20; // was originally 70, changed to 30 for issue #193, then to 20 with issue #344
-
     // ww
-    uint8_t  wwSetTemp_;          // Warm Water set temperature
-    uint8_t  wwSelTemp_;          // Warm Water selected temperature
-    uint8_t  wwSelTempLow_;       // Warm Water lower selected temperature
-    uint8_t  wwSelTempOff_;       // Warm Water selected temperature for off position
-    uint8_t  wwSelTempSingle_;    // Warm Water single charge temperature
-    uint8_t  wwType_;             // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
-    uint8_t  wwComfort_;          // WW comfort mode
-    uint8_t  wwCircPump_;         // Warm Water circulation pump available
-    uint8_t  wwChargeType_;       // Warm Water charge type (pump or 3-way-valve)
-    uint8_t  wwDisinfectionTemp_; // Warm Water disinfection temperature to prevent infection
-    uint8_t  wwCircMode_;         // Warm Water circulation pump mode
-    uint8_t  wwCirc_;             // Circulation on/off
-    uint16_t wwCurTemp_;          // Warm Water current temperature
-    uint16_t wwCurTemp2_;         // Warm Water current temperature storage
-    uint8_t  wwCurFlow_;          // Warm Water current flow temp in l/min
-    uint16_t wwStorageTemp1_;     // warm water storage temp 1
-    uint16_t wwStorageTemp2_;     // warm water storage temp 2
-    uint8_t  wwActivated_;        // Warm Water activated
-    uint8_t  wwOneTime_;          // Warm Water one time function on/off
-    uint8_t  wwDisinfect_;        // Warm Water disinfection on/off
-    uint8_t  wwCharging_;         // Warm Water charging on/off
-    uint8_t  wwRecharging_;       // Warm Water recharge on/off
-    uint8_t  wwTempOK_;           // Warm Water temperature ok on/off
-    uint8_t  wwActive_;           //
-    uint8_t  wwHeat_;             // 3-way valve on WW
-    uint8_t  wwSetPumpPower_;     // ww pump speed/power?
-    uint8_t  wwFlowTempOffset_;   // Boiler offset for ww heating
-    uint8_t  wwMaxPower_;         // Warm Water maximum power
-    uint32_t wwStarts_;           // Warm Water starts
-    uint32_t wwStarts2_;          // Warm water control starts
-    uint32_t wwWorkM_;            // Warm Water minutes
+    uint8_t  wwSetTemp_;            // DHW set temperature
+    uint8_t  wwSelTemp_;            // DHW selected temperature
+    uint8_t  wwSelTempLow_;         // DHW lower selected temperature
+    uint8_t  wwSelTempOff_;         // DHW selected temperature for off position
+    uint8_t  wwSelTempSingle_;      // DHW single charge temperature
+    uint8_t  wwType_;               // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
+    uint8_t  wwComfort_;            // WW comfort mode
+    uint8_t  wwComfort1_;           // WW comfort mode RC310
+    uint8_t  wwCircPump_;           // DHW circulation pump available
+    uint8_t  wwChargeType_;         // DHW charge type (pump or 3-way-valve)
+    uint8_t  wwChargeOptimization_; // DHW charge optimization
+    uint8_t  wwDisinfectionTemp_;   // DHW disinfection temperature to prevent infection
+    uint8_t  wwCircMode_;           // DHW circulation pump mode
+    uint8_t  wwCirc_;               // Circulation on/off
+    uint16_t wwCurTemp_;            // DHW current temperature
+    uint16_t wwCurTemp2_;           // DHW current temperature storage
+    uint8_t  wwCurFlow_;            // DHW current flow temp in l/min
+    uint16_t wwStorageTemp1_;       // DHW storage temp 1
+    uint16_t wwStorageTemp2_;       // DHW storage temp 2
+    uint8_t  wwActivated_;          // DHW activated
+    uint8_t  wwOneTime_;            // DHW one time function on/off
+    uint8_t  wwDisinfect_;          // DHW disinfection on/off
+    uint8_t  wwCharging_;           // DHW charging on/off
+    uint8_t  wwRecharging_;         // DHW recharge on/off
+    uint8_t  wwTempOK_;             // DHW temperature ok on/off
+    uint8_t  wwActive_;             //
+    uint8_t  ww3wayValve_;          // 3-way valve on WW
+    uint8_t  wwSetPumpPower_;       // ww pump speed/power?
+    uint8_t  wwFlowTempOffset_;     // Boiler offset for ww heating
+    uint8_t  wwMaxPower_;           // DHW maximum power
+    uint8_t  wwMaxTemp_;            // DHW maximum temperature
+    uint32_t wwStarts_;             // DHW starts
+    uint32_t wwStarts2_;            // DHW control starts
+    uint32_t wwWorkM_;              // DHW minutes
     int8_t   wwHystOn_;
     int8_t   wwHystOff_;
-    uint8_t  wwTapActivated_;   // maintenance-mode to switch DHW off
-    uint16_t wwMixerTemp_;      // mixing temperature
-    uint16_t wwTankMiddleTemp_; // Tank middle temperature (TS3)
+    uint8_t  wwTapActivated_;  // maintenance-mode to switch DHW off
+    uint16_t wwMixerTemp_;     // mixing temperature
+    uint16_t wwCylMiddleTemp_; // Cyl middle temperature (TS3)
 
     // main
-    uint8_t  id_;               // product id
-    uint8_t  dummy8u_;          // for commands with no output
-    uint8_t  dummybool_;        // for commands with no output
+    uint8_t  reset_;            // for reset command
     uint8_t  heatingActive_;    // Central heating is on/off
     uint8_t  tapwaterActive_;   // Hot tap water is on/off
     uint8_t  selFlowTemp_;      // Selected flow temperature
-    uint8_t  selBurnPow_;       // Burner max power %
+    uint8_t  selBurnPow_;       // Burner max power % (can be > 100%)
     uint8_t  heatingPump2Mod_;  // heatpump modulation from 0xE3 (heatpumps)
     uint8_t  heatingPumpMod_;   // Pump modulation %
     int16_t  outdoorTemp_;      // Outside temperature
@@ -110,10 +107,12 @@ class Boiler : public EMSdevice {
     uint16_t boilTemp_;         // Boiler temperature
     uint16_t exhaustTemp_;      // Exhaust temperature
     uint8_t  burnGas_;          // Gas on/off
+    uint8_t  burnGas2_;         // Gas stage 2 on/off
     uint16_t flameCurr_;        // Flame current in micro amps
     uint8_t  heatingPump_;      // Boiler heating pump on/off
     uint8_t  fanWork_;          // Fan on/off
     uint8_t  ignWork_;          // Ignition on/off
+    uint8_t  oilPreHeat_;       // oil preheating on
     uint8_t  heatingActivated_; // Heating activated on the boiler
     uint8_t  heatingTemp_;      // Heating temperature setting on the boiler
     uint8_t  pumpModMax_;       // Boiler circuit pump modulation max. power %
@@ -129,31 +128,34 @@ class Boiler : public EMSdevice {
     uint8_t  setBurnPow_;        // max output power in %
     uint32_t burnStarts_;        // burner restarts
     uint32_t burnWorkMin_;       // Total burner operating time
+    uint32_t burn2WorkMin_;      // burner stage 2 operating time
     uint32_t heatWorkMin_;       // Total heat operating time
     uint32_t UBAuptime_;         // Total UBA working hours
-    char     lastCode_[60];      // last error code
+    char     lastCode_[50];      // last error code
     char     serviceCode_[4];    // 3 character status/service code
     uint16_t serviceCodeNumber_; // error/service code
+    uint8_t  emergencyOps_;
+    uint8_t  emergencyTemp_;
 
     // info
     uint32_t upTimeControl_;             // Operating time control
     uint32_t upTimeCompHeating_;         // Operating time compressor heating
     uint32_t upTimeCompCooling_;         // Operating time compressor cooling
-    uint32_t upTimeCompWw_;              // Operating time compressor warm water
+    uint32_t upTimeCompWw_;              // Operating time compressor DHW
     uint32_t upTimeCompPool_;            // Operating time compressor pool
     uint32_t totalCompStarts_;           // Total Commpressor control starts
     uint32_t heatingStarts_;             // Heating control starts
     uint32_t coolingStarts_;             // Cooling control starts
-    uint32_t poolStarts_;                // Warm water control starts
+    uint32_t poolStarts_;                // DHW control starts
     uint32_t nrgConsTotal_;              // Energy consumption total
     uint32_t nrgConsCompTotal_;          // Energy consumption compressor total
     uint32_t nrgConsCompHeating_;        // Energy consumption compressor heating
-    uint32_t nrgConsCompWw_;             // Energy consumption compressor warm water
+    uint32_t nrgConsCompWw_;             // Energy consumption compressor DHW
     uint32_t nrgConsCompCooling_;        // Energy consumption compressor cooling
     uint32_t nrgConsCompPool_;           // Energy consumption compressor pool
     uint32_t nrgSuppTotal_;              // Energy supplied total
     uint32_t nrgSuppHeating_;            // Energy supplied heating
-    uint32_t nrgSuppWw_;                 // Energy supplied warm water
+    uint32_t nrgSuppWw_;                 // Energy supplied DHW
     uint32_t nrgSuppCooling_;            // Energy supplied cooling
     uint32_t nrgSuppPool_;               // Energy supplied pool
     uint32_t auxElecHeatNrgConsTotal_;   // Auxiliary electrical heater energy consumption total
@@ -181,7 +183,6 @@ class Boiler : public EMSdevice {
     uint8_t  hpCoolingOn_;
     uint8_t  hpWwOn_;
     uint8_t  hpPoolOn_;
-    uint8_t  hpHeatingOn;
     int16_t  hpTc0_;
     int16_t  hpTc1_;
     int16_t  hpTc3_;
@@ -196,6 +197,21 @@ class Boiler : public EMSdevice {
 
     // Pool unit
     int8_t poolSetTemp_;
+
+    /*
+ * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
+ * thermostat always overwrites settings in boiler
+ * enable settings here if no thermostat is used in system
+ *
+// HybridHP
+    uint8_t hybridStrategy_;  // cost = 2, temperature = 3, mix = 4
+    int8_t  switchOverTemp_;  // degrees
+    uint8_t energyCostRatio_; // is *10
+    uint8_t fossileFactor_;   // is * 10
+    uint8_t electricFactor_;  // is * 10
+    uint8_t delayBoiler_;     // minutes
+    uint8_t tempDiffBoiler_;  // relative temperature degrees
+    */
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
@@ -214,6 +230,7 @@ class Boiler : public EMSdevice {
     void process_MC110Status(std::shared_ptr<const Telegram> telegram);
     void process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram);
     void process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram);
+    void process_ErrorMessage(std::shared_ptr<const Telegram> telegram);
     void process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram);
     void process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram);
@@ -224,9 +241,11 @@ class Boiler : public EMSdevice {
     void process_HpPower(std::shared_ptr<const Telegram> telegram);
     void process_HpOutdoor(std::shared_ptr<const Telegram> telegram);
     void process_HpPool(std::shared_ptr<const Telegram> telegram);
+    void process_HybridHp(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
     bool set_ww_mode(const char * value, const int8_t id);
+    bool set_ww_mode1(const char * value, const int8_t id);
     bool set_ww_activated(const char * value, const int8_t id);
     bool set_tapwarmwater_activated(const char * value, const int8_t id);
     bool set_ww_onetime(const char * value, const int8_t id);
@@ -239,7 +258,9 @@ class Boiler : public EMSdevice {
     bool set_ww_temp_single(const char * value, const int8_t id);
     bool set_ww_disinfect_temp(const char * value, const int8_t id);
     bool set_ww_maxpower(const char * value, const int8_t id);
+    bool set_ww_maxtemp(const char * value, const int8_t id);
     bool set_ww_flowTempOffset(const char * value, const int8_t id);
+    bool set_ww_chargeOptimization(const char * value, const int8_t id);
     bool set_flow_temp(const char * value, const int8_t id);
     bool set_burn_power(const char * value, const int8_t id);
     bool set_heating_activated(const char * value, const int8_t id);
@@ -259,6 +280,17 @@ class Boiler : public EMSdevice {
     bool set_ww_hyst_on(const char * value, const int8_t id);
     bool set_ww_hyst_off(const char * value, const int8_t id);
     bool set_pool_temp(const char * value, const int8_t id);
+    bool set_emergency_temp(const char * value, const int8_t id);
+    bool set_emergency_ops(const char * value, const int8_t id);
+    /*
+    bool set_hybridStrategy(const char * value, const int8_t id);
+    bool set_switchOverTemp(const char * value, const int8_t id);
+    bool set_energyCostRatio(const char * value, const int8_t id);
+    bool set_fossileFactor(const char * value, const int8_t id);
+    bool set_electricFactor(const char * value, const int8_t id);
+    bool set_delayBoiler(const char * value, const int8_t id);
+    bool set_tempDiffBoiler(const char * value, const int8_t id);
+    */
 };
 
 } // namespace emsesp

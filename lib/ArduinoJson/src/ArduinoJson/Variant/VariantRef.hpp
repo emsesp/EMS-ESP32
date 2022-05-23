@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -32,7 +32,7 @@ class VariantRefBase : public VariantTag {
     return variantIsNull(_data);
   }
 
-  FORCE_INLINE bool isUndefined() const {
+  FORCE_INLINE bool isUnbound() const {
     return !_data;
   }
 
@@ -119,7 +119,7 @@ class VariantRef : public VariantRefBase<VariantData>,
   ARDUINOJSON_DEPRECATED(
       "Support for char is deprecated, use int8_t or uint8_t instead")
       as() const {
-    return as<signed char>();
+    return static_cast<char>(as<signed char>());
   }
 
   template <typename T>
@@ -265,7 +265,7 @@ class VariantConstRef : public VariantRefBase<const VariantData>,
   ARDUINOJSON_DEPRECATED(
       "Support for char is deprecated, use int8_t or uint8_t instead")
       as() const {
-    return as<signed char>();
+    return static_cast<char>(as<signed char>());
   }
 
   template <typename T>

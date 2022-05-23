@@ -19,11 +19,6 @@
 #ifndef EMSESP_CONSOLE_H
 #define EMSESP_CONSOLE_H
 
-#include <Arduino.h>
-
-#include <string>
-#include <vector>
-
 #include <uuid/console.h>
 #include <uuid/log.h>
 
@@ -101,10 +96,9 @@ class EMSESPShell : virtual public uuid::console::Shell {
     void        stopped() override;
     void        display_banner() override;
     std::string hostname_text() override;
-    // std::string context_text() override;
     std::string prompt_suffix() override;
     void        end_of_transmission() override;
-    // bool        exit_context() override;
+
 
   private:
     void        add_console_commands();
@@ -132,13 +126,16 @@ class EMSESPStreamConsole : public uuid::console::StreamConsole, public EMSESPSh
 class Console {
   public:
     void loop();
-    void start();
+    void start_serial();
+    void start_telnet();
 
     uuid::log::Level log_level();
 
-    // static void enter_custom_context(Shell & shell, unsigned int context);
     static void load_standard_commands(unsigned int context);
     static void load_system_commands(unsigned int context);
+
+  private:
+    bool telnet_enabled_ = false; // telnet is default off
 };
 
 } // namespace emsesp

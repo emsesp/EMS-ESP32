@@ -31,9 +31,8 @@ std::shared_ptr<Commands> EMSESPShell::commands = [] {
     return commands;
 }();
 
-static std::shared_ptr<EMSESPShell> shell;
-
-std::vector<bool> EMSESPStreamConsole::ptys_;
+std::shared_ptr<EMSESPShell> shell;
+std::vector<bool>            EMSESPStreamConsole::ptys_;
 
 #ifndef EMSESP_STANDALONE
 uuid::telnet::TelnetService telnet_([](Stream & stream, const IPAddress & addr, uint16_t port) -> std::shared_ptr<uuid::console::Shell> {
@@ -54,10 +53,6 @@ void EMSESPShell::stopped() {
         logger().log(LogLevel::DEBUG, LogFacility::AUTH, F("su session closed on console %s"), console_name().c_str());
     }
     logger().log(LogLevel::DEBUG, LogFacility::CONSOLE, F("User session closed on console %s"), console_name().c_str());
-
-    // remove all custom contexts
-    // commands->remove_all_commands();
-    // console_commands_loaded_ = false; // make sure they get reloaded next time a console is opened
 }
 
 // show welcome banner
@@ -76,8 +71,7 @@ void EMSESPShell::display_banner() {
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) { console_hostname_ = networkSettings.hostname.c_str(); });
 
     if (console_hostname_.empty()) {
-        console_hostname_.resize(16, '\0');
-        snprintf(&console_hostname_[0], console_hostname_.capacity() + 1, "ems-esp");
+        console_hostname_ = "ems-esp";
     }
 
     // load the list of commands
@@ -244,12 +238,12 @@ void EMSESPShell::add_console_commands() {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           flash_string_vector{F_(read)},
-                          flash_string_vector{F_(deviceid_mandatory), F_(typeid_mandatory), F_(offset_optional)},
+                          flash_string_vector{F_(deviceid_mandatory), F_(typeid_mandatory), F_(offset_optional), F_(length_optional)},
                           [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
                               uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
 
                               if (!EMSESP::valid_device(device_id)) {
-                                  shell.printfln(F("Invalid device ID"));
+                                  shell.printfln(F("Invalid deviceID"));
                                   return;
                               }
 
@@ -355,7 +349,7 @@ void EMSESPShell::add_console_commands() {
                               if (watch_id > 0x80) {
                                   shell.printfln(F("Filtering only telegrams that match a telegram type of 0x%02X"), watch_id);
                               } else if (watch_id != WATCH_ID_NONE) {
-                                  shell.printfln(F("Filtering only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
+                                  shell.printfln(F("Filtering only telegrams that match a deviceID or telegram type of 0x%02X"), watch_id);
                               }
                           });
 
@@ -433,6 +427,7 @@ void EMSESPShell::add_console_commands() {
                 std::vector<std::string> devices_list;
                 devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
                 devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR));
+                devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
                 for (const auto & device_class : EMSFactory::device_handlers()) {
                     if (Command::device_has_commands(device_class.first)) {
                         devices_list.emplace_back(EMSdevice::device_type_2_device_name(device_class.first));
@@ -463,48 +458,24 @@ std::string EMSESPShell::hostname_text() {
     return console_hostname_;
 }
 
-/*
-// remove commands from the current context to save memory before exiting
-bool EMSESPShell::exit_context() {
-    unsigned int current_context = context();
-
-    if (current_context == ShellContext::MAIN) {
-        Shell::stop();
-        return true;
-    }
-    // commands->remove_context_commands(current_context);
-    // return Shell::exit_context();
-    return false;
-}
-
-// enter a custom context (sub-menu)
-void Console::enter_custom_context(Shell & shell, unsigned int context) {
-    // load_standard_commands(context);
-
-    // don't go into the new context if it's already the root (to prevent double loading)
-    if (context != ShellContext::MAIN) {
-        shell.enter_context(context);
-    }
-}
-*/
-
 // each custom context has the common commands like log, help, exit, su etc
 void Console::load_standard_commands(unsigned int context) {
 #if defined(EMSESP_DEBUG)
+    // create commands test and t
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
                                        flash_string_vector{F("test")},
-                                       flash_string_vector{F_(name_optional)},
+                                       flash_string_vector{F_(name_optional), F_(data_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           if (arguments.size() == 0) {
+                                           if (arguments.empty()) {
                                                Test::run_test(shell, "default");
-                                           } else {
+                                           } else if (arguments.size() == 1) {
                                                Test::run_test(shell, arguments.front());
+                                           } else {
+                                               Test::run_test(shell, arguments[0].c_str(), arguments[1].c_str());
                                            }
                                        });
-#endif
 
-#if defined(EMSESP_STANDALONE)
     EMSESPShell::commands->add_command(context, CommandFlags::USER, flash_string_vector{F("t")}, [](Shell & shell, const std::vector<std::string> & arguments) {
         Test::run_test(shell, "default");
     });
@@ -516,7 +487,7 @@ void Console::load_standard_commands(unsigned int context) {
                                        flash_string_vector{F_(debug)},
                                        flash_string_vector{F_(name_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           if (arguments.size() == 0) {
+                                           if (arguments.empty()) {
                                                Test::debug(shell, "default");
                                            } else {
                                                Test::debug(shell, arguments.front());
@@ -564,10 +535,7 @@ void Console::load_standard_commands(unsigned int context) {
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
                                        flash_string_vector{F_(exit)},
-                                       [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           shell.stop();
-                                           // shell.exit_context();
-                                       });
+                                       [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { shell.stop(); });
 
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
@@ -693,7 +661,17 @@ void Console::load_system_commands(unsigned int context) {
                                                networkSettings.ssid = arguments.front().c_str();
                                                return StateUpdateResult::CHANGED;
                                            });
-                                           shell.println("Use `wifi reconnect` to save and apply the new settings");
+                                           shell.println("Use `wifi reconnect` to apply the new settings");
+                                       });
+
+    // added by mvdp
+    EMSESPShell::commands->add_command(context,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F("mqtt"), F("subscribe")},
+                                       flash_string_vector{F("<topic>")},
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
+                                           Mqtt::subscribe(arguments.front());
+                                           shell.println("subscribing");
                                        });
 
     EMSESPShell::commands->add_command(context,
@@ -723,72 +701,33 @@ void Console::load_system_commands(unsigned int context) {
 
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(sensorname)},
-                                       flash_string_vector{F_(sensorid_optional), F_(name_optional), F_(offset_optional)},
+                                       flash_string_vector{F_(set), F_(board_profile)},
+                                       flash_string_vector{F_(name_mandatory)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           if (arguments.size() == 0) {
-                                               EMSESP::webSettingsService.read([&](WebSettings & settings) {
-                                                   for (uint8_t i = 0; i < MAX_NUM_SENSOR_NAMES; i++) {
-                                                       if (!settings.sensor[i].id.isEmpty()) {
-                                                           shell.print(settings.sensor[i].id);
-                                                           shell.print(" : ");
-                                                           shell.print(settings.sensor[i].name);
-                                                           shell.print(" : ");
-                                                           char buf[10];
-                                                           shell.println(Helpers::render_value(buf, settings.sensor[i].offset, 10));
-                                                       }
-                                                   }
-                                               });
+                                           std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+                                           std::string         board_profile = Helpers::toUpper(arguments.front());
+                                           if (!EMSESP::system_.load_board_profile(data, board_profile)) {
+                                               shell.println(F("Invalid board profile (S32, E32, MH-ET, NODEMCU, OLIMEX, OLIMEXPOE, CUSTOM)"));
                                                return;
                                            }
-                                           if (arguments.size() == 1) {
-                                               EMSESP::dallassensor_.update(arguments.front().c_str(), "", 0);
-                                               // shell.println(EMSESP::dallassensor_.get_name(arguments.front().c_str()));
-                                               return;
-                                           }
-                                           int16_t offset = 0;
-                                           float   val;
-                                           if (arguments.size() == 2) {
-                                               if (Helpers::value2float(arguments.back().c_str(), val)) {
-                                                   offset = (10 * val);
-                                                   EMSESP::dallassensor_.update(arguments.front().c_str(), "", offset);
-                                                   return;
-                                               }
-                                           } else if (arguments.size() == 3) {
-                                               if (Helpers::value2float(arguments.back().c_str(), val)) {
-                                                   offset = (10 * val);
-                                               }
-                                           }
-                                           EMSESP::dallassensor_.update(arguments.front().c_str(), arguments[1].c_str(), offset);
+                                           EMSESP::webSettingsService.update(
+                                               [&](WebSettings & settings) {
+                                                   settings.board_profile  = board_profile.c_str();
+                                                   settings.led_gpio       = data[0];
+                                                   settings.dallas_gpio    = data[1];
+                                                   settings.rx_gpio        = data[2];
+                                                   settings.tx_gpio        = data[3];
+                                                   settings.pbutton_gpio   = data[4];
+                                                   settings.phy_type       = data[5];
+                                                   settings.eth_power      = data[6]; // can be -1
+                                                   settings.eth_phy_addr   = data[7];
+                                                   settings.eth_clock_mode = data[8];
+                                                   return StateUpdateResult::CHANGED;
+                                               },
+                                               "local");
+                                           shell.printfln("Loaded board profile %s", board_profile.c_str());
+                                           EMSESP::system_.network_init(true);
                                        });
-
-    EMSESPShell::commands->add_command(
-        context,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(board_profile)},
-        flash_string_vector{F_(name_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            std::vector<uint8_t> data; // led, dallas, rx, tx, button
-            std::string          board_profile = Helpers::toUpper(arguments.front());
-            if (!EMSESP::system_.load_board_profile(data, board_profile)) {
-                shell.println(F("Invalid board profile (S32, E32, MH-ET, NODEMCU, OLIMEX, CUSTOM)"));
-                return;
-            }
-            EMSESP::webSettingsService.update(
-                [&](WebSettings & settings) {
-                    settings.board_profile = board_profile.c_str();
-                    settings.led_gpio      = data[0];
-                    settings.dallas_gpio   = data[1];
-                    settings.rx_gpio       = data[2];
-                    settings.tx_gpio       = data[3];
-                    settings.pbutton_gpio  = data[4];
-                    settings.phy_type      = data[5];
-                    return StateUpdateResult::CHANGED;
-                },
-                "local");
-            shell.printfln("Loaded board profile %s (%d,%d,%d,%d,%d,%d)", board_profile.c_str(), data[0], data[1], data[2], data[3], data[4], data[5]);
-            EMSESP::system_.network_init(true);
-        });
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(show), F_(users)},
@@ -796,22 +735,6 @@ void Console::load_system_commands(unsigned int context) {
                                            EMSESP::system_.show_users(shell);
                                        });
 }
-
-/*
-// prompt, change per context
-std::string EMSESPShell::context_text() {
-    switch (static_cast<ShellContext>(context())) {
-    case ShellContext::MAIN:
-        return std::string{'/'};
-
-    case ShellContext::SYSTEM:
-        return std::string{"/system"};
-
-    default:
-        return std::string{};
-    }
-}
-*/
 
 // when in su (admin) show # as the prompt suffix
 std::string EMSESPShell::prompt_suffix() {
@@ -853,7 +776,7 @@ EMSESPStreamConsole::EMSESPStreamConsole(Stream & stream, const IPAddress & addr
         ptys_[pty_] = true;
     }
 
-    snprintf(text.data(), text.size(), "pty%u", pty_);
+    snprintf(text.data(), text.size(), "pty%u", (uint16_t)pty_);
     name_ = text.data();
 #ifndef EMSESP_STANDALONE
     logger().info(F("Allocated console %s for connection from [%s]:%u"), name_.c_str(), uuid::printable_to_string(addr_).c_str(), port_);
@@ -874,11 +797,13 @@ std::string EMSESPStreamConsole::console_name() {
     return name_;
 }
 
-// Start up telnet and logging
-// Log order is off, err, warning, notice, info, debug, trace, all
-void Console::start() {
+// Start serial console
+void Console::start_serial() {
+    Serial.begin(115200);
+
+    // Serial Console - is always active
     shell = std::make_shared<EMSESPStreamConsole>(Serial, true);
-    shell->maximum_log_messages(100); // default was 50
+    shell->maximum_log_messages(100);
     shell->start();
 
 #if defined(EMSESP_DEBUG)
@@ -888,18 +813,20 @@ void Console::start() {
 #if defined(EMSESP_STANDALONE)
     shell->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when running tests
 #endif
+}
 
-// start the telnet service
-// default idle is 10 minutes, default write timeout is 0 (automatic)
-// note, this must be started after the network/wifi for ESP32 otherwise it'll crash
+// Start up telnet
+void Console::start_telnet() {
+    telnet_enabled_ = true; // telnet is enabled when calling this function
+
+    // start the telnet service
+    // default idle is 10 minutes, default write timeout is 0 (automatic)
+    // note, this must be started after the network/wifi for ESP32 otherwise it'll crash
 #ifndef EMSESP_STANDALONE
     telnet_.start();
     telnet_.initial_idle_timeout(3600);  // in sec, one hour idle timeout
     telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
 #endif
-
-    // turn watch off in case it was still set in the last session
-    // EMSESP::watch(EMSESP::WATCH_OFF);
 }
 
 // handles telnet sync and logging to console
@@ -907,7 +834,9 @@ void Console::loop() {
     uuid::loop();
 
 #ifndef EMSESP_STANDALONE
-    telnet_.loop();
+    if (telnet_enabled_) {
+        telnet_.loop();
+    }
 #endif
 
     Shell::loop_all();

@@ -53,6 +53,38 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
+    if (strcmp(command, "2thermostats") == 0) {
+        EMSESP::logger().info(F("Testing with multiple thermostats..."));
+
+        add_device(0x08, 123); // GB072
+        add_device(0x10, 158); // RC310
+        add_device(0x18, 157); // Bosch CR100
+
+        // Boiler -> Me, UBAMonitorFast(0x18), telegram: 08 00 18 00 00 02 5A 73 3D 0A 10 65 40 02 1A 80 00 01 E1 01 76 0E 3D 48 00 C9 44 02 00 (#data=25)
+        uart_telegram({0x08, 0x00, 0x18, 0x00, 0x00, 0x02, 0x5A, 0x73, 0x3D, 0x0A, 0x10, 0x65, 0x40, 0x02, 0x1A,
+                       0x80, 0x00, 0x01, 0xE1, 0x01, 0x76, 0x0E, 0x3D, 0x48, 0x00, 0xC9, 0x44, 0x02, 0x00});
+
+        // Boiler -> Thermostat, UBAParameterWW(0x33), telegram: 08 97 33 00 23 24 (#data=2)
+        uart_telegram({0x08, 0x90, 0x33, 0x00, 0x23, 0x24});
+
+        // Boiler -> Me, UBAParameterWW(0x33), telegram: 08 0B 33 00 08 FF 34 FB 00 28 00 00 46 00 FF FF 00 (#data=13)
+        uart_telegram({0x08, 0x0B, 0x33, 0x00, 0x08, 0xFF, 0x34, 0xFB, 0x00, 0x28, 0x00, 0x00, 0x46, 0x00, 0xFF, 0xFF, 0x00});
+
+        // Thermostat 0x2A5 for HC1
+        uart_telegram({0x10, 00, 0xFF, 00, 01,   0xA5, 0x80, 00, 01, 0x30, 0x28, 00, 0x30, 0x28, 01, 0x54,
+                       03,   03, 01,   01, 0x54, 02,   0xA8, 00, 00, 0x11, 01,   03, 0xFF, 0xFF, 00});
+
+        // RC300WWmode2(0x31D), data: 00 00 09 07
+        uart_telegram({0x10, 00, 0xFF, 00, 02, 0x1D, 00, 00, 0x09, 0x07});
+
+        // 2nd thermostat
+        // Thermostat RCPLUSStatusMessage_HC2(0x01A6)
+        uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA6, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
+                       0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
+
+        return true;
+    }
+
     if (strcmp(command, "310") == 0) {
         EMSESP::logger().info(F("Adding a GB072/RC310 combo..."));
 
@@ -189,14 +221,12 @@ bool Test::run_test(const char * command, int8_t id) {
 
 // These next tests are run from the Console
 // using the test command
-void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
+void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const std::string & data) {
     // switch to su
     shell.add_flags(CommandFlags::ADMIN);
 
     // init stuff
     Mqtt::ha_enabled(true);
-    EMSESP::dallassensor_.dallas_format(1);
-    Mqtt::ha_climate_format(1);
     EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
     EMSESP::watch(EMSESP::Watch::WATCH_RAW); // raw
 
@@ -334,7 +364,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.printfln(F("Testing unknown2..."));
 
         // simulate getting version information back from an unknown device
-        rx_telegram({0x09, 0x0B, 0x02, 0x00, 0x5A, 0x01, 0x02}); // product id is 90 which doesn't exist
+        rx_telegram({0x09, 0x0B, 0x02, 0x00, 0x5A, 0x01, 0x02}); // productID is 90 which doesn't exist
     }
 
     if (command == "gateway") {
@@ -351,8 +381,18 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("show mqtt");
     }
 
+    if (command == "2thermostats") {
+        shell.printfln(F("Testing multiple thermostats..."));
+        run_test("2thermostats");
+        shell.invoke_command("show");
+        shell.invoke_command("show devices");
+    }
+
     if (command == "web") {
         shell.printfln(F("Testing Web..."));
+
+        Mqtt::enabled(false);    // turn off mqtt
+        Mqtt::ha_enabled(false); // turn off ha
 
         run_test("boiler");
         run_test("thermostat");
@@ -373,10 +413,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
                 shell.println();
                 Serial.print(COLOR_RESET);
 
-
                 doc.clear();
-                JsonObject root = doc.to<JsonObject>();
-                emsdevice->generate_values_json_web(root);
+                // JsonObject root = doc.to<JsonObject>();
+                // emsdevice->generate_values_web(root);
+
+                JsonArray output = doc.to<JsonArray>();
+                emsdevice->generate_values_web_all(output);
 
                 Serial.print(COLOR_BRIGHT_MAGENTA);
                 serializeJson(doc, Serial);
@@ -453,38 +495,25 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     }
 
     if (command == "ha") {
-        shell.printfln(F("Testing HA discovery"));
+        shell.printfln(F("Testing HA mqtt discovery"));
         Mqtt::ha_enabled(true);
-        // Mqtt::nested_format(1);
-        Mqtt::nested_format(2);
+        // Mqtt::ha_enabled(false);
+
+        Mqtt::nested_format(1); // is nested
+        // Mqtt::nested_format(2); // not nested
 
         run_test("boiler");
         run_test("thermostat");
-        // run_test("solar");
-        // run_test("mixer");
+        run_test("solar");
+        run_test("mixer");
 
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
 
-        shell.invoke_command("call boiler fanwork");
-        shell.invoke_command("call thermostat seltemp"); // sensor.thermostat_hc1_selected_room_temperature
-        shell.invoke_command("call thermostat entities");
-        shell.invoke_command("call boiler entities");
-    }
-
-    if (command == "dv") {
-        shell.printfln(F("Testing device value rendering"));
-
-        Mqtt::ha_enabled(true);
-        Mqtt::nested_format(1);
-        Mqtt::send_response(false);
-
-        run_test("boiler");
-        run_test("thermostat");
-
-        // change a value to null/bogus/dormant
-        shell.invoke_command("call boiler wwseltemp");
-        shell.invoke_command("call system publish");
+        // shell.invoke_command("call boiler fanwork");
+        // shell.invoke_command("call thermostat seltemp"); // sensor.thermostat_hc1_selected_room_temperature
+        // shell.invoke_command("call thermostat entities");
+        // shell.invoke_command("call boiler entities");
     }
 
     if (command == "lastcode") {
@@ -505,8 +534,106 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         // shell.invoke_command("show");
     }
 
+    if (command == "dv") {
+        shell.printfln(F("Testing device value rendering"));
+
+        Mqtt::ha_enabled(true);
+        Mqtt::nested_format(1);
+        Mqtt::send_response(false);
+
+        run_test("boiler");
+        run_test("thermostat");
+
+        shell.invoke_command("call boiler wwseltemp");
+        shell.invoke_command("call system publish");
+    }
+
+    if (command == "dallas") {
+        shell.printfln(F("Testing adding Dallas sensor"));
+        emsesp::EMSESP::dallassensor_.test();
+    }
+
+    if (command == "dallas_full") {
+        shell.printfln(F("Testing adding and changing Dallas sensor"));
+        Mqtt::ha_enabled(true);
+        Mqtt::nested_format(1);
+        // Mqtt::nested_format(0);
+
+        emsesp::EMSESP::dallassensor_.test();
+        shell.invoke_command("show");
+        shell.invoke_command("call system publish");
+
+        // rename
+        EMSESP::dallassensor_.update("01-0203-0405-0607", "testdallas", 2);
+        shell.invoke_command("show");
+        shell.invoke_command("call system publish");
+    }
+
+    if (command == "analog") {
+        shell.printfln(F("Testing adding Analog sensor"));
+        Mqtt::ha_enabled(true);
+        // Mqtt::ha_enabled(false);
+        Mqtt::nested_format(1);
+        // Mqtt::nested_format(0);
+
+        emsesp::EMSESP::analogsensor_.test();
+        shell.invoke_command("show");
+        // shell.invoke_command("call system publish");
+        // shell.invoke_command("show mqtt");
+
+        // rename
+        // bool update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, uint8_t type);
+        EMSESP::analogsensor_.update(36, "analogtest", 2, 0.7, 17, 1);
+        shell.invoke_command("show");
+        // shell.invoke_command("call system publish");
+    }
+
+    if (command == "healthcheck") {
+        uint8_t n = 0;
+        if (!data.empty()) {
+            n = Helpers::atoint(data.c_str());
+        }
+
+        // n=1 = EMSESP::system_.HEALTHCHECK_NO_BUS
+        // n=2 = EMSESP::system_.HEALTHCHECK_NO_NETWORK
+        shell.printfln(F("Testing healthcheck with %d"), n);
+        EMSESP::system_.healthcheck(n);
+    }
+
+    if (command == "masked") {
+        shell.printfln(F("Testing masked entities"));
+
+        Mqtt::ha_enabled(true);
+        Mqtt::send_response(false);
+
+        run_test("boiler");
+
+        shell.invoke_command("call boiler wwseltemp");
+        shell.invoke_command("call system publish");
+
+        // toggle mode
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice->unique_id() == 1) { // boiler
+                std::string a = "07wwseltemp";
+                emsdevice->mask_entity(a);
+                break;
+            }
+        }
+
+        shell.invoke_command("call boiler wwseltemp");
+        shell.invoke_command("call system publish");
+    }
+
     if (command == "dv2") {
         shell.printfln(F("Testing device value lost"));
+
+        Mqtt::ha_enabled(true);
+        Mqtt::send_response(false);
+
+        run_test("boiler");
+
+        shell.invoke_command("call boiler wwseltemp");
+        shell.invoke_command("call system publish");
 
         // Boiler -> Me, UBAParameterWW(0x33)
         // wwseltemp = goes from 52 degrees (0x34) to void (0xFF)
@@ -515,6 +642,54 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         shell.invoke_command("call boiler wwseltemp");
         shell.invoke_command("call system publish");
+    }
+
+    if (command == "api_values") {
+#if defined(EMSESP_STANDALONE)
+        shell.printfln(F("Testing API getting values"));
+        Mqtt::ha_enabled(false);
+        Mqtt::nested_format(1);
+        Mqtt::send_response(false);
+        // EMSESP::bool_format(BOOL_FORMAT_10); // BOOL_FORMAT_10_STR
+        EMSESP::system_.bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
+
+        run_test("boiler");
+        run_test("thermostat");
+
+        AsyncWebServerRequest request;
+        DynamicJsonDocument   doc(2000);
+        JsonVariant           json;
+        request.method(HTTP_GET);
+
+        request.url("/api/boiler/values");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/boiler/wwcirc");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/boiler/wwcirc/fullname");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/boiler/selburnpow/value");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/boiler/wwchargetype/writeable");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/boiler/flamecurr/value");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/boiler/flamecurr/bad");
+        EMSESP::webAPIService.webAPIService_get(&request);
+#endif
+    }
+
+    if (command == "mqtt_post") {
+        shell.printfln(F("Testing MQTT incoming changes"));
+        Mqtt::ha_enabled(false);
+        Mqtt::nested_format(1);
+        Mqtt::send_response(false);
+        EMSESP::system_.bool_format(BOOL_FORMAT_10); // BOOL_FORMAT_10_STR
+        // EMSESP::bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
+
+        run_test("boiler");
+        run_test("thermostat");
+
+        EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp", "59");
     }
 
     if (command == "api") {
@@ -609,16 +784,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         /*
         requestX.url("/api"); // should fail
         EMSESP::webAPIService.webAPIService_get(&requestX);
+        */
 
         requestX.method(HTTP_POST);
 
-        char dataX[] = "{\"device\":\"thermostat\", \"entity\":\"seltemp\",\"value\":13}";
+        /*
+        char dataX[] = "{\"device\":\"system\", \"entity\":\"settings\"}";
         deserializeJson(docX, dataX);
         jsonX = docX.as<JsonVariant>();
         requestX.url("/api");
         EMSESP::webAPIService.webAPIService_post(&requestX, jsonX);
         return;
         */
+
 
         /*
         // char                dataX[] = "{\"value\":\"0B 88 19 19 02\"}";
@@ -642,28 +820,28 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         // test command parse
         int8_t       id_n;
-        const char * cmd;
+        const char * ncmd;
         char         command_s[100];
         id_n = -1;
-        strcpy(command_s, "hc2/seltemp");
-        cmd = Command::parse_command_string(command_s, id_n);
-        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        strlcpy(command_s, "hc2/seltemp", sizeof(command_s));
+        ncmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", ncmd, id_n);
         id_n = -1;
-        strcpy(command_s, "seltemp");
-        cmd = Command::parse_command_string(command_s, id_n);
-        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        strlcpy(command_s, "seltemp", sizeof(command_s));
+        ncmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", ncmd, id_n);
         id_n = -1;
-        strcpy(command_s, "xyz/seltemp");
-        cmd = Command::parse_command_string(command_s, id_n);
-        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        strlcpy(command_s, "xyz/seltemp", sizeof(command_s));
+        ncmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", ncmd, id_n);
         id_n = -1;
-        strcpy(command_s, "wwc4/seltemp");
-        cmd = Command::parse_command_string(command_s, id_n);
-        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        strlcpy(command_s, "wwc4/seltemp", sizeof(command_s));
+        ncmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", ncmd, id_n);
         id_n = -1;
-        strcpy(command_s, "hc3_seltemp");
-        cmd = Command::parse_command_string(command_s, id_n);
-        shell.printfln("test cmd parse cmd=%s id=%d", cmd, id_n);
+        strlcpy(command_s, "hc3_seltemp", sizeof(command_s));
+        ncmd = Command::parse_command_string(command_s, id_n);
+        shell.printfln("test cmd parse cmd=%s id=%d", ncmd, id_n);
 
 #endif
 
@@ -702,6 +880,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 #if defined(EMSESP_STANDALONE)
         // Web API TESTS
         AsyncWebServerRequest request;
+
         request.method(HTTP_GET);
 
         request.url("/api/thermostat"); // check if defaults to info
@@ -727,7 +906,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         JsonVariant         json;
 
         // 1
-        char data1[] = "{\"name\":\"temp\",\"value\":11}";
+        char data1[] = "{\"entity\":\"seltemp\",\"value\":11}";
         deserializeJson(doc, data1);
         json = doc.as<JsonVariant>();
         request.url("/api/thermostat");
@@ -737,11 +916,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         char data2[] = "{\"value\":12}";
         deserializeJson(doc, data2);
         json = doc.as<JsonVariant>();
-        request.url("/api/thermostat/temp");
+        request.url("/api/thermostat/seltemp");
         EMSESP::webAPIService.webAPIService_post(&request, json);
 
         // 3
-        char data3[] = "{\"device\":\"thermostat\", \"name\":\"seltemp\",\"value\":13}";
+        char data3[] = "{\"device\":\"thermostat\", \"cmd\":\"seltemp\",\"value\":13}";
         deserializeJson(doc, data3);
         json = doc.as<JsonVariant>();
         request.url("/api");
@@ -1127,8 +1306,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN);
 
-        char key[6];
-        char value[6];
+        char key[8];
+        char value[8];
 
         // fit it up, to its limit of the Json buffer (which is about 169 records)
         for (uint8_t i = 0; i < 200; i++) {
@@ -1170,23 +1349,29 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         char boiler_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         char thermostat_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         char system_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        EMSESP::EMSESP::mqtt_.publish("boiler", "test me");
         Mqtt::show_mqtt(shell); // show queue
 
-        strcpy(boiler_topic, "ems-esp/boiler");
-        strcpy(thermostat_topic, "ems-esp/thermostat");
-        strcpy(system_topic, "ems-esp/system");
+        strlcpy(boiler_topic, "ems-esp/boiler", sizeof(boiler_topic));
+        strlcpy(thermostat_topic, "ems-esp/thermostat", sizeof(thermostat_topic));
+        strlcpy(system_topic, "ems-esp/system", sizeof(system_topic));
 
-        EMSESP::mqtt_.incoming(boiler_topic, ""); // test if ignore empty payloads
+        // test publishing
+        EMSESP::mqtt_.publish(boiler_topic, "test me");
+
+        // test receiving
+        EMSESP::mqtt_.incoming(boiler_topic, ""); // test if ignore empty payloads, should return values
 
         EMSESP::mqtt_.incoming(boiler_topic, "12345");                                // error: invalid format
-        EMSESP::mqtt_.incoming("bad_topic", "12345");                                 // error: no matching topic
+        EMSESP::mqtt_.incoming("bad_topic", "123456");                                // error: no matching topic
         EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"garbage\",\"data\":22.52}"); // error: should report error
 
         EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"comfort\",\"data\":\"eco\"}");
         EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"wwactivated\",\"data\":\"1\"}"); // with quotes
         EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"wwactivated\",\"data\":1}");     // without quotes
-        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"flowtemp\",\"data\":55}");
+        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"selflowtemp\",\"data\":55}");
+
+        // test direct commands
+        EMSESP::mqtt_.incoming("ems-esp/boiler/selflowtemp", "56");
 
         EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"send\",\"data\":\"01 02 03 04 05\"}");
         EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"pin\",\"id\":12,\"data\":\"1\"}");
@@ -1429,6 +1614,7 @@ void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
             if (levels) {
                 listDir(fs, file.name(), levels - 1);
             }
+            Serial.println();
         } else {
             Serial.print("  FILE: ");
             Serial.print(file.name());
@@ -1453,6 +1639,7 @@ void Test::debug(uuid::console::Shell & shell, const std::string & cmd) {
 #ifndef EMSESP_STANDALONE
     if (command == "ls") {
         listDir(LITTLEFS, "/", 3);
+        Serial.println();
     }
 #endif
 }

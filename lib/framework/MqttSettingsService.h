@@ -50,7 +50,7 @@ static String generateClientId() {
 #endif
 
 #ifndef FACTORY_MQTT_CLEAN_SESSION
-#define FACTORY_MQTT_CLEAN_SESSION true
+#define FACTORY_MQTT_CLEAN_SESSION false
 #endif
 
 #ifndef FACTORY_MQTT_MAX_TOPIC_LENGTH
@@ -86,9 +86,11 @@ class MqttSettings {
     uint16_t publish_time_sensor;
     uint8_t  mqtt_qos;
     bool     mqtt_retain;
-    uint8_t  ha_climate_format;
     bool     ha_enabled;
     uint8_t  nested_format;
+    String   discovery_prefix;
+    bool     publish_single;
+    bool     publish_single2cmd;
     bool     send_response;
 
     static void              read(MqttSettings & settings, JsonObject & root);
@@ -138,4 +140,4 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     void configureMqtt();
 };
 
-#endif // end MqttSettingsService_h
+#endif

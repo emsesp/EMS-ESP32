@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -77,7 +77,7 @@ class ObjectConstRef : public ObjectRefBase<const CollectionData>,
   // containsKey(const String&) const
   template <typename TString>
   FORCE_INLINE bool containsKey(const TString& key) const {
-    return !getMember(key).isUndefined();
+    return !getMember(key).isUnbound();
   }
 
   // containsKey(char*) const
@@ -85,7 +85,7 @@ class ObjectConstRef : public ObjectRefBase<const CollectionData>,
   // containsKey(const __FlashStringHelper*) const
   template <typename TChar>
   FORCE_INLINE bool containsKey(TChar* key) const {
-    return !getMember(key).isUndefined();
+    return !getMember(key).isUnbound();
   }
 
   // getMember(const std::string&) const
@@ -196,7 +196,8 @@ class ObjectRef : public ObjectRefBase<CollectionData>,
   template <typename TString>
   FORCE_INLINE VariantRef getOrAddMember(const TString& key) const {
     return VariantRef(_pool,
-                      objectGetOrAddMember(_data, adaptString(key), _pool));
+                      objectGetOrAddMember(_data, adaptString(key), _pool,
+                                           getStringStoragePolicy(key)));
   }
 
   // getOrAddMember(char*) const
@@ -205,7 +206,8 @@ class ObjectRef : public ObjectRefBase<CollectionData>,
   template <typename TChar>
   FORCE_INLINE VariantRef getOrAddMember(TChar* key) const {
     return VariantRef(_pool,
-                      objectGetOrAddMember(_data, adaptString(key), _pool));
+                      objectGetOrAddMember(_data, adaptString(key), _pool,
+                                           getStringStoragePolicy(key)));
   }
 
   FORCE_INLINE bool operator==(ObjectRef rhs) const {
