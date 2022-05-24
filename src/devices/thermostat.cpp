@@ -959,6 +959,10 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
 
     has_update(telegram, hc->manualtemp, 10);     // is * 2
     has_enumupdate(telegram, hc->program, 11, 1); // timer program 1 or 2
+
+    has_enumupdate(telegram, hc->reducemode1, 5, 1); // 1-outdoor temp threshold, 2-room temp threshold, 3-reduced mode
+    has_update(telegram, hc->reducetemp, 9);
+    has_update(telegram, hc->noreducetemp, 12); 
 }
 
 // types 0x2AF ff
@@ -2399,6 +2403,27 @@ bool Thermostat::set_reducemode(const char * value, const int8_t id) {
     return true;
 }
 
+// sets the thermostat reducemode1 for RC310
+bool Thermostat::set_reducemode1(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+
+    uint8_t set = 0xFF;
+    if (model() == EMS_DEVICE_FLAG_RC300 || model() == EMS_DEVICE_FLAG_RC100) {
+        if (Helpers::value2enum(value, set, FL_(enum_reducemode1))) {
+            write_command(set_typeids[hc->hc()], 5, set + 1, set_typeids[hc->hc()]);
+        }
+    } 
+
+    if (set == 0xFF) {
+        return false;
+    }
+    return true;
+}
+
 // sets the thermostat reducemode for RC35 vacations
 bool Thermostat::set_vacreducemode(const char * value, const int8_t id) {
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
@@ -2893,6 +2918,14 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             validate_typeid = set_typeid;
             offset          = 0;
             factor          = 1;
+            break;
+        case HeatingCircuit::Mode::NOREDUCE:
+            offset = 12;
+            factor = 1;
+            break;
+        case HeatingCircuit::Mode::REDUCE:
+            offset = 9;
+            factor = 1;
             break;
         default:
             // HeatingCircuit::Mode::AUTO:
@@ -3849,6 +3882,9 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(
             tag, &hc->tempautotemp, DeviceValueType::INT, FL_(div2), FL_(tempautotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_tempautotemp), -1, 30);
         register_device_value(tag, &hc->fastHeatup, DeviceValueType::UINT, nullptr, FL_(fastheatup), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fastheatup));
+        register_device_value(tag, &hc->reducemode1, DeviceValueType::ENUM, FL_(enum_reducemode1), FL_(reducemode1), DeviceValueUOM::NONE, MAKE_CF_CB(set_reducemode1));
+        register_device_value(tag, &hc->noreducetemp, DeviceValueType::INT, nullptr, FL_(noreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_noreducetemp));
+        register_device_value(tag, &hc->reducetemp, DeviceValueType::INT, nullptr, FL_(reducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_reducetemp));
         break;
     case EMS_DEVICE_FLAG_CRF:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode5), FL_(mode), DeviceValueUOM::NONE);

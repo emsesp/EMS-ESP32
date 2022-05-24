@@ -63,6 +63,7 @@ class Thermostat : public EMSdevice {
         uint8_t minflowtemp;
         uint8_t maxflowtemp;
         uint8_t reducemode;
+        uint8_t reducemode1;  // for RC310
         uint8_t nofrostmode;
         uint8_t program;
         uint8_t controlmode;
@@ -71,6 +72,7 @@ class Thermostat : public EMSdevice {
         uint8_t party;
         int8_t  noreducetemp; // signed -20°C to +10°C
         int8_t  reducetemp;
+        int8_t  reducetemp1;
         int8_t  vacreducetemp;
         uint8_t vacreducemode;
         uint8_t wwprio;
@@ -420,6 +422,7 @@ class Thermostat : public EMSdevice {
     bool set_minflowtemp(const char * value, const int8_t id);
     bool set_maxflowtemp(const char * value, const int8_t id);
     bool set_reducemode(const char * value, const int8_t id);
+    bool set_reducemode1(const char * value, const int8_t id);  // for RC310
     bool set_switchtime1(const char * value, const int8_t id);
     bool set_switchtime2(const char * value, const int8_t id);
     bool set_program(const char * value, const int8_t id);
