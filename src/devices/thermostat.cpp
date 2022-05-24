@@ -1010,6 +1010,7 @@ void Thermostat::process_RC300Curve(std::shared_ptr<const Telegram> telegram) {
 
     has_update(telegram, hc->controlmode, 0); // 1-outdoor, 2-simple, 3-MPC, 4-room, 5-power, 6-const
     has_update(telegram, hc->heatingtype, 1); // 1=radiator, 2=convector, 3=floor
+    has_enumupdate(telegram, hc->nofrostmode1, 5, 1); // 1-room, 2-outdoor, 3- room & outdoor
     has_update(telegram, hc->nofrosttemp, 6);
 
     if (hc->heatingtype < 3) {
@@ -2458,6 +2459,22 @@ bool Thermostat::set_nofrostmode(const char * value, const int8_t id) {
     return true;
 }
 
+bool Thermostat::set_nofrostmode1(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+
+    uint8_t set = 0xFF;
+    if (!Helpers::value2enum(value, set, FL_(enum_nofrostmode1))) {
+        return false;
+    }
+
+    write_command(curve_typeids[hc->hc()], 5, set + 1, curve_typeids[hc->hc()]);
+    return true;
+}
+
 // sets the thermostat heatingtype for RC35, RC300
 bool Thermostat::set_heatingtype(const char * value, const int8_t id) {
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
@@ -3862,6 +3879,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(
             tag, &hc->roominfl_factor, DeviceValueType::UINT, FL_(div10), FL_(roominfl_factor), DeviceValueUOM::NONE, MAKE_CF_CB(set_roominfl_factor));
         register_device_value(tag, &hc->curroominfl, DeviceValueType::SHORT, FL_(div10), FL_(curroominfl), DeviceValueUOM::DEGREES_R);
+        register_device_value(
+            tag, &hc->nofrostmode1, DeviceValueType::ENUM, FL_(enum_nofrostmode1), FL_(nofrostmode1), DeviceValueUOM::NONE, MAKE_CF_CB(set_nofrostmode1));
         register_device_value(tag, &hc->nofrosttemp, DeviceValueType::INT, nullptr, FL_(nofrosttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nofrosttemp));
         register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT, nullptr, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
         register_device_value(

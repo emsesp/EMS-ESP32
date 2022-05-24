@@ -65,6 +65,7 @@ class Thermostat : public EMSdevice {
         uint8_t reducemode;
         uint8_t reducemode1;  // for RC310
         uint8_t nofrostmode;
+        uint8_t nofrostmode1; // for RC310
         uint8_t program;
         uint8_t controlmode;
         uint8_t control;
@@ -414,6 +415,7 @@ class Thermostat : public EMSdevice {
     bool set_vacreducetemp(const char * value, const int8_t id);
     bool set_vacreducemode(const char * value, const int8_t id);
     bool set_nofrostmode(const char * value, const int8_t id);
+    bool set_nofrostmode1(const char * value, const int8_t id);
 
     bool set_remotetemp(const char * value, const int8_t id);
     bool set_roominfluence(const char * value, const int8_t id);
