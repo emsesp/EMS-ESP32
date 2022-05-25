@@ -672,6 +672,7 @@ MAKE_PSTR_LIST(nofrostmode1, F("nofrostmode1"), F("nofrost mode")) // RC310
 MAKE_PSTR_LIST(remotetemp, F("remotetemp"), F("room temperature from remote"))
 MAKE_PSTR_LIST(reducehours, F("reducehours"), F("duration for nighttemp"))
 MAKE_PSTR_LIST(reduceminutes, F("reduceminutes"), F("remaining time for nightmode"))
+MAKE_PSTR_LIST(switchonoptimization, F("switchonoptimization"), F("switch-on optimization"))
 
 // heatpump
 MAKE_PSTR_LIST(airHumidity, F("airhumidity"), F("relative air humidity"))

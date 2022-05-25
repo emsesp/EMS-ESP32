@@ -4,6 +4,7 @@
 
 ### Added
 
+- Added switchonoptimization for RC310
 - Added enum_controlmode for RC310 (new enum list) 
 - Added nofrostmode, reducemode, reducetemp & noreducetemp for RC310
 - Added emergencyops and emergencytemp, wwmaxtemp, wwflowtempoffset and wwcomfort1 for RC310

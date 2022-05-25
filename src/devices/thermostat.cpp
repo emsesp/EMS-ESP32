@@ -1010,6 +1010,7 @@ void Thermostat::process_RC300Curve(std::shared_ptr<const Telegram> telegram) {
 
     has_enumupdate(telegram, hc->controlmode, 0, 1); // 1-weather_compensated, 2-outside_footpoint,3-n/a, 4-room --  RC310  
     has_update(telegram, hc->heatingtype, 1); // 1=radiator, 2=convector, 3=floor
+    has_update(telegram, hc->switchonoptimization, 4);
     has_enumupdate(telegram, hc->nofrostmode, 5, 1); // 1-room, 2-outdoor, 3- room & outdoor
     has_update(telegram, hc->nofrosttemp, 6);
 
@@ -2386,6 +2387,24 @@ bool Thermostat::set_fastheatup(const char * value, const int8_t id) {
     write_command(summer_typeids[hc->hc()], 10, set, summer_typeids[hc->hc()]);
     return true;
 }
+
+// Set switchonoptimization RC310
+bool Thermostat::set_switchonoptimization(const char * value, const int8_t id) {
+uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+
+    bool b = false;
+    
+    if (!Helpers::value2bool(value, b)) {
+        return false;
+    }
+    write_command(curve_typeids[hc->hc()], 4, b ? 0xFF : 0x00, curve_typeids[hc->hc()]);    
+    return true;
+}
+
 
 // sets the thermostat reducemode for RC35 and RC310
 bool Thermostat::set_reducemode(const char * value, const int8_t id) {
@@ -3881,6 +3900,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(
             tag, &hc->tempautotemp, DeviceValueType::INT, FL_(div2), FL_(tempautotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_tempautotemp), -1, 30);
         register_device_value(tag, &hc->fastHeatup, DeviceValueType::UINT, nullptr, FL_(fastheatup), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fastheatup));
+        register_device_value(tag, &hc->switchonoptimization, DeviceValueType::BOOL, nullptr, FL_(switchonoptimization), DeviceValueUOM::NONE, MAKE_CF_CB(set_switchonoptimization));
         register_device_value(tag, &hc->reducemode, DeviceValueType::ENUM, FL_(enum_reducemode1), FL_(reducemode), DeviceValueUOM::NONE, MAKE_CF_CB(set_reducemode));
         register_device_value(tag, &hc->noreducetemp, DeviceValueType::INT, nullptr, FL_(noreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_noreducetemp));
         register_device_value(tag, &hc->reducetemp, DeviceValueType::INT, nullptr, FL_(reducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_reducetemp));

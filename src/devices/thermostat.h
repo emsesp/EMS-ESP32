@@ -80,6 +80,7 @@ class Thermostat : public EMSdevice {
         char    switchtime1[16];
         char    switchtime2[16];
         uint8_t climate;
+        uint8_t switchonoptimization;
 
         // RC 10
         uint8_t  reducehours;   // night reduce duration
@@ -425,6 +426,7 @@ class Thermostat : public EMSdevice {
     bool set_controlmode(const char * value, const int8_t id);
     bool set_wwprio(const char * value, const int8_t id);
     bool set_fastheatup(const char * value, const int8_t id);
+    bool set_switchonoptimization(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);
