@@ -960,7 +960,7 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->manualtemp, 10);     // is * 2
     has_enumupdate(telegram, hc->program, 11, 1); // timer program 1 or 2
 
-    has_enumupdate(telegram, hc->reducemode1, 5, 1); // 1-outdoor temp threshold, 2-room temp threshold, 3-reduced mode
+    has_enumupdate(telegram, hc->reducemode, 5, 1); // 1-outdoor temp threshold, 2-room temp threshold, 3-reduced mode
     has_update(telegram, hc->reducetemp, 9);
     has_update(telegram, hc->noreducetemp, 12); 
 }
@@ -1010,7 +1010,7 @@ void Thermostat::process_RC300Curve(std::shared_ptr<const Telegram> telegram) {
 
     has_enumupdate(telegram, hc->controlmode, 0, 1); // 1-weather_compensated, 2-outside_footpoint,3-n/a, 4-room --  RC310  
     has_update(telegram, hc->heatingtype, 1); // 1=radiator, 2=convector, 3=floor
-    has_enumupdate(telegram, hc->nofrostmode1, 5, 1); // 1-room, 2-outdoor, 3- room & outdoor
+    has_enumupdate(telegram, hc->nofrostmode, 5, 1); // 1-room, 2-outdoor, 3- room & outdoor
     has_update(telegram, hc->nofrosttemp, 6);
 
     if (hc->heatingtype < 3) {
@@ -2387,7 +2387,7 @@ bool Thermostat::set_fastheatup(const char * value, const int8_t id) {
     return true;
 }
 
-// sets the thermostat reducemode for RC35
+// sets the thermostat reducemode for RC35 and RC310
 bool Thermostat::set_reducemode(const char * value, const int8_t id) {
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
@@ -2396,34 +2396,20 @@ bool Thermostat::set_reducemode(const char * value, const int8_t id) {
     }
 
     uint8_t set = 0xFF;
-    if (!Helpers::value2enum(value, set, FL_(enum_reducemode))) {
-        return false;
-    }
-
-    write_command(set_typeids[hc->hc()], EMS_OFFSET_RC35Set_reducemode, set, set_typeids[hc->hc()]);
-    return true;
-}
-
-// sets the thermostat reducemode1 for RC310
-bool Thermostat::set_reducemode1(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
-    if (hc == nullptr) {
-        return false;
-    }
-
-    uint8_t set = 0xFF;
-    if (model() == EMS_DEVICE_FLAG_RC300 || model() == EMS_DEVICE_FLAG_RC100) {
+    if (model() == EMS_DEVICE_FLAG_RC300 ) {
         if (Helpers::value2enum(value, set, FL_(enum_reducemode1))) {
             write_command(set_typeids[hc->hc()], 5, set + 1, set_typeids[hc->hc()]);
         }
     } 
-
-    if (set == 0xFF) {
-        return false;
+    else {
+        if (Helpers::value2enum(value, set, FL_(enum_reducemode))) {
+            write_command(set_typeids[hc->hc()], EMS_OFFSET_RC35Set_reducemode, set, set_typeids[hc->hc()]);  
+            return true;
+        }
     }
     return true;
 }
+
 
 // sets the thermostat reducemode for RC35 vacations
 bool Thermostat::set_vacreducemode(const char * value, const int8_t id) {
@@ -2449,29 +2435,18 @@ bool Thermostat::set_nofrostmode(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
-
     uint8_t set = 0xFF;
-    if (!Helpers::value2enum(value, set, FL_(enum_nofrostmode))) {
-        return false;
+    if (model() == EMS_DEVICE_FLAG_RC300) {
+        if (Helpers::value2enum(value, set, FL_(enum_controlmode1))) {
+            write_command(curve_typeids[hc->hc()], 5, set + 1, curve_typeids[hc->hc()]);
+            return true;
+        }
+    } else {
+        if (Helpers::value2enum(value, set, FL_(enum_controlmode))) {
+            write_command(set_typeids[hc->hc()], EMS_OFFSET_RC35Set_nofrostmode, set, set_typeids[hc->hc()]);
+            return true;
+        }
     }
-
-    write_command(set_typeids[hc->hc()], EMS_OFFSET_RC35Set_nofrostmode, set, set_typeids[hc->hc()]);
-    return true;
-}
-
-bool Thermostat::set_nofrostmode1(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
-    if (hc == nullptr) {
-        return false;
-    }
-
-    uint8_t set = 0xFF;
-    if (!Helpers::value2enum(value, set, FL_(enum_nofrostmode1))) {
-        return false;
-    }
-
-    write_command(curve_typeids[hc->hc()], 5, set + 1, curve_typeids[hc->hc()]);
     return true;
 }
 
@@ -3885,7 +3860,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->roominfl_factor, DeviceValueType::UINT, FL_(div10), FL_(roominfl_factor), DeviceValueUOM::NONE, MAKE_CF_CB(set_roominfl_factor));
         register_device_value(tag, &hc->curroominfl, DeviceValueType::SHORT, FL_(div10), FL_(curroominfl), DeviceValueUOM::DEGREES_R);
         register_device_value(
-            tag, &hc->nofrostmode1, DeviceValueType::ENUM, FL_(enum_nofrostmode1), FL_(nofrostmode1), DeviceValueUOM::NONE, MAKE_CF_CB(set_nofrostmode1));
+            tag, &hc->nofrostmode, DeviceValueType::ENUM, FL_(enum_nofrostmode1), FL_(nofrostmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_nofrostmode));
         register_device_value(tag, &hc->nofrosttemp, DeviceValueType::INT, nullptr, FL_(nofrosttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nofrosttemp));
         register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT, nullptr, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
         register_device_value(
@@ -3906,7 +3881,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(
             tag, &hc->tempautotemp, DeviceValueType::INT, FL_(div2), FL_(tempautotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_tempautotemp), -1, 30);
         register_device_value(tag, &hc->fastHeatup, DeviceValueType::UINT, nullptr, FL_(fastheatup), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fastheatup));
-        register_device_value(tag, &hc->reducemode1, DeviceValueType::ENUM, FL_(enum_reducemode1), FL_(reducemode1), DeviceValueUOM::NONE, MAKE_CF_CB(set_reducemode1));
+        register_device_value(tag, &hc->reducemode, DeviceValueType::ENUM, FL_(enum_reducemode1), FL_(reducemode), DeviceValueUOM::NONE, MAKE_CF_CB(set_reducemode));
         register_device_value(tag, &hc->noreducetemp, DeviceValueType::INT, nullptr, FL_(noreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_noreducetemp));
         register_device_value(tag, &hc->reducetemp, DeviceValueType::INT, nullptr, FL_(reducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_reducetemp));
         break;

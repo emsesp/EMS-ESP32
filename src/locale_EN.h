@@ -663,7 +663,6 @@ MAKE_PSTR_LIST(summermode, F("summermode"), F("summer mode"))
 MAKE_PSTR_LIST(holidaymode, F("holidaymode"), F("holiday mode"))
 MAKE_PSTR_LIST(flowtempoffset, F("flowtempoffset"), F("flow temperature offset for mixer"))
 MAKE_PSTR_LIST(reducemode, F("reducemode"), F("reduce mode"))
-MAKE_PSTR_LIST(reducemode1, F("reducemode1"), F("reduce/setback mode"))  // RC310
 MAKE_PSTR_LIST(noreducetemp, F("noreducetemp"), F("no reduce below temperature"))
 MAKE_PSTR_LIST(reducetemp, F("reducetemp"), F("off/reduce switch temperature"))
 MAKE_PSTR_LIST(vacreducetemp, F("vacreducetemp"), F("vacations off/reduce switch temperature"))
