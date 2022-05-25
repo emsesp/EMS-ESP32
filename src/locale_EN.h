@@ -389,6 +389,7 @@ MAKE_PSTR_LIST(enum_nofrostmode, F_(off), F_(room), F_(outdoor))
 MAKE_PSTR_LIST(enum_nofrostmode1, F_(room), F_(outdoor), F_(room_outdoor))
 
 MAKE_PSTR_LIST(enum_controlmode, F_(off), F_(optimized), F_(simple), F_(mpc), F_(room), F_(power), F_(constant))
+MAKE_PSTR_LIST(enum_controlmode1, F("weather-compensated") ,F("outside-basepoint"), F("n/a"), F_(room)) // RC310 1-4 
 MAKE_PSTR_LIST(enum_controlmode2, F_(outdoor), F_(room))
 // MAKE_PSTR_LIST(enum_controlmode3, F_(off), F_(room), F_(outdoor), F("room+outdoor"))
 MAKE_PSTR_LIST(enum_control, F_(off), F_(rc20), F_(rc3x))

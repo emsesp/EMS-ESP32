@@ -4,6 +4,7 @@
 
 ### Added
 
+- Added enum_controlmode1 for RC310 (enum list) 
 - Added nofrostmode1, reducemode1,reducetemp & noreducetemp for RC310
 - Added emergencyops and emergencytemp, wwmaxtemp, wwflowtempoffset and wwcomfort1 for RC310
 - WebUI optimizations, updated look&feel and better performance [#124](https://github.com/emsesp/EMS-ESP32/issues/124)
