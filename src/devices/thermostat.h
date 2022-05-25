@@ -71,7 +71,6 @@ class Thermostat : public EMSdevice {
         uint8_t party;
         int8_t  noreducetemp; // signed -20°C to +10°C
         int8_t  reducetemp;
-        int8_t  reducetemp1;
         int8_t  vacreducetemp;
         uint8_t vacreducemode;
         uint8_t wwprio;
