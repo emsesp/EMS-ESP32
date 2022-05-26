@@ -25,8 +25,10 @@ REGISTER_FACTORY(Controller, EMSdevice::DeviceType::CONTROLLER);
 Controller::Controller(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // IVT broadcasts Thermostat time  from controller (0x09) if display is off.
-    register_telegram_type(0x06, F("RCTime"), false, MAKE_PF_CB(process_dateTime));
-    register_device_value(DeviceValueTAG::TAG_NONE, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE);
+    if ((flags & 0x0F) == EMS_DEVICE_FLAG_IVT) {
+        register_telegram_type(0x06, F("RCTime"), false, MAKE_PF_CB(process_dateTime));
+        register_device_value(DeviceValueTAG::TAG_NONE, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE);
+    }
 }
 
 // process_dateTime - type 0x06 - date and time from a thermostat - 14 bytes long, IVT only
