@@ -5,6 +5,96 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [3.4.0] May 23 2022
+
+## Added
+
+- WebUI optimizations, updated look&feel and better performance [#124](https://github.com/emsesp/EMS-ESP32/issues/124)
+- Auto refresh of WebUI after successful firmware upload [#178](https://github.com/emsesp/EMS-ESP32/issues/178)
+- New Customization Service in WebUI. First feature is the ability to enable/disabled Enitites (device values) from EMS devices [#206](https://github.com/emsesp/EMS-ESP32/issues/206)
+- Option to disable Telnet Console [#209](https://github.com/emsesp/EMS-ESP32/issues/209)
+- Added Hide SSID, Max Clients and Preferred Channel to Access Point
+- Merged in MichaelDvP's changes like Fahrenheit conversion, publish single (for IOBroker) and a few other critical optimizations
+- Enabled bi-directional read/write with Home Assistant, so values can be changed automatically from the UI without scripting [#265](https://github.com/emsesp/EMS-ESP32/issues/265)
+- Added GC7000F Boiler [#270](https://github.com/emsesp/EMS-ESP32/issues/270)
+- Revised LED flash sequence on boot up to show system health (1 flash=no ems, 2 flashes=no wifi) [#224](https://github.com/emsesp/EMS-ESP32/issues/224)
+- Analog Sensor support [#271](https://github.com/emsesp/EMS-ESP32/issues/271)
+- Solar cylinder priority [#247](https://github.com/emsesp/EMS-ESP32/issues/247)
+- Read only mode in Settings, where EMS Tx/Write commands are blocked [#286](https://github.com/emsesp/EMS-ESP32/issues/286)
+- Added 8700i Boiler device
+- Added Cascade CM10 Controller device
+- Add Olimex ESP32-POE-ISO to board profiles plus settings to customize Ethernet modules [#301](https://github.com/emsesp/EMS-ESP32/issues/301)
+- Help text for string commands in WebUI [#320](https://github.com/emsesp/EMS-ESP32/issues/320)
+- Germany translations (at compile time)
+- #entities added to system/info` endpoint [#322](https://github.com/emsesp/EMS-ESP32/issues/322)
+- analog outputs digital/pwm/dac
+- remove MQTT retained configs if discovery is disabled
+- timeout 10 min for MQTT-QoS wait
+- Moduline 300 auto-temperatures T1-T4, RC300 romminfluencefactor
+- RC35 parameters [#392](https://github.com/emsesp/EMS-ESP32/issues/392), [#398](https://github.com/emsesp/EMS-ESP32/issues/398)
+- sync time with thermostat [#386](https://github.com/emsesp/EMS-ESP32/issues/386), [#408](https://github.com/emsesp/EMS-ESP32/issues/408)
+- set mode has immediate effect [#395](https://github.com/emsesp/EMS-ESP32/issues/395)
+- min/max in web value setting
+- Extend customization to select if an entity is to be shown in the WebUI or forced as read-only [#317](https://github.com/emsesp/EMS-ESP32/issues/317)
+- Added Moduline 400 installation parameters [PR #449 by @kwertie01](https://github.com/emsesp/EMS-ESP32/pull/449)
+- Read time from IVT-controller [#439](https://github.com/emsesp/EMS-ESP32/issues/439)
+- Hybrid Heatpump product-id 168 [#459](https://github.com/emsesp/EMS-ESP32/issues/459), thermostat settings
+- Junkers ISM2 and IPM in warm water mode [#437](https://github.com/emsesp/EMS-ESP32/issues/437)
+- Added Shower Alert trigger time and cold shot time [#436](https://github.com/emsesp/EMS-ESP32/issues/436)
+- Improved Table layout in Web UI (searching, filtering, sorting, exporting to CSV)
+- API fetch individual attributes from an entity [#462](https://github.com/emsesp/EMS-ESP32/issues/462)
+- Option to disable mDNS
+- Option for rendering booleans on dashboard [#456](https://github.com/emsesp/EMS-ESP32/issues/456)
+- Upload customization settings from a file [#256](https://github.com/emsesp/EMS-ESP32/issues/256)
+
+## Fixed
+
+- lastcode broke MQTT JSON structure [#228](https://github.com/emsesp/EMS-ESP32/issues/228)
+- fixed issue with overlapping while reading sequence of EMS1.0 telegrams
+- fixed redundant telegram readings (because of offset overflow)
+- added missing RC30/Moduline 400 [#243](https://github.com/emsesp/EMS-ESP32/issues/243)
+- Correct modes for RC25 [#106](https://github.com/emsesp/EMS-ESP32/issues/106)
+- Clean up old HA config's in MQTT before publishing data. This will prevent HA giving the 'dict' warnings [#229](https://github.com/emsesp/EMS-ESP32/issues/229)
+- RC25 temperature setting [#272](https://github.com/emsesp/EMS-ESP32/issues/272)
+- Buderus RC25 - "hc1 mode type" incorrect value [#273](https://github.com/emsesp/EMS-ESP32/issues/273)
+- Increased number of Mixers and Heating Circuits [#294](https://github.com/emsesp/EMS-ESP32/issues/294)
+- Check receive status before removing a telegram fetch [#268](https://github.com/emsesp/EMS-ESP32/issues/268), [#282](https://github.com/emsesp/EMS-ESP32/issues/282)
+- Fix uploading firmware on OSX [#345](https://github.com/emsesp/EMS-ESP32/issues/345)
+- Non-nested MQTT would corrupt the json [#354](https://github.com/emsesp/EMS-ESP32/issues/354)
+- Burner selected max power can have a value higher than 100% [#314](https://github.com/emsesp/EMS-ESP32/issues/314)
+- some missing fahrenheit calculations
+- limited number of exclusions [#339](https://github.com/emsesp/EMS-ESP32/issues/339)
+- MQTT sometimes would not reconnect after a WiFi outage
+
+## Changed
+
+- Use flash system to show system health (1 flash=no ems, 2 flashes=no wifi) [#224](https://github.com/emsesp/EMS-ESP32/issues/224)
+- Renamed Dallas Sensor to Temperature Sensor in UI
+- Dallas Format removed. Use the name to give each sensor an alias
+- No longer MQTT subscribes to topic `/thermostat_hc<n>` as it supports a path similar to the API endpoint construct
+- Show Sensors quality in WebUI
+- Controller not shown in WebUI dashboard
+- renamed "Home Assistant Integration" to "MQTT Discovery" in MQTT Settings [#290](https://github.com/emsesp/EMS-ESP32/issues/290)
+- Show ems tx reads and writes separately
+- Show ems device handlers separated for received, fetched and pending handlers.
+- Wired renamed to Ethernet
+- removed system/pin command, new commands in analogsensors
+- system/info device-info split to name/version/brand
+- exclude list uses short-names, possible flags for web/api/mqtt excludes, readonly and favorite (selection not yet implemented)
+- thermostat clock formate date-time: dd.mm.yyyy hh:mm
+- RC300 summermode as other thermostats `winter/summer` instead of `off/on`
+
+## **BREAKING CHANGES:**
+
+- Settings:
+  - order of Boolean Format has changed in Application Settings - check your settings
+  - Dallas Format setting removed. Now customize name of each Dallas sensor via the UI
+- MQTT/API
+  - Boiler `wwheat` renamed to `ww3wayon` [#211](https://github.com/emsesp/EMS-ESP32/issues/211)
+  - Boiler `ww` tag renamed to `dhw`. Any custom Home Assistant lovelace dashboards will need updating.
+  - Renamed description of `wwtapactivated` to "turn on/off DHW". Otherwise would have looked like "boiler_dhw_turn_on_off_dhw" in HA.
+  - `/api/system/info` endpoint has updated keys. Now lowercase, no underscores and not capitalized. Replace "handlers" with "handlers received", "handlers fetched" and "handlers pending".
+
 # [3.3.1] January 20 2022
 
 - lastcode broke MQTT JSON structure [#228](https://github.com/emsesp/EMS-ESP32/issues/228)
