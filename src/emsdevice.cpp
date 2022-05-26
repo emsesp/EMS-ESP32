@@ -775,7 +775,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 
 // as generate_values_web() but stripped down to only show all entities and their state
 // this is used only for WebCustomizationService::device_entities()
-void EMSdevice::generate_values_web_all(JsonArray & output) {
+void EMSdevice::generate_values_web_customization(JsonArray & output) {
     for (const auto & dv : devicevalues_) {
         // also show commands and entities that have an empty full name
         JsonObject obj = output.createNestedObject();
@@ -832,11 +832,19 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
                 }
             }
         } else {
-            // must always have v for sorting to work in web
-            obj["v"] = "";
+            obj["v"] = ""; // must always have v for sorting to work in web
         }
 
-        // add name, prefixing the tag if it exists as the id (key for table sorting)
+        // shortname
+        std::string shortname;
+        if (dv.tag >= DeviceValueTAG::TAG_HC1) {
+            shortname = tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
+        } else {
+            shortname = read_flash_string(dv.short_name);
+        }
+        obj["s"] = shortname;
+
+        // id is the fullname, or the shortname (it must exist for the web table to work)
         if (dv.full_name) {
             if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
                 obj["id"] = dv.full_name;
@@ -846,14 +854,7 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
                 obj["id"] = name;
             }
         } else {
-            obj["id"] = "";
-        }
-
-        // shortname
-        if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-            obj["s"] = tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
-        } else {
-            obj["s"] = dv.short_name;
+            obj["id"] = shortname; // fullname/id is same as shortname
         }
 
         obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble
