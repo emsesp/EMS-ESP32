@@ -473,7 +473,7 @@ const SettingsCustomization: FC = () => {
                         <ToggleButton value="2">
                           <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
-                        <ToggleButton value="1">
+                        <ToggleButton value="1" disabled={de.id === ''}>
                           <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
                       </ToggleButtonGroup>
