@@ -132,6 +132,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         JsonVariant data = output["api_data"];
         request->send(200, "text/plain; charset=utf-8", data.as<String>());
         api_count_++;
+        delete response;
         return;
     }
 
