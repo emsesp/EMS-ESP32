@@ -616,7 +616,7 @@ MAKE_PSTR_LIST(wwDailyHeating, F("wwdailyheating"), F("daily heating"))
 MAKE_PSTR_LIST(wwDailyHeatTime, F("wwdailyheattime"), F("daily heating time"))
 MAKE_PSTR_LIST(wwWhenModeOff, F("wwwhenmodeoff"), F("when thermostat mode off"))
 // thermostat hc
-MAKE_PSTR_LIST(climate, F("ha_climate_config_creation")) // no full-name, hidden, only for creation
+MAKE_PSTR_LIST(climate, F("HA climate config creation")) // no full-name, hidden, only for creation
 MAKE_PSTR_LIST(selRoomTemp, F("seltemp"), F("selected room temperature"))
 MAKE_PSTR_LIST(roomTemp, F("currtemp"), F("current room temperature"))
 MAKE_PSTR_LIST(mode, F("mode"), F("mode"))
