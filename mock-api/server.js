@@ -473,7 +473,7 @@ const emsesp_devicedata_1 = {
 const emsesp_devicedata_2 = {
   label: 'Boiler: Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i',
   data: [
-    { v: 0, u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
+    { v: '', u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
     { v: 'false', u: 0, id: '08heating active' },
     { v: 'false', u: 0, id: '04tapwater active' },
     { v: 5, u: 1, id: '04selected flow temperature', c: 'selflowtemp' },
@@ -591,6 +591,13 @@ const emsesp_deviceentities_1 = [
     w: false,
   },
   {
+    v: 'roomTemp',
+    id: 'hc1/HA climate config creation',
+    s: 'hc1/HA climate config creation',
+    m: 0,
+    w: false,
+  },
+  {
     v: 18.2,
     id: 'hc1 selected room temperature',
     s: 'hc1/seltemp',
@@ -614,10 +621,11 @@ const emsesp_deviceentities_1 = [
 ]
 
 const emsesp_deviceentities_2 = [
-  { v: false, id: 'heating active', s: 'heatingactive', m: 0, w: false },
-  { v: false, id: 'tapwater active', s: 'tapwateractive', m: 0, w: false },
-  { v: 5, id: 'selected flow temperature', s: 'selflowtemp', m: 0, w: true },
-  { v: 0, id: 'burner selected max power', s: 'selburnpow', m: 0, w: true },
+  { u: 0, id: 'reset', s: 'reset', m: 8, w: false },
+  { v: false, id: 'heating active', s: 'heatingactive', m: 8, w: false },
+  { v: false, id: 'tapwater active', s: 'tapwateractive', m: 4, w: false },
+  { v: 5, id: 'selected flow temperature', s: 'selflowtemp', m: 4, w: true },
+  { v: 0, id: 'burner selected max power', s: 'selburnpow', m: 14, w: true },
   { v: 0, id: 'heating pump modulation', s: 'heatingpumpmod', m: 0, w: false },
   { id: 'heating pump 2 modulation', s: 'heatingpump2mod', m: 0, w: false },
   { id: 'outside temperature', s: 'outdoortemp', m: 0, w: false },
