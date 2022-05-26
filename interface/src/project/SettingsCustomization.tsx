@@ -199,6 +199,13 @@ const SettingsCustomization: FC = () => {
     return value;
   }
 
+  function formatName(de: DeviceEntity) {
+    if (de.id == de.s) {
+      return de.s;
+    }
+    return de.id + ' (' + de.s + ')';
+  }
+
   const getMaskNumber = (newMask: string[]) => {
     var new_mask = 0;
     for (let entry of newMask) {
@@ -403,7 +410,7 @@ const SettingsCustomization: FC = () => {
             <VisibilityOffOutlinedIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />:
           </Grid>
           <Grid item>
-            <Tooltip arrow placement="top" title="mark shown entities to be all visible and output ">
+            <Tooltip arrow placement="top" title="set shown entities to be all visible and output">
               <Button
                 size="small"
                 sx={{ fontSize: 10 }}
@@ -416,7 +423,7 @@ const SettingsCustomization: FC = () => {
             </Tooltip>
           </Grid>
           <Grid item>
-            <Tooltip arrow placement="top" title="mark shown entities to be not visible or output ">
+            <Tooltip arrow placement="top" title="set shown entities to be not visible or output">
               <Button
                 size="small"
                 sx={{ fontSize: 10 }}
@@ -464,7 +471,7 @@ const SettingsCustomization: FC = () => {
                           setMasks(['']);
                         }}
                       >
-                        <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.id === ''}>
+                        <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.id === '' || de.s === de.id}>
                           <StarIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
                         <ToggleButton value="4" disabled={!de.w || (de.m & 3) === 3}>
@@ -473,14 +480,12 @@ const SettingsCustomization: FC = () => {
                         <ToggleButton value="2">
                           <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
-                        <ToggleButton value="1">
+                        <ToggleButton value="1" disabled={de.s === de.id}>
                           <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
                       </ToggleButtonGroup>
                     </Cell>
-                    <Cell>
-                      {de.id}&nbsp;({de.s})
-                    </Cell>
+                    <Cell>{formatName(de)}</Cell>
                     <Cell>{formatValue(de.v)}</Cell>
                   </Row>
                 ))}
