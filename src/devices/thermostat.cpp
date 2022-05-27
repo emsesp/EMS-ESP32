@@ -379,7 +379,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     if (set_typeids.size()) {
         toggle_fetch(set_typeids[hc_num - 1], toggle_);
     }
-    if (set2_typeids.size()) {
+    if (hc_num <= set2_typeids.size()) {
         toggle_fetch(set2_typeids[hc_num - 1], toggle_);
     }
     if (summer_typeids.size()) {
@@ -2971,13 +2971,11 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             factor          = 1;
             break;
         case HeatingCircuit::Mode::NOREDUCE:
-            set_typeid      = set_typeids[hc->hc()];
             validate_typeid = set_typeid;
             offset = 12;
             factor = 1;
             break;
         case HeatingCircuit::Mode::REDUCE:
-            set_typeid      = set_typeids[hc->hc()];
             validate_typeid = set_typeid;
             offset = 9;
             factor = 1;
