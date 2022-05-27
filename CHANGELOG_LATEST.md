@@ -4,9 +4,10 @@
 
 ### Added
 
-- Added switchonoptimization for RC310
+- Added wwprio for RC310 heating circuits
+- Added switchonoptimization for RC310 heating circuits
 - Added enum_controlmode for RC310 (new enum list) 
-- Added nofrostmode, reducemode, reducetemp & noreducetemp for RC310
+- Added nofrostmode, reducemode, reducetemp & noreducetemp for RC310 
 - Added emergencyops and emergencytemp, wwmaxtemp, wwflowtempoffset and wwcomfort1 for RC310
 - WebUI optimizations, updated look&feel and better performance [#124](https://github.com/emsesp/EMS-ESP32/issues/124)
 - Auto refresh of WebUI after successful firmware upload [#178](https://github.com/emsesp/EMS-ESP32/issues/178)
