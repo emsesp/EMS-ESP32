@@ -47,7 +47,7 @@ import { DeviceShort, Devices, DeviceEntity, DeviceEntityMask } from './types';
 const SettingsCustomization: FC = () => {
   const { enqueueSnackbar } = useSnackbar();
 
-  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([{ id: '', v: 0, s: '', m: 0, w: false }]);
+  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([{ id: '', v: 0, n: '', m: 0, w: false }]);
   const [devices, setDevices] = useState<Devices>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
@@ -200,10 +200,10 @@ const SettingsCustomization: FC = () => {
   }
 
   function formatName(de: DeviceEntity) {
-    if (de.id == de.s) {
-      return de.s;
+    if (de.n === undefined) {
+      return de.id;
     }
-    return de.id + ' (' + de.s + ')';
+    return de.n + ' (' + de.id + ')';
   }
 
   const getMaskNumber = (newMask: string[]) => {
@@ -279,7 +279,7 @@ const SettingsCustomization: FC = () => {
     if (deviceEntities && selectedDevice) {
       const masked_entities = deviceEntities
         .filter((de) => de.m !== de.om)
-        .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.s);
+        .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.id);
 
       if (masked_entities.length > 60) {
         enqueueSnackbar('Selected entities exceeded limit of 60. Please Save in batches', { variant: 'warning' });
@@ -471,7 +471,7 @@ const SettingsCustomization: FC = () => {
                           setMasks(['']);
                         }}
                       >
-                        <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.id === '' || de.s === de.id}>
+                        <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.id === '' || de.n === undefined}>
                           <StarIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
                         <ToggleButton value="4" disabled={!de.w || (de.m & 3) === 3}>
@@ -480,7 +480,7 @@ const SettingsCustomization: FC = () => {
                         <ToggleButton value="2">
                           <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
-                        <ToggleButton value="1" disabled={de.s === de.id}>
+                        <ToggleButton value="1" disabled={de.n === undefined}>
                           <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
                       </ToggleButtonGroup>
