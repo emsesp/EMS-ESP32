@@ -322,7 +322,7 @@ const SettingsCustomization: FC = () => {
             <EditOffOutlinedIcon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
             =enable/disable write action&nbsp;&nbsp;
             <CommentsDisabledOutlinedIcon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
-            =include/excluded from MQTT and API outputs&nbsp;&nbsp;
+            =include/exclude from MQTT and API outputs&nbsp;&nbsp;
             <VisibilityOffOutlinedIcon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
             =show/hide from Web Dashboard
           </Typography>
