@@ -1082,6 +1082,7 @@ void Thermostat::process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegr
 
 // 0x240 RC300 parameter
 void Thermostat::process_RC300Settings(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, ibaDamping_, 8);
     has_enumupdate(telegram, ibaBuildingType_, 9, 1); // 1=light, 2=medium, 3=heavy
     has_update(telegram, ibaMinExtTemperature_, 10);
 }
@@ -1671,14 +1672,20 @@ bool Thermostat::set_heatingpid(const char * value, const int8_t id) {
     return true;
 }
 
-// 0xA5 - Set the damping settings
+// 0xA5 and 0x0240- Set the damping settings
 bool Thermostat::set_damping(const char * value, const int8_t id) {
     bool dmp;
-    if (Helpers::value2bool(value, dmp)) {
-        write_command(EMS_TYPE_IBASettings, 21, dmp ? 0xFF : 0, EMS_TYPE_IBASettings);
-        return true;
+    if (model() == EMS_DEVICE_FLAG_RC300) {
+        if (Helpers::value2bool(value, dmp)) {
+            write_command(0x240, 8, dmp ? 0xFF : 0, 0x240);
+            return true;
+        }
+    } else {
+        if (Helpers::value2bool(value, dmp)) {
+            write_command(EMS_TYPE_IBASettings, 21, dmp ? 0xFF : 0, EMS_TYPE_IBASettings);
+            return true;
+        }
     }
-
     return false;
 }
 
@@ -3348,6 +3355,13 @@ void Thermostat::register_device_values() {
                               FL_(ibaMinExtTemperature),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_minexttemp));
+        register_device_value(DeviceValueTAG::TAG_THERMOSTAT_DATA, 
+                              &ibaDamping_, 
+                              DeviceValueType::BOOL,
+                              nullptr, 
+                              FL_(damping), 
+                              DeviceValueUOM::NONE, 
+                              MAKE_CF_CB(set_damping));
         register_device_value(
             DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwSetTemp_, DeviceValueType::UINT, nullptr, FL_(wwSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemp));
         register_device_value(
