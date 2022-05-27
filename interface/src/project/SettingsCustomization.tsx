@@ -200,10 +200,14 @@ const SettingsCustomization: FC = () => {
   }
 
   function formatName(de: DeviceEntity) {
-    if (de.n === undefined) {
+    if (de.n === undefined || de.n === de.id) {
       return de.id;
     }
     return de.n + ' (' + de.id + ')';
+  }
+
+  function isCmd(de: DeviceEntity) {
+    return de.n === undefined;
   }
 
   const getMaskNumber = (newMask: string[]) => {
@@ -310,8 +314,18 @@ const SettingsCustomization: FC = () => {
 
     return (
       <>
-        <Box color="warning.main">
-          <Typography variant="body2">Select a device and customize each of its entities using the options.</Typography>
+        <Box mb={2} color="warning.main">
+          <Typography variant="body2">Select a device and customize each of its entities using the options:</Typography>
+          <Typography variant="body2">
+            <StarIcon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+            =mark/unmark as a favorite&nbsp;&nbsp;
+            <EditOffOutlinedIcon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+            =enable/disable write action&nbsp;&nbsp;
+            <CommentsDisabledOutlinedIcon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+            =include/excluded from MQTT and API outputs&nbsp;&nbsp;
+            <VisibilityOffOutlinedIcon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+            =show/hide from Web Dashboard
+          </Typography>
         </Box>
         <ValidatedTextField
           name="device"
@@ -406,11 +420,7 @@ const SettingsCustomization: FC = () => {
           </Grid>
 
           <Grid item>
-            <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />
-            <VisibilityOffOutlinedIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />:
-          </Grid>
-          <Grid item>
-            <Tooltip arrow placement="top" title="set shown entities to be all visible and output">
+            <Tooltip arrow placement="top" title="set selected entities to be both visible and output">
               <Button
                 size="small"
                 sx={{ fontSize: 10 }}
@@ -418,12 +428,14 @@ const SettingsCustomization: FC = () => {
                 color="inherit"
                 onClick={() => maskDisabled(false)}
               >
-                enable
+                set&nbsp;
+                <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />
+                <VisibilityOffOutlinedIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />
               </Button>
             </Tooltip>
           </Grid>
           <Grid item>
-            <Tooltip arrow placement="top" title="set shown entities to be not visible or output">
+            <Tooltip arrow placement="top" title="set selected entities to be not visible and not output">
               <Button
                 size="small"
                 sx={{ fontSize: 10 }}
@@ -431,7 +443,9 @@ const SettingsCustomization: FC = () => {
                 color="inherit"
                 onClick={() => maskDisabled(true)}
               >
-                disable
+                unset&nbsp;
+                <CommentsDisabledOutlinedIcon sx={{ fontSize: 14, verticalAlign: 'middle' }} />
+                <VisibilityOffOutlinedIcon sx={{ fontSize: 14, verticalAlign: 'middle' }} />
               </Button>
             </Tooltip>
           </Grid>
@@ -471,16 +485,16 @@ const SettingsCustomization: FC = () => {
                           setMasks(['']);
                         }}
                       >
-                        <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.id === '' || de.n === undefined}>
+                        <ToggleButton value="8" disabled={(de.m & 1) !== 0}>
                           <StarIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
-                        <ToggleButton value="4" disabled={!de.w || (de.m & 3) === 3}>
+                        <ToggleButton value="4" disabled={!de.w || (de.m & 3) === 3 || isCmd(de)}>
                           <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
-                        <ToggleButton value="2">
+                        <ToggleButton value="2" disabled={isCmd(de)}>
                           <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
-                        <ToggleButton value="1" disabled={de.n === undefined}>
+                        <ToggleButton value="1">
                           <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
                         </ToggleButton>
                       </ToggleButtonGroup>
