@@ -4,6 +4,7 @@
 
 ### Added
 
+- Added damping for RC310
 - Added wwprio for RC310 heating circuits
 - Added switchonoptimization for RC310 heating circuits
 - Added enum_controlmode for RC310 (new enum list) 
