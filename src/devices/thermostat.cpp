@@ -2489,7 +2489,7 @@ bool Thermostat::set_vacreducemode(const char * value, const int8_t id) {
     return true;
 }
 
-// sets the thermostat nofrost mode for RC35
+// sets the thermostat nofrost mode for RC35, RC300/RC310
 bool Thermostat::set_nofrostmode(const char * value, const int8_t id) {
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
@@ -2498,12 +2498,12 @@ bool Thermostat::set_nofrostmode(const char * value, const int8_t id) {
     }
     uint8_t set = 0xFF;
     if (model() == EMS_DEVICE_FLAG_RC300) {
-        if (Helpers::value2enum(value, set, FL_(enum_controlmode1))) {
+        if (Helpers::value2enum(value, set, FL_(enum_nofrostmode1))) {
             write_command(curve_typeids[hc->hc()], 5, set + 1, curve_typeids[hc->hc()]);
             return true;
         }
     } else {
-        if (Helpers::value2enum(value, set, FL_(enum_controlmode))) {
+        if (Helpers::value2enum(value, set, FL_(enum_nofrostmode))) {
             write_command(set_typeids[hc->hc()], EMS_OFFSET_RC35Set_nofrostmode, set, set_typeids[hc->hc()]);
             return true;
         }
