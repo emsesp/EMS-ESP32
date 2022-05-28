@@ -929,13 +929,13 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
 })
 
 function updateMask(entity, de, dd) {
-  const name = entity.slice(2)
+  const shortname = entity.slice(2)
   const new_mask = parseInt(entity.slice(0, 2), 16)
 
-  objIndex = de.findIndex((obj) => obj.s == name)
+  objIndex = de.findIndex((obj) => obj.id == shortname)
   if (objIndex !== -1) {
     de[objIndex].m = new_mask
-    const fullname = de[objIndex].id
+    const fullname = de[objIndex].n
     objIndex = dd.data.findIndex((obj) => obj.id.slice(2) == fullname)
     if (objIndex !== -1) {
       // see if the mask has changed
@@ -947,7 +947,7 @@ function updateMask(entity, de, dd) {
       }
     }
   } else {
-    console.log("can't locate record for id " + id)
+    console.log("can't locate record for name " + shortname)
   }
 }
 
