@@ -850,6 +850,8 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
                     obj["n"] = name;
                 }
             }
+        } else {
+            obj["n"] = "";
         }
 
         obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble
