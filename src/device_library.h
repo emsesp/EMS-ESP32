@@ -68,7 +68,7 @@
 {224, DeviceType::CONTROLLER, F("9000i"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {229, DeviceType::CONTROLLER, F("8700i"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {230, DeviceType::CONTROLLER, F("BC Base"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{240, DeviceType::CONTROLLER, F("Rego 3000"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{240, DeviceType::CONTROLLER, F("Rego 3000"), DeviceFlags::EMS_DEVICE_FLAG_IVT}, // 0x09
 {241, DeviceType::CONTROLLER, F("Condens 5000i"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 
 // Thermostat - not currently supporting write operations, like the Easy/100 types - 0x18

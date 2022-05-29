@@ -384,7 +384,10 @@ const DashboardData: FC = () => {
   const handleDownloadCsv = () => {
     const columns = [
       { accessor: (dv: any) => dv.id.slice(2), name: 'Entity' },
-      { accessor: (dv: any) => (typeof dv.v === 'number') ? new Intl.NumberFormat().format(dv.v) : dv.v, name: 'Value' },
+      {
+        accessor: (dv: any) => (typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v),
+        name: 'Value'
+      },
       { accessor: (dv: any) => DeviceValueUOM_s[dv.u], name: 'UoM' }
     ];
     downloadAsCsv(
@@ -449,7 +452,7 @@ const DashboardData: FC = () => {
     }
   };
 
-  const isCmdOnly = (dv: DeviceValue) => dv.v === undefined && dv.c;
+  const isCmdOnly = (dv: DeviceValue) => dv.v === '' && dv.c;
 
   function formatValue(value: any, uom: number) {
     if (value === undefined) {
