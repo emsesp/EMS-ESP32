@@ -183,9 +183,11 @@ uint8_t EMSESP::check_master_device(const uint8_t device_id, const uint16_t type
         uint16_t curve_ids[]   = {0x029B, 0x029C, 0x029D, 0x029E, 0x029F, 0x02A0, 0x02A1, 0x02A2};
         uint16_t summer2_ids[] = {0x0471, 0x0472, 0x0473, 0x0474, 0x0475, 0x0476, 0x0477, 0x0478};
         uint16_t master_ids[]  = {0x02F5, 0x031B, 0x031D, 0x031E, 0x023A, 0x0267, 0x0240};
+        uint16_t set2_ids[]    = {0x02CC, 0x02CE, 0x02D0, 0x02D2};
         // look for heating circuits
         for (uint8_t i = 0; i < sizeof(mon_ids) / 2; i++) {
-            if (type_id == mon_ids[i] || type_id == set_ids[i] || type_id == summer_ids[i] || type_id == curve_ids[i] || type_id == summer2_ids[i]) {
+            if (type_id == mon_ids[i] || type_id == set_ids[i] || type_id == summer_ids[i] 
+                    || type_id == curve_ids[i] || type_id == summer2_ids[i] || (i <4 && type_id == set2_ids[i])) {
                 if (read) {
                     // receiving telegrams and map all to master thermostat at 0x18 (src manipulated)
                     return 0x18;
