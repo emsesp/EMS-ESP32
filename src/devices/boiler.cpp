@@ -206,6 +206,22 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           FL_(maintenanceDate),
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_maintenancedate));
+    register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
+                          &emergencyOps_,
+                          DeviceValueType::BOOL,
+                          nullptr,
+                          FL_(emergencyOps),
+                          DeviceValueUOM::NONE,
+                          MAKE_CF_CB(set_emergency_ops));
+    register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
+                          &emergencyTemp_,
+                          DeviceValueType::UINT,
+                          nullptr,
+                          FL_(emergencyTemp),
+                          DeviceValueUOM::DEGREES,
+                          MAKE_CF_CB(set_emergency_temp),
+                          40,
+                          70);
 
     /*
     * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
@@ -425,6 +441,15 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           MAKE_CF_CB(set_ww_maxpower),
                           0,
                           130);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                          &wwMaxTemp_,
+                          DeviceValueType::UINT,
+                          nullptr,
+                          FL_(wwMaxTemp),
+                          DeviceValueUOM::DEGREES,
+                          MAKE_CF_CB(set_ww_maxtemp),
+                          0,
+                          70);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                           &wwCircPump_,
                           DeviceValueType::BOOL,
@@ -775,6 +800,9 @@ void Boiler::process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram)
     has_update(telegram, boilHystOff_, 8);
     has_update(telegram, boilHystOn_, 9);
     has_update(telegram, burnMinPeriod_, 10);
+    has_update(telegram, emergencyOps_, 18);
+    has_update(telegram, emergencyTemp_, 19);
+
     // has_update(telegram, pumpType_, 11);   // guess, RC300 manual: power controlled, pressure controlled 1-4?
     // has_update(telegram, pumpDelay_, 12);  // guess
     // has_update(telegram, pumpModMax_, 13); // guess
@@ -795,6 +823,7 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwDisinfectionTemp_, 12); // setting here, status in E9
     has_update(telegram, wwSelTempSingle_, 16);
     has_update(telegram, wwSelTempLow_, 18);
+    has_update(telegram, wwMaxTemp_, 20);
     has_update(telegram, wwChargeOptimization_, 25);
 
     uint8_t wwComfort1 = EMS_VALUE_UINT_NOTSET;
@@ -1412,6 +1441,18 @@ bool Boiler::set_ww_maxpower(const char * value, const int8_t id) {
     return true;
 }
 
+// set dhw maximum temperature
+bool Boiler::set_ww_maxtemp(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+
+    write_command(EMS_TYPE_UBAParameterWWPlus, 20, v, EMS_TYPE_UBAParameterWWPlus);
+
+    return true;
+}
+
 // set min pump modulation
 bool Boiler::set_min_pump(const char * value, const int8_t id) {
     int v = 0;
@@ -1829,6 +1870,26 @@ bool Boiler::set_pool_temp(const char * value, const int8_t id) {
     // LOG_INFO(F("Setting pool temperature to %d.%d C"), v2 >> 1, (v2 & 0x01) * 5);
     write_command(0x48A, 1, v2, 0x48A);
 
+    return true;
+}
+
+bool Boiler::set_emergency_temp(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+
+    write_command(EMS_TYPE_UBAParametersPlus, 19, v, EMS_TYPE_UBAParametersPlus);
+
+    return true;
+}
+
+bool Boiler::set_emergency_ops(const char * value, const int8_t id) {
+    bool v = false;
+    if (!Helpers::value2bool(value, v)) {
+        return false;
+    }
+    write_command(EMS_TYPE_UBAParametersPlus, 18, v ? 0x01 : 0x00, EMS_TYPE_UBAParametersPlus);
     return true;
 }
 

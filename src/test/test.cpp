@@ -418,7 +418,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 // emsdevice->generate_values_web(root);
 
                 JsonArray output = doc.to<JsonArray>();
-                emsdevice->generate_values_web_all(output);
+                emsdevice->generate_values_web_customization(output);
 
                 Serial.print(COLOR_BRIGHT_MAGENTA);
                 serializeJson(doc, Serial);

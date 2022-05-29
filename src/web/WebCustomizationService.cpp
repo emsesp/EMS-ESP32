@@ -196,7 +196,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request, J
             if (emsdevice->unique_id() == json["id"]) {
 #ifndef EMSESP_STANDALONE
                 JsonArray output = response->getRoot();
-                emsdevice->generate_values_web_all(output);
+                emsdevice->generate_values_web_customization(output);
 #endif
                 response->setLength();
                 request->send(response);

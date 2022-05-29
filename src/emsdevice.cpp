@@ -716,11 +716,9 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 
             auto mask = Helpers::hextoa((uint8_t)(dv.state >> 4), false); // create mask to a 2-char string
 
-            // add name, prefixing the tag if it exists. This is the id used for the table sorting
+            // add name, prefixing the tag if it exists. This is the id used in the WebUI table and must be unique
             if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
                 obj["id"] = mask + read_flash_string(dv.full_name);
-            } else if (dv.tag < DeviceValueTAG::TAG_HC1) {
-                obj["id"] = mask + tag_to_string(dv.tag) + " " + read_flash_string(dv.full_name);
             } else {
                 obj["id"] = mask + tag_to_string(dv.tag) + " " + read_flash_string(dv.full_name);
             }
@@ -775,7 +773,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 
 // as generate_values_web() but stripped down to only show all entities and their state
 // this is used only for WebCustomizationService::device_entities()
-void EMSdevice::generate_values_web_all(JsonArray & output) {
+void EMSdevice::generate_values_web_customization(JsonArray & output) {
     for (const auto & dv : devicevalues_) {
         // also show commands and entities that have an empty full name
         JsonObject obj = output.createNestedObject();
@@ -831,29 +829,29 @@ void EMSdevice::generate_values_web_all(JsonArray & output) {
                     obj["v"]            = (divider > 0) ? time_value / divider : time_value * factor; // sometimes we need to divide by 60
                 }
             }
-        } else {
-            // must always have v for sorting to work in web
-            obj["v"] = "";
         }
 
-        // add name, prefixing the tag if it exists as the id (key for table sorting)
-        if (dv.full_name) {
-            if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
-                obj["id"] = dv.full_name;
-            } else {
-                char name[50];
-                snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag).c_str(), read_flash_string(dv.full_name).c_str());
-                obj["id"] = name;
+        // id holds the shortname and must always have a value for the WebUI table to work
+        if (dv.tag >= DeviceValueTAG::TAG_HC1) {
+            obj["id"] = tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
+        } else {
+            obj["id"] = read_flash_string(dv.short_name);
+        }
+
+        // n is the fullname, and can be optional
+        // don't add the fullname if its a command
+        if (dv.type != DeviceValueType::CMD) {
+            if (dv.full_name) {
+                if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
+                    obj["n"] = dv.full_name;
+                } else {
+                    char name[50];
+                    snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag).c_str(), read_flash_string(dv.full_name).c_str());
+                    obj["n"] = name;
+                }
             }
         } else {
-            obj["id"] = "";
-        }
-
-        // shortname
-        if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-            obj["s"] = tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
-        } else {
-            obj["s"] = dv.short_name;
+            obj["n"] = "";
         }
 
         obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble

@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router-dom';
 
 import * as AuthenticationApi from '../../api/authentication';
 import { ACCESS_TOKEN } from '../../api/endpoints';
+import { RequiredChildrenProps } from '../../utils';
 import { LoadingSpinner } from '../../components';
 import { Me } from '../../types';
 import { FeaturesContext } from '../features';
 import { AuthenticationContext } from './context';
 
-const Authentication: FC = ({ children }) => {
+const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
   const { features } = useContext(FeaturesContext);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();

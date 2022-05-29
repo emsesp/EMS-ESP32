@@ -81,6 +81,7 @@ class Boiler : public EMSdevice {
     uint8_t  wwSetPumpPower_;       // ww pump speed/power?
     uint8_t  wwFlowTempOffset_;     // Boiler offset for ww heating
     uint8_t  wwMaxPower_;           // DHW maximum power
+    uint8_t  wwMaxTemp_;            // DHW maximum temperature
     uint32_t wwStarts_;             // DHW starts
     uint32_t wwStarts2_;            // DHW control starts
     uint32_t wwWorkM_;              // DHW minutes
@@ -133,6 +134,8 @@ class Boiler : public EMSdevice {
     char     lastCode_[50];      // last error code
     char     serviceCode_[4];    // 3 character status/service code
     uint16_t serviceCodeNumber_; // error/service code
+    uint8_t  emergencyOps_;
+    uint8_t  emergencyTemp_;
 
     // info
     uint32_t upTimeControl_;             // Operating time control
@@ -255,6 +258,7 @@ class Boiler : public EMSdevice {
     bool set_ww_temp_single(const char * value, const int8_t id);
     bool set_ww_disinfect_temp(const char * value, const int8_t id);
     bool set_ww_maxpower(const char * value, const int8_t id);
+    bool set_ww_maxtemp(const char * value, const int8_t id);
     bool set_ww_flowTempOffset(const char * value, const int8_t id);
     bool set_ww_chargeOptimization(const char * value, const int8_t id);
     bool set_flow_temp(const char * value, const int8_t id);
@@ -276,6 +280,8 @@ class Boiler : public EMSdevice {
     bool set_ww_hyst_on(const char * value, const int8_t id);
     bool set_ww_hyst_off(const char * value, const int8_t id);
     bool set_pool_temp(const char * value, const int8_t id);
+    bool set_emergency_temp(const char * value, const int8_t id);
+    bool set_emergency_ops(const char * value, const int8_t id);
     /*
     bool set_hybridStrategy(const char * value, const int8_t id);
     bool set_switchOverTemp(const char * value, const int8_t id);

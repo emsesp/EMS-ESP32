@@ -313,6 +313,7 @@ MAKE_PSTR_WORD(winter)
 MAKE_PSTR_WORD(outdoor)
 MAKE_PSTR_WORD(mpc)
 MAKE_PSTR_WORD(room)
+MAKE_PSTR_WORD(room_outdoor)
 MAKE_PSTR_WORD(power)
 MAKE_PSTR_WORD(constant)
 MAKE_PSTR_WORD(simple)
@@ -383,9 +384,12 @@ MAKE_PSTR_LIST(enum_modetype4, F_(nofrost), F_(eco), F_(heat))
 MAKE_PSTR_LIST(enum_modetype5, F_(off), F_(on))
 
 MAKE_PSTR_LIST(enum_reducemode, F_(nofrost), F_(reduce), F_(room), F_(outdoor))
+MAKE_PSTR_LIST(enum_reducemode1, F_(outdoor), F_(room), F_(reduce)) // RC310 values: 1-3
 MAKE_PSTR_LIST(enum_nofrostmode, F_(off), F_(room), F_(outdoor))
+MAKE_PSTR_LIST(enum_nofrostmode1, F_(room), F_(outdoor), F_(room_outdoor))
 
 MAKE_PSTR_LIST(enum_controlmode, F_(off), F_(optimized), F_(simple), F_(mpc), F_(room), F_(power), F_(constant))
+MAKE_PSTR_LIST(enum_controlmode1, F("weather-compensated"), F("outside-basepoint"), F("n/a"), F_(room)) // RC310 1-4
 MAKE_PSTR_LIST(enum_controlmode2, F_(outdoor), F_(room))
 // MAKE_PSTR_LIST(enum_controlmode3, F_(off), F_(room), F_(outdoor), F("room+outdoor"))
 MAKE_PSTR_LIST(enum_control, F_(off), F_(rc20), F_(rc3x))
@@ -465,6 +469,8 @@ MAKE_PSTR_LIST(maintenanceMessage, F("maintenancemessage"), F("maintenance messa
 MAKE_PSTR_LIST(maintenanceDate, F("maintenancedate"), F("next maintenance date"))
 MAKE_PSTR_LIST(maintenanceType, F_(maintenance), F("maintenance scheduled"))
 MAKE_PSTR_LIST(maintenanceTime, F("maintenancetime"), F("time to next maintenance"))
+MAKE_PSTR_LIST(emergencyOps, F("emergencyops"), F("emergency operation"))
+MAKE_PSTR_LIST(emergencyTemp, F("emergencytemp"), F("emergency temperature"))
 
 // heatpump/compress specific
 MAKE_PSTR_LIST(upTimeControl, F("uptimecontrol"), F("total operating time heat"))
@@ -614,7 +620,7 @@ MAKE_PSTR_LIST(wwDailyHeating, F("wwdailyheating"), F("daily heating"))
 MAKE_PSTR_LIST(wwDailyHeatTime, F("wwdailyheattime"), F("daily heating time"))
 MAKE_PSTR_LIST(wwWhenModeOff, F("wwwhenmodeoff"), F("when thermostat mode off"))
 // thermostat hc
-MAKE_PSTR_LIST(climate, F("climate"))
+MAKE_PSTR_LIST(climate, F("HA climate config creation")) // no full-name, hidden, only for creation
 MAKE_PSTR_LIST(selRoomTemp, F("seltemp"), F("selected room temperature"))
 MAKE_PSTR_LIST(roomTemp, F("currtemp"), F("current room temperature"))
 MAKE_PSTR_LIST(mode, F("mode"), F("mode"))
@@ -662,9 +668,11 @@ MAKE_PSTR_LIST(reducetemp, F("reducetemp"), F("off/reduce switch temperature"))
 MAKE_PSTR_LIST(vacreducetemp, F("vacreducetemp"), F("vacations off/reduce switch temperature"))
 MAKE_PSTR_LIST(vacreducemode, F("vacreducemode"), F("vacations reduce mode"))
 MAKE_PSTR_LIST(nofrostmode, F("nofrostmode"), F("nofrost mode"))
+MAKE_PSTR_LIST(nofrostmode1, F("nofrostmode1"), F("nofrost mode")) // RC310
 MAKE_PSTR_LIST(remotetemp, F("remotetemp"), F("room temperature from remote"))
 MAKE_PSTR_LIST(reducehours, F("reducehours"), F("duration for nighttemp"))
 MAKE_PSTR_LIST(reduceminutes, F("reduceminutes"), F("remaining time for nightmode"))
+MAKE_PSTR_LIST(switchonoptimization, F("switchonoptimization"), F("switch-on optimization"))
 
 // heatpump
 MAKE_PSTR_LIST(airHumidity, F("airhumidity"), F("relative air humidity"))
