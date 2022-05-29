@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# Changelog
+
+## [3.4.1] May 29 2022
+
+### Fixed
+
+- Fix memory leak in api [#524](https://github.com/emsesp/EMS-ESP32/issues/524)
+
+### Changed
+
+- Controller data in web-ui only for IVT [#522](https://github.com/emsesp/EMS-ESP32/issues/522)
+- Rename hidden `climate` to a more explaining name [#523](https://github.com/emsesp/EMS-ESP32/issues/523)
+- Minor changes to the Customizations web page [#527](https://github.com/emsesp/EMS-ESP32/pull/527)
+
 # [3.4.0] May 23 2022
 
 ## Added
