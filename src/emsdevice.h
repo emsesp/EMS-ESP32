@@ -202,7 +202,7 @@ class EMSdevice {
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT, CONSOLE };
     bool generate_values(JsonObject & output, const uint8_t tag_filter, const bool nested, const uint8_t output_target);
     void generate_values_web(JsonObject & output);
-    void generate_values_web_all(JsonArray & output);
+    void generate_values_web_customization(JsonArray & output);
 
     void register_device_value(uint8_t                             tag,
                                void *                              value_p,
@@ -316,6 +316,9 @@ class EMSdevice {
 
     // device flags: The lower 4 bits hold the unique identifier, the upper 4 bits are used for specific flags
     static constexpr uint8_t EMS_DEVICE_FLAG_NONE = 0;
+
+    // Controller
+    static constexpr uint8_t EMS_DEVICE_FLAG_IVT = 1;
 
     // Boiler
     static constexpr uint8_t EMS_DEVICE_FLAG_EMS      = 1;

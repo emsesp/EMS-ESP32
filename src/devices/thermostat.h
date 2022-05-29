@@ -80,6 +80,7 @@ class Thermostat : public EMSdevice {
         char    switchtime1[16];
         char    switchtime2[16];
         uint8_t climate;
+        uint8_t switchonoptimization;
 
         // RC 10
         uint8_t  reducehours;   // night reduce duration
@@ -160,6 +161,7 @@ class Thermostat : public EMSdevice {
     // each thermostat has a list of heating controller type IDs for reading and writing
     std::vector<uint16_t> monitor_typeids;
     std::vector<uint16_t> set_typeids;
+    std::vector<uint16_t> set2_typeids;
     std::vector<uint16_t> timer_typeids;
     std::vector<uint16_t> timer2_typeids;
     std::vector<uint16_t> summer_typeids;
@@ -357,6 +359,7 @@ class Thermostat : public EMSdevice {
     void process_CRFMonitor(std::shared_ptr<const Telegram> telegram);
     void process_RC300Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC300Set(std::shared_ptr<const Telegram> telegram);
+    void process_RC300Set2(std::shared_ptr<const Telegram> telegram);
     void process_RC300Summer(std::shared_ptr<const Telegram> telegram);
     void process_RC300Summer2(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWmode(std::shared_ptr<const Telegram> telegram);
@@ -412,7 +415,6 @@ class Thermostat : public EMSdevice {
     bool set_vacreducetemp(const char * value, const int8_t id);
     bool set_vacreducemode(const char * value, const int8_t id);
     bool set_nofrostmode(const char * value, const int8_t id);
-
     bool set_remotetemp(const char * value, const int8_t id);
     bool set_roominfluence(const char * value, const int8_t id);
     bool set_roominfl_factor(const char * value, const int8_t id);
@@ -426,6 +428,7 @@ class Thermostat : public EMSdevice {
     bool set_controlmode(const char * value, const int8_t id);
     bool set_wwprio(const char * value, const int8_t id);
     bool set_fastheatup(const char * value, const int8_t id);
+    bool set_switchonoptimization(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);

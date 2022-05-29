@@ -131,9 +131,9 @@ export interface DeviceData {
 }
 
 export interface DeviceEntity {
-  id: string; // name
-  v: any; // value, in any format
-  s: string; // shortname
+  id: string; // shortname
+  v?: any; // value, in any format, optional
+  n?: string; // fullname, optional
   m: number; // mask
   om?: number; // original mask before edits
   w: boolean; // writeable
