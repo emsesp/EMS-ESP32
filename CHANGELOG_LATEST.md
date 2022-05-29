@@ -16,4 +16,7 @@
 
 ## Changed
 
+- platformio 2.3.0 (IDF 4, Arduino 2)
+- remove master-thermostat, support multiple thermostats
+
 ## **BREAKING CHANGES:**

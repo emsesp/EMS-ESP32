@@ -1329,8 +1329,7 @@ std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
     }
 
     // if there is a tag add it
-    if (!EMSdevice::tag_to_mqtt(tag).empty()
-        && ((device_type == EMSdevice::DeviceType::BOILER && tag == DeviceValueTAG::TAG_DEVICE_DATA_WW) || (!is_nested() && tag >= DeviceValueTAG::TAG_HC1))) {
+    if (!EMSdevice::tag_to_mqtt(tag).empty() && ((tag == DeviceValueTAG::TAG_BOILER_DATA_WW) || (!is_nested() && tag >= DeviceValueTAG::TAG_HC1))) {
         return EMSdevice::device_type_2_device_name(device_type) + "_data_" + EMSdevice::tag_to_mqtt(tag);
     } else {
         return EMSdevice::device_type_2_device_name(device_type) + "_data";

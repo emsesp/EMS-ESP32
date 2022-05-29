@@ -65,8 +65,6 @@ MAKE_PSTR_WORD(reconnect)
 MAKE_PSTR_WORD(ssid)
 MAKE_PSTR_WORD(heartbeat)
 MAKE_PSTR_WORD(users)
-MAKE_PSTR_WORD(master)
-MAKE_PSTR_WORD(pin)
 MAKE_PSTR_WORD(publish)
 MAKE_PSTR_WORD(timeout)
 MAKE_PSTR_WORD(board_profile)
@@ -105,7 +103,6 @@ MAKE_PSTR_WORD(unknown)
 MAKE_PSTR_WORD(dallassensor)
 
 // format strings
-MAKE_PSTR(master_thermostat_fmt, "Master Thermostat device ID: %s")
 MAKE_PSTR(host_fmt, "Host: %s")
 MAKE_PSTR(port_fmt, "Port: %d")
 MAKE_PSTR(hostname_fmt, "Hostname: %s")
@@ -206,9 +203,9 @@ MAKE_PSTR(l, "l")
 // mqtt tags must not have spaces
 MAKE_PSTR(tag_none, "")
 MAKE_PSTR(tag_heartbeat, "")
-MAKE_PSTR(tag_boiler_data, "")
+MAKE_PSTR(tag_boiler_data_ww, "dhw")
+MAKE_PSTR(tag_device_data, "")
 MAKE_PSTR(tag_device_data_ww, "dhw")
-MAKE_PSTR(tag_thermostat_data, "")
 MAKE_PSTR(tag_hc1, "hc1")
 MAKE_PSTR(tag_hc2, "hc2")
 MAKE_PSTR(tag_hc3, "hc3")
@@ -246,8 +243,9 @@ MAKE_PSTR(tag_hs16, "hs16")
 
 // MQTT topic names
 // MAKE_PSTR(tag_heartbeat_mqtt, "heartbeat")
-MAKE_PSTR(tag_boiler_data_mqtt, "")
-MAKE_PSTR(tag_device_data_ww_mqtt, "ww")
+// MAKE_PSTR(tag_boiler_data_mqtt, "")
+MAKE_PSTR(tag_boiler_data_ww_mqtt, "ww")
+MAKE_PSTR(tag_device_data_ww_mqtt, "")
 
 // boiler
 MAKE_PSTR_WORD(time)
@@ -389,7 +387,7 @@ MAKE_PSTR_LIST(enum_nofrostmode, F_(off), F_(room), F_(outdoor))
 MAKE_PSTR_LIST(enum_nofrostmode1, F_(room), F_(outdoor), F_(room_outdoor))
 
 MAKE_PSTR_LIST(enum_controlmode, F_(off), F_(optimized), F_(simple), F_(mpc), F_(room), F_(power), F_(constant))
-MAKE_PSTR_LIST(enum_controlmode1, F("weather-compensated") ,F("outside-basepoint"), F("n/a"), F_(room)) // RC310 1-4 
+MAKE_PSTR_LIST(enum_controlmode1, F("weather-compensated"), F("outside-basepoint"), F("n/a"), F_(room)) // RC310 1-4
 MAKE_PSTR_LIST(enum_controlmode2, F_(outdoor), F_(room))
 // MAKE_PSTR_LIST(enum_controlmode3, F_(off), F_(room), F_(outdoor), F("room+outdoor"))
 MAKE_PSTR_LIST(enum_control, F_(off), F_(rc20), F_(rc3x))

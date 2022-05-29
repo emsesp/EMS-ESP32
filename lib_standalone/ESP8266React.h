@@ -33,7 +33,6 @@ class DummySettings {
     uint32_t syslog_mark_interval  = 0;
     String   syslog_host           = "192.168.1.4";
     uint16_t syslog_port           = 514;
-    uint8_t  master_thermostat     = 0;
     bool     shower_timer          = true;
     bool     shower_alert          = false;
     uint8_t  shower_alert_coldshot = 10;

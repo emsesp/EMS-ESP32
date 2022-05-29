@@ -33,12 +33,12 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 // handles both WiFI and Ethernet
 void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     switch (event) {
-    case SYSTEM_EVENT_STA_DISCONNECTED:
-        EMSESP::logger().info(F("WiFi disconnected. Reason code=%d"), info.disconnected.reason);
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+        EMSESP::logger().info(F("WiFi disconnected. Reason code=%d"), info.wifi_sta_disconnected.reason); // IDF 4.0
         WiFi.disconnect(true);
         break;
 
-    case SYSTEM_EVENT_STA_GOT_IP:
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
 #ifndef EMSESP_STANDALONE
         EMSESP::logger().info(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
 #endif
@@ -51,7 +51,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         mDNS_start();
         break;
 
-    case SYSTEM_EVENT_ETH_START:
+    case ARDUINO_EVENT_ETH_START:
         // EMSESP::logger().info(F("Ethernet initialized"));
         ETH.setHostname(EMSESP::system_.hostname().c_str());
 
@@ -64,7 +64,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 
         break;
 
-    case SYSTEM_EVENT_ETH_GOT_IP:
+    case ARDUINO_EVENT_ETH_GOT_IP:
         // prevent double calls
         if (!EMSESP::system_.ethernet_connected()) {
 #ifndef EMSESP_STANDALONE
@@ -81,18 +81,18 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         }
         break;
 
-    case SYSTEM_EVENT_ETH_DISCONNECTED:
+    case ARDUINO_EVENT_ETH_DISCONNECTED:
         EMSESP::logger().info(F("Ethernet disconnected"));
         EMSESP::system_.ethernet_connected(false);
         break;
 
-    case SYSTEM_EVENT_ETH_STOP:
+    case ARDUINO_EVENT_ETH_STOP:
         EMSESP::logger().info(F("Ethernet stopped"));
         EMSESP::system_.ethernet_connected(false);
         break;
 
 #ifndef EMSESP_STANDALONE
-    case SYSTEM_EVENT_STA_CONNECTED:
+    case ARDUINO_EVENT_WIFI_STA_CONNECTED:
         EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
             if (networkSettings.enableIPv6) {
                 WiFi.enableIpV6();
@@ -100,7 +100,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         });
         break;
 
-    case SYSTEM_EVENT_ETH_CONNECTED:
+    case ARDUINO_EVENT_ETH_CONNECTED:
         EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
             if (networkSettings.enableIPv6) {
                 ETH.enableIpV6();
@@ -108,7 +108,8 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         });
         break;
 
-    case SYSTEM_EVENT_GOT_IP6:
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
+    case ARDUINO_EVENT_ETH_GOT_IP6:
         if (EMSESP::system_.ethernet_connected()) {
             EMSESP::logger().info(F("Ethernet connected with IP=%s, speed %d Mbps"), ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
         } else {

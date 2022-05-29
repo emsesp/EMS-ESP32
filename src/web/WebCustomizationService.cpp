@@ -148,7 +148,7 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
 // deletes the customization file
 void WebCustomizationService::reset_customization(AsyncWebServerRequest * request) {
 #ifndef EMSESP_STANDALONE
-    if (LITTLEFS.remove(EMSESP_CUSTOMIZATION_FILE)) {
+    if (LittleFS.remove(EMSESP_CUSTOMIZATION_FILE)) {
         AsyncWebServerResponse * response = request->beginResponse(200); // OK
         request->send(response);
         EMSESP::system_.restart_requested(true);

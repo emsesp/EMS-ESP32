@@ -52,7 +52,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             }
         } else {
             // its a normal file, open a new temp file to write the contents too
-            request->_tempFile = LITTLEFS.open(TEMP_FILENAME_PATH, "w");
+            request->_tempFile = LittleFS.open(TEMP_FILENAME_PATH, "w");
         }
     }
 

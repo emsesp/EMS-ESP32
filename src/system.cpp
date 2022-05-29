@@ -245,7 +245,7 @@ void System::format(uuid::console::Shell & shell) {
     EMSuart::stop();
 
 #ifndef EMSESP_STANDALONE
-    LITTLEFS.format();
+    LittleFS.format();
 #endif
 
     System::system_restart();
@@ -433,7 +433,7 @@ void System::button_OnVLongPress(PButton & b) {
     EMSESP::console_.loop();
 
 #ifdef EMSESP_DEBUG
-    Test::listDir(LITTLEFS, FS_CONFIG_DIRECTORY, 3);
+    Test::listDir(LittleFS, FS_CONFIG_DIRECTORY, 3);
 #endif
 
     EMSESP::esp8266React.factoryReset();
@@ -895,7 +895,7 @@ bool System::check_upgrade() {
 
 #ifndef EMSESP_STANDALONE
     // see if we have a temp file, if so try and read it
-    File new_file = LITTLEFS.open(TEMP_FILENAME_PATH);
+    File new_file = LittleFS.open(TEMP_FILENAME_PATH);
     if (new_file) {
         DynamicJsonDocument  jsonDocument = DynamicJsonDocument(FS_BUFFER_SIZE);
         DeserializationError error        = deserializeJson(jsonDocument, new_file);
@@ -923,7 +923,7 @@ bool System::check_upgrade() {
 
         // close (just in case) and remove the temp file
         new_file.close();
-        LITTLEFS.remove(TEMP_FILENAME_PATH);
+        LittleFS.remove(TEMP_FILENAME_PATH);
     }
 #endif
 
@@ -938,7 +938,7 @@ bool System::command_commands(const char * value, const int8_t id, JsonObject & 
 // convert settings file into json object
 void System::extractSettings(const char * filename, const char * section, JsonObject & output) {
 #ifndef EMSESP_STANDALONE
-    File settingsFile = LITTLEFS.open(filename);
+    File settingsFile = LittleFS.open(filename);
     if (settingsFile) {
         DynamicJsonDocument  jsonDocument = DynamicJsonDocument(EMSESP_JSON_SIZE_XLARGE_DYN);
         DeserializationError error        = deserializeJson(jsonDocument, settingsFile);
@@ -959,7 +959,7 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
 #ifndef EMSESP_STANDALONE
     JsonObject section_json = input[section];
     if (section_json) {
-        File section_file = LITTLEFS.open(filename, "w");
+        File section_file = LittleFS.open(filename, "w");
         if (section_file) {
             LOG_INFO(F("Applying new %s settings"), section);
             serializeJson(section_json, section_file);

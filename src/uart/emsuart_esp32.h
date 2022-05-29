@@ -20,25 +20,15 @@
 /*
  * ESP32 UART port by @ArwedL and improved by @MichaelDvP. See https://github.com/emsesp/EMS-ESP/issues/380
  */
-#if defined(ESP32)
 
 #ifndef EMSESP_EMSUART_H
 #define EMSESP_EMSUART_H
 
-#include <Arduino.h>
-
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/ringbuf.h"
-#include "freertos/queue.h"
-#include <driver/uart.h>
-#include <driver/timer.h>
-
 #define EMS_MAXBUFFERSIZE 33 // max size of the buffer. EMS packets are max 32 bytes, plus extra for BRK
 
-#define EMSUART_UART UART_NUM_2 // on the ESP32 we're using UART2
-#define EMS_UART UART2          // for intr setting
-#define EMSUART_BAUD 9600       // uart baud rate for the EMS circuit
+#define EMSUART_NUM UART_NUM_2 // on the ESP32 we're using UART2
+#define EMSUART UART2          // for intr setting
+#define EMSUART_BAUD 9600      // uart baud rate for the EMS circuit
 
 #define EMS_TXMODE_DEFAULT 1
 #define EMS_TXMODE_EMSPLUS 2
@@ -78,12 +68,9 @@ class EMSuart {
     static uint16_t transmit(const uint8_t * buf, const uint8_t len);
 
   private:
-    static void           emsuart_recvTask(void * para);
-    static void IRAM_ATTR emsuart_rx_intr_handler(void * para);
-    static void           restart();
+    static void uart_event_task(void * pvParameters);
 };
 
 } // namespace emsesp
 
-#endif
 #endif
