@@ -20,6 +20,8 @@
  * ESP32 UART port by @ArwedL and improved by @MichaelDvP. See https://github.com/emsesp/EMS-ESP/issues/380
  */
 
+#ifndef EMSESP_STANDALONE
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -166,3 +168,5 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
 }
 
 } // namespace emsesp
+
+#endif
