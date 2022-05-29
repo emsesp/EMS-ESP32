@@ -9,9 +9,10 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'emsesp'
+    # if: github.repository == 'emsesp/EMS-ESP32'
     env:
       # https://binaries.sonarsource.com/?prefix=Distribution/sonar-scanner-cli/
-      # SONAR_SCANNER_VERSION: 4.6.1.2450
       SONAR_SCANNER_VERSION: 4.7.0.2747                                
       SONAR_SERVER_URL: "https://sonarcloud.io"
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
