@@ -12,5 +12,6 @@
 
 - controller data in web-ui only for IVT [#522](https://github.com/emsesp/EMS-ESP32/issues/522)
 - rename hidden `climate` to a more explaining name [#523](https://github.com/emsesp/EMS-ESP32/issues/523)
+- Minor changes to the Customizations web page [#527](https://github.com/emsesp/EMS-ESP32/pull/527)
 
 ## **BREAKING CHANGES:**

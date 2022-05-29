@@ -37,7 +37,7 @@ void Controller::process_dateTime(std::shared_ptr<const Telegram> telegram) {
         return;
     }
     char newdatetime[sizeof(dateTime_)];
-    // publich as dd.mm.yyyy hh:mmF
+    // publish as dd.mm.yyyy hh:mmF
     snprintf(newdatetime,
              sizeof(dateTime_),
              "%02d.%02d.%04d %02d:%02d",
@@ -48,6 +48,5 @@ void Controller::process_dateTime(std::shared_ptr<const Telegram> telegram) {
              telegram->message_data[4]);
     has_update(dateTime_, newdatetime, sizeof(dateTime_));
 }
-
 
 } // namespace emsesp

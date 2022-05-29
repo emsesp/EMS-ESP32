@@ -25,16 +25,20 @@ import { useSnackbar } from 'notistack';
 
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
-import StarIcon from '@mui/icons-material/Star';
-import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
+
+// import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
+// import StarIcon from '@mui/icons-material/Star';
+// import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+// import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
+
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
+
+import OptionIcon from './OptionIcon';
 
 import { ButtonRow, FormLoader, ValidatedTextField, SectionContent } from '../components';
 
@@ -47,7 +51,7 @@ import { DeviceShort, Devices, DeviceEntity, DeviceEntityMask } from './types';
 const SettingsCustomization: FC = () => {
   const { enqueueSnackbar } = useSnackbar();
 
-  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([{ id: '', v: 0, s: '', m: 0, w: false }]);
+  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([{ id: '', v: 0, n: '', m: 0, w: false }]);
   const [devices, setDevices] = useState<Devices>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(0);
@@ -199,6 +203,15 @@ const SettingsCustomization: FC = () => {
     return value;
   }
 
+  function formatName(de: DeviceEntity) {
+    if (de.n === undefined || de.n === de.id) {
+      return de.id;
+    } else if (de.n === '') {
+      return 'Command: ' + de.id;
+    }
+    return de.n + ' (' + de.id + ')';
+  }
+
   const getMaskNumber = (newMask: string[]) => {
     var new_mask = 0;
     for (let entry of newMask) {
@@ -272,7 +285,7 @@ const SettingsCustomization: FC = () => {
     if (deviceEntities && selectedDevice) {
       const masked_entities = deviceEntities
         .filter((de) => de.m !== de.om)
-        .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.s);
+        .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.id);
 
       if (masked_entities.length > 60) {
         enqueueSnackbar('Selected entities exceeded limit of 60. Please Save in batches', { variant: 'warning' });
@@ -303,8 +316,18 @@ const SettingsCustomization: FC = () => {
 
     return (
       <>
-        <Box color="warning.main">
-          <Typography variant="body2">Select a device and customize each of its entities using the options.</Typography>
+        <Box mb={2} color="warning.main">
+          <Typography variant="body2">Select a device and customize each of its entities using the options:</Typography>
+          <Typography variant="body2">
+            <OptionIcon type="favorite" isSet={true} />
+            =mark as a favorite&nbsp;&nbsp;
+            <OptionIcon type="readonly" isSet={true} />
+            =disable write action&nbsp;&nbsp;
+            <OptionIcon type="api_mqtt_exclude" isSet={true} />
+            =exclude from MQTT and API outputs&nbsp;&nbsp;
+            <OptionIcon type="web_exclude" isSet={true} />
+            =hide from Web Dashboard
+          </Typography>
         </Box>
         <ValidatedTextField
           name="device"
@@ -363,9 +386,11 @@ const SettingsCustomization: FC = () => {
               }}
             />
           </Grid>
-          <Grid item>
-            <FilterListIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />:
-          </Grid>
+          <Tooltip arrow placement="top" title="apply filter">
+            <Grid item>
+              <FilterListIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />:
+            </Grid>
+          </Tooltip>
           <Grid item>
             <ToggleButtonGroup
               size="small"
@@ -376,34 +401,22 @@ const SettingsCustomization: FC = () => {
               }}
             >
               <ToggleButton value="8">
-                <Tooltip arrow placement="top" title="filter favorites">
-                  <StarIcon sx={{ fontSize: 14 }} />
-                </Tooltip>
+                <OptionIcon type="favorite" isSet={true} />
               </ToggleButton>
               <ToggleButton value="4">
-                <Tooltip arrow placement="top" title="filter entities with write action disabled">
-                  <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
-                </Tooltip>
+                <OptionIcon type="readonly" isSet={true} />
               </ToggleButton>
               <ToggleButton value="2">
-                <Tooltip arrow placement="top" title="filter entities excluded from MQTT and API outputs">
-                  <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
-                </Tooltip>
+                <OptionIcon type="api_mqtt_exclude" isSet={true} />
               </ToggleButton>
               <ToggleButton value="1">
-                <Tooltip arrow placement="top" title="filter entities hidden from Web Dashboard">
-                  <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
-                </Tooltip>
+                <OptionIcon type="web_exclude" isSet={true} />
               </ToggleButton>
             </ToggleButtonGroup>
           </Grid>
 
           <Grid item>
-            <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />
-            <VisibilityOffOutlinedIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />:
-          </Grid>
-          <Grid item>
-            <Tooltip arrow placement="top" title="mark shown entities to be all visible and output ">
+            <Tooltip arrow placement="top" title="set selected entities to be both visible and output">
               <Button
                 size="small"
                 sx={{ fontSize: 10 }}
@@ -411,12 +424,14 @@ const SettingsCustomization: FC = () => {
                 color="inherit"
                 onClick={() => maskDisabled(false)}
               >
-                enable
+                set all&nbsp;
+                <OptionIcon type="api_mqtt_exclude" isSet={false} />
+                <OptionIcon type="web_exclude" isSet={false} />
               </Button>
             </Tooltip>
           </Grid>
           <Grid item>
-            <Tooltip arrow placement="top" title="mark shown entities to be not visible or output ">
+            <Tooltip arrow placement="top" title="set selected entities to be not visible and not output">
               <Button
                 size="small"
                 sx={{ fontSize: 10 }}
@@ -424,7 +439,9 @@ const SettingsCustomization: FC = () => {
                 color="inherit"
                 onClick={() => maskDisabled(true)}
               >
-                disable
+                set all&nbsp;
+                <OptionIcon type="api_mqtt_exclude" isSet={true} />
+                <OptionIcon type="web_exclude" isSet={true} />
               </Button>
             </Tooltip>
           </Grid>
@@ -458,29 +475,44 @@ const SettingsCustomization: FC = () => {
                         value={getMaskString(de.m)}
                         onChange={(event, mask) => {
                           de.m = getMaskNumber(mask);
+                          if (de.n === '' && de.m & DeviceEntityMask.DV_READONLY) {
+                            de.m = de.m | DeviceEntityMask.DV_WEB_EXCLUDE;
+                          }
                           if (de.m & DeviceEntityMask.DV_WEB_EXCLUDE) {
                             de.m = de.m & ~DeviceEntityMask.DV_FAVORITE;
                           }
                           setMasks(['']);
                         }}
                       >
-                        <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.id === ''}>
-                          <StarIcon sx={{ fontSize: 14 }} />
+                        <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.n === undefined}>
+                          <OptionIcon
+                            type="favorite"
+                            isSet={(de.m & DeviceEntityMask.DV_FAVORITE) === DeviceEntityMask.DV_FAVORITE}
+                          />
                         </ToggleButton>
                         <ToggleButton value="4" disabled={!de.w || (de.m & 3) === 3}>
-                          <EditOffOutlinedIcon sx={{ fontSize: 14 }} />
+                          <OptionIcon
+                            type="readonly"
+                            isSet={(de.m & DeviceEntityMask.DV_READONLY) === DeviceEntityMask.DV_READONLY}
+                          />
                         </ToggleButton>
-                        <ToggleButton value="2">
-                          <CommentsDisabledOutlinedIcon sx={{ fontSize: 14 }} />
+                        <ToggleButton value="2" disabled={de.n === ''}>
+                          <OptionIcon
+                            type="api_mqtt_exclude"
+                            isSet={
+                              (de.m & DeviceEntityMask.DV_API_MQTT_EXCLUDE) === DeviceEntityMask.DV_API_MQTT_EXCLUDE
+                            }
+                          />
                         </ToggleButton>
-                        <ToggleButton value="1">
-                          <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />
+                        <ToggleButton value="1" disabled={de.n === undefined}>
+                          <OptionIcon
+                            type="web_exclude"
+                            isSet={(de.m & DeviceEntityMask.DV_WEB_EXCLUDE) === DeviceEntityMask.DV_WEB_EXCLUDE}
+                          />
                         </ToggleButton>
                       </ToggleButtonGroup>
                     </Cell>
-                    <Cell>
-                      {de.id}&nbsp;({de.s})
-                    </Cell>
+                    <Cell>{formatName(de)}</Cell>
                     <Cell>{formatValue(de.v)}</Cell>
                   </Row>
                 ))}
