@@ -245,7 +245,7 @@ bool EMSdevice::is_fetch(uint16_t telegram_id) const {
 }
 
 // check for a tag to create a nest
-bool EMSdevice::has_tag(const uint8_t tag) {
+bool EMSdevice::has_tag(const uint8_t tag) const {
     for (const auto & dv : devicevalues_) {
         if (dv.tag == tag && tag >= DeviceValueTAG::TAG_HC1) {
             return true;
@@ -573,7 +573,7 @@ void EMSdevice::publish_value(void * value_p) const {
             }
 
             int8_t  divider     = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
-            char    payload[50] = {'\0'};
+            char    payload[55] = {'\0'};
             uint8_t fahrenheit  = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
             switch (dv.type) {

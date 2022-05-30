@@ -178,6 +178,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &curBurnPow_, DeviceValueType::UINT, nullptr, FL_(curBurnPow), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &burnStarts_, DeviceValueType::ULONG, nullptr, FL_(burnStarts), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &burnWorkMin_, DeviceValueType::TIME, nullptr, FL_(burnWorkMin), DeviceValueUOM::MINUTES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &burn2WorkMin_, DeviceValueType::TIME, nullptr, FL_(burn2WorkMin), DeviceValueUOM::MINUTES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatWorkMin_, DeviceValueType::TIME, nullptr, FL_(heatWorkMin), DeviceValueUOM::MINUTES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &UBAuptime_, DeviceValueType::TIME, nullptr, FL_(UBAuptime), DeviceValueUOM::MINUTES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &lastCode_, DeviceValueType::STRING, nullptr, FL_(lastCode), DeviceValueUOM::NONE);
@@ -253,7 +254,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_energyCostRatio),
                               0,
-                              19.9);
+                              20);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &fossileFactor_,
                               DeviceValueType::UINT,
@@ -414,7 +415,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           FL_(enum_comfort1),
                           FL_(wwComfort1),
                           DeviceValueUOM::NONE,
-                          MAKE_CF_CB(set_ww_mode1));
+                          MAKE_CF_CB(set_ww_mode));
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                           &wwFlowTempOffset_,
                           DeviceValueType::UINT,
@@ -1549,55 +1550,23 @@ bool Boiler::set_pump_delay(const char * value, const int8_t id) {
 
 // note some boilers do not have this setting, than it's done by thermostat
 // on a RC35 it's by EMSESP::send_write_request(0x37, 0x10, 2, &set, 1, 0); (set is 1,2,3) 1=hot, 2=eco, 3=intelligent
+// on a RC310 it's 1=high, 2=eco
 bool Boiler::set_ww_mode(const char * value, const int8_t id) {
     uint8_t set;
-    if (!Helpers::value2enum(value, set, FL_(enum_comfort))) {
-        return false;
-    }
+    uint8_t comfort[] = {0x00, 0xD8, 0xEC};
 
-    if (!is_fetch(EMS_TYPE_UBAParameterWW)) {
-        return false;
-    }
-
-    if (set == 0) {
-        // LOG_INFO(F("Setting boiler dhw to Hot"));
-    } else if (set == 1) {
-        // LOG_INFO(F("Setting boiler dhw to Eco"));
-        set = 0xD8;
-    } else if (set == 2) {
-        // LOG_INFO(F("Setting boiler dhw to Intelligent"));
-        set = 0xEC;
+    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+        if (Helpers::value2enum(value, set, FL_(enum_comfort1))) {
+            write_command(EMS_TYPE_UBAParameterWWPlus, 13, comfort[set], EMS_TYPE_UBAParameterWWPlus);
+            return true;
+        }
     } else {
-        return false; // do nothing
+        if (Helpers::value2enum(value, set, FL_(enum_comfort))) {
+            write_command(EMS_TYPE_UBAParameterWW, 9, comfort[set], EMS_TYPE_UBAParameterWW);
+            return true;
+        }
     }
-
-    write_command(EMS_TYPE_UBAParameterWW, 9, set, EMS_TYPE_UBAParameterWW);
-    return true;
-}
-
-// wwcomfort1 for RC310
-// on a RC310 it's 1=high, 2=eco
-bool Boiler::set_ww_mode1(const char * value, const int8_t id) {
-    uint8_t set;
-    if (!Helpers::value2enum(value, set, FL_(enum_comfort1))) {
-        return false;
-    }
-
-    if (!is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
-        return false;
-    }
-
-    if (set == 0) {
-        // LOG_INFO(F("Setting boiler dhw to High"));
-    } else if (set == 1) {
-        // LOG_INFO(F("Setting boiler dhw to Eco"));
-        set = 0xD8;
-    } else {
-        return false; // do nothing
-    }
-
-    write_command(EMS_TYPE_UBAParameterWWPlus, 13, set, EMS_TYPE_UBAParameterWWPlus);
-    return true;
+    return false;
 }
 
 // turn on/off dhw

@@ -131,7 +131,7 @@ class Boiler : public EMSdevice {
     uint32_t burn2WorkMin_;      // burner stage 2 operating time
     uint32_t heatWorkMin_;       // Total heat operating time
     uint32_t UBAuptime_;         // Total UBA working hours
-    char     lastCode_[52];      // last error code
+    char     lastCode_[55];      // last error code
     char     serviceCode_[4];    // 3 character status/service code
     uint16_t serviceCodeNumber_; // error/service code
     uint8_t  emergencyOps_;
@@ -245,7 +245,6 @@ class Boiler : public EMSdevice {
 
     // commands - none of these use the additional id parameter
     bool set_ww_mode(const char * value, const int8_t id);
-    bool set_ww_mode1(const char * value, const int8_t id);
     bool set_ww_activated(const char * value, const int8_t id);
     bool set_tapwarmwater_activated(const char * value, const int8_t id);
     bool set_ww_onetime(const char * value, const int8_t id);

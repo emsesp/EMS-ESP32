@@ -52,7 +52,7 @@ class EMSdevice {
     static std::string tag_to_string(uint8_t tag);
     static std::string tag_to_mqtt(uint8_t tag);
 
-    bool has_tag(const uint8_t tag);
+    bool has_tag(const uint8_t tag) const;
 
     inline uint8_t device_id() const {
         return device_id_;
