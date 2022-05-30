@@ -2418,9 +2418,10 @@ bool Thermostat::set_reducemode(const char * value, const int8_t id) {
     }
 
     uint8_t set = 0xFF;
-    if (model() == EMS_DEVICE_FLAG_RC300) {
+    if (model() == EMS_DEVICE_FLAG_RC300 || model() == EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, set, FL_(enum_reducemode1))) {
             write_command(set_typeids[hc->hc()], 5, set + 1, set_typeids[hc->hc()]);
+            return true;
         }
     } else {
         if (Helpers::value2enum(value, set, FL_(enum_reducemode))) {
@@ -2428,7 +2429,7 @@ bool Thermostat::set_reducemode(const char * value, const int8_t id) {
             return true;
         }
     }
-    return true;
+    return false;
 }
 
 
@@ -2489,8 +2490,8 @@ bool Thermostat::set_heatingtype(const char * value, const int8_t id) {
             write_command(curve_typeids[hc->hc()], 0, set, curve_typeids[hc->hc()]);
         } else {
             write_command(curve_typeids[hc->hc()], 1, set, curve_typeids[hc->hc()]);
-            return true;
         }
+        return true;
     }
 
     return false;
@@ -3760,7 +3761,7 @@ void Thermostat::register_device_values() {
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_energyCostRatio),
                               0,
-                              19.9);
+                              20);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &fossileFactor_,
                               DeviceValueType::UINT,
