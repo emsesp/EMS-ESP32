@@ -592,13 +592,13 @@ const emsesp_deviceentities_1 = [
     m: 0,
     w: false,
   },
-  {
-    v: 'test data',
-    n: 'test',
-    id: 'test',
-    m: 0,
-    w: false,
-  },
+  // {
+  //   v: 'test data',
+  //   n: 'test',
+  //   id: 'test',
+  //   m: 0,
+  //   w: false,
+  // },
   {
     v: 'roomTemp',
     id: 'hc1/HA climate config creation',
