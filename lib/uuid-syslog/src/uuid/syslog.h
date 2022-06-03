@@ -198,6 +198,13 @@ class SyslogService : public uuid::log::Handler {
         return ip_;
     }
 
+    unsigned long message_count() {
+        return log_message_id_;
+    }
+    unsigned long message_fails() {
+        return log_message_fails_;
+    }
+
   private:
     /**
 	 * Log message that has been queued.
@@ -268,8 +275,9 @@ class SyslogService : public uuid::log::Handler {
     unsigned long               log_message_id_       = 0;                /*!< The next identifier to use for queued log messages. @since 1.0.0 */
     std::list<QueuedLogMessage> log_messages_;                            /*!< Queued log messages, in the order they were received. @since 1.0.0 */
     std::atomic<bool>           log_messages_overflow_{false};            /*!< Check if log messages have overflowed the buffer. @since 1.0.0 */
-    uint64_t                    mark_interval_ = 0;                       /*!< Mark interval in milliseconds. @since 2.0.0 */
-    uint64_t                    last_message_  = 0;                       /*!< Last message/mark time. @since 2.0.0 */
+    uint64_t                    mark_interval_     = 0;                   /*!< Mark interval in milliseconds. @since 2.0.0 */
+    uint64_t                    last_message_      = 0;                   /*!< Last message/mark time. @since 2.0.0 */
+    unsigned long               log_message_fails_ = 0;
 };
 
 } // namespace syslog

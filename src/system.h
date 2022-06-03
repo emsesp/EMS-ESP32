@@ -77,6 +77,18 @@ class System {
     bool heartbeat_json(JsonObject & output);
     void send_heartbeat();
 
+    bool syslog_enabled() {
+        return syslog_enabled_;
+    }
+
+    unsigned long syslog_count() {
+        return syslog_.message_count();
+    }
+
+    unsigned long syslog_fails() {
+        return syslog_.message_fails();
+    }
+
     void led_init(bool refresh);
     void network_init(bool refresh);
     void button_init(bool refresh);
