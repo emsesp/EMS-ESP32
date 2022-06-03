@@ -3730,13 +3730,18 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwCircSwitchTime));
         break;
     case EMS_DEVICE_FLAG_JUNKERS:
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &dateTime_,
-                              DeviceValueType::STRING,
-                              FL_(tpl_datetime),
-                              FL_(dateTime),
-                              DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_datetime));
+        if (has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {
+            // FR100 is not writable, see. https://github.com/emsesp/EMS-ESP32/issues/536
+            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dateTime_, DeviceValueType::STRING, FL_(tpl_datetime), FL_(dateTime), DeviceValueUOM::NONE);
+        } else {
+            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                                  &dateTime_,
+                                  DeviceValueType::STRING,
+                                  FL_(tpl_datetime),
+                                  FL_(dateTime),
+                                  DeviceValueUOM::NONE,
+                                  MAKE_CF_CB(set_datetime));
+        }
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hybridStrategy_,
                               DeviceValueType::ENUM,
