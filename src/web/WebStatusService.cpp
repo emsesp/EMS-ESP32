@@ -187,6 +187,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     statJson["q"] =
         WebAPIService::api_count() == 0 ? 100 : 100 - (uint8_t)((100 * WebAPIService::api_fails()) / (WebAPIService::api_count() + WebAPIService::api_fails()));
 
+#ifndef EMSESP_STANDALONE
     if (EMSESP::system_.syslog_enabled()) {
         statJson       = statsJson.createNestedObject();
         statJson["id"] = "Syslog Messages";
@@ -196,6 +197,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
                              ? 100
                              : 100 - (uint8_t)((100 * EMSESP::system_.syslog_fails()) / (EMSESP::system_.syslog_count() + EMSESP::system_.syslog_fails()));
     }
+#endif
 
     response->setLength();
     request->send(response);

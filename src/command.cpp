@@ -276,7 +276,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
             }
         }
 
-        // call the function baesed on type
+        // call the function based on type
         if (cf->cmdfunction_json_) {
             return_code = ((cf->cmdfunction_json_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
         }

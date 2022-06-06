@@ -81,6 +81,7 @@ class System {
         return syslog_enabled_;
     }
 
+#ifndef EMSESP_STANDALONE
     unsigned long syslog_count() {
         return syslog_.message_count();
     }
@@ -88,6 +89,7 @@ class System {
     unsigned long syslog_fails() {
         return syslog_.message_fails();
     }
+#endif
 
     void led_init(bool refresh);
     void network_init(bool refresh);
@@ -189,7 +191,7 @@ class System {
 #ifndef EMSESP_STANDALONE
         return (ethernet_connected() || WiFi.isConnected());
 #else
-        return true;
+    return true;
 #endif
     }
 
