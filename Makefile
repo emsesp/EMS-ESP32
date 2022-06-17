@@ -141,7 +141,7 @@ run: $(OUTPUT)
 
 .PHONY: clean
 clean:
-	@$(RM) -r $(BUILD) $(OUTPUT)
+	@$(RM) -rf $(BUILD) $(OUTPUT)
 
 help:
 	@echo available targets: all run clean
