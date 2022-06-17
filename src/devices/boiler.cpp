@@ -220,7 +220,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           FL_(emergencyTemp),
                           DeviceValueUOM::DEGREES,
                           MAKE_CF_CB(set_emergency_temp),
-                          40,
+                          15,
                           70);
 
     /*
