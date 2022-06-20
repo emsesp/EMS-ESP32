@@ -95,6 +95,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(timer_typeids[i], F("RC30Timer"), false, MAKE_PF_CB(process_RC30Timer));
         }
         register_telegram_type(EMS_TYPE_RC30wwSettings, F("RC30WWSettings"), true, MAKE_PF_CB(process_RC30wwSettings));
+        register_telegram_type(0x38, F("WWTimer"), true, MAKE_PF_CB(process_RC35wwTimer));
+        register_telegram_type(0x39, F("WWCircTimer"), true, MAKE_PF_CB(process_RC35wwTimer));
 
         // EASY
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_EASY) {
@@ -816,6 +818,38 @@ void Thermostat::process_RC35wwTimer(std::shared_ptr<const Telegram> telegram) {
         if (is_fetch(telegram->type_id)) {
             toggle_fetch(telegram->type_id, false); // dont fetch again
         }
+    }
+
+    // vacation/holiday only from dhw timer
+    if (telegram->type_id != 0x38) {
+        return;
+    }
+    if (telegram->message_length + telegram->offset >= 92 && telegram->offset <= 87) {
+        char data[sizeof(wwVacation_)];
+        snprintf(data,
+                 sizeof(data),
+                 "%02d.%02d.%04d-%02d.%02d.%04d",
+                 telegram->message_data[87 - telegram->offset],
+                 telegram->message_data[88 - telegram->offset],
+                 telegram->message_data[89 - telegram->offset] + 2000,
+                 telegram->message_data[90 - telegram->offset],
+                 telegram->message_data[91 - telegram->offset],
+                 telegram->message_data[92 - telegram->offset] + 2000);
+        has_update(wwVacation_, data, sizeof(wwVacation_));
+    }
+
+    if (telegram->message_length + telegram->offset >= 98 && telegram->offset <= 93) {
+        char data[sizeof(wwHoliday_)];
+        snprintf(data,
+                 sizeof(data),
+                 "%02d.%02d.%04d-%02d.%02d.%04d",
+                 telegram->message_data[93 - telegram->offset],
+                 telegram->message_data[94 - telegram->offset],
+                 telegram->message_data[95 - telegram->offset] + 2000,
+                 telegram->message_data[96 - telegram->offset],
+                 telegram->message_data[97 - telegram->offset],
+                 telegram->message_data[98 - telegram->offset] + 2000);
+        has_update(wwHoliday_, data, sizeof(wwHoliday_));
     }
 }
 
@@ -2016,7 +2050,7 @@ bool Thermostat::set_holiday(const char * value, const int8_t id, const bool vac
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
 
-    if ((hc == nullptr) || (value == nullptr)) {
+    if (value == nullptr) {
         return false;
     }
 
@@ -2037,9 +2071,20 @@ bool Thermostat::set_holiday(const char * value, const int8_t id, const bool vac
     }
 
     if (!vacation || value[10] == '+') { // + for compatibility
-        write_command(timer_typeids[hc->hc()], 93, data, 6, 0);
+        if (hc) {
+            write_command(timer_typeids[hc->hc()], 93, data, 6, timer_typeids[hc->hc()]);
+
+        } else {
+            write_command(0x38, 93, data, 6, 0x38); // dhw
+            write_command(0x39, 93, data, 6, 0);    // circ, no validate
+        }
     } else {
-        write_command(timer_typeids[hc->hc()], 87, data, 6, 0);
+        if (hc) {
+            write_command(timer_typeids[hc->hc()], 87, data, 6, timer_typeids[hc->hc()]);
+        } else {
+            write_command(0x38, 87, data, 6, 0x38); // dhw
+            write_command(0x39, 87, data, 6, 0);    // circ
+        }
     }
 
     return true;
@@ -3505,6 +3550,20 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwDisinfectHour),
                               0,
                               23);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                              &wwHoliday_,
+                              DeviceValueType::STRING,
+                              FL_(tpl_holidays),
+                              FL_(holidays),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_wwHoliday));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                              &wwVacation_,
+                              DeviceValueType::STRING,
+                              FL_(tpl_holidays),
+                              FL_(vacations),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_wwVacation));
         break;
     case EMS_DEVICE_FLAG_RC30_N:
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dateTime_, DeviceValueType::STRING, nullptr, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
@@ -3617,6 +3676,20 @@ void Thermostat::register_device_values() {
                               FL_(wwcircswitchtime),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_wwCircSwitchTime));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                              &wwHoliday_,
+                              DeviceValueType::STRING,
+                              FL_(tpl_holidays),
+                              FL_(holidays),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_wwHoliday));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                              &wwVacation_,
+                              DeviceValueType::STRING,
+                              FL_(tpl_holidays),
+                              FL_(vacations),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_wwVacation));
         break;
     case EMS_DEVICE_FLAG_RC35:
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
@@ -3728,6 +3801,20 @@ void Thermostat::register_device_values() {
                               FL_(wwcircswitchtime),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_wwCircSwitchTime));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                              &wwHoliday_,
+                              DeviceValueType::STRING,
+                              FL_(tpl_holidays),
+                              FL_(holidays),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_wwHoliday));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
+                              &wwVacation_,
+                              DeviceValueType::STRING,
+                              FL_(tpl_holidays),
+                              FL_(vacations),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_wwVacation));
         break;
     case EMS_DEVICE_FLAG_JUNKERS:
         if (has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {
