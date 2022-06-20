@@ -3554,14 +3554,14 @@ void Thermostat::register_device_values() {
                               &wwHoliday_,
                               DeviceValueType::STRING,
                               FL_(tpl_holidays),
-                              FL_(holidays),
+                              FL_(wwHolidays),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_wwHoliday));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                               &wwVacation_,
                               DeviceValueType::STRING,
                               FL_(tpl_holidays),
-                              FL_(vacations),
+                              FL_(wwVacations),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_wwVacation));
         break;
@@ -3680,14 +3680,14 @@ void Thermostat::register_device_values() {
                               &wwHoliday_,
                               DeviceValueType::STRING,
                               FL_(tpl_holidays),
-                              FL_(holidays),
+                              FL_(wwHolidays),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_wwHoliday));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                               &wwVacation_,
                               DeviceValueType::STRING,
                               FL_(tpl_holidays),
-                              FL_(vacations),
+                              FL_(wwVacations),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_wwVacation));
         break;
@@ -3805,14 +3805,14 @@ void Thermostat::register_device_values() {
                               &wwHoliday_,
                               DeviceValueType::STRING,
                               FL_(tpl_holidays),
-                              FL_(holidays),
+                              FL_(wwHolidays),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_wwHoliday));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                               &wwVacation_,
                               DeviceValueType::STRING,
                               FL_(tpl_holidays),
-                              FL_(vacations),
+                              FL_(wwVacations),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_wwVacation));
         break;
