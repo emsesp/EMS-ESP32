@@ -219,6 +219,8 @@ class Thermostat : public EMSdevice {
     uint8_t wwDailyHeating_;
     uint8_t wwDailyHeatTime_;
     uint8_t wwWhenModeOff_;
+    char    wwHoliday_[26];
+    char    wwVacation_[26];
 
     // HybridHP
     uint8_t hybridStrategy_;  // co2 = 1, cost = 2, temperature = 3, mix = 4
@@ -449,6 +451,12 @@ class Thermostat : public EMSdevice {
     bool set_wwDailyHeating(const char * value, const int8_t id);
     bool set_wwDailyHeatTime(const char * value, const int8_t id);
     bool set_wwwhenmodeoff(const char * value, const int8_t id);
+    bool set_wwVacation(const char * value, const int8_t id) {
+        return set_holiday(value, DeviceValueTAG::TAG_WWC1, true);
+    }
+    bool set_wwHoliday(const char * value, const int8_t id) {
+        return set_holiday(value, DeviceValueTAG::TAG_WWC1);
+    }
 
     bool set_datetime(const char * value, const int8_t id);
     bool set_minexttemp(const char * value, const int8_t id);
