@@ -114,7 +114,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueUOM::PERCENT,
                           MAKE_CF_CB(set_burn_power),
                           0,
-                          130);
+                          254);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingPumpMod_, DeviceValueType::UINT, nullptr, FL_(heatingPumpMod), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingPump2Mod_, DeviceValueType::UINT, nullptr, FL_(heatingPump2Mod), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &outdoorTemp_, DeviceValueType::SHORT, FL_(div10), FL_(outdoorTemp), DeviceValueUOM::DEGREES);
@@ -168,7 +168,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueUOM::PERCENT,
                           MAKE_CF_CB(set_max_power),
                           0,
-                          130);
+                          254);
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &boilHystOn_, DeviceValueType::INT, nullptr, FL_(boilHystOn), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst_on));
     register_device_value(
@@ -440,7 +440,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueUOM::PERCENT,
                           MAKE_CF_CB(set_ww_maxpower),
                           0,
-                          130);
+                          254);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                           &wwMaxTemp_,
                           DeviceValueType::UINT,
