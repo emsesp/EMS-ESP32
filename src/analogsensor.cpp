@@ -403,7 +403,10 @@ void AnalogSensor::publish_values(const bool force) {
                     snprintf(str, sizeof(str), "{{value_json['%d'].value}}", sensor.gpio());
                     config["val_tpl"] = str;
 
-                    snprintf(str, sizeof(str), "Analog Sensor %s", sensor.name().c_str());
+                    snprintf(str, sizeof(str), "analog_sensor_%s", sensor.name().c_str());
+                    config["object_id"] = str;
+
+                    snprintf(str, sizeof(str), "%s", sensor.name().c_str());
                     config["name"] = str;
 
                     snprintf(str, sizeof(str), "analogsensor_%d", sensor.gpio());

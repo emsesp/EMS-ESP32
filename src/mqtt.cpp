@@ -629,6 +629,7 @@ void Mqtt::ha_status() {
     // doc["avty_t"]      = FJSON("~/status"); // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = FJSON("~/heartbeat"); // store also as HA attributes
     doc["stat_t"]  = FJSON("~/heartbeat");
+    doc["object_id"] = FJSON("ems_esp_status");
     doc["name"]    = FJSON("EMS-ESP status");
     doc["ic"]      = F_(icondevice);
     doc["val_tpl"] = FJSON("{{value_json['bus_status']}}");
@@ -1104,15 +1105,23 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     snprintf(stat_t, sizeof(stat_t), "~/%s", tag_to_topic(device_type, tag).c_str());
     doc["stat_t"] = stat_t;
 
-    // name = <device> <tag> <name>
-    char new_name[80];
+    // friendly name = <tag> <name>
+    char short_name[70];
     if (have_tag) {
-        snprintf(new_name, sizeof(new_name), "%s %s %s", device_name, EMSdevice::tag_to_string(tag).c_str(), read_flash_string(name).c_str());
+        snprintf(short_name, sizeof(short_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), read_flash_string(name).c_str());
     } else {
-        snprintf(new_name, sizeof(new_name), "%s %s", device_name, read_flash_string(name).c_str());
+        snprintf(short_name, sizeof(short_name), "%s", read_flash_string(name).c_str());
     }
-    new_name[0] = toupper(new_name[0]); // capitalize first letter
-    doc["name"] = new_name;
+
+    // entity id = emsesp_<device>_<tag>_<name>
+    char long_name[130];
+    snprintf(long_name, sizeof(long_name), "%s_%s", device_name, short_name);
+    // snprintf(long_name, sizeof(long_name), "emsesp_%s_%s", device_name, short_name);      //wouldn't it be better?
+    doc["object_id"] = long_name; 
+    
+    // name (friendly name) = <tag> <name>
+    short_name[0] = toupper(short_name[0]); // capitalize first letter
+    doc["name"] = short_name;
 
     // value template
     // if its nested mqtt format then use the appended entity name, otherwise take the original
@@ -1240,7 +1249,8 @@ void Mqtt::publish_ha_climate_config(uint8_t tag, bool has_roomtemp, bool remove
     char seltemp_s[30];
     char currtemp_s[30];
     char mode_str_tpl[400];
-    char name_s[30];
+    char name_s[10];
+    char id_s[20];
     char uniq_id_s[30];
     char temp_cmd_s[30];
     char mode_cmd_s[30];
@@ -1279,7 +1289,8 @@ void Mqtt::publish_ha_climate_config(uint8_t tag, bool has_roomtemp, bool remove
              hc_mode_s,
              hc_mode_s);
 
-    snprintf(name_s, sizeof(name_s), "Thermostat hc%d", hc_num);
+    snprintf(id_s, sizeof(id_s), "thermostat_hc%d", hc_num);
+    snprintf(name_s, sizeof(name_s), "Hc%d", hc_num);
     snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num);
     snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/seltemp", hc_num);
     snprintf(mode_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/mode", hc_num);
@@ -1287,6 +1298,7 @@ void Mqtt::publish_ha_climate_config(uint8_t tag, bool has_roomtemp, bool remove
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
     doc["~"]             = base();
+    doc["object_id"]     = id_s;
     doc["name"]          = name_s;
     doc["uniq_id"]       = uniq_id_s;
     doc["mode_stat_t"]   = topic_t;
