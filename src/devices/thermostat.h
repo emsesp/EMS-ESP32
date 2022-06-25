@@ -56,6 +56,7 @@ class Thermostat : public EMSdevice {
         uint8_t manualtemp;
         uint8_t summersetmode;
         uint8_t hpoperatingmode;
+        uint8_t hpoperatingstate;
         uint8_t roominfluence;
         uint8_t roominfl_factor;
         int16_t curroominfl;
@@ -81,6 +82,7 @@ class Thermostat : public EMSdevice {
         char    switchtime2[16];
         uint8_t climate;
         uint8_t switchonoptimization;
+        uint8_t statusbyte; // from RC300monitor
 
         // RC 10
         uint8_t  reducehours;   // night reduce duration
