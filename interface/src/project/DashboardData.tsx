@@ -472,7 +472,7 @@ const DashboardData: FC = () => {
                 label={deviceValue.id.slice(2)}
                 value={deviceValue.u ? numberValue(deviceValue.v) : deviceValue.v}
                 autoFocus
-                multiline
+                multiline={deviceValue.u ? false : true}
                 sx={{ width: '30ch' }}
                 type={deviceValue.u ? 'number' : 'text'}
                 onChange={updateValue(setDeviceValue)}
