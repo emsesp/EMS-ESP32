@@ -45,7 +45,7 @@ class AnalogSensor {
 
         std::string name() const;
         void        set_name(const std::string & name) {
-            name_ = name;
+                   name_ = name;
         }
 
         uint8_t gpio() const {
