@@ -162,7 +162,7 @@ const DashboardData: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 200px 40px;
+        --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 100px 40px;
       `,
       BaseRow: `
         .td {
@@ -751,7 +751,7 @@ const DashboardData: FC = () => {
                       ENTITY NAME
                     </Button>
                   </HeaderCell>
-                  <HeaderCell reszie>
+                  <HeaderCell resize>
                     <Button
                       fullWidth
                       style={{ fontSize: '14px', justifyContent: 'flex-end' }}
