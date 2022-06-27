@@ -1022,11 +1022,11 @@ void Thermostat::process_RC300Summer2(std::shared_ptr<const Telegram> telegram) 
         return;
     }
     if (hc->statusbyte & 1) {
-        has_update(telegram, hc->summermode, 0);
+        has_update(telegram, hc->summersetmode, 0);
         has_update(hc->hpoperatingmode, EMS_VALUE_UINT_NOTSET);
     } else {
         has_update(telegram, hc->hpoperatingmode, 0);
-        has_update(hc->summermode, EMS_VALUE_UINT_NOTSET);
+        has_update(hc->summersetmode, EMS_VALUE_UINT_NOTSET);
     }
     has_update(telegram, hc->summertemp, 1);
 }
