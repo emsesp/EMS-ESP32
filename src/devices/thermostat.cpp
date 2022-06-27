@@ -2421,18 +2421,19 @@ bool Thermostat::set_summermode(const char * value, const int8_t id) {
     uint8_t set = 0xFF;
 
     if (is_fetch(summer2_typeids[hc->hc()])) {
-        if (!Helpers::value2enum(value, set, FL_(enum_hpoperatingmode))) {
-            return false;
+        if ((hc->statusbyte & 1) && Helpers::value2enum(value, set, FL_(enum_summermode))) {
+            write_command(summer2_typeids[hc->hc()], 0, set, summer2_typeids[hc->hc()]);
+            return true;
+        } else if (Helpers::value2enum(value, set, FL_(enum_hpoperatingmode))) {
+            write_command(summer2_typeids[hc->hc()], 0, set, summer2_typeids[hc->hc()]);
+            return true;
         }
-        write_command(summer2_typeids[hc->hc()], 0, set, summer2_typeids[hc->hc()]);
-    } else {
-        if (!Helpers::value2enum(value, set, FL_(enum_summermode))) {
-            return false;
-        }
+    } else if (Helpers::value2enum(value, set, FL_(enum_summermode))) {
         write_command(summer_typeids[hc->hc()], 7, set, summer_typeids[hc->hc()]);
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 // Set fastheatupfactor, ems+
