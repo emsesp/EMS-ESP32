@@ -269,6 +269,8 @@ MAKE_PSTR_WORD(buffer)
 MAKE_PSTR(bufferedflow, "buffered flow")
 MAKE_PSTR(layeredbuffer, "layered buffer")
 MAKE_PSTR_WORD(maintenance)
+MAKE_PSTR_WORD(heating)
+MAKE_PSTR_WORD(cooling)
 
 // boiler lists
 MAKE_PSTR_LIST(tpl_date, F("Format: < dd.mm.yyyy >")) // template for text input
@@ -282,7 +284,7 @@ MAKE_PSTR_LIST(enum_reset, F("-"), F_(maintenance), F_(error))
 // MAKE_PSTR_LIST(enum_bool, F_(off), F_(on))
 
 //heatpump
-MAKE_PSTR_LIST(enum_hpactivity, F("none"), F("heating"), F("cooling"), F("hot water"), F("pool"))
+MAKE_PSTR_LIST(enum_hpactivity, F("none"), F_(heating), F_(cooling), F("hot_water"), F("pool"))
 
 // mixer
 MAKE_PSTR_LIST(enum_shunt, F("stopped"), F("opening"), F("closing"), F("open"), F("close"))
@@ -340,7 +342,7 @@ MAKE_PSTR(functioning_mode, "functioning mode")
 MAKE_PSTR(smoke_temperature, "smoke temperature")
 
 // thermostat lists
-MAKE_PSTR_LIST(tpl_datetime, F("Format: < NTP | dd.mm.yyyy-hh:mm:ss-dw-dst >"))
+MAKE_PSTR_LIST(tpl_datetime, F("Format: < NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1) >"))
 MAKE_PSTR_LIST(tpl_switchtime, F("Format: <nn> [ not_set | day hh:mm on|off ]"))
 MAKE_PSTR_LIST(tpl_switchtime1, F("Format: <nn> [ not_set | day hh:mm Tn ]"))
 MAKE_PSTR_LIST(tpl_holidays, F("format: < dd.mm.yyyy-dd.mm.yyyy >"))
@@ -365,8 +367,9 @@ MAKE_PSTR_LIST(enum_wwMode2, F_(off), F_(on), F_(auto))
 MAKE_PSTR_LIST(enum_wwMode3, F_(on), F_(off), F_(auto))
 MAKE_PSTR_LIST(enum_heatingtype, F_(off), F_(radiator), F_(convector), F_(floor))
 MAKE_PSTR_LIST(enum_summermode, F_(summer), F_(auto), F_(winter))
-MAKE_PSTR_LIST(enum_hpoperatingmode, F_(off), F_(auto), F("heating"), F("cooling"))
+MAKE_PSTR_LIST(enum_hpoperatingmode, F_(off), F_(auto), F_(heating), F_(cooling))
 MAKE_PSTR_LIST(enum_summer, F_(winter), F_(summer))
+MAKE_PSTR_LIST(enum_operatingstate, F_(heating), F_(off), F_(cooling))
 
 MAKE_PSTR_LIST(enum_mode, F_(manual), F_(auto))                      // RC100, RC300, RC310
 MAKE_PSTR_LIST(enum_mode2, F_(off), F_(manual), F_(auto))            // RC20
@@ -648,6 +651,7 @@ MAKE_PSTR_LIST(targetflowtemp, F("targetflowtemp"), F("target flow temperature")
 MAKE_PSTR_LIST(heatingtype, F("heatingtype"), F("heating type"))
 MAKE_PSTR_LIST(summersetmode, F("summersetmode"), F("set summer mode"))
 MAKE_PSTR_LIST(hpoperatingmode, F("hpoperatingmode"), F("heatpump operating mode"))
+MAKE_PSTR_LIST(hpoperatingstate, F("hpoperatingstate"), F("heatpump operating state"))
 MAKE_PSTR_LIST(controlmode, F("controlmode"), F("control mode"))
 MAKE_PSTR_LIST(control, F("control"), F("control device"))
 MAKE_PSTR_LIST(wwHolidays, F("wwholidays"), F("holiday dates"))
