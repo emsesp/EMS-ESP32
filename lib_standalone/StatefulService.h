@@ -12,7 +12,7 @@
 #endif
 
 #ifndef FS_BUFFER_SIZE
-#define FS_BUFFER_SIZE 4096
+#define FS_BUFFER_SIZE 8192
 #endif
 
 enum class StateUpdateResult {
