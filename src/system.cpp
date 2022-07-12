@@ -940,7 +940,7 @@ void System::extractSettings(const char * filename, const char * section, JsonOb
 #ifndef EMSESP_STANDALONE
     File settingsFile = LittleFS.open(filename);
     if (settingsFile) {
-        DynamicJsonDocument  jsonDocument = DynamicJsonDocument(EMSESP_JSON_SIZE_XLARGE_DYN);
+        DynamicJsonDocument  jsonDocument = DynamicJsonDocument(FS_BUFFER_SIZE);
         DeserializationError error        = deserializeJson(jsonDocument, settingsFile);
         if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
             JsonObject jsonObject = jsonDocument.as<JsonObject>();
