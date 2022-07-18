@@ -204,7 +204,7 @@ class Boiler : public EMSdevice {
     int16_t cylBottomTemp_; // TB3
     int16_t aFlowTemp_;     // TA1
     int16_t aRetTemp_;      // TR1
-    uint8_t aPump_;         // PR1
+    uint8_t aPump_;         // PR1 - percent
     uint8_t valveByPass_;   // VR2
     uint8_t valveBuffer_;   // VB1
     uint8_t valveReturn_;   // VR1
