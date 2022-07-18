@@ -26,7 +26,7 @@ const HelpInformation: FC = () => {
 
   const saveFile = (json: any, endpoint: string) => {
     const a = document.createElement('a');
-    const filename = 'emsesp_' + endpoint + '.json';
+    const filename = 'emsesp_' + endpoint;
     a.href = URL.createObjectURL(
       new Blob([JSON.stringify(json, null, 2)], {
         type: 'text/plain'
@@ -49,7 +49,7 @@ const HelpInformation: FC = () => {
       if (response.status !== 200) {
         enqueueSnackbar('API call failed', { variant: 'error' });
       } else {
-        saveFile(response.data, endpoint);
+        saveFile(response.data, endpoint + '.json.txt');
       }
     } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
@@ -62,7 +62,7 @@ const HelpInformation: FC = () => {
       if (response.status !== 200) {
         enqueueSnackbar('Unable to get settings', { variant: 'error' });
       } else {
-        saveFile(response.data, 'settings');
+        saveFile(response.data, 'settings.json');
       }
     } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
@@ -75,7 +75,7 @@ const HelpInformation: FC = () => {
       if (response.status !== 200) {
         enqueueSnackbar('Unable to get customizations', { variant: 'error' });
       } else {
-        saveFile(response.data, 'customizations');
+        saveFile(response.data, 'customizations.json');
       }
     } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
@@ -132,10 +132,15 @@ const HelpInformation: FC = () => {
           </ListItemAvatar>
           <ListItemText>
             To report an issue or request a feature, please&nbsp;
-            <Link component="button" variant="body1" onClick={() => callAPI('info')}>
-              download
-            </Link>
-            &nbsp;the debug information and include in a new&nbsp;
+            <Button
+              startIcon={<DownloadIcon />}
+              variant="outlined"
+              color="primary"
+              onClick={() => callAPI('info')}
+            >
+              download the debug information
+            </Button>
+            &nbsp;and include in a new&nbsp;
             <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32/issues/new/choose" color="primary">
               GitHub issue
             </Link>
