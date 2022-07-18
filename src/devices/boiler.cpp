@@ -42,7 +42,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &valveByPass_, DeviceValueType::BOOL, nullptr, FL_(valveByPass), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &valveBuffer_, DeviceValueType::BOOL, nullptr, FL_(valveBuffer), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &valveReturn_, DeviceValueType::BOOL, nullptr, FL_(valveReturn), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &aPump_, DeviceValueType::BOOL, nullptr, FL_(aPump), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &aPump_, DeviceValueType::UINT, nullptr, FL_(aPump), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatSource_, DeviceValueType::BOOL, nullptr, FL_(heatSource), DeviceValueUOM::NONE);
         return;
     }
@@ -1153,11 +1153,13 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
 /*
  * alternative heatingsource AM200
  */
+// Rx: 60 00 FF 00 04 4D 0103 0108 8000 00C6 0127 0205 8000 0200 0000 8000 6C
+//                        TB4  TR2       TA1  TR1  TB1  TB2* TB3
 void Boiler::process_amTempMessage(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, aRetTemp_, 0);
+    has_update(telegram, curFlowTemp_, 0); // TB4
+    has_update(telegram, retTemp_, 2);     // TR2
     has_update(telegram, aFlowTemp_, 6);
-    has_update(telegram, curFlowTemp_, 8);
-    has_update(telegram, retTemp_, 2);
+    has_update(telegram, aRetTemp_, 8);
     has_update(telegram, cylTopTemp_, 10);
     has_update(telegram, cylCenterTemp_, 12);
     has_update(telegram, cylBottomTemp_, 14);
@@ -1173,7 +1175,6 @@ void Boiler::process_amStatusMessage(std::shared_ptr<const Telegram> telegram) {
 void Boiler::process_amSettingMessage(std::shared_ptr<const Telegram> telegram) {
     // has_update(telegram, setRetTemp_, 0);
     // has_update(telegram, setFlowTemp_, 1);
-
 }
 /*
  * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat

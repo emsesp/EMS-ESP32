@@ -540,12 +540,12 @@ MAKE_PSTR_LIST(tempDiffBoiler, F("tempdiffboiler"), F("tempediff boiler support"
 MAKE_PSTR_LIST(aCylTopTemp, F("cyltoptemp"), F("cylinder top temperature"))
 MAKE_PSTR_LIST(aCylCenterTemp, F("cylcentertemp"), F("cylinder center temperature"))
 MAKE_PSTR_LIST(aCylBottomTemp, F("cylbottomtemp"), F("cylinder bottom temperature"))
-MAKE_PSTR_LIST(aFlowTemp, F("aflowtemp"), F("alternative flow temperature"))
-MAKE_PSTR_LIST(aRetTemp, F("arettemp"), F("alternative return temperature"))
+MAKE_PSTR_LIST(aFlowTemp, F("altflowtemp"), F("alternative hs flow temperature"))
+MAKE_PSTR_LIST(aRetTemp, F("altrettemp"), F("alternative hs return temperature"))
 MAKE_PSTR_LIST(valveByPass, F("valvebypass"), F("bypass valve"))
 MAKE_PSTR_LIST(valveBuffer, F("valvebuffer"), F("buffer valve"))
 MAKE_PSTR_LIST(valveReturn, F("valvereturn"), F("return valve"))
-MAKE_PSTR_LIST(aPump, F("apump"), F("alternative heating pump"))
+MAKE_PSTR_LIST(aPump, F("altpump"), F("alternative hs pump"))
 MAKE_PSTR_LIST(heatSource, F("heatsource"), F("alternative heating active"))
 
 // the following are dhw for the boiler and automatically tagged with 'ww'
