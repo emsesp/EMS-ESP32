@@ -1100,7 +1100,7 @@ bool EMSESP::command_commands(uint8_t device_type, JsonObject & output, const in
 bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
     bool    has_value = false;
     uint8_t tag;
-    if (id >= 1 && id <= 34) {
+    if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
         tag = DeviceValueTAG::TAG_HC1 + id - 1; // this sets also WWC and HS
     } else if (id == -1 || id == 0) {
         tag = DeviceValueTAG::TAG_NONE;

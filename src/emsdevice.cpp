@@ -911,7 +911,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
     int8_t     tag  = id;
 
     // check if we have hc or wwc or hs
-    if (id >= 1 && id <= 34) {
+    if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
         tag = DeviceValueTAG::TAG_HC1 + id - 1;
     }
 
