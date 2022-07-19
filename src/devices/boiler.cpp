@@ -32,18 +32,18 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x54E, F("AmStatus"), false, MAKE_PF_CB(process_amStatusMessage));
         register_telegram_type(0x550, F("AmSettings"), false, MAKE_PF_CB(process_amSettingMessage));
 
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &curFlowTemp_, DeviceValueType::SHORT, FL_(div10), FL_(curFlowTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &retTemp_, DeviceValueType::SHORT, FL_(div10), FL_(retTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &aFlowTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aFlowTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &aRetTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aRetTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cylTopTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aCylTopTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cylCenterTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aCylCenterTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cylBottomTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aCylBottomTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &valveByPass_, DeviceValueType::BOOL, nullptr, FL_(valveByPass), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &valveBuffer_, DeviceValueType::BOOL, nullptr, FL_(valveBuffer), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &valveReturn_, DeviceValueType::BOOL, nullptr, FL_(valveReturn), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &aPump_, DeviceValueType::UINT, nullptr, FL_(aPump), DeviceValueUOM::PERCENT);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatSource_, DeviceValueType::BOOL, nullptr, FL_(heatSource), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_AHS, &curFlowTemp_, DeviceValueType::SHORT, FL_(div10), FL_(sysFlowTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &retTemp_, DeviceValueType::SHORT, FL_(div10), FL_(sysRetTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &aFlowTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aFlowTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &aRetTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aRetTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &cylTopTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aCylTopTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &cylCenterTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aCylCenterTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &cylBottomTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aCylBottomTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &valveByPass_, DeviceValueType::BOOL, nullptr, FL_(valveByPass), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_AHS, &valveBuffer_, DeviceValueType::BOOL, nullptr, FL_(valveBuffer), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_AHS, &valveReturn_, DeviceValueType::BOOL, nullptr, FL_(valveReturn), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_AHS, &aPump_, DeviceValueType::UINT, nullptr, FL_(aPump), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_AHS, &heatSource_, DeviceValueType::BOOL, nullptr, FL_(heatSource), DeviceValueUOM::NONE);
         return;
     }
     // cascaded heatingsources, only some values per individual heatsource (hs)
