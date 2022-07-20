@@ -30,25 +30,6 @@ class Shower {
 
     void set_shower_state(bool state, bool force = false);
 
-    /* unused header
-    *
-    bool shower_alert() const {
-        return shower_alert_;
-    }
-
-    void shower_alert(const bool shower_alert) {
-        shower_alert_ = shower_alert;
-    }
-
-    bool shower_timer() const {
-        return shower_timer_;
-    }
-
-    void shower_timer(const bool shower_timer) {
-        shower_timer_ = shower_timer;
-    }
-    */
-
   private:
     static uuid::log::Logger logger_;
 
@@ -56,7 +37,6 @@ class Shower {
     static constexpr uint32_t SHOWER_MIN_DURATION = 120000; // in ms. 2 minutes, before recognizing its a shower
     static constexpr uint32_t SHOWER_OFFSET_TIME  = 5000;   // in ms. 5 seconds grace time, to calibrate actual time under the shower
 
-    void publish_shower_data() const;
     void shower_alert_start();
     void shower_alert_stop();
 
