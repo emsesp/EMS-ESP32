@@ -411,10 +411,10 @@ void AnalogSensor::publish_values(const bool force) {
 
                     snprintf(str, sizeof(str), "analogsensor_%d", sensor.gpio());
                     config["uniq_id"] = str;
-                    
+
                     if (sensor.uom() != DeviceValueUOM::NONE) {
                         config["unit_of_meas"] = EMSdevice::uom_to_string(sensor.uom());
-                    }  
+                    }
 
                     JsonObject dev = config.createNestedObject("dev");
                     JsonArray  ids = dev.createNestedArray("ids");
