@@ -72,7 +72,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
       {!uploading && (
         <Box mb={2} color="warning.main">
           <Typography variant="body2">
-            Upload a new firmware (.bin) file, settings or customizations (*_json.txt) file below.
+            Upload a new firmware (.bin) file, settings or customizations (.json) file below.
           </Typography>
         </Box>
       )}
