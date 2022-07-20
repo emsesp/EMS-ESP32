@@ -21,7 +21,7 @@ const HelpInformation: FC = () => {
 
   const saveFile = (json: any, endpoint: string) => {
     const a = document.createElement('a');
-    const filename = 'emsesp_' + endpoint + '_json.txt';
+    const filename = 'emsesp_' + endpoint + '.txt';
     a.href = URL.createObjectURL(
       new Blob([JSON.stringify(json, null, 2)], {
         type: 'text/plain'
@@ -31,7 +31,7 @@ const HelpInformation: FC = () => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    enqueueSnackbar('File downloaded', { variant: 'info' });
+    enqueueSnackbar('System information downloaded', { variant: 'info' });
   };
 
   const callAPI = async (endpoint: string) => {

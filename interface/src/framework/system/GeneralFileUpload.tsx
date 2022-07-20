@@ -1,12 +1,10 @@
-import { FC, useContext } from 'react';
+import { FC } from 'react';
 import { AxiosPromise } from 'axios';
 
 import { Typography, Button, Box } from '@mui/material';
 
 import { FileUploadConfig } from '../../api/endpoints';
 import { SingleUpload, useFileUpload } from '../../components';
-
-import { AuthenticatedContext } from '../../contexts/authentication';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
 
@@ -23,12 +21,11 @@ interface UploadFileProps {
 const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
   const [uploadFile, cancelUpload, uploading, uploadProgress] = useFileUpload({ upload: uploadGeneralFile });
 
-  const { me } = useContext(AuthenticatedContext);
   const { enqueueSnackbar } = useSnackbar();
 
   const saveFile = (json: any, endpoint: string) => {
     const a = document.createElement('a');
-    const filename = 'emsesp_' + endpoint + '_json.txt';
+    const filename = 'emsesp_' + endpoint + '.json';
     a.href = URL.createObjectURL(
       new Blob([JSON.stringify(json, null, 2)], {
         type: 'text/plain'
@@ -84,7 +81,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
       <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
         Download
       </Typography>
-      {me.admin && (
+      {!uploading && (
         <>
           <Box color="warning.main">
             <Typography mb={1} variant="body2">
