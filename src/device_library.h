@@ -144,7 +144,7 @@
 {238, DeviceType::CONNECT, F("Wireless sensor base"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // EM10 error detection - 0x12
-{ 74, DeviceType::CONNECT, F("Error Module EM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{ 74, DeviceType::SWITCH, F("Error Module EM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Switches - 0x11
 { 71, DeviceType::SWITCH, F("WM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
