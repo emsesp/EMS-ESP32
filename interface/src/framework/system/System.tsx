@@ -26,7 +26,7 @@ const System: FC = () => {
         <Tab value="log" label="System Log" />
 
         {features.ota && <Tab value="ota" label="OTA Settings" disabled={!me.admin} />}
-        {features.upload_firmware && <Tab value="upload" label="Upload" disabled={!me.admin} />}
+        {features.upload_firmware && <Tab value="upload" label="Upload/Download" disabled={!me.admin} />}
       </RouterTabs>
       <Routes>
         <Route path="status" element={<SystemStatusForm />} />

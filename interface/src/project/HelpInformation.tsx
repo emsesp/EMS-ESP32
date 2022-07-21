@@ -1,10 +1,8 @@
-import { FC, useContext } from 'react';
+import { FC } from 'react';
 
 import { Typography, Button, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@mui/material';
 
-import { SectionContent, ButtonRow, MessageBox } from '../components';
-
-import { AuthenticatedContext } from '../contexts/authentication';
+import { SectionContent } from '../components';
 
 import { useSnackbar } from 'notistack';
 
@@ -13,7 +11,6 @@ import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import StarIcon from '@mui/icons-material/Star';
 import DownloadIcon from '@mui/icons-material/GetApp';
-import TuneIcon from '@mui/icons-material/Tune';
 
 import { extractErrorMessage } from '../utils';
 
@@ -22,11 +19,9 @@ import * as EMSESP from './api';
 const HelpInformation: FC = () => {
   const { enqueueSnackbar } = useSnackbar();
 
-  const { me } = useContext(AuthenticatedContext);
-
   const saveFile = (json: any, endpoint: string) => {
     const a = document.createElement('a');
-    const filename = 'emsesp_' + endpoint;
+    const filename = 'emsesp_' + endpoint + '.txt';
     a.href = URL.createObjectURL(
       new Blob([JSON.stringify(json, null, 2)], {
         type: 'text/plain'
@@ -36,7 +31,7 @@ const HelpInformation: FC = () => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    enqueueSnackbar('File downloaded', { variant: 'info' });
+    enqueueSnackbar('System information downloaded', { variant: 'info' });
   };
 
   const callAPI = async (endpoint: string) => {
@@ -49,33 +44,7 @@ const HelpInformation: FC = () => {
       if (response.status !== 200) {
         enqueueSnackbar('API call failed', { variant: 'error' });
       } else {
-        saveFile(response.data, endpoint + '.json.txt');
-      }
-    } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
-    }
-  };
-
-  const downloadSettings = async () => {
-    try {
-      const response = await EMSESP.getSettings();
-      if (response.status !== 200) {
-        enqueueSnackbar('Unable to get settings', { variant: 'error' });
-      } else {
-        saveFile(response.data, 'settings.json');
-      }
-    } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
-    }
-  };
-
-  const downloadCustomizations = async () => {
-    try {
-      const response = await EMSESP.getCustomizations();
-      if (response.status !== 200) {
-        enqueueSnackbar('Unable to get customizations', { variant: 'error' });
-      } else {
-        saveFile(response.data, 'customizations.json');
+        saveFile(response.data, endpoint);
       }
     } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
@@ -83,33 +52,26 @@ const HelpInformation: FC = () => {
   };
 
   return (
-    <SectionContent title="Application Information &amp; Support" titleGutter>
+    <SectionContent title="Support Information" titleGutter>
       <List>
-        <ListItem>
-          <ListItemAvatar>
-            <TuneIcon />
-          </ListItemAvatar>
-          <ListItemText>
-            For a help on each of the Application Settings see&nbsp;
-            <Link
-              target="_blank"
-              href="https://emsesp.github.io/docs/#/Configure-firmware?id=ems-esp-settings"
-              color="primary"
-            >
-              {'Configuring EMS-ESP'}
-            </Link>
-          </ListItemText>
-        </ListItem>
-
         <ListItem>
           <ListItemAvatar>
             <MenuBookIcon />
           </ListItemAvatar>
           <ListItemText>
-            For general information about EMS-ESP visit the online&nbsp;
+            Visit the online&nbsp;
             <Link target="_blank" href="https://emsesp.github.io/docs" color="primary">
-              {'Documentation'}
+              {'Wiki'}
             </Link>
+            &nbsp;to get instructions on how to&nbsp;
+            <Link
+              target="_blank"
+              href="https://emsesp.github.io/docs/#/Configure-firmware?id=ems-esp-settings"
+              color="primary"
+            >
+              {'configure'}
+            </Link>
+            &nbsp;EMS-ESP and access other information.
           </ListItemText>
         </ListItem>
 
@@ -122,7 +84,7 @@ const HelpInformation: FC = () => {
             <Link target="_blank" href="https://discord.gg/3J3GgnzpyT" color="primary">
               {'Discord'}
             </Link>
-            &nbsp;server
+            &nbsp;server.
           </ListItemText>
         </ListItem>
 
@@ -130,74 +92,33 @@ const HelpInformation: FC = () => {
           <ListItemAvatar>
             <GitHubIcon />
           </ListItemAvatar>
+
           <ListItemText>
-            To report an issue or request a feature, please&nbsp;
-            <Button
-              startIcon={<DownloadIcon />}
-              variant="outlined"
-              color="primary"
-              onClick={() => callAPI('info')}
-            >
-              download the debug information
-            </Button>
-            &nbsp;and include in a new&nbsp;
+            Submit a&nbsp;
             <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32/issues/new/choose" color="primary">
-              GitHub issue
+              support issue
             </Link>
+            &nbsp;for requesting a new feature or reporting a bug.
+            <br />
+            Make sure you also&nbsp;
+            <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => callAPI('info')}>
+              download
+            </Button>
+            &nbsp; and attach your system details for a faster response.
           </ListItemText>
         </ListItem>
       </List>
 
-      {me.admin && (
-        <>
-          <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-            Download Settings
-          </Typography>
-          <Box color="warning.main">
-            <Typography variant="body2">
-              Export the application settings and any customizations to a JSON file. These files can later be uploaded
-              via System&rarr;Upload.
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex' }}>
-            <ButtonRow>
-              <Button
-                startIcon={<DownloadIcon />}
-                variant="outlined"
-                color="primary"
-                onClick={() => downloadSettings()}
-              >
-                settings
-              </Button>
-              <Button
-                startIcon={<DownloadIcon />}
-                variant="outlined"
-                color="primary"
-                onClick={() => downloadCustomizations()}
-              >
-                customizations
-              </Button>
-            </ButtonRow>
-          </Box>
-          <MessageBox
-            my={2}
-            level="warning"
-            message="Be careful when sharing your Settings as the file contains passwords and other sensitive system
-              information!"
-          />
-        </>
-      )}
-
-      <Box bgcolor="secondary.info" border={1} p={1} mt={4}>
-        <Typography align="center" variant="h6">
-          EMS-ESP is a free and open-source project.
-          <br></br>Please consider supporting us by giving it a&nbsp;
-          <StarIcon style={{ fontSize: 16, color: '#fdff3a', verticalAlign: 'middle' }} /> on&nbsp;
+      <Box border={1} p={1} mt={4}>
+        <Typography align="center" variant="h6" color="orange">
+          EMS-ESP will always be a free and open-source project
+          <br></br>Please consider supporting it with a&nbsp;
+          <StarIcon style={{ fontSize: 16, color: 'yellow', verticalAlign: 'middle' }} /> on&nbsp;
           <Link href="https://github.com/emsesp/EMS-ESP32" color="primary">
             {'GitHub'}
           </Link>
-          &nbsp;!
         </Typography>
+        <Typography align="center">@proddy @MichaelDvP</Typography>
       </Box>
     </SectionContent>
   );
