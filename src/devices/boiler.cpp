@@ -675,17 +675,18 @@ void Boiler::process_UBAParameterWW(std::shared_ptr<const Telegram> telegram) {
     has_bitupdate(telegram, wwChargeType_, 10, 0); // 0 = charge pump, 0xff = 3-way valve
 
     uint8_t wwComfort = EMS_VALUE_UINT_NOTSET;
-    telegram->read_value(wwComfort, 9);
-    if (wwComfort == 0) {
-        wwComfort = 0; // Hot
-    } else if (wwComfort == 0xD8) {
-        wwComfort = 1; // Eco
-    } else if (wwComfort == 0xEC) {
-        wwComfort = 2; // Intelligent
-    } else {
-        wwComfort = EMS_VALUE_UINT_NOTSET;
+    if (telegram->read_value(wwComfort, 9)) {
+        if (wwComfort == 0) {
+            wwComfort = 0; // Hot
+        } else if (wwComfort == 0xD8) {
+            wwComfort = 1; // Eco
+        } else if (wwComfort == 0xEC) {
+            wwComfort = 2; // Intelligent
+        } else {
+            wwComfort = EMS_VALUE_UINT_NOTSET;
+        }
+        has_update(wwComfort_, wwComfort);
     }
-    has_update(wwComfort_, wwComfort);
 }
 
 /*
@@ -847,15 +848,16 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwChargeOptimization_, 25);
 
     uint8_t wwComfort1 = EMS_VALUE_UINT_NOTSET;
-    telegram->read_value(wwComfort1, 13);
-    if (wwComfort1 == 0) {
-        wwComfort1 = 0; // High_Comfort
-    } else if (wwComfort1 == 0xD8) {
-        wwComfort1 = 1; // Eco
-    } else {
-        wwComfort1 = EMS_VALUE_UINT_NOTSET;
+    if (telegram->read_value(wwComfort1, 13)) {
+        if (wwComfort1 == 0) {
+            wwComfort1 = 0; // High_Comfort
+        } else if (wwComfort1 == 0xD8) {
+            wwComfort1 = 1; // Eco
+        } else {
+            wwComfort1 = EMS_VALUE_UINT_NOTSET;
+        }
+        has_update(wwComfort1_, wwComfort1);
     }
-    has_update(wwComfort1_, wwComfort1);
 }
 
 // 0xE9 - WW monitor ems+
