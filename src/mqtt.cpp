@@ -445,19 +445,17 @@ void Mqtt::start() {
         }
         connecting_ = false;
         if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
-            LOG_INFO(F("MQTT disconnected: TCP"));
-        }
-        if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
-            LOG_INFO(F("MQTT disconnected: Identifier Rejected"));
-        }
-        if (reason == AsyncMqttClientDisconnectReason::MQTT_SERVER_UNAVAILABLE) {
-            LOG_INFO(F("MQTT disconnected: Server unavailable"));
-        }
-        if (reason == AsyncMqttClientDisconnectReason::MQTT_MALFORMED_CREDENTIALS) {
-            LOG_INFO(F("MQTT disconnected: Malformed credentials"));
-        }
-        if (reason == AsyncMqttClientDisconnectReason::MQTT_NOT_AUTHORIZED) {
-            LOG_INFO(F("MQTT disconnected: Not authorized"));
+            LOG_WARNING(F("MQTT disconnected: TCP"));
+        } else if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
+            LOG_WARNING(F("MQTT disconnected: Identifier Rejected"));
+        } else if (reason == AsyncMqttClientDisconnectReason::MQTT_SERVER_UNAVAILABLE) {
+            LOG_WARNING(F("MQTT disconnected: Server unavailable"));
+        } else if (reason == AsyncMqttClientDisconnectReason::MQTT_MALFORMED_CREDENTIALS) {
+            LOG_WARNING(F("MQTT disconnected: Malformed credentials"));
+        } else if (reason == AsyncMqttClientDisconnectReason::MQTT_NOT_AUTHORIZED) {
+            LOG_WARNING(F("MQTT disconnected: Not authorized"));
+        } else {
+            LOG_WARNING(F("MQTT disconnected: code %d"), reason);
         }
     });
 
@@ -628,11 +626,11 @@ void Mqtt::ha_status() {
     doc["~"]       = mqtt_base_; // default ems-esp
     // doc["avty_t"]      = FJSON("~/status"); // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = FJSON("~/heartbeat"); // store also as HA attributes
-    doc["stat_t"]  = FJSON("~/heartbeat");
+    doc["stat_t"]    = FJSON("~/heartbeat");
     doc["object_id"] = FJSON("ems_esp_status");
-    doc["name"]    = FJSON("EMS-ESP status");
-    doc["ic"]      = F_(icondevice);
-    doc["val_tpl"] = FJSON("{{value_json['bus_status']}}");
+    doc["name"]      = FJSON("EMS-ESP status");
+    doc["ic"]        = F_(icondevice);
+    doc["val_tpl"]   = FJSON("{{value_json['bus_status']}}");
 
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = F_(EMSESP); // "EMS-ESP"
@@ -1117,11 +1115,11 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     char long_name[130];
     snprintf(long_name, sizeof(long_name), "%s_%s", device_name, short_name);
     // snprintf(long_name, sizeof(long_name), "emsesp_%s_%s", device_name, short_name);      //wouldn't it be better?
-    doc["object_id"] = long_name; 
-    
+    doc["object_id"] = long_name;
+
     // name (friendly name) = <tag> <name>
     short_name[0] = toupper(short_name[0]); // capitalize first letter
-    doc["name"] = short_name;
+    doc["name"]   = short_name;
 
     // value template
     // if its nested mqtt format then use the appended entity name, otherwise take the original

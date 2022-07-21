@@ -57,7 +57,6 @@ void Shower::loop() {
                 // first check to see if hot water has been on long enough to be recognized as a Shower/Bath
                 if (!shower_state_ && (time_now - timer_start_) > SHOWER_MIN_DURATION) {
                     set_shower_state(true);
-                    publish_shower_data();
                     LOG_DEBUG(F("[Shower] hot water still running, starting shower timer"));
                 }
                 // check if the shower has been on too long
@@ -78,7 +77,12 @@ void Shower::loop() {
                 if ((timer_pause_ - timer_start_) > SHOWER_OFFSET_TIME) {
                     duration_ = (timer_pause_ - timer_start_ - SHOWER_OFFSET_TIME);
                     if (duration_ > SHOWER_MIN_DURATION) {
-                        publish_shower_data();
+                        StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
+
+                        char s[50];
+                        snprintf(s, 50, "%d minutes and %d seconds", (uint8_t)(duration_ / 60000), (uint8_t)((duration_ / 1000) % 60));
+                        doc["duration"] = s;
+                        Mqtt::publish(F("shower_data"), doc.as<JsonObject>());
                         LOG_DEBUG(F("[Shower] finished with duration %d"), duration_);
                     }
                 }
@@ -118,34 +122,6 @@ void Shower::shower_alert_start() {
         doing_cold_shot_   = true;
         alert_timer_start_ = uuid::get_uptime(); // timer starts now
     }
-}
-
-// Publish to the shower_data topic
-// showing whether the shower timer and alert are enabled or disabled
-// and the duration of the last shower
-void Shower::publish_shower_data() const {
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
-
-    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-        doc["shower_timer"] = shower_timer_;
-        doc["shower_alert"] = shower_alert_;
-    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-        doc["shower_timer"] = shower_timer_ ? 1 : 0;
-        doc["shower_alert"] = shower_alert_ ? 1 : 0;
-    } else {
-        char result[10];
-        doc["shower_timer"] = Helpers::render_boolean(result, shower_timer_);
-        doc["shower_alert"] = Helpers::render_boolean(result, shower_alert_);
-    }
-
-    // only publish shower duration if there is a value
-    if (duration_ > SHOWER_MIN_DURATION) {
-        char s[50];
-        snprintf(s, 50, "%d minutes and %d seconds", (uint8_t)(duration_ / 60000), (uint8_t)((duration_ / 1000) % 60));
-        doc["duration"] = s;
-    }
-
-    Mqtt::publish(F("shower_data"), doc.as<JsonObject>());
 }
 
 // send status of shower to MQTT topic called shower_active - which is determined by the state parameter

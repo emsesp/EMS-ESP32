@@ -17,7 +17,7 @@ const UploadFileForm: FC = () => {
   });
 
   return (
-    <SectionContent title="Upload File" titleGutter>
+    <SectionContent title="Upload/Download" titleGutter>
       {restarting ? <RestartMonitor /> : <GeneralFileUpload uploadGeneralFile={uploadFile.current} />}
     </SectionContent>
   );
