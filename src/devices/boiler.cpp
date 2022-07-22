@@ -1152,9 +1152,11 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
         has_update(maintenanceDate_, date, sizeof(maintenanceDate_));
     }
 }
+
 /*
  * alternative heatingsource AM200
  */
+// 0x054D AM200 temperatures
 // Rx: 60 00 FF 00 04 4D 0103 0108 8000 00C6 0127 0205 8000 0200 0000 8000 6C
 //                        TB4  TR2       TA1  TR1  TB1  TB2* TB3
 void Boiler::process_amTempMessage(std::shared_ptr<const Telegram> telegram) {
@@ -1167,17 +1169,24 @@ void Boiler::process_amTempMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, cylBottomTemp_, 14);
 }
 
+// 0x054E AM200 status (6 bytes long)
+// Rx: 60 00 FF 00 04 4E 00 00 00 00 00 00 86
 void Boiler::process_amStatusMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, aPump_, 0);
-    has_update(telegram, valveByPass_, 1);
-    has_update(telegram, valveBuffer_, 2);
-    has_update(telegram, valveReturn_, 3);
+    // actually we dont know the offset of the valves
+    // has_update(telegram, valveByPass_, 1);
+    // has_update(telegram, valveBuffer_, 2);
+    // has_update(telegram, valveReturn_, 3);
 }
 
+// 0x0550 AM200 broadcasted message, all 27 bytes unkown
+// Rx: 60 00 FF 00 04 50 00 FF 00 FF FF 00 0D 00 01 00 00 00 00 01 03 01 00 03 00 2D 19 C8 02 94 00 4A
+// Rx: 60 00 FF 19 04 50 00 FF FF 39
 void Boiler::process_amSettingMessage(std::shared_ptr<const Telegram> telegram) {
-    // has_update(telegram, setRetTemp_, 0);
-    // has_update(telegram, setFlowTemp_, 1);
+    // has_update(telegram, setRetTemp_, ?);
+    // has_update(telegram, setFlowTemp_, ?);
 }
+
 /*
  * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
  * thermostat always overwrites settings in boiler
