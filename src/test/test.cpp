@@ -692,6 +692,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp", "59");
     }
 
+#if defined(EMSESP_STANDALONE)
     // https://github.com/emsesp/EMS-ESP32/issues/541
     if (command == "api_wwmode") {
         shell.printfln(F("Testing API wwmode"));
@@ -710,6 +711,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         request.url("/api/thermostat/wwmode");
         EMSESP::webAPIService.webAPIService_post(&request, json);
     }
+#endif
 
     if (command == "api") {
         shell.printfln(F("Testing API with MQTT and REST, standalone"));
