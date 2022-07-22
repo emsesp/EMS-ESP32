@@ -24,10 +24,6 @@ REGISTER_FACTORY(Switch, EMSdevice::DeviceType::SWITCH);
 
 Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    // check for EM10 module
-    if (device_id == 0x12) {
-        return;
-    }
     // WM10 module, device_id 0x11
     register_telegram_type(0x9C, F("WM10MonitorMessage"), false, MAKE_PF_CB(process_WM10MonitorMessage));
     register_telegram_type(0x9D, F("WM10SetMessage"), false, MAKE_PF_CB(process_WM10SetMessage));

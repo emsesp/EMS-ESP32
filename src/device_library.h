@@ -143,11 +143,11 @@
 {236, DeviceType::CONNECT, F("Wireless sensor base"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {238, DeviceType::CONNECT, F("Wireless sensor base"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
-// EM10 error detection - 0x12
-{ 74, DeviceType::SWITCH, F("Error Module EM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-
 // Switches - 0x11
 { 71, DeviceType::SWITCH, F("WM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
+// EM10 error contact and analog flowtemp control- 0x12
+{ 74, DeviceType::GATEWAY, F("Error Module EM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Gateways - 0x48
 {189, DeviceType::GATEWAY, F("KM200/MB LAN 2"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
