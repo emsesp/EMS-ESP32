@@ -1590,9 +1590,10 @@ bool Boiler::set_ww_activated(const char * value, const int8_t id) {
 // Activate / De-activate the Warm Tap Water
 // Note: Using the type 0x1D to put the boiler into Test mode. This may be shown on the boiler with a flashing 'T'
 bool Boiler::set_tapwarmwater_activated(const char * value, const int8_t id) {
-    if (!Helpers::hasValue(wwTapActivated_, EMS_VALUE_BOOL)) {
-        return false;
-    }
+    // as it's a command it may not initially exist
+    // if (!Helpers::hasValue(wwTapActivated_, EMS_VALUE_BOOL)) {
+    //     return false;
+    // }
 
     bool v = false;
     if (!Helpers::value2bool(value, v)) {
