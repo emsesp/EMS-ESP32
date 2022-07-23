@@ -398,7 +398,7 @@ void EMSESPShell::add_console_commands() {
                 shell.print(F("Available commands are: "));
                 Command::show(shell, device_type, false); // non-verbose mode
             } else if (return_code != CommandRet::OK) {
-                shell.println(F("Bad syntax"));
+                shell.printfln(F("Bad syntax (error code %d)"), return_code);
             }
         },
         [&](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) -> std::vector<std::string> {

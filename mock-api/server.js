@@ -1132,7 +1132,7 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
 // EMS-ESP API specific
 const emsesp_info = {
   System: {
-    version: '3.x.x',
+    version: '3.4.2',
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
@@ -1224,7 +1224,6 @@ rest_server.get(GET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
 
 // start server
 const expressServer = rest_server.listen(port, () =>
-  console.log(`Mock server for EMS-ESP is up and running at http://localhost:${port}`),
 )
 console.log(`EMS-ESP Rest API listening to http://localhost:${port}/api`)
 

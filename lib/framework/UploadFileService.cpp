@@ -28,8 +28,10 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         std::string extension = fname.substr(position + 1);
         size_t      fsize     = request->contentLength();
 
+#if defined(EMSESP_USE_SERIAL)
         Serial.printf("Received filename: %s, len: %d, index: %d, ext: %s, fsize: %d", filename.c_str(), len, index, extension.c_str(), fsize);
         Serial.println();
+#endif
 
         if ((extension == "bin") && (fsize > 1500000)) {
             is_firmware = true;
