@@ -955,9 +955,9 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     for (auto & device : device_library_) {
         if (device.product_id == product_id) {
             // sometimes boilers share the same productID as controllers
-            // so only add boilers if the device_id is 0x08, which is fixed for EMS
+            // so only add boilers if the device_id is 0x08 or 0x60 or 0x70.., which is fixed for EMS
             if (device.device_type == DeviceType::BOILER) {
-                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER
+                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER || device_id == EMSdevice::EMS_DEVICE_ID_AM200
                     || (device_id >= EMSdevice::EMS_DEVICE_ID_BOILER_1 && device_id <= EMSdevice::EMS_DEVICE_ID_BOILER_F)) {
                     device_p = &device;
                     break;
@@ -1100,7 +1100,7 @@ bool EMSESP::command_commands(uint8_t device_type, JsonObject & output, const in
 bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
     bool    has_value = false;
     uint8_t tag;
-    if (id >= 1 && id <= 34) {
+    if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
         tag = DeviceValueTAG::TAG_HC1 + id - 1; // this sets also WWC and HS
     } else if (id == -1 || id == 0) {
         tag = DeviceValueTAG::TAG_NONE;

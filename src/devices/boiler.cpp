@@ -26,6 +26,26 @@ uuid::log::Logger Boiler::logger_{F_(boiler), uuid::log::Facility::CONSOLE};
 
 Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
+    // alternative heatsource special messages
+    if (device_id == EMSdevice::EMS_DEVICE_ID_AM200) {
+        register_telegram_type(0x54D, F("AmTemperatures"), false, MAKE_PF_CB(process_amTempMessage));
+        register_telegram_type(0x54E, F("AmStatus"), false, MAKE_PF_CB(process_amStatusMessage));
+        register_telegram_type(0x550, F("AmSettings"), false, MAKE_PF_CB(process_amSettingMessage));
+
+        register_device_value(DeviceValueTAG::TAG_AHS, &curFlowTemp_, DeviceValueType::SHORT, FL_(div10), FL_(sysFlowTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &retTemp_, DeviceValueType::SHORT, FL_(div10), FL_(sysRetTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &aFlowTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aFlowTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &aRetTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aRetTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &cylTopTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aCylTopTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &cylCenterTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aCylCenterTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &cylBottomTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aCylBottomTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS, &valveByPass_, DeviceValueType::BOOL, nullptr, FL_(valveByPass), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_AHS, &valveBuffer_, DeviceValueType::BOOL, nullptr, FL_(valveBuffer), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_AHS, &valveReturn_, DeviceValueType::BOOL, nullptr, FL_(valveReturn), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_AHS, &aPump_, DeviceValueType::UINT, nullptr, FL_(aPump), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_AHS, &heatSource_, DeviceValueType::BOOL, nullptr, FL_(heatSource), DeviceValueUOM::NONE);
+        return;
+    }
     // cascaded heatingsources, only some values per individual heatsource (hs)
     if (device_id != EMSdevice::EMS_DEVICE_ID_BOILER) {
         uint8_t hs = device_id - EMSdevice::EMS_DEVICE_ID_BOILER_1; // heating source id, count from 0
@@ -424,7 +444,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueUOM::DEGREES_R,
                           MAKE_CF_CB(set_ww_flowTempOffset),
                           0,
-                          40);
+                          45);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                           &wwChargeOptimization_,
                           DeviceValueType::BOOL,
@@ -655,17 +675,18 @@ void Boiler::process_UBAParameterWW(std::shared_ptr<const Telegram> telegram) {
     has_bitupdate(telegram, wwChargeType_, 10, 0); // 0 = charge pump, 0xff = 3-way valve
 
     uint8_t wwComfort = EMS_VALUE_UINT_NOTSET;
-    telegram->read_value(wwComfort, 9);
-    if (wwComfort == 0) {
-        wwComfort = 0; // Hot
-    } else if (wwComfort == 0xD8) {
-        wwComfort = 1; // Eco
-    } else if (wwComfort == 0xEC) {
-        wwComfort = 2; // Intelligent
-    } else {
-        wwComfort = EMS_VALUE_UINT_NOTSET;
+    if (telegram->read_value(wwComfort, 9)) {
+        if (wwComfort == 0) {
+            wwComfort = 0; // Hot
+        } else if (wwComfort == 0xD8) {
+            wwComfort = 1; // Eco
+        } else if (wwComfort == 0xEC) {
+            wwComfort = 2; // Intelligent
+        } else {
+            wwComfort = EMS_VALUE_UINT_NOTSET;
+        }
+        has_update(wwComfort_, wwComfort);
     }
-    has_update(wwComfort_, wwComfort);
 }
 
 /*
@@ -827,15 +848,16 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwChargeOptimization_, 25);
 
     uint8_t wwComfort1 = EMS_VALUE_UINT_NOTSET;
-    telegram->read_value(wwComfort1, 13);
-    if (wwComfort1 == 0) {
-        wwComfort1 = 0; // High_Comfort
-    } else if (wwComfort1 == 0xD8) {
-        wwComfort1 = 1; // Eco
-    } else {
-        wwComfort1 = EMS_VALUE_UINT_NOTSET;
+    if (telegram->read_value(wwComfort1, 13)) {
+        if (wwComfort1 == 0) {
+            wwComfort1 = 0; // High_Comfort
+        } else if (wwComfort1 == 0xD8) {
+            wwComfort1 = 1; // Eco
+        } else {
+            wwComfort1 = EMS_VALUE_UINT_NOTSET;
+        }
+        has_update(wwComfort1_, wwComfort1);
     }
-    has_update(wwComfort1_, wwComfort1);
 }
 
 // 0xE9 - WW monitor ems+
@@ -1130,6 +1152,41 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
         has_update(maintenanceDate_, date, sizeof(maintenanceDate_));
     }
 }
+
+/*
+ * alternative heatingsource AM200
+ */
+// 0x054D AM200 temperatures
+// Rx: 60 00 FF 00 04 4D 0103 0108 8000 00C6 0127 0205 8000 0200 0000 8000 6C
+//                        TB4  TR2       TA1  TR1  TB1  TB2* TB3
+void Boiler::process_amTempMessage(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, curFlowTemp_, 0); // TB4
+    has_update(telegram, retTemp_, 2);     // TR2
+    has_update(telegram, aFlowTemp_, 6);
+    has_update(telegram, aRetTemp_, 8);
+    has_update(telegram, cylTopTemp_, 10);
+    has_update(telegram, cylCenterTemp_, 12);
+    has_update(telegram, cylBottomTemp_, 14);
+}
+
+// 0x054E AM200 status (6 bytes long)
+// Rx: 60 00 FF 00 04 4E 00 00 00 00 00 00 86
+void Boiler::process_amStatusMessage(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, aPump_, 0);
+    // actually we dont know the offset of the valves
+    // has_update(telegram, valveByPass_, 1);
+    // has_update(telegram, valveBuffer_, 2);
+    // has_update(telegram, valveReturn_, 3);
+}
+
+// 0x0550 AM200 broadcasted message, all 27 bytes unkown
+// Rx: 60 00 FF 00 04 50 00 FF 00 FF FF 00 0D 00 01 00 00 00 00 01 03 01 00 03 00 2D 19 C8 02 94 00 4A
+// Rx: 60 00 FF 19 04 50 00 FF FF 39
+void Boiler::process_amSettingMessage(std::shared_ptr<const Telegram> telegram) {
+    // has_update(telegram, setRetTemp_, ?);
+    // has_update(telegram, setFlowTemp_, ?);
+}
+
 /*
  * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
  * thermostat always overwrites settings in boiler

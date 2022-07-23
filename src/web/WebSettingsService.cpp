@@ -274,6 +274,7 @@ void WebSettingsService::onUpdate() {
 
 void WebSettingsService::begin() {
     _fsPersistence.readFromFS();
+    WebSettings::reset_flags();
 }
 
 void WebSettingsService::save() {

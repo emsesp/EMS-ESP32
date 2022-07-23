@@ -42,11 +42,12 @@
 {173, DeviceType::BOILER, F("Geo 5xx"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 {195, DeviceType::BOILER, F("Condens 5000i/Greenstar 8000"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {203, DeviceType::BOILER, F("Logamax U122/Cerapur"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{206, DeviceType::BOILER, F("Ecomline Excellent"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {208, DeviceType::BOILER, F("Logamax Plus/GB192/Condens GC9000"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {210, DeviceType::BOILER, F("Cascade MC400"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {211, DeviceType::BOILER, F("EasyControl Adapter"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{228, DeviceType::BOILER, F("Alternative Heatsource"), DeviceFlags::EMS_DEVICE_FLAG_AM200},
 {234, DeviceType::BOILER, F("Logamax Plus GB122/Condense 2300"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{206, DeviceType::BOILER, F("Ecomline Excellent"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Controllers - 0x09 / 0x10 / 0x50
 { 68, DeviceType::CONTROLLER, F("BC10/RFM20"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
@@ -144,6 +145,9 @@
 
 // Switches - 0x11
 { 71, DeviceType::SWITCH, F("WM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
+// EM10 error contact and analog flowtemp control- 0x12
+{ 74, DeviceType::GATEWAY, F("Error Module EM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Gateways - 0x48
 {189, DeviceType::GATEWAY, F("KM200/MB LAN 2"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
