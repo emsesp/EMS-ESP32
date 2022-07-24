@@ -269,7 +269,7 @@ MAKE_PSTR(bufferedflow, "Durchlaufspeicher")
 MAKE_PSTR(layeredbuffer, "Schichtspeicher")
 MAKE_PSTR(maintenance, "Wartung")
 MAKE_PSTR(heating, "Heizen")
-MAKE_PSTR(cooling, "Kühlen")
+MAKE_PSTR(cooling, "Kï¿½hlen")
 
 // boiler lists
 MAKE_PSTR_LIST(tpl_date, F("Format: < dd.mm.yyyy >")) // template for text input
@@ -312,7 +312,7 @@ MAKE_PSTR(winter, "Winter")
 MAKE_PSTR(outdoor, "Aussentemperatur")
 MAKE_PSTR_WORD(mpc)
 MAKE_PSTR(room, "Raum")
-MAKE_PSTR(room_outdoor, "Raum+Außen")
+MAKE_PSTR(room_outdoor, "Raum+Auï¿½en")
 MAKE_PSTR(power, "Leistung")
 MAKE_PSTR(constant, "konstant")
 MAKE_PSTR(simple, "einfach")

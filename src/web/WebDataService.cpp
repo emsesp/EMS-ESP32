@@ -74,10 +74,10 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     JsonObject root     = response->getRoot();
 
     // list is already sorted by device type
-    // Ignore Contoller
     JsonArray devices = root.createNestedArray("devices");
     char      buffer[3];
     for (const auto & emsdevice : EMSESP::emsdevices) {
+        // ignore controller
         if (emsdevice && (emsdevice->device_type() != EMSdevice::DeviceType::CONTROLLER || emsdevice->count_entities() > 0)) {
             JsonObject obj = devices.createNestedObject();
             obj["id"]      = Helpers::smallitoa(buffer, emsdevice->unique_id()); // a unique id as a string

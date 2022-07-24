@@ -16,8 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// SUrlParser from https://github.com/Mad-ness/simple-url-parser
-
 #include "emsesp.h"
 
 using namespace std::placeholders; // for `_1` etc
