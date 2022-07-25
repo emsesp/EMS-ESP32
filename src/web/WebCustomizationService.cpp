@@ -175,6 +175,8 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
             obj["s"]       = emsdevice->device_type_name() + " (" + emsdevice->name() + ")"; // shortname
 
             // device type name. We may have one than one (e.g. multiple thermostats) so postfix name with index
+            // code block not needed - see https://github.com/emsesp/EMS-ESP32/pull/586#issuecomment-1193779668
+            /*
             uint8_t device_index = EMSESP::device_index(emsdevice->device_type(), emsdevice->unique_id());
             if (device_index) {
                 char s[10];
@@ -182,6 +184,8 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
             } else {
                 obj["t"] = Helpers::toLower(emsdevice->device_type_name());
             }
+            */
+            obj["t"] = Helpers::toLower(emsdevice->device_type_name());
         }
     }
 
