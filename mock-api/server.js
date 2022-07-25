@@ -347,18 +347,21 @@ const emsesp_devices = {
       d: 23,
       p: 77,
       s: 'Thermostat (RC20/Moduline 300)',
+      t: 'thermostat1',
     },
     {
       i: 2,
       d: 8,
       p: 123,
       s: 'Boiler (Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i)',
+      t: 'boiler',
     },
     {
       i: 4,
       d: 16,
       p: 165,
       s: 'Thermostat (RC100/Moduline 1000/1010)',
+      t: 'thermostat2',
     },
   ],
 }
@@ -1224,8 +1227,8 @@ rest_server.get(GET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
 
 // start server
 const expressServer = rest_server.listen(port, () =>
+  console.log(`EMS-ESP REST API server running on http://localhost:${port}/api`),
 )
-console.log(`EMS-ESP Rest API listening to http://localhost:${port}/api`)
 
 // start websocket server
 const websocketServer = new WebSocket.Server({

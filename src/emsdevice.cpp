@@ -114,7 +114,7 @@ std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
 // returns device_type from a string
 uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!topic) {
-        return DeviceType::UNKNOWN; // nullptr
+        return DeviceType::UNKNOWN;
     }
 
     // convert topic to lowercase and compare

@@ -104,9 +104,10 @@ export interface CoreData {
 
 export interface DeviceShort {
   i: number; // id
-  d: number; // deviceid
-  p: number; // productid
+  d?: number; // deviceid
+  p?: number; // productid
   s: string; // shortname
+  t?: string; // device type name
 }
 
 export interface Devices {
