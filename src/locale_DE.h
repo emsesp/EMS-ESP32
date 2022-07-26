@@ -224,6 +224,7 @@ MAKE_PSTR(tag_wwc7, "wwc7")
 MAKE_PSTR(tag_wwc8, "wwc8")
 MAKE_PSTR(tag_wwc9, "wwc9")
 MAKE_PSTR(tag_wwc10, "wwc10")
+MAKE_PSTR(tag_ahs, "ahs")
 MAKE_PSTR(tag_hs1, "hs1")
 MAKE_PSTR(tag_hs2, "hs2")
 MAKE_PSTR(tag_hs3, "hs3")
@@ -243,6 +244,7 @@ MAKE_PSTR(tag_hs16, "hs16")
 
 // MQTT topic names
 // MAKE_PSTR(tag_heartbeat_mqtt, "heartbeat")
+// MAKE_PSTR(tag_boiler_data_mqtt, "")
 MAKE_PSTR(tag_boiler_data_ww_mqtt, "ww")
 MAKE_PSTR(tag_device_data_ww_mqtt, "")
 
@@ -545,6 +547,20 @@ MAKE_PSTR_LIST(fossileFactor, F("fossilefactor"), F("fossile energy factor"))
 MAKE_PSTR_LIST(electricFactor, F("electricfactor"), F("electric energy factor"))
 MAKE_PSTR_LIST(delayBoiler, F("delayboiler"), F("delay boiler support"))
 MAKE_PSTR_LIST(tempDiffBoiler, F("tempdiffboiler"), F("tempediff boiler support"))
+
+// alternative heatsource AM200
+MAKE_PSTR_LIST(aCylTopTemp, F("cyltoptemp"), F("Zylinder oben Temperatur"))
+MAKE_PSTR_LIST(aCylCenterTemp, F("cylcentertemp"), F("Zylinder mitte Temperatur"))
+MAKE_PSTR_LIST(aCylBottomTemp, F("cylbottomtemp"), F("Zylinder unten Temperatur"))
+MAKE_PSTR_LIST(aFlowTemp, F("altflowtemp"), F("Alternativ hs Flusstemperatur"))
+MAKE_PSTR_LIST(aRetTemp, F("altrettemp"), F("Alternativ hs Rücktemperatur"))
+MAKE_PSTR_LIST(sysFlowTemp, F("sysflowtemp"), F("System Flusstemperature"))
+MAKE_PSTR_LIST(sysRetTemp, F("sysrettemp"), F("System Rücktemperature"))
+MAKE_PSTR_LIST(valveByPass, F("valvebypass"), F("bypass Ventil"))
+MAKE_PSTR_LIST(valveBuffer, F("valvebuffer"), F("Puffer Ventil"))
+MAKE_PSTR_LIST(valveReturn, F("valvereturn"), F("Rückfluss Ventil"))
+MAKE_PSTR_LIST(aPumpMod, F("altpumpmod"), F("Alternativ hs Pumpenmodulation"))
+MAKE_PSTR_LIST(heatSource, F("heatsource"), F("Alternativ Heizung"))
 
 // the following are dhw for the boiler and automatically tagged with 'ww'
 MAKE_PSTR_LIST(wWSelTemp, F("wwseltemp"), F("gewählte Temperatur"))

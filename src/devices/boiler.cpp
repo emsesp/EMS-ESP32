@@ -39,11 +39,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(DeviceValueTAG::TAG_AHS, &cylTopTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aCylTopTemp), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_AHS, &cylCenterTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aCylCenterTemp), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_AHS, &cylBottomTemp_, DeviceValueType::SHORT, FL_(div10), FL_(aCylBottomTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_AHS, &valveByPass_, DeviceValueType::BOOL, nullptr, FL_(valveByPass), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_AHS, &valveBuffer_, DeviceValueType::BOOL, nullptr, FL_(valveBuffer), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_AHS, &valveReturn_, DeviceValueType::BOOL, nullptr, FL_(valveReturn), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_AHS, &aPump_, DeviceValueType::UINT, nullptr, FL_(aPump), DeviceValueUOM::PERCENT);
-        register_device_value(DeviceValueTAG::TAG_AHS, &heatSource_, DeviceValueType::BOOL, nullptr, FL_(heatSource), DeviceValueUOM::NONE);
+        // register_device_value(DeviceValueTAG::TAG_AHS, &valveByPass_, DeviceValueType::BOOL, nullptr, FL_(valveByPass), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_AHS, &valveBuffer_, DeviceValueType::UINT, nullptr, FL_(valveBuffer), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_AHS, &valveReturn_, DeviceValueType::UINT, nullptr, FL_(valveReturn), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_AHS, &aPumpMod_, DeviceValueType::UINT, nullptr, FL_(aPumpMod), DeviceValueUOM::PERCENT);
+        // register_device_value(DeviceValueTAG::TAG_AHS, &heatSource_, DeviceValueType::BOOL, nullptr, FL_(heatSource), DeviceValueUOM::NONE);
+        // register_device_value(DeviceValueTAG::TAG_AHS, &setValveBuffer_, DeviceValueType::ENUM, FL_(enum_am200valve), FL_(setValveBuffer), DeviceValueUOM::NONE, MAKE_CF_CB(set_valveBuffer));
+        // register_device_value(DeviceValueTAG::TAG_AHS, &setValveReturn_, DeviceValueType::ENUM, FL_(enum_am200valve), FL_(setValveReturn), DeviceValueUOM::NONE, MAKE_CF_CB(set_valveReturn));
         return;
     }
     // cascaded heatingsources, only some values per individual heatsource (hs)
@@ -1172,20 +1174,36 @@ void Boiler::process_amTempMessage(std::shared_ptr<const Telegram> telegram) {
 // 0x054E AM200 status (6 bytes long)
 // Rx: 60 00 FF 00 04 4E 00 00 00 00 00 00 86
 void Boiler::process_amStatusMessage(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, aPump_, 0);
-    // actually we dont know the offset of the valves
-    // has_update(telegram, valveByPass_, 1);
-    // has_update(telegram, valveBuffer_, 2);
-    // has_update(telegram, valveReturn_, 3);
+    has_update(telegram, aPumpMod_, 0); // PR1
+    // offset 1: bitfield 01-pump on, 02-VR1 opening, 04-VR1 closing, 08-VB1 opening, 10-VB1 closing
+    // uint8_t stat = aPump_ | setValveBuffer_ << 3 | setValveReturn_ << 1;
+    // if (telegram->read_value(stat, 1)) {
+    //     has_update(aPump_, stat & 0x01);
+    //     has_update(valveBuffer_, (stat >> 3) & 0x03);
+    //     has_update(valveReturn_, (stat >> 1) & 0x03);
+    // }
+    // actually we dont know the offset of VR2
+    // has_update(telegram, valveByPass_, ?); // VR2
+    has_update(telegram, valveReturn_, 4); // VR1, percent
+    has_update(telegram, valveBuffer_, 5); // VB1, percent
+}
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+// 0x054F AM200 not broadcasted message
+void Boiler::process_amSettingMessage(std::shared_ptr<const Telegram> telegram) {
+    // has_update(telegram, setValveBuffer_, 3); // VB1 0-off, 1-open, 2-close
+    // has_update(telegram, setValveReturn_, 2); // VR1 0-off, 1-open, 2-close
 }
 
 // 0x0550 AM200 broadcasted message, all 27 bytes unkown
 // Rx: 60 00 FF 00 04 50 00 FF 00 FF FF 00 0D 00 01 00 00 00 00 01 03 01 00 03 00 2D 19 C8 02 94 00 4A
 // Rx: 60 00 FF 19 04 50 00 FF FF 39
-void Boiler::process_amSettingMessage(std::shared_ptr<const Telegram> telegram) {
-    // has_update(telegram, setRetTemp_, ?);
-    // has_update(telegram, setFlowTemp_, ?);
+void Boiler::process_amDataMessage(std::shared_ptr<const Telegram> telegram) {
 }
+
+#pragma GCC diagnostic pop
 
 /*
  * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat

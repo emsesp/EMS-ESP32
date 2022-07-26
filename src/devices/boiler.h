@@ -199,20 +199,21 @@ class Boiler : public EMSdevice {
     int8_t poolSetTemp_;
 
     // Alternative Heatsource AM200
-    int16_t cylTopTemp_;    // TB1
-    int16_t cylCenterTemp_; // TB2
-    int16_t cylBottomTemp_; // TB3
-    int16_t aFlowTemp_;     // TA1
-    int16_t aRetTemp_;      // TR1
-    uint8_t aPump_;         // PR1 - percent
-    uint8_t valveByPass_;   // VR2
-    uint8_t valveBuffer_;   // VB1
-    uint8_t valveReturn_;   // VR1
-    uint8_t heatSource_;    // OEV
-    // int8_t setRetTemp_;
+    int16_t cylTopTemp_;     // TB1
+    int16_t cylCenterTemp_;  // TB2
+    int16_t cylBottomTemp_;  // TB3
+    int16_t aFlowTemp_;      // TA1
+    int16_t aRetTemp_;       // TR1
+    // uint8_t aPump_;          // PR1 - on/off
+    uint8_t aPumpMod_;       // PR1 - percent
+    // uint8_t valveByPass_;    // VR2
+    uint8_t valveBuffer_;    // VB1
+    uint8_t valveReturn_;    // VR1
+    // uint8_t heatSource_;     // OEV
+    // uint8_t setValveBuffer_; // VB1
+    // uint8_t setValveReturn_; // VR1
 
-
-    /*
+ /*
  * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
  * thermostat always overwrites settings in boiler
  * enable settings here if no thermostat is used in system
@@ -259,6 +260,7 @@ class Boiler : public EMSdevice {
     void process_amTempMessage(std::shared_ptr<const Telegram> telegram);
     void process_amStatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_amSettingMessage(std::shared_ptr<const Telegram> telegram);
+    void process_amDataMessage(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
     bool set_ww_mode(const char * value, const int8_t id);

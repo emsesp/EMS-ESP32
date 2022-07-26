@@ -548,7 +548,7 @@ MAKE_PSTR_LIST(sysRetTemp, F("sysrettemp"), F("system return temperature"))
 MAKE_PSTR_LIST(valveByPass, F("valvebypass"), F("bypass valve"))
 MAKE_PSTR_LIST(valveBuffer, F("valvebuffer"), F("buffer valve"))
 MAKE_PSTR_LIST(valveReturn, F("valvereturn"), F("return valve"))
-MAKE_PSTR_LIST(aPump, F("altpump"), F("alternative hs pump"))
+MAKE_PSTR_LIST(aPumpMod, F("altpumpmod"), F("alternative hs pump modulation"))
 MAKE_PSTR_LIST(heatSource, F("heatsource"), F("alternative heating active"))
 
 // the following are dhw for the boiler and automatically tagged with 'ww'
