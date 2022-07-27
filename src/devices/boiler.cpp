@@ -30,6 +30,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     if (device_id == EMSdevice::EMS_DEVICE_ID_AM200) {
         register_telegram_type(0x54D, F("AmTemperatures"), false, MAKE_PF_CB(process_amTempMessage));
         register_telegram_type(0x54E, F("AmStatus"), false, MAKE_PF_CB(process_amStatusMessage));
+        register_telegram_type(0x54F, F("AmCommand"), false, MAKE_PF_CB(process_amCommandMessage)); // not broadcasted, but actually not used
         register_telegram_type(0x550, F("AmSettings"), false, MAKE_PF_CB(process_amSettingMessage));
 
         register_device_value(DeviceValueTAG::TAG_AHS, &curFlowTemp_, DeviceValueType::SHORT, FL_(div10), FL_(sysFlowTemp), DeviceValueUOM::DEGREES);
@@ -44,8 +45,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(DeviceValueTAG::TAG_AHS, &valveReturn_, DeviceValueType::UINT, nullptr, FL_(valveReturn), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_AHS, &aPumpMod_, DeviceValueType::UINT, nullptr, FL_(aPumpMod), DeviceValueUOM::PERCENT);
         // register_device_value(DeviceValueTAG::TAG_AHS, &heatSource_, DeviceValueType::BOOL, nullptr, FL_(heatSource), DeviceValueUOM::NONE);
-        // register_device_value(DeviceValueTAG::TAG_AHS, &setValveBuffer_, DeviceValueType::ENUM, FL_(enum_am200valve), FL_(setValveBuffer), DeviceValueUOM::NONE, MAKE_CF_CB(set_valveBuffer));
-        // register_device_value(DeviceValueTAG::TAG_AHS, &setValveReturn_, DeviceValueType::ENUM, FL_(enum_am200valve), FL_(setValveReturn), DeviceValueUOM::NONE, MAKE_CF_CB(set_valveReturn));
         return;
     }
     // cascaded heatingsources, only some values per individual heatsource (hs)
@@ -1191,8 +1190,9 @@ void Boiler::process_amStatusMessage(std::shared_ptr<const Telegram> telegram) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-// 0x054F AM200 not broadcasted message
-void Boiler::process_amSettingMessage(std::shared_ptr<const Telegram> telegram) {
+// 0x054F AM200 not broadcasted message, 7 bytes long
+// Boiler(0x60) -> Me(0x0B), ?(0x054F), data: 00 00 00 00 00 00 00
+void Boiler::process_amCommandMessage(std::shared_ptr<const Telegram> telegram) {
     // has_update(telegram, setValveBuffer_, 3); // VB1 0-off, 1-open, 2-close
     // has_update(telegram, setValveReturn_, 2); // VR1 0-off, 1-open, 2-close
 }
@@ -1200,7 +1200,7 @@ void Boiler::process_amSettingMessage(std::shared_ptr<const Telegram> telegram) 
 // 0x0550 AM200 broadcasted message, all 27 bytes unkown
 // Rx: 60 00 FF 00 04 50 00 FF 00 FF FF 00 0D 00 01 00 00 00 00 01 03 01 00 03 00 2D 19 C8 02 94 00 4A
 // Rx: 60 00 FF 19 04 50 00 FF FF 39
-void Boiler::process_amDataMessage(std::shared_ptr<const Telegram> telegram) {
+void Boiler::process_amSettingMessage(std::shared_ptr<const Telegram> telegram) {
 }
 
 #pragma GCC diagnostic pop

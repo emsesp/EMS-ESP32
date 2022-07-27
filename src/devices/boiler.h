@@ -210,8 +210,6 @@ class Boiler : public EMSdevice {
     uint8_t valveBuffer_;    // VB1
     uint8_t valveReturn_;    // VR1
     // uint8_t heatSource_;     // OEV
-    // uint8_t setValveBuffer_; // VB1
-    // uint8_t setValveReturn_; // VR1
 
  /*
  * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
@@ -260,7 +258,7 @@ class Boiler : public EMSdevice {
     void process_amTempMessage(std::shared_ptr<const Telegram> telegram);
     void process_amStatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_amSettingMessage(std::shared_ptr<const Telegram> telegram);
-    void process_amDataMessage(std::shared_ptr<const Telegram> telegram);
+    void process_amCommandMessage(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
     bool set_ww_mode(const char * value, const int8_t id);
