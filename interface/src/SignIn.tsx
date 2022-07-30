@@ -1,8 +1,8 @@
-import { FC, useContext, useState } from 'react';
+import { FC, useContext, useState, ChangeEventHandler } from 'react';
 import { ValidateFieldsError } from 'async-validator';
 import { useSnackbar } from 'notistack';
 
-import { Box, Fab, Paper, Typography } from '@mui/material';
+import { Box, Fab, Paper, Typography, MenuItem } from '@mui/material';
 import ForwardIcon from '@mui/icons-material/Forward';
 
 import * as AuthenticationApi from './api/authentication';
@@ -15,6 +15,11 @@ import { extractErrorMessage, onEnterCallback, updateValue } from './utils';
 import { SignInRequest } from './types';
 import { ValidatedTextField } from './components';
 import { SIGN_IN_REQUEST_VALIDATOR, validate } from './validators';
+
+import { I18nContext } from './i18n/i18n-react';
+import type { Locales } from './i18n/i18n-types';
+import { locales } from './i18n/i18n-util';
+import { loadLocaleAsync } from './i18n/i18n-util.async';
 
 const SignIn: FC = () => {
   const authenticationContext = useContext(AuthenticationContext);
@@ -58,6 +63,15 @@ const SignIn: FC = () => {
 
   const submitOnEnter = onEnterCallback(signIn);
 
+  const { locale, LL, setLocale } = useContext(I18nContext);
+
+  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({ target }) => {
+    const loc = target.value as Locales;
+    localStorage.setItem('lang', loc);
+    await loadLocaleAsync(loc);
+    setLocale(loc);
+  };
+
   return (
     <Box
       display="flex"
@@ -81,11 +95,39 @@ const SignIn: FC = () => {
         })}
       >
         <Typography variant="h4">{PROJECT_NAME}</Typography>
+
+        <Box
+          component="form"
+          sx={{
+            '& .MuiTextField-root': { m: 1, width: '15ch' }
+          }}
+          noValidate
+          autoComplete="off"
+        >
+          <ValidatedTextField
+            name="locale"
+            label={LL.LANGUAGE()}
+            variant="outlined"
+            fullWidth
+            value={locale || ''}
+            onChange={onLocaleSelected}
+            margin="normal"
+            size="small"
+            select
+          >
+            {locales.map((loc) => (
+              <MenuItem key={loc} value={loc}>
+                {loc}
+              </MenuItem>
+            ))}
+          </ValidatedTextField>
+        </Box>
+
         <ValidatedTextField
           fieldErrors={fieldErrors}
           disabled={processing}
           name="username"
-          label="Username"
+          label={LL.USERNAME()}
           value={signInRequest.username}
           onChange={updateLoginRequestValue}
           margin="normal"
@@ -97,7 +139,7 @@ const SignIn: FC = () => {
           disabled={processing}
           type="password"
           name="password"
-          label="Password"
+          label={LL.PASSWORD()}
           value={signInRequest.password}
           onChange={updateLoginRequestValue}
           onKeyDown={submitOnEnter}
@@ -107,7 +149,7 @@ const SignIn: FC = () => {
         />
         <Fab variant="extended" color="primary" sx={{ mt: 2 }} onClick={validateAndSignIn} disabled={processing}>
           <ForwardIcon sx={{ mr: 1 }} />
-          Sign In
+          {LL.SIGN_IN()}
         </Fab>
       </Paper>
     </Box>
