@@ -284,6 +284,14 @@ MAKE_PSTR_LIST(enum_flow, F_(off), F_(flow), F_(bufferedflow), F_(buffer), F_(la
 MAKE_PSTR_LIST(enum_reset, F("-"), F_(maintenance), F_(error))
 // MAKE_PSTR_LIST(enum_bool, F_(off), F_(on))
 
+// AM200 lists
+MAKE_PSTR_LIST(enum_vr2Config, F_(off), F("bypass"));
+MAKE_PSTR_LIST(enum_aPumpSignal, F_(off), F("pwm"), F("pwm_invers"));
+MAKE_PSTR_LIST(enum_bufBypass, F("no"), F_(mixer), F("valve"));
+MAKE_PSTR_LIST(enum_bufConfig, F("monovalent"), F("bivalent"));
+MAKE_PSTR_LIST(enum_blockMode, F_(off), F_(auto), F("blocking"));
+MAKE_PSTR_LIST(enum_blockTerm, F("n_o"), F("n_c"));
+
 //heatpump
 MAKE_PSTR_LIST(enum_hpactivity, F("none"), F_(heating), F_(cooling), F("hot_water"), F("pool"))
 
@@ -550,6 +558,23 @@ MAKE_PSTR_LIST(valveBuffer, F("valvebuffer"), F("buffer valve"))
 MAKE_PSTR_LIST(valveReturn, F("valvereturn"), F("return valve"))
 MAKE_PSTR_LIST(aPumpMod, F("altpumpmod"), F("alternative hs pump modulation"))
 MAKE_PSTR_LIST(heatSource, F("heatsource"), F("alternative heating active"))
+
+MAKE_PSTR_LIST(vr2Config, F("vr2config"), F("vr2 configuration"))
+MAKE_PSTR_LIST(ahsActivated, F("ahsactivated"), F("alternate heat source activation"))
+MAKE_PSTR_LIST(aPumpConfig, F("apumpconfig"), F("primary pump config"))
+MAKE_PSTR_LIST(aPumpSignal, F("apumpsignal"), F("output for pr1 pump"))
+MAKE_PSTR_LIST(aPumpMin, F("apumpmin"), F("min output pump pr1"))
+MAKE_PSTR_LIST(tempRise, F("temprise"), F("ahs return temp rise"))
+MAKE_PSTR_LIST(setReturnTemp, F("setreturntemp"), F("set temp return"))
+MAKE_PSTR_LIST(mixRuntime, F("mixruntime"), F("mixer run time"))
+// MAKE_PSTR_LIST(setFlowTemp, F("setflowtemp"), F("set flow temp"))
+MAKE_PSTR_LIST(bufBypass, F("bufbypass"), F("buffer bypass config"))
+MAKE_PSTR_LIST(bufMixRuntime, F("bufmixruntime"), F("bypass mixer run time"))
+MAKE_PSTR_LIST(bufConfig, F("bufconfig"), F("dhw buffer config"))
+MAKE_PSTR_LIST(blockMode, F("blockmode"), F("config htg. blocking mode"))
+MAKE_PSTR_LIST(blockTerm, F("blockterm"), F("config of block terminal"))
+MAKE_PSTR_LIST(blockHyst, F("blockhyst"), F("hyst. for bolier block"))
+MAKE_PSTR_LIST(releaseWait, F("releasewait"), F("boiler release wait time"))
 
 // the following are dhw for the boiler and automatically tagged with 'ww'
 MAKE_PSTR_LIST(wwSelTemp, F("wwseltemp"), F("selected temperature"))

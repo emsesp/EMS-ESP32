@@ -199,19 +199,38 @@ class Boiler : public EMSdevice {
     int8_t poolSetTemp_;
 
     // Alternative Heatsource AM200
-    int16_t cylTopTemp_;     // TB1
-    int16_t cylCenterTemp_;  // TB2
-    int16_t cylBottomTemp_;  // TB3
-    int16_t aFlowTemp_;      // TA1
-    int16_t aRetTemp_;       // TR1
-    // uint8_t aPump_;          // PR1 - on/off
-    uint8_t aPumpMod_;       // PR1 - percent
+    int16_t cylTopTemp_;    // TB1
+    int16_t cylCenterTemp_; // TB2
+    int16_t cylBottomTemp_; // TB3
+    int16_t aFlowTemp_;     // TA1
+    int16_t aRetTemp_;      // TR1
+    uint8_t aPumpMod_;      // PR1 - percent
     // uint8_t valveByPass_;    // VR2
-    uint8_t valveBuffer_;    // VB1
-    uint8_t valveReturn_;    // VR1
+    uint8_t valveBuffer_; // VB1
+    uint8_t valveReturn_; // VR1
     // uint8_t heatSource_;     // OEV
+    // Settings:
+    uint8_t  vr2Config_;     // pos 12: off(00)/Keelbypass(01)/(hc1pump(02) only standalone)
+    uint8_t  ahsActivated_;  // pos 00: Alternate heat source activation: No(00),Yes(01)
+    uint8_t  aPumpConfig_;   // pos 04: Buffer primary pump->Config pump: No(00),Yes(01)
+    uint8_t  aPumpSignal_;   // pos 03: Output for PR1 pump: On/Off(00),PWM(01),PWM invers(02)
+    uint8_t  aPumpMin_;      // pos 21: Min output pump PR1 (%)
+    uint8_t  tempRise_;      // pos 01: AHS return temp rise: No(00),Yes(01) (mixer VR1)
+    uint8_t  setReturnTemp_; // pos 06: Set temp return (°C) (VR1)
+    uint16_t mixRuntime_;    // pos 10/11?: Mixer run time (s) (VR1)
+    // uint8_t  setFlowTemp_;   // pos 07: Set flow temp AHS (°C) (Buffer)
+    uint8_t  bufBypass_;     // pos 02: Puffer bypass: No(00), Mischer(01), Ventil(02) (Buffer)
+    uint16_t bufMixRuntime_; // pos 8/9: Bypass mixer run time: [time] (s) (Buffer)
+    uint8_t  bufConfig_;     // pos 20: Konfig WW-Speicher Monovalent(01), Bivalent(02) (buffer)
+    uint8_t  blockMode_;     // pos 16: Config htg. blocking mode: No(00),Automatic(01),Always block02) (blocking)
+    uint8_t  blockTerm_;     // pos 17: Config of block terminal: NO(00), NC(01)
+    int8_t   blockHyst_;     // pos 14?: Hyst. for bolier block (K)
+    uint8_t  releaseWait_;   // pos 15: Boiler release wait time (min)
 
- /*
+
+
+
+    /*
  * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
  * thermostat always overwrites settings in boiler
  * enable settings here if no thermostat is used in system
@@ -259,6 +278,7 @@ class Boiler : public EMSdevice {
     void process_amStatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_amSettingMessage(std::shared_ptr<const Telegram> telegram);
     void process_amCommandMessage(std::shared_ptr<const Telegram> telegram);
+    void process_amExtraMessage(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
     bool set_ww_mode(const char * value, const int8_t id);
@@ -298,6 +318,24 @@ class Boiler : public EMSdevice {
     bool set_pool_temp(const char * value, const int8_t id);
     bool set_emergency_temp(const char * value, const int8_t id);
     bool set_emergency_ops(const char * value, const int8_t id);
+
+    bool set_vr2Config(const char * value, const int8_t id);     // pos 12: off(00)/Keelbypass(01)/(hc1pump(02) only standalone)
+    bool set_ahsActivated(const char * value, const int8_t id);  // pos 00: Alternate heat source activation: No(00),Yes(01)
+    bool set_aPumpConfig(const char * value, const int8_t id);   // pos 04: Buffer primary pump->Config pump: No(00),Yes(01)
+    bool set_aPumpSignal(const char * value, const int8_t id);   // pos 03: Output for PR1 pump: On/Off(00),PWM(01),PWM invers(02)
+    bool set_aPumpMin(const char * value, const int8_t id);      // pos 21: Min output pump PR1 (%)
+    bool set_tempRise(const char * value, const int8_t id);      // pos 01: AHS return temp rise: No(00),Yes(01) (mixer VR1)
+    bool set_setReturnTemp(const char * value, const int8_t id); // pos 06: Set temp return (°C) (VR1)
+    bool set_mixRuntime(const char * value, const int8_t id);    // pos 10/11?: Mixer run time (s) (VR1)
+    bool set_setFlowTemp(const char * value, const int8_t id);   // pos 07: Set flow temp AHS (°C) (Buffer)
+    bool set_bufBypass(const char * value, const int8_t id);     // pos 02: Puffer bypass: No(00), Mischer(01), Ventil(02) (Buffer)
+    bool set_bufMixRuntime(const char * value, const int8_t id); // pos 8/9: Bypass mixer run time: [time] (s) (Buffer)
+    bool set_bufConfig(const char * value, const int8_t id);     // pos 20: Konfig WW-Speicher Monovalent(01), Bivalent(02) (buffer)
+    bool set_blockMode(const char * value, const int8_t id);     // pos 16: Config htg. blocking mode: No(00),Automatic(01),Always block02) (blocking)
+    bool set_blockTerm(const char * value, const int8_t id);     // pos 17: Config of block terminal: NO(00), NC(01)
+    bool set_blockHyst(const char * value, const int8_t id);     // pos 14?: Hyst. for bolier block (K)
+    bool set_releaseWait(const char * value, const int8_t id);   // pos 15: Boiler release wait time (min)
+
     /*
     bool set_hybridStrategy(const char * value, const int8_t id);
     bool set_switchOverTemp(const char * value, const int8_t id);
