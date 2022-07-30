@@ -80,7 +80,7 @@ const MqttSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="base"
-              label="Bsse"
+              label="Base"
               fullWidth
               variant="outlined"
               value={data.base}
