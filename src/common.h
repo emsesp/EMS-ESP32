@@ -19,9 +19,7 @@
 #ifndef EMSESP_COMMON_H
 #define EMSESP_COMMON_H
 
-
 // logging
-
 #include <uuid/log.h>
 
 using uuid::log::Level;
@@ -33,7 +31,6 @@ using uuid::log::Level;
 #define LOG_ERROR(...) logger_.err(__VA_ARGS__)
 
 // flash strings
-
 using uuid::flash_string_vector;
 using uuid::read_flash_string;
 
@@ -61,6 +58,8 @@ using uuid::read_flash_string;
 //
 // load translations
 //
-#include "locale_EN.h"
+// #include "locale_EN.h"
+#include "locale_DE.h"
+#include "locale_common.h"
 
 #endif

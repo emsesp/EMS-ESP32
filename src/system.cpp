@@ -1145,6 +1145,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node = output.createNestedObject("Settings");
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         node["board profile"] = settings.board_profile;
+        node["locale"]        = settings.locale;
         node["tx mode"]       = settings.tx_mode;
         node["ems bus id"]    = settings.ems_bus_id;
         node["shower timer"]  = settings.shower_timer;

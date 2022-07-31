@@ -321,6 +321,26 @@ const SettingsApplication: FC = () => {
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           General Options
         </Typography>
+        <Box
+          sx={{
+            '& .MuiTextField-root': { width: '25ch' }
+          }}
+        >
+          <ValidatedTextField
+            name="locale"
+            label="Language (for device entities)"
+            disabled={saving}
+            value={data.locale}
+            variant="outlined"
+            onChange={updateFormValue}
+            margin="normal"
+            size="small"
+            select
+          >
+            <MenuItem value="en">English</MenuItem>
+            <MenuItem value="de">Deutsch</MenuItem>
+          </ValidatedTextField>
+        </Box>
         {data.led_gpio !== 0 && (
           <BlockFormControlLabel
             control={<Checkbox checked={data.hide_led} onChange={updateFormValue} name="hide_led" />}
@@ -350,7 +370,7 @@ const SettingsApplication: FC = () => {
         />
         <BlockFormControlLabel
           control={<Checkbox checked={data.readonly_mode} onChange={updateFormValue} name="readonly_mode" />}
-          label="Enable Read only mode (blocks all outgoing EMS Tx write commands)"
+          label="Enable read-only mode (blocks all outgoing EMS Tx Write commands)"
           disabled={saving}
         />
         <BlockFormControlLabel

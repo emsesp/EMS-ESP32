@@ -26,6 +26,7 @@
 
 class DummySettings {
   public:
+    String   locale                = "en";
     uint8_t  tx_mode               = 1;
     uint8_t  ems_bus_id            = 0x0B;
     bool     syslog_enabled        = false;

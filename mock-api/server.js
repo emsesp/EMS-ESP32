@@ -306,7 +306,8 @@ const EMSESP_MASKED_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'maskedEntities'
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations'
 
 settings = {
-  tx_mode: 1,
+  locale: 'en',
+  tx_mode: 4,
   ems_bus_id: 11,
   syslog_enabled: false,
   syslog_level: 3,
@@ -344,24 +345,18 @@ const emsesp_devices = {
   devices: [
     {
       i: 1,
-      d: 23,
-      p: 77,
       s: 'Thermostat (RC20/Moduline 300)',
-      t: 'thermostat1',
+      t: 'thermostat',
     },
     {
       i: 2,
-      d: 8,
-      p: 123,
       s: 'Boiler (Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i)',
       t: 'boiler',
     },
     {
       i: 4,
-      d: 16,
-      p: 165,
       s: 'Thermostat (RC100/Moduline 1000/1010)',
-      t: 'thermostat2',
+      t: 'thermostat',
     },
   ],
 }
@@ -852,6 +847,7 @@ rest_server.post(UPLOAD_FILE_ENDPOINT, (req, res) => {
   res.sendStatus(200)
 })
 rest_server.post(SIGN_IN_ENDPOINT, (req, res) => {
+  console.log('Signed in as ' + req.body.username)
   res.json(signin)
 })
 rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {

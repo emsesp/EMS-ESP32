@@ -98,20 +98,15 @@ const SignIn: FC = () => {
         })}
       >
         <Typography variant="h4">{PROJECT_NAME}</Typography>
-
         <Box
-          component="form"
           sx={{
             '& .MuiTextField-root': { m: 2, width: '15ch' }
           }}
-          noValidate
-          autoComplete="off"
         >
           <ValidatedTextField
             name="locale"
             label={LL.LANGUAGE()}
             variant="outlined"
-            fullWidth
             value={locale || ''}
             onChange={onLocaleSelected}
             margin="normal"
@@ -125,7 +120,6 @@ const SignIn: FC = () => {
             ))}
           </ValidatedTextField>
         </Box>
-
         <ValidatedTextField
           fieldErrors={fieldErrors}
           disabled={processing}

@@ -37,6 +37,7 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
 }
 
 void WebSettings::read(WebSettings & settings, JsonObject & root) {
+    root["locale"]                = settings.locale;
     root["tx_mode"]               = settings.tx_mode;
     root["ems_bus_id"]            = settings.ems_bus_id;
     root["syslog_enabled"]        = settings.syslog_enabled;
@@ -211,6 +212,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
     settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
+
+    settings.locale = root["locale"] | EMSESP_DEFAULT_LOCALE;
+    EMSESP::system_.locale(std::string(settings.locale.c_str()));
 
     settings.fahrenheit = root["fahrenheit"] | false;
     EMSESP::system_.fahrenheit(settings.fahrenheit);

@@ -20,6 +20,10 @@
 
 // GENERAL SETTINGS
 
+#ifndef EMSESP_DEFAULT_LOCALE
+#define EMSESP_DEFAULT_LOCALE "en" // English
+#endif
+
 #ifndef EMSESP_DEFAULT_TX_MODE
 #define EMSESP_DEFAULT_TX_MODE 1 // EMS1.0
 #endif
