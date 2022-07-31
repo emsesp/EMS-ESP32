@@ -21,12 +21,9 @@
 
 #include "telegram.h" // for EMS_VALUE_* settings
 
-#define FJSON(x) x
-// #define FJSON(x) F(x)
+#include "common.h"
 
 namespace emsesp {
-
-using flash_string_vector = std::vector<const __FlashStringHelper *>;
 
 class Helpers {
   public:

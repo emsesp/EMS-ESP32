@@ -36,6 +36,9 @@ const SignIn: FC = () => {
 
   const validateAndSignIn = async () => {
     setProcessing(true);
+    SIGN_IN_REQUEST_VALIDATOR.messages({
+      required: '%s ' + LL.IS_REQUIRED()
+    });
     try {
       await validate(SIGN_IN_REQUEST_VALIDATOR, signInRequest);
       signIn();
@@ -99,7 +102,7 @@ const SignIn: FC = () => {
         <Box
           component="form"
           sx={{
-            '& .MuiTextField-root': { m: 1, width: '15ch' }
+            '& .MuiTextField-root': { m: 2, width: '15ch' }
           }}
           noValidate
           autoComplete="off"

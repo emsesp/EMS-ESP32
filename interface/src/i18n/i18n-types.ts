@@ -19,6 +19,10 @@ type RootTranslation = {
 	 */
 	LANGUAGE: string
 	/**
+	 * is required
+	 */
+	IS_REQUIRED: string
+	/**
 	 * Sign In
 	 */
 	SIGN_IN: string
@@ -43,10 +47,10 @@ type RootTranslation = {
 	 */
 	HELP: string
 	/**
-	 * Hello {name}!
-	 * @param {string} name
+	 * Logged in as {name}
+	 * @param {unknown} name
 	 */
-	HI: RequiredParams<'name'>
+	LOGGED_IN: RequiredParams<'name'>
 }
 
 export type TranslationFunctions = {
@@ -54,6 +58,10 @@ export type TranslationFunctions = {
 	 * Language
 	 */
 	LANGUAGE: () => LocalizedString
+	/**
+	 * is required
+	 */
+	IS_REQUIRED: () => LocalizedString
 	/**
 	 * Sign In
 	 */
@@ -79,9 +87,9 @@ export type TranslationFunctions = {
 	 */
 	HELP: () => LocalizedString
 	/**
-	 * Hello {name}!
+	 * Logged in as {name}
 	 */
-	HI: (arg: { name: string }) => LocalizedString
+	LOGGED_IN: (arg: { name: unknown }) => LocalizedString
 }
 
 export type Formatters = {}

@@ -1,14 +1,15 @@
 import type { Translation } from '../i18n-types';
 
 const de: Translation = {
-  LANGUAGE: 'DE_Language',
-  SIGN_IN: 'DE_Sign In',
-  USERNAME: 'DE_Username',
-  PASSWORD: 'DE_Password',
-  DASHBOARD: 'DE_Dashboard',
-  SETTINGS: 'DE_Settings',
-  HELP: 'DE_Help',
-  HI: 'Hallo {name}!'
+  LANGUAGE: 'Sprache',
+  IS_REQUIRED: 'ist nötig',
+  SIGN_IN: 'Einloggen',
+  USERNAME: 'Nutzername',
+  PASSWORD: 'Passwort',
+  DASHBOARD: 'Armaturenbrett',
+  SETTINGS: 'Einstellungen',
+  HELP: 'Hilfe',
+  LOGGED_IN: 'Eingeloggt als {name}'
 };
 
 export default de;
