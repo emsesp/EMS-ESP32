@@ -83,6 +83,8 @@ class Thermostat : public EMSdevice {
         uint8_t climate;
         uint8_t switchonoptimization;
         uint8_t statusbyte; // from RC300monitor
+        int8_t  humidity;
+        int8_t  dewtemperature;
 
         // RC 10
         uint8_t  reducehours;   // night reduce duration
@@ -380,6 +382,8 @@ class Thermostat : public EMSdevice {
     void process_JunkersRemoteMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersHybridSettings(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram);
+    void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
+    void process_RemoteHumidity(std::shared_ptr<const Telegram> telegram);
 
     // internal helper functions
     bool set_mode_n(const uint8_t mode, const uint8_t hc_num);

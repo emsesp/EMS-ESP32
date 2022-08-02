@@ -28,6 +28,12 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     uint8_t model = this->model();
 
+    // remote thermostats with humidity
+    if (device_id >= 0x38 && device_id <= 0x3F) { // RC100H remote
+        register_telegram_type(0x042B, F("RemoteTemp"), true, MAKE_PF_CB(process_RemoteTemp));
+        register_telegram_type(0x047B, F("RemoteHumidity"), true, MAKE_PF_CB(process_RemoteHumidity));
+        return; // no values to add
+    }
     // common telegram handlers
     register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, MAKE_PF_CB(process_RCOutdoorTemp));
     register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), false, MAKE_PF_CB(process_RCTime));
@@ -288,8 +294,14 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     }
 
     // not found, search device-id types for remote thermostats
-    if (telegram->src >= 0x18 && telegram->src <= 0x1B) {
+    if (telegram->src >= 0x18 && telegram->src <= 0x1F) {
         hc_num  = telegram->src - 0x17;
+        toggle_ = true;
+    }
+
+    // not found, search device-id types for remote thermostats
+    if (telegram->src >= 0x38 && telegram->src <= 0x3F) {
+        hc_num  = telegram->src - 0x37;
         toggle_ = true;
     }
 
@@ -680,6 +692,27 @@ void Thermostat::process_RC20Remote(std::shared_ptr<const Telegram> telegram) {
         return;
     }
     has_update(telegram, hc->remotetemp, 0);
+}
+// 0x42B - for reading the roomtemperature from the RC20/ES72 thermostat (0x38, 0x39, ..)
+// e.g. "38 10 FF 00 03 2B 00 D1 08 2A 01"
+ void Thermostat::process_RemoteTemp(std::shared_ptr<const Telegram> telegram) {
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    if (hc == nullptr) {
+        return;
+    }
+    has_update(telegram, hc->remotetemp, 0);
+
+}
+
+// 0x47B - for reading the roomtemperature from the RC20/ES72 thermostat (0x38, 0x39, ..)
+// e.g. "38 10 FF 00 03 7B 08 24 00 4B"
+void Thermostat::process_RemoteHumidity(std::shared_ptr<const Telegram> telegram) {
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    if (hc == nullptr) {
+        return;
+    }
+    has_update(telegram, hc->dewtemperature, 0);
+    has_update(telegram, hc->humidity, 1);
 }
 
 // type 0x0165, ff
@@ -3925,6 +3958,14 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
 
     // heating circuit
     uint8_t tag = DeviceValueTAG::TAG_HC1 + hc->hc();
+
+    // RC300 remote with humidity
+    if (device_id() >= 0x38 && device_id() <= 0x3F) {
+        register_device_value(tag, &hc->remotetemp, DeviceValueType::SHORT, FL_(div10), FL_(remotetemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->dewtemperature, DeviceValueType::INT, nullptr, FL_(dewTemperature), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->humidity, DeviceValueType::INT, nullptr, FL_(airHumidity), DeviceValueUOM::PERCENT);
+        return;
+    }
 
     // different logic on how temperature values are stored, depending on model
     const __FlashStringHelper * const * seltemp_divider;

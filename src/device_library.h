@@ -112,6 +112,9 @@
 {191, DeviceType::THERMOSTAT, F("FR120"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS | DeviceFlags::EMS_DEVICE_FLAG_JUNKERS_OLD}, // older model
 {192, DeviceType::THERMOSTAT, F("FW120"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},
 
+// Thermostat remote - 0x38
+{200, DeviceType::THERMOSTAT, F("RC100H"), DeviceFlags::EMS_DEVICE_FLAG_RC100H},
+
 // Solar Modules - 0x30 (for solar), 0x2A, 0x41 (for ww)
 { 73, DeviceType::SOLAR, F("SM10"), DeviceFlags::EMS_DEVICE_FLAG_SM10},
 {101, DeviceType::SOLAR, F("ISM1"), DeviceFlags::EMS_DEVICE_FLAG_ISM},
@@ -129,10 +132,11 @@
 {161, DeviceType::MIXER, F("MM200"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {204, DeviceType::MIXER, F("MP100"), DeviceFlags::EMS_DEVICE_FLAG_MP}, // pool
 
-// Heat Pumps - 0x38
-{200, DeviceType::HEATPUMP, F("HP Module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{248, DeviceType::HEATPUMP, F("Hybrid Manager HM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+// Heat Pumps - 0x38?
 {252, DeviceType::HEATPUMP, F("HP Module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
+// Heat Pumps - 0x53
+{248, DeviceType::HEATPUMP, F("Hybrid Manager HM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Connect devices - 0x02
 {171, DeviceType::CONNECT, F("OpenTherm Converter"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
