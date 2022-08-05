@@ -30,8 +30,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
     // remote thermostats with humidity
     if (device_id >= 0x38 && device_id <= 0x3F) { // RC100H remote
-        register_telegram_type(0x042B, F("RemoteTemp"), true, MAKE_PF_CB(process_RemoteTemp));
-        register_telegram_type(0x047B, F("RemoteHumidity"), true, MAKE_PF_CB(process_RemoteHumidity));
+        register_telegram_type(0x042B, F("RemoteTemp"), false, MAKE_PF_CB(process_RemoteTemp));
+        register_telegram_type(0x047B, F("RemoteHumidity"), false, MAKE_PF_CB(process_RemoteHumidity));
         return; // no values to add
     }
     // common telegram handlers
