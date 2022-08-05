@@ -1237,22 +1237,22 @@ void Boiler::process_amStatusMessage(std::shared_ptr<const Telegram> telegram) {
 // 0x054C AM200 not broadcasted message, 23 bytes long
 // data: 00 01 01 00 01 00 41 4B 00 5A 00 5A 00 01 05 3C 00 00 5A 00 01 23 00
 void Boiler::process_amSettingMessage(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, vr2Config_, 12);    // pos 12: off(00)/bypass(01)
-    has_update(telegram, ahsActivated_, 0);  // pos 00: Alternate heat source activation: No(00),Yes(01)
-    has_update(telegram, aPumpConfig_, 4);   // pos 04: Buffer primary pump->Config pump: No(00),Yes(01)
-    has_update(telegram, aPumpSignal_, 3);   // pos 03: Output for PR1 pump: On/Off(00),PWM(01),PWM invers(02)
-    has_update(telegram, aPumpMin_, 21);     // pos 21: Min output pump PR1 (%)
-    has_update(telegram, tempRise_, 1);      // pos 01: AHS return temp rise: No(00),Yes(01) (mixer VR1)
-    has_update(telegram, setReturnTemp_, 6); // pos 06: Set temp return (°C) (VR1)
-    has_update(telegram, mixRuntime_, 10);   // pos 10/11?: Mixer run time (s) (VR1)
-    has_update(telegram, setFlowTemp_, 7);   // pos 07: Set flow temp AHS (°C) (Buffer)
-    has_update(telegram, bufBypass_, 2);     // pos 02: Puffer bypass: No(00), Mischer(01), Ventil(02) (Buffer)
-    has_update(telegram, bufMixRuntime_, 8); // pos 8/9: Bypass mixer run time: [time] (s) (Buffer)
-    has_update(telegram, bufConfig_, 20);    // pos 20: Konfig WW-Speicher Monovalent(01), Bivalent(02) (buffer)
-    has_update(telegram, blockMode_, 16);    // pos 16: Config htg. blocking mode: No(00),Automatic(01),Always block02) (blocking)
-    has_update(telegram, blockTerm_, 17);    // pos 17: Config of block terminal: NO(00), NC(01)
-    has_update(telegram, blockHyst_, 14);    // pos 14?: Hyst. for bolier block (K)
-    has_update(telegram, releaseWait_, 15);  // pos 15: Boiler release wait time (min)
+    has_update(telegram, vr2Config_, 12);     // pos 12: off(00)/bypass(01)
+    has_update(telegram, ahsActivated_, 0);   // pos 00: Alternate heat source activation: No(00),Yes(01)
+    has_update(telegram, aPumpConfig_, 4);    // pos 04: Buffer primary pump->Config pump: No(00),Yes(01)
+    has_update(telegram, aPumpSignal_, 3);    // pos 03: Output for PR1 pump: On/Off(00),PWM(01),PWM invers(02)
+    has_update(telegram, aPumpMin_, 21);      // pos 21: Min output pump PR1 (%)
+    has_update(telegram, tempRise_, 1);       // pos 01: AHS return temp rise: No(00),Yes(01) (mixer VR1)
+    has_update(telegram, setReturnTemp_, 6);  // pos 06: Set temp return (°C) (VR1)
+    has_update(telegram, mixRuntime_, 8);     // pos 8/9: Mixer run time (s) (VR1)
+    has_update(telegram, setFlowTemp_, 7);    // pos 07: Set flow temp AHS (°C) (Buffer)
+    has_update(telegram, bufBypass_, 2);      // pos 02: Puffer bypass: No(00), Mischer(01), Ventil(02) (Buffer)
+    has_update(telegram, bufMixRuntime_, 10); // pos 10/11: Bypass mixer run time: [time] (s) (Buffer)
+    has_update(telegram, bufConfig_, 20);     // pos 20: Konfig WW-Speicher Monovalent(01), Bivalent(02) (buffer)
+    has_update(telegram, blockMode_, 16);     // pos 16: Config htg. blocking mode: No(00),Automatic(01),Always block02) (blocking)
+    has_update(telegram, blockTerm_, 17);     // pos 17: Config of block terminal: NO(00), NC(01)
+    has_update(telegram, blockHyst_, 14);     // pos 14?: Hyst. for bolier block (K)
+    has_update(telegram, releaseWait_, 15);   // pos 15: Boiler release wait time (min)
 }
 
 #pragma GCC diagnostic push
@@ -1354,7 +1354,7 @@ bool Boiler::set_mixRuntime(const char * value, const int8_t id) {
         return false;
     }
     uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
-    write_command(0x54C, 10, data, 2, 0x54C);
+    write_command(0x54C, 8, data, 2, 0x54C);
     return true;
 }
 
@@ -1385,7 +1385,7 @@ bool Boiler::set_bufMixRuntime(const char * value, const int8_t id) {
         return false;
     }
     uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
-    write_command(0x54C, 8, data, 2, 0x54C);
+    write_command(0x54C, 10, data, 2, 0x54C);
     return true;
 }
 
