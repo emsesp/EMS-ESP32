@@ -3,7 +3,7 @@ import { ValidateFieldsError } from 'async-validator';
 
 import { useSnackbar } from 'notistack';
 
-import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider } from '@mui/material';
+import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider, InputAdornment } from '@mui/material';
 
 import SaveIcon from '@mui/icons-material/Save';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
@@ -116,7 +116,7 @@ const SettingsApplication: FC = () => {
         <Box color="warning.main">
           <Typography variant="body2">
             Select a pre-configured interface board profile from the list below or choose "Custom" to configure your own
-            hardware settings.
+            hardware settings
           </Typography>
         </Box>
         <ValidatedTextField
@@ -391,11 +391,14 @@ const SettingsApplication: FC = () => {
           />
           {data.shower_alert && (
             <>
-              <Grid item xs={2}>
+              <Grid item xs={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="shower_alert_trigger"
-                  label="Trigger Time (minutes)"
+                  label="Trigger Time"
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">minutes</InputAdornment>
+                  }}
                   variant="outlined"
                   value={data.shower_alert_trigger}
                   type="number"
@@ -403,11 +406,14 @@ const SettingsApplication: FC = () => {
                   disabled={!data.shower_timer}
                 />
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="shower_alert_coldshot"
-                  label="Cold Shot Time (seconds)"
+                  label="Cold Shot Duration"
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+                  }}
                   variant="outlined"
                   value={data.shower_alert_coldshot}
                   type="number"
@@ -507,7 +513,7 @@ const SettingsApplication: FC = () => {
         />
         {data.syslog_enabled && (
           <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_host"
@@ -520,7 +526,7 @@ const SettingsApplication: FC = () => {
                 disabled={saving}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_port"
@@ -534,7 +540,7 @@ const SettingsApplication: FC = () => {
                 disabled={saving}
               />
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <ValidatedTextField
                 name="syslog_level"
                 label="Log Level"
@@ -554,11 +560,14 @@ const SettingsApplication: FC = () => {
                 <MenuItem value={9}>ALL</MenuItem>
               </ValidatedTextField>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_mark_interval"
-                label="Mark Interval (seconds, 0=off)"
+                label="Mark Interval"
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+                }}
                 fullWidth
                 variant="outlined"
                 value={data.syslog_mark_interval}

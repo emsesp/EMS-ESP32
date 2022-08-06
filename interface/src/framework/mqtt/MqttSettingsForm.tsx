@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
 
-import { Button, Checkbox, MenuItem, Grid, Typography } from '@mui/material';
+import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 
 import { MQTT_SETTINGS_VALIDATOR, validate } from '../../validators';
@@ -129,7 +129,10 @@ const MqttSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="keep_alive"
-              label="Keep Alive (seconds)"
+              label="Keep Alive"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+              }}
               fullWidth
               variant="outlined"
               value={numberValue(data.keep_alive)}
@@ -149,7 +152,7 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
               select
             >
-              <MenuItem value={0}>0 (default)</MenuItem>
+              <MenuItem value={0}>0</MenuItem>
               <MenuItem value={1}>1</MenuItem>
               <MenuItem value={2}>2</MenuItem>
             </ValidatedTextField>
@@ -227,7 +230,7 @@ const MqttSettingsForm: FC = () => {
           </Grid>
         )}
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          Publish Intervals (in seconds, 0=automatic)
+          Publish Intervals (0=auto)
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <Grid item xs={4}>
@@ -235,6 +238,9 @@ const MqttSettingsForm: FC = () => {
               fieldErrors={fieldErrors}
               name="publish_time_boiler"
               label="Boilers and Heat Pumps"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+              }}
               fullWidth
               variant="outlined"
               value={numberValue(data.publish_time_boiler)}
@@ -248,6 +254,9 @@ const MqttSettingsForm: FC = () => {
               fieldErrors={fieldErrors}
               name="publish_time_thermostat"
               label="Thermostats"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+              }}
               fullWidth
               variant="outlined"
               value={numberValue(data.publish_time_thermostat)}
@@ -261,6 +270,9 @@ const MqttSettingsForm: FC = () => {
               fieldErrors={fieldErrors}
               name="publish_time_solar"
               label="Solar Modules"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+              }}
               fullWidth
               variant="outlined"
               value={numberValue(data.publish_time_solar)}
@@ -274,6 +286,9 @@ const MqttSettingsForm: FC = () => {
               fieldErrors={fieldErrors}
               name="publish_time_mixer"
               label="Mixer Modules"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+              }}
               fullWidth
               variant="outlined"
               value={numberValue(data.publish_time_mixer)}
@@ -287,6 +302,9 @@ const MqttSettingsForm: FC = () => {
               fieldErrors={fieldErrors}
               name="publish_time_sensor"
               label="Temperature Sensors"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+              }}
               fullWidth
               variant="outlined"
               value={numberValue(data.publish_time_sensor)}
@@ -299,6 +317,9 @@ const MqttSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_other"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+              }}
               label="Default"
               fullWidth
               variant="outlined"

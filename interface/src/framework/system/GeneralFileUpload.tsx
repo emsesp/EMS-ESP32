@@ -72,7 +72,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
       {!uploading && (
         <Box mb={2} color="warning.main">
           <Typography variant="body2">
-            Upload a new firmware (.bin) file, settings or customizations (.json) file below.
+            Upload a new firmware (.bin) file, settings or customizations (.json) file below
           </Typography>
         </Box>
       )}
@@ -86,7 +86,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
           <Box color="warning.main">
             <Typography mb={1} variant="body2">
               Download the application settings. Be careful when sharing your settings as this file contains passwords
-              and other sensitive system information.
+              and other sensitive system information
             </Typography>
           </Box>
           <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => downloadSettings()}>
@@ -95,7 +95,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
 
           <Box color="warning.main">
             <Typography mt={2} mb={1} variant="body2">
-              Download the entity customizations.
+              Download the entity customizations
             </Typography>
           </Box>
           <Button

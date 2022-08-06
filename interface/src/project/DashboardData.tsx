@@ -1130,7 +1130,7 @@ const DashboardData: FC = () => {
                   <Grid item>
                     <ValidatedTextField
                       name="o"
-                      label="Dutycycle"
+                      label="Duty Cycle"
                       value={numberValue(analog.o)}
                       sx={{ width: '20ch' }}
                       type="number"
