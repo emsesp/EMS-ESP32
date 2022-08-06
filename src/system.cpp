@@ -414,7 +414,9 @@ void System::button_OnClick(PButton & b) {
     LOG_DEBUG(F("Button pressed - single click"));
 
 #ifdef EMSESP_DEBUG
+#ifndef EMSESP_STANDALONE
     Test::listDir(LittleFS, FS_CONFIG_DIRECTORY, 3);
+#endif
 #endif
 }
 
