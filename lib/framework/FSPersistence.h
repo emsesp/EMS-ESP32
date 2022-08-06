@@ -68,11 +68,28 @@ class FSPersistence {
         JsonObject          jsonObject   = jsonDocument.to<JsonObject>();
         _statefulService->read(jsonObject, _stateReader);
 
+        // make directories if required, for new IDF4.2 & LittleFS
+        String path(_filePath);
+        int    index = 0;
+        while ((index = path.indexOf('/', index + 1)) != -1) {
+            String segment = path.substring(0, index);
+            if (!_fs->exists(segment)) {
+                _fs->mkdir(segment);
+            }
+        }
+
         // serialize it to filesystem
         File settingsFile = _fs->open(_filePath, "w");
 
         // failed to open file, return false
         if (!settingsFile) {
+#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_USE_SERIAL)
+            Serial.println();
+            Serial.printf("Cannot write to file system.");
+            Serial.println();
+#endif
+#endif
             return false;
         }
 
