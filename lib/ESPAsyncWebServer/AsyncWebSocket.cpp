@@ -704,8 +704,13 @@ void AsyncWebSocketClient::_onData(void *pbuf, size_t plen){
       } else if(_pinfo.opcode == WS_PING){
         _queueControl(new AsyncWebSocketControl(WS_PONG, data, datalen));
       } else if(_pinfo.opcode == WS_PONG){
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
         if(datalen != AWSC_PING_PAYLOAD_LEN || memcmp_P(data, AWSC_PING_PAYLOAD, AWSC_PING_PAYLOAD_LEN) != 0)
           _server->_handleEvent(this, WS_EVT_PONG, NULL, data, datalen);
+#pragma GCC diagnostic pop
+
       } else if(_pinfo.opcode < 8){//continuation or text/binary frame
         _server->_handleEvent(this, WS_EVT_DATA, (void *)&_pinfo, data, datalen);
       }
