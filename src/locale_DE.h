@@ -102,8 +102,8 @@ MAKE_PSTR(maxflow, "maxfluss")
 
 MAKE_PSTR(fast, "fast")
 MAKE_PSTR(slow, "slow")
-MAKE_PSTR(weather_compensated, "weather_compensated")
-MAKE_PSTR(outside_basepoint, "outside_basepoint")
+MAKE_PSTR(weather_compensated, "weather compensated")
+MAKE_PSTR(outside_basepoint, "outside basepoint")
 
 MAKE_PSTR(internal_temperature, "interne Temperatur")
 MAKE_PSTR(internal_setpoint, "interner Sollwert")

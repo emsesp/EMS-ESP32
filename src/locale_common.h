@@ -138,7 +138,7 @@ MAKE_PSTR(unset, "<unset>")
 
 MAKE_STR(productid_fmt, "%s EMS ProductID")
 
-// more common names
+// more common names that don't need translations
 MAKE_PSTR_WORD(1x3min)
 MAKE_PSTR_WORD(2x3min)
 MAKE_PSTR_WORD(3x3min)
@@ -150,6 +150,7 @@ MAKE_PSTR_WORD(fb10)
 MAKE_PSTR_WORD(fb100)
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
+// These don't need translating
 MAKE_PSTR(blank, " ")
 MAKE_PSTR(percent, "%")
 MAKE_PSTR(degrees, "°C")
@@ -201,6 +202,9 @@ MAKE_PSTR_LIST(mul5, F("-5"))
 MAKE_PSTR_LIST(mul10, F("-10"))
 MAKE_PSTR_LIST(mul15, F("-15"))
 
+MAKE_PSTR_WORD(rc3x)
+MAKE_PSTR_WORD(rc20)
+
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
 // mqtt tags must not have spaces
@@ -248,12 +252,14 @@ MAKE_PSTR(tag_hs16, "hs16")
 // Home Assistant
 MAKE_PSTR_LIST(ID, F_(id)) // id used to store the device ID. empty full name so only gets displayed in the MQTT payload
 
-// MQTT
+// MQTT topics and prefixes
 MAKE_PSTR_WORD(heating_active)
 MAKE_PSTR_WORD(tapwater_active)
 MAKE_PSTR_WORD(response)
 MAKE_PSTR(tag_boiler_data_ww_mqtt, "ww")
 MAKE_PSTR(tag_device_data_ww_mqtt, "")
+
+// the following lists are generated
 
 // boiler lists
 MAKE_PSTR_LIST(tpl_date, F("Format: < dd.mm.yyyy >")) // template for text input
@@ -264,9 +270,6 @@ MAKE_PSTR_LIST(enum_comfort, F_(hot), F_(eco), F_(intelligent))
 MAKE_PSTR_LIST(enum_comfort1, F_(high_comfort), F_(eco))
 MAKE_PSTR_LIST(enum_flow, F_(off), F_(flow), F_(bufferedflow), F_(buffer), F_(layeredbuffer))
 MAKE_PSTR_LIST(enum_reset, F("-"), F_(maintenance), F_(error))
-
-MAKE_PSTR_WORD(rc3x)
-MAKE_PSTR_WORD(rc20)
 
 // thermostat lists
 MAKE_PSTR_LIST(enum_ibaMainDisplay,

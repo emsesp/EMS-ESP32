@@ -58,8 +58,8 @@ using uuid::read_flash_string;
 //
 // load translations
 //
-// #include "locale_EN.h"
-#include "locale_DE.h"
+#include "locale_EN.h"
+// #include "locale_DE.h"
 #include "locale_common.h"
 
 #endif
