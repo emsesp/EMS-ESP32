@@ -412,6 +412,10 @@ void System::start() {
 // button single click
 void System::button_OnClick(PButton & b) {
     LOG_DEBUG(F("Button pressed - single click"));
+
+#ifdef EMSESP_DEBUG
+    Test::listDir(LittleFS, FS_CONFIG_DIRECTORY, 3);
+#endif
 }
 
 // button double click
@@ -431,11 +435,6 @@ void System::button_OnVLongPress(PButton & b) {
 #ifndef EMSESP_STANDALONE
     LOG_WARNING(F("Performing factory reset..."));
     EMSESP::console_.loop();
-
-#ifdef EMSESP_DEBUG
-    Test::listDir(LittleFS, FS_CONFIG_DIRECTORY, 3);
-#endif
-
     EMSESP::esp8266React.factoryReset();
 #endif
 }
