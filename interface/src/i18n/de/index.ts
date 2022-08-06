@@ -9,7 +9,9 @@ const de: Translation = {
   DASHBOARD: 'Armaturenbrett',
   SETTINGS: 'Einstellungen',
   HELP: 'Hilfe',
-  LOGGED_IN: 'Eingeloggt als {name}'
+  LOGGED_IN: 'Eingeloggt als {name}',
+  PLEASE_SIGNIN: 'DE_Please sign in to continue',
+  UPLOAD_SUCCESSFUL: 'DE_Upload successful'
 };
 
 export default de;

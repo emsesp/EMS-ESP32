@@ -51,6 +51,14 @@ type RootTranslation = {
 	 * @param {unknown} name
 	 */
 	LOGGED_IN: RequiredParams<'name'>
+	/**
+	 * Please sign in to continue
+	 */
+	PLEASE_SIGNIN: string
+	/**
+	 * Upload successful
+	 */
+	UPLOAD_SUCCESSFUL: string
 }
 
 export type TranslationFunctions = {
@@ -90,6 +98,14 @@ export type TranslationFunctions = {
 	 * Logged in as {name}
 	 */
 	LOGGED_IN: (arg: { name: unknown }) => LocalizedString
+	/**
+	 * Please sign in to continue
+	 */
+	PLEASE_SIGNIN: () => LocalizedString
+	/**
+	 * Upload successful
+	 */
+	UPLOAD_SUCCESSFUL: () => LocalizedString
 }
 
 export type Formatters = {}

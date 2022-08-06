@@ -9,7 +9,9 @@ const en: BaseTranslation = {
   DASHBOARD: 'Dashboard',
   SETTINGS: 'Settings',
   HELP: 'Help',
-  LOGGED_IN: 'Logged in as {name}'
+  LOGGED_IN: 'Logged in as {name}',
+  PLEASE_SIGNIN: 'Please sign in to continue',
+  UPLOAD_SUCCESSFUL: 'Upload successful'
 };
 
 export default en;
