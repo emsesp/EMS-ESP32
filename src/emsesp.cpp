@@ -1291,11 +1291,16 @@ void EMSESP::start() {
 
     esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
+
+#ifdef EMSESP_DEBUG
+    LOG_NOTICE(F("System is running in Debug mode"));
+#endif
+
     LOG_INFO(F("Last system reset reason Core0: %s, Core1: %s"), system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
     // do any system upgrades
     if (system_.check_upgrade()) {
-        LOG_INFO(F("System will be restarted to apply upgrade"));
+        LOG_INFO(F("System needs a restart to apply new settings. Please wait."));
         system_.system_restart();
     };
 
