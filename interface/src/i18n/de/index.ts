@@ -11,7 +11,8 @@ const de: Translation = {
   HELP: 'Hilfe',
   LOGGED_IN: 'Eingeloggt als {name}',
   PLEASE_SIGNIN: 'DE_Please sign in to continue',
-  UPLOAD_SUCCESSFUL: 'DE_Upload successful'
+  UPLOAD_SUCCESSFUL: 'DE_Upload successful',
+  INVALID_LOGIN: 'DE_Invalid login details'
 };
 
 export default de;

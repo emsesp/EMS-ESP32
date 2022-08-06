@@ -59,6 +59,10 @@ type RootTranslation = {
 	 * Upload successful
 	 */
 	UPLOAD_SUCCESSFUL: string
+	/**
+	 * Invalid login details
+	 */
+	INVALID_LOGIN: string
 }
 
 export type TranslationFunctions = {
@@ -106,6 +110,10 @@ export type TranslationFunctions = {
 	 * Upload successful
 	 */
 	UPLOAD_SUCCESSFUL: () => LocalizedString
+	/**
+	 * Invalid login details
+	 */
+	INVALID_LOGIN: () => LocalizedString
 }
 
 export type Formatters = {}

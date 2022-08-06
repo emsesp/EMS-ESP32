@@ -55,7 +55,7 @@ const SignIn: FC = () => {
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
         if (error.response?.status === 401) {
-          enqueueSnackbar('Invalid login details', { variant: 'warning' });
+          enqueueSnackbar(LL.INVALID_LOGIN(), { variant: 'warning' });
         }
       } else {
         enqueueSnackbar(extractErrorMessage(error, 'Unexpected error, please try again'), { variant: 'error' });

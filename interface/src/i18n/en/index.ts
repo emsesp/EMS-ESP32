@@ -11,7 +11,8 @@ const en: BaseTranslation = {
   HELP: 'Help',
   LOGGED_IN: 'Logged in as {name}',
   PLEASE_SIGNIN: 'Please sign in to continue',
-  UPLOAD_SUCCESSFUL: 'Upload successful'
+  UPLOAD_SUCCESSFUL: 'Upload successful',
+  INVALID_LOGIN: 'Invalid login details'
 };
 
 export default en;
