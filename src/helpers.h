@@ -65,9 +65,13 @@ class Helpers {
     static bool value2float(const char * value, float & value_f);
     static bool value2bool(const char * value, bool & value_b);
     static bool value2string(const char * value, std::string & value_s);
+    static bool value2enum(const char * value, uint8_t & value_ui, const __FlashStringHelper * const ** strs);
     static bool value2enum(const char * value, uint8_t & value_ui, const __FlashStringHelper * const * strs);
     static bool value2temperature(const char * value, float & value_f, bool relative = false);
     static bool value2temperature(const char * value, int & value_i, const bool relative = false, const int min = -2147483648, const int max = 2147483647);
+
+    static uint8_t count_items(const __FlashStringHelper * const ** list);
+    static uint8_t count_items(const __FlashStringHelper * const * list);
 
 #ifdef EMSESP_STANDALONE
     static char * ultostr(char * ptr, uint32_t value, const uint8_t base);

@@ -225,6 +225,7 @@ void EMSESPShell::add_console_commands() {
                           flash_string_vector{F_(set)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                               EMSESP::webSettingsService.read([&](WebSettings & settings) {
+                                  shell.printfln(F("Language: %s"), settings.locale.c_str());
                                   shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                   shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
                                   shell.printfln(F_(board_profile_fmt), settings.board_profile.c_str());

@@ -17,6 +17,8 @@
  */
 
 #pragma once
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 
 // common words
 MAKE_PSTR_WORD(debug)
@@ -30,7 +32,6 @@ MAKE_PSTR_WORD(set)
 MAKE_PSTR_WORD(show)
 MAKE_PSTR_WORD(su)
 MAKE_PSTR_WORD(name)
-MAKE_PSTR_WORD(auto)
 MAKE_PSTR_WORD(scan)
 MAKE_PSTR_WORD(password)
 MAKE_PSTR_WORD(read)
@@ -80,7 +81,6 @@ MAKE_PSTR_WORD(info)
 MAKE_PSTR_WORD(settings)
 MAKE_PSTR_WORD(customizations)
 MAKE_PSTR_WORD(value)
-MAKE_PSTR_WORD(error)
 MAKE_PSTR_WORD(entities)
 
 // devices
@@ -136,18 +136,23 @@ MAKE_PSTR(new_password_prompt2, "Retype new password: ")
 MAKE_PSTR(password_prompt, "Password: ")
 MAKE_PSTR(unset, "<unset>")
 
-MAKE_STR(productid_fmt, "%s EMS ProductID")
-
 // more common names that don't need translations
-MAKE_PSTR_WORD(1x3min)
-MAKE_PSTR_WORD(2x3min)
-MAKE_PSTR_WORD(3x3min)
-MAKE_PSTR_WORD(4x3min)
-MAKE_PSTR_WORD(5x3min)
-MAKE_PSTR_WORD(6x3min)
-MAKE_PSTR(na, "n/a")
-MAKE_PSTR_WORD(fb10)
-MAKE_PSTR_WORD(fb100)
+MAKE_PSTR_LIST(1x3min, F("1x3min"))
+MAKE_PSTR_LIST(2x3min, F("2x3min"))
+MAKE_PSTR_LIST(3x3min, F("3x3min"))
+MAKE_PSTR_LIST(4x3min, F("4x3min"))
+MAKE_PSTR_LIST(5x3min, F("5x3min"))
+MAKE_PSTR_LIST(6x3min, F("6x3min"))
+MAKE_PSTR_LIST(auto, F("auto"))
+MAKE_PSTR_LIST(na, F("n/a"))
+MAKE_PSTR_LIST(rc3x, F("rc3x"))
+MAKE_PSTR_LIST(rc20, F("rc20"))
+MAKE_PSTR_LIST(fb10, F("fb10"))
+MAKE_PSTR_LIST(fb100, F("fb100"))
+MAKE_PSTR_LIST(dash, F("-"))
+MAKE_PSTR_LIST(error, F("error"))
+MAKE_PSTR_LIST(BLANK, F(""))
+MAKE_PSTR_LIST(pwm, F("pwm"))
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
 // These don't need translating
@@ -169,41 +174,13 @@ MAKE_PSTR(sqm, "sqm")
 MAKE_PSTR(m3, "m3")
 MAKE_PSTR(l, "l")
 
-// syslog
-MAKE_PSTR_LIST(enum_syslog_level, F_(off), F("emerg"), F("alert"), F("crit"), F_(error), F("warn"), F("notice"), F_(info), F_(debug), F("trace"), F("all"))
-
-// watch
-MAKE_PSTR_LIST(enum_watch, F_(off), F_(on), F_(raw), F_(unknown))
-
-// sensors
-MAKE_PSTR_LIST(enum_sensortype, F("none"), F("digital in"), F("counter"), F("adc"), F("timer"), F("rate"), F("digital out"), F("pwm 0"), F("pwm 1"), F("pwm 2"))
-
-// command descriptions
+// commands
 MAKE_PSTR(info_cmd, "lists all values")
 MAKE_PSTR(commands_cmd, "lists all commands")
 MAKE_PSTR(entities_cmd, "lists all entities")
-
-MAKE_PSTR_WORD(number)
-MAKE_PSTR_WORD(enum)
-MAKE_PSTR_WORD(text)
-
-MAKE_PSTR_WORD(2)
-MAKE_PSTR_WORD(4)
-MAKE_PSTR_WORD(10)
-MAKE_PSTR_WORD(100)
-MAKE_PSTR_WORD(60)
-
-MAKE_PSTR_LIST(div2, F_(2))
-MAKE_PSTR_LIST(div4, F_(4))
-MAKE_PSTR_LIST(div10, F_(10))
-MAKE_PSTR_LIST(div60, F_(60))
-MAKE_PSTR_LIST(div100, F_(100))
-MAKE_PSTR_LIST(mul5, F("-5"))
-MAKE_PSTR_LIST(mul10, F("-10"))
-MAKE_PSTR_LIST(mul15, F("-15"))
-
-MAKE_PSTR_WORD(rc3x)
-MAKE_PSTR_WORD(rc20)
+MAKE_PSTR(number, "number")
+MAKE_PSTR(enum, "enum")
+MAKE_PSTR(text, "text")
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
@@ -249,78 +226,123 @@ MAKE_PSTR(tag_hs14, "hs14")
 MAKE_PSTR(tag_hs15, "hs15")
 MAKE_PSTR(tag_hs16, "hs16")
 
-// Home Assistant
-MAKE_PSTR_LIST(ID, F_(id)) // id used to store the device ID. empty full name so only gets displayed in the MQTT payload
-
 // MQTT topics and prefixes
-MAKE_PSTR_WORD(heating_active)
-MAKE_PSTR_WORD(tapwater_active)
-MAKE_PSTR_WORD(response)
+MAKE_PSTR(heating_active, "heating_active")
+MAKE_PSTR(tapwater_active, "tapwater_active")
+MAKE_PSTR(response, "response")
 MAKE_PSTR(tag_boiler_data_ww_mqtt, "ww")
 MAKE_PSTR(tag_device_data_ww_mqtt, "")
 
-// the following lists are generated
+// command parameters
+MAKE_PSTR_LIST(div2, F("2"))
+MAKE_PSTR_LIST(div4, F("4"))
+MAKE_PSTR_LIST(div10, F("10"))
+MAKE_PSTR_LIST(div60, F("60"))
+MAKE_PSTR_LIST(div100, F("100"))
+MAKE_PSTR_LIST(mul5, F("-5"))
+MAKE_PSTR_LIST(mul10, F("-10"))
+MAKE_PSTR_LIST(mul15, F("-15"))
+
+MAKE_PSTR_LIST(climate, F("HA climate config creation")) // no full-name, hidden, only for creation
+
+// syslog
+MAKE_PSTR_LIST(list_syslog_level, F("off"), F("emerg"), F("alert"), F("crit"), F("error"), F("warn"), F("notice"), F("info"), F("debug"), F("trace"), F("all"))
+
+// sensors
+MAKE_PSTR_LIST(list_sensortype, F("none"), F("digital in"), F("counter"), F("adc"), F("timer"), F("rate"), F("digital out"), F("pwm 0"), F("pwm 1"), F("pwm 2"))
+
+// watch
+MAKE_PSTR_LIST(list_watch, F("off"), F("on"), F("raw"), F("unknown"))
+
+// solar
+MAKE_PSTR_LIST(list_cylprio, F("cyl_1"), F("cyl_2"))
+
+//
+// These next set are translated
+//
 
 // boiler lists
-MAKE_PSTR_LIST(tpl_date, F("Format: < dd.mm.yyyy >")) // template for text input
-MAKE_PSTR_LIST(enum_off_time_date_manual, F_(off), F_(time), F_(date), F_(manual))
-MAKE_PSTR_LIST(enum_freq, F_(off), F_(1x3min), F_(2x3min), F_(3x3min), F_(4x3min), F_(5x3min), F_(6x3min), F_(continuous))
-MAKE_PSTR_LIST(enum_charge, F_(chargepump), F_(3wayvalve))
-MAKE_PSTR_LIST(enum_comfort, F_(hot), F_(eco), F_(intelligent))
-MAKE_PSTR_LIST(enum_comfort1, F_(high_comfort), F_(eco))
-MAKE_PSTR_LIST(enum_flow, F_(off), F_(flow), F_(bufferedflow), F_(buffer), F_(layeredbuffer))
-MAKE_PSTR_LIST(enum_reset, F("-"), F_(maintenance), F_(error))
+
+// TODO replace with enums - translate these too! or see if they work
+MAKE_PSTR_LIST(enum_progMode, F("prog_1"), F("prog_2"))
+MAKE_PSTR_LIST(enum_progMode4, F("prog_a"), F("prog_b"), F("prog_c"), F("prog_d"), F("prog_e"), F("prog_f"))
+MAKE_PSTR_LIST(enum_climate, F("selTemp"), F("roomTemp"))
+
+MAKE_PSTR_ENUM(enum_charge, FL_(chargepump), FL_(3wayvalve))
+MAKE_PSTR_ENUM(enum_freq, FL_(off), FL_(1x3min), FL_(2x3min), FL_(3x3min), FL_(4x3min), FL_(5x3min), FL_(6x3min), FL_(continuous))
+MAKE_PSTR_ENUM(enum_off_time_date_manual, FL_(off), FL_(time), FL_(date), FL_(manual))
+MAKE_PSTR_ENUM(enum_comfort, FL_(hot), FL_(eco), FL_(intelligent))
+MAKE_PSTR_ENUM(enum_comfort1, FL_(high_comfort), FL_(eco))
+MAKE_PSTR_ENUM(enum_flow, FL_(off), FL_(flow), FL_(bufferedflow), FL_(buffer), FL_(layeredbuffer))
+MAKE_PSTR_ENUM(enum_reset, FL_(dash), FL_(maintenance), FL_(error))
 
 // thermostat lists
-MAKE_PSTR_LIST(enum_ibaMainDisplay,
-               F_(internal_temperature),
-               F_(internal_setpoint),
-               F_(external_temperature),
-               F_(burner_temperature),
-               F_(ww_temperature),
-               F_(functioning_mode),
-               F_(time),
-               F_(date),
-               F_(smoke_temperature))
-MAKE_PSTR_LIST(enum_ibaLanguage, F_(german), F_(dutch), F_(french), F_(italian))
-MAKE_PSTR_LIST(enum_ibaLanguage_RC30, F_(german), F_(dutch))
-MAKE_PSTR_LIST(enum_floordrystatus, F_(off), F_(start), F_(heat), F_(hold), F_(cool), F_(end))
-MAKE_PSTR_LIST(enum_ibaBuildingType, F_(light), F_(medium), F_(heavy))
-MAKE_PSTR_LIST(enum_PID, F_(fast), F_(medium), F_(slow))
-MAKE_PSTR_LIST(enum_wwMode, F_(off), F_(low), F_(high), F_(auto), F_(own_prog))
-MAKE_PSTR_LIST(enum_wwCircMode, F_(off), F_(on), F_(auto), F_(own_prog))
-MAKE_PSTR_LIST(enum_wwMode2, F_(off), F_(on), F_(auto))
-MAKE_PSTR_LIST(enum_wwMode3, F_(on), F_(off), F_(auto))
-MAKE_PSTR_LIST(enum_heatingtype, F_(off), F_(radiator), F_(convector), F_(floor))
-MAKE_PSTR_LIST(enum_summermode, F_(summer), F_(auto), F_(winter))
-MAKE_PSTR_LIST(enum_hpoperatingmode, F_(off), F_(auto), F_(heating), F_(cooling))
-MAKE_PSTR_LIST(enum_summer, F_(winter), F_(summer))
-MAKE_PSTR_LIST(enum_operatingstate, F_(heating), F_(off), F_(cooling))
 
-MAKE_PSTR_LIST(enum_mode, F_(manual), F_(auto))                      // RC100, RC300, RC310
-MAKE_PSTR_LIST(enum_mode2, F_(off), F_(manual), F_(auto))            // RC20
-MAKE_PSTR_LIST(enum_mode3, F_(night), F_(day), F_(auto))             // RC35, RC30, RC25
-MAKE_PSTR_LIST(enum_mode4, F_(nofrost), F_(eco), F_(heat), F_(auto)) // JUNKERS
-MAKE_PSTR_LIST(enum_mode5, F_(auto), F_(off))                        // CRF
-MAKE_PSTR_LIST(enum_mode6, F_(nofrost), F_(night), F_(day))          // RC10
+MAKE_PSTR_ENUM(enum_ibaMainDisplay,
+               FL_(internal_temperature),
+               FL_(internal_setpoint),
+               FL_(external_temperature),
+               FL_(burner_temperature),
+               FL_(ww_temperature),
+               FL_(functioning_mode),
+               FL_(time),
+               FL_(date),
+               FL_(smoke_temperature))
+MAKE_PSTR_ENUM(enum_ibaLanguage, FL_(german), FL_(dutch), FL_(french), FL_(italian))
+MAKE_PSTR_ENUM(enum_ibaLanguage_RC30, FL_(german), FL_(dutch))
+MAKE_PSTR_ENUM(enum_floordrystatus, FL_(off), FL_(start), FL_(heat), FL_(hold), FL_(cool), FL_(end))
+MAKE_PSTR_ENUM(enum_ibaBuildingType, FL_(light), FL_(medium), FL_(heavy))
+MAKE_PSTR_ENUM(enum_PID, FL_(fast), FL_(medium), FL_(slow))
+MAKE_PSTR_ENUM(enum_wwMode, FL_(off), FL_(low), FL_(high), FL_(auto), FL_(own_prog))
+MAKE_PSTR_ENUM(enum_wwCircMode, FL_(off), FL_(on), FL_(auto), FL_(own_prog))
+MAKE_PSTR_ENUM(enum_wwMode2, FL_(off), FL_(on), FL_(auto))
+MAKE_PSTR_ENUM(enum_wwMode3, FL_(on), FL_(off), FL_(auto))
+MAKE_PSTR_ENUM(enum_heatingtype, FL_(off), FL_(radiator), FL_(convector), FL_(floor))
+MAKE_PSTR_ENUM(enum_summermode, FL_(summer), FL_(auto), FL_(winter))
+MAKE_PSTR_ENUM(enum_hpoperatingmode, FL_(off), FL_(auto), FL_(heating), FL_(cooling))
+MAKE_PSTR_ENUM(enum_summer, FL_(winter), FL_(summer))
+MAKE_PSTR_ENUM(enum_operatingstate, FL_(heating), FL_(off), FL_(cooling))
 
-MAKE_PSTR_LIST(enum_modetype, F_(eco), F_(comfort))
-MAKE_PSTR_LIST(enum_modetype3, F_(night), F_(day))
-MAKE_PSTR_LIST(enum_modetype4, F_(nofrost), F_(eco), F_(heat))
-MAKE_PSTR_LIST(enum_modetype5, F_(off), F_(on))
+MAKE_PSTR_ENUM(enum_mode, FL_(manual), FL_(auto))                        // RC100, RC300, RC310
+MAKE_PSTR_ENUM(enum_mode2, FL_(off), FL_(manual), FL_(auto))             // RC20
+MAKE_PSTR_ENUM(enum_mode3, FL_(night), FL_(day), FL_(auto))              // RC35, RC30, RC25
+MAKE_PSTR_ENUM(enum_mode4, FL_(nofrost), FL_(eco), FL_(heat), FL_(auto)) // JUNKERS
+MAKE_PSTR_ENUM(enum_mode5, FL_(auto), FL_(off))                          // CRF
+MAKE_PSTR_ENUM(enum_mode6, FL_(nofrost), FL_(night), FL_(day))           // RC10
 
-MAKE_PSTR_LIST(enum_reducemode, F_(nofrost), F_(reduce), F_(room), F_(outdoor))
-MAKE_PSTR_LIST(enum_reducemode1, F_(outdoor), F_(room), F_(reduce)) // RC310 values: 1-3
-MAKE_PSTR_LIST(enum_nofrostmode, F_(off), F_(room), F_(outdoor))
-MAKE_PSTR_LIST(enum_nofrostmode1, F_(room), F_(outdoor), F_(room_outdoor))
+MAKE_PSTR_ENUM(enum_modetype, FL_(eco), FL_(comfort))
+MAKE_PSTR_ENUM(enum_modetype3, FL_(night), FL_(day))
+MAKE_PSTR_ENUM(enum_modetype4, FL_(nofrost), FL_(eco), FL_(heat))
+MAKE_PSTR_ENUM(enum_modetype5, FL_(off), FL_(on))
 
-MAKE_PSTR_LIST(enum_controlmode, F_(off), F_(optimized), F_(simple), F_(mpc), F_(room), F_(power), F_(constant))
-MAKE_PSTR_LIST(enum_controlmode1, F_(weather_compensated), F_(outside_basepoint), F_(na), F_(room)) // RC310 1-4
-MAKE_PSTR_LIST(enum_controlmode2, F_(outdoor), F_(room))
-MAKE_PSTR_LIST(enum_control, F_(off), F_(rc20), F_(rc3x))
-MAKE_PSTR_LIST(enum_j_control, F_(off), F_(fb10), F_(fb100))
+MAKE_PSTR_ENUM(enum_reducemode, FL_(nofrost), FL_(reduce), FL_(room), FL_(outdoor))
+MAKE_PSTR_ENUM(enum_reducemode1, FL_(outdoor), FL_(room), FL_(reduce)) // RC310 values: 1-3
+MAKE_PSTR_ENUM(enum_nofrostmode, FL_(off), FL_(room), FL_(outdoor))
+MAKE_PSTR_ENUM(enum_nofrostmode1, FL_(room), FL_(outdoor), FL_(room_outdoor))
 
-MAKE_PSTR_LIST(enum_switchmode, F_(off), F_(eco), F_(comfort), F_(heat))
+MAKE_PSTR_ENUM(enum_controlmode, FL_(off), FL_(optimized), FL_(simple), FL_(mpc), FL_(room), FL_(power), FL_(constant))
+MAKE_PSTR_ENUM(enum_controlmode1, FL_(weather_compensated), FL_(outside_basepoint), FL_(na), FL_(room)) // RC310 1-4
+MAKE_PSTR_ENUM(enum_controlmode2, FL_(outdoor), FL_(room))
+MAKE_PSTR_ENUM(enum_control, FL_(off), FL_(rc20), FL_(rc3x))
+MAKE_PSTR_ENUM(enum_j_control, FL_(off), FL_(fb10), FL_(fb100))
 
-// heatpump
-MAKE_PSTR_LIST(enum_hpactivity, F_(none), F_(heating), F_(cooling), F_(hot_water), F_(pool))
+MAKE_PSTR_ENUM(enum_switchmode, FL_(off), FL_(eco), FL_(comfort), FL_(heat))
+
+MAKE_PSTR_ENUM(enum_dayOfWeek, FL_(day_mo), FL_(day_tu), FL_(day_we), FL_(day_th), FL_(day_fr), FL_(day_sa), FL_(day_su), FL_(all))
+MAKE_PSTR_ENUM(enum_progMode2, FL_(own_1), FL_(family), FL_(morning), FL_(evening), FL_(am), FL_(pm), FL_(midday), FL_(singles), FL_(seniors), FL_(new), FL_(own_2))
+MAKE_PSTR_ENUM(enum_progMode3, FL_(family), FL_(morning), FL_(evening), FL_(am), FL_(pm), FL_(midday), FL_(singles), FL_(seniors))
+MAKE_PSTR_ENUM(enum_hybridStrategy, FL_(co2_optimized), FL_(cost_optimized), FL_(outside_temp_switched), FL_(co2_cost_mix))
+
+// heat pump
+MAKE_PSTR_ENUM(enum_hpactivity, FL_(none), FL_(heating), FL_(cooling), FL_(hot_water), FL_(pool))
+
+// solar
+MAKE_PSTR_ENUM(enum_solarmode, FL_(constant), FL_(pwm), FL_(analog))
+MAKE_PSTR_ENUM(enum_collectortype, FL_(flat), FL_(vacuum))
+MAKE_PSTR_ENUM(enum_wwStatus2, FL_(BLANK), FL_(BLANK), FL_(BLANK), FL_(no_heat), FL_(BLANK), FL_(BLANK), FL_(heatrequest), FL_(BLANK), FL_(disinfecting), FL_(hold))
+
+// mixer
+MAKE_PSTR_ENUM(enum_shunt, FL_(stopped), FL_(opening), FL_(closing), FL_(open), FL_(close))
+MAKE_PSTR_ENUM(enum_wwProgMode, FL_(std_prog), FL_(own_prog))
+
+#pragma GCC diagnostic pop

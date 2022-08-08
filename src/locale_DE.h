@@ -312,6 +312,7 @@ MAKE_PSTR_LIST(wwMaxTemp, F("wwmaxtemp"), F("Maximale Temperatur"))
 MAKE_PSTR_LIST(wwOneTimeKey, F("wwonetimekey"), F("Einmalladungstaste"))
 
 // mqtt values / commands
+MAKE_PSTR_LIST(tpl_date, F("Format: < dd.mm.yyyy >")) // template for text input
 MAKE_PSTR_LIST(switchtime, F("switchtime"), F("Program Schaltzeit"))
 MAKE_PSTR_LIST(switchtime1, F("switchtime1"), F("Program 1 Schaltzeit"))
 MAKE_PSTR_LIST(switchtime2, F("switchtime2"), F("Programm 2 Schaltzeit"))
@@ -469,9 +470,10 @@ MAKE_PSTR_LIST(solarPumpTurnoffDiff, F("turnoffdiff"), F("pump turn off differen
 MAKE_PSTR_LIST(pump2MinMod, F("pump2minmod"), F("minimum pump 2 modulation"))
 MAKE_PSTR_LIST(solarPump2TurnonDiff, F("turnondiff2"), F("pump 2 turn on difference"))
 MAKE_PSTR_LIST(solarPump2TurnoffDiff, F("turnoffdiff2"), F("pump 2 turn off difference"))
+
 MAKE_PSTR_LIST(enum_solarmode, F_(constant), F("pwm"), F("analog"))
 MAKE_PSTR_LIST(enum_collectortype, F("flach"), F("vakuum"))
-MAKE_PSTR_LIST(enum_cylprio, F("Zyl_1"), F("Zyl_2"))
+MAKE_PSTR_LIST(list_cylprio, F("Zyl_1"), F("Zyl_2"))
 
 // solar ww
 MAKE_PSTR_LIST(wwTemp1, F("wwtemp1"), F("Temperatur 1"))

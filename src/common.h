@@ -42,17 +42,21 @@ using uuid::read_flash_string;
 // #define FJSON(x) F(x)
 
 // clang-format off
+
 #define MAKE_STR(string_name, string_literal) static constexpr const char * __str__##string_name = string_literal;
-#define FSTR_(string_name) __str__##string_name
-#define FL_(list_name) (__pstr__##list_name)
 
 #define FPSTR(pstr_pointer) (reinterpret_cast<const __FlashStringHelper *>(pstr_pointer))
 #define F_(string_name) FPSTR(__pstr__##string_name)
-#define F(string_literal) (FPSTR(PSTR(string_literal)))
 
 #define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = string_literal;
 #define MAKE_PSTR_WORD(string_name) MAKE_PSTR(string_name, #string_name)
+
+#define FL_(list_name) (__pstr__##list_name)
 #define MAKE_PSTR_LIST(list_name, ...) static const __FlashStringHelper * const __pstr__##list_name[] PROGMEM = {__VA_ARGS__, nullptr};
+
+// ENUMS
+#define MAKE_PSTR_ENUM(list_nome, ...) static const __FlashStringHelper * const * __pstr__##list_nome[] PROGMEM = {__VA_ARGS__, nullptr};
+
 // clang-format on
 
 //

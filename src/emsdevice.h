@@ -204,17 +204,44 @@ class EMSdevice {
     void generate_values_web(JsonObject & output);
     void generate_values_web_customization(JsonArray & output);
 
-    void register_device_value(uint8_t                             tag,
-                               void *                              value_p,
-                               uint8_t                             type,
-                               const __FlashStringHelper * const * options,
-                               const __FlashStringHelper *         short_name,
-                               const __FlashStringHelper *         full_name,
-                               uint8_t                             uom,
-                               bool                                has_cmd,
-                               int16_t                             min,
-                               uint16_t                            max);
+    void add_device_value(uint8_t                             tag,
+                          void *                              value_p,
+                          uint8_t                             type,
+                          const __FlashStringHelper * const * options,
+                          uint8_t                             options_size,
+                          const __FlashStringHelper *         short_name,
+                          const __FlashStringHelper *         full_name,
+                          uint8_t                             uom,
+                          bool                                has_cmd,
+                          int16_t                             min,
+                          uint16_t                            max);
 
+    void register_device_value(uint8_t                              tag,
+                               void *                               value_p,
+                               uint8_t                              type,
+                               const __FlashStringHelper * const ** options,
+                               const __FlashStringHelper * const *  name,
+                               uint8_t                              uom,
+                               const cmd_function_p                 f,
+                               int16_t                              min,
+                               uint16_t                             max);
+
+    void register_device_value(uint8_t                              tag,
+                               void *                               value_p,
+                               uint8_t                              type,
+                               const __FlashStringHelper * const ** options,
+                               const __FlashStringHelper * const *  name,
+                               uint8_t                              uom,
+                               const cmd_function_p                 f);
+
+    void register_device_value(uint8_t                              tag,
+                               void *                               value_p,
+                               uint8_t                              type,
+                               const __FlashStringHelper * const ** options,
+                               const __FlashStringHelper * const *  name,
+                               uint8_t                              uom);
+
+    // single list of options, with min and max
     void register_device_value(uint8_t                             tag,
                                void *                              value_p,
                                uint8_t                             type,
@@ -225,20 +252,27 @@ class EMSdevice {
                                int16_t                             min,
                                uint16_t                            max);
 
+    // single list of options
     void register_device_value(uint8_t                             tag,
                                void *                              value_p,
                                uint8_t                             type,
                                const __FlashStringHelper * const * options,
                                const __FlashStringHelper * const * name,
                                uint8_t                             uom,
-                               const cmd_function_p                f);
+                               const cmd_function_p                f = nullptr);
 
+    // no options, optional function f
+    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * name, uint8_t uom, const cmd_function_p f = nullptr);
+
+    // no options, with min/max
     void register_device_value(uint8_t                             tag,
                                void *                              value_p,
                                uint8_t                             type,
-                               const __FlashStringHelper * const * options,
                                const __FlashStringHelper * const * name,
-                               uint8_t                             uom);
+                               uint8_t                             uom,
+                               const cmd_function_p                f,
+                               int16_t                             min,
+                               uint16_t                            max);
 
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid) const;
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid) const;
@@ -391,8 +425,7 @@ class EMSdevice {
 
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 
-    // device values
-    std::vector<DeviceValue> devicevalues_;
+    std::vector<DeviceValue> devicevalues_; // all the device values
 
     std::vector<uint16_t> handlers_ignored_;
 };

@@ -388,21 +388,46 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __
 //  type: one of DeviceValueType
 //  options: options for enum or a divider for int (e.g. F("10"))
 //  short_name: used in Mqtt as keys
-//  full_name: used in Web and Console unless empty (nullptr)
+//  full_name: used in Web and Console unless empty (nullptr) - can be translated
 //  uom: unit of measure from DeviceValueUOM
 //  has_cmd: true if this is an associated command
 //  min: min allowed value
 //  max: max allowed value
-void EMSdevice::register_device_value(uint8_t                             tag,
-                                      void *                              value_p,
-                                      uint8_t                             type,
-                                      const __FlashStringHelper * const * options,
-                                      const __FlashStringHelper *         short_name,
-                                      const __FlashStringHelper *         full_name,
-                                      uint8_t                             uom,
-                                      bool                                has_cmd,
-                                      int16_t                             min,
-                                      uint16_t                            max) {
+void EMSdevice::add_device_value(uint8_t                             tag,
+                                 void *                              value_p,
+                                 uint8_t                             type,
+                                 const __FlashStringHelper * const * options,
+                                 uint8_t                             options_size,
+                                 const __FlashStringHelper *         short_name,
+                                 const __FlashStringHelper *         full_name,
+                                 uint8_t                             uom,
+                                 bool                                has_cmd,
+                                 int16_t                             min,
+                                 uint16_t                            max) {
+#ifdef EMSESP_STANDALONE
+    Serial.print("registering entity: ");
+    Serial.print(read_flash_string(short_name).c_str());
+    Serial.print("/");
+    Serial.print(read_flash_string(full_name).c_str());
+    Serial.print(" ");
+    if (options != nullptr) {
+        uint8_t i = 0;
+        while (options[i]) {
+            Serial.print(" option");
+            Serial.print(i + 1);
+            Serial.print(":");
+            auto str = options[i];
+            if (str != nullptr) {
+                Serial.print(read_flash_string(str).c_str());
+            }
+            i++;
+        }
+    }
+    Serial.print(" (#options=");
+    Serial.print(options_size);
+    Serial.println(")");
+#endif
+
     // initialize the device value depending on it's type
     if (type == DeviceValueType::STRING) {
         *(char *)(value_p) = {'\0'}; // this is important for string functions like strlen() to work later
@@ -418,15 +443,6 @@ void EMSdevice::register_device_value(uint8_t                             tag,
         *(int8_t *)(value_p) = EMS_VALUE_BOOL_NOTSET; // bool is uint8_t, but other initial value
     } else {
         *(uint8_t *)(value_p) = EMS_VALUE_UINT_NOTSET; // enums behave as uint8_t
-    }
-
-    // count #options
-    uint8_t options_size = 0;
-    if (options != nullptr) {
-        uint8_t i = 0;
-        while (options[i++]) {
-            options_size++;
-        }
     }
 
     // determine state
@@ -448,12 +464,22 @@ void EMSdevice::register_device_value(uint8_t                             tag,
         }
     });
 
-    // add the device
+    // add the device entity
     devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, 0, has_cmd, min, max, state);
 }
 
-// function with min and max values
-// adds a new command to the command list
+// single list of options
+void EMSdevice::register_device_value(uint8_t                             tag,
+                                      void *                              value_p,
+                                      uint8_t                             type,
+                                      const __FlashStringHelper * const * options,
+                                      const __FlashStringHelper * const * name,
+                                      uint8_t                             uom,
+                                      const cmd_function_p                f) {
+    register_device_value(tag, value_p, type, (const __FlashStringHelper * const *)nullptr, name, uom, f, 0, 0);
+};
+
+// single list of options, with no translations, with min and max
 void EMSdevice::register_device_value(uint8_t                             tag,
                                       void *                              value_p,
                                       uint8_t                             type,
@@ -463,13 +489,90 @@ void EMSdevice::register_device_value(uint8_t                             tag,
                                       const cmd_function_p                f,
                                       int16_t                             min,
                                       uint16_t                            max) {
-    auto short_name = name[0];
-    auto full_name  = name[1];
+    // TODO convert to single list
+    // for now we just use null for options
+    register_device_value(tag, value_p, type, (const __FlashStringHelper * const **)nullptr, name, uom, f);
+};
 
-    register_device_value(tag, value_p, type, options, short_name, full_name, uom, (f != nullptr), min, max);
+// no options, optional function f
+void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * name, uint8_t uom, const cmd_function_p f) {
+    register_device_value(tag, value_p, type, (const __FlashStringHelper * const **)nullptr, name, uom, nullptr);
+};
+
+// no options, with min/max
+void EMSdevice::register_device_value(uint8_t                             tag,
+                                      void *                              value_p,
+                                      uint8_t                             type,
+                                      const __FlashStringHelper * const * name,
+                                      uint8_t                             uom,
+                                      const cmd_function_p                f,
+                                      int16_t                             min,
+                                      uint16_t                            max) {
+    register_device_value(tag, value_p, type, (const __FlashStringHelper * const **)nullptr, name, uom, f, min, max);
+};
+
+
+// function with min and max values
+// adds a new command to the command list
+// in this function we separate out the short and long names and take any translations
+void EMSdevice::register_device_value(uint8_t                              tag,
+                                      void *                               value_p,
+                                      uint8_t                              type,
+                                      const __FlashStringHelper * const ** options,
+                                      const __FlashStringHelper * const *  name,
+                                      uint8_t                              uom,
+                                      const cmd_function_p                 f,
+                                      int16_t                              min,
+                                      uint16_t                             max) {
+    // determine language index
+    uint8_t language_index = EMSESP::system_.language_index();
+
+#ifdef EMSESP_STANDALONE
+    // language_index = 1; // override for testing - DE
+
+    language_index = 0; // override for testing - EN
+#endif
+
+    // count # translations of the name
+    // fall back to English if there are no translations
+    // name contains short name and then a serial of translated long names
+    const __FlashStringHelper * full_name;
+    if (Helpers::count_items(name) <= 2) {
+        full_name = name[1]; // EMSESP_LOCALE_EN
+    } else {
+        full_name = name[language_index + 1];
+    }
+    auto short_name = name[0];
+
+    // count #options
+    uint8_t options_size = Helpers::count_items(options);
+
+    // now make a new list for options, used the translated strings
+    const __FlashStringHelper * translated_options[options_size];
+
+    uint8_t i = 0;
+    uint8_t n = 0;
+
+    // go through each option. Each option points to a list with one or more translations
+    while (i < options_size) {
+        auto opt_list = options[i++];
+
+        // see how many translations we have for this entity
+        // if there is no translation for this, revert to EN
+        if ((language_index + 1) < Helpers::count_items(opt_list)) {
+            translated_options[n] = opt_list[0]; // default to EN
+        } else {
+            translated_options[n] = opt_list[language_index];
+        }
+        n++;
+    }
+    translated_options[n] = nullptr; // close list
+    bool has_cmd          = (f != nullptr);
+
+    add_device_value(tag, value_p, type, translated_options, options_size, short_name, full_name, uom, has_cmd, min, max);
 
     // add a new command if it has a function attached
-    if (f == nullptr) {
+    if (!has_cmd) {
         return;
     }
 
@@ -489,23 +592,23 @@ void EMSdevice::register_device_value(uint8_t                             tag,
 }
 
 // function with no min and max values (set to 0)
-void EMSdevice::register_device_value(uint8_t                             tag,
-                                      void *                              value_p,
-                                      uint8_t                             type,
-                                      const __FlashStringHelper * const * options,
-                                      const __FlashStringHelper * const * name,
-                                      uint8_t                             uom,
-                                      const cmd_function_p                f) {
+void EMSdevice::register_device_value(uint8_t                              tag,
+                                      void *                               value_p,
+                                      uint8_t                              type,
+                                      const __FlashStringHelper * const ** options,
+                                      const __FlashStringHelper * const *  name,
+                                      uint8_t                              uom,
+                                      const cmd_function_p                 f) {
     register_device_value(tag, value_p, type, options, name, uom, f, 0, 0);
 }
 
 // no associated command function, or min/max values
-void EMSdevice::register_device_value(uint8_t                             tag,
-                                      void *                              value_p,
-                                      uint8_t                             type,
-                                      const __FlashStringHelper * const * options,
-                                      const __FlashStringHelper * const * name,
-                                      uint8_t                             uom) {
+void EMSdevice::register_device_value(uint8_t                              tag,
+                                      void *                               value_p,
+                                      uint8_t                              type,
+                                      const __FlashStringHelper * const ** options,
+                                      const __FlashStringHelper * const *  name,
+                                      uint8_t                              uom) {
     register_device_value(tag, value_p, type, options, name, uom, nullptr, 0, 0);
 }
 

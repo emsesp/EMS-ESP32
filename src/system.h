@@ -203,12 +203,14 @@ class System {
         return fahrenheit_;
     }
 
-    void locale(std::string locale) {
+    uint8_t language_index();
+
+    void locale(String locale) {
         locale_ = locale;
     }
 
     std::string locale() {
-        return locale_;
+        return std::string(locale_.c_str());
     }
 
     void healthcheck(uint8_t healthcheck) {
@@ -265,7 +267,7 @@ class System {
     // EMS-ESP settings
     // copies from WebSettings class in WebSettingsService.h and loaded with reload_settings()
     std::string hostname_ = FACTORY_WIFI_HOSTNAME;
-    std::string locale_;
+    String      locale_;
     bool        hide_led_;
     uint8_t     led_gpio_;
     bool        analog_enabled_;

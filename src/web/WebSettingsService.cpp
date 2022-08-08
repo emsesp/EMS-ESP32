@@ -213,8 +213,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
     settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
 
+    // locale
     settings.locale = root["locale"] | EMSESP_DEFAULT_LOCALE;
-    EMSESP::system_.locale(std::string(settings.locale.c_str()));
+    EMSESP::system_.locale(settings.locale);
 
     settings.fahrenheit = root["fahrenheit"] | false;
     EMSESP::system_.fahrenheit(settings.fahrenheit);

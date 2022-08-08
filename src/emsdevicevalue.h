@@ -139,7 +139,7 @@ class DeviceValue {
     const __FlashStringHelper *         short_name;   // used in MQTT
     const __FlashStringHelper *         full_name;    // used in Web and Console
     uint8_t                             uom;          // DeviceValueUOM::*
-    uint8_t                             ha;           // DevcieValueHA::
+    uint8_t                             ha;           // DeviceValueHA::
     bool                                has_cmd;      // true if there is a Console/MQTT command which matches the short_name
     int16_t                             min;          // min range
     uint16_t                            max;          // max range

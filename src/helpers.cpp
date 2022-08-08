@@ -582,6 +582,31 @@ bool Helpers::value2bool(const char * value, bool & value_b) {
 }
 
 // checks to see if a string is member of a vector and return the index, also allow true/false for on/off
+bool Helpers::value2enum(const char * value, uint8_t & value_ui, const __FlashStringHelper * const ** strs) {
+    if ((value == nullptr) || (strlen(value) == 0)) {
+        return false;
+    }
+    std::string str = toLower(value);
+
+    // TODO fix this for list of lists
+    // convert translations to normal and pass to main function
+
+    /*
+
+    for (value_ui = 0; strs[value_ui]; value_ui++) {
+        std::string str1 = toLower(read_flash_string(strs[value_ui]));
+        if ((str1 != "")
+            && ((str1 == read_flash_string(F_(off)) && str == "false") || (str1 == read_flash_string(F_(on)) && str == "true") || (str == str1)
+                || (value[0] == ('0' + value_ui) && value[1] == '\0'))) {
+            return true;
+        }
+    }
+    */
+
+    return false;
+}
+
+// checks to see if a string is member of a vector and return the index, also allow true/false for on/off
 bool Helpers::value2enum(const char * value, uint8_t & value_ui, const __FlashStringHelper * const * strs) {
     if ((value == nullptr) || (strlen(value) == 0)) {
         return false;
@@ -596,6 +621,7 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const __FlashSt
             return true;
         }
     }
+
     return false;
 }
 
@@ -623,6 +649,30 @@ void Helpers::replace_char(char * str, char find, char replace) {
 
         i++;
     }
+}
+
+// count number of items in a list
+uint8_t Helpers::count_items(const __FlashStringHelper * const * list) {
+    uint8_t list_size = 0;
+    if (list != nullptr) {
+        while (list[list_size]) {
+            list_size++;
+        }
+    }
+
+    return list_size;
+}
+
+// count number of items in a list of lists
+uint8_t Helpers::count_items(const __FlashStringHelper * const ** list) {
+    uint8_t list_size = 0;
+    if (list != nullptr) {
+        while (list[list_size]) {
+            list_size++;
+        }
+    }
+
+    return list_size;
 }
 
 } // namespace emsesp
