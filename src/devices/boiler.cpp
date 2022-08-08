@@ -60,7 +60,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(aPumpSignal),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_aPumpSignal));
-        register_device_value(DeviceValueTAG::TAG_AHS, &aPumpMin_, DeviceValueType::UINT, nullptr, FL_(aPumpMin), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_aPumpMin));
+        register_device_value(
+            DeviceValueTAG::TAG_AHS, &aPumpMin_, DeviceValueType::UINT, nullptr, FL_(aPumpMin), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_aPumpMin), 12, 50);
         register_device_value(DeviceValueTAG::TAG_AHS, &tempRise_, DeviceValueType::BOOL, nullptr, FL_(tempRise), DeviceValueUOM::NONE, MAKE_CF_CB(set_tempRise));
         register_device_value(DeviceValueTAG::TAG_AHS,
                               &setReturnTemp_,
@@ -68,11 +69,20 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               nullptr,
                               FL_(setReturnTemp),
                               DeviceValueUOM::DEGREES,
-                              MAKE_CF_CB(set_setReturnTemp));
+                              MAKE_CF_CB(set_setReturnTemp),
+                              40,
+                              75);
         register_device_value(
-            DeviceValueTAG::TAG_AHS, &mixRuntime_, DeviceValueType::USHORT, nullptr, FL_(mixRuntime), DeviceValueUOM::SECONDS, MAKE_CF_CB(set_mixRuntime));
-        register_device_value(
-            DeviceValueTAG::TAG_AHS, &setFlowTemp_, DeviceValueType::UINT, nullptr, FL_(setFlowTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_setFlowTemp));
+            DeviceValueTAG::TAG_AHS, &mixRuntime_, DeviceValueType::USHORT, nullptr, FL_(mixRuntime), DeviceValueUOM::SECONDS, MAKE_CF_CB(set_mixRuntime), 0, 600);
+        register_device_value(DeviceValueTAG::TAG_AHS,
+                              &setFlowTemp_,
+                              DeviceValueType::UINT,
+                              nullptr,
+                              FL_(setFlowTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_setFlowTemp),
+                              40,
+                              75);
         register_device_value(
             DeviceValueTAG::TAG_AHS, &bufBypass_, DeviceValueType::ENUM, FL_(enum_bufBypass), FL_(bufBypass), DeviceValueUOM::NONE, MAKE_CF_CB(set_bufBypass));
         register_device_value(DeviceValueTAG::TAG_AHS,
@@ -81,7 +91,9 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               nullptr,
                               FL_(bufMixRuntime),
                               DeviceValueUOM::SECONDS,
-                              MAKE_CF_CB(set_bufMixRuntime));
+                              MAKE_CF_CB(set_bufMixRuntime),
+                              0,
+                              600);
         register_device_value(
             DeviceValueTAG::TAG_AHS, &bufConfig_, DeviceValueType::ENUM, FL_(enum_bufConfig), FL_(bufConfig), DeviceValueUOM::NONE, MAKE_CF_CB(set_bufConfig));
         register_device_value(
@@ -89,9 +101,16 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(
             DeviceValueTAG::TAG_AHS, &blockTerm_, DeviceValueType::ENUM, FL_(enum_blockTerm), FL_(blockTerm), DeviceValueUOM::NONE, MAKE_CF_CB(set_blockTerm));
         register_device_value(
-            DeviceValueTAG::TAG_AHS, &blockHyst_, DeviceValueType::INT, nullptr, FL_(blockHyst), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_blockHyst));
-        register_device_value(
-            DeviceValueTAG::TAG_AHS, &releaseWait_, DeviceValueType::UINT, nullptr, FL_(releaseWait), DeviceValueUOM::MINUTES, MAKE_CF_CB(set_releaseWait));
+            DeviceValueTAG::TAG_AHS, &blockHyst_, DeviceValueType::INT, nullptr, FL_(blockHyst), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_blockHyst), 0, 50);
+        register_device_value(DeviceValueTAG::TAG_AHS,
+                              &releaseWait_,
+                              DeviceValueType::UINT,
+                              nullptr,
+                              FL_(releaseWait),
+                              DeviceValueUOM::MINUTES,
+                              MAKE_CF_CB(set_releaseWait),
+                              0,
+                              240);
         return;
     }
     // cascaded heatingsources, only some values per individual heatsource (hs)
