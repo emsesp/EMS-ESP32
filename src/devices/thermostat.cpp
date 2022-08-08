@@ -693,7 +693,7 @@ void Thermostat::process_RC20Remote(std::shared_ptr<const Telegram> telegram) {
     }
     has_update(telegram, hc->remotetemp, 0);
 }
-// 0x42B - for reading the roomtemperature from the RC20/ES72 thermostat (0x38, 0x39, ..)
+// 0x42B - for reading the roomtemperature from the RC100H remote thermostat (0x38, 0x39, ..)
 // e.g. "38 10 FF 00 03 2B 00 D1 08 2A 01"
  void Thermostat::process_RemoteTemp(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
@@ -704,7 +704,7 @@ void Thermostat::process_RC20Remote(std::shared_ptr<const Telegram> telegram) {
 
 }
 
-// 0x47B - for reading the roomtemperature from the RC20/ES72 thermostat (0x38, 0x39, ..)
+// 0x47B - for reading humidity from the RC100H remote thermostat (0x38, 0x39, ..)
 // e.g. "38 10 FF 00 03 7B 08 24 00 4B"
 void Thermostat::process_RemoteHumidity(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
