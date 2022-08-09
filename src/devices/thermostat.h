@@ -84,8 +84,8 @@ class Thermostat : public EMSdevice {
         uint8_t climate;
         uint8_t switchonoptimization;
         uint8_t statusbyte; // from RC300monitor
-        int8_t  humidity;
-        int8_t  dewtemperature;
+        uint8_t humidity;
+        uint8_t dewtemperature;
 
         // RC 10
         uint8_t  reducehours;   // night reduce duration

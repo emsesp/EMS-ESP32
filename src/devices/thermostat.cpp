@@ -3978,8 +3978,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
     // RC300 remote with humidity, this is also EMS_DEVICE_FLAG_RC100 for set_calinttemp
     if (device_id() >= 0x38 && device_id() <= 0x3F) {
         register_device_value(tag, &hc->remotetemp, DeviceValueType::SHORT, FL_(div10), FL_(remotetemp), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &hc->dewtemperature, DeviceValueType::INT, nullptr, FL_(dewTemperature), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &hc->humidity, DeviceValueType::INT, nullptr, FL_(airHumidity), DeviceValueUOM::PERCENT);
+        register_device_value(tag, &hc->dewtemperature, DeviceValueType::UINT, nullptr, FL_(dewTemperature), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->humidity, DeviceValueType::UINT, nullptr, FL_(airHumidity), DeviceValueUOM::PERCENT);
         register_device_value(
             tag, &ibaCalIntTemperature_, DeviceValueType::INT, FL_(div10), FL_(ibaCalIntTemperature), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_calinttemp));
         return;
