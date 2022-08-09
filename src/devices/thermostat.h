@@ -38,6 +38,7 @@ class Thermostat : public EMSdevice {
         int16_t roomTemp;
         int16_t remotetemp; // for readback
         uint8_t tempautotemp;
+        int8_t  remoteseltemp;
         uint8_t mode;
         uint8_t modetype;
         uint8_t summermode;
@@ -135,6 +136,7 @@ class Thermostat : public EMSdevice {
             ON,
             DAYLOW,
             DAYMID,
+            REMOTESELTEMP,
             UNKNOWN
 
         };
@@ -384,6 +386,7 @@ class Thermostat : public EMSdevice {
     void process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram);
     void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
     void process_RemoteHumidity(std::shared_ptr<const Telegram> telegram);
+    void process_RemoteCorrection(std::shared_ptr<const Telegram> telegram);
 
     // internal helper functions
     bool set_mode_n(const uint8_t mode, const uint8_t hc_num);
@@ -437,6 +440,7 @@ class Thermostat : public EMSdevice {
     bool set_wwprio(const char * value, const int8_t id);
     bool set_fastheatup(const char * value, const int8_t id);
     bool set_switchonoptimization(const char * value, const int8_t id);
+    bool set_remoteseltemp(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);
