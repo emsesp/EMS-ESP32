@@ -826,16 +826,13 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // match device_id and type_id
     // calls the associated process function for that EMS device
     // returns false if the device_id doesn't recognize it
-    // after the telegram has been processed, call see if there have been values changed and we need to do a MQTT publish
+    // after the telegram has been processed, see if there have been values changed and we need to do a MQTT publish
     bool found       = false;
     bool knowndevice = false;
     for (const auto & emsdevice : emsdevices) {
-        if (emsdevice->is_device_id(telegram->src) || emsdevice->is_device_id(telegram->dest)) {
+        if (emsdevice->is_device_id(telegram->src)) {
             knowndevice = true;
             found       = emsdevice->handle_telegram(telegram);
-            if (found && emsdevice->is_device_id(telegram->dest)) {
-                LOG_DEBUG(F("Process setting 0x%02X for device 0x%02X"), telegram->type_id, telegram->dest);
-            }
             // if we correctly processed the telegram then follow up with sending it via MQTT (if enabled)
             if (found && Mqtt::connected()) {
                 if ((mqtt_.get_publish_onchange(emsdevice->device_type()) && emsdevice->has_update())
@@ -852,7 +849,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
             if (wait_validate_ == telegram->type_id) {
                 wait_validate_ = 0;
             }
-            if (!found && emsdevice->is_device_id(telegram->src) && telegram->message_length > 0) {
+            if (!found && telegram->message_length > 0) {
                 emsdevice->add_handlers_ignored(telegram->type_id);
             }
             break;
