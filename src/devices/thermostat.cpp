@@ -33,6 +33,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(0x042B, F("RemoteTemp"), false, MAKE_PF_CB(process_RemoteTemp));
         register_telegram_type(0x047B, F("RemoteHumidity"), false, MAKE_PF_CB(process_RemoteHumidity));
         register_telegram_type(0x0273, F("RemoteCorrection"), true, MAKE_PF_CB(process_RemoteCorrection));
+        monitor_typeids = {};
+        set_typeids     = {};
         return; // no values to add
     }
     // common telegram handlers
@@ -295,19 +297,19 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     }
 
     // not found, search device-id types for remote thermostats
-    if (telegram->src >= 0x18 && telegram->src <= 0x1F) {
+    if (hc_num == 0 && telegram->src >= 0x18 && telegram->src <= 0x1F) {
         hc_num  = telegram->src - 0x17;
         toggle_ = true;
     }
 
     // not found, search device-id types for remote thermostats
-    if (telegram->src >= 0x38 && telegram->src <= 0x3F) {
+    if (hc_num == 0 && telegram->src >= 0x38 && telegram->src <= 0x3F) {
         hc_num  = telegram->src - 0x37;
         toggle_ = true;
     }
 
     // not found, search device-id types for remote thermostats
-    if (telegram->dest >= 0x20 && telegram->dest <= 0x27) {
+    if (hc_num == 0 && telegram->dest >= 0x20 && telegram->dest <= 0x27) {
         hc_num = telegram->dest - 0x20;
     }
 
@@ -352,8 +354,9 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 
     // set the flag saying we want its data during the next auto fetch
     // monitor is broadcasted, but not frequently in some thermostats (IVT, #356)
-    toggle_fetch(monitor_typeids[hc_num - 1], toggle_);
-
+    if (monitor_typeids.size()) {
+        toggle_fetch(monitor_typeids[hc_num - 1], toggle_);
+    }
     if (set_typeids.size()) {
         toggle_fetch(set_typeids[hc_num - 1], toggle_);
     }
@@ -718,6 +721,7 @@ void Thermostat::process_RemoteHumidity(std::shared_ptr<const Telegram> telegram
 
 // 0x273 - for reading temperaturcorrection from the RC100H remote thermostat (0x38, 0x39, ..)
 void Thermostat::process_RemoteCorrection(std::shared_ptr<const Telegram> telegram) {
+    heating_circuit(telegram); // create hc if it does not exist yet
     has_update(telegram, ibaCalIntTemperature_, 0);
 }
 
