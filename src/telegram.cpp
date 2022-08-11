@@ -233,8 +233,8 @@ void RxService::add(uint8_t * data, uint8_t length) {
 }
 
 // add empty telegram to rx-queue
-void RxService::add_empty(const uint8_t src, const uint8_t dest, const uint16_t type_id) {
-    auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, 0, nullptr, 0);
+void RxService::add_empty(const uint8_t src, const uint8_t dest, const uint16_t type_id, uint8_t offset) {
+    auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, nullptr, 0);
     // only if queue is  not full
     if (rx_telegrams_.size() < MAX_RX_TELEGRAMS) {
         rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
@@ -598,7 +598,7 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
                   MAXIMUM_TX_RETRIES,
                   telegram_last_->to_string().c_str());
         if (operation == Telegram::Operation::TX_READ) {
-            EMSESP::rxservice_.add_empty(telegram_last_->dest, telegram_last_->src, telegram_last_->type_id);
+            EMSESP::rxservice_.add_empty(telegram_last_->dest, telegram_last_->src, telegram_last_->type_id, telegram_last_->offset);
         }
         return;
     }
