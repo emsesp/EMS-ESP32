@@ -585,14 +585,17 @@ void TxService::send_raw(const char * telegram_data) {
 void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const uint8_t length) {
     // have we reached the limit? if so, reset count and give up
     if (++retry_count_ > MAXIMUM_TX_RETRIES) {
-        reset_retry_count(); // give up
+        reset_retry_count();      // give up
+        EMSESP::wait_validate(0); // do not wait for validation
         if (operation == Telegram::Operation::TX_READ) {
+            if (telegram_last_->offset > 0) { // ignore errors for higher offsets
+                LOG_DEBUG(F("Last Tx Read operation failed after %d retries. Ignoring request: %s"), MAXIMUM_TX_RETRIES, telegram_last_->to_string().c_str());
+                return;
+            }
             increment_telegram_read_fail_count(); // another Tx fail
         } else {
             increment_telegram_write_fail_count(); // another Tx fail
         }
-        EMSESP::wait_validate(0); // do not wait for validation
-
         LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request: %s"),
                   (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
                   MAXIMUM_TX_RETRIES,
