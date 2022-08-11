@@ -511,7 +511,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueUOM::DEGREES_R,
                           MAKE_CF_CB(set_ww_flowTempOffset),
                           0,
-                          45);
+                          100);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                           &wwChargeOptimization_,
                           DeviceValueType::BOOL,
