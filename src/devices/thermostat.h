@@ -84,8 +84,6 @@ class Thermostat : public EMSdevice {
         uint8_t climate;
         uint8_t switchonoptimization;
         uint8_t statusbyte; // from RC300monitor
-        uint8_t humidity;
-        uint8_t dewtemperature;
 
         // RC 10
         uint8_t  reducehours;   // night reduce duration
@@ -197,12 +195,14 @@ class Thermostat : public EMSdevice {
     uint8_t offtemp_;      // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
     uint8_t mixingvalves_; // Number of Mixing Valves: (0x00=0, 0x01=1, 0x02=2)
 
-    int8_t   dampedoutdoortemp_;
-    uint16_t tempsensor1_;
-    uint16_t tempsensor2_;
-    int16_t  dampedoutdoortemp2_;
-    uint8_t  floordrystatus_;
-    uint8_t  floordrytemp_;
+    int8_t  dampedoutdoortemp_;
+    int16_t tempsensor1_;
+    int16_t tempsensor2_;
+    int16_t dampedoutdoortemp2_;
+    uint8_t floordrystatus_;
+    uint8_t floordrytemp_;
+    uint8_t dewtemperature_;
+    uint8_t humidity_;
 
     uint8_t wwExtra1_; // wwExtra active for wwSystem 1
     uint8_t wwExtra2_;
