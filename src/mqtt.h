@@ -92,19 +92,19 @@ class Mqtt {
 
     static void
     publish_ha_sensor_config(DeviceValue & dv, const std::string & model, const std::string & brand, const bool remove, const bool create_device_config = false);
-    static void publish_ha_sensor_config(uint8_t                             type,
-                                         uint8_t                             tag,
-                                         const __FlashStringHelper *         name,
-                                         const uint8_t                       device_type,
-                                         const __FlashStringHelper *         entity,
-                                         const uint8_t                       uom,
-                                         const bool                          remove,
-                                         const bool                          has_cmd,
-                                         const __FlashStringHelper * const * options,
-                                         uint8_t                             options_size,
-                                         const int16_t                       dv_set_min,
-                                         const int16_t                       dv_set_max,
-                                         const JsonObject &                  dev_json);
+    static void publish_ha_sensor_config(uint8_t                              type,
+                                         uint8_t                              tag,
+                                         const __FlashStringHelper *          name,
+                                         const uint8_t                        device_type,
+                                         const __FlashStringHelper *          entity,
+                                         const uint8_t                        uom,
+                                         const bool                           remove,
+                                         const bool                           has_cmd,
+                                         const __FlashStringHelper * const ** options,
+                                         uint8_t                              options_size,
+                                         const int16_t                        dv_set_min,
+                                         const int16_t                        dv_set_max,
+                                         const JsonObject &                   dev_json);
 
     static void publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelper * name, const __FlashStringHelper * entity, const uint8_t uom);
     static void publish_ha_climate_config(uint8_t tag, bool has_roomtemp, bool remove = false);

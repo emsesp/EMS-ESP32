@@ -955,19 +955,19 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelp
 // MQTT discovery configs
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
-void Mqtt::publish_ha_sensor_config(uint8_t                             type,        // EMSdevice::DeviceValueType
-                                    uint8_t                             tag,         // EMSdevice::DeviceValueTAG
-                                    const __FlashStringHelper *         name,        // fullname
-                                    const uint8_t                       device_type, // EMSdevice::DeviceType
-                                    const __FlashStringHelper *         entity,      // shortname
-                                    const uint8_t                       uom,         // EMSdevice::DeviceValueUOM (0=NONE)
-                                    const bool                          remove,      // true if we want to remove this topic
-                                    const bool                          has_cmd,
-                                    const __FlashStringHelper * const * options,
-                                    uint8_t                             options_size,
-                                    const int16_t                       dv_set_min,
-                                    const int16_t                       dv_set_max,
-                                    const JsonObject &                  dev_json) {
+void Mqtt::publish_ha_sensor_config(uint8_t                              type,        // EMSdevice::DeviceValueType
+                                    uint8_t                              tag,         // EMSdevice::DeviceValueTAG
+                                    const __FlashStringHelper *          name,        // fullname
+                                    const uint8_t                        device_type, // EMSdevice::DeviceType
+                                    const __FlashStringHelper *          entity,      // shortname
+                                    const uint8_t                        uom,         // EMSdevice::DeviceValueUOM (0=NONE)
+                                    const bool                           remove,      // true if we want to remove this topic
+                                    const bool                           has_cmd,
+                                    const __FlashStringHelper * const ** options,
+                                    uint8_t                              options_size,
+                                    const int16_t                        dv_set_min,
+                                    const int16_t                        dv_set_max,
+                                    const JsonObject &                   dev_json) {
     // ignore if name (fullname) is empty
     if (name == nullptr) {
         return;
@@ -1065,7 +1065,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
         if (type == DeviceValueType::ENUM) {
             JsonArray option_list = doc.createNestedArray("options");
             for (uint8_t i = 0; i < options_size; i++) {
-                option_list.add(options[i]);
+                option_list.add(Helpers::translated_word(options[i]));
             }
         } else if (type != DeviceValueType::STRING) {
             // Must be Numeric....

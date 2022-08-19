@@ -95,7 +95,6 @@ MAKE_PSTR_WORD(connect)
 MAKE_PSTR_WORD(heatpump)
 MAKE_PSTR_WORD(generic)
 MAKE_PSTR_WORD(analogsensor)
-MAKE_PSTR_WORD(unknown)
 MAKE_PSTR_WORD(dallassensor)
 
 // Console
@@ -153,6 +152,17 @@ MAKE_PSTR_LIST(dash, F("-"))
 MAKE_PSTR_LIST(error, F("error"))
 MAKE_PSTR_LIST(BLANK, F(""))
 MAKE_PSTR_LIST(pwm, F("pwm"))
+
+MAKE_PSTR_LIST(cyl1, F("cyl_1"))
+MAKE_PSTR_LIST(cyl2, F("cyl_2"))
+MAKE_PSTR_LIST(prog1, F("prog 1"))
+MAKE_PSTR_LIST(prog2, F("prog 2"))
+MAKE_PSTR_LIST(proga, F("prog a"))
+MAKE_PSTR_LIST(progb, F("prog b"))
+MAKE_PSTR_LIST(progc, F("prog c"))
+MAKE_PSTR_LIST(progd, F("prog d"))
+MAKE_PSTR_LIST(proge, F("prog e"))
+MAKE_PSTR_LIST(progf, F("prog f"))
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
 // These don't need translating
@@ -233,17 +243,7 @@ MAKE_PSTR(response, "response")
 MAKE_PSTR(tag_boiler_data_ww_mqtt, "ww")
 MAKE_PSTR(tag_device_data_ww_mqtt, "")
 
-// command parameters
-MAKE_PSTR_LIST(div2, F("2"))
-MAKE_PSTR_LIST(div4, F("4"))
-MAKE_PSTR_LIST(div10, F("10"))
-MAKE_PSTR_LIST(div60, F("60"))
-MAKE_PSTR_LIST(div100, F("100"))
-MAKE_PSTR_LIST(mul5, F("-5"))
-MAKE_PSTR_LIST(mul10, F("-10"))
-MAKE_PSTR_LIST(mul15, F("-15"))
-
-MAKE_PSTR_LIST(climate, F("HA climate config creation")) // no full-name, hidden, only for creation
+MAKE_PSTR_LIST(climate, F("HA climate config creation"))
 
 // syslog
 MAKE_PSTR_LIST(list_syslog_level, F("off"), F("emerg"), F("alert"), F("crit"), F("error"), F("warn"), F("notice"), F("info"), F("debug"), F("trace"), F("all"))
@@ -254,20 +254,10 @@ MAKE_PSTR_LIST(list_sensortype, F("none"), F("digital in"), F("counter"), F("adc
 // watch
 MAKE_PSTR_LIST(list_watch, F("off"), F("on"), F("raw"), F("unknown"))
 
-// solar
-MAKE_PSTR_LIST(list_cylprio, F("cyl_1"), F("cyl_2"))
-
-//
-// These next set are translated
-//
-
-// boiler lists
-
-// TODO replace with enums - translate these too! or see if they work
-MAKE_PSTR_LIST(enum_progMode, F("prog_1"), F("prog_2"))
-MAKE_PSTR_LIST(enum_progMode4, F("prog_a"), F("prog_b"), F("prog_c"), F("prog_d"), F("prog_e"), F("prog_f"))
-MAKE_PSTR_LIST(enum_climate, F("selTemp"), F("roomTemp"))
-
+MAKE_PSTR_ENUM(enum_cylprio, FL_(cyl1), FL_(cyl2))
+MAKE_PSTR_ENUM(enum_progMode, FL_(prog1), FL_(prog2))
+MAKE_PSTR_ENUM(enum_progMode4, FL_(proga), FL_(progb), FL_(progc), FL_(progd), FL_(proge), FL_(progf))
+MAKE_PSTR_ENUM(enum_climate, FL_(seltemp), FL_(roomtemp))
 MAKE_PSTR_ENUM(enum_charge, FL_(chargepump), FL_(3wayvalve))
 MAKE_PSTR_ENUM(enum_freq, FL_(off), FL_(1x3min), FL_(2x3min), FL_(3x3min), FL_(4x3min), FL_(5x3min), FL_(6x3min), FL_(continuous))
 MAKE_PSTR_ENUM(enum_off_time_date_manual, FL_(off), FL_(time), FL_(date), FL_(manual))
@@ -277,7 +267,6 @@ MAKE_PSTR_ENUM(enum_flow, FL_(off), FL_(flow), FL_(bufferedflow), FL_(buffer), F
 MAKE_PSTR_ENUM(enum_reset, FL_(dash), FL_(maintenance), FL_(error))
 
 // thermostat lists
-
 MAKE_PSTR_ENUM(enum_ibaMainDisplay,
                FL_(internal_temperature),
                FL_(internal_setpoint),

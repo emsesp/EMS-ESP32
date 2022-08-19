@@ -41,9 +41,10 @@
 
 namespace emsesp {
 
-// Languages supported
-const char * const languages[]   = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE};
-size_t             num_languages = sizeof(languages) / sizeof(const char *);
+// Languages supported. Note: the order is important and must match locale_languages.h
+const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE};
+
+size_t num_languages = sizeof(languages) / sizeof(const char *);
 
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 

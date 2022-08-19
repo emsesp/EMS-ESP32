@@ -130,55 +130,56 @@ class DeviceValue {
         DV_FAVORITE         = (1 << 7)  // 128 - sort to front
     };
 
-    uint8_t                             device_type;  // EMSdevice::DeviceType
-    uint8_t                             tag;          // DeviceValueTAG::*
-    void *                              value_p;      // pointer to variable of any type
-    uint8_t                             type;         // DeviceValueType::*
-    const __FlashStringHelper * const * options;      // options as a flash char array
-    uint8_t                             options_size; // number of options in the char array, calculated
-    const __FlashStringHelper *         short_name;   // used in MQTT
-    const __FlashStringHelper *         full_name;    // used in Web and Console
-    uint8_t                             uom;          // DeviceValueUOM::*
-    uint8_t                             ha;           // DeviceValueHA::
-    bool                                has_cmd;      // true if there is a Console/MQTT command which matches the short_name
-    int16_t                             min;          // min range
-    uint16_t                            max;          // max range
-    uint8_t                             state;        // DeviceValueState::*
+    // numeric operators
+    // negative numbers used for multipliers
+    enum DeviceValueNumOp : int8_t {
+        DV_NUMOP_NONE = 0, // default
+        DV_NUMOP_DIV2 = 2,
+        DV_NUMOP_DIV10 = 10,
+        DV_NUMOP_DIV60 = 60,
+        DV_NUMOP_DIV100 = 100,
+        DV_NUMOP_MUL5 = -5,
+        DV_NUMOP_MUL10 = -10,
+        DV_NUMOP_MUL15 = -15
+    };
 
-    DeviceValue(uint8_t                             device_type,
-                uint8_t                             tag,
-                void *                              value_p,
-                uint8_t                             type,
-                const __FlashStringHelper * const * options,
-                uint8_t                             options_size,
-                const __FlashStringHelper *         short_name,
-                const __FlashStringHelper *         full_name,
-                uint8_t                             uom,
-                uint8_t                             ha,
-                bool                                has_cmd,
-                int16_t                             min,
-                uint16_t                            max,
-                uint8_t                             state)
-        : device_type(device_type)
-        , tag(tag)
-        , value_p(value_p)
-        , type(type)
-        , options(options)
-        , options_size(options_size)
-        , short_name(short_name)
-        , full_name(full_name)
-        , uom(uom)
-        , ha(ha)
-        , has_cmd(has_cmd)
-        , min(min)
-        , max(max)
-        , state(state) {
-    }
+    uint8_t                              device_type;    // EMSdevice::DeviceType
+    uint8_t                              tag;            // DeviceValueTAG::*
+    void *                               value_p;        // pointer to variable of any type
+    uint8_t                              type;           // DeviceValueType::*
+    const __FlashStringHelper * const ** options;        // options as a flash char array
+    const __FlashStringHelper * const *  options_single; // options are not translated
+    int8_t                              numeric_operator;
+    uint8_t                              options_size; // number of options in the char array, calculated
+    const __FlashStringHelper *          short_name;   // used in MQTT
+    const __FlashStringHelper *          full_name;    // used in Web and Console
+    uint8_t                              uom;          // DeviceValueUOM::*
+    uint8_t                              ha;           // DeviceValueHA::
+    bool                                 has_cmd;      // true if there is a Console/MQTT command which matches the short_name
+    int16_t                              min;          // min range
+    uint16_t                             max;          // max range
+    uint8_t                              state;        // DeviceValueState::*
+
+    DeviceValue(uint8_t                              device_type,
+                uint8_t                              tag,
+                void *                               value_p,
+                uint8_t                              type,
+                const __FlashStringHelper * const ** options,
+                const __FlashStringHelper * const *  options_single,
+                int8_t                              numeric_operator,
+                const __FlashStringHelper *          short_name,
+                const __FlashStringHelper *          full_name,
+                uint8_t                              uom,
+                uint8_t                              ha,
+                bool                                 has_cmd,
+                int16_t                              min,
+                uint16_t                             max,
+                uint8_t                              state);
 
     bool hasValue() const;
     bool get_min_max(int16_t & dv_set_min, int16_t & dv_set_max);
 
-    // state flags
+    // dv state flags
     void add_state(uint8_t s) {
         state |= s;
     }

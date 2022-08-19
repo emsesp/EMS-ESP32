@@ -8,10 +8,10 @@
     "@emotion/styled": "^11.10.0",
     "@msgpack/msgpack": "^2.7.2",
     "@mui/icons-material": "^5.8.4",
-    "@mui/material": "^5.9.3",
-    "@table-library/react-table-library": "4.0.10",
-    "@types/lodash": "^4.14.182",
-    "@types/node": "^18.6.5",
+    "@mui/material": "^5.10.1",
+    "@table-library/react-table-library": "4.0.11",
+    "@types/lodash": "^4.14.184",
+    "@types/node": "^18.7.6",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@types/react-router-dom": "^5.3.3",
@@ -30,7 +30,7 @@
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "sockette": "^2.0.6",
-    "typesafe-i18n": "^5.11.0",
+    "typesafe-i18n": "^5.12.0",
     "typescript": "^4.7.4"
   },
   "scripts": {

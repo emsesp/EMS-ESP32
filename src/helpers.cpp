@@ -177,10 +177,11 @@ char * Helpers::smallitoa(char * result, const uint16_t value) {
 // for strings only
 char * Helpers::render_boolean(char * result, const bool value, const bool dashboard) {
     uint8_t bool_format_ = dashboard ? EMSESP::system_.bool_dashboard() : EMSESP::system_.bool_format();
+
     if (bool_format_ == BOOL_FORMAT_ONOFF_STR) {
-        strlcpy(result, value ? read_flash_string(F_(on)).c_str() : read_flash_string(F_(off)).c_str(), 5);
+        strlcpy(result, value ? translated_word(FL_(on)).c_str() : translated_word(FL_(off)).c_str(), 5);
     } else if (bool_format_ == BOOL_FORMAT_ONOFF_STR_CAP) {
-        strlcpy(result, value ? read_flash_string(F_(ON)).c_str() : read_flash_string(F_(OFF)).c_str(), 5);
+        strlcpy(result, value ? translated_word(FL_(ON)).c_str() : translated_word(FL_(OFF)).c_str(), 5);
     } else if ((bool_format_ == BOOL_FORMAT_10) || (bool_format_ == BOOL_FORMAT_10_STR)) {
         strlcpy(result, value ? "1" : "0", 2);
     } else {
@@ -439,17 +440,42 @@ int Helpers::atoint(const char * value) {
 //  The conversion to Fahrenheit is different for absolute temperatures and relative temperatures like hysteresis.
 //  fahrenheit=0 - off, no conversion
 //  fahrenheit=1 - relative, 1.8t
-//  fahrenheit=2 - absolute, 1.8t + 32(fahrenheit-1).
-float Helpers::round2(float value, const int8_t divider, const uint8_t fahrenheit) {
-    float val = (value * 100 + 0.5);
-    if (divider > 0) {
-        val = ((value / divider) * 100 + 0.5);
-    } else if (divider < 0) {
-        val = value * -100 * divider;
+//  fahrenheit=2 - absolute, 1.8t + 32(fahrenheit-1)
+// TODO test num_ops is working
+float Helpers::transformNumFloat(float value, const int8_t numeric_operator, const uint8_t fahrenheit) {
+    float val;
+
+    switch (numeric_operator) {
+    case DeviceValueNumOp::DV_NUMOP_DIV2:
+        val = ((value / 2) * 100 + 0.5);
+        break;
+    case DeviceValueNumOp::DV_NUMOP_DIV10:
+        val = ((value / 10) * 100 + 0.5);
+        break;
+    case DeviceValueNumOp::DV_NUMOP_DIV60:
+        val = ((value / 60) * 100 + 0.5);
+        break;
+    case DeviceValueNumOp::DV_NUMOP_DIV100:
+        val = ((value / 100) * 100 + 0.5);
+        break;
+    case DeviceValueNumOp::DV_NUMOP_MUL5:
+        val = value * -100 * 5;
+        break;
+    case DeviceValueNumOp::DV_NUMOP_MUL10:
+        val = value * -100 * 10;
+        break;
+    case DeviceValueNumOp::DV_NUMOP_MUL15:
+        val = value * -100 * 15;
+        break;
+    default:
+        val = (value * 100 + 0.5); // no ops
+        break;
     }
+
     if (value < 0) { // negative rounding
         val = val - 1;
     }
+
     if (fahrenheit) {
         val = val * 1.8 + 3200 * (fahrenheit - 1);
     }
@@ -568,12 +594,12 @@ bool Helpers::value2bool(const char * value, bool & value_b) {
 
     std::string bool_str = toLower(value); // convert to lower case
 
-    if ((bool_str == read_flash_string(F_(on))) || (bool_str == "1") || (bool_str == "true")) {
+    if ((bool_str == Helpers::translated_word(FL_(on))) || (bool_str == "1") || (bool_str == "true")) {
         value_b = true;
         return true; // is a bool
     }
 
-    if ((bool_str == read_flash_string(F_(off))) || (bool_str == "0") || (bool_str == "false")) {
+    if ((bool_str == Helpers::translated_word(FL_(off))) || (bool_str == "0") || (bool_str == "false")) {
         value_b = false;
         return true; // is a bool
     }
@@ -582,26 +608,22 @@ bool Helpers::value2bool(const char * value, bool & value_b) {
 }
 
 // checks to see if a string is member of a vector and return the index, also allow true/false for on/off
+// this for a list of lists, when using translated strings
 bool Helpers::value2enum(const char * value, uint8_t & value_ui, const __FlashStringHelper * const ** strs) {
     if ((value == nullptr) || (strlen(value) == 0)) {
         return false;
     }
     std::string str = toLower(value);
 
-    // TODO fix this for list of lists
-    // convert translations to normal and pass to main function
-
-    /*
-
+    // TODO test to see if it works, with syslog or watch using a command API
     for (value_ui = 0; strs[value_ui]; value_ui++) {
-        std::string str1 = toLower(read_flash_string(strs[value_ui]));
+        std::string str1 = toLower(Helpers::translated_word(strs[value_ui]));
         if ((str1 != "")
-            && ((str1 == read_flash_string(F_(off)) && str == "false") || (str1 == read_flash_string(F_(on)) && str == "true") || (str == str1)
+            && ((str1 == Helpers::translated_word(FL_(off)) && str == "false") || (str1 == Helpers::translated_word(FL_(on)) && str == "true") || (str == str1)
                 || (value[0] == ('0' + value_ui) && value[1] == '\0'))) {
             return true;
         }
     }
-    */
 
     return false;
 }
@@ -616,7 +638,7 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const __FlashSt
     for (value_ui = 0; strs[value_ui]; value_ui++) {
         std::string str1 = toLower(read_flash_string(strs[value_ui]));
         if ((str1 != "")
-            && ((str1 == read_flash_string(F_(off)) && str == "false") || (str1 == read_flash_string(F_(on)) && str == "true") || (str == str1)
+            && ((str1 == Helpers::translated_word(FL_(off)) && str == "false") || (str1 == Helpers::translated_word(FL_(on)) && str == "true") || (str == str1)
                 || (value[0] == ('0' + value_ui) && value[1] == '\0'))) {
             return true;
         }
@@ -652,6 +674,7 @@ void Helpers::replace_char(char * str, char find, char replace) {
 }
 
 // count number of items in a list
+// the end of a list has a nullptr
 uint8_t Helpers::count_items(const __FlashStringHelper * const * list) {
     uint8_t list_size = 0;
     if (list != nullptr) {
@@ -659,11 +682,11 @@ uint8_t Helpers::count_items(const __FlashStringHelper * const * list) {
             list_size++;
         }
     }
-
     return list_size;
 }
 
 // count number of items in a list of lists
+// the end of a list has a nullptr
 uint8_t Helpers::count_items(const __FlashStringHelper * const ** list) {
     uint8_t list_size = 0;
     if (list != nullptr) {
@@ -671,8 +694,33 @@ uint8_t Helpers::count_items(const __FlashStringHelper * const ** list) {
             list_size++;
         }
     }
-
     return list_size;
+}
+
+// return translated string
+// takes a FL(...)
+std::string Helpers::translated_word(const __FlashStringHelper * const * strings) {
+    uint8_t language_index = EMSESP::system_.language_index();
+
+    // see how many translations we have for this entity
+    // if there is no translation for this, revert to EN
+    if (Helpers::count_items(strings) >= language_index + 1) {
+        return read_flash_string(strings[language_index]);
+    }
+    return read_flash_string(strings[0]);
+}
+
+// return translated string
+// takes a FL(...)
+const __FlashStringHelper * Helpers::translated_fword(const __FlashStringHelper * const * strings) {
+    uint8_t language_index = EMSESP::system_.language_index();
+
+    // see how many translations we have for this entity
+    // if there is no translation for this, revert to EN
+    if (Helpers::count_items(strings) >= language_index + 1) {
+        return (strings[language_index]);
+    }
+    return (strings[0]);
 }
 
 } // namespace emsesp

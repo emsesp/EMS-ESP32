@@ -393,40 +393,29 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __
 //  has_cmd: true if this is an associated command
 //  min: min allowed value
 //  max: max allowed value
-void EMSdevice::add_device_value(uint8_t                             tag,
-                                 void *                              value_p,
-                                 uint8_t                             type,
-                                 const __FlashStringHelper * const * options,
-                                 uint8_t                             options_size,
-                                 const __FlashStringHelper *         short_name,
-                                 const __FlashStringHelper *         full_name,
-                                 uint8_t                             uom,
-                                 bool                                has_cmd,
-                                 int16_t                             min,
-                                 uint16_t                            max) {
-#ifdef EMSESP_STANDALONE
-    Serial.print("registering entity: ");
-    Serial.print(read_flash_string(short_name).c_str());
-    Serial.print("/");
-    Serial.print(read_flash_string(full_name).c_str());
-    Serial.print(" ");
-    if (options != nullptr) {
-        uint8_t i = 0;
-        while (options[i]) {
-            Serial.print(" option");
-            Serial.print(i + 1);
-            Serial.print(":");
-            auto str = options[i];
-            if (str != nullptr) {
-                Serial.print(read_flash_string(str).c_str());
-            }
-            i++;
-        }
+void EMSdevice::add_device_value(uint8_t                              tag,
+                                 void *                               value_p,
+                                 uint8_t                              type,
+                                 const __FlashStringHelper * const ** options,
+                                 const __FlashStringHelper * const *  options_single,
+                                 int8_t                               numeric_operator,
+                                 const __FlashStringHelper * const *  name,
+                                 uint8_t                              uom,
+                                 const cmd_function_p                 f,
+                                 int16_t                              min,
+                                 uint16_t                             max) {
+    bool has_cmd = (f != nullptr);
+
+    // count # translations of the name
+    // fallback to English if there are no translations
+    // name contains short name and then a serial of translated long names
+    const __FlashStringHelper * full_name;
+    if (Helpers::count_items(name) <= 2) {
+        full_name = name[1]; // take English as default
+    } else {
+        full_name = name[EMSESP::system_.language_index() + 1];
     }
-    Serial.print(" (#options=");
-    Serial.print(options_size);
-    Serial.println(")");
-#endif
+    auto short_name = name[0];
 
     // initialize the device value depending on it's type
     if (type == DeviceValueType::STRING) {
@@ -465,111 +454,7 @@ void EMSdevice::add_device_value(uint8_t                             tag,
     });
 
     // add the device entity
-    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, 0, has_cmd, min, max, state);
-}
-
-// single list of options
-void EMSdevice::register_device_value(uint8_t                             tag,
-                                      void *                              value_p,
-                                      uint8_t                             type,
-                                      const __FlashStringHelper * const * options,
-                                      const __FlashStringHelper * const * name,
-                                      uint8_t                             uom,
-                                      const cmd_function_p                f) {
-    register_device_value(tag, value_p, type, (const __FlashStringHelper * const *)nullptr, name, uom, f, 0, 0);
-};
-
-// single list of options, with no translations, with min and max
-void EMSdevice::register_device_value(uint8_t                             tag,
-                                      void *                              value_p,
-                                      uint8_t                             type,
-                                      const __FlashStringHelper * const * options,
-                                      const __FlashStringHelper * const * name,
-                                      uint8_t                             uom,
-                                      const cmd_function_p                f,
-                                      int16_t                             min,
-                                      uint16_t                            max) {
-    // TODO convert to single list
-    // for now we just use null for options
-    register_device_value(tag, value_p, type, (const __FlashStringHelper * const **)nullptr, name, uom, f);
-};
-
-// no options, optional function f
-void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * name, uint8_t uom, const cmd_function_p f) {
-    register_device_value(tag, value_p, type, (const __FlashStringHelper * const **)nullptr, name, uom, nullptr);
-};
-
-// no options, with min/max
-void EMSdevice::register_device_value(uint8_t                             tag,
-                                      void *                              value_p,
-                                      uint8_t                             type,
-                                      const __FlashStringHelper * const * name,
-                                      uint8_t                             uom,
-                                      const cmd_function_p                f,
-                                      int16_t                             min,
-                                      uint16_t                            max) {
-    register_device_value(tag, value_p, type, (const __FlashStringHelper * const **)nullptr, name, uom, f, min, max);
-};
-
-
-// function with min and max values
-// adds a new command to the command list
-// in this function we separate out the short and long names and take any translations
-void EMSdevice::register_device_value(uint8_t                              tag,
-                                      void *                               value_p,
-                                      uint8_t                              type,
-                                      const __FlashStringHelper * const ** options,
-                                      const __FlashStringHelper * const *  name,
-                                      uint8_t                              uom,
-                                      const cmd_function_p                 f,
-                                      int16_t                              min,
-                                      uint16_t                             max) {
-    // determine language index
-    uint8_t language_index = EMSESP::system_.language_index();
-
-#ifdef EMSESP_STANDALONE
-    // language_index = 1; // override for testing - DE
-
-    language_index = 0; // override for testing - EN
-#endif
-
-    // count # translations of the name
-    // fall back to English if there are no translations
-    // name contains short name and then a serial of translated long names
-    const __FlashStringHelper * full_name;
-    if (Helpers::count_items(name) <= 2) {
-        full_name = name[1]; // EMSESP_LOCALE_EN
-    } else {
-        full_name = name[language_index + 1];
-    }
-    auto short_name = name[0];
-
-    // count #options
-    uint8_t options_size = Helpers::count_items(options);
-
-    // now make a new list for options, used the translated strings
-    const __FlashStringHelper * translated_options[options_size];
-
-    uint8_t i = 0;
-    uint8_t n = 0;
-
-    // go through each option. Each option points to a list with one or more translations
-    while (i < options_size) {
-        auto opt_list = options[i++];
-
-        // see how many translations we have for this entity
-        // if there is no translation for this, revert to EN
-        if ((language_index + 1) < Helpers::count_items(opt_list)) {
-            translated_options[n] = opt_list[0]; // default to EN
-        } else {
-            translated_options[n] = opt_list[language_index];
-        }
-        n++;
-    }
-    translated_options[n] = nullptr; // close list
-    bool has_cmd          = (f != nullptr);
-
-    add_device_value(tag, value_p, type, translated_options, options_size, short_name, full_name, uom, has_cmd, min, max);
+    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_single, numeric_operator, short_name, full_name, uom, 0, has_cmd, min, max, state);
 
     // add a new command if it has a function attached
     if (!has_cmd) {
@@ -591,6 +476,86 @@ void EMSdevice::register_device_value(uint8_t                              tag,
     Command::add(device_type_, short_name, f, full_name, flags);
 }
 
+// single list of options
+void EMSdevice::register_device_value(uint8_t                             tag,
+                                      void *                              value_p,
+                                      uint8_t                             type,
+                                      const __FlashStringHelper * const * options_single,
+                                      const __FlashStringHelper * const * name,
+                                      uint8_t                             uom,
+                                      const cmd_function_p                f) {
+    // create a multi-list from the options
+    add_device_value(tag, value_p, type, nullptr, options_single, 0, name, uom, f, 0, 0);
+};
+
+// single list of options, with no translations, with min and max
+void EMSdevice::register_device_value(uint8_t                             tag,
+                                      void *                              value_p,
+                                      uint8_t                             type,
+                                      const __FlashStringHelper * const * options_single,
+                                      const __FlashStringHelper * const * name,
+                                      uint8_t                             uom,
+                                      const cmd_function_p                f,
+                                      int16_t                             min,
+                                      uint16_t                            max) {
+    // create a multi-list from the options
+    add_device_value(tag, value_p, type, nullptr, options_single, 0, name, uom, f, min, max);
+};
+
+void EMSdevice::register_device_value(uint8_t                             tag,
+                                      void *                              value_p,
+                                      uint8_t                             type,
+                                      int8_t                              numeric_operator,
+                                      const __FlashStringHelper * const * name,
+                                      uint8_t                             uom,
+                                      const cmd_function_p                f) {
+    add_device_value(tag, value_p, type, nullptr, nullptr, numeric_operator, name, uom, f, 0, 0);
+}
+
+void EMSdevice::register_device_value(uint8_t                             tag,
+                                      void *                              value_p,
+                                      uint8_t                             type,
+                                      int8_t                              numeric_operator,
+                                      const __FlashStringHelper * const * name,
+                                      uint8_t                             uom,
+                                      const cmd_function_p                f,
+                                      int16_t                             min,
+                                      uint16_t                            max) {
+    add_device_value(tag, value_p, type, nullptr, nullptr, numeric_operator, name, uom, f, min, max);
+}
+
+// no options, no function
+void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * name, uint8_t uom, const cmd_function_p f) {
+    add_device_value(tag, value_p, type, nullptr, nullptr, 0, name, uom, nullptr, 0, 0);
+};
+
+// no options, with min/max
+void EMSdevice::register_device_value(uint8_t                             tag,
+                                      void *                              value_p,
+                                      uint8_t                             type,
+                                      const __FlashStringHelper * const * name,
+                                      uint8_t                             uom,
+                                      const cmd_function_p                f,
+                                      int16_t                             min,
+                                      uint16_t                            max) {
+    add_device_value(tag, value_p, type, nullptr, nullptr, 0, name, uom, f, min, max);
+};
+
+// function with min and max values
+// adds a new command to the command list
+// in this function we separate out the short and long names and take any translations
+void EMSdevice::register_device_value(uint8_t                              tag,
+                                      void *                               value_p,
+                                      uint8_t                              type,
+                                      const __FlashStringHelper * const ** options,
+                                      const __FlashStringHelper * const *  name,
+                                      uint8_t                              uom,
+                                      const cmd_function_p                 f,
+                                      int16_t                              min,
+                                      uint16_t                             max) {
+    add_device_value(tag, value_p, type, options, nullptr, 0, name, uom, f, min, max);
+}
+
 // function with no min and max values (set to 0)
 void EMSdevice::register_device_value(uint8_t                              tag,
                                       void *                               value_p,
@@ -599,7 +564,7 @@ void EMSdevice::register_device_value(uint8_t                              tag,
                                       const __FlashStringHelper * const *  name,
                                       uint8_t                              uom,
                                       const cmd_function_p                 f) {
-    register_device_value(tag, value_p, type, options, name, uom, f, 0, 0);
+    add_device_value(tag, value_p, type, options, nullptr, 0, name, uom, f, 0, 0);
 }
 
 // no associated command function, or min/max values
@@ -609,7 +574,7 @@ void EMSdevice::register_device_value(uint8_t                              tag,
                                       const __FlashStringHelper * const ** options,
                                       const __FlashStringHelper * const *  name,
                                       uint8_t                              uom) {
-    register_device_value(tag, value_p, type, options, name, uom, nullptr, 0, 0);
+    add_device_value(tag, value_p, type, options, nullptr, 0, name, uom, nullptr, 0, 0);
 }
 
 // check if value is readable via mqtt/api
@@ -675,7 +640,10 @@ void EMSdevice::publish_value(void * value_p) const {
                 snprintf(topic, sizeof(topic), "%s/%s", Mqtt::tag_to_topic(device_type_, dv.tag).c_str(), read_flash_string(dv.short_name).c_str());
             }
 
-            int8_t  divider     = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
+            // TODO test divider works
+
+            int8_t num_op = dv.numeric_operator;
+
             char    payload[55] = {'\0'};
             uint8_t fahrenheit  = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
@@ -688,32 +656,32 @@ void EMSdevice::publish_value(void * value_p) const {
                     if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
                         Helpers::render_value(payload, *(uint8_t *)(value_p), 0);
                     } else {
-                        strlcpy(payload, read_flash_string(dv.options[*(uint8_t *)(value_p)]).c_str(), sizeof(payload));
+                        auto enum_str = Helpers::translated_word(dv.options[*(uint8_t *)(value_p)]);
+                        strlcpy(payload, enum_str.c_str(), sizeof(payload));
                     }
                 }
                 break;
             }
             case DeviceValueType::USHORT:
-                Helpers::render_value(payload, *(uint16_t *)(value_p), divider, fahrenheit);
+                Helpers::render_value(payload, *(uint16_t *)(value_p), num_op, fahrenheit);
                 break;
             case DeviceValueType::UINT:
-                Helpers::render_value(payload, *(uint8_t *)(value_p), divider, fahrenheit);
+                Helpers::render_value(payload, *(uint8_t *)(value_p), num_op, fahrenheit);
                 break;
             case DeviceValueType::SHORT:
-                Helpers::render_value(payload, *(int16_t *)(value_p), divider, fahrenheit);
+                Helpers::render_value(payload, *(int16_t *)(value_p), num_op, fahrenheit);
                 break;
             case DeviceValueType::INT:
-                Helpers::render_value(payload, *(int8_t *)(value_p), divider, fahrenheit);
+                Helpers::render_value(payload, *(int8_t *)(value_p), num_op, fahrenheit);
                 break;
             case DeviceValueType::ULONG:
-                Helpers::render_value(payload, *(uint32_t *)(value_p), divider, fahrenheit);
+                Helpers::render_value(payload, *(uint32_t *)(value_p), num_op, fahrenheit);
                 break;
-            case DeviceValueType::BOOL: {
+            case DeviceValueType::BOOL:
                 Helpers::render_boolean(payload, (bool)*(uint8_t *)(value_p));
                 break;
-            }
             case DeviceValueType::TIME:
-                Helpers::render_value(payload, *(uint32_t *)(value_p), divider);
+                Helpers::render_value(payload, *(uint32_t *)(value_p), num_op);
                 break;
             case DeviceValueType::STRING:
                 if (Helpers::hasValue((char *)(value_p))) {
@@ -794,7 +762,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 
             // handle ENUMs
             else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
-                obj["v"] = dv.options[*(uint8_t *)(dv.value_p)];
+                obj["v"] = Helpers::translated_word(dv.options[*(uint8_t *)(dv.value_p)]);
             }
 
             // handle numbers
@@ -802,25 +770,26 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 // If a divider is specified, do the division to 2 decimals places and send back as double/float
                 // otherwise force as an integer whole
                 // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
-                int8_t divider = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
-                fahrenheit     = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
+
+                // TODO test divider works
+                int8_t num_op = dv.numeric_operator;
+
+                fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
                 if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(int8_t *)(dv.value_p), divider, fahrenheit);
+                    obj["v"] = Helpers::transformNumFloat(*(int8_t *)(dv.value_p), num_op, fahrenheit);
                 } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(uint8_t *)(dv.value_p), divider, fahrenheit);
+                    obj["v"] = Helpers::transformNumFloat(*(uint8_t *)(dv.value_p), num_op, fahrenheit);
                 } else if ((dv.type == DeviceValueType::SHORT) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(int16_t *)(dv.value_p), divider, fahrenheit);
+                    obj["v"] = Helpers::transformNumFloat(*(int16_t *)(dv.value_p), num_op, fahrenheit);
                 } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(uint16_t *)(dv.value_p), divider, fahrenheit);
+                    obj["v"] = Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), num_op, fahrenheit);
                 } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::round2(*(uint32_t *)(dv.value_p), divider, fahrenheit);
+                    obj["v"] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), num_op, fahrenheit);
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    uint32_t time_value = *(uint32_t *)(dv.value_p);
-                    obj["v"]            = (divider > 0) ? time_value / divider : time_value; // sometimes we need to divide by 60
+                    obj["v"] = (num_op) ? (*(uint32_t *)(dv.value_p) / num_op) : *(uint32_t *)(dv.value_p);
                 } else {
-                    // must have a value for sorting to work
-                    obj["v"] = "";
+                    obj["v"] = ""; // must have a value for sorting to work
                 }
             }
 
@@ -844,12 +813,14 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 } else {
                     obj["c"] = dv.short_name;
                 }
+
                 // add the Command options
                 if (dv.type == DeviceValueType::ENUM || (dv.type == DeviceValueType::CMD && dv.options_size > 1)) {
                     JsonArray l = obj.createNestedArray("l");
                     for (uint8_t i = 0; i < dv.options_size; i++) {
-                        if (!read_flash_string(dv.options[i]).empty()) {
-                            l.add(read_flash_string(dv.options[i]));
+                        auto enum_str = Helpers::translated_word(dv.options[i]);
+                        if (!enum_str.empty()) {
+                            l.add(enum_str);
                         }
                     }
                 } else if (dv.type == DeviceValueType::BOOL) {
@@ -861,18 +832,19 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 // add command help template
                 else if (dv.type == DeviceValueType::STRING || dv.type == DeviceValueType::CMD) {
                     if (dv.options_size == 1) {
-                        obj["h"] = dv.options[0];
+                        obj["h"] = Helpers::translated_word(dv.options[0]);
                     }
                 }
+                // handle INTs
                 // add steps to numeric values with divider/multiplier
                 else {
-                    int8_t divider = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
-                    char   s[10];
-                    if (divider > 0) {
-                        obj["s"] = Helpers::render_value(s, (float)1 / divider, 1);
-                    } else if (divider < 0) {
-                        obj["s"] = Helpers::render_value(s, (-1) * divider, 0);
+                    char s[10];
+                    if (dv.numeric_operator > 0) {
+                        obj["s"] = Helpers::render_value(s, (float)1 / dv.numeric_operator, 1);
+                    } else if (dv.numeric_operator < 0) {
+                        obj["s"] = Helpers::render_value(s, (-1) * dv.numeric_operator, 0);
                     }
+
                     int16_t dv_set_min, dv_set_max;
                     if (dv.get_min_max(dv_set_min, dv_set_max)) {
                         obj["m"] = Helpers::render_value(s, dv_set_min, 0);
@@ -907,7 +879,7 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
 
             // handle ENUMs
             else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
-                obj["v"] = dv.options[*(uint8_t *)(dv.value_p)];
+                obj["v"] = Helpers::translated_word(dv.options[*(uint8_t *)(dv.value_p)]);
             }
 
             // handle Integers and Floats
@@ -915,31 +887,29 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
                 // If a divider is specified, do the division to 2 decimals places and send back as double/float
                 // otherwise force as an integer whole
                 // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
-                uint8_t divider = 0;
-                uint8_t factor  = 1;
-                if (dv.options_size == 1) {
-                    auto s_str     = read_flash_string(dv.options[0]); // prevent object backing the pointer will be destroyed at the end of the full-expression
-                    const char * s = s_str.c_str();
-                    if (s[0] == '*') {
-                        factor = Helpers::atoint(&s[1]);
-                    } else {
-                        divider = Helpers::atoint(s);
-                    }
+
+                // TODO test divider works
+
+                int8_t num_op     = dv.numeric_operator;
+                bool   make_float = true;
+                if (num_op < 0) {
+                    num_op *= -1; // convert to a positive multiplier
+                    make_float = false;
                 }
 
                 if (dv.type == DeviceValueType::INT) {
-                    obj["v"] = divider ? Helpers::round2(*(int8_t *)(dv.value_p), divider) : *(int8_t *)(dv.value_p) * factor;
+                    obj["v"] = make_float ? Helpers::transformNumFloat(*(int8_t *)(dv.value_p), num_op) : *(int8_t *)(dv.value_p) * num_op;
                 } else if (dv.type == DeviceValueType::UINT) {
-                    obj["v"] = divider ? Helpers::round2(*(uint8_t *)(dv.value_p), divider) : *(uint8_t *)(dv.value_p) * factor;
+                    obj["v"] = make_float ? Helpers::transformNumFloat(*(uint8_t *)(dv.value_p), num_op) : *(uint8_t *)(dv.value_p) * num_op;
                 } else if (dv.type == DeviceValueType::SHORT) {
-                    obj["v"] = divider ? Helpers::round2(*(int16_t *)(dv.value_p), divider) : *(int16_t *)(dv.value_p) * factor;
+                    obj["v"] = make_float ? Helpers::transformNumFloat(*(int16_t *)(dv.value_p), num_op) : *(int16_t *)(dv.value_p) * num_op;
                 } else if (dv.type == DeviceValueType::USHORT) {
-                    obj["v"] = divider ? Helpers::round2(*(uint16_t *)(dv.value_p), divider) : *(uint16_t *)(dv.value_p) * factor;
+                    obj["v"] = make_float ? Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), num_op) : *(uint16_t *)(dv.value_p) * num_op;
                 } else if (dv.type == DeviceValueType::ULONG) {
-                    obj["v"] = divider ? Helpers::round2(*(uint32_t *)(dv.value_p), divider) : *(uint32_t *)(dv.value_p) * factor;
+                    obj["v"] = make_float ? Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), num_op) : *(uint32_t *)(dv.value_p) * num_op;
                 } else if (dv.type == DeviceValueType::TIME) {
-                    uint32_t time_value = *(uint32_t *)(dv.value_p);
-                    obj["v"]            = (divider > 0) ? time_value / divider : time_value * factor; // sometimes we need to divide by 60
+                    obj["v"] = num_op ? *(uint32_t *)(dv.value_p)
+                                      : (uint32_t)Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), num_op); // sometimes we need to divide by 60
                 }
             }
         }
@@ -1033,7 +1003,10 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
     // search device value with this tag
     for (auto & dv : devicevalues_) {
         if (strcmp(command_s, Helpers::toLower(read_flash_string(dv.short_name)).c_str()) == 0 && (tag <= 0 || tag == dv.tag)) {
-            int8_t  divider    = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
+            // TODO test divider works
+
+            int8_t num_op = dv.numeric_operator;
+
             uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
             const char * type  = "type";
@@ -1060,48 +1033,48 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                     if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
                         json[value] = (uint8_t)(*(uint8_t *)(dv.value_p));
                     } else {
-                        json[value] = dv.options[*(uint8_t *)(dv.value_p)]; // text
+                        json[value] = Helpers::translated_word(dv.options[*(uint8_t *)(dv.value_p)]); // text
                     }
                 }
                 json[type]      = F_(enum);
                 JsonArray enum_ = json.createNestedArray(F_(enum));
                 for (uint8_t i = 0; i < dv.options_size; i++) {
-                    enum_.add(dv.options[i]);
+                    enum_.add(Helpers::translated_word(dv.options[i]));
                 }
                 break;
             }
 
             case DeviceValueType::USHORT:
                 if (Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
-                    json[value] = Helpers::round2(*(uint16_t *)(dv.value_p), divider, fahrenheit);
+                    json[value] = Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), num_op, fahrenheit);
                 }
                 json[type] = F_(number);
                 break;
 
             case DeviceValueType::UINT:
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                    json[value] = Helpers::round2(*(uint8_t *)(dv.value_p), divider, fahrenheit);
+                    json[value] = Helpers::transformNumFloat(*(uint8_t *)(dv.value_p), num_op, fahrenheit);
                 }
                 json[type] = F_(number);
                 break;
 
             case DeviceValueType::SHORT:
                 if (Helpers::hasValue(*(int16_t *)(dv.value_p))) {
-                    json[value] = Helpers::round2(*(int16_t *)(dv.value_p), divider, fahrenheit);
+                    json[value] = Helpers::transformNumFloat(*(int16_t *)(dv.value_p), num_op, fahrenheit);
                 }
                 json[type] = F_(number);
                 break;
 
             case DeviceValueType::INT:
                 if (Helpers::hasValue(*(int8_t *)(dv.value_p))) {
-                    json[value] = Helpers::round2(*(int8_t *)(dv.value_p), divider, fahrenheit);
+                    json[value] = Helpers::transformNumFloat(*(int8_t *)(dv.value_p), num_op, fahrenheit);
                 }
                 json[type] = F_(number);
                 break;
 
             case DeviceValueType::ULONG:
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    json[value] = Helpers::round2(*(uint32_t *)(dv.value_p), divider);
+                    json[value] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), num_op);
                 }
                 json[type] = F_(number);
                 break;
@@ -1123,7 +1096,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
 
             case DeviceValueType::TIME:
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    json[value] = Helpers::round2(*(uint32_t *)(dv.value_p), divider);
+                    json[value] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), num_op);
                 }
                 json[type] = F_(number);
                 break;
@@ -1140,7 +1113,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                 if (dv.options_size > 1) {
                     JsonArray enum_ = json.createNestedArray(F_(enum));
                     for (uint8_t i = 0; i < dv.options_size; i++) {
-                        enum_.add(dv.options[i]);
+                        enum_.add(Helpers::translated_word(dv.options[i]));
                     }
                 }
                 break;
@@ -1239,6 +1212,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
 
             // create the name for the JSON key
             char name[80];
+
             if (output_target == OUTPUT_TARGET::API_VERBOSE || output_target == OUTPUT_TARGET::CONSOLE) {
                 if (have_tag) {
                     snprintf(name, 80, "%s %s", tag_to_string(dv.tag).c_str(), read_flash_string(dv.full_name).c_str()); // prefix the tag
@@ -1287,7 +1261,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                 if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
                     json[name] = (uint8_t)(*(uint8_t *)(dv.value_p));
                 } else {
-                    json[name] = dv.options[*(uint8_t *)(dv.value_p)];
+                    json[name] = Helpers::translated_word(dv.options[*(uint8_t *)(dv.value_p)]);
                 }
             }
 
@@ -1298,71 +1272,71 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             else {
                 // If a divider is specified, do the division to 2 decimals places and send back as double/float
                 // otherwise force as an integer whole
-                uint8_t divider = 0;
-                uint8_t factor  = 1;
-                if (dv.options_size == 1) {
-                    auto s_str     = read_flash_string(dv.options[0]); // prevent object backing the pointer will be destroyed at the end of the full-expression
-                    const char * s = s_str.c_str();
-                    if (s[0] == '*') {
-                        factor = Helpers::atoint(&s[1]);
-                    } else {
-                        divider = Helpers::atoint(s);
-                    }
-                }
 
-                // fahrenheit, 0 is no converstion other 1 or 2. not sure why?
+                // TODO test divider works
+
+                // fahrenheit, 0 is no conversion other 1 or 2. not sure why?
                 uint8_t fahrenheit = !EMSESP::system_.fahrenheit()           ? 0
                                      : (dv.uom == DeviceValueUOM::DEGREES)   ? 2
                                      : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1
                                                                              : 0;
 
+                int8_t num_op     = dv.numeric_operator;
+                bool   make_float = true;
+                if (num_op < 0) {
+                    num_op *= -1; // convert to a positive multiplier
+                    make_float = false;
+                }
+
                 // always convert temperatures to floats with 1 decimal place
-                bool make_float = (divider || (dv.uom == DeviceValueUOM::DEGREES) || (dv.uom == DeviceValueUOM::DEGREES_R));
+                if ((dv.uom == DeviceValueUOM::DEGREES) || (dv.uom == DeviceValueUOM::DEGREES_R)) {
+                    make_float = true;
+                }
 
                 if (dv.type == DeviceValueType::INT) {
                     if (make_float) {
-                        json[name] = Helpers::round2(*(int8_t *)(dv.value_p), divider, fahrenheit);
+                        json[name] = Helpers::transformNumFloat(*(int8_t *)(dv.value_p), num_op, fahrenheit);
                     } else {
-                        json[name] = *(int8_t *)(dv.value_p) * factor;
+                        json[name] = *(int8_t *)(dv.value_p) * num_op;
                     }
                 } else if (dv.type == DeviceValueType::UINT) {
                     if (make_float) {
-                        json[name] = Helpers::round2(*(uint8_t *)(dv.value_p), divider, fahrenheit);
+                        json[name] = Helpers::transformNumFloat(*(uint8_t *)(dv.value_p), num_op, fahrenheit);
                     } else {
-                        json[name] = *(uint8_t *)(dv.value_p) * factor;
+                        json[name] = *(uint8_t *)(dv.value_p) * num_op;
                     }
                 } else if (dv.type == DeviceValueType::SHORT) {
                     if (make_float) {
-                        json[name] = Helpers::round2(*(int16_t *)(dv.value_p), divider, fahrenheit);
+                        json[name] = Helpers::transformNumFloat(*(int16_t *)(dv.value_p), num_op, fahrenheit);
                     } else {
-                        json[name] = *(int16_t *)(dv.value_p) * factor;
+                        json[name] = *(int16_t *)(dv.value_p) * num_op;
                     }
                 } else if (dv.type == DeviceValueType::USHORT) {
                     if (make_float) {
-                        json[name] = Helpers::round2(*(uint16_t *)(dv.value_p), divider, fahrenheit);
+                        json[name] = Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), num_op, fahrenheit);
                     } else {
-                        json[name] = *(uint16_t *)(dv.value_p) * factor;
+                        json[name] = *(uint16_t *)(dv.value_p) * num_op;
                     }
                 } else if (dv.type == DeviceValueType::ULONG) {
                     if (make_float) {
-                        json[name] = Helpers::round2(*(uint32_t *)(dv.value_p), divider, fahrenheit);
+                        json[name] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), num_op, fahrenheit);
                     } else {
-                        json[name] = *(uint32_t *)(dv.value_p) * factor;
+                        json[name] = *(uint32_t *)(dv.value_p) * num_op;
                     }
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     uint32_t time_value = *(uint32_t *)(dv.value_p);
-                    time_value          = Helpers::round2(time_value, divider); // sometimes we need to divide by 60
+                    time_value          = Helpers::transformNumFloat(time_value, num_op); // sometimes we need to divide by 60
                     if (output_target == OUTPUT_TARGET::API_VERBOSE || output_target == OUTPUT_TARGET::CONSOLE) {
-                        char time_s[40];
+                        char time_s[60];
                         snprintf(time_s,
                                  sizeof(time_s),
                                  "%d %s %d %s %d %s",
                                  (time_value / 1440),
-                                 read_flash_string(F_(days)).c_str(),
+                                 Helpers::translated_word(FL_(days)).c_str(),
                                  ((time_value % 1440) / 60),
-                                 read_flash_string(F_(hours)).c_str(),
+                                 Helpers::translated_word(FL_(hours)).c_str(),
                                  (time_value % 60),
-                                 read_flash_string(F_(minutes)).c_str());
+                                 Helpers::translated_word(FL_(minutes)).c_str());
                         json[name] = time_s;
                     } else {
                         json[name] = time_value;

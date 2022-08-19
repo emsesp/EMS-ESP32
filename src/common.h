@@ -59,11 +59,8 @@ using uuid::read_flash_string;
 
 // clang-format on
 
-//
 // load translations
-//
-#include "locale_EN.h"
-// #include "locale_DE.h"
+#include "locale_languages.h"
 #include "locale_common.h"
 
 #endif

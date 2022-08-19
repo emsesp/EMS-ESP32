@@ -22,6 +22,73 @@
 
 namespace emsesp {
 
+// constructor
+DeviceValue::DeviceValue(uint8_t                              device_type,
+                         uint8_t                              tag,
+                         void *                               value_p,
+                         uint8_t                              type,
+                         const __FlashStringHelper * const ** options,
+                         const __FlashStringHelper * const *  options_single,
+                         int8_t                               numeric_operator,
+                         const __FlashStringHelper *          short_name,
+                         const __FlashStringHelper *          full_name,
+                         uint8_t                              uom,
+                         uint8_t                              ha,
+                         bool                                 has_cmd,
+                         int16_t                              min,
+                         uint16_t                             max,
+                         uint8_t                              state)
+    : device_type(device_type)
+    , tag(tag)
+    , value_p(value_p)
+    , type(type)
+    , options(options)
+    , options_single(options_single)
+    , numeric_operator(numeric_operator)
+    , short_name(short_name)
+    , full_name(full_name)
+    , uom(uom)
+    , ha(ha)
+    , has_cmd(has_cmd)
+    , min(min)
+    , max(max)
+    , state(state) {
+    // #items in options list
+    if (options_single) {
+        options_size = 1;
+    } else {
+        options_size = Helpers::count_items(options);
+    }
+
+#ifdef EMSESP_STANDALONE
+    Serial.print("registering entity: ");
+    Serial.print(read_flash_string(short_name).c_str());
+    Serial.print("/");
+    Serial.print(read_flash_string(full_name).c_str());
+    Serial.print(" (#options=");
+    Serial.print(options_size);
+    Serial.print(",numop=");
+    Serial.print(numeric_operator);
+    Serial.print(") ");
+    if (options != nullptr) {
+        uint8_t i = 0;
+        while (i < options_size) {
+            Serial.print(" option");
+            Serial.print(i + 1);
+            Serial.print(":");
+            auto str = Helpers::translated_fword(options[i]);
+            Serial.print(read_flash_string(str).c_str());
+            i++;
+        }
+    } else if (options_single != nullptr) {
+        Serial.print("option1:!");
+        Serial.print(uuid::read_flash_string(options_single[0]).c_str());
+        Serial.print("!");
+    }
+    Serial.println("");
+#endif
+}
+
 // mapping of UOM, to match order in DeviceValueUOM enum emsdevice.h
 // also maps to DeviceValueUOM in interface/src/project/types.ts for the Web UI
 // must be an int of 4 bytes, 32bit aligned
@@ -198,8 +265,8 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
     // if we have individual limits set already, just do the conversion
     // limits are not scaled with divider and temperatures are °C
     if (min != 0 || max != 0) {
-        dv_set_min = Helpers::round2(min, 0, fahrenheit);
-        dv_set_max = Helpers::round2(max, 0, fahrenheit);
+        dv_set_min = Helpers::transformNumFloat(min, 0, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(max, 0, fahrenheit);
         return true;
     }
 
@@ -207,17 +274,17 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
     dv_set_min = 0;
     dv_set_max = 0;
 
-    int8_t divider = (options_size == 1) ? Helpers::atoint(uuid::read_flash_string(options[0]).c_str()) : 0;
+    int8_t divider = (options_size == 1) ? Helpers::atoint(Helpers::translated_word(options[0]).c_str()) : 0;
 
     if (type == DeviceValueType::USHORT) {
-        dv_set_min = Helpers::round2(0, divider, fahrenheit);
-        dv_set_max = Helpers::round2(EMS_VALUE_USHORT_NOTSET, divider, fahrenheit);
+        dv_set_min = Helpers::transformNumFloat(0, divider, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_USHORT_NOTSET, divider, fahrenheit);
         return true;
     }
 
     if (type == DeviceValueType::SHORT) {
-        dv_set_min = Helpers::round2(-EMS_VALUE_SHORT_NOTSET, divider, fahrenheit);
-        dv_set_max = Helpers::round2(EMS_VALUE_SHORT_NOTSET, divider, fahrenheit);
+        dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_SHORT_NOTSET, divider, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_SHORT_NOTSET, divider, fahrenheit);
         return true;
     }
 
@@ -225,7 +292,7 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
         if (uom == DeviceValueUOM::PERCENT) {
             dv_set_max = 100;
         } else {
-            dv_set_max = Helpers::round2(EMS_VALUE_UINT_NOTSET, divider, fahrenheit);
+            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_UINT_NOTSET, divider, fahrenheit);
         }
         return true;
     }
@@ -235,19 +302,19 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
             dv_set_min = -100;
             dv_set_max = 100;
         } else {
-            dv_set_min = Helpers::round2(-EMS_VALUE_INT_NOTSET, divider, fahrenheit);
-            dv_set_max = Helpers::round2(EMS_VALUE_INT_NOTSET, divider, fahrenheit);
+            dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_INT_NOTSET, divider, fahrenheit);
+            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_INT_NOTSET, divider, fahrenheit);
         }
         return true;
     }
 
     if (type == DeviceValueType::ULONG) {
-        dv_set_max = Helpers::round2(EMS_VALUE_ULONG_NOTSET, divider);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET, divider);
         return true;
     }
 
     if (type == DeviceValueType::TIME) {
-        dv_set_max = Helpers::round2(EMS_VALUE_ULONG_NOTSET, divider);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET, divider);
         return true;
     }
 
