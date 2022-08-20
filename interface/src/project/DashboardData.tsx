@@ -79,7 +79,7 @@ const DashboardData: FC = () => {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const [coreData, setCoreData] = useState<CoreData>({ devices: [], active_sensors: 0, analog_enabled: false });
+  const [coreData, setCoreData] = useState<CoreData>({ connected: true, devices: [], active_sensors: 0, analog_enabled: false });
   const [deviceData, setDeviceData] = useState<DeviceData>({ label: '', data: [] });
   const [sensorData, setSensorData] = useState<SensorData>({ sensors: [], analogs: [] });
   const [deviceValue, setDeviceValue] = useState<DeviceValue>();
@@ -640,7 +640,8 @@ const DashboardData: FC = () => {
 
   const renderCoreData = () => (
     <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
-      {coreData.devices.length === 0 && <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />}
+      {!coreData.connected && <MessageBox my={2} level="error" message="EMSbus disconnected, check settings and board profile" />}
+      {coreData.connected && coreData.devices.length === 0 && <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />}
       <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
         {(tableList: any) => (
           <>

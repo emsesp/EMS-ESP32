@@ -28,6 +28,14 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     uint8_t model = this->model();
 
+    // remote thermostats with humidity
+    if (device_id >= 0x38 && device_id <= 0x3F) { // RC100H remote
+        register_telegram_type(0x042B, F("RemoteTemp"), false, MAKE_PF_CB(process_RemoteTemp));
+        register_telegram_type(0x047B, F("RemoteHumidity"), false, MAKE_PF_CB(process_RemoteHumidity));
+        register_telegram_type(0x0273, F("RemoteCorrection"), true, MAKE_PF_CB(process_RemoteCorrection));
+        register_device_values(); // register device values for common values (not heating circuit)
+        return; // no values to add
+    }
     // common telegram handlers
     register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, MAKE_PF_CB(process_RCOutdoorTemp));
     register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), false, MAKE_PF_CB(process_RCTime));
@@ -288,13 +296,13 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     }
 
     // not found, search device-id types for remote thermostats
-    if (telegram->src >= 0x18 && telegram->src <= 0x1B) {
+    if (hc_num == 0 && telegram->src >= 0x18 && telegram->src <= 0x1F) {
         hc_num  = telegram->src - 0x17;
         toggle_ = true;
     }
 
     // not found, search device-id types for remote thermostats
-    if (telegram->dest >= 0x20 && telegram->dest <= 0x27) {
+    if (hc_num == 0 && telegram->dest >= 0x20 && telegram->dest <= 0x27) {
         hc_num = telegram->dest - 0x20;
     }
 
@@ -339,8 +347,9 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 
     // set the flag saying we want its data during the next auto fetch
     // monitor is broadcasted, but not frequently in some thermostats (IVT, #356)
-    toggle_fetch(monitor_typeids[hc_num - 1], toggle_);
-
+    if (monitor_typeids.size()) {
+        toggle_fetch(monitor_typeids[hc_num - 1], toggle_);
+    }
     if (set_typeids.size()) {
         toggle_fetch(set_typeids[hc_num - 1], toggle_);
     }
@@ -682,6 +691,24 @@ void Thermostat::process_RC20Remote(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->remotetemp, 0);
 }
 
+// 0x42B - for reading the roomtemperature from the RC100H remote thermostat (0x38, 0x39, ..)
+// e.g. "38 10 FF 00 03 2B 00 D1 08 2A 01"
+void Thermostat::process_RemoteTemp(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, tempsensor1_, 0);
+}
+
+// 0x47B - for reading humidity from the RC100H remote thermostat (0x38, 0x39, ..)
+// e.g. "38 10 FF 00 03 7B 08 24 00 4B"
+void Thermostat::process_RemoteHumidity(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, dewtemperature_, 0);
+    has_update(telegram, humidity_, 1);
+}
+
+// 0x273 - for reading temperaturcorrection from the RC100H remote thermostat (0x38, 0x39, ..)
+void Thermostat::process_RemoteCorrection(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, ibaCalIntTemperature_, 0);
+}
+
 // type 0x0165, ff
 void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
@@ -986,6 +1013,7 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     has_enumupdate(telegram, hc->reducemode, 5, 1); // 1-outdoor temp threshold, 2-room temp threshold, 3-reduced mode
     has_update(telegram, hc->reducetemp, 9);
     has_update(telegram, hc->noreducetemp, 12);
+    has_update(telegram, hc->remoteseltemp, 17); // see https://github.com/emsesp/EMS-ESP32/issues/590
 }
 
 // types 0x2AF ff
@@ -1597,6 +1625,8 @@ bool Thermostat::set_calinttemp(const char * value, const int8_t id) {
         write_command(0xB0, 0, t, 0xB0);
     } else if (model() == EMS_DEVICE_FLAG_RC30) {
         write_command(EMS_TYPE_RC30Settings, 1, t, EMS_TYPE_RC30Settings);
+    } else if (model() == EMS_DEVICE_FLAG_RC100H) {
+        write_command(0x273, 0, t, 0x273);
     } else {
         write_command(EMS_TYPE_IBASettings, 2, t, EMS_TYPE_IBASettings);
     }
@@ -2950,6 +2980,9 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                 factor = 1; // to write 0xFF
             }
             break;
+        case HeatingCircuit::Mode::REMOTESELTEMP:
+            offset = 0x11;
+            break;
         case HeatingCircuit::Mode::COMFORT:
             offset = 0x02; // comfort offset level 2
             break;
@@ -3334,9 +3367,25 @@ bool Thermostat::set_roominfluence(const char * value, const int8_t id) {
     return set_temperature_value(value, id, HeatingCircuit::Mode::ROOMINFLUENCE, true);
 }
 
+bool Thermostat::set_remoteseltemp(const char * value, const int8_t id) {
+    return set_temperature_value(value, id, HeatingCircuit::Mode::REMOTESELTEMP);
+}
+
 // register main device values, top level for all thermostats (excluding heating circuits)
 // as these are done in void Thermostat::register_device_values_hc()
 void Thermostat::register_device_values() {
+    // RC100H remote with humidity, this is also EMS_DEVICE_FLAG_RC100 for set_calinttemp
+    if (device_id() >= 0x38 && device_id() <= 0x3F) {
+        // each device controls only one hc, so we tag the values
+        uint8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x38;
+        register_device_value(tag, &tempsensor1_, DeviceValueType::SHORT, FL_(div10), FL_(remotetemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &dewtemperature_, DeviceValueType::INT, nullptr, FL_(dewTemperature), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &humidity_, DeviceValueType::INT, nullptr, FL_(airHumidity), DeviceValueUOM::PERCENT);
+        register_device_value(
+            tag, &ibaCalIntTemperature_, DeviceValueType::INT, FL_(div10), FL_(ibaCalIntTemperature), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_calinttemp));
+        return;
+    }
+
     // Common for all thermostats
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &errorCode_, DeviceValueType::STRING, nullptr, FL_(errorCode), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &lastCode_, DeviceValueType::STRING, nullptr, FL_(lastCode), DeviceValueUOM::NONE);
@@ -3732,8 +3781,8 @@ void Thermostat::register_device_values() {
                               FL_(ibaMinExtTemperature),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_minexttemp));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &tempsensor1_, DeviceValueType::USHORT, FL_(div10), FL_(tempsensor1), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &tempsensor2_, DeviceValueType::USHORT, FL_(div10), FL_(tempsensor2), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &tempsensor1_, DeviceValueType::SHORT, FL_(div10), FL_(tempsensor1), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &tempsensor2_, DeviceValueType::SHORT, FL_(div10), FL_(tempsensor2), DeviceValueUOM::DEGREES);
         register_device_value(
             DeviceValueTAG::TAG_DEVICE_DATA, &ibaDamping_, DeviceValueType::BOOL, nullptr, FL_(damping), DeviceValueUOM::NONE, MAKE_CF_CB(set_damping));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dampedoutdoortemp_, DeviceValueType::INT, nullptr, FL_(dampedoutdoortemp), DeviceValueUOM::DEGREES);
@@ -3994,6 +4043,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(
             tag, &hc->tempautotemp, DeviceValueType::INT, FL_(div2), FL_(tempautotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_tempautotemp), -1, 30);
+        register_device_value(
+            tag, &hc->remoteseltemp, DeviceValueType::INT, FL_(div2), FL_(remoteseltemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_remoteseltemp), -1, 30);
         register_device_value(tag, &hc->fastHeatup, DeviceValueType::UINT, nullptr, FL_(fastheatup), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fastheatup));
         register_device_value(tag,
                               &hc->switchonoptimization,
