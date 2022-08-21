@@ -75,7 +75,7 @@ class Helpers {
     static uint8_t count_items(const __FlashStringHelper * const ** list);
     static uint8_t count_items(const __FlashStringHelper * const * list);
 
-    static std::string                 translated_word(const __FlashStringHelper * const * strings);
+    static std::string                 translated_word(const __FlashStringHelper * const * strings, bool to_lower = false);
     static const __FlashStringHelper * translated_fword(const __FlashStringHelper * const * strings);
 
 #ifdef EMSESP_STANDALONE

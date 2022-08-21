@@ -281,11 +281,11 @@ void EMSESPShell::add_console_commands() {
                                   // get raw/pretty
                                   if (arguments[0] == read_flash_string(F_(raw))) {
                                       EMSESP::watch(EMSESP::WATCH_RAW); // raw
-                                  } else if (arguments[0] == read_flash_string(F_(on))) {
+                                  } else if (arguments[0] == Helpers::translated_word(FL_(on))) {
                                       EMSESP::watch(EMSESP::WATCH_ON); // on
-                                  } else if (arguments[0] == read_flash_string(F_(off))) {
+                                  } else if (arguments[0] == Helpers::translated_word(FL_(off))) {
                                       EMSESP::watch(EMSESP::WATCH_OFF); // off
-                                  } else if (arguments[0] == read_flash_string(F_(unknown))) {
+                                  } else if (arguments[0] == Helpers::translated_word(FL_(unknown))) {
                                       EMSESP::watch(EMSESP::WATCH_UNKNOWN); // unknown
                                       watch_id = WATCH_ID_NONE;
                                   } else {

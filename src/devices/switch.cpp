@@ -30,7 +30,12 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     register_telegram_type(0x1E, F("WM10TempMessage"), false, MAKE_PF_CB(process_WM10TempMessage));
 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &activated_, DeviceValueType::BOOL, FL_(activated), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &flowTempHc_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempHc), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &flowTempHc_,
+                          DeviceValueType::USHORT,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(flowTempHc),
+                          DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &status_, DeviceValueType::INT, FL_(status), DeviceValueUOM::NONE);
 }
 

@@ -53,7 +53,7 @@ DeviceValue::DeviceValue(uint8_t                              device_type,
     , min(min)
     , max(max)
     , state(state) {
-    // #items in options list
+    // calculate #items in options list
     if (options_single) {
         options_size = 1;
     } else {
@@ -61,6 +61,7 @@ DeviceValue::DeviceValue(uint8_t                              device_type,
     }
 
 #ifdef EMSESP_STANDALONE
+    // only added for debugging
     Serial.print("registering entity: ");
     Serial.print(read_flash_string(short_name).c_str());
     Serial.print("/");
@@ -82,7 +83,7 @@ DeviceValue::DeviceValue(uint8_t                              device_type,
         }
     } else if (options_single != nullptr) {
         Serial.print("option1:!");
-        Serial.print(uuid::read_flash_string(options_single[0]).c_str());
+        Serial.print(read_flash_string(options_single[0]).c_str());
         Serial.print("!");
     }
     Serial.println("");
@@ -94,25 +95,25 @@ DeviceValue::DeviceValue(uint8_t                              device_type,
 // must be an int of 4 bytes, 32bit aligned
 const __FlashStringHelper * DeviceValue::DeviceValueUOM_s[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = {
 
-    F_(blank),
-    F_(degrees),
-    F_(degrees),
-    F_(percent),
-    F_(lmin),
-    F_(kwh),
-    F_(wh),
-    F_(hours),
-    F_(minutes),
-    F_(ua),
-    F_(bar),
-    F_(kw),
-    F_(w),
-    F_(kb),
-    F_(seconds),
-    F_(dbm),
-    F_(fahrenheit),
-    F_(mv),
-    F_(sqm)
+    F_(uom_blank),
+    F_(uom_degrees),
+    F_(uom_degrees),
+    F_(uom_percent),
+    F_(uom_lmin),
+    F_(uom_kwh),
+    F_(uom_wh),
+    F_(uom_hours),
+    F_(uom_minutes),
+    F_(uom_ua),
+    F_(uom_bar),
+    F_(uom_kw),
+    F_(uom_w),
+    F_(uom_kb),
+    F_(uom_seconds),
+    F_(uom_dbm),
+    F_(uom_fahrenheit),
+    F_(uom_mv),
+    F_(uom_sqm)
 
 };
 

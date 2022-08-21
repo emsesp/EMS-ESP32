@@ -38,6 +38,7 @@ class Thermostat : public EMSdevice {
         int16_t roomTemp;
         int16_t remotetemp; // for readback
         uint8_t tempautotemp;
+        int8_t  remoteseltemp;
         uint8_t mode;
         uint8_t modetype;
         uint8_t summermode;
@@ -133,6 +134,7 @@ class Thermostat : public EMSdevice {
             ON,
             DAYLOW,
             DAYMID,
+            REMOTESELTEMP,
             UNKNOWN
 
         };
@@ -193,12 +195,14 @@ class Thermostat : public EMSdevice {
     uint8_t offtemp_;      // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
     uint8_t mixingvalves_; // Number of Mixing Valves: (0x00=0, 0x01=1, 0x02=2)
 
-    int8_t   dampedoutdoortemp_;
-    uint16_t tempsensor1_;
-    uint16_t tempsensor2_;
-    int16_t  dampedoutdoortemp2_;
-    uint8_t  floordrystatus_;
-    uint8_t  floordrytemp_;
+    int8_t  dampedoutdoortemp_;
+    int16_t tempsensor1_;
+    int16_t tempsensor2_;
+    int16_t dampedoutdoortemp2_;
+    uint8_t floordrystatus_;
+    uint8_t floordrytemp_;
+    uint8_t dewtemperature_;
+    uint8_t humidity_;
 
     uint8_t wwExtra1_; // wwExtra active for wwSystem 1
     uint8_t wwExtra2_;
@@ -380,6 +384,9 @@ class Thermostat : public EMSdevice {
     void process_JunkersRemoteMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersHybridSettings(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram);
+    void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
+    void process_RemoteHumidity(std::shared_ptr<const Telegram> telegram);
+    void process_RemoteCorrection(std::shared_ptr<const Telegram> telegram);
 
     // internal helper functions
     bool set_mode_n(const uint8_t mode, const uint8_t hc_num);
@@ -433,6 +440,7 @@ class Thermostat : public EMSdevice {
     bool set_wwprio(const char * value, const int8_t id);
     bool set_fastheatup(const char * value, const int8_t id);
     bool set_switchonoptimization(const char * value, const int8_t id);
+    bool set_remoteseltemp(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);

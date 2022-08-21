@@ -233,8 +233,8 @@ void RxService::add(uint8_t * data, uint8_t length) {
 }
 
 // add empty telegram to rx-queue
-void RxService::add_empty(const uint8_t src, const uint8_t dest, const uint16_t type_id) {
-    auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, 0, nullptr, 0);
+void RxService::add_empty(const uint8_t src, const uint8_t dest, const uint16_t type_id, uint8_t offset) {
+    auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, nullptr, 0);
     // only if queue is  not full
     if (rx_telegrams_.size() < MAX_RX_TELEGRAMS) {
         rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
@@ -585,20 +585,25 @@ void TxService::send_raw(const char * telegram_data) {
 void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const uint8_t length) {
     // have we reached the limit? if so, reset count and give up
     if (++retry_count_ > MAXIMUM_TX_RETRIES) {
-        reset_retry_count(); // give up
+        reset_retry_count();      // give up
+        EMSESP::wait_validate(0); // do not wait for validation
         if (operation == Telegram::Operation::TX_READ) {
+            if (telegram_last_->offset > 0) { // ignore errors for higher offsets
+                LOG_DEBUG(F("Last Tx Read operation failed after %d retries. Ignoring request: %s"), MAXIMUM_TX_RETRIES, telegram_last_->to_string().c_str());
+                return;
+            }
             increment_telegram_read_fail_count(); // another Tx fail
         } else {
             increment_telegram_write_fail_count(); // another Tx fail
         }
-        EMSESP::wait_validate(0); // do not wait for validation
 
         LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request: %s"),
                   (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
                   MAXIMUM_TX_RETRIES,
                   telegram_last_->to_string().c_str());
+
         if (operation == Telegram::Operation::TX_READ) {
-            EMSESP::rxservice_.add_empty(telegram_last_->dest, telegram_last_->src, telegram_last_->type_id);
+            EMSESP::rxservice_.add_empty(telegram_last_->dest, telegram_last_->src, telegram_last_->type_id, telegram_last_->offset);
         }
         return;
     }

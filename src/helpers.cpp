@@ -634,10 +634,11 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const __FlashSt
     std::string str = toLower(value);
 
     for (value_ui = 0; strs[value_ui]; value_ui++) {
-        std::string str1 = toLower(read_flash_string(strs[value_ui]));
-        if ((str1 != "")
-            && ((str1 == Helpers::translated_word(FL_(off)) && str == "false") || (str1 == Helpers::translated_word(FL_(on)) && str == "true") || (str == str1)
-                || (value[0] == ('0' + value_ui) && value[1] == '\0'))) {
+        std::string enum_str = toLower(read_flash_string(strs[value_ui]));
+
+        if ((enum_str != "")
+            && ((enum_str == Helpers::translated_word(FL_(off)) && str == "false") || (enum_str == Helpers::translated_word(FL_(on)) && str == "true")
+                || (str == enum_str) || (value[0] == ('0' + value_ui) && value[1] == '\0'))) {
             return true;
         }
     }
@@ -695,30 +696,31 @@ uint8_t Helpers::count_items(const __FlashStringHelper * const ** list) {
     return list_size;
 }
 
-// return translated string
+// return translated string as a std::string, optionally converting to lowercase (for console commands)
 // takes a FL(...)
-std::string Helpers::translated_word(const __FlashStringHelper * const * strings) {
+std::string Helpers::translated_word(const __FlashStringHelper * const * strings, bool to_lower) {
     uint8_t language_index = EMSESP::system_.language_index();
+    uint8_t index          = 0;
 
-    // see how many translations we have for this entity
-    // if there is no translation for this, revert to EN
+    // see how many translations we have for this entity. if there is no translation for this, revert to EN
     if (Helpers::count_items(strings) >= language_index + 1) {
-        return read_flash_string(strings[language_index]);
+        index = language_index;
     }
-    return read_flash_string(strings[0]);
+
+    return to_lower ? toLower(read_flash_string(strings[index])) : read_flash_string(strings[index]);
 }
 
 // return translated string
-// takes a FL(...)
+// takes a F(...)
 const __FlashStringHelper * Helpers::translated_fword(const __FlashStringHelper * const * strings) {
     uint8_t language_index = EMSESP::system_.language_index();
+    uint8_t index          = 0;
 
-    // see how many translations we have for this entity
-    // if there is no translation for this, revert to EN
+    // see how many translations we have for this entity. if there is no translation for this, revert to EN
     if (Helpers::count_items(strings) >= language_index + 1) {
-        return (strings[language_index]);
+        index = language_index;
     }
-    return (strings[0]);
+    return strings[index];
 }
 
 } // namespace emsesp

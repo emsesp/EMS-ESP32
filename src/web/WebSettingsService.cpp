@@ -108,10 +108,10 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     check_flag(prev, settings.tx_mode, ChangeFlags::UART);
     prev             = settings.rx_gpio;
     settings.rx_gpio = root["rx_gpio"] | default_rx_gpio;
-    check_flag(prev, settings.rx_gpio, ChangeFlags::UART);
+    check_flag(prev, settings.rx_gpio, ChangeFlags::RESTART);
     prev             = settings.tx_gpio;
     settings.tx_gpio = root["tx_gpio"] | default_tx_gpio;
-    check_flag(prev, settings.tx_gpio, ChangeFlags::UART);
+    check_flag(prev, settings.tx_gpio, ChangeFlags::RESTART);
 
     // syslog
     prev                    = settings.syslog_enabled;

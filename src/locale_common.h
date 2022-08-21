@@ -101,6 +101,10 @@ MAKE_PSTR_WORD(generic)
 MAKE_PSTR_WORD(analogsensor)
 MAKE_PSTR_WORD(dallassensor)
 
+MAKE_PSTR(number, "number")
+MAKE_PSTR(enum, "enum")
+MAKE_PSTR(text, "text")
+
 // Console
 MAKE_PSTR(EMSESP, "EMS-ESP")
 MAKE_PSTR(host_fmt, "Host: %s")
@@ -156,9 +160,15 @@ MAKE_PSTR_LIST(dash, F("-"))
 MAKE_PSTR_LIST(error, F("error"))
 MAKE_PSTR_LIST(BLANK, F(""))
 MAKE_PSTR_LIST(pwm, F("pwm"))
+MAKE_PSTR_LIST(pwm_invers, F("pwm inverse"))
 MAKE_PSTR_LIST(mpc, F("mpc"))
 MAKE_PSTR_LIST(tempauto, F("temp auto"))
-
+MAKE_PSTR_LIST(bypass, F("bypass"))
+MAKE_PSTR_LIST(mixer, F("mixer"))
+MAKE_PSTR_LIST(monovalent, F("monovalent"))
+MAKE_PSTR_LIST(bivalent, F("bivalent"))
+MAKE_PSTR_LIST(n_o, F("n_o"))
+MAKE_PSTR_LIST(n_c, F("n_c"))
 MAKE_PSTR_LIST(prog1, F("prog 1"))
 MAKE_PSTR_LIST(prog2, F("prog 2"))
 MAKE_PSTR_LIST(proga, F("prog a"))
@@ -176,32 +186,32 @@ MAKE_PSTR_LIST(tpl_holidays, F("Format: < dd.mm.yyyy-dd.mm.yyyy >"))
 MAKE_PSTR_LIST(tpl_date, F("Format: < dd.mm.yyyy >"))
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
-// These don't need translating
-MAKE_PSTR(blank, " ")
-MAKE_PSTR(percent, "%")
-MAKE_PSTR(degrees, "°C")
-MAKE_PSTR(kwh, "kWh")
-MAKE_PSTR(wh, "Wh")
-MAKE_PSTR(bar, "bar")
-MAKE_PSTR(ua, "uA")
-MAKE_PSTR(lmin, "l/min")
-MAKE_PSTR(kw, "kW")
-MAKE_PSTR(w, "W")
-MAKE_PSTR(kb, "KB")
-MAKE_PSTR(dbm, "dBm")
-MAKE_PSTR(fahrenheit, "°F")
-MAKE_PSTR(mv, "mV")
-MAKE_PSTR(sqm, "sqm")
-MAKE_PSTR(m3, "m3")
-MAKE_PSTR(l, "l")
+// These don't need translating, it will mess up HA and the API
+MAKE_PSTR(uom_blank, " ")
+MAKE_PSTR(uom_percent, "%")
+MAKE_PSTR(uom_degrees, "°C")
+MAKE_PSTR(uom_hours, "hours")
+MAKE_PSTR(uom_minutes, "minutes")
+MAKE_PSTR(uom_seconds, "seconds")
+MAKE_PSTR(uom_kwh, "kWh")
+MAKE_PSTR(uom_wh, "Wh")
+MAKE_PSTR(uom_bar, "bar")
+MAKE_PSTR(uom_ua, "uA")
+MAKE_PSTR(uom_lmin, "l/min")
+MAKE_PSTR(uom_kw, "kW")
+MAKE_PSTR(uom_w, "W")
+MAKE_PSTR(uom_kb, "KB")
+MAKE_PSTR(uom_dbm, "dBm")
+MAKE_PSTR(uom_fahrenheit, "°F")
+MAKE_PSTR(uom_mv, "mV")
+MAKE_PSTR(uom_sqm, "sqm")
+MAKE_PSTR(uom_m3, "m3")
+MAKE_PSTR(uom_l, "l")
 
 // commands
 MAKE_PSTR(info_cmd, "lists all values")
 MAKE_PSTR(commands_cmd, "lists all commands")
 MAKE_PSTR(entities_cmd, "lists all entities")
-MAKE_PSTR(number, "number")
-MAKE_PSTR(enum, "enum")
-MAKE_PSTR(text, "text")
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
@@ -265,6 +275,10 @@ MAKE_PSTR_LIST(list_sensortype, F("none"), F("digital in"), F("counter"), F("adc
 // watch
 MAKE_PSTR_LIST(list_watch, F("off"), F("on"), F("raw"), F("unknown"))
 
+/*
+ * The rest below are Enums and generated from translations lists
+ */
+
 MAKE_PSTR_ENUM(enum_cylprio, FL_(cyl1), FL_(cyl2))
 MAKE_PSTR_ENUM(enum_progMode, FL_(prog1), FL_(prog2))
 MAKE_PSTR_ENUM(enum_progMode4, FL_(proga), FL_(progb), FL_(progc), FL_(progd), FL_(proge), FL_(progf))
@@ -293,7 +307,7 @@ MAKE_PSTR_ENUM(enum_ibaLanguage_RC30, FL_(german), FL_(dutch))
 MAKE_PSTR_ENUM(enum_floordrystatus, FL_(off), FL_(start), FL_(heat), FL_(hold), FL_(cool), FL_(end))
 MAKE_PSTR_ENUM(enum_ibaBuildingType, FL_(light), FL_(medium), FL_(heavy))
 MAKE_PSTR_ENUM(enum_PID, FL_(fast), FL_(medium), FL_(slow))
-MAKE_PSTR_ENUM(enum_wwMode, FL_(off), FL_(low), FL_(high), FL_(auto), FL_(own_prog))
+MAKE_PSTR_ENUM(enum_wwMode, FL_(off), FL_(normal), FL_(comfort), FL_(auto), FL_(own_prog), FL_(eco))
 MAKE_PSTR_ENUM(enum_wwCircMode, FL_(off), FL_(on), FL_(auto), FL_(own_prog))
 MAKE_PSTR_ENUM(enum_wwMode2, FL_(off), FL_(on), FL_(auto))
 MAKE_PSTR_ENUM(enum_wwMode3, FL_(on), FL_(off), FL_(auto))
@@ -344,5 +358,13 @@ MAKE_PSTR_ENUM(enum_wwStatus2, FL_(BLANK), FL_(BLANK), FL_(BLANK), FL_(no_heat),
 // mixer
 MAKE_PSTR_ENUM(enum_shunt, FL_(stopped), FL_(opening), FL_(closing), FL_(open), FL_(close))
 MAKE_PSTR_ENUM(enum_wwProgMode, FL_(std_prog), FL_(own_prog))
+
+// AM200 lists
+MAKE_PSTR_ENUM(enum_vr2Config, FL_(off), FL_(bypass))
+MAKE_PSTR_ENUM(enum_aPumpSignal, FL_(off), FL_(pwm), FL_(pwm_invers))
+MAKE_PSTR_ENUM(enum_bufBypass, FL_(no), FL_(mixer), FL_(valve))
+MAKE_PSTR_ENUM(enum_blockMode, FL_(off), FL_(auto), FL_(blocking))
+MAKE_PSTR_ENUM(enum_bufConfig, FL_(monovalent), FL_(bivalent))
+MAKE_PSTR_ENUM(enum_blockTerm, FL_(n_o), FL_(n_c))
 
 #pragma GCC diagnostic pop

@@ -51,11 +51,9 @@ using uuid::read_flash_string;
 #define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = string_literal;
 #define MAKE_PSTR_WORD(string_name) MAKE_PSTR(string_name, #string_name)
 
-#define FL_(list_name) (__pstr__##list_name)
-#define MAKE_PSTR_LIST(list_name, ...) static const __FlashStringHelper * const __pstr__##list_name[] PROGMEM = {__VA_ARGS__, nullptr};
-
-// ENUMS
-#define MAKE_PSTR_ENUM(list_nome, ...) static const __FlashStringHelper * const * __pstr__##list_nome[] PROGMEM = {__VA_ARGS__, nullptr};
+#define FL_(list_name) (__pstr__L_##list_name)
+#define MAKE_PSTR_LIST(list_name, ...) static const __FlashStringHelper * const __pstr__L_##list_name[] PROGMEM = {__VA_ARGS__, nullptr};
+#define MAKE_PSTR_ENUM(enum_name, ...) static const __FlashStringHelper * const * __pstr__L_##enum_name[] PROGMEM = {__VA_ARGS__, nullptr};
 
 // clang-format on
 

@@ -133,14 +133,14 @@ class DeviceValue {
     // numeric operators
     // negative numbers used for multipliers
     enum DeviceValueNumOp : int8_t {
-        DV_NUMOP_NONE = 0, // default
-        DV_NUMOP_DIV2 = 2,
-        DV_NUMOP_DIV10 = 10,
-        DV_NUMOP_DIV60 = 60,
+        DV_NUMOP_NONE   = 0, // default
+        DV_NUMOP_DIV2   = 2,
+        DV_NUMOP_DIV10  = 10,
+        DV_NUMOP_DIV60  = 60,
         DV_NUMOP_DIV100 = 100,
-        DV_NUMOP_MUL5 = -5,
-        DV_NUMOP_MUL10 = -10,
-        DV_NUMOP_MUL15 = -15
+        DV_NUMOP_MUL5   = -5,
+        DV_NUMOP_MUL10  = -10,
+        DV_NUMOP_MUL15  = -15
     };
 
     uint8_t                              device_type;    // EMSdevice::DeviceType
@@ -149,7 +149,7 @@ class DeviceValue {
     uint8_t                              type;           // DeviceValueType::*
     const __FlashStringHelper * const ** options;        // options as a flash char array
     const __FlashStringHelper * const *  options_single; // options are not translated
-    int8_t                              numeric_operator;
+    int8_t                               numeric_operator;
     uint8_t                              options_size; // number of options in the char array, calculated
     const __FlashStringHelper *          short_name;   // used in MQTT
     const __FlashStringHelper *          full_name;    // used in Web and Console
@@ -166,7 +166,7 @@ class DeviceValue {
                 uint8_t                              type,
                 const __FlashStringHelper * const ** options,
                 const __FlashStringHelper * const *  options_single,
-                int8_t                              numeric_operator,
+                int8_t                               numeric_operator,
                 const __FlashStringHelper *          short_name,
                 const __FlashStringHelper *          full_name,
                 uint8_t                              uom,

@@ -51,6 +51,7 @@ std::string EMSdevice::tag_to_mqtt(uint8_t tag) {
     return read_flash_string(DeviceValue::DeviceValueTAG_mqtt[tag]);
 }
 
+// convert UOM to a string - these don't need translating
 std::string EMSdevice::uom_to_string(uint8_t uom) {
     if (EMSESP::system_.fahrenheit() && (uom == DeviceValueUOM::DEGREES || uom == DeviceValueUOM::DEGREES_R)) {
         return read_flash_string(DeviceValue::DeviceValueUOM_s[DeviceValueUOM::FAHRENHEIT]);
@@ -107,7 +108,7 @@ std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     case DeviceType::GATEWAY:
         return read_flash_string(F_(gateway));
     default:
-        return read_flash_string(F_(unknown));
+        return Helpers::translated_word(FL_(unknown));
     }
 }
 
@@ -1111,7 +1112,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                 break;
 
             default:
-                json[type] = F_(unknown);
+                json[type] = Helpers::translated_word(FL_(unknown));
                 break;
             }
 

@@ -94,6 +94,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     // sensors stuff
     root["active_sensors"] = EMSESP::dallassensor_.no_sensors() + (EMSESP::analogsensor_.analog_enabled() ? EMSESP::analogsensor_.no_sensors() : 0);
     root["analog_enabled"] = EMSESP::analogsensor_.analog_enabled();
+    root["connected"]      = EMSESP::bus_status() != 2;
 
     response->setLength();
     request->send(response);

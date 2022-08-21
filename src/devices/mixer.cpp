@@ -30,7 +30,12 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MP) {
         register_telegram_type(0x5BA, F("HpPoolStatus"), true, MAKE_PF_CB(process_HpPoolStatus));
         type_ = Type::MP;
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolTemp_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(poolTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &poolTemp_,
+                              DeviceValueType::SHORT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(poolTemp),
+                              DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolShuntStatus_, DeviceValueType::ENUM, FL_(enum_shunt), FL_(poolShuntStatus), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolShunt_, DeviceValueType::UINT, FL_(poolShunt), DeviceValueUOM::PERCENT);
     }
@@ -91,8 +96,15 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
         register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
         register_device_value(tag, &activated_, DeviceValueType::BOOL, FL_(activated), DeviceValueUOM::NONE, MAKE_CF_CB(set_activated));
-        register_device_value(
-            tag, &setValveTime_, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_MUL10, FL_(mixerSetTime), DeviceValueUOM::SECONDS, MAKE_CF_CB(set_setValveTime), 10, 120);
+        register_device_value(tag,
+                              &setValveTime_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_MUL10,
+                              FL_(mixerSetTime),
+                              DeviceValueUOM::SECONDS,
+                              MAKE_CF_CB(set_setValveTime),
+                              10,
+                              120);
     }
 
     // HT3
