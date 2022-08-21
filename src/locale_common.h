@@ -20,6 +20,10 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
+/*
+ * THIS FILE CONTAINS STANDARD STRING LITERALS THAT DON'T NEED LANGUAGE TRANSLATIONS
+ */
+
 // common words
 MAKE_PSTR_WORD(debug)
 MAKE_PSTR_WORD(exit)
@@ -152,9 +156,9 @@ MAKE_PSTR_LIST(dash, F("-"))
 MAKE_PSTR_LIST(error, F("error"))
 MAKE_PSTR_LIST(BLANK, F(""))
 MAKE_PSTR_LIST(pwm, F("pwm"))
+MAKE_PSTR_LIST(mpc, F("mpc"))
+MAKE_PSTR_LIST(tempauto, F("temp auto"))
 
-MAKE_PSTR_LIST(cyl1, F("cyl_1"))
-MAKE_PSTR_LIST(cyl2, F("cyl_2"))
 MAKE_PSTR_LIST(prog1, F("prog 1"))
 MAKE_PSTR_LIST(prog2, F("prog 2"))
 MAKE_PSTR_LIST(proga, F("prog a"))
@@ -163,6 +167,13 @@ MAKE_PSTR_LIST(progc, F("prog c"))
 MAKE_PSTR_LIST(progd, F("prog d"))
 MAKE_PSTR_LIST(proge, F("prog e"))
 MAKE_PSTR_LIST(progf, F("prog f"))
+
+// templates
+MAKE_PSTR_LIST(tpl_datetime, F("Format: < NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1) >"))
+MAKE_PSTR_LIST(tpl_switchtime, F("Format: <nn> [ not_set | day hh:mm on|off ]"))
+MAKE_PSTR_LIST(tpl_switchtime1, F("Format: <nn> [ not_set | day hh:mm Tn ]"))
+MAKE_PSTR_LIST(tpl_holidays, F("Format: < dd.mm.yyyy-dd.mm.yyyy >"))
+MAKE_PSTR_LIST(tpl_date, F("Format: < dd.mm.yyyy >"))
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
 // These don't need translating

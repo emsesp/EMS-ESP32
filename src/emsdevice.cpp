@@ -640,8 +640,6 @@ void EMSdevice::publish_value(void * value_p) const {
                 snprintf(topic, sizeof(topic), "%s/%s", Mqtt::tag_to_topic(device_type_, dv.tag).c_str(), read_flash_string(dv.short_name).c_str());
             }
 
-            // TODO test divider works
-
             int8_t num_op = dv.numeric_operator;
 
             char    payload[55] = {'\0'};
@@ -770,8 +768,6 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 // If a divider is specified, do the division to 2 decimals places and send back as double/float
                 // otherwise force as an integer whole
                 // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
-
-                // TODO test divider works
                 int8_t num_op = dv.numeric_operator;
 
                 fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
@@ -888,8 +884,6 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
                 // otherwise force as an integer whole
                 // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
 
-                // TODO test divider works
-
                 int8_t num_op     = dv.numeric_operator;
                 bool   make_float = true;
                 if (num_op < 0) {
@@ -1003,8 +997,6 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
     // search device value with this tag
     for (auto & dv : devicevalues_) {
         if (strcmp(command_s, Helpers::toLower(read_flash_string(dv.short_name)).c_str()) == 0 && (tag <= 0 || tag == dv.tag)) {
-            // TODO test divider works
-
             int8_t num_op = dv.numeric_operator;
 
             uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
@@ -1272,8 +1264,6 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             else {
                 // If a divider is specified, do the division to 2 decimals places and send back as double/float
                 // otherwise force as an integer whole
-
-                // TODO test divider works
 
                 // fahrenheit, 0 is no conversion other 1 or 2. not sure why?
                 uint8_t fahrenheit = !EMSESP::system_.fahrenheit()           ? 0

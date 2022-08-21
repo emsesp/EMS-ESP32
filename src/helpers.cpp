@@ -441,7 +441,6 @@ int Helpers::atoint(const char * value) {
 //  fahrenheit=0 - off, no conversion
 //  fahrenheit=1 - relative, 1.8t
 //  fahrenheit=2 - absolute, 1.8t + 32(fahrenheit-1)
-// TODO test num_ops is working
 float Helpers::transformNumFloat(float value, const int8_t numeric_operator, const uint8_t fahrenheit) {
     float val;
 
@@ -615,7 +614,6 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const __FlashSt
     }
     std::string str = toLower(value);
 
-    // TODO test to see if it works, with syslog or watch using a command API
     for (value_ui = 0; strs[value_ui]; value_ui++) {
         std::string str1 = toLower(Helpers::translated_word(strs[value_ui]));
         if ((str1 != "")

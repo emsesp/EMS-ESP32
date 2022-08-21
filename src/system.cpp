@@ -822,6 +822,7 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F(" SDK version: %s"), ESP.getSdkVersion());
     shell.printfln(F(" CPU frequency: %lu MHz"), ESP.getCpuFreqMHz());
     shell.printfln(F(" Free heap: %lu bytes"), (uint32_t)ESP.getFreeHeap());
+    shell.printfln(F(" FS used/total: %lu/%lu (bytes)"), LittleFS.usedBytes(), LittleFS.totalBytes());
     shell.println();
 
     shell.println("Network:");
