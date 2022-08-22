@@ -646,7 +646,11 @@ const DashboardData: FC = () => {
   const renderCoreData = () => (
     <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
       {!coreData.connected && (
-        <MessageBox my={2} level="error" message="EMS bus disconnected. Check settings and board profile" />
+        <MessageBox
+          my={2}
+          level="error"
+          message="EMS bus disconnected. If this warning still persists after a few seconds please check settings and board profile"
+        />
       )}
       {coreData.connected && coreData.devices.length === 0 && (
         <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />
