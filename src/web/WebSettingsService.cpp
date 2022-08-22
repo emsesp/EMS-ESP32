@@ -204,18 +204,23 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.low_clock = root["low_clock"] | false;
     check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
 
+#ifndef EMSESP_STANDALONE
+    String old_local = settings.locale;
+    settings.locale  = root["locale"] | EMSESP_DEFAULT_LOCALE;
+    if (!old_local.equals(settings.locale)) {
+        add_flags(ChangeFlags::RESTART);
+        // EMSESP::system_.locale(settings.locale);
+    }
+#endif
+
     //
-    // without checks...
+    // without checks or necessary restarts...
     //
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
 
     settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
     settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
-
-    // locale
-    settings.locale = root["locale"] | EMSESP_DEFAULT_LOCALE;
-    EMSESP::system_.locale(settings.locale);
 
     settings.fahrenheit = root["fahrenheit"] | false;
     EMSESP::system_.fahrenheit(settings.fahrenheit);
