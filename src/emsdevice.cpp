@@ -387,7 +387,9 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __
 //  tag: to be used to group mqtt together, either as separate topics as a nested object
 //  value_p: pointer to the value from the .h file
 //  type: one of DeviceValueType
-//  options: options for enum or a divider for int (e.g. F("10"))
+//  options: options for enum, which are translated as a list of lists
+//  options_single: list of names
+//  numeric_operatpr: to divide or multiply, see DeviceValueNumOps::
 //  short_name: used in Mqtt as keys
 //  full_name: used in Web and Console unless empty (nullptr) - can be translated
 //  uom: unit of measure from DeviceValueUOM
@@ -766,25 +768,21 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 
             // handle numbers
             else {
-                // If a divider is specified, do the division to 2 decimals places and send back as double/float
-                // otherwise force as an integer whole
-                // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
-                int8_t num_op = dv.numeric_operator;
-
+                // note, the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
                 fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
                 if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::transformNumFloat(*(int8_t *)(dv.value_p), num_op, fahrenheit);
+                    obj["v"] = Helpers::transformNumFloat(*(int8_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
                 } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::transformNumFloat(*(uint8_t *)(dv.value_p), num_op, fahrenheit);
+                    obj["v"] = Helpers::transformNumFloat(*(uint8_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
                 } else if ((dv.type == DeviceValueType::SHORT) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::transformNumFloat(*(int16_t *)(dv.value_p), num_op, fahrenheit);
+                    obj["v"] = Helpers::transformNumFloat(*(int16_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
                 } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), num_op, fahrenheit);
+                    obj["v"] = Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
                 } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), num_op, fahrenheit);
+                    obj["v"] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    obj["v"] = (num_op) ? (*(uint32_t *)(dv.value_p) / num_op) : *(uint32_t *)(dv.value_p);
+                    obj["v"] = dv.numeric_operator ? (*(uint32_t *)(dv.value_p) / dv.numeric_operator) : *(uint32_t *)(dv.value_p);
                 } else {
                     obj["v"] = ""; // must have a value for sorting to work
                 }
@@ -833,7 +831,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                     }
                 }
                 // handle INTs
-                // add steps to numeric values with divider/multiplier
+                // add steps to numeric values with numeric_operator
                 else {
                     char s[10];
                     if (dv.numeric_operator > 0) {
@@ -881,10 +879,6 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
 
             // handle Integers and Floats
             else {
-                // If a divider is specified, do the division to 2 decimals places and send back as double/float
-                // otherwise force as an integer whole
-                // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
-
                 int8_t num_op     = dv.numeric_operator;
                 bool   make_float = true;
                 if (num_op < 0) {
@@ -1259,13 +1253,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             }
 
             // handle Numbers
-            // If a divider is specified, do the division to 2 decimals places and send back as double/float
-            // otherwise force as a whole integer
-            // note: the strange nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
             else {
-                // If a divider is specified, do the division to 2 decimals places and send back as double/float
-                // otherwise force as an integer whole
-
                 // fahrenheit, 0 is no conversion other 1 or 2. not sure why?
                 uint8_t fahrenheit = !EMSESP::system_.fahrenheit()           ? 0
                                      : (dv.uom == DeviceValueUOM::DEGREES)   ? 2

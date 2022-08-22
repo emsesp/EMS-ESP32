@@ -2724,11 +2724,15 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         }
         if (strlen(value) > 4) {
             for (uint8_t i = 0; i < 7; i++) {
-                // TODO make sure value is big enough to hold translations
-                auto translated_dow = Helpers::translated_word(FL_(enum_dayOfWeek)[i]);
-                if (!strncmp(&value[3], translated_dow.c_str(), translated_dow.length())) {
+                // we use EN settings for the day abbreviation
+                if (!strncmp(&value[3], read_flash_string(FL_(enum_dayOfWeek)[i][0]).c_str(), 2)) {
                     day = i;
                 }
+
+                // auto translated_dow = Helpers::translated_word(FL_(enum_dayOfWeek)[i]);
+                // if (!strncmp(&value[3], translated_dow.c_str(), translated_dow.length())) {
+                //     day = i;
+                // }
             }
         }
         if (strlen(value) > 10) {

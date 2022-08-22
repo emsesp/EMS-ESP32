@@ -264,7 +264,7 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
     uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
     // if we have individual limits set already, just do the conversion
-    // limits are not scaled with divider and temperatures are °C
+    // limits are not scaled with num operator and temperatures are °C
     if (min != 0 || max != 0) {
         dv_set_min = Helpers::transformNumFloat(min, 0, fahrenheit);
         dv_set_max = Helpers::transformNumFloat(max, 0, fahrenheit);
@@ -275,17 +275,15 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
     dv_set_min = 0;
     dv_set_max = 0;
 
-    int8_t divider = (options_size == 1) ? Helpers::atoint(Helpers::translated_word(options[0]).c_str()) : 0;
-
     if (type == DeviceValueType::USHORT) {
-        dv_set_min = Helpers::transformNumFloat(0, divider, fahrenheit);
-        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_USHORT_NOTSET, divider, fahrenheit);
+        dv_set_min = Helpers::transformNumFloat(0, numeric_operator, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_USHORT_NOTSET, numeric_operator, fahrenheit);
         return true;
     }
 
     if (type == DeviceValueType::SHORT) {
-        dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_SHORT_NOTSET, divider, fahrenheit);
-        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_SHORT_NOTSET, divider, fahrenheit);
+        dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_SHORT_NOTSET, numeric_operator, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_SHORT_NOTSET, numeric_operator, fahrenheit);
         return true;
     }
 
@@ -293,7 +291,7 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
         if (uom == DeviceValueUOM::PERCENT) {
             dv_set_max = 100;
         } else {
-            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_UINT_NOTSET, divider, fahrenheit);
+            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_UINT_NOTSET, numeric_operator, fahrenheit);
         }
         return true;
     }
@@ -303,19 +301,19 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
             dv_set_min = -100;
             dv_set_max = 100;
         } else {
-            dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_INT_NOTSET, divider, fahrenheit);
-            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_INT_NOTSET, divider, fahrenheit);
+            dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_INT_NOTSET, numeric_operator, fahrenheit);
+            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_INT_NOTSET, numeric_operator, fahrenheit);
         }
         return true;
     }
 
     if (type == DeviceValueType::ULONG) {
-        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET, divider);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET, numeric_operator);
         return true;
     }
 
     if (type == DeviceValueType::TIME) {
-        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET, divider);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET, numeric_operator);
         return true;
     }
 

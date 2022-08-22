@@ -448,7 +448,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "boiler") {
         shell.printfln(F("Testing boiler..."));
-        Mqtt::ha_enabled(false);
+        // Mqtt::ha_enabled(false);
+        Mqtt::ha_enabled(true);
         Mqtt::nested_format(1);
 
         run_test("boiler");
