@@ -26,6 +26,7 @@ namespace emsesp {
 AsyncMqttClient * Mqtt::mqttClient_;
 
 // static parameters we make global
+std::string Mqtt::system_hostname_; // copy from System::hostname()
 std::string Mqtt::mqtt_base_;
 uint8_t     Mqtt::mqtt_qos_;
 bool        Mqtt::mqtt_retain_;
@@ -277,7 +278,7 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
         return;
     }
 
-    // check first againts any of our subscribed topics
+    // check first against any of our subscribed topics
     for (const auto & mf : mqtt_subfunctions_) {
         // add the base back
         char full_topic[MQTT_TOPIC_MAX_SIZE];
@@ -420,6 +421,9 @@ void Mqtt::load_settings() {
         publish_time_other_      = mqttSettings.publish_time_other * 1000;
         publish_time_sensor_     = mqttSettings.publish_time_sensor * 1000;
     });
+
+    // get a local copy of the system hostname
+    system_hostname_ = EMSESP::system_.hostname();
 }
 
 void Mqtt::start() {
@@ -576,23 +580,23 @@ void Mqtt::on_connect() {
     publish(F_(info), doc.as<JsonObject>()); // topic called "info"
 
     if (ha_enabled_) {
-        queue_unsubscribe_message(discovery_prefix_ + "/climate/" + mqtt_base_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/sensor/" + mqtt_base_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/binary_sensor/" + mqtt_base_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/number/" + mqtt_base_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/select/" + mqtt_base_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/switch/" + mqtt_base_ + "/#");
+        queue_unsubscribe_message(discovery_prefix_ + "/climate/" + system_hostname_ + "/#");
+        queue_unsubscribe_message(discovery_prefix_ + "/sensor/" + system_hostname_ + "/#");
+        queue_unsubscribe_message(discovery_prefix_ + "/binary_sensor/" + system_hostname_ + "/#");
+        queue_unsubscribe_message(discovery_prefix_ + "/number/" + system_hostname_ + "/#");
+        queue_unsubscribe_message(discovery_prefix_ + "/select/" + system_hostname_ + "/#");
+        queue_unsubscribe_message(discovery_prefix_ + "/switch/" + system_hostname_ + "/#");
         EMSESP::reset_mqtt_ha(); // re-create all HA devices if there are any
         ha_status();             // create the EMS-ESP device in HA, which is MQTT retained
         ha_climate_reset(true);
     } else {
-        queue_subscribe_message(discovery_prefix_ + "/climate/" + mqtt_base_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/sensor/" + mqtt_base_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/binary_sensor/" + mqtt_base_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/number/" + mqtt_base_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/select/" + mqtt_base_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/switch/" + mqtt_base_ + "/#");
-        LOG_INFO(F("start removing topics %s/+/%s/#"), discovery_prefix_.c_str(), mqtt_base_.c_str());
+        queue_subscribe_message(discovery_prefix_ + "/climate/" + system_hostname_ + "/#");
+        queue_subscribe_message(discovery_prefix_ + "/sensor/" + system_hostname_ + "/#");
+        queue_subscribe_message(discovery_prefix_ + "/binary_sensor/" + system_hostname_ + "/#");
+        queue_subscribe_message(discovery_prefix_ + "/number/" + system_hostname_ + "/#");
+        queue_subscribe_message(discovery_prefix_ + "/select/" + system_hostname_ + "/#");
+        queue_subscribe_message(discovery_prefix_ + "/switch/" + system_hostname_ + "/#");
+        LOG_INFO(F("start removing topics %s/+/%s/#"), discovery_prefix_.c_str(), system_hostname_.c_str());
     }
 
     // send initial MQTT messages for some of our services
@@ -641,7 +645,7 @@ void Mqtt::ha_status() {
     ids.add("ems-esp");
 
     char topic[MQTT_TOPIC_MAX_SIZE];
-    snprintf(topic, sizeof(topic), "sensor/%s/system/config", mqtt_base_.c_str());
+    snprintf(topic, sizeof(topic), "sensor/%s/system/config", system_hostname_.c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors - must match the MQTT payload keys
@@ -810,7 +814,7 @@ void Mqtt::process_queue() {
     if (message->topic.find(discovery_prefix_) == 0) {
         strlcpy(topic, message->topic.c_str(), sizeof(topic)); // leave topic as it is
     } else {
-        snprintf(topic, MQTT_TOPIC_MAX_SIZE, "%s/%s", mqtt_base_.c_str(), message->topic.c_str());
+        snprintf(topic, MQTT_TOPIC_MAX_SIZE, "%s/%s", mqtt_base_.c_str(), message->topic.c_str()); // uses base
     }
 
     // if this has already been published and we're waiting for an ACK, don't publish again
@@ -1008,28 +1012,28 @@ void Mqtt::publish_ha_sensor_config(uint8_t                              type,  
             // number - https://www.home-assistant.io/integrations/number.mqtt
             // https://developers.home-assistant.io/docs/core/entity/number
 
-            snprintf(topic, sizeof(topic), "number/%s/%s/config", mqtt_base_.c_str(), uniq);
+            snprintf(topic, sizeof(topic), "number/%s/%s/config", system_hostname_.c_str(), uniq);
             break;
         case DeviceValueType::BOOL:
             // switch - https://www.home-assistant.io/integrations/switch.mqtt
-            snprintf(topic, sizeof(topic), "switch/%s/%s/config", mqtt_base_.c_str(), uniq);
+            snprintf(topic, sizeof(topic), "switch/%s/%s/config", system_hostname_.c_str(), uniq);
             break;
         case DeviceValueType::ENUM:
             // select - https://www.home-assistant.io/integrations/select.mqtt
-            snprintf(topic, sizeof(topic), "select/%s/%s/config", mqtt_base_.c_str(), uniq);
+            snprintf(topic, sizeof(topic), "select/%s/%s/config", system_hostname_.c_str(), uniq);
             break;
         default:
             // plain old sensor
-            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq);
+            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", system_hostname_.c_str(), uniq);
             break;
         }
     } else {
         // plain old read only device entity
         if (type == DeviceValueType::BOOL) {
-            snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", mqtt_base_.c_str(), uniq); // binary sensor
+            snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", system_hostname_.c_str(), uniq); // binary sensor
         } else {
             use_ha_sensor = true;
-            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq); // normal HA sensor, not a boolean one
+            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", system_hostname_.c_str(), uniq); // normal HA sensor, not a boolean one
         }
     }
 

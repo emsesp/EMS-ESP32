@@ -286,6 +286,8 @@ class Mqtt {
     static bool     ha_climate_reset_;
 
     // settings, copied over
+    static std::string system_hostname_;
+    
     static std::string mqtt_base_;
     static uint8_t     mqtt_qos_;
     static bool        mqtt_retain_;
