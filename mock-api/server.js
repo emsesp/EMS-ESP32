@@ -362,6 +362,7 @@ const emsesp_devices = {
 }
 
 const emsesp_coredata = {
+  connected: true,
   // devices: [],
   devices: [
     {

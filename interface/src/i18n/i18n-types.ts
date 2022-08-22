@@ -63,6 +63,66 @@ type RootTranslation = {
 	 * Invalid login details
 	 */
 	INVALID_LOGIN: string
+	/**
+	 * Network Connection
+	 */
+	NETWORK_CONNECTION: string
+	/**
+	 * Security
+	 */
+	SECURITY: string
+	/**
+	 * Network Time
+	 */
+	NETWORK_TIME: string
+	/**
+	 * ON/OFF
+	 */
+	ONOFF_CAP: string
+	/**
+	 * on/off
+	 */
+	ONOFF: string
+	/**
+	 * Type
+	 */
+	TYPE: string
+	/**
+	 * Description
+	 */
+	DESCRIPTION: string
+	/**
+	 * Entities
+	 */
+	ENTITIES: string
+	/**
+	 * Refresh
+	 */
+	REFRESH: string
+	/**
+	 * Export
+	 */
+	EXPORT: string
+	/**
+	 * Entity Name
+	 */
+	ENTITY_NAME: string
+	/**
+	 * Value
+	 */
+	VALUE: string
+	/**
+	 * only show favorites
+	 */
+	SHOW_FAV: string
+	/**
+	 * Device and Sensor Data
+	 */
+	DEVICE_SENSOR_DATA: string
+	/**
+	 * Devices & Sensors
+	 */
+	DEVICES_SENSORS: string
 }
 
 export type TranslationFunctions = {
@@ -114,6 +174,66 @@ export type TranslationFunctions = {
 	 * Invalid login details
 	 */
 	INVALID_LOGIN: () => LocalizedString
+	/**
+	 * Network Connection
+	 */
+	NETWORK_CONNECTION: () => LocalizedString
+	/**
+	 * Security
+	 */
+	SECURITY: () => LocalizedString
+	/**
+	 * Network Time
+	 */
+	NETWORK_TIME: () => LocalizedString
+	/**
+	 * ON/OFF
+	 */
+	ONOFF_CAP: () => LocalizedString
+	/**
+	 * on/off
+	 */
+	ONOFF: () => LocalizedString
+	/**
+	 * Type
+	 */
+	TYPE: () => LocalizedString
+	/**
+	 * Description
+	 */
+	DESCRIPTION: () => LocalizedString
+	/**
+	 * Entities
+	 */
+	ENTITIES: () => LocalizedString
+	/**
+	 * Refresh
+	 */
+	REFRESH: () => LocalizedString
+	/**
+	 * Export
+	 */
+	EXPORT: () => LocalizedString
+	/**
+	 * Entity Name
+	 */
+	ENTITY_NAME: () => LocalizedString
+	/**
+	 * Value
+	 */
+	VALUE: () => LocalizedString
+	/**
+	 * only show favorites
+	 */
+	SHOW_FAV: () => LocalizedString
+	/**
+	 * Device and Sensor Data
+	 */
+	DEVICE_SENSOR_DATA: () => LocalizedString
+	/**
+	 * Devices & Sensors
+	 */
+	DEVICES_SENSORS: () => LocalizedString
 }
 
 export type Formatters = {}

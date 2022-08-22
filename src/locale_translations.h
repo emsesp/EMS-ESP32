@@ -345,7 +345,7 @@ MAKE_PSTR_LIST(wwChargeOptimization, F("wwchargeoptimization"), F("charge optimi
 MAKE_PSTR_LIST(wwRecharging, F("wwrecharging"), F("recharging"), F("Nachladen"))
 MAKE_PSTR_LIST(wwTempOK, F("wwtempok"), F("temperature ok"), F("Temperatur ok"))
 MAKE_PSTR_LIST(wwActive, F("wwactive"), F("active"), F("aktiv"))
-MAKE_PSTR_LIST(ww3wayValve, F("ww3wayvalve"), F("3way valve active"), F("3-Wegeventil aktiv"))
+MAKE_PSTR_LIST(ww3wayValve, F("ww3wayvalve"), F("3-way valve active"), F("3-Wegeventil aktiv"))
 MAKE_PSTR_LIST(wwSetPumpPower, F("wwsetpumppower"), F("set pump power"), F("Soll Pumpenleistung"))
 MAKE_PSTR_LIST(wwMixerTemp, F("wwmixertemp"), F("mixer temperature"), F("Mischertemperatur"))
 MAKE_PSTR_LIST(wwStarts, F("wwstarts"), F("starts"), F("Anzahl starts"))

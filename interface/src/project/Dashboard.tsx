@@ -12,14 +12,14 @@ import DashboardData from './DashboardData';
 
 const Dashboard: FC = () => {
   const { routerTab } = useRouterTab();
-  const { LL } = useI18nContext();
 
+  const { LL } = useI18nContext();
   useLayoutTitle(LL.DASHBOARD());
 
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="data" label="Devices &amp; Sensors" />
+        <Tab value="data" label={LL.DEVICES_SENSORS()} />
         <Tab value="status" label="Status" />
       </RouterTabs>
       <Routes>

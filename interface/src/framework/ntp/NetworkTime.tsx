@@ -9,8 +9,11 @@ import { AuthenticatedContext } from '../../contexts/authentication';
 import NTPStatusForm from './NTPStatusForm';
 import NTPSettingsForm from './NTPSettingsForm';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const NetworkTime: FC = () => {
-  useLayoutTitle('Network Time');
+  const { LL } = useI18nContext();
+  useLayoutTitle(LL.NETWORK_TIME());
 
   const authenticatedContext = useContext(AuthenticatedContext);
   const { routerTab } = useRouterTab();

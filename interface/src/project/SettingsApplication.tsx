@@ -24,6 +24,8 @@ import { numberValue, extractErrorMessage, updateValue, useRest } from '../utils
 import * as EMSESP from './api';
 import { Settings, BOARD_PROFILES } from './types';
 
+import { useI18nContext } from '../i18n/i18n-react';
+
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
     <MenuItem key={code} value={code}>
@@ -37,6 +39,8 @@ const SettingsApplication: FC = () => {
     read: EMSESP.readSettings,
     update: EMSESP.writeSettings
   });
+
+  const { LL } = useI18nContext();
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -439,8 +443,8 @@ const SettingsApplication: FC = () => {
               margin="normal"
               select
             >
-              <MenuItem value={1}>on/off</MenuItem>
-              <MenuItem value={2}>ON/OFF</MenuItem>
+              <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
+              <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
               <MenuItem value={3}>true/false</MenuItem>
               <MenuItem value={5}>1/0</MenuItem>
             </ValidatedTextField>
@@ -456,8 +460,8 @@ const SettingsApplication: FC = () => {
               margin="normal"
               select
             >
-              <MenuItem value={1}>"on"/"off"</MenuItem>
-              <MenuItem value={2}>"ON"/"OFF"</MenuItem>
+              <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
+              <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
               <MenuItem value={3}>"true"/"false"</MenuItem>
               <MenuItem value={4}>true/false</MenuItem>
               <MenuItem value={5}>"1"/"0"</MenuItem>

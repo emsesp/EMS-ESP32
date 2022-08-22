@@ -8,8 +8,11 @@ import { RouterTabs, useRouterTab, useLayoutTitle } from '../../components';
 import SecuritySettingsForm from './SecuritySettingsForm';
 import ManageUsersForm from './ManageUsersForm';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const Security: FC = () => {
-  useLayoutTitle('Security');
+  const { LL } = useI18nContext();
+  useLayoutTitle(LL.SECURITY());
 
   const { routerTab } = useRouterTab();
 

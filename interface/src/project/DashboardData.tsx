@@ -74,8 +74,12 @@ import {
   DeviceEntityMask
 } from './types';
 
+import { useI18nContext } from '../i18n/i18n-react';
+
 const DashboardData: FC = () => {
   const { me } = useContext(AuthenticatedContext);
+
+  const { LL } = useI18nContext();
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -139,7 +143,7 @@ const DashboardData: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 40px 100px repeat(1, minmax(0, 1fr)) 80px 40px;
+        --data-table-library_grid-template-columns: 40px 100px repeat(1, minmax(0, 1fr)) 90px 40px;
       `,
       BaseRow: `
         .td {
@@ -662,9 +666,9 @@ const DashboardData: FC = () => {
             <Header>
               <HeaderRow>
                 <HeaderCell stiff />
-                <HeaderCell stiff>TYPE</HeaderCell>
-                <HeaderCell resize>DESCRIPTION</HeaderCell>
-                <HeaderCell stiff>ENTITIES</HeaderCell>
+                <HeaderCell stiff>{LL.TYPE()}</HeaderCell>
+                <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
+                <HeaderCell stiff>{LL.ENTITIES()}</HeaderCell>
                 <HeaderCell stiff />
               </HeaderRow>
             </Header>
@@ -737,7 +741,7 @@ const DashboardData: FC = () => {
           control={<Checkbox size="small" name="onlyFav" checked={onlyFav} onChange={() => setOnlyFav(!onlyFav)} />}
           label={
             <span style={{ fontSize: '12px' }}>
-              only show favorites&nbsp;
+              {LL.SHOW_FAV()}&nbsp;
               <StarIcon color="primary" sx={{ fontSize: 12 }} />
             </span>
           }
@@ -763,7 +767,7 @@ const DashboardData: FC = () => {
                       endIcon={getSortIcon(dv_sort.state, 'NAME')}
                       onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'NAME' })}
                     >
-                      ENTITY NAME
+                      {LL.ENTITY_NAME()}
                     </Button>
                   </HeaderCell>
                   <HeaderCell resize>
@@ -773,7 +777,7 @@ const DashboardData: FC = () => {
                       endIcon={getSortIcon(dv_sort.state, 'VALUE')}
                       onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
                     >
-                      VALUE
+                      {LL.VALUE()}
                     </Button>
                   </HeaderCell>
                   <HeaderCell stiff />
@@ -1194,7 +1198,7 @@ const DashboardData: FC = () => {
   };
 
   return (
-    <SectionContent title="Device and Sensor Data" titleGutter>
+    <SectionContent title={LL.DEVICE_SENSOR_DATA()} titleGutter>
       {renderCoreData()}
       {renderDeviceData()}
       {renderDeviceDialog()}
@@ -1205,11 +1209,11 @@ const DashboardData: FC = () => {
       {renderAnalogDialog()}
       <ButtonRow>
         <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
-          Refresh
+          {LL.REFRESH()}
         </Button>
         {device_select.state.id && device_select.state.id !== 'sensor' && (
           <Button startIcon={<DownloadIcon />} variant="outlined" onClick={handleDownloadCsv}>
-            Export
+            {LL.EXPORT()}
           </Button>
         )}
       </ButtonRow>

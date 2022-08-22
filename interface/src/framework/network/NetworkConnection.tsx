@@ -11,12 +11,16 @@ import NetworkStatusForm from './NetworkStatusForm';
 import WiFiNetworkScanner from './WiFiNetworkScanner';
 import NetworkSettingsForm from './NetworkSettingsForm';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const NetworkConnection: FC = () => {
-  useLayoutTitle('Network Connection');
+  const { LL } = useI18nContext();
+  useLayoutTitle(LL.NETWORK_CONNECTION());
+
+  const { routerTab } = useRouterTab();
 
   const authenticatedContext = useContext(AuthenticatedContext);
   const navigate = useNavigate();
-  const { routerTab } = useRouterTab();
 
   const [selectedNetwork, setSelectedNetwork] = useState<WiFiNetwork>();
 
