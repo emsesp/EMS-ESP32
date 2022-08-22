@@ -178,7 +178,7 @@ MAKE_PSTR_LIST(progd, F("prog d"))
 MAKE_PSTR_LIST(proge, F("prog e"))
 MAKE_PSTR_LIST(progf, F("prog f"))
 
-// templates
+// templates - this are not translated and will be saved under optons_single
 MAKE_PSTR_LIST(tpl_datetime, F("Format: < NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1) >"))
 MAKE_PSTR_LIST(tpl_switchtime, F("Format: <nn> [ not_set | day hh:mm on|off ]"))
 MAKE_PSTR_LIST(tpl_switchtime1, F("Format: <nn> [ not_set | day hh:mm Tn ]"))

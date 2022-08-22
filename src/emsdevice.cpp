@@ -827,7 +827,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 // add command help template
                 else if (dv.type == DeviceValueType::STRING || dv.type == DeviceValueType::CMD) {
                     if (dv.options_size == 1) {
-                        obj["h"] = Helpers::translated_word(dv.options[0]);
+                        obj["h"] = dv.options_single[0]; // NOT translated
                     }
                 }
                 // handle INTs
