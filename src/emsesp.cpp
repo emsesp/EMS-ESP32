@@ -299,7 +299,6 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 }
 
 // show EMS device values to the shell console
-// generate_values_json is called in verbose mode
 void EMSESP::show_device_values(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
         shell.printfln(F("No EMS devices detected."));
@@ -317,7 +316,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                 DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN); // use max size
                 JsonObject          json = doc.to<JsonObject>();
 
-                emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::CONSOLE); // verbose mode and nested
+                emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::CONSOLE);
 
                 // print line
                 uint8_t id = 0;
