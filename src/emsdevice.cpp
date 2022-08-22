@@ -529,7 +529,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
 
 // no options, no function
 void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * name, uint8_t uom, const cmd_function_p f) {
-    add_device_value(tag, value_p, type, nullptr, nullptr, 0, name, uom, nullptr, 0, 0);
+    add_device_value(tag, value_p, type, nullptr, nullptr, 0, name, uom, f, 0, 0);
 };
 
 // no options, with min/max
@@ -879,11 +879,24 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
 
             // handle Integers and Floats
             else {
-                int8_t num_op     = dv.numeric_operator;
-                bool   make_float = true;
-                if (num_op < 0) {
-                    num_op *= -1; // convert to a positive multiplier
+                int8_t num_op = dv.numeric_operator;
+                bool   make_float;
+                if (num_op == 0) {
+                    // no changes to number
                     make_float = false;
+                    num_op     = 1; // so it gets *1
+                } else if (num_op < 0) {
+                    // negative numbers, convert to a positive multiplier
+                    make_float = false;
+                    num_op *= -1;
+                } else {
+                    // has a divider, make it a float
+                    make_float = true;
+                }
+
+                // always convert temperatures to floats with 1 decimal place
+                if ((dv.uom == DeviceValueUOM::DEGREES) || (dv.uom == DeviceValueUOM::DEGREES_R)) {
+                    make_float = true;
                 }
 
                 if (dv.type == DeviceValueType::INT) {
@@ -897,8 +910,9 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
                 } else if (dv.type == DeviceValueType::ULONG) {
                     obj["v"] = make_float ? Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), num_op) : *(uint32_t *)(dv.value_p) * num_op;
                 } else if (dv.type == DeviceValueType::TIME) {
-                    obj["v"] = num_op ? *(uint32_t *)(dv.value_p)
-                                      : (uint32_t)Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), num_op); // sometimes we need to divide by 60
+                    // sometimes we need to divide by 60
+                    obj["v"] = (num_op == DeviceValueNumOp::DV_NUMOP_DIV60) ? (uint32_t)Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), num_op)
+                                                                            : *(uint32_t *)(dv.value_p);
                 }
             }
         }
@@ -1260,11 +1274,19 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                                      : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1
                                                                              : 0;
 
-                int8_t num_op     = dv.numeric_operator;
-                bool   make_float = true;
-                if (num_op < 0) {
-                    num_op *= -1; // convert to a positive multiplier
+                int8_t num_op = dv.numeric_operator;
+                bool   make_float;
+                if (num_op == 0) {
+                    // no changes to number
                     make_float = false;
+                    num_op     = 1; // so it gets *1
+                } else if (num_op < 0) {
+                    // negative numbers, convert to a positive multiplier
+                    make_float = false;
+                    num_op *= -1;
+                } else {
+                    // has a divider, make it a float
+                    make_float = true;
                 }
 
                 // always convert temperatures to floats with 1 decimal place
@@ -1303,8 +1325,13 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                         json[name] = *(uint32_t *)(dv.value_p) * num_op;
                     }
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    uint32_t time_value = *(uint32_t *)(dv.value_p);
-                    time_value          = Helpers::transformNumFloat(time_value, num_op); // sometimes we need to divide by 60
+                    uint32_t time_value;
+                    if (num_op == DeviceValueNumOp::DV_NUMOP_DIV60) {
+                        // sometimes we need to divide by 60
+                        time_value = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), num_op);
+                    } else {
+                        time_value = *(uint32_t *)(dv.value_p);
+                    }
                     if (output_target == OUTPUT_TARGET::API_VERBOSE || output_target == OUTPUT_TARGET::CONSOLE) {
                         char time_s[60];
                         snprintf(time_s,
