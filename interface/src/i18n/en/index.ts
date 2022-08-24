@@ -27,7 +27,23 @@ const en: BaseTranslation = {
   VALUE: 'Value',
   SHOW_FAV: 'only show favorites',
   DEVICE_SENSOR_DATA: 'Device and Sensor Data',
-  DEVICES_SENSORS: 'Devices & Sensors'
+  DEVICES_SENSORS: 'Devices & Sensors',
+  ATTACHED_SENSORS: 'Attached EMS-ESP Sensors',
+  RUN_COMMAND: 'Call Command',
+  CHANGE_VALUE: 'Change Value',
+  CANCEL: 'Cancel',
+  RESET: 'Reset',
+  SEND: 'Send',
+  SAVE: 'Save',
+  REMOVE: 'Remove',
+  PROBLEM_UPDATING: 'Problem updating',
+  ACCESS_DENIED: 'Access Denied',
+  ANALOG_SENSOR: 'Analog Sensor {cmd}',
+  TEMP_SENSOR: 'Temperature Sensor {cmd}',
+  WRITE_COMMAND: 'Write command {cmd}',
+  EMS_BUS_WARNING:
+    'EMS bus disconnected. If this warning still persists after a few seconds please check settings and board profile',
+  EMS_BUS_SCANNING: 'Scanning for EMS devices...'
 };
 
 export default en;

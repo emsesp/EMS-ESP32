@@ -151,10 +151,9 @@ class DeviceValue {
     const __FlashStringHelper * const *  options_single; // options are not translated
     int8_t                               numeric_operator;
     uint8_t                              options_size; // number of options in the char array, calculated
-    const __FlashStringHelper *          short_name;   // used in MQTT
-    const __FlashStringHelper *          full_name;    // used in Web and Console
+    const __FlashStringHelper * const    short_name;   // used in MQTT and API
+    const __FlashStringHelper * const *  fullname;     // used in Web and Console, is translated
     uint8_t                              uom;          // DeviceValueUOM::*
-    uint8_t                              ha;           // DeviceValueHA::
     bool                                 has_cmd;      // true if there is a Console/MQTT command which matches the short_name
     int16_t                              min;          // min range
     uint16_t                             max;          // max range
@@ -167,10 +166,9 @@ class DeviceValue {
                 const __FlashStringHelper * const ** options,
                 const __FlashStringHelper * const *  options_single,
                 int8_t                               numeric_operator,
-                const __FlashStringHelper *          short_name,
-                const __FlashStringHelper *          full_name,
+                const __FlashStringHelper * const    short_name,
+                const __FlashStringHelper * const *  fullname,
                 uint8_t                              uom,
-                uint8_t                              ha,
                 bool                                 has_cmd,
                 int16_t                              min,
                 uint16_t                             max,

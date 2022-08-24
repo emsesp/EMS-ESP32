@@ -162,9 +162,7 @@ MAKE_PSTR_LIST(close, F("close"), F("Geschlossen"))
 // Boiler
 MAKE_PSTR_LIST(wwtapactivated, F("wwtapactivated"), F("turn on/off"), F("Aktiviere Warmwasser im Wartungsmodus"))
 MAKE_PSTR_LIST(reset, F("reset"), F("Reset"))
-
-MAKE_PSTR_LIST(oilPreHeat, F("oilpreheat"), F("oil preheating"), F("oil preheating")) // need DE
-
+MAKE_PSTR_LIST(oilPreHeat, F("oilpreheat"), F("oil preheating"), F("Ölvorwärmung"))
 MAKE_PSTR_LIST(heatingActive, F("heatingactive"), F("heating active"), F("Heizung aktiv"))
 MAKE_PSTR_LIST(tapwaterActive, F("tapwateractive"), F("tapwater active"), F("Warmwasser aktiv"))
 MAKE_PSTR_LIST(selFlowTemp, F("selflowtemp"), F("selected flow temperature"), F("Sollwert Flusstemperatur"))

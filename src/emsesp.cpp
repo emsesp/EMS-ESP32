@@ -487,6 +487,8 @@ void EMSESP::reset_mqtt_ha() {
     for (const auto & emsdevice : emsdevices) {
         emsdevice->ha_config_clear();
     }
+
+    // force the re-creating of the dallas and analog sensor topics (for HA)
     dallassensor_.reload();
     analogsensor_.reload();
 }

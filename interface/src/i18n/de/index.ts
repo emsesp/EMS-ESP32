@@ -10,9 +10,9 @@ const de: Translation = {
   SETTINGS: 'Einstellungen',
   HELP: 'Hilfe',
   LOGGED_IN: 'Eingeloggt als {name}',
-  PLEASE_SIGNIN: 'DE_Please sign in to continue',
-  UPLOAD_SUCCESSFUL: 'DE_Upload successful',
-  INVALID_LOGIN: 'DE_Invalid login details',
+  PLEASE_SIGNIN: 'Bitte einloggen, um fortzufahren',
+  UPLOAD_SUCCESSFUL: 'Hochladen erfolgreich',
+  INVALID_LOGIN: 'Ungültige Login Daten',
   NETWORK_CONNECTION: 'Netzwerkverbindung',
   SECURITY: 'Sicherheit',
   NETWORK_TIME: 'Netzwerkzeit',
@@ -27,7 +27,23 @@ const de: Translation = {
   VALUE: 'Wert',
   SHOW_FAV: 'nur Favoriten anzeigen',
   DEVICE_SENSOR_DATA: 'Device und Sensordaten',
-  DEVICES_SENSORS: 'Devices & Sensoren'
+  DEVICES_SENSORS: 'Devices & Sensoren',
+  ATTACHED_SENSORS: 'Angeschlossene EMS-ESP Sensoren',
+  RUN_COMMAND: 'Befehl ausführen',
+  CHANGE_VALUE: 'Wert ändern',
+  CANCEL: 'Absagen',
+  RESET: 'Zurücksetzen',
+  SEND: 'Senden',
+  SAVE: 'Speichern',
+  REMOVE: 'Entfernen',
+  PROBLEM_UPDATING: 'Problem beim Aktualisieren',
+  ACCESS_DENIED: 'Zugriff abgelehnt',
+  ANALOG_SENSOR: 'Analoger Sensor {cmd}',
+  TEMP_SENSOR: 'Temperatursensor {cmd}',
+  WRITE_COMMAND: 'Befehl schreiben {cmd}',
+  EMS_BUS_WARNING:
+    'EMS-Bus getrennt. Wenn diese Warnung nach einigen Sekunden immer noch besteht, überprüfen Sie bitte die Einstellungen und das Board-Profil',
+  EMS_BUS_SCANNING: 'Scannen nach EMS devices...'
 };
 
 export default de;

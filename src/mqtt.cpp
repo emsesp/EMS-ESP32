@@ -110,7 +110,7 @@ void Mqtt::subscribe(const std::string & topic) {
 }
 
 // resubscribe to all MQTT topics
-// if it's already in the queue, ignore it
+// if it's already in the queue then just ignore it
 void Mqtt::resubscribe() {
     if (mqtt_subfunctions_.empty()) {
         return;
@@ -580,28 +580,32 @@ void Mqtt::on_connect() {
     publish(F_(info), doc.as<JsonObject>()); // topic called "info"
 
     if (ha_enabled_) {
+        LOG_INFO(F("start removing topics %s/+/%s/#"), discovery_prefix_.c_str(), system_hostname_.c_str());
         queue_unsubscribe_message(discovery_prefix_ + "/climate/" + system_hostname_ + "/#");
         queue_unsubscribe_message(discovery_prefix_ + "/sensor/" + system_hostname_ + "/#");
         queue_unsubscribe_message(discovery_prefix_ + "/binary_sensor/" + system_hostname_ + "/#");
         queue_unsubscribe_message(discovery_prefix_ + "/number/" + system_hostname_ + "/#");
         queue_unsubscribe_message(discovery_prefix_ + "/select/" + system_hostname_ + "/#");
         queue_unsubscribe_message(discovery_prefix_ + "/switch/" + system_hostname_ + "/#");
+        // TODO reset
         EMSESP::reset_mqtt_ha(); // re-create all HA devices if there are any
         ha_status();             // create the EMS-ESP device in HA, which is MQTT retained
         ha_climate_reset(true);
     } else {
+        // TODO commented out - not sure why we need to subscribe if not using discovery?
+        /*
         queue_subscribe_message(discovery_prefix_ + "/climate/" + system_hostname_ + "/#");
         queue_subscribe_message(discovery_prefix_ + "/sensor/" + system_hostname_ + "/#");
         queue_subscribe_message(discovery_prefix_ + "/binary_sensor/" + system_hostname_ + "/#");
         queue_subscribe_message(discovery_prefix_ + "/number/" + system_hostname_ + "/#");
         queue_subscribe_message(discovery_prefix_ + "/select/" + system_hostname_ + "/#");
         queue_subscribe_message(discovery_prefix_ + "/switch/" + system_hostname_ + "/#");
-        LOG_INFO(F("start removing topics %s/+/%s/#"), discovery_prefix_.c_str(), system_hostname_.c_str());
+        */
     }
 
     // send initial MQTT messages for some of our services
     EMSESP::shower_.set_shower_state(false, true); // Send shower_activated as false
-    EMSESP::system_.send_heartbeat();              // send heatbeat
+    EMSESP::system_.send_heartbeat();              // send heartbeat
 
     // re-subscribe to all custom registered MQTT topics
     resubscribe();
@@ -933,7 +937,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
 
     publish_ha_sensor_config(dv.type,
                              dv.tag,
-                             dv.full_name,
+                             Helpers::translated_fword(dv.fullname),
                              dv.device_type,
                              dv.short_name,
                              dv.uom,
@@ -962,9 +966,9 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelp
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
 void Mqtt::publish_ha_sensor_config(uint8_t                              type,        // EMSdevice::DeviceValueType
                                     uint8_t                              tag,         // EMSdevice::DeviceValueTAG
-                                    const __FlashStringHelper *          name,        // fullname
+                                    const __FlashStringHelper * const    fullname,    // fullname, already translated
                                     const uint8_t                        device_type, // EMSdevice::DeviceType
-                                    const __FlashStringHelper *          entity,      // shortname
+                                    const __FlashStringHelper * const    entity,      // same as shortname
                                     const uint8_t                        uom,         // EMSdevice::DeviceValueUOM (0=NONE)
                                     const bool                           remove,      // true if we want to remove this topic
                                     const bool                           has_cmd,
@@ -974,7 +978,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                              type,  
                                     const int16_t                        dv_set_max,
                                     const JsonObject &                   dev_json) {
     // ignore if name (fullname) is empty
-    if (name == nullptr) {
+    if (fullname == nullptr) {
         return;
     }
 
@@ -1109,22 +1113,21 @@ void Mqtt::publish_ha_sensor_config(uint8_t                              type,  
     doc["stat_t"] = stat_t;
 
     // friendly name = <tag> <name>
-    char short_name[70];
+    char ha_name[70];
     if (have_tag) {
-        snprintf(short_name, sizeof(short_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), read_flash_string(name).c_str());
+        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), read_flash_string(fullname).c_str());
     } else {
-        snprintf(short_name, sizeof(short_name), "%s", read_flash_string(name).c_str());
+        snprintf(ha_name, sizeof(ha_name), "%s", read_flash_string(fullname).c_str());
     }
+    ha_name[0]  = toupper(ha_name[0]); // capitalize first letter
+    doc["name"] = ha_name;
 
-    // entity id = emsesp_<device>_<tag>_<name>
-    char long_name[130];
-    snprintf(long_name, sizeof(long_name), "%s_%s", device_name, short_name);
-    // snprintf(long_name, sizeof(long_name), "emsesp_%s_%s", device_name, short_name);      //wouldn't it be better?
-    doc["object_id"] = long_name;
-
-    // name (friendly name) = <tag> <name>
-    short_name[0] = toupper(short_name[0]); // capitalize first letter
-    doc["name"]   = short_name;
+    // entity id is generated from the name, see https://www.home-assistant.io/docs/mqtt/discovery/#use-object_id-to-influence-the-entity-id
+    // so we override it to make it unique using entity_id
+    // emsesp_<device>_<tag>_<name>
+    char object_id[130];
+    snprintf(object_id, sizeof(object_id), "emsesp_%s_%s", device_name, ha_name);
+    doc["object_id"] = object_id;
 
     // value template
     // if its nested mqtt format then use the appended entity name, otherwise take the original

@@ -664,7 +664,7 @@ void Helpers::replace_char(char * str, char find, char replace) {
     int i = 0;
 
     while (str[i] != '\0') {
-        /*Replace the matched character...*/
+        // Replace the matched character...
         if (str[i] == find)
             str[i] = replace;
 

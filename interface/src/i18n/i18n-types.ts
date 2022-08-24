@@ -123,6 +123,69 @@ type RootTranslation = {
 	 * Devices & Sensors
 	 */
 	DEVICES_SENSORS: string
+	/**
+	 * Attached EMS-ESP Sensors
+	 */
+	ATTACHED_SENSORS: string
+	/**
+	 * Call Command
+	 */
+	RUN_COMMAND: string
+	/**
+	 * Change Value
+	 */
+	CHANGE_VALUE: string
+	/**
+	 * Cancel
+	 */
+	CANCEL: string
+	/**
+	 * Reset
+	 */
+	RESET: string
+	/**
+	 * Send
+	 */
+	SEND: string
+	/**
+	 * Save
+	 */
+	SAVE: string
+	/**
+	 * Remove
+	 */
+	REMOVE: string
+	/**
+	 * Problem updating
+	 */
+	PROBLEM_UPDATING: string
+	/**
+	 * Access Denied
+	 */
+	ACCESS_DENIED: string
+	/**
+	 * Analog Sensor {cmd}
+	 * @param {unknown} cmd
+	 */
+	ANALOG_SENSOR: RequiredParams<'cmd'>
+	/**
+	 * Temperature Sensor {cmd}
+	 * @param {unknown} cmd
+	 */
+	TEMP_SENSOR: RequiredParams<'cmd'>
+	/**
+	 * Write command {cmd}
+	 * @param {unknown} cmd
+	 */
+	WRITE_COMMAND: RequiredParams<'cmd'>
+	/**
+	 * EMS bus disconnected. If this warning still persists after a few seconds please check settings and board profile
+	 */
+	EMS_BUS_WARNING: string
+	/**
+	 * Scanning for EMS devices...
+	 */
+	EMS_BUS_SCANNING: string
 }
 
 export type TranslationFunctions = {
@@ -234,6 +297,66 @@ export type TranslationFunctions = {
 	 * Devices & Sensors
 	 */
 	DEVICES_SENSORS: () => LocalizedString
+	/**
+	 * Attached EMS-ESP Sensors
+	 */
+	ATTACHED_SENSORS: () => LocalizedString
+	/**
+	 * Call Command
+	 */
+	RUN_COMMAND: () => LocalizedString
+	/**
+	 * Change Value
+	 */
+	CHANGE_VALUE: () => LocalizedString
+	/**
+	 * Cancel
+	 */
+	CANCEL: () => LocalizedString
+	/**
+	 * Reset
+	 */
+	RESET: () => LocalizedString
+	/**
+	 * Send
+	 */
+	SEND: () => LocalizedString
+	/**
+	 * Save
+	 */
+	SAVE: () => LocalizedString
+	/**
+	 * Remove
+	 */
+	REMOVE: () => LocalizedString
+	/**
+	 * Problem updating
+	 */
+	PROBLEM_UPDATING: () => LocalizedString
+	/**
+	 * Access Denied
+	 */
+	ACCESS_DENIED: () => LocalizedString
+	/**
+	 * Analog Sensor {cmd}
+	 */
+	ANALOG_SENSOR: (arg: { cmd: unknown }) => LocalizedString
+	/**
+	 * Temperature Sensor {cmd}
+	 */
+	TEMP_SENSOR: (arg: { cmd: unknown }) => LocalizedString
+	/**
+	 * Write command {cmd}
+	 */
+	WRITE_COMMAND: (arg: { cmd: unknown }) => LocalizedString
+	/**
+	 * EMS bus disconnected. If this warning still persists after a few seconds please check settings and board profile
+	 */
+	EMS_BUS_WARNING: () => LocalizedString
+	/**
+	 * Scanning for EMS devices...
+	 */
+	EMS_BUS_SCANNING: () => LocalizedString
 }
 
 export type Formatters = {}

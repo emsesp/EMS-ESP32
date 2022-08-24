@@ -30,10 +30,9 @@ DeviceValue::DeviceValue(uint8_t                              device_type,
                          const __FlashStringHelper * const ** options,
                          const __FlashStringHelper * const *  options_single,
                          int8_t                               numeric_operator,
-                         const __FlashStringHelper *          short_name,
-                         const __FlashStringHelper *          full_name,
+                         const __FlashStringHelper * const    short_name,
+                         const __FlashStringHelper * const *  fullname,
                          uint8_t                              uom,
-                         uint8_t                              ha,
                          bool                                 has_cmd,
                          int16_t                              min,
                          uint16_t                             max,
@@ -46,14 +45,13 @@ DeviceValue::DeviceValue(uint8_t                              device_type,
     , options_single(options_single)
     , numeric_operator(numeric_operator)
     , short_name(short_name)
-    , full_name(full_name)
+    , fullname(fullname)
     , uom(uom)
-    , ha(ha)
     , has_cmd(has_cmd)
     , min(min)
     , max(max)
     , state(state) {
-    // calculate #items in options list
+    // calculate #options in options list
     if (options_single) {
         options_size = 1;
     } else {
@@ -65,7 +63,8 @@ DeviceValue::DeviceValue(uint8_t                              device_type,
     Serial.print("registering entity: ");
     Serial.print(read_flash_string(short_name).c_str());
     Serial.print("/");
-    Serial.print(read_flash_string(full_name).c_str());
+    auto trans_fullname = Helpers::translated_word(fullname);
+    Serial.print(trans_fullname.c_str());
     Serial.print(" (#options=");
     Serial.print(options_size);
     Serial.print(",numop=");

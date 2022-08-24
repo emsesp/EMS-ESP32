@@ -94,9 +94,9 @@ class Mqtt {
     publish_ha_sensor_config(DeviceValue & dv, const std::string & model, const std::string & brand, const bool remove, const bool create_device_config = false);
     static void publish_ha_sensor_config(uint8_t                              type,
                                          uint8_t                              tag,
-                                         const __FlashStringHelper *          name,
+                                         const __FlashStringHelper * const    fullname,
                                          const uint8_t                        device_type,
-                                         const __FlashStringHelper *          entity,
+                                         const __FlashStringHelper * const    entity,
                                          const uint8_t                        uom,
                                          const bool                           remove,
                                          const bool                           has_cmd,
@@ -287,7 +287,7 @@ class Mqtt {
 
     // settings, copied over
     static std::string system_hostname_;
-    
+
     static std::string mqtt_base_;
     static uint8_t     mqtt_qos_;
     static bool        mqtt_retain_;

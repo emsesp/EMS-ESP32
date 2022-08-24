@@ -82,6 +82,7 @@ class WebSettings {
         SHOWER  = (1 << 4), // 16
         LED     = (1 << 5), // 32
         BUTTON  = (1 << 6), // 64
+        MQTT    = (1 << 7), // 128
         RESTART = 0xFF
 
     };
