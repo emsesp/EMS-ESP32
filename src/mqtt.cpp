@@ -587,12 +587,11 @@ void Mqtt::on_connect() {
         queue_unsubscribe_message(discovery_prefix_ + "/number/" + system_hostname_ + "/#");
         queue_unsubscribe_message(discovery_prefix_ + "/select/" + system_hostname_ + "/#");
         queue_unsubscribe_message(discovery_prefix_ + "/switch/" + system_hostname_ + "/#");
-        // TODO reset
         EMSESP::reset_mqtt_ha(); // re-create all HA devices if there are any
         ha_status();             // create the EMS-ESP device in HA, which is MQTT retained
         ha_climate_reset(true);
     } else {
-        // TODO commented out - not sure why we need to subscribe if not using discovery?
+        // TODO commented out - not sure why we need to subscribe if not using discovery. Check with Michael!
         /*
         queue_subscribe_message(discovery_prefix_ + "/climate/" + system_hostname_ + "/#");
         queue_subscribe_message(discovery_prefix_ + "/sensor/" + system_hostname_ + "/#");
