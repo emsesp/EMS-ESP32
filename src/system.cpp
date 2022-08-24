@@ -41,6 +41,11 @@
 
 namespace emsesp {
 
+// Languages supported. Note: the order is important and must match locale_translations.h
+const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE};
+
+size_t num_languages = sizeof(languages) / sizeof(const char *);
+
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
 #ifndef EMSESP_STANDALONE
@@ -50,6 +55,17 @@ uuid::syslog::SyslogService System::syslog_;
 // init statics
 PButton System::myPButton_;
 bool    System::restart_requested_ = false;
+
+// find the index of the language
+// 0 = EN, 1 = DE, etc...
+uint8_t System::language_index() {
+    for (uint8_t i = 0; i < num_languages; i++) {
+        if (languages[i] == locale()) {
+            return i;
+        }
+    }
+    return 0; // EN
+}
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
@@ -161,7 +177,7 @@ bool System::command_publish(const char * value, const int8_t id) {
 // syslog level
 bool System::command_syslog_level(const char * value, const int8_t id) {
     uint8_t s = 0xff;
-    if (Helpers::value2enum(value, s, FL_(enum_syslog_level))) {
+    if (Helpers::value2enum(value, s, FL_(list_syslog_level))) {
         bool changed = false;
         EMSESP::webSettingsService.update(
             [&](WebSettings & settings) {
@@ -184,17 +200,17 @@ bool System::command_syslog_level(const char * value, const int8_t id) {
 bool System::command_watch(const char * value, const int8_t id) {
     uint8_t  w = 0xff;
     uint16_t i = Helpers::hextoint(value);
-    if (Helpers::value2enum(value, w, FL_(enum_watch))) {
+    if (Helpers::value2enum(value, w, FL_(list_watch))) {
         if (w == 0 || EMSESP::watch() == EMSESP::Watch::WATCH_OFF) {
             EMSESP::watch_id(0);
         }
         if (Mqtt::publish_single() && w != EMSESP::watch()) {
             if (Mqtt::publish_single2cmd()) {
                 Mqtt::publish(F("system/watch"),
-                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : read_flash_string(FL_(enum_watch)[w]).c_str());
+                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : read_flash_string(FL_(list_watch)[w]).c_str());
             } else {
                 Mqtt::publish(F("system_data/watch"),
-                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : read_flash_string(FL_(enum_watch)[w]).c_str());
+                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : read_flash_string(FL_(list_watch)[w]).c_str());
             }
         }
         EMSESP::watch(w);
@@ -288,21 +304,21 @@ void System::syslog_init() {
 
     if (Mqtt::publish_single()) {
         if (Mqtt::publish_single2cmd()) {
-            Mqtt::publish(F("system/syslog"), syslog_enabled_ ? read_flash_string(FL_(enum_syslog_level)[syslog_level_ + 1]).c_str() : "off");
+            Mqtt::publish(F("system/syslog"), syslog_enabled_ ? read_flash_string(FL_(list_syslog_level)[syslog_level_ + 1]).c_str() : "off");
             if (EMSESP::watch_id() == 0 || EMSESP::watch() == 0) {
                 Mqtt::publish(F("system/watch"),
                               EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch())
-                                                                                 : read_flash_string(FL_(enum_watch)[EMSESP::watch()]).c_str());
+                                                                                 : read_flash_string(FL_(list_watch)[EMSESP::watch()]).c_str());
             } else {
                 Mqtt::publish(F("system/watch"), Helpers::hextoa(EMSESP::watch_id()));
             }
 
         } else {
-            Mqtt::publish(F("system_data/syslog"), syslog_enabled_ ? read_flash_string(FL_(enum_syslog_level)[syslog_level_ + 1]).c_str() : "off");
+            Mqtt::publish(F("system_data/syslog"), syslog_enabled_ ? read_flash_string(FL_(list_syslog_level)[syslog_level_ + 1]).c_str() : "off");
             if (EMSESP::watch_id() == 0 || EMSESP::watch() == 0) {
                 Mqtt::publish(F("system_data/watch"),
                               EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch())
-                                                                                 : read_flash_string(FL_(enum_watch)[EMSESP::watch()]).c_str());
+                                                                                 : read_flash_string(FL_(list_watch)[EMSESP::watch()]).c_str());
             } else {
                 Mqtt::publish(F("system_data/watch"), Helpers::hextoa(EMSESP::watch_id()));
             }
@@ -342,6 +358,8 @@ void System::reload_settings() {
         eth_power_      = settings.eth_power;
         eth_phy_addr_   = settings.eth_phy_addr;
         eth_clock_mode_ = settings.eth_clock_mode;
+
+        locale_ = settings.locale;
     });
 }
 
@@ -412,6 +430,12 @@ void System::start() {
 // button single click
 void System::button_OnClick(PButton & b) {
     LOG_DEBUG(F("Button pressed - single click"));
+
+#ifdef EMSESP_DEBUG
+#ifndef EMSESP_STANDALONE
+    Test::listDir(LittleFS, FS_CONFIG_DIRECTORY, 3);
+#endif
+#endif
 }
 
 // button double click
@@ -431,11 +455,6 @@ void System::button_OnVLongPress(PButton & b) {
 #ifndef EMSESP_STANDALONE
     LOG_WARNING(F("Performing factory reset..."));
     EMSESP::console_.loop();
-
-#ifdef EMSESP_DEBUG
-    Test::listDir(LittleFS, FS_CONFIG_DIRECTORY, 3);
-#endif
-
     EMSESP::esp8266React.factoryReset();
 #endif
 }
@@ -803,6 +822,7 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F(" SDK version: %s"), ESP.getSdkVersion());
     shell.printfln(F(" CPU frequency: %lu MHz"), ESP.getCpuFreqMHz());
     shell.printfln(F(" Free heap: %lu bytes"), (uint32_t)ESP.getFreeHeap());
+    shell.printfln(F(" FS used/total: %lu/%lu (bytes)"), LittleFS.usedBytes(), LittleFS.totalBytes());
     shell.println();
 
     shell.println("Network:");
@@ -1089,7 +1109,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.syslog_enabled_) {
         node["syslog started"] = syslog_.started();
-        node["syslog level"]   = FL_(enum_syslog_level)[syslog_.log_level() + 1];
+        node["syslog level"]   = FL_(list_syslog_level)[syslog_.log_level() + 1];
         node["syslog ip"]      = syslog_.ip();
         node["syslog queue"]   = syslog_.queued();
     }
@@ -1145,6 +1165,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node = output.createNestedObject("Settings");
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         node["board profile"] = settings.board_profile;
+        node["locale"]        = settings.locale;
         node["tx mode"]       = settings.tx_mode;
         node["ems bus id"]    = settings.ems_bus_id;
         node["shower timer"]  = settings.shower_timer;

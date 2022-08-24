@@ -363,10 +363,10 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
             JsonObject dataSensor = output.createNestedObject(sensor.name());
             dataSensor["id"]      = sensor.id();
             if (Helpers::hasValue(sensor.temperature_c)) {
-                dataSensor["temp"] = Helpers::round2((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
+                dataSensor["temp"] = Helpers::transformNumFloat((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
             }
         } else if (Helpers::hasValue(sensor.temperature_c)) {
-            output[sensor.name()] = Helpers::round2((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
+            output[sensor.name()] = Helpers::transformNumFloat((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
         }
     }
 
@@ -392,11 +392,11 @@ bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const i
             output["id"]   = sensor.id();
             output["name"] = sensor.name();
             if (Helpers::hasValue(sensor.temperature_c)) {
-                output["value"] = Helpers::round2((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
+                output["value"] = Helpers::transformNumFloat((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
             }
             output["type"]      = F_(number);
-            output["min"]       = Helpers::round2(-55, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
-            output["max"]       = Helpers::round2(125, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+            output["min"]       = Helpers::transformNumFloat(-55, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+            output["max"]       = Helpers::transformNumFloat(125, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
             output["uom"]       = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
             output["writeable"] = false;
             // if we're filtering on an attribute, go find it
@@ -472,10 +472,10 @@ void DallasSensor::publish_values(const bool force) {
             JsonObject dataSensor = doc.createNestedObject(sensor.id());
             dataSensor["name"]    = sensor.name();
             if (has_value) {
-                dataSensor["temp"] = Helpers::round2((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
+                dataSensor["temp"] = Helpers::transformNumFloat((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
             }
         } else if (has_value) {
-            doc[sensor.name()] = Helpers::round2((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
+            doc[sensor.name()] = Helpers::transformNumFloat((float)(sensor.temperature_c), 10, EMSESP::system_.fahrenheit() ? 2 : 0);
         }
 
         // create the HA MQTT config

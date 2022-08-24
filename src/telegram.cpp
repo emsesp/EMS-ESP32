@@ -596,10 +596,12 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         } else {
             increment_telegram_write_fail_count(); // another Tx fail
         }
+
         LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request: %s"),
                   (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
                   MAXIMUM_TX_RETRIES,
                   telegram_last_->to_string().c_str());
+
         if (operation == Telegram::Operation::TX_READ) {
             EMSESP::rxservice_.add_empty(telegram_last_->dest, telegram_last_->src, telegram_last_->type_id, telegram_last_->offset);
         }

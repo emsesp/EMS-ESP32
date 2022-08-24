@@ -304,13 +304,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         uint16_t temp;
         float    doub;
-        temp = 0x0201;                    // decimal 513
-        doub = Helpers::round2(temp, 10); // divide by 10
+        temp = 0x0201;                               // decimal 513
+        doub = Helpers::transformNumFloat(temp, 10); // divide by 10
         shell.printfln("Round test from x%02X to %d to %f", temp, temp, doub);
-        doub = Helpers::round2(temp, 10); // divide by 10
+        doub = Helpers::transformNumFloat(temp, 10); // divide by 10
         shell.printfln("Round test div10 from x%02X to %d to %f", temp, temp, doub);
         temp = 0x63;
-        doub = Helpers::round2(temp, 2); // divide by 2
+        doub = Helpers::transformNumFloat(temp, 2); // divide by 2
         shell.printfln("Round test div2 from x%02X to %d to %f", temp, temp, doub);
     }
 
@@ -448,7 +448,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "boiler") {
         shell.printfln(F("Testing boiler..."));
-        Mqtt::ha_enabled(false);
+        // Mqtt::ha_enabled(false);
+        Mqtt::ha_enabled(true);
         Mqtt::nested_format(1);
 
         run_test("boiler");

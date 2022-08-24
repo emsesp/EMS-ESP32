@@ -225,6 +225,7 @@ void EMSESPShell::add_console_commands() {
                           flash_string_vector{F_(set)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                               EMSESP::webSettingsService.read([&](WebSettings & settings) {
+                                  shell.printfln(F("Language: %s"), settings.locale.c_str());
                                   shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                   shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
                                   shell.printfln(F_(board_profile_fmt), settings.board_profile.c_str());
@@ -280,11 +281,11 @@ void EMSESPShell::add_console_commands() {
                                   // get raw/pretty
                                   if (arguments[0] == read_flash_string(F_(raw))) {
                                       EMSESP::watch(EMSESP::WATCH_RAW); // raw
-                                  } else if (arguments[0] == read_flash_string(F_(on))) {
+                                  } else if (arguments[0] == Helpers::translated_word(FL_(on))) {
                                       EMSESP::watch(EMSESP::WATCH_ON); // on
-                                  } else if (arguments[0] == read_flash_string(F_(off))) {
+                                  } else if (arguments[0] == Helpers::translated_word(FL_(off))) {
                                       EMSESP::watch(EMSESP::WATCH_OFF); // off
-                                  } else if (arguments[0] == read_flash_string(F_(unknown))) {
+                                  } else if (arguments[0] == Helpers::translated_word(FL_(unknown))) {
                                       EMSESP::watch(EMSESP::WATCH_UNKNOWN); // unknown
                                       watch_id = WATCH_ID_NONE;
                                   } else {

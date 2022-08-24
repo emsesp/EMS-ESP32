@@ -1,4 +1,5 @@
 export interface Settings {
+  locale: string;
   tx_mode: number;
   ems_bus_id: number;
   syslog_enabled: boolean;

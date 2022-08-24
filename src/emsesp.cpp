@@ -299,7 +299,6 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 }
 
 // show EMS device values to the shell console
-// generate_values_json is called in verbose mode
 void EMSESP::show_device_values(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
         shell.printfln(F("No EMS devices detected."));
@@ -317,7 +316,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                 DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN); // use max size
                 JsonObject          json = doc.to<JsonObject>();
 
-                emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::CONSOLE); // verbose mode and nested
+                emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::CONSOLE);
 
                 // print line
                 uint8_t id = 0;
@@ -334,7 +333,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                         char s[10];
                         shell.print(Helpers::render_value(s, data.as<float>(), 1));
                     } else if (data.is<bool>()) {
-                        shell.print(data.as<bool>() ? F_(on) : F_(off));
+                        shell.print(data.as<bool>() ? Helpers::translated_word(FL_(on)) : Helpers::translated_word(FL_(off)));
                     }
 
                     // if there is a uom print it
@@ -488,6 +487,8 @@ void EMSESP::reset_mqtt_ha() {
     for (const auto & emsdevice : emsdevices) {
         emsdevice->ha_config_clear();
     }
+
+    // force the re-creating of the dallas and analog sensor topics (for HA)
     dallassensor_.reload();
     analogsensor_.reload();
 }
@@ -1291,11 +1292,16 @@ void EMSESP::start() {
 
     esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
+
+#ifdef EMSESP_DEBUG
+    LOG_NOTICE(F("System is running in Debug mode"));
+#endif
+
     LOG_INFO(F("Last system reset reason Core0: %s, Core1: %s"), system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
     // do any system upgrades
     if (system_.check_upgrade()) {
-        LOG_INFO(F("System will be restarted to apply upgrade"));
+        LOG_INFO(F("System needs a restart to apply new settings. Please wait."));
         system_.system_restart();
     };
 

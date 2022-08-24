@@ -26,6 +26,7 @@ namespace emsesp {
 AsyncMqttClient * Mqtt::mqttClient_;
 
 // static parameters we make global
+std::string Mqtt::system_hostname_; // copy from System::hostname()
 std::string Mqtt::mqtt_base_;
 uint8_t     Mqtt::mqtt_qos_;
 bool        Mqtt::mqtt_retain_;
@@ -109,7 +110,7 @@ void Mqtt::subscribe(const std::string & topic) {
 }
 
 // resubscribe to all MQTT topics
-// if it's already in the queue, ignore it
+// if it's already in the queue then just ignore it
 void Mqtt::resubscribe() {
     if (mqtt_subfunctions_.empty()) {
         return;
@@ -277,7 +278,7 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
         return;
     }
 
-    // check first againts any of our subscribed topics
+    // check first against any of our subscribed topics
     for (const auto & mf : mqtt_subfunctions_) {
         // add the base back
         char full_topic[MQTT_TOPIC_MAX_SIZE];
@@ -420,6 +421,9 @@ void Mqtt::load_settings() {
         publish_time_other_      = mqttSettings.publish_time_other * 1000;
         publish_time_sensor_     = mqttSettings.publish_time_sensor * 1000;
     });
+
+    // get a local copy of the system hostname
+    system_hostname_ = EMSESP::system_.hostname();
 }
 
 void Mqtt::start() {
@@ -576,28 +580,31 @@ void Mqtt::on_connect() {
     publish(F_(info), doc.as<JsonObject>()); // topic called "info"
 
     if (ha_enabled_) {
-        queue_unsubscribe_message(discovery_prefix_ + "/climate/" + mqtt_base_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/sensor/" + mqtt_base_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/binary_sensor/" + mqtt_base_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/number/" + mqtt_base_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/select/" + mqtt_base_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/switch/" + mqtt_base_ + "/#");
+        LOG_INFO(F("start removing topics %s/+/%s/#"), discovery_prefix_.c_str(), system_hostname_.c_str());
+        queue_unsubscribe_message(discovery_prefix_ + "/climate/" + system_hostname_ + "/#");
+        queue_unsubscribe_message(discovery_prefix_ + "/sensor/" + system_hostname_ + "/#");
+        queue_unsubscribe_message(discovery_prefix_ + "/binary_sensor/" + system_hostname_ + "/#");
+        queue_unsubscribe_message(discovery_prefix_ + "/number/" + system_hostname_ + "/#");
+        queue_unsubscribe_message(discovery_prefix_ + "/select/" + system_hostname_ + "/#");
+        queue_unsubscribe_message(discovery_prefix_ + "/switch/" + system_hostname_ + "/#");
         EMSESP::reset_mqtt_ha(); // re-create all HA devices if there are any
         ha_status();             // create the EMS-ESP device in HA, which is MQTT retained
         ha_climate_reset(true);
     } else {
-        queue_subscribe_message(discovery_prefix_ + "/climate/" + mqtt_base_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/sensor/" + mqtt_base_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/binary_sensor/" + mqtt_base_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/number/" + mqtt_base_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/select/" + mqtt_base_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/switch/" + mqtt_base_ + "/#");
-        LOG_INFO(F("start removing topics %s/+/%s/#"), discovery_prefix_.c_str(), mqtt_base_.c_str());
+        // TODO commented out - not sure why we need to subscribe if not using discovery. Check with Michael!
+        /*
+        queue_subscribe_message(discovery_prefix_ + "/climate/" + system_hostname_ + "/#");
+        queue_subscribe_message(discovery_prefix_ + "/sensor/" + system_hostname_ + "/#");
+        queue_subscribe_message(discovery_prefix_ + "/binary_sensor/" + system_hostname_ + "/#");
+        queue_subscribe_message(discovery_prefix_ + "/number/" + system_hostname_ + "/#");
+        queue_subscribe_message(discovery_prefix_ + "/select/" + system_hostname_ + "/#");
+        queue_subscribe_message(discovery_prefix_ + "/switch/" + system_hostname_ + "/#");
+        */
     }
 
     // send initial MQTT messages for some of our services
     EMSESP::shower_.set_shower_state(false, true); // Send shower_activated as false
-    EMSESP::system_.send_heartbeat();              // send heatbeat
+    EMSESP::system_.send_heartbeat();              // send heartbeat
 
     // re-subscribe to all custom registered MQTT topics
     resubscribe();
@@ -641,7 +648,7 @@ void Mqtt::ha_status() {
     ids.add("ems-esp");
 
     char topic[MQTT_TOPIC_MAX_SIZE];
-    snprintf(topic, sizeof(topic), "sensor/%s/system/config", mqtt_base_.c_str());
+    snprintf(topic, sizeof(topic), "sensor/%s/system/config", system_hostname_.c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors - must match the MQTT payload keys
@@ -810,7 +817,7 @@ void Mqtt::process_queue() {
     if (message->topic.find(discovery_prefix_) == 0) {
         strlcpy(topic, message->topic.c_str(), sizeof(topic)); // leave topic as it is
     } else {
-        snprintf(topic, MQTT_TOPIC_MAX_SIZE, "%s/%s", mqtt_base_.c_str(), message->topic.c_str());
+        snprintf(topic, MQTT_TOPIC_MAX_SIZE, "%s/%s", mqtt_base_.c_str(), message->topic.c_str()); // uses base
     }
 
     // if this has already been published and we're waiting for an ACK, don't publish again
@@ -919,7 +926,8 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
     }
 
     // calculate the min and max
-    int16_t dv_set_min, dv_set_max;
+    int16_t dv_set_min;
+    int16_t dv_set_max;
     (void)dv.get_min_max(dv_set_min, dv_set_max);
 
     // determine if we're creating the command topics which we use special HA configs
@@ -928,7 +936,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
 
     publish_ha_sensor_config(dv.type,
                              dv.tag,
-                             dv.full_name,
+                             Helpers::translated_fword(dv.fullname),
                              dv.device_type,
                              dv.short_name,
                              dv.uom,
@@ -955,21 +963,21 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelp
 // MQTT discovery configs
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
-void Mqtt::publish_ha_sensor_config(uint8_t                             type,        // EMSdevice::DeviceValueType
-                                    uint8_t                             tag,         // EMSdevice::DeviceValueTAG
-                                    const __FlashStringHelper *         name,        // fullname
-                                    const uint8_t                       device_type, // EMSdevice::DeviceType
-                                    const __FlashStringHelper *         entity,      // shortname
-                                    const uint8_t                       uom,         // EMSdevice::DeviceValueUOM (0=NONE)
-                                    const bool                          remove,      // true if we want to remove this topic
-                                    const bool                          has_cmd,
-                                    const __FlashStringHelper * const * options,
-                                    uint8_t                             options_size,
-                                    const int16_t                       dv_set_min,
-                                    const int16_t                       dv_set_max,
-                                    const JsonObject &                  dev_json) {
+void Mqtt::publish_ha_sensor_config(uint8_t                              type,        // EMSdevice::DeviceValueType
+                                    uint8_t                              tag,         // EMSdevice::DeviceValueTAG
+                                    const __FlashStringHelper * const    fullname,    // fullname, already translated
+                                    const uint8_t                        device_type, // EMSdevice::DeviceType
+                                    const __FlashStringHelper * const    entity,      // same as shortname
+                                    const uint8_t                        uom,         // EMSdevice::DeviceValueUOM (0=NONE)
+                                    const bool                           remove,      // true if we want to remove this topic
+                                    const bool                           has_cmd,
+                                    const __FlashStringHelper * const ** options,
+                                    uint8_t                              options_size,
+                                    const int16_t                        dv_set_min,
+                                    const int16_t                        dv_set_max,
+                                    const JsonObject &                   dev_json) {
     // ignore if name (fullname) is empty
-    if (name == nullptr) {
+    if (fullname == nullptr) {
         return;
     }
 
@@ -977,7 +985,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     char device_name[50];
     strlcpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str(), sizeof(device_name));
 
-    // create entity by add the hc/wwc tag if present, seperating with a .
+    // create entity by add the hc/wwc tag if present, separating with a .
     char new_entity[50];
     if (tag >= DeviceValueTAG::TAG_HC1) {
         snprintf(new_entity, sizeof(new_entity), "%s.%s", EMSdevice::tag_to_string(tag).c_str(), read_flash_string(entity).c_str());
@@ -1007,28 +1015,28 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
             // number - https://www.home-assistant.io/integrations/number.mqtt
             // https://developers.home-assistant.io/docs/core/entity/number
 
-            snprintf(topic, sizeof(topic), "number/%s/%s/config", mqtt_base_.c_str(), uniq);
+            snprintf(topic, sizeof(topic), "number/%s/%s/config", system_hostname_.c_str(), uniq);
             break;
         case DeviceValueType::BOOL:
             // switch - https://www.home-assistant.io/integrations/switch.mqtt
-            snprintf(topic, sizeof(topic), "switch/%s/%s/config", mqtt_base_.c_str(), uniq);
+            snprintf(topic, sizeof(topic), "switch/%s/%s/config", system_hostname_.c_str(), uniq);
             break;
         case DeviceValueType::ENUM:
             // select - https://www.home-assistant.io/integrations/select.mqtt
-            snprintf(topic, sizeof(topic), "select/%s/%s/config", mqtt_base_.c_str(), uniq);
+            snprintf(topic, sizeof(topic), "select/%s/%s/config", system_hostname_.c_str(), uniq);
             break;
         default:
             // plain old sensor
-            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq);
+            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", system_hostname_.c_str(), uniq);
             break;
         }
     } else {
         // plain old read only device entity
         if (type == DeviceValueType::BOOL) {
-            snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", mqtt_base_.c_str(), uniq); // binary sensor
+            snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", system_hostname_.c_str(), uniq); // binary sensor
         } else {
             use_ha_sensor = true;
-            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_base_.c_str(), uniq); // normal HA sensor, not a boolean one
+            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", system_hostname_.c_str(), uniq); // normal HA sensor, not a boolean one
         }
     }
 
@@ -1065,7 +1073,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
         if (type == DeviceValueType::ENUM) {
             JsonArray option_list = doc.createNestedArray("options");
             for (uint8_t i = 0; i < options_size; i++) {
-                option_list.add(options[i]);
+                option_list.add(Helpers::translated_word(options[i]));
             }
         } else if (type != DeviceValueType::STRING) {
             // Must be Numeric....
@@ -1104,22 +1112,21 @@ void Mqtt::publish_ha_sensor_config(uint8_t                             type,   
     doc["stat_t"] = stat_t;
 
     // friendly name = <tag> <name>
-    char short_name[70];
+    char ha_name[70];
     if (have_tag) {
-        snprintf(short_name, sizeof(short_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), read_flash_string(name).c_str());
+        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), read_flash_string(fullname).c_str());
     } else {
-        snprintf(short_name, sizeof(short_name), "%s", read_flash_string(name).c_str());
+        snprintf(ha_name, sizeof(ha_name), "%s", read_flash_string(fullname).c_str());
     }
+    ha_name[0]  = toupper(ha_name[0]); // capitalize first letter
+    doc["name"] = ha_name;
 
-    // entity id = emsesp_<device>_<tag>_<name>
-    char long_name[130];
-    snprintf(long_name, sizeof(long_name), "%s_%s", device_name, short_name);
-    // snprintf(long_name, sizeof(long_name), "emsesp_%s_%s", device_name, short_name);      //wouldn't it be better?
-    doc["object_id"] = long_name;
-
-    // name (friendly name) = <tag> <name>
-    short_name[0] = toupper(short_name[0]); // capitalize first letter
-    doc["name"]   = short_name;
+    // entity id is generated from the name, see https://www.home-assistant.io/docs/mqtt/discovery/#use-object_id-to-influence-the-entity-id
+    // so we override it to make it unique using entity_id
+    // emsesp_<device>_<tag>_<name>
+    char object_id[130];
+    snprintf(object_id, sizeof(object_id), "emsesp_%s_%s", device_name, ha_name);
+    doc["object_id"] = object_id;
 
     // value template
     // if its nested mqtt format then use the appended entity name, otherwise take the original

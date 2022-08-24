@@ -15,10 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef EMSESP_DEFAULT_SETTINGS_H
 #define EMSESP_DEFAULT_SETTINGS_H
 
 // GENERAL SETTINGS
+
+#ifndef EMSESP_STANDALONE
+#define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_EN // English
+#else
+// this is for debugging different languages in standalone version
+#define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_DE // German
+// #define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_EN // English
+#endif
 
 #ifndef EMSESP_DEFAULT_TX_MODE
 #define EMSESP_DEFAULT_TX_MODE 1 // EMS1.0
@@ -199,19 +208,19 @@
 // matches Web UI settings
 enum {
 
-    BOOL_FORMAT_ONOFF_STR = 1,
-    BOOL_FORMAT_ONOFF_STR_CAP,
-    BOOL_FORMAT_TRUEFALSE_STR,
-    BOOL_FORMAT_TRUEFALSE,
-    BOOL_FORMAT_10_STR,
-    BOOL_FORMAT_10
+    BOOL_FORMAT_ONOFF_STR = 1, // 1
+    BOOL_FORMAT_ONOFF_STR_CAP, // 2
+    BOOL_FORMAT_TRUEFALSE_STR, // 3
+    BOOL_FORMAT_TRUEFALSE,     // 4
+    BOOL_FORMAT_10_STR,        // 5
+    BOOL_FORMAT_10             // 6
 
 };
 
 enum {
 
-    ENUM_FORMAT_VALUE = 1,
-    ENUM_FORMAT_INDEX // 2
+    ENUM_FORMAT_VALUE = 1, // 1
+    ENUM_FORMAT_INDEX      // 2
 
 };
 

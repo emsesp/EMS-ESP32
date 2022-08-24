@@ -74,12 +74,21 @@ import {
   DeviceEntityMask
 } from './types';
 
+import { useI18nContext } from '../i18n/i18n-react';
+
 const DashboardData: FC = () => {
   const { me } = useContext(AuthenticatedContext);
 
+  const { LL } = useI18nContext();
+
   const { enqueueSnackbar } = useSnackbar();
 
-  const [coreData, setCoreData] = useState<CoreData>({ connected: true, devices: [], active_sensors: 0, analog_enabled: false });
+  const [coreData, setCoreData] = useState<CoreData>({
+    connected: true,
+    devices: [],
+    active_sensors: 0,
+    analog_enabled: false
+  });
   const [deviceData, setDeviceData] = useState<DeviceData>({ label: '', data: [] });
   const [sensorData, setSensorData] = useState<SensorData>({ sensors: [], analogs: [] });
   const [deviceValue, setDeviceValue] = useState<DeviceValue>();
@@ -134,7 +143,7 @@ const DashboardData: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 40px 100px repeat(1, minmax(0, 1fr)) 80px 40px;
+        --data-table-library_grid-template-columns: 40px 100px repeat(1, minmax(0, 1fr)) 90px 40px;
       `,
       BaseRow: `
         .td {
@@ -429,15 +438,15 @@ const DashboardData: FC = () => {
           devicevalue: deviceValue
         });
         if (response.status === 204) {
-          enqueueSnackbar('Write command failed', { variant: 'error' });
+          enqueueSnackbar(LL.WRITE_COMMAND({ cmd: 'failed' }), { variant: 'error' });
         } else if (response.status === 403) {
-          enqueueSnackbar('Write access denied', { variant: 'error' });
+          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar('Write command sent', { variant: 'success' });
+          enqueueSnackbar(LL.WRITE_COMMAND({ cmd: 'send' }), { variant: 'success' });
         }
         setDeviceValue(undefined);
       } catch (error: unknown) {
-        enqueueSnackbar(extractErrorMessage(error, 'Problem writing value'), { variant: 'error' });
+        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       } finally {
         refreshData();
         setDeviceValue(undefined);
@@ -449,7 +458,7 @@ const DashboardData: FC = () => {
     if (deviceValue) {
       return (
         <Dialog open={deviceValue !== undefined} onClose={() => setDeviceValue(undefined)}>
-          <DialogTitle>{isCmdOnly(deviceValue) ? 'Run Command' : 'Change Value'}</DialogTitle>
+          <DialogTitle>{isCmdOnly(deviceValue) ? LL.RUN_COMMAND() : LL.CHANGE_VALUE()}</DialogTitle>
           <DialogContent dividers>
             {deviceValue.l && (
               <ValidatedTextField
@@ -491,7 +500,7 @@ const DashboardData: FC = () => {
               onClick={() => setDeviceValue(undefined)}
               color="secondary"
             >
-              Cancel
+              {LL.CANCEL()}
             </Button>
             <Button
               startIcon={<SendIcon />}
@@ -500,7 +509,7 @@ const DashboardData: FC = () => {
               onClick={() => sendDeviceValue()}
               color="warning"
             >
-              Send
+              {LL.SEND()}
             </Button>
           </DialogActions>
         </Dialog>
@@ -521,15 +530,15 @@ const DashboardData: FC = () => {
           offset: sensor.o
         });
         if (response.status === 204) {
-          enqueueSnackbar('Sensor change failed', { variant: 'error' });
+          enqueueSnackbar(LL.TEMP_SENSOR({ cmd: 'change failed' }), { variant: 'error' });
         } else if (response.status === 403) {
-          enqueueSnackbar('Access denied', { variant: 'error' });
+          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar('Sensor updated', { variant: 'success' });
+          enqueueSnackbar(LL.TEMP_SENSOR({ cmd: 'removed' }), { variant: 'success' });
         }
         setSensor(undefined);
       } catch (error: unknown) {
-        enqueueSnackbar(extractErrorMessage(error, 'Problem updating sensor'), { variant: 'error' });
+        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       } finally {
         setSensor(undefined);
         fetchSensorData();
@@ -581,7 +590,7 @@ const DashboardData: FC = () => {
               onClick={() => setSensor(undefined)}
               color="secondary"
             >
-              Cancel
+              {LL.CANCEL()}
             </Button>
             <Button
               startIcon={<SaveIcon />}
@@ -590,7 +599,7 @@ const DashboardData: FC = () => {
               onClick={() => sendSensor()}
               color="warning"
             >
-              Save
+              {LL.SAVE()}
             </Button>
           </DialogActions>
         </Dialog>
@@ -640,17 +649,20 @@ const DashboardData: FC = () => {
 
   const renderCoreData = () => (
     <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
-      {!coreData.connected && <MessageBox my={2} level="error" message="EMSbus disconnected, check settings and board profile" />}
-      {coreData.connected && coreData.devices.length === 0 && <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />}
+      {!coreData.connected && <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />}
+      {coreData.connected && coreData.devices.length === 0 && (
+        <MessageBox my={2} level="warning" message={LL.EMS_BUS_SCANNING()} />
+      )}
+
       <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
         {(tableList: any) => (
           <>
             <Header>
               <HeaderRow>
                 <HeaderCell stiff />
-                <HeaderCell stiff>TYPE</HeaderCell>
-                <HeaderCell resize>DESCRIPTION</HeaderCell>
-                <HeaderCell stiff>ENTITIES</HeaderCell>
+                <HeaderCell stiff>{LL.TYPE()}</HeaderCell>
+                <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
+                <HeaderCell stiff>{LL.ENTITIES()}</HeaderCell>
                 <HeaderCell stiff />
               </HeaderRow>
             </Header>
@@ -676,7 +688,7 @@ const DashboardData: FC = () => {
                     <DeviceIcon type="Sensor" />
                   </Cell>
                   <Cell>Sensors</Cell>
-                  <Cell>Attached EMS-ESP Sensors</Cell>
+                  <Cell>{LL.ATTACHED_SENSORS()}</Cell>
                   <Cell>{coreData.active_sensors}</Cell>
                   <Cell>
                     <IconButton size="small" onClick={() => addAnalogSensor()}>
@@ -723,7 +735,7 @@ const DashboardData: FC = () => {
           control={<Checkbox size="small" name="onlyFav" checked={onlyFav} onChange={() => setOnlyFav(!onlyFav)} />}
           label={
             <span style={{ fontSize: '12px' }}>
-              only show favorites&nbsp;
+              {LL.SHOW_FAV()}&nbsp;
               <StarIcon color="primary" sx={{ fontSize: 12 }} />
             </span>
           }
@@ -749,7 +761,7 @@ const DashboardData: FC = () => {
                       endIcon={getSortIcon(dv_sort.state, 'NAME')}
                       onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'NAME' })}
                     >
-                      ENTITY NAME
+                      {LL.ENTITY_NAME()}
                     </Button>
                   </HeaderCell>
                   <HeaderCell resize>
@@ -759,7 +771,7 @@ const DashboardData: FC = () => {
                       endIcon={getSortIcon(dv_sort.state, 'VALUE')}
                       onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
                     >
-                      VALUE
+                      {LL.VALUE()}
                     </Button>
                   </HeaderCell>
                   <HeaderCell stiff />
@@ -943,14 +955,14 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar('Analog deletion failed', { variant: 'error' });
+          enqueueSnackbar(LL.ANALOG_SENSOR({ cmd: 'deletion failed' }), { variant: 'error' });
         } else if (response.status === 403) {
-          enqueueSnackbar('Access denied', { variant: 'error' });
+          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar('Analog sensor removed', { variant: 'success' });
+          enqueueSnackbar(LL.ANALOG_SENSOR({ cmd: 'removed' }), { variant: 'success' });
         }
       } catch (error: unknown) {
-        enqueueSnackbar(extractErrorMessage(error, 'Problem updating analog sensor'), { variant: 'error' });
+        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       } finally {
         setAnalog(undefined);
         fetchSensorData();
@@ -971,14 +983,14 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar('Analog sensor update failed', { variant: 'error' });
+          enqueueSnackbar(LL.ANALOG_SENSOR({ cmd: 'update failed' }), { variant: 'error' });
         } else if (response.status === 403) {
-          enqueueSnackbar('Access denied', { variant: 'error' });
+          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar('Analog sensor updated', { variant: 'success' });
+          enqueueSnackbar(LL.ANALOG_SENSOR({ cmd: 'updated' }), { variant: 'success' });
         }
       } catch (error: unknown) {
-        enqueueSnackbar(extractErrorMessage(error, 'Problem updating analog'), { variant: 'error' });
+        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       } finally {
         setAnalog(undefined);
         fetchSensorData();
@@ -1131,7 +1143,7 @@ const DashboardData: FC = () => {
                   <Grid item>
                     <ValidatedTextField
                       name="o"
-                      label="Dutycycle"
+                      label="Duty Cycle"
                       value={numberValue(analog.o)}
                       sx={{ width: '20ch' }}
                       type="number"
@@ -1153,7 +1165,7 @@ const DashboardData: FC = () => {
           <DialogActions>
             <Box flexGrow={1} sx={{ '& button': { mt: 0 } }}>
               <Button startIcon={<RemoveIcon />} variant="outlined" color="error" onClick={() => sendRemoveAnalog()}>
-                Remove
+                {LL.REMOVE()}
               </Button>
             </Box>
             <Button
@@ -1162,7 +1174,7 @@ const DashboardData: FC = () => {
               onClick={() => setAnalog(undefined)}
               color="secondary"
             >
-              Cancel
+              {LL.CANCEL()}
             </Button>
             <Button
               startIcon={<SaveIcon />}
@@ -1171,7 +1183,7 @@ const DashboardData: FC = () => {
               onClick={() => sendAnalog()}
               color="warning"
             >
-              Save
+              {LL.SAVE()}
             </Button>
           </DialogActions>
         </Dialog>
@@ -1180,7 +1192,7 @@ const DashboardData: FC = () => {
   };
 
   return (
-    <SectionContent title="Device and Sensor Data" titleGutter>
+    <SectionContent title={LL.DEVICE_SENSOR_DATA()} titleGutter>
       {renderCoreData()}
       {renderDeviceData()}
       {renderDeviceDialog()}
@@ -1191,11 +1203,11 @@ const DashboardData: FC = () => {
       {renderAnalogDialog()}
       <ButtonRow>
         <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
-          Refresh
+          {LL.REFRESH()}
         </Button>
         {device_select.state.id && device_select.state.id !== 'sensor' && (
           <Button startIcon={<DownloadIcon />} variant="outlined" onClick={handleDownloadCsv}>
-            Export
+            {LL.EXPORT()}
           </Button>
         )}
       </ButtonRow>

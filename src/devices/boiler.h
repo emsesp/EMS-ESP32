@@ -227,15 +227,11 @@ class Boiler : public EMSdevice {
     int8_t   blockHyst_;     // pos 14?: Hyst. for bolier block (K)
     uint8_t  releaseWait_;   // pos 15: Boiler release wait time (min)
 
-
-
-
     /*
- * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
- * thermostat always overwrites settings in boiler
- * enable settings here if no thermostat is used in system
- *
-// HybridHP
+  // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
+  // thermostat always overwrites settings in boiler
+  //enable settings here if no thermostat is used in system
+  // HybridHP
     uint8_t hybridStrategy_;  // cost = 2, temperature = 3, mix = 4
     int8_t  switchOverTemp_;  // degrees
     uint8_t energyCostRatio_; // is *10
@@ -243,7 +239,7 @@ class Boiler : public EMSdevice {
     uint8_t electricFactor_;  // is * 10
     uint8_t delayBoiler_;     // minutes
     uint8_t tempDiffBoiler_;  // relative temperature degrees
-    */
+  */
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);

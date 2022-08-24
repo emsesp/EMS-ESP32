@@ -3,7 +3,7 @@ import { ValidateFieldsError } from 'async-validator';
 
 import { useSnackbar } from 'notistack';
 
-import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider } from '@mui/material';
+import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider, InputAdornment } from '@mui/material';
 
 import SaveIcon from '@mui/icons-material/Save';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
@@ -24,6 +24,8 @@ import { numberValue, extractErrorMessage, updateValue, useRest } from '../utils
 import * as EMSESP from './api';
 import { Settings, BOARD_PROFILES } from './types';
 
+import { useI18nContext } from '../i18n/i18n-react';
+
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
     <MenuItem key={code} value={code}>
@@ -37,6 +39,8 @@ const SettingsApplication: FC = () => {
     read: EMSESP.readSettings,
     update: EMSESP.writeSettings
   });
+
+  const { LL } = useI18nContext();
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -116,7 +120,7 @@ const SettingsApplication: FC = () => {
         <Box color="warning.main">
           <Typography variant="body2">
             Select a pre-configured interface board profile from the list below or choose "Custom" to configure your own
-            hardware settings.
+            hardware settings
           </Typography>
         </Box>
         <ValidatedTextField
@@ -321,6 +325,26 @@ const SettingsApplication: FC = () => {
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           General Options
         </Typography>
+        <Box
+          sx={{
+            '& .MuiTextField-root': { width: '25ch' }
+          }}
+        >
+          <ValidatedTextField
+            name="locale"
+            label="Language (for device entities)"
+            disabled={saving}
+            value={data.locale}
+            variant="outlined"
+            onChange={updateFormValue}
+            margin="normal"
+            size="small"
+            select
+          >
+            <MenuItem value="en">English</MenuItem>
+            <MenuItem value="de">Deutsch</MenuItem>
+          </ValidatedTextField>
+        </Box>
         {data.led_gpio !== 0 && (
           <BlockFormControlLabel
             control={<Checkbox checked={data.hide_led} onChange={updateFormValue} name="hide_led" />}
@@ -350,7 +374,7 @@ const SettingsApplication: FC = () => {
         />
         <BlockFormControlLabel
           control={<Checkbox checked={data.readonly_mode} onChange={updateFormValue} name="readonly_mode" />}
-          label="Enable Read only mode (blocks all outgoing EMS Tx write commands)"
+          label="Enable read-only mode (blocks all outgoing EMS Tx Write commands)"
           disabled={saving}
         />
         <BlockFormControlLabel
@@ -371,11 +395,14 @@ const SettingsApplication: FC = () => {
           />
           {data.shower_alert && (
             <>
-              <Grid item xs={2}>
+              <Grid item xs={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="shower_alert_trigger"
-                  label="Trigger Time (minutes)"
+                  label="Trigger Time"
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">minutes</InputAdornment>
+                  }}
                   variant="outlined"
                   value={data.shower_alert_trigger}
                   type="number"
@@ -383,11 +410,14 @@ const SettingsApplication: FC = () => {
                   disabled={!data.shower_timer}
                 />
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="shower_alert_coldshot"
-                  label="Cold Shot Time (seconds)"
+                  label="Cold Shot Duration"
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+                  }}
                   variant="outlined"
                   value={data.shower_alert_coldshot}
                   type="number"
@@ -413,8 +443,8 @@ const SettingsApplication: FC = () => {
               margin="normal"
               select
             >
-              <MenuItem value={1}>on/off</MenuItem>
-              <MenuItem value={2}>ON/OFF</MenuItem>
+              <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
+              <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
               <MenuItem value={3}>true/false</MenuItem>
               <MenuItem value={5}>1/0</MenuItem>
             </ValidatedTextField>
@@ -430,8 +460,8 @@ const SettingsApplication: FC = () => {
               margin="normal"
               select
             >
-              <MenuItem value={1}>"on"/"off"</MenuItem>
-              <MenuItem value={2}>"ON"/"OFF"</MenuItem>
+              <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
+              <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
               <MenuItem value={3}>"true"/"false"</MenuItem>
               <MenuItem value={4}>true/false</MenuItem>
               <MenuItem value={5}>"1"/"0"</MenuItem>
@@ -487,7 +517,7 @@ const SettingsApplication: FC = () => {
         />
         {data.syslog_enabled && (
           <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_host"
@@ -500,7 +530,7 @@ const SettingsApplication: FC = () => {
                 disabled={saving}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_port"
@@ -514,7 +544,7 @@ const SettingsApplication: FC = () => {
                 disabled={saving}
               />
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <ValidatedTextField
                 name="syslog_level"
                 label="Log Level"
@@ -534,11 +564,14 @@ const SettingsApplication: FC = () => {
                 <MenuItem value={9}>ALL</MenuItem>
               </ValidatedTextField>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_mark_interval"
-                label="Mark Interval (seconds, 0=off)"
+                label="Mark Interval"
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+                }}
                 fullWidth
                 variant="outlined"
                 value={data.syslog_mark_interval}

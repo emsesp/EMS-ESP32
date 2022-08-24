@@ -10,7 +10,8 @@ import {
   ListItemAvatar,
   ListItemSecondaryAction,
   ListItemText,
-  Typography
+  Typography,
+  InputAdornment
 } from '@mui/material';
 
 import LockOpenIcon from '@mui/icons-material/LockOpen';
@@ -135,7 +136,10 @@ const WiFiSettingsForm: FC = () => {
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="tx_power"
-          label="WiFi Tx Power (dBm)"
+          label="WiFi Tx Power"
+          InputProps={{
+            endAdornment: <InputAdornment position="end">dBm</InputAdornment>
+          }}
           fullWidth
           variant="outlined"
           value={numberValue(data.tx_power)}

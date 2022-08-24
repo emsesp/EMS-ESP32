@@ -1,5 +1,17 @@
 # Changelog
 
+# [3.5.0]
+
+## Added
+
+- Translations in Web UI and all device entity names to German. [#22](https://github.com/emsesp/EMS-ESP32/issues/22)
+
+## Fixed
+
+## Changed
+
+## **BREAKING CHANGES:**
+
 # [3.4.2]
 
 ## Added

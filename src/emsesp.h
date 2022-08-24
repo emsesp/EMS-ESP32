@@ -92,6 +92,8 @@ using DeviceValueUOM   = emsesp::DeviceValue::DeviceValueUOM;
 using DeviceValueType  = emsesp::DeviceValue::DeviceValueType;
 using DeviceValueState = emsesp::DeviceValue::DeviceValueState;
 using DeviceValueTAG   = emsesp::DeviceValue::DeviceValueTAG;
+using DeviceValueNumOp = emsesp::DeviceValue::DeviceValueNumOp;
+
 
 class Shower; // forward declaration for compiler
 

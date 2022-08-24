@@ -1,18 +1,18 @@
 {
   "name": "EMS-ESP",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "private": true,
   "proxy": "http://localhost:3080",
   "dependencies": {
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
     "@msgpack/msgpack": "^2.7.2",
-    "@mui/icons-material": "^5.8.4",
-    "@mui/material": "^5.9.3",
-    "@table-library/react-table-library": "4.0.10",
-    "@types/lodash": "^4.14.182",
-    "@types/node": "^18.6.3",
-    "@types/react": "^18.0.15",
+    "@mui/icons-material": "^5.10.2",
+    "@mui/material": "^5.10.2",
+    "@table-library/react-table-library": "4.0.12",
+    "@types/lodash": "^4.14.184",
+    "@types/node": "^18.7.13",
+    "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@types/react-router-dom": "^5.3.3",
     "async-validator": "^4.2.5",
@@ -30,6 +30,7 @@
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "sockette": "^2.0.6",
+    "typesafe-i18n": "^5.12.0",
     "typescript": "^4.7.4"
   },
   "scripts": {
@@ -41,8 +42,9 @@
     "build-hosted": "env-cmd -f .env.hosted npm run build",
     "build-localhost": "PUBLIC_URL=/ react-app-rewired build",
     "mock-api": "nodemon --watch ../mock-api ../mock-api/server.js",
-    "standalone": "npm-run-all -p start mock-api",
-    "lint": "eslint . --ext .ts,.tsx"
+    "standalone": "npm-run-all -p start typesafe-i18n mock-api",
+    "lint": "eslint . --ext .ts,.tsx",
+    "typesafe-i18n": "typesafe-i18n"
   },
   "eslintConfig": {
     "extends": [

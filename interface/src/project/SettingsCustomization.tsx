@@ -294,7 +294,7 @@ const SettingsCustomization: FC = () => {
     return (
       <>
         <Box mb={2} color="warning.main">
-          <Typography variant="body2">Select a device and customize each of its entities using the options:</Typography>
+          <Typography variant="body2">Select a device and customize the entities using the options:</Typography>
           <Typography variant="body2">
             <OptionIcon type="favorite" isSet={true} />
             =mark as favorite&nbsp;&nbsp;
