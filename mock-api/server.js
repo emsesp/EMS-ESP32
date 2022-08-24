@@ -253,7 +253,7 @@ const UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn'
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken'
 const system_status = {
-  emsesp_version: '3.4demo',
+  emsesp_version: '3.5demo',
   esp_platform: 'ESP32',
   max_alloc_heap: 113792,
   psram_size: 0,
@@ -1132,7 +1132,7 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
 // EMS-ESP API specific
 const emsesp_info = {
   System: {
-    version: '3.4.2',
+    version: '3.5.0',
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
