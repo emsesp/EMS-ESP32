@@ -49,8 +49,6 @@ import DeviceIcon from './DeviceIcon';
 
 import { IconContext } from 'react-icons';
 
-import { formatDurationMin, pluralize } from '../utils';
-
 import { AuthenticatedContext } from '../contexts/authentication';
 
 import { ButtonRow, ValidatedTextField, SectionContent, MessageBox } from '../components';
@@ -75,6 +73,8 @@ import {
 } from './types';
 
 import { useI18nContext } from '../i18n/i18n-react';
+
+import parseMilliseconds from 'parse-ms';
 
 const DashboardData: FC = () => {
   const { me } = useContext(AuthenticatedContext);
@@ -399,15 +399,32 @@ const DashboardData: FC = () => {
 
   const isCmdOnly = (dv: DeviceValue) => dv.v === '' && dv.c;
 
+  const formatDurationMin = (duration_min: number) => {
+    const { days, hours, minutes } = parseMilliseconds(duration_min * 60000);
+    let formatted = '';
+    if (days) {
+      formatted += LL.NUM_DAYS({ num: days }) + ' ';
+    }
+    if (hours) {
+      formatted += LL.NUM_HOURS({ num: hours }) + ' ';
+    }
+    if (minutes) {
+      formatted += LL.NUM_MINUTES({ num: minutes });
+    }
+    return formatted;
+  };
+
   function formatValue(value: any, uom: number) {
     if (value === undefined) {
       return '';
     }
     switch (uom) {
       case DeviceValueUOM.HOURS:
-        return value ? formatDurationMin(value * 60) : '0 hours';
+        return formatDurationMin(value * 60);
       case DeviceValueUOM.MINUTES:
-        return value ? formatDurationMin(value) : '0 minutes';
+        return formatDurationMin(value);
+      case DeviceValueUOM.SECONDS:
+        return LL.NUM_SECONDS({ num: value });
       case DeviceValueUOM.NONE:
         if (typeof value === 'number') {
           return new Intl.NumberFormat().format(value);
@@ -423,8 +440,6 @@ const DashboardData: FC = () => {
           ' ' +
           DeviceValueUOM_s[uom]
         );
-      case DeviceValueUOM.SECONDS:
-        return pluralize(value, DeviceValueUOM_s[uom]);
       default:
         return new Intl.NumberFormat().format(value) + ' ' + DeviceValueUOM_s[uom];
     }

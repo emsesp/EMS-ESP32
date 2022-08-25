@@ -280,6 +280,41 @@ type RootTranslation = {
 		 */
 		'7': string
 	}
+	/**
+	 * {num} Device{{s}}
+	 * @param {string | number | boolean} num
+	 */
+	NUM_DEVICES: RequiredParams<'num'>
+	/**
+	 * {num} Temperature Sensor{{s}}
+	 * @param {string | number | boolean} num
+	 */
+	NUM_TEMP_SENSORS: RequiredParams<'num'>
+	/**
+	 * {num} Analog Sensor{{s}}
+	 * @param {string | number | boolean} num
+	 */
+	NUM_ANALOG_SENSORS: RequiredParams<'num'>
+	/**
+	 * {num} Day{{s}}
+	 * @param {string | number | boolean} num
+	 */
+	NUM_DAYS: RequiredParams<'num'>
+	/**
+	 * {num} Second{{s}}
+	 * @param {string | number | boolean} num
+	 */
+	NUM_SECONDS: RequiredParams<'num'>
+	/**
+	 * {num} Hour{{s}}
+	 * @param {string | number | boolean} num
+	 */
+	NUM_HOURS: RequiredParams<'num'>
+	/**
+	 * {num} Minute{{s}}
+	 * @param {string | number | boolean} num
+	 */
+	NUM_MINUTES: RequiredParams<'num'>
 }
 
 export type TranslationFunctions = {
@@ -545,6 +580,34 @@ export type TranslationFunctions = {
 		 */
 		'7': () => LocalizedString
 	}
+	/**
+	 * {num} Device{{s}}
+	 */
+	NUM_DEVICES: (arg: { num: string | number | boolean }) => LocalizedString
+	/**
+	 * {num} Temperature Sensor{{s}}
+	 */
+	NUM_TEMP_SENSORS: (arg: { num: string | number | boolean }) => LocalizedString
+	/**
+	 * {num} Analog Sensor{{s}}
+	 */
+	NUM_ANALOG_SENSORS: (arg: { num: string | number | boolean }) => LocalizedString
+	/**
+	 * {num} Day{{s}}
+	 */
+	NUM_DAYS: (arg: { num: string | number | boolean }) => LocalizedString
+	/**
+	 * {num} Second{{s}}
+	 */
+	NUM_SECONDS: (arg: { num: string | number | boolean }) => LocalizedString
+	/**
+	 * {num} Hour{{s}}
+	 */
+	NUM_HOURS: (arg: { num: string | number | boolean }) => LocalizedString
+	/**
+	 * {num} Minute{{s}}
+	 */
+	NUM_MINUTES: (arg: { num: string | number | boolean }) => LocalizedString
 }
 
 export type Formatters = {}

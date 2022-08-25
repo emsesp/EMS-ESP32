@@ -1,5 +1,3 @@
-import parseMilliseconds from 'parse-ms';
-
 const LOCALE_FORMAT = new Intl.DateTimeFormat([...window.navigator.languages], {
   day: 'numeric',
   month: 'short',
@@ -20,21 +18,6 @@ export const formatLocalDateTime = (date: Date) => {
 
 export const pluralize = (count: number, noun: string) =>
   `${Intl.NumberFormat().format(count)} ${noun}${count !== 1 ? 's' : ''}`;
-
-export const formatDurationMin = (duration_min: number) => {
-  const { days, hours, minutes } = parseMilliseconds(duration_min * 60000);
-  let formatted = '';
-  if (days) {
-    formatted += pluralize(days, 'day') + ' ';
-  }
-  if (hours) {
-    formatted += pluralize(hours, 'hour') + ' ';
-  }
-  if (minutes) {
-    formatted += pluralize(minutes, 'minute') + ' ';
-  }
-  return formatted;
-};
 
 export const formatDurationSec = (duration_sec: number) => {
   if (duration_sec === 0) {

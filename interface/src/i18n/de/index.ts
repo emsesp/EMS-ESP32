@@ -68,7 +68,14 @@ const de: Translation = {
     'MQTT Veröffentlicht',
     'API Aufrufe',
     'Syslog Mitteilungen'
-  ]
+  ],
+  NUM_DEVICES: '{num} Gerät{{en}}',
+  NUM_TEMP_SENSORS: '{num} Temperatursensor{{en}}',
+  NUM_ANALOG_SENSORS: '{num} Analoger Sensor{{en}}',
+  NUM_DAYS: '{num} Tag{{en}}',
+  NUM_SECONDS: '{num} Sekund{{en}}',
+  NUM_HOURS: '{num} Stunde{{n}}',
+  NUM_MINUTES: '{num} Minute{{en}}'
 };
 
 export default de;

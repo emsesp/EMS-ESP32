@@ -32,7 +32,7 @@ import { ButtonRow, FormLoader, SectionContent } from '../components';
 
 import { Status, busConnectionStatus, Stat } from './types';
 
-import { formatDurationSec, pluralize, extractErrorMessage, useRest } from '../utils';
+import { formatDurationSec, extractErrorMessage, useRest } from '../utils';
 
 import * as EMSESP from './api';
 
@@ -195,11 +195,11 @@ const DashboardStatus: FC = () => {
             <ListItemText
               primary={LL.ACTIVE_DEVICES()}
               secondary={
-                pluralize(data.num_devices, 'EMS ' + LL.DEVICE()) +
+                LL.NUM_DEVICES({ num: data.num_devices }) +
                 ', ' +
-                pluralize(data.num_sensors, LL.TEMP_SENSOR({ post: '' })) +
+                LL.NUM_TEMP_SENSORS({ num: data.num_sensors }) +
                 ', ' +
-                pluralize(data.num_analogs, LL.ANALOG_SENSOR({ post: '' }))
+                LL.NUM_ANALOG_SENSORS({ num: data.num_analogs })
               }
             />
           </ListItem>
