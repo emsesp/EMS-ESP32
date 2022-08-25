@@ -1,11 +1,28 @@
-import { FC, useState, useContext } from 'react';
+import { FC, useState, useContext, ChangeEventHandler } from 'react';
 
-import { Box, Button, Divider, IconButton, Popover, Typography, Avatar, styled, TypographyProps } from '@mui/material';
+import {
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  Popover,
+  Typography,
+  Avatar,
+  styled,
+  TypographyProps,
+  MenuItem,
+  TextField
+} from '@mui/material';
 
 import PersonIcon from '@mui/icons-material/Person';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 import { AuthenticatedContext } from '../../contexts/authentication';
+
+import { I18nContext } from '../../i18n/i18n-react';
+import type { Locales } from '../../i18n/i18n-types';
+import { locales } from '../..//i18n/i18n-util';
+import { loadLocaleAsync } from '../../i18n/i18n-util.async';
 
 const ItemTypography = styled(Typography)<TypographyProps>({
   maxWidth: '250px',
@@ -23,6 +40,15 @@ const LayoutAuthMenu: FC = () => {
     setAnchorEl(event.currentTarget);
   };
 
+  const { locale, LL, setLocale } = useContext(I18nContext);
+
+  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({ target }) => {
+    const loc = target.value as Locales;
+    localStorage.setItem('lang', loc);
+    await loadLocaleAsync(loc);
+    setLocale(loc);
+  };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -32,7 +58,20 @@ const LayoutAuthMenu: FC = () => {
 
   return (
     <>
-      <IconButton id="open-auth-menu" sx={{ padding: 0 }} aria-describedby={id} color="inherit" onClick={handleClick}>
+      <TextField name="locale" variant="outlined" value={locale} onChange={onLocaleSelected} size="small" select>
+        {locales.map((loc) => (
+          <MenuItem key={loc} value={loc}>
+            {loc}
+          </MenuItem>
+        ))}
+      </TextField>
+      <IconButton
+        id="open-auth-menu"
+        sx={{ ml: 1, padding: 0 }}
+        aria-describedby={id}
+        color="inherit"
+        onClick={handleClick}
+      >
         <AccountCircleIcon />
       </IconButton>
       <Popover
@@ -62,7 +101,7 @@ const LayoutAuthMenu: FC = () => {
         <Divider />
         <Box p={1.5}>
           <Button variant="outlined" fullWidth color="primary" onClick={() => signOut(true)}>
-            Sign Out
+            {LL.SIGN_OUT()}
           </Button>
         </Box>
       </Popover>

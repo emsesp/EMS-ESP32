@@ -4,6 +4,7 @@ const en: BaseTranslation = {
   LANGUAGE: 'Language',
   IS_REQUIRED: 'is required',
   SIGN_IN: 'Sign In',
+  SIGN_OUT: 'Sign Out',
   USERNAME: 'Username',
   PASSWORD: 'Password',
   DASHBOARD: 'Dashboard',
@@ -38,12 +39,36 @@ const en: BaseTranslation = {
   REMOVE: 'Remove',
   PROBLEM_UPDATING: 'Problem updating',
   ACCESS_DENIED: 'Access Denied',
-  ANALOG_SENSOR: 'Analog Sensor {cmd}',
-  TEMP_SENSOR: 'Temperature Sensor {cmd}',
+  ANALOG_SENSOR: 'Analog Sensor{post}',
+  TEMP_SENSOR: 'Temperature Sensor{post}',
   WRITE_COMMAND: 'Write command {cmd}',
   EMS_BUS_WARNING:
     'EMS bus disconnected. If this warning still persists after a few seconds please check settings and board profile',
-  EMS_BUS_SCANNING: 'Scanning for EMS devices...'
+  EMS_BUS_SCANNING: 'Scanning for EMS devices...',
+  CONNECTED: 'Connected',
+  TX_ISSUES: 'Tx issues - try a different Tx Mode',
+  DISCONNECTED: 'Disconnected',
+  SCANNING: 'Scanning for devices...',
+  EMS_SCAN: 'Are you sure you want to initiate a full device scan of the EMS bus?',
+  EMS_BUS_STATUS: 'EMS Bus Status',
+  ACTIVE_DEVICES: 'Active Devices & Sensors',
+  DEVICE: 'Device',
+  SUCCESS: 'SUCCESS',
+  FAIL: 'FAIL',
+  QUALITY: 'QUALITY',
+  SCAN_DEVICES: 'Scan for new devices',
+  EMS_BUS_STATUS_TITLE: 'EMS Bus & Activity Status',
+  SCAN: 'Scan',
+  STATUS_NAMES: [
+    'EMS Telegrams Received (Rx)',
+    'EMS Reads (Tx)',
+    'EMS Writes (Tx)',
+    'Temperature Sensor Reads',
+    'Analog Sensor Reads',
+    'MQTT Publishes',
+    'API Calls',
+    'Syslog Messages'
+  ]
 };
 
 export default en;

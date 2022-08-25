@@ -530,11 +530,11 @@ const DashboardData: FC = () => {
           offset: sensor.o
         });
         if (response.status === 204) {
-          enqueueSnackbar(LL.TEMP_SENSOR({ cmd: 'change failed' }), { variant: 'error' });
+          enqueueSnackbar(LL.TEMP_SENSOR({ post: ' change failed' }), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar(LL.TEMP_SENSOR({ cmd: 'removed' }), { variant: 'success' });
+          enqueueSnackbar(LL.TEMP_SENSOR({ post: ' removed' }), { variant: 'success' });
         }
         setSensor(undefined);
       } catch (error: unknown) {
@@ -955,11 +955,11 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar(LL.ANALOG_SENSOR({ cmd: 'deletion failed' }), { variant: 'error' });
+          enqueueSnackbar(LL.ANALOG_SENSOR({ post: ' deletion failed' }), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar(LL.ANALOG_SENSOR({ cmd: 'removed' }), { variant: 'success' });
+          enqueueSnackbar(LL.ANALOG_SENSOR({ post: ' removed' }), { variant: 'success' });
         }
       } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
@@ -983,11 +983,11 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar(LL.ANALOG_SENSOR({ cmd: 'update failed' }), { variant: 'error' });
+          enqueueSnackbar(LL.ANALOG_SENSOR({ post: ' update failed' }), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar(LL.ANALOG_SENSOR({ cmd: 'updated' }), { variant: 'success' });
+          enqueueSnackbar(LL.ANALOG_SENSOR({ post: ' updated' }), { variant: 'success' });
         }
       } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });

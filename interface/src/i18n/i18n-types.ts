@@ -27,6 +27,10 @@ type RootTranslation = {
 	 */
 	SIGN_IN: string
 	/**
+	 * Sign Out
+	 */
+	SIGN_OUT: string
+	/**
 	 * Username
 	 */
 	USERNAME: string
@@ -164,15 +168,15 @@ type RootTranslation = {
 	 */
 	ACCESS_DENIED: string
 	/**
-	 * Analog Sensor {cmd}
-	 * @param {unknown} cmd
+	 * Analog Sensor{post}
+	 * @param {unknown} post
 	 */
-	ANALOG_SENSOR: RequiredParams<'cmd'>
+	ANALOG_SENSOR: RequiredParams<'post'>
 	/**
-	 * Temperature Sensor {cmd}
-	 * @param {unknown} cmd
+	 * Temperature Sensor{post}
+	 * @param {unknown} post
 	 */
-	TEMP_SENSOR: RequiredParams<'cmd'>
+	TEMP_SENSOR: RequiredParams<'post'>
 	/**
 	 * Write command {cmd}
 	 * @param {unknown} cmd
@@ -186,6 +190,96 @@ type RootTranslation = {
 	 * Scanning for EMS devices...
 	 */
 	EMS_BUS_SCANNING: string
+	/**
+	 * Connected
+	 */
+	CONNECTED: string
+	/**
+	 * Tx issues - try a different Tx Mode
+	 */
+	TX_ISSUES: string
+	/**
+	 * Disconnected
+	 */
+	DISCONNECTED: string
+	/**
+	 * Scanning for devices...
+	 */
+	SCANNING: string
+	/**
+	 * Are you sure you want to initiate a full device scan of the EMS bus?
+	 */
+	EMS_SCAN: string
+	/**
+	 * EMS Bus Status
+	 */
+	EMS_BUS_STATUS: string
+	/**
+	 * Active Devices & Sensors
+	 */
+	ACTIVE_DEVICES: string
+	/**
+	 * Device
+	 */
+	DEVICE: string
+	/**
+	 * SUCCESS
+	 */
+	SUCCESS: string
+	/**
+	 * FAIL
+	 */
+	FAIL: string
+	/**
+	 * QUALITY
+	 */
+	QUALITY: string
+	/**
+	 * Scan for new devices
+	 */
+	SCAN_DEVICES: string
+	/**
+	 * EMS Bus & Activity Status
+	 */
+	EMS_BUS_STATUS_TITLE: string
+	/**
+	 * Scan
+	 */
+	SCAN: string
+	STATUS_NAMES: {
+		/**
+		 * EMS Telegrams Received (Rx)
+		 */
+		'0': string
+		/**
+		 * EMS Reads (Tx)
+		 */
+		'1': string
+		/**
+		 * EMS Writes (Tx)
+		 */
+		'2': string
+		/**
+		 * Temperature Sensor Reads
+		 */
+		'3': string
+		/**
+		 * Analog Sensor Reads
+		 */
+		'4': string
+		/**
+		 * MQTT Publishes
+		 */
+		'5': string
+		/**
+		 * API Calls
+		 */
+		'6': string
+		/**
+		 * Syslog Messages
+		 */
+		'7': string
+	}
 }
 
 export type TranslationFunctions = {
@@ -201,6 +295,10 @@ export type TranslationFunctions = {
 	 * Sign In
 	 */
 	SIGN_IN: () => LocalizedString
+	/**
+	 * Sign Out
+	 */
+	SIGN_OUT: () => LocalizedString
 	/**
 	 * Username
 	 */
@@ -338,13 +436,13 @@ export type TranslationFunctions = {
 	 */
 	ACCESS_DENIED: () => LocalizedString
 	/**
-	 * Analog Sensor {cmd}
+	 * Analog Sensor{post}
 	 */
-	ANALOG_SENSOR: (arg: { cmd: unknown }) => LocalizedString
+	ANALOG_SENSOR: (arg: { post: unknown }) => LocalizedString
 	/**
-	 * Temperature Sensor {cmd}
+	 * Temperature Sensor{post}
 	 */
-	TEMP_SENSOR: (arg: { cmd: unknown }) => LocalizedString
+	TEMP_SENSOR: (arg: { post: unknown }) => LocalizedString
 	/**
 	 * Write command {cmd}
 	 */
@@ -357,6 +455,96 @@ export type TranslationFunctions = {
 	 * Scanning for EMS devices...
 	 */
 	EMS_BUS_SCANNING: () => LocalizedString
+	/**
+	 * Connected
+	 */
+	CONNECTED: () => LocalizedString
+	/**
+	 * Tx issues - try a different Tx Mode
+	 */
+	TX_ISSUES: () => LocalizedString
+	/**
+	 * Disconnected
+	 */
+	DISCONNECTED: () => LocalizedString
+	/**
+	 * Scanning for devices...
+	 */
+	SCANNING: () => LocalizedString
+	/**
+	 * Are you sure you want to initiate a full device scan of the EMS bus?
+	 */
+	EMS_SCAN: () => LocalizedString
+	/**
+	 * EMS Bus Status
+	 */
+	EMS_BUS_STATUS: () => LocalizedString
+	/**
+	 * Active Devices & Sensors
+	 */
+	ACTIVE_DEVICES: () => LocalizedString
+	/**
+	 * Device
+	 */
+	DEVICE: () => LocalizedString
+	/**
+	 * SUCCESS
+	 */
+	SUCCESS: () => LocalizedString
+	/**
+	 * FAIL
+	 */
+	FAIL: () => LocalizedString
+	/**
+	 * QUALITY
+	 */
+	QUALITY: () => LocalizedString
+	/**
+	 * Scan for new devices
+	 */
+	SCAN_DEVICES: () => LocalizedString
+	/**
+	 * EMS Bus & Activity Status
+	 */
+	EMS_BUS_STATUS_TITLE: () => LocalizedString
+	/**
+	 * Scan
+	 */
+	SCAN: () => LocalizedString
+	STATUS_NAMES: {
+		/**
+		 * EMS Telegrams Received (Rx)
+		 */
+		'0': () => LocalizedString
+		/**
+		 * EMS Reads (Tx)
+		 */
+		'1': () => LocalizedString
+		/**
+		 * EMS Writes (Tx)
+		 */
+		'2': () => LocalizedString
+		/**
+		 * Temperature Sensor Reads
+		 */
+		'3': () => LocalizedString
+		/**
+		 * Analog Sensor Reads
+		 */
+		'4': () => LocalizedString
+		/**
+		 * MQTT Publishes
+		 */
+		'5': () => LocalizedString
+		/**
+		 * API Calls
+		 */
+		'6': () => LocalizedString
+		/**
+		 * Syslog Messages
+		 */
+		'7': () => LocalizedString
+	}
 }
 
 export type Formatters = {}

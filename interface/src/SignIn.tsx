@@ -105,7 +105,7 @@ const SignIn: FC = () => {
         >
           <ValidatedTextField
             name="locale"
-            label={LL.LANGUAGE()}
+            label="Language/Sprache"
             variant="outlined"
             value={locale || ''}
             onChange={onLocaleSelected}

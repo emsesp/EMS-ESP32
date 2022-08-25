@@ -4,6 +4,7 @@ const de: Translation = {
   LANGUAGE: 'Sprache',
   IS_REQUIRED: 'ist nötig',
   SIGN_IN: 'Einloggen',
+  SIGN_OUT: 'Ausloggen',
   USERNAME: 'Nutzername',
   PASSWORD: 'Passwort',
   DASHBOARD: 'Armaturenbrett',
@@ -38,12 +39,36 @@ const de: Translation = {
   REMOVE: 'Entfernen',
   PROBLEM_UPDATING: 'Problem beim Aktualisieren',
   ACCESS_DENIED: 'Zugriff abgelehnt',
-  ANALOG_SENSOR: 'Analoger Sensor {cmd}',
-  TEMP_SENSOR: 'Temperatursensor {cmd}',
+  ANALOG_SENSOR: 'Analoger Sensor{post}',
+  TEMP_SENSOR: 'Temperatursensor{post}',
   WRITE_COMMAND: 'Befehl schreiben {cmd}',
   EMS_BUS_WARNING:
     'EMS-Bus getrennt. Wenn diese Warnung nach einigen Sekunden immer noch besteht, überprüfen Sie bitte die Einstellungen und das Board-Profil',
-  EMS_BUS_SCANNING: 'Scannen nach EMS devices...'
+  EMS_BUS_SCANNING: 'Scannen nach EMS devices...',
+  CONNECTED: 'in Verbindung gebracht',
+  TX_ISSUES: 'Tx-Probleme - versuchen Sie einen anderen Tx-Modus',
+  DISCONNECTED: 'Getrennt',
+  SCANNING: 'Suche nach Geräten...',
+  EMS_SCAN: 'Möchten Sie wirklich einen vollständigen Gerätescan des EMS-Busses starten?',
+  EMS_BUS_STATUS: 'EMS Bus Status',
+  ACTIVE_DEVICES: 'Aktive Geräte und Sensoren',
+  DEVICE: 'Device',
+  SUCCESS: 'ERFOLG',
+  FAIL: 'SCHEITERN',
+  QUALITY: 'QUALITÄT',
+  SCAN_DEVICES: 'Nach neuen Geräten suchen',
+  EMS_BUS_STATUS_TITLE: 'EMS Bus und Aktivitätsstatus',
+  SCAN: 'Scan',
+  STATUS_NAMES: [
+    'EMS Telegramme erhalten (Rx)',
+    'EMS Liest (Tx)',
+    'EMS Schreibt (Tx)',
+    'Temperatursensor liest',
+    'Analoger Sensor liest',
+    'MQTT Veröffentlicht',
+    'API Aufrufe',
+    'Syslog Mitteilungen'
+  ]
 };
 
 export default de;

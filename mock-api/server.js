@@ -425,13 +425,13 @@ const status = {
   num_sensors: 1,
   num_analogs: 1,
   stats: [
-    { id: 'EMS Telegrams Received (Rx)', s: 56506, f: 11, q: 100 },
-    { id: 'EMS Reads (Tx)', s: 9026, f: 0, q: 100 },
-    { id: 'EMS Writes (Tx)', s: 33, f: 2, q: 95 },
-    { id: 'Temperature Sensor Reads', s: 56506, f: 11, q: 100 },
-    { id: 'Analog Sensor Reads', s: 0, f: 0, q: 100 },
-    { id: 'MQTT Publishes', s: 12, f: 10, q: 20 },
-    { id: 'API Calls', s: 0, f: 0, q: 0 },
+    { id: '0', s: 56506, f: 11, q: 100 },
+    { id: '1', s: 9026, f: 0, q: 100 },
+    { id: '2', s: 33, f: 2, q: 95 },
+    { id: '3', s: 56506, f: 11, q: 100 },
+    { id: '4', s: 0, f: 0, q: 100 },
+    { id: '5', s: 12, f: 10, q: 20 },
+    { id: '6', s: 0, f: 0, q: 0 },
   ],
 }
 

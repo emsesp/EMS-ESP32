@@ -42,7 +42,7 @@ export enum busConnectionStatus {
 }
 
 export interface Stat {
-  id: string; // name
+  id: string; // id - needs to be a string
   s: number; // success
   f: number; // fail
   q: number; // quality
