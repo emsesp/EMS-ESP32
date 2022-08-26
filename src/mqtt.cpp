@@ -591,15 +591,16 @@ void Mqtt::on_connect() {
         ha_status();             // create the EMS-ESP device in HA, which is MQTT retained
         ha_climate_reset(true);
     } else {
-        // TODO commented out - not sure why we need to subscribe if not using discovery. Check with Michael!
-        /*
+        // with disabled HA we subscribe and the broker sends all stored HA-emsesp-configs.
+        // In line 272 they are removed. If HA is enabled the subscriptions are removed.
+        // As described in the doc (https://emsesp.github.io/docs/#/Troubleshooting?id=home-assistant):
+        //   disable HA, wait 5 minutes (to allow the broker to send all), than reenable HA again.
         queue_subscribe_message(discovery_prefix_ + "/climate/" + system_hostname_ + "/#");
         queue_subscribe_message(discovery_prefix_ + "/sensor/" + system_hostname_ + "/#");
         queue_subscribe_message(discovery_prefix_ + "/binary_sensor/" + system_hostname_ + "/#");
         queue_subscribe_message(discovery_prefix_ + "/number/" + system_hostname_ + "/#");
         queue_subscribe_message(discovery_prefix_ + "/select/" + system_hostname_ + "/#");
         queue_subscribe_message(discovery_prefix_ + "/switch/" + system_hostname_ + "/#");
-        */
     }
 
     // send initial MQTT messages for some of our services
