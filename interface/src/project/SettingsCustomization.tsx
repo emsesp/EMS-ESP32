@@ -44,9 +44,13 @@ import { extractErrorMessage } from '../utils';
 
 import { DeviceShort, Devices, DeviceEntity, DeviceEntityMask } from './types';
 
+import { useI18nContext } from '../i18n/i18n-react';
+
 export const APIURL = window.location.origin + '/api/';
 
 const SettingsCustomization: FC = () => {
+  const { LL } = useI18nContext();
+
   const { enqueueSnackbar } = useSnackbar();
 
   const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([{ id: '', v: 0, n: '', m: 0, w: false }]);
@@ -148,9 +152,9 @@ const SettingsCustomization: FC = () => {
     try {
       setDevices((await EMSESP.readDevices()).data);
     } catch (error: unknown) {
-      setErrorMessage(extractErrorMessage(error, 'Failed to fetch device list'));
+      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
-  }, []);
+  }, [LL]);
 
   const setInitialMask = (data: DeviceEntity[]) => {
     setDeviceEntities(data.map((de) => ({ ...de, om: de.m })));
@@ -161,7 +165,7 @@ const SettingsCustomization: FC = () => {
       const data = (await EMSESP.readDeviceEntities({ id: unique_id })).data;
       setInitialMask(data);
     } catch (error: unknown) {
-      setErrorMessage(extractErrorMessage(error, 'Problem fetching device entities'));
+      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
 
@@ -184,7 +188,7 @@ const SettingsCustomization: FC = () => {
     if (de.n === undefined || de.n === de.id) {
       return de.id;
     } else if (de.n === '') {
-      return 'Command: ' + de.id;
+      return LL.COMMAND() + ': ' + de.id;
     }
     return (
       <>
@@ -250,9 +254,9 @@ const SettingsCustomization: FC = () => {
   const resetCustomization = async () => {
     try {
       await EMSESP.resetCustomizations();
-      enqueueSnackbar('All customizations have been removed. Restarting...', { variant: 'info' });
+      enqueueSnackbar(LL.CUSTOMIZATIONS_RESTART(), { variant: 'info' });
     } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem resetting customizations'), { variant: 'error' });
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     } finally {
       setConfirmReset(false);
     }
@@ -265,7 +269,7 @@ const SettingsCustomization: FC = () => {
         .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.id);
 
       if (masked_entities.length > 60) {
-        enqueueSnackbar('Selected entities exceeded limit of 60. Please Save in batches', { variant: 'warning' });
+        enqueueSnackbar(LL.CUSTOMIZATIONS_FULL(), { variant: 'warning' });
         return;
       }
 
@@ -275,12 +279,12 @@ const SettingsCustomization: FC = () => {
           entity_ids: masked_entities
         });
         if (response.status === 200) {
-          enqueueSnackbar('Customization saved', { variant: 'success' });
+          enqueueSnackbar(LL.CUSTOMIZATIONS_SAVED(), { variant: 'success' });
         } else {
-          enqueueSnackbar('Customization save failed', { variant: 'error' });
+          enqueueSnackbar(LL.PROBLEM_UPDATING(), { variant: 'error' });
         }
       } catch (error: unknown) {
-        enqueueSnackbar(extractErrorMessage(error, 'Problem sending entity list'), { variant: 'error' });
+        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       }
       setInitialMask(deviceEntities);
     }
@@ -294,21 +298,17 @@ const SettingsCustomization: FC = () => {
     return (
       <>
         <Box mb={2} color="warning.main">
-          <Typography variant="body2">Select a device and customize the entities using the options:</Typography>
+          <Typography variant="body2">{LL.CUSTOMIZATIONS_HELP_1()}:</Typography>
           <Typography variant="body2">
-            <OptionIcon type="favorite" isSet={true} />
-            =mark as favorite&nbsp;&nbsp;
-            <OptionIcon type="readonly" isSet={true} />
-            =disable write action&nbsp;&nbsp;
-            <OptionIcon type="api_mqtt_exclude" isSet={true} />
-            =exclude from MQTT and API&nbsp;&nbsp;
-            <OptionIcon type="web_exclude" isSet={true} />
-            =hide from Dashboard
+            <OptionIcon type="favorite" isSet={true} />={LL.CUSTOMIZATIONS_HELP_2()}&nbsp;&nbsp;
+            <OptionIcon type="readonly" isSet={true} />={LL.CUSTOMIZATIONS_HELP_3()}&nbsp;&nbsp;
+            <OptionIcon type="api_mqtt_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_4()}&nbsp;&nbsp;
+            <OptionIcon type="web_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_5()}
           </Typography>
         </Box>
         <ValidatedTextField
           name="device"
-          label="EMS Device"
+          label={'EMS ' + LL.DEVICE()}
           variant="outlined"
           fullWidth
           value={selectedDevice}
@@ -317,7 +317,7 @@ const SettingsCustomization: FC = () => {
           select
         >
           <MenuItem disabled key={0} value={-1}>
-            Select a device...
+            {LL.SELECT_DEVICE()}...
           </MenuItem>
           {devices.devices.map((device: DeviceShort, index) => (
             <MenuItem key={index} value={index}>
@@ -401,7 +401,7 @@ const SettingsCustomization: FC = () => {
                 color="inherit"
                 onClick={() => maskDisabled(false)}
               >
-                set all&nbsp;
+                {LL.SET_ALL()}&nbsp;
                 <OptionIcon type="api_mqtt_exclude" isSet={false} />
                 <OptionIcon type="web_exclude" isSet={false} />
               </Button>
@@ -416,7 +416,7 @@ const SettingsCustomization: FC = () => {
                 color="inherit"
                 onClick={() => maskDisabled(true)}
               >
-                set all&nbsp;
+                {LL.SET_ALL()}&nbsp;
                 <OptionIcon type="api_mqtt_exclude" isSet={true} />
                 <OptionIcon type="web_exclude" isSet={true} />
               </Button>
@@ -428,7 +428,7 @@ const SettingsCustomization: FC = () => {
             <>
               <Header>
                 <HeaderRow>
-                  <HeaderCell stiff>OPTIONS</HeaderCell>
+                  <HeaderCell stiff>{LL.OPTIONS()}</HeaderCell>
                   <HeaderCell resize>
                     <Button
                       fullWidth
@@ -436,10 +436,10 @@ const SettingsCustomization: FC = () => {
                       endIcon={getSortIcon(entity_sort.state, 'NAME')}
                       onClick={() => entity_sort.fns.onToggleSort({ sortKey: 'NAME' })}
                     >
-                      NAME
+                      {LL.NAME()}
                     </Button>
                   </HeaderCell>
-                  <HeaderCell resize>VALUE</HeaderCell>
+                  <HeaderCell resize>{LL.VALUE()}</HeaderCell>
                 </HeaderRow>
               </Header>
               <Body>
@@ -503,14 +503,11 @@ const SettingsCustomization: FC = () => {
 
   const renderResetDialog = () => (
     <Dialog open={confirmReset} onClose={() => setConfirmReset(false)}>
-      <DialogTitle>Reset</DialogTitle>
-      <DialogContent dividers>
-        Are you sure you want remove all customizations including the custom settings of the Temperature and Analog
-        sensors?
-      </DialogContent>
+      <DialogTitle>{LL.RESET()}</DialogTitle>
+      <DialogContent dividers>{LL.CUSTOMIZATIONS_RESET()}</DialogContent>
       <DialogActions>
         <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmReset(false)} color="secondary">
-          Cancel
+          {LL.CANCEL()}
         </Button>
         <Button
           startIcon={<SettingsBackupRestoreIcon />}
@@ -519,7 +516,7 @@ const SettingsCustomization: FC = () => {
           autoFocus
           color="error"
         >
-          Reset
+          {LL.RESET()}
         </Button>
       </DialogActions>
     </Dialog>
@@ -529,7 +526,7 @@ const SettingsCustomization: FC = () => {
     return (
       <>
         <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-          Device Entities
+          {LL.DEVICE_ENTITIES()}
         </Typography>
         {renderDeviceList()}
         {renderDeviceData()}
@@ -537,7 +534,7 @@ const SettingsCustomization: FC = () => {
           <Box flexGrow={1}>
             <ButtonRow>
               <Button startIcon={<SaveIcon />} variant="outlined" color="primary" onClick={() => saveCustomization()}>
-                Save
+                {LL.SAVE()}
               </Button>
             </ButtonRow>
           </Box>
@@ -548,7 +545,7 @@ const SettingsCustomization: FC = () => {
               color="error"
               onClick={() => setConfirmReset(true)}
             >
-              Reset
+              {LL.RESET()}
             </Button>
           </ButtonRow>
         </Box>
@@ -558,7 +555,7 @@ const SettingsCustomization: FC = () => {
   };
 
   return (
-    <SectionContent title="User Customization" titleGutter>
+    <SectionContent title={LL.USER_CUSTOMIZATION()} titleGutter>
       {content()}
     </SectionContent>
   );

@@ -164,6 +164,10 @@ type RootTranslation = {
 	 */
 	PROBLEM_UPDATING: string
 	/**
+	 * Problem loading
+	 */
+	PROBLEM_LOADING: string
+	/**
 	 * Access Denied
 	 */
 	ACCESS_DENIED: string
@@ -177,6 +181,10 @@ type RootTranslation = {
 	 * @param {unknown} post
 	 */
 	TEMP_SENSOR: RequiredParams<'post'>
+	/**
+	 * Temperature Sensors
+	 */
+	TEMP_SENSORS: string
 	/**
 	 * Write command {cmd}
 	 * @param {unknown} cmd
@@ -315,6 +323,258 @@ type RootTranslation = {
 	 * @param {string | number | boolean} num
 	 */
 	NUM_MINUTES: RequiredParams<'num'>
+	/**
+	 * Application Settings
+	 */
+	APPLICATION_SETTINGS: string
+	/**
+	 * Customization
+	 */
+	CUSTOMIZATION: string
+	/**
+	 * EMS-ESP is restarting
+	 */
+	APPLICATION_RESTARTING: string
+	/**
+	 * Select a pre-configured interface board profile from the list below or choose Custom to configure your own hardware settings
+	 */
+	BOARD_PROFILE_TEXT: string
+	/**
+	 * Board Profile
+	 */
+	BOARD_PROFILE: string
+	/**
+	 * Button
+	 */
+	BUTTON: string
+	/**
+	 * Temperature
+	 */
+	TEMPERATURE: string
+	/**
+	 * disabled
+	 */
+	DISABLED: string
+	/**
+	 * General Options
+	 */
+	GENERAL_OPTIONS: string
+	/**
+	 * Language (for device entities)
+	 */
+	LANGUAGE_ENTITIES: string
+	/**
+	 * Hide LED
+	 */
+	HIDE_LED: string
+	/**
+	 * Enable Telnet Console
+	 */
+	ENABLE_TELNET: string
+	/**
+	 * Enable Analog Sensors
+	 */
+	ENABLE_ANALOG: string
+	/**
+	 * Convert temperature values to Fahrenheit
+	 */
+	CONVERT_FAHRENHEIT: string
+	/**
+	 * Bypass Access Token authorization on API calls
+	 */
+	BYPASS_TOKEN: string
+	/**
+	 * Enable read-only mode (blocks all outgoing EMS Tx Write commands)
+	 */
+	READONLY: string
+	/**
+	 * Underclock CPU speed
+	 */
+	UNDERCLOCK_CPU: string
+	/**
+	 * Enable Shower Timer
+	 */
+	ENABLE_SHOWER_TIMER: string
+	/**
+	 * Enable Shower Alert
+	 */
+	ENABLE_SHOWER_ALERT: string
+	/**
+	 * Trigger Time
+	 */
+	TRIGGER_TIME: string
+	/**
+	 * Cold Shot Duration
+	 */
+	COLD_SHOT_DURATION: string
+	/**
+	 * Formatting Options
+	 */
+	FORMATTING_OPTIONS: string
+	/**
+	 * Boolean Format Dashboard
+	 */
+	BOOLEAN_FORMAT_DASHBOARD: string
+	/**
+	 * Boolean Format API/MQTT
+	 */
+	BOOLEAN_FORMAT_API: string
+	/**
+	 * Enum Format API/MQTT
+	 */
+	ENUM_FORMAT: string
+	/**
+	 * Index
+	 */
+	INDEX: string
+	/**
+	 * Enable parasite power
+	 */
+	ENABLE_PARASITE: string
+	/**
+	 * Logging
+	 */
+	LOGGING: string
+	/**
+	 * Log EMS telegrams in hexadecimal
+	 */
+	LOG_HEX: string
+	/**
+	 * Enable Syslog
+	 */
+	ENABLE_SYSLOG: string
+	/**
+	 * Mark Interval
+	 */
+	MARK_INTERVAL: string
+	/**
+	 * seconds
+	 */
+	SECONDS: string
+	/**
+	 * minutes
+	 */
+	MINUTES: string
+	/**
+	 * Restart
+	 */
+	RESTART: string
+	/**
+	 * EMS-ESP needs to be restarted to apply changed system settings
+	 */
+	RESTART_TEXT: string
+	/**
+	 * Command
+	 */
+	COMMAND: string
+	/**
+	 * All customizations have been removed. Restarting...
+	 */
+	CUSTOMIZATIONS_RESTART: string
+	/**
+	 * Selected entities exceeded limit of 60. Please Save in batches
+	 */
+	CUSTOMIZATIONS_FULL: string
+	/**
+	 * Customizations saved
+	 */
+	CUSTOMIZATIONS_SAVED: string
+	/**
+	 * Select a device and customize the entities using the options
+	 */
+	CUSTOMIZATIONS_HELP_1: string
+	/**
+	 * mark as favorite
+	 */
+	CUSTOMIZATIONS_HELP_2: string
+	/**
+	 * disable write action
+	 */
+	CUSTOMIZATIONS_HELP_3: string
+	/**
+	 * exclude from MQTT and API
+	 */
+	CUSTOMIZATIONS_HELP_4: string
+	/**
+	 * hide from Dashboard
+	 */
+	CUSTOMIZATIONS_HELP_5: string
+	/**
+	 * Select a device
+	 */
+	SELECT_DEVICE: string
+	/**
+	 * set all
+	 */
+	SET_ALL: string
+	/**
+	 * Options
+	 */
+	OPTIONS: string
+	/**
+	 * Name
+	 */
+	NAME: string
+	/**
+	 * Are you sure you want remove all customizations including the custom settings of the Temperature and Analog sensors?
+	 */
+	CUSTOMIZATIONS_RESET: string
+	/**
+	 * Device Entities
+	 */
+	DEVICE_ENTITIES: string
+	/**
+	 * configure
+	 */
+	CONFIGURE: string
+	/**
+	 * User Customization
+	 */
+	USER_CUSTOMIZATION: string
+	/**
+	 * Support Information
+	 */
+	SUPPORT_INFORMATION: string
+	/**
+	 * Visit the online
+	 */
+	HELP_INFORMATION_1: string
+	/**
+	 * to get instructions on how to
+	 */
+	HELP_INFORMATION_2: string
+	/**
+	 * and access other information
+	 */
+	HELP_INFORMATION_3: string
+	/**
+	 * For live community chat join our
+	 */
+	HELP_INFORMATION_4: string
+	/**
+	 * Submit a
+	 */
+	HELP_INFORMATION_5: string
+	/**
+	 * support issue
+	 */
+	HELP_INFORMATION_6: string
+	/**
+	 * for requesting a new feature or reporting a bug
+	 */
+	HELP_INFORMATION_7: string
+	/**
+	 * Make sure you also
+	 */
+	HELP_INFORMATION_8: string
+	/**
+	 * and attach your system details for a faster response
+	 */
+	HELP_INFORMATION_9: string
+	/**
+	 * EMS-ESP will always be a free and open-source project. Please consider supporting it with a 
+	 */
+	HELP_INFORMATION_10: string
 }
 
 export type TranslationFunctions = {
@@ -467,6 +727,10 @@ export type TranslationFunctions = {
 	 */
 	PROBLEM_UPDATING: () => LocalizedString
 	/**
+	 * Problem loading
+	 */
+	PROBLEM_LOADING: () => LocalizedString
+	/**
 	 * Access Denied
 	 */
 	ACCESS_DENIED: () => LocalizedString
@@ -478,6 +742,10 @@ export type TranslationFunctions = {
 	 * Temperature Sensor{post}
 	 */
 	TEMP_SENSOR: (arg: { post: unknown }) => LocalizedString
+	/**
+	 * Temperature Sensors
+	 */
+	TEMP_SENSORS: () => LocalizedString
 	/**
 	 * Write command {cmd}
 	 */
@@ -608,6 +876,258 @@ export type TranslationFunctions = {
 	 * {num} Minute{{s}}
 	 */
 	NUM_MINUTES: (arg: { num: string | number | boolean }) => LocalizedString
+	/**
+	 * Application Settings
+	 */
+	APPLICATION_SETTINGS: () => LocalizedString
+	/**
+	 * Customization
+	 */
+	CUSTOMIZATION: () => LocalizedString
+	/**
+	 * EMS-ESP is restarting
+	 */
+	APPLICATION_RESTARTING: () => LocalizedString
+	/**
+	 * Select a pre-configured interface board profile from the list below or choose Custom to configure your own hardware settings
+	 */
+	BOARD_PROFILE_TEXT: () => LocalizedString
+	/**
+	 * Board Profile
+	 */
+	BOARD_PROFILE: () => LocalizedString
+	/**
+	 * Button
+	 */
+	BUTTON: () => LocalizedString
+	/**
+	 * Temperature
+	 */
+	TEMPERATURE: () => LocalizedString
+	/**
+	 * disabled
+	 */
+	DISABLED: () => LocalizedString
+	/**
+	 * General Options
+	 */
+	GENERAL_OPTIONS: () => LocalizedString
+	/**
+	 * Language (for device entities)
+	 */
+	LANGUAGE_ENTITIES: () => LocalizedString
+	/**
+	 * Hide LED
+	 */
+	HIDE_LED: () => LocalizedString
+	/**
+	 * Enable Telnet Console
+	 */
+	ENABLE_TELNET: () => LocalizedString
+	/**
+	 * Enable Analog Sensors
+	 */
+	ENABLE_ANALOG: () => LocalizedString
+	/**
+	 * Convert temperature values to Fahrenheit
+	 */
+	CONVERT_FAHRENHEIT: () => LocalizedString
+	/**
+	 * Bypass Access Token authorization on API calls
+	 */
+	BYPASS_TOKEN: () => LocalizedString
+	/**
+	 * Enable read-only mode (blocks all outgoing EMS Tx Write commands)
+	 */
+	READONLY: () => LocalizedString
+	/**
+	 * Underclock CPU speed
+	 */
+	UNDERCLOCK_CPU: () => LocalizedString
+	/**
+	 * Enable Shower Timer
+	 */
+	ENABLE_SHOWER_TIMER: () => LocalizedString
+	/**
+	 * Enable Shower Alert
+	 */
+	ENABLE_SHOWER_ALERT: () => LocalizedString
+	/**
+	 * Trigger Time
+	 */
+	TRIGGER_TIME: () => LocalizedString
+	/**
+	 * Cold Shot Duration
+	 */
+	COLD_SHOT_DURATION: () => LocalizedString
+	/**
+	 * Formatting Options
+	 */
+	FORMATTING_OPTIONS: () => LocalizedString
+	/**
+	 * Boolean Format Dashboard
+	 */
+	BOOLEAN_FORMAT_DASHBOARD: () => LocalizedString
+	/**
+	 * Boolean Format API/MQTT
+	 */
+	BOOLEAN_FORMAT_API: () => LocalizedString
+	/**
+	 * Enum Format API/MQTT
+	 */
+	ENUM_FORMAT: () => LocalizedString
+	/**
+	 * Index
+	 */
+	INDEX: () => LocalizedString
+	/**
+	 * Enable parasite power
+	 */
+	ENABLE_PARASITE: () => LocalizedString
+	/**
+	 * Logging
+	 */
+	LOGGING: () => LocalizedString
+	/**
+	 * Log EMS telegrams in hexadecimal
+	 */
+	LOG_HEX: () => LocalizedString
+	/**
+	 * Enable Syslog
+	 */
+	ENABLE_SYSLOG: () => LocalizedString
+	/**
+	 * Mark Interval
+	 */
+	MARK_INTERVAL: () => LocalizedString
+	/**
+	 * seconds
+	 */
+	SECONDS: () => LocalizedString
+	/**
+	 * minutes
+	 */
+	MINUTES: () => LocalizedString
+	/**
+	 * Restart
+	 */
+	RESTART: () => LocalizedString
+	/**
+	 * EMS-ESP needs to be restarted to apply changed system settings
+	 */
+	RESTART_TEXT: () => LocalizedString
+	/**
+	 * Command
+	 */
+	COMMAND: () => LocalizedString
+	/**
+	 * All customizations have been removed. Restarting...
+	 */
+	CUSTOMIZATIONS_RESTART: () => LocalizedString
+	/**
+	 * Selected entities exceeded limit of 60. Please Save in batches
+	 */
+	CUSTOMIZATIONS_FULL: () => LocalizedString
+	/**
+	 * Customizations saved
+	 */
+	CUSTOMIZATIONS_SAVED: () => LocalizedString
+	/**
+	 * Select a device and customize the entities using the options
+	 */
+	CUSTOMIZATIONS_HELP_1: () => LocalizedString
+	/**
+	 * mark as favorite
+	 */
+	CUSTOMIZATIONS_HELP_2: () => LocalizedString
+	/**
+	 * disable write action
+	 */
+	CUSTOMIZATIONS_HELP_3: () => LocalizedString
+	/**
+	 * exclude from MQTT and API
+	 */
+	CUSTOMIZATIONS_HELP_4: () => LocalizedString
+	/**
+	 * hide from Dashboard
+	 */
+	CUSTOMIZATIONS_HELP_5: () => LocalizedString
+	/**
+	 * Select a device
+	 */
+	SELECT_DEVICE: () => LocalizedString
+	/**
+	 * set all
+	 */
+	SET_ALL: () => LocalizedString
+	/**
+	 * Options
+	 */
+	OPTIONS: () => LocalizedString
+	/**
+	 * Name
+	 */
+	NAME: () => LocalizedString
+	/**
+	 * Are you sure you want remove all customizations including the custom settings of the Temperature and Analog sensors?
+	 */
+	CUSTOMIZATIONS_RESET: () => LocalizedString
+	/**
+	 * Device Entities
+	 */
+	DEVICE_ENTITIES: () => LocalizedString
+	/**
+	 * configure
+	 */
+	CONFIGURE: () => LocalizedString
+	/**
+	 * User Customization
+	 */
+	USER_CUSTOMIZATION: () => LocalizedString
+	/**
+	 * Support Information
+	 */
+	SUPPORT_INFORMATION: () => LocalizedString
+	/**
+	 * Visit the online
+	 */
+	HELP_INFORMATION_1: () => LocalizedString
+	/**
+	 * to get instructions on how to
+	 */
+	HELP_INFORMATION_2: () => LocalizedString
+	/**
+	 * and access other information
+	 */
+	HELP_INFORMATION_3: () => LocalizedString
+	/**
+	 * For live community chat join our
+	 */
+	HELP_INFORMATION_4: () => LocalizedString
+	/**
+	 * Submit a
+	 */
+	HELP_INFORMATION_5: () => LocalizedString
+	/**
+	 * support issue
+	 */
+	HELP_INFORMATION_6: () => LocalizedString
+	/**
+	 * for requesting a new feature or reporting a bug
+	 */
+	HELP_INFORMATION_7: () => LocalizedString
+	/**
+	 * Make sure you also
+	 */
+	HELP_INFORMATION_8: () => LocalizedString
+	/**
+	 * and attach your system details for a faster response
+	 */
+	HELP_INFORMATION_9: () => LocalizedString
+	/**
+	 * EMS-ESP will always be a free and open-source project. Please consider supporting it with a 
+	 */
+	HELP_INFORMATION_10: () => LocalizedString
 }
 
 export type Formatters = {}

@@ -14,9 +14,13 @@ import DownloadIcon from '@mui/icons-material/GetApp';
 
 import { extractErrorMessage } from '../utils';
 
+import { useI18nContext } from '../i18n/i18n-react';
+
 import * as EMSESP from './api';
 
 const HelpInformation: FC = () => {
+  const { LL } = useI18nContext();
+
   const { enqueueSnackbar } = useSnackbar();
 
   const saveFile = (json: any, endpoint: string) => {
@@ -47,40 +51,40 @@ const HelpInformation: FC = () => {
         saveFile(response.data, endpoint);
       }
     } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     }
   };
 
   return (
-    <SectionContent title="Support Information" titleGutter>
+    <SectionContent title={LL.SUPPORT_INFORMATION()} titleGutter>
       <List>
         <ListItem>
           <ListItemAvatar>
-            <MenuBookIcon />
+            <MenuBookIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
           </ListItemAvatar>
           <ListItemText>
-            Visit the online&nbsp;
+            {LL.HELP_INFORMATION_1()}&nbsp;
             <Link target="_blank" href="https://emsesp.github.io/docs" color="primary">
               {'Wiki'}
             </Link>
-            &nbsp;to get instructions on how to&nbsp;
+            &nbsp;{LL.HELP_INFORMATION_2()}&nbsp;
             <Link
               target="_blank"
               href="https://emsesp.github.io/docs/#/Configure-firmware?id=ems-esp-settings"
               color="primary"
             >
-              {'configure'}
+              {LL.CONFIGURE()}
             </Link>
-            &nbsp;EMS-ESP and access other information.
+            {' EMS-ESP ' + LL.HELP_INFORMATION_3() + '.'}
           </ListItemText>
         </ListItem>
 
         <ListItem>
           <ListItemAvatar>
-            <CommentIcon />
+            <CommentIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
           </ListItemAvatar>
           <ListItemText>
-            For live community chat join our&nbsp;
+            {LL.HELP_INFORMATION_4()}&nbsp;
             <Link target="_blank" href="https://discord.gg/3J3GgnzpyT" color="primary">
               {'Discord'}
             </Link>
@@ -90,33 +94,31 @@ const HelpInformation: FC = () => {
 
         <ListItem>
           <ListItemAvatar>
-            <GitHubIcon />
+            <GitHubIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
           </ListItemAvatar>
-
           <ListItemText>
-            Submit a&nbsp;
+            {LL.HELP_INFORMATION_5()}&nbsp;
             <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32/issues/new/choose" color="primary">
-              support issue
+              {LL.HELP_INFORMATION_6()}
             </Link>
-            &nbsp;for requesting a new feature or reporting a bug.
+            &nbsp;{LL.HELP_INFORMATION_7()}.
             <br />
-            Make sure you also&nbsp;
+            {LL.HELP_INFORMATION_8()}&nbsp;
             <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => callAPI('info')}>
               download
             </Button>
-            &nbsp; and attach your system details for a faster response.
+            &nbsp;&nbsp;{LL.HELP_INFORMATION_9()}.
           </ListItemText>
         </ListItem>
       </List>
 
       <Box border={1} p={1} mt={4}>
         <Typography align="center" variant="h6" color="orange">
-          EMS-ESP will always be a free and open-source project
-          <br></br>Please consider supporting it with a&nbsp;
-          <StarIcon style={{ fontSize: 16, color: 'yellow', verticalAlign: 'middle' }} /> on&nbsp;
+          {LL.HELP_INFORMATION_10()}
           <Link href="https://github.com/emsesp/EMS-ESP32" color="primary">
             {'GitHub'}
           </Link>
+          <StarIcon style={{ fontSize: 20, color: 'yellow', verticalAlign: 'middle' }} />
         </Typography>
         <Typography align="center">@proddy @MichaelDvP</Typography>
       </Box>

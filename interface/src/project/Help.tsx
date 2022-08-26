@@ -18,7 +18,7 @@ const Help: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="information" label="EMS-ESP Help" />
+        <Tab value="information" label={"EMS-ESP " + LL.HELP()} />
       </RouterTabs>
       <Routes>
         <Route path="information" element={<HelpInformation />} />
