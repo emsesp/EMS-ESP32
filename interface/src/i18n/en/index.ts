@@ -9,6 +9,7 @@ const en: BaseTranslation = {
   PASSWORD: 'Password',
   DASHBOARD: 'Dashboard',
   SETTINGS: 'Settings',
+  SAVED: 'saved',
   HELP: 'Help',
   LOGGED_IN: 'Logged in as {name}',
   PLEASE_SIGNIN: 'Please sign in to continue',
@@ -142,7 +143,11 @@ const en: BaseTranslation = {
   HELP_INFORMATION_7: 'for requesting a new feature or reporting a bug',
   HELP_INFORMATION_8: 'Make sure you also',
   HELP_INFORMATION_9: 'and attach your system details for a faster response',
-  HELP_INFORMATION_10: 'EMS-ESP will always be a free and open-source project. Please consider supporting it with a '
+  HELP_INFORMATION_10: 'EMS-ESP will always be a free and open-source project. Please consider supporting it with a',
+  UPLOAD: 'Upload',
+  ABORTED: 'aborted',
+  FAILED: 'failed',
+  SUCCESSFUL: 'successful'
 };
 
 export default en;

@@ -114,7 +114,7 @@ const HelpInformation: FC = () => {
 
       <Box border={1} p={1} mt={4}>
         <Typography align="center" variant="h6" color="orange">
-          {LL.HELP_INFORMATION_10()}
+          {LL.HELP_INFORMATION_10()}&nbsp;
           <Link href="https://github.com/emsesp/EMS-ESP32" color="primary">
             {'GitHub'}
           </Link>

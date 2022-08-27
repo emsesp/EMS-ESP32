@@ -47,6 +47,10 @@ type RootTranslation = {
 	 */
 	SETTINGS: string
 	/**
+	 * saved
+	 */
+	SAVED: string
+	/**
 	 * Help
 	 */
 	HELP: string
@@ -572,9 +576,25 @@ type RootTranslation = {
 	 */
 	HELP_INFORMATION_9: string
 	/**
-	 * EMS-ESP will always be a free and open-source project. Please consider supporting it with a 
+	 * EMS-ESP will always be a free and open-source project. Please consider supporting it with a
 	 */
 	HELP_INFORMATION_10: string
+	/**
+	 * Upload
+	 */
+	UPLOAD: string
+	/**
+	 * aborted
+	 */
+	ABORTED: string
+	/**
+	 * failed
+	 */
+	FAILED: string
+	/**
+	 * successful
+	 */
+	SUCCESSFUL: string
 }
 
 export type TranslationFunctions = {
@@ -610,6 +630,10 @@ export type TranslationFunctions = {
 	 * Settings
 	 */
 	SETTINGS: () => LocalizedString
+	/**
+	 * saved
+	 */
+	SAVED: () => LocalizedString
 	/**
 	 * Help
 	 */
@@ -1125,9 +1149,25 @@ export type TranslationFunctions = {
 	 */
 	HELP_INFORMATION_9: () => LocalizedString
 	/**
-	 * EMS-ESP will always be a free and open-source project. Please consider supporting it with a 
+	 * EMS-ESP will always be a free and open-source project. Please consider supporting it with a
 	 */
 	HELP_INFORMATION_10: () => LocalizedString
+	/**
+	 * Upload
+	 */
+	UPLOAD: () => LocalizedString
+	/**
+	 * aborted
+	 */
+	ABORTED: () => LocalizedString
+	/**
+	 * failed
+	 */
+	FAILED: () => LocalizedString
+	/**
+	 * successful
+	 */
+	SUCCESSFUL: () => LocalizedString
 }
 
 export type Formatters = {}

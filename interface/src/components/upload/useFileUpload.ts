@@ -5,11 +5,15 @@ import { useSnackbar } from 'notistack';
 import { extractErrorMessage } from '../../utils';
 import { FileUploadConfig } from '../../api/endpoints';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 interface MediaUploadOptions {
   upload: (file: File, config?: FileUploadConfig) => AxiosPromise<void>;
 }
 
 const useFileUpload = ({ upload }: MediaUploadOptions) => {
+  const { LL } = useI18nContext();
+
   const { enqueueSnackbar } = useSnackbar();
   const [uploading, setUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<ProgressEvent>();
@@ -42,13 +46,13 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
         cancelToken: cancelToken.token
       });
       resetUploadingStates();
-      enqueueSnackbar('File uploaded', { variant: 'success' });
+      enqueueSnackbar(LL.UPLOAD() + ' ' + LL.SUCCESSFUL(), { variant: 'success' });
     } catch (error: unknown) {
       if (axios.isCancel(error)) {
-        enqueueSnackbar('Upload aborted', { variant: 'warning' });
+        enqueueSnackbar(LL.UPLOAD() + ' ' + LL.ABORTED(), { variant: 'warning' });
       } else {
         resetUploadingStates();
-        enqueueSnackbar(extractErrorMessage(error, 'Upload failed'), { variant: 'error' });
+        enqueueSnackbar(extractErrorMessage(error, LL.UPLOAD() + ' ' + LL.FAILED()), { variant: 'error' });
       }
     }
   };

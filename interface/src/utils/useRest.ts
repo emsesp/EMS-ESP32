@@ -4,12 +4,16 @@ import { AxiosPromise } from 'axios';
 
 import { extractErrorMessage } from '.';
 
+import { useI18nContext } from '../i18n/i18n-react';
+
 export interface RestRequestOptions<D> {
   read: () => AxiosPromise<D>;
   update?: (value: D) => AxiosPromise<D>;
 }
 
 export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
+  const { LL } = useI18nContext();
+
   const { enqueueSnackbar } = useSnackbar();
 
   const [saving, setSaving] = useState<boolean>(false);
@@ -23,11 +27,11 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     try {
       setData((await read()).data);
     } catch (error: unknown) {
-      const message = extractErrorMessage(error, 'Problem loading data');
+      const message = extractErrorMessage(error, LL.PROBLEM_LOADING());
       enqueueSnackbar(message, { variant: 'error' });
       setErrorMessage(message);
     }
-  }, [read, enqueueSnackbar]);
+  }, [read, enqueueSnackbar, LL]);
 
   const save = useCallback(
     async (toSave: D) => {
@@ -43,17 +47,17 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
         if (response.status === 202) {
           setRestartNeeded(true);
         } else {
-          enqueueSnackbar('Settings saved', { variant: 'success' });
+          enqueueSnackbar(LL.SETTINGS() + ' ' + LL.SAVED(), { variant: 'success' });
         }
       } catch (error: unknown) {
-        const message = extractErrorMessage(error, 'Problem saving data');
+        const message = extractErrorMessage(error, LL.PROBLEM_UPDATING());
         enqueueSnackbar(message, { variant: 'error' });
         setErrorMessage(message);
       } finally {
         setSaving(false);
       }
     },
-    [update, enqueueSnackbar]
+    [update, enqueueSnackbar, LL]
   );
 
   const saveData = () => data && save(data);

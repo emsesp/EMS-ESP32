@@ -9,6 +9,7 @@ const de: Translation = {
   PASSWORD: 'Passwort',
   DASHBOARD: 'Armaturenbrett',
   SETTINGS: 'Einstellungen',
+  SAVED: 'gespeichert',
   HELP: 'Hilfe',
   LOGGED_IN: 'Eingeloggt als {name}',
   PLEASE_SIGNIN: 'Bitte einloggen, um fortzufahren',
@@ -142,7 +143,11 @@ const de: Translation = {
   HELP_INFORMATION_7: 'um eine neue Funktion anzufordern oder einen Fehler zu melden',
   HELP_INFORMATION_8: 'Überzeugen Sie sich auch',
   HELP_INFORMATION_9: 'und hängen Sie Ihre Systemdetails für eine schnellere Antwort an',
-  HELP_INFORMATION_10: 'EMS-ESP wird immer ein kostenloses Open-Source-Projekt sein. Bitte erwägen Sie, es mit einem '
+  HELP_INFORMATION_10: 'EMS-ESP wird immer ein kostenloses Open-Source-Projekt sein. Bitte erwägen Sie, es mit einem',
+  UPLOAD: 'Hochladen',
+  ABORTED: 'abgebrochen',
+  FAILED: 'gescheitert',
+  SUCCESSFUL: 'erfolgreich'
 };
 
 export default de;
