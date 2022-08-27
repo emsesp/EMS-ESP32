@@ -1015,7 +1015,6 @@ void Mqtt::publish_ha_sensor_config(uint8_t                              type,  
         case DeviceValueType::ULONG:
             // number - https://www.home-assistant.io/integrations/number.mqtt
             // https://developers.home-assistant.io/docs/core/entity/number
-
             snprintf(topic, sizeof(topic), "number/%s/%s/config", system_hostname_.c_str(), uniq);
             break;
         case DeviceValueType::BOOL:
@@ -1124,9 +1123,10 @@ void Mqtt::publish_ha_sensor_config(uint8_t                              type,  
 
     // entity id is generated from the name, see https://www.home-assistant.io/docs/mqtt/discovery/#use-object_id-to-influence-the-entity-id
     // so we override it to make it unique using entity_id
-    // emsesp_<device>_<tag>_<name>
+    // See https://github.com/emsesp/EMS-ESP32/issues/596
+    // "<hostname>_<device>_<tag> <name>"
     char object_id[130];
-    snprintf(object_id, sizeof(object_id), "emsesp_%s_%s", device_name, ha_name);
+    snprintf(object_id, sizeof(object_id), "%s_%s_%s", system_hostname_.c_str(), device_name, ha_name);
     doc["object_id"] = object_id;
 
     // value template
