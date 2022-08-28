@@ -13,7 +13,7 @@ import { useI18nContext } from '../../i18n/i18n-react';
 
 const NetworkTime: FC = () => {
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.NETWORK_TIME());
+  useLayoutTitle("NTP");
 
   const authenticatedContext = useContext(AuthenticatedContext);
   const { routerTab } = useRouterTab();
@@ -21,8 +21,8 @@ const NetworkTime: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="status" label="NTP Status" />
-        <Tab value="settings" label="NTP Settings" disabled={!authenticatedContext.me.admin} />
+        <Tab value="status" label={'NTP ' + LL.STATUS()} />
+        <Tab value="settings" label={'NTP ' + LL.SETTINGS()} disabled={!authenticatedContext.me.admin} />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<NTPStatusForm />} />

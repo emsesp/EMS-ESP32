@@ -12,11 +12,15 @@ import * as NTPApi from '../../api/ntp';
 import { selectedTimeZone, timeZoneSelectItems, TIME_ZONES } from './TZ';
 import { NTP_SETTINGS_VALIDATOR } from '../../validators/ntp';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const NTPSettingsForm: FC = () => {
   const { loadData, saving, data, setData, saveData, errorMessage } = useRest<NTPSettings>({
     read: NTPApi.readNTPSettings,
     update: NTPApi.updateNTPSettings
   });
+
+  const { LL } = useI18nContext();
 
   const updateFormValue = updateValue(setData);
 
@@ -49,7 +53,7 @@ const NTPSettingsForm: FC = () => {
       <>
         <BlockFormControlLabel
           control={<Checkbox name="enabled" checked={data.enabled} onChange={updateFormValue} />}
-          label="Enable NTP"
+          label={LL.ENABLE_NTP()}
         />
         <ValidatedTextField
           fieldErrors={fieldErrors}
@@ -64,7 +68,7 @@ const NTPSettingsForm: FC = () => {
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="tz_label"
-          label="Time zone"
+          label={LL.TIME_ZONE()}
           fullWidth
           variant="outlined"
           value={selectedTimeZone(data.tz_label, data.tz_format)}
@@ -72,7 +76,7 @@ const NTPSettingsForm: FC = () => {
           margin="normal"
           select
         >
-          <MenuItem disabled>Time zone...</MenuItem>
+          <MenuItem disabled>{LL.TIME_ZONE()}...</MenuItem>
           {timeZoneSelectItems()}
         </ValidatedTextField>
         <ButtonRow>
@@ -84,7 +88,7 @@ const NTPSettingsForm: FC = () => {
             type="submit"
             onClick={validateAndSubmit}
           >
-            Save
+            {LL.SAVE()}
           </Button>
         </ButtonRow>
       </>
@@ -92,7 +96,7 @@ const NTPSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title="NTP Settings" titleGutter>
+    <SectionContent title={'NTP ' + LL.SETTINGS()} titleGutter>
       {content()}
     </SectionContent>
   );

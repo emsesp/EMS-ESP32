@@ -19,8 +19,8 @@ const Security: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="users" label="Manage Users" />
-        <Tab value="settings" label="Security Settings" />
+        <Tab value="users" label={LL.MANAGE_USERS()} />
+        <Tab value="settings" label={LL.SECURITY() + ' ' + LL.SETTINGS()} />
       </RouterTabs>
       <Routes>
         <Route path="users" element={<ManageUsersForm />} />

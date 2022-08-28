@@ -84,10 +84,6 @@ type RootTranslation = {
 	 */
 	SECURITY: string
 	/**
-	 * Network Time
-	 */
-	NETWORK_TIME: string
-	/**
 	 * ON/OFF
 	 */
 	ONOFF_CAP: string
@@ -695,6 +691,198 @@ type RootTranslation = {
 	 * Time set
 	 */
 	TIME_SET: string
+	/**
+	 * Manage Users
+	 */
+	MANAGE_USERS: string
+	/**
+	 * is Admin
+	 */
+	IS_ADMIN: string
+	/**
+	 * You must have at least one admin user configured
+	 */
+	USER_WARNING: string
+	/**
+	 * Add
+	 */
+	ADD: string
+	/**
+	 * Access Token for
+	 */
+	ACCESS_TOKEN_FOR: string
+	/**
+	 * The token below is used with REST API calls that require authorization. It can be passed either as a Bearer token in the Authorization header or in the access_token URL query parameter.
+	 */
+	ACCESS_TOKEN_TEXT: string
+	/**
+	 * Generating token
+	 */
+	GENERATING_TOKEN: string
+	/**
+	 * User
+	 */
+	USER: string
+	/**
+	 * Modify
+	 */
+	MODIFY: string
+	/**
+	 * The su (super user) password is used to sign authentication tokens and also enable admin privileges within the Console.
+	 */
+	SU_TEXT: string
+	/**
+	 * Not enabled
+	 */
+	NOT_ENABLED: string
+	/**
+	 * Errors
+	 */
+	ERRORS: string
+	/**
+	 * Disconnect Reason
+	 */
+	DISCONNECT_REASON: string
+	/**
+	 * Enable MQTT
+	 */
+	ENABLE_MQTT: string
+	/**
+	 * Optional
+	 */
+	OPTIONAL: string
+	/**
+	 * Formatting
+	 */
+	FORMATTING: string
+	/**
+	 * Format
+	 */
+	FORMAT: string
+	/**
+	 * Nested in a single topic
+	 */
+	MQTT_NEST_1: string
+	/**
+	 * As individual topics
+	 */
+	MQTT_NEST_2: string
+	/**
+	 * Publish command output to a `response` topic
+	 */
+	MQTT_RESPONSE: string
+	/**
+	 * Publish single value topics on change
+	 */
+	MQTT_PUBLISH_TEXT_1: string
+	/**
+	 * Publish to command topics (ioBroker)
+	 */
+	MQTT_PUBLISH_TEXT_2: string
+	/**
+	 * Enable MQTT Discovery (Home Assistant, Domoticz)
+	 */
+	MQTT_PUBLISH_TEXT_3: string
+	/**
+	 * Prefix for the Discovery topics
+	 */
+	MQTT_PUBLISH_TEXT_4: string
+	/**
+	 * Publish Intervals
+	 */
+	MQTT_PUBLISH_INTERVALS: string
+	/**
+	 * Boilers and Heat Pumps
+	 */
+	MQTT_INT_BOILER: string
+	/**
+	 * Thermostats
+	 */
+	MQTT_INT_THERMOSTATS: string
+	/**
+	 * Solar Modules
+	 */
+	MQTT_INT_SOLAR: string
+	/**
+	 * Mixer Modules
+	 */
+	MQTT_INT_MIXER: string
+	/**
+	 * Default
+	 */
+	DEFAULT: string
+	/**
+	 * Set Clean Session
+	 */
+	MQTT_CLEAN_SESSION: string
+	/**
+	 * Always set Retain flag
+	 */
+	MQTT_RETAIN_FLAG: string
+	/**
+	 * Inactive
+	 */
+	INACTIVE: string
+	/**
+	 * Active
+	 */
+	ACTIVE: string
+	/**
+	 * Unknown
+	 */
+	UNKNOWN: string
+	/**
+	 * Set Time
+	 */
+	SET_TIME: string
+	/**
+	 * Enter local date and time below to set the time.
+	 */
+	SET_TIME_TEXT: string
+	/**
+	 * Local Time
+	 */
+	LOCAL_TIME: string
+	/**
+	 * UTC Time
+	 */
+	UTC_TIME: string
+	/**
+	 * Enable NTP
+	 */
+	ENABLE_NTP: string
+	/**
+	 * Time Zone
+	 */
+	TIME_ZONE: string
+	/**
+	 * Access Point
+	 */
+	ACCESS_POINT: string
+	/**
+	 * Enable Access Point
+	 */
+	AP_PROVIDE: string
+	/**
+	 * always
+	 */
+	AP_PROVIDE_TEXT_1: string
+	/**
+	 * when WiFi is disconnected
+	 */
+	AP_PROVIDE_TEXT_2: string
+	/**
+	 * never
+	 */
+	AP_PROVIDE_TEXT_3: string
+	/**
+	 * Preferred Channel
+	 */
+	AP_PREFERRED_CHANNEL: string
+	/**
+	 * Hide SSID
+	 */
+	AP_HIDE_SSID: string
 }
 
 export type TranslationFunctions = {
@@ -766,10 +954,6 @@ export type TranslationFunctions = {
 	 * Security
 	 */
 	SECURITY: () => LocalizedString
-	/**
-	 * Network Time
-	 */
-	NETWORK_TIME: () => LocalizedString
 	/**
 	 * ON/OFF
 	 */
@@ -1368,6 +1552,198 @@ export type TranslationFunctions = {
 	 * Time set
 	 */
 	TIME_SET: () => LocalizedString
+	/**
+	 * Manage Users
+	 */
+	MANAGE_USERS: () => LocalizedString
+	/**
+	 * is Admin
+	 */
+	IS_ADMIN: () => LocalizedString
+	/**
+	 * You must have at least one admin user configured
+	 */
+	USER_WARNING: () => LocalizedString
+	/**
+	 * Add
+	 */
+	ADD: () => LocalizedString
+	/**
+	 * Access Token for
+	 */
+	ACCESS_TOKEN_FOR: () => LocalizedString
+	/**
+	 * The token below is used with REST API calls that require authorization. It can be passed either as a Bearer token in the Authorization header or in the access_token URL query parameter.
+	 */
+	ACCESS_TOKEN_TEXT: () => LocalizedString
+	/**
+	 * Generating token
+	 */
+	GENERATING_TOKEN: () => LocalizedString
+	/**
+	 * User
+	 */
+	USER: () => LocalizedString
+	/**
+	 * Modify
+	 */
+	MODIFY: () => LocalizedString
+	/**
+	 * The su (super user) password is used to sign authentication tokens and also enable admin privileges within the Console.
+	 */
+	SU_TEXT: () => LocalizedString
+	/**
+	 * Not enabled
+	 */
+	NOT_ENABLED: () => LocalizedString
+	/**
+	 * Errors
+	 */
+	ERRORS: () => LocalizedString
+	/**
+	 * Disconnect Reason
+	 */
+	DISCONNECT_REASON: () => LocalizedString
+	/**
+	 * Enable MQTT
+	 */
+	ENABLE_MQTT: () => LocalizedString
+	/**
+	 * Optional
+	 */
+	OPTIONAL: () => LocalizedString
+	/**
+	 * Formatting
+	 */
+	FORMATTING: () => LocalizedString
+	/**
+	 * Format
+	 */
+	FORMAT: () => LocalizedString
+	/**
+	 * Nested in a single topic
+	 */
+	MQTT_NEST_1: () => LocalizedString
+	/**
+	 * As individual topics
+	 */
+	MQTT_NEST_2: () => LocalizedString
+	/**
+	 * Publish command output to a `response` topic
+	 */
+	MQTT_RESPONSE: () => LocalizedString
+	/**
+	 * Publish single value topics on change
+	 */
+	MQTT_PUBLISH_TEXT_1: () => LocalizedString
+	/**
+	 * Publish to command topics (ioBroker)
+	 */
+	MQTT_PUBLISH_TEXT_2: () => LocalizedString
+	/**
+	 * Enable MQTT Discovery (Home Assistant, Domoticz)
+	 */
+	MQTT_PUBLISH_TEXT_3: () => LocalizedString
+	/**
+	 * Prefix for the Discovery topics
+	 */
+	MQTT_PUBLISH_TEXT_4: () => LocalizedString
+	/**
+	 * Publish Intervals
+	 */
+	MQTT_PUBLISH_INTERVALS: () => LocalizedString
+	/**
+	 * Boilers and Heat Pumps
+	 */
+	MQTT_INT_BOILER: () => LocalizedString
+	/**
+	 * Thermostats
+	 */
+	MQTT_INT_THERMOSTATS: () => LocalizedString
+	/**
+	 * Solar Modules
+	 */
+	MQTT_INT_SOLAR: () => LocalizedString
+	/**
+	 * Mixer Modules
+	 */
+	MQTT_INT_MIXER: () => LocalizedString
+	/**
+	 * Default
+	 */
+	DEFAULT: () => LocalizedString
+	/**
+	 * Set Clean Session
+	 */
+	MQTT_CLEAN_SESSION: () => LocalizedString
+	/**
+	 * Always set Retain flag
+	 */
+	MQTT_RETAIN_FLAG: () => LocalizedString
+	/**
+	 * Inactive
+	 */
+	INACTIVE: () => LocalizedString
+	/**
+	 * Active
+	 */
+	ACTIVE: () => LocalizedString
+	/**
+	 * Unknown
+	 */
+	UNKNOWN: () => LocalizedString
+	/**
+	 * Set Time
+	 */
+	SET_TIME: () => LocalizedString
+	/**
+	 * Enter local date and time below to set the time.
+	 */
+	SET_TIME_TEXT: () => LocalizedString
+	/**
+	 * Local Time
+	 */
+	LOCAL_TIME: () => LocalizedString
+	/**
+	 * UTC Time
+	 */
+	UTC_TIME: () => LocalizedString
+	/**
+	 * Enable NTP
+	 */
+	ENABLE_NTP: () => LocalizedString
+	/**
+	 * Time Zone
+	 */
+	TIME_ZONE: () => LocalizedString
+	/**
+	 * Access Point
+	 */
+	ACCESS_POINT: () => LocalizedString
+	/**
+	 * Enable Access Point
+	 */
+	AP_PROVIDE: () => LocalizedString
+	/**
+	 * always
+	 */
+	AP_PROVIDE_TEXT_1: () => LocalizedString
+	/**
+	 * when WiFi is disconnected
+	 */
+	AP_PROVIDE_TEXT_2: () => LocalizedString
+	/**
+	 * never
+	 */
+	AP_PROVIDE_TEXT_3: () => LocalizedString
+	/**
+	 * Preferred Channel
+	 */
+	AP_PREFERRED_CHANNEL: () => LocalizedString
+	/**
+	 * Hide SSID
+	 */
+	AP_HIDE_SSID: () => LocalizedString
 }
 
 export type Formatters = {}

@@ -11,6 +11,8 @@ import { APNetworkStatus, APStatus } from '../../types';
 import { ButtonRow, FormLoader, SectionContent } from '../../components';
 import { useRest } from '../../utils';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
   switch (status) {
     case APNetworkStatus.ACTIVE:
@@ -24,23 +26,25 @@ export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
   }
 };
 
-export const apStatus = ({ status }: APStatus) => {
-  switch (status) {
-    case APNetworkStatus.ACTIVE:
-      return 'Active';
-    case APNetworkStatus.INACTIVE:
-      return 'Inactive';
-    case APNetworkStatus.LINGERING:
-      return 'Lingering until idle';
-    default:
-      return 'Unknown';
-  }
-};
-
 const APStatusForm: FC = () => {
   const { loadData, data, errorMessage } = useRest<APStatus>({ read: APApi.readAPStatus });
 
+  const { LL } = useI18nContext();
+
   const theme = useTheme();
+
+  const apStatus = ({ status }: APStatus) => {
+    switch (status) {
+      case APNetworkStatus.ACTIVE:
+        return LL.ACTIVE();
+      case APNetworkStatus.INACTIVE:
+        return LL.INACTIVE();
+      case APNetworkStatus.LINGERING:
+        return 'Lingering until idle';
+      default:
+        return LL.UNKNOWN();
+    }
+  };
 
   const content = () => {
     if (!data) {
@@ -56,7 +60,7 @@ const APStatusForm: FC = () => {
                 <SettingsInputAntennaIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Status" secondary={apStatus(data)} />
+            <ListItemText primary={LL.STATUS()} secondary={apStatus(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -87,7 +91,7 @@ const APStatusForm: FC = () => {
         </List>
         <ButtonRow>
           <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
-            Refresh
+            {LL.REFRESH()}
           </Button>
         </ButtonRow>
       </>
@@ -95,7 +99,7 @@ const APStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title="Access Point Status" titleGutter>
+    <SectionContent title={LL.ACCESS_POINT() + ' ' + LL.STATUS()} titleGutter>
       {content()}
     </SectionContent>
   );

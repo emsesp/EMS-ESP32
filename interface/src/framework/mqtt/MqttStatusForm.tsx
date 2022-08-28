@@ -11,6 +11,8 @@ import { MqttStatus, MqttDisconnectReason } from '../../types';
 import * as MqttApi from '../../api/mqtt';
 import { useRest } from '../../utils';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 export const mqttStatusHighlight = ({ enabled, connected }: MqttStatus, theme: Theme) => {
   if (!enabled) {
     return theme.palette.info.main;
@@ -29,43 +31,45 @@ export const mqttPublishHighlight = ({ mqtt_fails }: MqttStatus, theme: Theme) =
   return theme.palette.error.main;
 };
 
-export const mqttStatus = ({ enabled, connected }: MqttStatus) => {
-  if (!enabled) {
-    return 'Not enabled';
-  }
-  if (connected) {
-    return 'Connected';
-  }
-  return 'Disconnected';
-};
-
-export const disconnectReason = ({ disconnect_reason }: MqttStatus) => {
-  switch (disconnect_reason) {
-    case MqttDisconnectReason.TCP_DISCONNECTED:
-      return 'TCP disconnected';
-    case MqttDisconnectReason.MQTT_UNACCEPTABLE_PROTOCOL_VERSION:
-      return 'Unacceptable protocol version';
-    case MqttDisconnectReason.MQTT_IDENTIFIER_REJECTED:
-      return 'Client ID rejected';
-    case MqttDisconnectReason.MQTT_SERVER_UNAVAILABLE:
-      return 'Server unavailable';
-    case MqttDisconnectReason.MQTT_MALFORMED_CREDENTIALS:
-      return 'Malformed credentials';
-    case MqttDisconnectReason.MQTT_NOT_AUTHORIZED:
-      return 'Not authorized';
-    case MqttDisconnectReason.ESP8266_NOT_ENOUGH_SPACE:
-      return 'Device out of memory';
-    case MqttDisconnectReason.TLS_BAD_FINGERPRINT:
-      return 'Server fingerprint invalid';
-    default:
-      return 'Unknown';
-  }
-};
-
 const MqttStatusForm: FC = () => {
   const { loadData, data, errorMessage } = useRest<MqttStatus>({ read: MqttApi.readMqttStatus });
 
+  const { LL } = useI18nContext();
+
   const theme = useTheme();
+
+  const mqttStatus = ({ enabled, connected }: MqttStatus) => {
+    if (!enabled) {
+      return LL.NOT_ENABLED();
+    }
+    if (connected) {
+      return LL.CONNECTED();
+    }
+    return LL.DISCONNECTED();
+  };
+
+  const disconnectReason = ({ disconnect_reason }: MqttStatus) => {
+    switch (disconnect_reason) {
+      case MqttDisconnectReason.TCP_DISCONNECTED:
+        return 'TCP disconnected';
+      case MqttDisconnectReason.MQTT_UNACCEPTABLE_PROTOCOL_VERSION:
+        return 'Unacceptable protocol version';
+      case MqttDisconnectReason.MQTT_IDENTIFIER_REJECTED:
+        return 'Client ID rejected';
+      case MqttDisconnectReason.MQTT_SERVER_UNAVAILABLE:
+        return 'Server unavailable';
+      case MqttDisconnectReason.MQTT_MALFORMED_CREDENTIALS:
+        return 'Malformed credentials';
+      case MqttDisconnectReason.MQTT_NOT_AUTHORIZED:
+        return 'Not authorized';
+      case MqttDisconnectReason.ESP8266_NOT_ENOUGH_SPACE:
+        return 'Device out of memory';
+      case MqttDisconnectReason.TLS_BAD_FINGERPRINT:
+        return 'Server fingerprint invalid';
+      default:
+        return 'Unknown';
+    }
+  };
 
   const content = () => {
     if (!data) {
@@ -89,7 +93,7 @@ const MqttStatusForm: FC = () => {
                   <SpeakerNotesOffIcon />
                 </Avatar>
               </ListItemAvatar>
-              <ListItemText primary="MQTT Publish Errors" secondary={data.mqtt_fails} />
+              <ListItemText primary={'MQTT Publish ' + LL.ERRORS()} secondary={data.mqtt_fails} />
             </ListItem>
           </>
         );
@@ -102,7 +106,7 @@ const MqttStatusForm: FC = () => {
                 <ReportIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Disconnect Reason" secondary={disconnectReason(data)} />
+            <ListItemText primary={LL.DISCONNECT_REASON()} secondary={disconnectReason(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
         </>
@@ -118,14 +122,14 @@ const MqttStatusForm: FC = () => {
                 <DeviceHubIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Status" secondary={mqttStatus(data)} />
+            <ListItemText primary={LL.STATUS()} secondary={mqttStatus(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
           {data.enabled && renderConnectionStatus()}
         </List>
         <ButtonRow>
           <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
-            Refresh
+            {LL.REFRESH()}
           </Button>
         </ButtonRow>
       </>
@@ -133,7 +137,7 @@ const MqttStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title="MQTT Status" titleGutter>
+    <SectionContent title={'MQTT ' + LL.STATUS()} titleGutter>
       {content()}
     </SectionContent>
   );
