@@ -58,7 +58,7 @@ const SignIn: FC = () => {
           enqueueSnackbar(LL.INVALID_LOGIN(), { variant: 'warning' });
         }
       } else {
-        enqueueSnackbar(extractErrorMessage(error, 'Unexpected error, please try again'), { variant: 'error' });
+        enqueueSnackbar(extractErrorMessage(error, LL.ERROR()), { variant: 'error' });
       }
       setProcessing(false);
     }

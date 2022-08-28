@@ -31,6 +31,8 @@ import { ButtonRow, FormLoader, SectionContent } from '../../components';
 import { extractErrorMessage, formatDateTime, formatLocalDateTime, useRest } from '../../utils';
 import { AuthenticatedContext } from '../../contexts/authentication';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 export const isNtpActive = ({ status }: NTPStatus) => status === NTPSyncStatus.NTP_ACTIVE;
 export const isNtpEnabled = ({ status }: NTPStatus) => status !== NTPSyncStatus.NTP_DISABLED;
 
@@ -68,6 +70,8 @@ const NTPStatusForm: FC = () => {
   const { enqueueSnackbar } = useSnackbar();
   const { me } = useContext(AuthenticatedContext);
 
+  const { LL } = useI18nContext();
+
   const updateLocalTime = (event: React.ChangeEvent<HTMLInputElement>) => setLocalTime(event.target.value);
 
   const openSetTime = () => {
@@ -83,11 +87,11 @@ const NTPStatusForm: FC = () => {
       await NTPApi.updateTime({
         local_time: formatLocalDateTime(new Date(localTime))
       });
-      enqueueSnackbar('Time set', { variant: 'success' });
+      enqueueSnackbar(LL.TIME_SET(), { variant: 'success' });
       setSettingTime(false);
       loadData();
     } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem updating time'), { variant: 'error' });
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     } finally {
       setProcessing(false);
     }

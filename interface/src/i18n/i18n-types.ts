@@ -68,6 +68,10 @@ type RootTranslation = {
 	 */
 	UPLOAD_SUCCESSFUL: string
 	/**
+	 * Download successful
+	 */
+	DOWNLOAD_SUCCESSFUL: string
+	/**
 	 * Invalid login details
 	 */
 	INVALID_LOGIN: string
@@ -584,6 +588,10 @@ type RootTranslation = {
 	 */
 	UPLOAD: string
 	/**
+	 * Download
+	 */
+	DOWNLOAD: string
+	/**
 	 * aborted
 	 */
 	ABORTED: string
@@ -595,6 +603,98 @@ type RootTranslation = {
 	 * successful
 	 */
 	SUCCESSFUL: string
+	/**
+	 * System
+	 */
+	SYSTEM: string
+	/**
+	 * Log
+	 */
+	LOG: string
+	/**
+	 * Status
+	 */
+	STATUS: string
+	/**
+	 * Upload/Download
+	 */
+	UPLOAD_DOWNLOAD: string
+	/**
+	 * You are currently running version
+	 */
+	SYSTEM_VERSION_RUNNING: string
+	/**
+	 * to apply the new firmware
+	 */
+	SYSTEM_APPLY_FIRMWARE: string
+	/**
+	 * Close
+	 */
+	CLOSE: string
+	/**
+	 * Use
+	 */
+	USE: string
+	/**
+	 * Factory Reset
+	 */
+	FACTORY_RESET: string
+	/**
+	 * Device has been factory reset and will now restart
+	 */
+	SYSTEM_FACTORY_TEXT: string
+	/**
+	 * Are you sure you want to reset the device to its factory defaults?
+	 */
+	SYSTEM_FACTORY_TEXT_DIALOG: string
+	/**
+	 * Version Check
+	 */
+	VERSION_CHECK: string
+	/**
+	 * The latest
+	 */
+	THE_LATEST: string
+	/**
+	 * Buffer Size
+	 */
+	BUFFER_SIZE: string
+	/**
+	 * Compact
+	 */
+	COMPACT: string
+	/**
+	 * Enable OTA Updates
+	 */
+	ENABLE_OTA: string
+	/**
+	 * Download the entity customizations
+	 */
+	DOWNLOAD_CUSTOMIZATION_TEXT: string
+	/**
+	 * Download the application settings. Be careful when sharing your settings as this file contains passwords and other sensitive system information
+	 */
+	DOWNLOAD_SETTINGS_TEXT: string
+	/**
+	 * Upload a new firmware (.bin) file, settings or customizations (.json) file below
+	 */
+	UPLOAD_TEXT: string
+	/**
+	 * Uploading
+	 */
+	UPLOADING: string
+	/**
+	 * Drop file or click here
+	 */
+	UPLOAD_DROP_TEXT: string
+	/**
+	 * Unexpected Error, please try again
+	 */
+	ERROR: string
+	/**
+	 * Time set
+	 */
+	TIME_SET: string
 }
 
 export type TranslationFunctions = {
@@ -650,6 +750,10 @@ export type TranslationFunctions = {
 	 * Upload successful
 	 */
 	UPLOAD_SUCCESSFUL: () => LocalizedString
+	/**
+	 * Download successful
+	 */
+	DOWNLOAD_SUCCESSFUL: () => LocalizedString
 	/**
 	 * Invalid login details
 	 */
@@ -1157,6 +1261,10 @@ export type TranslationFunctions = {
 	 */
 	UPLOAD: () => LocalizedString
 	/**
+	 * Download
+	 */
+	DOWNLOAD: () => LocalizedString
+	/**
 	 * aborted
 	 */
 	ABORTED: () => LocalizedString
@@ -1168,6 +1276,98 @@ export type TranslationFunctions = {
 	 * successful
 	 */
 	SUCCESSFUL: () => LocalizedString
+	/**
+	 * System
+	 */
+	SYSTEM: () => LocalizedString
+	/**
+	 * Log
+	 */
+	LOG: () => LocalizedString
+	/**
+	 * Status
+	 */
+	STATUS: () => LocalizedString
+	/**
+	 * Upload/Download
+	 */
+	UPLOAD_DOWNLOAD: () => LocalizedString
+	/**
+	 * You are currently running version
+	 */
+	SYSTEM_VERSION_RUNNING: () => LocalizedString
+	/**
+	 * to apply the new firmware
+	 */
+	SYSTEM_APPLY_FIRMWARE: () => LocalizedString
+	/**
+	 * Close
+	 */
+	CLOSE: () => LocalizedString
+	/**
+	 * Use
+	 */
+	USE: () => LocalizedString
+	/**
+	 * Factory Reset
+	 */
+	FACTORY_RESET: () => LocalizedString
+	/**
+	 * Device has been factory reset and will now restart
+	 */
+	SYSTEM_FACTORY_TEXT: () => LocalizedString
+	/**
+	 * Are you sure you want to reset the device to its factory defaults?
+	 */
+	SYSTEM_FACTORY_TEXT_DIALOG: () => LocalizedString
+	/**
+	 * Version Check
+	 */
+	VERSION_CHECK: () => LocalizedString
+	/**
+	 * The latest
+	 */
+	THE_LATEST: () => LocalizedString
+	/**
+	 * Buffer Size
+	 */
+	BUFFER_SIZE: () => LocalizedString
+	/**
+	 * Compact
+	 */
+	COMPACT: () => LocalizedString
+	/**
+	 * Enable OTA Updates
+	 */
+	ENABLE_OTA: () => LocalizedString
+	/**
+	 * Download the entity customizations
+	 */
+	DOWNLOAD_CUSTOMIZATION_TEXT: () => LocalizedString
+	/**
+	 * Download the application settings. Be careful when sharing your settings as this file contains passwords and other sensitive system information
+	 */
+	DOWNLOAD_SETTINGS_TEXT: () => LocalizedString
+	/**
+	 * Upload a new firmware (.bin) file, settings or customizations (.json) file below
+	 */
+	UPLOAD_TEXT: () => LocalizedString
+	/**
+	 * Uploading
+	 */
+	UPLOADING: () => LocalizedString
+	/**
+	 * Drop file or click here
+	 */
+	UPLOAD_DROP_TEXT: () => LocalizedString
+	/**
+	 * Unexpected Error, please try again
+	 */
+	ERROR: () => LocalizedString
+	/**
+	 * Time set
+	 */
+	TIME_SET: () => LocalizedString
 }
 
 export type Formatters = {}

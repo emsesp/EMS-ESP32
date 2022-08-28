@@ -35,7 +35,7 @@ const HelpInformation: FC = () => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    enqueueSnackbar('System information downloaded', { variant: 'info' });
+    enqueueSnackbar(LL.DOWNLOAD_SUCCESSFUL(), { variant: 'info' });
   };
 
   const callAPI = async (endpoint: string) => {
@@ -46,7 +46,7 @@ const HelpInformation: FC = () => {
         id: 0
       });
       if (response.status !== 200) {
-        enqueueSnackbar('API call failed', { variant: 'error' });
+        enqueueSnackbar(LL.PROBLEM_LOADING(), { variant: 'error' });
       } else {
         saveFile(response.data, endpoint);
       }

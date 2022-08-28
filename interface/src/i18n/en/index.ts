@@ -14,6 +14,7 @@ const en: BaseTranslation = {
   LOGGED_IN: 'Logged in as {name}',
   PLEASE_SIGNIN: 'Please sign in to continue',
   UPLOAD_SUCCESSFUL: 'Upload successful',
+  DOWNLOAD_SUCCESSFUL: 'Download successful',
   INVALID_LOGIN: 'Invalid login details',
   NETWORK_CONNECTION: 'Network Connection',
   SECURITY: 'Security',
@@ -145,9 +146,34 @@ const en: BaseTranslation = {
   HELP_INFORMATION_9: 'and attach your system details for a faster response',
   HELP_INFORMATION_10: 'EMS-ESP will always be a free and open-source project. Please consider supporting it with a',
   UPLOAD: 'Upload',
+  DOWNLOAD: 'Download',
   ABORTED: 'aborted',
   FAILED: 'failed',
-  SUCCESSFUL: 'successful'
+  SUCCESSFUL: 'successful',
+  SYSTEM: 'System',
+  LOG: 'Log',
+  STATUS: 'Status',
+  UPLOAD_DOWNLOAD: 'Upload/Download',
+  SYSTEM_VERSION_RUNNING: 'You are currently running version',
+  SYSTEM_APPLY_FIRMWARE: 'to apply the new firmware',
+  CLOSE: 'Close',
+  USE: 'Use',
+  FACTORY_RESET: 'Factory Reset',
+  SYSTEM_FACTORY_TEXT: 'Device has been factory reset and will now restart',
+  SYSTEM_FACTORY_TEXT_DIALOG: 'Are you sure you want to reset the device to its factory defaults?',
+  VERSION_CHECK: 'Version Check',
+  THE_LATEST: 'The latest',
+  BUFFER_SIZE: 'Buffer Size',
+  COMPACT: 'Compact',
+  ENABLE_OTA: 'Enable OTA Updates',
+  DOWNLOAD_CUSTOMIZATION_TEXT: 'Download the entity customizations',
+  DOWNLOAD_SETTINGS_TEXT:
+    'Download the application settings. Be careful when sharing your settings as this file contains passwords and other sensitive system information',
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file, settings or customizations (.json) file below',
+  UPLOADING: 'Uploading',
+  UPLOAD_DROP_TEXT: 'Drop file or click here',
+  ERROR: 'Unexpected Error, please try again',
+  TIME_SET: 'Time set'
 };
 
 export default en;

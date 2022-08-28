@@ -35,8 +35,13 @@ const LayoutMenu: FC = () => {
         <LayoutMenuItem icon={SettingsInputAntennaIcon} label="Access Point" to="/ap" />
         {features.ntp && <LayoutMenuItem icon={AccessTimeIcon} label={LL.NETWORK_TIME()} to="/ntp" />}
         {features.mqtt && <LayoutMenuItem icon={DeviceHubIcon} label="MQTT" to="/mqtt" />}
-        <LayoutMenuItem icon={LockIcon} label={LL.SECURITY()} to="/security" disabled={!authenticatedContext.me.admin} />
-        <LayoutMenuItem icon={SettingsIcon} label="System" to="/system" />
+        <LayoutMenuItem
+          icon={LockIcon}
+          label={LL.SECURITY()}
+          to="/security"
+          disabled={!authenticatedContext.me.admin}
+        />
+        <LayoutMenuItem icon={SettingsIcon} label={LL.SYSTEM()} to="/system" />
       </List>
     </>
   );

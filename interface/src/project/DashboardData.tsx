@@ -364,9 +364,9 @@ const DashboardData: FC = () => {
     try {
       setCoreData((await EMSESP.readCoreData()).data);
     } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Failed to fetch core data'), { variant: 'error' });
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     }
-  }, [enqueueSnackbar]);
+  }, [enqueueSnackbar, LL]);
 
   useEffect(() => {
     fetchCoreData();
@@ -385,7 +385,7 @@ const DashboardData: FC = () => {
     try {
       setDeviceData((await EMSESP.readDeviceData({ id: unique_id })).data);
     } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem fetching device data'), { variant: 'error' });
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     }
   };
 
@@ -393,7 +393,7 @@ const DashboardData: FC = () => {
     try {
       setSensorData((await EMSESP.readSensorData()).data);
     } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem fetching sensor data'), { variant: 'error' });
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     }
   };
 
