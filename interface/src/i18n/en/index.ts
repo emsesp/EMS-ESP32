@@ -2,6 +2,8 @@ import type { BaseTranslation } from '../i18n-types';
 
 const en: BaseTranslation = {
   LANGUAGE: 'Language',
+  RETRY: 'Retry',
+  LOADING: 'Loading',
   IS_REQUIRED: 'is required',
   SIGN_IN: 'Sign In',
   SIGN_OUT: 'Sign Out',
@@ -16,7 +18,7 @@ const en: BaseTranslation = {
   UPLOAD_SUCCESSFUL: 'Upload successful',
   DOWNLOAD_SUCCESSFUL: 'Download successful',
   INVALID_LOGIN: 'Invalid login details',
-  NETWORK_CONNECTION: 'Network Connection',
+  NETWORK: 'Network',
   SECURITY: 'Security',
   ONOFF_CAP: 'ON/OFF',
   ONOFF: 'on/off',
@@ -51,7 +53,6 @@ const en: BaseTranslation = {
   CONNECTED: 'Connected',
   TX_ISSUES: 'Tx issues - try a different Tx Mode',
   DISCONNECTED: 'Disconnected',
-  SCANNING: 'Scanning for devices...',
   EMS_SCAN: 'Are you sure you want to initiate a full device scan of the EMS bus?',
   EMS_BUS_STATUS: 'EMS Bus Status',
   ACTIVE_DEVICES: 'Active Devices & Sensors',
@@ -222,7 +223,23 @@ const en: BaseTranslation = {
   AP_PROVIDE_TEXT_2: 'when WiFi is disconnected',
   AP_PROVIDE_TEXT_3: 'never',
   AP_PREFERRED_CHANNEL: 'Preferred Channel',
-  AP_HIDE_SSID: 'Hide SSID'
+  AP_HIDE_SSID: 'Hide SSID',
+  NETWORK_SCAN: 'Scan WiFi Networks',
+  IDLE: 'Idle',
+  LOST: 'Lost',
+  SCANNING: 'Scanning',
+  SCAN_AGAIN: 'Scan again',
+  NETWORK_SCANNER: 'Network Scanner',
+  NETWORK_NO_WIFI: 'No WiFi networks found',
+  NETWORK_BLANK_SSID: 'leave blank to disable WiFi',
+  POWER: 'Power',
+  NETWORK_DISABLE_SLEEP: 'Disable WiFi Sleep Mode',
+  NETWORK_LOW_BAND: 'Use Lower WiFi Bandwidth',
+  NETWORK_USE_DNS: 'Enable mDNS Service',
+  NETWORK_ENABLE_IPV6: 'Enable IPv6 support',
+  NETWORK_FIXED_IP: 'Use Fixed IP address',
+  ADMIN: 'Admin',
+  GUEST: 'Guest'
 };
 
 export default en;

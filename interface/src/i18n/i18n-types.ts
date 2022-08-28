@@ -19,6 +19,14 @@ type RootTranslation = {
 	 */
 	LANGUAGE: string
 	/**
+	 * Retry
+	 */
+	RETRY: string
+	/**
+	 * Loading
+	 */
+	LOADING: string
+	/**
 	 * is required
 	 */
 	IS_REQUIRED: string
@@ -76,9 +84,9 @@ type RootTranslation = {
 	 */
 	INVALID_LOGIN: string
 	/**
-	 * Network Connection
+	 * Network
 	 */
-	NETWORK_CONNECTION: string
+	NETWORK: string
 	/**
 	 * Security
 	 */
@@ -214,10 +222,6 @@ type RootTranslation = {
 	 * Disconnected
 	 */
 	DISCONNECTED: string
-	/**
-	 * Scanning for devices...
-	 */
-	SCANNING: string
 	/**
 	 * Are you sure you want to initiate a full device scan of the EMS bus?
 	 */
@@ -883,6 +887,70 @@ type RootTranslation = {
 	 * Hide SSID
 	 */
 	AP_HIDE_SSID: string
+	/**
+	 * Scan WiFi Networks
+	 */
+	NETWORK_SCAN: string
+	/**
+	 * Idle
+	 */
+	IDLE: string
+	/**
+	 * Lost
+	 */
+	LOST: string
+	/**
+	 * Scanning
+	 */
+	SCANNING: string
+	/**
+	 * Scan again
+	 */
+	SCAN_AGAIN: string
+	/**
+	 * Network Scanner
+	 */
+	NETWORK_SCANNER: string
+	/**
+	 * No WiFi networks found
+	 */
+	NETWORK_NO_WIFI: string
+	/**
+	 * leave blank to disable WiFi
+	 */
+	NETWORK_BLANK_SSID: string
+	/**
+	 * Power
+	 */
+	POWER: string
+	/**
+	 * Disable WiFi Sleep Mode
+	 */
+	NETWORK_DISABLE_SLEEP: string
+	/**
+	 * Use Lower WiFi Bandwidth
+	 */
+	NETWORK_LOW_BAND: string
+	/**
+	 * Enable mDNS Service
+	 */
+	NETWORK_USE_DNS: string
+	/**
+	 * Enable IPv6 support
+	 */
+	NETWORK_ENABLE_IPV6: string
+	/**
+	 * Use Fixed IP address
+	 */
+	NETWORK_FIXED_IP: string
+	/**
+	 * Admin
+	 */
+	ADMIN: string
+	/**
+	 * Guest
+	 */
+	GUEST: string
 }
 
 export type TranslationFunctions = {
@@ -890,6 +958,14 @@ export type TranslationFunctions = {
 	 * Language
 	 */
 	LANGUAGE: () => LocalizedString
+	/**
+	 * Retry
+	 */
+	RETRY: () => LocalizedString
+	/**
+	 * Loading
+	 */
+	LOADING: () => LocalizedString
 	/**
 	 * is required
 	 */
@@ -947,9 +1023,9 @@ export type TranslationFunctions = {
 	 */
 	INVALID_LOGIN: () => LocalizedString
 	/**
-	 * Network Connection
+	 * Network
 	 */
-	NETWORK_CONNECTION: () => LocalizedString
+	NETWORK: () => LocalizedString
 	/**
 	 * Security
 	 */
@@ -1082,10 +1158,6 @@ export type TranslationFunctions = {
 	 * Disconnected
 	 */
 	DISCONNECTED: () => LocalizedString
-	/**
-	 * Scanning for devices...
-	 */
-	SCANNING: () => LocalizedString
 	/**
 	 * Are you sure you want to initiate a full device scan of the EMS bus?
 	 */
@@ -1744,6 +1816,70 @@ export type TranslationFunctions = {
 	 * Hide SSID
 	 */
 	AP_HIDE_SSID: () => LocalizedString
+	/**
+	 * Scan WiFi Networks
+	 */
+	NETWORK_SCAN: () => LocalizedString
+	/**
+	 * Idle
+	 */
+	IDLE: () => LocalizedString
+	/**
+	 * Lost
+	 */
+	LOST: () => LocalizedString
+	/**
+	 * Scanning
+	 */
+	SCANNING: () => LocalizedString
+	/**
+	 * Scan again
+	 */
+	SCAN_AGAIN: () => LocalizedString
+	/**
+	 * Network Scanner
+	 */
+	NETWORK_SCANNER: () => LocalizedString
+	/**
+	 * No WiFi networks found
+	 */
+	NETWORK_NO_WIFI: () => LocalizedString
+	/**
+	 * leave blank to disable WiFi
+	 */
+	NETWORK_BLANK_SSID: () => LocalizedString
+	/**
+	 * Power
+	 */
+	POWER: () => LocalizedString
+	/**
+	 * Disable WiFi Sleep Mode
+	 */
+	NETWORK_DISABLE_SLEEP: () => LocalizedString
+	/**
+	 * Use Lower WiFi Bandwidth
+	 */
+	NETWORK_LOW_BAND: () => LocalizedString
+	/**
+	 * Enable mDNS Service
+	 */
+	NETWORK_USE_DNS: () => LocalizedString
+	/**
+	 * Enable IPv6 support
+	 */
+	NETWORK_ENABLE_IPV6: () => LocalizedString
+	/**
+	 * Use Fixed IP address
+	 */
+	NETWORK_FIXED_IP: () => LocalizedString
+	/**
+	 * Admin
+	 */
+	ADMIN: () => LocalizedString
+	/**
+	 * Guest
+	 */
+	GUEST: () => LocalizedString
 }
 
 export type Formatters = {}

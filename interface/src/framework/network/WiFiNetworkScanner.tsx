@@ -12,6 +12,8 @@ import { ButtonRow, FormLoader, SectionContent } from '../../components';
 
 import WiFiNetworkSelector from './WiFiNetworkSelector';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const NUM_POLLS = 10;
 const POLLING_FREQUENCY = 500;
 
@@ -22,6 +24,8 @@ const compareNetworks = (network1: WiFiNetwork, network2: WiFiNetwork) => {
 };
 
 const WiFiNetworkScanner: FC = () => {
+  const { LL } = useI18nContext();
+
   const { enqueueSnackbar } = useSnackbar();
 
   const pollCount = useRef(0);
@@ -46,7 +50,7 @@ const WiFiNetworkScanner: FC = () => {
           pollCount.current = completedPollCount;
           setTimeout(pollNetworkList, POLLING_FREQUENCY);
         } else {
-          finishedWithError('Device did not return network list in timely manner');
+          finishedWithError(LL.PROBLEM_LOADING());
         }
       } else {
         const newNetworkList = response.data;
@@ -55,12 +59,12 @@ const WiFiNetworkScanner: FC = () => {
       }
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
-        finishedWithError('Problem listing WiFi networks ' + error.response?.data.message);
+        finishedWithError(LL.PROBLEM_LOADING() + ' ' + error.response?.data.message);
       } else {
-        finishedWithError('Problem listing WiFi networks');
+        finishedWithError(LL.PROBLEM_LOADING());
       }
     }
-  }, [finishedWithError]);
+  }, [finishedWithError, LL]);
 
   const startNetworkScan = useCallback(async () => {
     pollCount.current = 0;
@@ -71,12 +75,12 @@ const WiFiNetworkScanner: FC = () => {
       setTimeout(pollNetworkList, POLLING_FREQUENCY);
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
-        finishedWithError('Problem scanning for WiFi networks ' + error.response?.data.message);
+        finishedWithError(LL.PROBLEM_LOADING() + ' ' + error.response?.data.message);
       } else {
-        finishedWithError('Problem scanning for WiFi networks');
+        finishedWithError(LL.PROBLEM_LOADING());
       }
     }
-  }, [finishedWithError, pollNetworkList]);
+  }, [finishedWithError, pollNetworkList, LL]);
 
   useEffect(() => {
     startNetworkScan();
@@ -84,13 +88,13 @@ const WiFiNetworkScanner: FC = () => {
 
   const renderNetworkScanner = () => {
     if (!networkList) {
-      return <FormLoader message="Scanning&hellip;" errorMessage={errorMessage} />;
+      return <FormLoader message={LL.SCANNING() + '...'} errorMessage={errorMessage} />;
     }
     return <WiFiNetworkSelector networkList={networkList} />;
   };
 
   return (
-    <SectionContent title="Network Scanner">
+    <SectionContent title={LL.NETWORK_SCANNER()}>
       {renderNetworkScanner()}
       <ButtonRow>
         <Button
@@ -100,7 +104,7 @@ const WiFiNetworkScanner: FC = () => {
           onClick={startNetworkScan}
           disabled={!errorMessage && !networkList}
         >
-          Scan again&hellip;
+          {LL.SCAN_AGAIN()}&hellip;
         </Button>
       </ButtonRow>
     </SectionContent>

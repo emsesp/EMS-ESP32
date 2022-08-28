@@ -31,7 +31,7 @@ const LayoutMenu: FC = () => {
         </List>
       )}
       <List disablePadding component="nav">
-        <LayoutMenuItem icon={SettingsEthernetIcon} label={LL.NETWORK_CONNECTION()} to="/network" />
+        <LayoutMenuItem icon={SettingsEthernetIcon} label={LL.NETWORK()} to="/network" />
         <LayoutMenuItem icon={SettingsInputAntennaIcon} label={LL.ACCESS_POINT()} to="/ap" />
         {features.ntp && <LayoutMenuItem icon={AccessTimeIcon} label="NTP" to="/ntp" />}
         {features.mqtt && <LayoutMenuItem icon={DeviceHubIcon} label="MQTT" to="/mqtt" />}

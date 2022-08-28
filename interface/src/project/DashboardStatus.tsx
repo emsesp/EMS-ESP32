@@ -147,7 +147,7 @@ const DashboardStatus: FC = () => {
   const scan = async () => {
     try {
       await EMSESP.scanDevices();
-      enqueueSnackbar(LL.SCANNING(), { variant: 'info' });
+      enqueueSnackbar(LL.SCANNING() + '...', { variant: 'info' });
     } catch (error: unknown) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     } finally {

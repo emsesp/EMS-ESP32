@@ -95,7 +95,9 @@ const LayoutAuthMenu: FC = () => {
           </Avatar>
           <Box pl={2}>
             <ItemTypography variant="h6">{me.username}</ItemTypography>
-            <ItemTypography variant="body1">{me.admin ? 'Admin User' : 'Guest User'}</ItemTypography>
+            <ItemTypography variant="body1">
+              {me.admin ? LL.ADMIN() + ' ' + LL.USER() : LL.GUEST() + ' ' + LL.USER()}
+            </ItemTypography>
           </Box>
         </Box>
         <Divider />

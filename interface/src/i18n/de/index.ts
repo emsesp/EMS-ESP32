@@ -2,6 +2,8 @@ import type { Translation } from '../i18n-types';
 
 const de: Translation = {
   LANGUAGE: 'Sprache',
+  RETRY: 'DE_Retry',
+  LOADING: 'DE_Loading',
   IS_REQUIRED: 'ist nötig',
   SIGN_IN: 'Einloggen',
   SIGN_OUT: 'Ausloggen',
@@ -16,7 +18,7 @@ const de: Translation = {
   UPLOAD_SUCCESSFUL: 'Hochladen erfolgreich',
   DOWNLOAD_SUCCESSFUL: 'DE_Download successful',
   INVALID_LOGIN: 'Ungültige Login Daten',
-  NETWORK_CONNECTION: 'Netzwerkverbindung',
+  NETWORK: 'Netzwerk',
   SECURITY: 'Sicherheit',
   ONOFF_CAP: 'AN/AUS',
   ONOFF: 'an/aus',
@@ -51,7 +53,6 @@ const de: Translation = {
   CONNECTED: 'in Verbindung gebracht',
   TX_ISSUES: 'Tx-Probleme - versuchen Sie einen anderen Tx-Modus',
   DISCONNECTED: 'Getrennt',
-  SCANNING: 'Suche nach Geräten...',
   EMS_SCAN: 'Möchten Sie wirklich einen vollständigen Gerätescan des EMS-Busses starten?',
   EMS_BUS_STATUS: 'EMS Bus Status',
   ACTIVE_DEVICES: 'Aktive Geräte und Sensoren',
@@ -222,8 +223,23 @@ const de: Translation = {
   AP_PROVIDE_TEXT_2: 'DE_when WiFi is disconnected',
   AP_PROVIDE_TEXT_3: 'DE_never',
   AP_PREFERRED_CHANNEL: 'DE_Preferred Channel',
-  AP_HIDE_SSID: 'DE_Hide SSID'
-
+  AP_HIDE_SSID: 'DE_Hide SSID',
+  NETWORK_SCAN: 'DE_Scan WiFi Networks',
+  IDLE: 'DE_Idle',
+  LOST: 'DE_Lost',
+  SCANNING: 'DE_Scanning',
+  SCAN_AGAIN: 'DE_Scan again',
+  NETWORK_SCANNER: 'DE_Network Scanner',
+  NETWORK_NO_WIFI: 'DE_No WiFi networks found',
+  NETWORK_BLANK_SSID: 'DE_leave blank to disable WiFi',
+  POWER: 'DE_Power',
+  NETWORK_DISABLE_SLEEP: 'DE_Disable WiFi Sleep Mode',
+  NETWORK_LOW_BAND: 'DE_Use Lower WiFi Bandwidth',
+  NETWORK_USE_DNS: 'DE_Enable mDNS Service',
+  NETWORK_ENABLE_IPV6: 'DE_Enable IPv6 support',
+  NETWORK_FIXED_IP: 'DE_Use Fixed IP address',
+  ADMIN: 'DE_Admin',
+  GUEST: 'DE_Guest'
 };
 
 export default de;

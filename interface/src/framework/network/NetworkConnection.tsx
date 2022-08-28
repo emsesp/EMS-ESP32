@@ -15,7 +15,7 @@ import { useI18nContext } from '../../i18n/i18n-react';
 
 const NetworkConnection: FC = () => {
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.NETWORK_CONNECTION());
+  useLayoutTitle(LL.NETWORK());
 
   const { routerTab } = useRouterTab();
 
@@ -45,9 +45,9 @@ const NetworkConnection: FC = () => {
       }}
     >
       <RouterTabs value={routerTab}>
-        <Tab value="status" label="Network Status" />
-        <Tab value="scan" label="Scan WiFi Networks" disabled={!authenticatedContext.me.admin} />
-        <Tab value="settings" label="Network Settings" disabled={!authenticatedContext.me.admin} />
+        <Tab value="status" label={LL.NETWORK() + ' ' + LL.STATUS()} />
+        <Tab value="scan" label={LL.NETWORK_SCAN()} disabled={!authenticatedContext.me.admin} />
+        <Tab value="settings" label={LL.NETWORK() + ' ' + LL.SETTINGS()} disabled={!authenticatedContext.me.admin} />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<NetworkStatusForm />} />
