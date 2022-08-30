@@ -42,6 +42,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), false, MAKE_PF_CB(process_RCTime));
     register_telegram_type(0xA2, F("RCError"), false, MAKE_PF_CB(process_RCError));
     register_telegram_type(0x12, F("RCErrorMessage"), false, MAKE_PF_CB(process_RCErrorMessage));
+    register_telegram_type(0x13, F("RCErrorMessage2"), false, MAKE_PF_CB(process_RCErrorMessage));
     // RC10
     if (model == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         monitor_typeids = {0xB1};
@@ -101,7 +102,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(monitor_typeids[i], F("RC30Monitor"), false, MAKE_PF_CB(process_RC30Monitor));
             register_telegram_type(set_typeids[i], F("RC30Set"), false, MAKE_PF_CB(process_RC30Set));
             register_telegram_type(curve_typeids[i], F("RC30Temp"), false, MAKE_PF_CB(process_RC30Temp));
-            register_telegram_type(timer_typeids[i], F("RC30Timer"), false, MAKE_PF_CB(process_RC30Timer));
+            register_telegram_type(timer_typeids[i], F("RC30Timer"), false, MAKE_PF_CB(process_RC35Timer));
         }
         register_telegram_type(EMS_TYPE_RC30wwSettings, F("RC30WWSettings"), true, MAKE_PF_CB(process_RC30wwSettings));
         register_telegram_type(0x38, F("WWTimer"), true, MAKE_PF_CB(process_RC35wwTimer));
@@ -491,53 +492,6 @@ uint8_t Thermostat::HeatingCircuit::get_mode_type() const {
     return HeatingCircuit::Mode::DAY;
 }
 
-// decodes the thermostat mode based on the thermostat type
-// works with both modes and mode_types
-std::string Thermostat::mode_tostring(uint8_t mode) {
-    switch (mode) {
-    case HeatingCircuit::Mode::OFF:
-        return Helpers::translated_word(FL_(off));
-    case HeatingCircuit::Mode::MANUAL:
-        return Helpers::translated_word(FL_(manual));
-    case HeatingCircuit::Mode::DAY:
-        return Helpers::translated_word(FL_(day));
-    case HeatingCircuit::Mode::NIGHT:
-        return Helpers::translated_word(FL_(night));
-    case HeatingCircuit::Mode::ECO:
-        return Helpers::translated_word(FL_(eco));
-    case HeatingCircuit::Mode::COMFORT:
-        return Helpers::translated_word(FL_(comfort));
-    case HeatingCircuit::Mode::HEAT:
-        return Helpers::translated_word(FL_(heat));
-    case HeatingCircuit::Mode::HOLIDAY:
-        return Helpers::translated_word(FL_(holiday));
-    case HeatingCircuit::Mode::NOFROST:
-        return Helpers::translated_word(FL_(nofrost));
-    case HeatingCircuit::Mode::AUTO:
-        return Helpers::translated_word(FL_(auto));
-    case HeatingCircuit::Mode::SUMMER:
-        return Helpers::translated_word(FL_(summer));
-    case HeatingCircuit::Mode::OFFSET:
-        return Helpers::translated_word(FL_(offset));
-    case HeatingCircuit::Mode::DESIGN:
-        return Helpers::translated_word(FL_(design));
-    case HeatingCircuit::Mode::MINFLOW:
-        return Helpers::translated_word(FL_(minflow));
-    case HeatingCircuit::Mode::MAXFLOW:
-        return Helpers::translated_word(FL_(maxflow));
-    case HeatingCircuit::Mode::ROOMINFLUENCE:
-        return Helpers::translated_word(FL_(roominfluence));
-    case HeatingCircuit::Mode::FLOWOFFSET:
-        return Helpers::translated_word(FL_(flowtempoffset));
-    case HeatingCircuit::Mode::TEMPAUTO:
-        return Helpers::translated_word(FL_(tempauto));
-    case HeatingCircuit::Mode::NOREDUCE:
-        return Helpers::translated_word(FL_(noreduce));
-    default:
-        return Helpers::translated_word(FL_(unknown));
-    }
-}
-
 // type 0xB1 - data from the RC10 thermostat (0x17)
 // Data: 04 23 00 BA 00 00 00 BA
 void Thermostat::process_RC10Monitor(std::shared_ptr<const Telegram> telegram) {
@@ -632,15 +586,16 @@ void Thermostat::process_RC20Timer(std::shared_ptr<const Telegram> telegram) {
         uint8_t temp = telegram->message_data[0] & 7;
         uint8_t time = telegram->message_data[1];
 
-        std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
+        // we use EN settings for the day abbreviation
+        std::string sday = read_flash_string(FL_(enum_dayOfWeek)[day][0]);
+        // std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
 
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
         } else {
             snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), temp);
         }
-        strlcpy(hc->switchtime1, data, sizeof(hc->switchtime1));
-        has_update(hc->switchtime1); // always publish
+        has_update(hc->switchtime1, data, sizeof(hc->switchtime1));
     }
 }
 
@@ -832,6 +787,9 @@ void Thermostat::process_RC35wwTimer(std::shared_ptr<const Telegram> telegram) {
         uint8_t time = telegram->message_data[1];
 
         char data[sizeof(wwSwitchTime_)];
+        // we use EN settings for the day abbreviation
+        std::string sday = read_flash_string(FL_(enum_dayOfWeek)[day][0]);
+        // std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
         } else {
@@ -839,17 +797,16 @@ void Thermostat::process_RC35wwTimer(std::shared_ptr<const Telegram> telegram) {
                      sizeof(data),
                      "%02d %s %02d:%02d %s",
                      no,
-                     Helpers::translated_word(FL_(enum_dayOfWeek)[day]).c_str(),
+                     sday.c_str(),
                      time / 6,
                      10 * (time % 6),
-                     on ? (Helpers::translated_word(FL_(on))).c_str() : (Helpers::translated_word(FL_(on))).c_str());
+                     // on ? (Helpers::translated_word(FL_(on))).c_str() : (Helpers::translated_word(FL_(off))).c_str());
+                     on ? "on" : "off");
         }
         if (telegram->type_id == 0x38) {
-            strlcpy(wwSwitchTime_, data, sizeof(wwSwitchTime_));
-            has_update(wwSwitchTime_);
+            has_update(wwSwitchTime_, data, sizeof(wwSwitchTime_));
         } else {
-            strlcpy(wwCircSwitchTime_, data, sizeof(wwCircSwitchTime_));
-            has_update(wwCircSwitchTime_);
+            has_update(wwCircSwitchTime_, data, sizeof(wwCircSwitchTime_));
         }
         if (is_fetch(telegram->type_id)) {
             toggle_fetch(telegram->type_id, false); // dont fetch again
@@ -951,6 +908,7 @@ void Thermostat::process_CRFMonitor(std::shared_ptr<const Telegram> telegram) {
 }
 
 // type 0x02A5 - data from the Nefit RC1010/3000 thermostat (0x18) and RC300/310s on 0x10
+// Rx: 10 0B FF 00 01 A5 80 00 01 30 23 00 30 28 01 E7 03 03 01 01 E7 02 33 00 00 11 01 03 FF FF 00 04
 void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
     if (hc == nullptr) {
@@ -986,6 +944,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
 }
 
 // type 0x02B9 EMS+ for reading from RC300/RC310 thermostat
+// Thermostat(0x10) -> Me(0x0B), RC300Set(0x2B9), data: FF 2E 2A 26 1E 02 4E FF FF 00 1C 01 E1 20 01 0F 05 00 00 02 1F
 void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
     if (hc == nullptr) {
@@ -1211,65 +1170,6 @@ void Thermostat::process_RC30Temp(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->holidaytemp, 7); // is * 2
 }
 
-// type 0x3F (HC1) - timer setting for RC30
-void Thermostat::process_RC30Timer(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
-    if (hc == nullptr) {
-        return;
-    }
-
-    if ((telegram->message_length == 2 && telegram->offset < 83 && !(telegram->offset & 1))
-        || (!telegram->offset && telegram->message_length > 1 && !strlen(hc->switchtime1))) {
-        char    data[sizeof(hc->switchtime1)];
-        uint8_t no   = telegram->offset / 2;
-        uint8_t day  = telegram->message_data[0] >> 5;
-        uint8_t temp = telegram->message_data[0] & 7;
-        uint8_t time = telegram->message_data[1];
-
-        std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
-
-        if (day == 7) {
-            snprintf(data, sizeof(data), "%02d not_set", no);
-        } else {
-            snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), temp);
-        }
-        strlcpy(hc->switchtime1, data, sizeof(hc->switchtime1));
-        has_update(hc->switchtime1); // always publish
-    }
-
-    has_update(telegram, hc->program, 84); // 0 .. 10, 0-userprogram 1, 10-userprogram 2
-    has_update(telegram, hc->pause, 85);   // time in hours
-    has_update(telegram, hc->party, 86);   // time in hours
-
-    if (telegram->message_length + telegram->offset >= 92 && telegram->offset <= 87) {
-        char data[sizeof(hc->vacation)];
-        snprintf(data,
-                 sizeof(data),
-                 "%02d.%02d.%04d-%02d.%02d.%04d",
-                 telegram->message_data[87 - telegram->offset],
-                 telegram->message_data[88 - telegram->offset],
-                 telegram->message_data[89 - telegram->offset] + 2000,
-                 telegram->message_data[90 - telegram->offset],
-                 telegram->message_data[91 - telegram->offset],
-                 telegram->message_data[92 - telegram->offset] + 2000);
-        has_update(hc->vacation, data, sizeof(hc->vacation));
-    }
-
-    if (telegram->message_length + telegram->offset >= 98 && telegram->offset <= 93) {
-        char data[sizeof(hc->holiday)];
-        snprintf(data,
-                 sizeof(data),
-                 "%02d.%02d.%04d-%02d.%02d.%04d",
-                 telegram->message_data[93 - telegram->offset],
-                 telegram->message_data[94 - telegram->offset],
-                 telegram->message_data[95 - telegram->offset] + 2000,
-                 telegram->message_data[96 - telegram->offset],
-                 telegram->message_data[97 - telegram->offset],
-                 telegram->message_data[98 - telegram->offset] + 2000);
-        has_update(hc->holiday, data, sizeof(hc->holiday));
-    }
-}
-
 // type 0x3E (HC1), 0x48 (HC2), 0x52 (HC3), 0x5C (HC4) - data from the RC35 thermostat (0x10) - 16 bytes
 void Thermostat::process_RC35Monitor(std::shared_ptr<const Telegram> telegram) {
     // exit if the 15th byte (second from last) is 0x00, which I think is calculated flow setpoint temperature
@@ -1359,20 +1259,18 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
         char    data[sizeof(hc->switchtime1)];
         uint8_t no   = telegram->offset / 2;
         uint8_t day  = telegram->message_data[0] >> 5;
-        uint8_t on   = telegram->message_data[0] & 1;
+        uint8_t on   = model() == EMS_DEVICE_FLAG_RC30 ? telegram->message_data[0] & 7 : telegram->message_data[0] & 1;
         uint8_t time = telegram->message_data[1];
 
+        // we use EN settings for the day abbreviation
+        std::string sday = read_flash_string(FL_(enum_dayOfWeek)[day][0]);
+        // std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
+        } else if (model() == EMS_DEVICE_FLAG_RC30) {
+            snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), on);
         } else {
-            snprintf(data,
-                     sizeof(data),
-                     "%02d %s %02d:%02d %s",
-                     no,
-                     Helpers::translated_word(FL_(enum_dayOfWeek)[day]).c_str(),
-                     time / 6,
-                     10 * (time % 6),
-                     on ? Helpers::translated_word(FL_(on)).c_str() : Helpers::translated_word(FL_(on)).c_str());
+            snprintf(data, sizeof(data), "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
         }
         if (!prog) {
             strlcpy(hc->switchtime1, data, sizeof(hc->switchtime1));
@@ -1495,7 +1393,7 @@ void Thermostat::process_RCError(std::shared_ptr<const Telegram> telegram) {
     has_update(errorCode_, code, sizeof(errorCode_));
 }
 
-// 0x12 error log
+// 0x12 and 0x13 error log
 // RCErrorMessage(0x12), data: 32 32 03 30 95 0A 0A 15 18 00 01 19 32 32 03 30 95 0A 09 05 18 00 01 19 31 38 03
 // RCErrorMessage(0x12), data: 39 95 08 09 0F 19 00 01 17 64 31 03 34 95 07 10 08 00 00 01 70 (offset 27)
 void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram) {
@@ -1504,12 +1402,13 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
     }
 
     // data: displaycode(2), errornumber(2), year, month, hour, day, minute, duration(2), src-addr
-    if (telegram->message_data[4] & 0x80) { // valid date
-        char     code[sizeof(lastCode_)] = {0};
-        uint16_t codeNo                  = EMS_VALUE_USHORT_NOTSET;
-        code[0]                          = telegram->message_data[0];
-        code[1]                          = telegram->message_data[1];
-        code[2]                          = 0;
+    if (telegram->message_data[4] & 0x80) {          // valid date
+        static uint32_t lastCodeDate_           = 0; // last code date
+        char            code[sizeof(lastCode_)] = {0};
+        uint16_t        codeNo                  = EMS_VALUE_USHORT_NOTSET;
+        code[0]                                 = telegram->message_data[0];
+        code[1]                                 = telegram->message_data[1];
+        code[2]                                 = 0;
         telegram->read_value(codeNo, 2);
         uint16_t year     = (telegram->message_data[4] & 0x7F) + 2000;
         uint8_t  month    = telegram->message_data[5];
@@ -1517,9 +1416,14 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
         uint8_t  hour     = telegram->message_data[6];
         uint8_t  min      = telegram->message_data[8];
         uint16_t duration = EMS_VALUE_SHORT_NOTSET;
+        uint32_t date     = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min;
         telegram->read_value(duration, 9);
-        snprintf(&code[2], sizeof(code) - 2, "(%d) %02d.%02d.%d %02d:%02d (%d min)", codeNo, day, month, year, hour, min, duration);
-        has_update(lastCode_, code, sizeof(lastCode_));
+        // store only the newest code from telegrams 12 and 13
+        if (date > lastCodeDate_) {
+            lastCodeDate_ = date;
+            snprintf(&code[2], sizeof(code) - 2, "(%d) %02d.%02d.%d %02d:%02d (%d min)", codeNo, day, month, year, hour, min, duration);
+            has_update(lastCode_, code, sizeof(lastCode_));
+        }
     }
 }
 
@@ -2280,27 +2184,27 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
         uint8_t num = value[0] - '0';
         switch (model()) {
         case EMSdevice::EMS_DEVICE_FLAG_RC10:
-            mode = Helpers::translated_word(FL_(enum_mode6)[num]);
+            mode = Helpers::translated_word(FL_(enum_mode6)[num], true);
             break;
         case EMSdevice::EMS_DEVICE_FLAG_RC20:
         case EMSdevice::EMS_DEVICE_FLAG_RC20_N:
-            mode = Helpers::translated_word(FL_(enum_mode2)[num]);
+            mode = Helpers::translated_word(FL_(enum_mode2)[num], true);
             break;
         case EMSdevice::EMS_DEVICE_FLAG_RC25:
         case EMSdevice::EMS_DEVICE_FLAG_RC30:
         case EMSdevice::EMS_DEVICE_FLAG_RC35:
         case EMSdevice::EMS_DEVICE_FLAG_RC30_N:
-            mode = Helpers::translated_word(FL_(enum_mode3)[num]);
+            mode = Helpers::translated_word(FL_(enum_mode3)[num], true);
             break;
         case EMSdevice::EMS_DEVICE_FLAG_RC300:
         case EMSdevice::EMS_DEVICE_FLAG_RC100:
-            mode = Helpers::translated_word(FL_(enum_mode)[num]);
+            mode = Helpers::translated_word(FL_(enum_mode)[num], true);
             break;
         case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
-            mode = Helpers::translated_word(FL_(enum_mode4)[num]);
+            mode = Helpers::translated_word(FL_(enum_mode4)[num], true);
             break;
         case EMSdevice::EMS_DEVICE_FLAG_CRF:
-            mode = Helpers::translated_word(FL_(enum_mode5)[num]);
+            mode = Helpers::translated_word(FL_(enum_mode5)[num], true);
             break;
         default:
             return false;
@@ -2311,34 +2215,34 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
 
     uint8_t hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
 
-    if (mode_tostring(HeatingCircuit::Mode::OFF) == mode) {
+    if (Helpers::translated_word(FL_(off), true) == mode) {
         return set_mode_n(HeatingCircuit::Mode::OFF, hc_num);
     }
-    if (mode_tostring(HeatingCircuit::Mode::MANUAL) == mode) {
+    if (Helpers::translated_word(FL_(manual), true) == mode) {
         return set_mode_n(HeatingCircuit::Mode::MANUAL, hc_num);
     }
-    if (mode_tostring(HeatingCircuit::Mode::AUTO) == mode) {
+    if (Helpers::translated_word(FL_(auto), true) == mode) {
         return set_mode_n(HeatingCircuit::Mode::AUTO, hc_num);
     }
-    if (mode_tostring(HeatingCircuit::Mode::DAY) == mode) {
+    if (Helpers::translated_word(FL_(day), true) == mode) {
         return set_mode_n(HeatingCircuit::Mode::DAY, hc_num);
     }
-    if (mode_tostring(HeatingCircuit::Mode::NIGHT) == mode) {
+    if (Helpers::translated_word(FL_(night), true) == mode) {
         return set_mode_n(HeatingCircuit::Mode::NIGHT, hc_num);
     }
-    if (mode_tostring(HeatingCircuit::Mode::HEAT) == mode) {
+    if (Helpers::translated_word(FL_(heat), true) == mode) {
         return set_mode_n(HeatingCircuit::Mode::HEAT, hc_num);
     }
-    if (mode_tostring(HeatingCircuit::Mode::NOFROST) == mode) {
+    if (Helpers::translated_word(FL_(nofrost), true) == mode) {
         return set_mode_n(HeatingCircuit::Mode::NOFROST, hc_num);
     }
-    if (mode_tostring(HeatingCircuit::Mode::ECO) == mode) {
+    if (Helpers::translated_word(FL_(eco), true) == mode) {
         return set_mode_n(HeatingCircuit::Mode::ECO, hc_num);
     }
-    if (mode_tostring(HeatingCircuit::Mode::HOLIDAY) == mode) {
+    if (Helpers::translated_word(FL_(holiday), true) == mode) {
         return set_mode_n(HeatingCircuit::Mode::HOLIDAY, hc_num);
     }
-    if (mode_tostring(HeatingCircuit::Mode::COMFORT) == mode) {
+    if (Helpers::translated_word(FL_(comfort), true) == mode) {
         return set_mode_n(HeatingCircuit::Mode::COMFORT, hc_num);
     }
 
@@ -2770,20 +2674,16 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         return false;
     }
     if (data[0] != 0xE7) {
-        std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
+        // we use EN settings for the day abbreviation
+        std::string sday = read_flash_string(FL_(enum_dayOfWeek)[day][0]);
+        // s td::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
         if (model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N) {
-            snprintf(out,
-                     len,
-                     "%02d %s %02d:%02d %s",
-                     no,
-                     sday.c_str(),
-                     time / 6,
-                     10 * (time % 6),
-                     on ? Helpers::translated_word(FL_(on)).c_str() : Helpers::translated_word(FL_(on)).c_str());
+            snprintf(out, len, "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
         } else if ((model() == EMS_DEVICE_FLAG_RC20) || (model() == EMS_DEVICE_FLAG_RC30)) {
             snprintf(out, len, "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), on);
         } else {
-            std::string son = Helpers::translated_word(FL_(enum_switchmode)[on]);
+            std::string son = read_flash_string(FL_(enum_switchmode)[on][0]);
+            // std::string son = Helpers::translated_word(FL_(enum_switchmode)[on]);
             snprintf(out, len, "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), son.c_str());
         }
     } else {
