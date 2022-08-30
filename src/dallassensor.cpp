@@ -36,6 +36,7 @@ void DallasSensor::start() {
     reload();
 
     if (!dallas_gpio_) {
+        sensors_.clear();
         return; // disabled if dallas gpio is 0
     }
 
@@ -152,23 +153,23 @@ void DallasSensor::loop() {
                                 if (sensor.internal_id() == get_id(addr)) {
                                     t += sensor.offset();
                                     if (t != sensor.temperature_c) {
+                                        sensor.temperature_c = t;
                                         publish_sensor(sensor);
                                         changed_ |= true;
                                     }
-                                    sensor.temperature_c = t;
-                                    sensor.read          = true;
-                                    found                = true;
+                                    sensor.read = true;
+                                    found       = true;
                                     break;
                                 }
                             }
                             // add new sensor. this will create the id string, empty name and offset
                             if (!found && (sensors_.size() < (MAX_SENSORS - 1))) {
                                 sensors_.emplace_back(addr);
-                                sensors_.back().temperature_c = t + sensors_.back().offset();
-                                sensors_.back().read          = true;
-                                changed_                      = true;
+                                sensors_.back().read = true;
+                                changed_             = true;
                                 // look in the customization service for an optional alias or offset for that particular sensor
                                 sensors_.back().apply_customization();
+                                sensors_.back().temperature_c = t + sensors_.back().offset();
                                 publish_sensor(sensors_.back()); // call publish single
                                 // sort the sensors based on name
                                 // std::sort(sensors_.begin(), sensors_.end(), [](const Sensor & a, const Sensor & b) { return a.name() < b.name(); });

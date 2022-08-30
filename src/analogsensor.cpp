@@ -60,7 +60,10 @@ void AnalogSensor::reload() {
 #if defined(EMSESP_STANDALONE)
     analog_enabled_ = true; // for local offline testing
 #endif
-
+    if (!analog_enabled_) {
+        sensors_.clear();
+        return;
+    }
     // load the list of analog sensors from the customization service
     // and store them locally and then activate them
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
