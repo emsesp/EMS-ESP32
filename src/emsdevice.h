@@ -358,10 +358,21 @@ class EMSdevice {
     };
 
     // static device IDs
-    static constexpr uint8_t EMS_DEVICE_ID_BOILER   = 0x08; // fixed device_id for Master Boiler/UBA
-    static constexpr uint8_t EMS_DEVICE_ID_BOILER_1 = 0x70; // fixed device_id for 1st. Cascade Boiler/UBA
-    static constexpr uint8_t EMS_DEVICE_ID_BOILER_F = 0x7F; // fixed device_id for last Cascade Boiler/UBA
-    static constexpr uint8_t EMS_DEVICE_ID_AM200    = 0x60; // fixed device_id for alternative Heating AM200
+    static constexpr uint8_t EMS_DEVICE_ID_BOILER     = 0x08; // fixed device_id for Master Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_BOILER_1   = 0x70; // fixed device_id for 1st. Cascade Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_BOILER_F   = 0x7F; // fixed device_id for last Cascade Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_AM200      = 0x60; // fixed device_id for alternative Heating AM200
+    static constexpr uint8_t EMS_DEVICE_ID_RS232      = 0x04;
+    static constexpr uint8_t EMS_DEVICE_ID_TERMINAL   = 0x0A;
+    static constexpr uint8_t EMS_DEVICE_ID_SERVICEKEY = 0x0B;
+    static constexpr uint8_t EMS_DEVICE_ID_CASCADE    = 0x0C;
+    static constexpr uint8_t EMS_DEVICE_ID_EASYCOM    = 0x0D;
+    static constexpr uint8_t EMS_DEVICE_ID_CONVERTER  = 0x0E;
+    static constexpr uint8_t EMS_DEVICE_ID_CLOCK      = 0x0F;
+    static constexpr uint8_t EMS_DEVICE_ID_SWITCH     = 0x11; // Switch WM10
+    static constexpr uint8_t EMS_DEVICE_ID_ERROR      = 0x12; // Error module WM10
+    static constexpr uint8_t EMS_DEVICE_ID_PUMP       = 0x15; // pump module PM10
+    static constexpr uint8_t EMS_DEVICE_ID_MODEM      = 0x48;
 
     // generic type IDs
     static constexpr uint16_t EMS_TYPE_VERSION    = 0x02; // type ID for Version information. Generic across all EMS devices.

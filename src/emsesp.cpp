@@ -994,27 +994,27 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             name        = "generic thermostat";
             device_type = DeviceType::THERMOSTAT;
             flags       = DeviceFlags::EMS_DEVICE_FLAG_RC10 | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE;
-        } else if (device_id == 0x04) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_RS232) {
             name        = "RS232";
             device_type = DeviceType::CONNECT;
-        } else if (device_id == 0x0A) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_TERMINAL) {
             name        = "terminal";
             device_type = DeviceType::CONNECT;
-        } else if (device_id == 0x0B) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_SERVICEKEY) {
             name        = "service key";
             device_type = DeviceType::CONNECT;
-        } else if (device_id == 0x0C) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_CASCADE) {
             name        = "cascade";
             device_type = DeviceType::CONNECT;
-        } else if (device_id == 0x0D) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_EASYCOM) {
             // see https://github.com/emsesp/EMS-ESP/issues/460#issuecomment-709553012
             name        = "modem";
             device_type = DeviceType::CONNECT;
-        } else if (device_id == 0x0E) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_CONVERTER) {
             name = "converter"; // generic
-        } else if (device_id == 0x0F) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_CLOCK) {
             name = "clock"; // generic
-        } else if (device_id == 0x08) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER) {
             name        = "generic boiler";
             device_type = DeviceType::BOILER;
             flags       = DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP;
