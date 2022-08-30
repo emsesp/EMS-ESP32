@@ -135,7 +135,7 @@ const MqttSettingsForm: FC = () => {
               name="keep_alive"
               label="Keep Alive"
               InputProps={{
-                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
               }}
               fullWidth
               variant="outlined"
@@ -243,7 +243,7 @@ const MqttSettingsForm: FC = () => {
               name="publish_time_boiler"
               label={LL.MQTT_INT_BOILER()}
               InputProps={{
-                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
               }}
               fullWidth
               variant="outlined"
@@ -259,7 +259,7 @@ const MqttSettingsForm: FC = () => {
               name="publish_time_thermostat"
               label={LL.MQTT_INT_THERMOSTATS()}
               InputProps={{
-                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
               }}
               fullWidth
               variant="outlined"
@@ -275,7 +275,7 @@ const MqttSettingsForm: FC = () => {
               name="publish_time_solar"
               label={LL.MQTT_INT_SOLAR()}
               InputProps={{
-                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
               }}
               fullWidth
               variant="outlined"
@@ -291,7 +291,7 @@ const MqttSettingsForm: FC = () => {
               name="publish_time_mixer"
               label={LL.MQTT_INT_MIXER()}
               InputProps={{
-                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
               }}
               fullWidth
               variant="outlined"
@@ -307,7 +307,7 @@ const MqttSettingsForm: FC = () => {
               name="publish_time_sensor"
               label={LL.TEMP_SENSORS()}
               InputProps={{
-                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
               }}
               fullWidth
               variant="outlined"
@@ -322,7 +322,7 @@ const MqttSettingsForm: FC = () => {
               fieldErrors={fieldErrors}
               name="publish_time_other"
               InputProps={{
-                endAdornment: <InputAdornment position="end">seconds</InputAdornment>
+                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
               }}
               label={LL.DEFAULT()}
               fullWidth

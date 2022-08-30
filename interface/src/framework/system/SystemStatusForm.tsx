@@ -104,7 +104,7 @@ const SystemStatusForm: FC = () => {
           onClick={() => setConfirmRestart(false)}
           color="secondary"
         >
-          Cancel
+          {LL.CANCEL()}
         </Button>
         <Button
           startIcon={<PowerSettingsNewIcon />}
@@ -114,7 +114,7 @@ const SystemStatusForm: FC = () => {
           color="primary"
           autoFocus
         >
-          Restart
+          {LL.RESTART()}
         </Button>
       </DialogActions>
     </Dialog>
@@ -242,7 +242,7 @@ const SystemStatusForm: FC = () => {
                 <DevicesIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Device (Platform / SDK)" secondary={data.esp_platform + ' / ' + data.sdk_version} />
+            <ListItemText primary={LL.PLATFORM()} secondary={data.esp_platform + ' / ' + data.sdk_version} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -251,7 +251,7 @@ const SystemStatusForm: FC = () => {
                 <TimerIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="System Uptime" secondary={data.uptime} />
+            <ListItemText primary={LL.UPTIME()} secondary={data.uptime} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -260,7 +260,7 @@ const SystemStatusForm: FC = () => {
                 <ShowChartIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="CPU Frequency" secondary={data.cpu_freq_mhz + ' MHz'} />
+            <ListItemText primary={LL.CPU_FREQ()} secondary={data.cpu_freq_mhz + ' MHz'} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -270,7 +270,7 @@ const SystemStatusForm: FC = () => {
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary="Heap (Free / Max Alloc)"
+              primary={LL.HEAP()}
               secondary={
                 formatNumber(data.free_heap) +
                 ' / ' +
@@ -290,7 +290,7 @@ const SystemStatusForm: FC = () => {
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
-                  primary="PSRAM (Size / Free)"
+                  primary={LL.PSRAM()}
                   secondary={formatNumber(data.psram_size) + ' / ' + formatNumber(data.free_psram) + ' bytes'}
                 />
               </ListItem>
@@ -304,7 +304,7 @@ const SystemStatusForm: FC = () => {
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary="Flash Chip (Size / Speed)"
+              primary={LL.FLASH()}
               secondary={
                 formatNumber(data.flash_chip_size) + ' bytes / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'
               }
@@ -318,7 +318,7 @@ const SystemStatusForm: FC = () => {
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary="File System (Used / Total)"
+              primary={LL.FILESYSTEM()}
               secondary={
                 formatNumber(data.fs_used) +
                 ' / ' +

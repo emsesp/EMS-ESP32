@@ -420,9 +420,9 @@ const DashboardData: FC = () => {
     }
     switch (uom) {
       case DeviceValueUOM.HOURS:
-        return formatDurationMin(value * 60);
+        return value ? formatDurationMin(value * 60) : LL.NUM_HOURS({ num: 0 });
       case DeviceValueUOM.MINUTES:
-        return formatDurationMin(value);
+        return value ? formatDurationMin(value) : LL.NUM_MINUTES({ num: 0 });
       case DeviceValueUOM.SECONDS:
         return LL.NUM_SECONDS({ num: value });
       case DeviceValueUOM.NONE:
@@ -444,6 +444,19 @@ const DashboardData: FC = () => {
         return new Intl.NumberFormat().format(value) + ' ' + DeviceValueUOM_s[uom];
     }
   }
+
+  const setUom = (uom: number) => {
+    switch (uom) {
+      case DeviceValueUOM.HOURS:
+        return LL.HOURS();
+      case DeviceValueUOM.MINUTES:
+        return LL.MINUTES();
+      case DeviceValueUOM.SECONDS:
+        return LL.SECONDS();
+      default:
+        return DeviceValueUOM_s[uom];
+    }
+  };
 
   const sendDeviceValue = async () => {
     if (deviceValue) {
@@ -502,7 +515,7 @@ const DashboardData: FC = () => {
                 onChange={updateValue(setDeviceValue)}
                 inputProps={deviceValue.u ? { min: deviceValue.m, max: deviceValue.x, step: deviceValue.s } : {}}
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">{DeviceValueUOM_s[deviceValue.u]}</InputAdornment>
+                  startAdornment: <InputAdornment position="start">{setUom(deviceValue.u)}</InputAdornment>
                 }}
               />
             )}
@@ -833,7 +846,7 @@ const DashboardData: FC = () => {
   const renderDallasData = () => (
     <>
       <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="secondary">
-        Temperature Sensors
+        {LL.TEMP_SENSORS()}
       </Typography>
       <Table
         data={{ nodes: sensorData.sensors }}
@@ -852,7 +865,7 @@ const DashboardData: FC = () => {
                     endIcon={getSortIcon(sensor_sort.state, 'NAME')}
                     onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'NAME' })}
                   >
-                    NAME
+                    {LL.ENTITY_NAME()}
                   </Button>
                 </HeaderCell>
                 <HeaderCell stiff>
@@ -862,7 +875,7 @@ const DashboardData: FC = () => {
                     endIcon={getSortIcon(sensor_sort.state, 'TEMPERATURE')}
                     onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'TEMPERATURE' })}
                   >
-                    TEMPERATURE
+                    {LL.VALUE()}
                   </Button>
                 </HeaderCell>
                 <HeaderCell stiff />
@@ -892,7 +905,7 @@ const DashboardData: FC = () => {
   const renderAnalogData = () => (
     <>
       <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="secondary">
-        Analog Sensors
+        {LL.ANALOG_SENSORS()}
       </Typography>
 
       <Table data={{ nodes: sensorData.analogs }} theme={analog_theme} sort={analog_sort} layout={{ custom: true }}>
@@ -917,7 +930,7 @@ const DashboardData: FC = () => {
                     endIcon={getSortIcon(analog_sort.state, 'NAME')}
                     onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'NAME' })}
                   >
-                    NAME
+                    {LL.ENTITY_NAME()}
                   </Button>
                 </HeaderCell>
                 <HeaderCell stiff>
@@ -927,7 +940,7 @@ const DashboardData: FC = () => {
                     endIcon={getSortIcon(analog_sort.state, 'TYPE')}
                     onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'TYPE' })}
                   >
-                    TYPE
+                    {LL.TYPE()}
                   </Button>
                 </HeaderCell>
                 <HeaderCell stiff>VALUE</HeaderCell>
@@ -1034,7 +1047,7 @@ const DashboardData: FC = () => {
               <Grid item>
                 <ValidatedTextField
                   name="n"
-                  label="Name"
+                  label={LL.ENTITY_NAME()}
                   value={analog.n}
                   sx={{ width: '20ch' }}
                   variant="outlined"
@@ -1042,7 +1055,7 @@ const DashboardData: FC = () => {
                 />
               </Grid>
               <Grid item>
-                <ValidatedTextField name="t" label="Type" value={analog.t} select onChange={updateValue(setAnalog)}>
+                <ValidatedTextField name="t" label={LL.TYPE()} value={analog.t} select onChange={updateValue(setAnalog)}>
                   {AnalogTypeNames.map((val, i) => (
                     <MenuItem key={i} value={i}>
                       {val}
@@ -1127,7 +1140,7 @@ const DashboardData: FC = () => {
                   <Grid item>
                     <ValidatedTextField
                       name="o"
-                      label="Value"
+                      label={LL.VALUE()}
                       value={numberValue(analog.o)}
                       sx={{ width: '20ch' }}
                       type="number"

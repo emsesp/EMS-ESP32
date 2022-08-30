@@ -70,21 +70,23 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
 
   return (
     <>
-      <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-        {LL.UPLOAD()}
-      </Typography>
       {!uploading && (
-        <Box mb={2} color="warning.main">
-          <Typography variant="body2">{LL.UPLOAD_TEXT()} </Typography>
-        </Box>
+        <>
+          <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+            {LL.UPLOAD()}
+          </Typography>
+          <Box mb={2} color="warning.main">
+            <Typography variant="body2">{LL.UPLOAD_TEXT()} </Typography>
+          </Box>
+        </>
       )}
       <SingleUpload onDrop={uploadFile} onCancel={cancelUpload} uploading={uploading} progress={uploadProgress} />
 
-      <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-        {LL.DOWNLOAD()}
-      </Typography>
       {!uploading && (
         <>
+          <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+            {LL.DOWNLOAD()}
+          </Typography>
           <Box color="warning.main">
             <Typography mb={1} variant="body2">
               {LL.DOWNLOAD_SETTINGS_TEXT()}

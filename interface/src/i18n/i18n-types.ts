@@ -189,6 +189,10 @@ type RootTranslation = {
 	 */
 	ANALOG_SENSOR: RequiredParams<'post'>
 	/**
+	 * Analog Sensors
+	 */
+	ANALOG_SENSORS: string
+	 /**
 	 * Temperature Sensor{post}
 	 * @param {unknown} post
 	 */
@@ -464,8 +468,12 @@ type RootTranslation = {
 	 */
 	MINUTES: string
 	/**
-	 * Restart
+	 * hours
 	 */
+	HOURS: string
+	/**
+	* Restart
+	*/
 	RESTART: string
 	/**
 	 * EMS-ESP needs to be restarted to apply changed system settings
@@ -656,8 +664,36 @@ type RootTranslation = {
 	 */
 	THE_LATEST: string
 	/**
-	 * Buffer Size
+	 * Device (Platform / SDK)
 	 */
+	PLATFORM: string
+	/**
+	 * System Uptime
+	 */
+	UPTIME: string
+	/**
+	 * CPU Frequency
+	 */
+	CPU_FREQ: string
+	/**
+	 * Heap (Free / Max Alloc)
+	 */
+	HEAP: string
+	/**
+	 * PSRAM (Size / Free)
+	 */
+	PSRAM: string
+	/**
+	 * Flash Chip (Size / Speed)
+	 */
+	FLASH: string
+	/**
+	 * File System (Used / Total)
+	 */
+	FILESYSTEM: string
+	/**
+	* Buffer Size
+	*/
 	BUFFER_SIZE: string
 	/**
 	 * Compact
@@ -1127,6 +1163,10 @@ export type TranslationFunctions = {
 	 */
 	ANALOG_SENSOR: (arg: { post: unknown }) => LocalizedString
 	/**
+	 * Analog Sensors
+	 */
+    ANALOG_SENSORS: () => LocalizedString
+	 /**
 	 * Temperature Sensor{post}
 	 */
 	TEMP_SENSOR: (arg: { post: unknown }) => LocalizedString
@@ -1393,8 +1433,12 @@ export type TranslationFunctions = {
 	 */
 	MINUTES: () => LocalizedString
 	/**
-	 * Restart
+	 * hours
 	 */
+	HOURS: () => LocalizedString
+	/**
+	* Restart
+	*/
 	RESTART: () => LocalizedString
 	/**
 	 * EMS-ESP needs to be restarted to apply changed system settings
@@ -1584,6 +1628,34 @@ export type TranslationFunctions = {
 	 * The latest
 	 */
 	THE_LATEST: () => LocalizedString
+	/**
+	 * Device (Platform / SDK)
+	 */
+	PLATFORM: () => LocalizedString
+	/**
+	 * ystem Uptime
+	 */
+	UPTIME: () => LocalizedString
+	/**
+	 * CPU Frequency
+	 */
+	CPU_FREQ: () => LocalizedString
+	/**
+	 * Heap (Free / Max Alloc)
+	 */
+	HEAP: () => LocalizedString
+	/**
+	 * PSRAM (Size / Free)
+	 */
+	PSRAM: () => LocalizedString
+	/**
+	 * Flash Chip (Size / Speed)
+	 */
+	FLASH: () => LocalizedString
+	/**
+	 * File System (Used / Total)
+	 */
+	FILESYSTEM: () => LocalizedString
 	/**
 	 * Buffer Size
 	 */
