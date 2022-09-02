@@ -639,7 +639,7 @@ const DashboardData: FC = () => {
     if (coreData && coreData.devices.length > 0 && deviceDialog !== -1) {
       return (
         <Dialog open={deviceDialog !== -1} onClose={() => setDeviceDialog(-1)}>
-          <DialogTitle>Device Details</DialogTitle>
+          <DialogTitle>{LL.DEVICE_DETAILS()}</DialogTitle>
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
@@ -667,7 +667,7 @@ const DashboardData: FC = () => {
           </DialogContent>
           <DialogActions>
             <Button variant="outlined" onClick={() => setDeviceDialog(-1)} color="secondary">
-              Close
+              {LL.CLOSE()}
             </Button>
           </DialogActions>
         </Dialog>

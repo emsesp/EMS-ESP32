@@ -121,6 +121,10 @@ type RootTranslation = {
 	 */
 	EXPORT: string
 	/**
+	 * Device Details
+	 */
+	DEVICE_DETAILS: string
+	/**
 	 * Brand
 	 */
 	BRAND: string
@@ -1123,6 +1127,10 @@ export type TranslationFunctions = {
 	 * Export
 	 */
 	EXPORT: () => LocalizedString
+	/**
+	 * Device Details
+	 */
+	DEVICE_DETAILS: () => LocalizedString
 	/**
 	 * Brand
 	 */
