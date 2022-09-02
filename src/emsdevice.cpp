@@ -1238,15 +1238,15 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                 if (Mqtt::ha_enabled() && (output_target == OUTPUT_TARGET::MQTT)) {
                     char s[7];
                     json[name] = Helpers::render_boolean(s, value_b); // for HA always render as string
-                } else {
-                    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                        json[name] = value_b;
-                    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                        json[name] = value_b ? 1 : 0;
-                    } else {
-                        char s[7];
-                        json[name] = Helpers::render_boolean(s, value_b);
-                    }
+                } else if (output_target == OUTPUT_TARGET::CONSOLE) {
+                    char s[7];
+                    json[name] = Helpers::render_boolean(s, value_b, true); // console use web settings
+                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                    json[name] = value_b;
+                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                    json[name] = value_b ? 1 : 0;
+                    char s[7];
+                    json[name] = Helpers::render_boolean(s, value_b);
                 }
             }
 
@@ -1257,8 +1257,8 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
 
             // handle ENUMs
             else if ((dv.type == DeviceValueType::ENUM) && (*(uint8_t *)(dv.value_p) < dv.options_size)) {
-                // check for numeric enum-format
-                if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
+                // check for numeric enum-format, console use text format
+                if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX && output_target != OUTPUT_TARGET::CONSOLE) {
                     json[name] = (uint8_t)(*(uint8_t *)(dv.value_p));
                 } else {
                     json[name] = Helpers::translated_word(dv.options[*(uint8_t *)(dv.value_p)]);
