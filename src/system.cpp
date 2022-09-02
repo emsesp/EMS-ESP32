@@ -42,7 +42,7 @@
 namespace emsesp {
 
 // Languages supported. Note: the order is important and must match locale_translations.h
-const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE};
+const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE, EMSESP_LOCALE_NL};
 
 size_t num_languages = sizeof(languages) / sizeof(const char *);
 

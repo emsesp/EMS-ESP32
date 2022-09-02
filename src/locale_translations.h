@@ -21,15 +21,16 @@
 // Makes sure they are also added in same order to languages[] in system.cpp
 #define EMSESP_LOCALE_EN "en"
 #define EMSESP_LOCALE_DE "de"
+#define EMSESP_LOCALE_NL "nl"
 
 // translations are in order en, de
 // if there is no translation, it will default to en
 
 // General
-MAKE_PSTR_LIST(on, F("on"), F("an"))
-MAKE_PSTR_LIST(off, F("off"), F("aus"))
-MAKE_PSTR_LIST(ON, F("ON"), F("AN"))
-MAKE_PSTR_LIST(OFF, F("OFF"), F("AUS"))
+MAKE_PSTR_LIST(on, F("on"), F("an"), F("naar"))
+MAKE_PSTR_LIST(off, F("off"), F("aus"), F("van"))
+MAKE_PSTR_LIST(ON, F("ON"), F("AN"), F("NAAR"))
+MAKE_PSTR_LIST(OFF, F("OFF"), F("AUS"), F("VAN"))
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
 // uom - also used with HA see https://github.com/home-assistant/core/blob/d7ac4bd65379e11461c7ce0893d3533d8d8b8cbf/homeassistant/const.py#L384
@@ -366,8 +367,8 @@ MAKE_PSTR_LIST(wwMaxTemp, F("wwmaxtemp"), F("maximum temperature"), F("Maximale 
 MAKE_PSTR_LIST(wwOneTimeKey, F("wwonetimekey"), F("one time key function"), F("Einmalladungstaste"))
 
 // mqtt values / commands
-MAKE_PSTR_LIST(switchtime, F("switchtime"), F("program switchtime"), F("Program Schaltzeit"))
-MAKE_PSTR_LIST(switchtime1, F("switchtime1"), F("own1 program switchtime"), F("Program 1 Schaltzeit"))
+MAKE_PSTR_LIST(switchtime, F("switchtime"), F("program switchtime"), F("Programm Schaltzeit"))
+MAKE_PSTR_LIST(switchtime1, F("switchtime1"), F("own1 program switchtime"), F("Programm 1 Schaltzeit"))
 MAKE_PSTR_LIST(switchtime2, F("switchtime2"), F("own2 program switchtime"), F("Programm 2 Schaltzeit"))
 MAKE_PSTR_LIST(wwswitchtime, F("wwswitchtime"), F("program switchtime"), F("Programm Schaltzeit"))
 MAKE_PSTR_LIST(wwcircswitchtime, F("wwcircswitchtime"), F("circulation program switchtime"), F("Zirculationsprogramm Schaltzeit"))
