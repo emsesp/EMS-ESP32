@@ -8,6 +8,7 @@ export type BaseLocale = 'en'
 export type Locales =
 	| 'de'
 	| 'en'
+	| 'nl'
 
 export type Translation = RootTranslation
 
@@ -120,6 +121,10 @@ type RootTranslation = {
 	 */
 	EXPORT: string
 	/**
+	 * Brand
+	 */
+	BRAND: string
+	/**
 	 * Entity Name
 	 */
 	ENTITY_NAME: string
@@ -192,7 +197,31 @@ type RootTranslation = {
 	 * Analog Sensors
 	 */
 	ANALOG_SENSORS: string
-	 /**
+	/**
+	 * Offset
+	 */
+	OFFSET: string
+	/**
+	 * Factor
+	 */
+	FACTOR: string
+	/**
+	 * Frequency
+	 */
+	FREQ: string
+	/**
+	 * Start value
+	 */
+	STARTVALUE: string
+	/**
+	 * Warning: be careful when assigning a GPIO!
+	 */
+	WARN_GPIO: string
+	/**
+	 * Edit
+	 */
+	EDIT: string
+	/**
 	 * Temperature Sensor{post}
 	 * @param {unknown} post
 	 */
@@ -468,13 +497,13 @@ type RootTranslation = {
 	 */
 	MINUTES: string
 	/**
+	 * Restart
+	 */
+	RESTART: string
+	/**
 	 * hours
 	 */
 	HOURS: string
-	/**
-	* Restart
-	*/
-	RESTART: string
 	/**
 	 * EMS-ESP needs to be restarted to apply changed system settings
 	 */
@@ -692,8 +721,8 @@ type RootTranslation = {
 	 */
 	FILESYSTEM: string
 	/**
-	* Buffer Size
-	*/
+	 * Buffer Size
+	 */
 	BUFFER_SIZE: string
 	/**
 	 * Compact
@@ -1095,6 +1124,10 @@ export type TranslationFunctions = {
 	 */
 	EXPORT: () => LocalizedString
 	/**
+	 * Brand
+	 */
+	BRAND: () => LocalizedString
+	/**
 	 * Entity Name
 	 */
 	ENTITY_NAME: () => LocalizedString
@@ -1165,8 +1198,32 @@ export type TranslationFunctions = {
 	/**
 	 * Analog Sensors
 	 */
-    ANALOG_SENSORS: () => LocalizedString
-	 /**
+	ANALOG_SENSORS: () => LocalizedString
+	/**
+	 * Offset
+	 */
+	OFFSET: () => LocalizedString
+	/**
+	 * Factor
+	 */
+	FACTOR: () => LocalizedString
+	/**
+	 * Frequency
+	 */
+	FREQ: () => LocalizedString
+	/**
+	 * Start value
+	 */
+	STARTVALUE: () => LocalizedString
+	/**
+	 * Warning: be careful when assigning a GPIO!
+	 */
+	WARN_GPIO: () => LocalizedString
+	/**
+	 * Edit
+	 */
+	EDIT: () => LocalizedString
+	/**
 	 * Temperature Sensor{post}
 	 */
 	TEMP_SENSOR: (arg: { post: unknown }) => LocalizedString
@@ -1433,13 +1490,13 @@ export type TranslationFunctions = {
 	 */
 	MINUTES: () => LocalizedString
 	/**
+	 * Restart
+	 */
+	RESTART: () => LocalizedString
+	/**
 	 * hours
 	 */
 	HOURS: () => LocalizedString
-	/**
-	* Restart
-	*/
-	RESTART: () => LocalizedString
 	/**
 	 * EMS-ESP needs to be restarted to apply changed system settings
 	 */
@@ -1633,7 +1690,7 @@ export type TranslationFunctions = {
 	 */
 	PLATFORM: () => LocalizedString
 	/**
-	 * ystem Uptime
+	 * System Uptime
 	 */
 	UPTIME: () => LocalizedString
 	/**

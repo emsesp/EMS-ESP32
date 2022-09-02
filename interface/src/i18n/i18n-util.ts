@@ -10,7 +10,8 @@ export const baseLocale: Locales = 'en'
 
 export const locales: Locales[] = [
 	'de',
-	'en'
+	'en',
+	'nl'
 ]
 
 export const loadedLocales = {} as Record<Locales, Translations>

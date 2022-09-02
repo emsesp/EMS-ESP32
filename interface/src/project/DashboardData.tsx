@@ -578,7 +578,7 @@ const DashboardData: FC = () => {
     if (sensor) {
       return (
         <Dialog open={sensor !== undefined} onClose={() => setSensor(undefined)}>
-          <DialogTitle>Edit Temperature Sensor</DialogTitle>
+          <DialogTitle>{LL.EDIT()} {LL.TEMP_SENSORS()}</DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
               <Typography variant="body2">Sensor ID {sensor.id}</Typography>
@@ -587,7 +587,7 @@ const DashboardData: FC = () => {
               <Grid item>
                 <ValidatedTextField
                   name="n"
-                  label="Name"
+                  label={LL.ENTITY_NAME()}
                   value={sensor.n}
                   autoFocus
                   sx={{ width: '30ch' }}
@@ -597,7 +597,7 @@ const DashboardData: FC = () => {
               <Grid item>
                 <ValidatedTextField
                   name="o"
-                  label="Offset"
+                  label={LL.OFFSET()}
                   value={numberValue(sensor.o)}
                   sx={{ width: '12ch' }}
                   type="number"
@@ -643,13 +643,13 @@ const DashboardData: FC = () => {
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
-                <ListItemText primary="Type" secondary={coreData.devices[deviceDialog].t} />
+                <ListItemText primary={LL.TYPE()} secondary={coreData.devices[deviceDialog].t} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Name" secondary={coreData.devices[deviceDialog].n} />
+                <ListItemText primary={LL.NAME()} secondary={coreData.devices[deviceDialog].n} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Brand" secondary={coreData.devices[deviceDialog].b} />
+                <ListItemText primary={LL.BRAND()} secondary={coreData.devices[deviceDialog].b} />
               </ListItem>
               <ListItem>
                 <ListItemText
@@ -943,7 +943,7 @@ const DashboardData: FC = () => {
                     {LL.TYPE()}
                   </Button>
                 </HeaderCell>
-                <HeaderCell stiff>VALUE</HeaderCell>
+                <HeaderCell stiff>{LL.VALUE()}</HeaderCell>
                 <HeaderCell stiff />
               </HeaderRow>
             </Header>
@@ -1030,7 +1030,7 @@ const DashboardData: FC = () => {
     if (analog) {
       return (
         <Dialog open={analog !== undefined} onClose={() => setAnalog(undefined)}>
-          <DialogTitle>Edit Analog Sensor</DialogTitle>
+          <DialogTitle>{LL.EDIT()} {LL.ANALOG_SENSORS()}</DialogTitle>
           <DialogContent dividers>
             <Grid container spacing={2}>
               <Grid item>
@@ -1078,7 +1078,7 @@ const DashboardData: FC = () => {
                     <Grid item>
                       <ValidatedTextField
                         name="o"
-                        label="Offset"
+                        label={LL.OFFSET()}
                         value={numberValue(analog.o)}
                         sx={{ width: '20ch' }}
                         type="number"
@@ -1095,7 +1095,7 @@ const DashboardData: FC = () => {
                     <Grid item>
                       <ValidatedTextField
                         name="o"
-                        label="Start Value"
+                        label={LL.STARTVALUE()}
                         value={numberValue(analog.o)}
                         sx={{ width: '20ch' }}
                         type="number"
@@ -1108,7 +1108,7 @@ const DashboardData: FC = () => {
                   <Grid item>
                     <ValidatedTextField
                       name="f"
-                      label="Factor"
+                      label={LL.FACTOR()}
                       value={numberValue(analog.f)}
                       sx={{ width: '20ch' }}
                       type="number"
@@ -1124,7 +1124,7 @@ const DashboardData: FC = () => {
                   <Grid item>
                     <ValidatedTextField
                       name="o"
-                      label="DAC Value"
+                      label={LL.VALUE()}
                       value={numberValue(analog.o)}
                       sx={{ width: '20ch' }}
                       type="number"
@@ -1156,7 +1156,7 @@ const DashboardData: FC = () => {
                   <Grid item>
                     <ValidatedTextField
                       name="f"
-                      label="Frequency"
+                      label={LL.CPU_FREQ()}
                       value={numberValue(analog.f)}
                       sx={{ width: '20ch' }}
                       type="number"
@@ -1187,7 +1187,7 @@ const DashboardData: FC = () => {
               )}
             </Grid>
             <Box color="warning.main" mt={2}>
-              <Typography variant="body2">Warning: be careful when assigning a GPIO!</Typography>
+              <Typography variant="body2">{LL.WARN_GPIO()}</Typography>
             </Box>
           </DialogContent>
           <DialogActions>
