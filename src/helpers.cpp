@@ -593,12 +593,12 @@ bool Helpers::value2bool(const char * value, bool & value_b) {
 
     std::string bool_str = toLower(value); // convert to lower case
 
-    if ((bool_str == Helpers::translated_word(FL_(on))) || (bool_str == "1") || (bool_str == "true")) {
+    if ((bool_str == Helpers::translated_word(FL_(on))) || (bool_str == "on") || (bool_str == "1") || (bool_str == "true")) {
         value_b = true;
         return true; // is a bool
     }
 
-    if ((bool_str == Helpers::translated_word(FL_(off))) || (bool_str == "0") || (bool_str == "false")) {
+    if ((bool_str == Helpers::translated_word(FL_(off))) || (bool_str == "off") || (bool_str == "0") || (bool_str == "false")) {
         value_b = false;
         return true; // is a bool
     }
@@ -616,8 +616,9 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const __FlashSt
 
     for (value_ui = 0; strs[value_ui]; value_ui++) {
         std::string str1 = toLower(Helpers::translated_word(strs[value_ui]));
+        std::string str2 = toLower(read_flash_string(strs[value_ui][0])); // also check for default language
         if ((str1 != "")
-            && ((str1 == Helpers::translated_word(FL_(off)) && str == "false") || (str1 == Helpers::translated_word(FL_(on)) && str == "true") || (str == str1)
+            && ((str2 == "off" && str == "false") || (str2 == "on" && str == "true") || (str == str1) || (str == str2)
                 || (value[0] == ('0' + value_ui) && value[1] == '\0'))) {
             return true;
         }
@@ -637,8 +638,9 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const __FlashSt
         std::string enum_str = toLower(read_flash_string(strs[value_ui]));
 
         if ((enum_str != "")
-            && ((enum_str == Helpers::translated_word(FL_(off)) && str == "false") || (enum_str == Helpers::translated_word(FL_(on)) && str == "true")
-                || (str == enum_str) || (value[0] == ('0' + value_ui) && value[1] == '\0'))) {
+            && ((enum_str == "off" && (str == Helpers::translated_word(FL_(off)) || str == "false"))
+                || (enum_str == "on" && (str == Helpers::translated_word(FL_(on)) || str == "true")) || (str == enum_str)
+                || (value[0] == ('0' + value_ui) && value[1] == '\0'))) {
             return true;
         }
     }
