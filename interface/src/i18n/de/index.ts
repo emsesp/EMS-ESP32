@@ -147,7 +147,7 @@ const de: Translation = {
   CLICK_HERE: 'Klick hier',
   HELP_INFORMATION_1: 'Visit the online wiki to get instructions on how to configure EMS-ESP',
   HELP_INFORMATION_2: 'For live community chat join our Discord server',
-  HELP_INFORMATION_3: 'Request a feature or report a bug',
+  HELP_INFORMATION_3: 'To request a feature or report a bug',
   HELP_INFORMATION_4:
     'remember to download and attach your system information for a faster response when reporting an issue',
   HELP_INFORMATION_5:

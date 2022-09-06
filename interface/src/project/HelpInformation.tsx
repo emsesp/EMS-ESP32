@@ -97,7 +97,8 @@ const HelpInformation: FC = () => {
             <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32/issues/new/choose" color="primary">
               {LL.CLICK_HERE()}
             </Link>
-            <br />({LL.HELP_INFORMATION_4()}&nbsp;
+            <br />
+            <i>({LL.HELP_INFORMATION_4()}</i>&nbsp;
             <Button
               startIcon={<DownloadIcon />}
               size="small"
@@ -122,7 +123,9 @@ const HelpInformation: FC = () => {
           </Link>
           <StarIcon style={{ fontSize: 20, color: 'yellow', verticalAlign: 'middle' }} />
         </Typography>
-        <Typography color="white" align="center">@proddy @MichaelDvP</Typography>
+        <Typography color="white" align="center">
+          @proddy @MichaelDvP
+        </Typography>
       </Box>
     </SectionContent>
   );

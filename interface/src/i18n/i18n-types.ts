@@ -593,7 +593,7 @@ type RootTranslation = {
 	 */
 	HELP_INFORMATION_2: string
 	/**
-	 * Request a feature or report a bug
+	 * To request a feature or report a bug
 	 */
 	HELP_INFORMATION_3: string
 	/**
@@ -1574,7 +1574,7 @@ export type TranslationFunctions = {
 	 */
 	HELP_INFORMATION_2: () => LocalizedString
 	/**
-	 * Request a feature or report a bug
+	 * To request a feature or report a bug
 	 */
 	HELP_INFORMATION_3: () => LocalizedString
 	/**
