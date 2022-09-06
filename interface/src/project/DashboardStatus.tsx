@@ -32,12 +32,13 @@ import { ButtonRow, FormLoader, SectionContent } from '../components';
 
 import { Status, busConnectionStatus, Stat } from './types';
 
-import { formatDurationSec, extractErrorMessage, useRest } from '../utils';
+import { extractErrorMessage, useRest } from '../utils';
 
 import * as EMSESP from './api';
 
 import type { Translation } from '../i18n/i18n-types';
 import { useI18nContext } from '../i18n/i18n-react';
+import parseMilliseconds from 'parse-ms';
 
 export const isConnected = ({ status }: Status) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
 
@@ -153,6 +154,22 @@ const DashboardStatus: FC = () => {
     } finally {
       setConfirmScan(false);
     }
+  };
+
+  const formatDurationSec = (duration_sec: number) => {
+    const { days, hours, minutes, seconds } = parseMilliseconds(duration_sec * 1000);
+    let formatted = ' ';
+    if (days) {
+      formatted += LL.NUM_DAYS({ num: days }) + ' ';
+    }
+    if (hours) {
+      formatted += LL.NUM_HOURS({ num: hours }) + ' ';
+    }
+    if (minutes) {
+      formatted += LL.NUM_MINUTES({ num: minutes }) + ' ';
+    }
+    formatted += LL.NUM_SECONDS({ num: seconds });
+    return formatted;
   };
 
   const renderScanDialog = () => (

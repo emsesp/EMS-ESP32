@@ -328,10 +328,10 @@ const DashboardData: FC = () => {
 
   const handleDownloadCsv = () => {
     const columns = [
-      { accessor: (dv: any) => dv.id.slice(2), name: 'Entity' },
+      { accessor: (dv: any) => dv.id.slice(2), name: LL.ENTITY_NAME() },
       {
         accessor: (dv: any) => (typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v),
-        name: 'Value'
+        name: LL.VALUE()
       },
       { accessor: (dv: any) => DeviceValueUOM_s[dv.u], name: 'UoM' }
     ];
