@@ -21,8 +21,11 @@ import { AuthenticatedContext } from '../../contexts/authentication';
 
 import { I18nContext } from '../../i18n/i18n-react';
 import type { Locales } from '../../i18n/i18n-types';
-import { locales } from '../..//i18n/i18n-util';
 import { loadLocaleAsync } from '../../i18n/i18n-util.async';
+
+import { ReactComponent as NLflag } from '../../i18n/NL.svg';
+import { ReactComponent as DEflag } from '../../i18n/DE.svg';
+import { ReactComponent as USflag } from '../../i18n/US.svg';
 
 const ItemTypography = styled(Typography)<TypographyProps>({
   maxWidth: '250px',
@@ -58,13 +61,29 @@ const LayoutAuthMenu: FC = () => {
 
   return (
     <>
-      <TextField name="locale" variant="outlined" value={locale} onChange={onLocaleSelected} size="small" select>
-        {locales.map((loc) => (
-          <MenuItem key={loc} value={loc}>
-            {loc}
-          </MenuItem>
-        ))}
+      <TextField
+        name="locale"
+        InputProps={{ style: { fontSize: 10 } }}
+        variant="outlined"
+        value={locale}
+        onChange={onLocaleSelected}
+        size="small"
+        select
+      >
+        <MenuItem key="en" value="en">
+          <USflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;EN
+        </MenuItem>
+        <MenuItem key="de" value="de">
+          <DEflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;DE
+        </MenuItem>
+        <MenuItem key="nl" value="nl">
+          <NLflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;NL
+        </MenuItem>
       </TextField>
+
       <IconButton
         id="open-auth-menu"
         sx={{ ml: 1, padding: 0 }}

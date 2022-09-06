@@ -103,14 +103,8 @@ const SignIn: FC = () => {
         <Box
           sx={{
             '& button, & a, & .MuiCard-root': {
-              mt: 0,
-              mx: 0.6,
-              '&:last-child': {
-                mr: 0
-              },
-              '&:first-of-type': {
-                ml: 0
-              }
+              mt: 0.5,
+              mx: 0.5
             }
           }}
         >
