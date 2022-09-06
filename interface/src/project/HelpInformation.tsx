@@ -11,6 +11,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import StarIcon from '@mui/icons-material/Star';
 import DownloadIcon from '@mui/icons-material/GetApp';
+import EastIcon from '@mui/icons-material/East';
 
 import { extractErrorMessage } from '../utils';
 
@@ -64,18 +65,11 @@ const HelpInformation: FC = () => {
           </ListItemAvatar>
           <ListItemText>
             {LL.HELP_INFORMATION_1()}&nbsp;
+            <EastIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
+            &nbsp;
             <Link target="_blank" href="https://emsesp.github.io/docs" color="primary">
-              {'Wiki'}
+            {LL.CLICK_HERE()}
             </Link>
-            &nbsp;{LL.HELP_INFORMATION_2()}&nbsp;
-            <Link
-              target="_blank"
-              href="https://emsesp.github.io/docs/#/Configure-firmware?id=ems-esp-settings"
-              color="primary"
-            >
-              {LL.CONFIGURE()}
-            </Link>
-            {' EMS-ESP ' + LL.HELP_INFORMATION_3() + '.'}
           </ListItemText>
         </ListItem>
 
@@ -84,11 +78,11 @@ const HelpInformation: FC = () => {
             <CommentIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
           </ListItemAvatar>
           <ListItemText>
-            {LL.HELP_INFORMATION_4()}&nbsp;
+            {LL.HELP_INFORMATION_2()}&nbsp;
+            <EastIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
             <Link target="_blank" href="https://discord.gg/3J3GgnzpyT" color="primary">
-              {'Discord'}
+            {LL.CLICK_HERE()}
             </Link>
-            &nbsp;server.
           </ListItemText>
         </ListItem>
 
@@ -97,24 +91,31 @@ const HelpInformation: FC = () => {
             <GitHubIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
           </ListItemAvatar>
           <ListItemText>
-            {LL.HELP_INFORMATION_5()}&nbsp;
+            {LL.HELP_INFORMATION_3()}&nbsp;
+            <EastIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
             <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32/issues/new/choose" color="primary">
-              {LL.HELP_INFORMATION_6()}
+            {LL.CLICK_HERE()}
             </Link>
-            &nbsp;{LL.HELP_INFORMATION_7()}.
-            <br />
-            {LL.HELP_INFORMATION_8()}&nbsp;
-            <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => callAPI('info')}>
-              download
+            <br />({LL.HELP_INFORMATION_4()}&nbsp;
+            <Button
+              startIcon={<DownloadIcon />}
+              size="small"
+              variant="outlined"
+              color="primary"
+              onClick={() => callAPI('info')}
+            >
+              {LL.DOWNLOAD()}
             </Button>
-            &nbsp;&nbsp;{LL.HELP_INFORMATION_9()}.
+            &nbsp;)
           </ListItemText>
         </ListItem>
       </List>
 
       <Box border={1} p={1} mt={4}>
         <Typography align="center" variant="h6" color="orange">
-          {LL.HELP_INFORMATION_10()}&nbsp;
+          {LL.HELP_INFORMATION_5()}
+        </Typography>
+        <Typography align="center" >
           <Link href="https://github.com/emsesp/EMS-ESP32" color="primary">
             {'GitHub'}
           </Link>

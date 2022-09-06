@@ -1,8 +1,8 @@
-import { FC, useContext, useState, ChangeEventHandler } from 'react';
+import { FC, useContext, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
 import { useSnackbar } from 'notistack';
 
-import { Box, Fab, Paper, Typography, MenuItem } from '@mui/material';
+import { Box, Fab, Paper, Typography, Button } from '@mui/material';
 import ForwardIcon from '@mui/icons-material/Forward';
 
 import * as AuthenticationApi from './api/authentication';
@@ -18,8 +18,11 @@ import { SIGN_IN_REQUEST_VALIDATOR, validate } from './validators';
 
 import { I18nContext } from './i18n/i18n-react';
 import type { Locales } from './i18n/i18n-types';
-import { locales } from './i18n/i18n-util';
 import { loadLocaleAsync } from './i18n/i18n-util.async';
+
+import { ReactComponent as NLflag } from './i18n/NL.svg';
+import { ReactComponent as DEflag } from './i18n/DE.svg';
+import { ReactComponent as USflag } from './i18n/US.svg';
 
 const SignIn: FC = () => {
   const authenticationContext = useContext(AuthenticationContext);
@@ -66,10 +69,9 @@ const SignIn: FC = () => {
 
   const submitOnEnter = onEnterCallback(signIn);
 
-  const { locale, LL, setLocale } = useContext(I18nContext);
+  const { LL, setLocale, locale } = useContext(I18nContext);
 
-  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({ target }) => {
-    const loc = target.value as Locales;
+  const selectLocale = async (loc: Locales) => {
     localStorage.setItem('lang', loc);
     await loadLocaleAsync(loc);
     setLocale(loc);
@@ -100,26 +102,32 @@ const SignIn: FC = () => {
         <Typography variant="h4">{PROJECT_NAME}</Typography>
         <Box
           sx={{
-            '& .MuiTextField-root': { m: 2, width: '15ch' }
+            '& button, & a, & .MuiCard-root': {
+              mt: 0,
+              mx: 0.6,
+              '&:last-child': {
+                mr: 0
+              },
+              '&:first-of-type': {
+                ml: 0
+              }
+            }
           }}
         >
-          <ValidatedTextField
-            name="locale"
-            label="Language/Sprache"
-            variant="outlined"
-            value={locale || ''}
-            onChange={onLocaleSelected}
-            margin="normal"
-            size="small"
-            select
-          >
-            {locales.map((loc) => (
-              <MenuItem key={loc} value={loc}>
-                {loc}
-              </MenuItem>
-            ))}
-          </ValidatedTextField>
+          <Button size="small" variant={locale === 'en' ? 'contained' : 'outlined'} onClick={() => selectLocale('en')}>
+            <USflag style={{ width: 24 }} />
+            &nbsp;EN
+          </Button>
+          <Button size="small" variant={locale === 'de' ? 'contained' : 'outlined'} onClick={() => selectLocale('de')}>
+            <DEflag style={{ width: 24 }} />
+            &nbsp;DE
+          </Button>
+          <Button size="small" variant={locale === 'nl' ? 'contained' : 'outlined'} onClick={() => selectLocale('nl')}>
+            <NLflag style={{ width: 24 }} />
+            &nbsp;NL
+          </Button>
         </Box>
+
         <ValidatedTextField
           fieldErrors={fieldErrors}
           disabled={processing}

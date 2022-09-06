@@ -6,12 +6,12 @@
   "dependencies": {
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
-    "@msgpack/msgpack": "^2.7.2",
+    "@msgpack/msgpack": "^2.8.0",
     "@mui/icons-material": "^5.10.3",
-    "@mui/material": "^5.10.3",
+    "@mui/material": "^5.10.4",
     "@table-library/react-table-library": "4.0.18",
     "@types/lodash": "^4.14.184",
-    "@types/node": "^18.7.14",
+    "@types/node": "^18.7.15",
     "@types/react": "^18.0.18",
     "@types/react-dom": "^18.0.6",
     "@types/react-router-dom": "^5.3.3",
@@ -80,7 +80,7 @@
       "max-len": [
         1,
         {
-          "code": 200
+          "code": 220
         }
       ],
       "arrow-parens": 1

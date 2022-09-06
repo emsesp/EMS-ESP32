@@ -573,10 +573,6 @@ type RootTranslation = {
 	 */
 	DEVICE_ENTITIES: string
 	/**
-	 * configure
-	 */
-	CONFIGURE: string
-	/**
 	 * User Customization
 	 */
 	USER_CUSTOMIZATION: string
@@ -585,45 +581,29 @@ type RootTranslation = {
 	 */
 	SUPPORT_INFORMATION: string
 	/**
-	 * Visit the online
+	 * Click Here
+	 */
+	CLICK_HERE: string
+	/**
+	 * Visit the online wiki to get instructions on how to configure EMS-ESP
 	 */
 	HELP_INFORMATION_1: string
 	/**
-	 * to get instructions on how to
+	 * For live community chat join our Discord server
 	 */
 	HELP_INFORMATION_2: string
 	/**
-	 * and access other information
+	 * Submit a support issue on Github for requesting a new feature or reporting a bug
 	 */
 	HELP_INFORMATION_3: string
 	/**
-	 * For live community chat join our
+	 * remember to download and attach your system details for a faster response
 	 */
 	HELP_INFORMATION_4: string
 	/**
-	 * Submit a
+	 * EMS-ESP is a free and open-source project. Please support it's future development by giving it a star on Github!
 	 */
 	HELP_INFORMATION_5: string
-	/**
-	 * support issue
-	 */
-	HELP_INFORMATION_6: string
-	/**
-	 * for requesting a new feature or reporting a bug
-	 */
-	HELP_INFORMATION_7: string
-	/**
-	 * Make sure you also
-	 */
-	HELP_INFORMATION_8: string
-	/**
-	 * and attach your system details for a faster response
-	 */
-	HELP_INFORMATION_9: string
-	/**
-	 * EMS-ESP will always be a free and open-source project. Please consider supporting it with a
-	 */
-	HELP_INFORMATION_10: string
 	/**
 	 * Upload
 	 */
@@ -1570,10 +1550,6 @@ export type TranslationFunctions = {
 	 */
 	DEVICE_ENTITIES: () => LocalizedString
 	/**
-	 * configure
-	 */
-	CONFIGURE: () => LocalizedString
-	/**
 	 * User Customization
 	 */
 	USER_CUSTOMIZATION: () => LocalizedString
@@ -1582,45 +1558,29 @@ export type TranslationFunctions = {
 	 */
 	SUPPORT_INFORMATION: () => LocalizedString
 	/**
-	 * Visit the online
+	 * Click Here
+	 */
+	CLICK_HERE: () => LocalizedString
+	/**
+	 * Visit the online wiki to get instructions on how to configure EMS-ESP
 	 */
 	HELP_INFORMATION_1: () => LocalizedString
 	/**
-	 * to get instructions on how to
+	 * For live community chat join our Discord server
 	 */
 	HELP_INFORMATION_2: () => LocalizedString
 	/**
-	 * and access other information
+	 * Submit a support issue on Github for requesting a new feature or reporting a bug
 	 */
 	HELP_INFORMATION_3: () => LocalizedString
 	/**
-	 * For live community chat join our
+	 * remember to download and attach your system details for a faster response
 	 */
 	HELP_INFORMATION_4: () => LocalizedString
 	/**
-	 * Submit a
+	 * EMS-ESP is a free and open-source project. Please support it's future development by giving it a star on Github!
 	 */
 	HELP_INFORMATION_5: () => LocalizedString
-	/**
-	 * support issue
-	 */
-	HELP_INFORMATION_6: () => LocalizedString
-	/**
-	 * for requesting a new feature or reporting a bug
-	 */
-	HELP_INFORMATION_7: () => LocalizedString
-	/**
-	 * Make sure you also
-	 */
-	HELP_INFORMATION_8: () => LocalizedString
-	/**
-	 * and attach your system details for a faster response
-	 */
-	HELP_INFORMATION_9: () => LocalizedString
-	/**
-	 * EMS-ESP will always be a free and open-source project. Please consider supporting it with a
-	 */
-	HELP_INFORMATION_10: () => LocalizedString
 	/**
 	 * Upload
 	 */
