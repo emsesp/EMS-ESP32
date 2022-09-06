@@ -22,7 +22,7 @@ import { loadLocaleAsync } from './i18n/i18n-util.async';
 
 import { ReactComponent as NLflag } from './i18n/NL.svg';
 import { ReactComponent as DEflag } from './i18n/DE.svg';
-import { ReactComponent as USflag } from './i18n/US.svg';
+import { ReactComponent as GBflag } from './i18n/GB.svg';
 
 const SignIn: FC = () => {
   const authenticationContext = useContext(AuthenticationContext);
@@ -109,7 +109,7 @@ const SignIn: FC = () => {
           }}
         >
           <Button size="small" variant={locale === 'en' ? 'contained' : 'outlined'} onClick={() => selectLocale('en')}>
-            <USflag style={{ width: 24 }} />
+            <GBflag style={{ width: 24 }} />
             &nbsp;EN
           </Button>
           <Button size="small" variant={locale === 'de' ? 'contained' : 'outlined'} onClick={() => selectLocale('de')}>
