@@ -68,7 +68,7 @@ const HelpInformation: FC = () => {
             <EastIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
             &nbsp;
             <Link target="_blank" href="https://emsesp.github.io/docs" color="primary">
-            {LL.CLICK_HERE()}
+              {LL.CLICK_HERE()}
             </Link>
           </ListItemText>
         </ListItem>
@@ -80,8 +80,9 @@ const HelpInformation: FC = () => {
           <ListItemText>
             {LL.HELP_INFORMATION_2()}&nbsp;
             <EastIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
+            &nbsp;
             <Link target="_blank" href="https://discord.gg/3J3GgnzpyT" color="primary">
-            {LL.CLICK_HERE()}
+              {LL.CLICK_HERE()}
             </Link>
           </ListItemText>
         </ListItem>
@@ -94,7 +95,7 @@ const HelpInformation: FC = () => {
             {LL.HELP_INFORMATION_3()}&nbsp;
             <EastIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
             <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32/issues/new/choose" color="primary">
-            {LL.CLICK_HERE()}
+              {LL.CLICK_HERE()}
             </Link>
             <br />({LL.HELP_INFORMATION_4()}&nbsp;
             <Button
@@ -104,24 +105,24 @@ const HelpInformation: FC = () => {
               color="primary"
               onClick={() => callAPI('info')}
             >
-              {LL.DOWNLOAD()}
+              {LL.SUPPORT_INFO()}
             </Button>
             &nbsp;)
           </ListItemText>
         </ListItem>
       </List>
 
-      <Box border={1} p={1} mt={4}>
+      <Box border={1} p={1} mt={4} color="orange">
         <Typography align="center" variant="h6" color="orange">
           {LL.HELP_INFORMATION_5()}
         </Typography>
-        <Typography align="center" >
+        <Typography align="center">
           <Link href="https://github.com/emsesp/EMS-ESP32" color="primary">
-            {'GitHub'}
+            {'Github'}
           </Link>
           <StarIcon style={{ fontSize: 20, color: 'yellow', verticalAlign: 'middle' }} />
         </Typography>
-        <Typography align="center">@proddy @MichaelDvP</Typography>
+        <Typography color="white" align="center">@proddy @MichaelDvP</Typography>
       </Box>
     </SectionContent>
   );

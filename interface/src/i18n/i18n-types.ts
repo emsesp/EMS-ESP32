@@ -593,17 +593,21 @@ type RootTranslation = {
 	 */
 	HELP_INFORMATION_2: string
 	/**
-	 * Submit a support issue on Github for requesting a new feature or reporting a bug
+	 * Request a feature or report a bug
 	 */
 	HELP_INFORMATION_3: string
 	/**
-	 * remember to download and attach your system details for a faster response
+	 * remember to download and attach your system information for a faster response when reporting an issue
 	 */
 	HELP_INFORMATION_4: string
 	/**
-	 * EMS-ESP is a free and open-source project. Please support it's future development by giving it a star on Github!
+	 * EMS-ESP is a free and open-source project. Please support its future development by giving it a star on Github!
 	 */
 	HELP_INFORMATION_5: string
+	/**
+	 * Support Info
+	 */
+	SUPPORT_INFO: string
 	/**
 	 * Upload
 	 */
@@ -1570,17 +1574,21 @@ export type TranslationFunctions = {
 	 */
 	HELP_INFORMATION_2: () => LocalizedString
 	/**
-	 * Submit a support issue on Github for requesting a new feature or reporting a bug
+	 * Request a feature or report a bug
 	 */
 	HELP_INFORMATION_3: () => LocalizedString
 	/**
-	 * remember to download and attach your system details for a faster response
+	 * remember to download and attach your system information for a faster response when reporting an issue
 	 */
 	HELP_INFORMATION_4: () => LocalizedString
 	/**
-	 * EMS-ESP is a free and open-source project. Please support it's future development by giving it a star on Github!
+	 * EMS-ESP is a free and open-source project. Please support its future development by giving it a star on Github!
 	 */
 	HELP_INFORMATION_5: () => LocalizedString
+	/**
+	 * Support Info
+	 */
+	SUPPORT_INFO: () => LocalizedString
 	/**
 	 * Upload
 	 */
