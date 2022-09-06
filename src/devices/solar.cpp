@@ -224,15 +224,16 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_solarEnabled));
 
-        /* unknown values for testing and logging. Used by MichaelDvP
+        /*
+        // unknown values for testing and logging. Used by MichaelDvP
         register_device_value(
-            DeviceValueTAG::TAG_DEVICE_DATA, &setting3_, DeviceValueType::UINT, nullptr, FL_(setting3), DeviceValueUOM::NONE, MAKE_CF_CB(set_CollectorMaxTemp));
+            DeviceValueTAG::TAG_DEVICE_DATA, &setting3_, DeviceValueType::UINT, FL_(setting3), DeviceValueUOM::NONE, MAKE_CF_CB(set_CollectorMaxTemp));
         register_device_value(
-            DeviceValueTAG::TAG_DEVICE_DATA, &setting4_, DeviceValueType::UINT, nullptr, FL_(setting4), DeviceValueUOM::NONE, MAKE_CF_CB(set_CollectorMinTemp));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data11_, DeviceValueType::UINT, nullptr, FL_(data11), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data12_, DeviceValueType::UINT, nullptr, FL_(data12), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data1_, DeviceValueType::UINT, nullptr, FL_(data1), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data0_, DeviceValueType::UINT, nullptr, FL_(data0), DeviceValueUOM::NONE);
+            DeviceValueTAG::TAG_DEVICE_DATA, &setting4_, DeviceValueType::UINT, FL_(setting4), DeviceValueUOM::NONE, MAKE_CF_CB(set_CollectorMinTemp));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data11_, DeviceValueType::UINT, FL_(data11), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data12_, DeviceValueType::UINT, FL_(data12), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data1_, DeviceValueType::UINT, FL_(data1), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data0_, DeviceValueType::UINT, FL_(data0), DeviceValueUOM::NONE);
 		*/
     }
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {

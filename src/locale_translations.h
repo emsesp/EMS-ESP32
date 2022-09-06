@@ -719,11 +719,14 @@ MAKE_PSTR_LIST(status, F("status"), F("status"), F("Status"), F("Status"))
 // RF sensor, id 0x40, telegram 0x435
 MAKE_PSTR_LIST(RFTemp, F("rftemp"), F("RF room temperature sensor"), F("RF Raumtemperatur Sensor"), F("RF ruimtetemperatuur sensor"))
 
-// unknown fields to track (SM10)
-MAKE_PSTR_LIST(data11, F("data11"), F("unknown datafield 11"), F("dataveld 11 (onbekend)"))
-MAKE_PSTR_LIST(data12, F("data12"), F("unknown datafield 12"), F("dataveld 12 (onbekend)"))
-MAKE_PSTR_LIST(data8, F("data8"), F("unknown datafield 8"), F("dataveld 8 (onbekend)"))
-MAKE_PSTR_LIST(data0, F("data0"), F("unknown datafield 0"), F("dataveld 0 (onbekend)"))
-MAKE_PSTR_LIST(data1, F("data1"), F("unknown datafield 1"), F("dataveld 1 (onbekend)"))
-MAKE_PSTR_LIST(setting3, F("setting3"), F("unknown setting 3"), F("instelling 3 (onbekend)"))
-MAKE_PSTR_LIST(setting4, F("setting4"), F("unknown setting 4"), F("instelling 4 (onbekend)"))
+/*
+// unknown fields to track (SM10), only for testing
+// **** NO TRANSLATION NEEDED ****
+MAKE_PSTR_LIST(data11, F("data11"), F("unknown datafield 11"))
+MAKE_PSTR_LIST(data12, F("data12"), F("unknown datafield 12"))
+MAKE_PSTR_LIST(data8, F("data8"), F("unknown datafield 8"))
+MAKE_PSTR_LIST(data0, F("data0"), F("unknown datafield 0"))
+MAKE_PSTR_LIST(data1, F("data1"), F("unknown datafield 1"))
+MAKE_PSTR_LIST(setting3, F("setting3"), F("unknown setting 3"))
+MAKE_PSTR_LIST(setting4, F("setting4"), F("unknown setting 4"))
+*/
