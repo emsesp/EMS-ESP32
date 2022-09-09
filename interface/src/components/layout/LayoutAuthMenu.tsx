@@ -26,6 +26,7 @@ import { loadLocaleAsync } from '../../i18n/i18n-util.async';
 import { ReactComponent as NLflag } from '../../i18n/NL.svg';
 import { ReactComponent as DEflag } from '../../i18n/DE.svg';
 import { ReactComponent as GBflag } from '../../i18n/GB.svg';
+import { ReactComponent as SEflag } from '../../i18n/SE.svg';
 
 const ItemTypography = styled(Typography)<TypographyProps>({
   maxWidth: '250px',
@@ -81,6 +82,10 @@ const LayoutAuthMenu: FC = () => {
         <MenuItem key="nl" value="nl">
           <NLflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;NL
+        </MenuItem>
+        <MenuItem key="se" value="se">
+          <SEflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;SE
         </MenuItem>
       </TextField>
 

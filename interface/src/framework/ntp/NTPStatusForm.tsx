@@ -16,7 +16,8 @@ import {
   ListItemText,
   TextField,
   Theme,
-  useTheme
+  useTheme,
+  Typography
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -97,43 +98,42 @@ const NTPStatusForm: FC = () => {
     }
   };
 
-  const renderSetTimeDialog = () => {
-    return (
-      <Dialog open={settingTime} onClose={() => setSettingTime(false)}>
-        <DialogTitle>{LL.SET_TIME()}</DialogTitle>
-        <DialogContent dividers>
-          <Box mb={2}>{LL.SET_TIME_TEXT()}</Box>
-          <TextField
-            label={LL.LOCAL_TIME()}
-            type="datetime-local"
-            value={localTime}
-            onChange={updateLocalTime}
-            disabled={processing}
-            variant="outlined"
-            fullWidth
-            InputLabelProps={{
-              shrink: true
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setSettingTime(false)} color="secondary">
-            {LL.CANCEL()}
-          </Button>
-          <Button
-            startIcon={<AccessTimeIcon />}
-            variant="outlined"
-            onClick={configureTime}
-            disabled={processing}
-            color="primary"
-            autoFocus
-          >
-            {LL.SET_TIME()}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-  };
+  const renderSetTimeDialog = () => (
+    <Dialog open={settingTime} onClose={() => setSettingTime(false)}>
+      <DialogTitle>{LL.SET_TIME()}</DialogTitle>
+      <DialogContent dividers>
+        <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
+          <Typography variant="body2">{LL.SET_TIME_TEXT()}</Typography>
+        </Box>
+        <TextField
+          label={LL.LOCAL_TIME()}
+          type="datetime-local"
+          value={localTime}
+          onChange={updateLocalTime}
+          disabled={processing}
+          fullWidth
+          InputLabelProps={{
+            shrink: true
+          }}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setSettingTime(false)} color="secondary">
+          {LL.CANCEL()}
+        </Button>
+        <Button
+          startIcon={<AccessTimeIcon />}
+          variant="outlined"
+          onClick={configureTime}
+          disabled={processing}
+          color="primary"
+          autoFocus
+        >
+          {LL.SET_TIME()}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 
   const content = () => {
     if (!data) {

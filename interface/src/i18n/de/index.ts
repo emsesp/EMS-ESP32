@@ -230,7 +230,7 @@ const de: Translation = {
   ACTIVE: 'Aktiv',
   UNKNOWN: 'Unbekannt',
   SET_TIME: 'Zeiteinstellung',
-  SET_TIME_TEXT: 'Geben Sie das lokale Datum und die Zeit ein.',
+  SET_TIME_TEXT: 'Geben Sie das lokale Datum und die Zeit ein',
   LOCAL_TIME: 'Lokalzeit',
   UTC_TIME: 'UTC Zeit',
   ENABLE_NTP: 'Aktiviere NTP',

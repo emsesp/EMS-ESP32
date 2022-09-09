@@ -284,7 +284,7 @@ const SettingsCustomization: FC = () => {
     return (
       <>
         <Box mb={2} color="warning.main">
-          <Typography variant="body2">{LL.CUSTOMIZATIONS_HELP_1()}:</Typography>
+          <Typography variant="body2">{LL.CUSTOMIZATIONS_HELP_1()}</Typography>
           <Typography variant="body2">
             <OptionIcon type="favorite" isSet={true} />={LL.CUSTOMIZATIONS_HELP_2()}&nbsp;&nbsp;
             <OptionIcon type="readonly" isSet={true} />={LL.CUSTOMIZATIONS_HELP_3()}&nbsp;&nbsp;
@@ -558,10 +558,10 @@ const SettingsCustomization: FC = () => {
     );
   };
 
-  const renderEditEntity = () => (
-    <Dialog open={!!deviceEntity} onClose={() => setDeviceEntity(undefined)}>
-      {deviceEntity && (
-        <>
+  const renderEditEntity = () => {
+    if (deviceEntity) {
+      return (
+        <Dialog open={!!deviceEntity} onClose={() => setDeviceEntity(undefined)}>
           <DialogTitle>{LL.RENAME() + ' ' + LL.ENTITY_NAME()}</DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
@@ -599,10 +599,10 @@ const SettingsCustomization: FC = () => {
               {LL.SAVE()}
             </Button>
           </DialogActions>
-        </>
-      )}
-    </Dialog>
-  );
+        </Dialog>
+      );
+    }
+  };
 
   return (
     <SectionContent title={LL.USER_CUSTOMIZATION()} titleGutter>

@@ -580,11 +580,11 @@ const DashboardData: FC = () => {
       return (
         <Dialog open={sensor !== undefined} onClose={() => setSensor(undefined)}>
           <DialogTitle>
-            {LL.EDIT()} {LL.TEMP_SENSORS()}
+            {LL.EDIT()} {LL.TEMP_SENSOR()}
           </DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
-              <Typography variant="body2">Sensor ID {sensor.id}</Typography>
+              <Typography variant="body2">Sensor ID: {sensor.id}</Typography>
             </Box>
             <Grid container spacing={1}>
               <Grid item>
@@ -1034,7 +1034,7 @@ const DashboardData: FC = () => {
       return (
         <Dialog open={analog !== undefined} onClose={() => setAnalog(undefined)}>
           <DialogTitle>
-            {LL.EDIT()} {LL.ANALOG_SENSORS()}
+            {LL.EDIT()} {LL.ANALOG_SENSOR()}
           </DialogTitle>
           <DialogContent dividers>
             <Grid container spacing={2}>

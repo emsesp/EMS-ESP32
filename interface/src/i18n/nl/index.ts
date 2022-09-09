@@ -230,7 +230,7 @@ const nl: BaseTranslation = {
   ACTIVE: 'Actief',
   UNKNOWN: 'Onbekend',
   SET_TIME: 'Tijd instellen',
-  SET_TIME_TEXT: 'Geef de locale datum en tijd in.',
+  SET_TIME_TEXT: 'Geef de locale datum en tijd in',
   LOCAL_TIME: 'Locale Tijd',
   UTC_TIME: 'UTC Tijd',
   ENABLE_NTP: 'Activeer NTP',

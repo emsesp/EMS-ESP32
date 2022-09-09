@@ -9,6 +9,7 @@ export type Locales =
 	| 'de'
 	| 'en'
 	| 'nl'
+	| 'se'
 
 export type Translation = RootTranslation
 
@@ -543,7 +544,7 @@ type RootTranslation = {
 	 */
 	CUSTOMIZATIONS_SAVED: string
 	/**
-	 * Select a device and customize the entities using the options
+	 * Select a device and customize the entities options or click to rename
 	 */
 	CUSTOMIZATIONS_HELP_1: string
 	/**
@@ -907,7 +908,7 @@ type RootTranslation = {
 	 */
 	SET_TIME: string
 	/**
-	 * Enter local date and time below to set the time.
+	 * Enter local date and time below to set the time
 	 */
 	SET_TIME_TEXT: string
 	/**
@@ -1548,7 +1549,7 @@ export type TranslationFunctions = {
 	 */
 	CUSTOMIZATIONS_SAVED: () => LocalizedString
 	/**
-	 * Select a device and customize the entities using the options
+	 * Select a device and customize the entities options or click to rename
 	 */
 	CUSTOMIZATIONS_HELP_1: () => LocalizedString
 	/**
@@ -1912,7 +1913,7 @@ export type TranslationFunctions = {
 	 */
 	SET_TIME: () => LocalizedString
 	/**
-	 * Enter local date and time below to set the time.
+	 * Enter local date and time below to set the time
 	 */
 	SET_TIME_TEXT: () => LocalizedString
 	/**
