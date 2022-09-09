@@ -42,12 +42,8 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 #ifndef EMSESP_STANDALONE
         EMSESP::logger().info(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
 #endif
-        EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-            if (!networkSettings.enableIPv6) {
-                EMSESP::system_.send_heartbeat();
-                EMSESP::system_.syslog_init();
-            }
-        });
+        // EMSESP::system_.send_heartbeat(); // send from mqtt start
+        EMSESP::system_.syslog_init();
         mDNS_start();
         break;
 
@@ -70,12 +66,8 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 #ifndef EMSESP_STANDALONE
             EMSESP::logger().info(F("Ethernet connected with IP=%s, speed %d Mbps"), ETH.localIP().toString().c_str(), ETH.linkSpeed());
 #endif
-            EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-                if (!networkSettings.enableIPv6) {
-                    EMSESP::system_.send_heartbeat();
-                    EMSESP::system_.syslog_init();
-                }
-            });
+            // EMSESP::system_.send_heartbeat(); // send from mqtt start
+            EMSESP::system_.syslog_init();
             EMSESP::system_.ethernet_connected(true);
             mDNS_start();
         }
@@ -111,11 +103,11 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
     case ARDUINO_EVENT_ETH_GOT_IP6:
         if (EMSESP::system_.ethernet_connected()) {
-            EMSESP::logger().info(F("Ethernet connected with IP=%s, speed %d Mbps"), ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
+            EMSESP::logger().info(F("Ethernet connected with IPv6=%s, speed %d Mbps"), ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
         } else {
-            EMSESP::logger().info(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
+            EMSESP::logger().info(F("WiFi connected with IPv6=%s, hostname=%s"), WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
         }
-        EMSESP::system_.send_heartbeat();
+        // EMSESP::system_.send_heartbeat(); // send from mqtt start
         EMSESP::system_.syslog_init();
         mDNS_start();
         break;
