@@ -95,11 +95,27 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
 // call on initialization and also when the page is saved via web UI
 // this loads the data into the internal class
 StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization & settings) {
+#ifdef EMSESP_STANDALONE
+    // invoke some fake data for testing
+    // using https://arduinojson.org/v5/assistant/
+    const char * json =
+        "{\"sensors\":[],\"analogs\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom name for heating active\",\"08tapwateractive\"]}]}";
+
+    StaticJsonDocument<500> doc;
+    deserializeJson(doc, json);
+    root = doc.as<JsonObject>();
+
+    Serial.println(COLOR_BRIGHT_MAGENTA);
+    Serial.print("Using custom file: ");
+    serializeJson(root, Serial);
+    Serial.println(COLOR_RESET);
+#endif
+
     // Dallas Sensor customization
     settings.sensorCustomizations.clear();
     if (root["sensors"].is<JsonArray>()) {
         for (const JsonObject sensorJson : root["sensors"].as<JsonArray>()) {
-            // create each of the sensor, overwritting any previous settings
+            // create each of the sensor, overwriting any previous settings
             auto sensor   = SensorCustomization();
             sensor.id     = sensorJson["id"].as<std::string>();
             sensor.name   = sensorJson["name"].as<std::string>();
@@ -112,7 +128,7 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
     settings.analogCustomizations.clear();
     if (root["analogs"].is<JsonArray>()) {
         for (const JsonObject analogJson : root["analogs"].as<JsonArray>()) {
-            // create each of the sensor, overwritting any previous settings
+            // create each of the sensor, overwriting any previous settings
             auto sensor   = AnalogCustomization();
             sensor.gpio   = analogJson["gpio"];
             sensor.name   = analogJson["name"].as<std::string>();
@@ -160,7 +176,7 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
 #endif
 }
 
-// send back a list of devices used to the customization web page
+// send back a list of devices used in the customization web page
 void WebCustomizationService::devices(AsyncWebServerRequest * request) {
     auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN);
     JsonObject root     = response->getRoot();
@@ -173,19 +189,7 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
             JsonObject obj = devices.createNestedObject();
             obj["i"]       = emsdevice->unique_id();                                         // its unique id
             obj["s"]       = emsdevice->device_type_name() + " (" + emsdevice->name() + ")"; // shortname
-
-            // device type name. We may have one than one (e.g. multiple thermostats) so postfix name with index
-            // code block not needed - see https://github.com/emsesp/EMS-ESP32/pull/586#issuecomment-1193779668
-            /*
-            uint8_t device_index = EMSESP::device_index(emsdevice->device_type(), emsdevice->unique_id());
-            if (device_index) {
-                char s[10];
-                obj["t"] = Helpers::toLower(emsdevice->device_type_name()) + Helpers::smallitoa(s, device_index);
-            } else {
-                obj["t"] = Helpers::toLower(emsdevice->device_type_name());
-            }
-            */
-            obj["t"] = Helpers::toLower(emsdevice->device_type_name());
+            obj["t"]       = Helpers::toLower(emsdevice->device_type_name());
         }
     }
 

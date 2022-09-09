@@ -45,15 +45,19 @@ const de: Translation = {
   PROBLEM_UPDATING: 'Problem beim Aktualisieren',
   PROBLEM_LOADING: 'Problem beim Laden',
   ACCESS_DENIED: 'Zugriff abgelehnt',
-  ANALOG_SENSOR: 'Analogsensor{post}',
+  ANALOG_SENSOR: 'Analogsensor',
   ANALOG_SENSORS: 'Analogsensoren',
+  UPDATED: 'DE_Updated',
+  UPDATE: 'DE_Update',
+  REMOVED: 'DE_Removed',
+  DELETION: 'DE_Deletion',
   OFFSET: 'Addition',
   FACTOR: 'Faktor',
   FREQ: 'Frequenz',
   STARTVALUE: 'Startwert',
   WARN_GPIO: 'Warnung: Vorsicht bei der korrekten Wahl des GPIO!',
   EDIT: 'Editiere',
-  TEMP_SENSOR: 'Temperatursensor{post}',
+  TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperatursensoren',
   WRITE_COMMAND: 'Befehl schreiben {cmd}',
   EMS_BUS_WARNING:
@@ -128,7 +132,7 @@ const de: Translation = {
   RESTART_TEXT: 'EMS-ESP muss neu gestartet werden, um geänderte Systemeinstellungen zu übernehmen',
   COMMAND: 'Befehl',
   CUSTOMIZATIONS_RESTART: 'Alle Anpassungen wurden entfernt. Neustart...',
-  CUSTOMIZATIONS_FULL: 'Ausgewählte Entitäten haben das Limit von 60 überschritten. Bitte stapelweise speichern',
+  CUSTOMIZATIONS_FULL: 'Ausgewählte Entitäten haben das Limit überschritten. Bitte stapelweise speichern',
   CUSTOMIZATIONS_SAVED: 'Anpassungen gespeichert',
   CUSTOMIZATIONS_HELP_1: 'Wählen Sie ein Gerät aus und passen Sie die Entitäten mithilfe der Optionen an',
   CUSTOMIZATIONS_HELP_2: 'als Favorit markieren',
@@ -253,7 +257,9 @@ const de: Translation = {
   NETWORK_ENABLE_IPV6: 'Aktiviere IPv6 Unterstützung',
   NETWORK_FIXED_IP: 'Feste IP Addresse',
   ADMIN: 'Administrator',
-  GUEST: 'Gast'
+  GUEST: 'Gast',
+  NEW: 'Neu',
+  RENAME: 'DE_Rename'
 };
 
 export default de;

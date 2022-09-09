@@ -193,14 +193,29 @@ type RootTranslation = {
 	 */
 	ACCESS_DENIED: string
 	/**
-	 * Analog Sensor{post}
-	 * @param {unknown} post
+	 * Analog Sensor
 	 */
-	ANALOG_SENSOR: RequiredParams<'post'>
+	ANALOG_SENSOR: string
 	/**
 	 * Analog Sensors
 	 */
 	ANALOG_SENSORS: string
+	/**
+	 * Updated
+	 */
+	UPDATED: string
+	/**
+	 * Update
+	 */
+	UPDATE: string
+	/**
+	 * Removed
+	 */
+	REMOVED: string
+	/**
+	 * Deletion
+	 */
+	DELETION: string
 	/**
 	 * Offset
 	 */
@@ -226,10 +241,9 @@ type RootTranslation = {
 	 */
 	EDIT: string
 	/**
-	 * Temperature Sensor{post}
-	 * @param {unknown} post
+	 * Temperature Sensor
 	 */
-	TEMP_SENSOR: RequiredParams<'post'>
+	TEMP_SENSOR: string
 	/**
 	 * Temperature Sensors
 	 */
@@ -521,7 +535,7 @@ type RootTranslation = {
 	 */
 	CUSTOMIZATIONS_RESTART: string
 	/**
-	 * Selected entities exceeded limit of 60. Please Save in batches
+	 * Selected entities exceeded limit. Please save in batches
 	 */
 	CUSTOMIZATIONS_FULL: string
 	/**
@@ -1008,6 +1022,10 @@ type RootTranslation = {
 	 * New
 	 */
 	NEW: string
+	/**
+	 * Rename
+	 */
+	RENAME: string
 }
 
 export type TranslationFunctions = {
@@ -1188,13 +1206,29 @@ export type TranslationFunctions = {
 	 */
 	ACCESS_DENIED: () => LocalizedString
 	/**
-	 * Analog Sensor{post}
+	 * Analog Sensor
 	 */
-	ANALOG_SENSOR: (arg: { post: unknown }) => LocalizedString
+	ANALOG_SENSOR: () => LocalizedString
 	/**
 	 * Analog Sensors
 	 */
 	ANALOG_SENSORS: () => LocalizedString
+	/**
+	 * Updated
+	 */
+	UPDATED: () => LocalizedString
+	/**
+	 * Update
+	 */
+	UPDATE: () => LocalizedString
+	/**
+	 * Removed
+	 */
+	REMOVED: () => LocalizedString
+	/**
+	 * Deletion
+	 */
+	DELETION: () => LocalizedString
 	/**
 	 * Offset
 	 */
@@ -1220,9 +1254,9 @@ export type TranslationFunctions = {
 	 */
 	EDIT: () => LocalizedString
 	/**
-	 * Temperature Sensor{post}
+	 * Temperature Sensor
 	 */
-	TEMP_SENSOR: (arg: { post: unknown }) => LocalizedString
+	TEMP_SENSOR: () => LocalizedString
 	/**
 	 * Temperature Sensors
 	 */
@@ -1506,7 +1540,7 @@ export type TranslationFunctions = {
 	 */
 	CUSTOMIZATIONS_RESTART: () => LocalizedString
 	/**
-	 * Selected entities exceeded limit of 60. Please Save in batches
+	 * Selected entities exceeded limit. Please save in batches
 	 */
 	CUSTOMIZATIONS_FULL: () => LocalizedString
 	/**
@@ -1993,6 +2027,10 @@ export type TranslationFunctions = {
 	 * New
 	 */
 	NEW: () => LocalizedString
+	/**
+	 * Rename
+	 */
+	RENAME: () => LocalizedString
 }
 
 export type Formatters = {}

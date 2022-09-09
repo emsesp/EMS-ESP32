@@ -89,6 +89,7 @@ const DashboardData: FC = () => {
     active_sensors: 0,
     analog_enabled: false
   });
+
   const [deviceData, setDeviceData] = useState<DeviceData>({ label: '', data: [] });
   const [sensorData, setSensorData] = useState<SensorData>({ sensors: [], analogs: [] });
   const [deviceValue, setDeviceValue] = useState<DeviceValue>();
@@ -558,11 +559,11 @@ const DashboardData: FC = () => {
           offset: sensor.o
         });
         if (response.status === 204) {
-          enqueueSnackbar(LL.TEMP_SENSOR({ post: ' change failed' }), { variant: 'error' });
+          enqueueSnackbar(LL.TEMP_SENSOR() + ' ' + LL.UPLOAD_TEXT() + ' ' + LL.FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar(LL.TEMP_SENSOR({ post: ' removed' }), { variant: 'success' });
+          enqueueSnackbar(LL.TEMP_SENSOR() + ' ' + LL.UPDATED(), { variant: 'success' });
         }
         setSensor(undefined);
       } catch (error: unknown) {
@@ -578,7 +579,9 @@ const DashboardData: FC = () => {
     if (sensor) {
       return (
         <Dialog open={sensor !== undefined} onClose={() => setSensor(undefined)}>
-          <DialogTitle>{LL.EDIT()} {LL.TEMP_SENSORS()}</DialogTitle>
+          <DialogTitle>
+            {LL.EDIT()} {LL.TEMP_SENSORS()}
+          </DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
               <Typography variant="body2">Sensor ID {sensor.id}</Typography>
@@ -983,11 +986,11 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar(LL.ANALOG_SENSOR({ post: ' deletion failed' }), { variant: 'error' });
+          enqueueSnackbar(LL.ANALOG_SENSOR() + ' ' + LL.DELETION() + ' ' + LL.FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar(LL.ANALOG_SENSOR({ post: ' removed' }), { variant: 'success' });
+          enqueueSnackbar(LL.ANALOG_SENSOR() + ' ' + LL.REMOVED(), { variant: 'success' });
         }
       } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
@@ -1011,11 +1014,11 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar(LL.ANALOG_SENSOR({ post: ' update failed' }), { variant: 'error' });
+          enqueueSnackbar(LL.ANALOG_SENSOR() + ' ' + LL.UPDATE() + ' ' + LL.FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar(LL.ANALOG_SENSOR({ post: ' updated' }), { variant: 'success' });
+          enqueueSnackbar(LL.ANALOG_SENSOR() + ' ' + LL.UPDATED(), { variant: 'success' });
         }
       } catch (error: unknown) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
@@ -1030,7 +1033,9 @@ const DashboardData: FC = () => {
     if (analog) {
       return (
         <Dialog open={analog !== undefined} onClose={() => setAnalog(undefined)}>
-          <DialogTitle>{LL.EDIT()} {LL.ANALOG_SENSORS()}</DialogTitle>
+          <DialogTitle>
+            {LL.EDIT()} {LL.ANALOG_SENSORS()}
+          </DialogTitle>
           <DialogContent dividers>
             <Grid container spacing={2}>
               <Grid item>
@@ -1055,7 +1060,13 @@ const DashboardData: FC = () => {
                 />
               </Grid>
               <Grid item>
-                <ValidatedTextField name="t" label={LL.TYPE()} value={analog.t} select onChange={updateValue(setAnalog)}>
+                <ValidatedTextField
+                  name="t"
+                  label={LL.TYPE()}
+                  value={analog.t}
+                  select
+                  onChange={updateValue(setAnalog)}
+                >
                   {AnalogTypeNames.map((val, i) => (
                     <MenuItem key={i} value={i}>
                       {val}

@@ -44,15 +44,19 @@ const nl: BaseTranslation = {
   PROBLEM_UPDATING: 'Probleem met updaten',
   PROBLEM_LOADING: 'Probleem met laden',
   ACCESS_DENIED: 'Toegang geweigerd',
-  ANALOG_SENSOR: 'Analoge sensor{post}',
+  ANALOG_SENSOR: 'Analoge sensor',
   ANALOG_SENSORS: 'Analoge Sensoren',
+  UPDATED: 'Bijgewerkt',
+  UPDATE: 'Bijwerken',
+  REMOVED: 'Verwijderd',
+  DELETION: 'Verwijder',
   OFFSET: 'Offset',
   FACTOR: 'Factor',
   FREQ: 'Frequentie',
   STARTVALUE: 'Startwaarde',
   WARN_GPIO: 'Waarschuwing: let op met het koppelen van de juiste GPIO pin!',
   EDIT: 'Wijzigen',
-  TEMP_SENSOR: 'Temperatuur sensor{post}',
+  TEMP_SENSOR: 'Temperatuur sensor',
   TEMP_SENSORS: 'Temperatuur Sensoren',
   WRITE_COMMAND: 'Schrijf commando {cmd}',
   EMS_BUS_WARNING:
@@ -127,7 +131,7 @@ const nl: BaseTranslation = {
   RESTART_TEXT: 'EMS-ESP dient opnieuw gestart te worden om de wijzingen toe te passen',
   COMMAND: 'Commando',
   CUSTOMIZATIONS_RESTART: 'Alle custom profielen worden verwijderd. Herstarten...',
-  CUSTOMIZATIONS_FULL: 'Meer dan 60 entiteiten geselecteerd. Sla op in delen aub',
+  CUSTOMIZATIONS_FULL: 'Te veel entiteiten geselecteerd. Sla op in delen aub',
   CUSTOMIZATIONS_SAVED: 'Custom aanpassingen opgeslagen',
   CUSTOMIZATIONS_HELP_1: 'Selecteer een apparaat en pas de entiteiten aan door middel van de opties',
   CUSTOMIZATIONS_HELP_2: 'Markeer as favoriet',
@@ -254,7 +258,8 @@ const nl: BaseTranslation = {
   NETWORK_FIXED_IP: 'Gebruik vast IP addres',
   ADMIN: 'Admin',
   GUEST: 'Gast',
-  NEW: 'Nieuwe'
+  NEW: 'Nieuwe',
+  RENAME: 'Hernoem'
 };
 
 export default nl;

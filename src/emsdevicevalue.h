@@ -153,7 +153,7 @@ class DeviceValue {
     uint8_t                              options_size;    // number of options in the char array, calculated
     const __FlashStringHelper * const    short_name;      // used in MQTT and API
     const __FlashStringHelper * const *  fullname;        // used in Web and Console, is translated
-    const __FlashStringHelper * const    custom_fullname; // optional, from customization
+    const std::string                    custom_fullname; // optional, from customization
     uint8_t                              uom;             // DeviceValueUOM::*
     bool                                 has_cmd;         // true if there is a Console/MQTT command which matches the short_name
     int16_t                              min;             // min range
@@ -169,7 +169,7 @@ class DeviceValue {
                 int8_t                               numeric_operator,
                 const __FlashStringHelper * const    short_name,
                 const __FlashStringHelper * const *  fullname,
-                const __FlashStringHelper * const    custom_fullname,
+                const std::string &                  custom_fullname,
                 uint8_t                              uom,
                 bool                                 has_cmd,
                 int16_t                              min,
@@ -178,6 +178,8 @@ class DeviceValue {
 
     bool hasValue() const;
     bool get_min_max(int16_t & dv_set_min, int16_t & dv_set_max);
+
+    std::string get_fullname() const;
 
     // dv state flags
     void add_state(uint8_t s) {

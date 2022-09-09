@@ -45,15 +45,19 @@ const en: BaseTranslation = {
   PROBLEM_UPDATING: 'Problem updating',
   PROBLEM_LOADING: 'Problem loading',
   ACCESS_DENIED: 'Access Denied',
-  ANALOG_SENSOR: 'Analog Sensor{post}',
+  ANALOG_SENSOR: 'Analog Sensor',
   ANALOG_SENSORS: 'Analog Sensors',
+  UPDATED: 'Updated',
+  UPDATE: 'Update',
+  REMOVED: 'Removed',
+  DELETION: 'Deletion',
   OFFSET: 'Offset',
   FACTOR: 'Factor',
   FREQ: 'Frequency',
   STARTVALUE: 'Start value',
   WARN_GPIO: 'Warning: be careful when assigning a GPIO!',
   EDIT: 'Edit',
-  TEMP_SENSOR: 'Temperature Sensor{post}',
+  TEMP_SENSOR: 'Temperature Sensor',
   TEMP_SENSORS: 'Temperature Sensors',
   WRITE_COMMAND: 'Write command {cmd}',
   EMS_BUS_WARNING:
@@ -128,7 +132,7 @@ const en: BaseTranslation = {
   RESTART_TEXT: 'EMS-ESP needs to be restarted to apply changed system settings',
   COMMAND: 'Command',
   CUSTOMIZATIONS_RESTART: 'All customizations have been removed. Restarting...',
-  CUSTOMIZATIONS_FULL: 'Selected entities exceeded limit of 60. Please Save in batches',
+  CUSTOMIZATIONS_FULL: 'Selected entities exceeded limit. Please save in batches',
   CUSTOMIZATIONS_SAVED: 'Customizations saved',
   CUSTOMIZATIONS_HELP_1: 'Select a device and customize the entities using the options',
   CUSTOMIZATIONS_HELP_2: 'mark as favorite',
@@ -254,7 +258,8 @@ const en: BaseTranslation = {
   NETWORK_FIXED_IP: 'Use Fixed IP address',
   ADMIN: 'Admin',
   GUEST: 'Guest',
-  NEW: 'New'
+  NEW: 'New',
+  RENAME: 'Rename'
 };
 
 export default en;

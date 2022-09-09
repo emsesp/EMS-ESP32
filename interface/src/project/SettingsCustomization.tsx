@@ -19,7 +19,6 @@ import {
 
 import { Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 
 import { useSnackbar } from 'notistack';
@@ -28,9 +27,6 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
-import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
-import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
-import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 
@@ -53,16 +49,17 @@ const SettingsCustomization: FC = () => {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([{ id: '', v: 0, n: '', m: 0, w: false }]);
+  const emptyDeviceEntity = { id: '', v: 0, n: '', cn: '', m: 0, w: false };
+
+  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([emptyDeviceEntity]);
   const [devices, setDevices] = useState<Devices>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(-1);
-
-  const [selectedEntity, setSelectedEntity] = useState<DeviceEntity>();
-
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
   const [selectedFilters, setSelectedFilters] = useState<number>(0);
   const [search, setSearch] = useState('');
+
+  const [deviceEntity, setDeviceEntity] = useState<DeviceEntity>();
 
   // eslint-disable-next-line
   const [masks, setMasks] = useState(() => ['']);
@@ -131,32 +128,6 @@ const SettingsCustomization: FC = () => {
     `
   });
 
-  const getSortIcon = (state: any, sortKey: any) => {
-    if (state.sortKey === sortKey && state.reverse) {
-      return <KeyboardArrowDownOutlinedIcon />;
-    }
-    if (state.sortKey === sortKey && !state.reverse) {
-      return <KeyboardArrowUpOutlinedIcon />;
-    }
-    return <UnfoldMoreOutlinedIcon />;
-  };
-
-  const entity_sort = useSort(
-    { nodes: deviceEntities },
-    {},
-    {
-      sortIcon: {
-        iconDefault: <UnfoldMoreOutlinedIcon />,
-        iconUp: <KeyboardArrowUpOutlinedIcon />,
-        iconDown: <KeyboardArrowDownOutlinedIcon />
-      },
-      sortToggleType: SortToggleType.AlternateWithReset,
-      sortFns: {
-        NAME: (array) => array.sort((a, b) => a.id.localeCompare(b.id))
-      }
-    }
-  );
-
   const fetchDevices = useCallback(async () => {
     try {
       setDevices((await EMSESP.readDevices()).data);
@@ -166,13 +137,13 @@ const SettingsCustomization: FC = () => {
   }, [LL]);
 
   const setInitialMask = (data: DeviceEntity[]) => {
-    setDeviceEntities(data.map((de) => ({ ...de, om: de.m })));
+    setDeviceEntities(data.map((de) => ({ ...de, o_m: de.m, o_cn: de.cn })));
   };
 
   const fetchDeviceEntities = async (unique_id: number) => {
     try {
-      const data = (await EMSESP.readDeviceEntities({ id: unique_id })).data;
-      setInitialMask(data);
+      const new_deviceEntities = (await EMSESP.readDeviceEntities({ id: unique_id })).data;
+      setInitialMask(new_deviceEntities);
     } catch (error: unknown) {
       setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
@@ -196,12 +167,16 @@ const SettingsCustomization: FC = () => {
   function formatName(de: DeviceEntity) {
     if (de.n === undefined || de.n === de.id) {
       return de.id;
-    } else if (de.n === '') {
+    }
+
+    if (de.n === '') {
       return LL.COMMAND() + ': ' + de.id;
     }
+
     return (
       <>
-        {de.n}&nbsp;(
+        {de.cn !== undefined && de.cn !== '' ? de.cn : de.n}
+        &nbsp;(
         <Link target="_blank" href={APIURL + devices?.devices[selectedDevice].t + '/' + de.id}>
           {de.id}
         </Link>
@@ -274,10 +249,12 @@ const SettingsCustomization: FC = () => {
   const saveCustomization = async () => {
     if (devices && deviceEntities && selectedDevice !== -1) {
       const masked_entities = deviceEntities
-        .filter((de) => de.m !== de.om)
-        .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.id);
+        .filter((de) => de.m !== de.o_m || de.cn !== de.o_cn)
+        .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.id + (new_de.cn ? '|' + new_de.cn : ''));
 
-      if (masked_entities.length > 60) {
+      // check size in bytes to match buffer in CPP, which is 4096
+      const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
+      if (bytes > 4000) {
         enqueueSnackbar(LL.CUSTOMIZATIONS_FULL(), { variant: 'warning' });
         return;
       }
@@ -339,16 +316,26 @@ const SettingsCustomization: FC = () => {
   };
 
   const editEntity = (de: DeviceEntity) => {
-    if (de.n) {
-      setSelectedEntity(de);
-      console.log(de.n); // TODO
+    if (de.cn === undefined) {
+      de.cn = '';
     }
+    setDeviceEntity(de);
   };
 
   const updateEntity = () => {
-    if (selectedEntity) {
-      setSelectedEntity(undefined); // TODO
+    if (deviceEntity) {
+      setDeviceEntities((prevState) => {
+        const newState = prevState.map((obj) => {
+          if (obj.id === deviceEntity.id) {
+            return { ...obj, cn: deviceEntity.cn };
+          }
+          return obj;
+        });
+        return newState;
+      });
     }
+
+    setDeviceEntity(undefined);
   };
 
   const renderDeviceData = () => {
@@ -445,19 +432,14 @@ const SettingsCustomization: FC = () => {
             </Tooltip>
           </Grid>
         </Grid>
-        <Table data={{ nodes: shown_data }} theme={entities_theme} sort={entity_sort} layout={{ custom: true }}>
+        <Table data={{ nodes: shown_data }} theme={entities_theme} layout={{ custom: true }}>
           {(tableList: any) => (
             <>
               <Header>
                 <HeaderRow>
                   <HeaderCell stiff>{LL.OPTIONS()}</HeaderCell>
                   <HeaderCell resize>
-                    <Button
-                      fullWidth
-                      style={{ fontSize: '14px', justifyContent: 'flex-start' }}
-                      endIcon={getSortIcon(entity_sort.state, 'NAME')}
-                      onClick={() => entity_sort.fns.onToggleSort({ sortKey: 'NAME' })}
-                    >
+                    <Button fullWidth style={{ fontSize: '14px', justifyContent: 'flex-start' }}>
                       {LL.NAME()}
                     </Button>
                   </HeaderCell>
@@ -576,24 +558,24 @@ const SettingsCustomization: FC = () => {
     );
   };
 
-  const renderEditEntity = () => {
-    if (selectedEntity) {
-      return (
-        <Dialog open={selectedEntity !== undefined} onClose={() => setSelectedEntity(undefined)}>
-          <DialogTitle>Rename Entity</DialogTitle>
+  const renderEditEntity = () => (
+    <Dialog open={!!deviceEntity} onClose={() => setDeviceEntity(undefined)}>
+      {deviceEntity && (
+        <>
+          <DialogTitle>{LL.RENAME() + ' ' + LL.ENTITY_NAME()}</DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
-              <Typography variant="body2">{selectedEntity.n}</Typography>
+              <Typography variant="body2">{deviceEntity.n}</Typography>
             </Box>
             <Grid container spacing={1}>
               <Grid item>
-                <ValidatedTextField
+                <TextField
                   name="cn"
                   label={LL.NEW() + ' ' + LL.ENTITY_NAME()}
-                  value={selectedEntity.cn}
+                  value={deviceEntity.cn}
                   autoFocus
                   sx={{ width: '30ch' }}
-                  onChange={updateValue(setSelectedEntity)}
+                  onChange={updateValue(setDeviceEntity)}
                 />
               </Grid>
             </Grid>
@@ -602,7 +584,7 @@ const SettingsCustomization: FC = () => {
             <Button
               startIcon={<CancelIcon />}
               variant="outlined"
-              onClick={() => setSelectedEntity(undefined)}
+              onClick={() => setDeviceEntity(undefined)}
               color="secondary"
             >
               {LL.CANCEL()}
@@ -617,10 +599,10 @@ const SettingsCustomization: FC = () => {
               {LL.SAVE()}
             </Button>
           </DialogActions>
-        </Dialog>
-      );
-    }
-  };
+        </>
+      )}
+    </Dialog>
+  );
 
   return (
     <SectionContent title={LL.USER_CUSTOMIZATION()} titleGutter>

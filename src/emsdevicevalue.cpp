@@ -32,12 +32,12 @@ DeviceValue::DeviceValue(uint8_t                              device_type,
                          int8_t                               numeric_operator,
                          const __FlashStringHelper * const    short_name,
                          const __FlashStringHelper * const *  fullname,
-                         const __FlashStringHelper * const    custom_fullname,
-                         uint8_t  uom,
-                         bool     has_cmd,
-                         int16_t  min,
-                         uint16_t max,
-                         uint8_t  state)
+                         const std::string &                  custom_fullname,
+                         uint8_t                              uom,
+                         bool                                 has_cmd,
+                         int16_t                              min,
+                         uint16_t                             max,
+                         uint8_t                              state)
     : device_type(device_type)
     , tag(tag)
     , value_p(value_p)
@@ -65,8 +65,13 @@ DeviceValue::DeviceValue(uint8_t                              device_type,
     Serial.print("registering entity: ");
     Serial.print(read_flash_string(short_name).c_str());
     Serial.print("/");
-    auto trans_fullname = Helpers::translated_word(fullname);
-    Serial.print(trans_fullname.c_str());
+    if (!custom_fullname.empty()) {
+        Serial.print(COLOR_BRIGHT_CYAN);
+        Serial.print(custom_fullname.c_str());
+        Serial.print(COLOR_RESET);
+    } else {
+        Serial.print(Helpers::translated_word(fullname).c_str());
+    }
     Serial.print(" (#options=");
     Serial.print(options_size);
     Serial.print(",numop=");
@@ -319,6 +324,15 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
     }
 
     return false; // nothing changed, not supported
+}
+
+// returns the translated fullname or the custom fullname (if provided)
+// always returns a std::string
+std::string DeviceValue::get_fullname() const {
+    if (custom_fullname.empty()) {
+        return Helpers::translated_word(fullname);
+    }
+    return custom_fullname;
 }
 
 } // namespace emsesp

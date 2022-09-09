@@ -139,7 +139,8 @@ export interface DeviceEntity {
   n?: string; // fullname, optional
   cn?: string; // custom fullname, optional
   m: number; // mask
-  om?: number; // original mask before edits
+  o_m?: number; // original mask before edits
+  o_cn?: string; // original cn before edits
   w: boolean; // writeable
 }
 

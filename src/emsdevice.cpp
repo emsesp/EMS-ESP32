@@ -259,8 +259,8 @@ bool EMSdevice::has_tag(const uint8_t tag) const {
 // called from the command 'entities'
 void EMSdevice::list_device_entries(JsonObject & output) const {
     for (const auto & dv : devicevalues_) {
-        auto fullname = Helpers::translated_fword(dv.fullname);
-        if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.type != DeviceValueType::CMD && fullname) {
+        std::string fullname = dv.get_fullname();
+        if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.type != DeviceValueType::CMD && !fullname.empty()) {
             // if we have a tag prefix it
             char key[50];
             if (!EMSdevice::tag_to_mqtt(dv.tag).empty()) {
@@ -433,26 +433,57 @@ void EMSdevice::add_device_value(uint8_t                              tag,
     // determine state
     uint8_t state = DeviceValueState::DV_DEFAULT;
 
+    // custom fullname
+    std::string custom_fullname = std::string("");
+
     // scan through customizations to see if it's on the exclusion list by matching the productID and deviceID
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         for (EntityCustomization entityCustomization : settings.entityCustomizations) {
             if ((entityCustomization.product_id == product_id()) && (entityCustomization.device_id == device_id())) {
                 std::string entity = tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(short_name) : tag_to_string(tag) + "/" + read_flash_string(short_name);
                 for (std::string entity_id : entityCustomization.entity_ids) {
-                    if (entity_id.substr(2) == entity) {
+                    // if there is an appended custom name, strip it to get the true entity name
+                    // and extract the new custom name
+                    std::string matched_entity;
+                    auto        custom_name_pos = entity_id.find('|');
+                    bool        has_custom_name = (custom_name_pos != std::string::npos);
+                    if (has_custom_name) {
+                        matched_entity = entity_id.substr(2, custom_name_pos - 2);
+                    } else {
+                        matched_entity = entity_id.substr(2);
+                    }
+
+                    /*
+                    Serial.print(COLOR_BRIGHT_GREEN);
+                    Serial.print(" entity name=");
+                    Serial.print(entity_id.c_str());
+                    Serial.print(" ,matched name=");
+                    Serial.print(matched_entity.c_str());
+                    Serial.print(" ,matched pos=");
+                    Serial.println(custom_name_pos);
+                    Serial.print(COLOR_RESET);
+                    */
+
+                    // we found the device entity
+                    if (matched_entity == entity) {
+                        // get Mask
                         uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
                         state        = mask << 4; // set state high bits to flag, turn off active and ha flags
+                        // see if there is a custom name in the entity string
+                        if (has_custom_name) {
+                            /*
+                            Serial.print(COLOR_BRIGHT_MAGENTA);
+                            Serial.println(entity_id.substr(custom_name_pos + 1).c_str());
+                            Serial.print(COLOR_RESET);
+                            */
+                            custom_fullname = entity_id.substr(custom_name_pos + 1);
+                        }
                         break;
                     }
                 }
             }
         }
     });
-
-    // TODO
-    const __FlashStringHelper * custom_fullname;
-
-    custom_fullname = nullptr;
 
     // add the device entity
     devicevalues_.emplace_back(
@@ -475,6 +506,7 @@ void EMSdevice::add_device_value(uint8_t                              tag,
 
     // add the command to our library
     // cmd is the short_name and the description is the fullname
+    // TODO this needs adapting to take the custom fullname since its not a FPTR()
     Command::add(device_type_, short_name, f, Helpers::translated_fword(fullname), flags);
 }
 
@@ -700,6 +732,8 @@ void EMSdevice::publish_value(void * value_p) const {
 }
 
 // looks up the UOM for a given key from the device value table
+// key is the fullname
+// TODO really should be using the shortname as the identifier
 std::string EMSdevice::get_value_uom(const char * key) const {
     // the key may have a TAG string prefixed at the beginning. If so, remove it
     char new_key[80];
@@ -719,8 +753,8 @@ std::string EMSdevice::get_value_uom(const char * key) const {
 
     // look up key in our device value list
     for (const auto & dv : devicevalues_) {
-        auto fullname = Helpers::translated_fword(dv.fullname);
-        if ((!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && fullname) && (read_flash_string(fullname) == key_p)) {
+        auto fullname = dv.get_fullname();
+        if ((!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && !fullname.empty()) && (fullname == key_p)) {
             // ignore TIME since "minutes" is already added to the string value
             if ((dv.uom == DeviceValueUOM::NONE) || (dv.uom == DeviceValueUOM::MINUTES)) {
                 break;
@@ -741,13 +775,13 @@ void EMSdevice::generate_values_web(JsonObject & output) {
     JsonArray data  = output.createNestedArray("data");
 
     for (auto & dv : devicevalues_) {
-        auto fullname = Helpers::translated_fword(dv.fullname);
+        auto fullname = dv.get_fullname();
 
         // check conditions:
         //  1. fullname cannot be empty
         //  2. it must have a valid value, if it is not a command like 'reset'
         //  3. show favorites first
-        if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && fullname && (dv.hasValue() || (dv.type == DeviceValueType::CMD))) {
+        if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && !fullname.empty() && (dv.hasValue() || (dv.type == DeviceValueType::CMD))) {
             JsonObject obj        = data.createNestedObject(); // create the object, we know there is a value
             uint8_t    fahrenheit = 0;
 
@@ -797,9 +831,9 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 
             // add name, prefixing the tag if it exists. This is the id used in the WebUI table and must be unique
             if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
-                obj["id"] = mask + Helpers::translated_word(dv.fullname);
+                obj["id"] = mask + dv.get_fullname();
             } else {
-                obj["id"] = mask + tag_to_string(dv.tag) + " " + Helpers::translated_word(dv.fullname);
+                obj["id"] = mask + tag_to_string(dv.tag) + " " + dv.get_fullname();
             }
 
             // add commands and options
@@ -928,19 +962,24 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
 
         // n is the fullname, and can be optional
         // don't add the fullname if its a command
-        auto translated_full_name = Helpers::translated_fword(dv.fullname);
+        auto fullname = dv.get_fullname();
         if (dv.type != DeviceValueType::CMD) {
-            if (translated_full_name) {
+            if (!fullname.empty()) {
                 if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
-                    obj["n"] = read_flash_string(translated_full_name);
+                    obj["n"] = fullname;
                 } else {
                     char name[50];
-                    snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag).c_str(), read_flash_string(translated_full_name).c_str());
+                    snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag).c_str(), fullname.c_str());
                     obj["n"] = name;
                 }
             }
         } else {
             obj["n"] = "";
+        }
+
+        // add the custom name, is optional
+        if (!dv.custom_fullname.empty()) {
+            obj["cn"] = dv.custom_fullname;
         }
 
         obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble
@@ -1018,12 +1057,12 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
 
             json["name"] = dv.short_name;
 
-            auto fullname = Helpers::translated_fword(dv.fullname);
-            if (fullname != nullptr) {
+            auto fullname = dv.get_fullname();
+            if (!fullname.empty()) {
                 if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
                     json["fullname"] = fullname;
                 } else {
-                    json["fullname"] = tag_to_string(dv.tag) + " " + read_flash_string(fullname);
+                    json["fullname"] = tag_to_string(dv.tag) + " " + fullname;
                 }
             }
 
@@ -1202,14 +1241,14 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             dv.remove_state(DeviceValueState::DV_ACTIVE);
         }
 
-        auto fullname = Helpers::translated_fword(dv.fullname);
+        auto fullname = dv.get_fullname();
 
         // check conditions:
         //  1. it must have a valid value (state is active)
         //  2. it must have a visible flag
         //  3. it must match the given tag filter or have an empty tag
         //  4. it must not have the exclude flag set or outputs to console
-        if (dv.has_state(DeviceValueState::DV_ACTIVE) && fullname && (tag_filter == DeviceValueTAG::TAG_NONE || tag_filter == dv.tag)
+        if (dv.has_state(DeviceValueState::DV_ACTIVE) && !fullname.empty() && (tag_filter == DeviceValueTAG::TAG_NONE || tag_filter == dv.tag)
             && (output_target == OUTPUT_TARGET::CONSOLE || !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE))) {
             has_values = true; // flagged if we actually have data
 
@@ -1221,9 +1260,9 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
 
             if (output_target == OUTPUT_TARGET::API_VERBOSE || output_target == OUTPUT_TARGET::CONSOLE) {
                 if (have_tag) {
-                    snprintf(name, 80, "%s %s", tag_to_string(dv.tag).c_str(), read_flash_string(fullname).c_str()); // prefix the tag
+                    snprintf(name, 80, "%s %s", tag_to_string(dv.tag).c_str(), fullname.c_str()); // prefix the tag
                 } else {
-                    strlcpy(name, read_flash_string(fullname).c_str(), sizeof(name)); // use full name
+                    strlcpy(name, fullname.c_str(), sizeof(name)); // use full name
                 }
             } else {
                 strlcpy(name, read_flash_string(dv.short_name).c_str(), sizeof(name)); // use short name

@@ -937,7 +937,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
 
     publish_ha_sensor_config(dv.type,
                              dv.tag,
-                             Helpers::translated_fword(dv.fullname),
+                             dv.get_fullname(),
                              dv.device_type,
                              dv.short_name,
                              dv.uom,
@@ -958,7 +958,9 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelp
     JsonArray ids = dev_json.createNestedArray("ids");
     ids.add("ems-esp");
 
-    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
+    auto fullname = read_flash_string(name); // TODO make sure it works, it may need a std::move()?
+
+    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, fullname, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
 }
 
 // MQTT discovery configs
@@ -966,7 +968,7 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelp
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
 void Mqtt::publish_ha_sensor_config(uint8_t                              type,        // EMSdevice::DeviceValueType
                                     uint8_t                              tag,         // EMSdevice::DeviceValueTAG
-                                    const __FlashStringHelper * const    fullname,    // fullname, already translated
+                                    const std::string &                  fullname,    // fullname, already translated
                                     const uint8_t                        device_type, // EMSdevice::DeviceType
                                     const __FlashStringHelper * const    entity,      // same as shortname
                                     const uint8_t                        uom,         // EMSdevice::DeviceValueUOM (0=NONE)
@@ -978,7 +980,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                              type,  
                                     const int16_t                        dv_set_max,
                                     const JsonObject &                   dev_json) {
     // ignore if name (fullname) is empty
-    if (fullname == nullptr) {
+    if (fullname.empty()) {
         return;
     }
 
@@ -1114,9 +1116,9 @@ void Mqtt::publish_ha_sensor_config(uint8_t                              type,  
     // friendly name = <tag> <name>
     char ha_name[70];
     if (have_tag) {
-        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), read_flash_string(fullname).c_str());
+        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), fullname.c_str());
     } else {
-        snprintf(ha_name, sizeof(ha_name), "%s", read_flash_string(fullname).c_str());
+        snprintf(ha_name, sizeof(ha_name), "%s", fullname.c_str());
     }
     ha_name[0]  = toupper(ha_name[0]); // capitalize first letter
     doc["name"] = ha_name;

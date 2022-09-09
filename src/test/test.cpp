@@ -399,7 +399,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
 #if defined(EMSESP_STANDALONE)
 
-        DynamicJsonDocument doc(8000); // some absurb high number
+        DynamicJsonDocument doc(8000); // some absurd high number
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
                 doc.clear();

@@ -442,7 +442,7 @@ const emsesp_devicedata_1 = {
     {
       v: '(0)',
       u: 0,
-      id: '00error code',
+      id: '08error code',
     },
     {
       v: '14:54:39 06/06/2021',
@@ -580,8 +580,9 @@ const emsesp_deviceentities_1 = [
   {
     v: '(0)',
     n: 'error code',
+    cn: 'my custom error code',
     id: 'errorcode',
-    m: 0,
+    m: 8,
     w: false,
   },
   {
@@ -922,22 +923,55 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
 })
 
 function updateMask(entity, de, dd) {
-  const shortname = entity.slice(2)
-  const new_mask = parseInt(entity.slice(0, 2), 16)
+  new_mask = parseInt(entity.slice(0, 2), 16)
+  const shortname_with_customname = entity.slice(2)
+  const shortname = shortname_with_customname.split('|')[0]
+  const new_custom_name = shortname_with_customname.split('|')[1]
 
-  objIndex = de.findIndex((obj) => obj.id == shortname)
-  if (objIndex !== -1) {
-    de[objIndex].m = new_mask
-    const fullname = de[objIndex].n
-    objIndex = dd.data.findIndex((obj) => obj.id.slice(2) == fullname)
-    if (objIndex !== -1) {
+  // find in de
+  de_objIndex = de.findIndex((obj) => obj.id == shortname)
+  if (de_objIndex !== -1) {
+    // find in dd, either looking for fullname or custom name
+    if (de[de_objIndex].cn) {
+      fullname = de[de_objIndex].cn
+    } else {
+      fullname = de[de_objIndex].n
+    }
+    dd_objIndex = dd.data.findIndex((obj) => obj.id.slice(2) == fullname)
+    if (dd_objIndex !== -1) {
+      let changed = new Boolean(false)
+
       // see if the mask has changed
-      const old_mask = parseInt(dd.data[objIndex].id.slice(0, 2), 16)
+      const old_mask = parseInt(dd.data[dd_objIndex].id.slice(0, 2), 16)
       if (old_mask !== new_mask) {
-        const mask_hex = entity.slice(0, 2)
-        console.log('Updating ' + dd.data[objIndex].id + ' -> ' + mask_hex + fullname)
-        dd.data[objIndex].id = mask_hex + fullname
+        console.log('mask has changed')
+        new_mask = entity.slice(0, 2)
+        changed = true
       }
+
+      // see if the custom name has changed
+      const old_custom_name = dd.data[dd_objIndex].cn
+      if (old_custom_name !== new_custom_name) {
+        console.log('name has changed')
+        changed = true
+        new_fullname = new_custom_name
+      } else {
+        new_fullname = fullname
+      }
+
+      if (changed) {
+        console.log('Updating ' + dd.data[dd_objIndex].id + ' -> ' + new_mask + new_fullname)
+        de[de_objIndex].m = new_mask
+        de[de_objIndex].cn = new_fullname
+        dd.data[dd_objIndex].id = new_mask + new_fullname
+      }
+
+      console.log('dd:')
+      console.log(dd.data[dd_objIndex])
+      console.log('de:')
+      console.log(de[de_objIndex])
+    } else {
+      console.log('error, not found')
     }
   } else {
     console.log("can't locate record for name " + shortname)
