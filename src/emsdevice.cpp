@@ -444,13 +444,13 @@ void EMSdevice::add_device_value(uint8_t                              tag,
                 for (std::string entity_id : entityCustomization.entity_ids) {
                     // if there is an appended custom name, strip it to get the true entity name
                     // and extract the new custom name
-                    std::string matched_entity;
+                    std::string shortname;
                     auto        custom_name_pos = entity_id.find('|');
                     bool        has_custom_name = (custom_name_pos != std::string::npos);
                     if (has_custom_name) {
-                        matched_entity = entity_id.substr(2, custom_name_pos - 2);
+                        shortname = entity_id.substr(2, custom_name_pos - 2);
                     } else {
-                        matched_entity = entity_id.substr(2);
+                        shortname = entity_id.substr(2);
                     }
 
                     /*
@@ -465,7 +465,7 @@ void EMSdevice::add_device_value(uint8_t                              tag,
                     */
 
                     // we found the device entity
-                    if (matched_entity == entity) {
+                    if (shortname == entity) {
                         // get Mask
                         uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
                         state        = mask << 4; // set state high bits to flag, turn off active and ha flags
@@ -506,8 +506,7 @@ void EMSdevice::add_device_value(uint8_t                              tag,
 
     // add the command to our library
     // cmd is the short_name and the description is the fullname
-    // TODO this needs adapting to take the custom fullname since its not a FPTR()
-    Command::add(device_type_, short_name, f, Helpers::translated_fword(fullname), flags);
+    Command::add(device_type_, short_name, f, Helpers::translated_word(fullname), flags);
 }
 
 // single list of options
@@ -989,34 +988,59 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
 
 // set mask per device entity based on the id which is prefixed with the 2 char hex mask value
 // returns true if the entity has a mask set (not 0 the default)
-void EMSdevice::mask_entity(const std::string & entity_id) {
+void EMSdevice::setCustomEntity(const std::string & entity_id) {
     for (auto & dv : devicevalues_) {
         std::string entity_name =
             dv.tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(dv.short_name) : tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
-        if (entity_name == entity_id.substr(2)) {
-            // this entity has a new mask set
+
+        // extra shortname
+        std::string shortname;
+        auto        custom_name_pos = entity_id.find('|');
+        bool        has_custom_name = (custom_name_pos != std::string::npos);
+        if (has_custom_name) {
+            shortname = entity_id.substr(2, custom_name_pos - 2);
+        } else {
+            shortname = entity_id.substr(2);
+        }
+
+        if (entity_name == shortname) {
+            // check the masks
             uint8_t current_mask = dv.state >> 4;
             uint8_t new_mask     = Helpers::hextoint(entity_id.substr(0, 2).c_str()); // first character contains mask flags
+
+            // if it's a new mask, reconfigure HA
             if (Mqtt::ha_enabled() && ((current_mask ^ new_mask) & (DeviceValueState::DV_READONLY >> 4))) {
                 // remove ha config on change of dv_readonly flag
                 dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                 Mqtt::publish_ha_sensor_config(dv, "", "", true); // delete topic (remove = true)
             }
+
+            // always write the mask
             dv.state = ((dv.state & 0x0F) | (new_mask << 4)); // set state high bits to flag
+
+            // set the custom name if it has one
+            if (has_custom_name) {
+                dv.custom_fullname = entity_id.substr(custom_name_pos + 1);
+            }
+
             return;
         }
     }
 }
 
-// populate a string vector with entities that have masks set
-void EMSdevice::getMaskedEntities(std::vector<std::string> & entity_ids) {
+// populate a string vector with entities that have masks set or have a custom name
+void EMSdevice::getCustomEntities(std::vector<std::string> & entity_ids) {
     for (const auto & dv : devicevalues_) {
         std::string entity_name =
             dv.tag < DeviceValueTAG::TAG_HC1 ? read_flash_string(dv.short_name) : tag_to_string(dv.tag) + "/" + read_flash_string(dv.short_name);
         uint8_t mask = dv.state >> 4;
 
-        if (mask) {
-            entity_ids.push_back(Helpers::hextoa(mask, false) + entity_name);
+        if (mask || !dv.custom_fullname.empty()) {
+            if (dv.custom_fullname.empty()) {
+                entity_ids.push_back(Helpers::hextoa(mask, false) + entity_name);
+            } else {
+                entity_ids.push_back(Helpers::hextoa(mask, false) + entity_name + "|" + dv.custom_fullname);
+            }
         }
     }
 }

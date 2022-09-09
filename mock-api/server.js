@@ -302,7 +302,7 @@ const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile'
 const EMSESP_WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
 const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
 const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalog'
-const EMSESP_MASKED_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'maskedEntities'
+const EMSESP_CUSTOM_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities'
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations'
 
 settings = {
@@ -978,7 +978,7 @@ function updateMask(entity, de, dd) {
   }
 }
 
-rest_server.post(EMSESP_MASKED_ENTITIES_ENDPOINT, (req, res) => {
+rest_server.post(EMSESP_CUSTOM_ENTITIES_ENDPOINT, (req, res) => {
   const id = req.body.id
   console.log('customization id = ' + id)
   console.log(req.body.entity_ids)

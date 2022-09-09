@@ -187,8 +187,8 @@ class EMSdevice {
     void   list_device_entries(JsonObject & output) const;
     void   add_handlers_ignored(const uint16_t handler);
 
-    void mask_entity(const std::string & entity_id);
-    void getMaskedEntities(std::vector<std::string> & entity_ids);
+    void setCustomEntity(const std::string & entity_id);
+    void getCustomEntities(std::vector<std::string> & entity_ids);
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
 

@@ -31,8 +31,8 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
                     securityManager,
                     AuthenticationPredicates::IS_AUTHENTICATED)
     , _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE)
-    , _masked_entities_handler(MASKED_ENTITIES_PATH,
-                               securityManager->wrapCallback(std::bind(&WebCustomizationService::masked_entities, this, _1, _2),
+    , _masked_entities_handler(CUSTOM_ENTITIES_PATH,
+                               securityManager->wrapCallback(std::bind(&WebCustomizationService::custom_entities, this, _1, _2),
                                                              AuthenticationPredicates::IS_AUTHENTICATED))
     , _device_entities_handler(DEVICE_ENTITIES_PATH,
                                securityManager->wrapCallback(std::bind(&WebCustomizationService::device_entities, this, _1, _2),
@@ -85,6 +85,7 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
         entityJson["product_id"] = entityCustomization.product_id;
         entityJson["device_id"]  = entityCustomization.device_id;
 
+        // entries are in the form <XX><shortname>[|optional customname] e.g "08heatingactive|heating is on"
         JsonArray masked_entityJson = entityJson.createNestedArray("entity_ids");
         for (std::string entity_id : entityCustomization.entity_ids) {
             masked_entityJson.add(entity_id);
@@ -97,9 +98,8 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
 StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization & settings) {
 #ifdef EMSESP_STANDALONE
     // invoke some fake data for testing
-    // using https://arduinojson.org/v5/assistant/
-    const char * json =
-        "{\"sensors\":[],\"analogs\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom name for heating active\",\"08tapwateractive\"]}]}";
+    const char * json = "{\"sensors\":[],\"analogs\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom "
+                        "name for heating active\",\"08tapwateractive\"]}]}";
 
     StaticJsonDocument<500> doc;
     deserializeJson(doc, json);
@@ -222,7 +222,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request, J
 // takes a list of updated entities with new masks from the web UI
 // saves it in the customization service
 // and updates the entity list real-time
-void WebCustomizationService::masked_entities(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebCustomizationService::custom_entities(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
         // find the device using the unique_id
         for (const auto & emsdevice : EMSESP::emsdevices) {
@@ -232,10 +232,10 @@ void WebCustomizationService::masked_entities(AsyncWebServerRequest * request, J
                     uint8_t product_id = emsdevice->product_id();
                     uint8_t device_id  = emsdevice->device_id();
 
-                    // and set the mask immediately for the changed entities
+                    // and set the mask and custom names immediately for any listed entities
                     JsonArray entity_ids_json = json["entity_ids"];
                     for (const JsonVariant id : entity_ids_json) {
-                        emsdevice->mask_entity(id.as<std::string>());
+                        emsdevice->setCustomEntity(id.as<std::string>());
                     }
 
                     // Save the list to the customization file
@@ -260,9 +260,9 @@ void WebCustomizationService::masked_entities(AsyncWebServerRequest * request, J
                             new_entry.product_id = product_id;
                             new_entry.device_id  = device_id;
 
-                            // get list of entities that have masks
+                            // get list of entities that have masks set or a custom fullname
                             std::vector<std::string> entity_ids;
-                            emsdevice->getMaskedEntities(entity_ids);
+                            emsdevice->getCustomEntities(entity_ids);
                             new_entry.entity_ids = entity_ids;
 
                             // add the record and save

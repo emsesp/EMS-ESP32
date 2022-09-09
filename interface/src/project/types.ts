@@ -144,7 +144,7 @@ export interface DeviceEntity {
   w: boolean; // writeable
 }
 
-export interface MaskedEntities {
+export interface CustomEntities {
   id: number;
   entity_ids: string[];
 }

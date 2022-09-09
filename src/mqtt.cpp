@@ -958,7 +958,7 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelp
     JsonArray ids = dev_json.createNestedArray("ids");
     ids.add("ems-esp");
 
-    auto fullname = read_flash_string(name); // TODO make sure it works, it may need a std::move()?
+    auto fullname = read_flash_string(name);
 
     publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, fullname, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
 }

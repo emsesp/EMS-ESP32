@@ -260,7 +260,7 @@ const SettingsCustomization: FC = () => {
       }
 
       try {
-        const response = await EMSESP.writeMaskedEntities({
+        const response = await EMSESP.writeCustomEntities({
           id: devices?.devices[selectedDevice].i,
           entity_ids: masked_entities
         });

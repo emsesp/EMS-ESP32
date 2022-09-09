@@ -616,7 +616,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == 1) { // boiler
                 std::string a = "07wwseltemp";
-                emsdevice->mask_entity(a);
+                emsdevice->setCustomEntity(a);
                 break;
             }
         }

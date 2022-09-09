@@ -37,18 +37,18 @@ void AnalogSensor::start() {
         EMSdevice::DeviceType::ANALOGSENSOR,
         F_(info),
         [&](const char * value, const int8_t id, JsonObject & output) { return command_info(value, id, output); },
-        F_(info_cmd));
+        uuid::read_flash_string(F_(info_cmd)));
     Command::add(
         EMSdevice::DeviceType::ANALOGSENSOR,
         F_(setvalue),
         [&](const char * value, const int8_t id) { return command_setvalue(value, id); },
-        F("set io value"),
+        "set io value", // TODO this needs translating
         CommandFlag::ADMIN_ONLY);
     Command::add(
         EMSdevice::DeviceType::ANALOGSENSOR,
         F_(commands),
         [&](const char * value, const int8_t id, JsonObject & output) { return command_commands(value, id, output); },
-        F_(commands_cmd));
+        uuid::read_flash_string(F_(commands_cmd)));
 
     Mqtt::subscribe(EMSdevice::DeviceType::ANALOGSENSOR, "analogsensor/#", nullptr); // use empty function callback
 }
