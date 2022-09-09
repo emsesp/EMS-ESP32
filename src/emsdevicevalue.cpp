@@ -32,11 +32,12 @@ DeviceValue::DeviceValue(uint8_t                              device_type,
                          int8_t                               numeric_operator,
                          const __FlashStringHelper * const    short_name,
                          const __FlashStringHelper * const *  fullname,
-                         uint8_t                              uom,
-                         bool                                 has_cmd,
-                         int16_t                              min,
-                         uint16_t                             max,
-                         uint8_t                              state)
+                         const __FlashStringHelper * const    custom_fullname,
+                         uint8_t  uom,
+                         bool     has_cmd,
+                         int16_t  min,
+                         uint16_t max,
+                         uint8_t  state)
     : device_type(device_type)
     , tag(tag)
     , value_p(value_p)
@@ -46,6 +47,7 @@ DeviceValue::DeviceValue(uint8_t                              device_type,
     , numeric_operator(numeric_operator)
     , short_name(short_name)
     , fullname(fullname)
+    , custom_fullname(custom_fullname)
     , uom(uom)
     , has_cmd(has_cmd)
     , min(min)

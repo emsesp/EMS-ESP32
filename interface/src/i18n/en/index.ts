@@ -253,7 +253,8 @@ const en: BaseTranslation = {
   NETWORK_ENABLE_IPV6: 'Enable IPv6 support',
   NETWORK_FIXED_IP: 'Use Fixed IP address',
   ADMIN: 'Admin',
-  GUEST: 'Guest'
+  GUEST: 'Guest',
+  NEW: 'New'
 };
 
 export default en;

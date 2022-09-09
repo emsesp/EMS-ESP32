@@ -449,8 +449,14 @@ void EMSdevice::add_device_value(uint8_t                              tag,
         }
     });
 
+    // TODO
+    const __FlashStringHelper * custom_fullname;
+
+    custom_fullname = nullptr;
+
     // add the device entity
-    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_single, numeric_operator, short_name, fullname, uom, has_cmd, min, max, state);
+    devicevalues_.emplace_back(
+        device_type_, tag, value_p, type, options, options_single, numeric_operator, short_name, fullname, custom_fullname, uom, has_cmd, min, max, state);
 
     // add a new command if it has a function attached
     if (!has_cmd) {

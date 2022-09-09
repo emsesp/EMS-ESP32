@@ -253,7 +253,8 @@ const nl: BaseTranslation = {
   NETWORK_ENABLE_IPV6: 'Activeer IPv6 support',
   NETWORK_FIXED_IP: 'Gebruik vast IP addres',
   ADMIN: 'Admin',
-  GUEST: 'Gast'
+  GUEST: 'Gast',
+  NEW: 'Nieuwe'
 };
 
 export default nl;

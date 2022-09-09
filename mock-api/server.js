@@ -598,19 +598,13 @@ const emsesp_deviceentities_1 = [
   //   m: 0,
   //   w: false,
   // },
-  {
-    v: 'roomTemp',
-    id: 'hc1/HA climate config creation',
-    m: 0,
-    w: false,
-  },
-  {
-    v: 18.2,
-    n: 'hc1 selected room temperature',
-    id: 'hc1/seltemp',
-    m: 0,
-    w: true,
-  },
+  // {
+  //   v: 18.2,
+  //   n: 'hc1 selected room temperature',
+  //   id: 'hc1/seltemp',
+  //   m: 0,
+  //   w: true,
+  // },
   {
     v: 22.6,
     n: 'hc1 current room temperature',

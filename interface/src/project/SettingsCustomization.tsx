@@ -40,7 +40,7 @@ import { ButtonRow, FormLoader, ValidatedTextField, SectionContent } from '../co
 
 import * as EMSESP from './api';
 
-import { extractErrorMessage } from '../utils';
+import { extractErrorMessage, updateValue } from '../utils';
 
 import { DeviceShort, Devices, DeviceEntity, DeviceEntityMask } from './types';
 
@@ -57,6 +57,9 @@ const SettingsCustomization: FC = () => {
   const [devices, setDevices] = useState<Devices>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(-1);
+
+  const [selectedEntity, setSelectedEntity] = useState<DeviceEntity>();
+
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
   const [selectedFilters, setSelectedFilters] = useState<number>(0);
   const [search, setSearch] = useState('');
@@ -96,6 +99,7 @@ const SettingsCustomization: FC = () => {
     Row: `
       background-color: #1e1e1e;
       position: relative;
+      cursor: pointer;
     
       .td {
         border-top: 1px solid #565656;
@@ -106,6 +110,11 @@ const SettingsCustomization: FC = () => {
         background-color: #3d4752;
         color: white;
         font-weight: normal;
+      }
+
+      &:hover .td {
+        border-top: 1px solid #177ac9;
+        border-bottom: 1px solid #177ac9;
       }
 
       &:nth-of-type(odd) .td {
@@ -329,6 +338,19 @@ const SettingsCustomization: FC = () => {
     );
   };
 
+  const editEntity = (de: DeviceEntity) => {
+    if (de.n) {
+      setSelectedEntity(de);
+      console.log(de.n); // TODO
+    }
+  };
+
+  const updateEntity = () => {
+    if (selectedEntity) {
+      setSelectedEntity(undefined); // TODO
+    }
+  };
+
   const renderDeviceData = () => {
     if (devices?.devices.length === 0 || deviceEntities[0].id === '') {
       return;
@@ -444,7 +466,7 @@ const SettingsCustomization: FC = () => {
               </Header>
               <Body>
                 {tableList.map((de: DeviceEntity) => (
-                  <Row key={de.id} item={de}>
+                  <Row key={de.id} item={de} onClick={() => editEntity(de)}>
                     <Cell stiff>
                       <ToggleButtonGroup
                         size="small"
@@ -554,8 +576,55 @@ const SettingsCustomization: FC = () => {
     );
   };
 
+  const renderEditEntity = () => {
+    if (selectedEntity) {
+      return (
+        <Dialog open={selectedEntity !== undefined} onClose={() => setSelectedEntity(undefined)}>
+          <DialogTitle>Rename Entity</DialogTitle>
+          <DialogContent dividers>
+            <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
+              <Typography variant="body2">{selectedEntity.n}</Typography>
+            </Box>
+            <Grid container spacing={1}>
+              <Grid item>
+                <ValidatedTextField
+                  name="cn"
+                  label={LL.NEW() + ' ' + LL.ENTITY_NAME()}
+                  value={selectedEntity.cn}
+                  autoFocus
+                  sx={{ width: '30ch' }}
+                  onChange={updateValue(setSelectedEntity)}
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              startIcon={<CancelIcon />}
+              variant="outlined"
+              onClick={() => setSelectedEntity(undefined)}
+              color="secondary"
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              startIcon={<SaveIcon />}
+              variant="outlined"
+              type="submit"
+              onClick={() => updateEntity()}
+              color="warning"
+            >
+              {LL.SAVE()}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      );
+    }
+  };
+
   return (
     <SectionContent title={LL.USER_CUSTOMIZATION()} titleGutter>
+      {renderEditEntity()}
       {content()}
     </SectionContent>
   );

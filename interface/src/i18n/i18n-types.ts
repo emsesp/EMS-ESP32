@@ -1004,6 +1004,10 @@ type RootTranslation = {
 	 * Guest
 	 */
 	GUEST: string
+	/**
+	 * New
+	 */
+	NEW: string
 }
 
 export type TranslationFunctions = {
@@ -1985,6 +1989,10 @@ export type TranslationFunctions = {
 	 * Guest
 	 */
 	GUEST: () => LocalizedString
+	/**
+	 * New
+	 */
+	NEW: () => LocalizedString
 }
 
 export type Formatters = {}

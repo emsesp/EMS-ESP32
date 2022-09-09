@@ -150,14 +150,15 @@ class DeviceValue {
     const __FlashStringHelper * const ** options;        // options as a flash char array
     const __FlashStringHelper * const *  options_single; // options are not translated
     int8_t                               numeric_operator;
-    uint8_t                              options_size; // number of options in the char array, calculated
-    const __FlashStringHelper * const    short_name;   // used in MQTT and API
-    const __FlashStringHelper * const *  fullname;     // used in Web and Console, is translated
-    uint8_t                              uom;          // DeviceValueUOM::*
-    bool                                 has_cmd;      // true if there is a Console/MQTT command which matches the short_name
-    int16_t                              min;          // min range
-    uint16_t                             max;          // max range
-    uint8_t                              state;        // DeviceValueState::*
+    uint8_t                              options_size;    // number of options in the char array, calculated
+    const __FlashStringHelper * const    short_name;      // used in MQTT and API
+    const __FlashStringHelper * const *  fullname;        // used in Web and Console, is translated
+    const __FlashStringHelper * const    custom_fullname; // optional, from customization
+    uint8_t                              uom;             // DeviceValueUOM::*
+    bool                                 has_cmd;         // true if there is a Console/MQTT command which matches the short_name
+    int16_t                              min;             // min range
+    uint16_t                             max;             // max range
+    uint8_t                              state;           // DeviceValueState::*
 
     DeviceValue(uint8_t                              device_type,
                 uint8_t                              tag,
@@ -168,6 +169,7 @@ class DeviceValue {
                 int8_t                               numeric_operator,
                 const __FlashStringHelper * const    short_name,
                 const __FlashStringHelper * const *  fullname,
+                const __FlashStringHelper * const    custom_fullname,
                 uint8_t                              uom,
                 bool                                 has_cmd,
                 int16_t                              min,
