@@ -453,17 +453,6 @@ void EMSdevice::add_device_value(uint8_t                              tag,
                         shortname = entity_id.substr(2);
                     }
 
-                    /*
-                    Serial.print(COLOR_BRIGHT_GREEN);
-                    Serial.print(" entity name=");
-                    Serial.print(entity_id.c_str());
-                    Serial.print(" ,matched name=");
-                    Serial.print(matched_entity.c_str());
-                    Serial.print(" ,matched pos=");
-                    Serial.println(custom_name_pos);
-                    Serial.print(COLOR_RESET);
-                    */
-
                     // we found the device entity
                     if (shortname == entity) {
                         // get Mask
@@ -471,11 +460,6 @@ void EMSdevice::add_device_value(uint8_t                              tag,
                         state        = mask << 4; // set state high bits to flag, turn off active and ha flags
                         // see if there is a custom name in the entity string
                         if (has_custom_name) {
-                            /*
-                            Serial.print(COLOR_BRIGHT_MAGENTA);
-                            Serial.println(entity_id.substr(custom_name_pos + 1).c_str());
-                            Serial.print(COLOR_RESET);
-                            */
                             custom_fullname = entity_id.substr(custom_name_pos + 1);
                         }
                         break;
@@ -505,8 +489,8 @@ void EMSdevice::add_device_value(uint8_t                              tag,
     }
 
     // add the command to our library
-    // cmd is the short_name and the description is the fullname
-    Command::add(device_type_, short_name, f, Helpers::translated_word(fullname), flags);
+    // cmd is the short_name and the description is the fullname (not the custom fullname)
+    Command::add(device_type_, short_name, f, Helpers::translated_fword(fullname), flags);
 }
 
 // single list of options

@@ -50,12 +50,12 @@ void DallasSensor::start() {
         EMSdevice::DeviceType::DALLASSENSOR,
         F_(info),
         [&](const char * value, const int8_t id, JsonObject & output) { return command_info(value, id, output); },
-        uuid::read_flash_string(F_(info_cmd)));
+        F_(info_cmd));
     Command::add(
         EMSdevice::DeviceType::DALLASSENSOR,
         F_(commands),
         [&](const char * value, const int8_t id, JsonObject & output) { return command_commands(value, id, output); },
-        uuid::read_flash_string(F_(commands_cmd)));
+        F_(commands_cmd));
 
     Mqtt::subscribe(EMSdevice::DeviceType::DALLASSENSOR, "dallasssensor/#", nullptr); // use empty function callback
 }

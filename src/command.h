@@ -59,14 +59,14 @@ class Command {
         const __FlashStringHelper * cmd_;
         const cmd_function_p        cmdfunction_;
         const cmd_json_function_p   cmdfunction_json_;
-        const std::string           description_;
+        const __FlashStringHelper * description_;
 
         CmdFunction(const uint8_t               device_type,
                     const uint8_t               flags,
                     const __FlashStringHelper * cmd,
                     const cmd_function_p        cmdfunction,
                     const cmd_json_function_p   cmdfunction_json,
-                    const std::string &         description)
+                    const __FlashStringHelper * description)
             : device_type_(device_type)
             , flags_(flags)
             , cmd_(cmd)
@@ -102,14 +102,14 @@ class Command {
     static void add(const uint8_t               device_type,
                     const __FlashStringHelper * cmd,
                     const cmd_function_p        cb,
-                    const std::string &         description,
+                    const __FlashStringHelper * description,
                     uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
 
     // callback function taking value, id and a json object for its output
     static void add(const uint8_t               device_type,
                     const __FlashStringHelper * cmd,
                     const cmd_json_function_p   cb,
-                    const std::string &         description,
+                    const __FlashStringHelper * description,
                     uint8_t                     flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
 
     static void                   show_all(uuid::console::Shell & shell);
