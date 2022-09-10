@@ -442,7 +442,7 @@ const emsesp_devicedata_1 = {
     {
       v: '(0)',
       u: 0,
-      id: '08error code',
+      id: '08my custom error code',
     },
     {
       v: '14:54:39 06/06/2021',
@@ -923,58 +923,60 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
 })
 
 function updateMask(entity, de, dd) {
-  new_mask = parseInt(entity.slice(0, 2), 16)
+  const current_mask = parseInt(entity.slice(0, 2), 16)
   const shortname_with_customname = entity.slice(2)
   const shortname = shortname_with_customname.split('|')[0]
   const new_custom_name = shortname_with_customname.split('|')[1]
 
   // find in de
-  de_objIndex = de.findIndex((obj) => obj.id == shortname)
+  de_objIndex = de.findIndex((obj) => obj.id === shortname)
   if (de_objIndex !== -1) {
-    // find in dd, either looking for fullname or custom name
     if (de[de_objIndex].cn) {
       fullname = de[de_objIndex].cn
     } else {
       fullname = de[de_objIndex].n
     }
-    dd_objIndex = dd.data.findIndex((obj) => obj.id.slice(2) == fullname)
+
+    // find in dd, either looking for fullname or custom name
+    dd_objIndex = dd.data.findIndex((obj) => obj.id.slice(2) === fullname)
     if (dd_objIndex !== -1) {
       let changed = new Boolean(false)
 
       // see if the mask has changed
       const old_mask = parseInt(dd.data[dd_objIndex].id.slice(0, 2), 16)
-      if (old_mask !== new_mask) {
-        console.log('mask has changed')
-        new_mask = entity.slice(0, 2)
+      if (old_mask !== current_mask) {
         changed = true
+        console.log('mask has changed to ' + current_mask.toString(16))
       }
 
       // see if the custom name has changed
       const old_custom_name = dd.data[dd_objIndex].cn
       if (old_custom_name !== new_custom_name) {
-        console.log('name has changed')
         changed = true
         new_fullname = new_custom_name
+        console.log('name has changed to ' + new_custom_name)
       } else {
         new_fullname = fullname
       }
 
       if (changed) {
-        console.log('Updating ' + dd.data[dd_objIndex].id + ' -> ' + new_mask + new_fullname)
-        de[de_objIndex].m = new_mask
+        console.log(
+          'Updating ' + dd.data[dd_objIndex].id + ' -> ' + current_mask.toString(16).padStart(2, '0') + new_fullname,
+        )
+        de[de_objIndex].m = current_mask
         de[de_objIndex].cn = new_fullname
-        dd.data[dd_objIndex].id = new_mask + new_fullname
+        dd.data[dd_objIndex].id = current_mask.toString(16).padStart(2, '0') + new_fullname
       }
 
-      console.log('dd:')
+      console.log('new dd:')
       console.log(dd.data[dd_objIndex])
-      console.log('de:')
+      console.log('new de:')
       console.log(de[de_objIndex])
     } else {
-      console.log('error, not found')
+      console.log('error, dd not found')
     }
   } else {
-    console.log("can't locate record for name " + shortname)
+    console.log("can't locate record for shortname " + shortname)
   }
 }
 
