@@ -2,7 +2,7 @@ import type { BaseTranslation } from '../i18n-types';
 
 const se: BaseTranslation = {
   LANGUAGE: 'Språk',
-  RETRY: 'Nytt Försök',
+  RETRY: 'Försök igen',
   LOADING: 'Laddar',
   IS_REQUIRED: 'Krävs',
   SIGN_IN: 'Logga In',
