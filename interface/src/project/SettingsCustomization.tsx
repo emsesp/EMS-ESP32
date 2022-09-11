@@ -533,7 +533,7 @@ const SettingsCustomization: FC = () => {
           {LL.DEVICE_ENTITIES()}
         </Typography>
         {renderDeviceList()}
-        {renderDeviceData()}
+        {!deviceEntity && renderDeviceData()}
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1}>
             <ButtonRow>
