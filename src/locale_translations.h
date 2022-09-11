@@ -65,7 +65,7 @@ MAKE_PSTR_LIST(unknown, F("unknown"), F("Unbekannt"), F("Onbekend"), F("Okänt")
 MAKE_PSTR_LIST(flat, F("flat"), F("flach"), F("vlak"), F("Platt"))
 MAKE_PSTR_LIST(vacuum, F("vacuum"), F("vakuum"), F("vacuum"), F("Vakuum"))
 MAKE_PSTR_LIST(co2_optimized, F("co2 optimized"), F("CO2 optimiert"), F("CO2 geoptimaliseerd"), F("CO2-optimerad"))
-MAKE_PSTR_LIST(cost_optimized, F("cost optimized"), F("kostenoptimiert"), F("kosten geoptimaliseerd"), F("kostnads-optimerad"))
+MAKE_PSTR_LIST(cost_optimized, F("cost optimized"), F("kostenoptimiert"), F("kosten geoptimaliseerd"), F("kostnadsoptimerad"))
 MAKE_PSTR_LIST(outside_temp_switched, F("outside temp switched"), F("Außentemp. gesteuert"), F("Buitentemp. gestuurd"), F("Utomhustemp korrigerad"))
 MAKE_PSTR_LIST(co2_cost_mix, F("co2 cost mix"), F("Kostenmix"), F("Kostenmix"), F("Kostnadsmix"))
 MAKE_PSTR_LIST(analog, F("analog"), F("analog"), F("analoog"), F("analog"))
@@ -76,7 +76,7 @@ MAKE_PSTR_LIST(blocking, F("blocking"), F("Blockierung"), F("Blokkering"), F("Bl
 MAKE_PSTR_LIST(time, F("time"), F("Zeit"), F("Tijd"), F("Tid"))
 MAKE_PSTR_LIST(date, F("date"), F("Datum"), F("Datum"), F("Datum"))
 MAKE_PSTR_LIST(continuous, F("continuous"), F("kontinuierlich"), F("continue"), F("kontinuerlig"))
-MAKE_PSTR_LIST(3wayvalve, F("3-way valve"), F("3-Wege Ventil"), F("3-weg klep"), F("3-vägsventil"))
+MAKE_PSTR_LIST(3wayvalve, F("3-way valve"), F("3-Wege Ventil"), F("3-weg klep"), F("trevägsventil"))
 MAKE_PSTR_LIST(chargepump, F("chargepump"), F("Ladepumpe"), F("laadpomp"), F("laddpump"))
 MAKE_PSTR_LIST(hot, F("hot"), F("Heiß"), F("Heet"), F("Het"))
 MAKE_PSTR_LIST(high_comfort, F("high comfort"), F("gehobener Komfort"), F("Verhoogd comfort"), F("Förhöjd komfort"))
@@ -89,7 +89,7 @@ MAKE_PSTR_LIST(bufferedflow, F("buffered flow"), F("Durchlaufspeicher"), F("Door
 MAKE_PSTR_LIST(layeredbuffer, F("layered buffer"), F("Schichtspeicher"), F("Gelaagde buffer"), F("Lagrad buffert"))
 MAKE_PSTR_LIST(maintenance, F("maintenance"), F("Wartung"), F("Onderhoud"), F("Underhåll"))
 MAKE_PSTR_LIST(heating, F("heating"), F("Heizen"), F("Verwarmen"), F("Uppvärmning"))
-MAKE_PSTR_LIST(cooling, F("cooling"), F("Kühlen"), F("Koelen"), F("Kyla"))
+MAKE_PSTR_LIST(cooling, F("cooling"), F("Kühlen"), F("Koelen"), F("Kyler"))
 MAKE_PSTR_LIST(disinfecting, F("disinfecting"), F("desinfizieren"), F("Desinfecteren"), F("Desinficerar"))
 MAKE_PSTR_LIST(no_heat, F("no heat"), F("keine Wärme"), F("Geen warmte"), F("Ingen värme"))
 MAKE_PSTR_LIST(heatrequest, F("heat request"), F("Wärmeanforderung"), F("Verwarmignsverzoek"), F("Värmeförfrågan"))
@@ -109,9 +109,9 @@ MAKE_PSTR_LIST(light, F("light"), F("Leicht"), F("Licht"), F("Lätt"))
 MAKE_PSTR_LIST(medium, F("medium"), F("Mittel"), F("Middel"), F("Medel"))
 MAKE_PSTR_LIST(heavy, F("heavy"), F("Schwer"), F("Zwaar"), F("Tung"))
 MAKE_PSTR_LIST(start, F("start"), F("Start"), F("Start"), F("Start"))
-MAKE_PSTR_LIST(heat, F("heat"), F("Heizen"), F("Verwarmen"), F("Uppvärmning"))
+MAKE_PSTR_LIST(heat, F("heat"), F("Heizen"), F("Verwarmen"), F("Värme"))
 MAKE_PSTR_LIST(hold, F("hold"), F("Halten"), F("Pauzeren"), F("Paus"))
-MAKE_PSTR_LIST(cool, F("cool"), F("Kühlen"), F("Koelen"), F("Kyler"))
+MAKE_PSTR_LIST(cool, F("cool"), F("Kühlen"), F("Koelen"), F("Kyla"))
 MAKE_PSTR_LIST(end, F("end"), F("Ende"), F("Einde"), F("Slut"))
 MAKE_PSTR_LIST(german, F("german"), F("Deutsch"), F("Duits"), F("Tyska"))
 MAKE_PSTR_LIST(dutch, F("dutch"), F("Niederländisch"), F("Nederlands"), F("Nederländska"))
@@ -136,20 +136,20 @@ MAKE_PSTR_LIST(comfort, F("comfort"), F("Komfort"), F("Comfort"), F("Komfort"))
 MAKE_PSTR_LIST(night, F("night"), F("Nacht"), F("Nacht"), F("Natt"))
 MAKE_PSTR_LIST(day, F("day"), F("Tag"), F("Dag"), F("Dag"))
 MAKE_PSTR_LIST(holiday, F("holiday"), F("Urlaub"), F("Vakantie"), F("Helgdag"))
-MAKE_PSTR_LIST(reduce, F("reduce"), F("reduziert"), F("gereduceerd"), F("reducerad"))
+MAKE_PSTR_LIST(reduce, F("reduce"), F("reduziert"), F("gereduceerd"), F("Reducera"))
 MAKE_PSTR_LIST(noreduce, F("no reduce"), F("unreduziert"), F("niet gerduceerd"), F("oreducerad"))
-MAKE_PSTR_LIST(offset, F("offset"), F("Anhebung"), F("offset"), F("kompensering"))
+MAKE_PSTR_LIST(offset, F("offset"), F("Anhebung"), F("offset"), F("Förskutning"))
 MAKE_PSTR_LIST(design, F("design"), F("Auslegung"), F("Ontwero"), F("Design"))
 MAKE_PSTR_LIST(minflow, F("min flow"), F("min. Durchfluss"), F("Min. Doorstroom"), F("Min flöde"))
 MAKE_PSTR_LIST(maxflow, F("max flow"), F("max. Durchfluss"), F("Max. Doorstroom"), F("Max flöde"))
 MAKE_PSTR_LIST(fast, F("fast"), F("schnell"), F("snel"), F("snabb"))
 MAKE_PSTR_LIST(slow, F("slow"), F("langsam"), F("langzaam"), F("långsam"))
-MAKE_PSTR_LIST(internal_temperature, F("internal temperature"), F("Interne Temperatur"), F("Interne Temperatuur"), F("Intern temperatur"))
+MAKE_PSTR_LIST(internal_temperature, F("internal temperature"), F("Interne Temperatur"), F("Interne Temperatuur"), F("Interntemperatur"))
 MAKE_PSTR_LIST(internal_setpoint, F("internal setpoint"), F("Interner Sollwert"), F("Interne Streeftemperatuur"), F("Internt börvärde"))
 MAKE_PSTR_LIST(external_temperature, F("external temperature"), F("Externe Temperatur"), F("Externe Temperatuur"), F("Extern temperatur"))
 MAKE_PSTR_LIST(burner_temperature, F("burner temperature"), F("Brennertemperatur"), F("Brander Temperuur"), F("Brännartemperatur"))
 MAKE_PSTR_LIST(ww_temperature, F("ww temperature"), F("Wassertemperatur"), F("Watertemperatuur"), F("Vattentemperatur"))
-MAKE_PSTR_LIST(smoke_temperature, F("smoke temperature"), F("Abgastemperatur"), F("Buitentemperatuur"), F("Avgastemperatur"))
+MAKE_PSTR_LIST(smoke_temperature, F("smoke temperature"), F("Abgastemperatur"), F("Buitentemperatuur"), F("Rökgastemperatur"))
 MAKE_PSTR_LIST(weather_compensated, F("weather compensated"), F("Wetter kompensiert"), F("Weer gecompenseerd"), F("Väderkompenserad"))
 MAKE_PSTR_LIST(outside_basepoint, F("outside basepoint"), F("außerhalb des Basispunktes"), F("Buiten basispunt"), F("Utomhus baspunkt"))
 MAKE_PSTR_LIST(functioning_mode, F("functioning mode"), F("Funktionsweise"), F("Functiemodus"), F("Driftläge"))
@@ -180,7 +180,7 @@ MAKE_PSTR_LIST(boilTemp, F("boiltemp"), F("actual boiler temperature"), F("Kesse
 MAKE_PSTR_LIST(exhaustTemp, F("exhausttemp"), F("exhaust temperature"), F("Auslasstemperatur"), F("Uitlaattemperatuur"), F("Avgastemperatur"))
 MAKE_PSTR_LIST(burnGas, F("burngas"), F("gas"), F("Gas"), F("Gas"), F("Gas"))
 MAKE_PSTR_LIST(burnGas2, F("burngas2"), F("gas stage 2"), F("Gas Stufe 2"), F("gas fase 2"), F("Gas Fas 2"))
-MAKE_PSTR_LIST(flameCurr, F("flamecurr"), F("flame current"), F("Flammstrom"), F("Vlammenstroom"), F("Ström Låga"))
+MAKE_PSTR_LIST(flameCurr, F("flamecurr"), F("flame current"), F("Flammstrom"), F("Vlammenstroom"), F("Lågström"))
 MAKE_PSTR_LIST(heatingPump, F("heatingpump"), F("heating pump"), F("Heizungspumpe"), F("Verwarmingspomp"), F("Värmepump"))
 MAKE_PSTR_LIST(fanWork, F("fanwork"), F("fan"), F("Gebläse"), F("Ventilator"), F("Fläkt"))
 MAKE_PSTR_LIST(ignWork, F("ignwork"), F("ignition"), F("Zündung"), F("Ontsteking"), F("Tändning"))
@@ -209,7 +209,7 @@ MAKE_PSTR_LIST(maintenanceMessage, F("maintenancemessage"), F("maintenance messa
 MAKE_PSTR_LIST(maintenanceDate, F("maintenancedate"), F("next maintenance date"), F("Wartungsdatum"), F("Onderhoudsdatum"), F("Datum nästa Service"))
 MAKE_PSTR_LIST(maintenanceType, F("maintenance"), F("maintenance scheduled"), F("Wartungsplan"), F("Onderhoud gepland"), F("Underhåll schemlagt"))
 MAKE_PSTR_LIST(maintenanceTime, F("maintenancetime"), F("time to next maintenance"), F("Wartung in"), F("Onderhoud in"), F("Tid till nästa underhåll"))
-MAKE_PSTR_LIST(emergencyOps, F("emergencyops"), F("emergency operation"), F("Notoperation"), F("Noodoperatie"), F("Nödläge"))
+MAKE_PSTR_LIST(emergencyOps, F("emergencyops"), F("emergency operation"), F("Notoperation"), F("Noodoperatie"), F("Nöddrift"))
 MAKE_PSTR_LIST(emergencyTemp, F("emergencytemp"), F("emergency temperature"), F("Nottemperatur"), F("Noodtemperatuur"), F("Nödtemperatur"))
 
 // heatpump/compress specific
@@ -243,13 +243,13 @@ MAKE_PSTR_LIST(nrgConsCompTotal,
                F("total energy consumption compressor"),
                F("Energieverbrauch Kompressor gesamt"),
                F("Energieverbruik compressor totaal"),
-               F("Energiförbrukning Kompressor"))
+               F("Energiförbrukning kompressor"))
 MAKE_PSTR_LIST(nrgConsCompHeating,
                F("nrgconscompheating"),
                F("energy consumption compressor heating"),
                F("Energieverbrauch Kompressor heizen"),
                F("Energieverbruik compressor verwarmingsbedrijf"),
-               F("Energiförbrukning Uppvärmning"))
+               F("Energiförbrukning uppvärmning"))
 MAKE_PSTR_LIST(nrgConsCompWw,
                F("nrgconscompww"),
                F("energy consumption compressor dhw"),
@@ -267,7 +267,7 @@ MAKE_PSTR_LIST(nrgConsCompPool,
                F("energy consumption compressor pool"),
                F("Energieverbrauch Kompressor Pool"),
                F("Energiebedrijf compressor zwembadbedrijf"),
-               F("Energiförbrukning Pool"))
+               F("Energiförbrukning pool"))
 MAKE_PSTR_LIST(nrgSuppTotal, F("nrgsupptotal"), F("total energy supplied"), F("gesamte Energieabgabe"), F("Totaal opgewekte energie"), F("Tillförd energi"))
 MAKE_PSTR_LIST(nrgSuppHeating, F("nrgsuppheating"), F("total energy supplied heating"), F("gesamte Energieabgabe heizen"), F("Opgewekte energie verwarmingsbedrijf"), F("Tillförd energi Uppvärmning"))
 MAKE_PSTR_LIST(nrgSuppWw, F("nrgsuppww"), F("total energy warm supplied dhw"), F("gesamte Energieabgabe"), F("Opgewekte energie warmwaterbedrijf"), F("Tillförd energi Varmvatten"))
@@ -315,14 +315,14 @@ MAKE_PSTR_LIST(hpActivity, F("hpactivity"), F("compressor activity"), F("Kompres
 
 MAKE_PSTR_LIST(hpPower, F("hppower"), F("compressor power output"), F("Kopressorleistung"), F("Compressorvermogen"), F("Kompressoreffekt"))
 MAKE_PSTR_LIST(hpTc0, F("hptc0"), F("heat carrier return (TC0)"), F("Kältemittel Rücklauf (TC0)"), F("Koudemiddel retour (TC0O"), F("Värmebärare Retur (TC0)"))
-MAKE_PSTR_LIST(hpTc1, F("hptc1"), F("heat carrier forward (TC1)"), F("Kältemittel Vorlauf (TC1)"), F("Koudemiddel aanvoer (TC1)"), F("Värmebärare Tillopp (TC1)"))
+MAKE_PSTR_LIST(hpTc1, F("hptc1"), F("heat carrier forward (TC1)"), F("Kältemittel Vorlauf (TC1)"), F("Koudemiddel aanvoer (TC1)"), F("Värmebärare Framledning (TC1)"))
 MAKE_PSTR_LIST(hpTc3, F("hptc3"), F("condenser temperature (TC3)"), F("Verflüssigertemperatur (TC3)"), F("Condensortemperatuur (TC3)"), F("Kondensortemperatur (TC3)"))
 MAKE_PSTR_LIST(hpTr3,
                F("hptr3"),
                F("refrigerant temperature liquid side (condenser output) (TR3)"),
                F("Kältemittel (flüssig) (TR3)"),
                F("Temperatuur koudemiddel vloeibare zijde (TR3)",
-               F("Köldmedel temperatur (kondensorutlopp) (TR3)"))
+               F("Köldmedium temperatur (kondensorutlopp) (TR3)"))
 MAKE_PSTR_LIST(hpTr4, F("hptr4"), F("evaporator inlet temperature (TR4)"), F("Verdampfer Eingang (TR4)"), F("Verdamper ingangstemperatuur (TR4)"), F("Förångare inloppstemp (TR4)"))
 MAKE_PSTR_LIST(hpTr5, F("hptr5"), F("compressor inlet temperature (TR5)"), F("Kompessoreingang (TR5)"), F("Compressor ingangstemperatuur (TR5)"), F("Kompressor inloppstemp (TR5)"))
 MAKE_PSTR_LIST(hpTr6, F("hptr6"), F("compressor outlet temperature (TR6)"), F("Kompressorausgang (TR6)"), F("Compressor uitgangstemperatuur (TR6)"), F("Kompressor utloppstemp (TR6)"))
@@ -331,8 +331,8 @@ MAKE_PSTR_LIST(hpTr7,
                F("refrigerant temperature gas side (condenser input) (TR7)"),
                F("Kältemittel (gasförmig) (TR7)"),
                F("Temperatuur koudemiddel gasvormig (TR7)"),
-               F("Köldmedel temperatur gassida (kondensorinlopp) (TR7)"))
-MAKE_PSTR_LIST(hpTl2, F("hptl2"), F("air inlet temperature (TL2)"), F("Außenluft-Einlasstemperatur (TL2)"), F("Temperatuur luchtinlaat (TL2)"), F("Luftintag temperatur (TL2)"))
+               F("Köldmedium temperatur gassida (kondensorinlopp) (TR7)"))
+MAKE_PSTR_LIST(hpTl2, F("hptl2"), F("air inlet temperature (TL2)"), F("Außenluft-Einlasstemperatur (TL2)"), F("Temperatuur luchtinlaat (TL2)"), F("Luftintagstemperatur (TL2)"))
 MAKE_PSTR_LIST(hpPl1, F("hppl1"), F("low pressure side temperature (PL1)"), F("Niedrigdruckfühler (PL1)"), F("Temperatuur lage drukzijde (PL1)"), F("Temperatur Lågtryckssidan (PL1)"))
 MAKE_PSTR_LIST(hpPh1, F("hpph1"), F("high pressure side temperature (PH1)"), F("Hochdruckfühler (PH1)"), F("Temperatuur hoge drukzijde (PH1)"), F("Temperatur Högtryckssidan (PH1)"))
 
@@ -356,8 +356,8 @@ MAKE_PSTR_LIST(switchOverTemp,
 MAKE_PSTR_LIST(energyCostRatio, F("energycostratio"), F("energy cost ratio"), F("Energie-Kosten-Verhältnis"), F("Energiekostenratio"), F("Energi/Kostnads-förhållande"))
 MAKE_PSTR_LIST(fossileFactor, F("fossilefactor"), F("fossile energy factor"), F("Energiefaktor Fossil"), F("Energiefactor fossiele brandstof"), F("Energifaktor fossilenergi"))
 MAKE_PSTR_LIST(electricFactor, F("electricfactor"), F("electric energy factor"), F("Energiefaktor elektrisch"), F("Energiefactor electrisch"), F("Elektrisk energifaktor"))
-MAKE_PSTR_LIST(delayBoiler, F("delayboiler"), F("delay boiler support"), F("Verzögerungs-Option"), F("Vertragingsoptie"), F("Fördörjnings-option"))
-MAKE_PSTR_LIST(tempDiffBoiler, F("tempdiffboiler"), F("temp diff boiler support"), F("Temperaturdifferenz-Option"), F("Verschiltemperatuuroptie"), F("Temperaturskillnads-option"))
+MAKE_PSTR_LIST(delayBoiler, F("delayboiler"), F("delay boiler support"), F("Verzögerungs-Option"), F("Vertragingsoptie"), F("Fördörjningsoption"))
+MAKE_PSTR_LIST(tempDiffBoiler, F("tempdiffboiler"), F("temp diff boiler support"), F("Temperaturdifferenz-Option"), F("Verschiltemperatuuroptie"), F("Temperaturskillnadsoption"))
 
 // alternative heatsource AM200
 MAKE_PSTR_LIST(aCylTopTemp, F("cyltoptemp"), F("cylinder top temperature"), F("Speicher oben Temperatur"), F("Buffer temperatuur boven"), F("Cylindertemperatur Toppen"))
@@ -375,24 +375,24 @@ MAKE_PSTR_LIST(aRetTemp,
                F("Alternativer WE Rücklauftemperatur"),
                F("Alternatieve warmtebron retourtemperatuur"),
                F("Alternativ returtemp värmekälla"))
-MAKE_PSTR_LIST(sysFlowTemp, F("sysflowtemp"), F("system flow temperature"), F("System Vorlauftemperatur"), F("Systeem aanvoertemperatuur"), F("System Flödestemperatur"))
-MAKE_PSTR_LIST(sysRetTemp, F("sysrettemp"), F("system return temperature"), F("System Rücklauftemperatur"), F("Systeem retourtemperatuur"), F("System Returtemperatur"))
-MAKE_PSTR_LIST(valveByPass, F("valvebypass"), F("bypass valve"), F("Bypass-Ventil"), F("Bypass klep"), F("Bypass-ventil"))
-MAKE_PSTR_LIST(valveBuffer, F("valvebuffer"), F("buffer valve"), F("Puffer-Ventil"), F("Bufferklep"), F("Buffert-ventil"))
-MAKE_PSTR_LIST(valveReturn, F("valvereturn"), F("return valve"), F("Rückfluss-Ventil"), F("Retourklep"), F("Retur-ventil"))
+MAKE_PSTR_LIST(sysFlowTemp, F("sysflowtemp"), F("system flow temperature"), F("System Vorlauftemperatur"), F("Systeem aanvoertemperatuur"), F("Systemflödestemperatur"))
+MAKE_PSTR_LIST(sysRetTemp, F("sysrettemp"), F("system return temperature"), F("System Rücklauftemperatur"), F("Systeem retourtemperatuur"), F("Systemreturtemperatur"))
+MAKE_PSTR_LIST(valveByPass, F("valvebypass"), F("bypass valve"), F("Bypass-Ventil"), F("Bypass klep"), F("Bypassventil"))
+MAKE_PSTR_LIST(valveBuffer, F("valvebuffer"), F("buffer valve"), F("Puffer-Ventil"), F("Bufferklep"), F("Buffertventil"))
+MAKE_PSTR_LIST(valveReturn, F("valvereturn"), F("return valve"), F("Rückfluss-Ventil"), F("Retourklep"), F("Returventil"))
 MAKE_PSTR_LIST(aPumpMod, F("altpumpmod"), F("alternative hs pump modulation"), F("Alternativer WE Pumpenmodulation"), F("Alternatieve warmtebron pomp modulatie"), F("Alternativ Pumpmodulering Värmekälla"))
 MAKE_PSTR_LIST(heatSource, F("heatsource"), F("alternative heating active"), F("Alternativer Wärmeerzeuger aktiv"), F("Alternatieve warmtebron aktief"), F("Alternativ Värmekälla aktiv"))
 
 MAKE_PSTR_LIST(vr2Config, F("vr2config"), F("vr2 configuration"), F("VR2 Konfiguration"), F("VR2 configuratie"), F("VR2 Konfiguration"))
-MAKE_PSTR_LIST(ahsActivated, F("ahsactivated"), F("alternate heat source activation"), F("Alt. Wärmeerzeuger aktiviert"), F("Altenatieve warmtebron geactiveerd"), F("Alternativ värmekälla aktiverad"))
-MAKE_PSTR_LIST(aPumpConfig, F("apumpconfig"), F("primary pump config"), F("Konfig. Hauptpumpe"), F("Primaire pomp configuratie"), F("Konfiguration Primär Pump"))
+MAKE_PSTR_LIST(ahsActivated, F("ahsactivated"), F("alternate heat source activation"), F("Alt. Wärmeerzeuger aktiviert"), F("Altenatieve warmtebron geactiveerd"), F("Alternativ värmekälla aktivering"))
+MAKE_PSTR_LIST(aPumpConfig, F("apumpconfig"), F("primary pump config"), F("Konfig. Hauptpumpe"), F("Primaire pomp configuratie"), F("Konfiguration Primärpump"))
 MAKE_PSTR_LIST(aPumpSignal, F("apumpsignal"), F("output for pr1 pump"), F("Signal Hauptpumpe"), F("Output voor pomp PR1"), F("Utgång från pump PR1"))
 MAKE_PSTR_LIST(aPumpMin, F("apumpmin"), F("min output pump pr1"), F("Minimale Pumpenansteuerung"), F("Minimale output pomp PR1"), F("Min Output Pump PR1"))
 MAKE_PSTR_LIST(tempRise, F("temprise"), F("ahs return temp rise"), F("Rücklauf Temperaturerhöhung"), F("Verhoging retourtemperatuur"), F("Förhöjd returtemperatur"))
 MAKE_PSTR_LIST(setReturnTemp, F("setreturntemp"), F("set temp return"), F("Soll-Rücklauftemperatur"), F("Streeftemperatuur retour"), F("Vald returtemperatur"))
-MAKE_PSTR_LIST(mixRuntime, F("mixruntime"), F("mixer run time"), F("Mischer-Laufzeit"), F("Mixer looptijd"), F("Shunt körtid"))
+MAKE_PSTR_LIST(mixRuntime, F("mixruntime"), F("mixer run time"), F("Mischer-Laufzeit"), F("Mixer looptijd"), F("Blandningsventil drifttid"))
 MAKE_PSTR_LIST(bufBypass, F("bufbypass"), F("buffer bypass config"), F("Konfig. Bypass"), F("Buffer bypass configuratie"), F("Konfiguration Buffer bypass"))
-MAKE_PSTR_LIST(bufMixRuntime, F("bufmixruntime"), F("bypass mixer run time"), F("Speicher-Mischer-Laufzeit"), F("Buffer mixer looptijd"), F("Shunt Bypass körtid"))
+MAKE_PSTR_LIST(bufMixRuntime, F("bufmixruntime"), F("bypass mixer run time"), F("Speicher-Mischer-Laufzeit"), F("Buffer mixer looptijd"), F("Blandningsventil Bypass drifttid"))
 MAKE_PSTR_LIST(bufConfig, F("bufconfig"), F("dhw buffer config"), F("Konfig. Warmwasserspeicher"), F("Warmwater boiler configuratie"), F("Konfiguration Varmvattentank"))
 MAKE_PSTR_LIST(blockMode, F("blockmode"), F("config htg. blocking mode"), F("Konfig. Sperr-Modus"), F("Configuratie blokeermodus"), F("Konfiguration Blockeringsläge"))
 MAKE_PSTR_LIST(blockTerm, F("blockterm"), F("config of block terminal"), F("Konfig. Sperrterminal"), F("Configuratie blookerterminal"), F("Konfiguration Blockeringsterminal"))
@@ -400,7 +400,7 @@ MAKE_PSTR_LIST(blockHyst, F("blockhyst"), F("hyst. for boiler block"), F("Hyster
 MAKE_PSTR_LIST(releaseWait, F("releasewait"), F("boiler release wait time"), F("Wartezeit Freigabe"), F("Wachttijd ketel vrijgave"), F("Väntetid Frisläppning"))
 
 // the following are dhw for the boiler and automatically tagged with 'dhw'
-MAKE_PSTR_LIST(wwSelTempLow, F("wwseltemplow"), F("selected lower temperature"), F("untere Solltemperatur"), F("Onderste streeftemperatuur"), F("Vald lägsta temperatur"))
+MAKE_PSTR_LIST(wwSelTempLow, F("wwseltemplow"), F("selected lower temperature"), F("untere Solltemperatur"), F("Onderste streeftemperatuur"), F("Vald lägstatemperatur"))
 MAKE_PSTR_LIST(wwSelTempOff, F("wwseltempoff"), F("selected temperature for off"), F("Solltemperatur bei AUS"), F("Streeftemperatuur bij UIT"), F("Vald tempereatur för AV"))
 MAKE_PSTR_LIST(wwSelTempSingle, F("wwseltempsingle"), F("single charge temperature"), F("Solltemperature Einmalladung"), F("Streeftemperatuur enkele lading"), F("Temperatur Engångsladdning"))
 MAKE_PSTR_LIST(wwCylMiddleTemp, F("wwcylmiddletemp"), F("cylinder middle temperature (TS3)"), F("Speichertemperature Mitte"), F("Buffer temperatuur midden"), F("Cylinder Temperatur Mitten (TS3)"))
@@ -409,12 +409,12 @@ MAKE_PSTR_LIST(wwSelTemp, F("wwseltemp"), F("selected temperature"), F("gewählt
 MAKE_PSTR_LIST(wwSetTemp, F("wwsettemp"), F("set temperature"), F("Solltemperatur"), F("Streeftemperatuut"), F("Börtempertur"))
 MAKE_PSTR_LIST(wwType, F("wwtype"), F("type"), F("Typ"), F("type"), F("Typ"))
 MAKE_PSTR_LIST(wwComfort, F("wwcomfort"), F("comfort"), F("Komfort"), F("Comfort"), F("Komfort"))
-MAKE_PSTR_LIST(wwComfort1, F("wwcomfort1"), F("comfort mode"), F("Komfort-Modus"), F("Comfort modus"), F("Komfort-läge"))
-MAKE_PSTR_LIST(wwFlowTempOffset, F("wwflowtempoffset"), F("flow temperature offset"), F("Vorlauftemperaturanhebung"), F("Aanvoertemperatuur offset"), F("Flödestemperatur Offset"))
+MAKE_PSTR_LIST(wwComfort1, F("wwcomfort1"), F("comfort mode"), F("Komfort-Modus"), F("Comfort modus"), F("Komfortläge"))
+MAKE_PSTR_LIST(wwFlowTempOffset, F("wwflowtempoffset"), F("flow temperature offset"), F("Vorlauftemperaturanhebung"), F("Aanvoertemperatuur offset"), F("Flödestemperatur förskjutning"))
 MAKE_PSTR_LIST(wwMaxPower, F("wwmaxpower"), F("max power"), F("max Leistung"), F("Maximaal vermogen"), F("Max Effekt"))
 MAKE_PSTR_LIST(wwCircPump, F("wwcircpump"), F("circulation pump available"), F("Zirkulationspumpe vorhanden"), F("Circulatiepomp aanwezig"), F("Cirkulationspump tillgänglig"))
 MAKE_PSTR_LIST(wwChargeType, F("wwchargetype"), F("charging type"), F("Ladungstyp"), F("Buffer laadtype"), F("Laddningstyp"))
-MAKE_PSTR_LIST(wwDisinfectionTemp, F("wwdisinfectiontemp"), F("disinfection temperature"), F("Desinfectionstemperatur"), F("Desinfectietemperatuur"), F("Desinfektions-temperatur"))
+MAKE_PSTR_LIST(wwDisinfectionTemp, F("wwdisinfectiontemp"), F("disinfection temperature"), F("Desinfectionstemperatur"), F("Desinfectietemperatuur"), F("Desinfektionstemperatur"))
 MAKE_PSTR_LIST(wwCircMode, F("wwcircmode"), F("circulation pump mode"), F("Zirkulationspumpen-Modus"), F("Modus circulatiepomp"), F("Läge Cirkulationspump"))
 MAKE_PSTR_LIST(wwCirc, F("wwcirc"), F("circulation active"), F("Zirkulation aktiv"), F("Circulatiepomp actief"), F("Cirkulation aktiv"))
 MAKE_PSTR_LIST(wwCurTemp, F("wwcurtemp"), F("current intern temperature"), F("aktuelle interne Temperatur"), F("Huidige interne temperatuur"), F("Aktuell Intern Temperatur"))
@@ -423,22 +423,22 @@ MAKE_PSTR_LIST(wwCurFlow, F("wwcurflow"), F("current tap water flow"), F("aktuel
 MAKE_PSTR_LIST(wwStorageTemp1, F("wwstoragetemp1"), F("storage intern temperature"), F("interne Speichertemperature"), F("Interne buffertemperatuur"), F("Beredare Intern Temperatur"))
 MAKE_PSTR_LIST(wwStorageTemp2, F("wwstoragetemp2"), F("storage extern temperature"), F("externer Speichertemperatur"), F("Externe buffertemperatuur"), F("Beredare Extern Tempereatur"))
 MAKE_PSTR_LIST(wwActivated, F("wwactivated"), F("activated"), F("aktiviert"), F("geactiveerd"), F("Aktiverad"))
-MAKE_PSTR_LIST(wwOneTime, F("wwonetime"), F("one time charging"), F("Einmalladung"), F("Buffer eenmalig laden"), F("Engångsladdning Aktiv"))
+MAKE_PSTR_LIST(wwOneTime, F("wwonetime"), F("one time charging"), F("Einmalladung"), F("Buffer eenmalig laden"), F("Engångsladdning"))
 MAKE_PSTR_LIST(wwDisinfecting, F("wwdisinfecting"), F("disinfecting"), F("Desinfizieren"), F("Desinfectie"), F("Desinficerar"))
 MAKE_PSTR_LIST(wwCharging, F("wwcharging"), F("charging"), F("Laden"), F("Laden"), F("Laddar"))
 MAKE_PSTR_LIST(wwChargeOptimization, F("wwchargeoptimization"), F("charge optimization"), F("Ladungsoptimierung"), F("laadoptimalisatie"), F("Laddningsoptimering"))
 MAKE_PSTR_LIST(wwRecharging, F("wwrecharging"), F("recharging"), F("Nachladen"), F("herladen"), F("Omladdar"))
 MAKE_PSTR_LIST(wwTempOK, F("wwtempok"), F("temperature ok"), F("Temperatur ok"), F("Temperatuur OK"), F("Temperatur OK"))
 MAKE_PSTR_LIST(wwActive, F("wwactive"), F("active"), F("aktiv"), F("Actief"), F("Aktiv"))
-MAKE_PSTR_LIST(ww3wayValve, F("ww3wayvalve"), F("3-way valve active"), F("3-Wegeventil aktiv"), F("3-wegklep actief"), F("3-vägsventil Aktiv"))
+MAKE_PSTR_LIST(ww3wayValve, F("ww3wayvalve"), F("3-way valve active"), F("3-Wegeventil aktiv"), F("3-wegklep actief"), F("Trevägsventil Aktiv"))
 MAKE_PSTR_LIST(wwSetPumpPower, F("wwsetpumppower"), F("set pump power"), F("Soll Pumpenleistung"), F("Streefwaarde pompvermogen"), F("Vald pumpeffekt"))
-MAKE_PSTR_LIST(wwMixerTemp, F("wwmixertemp"), F("mixer temperature"), F("Mischertemperatur"), F("Mixertemperatuur"), F("Shunt-tempertur"))
+MAKE_PSTR_LIST(wwMixerTemp, F("wwmixertemp"), F("mixer temperature"), F("Mischertemperatur"), F("Mixertemperatuur"), F("Blandningsventil-tempertur"))
 MAKE_PSTR_LIST(wwStarts, F("wwstarts"), F("starts"), F("Anzahl Starts"), F("Aantal starts"), F("Antal Starter"))
 MAKE_PSTR_LIST(wwStarts2, F("wwstarts2"), F("control starts2"), F("Kreis 2 Anzahl Starts"), F("Aantal starts circuit 2"), F("Antal Starter Krets 2"))
 MAKE_PSTR_LIST(wwWorkM, F("wwworkm"), F("active time"), F("aktive Zeit"), F("Actieve tijd"), F("Aktiv Tid"))
 MAKE_PSTR_LIST(wwHystOn, F("wwhyston"), F("hysteresis on temperature"), F("Einschalttemperaturdifferenz"), F("Inschakeltemperatuurverschil"), F("Hysteres PÅ-temperatur"))
 MAKE_PSTR_LIST(wwHystOff, F("wwhystoff"), F("hysteresis off temperature"), F("Ausschalttemperaturdifferenz"), F("Uitschakeltemperatuurverschil"), F("Hysteres AV-temperatur"))
-MAKE_PSTR_LIST(wwProgMode, F("wwprogmode"), F("program"), F("Programmmodus"), F("Programma"), F("Progrma"))
+MAKE_PSTR_LIST(wwProgMode, F("wwprogmode"), F("program"), F("Programmmodus"), F("Programma"), F("Program"))
 MAKE_PSTR_LIST(wwCircProg, F("wwcircprog"), F("circulation program"), F("Zirkulationsprogramm"), F("Circulatieprogramma"), F("Cirkulationsprogram"))
 MAKE_PSTR_LIST(wwMaxTemp, F("wwmaxtemp"), F("maximum temperature"), F("Maximale Temperatur"), F("Maximale temperatuur"), F("Maximal Temperatur"))
 MAKE_PSTR_LIST(wwOneTimeKey, F("wwonetimekey"), F("one time key function"), F("Einmalladungstaste"), F("Knop voor eenmalig laden buffer"), F("Engångsfunktion"))
@@ -477,13 +477,13 @@ MAKE_PSTR_LIST(autodst,
                F("automatische Sommerzeit Umstellung"),
                F("Automatische omschakeling zomer-wintertijd"),
                F("Automatisk växling sommar/vinter-tid"))
-MAKE_PSTR_LIST(preheating, F("preheating"), F("preheating in the clock program"), F("Vorheizen im Zeitprogramm"), F("Voorverwarming in het klokprogramma"), F("Förvärmning in tidsprogrm"))
+MAKE_PSTR_LIST(preheating, F("preheating"), F("preheating in the clock program"), F("Vorheizen im Zeitprogramm"), F("Voorverwarming in het klokprogramma"), F("Förvärmning i tidsprogram"))
 MAKE_PSTR_LIST(offtemp, F("offtemp"), F("temperature when mode is off"), F("Temperatur bei AUS"), F("Temperatuur bij UIT"), F("Temperatur Avslagen"))
 MAKE_PSTR_LIST(mixingvalves, F("mixingvalves"), F("mixing valves"), F("Mischventile"), F("Mengkleppen"), F("Blandningsventiler"))
 
 // thermostat ww
 MAKE_PSTR_LIST(wwMode, F("wwmode"), F("mode"), F("Modus"), F("Modus"), F("Läge"))
-MAKE_PSTR_LIST(wwSetTempLow, F("wwsettemplow"), F("set low temperature"), F("untere Solltemperatur"), F("Onderste streeftemperatuur"), F("Undre Börvärde"))
+MAKE_PSTR_LIST(wwSetTempLow, F("wwsettemplow"), F("set low temperature"), F("untere Solltemperatur"), F("Onderste streeftemperatuur"), F("Nedre Börvärde"))
 MAKE_PSTR_LIST(wwWhenModeOff, F("wwwhenmodeoff"), F("when thermostat mode off"), F("bei Thermostatmodus AUS"), F("Als Thermostaat op UIT"), F("när Termostatläge är AV"))
 MAKE_PSTR_LIST(wwExtra1, F("wwextra1"), F("circuit 1 extra"), F("Kreis 1 Extra"), F("Circuit 1 extra"), F("Krets 1 Extra"))
 MAKE_PSTR_LIST(wwExtra2, F("wwextra2"), F("circuit 2 extra"), F("Kreis 2 Extra"), F("Circuit 2 extra"), F("Kets 2 Extra"))
@@ -491,8 +491,8 @@ MAKE_PSTR_LIST(wwExtra2, F("wwextra2"), F("circuit 2 extra"), F("Kreis 2 Extra")
 MAKE_PSTR_LIST(wwCharge, F("wwcharge"), F("charge"), F("Laden"), F("Laden"), F("Ladda"))
 MAKE_PSTR_LIST(wwChargeDuration, F("wwchargeduration"), F("charge duration"), F("Ladedauer"), F("Laadtijd"), F("Laddtid"))
 MAKE_PSTR_LIST(wwDisinfect, F("wwdisinfect"), F("disinfection"), F("Desinfektion"), F("Desinfectie"), F("Desinfektion"))
-MAKE_PSTR_LIST(wwDisinfectDay, F("wwdisinfectday"), F("disinfection day"), F("Desinfektionstag"), F("Desinfectiedag"), F("Desinfektion Dag"))
-MAKE_PSTR_LIST(wwDisinfectHour, F("wwdisinfecthour"), F("disinfection hour"), F("Desinfektionsstunde"), F("Desinfectieuur"), F("Desinfektion Timmar"))
+MAKE_PSTR_LIST(wwDisinfectDay, F("wwdisinfectday"), F("disinfection day"), F("Desinfektionstag"), F("Desinfectiedag"), F("Desinfektionsdag"))
+MAKE_PSTR_LIST(wwDisinfectHour, F("wwdisinfecthour"), F("disinfection hour"), F("Desinfektionsstunde"), F("Desinfectieuur"), F("Desinfektionstimme"))
 MAKE_PSTR_LIST(wwDisinfectTime, F("wwdisinfecttime"), F("disinfection time"), F("Desinfektionszeit"), F("Desinfectietijd"), F("Desinfektionstid"))
 MAKE_PSTR_LIST(wwDailyHeating, F("wwdailyheating"), F("daily heating"), F("täglich Heizen"), F("Dagelijks opwarmen"), F("Daglig Uppvärmning"))
 MAKE_PSTR_LIST(wwDailyHeatTime, F("wwdailyheattime"), F("daily heating time"), F("tägliche Heizzeit"), F("Tijd dagelijkse opwarming"), F("Daglig Uppvärmningstid"))
@@ -524,8 +524,8 @@ MAKE_PSTR_LIST(remoteseltemp,
                F("Temperatur von Fernsteuerung"),
                F("Temperatuur van afstandsbedieding"),
                F("Temperatur från fjärruppkoppling"))
-MAKE_PSTR_LIST(comforttemp, F("comforttemp"), F("comfort temperature"), F("Komforttemperatur"), F("Comforttemperatuur"), F("Komfort-temperatur"))
-MAKE_PSTR_LIST(summertemp, F("summertemp"), F("summer temperature"), F("Sommertemperatur"), F("Zomertemperatuur"), F("Sommar-temperatur"))
+MAKE_PSTR_LIST(comforttemp, F("comforttemp"), F("comfort temperature"), F("Komforttemperatur"), F("Comforttemperatuur"), F("Komforttemperatur"))
+MAKE_PSTR_LIST(summertemp, F("summertemp"), F("summer temperature"), F("Sommertemperatur"), F("Zomertemperatuur"), F("Sommartemperatur"))
 MAKE_PSTR_LIST(designtemp, F("designtemp"), F("design temperature"), F("Auslegungstemperatur"), F("Ontwerptemperatuur"), F("Design-temperatur"))
 MAKE_PSTR_LIST(offsettemp, F("offsettemp"), F("offset temperature"), F("Temperaturanhebung"), F("Temperatuur offset"), F("Temperaturkorrigering"))
 MAKE_PSTR_LIST(minflowtemp, F("minflowtemp"), F("min flow temperature"), F("min Vorlauftemperatur"), F("Min Flödestemperatur"))
@@ -534,7 +534,7 @@ MAKE_PSTR_LIST(roominfluence, F("roominfluence"), F("room influence"), F("Raumei
 MAKE_PSTR_LIST(roominfl_factor, F("roominflfactor"), F("room influence factor"), F("Raumeinfluss Factor"), F("Factor ruimteinvloed"), F("Rumspåverkansfaktor"))
 MAKE_PSTR_LIST(curroominfl, F("curroominfl"), F("current room influence"), F("aktueller Raumeinfluss"), F("Huidige ruimteinvloed"), F("Aktuell Rumspåverkan"))
 MAKE_PSTR_LIST(nofrosttemp, F("nofrosttemp"), F("nofrost temperature"), F("Frostschutztemperatur"), F("Temperatuur vorstbeveiliging"), F("Temperatur Frostskydd"))
-MAKE_PSTR_LIST(targetflowtemp, F("targetflowtemp"), F("target flow temperature"), F("berechnete Vorlauftemperatur"), F("Berekende aanvoertemperatuur"), F("Börvärde Flödestemperatur"))
+MAKE_PSTR_LIST(targetflowtemp, F("targetflowtemp"), F("target flow temperature"), F("berechnete Vorlauftemperatur"), F("Berekende aanvoertemperatuur"), F("Målvärde Flödestemperatur"))
 MAKE_PSTR_LIST(heatingtype, F("heatingtype"), F("heating type"), F("Heizungstyp"), F("Verwarmingstype"), F("Uppvärmningstyp"))
 MAKE_PSTR_LIST(summersetmode, F("summersetmode"), F("set summer mode"), F("Einstellung Sommerbetrieb"), F("Instelling zomerbedrijf"), F("Aktivera Sommarläge"))
 MAKE_PSTR_LIST(hpoperatingmode, F("hpoperatingmode"), F("heatpump operating mode"), F("Wärmepumpe Betriebsmodus"), F("Bedrijfsmodus warmtepomp"), F("Värmepump Driftläge"))
@@ -543,11 +543,11 @@ MAKE_PSTR_LIST(controlmode, F("controlmode"), F("control mode"), F("Kontrollmodu
 MAKE_PSTR_LIST(control, F("control"), F("control device"), F("Fernsteuerung"), F("Afstandsbedieding"), F("Kontrollenhet"))
 MAKE_PSTR_LIST(program, F("program"), F("program"), F("Programm"), F("Programma"), F("Program"))
 MAKE_PSTR_LIST(pause, F("pause"), F("pause time"), F("Pausenzeit"), F("Pausetijd"), F("Paustid"))
-MAKE_PSTR_LIST(party, F("party"), F("party time"), F("Partyzeit"), F("Partytijd"), F("Partyläge"))
+MAKE_PSTR_LIST(party, F("party"), F("party time"), F("Partyzeit"), F("Partytijd"), F("Partytid"))
 MAKE_PSTR_LIST(holidaytemp, F("holidaytemp"), F("holiday temperature"), F("Urlaubstemperatur"), F("Vakantietemperatuur"), F("Helgtemperatur"))
 MAKE_PSTR_LIST(summermode, F("summermode"), F("summer mode"), F("Sommerbetrieb"), F("Zomerbedrijf"), F("Sommarläge"))
 MAKE_PSTR_LIST(holidaymode, F("holidaymode"), F("holiday mode"), F("Urlaubsbetrieb"), F("Vakantiebedrijf"), F("Helgläge"))
-MAKE_PSTR_LIST(flowtempoffset, F("flowtempoffset"), F("flow temperature offset for mixer"), F("Vorlauftemperaturanhebung"), F("Mixer aanvoertemperatuur offset"), F("Temperaturkorrigering Flödestemp. Shunt"))
+MAKE_PSTR_LIST(flowtempoffset, F("flowtempoffset"), F("flow temperature offset for mixer"), F("Vorlauftemperaturanhebung"), F("Mixer aanvoertemperatuur offset"), F("Temperaturkorrigering Flödestemp. Blandningsventil"))
 MAKE_PSTR_LIST(reducemode, F("reducemode"), F("reduce mode"), F("Absenkmodus"), F("Gereduceerde modus"), F("Reducerat Läge"))
 MAKE_PSTR_LIST(noreducetemp, F("noreducetemp"), F("no reduce below temperature"), F("Absenkung unterbrechen unter"), F("Reduceermodus onderbreken onder"), F("Inaktivera reducering under"))
 MAKE_PSTR_LIST(reducetemp, F("reducetemp"), F("off/reduce switch temperature"), F("Absenkmodus unter"), F("Onderste afschakeltemperatuur"), F("Avslag/Reducera under"))
@@ -573,13 +573,13 @@ MAKE_PSTR_LIST(switchonoptimization, F("switchonoptimization"), F("switch-on opt
 
 // heatpump
 MAKE_PSTR_LIST(airHumidity, F("airhumidity"), F("relative air humidity"), F("relative Luftfeuchte"), F("Relatieve luchtvochtigheid"), F("Relativ Luftfuktighet"))
-MAKE_PSTR_LIST(dewTemperature, F("dewtemperature"), F("dew point temperature"), F("Taupunkttemperatur"), F("Dauwpunttemperatuur"), F("Daggtemperatur"))
+MAKE_PSTR_LIST(dewTemperature, F("dewtemperature"), F("dew point temperature"), F("Taupunkttemperatur"), F("Dauwpunttemperatuur"), F("Daggpunkt"))
 
 // mixer
-MAKE_PSTR_LIST(flowSetTemp, F("flowsettemp"), F("setpoint flow temperature"), F("Sollwert Vorlauftemperatur"), F("Streefwaarde aanvoertemperatuur"), F("Vald flödestemperur"))
+MAKE_PSTR_LIST(flowSetTemp, F("flowsettemp"), F("setpoint flow temperature"), F("Sollwert Vorlauftemperatur"), F("Streefwaarde aanvoertemperatuur"), F("Vald flödestemperatur"))
 MAKE_PSTR_LIST(flowTempHc, F("flowtemphc"), F("flow temperature (TC1)"), F("Vorlauftemperatur des HK (TC1)"), F("Aanvoertemperatuut circuit (TC1)"), F("Flödestemperatur (TC1)"))
 MAKE_PSTR_LIST(pumpStatus, F("pumpstatus"), F("pump status (PC1)"), F("Pumpenstatus des HK (PC1)"), F("pompstatus circuit (PC1)"), F("Pumpstatus (PC1)"))
-MAKE_PSTR_LIST(mixerStatus, F("valvestatus"), F("mixing valve actuator (VC1)"), F("Mischerventil Position (VC1)"), F("positie mixerklep (VC1)"), F("Stuntventil Status (VC1)"))
+MAKE_PSTR_LIST(mixerStatus, F("valvestatus"), F("mixing valve actuator (VC1)"), F("Mischerventil Position (VC1)"), F("positie mixerklep (VC1)"), F("Shuntventil Status (VC1)"))
 MAKE_PSTR_LIST(flowTempVf,
                F("flowtempvf"),
                F("flow temperature in header (T0/Vf)"),
@@ -614,12 +614,13 @@ MAKE_PSTR_LIST(cylMiddleTemp,
                F("cylinder middle temperature (TS3)"),
                F("Speichertemperatur Mitte (TS3)"),
                F("Zonneboilertemperatuur midden (TS3)"),
-               F("Cylindertemperatur Mitten (TS3)"))
+               F("Cylindertemperatur Mitten (TS3)"),)
 MAKE_PSTR_LIST(retHeatAssist,
                F("retheatassist"),
                F("return temperature heat assistance (TS4)"),
                F("Rücklaufanhebungs-Temp. (TS4)"),
-               F("Retourtemperatuur verwarmingsassistentie (TS4)"))
+               F("Retourtemperatuur verwarmingsassistentie (TS4)"),
+               F("Returtemperatur värmestöd (TS4)")
 MAKE_PSTR_LIST(m1Valve, F("heatassistvalve"), F("heat assistance valve (M1)"), F("Ventil Heizungsunterstützung (M1)"), F("Klep verwarmingsassistentie (M1)"), F("Uppvärmningsstöd Ventil (M1)"))
 MAKE_PSTR_LIST(m1Power,
                F("heatassistpower"),
@@ -686,7 +687,7 @@ MAKE_PSTR_LIST(wwPump, F("wwpump"), F("pump"), F("Pumpe"), F("Pomp"), F("Pump"))
 // solar ww and mixer wwc
 MAKE_PSTR_LIST(wwMinTemp, F("wwmintemp"), F("minimum temperature"), F("minimale Temperatur"), F("Minimale temperatuur"), F("Min Temperatur"))
 MAKE_PSTR_LIST(wwRedTemp, F("wwredtemp"), F("reduced temperature"), F("redizierte Temperatur"), F("Gereduceerde temperatuur"), F("Reducerad Temperatur"))
-MAKE_PSTR_LIST(wwDailyTemp, F("wwdailytemp"), F("daily temperature"), F("tägl. Temperatur"), F("Dagelijkse temperatuur"), F("Dagtemperatur"))
+MAKE_PSTR_LIST(wwDailyTemp, F("wwdailytemp"), F("daily temperature"), F("tägl. Temperatur"), F("Dagelijkse temperatuur"), F("Daglig temperatur"))
 MAKE_PSTR_LIST(wwKeepWarm, F("wwkeepwarm"), F("keep warm"), F("Warmhalten"), F("Warm houde"), F("Varmhållning"))
 MAKE_PSTR_LIST(wwStatus2, F("wwstatus2"), F("status 2"), F("Status 2"), F("Status 2"), F("Status 2"))
 MAKE_PSTR_LIST(wwPumpMod, F("wwpumpmod"), F("pump modulation"), F("Pumpen Modulation"), F("Pompmodulatie"), F("Pumpmodulering"))
