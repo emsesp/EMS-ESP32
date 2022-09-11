@@ -101,17 +101,10 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
     case ARDUINO_EVENT_ETH_GOT_IP:
-        emsesp::EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-            if (!networkSettings.enableIPv6 && _state.enabled) {
-                // emsesp::EMSESP::logger().info(F("IPv4 Network connection found, starting MQTT client"));
-                onConfigUpdated();
-            }
-        });
-        break;
     case ARDUINO_EVENT_ETH_GOT_IP6:
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
         if (_state.enabled) {
-            // emsesp::EMSESP::logger().info(F("IPv6 Network connection found, starting MQTT client"));
+            // emsesp::EMSESP::logger().info(F("IPv4 Network connection found, starting MQTT client"));
             onConfigUpdated();
         }
         break;

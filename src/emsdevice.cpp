@@ -945,7 +945,7 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
 
         // n is the fullname, and can be optional
         // don't add the fullname if its a command
-        auto fullname = dv.get_fullname();
+        auto fullname = Helpers::translated_word(dv.fullname);
         if (dv.type != DeviceValueType::CMD) {
             if (!fullname.empty()) {
                 if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
@@ -1002,9 +1002,11 @@ void EMSdevice::setCustomEntity(const std::string & entity_id) {
             // always write the mask
             dv.state = ((dv.state & 0x0F) | (new_mask << 4)); // set state high bits to flag
 
-            // set the custom name if it has one
+            // set the custom name if it has one, or clear it
             if (has_custom_name) {
                 dv.custom_fullname = entity_id.substr(custom_name_pos + 1);
+            } else {
+                dv.custom_fullname = "";
             }
 
             return;
