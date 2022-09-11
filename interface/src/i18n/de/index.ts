@@ -47,10 +47,10 @@ const de: Translation = {
   ACCESS_DENIED: 'Zugriff abgelehnt',
   ANALOG_SENSOR: 'Analogsensor',
   ANALOG_SENSORS: 'Analogsensoren',
-  UPDATED: 'DE_Updated',
-  UPDATE: 'DE_Update',
-  REMOVED: 'DE_Removed',
-  DELETION: 'DE_Deletion',
+  UPDATED: 'Aktualisiert',
+  UPDATE: 'Aktualisieren',
+  REMOVED: 'Entfernt',
+  DELETION: 'Löschung',
   OFFSET: 'Addition',
   FACTOR: 'Faktor',
   FREQ: 'Frequenz',
@@ -258,8 +258,8 @@ const de: Translation = {
   NETWORK_FIXED_IP: 'Feste IP Addresse',
   ADMIN: 'Administrator',
   GUEST: 'Gast',
-  NEW: 'Neu',
-  RENAME: 'DE_Rename'
+  NEW: 'Neuer',
+  RENAME: 'Ändere'
 };
 
 export default de;
