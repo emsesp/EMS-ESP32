@@ -91,7 +91,7 @@ const se: BaseTranslation = {
   NUM_ANALOG_SENSORS: '{num} Analoga Sensor{{er}}',
   NUM_DAYS: '{num} Dag{{ar}}',
   NUM_SECONDS: '{num} Sekund{{er}}',
-  NUM_HOURS: '{num} Timmar', 
+  NUM_HOURS: '{num} Timmar',
   NUM_MINUTES: '{num} Minut{{er}}',
   APPLICATION_SETTINGS: 'Applikationsinställningar',
   CUSTOMIZATION: 'Anpassa',
