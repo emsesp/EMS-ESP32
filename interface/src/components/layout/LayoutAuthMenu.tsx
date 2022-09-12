@@ -27,6 +27,7 @@ import { ReactComponent as NLflag } from '../../i18n/NL.svg';
 import { ReactComponent as DEflag } from '../../i18n/DE.svg';
 import { ReactComponent as GBflag } from '../../i18n/GB.svg';
 import { ReactComponent as SEflag } from '../../i18n/SE.svg';
+import { ReactComponent as PLflag } from '../../i18n/PL.svg';
 
 const ItemTypography = styled(Typography)<TypographyProps>({
   maxWidth: '250px',
@@ -86,6 +87,10 @@ const LayoutAuthMenu: FC = () => {
         <MenuItem key="se" value="se">
           <SEflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;SE
+        </MenuItem>
+        <MenuItem key="pl" value="pl">
+          <PLflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;PL
         </MenuItem>
       </TextField>
 
