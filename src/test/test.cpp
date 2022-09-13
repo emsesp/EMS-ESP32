@@ -1046,7 +1046,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::show_device_values(shell);
         shell.invoke_command("call system publish");
 
-        // EMSESP::send_raw_telegram("B0 00 FF 18 02 62 80 00 B8");
+        // EMSESP::txservice_.send_raw("B0 00 FF 18 02 62 80 00 B8");
     }
 
     if (command == "heatpump") {
@@ -1071,7 +1071,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         rx_telegram({0xB0, 00, 0xFF, 0x18, 02, 0x62, 0x80, 00, 0xB8});
 
-        EMSESP::send_raw_telegram("B0 00 FF 18 02 62 80 00 B8");
+        EMSESP::txservice_.send_raw("B0 00 FF 18 02 62 80 00 B8");
 
         uart_telegram("30 00 FF 0A 02 6A 04");                                                 // SM100 pump on  1
         uart_telegram("30 00 FF 00 02 64 00 00 00 04 00 00 FF 00 00 1E 0B 09 64 00 00 00 00"); // SM100 modulation

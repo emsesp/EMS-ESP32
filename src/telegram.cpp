@@ -540,9 +540,9 @@ void TxService::read_request(const uint16_t type_id, const uint8_t dest, const u
 }
 
 // Send a raw telegram to the bus, telegram is a text string of hex values
-void TxService::send_raw(const char * telegram_data) {
+bool TxService::send_raw(const char * telegram_data) {
     if (telegram_data == nullptr) {
-        return;
+        return false;
     }
 
     // since the telegram data is a const, make a copy. add 1 to grab the \0 EOS
@@ -562,6 +562,8 @@ void TxService::send_raw(const char * telegram_data) {
     if ((p = strtok(telegram, " ,"))) { // delimiter
         strlcpy(value, p, sizeof(value));
         data[0] = (uint8_t)strtol(value, 0, 16);
+    } else {
+        return false;
     }
 
     // and iterate until end
@@ -573,11 +575,13 @@ void TxService::send_raw(const char * telegram_data) {
         }
     }
 
-    if (count == 0) {
-        return; // nothing to send
+    // check valid length and src
+    if ((count < 4) || ((data[0] & 0x7F) != ems_bus_id())) {
+        return false;
     }
 
     add(Telegram::Operation::TX_RAW, data, count + 1, 0, true); // add to top/front of Tx queue
+    return true;
 }
 
 // add last Tx to tx queue and increment count

@@ -128,7 +128,6 @@ class EMSESP {
     static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value);
     static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
 
-    static void send_raw_telegram(const char * data);
     static bool device_exists(const uint8_t device_id);
     static bool cmd_is_readonly(const uint8_t device_type, const char * cmd, const int8_t id);
 

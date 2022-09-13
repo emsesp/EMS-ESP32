@@ -108,8 +108,7 @@ bool System::command_pin(const char * value, const int8_t id) {
 
 // send raw to ems
 bool System::command_send(const char * value, const int8_t id) {
-    EMSESP::send_raw_telegram(value); // ignore id
-    return true;
+    return EMSESP::txservice_.send_raw(value); // ignore id
 }
 
 // fetch device values

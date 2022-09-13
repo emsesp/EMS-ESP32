@@ -1275,11 +1275,6 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     }
 }
 
-// sends raw data of bytes along the Tx line
-void EMSESP::send_raw_telegram(const char * data) {
-    txservice_.send_raw(data);
-}
-
 // start all the core services
 // the services must be loaded in the correct order
 void EMSESP::start() {
