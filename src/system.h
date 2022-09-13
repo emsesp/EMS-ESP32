@@ -49,7 +49,6 @@ class System {
     void loop();
 
     // commands
-    static bool command_pin(const char * value, const int8_t id);
     static bool command_send(const char * value, const int8_t id);
     static bool command_publish(const char * value, const int8_t id);
     static bool command_fetch(const char * value, const int8_t id);

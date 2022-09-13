@@ -67,45 +67,6 @@ uint8_t System::language_index() {
     return 0; // EN
 }
 
-// send on/off to a gpio pin
-// value: true = HIGH, false = LOW
-bool System::command_pin(const char * value, const int8_t id) {
-#ifndef EMSESP_STANDALONE
-
-    if (!is_valid_gpio(id)) {
-        LOG_INFO(F("Invalid GPIO number"));
-        return false;
-    }
-
-    bool        v  = false;
-    std::string v1 = {7, '\0'};
-    int         v2 = 0;
-
-    if (id == 25 && Helpers::value2number(value, v2)) {
-        if (v2 >= 0 && v2 <= 255) {
-            dacWrite(id, v2);
-            return true;
-        }
-    } else if (Helpers::value2bool(value, v)) {
-        pinMode(id, OUTPUT);
-        digitalWrite(id, v);
-        // LOG_INFO(F("GPIO %d set to %s"), id, v ? "HIGH" : "LOW");
-        return true;
-    } else if (Helpers::value2string(value, v1)) {
-        if (v1 == "input" || v1 == "in" || v1 == "-1") {
-            pinMode(id, INPUT);
-            v = digitalRead(id);
-            // LOG_INFO(F("GPIO %d set input, state %s"), id, v ? "HIGH" : "LOW");
-            return true;
-        }
-    }
-
-    // LOG_INFO(F("GPIO %d: invalid value"), id);
-#endif
-
-    return false;
-}
-
 // send raw to ems
 bool System::command_send(const char * value, const int8_t id) {
     return EMSESP::txservice_.send_raw(value); // ignore id
@@ -694,8 +655,6 @@ void System::system_check() {
 
 // commands - takes static function pointers
 void System::commands_init() {
-    // Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin, F("set a GPIO on/off"), CommandFlag::ADMIN_ONLY);
-
     // TODO these should be translated too
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, F("send a telegram"), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, F("refresh all EMS values"), CommandFlag::ADMIN_ONLY);
