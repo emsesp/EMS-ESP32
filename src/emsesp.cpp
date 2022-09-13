@@ -685,10 +685,13 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     std::string str;
     str.reserve(200);
     if (telegram->operation == Telegram::Operation::RX_READ) {
-        str = src_name + "(" + Helpers::hextoa(src) + ") <- " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+        str = src_name + "(" + Helpers::hextoa(src) + ") -R-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
               + Helpers::hextoa(telegram->type_id) + "), length: " + Helpers::hextoa(telegram->message_data[0]);
+    } else if (telegram->dest == 0) {
+        str = src_name + "(" + Helpers::hextoa(src) + ") -B-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+              + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
     } else {
-        str = src_name + "(" + Helpers::hextoa(src) + ") -> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+        str = src_name + "(" + Helpers::hextoa(src) + ") -W-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
               + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
     }
 
