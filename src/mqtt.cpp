@@ -1321,8 +1321,8 @@ void Mqtt::publish_ha_climate_config(uint8_t tag, bool has_roomtemp, bool remove
         doc["curr_temp_tpl"] = currtemp_s;
     }
 
-    doc["min_temp"]  = Helpers::render_value(min_s, 5, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
-    doc["max_temp"]  = Helpers::render_value(max_s, 30, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+    doc["min_temp"]  = Helpers::render_value(min_s, (uint32_t)5, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+    doc["max_temp"]  = Helpers::render_value(max_s, (uint32_t)30, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
     doc["temp_step"] = "0.5";
 
     // the HA climate component only responds to auto, heat and off

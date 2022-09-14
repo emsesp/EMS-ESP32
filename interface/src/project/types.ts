@@ -238,7 +238,8 @@ export const BOARD_PROFILES: BoardProfiles = {
   'MH-ET': 'MH-ET Live D1 Mini',
   LOLIN: 'Lolin D32',
   OLIMEX: 'Olimex ESP32-EVB',
-  OLIMEXPOE: 'Olimex ESP32-POE'
+  OLIMEXPOE: 'Olimex ESP32-POE',
+  C3MINI: 'Lolin C3 mini'
 };
 
 export interface BoardProfileName {

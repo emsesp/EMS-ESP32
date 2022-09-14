@@ -128,9 +128,11 @@ void AnalogSensor::reload() {
         } else if (sensor.type() == AnalogType::COUNTER) {
             LOG_DEBUG(F("Adding analog I/O Counter sensor on GPIO%d"), sensor.gpio());
             pinMode(sensor.gpio(), INPUT_PULLUP);
+            #ifndef ARDUINO_LOLIN_C3_MINI
             if (sensor.gpio() == 25 || sensor.gpio() == 26) {
                 dacWrite(sensor.gpio(), 255);
             }
+            #endif
             sensor.polltime_ = 0;
             sensor.poll_     = digitalRead(sensor.gpio());
             publish_sensor(sensor);
@@ -160,7 +162,9 @@ void AnalogSensor::reload() {
                 } else if (sensor.offset() < 0) {
                     sensor.set_offset(0);
                 }
-                dacWrite(sensor.gpio(), sensor.offset());
+                #ifndef ARDUINO_LOLIN_C3_MINI
+                    dacWrite(sensor.gpio(), sensor.offset());
+                #endif
                 sensor.set_value(sensor.offset());
             } else {
                 digitalWrite(sensor.gpio(), sensor.offset() > 0 ? 1 : 0);
@@ -572,7 +576,9 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                     sensor.set_offset(v);
                     sensor.set_value(v);
                     pinMode(sensor.gpio(), OUTPUT);
-                    dacWrite(sensor.gpio(), sensor.offset());
+                    #ifndef ARDUINO_LOLIN_C3_MINI
+                         dacWrite(sensor.gpio(), sensor.offset());
+                    #endif
                     publish_sensor(sensor);
                     return true;
                 } else if (v == 0 || v == 1) {

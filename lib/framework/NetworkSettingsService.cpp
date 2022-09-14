@@ -75,6 +75,9 @@ void NetworkSettingsService::manageSTA() {
         });
 
         WiFi.begin(_state.ssid.c_str(), _state.password.c_str()); // attempt to connect to the network
+        #ifdef ARDUINO_LOLIN_C3_MINI
+            WiFi.setTxPower(WIFI_POWER_8_5dBm); //https://www.wemos.cc/en/latest/c3/c3_mini.html#about-wifi
+        #endif
     }
 }
 
