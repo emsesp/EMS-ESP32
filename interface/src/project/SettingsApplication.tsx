@@ -124,13 +124,18 @@ const SettingsApplication: FC = () => {
           name="board_profile"
           label={LL.BOARD_PROFILE()}
           value={data.board_profile}
-          disabled={processingBoard}
+          disabled={processingBoard || data.board_profile === 'C3MINI'}
           variant="outlined"
           onChange={changeBoardProfile}
           margin="normal"
           select
         >
           {boardProfileSelectItems()}
+          {data.board_profile === 'C3MINI' && (
+            <MenuItem key={'C3MINI'} value={'C3MINI'}>
+              C3 Mini
+            </MenuItem>
+          )}
           <Divider />
           <MenuItem key={'CUSTOM'} value={'CUSTOM'}>
             Custom&hellip;
