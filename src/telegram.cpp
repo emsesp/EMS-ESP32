@@ -629,7 +629,6 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
 }
 
 // send a request to read the next block of data from longer telegrams
-// send a request to read the next block of data from longer telegrams
 uint16_t TxService::read_next_tx(const uint8_t offset, const uint8_t length) {
     uint8_t old_length   = telegram_last_->type_id > 0xFF ? length - 7 : length - 5;
     uint8_t next_length  = telegram_last_->type_id > 0xFF ? EMS_MAX_TELEGRAM_MESSAGE_LENGTH - 2 : EMS_MAX_TELEGRAM_MESSAGE_LENGTH;
