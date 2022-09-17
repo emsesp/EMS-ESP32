@@ -8,6 +8,7 @@ import { loadedFormatters, loadedLocales, locales } from './i18n-util'
 import de from './de'
 import en from './en'
 import nl from './nl'
+import no from './no'
 import pl from './pl'
 import se from './se'
 
@@ -15,6 +16,7 @@ const localeTranslations = {
 	de,
 	en,
 	nl,
+	no,
 	pl,
 	se,
 }
