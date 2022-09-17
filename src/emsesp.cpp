@@ -685,10 +685,13 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     std::string str;
     str.reserve(200);
     if (telegram->operation == Telegram::Operation::RX_READ) {
-        str = src_name + "(" + Helpers::hextoa(src) + ") <- " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+        str = src_name + "(" + Helpers::hextoa(src) + ") -R-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
               + Helpers::hextoa(telegram->type_id) + "), length: " + Helpers::hextoa(telegram->message_data[0]);
+    } else if (telegram->dest == 0) {
+        str = src_name + "(" + Helpers::hextoa(src) + ") -B-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+              + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
     } else {
-        str = src_name + "(" + Helpers::hextoa(src) + ") -> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+        str = src_name + "(" + Helpers::hextoa(src) + ") -W-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
               + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
     }
 
@@ -1213,7 +1216,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 tx_successful = true;
 
                 // if telegram is longer read next part with offset +25 for ems+ or +27 for ems1.0
-                if ((length == 32) && (txservice_.read_next_tx(data[3]) == read_id_)) {
+                if ((length >= 31) && (txservice_.read_next_tx(data[3], length) == read_id_)) {
                     read_next_ = true;
                 }
             }
@@ -1270,11 +1273,6 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 
         rxservice_.add(data, length); // add to RxQueue
     }
-}
-
-// sends raw data of bytes along the Tx line
-void EMSESP::send_raw_telegram(const char * data) {
-    txservice_.send_raw(data);
 }
 
 // start all the core services
