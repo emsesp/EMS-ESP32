@@ -220,6 +220,10 @@ class System {
     void wifi_reconnect();
     void show_users(uuid::console::Shell & shell);
 
+    uint32_t FStotal() {
+        return fstotal_;
+    }
+
   private:
     static uuid::log::Logger logger_;
     static bool              restart_requested_;
@@ -293,6 +297,9 @@ class System {
     int8_t  eth_power_;
     uint8_t eth_phy_addr_;
     uint8_t eth_clock_mode_;
+
+    uint32_t fstotal_;
+
 };
 
 } // namespace emsesp

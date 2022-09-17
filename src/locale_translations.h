@@ -24,6 +24,7 @@
 #define EMSESP_LOCALE_NL "nl"
 #define EMSESP_LOCALE_SE "se"
 #define EMSESP_LOCALE_PL "pl"
+#define EMSESP_LOCALE_NO "no"
 
 // translations are in order en, de,nl, se....
 // if there is no translation, it will default to en

@@ -12,9 +12,12 @@ export const locales: Locales[] = [
 	'de',
 	'en',
 	'nl',
+	'no',
 	'pl',
 	'se'
 ]
+
+export const isLocale = (locale: string) => locales.includes(locale as Locales)
 
 export const loadedLocales = {} as Record<Locales, Translations>
 

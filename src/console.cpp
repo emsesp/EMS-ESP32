@@ -281,18 +281,19 @@ void EMSESPShell::add_console_commands() {
                                   // get raw/pretty
                                   if (arguments[0] == read_flash_string(F_(raw))) {
                                       EMSESP::watch(EMSESP::WATCH_RAW); // raw
-                                  } else if (arguments[0] == Helpers::translated_word(FL_(on))) {
+                                  } else if (arguments[0] == Helpers::translated_word(FL_(on), true) || arguments[0] == read_flash_string(FL_(on)[0])) {
                                       EMSESP::watch(EMSESP::WATCH_ON); // on
-                                  } else if (arguments[0] == Helpers::translated_word(FL_(off))) {
+                                  } else if (arguments[0] == Helpers::translated_word(FL_(off), true) || arguments[0] == read_flash_string(FL_(off)[0])) {
                                       EMSESP::watch(EMSESP::WATCH_OFF); // off
-                                  } else if (arguments[0] == Helpers::translated_word(FL_(unknown))) {
+                                  } else if (arguments[0] == Helpers::translated_word(FL_(unknown), true) || arguments[0] == read_flash_string(FL_(unknown)[0])) {
                                       EMSESP::watch(EMSESP::WATCH_UNKNOWN); // unknown
                                       watch_id = WATCH_ID_NONE;
                                   } else {
                                       watch_id = Helpers::hextoint(arguments[0].c_str());
-                                      if (watch_id && ((EMSESP::watch() == EMSESP::WATCH_OFF) || (EMSESP::watch() == EMSESP::WATCH_UNKNOWN))) {
+                                      if (watch_id > 0 && ((EMSESP::watch() == EMSESP::WATCH_OFF) || (EMSESP::watch() == EMSESP::WATCH_UNKNOWN))) {
                                           EMSESP::watch(EMSESP::WATCH_ON); // on
-                                      } else if (!watch_id) {
+                                      } else if (watch_id == 0) {
+                                          EMSESP::watch(EMSESP::WATCH_OFF); // off
                                           return;
                                       }
                                   }
@@ -303,6 +304,9 @@ void EMSESPShell::add_console_commands() {
                                   }
 
                                   EMSESP::watch_id(watch_id);
+                              } else {
+                                  shell.printfln(F("Invalid: use watch raw|on|off|unknown|id [id]"));
+                                  return;
                               }
 
                               uint8_t watch = EMSESP::watch();

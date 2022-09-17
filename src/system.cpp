@@ -42,7 +42,7 @@
 namespace emsesp {
 
 // Languages supported. Note: the order is important and must match locale_translations.h
-const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE, EMSESP_LOCALE_NL, EMSESP_LOCALE_SE, EMSESP_LOCALE_PL};
+const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE, EMSESP_LOCALE_NL, EMSESP_LOCALE_SE, EMSESP_LOCALE_PL, EMSESP_LOCALE_NO};
 
 size_t num_languages = sizeof(languages) / sizeof(const char *);
 
@@ -373,6 +373,7 @@ void System::start() {
     if (low_clock_) {
         setCpuFrequencyMhz(160);
     }
+    fstotal_ = LittleFS.totalBytes(); // read only once, it takes 500 ms to read
 #endif
 
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
@@ -784,7 +785,7 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F(" SDK version: %s"), ESP.getSdkVersion());
     shell.printfln(F(" CPU frequency: %lu MHz"), ESP.getCpuFreqMHz());
     shell.printfln(F(" Free heap: %lu bytes"), (uint32_t)ESP.getFreeHeap());
-    shell.printfln(F(" FS used/total: %lu/%lu (bytes)"), LittleFS.usedBytes(), LittleFS.totalBytes());
+    shell.printfln(F(" FS used/total: %lu/%lu (bytes)"), LittleFS.usedBytes(), FStotal());
     shell.println();
 
     shell.println("Network:");
