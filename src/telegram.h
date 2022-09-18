@@ -304,12 +304,12 @@ class TxService : public EMSbus {
                  const bool     front = false);
     void     add(const uint8_t operation, const uint8_t * data, const uint8_t length, const uint16_t validateid, const bool front = false);
     void     read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0, const uint8_t length = 0);
-    void     send_raw(const char * telegram_data);
+    bool     send_raw(const char * telegram_data);
     void     send_poll() const;
     void     retry_tx(const uint8_t operation, const uint8_t * data, const uint8_t length);
     bool     is_last_tx(const uint8_t src, const uint8_t dest) const;
     uint16_t post_send_query();
-    uint16_t read_next_tx(uint8_t offset);
+    uint16_t read_next_tx(const uint8_t offset, const uint8_t length);
 
     uint8_t retry_count() const {
         return retry_count_;

@@ -12,6 +12,8 @@ import { WiFiEncryptionType, WiFiNetwork, WiFiNetworkList } from '../../types';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 interface WiFiNetworkSelectorProps {
   networkList: WiFiNetworkList;
 }
@@ -39,6 +41,8 @@ export const networkSecurityMode = ({ encryption_type }: WiFiNetwork) => {
 };
 
 const WiFiNetworkSelector: FC<WiFiNetworkSelectorProps> = ({ networkList }) => {
+  const { LL } = useI18nContext();
+
   const wifiConnectionContext = useContext(WiFiConnectionContext);
 
   const renderNetwork = (network: WiFiNetwork) => {
@@ -61,7 +65,7 @@ const WiFiNetworkSelector: FC<WiFiNetworkSelectorProps> = ({ networkList }) => {
   };
 
   if (networkList.networks.length === 0) {
-    return <MessageBox mt={2} mb={1} message="No WiFi networks found" level="info" />;
+    return <MessageBox mt={2} mb={1} message={LL.NETWORK_NO_WIFI()} level="info" />;
   }
 
   return <List>{networkList.networks.map(renderNetwork)}</List>;

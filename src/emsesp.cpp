@@ -299,7 +299,6 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 }
 
 // show EMS device values to the shell console
-// generate_values_json is called in verbose mode
 void EMSESP::show_device_values(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
         shell.printfln(F("No EMS devices detected."));
@@ -317,7 +316,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                 DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN); // use max size
                 JsonObject          json = doc.to<JsonObject>();
 
-                emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::CONSOLE); // verbose mode and nested
+                emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::CONSOLE);
 
                 // print line
                 uint8_t id = 0;
@@ -334,7 +333,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                         char s[10];
                         shell.print(Helpers::render_value(s, data.as<float>(), 1));
                     } else if (data.is<bool>()) {
-                        shell.print(data.as<bool>() ? F_(on) : F_(off));
+                        shell.print(data.as<bool>() ? Helpers::translated_word(FL_(on)) : Helpers::translated_word(FL_(off)));
                     }
 
                     // if there is a uom print it
@@ -488,6 +487,8 @@ void EMSESP::reset_mqtt_ha() {
     for (const auto & emsdevice : emsdevices) {
         emsdevice->ha_config_clear();
     }
+
+    // force the re-creating of the dallas and analog sensor topics (for HA)
     dallassensor_.reload();
     analogsensor_.reload();
 }
@@ -684,10 +685,13 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     std::string str;
     str.reserve(200);
     if (telegram->operation == Telegram::Operation::RX_READ) {
-        str = src_name + "(" + Helpers::hextoa(src) + ") <- " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+        str = src_name + "(" + Helpers::hextoa(src) + ") -R-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
               + Helpers::hextoa(telegram->type_id) + "), length: " + Helpers::hextoa(telegram->message_data[0]);
+    } else if (telegram->dest == 0) {
+        str = src_name + "(" + Helpers::hextoa(src) + ") -B-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+              + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
     } else {
-        str = src_name + "(" + Helpers::hextoa(src) + ") -> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+        str = src_name + "(" + Helpers::hextoa(src) + ") -W-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
               + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
     }
 
@@ -993,27 +997,27 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             name        = "generic thermostat";
             device_type = DeviceType::THERMOSTAT;
             flags       = DeviceFlags::EMS_DEVICE_FLAG_RC10 | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE;
-        } else if (device_id == 0x04) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_RS232) {
             name        = "RS232";
             device_type = DeviceType::CONNECT;
-        } else if (device_id == 0x0A) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_TERMINAL) {
             name        = "terminal";
             device_type = DeviceType::CONNECT;
-        } else if (device_id == 0x0B) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_SERVICEKEY) {
             name        = "service key";
             device_type = DeviceType::CONNECT;
-        } else if (device_id == 0x0C) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_CASCADE) {
             name        = "cascade";
             device_type = DeviceType::CONNECT;
-        } else if (device_id == 0x0D) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_EASYCOM) {
             // see https://github.com/emsesp/EMS-ESP/issues/460#issuecomment-709553012
             name        = "modem";
             device_type = DeviceType::CONNECT;
-        } else if (device_id == 0x0E) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_CONVERTER) {
             name = "converter"; // generic
-        } else if (device_id == 0x0F) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_CLOCK) {
             name = "clock"; // generic
-        } else if (device_id == 0x08) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER) {
             name        = "generic boiler";
             device_type = DeviceType::BOILER;
             flags       = DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP;
@@ -1212,7 +1216,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 tx_successful = true;
 
                 // if telegram is longer read next part with offset +25 for ems+ or +27 for ems1.0
-                if ((length == 32) && (txservice_.read_next_tx(data[3]) == read_id_)) {
+                if ((length >= 31) && (txservice_.read_next_tx(data[3], length) == read_id_)) {
                     read_next_ = true;
                 }
             }
@@ -1271,11 +1275,6 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     }
 }
 
-// sends raw data of bytes along the Tx line
-void EMSESP::send_raw_telegram(const char * data) {
-    txservice_.send_raw(data);
-}
-
 // start all the core services
 // the services must be loaded in the correct order
 void EMSESP::start() {
@@ -1291,11 +1290,16 @@ void EMSESP::start() {
 
     esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
+
+#ifdef EMSESP_DEBUG
+    LOG_NOTICE(F("System is running in Debug mode"));
+#endif
+
     LOG_INFO(F("Last system reset reason Core0: %s, Core1: %s"), system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
     // do any system upgrades
     if (system_.check_upgrade()) {
-        LOG_INFO(F("System will be restarted to apply upgrade"));
+        LOG_INFO(F("System needs a restart to apply new settings. Please wait."));
         system_.system_restart();
     };
 

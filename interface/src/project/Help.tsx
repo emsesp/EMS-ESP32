@@ -5,16 +5,20 @@ import { Tab } from '@mui/material';
 
 import { RouterTabs, useRouterTab, useLayoutTitle } from '../components';
 
+import { useI18nContext } from '../i18n/i18n-react';
+
 import HelpInformation from './HelpInformation';
 
 const Help: FC = () => {
-  useLayoutTitle('Help');
+  const { LL } = useI18nContext();
   const { routerTab } = useRouterTab();
+
+  useLayoutTitle(LL.HELP());
 
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="information" label="EMS-ESP Help" />
+        <Tab value="information" label={"EMS-ESP " + LL.HELP()} />
       </RouterTabs>
       <Routes>
         <Route path="information" element={<HelpInformation />} />

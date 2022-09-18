@@ -22,30 +22,104 @@
 
 namespace emsesp {
 
+// constructor
+DeviceValue::DeviceValue(uint8_t                              device_type,
+                         uint8_t                              tag,
+                         void *                               value_p,
+                         uint8_t                              type,
+                         const __FlashStringHelper * const ** options,
+                         const __FlashStringHelper * const *  options_single,
+                         int8_t                               numeric_operator,
+                         const __FlashStringHelper * const    short_name,
+                         const __FlashStringHelper * const *  fullname,
+                         std::string &                        custom_fullname,
+                         uint8_t                              uom,
+                         bool                                 has_cmd,
+                         int16_t                              min,
+                         uint16_t                             max,
+                         uint8_t                              state)
+    : device_type(device_type)
+    , tag(tag)
+    , value_p(value_p)
+    , type(type)
+    , options(options)
+    , options_single(options_single)
+    , numeric_operator(numeric_operator)
+    , short_name(short_name)
+    , fullname(fullname)
+    , custom_fullname(custom_fullname)
+    , uom(uom)
+    , has_cmd(has_cmd)
+    , min(min)
+    , max(max)
+    , state(state) {
+    // calculate #options in options list
+    if (options_single) {
+        options_size = 1;
+    } else {
+        options_size = Helpers::count_items(options);
+    }
+
+#ifdef EMSESP_STANDALONE
+    // only added for debugging
+    Serial.print("registering entity: ");
+    Serial.print(read_flash_string(short_name).c_str());
+    Serial.print("/");
+    if (!custom_fullname.empty()) {
+        Serial.print(COLOR_BRIGHT_CYAN);
+        Serial.print(custom_fullname.c_str());
+        Serial.print(COLOR_RESET);
+    } else {
+        Serial.print(Helpers::translated_word(fullname).c_str());
+    }
+    Serial.print(" (#options=");
+    Serial.print(options_size);
+    Serial.print(",numop=");
+    Serial.print(numeric_operator);
+    Serial.print(") ");
+    if (options != nullptr) {
+        uint8_t i = 0;
+        while (i < options_size) {
+            Serial.print(" option");
+            Serial.print(i + 1);
+            Serial.print(":");
+            auto str = Helpers::translated_fword(options[i]);
+            Serial.print(read_flash_string(str).c_str());
+            i++;
+        }
+    } else if (options_single != nullptr) {
+        Serial.print("option1:!");
+        Serial.print(read_flash_string(options_single[0]).c_str());
+        Serial.print("!");
+    }
+    Serial.println("");
+#endif
+}
+
 // mapping of UOM, to match order in DeviceValueUOM enum emsdevice.h
 // also maps to DeviceValueUOM in interface/src/project/types.ts for the Web UI
 // must be an int of 4 bytes, 32bit aligned
 const __FlashStringHelper * DeviceValue::DeviceValueUOM_s[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = {
 
-    F_(blank),
-    F_(degrees),
-    F_(degrees),
-    F_(percent),
-    F_(lmin),
-    F_(kwh),
-    F_(wh),
-    F_(hours),
-    F_(minutes),
-    F_(ua),
-    F_(bar),
-    F_(kw),
-    F_(w),
-    F_(kb),
-    F_(seconds),
-    F_(dbm),
-    F_(fahrenheit),
-    F_(mv),
-    F_(sqm)
+    F_(uom_blank),
+    F_(uom_degrees),
+    F_(uom_degrees),
+    F_(uom_percent),
+    F_(uom_lmin),
+    F_(uom_kwh),
+    F_(uom_wh),
+    F_(uom_hours),
+    F_(uom_minutes),
+    F_(uom_ua),
+    F_(uom_bar),
+    F_(uom_kw),
+    F_(uom_w),
+    F_(uom_kb),
+    F_(uom_seconds),
+    F_(uom_dbm),
+    F_(uom_fahrenheit),
+    F_(uom_mv),
+    F_(uom_sqm)
 
 };
 
@@ -196,10 +270,10 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
     uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
     // if we have individual limits set already, just do the conversion
-    // limits are not scaled with divider and temperatures are °C
+    // limits are not scaled with num operator and temperatures are °C
     if (min != 0 || max != 0) {
-        dv_set_min = Helpers::round2(min, 0, fahrenheit);
-        dv_set_max = Helpers::round2(max, 0, fahrenheit);
+        dv_set_min = Helpers::transformNumFloat(min, 0, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(max, 0, fahrenheit);
         return true;
     }
 
@@ -207,17 +281,15 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
     dv_set_min = 0;
     dv_set_max = 0;
 
-    int8_t divider = (options_size == 1) ? Helpers::atoint(uuid::read_flash_string(options[0]).c_str()) : 0;
-
     if (type == DeviceValueType::USHORT) {
-        dv_set_min = Helpers::round2(0, divider, fahrenheit);
-        dv_set_max = Helpers::round2(EMS_VALUE_USHORT_NOTSET, divider, fahrenheit);
+        dv_set_min = Helpers::transformNumFloat(0, numeric_operator, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_USHORT_NOTSET, numeric_operator, fahrenheit);
         return true;
     }
 
     if (type == DeviceValueType::SHORT) {
-        dv_set_min = Helpers::round2(-EMS_VALUE_SHORT_NOTSET, divider, fahrenheit);
-        dv_set_max = Helpers::round2(EMS_VALUE_SHORT_NOTSET, divider, fahrenheit);
+        dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_SHORT_NOTSET, numeric_operator, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_SHORT_NOTSET, numeric_operator, fahrenheit);
         return true;
     }
 
@@ -225,7 +297,7 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
         if (uom == DeviceValueUOM::PERCENT) {
             dv_set_max = 100;
         } else {
-            dv_set_max = Helpers::round2(EMS_VALUE_UINT_NOTSET, divider, fahrenheit);
+            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_UINT_NOTSET, numeric_operator, fahrenheit);
         }
         return true;
     }
@@ -235,23 +307,32 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
             dv_set_min = -100;
             dv_set_max = 100;
         } else {
-            dv_set_min = Helpers::round2(-EMS_VALUE_INT_NOTSET, divider, fahrenheit);
-            dv_set_max = Helpers::round2(EMS_VALUE_INT_NOTSET, divider, fahrenheit);
+            dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_INT_NOTSET, numeric_operator, fahrenheit);
+            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_INT_NOTSET, numeric_operator, fahrenheit);
         }
         return true;
     }
 
     if (type == DeviceValueType::ULONG) {
-        dv_set_max = Helpers::round2(EMS_VALUE_ULONG_NOTSET, divider);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET, numeric_operator);
         return true;
     }
 
     if (type == DeviceValueType::TIME) {
-        dv_set_max = Helpers::round2(EMS_VALUE_ULONG_NOTSET, divider);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET, numeric_operator);
         return true;
     }
 
     return false; // nothing changed, not supported
+}
+
+// returns the translated fullname or the custom fullname (if provided)
+// always returns a std::string
+std::string DeviceValue::get_fullname() const {
+    if (custom_fullname.empty()) {
+        return Helpers::translated_word(fullname);
+    }
+    return custom_fullname;
 }
 
 } // namespace emsesp

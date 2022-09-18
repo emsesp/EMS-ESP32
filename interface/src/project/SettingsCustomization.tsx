@@ -19,7 +19,6 @@ import {
 
 import { Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 
 import { useSnackbar } from 'notistack';
@@ -28,9 +27,6 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
-import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
-import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
-import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 
@@ -40,22 +36,30 @@ import { ButtonRow, FormLoader, ValidatedTextField, SectionContent } from '../co
 
 import * as EMSESP from './api';
 
-import { extractErrorMessage } from '../utils';
+import { extractErrorMessage, updateValue } from '../utils';
 
 import { DeviceShort, Devices, DeviceEntity, DeviceEntityMask } from './types';
+
+import { useI18nContext } from '../i18n/i18n-react';
 
 export const APIURL = window.location.origin + '/api/';
 
 const SettingsCustomization: FC = () => {
+  const { LL } = useI18nContext();
+
   const { enqueueSnackbar } = useSnackbar();
 
-  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([{ id: '', v: 0, n: '', m: 0, w: false }]);
+  const emptyDeviceEntity = { id: '', v: 0, n: '', cn: '', m: 0, w: false };
+
+  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([emptyDeviceEntity]);
   const [devices, setDevices] = useState<Devices>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(-1);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
   const [selectedFilters, setSelectedFilters] = useState<number>(0);
   const [search, setSearch] = useState('');
+
+  const [deviceEntity, setDeviceEntity] = useState<DeviceEntity>();
 
   // eslint-disable-next-line
   const [masks, setMasks] = useState(() => ['']);
@@ -92,6 +96,7 @@ const SettingsCustomization: FC = () => {
     Row: `
       background-color: #1e1e1e;
       position: relative;
+      cursor: pointer;
     
       .td {
         border-top: 1px solid #565656;
@@ -102,6 +107,11 @@ const SettingsCustomization: FC = () => {
         background-color: #3d4752;
         color: white;
         font-weight: normal;
+      }
+
+      &:hover .td {
+        border-top: 1px solid #177ac9;
+        border-bottom: 1px solid #177ac9;
       }
 
       &:nth-of-type(odd) .td {
@@ -118,50 +128,24 @@ const SettingsCustomization: FC = () => {
     `
   });
 
-  const getSortIcon = (state: any, sortKey: any) => {
-    if (state.sortKey === sortKey && state.reverse) {
-      return <KeyboardArrowDownOutlinedIcon />;
-    }
-    if (state.sortKey === sortKey && !state.reverse) {
-      return <KeyboardArrowUpOutlinedIcon />;
-    }
-    return <UnfoldMoreOutlinedIcon />;
-  };
-
-  const entity_sort = useSort(
-    { nodes: deviceEntities },
-    {},
-    {
-      sortIcon: {
-        iconDefault: <UnfoldMoreOutlinedIcon />,
-        iconUp: <KeyboardArrowUpOutlinedIcon />,
-        iconDown: <KeyboardArrowDownOutlinedIcon />
-      },
-      sortToggleType: SortToggleType.AlternateWithReset,
-      sortFns: {
-        NAME: (array) => array.sort((a, b) => a.id.localeCompare(b.id))
-      }
-    }
-  );
-
   const fetchDevices = useCallback(async () => {
     try {
       setDevices((await EMSESP.readDevices()).data);
     } catch (error: unknown) {
-      setErrorMessage(extractErrorMessage(error, 'Failed to fetch device list'));
+      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
-  }, []);
+  }, [LL]);
 
   const setInitialMask = (data: DeviceEntity[]) => {
-    setDeviceEntities(data.map((de) => ({ ...de, om: de.m })));
+    setDeviceEntities(data.map((de) => ({ ...de, o_m: de.m, o_cn: de.cn })));
   };
 
   const fetchDeviceEntities = async (unique_id: number) => {
     try {
-      const data = (await EMSESP.readDeviceEntities({ id: unique_id })).data;
-      setInitialMask(data);
+      const new_deviceEntities = (await EMSESP.readDeviceEntities({ id: unique_id })).data;
+      setInitialMask(new_deviceEntities);
     } catch (error: unknown) {
-      setErrorMessage(extractErrorMessage(error, 'Problem fetching device entities'));
+      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
 
@@ -183,12 +167,16 @@ const SettingsCustomization: FC = () => {
   function formatName(de: DeviceEntity) {
     if (de.n === undefined || de.n === de.id) {
       return de.id;
-    } else if (de.n === '') {
-      return 'Command: ' + de.id;
     }
+
+    if (de.n === '') {
+      return LL.COMMAND() + ': ' + de.id;
+    }
+
     return (
       <>
-        {de.n}&nbsp;(
+        {de.cn !== undefined && de.cn !== '' ? de.cn : de.n}
+        &nbsp;(
         <Link target="_blank" href={APIURL + devices?.devices[selectedDevice].t + '/' + de.id}>
           {de.id}
         </Link>
@@ -250,9 +238,9 @@ const SettingsCustomization: FC = () => {
   const resetCustomization = async () => {
     try {
       await EMSESP.resetCustomizations();
-      enqueueSnackbar('All customizations have been removed. Restarting...', { variant: 'info' });
+      enqueueSnackbar(LL.CUSTOMIZATIONS_RESTART(), { variant: 'info' });
     } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem resetting customizations'), { variant: 'error' });
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     } finally {
       setConfirmReset(false);
     }
@@ -261,26 +249,28 @@ const SettingsCustomization: FC = () => {
   const saveCustomization = async () => {
     if (devices && deviceEntities && selectedDevice !== -1) {
       const masked_entities = deviceEntities
-        .filter((de) => de.m !== de.om)
-        .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.id);
+        .filter((de) => de.m !== de.o_m || de.cn !== de.o_cn)
+        .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.id + (new_de.cn ? '|' + new_de.cn : ''));
 
-      if (masked_entities.length > 60) {
-        enqueueSnackbar('Selected entities exceeded limit of 60. Please Save in batches', { variant: 'warning' });
+      // check size in bytes to match buffer in CPP, which is 4096
+      const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
+      if (bytes > 4000) {
+        enqueueSnackbar(LL.CUSTOMIZATIONS_FULL(), { variant: 'warning' });
         return;
       }
 
       try {
-        const response = await EMSESP.writeMaskedEntities({
+        const response = await EMSESP.writeCustomEntities({
           id: devices?.devices[selectedDevice].i,
           entity_ids: masked_entities
         });
         if (response.status === 200) {
-          enqueueSnackbar('Customization saved', { variant: 'success' });
+          enqueueSnackbar(LL.CUSTOMIZATIONS_SAVED(), { variant: 'success' });
         } else {
-          enqueueSnackbar('Customization save failed', { variant: 'error' });
+          enqueueSnackbar(LL.PROBLEM_UPDATING(), { variant: 'error' });
         }
       } catch (error: unknown) {
-        enqueueSnackbar(extractErrorMessage(error, 'Problem sending entity list'), { variant: 'error' });
+        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       }
       setInitialMask(deviceEntities);
     }
@@ -294,21 +284,17 @@ const SettingsCustomization: FC = () => {
     return (
       <>
         <Box mb={2} color="warning.main">
-          <Typography variant="body2">Select a device and customize each of its entities using the options:</Typography>
+          <Typography variant="body2">{LL.CUSTOMIZATIONS_HELP_1()}</Typography>
           <Typography variant="body2">
-            <OptionIcon type="favorite" isSet={true} />
-            =mark as favorite&nbsp;&nbsp;
-            <OptionIcon type="readonly" isSet={true} />
-            =disable write action&nbsp;&nbsp;
-            <OptionIcon type="api_mqtt_exclude" isSet={true} />
-            =exclude from MQTT and API&nbsp;&nbsp;
-            <OptionIcon type="web_exclude" isSet={true} />
-            =hide from Dashboard
+            <OptionIcon type="favorite" isSet={true} />={LL.CUSTOMIZATIONS_HELP_2()}&nbsp;&nbsp;
+            <OptionIcon type="readonly" isSet={true} />={LL.CUSTOMIZATIONS_HELP_3()}&nbsp;&nbsp;
+            <OptionIcon type="api_mqtt_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_4()}&nbsp;&nbsp;
+            <OptionIcon type="web_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_5()}
           </Typography>
         </Box>
         <ValidatedTextField
           name="device"
-          label="EMS Device"
+          label={'EMS ' + LL.DEVICE()}
           variant="outlined"
           fullWidth
           value={selectedDevice}
@@ -317,7 +303,7 @@ const SettingsCustomization: FC = () => {
           select
         >
           <MenuItem disabled key={0} value={-1}>
-            Select a device...
+            {LL.SELECT_DEVICE()}...
           </MenuItem>
           {devices.devices.map((device: DeviceShort, index) => (
             <MenuItem key={index} value={index}>
@@ -327,6 +313,29 @@ const SettingsCustomization: FC = () => {
         </ValidatedTextField>
       </>
     );
+  };
+
+  const editEntity = (de: DeviceEntity) => {
+    if (de.cn === undefined) {
+      de.cn = '';
+    }
+    setDeviceEntity(de);
+  };
+
+  const updateEntity = () => {
+    if (deviceEntity) {
+      setDeviceEntities((prevState) => {
+        const newState = prevState.map((obj) => {
+          if (obj.id === deviceEntity.id) {
+            return { ...obj, cn: deviceEntity.cn };
+          }
+          return obj;
+        });
+        return newState;
+      });
+    }
+
+    setDeviceEntity(undefined);
   };
 
   const renderDeviceData = () => {
@@ -401,7 +410,7 @@ const SettingsCustomization: FC = () => {
                 color="inherit"
                 onClick={() => maskDisabled(false)}
               >
-                set all&nbsp;
+                {LL.SET_ALL()}&nbsp;
                 <OptionIcon type="api_mqtt_exclude" isSet={false} />
                 <OptionIcon type="web_exclude" isSet={false} />
               </Button>
@@ -416,35 +425,30 @@ const SettingsCustomization: FC = () => {
                 color="inherit"
                 onClick={() => maskDisabled(true)}
               >
-                set all&nbsp;
+                {LL.SET_ALL()}&nbsp;
                 <OptionIcon type="api_mqtt_exclude" isSet={true} />
                 <OptionIcon type="web_exclude" isSet={true} />
               </Button>
             </Tooltip>
           </Grid>
         </Grid>
-        <Table data={{ nodes: shown_data }} theme={entities_theme} sort={entity_sort} layout={{ custom: true }}>
+        <Table data={{ nodes: shown_data }} theme={entities_theme} layout={{ custom: true }}>
           {(tableList: any) => (
             <>
               <Header>
                 <HeaderRow>
-                  <HeaderCell stiff>OPTIONS</HeaderCell>
+                  <HeaderCell stiff>{LL.OPTIONS()}</HeaderCell>
                   <HeaderCell resize>
-                    <Button
-                      fullWidth
-                      style={{ fontSize: '14px', justifyContent: 'flex-start' }}
-                      endIcon={getSortIcon(entity_sort.state, 'NAME')}
-                      onClick={() => entity_sort.fns.onToggleSort({ sortKey: 'NAME' })}
-                    >
-                      NAME
+                    <Button fullWidth style={{ fontSize: '14px', justifyContent: 'flex-start' }}>
+                      {LL.NAME()}
                     </Button>
                   </HeaderCell>
-                  <HeaderCell resize>VALUE</HeaderCell>
+                  <HeaderCell resize>{LL.VALUE()}</HeaderCell>
                 </HeaderRow>
               </Header>
               <Body>
                 {tableList.map((de: DeviceEntity) => (
-                  <Row key={de.id} item={de}>
+                  <Row key={de.id} item={de} onClick={() => editEntity(de)}>
                     <Cell stiff>
                       <ToggleButtonGroup
                         size="small"
@@ -503,14 +507,11 @@ const SettingsCustomization: FC = () => {
 
   const renderResetDialog = () => (
     <Dialog open={confirmReset} onClose={() => setConfirmReset(false)}>
-      <DialogTitle>Reset</DialogTitle>
-      <DialogContent dividers>
-        Are you sure you want remove all customizations including the custom settings of the Temperature and Analog
-        sensors?
-      </DialogContent>
+      <DialogTitle>{LL.RESET()}</DialogTitle>
+      <DialogContent dividers>{LL.CUSTOMIZATIONS_RESET()}</DialogContent>
       <DialogActions>
         <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmReset(false)} color="secondary">
-          Cancel
+          {LL.CANCEL()}
         </Button>
         <Button
           startIcon={<SettingsBackupRestoreIcon />}
@@ -519,7 +520,7 @@ const SettingsCustomization: FC = () => {
           autoFocus
           color="error"
         >
-          Reset
+          {LL.RESET()}
         </Button>
       </DialogActions>
     </Dialog>
@@ -529,15 +530,15 @@ const SettingsCustomization: FC = () => {
     return (
       <>
         <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-          Device Entities
+          {LL.DEVICE_ENTITIES()}
         </Typography>
         {renderDeviceList()}
-        {renderDeviceData()}
+        {!deviceEntity && renderDeviceData()}
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1}>
             <ButtonRow>
               <Button startIcon={<SaveIcon />} variant="outlined" color="primary" onClick={() => saveCustomization()}>
-                Save
+                {LL.SAVE()}
               </Button>
             </ButtonRow>
           </Box>
@@ -548,7 +549,7 @@ const SettingsCustomization: FC = () => {
               color="error"
               onClick={() => setConfirmReset(true)}
             >
-              Reset
+              {LL.RESET()}
             </Button>
           </ButtonRow>
         </Box>
@@ -557,8 +558,55 @@ const SettingsCustomization: FC = () => {
     );
   };
 
+  const renderEditEntity = () => {
+    if (deviceEntity) {
+      return (
+        <Dialog open={!!deviceEntity} onClose={() => setDeviceEntity(undefined)}>
+          <DialogTitle>{LL.RENAME() + ' ' + LL.ENTITY_NAME()}</DialogTitle>
+          <DialogContent dividers>
+            <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
+              <Typography variant="body2">{deviceEntity.n}</Typography>
+            </Box>
+            <Grid container spacing={1}>
+              <Grid item>
+                <TextField
+                  name="cn"
+                  label={LL.NEW() + ' ' + LL.ENTITY_NAME()}
+                  value={deviceEntity.cn}
+                  autoFocus
+                  sx={{ width: '30ch' }}
+                  onChange={updateValue(setDeviceEntity)}
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              startIcon={<CancelIcon />}
+              variant="outlined"
+              onClick={() => setDeviceEntity(undefined)}
+              color="secondary"
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              startIcon={<SaveIcon />}
+              variant="outlined"
+              type="submit"
+              onClick={() => updateEntity()}
+              color="warning"
+            >
+              {LL.SAVE()}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      );
+    }
+  };
+
   return (
-    <SectionContent title="User Customization" titleGutter>
+    <SectionContent title={LL.USER_CUSTOMIZATION()} titleGutter>
+      {renderEditEntity()}
       {content()}
     </SectionContent>
   );

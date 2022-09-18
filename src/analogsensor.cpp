@@ -42,7 +42,7 @@ void AnalogSensor::start() {
         EMSdevice::DeviceType::ANALOGSENSOR,
         F_(setvalue),
         [&](const char * value, const int8_t id) { return command_setvalue(value, id); },
-        F("set io value"),
+        F("set io value"), // TODO this needs translating
         CommandFlag::ADMIN_ONLY);
     Command::add(
         EMSdevice::DeviceType::ANALOGSENSOR,
@@ -60,7 +60,10 @@ void AnalogSensor::reload() {
 #if defined(EMSESP_STANDALONE)
     analog_enabled_ = true; // for local offline testing
 #endif
-
+    if (!analog_enabled_) {
+        sensors_.clear();
+        return;
+    }
     // load the list of analog sensors from the customization service
     // and store them locally and then activate them
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
@@ -459,7 +462,7 @@ bool AnalogSensor::get_value_info(JsonObject & output, const char * cmd, const i
             output["gpio"]   = sensor.gpio();
             output["name"]   = sensor.name();
             output["type"]   = F_(number);
-            output["analog"] = FL_(enum_sensortype)[sensor.type()];
+            output["analog"] = FL_(list_sensortype)[sensor.type()];
             output["uom"]    = EMSdevice::uom_to_string(sensor.uom());
             output["offset"] = sensor.offset();
             output["factor"] = sensor.factor();
@@ -497,7 +500,7 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
             JsonObject dataSensor = output.createNestedObject(sensor.name());
             dataSensor["gpio"]    = sensor.gpio();
             dataSensor["type"]    = F_(number);
-            dataSensor["analog"]  = FL_(enum_sensortype)[sensor.type()];
+            dataSensor["analog"]  = FL_(list_sensortype)[sensor.type()];
             if (sensor.type() == AnalogType::ADC) {
                 dataSensor["uom"]    = EMSdevice::uom_to_string(sensor.uom());
                 dataSensor["offset"] = sensor.offset();

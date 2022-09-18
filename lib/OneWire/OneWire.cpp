@@ -143,6 +143,7 @@ sample code bearing this copyright.
 #include "OneWire.h"
 #include "util/OneWire_direct_gpio.h"
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
 
 void OneWire::begin(uint8_t pin)
 {
@@ -153,7 +154,6 @@ void OneWire::begin(uint8_t pin)
 	reset_search();
 #endif
 }
-
 
 // Perform the onewire reset function.  We will wait up to 250uS for
 // the bus to come high, if it doesn't then it is broken or shorted
@@ -578,3 +578,6 @@ uint16_t OneWire::crc16(const uint8_t* input, uint16_t len, uint16_t crc)
 #endif
 
 #endif
+
+#pragma GCC diagnostic pop
+

@@ -49,7 +49,6 @@ class System {
     void loop();
 
     // commands
-    static bool command_pin(const char * value, const int8_t id);
     static bool command_send(const char * value, const int8_t id);
     static bool command_publish(const char * value, const int8_t id);
     static bool command_fetch(const char * value, const int8_t id);
@@ -203,6 +202,16 @@ class System {
         return fahrenheit_;
     }
 
+    uint8_t language_index();
+
+    void locale(String locale) {
+        locale_ = locale;
+    }
+
+    std::string locale() {
+        return std::string(locale_.c_str());
+    }
+
     void healthcheck(uint8_t healthcheck) {
         healthcheck_ = healthcheck;
     }
@@ -210,6 +219,10 @@ class System {
     void show_system(uuid::console::Shell & shell);
     void wifi_reconnect();
     void show_users(uuid::console::Shell & shell);
+
+    uint32_t FStotal() {
+        return fstotal_;
+    }
 
   private:
     static uuid::log::Logger logger_;
@@ -257,6 +270,7 @@ class System {
     // EMS-ESP settings
     // copies from WebSettings class in WebSettingsService.h and loaded with reload_settings()
     std::string hostname_ = FACTORY_WIFI_HOSTNAME;
+    String      locale_;
     bool        hide_led_;
     uint8_t     led_gpio_;
     bool        analog_enabled_;
@@ -283,6 +297,9 @@ class System {
     int8_t  eth_power_;
     uint8_t eth_phy_addr_;
     uint8_t eth_clock_mode_;
+
+    uint32_t fstotal_;
+
 };
 
 } // namespace emsesp

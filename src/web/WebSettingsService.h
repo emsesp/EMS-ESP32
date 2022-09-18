@@ -29,6 +29,7 @@ namespace emsesp {
 
 class WebSettings {
   public:
+    String   locale;
     uint8_t  tx_mode;
     uint8_t  ems_bus_id;
     bool     shower_timer;
@@ -81,6 +82,7 @@ class WebSettings {
         SHOWER  = (1 << 4), // 16
         LED     = (1 << 5), // 32
         BUTTON  = (1 << 6), // 64
+        MQTT    = (1 << 7), // 128
         RESTART = 0xFF
 
     };

@@ -306,7 +306,7 @@ void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, co
     }
 
     // if the description is empty, it's hidden which means it will not show up in Web API or Console as an available command
-    if (description == nullptr) {
+    if (!description) {
         flags |= CommandFlag::HIDDEN;
     }
 
@@ -424,7 +424,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                     shell.print(EMSdevice::tag_to_string(DeviceValueTAG::TAG_DEVICE_DATA_WW));
                     shell.print(' ');
                 }
-                shell.print(read_flash_string(cf.description_));
+                shell.print(read_flash_string(cf.description_).c_str());
                 if (!cf.has_flags(CommandFlag::ADMIN_ONLY)) {
                     shell.print(' ');
                     shell.print(COLOR_BRIGHT_RED);

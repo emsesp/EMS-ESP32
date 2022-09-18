@@ -37,6 +37,7 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
 }
 
 void WebSettings::read(WebSettings & settings, JsonObject & root) {
+    root["locale"]                = settings.locale;
     root["tx_mode"]               = settings.tx_mode;
     root["ems_bus_id"]            = settings.ems_bus_id;
     root["syslog_enabled"]        = settings.syslog_enabled;
@@ -203,8 +204,17 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.low_clock = root["low_clock"] | false;
     check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
 
+    String old_local = settings.locale;
+    settings.locale  = root["locale"] | EMSESP_DEFAULT_LOCALE;
+    EMSESP::system_.locale(settings.locale);
+#ifndef EMSESP_STANDALONE
+    if (!old_local.equals(settings.locale)) {
+        add_flags(ChangeFlags::MQTT);
+    }
+#endif
+
     //
-    // without checks...
+    // without checks or necessary restarts...
     //
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
@@ -267,6 +277,10 @@ void WebSettingsService::onUpdate() {
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::LED)) {
         EMSESP::system_.led_init(true); // reload settings
+    }
+
+    if (WebSettings::has_flags(WebSettings::ChangeFlags::MQTT)) {
+        emsesp::EMSESP::mqtt_.reset_mqtt(); // reload MQTT, init HA etc
     }
 
     WebSettings::reset_flags();

@@ -6,6 +6,8 @@ import { Box, Button, LinearProgress, Theme, Typography, useTheme } from '@mui/m
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CancelIcon from '@mui/icons-material/Cancel';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const progressPercentage = (progress: ProgressEvent) => Math.round((progress.loaded * 100) / progress.total);
 
 const getBorderColor = (theme: Theme, props: DropzoneState) => {
@@ -41,14 +43,16 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, prog
   const { getRootProps, getInputProps } = dropzoneState;
   const theme = useTheme();
 
+  const { LL } = useI18nContext();
+
   const progressText = () => {
     if (uploading) {
       if (progress?.lengthComputable) {
-        return `Uploading: ${progressPercentage(progress)}%`;
+        return LL.UPLOADING() + `: ${progressPercentage(progress)}%`;
       }
-      return 'Uploading\u2026';
+      return LL.UPLOADING() + `\u2026`;
     }
-    return 'Drop file or click here';
+    return LL.UPLOAD_DROP_TEXT();
   };
 
   return (
@@ -81,7 +85,7 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, prog
               />
             </Box>
             <Button startIcon={<CancelIcon />} variant="outlined" color="secondary" onClick={onCancel}>
-              Cancel
+              {LL.CANCEL()}
             </Button>
           </Fragment>
         )}

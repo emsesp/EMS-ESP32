@@ -2,7 +2,7 @@ import { FC, useContext, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
 import { useSnackbar } from 'notistack';
 
-import { Box, Fab, Paper, Typography } from '@mui/material';
+import { Box, Fab, Paper, Typography, Button } from '@mui/material';
 import ForwardIcon from '@mui/icons-material/Forward';
 
 import * as AuthenticationApi from './api/authentication';
@@ -15,6 +15,15 @@ import { extractErrorMessage, onEnterCallback, updateValue } from './utils';
 import { SignInRequest } from './types';
 import { ValidatedTextField } from './components';
 import { SIGN_IN_REQUEST_VALIDATOR, validate } from './validators';
+
+import { I18nContext } from './i18n/i18n-react';
+import type { Locales } from './i18n/i18n-types';
+import { loadLocaleAsync } from './i18n/i18n-util.async';
+
+import { ReactComponent as NLflag } from './i18n/NL.svg';
+import { ReactComponent as DEflag } from './i18n/DE.svg';
+import { ReactComponent as GBflag } from './i18n/GB.svg';
+import { ReactComponent as SEflag } from './i18n/SE.svg';
 
 const SignIn: FC = () => {
   const authenticationContext = useContext(AuthenticationContext);
@@ -31,6 +40,9 @@ const SignIn: FC = () => {
 
   const validateAndSignIn = async () => {
     setProcessing(true);
+    SIGN_IN_REQUEST_VALIDATOR.messages({
+      required: '%s ' + LL.IS_REQUIRED()
+    });
     try {
       await validate(SIGN_IN_REQUEST_VALIDATOR, signInRequest);
       signIn();
@@ -47,16 +59,24 @@ const SignIn: FC = () => {
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
         if (error.response?.status === 401) {
-          enqueueSnackbar('Invalid login details', { variant: 'warning' });
+          enqueueSnackbar(LL.INVALID_LOGIN(), { variant: 'warning' });
         }
       } else {
-        enqueueSnackbar(extractErrorMessage(error, 'Unexpected error, please try again'), { variant: 'error' });
+        enqueueSnackbar(extractErrorMessage(error, LL.ERROR()), { variant: 'error' });
       }
       setProcessing(false);
     }
   };
 
   const submitOnEnter = onEnterCallback(signIn);
+
+  const { LL, setLocale, locale } = useContext(I18nContext);
+
+  const selectLocale = async (loc: Locales) => {
+    localStorage.setItem('lang', loc);
+    await loadLocaleAsync(loc);
+    setLocale(loc);
+  };
 
   return (
     <Box
@@ -81,11 +101,37 @@ const SignIn: FC = () => {
         })}
       >
         <Typography variant="h4">{PROJECT_NAME}</Typography>
+        <Box
+          sx={{
+            '& button, & a, & .MuiCard-root': {
+              mt: 0.5,
+              mx: 0.5
+            }
+          }}
+        >
+          <Button size="small" variant={locale === 'en' ? 'contained' : 'outlined'} onClick={() => selectLocale('en')}>
+            <GBflag style={{ width: 24 }} />
+            &nbsp;EN
+          </Button>
+          <Button size="small" variant={locale === 'de' ? 'contained' : 'outlined'} onClick={() => selectLocale('de')}>
+            <DEflag style={{ width: 24 }} />
+            &nbsp;DE
+          </Button>
+          <Button size="small" variant={locale === 'nl' ? 'contained' : 'outlined'} onClick={() => selectLocale('nl')}>
+            <NLflag style={{ width: 24 }} />
+            &nbsp;NL
+          </Button>
+          <Button size="small" variant={locale === 'se' ? 'contained' : 'outlined'} onClick={() => selectLocale('se')}>
+            <SEflag style={{ width: 24 }} />
+            &nbsp;SE
+          </Button>
+        </Box>
+
         <ValidatedTextField
           fieldErrors={fieldErrors}
           disabled={processing}
           name="username"
-          label="Username"
+          label={LL.USERNAME()}
           value={signInRequest.username}
           onChange={updateLoginRequestValue}
           margin="normal"
@@ -97,7 +143,7 @@ const SignIn: FC = () => {
           disabled={processing}
           type="password"
           name="password"
-          label="Password"
+          label={LL.PASSWORD()}
           value={signInRequest.password}
           onChange={updateLoginRequestValue}
           onKeyDown={submitOnEnter}
@@ -107,7 +153,7 @@ const SignIn: FC = () => {
         />
         <Fab variant="extended" color="primary" sx={{ mt: 2 }} onClick={validateAndSignIn} disabled={processing}>
           <ForwardIcon sx={{ mr: 1 }} />
-          Sign In
+          {LL.SIGN_IN()}
         </Fab>
       </Paper>
     </Box>

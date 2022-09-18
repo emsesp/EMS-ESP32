@@ -1,4 +1,5 @@
 export interface Settings {
+  locale: string;
   tx_mode: number;
   ems_bus_id: number;
   syslog_enabled: boolean;
@@ -41,7 +42,7 @@ export enum busConnectionStatus {
 }
 
 export interface Stat {
-  id: string; // name
+  id: string; // id - needs to be a string
   s: number; // success
   f: number; // fail
   q: number; // quality
@@ -136,12 +137,14 @@ export interface DeviceEntity {
   id: string; // shortname
   v?: any; // value, in any format, optional
   n?: string; // fullname, optional
+  cn?: string; // custom fullname, optional
   m: number; // mask
-  om?: number; // original mask before edits
+  o_m?: number; // original mask before edits
+  o_cn?: string; // original cn before edits
   w: boolean; // writeable
 }
 
-export interface MaskedEntities {
+export interface CustomEntities {
   id: number;
   entity_ids: string[];
 }

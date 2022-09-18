@@ -304,13 +304,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         uint16_t temp;
         float    doub;
-        temp = 0x0201;                    // decimal 513
-        doub = Helpers::round2(temp, 10); // divide by 10
+        temp = 0x0201;                               // decimal 513
+        doub = Helpers::transformNumFloat(temp, 10); // divide by 10
         shell.printfln("Round test from x%02X to %d to %f", temp, temp, doub);
-        doub = Helpers::round2(temp, 10); // divide by 10
+        doub = Helpers::transformNumFloat(temp, 10); // divide by 10
         shell.printfln("Round test div10 from x%02X to %d to %f", temp, temp, doub);
         temp = 0x63;
-        doub = Helpers::round2(temp, 2); // divide by 2
+        doub = Helpers::transformNumFloat(temp, 2); // divide by 2
         shell.printfln("Round test div2 from x%02X to %d to %f", temp, temp, doub);
     }
 
@@ -399,7 +399,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
 #if defined(EMSESP_STANDALONE)
 
-        DynamicJsonDocument doc(8000); // some absurb high number
+        DynamicJsonDocument doc(8000); // some absurd high number
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
                 doc.clear();
@@ -448,7 +448,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "boiler") {
         shell.printfln(F("Testing boiler..."));
-        Mqtt::ha_enabled(false);
+        // Mqtt::ha_enabled(false);
+        Mqtt::ha_enabled(true);
         Mqtt::nested_format(1);
 
         run_test("boiler");
@@ -615,7 +616,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == 1) { // boiler
                 std::string a = "07wwseltemp";
-                emsdevice->mask_entity(a);
+                emsdevice->setCustomEntity(a);
                 break;
             }
         }
@@ -1045,7 +1046,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::show_device_values(shell);
         shell.invoke_command("call system publish");
 
-        // EMSESP::send_raw_telegram("B0 00 FF 18 02 62 80 00 B8");
+        // EMSESP::txservice_.send_raw("B0 00 FF 18 02 62 80 00 B8");
     }
 
     if (command == "heatpump") {
@@ -1070,7 +1071,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         rx_telegram({0xB0, 00, 0xFF, 0x18, 02, 0x62, 0x80, 00, 0xB8});
 
-        EMSESP::send_raw_telegram("B0 00 FF 18 02 62 80 00 B8");
+        EMSESP::txservice_.send_raw("B0 00 FF 18 02 62 80 00 B8");
 
         uart_telegram("30 00 FF 0A 02 6A 04");                                                 // SM100 pump on  1
         uart_telegram("30 00 FF 00 02 64 00 00 00 04 00 00 FF 00 00 1E 0B 09 64 00 00 00 00"); // SM100 modulation

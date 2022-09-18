@@ -149,8 +149,6 @@ class Thermostat : public EMSdevice {
         uint8_t model_;  // the model type
     };
 
-    static std::string mode_tostring(uint8_t mode);
-
   private:
     static uuid::log::Logger logger_;
 
@@ -238,8 +236,6 @@ class Thermostat : public EMSdevice {
     uint8_t tempDiffBoiler_;  // relative temperature degrees
 
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
-
-    uint8_t zero_value_ = 0; // for fixing current room temperature to 0 for HA
 
     // Generic Types
     static constexpr uint16_t EMS_TYPE_RCTime        = 0x06; // time
@@ -353,7 +349,6 @@ class Thermostat : public EMSdevice {
     void process_RC30Set(std::shared_ptr<const Telegram> telegram);
     void process_RC30Temp(std::shared_ptr<const Telegram> telegram);
     void process_RC30wwSettings(std::shared_ptr<const Telegram> telegram);
-    void process_RC30Timer(std::shared_ptr<const Telegram> telegram);
     void process_RC20Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC20Set(std::shared_ptr<const Telegram> telegram);
     void process_RC20Temp(std::shared_ptr<const Telegram> telegram);

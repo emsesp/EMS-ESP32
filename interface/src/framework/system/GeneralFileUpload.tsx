@@ -14,6 +14,8 @@ import { extractErrorMessage } from '../../utils';
 
 import * as EMSESP from '../../project/api';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 interface UploadFileProps {
   uploadGeneralFile: (file: File, config?: FileUploadConfig) => AxiosPromise<void>;
 }
@@ -22,6 +24,8 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
   const [uploadFile, cancelUpload, uploading, uploadProgress] = useFileUpload({ upload: uploadGeneralFile });
 
   const { enqueueSnackbar } = useSnackbar();
+
+  const { LL } = useI18nContext();
 
   const saveFile = (json: any, endpoint: string) => {
     const a = document.createElement('a');
@@ -35,19 +39,19 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    enqueueSnackbar('File downloaded', { variant: 'info' });
+    enqueueSnackbar(LL.DOWNLOAD_SUCCESSFUL(), { variant: 'info' });
   };
 
   const downloadSettings = async () => {
     try {
       const response = await EMSESP.getSettings();
       if (response.status !== 200) {
-        enqueueSnackbar('Unable to get settings', { variant: 'error' });
+        enqueueSnackbar(LL.PROBLEM_LOADING(), { variant: 'error' });
       } else {
         saveFile(response.data, 'settings');
       }
     } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     }
   };
 
@@ -55,47 +59,45 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
     try {
       const response = await EMSESP.getCustomizations();
       if (response.status !== 200) {
-        enqueueSnackbar('Unable to get customizations', { variant: 'error' });
+        enqueueSnackbar(LL.PROBLEM_LOADING(), { variant: 'error' });
       } else {
         saveFile(response.data, 'customizations');
       }
     } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem with downloading'), { variant: 'error' });
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     }
   };
 
   return (
     <>
-      <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-        Upload
-      </Typography>
       {!uploading && (
-        <Box mb={2} color="warning.main">
-          <Typography variant="body2">
-            Upload a new firmware (.bin) file, settings or customizations (.json) file below.
+        <>
+          <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+            {LL.UPLOAD()}
           </Typography>
-        </Box>
+          <Box mb={2} color="warning.main">
+            <Typography variant="body2">{LL.UPLOAD_TEXT()} </Typography>
+          </Box>
+        </>
       )}
       <SingleUpload onDrop={uploadFile} onCancel={cancelUpload} uploading={uploading} progress={uploadProgress} />
 
-      <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-        Download
-      </Typography>
       {!uploading && (
         <>
+          <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+            {LL.DOWNLOAD()}
+          </Typography>
           <Box color="warning.main">
             <Typography mb={1} variant="body2">
-              Download the application settings. Be careful when sharing your settings as this file contains passwords
-              and other sensitive system information.
+              {LL.DOWNLOAD_SETTINGS_TEXT()}
             </Typography>
           </Box>
           <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => downloadSettings()}>
-            settings
+            {LL.SETTINGS()}
           </Button>
-
           <Box color="warning.main">
             <Typography mt={2} mb={1} variant="body2">
-              Download the entity customizations.
+              {LL.DOWNLOAD_CUSTOMIZATION_TEXT()}{' '}
             </Typography>
           </Box>
           <Button
@@ -104,7 +106,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
             color="primary"
             onClick={() => downloadCustomizations()}
           >
-            customizations
+            {LL.CUSTOMIZATION()}
           </Button>
         </>
       )}

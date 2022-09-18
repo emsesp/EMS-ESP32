@@ -3,7 +3,7 @@ import { ValidateFieldsError } from 'async-validator';
 
 import { useSnackbar } from 'notistack';
 
-import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider } from '@mui/material';
+import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider, InputAdornment } from '@mui/material';
 
 import SaveIcon from '@mui/icons-material/Save';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
@@ -24,6 +24,8 @@ import { numberValue, extractErrorMessage, updateValue, useRest } from '../utils
 import * as EMSESP from './api';
 import { Settings, BOARD_PROFILES } from './types';
 
+import { useI18nContext } from '../i18n/i18n-react';
+
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
     <MenuItem key={code} value={code}>
@@ -37,6 +39,8 @@ const SettingsApplication: FC = () => {
     read: EMSESP.readSettings,
     update: EMSESP.writeSettings
   });
+
+  const { LL } = useI18nContext();
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -65,7 +69,7 @@ const SettingsApplication: FC = () => {
         });
       }
     } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem fetching board profile'), { variant: 'error' });
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     } finally {
       setProcessingBoard(false);
     }
@@ -102,26 +106,23 @@ const SettingsApplication: FC = () => {
       validateAndSubmit();
       try {
         await EMSESP.restart();
-        enqueueSnackbar('EMS-ESP is restarting...', { variant: 'info' });
+        enqueueSnackbar(LL.APPLICATION_RESTARTING(), { variant: 'info' });
       } catch (error: unknown) {
-        enqueueSnackbar(extractErrorMessage(error, 'Problem restarting device'), { variant: 'error' });
+        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       }
     };
 
     return (
       <>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          Interface Board Profile
+          Interface {LL.BOARD_PROFILE()}
         </Typography>
         <Box color="warning.main">
-          <Typography variant="body2">
-            Select a pre-configured interface board profile from the list below or choose "Custom" to configure your own
-            hardware settings.
-          </Typography>
+          <Typography variant="body2">{LL.BOARD_PROFILE_TEXT()}</Typography>
         </Box>
         <ValidatedTextField
           name="board_profile"
-          label="Board Profile"
+          label={LL.BOARD_PROFILE()}
           value={data.board_profile}
           disabled={processingBoard}
           variant="outlined"
@@ -170,7 +171,7 @@ const SettingsApplication: FC = () => {
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="pbutton_gpio"
-                  label="Button GPIO"
+                  label={LL.BUTTON() + ' GPIO'}
                   fullWidth
                   variant="outlined"
                   value={numberValue(data.pbutton_gpio)}
@@ -184,7 +185,7 @@ const SettingsApplication: FC = () => {
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="dallas_gpio"
-                  label="Temperature GPIO (0=disabled)"
+                  label={LL.TEMPERATURE() + ' GPIO (0=' + LL.DISABLED() + ')'}
                   fullWidth
                   variant="outlined"
                   value={numberValue(data.dallas_gpio)}
@@ -198,7 +199,7 @@ const SettingsApplication: FC = () => {
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="led_gpio"
-                  label="LED GPIO (0=disabled)"
+                  label={'LED GPIO (0=' + LL.DISABLED() + ')'}
                   fullWidth
                   variant="outlined"
                   value={numberValue(data.led_gpio)}
@@ -221,7 +222,7 @@ const SettingsApplication: FC = () => {
                 margin="normal"
                 select
               >
-                <MenuItem value={0}>No Ethernet Module</MenuItem>
+                <MenuItem value={0}>{LL.DISABLED()}</MenuItem>
                 <MenuItem value={1}>LAN8720</MenuItem>
                 <MenuItem value={2}>TLK110</MenuItem>
               </ValidatedTextField>
@@ -231,7 +232,7 @@ const SettingsApplication: FC = () => {
                 <Grid item>
                   <ValidatedTextField
                     name="eth_power"
-                    label="Eth Power GPIO (-1=disabled)"
+                    label={'Eth Power GPIO (-1=' + LL.DISABLED() + ')'}
                     fullWidth
                     variant="outlined"
                     value={numberValue(data.eth_power)}
@@ -277,7 +278,7 @@ const SettingsApplication: FC = () => {
           </>
         )}
         <Typography variant="h6" color="primary">
-          EMS Bus Settings
+          EMS Bus {LL.SETTINGS()}
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <Grid item xs={6}>
@@ -319,63 +320,90 @@ const SettingsApplication: FC = () => {
           </Grid>
         </Grid>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          General Options
+          {LL.GENERAL_OPTIONS()}
         </Typography>
+        <Box
+          sx={{
+            '& .MuiTextField-root': { width: '25ch' }
+          }}
+        >
+          <ValidatedTextField
+            name="locale"
+            label={LL.LANGUAGE_ENTITIES()}
+            disabled={saving}
+            value={data.locale}
+            variant="outlined"
+            onChange={updateFormValue}
+            margin="normal"
+            size="small"
+            select
+          >
+            <MenuItem value="en">English (EN)</MenuItem>
+            <MenuItem value="de">Deutsch (DE)</MenuItem>
+            <MenuItem value="nl">Nederlands (NL)</MenuItem>
+            <MenuItem value="se">Svenska (SE)</MenuItem>
+            <MenuItem disabled value="pl">Polski (PL)</MenuItem>
+            <MenuItem disabled value="no">Norsk (NO)</MenuItem>
+          </ValidatedTextField>
+        </Box>
         {data.led_gpio !== 0 && (
           <BlockFormControlLabel
             control={<Checkbox checked={data.hide_led} onChange={updateFormValue} name="hide_led" />}
-            label="Hide LED"
+            label={LL.HIDE_LED()}
             disabled={saving}
           />
         )}
         <BlockFormControlLabel
           control={<Checkbox checked={data.telnet_enabled} onChange={updateFormValue} name="telnet_enabled" />}
-          label="Enable Telnet Console"
+          label={LL.ENABLE_TELNET()}
           disabled={saving}
         />
         <BlockFormControlLabel
           control={<Checkbox checked={data.analog_enabled} onChange={updateFormValue} name="analog_enabled" />}
-          label="Enable Analog Sensors"
+          label={LL.ENABLE_ANALOG()}
           disabled={saving}
         />
         <BlockFormControlLabel
           control={<Checkbox checked={data.fahrenheit} onChange={updateFormValue} name="fahrenheit" />}
-          label="Convert temperature values to Fahrenheit"
+          label={LL.CONVERT_FAHRENHEIT()}
           disabled={saving}
         />
         <BlockFormControlLabel
           control={<Checkbox checked={data.notoken_api} onChange={updateFormValue} name="notoken_api" />}
-          label="Bypass Access Token authorization on API calls"
+          label={LL.BYPASS_TOKEN()}
           disabled={saving}
         />
         <BlockFormControlLabel
           control={<Checkbox checked={data.readonly_mode} onChange={updateFormValue} name="readonly_mode" />}
-          label="Enable Read only mode (blocks all outgoing EMS Tx write commands)"
+          label={LL.READONLY()}
           disabled={saving}
         />
         <BlockFormControlLabel
           control={<Checkbox checked={data.low_clock} onChange={updateFormValue} name="low_clock" />}
-          label="Underclock CPU speed"
+          label={LL.UNDERCLOCK_CPU()}
           disabled={saving}
         />
         <Grid container spacing={0} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <BlockFormControlLabel
             control={<Checkbox checked={data.shower_timer} onChange={updateFormValue} name="shower_timer" />}
-            label="Enable Shower Timer"
+            label={LL.ENABLE_SHOWER_TIMER()}
             disabled={saving}
           />
           <BlockFormControlLabel
             control={<Checkbox checked={data.shower_alert} onChange={updateFormValue} name="shower_alert" />}
-            label="Enable Shower Alert"
+            label={LL.ENABLE_SHOWER_ALERT()}
             disabled={!data.shower_timer}
           />
           {data.shower_alert && (
             <>
-              <Grid item xs={2}>
+              <Grid item xs={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="shower_alert_trigger"
-                  label="Trigger Time (minutes)"
+                  label={LL.TRIGGER_TIME()}
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
+                  }}
                   variant="outlined"
                   value={data.shower_alert_trigger}
                   type="number"
@@ -383,11 +411,14 @@ const SettingsApplication: FC = () => {
                   disabled={!data.shower_timer}
                 />
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="shower_alert_coldshot"
-                  label="Cold Shot Time (seconds)"
+                  label={LL.COLD_SHOT_DURATION()}
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                  }}
                   variant="outlined"
                   value={data.shower_alert_coldshot}
                   type="number"
@@ -399,13 +430,13 @@ const SettingsApplication: FC = () => {
           )}
         </Grid>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          Formatting Options
+          {LL.FORMATTING_OPTIONS()}
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <Grid item xs={4}>
             <ValidatedTextField
               name="bool_dashboard"
-              label="Boolean Format Dashboard"
+              label={LL.BOOLEAN_FORMAT_DASHBOARD()}
               value={data.bool_dashboard}
               fullWidth
               variant="outlined"
@@ -413,8 +444,8 @@ const SettingsApplication: FC = () => {
               margin="normal"
               select
             >
-              <MenuItem value={1}>on/off</MenuItem>
-              <MenuItem value={2}>ON/OFF</MenuItem>
+              <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
+              <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
               <MenuItem value={3}>true/false</MenuItem>
               <MenuItem value={5}>1/0</MenuItem>
             </ValidatedTextField>
@@ -422,7 +453,7 @@ const SettingsApplication: FC = () => {
           <Grid item xs={4}>
             <ValidatedTextField
               name="bool_format"
-              label="Boolean Format API/MQTT"
+              label={LL.BOOLEAN_FORMAT_API()}
               value={data.bool_format}
               fullWidth
               variant="outlined"
@@ -430,8 +461,8 @@ const SettingsApplication: FC = () => {
               margin="normal"
               select
             >
-              <MenuItem value={1}>"on"/"off"</MenuItem>
-              <MenuItem value={2}>"ON"/"OFF"</MenuItem>
+              <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
+              <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
               <MenuItem value={3}>"true"/"false"</MenuItem>
               <MenuItem value={4}>true/false</MenuItem>
               <MenuItem value={5}>"1"/"0"</MenuItem>
@@ -441,7 +472,7 @@ const SettingsApplication: FC = () => {
           <Grid item xs={4}>
             <ValidatedTextField
               name="enum_format"
-              label="Enum Format API/MQTT"
+              label={LL.ENUM_FORMAT()}
               value={data.enum_format}
               fullWidth
               variant="outlined"
@@ -449,29 +480,29 @@ const SettingsApplication: FC = () => {
               margin="normal"
               select
             >
-              <MenuItem value={1}>Value</MenuItem>
-              <MenuItem value={2}>Index</MenuItem>
+              <MenuItem value={1}>{LL.VALUE()}</MenuItem>
+              <MenuItem value={2}>{LL.INDEX()}</MenuItem>
             </ValidatedTextField>
           </Grid>
         </Grid>
         {data.dallas_gpio !== 0 && (
           <>
             <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-              Temperature Sensors
+              {LL.TEMP_SENSORS()}
             </Typography>
             <BlockFormControlLabel
               control={<Checkbox checked={data.dallas_parasite} onChange={updateFormValue} name="dallas_parasite" />}
-              label="Enable parasite power"
+              label={LL.ENABLE_PARASITE()}
               disabled={saving}
             />
           </>
         )}
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          Logging
+          {LL.LOGGING()}
         </Typography>
         <BlockFormControlLabel
           control={<Checkbox checked={data.trace_raw} onChange={updateFormValue} name="trace_raw" />}
-          label="Log EMS telegrams in hexadecimal"
+          label={LL.LOG_HEX()}
           disabled={saving}
         />
         <BlockFormControlLabel
@@ -483,11 +514,11 @@ const SettingsApplication: FC = () => {
               disabled={saving}
             />
           }
-          label="Enable Syslog"
+          label={LL.ENABLE_SYSLOG()}
         />
         {data.syslog_enabled && (
           <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_host"
@@ -500,7 +531,7 @@ const SettingsApplication: FC = () => {
                 disabled={saving}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_port"
@@ -514,7 +545,7 @@ const SettingsApplication: FC = () => {
                 disabled={saving}
               />
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <ValidatedTextField
                 name="syslog_level"
                 label="Log Level"
@@ -534,11 +565,14 @@ const SettingsApplication: FC = () => {
                 <MenuItem value={9}>ALL</MenuItem>
               </ValidatedTextField>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_mark_interval"
-                label="Mark Interval (seconds, 0=off)"
+                label={LL.MARK_INTERVAL()}
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                }}
                 fullWidth
                 variant="outlined"
                 value={data.syslog_mark_interval}
@@ -551,9 +585,9 @@ const SettingsApplication: FC = () => {
           </Grid>
         )}
         {restartNeeded && (
-          <MessageBox my={2} level="warning" message="EMS-ESP needs to be restarted to apply changed system settings">
+          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT()}>
             <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
-              Restart
+              {LL.RESTART()}
             </Button>
           </MessageBox>
         )}
@@ -567,7 +601,7 @@ const SettingsApplication: FC = () => {
               type="submit"
               onClick={validateAndSubmit}
             >
-              Save
+              {LL.SAVE()}
             </Button>
           </ButtonRow>
         )}
@@ -576,7 +610,7 @@ const SettingsApplication: FC = () => {
   };
 
   return (
-    <SectionContent title="Application Settings" titleGutter>
+    <SectionContent title={LL.APPLICATION_SETTINGS()} titleGutter>
       {content()}
     </SectionContent>
   );

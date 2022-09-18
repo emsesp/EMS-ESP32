@@ -50,6 +50,7 @@ void NTPSettingsService::configureNTP() {
     emsesp::EMSESP::system_.ntp_connected(false);
     if (connected_ && _state.enabled) {
         emsesp::EMSESP::logger().info(F("Starting NTP"));
+        sntp_set_sync_interval(3600000); // onehour
         sntp_set_time_sync_notification_cb(ntp_received);
         configTzTime(_state.tzFormat.c_str(), _state.server.c_str());
     } else {

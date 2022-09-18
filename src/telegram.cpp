@@ -540,9 +540,9 @@ void TxService::read_request(const uint16_t type_id, const uint8_t dest, const u
 }
 
 // Send a raw telegram to the bus, telegram is a text string of hex values
-void TxService::send_raw(const char * telegram_data) {
+bool TxService::send_raw(const char * telegram_data) {
     if (telegram_data == nullptr) {
-        return;
+        return false;
     }
 
     // since the telegram data is a const, make a copy. add 1 to grab the \0 EOS
@@ -562,6 +562,8 @@ void TxService::send_raw(const char * telegram_data) {
     if ((p = strtok(telegram, " ,"))) { // delimiter
         strlcpy(value, p, sizeof(value));
         data[0] = (uint8_t)strtol(value, 0, 16);
+    } else {
+        return false;
     }
 
     // and iterate until end
@@ -573,11 +575,13 @@ void TxService::send_raw(const char * telegram_data) {
         }
     }
 
-    if (count == 0) {
-        return; // nothing to send
+    // check valid length and src
+    if ((count < 4) || ((data[0] & 0x7F) != ems_bus_id())) {
+        return false;
     }
 
     add(Telegram::Operation::TX_RAW, data, count + 1, 0, true); // add to top/front of Tx queue
+    return true;
 }
 
 // add last Tx to tx queue and increment count
@@ -596,10 +600,12 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         } else {
             increment_telegram_write_fail_count(); // another Tx fail
         }
+
         LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request: %s"),
                   (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
                   MAXIMUM_TX_RETRIES,
                   telegram_last_->to_string().c_str());
+
         if (operation == Telegram::Operation::TX_READ) {
             EMSESP::rxservice_.add_empty(telegram_last_->dest, telegram_last_->src, telegram_last_->type_id, telegram_last_->offset);
         }
@@ -623,24 +629,18 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
 }
 
 // send a request to read the next block of data from longer telegrams
-uint16_t TxService::read_next_tx(uint8_t offset) {
-    // add to the top/front of the queue
-    uint8_t message_data[1] = {EMS_MAX_TELEGRAM_LENGTH}; // request all data, 32 bytes
-    if (telegram_last_->offset != offset) {
-        return 0;
+uint16_t TxService::read_next_tx(const uint8_t offset, const uint8_t length) {
+    uint8_t old_length   = telegram_last_->type_id > 0xFF ? length - 7 : length - 5;
+    uint8_t next_length  = telegram_last_->type_id > 0xFF ? EMS_MAX_TELEGRAM_MESSAGE_LENGTH - 2 : EMS_MAX_TELEGRAM_MESSAGE_LENGTH;
+    uint8_t next_offset  = telegram_last_->offset + old_length;
+    uint8_t message_data = (UINT8_MAX - next_offset) >= next_length ? next_length : UINT8_MAX - next_offset;
+    // check telegram, offset and overflow
+    // some telegrams only reply with one byte less, but have higher offsets (0x10)
+    if (old_length >= (next_length - 1) && telegram_last_->offset == offset) {
+        add(Telegram::Operation::TX_READ, telegram_last_->dest, telegram_last_->type_id, next_offset, &message_data, 1, 0, true);
+        return telegram_last_->type_id;
     }
-
-    uint8_t add_offset = 25;               // for EMS+ telegram increase offset by 25
-    if (telegram_last_->type_id < 0x100) { // but for EMS1.0 by 27
-        add_offset = 27;
-    }
-
-    if (UINT8_MAX - telegram_last_->offset < add_offset) { // stop if new offset would overflow
-        return 0;
-    }
-
-    add(Telegram::Operation::TX_READ, telegram_last_->dest, telegram_last_->type_id, telegram_last_->offset + add_offset, message_data, 1, 0, true);
-    return telegram_last_->type_id;
+    return 0;
 }
 
 // checks if a telegram is sent to us matches the last Tx request

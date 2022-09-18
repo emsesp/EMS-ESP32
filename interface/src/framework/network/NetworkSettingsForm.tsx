@@ -10,7 +10,8 @@ import {
   ListItemAvatar,
   ListItemSecondaryAction,
   ListItemText,
-  Typography
+  Typography,
+  InputAdornment
 } from '@mui/material';
 
 import LockOpenIcon from '@mui/icons-material/LockOpen';
@@ -36,7 +37,11 @@ import { ValidateFieldsError } from 'async-validator';
 import { validate } from '../../validators';
 import { createNetworkSettingsValidator } from '../../validators/network';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const WiFiSettingsForm: FC = () => {
+  const { LL } = useI18nContext();
+
   const { selectedNetwork, deselectNetwork } = useContext(WiFiConnectionContext);
 
   const [initialized, setInitialized] = useState(false);
@@ -111,7 +116,7 @@ const WiFiSettingsForm: FC = () => {
           <ValidatedTextField
             fieldErrors={fieldErrors}
             name="ssid"
-            label="SSID (leave blank to disable WiFi)"
+            label={'SSID (' + LL.NETWORK_BLANK_SSID() + ')'}
             fullWidth
             variant="outlined"
             value={data.ssid}
@@ -123,7 +128,7 @@ const WiFiSettingsForm: FC = () => {
           <ValidatedPasswordField
             fieldErrors={fieldErrors}
             name="password"
-            label="Password"
+            label={LL.PASSWORD()}
             fullWidth
             variant="outlined"
             value={data.password}
@@ -135,7 +140,10 @@ const WiFiSettingsForm: FC = () => {
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="tx_power"
-          label="WiFi Tx Power (dBm)"
+          label={'WiFi Tx ' + LL.POWER()}
+          InputProps={{
+            endAdornment: <InputAdornment position="end">dBm</InputAdornment>
+          }}
           fullWidth
           variant="outlined"
           value={numberValue(data.tx_power)}
@@ -146,21 +154,21 @@ const WiFiSettingsForm: FC = () => {
 
         <BlockFormControlLabel
           control={<Checkbox name="nosleep" checked={data.nosleep} onChange={updateFormValue} />}
-          label="Disable WiFi Sleep Mode"
+          label={LL.NETWORK_DISABLE_SLEEP()}
         />
 
         <BlockFormControlLabel
           control={<Checkbox name="bandwidth20" checked={data.bandwidth20} onChange={updateFormValue} />}
-          label="Use Lower WiFi Bandwidth"
+          label={LL.NETWORK_LOW_BAND()}
         />
 
         <BlockFormControlLabel
           control={<Checkbox name="enableMDNS" checked={data.enableMDNS} onChange={updateFormValue} />}
-          label="Enable mDNS Service"
+          label={LL.NETWORK_USE_DNS()}
         />
 
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          General
+          {LL.GENERAL_OPTIONS()}
         </Typography>
 
         <ValidatedTextField
@@ -176,12 +184,12 @@ const WiFiSettingsForm: FC = () => {
 
         <BlockFormControlLabel
           control={<Checkbox name="enableIPv6" checked={data.enableIPv6} onChange={updateFormValue} />}
-          label="Enable IPv6 support"
+          label={LL.NETWORK_ENABLE_IPV6()}
         />
 
         <BlockFormControlLabel
           control={<Checkbox name="static_ip_config" checked={data.static_ip_config} onChange={updateFormValue} />}
-          label="Use Fixed IP address"
+          label={LL.NETWORK_FIXED_IP()}
         />
         {data.static_ip_config && (
           <>
@@ -246,7 +254,7 @@ const WiFiSettingsForm: FC = () => {
             type="submit"
             onClick={validateAndSubmit}
           >
-            Save
+            {LL.SAVE()}
           </Button>
         </ButtonRow>
       </>
@@ -254,7 +262,7 @@ const WiFiSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title="Network Settings" titleGutter>
+    <SectionContent title={LL.NETWORK() + ' ' + LL.SETTINGS()} titleGutter>
       {content()}
     </SectionContent>
   );

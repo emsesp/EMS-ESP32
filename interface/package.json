@@ -1,6 +1,6 @@
 {
   "name": "EMS-ESP",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "private": true,
   "proxy": "http://localhost:3080",
   "dependencies": {
@@ -30,6 +30,7 @@
     "react-router-dom": "^6.4.0",
     "react-scripts": "5.0.1",
     "sockette": "^2.0.6",
+    "typesafe-i18n": "^5.13.0",
     "typescript": "^4.8.3"
   },
   "scripts": {
@@ -41,8 +42,9 @@
     "build-hosted": "env-cmd -f .env.hosted npm run build",
     "build-localhost": "PUBLIC_URL=/ react-app-rewired build",
     "mock-api": "nodemon --watch ../mock-api ../mock-api/server.js",
-    "standalone": "npm-run-all -p start mock-api",
-    "lint": "eslint . --ext .ts,.tsx"
+    "standalone": "npm-run-all -p start typesafe-i18n mock-api",
+    "lint": "eslint . --ext .ts,.tsx",
+    "typesafe-i18n": "typesafe-i18n"
   },
   "eslintConfig": {
     "extends": [
@@ -78,7 +80,7 @@
       "max-len": [
         1,
         {
-          "code": 200
+          "code": 220
         }
       ],
       "arrow-parens": 1

@@ -39,6 +39,8 @@ import { AuthenticatedContext } from '../../contexts/authentication';
 
 import axios from 'axios';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 export const VERSIONCHECK_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/latest';
 export const VERSIONCHECK_DEV_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/tags/latest';
 export const uploadURL = window.location.origin + '/system/upload';
@@ -48,6 +50,8 @@ function formatNumber(num: number) {
 }
 
 const SystemStatusForm: FC = () => {
+  const { LL } = useI18nContext();
+
   const { loadData, data, errorMessage } = useRest<SystemStatus>({ read: SystemApi.readSystemStatus });
 
   const { me } = useContext(AuthenticatedContext);
@@ -80,9 +84,9 @@ const SystemStatusForm: FC = () => {
     setProcessing(true);
     try {
       await SystemApi.restart();
-      enqueueSnackbar('EMS-ESP is restarting...', { variant: 'info' });
+      enqueueSnackbar(LL.APPLICATION_RESTARTING(), { variant: 'info' });
     } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem restarting device'), { variant: 'error' });
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     } finally {
       setConfirmRestart(false);
       setProcessing(false);
@@ -92,7 +96,7 @@ const SystemStatusForm: FC = () => {
   const renderRestartDialog = () => (
     <Dialog open={confirmRestart} onClose={() => setConfirmRestart(false)}>
       <DialogTitle>Restart</DialogTitle>
-      <DialogContent dividers>Are you sure you want to restart EMS-ESP?</DialogContent>
+      <DialogContent dividers>{LL.RESTART_TEXT()}</DialogContent>
       <DialogActions>
         <Button
           startIcon={<CancelIcon />}
@@ -100,7 +104,7 @@ const SystemStatusForm: FC = () => {
           onClick={() => setConfirmRestart(false)}
           color="secondary"
         >
-          Cancel
+          {LL.CANCEL()}
         </Button>
         <Button
           startIcon={<PowerSettingsNewIcon />}
@@ -110,7 +114,7 @@ const SystemStatusForm: FC = () => {
           color="primary"
           autoFocus
         >
-          Restart
+          {LL.RESTART()}
         </Button>
       </DialogActions>
     </Dialog>
@@ -119,16 +123,12 @@ const SystemStatusForm: FC = () => {
   const renderVersionDialog = () => {
     return (
       <Dialog open={showingVersion} onClose={() => setShowingVersion(false)}>
-        <DialogTitle>Version Check</DialogTitle>
+        <DialogTitle>{LL.VERSION_CHECK()}</DialogTitle>
         <DialogContent dividers>
-          <MessageBox
-            my={0}
-            level="info"
-            message={'You are currently running EMS-ESP version ' + data?.emsesp_version}
-          />
+          <MessageBox my={0} level="info" message={LL.SYSTEM_VERSION_RUNNING() + ' ' + data?.emsesp_version} />
           {latestVersion && (
             <Box mt={2} mb={2}>
-              The latest <u>official</u> version is <b>{latestVersion.version}</b>&nbsp;(
+              {LL.THE_LATEST()}&nbsp;<u>official</u> version is <b>{latestVersion.version}</b>&nbsp;(
               <Link target="_blank" href={latestVersion.changelog} color="primary">
                 {'release notes'}
               </Link>
@@ -142,7 +142,7 @@ const SystemStatusForm: FC = () => {
 
           {latestDevVersion && (
             <Box mt={2} mb={2}>
-              The latest <u>development</u> version is&nbsp;<b>{latestDevVersion.version}</b>
+              {LL.THE_LATEST()}&nbsp;<u>development</u> version is&nbsp;<b>{latestDevVersion.version}</b>
               &nbsp;(
               <Link target="_blank" href={latestDevVersion.changelog} color="primary">
                 {'release notes'}
@@ -157,17 +157,17 @@ const SystemStatusForm: FC = () => {
 
           <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>
             <Typography variant="body2">
-              Use&nbsp;
+              {LL.USE()}&nbsp;
               <Link target="_blank" href={uploadURL} color="primary">
                 {'UPLOAD'}
               </Link>
-              &nbsp;to apply the new firmware
+              &nbsp;{LL.SYSTEM_APPLY_FIRMWARE()}
             </Typography>
           </Box>
         </DialogContent>
         <DialogActions>
           <Button variant="outlined" onClick={() => setShowingVersion(false)} color="secondary">
-            Close
+            {LL.CLOSE()}
           </Button>
         </DialogActions>
       </Dialog>
@@ -178,9 +178,9 @@ const SystemStatusForm: FC = () => {
     setProcessing(true);
     try {
       await SystemApi.factoryReset();
-      enqueueSnackbar('Device has been factory reset and will now restart', { variant: 'info' });
+      enqueueSnackbar(LL.SYSTEM_FACTORY_TEXT(), { variant: 'info' });
     } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem factory resetting the device'), { variant: 'error' });
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     } finally {
       setConfirmFactoryReset(false);
       setProcessing(false);
@@ -189,8 +189,8 @@ const SystemStatusForm: FC = () => {
 
   const renderFactoryResetDialog = () => (
     <Dialog open={confirmFactoryReset} onClose={() => setConfirmFactoryReset(false)}>
-      <DialogTitle>Factory Reset</DialogTitle>
-      <DialogContent dividers>Are you sure you want to reset the device to its factory defaults?</DialogContent>
+      <DialogTitle>{LL.FACTORY_RESET()}</DialogTitle>
+      <DialogContent dividers>{LL.SYSTEM_FACTORY_TEXT_DIALOG()}</DialogContent>
       <DialogActions>
         <Button
           startIcon={<CancelIcon />}
@@ -198,7 +198,7 @@ const SystemStatusForm: FC = () => {
           onClick={() => setConfirmFactoryReset(false)}
           color="secondary"
         >
-          Cancel
+          {LL.CANCEL()}
         </Button>
         <Button
           startIcon={<SettingsBackupRestoreIcon />}
@@ -208,7 +208,7 @@ const SystemStatusForm: FC = () => {
           autoFocus
           color="error"
         >
-          Factory Reset
+          {LL.FACTORY_RESET()}
         </Button>
       </DialogActions>
     </Dialog>
@@ -231,7 +231,7 @@ const SystemStatusForm: FC = () => {
             <ListItemText primary="EMS-ESP Version" secondary={'v' + data.emsesp_version} />
             {latestVersion && (
               <Button color="primary" onClick={() => setShowingVersion(true)}>
-                Version Check
+                {LL.VERSION_CHECK()}
               </Button>
             )}
           </ListItem>
@@ -242,7 +242,7 @@ const SystemStatusForm: FC = () => {
                 <DevicesIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Device (Platform / SDK)" secondary={data.esp_platform + ' / ' + data.sdk_version} />
+            <ListItemText primary={LL.PLATFORM()} secondary={data.esp_platform + ' / ' + data.sdk_version} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -251,7 +251,7 @@ const SystemStatusForm: FC = () => {
                 <TimerIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="System Uptime" secondary={data.uptime} />
+            <ListItemText primary={LL.UPTIME()} secondary={data.uptime} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -260,7 +260,7 @@ const SystemStatusForm: FC = () => {
                 <ShowChartIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="CPU Frequency" secondary={data.cpu_freq_mhz + ' MHz'} />
+            <ListItemText primary={LL.CPU_FREQ()} secondary={data.cpu_freq_mhz + ' MHz'} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -270,7 +270,7 @@ const SystemStatusForm: FC = () => {
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary="Heap (Free / Max Alloc)"
+              primary={LL.HEAP()}
               secondary={
                 formatNumber(data.free_heap) +
                 ' / ' +
@@ -290,7 +290,7 @@ const SystemStatusForm: FC = () => {
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
-                  primary="PSRAM (Size / Free)"
+                  primary={LL.PSRAM()}
                   secondary={formatNumber(data.psram_size) + ' / ' + formatNumber(data.free_psram) + ' bytes'}
                 />
               </ListItem>
@@ -304,7 +304,7 @@ const SystemStatusForm: FC = () => {
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary="Flash Chip (Size / Speed)"
+              primary={LL.FLASH()}
               secondary={
                 formatNumber(data.flash_chip_size) + ' bytes / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'
               }
@@ -318,7 +318,7 @@ const SystemStatusForm: FC = () => {
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary="File System (Used / Total)"
+              primary={LL.FILESYSTEM()}
               secondary={
                 formatNumber(data.fs_used) +
                 ' / ' +
@@ -335,7 +335,7 @@ const SystemStatusForm: FC = () => {
           <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
             <ButtonRow>
               <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
-                Refresh
+                {LL.REFRESH()}
               </Button>
             </ButtonRow>
           </Box>
@@ -348,7 +348,7 @@ const SystemStatusForm: FC = () => {
                   color="primary"
                   onClick={() => setConfirmRestart(true)}
                 >
-                  Restart
+                  {LL.RESTART()}
                 </Button>
                 <Button
                   startIcon={<SettingsBackupRestoreIcon />}
@@ -356,7 +356,7 @@ const SystemStatusForm: FC = () => {
                   onClick={() => setConfirmFactoryReset(true)}
                   color="error"
                 >
-                  Factory reset
+                  {LL.FACTORY_RESET()}
                 </Button>
               </ButtonRow>
             </Box>
@@ -370,7 +370,7 @@ const SystemStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title="System Status" titleGutter>
+    <SectionContent title={LL.SYSTEM() + ' ' + LL.STATUS()} titleGutter>
       {content()}
     </SectionContent>
   );
