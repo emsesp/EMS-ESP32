@@ -20,7 +20,7 @@ def bin_copy(source, target, env):
     app_version = bag.get('app_version')
     platform = "ESP32"
 
-    flash_size = env["PIOENV"].split('_')[1]
+    # flash_size = env["PIOENV"].split('_')[1]
 
     # print(env.Dump())
     # my_flags = env.ParseFlags(env['BUILD_FLAGS'])
@@ -33,10 +33,12 @@ def bin_copy(source, target, env):
 
     print("app version: "+app_version)
     print("platform: "+platform)
-    print("flash size: "+flash_size)
+    # print("flash size: "+flash_size)
 
     # convert . to _ so Windows doesn't complain
-    variant = "EMS-ESP-" + app_version.replace(".", "_") + "-" + platform + "_" + flash_size
+    variant = "EMS-ESP-" + app_version.replace(".", "_") + "-" + platform
+
+    # variant = "EMS-ESP-" + app_version.replace(".", "_") + "-" + platform + "_" + flash_size
 
     # check if output directories exist and create if necessary
     if not os.path.isdir(OUTPUT_DIR):
