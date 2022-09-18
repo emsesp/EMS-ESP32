@@ -88,65 +88,40 @@ const DashboardStatus: FC = () => {
   const { me } = useContext(AuthenticatedContext);
 
   const stats_theme = tableTheme({
+    Table: `
+      --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 90px 90px 80px;
+    `,
     BaseRow: `
       font-size: 14px;
-      color: white;
-      height: 32px;
     `,
     HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
-      font-weight: 500;
-      border-bottom: 1px solid #e0e0e0;
-      padding-left: 8px;
+
+      .th {
+        height: 42px;
+        font-weight: 500;
+        border-bottom: 1px solid #565656;
+      }
     `,
     Row: `
-      &:nth-of-type(odd) {
+      .td {
+        padding: 8px;
+        border-top: 1px solid #565656;
+        border-bottom: 1px solid #565656;
+      }
+
+      &:nth-of-type(odd) .td {
         background-color: #303030;
       }
-      &:nth-of-type(even) {
+      &:nth-of-type(even) .td {
         background-color: #1e1e1e;
-      }
-      border-top: 1px solid #565656;
-      border-bottom: 1px solid #565656;
-      position: relative;
-      z-index: 1;
-      &:not(:last-of-type) {
-        margin-bottom: -1px;
-      }
-      &:not(:first-of-type) {
-        margin-top: -1px;
-      }
-      &:hover {
-        color: white;
       }
     `,
     BaseCell: `
-      border-top: 1px solid transparent;
-      border-right: 1px solid transparent;
-      border-bottom: 1px solid transparent;
-      &:not(.stiff) > div {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      &:nth-of-type(1) {
-        padding-left: 8px;
-        flex: 1;
-      }
-      &:nth-of-type(2) {
-        width: 70px;
-        text-align: right;
-      }
-      &:nth-of-type(3) {
-        width: 40px;
-        text-align: right;
-      }
-      &:last-of-type {
-        width: 75px;
-        text-align: right;
-        padding-right: 8px;
+      &:not(:first-of-type) {
+        text-align: center;
       }
     `
   });
@@ -224,19 +199,19 @@ const DashboardStatus: FC = () => {
               <>
                 <Header>
                   <HeaderRow>
-                    <HeaderCell></HeaderCell>
-                    <HeaderCell>SUCCESS</HeaderCell>
-                    <HeaderCell>FAIL</HeaderCell>
-                    <HeaderCell>QUALITY</HeaderCell>
+                    <HeaderCell resize></HeaderCell>
+                    <HeaderCell stiff>SUCCESS</HeaderCell>
+                    <HeaderCell stiff>FAIL</HeaderCell>
+                    <HeaderCell stiff>QUALITY</HeaderCell>
                   </HeaderRow>
                 </Header>
                 <Body>
                   {tableList.map((stat: Stat) => (
                     <Row key={stat.id} item={stat}>
                       <Cell>{stat.id}</Cell>
-                      <Cell>{Intl.NumberFormat().format(stat.s)}</Cell>
-                      <Cell>{Intl.NumberFormat().format(stat.f)}</Cell>
-                      <Cell>{showQuality(stat)}</Cell>
+                      <Cell stiff>{Intl.NumberFormat().format(stat.s)}</Cell>
+                      <Cell stiff>{Intl.NumberFormat().format(stat.f)}</Cell>
+                      <Cell stiff>{showQuality(stat)}</Cell>
                     </Row>
                   ))}
                 </Body>

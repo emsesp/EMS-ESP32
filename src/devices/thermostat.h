@@ -38,6 +38,7 @@ class Thermostat : public EMSdevice {
         int16_t roomTemp;
         int16_t remotetemp; // for readback
         uint8_t tempautotemp;
+        int8_t  remoteseltemp;
         uint8_t mode;
         uint8_t modetype;
         uint8_t summermode;
@@ -56,6 +57,7 @@ class Thermostat : public EMSdevice {
         uint8_t manualtemp;
         uint8_t summersetmode;
         uint8_t hpoperatingmode;
+        uint8_t hpoperatingstate;
         uint8_t roominfluence;
         uint8_t roominfl_factor;
         int16_t curroominfl;
@@ -80,6 +82,8 @@ class Thermostat : public EMSdevice {
         char    switchtime1[16];
         char    switchtime2[16];
         uint8_t climate;
+        uint8_t switchonoptimization;
+        uint8_t statusbyte; // from RC300monitor
 
         // RC 10
         uint8_t  reducehours;   // night reduce duration
@@ -130,6 +134,7 @@ class Thermostat : public EMSdevice {
             ON,
             DAYLOW,
             DAYMID,
+            REMOTESELTEMP,
             UNKNOWN
 
         };
@@ -160,6 +165,7 @@ class Thermostat : public EMSdevice {
     // each thermostat has a list of heating controller type IDs for reading and writing
     std::vector<uint16_t> monitor_typeids;
     std::vector<uint16_t> set_typeids;
+    std::vector<uint16_t> set2_typeids;
     std::vector<uint16_t> timer_typeids;
     std::vector<uint16_t> timer2_typeids;
     std::vector<uint16_t> summer_typeids;
@@ -189,12 +195,14 @@ class Thermostat : public EMSdevice {
     uint8_t offtemp_;      // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
     uint8_t mixingvalves_; // Number of Mixing Valves: (0x00=0, 0x01=1, 0x02=2)
 
-    int8_t   dampedoutdoortemp_;
-    uint16_t tempsensor1_;
-    uint16_t tempsensor2_;
-    int16_t  dampedoutdoortemp2_;
-    uint8_t  floordrystatus_;
-    uint8_t  floordrytemp_;
+    int8_t  dampedoutdoortemp_;
+    int16_t tempsensor1_;
+    int16_t tempsensor2_;
+    int16_t dampedoutdoortemp2_;
+    uint8_t floordrystatus_;
+    uint8_t floordrytemp_;
+    uint8_t dewtemperature_;
+    uint8_t humidity_;
 
     uint8_t wwExtra1_; // wwExtra active for wwSystem 1
     uint8_t wwExtra2_;
@@ -217,6 +225,8 @@ class Thermostat : public EMSdevice {
     uint8_t wwDailyHeating_;
     uint8_t wwDailyHeatTime_;
     uint8_t wwWhenModeOff_;
+    char    wwHoliday_[26];
+    char    wwVacation_[26];
 
     // HybridHP
     uint8_t hybridStrategy_;  // co2 = 1, cost = 2, temperature = 3, mix = 4
@@ -357,6 +367,7 @@ class Thermostat : public EMSdevice {
     void process_CRFMonitor(std::shared_ptr<const Telegram> telegram);
     void process_RC300Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC300Set(std::shared_ptr<const Telegram> telegram);
+    void process_RC300Set2(std::shared_ptr<const Telegram> telegram);
     void process_RC300Summer(std::shared_ptr<const Telegram> telegram);
     void process_RC300Summer2(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWmode(std::shared_ptr<const Telegram> telegram);
@@ -373,6 +384,9 @@ class Thermostat : public EMSdevice {
     void process_JunkersRemoteMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersHybridSettings(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram);
+    void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
+    void process_RemoteHumidity(std::shared_ptr<const Telegram> telegram);
+    void process_RemoteCorrection(std::shared_ptr<const Telegram> telegram);
 
     // internal helper functions
     bool set_mode_n(const uint8_t mode, const uint8_t hc_num);
@@ -412,7 +426,6 @@ class Thermostat : public EMSdevice {
     bool set_vacreducetemp(const char * value, const int8_t id);
     bool set_vacreducemode(const char * value, const int8_t id);
     bool set_nofrostmode(const char * value, const int8_t id);
-
     bool set_remotetemp(const char * value, const int8_t id);
     bool set_roominfluence(const char * value, const int8_t id);
     bool set_roominfl_factor(const char * value, const int8_t id);
@@ -426,6 +439,8 @@ class Thermostat : public EMSdevice {
     bool set_controlmode(const char * value, const int8_t id);
     bool set_wwprio(const char * value, const int8_t id);
     bool set_fastheatup(const char * value, const int8_t id);
+    bool set_switchonoptimization(const char * value, const int8_t id);
+    bool set_remoteseltemp(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);
@@ -446,6 +461,12 @@ class Thermostat : public EMSdevice {
     bool set_wwDailyHeating(const char * value, const int8_t id);
     bool set_wwDailyHeatTime(const char * value, const int8_t id);
     bool set_wwwhenmodeoff(const char * value, const int8_t id);
+    bool set_wwVacation(const char * value, const int8_t id) {
+        return set_holiday(value, DeviceValueTAG::TAG_WWC1, true);
+    }
+    bool set_wwHoliday(const char * value, const int8_t id) {
+        return set_holiday(value, DeviceValueTAG::TAG_WWC1);
+    }
 
     bool set_datetime(const char * value, const int8_t id);
     bool set_minexttemp(const char * value, const int8_t id);

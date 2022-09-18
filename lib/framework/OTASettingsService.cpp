@@ -66,8 +66,8 @@ void OTASettingsService::configureArduinoOTA() {
 
 void OTASettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     switch (event) {
-    case SYSTEM_EVENT_STA_GOT_IP:
-    case SYSTEM_EVENT_ETH_GOT_IP:
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+    case ARDUINO_EVENT_ETH_GOT_IP:
         configureArduinoOTA();
         break;
     default:

@@ -75,9 +75,9 @@ class DeviceValue {
     enum DeviceValueTAG : uint8_t {
         TAG_NONE = 0, // wild card
         TAG_HEARTBEAT,
-        TAG_BOILER_DATA,
+        TAG_BOILER_DATA_WW,
+        TAG_DEVICE_DATA,
         TAG_DEVICE_DATA_WW,
-        TAG_THERMOSTAT_DATA,
         TAG_HC1,
         TAG_HC2,
         TAG_HC3,
@@ -96,6 +96,7 @@ class DeviceValue {
         TAG_WWC8,
         TAG_WWC9,
         TAG_WWC10,
+        TAG_AHS,
         TAG_HS1,
         TAG_HS2,
         TAG_HS3,

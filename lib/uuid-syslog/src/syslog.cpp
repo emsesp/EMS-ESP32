@@ -116,7 +116,8 @@ void SyslogService::remove_queued_messages(uuid::log::Level level) {
         }
     }
 
-    log_message_id_ -= offset;
+    log_message_id_    -= offset;
+    log_message_fails_ += offset;
 }
 
 void SyslogService::log_level(uuid::log::Level level) {
@@ -232,6 +233,7 @@ void SyslogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
     if (log_messages_.size() >= maximum_log_messages_) {
         log_messages_overflow_ = true;
         log_messages_.pop_front();
+        log_message_fails_++;
     }
 
     log_messages_.emplace_back(log_message_id_++, std::move(message));

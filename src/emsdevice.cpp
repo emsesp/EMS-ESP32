@@ -114,7 +114,7 @@ std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
 // returns device_type from a string
 uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!topic) {
-        return DeviceType::UNKNOWN; // nullptr
+        return DeviceType::UNKNOWN;
     }
 
     // convert topic to lowercase and compare
@@ -239,6 +239,16 @@ bool EMSdevice::is_fetch(uint16_t telegram_id) const {
     for (const auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram_id) {
             return tf.fetch_;
+        }
+    }
+    return false;
+}
+
+// check for a tag to create a nest
+bool EMSdevice::has_tag(const uint8_t tag) const {
+    for (const auto & dv : devicevalues_) {
+        if (dv.tag == tag && tag >= DeviceValueTAG::TAG_HC1) {
+            return true;
         }
     }
     return false;
@@ -469,7 +479,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
         flags |= CommandFlag::MQTT_SUB_FLAG_HC;
     } else if (tag >= DeviceValueTAG::TAG_WWC1 && tag <= DeviceValueTAG::TAG_WWC10) {
         flags |= CommandFlag::MQTT_SUB_FLAG_WWC;
-    } else if (tag == DeviceValueTAG::TAG_DEVICE_DATA_WW) {
+    } else if (tag == DeviceValueTAG::TAG_DEVICE_DATA_WW || tag == DeviceValueTAG::TAG_BOILER_DATA_WW) {
         flags |= CommandFlag::MQTT_SUB_FLAG_WW;
     }
 
@@ -541,7 +551,7 @@ void EMSdevice::publish_value(void * value_p) const {
         if (dv.value_p == value_p && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
             if (Mqtt::publish_single2cmd()) {
-                if (dv.tag >= DeviceValueTAG::TAG_HC1 && dv.tag <= DeviceValueTAG::TAG_WWC10) {
+                if (dv.tag >= DeviceValueTAG::TAG_HC1) {
                     snprintf(topic,
                              sizeof(topic),
                              "%s/%s/%s",
@@ -563,7 +573,7 @@ void EMSdevice::publish_value(void * value_p) const {
             }
 
             int8_t  divider     = (dv.options_size == 1) ? Helpers::atoint(read_flash_string(dv.options[0]).c_str()) : 0;
-            char    payload[50] = {'\0'};
+            char    payload[55] = {'\0'};
             uint8_t fahrenheit  = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
             switch (dv.type) {
@@ -900,11 +910,9 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
     JsonObject json = output;
     int8_t     tag  = id;
 
-    // check if we have hc or wwc
-    if (id >= 1 && id <= 8) {
+    // check if we have hc or wwc or hs
+    if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
         tag = DeviceValueTAG::TAG_HC1 + id - 1;
-    } else if (id >= 9 && id <= 19) {
-        tag = DeviceValueTAG::TAG_WWC1 + id - 9;
     }
 
     // make a copy of the string command for parsing

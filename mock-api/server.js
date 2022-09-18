@@ -314,7 +314,6 @@ settings = {
   syslog_mark_interval: 0,
   syslog_host: '192.168.1.4',
   syslog_port: 514,
-  master_thermostat: 0,
   shower_timer: true,
   shower_alert: true,
   shower_alert_trigger: 7,
@@ -348,18 +347,21 @@ const emsesp_devices = {
       d: 23,
       p: 77,
       s: 'Thermostat (RC20/Moduline 300)',
+      t: 'thermostat1',
     },
     {
       i: 2,
       d: 8,
       p: 123,
       s: 'Boiler (Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i)',
+      t: 'boiler',
     },
     {
       i: 4,
       d: 16,
       p: 165,
       s: 'Thermostat (RC100/Moduline 1000/1010)',
+      t: 'thermostat2',
     },
   ],
 }
@@ -593,13 +595,13 @@ const emsesp_deviceentities_1 = [
     m: 0,
     w: false,
   },
-  {
-    v: 'test data',
-    n: 'test',
-    id: 'test',
-    m: 0,
-    w: false,
-  },
+  // {
+  //   v: 'test data',
+  //   n: 'test',
+  //   id: 'test',
+  //   m: 0,
+  //   w: false,
+  // },
   {
     v: 'roomTemp',
     id: 'hc1/HA climate config creation',
@@ -1133,7 +1135,7 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
 // EMS-ESP API specific
 const emsesp_info = {
   System: {
-    version: '3.x.x',
+    version: '3.4.2',
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
@@ -1225,9 +1227,8 @@ rest_server.get(GET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
 
 // start server
 const expressServer = rest_server.listen(port, () =>
-  console.log(`Mock server for EMS-ESP is up and running at http://localhost:${port}`),
+  console.log(`EMS-ESP REST API server running on http://localhost:${port}/api`),
 )
-console.log(`EMS-ESP Rest API listening to http://localhost:${port}/api`)
 
 // start websocket server
 const websocketServer = new WebSocket.Server({

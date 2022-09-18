@@ -5,19 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# Changelog
+# [3.4.2]
 
-## [3.4.1] May 29 2022
+## Added
 
-### Fixed
+- RC310 additions [#520](https://github.com/emsesp/EMS-ESP32/pull/520)
+  - damping
+  - wwprio for RC310 heating circuits
+  - switchonoptimization for RC310 heating circuits
+  - enum_controlmode for RC310 (new enum list)
+  - nofrostmode, reducemode, reducetemp & noreducetemp for RC310
+  - emergencyops and emergencytemp, wwmaxtemp, wwflowtempoffset and wwcomfort1 for RC310
+  - HM200 hybrid module [#500](https://github.com/emsesp/EMS-ESP32/issues/500)
+  - AM200 alternative heatsource module [#573](https://github.com/emsesp/EMS-ESP32/issues/573)
+  - EM10 error module as gateway [#575](https://github.com/emsesp/EMS-ESP32/issues/575)
+
+## Fixed
+
+- fix Table resizing in WebUI [#519](https://github.com/emsesp/EMS-ESP32/issues/519)
+- allow larger customization files [#570](https://github.com/emsesp/EMS-ESP32/issues/570)
+- losing entitiy wwcomfort [#581](https://github.com/emsesp/EMS-ESP32/issues/581)
+
+## Changed
+
+- Shorten "friendly names" in Home Assistant [#555](https://github.com/emsesp/EMS-ESP32/issues/555)
+
+- platformio 2.3.0 (IDF 4, Arduino 2)
+- remove master-thermostat, support multiple thermostats
+- merge up- and download in webui [#577](https://github.com/emsesp/EMS-ESP32/issues/577)
+
+# [3.4.1] May 29 2022
+
+## Fixed
 
 - Fix memory leak in api [#524](https://github.com/emsesp/EMS-ESP32/issues/524)
 
-### Changed
-
-- Controller data in web-ui only for IVT [#522](https://github.com/emsesp/EMS-ESP32/issues/522)
-- Rename hidden `climate` to a more explaining name [#523](https://github.com/emsesp/EMS-ESP32/issues/523)
-- Minor changes to the Customizations web page [#527](https://github.com/emsesp/EMS-ESP32/pull/527)
+## Changed
 
 # [3.4.0] May 23 2022
 
@@ -284,51 +307,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
-- power settings, disabling BLE and turning off Wifi sleep
-- Rx and Tx counts to Heartbeat MQTT payload
-- ethernet support
-- id to info command to show only a heatingcircuit
-- add sending devices that are not listed to 0x07
-- extra MQTT boolean option for "ON" and "OFF"
-- support for chunked MQTT payloads to allow large data sets > 2kb
-- external Button support (#708) for resetting to factory defaults and other actions
-- new console set command in `system`, `set board_profile <profile>` for quickly enabling cabled ethernet connections without using the captive wifi portal
-- added in MQTT nested mode, for thermostat and mixer, like we had back in v2
-- cascade MC400 (product-id 210) (3.0.0b6), power values for heating sources (3.0.1b1)
-- values for wwMaxPower, wwFlowtempOffset
-- RC300 `thermostat temp -1` to clear temporary setpoint in auto mode
-- syslog port selectable (#744)
 - individual mqtt commands (#31)
 - board Profiles (#11)
 
 ## Fixed
 
-- telegrams matched to masterthermostat 0x18
-- multiple roomcontrollers
-- readback after write with delay (give ems-devices time to set the value)
-- thermostat ES72/RC20 device 66 to command-set RC20_2
-- MQTT payloads not adding to queue when MQTT is re-connecting (fixes #369)
-- fix for HA topics with invalid command formats (#728)
-- wrong position of values #723, #732
-- OTA Upload via Web on OSX
 - Rx and Tx quality % would sometimes show > 100
 
 ## Changed
 
-- changed how telegram parameters are rendered for mqtt, console and web (#632)
-- split `show values` in smaller packages (edited)
-- extended length of IP/hostname from 32 to 48 chars (#676)
-- check flowsensor for `tap_water_active`
-- mqtt prefixed with `Base`
-- count Dallas sensor fails
-- switch from SPIFFS to LITTLEFS
-- added ID to MQTT payloads which is the Device's product ID and used in HA to identify a unique HA device
-- increased MQTT buffer and reduced wait time between publishes
-- updated to the latest ArduinoJson library
-- some names of mqtt-tags like in v2.2.1
-- new ESP32 partition side to allow for smoother OTA and fallback
-- network Gateway IP is optional (#682)emsesp/EMS-ESP
-- moved to a new GitHub repo https://github.com/emsesp/EMS-ESP32
 - invert LED changed to Hide LED. Default is off.
 - renamed Scan Network to Scan WiFi Network
 - added version to cmd=settings

@@ -52,6 +52,8 @@ class EMSdevice {
     static std::string tag_to_string(uint8_t tag);
     static std::string tag_to_mqtt(uint8_t tag);
 
+    bool has_tag(const uint8_t tag) const;
+
     inline uint8_t device_id() const {
         return device_id_;
     }
@@ -307,6 +309,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_ID_BOILER   = 0x08; // fixed device_id for Master Boiler/UBA
     static constexpr uint8_t EMS_DEVICE_ID_BOILER_1 = 0x70; // fixed device_id for 1st. Cascade Boiler/UBA
     static constexpr uint8_t EMS_DEVICE_ID_BOILER_F = 0x7F; // fixed device_id for last Cascade Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_AM200    = 0x60; // fixed device_id for alternative Heating AM200
 
     // generic type IDs
     static constexpr uint16_t EMS_TYPE_VERSION    = 0x02; // type ID for Version information. Generic across all EMS devices.
@@ -324,6 +327,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_HT3      = 3;
     static constexpr uint8_t EMS_DEVICE_FLAG_HEATPUMP = 4;
     static constexpr uint8_t EMS_DEVICE_FLAG_HYBRID   = 5;
+    static constexpr uint8_t EMS_DEVICE_FLAG_AM200    = 6;
 
     // Solar Module
     static constexpr uint8_t EMS_DEVICE_FLAG_SM10  = 1;
@@ -351,6 +355,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_RC100       = 10;
     static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS     = 11;
     static constexpr uint8_t EMS_DEVICE_FLAG_CRF         = 12; // CRF200 only monitor
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC100H      = 13; // with humidity
 
     uint8_t count_entities();
     bool    has_entities() const;

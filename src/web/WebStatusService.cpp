@@ -33,25 +33,21 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 // handles both WiFI and Ethernet
 void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     switch (event) {
-    case SYSTEM_EVENT_STA_DISCONNECTED:
-        EMSESP::logger().info(F("WiFi disconnected. Reason code=%d"), info.disconnected.reason);
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+        EMSESP::logger().warning(F("WiFi disconnected. Reason code=%d"), info.wifi_sta_disconnected.reason); // IDF 4.0
         WiFi.disconnect(true);
         break;
 
-    case SYSTEM_EVENT_STA_GOT_IP:
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
 #ifndef EMSESP_STANDALONE
         EMSESP::logger().info(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
 #endif
-        EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-            if (!networkSettings.enableIPv6) {
-                EMSESP::system_.send_heartbeat();
-                EMSESP::system_.syslog_init();
-            }
-        });
+        // EMSESP::system_.send_heartbeat(); // send from mqtt start
+        EMSESP::system_.syslog_init();
         mDNS_start();
         break;
 
-    case SYSTEM_EVENT_ETH_START:
+    case ARDUINO_EVENT_ETH_START:
         // EMSESP::logger().info(F("Ethernet initialized"));
         ETH.setHostname(EMSESP::system_.hostname().c_str());
 
@@ -64,35 +60,31 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 
         break;
 
-    case SYSTEM_EVENT_ETH_GOT_IP:
+    case ARDUINO_EVENT_ETH_GOT_IP:
         // prevent double calls
         if (!EMSESP::system_.ethernet_connected()) {
 #ifndef EMSESP_STANDALONE
             EMSESP::logger().info(F("Ethernet connected with IP=%s, speed %d Mbps"), ETH.localIP().toString().c_str(), ETH.linkSpeed());
 #endif
-            EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-                if (!networkSettings.enableIPv6) {
-                    EMSESP::system_.send_heartbeat();
-                    EMSESP::system_.syslog_init();
-                }
-            });
+            // EMSESP::system_.send_heartbeat(); // send from mqtt start
+            EMSESP::system_.syslog_init();
             EMSESP::system_.ethernet_connected(true);
             mDNS_start();
         }
         break;
 
-    case SYSTEM_EVENT_ETH_DISCONNECTED:
-        EMSESP::logger().info(F("Ethernet disconnected"));
+    case ARDUINO_EVENT_ETH_DISCONNECTED:
+        EMSESP::logger().warning(F("Ethernet disconnected"));
         EMSESP::system_.ethernet_connected(false);
         break;
 
-    case SYSTEM_EVENT_ETH_STOP:
+    case ARDUINO_EVENT_ETH_STOP:
         EMSESP::logger().info(F("Ethernet stopped"));
         EMSESP::system_.ethernet_connected(false);
         break;
 
 #ifndef EMSESP_STANDALONE
-    case SYSTEM_EVENT_STA_CONNECTED:
+    case ARDUINO_EVENT_WIFI_STA_CONNECTED:
         EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
             if (networkSettings.enableIPv6) {
                 WiFi.enableIpV6();
@@ -100,7 +92,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         });
         break;
 
-    case SYSTEM_EVENT_ETH_CONNECTED:
+    case ARDUINO_EVENT_ETH_CONNECTED:
         EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
             if (networkSettings.enableIPv6) {
                 ETH.enableIpV6();
@@ -108,13 +100,14 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         });
         break;
 
-    case SYSTEM_EVENT_GOT_IP6:
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
+    case ARDUINO_EVENT_ETH_GOT_IP6:
         if (EMSESP::system_.ethernet_connected()) {
-            EMSESP::logger().info(F("Ethernet connected with IP=%s, speed %d Mbps"), ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
+            EMSESP::logger().info(F("Ethernet connected with IPv6=%s, speed %d Mbps"), ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
         } else {
-            EMSESP::logger().info(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
+            EMSESP::logger().info(F("WiFi connected with IPv6=%s, hostname=%s"), WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
         }
-        EMSESP::system_.send_heartbeat();
+        // EMSESP::system_.send_heartbeat(); // send from mqtt start
         EMSESP::system_.syslog_init();
         mDNS_start();
         break;
@@ -157,29 +150,46 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     statJson["f"]  = EMSESP::txservice_.telegram_write_fail_count();
     statJson["q"]  = EMSESP::txservice_.write_quality();
 
-    statJson       = statsJson.createNestedObject();
-    statJson["id"] = "Temperature Sensor Reads";
-    statJson["s"]  = EMSESP::dallassensor_.reads();
-    statJson["f"]  = EMSESP::dallassensor_.fails();
-    statJson["q"]  = EMSESP::dallassensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::dallassensor_.fails()) / EMSESP::dallassensor_.reads());
-
-    statJson       = statsJson.createNestedObject();
-    statJson["id"] = "Analog Sensor Reads";
-    statJson["s"]  = EMSESP::analogsensor_.reads();
-    statJson["f"]  = EMSESP::analogsensor_.fails();
-    statJson["q"]  = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
-
-    statJson       = statsJson.createNestedObject();
-    statJson["id"] = "MQTT Publishes";
-    statJson["s"]  = Mqtt::publish_count();
-    statJson["f"]  = Mqtt::publish_fails();
-    statJson["q"]  = Mqtt::publish_count() == 0 ? 100 : 100 - (Mqtt::publish_fails() * 100) / (Mqtt::publish_count() + Mqtt::publish_fails());
+    if (EMSESP::dallassensor_.dallas_enabled()) {
+        statJson       = statsJson.createNestedObject();
+        statJson["id"] = "Temperature Sensor Reads";
+        statJson["s"]  = EMSESP::dallassensor_.reads();
+        statJson["f"]  = EMSESP::dallassensor_.fails();
+        statJson["q"]  = EMSESP::dallassensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::dallassensor_.fails()) / EMSESP::dallassensor_.reads());
+    }
+    if (EMSESP::analog_enabled()) {
+        statJson       = statsJson.createNestedObject();
+        statJson["id"] = "Analog Sensor Reads";
+        statJson["s"]  = EMSESP::analogsensor_.reads();
+        statJson["f"]  = EMSESP::analogsensor_.fails();
+        statJson["q"]  = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
+    }
+    if (Mqtt::enabled()) {
+        statJson       = statsJson.createNestedObject();
+        statJson["id"] = "MQTT Publishes";
+        statJson["s"]  = Mqtt::publish_count();
+        statJson["f"]  = Mqtt::publish_fails();
+        statJson["q"]  = Mqtt::publish_count() == 0 ? 100 : 100 - (uint8_t)((100 * Mqtt::publish_fails()) / (Mqtt::publish_count() + Mqtt::publish_fails()));
+    }
 
     statJson       = statsJson.createNestedObject();
     statJson["id"] = "API Calls";
     statJson["s"]  = WebAPIService::api_count(); // + WebAPIService::api_fails();
     statJson["f"]  = WebAPIService::api_fails();
-    statJson["q"] = WebAPIService::api_count() == 0 ? 100 : 100 - (WebAPIService::api_fails() * 100) / (WebAPIService::api_count() + WebAPIService::api_fails());
+    statJson["q"] =
+        WebAPIService::api_count() == 0 ? 100 : 100 - (uint8_t)((100 * WebAPIService::api_fails()) / (WebAPIService::api_count() + WebAPIService::api_fails()));
+
+#ifndef EMSESP_STANDALONE
+    if (EMSESP::system_.syslog_enabled()) {
+        statJson       = statsJson.createNestedObject();
+        statJson["id"] = "Syslog Messages";
+        statJson["s"]  = EMSESP::system_.syslog_count();
+        statJson["f"]  = EMSESP::system_.syslog_fails();
+        statJson["q"]  = EMSESP::system_.syslog_count() == 0
+                             ? 100
+                             : 100 - (uint8_t)((100 * EMSESP::system_.syslog_fails()) / (EMSESP::system_.syslog_count() + EMSESP::system_.syslog_fails()));
+    }
+#endif
 
     response->setLength();
     request->send(response);

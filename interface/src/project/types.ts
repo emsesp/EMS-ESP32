@@ -6,7 +6,6 @@ export interface Settings {
   syslog_mark_interval: number;
   syslog_host: string;
   syslog_port: number;
-  master_thermostat: number;
   shower_timer: boolean;
   shower_alert: boolean;
   shower_alert_coldshot: number;
@@ -98,6 +97,7 @@ export interface SensorData {
 }
 
 export interface CoreData {
+  connected: boolean;
   devices: Device[];
   active_sensors: number;
   analog_enabled: boolean;
@@ -105,9 +105,10 @@ export interface CoreData {
 
 export interface DeviceShort {
   i: number; // id
-  d: number; // deviceid
-  p: number; // productid
+  d?: number; // deviceid
+  p?: number; // productid
   s: string; // shortname
+  t?: string; // device type name
 }
 
 export interface Devices {

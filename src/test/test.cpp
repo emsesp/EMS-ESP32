@@ -692,6 +692,27 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp", "59");
     }
 
+#if defined(EMSESP_STANDALONE)
+    // https://github.com/emsesp/EMS-ESP32/issues/541
+    if (command == "api_wwmode") {
+        shell.printfln(F("Testing API wwmode"));
+        Mqtt::ha_enabled(false);
+        Mqtt::nested_format(1);
+        run_test("310");
+
+        AsyncWebServerRequest request;
+        request.method(HTTP_POST);
+        DynamicJsonDocument doc(2000);
+        JsonVariant         json;
+
+        char data[] = "{\"value\":\"off\"}";
+        deserializeJson(doc, data);
+        json = doc.as<JsonVariant>();
+        request.url("/api/thermostat/wwmode");
+        EMSESP::webAPIService.webAPIService_post(&request, json);
+    }
+#endif
+
     if (command == "api") {
         shell.printfln(F("Testing API with MQTT and REST, standalone"));
 
@@ -1638,7 +1659,7 @@ void Test::debug(uuid::console::Shell & shell, const std::string & cmd) {
 
 #ifndef EMSESP_STANDALONE
     if (command == "ls") {
-        listDir(LITTLEFS, "/", 3);
+        listDir(LittleFS, "/", 3);
         Serial.println();
     }
 #endif

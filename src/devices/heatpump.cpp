@@ -25,12 +25,12 @@ REGISTER_FACTORY(Heatpump, EMSdevice::DeviceType::HEATPUMP);
 Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // telegram handlers
-    register_telegram_type(0x042B, F("HP1"), true, MAKE_PF_CB(process_HPMonitor1));
-    register_telegram_type(0x047B, F("HP2"), true, MAKE_PF_CB(process_HPMonitor2));
+    register_telegram_type(0x042B, F("HP1"), false, MAKE_PF_CB(process_HPMonitor1));
+    register_telegram_type(0x047B, F("HP2"), false, MAKE_PF_CB(process_HPMonitor2));
 
     // device values
-    register_device_value(DeviceValueTAG::TAG_NONE, &airHumidity_, DeviceValueType::UINT, FL_(div2), FL_(airHumidity), DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_NONE, &dewTemperature_, DeviceValueType::UINT, nullptr, FL_(dewTemperature), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &airHumidity_, DeviceValueType::UINT, nullptr, FL_(airHumidity), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dewTemperature_, DeviceValueType::UINT, nullptr, FL_(dewTemperature), DeviceValueUOM::DEGREES);
 }
 
 /*

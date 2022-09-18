@@ -13,7 +13,8 @@ import {
   ToggleButtonGroup,
   Tooltip,
   Grid,
-  TextField
+  TextField,
+  Link
 } from '@mui/material';
 
 import { Table } from '@table-library/react-table-library/table';
@@ -25,11 +26,6 @@ import { useSnackbar } from 'notistack';
 
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-
-// import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
-// import StarIcon from '@mui/icons-material/Star';
-// import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-// import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
@@ -48,13 +44,15 @@ import { extractErrorMessage } from '../utils';
 
 import { DeviceShort, Devices, DeviceEntity, DeviceEntityMask } from './types';
 
+export const APIURL = window.location.origin + '/api/';
+
 const SettingsCustomization: FC = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([{ id: '', v: 0, n: '', m: 0, w: false }]);
   const [devices, setDevices] = useState<Devices>();
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [selectedDevice, setSelectedDevice] = useState<number>(0);
+  const [selectedDevice, setSelectedDevice] = useState<number>(-1);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
   const [selectedFilters, setSelectedFilters] = useState<number>(0);
   const [search, setSearch] = useState('');
@@ -63,80 +61,59 @@ const SettingsCustomization: FC = () => {
   const [masks, setMasks] = useState(() => ['']);
 
   const entities_theme = useTheme({
+    Table: `
+      --data-table-library_grid-template-columns: 120px repeat(1, minmax(0, 1fr)) 120px;
+    `,
     BaseRow: `
       font-size: 14px;
-      color: white;
-      height: 32px;
-      min-height: 32px;
+      .td {
+        height: 32px;
+      }
+    `,
+    BaseCell: `
+      &:last-of-type {
+        text-align: right;
+      }
     `,
     HeaderRow: `
       text-transform: uppercase;
       background-color: black;
-      border-bottom: 1px solid #e0e0e0;
       color: #90CAF9;
-      font-weight: 500;
+
+      .th {
+        border-bottom: 1px solid #565656;
+        font-weight: 500;
+      }
+
+      &:nth-of-type(1) .th {
+        text-align: center;
+      }
     `,
     Row: `
       background-color: #1e1e1e;
-      border-top: 1px solid #565656;
-      border-bottom: 1px solid #565656;
       position: relative;
-      z-index: 1;
-      &:not(:last-of-type) {
-        margin-bottom: -1px;
+    
+      .td {
+        border-top: 1px solid #565656;
+        border-bottom: 1px solid #565656;
       }
-      &:not(:first-of-type) {
-        margin-top: -1px;
-      }
-      &:hover {
-        z-index: 2;
-        color: white;
-        border-top: 1px solid #177ac9;
-        border-bottom: 1px solid #177ac9;
-      },
-      &.tr.tr-body.row-select.row-select-single-selected, &.tr.tr-body.row-select.row-select-selected {
+
+      &.tr.tr-body.row-select.row-select-single-selected {
         background-color: #3d4752;
         color: white;
         font-weight: normal;
-        z-index: 2;
-        border-top: 1px solid #177ac9;
-        border-bottom: 1px solid #177ac9;
+      }
+
+      &:nth-of-type(odd) .td {
+        background-color: #303030;
       }
     `,
-    BaseCell: `
-      border-top: 1px solid transparent;
-      border-right: 1px solid transparent;
-      border-bottom: 1px solid transparent;
-      &:not(.stiff) > div {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      &:nth-of-type(1) {
-        width: 120px;
-        min-width: 120px;
-        max-width: 120px;
-      }
+    Cell: `
       &:nth-of-type(2) {
-        padding-left: 8px;
-        flex: 1;
+        padding: 8px;
       }
-      &:nth-of-type(3) {
+      &:last-of-type {
         padding-right: 8px;
-        text-align: right;
-        width: 120px;
-        min-width: 120px;
-      }
-    `,
-    HeaderCell: `
-      &:nth-of-type(1) {
-        padding-left: 24px;
-      }
-      &:nth-of-type(2) {
-        padding-left: 0px;
-      }
-      &:not(:last-of-type) {
-        border-right: 1px solid #565656;
       }
     `
   });
@@ -209,7 +186,15 @@ const SettingsCustomization: FC = () => {
     } else if (de.n === '') {
       return 'Command: ' + de.id;
     }
-    return de.n + ' (' + de.id + ')';
+    return (
+      <>
+        {de.n}&nbsp;(
+        <Link target="_blank" href={APIURL + devices?.devices[selectedDevice].t + '/' + de.id}>
+          {de.id}
+        </Link>
+        )
+      </>
+    );
   }
 
   const getMaskNumber = (newMask: string[]) => {
@@ -254,20 +239,12 @@ const SettingsCustomization: FC = () => {
     );
   };
 
-  function compareDevices(a: DeviceShort, b: DeviceShort) {
-    if (a.s < b.s) {
-      return -1;
-    }
-    if (a.s > b.s) {
-      return 1;
-    }
-    return 0;
-  }
-
   const changeSelectedDevice = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selected_device = parseInt(event.target.value, 10);
-    setSelectedDevice(selected_device);
-    fetchDeviceEntities(selected_device);
+    if (devices) {
+      const selected_device = parseInt(event.target.value, 10);
+      setSelectedDevice(selected_device);
+      fetchDeviceEntities(devices?.devices[selected_device].i);
+    }
   };
 
   const resetCustomization = async () => {
@@ -282,7 +259,7 @@ const SettingsCustomization: FC = () => {
   };
 
   const saveCustomization = async () => {
-    if (deviceEntities && selectedDevice) {
+    if (devices && deviceEntities && selectedDevice !== -1) {
       const masked_entities = deviceEntities
         .filter((de) => de.m !== de.om)
         .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.id);
@@ -294,7 +271,7 @@ const SettingsCustomization: FC = () => {
 
       try {
         const response = await EMSESP.writeMaskedEntities({
-          id: selectedDevice,
+          id: devices?.devices[selectedDevice].i,
           entity_ids: masked_entities
         });
         if (response.status === 200) {
@@ -320,13 +297,13 @@ const SettingsCustomization: FC = () => {
           <Typography variant="body2">Select a device and customize each of its entities using the options:</Typography>
           <Typography variant="body2">
             <OptionIcon type="favorite" isSet={true} />
-            =mark as a favorite&nbsp;&nbsp;
+            =mark as favorite&nbsp;&nbsp;
             <OptionIcon type="readonly" isSet={true} />
             =disable write action&nbsp;&nbsp;
             <OptionIcon type="api_mqtt_exclude" isSet={true} />
-            =exclude from MQTT and API outputs&nbsp;&nbsp;
+            =exclude from MQTT and API&nbsp;&nbsp;
             <OptionIcon type="web_exclude" isSet={true} />
-            =hide from Web Dashboard
+            =hide from Dashboard
           </Typography>
         </Box>
         <ValidatedTextField
@@ -339,11 +316,11 @@ const SettingsCustomization: FC = () => {
           margin="normal"
           select
         >
-          <MenuItem disabled key={0} value={0}>
+          <MenuItem disabled key={0} value={-1}>
             Select a device...
           </MenuItem>
-          {devices.devices.sort(compareDevices).map((device: DeviceShort, index) => (
-            <MenuItem key={index} value={device.i}>
+          {devices.devices.map((device: DeviceShort, index) => (
+            <MenuItem key={index} value={index}>
               {device.s}
             </MenuItem>
           ))}
@@ -451,7 +428,7 @@ const SettingsCustomization: FC = () => {
             <>
               <Header>
                 <HeaderRow>
-                  <HeaderCell>OPTIONS</HeaderCell>
+                  <HeaderCell stiff>OPTIONS</HeaderCell>
                   <HeaderCell resize>
                     <Button
                       fullWidth
@@ -462,13 +439,13 @@ const SettingsCustomization: FC = () => {
                       NAME
                     </Button>
                   </HeaderCell>
-                  <HeaderCell>VALUE</HeaderCell>
+                  <HeaderCell resize>VALUE</HeaderCell>
                 </HeaderRow>
               </Header>
               <Body>
                 {tableList.map((de: DeviceEntity) => (
                   <Row key={de.id} item={de}>
-                    <Cell>
+                    <Cell stiff>
                       <ToggleButtonGroup
                         size="small"
                         color="secondary"

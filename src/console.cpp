@@ -227,10 +227,6 @@ void EMSESPShell::add_console_commands() {
                               EMSESP::webSettingsService.read([&](WebSettings & settings) {
                                   shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                   shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
-                                  char buffer[4];
-                                  shell.printfln(F_(master_thermostat_fmt),
-                                                 settings.master_thermostat == 0 ? read_flash_string(F_(auto)).c_str()
-                                                                                 : Helpers::hextoa(buffer, settings.master_thermostat));
                                   shell.printfln(F_(board_profile_fmt), settings.board_profile.c_str());
                               });
                           });
@@ -259,23 +255,6 @@ void EMSESPShell::add_console_commands() {
                                   // send with length to send immediately and trigger publish read_id
                                   EMSESP::send_read_request(type_id, device_id, 0, EMS_MAX_TELEGRAM_LENGTH);
                               }
-                          });
-
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::ADMIN,
-                          flash_string_vector{F_(set), F_(master), F_(thermostat)},
-                          flash_string_vector{F_(deviceid_mandatory)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) {
-                              uint8_t value = Helpers::hextoint(arguments.front().c_str());
-                              EMSESP::webSettingsService.update(
-                                  [&](WebSettings & settings) {
-                                      settings.master_thermostat = value;
-                                      EMSESP::actual_master_thermostat(value); // set the internal value too
-                                      char buffer[5];
-                                      shell.printfln(F_(master_thermostat_fmt), !value ? read_flash_string(F_(auto)).c_str() : Helpers::hextoa(buffer, value));
-                                      return StateUpdateResult::CHANGED;
-                                  },
-                                  "local");
                           });
 
 #ifndef EMSESP_STANDALONE
@@ -419,7 +398,7 @@ void EMSESPShell::add_console_commands() {
                 shell.print(F("Available commands are: "));
                 Command::show(shell, device_type, false); // non-verbose mode
             } else if (return_code != CommandRet::OK) {
-                shell.println(F("Bad syntax"));
+                shell.printfln(F("Bad syntax (error code %d)"), return_code);
             }
         },
         [&](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) -> std::vector<std::string> {

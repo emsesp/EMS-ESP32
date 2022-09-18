@@ -42,11 +42,12 @@
 {173, DeviceType::BOILER, F("Geo 5xx"), DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 {195, DeviceType::BOILER, F("Condens 5000i/Greenstar 8000"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {203, DeviceType::BOILER, F("Logamax U122/Cerapur"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{206, DeviceType::BOILER, F("Ecomline Excellent"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {208, DeviceType::BOILER, F("Logamax Plus/GB192/Condens GC9000"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {210, DeviceType::BOILER, F("Cascade MC400"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {211, DeviceType::BOILER, F("EasyControl Adapter"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{228, DeviceType::BOILER, F("Alternative Heatsource"), DeviceFlags::EMS_DEVICE_FLAG_AM200},
 {234, DeviceType::BOILER, F("Logamax Plus GB122/Condense 2300"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{206, DeviceType::BOILER, F("Ecomline Excellent"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Controllers - 0x09 / 0x10 / 0x50
 { 68, DeviceType::CONTROLLER, F("BC10/RFM20"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
@@ -111,6 +112,9 @@
 {191, DeviceType::THERMOSTAT, F("FR120"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS | DeviceFlags::EMS_DEVICE_FLAG_JUNKERS_OLD}, // older model
 {192, DeviceType::THERMOSTAT, F("FW120"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},
 
+// Thermostat remote - 0x38
+{200, DeviceType::THERMOSTAT, F("RC100H"), DeviceFlags::EMS_DEVICE_FLAG_RC100H},
+
 // Solar Modules - 0x30 (for solar), 0x2A, 0x41 (for ww)
 { 73, DeviceType::SOLAR, F("SM10"), DeviceFlags::EMS_DEVICE_FLAG_SM10},
 {101, DeviceType::SOLAR, F("ISM1"), DeviceFlags::EMS_DEVICE_FLAG_ISM},
@@ -128,10 +132,11 @@
 {161, DeviceType::MIXER, F("MM200"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {204, DeviceType::MIXER, F("MP100"), DeviceFlags::EMS_DEVICE_FLAG_MP}, // pool
 
-// Heat Pumps - 0x38
-{200, DeviceType::HEATPUMP, F("HP Module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{248, DeviceType::HEATPUMP, F("Hybrid Manager HM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+// Heat Pumps - 0x38?
 {252, DeviceType::HEATPUMP, F("HP Module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
+// Heat Pumps - 0x53
+{248, DeviceType::HEATPUMP, F("Hybrid Manager HM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Connect devices - 0x02
 {171, DeviceType::CONNECT, F("OpenTherm Converter"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -144,6 +149,9 @@
 
 // Switches - 0x11
 { 71, DeviceType::SWITCH, F("WM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
+// EM10 error contact and analog flowtemp control- 0x12
+{ 74, DeviceType::GATEWAY, F("Error Module EM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Gateways - 0x48
 {189, DeviceType::GATEWAY, F("KM200/MB LAN 2"), DeviceFlags::EMS_DEVICE_FLAG_NONE},

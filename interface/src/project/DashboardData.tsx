@@ -79,7 +79,7 @@ const DashboardData: FC = () => {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const [coreData, setCoreData] = useState<CoreData>({ devices: [], active_sensors: 0, analog_enabled: false });
+  const [coreData, setCoreData] = useState<CoreData>({ connected: true, devices: [], active_sensors: 0, analog_enabled: false });
   const [deviceData, setDeviceData] = useState<DeviceData>({ label: '', data: [] });
   const [sensorData, setSensorData] = useState<SensorData>({ sensors: [], analogs: [] });
   const [deviceValue, setDeviceValue] = useState<DeviceValue>();
@@ -88,185 +88,121 @@ const DashboardData: FC = () => {
   const [deviceDialog, setDeviceDialog] = useState<number>(-1);
   const [onlyFav, setOnlyFav] = useState(false);
 
-  const device_theme = useTheme({
+  const common_theme = useTheme({
     BaseRow: `
       font-size: 14px;
-      color: white;
-      height: 46px;
-      &:focus {
-        z-index: 2;
-        border-top: 1px solid #177ac9;
-        border-bottom: 1px solid #177ac9;
-      }
     `,
     HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
-      border-bottom: 1px solid #e0e0e0;
-      font-weight: 500;
+
+      .th {
+        border-bottom: 1px solid #565656;
+      }
     `,
     Row: `
       background-color: #1e1e1e;
-      border-top: 1px solid #565656;
-      border-bottom: 1px solid #565656;
       position: relative;
-      z-index: 1;
-      &:not(:last-of-type) {
-        margin-bottom: -1px;
+      cursor: pointer;
+    
+      .td {
+        padding: 8px;
+        border-top: 1px solid #565656;
+        border-bottom: 1px solid #565656;
       }
-      &:not(:first-of-type) {
-        margin-top: -1px;
-      }
-      &:hover {
-        z-index: 2;
-        color: white;
-        border-top: 1px solid #177ac9;
-        border-bottom: 1px solid #177ac9;
-      },
-      &.tr.tr-body.row-select.row-select-single-selected, &.tr.tr-body.row-select.row-select-selected {
+
+      &.tr.tr-body.row-select.row-select-single-selected {
         background-color: #3d4752;
         color: white;
         font-weight: normal;
-        z-index: 2;
+      }
+
+      &:hover .td {
         border-top: 1px solid #177ac9;
         border-bottom: 1px solid #177ac9;
       }
     `,
-    BaseCell: `
-      border-top: 1px solid transparent;
-      border-right: 1px solid transparent;
-      border-bottom: 1px solid transparent;
-      &:not(.stiff) > div {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      &:nth-of-type(1) {
-        padding-left: 8px;
-        min-width: 42px;
-        width: 42px;
-        div {
-          width: 100%;
-        }
-      }
-      &:nth-of-type(2) {
-        min-width: 100px;
-        width: 100px;
-      }
-      &:nth-of-type(3) {
-        flex: 1;
-      }
-      &:nth-of-type(4) {
-        text-align: center;
-        max-width: 100px;
-      }
+    Cell: `
       &:last-of-type {
-        padding-left: 0px;
-        text-align: center;
-        width: 32px;
-        min-width: 32px;
-        max-width: 32px;
-      }
+        text-align: right;
+      },
     `
   });
 
-  const data_theme = useTheme({
-    BaseRow: `
-      font-size: 14px;
-      color: white;
-      height: 32px;
-    `,
-    HeaderRow: `
-      text-transform: uppercase;
-      background-color: black;
-      color: #90CAF9;
-      border-bottom: 1px solid #e0e0e0;
-      font-weight: 500;
-    `,
-    Row: `
-      &:nth-of-type(odd) {
-        background-color: #303030;
-      }
-      &:nth-of-type(even) {
-        background-color: #1e1e1e;
-      }
-      border-top: 1px solid #565656;
-      border-bottom: 1px solid #565656;
-      position: relative;
-      z-index: 1;
-      &:not(:last-of-type) {
-        margin-bottom: -1px;
-      }
-      &:not(:first-of-type) {
-        margin-top: -1px;
-      }
-      &:hover {
-        z-index: 2;
-        border-top: 1px solid #177ac9;
-        border-bottom: 1px solid #177ac9;
-        color: white;
-      }
-    `,
-    BaseCell: `
-      padding-left: 16px;
-      cursor: pointer;
-      border-top: 1px solid transparent;
-      border-right: 1px solid transparent;
-      border-bottom: 1px solid transparent;
-      &:not(.stiff) > div {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      &:nth-of-type(1) {
-        width: 260px;
-      }
-      &:nth-of-type(2) {
-        flex: 1;
-        text-align: right;
-      }
-      &:last-of-type {
-        padding-left: 0px;
-        text-align: center;
-        width: 32px;
-        min-width: 32px;
-        max-width: 32px;
-      }
-    `,
-    HeaderCell: `
-      &:not(:last-of-type) {
-        padding-left: 8px;
-        border-left: 1px solid #565656;
-      }
-      &:first-of-type {
-        border-left: 0px;
-      }
-    `
-  });
+  const device_theme = useTheme([
+    common_theme,
+    {
+      Table: `
+        --data-table-library_grid-template-columns: 40px 100px repeat(1, minmax(0, 1fr)) 80px 40px;
+      `,
+      BaseRow: `
+        .td {
+          height: 42px;
+        }
+      `,
+      BaseCell: `
+        &:nth-of-type(2) {
+          text-align: left;
+        },
+        &:nth-of-type(4) {
+          text-align: center;
+        }
+      `,
+      HeaderRow: `
+        .th {
+          padding: 8px;
+          height: 42px;
+          font-weight: 500;
+      `
+    }
+  ]);
+
+  const data_theme = useTheme([
+    common_theme,
+    {
+      Table: `
+        --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 140px 40px;
+      `,
+      BaseRow: `
+        .td {
+          height: 32px;
+        }
+      `,
+      BaseCell: `
+        &:nth-of-type(2) {
+          text-align: right;
+        },
+      `,
+      HeaderRow: `
+        .th {
+          height: 32px;
+        }
+      `,
+      Row: `
+        &:nth-of-type(odd) .td {
+          background-color: #303030;
+        }
+      `
+    }
+  ]);
 
   const temperature_theme = useTheme([data_theme]);
 
   const analog_theme = useTheme([
     data_theme,
     {
+      Table: `
+        --data-table-library_grid-template-columns: 80px repeat(1, minmax(0, 1fr)) 120px 100px 40px;
+      `,
       BaseCell: `
-        &:nth-of-type(1) {
-          width: 100px;
-          min-width: 100px;
-        }
         &:nth-of-type(2) {
           text-align: left;
-        }
-        &:nth-of-type(3) {
-          width: 100px;
-          min-width: 100px;
-        }
+        },
         &:nth-of-type(4) {
           text-align: right;
-          flex: 1;
         }
-    `
+      `
     }
   ]);
 
@@ -536,6 +472,7 @@ const DashboardData: FC = () => {
                 label={deviceValue.id.slice(2)}
                 value={deviceValue.u ? numberValue(deviceValue.v) : deviceValue.v}
                 autoFocus
+                multiline={deviceValue.u ? false : true}
                 sx={{ width: '30ch' }}
                 type={deviceValue.u ? 'number' : 'text'}
                 onChange={updateValue(setDeviceValue)}
@@ -703,29 +640,30 @@ const DashboardData: FC = () => {
 
   const renderCoreData = () => (
     <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
-      {coreData.devices.length === 0 && <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />}
+      {!coreData.connected && <MessageBox my={2} level="error" message="EMSbus disconnected, check settings and board profile" />}
+      {coreData.connected && coreData.devices.length === 0 && <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />}
       <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
         {(tableList: any) => (
           <>
             <Header>
               <HeaderRow>
-                <HeaderCell />
-                <HeaderCell>TYPE</HeaderCell>
-                <HeaderCell>DESCRIPTION</HeaderCell>
-                <HeaderCell>ENTITIES</HeaderCell>
-                <HeaderCell />
+                <HeaderCell stiff />
+                <HeaderCell stiff>TYPE</HeaderCell>
+                <HeaderCell resize>DESCRIPTION</HeaderCell>
+                <HeaderCell stiff>ENTITIES</HeaderCell>
+                <HeaderCell stiff />
               </HeaderRow>
             </Header>
             <Body>
               {tableList.map((device: Device, index: number) => (
                 <Row key={device.id} item={device}>
-                  <Cell>
+                  <Cell stiff>
                     <DeviceIcon type={device.t} />
                   </Cell>
-                  <Cell>{device.t}</Cell>
+                  <Cell stiff>{device.t}</Cell>
                   <Cell>{device.n}</Cell>
-                  <Cell>{device.e}</Cell>
-                  <Cell>
+                  <Cell stiff>{device.e}</Cell>
+                  <Cell stiff>
                     <IconButton size="small" onClick={() => setDeviceDialog(index)}>
                       <InfoOutlinedIcon color="info" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
                     </IconButton>
@@ -778,7 +716,7 @@ const DashboardData: FC = () => {
 
     return (
       <>
-        <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
+        <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="secondary">
           {deviceData.label}
         </Typography>
         <FormControlLabel
@@ -814,7 +752,7 @@ const DashboardData: FC = () => {
                       ENTITY NAME
                     </Button>
                   </HeaderCell>
-                  <HeaderCell>
+                  <HeaderCell resize>
                     <Button
                       fullWidth
                       style={{ fontSize: '14px', justifyContent: 'flex-end' }}
@@ -824,7 +762,7 @@ const DashboardData: FC = () => {
                       VALUE
                     </Button>
                   </HeaderCell>
-                  <HeaderCell />
+                  <HeaderCell stiff />
                 </HeaderRow>
               </Header>
               <Body>
@@ -832,7 +770,7 @@ const DashboardData: FC = () => {
                   <Row key={dv.id} item={dv} onClick={() => sendCommand(dv)}>
                     <Cell>{renderNameCell(dv)}</Cell>
                     <Cell>{formatValue(dv.v, dv.u)}</Cell>
-                    <Cell>
+                    <Cell stiff>
                       {dv.c && me.admin && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
                         <IconButton size="small" onClick={() => sendCommand(dv)}>
                           {isCmdOnly(dv) ? (
@@ -867,7 +805,7 @@ const DashboardData: FC = () => {
 
   const renderDallasData = () => (
     <>
-      <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
+      <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="secondary">
         Temperature Sensors
       </Typography>
       <Table
@@ -890,7 +828,7 @@ const DashboardData: FC = () => {
                     NAME
                   </Button>
                 </HeaderCell>
-                <HeaderCell>
+                <HeaderCell stiff>
                   <Button
                     fullWidth
                     style={{ fontSize: '14px', justifyContent: 'flex-end' }}
@@ -900,7 +838,7 @@ const DashboardData: FC = () => {
                     TEMPERATURE
                   </Button>
                 </HeaderCell>
-                <HeaderCell />
+                <HeaderCell stiff />
               </HeaderRow>
             </Header>
             <Body>
@@ -926,7 +864,7 @@ const DashboardData: FC = () => {
 
   const renderAnalogData = () => (
     <>
-      <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="primary">
+      <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="secondary">
         Analog Sensors
       </Typography>
 
@@ -935,7 +873,7 @@ const DashboardData: FC = () => {
           <>
             <Header>
               <HeaderRow>
-                <HeaderCell resize>
+                <HeaderCell stiff>
                   <Button
                     fullWidth
                     style={{ fontSize: '14px', justifyContent: 'flex-start' }}
@@ -955,7 +893,7 @@ const DashboardData: FC = () => {
                     NAME
                   </Button>
                 </HeaderCell>
-                <HeaderCell resize>
+                <HeaderCell stiff>
                   <Button
                     fullWidth
                     style={{ fontSize: '14px', justifyContent: 'flex-start' }}
@@ -965,18 +903,18 @@ const DashboardData: FC = () => {
                     TYPE
                   </Button>
                 </HeaderCell>
-                <HeaderCell>VALUE</HeaderCell>
-                <HeaderCell />
+                <HeaderCell stiff>VALUE</HeaderCell>
+                <HeaderCell stiff />
               </HeaderRow>
             </Header>
             <Body>
               {tableList.map((a: Analog) => (
                 <Row key={a.id} item={a} onClick={() => updateAnalog(a)}>
-                  <Cell>{a.g}</Cell>
+                  <Cell stiff>{a.g}</Cell>
                   <Cell>{a.n}</Cell>
-                  <Cell>{AnalogTypeNames[a.t]} </Cell>
-                  <Cell>{a.t ? formatValue(a.v, a.u) : ''}</Cell>
-                  <Cell>
+                  <Cell stiff>{AnalogTypeNames[a.t]} </Cell>
+                  <Cell stiff>{a.t ? formatValue(a.v, a.u) : ''}</Cell>
+                  <Cell stiff>
                     {me.admin && (
                       <IconButton onClick={() => updateAnalog(a)}>
                         <EditIcon color="primary" sx={{ fontSize: 16 }} />

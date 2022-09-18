@@ -57,8 +57,6 @@ void NetworkSettingsService::manageSTA() {
     if ((WiFi.getMode() & WIFI_STA) == 0) {
         if (_state.staticIPConfig) {
             WiFi.config(_state.localIP, _state.gatewayIP, _state.subnetMask, _state.dnsIP1, _state.dnsIP2); // configure for static IP
-        } else {
-            WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE); // configure for DHCP
         }
 
         WiFi.setHostname(_state.hostname.c_str()); // set hostname
@@ -66,9 +64,9 @@ void NetworkSettingsService::manageSTA() {
         // www.esp32.com/viewtopic.php?t=12055
         read([&](NetworkSettings & networkSettings) {
             if (networkSettings.bandwidth20) {
-                esp_wifi_set_bandwidth(ESP_IF_WIFI_STA, WIFI_BW_HT20);
+                esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_STA, WIFI_BW_HT20);
             } else {
-                esp_wifi_set_bandwidth(ESP_IF_WIFI_STA, WIFI_BW_HT40);
+                esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_STA, WIFI_BW_HT40);
             }
             esp_wifi_set_max_tx_power(networkSettings.tx_power * 4);
             if (networkSettings.nosleep) {
@@ -82,7 +80,7 @@ void NetworkSettingsService::manageSTA() {
 
 // handles if wifi stopped
 void NetworkSettingsService::WiFiEvent(WiFiEvent_t event) {
-    if (event == SYSTEM_EVENT_STA_STOP) {
+    if (event == ARDUINO_EVENT_WIFI_STA_STOP) {
         if (_stopping) {
             _lastConnectionAttempt = 0;
             _stopping              = false;

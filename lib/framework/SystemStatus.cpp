@@ -24,8 +24,8 @@ void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
     root["flash_chip_size"]      = ESP.getFlashChipSize();
     root["flash_chip_speed"]     = ESP.getFlashChipSpeed();
 
-    root["fs_total"] = LITTLEFS.totalBytes();
-    root["fs_used"]  = LITTLEFS.usedBytes();
+    root["fs_total"] = LittleFS.totalBytes();
+    root["fs_used"]  = LittleFS.usedBytes();
     root["uptime"]   = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
 
     response->setLength();

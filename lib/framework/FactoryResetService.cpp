@@ -19,7 +19,7 @@ void FactoryResetService::handleRequest(AsyncWebServerRequest * request) {
  */
 void FactoryResetService::factoryReset() {
     /* 
-   * Based on LITTLEFS. Modified by proddy
+   * Based on LittleFS. Modified by proddy
    * Could be replaced with fs.rmdir(FS_CONFIG_DIRECTORY) in IDF 4.2
    */
     File root = fs->open(FS_CONFIG_DIRECTORY);

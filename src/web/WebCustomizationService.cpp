@@ -148,7 +148,7 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
 // deletes the customization file
 void WebCustomizationService::reset_customization(AsyncWebServerRequest * request) {
 #ifndef EMSESP_STANDALONE
-    if (LITTLEFS.remove(EMSESP_CUSTOMIZATION_FILE)) {
+    if (LittleFS.remove(EMSESP_CUSTOMIZATION_FILE)) {
         AsyncWebServerResponse * response = request->beginResponse(200); // OK
         request->send(response);
         EMSESP::system_.restart_requested(true);
@@ -165,22 +165,27 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
     auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN);
     JsonObject root     = response->getRoot();
 
+    // list is already sorted by device type
+    // controller is ignored since it doesn't have any associated entities
     JsonArray devices = root.createNestedArray("devices");
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice->has_entities()) {
             JsonObject obj = devices.createNestedObject();
-            obj["i"]       = emsdevice->unique_id(); // a unique id
+            obj["i"]       = emsdevice->unique_id();                                         // its unique id
+            obj["s"]       = emsdevice->device_type_name() + " (" + emsdevice->name() + ")"; // shortname
 
+            // device type name. We may have one than one (e.g. multiple thermostats) so postfix name with index
+            // code block not needed - see https://github.com/emsesp/EMS-ESP32/pull/586#issuecomment-1193779668
             /*
             uint8_t device_index = EMSESP::device_index(emsdevice->device_type(), emsdevice->unique_id());
             if (device_index) {
                 char s[10];
-                obj["s"] = emsdevice->device_type_name() + Helpers::smallitoa(s, device_index) + " (" + emsdevice->name() + ")";  // shortname - we prefix the count to make it unique
+                obj["t"] = Helpers::toLower(emsdevice->device_type_name()) + Helpers::smallitoa(s, device_index);
             } else {
-                obj["s"] = emsdevice->device_type_name() + " (" + emsdevice->name() + ")";
+                obj["t"] = Helpers::toLower(emsdevice->device_type_name());
             }
             */
-            obj["s"] = emsdevice->device_type_name() + " (" + emsdevice->name() + ")";
+            obj["t"] = Helpers::toLower(emsdevice->device_type_name());
         }
     }
 

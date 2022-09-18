@@ -16,8 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// SUrlParser from https://github.com/Mad-ness/simple-url-parser
-
 #include "emsesp.h"
 
 using namespace std::placeholders; // for `_1` etc
@@ -158,7 +156,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
 }
 
 void WebAPIService::getSettings(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    auto *     response = new AsyncJsonResponse(false, FS_BUFFER_SIZE);
     JsonObject root     = response->getRoot();
 
     root["type"] = "settings";
@@ -179,7 +177,7 @@ void WebAPIService::getSettings(AsyncWebServerRequest * request) {
 }
 
 void WebAPIService::getCustomizations(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    auto *     response = new AsyncJsonResponse(false, FS_BUFFER_SIZE);
     JsonObject root     = response->getRoot();
 
     root["type"] = "customizations";

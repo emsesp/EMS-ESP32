@@ -30,9 +30,9 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MP) {
         register_telegram_type(0x5BA, F("HpPoolStatus"), true, MAKE_PF_CB(process_HpPoolStatus));
         type_ = Type::MP;
-        register_device_value(DeviceValueTAG::TAG_NONE, &poolTemp_, DeviceValueType::SHORT, FL_(div10), FL_(poolTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_NONE, &poolShuntStatus_, DeviceValueType::ENUM, FL_(enum_shunt), FL_(poolShuntStatus), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_NONE, &poolShunt_, DeviceValueType::UINT, nullptr, FL_(poolShunt), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolTemp_, DeviceValueType::SHORT, FL_(div10), FL_(poolTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolShuntStatus_, DeviceValueType::ENUM, FL_(enum_shunt), FL_(poolShuntStatus), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolShunt_, DeviceValueType::UINT, nullptr, FL_(poolShunt), DeviceValueUOM::PERCENT);
     }
 
     // EMS+

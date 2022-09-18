@@ -45,7 +45,6 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["syslog_mark_interval"]  = settings.syslog_mark_interval;
     root["syslog_host"]           = settings.syslog_host;
     root["syslog_port"]           = settings.syslog_port;
-    root["master_thermostat"]     = settings.master_thermostat;
     root["shower_timer"]          = settings.shower_timer;
     root["shower_alert"]          = settings.shower_alert;
     root["shower_alert_coldshot"] = settings.shower_alert_coldshot;
@@ -108,10 +107,10 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     check_flag(prev, settings.tx_mode, ChangeFlags::UART);
     prev             = settings.rx_gpio;
     settings.rx_gpio = root["rx_gpio"] | default_rx_gpio;
-    check_flag(prev, settings.rx_gpio, ChangeFlags::UART);
+    check_flag(prev, settings.rx_gpio, ChangeFlags::RESTART);
     prev             = settings.tx_gpio;
     settings.tx_gpio = root["tx_gpio"] | default_tx_gpio;
-    check_flag(prev, settings.tx_gpio, ChangeFlags::UART);
+    check_flag(prev, settings.tx_gpio, ChangeFlags::RESTART);
 
     // syslog
     prev                    = settings.syslog_enabled;
@@ -204,10 +203,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.low_clock = root["low_clock"] | false;
     check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
 
-    prev                       = settings.master_thermostat;
-    settings.master_thermostat = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
-    check_flag(prev, settings.master_thermostat, ChangeFlags::RESTART);
-
     //
     // without checks...
     //
@@ -279,6 +274,7 @@ void WebSettingsService::onUpdate() {
 
 void WebSettingsService::begin() {
     _fsPersistence.readFromFS();
+    WebSettings::reset_flags();
 }
 
 void WebSettingsService::save() {

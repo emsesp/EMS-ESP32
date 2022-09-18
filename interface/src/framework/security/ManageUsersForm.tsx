@@ -35,43 +35,44 @@ const ManageUsersForm: FC = () => {
   const authenticatedContext = useContext(AuthenticatedContext);
 
   const table_theme = useTheme({
+    Table: `
+      --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 90px 120px;
+    `,
     BaseRow: `
       font-size: 14px;
-      color: white;
-      padding-left: 8px;
     `,
     HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
-      font-weight: 500;
-      border-bottom: 1px solid #e0e0e0;
+      .th {
+        padding: 8px;
+        height: 42px;
+        font-weight: 500;
+        border-bottom: 1px solid #565656;
+      }
     `,
     Row: `
-      &:nth-of-type(odd) {
+      .td {
+        padding: 8px;
+        border-top: 1px solid #565656;
+        border-bottom: 1px solid #565656;
+      }
+
+      &:nth-of-type(odd) .td {
         background-color: #303030;
       }
-      &:nth-of-type(even) {
+      &:nth-of-type(even) .td {
         background-color: #1e1e1e;
-      }
-      border-top: 1px solid #565656;
-      border-bottom: 1px solid #565656;
-      position: relative;
-      z-index: 1;
-      &:not(:last-of-type) {
-        margin-bottom: -1px;
-      }
-      &:not(:first-of-type) {
-        margin-top: -1px;
-      }
-      &:hover {
-        color: white;
       }
     `,
     BaseCell: `
-      border-top: 1px solid transparent;
-      border-right: 1px solid transparent;
-      border-bottom: 1px solid transparent;
+      &:nth-of-type(2) {
+        text-align: center;
+      }
+      &:last-of-type {
+        text-align: right;
+      }
     `
   });
 
@@ -130,22 +131,22 @@ const ManageUsersForm: FC = () => {
 
     return (
       <>
-        <Table data={{ nodes: user_table }} theme={table_theme}>
+        <Table data={{ nodes: user_table }} theme={table_theme} layout={{ custom: true }}>
           {(tableList: any) => (
             <>
               <Header>
                 <HeaderRow>
-                  <HeaderCell>USERNAME</HeaderCell>
-                  <HeaderCell>IS ADMIN</HeaderCell>
-                  <HeaderCell />
+                  <HeaderCell resize>USERNAME</HeaderCell>
+                  <HeaderCell stiff>IS ADMIN</HeaderCell>
+                  <HeaderCell stiff />
                 </HeaderRow>
               </Header>
               <Body>
                 {tableList.map((u: any) => (
                   <Row key={u.id} item={u}>
                     <Cell>{u.username}</Cell>
-                    <Cell>{u.admin ? <CheckIcon /> : <CloseIcon />}</Cell>
-                    <Cell>
+                    <Cell stiff>{u.admin ? <CheckIcon /> : <CloseIcon />}</Cell>
+                    <Cell stiff>
                       <IconButton
                         size="small"
                         disabled={!authenticatedContext.me.admin}
