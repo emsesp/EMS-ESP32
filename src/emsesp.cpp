@@ -991,8 +991,9 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     if (product_id == 0) {
         // check for known device IDs
         if (device_id == 0x40) {
-            // see: https://github.com/emsesp/EMS-ESP32/issues/103#issuecomment-911717342
-            name = "rf room temperature sensor"; // generic
+            // see: https://github.com/emsesp/EMS-ESP32/issues/103#issuecomment-911717342 and https://github.com/emsesp/EMS-ESP32/issues/624
+            name        = "rf room temperature sensor";
+            device_type = DeviceType::THERMOSTAT;
         } else if (device_id == 0x17) {
             name        = "generic thermostat";
             device_type = DeviceType::THERMOSTAT;

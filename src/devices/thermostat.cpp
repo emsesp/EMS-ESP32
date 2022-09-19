@@ -28,8 +28,13 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     uint8_t model = this->model();
 
-    // remote thermostats with humidity
-    if (device_id >= 0x38 && device_id <= 0x3F) { // RC100H remote
+    // RF remote sensor seen at 0x40, maybe this is also for different hc with id 0x40 - 0x47? emsesp.cpp maps only 0x40
+    if (device_id >= 0x40 && device_id <= 0x47) {
+        register_telegram_type(0x0435, F("RFTemp"), false, MAKE_PF_CB(process_RemoteTemp));
+        return;
+    }
+    // remote thermostats with humidity: RC100H remote
+    if (device_id >= 0x38 && device_id <= 0x3F) {
         register_telegram_type(0x042B, F("RemoteTemp"), false, MAKE_PF_CB(process_RemoteTemp));
         register_telegram_type(0x047B, F("RemoteHumidity"), false, MAKE_PF_CB(process_RemoteHumidity));
         register_telegram_type(0x0273, F("RemoteCorrection"), true, MAKE_PF_CB(process_RemoteCorrection));
@@ -3321,6 +3326,12 @@ bool Thermostat::set_remoteseltemp(const char * value, const int8_t id) {
 // register main device values, top level for all thermostats (excluding heating circuits)
 // as these are done in void Thermostat::register_device_values_hc()
 void Thermostat::register_device_values() {
+    // RF remote sensor seen at 0x40, maybe this is also for different hc with id 0x40 - 0x47? emsesp.cpp maps only 0x40
+    if (device_id() >= 0x40 && device_id() <= 0x47) {
+        uint8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x40;
+        register_device_value(tag, &tempsensor1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(RFTemp), DeviceValueUOM::DEGREES);
+        return;
+    }
     // RC100H remote with humidity, this is also EMS_DEVICE_FLAG_RC100 for set_calinttemp
     if (device_id() >= 0x38 && device_id() <= 0x3F) {
         // each device controls only one hc, so we tag the values
