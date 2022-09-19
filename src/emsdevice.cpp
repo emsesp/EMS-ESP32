@@ -856,7 +856,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                     if (dv.numeric_operator > 0) {
                         obj["s"] = Helpers::render_value(s, (float)1 / dv.numeric_operator, 1);
                     } else if (dv.numeric_operator < 0) {
-                        obj["s"] = Helpers::render_value(s, (-1) * dv.numeric_operator, 0);
+                        obj["s"] = Helpers::render_value(s, (float)(-1) * dv.numeric_operator, 0);
                     }
 
                     int16_t dv_set_min, dv_set_max;

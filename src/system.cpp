@@ -353,6 +353,15 @@ void System::wifi_tweak() {
 #endif
 }
 
+#ifdef ARDUINO_LOLIN_C3_MINI
+// https://www.wemos.cc/en/latest/c3/c3_mini.html
+bool System::is_valid_gpio(uint8_t pin) {
+    if ((pin >= 11  && pin <= 19) || (pin > 21)) {
+        return false; // bad pin
+    }
+    return true;
+}
+#else
 // check for valid ESP32 pins. This is very dependent on which ESP32 board is being used.
 // Typically you can't use 1, 6-11, 12, 14, 15, 20, 24, 28-31 and 40+
 // we allow 0 as it has a special function on the NodeMCU apparently
@@ -364,6 +373,7 @@ bool System::is_valid_gpio(uint8_t pin) {
     }
     return true;
 }
+#endif
 
 // Starts up the UART Serial bridge
 void System::start() {
@@ -1224,6 +1234,8 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
         data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, -1, 0, 0}; // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
     } else if (board_profile == "OLIMEXPOE") {
         data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, 12, 0, 3}; // Olimex ESP32-POE
+    } else if (board_profile == "C3MINI") {
+        data = {7, 2, 4, 5, 9, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // Lolin C3 Mini
     } else if (board_profile == "CUSTOM") {
         // send back current values
         data = {(int8_t)EMSESP::system_.led_gpio_,

@@ -81,7 +81,11 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
     // load default GPIO configuration based on board profile
     std::vector<int8_t> data; //  // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
-    settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
+    #ifdef ARDUINO_LOLIN_C3_MINI
+        settings.board_profile = "C3MINI";
+    #else
+        settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
+    #endif
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
         settings.board_profile = "CUSTOM";
         EMSESP::logger().info("No board profile found. Re-setting to %s", settings.board_profile.c_str());
