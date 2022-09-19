@@ -705,10 +705,9 @@ std::string Helpers::translated_word(const __FlashStringHelper * const * strings
     uint8_t index          = 0;
 
     // see how many translations we have for this entity. if there is no translation for this, revert to EN
-    if (Helpers::count_items(strings) >= language_index + 1) {
+    if (Helpers::count_items(strings) >= language_index + 1 && !read_flash_string(strings[language_index]).empty()) {
         index = language_index;
     }
-
     return to_lower ? toLower(read_flash_string(strings[index])) : read_flash_string(strings[index]);
 }
 
@@ -719,7 +718,7 @@ const __FlashStringHelper * Helpers::translated_fword(const __FlashStringHelper 
     uint8_t index          = 0;
 
     // see how many translations we have for this entity. if there is no translation for this, revert to EN
-    if (Helpers::count_items(strings) >= language_index + 1) {
+    if (Helpers::count_items(strings) >= language_index + 1 && !read_flash_string(strings[language_index]).empty()) {
         index = language_index;
     }
     return strings[index];
