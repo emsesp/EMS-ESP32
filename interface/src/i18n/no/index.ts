@@ -1,6 +1,6 @@
 import type { BaseTranslation } from '../i18n-types';
 
-const en: BaseTranslation = {
+const no: BaseTranslation = {
   LANGUAGE: 'Language',
   RETRY: 'Retry',
   LOADING: 'Loading',
@@ -262,4 +262,4 @@ const en: BaseTranslation = {
   RENAME: 'Rename'
 };
 
-export default en;
+export default no;

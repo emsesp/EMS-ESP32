@@ -89,7 +89,7 @@ const LayoutAuthMenu: FC = () => {
           <SEflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;SE
         </MenuItem>
-        <MenuItem key="pl" value="pl" disabled>
+        <MenuItem key="pl" value="pl">
           <PLflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;PL
         </MenuItem>

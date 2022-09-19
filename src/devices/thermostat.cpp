@@ -28,8 +28,13 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     uint8_t model = this->model();
 
-    // remote thermostats with humidity
-    if (device_id >= 0x38 && device_id <= 0x3F) { // RC100H remote
+    // RF remote sensor seen at 0x40, maybe this is also for different hc with id 0x40 - 0x47? emsesp.cpp maps only 0x40
+    if (device_id >= 0x40 && device_id <= 0x47) {
+        register_telegram_type(0x0435, F("RFTemp"), false, MAKE_PF_CB(process_RemoteTemp));
+        return;
+    }
+    // remote thermostats with humidity: RC100H remote
+    if (device_id >= 0x38 && device_id <= 0x3F) {
         register_telegram_type(0x042B, F("RemoteTemp"), false, MAKE_PF_CB(process_RemoteTemp));
         register_telegram_type(0x047B, F("RemoteHumidity"), false, MAKE_PF_CB(process_RemoteHumidity));
         register_telegram_type(0x0273, F("RemoteCorrection"), true, MAKE_PF_CB(process_RemoteCorrection));
@@ -170,6 +175,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(0xBB, F("HybridSettings"), true, MAKE_PF_CB(process_JunkersHybridSettings));
         register_telegram_type(0x23, F("JunkersSetMixer"), true, MAKE_PF_CB(process_JunkersSetMixer));
         register_telegram_type(0x123, F("JunkersRemote"), false, MAKE_PF_CB(process_JunkersRemoteMonitor));
+        register_telegram_type(0x1D3, F("JunkersDhw"), true, MAKE_PF_CB(process_JunkersWW));
     }
 
     // register device values for common values (not heating circuit)
@@ -890,6 +896,9 @@ void Thermostat::process_JunkersSetMixer(std::shared_ptr<const Telegram> telegra
     has_update(telegram, hc->targetflowtemp, 0);
 }
 
+void Thermostat::process_JunkersWW(std::shared_ptr<const Telegram> telegram) {
+    has_bitupdate(telegram, wwCharge_, 0, 3);
+}
 
 // type 0x02A5 - data from Worchester CRF200
 void Thermostat::process_CRFMonitor(std::shared_ptr<const Telegram> telegram) {
@@ -1765,7 +1774,11 @@ bool Thermostat::set_wwcharge(const char * value, const int8_t id) {
         return false;
     }
 
-    write_command(0x02F5, 11, b ? 0xFF : 0x00, 0x02F5);
+    if ((model() == EMS_DEVICE_FLAG_JUNKERS)) {
+        write_command(0x0115, 0, b ? 0xFF : 0x00, 0x01D3);
+    } else {
+        write_command(0x02F5, 11, b ? 0xFF : 0x00, 0x02F5);
+    }
 
     return true;
 }
@@ -2602,7 +2615,16 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
             if (strlen(s_time) == 5 && s_time[2] == ':') {
                 time = 6 * ((s_time[0] - '0') * 10 + (s_time[1] - '0')) + (s_time[3] - '0');
             }
-        } else {
+        } else if ((model() == EMS_DEVICE_FLAG_RC20) || (model() == EMS_DEVICE_FLAG_RC30)) {
+            if (s_mode[0] == 'T') {
+                on = s_mode[1] - '0';
+            } else {
+                on = s_mode[0] - '0';
+            }
+            if (strlen(s_time) == 5 && s_time[2] == ':') {
+                time = 6 * ((s_time[0] - '0') * 10 + (s_time[1] - '0')) + (s_time[3] - '0');
+            }
+        } else { // RC300
             Helpers::value2enum(s_mode, on, FL_(enum_switchmode));
             if (strlen(s_time) == 5 && s_time[2] == ':') {
                 time = 4 * ((s_time[0] - '0') * 10 + (s_time[1] - '0')) + ((s_time[3] - '0') * 10 + (s_time[4] - '0')) / 15;
@@ -2676,7 +2698,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
     if (data[0] != 0xE7) {
         // we use EN settings for the day abbreviation
         std::string sday = read_flash_string(FL_(enum_dayOfWeek)[day][0]);
-        // s td::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
+        // std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
         if (model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N) {
             snprintf(out, len, "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
         } else if ((model() == EMS_DEVICE_FLAG_RC20) || (model() == EMS_DEVICE_FLAG_RC30)) {
@@ -3304,6 +3326,12 @@ bool Thermostat::set_remoteseltemp(const char * value, const int8_t id) {
 // register main device values, top level for all thermostats (excluding heating circuits)
 // as these are done in void Thermostat::register_device_values_hc()
 void Thermostat::register_device_values() {
+    // RF remote sensor seen at 0x40, maybe this is also for different hc with id 0x40 - 0x47? emsesp.cpp maps only 0x40
+    if (device_id() >= 0x40 && device_id() <= 0x47) {
+        uint8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x40;
+        register_device_value(tag, &tempsensor1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(RFTemp), DeviceValueUOM::DEGREES);
+        return;
+    }
     // RC100H remote with humidity, this is also EMS_DEVICE_FLAG_RC100 for set_calinttemp
     if (device_id() >= 0x38 && device_id() <= 0x3F) {
         // each device controls only one hc, so we tag the values
@@ -3865,6 +3893,7 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_tempDiffBoiler),
                               1,
                               99);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwCharge_, DeviceValueType::BOOL, FL_(wwCharge), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcharge));
         break;
     case EMS_DEVICE_FLAG_EASY:
         // Easy TC100 have no date/time, see issue #100, not sure about CT200, so leave it.
