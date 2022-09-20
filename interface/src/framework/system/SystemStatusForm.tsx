@@ -96,7 +96,7 @@ const SystemStatusForm: FC = () => {
   const renderRestartDialog = () => (
     <Dialog open={confirmRestart} onClose={() => setConfirmRestart(false)}>
       <DialogTitle>Restart</DialogTitle>
-      <DialogContent dividers>{LL.RESTART_TEXT()}</DialogContent>
+      <DialogContent dividers>{LL.RESTART_CONFIRM()}</DialogContent>
       <DialogActions>
         <Button
           startIcon={<CancelIcon />}
@@ -128,7 +128,7 @@ const SystemStatusForm: FC = () => {
           <MessageBox my={0} level="info" message={LL.SYSTEM_VERSION_RUNNING() + ' ' + data?.emsesp_version} />
           {latestVersion && (
             <Box mt={2} mb={2}>
-              {LL.THE_LATEST()}&nbsp;<u>official</u> version is <b>{latestVersion.version}</b>&nbsp;(
+              {LL.THE_LATEST()}&nbsp;<u>official</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestVersion.version}</b>&nbsp;(
               <Link target="_blank" href={latestVersion.changelog} color="primary">
                 {'release notes'}
               </Link>
@@ -142,8 +142,7 @@ const SystemStatusForm: FC = () => {
 
           {latestDevVersion && (
             <Box mt={2} mb={2}>
-              {LL.THE_LATEST()}&nbsp;<u>development</u> version is&nbsp;<b>{latestDevVersion.version}</b>
-              &nbsp;(
+              {LL.THE_LATEST()}&nbsp;<u>development</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestDevVersion.version}</b>&nbsp;(
               <Link target="_blank" href={latestDevVersion.changelog} color="primary">
                 {'release notes'}
               </Link>
@@ -158,7 +157,7 @@ const SystemStatusForm: FC = () => {
           <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>
             <Typography variant="body2">
               {LL.USE()}&nbsp;
-              <Link target="_blank" href={uploadURL} color="primary">
+              <Link href={uploadURL} color="primary">
                 {'UPLOAD'}
               </Link>
               &nbsp;{LL.SYSTEM_APPLY_FIRMWARE()}

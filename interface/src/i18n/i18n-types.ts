@@ -530,6 +530,10 @@ type RootTranslation = {
 	 */
 	RESTART_TEXT: string
 	/**
+	 * Are you sure you want to restart EMS-ESP?
+	 */
+	RESTART_CONFIRM: string
+	/**
 	 * Command
 	 */
 	COMMAND: string
@@ -697,6 +701,10 @@ type RootTranslation = {
 	 * The latest
 	 */
 	THE_LATEST: string
+	/**
+	 * version is
+	 */
+	VERSION_IS: string
 	/**
 	 * Device (Platform / SDK)
 	 */
@@ -1535,6 +1543,10 @@ export type TranslationFunctions = {
 	 */
 	RESTART_TEXT: () => LocalizedString
 	/**
+	 * Are you sure you want to restart EMS-ESP?
+	 */
+	RESTART_CONFIRM: () => LocalizedString
+	/**
 	 * Command
 	 */
 	COMMAND: () => LocalizedString
@@ -1702,6 +1714,10 @@ export type TranslationFunctions = {
 	 * The latest
 	 */
 	THE_LATEST: () => LocalizedString
+	/**
+	 * version is
+	 */
+	VERSION_IS: () => LocalizedString
 	/**
 	 * Device (Platform / SDK)
 	 */

@@ -118,7 +118,7 @@ const HelpInformation: FC = () => {
           {LL.HELP_INFORMATION_5()}
         </Typography>
         <Typography align="center">
-          <Link href="https://github.com/emsesp/EMS-ESP32" color="primary">
+          <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32" color="primary">
             {'Github'}
           </Link>
           <StarIcon style={{ fontSize: 20, color: 'yellow', verticalAlign: 'middle' }} />
