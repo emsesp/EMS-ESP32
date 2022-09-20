@@ -356,7 +356,7 @@ void System::wifi_tweak() {
 #ifdef ARDUINO_LOLIN_C3_MINI
 // https://www.wemos.cc/en/latest/c3/c3_mini.html
 bool System::is_valid_gpio(uint8_t pin) {
-    if ((pin >= 11  && pin <= 19) || (pin > 21)) {
+    if ((pin >= 11 && pin <= 19) || (pin > 21)) {
         return false; // bad pin
     }
     return true;

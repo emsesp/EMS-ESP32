@@ -299,7 +299,6 @@ class System {
     uint8_t eth_clock_mode_;
 
     uint32_t fstotal_;
-
 };
 
 } // namespace emsesp
