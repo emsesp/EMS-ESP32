@@ -458,13 +458,13 @@ float Helpers::transformNumFloat(float value, const int8_t numeric_operator, con
         val = ((value / 100) * 100 + 0.5);
         break;
     case DeviceValueNumOp::DV_NUMOP_MUL5:
-        val = value * -100 * 5;
+        val = value * 100 * 5;
         break;
     case DeviceValueNumOp::DV_NUMOP_MUL10:
-        val = value * -100 * 10;
+        val = value * 100 * 10;
         break;
     case DeviceValueNumOp::DV_NUMOP_MUL15:
-        val = value * -100 * 15;
+        val = value * 100 * 15;
         break;
     default:
         val = (value * 100 + 0.5); // no ops
