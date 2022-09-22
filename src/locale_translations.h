@@ -583,7 +583,7 @@ MAKE_PSTR_LIST(wwSelTempOff,
 MAKE_PSTR_LIST(wwSelTempSingle,
                F("wwseltempsingle"),
                F("single charge temperature"),
-               F("Solltemperature Einmalladung"),
+               F("Solltemperatur Einmalladung"),
                F("Streeftemperatuur enkele lading"),
                F("Temperatur Engångsladdning"))
 MAKE_PSTR_LIST(wwCylMiddleTemp,
