@@ -182,6 +182,7 @@ const en: BaseTranslation = {
   HEAP: 'Heap (Free / Max Alloc)',
   PSRAM: 'PSRAM (Size / Free)',
   FLASH: 'Flash Chip (Size / Speed)',
+  APPSIZE: 'Application (Size / Free)',
   FILESYSTEM: 'File System (Used / Total)',
   BUFFER_SIZE: 'Buffer Size',
   COMPACT: 'Compact',

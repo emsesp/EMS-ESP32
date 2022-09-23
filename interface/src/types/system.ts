@@ -12,6 +12,8 @@ interface ESPSystemStatus {
   sdk_version: string;
   flash_chip_size: number;
   flash_chip_speed: number;
+  app_size: number;
+  app_free: number;
   fs_used: number;
   fs_total: number;
   uptime: string;
@@ -20,8 +22,8 @@ interface ESPSystemStatus {
 
 export interface ESP32SystemStatus extends ESPSystemStatus {
   esp_platform: EspPlatform.ESP32;
-  psram_size: number;
-  free_psram: number;
+  psram_size?: number;
+  free_psram?: number;
 }
 
 export interface ESP8266SystemStatus extends ESPSystemStatus {

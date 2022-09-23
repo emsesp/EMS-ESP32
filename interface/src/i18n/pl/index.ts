@@ -184,6 +184,7 @@ const pl: BaseTranslation = {
   HEAP: 'Pamięć (Wolna / Zaalokowana)',
   PSRAM: 'PSRAM (Rozmiar / Wolna)',
   FLASH: 'Pamięć flash ( Rozmiar / Taktowanie)',
+  APPSIZE: 'Application (Size / Free)',
   FILESYSTEM: 'System plików (Wykorzystano / Cała pojemność)',
   BUFFER_SIZE: 'Rozmiar bufora',
   COMPACT: 'Kompaktowy',

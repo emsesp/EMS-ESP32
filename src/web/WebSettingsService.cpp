@@ -284,7 +284,7 @@ void WebSettingsService::onUpdate() {
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::MQTT)) {
-        emsesp::EMSESP::mqtt_.reset_mqtt(); // reload MQTT, init HA etc
+        emsesp::Mqtt::reset_mqtt(); // reload MQTT, init HA etc
     }
 
     WebSettings::reset_flags();

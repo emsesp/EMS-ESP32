@@ -181,6 +181,7 @@ const se: BaseTranslation = {
   HEAP: 'Heap (Ledigt / Max allokerat)',
   PSRAM: 'PSRAM (Storlek / Ledigt)',
   FLASH: 'Flash Chip (Storlek / Hastighet)',
+  APPSIZE: 'Application (Size / Free)',
   FILESYSTEM: 'Filsystem (Använt / Totalt)',
   BUFFER_SIZE: 'Bufferstorlek',
   COMPACT: 'Komprimera',

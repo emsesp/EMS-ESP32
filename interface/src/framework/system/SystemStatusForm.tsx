@@ -22,6 +22,7 @@ import ShowChartIcon from '@mui/icons-material/ShowChart';
 import MemoryIcon from '@mui/icons-material/Memory';
 import AppsIcon from '@mui/icons-material/Apps';
 import SdStorageIcon from '@mui/icons-material/SdStorage';
+import SdCardAlertIcon from '@mui/icons-material/SdCardAlert';
 import FolderIcon from '@mui/icons-material/Folder';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
@@ -272,14 +273,14 @@ const SystemStatusForm: FC = () => {
               primary={LL.HEAP()}
               secondary={
                 formatNumber(data.free_heap) +
-                ' / ' +
+                ' kb / ' +
                 formatNumber(data.max_alloc_heap) +
-                ' bytes ' +
+                ' kb ' +
                 (data.esp_platform === EspPlatform.ESP8266 ? '(' + data.heap_fragmentation + '% fragmentation)' : '')
               }
             />
           </ListItem>
-          {data.esp_platform === EspPlatform.ESP32 && data.psram_size > 0 && (
+          {data.esp_platform === EspPlatform.ESP32 && data.psram_size !== undefined && data.free_psram !== undefined && (
             <>
               <Divider variant="inset" component="li" />
               <ListItem>
@@ -290,7 +291,7 @@ const SystemStatusForm: FC = () => {
                 </ListItemAvatar>
                 <ListItemText
                   primary={LL.PSRAM()}
-                  secondary={formatNumber(data.psram_size) + ' / ' + formatNumber(data.free_psram) + ' bytes'}
+                  secondary={formatNumber(data.psram_size) + ' kb / ' + formatNumber(data.free_psram) + ' kb'}
                 />
               </ListItem>
             </>
@@ -305,7 +306,21 @@ const SystemStatusForm: FC = () => {
             <ListItemText
               primary={LL.FLASH()}
               secondary={
-                formatNumber(data.flash_chip_size) + ' bytes / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'
+                formatNumber(data.flash_chip_size) + ' kb / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'
+              }
+            />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <SdCardAlertIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary={LL.APPSIZE()}
+              secondary={
+                formatNumber(data.app_size) + ' kb / ' + formatNumber(data.app_free) + ' kb'
               }
             />
           </ListItem>
@@ -320,11 +335,11 @@ const SystemStatusForm: FC = () => {
               primary={LL.FILESYSTEM()}
               secondary={
                 formatNumber(data.fs_used) +
-                ' / ' +
+                ' kb / ' +
                 formatNumber(data.fs_total) +
-                ' bytes (' +
+                ' kb (' +
                 formatNumber(data.fs_total - data.fs_used) +
-                '\xa0bytes free)'
+                '\xa0kb free)'
               }
             />
           </ListItem>

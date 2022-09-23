@@ -182,6 +182,7 @@ const de: Translation = {
   HEAP: 'RAM Speicher (Frei / Max Belegt)',
   PSRAM: 'PSRAM (Größe / Frei)',
   FLASH: 'Flash Speicher (Größe / Geschwindigkeit)',
+  APPSIZE: 'Programm (Größe / Frei)',
   FILESYSTEM: 'Dateisystem (Genutzt / Gesamt)',
   BUFFER_SIZE: 'Puffergröße',
   COMPACT: 'Kompakte Darstellung',
