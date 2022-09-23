@@ -245,7 +245,7 @@ MAKE_PSTR_LIST(setFlowTemp,
                F("Börvärde Flödestemperatur"))
 MAKE_PSTR_LIST(setBurnPow, F("setburnpow"), F("burner set power"), F("Sollwert Brennerleistung"), F("Ingesteld brandervermogen"), F("Värmepanna vald Effekt"))
 MAKE_PSTR_LIST(curBurnPow, F("curburnpow"), F("burner current power"), F("Brennerleistung"), F("Brandervermogen"), F("Värmepanna aktuell effekt"))
-MAKE_PSTR_LIST(burnStarts, F("burnstarts"), F("burner starts"), F("Brenner # starts"), F("Aantal brander starts"), F("Värmepanna antal starter"))
+MAKE_PSTR_LIST(burnStarts, F("burnstarts"), F("burner starts"), F("Brenner Starts"), F("Aantal brander starts"), F("Värmepanna antal starter"))
 MAKE_PSTR_LIST(burnWorkMin, F("burnworkmin"), F("total burner operating time"), F("Brenner Laufzeit"), F("Totale branderlooptijd"), F("Värmepanna aktiva timmar"))
 MAKE_PSTR_LIST(burn2WorkMin,
                F("burn2workmin"),
@@ -583,7 +583,7 @@ MAKE_PSTR_LIST(wwSelTempOff,
 MAKE_PSTR_LIST(wwSelTempSingle,
                F("wwseltempsingle"),
                F("single charge temperature"),
-               F("Solltemperature Einmalladung"),
+               F("Solltemperatur Einmalladung"),
                F("Streeftemperatuur enkele lading"),
                F("Temperatur Engångsladdning"))
 MAKE_PSTR_LIST(wwCylMiddleTemp,
@@ -615,7 +615,7 @@ MAKE_PSTR_LIST(wwChargeType, F("wwchargetype"), F("charging type"), F("Speicher-
 MAKE_PSTR_LIST(wwDisinfectionTemp,
                F("wwdisinfectiontemp"),
                F("disinfection temperature"),
-               F("Desinfectionstemperatur"),
+               F("Desinfektionstemperatur"),
                F("Desinfectietemperatuur"),
                F("Desinfektionstemperatur"))
 MAKE_PSTR_LIST(wwCircMode, F("wwcircmode"), F("circulation pump mode"), F("Zirkulationspumpen-Modus"), F("Modus circulatiepomp"), F("Läge Cirkulationspump"))
