@@ -26,9 +26,11 @@ uuid::log::Logger AnalogSensor::logger_{F_(analogsensor), uuid::log::Facility::D
 void AnalogSensor::start() {
     reload(); // fetch the list of sensors from our customization service
 
-    if (analog_enabled_) {
-        analogSetAttenuation(ADC_2_5db); // for all channels 1.5V
+    if (!analog_enabled_) {
+        return;
     }
+    analogSetAttenuation(ADC_2_5db); // for all channels 1.5V
+
 
     LOG_INFO(F("Starting Analog sensor service"));
 
@@ -354,7 +356,7 @@ void AnalogSensor::remove_ha_topic(const uint8_t gpio) const {
     LOG_DEBUG(F("Removing HA config for analog sensor GPIO %d"), gpio);
 #endif
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%d/config", Mqtt::base().c_str(), gpio);
+    snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%d/config", Mqtt::basename().c_str(), gpio);
     Mqtt::publish_ha(topic);
 }
 
@@ -376,8 +378,7 @@ void AnalogSensor::publish_values(const bool force) {
 
     for (auto & sensor : sensors_) {
         if (sensor.type() != AnalogType::NOTUSED) {
-            if (Mqtt::is_nested() || Mqtt::ha_enabled()) {
-                // nested
+            if (Mqtt::is_nested()) {
                 char       s[10];
                 JsonObject dataSensor = doc.createNestedObject(Helpers::smallitoa(s, sensor.gpio()));
                 dataSensor["name"]    = sensor.name();
@@ -395,50 +396,52 @@ void AnalogSensor::publish_values(const bool force) {
                     dataSensor["value"] = (uint8_t)sensor.value(); // convert to char for 1 or 0
                     break;
                 }
-
-                // create HA config
-                if (Mqtt::ha_enabled() && (!sensor.ha_registered || force)) {
-                    LOG_DEBUG(F("Recreating HA config for analog sensor GPIO %d"), sensor.gpio());
-
-                    StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
-
-                    char stat_t[50];
-                    snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::base().c_str());
-                    config["stat_t"] = stat_t;
-
-                    char str[50];
-                    snprintf(str, sizeof(str), "{{value_json['%d'].value}}", sensor.gpio());
-                    config["val_tpl"] = str;
-
-                    snprintf(str, sizeof(str), "analog_sensor_%s", sensor.name().c_str());
-                    config["object_id"] = str;
-
-                    snprintf(str, sizeof(str), "%s", sensor.name().c_str());
-                    config["name"] = str;
-
-                    snprintf(str, sizeof(str), "analogsensor_%d", sensor.gpio());
-                    config["uniq_id"] = str;
-
-                    if (sensor.uom() != DeviceValueUOM::NONE) {
-                        config["unit_of_meas"] = EMSdevice::uom_to_string(sensor.uom());
-                    }
-
-                    JsonObject dev = config.createNestedObject("dev");
-                    JsonArray  ids = dev.createNestedArray("ids");
-                    ids.add("ems-esp");
-
-                    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-                    snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%d/config", Mqtt::base().c_str(), sensor.gpio());
-
-                    Mqtt::publish_ha(topic, config.as<JsonObject>());
-
-                    sensor.ha_registered = true;
-                }
-
-
             } else {
                 // not nested
                 doc[sensor.name()] = sensor.value();
+            }
+
+            // create HA config
+            if (Mqtt::ha_enabled() && (!sensor.ha_registered || force)) {
+                LOG_DEBUG(F("Recreating HA config for analog sensor GPIO %d"), sensor.gpio());
+
+                StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
+
+                char stat_t[50];
+                snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::base().c_str());
+                config["stat_t"] = stat_t;
+
+                char str[50];
+                if (Mqtt::is_nested()) {
+                    snprintf(str, sizeof(str), "{{value_json['%d'].value}}", sensor.gpio());
+                } else {
+                    snprintf(str, sizeof(str), "{{value_json['%s']}", sensor.name().c_str());
+                }
+                config["val_tpl"] = str;
+
+                snprintf(str, sizeof(str), "%s_analog_sensor_%s", Mqtt::basename().c_str(), sensor.name().c_str());
+                config["object_id"] = str;
+
+                snprintf(str, sizeof(str), "%s", sensor.name().c_str());
+                config["name"] = str;
+
+                snprintf(str, sizeof(str), "analogsensor_%d", sensor.gpio());
+                config["uniq_id"] = str;
+
+                if (sensor.uom() != DeviceValueUOM::NONE) {
+                    config["unit_of_meas"] = EMSdevice::uom_to_string(sensor.uom());
+                }
+
+                JsonObject dev = config.createNestedObject("dev");
+                JsonArray  ids = dev.createNestedArray("ids");
+                ids.add("ems-esp");
+
+                char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+                snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%d/config", Mqtt::basename().c_str(), sensor.gpio());
+
+                Mqtt::publish_ha(topic, config.as<JsonObject>());
+
+                sensor.ha_registered = true;
             }
         }
     }
