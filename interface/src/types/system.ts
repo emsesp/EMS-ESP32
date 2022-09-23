@@ -12,10 +12,10 @@ interface ESPSystemStatus {
   sdk_version: string;
   flash_chip_size: number;
   flash_chip_speed: number;
-  app_size: number;
+  app_used: number;
   app_free: number;
   fs_used: number;
-  fs_total: number;
+  fs_free: number;
   uptime: string;
   free_mem: number;
 }

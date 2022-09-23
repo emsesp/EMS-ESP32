@@ -319,9 +319,7 @@ const SystemStatusForm: FC = () => {
             </ListItemAvatar>
             <ListItemText
               primary={LL.APPSIZE()}
-              secondary={
-                formatNumber(data.app_size) + ' kb / ' + formatNumber(data.app_free) + ' kb'
-              }
+              secondary={formatNumber(data.app_used) + ' kb / ' + formatNumber(data.app_free) + ' kb'}
             />
           </ListItem>
           <Divider variant="inset" component="li" />
@@ -333,14 +331,7 @@ const SystemStatusForm: FC = () => {
             </ListItemAvatar>
             <ListItemText
               primary={LL.FILESYSTEM()}
-              secondary={
-                formatNumber(data.fs_used) +
-                ' kb / ' +
-                formatNumber(data.fs_total) +
-                ' kb (' +
-                formatNumber(data.fs_total - data.fs_used) +
-                '\xa0kb free)'
-              }
+              secondary={formatNumber(data.fs_used) + ' kb / ' + formatNumber(data.fs_free) + ' kb'}
             />
           </ListItem>
           <Divider variant="inset" component="li" />
