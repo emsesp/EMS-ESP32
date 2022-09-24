@@ -799,7 +799,7 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F(" Free heap: %lu KB"), (uint32_t)ESP.getFreeHeap() / 1024);
     shell.printfln(F(" App used/free: %lu KB / %lu KB"), appUsed(), appFree());
     uint32_t FSused = LittleFS.usedBytes() / 1024;
-    shell.printfln(F(" FS used/free: %lu KB / %lu KB"), FSused / 1024, FStotal() - FSused);
+    shell.printfln(F(" FS used/free: %lu KB / %lu KB"), FSused, FStotal() - FSused);
     shell.println();
 
     shell.println("Network:");
