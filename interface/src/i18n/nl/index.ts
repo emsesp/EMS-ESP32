@@ -261,7 +261,8 @@ const nl: BaseTranslation = {
   ADMIN: 'Admin',
   GUEST: 'Gast',
   NEW: 'Nieuwe',
-  RENAME: 'Hernoem'
+  RENAME: 'Hernoem',
+  ENTITY: 'Entiteit'
 };
 
 export default nl;

@@ -262,7 +262,8 @@ const de: Translation = {
   ADMIN: 'Administrator',
   GUEST: 'Gast',
   NEW: 'Neuer',
-  RENAME: 'Ändere'
+  RENAME: 'Ändere',
+  ENTITY: 'Einheit'
 };
 
 export default de;

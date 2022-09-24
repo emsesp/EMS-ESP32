@@ -1041,6 +1041,10 @@ type RootTranslation = {
 	 * Rename
 	 */
 	RENAME: string
+	/**
+	 * Entity
+	 */
+	ENTITY: string
 }
 
 export type TranslationFunctions = {
@@ -2058,6 +2062,10 @@ export type TranslationFunctions = {
 	 * Rename
 	 */
 	RENAME: () => LocalizedString
+	/**
+	 * Entity
+	 */
+	ENTITY: () => LocalizedString
 }
 
 export type Formatters = {}

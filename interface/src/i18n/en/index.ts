@@ -262,7 +262,8 @@ const en: BaseTranslation = {
   ADMIN: 'Admin',
   GUEST: 'Guest',
   NEW: 'New',
-  RENAME: 'Rename'
+  RENAME: 'Rename',
+  ENTITY: 'Entity'
 };
 
 export default en;

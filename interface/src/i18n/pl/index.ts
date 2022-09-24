@@ -51,7 +51,7 @@ const pl: BaseTranslation = {
   UPDATE: 'Aktualizacja',
   REMOVED: 'Usunięto',
   DELETION: 'Skasowano',
-// missing translations
+  // missing translations
   OFFSET: 'Offset',
   FACTOR: 'Factor',
 
@@ -62,7 +62,8 @@ const pl: BaseTranslation = {
   TEMP_SENSOR: 'Czujnik temperatury',
   TEMP_SENSORS: 'Czujniki temperatury',
   WRITE_COMMAND: 'Komenda zapisu',
-  EMS_BUS_WARNING: 'Magistrala EMS rozłączona. Jeśli ten błąd występuje dłużej niż kilka sekng, sprawdz ustawienia oraz profil urządzenia/płytki',
+  EMS_BUS_WARNING:
+    'Magistrala EMS rozłączona. Jeśli ten błąd występuje dłużej niż kilka sekng, sprawdz ustawienia oraz profil urządzenia/płytki',
   EMS_BUS_SCANNING: 'Skanuje w poszukiwaniu urządzeń EMS...',
   CONNECTED: 'Połączony',
   TX_ISSUES: 'Problem Tx - spróbuj wybrać inny trym Tx',
@@ -97,7 +98,8 @@ const pl: BaseTranslation = {
   APPLICATION_SETTINGS: 'Ustawienia aplikacji',
   CUSTOMIZATION: 'Personalizacja',
   APPLICATION_RESTARTING: 'Urządzenie się restartuje',
-  BOARD_PROFILE_TEXT: 'Wybierz wstępną konfigurację interfejsu płytki z listy lub stwórz własną konfigurację urządzenia',
+  BOARD_PROFILE_TEXT:
+    'Wybierz wstępną konfigurację interfejsu płytki z listy lub stwórz własną konfigurację urządzenia',
   BOARD_PROFILE: 'Profil urządzenia',
   BUTTON: 'Przycisk',
   TEMPERATURE: 'Temperatura',
@@ -111,7 +113,7 @@ const pl: BaseTranslation = {
   BYPASS_TOKEN: '',
   READONLY: 'Włącz tryb odczytu ',
   UNDERCLOCK_CPU: 'Zastosuj obniżone taktowanie CPU',
-// missing translations
+  // missing translations
   ENABLE_SHOWER_TIMER: 'Enable Shower Timer',
   ENABLE_SHOWER_ALERT: 'Enable Shower Alert',
   TRIGGER_TIME: 'Trigger Time',
@@ -146,8 +148,9 @@ const pl: BaseTranslation = {
   SET_ALL: 'Zaznacz wszystko',
   OPTIONS: 'Opcje',
   NAME: 'Nazwa',
-  CUSTOMIZATIONS_RESET: 'Czy jesteś pewien, że chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury i analogowych?',
-// missing translations
+  CUSTOMIZATIONS_RESET:
+    'Czy jesteś pewien, że chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury i analogowych?',
+  // missing translations
   DEVICE_ENTITIES: 'Device Entities',
   USER_CUSTOMIZATION: 'User Customization',
 
@@ -156,8 +159,10 @@ const pl: BaseTranslation = {
   HELP_INFORMATION_1: 'Skorzystaj z wiki w celu znalezienia szczegółowych instrukcji jak skonfigurowac EMS-ESP',
   HELP_INFORMATION_2: 'Skorzystaj z serwera Discord w celu komunikacji na żywo ze społecznością',
   HELP_INFORMATION_3: 'Aby zaproponować nową funkcjonalność, lub zgłosić problem',
-  HELP_INFORMATION_4: 'gdy zgłaszasz problem, będzie on szybciej zadresowany gdy do zgłoszenia dołączysz pełną informację systemową',
-  HELP_INFORMATION_5: 'EMS-ESP jest darmowym projektem typu open-source. Aby go wesprzeć, rozważ przyznanie nam gwiazdki na Github!',
+  HELP_INFORMATION_4:
+    'gdy zgłaszasz problem, będzie on szybciej zadresowany gdy do zgłoszenia dołączysz pełną informację systemową',
+  HELP_INFORMATION_5:
+    'EMS-ESP jest darmowym projektem typu open-source. Aby go wesprzeć, rozważ przyznanie nam gwiazdki na Github!',
   SUPPORT_INFO: 'Dodatkowe info',
   UPLOAD: 'Wgraj',
   DOWNLOAD: 'Ściągnij',
@@ -190,7 +195,8 @@ const pl: BaseTranslation = {
   COMPACT: 'Kompaktowy',
   ENABLE_OTA: 'Włącz aktualizację OTA',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Ściągnij personalizacje',
-  DOWNLOAD_SETTINGS_TEXT: 'Ściągnij ustawienia aplikacji. Uważaj jeśli udostępniasz plik z ustawieniami, ponieważ zawiera on hasła oraz inne wrażliwe informacjie',
+  DOWNLOAD_SETTINGS_TEXT:
+    'Ściągnij ustawienia aplikacji. Uważaj jeśli udostępniasz plik z ustawieniami, ponieważ zawiera on hasła oraz inne wrażliwe informacjie',
   UPLOAD_TEXT: 'Wgraj nowe oprogramowanie układowe - firmware (.bin), ustawienia lub personalizacje (.json)',
   UPLOADING: 'wgrywanie',
   UPLOAD_DROP_TEXT: 'Przeciągnij plik lub kliknij',
@@ -201,11 +207,13 @@ const pl: BaseTranslation = {
   USER_WARNING: 'Przynajmniej jeden użytkownik musi mieć uprawnienia admina',
   ADD: 'Dodaj',
   ACCESS_TOKEN_FOR: 'Token dostępowy dla',
-  ACCESS_TOKEN_TEXT: 'Token jest używany do korzystania z wywołań REST API, wymagających autoryzacji. Można go przekazać bezpośrednio lub przez URL',
+  ACCESS_TOKEN_TEXT:
+    'Token jest używany do korzystania z wywołań REST API, wymagających autoryzacji. Można go przekazać bezpośrednio lub przez URL',
   GENERATING_TOKEN: 'Genrowanie tokenu',
   USER: 'Użytkownik',
   MODIFY: 'Modyfikuj',
-  SU_TEXT: 'Hasło Super Użytkownika jest wykorzystywane do autoryzacji tokenów oraz dostępu do konsoli z uprawnieniami admina',
+  SU_TEXT:
+    'Hasło Super Użytkownika jest wykorzystywane do autoryzacji tokenów oraz dostępu do konsoli z uprawnieniami admina',
   NOT_ENABLED: 'wyłączony',
   ERRORS: 'Błędy',
   DISCONNECT_REASON: 'Powody rozłączenia',
@@ -254,7 +262,7 @@ const pl: BaseTranslation = {
   NETWORK_BLANK_SSID: 'Zostaw puste aby wyłączyć WiFi',
   POWER: 'Zasilanie',
   NETWORK_DISABLE_SLEEP: 'Wyłącz tryb uśpienia WiFi',
-// missing translation
+  // missing translation
   NETWORK_LOW_BAND: 'Use Lower WiFi Bandwidth',
 
   NETWORK_USE_DNS: 'Włącz wsparcie dla mDNS',
@@ -263,7 +271,8 @@ const pl: BaseTranslation = {
   ADMIN: 'Admin',
   GUEST: 'Gość',
   NEW: 'Nowy',
-  RENAME: 'Zmień nazwę'
+  RENAME: 'Zmień nazwę',
+  ENTITY: 'Podmiot'
 };
 
 export default pl;
