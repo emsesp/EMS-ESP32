@@ -15,7 +15,6 @@ import SystemLog from './SystemLog';
 import { useI18nContext } from '../../i18n/i18n-react';
 
 const System: FC = () => {
-
   const { LL } = useI18nContext();
 
   useLayoutTitle(LL.SYSTEM());
@@ -30,7 +29,7 @@ const System: FC = () => {
         <Tab value="status" label={LL.SYSTEM() + ' ' + LL.STATUS()} />
         <Tab value="log" label={LL.SYSTEM() + ' ' + LL.LOG()} />
 
-        {features.ota && <Tab value="ota" label={"OTA " + LL.SETTINGS()} disabled={!me.admin} />}
+        {features.ota && <Tab value="ota" label={'OTA ' + LL.SETTINGS()} disabled={!me.admin} />}
         {features.upload_firmware && <Tab value="upload" label={LL.UPLOAD_DOWNLOAD()} disabled={!me.admin} />}
       </RouterTabs>
       <Routes>

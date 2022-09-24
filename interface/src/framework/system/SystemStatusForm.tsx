@@ -143,7 +143,8 @@ const SystemStatusForm: FC = () => {
 
           {latestDevVersion && (
             <Box mt={2} mb={2}>
-              {LL.THE_LATEST()}&nbsp;<u>development</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestDevVersion.version}</b>&nbsp;(
+              {LL.THE_LATEST()}&nbsp;<u>development</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestDevVersion.version}</b>
+              &nbsp;(
               <Link target="_blank" href={latestDevVersion.changelog} color="primary">
                 {'release notes'}
               </Link>

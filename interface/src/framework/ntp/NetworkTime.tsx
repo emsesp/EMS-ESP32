@@ -13,7 +13,7 @@ import { useI18nContext } from '../../i18n/i18n-react';
 
 const NetworkTime: FC = () => {
   const { LL } = useI18nContext();
-  useLayoutTitle("NTP");
+  useLayoutTitle('NTP');
 
   const authenticatedContext = useContext(AuthenticatedContext);
   const { routerTab } = useRouterTab();

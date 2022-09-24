@@ -153,9 +153,10 @@ const en: BaseTranslation = {
   HELP_INFORMATION_1: 'Visit the online wiki to get instructions on how to configure EMS-ESP',
   HELP_INFORMATION_2: 'For live community chat join our Discord server',
   HELP_INFORMATION_3: 'To request a feature or report a bug',
-  HELP_INFORMATION_4: 'remember to download and attach your system information for a faster response when reporting an issue',
+  HELP_INFORMATION_4:
+    'remember to download and attach your system information for a faster response when reporting an issue',
   HELP_INFORMATION_5:
-    "EMS-ESP is a free and open-source project. Please support its future development by giving it a star on Github!",
+    'EMS-ESP is a free and open-source project. Please support its future development by giving it a star on Github!',
   SUPPORT_INFO: 'Support Info',
   UPLOAD: 'Upload',
   DOWNLOAD: 'Download',

@@ -38,4 +38,3 @@ export function updateLogSettings(logSettings: LogSettings): AxiosPromise<LogSet
 export function readLogEntries(): AxiosPromise<LogEntries> {
   return AXIOS_BIN.get('/fetchLog');
 }
-

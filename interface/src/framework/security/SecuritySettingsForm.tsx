@@ -46,18 +46,14 @@ const SecuritySettingsForm: FC = () => {
         <ValidatedPasswordField
           fieldErrors={fieldErrors}
           name="jwt_secret"
-          label={"su " + LL.PASSWORD()}
+          label={'su ' + LL.PASSWORD()}
           fullWidth
           variant="outlined"
           value={data.jwt_secret}
           onChange={updateFormValue}
           margin="normal"
         />
-        <MessageBox
-          level="info"
-          message={LL.SU_TEXT()}
-          mt={1}
-        />
+        <MessageBox level="info" message={LL.SU_TEXT()} mt={1} />
         <ButtonRow>
           <Button
             startIcon={<SaveIcon />}
@@ -75,7 +71,7 @@ const SecuritySettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SECURITY() + " " + LL.SETTINGS()} titleGutter>
+    <SectionContent title={LL.SECURITY() + ' ' + LL.SETTINGS()} titleGutter>
       {content()}
     </SectionContent>
   );
