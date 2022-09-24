@@ -9,7 +9,6 @@ import { useSnackbar } from 'notistack';
 import CommentIcon from '@mui/icons-material/CommentTwoTone';
 import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import StarIcon from '@mui/icons-material/Star';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import EastIcon from '@mui/icons-material/East';
 
@@ -98,7 +97,7 @@ const HelpInformation: FC = () => {
               {LL.CLICK_HERE()}
             </Link>
             <br />
-            <i>({LL.HELP_INFORMATION_4()}</i>&nbsp;
+            <i>({LL.HELP_INFORMATION_4()}</i>&nbsp;&nbsp;
             <Button
               startIcon={<DownloadIcon />}
               size="small"
@@ -114,14 +113,13 @@ const HelpInformation: FC = () => {
       </List>
 
       <Box border={1} p={1} mt={4} color="orange">
-        <Typography align="center" variant="h6" color="orange">
-          {LL.HELP_INFORMATION_5()}
+        <Typography align="center" variant="subtitle1" color="orange">
+          <b>{LL.HELP_INFORMATION_5()}</b>
         </Typography>
         <Typography align="center">
           <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32" color="primary">
-            {'Github'}
+            {'github.com/emsesp/EMS-ESP32'}
           </Link>
-          <StarIcon style={{ fontSize: 20, color: 'yellow', verticalAlign: 'middle' }} />
         </Typography>
         <Typography color="white" align="center">
           @proddy @MichaelDvP

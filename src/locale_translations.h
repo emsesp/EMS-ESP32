@@ -30,10 +30,10 @@
 // if there is no translation, it will default to en
 
 // General
-MAKE_PSTR_LIST(on, F("on"), F("an"), F("naar"), F("på"))
-MAKE_PSTR_LIST(off, F("off"), F("aus"), F("van"), F("av"))
-MAKE_PSTR_LIST(ON, F("ON"), F("AN"), F("NAAR"), F("PÅ"))
-MAKE_PSTR_LIST(OFF, F("OFF"), F("AUS"), F("VAN"), F("AV"))
+MAKE_PSTR_LIST(on, F("on"), F("an"), F("aan"), F("på"))
+MAKE_PSTR_LIST(off, F("off"), F("aus"), F("uit"), F("av"))
+MAKE_PSTR_LIST(ON, F("ON"), F("AN"), F("AAN"), F("PÅ"))
+MAKE_PSTR_LIST(OFF, F("OFF"), F("AUS"), F("UIT"), F("AV"))
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
 // uom - also used with HA see https://github.com/home-assistant/core/blob/d7ac4bd65379e11461c7ce0893d3533d8d8b8cbf/homeassistant/const.py#L384

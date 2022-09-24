@@ -96,7 +96,7 @@ const SystemStatusForm: FC = () => {
 
   const renderRestartDialog = () => (
     <Dialog open={confirmRestart} onClose={() => setConfirmRestart(false)}>
-      <DialogTitle>Restart</DialogTitle>
+      <DialogTitle>{LL.RESTART()}</DialogTitle>
       <DialogContent dividers>{LL.RESTART_CONFIRM()}</DialogContent>
       <DialogActions>
         <Button
