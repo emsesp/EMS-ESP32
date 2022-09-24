@@ -1120,11 +1120,13 @@ void Mqtt::publish_ha_sensor_config(uint8_t                              type,  
     // entity id is generated from the name, see https://www.home-assistant.io/docs/mqtt/discovery/#use-object_id-to-influence-the-entity-id
     // so we override it to make it unique using entity_id
     // See https://github.com/emsesp/EMS-ESP32/issues/596
-    // keep it compatible to v3.4, use english fullname, no prefix
+    // keep it compatible to v3.4, use english fullname, no prefix (basename prefix commmented out)
     char object_id[130];
     if (have_tag) {
+        // snprintf(object_id, sizeof(object_id), "%s_%s_%s_%s", mqtt_basename_, device_name, EMSdevice::tag_to_string(tag).c_str(), read_flash_string(en_name).c_str());
         snprintf(object_id, sizeof(object_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag).c_str(), read_flash_string(en_name).c_str());
     } else {
+        // snprintf(object_id, sizeof(object_id), "%s_%s_%s", mqtt_basename_, device_name, read_flash_string(en_name).c_str());
         snprintf(object_id, sizeof(object_id), "%s_%s", device_name, read_flash_string(en_name).c_str());
     }
     doc["object_id"] = object_id;

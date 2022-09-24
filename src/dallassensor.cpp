@@ -502,7 +502,8 @@ void DallasSensor::publish_values(const bool force) {
                 }
                 config["val_tpl"] = str;
 
-                snprintf(str, sizeof(str), "%s_temperature_sensor_%s", Mqtt::basename().c_str(), sensor.name().c_str());
+                // snprintf(str, sizeof(str), "%s_temperature_sensor_%s", Mqtt::basename().c_str(), sensor.name().c_str());
+                snprintf(str, sizeof(str), "temperature_sensor_%s", sensor.name().c_str());
                 config["object_id"] = str;
 
                 snprintf(str, sizeof(str), "%s", sensor.name().c_str());
