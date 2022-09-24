@@ -223,6 +223,12 @@ class System {
     uint32_t FStotal() {
         return fstotal_;
     }
+    uint32_t appFree() {
+        return appfree_;
+    }
+    uint32_t appUsed() {
+        return appused_;
+    }
 
   private:
     static uuid::log::Logger logger_;
@@ -299,6 +305,8 @@ class System {
     uint8_t eth_clock_mode_;
 
     uint32_t fstotal_;
+    uint32_t appused_;
+    uint32_t appfree_;
 };
 
 } // namespace emsesp

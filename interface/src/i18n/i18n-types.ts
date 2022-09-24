@@ -730,7 +730,11 @@ type RootTranslation = {
 	 */
 	FLASH: string
 	/**
-	 * File System (Used / Total)
+	 * Application (Used / Free)
+	 */
+	APPSIZE: string
+	/**
+	 * File System (Used / Free)
 	 */
 	FILESYSTEM: string
 	/**
@@ -1743,7 +1747,11 @@ export type TranslationFunctions = {
 	 */
 	FLASH: () => LocalizedString
 	/**
-	 * File System (Used / Total)
+	 * Application (Used / Free)
+	 */
+	APPSIZE: () => LocalizedString
+	/**
+	 * File System (Used / Free)
 	 */
 	FILESYSTEM: () => LocalizedString
 	/**

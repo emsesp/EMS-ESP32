@@ -447,7 +447,7 @@ void DallasSensor::remove_ha_topic(const std::string & id) {
     std::string sensorid = id;
     std::replace(sensorid.begin(), sensorid.end(), '-', '_');
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf(topic, sizeof(topic), "sensor/%s/dallassensor_%s/config", Mqtt::base().c_str(), sensorid.c_str());
+    snprintf(topic, sizeof(topic), "sensor/%s/dallassensor_%s/config", Mqtt::basename().c_str(), sensorid.c_str());
     Mqtt::publish_ha(topic);
 }
 
@@ -469,7 +469,7 @@ void DallasSensor::publish_values(const bool force) {
 
     for (auto & sensor : sensors_) {
         bool has_value = Helpers::hasValue(sensor.temperature_c);
-        if (Mqtt::is_nested() || Mqtt::ha_enabled()) {
+        if (Mqtt::is_nested()) {
             JsonObject dataSensor = doc.createNestedObject(sensor.id());
             dataSensor["name"]    = sensor.name();
             if (has_value) {
@@ -495,9 +495,14 @@ void DallasSensor::publish_values(const bool force) {
                 config["unit_of_meas"] = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
 
                 char str[50];
-                snprintf(str, sizeof(str), "{{value_json['%s'].temp}}", sensor.id().c_str());
+                if (Mqtt::is_nested()) {
+                    snprintf(str, sizeof(str), "{{value_json['%s'].temp}}", sensor.id().c_str());
+                } else {
+                    snprintf(str, sizeof(str), "{{value_json['%s']}}", sensor.name().c_str());
+                }
                 config["val_tpl"] = str;
 
+                // snprintf(str, sizeof(str), "%s_temperature_sensor_%s", Mqtt::basename().c_str(), sensor.name().c_str());
                 snprintf(str, sizeof(str), "temperature_sensor_%s", sensor.name().c_str());
                 config["object_id"] = str;
 
@@ -516,7 +521,7 @@ void DallasSensor::publish_values(const bool force) {
                 std::string sensorid = sensor.id();
                 std::replace(sensorid.begin(), sensorid.end(), '-', '_');
 
-                snprintf(topic, sizeof(topic), "sensor/%s/dallassensor_%s/config", Mqtt::base().c_str(), sensorid.c_str());
+                snprintf(topic, sizeof(topic), "sensor/%s/dallassensor_%s/config", Mqtt::basename().c_str(), sensorid.c_str());
 
                 Mqtt::publish_ha(topic, config.as<JsonObject>());
 

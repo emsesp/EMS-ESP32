@@ -383,7 +383,9 @@ void System::start() {
     if (low_clock_) {
         setCpuFrequencyMhz(160);
     }
-    fstotal_ = LittleFS.totalBytes(); // read only once, it takes 500 ms to read
+    fstotal_ = LittleFS.totalBytes() / 1024; // read only once, it takes 500 ms to read
+    appused_ = ESP.getSketchSize() / 1024;
+    appfree_ = ESP.getFreeSketchSpace() / 1024 - appused_;
 #endif
 
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
@@ -566,7 +568,7 @@ bool System::heartbeat_json(JsonObject & output) {
     }
 
 #ifndef EMSESP_STANDALONE
-    output["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes
+    output["freemem"] = ESP.getFreeHeap() / 1024; // kilobytes
 #endif
 
 #ifndef EMSESP_STANDALONE
@@ -794,8 +796,10 @@ void System::show_system(uuid::console::Shell & shell) {
 #ifndef EMSESP_STANDALONE
     shell.printfln(F(" SDK version: %s"), ESP.getSdkVersion());
     shell.printfln(F(" CPU frequency: %lu MHz"), ESP.getCpuFreqMHz());
-    shell.printfln(F(" Free heap: %lu bytes"), (uint32_t)ESP.getFreeHeap());
-    shell.printfln(F(" FS used/total: %lu/%lu (bytes)"), LittleFS.usedBytes(), FStotal());
+    shell.printfln(F(" Free heap: %lu KB"), (uint32_t)ESP.getFreeHeap() / 1024);
+    shell.printfln(F(" App used/free: %lu KB / %lu KB"), appUsed(), appFree());
+    uint32_t FSused = LittleFS.usedBytes() / 1024;
+    shell.printfln(F(" FS used/free: %lu KB / %lu KB"), FSused, FStotal() - FSused);
     shell.println();
 
     shell.println("Network:");
@@ -975,7 +979,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["uptime"]  = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     // node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
-    node["freemem"] = ESP.getFreeHeap() / 1000L; // kilobytes
+    node["freemem"]  = ESP.getFreeHeap() / 1024;  // kilobytes
+    node["free_app"] = EMSESP::system_.appFree(); // kilobytes
 #endif
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 

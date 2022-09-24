@@ -95,6 +95,7 @@ class Mqtt {
     static void publish_ha_sensor_config(uint8_t                              type,
                                          uint8_t                              tag,
                                          const std::string &                  fullname,
+                                         const __FlashStringHelper * const    en_name,
                                          const uint8_t                        device_type,
                                          const __FlashStringHelper * const    entity,
                                          const uint8_t                        uom,
@@ -140,6 +141,10 @@ class Mqtt {
 
     static std::string base() {
         return mqtt_base_;
+    }
+
+    static std::string basename() {
+        return mqtt_basename_;
     }
 
     // returns the discovery MQTT topic prefix and adds a /
@@ -286,9 +291,8 @@ class Mqtt {
     static bool     ha_climate_reset_;
 
     // settings, copied over
-    static std::string system_hostname_;
-
     static std::string mqtt_base_;
+    static std::string mqtt_basename_;
     static uint8_t     mqtt_qos_;
     static bool        mqtt_retain_;
     static uint32_t    publish_time_;
