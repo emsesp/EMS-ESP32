@@ -560,18 +560,63 @@ const SettingsCustomization: FC = () => {
 
   const renderEditEntity = () => {
     if (deviceEntity) {
+      const de = deviceEntity;
       return (
         <Dialog open={!!deviceEntity} onClose={() => setDeviceEntity(undefined)}>
-          <DialogTitle>{LL.RENAME() + ' ' + LL.ENTITY_NAME()}</DialogTitle>
+          <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY() + ' ' + de.id}</DialogTitle>
+
           <DialogContent dividers>
-            <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
-              <Typography variant="body2">{deviceEntity.n}</Typography>
+            <ToggleButtonGroup
+              size="small"
+              color="secondary"
+              value={getMaskString(de.m)}
+              onChange={(event, mask) => {
+                de.m = getMaskNumber(mask);
+                if (de.n === '' && de.m & DeviceEntityMask.DV_READONLY) {
+                  de.m = de.m | DeviceEntityMask.DV_WEB_EXCLUDE;
+                }
+                if (de.m & DeviceEntityMask.DV_WEB_EXCLUDE) {
+                  de.m = de.m & ~DeviceEntityMask.DV_FAVORITE;
+                }
+                setMasks(['']);
+              }}
+            >
+              <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.n === undefined}>
+                <OptionIcon
+                  type="favorite"
+                  isSet={(de.m & DeviceEntityMask.DV_FAVORITE) === DeviceEntityMask.DV_FAVORITE}
+                />
+              </ToggleButton>
+              <ToggleButton value="4" disabled={!de.w || (de.m & 3) === 3}>
+                <OptionIcon
+                  type="readonly"
+                  isSet={(de.m & DeviceEntityMask.DV_READONLY) === DeviceEntityMask.DV_READONLY}
+                />
+              </ToggleButton>
+              <ToggleButton value="2" disabled={de.n === ''}>
+                <OptionIcon
+                  type="api_mqtt_exclude"
+                  isSet={(de.m & DeviceEntityMask.DV_API_MQTT_EXCLUDE) === DeviceEntityMask.DV_API_MQTT_EXCLUDE}
+                />
+              </ToggleButton>
+              <ToggleButton value="1" disabled={de.n === undefined}>
+                <OptionIcon
+                  type="web_exclude"
+                  isSet={(de.m & DeviceEntityMask.DV_WEB_EXCLUDE) === DeviceEntityMask.DV_WEB_EXCLUDE}
+                />
+              </ToggleButton>
+            </ToggleButtonGroup>
+
+            <Box color="warning.main" p={0} pl={0} pr={0} mt={2} mb={2}>
+              <Typography variant="body2">
+                {LL.DEFAULT() + ' ' + LL.NAME()}:&nbsp;{deviceEntity.n}
+              </Typography>
             </Box>
             <Grid container spacing={1}>
               <Grid item>
                 <TextField
                   name="cn"
-                  label={LL.NEW() + ' ' + LL.ENTITY_NAME()}
+                  label={LL.RENAME() + ' ' + LL.ENTITY()}
                   value={deviceEntity.cn}
                   autoFocus
                   sx={{ width: '30ch' }}
