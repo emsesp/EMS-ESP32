@@ -273,9 +273,9 @@ const SystemStatusForm: FC = () => {
               primary={LL.HEAP()}
               secondary={
                 formatNumber(data.free_heap) +
-                ' kb / ' +
+                ' KB / ' +
                 formatNumber(data.max_alloc_heap) +
-                ' kb ' +
+                ' KB ' +
                 (data.esp_platform === EspPlatform.ESP8266 ? '(' + data.heap_fragmentation + '% fragmentation)' : '')
               }
             />
@@ -291,7 +291,7 @@ const SystemStatusForm: FC = () => {
                 </ListItemAvatar>
                 <ListItemText
                   primary={LL.PSRAM()}
-                  secondary={formatNumber(data.psram_size) + ' kb / ' + formatNumber(data.free_psram) + ' kb'}
+                  secondary={formatNumber(data.psram_size) + ' KB / ' + formatNumber(data.free_psram) + ' KB'}
                 />
               </ListItem>
             </>
@@ -306,7 +306,7 @@ const SystemStatusForm: FC = () => {
             <ListItemText
               primary={LL.FLASH()}
               secondary={
-                formatNumber(data.flash_chip_size) + ' kb / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'
+                formatNumber(data.flash_chip_size) + ' KB / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'
               }
             />
           </ListItem>
@@ -319,7 +319,7 @@ const SystemStatusForm: FC = () => {
             </ListItemAvatar>
             <ListItemText
               primary={LL.APPSIZE()}
-              secondary={formatNumber(data.app_used) + ' kb / ' + formatNumber(data.app_free) + ' kb'}
+              secondary={formatNumber(data.app_used) + ' KB / ' + formatNumber(data.app_free) + ' KB'}
             />
           </ListItem>
           <Divider variant="inset" component="li" />
@@ -331,7 +331,7 @@ const SystemStatusForm: FC = () => {
             </ListItemAvatar>
             <ListItemText
               primary={LL.FILESYSTEM()}
-              secondary={formatNumber(data.fs_used) + ' kb / ' + formatNumber(data.fs_free) + ' kb'}
+              secondary={formatNumber(data.fs_used) + ' KB / ' + formatNumber(data.fs_free) + ' KB'}
             />
           </ListItem>
           <Divider variant="inset" component="li" />
