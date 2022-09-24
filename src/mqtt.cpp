@@ -581,13 +581,7 @@ void Mqtt::on_connect() {
     publish(F_(info), doc.as<JsonObject>()); // topic called "info"
 
     if (ha_enabled_) {
-        LOG_INFO(F("start removing topics %s/+/%s/#"), discovery_prefix_.c_str(), mqtt_basename_.c_str());
-        queue_unsubscribe_message(discovery_prefix_ + "/climate/" + mqtt_basename_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/sensor/" + mqtt_basename_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/binary_sensor/" + mqtt_basename_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/number/" + mqtt_basename_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/select/" + mqtt_basename_ + "/#");
-        queue_unsubscribe_message(discovery_prefix_ + "/switch/" + mqtt_basename_ + "/#");
+        queue_unsubscribe_message(discovery_prefix_ + "/+/" + mqtt_basename_ + "/#");
         EMSESP::reset_mqtt_ha(); // re-create all HA devices if there are any
         ha_status();             // create the EMS-ESP device in HA, which is MQTT retained
         ha_climate_reset(true);
@@ -595,13 +589,8 @@ void Mqtt::on_connect() {
         // with disabled HA we subscribe and the broker sends all stored HA-emsesp-configs.
         // In line 272 they are removed. If HA is enabled the subscriptions are removed.
         // As described in the doc (https://emsesp.github.io/docs/#/Troubleshooting?id=home-assistant):
-        //   disable HA, wait 5 minutes (to allow the broker to send all), than reenable HA again.
-        queue_subscribe_message(discovery_prefix_ + "/climate/" + mqtt_basename_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/sensor/" + mqtt_basename_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/binary_sensor/" + mqtt_basename_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/number/" + mqtt_basename_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/select/" + mqtt_basename_ + "/#");
-        queue_subscribe_message(discovery_prefix_ + "/switch/" + mqtt_basename_ + "/#");
+        // disable HA, wait 5 minutes (to allow the broker to send all), than reenable HA again.
+        queue_subscribe_message(discovery_prefix_ + "/+/" + mqtt_basename_ + "/#");
     }
 
     // send initial MQTT messages for some of our services
@@ -939,6 +928,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
     publish_ha_sensor_config(dv.type,
                              dv.tag,
                              dv.get_fullname(),
+                             dv.fullname[0],
                              dv.device_type,
                              dv.short_name,
                              dv.uom,
@@ -961,15 +951,16 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelp
 
     auto fullname = read_flash_string(name);
 
-    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, fullname, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
+    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, fullname, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
 }
 
 // MQTT discovery configs
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
-void Mqtt::publish_ha_sensor_config(uint8_t                              type,        // EMSdevice::DeviceValueType
-                                    uint8_t                              tag,         // EMSdevice::DeviceValueTAG
-                                    const std::string &                  fullname,    // fullname, already translated
+void Mqtt::publish_ha_sensor_config(uint8_t                              type,     // EMSdevice::DeviceValueType
+                                    uint8_t                              tag,      // EMSdevice::DeviceValueTAG
+                                    const std::string &                  fullname, // fullname, already translated
+                                    const __FlashStringHelper * const    en_name,
                                     const uint8_t                        device_type, // EMSdevice::DeviceType
                                     const __FlashStringHelper * const    entity,      // same as shortname
                                     const uint8_t                        uom,         // EMSdevice::DeviceValueUOM (0=NONE)
@@ -981,7 +972,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t                              type,  
                                     const int16_t                        dv_set_max,
                                     const JsonObject &                   dev_json) {
     // ignore if name (fullname) is empty
-    if (fullname.empty()) {
+    if (fullname.empty() || en_name == nullptr) {
         return;
     }
 
@@ -1115,22 +1106,27 @@ void Mqtt::publish_ha_sensor_config(uint8_t                              type,  
     doc["stat_t"] = stat_t;
 
     // friendly name = <tag> <name>
-    char ha_name[70];
+    char   ha_name[70];
+    char * F_name = strdup(fullname.c_str());
+    F_name[0]     = toupper(F_name[0]); // capitalize first letter
     if (have_tag) {
-        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), fullname.c_str());
+        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), F_name);
     } else {
-        snprintf(ha_name, sizeof(ha_name), "%s", fullname.c_str());
+        snprintf(ha_name, sizeof(ha_name), "%s", F_name);
     }
-    ha_name[0]  = toupper(ha_name[0]); // capitalize first letter
+    free(F_name);
     doc["name"] = ha_name;
 
     // entity id is generated from the name, see https://www.home-assistant.io/docs/mqtt/discovery/#use-object_id-to-influence-the-entity-id
     // so we override it to make it unique using entity_id
     // See https://github.com/emsesp/EMS-ESP32/issues/596
-    // "<basename>_<device>_<tag> <name>"
-    // with basename a single instance with "/" replaced by "_"
+    // keep it compatible to v3.4, use english fullname, no prefix
     char object_id[130];
-    snprintf(object_id, sizeof(object_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, ha_name);
+    if (have_tag) {
+        snprintf(object_id, sizeof(object_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag).c_str(), read_flash_string(en_name).c_str());
+    } else {
+        snprintf(object_id, sizeof(object_id), "%s_%s", device_name, read_flash_string(en_name).c_str());
+    }
     doc["object_id"] = object_id;
 
     // value template
