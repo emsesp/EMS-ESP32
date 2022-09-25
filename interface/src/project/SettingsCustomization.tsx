@@ -169,8 +169,8 @@ const SettingsCustomization: FC = () => {
       return de.id;
     }
 
-    if (de.n === '') {
-      return LL.COMMAND() + ': ' + de.id;
+    if (de.n[0] === '!') {
+      return LL.COMMAND() + ': ' + de.n.slice(1);
     }
 
     return (
@@ -316,6 +316,10 @@ const SettingsCustomization: FC = () => {
   };
 
   const editEntity = (de: DeviceEntity) => {
+    if (de.n && de.n[0] === '!') {
+      return;
+    }
+
     if (de.cn === undefined) {
       de.cn = '';
     }
