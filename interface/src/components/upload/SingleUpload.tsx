@@ -64,7 +64,7 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, prog
           borderWidth: 2,
           borderRadius: 2,
           borderStyle: 'dashed',
-          color: theme.palette.grey[700],
+          color: theme.palette.grey[400],
           transition: 'border .24s ease-in-out',
           width: '100%',
           cursor: uploading ? 'default' : 'pointer',

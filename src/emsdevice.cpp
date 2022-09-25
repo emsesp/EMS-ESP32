@@ -956,13 +956,14 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
                     obj["n"] = name;
                 }
             }
-        } else {
-            obj["n"] = "";
-        }
 
-        // add the custom name, is optional
-        if (!dv.custom_fullname.empty()) {
-            obj["cn"] = dv.custom_fullname;
+            // add the custom name, is optional
+            if (!dv.custom_fullname.empty()) {
+                obj["cn"] = dv.custom_fullname;
+            }
+        } else {
+            // it's a command
+            obj["n"] = "!" + fullname; // prefix ! to fullname for commands
         }
 
         obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble

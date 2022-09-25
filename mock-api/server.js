@@ -623,7 +623,7 @@ const emsesp_deviceentities_1 = [
 ]
 
 const emsesp_deviceentities_2 = [
-  { u: 0, n: '', id: 'reset', m: 8, w: false },
+  { u: 0, n: '!reset', id: 'reset', m: 8, w: false },
   { v: false, n: 'heating active', id: 'heatingactive', m: 8, w: false },
   { v: false, n: 'tapwater active', id: 'tapwateractive', m: 4, w: false },
   { v: 5, n: 'selected flow temperature', id: 'selflowtemp', m: 4, w: true },
