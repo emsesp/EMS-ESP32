@@ -24,7 +24,7 @@ REGISTER_FACTORY(Thermostat, EMSdevice::DeviceType::THERMOSTAT);
 
 uuid::log::Logger Thermostat::logger_{F_(thermostat), uuid::log::Facility::CONSOLE};
 
-Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
+Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     uint8_t model = this->model();
 

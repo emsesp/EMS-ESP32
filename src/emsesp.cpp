@@ -945,7 +945,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             // find the name and flags in our database
             for (const auto & device : device_library_) {
                 if (device.product_id == product_id && device.device_type == emsdevice->device_type()) {
-                    emsdevice->name(std::move(read_flash_string(device.name)));
+                    emsdevice->name(device.name);
                     emsdevice->add_flags(device.flags);
                 }
             }
@@ -977,13 +977,12 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     // if we don't recognize the productID report it and add as a generic device
     if (device_p == nullptr) {
         LOG_NOTICE(F("Unrecognized EMS device (deviceID 0x%02X, productID %d). Please report on GitHub."), device_id, product_id);
-        std::string name("unknown");
         emsdevices.push_back(
-            EMSFactory::add(DeviceType::GENERIC, device_id, product_id, version, name, DeviceFlags::EMS_DEVICE_FLAG_NONE, EMSdevice::Brand::NO_BRAND));
+            EMSFactory::add(DeviceType::GENERIC, device_id, product_id, version, "unknown", DeviceFlags::EMS_DEVICE_FLAG_NONE, EMSdevice::Brand::NO_BRAND));
         return false; // not found
     }
 
-    auto name        = read_flash_string(device_p->name);
+    auto name        = device_p->name;
     auto device_type = device_p->device_type;
     auto flags       = device_p->flags;
 
@@ -1029,7 +1028,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         }
     }
 
-    LOG_DEBUG(F("Adding new device %s (deviceID 0x%02X, productID %d, version %s)"), name.c_str(), device_id, product_id, version);
+    LOG_DEBUG(F("Adding new device %s (deviceID 0x%02X, productID %d, version %s)"), name, device_id, product_id, version);
     emsdevices.push_back(EMSFactory::add(device_type, device_id, product_id, version, name, flags, brand));
 
     // assign a unique ID. Note that this is not actual unique after a restart as it's dependent on the order that devices are found

@@ -24,7 +24,7 @@ REGISTER_FACTORY(Mixer, EMSdevice::DeviceType::MIXER);
 
 uuid::log::Logger Mixer::logger_{F_(mixer), uuid::log::Facility::CONSOLE};
 
-Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
+Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // Pool module
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MP) {

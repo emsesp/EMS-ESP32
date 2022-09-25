@@ -24,7 +24,7 @@ REGISTER_FACTORY(Solar, EMSdevice::DeviceType::SOLAR);
 
 uuid::log::Logger Solar::logger_{F_(solar), uuid::log::Facility::CONSOLE};
 
-Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
+Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // telegram handlers
     if (flags == EMSdevice::EMS_DEVICE_FLAG_SM10) {

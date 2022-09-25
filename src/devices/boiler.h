@@ -25,7 +25,7 @@ namespace emsesp {
 
 class Boiler : public EMSdevice {
   public:
-    Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand);
+    Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
 
   private:
     static uuid::log::Logger logger_;

@@ -25,7 +25,7 @@ namespace emsesp {
 
 class Mixer : public EMSdevice {
   public:
-    Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand);
+    Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
 
   private:
     static uuid::log::Logger logger_;

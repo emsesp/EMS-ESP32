@@ -38,9 +38,6 @@ using uuid::read_flash_string;
 #undef FPSTR
 #endif
 
-#define FJSON(x) x
-// #define FJSON(x) F(x)
-
 // clang-format off
 
 #define MAKE_STR(string_name, string_literal) static constexpr const char * __str__##string_name = string_literal;
@@ -48,12 +45,15 @@ using uuid::read_flash_string;
 #define FPSTR(pstr_pointer) (reinterpret_cast<const __FlashStringHelper *>(pstr_pointer))
 #define F_(string_name) FPSTR(__pstr__##string_name)
 
-#define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = string_literal;
+#define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] = string_literal;
 #define MAKE_PSTR_WORD(string_name) MAKE_PSTR(string_name, #string_name)
 
 #define FL_(list_name) (__pstr__L_##list_name)
-#define MAKE_PSTR_LIST(list_name, ...) static const __FlashStringHelper * const __pstr__L_##list_name[] PROGMEM = {__VA_ARGS__, nullptr};
-#define MAKE_PSTR_ENUM(enum_name, ...) static const __FlashStringHelper * const * __pstr__L_##enum_name[] PROGMEM = {__VA_ARGS__, nullptr};
+#define MAKE_PSTR_LIST(list_name, ...) static const __FlashStringHelper * const __pstr__L_##list_name[]  = {__VA_ARGS__, nullptr};
+#define MAKE_PSTR_ENUM(enum_name, ...) static const __FlashStringHelper * const * __pstr__L_##enum_name[]  = {__VA_ARGS__, nullptr};
+
+// #define MAKE_PSTR_LIST2(list_name, ...) static const char * const __pstr__L_##list_name2[]  = {__VA_ARGS__, nullptr};
+
 
 // clang-format on
 

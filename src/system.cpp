@@ -528,11 +528,11 @@ void System::loop() {
 bool System::heartbeat_json(JsonObject & output) {
     uint8_t bus_status = EMSESP::bus_status();
     if (bus_status == EMSESP::BUS_STATUS_TX_ERRORS) {
-        output["bus_status"] = FJSON("txerror");
+        output["bus_status"] = "txerror";
     } else if (bus_status == EMSESP::BUS_STATUS_CONNECTED) {
-        output["bus_status"] = FJSON("connected");
+        output["bus_status"] = "connected";
     } else {
-        output["bus_status"] = FJSON("disconnected");
+        output["bus_status"] = "disconnected";
     }
 
     output["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
@@ -1174,9 +1174,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_class.first)) {
-                JsonObject obj = devices.createNestedObject();
-                obj["type"]    = emsdevice->device_type_name();
-                // obj["name"]     = emsdevice->to_string();
+                JsonObject obj    = devices.createNestedObject();
+                obj["type"]       = emsdevice->device_type_name();
                 obj["name"]       = emsdevice->name();
                 obj["device id"]  = Helpers::hextoa(emsdevice->device_id());
                 obj["product id"] = emsdevice->product_id();

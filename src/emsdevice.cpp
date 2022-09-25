@@ -193,11 +193,11 @@ uint8_t EMSdevice::decode_brand(uint8_t value) {
 std::string EMSdevice::to_string() const {
     // for devices that haven't been lookup yet, don't show all details
     if (product_id_ == 0) {
-        return name_ + " (DeviceID:" + Helpers::hextoa(device_id_) + ")";
+        return std::string(name_) + " (DeviceID:" + Helpers::hextoa(device_id_) + ")";
     }
 
     if (brand_ == Brand::NO_BRAND) {
-        return name_ + " (DeviceID:" + Helpers::hextoa(device_id_) + ", ProductID:" + Helpers::itoa(product_id_) + ", Version:" + version_ + ")";
+        return std::string(name_) + " (DeviceID:" + Helpers::hextoa(device_id_) + ", ProductID:" + Helpers::itoa(product_id_) + ", Version:" + version_ + ")";
     }
 
     return brand_to_string() + " " + name_ + " (DeviceID:" + Helpers::hextoa(device_id_) + ", ProductID:" + Helpers::itoa(product_id_) + ", Version:" + version_
@@ -956,14 +956,13 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
                     obj["n"] = name;
                 }
             }
-
-            // add the custom name, is optional
-            if (!dv.custom_fullname.empty()) {
-                obj["cn"] = dv.custom_fullname;
-            }
         } else {
-            // it's a command
-            obj["n"] = "!" + fullname; // prefix ! to fullname for commands
+            obj["n"] = "!" + fullname; // prefix commands with a !
+        }
+
+        // add the custom name, is optional
+        if (!dv.custom_fullname.empty()) {
+            obj["cn"] = dv.custom_fullname;
         }
 
         obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble

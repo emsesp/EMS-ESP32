@@ -546,9 +546,9 @@ void Mqtt::on_connect() {
     StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> doc;
     // first time to connect
     if (connectcount_ == 1) {
-        doc["event"] = FJSON("start");
+        doc["event"] = "start";
     } else {
-        doc["event"] = FJSON("reconnect");
+        doc["event"] = "reconnect";
     }
 
     doc["version"] = EMSESP_APP_VERSION;
@@ -620,20 +620,20 @@ void Mqtt::on_connect() {
 void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
-    doc["uniq_id"] = FJSON("ems-esp-system");
+    doc["uniq_id"] = "ems-esp-system";
     doc["~"]       = mqtt_base_; // default ems-esp
-    // doc["avty_t"]      = FJSON("~/status"); // commented out, as it causes errors in HA sometimes
-    // doc["json_attr_t"] = FJSON("~/heartbeat"); // store also as HA attributes
-    doc["stat_t"]    = FJSON("~/heartbeat");
-    doc["object_id"] = FJSON("ems_esp_status");
-    doc["name"]      = FJSON("EMS-ESP status");
+    // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
+    // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
+    doc["stat_t"]    = "~/heartbeat";
+    doc["object_id"] = "ems_esp_status";
+    doc["name"]      = "EMS-ESP status";
     doc["ic"]        = F_(icondevice);
-    doc["val_tpl"]   = FJSON("{{value_json['bus_status']}}");
+    doc["val_tpl"]   = "{{value_json['bus_status']}}";
 
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = F_(EMSESP); // "EMS-ESP"
     dev["sw"]      = "v" + std::string(EMSESP_APP_VERSION);
-    dev["mf"]      = FJSON("proddy");
+    dev["mf"]      = "proddy";
     dev["mdl"]     = F_(EMSESP); // "EMS-ESP"
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp");

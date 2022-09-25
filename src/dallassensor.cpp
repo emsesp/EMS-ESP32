@@ -486,7 +486,7 @@ void DallasSensor::publish_values(const bool force) {
                 LOG_DEBUG(F("Recreating HA config for sensor ID %s"), sensor.id().c_str());
 
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
-                config["dev_cla"] = FJSON("temperature");
+                config["dev_cla"] = "temperature";
 
                 char stat_t[50];
                 snprintf(stat_t, sizeof(stat_t), "%s/dallassensor_data", Mqtt::base().c_str());

@@ -151,10 +151,10 @@ void Shower::set_shower_state(bool state, bool force) {
         ha_configdone_ = true;
 
         StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
-        doc["name"]    = FJSON("Shower Active");
-        doc["uniq_id"] = FJSON("shower_active");
+        doc["name"]    = "Shower Active";
+        doc["uniq_id"] = "shower_active";
         doc["~"]       = Mqtt::base();
-        doc["stat_t"]  = FJSON("~/shower_active");
+        doc["stat_t"]  = "~/shower_active";
 
         // always render boolean as strings for HA
         char result[10];

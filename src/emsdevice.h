@@ -34,7 +34,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICES_MAX_TELEGRAMS = 20;
 
     // device_type defines which derived class to use, e.g. BOILER, THERMOSTAT etc..
-    EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
+    EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
         : device_type_(device_type)
         , device_id_(device_id)
         , product_id_(product_id)
@@ -104,11 +104,11 @@ class EMSdevice {
         return brand_;
     }
 
-    inline void name(const std::string & name) {
+    inline void name(const char * name) {
         name_ = name;
     }
 
-    inline std::string name() const {
+    inline const char * name() const {
         return name_;
     }
 
@@ -424,14 +424,14 @@ class EMSdevice {
     bool    has_entities() const;
 
   private:
-    uint8_t     unique_id_;
-    uint8_t     device_type_ = DeviceType::SYSTEM;
-    uint8_t     device_id_   = 0;
-    uint8_t     product_id_  = 0;
-    char        version_[6];
-    std::string name_; // the long name for the EMS model
-    uint8_t     flags_ = 0;
-    uint8_t     brand_ = Brand::NO_BRAND;
+    uint8_t      unique_id_;
+    uint8_t      device_type_ = DeviceType::SYSTEM;
+    uint8_t      device_id_   = 0;
+    uint8_t      product_id_  = 0;
+    char         version_[6];
+    const char * name_; // the long name for the EMS model
+    uint8_t      flags_ = 0;
+    uint8_t      brand_ = Brand::NO_BRAND;
 
     bool ha_config_done_     = false;
     bool has_update_         = false;
