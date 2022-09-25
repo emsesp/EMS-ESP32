@@ -26,7 +26,7 @@
 #define EMSESP_LOCALE_PL "pl"
 #define EMSESP_LOCALE_NO "no"
 
-// translations are in order en, de,nl, se....
+// translations are in order en, de, nl, se, pl, no....
 // if there is no translation, it will default to en
 
 // General
@@ -171,7 +171,7 @@ MAKE_PSTR_LIST(cyl2, F("cyl 2"), F("Zyl_2"), F("Cil 2"), F("Cyl 2"))
 // Entity translations
 // Boiler
 MAKE_PSTR_LIST(wwtapactivated, F("wwtapactivated"), F("turn on/off"), F("Durchlauferhitzer aktiv"), F("zet aan/uit"), F("sätt på/av"))
-MAKE_PSTR_LIST(reset, F("reset"), F("Reset"), F("Reset"), F("Nollställ"), F("reset"))
+MAKE_PSTR_LIST(reset, F("reset"), F("Reset"), F("Reset"), F("Reset"), F("Nollställ"))
 MAKE_PSTR_LIST(oilPreHeat, F("oilpreheat"), F("oil preheating"), F("Ölvorwärmung"), F("Olie voorverwarming"), F("Förvärmning olja"))
 MAKE_PSTR_LIST(heatingActive, F("heatingactive"), F("heating active"), F("Heizen aktiv"), F("Verwarming actief"), F("Uppvärmning aktiv"))
 MAKE_PSTR_LIST(tapwaterActive, F("tapwateractive"), F("tapwater active"), F("Warmwasser aktiv"), F("Warm water actief"), F("Varmvatten aktiv"))
