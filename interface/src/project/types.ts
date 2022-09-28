@@ -142,6 +142,10 @@ export interface DeviceEntity {
   o_m?: number; // original mask before edits
   o_cn?: string; // original cn before edits
   w: boolean; // writeable
+  mi?: string; // min value
+  ma?: string; // max value
+  o_mi?: string;
+  o_ma?: string;
 }
 
 export interface CustomEntities {

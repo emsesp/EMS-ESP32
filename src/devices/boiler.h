@@ -198,6 +198,17 @@ class Boiler : public EMSdevice {
     // Pool unit
     int8_t poolSetTemp_;
 
+    // Inputs
+    struct {
+        uint8_t state;
+        char    option[12]; // logic, block_comp, block_dhw, block_heat, block_cool, overheat_protect, evu_blocktime1,2,3, block_heater, Solar
+    } hpInput[4];
+
+    // Heater limits
+    uint8_t maxHeatComp_;
+    uint8_t maxHeatHeat_;
+    uint8_t maxHeatDhw_;
+
     // Alternative Heatsource AM200
     int16_t cylTopTemp_;    // TB1
     int16_t cylCenterTemp_; // TB2
@@ -269,6 +280,9 @@ class Boiler : public EMSdevice {
     void process_HpPower(std::shared_ptr<const Telegram> telegram);
     void process_HpOutdoor(std::shared_ptr<const Telegram> telegram);
     void process_HpPool(std::shared_ptr<const Telegram> telegram);
+    void process_HpInput(std::shared_ptr<const Telegram> telegram);
+    void process_HpInConfig(std::shared_ptr<const Telegram> telegram);
+    void process_HpHeaterConfig(std::shared_ptr<const Telegram> telegram);
     void process_HybridHp(std::shared_ptr<const Telegram> telegram);
     void process_amTempMessage(std::shared_ptr<const Telegram> telegram);
     void process_amStatusMessage(std::shared_ptr<const Telegram> telegram);
@@ -331,6 +345,29 @@ class Boiler : public EMSdevice {
     bool set_blockTerm(const char * value, const int8_t id);     // pos 17: Config of block terminal: NO(00), NC(01)
     bool set_blockHyst(const char * value, const int8_t id);     // pos 14?: Hyst. for bolier block (K)
     bool set_releaseWait(const char * value, const int8_t id);   // pos 15: Boiler release wait time (min)
+    bool set_HpInLogic(const char * value, const int8_t id);
+    bool set_HpIn1Logic(const char * value, const int8_t id) {
+        return set_HpInLogic(value, 1);
+    }
+    bool set_HpIn2Logic(const char * value, const int8_t id) {
+        return set_HpInLogic(value, 2);
+    }
+    bool set_HpIn3Logic(const char * value, const int8_t id) {
+        return set_HpInLogic(value, 3);
+    }
+    bool set_HpIn4Logic(const char * value, const int8_t id) {
+        return set_HpInLogic(value, 4);
+    }
+    bool set_maxHeat(const char * value, const int8_t id);
+    bool set_maxHeatComp(const char * value, const int8_t id) {
+        return set_maxHeat(value, 2);
+    }
+    bool set_maxHeatHeat(const char * value, const int8_t id) {
+        return set_maxHeat(value, 3);
+    }
+    bool set_maxHeatDhw(const char * value, const int8_t id) {
+        return set_maxHeat(value, 4);
+    }
 
     /*
     bool set_hybridStrategy(const char * value, const int8_t id);

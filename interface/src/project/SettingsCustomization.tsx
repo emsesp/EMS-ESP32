@@ -137,7 +137,7 @@ const SettingsCustomization: FC = () => {
   }, [LL]);
 
   const setInitialMask = (data: DeviceEntity[]) => {
-    setDeviceEntities(data.map((de) => ({ ...de, o_m: de.m, o_cn: de.cn })));
+    setDeviceEntities(data.map((de) => ({ ...de, o_m: de.m, o_cn: de.cn, o_mi: de.mi, o_ma: de.ma })));
   };
 
   const fetchDeviceEntities = async (unique_id: number) => {
@@ -249,8 +249,14 @@ const SettingsCustomization: FC = () => {
   const saveCustomization = async () => {
     if (devices && deviceEntities && selectedDevice !== -1) {
       const masked_entities = deviceEntities
-        .filter((de) => de.m !== de.o_m || de.cn !== de.o_cn)
-        .map((new_de) => new_de.m.toString(16).padStart(2, '0') + new_de.id + (new_de.cn ? '|' + new_de.cn : ''));
+        .filter((de) => de.m !== de.o_m || de.cn !== de.o_cn || de.ma !== de.o_ma || de.mi !== de.o_mi)
+        .map((new_de) =>
+          new_de.m.toString(16).padStart(2, '0') +
+          new_de.id +
+          ((new_de.cn || new_de.mi || new_de.ma) ? '|' : '') +
+          (new_de.cn ? new_de.cn : '') +
+          (new_de.mi ? '>' + new_de.mi : '') +
+          (new_de.ma ? '<' + new_de.ma : ''));
 
       // check size in bytes to match buffer in CPP, which is 4096
       const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
@@ -331,7 +337,7 @@ const SettingsCustomization: FC = () => {
       setDeviceEntities((prevState) => {
         const newState = prevState.map((obj) => {
           if (obj.id === deviceEntity.id) {
-            return { ...obj, cn: deviceEntity.cn };
+            return { ...obj, cn: deviceEntity.cn, mi: deviceEntity.mi, ma: deviceEntity.ma };
           }
           return obj;
         });
@@ -627,6 +633,28 @@ const SettingsCustomization: FC = () => {
                   onChange={updateValue(setDeviceEntity)}
                 />
               </Grid>
+              {typeof de.v === 'number' && de.w && (
+                <>
+                  <Grid item>
+                    <TextField
+                      name="mi"
+                      label="min"
+                      value={deviceEntity.mi}
+                      sx={{ width: '8ch' }}
+                      onChange={updateValue(setDeviceEntity)}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <TextField
+                      name="ma"
+                      label="max"
+                      value={deviceEntity.ma}
+                      sx={{ width: '8ch' }}
+                      onChange={updateValue(setDeviceEntity)}
+                    />
+                  </Grid>
+                </>
+              )}
             </Grid>
           </DialogContent>
           <DialogActions>
