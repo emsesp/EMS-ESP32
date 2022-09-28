@@ -327,29 +327,37 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
 }
 
 // extract custom min from custom_fullname
-bool DeviceValue::get_custom_min(int16_t & v) {
+bool DeviceValue::get_custom_min(int16_t & val) {
     auto    min_pos    = custom_fullname.find('>');
     bool    has_min    = (min_pos != std::string::npos);
     uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
     if (has_min) {
-        v = Helpers::atoint(custom_fullname.substr(min_pos + 1).c_str());
+        int v = Helpers::atoint(custom_fullname.substr(min_pos + 1).c_str());
         if (fahrenheit) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }
+        if (v > max) {
+            return false;
+        }
+        val = v;
     }
     return has_min;
 }
 
 // extract custom max from custom_fullname
-bool DeviceValue::get_custom_max(uint16_t & v) {
+bool DeviceValue::get_custom_max(uint16_t & val) {
     auto    max_pos    = custom_fullname.find('<');
     bool    has_max    = (max_pos != std::string::npos);
     uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
     if (has_max) {
-        v = Helpers::atoint(custom_fullname.substr(max_pos + 1).c_str());
+        int v = Helpers::atoint(custom_fullname.substr(max_pos + 1).c_str());
         if (fahrenheit) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }
+        if (v < 0 || v < min) {
+            return false;
+        }
+        val = v;
     }
     return has_max;
 }
