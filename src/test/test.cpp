@@ -597,7 +597,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         // n=1 = EMSESP::system_.HEALTHCHECK_NO_BUS
         // n=2 = EMSESP::system_.HEALTHCHECK_NO_NETWORK
-        shell.printfln(("Testing healthcheck with %d"), n);
+        shell.printfln("Testing healthcheck with %d", n);
         EMSESP::system_.healthcheck(n);
     }
 
@@ -1339,8 +1339,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         }
         doc.shrinkToFit();
         JsonObject jo = doc.as<JsonObject>();
-        shell.printfln(("Size of JSON payload = %d"), jo.memoryUsage());
-        shell.printfln(("Length of JSON payload = %d"), measureJson(jo));
+        shell.printfln("Size of JSON payload = %d", jo.memoryUsage());
+        shell.printfln("Length of JSON payload = %d", measureJson(jo));
 
         Mqtt::publish("test", jo);
         Mqtt::show_mqtt(shell); // show queue
@@ -1483,7 +1483,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 #pragma GCC diagnostic ignored "-Wdiv-by-zero"
 #pragma GCC diagnostic ignored "-Wunused-variable"
         uint8_t a = 2 / 0;
-        shell.printfln(("Testing %s"), a);
+        shell.printfln("Testing %s", a);
 
 #pragma GCC diagnostic pop
     }

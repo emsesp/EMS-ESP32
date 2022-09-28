@@ -248,17 +248,17 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 
     if (bus_status() != BUS_STATUS_OFFLINE) {
         shell.printfln("EMS Bus info:");
-        EMSESP::webSettingsService.read([&](WebSettings & settings) { shell.printfln(("  Tx mode: %d"), settings.tx_mode); });
-        shell.printfln(("  Bus protocol: %s"), EMSbus::is_ht3() ? ("HT3") : ("Buderus"));
-        shell.printfln(("  #recognized EMS devices: %d"), EMSESP::emsdevices.size());
-        shell.printfln(("  #telegrams received: %d"), rxservice_.telegram_count());
-        shell.printfln(("  #read requests sent: %d"), txservice_.telegram_read_count());
-        shell.printfln(("  #write requests sent: %d"), txservice_.telegram_write_count());
-        shell.printfln(("  #incomplete telegrams: %d"), rxservice_.telegram_error_count());
+        EMSESP::webSettingsService.read([&](WebSettings & settings) { shell.printfln("  Tx mode: %d", settings.tx_mode); });
+        shell.printfln("  Bus protocol: %s", EMSbus::is_ht3() ? ("HT3") : ("Buderus"));
+        shell.printfln("  #recognized EMS devices: %d", EMSESP::emsdevices.size());
+        shell.printfln("  #telegrams received: %d", rxservice_.telegram_count());
+        shell.printfln("  #read requests sent: %d", txservice_.telegram_read_count());
+        shell.printfln("  #write requests sent: %d", txservice_.telegram_write_count());
+        shell.printfln("  #incomplete telegrams: %d", rxservice_.telegram_error_count());
         shell.printfln(("  #read fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_read_fail_count());
         shell.printfln(("  #write fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_write_fail_count());
-        shell.printfln(("  Rx line quality: %d%%"), rxservice_.quality());
-        shell.printfln(("  Tx line quality: %d%%"), (txservice_.read_quality() + txservice_.read_quality()) / 2);
+        shell.printfln("  Rx line quality: %d%%", rxservice_.quality());
+        shell.printfln("  Tx line quality: %d%%", (txservice_.read_quality() + txservice_.read_quality()) / 2);
         shell.println();
     }
 
@@ -269,7 +269,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
     } else {
         shell.printfln(("Rx Queue (%ld telegram%s):"), rx_telegrams.size(), rx_telegrams.size() == 1 ? "" : "s");
         for (const auto & it : rx_telegrams) {
-            shell.printfln((" [%02d] %s"), it.id_, pretty_telegram(it.telegram_).c_str());
+            shell.printfln(" [%02d] %s", it.id_, pretty_telegram(it.telegram_).c_str());
         }
     }
 
@@ -291,7 +291,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
             } else if ((it.telegram_->operation) == Telegram::Operation::TX_WRITE) {
                 op = "WRITE";
             }
-            shell.printfln((" [%02d%c] %s %s"), it.id_, ((it.retry_) ? '*' : ' '), op.c_str(), pretty_telegram(it.telegram_).c_str());
+            shell.printfln(" [%02d%c] %s %s", it.id_, ((it.retry_) ? '*' : ' '), op.c_str(), pretty_telegram(it.telegram_).c_str());
         }
     }
 
@@ -725,7 +725,7 @@ void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
                     // if we haven't already detected this device, request it's version details, unless its us (EMS-ESP)
                     // when the version info is received, it will automagically add the device
                     if ((device_id != EMSbus::ems_bus_id()) && !(EMSESP::device_exists(device_id))) {
-                        LOG_DEBUG(("New EMS device detected with ID 0x%02X. Requesting version information."), device_id);
+                        LOG_DEBUG("New EMS device detected with ID 0x%02X. Requesting version information.", device_id);
                         send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
                     }
                 }
@@ -785,7 +785,7 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // if watching or reading...
     if ((telegram->type_id == read_id_) && (telegram->dest == txservice_.ems_bus_id())) {
-        LOG_INFO(("%s"), pretty_telegram(telegram).c_str());
+        LOG_INFO("%s", pretty_telegram(telegram).c_str());
         if (Mqtt::send_response()) {
             publish_response(telegram);
         }
@@ -797,12 +797,12 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     } else if (watch() == WATCH_ON) {
         if ((watch_id_ == WATCH_ID_NONE) || (telegram->type_id == watch_id_)
             || ((watch_id_ < 0x80) && ((telegram->src == watch_id_) || (telegram->dest == watch_id_)))) {
-            LOG_NOTICE(("%s"), pretty_telegram(telegram).c_str());
+            LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
         } else if (!trace_raw_) {
-            LOG_TRACE(("%s"), pretty_telegram(telegram).c_str());
+            LOG_TRACE("%s", pretty_telegram(telegram).c_str());
         }
     } else if (!trace_raw_) {
-        LOG_TRACE(("%s"), pretty_telegram(telegram).c_str());
+        LOG_TRACE("%s", pretty_telegram(telegram).c_str());
     }
 
     // only process broadcast telegrams or ones sent to us on request
@@ -860,7 +860,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     if (!found) {
         LOG_DEBUG(("No telegram type handler found for ID 0x%02X (src 0x%02X)"), telegram->type_id, telegram->src);
         if (watch() == WATCH_UNKNOWN) {
-            LOG_NOTICE(("%s"), pretty_telegram(telegram).c_str());
+            LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
         }
         if (!wait_km_ && !knowndevice && (telegram->src != EMSbus::ems_bus_id()) && (telegram->message_length > 0)) {
             send_read_request(EMSdevice::EMS_TYPE_VERSION, telegram->src);
@@ -905,7 +905,7 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_class.first)) {
-                shell.printf(("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
+                shell.printf("%s: %s", emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
                 shell.println();
                 emsdevice->show_telegram_handlers(shell);
 
@@ -932,7 +932,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             if (product_id == 0) { // update only with valid product_id
                 return true;
             }
-            LOG_DEBUG(("Updating details for already active deviceID 0x%02X"), device_id);
+            LOG_DEBUG("Updating details for already active deviceID 0x%02X", device_id);
             emsdevice->product_id(product_id);
             emsdevice->version(version);
             // only set brand if it doesn't already exist
@@ -1039,7 +1039,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     fetch_device_values(device_id); // go and fetch its data
 
     // Print to LOG showing we've added a new device
-    LOG_INFO(("Recognized new %s with deviceID 0x%02X"), EMSdevice::device_type_2_device_name(device_type).c_str(), device_id);
+    LOG_INFO("Recognized new %s with deviceID 0x%02X", EMSdevice::device_type_2_device_name(device_type).c_str(), device_id);
 
     // add command commands for all devices, except for connect, controller and gateway
     if ((device_type == DeviceType::CONNECT) || (device_type == DeviceType::CONTROLLER) || (device_type == DeviceType::GATEWAY)) {
@@ -1174,7 +1174,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
 #ifdef EMSESP_UART_DEBUG
         // get_uptime is only updated once per loop, does not give the right time
-        LOG_TRACE(("[UART_DEBUG] Echo after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
+        LOG_TRACE("[UART_DEBUG] Echo after %d ms: %s", ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
         // add to RxQueue for log/watch
         rxservice_.add(data, length);
@@ -1248,11 +1248,11 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #ifdef EMSESP_UART_DEBUG
         char s[4];
         if (first_value & 0x80) {
-            LOG_TRACE(("[UART_DEBUG] next Poll %s after %d ms"), Helpers::hextoa(s, first_value), ::millis() - rx_time_);
+            LOG_TRACE("[UART_DEBUG] next Poll %s after %d ms", Helpers::hextoa(s, first_value), ::millis() - rx_time_);
             // time measurement starts here, use millis because get_uptime is only updated once per loop
             rx_time_ = ::millis();
         } else {
-            LOG_TRACE(("[UART_DEBUG] Poll ack %s after %d ms"), Helpers::hextoa(s, first_value), ::millis() - rx_time_);
+            LOG_TRACE("[UART_DEBUG] Poll ack %s after %d ms", Helpers::hextoa(s, first_value), ::millis() - rx_time_);
         }
 #endif
         // check for poll to us, if so send top message from Tx queue immediately and quit
@@ -1264,7 +1264,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         return;
     } else {
 #ifdef EMSESP_UART_DEBUG
-        LOG_TRACE(("[UART_DEBUG] Reply after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
+        LOG_TRACE("[UART_DEBUG] Reply after %d ms: %s", ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data); // check if there is a message for the roomcontroller
 
@@ -1292,7 +1292,7 @@ void EMSESP::start() {
     LOG_NOTICE("System is running in Debug mode");
 #endif
 
-    LOG_INFO(("Last system reset reason Core0: %s, Core1: %s"), system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
+    LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
     // do any system upgrades
     if (system_.check_upgrade()) {

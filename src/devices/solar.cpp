@@ -664,7 +664,7 @@ void Solar::process_SM100ParamCfg(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(max, 13);
     telegram->read_value(cur, 17);
 
-    // LOG_DEBUG(("SM100ParamCfg param=0x%04X, offset=%d, min=%d, default=%d, max=%d, current=%d"), t_id, of, min, def, max, cur));
+    // LOG_DEBUG("SM100ParamCfg param=0x%04X, offset=%d, min=%d, default=%d, max=%d, current=%d", t_id, of, min, def, max, cur));
 }
 
 /*

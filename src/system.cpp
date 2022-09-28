@@ -166,9 +166,9 @@ bool System::command_watch(const char * value, const int8_t id) {
         }
         if (Mqtt::publish_single() && w != EMSESP::watch()) {
             if (Mqtt::publish_single2cmd()) {
-                Mqtt::publish(("system/watch"), EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
+                Mqtt::publish("system/watch", EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
             } else {
-                Mqtt::publish(("system_data/watch"), EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
+                Mqtt::publish("system_data/watch", EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
             }
         }
         EMSESP::watch(w);
@@ -176,9 +176,9 @@ bool System::command_watch(const char * value, const int8_t id) {
     } else if (i) {
         if (Mqtt::publish_single() && i != EMSESP::watch_id()) {
             if (Mqtt::publish_single2cmd()) {
-                Mqtt::publish(("system/watch"), Helpers::hextoa(i));
+                Mqtt::publish("system/watch", Helpers::hextoa(i));
             } else {
-                Mqtt::publish(("system_data/watch"), Helpers::hextoa(i));
+                Mqtt::publish("system_data/watch", Helpers::hextoa(i));
             }
         }
         EMSESP::watch_id(i);
@@ -263,21 +263,21 @@ void System::syslog_init() {
 
     if (Mqtt::publish_single()) {
         if (Mqtt::publish_single2cmd()) {
-            Mqtt::publish(("system/syslog"), syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
+            Mqtt::publish("system/syslog", syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
             if (EMSESP::watch_id() == 0 || EMSESP::watch() == 0) {
-                Mqtt::publish(("system/watch"),
+                Mqtt::publish("system/watch",
                               EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch()) : (FL_(list_watch)[EMSESP::watch()]));
             } else {
-                Mqtt::publish(("system/watch"), Helpers::hextoa(EMSESP::watch_id()));
+                Mqtt::publish("system/watch", Helpers::hextoa(EMSESP::watch_id()));
             }
 
         } else {
-            Mqtt::publish(("system_data/syslog"), syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
+            Mqtt::publish("system_data/syslog", syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
             if (EMSESP::watch_id() == 0 || EMSESP::watch() == 0) {
-                Mqtt::publish(("system_data/watch"),
+                Mqtt::publish("system_data/watch",
                               EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch()) : (FL_(list_watch)[EMSESP::watch()]));
             } else {
-                Mqtt::publish(("system_data/watch"), Helpers::hextoa(EMSESP::watch_id()));
+                Mqtt::publish("system_data/watch", Helpers::hextoa(EMSESP::watch_id()));
             }
         }
     }
@@ -344,7 +344,7 @@ void System::wifi_tweak() {
     WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
     bool s2 = WiFi.getSleep();
 #if defined(EMSESP_DEBUG)
-    LOG_DEBUG(("[DEBUG] Adjusting WiFi - Tx power %d->%d, Sleep %d->%d"), p1, p2, s1, s2);
+    LOG_DEBUG("[DEBUG] Adjusting WiFi - Tx power %d->%d, Sleep %d->%d", p1, p2, s1, s2);
 #endif
 #endif
 }
@@ -777,7 +777,7 @@ void System::show_users(uuid::console::Shell & shell) {
 #ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
         for (const User & user : securitySettings.users) {
-            shell.printfln((" username: %s, password: %s, is_admin: %s"), user.username.c_str(), user.password.c_str(), user.admin ? ("yes") : ("no"));
+            shell.printfln(" username: %s, password: %s, is_admin: %s", user.username.c_str(), user.password.c_str(), user.admin ? ("yes") : ("no"));
         }
     });
 #endif
@@ -787,15 +787,15 @@ void System::show_users(uuid::console::Shell & shell) {
 
 void System::show_system(uuid::console::Shell & shell) {
     shell.println("System:");
-    shell.printfln((" Board profile: %s"), board_profile().c_str());
-    shell.printfln((" Uptime: %s"), uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
+    shell.printfln(" Board profile: %s", board_profile().c_str());
+    shell.printfln(" Uptime: %s", uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
 #ifndef EMSESP_STANDALONE
-    shell.printfln((" SDK version: %s"), ESP.getSdkVersion());
-    shell.printfln((" CPU frequency: %lu MHz"), ESP.getCpuFreqMHz());
-    shell.printfln((" Free heap: %lu KB"), (uint32_t)ESP.getFreeHeap() / 1024);
-    shell.printfln((" App used/free: %lu KB / %lu KB"), appUsed(), appFree());
+    shell.printfln(" SDK version: %s", ESP.getSdkVersion());
+    shell.printfln(" CPU frequency: %lu MHz", ESP.getCpuFreqMHz());
+    shell.printfln(" Free heap: %lu KB", (uint32_t)ESP.getFreeHeap() / 1024);
+    shell.printfln(" App used/free: %lu KB / %lu KB", appUsed(), appFree());
     uint32_t FSused = LittleFS.usedBytes() / 1024;
-    shell.printfln((" FS used/free: %lu KB / %lu KB"), FSused, FStotal() - FSused);
+    shell.printfln(" FS used/free: %lu KB / %lu KB", FSused, FStotal() - FSused);
     shell.println();
 
     shell.println("Network:");
@@ -814,16 +814,16 @@ void System::show_system(uuid::console::Shell & shell) {
 
     case WL_CONNECTED:
         shell.printfln(" Network: connected");
-        shell.printfln((" SSID: %s"), WiFi.SSID().c_str());
-        shell.printfln((" BSSID: %s"), WiFi.BSSIDstr().c_str());
+        shell.printfln(" SSID: %s", WiFi.SSID().c_str());
+        shell.printfln(" BSSID: %s", WiFi.BSSIDstr().c_str());
         shell.printfln((" RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
-        shell.printfln((" MAC address: %s"), WiFi.macAddress().c_str());
-        shell.printfln((" Hostname: %s"), WiFi.getHostname());
-        shell.printfln((" IPv4 address: %s/%s"), uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
-        shell.printfln((" IPv4 gateway: %s"), uuid::printable_to_string(WiFi.gatewayIP()).c_str());
-        shell.printfln((" IPv4 nameserver: %s"), uuid::printable_to_string(WiFi.dnsIP()).c_str());
+        shell.printfln(" MAC address: %s", WiFi.macAddress().c_str());
+        shell.printfln(" Hostname: %s", WiFi.getHostname());
+        shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
+        shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(WiFi.gatewayIP()).c_str());
+        shell.printfln(" IPv4 nameserver: %s", uuid::printable_to_string(WiFi.dnsIP()).c_str());
         if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            shell.printfln((" IPv6 address: %s"), uuid::printable_to_string(WiFi.localIPv6()).c_str());
+            shell.printfln(" IPv6 address: %s", uuid::printable_to_string(WiFi.localIPv6()).c_str());
         }
         break;
 
@@ -849,13 +849,13 @@ void System::show_system(uuid::console::Shell & shell) {
     if (ethernet_connected_) {
         shell.println();
         shell.printfln(" Ethernet Network: connected");
-        shell.printfln((" MAC address: %s"), ETH.macAddress().c_str());
-        shell.printfln((" Hostname: %s"), ETH.getHostname());
-        shell.printfln((" IPv4 address: %s/%s"), uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
-        shell.printfln((" IPv4 gateway: %s"), uuid::printable_to_string(ETH.gatewayIP()).c_str());
-        shell.printfln((" IPv4 nameserver: %s"), uuid::printable_to_string(ETH.dnsIP()).c_str());
+        shell.printfln(" MAC address: %s", ETH.macAddress().c_str());
+        shell.printfln(" Hostname: %s", ETH.getHostname());
+        shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
+        shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(ETH.gatewayIP()).c_str());
+        shell.printfln(" IPv4 nameserver: %s", uuid::printable_to_string(ETH.dnsIP()).c_str());
         if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            shell.printfln((" IPv6 address: %s"), uuid::printable_to_string(ETH.localIPv6()).c_str());
+            shell.printfln(" IPv6 address: %s", uuid::printable_to_string(ETH.localIPv6()).c_str());
         }
     }
     shell.println();
@@ -864,17 +864,17 @@ void System::show_system(uuid::console::Shell & shell) {
     if (!syslog_enabled_) {
         shell.printfln(" Syslog: disabled");
     } else {
-        shell.printfln((" Syslog: %s"), syslog_.started() ? "started" : "stopped");
+        shell.printfln(" Syslog: %s", syslog_.started() ? "started" : "stopped");
         shell.print(" ");
         shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : (F_(unset)));
-        shell.printfln((" IP: %s"), uuid::printable_to_string(syslog_.ip()).c_str());
+        shell.printfln(" IP: %s", uuid::printable_to_string(syslog_.ip()).c_str());
         shell.print(" ");
         shell.printfln(F_(port_fmt), syslog_port_);
         shell.print(" ");
         shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(syslog_level_)));
         shell.print(" ");
         shell.printfln(F_(mark_interval_fmt), syslog_mark_interval_);
-        shell.printfln((" Queued: %d"), syslog_.queued());
+        shell.printfln(" Queued: %d", syslog_.queued());
     }
 
 #endif
@@ -954,7 +954,7 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
     if (section_json) {
         File section_file = LittleFS.open(filename, "w");
         if (section_file) {
-            LOG_INFO(("Applying new %s settings"), section);
+            LOG_INFO("Applying new %s settings", section);
             serializeJson(section_json, section_file);
             section_file.close();
             return true; // reboot required

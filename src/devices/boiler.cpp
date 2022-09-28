@@ -2081,7 +2081,7 @@ bool Boiler::set_ww_circulation_mode(const char * value, const int8_t id) {
     }
 
     if (v < 7) {
-        // LOG_INFO(("Setting dhw circulation mode %dx3min"), v);
+        // LOG_INFO("Setting dhw circulation mode %dx3min", v);
     } else if (v == 7) {
         // LOG_INFO("Setting dhw circulation mode continuous");
     } else {
@@ -2142,11 +2142,11 @@ bool Boiler::set_maintenance(const char * value, const int8_t id) {
         uint8_t month = (value[3] - '0') * 10 + (value[4] - '0');
         uint8_t year  = (uint8_t)(Helpers::atoint(&value[6]) - 2000);
         if (day > 0 && day < 32 && month > 0 && month < 13) {
-            LOG_INFO(("Setting maintenance date to %02d.%02d.%04d"), day, month, year + 2000);
+            LOG_INFO("Setting maintenance date to %02d.%02d.%04d", day, month, year + 2000);
             uint8_t data[5] = {2, (uint8_t)(maintenanceTime_ / 100), day, month, year};
             write_command(0x15, 0, data, 5, 0x15);
         } else {
-            LOG_WARNING(("Setting maintenance: wrong format %d.%d.%d"), day, month, year + 2000);
+            LOG_WARNING("Setting maintenance: wrong format %d.%d.%d", day, month, year + 2000);
             return false;
         }
         return true;
@@ -2155,7 +2155,7 @@ bool Boiler::set_maintenance(const char * value, const int8_t id) {
     int hrs;
     if (Helpers::value2number(value, hrs)) {
         if (hrs > 99 && hrs < 25600) {
-            LOG_INFO(("Setting maintenance time %d hours"), hrs);
+            LOG_INFO("Setting maintenance time %d hours", hrs);
             uint8_t data[2] = {1, (uint8_t)(hrs / 100)};
             write_command(0x15, 0, data, 2, 0x15);
             return true;
@@ -2164,7 +2164,7 @@ bool Boiler::set_maintenance(const char * value, const int8_t id) {
 
     uint8_t num;
     if (Helpers::value2enum(value, num, FL_(enum_off_time_date_manual))) {
-        LOG_INFO(("Setting maintenance type to %s"), value);
+        LOG_INFO("Setting maintenance type to %s", value);
         write_command(0x15, 0, num, 0x15);
         return true;
     }
@@ -2177,7 +2177,7 @@ bool Boiler::set_maintenancetime(const char * value, const int8_t id) {
     int hrs;
     if (Helpers::value2number(value, hrs)) {
         if (hrs > 99 && hrs < 25600) {
-            LOG_INFO(("Setting maintenance time %d hours"), hrs);
+            LOG_INFO("Setting maintenance time %d hours", hrs);
             uint8_t data[2] = {1, (uint8_t)(hrs / 100)};
             write_command(0x15, 0, data, 2, 0x15);
             return true;
@@ -2194,11 +2194,11 @@ bool Boiler::set_maintenancedate(const char * value, const int8_t id) {
         uint8_t month = (value[3] - '0') * 10 + (value[4] - '0');
         uint8_t year  = (uint8_t)(Helpers::atoint(&value[6]) - 2000);
         if (day > 0 && day < 32 && month > 0 && month < 13) {
-            LOG_INFO(("Setting maintenance date to %02d.%02d.%04d"), day, month, year + 2000);
+            LOG_INFO("Setting maintenance date to %02d.%02d.%04d", day, month, year + 2000);
             uint8_t data[5] = {2, (uint8_t)(maintenanceTime_ / 100), day, month, year};
             write_command(0x15, 0, data, 5, 0x15);
         } else {
-            LOG_WARNING(("Setting maintenance: wrong format %d.%d.%d"), day, month, year + 2000);
+            LOG_WARNING("Setting maintenance: wrong format %d.%d.%d", day, month, year + 2000);
             return false;
         }
         return true;
@@ -2215,7 +2215,7 @@ bool Boiler::set_pool_temp(const char * value, const int8_t id) {
         return false;
     }
     uint8_t v2 = ((v * 2) + 0.5);
-    // LOG_INFO(("Setting pool temperature to %d.%d C"), v2 >> 1, (v2 & 0x01) * 5);
+    // LOG_INFO("Setting pool temperature to %d.%d C", v2 >> 1, (v2 & 0x01) * 5);
     write_command(0x48A, 1, v2, 0x48A);
 
     return true;

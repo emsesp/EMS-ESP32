@@ -1548,7 +1548,7 @@ bool Thermostat::set_calinttemp(const char * value, const int8_t id) {
     }
 
     auto t = (int8_t)(ct * 10);
-    LOG_DEBUG(("Calibrating internal temperature to %d.%d C"), t / 10, t < 0 ? -t % 10 : t % 10);
+    LOG_DEBUG("Calibrating internal temperature to %d.%d C", t / 10, t < 0 ? -t % 10 : t % 10);
 
     if (model() == EMS_DEVICE_FLAG_RC10) {
         write_command(0xB0, 0, t, 0xB0);
@@ -2157,11 +2157,11 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
         return false;
     }
     if (data[1] == 0 || data[1] > 12 || data[2] > 23 || data[3] == 0 || data[3] > 31 || data[4] > 59 || data[5] > 59 || data[6] > 6 || data[7] > 3) {
-        LOG_WARNING(("Invalid date/time: %02d.%02d.2%03d-%02d:%02d:%02d-%d-%d"), data[3], data[1], data[0], data[2], data[4], data[5], data[6], data[7]);
+        LOG_WARNING("Invalid date/time: %02d.%02d.2%03d-%02d:%02d:%02d-%d-%d", data[3], data[1], data[0], data[2], data[4], data[5], data[6], data[7]);
         return false;
     }
 
-    // LOG_INFO(("Setting date and time: %02d.%02d.2%03d-%02d:%02d:%02d-%d-%d"), data[3], data[1], data[0], data[2], data[4], data[5], data[6], data[7]);
+    // LOG_INFO("Setting date and time: %02d.%02d.2%03d-%02d:%02d:%02d-%d-%d", data[3], data[1], data[0], data[2], data[4], data[5], data[6], data[7]);
     write_command(EMS_TYPE_time, 0, data, 8, EMS_TYPE_time);
 
     return true;
@@ -2634,7 +2634,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
             day  = 7;
             on   = 7;
             time = 0x90;
-            // LOG_INFO(("switchtime %02d cleared"), no);
+            // LOG_INFO("switchtime %02d cleared", no);
         }
     } else {
         if (strlen(value) > 1) {
@@ -2675,7 +2675,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
             day  = 7;
             on   = 7;
             time = 0x90;
-            // LOG_INFO(("switchtime %02d cleared"), no);
+            // LOG_INFO("switchtime %02d cleared", no);
         }
     }
     uint8_t data[2] = {0xE7, 0x90}; // unset switchtime
@@ -2691,8 +2691,8 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         max_on = 1;
     }
     if (no > 41 || time > 0x90 || ((on < min_on || on > max_on) && on != 7)) {
-        // LOG_WARNING(("Setting switchtime: Invalid data: %s"), value);
-        // LOG_WARNING(("Setting switchtime: Invalid data: %02d.%1d.0x%02X.%1d"), no, day, time, on);
+        // LOG_WARNING("Setting switchtime: Invalid data: %s", value);
+        // LOG_WARNING("Setting switchtime: Invalid data: %02d.%1d.0x%02X.%1d", no, day, time, on);
         return false;
     }
     if (data[0] != 0xE7) {

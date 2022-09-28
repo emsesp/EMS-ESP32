@@ -60,10 +60,10 @@ void EMSESPShell::stopped() {
 void EMSESPShell::display_banner() {
     println();
     printfln("┌──────────────────────────────────────┐");
-    printfln(("│ %sEMS-ESP version %-10s%s           │"), COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
-    printfln(("│ %s%shttps://github.com/emsesp/EMS-ESP32%s  │"), COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│ %sEMS-ESP version %-10s%s           │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
+    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s  │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
     printfln("│                                      │");
-    printfln(("│ type %shelp%s to show available commands │"), COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│ type %shelp%s to show available commands │", COLOR_UNDERLINE, COLOR_RESET);
     printfln("└──────────────────────────────────────┘");
     println();
 
@@ -102,7 +102,7 @@ void EMSESPShell::add_console_commands() {
                           CommandFlags::USER,
                           string_vector{F_(show)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                              shell.printfln(("%s%sEMS-ESP version %s%s"), COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
+                              shell.printfln("%s%sEMS-ESP version %s%s", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
                               shell.println();
                               EMSESP::show_device_values(shell);
                               EMSESP::show_sensor_values(shell);
@@ -225,7 +225,7 @@ void EMSESPShell::add_console_commands() {
                           string_vector{F_(set)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                               EMSESP::webSettingsService.read([&](WebSettings & settings) {
-                                  shell.printfln(("Language: %s"), settings.locale.c_str());
+                                  shell.printfln("Language: %s", settings.locale.c_str());
                                   shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                   shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
                                   shell.printfln(F_(board_profile_fmt), settings.board_profile.c_str());
@@ -266,7 +266,7 @@ void EMSESPShell::add_console_commands() {
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint16_t value = Helpers::atoint(arguments.front().c_str());
                               telnet_.initial_idle_timeout(value * 60);
-                              shell.printfln(("Telnet timeout set to %d minutes"), value);
+                              shell.printfln("Telnet timeout set to %d minutes", value);
                           });
 #endif
 
@@ -331,9 +331,9 @@ void EMSESPShell::add_console_commands() {
 
                               watch_id = EMSESP::watch_id();
                               if (watch_id > 0x80) {
-                                  shell.printfln(("Filtering only telegrams that match a telegram type of 0x%02X"), watch_id);
+                                  shell.printfln("Filtering only telegrams that match a telegram type of 0x%02X", watch_id);
                               } else if (watch_id != WATCH_ID_NONE) {
-                                  shell.printfln(("Filtering only telegrams that match a deviceID or telegram type of 0x%02X"), watch_id);
+                                  shell.printfln("Filtering only telegrams that match a deviceID or telegram type of 0x%02X", watch_id);
                               }
                           });
 
@@ -763,14 +763,14 @@ EMSESPStreamConsole::EMSESPStreamConsole(Stream & stream, const IPAddress & addr
     snprintf(text.data(), text.size(), "pty%u", (uint16_t)pty_);
     name_ = text.data();
 #ifndef EMSESP_STANDALONE
-    logger().info(("Allocated console %s for connection from [%s]:%u"), name_.c_str(), uuid::printable_to_string(addr_).c_str(), port_);
+    logger().info("Allocated console %s for connection from [%s]:%u", name_.c_str(), uuid::printable_to_string(addr_).c_str(), port_);
 #endif
 }
 
 EMSESPStreamConsole::~EMSESPStreamConsole() {
     if (pty_ != SIZE_MAX) {
 #ifndef EMSESP_STANDALONE
-        logger().info(("Shutdown console %s for connection from [%s]:%u"), name_.c_str(), uuid::printable_to_string(addr_).c_str(), port_);
+        logger().info("Shutdown console %s for connection from [%s]:%u", name_.c_str(), uuid::printable_to_string(addr_).c_str(), port_);
 #endif
         ptys_[pty_] = false;
         ptys_.shrink_to_fit();

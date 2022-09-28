@@ -82,8 +82,8 @@ void Shower::loop() {
                         char s[50];
                         snprintf(s, 50, "%d minutes and %d seconds", (uint8_t)(duration_ / 60000), (uint8_t)((duration_ / 1000) % 60));
                         doc["duration"] = s;
-                        Mqtt::publish(("shower_data"), doc.as<JsonObject>());
-                        LOG_DEBUG(("[Shower] finished with duration %d"), duration_);
+                        Mqtt::publish("shower_data", doc.as<JsonObject>());
+                        LOG_DEBUG("[Shower] finished with duration %d", duration_);
                     }
                 }
 
@@ -144,7 +144,7 @@ void Shower::set_shower_state(bool state, bool force) {
 
     // always publish as a string
     char s[7];
-    Mqtt::publish(("shower_active"), Helpers::render_boolean(s, shower_state_)); // https://github.com/emsesp/EMS-ESP/issues/369
+    Mqtt::publish("shower_active", Helpers::render_boolean(s, shower_state_)); // https://github.com/emsesp/EMS-ESP/issues/369
 
     // send out HA MQTT Discovery config topic
     if ((Mqtt::ha_enabled()) && (!ha_configdone_ || force)) {

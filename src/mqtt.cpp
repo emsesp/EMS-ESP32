@@ -186,15 +186,15 @@ void Mqtt::loop() {
 
 // print MQTT log and other stuff to console
 void Mqtt::show_mqtt(uuid::console::Shell & shell) {
-    shell.printfln(("MQTT is %s"), connected() ? F_(connected) : F_(disconnected));
+    shell.printfln("MQTT is %s", connected() ? F_(connected) : F_(disconnected));
 
-    shell.printfln(("MQTT publish errors: %lu"), mqtt_publish_fails_);
+    shell.printfln("MQTT publish errors: %lu", mqtt_publish_fails_);
     shell.println();
 
     // show subscriptions
     shell.printfln("MQTT topic subscriptions:");
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-        shell.printfln((" %s/%s"), mqtt_base_.c_str(), mqtt_subfunction.topic_.c_str());
+        shell.printfln(" %s/%s", mqtt_base_.c_str(), mqtt_subfunction.topic_.c_str());
     }
     shell.println();
 
@@ -266,14 +266,14 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
     if (len) {
         LOG_DEBUG(("Received topic `%s` => payload `%s` (length %d)"), topic, message, len);
     } else {
-        LOG_DEBUG(("Received topic `%s`"), topic);
+        LOG_DEBUG("Received topic `%s`", topic);
     }
 #endif
     // remove HA topics if we don't use discovery
     if (strncmp(topic, discovery_prefix().c_str(), discovery_prefix().size()) == 0) {
         if (!ha_enabled_ && len) { // don't ping pong the empty message
             queue_publish_message(topic, "", true);
-            LOG_DEBUG(("Remove topic %s"), topic);
+            LOG_DEBUG("Remove topic %s", topic);
         }
         return;
     }
@@ -285,7 +285,7 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
         snprintf(full_topic, sizeof(full_topic), "%s/%s", mqtt_base_.c_str(), mf.topic_.c_str());
         if ((!strcmp(topic, full_topic)) && (mf.mqtt_subfunction_)) {
             if (!(mf.mqtt_subfunction_)(message)) {
-                LOG_ERROR(("error: invalid payload %s for this topic %s"), message, topic);
+                LOG_ERROR("error: invalid payload %s for this topic %s", message, topic);
                 if (send_response_) {
                     Mqtt::publish(F_(response), "error: invalid data");
                 }
@@ -344,7 +344,7 @@ void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t devic
     // shell.print(" Subscribed MQTT topics: ");
     // for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
     //     if (mqtt_subfunction.device_type_ == device_type) {
-    //         shell.printf(("%s "), mqtt_subfunction.topic_.c_str());
+    //         shell.printf("%s ", mqtt_subfunction.topic_.c_str());
     //     }
     // }
     shell.println();
@@ -358,7 +358,7 @@ void Mqtt::on_publish(uint16_t packetId) const {
     // find the MQTT message in the queue and remove it
     if (mqtt_messages_.empty()) {
 #if defined(EMSESP_DEBUG)
-        LOG_DEBUG(("[DEBUG] No message stored for ACK pid %d"), packetId);
+        LOG_DEBUG("[DEBUG] No message stored for ACK pid %d", packetId);
 #endif
         return;
     }
@@ -374,12 +374,12 @@ void Mqtt::on_publish(uint16_t packetId) const {
     }
 
     if (mqtt_message.packet_id_ != packetId) {
-        LOG_ERROR(("Mismatch, expecting PID %d, got %d"), mqtt_message.packet_id_, packetId);
+        LOG_ERROR("Mismatch, expecting PID %d, got %d", mqtt_message.packet_id_, packetId);
         mqtt_publish_fails_++; // increment error count
     }
 
 #if defined(EMSESP_DEBUG)
-    LOG_DEBUG(("[DEBUG] ACK pid %d"), packetId);
+    LOG_DEBUG("[DEBUG] ACK pid %d", packetId);
 #endif
 
     mqtt_messages_.pop_front(); // always remove from queue, regardless if there was a successful ACK
@@ -460,7 +460,7 @@ void Mqtt::start() {
         } else if (reason == AsyncMqttClientDisconnectReason::MQTT_NOT_AUTHORIZED) {
             LOG_WARNING("MQTT disconnected: Not authorized");
         } else {
-            LOG_WARNING(("MQTT disconnected: code %d"), reason);
+            LOG_WARNING("MQTT disconnected: code %d", reason);
         }
     });
 
@@ -767,7 +767,7 @@ void Mqtt::publish_ha(const std::string & topic) {
 
     std::string fulltopic = Mqtt::discovery_prefix() + topic;
 #if defined(EMSESP_DEBUG)
-    LOG_DEBUG(("[DEBUG] Publishing empty HA topic=%s"), fulltopic.c_str());
+    LOG_DEBUG("[DEBUG] Publishing empty HA topic=%s", fulltopic.c_str());
 #endif
 
     queue_publish_message(fulltopic, "", true); // publish with retain to remove from broker
@@ -785,9 +785,9 @@ void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
 
     std::string fulltopic = Mqtt::discovery_prefix() + topic;
 #if defined(EMSESP_STANDALONE)
-    LOG_DEBUG(("Publishing HA topic=%s, payload=%s"), fulltopic.c_str(), payload_text.c_str());
+    LOG_DEBUG("Publishing HA topic=%s, payload=%s", fulltopic.c_str(), payload_text.c_str());
 #elif defined(EMSESP_DEBUG)
-    LOG_DEBUG(("[debug] Publishing HA topic=%s, payload=%s"), fulltopic.c_str(), payload_text.c_str());
+    LOG_DEBUG("[debug] Publishing HA topic=%s, payload=%s", fulltopic.c_str(), payload_text.c_str());
 #endif
 
     // queue messages if the MQTT connection is not yet established. to ensure we don't miss messages
@@ -827,13 +827,13 @@ void Mqtt::process_queue() {
 
     // if we're subscribing...
     if (message->operation == Operation::SUBSCRIBE) {
-        LOG_DEBUG(("Subscribing to topic '%s'"), topic);
+        LOG_DEBUG("Subscribing to topic '%s'", topic);
         uint16_t packet_id = mqttClient_->subscribe(topic, mqtt_qos_);
         if (!packet_id) {
             if (++mqtt_messages_.front().retry_count_ < MQTT_PUBLISH_MAX_RETRY) {
                 return;
             }
-            LOG_ERROR(("Error subscribing to topic '%s'"), topic);
+            LOG_ERROR("Error subscribing to topic '%s'", topic);
             mqtt_publish_fails_++; // increment failure counter
         }
 
@@ -844,13 +844,13 @@ void Mqtt::process_queue() {
 
     // if we're unsubscribing...
     if (message->operation == Operation::UNSUBSCRIBE) {
-        LOG_DEBUG(("Subscribing to topic '%s'"), topic);
+        LOG_DEBUG("Subscribing to topic '%s'", topic);
         uint16_t packet_id = mqttClient_->unsubscribe(topic);
         if (!packet_id) {
             if (++mqtt_messages_.front().retry_count_ < MQTT_PUBLISH_MAX_RETRY) {
                 return;
             }
-            LOG_ERROR(("Error unsubscribing to topic '%s'"), topic);
+            LOG_ERROR("Error unsubscribing to topic '%s'", topic);
             mqtt_publish_fails_++; // increment failure counter
         }
 
@@ -872,14 +872,14 @@ void Mqtt::process_queue() {
     if (packet_id == 0) {
         // it failed. if we retried n times, give up. remove from queue
         if (mqtt_message.retry_count_ == (MQTT_PUBLISH_MAX_RETRY - 1)) {
-            LOG_ERROR(("Failed to publish to %s after %d attempts"), topic, mqtt_message.retry_count_ + 1);
+            LOG_ERROR("Failed to publish to %s after %d attempts", topic, mqtt_message.retry_count_ + 1);
             mqtt_publish_fails_++;      // increment failure counter
             mqtt_messages_.pop_front(); // delete
             return;
         } else {
             // update the record
             mqtt_messages_.front().retry_count_++;
-            LOG_DEBUG(("Failed to publish to %s. Trying again, #%d"), topic, mqtt_message.retry_count_ + 1);
+            LOG_DEBUG("Failed to publish to %s. Trying again, #%d", topic, mqtt_message.retry_count_ + 1);
             return; // leave on queue for next time so it gets republished
         }
     }
@@ -889,7 +889,7 @@ void Mqtt::process_queue() {
     if (mqtt_qos_ != 0) {
         mqtt_messages_.front().packet_id_ = packet_id;
 #if defined(EMSESP_DEBUG)
-        LOG_DEBUG(("[DEBUG] Setting packetID for ACK to %d"), packet_id);
+        LOG_DEBUG("[DEBUG] Setting packetID for ACK to %d", packet_id);
 #endif
         return;
     }
@@ -1036,7 +1036,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
     // if we're asking to remove this topic, send an empty payload and exit
     // https://github.com/emsesp/EMS-ESP32/issues/196
     if (remove) {
-        LOG_DEBUG(("Removing HA config for %s"), uniq);
+        LOG_DEBUG("Removing HA config for %s", uniq);
         publish_ha(topic);
         return;
     }

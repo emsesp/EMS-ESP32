@@ -181,12 +181,12 @@ void DallasSensor::loop() {
 
                     default:
                         sensorfails_++;
-                        LOG_ERROR(("Unknown dallas sensor %s"), Sensor(addr).id().c_str());
+                        LOG_ERROR("Unknown dallas sensor %s", Sensor(addr).id().c_str());
                         break;
                     }
                 } else {
                     sensorfails_++;
-                    LOG_ERROR(("Invalid dallas sensor %s"), Sensor(addr).id().c_str());
+                    LOG_ERROR("Invalid dallas sensor %s", Sensor(addr).id().c_str());
                 }
             } else {
                 if (!parasite_) {
@@ -230,7 +230,7 @@ bool DallasSensor::temperature_convert_complete() {
 int16_t DallasSensor::get_temperature_c(const uint8_t addr[]) {
 #ifndef EMSESP_STANDALONE
     if (!bus_.reset()) {
-        LOG_ERROR(("Bus reset failed before reading scratchpad from %s"), Sensor(addr).id().c_str());
+        LOG_ERROR("Bus reset failed before reading scratchpad from %s", Sensor(addr).id().c_str());
         return EMS_VALUE_SHORT_NOTSET;
     }
     YIELD;
@@ -242,13 +242,13 @@ int16_t DallasSensor::get_temperature_c(const uint8_t addr[]) {
     YIELD;
 
     if (!bus_.reset()) {
-        LOG_ERROR(("Bus reset failed after reading scratchpad from %s"), Sensor(addr).id().c_str());
+        LOG_ERROR("Bus reset failed after reading scratchpad from %s", Sensor(addr).id().c_str());
         return EMS_VALUE_SHORT_NOTSET;
     }
     YIELD;
 
     if (bus_.crc8(scratchpad, SCRATCHPAD_LEN - 1) != scratchpad[SCRATCHPAD_LEN - 1]) {
-        LOG_WARNING(("Invalid scratchpad CRC: %02X%02X%02X%02X%02X%02X%02X%02X%02X from sensor %s"),
+        LOG_WARNING("Invalid scratchpad CRC: %02X%02X%02X%02X%02X%02X%02X%02X%02X from sensor %s",
                     scratchpad[0],
                     scratchpad[1],
                     scratchpad[2],
@@ -315,7 +315,7 @@ bool DallasSensor::update(const std::string & id, const std::string & name, int1
                             SensorCustomization.name   = name;
                             SensorCustomization.offset = offset;
                             found                      = true;
-                            LOG_DEBUG(("Customizing existing sensor ID %s"), id.c_str());
+                            LOG_DEBUG("Customizing existing sensor ID %s", id.c_str());
                             break;
                         }
                     }
@@ -325,7 +325,7 @@ bool DallasSensor::update(const std::string & id, const std::string & name, int1
                         newSensor.name                = name;
                         newSensor.offset              = offset;
                         settings.sensorCustomizations.push_back(newSensor);
-                        LOG_DEBUG(("Adding new customization for sensor ID %s"), id.c_str());
+                        LOG_DEBUG("Adding new customization for sensor ID %s", id.c_str());
                     }
                     sensor.ha_registered = false; // it's changed so we may need to recreate the HA config
                     return StateUpdateResult::CHANGED;
@@ -441,7 +441,7 @@ void DallasSensor::remove_ha_topic(const std::string & id) {
         return;
     }
 #ifdef EMSESP_DEBUG
-    LOG_DEBUG(("Removing HA config for temperature sensor ID %s"), id.c_str());
+    LOG_DEBUG("Removing HA config for temperature sensor ID %s", id.c_str());
 #endif
     // use '_' as HA doesn't like '-' in the topic name
     std::string sensorid = id;
@@ -483,7 +483,7 @@ void DallasSensor::publish_values(const bool force) {
         // to e.g. homeassistant/sensor/ems-esp/dallassensor_28-233D-9497-0C03/config
         if (Mqtt::ha_enabled()) {
             if (!sensor.ha_registered || force) {
-                LOG_DEBUG(("Recreating HA config for sensor ID %s"), sensor.id().c_str());
+                LOG_DEBUG("Recreating HA config for sensor ID %s", sensor.id().c_str());
 
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
                 config["dev_cla"] = "temperature";
@@ -530,7 +530,7 @@ void DallasSensor::publish_values(const bool force) {
         }
     }
 
-    Mqtt::publish(("dallassensor_data"), doc.as<JsonObject>());
+    Mqtt::publish("dallassensor_data", doc.as<JsonObject>());
 }
 
 
@@ -574,7 +574,7 @@ bool DallasSensor::Sensor::apply_customization() {
         if (!sensors.empty()) {
             for (const auto & sensor : sensors) {
 #if defined(EMSESP_DEBUG)
-                LOG_DEBUG(("Loading customization for dallas sensor %s"), sensor.id.c_str());
+                LOG_DEBUG("Loading customization for dallas sensor %s", sensor.id.c_str());
 #endif
                 if (id_ == sensor.id) {
                     set_name(sensor.name);

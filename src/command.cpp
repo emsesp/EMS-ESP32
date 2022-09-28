@@ -82,7 +82,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     // validate the device, make sure it exists
     uint8_t device_type = EMSdevice::device_name_2_device_type(device_s);
     if (!device_has_commands(device_type)) {
-        LOG_DEBUG(("Command failed: unknown device '%s'"), device_s);
+        LOG_DEBUG("Command failed: unknown device '%s'", device_s);
         return message(CommandRet::ERROR, "unknown device", output);
     }
 
@@ -248,7 +248,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     if ((device_type > EMSdevice::DeviceType::SYSTEM) && (!value || !strlen(value))) {
         if (!cf || !cf->cmdfunction_json_) {
 #if defined(EMSESP_DEBUG)
-            LOG_DEBUG(("[DEBUG] Calling %s command '%s' to retrieve attributes"), dname.c_str(), cmd);
+            LOG_DEBUG("[DEBUG] Calling %s command '%s' to retrieve attributes", dname.c_str(), cmd);
 #endif
             return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
         }
@@ -294,7 +294,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     }
 
     // we didn't find the command and its not an endpoint, report error
-    LOG_DEBUG(("Command failed: invalid command '%s'"), cmd);
+    LOG_DEBUG("Command failed: invalid command '%s'", cmd);
     return message(CommandRet::NOT_FOUND, "invalid command", output);
 }
 

@@ -215,7 +215,7 @@ std::string EMSdevice::to_string_short() const {
 
 // for each telegram that has the fetch value set (true) do a read request
 void EMSdevice::fetch_values() {
-    EMSESP::logger().debug(("Fetching values for deviceID 0x%02X"), device_id());
+    EMSESP::logger().debug("Fetching values for deviceID 0x%02X", device_id());
 
     for (const auto & tf : telegram_functions_) {
         if (tf.fetch_) {
@@ -226,7 +226,7 @@ void EMSdevice::fetch_values() {
 
 // toggle on/off automatic fetch for a telegramID
 void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
-    EMSESP::logger().debug(("Toggling fetch for deviceID 0x%02X, telegramID 0x%02X to %d"), device_id(), telegram_id, toggle);
+    EMSESP::logger().debug("Toggling fetch for deviceID 0x%02X, telegramID 0x%02X to %d", device_id(), telegram_id, toggle);
 
     for (auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram_id) {
@@ -289,7 +289,7 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) const {
     }
     /*
 	// colored list of type-ids
-    shell.printf((" This %s will listen to telegram type IDs: "), device_type_name().c_str());
+    shell.printf(" This %s will listen to telegram type IDs: ", device_type_name().c_str());
     for (const auto & tf : telegram_functions_) {
         if (tf.received_ && !tf.fetch_) {
             shell.printf(COLOR_BRIGHT_GREEN);
@@ -298,34 +298,34 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) const {
         } else {
             shell.printf(COLOR_BRIGHT_RED);
         }
-        shell.printf(("0x%02X "), tf.telegram_type_id_);
+        shell.printf("0x%02X ", tf.telegram_type_id_);
     }
     shell.printf(COLOR_RESET);
     */
     shell.printf(" Received telegram type IDs: ");
     for (const auto & tf : telegram_functions_) {
         if (tf.received_ && !tf.fetch_) {
-            shell.printf(("0x%02X "), tf.telegram_type_id_);
+            shell.printf("0x%02X ", tf.telegram_type_id_);
         }
     }
     shell.println();
     shell.printf(" Fetched telegram type IDs: ");
     for (const auto & tf : telegram_functions_) {
         if (tf.fetch_) {
-            shell.printf(("0x%02X "), tf.telegram_type_id_);
+            shell.printf("0x%02X ", tf.telegram_type_id_);
         }
     }
     shell.println();
     shell.printf(" Pending telegram type IDs: ");
     for (const auto & tf : telegram_functions_) {
         if (!tf.received_ && !tf.fetch_) {
-            shell.printf(("0x%02X "), tf.telegram_type_id_);
+            shell.printf("0x%02X ", tf.telegram_type_id_);
         }
     }
     shell.println();
     shell.printf(" Ignored telegram type IDs: ");
     for (auto handlers : handlers_ignored_) {
-        shell.printf(("0x%02X "), handlers);
+        shell.printf("0x%02X ", handlers);
     }
     shell.println();
 }
@@ -1183,7 +1183,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             // if we're filtering on an attribute, go find it
             if (attribute_s) {
 #if defined(EMSESP_DEBUG)
-                EMSESP::logger().debug(("[DEBUG] Attribute '%s'"), attribute_s);
+                EMSESP::logger().debug("[DEBUG] Attribute '%s'", attribute_s);
 #endif
                 if (json.containsKey(attribute_s)) {
                     JsonVariant data = json[attribute_s];
