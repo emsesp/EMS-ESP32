@@ -326,13 +326,58 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
     return false; // nothing changed, not supported
 }
 
+// extract custom min from custom_fullname
+bool DeviceValue::get_custom_min(int16_t & v) {
+    auto    min_pos    = custom_fullname.find('>');
+    bool    has_min    = (min_pos != std::string::npos);
+    uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
+    if (has_min) {
+        v = Helpers::atoint(custom_fullname.substr(min_pos + 1).c_str());
+        if (fahrenheit) {
+            v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
+        }
+    }
+    return has_min;
+}
+
+// extract custom max from custom_fullname
+bool DeviceValue::get_custom_max(uint16_t & v) {
+    auto    max_pos    = custom_fullname.find('<');
+    bool    has_max    = (max_pos != std::string::npos);
+    uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
+    if (has_max) {
+        v = Helpers::atoint(custom_fullname.substr(max_pos + 1).c_str());
+        if (fahrenheit) {
+            v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
+        }
+    }
+    return has_max;
+}
+
+// sets min max to stored custom values (if set)
+void DeviceValue::set_custom_minmax() {
+    get_custom_min(min);
+    get_custom_max(max);
+}
+
+std::string DeviceValue::get_custom_fullname() const {
+    auto min_pos    = custom_fullname.find('>');
+    auto max_pos    = custom_fullname.find('<');
+    auto minmax_pos = min_pos < max_pos ? min_pos : max_pos;
+    if (minmax_pos != std::string::npos) {
+        return custom_fullname.substr(0, minmax_pos);
+    }
+    return custom_fullname;
+}
+
 // returns the translated fullname or the custom fullname (if provided)
 // always returns a std::string
 std::string DeviceValue::get_fullname() const {
-    if (custom_fullname.empty()) {
+    std::string customname = get_custom_fullname();
+    if (customname.empty()) {
         return Helpers::translated_word(fullname);
     }
-    return custom_fullname;
+    return customname;
 }
 
 } // namespace emsesp

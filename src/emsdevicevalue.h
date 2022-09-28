@@ -179,6 +179,10 @@ class DeviceValue {
     bool hasValue() const;
     bool get_min_max(int16_t & dv_set_min, int16_t & dv_set_max);
 
+    void        set_custom_minmax();
+    bool        get_custom_min(int16_t & v);
+    bool        get_custom_max(uint16_t & v);
+    std::string get_custom_fullname() const;
     std::string get_fullname() const;
 
     // dv state flags
