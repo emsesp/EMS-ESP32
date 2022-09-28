@@ -84,10 +84,11 @@ class Thermostat : public EMSdevice {
         uint8_t climate;
         uint8_t switchonoptimization;
         uint8_t statusbyte; // from RC300monitor
-
         // RC 10
         uint8_t  reducehours;   // night reduce duration
         uint16_t reduceminutes; // remaining minutes to night->day
+        // FW100 temperature
+        uint8_t roomsensor; // 1-intern, 2-extern, 3-autoselect the lower value
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -489,6 +490,7 @@ class Thermostat : public EMSdevice {
     bool set_electricFactor(const char * value, const int8_t id);
     bool set_delayBoiler(const char * value, const int8_t id);
     bool set_tempDiffBoiler(const char * value, const int8_t id);
+    bool set_roomsensor(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

@@ -74,6 +74,9 @@ MAKE_PSTR_LIST(co2_cost_mix, F("co2 cost mix"), F("Kostenmix"), F("Kostenmix"), 
 MAKE_PSTR_LIST(analog, F("analog"), F("analog"), F("analoog"), F("analog"))
 MAKE_PSTR_LIST(normal, F("normal"), F("normal"), F("normaal"), F("normal"))
 MAKE_PSTR_LIST(blocking, F("blocking"), F("Blockierung"), F("Blokkering"), F("Blockering"))
+MAKE_PSTR_LIST(extern, F("extern"), F("extern"), F("extern"), F("extern"))
+MAKE_PSTR_LIST(intern, F("intern"), F("intern"), F("intern"), F("intern"))
+MAKE_PSTR_LIST(lower, F("lower"), F("niedirger"), F("lager"), F("lägre"))
 
 // boiler
 MAKE_PSTR_LIST(time, F("time"), F("Zeit"), F("Tijd"), F("Tid"))
@@ -457,6 +460,9 @@ MAKE_PSTR_LIST(hpIn1Opt, F("hpin1opt"), F("input 1 options"), F("Eingang 1 Einst
 MAKE_PSTR_LIST(hpIn2Opt, F("hpin2opt"), F("input 2 options"), F("Eingang 2 Einstellung"), F("Instelling input 2"), F("Inställningar Ingång 2"))
 MAKE_PSTR_LIST(hpIn3Opt, F("hpin3opt"), F("input 3 options"), F("Eingang 3 Einstellung"), F("Instelling input 3"), F("Inställningar Ingång 3"))
 MAKE_PSTR_LIST(hpIn4Opt, F("hpin4opt"), F("input 4 options"), F("Eingang 4 Einstellung"), F("Instelling input 4"), F("Inställningar Ingång 4"))
+MAKE_PSTR_LIST(maxHeatComp, F("maxheatcomp"), F("heat limit compressor"), F("Heizgrenze Kompressor"), F("heat limit compressor"), F("heat limit compressor"))
+MAKE_PSTR_LIST(maxHeatHeat, F("maxheatheat"), F("heat limit heating"), F("Heizgrenze Heizen"), F("heat limit heating"), F("heat limit heating"))
+MAKE_PSTR_LIST(maxHeatDhw, F("maxheatdhw"), F("heat limit dhw"), F("Heizgrenze Warmwasser"), F("heat limit dhw"), F("heat limit dhw"))
 
 // hybrid heatpump
 MAKE_PSTR_LIST(hybridStrategy, F("hybridstrategy"), F("hybrid control strategy"), F("Hybrid Strategie"), F("Hybride strategie"), F("Hybrid kontrollstrategi"))
@@ -589,7 +595,7 @@ MAKE_PSTR_LIST(wwSelTempSingle,
 MAKE_PSTR_LIST(wwCylMiddleTemp,
                F("wwcylmiddletemp"),
                F("cylinder middle temperature (TS3)"),
-               F("Speichertemperature Mitte"),
+               F("Speichertemperatur Mitte"),
                F("Buffer temperatuur midden"),
                F("Cylinder Temperatur Mitten (TS3)"))
 
@@ -814,6 +820,7 @@ MAKE_PSTR_LIST(hpoperatingmode,
 MAKE_PSTR_LIST(hpoperatingstate, F("hpoperatingstate"), F("heatpump operating state"), F("WP Arbeitsweise"), F("Huidige modus warmtepomp"), F("Värmepump Driftstatus"))
 MAKE_PSTR_LIST(controlmode, F("controlmode"), F("control mode"), F("Kontrollmodus"), F("Comtrolemodus"), F("Kontrolläge"))
 MAKE_PSTR_LIST(control, F("control"), F("control device"), F("Fernsteuerung"), F("Afstandsbedieding"), F("Kontrollenhet"))
+MAKE_PSTR_LIST(roomsensor, F("roomsensor"), F("room sensor"), F("Raumsensor"), F("Ruimtesensor"), F("Rumssensor"))
 MAKE_PSTR_LIST(program, F("program"), F("program"), F("Programm"), F("Programma"), F("Program"))
 MAKE_PSTR_LIST(pause, F("pause"), F("pause time"), F("Pausenzeit"), F("Pausetijd"), F("Paustid"))
 MAKE_PSTR_LIST(party, F("party"), F("party time"), F("Partyzeit"), F("Partytijd"), F("Partytid"))

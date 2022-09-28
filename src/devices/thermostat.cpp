@@ -686,6 +686,7 @@ void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->control, 1);         // remote: 0-off, 1-FB10, 2-FB100
     has_enumupdate(telegram, hc->program, 13, 1); // 1-6: 1 = A, 2 = B,...
     has_enumupdate(telegram, hc->mode, 14, 1);    // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
+    has_update(telegram, hc->roomsensor, 9);      // 1-intern, 2-extern, 3-autoselect the lower value
 }
 
 // type 0x0179, ff
@@ -1699,6 +1700,24 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
         return true;
     }
 
+    return false;
+}
+
+// Set sensor for Junkers, 1-external (from remote), 2-internal, 3-minimum value from int/ext
+bool Thermostat::set_roomsensor(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+
+    uint8_t ctrl = 0;
+    if (model() == EMS_DEVICE_FLAG_JUNKERS && !has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {
+        if (Helpers::value2enum(value, ctrl, FL_(enum_roomsensor))) {
+            write_command(set_typeids[hc->hc()], 9, ctrl);
+            return true;
+        }
+    }
     return false;
 }
 
@@ -3930,7 +3949,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
     if (has_flags(EMS_DEVICE_FLAG_NO_WRITE)) {
         register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES);
     } else {
-        register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_temp), 0, 29);
+        register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_temp), 0, 30);
     }
     register_device_value(tag, &hc->roomTemp, DeviceValueType::SHORT, roomtemp_divider, FL_(roomTemp), DeviceValueUOM::DEGREES);
     register_device_value(tag, &hc->climate, DeviceValueType::ENUM, FL_(enum_climate), FL_(climate), DeviceValueUOM::NONE);
@@ -4201,6 +4220,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode4), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(tag, &hc->remotetemp, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
         register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->roomsensor, DeviceValueType::ENUM, FL_(enum_roomsensor), FL_(roomsensor), DeviceValueUOM::NONE, MAKE_CF_CB(set_roomsensor));
         break;
     default:
         break;
