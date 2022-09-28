@@ -192,7 +192,7 @@ class EMSdevice {
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
 
-    void register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, const process_function_p cb);
+    void register_telegram_type(const uint16_t telegram_type_id, const char * telegram_type_name, bool fetch, const process_function_p cb);
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);
 
     std::string get_value_uom(const char * key) const;
@@ -204,93 +204,77 @@ class EMSdevice {
     void generate_values_web(JsonObject & output);
     void generate_values_web_customization(JsonArray & output);
 
-    void add_device_value(uint8_t                              tag,
-                          void *                               value_p,
-                          uint8_t                              type,
-                          const __FlashStringHelper * const ** options,
-                          const __FlashStringHelper * const *  options_single,
-                          int8_t                               numeric_operator,
-                          const __FlashStringHelper * const *  name,
-                          uint8_t                              uom,
-                          const cmd_function_p                 f,
-                          int16_t                              min,
-                          uint16_t                             max);
+    void add_device_value(uint8_t               tag,
+                          void *                value_p,
+                          uint8_t               type,
+                          const char * const ** options,
+                          const char * const *  options_single,
+                          int8_t                numeric_operator,
+                          const char * const *  name,
+                          uint8_t               uom,
+                          const cmd_function_p  f,
+                          int16_t               min,
+                          uint16_t              max);
 
-    void register_device_value(uint8_t                              tag,
-                               void *                               value_p,
-                               uint8_t                              type,
-                               const __FlashStringHelper * const ** options,
-                               const __FlashStringHelper * const *  name,
-                               uint8_t                              uom,
-                               const cmd_function_p                 f,
-                               int16_t                              min,
-                               uint16_t                             max);
+    void register_device_value(uint8_t               tag,
+                               void *                value_p,
+                               uint8_t               type,
+                               const char * const ** options,
+                               const char * const *  name,
+                               uint8_t               uom,
+                               const cmd_function_p  f,
+                               int16_t               min,
+                               uint16_t              max);
 
-    void register_device_value(uint8_t                              tag,
-                               void *                               value_p,
-                               uint8_t                              type,
-                               const __FlashStringHelper * const ** options,
-                               const __FlashStringHelper * const *  name,
-                               uint8_t                              uom,
-                               const cmd_function_p                 f);
+    void
+    register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom, const cmd_function_p f);
 
-    void register_device_value(uint8_t                              tag,
-                               void *                               value_p,
-                               uint8_t                              type,
-                               const __FlashStringHelper * const ** options,
-                               const __FlashStringHelper * const *  name,
-                               uint8_t                              uom);
+    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom);
 
-    void register_device_value(uint8_t                             tag,
-                               void *                              value_p,
-                               uint8_t                             type,
-                               int8_t                              numeric_operator,
-                               const __FlashStringHelper * const * name,
-                               uint8_t                             uom,
-                               const cmd_function_p                f = nullptr);
+    void register_device_value(uint8_t              tag,
+                               void *               value_p,
+                               uint8_t              type,
+                               int8_t               numeric_operator,
+                               const char * const * name,
+                               uint8_t              uom,
+                               const cmd_function_p f = nullptr);
 
-    void register_device_value(uint8_t                             tag,
-                               void *                              value_p,
-                               uint8_t                             type,
-                               int8_t                              numeric_operator,
-                               const __FlashStringHelper * const * name,
-                               uint8_t                             uom,
-                               const cmd_function_p                f,
-                               int16_t                             min,
-                               uint16_t                            max);
+    void register_device_value(uint8_t              tag,
+                               void *               value_p,
+                               uint8_t              type,
+                               int8_t               numeric_operator,
+                               const char * const * name,
+                               uint8_t              uom,
+                               const cmd_function_p f,
+                               int16_t              min,
+                               uint16_t             max);
 
     // single list of options
-    void register_device_value(uint8_t                             tag,
-                               void *                              value_p,
-                               uint8_t                             type,
-                               const __FlashStringHelper * const * options_single,
-                               const __FlashStringHelper * const * name,
-                               uint8_t                             uom,
-                               const cmd_function_p                f = nullptr);
+    void register_device_value(uint8_t              tag,
+                               void *               value_p,
+                               uint8_t              type,
+                               const char * const * options_single,
+                               const char * const * name,
+                               uint8_t              uom,
+                               const cmd_function_p f = nullptr);
 
     // single list of options, with no translations, with min and max
-    void register_device_value(uint8_t                             tag,
-                               void *                              value_p,
-                               uint8_t                             type,
-                               const __FlashStringHelper * const * options_single,
-                               const __FlashStringHelper * const * name,
-                               uint8_t                             uom,
-                               const cmd_function_p                f,
-                               int16_t                             min,
-                               uint16_t                            max);
+    void register_device_value(uint8_t              tag,
+                               void *               value_p,
+                               uint8_t              type,
+                               const char * const * options_single,
+                               const char * const * name,
+                               uint8_t              uom,
+                               const cmd_function_p f,
+                               int16_t              min,
+                               uint16_t             max);
 
     // no options, optional function f
-    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * name, uint8_t uom, const cmd_function_p f = nullptr);
+    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f = nullptr);
 
     // no options, with min/max
-    void register_device_value(uint8_t                             tag,
-                               void *                              value_p,
-                               uint8_t                             type,
-                               const __FlashStringHelper * const * name,
-                               uint8_t                             uom,
-                               const cmd_function_p                f,
-                               int16_t                             min,
-                               uint16_t                            max);
+    void
+    register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f, int16_t min, uint16_t max);
 
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid) const;
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid) const;
@@ -438,13 +422,13 @@ class EMSdevice {
     bool ha_config_firstrun_ = true; // this means a first setup of HA is needed after a restart
 
     struct TelegramFunction {
-        uint16_t                    telegram_type_id_;   // it's type_id
-        const __FlashStringHelper * telegram_type_name_; // e.g. RC20Message
-        bool                        fetch_;              // if this type_id be queried automatically
-        bool                        received_;
-        process_function_p          process_function_;
+        uint16_t           telegram_type_id_;   // it's type_id
+        const char *       telegram_type_name_; // e.g. RC20Message
+        bool               fetch_;              // if this type_id be queried automatically
+        bool               received_;
+        process_function_p process_function_;
 
-        TelegramFunction(uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, bool received, const process_function_p process_function)
+        TelegramFunction(uint16_t telegram_type_id, const char * telegram_type_name, bool fetch, bool received, const process_function_p process_function)
             : telegram_type_id_(telegram_type_id)
             , telegram_type_name_(telegram_type_name)
             , fetch_(fetch)

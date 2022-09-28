@@ -54,22 +54,20 @@
 #endif
 #endif
 
-static const char __pstr__logger_name[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = "telnet";
-
 namespace uuid {
 
 namespace telnet {
 
-uuid::log::Logger TelnetService::logger_{FPSTR(__pstr__logger_name), uuid::log::Facility::DAEMON};
+uuid::log::Logger TelnetService::logger_{"telnet", uuid::log::Facility::DAEMON};
 
 TelnetService::TelnetService(std::shared_ptr<uuid::console::Commands> commands, unsigned int context, unsigned int flags)
     : TelnetService(DEFAULT_PORT, commands, context, flags) {
 }
 
 TelnetService::TelnetService(uint16_t port, std::shared_ptr<uuid::console::Commands> commands, unsigned int context, unsigned int flags)
-    : TelnetService(port, [commands, context, flags](Stream & stream, const IPAddress & addr __attribute__((unused)), uint16_t port __attribute__((unused))) -> std::shared_ptr<uuid::console::Shell> {
-        return std::make_shared<uuid::console::StreamConsole>(commands, stream, context, flags);
-    }) {
+    : TelnetService(port,
+                    [commands, context, flags](Stream & stream, const IPAddress & addr __attribute__((unused)), uint16_t port __attribute__((unused)))
+                        -> std::shared_ptr<uuid::console::Shell> { return std::make_shared<uuid::console::StreamConsole>(commands, stream, context, flags); }) {
 }
 
 TelnetService::TelnetService(shell_factory_function shell_factory)
@@ -145,7 +143,9 @@ void TelnetService::loop() {
     if (client) {
         if (connections_.size() >= maximum_connections_) {
 #if UUID_TELNET_HAVE_WIFICLIENT_REMOTE
-            logger_.info(F("New connection from [%s]:%u rejected (connection limit reached)"), uuid::printable_to_string(client.remoteIP()).c_str(), client.remotePort());
+            logger_.info(F("New connection from [%s]:%u rejected (connection limit reached)"),
+                         uuid::printable_to_string(client.remoteIP()).c_str(),
+                         client.remotePort());
 #else
             logger_.info(F("New connection rejected (connection limit reached)"));
 #endif

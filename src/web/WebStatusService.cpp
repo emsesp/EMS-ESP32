@@ -34,13 +34,13 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-        EMSESP::logger().warning(F("WiFi disconnected. Reason code=%d"), info.wifi_sta_disconnected.reason); // IDF 4.0
+        EMSESP::logger().warning(("WiFi disconnected. Reason code=%d"), info.wifi_sta_disconnected.reason); // IDF 4.0
         WiFi.disconnect(true);
         break;
 
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
 #ifndef EMSESP_STANDALONE
-        EMSESP::logger().info(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
+        EMSESP::logger().info(("WiFi connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
 #endif
         // EMSESP::system_.send_heartbeat(); // send from mqtt start
         EMSESP::system_.syslog_init();
@@ -48,7 +48,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         break;
 
     case ARDUINO_EVENT_ETH_START:
-        // EMSESP::logger().info(F("Ethernet initialized"));
+        // EMSESP::logger().info(("Ethernet initialized"));
         ETH.setHostname(EMSESP::system_.hostname().c_str());
 
         // configure for static IP
@@ -64,7 +64,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         // prevent double calls
         if (!EMSESP::system_.ethernet_connected()) {
 #ifndef EMSESP_STANDALONE
-            EMSESP::logger().info(F("Ethernet connected with IP=%s, speed %d Mbps"), ETH.localIP().toString().c_str(), ETH.linkSpeed());
+            EMSESP::logger().info(("Ethernet connected with IP=%s, speed %d Mbps"), ETH.localIP().toString().c_str(), ETH.linkSpeed());
 #endif
             // EMSESP::system_.send_heartbeat();
             EMSESP::system_.syslog_init();
@@ -74,12 +74,12 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         break;
 
     case ARDUINO_EVENT_ETH_DISCONNECTED:
-        EMSESP::logger().warning(F("Ethernet disconnected"));
+        EMSESP::logger().warning(("Ethernet disconnected"));
         EMSESP::system_.ethernet_connected(false);
         break;
 
     case ARDUINO_EVENT_ETH_STOP:
-        EMSESP::logger().info(F("Ethernet stopped"));
+        EMSESP::logger().info(("Ethernet stopped"));
         EMSESP::system_.ethernet_connected(false);
         break;
 
@@ -103,9 +103,9 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
     case ARDUINO_EVENT_ETH_GOT_IP6:
         if (EMSESP::system_.ethernet_connected()) {
-            EMSESP::logger().info(F("Ethernet connected with IPv6=%s, speed %d Mbps"), ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
+            EMSESP::logger().info(("Ethernet connected with IPv6=%s, speed %d Mbps"), ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
         } else {
-            EMSESP::logger().info(F("WiFi connected with IPv6=%s, hostname=%s"), WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
+            EMSESP::logger().info(("WiFi connected with IPv6=%s, hostname=%s"), WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
         }
         // EMSESP::system_.send_heartbeat();
         EMSESP::system_.syslog_init();
@@ -202,7 +202,7 @@ void WebStatusService::mDNS_start() const {
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
         if (networkSettings.enableMDNS) {
             if (!MDNS.begin(EMSESP::system_.hostname().c_str())) {
-                EMSESP::logger().warning(F("Failed to start mDNS responder service"));
+                EMSESP::logger().warning(("Failed to start mDNS responder service"));
                 return;
             }
 
@@ -214,13 +214,13 @@ void WebStatusService::mDNS_start() const {
             MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
             MDNS.addServiceTxt("http", "tcp", "address", address_s.c_str());
 
-            EMSESP::logger().info(F("mDNS responder service started"));
+            EMSESP::logger().info(("mDNS responder service started"));
         }
     });
 #else
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
         if (networkSettings.enableMDNS) {
-            EMSESP::logger().info(F("mDNS responder service started"));
+            EMSESP::logger().info(("mDNS responder service started"));
         }
     });
 #endif
