@@ -8,6 +8,9 @@
 - Add support for Lolin C3 mini [#620](https://github.com/emsesp/EMS-ESP32/pull/620)
 - Add Greenstar 30Ri boiler
 - Add program memory info
+- Add min/max setting to customizations
+- Adapt min/max if ems-value is not in this range
+- Add heatpump settings for inputs and limits
 
 ## Fixed
 
