@@ -600,7 +600,7 @@ void Mqtt::on_connect() {
     // re-subscribe to all custom registered MQTT topics
     resubscribe();
 
-    publish_retain(("status"), "online", true); // say we're alive to the Last Will topic, with retain on
+    publish_retain("status", "online", true); // say we're alive to the Last Will topic, with retain on
 
     mqtt_publish_fails_ = 0; // reset fail count to 0
 
@@ -631,10 +631,10 @@ void Mqtt::ha_status() {
     doc["val_tpl"]   = "{{value_json['bus_status']}}";
 
     JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = F_(EMSESP); // "EMS-ESP"
+    dev["name"]    = "EMS-ESP";
     dev["sw"]      = "v" + std::string(EMSESP_APP_VERSION);
     dev["mf"]      = "proddy";
-    dev["mdl"]     = F_(EMSESP); // "EMS-ESP"
+    dev["mdl"]     = "EMS-ESP";
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp");
 
@@ -647,6 +647,7 @@ void Mqtt::ha_status() {
         publish_system_ha_sensor_config(DeviceValueType::INT, ("WiFi RSSI"), ("rssi"), DeviceValueUOM::DBM);
         publish_system_ha_sensor_config(DeviceValueType::INT, ("WiFi strength"), ("wifistrength"), DeviceValueUOM::PERCENT);
     }
+
     publish_system_ha_sensor_config(DeviceValueType::INT, ("Uptime"), ("uptime"), DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, ("Uptime (sec)"), ("uptime_sec"), DeviceValueUOM::SECONDS);
     publish_system_ha_sensor_config(DeviceValueType::BOOL, ("NTP status"), ("ntp_status"), DeviceValueUOM::NONE);
@@ -755,7 +756,7 @@ void Mqtt::publish_retain(const char * topic, const JsonObject & payload, bool r
 }
 
 void Mqtt::publish_ha(const char * topic, const JsonObject & payload) {
-    publish_ha((topic), payload);
+    publish_ha(std::string(topic), payload);
 }
 
 // publish empty payload to remove the topic
@@ -949,9 +950,7 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
     JsonArray ids = dev_json.createNestedArray("ids");
     ids.add("ems-esp");
 
-    auto fullname = (name); // TODO is this needed?
-
-    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, fullname, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
+    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, std::string(name), name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
 }
 
 // MQTT discovery configs
