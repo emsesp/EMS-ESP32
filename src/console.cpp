@@ -737,7 +737,7 @@ EMSESPStreamConsole::EMSESPStreamConsole(Stream & stream, bool local)
     : uuid::console::Shell(commands, ShellContext::MAIN, local ? (CommandFlags::USER | CommandFlags::LOCAL) : CommandFlags::USER)
     , uuid::console::StreamConsole(stream)
     , EMSESPShell()
-    , name_(("Serial"))
+    , name_("Serial")
     , pty_(SIZE_MAX)
     , addr_()
     , port_(0) {

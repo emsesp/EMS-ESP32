@@ -76,7 +76,7 @@ std::string EMSdevice::brand_to_string() const {
     case EMSdevice::Brand::IVT:
         return ("IVT");
     default:
-        return ((""));
+        return ("");
     }
 }
 

@@ -26,7 +26,7 @@ def bin_copy(source, target, env):
     # my_flags = env.ParseFlags(env['BUILD_FLAGS'])
     # defines = {k: v for (k, v) in my_flags.get("CPPDEFINES")}
     # print(my_flags)
-    # print((my_flags.get("CPPDEFINES"))
+    # print(my_flags.get("CPPDEFINES")
 
     # alternatively take platform from the pio target
     # platform = str(target[0]).split(os.path.sep)[2]
