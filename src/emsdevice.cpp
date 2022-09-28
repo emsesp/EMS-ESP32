@@ -701,7 +701,6 @@ void EMSdevice::publish_value(void * value_p) const {
 
 // looks up the UOM for a given key from the device value table
 // key is the fullname
-// TODO really should be using the shortname as the identifier
 std::string EMSdevice::get_value_uom(const char * key) const {
     // the key may have a TAG string prefixed at the beginning. If so, remove it
     char new_key[80];
@@ -711,8 +710,8 @@ std::string EMSdevice::get_value_uom(const char * key) const {
     for (uint8_t i = 0; i < DeviceValue::tag_count; i++) {
         auto tag = (DeviceValue::DeviceValueTAG_s[i]);
         if (tag) {
-            std::string key2   = key;         // copy char to a std::string
-            auto        length = strlen(tag); // TODO check if this still works
+            std::string key2   = key; // copy string to a std::string so we can use the find function
+            uint8_t     length = strlen(tag);
             if ((key2.find(tag) != std::string::npos) && (key[length] == ' ')) {
                 key_p += length + 1; // remove the tag
                 break;
