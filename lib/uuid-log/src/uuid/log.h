@@ -626,8 +626,8 @@ class Logger {
     static std::map<Handler *, Level> handlers_; /*!< Registered log handlers. @since 1.0.0 */
     static Level                      level_;    /*!< Minimum global log level across all handlers. @since 1.0.0 */
 
-    const char * name_;     /*!< Logger name (flash string). @since 1.0.0 */
-    const Facility              facility_; /*!< Default logging facility for messages. @since 1.0.0 */
+    const char *   name_;     /*!< Logger name (flash string). @since 1.0.0 */
+    const Facility facility_; /*!< Default logging facility for messages. @since 1.0.0 */
 };
 
 } // namespace log

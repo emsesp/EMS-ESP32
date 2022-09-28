@@ -376,7 +376,7 @@ bool Command::list(const uint8_t device_type, JsonObject & output) {
 // output list of all commands to console for a specific DeviceType
 void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbose) {
     if (cmdfunctions_.empty()) {
-        shell.println(("No commands available"));
+        shell.println("No commands available");
         return;
     }
 

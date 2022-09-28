@@ -48,7 +48,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         break;
 
     case ARDUINO_EVENT_ETH_START:
-        // EMSESP::logger().info(("Ethernet initialized"));
+        // EMSESP::logger().info("Ethernet initialized");
         ETH.setHostname(EMSESP::system_.hostname().c_str());
 
         // configure for static IP
@@ -74,12 +74,12 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         break;
 
     case ARDUINO_EVENT_ETH_DISCONNECTED:
-        EMSESP::logger().warning(("Ethernet disconnected"));
+        EMSESP::logger().warning("Ethernet disconnected");
         EMSESP::system_.ethernet_connected(false);
         break;
 
     case ARDUINO_EVENT_ETH_STOP:
-        EMSESP::logger().info(("Ethernet stopped"));
+        EMSESP::logger().info("Ethernet stopped");
         EMSESP::system_.ethernet_connected(false);
         break;
 
@@ -202,7 +202,7 @@ void WebStatusService::mDNS_start() const {
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
         if (networkSettings.enableMDNS) {
             if (!MDNS.begin(EMSESP::system_.hostname().c_str())) {
-                EMSESP::logger().warning(("Failed to start mDNS responder service"));
+                EMSESP::logger().warning("Failed to start mDNS responder service");
                 return;
             }
 
@@ -214,13 +214,13 @@ void WebStatusService::mDNS_start() const {
             MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
             MDNS.addServiceTxt("http", "tcp", "address", address_s.c_str());
 
-            EMSESP::logger().info(("mDNS responder service started"));
+            EMSESP::logger().info("mDNS responder service started");
         }
     });
 #else
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
         if (networkSettings.enableMDNS) {
-            EMSESP::logger().info(("mDNS responder service started"));
+            EMSESP::logger().info("mDNS responder service started");
         }
     });
 #endif

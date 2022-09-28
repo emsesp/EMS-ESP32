@@ -120,7 +120,7 @@ std::string Telegram::to_string() const {
 // returns telegram's message body only, in hex
 std::string Telegram::to_string_message() const {
     if (this->message_length == 0) {
-        return (("<empty>"));
+        return ("<empty>");
     }
 
     return Helpers::data_to_hex(this->message_data, this->message_length);
@@ -381,7 +381,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     uint16_t status = EMSuart::transmit(telegram_raw, length);
 
     if (status == EMS_TX_STATUS_ERR) {
-        LOG_ERROR(("Failed to transmit Tx via UART."));
+        LOG_ERROR("Failed to transmit Tx via UART.");
         if (telegram->operation == Telegram::Operation::TX_READ) {
             increment_telegram_read_fail_count(); // another Tx fail
         } else {
@@ -412,7 +412,7 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
     uint16_t status = EMSuart::transmit(telegram_raw, length);
 
     if (status == EMS_TX_STATUS_ERR) {
-        LOG_ERROR(("Failed to transmit Tx via UART."));
+        LOG_ERROR("Failed to transmit Tx via UART.");
         increment_telegram_fail_count(); // another Tx fail
     }
 }

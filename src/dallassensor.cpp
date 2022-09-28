@@ -42,7 +42,7 @@ void DallasSensor::start() {
 
 #ifndef EMSESP_STANDALONE
     bus_.begin(dallas_gpio_);
-    LOG_INFO(("Starting Dallas sensor service"));
+    LOG_INFO("Starting Dallas sensor service");
 #endif
 
     // Add API calls
@@ -84,7 +84,7 @@ void DallasSensor::loop() {
     if (state_ == State::IDLE) {
         if (time_now - last_activity_ >= READ_INTERVAL_MS) {
 #ifdef EMSESP_DEBUG_SENSOR
-            LOG_DEBUG(("[DEBUG] Read sensor temperature"));
+            LOG_DEBUG("[DEBUG] Read sensor temperature");
 #endif
             if (bus_.reset() || parasite_) {
                 YIELD;
@@ -99,7 +99,7 @@ void DallasSensor::loop() {
                     if (++scanretry_ > SCAN_MAX) { // every 30 sec
                         scanretry_ = 0;
 #ifdef EMSESP_DEBUG_SENSOR
-                        LOG_ERROR(("Bus reset failed"));
+                        LOG_ERROR("Bus reset failed");
 #endif
                         for (auto & sensor : sensors_) {
                             sensor.temperature_c = EMS_VALUE_SHORT_NOTSET;
@@ -112,13 +112,13 @@ void DallasSensor::loop() {
     } else if (state_ == State::READING) {
         if (temperature_convert_complete() && (time_now - last_activity_ > CONVERSION_MS)) {
 #ifdef EMSESP_DEBUG_SENSOR
-            LOG_DEBUG(("Scanning for sensors"));
+            LOG_DEBUG("Scanning for sensors");
 #endif
             bus_.reset_search();
             state_ = State::SCANNING;
         } else if (time_now - last_activity_ > READ_TIMEOUT_MS) {
 #ifdef EMSESP_DEBUG_SENSOR
-            LOG_WARNING(("Dallas sensor read timeout"));
+            LOG_WARNING("Dallas sensor read timeout");
 #endif
             state_ = State::IDLE;
             sensorfails_++;
@@ -126,7 +126,7 @@ void DallasSensor::loop() {
     } else if (state_ == State::SCANNING) {
         if (time_now - last_activity_ > SCAN_TIMEOUT_MS) {
 #ifdef EMSESP_DEBUG_SENSOR
-            LOG_ERROR(("Dallas sensor scan timeout"));
+            LOG_ERROR("Dallas sensor scan timeout");
 #endif
             state_ = State::IDLE;
             sensorfails_++;

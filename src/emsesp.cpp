@@ -190,7 +190,7 @@ void EMSESP::uart_init() {
     if (System::is_valid_gpio(rx_gpio) && System::is_valid_gpio(tx_gpio)) {
         EMSuart::start(tx_mode, rx_gpio, tx_gpio); // start UART
     } else {
-        LOG_WARNING(("Invalid UART Rx/Tx GPIOs. Check config."));
+        LOG_WARNING("Invalid UART Rx/Tx GPIOs. Check config.");
     }
 
     txservice_.start(); // sends out request to EMS bus for all devices
@@ -234,20 +234,20 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
     // EMS bus information
     switch (bus_status()) {
     case BUS_STATUS_OFFLINE:
-        shell.printfln(("EMS Bus is disconnected."));
+        shell.printfln("EMS Bus is disconnected.");
         break;
     case BUS_STATUS_TX_ERRORS:
-        shell.printfln(("EMS Bus is connected, but Tx is not stable."));
+        shell.printfln("EMS Bus is connected, but Tx is not stable.");
         break;
     default:
-        shell.printfln(("EMS Bus is connected."));
+        shell.printfln("EMS Bus is connected.");
         break;
     }
 
     shell.println();
 
     if (bus_status() != BUS_STATUS_OFFLINE) {
-        shell.printfln(("EMS Bus info:"));
+        shell.printfln("EMS Bus info:");
         EMSESP::webSettingsService.read([&](WebSettings & settings) { shell.printfln(("  Tx mode: %d"), settings.tx_mode); });
         shell.printfln(("  Bus protocol: %s"), EMSbus::is_ht3() ? ("HT3") : ("Buderus"));
         shell.printfln(("  #recognized EMS devices: %d"), EMSESP::emsdevices.size());
@@ -265,7 +265,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
     // Rx queue
     auto rx_telegrams = rxservice_.queue();
     if (rx_telegrams.empty()) {
-        shell.printfln(("Rx Queue is empty"));
+        shell.printfln("Rx Queue is empty");
     } else {
         shell.printfln(("Rx Queue (%ld telegram%s):"), rx_telegrams.size(), rx_telegrams.size() == 1 ? "" : "s");
         for (const auto & it : rx_telegrams) {
@@ -278,7 +278,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
     // Tx queue
     auto tx_telegrams = txservice_.queue();
     if (tx_telegrams.empty()) {
-        shell.printfln(("Tx Queue is empty"));
+        shell.printfln("Tx Queue is empty");
     } else {
         shell.printfln(("Tx Queue (%ld telegram%s):"), tx_telegrams.size(), tx_telegrams.size() == 1 ? "" : "s");
 
@@ -301,7 +301,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 // show EMS device values to the shell console
 void EMSESP::show_device_values(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
-        shell.printfln(("No EMS devices detected."));
+        shell.printfln("No EMS devices detected.");
         shell.println();
         return;
     }
@@ -359,7 +359,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
 // show Dallas temperature sensors and Analog sensors
 void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     if (dallassensor_.have_sensors()) {
-        shell.printfln(("Temperature sensors:"));
+        shell.printfln("Temperature sensors:");
         char    s[10];
         char    s2[10];
         uint8_t fahrenheit = EMSESP::system_.fahrenheit() ? 2 : 0;
@@ -384,7 +384,7 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     if (analogsensor_.have_sensors()) {
         char s[10];
         char s2[10];
-        shell.printfln(("Analog sensors:"));
+        shell.printfln("Analog sensors:");
         for (const auto & sensor : analogsensor_.sensors()) {
             switch (sensor.type()) {
             case AnalogSensor::AnalogType::ADC:
@@ -537,7 +537,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     }
     if (need_publish) {
         if (doc.overflowed()) {
-            LOG_WARNING(("MQTT buffer overflow, please use individual topics"));
+            LOG_WARNING("MQTT buffer overflow, please use individual topics");
         }
         Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE), json);
     }
@@ -808,7 +808,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // only process broadcast telegrams or ones sent to us on request
     // if ((telegram->dest != 0x00) && (telegram->dest != rxservice_.ems_bus_id())) {
     if (telegram->operation == Telegram::Operation::RX_READ) {
-        // LOG_DEBUG(("read telegram received, not processing"));
+        // LOG_DEBUG("read telegram received, not processing");
         return false;
     }
 
@@ -884,12 +884,12 @@ bool EMSESP::device_exists(const uint8_t device_id) {
 // for each associated EMS device go and get its system information
 void EMSESP::show_devices(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
-        shell.printfln(("No EMS devices detected. Try using 'scan devices' from the ems menu."));
+        shell.printfln("No EMS devices detected. Try using 'scan devices' from the ems menu.");
         shell.println();
         return;
     }
 
-    shell.printfln(("These EMS devices are currently active:"));
+    shell.printfln("These EMS devices are currently active:");
     shell.println();
 
     // count the number of thermostats
@@ -1018,7 +1018,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             name        = "generic boiler";
             device_type = DeviceType::BOILER;
             flags       = DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP;
-            LOG_WARNING(("Unknown EMS boiler. Using generic profile. Please report on GitHub."));
+            LOG_WARNING("Unknown EMS boiler. Using generic profile. Please report on GitHub.");
         } else {
             LOG_WARNING(("Unrecognized EMS device (device ID 0x%02X, no product ID). Please report on GitHub."), device_id);
             return false;
@@ -1190,14 +1190,14 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // if we're waiting on a Write operation, we want a single byte 1 or 4
         if ((tx_state == Telegram::Operation::TX_WRITE) && (length == 1)) {
             if (first_value == TxService::TX_WRITE_SUCCESS) {
-                LOG_DEBUG(("Last Tx write successful"));
+                LOG_DEBUG("Last Tx write successful");
                 txservice_.increment_telegram_write_count(); // last tx/write was confirmed ok
                 txservice_.send_poll();                      // close the bus
                 publish_id_ = txservice_.post_send_query();  // follow up with any post-read if set
                 txservice_.reset_retry_count();
                 tx_successful = true;
             } else if (first_value == TxService::TX_WRITE_FAIL) {
-                LOG_ERROR(("Last Tx write rejected by host"));
+                LOG_ERROR("Last Tx write rejected by host");
                 txservice_.send_poll(); // close the bus
                 txservice_.reset_retry_count();
             }
@@ -1206,7 +1206,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             uint8_t src  = data[0];
             uint8_t dest = data[1];
             if (txservice_.is_last_tx(src, dest)) {
-                LOG_DEBUG(("Last Tx read successful"));
+                LOG_DEBUG("Last Tx read successful");
                 txservice_.increment_telegram_read_count();
                 txservice_.send_poll(); // close the bus
                 txservice_.reset_retry_count();
@@ -1289,14 +1289,14 @@ void EMSESP::start() {
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
 
 #ifdef EMSESP_DEBUG
-    LOG_NOTICE(("System is running in Debug mode"));
+    LOG_NOTICE("System is running in Debug mode");
 #endif
 
     LOG_INFO(("Last system reset reason Core0: %s, Core1: %s"), system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
     // do any system upgrades
     if (system_.check_upgrade()) {
-        LOG_INFO(("System needs a restart to apply new settings. Please wait."));
+        LOG_INFO("System needs a restart to apply new settings. Please wait.");
         system_.system_restart();
     };
 

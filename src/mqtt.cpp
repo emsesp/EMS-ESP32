@@ -192,7 +192,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     shell.println();
 
     // show subscriptions
-    shell.printfln(("MQTT topic subscriptions:"));
+    shell.printfln("MQTT topic subscriptions:");
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
         shell.printfln((" %s/%s"), mqtt_base_.c_str(), mqtt_subfunction.topic_.c_str());
     }
@@ -200,7 +200,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
 
     // show queues
     if (mqtt_messages_.empty()) {
-        shell.printfln(("MQTT queue is empty"));
+        shell.printfln("MQTT queue is empty");
         shell.println();
         return;
     }
@@ -341,7 +341,7 @@ void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t devic
         return;
     }
 
-    // shell.print((" Subscribed MQTT topics: "));
+    // shell.print(" Subscribed MQTT topics: ");
     // for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
     //     if (mqtt_subfunction.device_type_ == device_type) {
     //         shell.printf(("%s "), mqtt_subfunction.topic_.c_str());
@@ -368,7 +368,7 @@ void Mqtt::on_publish(uint16_t packetId) const {
     // if the last published failed, don't bother checking it. wait for the next retry
     if (mqtt_message.packet_id_ == 0) {
 #if defined(EMSESP_DEBUG)
-        LOG_DEBUG(("[DEBUG] ACK for failed message pid 0"));
+        LOG_DEBUG("[DEBUG] ACK for failed message pid 0");
 #endif
         return;
     }
@@ -450,15 +450,15 @@ void Mqtt::start() {
         }
         connecting_ = false;
         if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
-            LOG_WARNING(("MQTT disconnected: TCP"));
+            LOG_WARNING("MQTT disconnected: TCP");
         } else if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
-            LOG_WARNING(("MQTT disconnected: Identifier Rejected"));
+            LOG_WARNING("MQTT disconnected: Identifier Rejected");
         } else if (reason == AsyncMqttClientDisconnectReason::MQTT_SERVER_UNAVAILABLE) {
-            LOG_WARNING(("MQTT disconnected: Server unavailable"));
+            LOG_WARNING("MQTT disconnected: Server unavailable");
         } else if (reason == AsyncMqttClientDisconnectReason::MQTT_MALFORMED_CREDENTIALS) {
-            LOG_WARNING(("MQTT disconnected: Malformed credentials"));
+            LOG_WARNING("MQTT disconnected: Malformed credentials");
         } else if (reason == AsyncMqttClientDisconnectReason::MQTT_NOT_AUTHORIZED) {
-            LOG_WARNING(("MQTT disconnected: Not authorized"));
+            LOG_WARNING("MQTT disconnected: Not authorized");
         } else {
             LOG_WARNING(("MQTT disconnected: code %d"), reason);
         }
@@ -535,7 +535,7 @@ void Mqtt::on_connect() {
         return;
     }
 
-    LOG_INFO(("MQTT connected"));
+    LOG_INFO("MQTT connected");
 
     connecting_ = true;
     connectcount_++;
@@ -686,7 +686,7 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
     // if the queue is full, make room but removing the last one
     if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES) {
         mqtt_messages_.pop_front();
-        LOG_WARNING(("Queue overflow, removing one message"));
+        LOG_WARNING("Queue overflow, removing one message");
         mqtt_publish_fails_++;
     }
     mqtt_messages_.emplace_back(mqtt_message_id_++, std::move(message));
@@ -815,7 +815,7 @@ void Mqtt::process_queue() {
     // it will have a real packet ID
     if (mqtt_message.packet_id_ > 0) {
 #if defined(EMSESP_DEBUG)
-        LOG_DEBUG(("[DEBUG] Waiting for QOS-ACK"));
+        LOG_DEBUG("[DEBUG] Waiting for QOS-ACK");
 #endif
         // if we don't get the ack within 10 minutes, republish with new packet_id
         if (uuid::get_uptime_sec() - last_publish_queue_ < 600) {

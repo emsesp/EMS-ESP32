@@ -62,19 +62,19 @@ std::string EMSdevice::uom_to_string(uint8_t uom) {
 std::string EMSdevice::brand_to_string() const {
     switch (brand_) {
     case EMSdevice::Brand::BOSCH:
-        return (("Bosch"));
+        return ("Bosch");
     case EMSdevice::Brand::JUNKERS:
-        return (("Junkers"));
+        return ("Junkers");
     case EMSdevice::Brand::BUDERUS:
-        return (("Buderus"));
+        return ("Buderus");
     case EMSdevice::Brand::NEFIT:
-        return (("Nefit"));
+        return ("Nefit");
     case EMSdevice::Brand::SIEGER:
-        return (("Sieger"));
+        return ("Sieger");
     case EMSdevice::Brand::WORCESTER:
-        return (("Worcester"));
+        return ("Worcester");
     case EMSdevice::Brand::IVT:
-        return (("IVT"));
+        return ("IVT");
     default:
         return ((""));
     }
@@ -302,28 +302,28 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) const {
     }
     shell.printf(COLOR_RESET);
     */
-    shell.printf((" Received telegram type IDs: "));
+    shell.printf(" Received telegram type IDs: ");
     for (const auto & tf : telegram_functions_) {
         if (tf.received_ && !tf.fetch_) {
             shell.printf(("0x%02X "), tf.telegram_type_id_);
         }
     }
     shell.println();
-    shell.printf((" Fetched telegram type IDs: "));
+    shell.printf(" Fetched telegram type IDs: ");
     for (const auto & tf : telegram_functions_) {
         if (tf.fetch_) {
             shell.printf(("0x%02X "), tf.telegram_type_id_);
         }
     }
     shell.println();
-    shell.printf((" Pending telegram type IDs: "));
+    shell.printf(" Pending telegram type IDs: ");
     for (const auto & tf : telegram_functions_) {
         if (!tf.received_ && !tf.fetch_) {
             shell.printf(("0x%02X "), tf.telegram_type_id_);
         }
     }
     shell.println();
-    shell.printf((" Ignored telegram type IDs: "));
+    shell.printf(" Ignored telegram type IDs: ");
     for (auto handlers : handlers_ignored_) {
         shell.printf(("0x%02X "), handlers);
     }
@@ -1467,9 +1467,9 @@ bool EMSdevice::has_telegram_id(uint16_t id) const {
 std::string EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> telegram) const {
     // see if it's one of the common ones, like Version
     if (telegram->type_id == EMS_TYPE_VERSION) {
-        return (("Version"));
+        return ("Version");
     } else if (telegram->type_id == EMS_TYPE_UBADevices) {
-        return (("UBADevices"));
+        return ("UBADevices");
     }
 
     for (const auto & tf : telegram_functions_) {

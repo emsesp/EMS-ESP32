@@ -685,8 +685,8 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
         PasswordData(const char * password_prompt, password_function && password_function);
         ~PasswordData() override = default;
 
-        const char * password_prompt_;   /*!< Prompt requesting password input. @since 0.1.0 */
-        password_function           password_function_; /*!< Function to execute after password entry. @since 0.1.0 */
+        const char *      password_prompt_;   /*!< Prompt requesting password input. @since 0.1.0 */
+        password_function password_function_; /*!< Function to execute after password entry. @since 0.1.0 */
     };
 
     /**
@@ -761,7 +761,7 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
         const std::shared_ptr<const uuid::log::Message> content_; /*!< Log message content. @since 0.1.0 */
     };
 
-    Shell(const Shell &) = delete;
+    Shell(const Shell &)             = delete;
     Shell & operator=(const Shell &) = delete;
 
     /**
@@ -906,7 +906,7 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
     size_t                      maximum_log_messages_ = MAX_LOG_MESSAGES; /*!< Maximum command line length in bytes. @since 0.6.0 */
     std::string                 line_buffer_;         /*!< Command line buffer. Limited to maximum_command_line_length() bytes. @since 0.1.0 */
     std::string                 line_old_[MAX_LINES]; /*!< old Command line buffer.*/
-    uint8_t                     line_no_ = 0;
+    uint8_t                     line_no_                     = 0;
     size_t                      maximum_command_line_length_ = MAX_COMMAND_LINE_LENGTH; /*!< Maximum command line length in bytes. @since 0.6.0 */
     unsigned char               previous_  = 0; /*!< Previous character that was entered on the command line. Used to detect CRLF line endings. @since 0.1.0 */
     uint8_t                     cursor_    = 0; /*!< cursor position from end of line */
@@ -955,9 +955,9 @@ class CommandLine {
     ~CommandLine() = default;
 
 #ifdef UNIT_TEST
-    CommandLine(CommandLine &&) = default;
-    CommandLine & operator=(CommandLine &&)                      = default;
-    CommandLine(const CommandLine &) __attribute__((deprecated)) = default;
+    CommandLine(CommandLine &&)                                              = default;
+    CommandLine & operator=(CommandLine &&)                                  = default;
+    CommandLine(const CommandLine &) __attribute__((deprecated))             = default;
     CommandLine & operator=(const CommandLine &) __attribute__((deprecated)) = default;
 #endif
 
@@ -1279,8 +1279,8 @@ class Commands {
 	 */
     void add_command(unsigned int                 context,
                      unsigned int                 flags,
-                     const string_vector &  name,
-                     const string_vector &  arguments,
+                     const string_vector &        name,
+                     const string_vector &        arguments,
                      command_function             function,
                      argument_completion_function arg_function);
 
@@ -1344,11 +1344,7 @@ class Commands {
 		 *                         completions for this command.
 		 * @since 0.1.0
 		 */
-        Command(unsigned int                 flags,
-                const string_vector    name,
-                const string_vector    arguments,
-                command_function             function,
-                argument_completion_function arg_function);
+        Command(unsigned int flags, const string_vector name, const string_vector arguments, command_function function, argument_completion_function arg_function);
         ~Command();
 
         /**
@@ -1372,13 +1368,13 @@ class Commands {
         }
 
         unsigned int                 flags_;        /*!< Shell flags that must be set for this command to be available. @since 0.1.0 */
-        const string_vector    name_;         /*!< Name of the command as a std::vector of flash strings. @since 0.1.0 */
-        const string_vector    arguments_;    /*!< Help text for arguments that the command accepts as a std::vector of flash strings. @since 0.1.0 */
+        const string_vector          name_;         /*!< Name of the command as a std::vector of flash strings. @since 0.1.0 */
+        const string_vector          arguments_;    /*!< Help text for arguments that the command accepts as a std::vector of flash strings. @since 0.1.0 */
         command_function             function_;     /*!< Function to be used when the command is executed. @since 0.1.0 */
         argument_completion_function arg_function_; /*!< Function to be used to perform argument completions for this command. @since 0.1.0 */
 
       private:
-        Command(const Command &) = delete;
+        Command(const Command &)             = delete;
         Command & operator=(const Command &) = delete;
     };
 
@@ -1487,7 +1483,7 @@ class StreamConsole : virtual public Shell {
     explicit StreamConsole(Stream & stream);
 
   private:
-    StreamConsole(const StreamConsole &) = delete;
+    StreamConsole(const StreamConsole &)             = delete;
     StreamConsole & operator=(const StreamConsole &) = delete;
 
     /**

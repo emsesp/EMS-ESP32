@@ -1369,7 +1369,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
         double difference = difftime(now, ttime);
         if (difference > 15 || difference < -15) {
             set_datetime("ntp", -1); // set from NTP
-            LOG_INFO(("thermostat time correction from ntp"));
+            LOG_INFO("thermostat time correction from ntp");
         }
     }
 #ifndef EMSESP_STANDALONE
@@ -1380,7 +1380,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
         }
         struct timeval newnow = {.tv_sec = ttime};
         settimeofday(&newnow, nullptr);
-        LOG_INFO(("ems-esp time set from thermostat"));
+        LOG_INFO("ems-esp time set from thermostat");
     }
 #endif
 }
@@ -2132,7 +2132,7 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
             return false;
         }
         if (!EMSESP::system_.ntp_connected()) {
-            LOG_WARNING(("Set date: no valid NTP data, setting from ESP Clock"));
+            LOG_WARNING("Set date: no valid NTP data, setting from ESP Clock");
         }
 
         data[0] = tm_->tm_year - 100; // Bosch counts from 2000
@@ -2153,7 +2153,7 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
         data[6] = (dt[20] - '0');                                           // day of week, Mo:0
         data[7] = (dt[22] - '0') + 2;                                       // DST and flag
     } else {
-        LOG_WARNING(("Set date: invalid data, wrong length"));
+        LOG_WARNING("Set date: invalid data, wrong length");
         return false;
     }
     if (data[1] == 0 || data[1] > 12 || data[2] > 23 || data[3] == 0 || data[3] > 31 || data[4] > 59 || data[5] > 59 || data[6] > 6 || data[7] > 3) {

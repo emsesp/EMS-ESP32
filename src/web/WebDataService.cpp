@@ -238,7 +238,7 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
                 if (return_code != CommandRet::OK) {
                     EMSESP::logger().err(("Write command failed %s (%s)"), (const char *)output["message"], Command::return_code_string(return_code).c_str());
                 } else {
-                    EMSESP::logger().debug(("Write command successful"));
+                    EMSESP::logger().debug("Write command successful");
                 }
 
                 response->setCode((return_code == CommandRet::OK) ? 200 : 204);

@@ -59,12 +59,12 @@ void EMSESPShell::stopped() {
 // this is one of the first functions called when the shell is started
 void EMSESPShell::display_banner() {
     println();
-    printfln(("┌──────────────────────────────────────┐"));
+    printfln("┌──────────────────────────────────────┐");
     printfln(("│ %sEMS-ESP version %-10s%s           │"), COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
     printfln(("│ %s%shttps://github.com/emsesp/EMS-ESP32%s  │"), COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
-    printfln(("│                                      │"));
+    printfln("│                                      │");
     printfln(("│ type %shelp%s to show available commands │"), COLOR_UNDERLINE, COLOR_RESET);
-    printfln(("└──────────────────────────────────────┘"));
+    printfln("└──────────────────────────────────────┘");
     println();
 
     // set console name
@@ -151,16 +151,16 @@ void EMSESPShell::add_console_commands() {
                     },
                     "local");
             } else {
-                shell.println(("Must be 0B, 0D, 0A, 0F or 12"));
+                shell.println("Must be 0B, 0D, 0A, 0F or 12");
             }
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
             return std::vector<std::string>{
-                (("0B")),
-                (("0D")),
-                (("0A")),
-                (("0F")),
-                (("12")),
+                ("0B"),
+                ("0D"),
+                ("0A"),
+                ("0F"),
+                ("12"),
 
             };
         });
@@ -189,7 +189,7 @@ void EMSESPShell::add_console_commands() {
                               if (arguments.size() == 0) {
                                   EMSESP::scan_devices();
                               } else {
-                                  shell.printfln(("Performing a deep scan..."));
+                                  shell.printfln("Performing a deep scan...");
                                   EMSESP::clear_all_devices();
                                   std::vector<uint8_t> Device_Ids;
 
@@ -240,7 +240,7 @@ void EMSESPShell::add_console_commands() {
                               uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
 
                               if (!EMSESP::valid_device(device_id)) {
-                                  shell.printfln(("Invalid deviceID"));
+                                  shell.printfln("Invalid deviceID");
                                   return;
                               }
 
@@ -305,28 +305,28 @@ void EMSESPShell::add_console_commands() {
 
                                   EMSESP::watch_id(watch_id);
                               } else {
-                                  shell.printfln(("Invalid: use watch raw|on|off|unknown|id [id]"));
+                                  shell.printfln("Invalid: use watch raw|on|off|unknown|id [id]");
                                   return;
                               }
 
                               uint8_t watch = EMSESP::watch();
                               if (watch == EMSESP::WATCH_OFF) {
-                                  shell.printfln(("Watching telegrams is off"));
+                                  shell.printfln("Watching telegrams is off");
                                   return;
                               }
 
                               // if logging is off, the watch won't show anything, show force it back to NOTICE
                               if (shell.log_level() < Level::NOTICE) {
                                   shell.log_level(Level::NOTICE);
-                                  shell.printfln(("Setting log level to Notice"));
+                                  shell.printfln("Setting log level to Notice");
                               }
 
                               if (watch == EMSESP::WATCH_ON) {
-                                  shell.printfln(("Watching incoming telegrams, displayed in decoded format"));
+                                  shell.printfln("Watching incoming telegrams, displayed in decoded format");
                               } else if (watch == EMSESP::WATCH_RAW) {
-                                  shell.printfln(("Watching incoming telegrams, displayed as raw bytes")); // WATCH_RAW
+                                  shell.printfln("Watching incoming telegrams, displayed as raw bytes"); // WATCH_RAW
                               } else {
-                                  shell.printfln(("Watching unknown telegrams")); // WATCH_UNKNOWN
+                                  shell.printfln("Watching unknown telegrams"); // WATCH_UNKNOWN
                               }
 
                               watch_id = EMSESP::watch_id();
@@ -351,7 +351,7 @@ void EMSESPShell::add_console_commands() {
             // validate the device_type
             uint8_t device_type = EMSdevice::device_name_2_device_type(arguments[0].c_str());
             if (!Command::device_has_commands(device_type)) {
-                shell.print(("Invalid device. Available devices are: "));
+                shell.print("Invalid device. Available devices are: ");
                 Command::show_devices(shell);
                 return;
             }
@@ -359,7 +359,7 @@ void EMSESPShell::add_console_commands() {
 
             // validate that a command is present
             if (arguments.size() < 2) {
-                shell.print(("Missing command. Available commands are: "));
+                shell.print("Missing command. Available commands are: ");
                 Command::show(shell, device_type, false); // non-verbose mode
                 return;
             }
@@ -399,8 +399,8 @@ void EMSESPShell::add_console_commands() {
             }
 
             if (return_code == CommandRet::NOT_FOUND) {
-                shell.println(("Unknown command"));
-                shell.print(("Available commands are: "));
+                shell.println("Unknown command");
+                shell.print("Available commands are: ");
                 Command::show(shell, device_type, false); // non-verbose mode
             } else if (return_code != CommandRet::OK) {
                 shell.printfln(("Bad syntax (error code %d)"), return_code);
@@ -494,7 +494,7 @@ void Console::load_standard_commands(unsigned int context) {
                     return;
                 }
             } else {
-                shell.print(("levels: "));
+                shell.print("levels: ");
                 std::vector<std::string> v = uuid::log::levels_lowercase();
                 size_t                   i = v.size();
                 while (i--) {
@@ -543,7 +543,7 @@ void Console::load_standard_commands(unsigned int context) {
                                                            } else {
                                                                shell.delay_until(now + INVALID_PASSWORD_DELAY_MS, [](Shell & shell) {
                                                                    shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, ("Invalid su password on console"));
-                                                                   shell.println(("su: incorrect password"));
+                                                                   shell.println("su: incorrect password");
                                                                });
                                                            }
                                                        });
@@ -579,7 +579,7 @@ void Console::load_system_commands(unsigned int context) {
                                                        if (securitySettings.jwtSecret.equals(password.c_str())) {
                                                            EMSESP::system_.format(shell);
                                                        } else {
-                                                           shell.println(("incorrect password"));
+                                                           shell.println("incorrect password");
                                                        }
                                                    });
                                                }
@@ -602,9 +602,9 @@ void Console::load_system_commands(unsigned int context) {
                                                                                             return StateUpdateResult::CHANGED;
                                                                                         },
                                                                                         "local");
-                                                                                    shell.println(("su password updated"));
+                                                                                    shell.println("su password updated");
                                                                                 } else {
-                                                                                    shell.println(("Passwords do not match"));
+                                                                                    shell.println("Passwords do not match");
                                                                                 }
                                                                             }
                                                                         });
@@ -675,7 +675,7 @@ void Console::load_system_commands(unsigned int context) {
                                                                                         });
                                                                                     shell.println("Use `wifi reconnect` to save and apply the new settings");
                                                                                 } else {
-                                                                                    shell.println(("Passwords do not match"));
+                                                                                    shell.println("Passwords do not match");
                                                                                 }
                                                                             }
                                                                         });
@@ -737,7 +737,7 @@ EMSESPStreamConsole::EMSESPStreamConsole(Stream & stream, bool local)
     : uuid::console::Shell(commands, ShellContext::MAIN, local ? (CommandFlags::USER | CommandFlags::LOCAL) : CommandFlags::USER)
     , uuid::console::StreamConsole(stream)
     , EMSESPShell()
-    , name_((("Serial")))
+    , name_(("Serial"))
     , pty_(SIZE_MAX)
     , addr_()
     , port_(0) {

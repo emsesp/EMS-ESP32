@@ -30,7 +30,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "general") == 0) {
-        EMSESP::logger().info(("Testing general. Adding a Boiler and Thermostat"));
+        EMSESP::logger().info("Testing general. Adding a Boiler and Thermostat");
 
         add_device(0x08, 123); // Nefit Trendline
         add_device(0x18, 157); // Bosch CR100
@@ -54,7 +54,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "2thermostats") == 0) {
-        EMSESP::logger().info(("Testing with multiple thermostats..."));
+        EMSESP::logger().info("Testing with multiple thermostats...");
 
         add_device(0x08, 123); // GB072
         add_device(0x10, 158); // RC310
@@ -86,7 +86,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "310") == 0) {
-        EMSESP::logger().info(("Adding a GB072/RC310 combo..."));
+        EMSESP::logger().info("Adding a GB072/RC310 combo...");
 
         add_device(0x08, 123); // GB072
         add_device(0x10, 158); // RC310
@@ -113,7 +113,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "gateway") == 0) {
-        EMSESP::logger().info(("Adding a Gateway..."));
+        EMSESP::logger().info("Adding a Gateway...");
 
         // add 0x48 KM200, via a version command
         rx_telegram({0x48, 0x0B, 0x02, 0x00, 0xBD, 0x04, 0x06, 00, 00, 00, 00, 00, 00, 00});
@@ -133,7 +133,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "mixer") == 0) {
-        EMSESP::logger().info(("Adding a mixer..."));
+        EMSESP::logger().info("Adding a mixer...");
 
         // add controller
         add_device(0x09, 114);
@@ -155,7 +155,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "boiler") == 0) {
-        EMSESP::logger().info(("Adding boiler..."));
+        EMSESP::logger().info("Adding boiler...");
         add_device(0x08, 123); // Nefit Trendline
 
         // UBAuptime
@@ -172,7 +172,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "thermostat") == 0) {
-        EMSESP::logger().info(("Adding thermostat..."));
+        EMSESP::logger().info("Adding thermostat...");
 
         add_device(0x10, 192); // FW120
 
@@ -185,7 +185,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "solar") == 0) {
-        EMSESP::logger().info(("Adding solar..."));
+        EMSESP::logger().info("Adding solar...");
 
         add_device(0x30, 163); // SM100
 
@@ -204,7 +204,7 @@ bool Test::run_test(const char * command, int8_t id) {
     }
 
     if (strcmp(command, "heatpump") == 0) {
-        EMSESP::logger().info(("Adding heatpump..."));
+        EMSESP::logger().info("Adding heatpump...");
 
         add_device(0x38, 200); // Enviline module
         add_device(0x10, 192); // FW120 thermostat
@@ -238,7 +238,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "general") {
-        shell.printfln(("Testing adding a general boiler & thermostat..."));
+        shell.printfln("Testing adding a general boiler & thermostat...");
         run_test("general");
         shell.invoke_command("show devices");
         shell.invoke_command("show");
@@ -247,7 +247,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "render") {
-        shell.printfln(("Testing render..."));
+        shell.printfln("Testing render...");
 
         // check read_value to make sure it handles all the data type correctly
         uint8_t message_data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // message_length is 9
@@ -315,7 +315,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "devices") {
-        shell.printfln(("Testing devices..."));
+        shell.printfln("Testing devices...");
 
         // A fake response - UBADevices(0x07)
         rx_telegram({0x08, 0x00, 0x07, 0x00, 0x0B, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
@@ -323,7 +323,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     // check for boiler and controller on same product_id
     if (command == "double") {
-        shell.printfln(("Testing double..."));
+        shell.printfln("Testing double...");
 
         add_device(0x08, 206); // Nefit Excellent HR30
         add_device(0x09, 206); // Nefit Excellent HR30 Controller
@@ -333,7 +333,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "620") {
-        EMSESP::logger().info(("Testing 620..."));
+        EMSESP::logger().info("Testing 620...");
 
         // Version Controller
         uart_telegram({0x09, 0x0B, 0x02, 0x00, 0x5F, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
@@ -344,7 +344,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     // unknown device
     if (command == "unknown") {
-        shell.printfln(("Testing unknown..."));
+        shell.printfln("Testing unknown...");
 
         // add boiler
         add_device(0x08, 84);
@@ -361,19 +361,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "unknown2") {
-        shell.printfln(("Testing unknown2..."));
+        shell.printfln("Testing unknown2...");
 
         // simulate getting version information back from an unknown device
         rx_telegram({0x09, 0x0B, 0x02, 0x00, 0x5A, 0x01, 0x02}); // productID is 90 which doesn't exist
     }
 
     if (command == "gateway") {
-        shell.printfln(("Testing Gateway..."));
+        shell.printfln("Testing Gateway...");
         run_test("gateway");
     }
 
     if (command == "310") {
-        shell.printfln(("Testing RC310..."));
+        shell.printfln("Testing RC310...");
         run_test("310");
         shell.invoke_command("show devices");
         shell.invoke_command("show");
@@ -382,14 +382,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "2thermostats") {
-        shell.printfln(("Testing multiple thermostats..."));
+        shell.printfln("Testing multiple thermostats...");
         run_test("2thermostats");
         shell.invoke_command("show");
         shell.invoke_command("show devices");
     }
 
     if (command == "web") {
-        shell.printfln(("Testing Web..."));
+        shell.printfln("Testing Web...");
 
         Mqtt::enabled(false);    // turn off mqtt
         Mqtt::ha_enabled(false); // turn off ha
@@ -438,7 +438,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "board_profile") {
-        shell.printfln(("Testing board profile..."));
+        shell.printfln("Testing board profile...");
 
         shell.invoke_command("system");
         shell.invoke_command("set board_profile wemos");
@@ -447,7 +447,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "boiler") {
-        shell.printfln(("Testing boiler..."));
+        shell.printfln("Testing boiler...");
         // Mqtt::ha_enabled(false);
         Mqtt::ha_enabled(true);
         Mqtt::nested_format(1);
@@ -475,7 +475,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "shower_alert") {
-        shell.printfln(("Testing Shower Alert..."));
+        shell.printfln("Testing Shower Alert...");
 
         run_test("boiler");
 
@@ -484,7 +484,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "fr120") {
-        shell.printfln(("Testing adding a thermostat FR120..."));
+        shell.printfln("Testing adding a thermostat FR120...");
 
         add_device(0x10, 191); // FR120 thermostat
 
@@ -496,7 +496,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "ha") {
-        shell.printfln(("Testing HA mqtt discovery"));
+        shell.printfln("Testing HA mqtt discovery");
         Mqtt::ha_enabled(true);
         // Mqtt::ha_enabled(false);
 
@@ -518,7 +518,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "lastcode") {
-        shell.printfln(("Testing lastcode"));
+        shell.printfln("Testing lastcode");
 
         Mqtt::ha_enabled(false);
         Mqtt::nested_format(1);
@@ -536,7 +536,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "dv") {
-        shell.printfln(("Testing device value rendering"));
+        shell.printfln("Testing device value rendering");
 
         Mqtt::ha_enabled(true);
         Mqtt::nested_format(1);
@@ -550,12 +550,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "dallas") {
-        shell.printfln(("Testing adding Dallas sensor"));
+        shell.printfln("Testing adding Dallas sensor");
         emsesp::EMSESP::dallassensor_.test();
     }
 
     if (command == "dallas_full") {
-        shell.printfln(("Testing adding and changing Dallas sensor"));
+        shell.printfln("Testing adding and changing Dallas sensor");
         Mqtt::ha_enabled(true);
         Mqtt::nested_format(1);
         // Mqtt::nested_format(0);
@@ -571,7 +571,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "analog") {
-        shell.printfln(("Testing adding Analog sensor"));
+        shell.printfln("Testing adding Analog sensor");
         Mqtt::ha_enabled(true);
         // Mqtt::ha_enabled(false);
         Mqtt::nested_format(1);
@@ -602,7 +602,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "masked") {
-        shell.printfln(("Testing masked entities"));
+        shell.printfln("Testing masked entities");
 
         Mqtt::ha_enabled(true);
         Mqtt::send_response(false);
@@ -626,7 +626,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "dv2") {
-        shell.printfln(("Testing device value lost"));
+        shell.printfln("Testing device value lost");
 
         Mqtt::ha_enabled(true);
         Mqtt::send_response(false);
@@ -647,7 +647,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "api_values") {
 #if defined(EMSESP_STANDALONE)
-        shell.printfln(("Testing API getting values"));
+        shell.printfln("Testing API getting values");
         Mqtt::ha_enabled(false);
         Mqtt::nested_format(1);
         Mqtt::send_response(false);
@@ -680,7 +680,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "mqtt_post") {
-        shell.printfln(("Testing MQTT incoming changes"));
+        shell.printfln("Testing MQTT incoming changes");
         Mqtt::ha_enabled(false);
         Mqtt::nested_format(1);
         Mqtt::send_response(false);
@@ -696,7 +696,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 #if defined(EMSESP_STANDALONE)
     // https://github.com/emsesp/EMS-ESP32/issues/541
     if (command == "api_wwmode") {
-        shell.printfln(("Testing API wwmode"));
+        shell.printfln("Testing API wwmode");
         Mqtt::ha_enabled(false);
         Mqtt::nested_format(1);
         run_test("310");
@@ -715,7 +715,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 #endif
 
     if (command == "api") {
-        shell.printfln(("Testing API with MQTT and REST, standalone"));
+        shell.printfln("Testing API with MQTT and REST, standalone");
 
         Mqtt::ha_enabled(true);
         // Mqtt::ha_enabled(false);
@@ -990,7 +990,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "mqtt_nested") {
-        shell.printfln(("Testing nested MQTT"));
+        shell.printfln("Testing nested MQTT");
         Mqtt::ha_enabled(false); // turn off HA Discovery to stop the chatter
 
         run_test("boiler");
@@ -1010,7 +1010,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "thermostat") {
-        shell.printfln(("Testing adding a thermostat FW120..."));
+        shell.printfln("Testing adding a thermostat FW120...");
 
         run_test("thermostat");
         shell.invoke_command("show");
@@ -1026,7 +1026,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "tc100") {
-        shell.printfln(("Testing adding a TC100 thermostat to the EMS bus..."));
+        shell.printfln("Testing adding a TC100 thermostat to the EMS bus...");
 
         // add a thermostat
         add_device(0x18, 202); // Bosch TC100 - https://github.com/emsesp/EMS-ESP/issues/474
@@ -1037,7 +1037,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "solar") {
-        shell.printfln(("Testing Solar"));
+        shell.printfln("Testing Solar");
         run_test("solar");
 
         uart_telegram("30 00 FF 0A 02 6A 04"); // SM100 pump on (1)sh
@@ -1050,14 +1050,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "heatpump") {
-        shell.printfln(("Testing Heat Pump"));
+        shell.printfln("Testing Heat Pump");
         run_test("heatpump");
         shell.invoke_command("call");
         shell.invoke_command("call heatpump info");
     }
 
     if (command == "solar200") {
-        shell.printfln(("Testing Solar SM200"));
+        shell.printfln("Testing Solar SM200");
 
         add_device(0x30, 164); // SM200
 
@@ -1082,7 +1082,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "km") {
-        shell.printfln(("Testing KM200 Gateway"));
+        shell.printfln("Testing KM200 Gateway");
 
         add_device(0x10, 158); // RC300
         add_device(0x48, 189); // KM200
@@ -1140,7 +1140,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "cr100") {
-        shell.printfln(("Testing CR100"));
+        shell.printfln("Testing CR100");
 
         add_device(0x18, 157); // Bosch CR100 - https://github.com/emsesp/EMS-ESP/issues/355
 
@@ -1165,14 +1165,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "rx2") {
-        shell.printfln(("Testing Rx2..."));
+        shell.printfln("Testing Rx2...");
         for (uint8_t i = 0; i < 30; i++) {
             uart_telegram({0x08, 0x0B, 0x33, 0x00, 0x08, 0xFF, 0x34, 0xFB, 0x00, 0x28, 0x00, 0x00, 0x46, 0x00, 0xFF, 0xFF, 0x00});
         }
     }
 
     if (command == "rx") {
-        shell.printfln(("Testing Rx..."));
+        shell.printfln("Testing Rx...");
 
         // fake telegrams. length includes CRC
         // Boiler -> Me, UBAMonitorFast(0x18), telegram: 08 00 18 00 00 02 5A 73 3D 0A 10 65 40 02 1A 80 00 01 E1 01 76 0E 3D 48 00 C9 44 02 00 (#data=25)
@@ -1229,7 +1229,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "tx") {
-        shell.printfln(("Testing Tx..."));
+        shell.printfln("Testing Tx...");
 
         // TX queue example - Me -> Thermostat, (0x91), telegram: 0B 17 91 05 44 45 46 47 (#data=4)
         uint8_t t11[] = {0x44, 0x45, 0x46, 0x47};
@@ -1266,7 +1266,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "poll") {
-        shell.printfln(("Testing Poll..."));
+        shell.printfln("Testing Poll...");
 
         // simulate sending a read request
         // uint8_t t16[] = {0x44, 0x45, 0x46, 0x47}; // Me -> Thermostat, (0x91), telegram: 0B 17 91 05 44 45 46 47 (#data=4)
@@ -1291,7 +1291,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "cmd") {
-        shell.printfln(("Testing Commands..."));
+        shell.printfln("Testing Commands...");
 
         // add a thermostat with 3 HCs
         add_device(0x10, 192); // FW120
@@ -1318,13 +1318,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "pin") {
-        shell.printfln(("Testing pin..."));
+        shell.printfln("Testing pin...");
         shell.invoke_command("call system pin");
         shell.invoke_command("call system pin 1 true");
     }
 
     if (command == "mqtt2") {
-        shell.printfln(("Testing MQTT large payloads..."));
+        shell.printfln("Testing MQTT large payloads...");
 
         DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN);
 
@@ -1347,7 +1347,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "mqtt") {
-        shell.printfln(("Testing MQTT..."));
+        shell.printfln("Testing MQTT...");
 
         Mqtt::ha_enabled(false);
         Mqtt::enabled(true);
@@ -1422,7 +1422,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "poll2") {
-        shell.printfln(("Testing Tx Sending last message on queue..."));
+        shell.printfln("Testing Tx Sending last message on queue...");
 
         EMSESP::show_ems(shell);
 
@@ -1433,7 +1433,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "rx2") {
-        shell.printfln(("Testing rx2..."));
+        shell.printfln("Testing rx2...");
 
         uart_telegram({0x1B, 0x5B, 0xFD, 0x2D, 0x9E, 0x3A, 0xB6, 0xE5, 0x02, 0x20, 0x33, 0x30, 0x32, 0x3A, 0x20, 0x5B,
                        0x73, 0xFF, 0xFF, 0xCB, 0xDF, 0xB7, 0xA7, 0xB5, 0x67, 0x77, 0x77, 0xE4, 0xFF, 0xFD, 0x77, 0xFF});
@@ -1441,14 +1441,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     // https://github.com/emsesp/EMS-ESP/issues/380#issuecomment-633663007
     if (command == "rx3") {
-        shell.printfln(("Testing rx3..."));
+        shell.printfln("Testing rx3...");
 
         uart_telegram({0x21, 0x0B, 0xFF, 0x00});
     }
 
     // testing the UART tx command, without a queue
     if (command == "tx2") {
-        shell.printfln(("Testing tx2..."));
+        shell.printfln("Testing tx2...");
 
         uint8_t t[] = {0x0B, 0x88, 0x18, 0x00, 0x20, 0xD4}; // including CRC
         EMSuart::transmit(t, sizeof(t));
@@ -1456,14 +1456,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     // send read request with offset
     if (command == "offset") {
-        shell.printfln(("Testing offset..."));
+        shell.printfln("Testing offset...");
 
         // send_read_request(0x18, 0x08);
         EMSESP::txservice_.read_request(0x18, 0x08, 27); // no offset
     }
 
     if (command == "mixer") {
-        shell.printfln(("Testing Mixer..."));
+        shell.printfln("Testing Mixer...");
 
         run_test("mixer");
 
@@ -1477,7 +1477,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "crash") {
-        shell.printfln(("Forcing a crash..."));
+        shell.printfln("Forcing a crash...");
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdiv-by-zero"

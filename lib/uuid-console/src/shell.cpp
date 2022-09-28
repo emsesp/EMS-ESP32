@@ -262,32 +262,30 @@ void Shell::loop_normal() {
                 } else if (esc_ == 1) { // pos1
                     cursor_ = line_buffer_.length();
                 } else if (esc_ == 11) { // F1
-
-                    // TODO use flash here?
-                    set_command_str(("help"));
+                    set_command_str("help");
                 } else if (esc_ == 12) { // F2
-                    set_command_str(("show"));
+                    set_command_str("show");
                 } else if (esc_ == 13) { // F3
-                    set_command_str(("log notice"));
+                    set_command_str("log notice");
                 } else if (esc_ == 14) { // F4
-                    set_command_str(("log info"));
+                    set_command_str("log info");
                 } else if (esc_ == 15) { // F5
-                    set_command_str(("log debug"));
+                    set_command_str("log debug");
                 } else if (esc_ == 17) { // F6
-                    set_command_str(("watch off"));
+                    set_command_str("watch off");
                 } else if (esc_ == 18) { // F7
-                    set_command_str(("watch on"));
+                    set_command_str("watch on");
                 } else if (esc_ == 19) { // F8
-                    set_command_str(("watch raw"));
+                    set_command_str("watch raw");
                 } else if (esc_ == 20) { // F9
-                    set_command_str(("call system info"));
+                    set_command_str("call system info");
                 } else if (esc_ == 21) { // F10
-                    set_command_str(("call system settings"));
+                    set_command_str("call system settings");
                 } else if (esc_ == 23) { // F11
-                    line_buffer_ = (("call send \"0B \""));
+                    line_buffer_ = ("call send \"0B \"");
                     cursor_      = 1;
                 } else if (esc_ == 24) { // F12
-                    set_command_str(("log debug; watch raw"));
+                    set_command_str("log debug; watch raw");
                 }
                 esc_ = 0;
             } else if (c >= '0' && (c <= '9')) { // numbers

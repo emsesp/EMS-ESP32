@@ -2083,9 +2083,9 @@ bool Boiler::set_ww_circulation_mode(const char * value, const int8_t id) {
     if (v < 7) {
         // LOG_INFO(("Setting dhw circulation mode %dx3min"), v);
     } else if (v == 7) {
-        // LOG_INFO(("Setting dhw circulation mode continuous"));
+        // LOG_INFO("Setting dhw circulation mode continuous");
     } else {
-        // LOG_WARNING(("Set dhw circulation mode: Invalid value"));
+        // LOG_WARNING("Set dhw circulation mode: Invalid value");
         return false;
     }
 
@@ -2109,12 +2109,12 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
     }
 
     if (num == 1) {
-        // LOG_INFO(("Reset boiler maintenance message"));
+        // LOG_INFO("Reset boiler maintenance message");
         write_command(0x05, 0x08, 0xFF, 0x1C);
         has_update(&reset_);
         return true;
     } else if (num == 2) {
-        // LOG_INFO(("Reset boiler error message"));
+        // LOG_INFO("Reset boiler error message");
         write_command(0x05, 0x00, 0x5A); // error reset
         has_update(&reset_);
         return true;
@@ -2131,7 +2131,7 @@ bool Boiler::set_maintenance(const char * value, const int8_t id) {
     std::string s;
     if (Helpers::value2string(value, s)) {
         if (s == Helpers::translated_word(FL_(reset))) {
-            // LOG_INFO(("Reset boiler maintenance message"));
+            // LOG_INFO("Reset boiler maintenance message");
             write_command(0x05, 0x08, 0xFF, 0x1C);
             return true;
         }
@@ -2169,7 +2169,7 @@ bool Boiler::set_maintenance(const char * value, const int8_t id) {
         return true;
     }
 
-    LOG_WARNING(("Setting maintenance: wrong format"));
+    LOG_WARNING("Setting maintenance: wrong format");
     return false;
 }
 //maintenance
@@ -2183,7 +2183,7 @@ bool Boiler::set_maintenancetime(const char * value, const int8_t id) {
             return true;
         }
     }
-    LOG_WARNING(("Setting maintenance: wrong format"));
+    LOG_WARNING("Setting maintenance: wrong format");
     return false;
 }
 
@@ -2204,7 +2204,7 @@ bool Boiler::set_maintenancedate(const char * value, const int8_t id) {
         return true;
     }
 
-    LOG_WARNING(("Setting maintenance: wrong format"));
+    LOG_WARNING("Setting maintenance: wrong format");
     return false;
 }
 
