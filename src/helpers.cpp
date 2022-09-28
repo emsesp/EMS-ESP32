@@ -655,21 +655,8 @@ std::string Helpers::toLower(std::string const & s) {
     return lc;
 }
 
-
-// TODO fix toLower
 std::string Helpers::toLower(const char * s) {
-    std::string lc = s;
-    std::transform(lc.begin(), lc.end(), lc.begin(), [](unsigned char c) { return std::tolower(c); });
-    return lc;
-
-    /*
-    
-    for (; *s; ++s) {
-        *p = tolower(*s);
-        p++;
-        }
-
-        */
+    return toLower(std::string(s));
 }
 
 std::string Helpers::toUpper(std::string const & s) {
