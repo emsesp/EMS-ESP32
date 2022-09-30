@@ -411,7 +411,13 @@ void EMSdevice::add_device_value(uint8_t               tag,
     bool has_cmd = (f != nullptr);
 
     auto short_name = name[0];
-    auto fullname   = &name[1]; // translations start at index 1
+
+    const char * const * fullname;
+    if (Helpers::count_items(name) == 1) {
+        fullname = &name[0]; // no translations available
+    } else {
+        fullname = &name[1]; // translations start at index 1
+    }
 
     // initialize the device value depending on it's type
     if (type == DeviceValueType::STRING) {
@@ -1401,7 +1407,7 @@ void EMSdevice::mqtt_ha_entity_config_remove() {
         if (dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED)
             && ((dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) || (!dv.has_state(DeviceValueState::DV_ACTIVE)))) {
             dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-            if (strcmp(dv.short_name, FL_(climate)[0])) {
+            if (dv.short_name == FL_(climate)[0]) {
                 Mqtt::publish_ha_climate_config(dv.tag, false, true); // delete topic (remove = true)
             } else {
                 Mqtt::publish_ha_sensor_config(dv, "", "", true); // delete topic (remove = true)
