@@ -755,12 +755,8 @@ void Mqtt::publish_retain(const char * topic, const JsonObject & payload, bool r
     }
 }
 
-void Mqtt::publish_ha(const char * topic, const JsonObject & payload) {
-    publish_ha(std::string(topic), payload);
-}
-
 // publish empty payload to remove the topic
-void Mqtt::publish_ha(const std::string & topic) {
+void Mqtt::publish_ha(const char * topic) {
     if (!enabled()) {
         return;
     }
@@ -774,7 +770,7 @@ void Mqtt::publish_ha(const std::string & topic) {
 }
 
 // publish a Home Assistant config topic and payload, with retain flag off.
-void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
+void Mqtt::publish_ha(const char * topic, const JsonObject & payload) {
     if (!enabled()) {
         return;
     }
@@ -928,7 +924,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
 
     publish_ha_sensor_config(dv.type,
                              dv.tag,
-                             dv.get_fullname(),
+                             dv.get_fullname().c_str(),
                              dv.fullname[0],
                              dv.device_type,
                              dv.short_name,
@@ -950,7 +946,7 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
     JsonArray ids = dev_json.createNestedArray("ids");
     ids.add("ems-esp");
 
-    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, std::string(name), name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
+    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
 }
 
 // MQTT discovery configs
@@ -958,7 +954,7 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
 void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice::DeviceValueType
                                     uint8_t               tag,      // EMSdevice::DeviceValueTAG
-                                    const std::string &   fullname, // fullname, already translated
+                                    const char * const    fullname, // fullname, already translated
                                     const char * const    en_name,
                                     const uint8_t         device_type, // EMSdevice::DeviceType
                                     const char * const    entity,      // same as shortname
@@ -971,7 +967,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
                                     const int16_t         dv_set_max,
                                     const JsonObject &    dev_json) {
     // ignore if name (fullname) is empty
-    if (fullname.empty() || en_name == nullptr) {
+    if (fullname == nullptr || en_name == nullptr) {
         return;
     }
 
@@ -1106,7 +1102,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
 
     // friendly name = <tag> <name>
     char   ha_name[70];
-    char * F_name = strdup(fullname.c_str());
+    char * F_name = strdup(fullname);
     F_name[0]     = toupper(F_name[0]); // capitalize first letter
     if (have_tag) {
         snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), F_name);

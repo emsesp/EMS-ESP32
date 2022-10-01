@@ -390,7 +390,7 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const ch
 //  type: one of DeviceValueType
 //  options: options for enum, which are translated as a list of lists
 //  options_single: list of names
-//  numeric_operatpr: to divide or multiply, see DeviceValueNumOps::
+//  numeric_operator: to divide or multiply, see DeviceValueNumOps::
 //  short_name: used in Mqtt as keys
 //  fullname: used in Web and Console unless empty (nullptr) - can be translated
 //  uom: unit of measure from DeviceValueUOM
