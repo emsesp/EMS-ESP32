@@ -2344,7 +2344,7 @@ bool Boiler::set_HpInLogic(const char * value, const int8_t id) {
     }
     bool v;
     if (Helpers::value2bool(value, v)) {
-        write_command(0x486, id == 4 ? 42 : id, v ? 1 : 0, 0x486);
+        write_command(0x486, id == 4 ? 42 : id - 1, v ? 1 : 0, 0x486);
         return true;
     }
     if (strlen(value) == 11 && id != 4) {
