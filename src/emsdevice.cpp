@@ -478,6 +478,7 @@ void EMSdevice::add_device_value(uint8_t               tag,
     // add the device entity
     devicevalues_.emplace_back(
         device_type_, tag, value_p, type, options, options_single, numeric_operator, short_name, fullname, custom_fullname, uom, has_cmd, min, max, state);
+    devicevalues_.back().set_custom_minmax();
 
     // add a new command if it has a function attached
     if (!has_cmd) {
@@ -864,9 +865,10 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 // as generate_values_web() but stripped down to only show all entities and their state
 // this is used only for WebCustomizationService::device_entities()
 void EMSdevice::generate_values_web_customization(JsonArray & output) {
-    for (const auto & dv : devicevalues_) {
+    for (auto & dv : devicevalues_) {
         // also show commands and entities that have an empty full name
-        JsonObject obj = output.createNestedObject();
+        JsonObject obj        = output.createNestedObject();
+        uint8_t    fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
         // create the value
         if (dv.hasValue()) {
@@ -910,13 +912,13 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
                 }
 
                 if (dv.type == DeviceValueType::INT) {
-                    obj["v"] = make_float ? Helpers::transformNumFloat(*(int8_t *)(dv.value_p), num_op) : *(int8_t *)(dv.value_p) * num_op;
+                    obj["v"] = make_float ? Helpers::transformNumFloat(*(int8_t *)(dv.value_p), num_op, fahrenheit) : *(int8_t *)(dv.value_p) * num_op;
                 } else if (dv.type == DeviceValueType::UINT) {
-                    obj["v"] = make_float ? Helpers::transformNumFloat(*(uint8_t *)(dv.value_p), num_op) : *(uint8_t *)(dv.value_p) * num_op;
+                    obj["v"] = make_float ? Helpers::transformNumFloat(*(uint8_t *)(dv.value_p), num_op, fahrenheit) : *(uint8_t *)(dv.value_p) * num_op;
                 } else if (dv.type == DeviceValueType::SHORT) {
-                    obj["v"] = make_float ? Helpers::transformNumFloat(*(int16_t *)(dv.value_p), num_op) : *(int16_t *)(dv.value_p) * num_op;
+                    obj["v"] = make_float ? Helpers::transformNumFloat(*(int16_t *)(dv.value_p), num_op, fahrenheit) : *(int16_t *)(dv.value_p) * num_op;
                 } else if (dv.type == DeviceValueType::USHORT) {
-                    obj["v"] = make_float ? Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), num_op) : *(uint16_t *)(dv.value_p) * num_op;
+                    obj["v"] = make_float ? Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), num_op, fahrenheit) : *(uint16_t *)(dv.value_p) * num_op;
                 } else if (dv.type == DeviceValueType::ULONG) {
                     obj["v"] = make_float ? Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), num_op) : *(uint32_t *)(dv.value_p) * num_op;
                 } else if (dv.type == DeviceValueType::TIME) {
@@ -947,6 +949,12 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
                     obj["n"] = name;
                 }
             }
+
+            // add the custom name, is optional
+            std::string custom_fullname = dv.get_custom_fullname();
+            if (!custom_fullname.empty()) {
+                obj["cn"] = custom_fullname;
+            }
         } else {
             obj["n"] = "!" + fullname; // prefix commands with a !
         }
@@ -958,6 +966,18 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
 
         obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble
         obj["w"] = dv.has_cmd;    // if writable
+
+        if (dv.has_cmd) {
+            // set the custom min and max values if there are any
+            int16_t  dv_set_min;
+            uint16_t dv_set_max;
+            if (dv.get_custom_min(dv_set_min)) {
+                obj["mi"] = fahrenheit ? (int)(dv_set_min * 1.8 + 32 * (fahrenheit - 1)) : dv_set_min;
+            }
+            if (dv.get_custom_max(dv_set_max)) {
+                obj["ma"] = fahrenheit ? (int)(dv_set_max * 1.8 + 32 * (fahrenheit - 1)) : dv_set_max;
+            }
+        }
     }
 }
 
@@ -998,7 +1018,7 @@ void EMSdevice::setCustomEntity(const std::string & entity_id) {
             } else {
                 dv.custom_fullname = "";
             }
-
+            dv.set_custom_minmax();
             return;
         }
     }
@@ -1393,6 +1413,24 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                 //  else if (dv.type == DeviceValueType::CMD && output_target != EMSdevice::OUTPUT_TARGET::MQTT) {
                 //     json[name] = "";
                 // }
+
+                // check for value outside min/max range and adapt the limits to avoid HA complains
+                // Should this also check for api output?
+                if ((output_target == OUTPUT_TARGET::MQTT) && (dv.min != 0 || dv.max != 0)) {
+                    if (json[name].is<float>() || json[name].is<int>()) {
+                        int v = json[name];
+                        if (fahrenheit) {
+                            v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
+                        }
+                        if (v < dv.min) {
+                            dv.min = v;
+                            dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                        } else if (v > dv.max) {
+                            dv.max = v;
+                            dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                        }
+                    }
+                }
             }
         }
     }

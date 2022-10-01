@@ -25,9 +25,9 @@ REGISTER_FACTORY(Switch, EMSdevice::DeviceType::SWITCH);
 Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // WM10 module, device_id 0x11
-    register_telegram_type(0x9C, ("WM10MonitorMessage"), false, MAKE_PF_CB(process_WM10MonitorMessage));
-    register_telegram_type(0x9D, ("WM10SetMessage"), false, MAKE_PF_CB(process_WM10SetMessage));
-    register_telegram_type(0x1E, ("WM10TempMessage"), false, MAKE_PF_CB(process_WM10TempMessage));
+    register_telegram_type(0x9C, "WM10MonitorMessage", false, MAKE_PF_CB(process_WM10MonitorMessage));
+    register_telegram_type(0x9D, "WM10SetMessage", false, MAKE_PF_CB(process_WM10SetMessage));
+    register_telegram_type(0x1E, "WM10TempMessage", false, MAKE_PF_CB(process_WM10TempMessage));
 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &activated_, DeviceValueType::BOOL, FL_(activated), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,

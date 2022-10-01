@@ -25,8 +25,8 @@ REGISTER_FACTORY(Heatpump, EMSdevice::DeviceType::HEATPUMP);
 Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // telegram handlers
-    register_telegram_type(0x042B, ("HP1"), false, MAKE_PF_CB(process_HPMonitor1));
-    register_telegram_type(0x047B, ("HP2"), false, MAKE_PF_CB(process_HPMonitor2));
+    register_telegram_type(0x042B, "HP1", false, MAKE_PF_CB(process_HPMonitor1));
+    register_telegram_type(0x047B, "HP2", false, MAKE_PF_CB(process_HPMonitor2));
 
     // device values
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &airHumidity_, DeviceValueType::UINT, FL_(airHumidity), DeviceValueUOM::PERCENT);

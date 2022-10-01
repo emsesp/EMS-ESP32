@@ -74,6 +74,9 @@ MAKE_PSTR_LIST(co2_cost_mix, "co2 cost mix", "Kostenmix", "Kostenmix", "Kostnads
 MAKE_PSTR_LIST(analog, "analog", "analog", "analoog", "analog")
 MAKE_PSTR_LIST(normal, "normal", "normal", "normaal", "normal")
 MAKE_PSTR_LIST(blocking, "blocking", "Blockierung", "Blokkering", "Blockering")
+MAKE_PSTR_LIST(extern, "extern", "extern", "extern", "extern")
+MAKE_PSTR_LIST(intern, "intern", "intern", "intern", "intern")
+MAKE_PSTR_LIST(lower, "lower", "niedirger", "lager", "lägre")
 
 // boiler
 MAKE_PSTR_LIST(time, "time", "Zeit", "Tijd", "Tid")
@@ -367,6 +370,9 @@ MAKE_PSTR_LIST(hpIn1Opt, "hpin1opt", "input 1 options", "Eingang 1 Einstellung",
 MAKE_PSTR_LIST(hpIn2Opt, "hpin2opt", "input 2 options", "Eingang 2 Einstellung", "Instelling input 2", "Inställningar Ingång 2")
 MAKE_PSTR_LIST(hpIn3Opt, "hpin3opt", "input 3 options", "Eingang 3 Einstellung", "Instelling input 3", "Inställningar Ingång 3")
 MAKE_PSTR_LIST(hpIn4Opt, "hpin4opt", "input 4 options", "Eingang 4 Einstellung", "Instelling input 4", "Inställningar Ingång 4")
+MAKE_PSTR_LIST(maxHeatComp, "maxheatcomp", "heat limit compressor", "Heizgrenze Kompressor", "heat limit compressor", "heat limit compressor")
+MAKE_PSTR_LIST(maxHeatHeat, "maxheatheat", "heat limit heating", "Heizgrenze Heizen", "heat limit heating", "heat limit heating")
+MAKE_PSTR_LIST(maxHeatDhw, "maxheatdhw", "heat limit dhw", "Heizgrenze Warmwasser", "heat limit dhw", "heat limit dhw")
 
 // hybrid heatpump
 MAKE_PSTR_LIST(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi")
@@ -444,7 +450,7 @@ MAKE_PSTR_LIST(wwSelTempSingle,
 MAKE_PSTR_LIST(wwCylMiddleTemp,
                "wwcylmiddletemp",
                "cylinder middle temperature (TS3)",
-               "Speichertemperature Mitte",
+               "Speichertemperatur Mitte",
                "Buffer temperatuur midden",
                "Cylinder Temperatur Mitten (TS3)")
 
@@ -470,14 +476,14 @@ MAKE_PSTR_LIST(wwOneTime, "wwonetime", "one time charging", "Einmalladung", "Buf
 MAKE_PSTR_LIST(wwDisinfecting, "wwdisinfecting", "disinfecting", "Desinfizieren", "Desinfectie", "Desinficerar")
 MAKE_PSTR_LIST(wwCharging, "wwcharging", "charging", "Laden", "Laden", "Laddar")
 MAKE_PSTR_LIST(wwChargeOptimization, "wwchargeoptimization", "charge optimization", "Ladungsoptimierung", "laadoptimalisatie", "Laddningsoptimering")
-MAKE_PSTR_LIST(wwRecharging, "wwrecharging", "recharging", "Nachladen", "herladen", "Omladdar")
+MAKE_PSTR_LIST(wwRecharging, "wwrecharging", "recharging", "Nachladen", "herladen", "Laddar om")
 MAKE_PSTR_LIST(wwTempOK, "wwtempok", "temperature ok", "Temperatur ok", "Temperatuur OK", "Temperatur OK")
 MAKE_PSTR_LIST(wwActive, "wwactive", "active", "aktiv", "Actief", "Aktiv")
-MAKE_PSTR_LIST(ww3wayValve, "ww3wayvalve", "3-way valve active", "3-Wegeventil aktiv", "3-wegklep actief", "Trevägsventil Aktiv")
+MAKE_PSTR_LIST(ww3wayValve, "ww3wayvalve", "3-way valve active", "3-Wegeventil aktiv", "3-wegklep actief", "Trevägsventil aktiv")
 MAKE_PSTR_LIST(wwSetPumpPower, "wwsetpumppower", "set pump power", "Soll Pumpenleistung", "Streefwaarde pompvermogen", "Vald pumpeffekt")
 MAKE_PSTR_LIST(wwMixerTemp, "wwmixertemp", "mixer temperature", "Mischertemperatur", "Mixertemperatuur", "Blandningsventil-tempertur")
-MAKE_PSTR_LIST(wwStarts, "wwstarts", "starts", "Anzahl Starts", "Aantal starts", "Antal Starter")
-MAKE_PSTR_LIST(wwStarts2, "wwstarts2", "control starts2", "Kreis 2 Anzahl Starts", "Aantal starts circuit 2", "Antal Starter Krets 2")
+MAKE_PSTR_LIST(wwStarts, "wwstarts", "starts", "Anzahl Starts", "Aantal starts", "Antal starter")
+MAKE_PSTR_LIST(wwStarts2, "wwstarts2", "control starts2", "Kreis 2 Anzahl Starts", "Aantal starts circuit 2", "Antal starter Krets 2")
 MAKE_PSTR_LIST(wwWorkM, "wwworkm", "active time", "aktive Zeit", "Actieve tijd", "Aktiv Tid")
 MAKE_PSTR_LIST(wwHystOn, "wwhyston", "hysteresis on temperature", "Einschalttemperaturdifferenz", "Inschakeltemperatuurverschil", "Hysteres PÅ-temperatur")
 MAKE_PSTR_LIST(wwHystOff, "wwhystoff", "hysteresis off temperature", "Ausschalttemperaturdifferenz", "Uitschakeltemperatuurverschil", "Hysteres AV-temperatur")
@@ -583,12 +589,13 @@ MAKE_PSTR_LIST(roominfl_factor, "roominflfactor", "room influence factor", "Raum
 MAKE_PSTR_LIST(curroominfl, "curroominfl", "current room influence", "aktueller Raumeinfluss", "Huidige ruimteinvloed", "Aktuell Rumspåverkan")
 MAKE_PSTR_LIST(nofrosttemp, "nofrosttemp", "nofrost temperature", "Frostschutztemperatur", "Temperatuur vorstbeveiliging", "Temperatur Frostskydd")
 MAKE_PSTR_LIST(targetflowtemp, "targetflowtemp", "target flow temperature", "berechnete Vorlauftemperatur", "Berekende aanvoertemperatuur", "Målvärde Flödestemperatur")
-MAKE_PSTR_LIST(heatingtype, "heatingtype", "heating type", "Heizungstyp", "Verwarmingstype", "Uppvärmningstyp")
+MAKE_PSTR_LIST(heatingtype, "heatingtype", "heating type", "Heizungstyp", "Verwarmingstype", "Värmesystem")
 MAKE_PSTR_LIST(summersetmode, "summersetmode", "set summer mode", "Einstellung Sommerbetrieb", "Instelling zomerbedrijf", "Aktivera Sommarläge")
 MAKE_PSTR_LIST(hpoperatingmode, "hpoperatingmode", "heatpump operating mode", "Wärmepumpe Betriebsmodus", "Bedrijfsmodus warmtepomp", "Värmepump Driftläge")
 MAKE_PSTR_LIST(hpoperatingstate, "hpoperatingstate", "heatpump operating state", "WP Arbeitsweise", "Huidige modus warmtepomp", "Värmepump Driftstatus")
 MAKE_PSTR_LIST(controlmode, "controlmode", "control mode", "Kontrollmodus", "Comtrolemodus", "Kontrolläge")
 MAKE_PSTR_LIST(control, "control", "control device", "Fernsteuerung", "Afstandsbedieding", "Kontrollenhet")
+MAKE_PSTR_LIST(roomsensor, "roomsensor", "room sensor", "Raumsensor", "Ruimtesensor", "Rumssensor")
 MAKE_PSTR_LIST(program, "program", "program", "Programm", "Programma", "Program")
 MAKE_PSTR_LIST(pause, "pause", "pause time", "Pausenzeit", "Pausetijd", "Paustid")
 MAKE_PSTR_LIST(party, "party", "party time", "Partyzeit", "Partytijd", "Partytid")

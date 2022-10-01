@@ -177,13 +177,22 @@ MAKE_PSTR_LIST(progc, "prog c")
 MAKE_PSTR_LIST(progd, "prog d")
 MAKE_PSTR_LIST(proge, "prog e")
 MAKE_PSTR_LIST(progf, "prog f")
+MAKE_PSTR_LIST(rc35, "RC35")
+MAKE_PSTR_LIST(0kW, "0 kW")
+MAKE_PSTR_LIST(2kW, "2 kW")
+MAKE_PSTR_LIST(3kW, "3 kW")
+MAKE_PSTR_LIST(4kW, "4 kW")
+MAKE_PSTR_LIST(6kW, "6 kW")
+MAKE_PSTR_LIST(9kW, "9 kW")
 
-// templates - this are not translated and will be saved under optons_single
+// templates - this are not translated and will be saved under options_single
 MAKE_PSTR_LIST(tpl_datetime, "Format: < NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1) >")
 MAKE_PSTR_LIST(tpl_switchtime, "Format: <nn> [ not_set | day hh:mm on|off ]")
 MAKE_PSTR_LIST(tpl_switchtime1, "Format: <nn> [ not_set | day hh:mm Tn ]")
 MAKE_PSTR_LIST(tpl_holidays, "Format: < dd.mm.yyyy-dd.mm.yyyy >")
 MAKE_PSTR_LIST(tpl_date, "Format: < dd.mm.yyyy >")
+MAKE_PSTR_LIST(tpl_input, "Format: <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]")
+MAKE_PSTR_LIST(tpl_input4, "Format: <inv>[<comp><aux><cool><heat><dhw><pv>]")
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
 // These don't need translating, it will mess up HA and the API
@@ -290,6 +299,7 @@ MAKE_PSTR_ENUM(enum_comfort, FL_(hot), FL_(eco), FL_(intelligent))
 MAKE_PSTR_ENUM(enum_comfort1, FL_(high_comfort), FL_(eco))
 MAKE_PSTR_ENUM(enum_flow, FL_(off), FL_(flow), FL_(bufferedflow), FL_(buffer), FL_(layeredbuffer))
 MAKE_PSTR_ENUM(enum_reset, FL_(dash), FL_(maintenance), FL_(error))
+MAKE_PSTR_ENUM(enum_maxHeat, FL_(0kW), FL_(2kW), FL_(3kW), FL_(4kW), FL_(6kW), FL_(9kW))
 
 // thermostat lists
 MAKE_PSTR_ENUM(enum_ibaMainDisplay,
@@ -339,6 +349,7 @@ MAKE_PSTR_ENUM(enum_controlmode1, FL_(weather_compensated), FL_(outside_basepoin
 MAKE_PSTR_ENUM(enum_controlmode2, FL_(outdoor), FL_(room))
 MAKE_PSTR_ENUM(enum_control, FL_(off), FL_(rc20), FL_(rc3x))
 MAKE_PSTR_ENUM(enum_j_control, FL_(off), FL_(fb10), FL_(fb100))
+MAKE_PSTR_ENUM(enum_roomsensor, FL_(extern), FL_(intern), FL_(auto))
 
 MAKE_PSTR_ENUM(enum_switchmode, FL_(off), FL_(eco), FL_(comfort), FL_(heat))
 

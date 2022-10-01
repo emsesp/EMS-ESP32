@@ -29,11 +29,11 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     // alternative heatsource special messages
 
     if (device_id == EMSdevice::EMS_DEVICE_ID_AM200) {
-        register_telegram_type(0x54D, ("AmTemperatures"), false, MAKE_PF_CB(process_amTempMessage));
-        register_telegram_type(0x54E, ("AmStatus"), false, MAKE_PF_CB(process_amStatusMessage));
-        register_telegram_type(0x54F, ("AmCommand"), false, MAKE_PF_CB(process_amCommandMessage)); // not broadcasted, but actually not used
-        register_telegram_type(0x550, ("AmExtra"), false, MAKE_PF_CB(process_amExtraMessage));
-        register_telegram_type(0x54C, ("AmSettings"), true, MAKE_PF_CB(process_amSettingMessage)); // not broadcasted
+        register_telegram_type(0x54D, "AmTemperatures", false, MAKE_PF_CB(process_amTempMessage));
+        register_telegram_type(0x54E, "AmStatus", false, MAKE_PF_CB(process_amStatusMessage));
+        register_telegram_type(0x54F, "AmCommand", false, MAKE_PF_CB(process_amCommandMessage)); // not broadcasted, but actually not used
+        register_telegram_type(0x550, "AmExtra", false, MAKE_PF_CB(process_amExtraMessage));
+        register_telegram_type(0x54C, "AmSettings", true, MAKE_PF_CB(process_amSettingMessage)); // not broadcasted
 
         register_device_value(DeviceValueTAG::TAG_AHS,
                               &curFlowTemp_,
@@ -113,12 +113,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     if (device_id >= EMSdevice::EMS_DEVICE_ID_BOILER_1) {
         uint8_t hs = device_id - EMSdevice::EMS_DEVICE_ID_BOILER_1; // heating source id, count from 0
         // Runtime of each heatingsource in 0x06DC, ff
-        register_telegram_type(0x6DC + hs, ("CascadeMessage"), false, MAKE_PF_CB(process_CascadeMessage));
+        register_telegram_type(0x6DC + hs, "CascadeMessage", false, MAKE_PF_CB(process_CascadeMessage));
         register_device_value(DeviceValueTAG::TAG_HS1 + hs, &burnWorkMin_, DeviceValueType::TIME, FL_(burnWorkMin), DeviceValueUOM::MINUTES);
         // selBurnpower in D2 and E4
-        // register_telegram_type(0xD2, ("CascadePowerMessage"), false, MAKE_PF_CB(process_CascadePowerMessage));
+        // register_telegram_type(0xD2, "CascadePowerMessage", false, MAKE_PF_CB(process_CascadePowerMessage));
         // individual Flowtemps and powervalues for each heatingsource in E4
-        register_telegram_type(0xE4, ("UBAMonitorFastPlus"), false, MAKE_PF_CB(process_UBAMonitorFastPlus));
+        register_telegram_type(0xE4, "UBAMonitorFastPlus", false, MAKE_PF_CB(process_UBAMonitorFastPlus));
         register_device_value(DeviceValueTAG::TAG_HS1 + hs, &selFlowTemp_, DeviceValueType::UINT, FL_(selFlowTemp), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_HS1 + hs, &selBurnPow_, DeviceValueType::UINT, FL_(selBurnPow), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_HS1 + hs,
@@ -136,48 +136,51 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
     // the telegram handlers...
     // common for all boilers
-    register_telegram_type(0xBF, ("ErrorMessage"), false, MAKE_PF_CB(process_ErrorMessage));
-    register_telegram_type(0x10, ("UBAErrorMessage1"), false, MAKE_PF_CB(process_UBAErrorMessage));
-    register_telegram_type(0x11, ("UBAErrorMessage2"), false, MAKE_PF_CB(process_UBAErrorMessage));
-    register_telegram_type(0xC2, ("UBAErrorMessage3"), false, MAKE_PF_CB(process_UBAErrorMessage2));
-    register_telegram_type(0x14, ("UBATotalUptime"), true, MAKE_PF_CB(process_UBATotalUptime));
-    register_telegram_type(0x15, ("UBAMaintenanceData"), false, MAKE_PF_CB(process_UBAMaintenanceData));
-    register_telegram_type(0x1C, ("UBAMaintenanceStatus"), false, MAKE_PF_CB(process_UBAMaintenanceStatus));
+    register_telegram_type(0xBF, "ErrorMessage", false, MAKE_PF_CB(process_ErrorMessage));
+    register_telegram_type(0x10, "UBAErrorMessage1", false, MAKE_PF_CB(process_UBAErrorMessage));
+    register_telegram_type(0x11, "UBAErrorMessage2", false, MAKE_PF_CB(process_UBAErrorMessage));
+    register_telegram_type(0xC2, "UBAErrorMessage3", false, MAKE_PF_CB(process_UBAErrorMessage2));
+    register_telegram_type(0x14, "UBATotalUptime", true, MAKE_PF_CB(process_UBATotalUptime));
+    register_telegram_type(0x15, "UBAMaintenanceData", false, MAKE_PF_CB(process_UBAMaintenanceData));
+    register_telegram_type(0x1C, "UBAMaintenanceStatus", false, MAKE_PF_CB(process_UBAMaintenanceStatus));
 
     // EMS1.0 and maybe EMS+?
-    register_telegram_type(0x18, ("UBAMonitorFast"), false, MAKE_PF_CB(process_UBAMonitorFast));
-    register_telegram_type(0x19, ("UBAMonitorSlow"), false, MAKE_PF_CB(process_UBAMonitorSlow));
-    register_telegram_type(0x1A, ("UBASetPoints"), false, MAKE_PF_CB(process_UBASetPoints));
-    register_telegram_type(0x35, ("UBAFlags"), false, MAKE_PF_CB(process_UBAFlags));
+    register_telegram_type(0x18, "UBAMonitorFast", false, MAKE_PF_CB(process_UBAMonitorFast));
+    register_telegram_type(0x19, "UBAMonitorSlow", false, MAKE_PF_CB(process_UBAMonitorSlow));
+    register_telegram_type(0x1A, "UBASetPoints", false, MAKE_PF_CB(process_UBASetPoints));
+    register_telegram_type(0x35, "UBAFlags", false, MAKE_PF_CB(process_UBAFlags));
 
     // only EMS 1.0
-    register_telegram_type(0x16, ("UBAParameters"), true, MAKE_PF_CB(process_UBAParameters));
-    register_telegram_type(0x33, ("UBAParameterWW"), true, MAKE_PF_CB(process_UBAParameterWW));
-    register_telegram_type(0x34, ("UBAMonitorWW"), false, MAKE_PF_CB(process_UBAMonitorWW));
+    register_telegram_type(0x16, "UBAParameters", true, MAKE_PF_CB(process_UBAParameters));
+    register_telegram_type(0x33, "UBAParameterWW", true, MAKE_PF_CB(process_UBAParameterWW));
+    register_telegram_type(0x34, "UBAMonitorWW", false, MAKE_PF_CB(process_UBAMonitorWW));
 
     // not ems1.0, but HT3
     if (model() != EMSdevice::EMS_DEVICE_FLAG_EMS) {
-        register_telegram_type(0x26, ("UBASettingsWW"), true, MAKE_PF_CB(process_UBASettingsWW));
-        register_telegram_type(0x2A, ("MC110Status"), false, MAKE_PF_CB(process_MC110Status));
+        register_telegram_type(0x26, "UBASettingsWW", true, MAKE_PF_CB(process_UBASettingsWW));
+        register_telegram_type(0x2A, "MC110Status", false, MAKE_PF_CB(process_MC110Status));
     }
 
     // only EMS+
     if (model() != EMSdevice::EMS_DEVICE_FLAG_EMS && model() != EMSdevice::EMS_DEVICE_FLAG_HT3 && model() != EMSdevice::EMS_DEVICE_FLAG_HYBRID) {
-        register_telegram_type(0xD1, ("UBAOutdoorTemp"), false, MAKE_PF_CB(process_UBAOutdoorTemp));
-        register_telegram_type(0xE3, ("UBAMonitorSlowPlus2"), false, MAKE_PF_CB(process_UBAMonitorSlowPlus2));
-        register_telegram_type(0xE4, ("UBAMonitorFastPlus"), false, MAKE_PF_CB(process_UBAMonitorFastPlus));
-        register_telegram_type(0xE5, ("UBAMonitorSlowPlus"), false, MAKE_PF_CB(process_UBAMonitorSlowPlus));
-        register_telegram_type(0xE6, ("UBAParametersPlus"), true, MAKE_PF_CB(process_UBAParametersPlus));
-        register_telegram_type(0xE9, ("UBAMonitorWWPlus"), false, MAKE_PF_CB(process_UBAMonitorWWPlus));
-        register_telegram_type(0xEA, ("UBAParameterWWPlus"), true, MAKE_PF_CB(process_UBAParameterWWPlus));
+        register_telegram_type(0xD1, "UBAOutdoorTemp", false, MAKE_PF_CB(process_UBAOutdoorTemp));
+        register_telegram_type(0xE3, "UBAMonitorSlowPlus2", false, MAKE_PF_CB(process_UBAMonitorSlowPlus2));
+        register_telegram_type(0xE4, "UBAMonitorFastPlus", false, MAKE_PF_CB(process_UBAMonitorFastPlus));
+        register_telegram_type(0xE5, "UBAMonitorSlowPlus", false, MAKE_PF_CB(process_UBAMonitorSlowPlus));
+        register_telegram_type(0xE6, "UBAParametersPlus", true, MAKE_PF_CB(process_UBAParametersPlus));
+        register_telegram_type(0xE9, "UBAMonitorWWPlus", false, MAKE_PF_CB(process_UBAMonitorWWPlus));
+        register_telegram_type(0xEA, "UBAParameterWWPlus", true, MAKE_PF_CB(process_UBAParameterWWPlus));
     }
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_HEATPUMP) {
-        register_telegram_type(0x494, ("UBAEnergySupplied"), false, MAKE_PF_CB(process_UBAEnergySupplied));
-        register_telegram_type(0x495, ("UBAInformation"), false, MAKE_PF_CB(process_UBAInformation));
-        register_telegram_type(0x48D, ("HpPower"), true, MAKE_PF_CB(process_HpPower));
-        register_telegram_type(0x48F, ("HpOutdoor"), false, MAKE_PF_CB(process_HpOutdoor));
-        register_telegram_type(0x48A, ("HpPool"), true, MAKE_PF_CB(process_HpPool));
+        register_telegram_type(0x494, "UBAEnergySupplied", false, MAKE_PF_CB(process_UBAEnergySupplied));
+        register_telegram_type(0x495, "UBAInformation", false, MAKE_PF_CB(process_UBAInformation));
+        register_telegram_type(0x48D, "HpPower", true, MAKE_PF_CB(process_HpPower));
+        register_telegram_type(0x48F, "HpOutdoor", false, MAKE_PF_CB(process_HpOutdoor));
+        register_telegram_type(0x48A, "HpPool", true, MAKE_PF_CB(process_HpPool));
+        register_telegram_type(0x4A2, "HpInput", false, MAKE_PF_CB(process_HpInput));
+        register_telegram_type(0x486, "HpInConfig", false, MAKE_PF_CB(process_HpInConfig));
+        register_telegram_type(0x492, "HpHeaterConfig", false, MAKE_PF_CB(process_HpHeaterConfig));
     }
 
     /*
@@ -186,7 +189,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     * enable settings here if no thermostat is used in system
     *
     if (model() == EMSdevice::EMS_DEVICE_FLAG_HYBRID) {
-        register_telegram_type(0xBB, ("HybridHp"), true, MAKE_PF_CB(process_HybridHp));
+        register_telegram_type(0xBB, "HybridHp", true, MAKE_PF_CB(process_HybridHp));
     }
     */
 
@@ -497,6 +500,59 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(poolSetTemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_pool_temp));
+        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[0].state, DeviceValueType::BOOL, FL_(hpInput1), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &hpInput[0].option,
+                              DeviceValueType::STRING,
+                              FL_(tpl_input),
+                              FL_(hpIn1Opt),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_HpIn1Logic));
+        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[1].state, DeviceValueType::BOOL, FL_(hpInput2), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &hpInput[1].option,
+                              DeviceValueType::STRING,
+                              FL_(tpl_input),
+                              FL_(hpIn2Opt),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_HpIn2Logic));
+        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[2].state, DeviceValueType::BOOL, FL_(hpInput3), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &hpInput[2].option,
+                              DeviceValueType::STRING,
+                              FL_(tpl_input),
+                              FL_(hpIn3Opt),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_HpIn3Logic));
+        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[3].state, DeviceValueType::BOOL, FL_(hpInput4), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &hpInput[3].option,
+                              DeviceValueType::STRING,
+                              FL_(tpl_input4),
+                              FL_(hpIn4Opt),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_HpIn4Logic));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &maxHeatComp_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_maxHeat),
+                              FL_(maxHeatComp),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_maxHeatComp));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &maxHeatHeat_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_maxHeat),
+                              FL_(maxHeatHeat),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_maxHeatHeat));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &maxHeatDhw_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_maxHeat),
+                              FL_(maxHeatDhw),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_maxHeatDhw));
     }
 
     // dhw - DEVICE_DATA_ww topic
@@ -1093,6 +1149,44 @@ void Boiler::process_HpPool(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, poolSetTemp_, 1);
 }
 
+// Heatpump inputs - type 0x4A2
+// Boiler(0x08) -> All(0x00), ?(0x04A2), data: 02 01 01 00 01 00
+void Boiler::process_HpInput(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, hpInput[0].state, 2);
+    has_update(telegram, hpInput[1].state, 3);
+    has_update(telegram, hpInput[2].state, 4);
+    has_update(telegram, hpInput[3].state, 5);
+}
+
+// Heatpump inputs settings- type 0x486
+// Boiler(0x08) -> All(0x00), ?(0x0486), data: 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+// Boiler(0x08) -> All(0x00), ?(0x0486), data: 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 01 00 00 00 00 00 (offset 25)
+// Boiler(0x08) -> All(0x00), ?(0x0486), data: 00 00 (offset 51)
+void Boiler::process_HpInConfig(std::shared_ptr<const Telegram> telegram) {
+    char option[12];
+    for (uint8_t i = 0; i < 2; i++) {
+        for (uint8_t j = 0; j < 11; j++) {
+            option[j] = hpInput[i].option[j] - '0';
+            telegram->read_value(option[j], j * 4 + i);
+            option[j] = option[j] ? '1' : '0';
+        }
+        option[11] = '\0'; // terminate string
+        has_update(hpInput[i].option, option, 12);
+    }
+    for (uint8_t j = 0; j < 9; j++) {
+        option[j] = hpInput[3].option[j] - '0';
+        telegram->read_value(option[j], 42 + j);
+        option[j] = option[j] ? '1' : '0';
+    }
+    option[9] = '\0'; // terminate string
+    has_update(hpInput[3].option, option, 12);
+}
+
+void Boiler::process_HpHeaterConfig(std::shared_ptr<const Telegram> telegram) {
+    has_update(maxHeatComp_, 2);
+    has_update(maxHeatHeat_, 3);
+    has_update(maxHeatDhw_, 4);
+}
 
 // 0x2A - MC110Status
 // e.g. 88 00 2A 00 00 00 00 00 00 00 00 00 D2 00 00 80 00 00 01 08 80 00 02 47 00
@@ -1335,6 +1429,9 @@ void Boiler::process_amCommandMessage(std::shared_ptr<const Telegram> telegram) 
     // pos 6: boiler blocking 0-off, 1-on
 }
 
+// 0x0550 AM200 broadcasted message, all 27 bytes unkown
+// Rx: 60 00 FF 00 04 50 00 FF 00 FF FF 00 0D 00 01 00 00 00 00 01 03 01 00 03 00 2D 19 C8 02 94 00 4A
+// Rx: 60 00 FF 19 04 50 00 FF FF 39
 void Boiler::process_amExtraMessage(std::shared_ptr<const Telegram> telegram) {
 }
 
@@ -2238,6 +2335,50 @@ bool Boiler::set_emergency_ops(const char * value, const int8_t id) {
         return false;
     }
     write_command(EMS_TYPE_UBAParametersPlus, 18, v ? 0x01 : 0x00, EMS_TYPE_UBAParametersPlus);
+    return true;
+}
+
+bool Boiler::set_HpInLogic(const char * value, const int8_t id) {
+    if (id == 0 || id > 4) {
+        return false;
+    }
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x486, id == 4 ? 42 : id - 1, v ? 1 : 0, 0x486);
+        return true;
+    }
+    if (strlen(value) == 11 && id != 4) {
+        uint8_t v[11];
+        for (uint8_t i = 0; i < 11; i++) {
+            v[i] = value[i] - '0';
+            if (v[i] > 1) {
+                return false;
+            }
+            write_command(0x486, i * 3 + id - 1, v[i]);
+        }
+        return true;
+    }
+    // input 4
+    if (strlen(value) == 8 && id == 4) {
+        uint8_t v[11];
+        for (uint8_t i = 0; i < 8; i++) {
+            v[i] = value[i] - '0';
+            if (v[i] > 1) {
+                return false;
+            }
+            write_command(0x486, 42 + i, v[i]);
+        }
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_maxHeat(const char * value, const int8_t id) {
+    uint8_t v;
+    if (!Helpers::value2enum(value, v, FL_(enum_maxHeat))) {
+        return false;
+    }
+    write_command(0x492, id, v, 0x492);
     return true;
 }
 

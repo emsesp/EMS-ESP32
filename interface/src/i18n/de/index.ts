@@ -179,7 +179,7 @@ const de: Translation = {
   PLATFORM: 'Platform (Platform / SDK)',
   UPTIME: 'System Betriebszeit',
   CPU_FREQ: 'CPU Frequenz',
-  HEAP: 'RAM Speicher (Frei / Max Belegt)',
+  HEAP: 'RAM freier Speicher (Gesamt / max. Block)',
   PSRAM: 'PSRAM (Größe / Frei)',
   FLASH: 'Flash Speicher (Größe / Geschwindigkeit)',
   APPSIZE: 'Programm (Genutzt / Frei)',
@@ -263,7 +263,7 @@ const de: Translation = {
   GUEST: 'Gast',
   NEW: 'Neuer',
   RENAME: 'Ändere',
-  ENTITY: 'Einheit'
+  ENTITY: 'Entität'
 };
 
 export default de;

@@ -28,7 +28,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // Pool module
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MP) {
-        register_telegram_type(0x5BA, ("HpPoolStatus"), true, MAKE_PF_CB(process_HpPoolStatus));
+        register_telegram_type(0x5BA, "HpPoolStatus", true, MAKE_PF_CB(process_HpPoolStatus));
         type_ = Type::MP;
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &poolTemp_,
@@ -43,8 +43,8 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     // EMS+
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         if (device_id >= 0x20 && device_id <= 0x27) {
-            register_telegram_type(device_id - 0x20 + 0x02D7, ("MMPLUSStatusMessage_HC"), false, MAKE_PF_CB(process_MMPLUSStatusMessage_HC));
-            // register_telegram_type(device_id - 0x20 + 0x02E1, ("MMPLUSStetMessage_HC"), true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
+            register_telegram_type(device_id - 0x20 + 0x02D7, "MMPLUSStatusMessage_HC", false, MAKE_PF_CB(process_MMPLUSStatusMessage_HC));
+            // register_telegram_type(device_id - 0x20 + 0x02E1, "MMPLUSStetMessage_HC", true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
             type_       = Type::HC;
             hc_         = device_id - 0x20 + 1;
             uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
@@ -53,9 +53,9 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
             register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
             register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
         } else if (device_id >= 0x28 && device_id <= 0x29) {
-            register_telegram_type(device_id - 0x28 + 0x0331, ("MMPLUSStatusMessage_WWC"), false, MAKE_PF_CB(process_MMPLUSStatusMessage_WWC));
-            register_telegram_type(device_id - 0x28 + 0x0313, ("MMPLUSConfigMessage_WWC"), true, MAKE_PF_CB(process_MMPLUSConfigMessage_WWC));
-            // register_telegram_type(device_id - 0x28 + 0x033B, ("MMPLUSSetMessage_WWC"), true, MAKE_PF_CB(process_MMPLUSSetMessage_WWC));
+            register_telegram_type(device_id - 0x28 + 0x0331, "MMPLUSStatusMessage_WWC", false, MAKE_PF_CB(process_MMPLUSStatusMessage_WWC));
+            register_telegram_type(device_id - 0x28 + 0x0313, "MMPLUSConfigMessage_WWC", true, MAKE_PF_CB(process_MMPLUSConfigMessage_WWC));
+            // register_telegram_type(device_id - 0x28 + 0x033B, "MMPLUSSetMessage_WWC", true, MAKE_PF_CB(process_MMPLUSSetMessage_WWC));
             type_       = Type::WWC;
             hc_         = device_id - 0x28 + 1;
             uint8_t tag = DeviceValueTAG::TAG_WWC1 + hc_ - 1;
@@ -85,9 +85,9 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
 
     // EMS 1.0
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MM10) {
-        register_telegram_type(0x00AA, ("MMConfigMessage"), true, MAKE_PF_CB(process_MMConfigMessage));
-        register_telegram_type(0x00AB, ("MMStatusMessage"), false, MAKE_PF_CB(process_MMStatusMessage));
-        register_telegram_type(0x00AC, ("MMSetMessage"), false, MAKE_PF_CB(process_MMSetMessage));
+        register_telegram_type(0x00AA, "MMConfigMessage", true, MAKE_PF_CB(process_MMConfigMessage));
+        register_telegram_type(0x00AB, "MMStatusMessage", false, MAKE_PF_CB(process_MMStatusMessage));
+        register_telegram_type(0x00AC, "MMSetMessage", false, MAKE_PF_CB(process_MMSetMessage));
         type_       = Type::HC;
         hc_         = device_id - 0x20 + 1;
         uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
@@ -110,10 +110,10 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     // HT3
     if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         if (device_id >= 0x40) { // special DHW pos 10
-            register_telegram_type(0x34, ("UBAMonitorWW"), false, MAKE_PF_CB(process_IPMMonitorWW));
-            register_telegram_type(0x1E, ("HydrTemp"), false, MAKE_PF_CB(process_IPMHydrTemp));
-            register_telegram_type(0x33, ("UBAParameterWW"), true, MAKE_PF_CB(process_IPMParameterWW));
-            // register_telegram_type(0x10D, ("wwNTCStatus"), false, MAKE_PF_CB(process_wwNTCStatus));
+            register_telegram_type(0x34, "UBAMonitorWW", false, MAKE_PF_CB(process_IPMMonitorWW));
+            register_telegram_type(0x1E, "HydrTemp", false, MAKE_PF_CB(process_IPMHydrTemp));
+            register_telegram_type(0x33, "UBAParameterWW", true, MAKE_PF_CB(process_IPMParameterWW));
+            // register_telegram_type(0x10D, "wwNTCStatus", false, MAKE_PF_CB(process_wwNTCStatus));
             type_       = Type::WWC;
             hc_         = device_id - 0x40 + 1;
             uint8_t tag = DeviceValueTAG::TAG_WWC9 + hc_ - 1;
@@ -139,9 +139,9 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                                   MAKE_CF_CB(set_wwCircPump));
             register_device_value(tag, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircMode));
         } else {
-            register_telegram_type(0x010C, ("IPMStatusMessage"), false, MAKE_PF_CB(process_IPMStatusMessage));
-            register_telegram_type(0x011E, ("IPMTempMessage"), false, MAKE_PF_CB(process_IPMTempMessage));
-            // register_telegram_type(0x0123, ("IPMSetMessage"), false, MAKE_PF_CB(process_IPMSetMessage));
+            register_telegram_type(0x010C, "IPMStatusMessage", false, MAKE_PF_CB(process_IPMStatusMessage));
+            register_telegram_type(0x011E, "IPMTempMessage", false, MAKE_PF_CB(process_IPMTempMessage));
+            // register_telegram_type(0x0123, "IPMSetMessage", false, MAKE_PF_CB(process_IPMSetMessage));
             type_       = Type::HC;
             hc_         = device_id - 0x20 + 1;
             uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
