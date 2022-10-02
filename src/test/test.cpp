@@ -601,6 +601,36 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::system_.healthcheck(n);
     }
 
+    if (command == "custom") {
+        shell.printfln(F("Testing custom entities"));
+
+        Mqtt::ha_enabled(true);
+        Mqtt::send_response(false);
+
+        run_test("thermostat");
+
+        // shell.invoke_command("call thermostat seltemp");
+        // shell.invoke_command("call system publish");
+
+        // toggle mode
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            Serial.print("Custom: ");
+            Serial.print(emsdevice->device_type_name().c_str());
+            Serial.print(" uniqueid=");
+            Serial.println(emsdevice->unique_id());
+
+            if (emsdevice->unique_id() == 1) { // thermostat
+                std::string a = "00hc1/seltemp|new name>5<52";
+                emsdevice->setCustomEntity(a);
+                break;
+            }
+        }
+
+        shell.invoke_command("call thermostat seltemp");
+        shell.invoke_command("call system publish");
+    }
+
+
     if (command == "masked") {
         shell.printfln("Testing masked entities");
 

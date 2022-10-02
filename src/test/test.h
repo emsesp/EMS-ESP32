@@ -51,6 +51,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "api_values"
 // #define EMSESP_DEBUG_DEFAULT "mqtt_post"
 // #define EMSESP_DEBUG_DEFAULT "api_wwmode"
+// #define EMSESP_DEBUG_DEFAULT "custom"
 
 class Test {
   public:
