@@ -925,7 +925,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
     publish_ha_sensor_config(dv.type,
                              dv.tag,
                              dv.get_fullname().c_str(),
-                             dv.fullname[0],
+                             (dv.fullname ? dv.fullname[0] : nullptr), // EN name
                              dv.device_type,
                              dv.short_name,
                              dv.uom,
@@ -1115,12 +1115,12 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
     // entity id is generated from the name, see https://www.home-assistant.io/docs/mqtt/discovery/#use-object_id-to-influence-the-entity-id
     // so we override it to make it unique using entity_id
     // See https://github.com/emsesp/EMS-ESP32/issues/596
-    // keep it compatible to v3.4, use english fullname, no prefix (basename prefix commmented out)
+    // keep it compatible to v3.4, use english fullname, no prefix (basename prefix commented out)
     char object_id[130];
     if (have_tag) {
-        snprintf(object_id, sizeof(object_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag).c_str(), (en_name));
+        snprintf(object_id, sizeof(object_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag).c_str(), en_name);
     } else {
-        snprintf(object_id, sizeof(object_id), "%s_%s", device_name, (en_name));
+        snprintf(object_id, sizeof(object_id), "%s_%s", device_name, en_name);
     }
     doc["object_id"] = object_id;
 
@@ -1130,7 +1130,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
     if (is_nested()) {
         snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", new_entity);
     } else {
-        snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", (entity));
+        snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", entity);
     }
     doc["val_tpl"] = val_tpl;
 
@@ -1162,11 +1162,11 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
         case DeviceValueUOM::DEGREES:
         case DeviceValueUOM::DEGREES_R:
             doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = ("temperature"); // no icon needed
+            doc[dc_ha] = "temperature"; // no icon needed
             break;
         case DeviceValueUOM::PERCENT:
             doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = ("power_factor"); // no icon needed
+            doc[dc_ha] = "power_factor"; // no icon needed
             break;
         case DeviceValueUOM::SECONDS:
         case DeviceValueUOM::MINUTES:
@@ -1191,11 +1191,11 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
             } else {
                 doc[sc_ha] = F_(measurement);
             }
-            doc[dc_ha] = ("energy"); // no icon needed
+            doc[dc_ha] = "energy"; // no icon needed
             break;
         case DeviceValueUOM::KWH:
             doc[sc_ha] = F_(total_increasing);
-            doc[dc_ha] = ("energy"); // no icon needed
+            doc[dc_ha] = "energy"; // no icon needed
             break;
         case DeviceValueUOM::UA:
             doc[ic_ha] = F_(iconua);
@@ -1203,16 +1203,16 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
             break;
         case DeviceValueUOM::BAR:
             doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = ("pressure");
+            doc[dc_ha] = "pressure";
             break;
         case DeviceValueUOM::W:
         case DeviceValueUOM::KW:
             doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = ("power");
+            doc[dc_ha] = "power";
             break;
         case DeviceValueUOM::DBM:
             doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = ("signal_strength");
+            doc[dc_ha] = "signal_strength";
             break;
         case DeviceValueUOM::NONE:
             // for device entities which have numerical values, with no UOM
