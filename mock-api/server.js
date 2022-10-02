@@ -597,6 +597,8 @@ const emsesp_deviceentities_1 = [
     n: 'hc1 selected room temperature',
     id: 'hc1/seltemp',
     m: 0,
+    mi: 5,
+    ma: 52,
     w: true,
   },
   {
