@@ -165,17 +165,21 @@ const SettingsCustomization: FC = () => {
   }
 
   function formatName(de: DeviceEntity) {
-    if (de.n === undefined || de.n === de.id) {
-      return de.id;
-    }
-
-    if (de.n[0] === '!') {
-      return LL.COMMAND() + ': ' + de.n.slice(1);
+    if (de.n === undefined) {
+      return (
+        <>
+          (
+          <Link target="_blank" href={APIURL + devices?.devices[selectedDevice].t + '/' + de.id}>
+            {de.id}
+          </Link>
+          )
+        </>
+      );
     }
 
     return (
       <>
-        {de.cn !== undefined && de.cn !== '' ? de.cn : de.n}
+        {de.n[0] === '!' ? LL.COMMAND() + ': ' + de.n.slice(1) : de.cn !== undefined && de.cn !== '' ? de.cn : de.n}
         &nbsp;(
         <Link target="_blank" href={APIURL + devices?.devices[selectedDevice].t + '/' + de.id}>
           {de.id}
@@ -322,7 +326,7 @@ const SettingsCustomization: FC = () => {
   };
 
   const editEntity = (de: DeviceEntity) => {
-    if (de.n && de.n[0] === '!') {
+    if (de.n === undefined || (de.n && de.n[0] === '!')) {
       return;
     }
 
