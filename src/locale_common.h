@@ -20,6 +20,8 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
+// clang-format off
+
 /*
  * THIS FILE CONTAINS STANDARD STRING LITERALS THAT DON'T NEED LANGUAGE TRANSLATIONS
  */
@@ -273,7 +275,8 @@ MAKE_PSTR(response, "response")
 MAKE_PSTR(tag_boiler_data_ww_mqtt, "ww")
 MAKE_PSTR(tag_device_data_ww_mqtt, "")
 
-MAKE_PSTR_LIST(climate, "HA climate config creation", "")
+// Home Assistant - this is special and has no translations
+MAKE_PSTR_LIST(climate, "HA climate config creation")
 
 // syslog
 MAKE_PSTR_LIST(list_syslog_level, "off", "emerg", "alert", "crit", "error", "warn", "notice", "info", "debug", "trace", "all")
@@ -302,16 +305,7 @@ MAKE_PSTR_ENUM(enum_reset, FL_(dash), FL_(maintenance), FL_(error))
 MAKE_PSTR_ENUM(enum_maxHeat, FL_(0kW), FL_(2kW), FL_(3kW), FL_(4kW), FL_(6kW), FL_(9kW))
 
 // thermostat lists
-MAKE_PSTR_ENUM(enum_ibaMainDisplay,
-               FL_(internal_temperature),
-               FL_(internal_setpoint),
-               FL_(external_temperature),
-               FL_(burner_temperature),
-               FL_(ww_temperature),
-               FL_(functioning_mode),
-               FL_(time),
-               FL_(date),
-               FL_(smoke_temperature))
+MAKE_PSTR_ENUM(enum_ibaMainDisplay, FL_(internal_temperature), FL_(internal_setpoint), FL_(external_temperature), FL_(burner_temperature), FL_(ww_temperature), FL_(functioning_mode), FL_(time), FL_(date), FL_(smoke_temperature))
 MAKE_PSTR_ENUM(enum_ibaLanguage, FL_(german), FL_(dutch), FL_(french), FL_(italian))
 MAKE_PSTR_ENUM(enum_ibaLanguage_RC30, FL_(german), FL_(dutch))
 MAKE_PSTR_ENUM(enum_floordrystatus, FL_(off), FL_(start), FL_(heat), FL_(hold), FL_(cool), FL_(end))
@@ -379,3 +373,5 @@ MAKE_PSTR_ENUM(enum_bufConfig, FL_(monovalent), FL_(bivalent))
 MAKE_PSTR_ENUM(enum_blockTerm, FL_(n_o), FL_(n_c))
 
 #pragma GCC diagnostic pop
+
+// clang-format on
