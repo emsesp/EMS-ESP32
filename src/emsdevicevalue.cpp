@@ -60,9 +60,13 @@ DeviceValue::DeviceValue(uint8_t               device_type,
         options_size = Helpers::count_items(options);
     }
 
+    // set the min/max
+    set_custom_minmax();
+
 #ifdef EMSESP_STANDALONE
     // only added for debugging
-    Serial.print("registering entity: ");
+    Serial.print(COLOR_BRIGHT_RED_BACKGROUND);
+    Serial.print(" registering entity: ");
     Serial.print((short_name));
     Serial.print("/");
     if (!custom_fullname.empty()) {
@@ -92,7 +96,7 @@ DeviceValue::DeviceValue(uint8_t               device_type,
         Serial.print((options_single[0]));
         Serial.print("!");
     }
-    Serial.println("");
+    Serial.println(COLOR_RESET);
 #endif
 }
 
