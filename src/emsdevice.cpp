@@ -391,7 +391,7 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const ch
 //  options: options for enum, which are translated as a list of lists
 //  options_single: list of names
 //  numeric_operator: to divide or multiply, see DeviceValueNumOps::
-//  short_name: used in Mqtt as keys
+//  short_name: used in MQTT as keys
 //  fullname: used in Web and Console unless empty (nullptr) - can be translated
 //  uom: unit of measure from DeviceValueUOM
 //  has_cmd: true if this is an associated command
@@ -414,7 +414,7 @@ void EMSdevice::add_device_value(uint8_t               tag,
 
     const char * const * fullname;
     if (Helpers::count_items(name) == 1) {
-        fullname = &name[0]; // no translations available
+        fullname = nullptr; // no translations available, use empty to prevent crash
     } else {
         fullname = &name[1]; // translations start at index 1
     }
@@ -478,7 +478,6 @@ void EMSdevice::add_device_value(uint8_t               tag,
     // add the device entity
     devicevalues_.emplace_back(
         device_type_, tag, value_p, type, options, options_single, numeric_operator, short_name, fullname, custom_fullname, uom, has_cmd, min, max, state);
-    devicevalues_.back().set_custom_minmax();
 
     // add a new command if it has a function attached
     if (!has_cmd) {
@@ -1018,7 +1017,10 @@ void EMSdevice::setCustomEntity(const std::string & entity_id) {
             } else {
                 dv.custom_fullname = "";
             }
+
+            // set the min / max
             dv.set_custom_minmax();
+
             return;
         }
     }
