@@ -20,7 +20,9 @@ void MqttStatus::mqttStatus(AsyncWebServerRequest * request) {
     root["client_id"]         = _mqttSettingsService->getClientId();
     root["disconnect_reason"] = (uint8_t)_mqttSettingsService->getDisconnectReason();
 
-    root["mqtt_fails"] = emsesp::Mqtt::publish_fails(); // proddy added
+    root["mqtt_queued"]   = emsesp::Mqtt::publish_queued(); // mdvp added
+    root["mqtt_fails"]    = emsesp::Mqtt::publish_fails();  // proddy added
+    root["connect_count"] = emsesp::Mqtt::connect_count();  // mdvp added
 
     response->setLength();
     request->send(response);

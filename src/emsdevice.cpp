@@ -860,7 +860,8 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                         obj["s"] = Helpers::render_value(s, (float)(-1) * dv.numeric_operator, 0);
                     }
 
-                    int16_t dv_set_min, dv_set_max;
+                    int16_t  dv_set_min;
+                    uint16_t dv_set_max;
                     if (dv.get_min_max(dv_set_min, dv_set_max)) {
                         obj["m"] = Helpers::render_value(s, dv_set_min, 0);
                         obj["x"] = Helpers::render_value(s, dv_set_max, 0);
@@ -1042,7 +1043,7 @@ void EMSdevice::setCustomEntity(const std::string & entity_id) {
             auto min = dv.min;
             auto max = dv.max;
             dv.set_custom_minmax();
-            if (dv.short_name == FL_(seltemp)[0] && (min != dv.min || max != dv.max)) {
+            if (Mqtt::ha_enabled() && dv.short_name == FL_(seltemp)[0] && (min != dv.min || max != dv.max)) {
                 set_climate_minmax(dv.tag, dv.min, dv.max);
             }
             return;
@@ -1214,7 +1215,8 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
 
             // set the min and max only for commands
             if (dv.has_cmd) {
-                int16_t dv_set_min, dv_set_max;
+                int16_t  dv_set_min;
+                uint16_t dv_set_max;
                 if (dv.get_min_max(dv_set_min, dv_set_max)) {
                     json["min"] = dv_set_min;
                     json["max"] = dv_set_max;

@@ -917,8 +917,8 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
     }
 
     // calculate the min and max
-    int16_t dv_set_min;
-    int16_t dv_set_max;
+    int16_t  dv_set_min;
+    uint16_t dv_set_max;
     (void)dv.get_min_max(dv_set_min, dv_set_max);
 
     // determine if we're creating the command topics which we use special HA configs

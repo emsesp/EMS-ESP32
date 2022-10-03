@@ -167,6 +167,14 @@ class Mqtt {
         return mqtt_publish_fails_;
     }
 
+    static uint32_t publish_queued() {
+        return mqtt_messages_.size();
+    }
+
+    static uint8_t connect_count() {
+        return connectcount_;
+    }
+
     static void reset_mqtt();
 
     static bool is_nested() {
@@ -178,7 +186,7 @@ class Mqtt {
     }
 
     static bool publish_single() {
-        return publish_single_;
+        return mqtt_enabled_ && publish_single_;
     }
 
     static bool publish_single2cmd() {
@@ -190,7 +198,7 @@ class Mqtt {
     }
 
     static bool ha_enabled() {
-        return ha_enabled_;
+        return mqtt_enabled_ && ha_enabled_;
     }
 
     static void ha_enabled(bool ha_enabled) {
