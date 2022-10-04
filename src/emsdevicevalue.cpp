@@ -270,7 +270,7 @@ bool DeviceValue::hasValue() const {
 // converts to signed int, which means rounding to an whole integer
 // returns false if there is no min/max needed
 // Types BOOL, ENUM, STRING and CMD are not used
-bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
+bool DeviceValue::get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max) {
     uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
     // if we have individual limits set already, just do the conversion

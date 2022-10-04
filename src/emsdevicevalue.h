@@ -176,7 +176,7 @@ class DeviceValue {
                 uint8_t               state);
 
     bool hasValue() const;
-    bool get_min_max(int16_t & dv_set_min, int16_t & dv_set_max);
+    bool get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max);
 
     void        set_custom_minmax();
     bool        get_custom_min(int16_t & val);

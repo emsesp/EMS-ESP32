@@ -240,6 +240,8 @@ const mqtt_status = {
   client_id: 'ems-esp',
   disconnect_reason: 0,
   mqtt_fails: 0,
+  mqtt_queued: 1,
+  connect_count: 2,
 }
 
 // SYSTEM

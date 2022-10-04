@@ -915,7 +915,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
 
     // calculate the min and max
     int16_t dv_set_min;
-    int16_t dv_set_max;
+    uint16_t dv_set_max;
     (void)dv.get_min_max(dv_set_min, dv_set_max);
 
     // determine if we're creating the command topics which we use special HA configs
@@ -1241,7 +1241,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
     publish_ha(topic, doc.as<JsonObject>());
 }
 
-void Mqtt::publish_ha_climate_config(uint8_t tag, bool has_roomtemp, bool remove) {
+void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint16_t max) {
     uint8_t hc_num = tag - DeviceValueTAG::TAG_HC1 + 1;
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -1313,9 +1313,9 @@ void Mqtt::publish_ha_climate_config(uint8_t tag, bool has_roomtemp, bool remove
         doc["curr_temp_t"]   = topic_t;
         doc["curr_temp_tpl"] = currtemp_s;
     }
-
-    doc["min_temp"]  = Helpers::render_value(min_s, (uint32_t)5, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
-    doc["max_temp"]  = Helpers::render_value(max_s, (uint32_t)30, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+    
+    doc["min_temp"]  = Helpers::render_value(min_s, min, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+    doc["max_temp"]  = Helpers::render_value(max_s, max, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
     doc["temp_step"] = "0.5";
 
     // the HA climate component only responds to auto, heat and off

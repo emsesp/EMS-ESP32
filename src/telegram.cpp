@@ -432,8 +432,13 @@ void TxService::add(const uint8_t  operation,
     LOG_DEBUG("[DEBUG] New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
 #endif
 
-    // if the queue is full, make room but removing the last one
+    // if the queue is full, make room by removing the last one
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+        if (tx_telegrams_.front().telegram_->operation == Telegram::Operation::TX_WRITE) {
+            telegram_write_fail_count_++;
+        } else {
+            telegram_read_fail_count_++;
+        }
         tx_telegrams_.pop_front();
     }
 
@@ -505,8 +510,13 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 
     auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length); // operation is TX_WRITE or TX_READ
 
-    // if the queue is full, make room but removing the last one
+    // if the queue is full, make room by removing the last one
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+        if (tx_telegrams_.front().telegram_->operation == Telegram::Operation::TX_WRITE) {
+            telegram_write_fail_count_++;
+        } else {
+            telegram_read_fail_count_++;
+        }
         tx_telegrams_.pop_front();
     }
 

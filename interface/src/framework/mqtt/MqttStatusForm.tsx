@@ -5,6 +5,7 @@ import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ReportIcon from '@mui/icons-material/Report';
 import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
+import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 
 import { ButtonRow, FormLoader, SectionContent } from '../../components';
 import { MqttStatus, MqttDisconnectReason } from '../../types';
@@ -31,6 +32,12 @@ export const mqttPublishHighlight = ({ mqtt_fails }: MqttStatus, theme: Theme) =
   return theme.palette.error.main;
 };
 
+export const mqttQueueHighlight = ({ mqtt_queued }: MqttStatus, theme: Theme) => {
+  if (mqtt_queued <= 1) return theme.palette.success.main;
+
+  return theme.palette.warning.main;
+};
+
 const MqttStatusForm: FC = () => {
   const { loadData, data, errorMessage } = useRest<MqttStatus>({ read: MqttApi.readMqttStatus });
 
@@ -38,14 +45,14 @@ const MqttStatusForm: FC = () => {
 
   const theme = useTheme();
 
-  const mqttStatus = ({ enabled, connected }: MqttStatus) => {
+  const mqttStatus = ({ enabled, connected, connect_count }: MqttStatus) => {
     if (!enabled) {
       return LL.NOT_ENABLED();
     }
     if (connected) {
-      return LL.CONNECTED();
+      return LL.CONNECTED() + (connect_count > 1 ? ' (' + connect_count + ')' : '');
     }
-    return LL.DISCONNECTED();
+    return LL.DISCONNECTED() + (connect_count > 1 ? ' (' + connect_count + ')' : '');
   };
 
   const disconnectReason = ({ disconnect_reason }: MqttStatus) => {
@@ -77,36 +84,44 @@ const MqttStatusForm: FC = () => {
     }
 
     const renderConnectionStatus = () => {
-      if (data.connected) {
-        return (
-          <>
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar>#</Avatar>
-              </ListItemAvatar>
-              <ListItemText primary="Client ID" secondary={data.client_id} />
-            </ListItem>
-            <Divider variant="inset" component="li" />
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar sx={{ bgcolor: mqttPublishHighlight(data, theme) }}>
-                  <SpeakerNotesOffIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={'MQTT Publish ' + LL.ERRORS()} secondary={data.mqtt_fails} />
-            </ListItem>
-          </>
-        );
-      }
       return (
         <>
+          {!data.connected && (
+            <>
+              <ListItem>
+                <ListItemAvatar>
+                  <Avatar>
+                    <ReportIcon />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={LL.DISCONNECT_REASON()} secondary={disconnectReason(data)} />
+              </ListItem>
+              <Divider variant="inset" component="li" />
+            </>
+          )}
           <ListItem>
             <ListItemAvatar>
-              <Avatar>
-                <ReportIcon />
+              <Avatar>#</Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="Client ID" secondary={data.client_id} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: mqttQueueHighlight(data, theme) }}>
+                <AutoAwesomeMotionIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.DISCONNECT_REASON()} secondary={disconnectReason(data)} />
+            <ListItemText primary="MQTT Queue" secondary={data.mqtt_queued} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: mqttPublishHighlight(data, theme) }}>
+                <SpeakerNotesOffIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary={'MQTT ' + LL.ERRORS()} secondary={data.mqtt_fails} />
           </ListItem>
           <Divider variant="inset" component="li" />
         </>

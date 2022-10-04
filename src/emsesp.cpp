@@ -1340,6 +1340,7 @@ void EMSESP::scheduled_fetch_values() {
             last_fetch_ = uuid::get_uptime();
             no          = 1;
         }
+        
         if (txservice_.tx_queue_empty()) {
             uint8_t i = 0;
             for (const auto & emsdevice : emsdevices) {

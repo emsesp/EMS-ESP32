@@ -107,7 +107,7 @@ class Mqtt {
                                          const JsonObject &    dev_json);
 
     static void publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
-    static void publish_ha_climate_config(uint8_t tag, bool has_roomtemp, bool remove = false);
+    static void publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove = false, const int16_t min = 5, const uint16_t max = 30);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -166,6 +166,14 @@ class Mqtt {
         return mqtt_publish_fails_;
     }
 
+    static uint32_t publish_queued() {
+        return mqtt_messages_.size();
+    }
+
+    static uint8_t connect_count() {
+        return connectcount_;
+    }
+
     static void reset_mqtt();
 
     static bool is_nested() {
@@ -177,7 +185,7 @@ class Mqtt {
     }
 
     static bool publish_single() {
-        return publish_single_;
+        return mqtt_enabled_ && publish_single_;
     }
 
     static bool publish_single2cmd() {
@@ -189,7 +197,7 @@ class Mqtt {
     }
 
     static bool ha_enabled() {
-        return ha_enabled_;
+        return mqtt_enabled_ && ha_enabled_;
     }
 
     static void ha_enabled(bool ha_enabled) {
