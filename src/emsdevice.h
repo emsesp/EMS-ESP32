@@ -187,6 +187,7 @@ class EMSdevice {
     void   list_device_entries(JsonObject & output) const;
     void   add_handlers_ignored(const uint16_t handler);
 
+    void set_climate_minmax(uint8_t tag, int16_t min, uint16_t max);
     void setCustomEntity(const std::string & entity_id);
     void getCustomEntities(std::vector<std::string> & entity_ids);
 

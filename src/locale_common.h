@@ -273,7 +273,7 @@ MAKE_PSTR(response, "response")
 MAKE_PSTR(tag_boiler_data_ww_mqtt, "ww")
 MAKE_PSTR(tag_device_data_ww_mqtt, "")
 
-MAKE_PSTR_LIST(climate, F("HA climate config creation"))
+MAKE_PSTR_LIST(climate, F("HA climate config creation"), F("")) // empty fullname
 
 // syslog
 MAKE_PSTR_LIST(list_syslog_level, F("off"), F("emerg"), F("alert"), F("crit"), F("error"), F("warn"), F("notice"), F("info"), F("debug"), F("trace"), F("all"))

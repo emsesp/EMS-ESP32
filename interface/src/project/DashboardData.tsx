@@ -508,7 +508,7 @@ const DashboardData: FC = () => {
               <ValidatedTextField
                 name="v"
                 label={deviceValue.id.slice(2)}
-                value={deviceValue.u ? numberValue(deviceValue.v) : deviceValue.v}
+                value={typeof deviceValue.v === 'number' ? (Math.round(deviceValue.v * 10) / 10) : deviceValue.v}
                 autoFocus
                 multiline={deviceValue.u ? false : true}
                 sx={{ width: '30ch' }}

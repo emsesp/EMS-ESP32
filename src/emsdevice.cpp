@@ -860,7 +860,8 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                         obj["s"] = Helpers::render_value(s, (float)(-1) * dv.numeric_operator, 0);
                     }
 
-                    int16_t dv_set_min, dv_set_max;
+                    int16_t  dv_set_min;
+                    uint16_t dv_set_max;
                     if (dv.get_min_max(dv_set_min, dv_set_max)) {
                         obj["m"] = Helpers::render_value(s, dv_set_min, 0);
                         obj["x"] = Helpers::render_value(s, dv_set_max, 0);
@@ -986,6 +987,20 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
     }
 }
 
+void EMSdevice::set_climate_minmax(uint8_t tag, int16_t min, uint16_t max) {
+    for (auto & dv : devicevalues_) {
+        if (dv.tag == tag && dv.short_name == FL_(climate[0])) {
+            if (dv.min != min || dv.max != max) {
+                dv.min = min;
+                dv.max = max;
+                dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                Mqtt::publish_ha_climate_config(dv.tag, false, true); // delete topic (remove = true)
+            }
+            return;
+        }
+    }
+}
+
 // set mask per device entity based on the id which is prefixed with the 2 char hex mask value
 // returns true if the entity has a mask set (not 0 the default)
 void EMSdevice::setCustomEntity(const std::string & entity_id) {
@@ -1009,7 +1024,7 @@ void EMSdevice::setCustomEntity(const std::string & entity_id) {
             uint8_t new_mask     = Helpers::hextoint(entity_id.substr(0, 2).c_str()); // first character contains mask flags
 
             // if it's a new mask, reconfigure HA
-            if (Mqtt::ha_enabled() && ((current_mask ^ new_mask) & (DeviceValueState::DV_READONLY >> 4))) {
+            if (Mqtt::ha_enabled() && (has_custom_name || ((current_mask ^ new_mask) & (DeviceValueState::DV_READONLY >> 4)))) {
                 // remove ha config on change of dv_readonly flag
                 dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                 Mqtt::publish_ha_sensor_config(dv, "", "", true); // delete topic (remove = true)
@@ -1024,7 +1039,13 @@ void EMSdevice::setCustomEntity(const std::string & entity_id) {
             } else {
                 dv.custom_fullname = "";
             }
+
+            auto min = dv.min;
+            auto max = dv.max;
             dv.set_custom_minmax();
+            if (Mqtt::ha_enabled() && dv.short_name == FL_(seltemp)[0] && (min != dv.min || max != dv.max)) {
+                set_climate_minmax(dv.tag, dv.min, dv.max);
+            }
             return;
         }
     }
@@ -1192,11 +1213,14 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                 break;
             }
 
-            // set the min and max
-            int16_t dv_set_min, dv_set_max;
-            if (dv.get_min_max(dv_set_min, dv_set_max)) {
-                json["min"] = dv_set_min;
-                json["max"] = dv_set_max;
+            // set the min and max only for commands
+            if (dv.has_cmd) {
+                int16_t  dv_set_min;
+                uint16_t dv_set_max;
+                if (dv.get_min_max(dv_set_min, dv_set_max)) {
+                    json["min"] = dv_set_min;
+                    json["max"] = dv_set_max;
+                }
             }
 
             // add uom if it's not a " " (single space)
@@ -1474,12 +1498,12 @@ void EMSdevice::mqtt_ha_entity_config_create() {
             if (*(int8_t *)(dv.value_p) == 1 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
                 dv.remove_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
                 dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                Mqtt::publish_ha_climate_config(dv.tag, true);
+                Mqtt::publish_ha_climate_config(dv.tag, true, false, dv.min, dv.max);
             } else if (*(int8_t *)(dv.value_p) == 0
                        && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || !dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
                 dv.add_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
                 dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                Mqtt::publish_ha_climate_config(dv.tag, false);
+                Mqtt::publish_ha_climate_config(dv.tag, false, false, dv.min, dv.max);
             }
         }
         if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && (dv.type != DeviceValueType::CMD) && dv.has_state(DeviceValueState::DV_ACTIVE)
