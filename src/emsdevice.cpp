@@ -1340,6 +1340,9 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                     json[name] = value_b;
                 } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
                     json[name] = value_b ? 1 : 0;
+                } else {
+                    char s[7];
+                    json[name] = Helpers::render_boolean(s, value_b);
                 }
             }
 
