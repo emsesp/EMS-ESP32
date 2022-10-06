@@ -67,6 +67,7 @@
 {207, DeviceType::CONTROLLER, "Sense II/CS200", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x10
 {209, DeviceType::CONTROLLER, "ErP", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {218, DeviceType::CONTROLLER, "M200/RFM200", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x50
+{220, DeviceType::CONTROLLER, "BC30", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x16
 {224, DeviceType::CONTROLLER, "9000i", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {229, DeviceType::CONTROLLER, "8700i", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {230, DeviceType::CONTROLLER, "BC Base", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
