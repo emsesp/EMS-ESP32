@@ -680,13 +680,19 @@ void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
-    has_update(telegram, hc->daytemp, 17);        // is * 2
-    has_update(telegram, hc->nighttemp, 16);      // is * 2
-    has_update(telegram, hc->nofrosttemp, 15);    // is * 2
-    has_update(telegram, hc->control, 1);         // remote: 0-off, 1-FB10, 2-FB100
-    has_enumupdate(telegram, hc->program, 13, 1); // 1-6: 1 = A, 2 = B,...
-    has_enumupdate(telegram, hc->mode, 14, 1);    // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
-    has_update(telegram, hc->roomsensor, 9);      // 1-intern, 2-extern, 3-autoselect the lower value
+    has_update(telegram, hc->daytemp, 17);          // is * 2
+    has_update(telegram, hc->nighttemp, 16);        // is * 2
+    has_update(telegram, hc->nofrosttemp, 15);      // is * 2
+    has_update(telegram, hc->control, 1);           // remote: 0-off, 1-FB10, 2-FB100
+    has_enumupdate(telegram, hc->program, 13, 1);   // 1-6: 1 = A, 2 = B,...
+    has_enumupdate(telegram, hc->mode, 14, 1);      // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
+    has_update(telegram, hc->daytemp, 17);          // is * 2
+    has_update(telegram, hc->nighttemp, 16);        // is * 2
+    has_update(telegram, hc->nofrosttemp, 15);      // is * 2
+    has_update(telegram, hc->control, 1);           // remote: 0-off, 1-FB10, 2-FB100
+    has_enumupdate(telegram, hc->program, 13, 1);   // 1-6: 1 = A, 2 = B,...
+    has_enumupdate(telegram, hc->mode, 14, 1);      // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
+    has_enumupdate(telegram, hc->roomsensor, 9, 1); // 1-intern, 2-extern, 3-autoselect the lower value
 }
 
 // type 0x0179, ff
@@ -1364,10 +1370,12 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     strftime(newdatetime, sizeof(dateTime_), "%d.%m.%G %H:%M", tm_);
     has_update(dateTime_, newdatetime, sizeof(dateTime_));
 
-    bool   ivtclock = (telegram->message_data[0] & 0x80) == 0x80; // dont sync ivt-clock, #439
-    time_t ttime    = mktime(tm_);                                // thermostat time
+    bool   ivtclock     = (telegram->message_data[0] & 0x80) == 0x80; // dont sync ivt-clock, #439
+    bool   junkersclock = model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS;
+    time_t ttime        = mktime(tm_); // thermostat time
+
     // correct thermostat clock if we have valid ntp time, and could write the command
-    if (!ivtclock && tset_ && EMSESP::system_.ntp_connected() && !EMSESP::system_.readonly_mode() && has_command(&dateTime_)) {
+    if (!ivtclock && !junkersclock && tset_ && EMSESP::system_.ntp_connected() && !EMSESP::system_.readonly_mode() && has_command(&dateTime_)) {
         double difference = difftime(now, ttime);
         if (difference > 15 || difference < -15) {
             set_datetime("ntp", -1); // set from NTP
@@ -1717,7 +1725,7 @@ bool Thermostat::set_roomsensor(const char * value, const int8_t id) {
     uint8_t ctrl = 0;
     if (model() == EMS_DEVICE_FLAG_JUNKERS && !has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {
         if (Helpers::value2enum(value, ctrl, FL_(enum_roomsensor))) {
-            write_command(set_typeids[hc->hc()], 9, ctrl);
+            write_command(set_typeids[hc->hc()], 9, ctrl + 1);
             return true;
         }
     }
@@ -2165,6 +2173,10 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
         data[5] = tm_->tm_sec;
         data[6] = (tm_->tm_wday + 6) % 7; // Bosch counts from Mo, time from Su
         data[7] = tm_->tm_isdst + 2;      // set DST and flag for ext. clock
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+            data[6]++; // Junkers use 1-7;
+            data[7] = 0;
+        }
     } else if (dt.length() == 23) {
         data[0] = (dt[7] - '0') * 100 + (dt[8] - '0') * 10 + (dt[9] - '0'); // year
         data[1] = (dt[3] - '0') * 10 + (dt[4] - '0');                       // month
@@ -2174,6 +2186,9 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
         data[5] = (dt[17] - '0') * 10 + (dt[18] - '0');                     // sec
         data[6] = (dt[20] - '0');                                           // day of week, Mo:0
         data[7] = (dt[22] - '0') + 2;                                       // DST and flag
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+            data[7] = 0;
+        }
     } else {
         LOG_WARNING("Set date: invalid data, wrong length");
         return false;
@@ -3846,8 +3861,9 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwVacation));
         break;
     case EMS_DEVICE_FLAG_JUNKERS:
+        // FR100 is not writable, see. https://github.com/emsesp/EMS-ESP32/issues/536
+        // FW500 is not writable, see. https://github.com/emsesp/EMS-ESP32/issues/666
         if (has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {
-            // FR100 is not writable, see. https://github.com/emsesp/EMS-ESP32/issues/536
             register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dateTime_, DeviceValueType::STRING, FL_(tpl_datetime), FL_(dateTime), DeviceValueUOM::NONE);
         } else {
             register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,

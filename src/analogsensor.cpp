@@ -390,7 +390,7 @@ void AnalogSensor::publish_values(const bool force) {
                 case AnalogType::PWM_0:
                 case AnalogType::PWM_1:
                 case AnalogType::PWM_2:
-                    dataSensor["value"] = sensor.value(); // float
+                    dataSensor["value"] = serialized(Helpers::render_value(s, sensor.value(), 2)); // float
                     break;
                 default:
                     dataSensor["value"] = (uint8_t)sensor.value(); // convert to char for 1 or 0
