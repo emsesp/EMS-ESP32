@@ -29,7 +29,9 @@
 
 #ifndef EMSESP_STANDALONE
 #include <esp_wifi.h>
+#ifndef ARDUINO_LOLIN_S2_MINI
 #include <esp_bt.h>
+#endif
 #include <ETH.h>
 #include <uuid/syslog.h>
 #endif

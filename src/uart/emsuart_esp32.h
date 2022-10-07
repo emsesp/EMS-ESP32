@@ -26,7 +26,7 @@
 
 #define EMS_MAXBUFFERSIZE 33 // max size of the buffer. EMS packets are max 32 bytes, plus extra for BRK
 
-#ifdef ARDUINO_LOLIN_C3_MINI
+#if (defined(ARDUINO_LOLIN_C3_MINI)) || (defined(ARDUINO_LOLIN_S2_MINI))
 #define EMSUART_NUM UART_NUM_1 // on C3 mini we're using UART1
 #else
 #define EMSUART_NUM UART_NUM_2 // on the ESP32 we're using UART2
