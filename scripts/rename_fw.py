@@ -18,6 +18,7 @@ def bin_copy(source, target, env):
                     bag[var] = m.group(1)
 
     app_version = bag.get('app_version')
+    
     platform = "ESP32"
 
     # flash_size = env["PIOENV"].split('_')[1]
@@ -30,13 +31,15 @@ def bin_copy(source, target, env):
 
     # alternatively take platform from the pio target
     # platform = str(target[0]).split(os.path.sep)[2]
+    chip_target = env.get('PIOENV').upper() 
 
     print("app version: "+app_version)
+    print("chip_target: "+chip_target)
     print("platform: "+platform)
     # print("flash size: "+flash_size)
 
     # convert . to _ so Windows doesn't complain
-    variant = "EMS-ESP-" + app_version.replace(".", "_") + "-" + platform
+    variant = "EMS-ESP-" + app_version.replace(".", "_") + "-" + chip_target
 
     # variant = "EMS-ESP-" + app_version.replace(".", "_") + "-" + platform + "_" + flash_size
 
