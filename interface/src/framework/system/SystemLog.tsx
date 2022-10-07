@@ -111,7 +111,7 @@ const SystemLog: FC = () => {
         if (response.status !== 200) {
           enqueueSnackbar(LL.PROBLEM_UPDATING(), { variant: 'error' });
         }
-      } catch (error: unknown) {
+      } catch (error) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       }
     }
@@ -163,7 +163,7 @@ const SystemLog: FC = () => {
   const fetchLog = useCallback(async () => {
     try {
       setLogEntries((await SystemApi.readLogEntries()).data);
-    } catch (error: unknown) {
+    } catch (error) {
       setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   }, [LL]);

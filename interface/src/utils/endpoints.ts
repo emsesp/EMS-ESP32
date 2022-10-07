@@ -1,7 +1,5 @@
-import { AxiosError } from 'axios';
-
-export const extractErrorMessage = (error: unknown, defaultMessage: string) => {
-  if (error instanceof AxiosError) {
+export const extractErrorMessage = (error: any, defaultMessage: string) => {
+  if (error.request) {
     return defaultMessage + ' (' + error.request.statusText + ')';
   } else if (error instanceof Error) {
     return defaultMessage + ' (' + error.message + ')';

@@ -364,7 +364,7 @@ const DashboardData: FC = () => {
   const fetchCoreData = useCallback(async () => {
     try {
       setCoreData((await EMSESP.readCoreData()).data);
-    } catch (error: unknown) {
+    } catch (error) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     }
   }, [enqueueSnackbar, LL]);
@@ -385,7 +385,7 @@ const DashboardData: FC = () => {
     const unique_id = parseInt(id);
     try {
       setDeviceData((await EMSESP.readDeviceData({ id: unique_id })).data);
-    } catch (error: unknown) {
+    } catch (error) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     }
   };
@@ -393,7 +393,7 @@ const DashboardData: FC = () => {
   const fetchSensorData = async () => {
     try {
       setSensorData((await EMSESP.readSensorData()).data);
-    } catch (error: unknown) {
+    } catch (error) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     }
   };
@@ -474,7 +474,7 @@ const DashboardData: FC = () => {
           enqueueSnackbar(LL.WRITE_COMMAND({ cmd: 'send' }), { variant: 'success' });
         }
         setDeviceValue(undefined);
-      } catch (error: unknown) {
+      } catch (error) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       } finally {
         refreshData();
@@ -566,7 +566,7 @@ const DashboardData: FC = () => {
           enqueueSnackbar(LL.TEMP_SENSOR() + ' ' + LL.UPDATED(), { variant: 'success' });
         }
         setSensor(undefined);
-      } catch (error: unknown) {
+      } catch (error) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       } finally {
         setSensor(undefined);
@@ -992,7 +992,7 @@ const DashboardData: FC = () => {
         } else {
           enqueueSnackbar(LL.ANALOG_SENSOR() + ' ' + LL.REMOVED(), { variant: 'success' });
         }
-      } catch (error: unknown) {
+      } catch (error) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       } finally {
         setAnalog(undefined);
@@ -1020,7 +1020,7 @@ const DashboardData: FC = () => {
         } else {
           enqueueSnackbar(LL.ANALOG_SENSOR() + ' ' + LL.UPDATED(), { variant: 'success' });
         }
-      } catch (error: unknown) {
+      } catch (error) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       } finally {
         setAnalog(undefined);

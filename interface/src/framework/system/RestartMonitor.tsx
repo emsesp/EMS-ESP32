@@ -21,7 +21,7 @@ const RestartMonitor: FC = () => {
     try {
       await SystemApi.readSystemStatus(POLL_TIMEOUT);
       document.location.href = '/fileUpdated';
-    } catch (error: unknown) {
+    } catch (error) {
       if (new Date().getTime() < timeoutAt.current) {
         setTimeoutId(setTimeout(poll.current, POLL_INTERVAL));
       } else {

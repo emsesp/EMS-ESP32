@@ -68,7 +68,7 @@ const SettingsApplication: FC = () => {
           eth_clock_mode: response.data.eth_clock_mode
         });
       }
-    } catch (error: unknown) {
+    } catch (error) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     } finally {
       setProcessingBoard(false);
@@ -107,7 +107,7 @@ const SettingsApplication: FC = () => {
       try {
         await EMSESP.restart();
         enqueueSnackbar(LL.APPLICATION_RESTARTING(), { variant: 'info' });
-      } catch (error: unknown) {
+      } catch (error) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       }
     };
