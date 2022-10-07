@@ -680,13 +680,13 @@ void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
-    has_update(telegram, hc->daytemp, 17);        // is * 2
-    has_update(telegram, hc->nighttemp, 16);      // is * 2
-    has_update(telegram, hc->nofrosttemp, 15);    // is * 2
-    has_update(telegram, hc->control, 1);         // remote: 0-off, 1-FB10, 2-FB100
-    has_enumupdate(telegram, hc->program, 13, 1); // 1-6: 1 = A, 2 = B,...
-    has_enumupdate(telegram, hc->mode, 14, 1);    // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
-    has_update(telegram, hc->roomsensor, 9);      // 1-intern, 2-extern, 3-autoselect the lower value
+    has_update(telegram, hc->daytemp, 17);          // is * 2
+    has_update(telegram, hc->nighttemp, 16);        // is * 2
+    has_update(telegram, hc->nofrosttemp, 15);      // is * 2
+    has_update(telegram, hc->control, 1);           // remote: 0-off, 1-FB10, 2-FB100
+    has_enumupdate(telegram, hc->program, 13, 1);   // 1-6: 1 = A, 2 = B,...
+    has_enumupdate(telegram, hc->mode, 14, 1);      // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
+    has_enumupdate(telegram, hc->roomsensor, 9, 1); // 1-intern, 2-extern, 3-autoselect the lower value
 }
 
 // type 0x0179, ff
@@ -1717,7 +1717,7 @@ bool Thermostat::set_roomsensor(const char * value, const int8_t id) {
     uint8_t ctrl = 0;
     if (model() == EMS_DEVICE_FLAG_JUNKERS && !has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {
         if (Helpers::value2enum(value, ctrl, FL_(enum_roomsensor))) {
-            write_command(set_typeids[hc->hc()], 9, ctrl);
+            write_command(set_typeids[hc->hc()], 9, ctrl + 1);
             return true;
         }
     }
