@@ -85,6 +85,16 @@ class FSPersistence {
 #endif
 #endif
 
+        // make directories if required, for new IDF4.2 & LittleFS
+        String path(_filePath);
+        int    index = 0;
+        while ((index = path.indexOf('/', index + 1)) != -1) {
+            String segment = path.substring(0, index);
+            if (!_fs->exists(segment)) {
+                _fs->mkdir(segment);
+            }
+        }
+
         // serialize the data to the file
         serializeJson(jsonDocument, settingsFile);
         settingsFile.close();
