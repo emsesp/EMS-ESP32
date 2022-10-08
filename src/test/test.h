@@ -31,8 +31,8 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "mixer"
 // #define EMSESP_DEBUG_DEFAULT "web"
 // #define EMSESP_DEBUG_DEFAULT "mqtt"
-// #define EMSESP_DEBUG_DEFAULT "general"
-#define EMSESP_DEBUG_DEFAULT "boiler"
+#define EMSESP_DEBUG_DEFAULT "general"
+// #define EMSESP_DEBUG_DEFAULT "boiler"
 // #define EMSESP_DEBUG_DEFAULT "mqtt2"
 // #define EMSESP_DEBUG_DEFAULT "mqtt_nested"
 // #define EMSESP_DEBUG_DEFAULT "ha"
@@ -51,6 +51,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "api_values"
 // #define EMSESP_DEBUG_DEFAULT "mqtt_post"
 // #define EMSESP_DEBUG_DEFAULT "api_wwmode"
+// #define EMSESP_DEBUG_DEFAULT "custom"
 
 class Test {
   public:

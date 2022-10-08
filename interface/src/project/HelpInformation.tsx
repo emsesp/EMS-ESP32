@@ -50,7 +50,7 @@ const HelpInformation: FC = () => {
       } else {
         saveFile(response.data, endpoint);
       }
-    } catch (error: unknown) {
+    } catch (error) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     }
   };

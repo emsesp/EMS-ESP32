@@ -25,7 +25,7 @@ namespace emsesp {
 
 class Thermostat : public EMSdevice {
   public:
-    Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand);
+    Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
     class HeatingCircuit {
       public:
         HeatingCircuit(const uint8_t hc_num, const uint8_t model)

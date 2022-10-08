@@ -98,8 +98,7 @@ const pl: BaseTranslation = {
   APPLICATION_SETTINGS: 'Ustawienia aplikacji',
   CUSTOMIZATION: 'Personalizacja',
   APPLICATION_RESTARTING: 'Trwa ponowne uruchamianie',
-  BOARD_PROFILE_TEXT:
-    'Wybierz z listy wstępną konfigurację płytki interfejsu lub stwórz własną konfigurację',
+  BOARD_PROFILE_TEXT: 'Wybierz z listy wstępną konfigurację płytki interfejsu lub stwórz własną konfigurację',
   BOARD_PROFILE: 'Profil płytki',
   BUTTON: 'Przycisk',
   TEMPERATURE: 'Temperatura',
@@ -109,7 +108,7 @@ const pl: BaseTranslation = {
   HIDE_LED: 'Wyłącz LED',
   ENABLE_TELNET: 'Aktywuj dostęp dla konsoli Telnet',
   ENABLE_ANALOG: 'Aktywuj czujniki analogowe',
-  CONVERT_FAHRENHEIT: "Konwertuj temperatury do skali Fahrenheita",
+  CONVERT_FAHRENHEIT: 'Konwertuj temperatury do skali Fahrenheita',
   BYPASS_TOKEN: 'Pomiń autoryzację tokenem w wywołaniach API',
   READONLY: 'Tryb pracy "tylko do odczytu" (blokuje wszystkie komendy zapisu na magistralę EMS)',
   UNDERCLOCK_CPU: 'Obniż taktowanie CPU',

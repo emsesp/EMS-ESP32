@@ -19,1030 +19,1030 @@ export type Translations = RootTranslation
 
 type RootTranslation = {
 	/**
-	 * Language
+	 * L​a​n​g​u​a​g​e
 	 */
 	LANGUAGE: string
 	/**
-	 * Retry
+	 * R​e​t​r​y
 	 */
 	RETRY: string
 	/**
-	 * Loading
+	 * L​o​a​d​i​n​g
 	 */
 	LOADING: string
 	/**
-	 * is required
+	 * i​s​ ​r​e​q​u​i​r​e​d
 	 */
 	IS_REQUIRED: string
 	/**
-	 * Sign In
+	 * S​i​g​n​ ​I​n
 	 */
 	SIGN_IN: string
 	/**
-	 * Sign Out
+	 * S​i​g​n​ ​O​u​t
 	 */
 	SIGN_OUT: string
 	/**
-	 * Username
+	 * U​s​e​r​n​a​m​e
 	 */
 	USERNAME: string
 	/**
-	 * Password
+	 * P​a​s​s​w​o​r​d
 	 */
 	PASSWORD: string
 	/**
-	 * Dashboard
+	 * D​a​s​h​b​o​a​r​d
 	 */
 	DASHBOARD: string
 	/**
-	 * Settings
+	 * S​e​t​t​i​n​g​s
 	 */
 	SETTINGS: string
 	/**
-	 * saved
+	 * s​a​v​e​d
 	 */
 	SAVED: string
 	/**
-	 * Help
+	 * H​e​l​p
 	 */
 	HELP: string
 	/**
-	 * Logged in as {name}
+	 * L​o​g​g​e​d​ ​i​n​ ​a​s​ ​{​n​a​m​e​}
 	 * @param {unknown} name
 	 */
 	LOGGED_IN: RequiredParams<'name'>
 	/**
-	 * Please sign in to continue
+	 * P​l​e​a​s​e​ ​s​i​g​n​ ​i​n​ ​t​o​ ​c​o​n​t​i​n​u​e
 	 */
 	PLEASE_SIGNIN: string
 	/**
-	 * Upload successful
+	 * U​p​l​o​a​d​ ​s​u​c​c​e​s​s​f​u​l
 	 */
 	UPLOAD_SUCCESSFUL: string
 	/**
-	 * Download successful
+	 * D​o​w​n​l​o​a​d​ ​s​u​c​c​e​s​s​f​u​l
 	 */
 	DOWNLOAD_SUCCESSFUL: string
 	/**
-	 * Invalid login details
+	 * I​n​v​a​l​i​d​ ​l​o​g​i​n​ ​d​e​t​a​i​l​s
 	 */
 	INVALID_LOGIN: string
 	/**
-	 * Network
+	 * N​e​t​w​o​r​k
 	 */
 	NETWORK: string
 	/**
-	 * Security
+	 * S​e​c​u​r​i​t​y
 	 */
 	SECURITY: string
 	/**
-	 * ON/OFF
+	 * O​N​/​O​F​F
 	 */
 	ONOFF_CAP: string
 	/**
-	 * on/off
+	 * o​n​/​o​f​f
 	 */
 	ONOFF: string
 	/**
-	 * Type
+	 * T​y​p​e
 	 */
 	TYPE: string
 	/**
-	 * Description
+	 * D​e​s​c​r​i​p​t​i​o​n
 	 */
 	DESCRIPTION: string
 	/**
-	 * Entities
+	 * E​n​t​i​t​i​e​s
 	 */
 	ENTITIES: string
 	/**
-	 * Refresh
+	 * R​e​f​r​e​s​h
 	 */
 	REFRESH: string
 	/**
-	 * Export
+	 * E​x​p​o​r​t
 	 */
 	EXPORT: string
 	/**
-	 * Device Details
+	 * D​e​v​i​c​e​ ​D​e​t​a​i​l​s
 	 */
 	DEVICE_DETAILS: string
 	/**
-	 * Brand
+	 * B​r​a​n​d
 	 */
 	BRAND: string
 	/**
-	 * Entity Name
+	 * E​n​t​i​t​y​ ​N​a​m​e
 	 */
 	ENTITY_NAME: string
 	/**
-	 * Value
+	 * V​a​l​u​e
 	 */
 	VALUE: string
 	/**
-	 * only show favorites
+	 * o​n​l​y​ ​s​h​o​w​ ​f​a​v​o​r​i​t​e​s
 	 */
 	SHOW_FAV: string
 	/**
-	 * Device and Sensor Data
+	 * D​e​v​i​c​e​ ​a​n​d​ ​S​e​n​s​o​r​ ​D​a​t​a
 	 */
 	DEVICE_SENSOR_DATA: string
 	/**
-	 * Devices & Sensors
+	 * D​e​v​i​c​e​s​ ​&​ ​S​e​n​s​o​r​s
 	 */
 	DEVICES_SENSORS: string
 	/**
-	 * Attached EMS-ESP Sensors
+	 * A​t​t​a​c​h​e​d​ ​E​M​S​-​E​S​P​ ​S​e​n​s​o​r​s
 	 */
 	ATTACHED_SENSORS: string
 	/**
-	 * Call Command
+	 * C​a​l​l​ ​C​o​m​m​a​n​d
 	 */
 	RUN_COMMAND: string
 	/**
-	 * Change Value
+	 * C​h​a​n​g​e​ ​V​a​l​u​e
 	 */
 	CHANGE_VALUE: string
 	/**
-	 * Cancel
+	 * C​a​n​c​e​l
 	 */
 	CANCEL: string
 	/**
-	 * Reset
+	 * R​e​s​e​t
 	 */
 	RESET: string
 	/**
-	 * Send
+	 * S​e​n​d
 	 */
 	SEND: string
 	/**
-	 * Save
+	 * S​a​v​e
 	 */
 	SAVE: string
 	/**
-	 * Remove
+	 * R​e​m​o​v​e
 	 */
 	REMOVE: string
 	/**
-	 * Problem updating
+	 * P​r​o​b​l​e​m​ ​u​p​d​a​t​i​n​g
 	 */
 	PROBLEM_UPDATING: string
 	/**
-	 * Problem loading
+	 * P​r​o​b​l​e​m​ ​l​o​a​d​i​n​g
 	 */
 	PROBLEM_LOADING: string
 	/**
-	 * Access Denied
+	 * A​c​c​e​s​s​ ​D​e​n​i​e​d
 	 */
 	ACCESS_DENIED: string
 	/**
-	 * Analog Sensor
+	 * A​n​a​l​o​g​ ​S​e​n​s​o​r
 	 */
 	ANALOG_SENSOR: string
 	/**
-	 * Analog Sensors
+	 * A​n​a​l​o​g​ ​S​e​n​s​o​r​s
 	 */
 	ANALOG_SENSORS: string
 	/**
-	 * Updated
+	 * U​p​d​a​t​e​d
 	 */
 	UPDATED: string
 	/**
-	 * Update
+	 * U​p​d​a​t​e
 	 */
 	UPDATE: string
 	/**
-	 * Removed
+	 * R​e​m​o​v​e​d
 	 */
 	REMOVED: string
 	/**
-	 * Deletion
+	 * D​e​l​e​t​i​o​n
 	 */
 	DELETION: string
 	/**
-	 * Offset
+	 * O​f​f​s​e​t
 	 */
 	OFFSET: string
 	/**
-	 * Factor
+	 * F​a​c​t​o​r
 	 */
 	FACTOR: string
 	/**
-	 * Frequency
+	 * F​r​e​q​u​e​n​c​y
 	 */
 	FREQ: string
 	/**
-	 * Start value
+	 * S​t​a​r​t​ ​v​a​l​u​e
 	 */
 	STARTVALUE: string
 	/**
-	 * Warning: be careful when assigning a GPIO!
+	 * W​a​r​n​i​n​g​:​ ​b​e​ ​c​a​r​e​f​u​l​ ​w​h​e​n​ ​a​s​s​i​g​n​i​n​g​ ​a​ ​G​P​I​O​!
 	 */
 	WARN_GPIO: string
 	/**
-	 * Edit
+	 * E​d​i​t
 	 */
 	EDIT: string
 	/**
-	 * Temperature Sensor
+	 * T​e​m​p​e​r​a​t​u​r​e​ ​S​e​n​s​o​r
 	 */
 	TEMP_SENSOR: string
 	/**
-	 * Temperature Sensors
+	 * T​e​m​p​e​r​a​t​u​r​e​ ​S​e​n​s​o​r​s
 	 */
 	TEMP_SENSORS: string
 	/**
-	 * Write command {cmd}
+	 * W​r​i​t​e​ ​c​o​m​m​a​n​d​ ​{​c​m​d​}
 	 * @param {unknown} cmd
 	 */
 	WRITE_COMMAND: RequiredParams<'cmd'>
 	/**
-	 * EMS bus disconnected. If this warning still persists after a few seconds please check settings and board profile
+	 * E​M​S​ ​b​u​s​ ​d​i​s​c​o​n​n​e​c​t​e​d​.​ ​I​f​ ​t​h​i​s​ ​w​a​r​n​i​n​g​ ​s​t​i​l​l​ ​p​e​r​s​i​s​t​s​ ​a​f​t​e​r​ ​a​ ​f​e​w​ ​s​e​c​o​n​d​s​ ​p​l​e​a​s​e​ ​c​h​e​c​k​ ​s​e​t​t​i​n​g​s​ ​a​n​d​ ​b​o​a​r​d​ ​p​r​o​f​i​l​e
 	 */
 	EMS_BUS_WARNING: string
 	/**
-	 * Scanning for EMS devices...
+	 * S​c​a​n​n​i​n​g​ ​f​o​r​ ​E​M​S​ ​d​e​v​i​c​e​s​.​.​.
 	 */
 	EMS_BUS_SCANNING: string
 	/**
-	 * Connected
+	 * C​o​n​n​e​c​t​e​d
 	 */
 	CONNECTED: string
 	/**
-	 * Tx issues - try a different Tx Mode
+	 * T​x​ ​i​s​s​u​e​s​ ​-​ ​t​r​y​ ​a​ ​d​i​f​f​e​r​e​n​t​ ​T​x​ ​M​o​d​e
 	 */
 	TX_ISSUES: string
 	/**
-	 * Disconnected
+	 * D​i​s​c​o​n​n​e​c​t​e​d
 	 */
 	DISCONNECTED: string
 	/**
-	 * Are you sure you want to initiate a full device scan of the EMS bus?
+	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​i​n​i​t​i​a​t​e​ ​a​ ​f​u​l​l​ ​d​e​v​i​c​e​ ​s​c​a​n​ ​o​f​ ​t​h​e​ ​E​M​S​ ​b​u​s​?
 	 */
 	EMS_SCAN: string
 	/**
-	 * EMS Bus Status
+	 * E​M​S​ ​B​u​s​ ​S​t​a​t​u​s
 	 */
 	EMS_BUS_STATUS: string
 	/**
-	 * Active Devices & Sensors
+	 * A​c​t​i​v​e​ ​D​e​v​i​c​e​s​ ​&​ ​S​e​n​s​o​r​s
 	 */
 	ACTIVE_DEVICES: string
 	/**
-	 * Device
+	 * D​e​v​i​c​e
 	 */
 	DEVICE: string
 	/**
-	 * SUCCESS
+	 * S​U​C​C​E​S​S
 	 */
 	SUCCESS: string
 	/**
-	 * FAIL
+	 * F​A​I​L
 	 */
 	FAIL: string
 	/**
-	 * QUALITY
+	 * Q​U​A​L​I​T​Y
 	 */
 	QUALITY: string
 	/**
-	 * Scan for new devices
+	 * S​c​a​n​ ​f​o​r​ ​n​e​w​ ​d​e​v​i​c​e​s
 	 */
 	SCAN_DEVICES: string
 	/**
-	 * EMS Bus & Activity Status
+	 * E​M​S​ ​B​u​s​ ​&​ ​A​c​t​i​v​i​t​y​ ​S​t​a​t​u​s
 	 */
 	EMS_BUS_STATUS_TITLE: string
 	/**
-	 * Scan
+	 * S​c​a​n
 	 */
 	SCAN: string
 	STATUS_NAMES: {
 		/**
-		 * EMS Telegrams Received (Rx)
+		 * E​M​S​ ​T​e​l​e​g​r​a​m​s​ ​R​e​c​e​i​v​e​d​ ​(​R​x​)
 		 */
 		'0': string
 		/**
-		 * EMS Reads (Tx)
+		 * E​M​S​ ​R​e​a​d​s​ ​(​T​x​)
 		 */
 		'1': string
 		/**
-		 * EMS Writes (Tx)
+		 * E​M​S​ ​W​r​i​t​e​s​ ​(​T​x​)
 		 */
 		'2': string
 		/**
-		 * Temperature Sensor Reads
+		 * T​e​m​p​e​r​a​t​u​r​e​ ​S​e​n​s​o​r​ ​R​e​a​d​s
 		 */
 		'3': string
 		/**
-		 * Analog Sensor Reads
+		 * A​n​a​l​o​g​ ​S​e​n​s​o​r​ ​R​e​a​d​s
 		 */
 		'4': string
 		/**
-		 * MQTT Publishes
+		 * M​Q​T​T​ ​P​u​b​l​i​s​h​e​s
 		 */
 		'5': string
 		/**
-		 * API Calls
+		 * A​P​I​ ​C​a​l​l​s
 		 */
 		'6': string
 		/**
-		 * Syslog Messages
+		 * S​y​s​l​o​g​ ​M​e​s​s​a​g​e​s
 		 */
 		'7': string
 	}
 	/**
-	 * {num} Device{{s}}
+	 * {​n​u​m​}​ ​D​e​v​i​c​e​{​{​s​}​}
 	 * @param {string | number | boolean} num
 	 */
 	NUM_DEVICES: RequiredParams<'num'>
 	/**
-	 * {num} Temperature Sensor{{s}}
+	 * {​n​u​m​}​ ​T​e​m​p​e​r​a​t​u​r​e​ ​S​e​n​s​o​r​{​{​s​}​}
 	 * @param {string | number | boolean} num
 	 */
 	NUM_TEMP_SENSORS: RequiredParams<'num'>
 	/**
-	 * {num} Analog Sensor{{s}}
+	 * {​n​u​m​}​ ​A​n​a​l​o​g​ ​S​e​n​s​o​r​{​{​s​}​}
 	 * @param {string | number | boolean} num
 	 */
 	NUM_ANALOG_SENSORS: RequiredParams<'num'>
 	/**
-	 * {num} Day{{s}}
+	 * {​n​u​m​}​ ​D​a​y​{​{​s​}​}
 	 * @param {string | number | boolean} num
 	 */
 	NUM_DAYS: RequiredParams<'num'>
 	/**
-	 * {num} Second{{s}}
+	 * {​n​u​m​}​ ​S​e​c​o​n​d​{​{​s​}​}
 	 * @param {string | number | boolean} num
 	 */
 	NUM_SECONDS: RequiredParams<'num'>
 	/**
-	 * {num} Hour{{s}}
+	 * {​n​u​m​}​ ​H​o​u​r​{​{​s​}​}
 	 * @param {string | number | boolean} num
 	 */
 	NUM_HOURS: RequiredParams<'num'>
 	/**
-	 * {num} Minute{{s}}
+	 * {​n​u​m​}​ ​M​i​n​u​t​e​{​{​s​}​}
 	 * @param {string | number | boolean} num
 	 */
 	NUM_MINUTES: RequiredParams<'num'>
 	/**
-	 * Application Settings
+	 * A​p​p​l​i​c​a​t​i​o​n​ ​S​e​t​t​i​n​g​s
 	 */
 	APPLICATION_SETTINGS: string
 	/**
-	 * Customization
+	 * C​u​s​t​o​m​i​z​a​t​i​o​n
 	 */
 	CUSTOMIZATION: string
 	/**
-	 * EMS-ESP is restarting
+	 * E​M​S​-​E​S​P​ ​i​s​ ​r​e​s​t​a​r​t​i​n​g
 	 */
 	APPLICATION_RESTARTING: string
 	/**
-	 * Select a pre-configured interface board profile from the list below or choose Custom to configure your own hardware settings
+	 * S​e​l​e​c​t​ ​a​ ​p​r​e​-​c​o​n​f​i​g​u​r​e​d​ ​i​n​t​e​r​f​a​c​e​ ​b​o​a​r​d​ ​p​r​o​f​i​l​e​ ​f​r​o​m​ ​t​h​e​ ​l​i​s​t​ ​b​e​l​o​w​ ​o​r​ ​c​h​o​o​s​e​ ​C​u​s​t​o​m​ ​t​o​ ​c​o​n​f​i​g​u​r​e​ ​y​o​u​r​ ​o​w​n​ ​h​a​r​d​w​a​r​e​ ​s​e​t​t​i​n​g​s
 	 */
 	BOARD_PROFILE_TEXT: string
 	/**
-	 * Board Profile
+	 * B​o​a​r​d​ ​P​r​o​f​i​l​e
 	 */
 	BOARD_PROFILE: string
 	/**
-	 * Button
+	 * B​u​t​t​o​n
 	 */
 	BUTTON: string
 	/**
-	 * Temperature
+	 * T​e​m​p​e​r​a​t​u​r​e
 	 */
 	TEMPERATURE: string
 	/**
-	 * disabled
+	 * d​i​s​a​b​l​e​d
 	 */
 	DISABLED: string
 	/**
-	 * General Options
+	 * G​e​n​e​r​a​l​ ​O​p​t​i​o​n​s
 	 */
 	GENERAL_OPTIONS: string
 	/**
-	 * Language (for device entities)
+	 * L​a​n​g​u​a​g​e​ ​(​f​o​r​ ​d​e​v​i​c​e​ ​e​n​t​i​t​i​e​s​)
 	 */
 	LANGUAGE_ENTITIES: string
 	/**
-	 * Hide LED
+	 * H​i​d​e​ ​L​E​D
 	 */
 	HIDE_LED: string
 	/**
-	 * Enable Telnet Console
+	 * E​n​a​b​l​e​ ​T​e​l​n​e​t​ ​C​o​n​s​o​l​e
 	 */
 	ENABLE_TELNET: string
 	/**
-	 * Enable Analog Sensors
+	 * E​n​a​b​l​e​ ​A​n​a​l​o​g​ ​S​e​n​s​o​r​s
 	 */
 	ENABLE_ANALOG: string
 	/**
-	 * Convert temperature values to Fahrenheit
+	 * C​o​n​v​e​r​t​ ​t​e​m​p​e​r​a​t​u​r​e​ ​v​a​l​u​e​s​ ​t​o​ ​F​a​h​r​e​n​h​e​i​t
 	 */
 	CONVERT_FAHRENHEIT: string
 	/**
-	 * Bypass Access Token authorization on API calls
+	 * B​y​p​a​s​s​ ​A​c​c​e​s​s​ ​T​o​k​e​n​ ​a​u​t​h​o​r​i​z​a​t​i​o​n​ ​o​n​ ​A​P​I​ ​c​a​l​l​s
 	 */
 	BYPASS_TOKEN: string
 	/**
-	 * Enable read-only mode (blocks all outgoing EMS Tx Write commands)
+	 * E​n​a​b​l​e​ ​r​e​a​d​-​o​n​l​y​ ​m​o​d​e​ ​(​b​l​o​c​k​s​ ​a​l​l​ ​o​u​t​g​o​i​n​g​ ​E​M​S​ ​T​x​ ​W​r​i​t​e​ ​c​o​m​m​a​n​d​s​)
 	 */
 	READONLY: string
 	/**
-	 * Underclock CPU speed
+	 * U​n​d​e​r​c​l​o​c​k​ ​C​P​U​ ​s​p​e​e​d
 	 */
 	UNDERCLOCK_CPU: string
 	/**
-	 * Enable Shower Timer
+	 * E​n​a​b​l​e​ ​S​h​o​w​e​r​ ​T​i​m​e​r
 	 */
 	ENABLE_SHOWER_TIMER: string
 	/**
-	 * Enable Shower Alert
+	 * E​n​a​b​l​e​ ​S​h​o​w​e​r​ ​A​l​e​r​t
 	 */
 	ENABLE_SHOWER_ALERT: string
 	/**
-	 * Trigger Time
+	 * T​r​i​g​g​e​r​ ​T​i​m​e
 	 */
 	TRIGGER_TIME: string
 	/**
-	 * Cold Shot Duration
+	 * C​o​l​d​ ​S​h​o​t​ ​D​u​r​a​t​i​o​n
 	 */
 	COLD_SHOT_DURATION: string
 	/**
-	 * Formatting Options
+	 * F​o​r​m​a​t​t​i​n​g​ ​O​p​t​i​o​n​s
 	 */
 	FORMATTING_OPTIONS: string
 	/**
-	 * Boolean Format Dashboard
+	 * B​o​o​l​e​a​n​ ​F​o​r​m​a​t​ ​D​a​s​h​b​o​a​r​d
 	 */
 	BOOLEAN_FORMAT_DASHBOARD: string
 	/**
-	 * Boolean Format API/MQTT
+	 * B​o​o​l​e​a​n​ ​F​o​r​m​a​t​ ​A​P​I​/​M​Q​T​T
 	 */
 	BOOLEAN_FORMAT_API: string
 	/**
-	 * Enum Format API/MQTT
+	 * E​n​u​m​ ​F​o​r​m​a​t​ ​A​P​I​/​M​Q​T​T
 	 */
 	ENUM_FORMAT: string
 	/**
-	 * Index
+	 * I​n​d​e​x
 	 */
 	INDEX: string
 	/**
-	 * Enable parasite power
+	 * E​n​a​b​l​e​ ​p​a​r​a​s​i​t​e​ ​p​o​w​e​r
 	 */
 	ENABLE_PARASITE: string
 	/**
-	 * Logging
+	 * L​o​g​g​i​n​g
 	 */
 	LOGGING: string
 	/**
-	 * Log EMS telegrams in hexadecimal
+	 * L​o​g​ ​E​M​S​ ​t​e​l​e​g​r​a​m​s​ ​i​n​ ​h​e​x​a​d​e​c​i​m​a​l
 	 */
 	LOG_HEX: string
 	/**
-	 * Enable Syslog
+	 * E​n​a​b​l​e​ ​S​y​s​l​o​g
 	 */
 	ENABLE_SYSLOG: string
 	/**
-	 * Mark Interval
+	 * M​a​r​k​ ​I​n​t​e​r​v​a​l
 	 */
 	MARK_INTERVAL: string
 	/**
-	 * seconds
+	 * s​e​c​o​n​d​s
 	 */
 	SECONDS: string
 	/**
-	 * minutes
+	 * m​i​n​u​t​e​s
 	 */
 	MINUTES: string
 	/**
-	 * Restart
+	 * R​e​s​t​a​r​t
 	 */
 	RESTART: string
 	/**
-	 * hours
+	 * h​o​u​r​s
 	 */
 	HOURS: string
 	/**
-	 * EMS-ESP needs to be restarted to apply changed system settings
+	 * E​M​S​-​E​S​P​ ​n​e​e​d​s​ ​t​o​ ​b​e​ ​r​e​s​t​a​r​t​e​d​ ​t​o​ ​a​p​p​l​y​ ​c​h​a​n​g​e​d​ ​s​y​s​t​e​m​ ​s​e​t​t​i​n​g​s
 	 */
 	RESTART_TEXT: string
 	/**
-	 * Are you sure you want to restart EMS-ESP?
+	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​r​e​s​t​a​r​t​ ​E​M​S​-​E​S​P​?
 	 */
 	RESTART_CONFIRM: string
 	/**
-	 * Command
+	 * C​o​m​m​a​n​d
 	 */
 	COMMAND: string
 	/**
-	 * All customizations have been removed. Restarting...
+	 * A​l​l​ ​c​u​s​t​o​m​i​z​a​t​i​o​n​s​ ​h​a​v​e​ ​b​e​e​n​ ​r​e​m​o​v​e​d​.​ ​R​e​s​t​a​r​t​i​n​g​.​.​.
 	 */
 	CUSTOMIZATIONS_RESTART: string
 	/**
-	 * Selected entities exceeded limit. Please save in batches
+	 * S​e​l​e​c​t​e​d​ ​e​n​t​i​t​i​e​s​ ​e​x​c​e​e​d​e​d​ ​l​i​m​i​t​.​ ​P​l​e​a​s​e​ ​s​a​v​e​ ​i​n​ ​b​a​t​c​h​e​s
 	 */
 	CUSTOMIZATIONS_FULL: string
 	/**
-	 * Customizations saved
+	 * C​u​s​t​o​m​i​z​a​t​i​o​n​s​ ​s​a​v​e​d
 	 */
 	CUSTOMIZATIONS_SAVED: string
 	/**
-	 * Select a device and customize the entities options or click to rename
+	 * S​e​l​e​c​t​ ​a​ ​d​e​v​i​c​e​ ​a​n​d​ ​c​u​s​t​o​m​i​z​e​ ​t​h​e​ ​e​n​t​i​t​i​e​s​ ​o​p​t​i​o​n​s​ ​o​r​ ​c​l​i​c​k​ ​t​o​ ​r​e​n​a​m​e
 	 */
 	CUSTOMIZATIONS_HELP_1: string
 	/**
-	 * mark as favorite
+	 * m​a​r​k​ ​a​s​ ​f​a​v​o​r​i​t​e
 	 */
 	CUSTOMIZATIONS_HELP_2: string
 	/**
-	 * disable write action
+	 * d​i​s​a​b​l​e​ ​w​r​i​t​e​ ​a​c​t​i​o​n
 	 */
 	CUSTOMIZATIONS_HELP_3: string
 	/**
-	 * exclude from MQTT and API
+	 * e​x​c​l​u​d​e​ ​f​r​o​m​ ​M​Q​T​T​ ​a​n​d​ ​A​P​I
 	 */
 	CUSTOMIZATIONS_HELP_4: string
 	/**
-	 * hide from Dashboard
+	 * h​i​d​e​ ​f​r​o​m​ ​D​a​s​h​b​o​a​r​d
 	 */
 	CUSTOMIZATIONS_HELP_5: string
 	/**
-	 * Select a device
+	 * S​e​l​e​c​t​ ​a​ ​d​e​v​i​c​e
 	 */
 	SELECT_DEVICE: string
 	/**
-	 * set all
+	 * s​e​t​ ​a​l​l
 	 */
 	SET_ALL: string
 	/**
-	 * Options
+	 * O​p​t​i​o​n​s
 	 */
 	OPTIONS: string
 	/**
-	 * Name
+	 * N​a​m​e
 	 */
 	NAME: string
 	/**
-	 * Are you sure you want remove all customizations including the custom settings of the Temperature and Analog sensors?
+	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​r​e​m​o​v​e​ ​a​l​l​ ​c​u​s​t​o​m​i​z​a​t​i​o​n​s​ ​i​n​c​l​u​d​i​n​g​ ​t​h​e​ ​c​u​s​t​o​m​ ​s​e​t​t​i​n​g​s​ ​o​f​ ​t​h​e​ ​T​e​m​p​e​r​a​t​u​r​e​ ​a​n​d​ ​A​n​a​l​o​g​ ​s​e​n​s​o​r​s​?
 	 */
 	CUSTOMIZATIONS_RESET: string
 	/**
-	 * Device Entities
+	 * D​e​v​i​c​e​ ​E​n​t​i​t​i​e​s
 	 */
 	DEVICE_ENTITIES: string
 	/**
-	 * User Customization
+	 * U​s​e​r​ ​C​u​s​t​o​m​i​z​a​t​i​o​n
 	 */
 	USER_CUSTOMIZATION: string
 	/**
-	 * Support Information
+	 * S​u​p​p​o​r​t​ ​I​n​f​o​r​m​a​t​i​o​n
 	 */
 	SUPPORT_INFORMATION: string
 	/**
-	 * Click Here
+	 * C​l​i​c​k​ ​H​e​r​e
 	 */
 	CLICK_HERE: string
 	/**
-	 * Visit the online wiki to get instructions on how to configure EMS-ESP
+	 * V​i​s​i​t​ ​t​h​e​ ​o​n​l​i​n​e​ ​w​i​k​i​ ​t​o​ ​g​e​t​ ​i​n​s​t​r​u​c​t​i​o​n​s​ ​o​n​ ​h​o​w​ ​t​o​ ​c​o​n​f​i​g​u​r​e​ ​E​M​S​-​E​S​P
 	 */
 	HELP_INFORMATION_1: string
 	/**
-	 * For live community chat join our Discord server
+	 * F​o​r​ ​l​i​v​e​ ​c​o​m​m​u​n​i​t​y​ ​c​h​a​t​ ​j​o​i​n​ ​o​u​r​ ​D​i​s​c​o​r​d​ ​s​e​r​v​e​r
 	 */
 	HELP_INFORMATION_2: string
 	/**
-	 * To request a feature or report a bug
+	 * T​o​ ​r​e​q​u​e​s​t​ ​a​ ​f​e​a​t​u​r​e​ ​o​r​ ​r​e​p​o​r​t​ ​a​ ​b​u​g
 	 */
 	HELP_INFORMATION_3: string
 	/**
-	 * remember to download and attach your system information for a faster response when reporting an issue
+	 * r​e​m​e​m​b​e​r​ ​t​o​ ​d​o​w​n​l​o​a​d​ ​a​n​d​ ​a​t​t​a​c​h​ ​y​o​u​r​ ​s​y​s​t​e​m​ ​i​n​f​o​r​m​a​t​i​o​n​ ​f​o​r​ ​a​ ​f​a​s​t​e​r​ ​r​e​s​p​o​n​s​e​ ​w​h​e​n​ ​r​e​p​o​r​t​i​n​g​ ​a​n​ ​i​s​s​u​e
 	 */
 	HELP_INFORMATION_4: string
 	/**
-	 * EMS-ESP is a free and open-source project. Please support its future development by giving it a star on Github!
+	 * E​M​S​-​E​S​P​ ​i​s​ ​a​ ​f​r​e​e​ ​a​n​d​ ​o​p​e​n​-​s​o​u​r​c​e​ ​p​r​o​j​e​c​t​.​ ​P​l​e​a​s​e​ ​s​u​p​p​o​r​t​ ​i​t​s​ ​f​u​t​u​r​e​ ​d​e​v​e​l​o​p​m​e​n​t​ ​b​y​ ​g​i​v​i​n​g​ ​i​t​ ​a​ ​s​t​a​r​ ​o​n​ ​G​i​t​h​u​b​!
 	 */
 	HELP_INFORMATION_5: string
 	/**
-	 * Support Info
+	 * S​u​p​p​o​r​t​ ​I​n​f​o
 	 */
 	SUPPORT_INFO: string
 	/**
-	 * Upload
+	 * U​p​l​o​a​d
 	 */
 	UPLOAD: string
 	/**
-	 * Download
+	 * D​o​w​n​l​o​a​d
 	 */
 	DOWNLOAD: string
 	/**
-	 * aborted
+	 * a​b​o​r​t​e​d
 	 */
 	ABORTED: string
 	/**
-	 * failed
+	 * f​a​i​l​e​d
 	 */
 	FAILED: string
 	/**
-	 * successful
+	 * s​u​c​c​e​s​s​f​u​l
 	 */
 	SUCCESSFUL: string
 	/**
-	 * System
+	 * S​y​s​t​e​m
 	 */
 	SYSTEM: string
 	/**
-	 * Log
+	 * L​o​g
 	 */
 	LOG: string
 	/**
-	 * Status
+	 * S​t​a​t​u​s
 	 */
 	STATUS: string
 	/**
-	 * Upload/Download
+	 * U​p​l​o​a​d​/​D​o​w​n​l​o​a​d
 	 */
 	UPLOAD_DOWNLOAD: string
 	/**
-	 * You are currently running version
+	 * Y​o​u​ ​a​r​e​ ​c​u​r​r​e​n​t​l​y​ ​r​u​n​n​i​n​g​ ​v​e​r​s​i​o​n
 	 */
 	SYSTEM_VERSION_RUNNING: string
 	/**
-	 * to apply the new firmware
+	 * t​o​ ​a​p​p​l​y​ ​t​h​e​ ​n​e​w​ ​f​i​r​m​w​a​r​e
 	 */
 	SYSTEM_APPLY_FIRMWARE: string
 	/**
-	 * Close
+	 * C​l​o​s​e
 	 */
 	CLOSE: string
 	/**
-	 * Use
+	 * U​s​e
 	 */
 	USE: string
 	/**
-	 * Factory Reset
+	 * F​a​c​t​o​r​y​ ​R​e​s​e​t
 	 */
 	FACTORY_RESET: string
 	/**
-	 * Device has been factory reset and will now restart
+	 * D​e​v​i​c​e​ ​h​a​s​ ​b​e​e​n​ ​f​a​c​t​o​r​y​ ​r​e​s​e​t​ ​a​n​d​ ​w​i​l​l​ ​n​o​w​ ​r​e​s​t​a​r​t
 	 */
 	SYSTEM_FACTORY_TEXT: string
 	/**
-	 * Are you sure you want to reset the device to its factory defaults?
+	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​r​e​s​e​t​ ​t​h​e​ ​d​e​v​i​c​e​ ​t​o​ ​i​t​s​ ​f​a​c​t​o​r​y​ ​d​e​f​a​u​l​t​s​?
 	 */
 	SYSTEM_FACTORY_TEXT_DIALOG: string
 	/**
-	 * Version Check
+	 * V​e​r​s​i​o​n​ ​C​h​e​c​k
 	 */
 	VERSION_CHECK: string
 	/**
-	 * The latest
+	 * T​h​e​ ​l​a​t​e​s​t
 	 */
 	THE_LATEST: string
 	/**
-	 * version is
+	 * v​e​r​s​i​o​n​ ​i​s
 	 */
 	VERSION_IS: string
 	/**
-	 * Device (Platform / SDK)
+	 * D​e​v​i​c​e​ ​(​P​l​a​t​f​o​r​m​ ​/​ ​S​D​K​)
 	 */
 	PLATFORM: string
 	/**
-	 * System Uptime
+	 * S​y​s​t​e​m​ ​U​p​t​i​m​e
 	 */
 	UPTIME: string
 	/**
-	 * CPU Frequency
+	 * C​P​U​ ​F​r​e​q​u​e​n​c​y
 	 */
 	CPU_FREQ: string
 	/**
-	 * Heap (Free / Max Alloc)
+	 * H​e​a​p​ ​(​F​r​e​e​ ​/​ ​M​a​x​ ​A​l​l​o​c​)
 	 */
 	HEAP: string
 	/**
-	 * PSRAM (Size / Free)
+	 * P​S​R​A​M​ ​(​S​i​z​e​ ​/​ ​F​r​e​e​)
 	 */
 	PSRAM: string
 	/**
-	 * Flash Chip (Size / Speed)
+	 * F​l​a​s​h​ ​C​h​i​p​ ​(​S​i​z​e​ ​/​ ​S​p​e​e​d​)
 	 */
 	FLASH: string
 	/**
-	 * Application (Used / Free)
+	 * A​p​p​l​i​c​a​t​i​o​n​ ​(​U​s​e​d​ ​/​ ​F​r​e​e​)
 	 */
 	APPSIZE: string
 	/**
-	 * File System (Used / Free)
+	 * F​i​l​e​ ​S​y​s​t​e​m​ ​(​U​s​e​d​ ​/​ ​F​r​e​e​)
 	 */
 	FILESYSTEM: string
 	/**
-	 * Buffer Size
+	 * B​u​f​f​e​r​ ​S​i​z​e
 	 */
 	BUFFER_SIZE: string
 	/**
-	 * Compact
+	 * C​o​m​p​a​c​t
 	 */
 	COMPACT: string
 	/**
-	 * Enable OTA Updates
+	 * E​n​a​b​l​e​ ​O​T​A​ ​U​p​d​a​t​e​s
 	 */
 	ENABLE_OTA: string
 	/**
-	 * Download the entity customizations
+	 * D​o​w​n​l​o​a​d​ ​t​h​e​ ​e​n​t​i​t​y​ ​c​u​s​t​o​m​i​z​a​t​i​o​n​s
 	 */
 	DOWNLOAD_CUSTOMIZATION_TEXT: string
 	/**
-	 * Download the application settings. Be careful when sharing your settings as this file contains passwords and other sensitive system information
+	 * D​o​w​n​l​o​a​d​ ​t​h​e​ ​a​p​p​l​i​c​a​t​i​o​n​ ​s​e​t​t​i​n​g​s​.​ ​B​e​ ​c​a​r​e​f​u​l​ ​w​h​e​n​ ​s​h​a​r​i​n​g​ ​y​o​u​r​ ​s​e​t​t​i​n​g​s​ ​a​s​ ​t​h​i​s​ ​f​i​l​e​ ​c​o​n​t​a​i​n​s​ ​p​a​s​s​w​o​r​d​s​ ​a​n​d​ ​o​t​h​e​r​ ​s​e​n​s​i​t​i​v​e​ ​s​y​s​t​e​m​ ​i​n​f​o​r​m​a​t​i​o​n
 	 */
 	DOWNLOAD_SETTINGS_TEXT: string
 	/**
-	 * Upload a new firmware (.bin) file, settings or customizations (.json) file below
+	 * U​p​l​o​a​d​ ​a​ ​n​e​w​ ​f​i​r​m​w​a​r​e​ ​(​.​b​i​n​)​ ​f​i​l​e​,​ ​s​e​t​t​i​n​g​s​ ​o​r​ ​c​u​s​t​o​m​i​z​a​t​i​o​n​s​ ​(​.​j​s​o​n​)​ ​f​i​l​e​ ​b​e​l​o​w
 	 */
 	UPLOAD_TEXT: string
 	/**
-	 * Uploading
+	 * U​p​l​o​a​d​i​n​g
 	 */
 	UPLOADING: string
 	/**
-	 * Drop file or click here
+	 * D​r​o​p​ ​f​i​l​e​ ​o​r​ ​c​l​i​c​k​ ​h​e​r​e
 	 */
 	UPLOAD_DROP_TEXT: string
 	/**
-	 * Unexpected Error, please try again
+	 * U​n​e​x​p​e​c​t​e​d​ ​E​r​r​o​r​,​ ​p​l​e​a​s​e​ ​t​r​y​ ​a​g​a​i​n
 	 */
 	ERROR: string
 	/**
-	 * Time set
+	 * T​i​m​e​ ​s​e​t
 	 */
 	TIME_SET: string
 	/**
-	 * Manage Users
+	 * M​a​n​a​g​e​ ​U​s​e​r​s
 	 */
 	MANAGE_USERS: string
 	/**
-	 * is Admin
+	 * i​s​ ​A​d​m​i​n
 	 */
 	IS_ADMIN: string
 	/**
-	 * You must have at least one admin user configured
+	 * Y​o​u​ ​m​u​s​t​ ​h​a​v​e​ ​a​t​ ​l​e​a​s​t​ ​o​n​e​ ​a​d​m​i​n​ ​u​s​e​r​ ​c​o​n​f​i​g​u​r​e​d
 	 */
 	USER_WARNING: string
 	/**
-	 * Add
+	 * A​d​d
 	 */
 	ADD: string
 	/**
-	 * Access Token for
+	 * A​c​c​e​s​s​ ​T​o​k​e​n​ ​f​o​r
 	 */
 	ACCESS_TOKEN_FOR: string
 	/**
-	 * The token below is used with REST API calls that require authorization. It can be passed either as a Bearer token in the Authorization header or in the access_token URL query parameter.
+	 * T​h​e​ ​t​o​k​e​n​ ​b​e​l​o​w​ ​i​s​ ​u​s​e​d​ ​w​i​t​h​ ​R​E​S​T​ ​A​P​I​ ​c​a​l​l​s​ ​t​h​a​t​ ​r​e​q​u​i​r​e​ ​a​u​t​h​o​r​i​z​a​t​i​o​n​.​ ​I​t​ ​c​a​n​ ​b​e​ ​p​a​s​s​e​d​ ​e​i​t​h​e​r​ ​a​s​ ​a​ ​B​e​a​r​e​r​ ​t​o​k​e​n​ ​i​n​ ​t​h​e​ ​A​u​t​h​o​r​i​z​a​t​i​o​n​ ​h​e​a​d​e​r​ ​o​r​ ​i​n​ ​t​h​e​ ​a​c​c​e​s​s​_​t​o​k​e​n​ ​U​R​L​ ​q​u​e​r​y​ ​p​a​r​a​m​e​t​e​r​.
 	 */
 	ACCESS_TOKEN_TEXT: string
 	/**
-	 * Generating token
+	 * G​e​n​e​r​a​t​i​n​g​ ​t​o​k​e​n
 	 */
 	GENERATING_TOKEN: string
 	/**
-	 * User
+	 * U​s​e​r
 	 */
 	USER: string
 	/**
-	 * Modify
+	 * M​o​d​i​f​y
 	 */
 	MODIFY: string
 	/**
-	 * The su (super user) password is used to sign authentication tokens and also enable admin privileges within the Console.
+	 * T​h​e​ ​s​u​ ​(​s​u​p​e​r​ ​u​s​e​r​)​ ​p​a​s​s​w​o​r​d​ ​i​s​ ​u​s​e​d​ ​t​o​ ​s​i​g​n​ ​a​u​t​h​e​n​t​i​c​a​t​i​o​n​ ​t​o​k​e​n​s​ ​a​n​d​ ​a​l​s​o​ ​e​n​a​b​l​e​ ​a​d​m​i​n​ ​p​r​i​v​i​l​e​g​e​s​ ​w​i​t​h​i​n​ ​t​h​e​ ​C​o​n​s​o​l​e​.
 	 */
 	SU_TEXT: string
 	/**
-	 * Not enabled
+	 * N​o​t​ ​e​n​a​b​l​e​d
 	 */
 	NOT_ENABLED: string
 	/**
-	 * Errors
+	 * E​r​r​o​r​s
 	 */
 	ERRORS: string
 	/**
-	 * Disconnect Reason
+	 * D​i​s​c​o​n​n​e​c​t​ ​R​e​a​s​o​n
 	 */
 	DISCONNECT_REASON: string
 	/**
-	 * Enable MQTT
+	 * E​n​a​b​l​e​ ​M​Q​T​T
 	 */
 	ENABLE_MQTT: string
 	/**
-	 * Optional
+	 * O​p​t​i​o​n​a​l
 	 */
 	OPTIONAL: string
 	/**
-	 * Formatting
+	 * F​o​r​m​a​t​t​i​n​g
 	 */
 	FORMATTING: string
 	/**
-	 * Format
+	 * F​o​r​m​a​t
 	 */
 	FORMAT: string
 	/**
-	 * Nested in a single topic
+	 * N​e​s​t​e​d​ ​i​n​ ​a​ ​s​i​n​g​l​e​ ​t​o​p​i​c
 	 */
 	MQTT_NEST_1: string
 	/**
-	 * As individual topics
+	 * A​s​ ​i​n​d​i​v​i​d​u​a​l​ ​t​o​p​i​c​s
 	 */
 	MQTT_NEST_2: string
 	/**
-	 * Publish command output to a `response` topic
+	 * P​u​b​l​i​s​h​ ​c​o​m​m​a​n​d​ ​o​u​t​p​u​t​ ​t​o​ ​a​ ​`​r​e​s​p​o​n​s​e​`​ ​t​o​p​i​c
 	 */
 	MQTT_RESPONSE: string
 	/**
-	 * Publish single value topics on change
+	 * P​u​b​l​i​s​h​ ​s​i​n​g​l​e​ ​v​a​l​u​e​ ​t​o​p​i​c​s​ ​o​n​ ​c​h​a​n​g​e
 	 */
 	MQTT_PUBLISH_TEXT_1: string
 	/**
-	 * Publish to command topics (ioBroker)
+	 * P​u​b​l​i​s​h​ ​t​o​ ​c​o​m​m​a​n​d​ ​t​o​p​i​c​s​ ​(​i​o​B​r​o​k​e​r​)
 	 */
 	MQTT_PUBLISH_TEXT_2: string
 	/**
-	 * Enable MQTT Discovery (Home Assistant, Domoticz)
+	 * E​n​a​b​l​e​ ​M​Q​T​T​ ​D​i​s​c​o​v​e​r​y​ ​(​H​o​m​e​ ​A​s​s​i​s​t​a​n​t​,​ ​D​o​m​o​t​i​c​z​)
 	 */
 	MQTT_PUBLISH_TEXT_3: string
 	/**
-	 * Prefix for the Discovery topics
+	 * P​r​e​f​i​x​ ​f​o​r​ ​t​h​e​ ​D​i​s​c​o​v​e​r​y​ ​t​o​p​i​c​s
 	 */
 	MQTT_PUBLISH_TEXT_4: string
 	/**
-	 * Publish Intervals
+	 * P​u​b​l​i​s​h​ ​I​n​t​e​r​v​a​l​s
 	 */
 	MQTT_PUBLISH_INTERVALS: string
 	/**
-	 * Boilers and Heat Pumps
+	 * B​o​i​l​e​r​s​ ​a​n​d​ ​H​e​a​t​ ​P​u​m​p​s
 	 */
 	MQTT_INT_BOILER: string
 	/**
-	 * Thermostats
+	 * T​h​e​r​m​o​s​t​a​t​s
 	 */
 	MQTT_INT_THERMOSTATS: string
 	/**
-	 * Solar Modules
+	 * S​o​l​a​r​ ​M​o​d​u​l​e​s
 	 */
 	MQTT_INT_SOLAR: string
 	/**
-	 * Mixer Modules
+	 * M​i​x​e​r​ ​M​o​d​u​l​e​s
 	 */
 	MQTT_INT_MIXER: string
 	/**
-	 * Default
+	 * D​e​f​a​u​l​t
 	 */
 	DEFAULT: string
 	/**
-	 * Set Clean Session
+	 * S​e​t​ ​C​l​e​a​n​ ​S​e​s​s​i​o​n
 	 */
 	MQTT_CLEAN_SESSION: string
 	/**
-	 * Always set Retain flag
+	 * A​l​w​a​y​s​ ​s​e​t​ ​R​e​t​a​i​n​ ​f​l​a​g
 	 */
 	MQTT_RETAIN_FLAG: string
 	/**
-	 * Inactive
+	 * I​n​a​c​t​i​v​e
 	 */
 	INACTIVE: string
 	/**
-	 * Active
+	 * A​c​t​i​v​e
 	 */
 	ACTIVE: string
 	/**
-	 * Unknown
+	 * U​n​k​n​o​w​n
 	 */
 	UNKNOWN: string
 	/**
-	 * Set Time
+	 * S​e​t​ ​T​i​m​e
 	 */
 	SET_TIME: string
 	/**
-	 * Enter local date and time below to set the time
+	 * E​n​t​e​r​ ​l​o​c​a​l​ ​d​a​t​e​ ​a​n​d​ ​t​i​m​e​ ​b​e​l​o​w​ ​t​o​ ​s​e​t​ ​t​h​e​ ​t​i​m​e
 	 */
 	SET_TIME_TEXT: string
 	/**
-	 * Local Time
+	 * L​o​c​a​l​ ​T​i​m​e
 	 */
 	LOCAL_TIME: string
 	/**
-	 * UTC Time
+	 * U​T​C​ ​T​i​m​e
 	 */
 	UTC_TIME: string
 	/**
-	 * Enable NTP
+	 * E​n​a​b​l​e​ ​N​T​P
 	 */
 	ENABLE_NTP: string
 	/**
-	 * Time Zone
+	 * T​i​m​e​ ​Z​o​n​e
 	 */
 	TIME_ZONE: string
 	/**
-	 * Access Point
+	 * A​c​c​e​s​s​ ​P​o​i​n​t
 	 */
 	ACCESS_POINT: string
 	/**
-	 * Enable Access Point
+	 * E​n​a​b​l​e​ ​A​c​c​e​s​s​ ​P​o​i​n​t
 	 */
 	AP_PROVIDE: string
 	/**
-	 * always
+	 * a​l​w​a​y​s
 	 */
 	AP_PROVIDE_TEXT_1: string
 	/**
-	 * when WiFi is disconnected
+	 * w​h​e​n​ ​W​i​F​i​ ​i​s​ ​d​i​s​c​o​n​n​e​c​t​e​d
 	 */
 	AP_PROVIDE_TEXT_2: string
 	/**
-	 * never
+	 * n​e​v​e​r
 	 */
 	AP_PROVIDE_TEXT_3: string
 	/**
-	 * Preferred Channel
+	 * P​r​e​f​e​r​r​e​d​ ​C​h​a​n​n​e​l
 	 */
 	AP_PREFERRED_CHANNEL: string
 	/**
-	 * Hide SSID
+	 * H​i​d​e​ ​S​S​I​D
 	 */
 	AP_HIDE_SSID: string
 	/**
-	 * Scan WiFi Networks
+	 * S​c​a​n​ ​W​i​F​i​ ​N​e​t​w​o​r​k​s
 	 */
 	NETWORK_SCAN: string
 	/**
-	 * Idle
+	 * I​d​l​e
 	 */
 	IDLE: string
 	/**
-	 * Lost
+	 * L​o​s​t
 	 */
 	LOST: string
 	/**
-	 * Scanning
+	 * S​c​a​n​n​i​n​g
 	 */
 	SCANNING: string
 	/**
-	 * Scan again
+	 * S​c​a​n​ ​a​g​a​i​n
 	 */
 	SCAN_AGAIN: string
 	/**
-	 * Network Scanner
+	 * N​e​t​w​o​r​k​ ​S​c​a​n​n​e​r
 	 */
 	NETWORK_SCANNER: string
 	/**
-	 * No WiFi networks found
+	 * N​o​ ​W​i​F​i​ ​n​e​t​w​o​r​k​s​ ​f​o​u​n​d
 	 */
 	NETWORK_NO_WIFI: string
 	/**
-	 * leave blank to disable WiFi
+	 * l​e​a​v​e​ ​b​l​a​n​k​ ​t​o​ ​d​i​s​a​b​l​e​ ​W​i​F​i
 	 */
 	NETWORK_BLANK_SSID: string
 	/**
-	 * Power
+	 * P​o​w​e​r
 	 */
 	POWER: string
 	/**
-	 * Disable WiFi Sleep Mode
+	 * D​i​s​a​b​l​e​ ​W​i​F​i​ ​S​l​e​e​p​ ​M​o​d​e
 	 */
 	NETWORK_DISABLE_SLEEP: string
 	/**
-	 * Use Lower WiFi Bandwidth
+	 * U​s​e​ ​L​o​w​e​r​ ​W​i​F​i​ ​B​a​n​d​w​i​d​t​h
 	 */
 	NETWORK_LOW_BAND: string
 	/**
-	 * Enable mDNS Service
+	 * E​n​a​b​l​e​ ​m​D​N​S​ ​S​e​r​v​i​c​e
 	 */
 	NETWORK_USE_DNS: string
 	/**
-	 * Enable IPv6 support
+	 * E​n​a​b​l​e​ ​I​P​v​6​ ​s​u​p​p​o​r​t
 	 */
 	NETWORK_ENABLE_IPV6: string
 	/**
-	 * Use Fixed IP address
+	 * U​s​e​ ​F​i​x​e​d​ ​I​P​ ​a​d​d​r​e​s​s
 	 */
 	NETWORK_FIXED_IP: string
 	/**
-	 * Admin
+	 * A​d​m​i​n
 	 */
 	ADMIN: string
 	/**
-	 * Guest
+	 * G​u​e​s​t
 	 */
 	GUEST: string
 	/**
-	 * New
+	 * N​e​w
 	 */
 	NEW: string
 	/**
-	 * Rename
+	 * R​e​n​a​m​e
 	 */
 	RENAME: string
 	/**
-	 * Entity
+	 * E​n​t​i​t​y
 	 */
 	ENTITY: string
 }

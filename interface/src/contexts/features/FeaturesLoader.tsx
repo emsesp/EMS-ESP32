@@ -16,7 +16,7 @@ const FeaturesLoader: FC<RequiredChildrenProps> = (props) => {
     try {
       const response = await FeaturesApi.readFeatures();
       setFeatures(response.data);
-    } catch (error: unknown) {
+    } catch (error) {
       setErrorMessage(extractErrorMessage(error, 'Failed to fetch application details.'));
     }
   }, []);

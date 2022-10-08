@@ -135,8 +135,8 @@ void Shell::loop_one() {
     }
 }
 
-void Shell::set_command_str(const __FlashStringHelper * str) {
-    line_buffer_ = read_flash_string(str);
+void Shell::set_command_str(const char * str) {
+    line_buffer_ = (str);
     erase_current_line();
     prompt_displayed_ = false;
     display_prompt();
@@ -262,30 +262,30 @@ void Shell::loop_normal() {
                 } else if (esc_ == 1) { // pos1
                     cursor_ = line_buffer_.length();
                 } else if (esc_ == 11) { // F1
-                    set_command_str(F("help"));
+                    set_command_str("help");
                 } else if (esc_ == 12) { // F2
-                    set_command_str(F("show"));
+                    set_command_str("show");
                 } else if (esc_ == 13) { // F3
-                    set_command_str(F("log notice"));
+                    set_command_str("log notice");
                 } else if (esc_ == 14) { // F4
-                    set_command_str(F("log info"));
+                    set_command_str("log info");
                 } else if (esc_ == 15) { // F5
-                    set_command_str(F("log debug"));
+                    set_command_str("log debug");
                 } else if (esc_ == 17) { // F6
-                    set_command_str(F("watch off"));
+                    set_command_str("watch off");
                 } else if (esc_ == 18) { // F7
-                    set_command_str(F("watch on"));
+                    set_command_str("watch on");
                 } else if (esc_ == 19) { // F8
-                    set_command_str(F("watch raw"));
+                    set_command_str("watch raw");
                 } else if (esc_ == 20) { // F9
-                    set_command_str(F("call system info"));
+                    set_command_str("call system info");
                 } else if (esc_ == 21) { // F10
-                    set_command_str(F("call system settings"));
+                    set_command_str("call system settings");
                 } else if (esc_ == 23) { // F11
-                    line_buffer_ = read_flash_string(F("call send \"0B \""));
+                    line_buffer_ = ("call send \"0B \"");
                     cursor_      = 1;
                 } else if (esc_ == 24) { // F12
-                    set_command_str(F("log debug; watch raw"));
+                    set_command_str("log debug; watch raw");
                 }
                 esc_ = 0;
             } else if (c >= '0' && (c <= '9')) { // numbers
@@ -320,7 +320,7 @@ void Shell::loop_normal() {
     idle_time_ = uuid::get_uptime_ms();
 }
 
-Shell::PasswordData::PasswordData(const __FlashStringHelper * password_prompt, password_function && password_function)
+Shell::PasswordData::PasswordData(const char * password_prompt, password_function && password_function)
     : password_prompt_(password_prompt)
     , password_function_(std::move(password_function)) {
 }
@@ -452,7 +452,7 @@ void Shell::loop_blocking() {
     }
 }
 
-void Shell::enter_password(const __FlashStringHelper * prompt, password_function function) {
+void Shell::enter_password(const char * prompt, password_function function) {
     if (mode_ == Mode::NORMAL) {
         mode_      = Mode::PASSWORD;
         mode_data_ = std::make_unique<Shell::PasswordData>(prompt, std::move(function));

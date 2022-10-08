@@ -24,37 +24,37 @@ REGISTER_FACTORY(Thermostat, EMSdevice::DeviceType::THERMOSTAT);
 
 uuid::log::Logger Thermostat::logger_{F_(thermostat), uuid::log::Facility::CONSOLE};
 
-Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
+Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     uint8_t model = this->model();
 
     // RF remote sensor seen at 0x40, maybe this is also for different hc with id 0x40 - 0x47? emsesp.cpp maps only 0x40
     if (device_id >= 0x40 && device_id <= 0x47) {
-        register_telegram_type(0x0435, F("RFTemp"), false, MAKE_PF_CB(process_RemoteTemp));
+        register_telegram_type(0x0435, "RFTemp", false, MAKE_PF_CB(process_RemoteTemp));
         return;
     }
     // remote thermostats with humidity: RC100H remote
     if (device_id >= 0x38 && device_id <= 0x3F) {
-        register_telegram_type(0x042B, F("RemoteTemp"), false, MAKE_PF_CB(process_RemoteTemp));
-        register_telegram_type(0x047B, F("RemoteHumidity"), false, MAKE_PF_CB(process_RemoteHumidity));
-        register_telegram_type(0x0273, F("RemoteCorrection"), true, MAKE_PF_CB(process_RemoteCorrection));
+        register_telegram_type(0x042B, "RemoteTemp", false, MAKE_PF_CB(process_RemoteTemp));
+        register_telegram_type(0x047B, "RemoteHumidity", false, MAKE_PF_CB(process_RemoteHumidity));
+        register_telegram_type(0x0273, "RemoteCorrection", true, MAKE_PF_CB(process_RemoteCorrection));
         register_device_values(); // register device values for common values (not heating circuit)
         return;                   // no values to add
     }
 
     // common telegram handlers
-    register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, MAKE_PF_CB(process_RCOutdoorTemp));
-    register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), false, MAKE_PF_CB(process_RCTime));
-    register_telegram_type(0xA2, F("RCError"), false, MAKE_PF_CB(process_RCError));
-    register_telegram_type(0x12, F("RCErrorMessage"), false, MAKE_PF_CB(process_RCErrorMessage));
-    register_telegram_type(0x13, F("RCErrorMessage2"), false, MAKE_PF_CB(process_RCErrorMessage));
+    register_telegram_type(EMS_TYPE_RCOutdoorTemp, "RCOutdoorTemp", false, MAKE_PF_CB(process_RCOutdoorTemp));
+    register_telegram_type(EMS_TYPE_RCTime, "RCTime", false, MAKE_PF_CB(process_RCTime));
+    register_telegram_type(0xA2, "RCError", false, MAKE_PF_CB(process_RCError));
+    register_telegram_type(0x12, "RCErrorMessage", false, MAKE_PF_CB(process_RCErrorMessage));
+    register_telegram_type(0x13, "RCErrorMessage2", false, MAKE_PF_CB(process_RCErrorMessage));
     // RC10
     if (model == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         monitor_typeids = {0xB1};
         set_typeids     = {0xB0};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC10Monitor"), false, MAKE_PF_CB(process_RC10Monitor));
-            register_telegram_type(set_typeids[i], F("RC10Set"), false, MAKE_PF_CB(process_RC10Set));
+            register_telegram_type(monitor_typeids[i], "RC10Monitor", false, MAKE_PF_CB(process_RC10Monitor));
+            register_telegram_type(set_typeids[i], "RC10Set", false, MAKE_PF_CB(process_RC10Set));
         }
 
         // RC35
@@ -64,15 +64,15 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         timer_typeids   = {0x3F, 0x49, 0x53, 0x5D};
         timer2_typeids  = {0x42, 0x4C, 0x56, 0x60};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC35Monitor"), false, MAKE_PF_CB(process_RC35Monitor));
-            register_telegram_type(set_typeids[i], F("RC35Set"), false, MAKE_PF_CB(process_RC35Set));
-            register_telegram_type(timer_typeids[i], F("RC35Timer"), false, MAKE_PF_CB(process_RC35Timer));
-            register_telegram_type(timer2_typeids[i], F("RC35Timer2"), false, MAKE_PF_CB(process_RC35Timer));
+            register_telegram_type(monitor_typeids[i], "RC35Monitor", false, MAKE_PF_CB(process_RC35Monitor));
+            register_telegram_type(set_typeids[i], "RC35Set", false, MAKE_PF_CB(process_RC35Set));
+            register_telegram_type(timer_typeids[i], "RC35Timer", false, MAKE_PF_CB(process_RC35Timer));
+            register_telegram_type(timer2_typeids[i], "RC35Timer2", false, MAKE_PF_CB(process_RC35Timer));
         }
-        register_telegram_type(EMS_TYPE_IBASettings, F("IBASettings"), true, MAKE_PF_CB(process_IBASettings));
-        register_telegram_type(EMS_TYPE_wwSettings, F("WWSettings"), true, MAKE_PF_CB(process_RC35wwSettings));
-        register_telegram_type(0x38, F("WWTimer"), true, MAKE_PF_CB(process_RC35wwTimer));
-        register_telegram_type(0x39, F("WWCircTimer"), true, MAKE_PF_CB(process_RC35wwTimer));
+        register_telegram_type(EMS_TYPE_IBASettings, "IBASettings", true, MAKE_PF_CB(process_IBASettings));
+        register_telegram_type(EMS_TYPE_wwSettings, "WWSettings", true, MAKE_PF_CB(process_RC35wwSettings));
+        register_telegram_type(0x38, "WWTimer", true, MAKE_PF_CB(process_RC35wwTimer));
+        register_telegram_type(0x39, "WWCircTimer", true, MAKE_PF_CB(process_RC35wwTimer));
 
         // RC20
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC20) {
@@ -81,22 +81,22 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         curve_typeids   = {0x90};
         timer_typeids   = {0x8F};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, MAKE_PF_CB(process_RC20Monitor));
-            register_telegram_type(set_typeids[i], F("RC20Set"), false, MAKE_PF_CB(process_RC20Set));
-            register_telegram_type(curve_typeids[i], F("RC20Temp"), false, MAKE_PF_CB(process_RC20Temp));
-            register_telegram_type(timer_typeids[i], F("RC20Timer"), false, MAKE_PF_CB(process_RC20Timer));
+            register_telegram_type(monitor_typeids[i], "RC20Monitor", false, MAKE_PF_CB(process_RC20Monitor));
+            register_telegram_type(set_typeids[i], "RC20Set", false, MAKE_PF_CB(process_RC20Set));
+            register_telegram_type(curve_typeids[i], "RC20Temp", false, MAKE_PF_CB(process_RC20Temp));
+            register_telegram_type(timer_typeids[i], "RC20Timer", false, MAKE_PF_CB(process_RC20Timer));
         }
         // remote thermostat uses only 0xAF
-        register_telegram_type(0xAF, F("RC20Remote"), false, MAKE_PF_CB(process_RC20Remote));
+        register_telegram_type(0xAF, "RC20Remote", false, MAKE_PF_CB(process_RC20Remote));
         // RC20 newer
     } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC20_N) || (model == EMSdevice::EMS_DEVICE_FLAG_RC25)) {
         monitor_typeids = {0xAE};
         set_typeids     = {0xAD};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, MAKE_PF_CB(process_RC20Monitor_2));
-            register_telegram_type(set_typeids[i], F("RC20Set"), false, MAKE_PF_CB(process_RC20Set_2));
+            register_telegram_type(monitor_typeids[i], "RC20Monitor", false, MAKE_PF_CB(process_RC20Monitor_2));
+            register_telegram_type(set_typeids[i], "RC20Set", false, MAKE_PF_CB(process_RC20Set_2));
         }
-        register_telegram_type(0xAF, F("RC20Remote"), false, MAKE_PF_CB(process_RC20Remote));
+        register_telegram_type(0xAF, "RC20Remote", false, MAKE_PF_CB(process_RC20Remote));
         // RC30
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         monitor_typeids = {0x41};
@@ -104,27 +104,27 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         curve_typeids   = {0x40};
         timer_typeids   = {0x3F};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC30Monitor"), false, MAKE_PF_CB(process_RC30Monitor));
-            register_telegram_type(set_typeids[i], F("RC30Set"), false, MAKE_PF_CB(process_RC30Set));
-            register_telegram_type(curve_typeids[i], F("RC30Temp"), false, MAKE_PF_CB(process_RC30Temp));
-            register_telegram_type(timer_typeids[i], F("RC30Timer"), false, MAKE_PF_CB(process_RC35Timer));
+            register_telegram_type(monitor_typeids[i], "RC30Monitor", false, MAKE_PF_CB(process_RC30Monitor));
+            register_telegram_type(set_typeids[i], "RC30Set", false, MAKE_PF_CB(process_RC30Set));
+            register_telegram_type(curve_typeids[i], "RC30Temp", false, MAKE_PF_CB(process_RC30Temp));
+            register_telegram_type(timer_typeids[i], "RC30Timer", false, MAKE_PF_CB(process_RC35Timer));
         }
-        register_telegram_type(EMS_TYPE_RC30wwSettings, F("RC30WWSettings"), true, MAKE_PF_CB(process_RC30wwSettings));
-        register_telegram_type(0x38, F("WWTimer"), true, MAKE_PF_CB(process_RC35wwTimer));
-        register_telegram_type(0x39, F("WWCircTimer"), true, MAKE_PF_CB(process_RC35wwTimer));
+        register_telegram_type(EMS_TYPE_RC30wwSettings, "RC30WWSettings", true, MAKE_PF_CB(process_RC30wwSettings));
+        register_telegram_type(0x38, "WWTimer", true, MAKE_PF_CB(process_RC35wwTimer));
+        register_telegram_type(0x39, "WWCircTimer", true, MAKE_PF_CB(process_RC35wwTimer));
 
         // EASY
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_EASY) {
         monitor_typeids = {0x0A};
         set_typeids     = {};
-        register_telegram_type(monitor_typeids[0], F("EasyMonitor"), true, MAKE_PF_CB(process_EasyMonitor));
+        register_telegram_type(monitor_typeids[0], "EasyMonitor", true, MAKE_PF_CB(process_EasyMonitor));
 
         // CRF
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_CRF) {
         monitor_typeids = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
         set_typeids     = {};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("CRFMonitor"), false, MAKE_PF_CB(process_CRFMonitor));
+            register_telegram_type(monitor_typeids[i], "CRFMonitor", false, MAKE_PF_CB(process_CRFMonitor));
         }
 
         // RC300/RC100
@@ -136,46 +136,46 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         curve_typeids   = {0x029B, 0x029C, 0x029D, 0x029E, 0x029F, 0x02A0, 0x02A1, 0x02A2};
         summer2_typeids = {0x0471, 0x0472, 0x0473, 0x0474, 0x0475, 0x0476, 0x0477, 0x0478};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC300Monitor"), false, MAKE_PF_CB(process_RC300Monitor));
-            register_telegram_type(set_typeids[i], F("RC300Set"), false, MAKE_PF_CB(process_RC300Set));
-            register_telegram_type(summer_typeids[i], F("RC300Summer"), false, MAKE_PF_CB(process_RC300Summer));
-            register_telegram_type(curve_typeids[i], F("RC300Curves"), false, MAKE_PF_CB(process_RC300Curve));
-            register_telegram_type(summer2_typeids[i], F("RC300Summer2"), false, MAKE_PF_CB(process_RC300Summer2));
+            register_telegram_type(monitor_typeids[i], "RC300Monitor", false, MAKE_PF_CB(process_RC300Monitor));
+            register_telegram_type(set_typeids[i], "RC300Set", false, MAKE_PF_CB(process_RC300Set));
+            register_telegram_type(summer_typeids[i], "RC300Summer", false, MAKE_PF_CB(process_RC300Summer));
+            register_telegram_type(curve_typeids[i], "RC300Curves", false, MAKE_PF_CB(process_RC300Curve));
+            register_telegram_type(summer2_typeids[i], "RC300Summer2", false, MAKE_PF_CB(process_RC300Summer2));
         }
         for (uint8_t i = 0; i < set2_typeids.size(); i++) {
-            register_telegram_type(set2_typeids[i], F("RC300Set2"), false, MAKE_PF_CB(process_RC300Set2));
+            register_telegram_type(set2_typeids[i], "RC300Set2", false, MAKE_PF_CB(process_RC300Set2));
         }
-        register_telegram_type(0x2F5, F("RC300WWmode"), true, MAKE_PF_CB(process_RC300WWmode));
-        register_telegram_type(0x31B, F("RC300WWtemp"), true, MAKE_PF_CB(process_RC300WWtemp));
-        register_telegram_type(0x31D, F("RC300WWmode2"), false, MAKE_PF_CB(process_RC300WWmode2));
-        register_telegram_type(0x31E, F("RC300WWmode2"), false, MAKE_PF_CB(process_RC300WWmode2));
-        register_telegram_type(0x23A, F("RC300OutdoorTemp"), true, MAKE_PF_CB(process_RC300OutdoorTemp));
-        register_telegram_type(0x267, F("RC300Floordry"), false, MAKE_PF_CB(process_RC300Floordry));
-        register_telegram_type(0x240, F("RC300Settings"), true, MAKE_PF_CB(process_RC300Settings));
+        register_telegram_type(0x2F5, "RC300WWmode", true, MAKE_PF_CB(process_RC300WWmode));
+        register_telegram_type(0x31B, "RC300WWtemp", true, MAKE_PF_CB(process_RC300WWtemp));
+        register_telegram_type(0x31D, "RC300WWmode2", false, MAKE_PF_CB(process_RC300WWmode2));
+        register_telegram_type(0x31E, "RC300WWmode2", false, MAKE_PF_CB(process_RC300WWmode2));
+        register_telegram_type(0x23A, "RC300OutdoorTemp", true, MAKE_PF_CB(process_RC300OutdoorTemp));
+        register_telegram_type(0x267, "RC300Floordry", false, MAKE_PF_CB(process_RC300Floordry));
+        register_telegram_type(0x240, "RC300Settings", true, MAKE_PF_CB(process_RC300Settings));
 
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), false, MAKE_PF_CB(process_JunkersMonitor));
+            register_telegram_type(monitor_typeids[i], "JunkersMonitor", false, MAKE_PF_CB(process_JunkersMonitor));
         }
 
         if (has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {
             // FR120, FR100
             set_typeids = {0x0179, 0x017A, 0x017B, 0x017C};
             for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-                register_telegram_type(set_typeids[i], F("JunkersSet"), false, MAKE_PF_CB(process_JunkersSet2));
+                register_telegram_type(set_typeids[i], "JunkersSet", false, MAKE_PF_CB(process_JunkersSet2));
             }
         } else {
             set_typeids = {0x0165, 0x0166, 0x0167, 0x0168};
             for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-                register_telegram_type(set_typeids[i], F("JunkersSet"), false, MAKE_PF_CB(process_JunkersSet));
+                register_telegram_type(set_typeids[i], "JunkersSet", false, MAKE_PF_CB(process_JunkersSet));
             }
         }
-        register_telegram_type(0xBB, F("HybridSettings"), true, MAKE_PF_CB(process_JunkersHybridSettings));
-        register_telegram_type(0x23, F("JunkersSetMixer"), true, MAKE_PF_CB(process_JunkersSetMixer));
-        register_telegram_type(0x123, F("JunkersRemote"), false, MAKE_PF_CB(process_JunkersRemoteMonitor));
-        register_telegram_type(0x1D3, F("JunkersDhw"), true, MAKE_PF_CB(process_JunkersWW));
+        register_telegram_type(0xBB, "HybridSettings", true, MAKE_PF_CB(process_JunkersHybridSettings));
+        register_telegram_type(0x23, "JunkersSetMixer", true, MAKE_PF_CB(process_JunkersSetMixer));
+        register_telegram_type(0x123, "JunkersRemote", false, MAKE_PF_CB(process_JunkersRemoteMonitor));
+        register_telegram_type(0x1D3, "JunkersDhw", true, MAKE_PF_CB(process_JunkersWW));
     }
 
     // register device values for common values (not heating circuit)
@@ -593,7 +593,7 @@ void Thermostat::process_RC20Timer(std::shared_ptr<const Telegram> telegram) {
         uint8_t time = telegram->message_data[1];
 
         // we use EN settings for the day abbreviation
-        std::string sday = read_flash_string(FL_(enum_dayOfWeek)[day][0]);
+        std::string sday = (FL_(enum_dayOfWeek)[day][0]);
         // std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
 
         if (day == 7) {
@@ -680,6 +680,12 @@ void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
+    has_update(telegram, hc->daytemp, 17);          // is * 2
+    has_update(telegram, hc->nighttemp, 16);        // is * 2
+    has_update(telegram, hc->nofrosttemp, 15);      // is * 2
+    has_update(telegram, hc->control, 1);           // remote: 0-off, 1-FB10, 2-FB100
+    has_enumupdate(telegram, hc->program, 13, 1);   // 1-6: 1 = A, 2 = B,...
+    has_enumupdate(telegram, hc->mode, 14, 1);      // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
     has_update(telegram, hc->daytemp, 17);          // is * 2
     has_update(telegram, hc->nighttemp, 16);        // is * 2
     has_update(telegram, hc->nofrosttemp, 15);      // is * 2
@@ -795,7 +801,7 @@ void Thermostat::process_RC35wwTimer(std::shared_ptr<const Telegram> telegram) {
 
         char data[sizeof(wwSwitchTime_)];
         // we use EN settings for the day abbreviation
-        std::string sday = read_flash_string(FL_(enum_dayOfWeek)[day][0]);
+        std::string sday = (FL_(enum_dayOfWeek)[day][0]);
         // std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
@@ -1274,7 +1280,7 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
         uint8_t time = telegram->message_data[1];
 
         // we use EN settings for the day abbreviation
-        std::string sday = read_flash_string(FL_(enum_dayOfWeek)[day][0]);
+        std::string sday = (FL_(enum_dayOfWeek)[day][0]);
         // std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
@@ -1372,7 +1378,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
         double difference = difftime(now, ttime);
         if (difference > 15 || difference < -15) {
             set_datetime("ntp", -1); // set from NTP
-            LOG_INFO(F("thermostat time correction from ntp"));
+            LOG_INFO("thermostat time correction from ntp");
         }
     }
 #ifndef EMSESP_STANDALONE
@@ -1383,7 +1389,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
         }
         struct timeval newnow = {.tv_sec = ttime};
         settimeofday(&newnow, nullptr);
-        LOG_INFO(F("ems-esp time set from thermostat"));
+        LOG_INFO("ems-esp time set from thermostat");
     }
 #endif
 }
@@ -1551,7 +1557,7 @@ bool Thermostat::set_calinttemp(const char * value, const int8_t id) {
     }
 
     auto t = (int8_t)(ct * 10);
-    LOG_DEBUG(F("Calibrating internal temperature to %d.%d C"), t / 10, t < 0 ? -t % 10 : t % 10);
+    LOG_DEBUG("Calibrating internal temperature to %d.%d C", t / 10, t < 0 ? -t % 10 : t % 10);
 
     if (model() == EMS_DEVICE_FLAG_RC10) {
         write_command(0xB0, 0, t, 0xB0);
@@ -2155,7 +2161,7 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
             return false;
         }
         if (!EMSESP::system_.ntp_connected()) {
-            LOG_WARNING(F("Set date: no valid NTP data, setting from ESP Clock"));
+            LOG_WARNING("Set date: no valid NTP data, setting from ESP Clock");
         }
 
         data[0] = tm_->tm_year - 100; // Bosch counts from 2000
@@ -2183,15 +2189,15 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
             data[7] = 0;
         }
     } else {
-        LOG_WARNING(F("Set date: invalid data, wrong length"));
+        LOG_WARNING("Set date: invalid data, wrong length");
         return false;
     }
     if (data[1] == 0 || data[1] > 12 || data[2] > 23 || data[3] == 0 || data[3] > 31 || data[4] > 59 || data[5] > 59 || data[6] > 6 || data[7] > 3) {
-        LOG_WARNING(F("Invalid date/time: %02d.%02d.2%03d-%02d:%02d:%02d-%d-%d"), data[3], data[1], data[0], data[2], data[4], data[5], data[6], data[7]);
+        LOG_WARNING("Invalid date/time: %02d.%02d.2%03d-%02d:%02d:%02d-%d-%d", data[3], data[1], data[0], data[2], data[4], data[5], data[6], data[7]);
         return false;
     }
 
-    // LOG_INFO(F("Setting date and time: %02d.%02d.2%03d-%02d:%02d:%02d-%d-%d"), data[3], data[1], data[0], data[2], data[4], data[5], data[6], data[7]);
+    // LOG_INFO("Setting date and time: %02d.%02d.2%03d-%02d:%02d:%02d-%d-%d", data[3], data[1], data[0], data[2], data[4], data[5], data[6], data[7]);
     write_command(EMS_TYPE_time, 0, data, 8, EMS_TYPE_time);
 
     return true;
@@ -2664,7 +2670,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
             day  = 7;
             on   = 7;
             time = 0x90;
-            // LOG_INFO(F("switchtime %02d cleared"), no);
+            // LOG_INFO("switchtime %02d cleared", no);
         }
     } else {
         if (strlen(value) > 1) {
@@ -2681,7 +2687,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         if (strlen(value) > 4) {
             for (uint8_t i = 0; i < 7; i++) {
                 // we use EN settings for the day abbreviation
-                if (!strncmp(&value[3], read_flash_string(FL_(enum_dayOfWeek)[i][0]).c_str(), 2)) {
+                if (!strncmp(&value[3], (FL_(enum_dayOfWeek)[i][0]), 2)) {
                     day = i;
                 }
 
@@ -2705,7 +2711,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
             day  = 7;
             on   = 7;
             time = 0x90;
-            // LOG_INFO(F("switchtime %02d cleared"), no);
+            // LOG_INFO("switchtime %02d cleared", no);
         }
     }
     uint8_t data[2] = {0xE7, 0x90}; // unset switchtime
@@ -2721,20 +2727,20 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         max_on = 1;
     }
     if (no > 41 || time > 0x90 || ((on < min_on || on > max_on) && on != 7)) {
-        // LOG_WARNING(F("Setting switchtime: Invalid data: %s"), value);
-        // LOG_WARNING(F("Setting switchtime: Invalid data: %02d.%1d.0x%02X.%1d"), no, day, time, on);
+        // LOG_WARNING("Setting switchtime: Invalid data: %s", value);
+        // LOG_WARNING("Setting switchtime: Invalid data: %02d.%1d.0x%02X.%1d", no, day, time, on);
         return false;
     }
     if (data[0] != 0xE7) {
         // we use EN settings for the day abbreviation
-        std::string sday = read_flash_string(FL_(enum_dayOfWeek)[day][0]);
+        std::string sday = (FL_(enum_dayOfWeek)[day][0]);
         // std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
         if (model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N) {
             snprintf(out, len, "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
         } else if ((model() == EMS_DEVICE_FLAG_RC20) || (model() == EMS_DEVICE_FLAG_RC30)) {
             snprintf(out, len, "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), on);
         } else {
-            std::string son = read_flash_string(FL_(enum_switchmode)[on][0]);
+            std::string son = (FL_(enum_switchmode)[on][0]);
             // std::string son = Helpers::translated_word(FL_(enum_switchmode)[on]);
             snprintf(out, len, "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), son.c_str());
         }

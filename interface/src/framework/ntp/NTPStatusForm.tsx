@@ -91,7 +91,7 @@ const NTPStatusForm: FC = () => {
       enqueueSnackbar(LL.TIME_SET(), { variant: 'success' });
       setSettingTime(false);
       loadData();
-    } catch (error: unknown) {
+    } catch (error) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     } finally {
       setProcessing(false);

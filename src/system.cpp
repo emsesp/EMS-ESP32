@@ -77,19 +77,19 @@ bool System::command_fetch(const char * value, const int8_t id) {
     std::string value_s;
     if (Helpers::value2string(value, value_s)) {
         if (value_s == "all") {
-            LOG_INFO(F("Requesting data from EMS devices"));
+            LOG_INFO("Requesting data from EMS devices");
             EMSESP::fetch_device_values();
             return true;
-        } else if (value_s == read_flash_string(F_(boiler))) {
+        } else if (value_s == (F_(boiler))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::BOILER);
             return true;
-        } else if (value_s == read_flash_string(F_(thermostat))) {
+        } else if (value_s == (F_(thermostat))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::THERMOSTAT);
             return true;
-        } else if (value_s == read_flash_string(F_(solar))) {
+        } else if (value_s == (F_(solar))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::SOLAR);
             return true;
-        } else if (value_s == read_flash_string(F_(mixer))) {
+        } else if (value_s == (F_(mixer))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::MIXER);
             return true;
         }
@@ -105,31 +105,31 @@ bool System::command_publish(const char * value, const int8_t id) {
     if (Helpers::value2string(value, value_s)) {
         if (value_s == "ha") {
             EMSESP::publish_all(true); // includes HA
-            LOG_INFO(F("Publishing all data to MQTT, including HA configs"));
+            LOG_INFO("Publishing all data to MQTT, including HA configs");
             return true;
-        } else if (value_s == read_flash_string(F_(boiler))) {
+        } else if (value_s == (F_(boiler))) {
             EMSESP::publish_device_values(EMSdevice::DeviceType::BOILER);
             return true;
-        } else if (value_s == read_flash_string(F_(thermostat))) {
+        } else if (value_s == (F_(thermostat))) {
             EMSESP::publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
             return true;
-        } else if (value_s == read_flash_string(F_(solar))) {
+        } else if (value_s == (F_(solar))) {
             EMSESP::publish_device_values(EMSdevice::DeviceType::SOLAR);
             return true;
-        } else if (value_s == read_flash_string(F_(mixer))) {
+        } else if (value_s == (F_(mixer))) {
             EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
             return true;
         } else if (value_s == "other") {
             EMSESP::publish_other_values(); // switch and heat pump
             return true;
-        } else if ((value_s == read_flash_string(F_(dallassensor))) || (value_s == read_flash_string(F_(analogsensor)))) {
+        } else if ((value_s == (F_(dallassensor))) || (value_s == (F_(analogsensor)))) {
             EMSESP::publish_sensor_values(true);
             return true;
         }
     }
 
     EMSESP::publish_all();
-    LOG_INFO(F("Publishing all data to MQTT"));
+    LOG_INFO("Publishing all data to MQTT");
 
     return true;
 }
@@ -166,11 +166,9 @@ bool System::command_watch(const char * value, const int8_t id) {
         }
         if (Mqtt::publish_single() && w != EMSESP::watch()) {
             if (Mqtt::publish_single2cmd()) {
-                Mqtt::publish(F("system/watch"),
-                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : read_flash_string(FL_(list_watch)[w]).c_str());
+                Mqtt::publish("system/watch", EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
             } else {
-                Mqtt::publish(F("system_data/watch"),
-                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : read_flash_string(FL_(list_watch)[w]).c_str());
+                Mqtt::publish("system_data/watch", EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
             }
         }
         EMSESP::watch(w);
@@ -178,9 +176,9 @@ bool System::command_watch(const char * value, const int8_t id) {
     } else if (i) {
         if (Mqtt::publish_single() && i != EMSESP::watch_id()) {
             if (Mqtt::publish_single2cmd()) {
-                Mqtt::publish(F("system/watch"), Helpers::hextoa(i));
+                Mqtt::publish("system/watch", Helpers::hextoa(i));
             } else {
-                Mqtt::publish(F("system_data/watch"), Helpers::hextoa(i));
+                Mqtt::publish("system_data/watch", Helpers::hextoa(i));
             }
         }
         EMSESP::watch_id(i);
@@ -194,7 +192,7 @@ bool System::command_watch(const char * value, const int8_t id) {
 
 // restart EMS-ESP
 void System::system_restart() {
-    LOG_INFO(F("Restarting EMS-ESP..."));
+    LOG_INFO("Restarting EMS-ESP...");
     Shell::loop_all();
     delay(1000); // wait a second
 #ifndef EMSESP_STANDALONE
@@ -204,7 +202,7 @@ void System::system_restart() {
 
 // saves all settings
 void System::wifi_reconnect() {
-    LOG_INFO(F("WiFi reconnecting..."));
+    LOG_INFO("WiFi reconnecting...");
     Shell::loop_all();
     EMSESP::console_.loop();
     delay(1000);                                                                   // wait a second
@@ -214,7 +212,7 @@ void System::wifi_reconnect() {
 
 // format the FS. Wipes everything.
 void System::format(uuid::console::Shell & shell) {
-    auto msg = F("Formatting file system. This will reset all settings to their defaults");
+    auto msg = ("Formatting file system. This will reset all settings to their defaults");
     shell.logger().warning(msg);
     shell.flush();
 
@@ -243,7 +241,7 @@ void System::syslog_init() {
         // start & configure syslog
         if (!was_enabled) {
             syslog_.start();
-            EMSESP::logger().info(F("Starting Syslog"));
+            EMSESP::logger().info("Starting Syslog");
         }
         syslog_.log_level((uuid::log::Level)syslog_level_);
         syslog_.mark_interval(syslog_mark_interval_);
@@ -252,12 +250,12 @@ void System::syslog_init() {
 
         // register the command
         // TODO translate this
-        Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, F("change the syslog level"), CommandFlag::ADMIN_ONLY);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, ("change the syslog level"), CommandFlag::ADMIN_ONLY);
 
     } else if (was_enabled) {
         // in case service is still running, this flushes the queue
         // https://github.com/emsesp/EMS-ESP/issues/496
-        EMSESP::logger().info(F("Stopping Syslog"));
+        EMSESP::logger().info("Stopping Syslog");
         syslog_.log_level((uuid::log::Level)-1);
         syslog_.mark_interval(0);
         syslog_.destination("");
@@ -265,23 +263,21 @@ void System::syslog_init() {
 
     if (Mqtt::publish_single()) {
         if (Mqtt::publish_single2cmd()) {
-            Mqtt::publish(F("system/syslog"), syslog_enabled_ ? read_flash_string(FL_(list_syslog_level)[syslog_level_ + 1]).c_str() : "off");
+            Mqtt::publish("system/syslog", syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
             if (EMSESP::watch_id() == 0 || EMSESP::watch() == 0) {
-                Mqtt::publish(F("system/watch"),
-                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch())
-                                                                                 : read_flash_string(FL_(list_watch)[EMSESP::watch()]).c_str());
+                Mqtt::publish("system/watch",
+                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch()) : (FL_(list_watch)[EMSESP::watch()]));
             } else {
-                Mqtt::publish(F("system/watch"), Helpers::hextoa(EMSESP::watch_id()));
+                Mqtt::publish("system/watch", Helpers::hextoa(EMSESP::watch_id()));
             }
 
         } else {
-            Mqtt::publish(F("system_data/syslog"), syslog_enabled_ ? read_flash_string(FL_(list_syslog_level)[syslog_level_ + 1]).c_str() : "off");
+            Mqtt::publish("system_data/syslog", syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
             if (EMSESP::watch_id() == 0 || EMSESP::watch() == 0) {
-                Mqtt::publish(F("system_data/watch"),
-                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch())
-                                                                                 : read_flash_string(FL_(list_watch)[EMSESP::watch()]).c_str());
+                Mqtt::publish("system_data/watch",
+                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch()) : (FL_(list_watch)[EMSESP::watch()]));
             } else {
-                Mqtt::publish(F("system_data/watch"), Helpers::hextoa(EMSESP::watch_id()));
+                Mqtt::publish("system_data/watch", Helpers::hextoa(EMSESP::watch_id()));
             }
         }
     }
@@ -348,7 +344,7 @@ void System::wifi_tweak() {
     WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
     bool s2 = WiFi.getSleep();
 #if defined(EMSESP_DEBUG)
-    LOG_DEBUG(F("[DEBUG] Adjusting WiFi - Tx power %d->%d, Sleep %d->%d"), p1, p2, s1, s2);
+    LOG_DEBUG("[DEBUG] Adjusting WiFi - Tx power %d->%d, Sleep %d->%d", p1, p2, s1, s2);
 #endif
 #endif
 }
@@ -403,7 +399,7 @@ void System::start() {
 
 // button single click
 void System::button_OnClick(PButton & b) {
-    LOG_DEBUG(F("Button pressed - single click"));
+    LOG_DEBUG("Button pressed - single click");
 
 #ifdef EMSESP_DEBUG
 #ifndef EMSESP_STANDALONE
@@ -414,20 +410,20 @@ void System::button_OnClick(PButton & b) {
 
 // button double click
 void System::button_OnDblClick(PButton & b) {
-    LOG_DEBUG(F("Button pressed - double click - reconnect"));
+    LOG_DEBUG("Button pressed - double click - reconnect");
     EMSESP::system_.wifi_reconnect();
 }
 
 // button long press
 void System::button_OnLongPress(PButton & b) {
-    LOG_DEBUG(F("Button pressed - long press"));
+    LOG_DEBUG("Button pressed - long press");
 }
 
 // button indefinite press
 void System::button_OnVLongPress(PButton & b) {
-    LOG_DEBUG(F("Button pressed - very long press"));
+    LOG_DEBUG("Button pressed - very long press");
 #ifndef EMSESP_STANDALONE
-    LOG_WARNING(F("Performing factory reset..."));
+    LOG_WARNING("Performing factory reset...");
     EMSESP::console_.loop();
     EMSESP::esp8266React.factoryReset();
 #endif
@@ -441,12 +437,12 @@ void System::button_init(bool refresh) {
 
     if (is_valid_gpio(pbutton_gpio_)) {
         if (!myPButton_.init(pbutton_gpio_, HIGH)) {
-            LOG_DEBUG(F("Multi-functional button not detected"));
+            LOG_DEBUG("Multi-functional button not detected");
         } else {
-            LOG_DEBUG(F("Multi-functional button enabled"));
+            LOG_DEBUG("Multi-functional button enabled");
         }
     } else {
-        LOG_WARNING(F("Invalid button GPIO. Check config."));
+        LOG_WARNING("Invalid button GPIO. Check config.");
     }
 
     myPButton_.onClick(BUTTON_Debounce, button_OnClick);
@@ -528,11 +524,11 @@ void System::loop() {
 bool System::heartbeat_json(JsonObject & output) {
     uint8_t bus_status = EMSESP::bus_status();
     if (bus_status == EMSESP::BUS_STATUS_TX_ERRORS) {
-        output["bus_status"] = FJSON("txerror");
+        output["bus_status"] = "txerror";
     } else if (bus_status == EMSESP::BUS_STATUS_CONNECTED) {
-        output["bus_status"] = FJSON("connected");
+        output["bus_status"] = "connected";
     } else {
-        output["bus_status"] = FJSON("disconnected");
+        output["bus_status"] = "disconnected";
     }
 
     output["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
@@ -668,25 +664,25 @@ void System::system_check() {
 
 // commands - takes static function pointers
 void System::commands_init() {
-    // TODO these should be translated too
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, F("send a telegram"), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, F("refresh all EMS values"), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, F("restart EMS-ESP"), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, F("watch incoming telegrams"));
+    // TODO translate this
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, ("send a telegram"), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, ("refresh all EMS values"), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, ("restart EMS-ESP"), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, ("watch incoming telegrams"));
 
     // register syslog command in syslog init
-    // Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, F("set syslog level"), CommandFlag::ADMIN_ONLY);
+    // Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, ("set syslog level"), CommandFlag::ADMIN_ONLY);
 
     if (Mqtt::enabled()) {
-        Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, F("force a MQTT publish"));
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, ("force a MQTT publish"));
     }
 
     // these commands will return data in JSON format
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, F("show system status"));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, F("fetch system commands"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, ("show system status"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, ("fetch system commands"));
 
 #if defined(EMSESP_DEBUG)
-    Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test, F("run a specific test"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, ("test"), System::command_test, ("run a specific test"));
 #endif
 
     // MQTT subscribe "ems-esp/system/#"
@@ -776,12 +772,12 @@ int8_t System::wifi_quality(int8_t dBm) {
 
 // print users to console
 void System::show_users(uuid::console::Shell & shell) {
-    shell.printfln(F("Users:"));
+    shell.printfln("Users:");
 
 #ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
         for (const User & user : securitySettings.users) {
-            shell.printfln(F(" username: %s, password: %s, is_admin: %s"), user.username.c_str(), user.password.c_str(), user.admin ? F("yes") : F("no"));
+            shell.printfln(" username: %s, password: %s, is_admin: %s", user.username.c_str(), user.password.c_str(), user.admin ? ("yes") : ("no"));
         }
     });
 #endif
@@ -791,94 +787,94 @@ void System::show_users(uuid::console::Shell & shell) {
 
 void System::show_system(uuid::console::Shell & shell) {
     shell.println("System:");
-    shell.printfln(F(" Board profile: %s"), board_profile().c_str());
-    shell.printfln(F(" Uptime: %s"), uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
+    shell.printfln(" Board profile: %s", board_profile().c_str());
+    shell.printfln(" Uptime: %s", uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
 #ifndef EMSESP_STANDALONE
-    shell.printfln(F(" SDK version: %s"), ESP.getSdkVersion());
-    shell.printfln(F(" CPU frequency: %lu MHz"), ESP.getCpuFreqMHz());
-    shell.printfln(F(" Free heap: %lu KB"), (uint32_t)ESP.getFreeHeap() / 1024);
-    shell.printfln(F(" App used/free: %lu KB / %lu KB"), appUsed(), appFree());
+    shell.printfln(" SDK version: %s", ESP.getSdkVersion());
+    shell.printfln(" CPU frequency: %lu MHz", ESP.getCpuFreqMHz());
+    shell.printfln(" Free heap: %lu KB", (uint32_t)ESP.getFreeHeap() / 1024);
+    shell.printfln(" App used/free: %lu KB / %lu KB", appUsed(), appFree());
     uint32_t FSused = LittleFS.usedBytes() / 1024;
-    shell.printfln(F(" FS used/free: %lu KB / %lu KB"), FSused, FStotal() - FSused);
+    shell.printfln(" FS used/free: %lu KB / %lu KB", FSused, FStotal() - FSused);
     shell.println();
 
     shell.println("Network:");
     switch (WiFi.status()) {
     case WL_IDLE_STATUS:
-        shell.printfln(F(" Network: Idle"));
+        shell.printfln(" Network: Idle");
         break;
 
     case WL_NO_SSID_AVAIL:
-        shell.printfln(F(" Network: Network not found"));
+        shell.printfln(" Network: Network not found");
         break;
 
     case WL_SCAN_COMPLETED:
-        shell.printfln(F(" Network: Network scan complete"));
+        shell.printfln(" Network: Network scan complete");
         break;
 
     case WL_CONNECTED:
-        shell.printfln(F(" Network: connected"));
-        shell.printfln(F(" SSID: %s"), WiFi.SSID().c_str());
-        shell.printfln(F(" BSSID: %s"), WiFi.BSSIDstr().c_str());
-        shell.printfln(F(" RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
-        shell.printfln(F(" MAC address: %s"), WiFi.macAddress().c_str());
-        shell.printfln(F(" Hostname: %s"), WiFi.getHostname());
-        shell.printfln(F(" IPv4 address: %s/%s"), uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
-        shell.printfln(F(" IPv4 gateway: %s"), uuid::printable_to_string(WiFi.gatewayIP()).c_str());
-        shell.printfln(F(" IPv4 nameserver: %s"), uuid::printable_to_string(WiFi.dnsIP()).c_str());
+        shell.printfln(" Network: connected");
+        shell.printfln(" SSID: %s", WiFi.SSID().c_str());
+        shell.printfln(" BSSID: %s", WiFi.BSSIDstr().c_str());
+        shell.printfln((" RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
+        shell.printfln(" MAC address: %s", WiFi.macAddress().c_str());
+        shell.printfln(" Hostname: %s", WiFi.getHostname());
+        shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
+        shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(WiFi.gatewayIP()).c_str());
+        shell.printfln(" IPv4 nameserver: %s", uuid::printable_to_string(WiFi.dnsIP()).c_str());
         if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            shell.printfln(F(" IPv6 address: %s"), uuid::printable_to_string(WiFi.localIPv6()).c_str());
+            shell.printfln(" IPv6 address: %s", uuid::printable_to_string(WiFi.localIPv6()).c_str());
         }
         break;
 
     case WL_CONNECT_FAILED:
-        shell.printfln(F(" WiFi Network: Connection failed"));
+        shell.printfln(" WiFi Network: Connection failed");
         break;
 
     case WL_CONNECTION_LOST:
-        shell.printfln(F(" WiFi Network: Connection lost"));
+        shell.printfln(" WiFi Network: Connection lost");
         break;
 
     case WL_DISCONNECTED:
-        shell.printfln(F(" WiFi Network: Disconnected"));
+        shell.printfln(" WiFi Network: Disconnected");
         break;
 
     case WL_NO_SHIELD:
     default:
-        shell.printfln(F(" WiFi Network: Unknown"));
+        shell.printfln(" WiFi Network: Unknown");
         break;
     }
 
     // show Ethernet if connected
     if (ethernet_connected_) {
         shell.println();
-        shell.printfln(F(" Ethernet Network: connected"));
-        shell.printfln(F(" MAC address: %s"), ETH.macAddress().c_str());
-        shell.printfln(F(" Hostname: %s"), ETH.getHostname());
-        shell.printfln(F(" IPv4 address: %s/%s"), uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
-        shell.printfln(F(" IPv4 gateway: %s"), uuid::printable_to_string(ETH.gatewayIP()).c_str());
-        shell.printfln(F(" IPv4 nameserver: %s"), uuid::printable_to_string(ETH.dnsIP()).c_str());
+        shell.printfln(" Ethernet Network: connected");
+        shell.printfln(" MAC address: %s", ETH.macAddress().c_str());
+        shell.printfln(" Hostname: %s", ETH.getHostname());
+        shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
+        shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(ETH.gatewayIP()).c_str());
+        shell.printfln(" IPv4 nameserver: %s", uuid::printable_to_string(ETH.dnsIP()).c_str());
         if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            shell.printfln(F(" IPv6 address: %s"), uuid::printable_to_string(ETH.localIPv6()).c_str());
+            shell.printfln(" IPv6 address: %s", uuid::printable_to_string(ETH.localIPv6()).c_str());
         }
     }
     shell.println();
 
     shell.println("Syslog:");
     if (!syslog_enabled_) {
-        shell.printfln(F(" Syslog: disabled"));
+        shell.printfln(" Syslog: disabled");
     } else {
-        shell.printfln(F(" Syslog: %s"), syslog_.started() ? "started" : "stopped");
-        shell.print(F(" "));
-        shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : read_flash_string(F_(unset)).c_str());
-        shell.printfln(F(" IP: %s"), uuid::printable_to_string(syslog_.ip()).c_str());
-        shell.print(F(" "));
+        shell.printfln(" Syslog: %s", syslog_.started() ? "started" : "stopped");
+        shell.print(" ");
+        shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : (F_(unset)));
+        shell.printfln(" IP: %s", uuid::printable_to_string(syslog_.ip()).c_str());
+        shell.print(" ");
         shell.printfln(F_(port_fmt), syslog_port_);
-        shell.print(F(" "));
+        shell.print(" ");
         shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(syslog_level_)));
-        shell.print(F(" "));
+        shell.print(" ");
         shell.printfln(F_(mark_interval_fmt), syslog_mark_interval_);
-        shell.printfln(F(" Queued: %d"), syslog_.queued());
+        shell.printfln(" Queued: %d", syslog_.queued());
     }
 
 #endif
@@ -912,10 +908,10 @@ bool System::check_upgrade() {
                 // it's a customization file, just replace it and there's no need to reboot
                 saveSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", input);
             } else {
-                LOG_ERROR(F("Unrecognized file uploaded"));
+                LOG_ERROR("Unrecognized file uploaded");
             }
         } else {
-            LOG_ERROR(F("Unrecognized file uploaded, not json"));
+            LOG_ERROR("Unrecognized file uploaded, not json");
         }
 
         // close (just in case) and remove the temp file
@@ -958,7 +954,7 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
     if (section_json) {
         File section_file = LittleFS.open(filename, "w");
         if (section_file) {
-            LOG_INFO(F("Applying new %s settings"), section);
+            LOG_INFO("Applying new %s settings", section);
             serializeJson(section_json, section_file);
             section_file.close();
             return true; // reboot required
@@ -988,7 +984,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     // Network Status
     node = output.createNestedObject("Network Status");
     if (WiFi.status() == WL_CONNECTED) {
-        node["connection"] = F("WiFi");
+        node["connection"] = ("WiFi");
         node["hostname"]   = WiFi.getHostname();
         // node["SSID"]            = WiFi.SSID();
         // node["BSSID"]           = WiFi.BSSIDstr();
@@ -1001,7 +997,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
         }
     } else if (EMSESP::system_.ethernet_connected()) {
-        node["connection"]      = F("Ethernet");
+        node["connection"]      = ("Ethernet");
         node["hostname"]        = ETH.getHostname();
         node["MAC"]             = ETH.macAddress();
         node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
@@ -1115,20 +1111,20 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node = output.createNestedObject("Bus Status");
     switch (EMSESP::bus_status()) {
     case EMSESP::BUS_STATUS_OFFLINE:
-        node["bus status"] = (F("disconnected"));
+        node["bus status"] = ("disconnected");
         break;
     case EMSESP::BUS_STATUS_TX_ERRORS:
-        node["bus status"] = (F("connected, tx issues - try a different Tx Mode"));
+        node["bus status"] = ("connected, tx issues - try a different Tx Mode");
         break;
     case EMSESP::BUS_STATUS_CONNECTED:
-        node["bus status"] = (F("connected"));
+        node["bus status"] = ("connected");
         break;
     default:
-        node["bus status"] = (F("unknown"));
+        node["bus status"] = ("unknown");
         break;
     }
     if (EMSESP::bus_status() != EMSESP::BUS_STATUS_OFFLINE) {
-        node["bus protocol"]                = EMSbus::is_ht3() ? F("HT3") : F("Buderus");
+        node["bus protocol"]                = EMSbus::is_ht3() ? ("HT3") : ("Buderus");
         node["bus telegrams received (rx)"] = EMSESP::rxservice_.telegram_count();
         node["bus reads (tx)"]              = EMSESP::txservice_.telegram_read_count();
         node["bus writes (tx)"]             = EMSESP::txservice_.telegram_write_count();
@@ -1174,9 +1170,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_class.first)) {
-                JsonObject obj = devices.createNestedObject();
-                obj["type"]    = emsdevice->device_type_name();
-                // obj["name"]     = emsdevice->to_string();
+                JsonObject obj    = devices.createNestedObject();
+                obj["type"]       = emsdevice->device_type_name();
                 obj["name"]       = emsdevice->name();
                 obj["device id"]  = Helpers::hextoa(emsdevice->device_id());
                 obj["product id"] = emsdevice->product_id();
@@ -1321,7 +1316,7 @@ std::string System::reset_reason(uint8_t cpu) const {
 // set NTP status
 void System::ntp_connected(bool b) {
     if (b != ntp_connected_) {
-        LOG_INFO(b ? F("NTP connected") : F("NTP disconnected"));
+        LOG_INFO(b ? ("NTP connected") : ("NTP disconnected"));
     }
     ntp_connected_  = b;
     ntp_last_check_ = b ? uuid::get_uptime_sec() : 0;

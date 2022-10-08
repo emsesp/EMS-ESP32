@@ -25,7 +25,7 @@ namespace emsesp {
 
 class Gateway : public EMSdevice {
   public:
-    Gateway(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand);
+    Gateway(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
 };
 
 } // namespace emsesp

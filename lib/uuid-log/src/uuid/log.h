@@ -231,7 +231,7 @@ struct Message {
 	 * @param[in] text Log message text.
 	 * @since 1.0.0
 	 */
-    Message(uint64_t uptime_ms, Level level, Facility facility, const __FlashStringHelper * name, const std::string && text);
+    Message(uint64_t uptime_ms, Level level, Facility facility, const char * name, const std::string && text);
     ~Message() = default;
 
     /**
@@ -261,7 +261,7 @@ struct Message {
 	 *
 	 * @since 1.0.0
 	 */
-    const __FlashStringHelper * name;
+    const char * name;
 
     /**
 	 * Formatted log message text.
@@ -331,7 +331,7 @@ class Logger {
 	 *
 	 * @since 1.0.0
 	 */
-    Logger(const __FlashStringHelper * name, Facility facility = Facility::LOCAL0);
+    Logger(const char * name, Facility facility = Facility::LOCAL0);
     ~Logger() = default;
 
     /**
@@ -626,8 +626,8 @@ class Logger {
     static std::map<Handler *, Level> handlers_; /*!< Registered log handlers. @since 1.0.0 */
     static Level                      level_;    /*!< Minimum global log level across all handlers. @since 1.0.0 */
 
-    const __FlashStringHelper * name_;     /*!< Logger name (flash string). @since 1.0.0 */
-    const Facility              facility_; /*!< Default logging facility for messages. @since 1.0.0 */
+    const char *   name_;     /*!< Logger name (flash string). @since 1.0.0 */
+    const Facility facility_; /*!< Default logging facility for messages. @since 1.0.0 */
 };
 
 } // namespace log

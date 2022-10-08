@@ -85,7 +85,8 @@ std::string printable_to_string(const Printable & printable);
  *
  * @since 1.0.0
  */
-using flash_string_vector = std::vector<const __FlashStringHelper *>;
+
+using string_vector = std::vector<const char *>;
 
 /**
  * Loop function that must be called regularly to detect a 32-bit

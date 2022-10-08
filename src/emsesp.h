@@ -251,10 +251,10 @@ class EMSESP {
     static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute
 
     struct Device_record {
-        uint8_t                     product_id;
-        EMSdevice::DeviceType       device_type;
-        const __FlashStringHelper * name;
-        uint8_t                     flags;
+        uint8_t               product_id;
+        EMSdevice::DeviceType device_type;
+        const char *          name;
+        uint8_t               flags;
     };
     static std::vector<Device_record> device_library_;
 
