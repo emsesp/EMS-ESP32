@@ -31,7 +31,6 @@ void AnalogSensor::start() {
     }
     analogSetAttenuation(ADC_2_5db); // for all channels 1.5V
 
-
     LOG_INFO("Starting Analog sensor service");
 
     // Add API call for /info
@@ -39,18 +38,18 @@ void AnalogSensor::start() {
         EMSdevice::DeviceType::ANALOGSENSOR,
         F_(info),
         [&](const char * value, const int8_t id, JsonObject & output) { return command_info(value, id, output); },
-        F_(info_cmd));
+        FL_(info_cmd));
     Command::add(
         EMSdevice::DeviceType::ANALOGSENSOR,
         F_(setvalue),
         [&](const char * value, const int8_t id) { return command_setvalue(value, id); },
-        ("set io value"), // TODO translate this
+        FL_(setiovalue_cmd),
         CommandFlag::ADMIN_ONLY);
     Command::add(
         EMSdevice::DeviceType::ANALOGSENSOR,
         F_(commands),
         [&](const char * value, const int8_t id, JsonObject & output) { return command_commands(value, id, output); },
-        F_(commands_cmd));
+        FL_(commands_cmd));
 
     Mqtt::subscribe(EMSdevice::DeviceType::ANALOGSENSOR, "analogsensor/#", nullptr); // use empty function callback
 }

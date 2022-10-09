@@ -31,6 +31,23 @@
 // translations are in order en, de,nl, se....
 // if there is no translation, it will default to en
 
+// commands
+MAKE_PSTR_LIST(info_cmd, "lists all values")
+MAKE_PSTR_LIST(commands_cmd, "lists all commands")
+MAKE_PSTR_LIST(entities_cmd, "lists all entities")
+MAKE_PSTR_LIST(send_cmd, "send a telegram")
+MAKE_PSTR_LIST(setiovalue_cmd, "set io value")
+MAKE_PSTR_LIST(changeloglevel_cmd, "change log level")
+MAKE_PSTR_LIST(fetch_cmd, "refresh all EMS values")
+MAKE_PSTR_LIST(restart_cmd, "restart EMS-ESP")
+MAKE_PSTR_LIST(watch_cmd, "watch incoming telegrams")
+MAKE_PSTR_LIST(publish_cmd, "publish all to MQTT")
+MAKE_PSTR_LIST(system_info_cmd, "show system status")
+
+#if defined(EMSESP_DEBUG)
+MAKE_PSTR_LIST(test_cmd, "run a test")
+#endif
+
 // General
 MAKE_PSTR_LIST(on, "on", "an", "aan", "på")
 MAKE_PSTR_LIST(off, "off", "aus", "uit", "av")

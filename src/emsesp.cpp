@@ -1052,7 +1052,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         [device_type](const char * value, const int8_t id, JsonObject & output) {
             return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
         },
-        F_(info_cmd));
+        FL_(info_cmd));
     Command::add(
         device_type,
         ("values"),
@@ -1065,12 +1065,12 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         device_type,
         F_(commands),
         [device_type](const char * value, const int8_t id, JsonObject & output) { return command_commands(device_type, output, id); },
-        F_(commands_cmd));
+        FL_(commands_cmd));
     Command::add(
         device_type,
         F_(entities),
         [device_type](const char * value, const int8_t id, JsonObject & output) { return command_entities(device_type, output, id); },
-        F_(entities_cmd));
+        FL_(entities_cmd));
 
     // MQTT subscribe to the device e.g. "ems-esp/boiler/#"
     Mqtt::subscribe(device_type, EMSdevice::device_type_2_device_name(device_type) + "/#", nullptr);

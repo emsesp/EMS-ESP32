@@ -495,8 +495,7 @@ void EMSdevice::add_device_value(uint8_t               tag,
     }
 
     // add the command to our library
-    // cmd is the short_name and the description is the fullname (not the custom fullname)
-    Command::add(device_type_, short_name, f, Helpers::translated_fullname(fullname), flags);
+    Command::add(device_type_, short_name, f, fullname, flags);
 }
 
 // single list of options

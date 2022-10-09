@@ -425,7 +425,7 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
 
         if (commands.exact.count(longest->first) == 1) {
             for (auto & name : longest->second->name_) {
-                result.replacement->push_back(std::move((name))); // TODO remove all moves?
+                result.replacement->push_back(name);
             }
 
             // Add a space because there are sub-commands for a command that has matched exactly

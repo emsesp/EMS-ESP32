@@ -219,11 +219,6 @@ MAKE_PSTR(uom_sqm, "sqm")
 MAKE_PSTR(uom_m3, "m3")
 MAKE_PSTR(uom_l, "l")
 
-// commands
-MAKE_PSTR(info_cmd, "lists all values")
-MAKE_PSTR(commands_cmd, "lists all commands")
-MAKE_PSTR(entities_cmd, "lists all entities")
-
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
 // mqtt tags must not have spaces

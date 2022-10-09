@@ -299,7 +299,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 }
 
 // add a command to the list, which does not return json
-void Command::add(const uint8_t device_type, const char * cmd, const cmd_function_p cb, const char * description, uint8_t flags) {
+void Command::add(const uint8_t device_type, const char * cmd, const cmd_function_p cb, const char * const * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
     if (find_command(device_type, cmd) != nullptr) {
         return;
@@ -314,7 +314,7 @@ void Command::add(const uint8_t device_type, const char * cmd, const cmd_functio
 }
 
 // add a command to the list, which does return a json object as output
-void Command::add(const uint8_t device_type, const char * cmd, const cmd_json_function_p cb, const char * description, uint8_t flags) {
+void Command::add(const uint8_t device_type, const char * cmd, const cmd_json_function_p cb, const char * const * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
     if (find_command(device_type, cmd) != nullptr) {
         return;
@@ -348,7 +348,6 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ch
 
 // list all commands for a specific device, output as json
 bool Command::list(const uint8_t device_type, JsonObject & output) {
-
     if (cmdfunctions_.empty()) {
         output["message"] = "no commands available";
         return false;
@@ -366,7 +365,7 @@ bool Command::list(const uint8_t device_type, JsonObject & output) {
     for (const auto & cl : sorted_cmds) {
         for (const auto & cf : cmdfunctions_) {
             if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == std::string(cf.cmd_))) {
-                output[cl] = cf.description_;
+                output[cl] = Helpers::translated_fullname(cf.description_);
             }
         }
     }
@@ -425,7 +424,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                     shell.print(EMSdevice::tag_to_string(DeviceValueTAG::TAG_DEVICE_DATA_WW));
                     shell.print(' ');
                 }
-                shell.print((cf.description_));
+                shell.print(Helpers::translated_fullname(cf.description_));
                 if (!cf.has_flags(CommandFlag::ADMIN_ONLY)) {
                     shell.print(' ');
                     shell.print(COLOR_BRIGHT_RED);
