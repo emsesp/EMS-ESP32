@@ -129,12 +129,7 @@ const SignIn: FC = () => {
             <PLflag style={{ width: 24 }} />
             &nbsp;PL
           </Button>
-          <Button
-            disabled
-            size="small"
-            variant={locale === 'no' ? 'contained' : 'outlined'}
-            onClick={() => selectLocale('no')}
-          >
+          <Button size="small" variant={locale === 'no' ? 'contained' : 'outlined'} onClick={() => selectLocale('no')}>
             <NOflag style={{ width: 24 }} />
             &nbsp;NO
           </Button>

@@ -28,7 +28,7 @@
 #define EMSESP_LOCALE_PL "pl"
 #define EMSESP_LOCALE_NO "no"
 
-// translations are in order en, de,nl, se....
+// translations are in order en, de, nl, se, pl, se, no, ....
 // if there is no translation, it will default to en
 
 // commands

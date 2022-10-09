@@ -93,7 +93,7 @@ const LayoutAuthMenu: FC = () => {
           <PLflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;PL
         </MenuItem>
-        <MenuItem key="no" value="no" disabled>
+        <MenuItem key="no" value="no">
           <NOflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;NO
         </MenuItem>
