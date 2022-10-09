@@ -266,13 +266,13 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
             if (EMSESP::system_.readonly_mode()) {
                 LOG_INFO(("[readonly] Calling command '%s/%s' (%s)"), dname.c_str(), cmd, cf->description_);
             } else {
-                LOG_DEBUG(("Calling command '%s/%s' (%s)"), dname.c_str(), cmd, (cf->description_));
+                LOG_DEBUG(("Calling command '%s/%s' (%s)"), dname.c_str(), cmd, cf->description_);
             }
         } else {
             if (EMSESP::system_.readonly_mode()) {
                 LOG_INFO(("[readonly] Calling command '%s/%s' (%s) with value %s"), dname.c_str(), cmd, cf->description_, value);
             } else {
-                LOG_DEBUG(("Calling command '%s/%s' (%s) with value %s"), dname.c_str(), cmd, (cf->description_), value);
+                LOG_DEBUG(("Calling command '%s/%s' (%s) with value %s"), dname.c_str(), cmd, cf->description_, value);
             }
         }
 
@@ -348,6 +348,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ch
 
 // list all commands for a specific device, output as json
 bool Command::list(const uint8_t device_type, JsonObject & output) {
+
     if (cmdfunctions_.empty()) {
         output["message"] = "no commands available";
         return false;
