@@ -93,8 +93,6 @@ class Command {
         return cmdfunctions_;
     }
 
-#define add_
-
     static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject & output);
     static uint8_t call(const uint8_t device_type, const char * cmd, const char * value);
 

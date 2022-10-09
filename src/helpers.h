@@ -77,7 +77,9 @@ class Helpers {
     static uint8_t count_items(const char * const ** list);
     static uint8_t count_items(const char * const * list);
 
-    static std::string translated_word(const char * const * strings, bool to_lower = false);
+    static std::string  translated_word(const char * const * strings, bool to_lower = false);
+    static const char * translated_fullname(const char * const * strings);
+
 
 #ifdef EMSESP_STANDALONE
     static char * ultostr(char * ptr, uint32_t value, const uint8_t base);
