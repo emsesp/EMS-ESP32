@@ -44,7 +44,7 @@ bool EMSdevice::has_entities() const {
 }
 
 std::string EMSdevice::tag_to_string(uint8_t tag) {
-    return (DeviceValue::DeviceValueTAG_s[tag]);
+    return (Helpers::translated_word(DeviceValue::DeviceValueTAG_s[tag]));
 }
 
 std::string EMSdevice::tag_to_mqtt(uint8_t tag) {
@@ -713,10 +713,10 @@ std::string EMSdevice::get_value_uom(const char * key) const {
     char * key_p = new_key;
 
     for (uint8_t i = 0; i < DeviceValue::tag_count; i++) {
-        auto tag = (DeviceValue::DeviceValueTAG_s[i]);
-        if (tag) {
+        auto tag = Helpers::translated_word(DeviceValue::DeviceValueTAG_s[i]);
+        if (tag.empty()) {
             std::string key2   = key; // copy string to a std::string so we can use the find function
-            uint8_t     length = strlen(tag);
+            uint8_t     length = tag.length();
             if ((key2.find(tag) != std::string::npos) && (key[length] == ' ')) {
                 key_p += length + 1; // remove the tag
                 break;
@@ -804,16 +804,16 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 
             // add name, prefixing the tag if it exists. This is the id used in the WebUI table and must be unique
             if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
-                obj["id"] = mask + dv.get_fullname();
+                obj["id"] = mask + fullname;
             } else {
-                obj["id"] = mask + tag_to_string(dv.tag) + " " + dv.get_fullname();
+                obj["id"] = mask + tag_to_string(dv.tag) + " " + fullname;
             }
 
             // add commands and options
             if (dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY)) {
                 // add the name of the Command function
                 if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-                    obj["c"] = tag_to_mqtt(dv.tag) + "/" + (dv.short_name);
+                    obj["c"] = tag_to_mqtt(dv.tag) + "/" + dv.short_name;
                 } else {
                     obj["c"] = dv.short_name;
                 }

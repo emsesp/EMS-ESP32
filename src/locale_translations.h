@@ -28,7 +28,7 @@
 #define EMSESP_LOCALE_PL "pl"
 #define EMSESP_LOCALE_NO "no"
 
-// translations are in order en, de, nl, se, pl, se, no, ....
+// translations are in order en, de, nl, se, pl, no, ....
 // if there is no translation, it will default to en
 
 // commands
@@ -37,7 +37,7 @@ MAKE_PSTR_LIST(commands_cmd, "lists all commands", "Liste aller Kommandos")
 MAKE_PSTR_LIST(entities_cmd, "lists all entities", "Liste aller Entitäten")
 MAKE_PSTR_LIST(send_cmd, "send a telegram", "Sende EMS-Telegramm")
 MAKE_PSTR_LIST(setiovalue_cmd, "set io value", "Setze Wertevorgabe")
-MAKE_PSTR_LIST(changeloglevel_cmd, "change log level")
+MAKE_PSTR_LIST(changeloglevel_cmd, "change log level", "Ändere Sysloglevel")
 MAKE_PSTR_LIST(fetch_cmd, "refresh all EMS values", "Lese alle EMS-Werte neu")
 MAKE_PSTR_LIST(restart_cmd, "restart EMS-ESP", "Neustart")
 MAKE_PSTR_LIST(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme")
@@ -47,6 +47,50 @@ MAKE_PSTR_LIST(system_info_cmd, "show system status", "Zeige System-Status")
 #if defined(EMSESP_DEBUG)
 MAKE_PSTR_LIST(test_cmd, "run a test")
 #endif
+
+// TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
+// use empty string if want to suppress showing tags
+// mqtt tags must not have spaces
+MAKE_PSTR_LIST(tag_none, "")
+MAKE_PSTR_LIST(tag_heartbeat, "")
+MAKE_PSTR_LIST(tag_boiler_data_ww, "dhw", "WW")
+MAKE_PSTR_LIST(tag_device_data, "")
+MAKE_PSTR_LIST(tag_device_data_ww, "dhw", "WW")
+MAKE_PSTR_LIST(tag_hc1, "hc1", "HK1")
+MAKE_PSTR_LIST(tag_hc2, "hc2", "HK2")
+MAKE_PSTR_LIST(tag_hc3, "hc3", "HK3")
+MAKE_PSTR_LIST(tag_hc4, "hc4", "HK4")
+MAKE_PSTR_LIST(tag_hc5, "hc5", "HK5")
+MAKE_PSTR_LIST(tag_hc6, "hc6", "HK6")
+MAKE_PSTR_LIST(tag_hc7, "hc7", "HK7")
+MAKE_PSTR_LIST(tag_hc8, "hc8", "HK8")
+MAKE_PSTR_LIST(tag_wwc1, "wwc1", "WWK1")
+MAKE_PSTR_LIST(tag_wwc2, "wwc2", "WWK2")
+MAKE_PSTR_LIST(tag_wwc3, "wwc3", "WWK3")
+MAKE_PSTR_LIST(tag_wwc4, "wwc4", "WWK4")
+MAKE_PSTR_LIST(tag_wwc5, "wwc5", "WWK5")
+MAKE_PSTR_LIST(tag_wwc6, "wwc6", "WWK6")
+MAKE_PSTR_LIST(tag_wwc7, "wwc7", "WWK7")
+MAKE_PSTR_LIST(tag_wwc8, "wwc8", "WWK8")
+MAKE_PSTR_LIST(tag_wwc9, "wwc9", "WWK9")
+MAKE_PSTR_LIST(tag_wwc10, "wwc10", "WWK10")
+MAKE_PSTR_LIST(tag_ahs, "ahs", "AHQ")
+MAKE_PSTR_LIST(tag_hs1, "hs1")
+MAKE_PSTR_LIST(tag_hs2, "hs2")
+MAKE_PSTR_LIST(tag_hs3, "hs3")
+MAKE_PSTR_LIST(tag_hs4, "hs4")
+MAKE_PSTR_LIST(tag_hs5, "hs5")
+MAKE_PSTR_LIST(tag_hs6, "hs6")
+MAKE_PSTR_LIST(tag_hs7, "hs7")
+MAKE_PSTR_LIST(tag_hs8, "hs8")
+MAKE_PSTR_LIST(tag_hs9, "hs9")
+MAKE_PSTR_LIST(tag_hs10, "hs10")
+MAKE_PSTR_LIST(tag_hs11, "hs11")
+MAKE_PSTR_LIST(tag_hs12, "hs12")
+MAKE_PSTR_LIST(tag_hs13, "hs13")
+MAKE_PSTR_LIST(tag_hs14, "hs14")
+MAKE_PSTR_LIST(tag_hs15, "hs15")
+MAKE_PSTR_LIST(tag_hs16, "hs16")
 
 // General
 MAKE_PSTR_LIST(on, "on", "an", "aan", "på")
