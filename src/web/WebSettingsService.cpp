@@ -75,15 +75,18 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["eth_power"]             = settings.eth_power;
     root["eth_phy_addr"]          = settings.eth_phy_addr;
     root["eth_clock_mode"]        = settings.eth_clock_mode;
+    root["platform"]              = EMSESP_PLATFORM;
 }
 
 // call on initialization and also when settings are updated via web or console
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
     // load default GPIO configuration based on board profile
     std::vector<int8_t> data; //  // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
-#ifdef ARDUINO_LOLIN_C3_MINI
-    settings.board_profile = "C3MINI";
-#else
+#if CONFIG_IDF_TARGET_ESP32C3
+    settings.board_profile = root["board_profile"] | "C3MINI";
+#elif CONFIG_IDF_TARGET_ESP32S2
+    settings.board_profile = root["board_profile"] | "S2MINI";
+#elif CONFIG_IDF_TARGET_ESP32
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 #endif
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {

@@ -29,8 +29,8 @@
 
 #ifndef EMSESP_STANDALONE
 #include <esp_wifi.h>
-#ifndef ARDUINO_LOLIN_S2_MINI
-#include <esp_bt.h>
+#if CONFIG_IDF_TARGET_ESP32
+// #include <esp_bt.h>
 #endif
 #include <ETH.h>
 #include <uuid/syslog.h>
@@ -225,6 +225,9 @@ class System {
     uint32_t FStotal() {
         return fstotal_;
     }
+    uint32_t PSram() {
+        return psram_;
+    }
     uint32_t appFree() {
         return appfree_;
     }
@@ -307,6 +310,7 @@ class System {
     uint8_t eth_clock_mode_;
 
     uint32_t fstotal_;
+    uint32_t psram_;
     uint32_t appused_;
     uint32_t appfree_;
 };

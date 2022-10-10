@@ -33,6 +33,7 @@ export interface Settings {
   eth_power: number;
   eth_phy_addr: number;
   eth_clock_mode: number;
+  platform: string;
 }
 
 export enum busConnectionStatus {
@@ -242,7 +243,9 @@ export const BOARD_PROFILES: BoardProfiles = {
   'MH-ET': 'MH-ET Live D1 Mini',
   LOLIN: 'Lolin D32',
   OLIMEX: 'Olimex ESP32-EVB',
-  OLIMEXPOE: 'Olimex ESP32-POE'
+  OLIMEXPOE: 'Olimex ESP32-POE',
+  C3MINI: 'Wemos C3 Mini',
+  S2MINI: 'Wemos S2 Mini'
 };
 
 export interface BoardProfileName {

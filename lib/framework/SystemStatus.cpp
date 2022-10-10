@@ -13,14 +13,10 @@ SystemStatus::SystemStatus(AsyncWebServer * server, SecurityManager * securityMa
 void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_ESP_STATUS_SIZE);
     JsonObject          root     = response->getRoot();
-    root["emsesp_version"]       = EMSESP_APP_VERSION;
-    root["esp_platform"]         = "ESP32";
-    root["max_alloc_heap"]       = ESP.getMaxAllocHeap() / 1024;
-#if defined(BOARD_HAS_PSRAM)
-    root["psram_size"] = ESP.getPsramSize() / 1024;
-    root["free_psram"] = ESP.getFreePsram() / 1024;
-#endif
+    root["emsesp_version"]   = EMSESP_APP_VERSION;
+    root["esp_platform"]     = EMSESP_PLATFORM;
     root["cpu_freq_mhz"]     = ESP.getCpuFreqMHz();
+    root["max_alloc_heap"]   = ESP.getMaxAllocHeap() / 1024;
     root["free_heap"]        = ESP.getFreeHeap() / 1024;
     root["sdk_version"]      = ESP.getSdkVersion();
     root["flash_chip_size"]  = ESP.getFlashChipSize() / 1024;
@@ -31,6 +27,10 @@ void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
     root["fs_used"]          = FSused;
     root["fs_free"]          = emsesp::EMSESP::system_.FStotal() - FSused;
     root["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+    if (emsesp::EMSESP::system_.PSram()) {
+        root["psram_size"] = emsesp::EMSESP::system_.PSram();
+        root["free_psram"] = ESP.getFreePsram() / 1024;
+    }
 
     response->setLength();
     request->send(response);
