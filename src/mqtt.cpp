@@ -899,15 +899,16 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> dev_json;
 
     // always create the ids
-    JsonArray   ids = dev_json.createNestedArray("ids");
-    char        ha_device[40];
-    std::string device_type_name = EMSdevice::device_type_2_device_name(dv.device_type);
-    snprintf(ha_device, sizeof(ha_device), "ems-esp-%s", device_type_name.c_str());
+    JsonArray ids = dev_json.createNestedArray("ids");
+    char      ha_device[40];
+    auto      device_type_name = EMSdevice::device_type_2_device_name(dv.device_type);
+    snprintf(ha_device, sizeof(ha_device), "ems-esp-%s", device_type_name);
     ids.add(ha_device);
 
     if (create_device_config) {
-        device_type_name[0]    = toupper(device_type_name[0]); // capitalize
-        dev_json["name"]       = "EMS-ESP " + device_type_name;
+        auto cap_name          = strdup(device_type_name);
+        cap_name[0]            = toupper(cap_name[0]); // capitalize
+        dev_json["name"]       = std::string("EMS-ESP ") + cap_name;
         dev_json["mf"]         = brand;
         dev_json["mdl"]        = model;
         dev_json["via_device"] = "ems-esp";
@@ -972,8 +973,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
     }
 
     // create the device name
-    char device_name[50];
-    strlcpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str(), sizeof(device_name));
+    auto device_name = EMSdevice::device_type_2_device_name(device_type);
 
     // create entity by add the hc/wwc tag if present, separating with a .
     char new_entity[50];
@@ -1341,11 +1341,13 @@ std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
         return EMSdevice::tag_to_mqtt(tag);
     }
 
+    std::string topic = EMSdevice::device_type_2_device_name(device_type);
+
     // if there is a tag add it
     if (!EMSdevice::tag_to_mqtt(tag).empty() && ((tag == DeviceValueTAG::TAG_BOILER_DATA_WW) || (!is_nested() && tag >= DeviceValueTAG::TAG_HC1))) {
-        return EMSdevice::device_type_2_device_name(device_type) + "_data_" + EMSdevice::tag_to_mqtt(tag);
+        return topic + "_data_" + EMSdevice::tag_to_mqtt(tag);
     } else {
-        return EMSdevice::device_type_2_device_name(device_type) + "_data";
+        return topic + "_data";
     }
 }
 
