@@ -159,7 +159,6 @@ MAKE_PSTR_LIST(rc20, "rc20")
 MAKE_PSTR_LIST(fb10, "fb10")
 MAKE_PSTR_LIST(fb100, "fb100")
 MAKE_PSTR_LIST(dash, "-")
-MAKE_PSTR_LIST(error, "error")
 MAKE_PSTR_LIST(BLANK, "")
 MAKE_PSTR_LIST(pwm, "pwm")
 MAKE_PSTR_LIST(pwm_invers, "pwm inverse")
@@ -295,6 +294,7 @@ MAKE_PSTR_ENUM(enum_freq, FL_(off), FL_(1x3min), FL_(2x3min), FL_(3x3min), FL_(4
 MAKE_PSTR_ENUM(enum_off_time_date_manual, FL_(off), FL_(time), FL_(date), FL_(manual))
 MAKE_PSTR_ENUM(enum_comfort, FL_(hot), FL_(eco), FL_(intelligent))
 MAKE_PSTR_ENUM(enum_comfort1, FL_(high_comfort), FL_(eco))
+MAKE_PSTR_ENUM(enum_comfort2, FL_(eco), FL_(high_comfort))
 MAKE_PSTR_ENUM(enum_flow, FL_(off), FL_(flow), FL_(bufferedflow), FL_(buffer), FL_(layeredbuffer))
 MAKE_PSTR_ENUM(enum_reset, FL_(dash), FL_(maintenance), FL_(error))
 MAKE_PSTR_ENUM(enum_maxHeat, FL_(0kW), FL_(2kW), FL_(3kW), FL_(4kW), FL_(6kW), FL_(9kW))
@@ -334,7 +334,7 @@ MAKE_PSTR_ENUM(enum_nofrostmode, FL_(off), FL_(room), FL_(outdoor))
 MAKE_PSTR_ENUM(enum_nofrostmode1, FL_(room), FL_(outdoor), FL_(room_outdoor))
 
 MAKE_PSTR_ENUM(enum_controlmode, FL_(off), FL_(optimized), FL_(simple), FL_(mpc), FL_(room), FL_(power), FL_(constant))
-MAKE_PSTR_ENUM(enum_controlmode1, FL_(weather_compensated), FL_(outside_basepoint), FL_(na), FL_(room)) // RC310 1-4
+MAKE_PSTR_ENUM(enum_controlmode1, FL_(weather_compensated), FL_(outside_basepoint), FL_(na), FL_(room), FL_(power), FL_(constant)) // RC310 1-4
 MAKE_PSTR_ENUM(enum_controlmode2, FL_(outdoor), FL_(room))
 MAKE_PSTR_ENUM(enum_control, FL_(off), FL_(rc20), FL_(rc3x))
 MAKE_PSTR_ENUM(enum_j_control, FL_(off), FL_(fb10), FL_(fb100))
@@ -346,6 +346,8 @@ MAKE_PSTR_ENUM(enum_dayOfWeek, FL_(day_mo), FL_(day_tu), FL_(day_we), FL_(day_th
 MAKE_PSTR_ENUM(enum_progMode2, FL_(own_1), FL_(family), FL_(morning), FL_(evening), FL_(am), FL_(pm), FL_(midday), FL_(singles), FL_(seniors), FL_(new), FL_(own_2))
 MAKE_PSTR_ENUM(enum_progMode3, FL_(family), FL_(morning), FL_(evening), FL_(am), FL_(pm), FL_(midday), FL_(singles), FL_(seniors))
 MAKE_PSTR_ENUM(enum_hybridStrategy, FL_(co2_optimized), FL_(cost_optimized), FL_(outside_temp_switched), FL_(co2_cost_mix))
+MAKE_PSTR_ENUM(enum_hybridStrategy1, FL_(cost_optimized), FL_(co2_optimized), FL_(outside_temp_alt), FL_(outside_temp_par), FL_(hp_prefered), FL_(boiler_only))
+MAKE_PSTR_ENUM(enum_lowNoiseMode, FL_(off), FL_(reduced_output), FL_(switchoff), FL_(perm))
 
 // heat pump
 MAKE_PSTR_ENUM(enum_hpactivity, FL_(none), FL_(heating), FL_(cooling), FL_(hot_water), FL_(pool))
