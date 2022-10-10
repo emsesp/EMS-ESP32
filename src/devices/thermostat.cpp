@@ -594,7 +594,6 @@ void Thermostat::process_RC20Timer(std::shared_ptr<const Telegram> telegram) {
 
         // we use EN settings for the day abbreviation
         std::string sday = (FL_(enum_dayOfWeek)[day][0]);
-        // std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
 
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
@@ -802,19 +801,10 @@ void Thermostat::process_RC35wwTimer(std::shared_ptr<const Telegram> telegram) {
         char data[sizeof(wwSwitchTime_)];
         // we use EN settings for the day abbreviation
         std::string sday = (FL_(enum_dayOfWeek)[day][0]);
-        // std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
         } else {
-            snprintf(data,
-                     sizeof(data),
-                     "%02d %s %02d:%02d %s",
-                     no,
-                     sday.c_str(),
-                     time / 6,
-                     10 * (time % 6),
-                     // on ? (Helpers::translated_word(FL_(on))).c_str() : (Helpers::translated_word(FL_(off))).c_str());
-                     on ? "on" : "off");
+            snprintf(data, sizeof(data), "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
         }
         if (telegram->type_id == 0x38) {
             has_update(wwSwitchTime_, data, sizeof(wwSwitchTime_));
@@ -1281,7 +1271,6 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
 
         // we use EN settings for the day abbreviation
         std::string sday = (FL_(enum_dayOfWeek)[day][0]);
-        // std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
         } else if (model() == EMS_DEVICE_FLAG_RC30) {
@@ -2220,82 +2209,93 @@ bool Thermostat::set_roominfl_factor(const char * value, const int8_t id) {
     return true;
 }
 
-// sets the thermostat working mode, where mode is a string
-// converts string mode to HeatingCircuit::Mode
+// sets the thermostat working mode
 bool Thermostat::set_mode(const char * value, const int8_t id) {
     if ((value == nullptr) || (strlen(value) >= 20)) {
         return false;
     }
 
-    std::string mode;
-
-    if (value[0] >= '0' && value[0] <= '9') {
-        uint8_t num = value[0] - '0';
-        switch (model()) {
-        case EMSdevice::EMS_DEVICE_FLAG_RC10:
-            mode = Helpers::translated_word(FL_(enum_mode6)[num], true);
-            break;
-        case EMSdevice::EMS_DEVICE_FLAG_RC20:
-        case EMSdevice::EMS_DEVICE_FLAG_RC20_N:
-            mode = Helpers::translated_word(FL_(enum_mode2)[num], true);
-            break;
-        case EMSdevice::EMS_DEVICE_FLAG_RC25:
-        case EMSdevice::EMS_DEVICE_FLAG_RC30:
-        case EMSdevice::EMS_DEVICE_FLAG_RC35:
-        case EMSdevice::EMS_DEVICE_FLAG_RC30_N:
-            mode = Helpers::translated_word(FL_(enum_mode3)[num], true);
-            break;
-        case EMSdevice::EMS_DEVICE_FLAG_RC300:
-        case EMSdevice::EMS_DEVICE_FLAG_RC100:
-            mode = Helpers::translated_word(FL_(enum_mode)[num], true);
-            break;
-        case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
-            mode = Helpers::translated_word(FL_(enum_mode4)[num], true);
-            break;
-        case EMSdevice::EMS_DEVICE_FLAG_CRF:
-            mode = Helpers::translated_word(FL_(enum_mode5)[num], true);
-            break;
-        default:
-            return false;
-        }
-    } else if (!Helpers::value2string(value, mode)) {
+    // first determine which enum we are using
+    const char * const ** mode_list = nullptr; // points to a translated list of modes
+    switch (model()) {
+    case EMSdevice::EMS_DEVICE_FLAG_RC10:
+        mode_list = FL_(enum_mode6);
+        break;
+    case EMSdevice::EMS_DEVICE_FLAG_RC20:
+    case EMSdevice::EMS_DEVICE_FLAG_RC20_N:
+        mode_list = FL_(enum_mode2);
+        break;
+    case EMSdevice::EMS_DEVICE_FLAG_RC25:
+    case EMSdevice::EMS_DEVICE_FLAG_RC30:
+    case EMSdevice::EMS_DEVICE_FLAG_RC35:
+    case EMSdevice::EMS_DEVICE_FLAG_RC30_N:
+        mode_list = FL_(enum_mode3);
+        break;
+    case EMSdevice::EMS_DEVICE_FLAG_RC300:
+    case EMSdevice::EMS_DEVICE_FLAG_RC100:
+        mode_list = FL_(enum_mode);
+        break;
+    case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
+        mode_list = FL_(enum_mode4);
+        break;
+    case EMSdevice::EMS_DEVICE_FLAG_CRF:
+        mode_list = FL_(enum_mode5);
+        break;
+    default:
         return false;
     }
 
-    uint8_t hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    uint8_t enum_index = 0;
 
-    if (Helpers::translated_word(FL_(off), true) == mode) {
-        return set_mode_n(HeatingCircuit::Mode::OFF, hc_num);
+    // check for a mode number as a string with a single digit (0..9)
+    if (value[0] >= '0' && value[0] <= '9') {
+        enum_index = value[0] - '0';
+        if (enum_index >= Helpers::count_items(mode_list)) {
+            return false; // invalid number, not in enum
+        }
+    } else {
+        // check for the mode being a full string name
+        if (!Helpers::value2enum(value, enum_index, mode_list)) {
+            return false; // not found
+        }
     }
-    if (Helpers::translated_word(FL_(manual), true) == mode) {
-        return set_mode_n(HeatingCircuit::Mode::MANUAL, hc_num);
-    }
-    if (Helpers::translated_word(FL_(auto), true) == mode) {
+
+    uint8_t hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id; // heating circuit
+
+    // compare the english string
+    auto mode = mode_list[enum_index][0];
+    if (!strcmp(mode, FL_(auto)[0])) {
         return set_mode_n(HeatingCircuit::Mode::AUTO, hc_num);
     }
-    if (Helpers::translated_word(FL_(day), true) == mode) {
+    if (!strcmp(mode, FL_(off)[0])) {
+        return set_mode_n(HeatingCircuit::Mode::OFF, hc_num);
+    }
+    if (!strcmp(mode, FL_(manual)[0])) {
+        return set_mode_n(HeatingCircuit::Mode::MANUAL, hc_num);
+    }
+    if (!strcmp(mode, FL_(day)[0])) {
         return set_mode_n(HeatingCircuit::Mode::DAY, hc_num);
     }
-    if (Helpers::translated_word(FL_(night), true) == mode) {
+    if (!strcmp(mode, FL_(night)[0])) {
         return set_mode_n(HeatingCircuit::Mode::NIGHT, hc_num);
     }
-    if (Helpers::translated_word(FL_(heat), true) == mode) {
+    if (!strcmp(mode, FL_(heat)[0])) {
         return set_mode_n(HeatingCircuit::Mode::HEAT, hc_num);
     }
-    if (Helpers::translated_word(FL_(nofrost), true) == mode) {
+    if (!strcmp(mode, FL_(nofrost)[0])) {
         return set_mode_n(HeatingCircuit::Mode::NOFROST, hc_num);
     }
-    if (Helpers::translated_word(FL_(eco), true) == mode) {
+    if (!strcmp(mode, FL_(eco)[0])) {
         return set_mode_n(HeatingCircuit::Mode::ECO, hc_num);
     }
-    if (Helpers::translated_word(FL_(holiday), true) == mode) {
+    if (!strcmp(mode, FL_(holiday)[0])) {
         return set_mode_n(HeatingCircuit::Mode::HOLIDAY, hc_num);
     }
-    if (Helpers::translated_word(FL_(comfort), true) == mode) {
+    if (!strcmp(mode, FL_(comfort)[0])) {
         return set_mode_n(HeatingCircuit::Mode::COMFORT, hc_num);
     }
 
-    return false;
+    return false; // not found
 }
 
 // Set the thermostat working mode
@@ -2318,14 +2318,12 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
     case HeatingCircuit::Mode::OFF:
         set_mode_value = 0;
         break;
-
     case HeatingCircuit::Mode::DAY:
     case HeatingCircuit::Mode::HEAT:
     case HeatingCircuit::Mode::MANUAL:
     case HeatingCircuit::Mode::NOFROST:
         set_mode_value = 1;
         break;
-
     default: // AUTO & ECO
         set_mode_value = 2;
         break;
@@ -2690,11 +2688,6 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
                 if (!strncmp(&value[3], (FL_(enum_dayOfWeek)[i][0]), 2)) {
                     day = i;
                 }
-
-                // auto translated_dow = Helpers::translated_word(FL_(enum_dayOfWeek)[i]);
-                // if (!strncmp(&value[3], translated_dow.c_str(), translated_dow.length())) {
-                //     day = i;
-                // }
             }
         }
         if (strlen(value) > 10) {
@@ -2734,14 +2727,12 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
     if (data[0] != 0xE7) {
         // we use EN settings for the day abbreviation
         std::string sday = (FL_(enum_dayOfWeek)[day][0]);
-        // std::string sday = Helpers::translated_word(FL_(enum_dayOfWeek)[day]);
         if (model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N) {
             snprintf(out, len, "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
         } else if ((model() == EMS_DEVICE_FLAG_RC20) || (model() == EMS_DEVICE_FLAG_RC30)) {
             snprintf(out, len, "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), on);
         } else {
             std::string son = (FL_(enum_switchmode)[on][0]);
-            // std::string son = Helpers::translated_word(FL_(enum_switchmode)[on]);
             snprintf(out, len, "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), son.c_str());
         }
     } else {
