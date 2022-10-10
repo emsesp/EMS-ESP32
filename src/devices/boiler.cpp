@@ -1693,7 +1693,7 @@ bool Boiler::set_tempDiffBoiler(const char * value, const int8_t id) {
 
 // Set the dhw temperature 0x33/0x35 or 0xEA
 bool Boiler::set_ww_temp(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -1713,7 +1713,7 @@ bool Boiler::set_ww_temp(const char * value, const int8_t id) {
 
 // Set the lower dhw temperature 0xEA
 bool Boiler::set_ww_temp_low(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -1735,7 +1735,7 @@ bool Boiler::set_ww_temp_single(const char * value, const int8_t id) {
 
 // Set the dhw disinfection temperature
 bool Boiler::set_ww_disinfect_temp(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -1751,7 +1751,7 @@ bool Boiler::set_ww_disinfect_temp(const char * value, const int8_t id) {
 
 // flow temp
 bool Boiler::set_flow_temp(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -1766,7 +1766,7 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
 
 // set selected burner power
 bool Boiler::set_burn_power(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
@@ -1778,7 +1778,7 @@ bool Boiler::set_burn_power(const char * value, const int8_t id) {
 
 // Set the dhw flow temperature offset 0x33
 bool Boiler::set_ww_flowTempOffset(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2temperature(value, v, true)) {
         return false;
     }
@@ -1794,7 +1794,7 @@ bool Boiler::set_ww_flowTempOffset(const char * value, const int8_t id) {
 
 // set heating activated
 bool Boiler::set_heating_activated(const char * value, const int8_t id) {
-    bool v = false;
+    bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
@@ -1810,7 +1810,7 @@ bool Boiler::set_heating_activated(const char * value, const int8_t id) {
 
 // set heating maximum temperature
 bool Boiler::set_heating_temp(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -1826,7 +1826,7 @@ bool Boiler::set_heating_temp(const char * value, const int8_t id) {
 
 // set min boiler output
 bool Boiler::set_min_power(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
@@ -1842,7 +1842,7 @@ bool Boiler::set_min_power(const char * value, const int8_t id) {
 
 // set max boiler output
 bool Boiler::set_max_power(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
@@ -1858,7 +1858,7 @@ bool Boiler::set_max_power(const char * value, const int8_t id) {
 
 // set ww on hysteresis
 bool Boiler::set_ww_hyst_on(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2temperature(value, v, true)) {
         return false;
     }
@@ -1874,7 +1874,7 @@ bool Boiler::set_ww_hyst_on(const char * value, const int8_t id) {
 
 // set ww off hysteresis
 bool Boiler::set_ww_hyst_off(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2temperature(value, v, true)) {
         return false;
     }
@@ -1890,7 +1890,7 @@ bool Boiler::set_ww_hyst_off(const char * value, const int8_t id) {
 
 // set ww charge optimization
 bool Boiler::set_ww_chargeOptimization(const char * value, const int8_t id) {
-    bool v = false;
+    bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
@@ -1907,7 +1907,7 @@ bool Boiler::set_ww_chargeOptimization(const char * value, const int8_t id) {
 
 // set dhw max power
 bool Boiler::set_ww_maxpower(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
@@ -1919,7 +1919,7 @@ bool Boiler::set_ww_maxpower(const char * value, const int8_t id) {
 
 // set dhw maximum temperature
 bool Boiler::set_ww_maxtemp(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
@@ -1931,7 +1931,7 @@ bool Boiler::set_ww_maxtemp(const char * value, const int8_t id) {
 
 // set min pump modulation
 bool Boiler::set_min_pump(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
@@ -1947,7 +1947,7 @@ bool Boiler::set_min_pump(const char * value, const int8_t id) {
 
 // set max pump modulation
 bool Boiler::set_max_pump(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
@@ -1963,7 +1963,7 @@ bool Boiler::set_max_pump(const char * value, const int8_t id) {
 
 // set boiler on hysteresis
 bool Boiler::set_hyst_on(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2temperature(value, v, true)) {
         return false;
     }
@@ -1979,7 +1979,7 @@ bool Boiler::set_hyst_on(const char * value, const int8_t id) {
 
 // set boiler off hysteresis
 bool Boiler::set_hyst_off(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2temperature(value, v, true)) {
         return false;
     }
@@ -1995,7 +1995,7 @@ bool Boiler::set_hyst_off(const char * value, const int8_t id) {
 
 // set min burner period
 bool Boiler::set_burn_period(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
@@ -2011,7 +2011,7 @@ bool Boiler::set_burn_period(const char * value, const int8_t id) {
 
 // set pump delay
 bool Boiler::set_pump_delay(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
@@ -2047,7 +2047,7 @@ bool Boiler::set_ww_mode(const char * value, const int8_t id) {
 
 // turn on/off dhw
 bool Boiler::set_ww_activated(const char * value, const int8_t id) {
-    bool v = false;
+    bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
@@ -2071,7 +2071,7 @@ bool Boiler::set_tapwarmwater_activated(const char * value, const int8_t id) {
     //     return false;
     // }
 
-    bool v = false;
+    bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
@@ -2106,7 +2106,7 @@ bool Boiler::set_tapwarmwater_activated(const char * value, const int8_t id) {
 // true = on, false = off
 // See also https://github.com/emsesp/EMS-ESP/issues/341#issuecomment-596245458 for Junkers
 bool Boiler::set_ww_onetime(const char * value, const int8_t id) {
-    bool v = false;
+    bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
@@ -2122,7 +2122,7 @@ bool Boiler::set_ww_onetime(const char * value, const int8_t id) {
 
 // starting dhw disinfect, set to off seems not working
 bool Boiler::set_ww_disinfect(const char * value, const int8_t id) {
-    bool v = false;
+    bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
@@ -2139,7 +2139,7 @@ bool Boiler::set_ww_disinfect(const char * value, const int8_t id) {
 // Activate / De-activate circulation of dhw 0x35
 // true = on, false = off
 bool Boiler::set_ww_circulation(const char * value, const int8_t id) {
-    bool v = false;
+    bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
@@ -2155,7 +2155,7 @@ bool Boiler::set_ww_circulation(const char * value, const int8_t id) {
 
 // configuration of dhw circulation pump
 bool Boiler::set_ww_circulation_pump(const char * value, const int8_t id) {
-    bool v = false;
+    bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
@@ -2172,7 +2172,7 @@ bool Boiler::set_ww_circulation_pump(const char * value, const int8_t id) {
 // Set the mode of circulation, 1x3min, ... 6x3min, continuous
 // true = on, false = off
 bool Boiler::set_ww_circulation_mode(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
@@ -2307,7 +2307,7 @@ bool Boiler::set_maintenancedate(const char * value, const int8_t id) {
 
 // Set the pool temperature 0x48A
 bool Boiler::set_pool_temp(const char * value, const int8_t id) {
-    float v = 0;
+    float v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -2319,7 +2319,7 @@ bool Boiler::set_pool_temp(const char * value, const int8_t id) {
 }
 
 bool Boiler::set_emergency_temp(const char * value, const int8_t id) {
-    int v = 0;
+    int v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -2330,7 +2330,7 @@ bool Boiler::set_emergency_temp(const char * value, const int8_t id) {
 }
 
 bool Boiler::set_emergency_ops(const char * value, const int8_t id) {
-    bool v = false;
+    bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }

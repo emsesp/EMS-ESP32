@@ -389,7 +389,7 @@ bool Mixer::set_setValveTime(const char * value, const int8_t id) {
 
 bool Mixer::set_wwMaxTemp(const char * value, const int8_t id) {
     uint8_t wwc = device_id() - 0x28;
-    float   v   = 0;
+    float   v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -399,7 +399,7 @@ bool Mixer::set_wwMaxTemp(const char * value, const int8_t id) {
 
 bool Mixer::set_wwDiffTemp(const char * value, const int8_t id) {
     uint8_t wwc = device_id() - 0x28;
-    float   v   = 0;
+    float   v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -409,7 +409,7 @@ bool Mixer::set_wwDiffTemp(const char * value, const int8_t id) {
 
 bool Mixer::set_wwReducedTemp(const char * value, const int8_t id) {
     uint8_t wwc = device_id() - 0x28;
-    float   v   = 0;
+    float   v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -419,7 +419,7 @@ bool Mixer::set_wwReducedTemp(const char * value, const int8_t id) {
 
 bool Mixer::set_wwRequiredTemp(const char * value, const int8_t id) {
     uint8_t wwc = device_id() - 0x28;
-    float   v   = 0;
+    float   v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -428,7 +428,7 @@ bool Mixer::set_wwRequiredTemp(const char * value, const int8_t id) {
 }
 
 bool Mixer::set_wwDisinfectionTemp(const char * value, const int8_t id) {
-    float v = 0;
+    float v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -442,7 +442,7 @@ bool Mixer::set_wwDisinfectionTemp(const char * value, const int8_t id) {
 }
 
 bool Mixer::set_wwCircPump(const char * value, const int8_t id) {
-    bool v = false;
+    bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }

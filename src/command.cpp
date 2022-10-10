@@ -117,9 +117,9 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         // default to 'info' for SYSTEM, DALLASENSOR and ANALOGSENSOR, the other devices to 'values' for shortname version
         if (num_paths < (id_n > 0 ? 4 : 3)) {
             if (device_type < EMSdevice::DeviceType::BOILER) {
-                command_p = "info";
+                command_p = F_(info);
             } else {
-                command_p = "values";
+                command_p = F_(values);
             }
         } else {
             return message(CommandRet::NOT_FOUND, "missing or bad command", output);
@@ -170,15 +170,15 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
 std::string Command::return_code_string(const uint8_t return_code) {
     switch (return_code) {
     case CommandRet::ERROR:
-        return ("Error");
+        return "Error";
     case CommandRet::OK:
-        return ("OK");
+        return "OK";
     case CommandRet::NOT_FOUND:
-        return ("Not Found");
+        return "Not Found";
     case CommandRet::NOT_ALLOWED:
-        return ("Not Authorized");
+        return "Not Authorized";
     case CommandRet::FAIL:
-        return ("Failed");
+        return "Failed";
     default:
         break;
     }
@@ -264,15 +264,15 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
         if ((value == nullptr) || (strlen(value) == 0)) {
             if (EMSESP::system_.readonly_mode()) {
-                LOG_INFO(("[readonly] Calling command '%s/%s' (%s)"), dname.c_str(), cmd, cf->description_);
+                LOG_INFO("[readonly] Calling command '%s/%s' (%s)", dname.c_str(), cmd, Helpers::translated_word(cf->description_).c_str());
             } else {
-                LOG_DEBUG(("Calling command '%s/%s' (%s)"), dname.c_str(), cmd, cf->description_);
+                LOG_DEBUG("Calling command '%s/%s' (%s)", dname.c_str(), cmd, Helpers::translated_word(cf->description_).c_str());
             }
         } else {
             if (EMSESP::system_.readonly_mode()) {
-                LOG_INFO(("[readonly] Calling command '%s/%s' (%s) with value %s"), dname.c_str(), cmd, cf->description_, value);
+                LOG_INFO("[readonly] Calling command '%s/%s' (%s) with value %s", dname.c_str(), cmd, Helpers::translated_word(cf->description_).c_str(), value);
             } else {
-                LOG_DEBUG(("Calling command '%s/%s' (%s) with value %s"), dname.c_str(), cmd, cf->description_, value);
+                LOG_DEBUG("Calling command '%s/%s' (%s) with value %s", dname.c_str(), cmd, Helpers::translated_word(cf->description_).c_str(), value);
             }
         }
 
@@ -294,7 +294,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     }
 
     // we didn't find the command and its not an endpoint, report error
-    LOG_DEBUG("Command failed: invalid command '%s'", cmd);
+    LOG_DEBUG("Command failed: invalid command '%s'", cmd ? cmd : "");
     return message(CommandRet::NOT_FOUND, "invalid command", output);
 }
 
@@ -497,7 +497,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
 // output list of all commands to console
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
-    shell.println(("Available commands (*=do not need authorization): "));
+    shell.println("Available commands (*=do not need authorization): ");
 
     // show system first
     shell.print(COLOR_BOLD_ON);

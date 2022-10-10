@@ -205,7 +205,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
         return;
     }
 
-    shell.printfln(("MQTT queue (%d/%d messages):"), mqtt_messages_.size(), MAX_MQTT_MESSAGES);
+    shell.printfln("MQTT queue (%d/%d messages):", mqtt_messages_.size(), MAX_MQTT_MESSAGES);
 
     for (const auto & message : mqtt_messages_) {
         auto content = message.content_;
@@ -222,12 +222,12 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
             // Publish messages
             if (message.retry_count_ == 0) {
                 if (message.packet_id_ == 0) {
-                    shell.printfln((" [%02d] (Pub) topic=%s payload=%s"), message.id_, topic, content->payload.c_str());
+                    shell.printfln(" [%02d] (Pub) topic=%s payload=%s", message.id_, topic, content->payload.c_str());
                 } else {
-                    shell.printfln((" [%02d] (Pub) topic=%s payload=%s (pid %d)"), message.id_, topic, content->payload.c_str(), message.packet_id_);
+                    shell.printfln(" [%02d] (Pub) topic=%s payload=%s (pid %d)", message.id_, topic, content->payload.c_str(), message.packet_id_);
                 }
             } else {
-                shell.printfln((" [%02d] (Pub) topic=%s payload=%s (pid %d, retry #%d)"),
+                shell.printfln(" [%02d] (Pub) topic=%s payload=%s (pid %d, retry #%d)",
                                message.id_,
                                topic,
                                content->payload.c_str(),
@@ -236,7 +236,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
             }
         } else {
             // Subscribe messages
-            shell.printfln((" [%02d] (Sub) topic=%s"), message.id_, topic);
+            shell.printfln(" [%02d] (Sub) topic=%s", message.id_, topic);
         }
     }
     shell.println();
@@ -264,7 +264,7 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
 
 #if defined(EMSESP_DEBUG)
     if (len) {
-        LOG_DEBUG(("Received topic `%s` => payload `%s` (length %d)"), topic, message, len);
+        LOG_DEBUG("Received topic `%s` => payload `%s` (length %d)", topic, message, len);
     } else {
         LOG_DEBUG("Received topic `%s`", topic);
     }
@@ -554,7 +554,7 @@ void Mqtt::on_connect() {
     doc["version"] = EMSESP_APP_VERSION;
 #ifndef EMSESP_STANDALONE
     if (WiFi.status() == WL_CONNECTED) {
-        doc["connection"]      = ("WiFi");
+        doc["connection"]      = "WiFi";
         doc["hostname"]        = WiFi.getHostname();
         doc["SSID"]            = WiFi.SSID();
         doc["BSSID"]           = WiFi.BSSIDstr();
@@ -567,7 +567,7 @@ void Mqtt::on_connect() {
             doc["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
         }
     } else if (EMSESP::system_.ethernet_connected()) {
-        doc["connection"]      = ("Ethernet");
+        doc["connection"]      = "Ethernet";
         doc["hostname"]        = ETH.getHostname();
         doc["MAC"]             = ETH.macAddress();
         doc["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
@@ -609,7 +609,7 @@ void Mqtt::on_connect() {
     LOG_INFO("Queue size: %d", mqtt_messages_.size());
     for (const auto & message : mqtt_messages_) {
         auto content = message.content_;
-        LOG_INFO((" [%02d] (%d) topic=%s payload=%s"), message.id_, content->operation, content->topic.c_str(), content->payload.c_str());
+        LOG_INFO(" [%02d] (%d) topic=%s payload=%s", message.id_, content->operation, content->topic.c_str(), content->payload.c_str());
     }
     */
 }
@@ -857,7 +857,7 @@ void Mqtt::process_queue() {
 
     // else try and publish it
     uint16_t packet_id = mqttClient_->publish(topic, mqtt_qos_, message->retain, message->payload.c_str(), message->payload.size(), false, mqtt_message.id_);
-    LOG_DEBUG(("Publishing topic %s (#%02d, retain=%d, retry=%d, size=%d, pid=%d)"),
+    LOG_DEBUG("Publishing topic %s (#%02d, retain=%d, retry=%d, size=%d, pid=%d)",
               topic,
               mqtt_message.id_,
               message->retain,
@@ -978,9 +978,9 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
     // create entity by add the hc/wwc tag if present, separating with a .
     char new_entity[50];
     if (tag >= DeviceValueTAG::TAG_HC1) {
-        snprintf(new_entity, sizeof(new_entity), "%s.%s", EMSdevice::tag_to_string(tag).c_str(), (entity));
+        snprintf(new_entity, sizeof(new_entity), "%s.%s", EMSdevice::tag_to_mqtt(tag).c_str(), entity);
     } else {
-        snprintf(new_entity, sizeof(new_entity), "%s", (entity));
+        snprintf(new_entity, sizeof(new_entity), "%s", entity);
     }
 
     // build unique identifier which will be used in the topic, replacing all . with _ as not to break HA
@@ -1140,9 +1140,9 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
     // and has no unit of measure or icon
     if (type == DeviceValueType::BOOL) {
         char result[10];
-        doc[("payload_on")]  = Helpers::render_boolean(result, true);
-        doc[("payload_off")] = Helpers::render_boolean(result, false);
-        doc[sc_ha]           = F_(measurement);
+        doc["payload_on"]  = Helpers::render_boolean(result, true);
+        doc["payload_off"] = Helpers::render_boolean(result, false);
+        doc[sc_ha]         = F_(measurement);
     } else {
         // always set the uom
         if (uom != DeviceValueUOM::NONE) {

@@ -25,9 +25,6 @@
 
 #ifndef EMSESP_STANDALONE
 #include "driver/adc.h"
-#ifndef ARDUINO_LOLIN_S2_MINI
-#include <esp_bt.h>
-#endif
 #endif
 
 #include <uuid/log.h>
