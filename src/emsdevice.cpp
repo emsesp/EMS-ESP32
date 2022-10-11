@@ -81,7 +81,7 @@ std::string EMSdevice::brand_to_string() const {
 }
 
 // returns the name of the MQTT topic to use for a specific device, without the base
-std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
+const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     switch (device_type) {
     case DeviceType::SYSTEM:
         return (F_(system));
@@ -259,7 +259,7 @@ bool EMSdevice::has_tag(const uint8_t tag) const {
 // called from the command 'entities'
 void EMSdevice::list_device_entries(JsonObject & output) const {
     for (const auto & dv : devicevalues_) {
-        std::string fullname = dv.get_fullname();
+        auto fullname = dv.get_fullname();
         if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.type != DeviceValueType::CMD && !fullname.empty()) {
             // if we have a tag prefix it
             char key[50];
@@ -495,8 +495,7 @@ void EMSdevice::add_device_value(uint8_t               tag,
     }
 
     // add the command to our library
-    // cmd is the short_name and the description is the fullname (not the custom fullname)
-    Command::add(device_type_, short_name, f, Helpers::translated_fullname(fullname), flags);
+    Command::add(device_type_, short_name, f, fullname, flags);
 }
 
 // single list of options
@@ -638,9 +637,9 @@ void EMSdevice::publish_value(void * value_p) const {
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
             if (Mqtt::publish_single2cmd()) {
                 if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-                    snprintf(topic, sizeof(topic), "%s/%s/%s", device_type_2_device_name(device_type_).c_str(), tag_to_mqtt(dv.tag).c_str(), (dv.short_name));
+                    snprintf(topic, sizeof(topic), "%s/%s/%s", device_type_2_device_name(device_type_), tag_to_mqtt(dv.tag).c_str(), (dv.short_name));
                 } else {
-                    snprintf(topic, sizeof(topic), "%s/%s", device_type_2_device_name(device_type_).c_str(), (dv.short_name));
+                    snprintf(topic, sizeof(topic), "%s/%s", device_type_2_device_name(device_type_), (dv.short_name));
                 }
             } else if (Mqtt::is_nested() && dv.tag >= DeviceValueTAG::TAG_HC1) {
                 snprintf(topic, sizeof(topic), "%s/%s/%s", Mqtt::tag_to_topic(device_type_, dv.tag).c_str(), tag_to_mqtt(dv.tag).c_str(), (dv.short_name));
@@ -663,7 +662,7 @@ void EMSdevice::publish_value(void * value_p) const {
                         Helpers::render_value(payload, *(uint8_t *)(value_p), 0);
                     } else {
                         auto enum_str = Helpers::translated_word(dv.options[*(uint8_t *)(value_p)]);
-                        strlcpy(payload, enum_str.c_str(), sizeof(payload));
+                        strlcpy(payload, enum_str, sizeof(payload));
                     }
                 }
                 break;
@@ -824,7 +823,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                     JsonArray l = obj.createNestedArray("l");
                     for (uint8_t i = 0; i < dv.options_size; i++) {
                         auto enum_str = Helpers::translated_word(dv.options[i]);
-                        if (!enum_str.empty()) {
+                        if (enum_str) {
                             l.add(enum_str);
                         }
                     }
@@ -918,12 +917,12 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
         // don't add the fullname if its a command
         auto fullname = Helpers::translated_word(dv.fullname);
         if (dv.type != DeviceValueType::CMD) {
-            if (!fullname.empty()) {
+            if (fullname) {
                 if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
                     obj["n"] = fullname;
                 } else {
                     char name[50];
-                    snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag).c_str(), fullname.c_str());
+                    snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag).c_str(), fullname);
                     obj["n"] = name;
                 }
             }
@@ -934,7 +933,7 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
                 obj["cn"] = custom_fullname;
             }
         } else {
-            obj["n"] = "!" + fullname; // prefix commands with a !
+            obj["n"] = "!" + std::string(fullname); // prefix commands with a !
         }
 
         // add the custom name, is optional
@@ -1363,11 +1362,11 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                                  sizeof(time_s),
                                  "%d %s %d %s %d %s",
                                  (time_value / 1440),
-                                 Helpers::translated_word(FL_(days)).c_str(),
+                                 Helpers::translated_word(FL_(days)),
                                  ((time_value % 1440) / 60),
-                                 Helpers::translated_word(FL_(hours)).c_str(),
+                                 Helpers::translated_word(FL_(hours)),
                                  (time_value % 60),
-                                 Helpers::translated_word(FL_(minutes)).c_str());
+                                 Helpers::translated_word(FL_(minutes)));
                         json[name] = time_s;
                     } else {
                         json[name] = time_value;

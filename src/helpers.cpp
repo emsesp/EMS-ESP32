@@ -179,9 +179,9 @@ char * Helpers::render_boolean(char * result, const bool value, const bool dashb
     uint8_t bool_format_ = dashboard ? EMSESP::system_.bool_dashboard() : EMSESP::system_.bool_format();
 
     if (bool_format_ == BOOL_FORMAT_ONOFF_STR) {
-        strlcpy(result, value ? translated_word(FL_(on)).c_str() : translated_word(FL_(off)).c_str(), 5);
+        strlcpy(result, value ? translated_word(FL_(on)) : translated_word(FL_(off)), 5);
     } else if (bool_format_ == BOOL_FORMAT_ONOFF_STR_CAP) {
-        strlcpy(result, value ? translated_word(FL_(ON)).c_str() : translated_word(FL_(OFF)).c_str(), 5);
+        strlcpy(result, value ? translated_word(FL_(ON)) : translated_word(FL_(OFF)), 5);
     } else if ((bool_format_ == BOOL_FORMAT_10) || (bool_format_ == BOOL_FORMAT_10_STR)) {
         strlcpy(result, value ? "1" : "0", 2);
     } else {
@@ -593,12 +593,12 @@ bool Helpers::value2bool(const char * value, bool & value_b) {
 
     std::string bool_str = toLower(value); // convert to lower case
 
-    if ((bool_str == Helpers::translated_word(FL_(on))) || (bool_str == "on") || (bool_str == "1") || (bool_str == "true")) {
+    if ((bool_str == std::string(Helpers::translated_word(FL_(on)))) || (bool_str == "on") || (bool_str == "1") || (bool_str == "true")) {
         value_b = true;
         return true; // is a bool
     }
 
-    if ((bool_str == Helpers::translated_word(FL_(off))) || (bool_str == "off") || (bool_str == "0") || (bool_str == "false")) {
+    if ((bool_str == std::string(Helpers::translated_word(FL_(off)))) || (bool_str == "off") || (bool_str == "0") || (bool_str == "false")) {
         value_b = false;
         return true; // is a bool
     }
@@ -615,7 +615,7 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
     std::string str = toLower(value);
 
     for (value_ui = 0; strs[value_ui]; value_ui++) {
-        std::string str1 = toLower(Helpers::translated_word(strs[value_ui]));
+        std::string str1 = toLower(std::string(Helpers::translated_word(strs[value_ui])));
         std::string str2 = toLower((strs[value_ui][0])); // also check for default language
         if ((str1 != "")
             && ((str2 == "off" && str == "false") || (str2 == "on" && str == "true") || (str == str1) || (str == str2)
@@ -627,19 +627,25 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
     return false;
 }
 
-// checks to see if a string is member of a vector and return the index, also allow true/false for on/off
+// finds the string (value) of a list vector (strs)
+// returns true if found, and sets the value_ui to the index, else false
+// also allow true/false for on/off
 bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * const * strs) {
     if ((value == nullptr) || (strlen(value) == 0)) {
         return false;
     }
     std::string str = toLower(value);
 
+    std::string s_on  = Helpers::translated_word(FL_(on));
+    std::string s_off = Helpers::translated_word(FL_(off));
+
+    // stops when a nullptr is found, which is the end delimeter of a MAKE_PSTR_LIST()
+    // could use count_items() to avoid buffer over-run but this works
     for (value_ui = 0; strs[value_ui]; value_ui++) {
         std::string enum_str = toLower((strs[value_ui]));
 
         if ((enum_str != "")
-            && ((enum_str == "off" && (str == Helpers::translated_word(FL_(off)) || str == "false"))
-                || (enum_str == "on" && (str == Helpers::translated_word(FL_(on)) || str == "true")) || (str == enum_str)
+            && ((enum_str == "off" && (str == s_off || str == "false")) || (enum_str == "on" && (str == s_on || str == "true")) || (str == enum_str)
                 || (value[0] == ('0' + value_ui) && value[1] == '\0'))) {
             return true;
         }
@@ -702,31 +708,13 @@ uint8_t Helpers::count_items(const char * const ** list) {
     return list_size;
 }
 
-// return translated string as a std::string, optionally converting to lowercase (for console commands)
-std::string Helpers::translated_word(const char * const * strings, bool to_lower) {
-    uint8_t language_index = EMSESP::system_.language_index();
-    uint8_t index          = 0;
-
-    // check for empty
-    if (!strings) {
-        return ""; // it's a nullptr with no translations, return empty to prevent unwanted crash
-    }
-
-    // see how many translations we have for this entity. if there is no translation for this, revert to EN
-    if (Helpers::count_items(strings) >= language_index + 1 && strlen(strings[language_index])) {
-        index = language_index;
-    }
-    return to_lower ? toLower((strings[index])) : (strings[index]);
-}
-
 // returns char pointer to translated description or fullname
-const char * Helpers::translated_fullname(const char * const * strings) {
+const char * Helpers::translated_word(const char * const * strings) {
     uint8_t language_index = EMSESP::system_.language_index();
     uint8_t index          = 0;
 
-    // check for empty
     if (!strings) {
-        return nullptr; // it's a nullptr with no translations, return empty to prevent unwanted crash
+        return ""; // no translations
     }
 
     // see how many translations we have for this entity. if there is no translation for this, revert to EN

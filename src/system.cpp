@@ -249,8 +249,7 @@ void System::syslog_init() {
         syslog_.hostname(hostname().c_str());
 
         // register the command
-        // TODO translate this
-        Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, ("change the syslog level"), CommandFlag::ADMIN_ONLY);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, FL_(changeloglevel_cmd), CommandFlag::ADMIN_ONLY);
 
     } else if (was_enabled) {
         // in case service is still running, this flushes the queue
@@ -664,25 +663,21 @@ void System::system_check() {
 
 // commands - takes static function pointers
 void System::commands_init() {
-    // TODO translate this
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, ("send a telegram"), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, ("refresh all EMS values"), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, ("restart EMS-ESP"), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, ("watch incoming telegrams"));
-
-    // register syslog command in syslog init
-    // Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, ("set syslog level"), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, FL_(send_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, FL_(watch_cmd));
 
     if (Mqtt::enabled()) {
-        Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, ("force a MQTT publish"));
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, FL_(publish_cmd));
     }
 
     // these commands will return data in JSON format
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, ("show system status"));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, ("fetch system commands"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, FL_(system_info_cmd));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, FL_(commands_cmd));
 
 #if defined(EMSESP_DEBUG)
-    Command::add(EMSdevice::DeviceType::SYSTEM, ("test"), System::command_test, ("run a specific test"));
+    Command::add(EMSdevice::DeviceType::SYSTEM, ("test"), System::command_test, FL_(test_cmd));
 #endif
 
     // MQTT subscribe "ems-esp/system/#"

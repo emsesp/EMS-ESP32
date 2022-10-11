@@ -1039,7 +1039,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     fetch_device_values(device_id); // go and fetch its data
 
     // Print to LOG showing we've added a new device
-    LOG_INFO("Recognized new %s with deviceID 0x%02X", EMSdevice::device_type_2_device_name(device_type).c_str(), device_id);
+    LOG_INFO("Recognized new %s with deviceID 0x%02X", EMSdevice::device_type_2_device_name(device_type), device_id);
 
     // add command commands for all devices, except for connect, controller and gateway
     if ((device_type == DeviceType::CONNECT) || (device_type == DeviceType::CONTROLLER) || (device_type == DeviceType::GATEWAY)) {
@@ -1052,7 +1052,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         [device_type](const char * value, const int8_t id, JsonObject & output) {
             return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
         },
-        F_(info_cmd));
+        FL_(info_cmd));
     Command::add(
         device_type,
         ("values"),
@@ -1065,15 +1065,16 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         device_type,
         F_(commands),
         [device_type](const char * value, const int8_t id, JsonObject & output) { return command_commands(device_type, output, id); },
-        F_(commands_cmd));
+        FL_(commands_cmd));
     Command::add(
         device_type,
         F_(entities),
         [device_type](const char * value, const int8_t id, JsonObject & output) { return command_entities(device_type, output, id); },
-        F_(entities_cmd));
+        FL_(entities_cmd));
 
     // MQTT subscribe to the device e.g. "ems-esp/boiler/#"
-    Mqtt::subscribe(device_type, EMSdevice::device_type_2_device_name(device_type) + "/#", nullptr);
+    auto topic = std::string(EMSdevice::device_type_2_device_name(device_type)) + "/#";
+    Mqtt::subscribe(device_type, topic, nullptr);
 
     return true;
 }

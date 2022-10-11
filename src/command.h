@@ -59,14 +59,14 @@ class Command {
         const char *              cmd_;
         const cmd_function_p      cmdfunction_;
         const cmd_json_function_p cmdfunction_json_;
-        const char *              description_;
+        const char * const *      description_;
 
         CmdFunction(const uint8_t             device_type,
                     const uint8_t             flags,
                     const char *              cmd,
                     const cmd_function_p      cmdfunction,
                     const cmd_json_function_p cmdfunction_json,
-                    const char *              description)
+                    const char * const *      description)
             : device_type_(device_type)
             , flags_(flags)
             , cmd_(cmd)
@@ -97,12 +97,18 @@ class Command {
     static uint8_t call(const uint8_t device_type, const char * cmd, const char * value);
 
     // with normal call back function taking a value and id
-    static void
-    add(const uint8_t device_type, const char * cmd, const cmd_function_p cb, const char * description, uint8_t flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
+    static void add(const uint8_t        device_type,
+                    const char *         cmd,
+                    const cmd_function_p cb,
+                    const char * const * description,
+                    uint8_t              flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
 
     // callback function taking value, id and a json object for its output
-    static void
-    add(const uint8_t device_type, const char * cmd, const cmd_json_function_p cb, const char * description, uint8_t flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
+    static void add(const uint8_t             device_type,
+                    const char *              cmd,
+                    const cmd_json_function_p cb,
+                    const char * const *      description,
+                    uint8_t                   flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
 
     static void                   show_all(uuid::console::Shell & shell);
     static Command::CmdFunction * find_command(const uint8_t device_type, const char * cmd);

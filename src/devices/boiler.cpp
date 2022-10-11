@@ -2227,7 +2227,7 @@ bool Boiler::set_maintenance(const char * value, const int8_t id) {
 
     std::string s;
     if (Helpers::value2string(value, s)) {
-        if (s == Helpers::translated_word(FL_(reset))) {
+        if (s == std::string(Helpers::translated_word(FL_(reset)))) {
             // LOG_INFO("Reset boiler maintenance message");
             write_command(0x05, 0x08, 0xFF, 0x1C);
             return true;
