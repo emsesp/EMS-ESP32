@@ -1167,7 +1167,7 @@ const DashboardData: FC = () => {
                   <Grid item>
                     <ValidatedTextField
                       name="f"
-                      label={LL.CPU_FREQ()}
+                      label={LL.FREQ()}
                       value={numberValue(analog.f)}
                       sx={{ width: '20ch' }}
                       type="number"
