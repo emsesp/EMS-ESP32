@@ -661,13 +661,23 @@ void System::system_check() {
             if (healthcheck_ == 0) {
                 // everything is healthy, show LED permanently on or off depending on setting
                 if (led_gpio_) {
+#ifdef ARDUINO_LOLIN_C3_MINI
+                    pixels.setPixelColor(0, 0, hide_led_ ? 0 : 128, 0);
+                    pixels.show();
+#else
                     digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
+#endif
                 }
                 send_heartbeat();
             } else {
                 // turn off LED so we're ready to the flashes
                 if (led_gpio_) {
+#ifdef ARDUINO_LOLIN_C3_MINI
+                    pixels.setPixelColor(0, 0, 0, 0);
+                    pixels.show();
+#else
                     digitalWrite(led_gpio_, !LED_ON);
+#endif
                 }
             }
         }
@@ -756,7 +766,7 @@ void System::led_monitor() {
 
             if (led_on_) {
 #ifdef ARDUINO_LOLIN_C3_MINI
-                pixels.setPixelColor(0, 0, 0, 128);
+                pixels.setPixelColor(0, 128, 0, 0);
                 pixels.show();
 #else
                 digitalWrite(led_gpio_, LED_ON);  // LED off
