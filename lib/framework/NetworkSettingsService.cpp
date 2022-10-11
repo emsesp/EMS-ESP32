@@ -76,7 +76,7 @@ void NetworkSettingsService::manageSTA() {
 
         WiFi.begin(_state.ssid.c_str(), _state.password.c_str()); // attempt to connect to the network
 #ifdef BOARD_C3_MINI_V1
-        WiFi.setTxPower(WIFI_POWER_8_5dBm); //https://www.wemos.cc/en/latest/c3/c3_mini.html#about-wifi
+        WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
 #endif
     }
 }
