@@ -246,6 +246,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.invoke_command("show mqtt");
     }
 
+    if (command == "modes") {
+        shell.printfln("Testing thermostat modes...");
+        run_test("general");
+        shell.invoke_command("call thermostat mode auto");
+        shell.invoke_command("call thermostat mode Manuell"); // DE
+        shell.invoke_command("call thermostat mode 1");
+    }
+
     if (command == "render") {
         shell.printfln("Testing render...");
 

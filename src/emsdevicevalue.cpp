@@ -74,7 +74,7 @@ DeviceValue::DeviceValue(uint8_t               device_type,
         Serial.print(custom_fullname.c_str());
         Serial.print(COLOR_RESET);
     } else {
-        Serial.print(Helpers::translated_word(fullname).c_str());
+        Serial.print(Helpers::translated_word(fullname));
     }
     Serial.print(" (#options=");
     Serial.print(options_size);
@@ -88,7 +88,7 @@ DeviceValue::DeviceValue(uint8_t               device_type,
             Serial.print(i + 1);
             Serial.print(":");
             auto str = Helpers::translated_word(options[i]);
-            Serial.print((str.c_str()));
+            Serial.print(str);
             i++;
         }
     } else if (options_single != nullptr) {

@@ -270,15 +270,16 @@ void EMSESPShell::add_console_commands() {
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint16_t watch_id = WATCH_ID_NONE;
 
+                              // only use english commands, not the translations
                               if (!arguments.empty()) {
                                   // get raw/pretty
                                   if (arguments[0] == (F_(raw))) {
                                       EMSESP::watch(EMSESP::WATCH_RAW); // raw
-                                  } else if (arguments[0] == Helpers::translated_word(FL_(on), true) || arguments[0] == (FL_(on)[0])) {
+                                  } else if (arguments[0] == (FL_(on)[0])) {
                                       EMSESP::watch(EMSESP::WATCH_ON); // on
-                                  } else if (arguments[0] == Helpers::translated_word(FL_(off), true) || arguments[0] == (FL_(off)[0])) {
+                                  } else if (arguments[0] == (FL_(off)[0])) {
                                       EMSESP::watch(EMSESP::WATCH_OFF); // off
-                                  } else if (arguments[0] == Helpers::translated_word(FL_(unknown), true) || arguments[0] == (FL_(unknown)[0])) {
+                                  } else if (arguments[0] == (FL_(unknown)[0])) {
                                       EMSESP::watch(EMSESP::WATCH_UNKNOWN); // unknown
                                       watch_id = WATCH_ID_NONE;
                                   } else {

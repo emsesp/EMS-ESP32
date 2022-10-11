@@ -443,7 +443,6 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
         udp_.print('-');
     }
 
-    // TODO should use flash?
     udp_.printf_P(PSTR(" %s %s - - - "), hostname_.c_str(), (message.content_->name));
 
     char id_c_str[15];
