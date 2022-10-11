@@ -593,12 +593,12 @@ void Thermostat::process_RC20Timer(std::shared_ptr<const Telegram> telegram) {
         uint8_t time = telegram->message_data[1];
 
         // we use EN settings for the day abbreviation
-        std::string sday = (FL_(enum_dayOfWeek)[day][0]);
+        auto sday = (FL_(enum_dayOfWeek)[day][0]);
 
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
         } else {
-            snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), temp);
+            snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday, time / 6, 10 * (time % 6), temp);
         }
         has_update(hc->switchtime1, data, sizeof(hc->switchtime1));
     }
@@ -794,11 +794,11 @@ void Thermostat::process_RC35wwTimer(std::shared_ptr<const Telegram> telegram) {
 
         char data[sizeof(wwSwitchTime_)];
         // we use EN settings for the day abbreviation
-        std::string sday = (FL_(enum_dayOfWeek)[day][0]);
+        auto sday = (FL_(enum_dayOfWeek)[day][0]);
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
         } else {
-            snprintf(data, sizeof(data), "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
+            snprintf(data, sizeof(data), "%02d %s %02d:%02d %s", no, sday, time / 6, 10 * (time % 6), on ? "on" : "off");
         }
         if (telegram->type_id == 0x38) {
             has_update(wwSwitchTime_, data, sizeof(wwSwitchTime_));
@@ -1264,13 +1264,13 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
         uint8_t time = telegram->message_data[1];
 
         // we use EN settings for the day abbreviation
-        std::string sday = (FL_(enum_dayOfWeek)[day][0]);
+        auto sday = (FL_(enum_dayOfWeek)[day][0]);
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
         } else if (model() == EMS_DEVICE_FLAG_RC30) {
-            snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), on);
+            snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday, time / 6, 10 * (time % 6), on);
         } else {
-            snprintf(data, sizeof(data), "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
+            snprintf(data, sizeof(data), "%02d %s %02d:%02d %s", no, sday, time / 6, 10 * (time % 6), on ? "on" : "off");
         }
         if (!prog) {
             strlcpy(hc->switchtime1, data, sizeof(hc->switchtime1));
@@ -2720,14 +2720,14 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
     }
     if (data[0] != 0xE7) {
         // we use EN settings for the day abbreviation
-        std::string sday = (FL_(enum_dayOfWeek)[day][0]);
+        auto sday = (FL_(enum_dayOfWeek)[day][0]);
         if (model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N) {
-            snprintf(out, len, "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
+            snprintf(out, len, "%02d %s %02d:%02d %s", no, sday, time / 6, 10 * (time % 6), on ? "on" : "off");
         } else if ((model() == EMS_DEVICE_FLAG_RC20) || (model() == EMS_DEVICE_FLAG_RC30)) {
-            snprintf(out, len, "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), on);
+            snprintf(out, len, "%02d %s %02d:%02d T%d", no, sday, time / 6, 10 * (time % 6), on);
         } else {
-            std::string son = (FL_(enum_switchmode)[on][0]);
-            snprintf(out, len, "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), son.c_str());
+            auto son = (FL_(enum_switchmode)[on][0]);
+            snprintf(out, len, "%02d %s %02d:%02d %s", no, sday, time / 6, 10 * (time % 6), son);
         }
     } else {
         snprintf(out, len, "%02d not_set", no);
