@@ -350,7 +350,7 @@ MAKE_PSTR_LIST(releaseWait, "releasewait", "boiler release wait time", "Wartezei
 // the following are dhw for the boiler and automatically tagged with 'dhw'
 MAKE_PSTR_LIST(wwSelTempLow, "wwseltemplow", "selected lower temperature", "untere Solltemperatur", "Onderste streeftemperatuur", "Vald lägstatemperatur")
 MAKE_PSTR_LIST(wwSelTempOff, "wwseltempoff", "selected temperature for off", "Solltemperatur bei AUS", "Streeftemperatuur bij UIT", "Vald tempereatur för AV")
-MAKE_PSTR_LIST(wwSelTempSingle, "wwseltempsingle", "single charge temperature", "Ladetemperatur", "Streeftemperatuur enkele lading", "Temperatur Engångsladdning")
+MAKE_PSTR_LIST(wwSelTempSingle, "wwseltempsingle", "single charge temperature", "Solltemperatur Einmalladung", "Streeftemperatuur enkele lading", "Temperatur Engångsladdning")
 MAKE_PSTR_LIST(wwCylMiddleTemp, "wwcylmiddletemp", "cylinder middle temperature (TS3)", "Speichertemperatur Mitte", "Buffer temperatuur midden", "Cylinder Temperatur Mitten (TS3)")
 
 MAKE_PSTR_LIST(wwSelTemp, "wwseltemp", "selected temperature", "gewählte Temperatur", "Geselecteerd temperatuur", "Vald Temperatur")
