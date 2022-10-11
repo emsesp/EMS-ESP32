@@ -131,7 +131,7 @@ const SettingsCustomization: FC = () => {
   const fetchDevices = useCallback(async () => {
     try {
       setDevices((await EMSESP.readDevices()).data);
-    } catch (error: unknown) {
+    } catch (error) {
       setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   }, [LL]);
@@ -144,7 +144,7 @@ const SettingsCustomization: FC = () => {
     try {
       const new_deviceEntities = (await EMSESP.readDeviceEntities({ id: unique_id })).data;
       setInitialMask(new_deviceEntities);
-    } catch (error: unknown) {
+    } catch (error) {
       setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
@@ -165,17 +165,21 @@ const SettingsCustomization: FC = () => {
   }
 
   function formatName(de: DeviceEntity) {
-    if (de.n === undefined || de.n === de.id) {
-      return de.id;
-    }
-
-    if (de.n[0] === '!') {
-      return LL.COMMAND() + ': ' + de.n.slice(1);
+    if (de.n === undefined) {
+      return (
+        <>
+          (
+          <Link target="_blank" href={APIURL + devices?.devices[selectedDevice].t + '/' + de.id}>
+            {de.id}
+          </Link>
+          )
+        </>
+      );
     }
 
     return (
       <>
-        {de.cn !== undefined && de.cn !== '' ? de.cn : de.n}
+        {de.n[0] === '!' ? LL.COMMAND() + ': ' + de.n.slice(1) : de.cn !== undefined && de.cn !== '' ? de.cn : de.n}
         &nbsp;(
         <Link target="_blank" href={APIURL + devices?.devices[selectedDevice].t + '/' + de.id}>
           {de.id}
@@ -239,7 +243,7 @@ const SettingsCustomization: FC = () => {
     try {
       await EMSESP.resetCustomizations();
       enqueueSnackbar(LL.CUSTOMIZATIONS_RESTART(), { variant: 'info' });
-    } catch (error: unknown) {
+    } catch (error) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     } finally {
       setConfirmReset(false);
@@ -250,13 +254,15 @@ const SettingsCustomization: FC = () => {
     if (devices && deviceEntities && selectedDevice !== -1) {
       const masked_entities = deviceEntities
         .filter((de) => de.m !== de.o_m || de.cn !== de.o_cn || de.ma !== de.o_ma || de.mi !== de.o_mi)
-        .map((new_de) =>
-          new_de.m.toString(16).padStart(2, '0') +
-          new_de.id +
-          ((new_de.cn || new_de.mi || new_de.ma) ? '|' : '') +
-          (new_de.cn ? new_de.cn : '') +
-          (new_de.mi ? '>' + new_de.mi : '') +
-          (new_de.ma ? '<' + new_de.ma : ''));
+        .map(
+          (new_de) =>
+            new_de.m.toString(16).padStart(2, '0') +
+            new_de.id +
+            (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
+            (new_de.cn ? new_de.cn : '') +
+            (new_de.mi ? '>' + new_de.mi : '') +
+            (new_de.ma ? '<' + new_de.ma : '')
+        );
 
       // check size in bytes to match buffer in CPP, which is 4096
       const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
@@ -275,7 +281,7 @@ const SettingsCustomization: FC = () => {
         } else {
           enqueueSnackbar(LL.PROBLEM_UPDATING(), { variant: 'error' });
         }
-      } catch (error: unknown) {
+      } catch (error) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       }
       setInitialMask(deviceEntities);
@@ -322,7 +328,7 @@ const SettingsCustomization: FC = () => {
   };
 
   const editEntity = (de: DeviceEntity) => {
-    if (de.n && de.n[0] === '!') {
+    if (de.n === undefined || (de.n && de.n[0] === '!')) {
       return;
     }
 

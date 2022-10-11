@@ -28,7 +28,7 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
       const decodedMe = AuthenticationApi.decodeMeJWT(accessToken);
       setMe(decodedMe);
       enqueueSnackbar(LL.LOGGED_IN({ name: decodedMe.username }), { variant: 'success' });
-    } catch (error: unknown) {
+    } catch (error) {
       setMe(undefined);
       throw new Error('Failed to parse JWT');
     }
@@ -54,7 +54,7 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
         await AuthenticationApi.verifyAuthorization();
         setMe(AuthenticationApi.decodeMeJWT(accessToken));
         setInitialized(true);
-      } catch (error: unknown) {
+      } catch (error) {
         setMe(undefined);
         setInitialized(true);
       }

@@ -96,8 +96,7 @@ const pl: BaseTranslation = {
   APPLICATION_SETTINGS: 'Ustawienia aplikacji',
   CUSTOMIZATION: 'Personalizacja',
   APPLICATION_RESTARTING: 'Trwa ponowne uruchamianie',
-  BOARD_PROFILE_TEXT:
-    'Wybierz z listy wstępną konfigurację płytki interfejsu lub stwórz własną konfigurację.',
+  BOARD_PROFILE_TEXT: 'Wybierz z listy wstępną konfigurację płytki interfejsu lub stwórz własną konfigurację.',
   BOARD_PROFILE: 'Profil płytki',
   BUTTON: 'Przycisk',
   TEMPERATURE: 'Temperatura',

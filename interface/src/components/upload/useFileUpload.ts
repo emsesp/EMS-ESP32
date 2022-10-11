@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import axios, { AxiosPromise, CancelTokenSource } from 'axios';
+import axios, { AxiosPromise, CancelTokenSource, AxiosProgressEvent } from 'axios';
 import { useSnackbar } from 'notistack';
 
 import { extractErrorMessage } from '../../utils';
@@ -16,7 +16,7 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
 
   const { enqueueSnackbar } = useSnackbar();
   const [uploading, setUploading] = useState<boolean>(false);
-  const [uploadProgress, setUploadProgress] = useState<ProgressEvent>();
+  const [uploadProgress, setUploadProgress] = useState<AxiosProgressEvent>();
   const [uploadCancelToken, setUploadCancelToken] = useState<CancelTokenSource>();
 
   const resetUploadingStates = () => {
@@ -47,7 +47,7 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
       });
       resetUploadingStates();
       enqueueSnackbar(LL.UPLOAD() + ' ' + LL.SUCCESSFUL(), { variant: 'success' });
-    } catch (error: unknown) {
+    } catch (error) {
       if (axios.isCancel(error)) {
         enqueueSnackbar(LL.UPLOAD() + ' ' + LL.ABORTED(), { variant: 'warning' });
       } else {

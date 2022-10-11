@@ -1,14 +1,14 @@
 import { FC, Fragment } from 'react';
 import { useDropzone, DropzoneState } from 'react-dropzone';
 
+import { AxiosProgressEvent } from 'axios';
+
 import { Box, Button, LinearProgress, Theme, Typography, useTheme } from '@mui/material';
 
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 import { useI18nContext } from '../../i18n/i18n-react';
-
-const progressPercentage = (progress: ProgressEvent) => Math.round((progress.loaded * 100) / progress.total);
 
 const getBorderColor = (theme: Theme, props: DropzoneState) => {
   if (props.isDragAccept) {
@@ -27,7 +27,7 @@ export interface SingleUploadProps {
   onDrop: (acceptedFiles: File[]) => void;
   onCancel: () => void;
   uploading: boolean;
-  progress?: ProgressEvent;
+  progress?: AxiosProgressEvent;
 }
 
 const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, progress }) => {
@@ -47,8 +47,8 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, prog
 
   const progressText = () => {
     if (uploading) {
-      if (progress?.lengthComputable) {
-        return LL.UPLOADING() + `: ${progressPercentage(progress)}%`;
+      if (progress?.total) {
+        return LL.UPLOADING() + ': ' + Math.round((progress.loaded * 100) / progress.total) + '%';
       }
       return LL.UPLOADING() + `\u2026`;
     }
@@ -80,8 +80,8 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, prog
           <Fragment>
             <Box width="100%" p={2}>
               <LinearProgress
-                variant={!progress || progress.lengthComputable ? 'determinate' : 'indeterminate'}
-                value={!progress ? 0 : progress.lengthComputable ? progressPercentage(progress) : 0}
+                variant={!progress || progress.total ? 'determinate' : 'indeterminate'}
+                value={!progress ? 0 : progress.total ? Math.round((progress.loaded * 100) / progress.total) : 0}
               />
             </Box>
             <Button startIcon={<CancelIcon />} variant="outlined" color="secondary" onClick={onCancel}>

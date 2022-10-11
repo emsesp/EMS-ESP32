@@ -240,6 +240,8 @@ const mqtt_status = {
   client_id: 'ems-esp',
   disconnect_reason: 0,
   mqtt_fails: 0,
+  mqtt_queued: 1,
+  connect_count: 2,
 }
 
 // SYSTEM
@@ -592,20 +594,15 @@ const emsesp_deviceentities_1 = [
     m: 0,
     w: false,
   },
-  // {
-  //   v: 'test data',
-  //   n: 'test',
-  //   id: 'test',
-  //   m: 0,
-  //   w: false,
-  // },
-  // {
-  //   v: 18.2,
-  //   n: 'hc1 selected room temperature',
-  //   id: 'hc1/seltemp',
-  //   m: 0,
-  //   w: true,
-  // },
+  {
+    v: 18.2,
+    n: 'hc1 selected room temperature',
+    id: 'hc1/seltemp',
+    m: 0,
+    mi: 5,
+    ma: 52,
+    w: true,
+  },
   {
     v: 22.6,
     n: 'hc1 current room temperature',

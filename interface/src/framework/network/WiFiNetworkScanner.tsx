@@ -1,8 +1,6 @@
 import { useEffect, FC, useState, useCallback, useRef } from 'react';
 import { useSnackbar } from 'notistack';
 
-import { AxiosError } from 'axios';
-
 import { Button } from '@mui/material';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 
@@ -57,8 +55,8 @@ const WiFiNetworkScanner: FC = () => {
         newNetworkList.networks.sort(compareNetworks);
         setNetworkList(newNetworkList);
       }
-    } catch (error: unknown) {
-      if (error instanceof AxiosError) {
+    } catch (error) {
+      if (error.response) {
         finishedWithError(LL.PROBLEM_LOADING() + ' ' + error.response?.data.message);
       } else {
         finishedWithError(LL.PROBLEM_LOADING());
@@ -73,8 +71,8 @@ const WiFiNetworkScanner: FC = () => {
     try {
       await NetworkApi.scanNetworks();
       setTimeout(pollNetworkList, POLLING_FREQUENCY);
-    } catch (error: unknown) {
-      if (error instanceof AxiosError) {
+    } catch (error) {
+      if (error.response) {
         finishedWithError(LL.PROBLEM_LOADING() + ' ' + error.response?.data.message);
       } else {
         finishedWithError(LL.PROBLEM_LOADING());

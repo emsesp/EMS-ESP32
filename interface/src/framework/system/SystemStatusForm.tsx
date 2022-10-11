@@ -86,7 +86,7 @@ const SystemStatusForm: FC = () => {
     try {
       await SystemApi.restart();
       enqueueSnackbar(LL.APPLICATION_RESTARTING(), { variant: 'info' });
-    } catch (error: unknown) {
+    } catch (error) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     } finally {
       setConfirmRestart(false);
@@ -180,7 +180,7 @@ const SystemStatusForm: FC = () => {
     try {
       await SystemApi.factoryReset();
       enqueueSnackbar(LL.SYSTEM_FACTORY_TEXT(), { variant: 'info' });
-    } catch (error: unknown) {
+    } catch (error) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     } finally {
       setConfirmFactoryReset(false);

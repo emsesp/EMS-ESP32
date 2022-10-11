@@ -23,21 +23,21 @@
 namespace emsesp {
 
 // constructor
-DeviceValue::DeviceValue(uint8_t                              device_type,
-                         uint8_t                              tag,
-                         void *                               value_p,
-                         uint8_t                              type,
-                         const __FlashStringHelper * const ** options,
-                         const __FlashStringHelper * const *  options_single,
-                         int8_t                               numeric_operator,
-                         const __FlashStringHelper * const    short_name,
-                         const __FlashStringHelper * const *  fullname,
-                         std::string &                        custom_fullname,
-                         uint8_t                              uom,
-                         bool                                 has_cmd,
-                         int16_t                              min,
-                         uint16_t                             max,
-                         uint8_t                              state)
+DeviceValue::DeviceValue(uint8_t               device_type,
+                         uint8_t               tag,
+                         void *                value_p,
+                         uint8_t               type,
+                         const char * const ** options,
+                         const char * const *  options_single,
+                         int8_t                numeric_operator,
+                         const char * const    short_name,
+                         const char * const *  fullname,
+                         std::string &         custom_fullname,
+                         uint8_t               uom,
+                         bool                  has_cmd,
+                         int16_t               min,
+                         uint16_t              max,
+                         uint8_t               state)
     : device_type(device_type)
     , tag(tag)
     , value_p(value_p)
@@ -60,17 +60,21 @@ DeviceValue::DeviceValue(uint8_t                              device_type,
         options_size = Helpers::count_items(options);
     }
 
+    // set the min/max
+    set_custom_minmax();
+
 #ifdef EMSESP_STANDALONE
     // only added for debugging
-    Serial.print("registering entity: ");
-    Serial.print(read_flash_string(short_name).c_str());
+    Serial.print(COLOR_BRIGHT_RED_BACKGROUND);
+    Serial.print(" registering entity: ");
+    Serial.print((short_name));
     Serial.print("/");
     if (!custom_fullname.empty()) {
         Serial.print(COLOR_BRIGHT_CYAN);
         Serial.print(custom_fullname.c_str());
         Serial.print(COLOR_RESET);
     } else {
-        Serial.print(Helpers::translated_word(fullname).c_str());
+        Serial.print(Helpers::translated_word(fullname));
     }
     Serial.print(" (#options=");
     Serial.print(options_size);
@@ -83,23 +87,23 @@ DeviceValue::DeviceValue(uint8_t                              device_type,
             Serial.print(" option");
             Serial.print(i + 1);
             Serial.print(":");
-            auto str = Helpers::translated_fword(options[i]);
-            Serial.print(read_flash_string(str).c_str());
+            auto str = Helpers::translated_word(options[i]);
+            Serial.print(str);
             i++;
         }
     } else if (options_single != nullptr) {
         Serial.print("option1:!");
-        Serial.print(read_flash_string(options_single[0]).c_str());
+        Serial.print((options_single[0]));
         Serial.print("!");
     }
-    Serial.println("");
+    Serial.println(COLOR_RESET);
 #endif
 }
 
 // mapping of UOM, to match order in DeviceValueUOM enum emsdevice.h
 // also maps to DeviceValueUOM in interface/src/project/types.ts for the Web UI
 // must be an int of 4 bytes, 32bit aligned
-const __FlashStringHelper * DeviceValue::DeviceValueUOM_s[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = {
+const char * DeviceValue::DeviceValueUOM_s[] = {
 
     F_(uom_blank),
     F_(uom_degrees),
@@ -125,7 +129,7 @@ const __FlashStringHelper * DeviceValue::DeviceValueUOM_s[] __attribute__((__ali
 
 // mapping of TAGs, to match order in DeviceValueTAG enum in emsdevice.h
 // must be an int of 4 bytes, 32bit aligned
-const __FlashStringHelper * const DeviceValue::DeviceValueTAG_s[] PROGMEM = {
+const char * const DeviceValue::DeviceValueTAG_s[] = {
 
     F_(tag_none),           // ""
     F_(tag_heartbeat),      // ""
@@ -171,7 +175,7 @@ const __FlashStringHelper * const DeviceValue::DeviceValueTAG_s[] PROGMEM = {
 };
 
 // MQTT topics derived from tags
-const __FlashStringHelper * const DeviceValue::DeviceValueTAG_mqtt[] PROGMEM = {
+const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
 
     F_(tag_none),                // ""
     F_(heartbeat),               // "heartbeat"
@@ -217,7 +221,7 @@ const __FlashStringHelper * const DeviceValue::DeviceValueTAG_mqtt[] PROGMEM = {
 };
 
 // count #tags once at compile time
-size_t DeviceValue::tag_count = sizeof(DeviceValue::DeviceValueTAG_s) / sizeof(__FlashStringHelper *);
+size_t DeviceValue::tag_count = sizeof(DeviceValue::DeviceValueTAG_s) / sizeof(char *);
 
 // checks whether the device value has an actual value
 // returns true if its valid
@@ -266,7 +270,7 @@ bool DeviceValue::hasValue() const {
 // converts to signed int, which means rounding to an whole integer
 // returns false if there is no min/max needed
 // Types BOOL, ENUM, STRING and CMD are not used
-bool DeviceValue::get_min_max(int16_t & dv_set_min, int16_t & dv_set_max) {
+bool DeviceValue::get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max) {
     uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
     // if we have individual limits set already, just do the conversion

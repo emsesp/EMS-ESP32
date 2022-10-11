@@ -9,8 +9,6 @@ import * as AuthenticationApi from './api/authentication';
 import { PROJECT_NAME } from './api/env';
 import { AuthenticationContext } from './contexts/authentication';
 
-import { AxiosError } from 'axios';
-
 import { extractErrorMessage, onEnterCallback, updateValue } from './utils';
 import { SignInRequest } from './types';
 import { ValidatedTextField } from './components';
@@ -24,6 +22,8 @@ import { ReactComponent as NLflag } from './i18n/NL.svg';
 import { ReactComponent as DEflag } from './i18n/DE.svg';
 import { ReactComponent as GBflag } from './i18n/GB.svg';
 import { ReactComponent as SEflag } from './i18n/SE.svg';
+import { ReactComponent as PLflag } from './i18n/PL.svg';
+import { ReactComponent as NOflag } from './i18n/NO.svg';
 
 const SignIn: FC = () => {
   const authenticationContext = useContext(AuthenticationContext);
@@ -56,8 +56,8 @@ const SignIn: FC = () => {
     try {
       const { data: loginResponse } = await AuthenticationApi.signIn(signInRequest);
       authenticationContext.signIn(loginResponse.access_token);
-    } catch (error: unknown) {
-      if (error instanceof AxiosError) {
+    } catch (error) {
+      if (error.response) {
         if (error.response?.status === 401) {
           enqueueSnackbar(LL.INVALID_LOGIN(), { variant: 'warning' });
         }
@@ -124,6 +124,14 @@ const SignIn: FC = () => {
           <Button size="small" variant={locale === 'se' ? 'contained' : 'outlined'} onClick={() => selectLocale('se')}>
             <SEflag style={{ width: 24 }} />
             &nbsp;SE
+          </Button>
+          <Button size="small" variant={locale === 'pl' ? 'contained' : 'outlined'} onClick={() => selectLocale('pl')}>
+            <PLflag style={{ width: 24 }} />
+            &nbsp;PL
+          </Button>
+          <Button size="small" variant={locale === 'no' ? 'contained' : 'outlined'} onClick={() => selectLocale('no')}>
+            <NOflag style={{ width: 24 }} />
+            &nbsp;NO
           </Button>
         </Box>
 

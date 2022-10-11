@@ -82,13 +82,13 @@
 #include <uuid/common.h>
 #include <uuid/log.h>
 
-static const char __pstr__logger_name[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = "syslog";
+static const char __pstr__logger_name[] = "syslog";
 
 namespace uuid {
 
 namespace syslog {
 
-uuid::log::Logger SyslogService::logger_{FPSTR(__pstr__logger_name), uuid::log::Facility::SYSLOG};
+uuid::log::Logger SyslogService::logger_{__pstr__logger_name, uuid::log::Facility::SYSLOG};
 bool              SyslogService::QueuedLogMessage::time_good_ = false;
 
 SyslogService::~SyslogService() {
@@ -116,7 +116,7 @@ void SyslogService::remove_queued_messages(uuid::log::Level level) {
         }
     }
 
-    log_message_id_    -= offset;
+    log_message_id_ -= offset;
     log_message_fails_ += offset;
 }
 
@@ -269,8 +269,8 @@ void SyslogService::loop() {
             operator<<(std::make_shared<uuid::log::Message>(uuid::get_uptime_ms(),
                                                             uuid::log::Level::INFO,
                                                             uuid::log::Facility::SYSLOG,
-                                                            reinterpret_cast<const __FlashStringHelper *>(__pstr__logger_name),
-                                                            uuid::read_flash_string(F("-- MARK --"))));
+                                                            (__pstr__logger_name),
+                                                            (F("-- MARK --"))));
         }
     }
 }
@@ -443,7 +443,7 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
         udp_.print('-');
     }
 
-    udp_.printf_P(PSTR(" %s %s - - - "), hostname_.c_str(), uuid::read_flash_string(message.content_->name).c_str());
+    udp_.printf_P(PSTR(" %s %s - - - "), hostname_.c_str(), (message.content_->name));
 
     char id_c_str[15];
     snprintf_P(id_c_str, sizeof(id_c_str), PSTR(" %lu: "), message.id_);

@@ -49,9 +49,9 @@ void APSettingsService::startAP() {
     WiFi.softAPConfig(_state.localIP, _state.gatewayIP, _state.subnetMask);
     esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_AP, WIFI_BW_HT20);
     WiFi.softAP(_state.ssid.c_str(), _state.password.c_str(), _state.channel, _state.ssidHidden, _state.maxClients);
-    #ifdef ARDUINO_LOLIN_C3_MINI
-        WiFi.setTxPower(WIFI_POWER_8_5dBm); //https://www.wemos.cc/en/latest/c3/c3_mini.html#about-wifi
-    #endif
+#ifdef ARDUINO_LOLIN_C3_MINI
+    WiFi.setTxPower(WIFI_POWER_8_5dBm); //https://www.wemos.cc/en/latest/c3/c3_mini.html#about-wifi
+#endif
     if (!_dnsServer) {
         IPAddress apIp = WiFi.softAPIP();
         emsesp::EMSESP::logger().info(F("Starting Access Point with captive portal on %s"), apIp.toString().c_str());

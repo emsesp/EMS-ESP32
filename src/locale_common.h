@@ -20,6 +20,8 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
+// clang-format off
+
 /*
  * THIS FILE CONTAINS STANDARD STRING LITERALS THAT DON'T NEED LANGUAGE TRANSLATIONS
  */
@@ -144,55 +146,55 @@ MAKE_PSTR(password_prompt, "Password: ")
 MAKE_PSTR(unset, "<unset>")
 
 // more common names that don't need translations
-MAKE_PSTR_LIST(1x3min, F("1x3min"))
-MAKE_PSTR_LIST(2x3min, F("2x3min"))
-MAKE_PSTR_LIST(3x3min, F("3x3min"))
-MAKE_PSTR_LIST(4x3min, F("4x3min"))
-MAKE_PSTR_LIST(5x3min, F("5x3min"))
-MAKE_PSTR_LIST(6x3min, F("6x3min"))
-MAKE_PSTR_LIST(auto, F("auto"))
-MAKE_PSTR_LIST(na, F("n/a"))
-MAKE_PSTR_LIST(rc3x, F("rc3x"))
-MAKE_PSTR_LIST(rc20, F("rc20"))
-MAKE_PSTR_LIST(fb10, F("fb10"))
-MAKE_PSTR_LIST(fb100, F("fb100"))
-MAKE_PSTR_LIST(dash, F("-"))
-MAKE_PSTR_LIST(error, F("error"))
-MAKE_PSTR_LIST(BLANK, F(""))
-MAKE_PSTR_LIST(pwm, F("pwm"))
-MAKE_PSTR_LIST(pwm_invers, F("pwm inverse"))
-MAKE_PSTR_LIST(mpc, F("mpc"))
-MAKE_PSTR_LIST(tempauto, F("temp auto"))
-MAKE_PSTR_LIST(bypass, F("bypass"))
-MAKE_PSTR_LIST(mixer, F("mixer"))
-MAKE_PSTR_LIST(monovalent, F("monovalent"))
-MAKE_PSTR_LIST(bivalent, F("bivalent"))
-MAKE_PSTR_LIST(n_o, F("n_o"))
-MAKE_PSTR_LIST(n_c, F("n_c"))
-MAKE_PSTR_LIST(prog1, F("prog 1"))
-MAKE_PSTR_LIST(prog2, F("prog 2"))
-MAKE_PSTR_LIST(proga, F("prog a"))
-MAKE_PSTR_LIST(progb, F("prog b"))
-MAKE_PSTR_LIST(progc, F("prog c"))
-MAKE_PSTR_LIST(progd, F("prog d"))
-MAKE_PSTR_LIST(proge, F("prog e"))
-MAKE_PSTR_LIST(progf, F("prog f"))
-MAKE_PSTR_LIST(rc35, F("RC35"))
-MAKE_PSTR_LIST(0kW, F("0 kW"))
-MAKE_PSTR_LIST(2kW, F("2 kW"))
-MAKE_PSTR_LIST(3kW, F("3 kW"))
-MAKE_PSTR_LIST(4kW, F("4 kW"))
-MAKE_PSTR_LIST(6kW, F("6 kW"))
-MAKE_PSTR_LIST(9kW, F("9 kW"))
+MAKE_PSTR_LIST(1x3min, "1x3min")
+MAKE_PSTR_LIST(2x3min, "2x3min")
+MAKE_PSTR_LIST(3x3min, "3x3min")
+MAKE_PSTR_LIST(4x3min, "4x3min")
+MAKE_PSTR_LIST(5x3min, "5x3min")
+MAKE_PSTR_LIST(6x3min, "6x3min")
+MAKE_PSTR_LIST(auto, "auto")
+MAKE_PSTR_LIST(na, "n/a")
+MAKE_PSTR_LIST(rc3x, "rc3x")
+MAKE_PSTR_LIST(rc20, "rc20")
+MAKE_PSTR_LIST(fb10, "fb10")
+MAKE_PSTR_LIST(fb100, "fb100")
+MAKE_PSTR_LIST(dash, "-")
+MAKE_PSTR_LIST(error, "error")
+MAKE_PSTR_LIST(BLANK, "")
+MAKE_PSTR_LIST(pwm, "pwm")
+MAKE_PSTR_LIST(pwm_invers, "pwm inverse")
+MAKE_PSTR_LIST(mpc, "mpc")
+MAKE_PSTR_LIST(tempauto, "temp auto")
+MAKE_PSTR_LIST(bypass, "bypass")
+MAKE_PSTR_LIST(mixer, "mixer")
+MAKE_PSTR_LIST(monovalent, "monovalent")
+MAKE_PSTR_LIST(bivalent, "bivalent")
+MAKE_PSTR_LIST(n_o, "n_o")
+MAKE_PSTR_LIST(n_c, "n_c")
+MAKE_PSTR_LIST(prog1, "prog 1")
+MAKE_PSTR_LIST(prog2, "prog 2")
+MAKE_PSTR_LIST(proga, "prog a")
+MAKE_PSTR_LIST(progb, "prog b")
+MAKE_PSTR_LIST(progc, "prog c")
+MAKE_PSTR_LIST(progd, "prog d")
+MAKE_PSTR_LIST(proge, "prog e")
+MAKE_PSTR_LIST(progf, "prog f")
+MAKE_PSTR_LIST(rc35, "RC35")
+MAKE_PSTR_LIST(0kW, "0 kW")
+MAKE_PSTR_LIST(2kW, "2 kW")
+MAKE_PSTR_LIST(3kW, "3 kW")
+MAKE_PSTR_LIST(4kW, "4 kW")
+MAKE_PSTR_LIST(6kW, "6 kW")
+MAKE_PSTR_LIST(9kW, "9 kW")
 
-// templates - this are not translated and will be saved under optons_single
-MAKE_PSTR_LIST(tpl_datetime, F("Format: < NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1) >"))
-MAKE_PSTR_LIST(tpl_switchtime, F("Format: <nn> [ not_set | day hh:mm on|off ]"))
-MAKE_PSTR_LIST(tpl_switchtime1, F("Format: <nn> [ not_set | day hh:mm Tn ]"))
-MAKE_PSTR_LIST(tpl_holidays, F("Format: < dd.mm.yyyy-dd.mm.yyyy >"))
-MAKE_PSTR_LIST(tpl_date, F("Format: < dd.mm.yyyy >"))
-MAKE_PSTR_LIST(tpl_input, F("Format: <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]"))
-MAKE_PSTR_LIST(tpl_input4, F("Format: <inv>[<comp><aux><cool><heat><dhw><pv>]"))
+// templates - this are not translated and will be saved under options_single
+MAKE_PSTR_LIST(tpl_datetime, "Format: < NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1) >")
+MAKE_PSTR_LIST(tpl_switchtime, "Format: <nn> [ not_set | day hh:mm on|off ]")
+MAKE_PSTR_LIST(tpl_switchtime1, "Format: <nn> [ not_set | day hh:mm Tn ]")
+MAKE_PSTR_LIST(tpl_holidays, "Format: < dd.mm.yyyy-dd.mm.yyyy >")
+MAKE_PSTR_LIST(tpl_date, "Format: < dd.mm.yyyy >")
+MAKE_PSTR_LIST(tpl_input, "Format: <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]")
+MAKE_PSTR_LIST(tpl_input4, "Format: <inv>[<comp><aux><cool><heat><dhw><pv>]")
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
 // These don't need translating, it will mess up HA and the API
@@ -216,11 +218,6 @@ MAKE_PSTR(uom_mv, "mV")
 MAKE_PSTR(uom_sqm, "sqm")
 MAKE_PSTR(uom_m3, "m3")
 MAKE_PSTR(uom_l, "l")
-
-// commands
-MAKE_PSTR(info_cmd, "lists all values")
-MAKE_PSTR(commands_cmd, "lists all commands")
-MAKE_PSTR(entities_cmd, "lists all entities")
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
 // use empty string if want to suppress showing tags
@@ -273,16 +270,17 @@ MAKE_PSTR(response, "response")
 MAKE_PSTR(tag_boiler_data_ww_mqtt, "ww")
 MAKE_PSTR(tag_device_data_ww_mqtt, "")
 
-MAKE_PSTR_LIST(climate, F("HA climate config creation"))
+// Home Assistant - this is special and has no translations
+MAKE_PSTR_LIST(climate, "HA climate config creation")
 
 // syslog
-MAKE_PSTR_LIST(list_syslog_level, F("off"), F("emerg"), F("alert"), F("crit"), F("error"), F("warn"), F("notice"), F("info"), F("debug"), F("trace"), F("all"))
+MAKE_PSTR_LIST(list_syslog_level, "off", "emerg", "alert", "crit", "error", "warn", "notice", "info", "debug", "trace", "all")
 
 // sensors
-MAKE_PSTR_LIST(list_sensortype, F("none"), F("digital in"), F("counter"), F("adc"), F("timer"), F("rate"), F("digital out"), F("pwm 0"), F("pwm 1"), F("pwm 2"))
+MAKE_PSTR_LIST(list_sensortype, "none", "digital in", "counter", "adc", "timer", "rate", "digital out", "pwm 0", "pwm 1", "pwm 2")
 
 // watch
-MAKE_PSTR_LIST(list_watch, F("off"), F("on"), F("raw"), F("unknown"))
+MAKE_PSTR_LIST(list_watch, "off", "on", "raw", "unknown")
 
 /*
  * The rest below are Enums and generated from translations lists
@@ -302,16 +300,7 @@ MAKE_PSTR_ENUM(enum_reset, FL_(dash), FL_(maintenance), FL_(error))
 MAKE_PSTR_ENUM(enum_maxHeat, FL_(0kW), FL_(2kW), FL_(3kW), FL_(4kW), FL_(6kW), FL_(9kW))
 
 // thermostat lists
-MAKE_PSTR_ENUM(enum_ibaMainDisplay,
-               FL_(internal_temperature),
-               FL_(internal_setpoint),
-               FL_(external_temperature),
-               FL_(burner_temperature),
-               FL_(ww_temperature),
-               FL_(functioning_mode),
-               FL_(time),
-               FL_(date),
-               FL_(smoke_temperature))
+MAKE_PSTR_ENUM(enum_ibaMainDisplay, FL_(internal_temperature), FL_(internal_setpoint), FL_(external_temperature), FL_(burner_temperature), FL_(ww_temperature), FL_(functioning_mode), FL_(time), FL_(date), FL_(smoke_temperature))
 MAKE_PSTR_ENUM(enum_ibaLanguage, FL_(german), FL_(dutch), FL_(french), FL_(italian))
 MAKE_PSTR_ENUM(enum_ibaLanguage_RC30, FL_(german), FL_(dutch))
 MAKE_PSTR_ENUM(enum_floordrystatus, FL_(off), FL_(start), FL_(heat), FL_(hold), FL_(cool), FL_(end))
@@ -379,3 +368,5 @@ MAKE_PSTR_ENUM(enum_bufConfig, FL_(monovalent), FL_(bivalent))
 MAKE_PSTR_ENUM(enum_blockTerm, FL_(n_o), FL_(n_c))
 
 #pragma GCC diagnostic pop
+
+// clang-format on
