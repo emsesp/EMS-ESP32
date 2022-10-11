@@ -160,7 +160,7 @@ const SystemStatusForm: FC = () => {
             <Typography variant="body2">
               {LL.USE()}&nbsp;
               <Link href={uploadURL} color="primary">
-                {'UPLOAD'}
+                {LL.UPLOAD()}
               </Link>
               &nbsp;{LL.SYSTEM_APPLY_FIRMWARE()}
             </Typography>
