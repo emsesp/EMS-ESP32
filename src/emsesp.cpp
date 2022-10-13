@@ -325,17 +325,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                     shell.printf("  %s: ", key);
                     JsonVariant data = p.value();
                     shell.print(COLOR_BRIGHT_GREEN);
-                    if (data.is<const char *>()) {
-                        shell.print(data.as<const char *>());
-                    } else if (data.is<int>()) {
-                        shell.print(data.as<int>());
-                    } else if (data.is<float>()) {
-                        char s[10];
-                        shell.print(Helpers::render_value(s, data.as<float>(), 1));
-                    } else if (data.is<bool>()) {
-                        shell.print(data.as<bool>() ? Helpers::translated_word(FL_(on)) : Helpers::translated_word(FL_(off)));
-                    }
-
+                    shell.print(data.as<std::string>());
                     // if there is a uom print it
                     std::string uom = emsdevice->get_value_uom(key);
                     if (uom == "°C" && EMSESP::system_.fahrenheit()) {
