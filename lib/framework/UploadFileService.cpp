@@ -43,6 +43,27 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         }
 
         if (is_firmware) {
+            // Check firmware header, 0xE9 magic offset 0 indicates esp bin, chip offset 12: esp32:0, S2:2, C3:5
+#if CONFIG_IDF_TARGET_ESP32 // ESP32/PICO-D4
+            bool isC3 = (fname.find("C3") != std::string::npos);
+            bool isS2 = (fname.find("S2") != std::string::npos);
+            if (isC3 || isS2 || (len > 12 && (data[0] != 0xE9 || data[12] != 0))) {
+                handleError(request, 503); // service unavailable
+                return;
+            }
+#elif CONFIG_IDF_TARGET_ESP32S2
+            bool isS2 = (fname.find("S2") != std::string::npos);
+            if (!isS2 || (len > 12 && (data[0] != 0xE9 || data[12] != 2))) {
+                handleError(request, 503); // service unavailable
+                return;
+            }
+#elif CONFIG_IDF_TARGET_ESP32C3
+            bool isC3 = (fname.find("C3") != std::string::npos);
+            if (!isC3 || (len > 12 && (data[0] != 0xE9 || data[12] != 5))) {
+                handleError(request, 503); // service unavailable
+                return;
+            }
+#endif
             // it's firmware - initialize the ArduinoOTA updater
             if (Update.begin(fsize)) {
                 request->onDisconnect(UploadFileService::handleEarlyDisconnect); // success, let's make sure we end the update if the client hangs up
@@ -50,7 +71,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
 #if defined(EMSESP_USE_SERIAL)
                 Update.printError(Serial);
 #endif
-                handleError(request, 500); // failed to begin, send an error response
+                handleError(request, 507); // failed to begin, send an error response Insufficient Storage
             }
         } else {
             // its a normal file, open a new temp file to write the contents too

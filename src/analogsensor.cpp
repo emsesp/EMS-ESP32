@@ -129,8 +129,12 @@ void AnalogSensor::reload() {
         } else if (sensor.type() == AnalogType::COUNTER) {
             LOG_DEBUG("Adding analog I/O Counter sensor on GPIO%d", sensor.gpio());
             pinMode(sensor.gpio(), INPUT_PULLUP);
-#ifndef ARDUINO_LOLIN_C3_MINI
+#if CONFIG_IDF_TARGET_ESP32
             if (sensor.gpio() == 25 || sensor.gpio() == 26) {
+                dacWrite(sensor.gpio(), 255);
+            }
+#elif CONFIG_IDF_TARGET_ESP32S2
+            if (sensor.gpio() == 23 || sensor.gpio() == 24) {
                 dacWrite(sensor.gpio(), 255);
             }
 #endif
@@ -157,17 +161,28 @@ void AnalogSensor::reload() {
         } else if (sensor.type() == AnalogType::DIGITAL_OUT) {
             LOG_DEBUG("Adding analog Write sensor on GPIO%d", sensor.gpio());
             pinMode(sensor.gpio(), OUTPUT);
+#if CONFIG_IDF_TARGET_ESP32
             if (sensor.gpio() == 25 || sensor.gpio() == 26) {
                 if (sensor.offset() > 255) {
                     sensor.set_offset(255);
                 } else if (sensor.offset() < 0) {
                     sensor.set_offset(0);
                 }
-#ifndef ARDUINO_LOLIN_C3_MINI
                 dacWrite(sensor.gpio(), sensor.offset());
-#endif
                 sensor.set_value(sensor.offset());
-            } else {
+            } else
+#elif CONFIG_IDF_TARGET_ESP32S2
+            if (sensor.gpio() == 23 || sensor.gpio() == 24) {
+                if (sensor.offset() > 255) {
+                    sensor.set_offset(255);
+                } else if (sensor.offset() < 0) {
+                    sensor.set_offset(0);
+                }
+                dacWrite(sensor.gpio(), sensor.offset());
+                sensor.set_value(sensor.offset());
+            } else
+#endif
+            {
                 digitalWrite(sensor.gpio(), sensor.offset() > 0 ? 1 : 0);
                 sensor.set_value(digitalRead(sensor.gpio()));
             }
@@ -337,9 +352,9 @@ void AnalogSensor::publish_sensor(const Sensor & sensor) const {
     if (Mqtt::publish_single()) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         if (Mqtt::publish_single2cmd()) {
-            snprintf(topic, sizeof(topic), "%s/%s", (F_(analogsensor)), sensor.name().c_str());
+            snprintf(topic, sizeof(topic), "%s/%s", F_(analogsensor), sensor.name().c_str());
         } else {
-            snprintf(topic, sizeof(topic), "%s%s/%s", (F_(analogsensor)), "_data", sensor.name().c_str());
+            snprintf(topic, sizeof(topic), "%s%s/%s", F_(analogsensor), "_data", sensor.name().c_str());
         }
         char payload[10];
         Mqtt::publish(topic, Helpers::render_value(payload, sensor.value(), 2)); // always publish as floats
@@ -575,16 +590,26 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                 return true;
             } else if (sensor.type() == AnalogType::DIGITAL_OUT) {
                 uint8_t v = val;
-                if (sensor.gpio() == 25 || sensor.gpio() == 26) {
+#if CONFIG_IDF_TARGET_ESP32
+                if ((sensor.gpio() == 25 || sensor.gpio() == 26) && v <= 255) {
                     sensor.set_offset(v);
                     sensor.set_value(v);
                     pinMode(sensor.gpio(), OUTPUT);
-#ifndef ARDUINO_LOLIN_C3_MINI
                     dacWrite(sensor.gpio(), sensor.offset());
-#endif
                     publish_sensor(sensor);
                     return true;
-                } else if (v == 0 || v == 1) {
+                } else
+#elif CONFIG_IDF_TARGET_ESP32S2
+                if ((sensor.gpio() == 23 || sensor.gpio() == 24) && v <= 255) {
+                    sensor.set_offset(v);
+                    sensor.set_value(v);
+                    pinMode(sensor.gpio(), OUTPUT);
+                    dacWrite(sensor.gpio(), sensor.offset());
+                    publish_sensor(sensor);
+                    return true;
+                } else
+#endif
+                    if (v == 0 || v == 1) {
                     sensor.set_offset(v);
                     sensor.set_value(v);
                     pinMode(sensor.gpio(), OUTPUT);

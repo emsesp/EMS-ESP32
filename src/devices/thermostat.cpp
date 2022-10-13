@@ -593,12 +593,12 @@ void Thermostat::process_RC20Timer(std::shared_ptr<const Telegram> telegram) {
         uint8_t time = telegram->message_data[1];
 
         // we use EN settings for the day abbreviation
-        std::string sday = (FL_(enum_dayOfWeek)[day][0]);
+        auto sday = (FL_(enum_dayOfWeek)[day][0]);
 
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
         } else {
-            snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), temp);
+            snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday, time / 6, 10 * (time % 6), temp);
         }
         has_update(hc->switchtime1, data, sizeof(hc->switchtime1));
     }
@@ -679,12 +679,6 @@ void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
-    has_update(telegram, hc->daytemp, 17);          // is * 2
-    has_update(telegram, hc->nighttemp, 16);        // is * 2
-    has_update(telegram, hc->nofrosttemp, 15);      // is * 2
-    has_update(telegram, hc->control, 1);           // remote: 0-off, 1-FB10, 2-FB100
-    has_enumupdate(telegram, hc->program, 13, 1);   // 1-6: 1 = A, 2 = B,...
-    has_enumupdate(telegram, hc->mode, 14, 1);      // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
     has_update(telegram, hc->daytemp, 17);          // is * 2
     has_update(telegram, hc->nighttemp, 16);        // is * 2
     has_update(telegram, hc->nofrosttemp, 15);      // is * 2
@@ -800,11 +794,11 @@ void Thermostat::process_RC35wwTimer(std::shared_ptr<const Telegram> telegram) {
 
         char data[sizeof(wwSwitchTime_)];
         // we use EN settings for the day abbreviation
-        std::string sday = (FL_(enum_dayOfWeek)[day][0]);
+        auto sday = (FL_(enum_dayOfWeek)[day][0]);
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
         } else {
-            snprintf(data, sizeof(data), "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
+            snprintf(data, sizeof(data), "%02d %s %02d:%02d %s", no, sday, time / 6, 10 * (time % 6), on ? "on" : "off");
         }
         if (telegram->type_id == 0x38) {
             has_update(wwSwitchTime_, data, sizeof(wwSwitchTime_));
@@ -1270,13 +1264,13 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
         uint8_t time = telegram->message_data[1];
 
         // we use EN settings for the day abbreviation
-        std::string sday = (FL_(enum_dayOfWeek)[day][0]);
+        auto sday = (FL_(enum_dayOfWeek)[day][0]);
         if (day == 7) {
             snprintf(data, sizeof(data), "%02d not_set", no);
         } else if (model() == EMS_DEVICE_FLAG_RC30) {
-            snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), on);
+            snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday, time / 6, 10 * (time % 6), on);
         } else {
-            snprintf(data, sizeof(data), "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
+            snprintf(data, sizeof(data), "%02d %s %02d:%02d %s", no, sday, time / 6, 10 * (time % 6), on ? "on" : "off");
         }
         if (!prog) {
             strlcpy(hc->switchtime1, data, sizeof(hc->switchtime1));
@@ -1506,7 +1500,7 @@ bool Thermostat::set_tempDiffBoiler(const char * value, const int8_t id) {
 
 // 0xA5 - Set minimum external temperature
 bool Thermostat::set_minexttemp(const char * value, const int8_t id) {
-    int mt = 0;
+    int mt;
     if (!Helpers::value2temperature(value, mt)) {
         return false;
     }
@@ -1524,7 +1518,7 @@ bool Thermostat::set_minexttemp(const char * value, const int8_t id) {
 
 // 0xA5/0xA7 - Clock offset
 bool Thermostat::set_clockoffset(const char * value, const int8_t id) {
-    int co = 0;
+    int co;
     if (!Helpers::value2number(value, co)) {
         return false;
     }
@@ -1540,7 +1534,7 @@ bool Thermostat::set_clockoffset(const char * value, const int8_t id) {
 
 // 0xA5/0xA7 - Calibrate internal temperature
 bool Thermostat::set_calinttemp(const char * value, const int8_t id) {
-    float ct = 0;
+    float ct;
     if (!Helpers::value2temperature(value, ct, true)) {
         return false;
     }
@@ -1577,7 +1571,7 @@ bool Thermostat::set_display(const char * value, const int8_t id) {
 
 // 0xA7 - Set Screen brightness
 bool Thermostat::set_brightness(const char * value, const int8_t id) {
-    int bo = 0;
+    int bo;
     if (!Helpers::value2number(value, bo, -15, 15)) {
         return false;
     }
@@ -1588,7 +1582,7 @@ bool Thermostat::set_brightness(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
-    float f = 0;
+    float f;
     if (!Helpers::value2temperature(value, f)) {
         return false;
     }
@@ -1612,7 +1606,7 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
 
 // 0xA5/0xA7 - Set the building settings
 bool Thermostat::set_building(const char * value, const int8_t id) {
-    uint8_t bd = 0;
+    uint8_t bd;
     if (!Helpers::value2enum(value, bd, FL_(enum_ibaBuildingType))) {
         return false;
     }
@@ -1630,7 +1624,7 @@ bool Thermostat::set_building(const char * value, const int8_t id) {
 
 // 0xB0/0xA7 - Set RC10 heating pid
 bool Thermostat::set_heatingpid(const char * value, const int8_t id) {
-    uint8_t pid = 0;
+    uint8_t pid;
     if (!Helpers::value2enum(value, pid, FL_(enum_PID))) {
         return false;
     }
@@ -1663,7 +1657,7 @@ bool Thermostat::set_damping(const char * value, const int8_t id) {
 
 // 0xA5/0xA7 Set the language settings
 bool Thermostat::set_language(const char * value, const int8_t id) {
-    uint8_t lg = 0;
+    uint8_t lg;
 
     if (model() == EMS_DEVICE_FLAG_RC30) {
         if (!Helpers::value2enum(value, lg, FL_(enum_ibaLanguage_RC30))) {
@@ -1688,7 +1682,7 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
         return false;
     }
 
-    uint8_t ctrl = 0;
+    uint8_t ctrl;
     if (model() == EMS_DEVICE_FLAG_JUNKERS && !has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {
         if (Helpers::value2enum(value, ctrl, FL_(enum_j_control))) {
             write_command(set_typeids[hc->hc()], 1, ctrl);
@@ -1710,7 +1704,7 @@ bool Thermostat::set_roomsensor(const char * value, const int8_t id) {
         return false;
     }
 
-    uint8_t ctrl = 0;
+    uint8_t ctrl;
     if (model() == EMS_DEVICE_FLAG_JUNKERS && !has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {
         if (Helpers::value2enum(value, ctrl, FL_(enum_roomsensor))) {
             write_command(set_typeids[hc->hc()], 9, ctrl + 1);
@@ -1722,7 +1716,7 @@ bool Thermostat::set_roomsensor(const char * value, const int8_t id) {
 
 // sets the thermostat ww working mode, where mode is a string, ems and ems+
 bool Thermostat::set_wwmode(const char * value, const int8_t id) {
-    uint8_t set = 0xFF;
+    uint8_t set;
 
     if (model() == EMS_DEVICE_FLAG_RC10) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode3))) {
@@ -1751,7 +1745,7 @@ bool Thermostat::set_wwmode(const char * value, const int8_t id) {
 
 //Set ww when thermostat mode is off (RC30)
 bool Thermostat::set_wwwhenmodeoff(const char * value, const int8_t id) {
-    bool b = false;
+    bool b;
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
@@ -1775,7 +1769,7 @@ bool Thermostat::set_wwtemp(const char * value, const int8_t id) {
 
 // Set ww low temperature, ems+
 bool Thermostat::set_wwtemplow(const char * value, const int8_t id) {
-    int t = 0;
+    int t;
     if (!Helpers::value2temperature(value, t)) {
         return false;
     }
@@ -1787,7 +1781,7 @@ bool Thermostat::set_wwtemplow(const char * value, const int8_t id) {
 
 // Set ww charge RC300, ems+
 bool Thermostat::set_wwcharge(const char * value, const int8_t id) {
-    bool b = false;
+    bool b;
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
@@ -1803,7 +1797,7 @@ bool Thermostat::set_wwcharge(const char * value, const int8_t id) {
 
 // Set ww charge duration in steps of 15 min, ems+
 bool Thermostat::set_wwchargeduration(const char * value, const int8_t id) {
-    int t = 0xFF;
+    int t;
     if (!Helpers::value2number(value, t)) {
         return false;
     }
@@ -1837,7 +1831,7 @@ bool Thermostat::set_wwprio(const char * value, const int8_t id) {
 
 // sets the thermostat ww circulation working mode, where mode is a string
 bool Thermostat::set_wwcircmode(const char * value, const int8_t id) {
-    uint8_t set = 0xFF;
+    uint8_t set;
 
     if ((model() == EMS_DEVICE_FLAG_RC300) || (model() == EMS_DEVICE_FLAG_RC100)) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwCircMode))) {
@@ -1856,7 +1850,7 @@ bool Thermostat::set_wwcircmode(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDailyHeating(const char * value, const int8_t id) {
-    bool b = false;
+    bool b;
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
@@ -1883,7 +1877,7 @@ bool Thermostat::set_wwDailyHeatTime(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDisinfect(const char * value, const int8_t id) {
-    bool b = false;
+    bool b;
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
@@ -1900,7 +1894,7 @@ bool Thermostat::set_wwDisinfect(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDisinfectDay(const char * value, const int8_t id) {
-    uint8_t set = 0xFF;
+    uint8_t set;
     if (!Helpers::value2enum(value, set, FL_(enum_dayOfWeek))) {
         return false;
     }
@@ -1939,7 +1933,7 @@ bool Thermostat::set_wwDisinfectHour(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwMaxTemp(const char * value, const int8_t id) {
-    int t = 0;
+    int t;
     if (!Helpers::value2temperature(value, t, false, 0, 90)) {
         return false;
     }
@@ -1962,7 +1956,7 @@ bool Thermostat::set_wwOneTimeKey(const char * value, const int8_t id) {
 
 // for RC10, 0xB0 or RC30, 0xA7
 bool Thermostat::set_backlight(const char * value, const int8_t id) {
-    bool b = false;
+    bool b;
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
@@ -1977,7 +1971,7 @@ bool Thermostat::set_backlight(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_autodst(const char * value, const int8_t id) {
-    bool b = false;
+    bool b;
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
@@ -1988,7 +1982,7 @@ bool Thermostat::set_autodst(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_preheating(const char * value, const int8_t id) {
-    bool b = false;
+    bool b;
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
@@ -1999,7 +1993,7 @@ bool Thermostat::set_preheating(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_offtemp(const char * value, const int8_t id) {
-    int ot = 0;
+    int ot;
     if (!Helpers::value2temperature(value, ot, true)) {
         return false;
     }
@@ -2011,7 +2005,7 @@ bool Thermostat::set_offtemp(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_mixingvalves(const char * value, const int8_t id) {
-    int m = 0;
+    int m;
     if (!Helpers::value2number(value, m, 0, 2)) {
         return false;
     }
@@ -2022,7 +2016,7 @@ bool Thermostat::set_mixingvalves(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwProgMode(const char * value, const int8_t id) {
-    uint8_t set = 0xFF;
+    uint8_t set;
     if (!Helpers::value2enum(value, set, FL_(enum_wwProgMode))) {
         return false;
     }
@@ -2033,7 +2027,7 @@ bool Thermostat::set_wwProgMode(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwCircProg(const char * value, const int8_t id) {
-    uint8_t set = 0xFF;
+    uint8_t set;
     if (!Helpers::value2enum(value, set, FL_(enum_wwProgMode))) {
         return false;
     }
@@ -2199,7 +2193,7 @@ bool Thermostat::set_roominfl_factor(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
-    float val = 0;
+    float val;
     if (!Helpers::value2float(value, val)) {
         return false;
     }
@@ -2416,7 +2410,7 @@ bool Thermostat::set_summermode(const char * value, const int8_t id) {
         return false;
     }
 
-    uint8_t set = 0xFF;
+    uint8_t set;
 
     if (is_fetch(summer2_typeids[hc->hc()])) {
         if ((hc->statusbyte & 1) && Helpers::value2enum(value, set, FL_(enum_summermode))) {
@@ -2442,7 +2436,7 @@ bool Thermostat::set_fastheatup(const char * value, const int8_t id) {
         return false;
     }
 
-    int set = 0;
+    int set;
 
     if (!Helpers::value2number(value, set)) {
         return false;
@@ -2460,7 +2454,7 @@ bool Thermostat::set_switchonoptimization(const char * value, const int8_t id) {
         return false;
     }
 
-    bool b = false;
+    bool b;
 
     if (!Helpers::value2bool(value, b)) {
         return false;
@@ -2478,7 +2472,7 @@ bool Thermostat::set_reducemode(const char * value, const int8_t id) {
         return false;
     }
 
-    uint8_t set = 0xFF;
+    uint8_t set;
     if (model() == EMS_DEVICE_FLAG_RC300 || model() == EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, set, FL_(enum_reducemode1))) {
             write_command(set_typeids[hc->hc()], 5, set + 1, set_typeids[hc->hc()]);
@@ -2502,7 +2496,7 @@ bool Thermostat::set_vacreducemode(const char * value, const int8_t id) {
         return false;
     }
 
-    uint8_t set = 0xFF;
+    uint8_t set;
     if (!Helpers::value2enum(value, set, FL_(enum_reducemode))) {
         return false;
     }
@@ -2518,7 +2512,7 @@ bool Thermostat::set_nofrostmode(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
-    uint8_t set = 0xFF;
+    uint8_t set;
     if (model() == EMS_DEVICE_FLAG_RC300 || model() == EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, set, FL_(enum_nofrostmode1))) {
             write_command(curve_typeids[hc->hc()], 5, set + 1, curve_typeids[hc->hc()]);
@@ -2541,7 +2535,7 @@ bool Thermostat::set_heatingtype(const char * value, const int8_t id) {
         return false;
     }
 
-    uint8_t set = 0xFF;
+    uint8_t set;
     if (Helpers::value2enum(value, set, FL_(enum_heatingtype))) {
         if ((model() == EMS_DEVICE_FLAG_RC20_N) || (model() == EMS_DEVICE_FLAG_RC25)) {
             write_command(set_typeids[hc->hc()], 0, set, set_typeids[hc->hc()]);
@@ -2566,7 +2560,7 @@ bool Thermostat::set_controlmode(const char * value, const int8_t id) {
         return false;
     }
 
-    uint8_t set = 0xFF;
+    uint8_t set;
     if (model() == EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, set, FL_(enum_controlmode))) {
             write_command(curve_typeids[hc->hc()], 0, set, curve_typeids[hc->hc()]);
@@ -2726,14 +2720,14 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
     }
     if (data[0] != 0xE7) {
         // we use EN settings for the day abbreviation
-        std::string sday = (FL_(enum_dayOfWeek)[day][0]);
+        auto sday = (FL_(enum_dayOfWeek)[day][0]);
         if (model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N) {
-            snprintf(out, len, "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), on ? "on" : "off");
+            snprintf(out, len, "%02d %s %02d:%02d %s", no, sday, time / 6, 10 * (time % 6), on ? "on" : "off");
         } else if ((model() == EMS_DEVICE_FLAG_RC20) || (model() == EMS_DEVICE_FLAG_RC30)) {
-            snprintf(out, len, "%02d %s %02d:%02d T%d", no, sday.c_str(), time / 6, 10 * (time % 6), on);
+            snprintf(out, len, "%02d %s %02d:%02d T%d", no, sday, time / 6, 10 * (time % 6), on);
         } else {
-            std::string son = (FL_(enum_switchmode)[on][0]);
-            snprintf(out, len, "%02d %s %02d:%02d %s", no, sday.c_str(), time / 6, 10 * (time % 6), son.c_str());
+            auto son = (FL_(enum_switchmode)[on][0]);
+            snprintf(out, len, "%02d %s %02d:%02d %s", no, sday, time / 6, 10 * (time % 6), son);
         }
     } else {
         snprintf(out, len, "%02d not_set", no);
@@ -2811,7 +2805,7 @@ bool Thermostat::set_program(const char * value, const int8_t id) {
         return false;
     }
 
-    uint8_t set = 0xFF;
+    uint8_t set;
     if ((model() == EMS_DEVICE_FLAG_RC20_N) || (model() == EMS_DEVICE_FLAG_RC25)) {
         if (Helpers::value2enum(value, set, FL_(enum_progMode3))) {
             write_command(set_typeids[hc->hc()], 11, set + 1, set_typeids[hc->hc()]);
@@ -3249,7 +3243,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
 }
 
 bool Thermostat::set_temperature_value(const char * value, const int8_t id, const uint8_t mode, bool relative) {
-    float   f      = 0;
+    float   f;
     uint8_t hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     if (Helpers::value2temperature(value, f, relative)) {
         return set_temperature(f, mode, hc_num);

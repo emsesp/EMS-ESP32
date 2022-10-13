@@ -120,7 +120,7 @@ std::string Telegram::to_string() const {
 // returns telegram's message body only, in hex
 std::string Telegram::to_string_message() const {
     if (this->message_length == 0) {
-        return ("<empty>");
+        return "<empty>";
     }
 
     return Helpers::data_to_hex(this->message_data, this->message_length);
@@ -141,7 +141,7 @@ void RxService::loop() {
 // length includes the CRC
 // for EMS+ the type_id has the value + 256. We look for these type of telegrams with F7, F9 and FF in 3rd byte
 void RxService::add(uint8_t * data, uint8_t length) {
-    if (length < 2) {
+    if (length < 5) {
         return;
     }
 
@@ -612,7 +612,7 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         }
 
         LOG_ERROR("Last Tx %s operation failed after %d retries. Ignoring request: %s",
-                  (operation == Telegram::Operation::TX_WRITE) ? ("Write") : ("Read"),
+                  (operation == Telegram::Operation::TX_WRITE) ? "Write" : "Read",
                   MAXIMUM_TX_RETRIES,
                   telegram_last_->to_string().c_str());
 

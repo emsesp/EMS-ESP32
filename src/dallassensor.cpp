@@ -204,7 +204,7 @@ void DallasSensor::loop() {
                     scancnt_ = 0;
                 } else if (scancnt_ == SCAN_START + 1) { // startup
                     firstscan_ = sensors_.size();
-                    // LOG_DEBUG(("Adding %d dallas sensor(s) from first scan"), firstscan_);
+                    // LOG_DEBUG("Adding %d dallas sensor(s) from first scan", firstscan_);
                 } else if ((scancnt_ <= 0) && (firstscan_ != sensors_.size())) { // check 2 times for no change of sensor #
                     scancnt_ = SCAN_START;
                     sensors_.clear(); // restart scaning and clear to get correct numbering
@@ -399,8 +399,8 @@ bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const i
             }
 
             output["type"]      = F_(number);
-            output["min"]       = serialized(Helpers::render_value(val, -55, 0, EMSESP::system_.fahrenheit() ? 2 : 0));
-            output["max"]       = serialized(Helpers::render_value(val, 125, 0, EMSESP::system_.fahrenheit() ? 2 : 0));
+            output["min"]       = serialized(Helpers::render_value(val, (int8_t)-55, 0, EMSESP::system_.fahrenheit() ? (uint8_t)2 : (uint8_t)0));
+            output["max"]       = serialized(Helpers::render_value(val, (int8_t)125, 0, EMSESP::system_.fahrenheit() ? (uint8_t)2 : (uint8_t)0));
             output["uom"]       = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
             output["writeable"] = false;
 

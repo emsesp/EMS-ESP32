@@ -38,6 +38,10 @@
 #include "../rom/rtc.h"
 #endif
 #endif
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
+#include <Adafruit_NeoPixel.h>
+Adafruit_NeoPixel pixels(1, 7, NEO_GRB + NEO_KHZ800);
+#endif
 
 namespace emsesp {
 
@@ -348,27 +352,24 @@ void System::wifi_tweak() {
 #endif
 }
 
-#ifdef ARDUINO_LOLIN_C3_MINI
-// https://www.wemos.cc/en/latest/c3/c3_mini.html
-bool System::is_valid_gpio(uint8_t pin) {
-    if ((pin >= 11 && pin <= 19) || (pin > 21)) {
-        return false; // bad pin
-    }
-    return true;
-}
-#else
 // check for valid ESP32 pins. This is very dependent on which ESP32 board is being used.
 // Typically you can't use 1, 6-11, 12, 14, 15, 20, 24, 28-31 and 40+
 // we allow 0 as it has a special function on the NodeMCU apparently
 // See https://diyprojects.io/esp32-how-to-use-gpio-digital-io-arduino-code/#.YFpVEq9KhjG
 // and https://nodemcu.readthedocs.io/en/dev-esp32/modules/gpio/
 bool System::is_valid_gpio(uint8_t pin) {
+#if CONFIG_IDF_TARGET_ESP32
     if ((pin == 1) || (pin >= 6 && pin <= 12) || (pin >= 14 && pin <= 15) || (pin == 20) || (pin == 24) || (pin >= 28 && pin <= 31) || (pin > 40)) {
+#elif CONFIG_IDF_TARGET_ESP32S2
+    if ((pin >= 19 && pin <= 20) || (pin >= 22 && pin <= 32) || (pin > 40)) {
+#elif CONFIG_IDF_TARGET_ESP32C3
+    // https://www.wemos.cc/en/latest/c3/c3_mini.html
+    if ((pin >= 11 && pin <= 19) || (pin > 21)) {
+#endif
         return false; // bad pin
     }
     return true;
 }
-#endif
 
 // Starts up the UART Serial bridge
 void System::start() {
@@ -379,6 +380,7 @@ void System::start() {
         setCpuFrequencyMhz(160);
     }
     fstotal_ = LittleFS.totalBytes() / 1024; // read only once, it takes 500 ms to read
+    psram_   = ESP.getPsramSize() / 1024;
     appused_ = ESP.getSketchSize() / 1024;
     appfree_ = ESP.getFreeSketchSpace() / 1024 - appused_;
 #endif
@@ -457,8 +459,18 @@ void System::led_init(bool refresh) {
     }
 
     if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
+        // rgb LED WS2812B, use Adafruit Neopixel
+        // Adafruit_NeoPixel pixels(1, 7, NEO_GRB + NEO_KHZ800);
+        pixels.begin();
+        pixels.setPin(led_gpio_);
+        // pixels.setBrightness(0);
+        // pixels.Color(0, 0, 0, 0);
+        // pixels.show();
+#else
         pinMode(led_gpio_, OUTPUT);       // 0 means disabled
         digitalWrite(led_gpio_, !LED_ON); // start with LED off
+#endif
     }
 }
 
@@ -551,8 +563,9 @@ bool System::heartbeat_json(JsonObject & output) {
     output["txfails"]    = EMSESP::txservice_.telegram_read_fail_count() + EMSESP::txservice_.telegram_write_fail_count();
 
     if (Mqtt::enabled()) {
-        output["mqttcount"] = Mqtt::publish_count();
-        output["mqttfails"] = Mqtt::publish_fails();
+        output["mqttcount"]    = Mqtt::publish_count();
+        output["mqttfails"]    = Mqtt::publish_fails();
+        output["mqttconnects"] = Mqtt::connect_count();
     }
     output["apicalls"] = WebAPIService::api_count(); // + WebAPIService::api_fails();
     output["apifails"] = WebAPIService::api_fails();
@@ -648,13 +661,23 @@ void System::system_check() {
             if (healthcheck_ == 0) {
                 // everything is healthy, show LED permanently on or off depending on setting
                 if (led_gpio_) {
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
+                    pixels.setPixelColor(0, 0, hide_led_ ? 0 : 128, 0);
+                    pixels.show();
+#else
                     digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
+#endif
                 }
                 send_heartbeat();
             } else {
                 // turn off LED so we're ready to the flashes
                 if (led_gpio_) {
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
+                    pixels.setPixelColor(0, 0, 0, 0);
+                    pixels.show();
+#else
                     digitalWrite(led_gpio_, !LED_ON);
+#endif
                 }
             }
         }
@@ -687,7 +710,7 @@ void System::commands_init() {
 // uses LED to show system health
 void System::led_monitor() {
     // we only need to run the LED healthcheck if there are errors
-    if (!healthcheck_) {
+    if (!healthcheck_ || !led_gpio_) {
         return; // all good
     }
 
@@ -715,12 +738,35 @@ void System::led_monitor() {
             // Serial.println("resetting flash check");
             led_long_timer_ = uuid::get_uptime();
             led_flash_step_ = 0;
-            digitalWrite(led_gpio_, !LED_ON); // LED off
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
+            pixels.setPixelColor(0, 0, 0, 0);
+            pixels.show();
+#else
+            digitalWrite(led_gpio_, !LED_ON);     // LED off
+#endif
         } else if (led_flash_step_ % 2) {
             // handle the step events (on odd numbers 3,5,7,etc). see if we need to turn on a LED
             //  1 flash is the EMS bus is not connected
             //  2 flashes if the network (wifi or ethernet) is not connected
             //  3 flashes is both the bus and the network are not connected. Then you know you're truly f*cked.
+
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
+            if (led_flash_step_ == 3) {
+                if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
+                    pixels.setPixelColor(0, 128, 0, 0); // red
+                } else if ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS) {
+                    pixels.setPixelColor(0, 0, 0, 128); // blue
+                }
+            }
+            if (led_flash_step_ == 5 && (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
+                pixels.setPixelColor(0, 128, 0, 0); // red
+            }
+            if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
+                && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
+                pixels.setPixelColor(0, 0, 0, 128); // blue
+            }
+            pixels.show();
+#else
 
             if ((led_flash_step_ == 3)
                 && (((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) || ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS))) {
@@ -736,13 +782,19 @@ void System::led_monitor() {
                 led_on_ = true;
             }
 
-            if (led_on_ && led_gpio_) {
-                digitalWrite(led_gpio_, LED_ON);
+            if (led_on_) {
+                digitalWrite(led_gpio_, LED_ON); // LED off
             }
+#endif
         } else {
             // turn the led off after the flash, on even number count
-            if (led_on_ && led_gpio_) {
-                digitalWrite(led_gpio_, !LED_ON);
+            if (led_on_) {
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
+                pixels.setPixelColor(0, 0, 0, 0);
+                pixels.show();
+#else
+                digitalWrite(led_gpio_, !LED_ON); // LED off
+#endif
                 led_on_ = false;
             }
         }
@@ -811,7 +863,7 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(" Network: connected");
         shell.printfln(" SSID: %s", WiFi.SSID().c_str());
         shell.printfln(" BSSID: %s", WiFi.BSSIDstr().c_str());
-        shell.printfln((" RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
+        shell.printfln(" RSSI: %d dBm (%d %%)", WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
         shell.printfln(" MAC address: %s", WiFi.macAddress().c_str());
         shell.printfln(" Hostname: %s", WiFi.getHostname());
         shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
@@ -965,9 +1017,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     JsonObject node;
 
     // System
-    node            = output.createNestedObject("System Status");
-    node["version"] = EMSESP_APP_VERSION;
-    node["uptime"]  = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+    node             = output.createNestedObject("System Status");
+    node["version"]  = EMSESP_APP_VERSION;
+    node["platform"] = EMSESP_PLATFORM;
+    node["uptime"]   = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     // node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
     node["freemem"]  = ESP.getFreeHeap() / 1024;  // kilobytes
@@ -979,7 +1032,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     // Network Status
     node = output.createNestedObject("Network Status");
     if (WiFi.status() == WL_CONNECTED) {
-        node["connection"] = ("WiFi");
+        node["connection"] = "WiFi";
         node["hostname"]   = WiFi.getHostname();
         // node["SSID"]            = WiFi.SSID();
         // node["BSSID"]           = WiFi.BSSIDstr();
@@ -992,7 +1045,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
         }
     } else if (EMSESP::system_.ethernet_connected()) {
-        node["connection"]      = ("Ethernet");
+        node["connection"]      = "Ethernet";
         node["hostname"]        = ETH.getHostname();
         node["MAC"]             = ETH.macAddress();
         node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
@@ -1048,7 +1101,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["MQTT status"] = Mqtt::connected() ? F_(connected) : F_(disconnected);
     if (Mqtt::enabled()) {
         node["MQTT publishes"]     = Mqtt::publish_count();
+        node["MQTT queued"]        = Mqtt::publish_queued();
         node["MQTT publish fails"] = Mqtt::publish_fails();
+        node["MQTT connects"]      = Mqtt::connect_count();
     }
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
         node["enabled"]                 = settings.enabled;
@@ -1106,20 +1161,20 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node = output.createNestedObject("Bus Status");
     switch (EMSESP::bus_status()) {
     case EMSESP::BUS_STATUS_OFFLINE:
-        node["bus status"] = ("disconnected");
+        node["bus status"] = "disconnected";
         break;
     case EMSESP::BUS_STATUS_TX_ERRORS:
-        node["bus status"] = ("connected, tx issues - try a different Tx Mode");
+        node["bus status"] = "connected, tx issues - try a different Tx Mode";
         break;
     case EMSESP::BUS_STATUS_CONNECTED:
-        node["bus status"] = ("connected");
+        node["bus status"] = "connected";
         break;
     default:
-        node["bus status"] = ("unknown");
+        node["bus status"] = "unknown";
         break;
     }
     if (EMSESP::bus_status() != EMSESP::BUS_STATUS_OFFLINE) {
-        node["bus protocol"]                = EMSbus::is_ht3() ? ("HT3") : ("Buderus");
+        node["bus protocol"]                = EMSbus::is_ht3() ? "HT3" : "Buderus";
         node["bus telegrams received (rx)"] = EMSESP::rxservice_.telegram_count();
         node["bus reads (tx)"]              = EMSESP::txservice_.telegram_read_count();
         node["bus writes (tx)"]             = EMSESP::txservice_.telegram_write_count();
@@ -1230,7 +1285,9 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
     } else if (board_profile == "OLIMEXPOE") {
         data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, 12, 0, 3}; // Olimex ESP32-POE
     } else if (board_profile == "C3MINI") {
-        data = {7, 2, 4, 5, 9, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // Lolin C3 Mini
+        data = {7, 1, 4, 5, 9, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // Lolin C3 Mini
+    } else if (board_profile == "S2MINI") {
+        data = {15, 7, 11, 12, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; //Lolin S2 Mini
     } else if (board_profile == "CUSTOM") {
         // send back current values
         data = {(int8_t)EMSESP::system_.led_gpio_,
@@ -1267,6 +1324,9 @@ bool System::command_restart(const char * value, const int8_t id) {
     return true;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch"
+
 std::string System::reset_reason(uint8_t cpu) const {
 #ifndef EMSESP_STANDALONE
     switch (rtc_get_reset_reason(cpu)) {
@@ -1275,11 +1335,11 @@ std::string System::reset_reason(uint8_t cpu) const {
     // case 2 :reset pin not on esp32
     case 3:
         return ("Software reset");
-    case 4:
+    case 4: // not on S2, C3
         return ("Legacy watch dog reset");
     case 5:
         return ("Deep sleep reset");
-    case 6:
+    case 6: // not on S2, C3
         return ("Reset by SDIO");
     case 7:
         return ("Timer group0 watch dog reset");
@@ -1295,7 +1355,7 @@ std::string System::reset_reason(uint8_t cpu) const {
         return ("Software reset CPU");
     case 13:
         return ("RTC watch dog reset: CPU");
-    case 14:
+    case 14: // not on S2, C3
         return ("APP CPU reset by PRO CPU");
     case 15:
         return ("Brownout reset");
@@ -1307,11 +1367,12 @@ std::string System::reset_reason(uint8_t cpu) const {
 #endif
     return ("Unkonwn");
 }
+#pragma GCC diagnostic pop
 
 // set NTP status
 void System::ntp_connected(bool b) {
     if (b != ntp_connected_) {
-        LOG_INFO(b ? ("NTP connected") : ("NTP disconnected"));
+        LOG_INFO(b ? "NTP connected" : "NTP disconnected");
     }
     ntp_connected_  = b;
     ntp_last_check_ = b ? uuid::get_uptime_sec() : 0;

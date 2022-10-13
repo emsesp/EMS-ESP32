@@ -62,7 +62,7 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
 
 // scan devices service
 void WebDataService::scan_devices(AsyncWebServerRequest * request) {
-    EMSESP::logger().info(F("Scanning devices..."));
+    EMSESP::logger().info("Scanning devices...");
     EMSESP::scan_devices();
     request->send(200);
 }
@@ -236,7 +236,7 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
 
                 // write debug
                 if (return_code != CommandRet::OK) {
-                    EMSESP::logger().err(("Write command failed %s (%s)"), (const char *)output["message"], Command::return_code_string(return_code).c_str());
+                    EMSESP::logger().err("Write command failed %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
                 } else {
                     EMSESP::logger().debug("Write command successful");
                 }

@@ -155,14 +155,7 @@ void EMSESPShell::add_console_commands() {
             }
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{
-                ("0B"),
-                ("0D"),
-                ("0A"),
-                ("0F"),
-                ("12"),
-
-            };
+            return std::vector<std::string>{"0B", "0D", "0A", "0F", "12"};
         });
 
     commands->add_command(ShellContext::MAIN,
@@ -404,7 +397,7 @@ void EMSESPShell::add_console_commands() {
                 shell.print("Available commands are: ");
                 Command::show(shell, device_type, false); // non-verbose mode
             } else if (return_code != CommandRet::OK) {
-                shell.printfln(("Bad syntax (error code %d)"), return_code);
+                shell.printfln("Bad syntax (error code %d)", return_code);
             }
         },
         [&](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) -> std::vector<std::string> {
@@ -425,7 +418,7 @@ void EMSESPShell::add_console_commands() {
                 if (Command::device_has_commands(device_type)) {
                     for (const auto & cf : Command::commands()) {
                         if (cf.device_type_ == device_type) {
-                            command_list.emplace_back((cf.cmd_));
+                            command_list.emplace_back(cf.cmd_);
                         }
                     }
                     return command_list;
@@ -449,7 +442,7 @@ void Console::load_standard_commands(unsigned int context) {
     // create commands test and t
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
-                                       string_vector{("test")},
+                                       string_vector{"test"},
                                        string_vector{F_(name_optional), F_(data_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            if (arguments.empty()) {
@@ -543,7 +536,7 @@ void Console::load_standard_commands(unsigned int context) {
                                                                become_admin(shell);
                                                            } else {
                                                                shell.delay_until(now + INVALID_PASSWORD_DELAY_MS, [](Shell & shell) {
-                                                                   shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, ("Invalid su password on console"));
+                                                                   shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, "Invalid su password on console");
                                                                    shell.println("su: incorrect password");
                                                                });
                                                            }
@@ -692,7 +685,7 @@ void Console::load_system_commands(unsigned int context) {
                                            std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
                                            std::string         board_profile = Helpers::toUpper(arguments.front());
                                            if (!EMSESP::system_.load_board_profile(data, board_profile)) {
-                                               shell.println(("Invalid board profile (S32, E32, MH-ET, NODEMCU, OLIMEX, OLIMEXPOE, C3MINI, CUSTOM)"));
+                                               shell.println("Invalid board profile (S32, E32, MH-ET, NODEMCU, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, CUSTOM)");
                                                return;
                                            }
                                            EMSESP::webSettingsService.update(
@@ -731,7 +724,7 @@ std::string EMSESPShell::prompt_suffix() {
 }
 
 void EMSESPShell::end_of_transmission() {
-    invoke_command((F_(exit)));
+    invoke_command(F_(exit));
 }
 
 EMSESPStreamConsole::EMSESPStreamConsole(Stream & stream, bool local)

@@ -31,8 +31,46 @@ class Heatpump : public EMSdevice {
     uint8_t airHumidity_;
     uint8_t dewTemperature_;
 
+    // HM200
+    uint8_t controlStrategy_;
+    uint8_t lowNoiseMode_;
+    uint8_t lowNoiseStart_;
+    uint8_t lowNoiseStop_;
+    uint8_t hybridDHW_;
+    uint8_t energyPriceGas_;
+    uint8_t energyPriceEl_;
+    uint8_t energyPricePV_;
+    int8_t  switchOverTemp_;
+
+    // Function test
+    uint8_t airPurgeMode_;
+    uint8_t heatPumpOutput_;
+    uint8_t coolingCircuit_;
+    uint8_t compStartMod_;
+    uint8_t heatDrainPan_;
+    uint8_t heatCable_;
+
     void process_HPMonitor1(std::shared_ptr<const Telegram> telegram);
     void process_HPMonitor2(std::shared_ptr<const Telegram> telegram);
+    void process_HPSettings(std::shared_ptr<const Telegram> telegram);
+    void process_HPFunctionTest(std::shared_ptr<const Telegram> telegram);
+
+    bool set_controlStrategy(const char * value, const int8_t id);
+    bool set_lowNoiseMode(const char * value, const int8_t id);
+    bool set_lowNoiseStart(const char * value, const int8_t id);
+    bool set_lowNoiseStop(const char * value, const int8_t id);
+    bool set_hybridDHW(const char * value, const int8_t id);
+    bool set_energyPriceGas(const char * value, const int8_t id);
+    bool set_energyPriceEl(const char * value, const int8_t id);
+    bool set_energyPricePV(const char * value, const int8_t id);
+    bool set_switchOverTemp(const char * value, const int8_t id);
+
+    bool set_airPurgeMode(const char * value, const int8_t id);
+    bool set_heatPumpOutput(const char * value, const int8_t id);
+    bool set_coolingCircuit(const char * value, const int8_t id);
+    bool set_compStartMod(const char * value, const int8_t id);
+    bool set_heatDrainPan(const char * value, const int8_t id);
+    bool set_heatCable(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

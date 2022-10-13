@@ -12,7 +12,9 @@
 - Add mqtt queue and connection infos
 - Add min/max setting to customizations
 - Adapt min/max if ems-value is not in this range
-- Add heat pump settings for inputs and limits
+- Add heat pump settings for inputs and limits [#600](https://github.com/emsesp/EMS-ESP32/issues/600)
+- Add hybrid heatpump [#500](https://github.com/emsesp/EMS-ESP32/issues/500)
+- Add translated tags
 
 ## Fixed
 
