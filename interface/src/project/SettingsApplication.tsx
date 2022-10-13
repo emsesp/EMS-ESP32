@@ -347,9 +347,7 @@ const SettingsApplication: FC = () => {
             <MenuItem value="de">Deutsch (DE)</MenuItem>
             <MenuItem value="nl">Nederlands (NL)</MenuItem>
             <MenuItem value="se">Svenska (SE)</MenuItem>
-            <MenuItem disabled value="pl">
-              Polski (PL)
-            </MenuItem>
+            <MenuItem value="pl">Polski (PL)</MenuItem>
             <MenuItem disabled value="no">
               Norsk (NO)
             </MenuItem>
