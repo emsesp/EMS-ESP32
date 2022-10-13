@@ -38,7 +38,7 @@
 #include "../rom/rtc.h"
 #endif
 #endif
-#ifdef ARDUINO_LOLIN_C3_MINI
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
 #include <Adafruit_NeoPixel.h>
 Adafruit_NeoPixel pixels(1, 7, NEO_GRB + NEO_KHZ800);
 #endif
@@ -459,14 +459,14 @@ void System::led_init(bool refresh) {
     }
 
     if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
-#ifdef ARDUINO_LOLIN_C3_MINI
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
         // rgb LED WS2812B, use Adafruit Neopixel
         // Adafruit_NeoPixel pixels(1, 7, NEO_GRB + NEO_KHZ800);
         pixels.begin();
         pixels.setPin(led_gpio_);
         // pixels.setBrightness(0);
-        pixels.Color(0, 0, 0, 0);
-        pixels.show();
+        // pixels.Color(0, 0, 0, 0);
+        // pixels.show();
 #else
         pinMode(led_gpio_, OUTPUT);       // 0 means disabled
         digitalWrite(led_gpio_, !LED_ON); // start with LED off
@@ -661,7 +661,7 @@ void System::system_check() {
             if (healthcheck_ == 0) {
                 // everything is healthy, show LED permanently on or off depending on setting
                 if (led_gpio_) {
-#ifdef ARDUINO_LOLIN_C3_MINI
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
                     pixels.setPixelColor(0, 0, hide_led_ ? 0 : 128, 0);
                     pixels.show();
 #else
@@ -672,7 +672,7 @@ void System::system_check() {
             } else {
                 // turn off LED so we're ready to the flashes
                 if (led_gpio_) {
-#ifdef ARDUINO_LOLIN_C3_MINI
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
                     pixels.setPixelColor(0, 0, 0, 0);
                     pixels.show();
 #else
@@ -738,7 +738,7 @@ void System::led_monitor() {
             // Serial.println("resetting flash check");
             led_long_timer_ = uuid::get_uptime();
             led_flash_step_ = 0;
-#ifdef ARDUINO_LOLIN_C3_MINI
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
             pixels.setPixelColor(0, 0, 0, 0);
             pixels.show();
 #else
@@ -749,6 +749,24 @@ void System::led_monitor() {
             //  1 flash is the EMS bus is not connected
             //  2 flashes if the network (wifi or ethernet) is not connected
             //  3 flashes is both the bus and the network are not connected. Then you know you're truly f*cked.
+
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
+            if (led_flash_step_ == 3) {
+                if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
+                    pixels.setPixelColor(0, 128, 0, 0); // red
+                } else if ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS) {
+                    pixels.setPixelColor(0, 0, 0, 128); // blue
+                }
+            }
+            if (led_flash_step_ == 5 && (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
+                pixels.setPixelColor(0, 128, 0, 0); // red
+            }
+            if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
+                && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
+                pixels.setPixelColor(0, 0, 0, 128); // blue
+            }
+            pixels.show();
+#else
 
             if ((led_flash_step_ == 3)
                 && (((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) || ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS))) {
@@ -765,17 +783,13 @@ void System::led_monitor() {
             }
 
             if (led_on_) {
-#ifdef ARDUINO_LOLIN_C3_MINI
-                pixels.setPixelColor(0, 128, 0, 0);
-                pixels.show();
-#else
-                digitalWrite(led_gpio_, LED_ON);  // LED off
-#endif
+                digitalWrite(led_gpio_, LED_ON); // LED off
             }
+#endif
         } else {
             // turn the led off after the flash, on even number count
             if (led_on_) {
-#ifdef ARDUINO_LOLIN_C3_MINI
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
                 pixels.setPixelColor(0, 0, 0, 0);
                 pixels.show();
 #else
