@@ -255,18 +255,20 @@ const UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn'
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken'
 const system_status = {
-  emsesp_version: '3.5demo',
+  emsesp_version: '3.5.0demo',
   esp_platform: 'ESP32',
-  max_alloc_heap: 113792,
+  max_alloc_heap: 89,
   psram_size: 0,
   free_psram: 0,
   cpu_freq_mhz: 240,
-  free_heap: 193340,
-  sdk_version: 'v3.3.5-1-g85c43024c',
-  flash_chip_size: 4194304,
+  free_heap: 143,
+  sdk_version: 'v4.4.2',
+  flash_chip_size: 4096,
   flash_chip_speed: 40000000,
-  fs_total: 65536,
-  fs_used: 16384,
+  fs_used: 40,
+  fs_free: 24,
+  app_used: 1863,
+  app_free: 121,
   uptime: '000+00:15:42.707',
 }
 security_settings = {
