@@ -139,7 +139,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     int ret_codes[5] = {400, 200, 400, 400, 401};
     response->setCode(ret_codes[return_code]);
     response->setLength();
-    response->setContentType("application/json");
+    response->setContentType("application/json; charset=utf-8");
     request->send(response);
     api_count_++;
 

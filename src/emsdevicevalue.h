@@ -198,10 +198,10 @@ class DeviceValue {
         return state;
     }
 
-    static const char *       DeviceValueUOM_s[];
-    static const char * const DeviceValueTAG_s[];
-    static const char * const DeviceValueTAG_mqtt[];
-    static size_t             tag_count; // # tags
+    static const char *         DeviceValueUOM_s[];
+    static const char * const * DeviceValueTAG_s[];
+    static const char * const   DeviceValueTAG_mqtt[];
+    static size_t               tag_count; // # tags
 };
 
 }; // namespace emsesp

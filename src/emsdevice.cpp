@@ -44,7 +44,7 @@ bool EMSdevice::has_entities() const {
 }
 
 std::string EMSdevice::tag_to_string(uint8_t tag) {
-    return (DeviceValue::DeviceValueTAG_s[tag]);
+    return (Helpers::translated_word(DeviceValue::DeviceValueTAG_s[tag]));
 }
 
 std::string EMSdevice::tag_to_mqtt(uint8_t tag) {
@@ -62,21 +62,21 @@ std::string EMSdevice::uom_to_string(uint8_t uom) {
 std::string EMSdevice::brand_to_string() const {
     switch (brand_) {
     case EMSdevice::Brand::BOSCH:
-        return ("Bosch");
+        return "Bosch";
     case EMSdevice::Brand::JUNKERS:
-        return ("Junkers");
+        return "Junkers";
     case EMSdevice::Brand::BUDERUS:
-        return ("Buderus");
+        return "Buderus";
     case EMSdevice::Brand::NEFIT:
-        return ("Nefit");
+        return "Nefit";
     case EMSdevice::Brand::SIEGER:
-        return ("Sieger");
+        return "Sieger";
     case EMSdevice::Brand::WORCESTER:
-        return ("Worcester");
+        return "Worcester";
     case EMSdevice::Brand::IVT:
-        return ("IVT");
+        return "IVT";
     default:
-        return ("");
+        return "";
     }
 }
 
@@ -84,29 +84,29 @@ std::string EMSdevice::brand_to_string() const {
 const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     switch (device_type) {
     case DeviceType::SYSTEM:
-        return (F_(system));
+        return F_(system);
     case DeviceType::BOILER:
-        return (F_(boiler));
+        return F_(boiler);
     case DeviceType::THERMOSTAT:
-        return (F_(thermostat));
+        return F_(thermostat);
     case DeviceType::HEATPUMP:
-        return (F_(heatpump));
+        return F_(heatpump);
     case DeviceType::SOLAR:
-        return (F_(solar));
+        return F_(solar);
     case DeviceType::CONNECT:
-        return (F_(connect));
+        return F_(connect);
     case DeviceType::MIXER:
-        return (F_(mixer));
+        return F_(mixer);
     case DeviceType::DALLASSENSOR:
-        return (F_(dallassensor));
+        return F_(dallassensor);
     case DeviceType::ANALOGSENSOR:
-        return (F_(analogsensor));
+        return F_(analogsensor);
     case DeviceType::CONTROLLER:
-        return (F_(controller));
+        return F_(controller);
     case DeviceType::SWITCH:
-        return (F_(switch));
+        return F_(switch);
     case DeviceType::GATEWAY:
-        return (F_(gateway));
+        return F_(gateway);
     default:
         return Helpers::translated_word(FL_(unknown));
     }
@@ -125,35 +125,35 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
         *p = tolower(*p);
     }
 
-    if (!strcmp(lowtopic, reinterpret_cast<PGM_P>(F_(boiler)))) {
+    if (!strcmp(lowtopic, F_(boiler))) {
         return DeviceType::BOILER;
     }
 
-    if (!strcmp(lowtopic, reinterpret_cast<PGM_P>(F_(thermostat)))) {
+    if (!strcmp(lowtopic, F_(thermostat))) {
         return DeviceType::THERMOSTAT;
     }
 
-    if (!strcmp(lowtopic, reinterpret_cast<PGM_P>(F_(system)))) {
+    if (!strcmp(lowtopic, F_(system))) {
         return DeviceType::SYSTEM;
     }
 
-    if (!strcmp(lowtopic, reinterpret_cast<PGM_P>(F_(heatpump)))) {
+    if (!strcmp(lowtopic, F_(heatpump))) {
         return DeviceType::HEATPUMP;
     }
 
-    if (!strcmp(lowtopic, reinterpret_cast<PGM_P>(F_(solar)))) {
+    if (!strcmp(lowtopic, F_(solar))) {
         return DeviceType::SOLAR;
     }
 
-    if (!strcmp(lowtopic, reinterpret_cast<PGM_P>(F_(mixer)))) {
+    if (!strcmp(lowtopic, F_(mixer))) {
         return DeviceType::MIXER;
     }
 
-    if (!strcmp(lowtopic, reinterpret_cast<PGM_P>(F_(dallassensor)))) {
+    if (!strcmp(lowtopic, F_(dallassensor))) {
         return DeviceType::DALLASSENSOR;
     }
 
-    if (!strcmp(lowtopic, reinterpret_cast<PGM_P>(F_(analogsensor)))) {
+    if (!strcmp(lowtopic, F_(analogsensor))) {
         return DeviceType::ANALOGSENSOR;
     }
 
@@ -264,9 +264,9 @@ void EMSdevice::list_device_entries(JsonObject & output) const {
             // if we have a tag prefix it
             char key[50];
             if (!EMSdevice::tag_to_mqtt(dv.tag).empty()) {
-                snprintf(key, sizeof(key), "%s.%s", EMSdevice::tag_to_mqtt(dv.tag).c_str(), (dv.short_name));
+                snprintf(key, sizeof(key), "%s.%s", EMSdevice::tag_to_mqtt(dv.tag).c_str(), dv.short_name);
             } else {
-                snprintf(key, sizeof(key), "%s", (dv.short_name));
+                snprintf(key, sizeof(key), "%s", dv.short_name);
             }
 
             JsonArray details = output.createNestedArray(key);
@@ -446,7 +446,7 @@ void EMSdevice::add_device_value(uint8_t               tag,
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         for (EntityCustomization entityCustomization : settings.entityCustomizations) {
             if ((entityCustomization.product_id == product_id()) && (entityCustomization.device_id == device_id())) {
-                std::string entity = tag < DeviceValueTAG::TAG_HC1 ? (short_name) : tag_to_string(tag) + "/" + (short_name);
+                std::string entity = tag < DeviceValueTAG::TAG_HC1 ? short_name : tag_to_mqtt(tag) + "/" + short_name;
                 for (std::string entity_id : entityCustomization.entity_ids) {
                     // if there is an appended custom name, strip it to get the true entity name
                     // and extract the new custom name
@@ -637,14 +637,14 @@ void EMSdevice::publish_value(void * value_p) const {
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
             if (Mqtt::publish_single2cmd()) {
                 if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-                    snprintf(topic, sizeof(topic), "%s/%s/%s", device_type_2_device_name(device_type_), tag_to_mqtt(dv.tag).c_str(), (dv.short_name));
+                    snprintf(topic, sizeof(topic), "%s/%s/%s", device_type_2_device_name(device_type_), tag_to_mqtt(dv.tag).c_str(), dv.short_name);
                 } else {
                     snprintf(topic, sizeof(topic), "%s/%s", device_type_2_device_name(device_type_), (dv.short_name));
                 }
             } else if (Mqtt::is_nested() && dv.tag >= DeviceValueTAG::TAG_HC1) {
-                snprintf(topic, sizeof(topic), "%s/%s/%s", Mqtt::tag_to_topic(device_type_, dv.tag).c_str(), tag_to_mqtt(dv.tag).c_str(), (dv.short_name));
+                snprintf(topic, sizeof(topic), "%s/%s/%s", Mqtt::tag_to_topic(device_type_, dv.tag).c_str(), tag_to_mqtt(dv.tag).c_str(), dv.short_name);
             } else {
-                snprintf(topic, sizeof(topic), "%s/%s", Mqtt::tag_to_topic(device_type_, dv.tag).c_str(), (dv.short_name));
+                snprintf(topic, sizeof(topic), "%s/%s", Mqtt::tag_to_topic(device_type_, dv.tag).c_str(), dv.short_name);
             }
 
             int8_t num_op = dv.numeric_operator;
@@ -713,7 +713,7 @@ std::string EMSdevice::get_value_uom(const char * key) const {
     char * key_p = new_key;
 
     for (uint8_t i = 0; i < DeviceValue::tag_count; i++) {
-        auto tag = (DeviceValue::DeviceValueTAG_s[i]);
+        auto tag = Helpers::translated_word(DeviceValue::DeviceValueTAG_s[i]);
         if (tag) {
             std::string key2   = key; // copy string to a std::string so we can use the find function
             uint8_t     length = strlen(tag);
@@ -804,16 +804,16 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 
             // add name, prefixing the tag if it exists. This is the id used in the WebUI table and must be unique
             if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
-                obj["id"] = mask + dv.get_fullname();
+                obj["id"] = mask + fullname;
             } else {
-                obj["id"] = mask + tag_to_string(dv.tag) + " " + dv.get_fullname();
+                obj["id"] = mask + tag_to_string(dv.tag) + " " + fullname;
             }
 
             // add commands and options
             if (dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY)) {
                 // add the name of the Command function
                 if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-                    obj["c"] = tag_to_mqtt(dv.tag) + "/" + (dv.short_name);
+                    obj["c"] = tag_to_mqtt(dv.tag) + "/" + dv.short_name;
                 } else {
                     obj["c"] = dv.short_name;
                 }
@@ -908,9 +908,9 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
 
         // id holds the shortname and must always have a value for the WebUI table to work
         if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-            obj["id"] = tag_to_string(dv.tag) + "/" + (dv.short_name);
+            obj["id"] = tag_to_mqtt(dv.tag) + "/" + dv.short_name;
         } else {
-            obj["id"] = (dv.short_name);
+            obj["id"] = dv.short_name;
         }
 
         // n is the fullname, and can be optional
@@ -934,11 +934,6 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
             }
         } else {
             obj["n"] = "!" + std::string(fullname); // prefix commands with a !
-        }
-
-        // add the custom name, is optional
-        if (!dv.custom_fullname.empty()) {
-            obj["cn"] = dv.custom_fullname;
         }
 
         obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble
@@ -976,7 +971,7 @@ void EMSdevice::set_climate_minmax(uint8_t tag, int16_t min, uint16_t max) {
 // returns true if the entity has a mask set (not 0 the default)
 void EMSdevice::setCustomEntity(const std::string & entity_id) {
     for (auto & dv : devicevalues_) {
-        std::string entity_name = dv.tag < DeviceValueTAG::TAG_HC1 ? (dv.short_name) : tag_to_string(dv.tag) + "/" + (dv.short_name);
+        std::string entity_name = dv.tag < DeviceValueTAG::TAG_HC1 ? dv.short_name : tag_to_mqtt(dv.tag) + "/" + dv.short_name;
 
         // extra shortname
         std::string shortname;
@@ -1028,7 +1023,7 @@ void EMSdevice::setCustomEntity(const std::string & entity_id) {
 // populate a string vector with entities that have masks set or have a custom name
 void EMSdevice::getCustomEntities(std::vector<std::string> & entity_ids) {
     for (const auto & dv : devicevalues_) {
-        std::string entity_name = dv.tag < DeviceValueTAG::TAG_HC1 ? (dv.short_name) : tag_to_string(dv.tag) + "/" + (dv.short_name);
+        std::string entity_name = dv.tag < DeviceValueTAG::TAG_HC1 ? dv.short_name : tag_to_mqtt(dv.tag) + "/" + dv.short_name;
         uint8_t     mask        = dv.state >> 4;
 
         if (mask || !dv.custom_fullname.empty()) {
@@ -1293,7 +1288,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                 if (dv.tag != old_tag) {
                     old_tag = dv.tag;
                     if (nested && have_tag && dv.tag >= DeviceValueTAG::TAG_HC1) {
-                        json = output.createNestedObject(tag_to_string(dv.tag));
+                        json = output.createNestedObject(tag_to_mqtt(dv.tag));
                     }
                 }
             }
@@ -1473,14 +1468,14 @@ bool EMSdevice::has_telegram_id(uint16_t id) const {
 std::string EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> telegram) const {
     // see if it's one of the common ones, like Version
     if (telegram->type_id == EMS_TYPE_VERSION) {
-        return ("Version");
+        return "Version";
     } else if (telegram->type_id == EMS_TYPE_UBADevices) {
-        return ("UBADevices");
+        return "UBADevices";
     }
 
     for (const auto & tf : telegram_functions_) {
         if ((tf.telegram_type_id_ == telegram->type_id) && (telegram->type_id != 0xFF)) {
-            return (tf.telegram_type_name_);
+            return tf.telegram_type_name_;
         }
     }
 
@@ -1495,7 +1490,7 @@ bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
             // if the data block is empty and we have not received data before, assume that this telegram
             // is not recognized by the bus master. So remove it from the automatic fetch list
             if (telegram->message_length == 0 && telegram->offset == 0 && !tf.received_) {
-                EMSESP::logger().debug(("This telegram (%s) is not recognized by the EMS bus"), (tf.telegram_type_name_));
+                EMSESP::logger().debug("This telegram (%s) is not recognized by the EMS bus", tf.telegram_type_name_);
                 tf.fetch_ = false;
                 return false;
             }

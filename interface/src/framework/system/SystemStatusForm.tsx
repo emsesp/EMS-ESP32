@@ -32,7 +32,7 @@ import TimerIcon from '@mui/icons-material/Timer';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 import { ButtonRow, FormLoader, SectionContent, MessageBox } from '../../components';
-import { EspPlatform, SystemStatus, Version } from '../../types';
+import { SystemStatus, Version } from '../../types';
 import * as SystemApi from '../../api/system';
 import { extractErrorMessage, useRest } from '../../utils';
 
@@ -276,12 +276,11 @@ const SystemStatusForm: FC = () => {
                 formatNumber(data.free_heap) +
                 ' KB / ' +
                 formatNumber(data.max_alloc_heap) +
-                ' KB ' +
-                (data.esp_platform === EspPlatform.ESP8266 ? '(' + data.heap_fragmentation + '% fragmentation)' : '')
+                ' KB '
               }
             />
           </ListItem>
-          {data.esp_platform === EspPlatform.ESP32 && data.psram_size !== undefined && data.free_psram !== undefined && (
+          {data.psram_size !== undefined && data.free_psram !== undefined && (
             <>
               <Divider variant="inset" component="li" />
               <ListItem>
@@ -306,9 +305,7 @@ const SystemStatusForm: FC = () => {
             </ListItemAvatar>
             <ListItemText
               primary={LL.FLASH()}
-              secondary={
-                formatNumber(data.flash_chip_size) + ' KB / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'
-              }
+              secondary={formatNumber(data.flash_chip_size) + ' KB / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'}
             />
           </ListItem>
           <Divider variant="inset" component="li" />
