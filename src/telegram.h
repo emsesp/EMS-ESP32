@@ -250,11 +250,7 @@ class RxService : public EMSbus {
         if (telegram_error_count_ == 0) {
             return 100; // all good, 100%
         }
-        if (telegram_error_count_ >= telegram_count_) {
-            return 100;
-        }
-        uint8_t q = ((float)telegram_error_count_ / telegram_count_ * 100);
-
+        uint8_t q = (telegram_error_count_ * 100 / (telegram_count_ + telegram_error_count_));
         return (q <= EMS_BUS_QUALITY_RX_THRESHOLD ? 100 : 100 - q);
     }
 

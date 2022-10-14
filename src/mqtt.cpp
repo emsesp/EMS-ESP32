@@ -912,6 +912,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
         dev_json["mf"]         = brand;
         dev_json["mdl"]        = model;
         dev_json["via_device"] = "ems-esp";
+        free(cap_name);
     }
 
     // calculate the min and max
