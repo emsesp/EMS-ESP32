@@ -394,61 +394,96 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     tx_state(telegram->operation); // tx now in a wait state
 }
 
-/*
-// send an array of bytes as a telegram
-// we need to calculate the CRC and append it before sending
-// this function is fire-and-forget. there are no checks or post-send validations
-void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
-    uint8_t telegram_raw[EMS_MAX_TELEGRAM_LENGTH];
-
-    for (uint8_t i = 0; i < length; i++) {
-        telegram_raw[i] = data[i];
-    }
-    telegram_raw[length] = calculate_crc(telegram_raw, length); // apppend CRC
-
-    tx_state(Telegram::Operation::NONE); // no post validation needed
-
-    // send the telegram to the UART Tx
-    uint16_t status = EMSuart::transmit(telegram_raw, length);
-
-    if (status == EMS_TX_STATUS_ERR) {
-        LOG_ERROR("Failed to transmit Tx via UART.");
-        increment_telegram_fail_count(); // another Tx fail
-    }
-}
-*/
-
-void TxService::add(const uint8_t  operation,
+/// send an array of bytes as a telegram
+/// we need to calculate the CRC and append it before sending
+/// this function is fire-and-forget. there are no checks or post-send validations
+/// void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
+///    uint8_t telegram_raw[EMS_MAX_TELEGRAM_LENGTH];
+///
+/// for (uint8_t i = 0; i < length; i++) {
+///    telegram_raw[i] = data[i];
+/// }
+/// telegram_raw[length] = calculate_crc(telegram_raw, length); // apppend CRC
+///
+/// tx_state(Telegram::Operation::NONE); // no post validation needed
+///
+/// send the telegram to the UART Tx
+/// uint16_t status = EMSuart::transmit(telegram_raw, length);
+///
+/// if (status == EMS_TX_STATUS_ERR) {
+///     LOG_ERROR(F("Failed to transmit Tx via UART."));
+///    increment_telegram_fail_count(); // another Tx fail
+/// }
+/// }
+/// \param operation
+/// \param dest
+/// \param type_id
+/// \param offset
+/// \param message_data
+/// \param message_length
+/// \param validate_id
+/// \param prioritize_message
+/// If set, the message gets prioritized over all other messages waiting in the queue
+void TxService::add(const Telegram::Operation  operation,
                     const uint8_t  dest,
                     const uint16_t type_id,
                     const uint8_t  offset,
                     uint8_t *      message_data,
                     const uint8_t  message_length,
-                    const uint16_t validateid,
-                    const bool     front) {
+                    const uint16_t            validate_id,
+                    const bool     prioritize_message) {
     auto telegram = std::make_shared<Telegram>(operation, ems_bus_id(), dest, type_id, offset, message_data, message_length);
 
 #ifdef EMSESP_DEBUG
-    LOG_DEBUG("[DEBUG] New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
+    LOG_DEBUG(F("[DEBUG] New Tx [#%d] telegram, length %d"), tx_telegram_id_, message_length);
 #endif
-
-    // if the queue is full, make room by removing the last one
-    if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
-        if (tx_telegrams_.front().telegram_->operation == Telegram::Operation::TX_WRITE) {
-            telegram_write_fail_count_++;
-        } else {
-            telegram_read_fail_count_++;
+    //If the queue is empty, just append the telegram
+    if (tx_telegrams_.empty()) {
+        tx_telegrams_.emplace_back(tx_telegram_id_, std::move(telegram), false, validate_id);
+        return ;
+    }
+    auto latest_telegram = tx_telegrams_.back().telegram_;
+    if (validate_id != 0) {
+        EMSESP::wait_validate(validate_id);
+#ifdef EMSESP_DEBUG
+        LOG_DEBUG(F("[DEBUG] Old type_id %d : New type_id %d "), latest_telegram->type_id, telegram->type_id);
+        LOG_DEBUG(F("[DEBUG] Old latest_telegram %d : New latest_telegram %d "), latest_telegram->offset, telegram->offset);
+#endif
+        //Replace previous write if the newly created telegram wants to write the same value
+        if (latest_telegram->type_id == telegram->type_id && latest_telegram->offset == telegram->offset && !prioritize_message) {
+            LOG_DEBUG(F("[DEBUG] Replaced telegram [#%d] whit updated version, because it sets the same value"), tx_telegrams_.front().id_);
+            tx_telegrams_.pop_back();
         }
-        tx_telegrams_.pop_front();
-    }
+        else if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+            LOG_WARNING(F("[WARNING] Send queue is full, this indicates a sender which is sending to fast"));
+            if (tx_telegrams_.front().telegram_->operation == Telegram::Operation::TX_WRITE) {
+                telegram_write_fail_count_++;
+            } else {
+                telegram_read_fail_count_++;
+            }
+            if (operation == Telegram::Operation::TX_READ) {
+                // Prioritize periodical read request even if the queue is full to prevent starvation.
+                // Therefore, the oldest queue element gets replaced with the read request.
+                LOG_WARNING(F("[WARNING] Prioritizing read request [#%d] telegram, type_id %d, which resulted in the deletion of [#%d] telegram, type_id %d"),
+                            tx_telegram_id_, telegram->type_id, tx_telegrams_.front().id_, tx_telegrams_.front().telegram_->type_id);
+                tx_telegrams_.pop_front();
+                tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validate_id);
+                return ;
+            } else {
+                LOG_WARNING(F("[WARNING] Queue is full, prioritizing newer write request [#%d] telegram, type_id %d, which resulted in the deletion of "
+                              "the older telegram [#%d] telegram, type_id %d"),
+                            tx_telegram_id_, telegram->type_id, tx_telegrams_.front().id_, tx_telegrams_.front().telegram_->type_id);
+                            tx_telegrams_.pop_front();
+            }
+        } else {
+            if (prioritize_message) {
+                LOG_DEBUG(F("[DEBUG] Writing a prioritized message to the queue [#%d] telegram, type_id %d"), telegram->type_id);
+                tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validate_id);
+            } else {
+                tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validate_id);
+            }
 
-    if (front) {
-        tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validateid); // add to front of queue
-    } else {
-        tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validateid); // add to back of queue
-    }
-    if (validateid != 0) {
-        EMSESP::wait_validate(validateid);
+        }
     }
 }
 
