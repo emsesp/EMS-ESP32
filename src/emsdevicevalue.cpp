@@ -340,7 +340,7 @@ bool DeviceValue::get_custom_min(int16_t & val) {
         if (fahrenheit) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }
-        if (v > max) {
+        if (max > 0 && v > max) {
             return false;
         }
         val = v;

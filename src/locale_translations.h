@@ -457,6 +457,7 @@ MAKE_PSTR_LIST(wwProgMode, "wwprogmode", "program", "Programmmodus", "Programma"
 MAKE_PSTR_LIST(wwCircProg, "wwcircprog", "circulation program", "Zirkulationsprogramm", "Circulatieprogramma", "Cirkulationsprogram", "program cyrkulacji c.w.u.")
 MAKE_PSTR_LIST(wwMaxTemp, "wwmaxtemp", "maximum temperature", "Maximale Temperatur", "Maximale temperatuur", "Maximal Temperatur", "temperatura maksymalna")
 MAKE_PSTR_LIST(wwOneTimeKey, "wwonetimekey", "one time key function", "Einmalladungstaste", "Knop voor eenmalig laden buffer", "Engångsfunktion", "przycisk jednorazowego ogrzania")
+MAKE_PSTR_LIST(wwSolarTemp, "wwsolartemp", "solar boiler temperature", "Solarboiler Temperatur", "Zonneboiler temperatuur", "", "")
 
 // mqtt values / commands
 

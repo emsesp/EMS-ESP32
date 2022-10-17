@@ -577,6 +577,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           FL_(wwSelTempSingle),
                           DeviceValueUOM::DEGREES,
                           MAKE_CF_CB(set_ww_temp_single));
+    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &wwSolarTemp_, DeviceValueType::USHORT, FL_(wwSolarTemp), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &wwType_, DeviceValueType::ENUM, FL_(enum_flow), FL_(wwType), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                           &wwComfort_,
@@ -873,6 +874,7 @@ void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
 
     has_update(telegram, wwType_, 8);
     has_update(telegram, wwCurFlow_, 9);
+    has_update(telegram, wwSolarTemp_, 17);
     has_update(telegram, wwWorkM_, 10, 3);  // force to 3 bytes
     has_update(telegram, wwStarts_, 13, 3); // force to 3 bytes
 
