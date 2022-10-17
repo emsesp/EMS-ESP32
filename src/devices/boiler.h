@@ -90,6 +90,7 @@ class Boiler : public EMSdevice {
     uint8_t  wwTapActivated_;  // maintenance-mode to switch DHW off
     uint16_t wwMixerTemp_;     // mixing temperature
     uint16_t wwCylMiddleTemp_; // Cyl middle temperature (TS3)
+    uint16_t wwSolarTemp_;
 
     // main
     uint8_t  reset_;            // for reset command
