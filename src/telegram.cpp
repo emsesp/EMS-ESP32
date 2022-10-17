@@ -431,58 +431,60 @@ void TxService::add(const Telegram::Operation  operation,
                     uint8_t *      message_data,
                     const uint8_t  message_length,
                     const uint16_t            validate_id,
-                    const bool     prioritize_message) {
-    auto telegram = std::make_shared<Telegram>(operation, ems_bus_id(), dest, type_id, offset, message_data, message_length);
-
-#ifdef EMSESP_DEBUG
-    LOG_DEBUG(F("[DEBUG] New Tx [#%d] telegram, length %d"), tx_telegram_id_, message_length);
-#endif
-    //If the queue is empty, just append the telegram
+                    bool     system_message) {
+    //TODO set the system_message on each call accordingly and then remove this!
+    //Right now every read operation is a system generated message
+    if (operation == Telegram::Operation::TX_READ) {
+        system_message = true;
+    }
+    auto new_telegram = std::make_shared<Telegram>(operation, ems_bus_id(), dest, type_id, offset, message_data, message_length);
+    tx_telegram_id_++;
+    //If the queue is empty, just append the telegram.
     if (tx_telegrams_.empty()) {
-        tx_telegrams_.emplace_back(tx_telegram_id_, std::move(telegram), false, validate_id);
+        tx_telegrams_.emplace_back(tx_telegram_id_, std::move(new_telegram), false, validate_id, system_message);
         return ;
     }
-    auto latest_telegram = tx_telegrams_.back().telegram_;
-    if (validate_id != 0) {
-        EMSESP::wait_validate(validate_id);
-#ifdef EMSESP_DEBUG
-        LOG_DEBUG(F("[DEBUG] Old type_id %d : New type_id %d "), latest_telegram->type_id, telegram->type_id);
-        LOG_DEBUG(F("[DEBUG] Old latest_telegram %d : New latest_telegram %d "), latest_telegram->offset, telegram->offset);
-#endif
-        //Replace previous write if the newly created telegram wants to write the same value
-        if (latest_telegram->type_id == telegram->type_id && latest_telegram->offset == telegram->offset && !prioritize_message) {
-            LOG_DEBUG(F("[DEBUG] Replaced telegram [#%d] whit updated version, because it sets the same value"), tx_telegrams_.front().id_);
-            tx_telegrams_.pop_back();
-        }
-        else if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
-            LOG_WARNING(F("[WARNING] Send queue is full, this indicates a sender which is sending to fast"));
-            if (tx_telegrams_.front().telegram_->operation == Telegram::Operation::TX_WRITE) {
-                telegram_write_fail_count_++;
-            } else {
-                telegram_read_fail_count_++;
-            }
-            if (operation == Telegram::Operation::TX_READ) {
-                // Prioritize periodical read request even if the queue is full to prevent starvation.
-                // Therefore, the oldest queue element gets replaced with the read request.
-                LOG_WARNING(F("[WARNING] Prioritizing read request [#%d] telegram, type_id %d, which resulted in the deletion of [#%d] telegram, type_id %d"),
-                            tx_telegram_id_, telegram->type_id, tx_telegrams_.front().id_, tx_telegrams_.front().telegram_->type_id);
-                tx_telegrams_.pop_front();
-                tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validate_id);
+    //If it's a system message, ignore potentially full queue and place the system message in front of the queue.
+    else if (system_message) {
+        LOG_DEBUG(F("[DEBUG] Prioritized new system message [#%d] telegram, length %d"), tx_telegram_id_, message_length);
+        tx_telegrams_.emplace_front(tx_telegram_id_, std::move(new_telegram), false, validate_id, system_message);
+        return ;
+    } else {
+        uint8_t system_messages_count = 0;
+        uint8_t i                     = 0;
+        // Search the queue for an entry which sets the same value. If one is found replace the old value with the newer one.
+        for (auto queued_telegram = tx_telegrams_.cbegin(); queued_telegram != tx_telegrams_.cend(); ++queued_telegram) {
+            if (queued_telegram->system_message_) {
+                system_messages_count++;
+            } else if (queued_telegram->telegram_->type_id == new_telegram->type_id && queued_telegram->telegram_->offset == new_telegram->offset) {
+                // Found a write operation which sets the same value as the newly arrived write, therefore replacing the old one
+                LOG_DEBUG(F("[DEBUG] Replaced telegram [#%d] whit updated version, because it sets the same value"), tx_telegrams_.front().id_);
+                tx_telegrams_[i] = QueuedTxTelegram(tx_telegram_id_, std::move(new_telegram), false, validate_id, false);
                 return ;
-            } else {
-                LOG_WARNING(F("[WARNING] Queue is full, prioritizing newer write request [#%d] telegram, type_id %d, which resulted in the deletion of "
-                              "the older telegram [#%d] telegram, type_id %d"),
-                            tx_telegram_id_, telegram->type_id, tx_telegrams_.front().id_, tx_telegrams_.front().telegram_->type_id);
-                            tx_telegrams_.pop_front();
             }
-        } else {
-            if (prioritize_message) {
-                LOG_DEBUG(F("[DEBUG] Writing a prioritized message to the queue [#%d] telegram, type_id %d"), telegram->type_id);
-                tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validate_id);
-            } else {
-                tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validate_id);
+            i++;
+        }
+        //No duplicate write request was found therefore appending the new write operation to the queue.
+        tx_telegrams_.emplace_back(tx_telegram_id_, std::move(new_telegram), false, validate_id, false);
+        // Handle full queue, system generated massages are ignored at the length calculation.
+        if ((tx_telegrams_.size() + system_messages_count) >= MAX_TX_TELEGRAMS) {
+            LOG_WARNING(F("[WARNING] Send queue is full, this indicates a sender which is sending to fast"));
+            std::deque<QueuedTxTelegram> system_telegrams;
+            //Backup the system telegrams
+            for (int j = 0; j < system_messages_count; ++j) {
+                system_telegrams.emplace_back(tx_telegrams_.front());
+                tx_telegrams_.pop_front();
             }
-
+            LOG_WARNING(F("[WARNING] Send-queue is full, prioritizing newer write request [#%d] telegram, type_id %d, which resulted in the deletion of "
+                          "the older telegram [#%d] telegram, type_id %d"),
+                        tx_telegram_id_, new_telegram->type_id, tx_telegrams_.front().id_, tx_telegrams_.front().telegram_->type_id);
+            //Delete the oldest non system telegram.
+            tx_telegrams_.pop_front();
+            //Restore the system telegrams.
+            for (int j = 0; j < system_messages_count; ++j) {
+                tx_telegrams_.emplace_front(system_telegrams.front());
+                system_telegrams.pop_front();
+            }
         }
     }
 }
@@ -561,10 +563,10 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 
     if (front) {
         // tx_telegrams_.push_front(qtxt); // add to front of queue
-        tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validate_id); // add to front of queue
+        tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validate_id, true); // add to front of queue
     } else {
         // tx_telegrams_.push_back(qtxt); // add to back of queue
-        tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validate_id); // add to back of queue
+        tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validate_id, true); // add to back of queue
     }
     if (validate_id != 0) {
         EMSESP::wait_validate(validate_id);
@@ -670,7 +672,7 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         tx_telegrams_.pop_back();
     }
 
-    tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram_last_), true, get_post_send_query());
+    tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram_last_), true, get_post_send_query(), true);
 }
 
 // send a request to read the next block of data from longer telegrams

@@ -382,17 +382,19 @@ class TxService : public EMSbus {
     }
 
     struct QueuedTxTelegram {
-        const uint16_t                        id_;
-        const std::shared_ptr<const Telegram> telegram_;
-        const bool                            retry_; // true if its a retry
-        const uint16_t                        validateid_;
+        uint16_t                        id_;
+        std::shared_ptr<const Telegram> telegram_;
+        bool                            retry_; // true if its a retry
+        uint16_t                        validateid_;
+        bool system_message_; //true if it's a system telegram
 
         ~QueuedTxTelegram() = default;
-        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram, bool retry, uint16_t validateid)
+        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram, bool retry, uint16_t validateid, bool system_message)
             : id_(id)
             , telegram_(std::move(telegram))
             , retry_(retry)
-            , validateid_(validateid) {
+            , validateid_(validateid)
+            , system_message_(system_message){
         }
     };
 
@@ -413,7 +415,7 @@ class TxService : public EMSbus {
     static constexpr uint32_t POST_SEND_DELAY = 2000;
 
   private:
-    std::deque<QueuedTxTelegram> tx_telegrams_; // the Tx queue
+    std::deque<std::QueuedTxTelegram> tx_telegrams_; // the Tx queue
 
     uint32_t telegram_read_count_       = 0; // # Tx successful reads
     uint32_t telegram_write_count_      = 0; // # Tx successful writes
