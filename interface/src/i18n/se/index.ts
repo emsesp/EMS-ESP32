@@ -174,6 +174,10 @@ const se: BaseTranslation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Är du säker att du vill fabriksåterställa enheten?',
   VERSION_CHECK: 'Kontrollera version',
   THE_LATEST: 'Den senaste',
+  OFFICIAL: 'official',
+  DEVELOPMENT: 'development',
+  /**VERSION_IS: 'version is',*/
+  RELEASE_NOTES: 'release notes',
   PLATFORM: 'Enhet (Plattform / SDK)',
   UPTIME: 'Systemets Uptid',
   CPU_FREQ: 'CPU-frekvens',

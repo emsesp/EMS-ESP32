@@ -1150,7 +1150,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
     // always render boolean as strings true & false
     // and has no unit of measure or icon
     if (type == DeviceValueType::BOOL) {
-        char result[10];
+        char result[12];
         doc["payload_on"]  = Helpers::render_boolean(result, true);
         doc["payload_off"] = Helpers::render_boolean(result, false);
         doc[sc_ha]         = F_(measurement);

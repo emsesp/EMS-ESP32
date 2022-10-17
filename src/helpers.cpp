@@ -179,9 +179,9 @@ char * Helpers::render_boolean(char * result, const bool value, const bool dashb
     uint8_t bool_format_ = dashboard ? EMSESP::system_.bool_dashboard() : EMSESP::system_.bool_format();
 
     if (bool_format_ == BOOL_FORMAT_ONOFF_STR) {
-        strlcpy(result, value ? translated_word(FL_(on)) : translated_word(FL_(off)), 5);
+        strlcpy(result, value ? translated_word(FL_(on)) : translated_word(FL_(off)), 12);
     } else if (bool_format_ == BOOL_FORMAT_ONOFF_STR_CAP) {
-        strlcpy(result, value ? translated_word(FL_(ON)) : translated_word(FL_(OFF)), 5);
+        strlcpy(result, value ? translated_word(FL_(ON)) : translated_word(FL_(OFF)), 12);
     } else if ((bool_format_ == BOOL_FORMAT_10) || (bool_format_ == BOOL_FORMAT_10_STR)) {
         strlcpy(result, value ? "1" : "0", 2);
     } else {

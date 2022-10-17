@@ -143,7 +143,7 @@ void Shower::set_shower_state(bool state, bool force) {
     old_shower_state_ = shower_state_; // copy current state
 
     // always publish as a string
-    char s[7];
+    char s[12];
     Mqtt::publish("shower_active", Helpers::render_boolean(s, shower_state_)); // https://github.com/emsesp/EMS-ESP/issues/369
 
     // send out HA MQTT Discovery config topic
@@ -157,7 +157,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["stat_t"]  = "~/shower_active";
 
         // always render boolean as strings for HA
-        char result[10];
+        char result[12];
         doc[("payload_on")]  = Helpers::render_boolean(result, true);
         doc[("payload_off")] = Helpers::render_boolean(result, false);
 

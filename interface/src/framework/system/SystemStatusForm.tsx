@@ -129,13 +129,13 @@ const SystemStatusForm: FC = () => {
           <MessageBox my={0} level="info" message={LL.SYSTEM_VERSION_RUNNING() + ' ' + data?.emsesp_version} />
           {latestVersion && (
             <Box mt={2} mb={2}>
-              {LL.THE_LATEST()}&nbsp;<u>official</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestVersion.version}</b>&nbsp;(
+              {LL.THE_LATEST()}&nbsp;<u>{LL.OFFICIAL()}</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestVersion.version}</b>&nbsp;(
               <Link target="_blank" href={latestVersion.changelog} color="primary">
-                {'release notes'}
+                {LL.RELEASE_NOTES()}
               </Link>
               )&nbsp;(
               <Link target="_blank" href={latestVersion.url} color="primary">
-                {'download'}
+                {LL.DOWNLOAD()}
               </Link>
               )
             </Box>
@@ -143,14 +143,14 @@ const SystemStatusForm: FC = () => {
 
           {latestDevVersion && (
             <Box mt={2} mb={2}>
-              {LL.THE_LATEST()}&nbsp;<u>development</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestDevVersion.version}</b>
+              {LL.THE_LATEST()}&nbsp;<u>{LL.DEVELOPMENT()}</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestDevVersion.version}</b>
               &nbsp;(
               <Link target="_blank" href={latestDevVersion.changelog} color="primary">
-                {'release notes'}
+                {LL.RELEASE_NOTES()}
               </Link>
               )&nbsp;(
               <Link target="_blank" href={latestDevVersion.url} color="primary">
-                {'download'}
+                {LL.DOWNLOAD()}
               </Link>
               )
             </Box>

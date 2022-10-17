@@ -702,9 +702,21 @@ type RootTranslation = {
 	 */
 	THE_LATEST: string
 	/**
+	 * o​f​f​i​c​i​a​l
+	 */
+	OFFICIAL: string
+	/**
+	 * d​e​v​e​l​o​p​m​e​n​t
+	 */
+	DEVELOPMENT: string
+	/**
 	 * v​e​r​s​i​o​n​ ​i​s
 	 */
 	VERSION_IS: string
+	/**
+	 * r​e​l​e​a​s​e​ ​n​o​t​e​s
+	 */
+	RELEASE_NOTES: string
 	/**
 	 * D​e​v​i​c​e​ ​(​P​l​a​t​f​o​r​m​ ​/​ ​S​D​K​)
 	 */
@@ -1723,9 +1735,21 @@ export type TranslationFunctions = {
 	 */
 	THE_LATEST: () => LocalizedString
 	/**
+	 * official
+	 */
+	OFFICIAL: () => LocalizedString
+	/**
+	 * development
+	 */
+	DEVELOPMENT: () => LocalizedString
+	/**
 	 * version is
 	 */
 	VERSION_IS: () => LocalizedString
+	/**
+	 * release notes
+	 */
+	RELEASE_NOTES: () => LocalizedString
 	/**
 	 * Device (Platform / SDK)
 	 */

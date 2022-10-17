@@ -761,7 +761,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
             // handle Booleans (true, false), use strings, no native true/false)
             if (dv.type == DeviceValueType::BOOL) {
                 auto value_b = (bool)*(uint8_t *)(dv.value_p);
-                char s[7];
+                char s[12];
                 obj["v"] = Helpers::render_boolean(s, value_b, true);
             }
 
@@ -829,7 +829,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                     }
                 } else if (dv.type == DeviceValueType::BOOL) {
                     JsonArray l = obj.createNestedArray("l");
-                    char      result[10];
+                    char      result[12];
                     l.add(Helpers::render_boolean(result, false, true));
                     l.add(Helpers::render_boolean(result, true, true));
                 }
@@ -874,7 +874,7 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
             // handle Booleans (true, false), use strings, no native true/false)
             if (dv.type == DeviceValueType::BOOL) {
                 auto value_b = (bool)*(uint8_t *)(dv.value_p);
-                char s[7];
+                char s[12];
                 obj["v"] = Helpers::render_boolean(s, value_b, true);
             }
 
@@ -1144,7 +1144,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                     } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
                         json[value] = value_b ? 1 : 0;
                     } else {
-                        char s[7];
+                        char s[12];
                         json[value] = Helpers::render_boolean(s, value_b);
                     }
                 }
@@ -1298,17 +1298,17 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                 // see how to render the value depending on the setting
                 auto value_b = (bool)*(uint8_t *)(dv.value_p);
                 if (Mqtt::ha_enabled() && (output_target == OUTPUT_TARGET::MQTT)) {
-                    char s[7];
+                    char s[12];
                     json[name] = Helpers::render_boolean(s, value_b); // for HA always render as string
                 } else if (output_target == OUTPUT_TARGET::CONSOLE) {
-                    char s[7];
+                    char s[12];
                     json[name] = Helpers::render_boolean(s, value_b, true); // console use web settings
                 } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                     json[name] = value_b;
                 } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
                     json[name] = value_b ? 1 : 0;
                 } else {
-                    char s[7];
+                    char s[12];
                     json[name] = Helpers::render_boolean(s, value_b);
                 }
             }
