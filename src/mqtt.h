@@ -297,6 +297,9 @@ class Mqtt {
     static uint8_t  connectcount_;
     static bool     ha_climate_reset_;
 
+    static std::string lasttopic_;
+    static std::string lastpayload_;
+
     // settings, copied over
     static std::string mqtt_base_;
     static std::string mqtt_basename_;
