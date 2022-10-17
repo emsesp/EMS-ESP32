@@ -415,7 +415,7 @@ class TxService : public EMSbus {
     static constexpr uint32_t POST_SEND_DELAY = 2000;
 
   private:
-    std::deque<std::QueuedTxTelegram> tx_telegrams_; // the Tx queue
+    std::deque<QueuedTxTelegram> tx_telegrams_; // the Tx queue
 
     uint32_t telegram_read_count_       = 0; // # Tx successful reads
     uint32_t telegram_write_count_      = 0; // # Tx successful writes
