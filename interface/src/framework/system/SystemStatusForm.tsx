@@ -124,7 +124,7 @@ const SystemStatusForm: FC = () => {
   const renderVersionDialog = () => {
     return (
       <Dialog open={showingVersion} onClose={() => setShowingVersion(false)}>
-        <DialogTitle>{LL.VERSION_CHECK()}</DialogTitle>
+        <DialogTitle>{LL.VERSION_CHECK(1)}</DialogTitle>
         <DialogContent dividers>
           <MessageBox my={0} level="info" message={LL.SYSTEM_VERSION_RUNNING() + ' ' + data?.emsesp_version} />
           {latestVersion && (
@@ -232,7 +232,7 @@ const SystemStatusForm: FC = () => {
             <ListItemText primary="EMS-ESP Version" secondary={'v' + data.emsesp_version} />
             {latestVersion && (
               <Button color="primary" onClick={() => setShowingVersion(true)}>
-                {LL.VERSION_CHECK()}
+                {LL.VERSION_CHECK(0)}
               </Button>
             )}
           </ListItem>

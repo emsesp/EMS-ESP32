@@ -173,7 +173,7 @@ const pl: BaseTranslation = {
   FACTORY_RESET: 'Ustawienia fabryczne',
   SYSTEM_FACTORY_TEXT: 'Interfejs EMS-ESP został przywrócony do ustawień fabrycznych i zostanie teraz ponownie uruchomiony.',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Czy jesteś pewien, że chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP? ',
-  VERSION_CHECK: 'Wersje firmware\'u',
+  VERSION_CHECK: '{{Sprawdź wersję (main translation idx=0)|Sprawdzanie wersji (alt translation idx=1)|not used (translation idx=other)}}',
   THE_LATEST: 'Najnowsza',
   OFFICIAL: 'oficjalna',
   DEVELOPMENT: 'testowa',

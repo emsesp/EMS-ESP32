@@ -1729,7 +1729,7 @@ export type TranslationFunctions = {
 	/**
 	 * Version Check
 	 */
-	VERSION_CHECK: () => LocalizedString
+	VERSION_CHECK: (arg0: string | number | boolean) => LocalizedString
 	/**
 	 * The latest
 	 */
