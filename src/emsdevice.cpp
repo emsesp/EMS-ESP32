@@ -157,6 +157,14 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
         return DeviceType::ANALOGSENSOR;
     }
 
+    if (!strcmp(lowtopic, F_(switch))) {
+        return DeviceType::SWITCH;
+    }
+
+    if (!strcmp(lowtopic, F_(gateway))) {
+        return DeviceType::GATEWAY;
+    }
+
     return DeviceType::UNKNOWN;
 }
 
