@@ -546,14 +546,14 @@ bool System::heartbeat_json(JsonObject & output) {
     output["uptime_sec"] = uuid::get_uptime_sec();
     bool value_b         = EMSESP::system_.ntp_connected();
     if (Mqtt::ha_enabled()) {
-        char s[7];
+        char s[12];
         output["ntp_status"] = Helpers::render_boolean(s, value_b); // for HA always render as string
     } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
         output["ntp_status"] = value_b;
     } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
         output["ntp_status"] = value_b ? 1 : 0;
     } else {
-        char s[7];
+        char s[12];
         output["ntp_status"] = Helpers::render_boolean(s, value_b);
     }
     output["rxreceived"] = EMSESP::rxservice_.telegram_count();
