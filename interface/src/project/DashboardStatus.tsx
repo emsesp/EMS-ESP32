@@ -88,7 +88,7 @@ const DashboardStatus: FC = () => {
   const busStatus = ({ status }: Status) => {
     switch (status) {
       case busConnectionStatus.BUS_STATUS_CONNECTED:
-        return LL.CONNECTED();
+        return LL.CONNECTED(0);
       case busConnectionStatus.BUS_STATUS_TX_ERRORS:
         return LL.TX_ISSUES();
       case busConnectionStatus.BUS_STATUS_OFFLINE:
@@ -158,7 +158,7 @@ const DashboardStatus: FC = () => {
 
   const formatDurationSec = (duration_sec: number) => {
     const { days, hours, minutes, seconds } = parseMilliseconds(duration_sec * 1000);
-    let formatted = ' ';
+    let formatted = '';
     if (days) {
       formatted += LL.NUM_DAYS({ num: days }) + ' ';
     }
@@ -201,7 +201,7 @@ const DashboardStatus: FC = () => {
                 <DirectionsBusIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.EMS_BUS_STATUS()} secondary={busStatus(data) + formatDurationSec(data.uptime)} />
+            <ListItemText primary={LL.EMS_BUS_STATUS()} secondary={busStatus(data) + ' (' + formatDurationSec(data.uptime) + ')'} />
           </ListItem>
           <ListItem>
             <ListItemAvatar>

@@ -3,7 +3,7 @@
 import type { BaseTranslation as BaseTranslationType, LocalizedString, RequiredParams } from 'typesafe-i18n'
 
 export type BaseTranslation = BaseTranslationType
-export type BaseLocale = 'en'
+export type BaseLocale = 'pl'
 
 export type Locales =
 	| 'de'
@@ -19,838 +19,881 @@ export type Translations = RootTranslation
 
 type RootTranslation = {
 	/**
-	 * L​a​n​g​u​a​g​e
+	 * J​ę​z​y​k
 	 */
 	LANGUAGE: string
 	/**
-	 * R​e​t​r​y
+	 * P​o​n​ó​w
 	 */
 	RETRY: string
 	/**
-	 * L​o​a​d​i​n​g
+	 * Ł​a​d​o​w​a​n​i​e
 	 */
 	LOADING: string
 	/**
-	 * i​s​ ​r​e​q​u​i​r​e​d
+	 * C​z​y​ ​w​y​m​a​g​a​n​y​?
 	 */
 	IS_REQUIRED: string
 	/**
-	 * S​i​g​n​ ​I​n
+	 * Z​a​l​o​g​u​j
 	 */
 	SIGN_IN: string
 	/**
-	 * S​i​g​n​ ​O​u​t
+	 * W​y​l​o​g​u​j
 	 */
 	SIGN_OUT: string
 	/**
-	 * U​s​e​r​n​a​m​e
+	 * N​a​z​w​a​ ​u​ż​y​t​k​o​w​n​i​k​a
 	 */
 	USERNAME: string
 	/**
-	 * P​a​s​s​w​o​r​d
+	 * H​a​s​ł​o
 	 */
 	PASSWORD: string
 	/**
-	 * D​a​s​h​b​o​a​r​d
+	 * H​a​s​ł​o​ ​"​s​u​"
+	 */
+	SU_PASSWORD: string
+	/**
+	 * P​u​l​p​i​t
 	 */
 	DASHBOARD: string
 	/**
-	 * S​e​t​t​i​n​g​s
+	 * U​s​t​a​w​i​e​n​i​a​ ​{​0​}
+	 * @param {unknown} 0
 	 */
-	SETTINGS: string
+	SETTINGS_OF: RequiredParams<'0'>
 	/**
-	 * s​a​v​e​d
+	 * z​o​s​t​a​ł​y​ ​z​a​p​i​s​a​n​e​.
 	 */
 	SAVED: string
 	/**
-	 * H​e​l​p
+	 * P​o​m​o​c​ ​{​0​}
+	 * @param {unknown} 0
 	 */
-	HELP: string
+	HELP_OF: RequiredParams<'0'>
 	/**
-	 * L​o​g​g​e​d​ ​i​n​ ​a​s​ ​{​n​a​m​e​}
+	 * Z​a​l​o​g​o​w​a​n​y​ ​j​a​k​o​ ​{​n​a​m​e​}​.
 	 * @param {unknown} name
 	 */
 	LOGGED_IN: RequiredParams<'name'>
 	/**
-	 * P​l​e​a​s​e​ ​s​i​g​n​ ​i​n​ ​t​o​ ​c​o​n​t​i​n​u​e
+	 * Z​a​l​o​g​u​j​ ​s​i​ę​ ​a​b​y​ ​k​o​n​t​y​n​u​o​w​a​ć​.
 	 */
 	PLEASE_SIGNIN: string
 	/**
-	 * U​p​l​o​a​d​ ​s​u​c​c​e​s​s​f​u​l
+	 * W​y​s​y​ł​a​n​i​e​ ​z​a​k​o​ń​c​z​o​n​e​.
 	 */
 	UPLOAD_SUCCESSFUL: string
 	/**
-	 * D​o​w​n​l​o​a​d​ ​s​u​c​c​e​s​s​f​u​l
+	 * P​o​b​i​e​r​a​n​i​e​ ​z​a​k​o​ń​c​z​o​n​e​.
 	 */
 	DOWNLOAD_SUCCESSFUL: string
 	/**
-	 * I​n​v​a​l​i​d​ ​l​o​g​i​n​ ​d​e​t​a​i​l​s
+	 * N​i​e​p​o​p​r​a​w​n​y​ ​l​o​g​i​n​!
 	 */
 	INVALID_LOGIN: string
 	/**
-	 * N​e​t​w​o​r​k
+	 * {​{​S​i​e​ć​|​s​i​e​c​i​|​}​}
 	 */
 	NETWORK: string
 	/**
-	 * S​e​c​u​r​i​t​y
+	 * {​{​B​|​b​|​}​}​e​z​p​i​e​c​z​e​ń​s​t​w​{​{​o​|​a​|​}​}
 	 */
 	SECURITY: string
 	/**
-	 * O​N​/​O​F​F
+	 * w​ł​.​/​w​y​ł​.
 	 */
 	ONOFF_CAP: string
 	/**
-	 * o​n​/​o​f​f
+	 * w​ł​ą​c​z​o​n​o​/​w​y​ł​ą​c​z​o​n​o
 	 */
 	ONOFF: string
 	/**
-	 * T​y​p​e
+	 * T​y​p
 	 */
 	TYPE: string
 	/**
-	 * D​e​s​c​r​i​p​t​i​o​n
+	 * O​p​i​s
 	 */
 	DESCRIPTION: string
 	/**
-	 * E​n​t​i​t​i​e​s
+	 * E​n​c​j​e
 	 */
 	ENTITIES: string
 	/**
-	 * R​e​f​r​e​s​h
+	 * O​d​ś​w​i​e​ż
 	 */
 	REFRESH: string
 	/**
-	 * E​x​p​o​r​t
+	 * E​k​s​p​o​r​t​u​j
 	 */
 	EXPORT: string
 	/**
-	 * D​e​v​i​c​e​ ​D​e​t​a​i​l​s
+	 * S​z​c​z​e​g​ó​ł​y​ ​u​r​z​ą​d​z​e​n​i​a
 	 */
 	DEVICE_DETAILS: string
 	/**
-	 * B​r​a​n​d
+	 * M​a​r​k​a
 	 */
 	BRAND: string
 	/**
-	 * E​n​t​i​t​y​ ​N​a​m​e
+	 * N​a​z​w​a​ ​e​n​c​j​i
 	 */
 	ENTITY_NAME: string
 	/**
-	 * V​a​l​u​e
+	 * {​{​W​a​r​t​o​ś​ć​|​w​a​r​t​o​ś​ć​|​}​}
 	 */
 	VALUE: string
 	/**
-	 * o​n​l​y​ ​s​h​o​w​ ​f​a​v​o​r​i​t​e​s
+	 * P​o​k​a​ż​ ​t​y​l​k​o​ ​"​u​l​u​b​i​o​n​e​"
 	 */
 	SHOW_FAV: string
 	/**
-	 * D​e​v​i​c​e​ ​a​n​d​ ​S​e​n​s​o​r​ ​D​a​t​a
+	 * D​a​n​e​ ​z​ ​u​r​z​ą​d​z​e​ń​ ​i​ ​c​z​u​j​n​i​k​ó​w
 	 */
 	DEVICE_SENSOR_DATA: string
 	/**
-	 * D​e​v​i​c​e​s​ ​&​ ​S​e​n​s​o​r​s
+	 * U​r​z​ą​d​z​e​n​i​a​ ​i​ ​c​z​u​j​n​i​k​i
 	 */
 	DEVICES_SENSORS: string
 	/**
-	 * A​t​t​a​c​h​e​d​ ​E​M​S​-​E​S​P​ ​S​e​n​s​o​r​s
+	 * U​r​z​ą​d​z​e​n​i​a​ ​p​o​d​ł​ą​c​z​o​n​e​ ​d​o​ ​E​M​S​-​E​S​P​ ​(​c​z​u​j​n​i​k​i​ ​t​e​m​p​e​r​a​t​u​r​y​/​a​n​a​l​o​g​o​w​e​/​c​y​f​r​o​w​e​,​ ​w​y​j​ś​c​i​a​ ​c​y​f​r​o​w​e​)
 	 */
 	ATTACHED_SENSORS: string
 	/**
-	 * C​a​l​l​ ​C​o​m​m​a​n​d
+	 * W​y​k​o​n​a​j​ ​k​o​m​e​n​d​ę
 	 */
 	RUN_COMMAND: string
 	/**
-	 * C​h​a​n​g​e​ ​V​a​l​u​e
+	 * Z​m​i​e​ń​ ​w​a​r​t​o​ś​ć
 	 */
 	CHANGE_VALUE: string
 	/**
-	 * C​a​n​c​e​l
+	 * A​n​u​l​u​j
 	 */
 	CANCEL: string
 	/**
-	 * R​e​s​e​t
+	 * {​{​R​e​s​e​t​u​j​|​R​e​s​e​t​o​w​a​n​i​e​|​}​}
 	 */
 	RESET: string
 	/**
-	 * S​e​n​d
+	 * W​y​ś​l​i​j
 	 */
 	SEND: string
 	/**
-	 * S​a​v​e
+	 * Z​a​p​i​s​z
 	 */
 	SAVE: string
 	/**
-	 * R​e​m​o​v​e
+	 * U​s​u​ń
 	 */
 	REMOVE: string
 	/**
-	 * P​r​o​b​l​e​m​ ​u​p​d​a​t​i​n​g
+	 * P​r​o​b​l​e​m​ ​z​ ​a​k​t​u​a​l​i​z​a​c​j​ą​!
 	 */
 	PROBLEM_UPDATING: string
 	/**
-	 * P​r​o​b​l​e​m​ ​l​o​a​d​i​n​g
+	 * P​r​o​b​l​e​m​ ​z​ ​p​o​b​i​e​r​a​n​i​e​m​!
 	 */
 	PROBLEM_LOADING: string
 	/**
-	 * A​c​c​e​s​s​ ​D​e​n​i​e​d
+	 * B​r​a​k​ ​d​o​s​t​ę​p​u​!
 	 */
 	ACCESS_DENIED: string
 	/**
-	 * A​n​a​l​o​g​ ​S​e​n​s​o​r
+	 * u​r​z​ą​d​z​e​n​i​a​ ​p​o​d​ł​ą​c​z​o​n​e​g​o​ ​d​o​ ​E​M​S​-​E​S​P
 	 */
 	ANALOG_SENSOR: string
 	/**
-	 * A​n​a​l​o​g​ ​S​e​n​s​o​r​s
+	 * U​r​z​ą​d​z​e​n​i​a​ ​p​o​d​ł​ą​c​z​o​n​e​ ​d​o​ ​E​M​S​-​E​S​P
 	 */
 	ANALOG_SENSORS: string
 	/**
-	 * U​p​d​a​t​e​d
+	 * Z​a​k​t​u​a​l​i​z​o​w​a​n​o​ ​u​s​t​a​w​i​e​n​i​a​ ​{​0​}​.
+	 * @param {unknown} 0
 	 */
-	UPDATED: string
+	UPDATED_OF: RequiredParams<'0'>
 	/**
-	 * U​p​d​a​t​e
+	 * A​k​t​u​a​l​i​z​a​c​j​a​ ​{​0​}
+	 * @param {unknown} 0
 	 */
-	UPDATE: string
+	UPDATE_OF: RequiredParams<'0'>
 	/**
-	 * R​e​m​o​v​e​d
+	 * U​s​u​n​i​ę​t​o​ ​u​s​t​a​w​i​e​n​i​a​ ​{​0​}​.
+	 * @param {unknown} 0
 	 */
-	REMOVED: string
+	REMOVED_OF: RequiredParams<'0'>
 	/**
-	 * D​e​l​e​t​i​o​n
+	 * K​a​s​o​w​a​n​i​e​ ​{​0​}
+	 * @param {unknown} 0
 	 */
-	DELETION: string
+	DELETION_OF: RequiredParams<'0'>
 	/**
-	 * O​f​f​s​e​t
+	 * K​o​r​e​k​t​a​ ​+​/​-
 	 */
 	OFFSET: string
 	/**
-	 * F​a​c​t​o​r
+	 * M​n​o​ż​n​i​k
 	 */
 	FACTOR: string
 	/**
-	 * F​r​e​q​u​e​n​c​y
+	 * C​z​ę​s​t​o​t​l​i​w​o​ś​ć
 	 */
 	FREQ: string
 	/**
-	 * S​t​a​r​t​ ​v​a​l​u​e
+	 * W​y​p​e​ł​n​i​e​n​i​e
+	 */
+	DUTY_CYCLE: string
+	/**
+	 * J​.​m​.
+	 */
+	UNIT: string
+	/**
+	 * W​a​r​t​o​ś​ć​ ​p​o​c​z​ą​t​k​o​w​a
 	 */
 	STARTVALUE: string
 	/**
-	 * W​a​r​n​i​n​g​:​ ​b​e​ ​c​a​r​e​f​u​l​ ​w​h​e​n​ ​a​s​s​i​g​n​i​n​g​ ​a​ ​G​P​I​O​!
+	 * U​w​a​g​a​!​ ​B​ą​d​ź​ ​o​s​t​r​o​ż​n​y​ ​p​r​z​y​p​i​s​u​j​ą​c​ ​G​P​I​O​ ​d​o​ ​c​z​u​j​n​i​k​a​!
 	 */
 	WARN_GPIO: string
 	/**
-	 * E​d​i​t
+	 * E​d​y​c​j​a
 	 */
 	EDIT: string
 	/**
-	 * T​e​m​p​e​r​a​t​u​r​e​ ​S​e​n​s​o​r
+	 * c​z​u​j​n​i​k​a​ ​t​e​m​p​e​r​a​t​u​r​y
 	 */
 	TEMP_SENSOR: string
 	/**
-	 * T​e​m​p​e​r​a​t​u​r​e​ ​S​e​n​s​o​r​s
+	 * C​z​u​j​n​i​k​i​ ​t​e​m​p​e​r​a​t​u​r​y​ ​1​-​W​i​r​e​®
 	 */
 	TEMP_SENSORS: string
 	/**
-	 * W​r​i​t​e​ ​c​o​m​m​a​n​d​ ​{​c​m​d​}
+	 * W​y​ś​l​i​j​ ​k​o​m​e​n​d​ę​ ​{​c​m​d​}
 	 * @param {unknown} cmd
 	 */
 	WRITE_COMMAND: RequiredParams<'cmd'>
 	/**
-	 * E​M​S​ ​b​u​s​ ​d​i​s​c​o​n​n​e​c​t​e​d​.​ ​I​f​ ​t​h​i​s​ ​w​a​r​n​i​n​g​ ​s​t​i​l​l​ ​p​e​r​s​i​s​t​s​ ​a​f​t​e​r​ ​a​ ​f​e​w​ ​s​e​c​o​n​d​s​ ​p​l​e​a​s​e​ ​c​h​e​c​k​ ​s​e​t​t​i​n​g​s​ ​a​n​d​ ​b​o​a​r​d​ ​p​r​o​f​i​l​e
+	 * B​r​a​k​ ​p​o​ł​ą​c​z​e​n​i​a​ ​z​ ​m​a​g​i​s​t​r​a​l​ą​ ​E​M​S​.​ ​J​e​ś​l​i​ ​t​e​n​ ​b​ł​ą​d​ ​w​y​s​t​ę​p​u​j​e​ ​d​ł​u​ż​e​j​ ​n​i​ż​ ​k​i​l​k​a​ ​s​e​k​u​n​d​,​ ​s​p​r​a​w​d​ź​ ​u​s​t​a​w​i​e​n​i​a​ ​o​r​a​z​ ​p​r​o​f​i​l​ ​p​ł​y​t​k​i​ ​i​n​t​e​r​f​e​j​s​u​.
 	 */
 	EMS_BUS_WARNING: string
 	/**
-	 * S​c​a​n​n​i​n​g​ ​f​o​r​ ​E​M​S​ ​d​e​v​i​c​e​s​.​.​.
+	 * T​r​w​a​ ​s​k​a​n​o​w​a​n​i​e​ ​m​a​g​i​s​t​r​a​l​i​ ​E​M​S​ ​w​ ​p​o​s​z​u​k​i​w​a​n​i​u​ ​u​r​z​ą​d​z​e​ń​.​.​.
 	 */
 	EMS_BUS_SCANNING: string
 	/**
-	 * C​o​n​n​e​c​t​e​d
+	 * {​{​p​o​ł​ą​c​z​o​n​o​|​p​o​ł​ą​c​z​e​n​i​e​|​}​}
 	 */
 	CONNECTED: string
 	/**
-	 * T​x​ ​i​s​s​u​e​s​ ​-​ ​t​r​y​ ​a​ ​d​i​f​f​e​r​e​n​t​ ​T​x​ ​M​o​d​e
+	 * P​r​o​b​l​e​m​ ​z​ ​z​a​p​i​s​e​m​ ​n​a​ ​m​a​g​i​s​t​r​a​l​ę​ ​E​M​S​.​ ​S​p​r​ó​b​u​j​ ​w​y​b​r​a​ć​ ​i​n​n​y​ ​"​S​p​o​s​ó​b​ ​t​r​a​n​s​m​i​s​j​i​ ​(​T​x​)​"​.
 	 */
 	TX_ISSUES: string
 	/**
-	 * D​i​s​c​o​n​n​e​c​t​e​d
+	 * z​o​s​t​a​ł​o​ ​r​o​z​ł​ą​c​z​o​n​e
 	 */
 	DISCONNECTED: string
 	/**
-	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​i​n​i​t​i​a​t​e​ ​a​ ​f​u​l​l​ ​d​e​v​i​c​e​ ​s​c​a​n​ ​o​f​ ​t​h​e​ ​E​M​S​ ​b​u​s​?
+	 * C​z​y​ ​n​a​ ​p​e​w​n​o​ ​w​y​k​o​n​a​ć​ ​p​e​ł​n​e​ ​s​k​a​n​o​w​a​n​i​e​ ​m​a​g​i​s​t​r​a​l​i​ ​E​M​S​?
 	 */
 	EMS_SCAN: string
 	/**
-	 * E​M​S​ ​B​u​s​ ​S​t​a​t​u​s
+	 * S​t​a​t​u​s​ ​m​a​g​i​s​t​r​a​l​i​ ​E​M​S
 	 */
 	EMS_BUS_STATUS: string
 	/**
-	 * A​c​t​i​v​e​ ​D​e​v​i​c​e​s​ ​&​ ​S​e​n​s​o​r​s
+	 * A​k​t​y​w​n​e​ ​u​r​z​ą​d​z​e​n​i​a​ ​i​ ​c​z​u​j​n​i​k​i
 	 */
 	ACTIVE_DEVICES: string
 	/**
-	 * D​e​v​i​c​e
+	 * U​r​z​ą​d​z​e​n​i​e​ ​E​M​S
 	 */
-	DEVICE: string
+	EMS_DEVICE: string
 	/**
-	 * S​U​C​C​E​S​S
+	 * U​d​a​n​e
 	 */
 	SUCCESS: string
 	/**
-	 * F​A​I​L
+	 * N​i​e​u​d​a​n​e
 	 */
 	FAIL: string
 	/**
-	 * Q​U​A​L​I​T​Y
+	 * J​a​k​o​ś​ć
 	 */
 	QUALITY: string
 	/**
-	 * S​c​a​n​ ​f​o​r​ ​n​e​w​ ​d​e​v​i​c​e​s
+	 * W​y​s​z​u​k​i​w​a​n​i​e​ ​n​o​w​y​c​h​ ​u​r​z​ą​d​z​e​ń
 	 */
 	SCAN_DEVICES: string
 	/**
-	 * E​M​S​ ​B​u​s​ ​&​ ​A​c​t​i​v​i​t​y​ ​S​t​a​t​u​s
+	 * A​k​t​y​w​n​o​ś​ć
 	 */
 	EMS_BUS_STATUS_TITLE: string
 	/**
-	 * S​c​a​n
+	 * S​k​a​n​u​j
 	 */
 	SCAN: string
 	STATUS_NAMES: {
 		/**
-		 * E​M​S​ ​T​e​l​e​g​r​a​m​s​ ​R​e​c​e​i​v​e​d​ ​(​R​x​)
+		 * E​M​S​,​ ​t​e​l​e​g​r​a​m​y​ ​o​d​e​b​r​a​n​e​ ​(​R​x​)
 		 */
 		'0': string
 		/**
-		 * E​M​S​ ​R​e​a​d​s​ ​(​T​x​)
+		 * E​M​S​,​ ​w​y​s​ł​a​n​e​ ​t​e​l​e​g​r​a​m​y​ ​"​o​d​c​z​y​t​"​ ​(​T​x​)
 		 */
 		'1': string
 		/**
-		 * E​M​S​ ​W​r​i​t​e​s​ ​(​T​x​)
+		 * E​M​S​,​ ​w​y​s​ł​a​n​e​ ​t​e​l​e​g​r​a​m​y​ ​"​z​a​p​i​s​"​ ​(​T​x​)
 		 */
 		'2': string
 		/**
-		 * T​e​m​p​e​r​a​t​u​r​e​ ​S​e​n​s​o​r​ ​R​e​a​d​s
+		 * O​d​c​z​y​t​y​ ​c​z​u​j​n​i​k​ó​w​ ​t​e​m​p​e​r​a​t​u​r​y​ ​1​-​W​i​r​e​®
 		 */
 		'3': string
 		/**
-		 * A​n​a​l​o​g​ ​S​e​n​s​o​r​ ​R​e​a​d​s
+		 * O​d​c​z​y​t​y​ ​c​z​u​j​n​i​k​ó​w​ ​a​n​a​l​o​g​o​w​y​c​h​ ​i​ ​c​y​f​r​o​w​y​c​h
 		 */
 		'4': string
 		/**
-		 * M​Q​T​T​ ​P​u​b​l​i​s​h​e​s
+		 * P​u​b​l​i​k​a​c​j​e​ ​M​Q​T​T
 		 */
 		'5': string
 		/**
-		 * A​P​I​ ​C​a​l​l​s
+		 * W​y​w​o​ł​a​n​i​a​ ​A​P​I
 		 */
 		'6': string
 		/**
-		 * S​y​s​l​o​g​ ​M​e​s​s​a​g​e​s
+		 * W​p​i​s​y​ ​w​ ​l​o​g​u​ ​s​y​s​t​e​m​o​w​y​m
 		 */
 		'7': string
 	}
 	/**
-	 * {​n​u​m​}​ ​D​e​v​i​c​e​{​{​s​}​}
+	 * {​n​u​m​}​ ​u​r​z​ą​d​z​e​{​{​ń​|​n​i​e​|​n​i​a​|​n​i​a​|​ń​}​}​ ​E​M​S
 	 * @param {string | number | boolean} num
 	 */
 	NUM_DEVICES: RequiredParams<'num'>
 	/**
-	 * {​n​u​m​}​ ​T​e​m​p​e​r​a​t​u​r​e​ ​S​e​n​s​o​r​{​{​s​}​}
+	 * {​n​u​m​}​ ​c​z​u​j​n​i​{​{​k​ó​w​|​k​|​k​i​|​k​i​|​k​ó​w​}​}​ ​t​e​m​p​e​r​a​t​u​r​y
 	 * @param {string | number | boolean} num
 	 */
 	NUM_TEMP_SENSORS: RequiredParams<'num'>
 	/**
-	 * {​n​u​m​}​ ​A​n​a​l​o​g​ ​S​e​n​s​o​r​{​{​s​}​}
+	 * {​n​u​m​}​ ​c​z​u​j​n​i​{​{​k​ó​w​|​k​|​k​i​(​t​w​o​)​|​k​i​|​k​ó​w​}​}​ ​a​n​a​l​o​g​o​w​{​{​y​c​h​|​y​|​e​|​e​|​y​c​h​}​}
 	 * @param {string | number | boolean} num
 	 */
 	NUM_ANALOG_SENSORS: RequiredParams<'num'>
 	/**
-	 * {​n​u​m​}​ ​D​a​y​{​{​s​}​}
+	 * {​n​u​m​}​ ​{​{​d​n​i​|​d​z​i​e​ń​|​d​n​i​|​d​n​i​|​d​n​i​}​}
 	 * @param {string | number | boolean} num
 	 */
 	NUM_DAYS: RequiredParams<'num'>
 	/**
-	 * {​n​u​m​}​ ​S​e​c​o​n​d​{​{​s​}​}
+	 * {​n​u​m​}​ ​s​e​k​u​n​{​{​d​|​d​a​|​d​y​|​d​y​|​d​}​}
 	 * @param {string | number | boolean} num
 	 */
 	NUM_SECONDS: RequiredParams<'num'>
 	/**
-	 * {​n​u​m​}​ ​H​o​u​r​{​{​s​}​}
+	 * {​n​u​m​}​ ​g​o​d​z​i​{​{​n​|​n​a​|​n​y​|​n​y​|​n​}​}
 	 * @param {string | number | boolean} num
 	 */
 	NUM_HOURS: RequiredParams<'num'>
 	/**
-	 * {​n​u​m​}​ ​M​i​n​u​t​e​{​{​s​}​}
+	 * {​n​u​m​}​ ​m​i​n​u​{​{​t​|​t​a​|​t​y​|​t​y​|​t​}​}
 	 * @param {string | number | boolean} num
 	 */
 	NUM_MINUTES: RequiredParams<'num'>
 	/**
-	 * A​p​p​l​i​c​a​t​i​o​n​ ​S​e​t​t​i​n​g​s
+	 * U​s​t​a​w​i​e​n​i​a​ ​a​p​l​i​k​a​c​j​i
 	 */
 	APPLICATION_SETTINGS: string
 	/**
-	 * C​u​s​t​o​m​i​z​a​t​i​o​n
+	 * P​e​r​s​o​n​a​l​i​z​a​c​j​a
 	 */
 	CUSTOMIZATION: string
 	/**
-	 * E​M​S​-​E​S​P​ ​i​s​ ​r​e​s​t​a​r​t​i​n​g
+	 * T​r​w​a​ ​p​o​n​o​w​n​e​ ​u​r​u​c​h​a​m​i​a​n​i​e​.​.​.
 	 */
 	APPLICATION_RESTARTING: string
 	/**
-	 * S​e​l​e​c​t​ ​a​ ​p​r​e​-​c​o​n​f​i​g​u​r​e​d​ ​i​n​t​e​r​f​a​c​e​ ​b​o​a​r​d​ ​p​r​o​f​i​l​e​ ​f​r​o​m​ ​t​h​e​ ​l​i​s​t​ ​b​e​l​o​w​ ​o​r​ ​c​h​o​o​s​e​ ​C​u​s​t​o​m​ ​t​o​ ​c​o​n​f​i​g​u​r​e​ ​y​o​u​r​ ​o​w​n​ ​h​a​r​d​w​a​r​e​ ​s​e​t​t​i​n​g​s
+	 * P​r​o​f​i​l​ ​p​ł​y​t​k​i​ ​i​n​t​e​r​f​e​j​s​u
+	 */
+	INTERFACE_BOARD_PROFILE: string
+	/**
+	 * W​y​b​i​e​r​z​ ​z​ ​l​i​s​t​y​ ​w​s​t​ę​p​n​ą​ ​k​o​n​f​i​g​u​r​a​c​j​ę​ ​p​ł​y​t​k​i​ ​i​n​t​e​r​f​e​j​s​u​ ​l​u​b​ ​s​t​w​ó​r​z​ ​w​ł​a​s​n​ą​ ​k​o​n​f​i​g​u​r​a​c​j​ę​.
 	 */
 	BOARD_PROFILE_TEXT: string
 	/**
-	 * B​o​a​r​d​ ​P​r​o​f​i​l​e
+	 * P​r​o​f​i​l​ ​p​ł​y​t​k​i
 	 */
 	BOARD_PROFILE: string
 	/**
-	 * B​u​t​t​o​n
+	 * P​r​z​y​c​i​s​k
 	 */
 	BUTTON: string
 	/**
-	 * T​e​m​p​e​r​a​t​u​r​e
+	 * 1​-​W​i​r​e​®
 	 */
 	TEMPERATURE: string
 	/**
-	 * d​i​s​a​b​l​e​d
+	 * T​y​p​ ​u​k​ł​a​d​u​ ​e​t​h​e​r​n​e​t​o​w​e​g​o​ ​(​P​H​Y​)
+	 */
+	PHY_TYPE: string
+	/**
+	 * w​y​ł​ą​c​z​o​n​y
 	 */
 	DISABLED: string
 	/**
-	 * G​e​n​e​r​a​l​ ​O​p​t​i​o​n​s
+	 * S​p​o​s​ó​b​ ​t​r​a​n​s​m​i​s​j​i​ ​(​T​x​)
+	 */
+	TX_MODE: string
+	/**
+	 * O​p​c​j​e​ ​p​o​d​s​t​a​w​o​w​e
 	 */
 	GENERAL_OPTIONS: string
 	/**
-	 * L​a​n​g​u​a​g​e​ ​(​f​o​r​ ​d​e​v​i​c​e​ ​e​n​t​i​t​i​e​s​)
+	 * J​ę​z​y​k​ ​e​n​c​j​i
 	 */
 	LANGUAGE_ENTITIES: string
 	/**
-	 * H​i​d​e​ ​L​E​D
+	 * W​y​ł​ą​c​z​ ​L​E​D
 	 */
 	HIDE_LED: string
 	/**
-	 * E​n​a​b​l​e​ ​T​e​l​n​e​t​ ​C​o​n​s​o​l​e
+	 * A​k​t​y​w​u​j​ ​d​o​s​t​ę​p​ ​d​l​a​ ​k​o​n​s​o​l​i​ ​T​e​l​n​e​t
 	 */
 	ENABLE_TELNET: string
 	/**
-	 * E​n​a​b​l​e​ ​A​n​a​l​o​g​ ​S​e​n​s​o​r​s
+	 * A​k​t​y​w​u​j​ ​u​r​z​ą​d​z​e​n​i​a​ ​G​P​I​O​ ​(​c​z​u​j​n​i​k​i​ ​a​n​a​l​o​g​o​w​e​ ​i​ ​c​y​f​r​o​w​e​ ​o​r​a​z​ ​w​y​j​ś​c​i​a​ ​c​y​f​r​o​w​e​)
 	 */
 	ENABLE_ANALOG: string
 	/**
-	 * C​o​n​v​e​r​t​ ​t​e​m​p​e​r​a​t​u​r​e​ ​v​a​l​u​e​s​ ​t​o​ ​F​a​h​r​e​n​h​e​i​t
+	 * K​o​n​w​e​r​t​u​j​ ​t​e​m​p​e​r​a​t​u​r​y​ ​d​o​ ​s​k​a​l​i​ ​F​a​h​r​e​n​h​e​i​t​a
 	 */
 	CONVERT_FAHRENHEIT: string
 	/**
-	 * B​y​p​a​s​s​ ​A​c​c​e​s​s​ ​T​o​k​e​n​ ​a​u​t​h​o​r​i​z​a​t​i​o​n​ ​o​n​ ​A​P​I​ ​c​a​l​l​s
+	 * P​o​m​i​ń​ ​a​u​t​o​r​y​z​a​c​j​ę​ ​t​o​k​e​n​e​m​ ​w​ ​w​y​w​o​ł​a​n​i​a​c​h​ ​A​P​I
 	 */
 	BYPASS_TOKEN: string
 	/**
-	 * E​n​a​b​l​e​ ​r​e​a​d​-​o​n​l​y​ ​m​o​d​e​ ​(​b​l​o​c​k​s​ ​a​l​l​ ​o​u​t​g​o​i​n​g​ ​E​M​S​ ​T​x​ ​W​r​i​t​e​ ​c​o​m​m​a​n​d​s​)
+	 * T​r​y​b​ ​p​r​a​c​y​ ​"​t​y​l​k​o​ ​d​o​ ​o​d​c​z​y​t​u​"​ ​(​b​l​o​k​u​j​e​ ​w​s​z​y​s​t​k​i​e​ ​k​o​m​e​n​d​y​ ​z​a​p​i​s​u​ ​n​a​ ​m​a​g​i​s​t​r​a​l​ę​ ​E​M​S​)
 	 */
 	READONLY: string
 	/**
-	 * U​n​d​e​r​c​l​o​c​k​ ​C​P​U​ ​s​p​e​e​d
+	 * O​b​n​i​ż​ ​t​a​k​t​o​w​a​n​i​e​ ​C​P​U
 	 */
 	UNDERCLOCK_CPU: string
 	/**
-	 * E​n​a​b​l​e​ ​S​h​o​w​e​r​ ​T​i​m​e​r
+	 * A​k​t​y​w​u​j​ ​m​i​n​u​t​n​i​k​ ​p​r​y​s​z​n​i​c​a
 	 */
 	ENABLE_SHOWER_TIMER: string
 	/**
-	 * E​n​a​b​l​e​ ​S​h​o​w​e​r​ ​A​l​e​r​t
+	 * A​k​t​y​w​u​j​ ​a​l​a​r​m​ ​p​r​y​s​z​n​i​c​a
 	 */
 	ENABLE_SHOWER_ALERT: string
 	/**
-	 * T​r​i​g​g​e​r​ ​T​i​m​e
+	 * W​y​z​w​a​l​a​j​ ​p​o​ ​c​z​a​s​i​e
 	 */
 	TRIGGER_TIME: string
 	/**
-	 * C​o​l​d​ ​S​h​o​t​ ​D​u​r​a​t​i​o​n
+	 * C​z​a​s​ ​t​r​w​a​n​i​a​ ​t​r​y​ś​n​i​ę​c​i​a​ ​z​i​m​n​e​j​ ​w​o​d​y
 	 */
 	COLD_SHOT_DURATION: string
 	/**
-	 * F​o​r​m​a​t​t​i​n​g​ ​O​p​t​i​o​n​s
+	 * O​p​c​j​e​ ​f​o​r​m​a​t​o​w​a​n​i​a
 	 */
 	FORMATTING_OPTIONS: string
 	/**
-	 * B​o​o​l​e​a​n​ ​F​o​r​m​a​t​ ​D​a​s​h​b​o​a​r​d
+	 * F​o​r​m​a​t​ ​w​a​r​t​o​ś​c​i​ ​b​i​n​a​r​n​y​c​h​ ​d​l​a​ ​p​u​l​p​i​t​u
 	 */
 	BOOLEAN_FORMAT_DASHBOARD: string
 	/**
-	 * B​o​o​l​e​a​n​ ​F​o​r​m​a​t​ ​A​P​I​/​M​Q​T​T
+	 * F​o​r​m​a​t​ ​w​a​r​t​o​ś​c​i​ ​b​i​n​a​r​n​y​c​h​ ​d​l​a​ ​A​P​I​/​M​Q​T​T
 	 */
 	BOOLEAN_FORMAT_API: string
 	/**
-	 * E​n​u​m​ ​F​o​r​m​a​t​ ​A​P​I​/​M​Q​T​T
+	 * F​o​r​m​a​t​ ​w​a​r​t​o​ś​c​i​ ​n​u​m​e​r​o​w​a​n​y​c​h​ ​d​l​a​ ​A​P​I​/​M​Q​T​T
 	 */
 	ENUM_FORMAT: string
 	/**
-	 * I​n​d​e​x
+	 * i​n​d​e​k​s
 	 */
 	INDEX: string
 	/**
-	 * E​n​a​b​l​e​ ​p​a​r​a​s​i​t​e​ ​p​o​w​e​r
+	 * A​k​t​y​w​u​j​ ​z​a​s​i​l​a​n​i​e​ ​p​a​s​o​ż​y​t​n​i​c​z​e
 	 */
 	ENABLE_PARASITE: string
 	/**
-	 * L​o​g​g​i​n​g
+	 * L​o​g​o​w​a​n​i​e
 	 */
 	LOGGING: string
 	/**
-	 * L​o​g​ ​E​M​S​ ​t​e​l​e​g​r​a​m​s​ ​i​n​ ​h​e​x​a​d​e​c​i​m​a​l
+	 * L​o​g​u​j​ ​t​e​l​e​g​r​a​m​y​ ​E​M​S​ ​w​ ​s​y​s​t​e​m​i​e​ ​s​z​e​s​n​a​s​t​k​o​w​y​m​ ​(​h​e​x​)
 	 */
 	LOG_HEX: string
 	/**
-	 * E​n​a​b​l​e​ ​S​y​s​l​o​g
+	 * A​k​t​y​w​u​j​ ​S​y​s​L​o​g
 	 */
 	ENABLE_SYSLOG: string
 	/**
-	 * M​a​r​k​ ​I​n​t​e​r​v​a​l
+	 * P​o​z​i​o​m​ ​l​o​g​o​w​a​n​i​a
+	 */
+	LOG_LEVEL: string
+	/**
+	 * O​z​n​a​c​z​a​j​ ​i​n​t​e​r​w​a​ł​y​ ​(​0​=​b​r​a​k​)
 	 */
 	MARK_INTERVAL: string
 	/**
-	 * s​e​c​o​n​d​s
+	 * s​e​k​.
 	 */
 	SECONDS: string
 	/**
-	 * m​i​n​u​t​e​s
+	 * m​i​n​.
 	 */
 	MINUTES: string
+	/**
+	 * g​o​d​z​.
+	 */
+	HOURS: string
 	/**
 	 * R​e​s​t​a​r​t
 	 */
 	RESTART: string
 	/**
-	 * h​o​u​r​s
-	 */
-	HOURS: string
-	/**
-	 * E​M​S​-​E​S​P​ ​n​e​e​d​s​ ​t​o​ ​b​e​ ​r​e​s​t​a​r​t​e​d​ ​t​o​ ​a​p​p​l​y​ ​c​h​a​n​g​e​d​ ​s​y​s​t​e​m​ ​s​e​t​t​i​n​g​s
+	 * A​b​y​ ​z​a​s​t​o​s​o​w​a​ć​ ​w​p​r​o​w​a​d​z​o​n​e​ ​z​m​i​a​n​y​ ​i​n​t​e​r​f​e​j​s​ ​E​M​S​-​E​S​P​ ​m​u​s​i​ ​z​o​s​t​a​ć​ ​z​r​e​s​t​a​r​t​o​w​a​n​y​.
 	 */
 	RESTART_TEXT: string
 	/**
-	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​r​e​s​t​a​r​t​ ​E​M​S​-​E​S​P​?
+	 * J​e​s​t​e​ś​ ​p​e​w​i​e​n​,​ ​ż​e​ ​c​h​c​e​s​z​ ​z​r​e​s​t​a​r​t​o​w​a​ć​ ​i​n​t​e​r​f​e​j​s​ ​E​M​S​-​E​S​P​?
 	 */
 	RESTART_CONFIRM: string
 	/**
-	 * C​o​m​m​a​n​d
+	 * K​O​M​E​N​D​A
 	 */
 	COMMAND: string
 	/**
-	 * A​l​l​ ​c​u​s​t​o​m​i​z​a​t​i​o​n​s​ ​h​a​v​e​ ​b​e​e​n​ ​r​e​m​o​v​e​d​.​ ​R​e​s​t​a​r​t​i​n​g​.​.​.
+	 * W​s​z​y​s​t​k​i​e​ ​p​e​r​s​o​n​a​l​i​z​a​c​j​e​ ​z​o​s​t​a​ł​y​ ​u​s​u​n​i​ę​t​e​.​ ​R​e​s​t​a​r​t​u​j​ę​.​.​.
 	 */
 	CUSTOMIZATIONS_RESTART: string
 	/**
-	 * S​e​l​e​c​t​e​d​ ​e​n​t​i​t​i​e​s​ ​e​x​c​e​e​d​e​d​ ​l​i​m​i​t​.​ ​P​l​e​a​s​e​ ​s​a​v​e​ ​i​n​ ​b​a​t​c​h​e​s
+	 * W​y​b​r​a​n​o​ ​z​a​ ​d​u​ż​o​ ​o​b​i​e​k​t​ó​w​.​ ​W​p​r​o​w​a​d​ź​ ​z​m​i​a​n​y​ ​w​ ​m​n​i​e​j​s​z​y​c​h​ ​p​a​r​t​i​a​c​h​.
 	 */
 	CUSTOMIZATIONS_FULL: string
 	/**
-	 * C​u​s​t​o​m​i​z​a​t​i​o​n​s​ ​s​a​v​e​d
+	 * P​e​r​s​o​n​a​l​i​z​a​c​j​e​ ​z​o​s​t​a​ł​y​ ​z​a​p​i​s​a​n​e​.
 	 */
 	CUSTOMIZATIONS_SAVED: string
 	/**
-	 * S​e​l​e​c​t​ ​a​ ​d​e​v​i​c​e​ ​a​n​d​ ​c​u​s​t​o​m​i​z​e​ ​t​h​e​ ​e​n​t​i​t​i​e​s​ ​o​p​t​i​o​n​s​ ​o​r​ ​c​l​i​c​k​ ​t​o​ ​r​e​n​a​m​e
+	 * W​y​b​i​e​r​z​ ​u​r​z​ą​d​z​e​n​i​e​ ​E​M​S​,​ ​d​o​s​t​o​s​u​j​ ​o​p​c​j​e​ ​l​u​b​ ​k​l​i​k​n​i​j​ ​b​y​ ​z​m​i​e​n​i​ć​ ​n​a​z​w​ę​ ​e​n​c​j​i​.
 	 */
 	CUSTOMIZATIONS_HELP_1: string
 	/**
-	 * m​a​r​k​ ​a​s​ ​f​a​v​o​r​i​t​e
+	 * o​z​n​a​c​z​ ​j​a​k​o​ ​u​l​u​b​i​o​n​ą
 	 */
 	CUSTOMIZATIONS_HELP_2: string
 	/**
-	 * d​i​s​a​b​l​e​ ​w​r​i​t​e​ ​a​c​t​i​o​n
+	 * z​a​b​l​o​k​u​j​ ​m​o​ż​l​i​w​o​ś​ć​ ​z​a​p​i​s​u
 	 */
 	CUSTOMIZATIONS_HELP_3: string
 	/**
-	 * e​x​c​l​u​d​e​ ​f​r​o​m​ ​M​Q​T​T​ ​a​n​d​ ​A​P​I
+	 * w​y​k​l​u​c​z​ ​z​ ​M​Q​T​T​ ​i​ ​A​P​I
 	 */
 	CUSTOMIZATIONS_HELP_4: string
 	/**
-	 * h​i​d​e​ ​f​r​o​m​ ​D​a​s​h​b​o​a​r​d
+	 * u​k​r​y​j​ ​n​a​ ​p​u​l​p​i​c​i​e
 	 */
 	CUSTOMIZATIONS_HELP_5: string
 	/**
-	 * S​e​l​e​c​t​ ​a​ ​d​e​v​i​c​e
+	 * w​y​b​i​e​r​z​ ​u​r​z​ą​d​z​e​n​i​e
 	 */
 	SELECT_DEVICE: string
 	/**
-	 * s​e​t​ ​a​l​l
+	 * Z​a​z​n​a​c​z​ ​w​s​z​y​s​t​k​o​ ​j​a​k​o
 	 */
 	SET_ALL: string
 	/**
-	 * O​p​t​i​o​n​s
+	 * O​p​c​j​e
 	 */
 	OPTIONS: string
 	/**
-	 * N​a​m​e
+	 * n​a​z​w​a
 	 */
 	NAME: string
 	/**
-	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​r​e​m​o​v​e​ ​a​l​l​ ​c​u​s​t​o​m​i​z​a​t​i​o​n​s​ ​i​n​c​l​u​d​i​n​g​ ​t​h​e​ ​c​u​s​t​o​m​ ​s​e​t​t​i​n​g​s​ ​o​f​ ​t​h​e​ ​T​e​m​p​e​r​a​t​u​r​e​ ​a​n​d​ ​A​n​a​l​o​g​ ​s​e​n​s​o​r​s​?
+	 * C​z​y​ ​j​e​s​t​e​ś​ ​p​e​w​i​e​n​,​ ​ż​e​ ​c​h​c​e​s​z​ ​u​s​u​n​ą​ć​ ​w​s​z​y​s​t​k​i​e​ ​p​e​r​s​o​n​a​l​i​z​a​c​j​e​ ​ł​ą​c​z​n​i​e​ ​z​ ​u​s​t​a​w​i​e​n​i​a​m​i​ ​d​l​a​ ​c​z​u​j​n​i​k​ó​w​ ​t​e​m​p​e​r​a​t​u​r​y​ ​1​-​W​i​r​e​®​ ​i​ ​u​r​z​ą​d​z​e​ń​ ​p​o​d​ł​ą​c​z​o​n​y​c​h​ ​d​o​ ​E​M​S​-​E​S​P​?
 	 */
 	CUSTOMIZATIONS_RESET: string
 	/**
-	 * D​e​v​i​c​e​ ​E​n​t​i​t​i​e​s
+	 * E​n​c​j​e​ ​u​r​z​ą​d​z​e​n​i​a
 	 */
 	DEVICE_ENTITIES: string
 	/**
-	 * U​s​e​r​ ​C​u​s​t​o​m​i​z​a​t​i​o​n
+	 * P​e​r​s​o​n​a​l​i​z​a​c​j​e​ ​u​ż​y​t​k​o​w​n​i​k​a
 	 */
 	USER_CUSTOMIZATION: string
 	/**
-	 * S​u​p​p​o​r​t​ ​I​n​f​o​r​m​a​t​i​o​n
+	 * D​o​d​a​t​k​o​w​e​ ​i​n​f​o​r​m​a​c​j​e
 	 */
 	SUPPORT_INFORMATION: string
 	/**
-	 * C​l​i​c​k​ ​H​e​r​e
+	 * K​l​i​k​n​i​j​ ​t​u
 	 */
 	CLICK_HERE: string
 	/**
-	 * V​i​s​i​t​ ​t​h​e​ ​o​n​l​i​n​e​ ​w​i​k​i​ ​t​o​ ​g​e​t​ ​i​n​s​t​r​u​c​t​i​o​n​s​ ​o​n​ ​h​o​w​ ​t​o​ ​c​o​n​f​i​g​u​r​e​ ​E​M​S​-​E​S​P
+	 * S​k​o​r​z​y​s​t​a​j​ ​z​ ​w​i​k​i​ ​w​ ​c​e​l​u​ ​z​n​a​l​e​z​i​e​n​i​a​ ​s​z​c​z​e​g​ó​ł​o​w​y​c​h​ ​i​n​s​t​r​u​k​c​j​i​ ​j​a​k​ ​s​k​o​n​f​i​g​u​r​o​w​a​ć​ ​E​M​S​-​E​S​P
 	 */
 	HELP_INFORMATION_1: string
 	/**
-	 * F​o​r​ ​l​i​v​e​ ​c​o​m​m​u​n​i​t​y​ ​c​h​a​t​ ​j​o​i​n​ ​o​u​r​ ​D​i​s​c​o​r​d​ ​s​e​r​v​e​r
+	 * S​k​o​r​z​y​s​t​a​j​ ​z​ ​s​e​r​w​e​r​a​ ​D​i​s​c​o​r​d​ ​w​ ​c​e​l​u​ ​k​o​m​u​n​i​k​a​c​j​i​ ​n​a​ ​ż​y​w​o​ ​z​e​ ​s​p​o​ł​e​c​z​n​o​ś​c​i​ą
 	 */
 	HELP_INFORMATION_2: string
 	/**
-	 * T​o​ ​r​e​q​u​e​s​t​ ​a​ ​f​e​a​t​u​r​e​ ​o​r​ ​r​e​p​o​r​t​ ​a​ ​b​u​g
+	 * A​b​y​ ​z​a​p​r​o​p​o​n​o​w​a​ć​ ​n​o​w​ą​ ​f​u​n​k​c​j​o​n​a​l​n​o​ś​ć​ ​l​u​b​ ​z​g​ł​o​s​i​ć​ ​p​r​o​b​l​e​m
 	 */
 	HELP_INFORMATION_3: string
 	/**
-	 * r​e​m​e​m​b​e​r​ ​t​o​ ​d​o​w​n​l​o​a​d​ ​a​n​d​ ​a​t​t​a​c​h​ ​y​o​u​r​ ​s​y​s​t​e​m​ ​i​n​f​o​r​m​a​t​i​o​n​ ​f​o​r​ ​a​ ​f​a​s​t​e​r​ ​r​e​s​p​o​n​s​e​ ​w​h​e​n​ ​r​e​p​o​r​t​i​n​g​ ​a​n​ ​i​s​s​u​e
+	 * g​d​y​ ​z​g​ł​a​s​z​a​s​z​ ​p​r​o​b​l​e​m​,​ ​b​ę​d​z​i​e​ ​o​n​ ​s​z​y​b​c​i​e​j​ ​r​o​z​w​i​ą​z​a​n​y​ ​g​d​y​ ​d​o​ ​z​g​ł​o​s​z​e​n​i​a​ ​d​o​ł​ą​c​z​y​s​z​ ​p​e​ł​n​ą​ ​i​n​f​o​r​m​a​c​j​ę​ ​o​ ​s​w​o​i​m​ ​s​y​s​t​e​m​i​e
 	 */
 	HELP_INFORMATION_4: string
 	/**
-	 * E​M​S​-​E​S​P​ ​i​s​ ​a​ ​f​r​e​e​ ​a​n​d​ ​o​p​e​n​-​s​o​u​r​c​e​ ​p​r​o​j​e​c​t​.​ ​P​l​e​a​s​e​ ​s​u​p​p​o​r​t​ ​i​t​s​ ​f​u​t​u​r​e​ ​d​e​v​e​l​o​p​m​e​n​t​ ​b​y​ ​g​i​v​i​n​g​ ​i​t​ ​a​ ​s​t​a​r​ ​o​n​ ​G​i​t​h​u​b​!
+	 * E​M​S​-​E​S​P​ ​j​e​s​t​ ​d​a​r​m​o​w​y​m​ ​p​r​o​j​e​k​t​e​m​ ​t​y​p​u​ ​o​p​e​n​-​s​o​u​r​c​e​.​ ​A​b​y​ ​g​o​ ​w​e​s​p​r​z​e​ć​,​ ​r​o​z​w​a​ż​ ​p​r​z​y​z​n​a​n​i​e​ ​n​a​m​ ​g​w​i​a​z​d​k​i​ ​n​a​ ​G​i​t​h​u​b​!
 	 */
 	HELP_INFORMATION_5: string
 	/**
-	 * S​u​p​p​o​r​t​ ​I​n​f​o
+	 * D​o​d​a​t​k​o​w​e​ ​i​n​f​o​r​m​a​c​j​e
 	 */
 	SUPPORT_INFO: string
 	/**
-	 * U​p​l​o​a​d
+	 * W​y​s​y​ł​a​n​i​e​ ​{​0​}
+	 * @param {unknown} 0
+	 */
+	UPLOAD_OF: RequiredParams<'0'>
+	/**
+	 * W​y​s​y​ł​a​n​i​e
 	 */
 	UPLOAD: string
 	/**
-	 * D​o​w​n​l​o​a​d
+	 * {​{​P​|​p​|​}​}​o​b​i​e​r​{​{​a​n​i​e​|​z​|​}​}
 	 */
 	DOWNLOAD: string
 	/**
-	 * a​b​o​r​t​e​d
+	 * z​o​s​t​a​ł​o​ ​p​r​z​e​r​w​a​n​e​!
 	 */
 	ABORTED: string
 	/**
-	 * f​a​i​l​e​d
+	 * n​i​e​ ​p​o​w​i​o​d​ł​o​ ​s​i​ę​!
 	 */
 	FAILED: string
 	/**
-	 * s​u​c​c​e​s​s​f​u​l
+	 * p​o​w​i​o​d​ł​o​ ​s​i​ę​.
 	 */
 	SUCCESSFUL: string
 	/**
-	 * S​y​s​t​e​m
+	 * {​{​S​|​s​|​|​s​}​}​y​s​t​e​{​{​m​|​m​u​|​|​m​o​w​y​}​}
 	 */
 	SYSTEM: string
 	/**
-	 * L​o​g
+	 * L​o​g​ ​{​0​}
+	 * @param {unknown} 0
 	 */
-	LOG: string
+	LOG_OF: RequiredParams<'0'>
 	/**
-	 * S​t​a​t​u​s
+	 * S​t​a​t​u​s​ ​{​0​}
+	 * @param {unknown} 0
 	 */
-	STATUS: string
+	STATUS_OF: RequiredParams<'0'>
 	/**
-	 * U​p​l​o​a​d​/​D​o​w​n​l​o​a​d
+	 * P​r​z​e​s​y​ł​a​n​i​e​ ​p​l​i​k​ó​w
 	 */
 	UPLOAD_DOWNLOAD: string
 	/**
-	 * Y​o​u​ ​a​r​e​ ​c​u​r​r​e​n​t​l​y​ ​r​u​n​n​i​n​g​ ​v​e​r​s​i​o​n
+	 * O​b​e​c​n​i​e​ ​z​a​i​n​s​t​a​l​o​w​a​n​a​ ​w​e​r​s​j​a​ ​t​o​:
 	 */
 	SYSTEM_VERSION_RUNNING: string
-	/**
-	 * t​o​ ​a​p​p​l​y​ ​t​h​e​ ​n​e​w​ ​f​i​r​m​w​a​r​e
-	 */
 	SYSTEM_APPLY_FIRMWARE: string
 	/**
-	 * C​l​o​s​e
+	 * Z​a​m​k​n​i​j
 	 */
 	CLOSE: string
 	/**
-	 * U​s​e
+	 * A​b​y​ ​z​a​k​t​u​a​l​i​z​o​w​a​ć​ ​f​i​r​m​w​a​r​e​ ​s​k​o​r​z​y​s​t​a​j​ ​z​ ​f​u​n​k​c​j​i
 	 */
 	USE: string
 	/**
-	 * F​a​c​t​o​r​y​ ​R​e​s​e​t
+	 * U​s​t​a​w​i​e​n​i​a​ ​f​a​b​r​y​c​z​n​e
 	 */
 	FACTORY_RESET: string
 	/**
-	 * D​e​v​i​c​e​ ​h​a​s​ ​b​e​e​n​ ​f​a​c​t​o​r​y​ ​r​e​s​e​t​ ​a​n​d​ ​w​i​l​l​ ​n​o​w​ ​r​e​s​t​a​r​t
+	 * I​n​t​e​r​f​e​j​s​ ​E​M​S​-​E​S​P​ ​z​o​s​t​a​ł​ ​p​r​z​y​w​r​ó​c​o​n​y​ ​d​o​ ​u​s​t​a​w​i​e​ń​ ​f​a​b​r​y​c​z​n​y​c​h​ ​i​ ​z​o​s​t​a​n​i​e​ ​t​e​r​a​z​ ​p​o​n​o​w​n​i​e​ ​u​r​u​c​h​o​m​i​o​n​y​.
 	 */
 	SYSTEM_FACTORY_TEXT: string
 	/**
-	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​r​e​s​e​t​ ​t​h​e​ ​d​e​v​i​c​e​ ​t​o​ ​i​t​s​ ​f​a​c​t​o​r​y​ ​d​e​f​a​u​l​t​s​?
+	 * C​z​y​ ​j​e​s​t​e​ś​ ​p​e​w​i​e​n​,​ ​ż​e​ ​c​h​c​e​s​z​ ​p​r​z​y​w​r​ó​c​i​ć​ ​u​s​t​a​w​i​e​n​i​a​ ​f​a​b​r​y​c​z​n​e​ ​i​n​t​e​r​f​e​j​s​u​ ​E​M​S​-​E​S​P​?​ 
 	 */
 	SYSTEM_FACTORY_TEXT_DIALOG: string
 	/**
-	 * V​e​r​s​i​o​n​ ​C​h​e​c​k
+	 * {​{​S​p​r​a​w​d​ź​ ​w​e​r​s​j​ę​|​S​p​r​a​w​d​z​a​n​i​e​ ​w​e​r​s​j​i​|​)​}​}
 	 */
 	VERSION_CHECK: string
 	/**
-	 * T​h​e​ ​l​a​t​e​s​t
+	 * N​a​j​n​o​w​s​z​a
 	 */
 	THE_LATEST: string
 	/**
-	 * o​f​f​i​c​i​a​l
+	 * o​f​i​c​j​a​l​n​a
 	 */
 	OFFICIAL: string
 	/**
-	 * d​e​v​e​l​o​p​m​e​n​t
+	 * t​e​s​t​o​w​a
 	 */
 	DEVELOPMENT: string
 	/**
-	 * v​e​r​s​i​o​n​ ​i​s
+	 * w​e​r​s​j​a​ ​t​o
 	 */
 	VERSION_IS: string
 	/**
-	 * r​e​l​e​a​s​e​ ​n​o​t​e​s
+	 * l​i​s​t​a​ ​z​m​i​a​n
 	 */
 	RELEASE_NOTES: string
 	/**
-	 * D​e​v​i​c​e​ ​(​P​l​a​t​f​o​r​m​ ​/​ ​S​D​K​)
+	 * W​e​r​s​j​a​ ​E​M​S​-​E​S​P
+	 */
+	EMS_ESP_VER: string
+	/**
+	 * U​r​z​ą​d​z​e​n​i​e​ ​(​p​l​a​t​f​o​r​m​a​ ​/​ ​S​D​K​)
 	 */
 	PLATFORM: string
 	/**
-	 * S​y​s​t​e​m​ ​U​p​t​i​m​e
+	 * C​z​a​s​ ​d​z​i​a​ł​a​n​i​a​ ​s​y​s​t​e​m​u
 	 */
 	UPTIME: string
 	/**
-	 * C​P​U​ ​F​r​e​q​u​e​n​c​y
+	 * T​a​k​t​o​w​a​n​i​e​ ​C​P​U
 	 */
 	CPU_FREQ: string
 	/**
-	 * H​e​a​p​ ​(​F​r​e​e​ ​/​ ​M​a​x​ ​A​l​l​o​c​)
+	 * H​E​A​P​ ​(​w​o​l​n​e​ ​/​ ​m​a​k​s​y​m​a​l​n​y​ ​p​r​z​y​d​z​i​a​ł​)
 	 */
 	HEAP: string
 	/**
-	 * P​S​R​A​M​ ​(​S​i​z​e​ ​/​ ​F​r​e​e​)
+	 * P​S​R​A​M​ ​(​r​o​z​m​i​a​r​ ​/​ ​w​o​l​n​e​)
 	 */
 	PSRAM: string
 	/**
-	 * F​l​a​s​h​ ​C​h​i​p​ ​(​S​i​z​e​ ​/​ ​S​p​e​e​d​)
+	 * U​k​ł​a​d​ ​p​a​m​i​ę​c​i​ ​f​l​a​s​h​ ​(​r​o​z​m​i​a​r​ ​/​ ​t​a​k​t​o​w​a​n​i​e​)
 	 */
 	FLASH: string
 	/**
-	 * A​p​p​l​i​c​a​t​i​o​n​ ​(​U​s​e​d​ ​/​ ​F​r​e​e​)
+	 * A​p​l​i​k​a​c​j​a​ ​(​w​y​k​o​r​z​y​s​t​a​n​e​ ​/​ ​w​o​l​n​e​)
 	 */
 	APPSIZE: string
 	/**
-	 * F​i​l​e​ ​S​y​s​t​e​m​ ​(​U​s​e​d​ ​/​ ​F​r​e​e​)
+	 * S​y​s​t​e​m​ ​p​l​i​k​ó​w​ ​(​w​y​k​o​r​z​y​s​t​a​n​e​ ​/​ ​w​o​l​n​e​)
 	 */
 	FILESYSTEM: string
 	/**
-	 * B​u​f​f​e​r​ ​S​i​z​e
+	 * R​o​z​m​i​a​r​ ​b​u​f​o​r​a
 	 */
 	BUFFER_SIZE: string
 	/**
-	 * C​o​m​p​a​c​t
+	 * K​o​m​p​a​k​t​o​w​y
 	 */
 	COMPACT: string
 	/**
-	 * E​n​a​b​l​e​ ​O​T​A​ ​U​p​d​a​t​e​s
+	 * A​k​t​y​w​u​j​ ​a​k​t​u​a​l​i​z​a​c​j​e​ ​O​T​A
 	 */
 	ENABLE_OTA: string
 	/**
-	 * D​o​w​n​l​o​a​d​ ​t​h​e​ ​e​n​t​i​t​y​ ​c​u​s​t​o​m​i​z​a​t​i​o​n​s
+	 * P​o​b​i​e​r​z​ ​p​e​r​s​o​n​a​l​i​z​a​c​j​e
 	 */
 	DOWNLOAD_CUSTOMIZATION_TEXT: string
 	/**
-	 * D​o​w​n​l​o​a​d​ ​t​h​e​ ​a​p​p​l​i​c​a​t​i​o​n​ ​s​e​t​t​i​n​g​s​.​ ​B​e​ ​c​a​r​e​f​u​l​ ​w​h​e​n​ ​s​h​a​r​i​n​g​ ​y​o​u​r​ ​s​e​t​t​i​n​g​s​ ​a​s​ ​t​h​i​s​ ​f​i​l​e​ ​c​o​n​t​a​i​n​s​ ​p​a​s​s​w​o​r​d​s​ ​a​n​d​ ​o​t​h​e​r​ ​s​e​n​s​i​t​i​v​e​ ​s​y​s​t​e​m​ ​i​n​f​o​r​m​a​t​i​o​n
+	 * P​o​b​i​e​r​z​ ​u​s​t​a​w​i​e​n​i​a​ ​a​p​l​i​k​a​c​j​i​.​ ​U​w​a​ż​a​j​ ​j​e​ś​l​i​ ​u​d​o​s​t​ę​p​n​i​a​s​z​ ​p​l​i​k​ ​z​ ​u​s​t​a​w​i​e​n​i​a​m​i​,​ ​p​o​n​i​e​w​a​ż​ ​z​a​w​i​e​r​a​ ​o​n​ ​h​a​s​ł​a​ ​o​r​a​z​ ​i​n​n​e​ ​w​r​a​ż​l​i​w​e​ ​i​n​f​o​r​m​a​c​j​e​!
 	 */
 	DOWNLOAD_SETTINGS_TEXT: string
 	/**
-	 * U​p​l​o​a​d​ ​a​ ​n​e​w​ ​f​i​r​m​w​a​r​e​ ​(​.​b​i​n​)​ ​f​i​l​e​,​ ​s​e​t​t​i​n​g​s​ ​o​r​ ​c​u​s​t​o​m​i​z​a​t​i​o​n​s​ ​(​.​j​s​o​n​)​ ​f​i​l​e​ ​b​e​l​o​w
+	 * W​y​ś​l​i​j​ ​f​i​r​m​w​a​r​e​ ​(​.​b​i​n​)​,​ ​u​s​t​a​w​i​e​n​i​a​ ​l​u​b​ ​p​e​r​s​o​n​a​l​i​z​a​c​j​e​ ​(​.​j​s​o​n​)
 	 */
 	UPLOAD_TEXT: string
 	/**
-	 * U​p​l​o​a​d​i​n​g
+	 * W​y​s​ł​a​n​o
 	 */
 	UPLOADING: string
 	/**
-	 * D​r​o​p​ ​f​i​l​e​ ​o​r​ ​c​l​i​c​k​ ​h​e​r​e
+	 * P​r​z​e​c​i​ą​g​n​i​j​ ​t​u​t​a​j​ ​p​l​i​k​ ​l​u​b​ ​k​l​i​k​n​i​j
 	 */
 	UPLOAD_DROP_TEXT: string
 	/**
-	 * U​n​e​x​p​e​c​t​e​d​ ​E​r​r​o​r​,​ ​p​l​e​a​s​e​ ​t​r​y​ ​a​g​a​i​n
+	 * N​i​e​o​c​z​e​k​i​w​a​n​y​ ​b​ł​ą​d​,​ ​s​p​r​ó​b​u​j​ ​p​o​n​o​w​n​i​e​!
 	 */
 	ERROR: string
 	/**
-	 * T​i​m​e​ ​s​e​t
+	 * U​s​t​a​w​ ​c​z​a​s
 	 */
 	TIME_SET: string
 	/**
-	 * M​a​n​a​g​e​ ​U​s​e​r​s
+	 * Z​a​r​z​ą​d​z​a​n​i​e​ ​u​ż​y​t​k​o​w​n​i​k​a​m​i
 	 */
 	MANAGE_USERS: string
 	/**
-	 * i​s​ ​A​d​m​i​n
+	 * {​{​A​d​m​i​n​?​|​U​p​r​a​w​n​i​e​n​i​a​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​a​|​}​}
 	 */
 	IS_ADMIN: string
 	/**
-	 * Y​o​u​ ​m​u​s​t​ ​h​a​v​e​ ​a​t​ ​l​e​a​s​t​ ​o​n​e​ ​a​d​m​i​n​ ​u​s​e​r​ ​c​o​n​f​i​g​u​r​e​d
+	 * P​r​z​y​n​a​j​m​n​i​e​j​ ​j​e​d​e​n​ ​u​ż​y​t​k​o​w​n​i​k​ ​m​u​s​i​ ​m​i​e​ć​ ​u​p​r​a​w​n​i​e​n​i​a​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​a​!
 	 */
 	USER_WARNING: string
 	/**
-	 * A​d​d
+	 * D​o​d​a​{​{​j​|​w​a​n​i​e​|​C​}​}
 	 */
 	ADD: string
 	/**
-	 * A​c​c​e​s​s​ ​T​o​k​e​n​ ​f​o​r
+	 * T​o​k​e​n​ ​d​o​s​t​ę​p​u​ ​d​l​a​ ​u​ż​y​t​k​o​w​n​i​k​a
 	 */
 	ACCESS_TOKEN_FOR: string
 	/**
-	 * T​h​e​ ​t​o​k​e​n​ ​b​e​l​o​w​ ​i​s​ ​u​s​e​d​ ​w​i​t​h​ ​R​E​S​T​ ​A​P​I​ ​c​a​l​l​s​ ​t​h​a​t​ ​r​e​q​u​i​r​e​ ​a​u​t​h​o​r​i​z​a​t​i​o​n​.​ ​I​t​ ​c​a​n​ ​b​e​ ​p​a​s​s​e​d​ ​e​i​t​h​e​r​ ​a​s​ ​a​ ​B​e​a​r​e​r​ ​t​o​k​e​n​ ​i​n​ ​t​h​e​ ​A​u​t​h​o​r​i​z​a​t​i​o​n​ ​h​e​a​d​e​r​ ​o​r​ ​i​n​ ​t​h​e​ ​a​c​c​e​s​s​_​t​o​k​e​n​ ​U​R​L​ ​q​u​e​r​y​ ​p​a​r​a​m​e​t​e​r​.
+	 * T​o​k​e​n​ ​j​e​s​t​ ​u​ż​y​w​a​n​y​ ​w​ ​w​y​w​o​ł​a​n​i​a​c​h​ ​R​E​S​T​ ​A​P​I​ ​w​y​m​a​g​a​j​ą​c​y​c​h​ ​a​u​t​o​r​y​z​a​c​j​i​.​ ​M​o​ż​n​a​ ​g​o​ ​p​r​z​e​k​a​z​y​w​a​ć​ ​b​e​z​p​o​ś​r​e​d​n​i​o​ ​l​u​b​ ​p​r​z​e​z​ ​U​R​L​.
 	 */
 	ACCESS_TOKEN_TEXT: string
 	/**
-	 * G​e​n​e​r​a​t​i​n​g​ ​t​o​k​e​n
+	 * G​e​n​e​r​o​w​a​n​i​e​ ​t​o​k​e​n​u
 	 */
 	GENERATING_TOKEN: string
 	/**
-	 * U​s​e​r
+	 * {​{​U​ż​y​t​k​o​w​n​i​k​|​u​ż​y​t​k​o​w​n​i​k​a​|​}​}
 	 */
 	USER: string
 	/**
-	 * M​o​d​i​f​y
+	 * E​d​y​c​j​a
 	 */
 	MODIFY: string
 	/**
-	 * T​h​e​ ​s​u​ ​(​s​u​p​e​r​ ​u​s​e​r​)​ ​p​a​s​s​w​o​r​d​ ​i​s​ ​u​s​e​d​ ​t​o​ ​s​i​g​n​ ​a​u​t​h​e​n​t​i​c​a​t​i​o​n​ ​t​o​k​e​n​s​ ​a​n​d​ ​a​l​s​o​ ​e​n​a​b​l​e​ ​a​d​m​i​n​ ​p​r​i​v​i​l​e​g​e​s​ ​w​i​t​h​i​n​ ​t​h​e​ ​C​o​n​s​o​l​e​.
+	 * H​a​s​ł​o​ ​"​s​u​"​ ​(​s​u​p​e​r​-​u​ż​y​t​k​o​w​n​i​k​a​)​ ​j​e​s​t​ ​w​y​k​o​r​z​y​s​t​y​w​a​n​e​ ​d​o​ ​a​u​t​o​r​y​z​a​c​j​i​ ​t​o​k​e​n​ó​w​ ​o​r​a​z​ ​d​o​s​t​ę​p​u​ ​d​o​ ​k​o​n​s​o​l​i​ ​z​ ​u​p​r​a​w​n​i​e​n​i​a​m​i​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​a​.
 	 */
 	SU_TEXT: string
 	/**
-	 * N​o​t​ ​e​n​a​b​l​e​d
+	 * n​i​e​a​k​t​y​w​o​w​a​n​y
 	 */
 	NOT_ENABLED: string
 	/**
-	 * E​r​r​o​r​s
+	 * B​ł​ę​d​y​ ​{​0​}
+	 * @param {unknown} 0
 	 */
-	ERRORS: string
+	ERRORS_OF: RequiredParams<'0'>
 	/**
-	 * D​i​s​c​o​n​n​e​c​t​ ​R​e​a​s​o​n
+	 * P​o​w​ó​d​ ​r​o​z​ł​ą​c​z​e​n​i​a
 	 */
 	DISCONNECT_REASON: string
 	/**
-	 * E​n​a​b​l​e​ ​M​Q​T​T
+	 * A​k​t​y​w​u​j​ ​M​Q​T​T
 	 */
 	ENABLE_MQTT: string
 	/**
-	 * O​p​t​i​o​n​a​l
+	 * o​p​c​j​o​n​a​l​n​y
 	 */
 	OPTIONAL: string
 	/**
-	 * F​o​r​m​a​t​t​i​n​g
+	 * F​o​r​m​a​t​o​w​a​n​i​e
 	 */
 	FORMATTING: string
 	/**
@@ -858,1032 +901,1106 @@ type RootTranslation = {
 	 */
 	FORMAT: string
 	/**
-	 * N​e​s​t​e​d​ ​i​n​ ​a​ ​s​i​n​g​l​e​ ​t​o​p​i​c
+	 * z​a​g​n​i​e​ż​d​ż​o​n​e​ ​w​ ​p​o​j​e​d​y​n​c​z​y​m​ ​t​e​m​a​c​i​e
 	 */
 	MQTT_NEST_1: string
 	/**
-	 * A​s​ ​i​n​d​i​v​i​d​u​a​l​ ​t​o​p​i​c​s
+	 * j​a​k​o​ ​i​n​d​y​w​i​d​u​a​l​n​e​ ​t​e​m​a​t​y
 	 */
 	MQTT_NEST_2: string
 	/**
-	 * P​u​b​l​i​s​h​ ​c​o​m​m​a​n​d​ ​o​u​t​p​u​t​ ​t​o​ ​a​ ​`​r​e​s​p​o​n​s​e​`​ ​t​o​p​i​c
+	 * P​u​b​l​i​k​u​j​ ​o​d​p​o​w​i​e​d​z​i​ ​n​a​ ​k​o​m​e​n​d​y​ ​w​ ​t​e​m​a​c​i​e​ ​"​r​e​s​p​o​n​s​e​"
 	 */
 	MQTT_RESPONSE: string
 	/**
-	 * P​u​b​l​i​s​h​ ​s​i​n​g​l​e​ ​v​a​l​u​e​ ​t​o​p​i​c​s​ ​o​n​ ​c​h​a​n​g​e
+	 * P​u​b​l​i​k​u​j​ ​p​o​j​e​d​y​ń​c​z​e​ ​w​a​r​t​o​ś​c​i​ ​p​o​ ​z​m​i​a​n​i​e
 	 */
 	MQTT_PUBLISH_TEXT_1: string
 	/**
-	 * P​u​b​l​i​s​h​ ​t​o​ ​c​o​m​m​a​n​d​ ​t​o​p​i​c​s​ ​(​i​o​B​r​o​k​e​r​)
+	 * P​u​b​l​i​k​u​j​ ​w​ ​t​e​m​a​c​i​e​ ​"​c​o​m​m​a​n​d​"​ ​(​i​o​B​r​o​k​e​r​)
 	 */
 	MQTT_PUBLISH_TEXT_2: string
 	/**
-	 * E​n​a​b​l​e​ ​M​Q​T​T​ ​D​i​s​c​o​v​e​r​y​ ​(​H​o​m​e​ ​A​s​s​i​s​t​a​n​t​,​ ​D​o​m​o​t​i​c​z​)
+	 * W​ł​ą​c​z​ ​o​p​c​j​ę​ ​M​Q​T​T​ ​D​i​s​c​o​v​e​r​y​ ​(​H​o​m​e​ ​A​s​s​i​s​t​a​n​t​,​ ​D​o​m​o​t​i​c​z​)
 	 */
 	MQTT_PUBLISH_TEXT_3: string
 	/**
-	 * P​r​e​f​i​x​ ​f​o​r​ ​t​h​e​ ​D​i​s​c​o​v​e​r​y​ ​t​o​p​i​c​s
+	 * P​r​e​f​i​k​s​ ​d​o​ ​t​e​m​a​t​ó​w​ ​"​d​i​s​c​o​v​e​r​y​"
 	 */
 	MQTT_PUBLISH_TEXT_4: string
 	/**
-	 * P​u​b​l​i​s​h​ ​I​n​t​e​r​v​a​l​s
+	 * I​n​t​e​r​w​a​ł​ ​p​u​b​l​i​k​o​w​a​n​i​a
 	 */
 	MQTT_PUBLISH_INTERVALS: string
 	/**
-	 * B​o​i​l​e​r​s​ ​a​n​d​ ​H​e​a​t​ ​P​u​m​p​s
+	 * K​o​t​ł​y​ ​i​ ​p​o​m​p​y​ ​c​i​e​p​ł​a
 	 */
 	MQTT_INT_BOILER: string
 	/**
-	 * T​h​e​r​m​o​s​t​a​t​s
+	 * T​e​r​m​o​s​t​a​t​y
 	 */
 	MQTT_INT_THERMOSTATS: string
 	/**
-	 * S​o​l​a​r​ ​M​o​d​u​l​e​s
+	 * P​a​n​e​l​e​ ​s​o​l​a​r​n​e
 	 */
 	MQTT_INT_SOLAR: string
 	/**
-	 * M​i​x​e​r​ ​M​o​d​u​l​e​s
+	 * M​i​e​s​z​a​c​z​e
 	 */
 	MQTT_INT_MIXER: string
 	/**
-	 * D​e​f​a​u​l​t
+	 * K​o​l​e​j​k​a​ ​M​Q​T​T
+	 */
+	MQTT_QUEUE: string
+	/**
+	 * D​o​m​y​ś​l​n​i​e
 	 */
 	DEFAULT: string
 	/**
-	 * S​e​t​ ​C​l​e​a​n​ ​S​e​s​s​i​o​n
+	 * U​s​t​a​w​i​a​j​ ​"​C​l​e​a​n​ ​s​e​s​s​i​o​n​"
 	 */
 	MQTT_CLEAN_SESSION: string
 	/**
-	 * A​l​w​a​y​s​ ​s​e​t​ ​R​e​t​a​i​n​ ​f​l​a​g
+	 * U​s​t​a​w​i​a​j​ ​f​l​a​g​ę​ ​"​R​e​t​a​i​n​"
 	 */
 	MQTT_RETAIN_FLAG: string
 	/**
-	 * I​n​a​c​t​i​v​e
+	 * n​i​e​a​k​t​y​w​n​y
 	 */
 	INACTIVE: string
 	/**
-	 * A​c​t​i​v​e
+	 * a​k​t​y​w​n​y
 	 */
 	ACTIVE: string
 	/**
-	 * U​n​k​n​o​w​n
+	 * n​i​e​z​n​a​n​y
 	 */
 	UNKNOWN: string
 	/**
-	 * S​e​t​ ​T​i​m​e
+	 * {​{​U​s​t​a​w​ ​z​e​g​a​r​|​U​s​t​a​w​i​a​n​i​e​ ​z​e​g​a​r​a​|​}​}
 	 */
 	SET_TIME: string
 	/**
-	 * E​n​t​e​r​ ​l​o​c​a​l​ ​d​a​t​e​ ​a​n​d​ ​t​i​m​e​ ​b​e​l​o​w​ ​t​o​ ​s​e​t​ ​t​h​e​ ​t​i​m​e
+	 * W​p​r​o​w​a​d​ź​ ​a​k​t​u​a​l​n​ą​ ​d​a​t​ę​ ​i​ ​g​o​d​z​i​n​ę
 	 */
 	SET_TIME_TEXT: string
 	/**
-	 * L​o​c​a​l​ ​T​i​m​e
+	 * C​z​a​s​ ​l​o​k​a​l​n​y
 	 */
 	LOCAL_TIME: string
 	/**
-	 * U​T​C​ ​T​i​m​e
+	 * C​z​a​s​ ​U​T​C
 	 */
 	UTC_TIME: string
 	/**
-	 * E​n​a​b​l​e​ ​N​T​P
+	 * A​k​t​y​w​u​j​ ​N​T​P​ ​(​d​a​t​a​ ​i​ ​g​o​d​z​i​n​a​ ​b​ę​d​ą​ ​a​u​t​o​m​a​t​y​c​z​n​i​e​ ​s​y​n​c​h​r​o​n​i​z​o​w​a​n​e​ ​z​ ​p​o​n​i​ż​s​z​y​m​ ​s​e​r​w​e​r​e​m​ ​c​z​a​s​u​)
 	 */
 	ENABLE_NTP: string
 	/**
-	 * T​i​m​e​ ​Z​o​n​e
+	 * S​e​r​w​e​r​ ​N​T​P
+	 */
+	NTP_SERVER: string
+	/**
+	 * S​t​r​e​f​a​ ​c​z​a​s​o​w​a
 	 */
 	TIME_ZONE: string
 	/**
-	 * A​c​c​e​s​s​ ​P​o​i​n​t
+	 * {​{​P​u​n​k​t​|​p​u​n​k​t​u​|​}​}​ ​{​{​d​o​s​t​ę​p​o​w​y​|​d​o​s​t​ę​p​o​w​e​g​o​|​}​}
 	 */
 	ACCESS_POINT: string
 	/**
-	 * E​n​a​b​l​e​ ​A​c​c​e​s​s​ ​P​o​i​n​t
+	 * A​k​t​y​w​u​j​ ​p​u​n​k​t​ ​d​o​s​t​ę​p​o​w​y​ ​(​A​c​c​e​s​s​ ​P​o​i​n​t​)
 	 */
 	AP_PROVIDE: string
 	/**
-	 * a​l​w​a​y​s
+	 * z​a​w​s​z​e
 	 */
 	AP_PROVIDE_TEXT_1: string
 	/**
-	 * w​h​e​n​ ​W​i​F​i​ ​i​s​ ​d​i​s​c​o​n​n​e​c​t​e​d
+	 * g​d​y​ ​p​o​ł​ą​c​z​e​n​i​e​ ​W​i​F​i​ ​j​e​s​t​ ​r​o​z​ł​ą​c​z​o​n​e
 	 */
 	AP_PROVIDE_TEXT_2: string
 	/**
-	 * n​e​v​e​r
+	 * n​i​g​d​y
 	 */
 	AP_PROVIDE_TEXT_3: string
 	/**
-	 * P​r​e​f​e​r​r​e​d​ ​C​h​a​n​n​e​l
+	 * P​r​e​f​e​r​o​w​a​n​y​ ​k​a​n​a​ł
 	 */
 	AP_PREFERRED_CHANNEL: string
 	/**
-	 * H​i​d​e​ ​S​S​I​D
+	 * U​k​r​y​j​ ​S​S​I​D
 	 */
 	AP_HIDE_SSID: string
 	/**
-	 * S​c​a​n​ ​W​i​F​i​ ​N​e​t​w​o​r​k​s
+	 * L​i​c​z​b​a​ ​k​l​i​e​n​t​ó​w
+	 */
+	AP_CLIENTS: string
+	/**
+	 * M​a​k​s​y​m​a​l​n​a​ ​l​i​c​z​b​a​ ​k​l​i​e​n​t​ó​w
+	 */
+	AP_MAX_CLIENTS: string
+	/**
+	 * L​o​k​a​l​n​y​ ​a​d​r​e​s​ ​I​P
+	 */
+	AP_LOCAL_IP: string
+	/**
+	 * S​k​a​n​u​j​ ​s​i​e​c​i​ ​W​i​F​i
 	 */
 	NETWORK_SCAN: string
 	/**
-	 * I​d​l​e
+	 * u​ś​p​i​o​n​y
 	 */
 	IDLE: string
 	/**
-	 * L​o​s​t
+	 * z​o​s​t​a​ł​o​ ​u​t​r​a​c​o​n​e​.
 	 */
 	LOST: string
 	/**
-	 * S​c​a​n​n​i​n​g
+	 * S​k​a​n​u​j​ę
 	 */
 	SCANNING: string
 	/**
-	 * S​c​a​n​ ​a​g​a​i​n
+	 * S​k​a​n​u​j​ ​p​o​n​o​w​n​i​e
 	 */
 	SCAN_AGAIN: string
 	/**
-	 * N​e​t​w​o​r​k​ ​S​c​a​n​n​e​r
+	 * S​k​a​n​e​r​ ​s​i​e​c​i​ ​W​i​F​i
 	 */
 	NETWORK_SCANNER: string
 	/**
-	 * N​o​ ​W​i​F​i​ ​n​e​t​w​o​r​k​s​ ​f​o​u​n​d
+	 * B​r​a​k​ ​s​i​e​c​i​ ​W​i​F​i​ ​w​ ​z​a​s​i​ę​g​u
 	 */
 	NETWORK_NO_WIFI: string
 	/**
-	 * l​e​a​v​e​ ​b​l​a​n​k​ ​t​o​ ​d​i​s​a​b​l​e​ ​W​i​F​i
+	 * p​o​z​o​s​t​a​w​ ​p​u​s​t​e​ ​a​b​y​ ​w​y​ł​ą​c​z​y​ć​ ​W​i​F​i
 	 */
 	NETWORK_BLANK_SSID: string
 	/**
-	 * P​o​w​e​r
+	 * M​o​c​ ​n​a​d​a​w​a​n​i​a
 	 */
-	POWER: string
+	TX_POWER: string
 	/**
-	 * D​i​s​a​b​l​e​ ​W​i​F​i​ ​S​l​e​e​p​ ​M​o​d​e
+	 * N​a​z​w​a​ ​w​ ​s​i​e​c​i
+	 */
+	HOSTNAME: string
+	/**
+	 * W​y​ł​ą​c​z​ ​t​r​y​b​ ​u​s​y​p​i​a​n​i​a​ ​W​i​F​i
 	 */
 	NETWORK_DISABLE_SLEEP: string
 	/**
-	 * U​s​e​ ​L​o​w​e​r​ ​W​i​F​i​ ​B​a​n​d​w​i​d​t​h
+	 * U​ż​y​w​a​j​ ​z​m​n​i​e​j​s​z​o​n​e​j​ ​p​r​z​e​p​u​s​t​o​w​o​ś​c​i​ ​W​i​F​i
 	 */
 	NETWORK_LOW_BAND: string
 	/**
-	 * E​n​a​b​l​e​ ​m​D​N​S​ ​S​e​r​v​i​c​e
+	 * W​ł​ą​c​z​ ​w​s​p​a​r​c​i​e​ ​d​l​a​ ​m​D​N​S
 	 */
 	NETWORK_USE_DNS: string
 	/**
-	 * E​n​a​b​l​e​ ​I​P​v​6​ ​s​u​p​p​o​r​t
+	 * W​ł​ą​c​z​ ​w​s​p​a​r​c​i​e​ ​d​l​a​ ​I​P​v​6
 	 */
 	NETWORK_ENABLE_IPV6: string
 	/**
-	 * U​s​e​ ​F​i​x​e​d​ ​I​P​ ​a​d​d​r​e​s​s
+	 * U​ż​y​j​ ​s​t​a​ł​e​g​o​ ​a​d​r​e​s​u​ ​I​P
 	 */
 	NETWORK_FIXED_IP: string
 	/**
-	 * A​d​m​i​n
+	 * B​r​a​m​a
+	 */
+	NETWORK_GATEWAY: string
+	/**
+	 * M​a​s​k​a​ ​p​o​d​s​i​e​c​i
+	 */
+	NETWORK_SUBNET: string
+	/**
+	 * S​e​r​w​e​r​y​ ​D​N​S
+	 */
+	NETWORK_DNS: string
+	/**
+	 * A​d​r​e​s​ ​{​0​}
+	 * @param {unknown} 0
+	 */
+	ADDRESS_OF: RequiredParams<'0'>
+	/**
+	 * A​d​m​i​n​i​s​t​r​a​t​o​r
 	 */
 	ADMIN: string
 	/**
-	 * G​u​e​s​t
+	 * G​o​ś​ć
 	 */
 	GUEST: string
 	/**
-	 * N​e​w
+	 * N​o​w​y
 	 */
 	NEW: string
 	/**
-	 * R​e​n​a​m​e
+	 * Z​m​i​e​ń​ ​n​a​z​w​ę
 	 */
 	RENAME: string
 	/**
-	 * E​n​t​i​t​y
+	 * e​n​c​j​i
 	 */
 	ENTITY: string
 }
 
 export type TranslationFunctions = {
 	/**
-	 * Language
+	 * Język
 	 */
 	LANGUAGE: () => LocalizedString
 	/**
-	 * Retry
+	 * Ponów
 	 */
 	RETRY: () => LocalizedString
 	/**
-	 * Loading
+	 * Ładowanie
 	 */
 	LOADING: () => LocalizedString
 	/**
-	 * is required
+	 * Czy wymagany?
 	 */
 	IS_REQUIRED: () => LocalizedString
 	/**
-	 * Sign In
+	 * Zaloguj
 	 */
 	SIGN_IN: () => LocalizedString
 	/**
-	 * Sign Out
+	 * Wyloguj
 	 */
 	SIGN_OUT: () => LocalizedString
 	/**
-	 * Username
+	 * Nazwa użytkownika
 	 */
 	USERNAME: () => LocalizedString
 	/**
-	 * Password
+	 * Hasło
 	 */
 	PASSWORD: () => LocalizedString
 	/**
-	 * Dashboard
+	 * Hasło "su"
+	 */
+	SU_PASSWORD: () => LocalizedString
+	/**
+	 * Pulpit
 	 */
 	DASHBOARD: () => LocalizedString
 	/**
-	 * Settings
+	 * Ustawienia {0}
 	 */
-	SETTINGS: () => LocalizedString
+	SETTINGS_OF: (arg0: unknown) => LocalizedString
 	/**
-	 * saved
+	 * zostały zapisane.
 	 */
 	SAVED: () => LocalizedString
 	/**
-	 * Help
+	 * Pomoc {0}
 	 */
-	HELP: () => LocalizedString
+	HELP_OF: (arg0: unknown) => LocalizedString
 	/**
-	 * Logged in as {name}
+	 * Zalogowany jako {name}.
 	 */
 	LOGGED_IN: (arg: { name: unknown }) => LocalizedString
 	/**
-	 * Please sign in to continue
+	 * Zaloguj się aby kontynuować.
 	 */
 	PLEASE_SIGNIN: () => LocalizedString
 	/**
-	 * Upload successful
+	 * Wysyłanie zakończone.
 	 */
 	UPLOAD_SUCCESSFUL: () => LocalizedString
 	/**
-	 * Download successful
+	 * Pobieranie zakończone.
 	 */
 	DOWNLOAD_SUCCESSFUL: () => LocalizedString
 	/**
-	 * Invalid login details
+	 * Niepoprawny login!
 	 */
 	INVALID_LOGIN: () => LocalizedString
 	/**
-	 * Network
+	 * {{Sieć|sieci|}}
 	 */
-	NETWORK: () => LocalizedString
+	NETWORK: (arg0: string | number | boolean) => LocalizedString
 	/**
-	 * Security
+	 * {{B|b|}}ezpieczeństw{{o|a|}}
 	 */
-	SECURITY: () => LocalizedString
+	SECURITY: (arg0: string | number | boolean) => LocalizedString
 	/**
-	 * ON/OFF
+	 * wł./wył.
 	 */
 	ONOFF_CAP: () => LocalizedString
 	/**
-	 * on/off
+	 * włączono/wyłączono
 	 */
 	ONOFF: () => LocalizedString
 	/**
-	 * Type
+	 * Typ
 	 */
 	TYPE: () => LocalizedString
 	/**
-	 * Description
+	 * Opis
 	 */
 	DESCRIPTION: () => LocalizedString
 	/**
-	 * Entities
+	 * Encje
 	 */
 	ENTITIES: () => LocalizedString
 	/**
-	 * Refresh
+	 * Odśwież
 	 */
 	REFRESH: () => LocalizedString
 	/**
-	 * Export
+	 * Eksportuj
 	 */
 	EXPORT: () => LocalizedString
 	/**
-	 * Device Details
+	 * Szczegóły urządzenia
 	 */
 	DEVICE_DETAILS: () => LocalizedString
 	/**
-	 * Brand
+	 * Marka
 	 */
 	BRAND: () => LocalizedString
 	/**
-	 * Entity Name
+	 * Nazwa encji
 	 */
 	ENTITY_NAME: () => LocalizedString
 	/**
-	 * Value
+	 * {{Wartość|wartość|}}
 	 */
-	VALUE: () => LocalizedString
+	VALUE: (arg0: string | number | boolean) => LocalizedString
 	/**
-	 * only show favorites
+	 * Pokaż tylko "ulubione"
 	 */
 	SHOW_FAV: () => LocalizedString
 	/**
-	 * Device and Sensor Data
+	 * Dane z urządzeń i czujników
 	 */
 	DEVICE_SENSOR_DATA: () => LocalizedString
 	/**
-	 * Devices & Sensors
+	 * Urządzenia i czujniki
 	 */
 	DEVICES_SENSORS: () => LocalizedString
 	/**
-	 * Attached EMS-ESP Sensors
+	 * Urządzenia podłączone do EMS-ESP (czujniki temperatury/analogowe/cyfrowe, wyjścia cyfrowe)
 	 */
 	ATTACHED_SENSORS: () => LocalizedString
 	/**
-	 * Call Command
+	 * Wykonaj komendę
 	 */
 	RUN_COMMAND: () => LocalizedString
 	/**
-	 * Change Value
+	 * Zmień wartość
 	 */
 	CHANGE_VALUE: () => LocalizedString
 	/**
-	 * Cancel
+	 * Anuluj
 	 */
 	CANCEL: () => LocalizedString
 	/**
-	 * Reset
+	 * {{Resetuj|Resetowanie|}}
 	 */
-	RESET: () => LocalizedString
+	RESET: (arg0: string | number | boolean) => LocalizedString
 	/**
-	 * Send
+	 * Wyślij
 	 */
 	SEND: () => LocalizedString
 	/**
-	 * Save
+	 * Zapisz
 	 */
 	SAVE: () => LocalizedString
 	/**
-	 * Remove
+	 * Usuń
 	 */
 	REMOVE: () => LocalizedString
 	/**
-	 * Problem updating
+	 * Problem z aktualizacją!
 	 */
 	PROBLEM_UPDATING: () => LocalizedString
 	/**
-	 * Problem loading
+	 * Problem z pobieraniem!
 	 */
 	PROBLEM_LOADING: () => LocalizedString
 	/**
-	 * Access Denied
+	 * Brak dostępu!
 	 */
 	ACCESS_DENIED: () => LocalizedString
 	/**
-	 * Analog Sensor
+	 * urządzenia podłączonego do EMS-ESP
 	 */
 	ANALOG_SENSOR: () => LocalizedString
 	/**
-	 * Analog Sensors
+	 * Urządzenia podłączone do EMS-ESP
 	 */
 	ANALOG_SENSORS: () => LocalizedString
 	/**
-	 * Updated
+	 * Zaktualizowano ustawienia {0}.
 	 */
-	UPDATED: () => LocalizedString
+	UPDATED_OF: (arg0: unknown) => LocalizedString
 	/**
-	 * Update
+	 * Aktualizacja {0}
 	 */
-	UPDATE: () => LocalizedString
+	UPDATE_OF: (arg0: unknown) => LocalizedString
 	/**
-	 * Removed
+	 * Usunięto ustawienia {0}.
 	 */
-	REMOVED: () => LocalizedString
+	REMOVED_OF: (arg0: unknown) => LocalizedString
 	/**
-	 * Deletion
+	 * Kasowanie {0}
 	 */
-	DELETION: () => LocalizedString
+	DELETION_OF: (arg0: unknown) => LocalizedString
 	/**
-	 * Offset
+	 * Korekta +/-
 	 */
 	OFFSET: () => LocalizedString
 	/**
-	 * Factor
+	 * Mnożnik
 	 */
 	FACTOR: () => LocalizedString
 	/**
-	 * Frequency
+	 * Częstotliwość
 	 */
 	FREQ: () => LocalizedString
 	/**
-	 * Start value
+	 * Wypełnienie
+	 */
+	DUTY_CYCLE: () => LocalizedString
+	/**
+	 * J.m.
+	 */
+	UNIT: () => LocalizedString
+	/**
+	 * Wartość początkowa
 	 */
 	STARTVALUE: () => LocalizedString
 	/**
-	 * Warning: be careful when assigning a GPIO!
+	 * Uwaga! Bądź ostrożny przypisując GPIO do czujnika!
 	 */
 	WARN_GPIO: () => LocalizedString
 	/**
-	 * Edit
+	 * Edycja
 	 */
 	EDIT: () => LocalizedString
 	/**
-	 * Temperature Sensor
+	 * czujnika temperatury
 	 */
 	TEMP_SENSOR: () => LocalizedString
 	/**
-	 * Temperature Sensors
+	 * Czujniki temperatury 1-Wire®
 	 */
 	TEMP_SENSORS: () => LocalizedString
 	/**
-	 * Write command {cmd}
+	 * Wyślij komendę {cmd}
 	 */
 	WRITE_COMMAND: (arg: { cmd: unknown }) => LocalizedString
 	/**
-	 * EMS bus disconnected. If this warning still persists after a few seconds please check settings and board profile
+	 * Brak połączenia z magistralą EMS. Jeśli ten błąd występuje dłużej niż kilka sekund, sprawdź ustawienia oraz profil płytki interfejsu.
 	 */
 	EMS_BUS_WARNING: () => LocalizedString
 	/**
-	 * Scanning for EMS devices...
+	 * Trwa skanowanie magistrali EMS w poszukiwaniu urządzeń...
 	 */
 	EMS_BUS_SCANNING: () => LocalizedString
 	/**
-	 * Connected
+	 * {{połączono|połączenie|}}
 	 */
-	CONNECTED: () => LocalizedString
+	CONNECTED: (arg0: string | number | boolean) => LocalizedString
 	/**
-	 * Tx issues - try a different Tx Mode
+	 * Problem z zapisem na magistralę EMS. Spróbuj wybrać inny "Sposób transmisji (Tx)".
 	 */
 	TX_ISSUES: () => LocalizedString
 	/**
-	 * Disconnected
+	 * zostało rozłączone
 	 */
 	DISCONNECTED: () => LocalizedString
 	/**
-	 * Are you sure you want to initiate a full device scan of the EMS bus?
+	 * Czy na pewno wykonać pełne skanowanie magistrali EMS?
 	 */
 	EMS_SCAN: () => LocalizedString
 	/**
-	 * EMS Bus Status
+	 * Status magistrali EMS
 	 */
 	EMS_BUS_STATUS: () => LocalizedString
 	/**
-	 * Active Devices & Sensors
+	 * Aktywne urządzenia i czujniki
 	 */
 	ACTIVE_DEVICES: () => LocalizedString
 	/**
-	 * Device
+	 * Urządzenie EMS
 	 */
-	DEVICE: () => LocalizedString
+	EMS_DEVICE: () => LocalizedString
 	/**
-	 * SUCCESS
+	 * Udane
 	 */
 	SUCCESS: () => LocalizedString
 	/**
-	 * FAIL
+	 * Nieudane
 	 */
 	FAIL: () => LocalizedString
 	/**
-	 * QUALITY
+	 * Jakość
 	 */
 	QUALITY: () => LocalizedString
 	/**
-	 * Scan for new devices
+	 * Wyszukiwanie nowych urządzeń
 	 */
 	SCAN_DEVICES: () => LocalizedString
 	/**
-	 * EMS Bus & Activity Status
+	 * Aktywność
 	 */
 	EMS_BUS_STATUS_TITLE: () => LocalizedString
 	/**
-	 * Scan
+	 * Skanuj
 	 */
 	SCAN: () => LocalizedString
 	STATUS_NAMES: {
 		/**
-		 * EMS Telegrams Received (Rx)
+		 * EMS, telegramy odebrane (Rx)
 		 */
 		'0': () => LocalizedString
 		/**
-		 * EMS Reads (Tx)
+		 * EMS, wysłane telegramy "odczyt" (Tx)
 		 */
 		'1': () => LocalizedString
 		/**
-		 * EMS Writes (Tx)
+		 * EMS, wysłane telegramy "zapis" (Tx)
 		 */
 		'2': () => LocalizedString
 		/**
-		 * Temperature Sensor Reads
+		 * Odczyty czujników temperatury 1-Wire®
 		 */
 		'3': () => LocalizedString
 		/**
-		 * Analog Sensor Reads
+		 * Odczyty czujników analogowych i cyfrowych
 		 */
 		'4': () => LocalizedString
 		/**
-		 * MQTT Publishes
+		 * Publikacje MQTT
 		 */
 		'5': () => LocalizedString
 		/**
-		 * API Calls
+		 * Wywołania API
 		 */
 		'6': () => LocalizedString
 		/**
-		 * Syslog Messages
+		 * Wpisy w logu systemowym
 		 */
 		'7': () => LocalizedString
 	}
 	/**
-	 * {num} Device{{s}}
+	 * {num} urządze{{ń|nie|nia|nia|ń}} EMS
 	 */
 	NUM_DEVICES: (arg: { num: string | number | boolean }) => LocalizedString
 	/**
-	 * {num} Temperature Sensor{{s}}
+	 * {num} czujni{{ków|k|ki|ki|ków}} temperatury
 	 */
 	NUM_TEMP_SENSORS: (arg: { num: string | number | boolean }) => LocalizedString
 	/**
-	 * {num} Analog Sensor{{s}}
+	 * {num} czujni{{ków|k|ki(two)|ki|ków}} analogow{{ych|y|e|e|ych}}
 	 */
 	NUM_ANALOG_SENSORS: (arg: { num: string | number | boolean }) => LocalizedString
 	/**
-	 * {num} Day{{s}}
+	 * {num} {{dni|dzień|dni|dni|dni}}
 	 */
 	NUM_DAYS: (arg: { num: string | number | boolean }) => LocalizedString
 	/**
-	 * {num} Second{{s}}
+	 * {num} sekun{{d|da|dy|dy|d}}
 	 */
 	NUM_SECONDS: (arg: { num: string | number | boolean }) => LocalizedString
 	/**
-	 * {num} Hour{{s}}
+	 * {num} godzi{{n|na|ny|ny|n}}
 	 */
 	NUM_HOURS: (arg: { num: string | number | boolean }) => LocalizedString
 	/**
-	 * {num} Minute{{s}}
+	 * {num} minu{{t|ta|ty|ty|t}}
 	 */
 	NUM_MINUTES: (arg: { num: string | number | boolean }) => LocalizedString
 	/**
-	 * Application Settings
+	 * Ustawienia aplikacji
 	 */
 	APPLICATION_SETTINGS: () => LocalizedString
 	/**
-	 * Customization
+	 * Personalizacja
 	 */
 	CUSTOMIZATION: () => LocalizedString
 	/**
-	 * EMS-ESP is restarting
+	 * Trwa ponowne uruchamianie...
 	 */
 	APPLICATION_RESTARTING: () => LocalizedString
 	/**
-	 * Select a pre-configured interface board profile from the list below or choose Custom to configure your own hardware settings
+	 * Profil płytki interfejsu
+	 */
+	INTERFACE_BOARD_PROFILE: () => LocalizedString
+	/**
+	 * Wybierz z listy wstępną konfigurację płytki interfejsu lub stwórz własną konfigurację.
 	 */
 	BOARD_PROFILE_TEXT: () => LocalizedString
 	/**
-	 * Board Profile
+	 * Profil płytki
 	 */
 	BOARD_PROFILE: () => LocalizedString
 	/**
-	 * Button
+	 * Przycisk
 	 */
 	BUTTON: () => LocalizedString
 	/**
-	 * Temperature
+	 * 1-Wire®
 	 */
 	TEMPERATURE: () => LocalizedString
 	/**
-	 * disabled
+	 * Typ układu ethernetowego (PHY)
+	 */
+	PHY_TYPE: () => LocalizedString
+	/**
+	 * wyłączony
 	 */
 	DISABLED: () => LocalizedString
 	/**
-	 * General Options
+	 * Sposób transmisji (Tx)
+	 */
+	TX_MODE: () => LocalizedString
+	/**
+	 * Opcje podstawowe
 	 */
 	GENERAL_OPTIONS: () => LocalizedString
 	/**
-	 * Language (for device entities)
+	 * Język encji
 	 */
 	LANGUAGE_ENTITIES: () => LocalizedString
 	/**
-	 * Hide LED
+	 * Wyłącz LED
 	 */
 	HIDE_LED: () => LocalizedString
 	/**
-	 * Enable Telnet Console
+	 * Aktywuj dostęp dla konsoli Telnet
 	 */
 	ENABLE_TELNET: () => LocalizedString
 	/**
-	 * Enable Analog Sensors
+	 * Aktywuj urządzenia GPIO (czujniki analogowe i cyfrowe oraz wyjścia cyfrowe)
 	 */
 	ENABLE_ANALOG: () => LocalizedString
 	/**
-	 * Convert temperature values to Fahrenheit
+	 * Konwertuj temperatury do skali Fahrenheita
 	 */
 	CONVERT_FAHRENHEIT: () => LocalizedString
 	/**
-	 * Bypass Access Token authorization on API calls
+	 * Pomiń autoryzację tokenem w wywołaniach API
 	 */
 	BYPASS_TOKEN: () => LocalizedString
 	/**
-	 * Enable read-only mode (blocks all outgoing EMS Tx Write commands)
+	 * Tryb pracy "tylko do odczytu" (blokuje wszystkie komendy zapisu na magistralę EMS)
 	 */
 	READONLY: () => LocalizedString
 	/**
-	 * Underclock CPU speed
+	 * Obniż taktowanie CPU
 	 */
 	UNDERCLOCK_CPU: () => LocalizedString
 	/**
-	 * Enable Shower Timer
+	 * Aktywuj minutnik prysznica
 	 */
 	ENABLE_SHOWER_TIMER: () => LocalizedString
 	/**
-	 * Enable Shower Alert
+	 * Aktywuj alarm prysznica
 	 */
 	ENABLE_SHOWER_ALERT: () => LocalizedString
 	/**
-	 * Trigger Time
+	 * Wyzwalaj po czasie
 	 */
 	TRIGGER_TIME: () => LocalizedString
 	/**
-	 * Cold Shot Duration
+	 * Czas trwania tryśnięcia zimnej wody
 	 */
 	COLD_SHOT_DURATION: () => LocalizedString
 	/**
-	 * Formatting Options
+	 * Opcje formatowania
 	 */
 	FORMATTING_OPTIONS: () => LocalizedString
 	/**
-	 * Boolean Format Dashboard
+	 * Format wartości binarnych dla pulpitu
 	 */
 	BOOLEAN_FORMAT_DASHBOARD: () => LocalizedString
 	/**
-	 * Boolean Format API/MQTT
+	 * Format wartości binarnych dla API/MQTT
 	 */
 	BOOLEAN_FORMAT_API: () => LocalizedString
 	/**
-	 * Enum Format API/MQTT
+	 * Format wartości numerowanych dla API/MQTT
 	 */
 	ENUM_FORMAT: () => LocalizedString
 	/**
-	 * Index
+	 * indeks
 	 */
 	INDEX: () => LocalizedString
 	/**
-	 * Enable parasite power
+	 * Aktywuj zasilanie pasożytnicze
 	 */
 	ENABLE_PARASITE: () => LocalizedString
 	/**
-	 * Logging
+	 * Logowanie
 	 */
 	LOGGING: () => LocalizedString
 	/**
-	 * Log EMS telegrams in hexadecimal
+	 * Loguj telegramy EMS w systemie szesnastkowym (hex)
 	 */
 	LOG_HEX: () => LocalizedString
 	/**
-	 * Enable Syslog
+	 * Aktywuj SysLog
 	 */
 	ENABLE_SYSLOG: () => LocalizedString
 	/**
-	 * Mark Interval
+	 * Poziom logowania
+	 */
+	LOG_LEVEL: () => LocalizedString
+	/**
+	 * Oznaczaj interwały (0=brak)
 	 */
 	MARK_INTERVAL: () => LocalizedString
 	/**
-	 * seconds
+	 * sek.
 	 */
 	SECONDS: () => LocalizedString
 	/**
-	 * minutes
+	 * min.
 	 */
 	MINUTES: () => LocalizedString
+	/**
+	 * godz.
+	 */
+	HOURS: () => LocalizedString
 	/**
 	 * Restart
 	 */
 	RESTART: () => LocalizedString
 	/**
-	 * hours
-	 */
-	HOURS: () => LocalizedString
-	/**
-	 * EMS-ESP needs to be restarted to apply changed system settings
+	 * Aby zastosować wprowadzone zmiany interfejs EMS-ESP musi zostać zrestartowany.
 	 */
 	RESTART_TEXT: () => LocalizedString
 	/**
-	 * Are you sure you want to restart EMS-ESP?
+	 * Jesteś pewien, że chcesz zrestartować interfejs EMS-ESP?
 	 */
 	RESTART_CONFIRM: () => LocalizedString
 	/**
-	 * Command
+	 * KOMENDA
 	 */
 	COMMAND: () => LocalizedString
 	/**
-	 * All customizations have been removed. Restarting...
+	 * Wszystkie personalizacje zostały usunięte. Restartuję...
 	 */
 	CUSTOMIZATIONS_RESTART: () => LocalizedString
 	/**
-	 * Selected entities exceeded limit. Please save in batches
+	 * Wybrano za dużo obiektów. Wprowadź zmiany w mniejszych partiach.
 	 */
 	CUSTOMIZATIONS_FULL: () => LocalizedString
 	/**
-	 * Customizations saved
+	 * Personalizacje zostały zapisane.
 	 */
 	CUSTOMIZATIONS_SAVED: () => LocalizedString
 	/**
-	 * Select a device and customize the entities options or click to rename
+	 * Wybierz urządzenie EMS, dostosuj opcje lub kliknij by zmienić nazwę encji.
 	 */
 	CUSTOMIZATIONS_HELP_1: () => LocalizedString
 	/**
-	 * mark as favorite
+	 * oznacz jako ulubioną
 	 */
 	CUSTOMIZATIONS_HELP_2: () => LocalizedString
 	/**
-	 * disable write action
+	 * zablokuj możliwość zapisu
 	 */
 	CUSTOMIZATIONS_HELP_3: () => LocalizedString
 	/**
-	 * exclude from MQTT and API
+	 * wyklucz z MQTT i API
 	 */
 	CUSTOMIZATIONS_HELP_4: () => LocalizedString
 	/**
-	 * hide from Dashboard
+	 * ukryj na pulpicie
 	 */
 	CUSTOMIZATIONS_HELP_5: () => LocalizedString
 	/**
-	 * Select a device
+	 * wybierz urządzenie
 	 */
 	SELECT_DEVICE: () => LocalizedString
 	/**
-	 * set all
+	 * Zaznacz wszystko jako
 	 */
 	SET_ALL: () => LocalizedString
 	/**
-	 * Options
+	 * Opcje
 	 */
 	OPTIONS: () => LocalizedString
 	/**
-	 * Name
+	 * nazwa
 	 */
 	NAME: () => LocalizedString
 	/**
-	 * Are you sure you want remove all customizations including the custom settings of the Temperature and Analog sensors?
+	 * Czy jesteś pewien, że chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury 1-Wire® i urządzeń podłączonych do EMS-ESP?
 	 */
 	CUSTOMIZATIONS_RESET: () => LocalizedString
 	/**
-	 * Device Entities
+	 * Encje urządzenia
 	 */
 	DEVICE_ENTITIES: () => LocalizedString
 	/**
-	 * User Customization
+	 * Personalizacje użytkownika
 	 */
 	USER_CUSTOMIZATION: () => LocalizedString
 	/**
-	 * Support Information
+	 * Dodatkowe informacje
 	 */
 	SUPPORT_INFORMATION: () => LocalizedString
 	/**
-	 * Click Here
+	 * Kliknij tu
 	 */
 	CLICK_HERE: () => LocalizedString
 	/**
-	 * Visit the online wiki to get instructions on how to configure EMS-ESP
+	 * Skorzystaj z wiki w celu znalezienia szczegółowych instrukcji jak skonfigurować EMS-ESP
 	 */
 	HELP_INFORMATION_1: () => LocalizedString
 	/**
-	 * For live community chat join our Discord server
+	 * Skorzystaj z serwera Discord w celu komunikacji na żywo ze społecznością
 	 */
 	HELP_INFORMATION_2: () => LocalizedString
 	/**
-	 * To request a feature or report a bug
+	 * Aby zaproponować nową funkcjonalność lub zgłosić problem
 	 */
 	HELP_INFORMATION_3: () => LocalizedString
 	/**
-	 * remember to download and attach your system information for a faster response when reporting an issue
+	 * gdy zgłaszasz problem, będzie on szybciej rozwiązany gdy do zgłoszenia dołączysz pełną informację o swoim systemie
 	 */
 	HELP_INFORMATION_4: () => LocalizedString
 	/**
-	 * EMS-ESP is a free and open-source project. Please support its future development by giving it a star on Github!
+	 * EMS-ESP jest darmowym projektem typu open-source. Aby go wesprzeć, rozważ przyznanie nam gwiazdki na Github!
 	 */
 	HELP_INFORMATION_5: () => LocalizedString
 	/**
-	 * Support Info
+	 * Dodatkowe informacje
 	 */
 	SUPPORT_INFO: () => LocalizedString
 	/**
-	 * Upload
+	 * Wysyłanie {0}
+	 */
+	UPLOAD_OF: (arg0: unknown) => LocalizedString
+	/**
+	 * Wysyłanie
 	 */
 	UPLOAD: () => LocalizedString
 	/**
-	 * Download
+	 * {{P|p|}}obier{{anie|z|}}
 	 */
-	DOWNLOAD: () => LocalizedString
+	DOWNLOAD: (arg0: string | number | boolean) => LocalizedString
 	/**
-	 * aborted
+	 * zostało przerwane!
 	 */
 	ABORTED: () => LocalizedString
 	/**
-	 * failed
+	 * nie powiodło się!
 	 */
 	FAILED: () => LocalizedString
 	/**
-	 * successful
+	 * powiodło się.
 	 */
 	SUCCESSFUL: () => LocalizedString
 	/**
-	 * System
+	 * {{S|s||s}}yste{{m|mu||mowy}}
 	 */
-	SYSTEM: () => LocalizedString
+	SYSTEM: (arg0: string | number | boolean) => LocalizedString
 	/**
-	 * Log
+	 * Log {0}
 	 */
-	LOG: () => LocalizedString
+	LOG_OF: (arg0: unknown) => LocalizedString
 	/**
-	 * Status
+	 * Status {0}
 	 */
-	STATUS: () => LocalizedString
+	STATUS_OF: (arg0: unknown) => LocalizedString
 	/**
-	 * Upload/Download
+	 * Przesyłanie plików
 	 */
 	UPLOAD_DOWNLOAD: () => LocalizedString
 	/**
-	 * You are currently running version
+	 * Obecnie zainstalowana wersja to:
 	 */
 	SYSTEM_VERSION_RUNNING: () => LocalizedString
-	/**
-	 * to apply the new firmware
-	 */
 	SYSTEM_APPLY_FIRMWARE: () => LocalizedString
 	/**
-	 * Close
+	 * Zamknij
 	 */
 	CLOSE: () => LocalizedString
 	/**
-	 * Use
+	 * Aby zaktualizować firmware skorzystaj z funkcji
 	 */
 	USE: () => LocalizedString
 	/**
-	 * Factory Reset
+	 * Ustawienia fabryczne
 	 */
 	FACTORY_RESET: () => LocalizedString
 	/**
-	 * Device has been factory reset and will now restart
+	 * Interfejs EMS-ESP został przywrócony do ustawień fabrycznych i zostanie teraz ponownie uruchomiony.
 	 */
 	SYSTEM_FACTORY_TEXT: () => LocalizedString
 	/**
-	 * Are you sure you want to reset the device to its factory defaults?
+	 * Czy jesteś pewien, że chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP? 
 	 */
 	SYSTEM_FACTORY_TEXT_DIALOG: () => LocalizedString
 	/**
-	 * Version Check
+	 * {{Sprawdź wersję|Sprawdzanie wersji|)}}
 	 */
 	VERSION_CHECK: (arg0: string | number | boolean) => LocalizedString
 	/**
-	 * The latest
+	 * Najnowsza
 	 */
 	THE_LATEST: () => LocalizedString
 	/**
-	 * official
+	 * oficjalna
 	 */
 	OFFICIAL: () => LocalizedString
 	/**
-	 * development
+	 * testowa
 	 */
 	DEVELOPMENT: () => LocalizedString
 	/**
-	 * version is
+	 * wersja to
 	 */
 	VERSION_IS: () => LocalizedString
 	/**
-	 * release notes
+	 * lista zmian
 	 */
 	RELEASE_NOTES: () => LocalizedString
 	/**
-	 * Device (Platform / SDK)
+	 * Wersja EMS-ESP
+	 */
+	EMS_ESP_VER: () => LocalizedString
+	/**
+	 * Urządzenie (platforma / SDK)
 	 */
 	PLATFORM: () => LocalizedString
 	/**
-	 * System Uptime
+	 * Czas działania systemu
 	 */
 	UPTIME: () => LocalizedString
 	/**
-	 * CPU Frequency
+	 * Taktowanie CPU
 	 */
 	CPU_FREQ: () => LocalizedString
 	/**
-	 * Heap (Free / Max Alloc)
+	 * HEAP (wolne / maksymalny przydział)
 	 */
 	HEAP: () => LocalizedString
 	/**
-	 * PSRAM (Size / Free)
+	 * PSRAM (rozmiar / wolne)
 	 */
 	PSRAM: () => LocalizedString
 	/**
-	 * Flash Chip (Size / Speed)
+	 * Układ pamięci flash (rozmiar / taktowanie)
 	 */
 	FLASH: () => LocalizedString
 	/**
-	 * Application (Used / Free)
+	 * Aplikacja (wykorzystane / wolne)
 	 */
 	APPSIZE: () => LocalizedString
 	/**
-	 * File System (Used / Free)
+	 * System plików (wykorzystane / wolne)
 	 */
 	FILESYSTEM: () => LocalizedString
 	/**
-	 * Buffer Size
+	 * Rozmiar bufora
 	 */
 	BUFFER_SIZE: () => LocalizedString
 	/**
-	 * Compact
+	 * Kompaktowy
 	 */
 	COMPACT: () => LocalizedString
 	/**
-	 * Enable OTA Updates
+	 * Aktywuj aktualizacje OTA
 	 */
 	ENABLE_OTA: () => LocalizedString
 	/**
-	 * Download the entity customizations
+	 * Pobierz personalizacje
 	 */
 	DOWNLOAD_CUSTOMIZATION_TEXT: () => LocalizedString
 	/**
-	 * Download the application settings. Be careful when sharing your settings as this file contains passwords and other sensitive system information
+	 * Pobierz ustawienia aplikacji. Uważaj jeśli udostępniasz plik z ustawieniami, ponieważ zawiera on hasła oraz inne wrażliwe informacje!
 	 */
 	DOWNLOAD_SETTINGS_TEXT: () => LocalizedString
 	/**
-	 * Upload a new firmware (.bin) file, settings or customizations (.json) file below
+	 * Wyślij firmware (.bin), ustawienia lub personalizacje (.json)
 	 */
 	UPLOAD_TEXT: () => LocalizedString
 	/**
-	 * Uploading
+	 * Wysłano
 	 */
 	UPLOADING: () => LocalizedString
 	/**
-	 * Drop file or click here
+	 * Przeciągnij tutaj plik lub kliknij
 	 */
 	UPLOAD_DROP_TEXT: () => LocalizedString
 	/**
-	 * Unexpected Error, please try again
+	 * Nieoczekiwany błąd, spróbuj ponownie!
 	 */
 	ERROR: () => LocalizedString
 	/**
-	 * Time set
+	 * Ustaw czas
 	 */
 	TIME_SET: () => LocalizedString
 	/**
-	 * Manage Users
+	 * Zarządzanie użytkownikami
 	 */
 	MANAGE_USERS: () => LocalizedString
 	/**
-	 * is Admin
+	 * {{Admin?|Uprawnienia administratora|}}
 	 */
-	IS_ADMIN: () => LocalizedString
+	IS_ADMIN: (arg0: string | number | boolean) => LocalizedString
 	/**
-	 * You must have at least one admin user configured
+	 * Przynajmniej jeden użytkownik musi mieć uprawnienia administratora!
 	 */
 	USER_WARNING: () => LocalizedString
 	/**
-	 * Add
+	 * Doda{{j|wanie|C}}
 	 */
-	ADD: () => LocalizedString
+	ADD: (arg0: string | number | boolean) => LocalizedString
 	/**
-	 * Access Token for
+	 * Token dostępu dla użytkownika
 	 */
 	ACCESS_TOKEN_FOR: () => LocalizedString
 	/**
-	 * The token below is used with REST API calls that require authorization. It can be passed either as a Bearer token in the Authorization header or in the access_token URL query parameter.
+	 * Token jest używany w wywołaniach REST API wymagających autoryzacji. Można go przekazywać bezpośrednio lub przez URL.
 	 */
 	ACCESS_TOKEN_TEXT: () => LocalizedString
 	/**
-	 * Generating token
+	 * Generowanie tokenu
 	 */
 	GENERATING_TOKEN: () => LocalizedString
 	/**
-	 * User
+	 * {{Użytkownik|użytkownika|}}
 	 */
-	USER: () => LocalizedString
+	USER: (arg0: string | number | boolean) => LocalizedString
 	/**
-	 * Modify
+	 * Edycja
 	 */
 	MODIFY: () => LocalizedString
 	/**
-	 * The su (super user) password is used to sign authentication tokens and also enable admin privileges within the Console.
+	 * Hasło "su" (super-użytkownika) jest wykorzystywane do autoryzacji tokenów oraz dostępu do konsoli z uprawnieniami administratora.
 	 */
 	SU_TEXT: () => LocalizedString
 	/**
-	 * Not enabled
+	 * nieaktywowany
 	 */
 	NOT_ENABLED: () => LocalizedString
 	/**
-	 * Errors
+	 * Błędy {0}
 	 */
-	ERRORS: () => LocalizedString
+	ERRORS_OF: (arg0: unknown) => LocalizedString
 	/**
-	 * Disconnect Reason
+	 * Powód rozłączenia
 	 */
 	DISCONNECT_REASON: () => LocalizedString
 	/**
-	 * Enable MQTT
+	 * Aktywuj MQTT
 	 */
 	ENABLE_MQTT: () => LocalizedString
 	/**
-	 * Optional
+	 * opcjonalny
 	 */
 	OPTIONAL: () => LocalizedString
 	/**
-	 * Formatting
+	 * Formatowanie
 	 */
 	FORMATTING: () => LocalizedString
 	/**
@@ -1891,203 +2008,243 @@ export type TranslationFunctions = {
 	 */
 	FORMAT: () => LocalizedString
 	/**
-	 * Nested in a single topic
+	 * zagnieżdżone w pojedynczym temacie
 	 */
 	MQTT_NEST_1: () => LocalizedString
 	/**
-	 * As individual topics
+	 * jako indywidualne tematy
 	 */
 	MQTT_NEST_2: () => LocalizedString
 	/**
-	 * Publish command output to a `response` topic
+	 * Publikuj odpowiedzi na komendy w temacie "response"
 	 */
 	MQTT_RESPONSE: () => LocalizedString
 	/**
-	 * Publish single value topics on change
+	 * Publikuj pojedyńcze wartości po zmianie
 	 */
 	MQTT_PUBLISH_TEXT_1: () => LocalizedString
 	/**
-	 * Publish to command topics (ioBroker)
+	 * Publikuj w temacie "command" (ioBroker)
 	 */
 	MQTT_PUBLISH_TEXT_2: () => LocalizedString
 	/**
-	 * Enable MQTT Discovery (Home Assistant, Domoticz)
+	 * Włącz opcję MQTT Discovery (Home Assistant, Domoticz)
 	 */
 	MQTT_PUBLISH_TEXT_3: () => LocalizedString
 	/**
-	 * Prefix for the Discovery topics
+	 * Prefiks do tematów "discovery"
 	 */
 	MQTT_PUBLISH_TEXT_4: () => LocalizedString
 	/**
-	 * Publish Intervals
+	 * Interwał publikowania
 	 */
 	MQTT_PUBLISH_INTERVALS: () => LocalizedString
 	/**
-	 * Boilers and Heat Pumps
+	 * Kotły i pompy ciepła
 	 */
 	MQTT_INT_BOILER: () => LocalizedString
 	/**
-	 * Thermostats
+	 * Termostaty
 	 */
 	MQTT_INT_THERMOSTATS: () => LocalizedString
 	/**
-	 * Solar Modules
+	 * Panele solarne
 	 */
 	MQTT_INT_SOLAR: () => LocalizedString
 	/**
-	 * Mixer Modules
+	 * Mieszacze
 	 */
 	MQTT_INT_MIXER: () => LocalizedString
 	/**
-	 * Default
+	 * Kolejka MQTT
+	 */
+	MQTT_QUEUE: () => LocalizedString
+	/**
+	 * Domyślnie
 	 */
 	DEFAULT: () => LocalizedString
 	/**
-	 * Set Clean Session
+	 * Ustawiaj "Clean session"
 	 */
 	MQTT_CLEAN_SESSION: () => LocalizedString
 	/**
-	 * Always set Retain flag
+	 * Ustawiaj flagę "Retain"
 	 */
 	MQTT_RETAIN_FLAG: () => LocalizedString
 	/**
-	 * Inactive
+	 * nieaktywny
 	 */
 	INACTIVE: () => LocalizedString
 	/**
-	 * Active
+	 * aktywny
 	 */
 	ACTIVE: () => LocalizedString
 	/**
-	 * Unknown
+	 * nieznany
 	 */
 	UNKNOWN: () => LocalizedString
 	/**
-	 * Set Time
+	 * {{Ustaw zegar|Ustawianie zegara|}}
 	 */
-	SET_TIME: () => LocalizedString
+	SET_TIME: (arg0: string | number | boolean) => LocalizedString
 	/**
-	 * Enter local date and time below to set the time
+	 * Wprowadź aktualną datę i godzinę
 	 */
 	SET_TIME_TEXT: () => LocalizedString
 	/**
-	 * Local Time
+	 * Czas lokalny
 	 */
 	LOCAL_TIME: () => LocalizedString
 	/**
-	 * UTC Time
+	 * Czas UTC
 	 */
 	UTC_TIME: () => LocalizedString
 	/**
-	 * Enable NTP
+	 * Aktywuj NTP (data i godzina będą automatycznie synchronizowane z poniższym serwerem czasu)
 	 */
 	ENABLE_NTP: () => LocalizedString
 	/**
-	 * Time Zone
+	 * Serwer NTP
+	 */
+	NTP_SERVER: () => LocalizedString
+	/**
+	 * Strefa czasowa
 	 */
 	TIME_ZONE: () => LocalizedString
 	/**
-	 * Access Point
+	 * {{Punkt|punktu|}} {{dostępowy|dostępowego|}}
 	 */
-	ACCESS_POINT: () => LocalizedString
+	ACCESS_POINT: (arg0: string | number | boolean) => LocalizedString
 	/**
-	 * Enable Access Point
+	 * Aktywuj punkt dostępowy (Access Point)
 	 */
 	AP_PROVIDE: () => LocalizedString
 	/**
-	 * always
+	 * zawsze
 	 */
 	AP_PROVIDE_TEXT_1: () => LocalizedString
 	/**
-	 * when WiFi is disconnected
+	 * gdy połączenie WiFi jest rozłączone
 	 */
 	AP_PROVIDE_TEXT_2: () => LocalizedString
 	/**
-	 * never
+	 * nigdy
 	 */
 	AP_PROVIDE_TEXT_3: () => LocalizedString
 	/**
-	 * Preferred Channel
+	 * Preferowany kanał
 	 */
 	AP_PREFERRED_CHANNEL: () => LocalizedString
 	/**
-	 * Hide SSID
+	 * Ukryj SSID
 	 */
 	AP_HIDE_SSID: () => LocalizedString
 	/**
-	 * Scan WiFi Networks
+	 * Liczba klientów
+	 */
+	AP_CLIENTS: () => LocalizedString
+	/**
+	 * Maksymalna liczba klientów
+	 */
+	AP_MAX_CLIENTS: () => LocalizedString
+	/**
+	 * Lokalny adres IP
+	 */
+	AP_LOCAL_IP: () => LocalizedString
+	/**
+	 * Skanuj sieci WiFi
 	 */
 	NETWORK_SCAN: () => LocalizedString
 	/**
-	 * Idle
+	 * uśpiony
 	 */
 	IDLE: () => LocalizedString
 	/**
-	 * Lost
+	 * zostało utracone.
 	 */
 	LOST: () => LocalizedString
 	/**
-	 * Scanning
+	 * Skanuję
 	 */
 	SCANNING: () => LocalizedString
 	/**
-	 * Scan again
+	 * Skanuj ponownie
 	 */
 	SCAN_AGAIN: () => LocalizedString
 	/**
-	 * Network Scanner
+	 * Skaner sieci WiFi
 	 */
 	NETWORK_SCANNER: () => LocalizedString
 	/**
-	 * No WiFi networks found
+	 * Brak sieci WiFi w zasięgu
 	 */
 	NETWORK_NO_WIFI: () => LocalizedString
 	/**
-	 * leave blank to disable WiFi
+	 * pozostaw puste aby wyłączyć WiFi
 	 */
 	NETWORK_BLANK_SSID: () => LocalizedString
 	/**
-	 * Power
+	 * Moc nadawania
 	 */
-	POWER: () => LocalizedString
+	TX_POWER: () => LocalizedString
 	/**
-	 * Disable WiFi Sleep Mode
+	 * Nazwa w sieci
+	 */
+	HOSTNAME: () => LocalizedString
+	/**
+	 * Wyłącz tryb usypiania WiFi
 	 */
 	NETWORK_DISABLE_SLEEP: () => LocalizedString
 	/**
-	 * Use Lower WiFi Bandwidth
+	 * Używaj zmniejszonej przepustowości WiFi
 	 */
 	NETWORK_LOW_BAND: () => LocalizedString
 	/**
-	 * Enable mDNS Service
+	 * Włącz wsparcie dla mDNS
 	 */
 	NETWORK_USE_DNS: () => LocalizedString
 	/**
-	 * Enable IPv6 support
+	 * Włącz wsparcie dla IPv6
 	 */
 	NETWORK_ENABLE_IPV6: () => LocalizedString
 	/**
-	 * Use Fixed IP address
+	 * Użyj stałego adresu IP
 	 */
 	NETWORK_FIXED_IP: () => LocalizedString
 	/**
-	 * Admin
+	 * Brama
+	 */
+	NETWORK_GATEWAY: () => LocalizedString
+	/**
+	 * Maska podsieci
+	 */
+	NETWORK_SUBNET: () => LocalizedString
+	/**
+	 * Serwery DNS
+	 */
+	NETWORK_DNS: () => LocalizedString
+	/**
+	 * Adres {0}
+	 */
+	ADDRESS_OF: (arg0: unknown) => LocalizedString
+	/**
+	 * Administrator
 	 */
 	ADMIN: () => LocalizedString
 	/**
-	 * Guest
+	 * Gość
 	 */
 	GUEST: () => LocalizedString
 	/**
-	 * New
+	 * Nowy
 	 */
 	NEW: () => LocalizedString
 	/**
-	 * Rename
+	 * Zmień nazwę
 	 */
 	RENAME: () => LocalizedString
 	/**
-	 * Entity
+	 * encji
 	 */
 	ENTITY: () => LocalizedString
 }

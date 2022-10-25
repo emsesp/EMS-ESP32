@@ -93,7 +93,7 @@ const OTASettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={'OTA ' + LL.SETTINGS()} titleGutter>
+    <SectionContent title={LL.SETTINGS_OF("OTA")} titleGutter>
       {content()}
     </SectionContent>
   );

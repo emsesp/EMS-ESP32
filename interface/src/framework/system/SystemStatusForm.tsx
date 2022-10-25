@@ -135,7 +135,7 @@ const SystemStatusForm: FC = () => {
               </Link>
               )&nbsp;(
               <Link target="_blank" href={latestVersion.url} color="primary">
-                {LL.DOWNLOAD()}
+                {LL.DOWNLOAD(1)}
               </Link>
               )
             </Box>
@@ -150,7 +150,7 @@ const SystemStatusForm: FC = () => {
               </Link>
               )&nbsp;(
               <Link target="_blank" href={latestDevVersion.url} color="primary">
-                {LL.DOWNLOAD()}
+                {LL.DOWNLOAD(1)}
               </Link>
               )
             </Box>
@@ -229,7 +229,7 @@ const SystemStatusForm: FC = () => {
                 <BuildIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="EMS-ESP Version" secondary={'v' + data.emsesp_version} />
+            <ListItemText primary={LL.EMS_ESP_VER()} secondary={'v' + data.emsesp_version} />
             {latestVersion && (
               <Button color="primary" onClick={() => setShowingVersion(true)}>
                 {LL.VERSION_CHECK(0)}
@@ -373,7 +373,7 @@ const SystemStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SYSTEM() + ' ' + LL.STATUS()} titleGutter>
+    <SectionContent title={LL.STATUS_OF( LL.SYSTEM(1) )} titleGutter>
       {content()}
     </SectionContent>
   );

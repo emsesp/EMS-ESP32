@@ -12,7 +12,7 @@ import { useI18nContext } from '../../i18n/i18n-react';
 
 const Security: FC = () => {
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.SECURITY());
+  useLayoutTitle(LL.SECURITY(0));
 
   const { routerTab } = useRouterTab();
 
@@ -20,7 +20,7 @@ const Security: FC = () => {
     <>
       <RouterTabs value={routerTab}>
         <Tab value="users" label={LL.MANAGE_USERS()} />
-        <Tab value="settings" label={LL.SECURITY() + ' ' + LL.SETTINGS()} />
+        <Tab value="settings" label={LL.SETTINGS_OF( LL.SECURITY(1) )} />
       </RouterTabs>
       <Routes>
         <Route path="users" element={<ManageUsersForm />} />

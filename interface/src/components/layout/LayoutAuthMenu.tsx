@@ -130,7 +130,7 @@ const LayoutAuthMenu: FC = () => {
           <Box pl={2}>
             <ItemTypography variant="h6">{me.username}</ItemTypography>
             <ItemTypography variant="body1">
-              {me.admin ? LL.ADMIN() + ' ' + LL.USER() : LL.GUEST() + ' ' + LL.USER()}
+              {me.admin ? LL.ADMIN() : LL.GUEST()}&nbsp;{LL.USER(2)}
             </ItemTypography>
           </Box>
         </Box>

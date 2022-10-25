@@ -47,7 +47,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
         if (response.status === 202) {
           setRestartNeeded(true);
         } else {
-          enqueueSnackbar(LL.SETTINGS() + ' ' + LL.SAVED(), { variant: 'success' });
+          enqueueSnackbar(LL.SETTINGS_OF("") + ' ' + LL.SAVED(), { variant: 'success' });
         }
       } catch (error) {
         const message = extractErrorMessage(error, LL.PROBLEM_UPDATING());

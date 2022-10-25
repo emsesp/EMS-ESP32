@@ -13,7 +13,7 @@ import { useI18nContext } from '../../i18n/i18n-react';
 const AccessPoint: FC = () => {
   const { LL } = useI18nContext();
 
-  useLayoutTitle(LL.ACCESS_POINT());
+  useLayoutTitle(LL.ACCESS_POINT(0));
 
   const authenticatedContext = useContext(AuthenticatedContext);
 
@@ -22,10 +22,10 @@ const AccessPoint: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="status" label={LL.ACCESS_POINT() + ' ' + LL.STATUS()} />
+        <Tab value="status" label={LL.STATUS_OF( LL.ACCESS_POINT(1) )} />
         <Tab
           value="settings"
-          label={LL.ACCESS_POINT() + ' ' + LL.SETTINGS()}
+          label={LL.SETTINGS_OF( LL.ACCESS_POINT(1) )}
           disabled={!authenticatedContext.me.admin}
         />
       </RouterTabs>

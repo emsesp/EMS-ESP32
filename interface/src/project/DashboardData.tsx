@@ -332,7 +332,7 @@ const DashboardData: FC = () => {
       { accessor: (dv: any) => dv.id.slice(2), name: LL.ENTITY_NAME() },
       {
         accessor: (dv: any) => (typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v),
-        name: LL.VALUE()
+        name: LL.VALUE(0)
       },
       { accessor: (dv: any) => DeviceValueUOM_s[dv.u], name: 'UoM' }
     ];
@@ -559,11 +559,11 @@ const DashboardData: FC = () => {
           offset: sensor.o
         });
         if (response.status === 204) {
-          enqueueSnackbar(LL.TEMP_SENSOR() + ' ' + LL.UPLOAD_TEXT() + ' ' + LL.FAILED(), { variant: 'error' });
+          enqueueSnackbar(LL.UPLOAD_OF( LL.TEMP_SENSOR() ) + ' ' + LL.FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar(LL.TEMP_SENSOR() + ' ' + LL.UPDATED(), { variant: 'success' });
+          enqueueSnackbar(LL.UPDATED_OF( LL.TEMP_SENSOR() ), { variant: 'success' });
         }
         setSensor(undefined);
       } catch (error) {
@@ -802,7 +802,7 @@ const DashboardData: FC = () => {
                       endIcon={getSortIcon(dv_sort.state, 'VALUE')}
                       onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
                     >
-                      {LL.VALUE()}
+                      {LL.VALUE(0)}
                     </Button>
                   </HeaderCell>
                   <HeaderCell stiff />
@@ -878,7 +878,7 @@ const DashboardData: FC = () => {
                     endIcon={getSortIcon(sensor_sort.state, 'TEMPERATURE')}
                     onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'TEMPERATURE' })}
                   >
-                    {LL.VALUE()}
+                    {LL.VALUE(0)}
                   </Button>
                 </HeaderCell>
                 <HeaderCell stiff />
@@ -946,7 +946,7 @@ const DashboardData: FC = () => {
                     {LL.TYPE()}
                   </Button>
                 </HeaderCell>
-                <HeaderCell stiff>{LL.VALUE()}</HeaderCell>
+                <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
                 <HeaderCell stiff />
               </HeaderRow>
             </Header>
@@ -986,11 +986,11 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar(LL.ANALOG_SENSOR() + ' ' + LL.DELETION() + ' ' + LL.FAILED(), { variant: 'error' });
+          enqueueSnackbar(LL.DELETION_OF( LL.ANALOG_SENSOR() ) + ' ' + LL.FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar(LL.ANALOG_SENSOR() + ' ' + LL.REMOVED(), { variant: 'success' });
+          enqueueSnackbar( LL.REMOVED_OF( LL.ANALOG_SENSOR() ), { variant: 'success' });
         }
       } catch (error) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
@@ -1014,11 +1014,11 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar(LL.ANALOG_SENSOR() + ' ' + LL.UPDATE() + ' ' + LL.FAILED(), { variant: 'error' });
+          enqueueSnackbar(LL.UPDATE_OF( LL.ANALOG_SENSOR() ) + ' ' + LL.FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar(LL.ANALOG_SENSOR() + ' ' + LL.UPDATED(), { variant: 'success' });
+          enqueueSnackbar(LL.UPDATED_OF( LL.ANALOG_SENSOR() ), { variant: 'success' });
         }
       } catch (error) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
@@ -1077,7 +1077,7 @@ const DashboardData: FC = () => {
               {analog.t >= AnalogType.COUNTER && analog.t <= AnalogType.RATE && (
                 <>
                   <Grid item>
-                    <ValidatedTextField name="u" label="UoM" value={analog.u} select onChange={updateValue(setAnalog)}>
+                    <ValidatedTextField name="u" label={LL.UNIT()} value={analog.u} select onChange={updateValue(setAnalog)}>
                       {DeviceValueUOM_s.map((val, i) => (
                         <MenuItem key={i} value={i}>
                           {val}
@@ -1135,7 +1135,7 @@ const DashboardData: FC = () => {
                   <Grid item>
                     <ValidatedTextField
                       name="o"
-                      label={LL.VALUE()}
+                      label={LL.VALUE(0)}
                       value={numberValue(analog.o)}
                       sx={{ width: '20ch' }}
                       type="number"
@@ -1151,7 +1151,7 @@ const DashboardData: FC = () => {
                   <Grid item>
                     <ValidatedTextField
                       name="o"
-                      label={LL.VALUE()}
+                      label={LL.VALUE(0)}
                       value={numberValue(analog.o)}
                       sx={{ width: '20ch' }}
                       type="number"
@@ -1182,7 +1182,7 @@ const DashboardData: FC = () => {
                   <Grid item>
                     <ValidatedTextField
                       name="o"
-                      label="Duty Cycle"
+                      label={LL.DUTY_CYCLE()}
                       value={numberValue(analog.o)}
                       sx={{ width: '20ch' }}
                       type="number"

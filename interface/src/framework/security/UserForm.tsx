@@ -54,7 +54,7 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
       {user && (
         <>
           <DialogTitle id="user-form-dialog-title">
-            {creating ? LL.ADD() : LL.MODIFY()}&nbsp;{LL.USER()}
+            {creating ? LL.ADD(1) : LL.MODIFY()}&nbsp;{LL.USER(1)}
           </DialogTitle>
           <DialogContent dividers>
             <ValidatedTextField
@@ -80,7 +80,7 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
             />
             <BlockFormControlLabel
               control={<Checkbox name="admin" checked={user.admin} onChange={updateFormValue} />}
-              label={LL.IS_ADMIN()}
+              label={LL.IS_ADMIN(1)}
             />
           </DialogContent>
           <DialogActions>
@@ -94,7 +94,7 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
               color="primary"
               autoFocus
             >
-              {LL.ADD()}
+              {LL.ADD(0)}
             </Button>
           </DialogActions>
         </>
