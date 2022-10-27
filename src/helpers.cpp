@@ -297,7 +297,7 @@ char * Helpers::render_value(char * result, const int32_t value, const int8_t fo
     } else if (format > 0) {
         strlcat(result, itoa(new_value / format, s, 10), sizeof(s));
         strlcat(result, ".", sizeof(s));
-        strlcat(result, itoa(new_value % format, s, 10), sizeof(s));
+        strlcat(result, itoa((new_value % format + format / 2) * 10 / format, s, 10), sizeof(s));
     } else {
         strlcat(result, itoa(new_value * format * -1, s, 10), sizeof(s));
     }
@@ -347,7 +347,7 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
     } else if (format > 0) {
         strlcpy(result, ltoa(new_value / format, s, 10), sizeof(s));
         strlcat(result, ".", sizeof(s));
-        strlcat(result, ltoa(new_value % format, s, 10), sizeof(s));
+        strlcat(result, itoa((new_value % format + format / 2) * 10 / format, s, 10), sizeof(s));
     } else {
         strlcpy(result, ltoa(new_value * format * -1, s, 10), sizeof(s));
     }
