@@ -128,6 +128,7 @@ class Boiler : public EMSdevice {
     uint8_t  curBurnPow_;        // Burner current power %
     uint8_t  setBurnPow_;        // max output power in %
     uint32_t burnStarts_;        // burner restarts
+    uint32_t heatStarts_;        // burner starts for heating
     uint32_t burnWorkMin_;       // Total burner operating time
     uint32_t burn2WorkMin_;      // burner stage 2 operating time
     uint32_t heatWorkMin_;       // Total heat operating time
