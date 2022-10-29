@@ -284,6 +284,7 @@ MAKE_PSTR_LIST(burnStarts, "burnstarts", "burner starts", "Brenner Starts", "Aan
 MAKE_PSTR_LIST(burnWorkMin, "burnworkmin", "total burner operating time", "Brenner Laufzeit", "Totale branderlooptijd", "Värmepanna aktiva timmar", "całkowity czas pracy palnika")
 MAKE_PSTR_LIST(burn2WorkMin, "burn2workmin", "burner stage 2 operating time", "Brenner Stufe 2 Laufzeit", "Totale looptijd brander fase 2", "Värmepanna steg 2 aktiva timmar", "całkowity czas pracy palnika 2 stopnia")
 MAKE_PSTR_LIST(heatWorkMin, "heatworkmin", "total heat operating time", "Heizung Laufzeit", "Totale looptijd verwarming", "Uppvärmning aktiva timmar", "całkowity czas grzania")
+MAKE_PSTR_LIST(heatStarts, "heatstarts", "burner starts heating", "Brenner Starts Heizung", "Aantal brander starts verwarming", "Uppvärmning antal starter", "")
 MAKE_PSTR_LIST(UBAuptime, "ubauptime", "total UBA operating time", "Anlagen-Gesamtlaufzeit", "totale looptijd branderautomaat (UBA)", "Total Tid", "całkowity czas pracy (UBA)")
 MAKE_PSTR_LIST(lastCode, "lastcode", "last error code", "Letzter Fehler", "Laatste foutcode", "Senaste Felkod", "ostatni błąd")
 MAKE_PSTR_LIST(serviceCode, "servicecode", "service code", "Statusmeldung", "Statuscode", "Servicekod", "kod serwisowy")
