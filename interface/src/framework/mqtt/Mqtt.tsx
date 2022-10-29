@@ -22,8 +22,8 @@ const Mqtt: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="status" label={'MQTT ' + LL.STATUS()} />
-        <Tab value="settings" label={'MQTT ' + LL.SETTINGS()} disabled={!authenticatedContext.me.admin} />
+        <Tab value="status" label={LL.STATUS_OF("MQTT")} />
+        <Tab value="settings" label={LL.SETTINGS_OF("MQTT")} disabled={!authenticatedContext.me.admin} />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<MqttStatusForm />} />

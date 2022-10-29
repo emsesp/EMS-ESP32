@@ -73,13 +73,13 @@ const NetworkStatusForm: FC = () => {
       case NetworkConnectionStatus.WIFI_STATUS_NO_SSID_AVAIL:
         return 'No SSID Available';
       case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
-        return LL.CONNECTED() + ' (WiFi)';
+        return LL.CONNECTED(0) + ' (WiFi)';
       case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
-        return LL.CONNECTED() + ' (Ethernet)';
+        return LL.CONNECTED(0) + ' (Ethernet)';
       case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
-        return LL.CONNECTED() + ' ' + LL.FAILED();
+        return LL.CONNECTED(1) + ' ' + LL.FAILED();
       case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
-        return LL.CONNECTED() + ' ' + LL.LOST();
+        return LL.CONNECTED(1) + ' ' + LL.LOST();
       case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
         return LL.DISCONNECTED();
       default:
@@ -124,7 +124,7 @@ const NetworkStatusForm: FC = () => {
                 <ListItemAvatar>
                   <Avatar>IP</Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="IP Address" secondary={IPs(data)} />
+                <ListItemText primary={LL.ADDRESS_OF("IP")} secondary={IPs(data)} />
               </ListItem>
               <Divider variant="inset" component="li" />
               <ListItem>
@@ -133,14 +133,14 @@ const NetworkStatusForm: FC = () => {
                     <DeviceHubIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="MAC Address" secondary={data.mac_address} />
+                <ListItemText primary={LL.ADDRESS_OF("MAC")} secondary={data.mac_address} />
               </ListItem>
               <Divider variant="inset" component="li" />
               <ListItem>
                 <ListItemAvatar>
                   <Avatar>#</Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="Subnet Mask" secondary={data.subnet_mask} />
+                <ListItemText primary={LL.NETWORK_SUBNET()} secondary={data.subnet_mask} />
               </ListItem>
               <Divider variant="inset" component="li" />
               <ListItem>
@@ -149,7 +149,7 @@ const NetworkStatusForm: FC = () => {
                     <SettingsInputComponentIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="Gateway IP" secondary={data.gateway_ip || 'none'} />
+                <ListItemText primary={LL.NETWORK_GATEWAY()} secondary={data.gateway_ip || 'none'} />
               </ListItem>
               <Divider variant="inset" component="li" />
               <ListItem>
@@ -158,7 +158,7 @@ const NetworkStatusForm: FC = () => {
                     <DnsIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="DNS Server IP" secondary={dnsServers(data)} />
+                <ListItemText primary={LL.NETWORK_DNS()}  secondary={dnsServers(data)} />
               </ListItem>
               <Divider variant="inset" component="li" />
             </>
@@ -174,7 +174,7 @@ const NetworkStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.NETWORK() + ' ' + LL.STATUS()} titleGutter>
+    <SectionContent title={LL.STATUS_OF( LL.NETWORK(1) )} titleGutter>
       {content()}
     </SectionContent>
   );

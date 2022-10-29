@@ -202,7 +202,7 @@ const SystemLog: FC = () => {
           <Grid item xs={4}>
             <ValidatedTextField
               name="level"
-              label="Log Level"
+              label={LL.LOG_LEVEL()}
               value={data.level}
               fullWidth
               variant="outlined"
@@ -278,7 +278,7 @@ const SystemLog: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SYSTEM() + ' ' + LL.LOG()} titleGutter id="log-window">
+    <SectionContent title={LL.LOG_OF( LL.SYSTEM(2) )} titleGutter id="log-window">
       {content()}
     </SectionContent>
   );

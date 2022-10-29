@@ -21,8 +21,8 @@ const NetworkTime: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="status" label={'NTP ' + LL.STATUS()} />
-        <Tab value="settings" label={'NTP ' + LL.SETTINGS()} disabled={!authenticatedContext.me.admin} />
+        <Tab value="status" label={LL.STATUS_OF("NTP")} />
+        <Tab value="settings" label={LL.SETTINGS_OF("NTP")} disabled={!authenticatedContext.me.admin} />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<NTPStatusForm />} />

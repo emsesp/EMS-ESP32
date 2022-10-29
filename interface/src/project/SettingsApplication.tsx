@@ -115,7 +115,7 @@ const SettingsApplication: FC = () => {
     return (
       <>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          Interface {LL.BOARD_PROFILE()}
+          {LL.INTERFACE_BOARD_PROFILE()}
         </Typography>
         <Box color="warning.main">
           <Typography variant="body2">{LL.BOARD_PROFILE_TEXT()}</Typography>
@@ -213,7 +213,7 @@ const SettingsApplication: FC = () => {
             <Grid item xs={4}>
               <ValidatedTextField
                 name="phy_type"
-                label="Eth PHY Type"
+                label={LL.PHY_TYPE()}
                 disabled={saving}
                 value={data.phy_type}
                 fullWidth
@@ -245,7 +245,7 @@ const SettingsApplication: FC = () => {
                 <Grid item>
                   <ValidatedTextField
                     name="eth_phy_addr"
-                    label="Eth I²C-address"
+                    label="Eth I²C Address"
                     fullWidth
                     variant="outlined"
                     value={numberValue(data.eth_phy_addr)}
@@ -258,7 +258,7 @@ const SettingsApplication: FC = () => {
                 <Grid item>
                   <ValidatedTextField
                     name="eth_clock_mode"
-                    label="Eth Clock Mode"
+                    label="Eth Clk Mode"
                     disabled={saving}
                     value={data.eth_clock_mode}
                     fullWidth
@@ -278,13 +278,13 @@ const SettingsApplication: FC = () => {
           </>
         )}
         <Typography variant="h6" color="primary">
-          EMS Bus {LL.SETTINGS()}
+          {LL.SETTINGS_OF("EMS BUS")}
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <Grid item xs={6}>
             <ValidatedTextField
               name="tx_mode"
-              label="Tx Mode"
+              label={LL.TX_MODE()}
               disabled={saving}
               value={data.tx_mode}
               fullWidth
@@ -483,7 +483,7 @@ const SettingsApplication: FC = () => {
               margin="normal"
               select
             >
-              <MenuItem value={1}>{LL.VALUE()}</MenuItem>
+              <MenuItem value={1}>{LL.VALUE(1)}</MenuItem>
               <MenuItem value={2}>{LL.INDEX()}</MenuItem>
             </ValidatedTextField>
           </Grid>
@@ -551,7 +551,7 @@ const SettingsApplication: FC = () => {
             <Grid item xs={4}>
               <ValidatedTextField
                 name="syslog_level"
-                label="Log Level"
+                label={LL.LOG_LEVEL()}
                 value={data.syslog_level}
                 fullWidth
                 variant="outlined"

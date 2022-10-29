@@ -74,7 +74,7 @@ const APSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="ssid"
-              label={LL.ACCESS_POINT() + ' SSID'}
+              label={LL.ACCESS_POINT(2) + ' SSID'}
               fullWidth
               variant="outlined"
               value={data.ssid}
@@ -84,7 +84,7 @@ const APSettingsForm: FC = () => {
             <ValidatedPasswordField
               fieldErrors={fieldErrors}
               name="password"
-              label={LL.ACCESS_POINT() + ' ' + LL.PASSWORD()}
+              label={LL.ACCESS_POINT(2) + ' ' + LL.PASSWORD()}
               fullWidth
               variant="outlined"
               value={data.password}
@@ -116,7 +116,7 @@ const APSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="max_clients"
-              label="Max Clients"
+              label={LL.AP_MAX_CLIENTS()}
               value={numberValue(data.max_clients)}
               fullWidth
               select
@@ -134,7 +134,7 @@ const APSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="local_ip"
-              label="Local IP"
+              label={LL.AP_LOCAL_IP()}
               fullWidth
               variant="outlined"
               value={data.local_ip}
@@ -144,7 +144,7 @@ const APSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="gateway_ip"
-              label="Gateway"
+              label={LL.NETWORK_GATEWAY()}
               fullWidth
               variant="outlined"
               value={data.gateway_ip}
@@ -154,7 +154,7 @@ const APSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="subnet_mask"
-              label="Subnet"
+              label={LL.NETWORK_SUBNET()}
               fullWidth
               variant="outlined"
               value={data.subnet_mask}
@@ -180,7 +180,7 @@ const APSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.ACCESS_POINT() + ' ' + LL.SETTINGS()} titleGutter>
+    <SectionContent title={LL.SETTINGS_OF( LL.ACCESS_POINT(1) )} titleGutter>
       {content()}
     </SectionContent>
   );

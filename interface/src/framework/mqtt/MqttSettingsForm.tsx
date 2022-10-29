@@ -351,7 +351,7 @@ const MqttSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={'MQTT ' + LL.SETTINGS()} titleGutter>
+    <SectionContent title={LL.SETTINGS_OF("MQTT")} titleGutter>
       {content()}
     </SectionContent>
   );

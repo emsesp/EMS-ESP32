@@ -140,7 +140,7 @@ const WiFiSettingsForm: FC = () => {
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="tx_power"
-          label={'WiFi Tx ' + LL.POWER()}
+          label={LL.TX_POWER()}
           InputProps={{
             endAdornment: <InputAdornment position="end">dBm</InputAdornment>
           }}
@@ -174,7 +174,7 @@ const WiFiSettingsForm: FC = () => {
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="hostname"
-          label="Hostname"
+          label={LL.HOSTNAME()}
           fullWidth
           variant="outlined"
           value={data.hostname}
@@ -262,7 +262,7 @@ const WiFiSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.NETWORK() + ' ' + LL.SETTINGS()} titleGutter>
+    <SectionContent title={LL.SETTINGS_OF( LL.NETWORK(1) )} titleGutter>
       {content()}
     </SectionContent>
   );

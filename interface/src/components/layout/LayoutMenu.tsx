@@ -31,17 +31,17 @@ const LayoutMenu: FC = () => {
         </List>
       )}
       <List disablePadding component="nav">
-        <LayoutMenuItem icon={SettingsEthernetIcon} label={LL.NETWORK()} to="/network" />
-        <LayoutMenuItem icon={SettingsInputAntennaIcon} label={LL.ACCESS_POINT()} to="/ap" />
+        <LayoutMenuItem icon={SettingsEthernetIcon} label={LL.NETWORK(0)} to="/network" />
+        <LayoutMenuItem icon={SettingsInputAntennaIcon} label={LL.ACCESS_POINT(0)} to="/ap" />
         {features.ntp && <LayoutMenuItem icon={AccessTimeIcon} label="NTP" to="/ntp" />}
         {features.mqtt && <LayoutMenuItem icon={DeviceHubIcon} label="MQTT" to="/mqtt" />}
         <LayoutMenuItem
           icon={LockIcon}
-          label={LL.SECURITY()}
+          label={LL.SECURITY(0)}
           to="/security"
           disabled={!authenticatedContext.me.admin}
         />
-        <LayoutMenuItem icon={SettingsIcon} label={LL.SYSTEM()} to="/system" />
+        <LayoutMenuItem icon={SettingsIcon} label={LL.SYSTEM(0)} to="/system" />
       </List>
     </>
   );

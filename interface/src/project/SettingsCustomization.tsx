@@ -296,7 +296,7 @@ const SettingsCustomization: FC = () => {
         </Box>
         <ValidatedTextField
           name="device"
-          label={'EMS ' + LL.DEVICE()}
+          label={LL.EMS_DEVICE()}
           variant="outlined"
           fullWidth
           value={selectedDevice}
@@ -449,7 +449,7 @@ const SettingsCustomization: FC = () => {
                       {LL.NAME()}
                     </Button>
                   </HeaderCell>
-                  <HeaderCell resize>{LL.VALUE()}</HeaderCell>
+                  <HeaderCell resize>{LL.VALUE(0)}</HeaderCell>
                 </HeaderRow>
               </Header>
               <Body>
@@ -513,7 +513,7 @@ const SettingsCustomization: FC = () => {
 
   const renderResetDialog = () => (
     <Dialog open={confirmReset} onClose={() => setConfirmReset(false)}>
-      <DialogTitle>{LL.RESET()}</DialogTitle>
+      <DialogTitle>{LL.RESET(1)}</DialogTitle>
       <DialogContent dividers>{LL.CUSTOMIZATIONS_RESET()}</DialogContent>
       <DialogActions>
         <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmReset(false)} color="secondary">
@@ -526,7 +526,7 @@ const SettingsCustomization: FC = () => {
           autoFocus
           color="error"
         >
-          {LL.RESET()}
+          {LL.RESET(0)}
         </Button>
       </DialogActions>
     </Dialog>
@@ -555,7 +555,7 @@ const SettingsCustomization: FC = () => {
               color="error"
               onClick={() => setConfirmReset(true)}
             >
-              {LL.RESET()}
+              {LL.RESET(0)}
             </Button>
           </ButtonRow>
         </Box>

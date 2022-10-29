@@ -14,7 +14,7 @@ const Settings: FC = () => {
   const { LL } = useI18nContext();
   const { routerTab } = useRouterTab();
 
-  useLayoutTitle(LL.SETTINGS());
+  useLayoutTitle(LL.SETTINGS_OF(""));
 
   return (
     <>

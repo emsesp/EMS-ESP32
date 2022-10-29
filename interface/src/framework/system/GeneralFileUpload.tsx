@@ -85,7 +85,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
       {!uploading && (
         <>
           <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-            {LL.DOWNLOAD()}
+            {LL.DOWNLOAD(0)}
           </Typography>
           <Box color="warning.main">
             <Typography mb={1} variant="body2">
@@ -93,7 +93,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
             </Typography>
           </Box>
           <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => downloadSettings()}>
-            {LL.SETTINGS()}
+            {LL.SETTINGS_OF("")}
           </Button>
           <Box color="warning.main">
             <Typography mt={2} mb={1} variant="body2">

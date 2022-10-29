@@ -50,7 +50,7 @@ const MqttStatusForm: FC = () => {
       return LL.NOT_ENABLED();
     }
     if (connected) {
-      return LL.CONNECTED() + (connect_count > 1 ? ' (' + connect_count + ')' : '');
+      return LL.CONNECTED(0) + (connect_count > 1 ? ' (' + connect_count + ')' : '');
     }
     return LL.DISCONNECTED() + (connect_count > 1 ? ' (' + connect_count + ')' : '');
   };
@@ -112,7 +112,7 @@ const MqttStatusForm: FC = () => {
                 <AutoAwesomeMotionIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="MQTT Queue" secondary={data.mqtt_queued} />
+            <ListItemText primary={LL.MQTT_QUEUE()} secondary={data.mqtt_queued} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -121,7 +121,7 @@ const MqttStatusForm: FC = () => {
                 <SpeakerNotesOffIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={'MQTT ' + LL.ERRORS()} secondary={data.mqtt_fails} />
+            <ListItemText primary={LL.ERRORS_OF("MQTT")} secondary={data.mqtt_fails} />
           </ListItem>
           <Divider variant="inset" component="li" />
         </>
@@ -137,7 +137,7 @@ const MqttStatusForm: FC = () => {
                 <DeviceHubIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.STATUS()} secondary={mqttStatus(data)} />
+            <ListItemText primary={LL.STATUS_OF("")} secondary={mqttStatus(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
           {data.enabled && renderConnectionStatus()}
@@ -152,7 +152,7 @@ const MqttStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title={'MQTT ' + LL.STATUS()} titleGutter>
+    <SectionContent title={LL.STATUS_OF("MQTT")} titleGutter>
       {content()}
     </SectionContent>
   );

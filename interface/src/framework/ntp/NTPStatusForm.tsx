@@ -100,7 +100,7 @@ const NTPStatusForm: FC = () => {
 
   const renderSetTimeDialog = () => (
     <Dialog open={settingTime} onClose={() => setSettingTime(false)}>
-      <DialogTitle>{LL.SET_TIME()}</DialogTitle>
+      <DialogTitle>{LL.SET_TIME(1)}</DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
           <Typography variant="body2">{LL.SET_TIME_TEXT()}</Typography>
@@ -129,7 +129,7 @@ const NTPStatusForm: FC = () => {
           color="primary"
           autoFocus
         >
-          {LL.SET_TIME()}
+          {LL.SAVE()}
         </Button>
       </DialogActions>
     </Dialog>
@@ -149,7 +149,7 @@ const NTPStatusForm: FC = () => {
                 <UpdateIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.STATUS()} secondary={ntpStatus(data)} />
+            <ListItemText primary={LL.STATUS_OF("")} secondary={ntpStatus(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
           {isNtpEnabled(data) && (
@@ -160,7 +160,7 @@ const NTPStatusForm: FC = () => {
                     <DnsIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="NTP Server" secondary={data.server} />
+                <ListItemText primary={LL.NTP_SERVER()} secondary={data.server} />
               </ListItem>
               <Divider variant="inset" component="li" />
             </>
@@ -196,7 +196,7 @@ const NTPStatusForm: FC = () => {
             <Box flexWrap="nowrap" whiteSpace="nowrap">
               <ButtonRow>
                 <Button onClick={openSetTime} variant="outlined" color="primary" startIcon={<AccessTimeIcon />}>
-                  {LL.SET_TIME()}
+                  {LL.SET_TIME(0)}
                 </Button>
               </ButtonRow>
             </Box>
@@ -208,7 +208,7 @@ const NTPStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title={'NTP ' + LL.STATUS()} titleGutter>
+    <SectionContent title={LL.STATUS_OF("NTP")} titleGutter>
       {content()}
     </SectionContent>
   );

@@ -58,7 +58,7 @@ const NTPSettingsForm: FC = () => {
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="server"
-          label="Server"
+          label={LL.NTP_SERVER()}
           fullWidth
           variant="outlined"
           value={data.server}
@@ -96,7 +96,7 @@ const NTPSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={'NTP ' + LL.SETTINGS()} titleGutter>
+    <SectionContent title={LL.SETTINGS_OF("NTP")} titleGutter>
       {content()}
     </SectionContent>
   );

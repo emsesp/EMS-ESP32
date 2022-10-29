@@ -141,7 +141,7 @@ const ManageUsersForm: FC = () => {
               <Header>
                 <HeaderRow>
                   <HeaderCell resize>{LL.USERNAME()}</HeaderCell>
-                  <HeaderCell stiff>{LL.IS_ADMIN()}</HeaderCell>
+                  <HeaderCell stiff>{LL.IS_ADMIN(0)}</HeaderCell>
                   <HeaderCell stiff />
                 </HeaderRow>
               </Header>
@@ -192,7 +192,7 @@ const ManageUsersForm: FC = () => {
           <Box flexWrap="nowrap" whiteSpace="nowrap">
             <ButtonRow>
               <Button startIcon={<PersonAddIcon />} variant="outlined" color="secondary" onClick={createUser}>
-                {LL.ADD()}
+                {LL.ADD(0)}
               </Button>
             </ButtonRow>
           </Box>
