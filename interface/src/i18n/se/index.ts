@@ -161,7 +161,7 @@ const se: Translation = {
   HELP_INFORMATION_3: 'Önska en ny funktion eller rapportera en bugg',
   HELP_INFORMATION_4: 'Bifoga din systeminformation för snabbare hantering när du rapporterar ett problem',
   HELP_INFORMATION_5:
-    'EMS-ESP är gratis och är öppen källkod. Bidra till utveklingen genom att ge oss en stjärna på GitHub!',
+    'EMS-ESP är gratis och är öppen källkod. Bidra till utvecklingen genom att ge oss en stjärna på GitHub!',
   SUPPORT_INFO: 'Supportinfo',
   UPLOAD_OF: '{0} Uppladdning',
   UPLOAD: 'Uppladdning',
@@ -183,7 +183,7 @@ const se: Translation = {
   VERSION_CHECK: 'Kontrollera version',
   THE_LATEST: 'Den senaste',
   OFFICIAL: 'officiell',
-  DEVELOPMENT: 'utvekling',
+  DEVELOPMENT: 'utveckling',
   VERSION_IS: 'version är',
   RELEASE_NOTES: 'release-logg',
   EMS_ESP_VER: 'EMS-ESP Version',
