@@ -100,7 +100,8 @@ const nl: Translation = {
   CUSTOMIZATION: 'Custom aanpassingen',
   APPLICATION_RESTARTING: 'EMS-ESP herstarten',
   INTERFACE_BOARD_PROFILE: 'Interface Apparaatprofiel',
-  BOARD_PROFILE_TEXT: 'Selecteer een vooraf ingesteld apparaat profiel uit de lijst of kies Eigen om zelf uw hardware te configureren',
+  BOARD_PROFILE_TEXT:
+    'Selecteer een vooraf ingesteld apparaat profiel uit de lijst of kies Eigen om zelf uw hardware te configureren',
   BOARD_PROFILE: 'Apparaatprofiel',
   BUTTON: 'Toets',
   TEMPERATURE: 'Temperatuur',

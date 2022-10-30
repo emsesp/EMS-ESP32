@@ -129,7 +129,8 @@ const SystemStatusForm: FC = () => {
           <MessageBox my={0} level="info" message={LL.SYSTEM_VERSION_RUNNING() + ' ' + data?.emsesp_version} />
           {latestVersion && (
             <Box mt={2} mb={2}>
-              {LL.THE_LATEST()}&nbsp;<u>{LL.OFFICIAL()}</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestVersion.version}</b>&nbsp;(
+              {LL.THE_LATEST()}&nbsp;<u>{LL.OFFICIAL()}</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestVersion.version}</b>
+              &nbsp;(
               <Link target="_blank" href={latestVersion.changelog} color="primary">
                 {LL.RELEASE_NOTES()}
               </Link>
@@ -143,7 +144,8 @@ const SystemStatusForm: FC = () => {
 
           {latestDevVersion && (
             <Box mt={2} mb={2}>
-              {LL.THE_LATEST()}&nbsp;<u>{LL.DEVELOPMENT()}</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestDevVersion.version}</b>
+              {LL.THE_LATEST()}&nbsp;<u>{LL.DEVELOPMENT()}</u>&nbsp;{LL.VERSION_IS()}&nbsp;
+              <b>{latestDevVersion.version}</b>
               &nbsp;(
               <Link target="_blank" href={latestDevVersion.changelog} color="primary">
                 {LL.RELEASE_NOTES()}
@@ -272,12 +274,7 @@ const SystemStatusForm: FC = () => {
             </ListItemAvatar>
             <ListItemText
               primary={LL.HEAP()}
-              secondary={
-                formatNumber(data.free_heap) +
-                ' KB / ' +
-                formatNumber(data.max_alloc_heap) +
-                ' KB '
-              }
+              secondary={formatNumber(data.free_heap) + ' KB / ' + formatNumber(data.max_alloc_heap) + ' KB '}
             />
           </ListItem>
           {data.psram_size !== undefined && data.free_psram !== undefined && (
@@ -305,7 +302,9 @@ const SystemStatusForm: FC = () => {
             </ListItemAvatar>
             <ListItemText
               primary={LL.FLASH()}
-              secondary={formatNumber(data.flash_chip_size) + ' KB / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'}
+              secondary={
+                formatNumber(data.flash_chip_size) + ' KB / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'
+              }
             />
           </ListItem>
           <Divider variant="inset" component="li" />
@@ -373,7 +372,7 @@ const SystemStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.STATUS_OF( LL.SYSTEM(1) )} titleGutter>
+    <SectionContent title={LL.STATUS_OF(LL.SYSTEM(1))} titleGutter>
       {content()}
     </SectionContent>
   );

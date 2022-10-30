@@ -22,12 +22,8 @@ const AccessPoint: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="status" label={LL.STATUS_OF( LL.ACCESS_POINT(1) )} />
-        <Tab
-          value="settings"
-          label={LL.SETTINGS_OF( LL.ACCESS_POINT(1) )}
-          disabled={!authenticatedContext.me.admin}
-        />
+        <Tab value="status" label={LL.STATUS_OF(LL.ACCESS_POINT(1))} />
+        <Tab value="settings" label={LL.SETTINGS_OF(LL.ACCESS_POINT(1))} disabled={!authenticatedContext.me.admin} />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<APStatusForm />} />

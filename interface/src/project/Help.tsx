@@ -13,12 +13,12 @@ const Help: FC = () => {
   const { LL } = useI18nContext();
   const { routerTab } = useRouterTab();
 
-  useLayoutTitle(LL.HELP_OF(""));
+  useLayoutTitle(LL.HELP_OF(''));
 
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="information" label={LL.HELP_OF("EMS-ESP")} />
+        <Tab value="information" label={LL.HELP_OF('EMS-ESP')} />
       </RouterTabs>
       <Routes>
         <Route path="information" element={<HelpInformation />} />

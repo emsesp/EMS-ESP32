@@ -20,7 +20,7 @@ const Security: FC = () => {
     <>
       <RouterTabs value={routerTab}>
         <Tab value="users" label={LL.MANAGE_USERS()} />
-        <Tab value="settings" label={LL.SETTINGS_OF( LL.SECURITY(1) )} />
+        <Tab value="settings" label={LL.SETTINGS_OF(LL.SECURITY(1))} />
       </RouterTabs>
       <Routes>
         <Route path="users" element={<ManageUsersForm />} />

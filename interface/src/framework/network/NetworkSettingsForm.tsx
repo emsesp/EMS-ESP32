@@ -262,7 +262,7 @@ const WiFiSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SETTINGS_OF( LL.NETWORK(1) )} titleGutter>
+    <SectionContent title={LL.SETTINGS_OF(LL.NETWORK(1))} titleGutter>
       {content()}
     </SectionContent>
   );

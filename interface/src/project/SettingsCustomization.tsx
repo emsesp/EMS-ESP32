@@ -167,10 +167,7 @@ const SettingsCustomization: FC = () => {
   function formatName(de: DeviceEntity) {
     return (
       <>
-        {de.n && (
-          (de.n[0] === '!' ? LL.COMMAND() + ': ' + de.n.slice(1) : de.cn && de.cn !== '' ? de.cn : de.n) + ' '
-        )}
-        (
+        {de.n && (de.n[0] === '!' ? LL.COMMAND() + ': ' + de.n.slice(1) : de.cn && de.cn !== '' ? de.cn : de.n) + ' '}(
         <Link target="_blank" href={APIURL + devices?.devices[selectedDevice].t + '/' + de.id}>
           {de.id}
         </Link>

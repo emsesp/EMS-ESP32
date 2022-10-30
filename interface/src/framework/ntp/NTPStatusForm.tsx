@@ -149,7 +149,7 @@ const NTPStatusForm: FC = () => {
                 <UpdateIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.STATUS_OF("")} secondary={ntpStatus(data)} />
+            <ListItemText primary={LL.STATUS_OF('')} secondary={ntpStatus(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
           {isNtpEnabled(data) && (
@@ -208,7 +208,7 @@ const NTPStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.STATUS_OF("NTP")} titleGutter>
+    <SectionContent title={LL.STATUS_OF('NTP')} titleGutter>
       {content()}
     </SectionContent>
   );

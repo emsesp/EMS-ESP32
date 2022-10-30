@@ -26,10 +26,10 @@ const System: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="status" label={LL.STATUS_OF( LL.SYSTEM(1) )} />
-        <Tab value="log" label={LL.LOG_OF( LL.SYSTEM(2) )} />
+        <Tab value="status" label={LL.STATUS_OF(LL.SYSTEM(1))} />
+        <Tab value="log" label={LL.LOG_OF(LL.SYSTEM(2))} />
 
-        {features.ota && <Tab value="ota" label={LL.SETTINGS_OF("OTA")} disabled={!me.admin} />}
+        {features.ota && <Tab value="ota" label={LL.SETTINGS_OF('OTA')} disabled={!me.admin} />}
         {features.upload_firmware && <Tab value="upload" label={LL.UPLOAD_DOWNLOAD()} disabled={!me.admin} />}
       </RouterTabs>
       <Routes>

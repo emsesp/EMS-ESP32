@@ -93,7 +93,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
             </Typography>
           </Box>
           <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => downloadSettings()}>
-            {LL.SETTINGS_OF("")}
+            {LL.SETTINGS_OF('')}
           </Button>
           <Box color="warning.main">
             <Typography mt={2} mb={1} variant="body2">

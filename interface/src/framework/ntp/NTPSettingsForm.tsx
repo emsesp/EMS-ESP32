@@ -96,7 +96,7 @@ const NTPSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SETTINGS_OF("NTP")} titleGutter>
+    <SectionContent title={LL.SETTINGS_OF('NTP')} titleGutter>
       {content()}
     </SectionContent>
   );
