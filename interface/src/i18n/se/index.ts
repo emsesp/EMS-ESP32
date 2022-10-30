@@ -258,7 +258,7 @@ const se: Translation = {
   AP_PROVIDE_TEXT_3: 'aldrig',
   AP_PREFERRED_CHANNEL: 'Föredragen kanal',
   AP_HIDE_SSID: 'Göm SSID',
-  AP_CLIENTS: 'AP Klienter',
+  AP_CLIENTS: 'AP-Klienter',
   AP_MAX_CLIENTS: 'Max Klienter',
   AP_LOCAL_IP: 'Lokalt IP',
   NETWORK_SCAN: 'Sök efter WiFi-nätverk',
