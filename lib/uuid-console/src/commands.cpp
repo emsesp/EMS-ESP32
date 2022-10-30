@@ -186,7 +186,6 @@ bool Commands::find_longest_common_prefix(const std::multimap<size_t, const Comm
         }
 
         if (chars_prefix > 0) {
-            // TODO fix, no more PGM
             longest_name.push_back(std::string(first).substr(0, chars_prefix));
             return false;
         }
