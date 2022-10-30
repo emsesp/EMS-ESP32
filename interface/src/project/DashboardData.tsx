@@ -559,11 +559,11 @@ const DashboardData: FC = () => {
           offset: sensor.o
         });
         if (response.status === 204) {
-          enqueueSnackbar(LL.UPLOAD_OF( LL.TEMP_SENSOR() ) + ' ' + LL.FAILED(), { variant: 'error' });
+          enqueueSnackbar(LL.UPLOAD_OF(LL.TEMP_SENSOR()) + ' ' + LL.FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar(LL.UPDATED_OF( LL.TEMP_SENSOR() ), { variant: 'success' });
+          enqueueSnackbar(LL.UPDATED_OF(LL.TEMP_SENSOR()), { variant: 'success' });
         }
         setSensor(undefined);
       } catch (error) {
@@ -986,11 +986,11 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar(LL.DELETION_OF( LL.ANALOG_SENSOR() ) + ' ' + LL.FAILED(), { variant: 'error' });
+          enqueueSnackbar(LL.DELETION_OF(LL.ANALOG_SENSOR()) + ' ' + LL.FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar( LL.REMOVED_OF( LL.ANALOG_SENSOR() ), { variant: 'success' });
+          enqueueSnackbar(LL.REMOVED_OF(LL.ANALOG_SENSOR()), { variant: 'success' });
         }
       } catch (error) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
@@ -1014,11 +1014,11 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar(LL.UPDATE_OF( LL.ANALOG_SENSOR() ) + ' ' + LL.FAILED(), { variant: 'error' });
+          enqueueSnackbar(LL.UPDATE_OF(LL.ANALOG_SENSOR()) + ' ' + LL.FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar(LL.UPDATED_OF( LL.ANALOG_SENSOR() ), { variant: 'success' });
+          enqueueSnackbar(LL.UPDATED_OF(LL.ANALOG_SENSOR()), { variant: 'success' });
         }
       } catch (error) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
@@ -1077,7 +1077,13 @@ const DashboardData: FC = () => {
               {analog.t >= AnalogType.COUNTER && analog.t <= AnalogType.RATE && (
                 <>
                   <Grid item>
-                    <ValidatedTextField name="u" label={LL.UNIT()} value={analog.u} select onChange={updateValue(setAnalog)}>
+                    <ValidatedTextField
+                      name="u"
+                      label={LL.UNIT()}
+                      value={analog.u}
+                      select
+                      onChange={updateValue(setAnalog)}
+                    >
                       {DeviceValueUOM_s.map((val, i) => (
                         <MenuItem key={i} value={i}>
                           {val}

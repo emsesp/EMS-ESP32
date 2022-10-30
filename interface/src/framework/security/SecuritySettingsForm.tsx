@@ -71,7 +71,7 @@ const SecuritySettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SETTINGS_OF( LL.SECURITY(1) )} titleGutter>
+    <SectionContent title={LL.SETTINGS_OF(LL.SECURITY(1))} titleGutter>
       {content()}
     </SectionContent>
   );

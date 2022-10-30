@@ -278,7 +278,7 @@ const SettingsApplication: FC = () => {
           </>
         )}
         <Typography variant="h6" color="primary">
-          {LL.SETTINGS_OF("EMS BUS")}
+          {LL.SETTINGS_OF('EMS BUS')}
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <Grid item xs={6}>

@@ -124,7 +124,7 @@ const NetworkStatusForm: FC = () => {
                 <ListItemAvatar>
                   <Avatar>IP</Avatar>
                 </ListItemAvatar>
-                <ListItemText primary={LL.ADDRESS_OF("IP")} secondary={IPs(data)} />
+                <ListItemText primary={LL.ADDRESS_OF('IP')} secondary={IPs(data)} />
               </ListItem>
               <Divider variant="inset" component="li" />
               <ListItem>
@@ -133,7 +133,7 @@ const NetworkStatusForm: FC = () => {
                     <DeviceHubIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary={LL.ADDRESS_OF("MAC")} secondary={data.mac_address} />
+                <ListItemText primary={LL.ADDRESS_OF('MAC')} secondary={data.mac_address} />
               </ListItem>
               <Divider variant="inset" component="li" />
               <ListItem>
@@ -158,7 +158,7 @@ const NetworkStatusForm: FC = () => {
                     <DnsIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary={LL.NETWORK_DNS()}  secondary={dnsServers(data)} />
+                <ListItemText primary={LL.NETWORK_DNS()} secondary={dnsServers(data)} />
               </ListItem>
               <Divider variant="inset" component="li" />
             </>
@@ -174,7 +174,7 @@ const NetworkStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.STATUS_OF( LL.NETWORK(1) )} titleGutter>
+    <SectionContent title={LL.STATUS_OF(LL.NETWORK(1))} titleGutter>
       {content()}
     </SectionContent>
   );

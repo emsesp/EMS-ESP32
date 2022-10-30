@@ -100,7 +100,8 @@ const de: Translation = {
   CUSTOMIZATION: 'Anpassungen',
   APPLICATION_RESTARTING: 'EMS-ESP startet neu',
   INTERFACE_BOARD_PROFILE: 'Interface Platinenprofil',
-  BOARD_PROFILE_TEXT: 'Wählen Sie ein vorkonfiguriertes Platinenprofil aus der Liste unten aus oder wählen Sie "Custom", um Ihre eigenen Hardwareeinstellungen zu konfigurieren',
+  BOARD_PROFILE_TEXT:
+    'Wählen Sie ein vorkonfiguriertes Platinenprofil aus der Liste unten aus oder wählen Sie "Custom", um Ihre eigenen Hardwareeinstellungen zu konfigurieren',
   BOARD_PROFILE: 'Platinenprofil',
   BUTTON: 'Taste',
   TEMPERATURE: 'Temperatur',

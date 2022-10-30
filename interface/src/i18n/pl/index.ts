@@ -112,7 +112,7 @@ const pl: Translation = {
   HIDE_LED: 'Wyłącz LED',
   ENABLE_TELNET: 'Aktywuj dostęp dla konsoli Telnet',
   ENABLE_ANALOG: 'Aktywuj urządzenia GPIO (czujniki analogowe i cyfrowe oraz wyjścia cyfrowe)',
-  CONVERT_FAHRENHEIT: "Konwertuj temperatury do skali Fahrenheita",
+  CONVERT_FAHRENHEIT: 'Konwertuj temperatury do skali Fahrenheita',
   BYPASS_TOKEN: 'Pomiń autoryzację tokenem w wywołaniach API',
   READONLY: 'Tryb pracy "tylko do odczytu" (blokuje wszystkie komendy zapisu na magistralę EMS)',
   UNDERCLOCK_CPU: 'Obniż taktowanie CPU',
@@ -159,8 +159,7 @@ const pl: Translation = {
   HELP_INFORMATION_1: 'W celu znalezienia szczegółowych instrukcji jak skonfigurować EMS-ESP skorzystaj z wiki',
   HELP_INFORMATION_2: 'W celu komunikacji na żywo ze społecznością skorzystaj z serwera Discord',
   HELP_INFORMATION_3: 'Aby zaproponować nową funkcjonalność lub zgłosić problem',
-  HELP_INFORMATION_4:
-    'zgłaszając problem, nie zapomnij dołączyć informacji o swoim systemie',
+  HELP_INFORMATION_4: 'zgłaszając problem, nie zapomnij dołączyć informacji o swoim systemie',
   HELP_INFORMATION_5:
     'EMS-ESP jest darmowym projektem typu open-source. Aby go wesprzeć, rozważ przyznanie nam gwiazdki na Github!',
   SUPPORT_INFO: 'Pobierz informacje',
@@ -179,7 +178,8 @@ const pl: Translation = {
   CLOSE: 'Zamknij',
   USE: 'Aby zaktualizować firmware skorzystaj z funkcji',
   FACTORY_RESET: 'Ustawienia fabryczne',
-  SYSTEM_FACTORY_TEXT: 'Interfejs EMS-ESP został przywrócony do ustawień fabrycznych i zostanie teraz ponownie uruchomiony.',
+  SYSTEM_FACTORY_TEXT:
+    'Interfejs EMS-ESP został przywrócony do ustawień fabrycznych i zostanie teraz ponownie uruchomiony.',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Czy jesteś pewien, że chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP? ',
   VERSION_CHECK: 'Sprawd{{ź|zanie|}} wersj{{ę|i|}}',
   THE_LATEST: 'Najnowsza',

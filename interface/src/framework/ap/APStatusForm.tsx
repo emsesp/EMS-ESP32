@@ -60,14 +60,14 @@ const APStatusForm: FC = () => {
                 <SettingsInputAntennaIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.STATUS_OF("")} secondary={apStatus(data)} />
+            <ListItemText primary={LL.STATUS_OF('')} secondary={apStatus(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
             <ListItemAvatar>
               <Avatar>IP</Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.ADDRESS_OF("IP")} secondary={data.ip_address} />
+            <ListItemText primary={LL.ADDRESS_OF('IP')} secondary={data.ip_address} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -76,7 +76,7 @@ const APStatusForm: FC = () => {
                 <DeviceHubIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.ADDRESS_OF("MAC")} secondary={data.mac_address} />
+            <ListItemText primary={LL.ADDRESS_OF('MAC')} secondary={data.mac_address} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -99,7 +99,7 @@ const APStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.STATUS_OF( LL.ACCESS_POINT(1) )} titleGutter>
+    <SectionContent title={LL.STATUS_OF(LL.ACCESS_POINT(1))} titleGutter>
       {content()}
     </SectionContent>
   );

@@ -45,9 +45,9 @@ const NetworkConnection: FC = () => {
       }}
     >
       <RouterTabs value={routerTab}>
-        <Tab value="status" label={LL.STATUS_OF( LL.NETWORK(1) )} />
+        <Tab value="status" label={LL.STATUS_OF(LL.NETWORK(1))} />
         <Tab value="scan" label={LL.NETWORK_SCAN()} disabled={!authenticatedContext.me.admin} />
-        <Tab value="settings" label={LL.SETTINGS_OF( LL.NETWORK(1) )} disabled={!authenticatedContext.me.admin} />
+        <Tab value="settings" label={LL.SETTINGS_OF(LL.NETWORK(1))} disabled={!authenticatedContext.me.admin} />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<NetworkStatusForm />} />

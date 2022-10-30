@@ -100,7 +100,8 @@ const se: Translation = {
   CUSTOMIZATION: 'Anpassa',
   APPLICATION_RESTARTING: 'EMS-ESP startar om',
   INTERFACE_BOARD_PROFILE: 'Interface Hårdvaruprofil',
-  BOARD_PROFILE_TEXT: 'Välj en förkonfigurerad hårdvaruprofil från listan nedan eller välj Anpassad för att konfigurera dina egna hårdvaruinställningar',
+  BOARD_PROFILE_TEXT:
+    'Välj en förkonfigurerad hårdvaruprofil från listan nedan eller välj Anpassad för att konfigurera dina egna hårdvaruinställningar',
   BOARD_PROFILE: 'Hårdvaruprofil',
   BUTTON: 'Knapp',
   TEMPERATURE: 'Temperatur',

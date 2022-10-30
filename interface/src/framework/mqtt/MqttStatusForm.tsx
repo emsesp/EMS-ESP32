@@ -121,7 +121,7 @@ const MqttStatusForm: FC = () => {
                 <SpeakerNotesOffIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.ERRORS_OF("MQTT")} secondary={data.mqtt_fails} />
+            <ListItemText primary={LL.ERRORS_OF('MQTT')} secondary={data.mqtt_fails} />
           </ListItem>
           <Divider variant="inset" component="li" />
         </>
@@ -137,7 +137,7 @@ const MqttStatusForm: FC = () => {
                 <DeviceHubIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.STATUS_OF("")} secondary={mqttStatus(data)} />
+            <ListItemText primary={LL.STATUS_OF('')} secondary={mqttStatus(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
           {data.enabled && renderConnectionStatus()}
@@ -152,7 +152,7 @@ const MqttStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.STATUS_OF("MQTT")} titleGutter>
+    <SectionContent title={LL.STATUS_OF('MQTT')} titleGutter>
       {content()}
     </SectionContent>
   );

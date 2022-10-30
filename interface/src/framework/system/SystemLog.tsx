@@ -278,7 +278,7 @@ const SystemLog: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.LOG_OF( LL.SYSTEM(2) )} titleGutter id="log-window">
+    <SectionContent title={LL.LOG_OF(LL.SYSTEM(2))} titleGutter id="log-window">
       {content()}
     </SectionContent>
   );

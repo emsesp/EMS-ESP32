@@ -201,7 +201,10 @@ const DashboardStatus: FC = () => {
                 <DirectionsBusIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.EMS_BUS_STATUS()} secondary={busStatus(data) + ' (' + formatDurationSec(data.uptime) + ')'} />
+            <ListItemText
+              primary={LL.EMS_BUS_STATUS()}
+              secondary={busStatus(data) + ' (' + formatDurationSec(data.uptime) + ')'}
+            />
           </ListItem>
           <ListItem>
             <ListItemAvatar>

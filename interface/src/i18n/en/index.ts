@@ -100,7 +100,8 @@ const en: BaseTranslation = {
   CUSTOMIZATION: 'Customization',
   APPLICATION_RESTARTING: 'EMS-ESP is restarting',
   INTERFACE_BOARD_PROFILE: 'Interface Board Profile',
-  BOARD_PROFILE_TEXT: 'Select a pre-configured interface board profile from the list below or choose Custom to configure your own hardware settings',
+  BOARD_PROFILE_TEXT:
+    'Select a pre-configured interface board profile from the list below or choose Custom to configure your own hardware settings',
   BOARD_PROFILE: 'Board Profile',
   BUTTON: 'Button',
   TEMPERATURE: 'Temperature',
@@ -133,7 +134,7 @@ const en: BaseTranslation = {
   MARK_INTERVAL: 'Mark Interval',
   SECONDS: 'seconds',
   MINUTES: 'minutes',
-  HOURS: 'hours',				 
+  HOURS: 'hours',
   RESTART: 'Restart',
   RESTART_TEXT: 'EMS-ESP needs to be restarted to apply changed system settings',
   RESTART_CONFIRM: 'Are you sure you want to restart EMS-ESP?',

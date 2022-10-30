@@ -22,11 +22,11 @@ const ProjectMenu: FC = () => {
       <LayoutMenuItem icon={DashboardIcon} label={LL.DASHBOARD()} to={`/${PROJECT_PATH}/dashboard`} />
       <LayoutMenuItem
         icon={TuneIcon}
-        label={LL.SETTINGS_OF("")}
+        label={LL.SETTINGS_OF('')}
         to={`/${PROJECT_PATH}/settings`}
         disabled={!authenticatedContext.me.admin}
       />
-      <LayoutMenuItem icon={InfoIcon} label={LL.HELP_OF("")} to={`/${PROJECT_PATH}/help`} />
+      <LayoutMenuItem icon={InfoIcon} label={LL.HELP_OF('')} to={`/${PROJECT_PATH}/help`} />
     </List>
   );
 };
