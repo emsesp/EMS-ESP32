@@ -742,7 +742,7 @@ void System::led_monitor() {
             pixels.setPixelColor(0, 0, 0, 0);
             pixels.show();
 #else
-            digitalWrite(led_gpio_, !LED_ON);     // LED off
+            digitalWrite(led_gpio_, !LED_ON); // LED off
 #endif
         } else if (led_flash_step_ % 2) {
             // handle the step events (on odd numbers 3,5,7,etc). see if we need to turn on a LED
