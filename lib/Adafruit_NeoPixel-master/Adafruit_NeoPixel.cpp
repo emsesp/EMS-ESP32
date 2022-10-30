@@ -2156,7 +2156,6 @@ void Adafruit_NeoPixel::show(void) {
     // We need to disable the device and disconnect
     // all the outputs before leave or the device will not
     // be selected on the next call.
-    // TODO: Check if disabling the device causes performance issues.
     pwm->ENABLE = 0;
 
     pwm->PSEL.OUT[0] = 0xFFFFFFFFUL;

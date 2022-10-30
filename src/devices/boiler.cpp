@@ -578,7 +578,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           FL_(wwSelTempSingle),
                           DeviceValueUOM::DEGREES,
                           MAKE_CF_CB(set_ww_temp_single));
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &wwSolarTemp_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwSolarTemp), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                          &wwSolarTemp_,
+                          DeviceValueType::USHORT,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(wwSolarTemp),
+                          DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &wwType_, DeviceValueType::ENUM, FL_(enum_flow), FL_(wwType), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                           &wwComfort_,
