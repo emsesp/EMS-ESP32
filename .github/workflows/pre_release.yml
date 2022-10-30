@@ -14,9 +14,9 @@ jobs:
 
     steps:
     
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+      - uses: actions/setup-node@v3
         with:
           node-version: '16'
 
@@ -24,14 +24,12 @@ jobs:
         id: build_info
         run: |
           version=`grep -E '^#define EMSESP_APP_VERSION' ./src/version.h | awk -F'"' '{print $2}'`
-          echo "::set-output name=version::$version"
+          echo "VERSION=$version" >> $GITHUB_OUTPUT
 
       - name: Install PlatformIO
         run: |
           python -m pip install --upgrade pip
           pip install -U platformio
-          platformio upgrade
-          platformio update
 
       - name: Build WebUI
         run: |
@@ -48,7 +46,7 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          title: Development Build v${{steps.build_info.outputs.version}}
+          title: Development Build v${{steps.build_info.outputs.VERSION}}
           automatic_release_tag: "latest"
           prerelease: true
           files: |
