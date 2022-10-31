@@ -25,8 +25,8 @@
 #define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_EN // English
 #else
 // this is for debugging different languages in standalone version
-#define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_DE // German
-// #define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_EN // English
+// #define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_DE // German
+#define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_EN // English
 #endif
 
 #ifndef EMSESP_DEFAULT_TX_MODE
