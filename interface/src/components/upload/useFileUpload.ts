@@ -16,6 +16,7 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
 
   const { enqueueSnackbar } = useSnackbar();
   const [uploading, setUploading] = useState<boolean>(false);
+  const [md5, setMd5] = useState<string>('');
   const [uploadProgress, setUploadProgress] = useState<AxiosProgressEvent>();
   const [uploadCancelToken, setUploadCancelToken] = useState<CancelTokenSource>();
 
@@ -23,6 +24,7 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
     setUploading(false);
     setUploadProgress(undefined);
     setUploadCancelToken(undefined);
+    setMd5('');
   };
 
   const cancelUpload = useCallback(() => {
@@ -41,12 +43,17 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
       const cancelToken = axios.CancelToken.source();
       setUploadCancelToken(cancelToken);
       setUploading(true);
-      await upload(images[0], {
+      const response = await upload(images[0], {
         onUploadProgress: setUploadProgress,
         cancelToken: cancelToken.token
       });
       resetUploadingStates();
-      enqueueSnackbar(LL.UPLOAD() + ' ' + LL.SUCCESSFUL(), { variant: 'success' });
+      if (response.status === 200) {
+        enqueueSnackbar(LL.UPLOAD() + ' ' + LL.SUCCESSFUL(), { variant: 'success' });
+      } else if (response.status === 201) {
+        setMd5((String)(response.data));
+        enqueueSnackbar(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL(), { variant: 'success' });
+      }
     } catch (error) {
       if (axios.isCancel(error)) {
         enqueueSnackbar(LL.UPLOAD() + ' ' + LL.ABORTED(), { variant: 'warning' });
@@ -57,7 +64,7 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
     }
   };
 
-  return [uploadFile, cancelUpload, uploading, uploadProgress] as const;
+  return [uploadFile, cancelUpload, uploading, uploadProgress, md5] as const;
 };
 
 export default useFileUpload;

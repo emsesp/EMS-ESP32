@@ -35,7 +35,8 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, prog
     onDrop,
     accept: {
       'application/octet-stream': ['.bin'],
-      'application/json': ['.json']
+      'application/json': ['.json'],
+      'text/plain': ['.md5']
     },
     disabled: uploading,
     multiple: false
