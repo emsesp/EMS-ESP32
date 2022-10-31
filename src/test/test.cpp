@@ -1339,6 +1339,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x70, 0x02, 0x01, 0x00, 0xCE, 0x00, 0xE5});
         uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x71, 0x01, 0x02, 0x00, 0xCF, 0x00, 0xE6});
 
+        // add room sensor - test for https://github.com/emsesp/EMS-ESP32/issues/699
+        // use auto
+        uart_telegram("90 00 FF 00 00 65 01 00 02 19 3D 42 02 01 00 03 FF 28 06 01 02 20 27 29 01 01 00");
+
         shell.invoke_command("help");
         shell.invoke_command("call");
         shell.invoke_command("call system info");
