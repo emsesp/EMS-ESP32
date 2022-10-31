@@ -632,7 +632,7 @@ type RootTranslation = {
 	 */
 	USER_CUSTOMIZATION: string
 	/**
-	 * D​o​d​a​t​k​o​w​e​ ​i​n​f​o​r​m​a​c​j​e
+	 * I​n​f​o​r​m​a​c​j​e​ ​d​o​t​y​c​z​ą​c​e​ ​w​s​p​a​r​c​i​a
 	 */
 	SUPPORT_INFORMATION: string
 	/**
@@ -640,11 +640,11 @@ type RootTranslation = {
 	 */
 	CLICK_HERE: string
 	/**
-	 * S​k​o​r​z​y​s​t​a​j​ ​z​ ​w​i​k​i​ ​w​ ​c​e​l​u​ ​z​n​a​l​e​z​i​e​n​i​a​ ​s​z​c​z​e​g​ó​ł​o​w​y​c​h​ ​i​n​s​t​r​u​k​c​j​i​ ​j​a​k​ ​s​k​o​n​f​i​g​u​r​o​w​a​ć​ ​E​M​S​-​E​S​P
+	 * W​ ​c​e​l​u​ ​z​n​a​l​e​z​i​e​n​i​a​ ​s​z​c​z​e​g​ó​ł​o​w​y​c​h​ ​i​n​s​t​r​u​k​c​j​i​ ​j​a​k​ ​s​k​o​n​f​i​g​u​r​o​w​a​ć​ ​E​M​S​-​E​S​P​ ​s​k​o​r​z​y​s​t​a​j​ ​z​ ​w​i​k​i
 	 */
 	HELP_INFORMATION_1: string
 	/**
-	 * S​k​o​r​z​y​s​t​a​j​ ​z​ ​s​e​r​w​e​r​a​ ​D​i​s​c​o​r​d​ ​w​ ​c​e​l​u​ ​k​o​m​u​n​i​k​a​c​j​i​ ​n​a​ ​ż​y​w​o​ ​z​e​ ​s​p​o​ł​e​c​z​n​o​ś​c​i​ą
+	 * W​ ​c​e​l​u​ ​k​o​m​u​n​i​k​a​c​j​i​ ​n​a​ ​ż​y​w​o​ ​z​e​ ​s​p​o​ł​e​c​z​n​o​ś​c​i​ą​ ​s​k​o​r​z​y​s​t​a​j​ ​z​ ​s​e​r​w​e​r​a​ ​D​i​s​c​o​r​d
 	 */
 	HELP_INFORMATION_2: string
 	/**
@@ -652,7 +652,7 @@ type RootTranslation = {
 	 */
 	HELP_INFORMATION_3: string
 	/**
-	 * g​d​y​ ​z​g​ł​a​s​z​a​s​z​ ​p​r​o​b​l​e​m​,​ ​b​ę​d​z​i​e​ ​o​n​ ​s​z​y​b​c​i​e​j​ ​r​o​z​w​i​ą​z​a​n​y​ ​g​d​y​ ​d​o​ ​z​g​ł​o​s​z​e​n​i​a​ ​d​o​ł​ą​c​z​y​s​z​ ​p​e​ł​n​ą​ ​i​n​f​o​r​m​a​c​j​ę​ ​o​ ​s​w​o​i​m​ ​s​y​s​t​e​m​i​e
+	 * z​g​ł​a​s​z​a​j​ą​c​ ​p​r​o​b​l​e​m​,​ ​n​i​e​ ​z​a​p​o​m​n​i​j​ ​d​o​ł​ą​c​z​y​ć​ ​i​n​f​o​r​m​a​c​j​i​ ​o​ ​s​w​o​i​m​ ​s​y​s​t​e​m​i​e
 	 */
 	HELP_INFORMATION_4: string
 	/**
@@ -660,7 +660,7 @@ type RootTranslation = {
 	 */
 	HELP_INFORMATION_5: string
 	/**
-	 * D​o​d​a​t​k​o​w​e​ ​i​n​f​o​r​m​a​c​j​e
+	 * P​o​b​i​e​r​z​ ​i​n​f​o​r​m​a​c​j​e
 	 */
 	SUPPORT_INFO: string
 	/**
@@ -673,7 +673,7 @@ type RootTranslation = {
 	 */
 	UPLOAD: string
 	/**
-	 * {​{​P​|​p​|​}​}​o​b​i​e​r​{​{​a​n​i​e​|​z​|​}​}
+	 * {​{​P​|​p​|​P​}​}​o​b​i​e​r​{​{​a​n​i​e​|​z​|​z​}​}
 	 */
 	DOWNLOAD: string
 	/**
@@ -732,7 +732,7 @@ type RootTranslation = {
 	 */
 	SYSTEM_FACTORY_TEXT_DIALOG: string
 	/**
-	 * {​{​S​p​r​a​w​d​ź​ ​w​e​r​s​j​ę​|​S​p​r​a​w​d​z​a​n​i​e​ ​w​e​r​s​j​i​|​)​}​}
+	 * S​p​r​a​w​d​{​{​ź​|​z​a​n​i​e​|​}​}​ ​w​e​r​s​j​{​{​ę​|​i​|​}​}
 	 */
 	VERSION_CHECK: string
 	/**
@@ -1743,7 +1743,7 @@ export type TranslationFunctions = {
 	 */
 	USER_CUSTOMIZATION: () => LocalizedString
 	/**
-	 * Dodatkowe informacje
+	 * Informacje dotyczące wsparcia
 	 */
 	SUPPORT_INFORMATION: () => LocalizedString
 	/**
@@ -1751,11 +1751,11 @@ export type TranslationFunctions = {
 	 */
 	CLICK_HERE: () => LocalizedString
 	/**
-	 * Skorzystaj z wiki w celu znalezienia szczegółowych instrukcji jak skonfigurować EMS-ESP
+	 * W celu znalezienia szczegółowych instrukcji jak skonfigurować EMS-ESP skorzystaj z wiki
 	 */
 	HELP_INFORMATION_1: () => LocalizedString
 	/**
-	 * Skorzystaj z serwera Discord w celu komunikacji na żywo ze społecznością
+	 * W celu komunikacji na żywo ze społecznością skorzystaj z serwera Discord
 	 */
 	HELP_INFORMATION_2: () => LocalizedString
 	/**
@@ -1763,7 +1763,7 @@ export type TranslationFunctions = {
 	 */
 	HELP_INFORMATION_3: () => LocalizedString
 	/**
-	 * gdy zgłaszasz problem, będzie on szybciej rozwiązany gdy do zgłoszenia dołączysz pełną informację o swoim systemie
+	 * zgłaszając problem, nie zapomnij dołączyć informacji o swoim systemie
 	 */
 	HELP_INFORMATION_4: () => LocalizedString
 	/**
@@ -1771,7 +1771,7 @@ export type TranslationFunctions = {
 	 */
 	HELP_INFORMATION_5: () => LocalizedString
 	/**
-	 * Dodatkowe informacje
+	 * Pobierz informacje
 	 */
 	SUPPORT_INFO: () => LocalizedString
 	/**
@@ -1783,7 +1783,7 @@ export type TranslationFunctions = {
 	 */
 	UPLOAD: () => LocalizedString
 	/**
-	 * {{P|p|}}obier{{anie|z|}}
+	 * {{P|p|P}}obier{{anie|z|z}}
 	 */
 	DOWNLOAD: (arg0: string | number | boolean) => LocalizedString
 	/**
@@ -1840,7 +1840,7 @@ export type TranslationFunctions = {
 	 */
 	SYSTEM_FACTORY_TEXT_DIALOG: () => LocalizedString
 	/**
-	 * {{Sprawdź wersję|Sprawdzanie wersji|)}}
+	 * Sprawd{{ź|zanie|}} wersj{{ę|i|}}
 	 */
 	VERSION_CHECK: (arg0: string | number | boolean) => LocalizedString
 	/**
