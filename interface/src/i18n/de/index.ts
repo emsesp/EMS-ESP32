@@ -31,7 +31,7 @@ const de: Translation = {
   DEVICE_DETAILS: 'Geräte Details',
   BRAND: 'Marke',
   ENTITY_NAME: 'Entitätsname',
-  VALUE: 'Wert',
+  VALUE: '{{Wert||wert}}',
   SHOW_FAV: 'nur Favoriten anzeigen',
   DEVICE_SENSOR_DATA: 'Geräte- und Sensordaten',
   DEVICES_SENSORS: 'Geräte & Sensoren',
@@ -202,7 +202,8 @@ const de: Translation = {
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Herunterladen der individuellen Entitätsanpassungen',
   DOWNLOAD_SETTINGS_TEXT:
     'Herunterladen der Anwendungseinstellungen. Vorsicht beim Teilen der Einstellungen, da sie Passwörter und andere sensitive Einstellungen enthalten',
-  UPLOAD_TEXT: 'Hochladen von neuer Firmware (.bin), Geräte- oder Entitätseinstellungen (.json), zur optionalen Validitätsprüfung zuerst die (.md5) Datei hochladen',
+  UPLOAD_TEXT:
+    'Hochladen von neuer Firmware (.bin), Geräte- oder Entitätseinstellungen (.json), zur optionalen Validitätsprüfung zuerst die (.md5) Datei hochladen',
   UPLOADING: 'Hochladen',
   UPLOAD_DROP_TEXT: 'Klicken Sie hier, oder ziehen eine Datei hierher',
   ERROR: 'Unerwarteter Fehler, bitter versuchen Sie es erneut',
