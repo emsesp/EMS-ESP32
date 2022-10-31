@@ -377,7 +377,11 @@ void System::start() {
     // disable bluetooth module
     // periph_module_disable(PERIPH_BT_MODULE);
     if (low_clock_) {
+#if CONFIG_IDF_TARGET_ESP32C3
+        setCpuFrequencyMhz(80);
+#else
         setCpuFrequencyMhz(160);
+#endif
     }
     fstotal_ = LittleFS.totalBytes() / 1024; // read only once, it takes 500 ms to read
     psram_   = ESP.getPsramSize() / 1024;
