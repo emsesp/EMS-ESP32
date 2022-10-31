@@ -39,6 +39,7 @@ import { extractErrorMessage, useRest } from '../../utils';
 import { AuthenticatedContext } from '../../contexts/authentication';
 
 import axios from 'axios';
+import RestartMonitor from './RestartMonitor';
 
 import { useI18nContext } from '../../i18n/i18n-react';
 
@@ -52,6 +53,7 @@ function formatNumber(num: number) {
 
 const SystemStatusForm: FC = () => {
   const { LL } = useI18nContext();
+  const [restarting, setRestarting] = useState<boolean>();
 
   const { loadData, data, errorMessage } = useRest<SystemStatus>({ read: SystemApi.readSystemStatus });
 
@@ -69,7 +71,8 @@ const SystemStatusForm: FC = () => {
       setLatestVersion({
         version: response.data.name,
         url: response.data.assets[1].browser_download_url,
-        changelog: response.data.html_url
+        changelog: response.data.assets[0].browser_download_url
+
       });
     });
     axios.get(VERSIONCHECK_DEV_ENDPOINT).then((response) => {
@@ -86,6 +89,7 @@ const SystemStatusForm: FC = () => {
     try {
       await SystemApi.restart();
       enqueueSnackbar(LL.APPLICATION_RESTARTING(), { variant: 'info' });
+      setRestarting(true);
     } catch (error) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     } finally {
@@ -103,6 +107,7 @@ const SystemStatusForm: FC = () => {
           startIcon={<CancelIcon />}
           variant="outlined"
           onClick={() => setConfirmRestart(false)}
+          disabled={processing}
           color="secondary"
         >
           {LL.CANCEL()}
@@ -199,6 +204,7 @@ const SystemStatusForm: FC = () => {
           startIcon={<CancelIcon />}
           variant="outlined"
           onClick={() => setConfirmFactoryReset(false)}
+          disabled={processing}
           color="secondary"
         >
           {LL.CANCEL()}
@@ -302,9 +308,7 @@ const SystemStatusForm: FC = () => {
             </ListItemAvatar>
             <ListItemText
               primary={LL.FLASH()}
-              secondary={
-                formatNumber(data.flash_chip_size) + ' KB / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'
-              }
+              secondary={formatNumber(data.flash_chip_size) + ' KB / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'}
             />
           </ListItem>
           <Divider variant="inset" component="li" />
@@ -373,7 +377,7 @@ const SystemStatusForm: FC = () => {
 
   return (
     <SectionContent title={LL.STATUS_OF(LL.SYSTEM(1))} titleGutter>
-      {content()}
+      {restarting ? <RestartMonitor /> : content()}
     </SectionContent>
   );
 };

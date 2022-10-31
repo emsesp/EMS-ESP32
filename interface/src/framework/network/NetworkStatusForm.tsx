@@ -44,7 +44,7 @@ const dnsServers = ({ dns_ip_1, dns_ip_2 }: NetworkStatus) => {
   if (!dns_ip_1) {
     return 'none';
   }
-  return dns_ip_1 + (dns_ip_2 === '0.0.0.0' ? '' : ',' + dns_ip_2);
+  return dns_ip_1 + (!dns_ip_2 || dns_ip_2 === '0.0.0.0' ? '' : ',' + dns_ip_2);
 };
 
 const IPs = (status: NetworkStatus) => {

@@ -4,6 +4,7 @@ import { AxiosPromise } from 'axios';
 import { Typography, Button, Box } from '@mui/material';
 
 import { FileUploadConfig } from '../../api/endpoints';
+
 import { SingleUpload, useFileUpload } from '../../components';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
@@ -21,7 +22,8 @@ interface UploadFileProps {
 }
 
 const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
-  const [uploadFile, cancelUpload, uploading, uploadProgress] = useFileUpload({ upload: uploadGeneralFile });
+
+  const [uploadFile, cancelUpload, uploading, uploadProgress, md5] = useFileUpload({ upload: uploadGeneralFile });
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -79,6 +81,11 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
             <Typography variant="body2">{LL.UPLOAD_TEXT()} </Typography>
           </Box>
         </>
+      )}
+      {md5 !== '' && (
+        <Box mb={2}>
+          <Typography variant="body2">{'MD5: ' + md5}</Typography>
+        </Box>
       )}
       <SingleUpload onDrop={uploadFile} onCancel={cancelUpload} uploading={uploading} progress={uploadProgress} />
 

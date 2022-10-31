@@ -1154,10 +1154,21 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
   } else if (board_profile == 'C3MINI') {
     // Lolin C3 mini
     data.led_gpio = 7
-    data.dallas_gpio = 2
+    data.dallas_gpio = 1
     data.rx_gpio = 4
     data.tx_gpio = 5
     data.pbutton_gpio = 9
+    data.phy_type = 0
+    data.eth_power = 0
+    data.eth_phy_addr = 0
+    data.eth_clock_mode = 0
+  } else if (board_profile == 'S2MINI') {
+    // Lolin C3 mini
+    data.led_gpio = 15
+    data.dallas_gpio = 7
+    data.rx_gpio = 11
+    data.tx_gpio = 12
+    data.pbutton_gpio = 0
     data.phy_type = 0
     data.eth_power = 0
     data.eth_phy_addr = 0

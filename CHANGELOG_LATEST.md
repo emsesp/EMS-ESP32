@@ -10,11 +10,13 @@
 - Add devices: Greenstar 30Ri boiler, Junkers FW500 thermostat, Buderus BC30 controller
 - Add program memory info
 - Add mqtt queue and connection infos
-- Add min/max setting to customizations
 - Adapt min/max if ems-value is not in this range
 - Add heat pump settings for inputs and limits [#600](https://github.com/emsesp/EMS-ESP32/issues/600)
 - Add hybrid heatpump [#500](https://github.com/emsesp/EMS-ESP32/issues/500)
 - Add translated tags
+- Add min/max to customization table [#686](https://github.com/emsesp/EMS-ESP32/issues/686)
+- Add MD5 check [#637](https://github.com/emsesp/EMS-ESP32/issues/637)
+- Add more bus-ids [#673](https://github.com/emsesp/EMS-ESP32/issues/673)
 
 ## Fixed
 
@@ -26,6 +28,7 @@
 - RF room temperature sensor are shown as thermostat
 - render mqtt float json values with trailing zero
 - removed flash strings
+- reload page after restart button is pressed
 
 ## **BREAKING CHANGES:**
 

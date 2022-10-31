@@ -47,15 +47,15 @@ void OTASettingsService::configureArduinoOTA() {
 #if defined(EMSESP_USE_SERIAL)
             Serial.printf("Error[%u]: ", error);
             if (error == OTA_AUTH_ERROR)
-                Serial.println(F("Auth Failed"));
+                Serial.println("Auth Failed");
             else if (error == OTA_BEGIN_ERROR)
-                Serial.println(F("Begin Failed"));
+                Serial.println("Begin Failed");
             else if (error == OTA_CONNECT_ERROR)
-                Serial.println(F("Connect Failed"));
+                Serial.println("Connect Failed");
             else if (error == OTA_RECEIVE_ERROR)
-                Serial.println(F("Receive Failed"));
+                Serial.println("Receive Failed");
             else if (error == OTA_END_ERROR)
-                Serial.println(F("End Failed"));
+                Serial.println("End Failed");
 #endif
         });
 

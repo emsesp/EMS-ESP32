@@ -80,11 +80,11 @@ AsyncMqttClient * MqttSettingsService::getMqttClient() {
 }
 
 void MqttSettingsService::onMqttConnect(bool sessionPresent) {
-    // emsesp::EMSESP::logger().info(F("Connected to MQTT, %s"), (sessionPresent) ? F("with persistent session") : F("without persistent session"));
+    // emsesp::EMSESP::logger().info("Connected to MQTT, %s", (sessionPresent) ? ("with persistent session") : ("without persistent session"));
 }
 
 void MqttSettingsService::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-    // emsesp::EMSESP::logger().info(F("Disconnected from MQTT reason: %d"), (uint8_t)reason);
+    // emsesp::EMSESP::logger().info("Disconnected from MQTT reason: %d", (uint8_t)reason);
     _disconnectReason = reason;
     _disconnectedAt   = uuid::get_uptime();
 }
@@ -104,14 +104,14 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     case ARDUINO_EVENT_ETH_GOT_IP6:
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
         if (_state.enabled) {
-            // emsesp::EMSESP::logger().info(F("IPv4 Network connection found, starting MQTT client"));
+            // emsesp::EMSESP::logger().info("IPv4 Network connection found, starting MQTT client");
             onConfigUpdated();
         }
         break;
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
     case ARDUINO_EVENT_ETH_DISCONNECTED:
         if (_state.enabled) {
-            // emsesp::EMSESP::logger().info(F("Network connection dropped, stopping MQTT client"));
+            // emsesp::EMSESP::logger().info("Network connection dropped, stopping MQTT client");
             _mqttClient.disconnect();
             // onConfigUpdated();
         }
@@ -127,7 +127,7 @@ void MqttSettingsService::configureMqtt() {
     _mqttClient.disconnect();
     // only connect if WiFi is connected and MQTT is enabled
     if (_state.enabled && emsesp::EMSESP::system_.network_connected()) {
-        // emsesp::EMSESP::logger().info(F("Configuring Mqtt client"));
+        // emsesp::EMSESP::logger().info("Configuring Mqtt client");
         _mqttClient.setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
         if (_state.username.length() > 0) {
             _mqttClient.setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername),
@@ -141,7 +141,7 @@ void MqttSettingsService::configureMqtt() {
         _mqttClient.setMaxTopicLength(_state.maxTopicLength);
         _mqttClient.connect();
         // } else {
-        // emsesp::EMSESP::logger().info(F("Error configuring Mqtt client"));
+        // emsesp::EMSESP::logger().info("Error configuring Mqtt client");
     }
 }
 

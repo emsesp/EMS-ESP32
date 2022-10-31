@@ -16,7 +16,9 @@ const UploadFileForm: FC = () => {
 
   const uploadFile = useRef(async (file: File, config?: FileUploadConfig) => {
     const response = await SystemApi.uploadFile(file, config);
-    setRestarting(true);
+    if (response.status === 200) {
+      setRestarting(true);
+    }
     return response;
   });
 
