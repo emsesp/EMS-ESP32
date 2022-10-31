@@ -1021,7 +1021,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     JsonObject node;
 
     // System
-    node             = output.createNestedObject("System Status");
+    node             = output.createNestedObject("System Info");
     node["version"]  = EMSESP_APP_VERSION;
     node["platform"] = EMSESP_PLATFORM;
     node["uptime"]   = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
@@ -1034,7 +1034,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 
 #ifndef EMSESP_STANDALONE
     // Network Status
-    node = output.createNestedObject("Network Status");
+    node = output.createNestedObject("Network Info");
     if (WiFi.status() == WL_CONNECTED) {
         node["connection"] = "WiFi";
         node["hostname"]   = WiFi.getHostname();
@@ -1082,9 +1082,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #endif
 
     // NTP status
-    node = output.createNestedObject("NTP Status");
+    node = output.createNestedObject("NTP Info");
 #ifndef EMSESP_STANDALONE
-    node["network time"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
+    node["NTP status"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
         node["enabled"]  = settings.enabled;
         node["server"]   = settings.server;
@@ -1093,7 +1093,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     });
 
     // OTA status
-    node = output.createNestedObject("OTA Status");
+    node = output.createNestedObject("OTA Info");
     EMSESP::esp8266React.getOTASettingsService()->read([&](OTASettings & settings) {
         node["enabled"] = settings.enabled;
         node["port"]    = settings.port;
@@ -1101,7 +1101,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #endif
 
     // MQTT Status
-    node                = output.createNestedObject("MQTT Status");
+    node                = output.createNestedObject("MQTT Info");
     node["MQTT status"] = Mqtt::connected() ? F_(connected) : F_(disconnected);
     if (Mqtt::enabled()) {
         node["MQTT publishes"]     = Mqtt::publish_count();
@@ -1132,7 +1132,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     });
 
     // Syslog Status
-    node            = output.createNestedObject("Syslog Status");
+    node            = output.createNestedObject("Syslog Info");
     node["enabled"] = EMSESP::system_.syslog_enabled_;
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.syslog_enabled_) {
@@ -1144,7 +1144,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #endif
 
     // Sensor Status
-    node = output.createNestedObject("Sensor Status");
+    node = output.createNestedObject("Sensor Info");
     if (EMSESP::dallas_enabled()) {
         node["temperature sensors"]      = EMSESP::dallassensor_.no_sensors();
         node["temperature sensor reads"] = EMSESP::dallassensor_.reads();
@@ -1157,12 +1157,12 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     }
 
     // API Status
-    node              = output.createNestedObject("API Status");
+    node              = output.createNestedObject("API Info");
     node["API calls"] = WebAPIService::api_count();
     node["API fails"] = WebAPIService::api_fails();
 
     // EMS Bus Status
-    node = output.createNestedObject("Bus Status");
+    node = output.createNestedObject("Bus Info");
     switch (EMSESP::bus_status()) {
     case EMSESP::BUS_STATUS_OFFLINE:
         node["bus status"] = "disconnected";
@@ -1219,34 +1219,36 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["telnet enabled"]  = settings.telnet_enabled;
     });
 
-    // Devices - show EMS devices
-    JsonArray devices = output.createNestedArray("Devices");
-    for (const auto & device_class : EMSFactory::device_handlers()) {
-        for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice && (emsdevice->device_type() == device_class.first)) {
-                JsonObject obj    = devices.createNestedObject();
-                obj["type"]       = emsdevice->device_type_name();
-                obj["name"]       = emsdevice->name();
-                obj["device id"]  = Helpers::hextoa(emsdevice->device_id());
-                obj["product id"] = emsdevice->product_id();
-                obj["version"]    = emsdevice->version();
-                obj["entities"]   = emsdevice->count_entities();
-                char result[300];
-                (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
-                if (result[0] != '\0') {
-                    obj["handlers received"] = result; // don't show handlers if there aren't any
-                }
-                (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::FETCHED);
-                if (result[0] != '\0') {
-                    obj["handlers fetched"] = result;
-                }
-                (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::PENDING);
-                if (result[0] != '\0') {
-                    obj["handlers pending"] = result;
-                }
-                (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::IGNORED);
-                if (result[0] != '\0') {
-                    obj["handlers ignored"] = result;
+    // Devices - show EMS devices if we have any
+    if (!EMSESP::emsdevices.empty()) {
+        JsonArray devices = output.createNestedArray("Devices");
+        for (const auto & device_class : EMSFactory::device_handlers()) {
+            for (const auto & emsdevice : EMSESP::emsdevices) {
+                if (emsdevice && (emsdevice->device_type() == device_class.first)) {
+                    JsonObject obj    = devices.createNestedObject();
+                    obj["type"]       = emsdevice->device_type_name();
+                    obj["name"]       = emsdevice->name();
+                    obj["device id"]  = Helpers::hextoa(emsdevice->device_id());
+                    obj["product id"] = emsdevice->product_id();
+                    obj["version"]    = emsdevice->version();
+                    obj["entities"]   = emsdevice->count_entities();
+                    char result[300];
+                    (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
+                    if (result[0] != '\0') {
+                        obj["handlers received"] = result; // don't show handlers if there aren't any
+                    }
+                    (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::FETCHED);
+                    if (result[0] != '\0') {
+                        obj["handlers fetched"] = result;
+                    }
+                    (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::PENDING);
+                    if (result[0] != '\0') {
+                        obj["handlers pending"] = result;
+                    }
+                    (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::IGNORED);
+                    if (result[0] != '\0') {
+                        obj["handlers ignored"] = result;
+                    }
                 }
             }
         }
