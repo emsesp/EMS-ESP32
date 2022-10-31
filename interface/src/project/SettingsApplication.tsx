@@ -311,12 +311,17 @@ const SettingsApplication: FC = () => {
               margin="normal"
               select
             >
+              <MenuItem value={0x0a}>Terminal (0x0A)</MenuItem>
               <MenuItem value={0x0b}>Service Key (0x0B)</MenuItem>
               <MenuItem value={0x0d}>Modem (0x0D)</MenuItem>
-              <MenuItem value={0x0a}>Terminal (0x0A)</MenuItem>
               <MenuItem value={0x0e}>Converter (0x0E)</MenuItem>
               <MenuItem value={0x0f}>Time Module (0x0F)</MenuItem>
-              <MenuItem value={0x12}>Alarm Module (0x12)</MenuItem>
+              <MenuItem value={0x48}>Gateway 1 (0x48)</MenuItem>
+              <MenuItem value={0x49}>Gateway 2 (0x49)</MenuItem>
+              <MenuItem value={0x4A}>Gateway 3 (0x4A)</MenuItem>
+              <MenuItem value={0x4B}>Gateway 4 (0x4B)</MenuItem>
+              <MenuItem value={0x4C}>Gateway 5 (0x4C)</MenuItem>
+              <MenuItem value={0x4D}>Gateway 7 (0x4D)</MenuItem>
             </ValidatedTextField>
           </Grid>
         </Grid>
@@ -344,9 +349,7 @@ const SettingsApplication: FC = () => {
             <MenuItem value="nl">Nederlands (NL)</MenuItem>
             <MenuItem value="se">Svenska (SE)</MenuItem>
             <MenuItem value="pl">Polski (PL)</MenuItem>
-            <MenuItem disabled value="no">
-              Norsk (NO)
-            </MenuItem>
+            <MenuItem value="no">Norsk (NO)</MenuItem>
           </ValidatedTextField>
         </Box>
         {data.led_gpio !== 0 && (

@@ -151,11 +151,11 @@ void EMSESPShell::add_console_commands() {
                     },
                     "local");
             } else {
-                shell.println("Must be 0B, 0D, 0A, 0F or 12");
+                shell.println("Must be 0B, 0D, 0A, 0E, 0F, or 48 - 4D");
             }
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{"0B", "0D", "0A", "0F", "12"};
+            return std::vector<std::string>{"0B", "0D", "0A", "0E", "0F", "48", "49", "4A", "4B", "4C", "4D"};
         });
 
     commands->add_command(ShellContext::MAIN,
