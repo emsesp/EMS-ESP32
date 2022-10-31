@@ -226,6 +226,7 @@ void WebStatusService::mDNS_start() const {
 }
 
 const char * WebStatusService::disconnectReason(uint8_t code) {
+#ifndef EMSESP_STANDALONE
     switch (code) {
     case WIFI_REASON_UNSPECIFIED: // = 1,
         return "unspecifiied";
@@ -286,6 +287,8 @@ const char * WebStatusService::disconnectReason(uint8_t code) {
     default:
         return "unknown";
     }
+#endif
+
     return "";
 }
 

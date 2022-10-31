@@ -51,7 +51,7 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
       if (response.status === 200) {
         enqueueSnackbar(LL.UPLOAD() + ' ' + LL.SUCCESSFUL(), { variant: 'success' });
       } else if (response.status === 201) {
-        setMd5((String)(response.data));
+        setMd5(String(response.data));
         enqueueSnackbar(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL(), { variant: 'success' });
       }
     } catch (error) {

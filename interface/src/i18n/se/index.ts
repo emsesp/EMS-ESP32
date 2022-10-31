@@ -31,7 +31,7 @@ const se: Translation = {
   DEVICE_DETAILS: 'Enhetsdetaljer',
   BRAND: 'Fabrikat',
   ENTITY_NAME: 'Entitetsnamn',
-  VALUE: 'Värde',
+  VALUE: '{{Värde|värde}}',
   SHOW_FAV: 'Visa enbart favoriter',
   DEVICE_SENSOR_DATA: 'Enhets och Sensor-data',
   DEVICES_SENSORS: 'Enheter & Sensorer',

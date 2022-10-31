@@ -31,7 +31,7 @@ const nl: Translation = {
   DEVICE_DETAILS: 'Device Gegevens',
   BRAND: 'Merk',
   ENTITY_NAME: 'Entiteit',
-  VALUE: 'Waarde',
+  VALUE: '{{Waarde|waarde}}',
   SHOW_FAV: 'alleen favorieten weergeven',
   DEVICE_SENSOR_DATA: 'Apparaat en Sensor data',
   DEVICES_SENSORS: 'Apparaten & Sensoren',

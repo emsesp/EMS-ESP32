@@ -318,10 +318,10 @@ const SettingsApplication: FC = () => {
               <MenuItem value={0x0f}>Time Module (0x0F)</MenuItem>
               <MenuItem value={0x48}>Gateway 1 (0x48)</MenuItem>
               <MenuItem value={0x49}>Gateway 2 (0x49)</MenuItem>
-              <MenuItem value={0x4A}>Gateway 3 (0x4A)</MenuItem>
-              <MenuItem value={0x4B}>Gateway 4 (0x4B)</MenuItem>
-              <MenuItem value={0x4C}>Gateway 5 (0x4C)</MenuItem>
-              <MenuItem value={0x4D}>Gateway 7 (0x4D)</MenuItem>
+              <MenuItem value={0x4a}>Gateway 3 (0x4A)</MenuItem>
+              <MenuItem value={0x4b}>Gateway 4 (0x4B)</MenuItem>
+              <MenuItem value={0x4c}>Gateway 5 (0x4C)</MenuItem>
+              <MenuItem value={0x4d}>Gateway 7 (0x4D)</MenuItem>
             </ValidatedTextField>
           </Grid>
         </Grid>

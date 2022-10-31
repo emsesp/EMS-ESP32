@@ -31,7 +31,7 @@ const no: Translation = {
   DEVICE_DETAILS: 'Enhetsdetaljer',
   BRAND: 'Fabrikat',
   ENTITY_NAME: 'Objektsnavn',
-  VALUE: 'Verdi',
+  VALUE: '{{Verdi|verdi}}',
   SHOW_FAV: ' Vis kun favoritter',
   DEVICE_SENSOR_DATA: 'Enheter og Sensordata',
   DEVICES_SENSORS: 'Enheter og Sensorer',

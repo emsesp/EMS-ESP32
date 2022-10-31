@@ -31,7 +31,7 @@ const en: BaseTranslation = {
   DEVICE_DETAILS: 'Device Details',
   BRAND: 'Brand',
   ENTITY_NAME: 'Entity Name',
-  VALUE: '{{Value}}',
+  VALUE: '{{Value|value}}',
   SHOW_FAV: 'only show favorites',
   DEVICE_SENSOR_DATA: 'Device and Sensor Data',
   DEVICES_SENSORS: 'Devices & Sensors',
@@ -203,7 +203,8 @@ const en: BaseTranslation = {
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Download the entity customizations',
   DOWNLOAD_SETTINGS_TEXT:
     'Download the application settings. Be careful when sharing your settings as this file contains passwords and other sensitive system information',
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file, settings or customizations (.json) file below, for optional validation upload (.md5) first',
+  UPLOAD_TEXT:
+    'Upload a new firmware (.bin) file, settings or customizations (.json) file below, for optional validation upload (.md5) first',
   UPLOADING: 'Uploading',
   UPLOAD_DROP_TEXT: 'Drop file or click here',
   ERROR: 'Unexpected Error, please try again',

@@ -22,7 +22,6 @@ interface UploadFileProps {
 }
 
 const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
-
   const [uploadFile, cancelUpload, uploading, uploadProgress, md5] = useFileUpload({ upload: uploadGeneralFile });
 
   const { enqueueSnackbar } = useSnackbar();

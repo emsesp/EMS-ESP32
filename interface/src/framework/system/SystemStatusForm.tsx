@@ -72,7 +72,6 @@ const SystemStatusForm: FC = () => {
         version: response.data.name,
         url: response.data.assets[1].browser_download_url,
         changelog: response.data.assets[0].browser_download_url
-
       });
     });
     axios.get(VERSIONCHECK_DEV_ENDPOINT).then((response) => {
@@ -308,7 +307,9 @@ const SystemStatusForm: FC = () => {
             </ListItemAvatar>
             <ListItemText
               primary={LL.FLASH()}
-              secondary={formatNumber(data.flash_chip_size) + ' KB / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'}
+              secondary={
+                formatNumber(data.flash_chip_size) + ' KB / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'
+              }
             />
           </ListItem>
           <Divider variant="inset" component="li" />
