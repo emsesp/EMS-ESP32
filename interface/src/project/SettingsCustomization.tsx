@@ -511,8 +511,8 @@ const SettingsCustomization: FC = () => {
                       </ToggleButtonGroup>
                     </Cell>
                     <Cell>{formatName(de)}</Cell>
-                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && (formatValue(de.mi))}</Cell>
-                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && (formatValue(de.ma))}</Cell>
+                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}</Cell>
+                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}</Cell>
                     <Cell>{formatValue(de.v)}</Cell>
                   </Row>
                 ))}
