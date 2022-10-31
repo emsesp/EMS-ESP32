@@ -66,7 +66,7 @@ const SettingsCustomization: FC = () => {
 
   const entities_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: 120px repeat(1, minmax(0, 1fr)) 120px;
+      --data-table-library_grid-template-columns: 120px repeat(1, minmax(80px, 1fr)) 40px 40px 120px;
     `,
     BaseRow: `
       font-size: 14px;
@@ -75,6 +75,12 @@ const SettingsCustomization: FC = () => {
       }
     `,
     BaseCell: `
+      &:nth-of-type(3) {
+        text-align: right;
+      }
+      &:nth-of-type(4) {
+        text-align: right;
+      }
       &:last-of-type {
         text-align: right;
       }
@@ -121,6 +127,12 @@ const SettingsCustomization: FC = () => {
     Cell: `
       &:nth-of-type(2) {
         padding: 8px;
+      }
+      &:nth-of-type(3) {
+        padding-right: 4px;
+      }
+      &:nth-of-type(4) {
+        padding-right: 4px;
       }
       &:last-of-type {
         padding-right: 8px;
@@ -446,6 +458,8 @@ const SettingsCustomization: FC = () => {
                       {LL.NAME()}
                     </Button>
                   </HeaderCell>
+                  <HeaderCell stiff>min</HeaderCell>
+                  <HeaderCell stiff>max</HeaderCell>
                   <HeaderCell resize>{LL.VALUE(0)}</HeaderCell>
                 </HeaderRow>
               </Header>
@@ -497,6 +511,8 @@ const SettingsCustomization: FC = () => {
                       </ToggleButtonGroup>
                     </Cell>
                     <Cell>{formatName(de)}</Cell>
+                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && (formatValue(de.mi))}</Cell>
+                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && (formatValue(de.ma))}</Cell>
                     <Cell>{formatValue(de.v)}</Cell>
                   </Row>
                 ))}
@@ -626,7 +642,7 @@ const SettingsCustomization: FC = () => {
                   onChange={updateValue(setDeviceEntity)}
                 />
               </Grid>
-              {typeof de.v === 'number' && de.w && (
+              {typeof de.v === 'number' && de.w && !(de.m & DeviceEntityMask.DV_READONLY) && (
                 <>
                   <Grid item>
                     <TextField

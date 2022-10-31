@@ -287,13 +287,13 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max) {
 
     if (type == DeviceValueType::USHORT) {
         dv_set_min = Helpers::transformNumFloat(0, numeric_operator, fahrenheit);
-        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_USHORT_NOTSET, numeric_operator, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_USHORT_NOTSET - 1, numeric_operator, fahrenheit);
         return true;
     }
 
     if (type == DeviceValueType::SHORT) {
-        dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_SHORT_NOTSET, numeric_operator, fahrenheit);
-        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_SHORT_NOTSET, numeric_operator, fahrenheit);
+        dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_SHORT_NOTSET + 1, numeric_operator, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_SHORT_NOTSET - 1, numeric_operator, fahrenheit);
         return true;
     }
 
@@ -301,7 +301,7 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max) {
         if (uom == DeviceValueUOM::PERCENT) {
             dv_set_max = 100;
         } else {
-            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_UINT_NOTSET, numeric_operator, fahrenheit);
+            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_UINT_NOTSET - 1, numeric_operator, fahrenheit);
         }
         return true;
     }
@@ -311,19 +311,19 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max) {
             dv_set_min = -100;
             dv_set_max = 100;
         } else {
-            dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_INT_NOTSET, numeric_operator, fahrenheit);
-            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_INT_NOTSET, numeric_operator, fahrenheit);
+            dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_INT_NOTSET + 1, numeric_operator, fahrenheit);
+            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_INT_NOTSET - 1, numeric_operator, fahrenheit);
         }
         return true;
     }
 
     if (type == DeviceValueType::ULONG) {
-        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET, numeric_operator);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET - 1, numeric_operator);
         return true;
     }
 
     if (type == DeviceValueType::TIME) {
-        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET, numeric_operator);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET - 1, numeric_operator);
         return true;
     }
 
