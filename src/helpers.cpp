@@ -337,9 +337,9 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
     if (!hasValue(value)) {
         return nullptr;
     }
-    result[0]         = '\0';
-    int32_t new_value = fahrenheit ? format ? value * 1.8 + 32 * format * (fahrenheit - 1) : value * 1.8 + 32 * (fahrenheit - 1) : value;
-    char    s[10]     = {0};
+    result[0]          = '\0';
+    uint32_t new_value = fahrenheit ? format ? value * 1.8 + 32 * format * (fahrenheit - 1) : value * 1.8 + 32 * (fahrenheit - 1) : value;
+    char     s[10]     = {0};
 
 #ifndef EMSESP_STANDALONE
     if (!format) {
