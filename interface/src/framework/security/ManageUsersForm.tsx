@@ -40,7 +40,7 @@ const ManageUsersForm: FC = () => {
 
   const table_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 120px 120px;
+      --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) minmax(120px, max-content) 120px;
     `,
     BaseRow: `
       font-size: 14px;
@@ -140,7 +140,7 @@ const ManageUsersForm: FC = () => {
             <>
               <Header>
                 <HeaderRow>
-                  <HeaderCell resize>{LL.USERNAME()}</HeaderCell>
+                  <HeaderCell resize>{LL.USERNAME(1)}</HeaderCell>
                   <HeaderCell stiff>{LL.IS_ADMIN(0)}</HeaderCell>
                   <HeaderCell stiff />
                 </HeaderRow>

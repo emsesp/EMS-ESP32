@@ -66,7 +66,7 @@ const SettingsCustomization: FC = () => {
 
   const entities_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: 120px repeat(1, minmax(80px, 1fr)) 40px 40px 120px;
+      --data-table-library_grid-template-columns: 120px repeat(1, minmax(80px, 1fr)) 45px 45px 120px;
     `,
     BaseRow: `
       font-size: 14px;
@@ -455,11 +455,11 @@ const SettingsCustomization: FC = () => {
                   <HeaderCell stiff>{LL.OPTIONS()}</HeaderCell>
                   <HeaderCell resize>
                     <Button fullWidth style={{ fontSize: '14px', justifyContent: 'flex-start' }}>
-                      {LL.NAME()}
+                      {LL.NAME(1)}
                     </Button>
                   </HeaderCell>
-                  <HeaderCell stiff>min</HeaderCell>
-                  <HeaderCell stiff>max</HeaderCell>
+                  <HeaderCell stiff>{LL.MIN()}</HeaderCell>
+                  <HeaderCell stiff>{LL.MAX()}</HeaderCell>
                   <HeaderCell resize>{LL.VALUE(0)}</HeaderCell>
                 </HeaderRow>
               </Header>
@@ -582,7 +582,7 @@ const SettingsCustomization: FC = () => {
       const de = deviceEntity;
       return (
         <Dialog open={!!deviceEntity} onClose={() => setDeviceEntity(undefined)}>
-          <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY() + ' ' + de.id}</DialogTitle>
+          <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY() + ' "' + de.id + '"'}</DialogTitle>
 
           <DialogContent dividers>
             <ToggleButtonGroup
@@ -628,14 +628,14 @@ const SettingsCustomization: FC = () => {
 
             <Box color="warning.main" p={0} pl={0} pr={0} mt={2} mb={2}>
               <Typography variant="body2">
-                {LL.DEFAULT() + ' ' + LL.NAME()}:&nbsp;{deviceEntity.n}
+                {LL.DEFAULT(1) + ' ' + LL.NAME(1)}:&nbsp;{deviceEntity.n}
               </Typography>
             </Box>
             <Grid container spacing={1}>
               <Grid item>
                 <TextField
                   name="cn"
-                  label={LL.RENAME() + ' ' + LL.ENTITY()}
+                  label={LL.NEW_NAME_OF(LL.ENTITY())}
                   value={deviceEntity.cn}
                   autoFocus
                   sx={{ width: '30ch' }}
@@ -647,7 +647,7 @@ const SettingsCustomization: FC = () => {
                   <Grid item>
                     <TextField
                       name="mi"
-                      label="min"
+                      label={LL.MIN()}
                       value={deviceEntity.mi}
                       sx={{ width: '8ch' }}
                       onChange={updateValue(setDeviceEntity)}
@@ -656,7 +656,7 @@ const SettingsCustomization: FC = () => {
                   <Grid item>
                     <TextField
                       name="ma"
-                      label="max"
+                      label={LL.MAX()}
                       value={deviceEntity.ma}
                       sx={{ width: '8ch' }}
                       onChange={updateValue(setDeviceEntity)}

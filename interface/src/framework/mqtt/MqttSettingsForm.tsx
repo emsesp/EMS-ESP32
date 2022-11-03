@@ -57,7 +57,7 @@ const MqttSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="host"
-              label="Host"
+              label={LL.ADDRESS_OF(LL.BROKER())}
               fullWidth
               variant="outlined"
               value={data.host}
@@ -84,7 +84,7 @@ const MqttSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="base"
-              label="Base"
+              label={LL.BASE_TOPIC()}
               fullWidth
               variant="outlined"
               value={data.base}
@@ -95,7 +95,7 @@ const MqttSettingsForm: FC = () => {
           <Grid item xs={6}>
             <ValidatedTextField
               name="client_id"
-              label={'Client ID (' + LL.OPTIONAL() + ')'}
+              label={LL.ID_OF(LL.CLIENT()) + ' (' + LL.OPTIONAL() + ')'}
               fullWidth
               variant="outlined"
               value={data.client_id}
@@ -108,7 +108,7 @@ const MqttSettingsForm: FC = () => {
           <Grid item xs={6}>
             <ValidatedTextField
               name="username"
-              label={LL.USERNAME()}
+              label={LL.USERNAME(0)}
               fullWidth
               variant="outlined"
               value={data.username}
@@ -175,7 +175,7 @@ const MqttSettingsForm: FC = () => {
         </Typography>
         <ValidatedTextField
           name="nested_format"
-          label={'Topic/Payload ' + LL.FORMAT()}
+          label={LL.MQTT_FORMAT()}
           value={data.nested_format}
           fullWidth
           variant="outlined"
@@ -324,7 +324,7 @@ const MqttSettingsForm: FC = () => {
               InputProps={{
                 endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
               }}
-              label={LL.DEFAULT()}
+              label={LL.DEFAULT(0)}
               fullWidth
               variant="outlined"
               value={numberValue(data.publish_time_other)}

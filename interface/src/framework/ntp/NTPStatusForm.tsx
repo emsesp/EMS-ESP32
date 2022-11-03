@@ -72,7 +72,7 @@ const NTPStatusForm: FC = () => {
   const ntpStatus = ({ status }: NTPStatus) => {
     switch (status) {
       case NTPSyncStatus.NTP_DISABLED:
-        return LL.DISABLED();
+        return LL.DISABLED(0);
       case NTPSyncStatus.NTP_INACTIVE:
         return LL.INACTIVE();
       case NTPSyncStatus.NTP_ACTIVE:

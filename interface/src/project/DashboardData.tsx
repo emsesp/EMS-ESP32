@@ -559,11 +559,11 @@ const DashboardData: FC = () => {
           offset: sensor.o
         });
         if (response.status === 204) {
-          enqueueSnackbar(LL.UPLOAD_OF(LL.TEMP_SENSOR()) + ' ' + LL.FAILED(), { variant: 'error' });
+          enqueueSnackbar(LL.UPLOAD_OF(LL.TEMP_SENSOR(0)) + ' ' + LL.FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar(LL.UPDATED_OF(LL.TEMP_SENSOR()), { variant: 'success' });
+          enqueueSnackbar(LL.UPDATED_OF(LL.TEMP_SENSOR(0)), { variant: 'success' });
         }
         setSensor(undefined);
       } catch (error) {
@@ -580,11 +580,11 @@ const DashboardData: FC = () => {
       return (
         <Dialog open={sensor !== undefined} onClose={() => setSensor(undefined)}>
           <DialogTitle>
-            {LL.EDIT()} {LL.TEMP_SENSOR()}
+            {LL.EDIT()} {LL.TEMP_SENSOR(0)}
           </DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
-              <Typography variant="body2">Sensor ID: {sensor.id}</Typography>
+              <Typography variant="body2">{LL.ID_OF(LL.TEMP_SENSOR(1))}: {sensor.id}</Typography>
             </Box>
             <Grid container spacing={1}>
               <Grid item>
@@ -649,22 +649,22 @@ const DashboardData: FC = () => {
                 <ListItemText primary={LL.TYPE()} secondary={coreData.devices[deviceDialog].t} />
               </ListItem>
               <ListItem>
-                <ListItemText primary={LL.NAME()} secondary={coreData.devices[deviceDialog].n} />
+                <ListItemText primary={LL.NAME(0)} secondary={coreData.devices[deviceDialog].n} />
               </ListItem>
               <ListItem>
                 <ListItemText primary={LL.BRAND()} secondary={coreData.devices[deviceDialog].b} />
               </ListItem>
               <ListItem>
                 <ListItemText
-                  primary="Device ID"
+                  primary={LL.ID_OF(LL.DEVICE())}
                   secondary={'0x' + ('00' + coreData.devices[deviceDialog].d.toString(16).toUpperCase()).slice(-2)}
                 />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Product ID" secondary={coreData.devices[deviceDialog].p} />
+                <ListItemText primary={LL.ID_OF(LL.PRODUCT())} secondary={coreData.devices[deviceDialog].p} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Version" secondary={coreData.devices[deviceDialog].v} />
+                <ListItemText primary={LL.VERSION()} secondary={coreData.devices[deviceDialog].v} />
               </ListItem>
             </List>
           </DialogContent>

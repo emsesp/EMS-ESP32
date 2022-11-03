@@ -31,9 +31,10 @@ type RootTranslation = {
 	 */
 	LOADING: string
 	/**
-	 * i​s​ ​r​e​q​u​i​r​e​d
+	 * {​0​}​ ​i​s​ ​r​e​q​u​i​r​e​d
+	 * @param {unknown} 0
 	 */
-	IS_REQUIRED: string
+	IS_REQUIRED: RequiredParams<'0'>
 	/**
 	 * S​i​g​n​ ​I​n
 	 */
@@ -43,7 +44,7 @@ type RootTranslation = {
 	 */
 	SIGN_OUT: string
 	/**
-	 * U​s​e​r​n​a​m​e
+	 * {​{​U​s​e​r​n​a​m​e​}​}
 	 */
 	USERNAME: string
 	/**
@@ -82,11 +83,11 @@ type RootTranslation = {
 	 */
 	PLEASE_SIGNIN: string
 	/**
-	 * U​p​l​o​a​d​ ​s​u​c​c​e​s​s​f​u​l
+	 * U​p​l​o​a​d​ ​f​i​n​i​s​h​e​d
 	 */
 	UPLOAD_SUCCESSFUL: string
 	/**
-	 * D​o​w​n​l​o​a​d​ ​s​u​c​c​e​s​s​f​u​l
+	 * D​o​w​n​l​o​a​d​ ​f​i​n​i​s​h​e​d
 	 */
 	DOWNLOAD_SUCCESSFUL: string
 	/**
@@ -134,6 +135,23 @@ type RootTranslation = {
 	 */
 	DEVICE_DETAILS: string
 	/**
+	 * {​0​}​ ​I​D
+	 * @param {unknown} 0
+	 */
+	ID_OF: RequiredParams<'0'>
+	/**
+	 * D​e​v​i​c​e
+	 */
+	DEVICE: string
+	/**
+	 * P​r​o​d​u​c​t
+	 */
+	PRODUCT: string
+	/**
+	 * V​e​r​s​i​o​n
+	 */
+	VERSION: string
+	/**
 	 * B​r​a​n​d
 	 */
 	BRAND: string
@@ -142,7 +160,7 @@ type RootTranslation = {
 	 */
 	ENTITY_NAME: string
 	/**
-	 * {​{​V​a​l​u​e​}​}
+	 * {​{​V​a​l​u​e​|​v​a​l​u​e​}​}
 	 */
 	VALUE: string
 	/**
@@ -262,7 +280,7 @@ type RootTranslation = {
 	 */
 	EDIT: string
 	/**
-	 * T​e​m​p​e​r​a​t​u​r​e​ ​S​e​n​s​o​r
+	 * {​{​|​T​e​m​p​e​r​a​t​u​r​e​}​}​ ​S​e​n​s​o​r
 	 */
 	TEMP_SENSOR: string
 	/**
@@ -428,6 +446,15 @@ type RootTranslation = {
 	 */
 	BOARD_PROFILE: string
 	/**
+	 * C​u​s​t​o​m
+	 */
+	CUSTOM: string
+	/**
+	 * {​0​}​ ​G​P​I​O
+	 * @param {unknown} 0
+	 */
+	GPIO_OF: RequiredParams<'0'>
+	/**
 	 * B​u​t​t​o​n
 	 */
 	BUTTON: string
@@ -440,13 +467,21 @@ type RootTranslation = {
 	 */
 	PHY_TYPE: string
 	/**
-	 * d​i​s​a​b​l​e​d
+	 * {​{​d​i​s​a​b​l​e​d​}​}
 	 */
 	DISABLED: string
 	/**
 	 * T​x​ ​M​o​d​e
 	 */
 	TX_MODE: string
+	/**
+	 * H​a​r​d​w​a​r​e
+	 */
+	HARDWARE: string
+	/**
+	 * {​{​B​U​S​|​E​M​S​ ​B​U​S​}​}
+	 */
+	EMS_BUS: string
 	/**
 	 * G​e​n​e​r​a​l​ ​O​p​t​i​o​n​s
 	 */
@@ -616,7 +651,7 @@ type RootTranslation = {
 	 */
 	OPTIONS: string
 	/**
-	 * N​a​m​e
+	 * {​{​N​a​m​e​}​}
 	 */
 	NAME: string
 	/**
@@ -892,6 +927,18 @@ type RootTranslation = {
 	 */
 	ENABLE_MQTT: string
 	/**
+	 * B​r​o​k​e​r
+	 */
+	BROKER: string
+	/**
+	 * C​l​i​e​n​t
+	 */
+	CLIENT: string
+	/**
+	 * B​a​s​e
+	 */
+	BASE_TOPIC: string
+	/**
 	 * O​p​t​i​o​n​a​l
 	 */
 	OPTIONAL: string
@@ -900,9 +947,9 @@ type RootTranslation = {
 	 */
 	FORMATTING: string
 	/**
-	 * F​o​r​m​a​t
+	 * T​o​p​i​c​/​P​a​y​l​o​a​d​ ​F​o​r​m​a​t
 	 */
-	FORMAT: string
+	MQTT_FORMAT: string
 	/**
 	 * N​e​s​t​e​d​ ​i​n​ ​a​ ​s​i​n​g​l​e​ ​t​o​p​i​c
 	 */
@@ -956,7 +1003,7 @@ type RootTranslation = {
 	 */
 	MQTT_QUEUE: string
 	/**
-	 * D​e​f​a​u​l​t
+	 * {​{​D​e​f​a​u​l​t​}​}
 	 */
 	DEFAULT: string
 	/**
@@ -1108,7 +1155,7 @@ type RootTranslation = {
 	 */
 	NETWORK_FIXED_IP: string
 	/**
-	 * G​e​t​a​w​a​y
+	 * G​a​t​e​w​a​y
 	 */
 	NETWORK_GATEWAY: string
 	/**
@@ -1137,13 +1184,22 @@ type RootTranslation = {
 	 */
 	NEW: string
 	/**
-	 * R​e​n​a​m​e
+	 * N​e​w​ ​{​0​}​ ​n​a​m​e
+	 * @param {unknown} 0
 	 */
-	RENAME: string
+	NEW_NAME_OF: RequiredParams<'0'>
 	/**
-	 * E​n​t​i​t​y
+	 * e​n​t​i​t​y
 	 */
 	ENTITY: string
+	/**
+	 * m​i​n
+	 */
+	MIN: string
+	/**
+	 * m​a​x
+	 */
+	MAX: string
 }
 
 export type TranslationFunctions = {
@@ -1160,9 +1216,9 @@ export type TranslationFunctions = {
 	 */
 	LOADING: () => LocalizedString
 	/**
-	 * is required
+	 * {0} is required
 	 */
-	IS_REQUIRED: () => LocalizedString
+	IS_REQUIRED: (arg0: unknown) => LocalizedString
 	/**
 	 * Sign In
 	 */
@@ -1172,9 +1228,9 @@ export type TranslationFunctions = {
 	 */
 	SIGN_OUT: () => LocalizedString
 	/**
-	 * Username
+	 * {{Username}}
 	 */
-	USERNAME: () => LocalizedString
+	USERNAME: (arg0: string | number | boolean) => LocalizedString
 	/**
 	 * Password
 	 */
@@ -1208,11 +1264,11 @@ export type TranslationFunctions = {
 	 */
 	PLEASE_SIGNIN: () => LocalizedString
 	/**
-	 * Upload successful
+	 * Upload finished
 	 */
 	UPLOAD_SUCCESSFUL: () => LocalizedString
 	/**
-	 * Download successful
+	 * Download finished
 	 */
 	DOWNLOAD_SUCCESSFUL: () => LocalizedString
 	/**
@@ -1260,6 +1316,22 @@ export type TranslationFunctions = {
 	 */
 	DEVICE_DETAILS: () => LocalizedString
 	/**
+	 * {0} ID
+	 */
+	ID_OF: (arg0: unknown) => LocalizedString
+	/**
+	 * Device
+	 */
+	DEVICE: () => LocalizedString
+	/**
+	 * Product
+	 */
+	PRODUCT: () => LocalizedString
+	/**
+	 * Version
+	 */
+	VERSION: () => LocalizedString
+	/**
 	 * Brand
 	 */
 	BRAND: () => LocalizedString
@@ -1268,7 +1340,7 @@ export type TranslationFunctions = {
 	 */
 	ENTITY_NAME: () => LocalizedString
 	/**
-	 * {{Value}}
+	 * {{Value|value}}
 	 */
 	VALUE: (arg0: string | number | boolean) => LocalizedString
 	/**
@@ -1384,9 +1456,9 @@ export type TranslationFunctions = {
 	 */
 	EDIT: () => LocalizedString
 	/**
-	 * Temperature Sensor
+	 * {{|Temperature}} Sensor
 	 */
-	TEMP_SENSOR: () => LocalizedString
+	TEMP_SENSOR: (arg0: string | number | boolean) => LocalizedString
 	/**
 	 * Temperature Sensors
 	 */
@@ -1542,6 +1614,14 @@ export type TranslationFunctions = {
 	 */
 	BOARD_PROFILE: () => LocalizedString
 	/**
+	 * Custom
+	 */
+	CUSTOM: () => LocalizedString
+	/**
+	 * {0} GPIO
+	 */
+	GPIO_OF: (arg0: unknown) => LocalizedString
+	/**
 	 * Button
 	 */
 	BUTTON: () => LocalizedString
@@ -1554,13 +1634,21 @@ export type TranslationFunctions = {
 	 */
 	PHY_TYPE: () => LocalizedString
 	/**
-	 * disabled
+	 * {{disabled}}
 	 */
-	DISABLED: () => LocalizedString
+	DISABLED: (arg0: string | number | boolean) => LocalizedString
 	/**
 	 * Tx Mode
 	 */
 	TX_MODE: () => LocalizedString
+	/**
+	 * Hardware
+	 */
+	HARDWARE: () => LocalizedString
+	/**
+	 * {{BUS|EMS BUS}}
+	 */
+	EMS_BUS: (arg0: string | number | boolean) => LocalizedString
 	/**
 	 * General Options
 	 */
@@ -1730,9 +1818,9 @@ export type TranslationFunctions = {
 	 */
 	OPTIONS: () => LocalizedString
 	/**
-	 * Name
+	 * {{Name}}
 	 */
-	NAME: () => LocalizedString
+	NAME: (arg0: string | number | boolean) => LocalizedString
 	/**
 	 * Are you sure you want remove all customizations including the custom settings of the Temperature and Analog sensors?
 	 */
@@ -2002,6 +2090,18 @@ export type TranslationFunctions = {
 	 */
 	ENABLE_MQTT: () => LocalizedString
 	/**
+	 * Broker
+	 */
+	BROKER: () => LocalizedString
+	/**
+	 * Client
+	 */
+	CLIENT: () => LocalizedString
+	/**
+	 * Base
+	 */
+	BASE_TOPIC: () => LocalizedString
+	/**
 	 * Optional
 	 */
 	OPTIONAL: () => LocalizedString
@@ -2010,9 +2110,9 @@ export type TranslationFunctions = {
 	 */
 	FORMATTING: () => LocalizedString
 	/**
-	 * Format
+	 * Topic/Payload Format
 	 */
-	FORMAT: () => LocalizedString
+	MQTT_FORMAT: () => LocalizedString
 	/**
 	 * Nested in a single topic
 	 */
@@ -2066,9 +2166,9 @@ export type TranslationFunctions = {
 	 */
 	MQTT_QUEUE: () => LocalizedString
 	/**
-	 * Default
+	 * {{Default}}
 	 */
-	DEFAULT: () => LocalizedString
+	DEFAULT: (arg0: string | number | boolean) => LocalizedString
 	/**
 	 * Set Clean Session
 	 */
@@ -2218,7 +2318,7 @@ export type TranslationFunctions = {
 	 */
 	NETWORK_FIXED_IP: () => LocalizedString
 	/**
-	 * Getaway
+	 * Gateway
 	 */
 	NETWORK_GATEWAY: () => LocalizedString
 	/**
@@ -2246,13 +2346,21 @@ export type TranslationFunctions = {
 	 */
 	NEW: () => LocalizedString
 	/**
-	 * Rename
+	 * New {0} name
 	 */
-	RENAME: () => LocalizedString
+	NEW_NAME_OF: (arg0: unknown) => LocalizedString
 	/**
-	 * Entity
+	 * entity
 	 */
 	ENTITY: () => LocalizedString
+	/**
+	 * min
+	 */
+	MIN: () => LocalizedString
+	/**
+	 * max
+	 */
+	MAX: () => LocalizedString
 }
 
 export type Formatters = {}
