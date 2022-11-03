@@ -196,7 +196,7 @@ const WiFiSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="local_ip"
-              label="Local IP"
+              label={LL.AP_LOCAL_IP()}
               fullWidth
               variant="outlined"
               value={data.local_ip}
@@ -206,7 +206,7 @@ const WiFiSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="gateway_ip"
-              label="Gateway"
+              label={LL.NETWORK_GATEWAY()}
               fullWidth
               variant="outlined"
               value={data.gateway_ip}
@@ -216,7 +216,7 @@ const WiFiSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="subnet_mask"
-              label="Subnet"
+              label={LL.NETWORK_SUBNET()}
               fullWidth
               variant="outlined"
               value={data.subnet_mask}
@@ -226,7 +226,7 @@ const WiFiSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="dns_ip_1"
-              label="DNS IP #1"
+              label="DNS #1"
               fullWidth
               variant="outlined"
               value={data.dns_ip_1}
@@ -236,7 +236,7 @@ const WiFiSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="dns_ip_2"
-              label="DNS IP #2"
+              label="DNS #2"
               fullWidth
               variant="outlined"
               value={data.dns_ip_2}

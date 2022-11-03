@@ -103,7 +103,7 @@ const MqttStatusForm: FC = () => {
             <ListItemAvatar>
               <Avatar>#</Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Client ID" secondary={data.client_id} />
+            <ListItemText primary={LL.ID_OF(LL.CLIENT())} secondary={data.client_id} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>

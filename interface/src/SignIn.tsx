@@ -41,7 +41,7 @@ const SignIn: FC = () => {
   const validateAndSignIn = async () => {
     setProcessing(true);
     SIGN_IN_REQUEST_VALIDATOR.messages({
-      required: '%s ' + LL.IS_REQUIRED()
+      required: LL.IS_REQUIRED('%s')
     });
     try {
       await validate(SIGN_IN_REQUEST_VALIDATOR, signInRequest);
@@ -139,7 +139,7 @@ const SignIn: FC = () => {
           fieldErrors={fieldErrors}
           disabled={processing}
           name="username"
-          label={LL.USERNAME()}
+          label={LL.USERNAME(0)}
           value={signInRequest.username}
           onChange={updateLoginRequestValue}
           margin="normal"

@@ -133,7 +133,7 @@ const SettingsApplication: FC = () => {
           {boardProfileSelectItems()}
           <Divider />
           <MenuItem key={'CUSTOM'} value={'CUSTOM'}>
-            Custom&hellip;
+            {LL.CUSTOM()}&hellip;
           </MenuItem>
         </ValidatedTextField>
         {data.board_profile === 'CUSTOM' && (
@@ -143,7 +143,7 @@ const SettingsApplication: FC = () => {
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="rx_gpio"
-                  label="Rx GPIO"
+                  label={LL.GPIO_OF('Rx')}
                   fullWidth
                   variant="outlined"
                   value={numberValue(data.rx_gpio)}
@@ -157,7 +157,7 @@ const SettingsApplication: FC = () => {
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="tx_gpio"
-                  label="Tx GPIO"
+                  label={LL.GPIO_OF('Tx')}
                   fullWidth
                   variant="outlined"
                   value={numberValue(data.tx_gpio)}
@@ -171,7 +171,7 @@ const SettingsApplication: FC = () => {
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="pbutton_gpio"
-                  label={LL.BUTTON() + ' GPIO'}
+                  label={LL.GPIO_OF(LL.BUTTON())}
                   fullWidth
                   variant="outlined"
                   value={numberValue(data.pbutton_gpio)}
@@ -185,7 +185,7 @@ const SettingsApplication: FC = () => {
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="dallas_gpio"
-                  label={LL.TEMPERATURE() + ' GPIO (0=' + LL.DISABLED() + ')'}
+                  label={LL.GPIO_OF(LL.TEMPERATURE()) + ' (0=' + LL.DISABLED(1) + ')'}
                   fullWidth
                   variant="outlined"
                   value={numberValue(data.dallas_gpio)}
@@ -199,7 +199,7 @@ const SettingsApplication: FC = () => {
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="led_gpio"
-                  label={'LED GPIO (0=' + LL.DISABLED() + ')'}
+                  label={LL.GPIO_OF('LED') + ' (0=' + LL.DISABLED(1) + ')'}
                   fullWidth
                   variant="outlined"
                   value={numberValue(data.led_gpio)}
@@ -222,7 +222,7 @@ const SettingsApplication: FC = () => {
                 margin="normal"
                 select
               >
-                <MenuItem value={0}>{LL.DISABLED()}</MenuItem>
+                <MenuItem value={0}>{LL.DISABLED(1)}</MenuItem>
                 <MenuItem value={1}>LAN8720</MenuItem>
                 <MenuItem value={2}>TLK110</MenuItem>
               </ValidatedTextField>
@@ -232,7 +232,7 @@ const SettingsApplication: FC = () => {
                 <Grid item>
                   <ValidatedTextField
                     name="eth_power"
-                    label={'Eth Power GPIO (-1=' + LL.DISABLED() + ')'}
+                    label={LL.GPIO_OF('PHY Power') + ' (-1=' + LL.DISABLED(1) + ')'}
                     fullWidth
                     variant="outlined"
                     value={numberValue(data.eth_power)}
@@ -245,7 +245,7 @@ const SettingsApplication: FC = () => {
                 <Grid item>
                   <ValidatedTextField
                     name="eth_phy_addr"
-                    label="Eth I²C Address"
+                    label={LL.ADDRESS_OF('PHY I²C')}
                     fullWidth
                     variant="outlined"
                     value={numberValue(data.eth_phy_addr)}
@@ -258,7 +258,7 @@ const SettingsApplication: FC = () => {
                 <Grid item>
                   <ValidatedTextField
                     name="eth_clock_mode"
-                    label="Eth Clk Mode"
+                    label="PHY Clk"
                     disabled={saving}
                     value={data.eth_clock_mode}
                     fullWidth
@@ -278,7 +278,7 @@ const SettingsApplication: FC = () => {
           </>
         )}
         <Typography variant="h6" color="primary">
-          {LL.SETTINGS_OF('EMS BUS')}
+          {LL.SETTINGS_OF(LL.EMS_BUS(0))}
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <Grid item xs={6}>
@@ -296,13 +296,13 @@ const SettingsApplication: FC = () => {
               <MenuItem value={1}>EMS</MenuItem>
               <MenuItem value={2}>EMS+</MenuItem>
               <MenuItem value={3}>HT3</MenuItem>
-              <MenuItem value={4}>Hardware</MenuItem>
+              <MenuItem value={4}>{LL.HARDWARE()}</MenuItem>
             </ValidatedTextField>
           </Grid>
           <Grid item xs={6}>
             <ValidatedTextField
               name="ems_bus_id"
-              label="Bus ID"
+              label={LL.ID_OF(LL.EMS_BUS(1))}
               disabled={saving}
               value={data.ems_bus_id}
               fullWidth

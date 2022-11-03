@@ -60,7 +60,7 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="username"
-              label={LL.USERNAME()}
+              label={LL.USERNAME(1)}
               fullWidth
               variant="outlined"
               value={user.username}
