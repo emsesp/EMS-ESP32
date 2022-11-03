@@ -545,45 +545,42 @@ const SettingsCustomization: FC = () => {
     </Dialog>
   );
 
-  const content = () => {
-    return (
-      <>
-        <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-          {LL.DEVICE_ENTITIES()}
-        </Typography>
-        {renderDeviceList()}
-        {!deviceEntity && renderDeviceData()}
-        <Box display="flex" flexWrap="wrap">
-          <Box flexGrow={1}>
-            <ButtonRow>
-              <Button startIcon={<SaveIcon />} variant="outlined" color="primary" onClick={() => saveCustomization()}>
-                {LL.SAVE()}
-              </Button>
-            </ButtonRow>
-          </Box>
+  const renderContent = () => (
+    <>
+      <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+        {LL.DEVICE_ENTITIES()}
+      </Typography>
+      {renderDeviceList()}
+      {renderDeviceData()}
+      <Box display="flex" flexWrap="wrap">
+        <Box flexGrow={1}>
           <ButtonRow>
-            <Button
-              startIcon={<SettingsBackupRestoreIcon />}
-              variant="outlined"
-              color="error"
-              onClick={() => setConfirmReset(true)}
-            >
-              {LL.RESET(0)}
+            <Button startIcon={<SaveIcon />} variant="outlined" color="primary" onClick={() => saveCustomization()}>
+              {LL.SAVE()}
             </Button>
           </ButtonRow>
         </Box>
-        {renderResetDialog()}
-      </>
-    );
-  };
+        <ButtonRow>
+          <Button
+            startIcon={<SettingsBackupRestoreIcon />}
+            variant="outlined"
+            color="error"
+            onClick={() => setConfirmReset(true)}
+          >
+            {LL.RESET(0)}
+          </Button>
+        </ButtonRow>
+      </Box>
+      {renderResetDialog()}
+    </>
+  );
 
-  const renderEditEntity = () => {
+  const renderEditDialog = () => {
     if (deviceEntity) {
       const de = deviceEntity;
       return (
         <Dialog open={!!deviceEntity} onClose={() => setDeviceEntity(undefined)}>
           <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY() + ' "' + de.id + '"'}</DialogTitle>
-
           <DialogContent dividers>
             <ToggleButtonGroup
               size="small"
@@ -692,8 +689,8 @@ const SettingsCustomization: FC = () => {
 
   return (
     <SectionContent title={LL.USER_CUSTOMIZATION()} titleGutter>
-      {renderEditEntity()}
-      {content()}
+      {renderContent()}
+      {renderEditDialog()}
     </SectionContent>
   );
 };
