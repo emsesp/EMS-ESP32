@@ -30,6 +30,7 @@ jobs:
         run: |
           cd interface
           npm ci
+          npx typesafe-i18n --no-watch
           npm run build
 
       - name: Build firmware
