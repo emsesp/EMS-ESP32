@@ -25,6 +25,7 @@ import * as EMSESP from './api';
 import { Settings, BOARD_PROFILES } from './types';
 
 import { useI18nContext } from '../i18n/i18n-react';
+import RestartMonitor from '../framework/system/RestartMonitor';
 
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
@@ -39,6 +40,7 @@ const SettingsApplication: FC = () => {
     read: EMSESP.readSettings,
     update: EMSESP.writeSettings
   });
+  const [restarting, setRestarting] = useState<boolean>();
 
   const { LL } = useI18nContext();
 
@@ -106,7 +108,7 @@ const SettingsApplication: FC = () => {
       validateAndSubmit();
       try {
         await EMSESP.restart();
-        enqueueSnackbar(LL.APPLICATION_RESTARTING(), { variant: 'info' });
+        setRestarting(true);
       } catch (error) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       }
@@ -617,7 +619,7 @@ const SettingsApplication: FC = () => {
 
   return (
     <SectionContent title={LL.APPLICATION_SETTINGS()} titleGutter>
-      {content()}
+      {restarting ? <RestartMonitor /> : content()}
     </SectionContent>
   );
 };
