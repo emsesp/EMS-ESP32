@@ -25,7 +25,7 @@
 
 // Boilers - 0x08
 { 64, DeviceType::BOILER, "BK13/BK15/Smartline/GB1x2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{ 72, DeviceType::BOILER, "GB125/MC10", DeviceFlags::EMS_DEVICE_FLAG_EMS},
+{ 72, DeviceType::BOILER, "GB125/GB135/MC10", DeviceFlags::EMS_DEVICE_FLAG_EMS},
 { 81, DeviceType::BOILER, "Cascade CM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 84, DeviceType::BOILER, "Logamax Plus GB022", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 95, DeviceType::BOILER, "Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3", DeviceFlags::EMS_DEVICE_FLAG_HT3},

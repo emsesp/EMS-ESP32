@@ -274,6 +274,10 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         DeviceValueTAG::TAG_DEVICE_DATA, &burnMaxPower_, DeviceValueType::UINT, FL_(burnMaxPower), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_max_power), 0, 254);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &boilHystOn_, DeviceValueType::INT, FL_(boilHystOn), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst_on));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &boilHystOff_, DeviceValueType::INT, FL_(boilHystOff), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst_off));
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &boil2HystOn_, DeviceValueType::INT, FL_(boil2HystOn), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst2_on), -20, 0);
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &boil2HystOff_, DeviceValueType::INT, FL_(boil2HystOff), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst2_off), 0, 20);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setFlowTemp_, DeviceValueType::UINT, FL_(setFlowTemp), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setBurnPow_, DeviceValueType::UINT, FL_(setBurnPow), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &curBurnPow_, DeviceValueType::UINT, FL_(curBurnPow), DeviceValueUOM::PERCENT);
@@ -829,6 +833,8 @@ void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, pumpDelay_, 8);
     has_update(telegram, pumpModMax_, 9);
     has_update(telegram, pumpModMin_, 10);
+    has_update(telegram, boil2HystOff_, 12);
+    has_update(telegram, boil2HystOn_, 13);
 }
 
 /*
@@ -1981,7 +1987,7 @@ bool Boiler::set_hyst_on(const char * value, const int8_t id) {
     if (is_fetch(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 9, v, EMS_TYPE_UBAParametersPlus);
     } else {
-        write_command(EMS_TYPE_UBAParameters, 5, v, EMS_TYPE_UBAParameters);
+        write_command(EMS_TYPE_UBAParameters, id == 2 ? 13 : 5, v, EMS_TYPE_UBAParameters);
     }
 
     return true;
@@ -1997,7 +2003,7 @@ bool Boiler::set_hyst_off(const char * value, const int8_t id) {
     if (is_fetch(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 8, v, EMS_TYPE_UBAParametersPlus);
     } else {
-        write_command(EMS_TYPE_UBAParameters, 4, v, EMS_TYPE_UBAParameters);
+        write_command(EMS_TYPE_UBAParameters, id == 2 ? 12 : 4, v, EMS_TYPE_UBAParameters);
     }
 
     return true;
