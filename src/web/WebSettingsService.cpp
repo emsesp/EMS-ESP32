@@ -90,7 +90,14 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 #endif
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
-        settings.board_profile = "CUSTOM";
+        // unknown, check for ethernet, use default E32/S32
+        if (ETH.begin(1, 16, 23, 18, ETH_PHY_LAN8720)) {
+            data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0}; // BBQKees Gateway E32
+            settings.board_profile = "E32";
+        } else {
+            data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // BBQKees Gateway S32
+            settings.board_profile = "S32";
+        }
         EMSESP::logger().info("No board profile found. Re-setting to %s", settings.board_profile.c_str());
     } else {
         EMSESP::logger().info("Loading board profile %s", settings.board_profile.c_str());

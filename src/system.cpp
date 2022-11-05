@@ -1306,18 +1306,7 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
                 (int8_t)EMSESP::system_.eth_phy_addr_,
                 (int8_t)EMSESP::system_.eth_clock_mode_};
     } else {
-        // unknown, use defaults and return false
-        data = {
-            EMSESP_DEFAULT_LED_GPIO,
-            EMSESP_DEFAULT_DALLAS_GPIO,
-            EMSESP_DEFAULT_RX_GPIO,
-            EMSESP_DEFAULT_TX_GPIO,
-            EMSESP_DEFAULT_PBUTTON_GPIO,
-            EMSESP_DEFAULT_PHY_TYPE,
-            -1, // power
-            0,  // phy_addr,
-            0   // clock_mode
-        };
+        // unknown, return false
         return false;
     }
 
