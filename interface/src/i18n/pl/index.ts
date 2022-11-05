@@ -1,4 +1,6 @@
 import type { Translation } from '../i18n-types';
+/* prettier-ignore */
+/* eslint-disable */
 
 const pl: Translation = {
   LANGUAGE: 'Język',
@@ -64,11 +66,11 @@ const pl: Translation = {
   STARTVALUE: 'Wartość początkowa',
   WARN_GPIO: 'Uwaga! Zachowaj ostrożność przypisując GPIO do urządzenia!',
   EDIT: 'Edycja',
-  TEMP_SENSOR: '{{czujnika temperatury|czujnika|}}',
+  SENSOR: 'czujnika',
+  TEMP_SENSOR: 'czujnika temperatury',
   TEMP_SENSORS: 'Czujniki temperatury 1-Wire®',
   WRITE_COMMAND: 'Wyślij komendę {cmd}',
-  EMS_BUS_WARNING:
-    'Brak połączenia z magistralą EMS. Jeśli ten błąd występuje dłużej niż kilka sekund, sprawdź ustawienia oraz profil płytki interfejsu.',
+  EMS_BUS_WARNING: 'Brak połączenia z magistralą EMS. Jeśli ten błąd występuje dłużej niż kilka sekund, sprawdź ustawienia oraz profil płytki interfejsu.',
   EMS_BUS_SCANNING: 'Trwa skanowanie urządzeń na magistrali EMS...',
   CONNECTED: '{{połączono|połączenie|}}',
   TX_ISSUES: 'Problem z zapisem na magistralę EMS. Spróbuj wybrać inny "Tryb transmisji (Tx)".',
@@ -158,8 +160,7 @@ const pl: Translation = {
   SET_ALL: 'Ustaw wszystko jako',
   OPTIONS: 'Opcje',
   NAME: '{{Nazwa|nazwa|}}',
-  CUSTOMIZATIONS_RESET:
-    'Czy jesteś pewien, że chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury 1-Wire® i urządzeń podłączonych do EMS-ESP?',
+  CUSTOMIZATIONS_RESET:  'Czy jesteś pewien, że chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury 1-Wire® i urządzeń podłączonych do EMS-ESP?',
   DEVICE_ENTITIES: 'Encje urządzenia',
   USER_CUSTOMIZATION: 'Personalizacje użytkownika',
   SUPPORT_INFORMATION: 'Informacje dotyczące wsparcia',
@@ -168,8 +169,7 @@ const pl: Translation = {
   HELP_INFORMATION_2: 'Aby dołączyć do naszego serwera Discord i komunikować się na żywo ze społecznością',
   HELP_INFORMATION_3: 'Aby zaproponować nową funkcjonalność lub zgłosić problem',
   HELP_INFORMATION_4: 'Zgłaszając problem, nie zapomnij dołączyć informacji o swoim systemie!',
-  HELP_INFORMATION_5:
-    'EMS-ESP jest darmowym projektem typu open-source. Aby go wesprzeć, rozważ przyznanie nam gwiazdki na Github!',
+  HELP_INFORMATION_5: 'EMS-ESP jest darmowym projektem typu open-source. Aby go wesprzeć, rozważ przyznanie nam gwiazdki na Github!',
   SUPPORT_INFO: 'Pobierz informacje',
   UPLOAD_OF: 'Wysyłanie {0}',
   UPLOAD: 'Wysyłanie',
@@ -186,8 +186,7 @@ const pl: Translation = {
   CLOSE: 'Zamknij',
   USE: 'Aby zaktualizować firmware skorzystaj z funkcji',
   FACTORY_RESET: 'Ustawienia fabryczne',
-  SYSTEM_FACTORY_TEXT:
-    'Interfejs EMS-ESP został przywrócony do ustawień fabrycznych i zostanie teraz ponownie uruchomiony.',
+  SYSTEM_FACTORY_TEXT: 'Interfejs EMS-ESP został przywrócony do ustawień fabrycznych i zostanie teraz ponownie uruchomiony.',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Czy jesteś pewien, że chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP? ',
   VERSION_CHECK: 'Sprawd{{ź|zanie|}} wersj{{ę|i|}}',
   THE_LATEST: 'Najnowsza',
@@ -208,8 +207,7 @@ const pl: Translation = {
   COMPACT: 'Kompaktowy',
   ENABLE_OTA: 'Aktywuj aktualizacje OTA',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Pobierz personalizacje',
-  DOWNLOAD_SETTINGS_TEXT:
-    'Pobierz ustawienia aplikacji. Uważaj jeśli udostępniasz plik z ustawieniami, ponieważ zawiera on hasła oraz inne wrażliwe informacje!',
+  DOWNLOAD_SETTINGS_TEXT: 'Pobierz ustawienia aplikacji. Uważaj jeśli udostępniasz plik z ustawieniami, ponieważ zawiera on hasła oraz inne wrażliwe informacje!',
   UPLOAD_TEXT: 'Wyślij firmware (.bin), ustawienia lub personalizacje (.json). Opcjonalnie, wyślij wcześniej plik walidacji (.md5).',
   UPLOADING: 'Wysłano',
   UPLOAD_DROP_TEXT: 'Przeciągnij tutaj plik lub kliknij',
@@ -220,13 +218,11 @@ const pl: Translation = {
   USER_WARNING: 'Przynajmniej jeden użytkownik musi mieć uprawnienia administratora!',
   ADD: 'Doda{{j|wanie|}}',
   ACCESS_TOKEN_FOR: 'Token dostępu dla użytkownika',
-  ACCESS_TOKEN_TEXT:
-    'Token jest używany w wywołaniach REST API wymagających autoryzacji. Można go przekazywać bezpośrednio lub przez URL.',
+  ACCESS_TOKEN_TEXT: 'Token jest używany w wywołaniach REST API wymagających autoryzacji. Można go przekazywać bezpośrednio lub przez URL.',
   GENERATING_TOKEN: 'Generowanie tokenu',
   USER: '{{Użytkownik|użytkownika|}}',
   MODIFY: 'Edycja',
-  SU_TEXT:
-    'Hasło "su" (super-użytkownika) służy do podpisywania tokenów autoryzujących oraz włączania uprawnień administratora w konsoli.',
+  SU_TEXT: 'Hasło "su" (super-użytkownika) służy do podpisywania tokenów autoryzujących oraz włączania uprawnień administratora w konsoli.',
   NOT_ENABLED: 'nieaktywny',
   ERRORS_OF: 'Błędy {0}',
   DISCONNECT_REASON: 'Przyczyna braku połączenia',

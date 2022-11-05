@@ -947,7 +947,7 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
         obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble
         obj["w"] = dv.has_cmd;    // if writable
 
-        if (dv.has_cmd &&  (obj["v"].is<float>() || obj["v"].is<int>())) {
+        if (dv.has_cmd && (obj["v"].is<float>() || obj["v"].is<int>())) {
             // set the min and max values if there are any and if entity has a value
             int16_t  dv_set_min;
             uint16_t dv_set_max;

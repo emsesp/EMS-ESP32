@@ -1,4 +1,5 @@
 import type { Translation } from '../i18n-types';
+// prettier-ignore
 
 const nl: Translation = {
   LANGUAGE: 'Taal',
@@ -64,11 +65,11 @@ const nl: Translation = {
   STARTVALUE: 'Startwaarde',
   WARN_GPIO: 'Waarschuwing: let op met het koppelen van de juiste GPIO pin!',
   EDIT: 'Wijzigen',
-  TEMP_SENSOR: '{{Sensor|Temperatuur sensor}}',
+  SENSOR: 'Sensor',
+  TEMP_SENSOR: 'Temperatuur sensor',
   TEMP_SENSORS: 'Temperatuur Sensoren',
   WRITE_COMMAND: 'Schrijf commando {cmd}',
-  EMS_BUS_WARNING:
-    'EMS bus niet gevonden. Als deze waarschuwing blijft staan na een paar seconden dan loop de instellingen na en in het bijzonder het apparaat type profiel na.',
+  EMS_BUS_WARNING: 'EMS bus niet gevonden. Als deze waarschuwing blijft staan na een paar seconden dan loop de instellingen na en in het bijzonder het apparaat type profiel na.',
   EMS_BUS_SCANNING: 'Scannen naar EMS apparaten...',
   CONNECTED: 'Verbonden',
   TX_ISSUES: 'Tx bus probleem. Probeer een andere Tx verzendmodus',
@@ -104,8 +105,7 @@ const nl: Translation = {
   CUSTOMIZATION: 'Custom aanpassingen',
   APPLICATION_RESTARTING: 'EMS-ESP herstarten',
   INTERFACE_BOARD_PROFILE: 'Interface Apparaatprofiel',
-  BOARD_PROFILE_TEXT:
-    'Selecteer een vooraf ingesteld apparaat profiel uit de lijst of kies Eigen om zelf uw hardware te configureren',
+  BOARD_PROFILE_TEXT: 'Selecteer een vooraf ingesteld apparaat profiel uit de lijst of kies Eigen om zelf uw hardware te configureren',
   BOARD_PROFILE: 'Apparaatprofiel',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -159,8 +159,7 @@ const nl: Translation = {
   SET_ALL: 'Alles aanzetten',
   OPTIONS: 'Opties',
   NAME: 'Naam',
-  CUSTOMIZATIONS_RESET:
-    'Weet je zeker dat je alle custom aanpassingen wilt verwijderen inclusief de custom instellingen voor analoge temperatuursensoren?',
+  CUSTOMIZATIONS_RESET: 'Weet je zeker dat je alle custom aanpassingen wilt verwijderen inclusief de custom instellingen voor analoge temperatuursensoren?',
   DEVICE_ENTITIES: 'Apparaat Entiteiten',
   USER_CUSTOMIZATION: 'Custom Instellingen',
   SUPPORT_INFORMATION: 'Support Informatie',
@@ -207,8 +206,7 @@ const nl: Translation = {
   COMPACT: 'Compact',
   ENABLE_OTA: 'Acitveer OTA Updates',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Download alle custom instellingen',
-  DOWNLOAD_SETTINGS_TEXT:
-    'Download de applicatie settings. Wees voorzichting met het delen van dit bestand want het bevat o.a. de wachtwoorden in plain text',
+  DOWNLOAD_SETTINGS_TEXT: 'Download de applicatie settings. Wees voorzichting met het delen van dit bestand want het bevat o.a. de wachtwoorden in plain text',
   UPLOAD_TEXT: 'Upload een nieuwe firmware (.bin) file, instellingen of custom instellingen (.json) bestand hieronder',
   UPLOADING: 'Uploading',
   UPLOAD_DROP_TEXT: 'Sleep bestand hierheen of klik hier',
@@ -219,13 +217,11 @@ const nl: Translation = {
   USER_WARNING: 'U dient tenminste 1 admin gebruiker te configureren',
   ADD: 'Toevoegen',
   ACCESS_TOKEN_FOR: 'Access Token voor',
-  ACCESS_TOKEN_TEXT:
-    'Het token hieronder wordt gebruikt voor de REST API calls die authorisatie nodig hebben. Het kan zowel als Bearer token in de Authorization header of in acccess_token URL query parameter gebruikt worden',
+  ACCESS_TOKEN_TEXT: 'Het token hieronder wordt gebruikt voor de REST API calls die authorisatie nodig hebben. Het kan zowel als Bearer token in de Authorization header of in acccess_token URL query parameter gebruikt worden',
   GENERATING_TOKEN: 'Token aan het genereren',
   USER: 'Gebruiker',
   MODIFY: 'Aanpassen',
-  SU_TEXT:
-    'Het su (super user) wachtwoord wordt gebruikt om authorisatie tokens te signeren en ook om admin privileges te activeren in de console.',
+  SU_TEXT: 'Het su (super user) wachtwoord wordt gebruikt om authorisatie tokens te signeren en ook om admin privileges te activeren in de console.',
   NOT_ENABLED: 'Niet geactiveerd',
   ERRORS_OF: '{0} Foutmeldingen',
   DISCONNECT_REASON: 'Verbinding verbroken vanwege',

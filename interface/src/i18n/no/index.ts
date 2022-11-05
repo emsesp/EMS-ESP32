@@ -1,4 +1,6 @@
 import type { Translation } from '../i18n-types';
+/* prettier-ignore */
+/* eslint-disable */
 
 const no: Translation = {
   LANGUAGE: 'Språk',
@@ -64,11 +66,11 @@ const no: Translation = {
   STARTVALUE: 'Startverdi',
   WARN_GPIO: 'Advarsel: vær forsiktig ved aktivering av GPIO!',
   EDIT: 'Endre',
-  TEMP_SENSOR: '{{Sensor|Temperatursensor}}',
+  SENSOR: 'Sensor',
+  TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperaturesensorer',
   WRITE_COMMAND: 'Skriv kommando {cmd}',
-  EMS_BUS_WARNING:
-    'EMS bussen koblet ned. Hvis denne advarselen fortsetter etter noen f¨sekunder sjekk instillinger og  prosessorkort',
+  EMS_BUS_WARNING: 'EMS bussen koblet ned. Hvis denne advarselen fortsetter etter noen f¨sekunder sjekk instillinger og  prosessorkort',
   EMS_BUS_SCANNING: 'Søker etter EMS enheter...',
   CONNECTED: 'Tilkoblet',
   TX_ISSUES: 'Tx problemer - prøv en annen Tx Modus',
@@ -104,8 +106,7 @@ const no: Translation = {
   CUSTOMIZATION: 'Tilpasninger',
   APPLICATION_RESTARTING: 'EMS-ESP restarter',
   INTERFACE_BOARD_PROFILE: 'Interface Prosessor Profil',
-  BOARD_PROFILE_TEXT:
-    'Velg en pre-konfigurert prosessor profil fra listen under eller velg  Tilpasset for å konfigurere dine egne innstillinger',
+  BOARD_PROFILE_TEXT: 'Velg en pre-konfigurert prosessor profil fra listen under eller velg  Tilpasset for å konfigurere dine egne innstillinger',
   BOARD_PROFILE: 'Prosessor Profil',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -159,8 +160,7 @@ const no: Translation = {
   SET_ALL: 'sett alle',
   OPTIONS: 'Alternativ',
   NAME: 'Navn',
-  CUSTOMIZATIONS_RESET:
-    'Er du sikker på att du vil fjerne tilpassninger inkludert innstillinger for Temperatur og Analoge sensorer?',
+  CUSTOMIZATIONS_RESET: 'Er du sikker på att du vil fjerne tilpassninger inkludert innstillinger for Temperatur og Analoge sensorer?',
   DEVICE_ENTITIES: 'Enhets objekter',
   USER_CUSTOMIZATION: 'Brukertilpasninger',
   SUPPORT_INFORMATION: 'Supportinformasjon',
@@ -168,8 +168,7 @@ const no: Translation = {
   HELP_INFORMATION_1: 'Besøk wiki for instruksjoner for å konfigurere EMS-ESP',
   HELP_INFORMATION_2: 'For community-support besøk vår Discord-server',
   HELP_INFORMATION_3: 'For å be om en ny funksjon eller melde feil',
-  HELP_INFORMATION_4:
-    'husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
+  HELP_INFORMATION_4: 'husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
   HELP_INFORMATION_5: 'EMS-ESP er gratis og åpen kildekode. Bidra til utviklingen ved å gi oss en stjerne på GitHub!',
   SUPPORT_INFO: 'Supportinfo',
   UPLOAD_OF: '{0} Opplasning',
@@ -208,8 +207,7 @@ const no: Translation = {
   COMPACT: 'Komprimere',
   ENABLE_OTA: 'Aktiviser OTA oppdateringer',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Last ned objektstilpasninger',
-  DOWNLOAD_SETTINGS_TEXT:
-    'Last ned applikasjonskonfigurasjon. Vær varsom med å dele fila da den inneholder passord og annen sensitiv system informasjon',
+  DOWNLOAD_SETTINGS_TEXT: 'Last ned applikasjonskonfigurasjon. Vær varsom med å dele fila da den inneholder passord og annen sensitiv system informasjon',
   UPLOAD_TEXT: 'Last opp en ny firmware (.bin) fil, innstillinger eller tilpassninger (.json) fil nedenfor',
   UPLOADING: 'Opplasting',
   UPLOAD_DROP_TEXT: 'Slipp fil eller klikk her',
@@ -220,13 +218,11 @@ const no: Translation = {
   USER_WARNING: 'Du må ha minst en admin bruker konfigurert',
   ADD: 'Legg til',
   ACCESS_TOKEN_FOR: 'Aksess Token for',
-  ACCESS_TOKEN_TEXT:
-    'Token nedenfor benyttes med REST API-kall som krever autorisering. Den kan sendes med enten som en Bearer token i Authorization-headern eller i access_token URL query-parameter.',
+  ACCESS_TOKEN_TEXT: 'Token nedenfor benyttes med REST API-kall som krever autorisering. Den kan sendes med enten som en Bearer token i Authorization-headern eller i access_token URL query-parameter.',
   GENERATING_TOKEN: 'Generer token',
   USER: 'Bruker',
   MODIFY: 'Endre',
-  SU_TEXT:
-    'su brukeren (super user) passord benyttes for å signere autentiserings token samt å tillate admin privileger i konsoll modus.',
+  SU_TEXT: 'su brukeren (super user) passord benyttes for å signere autentiserings token samt å tillate admin privileger i konsoll modus.',
   NOT_ENABLED: 'Ikke aktiv',
   ERRORS_OF: '{0} Feil',
   DISCONNECT_REASON: 'Årsak til nedkobling',
