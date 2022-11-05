@@ -1,4 +1,6 @@
 import type { Translation } from '../i18n-types';
+/* prettier-ignore */
+/* eslint-disable */
 
 const se: Translation = {
   LANGUAGE: 'Språk',
@@ -64,11 +66,11 @@ const se: Translation = {
   STARTVALUE: 'Startvärde',
   WARN_GPIO: 'Varning: Var försiktig vid aktivering av GPIO!',
   EDIT: 'Ändra',
-  TEMP_SENSOR: '{{Sensor|Temperatursensor}}',
+  SENSOR: 'Sensor',
+  TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperatursensorer',
   WRITE_COMMAND: 'Skrivkommando {cmd}',
-  EMS_BUS_WARNING:
-    'EMS-buss nedkopplad. Om denna varning kvarstår efter några sekunder, kontrollera inställningar och enhets-profil.',
+  EMS_BUS_WARNING: 'EMS-buss nedkopplad. Om denna varning kvarstår efter några sekunder, kontrollera inställningar och enhets-profil.',
   EMS_BUS_SCANNING: 'Söker efter EMS-enheter...',
   CONNECTED: 'Ansluten',
   TX_ISSUES: 'Sändfel - Prova ett annat TX-läge',
@@ -104,8 +106,7 @@ const se: Translation = {
   CUSTOMIZATION: 'Anpassa',
   APPLICATION_RESTARTING: 'EMS-ESP startar om',
   INTERFACE_BOARD_PROFILE: 'Interface Hårdvaruprofil',
-  BOARD_PROFILE_TEXT:
-    'Välj en förkonfigurerad hårdvaruprofil från listan nedan eller välj Anpassad för att konfigurera dina egna hårdvaruinställningar',
+  BOARD_PROFILE_TEXT: 'Välj en förkonfigurerad hårdvaruprofil från listan nedan eller välj Anpassad för att konfigurera dina egna hårdvaruinställningar',
   BOARD_PROFILE: 'Hårdvaruprofil',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -159,8 +160,7 @@ const se: Translation = {
   SET_ALL: 'ställ in alla',
   OPTIONS: 'Alternativ',
   NAME: 'Namn',
-  CUSTOMIZATIONS_RESET:
-    'Är du säker på att du vill ta bort alla anpassningar inklusive inställningar för Temperatur och Analoga sensorer?',
+  CUSTOMIZATIONS_RESET: 'Är du säker på att du vill ta bort alla anpassningar inklusive inställningar för Temperatur och Analoga sensorer?',
   DEVICE_ENTITIES: 'Enhets-entiteter',
   USER_CUSTOMIZATION: 'Användaranpassningar',
   SUPPORT_INFORMATION: 'Supportinformation',
@@ -169,8 +169,7 @@ const se: Translation = {
   HELP_INFORMATION_2: 'För community-support besök vår Discord-server',
   HELP_INFORMATION_3: 'Önska en ny funktion eller rapportera en bugg',
   HELP_INFORMATION_4: 'Bifoga din systeminformation för snabbare hantering när du rapporterar ett problem',
-  HELP_INFORMATION_5:
-    'EMS-ESP är gratis och är öppen källkod. Bidra till utvecklingen genom att ge oss en stjärna på GitHub!',
+  HELP_INFORMATION_5: 'EMS-ESP är gratis och är öppen källkod. Bidra till utvecklingen genom att ge oss en stjärna på GitHub!',
   SUPPORT_INFO: 'Supportinfo',
   UPLOAD_OF: '{0} Uppladdning',
   UPLOAD: 'Uppladdning',
@@ -208,8 +207,7 @@ const se: Translation = {
   COMPACT: 'Komprimera',
   ENABLE_OTA: 'Aktivera OTA-uppdateringar',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Ladda ner entitetsanpassningar',
-  DOWNLOAD_SETTINGS_TEXT:
-    'Ladda ner applikationsinställningar. Var försiktig om du delar dina iställlningar då de innehåller lösenord och annan känslig systeminformation',
+  DOWNLOAD_SETTINGS_TEXT: 'Ladda ner applikationsinställningar. Var försiktig om du delar dina iställlningar då de innehåller lösenord och annan känslig systeminformation',
   UPLOAD_TEXT: 'Ladda upp ett nytt firmware (.bin), inställningar eller anpassningar (.json) nedan',
   UPLOADING: 'Laddar upp',
   UPLOAD_DROP_TEXT: 'Släpp fil eller klicka här',
@@ -220,13 +218,11 @@ const se: Translation = {
   USER_WARNING: 'Du måste ha minst en admin konfigurerad',
   ADD: 'Lägg till',
   ACCESS_TOKEN_FOR: 'Access Token för',
-  ACCESS_TOKEN_TEXT:
-    'Nedan Token används med REST API-anrop som kräver auktorisering. Den kan skickas med antingen som en Bearer token i Authorization-headern eller i access_token URL query-parametern.',
+  ACCESS_TOKEN_TEXT: 'Nedan Token används med REST API-anrop som kräver auktorisering. Den kan skickas med antingen som en Bearer token i Authorization-headern eller i access_token URL query-parametern.',
   GENERATING_TOKEN: 'Genererar token',
   USER: 'Användare',
   MODIFY: 'Ändra',
-  SU_TEXT:
-    'SU-användarens (super user) lösenord används för att signera autensierings-tokens samt för att aktivera administratörsprivilegier i Console-läge',
+  SU_TEXT: 'SU-användarens (super user) lösenord används för att signera autensierings-tokens samt för att aktivera administratörsprivilegier i Console-läge',
   NOT_ENABLED: 'Ej aktiv',
   ERRORS_OF: '{0} fel',
   DISCONNECT_REASON: 'Anledning till nedkoppling',

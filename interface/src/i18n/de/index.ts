@@ -1,4 +1,6 @@
 import type { Translation } from '../i18n-types';
+/* prettier-ignore */
+/* eslint-disable */
 
 const de: Translation = {
   LANGUAGE: 'Sprache',
@@ -64,11 +66,11 @@ const de: Translation = {
   STARTVALUE: 'Startwert',
   WARN_GPIO: 'Warnung: Vorsicht bei der korrekten Wahl des GPIO!',
   EDIT: 'Editiere',
-  TEMP_SENSOR: '{{Sensor|Temperatursensor}}',
+  SENSOR: 'Sensor',
+  TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperatursensoren',
   WRITE_COMMAND: 'Befehl schreiben {cmd}',
-  EMS_BUS_WARNING:
-    'EMS-Bus getrennt. Wenn diese Warnung nach einigen Sekunden immer noch besteht, überprüfen Sie bitte die Einstellungen und das Board-Profil',
+  EMS_BUS_WARNING: 'EMS-Bus getrennt. Wenn diese Warnung nach einigen Sekunden immer noch besteht, überprüfen Sie bitte die Einstellungen und das Board-Profil',
   EMS_BUS_SCANNING: 'Suche nach EMS Geräten...',
   CONNECTED: 'Verbunden',
   TX_ISSUES: 'Tx-Probleme - versuchen Sie einen anderen Tx-Modus',
@@ -104,8 +106,7 @@ const de: Translation = {
   CUSTOMIZATION: 'Anpassungen',
   APPLICATION_RESTARTING: 'EMS-ESP startet neu',
   INTERFACE_BOARD_PROFILE: 'Interface Platinenprofil',
-  BOARD_PROFILE_TEXT:
-    'Wählen Sie ein vorkonfiguriertes Platinenprofil aus der Liste unten aus oder wählen Sie "Custom", um Ihre eigenen Hardwareeinstellungen zu konfigurieren',
+  BOARD_PROFILE_TEXT: 'Wählen Sie ein vorkonfiguriertes Platinenprofil aus der Liste unten aus oder wählen Sie "Custom", um Ihre eigenen Hardwareeinstellungen zu konfigurieren',
   BOARD_PROFILE: 'Platinenprofil',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -159,8 +160,7 @@ const de: Translation = {
   SET_ALL: 'setzen Sie alle',
   OPTIONS: 'Optionen',
   NAME: 'Name',
-  CUSTOMIZATIONS_RESET:
-    'Möchten Sie wirklich alle Anpassungen entfernen, einschließlich der benutzerdefinierten Einstellungen der Temperatur- und Analogsensoren?',
+  CUSTOMIZATIONS_RESET: 'Möchten Sie wirklich alle Anpassungen entfernen, einschließlich der benutzerdefinierten Einstellungen der Temperatur- und Analogsensoren?',
   DEVICE_ENTITIES: 'Geräteentitäten',
   USER_CUSTOMIZATION: 'Benutzeranpassung',
   SUPPORT_INFORMATION: 'Unterstützende Informationen',
@@ -169,8 +169,7 @@ const de: Translation = {
   HELP_INFORMATION_2: 'Für einen Live-Community-Chat besuchen Sie unseren Discord-Server',
   HELP_INFORMATION_3: 'Um neue Funktionen anzufragen oder Fehler zu melden, eröffnen Sie ein Issue auf Github',
   HELP_INFORMATION_4: 'Bitte laden Sie die System-Details und hängen Sie sie an das Support-Issue an. ',
-  HELP_INFORMATION_5:
-    'EMS-ESP ist ein freies Open-Source Projekt. Bitte unterstützen Sie die zukünftige Entwicklung mit einem "Star" auf Github!',
+  HELP_INFORMATION_5: 'EMS-ESP ist ein freies Open-Source Projekt. Bitte unterstützen Sie die zukünftige Entwicklung mit einem "Star" auf Github!',
   SUPPORT_INFO: 'Support Info',
   UPLOAD_OF: '{0} Hochladen',
   UPLOAD: 'Hochladen',
@@ -208,10 +207,8 @@ const de: Translation = {
   COMPACT: 'Kompakte Darstellung',
   ENABLE_OTA: 'OTA Updates verwenden',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Herunterladen der individuellen Entitätsanpassungen',
-  DOWNLOAD_SETTINGS_TEXT:
-    'Herunterladen der Anwendungseinstellungen. Vorsicht beim Teilen der Einstellungen, da sie Passwörter und andere sensitive Einstellungen enthalten',
-  UPLOAD_TEXT:
-    'Hochladen von neuer Firmware (.bin), Geräte- oder Entitätseinstellungen (.json), zur optionalen Validitätsprüfung zuerst die (.md5) Datei hochladen',
+  DOWNLOAD_SETTINGS_TEXT: 'Herunterladen der Anwendungseinstellungen. Vorsicht beim Teilen der Einstellungen, da sie Passwörter und andere sensitive Einstellungen enthalten',
+  UPLOAD_TEXT: 'Hochladen von neuer Firmware (.bin), Geräte- oder Entitätseinstellungen (.json), zur optionalen Validitätsprüfung zuerst die (.md5) Datei hochladen',
   UPLOADING: 'Hochladen',
   UPLOAD_DROP_TEXT: 'Klicken Sie hier, oder ziehen eine Datei hierher',
   ERROR: 'Unerwarteter Fehler, bitter versuchen Sie es erneut',
@@ -221,13 +218,11 @@ const de: Translation = {
   USER_WARNING: 'Sie müssen mindestens einen Admin-Nutzer konfigurieren',
   ADD: 'Hinzufügen',
   ACCESS_TOKEN_FOR: 'Zugangs-Token für',
-  ACCESS_TOKEN_TEXT:
-    'Dieses Token ist für REST API Aufrufe bestimmt, die eine Authentifizierung benötigen. Es kann entweder als Bearer Token im `Authorization-Header` oder in der Access_Token URL verwendet werden.',
+  ACCESS_TOKEN_TEXT: 'Dieses Token ist für REST API Aufrufe bestimmt, die eine Authentifizierung benötigen. Es kann entweder als Bearer Token im `Authorization-Header` oder in der Access_Token URL verwendet werden.',
   GENERATING_TOKEN: 'Erzeuge Token',
   USER: 'Nutzer',
   MODIFY: 'Ändern',
-  SU_TEXT:
-    'Das su (super user) Passwort wird zum Signieren der Authentifikations-Tokens verwendet und ermöglicht Admin-Berechtigung in der Konsole.',
+  SU_TEXT: 'Das su (super user) Passwort wird zum Signieren der Authentifikations-Tokens verwendet und ermöglicht Admin-Berechtigung in der Konsole.',
   NOT_ENABLED: 'Nicht aktiviert',
   ERRORS_OF: '{0} Fehler',
   DISCONNECT_REASON: 'Grund der Verbindungsunterbrechung',
