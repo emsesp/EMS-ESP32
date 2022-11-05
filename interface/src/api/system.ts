@@ -12,6 +12,10 @@ export function restart(): AxiosPromise<void> {
   return AXIOS.post('/restart');
 }
 
+export function partition(): AxiosPromise<void> {
+  return AXIOS.post('/partition');
+}
+
 export function factoryReset(): AxiosPromise<void> {
   return AXIOS.post('/factoryReset');
 }

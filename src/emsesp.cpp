@@ -847,7 +847,8 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         }
     }
 
-    if (!found) {
+    // handle unknown broadcasted telegrams
+    if (!found && telegram->dest == 0) {
         LOG_DEBUG("No telegram type handler found for ID 0x%02X (src 0x%02X)", telegram->type_id, telegram->src);
         if (watch() == WATCH_UNKNOWN) {
             LOG_NOTICE("%s", pretty_telegram(telegram).c_str());

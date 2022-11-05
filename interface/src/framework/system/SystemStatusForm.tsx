@@ -87,7 +87,19 @@ const SystemStatusForm: FC = () => {
     setProcessing(true);
     try {
       await SystemApi.restart();
-      enqueueSnackbar(LL.APPLICATION_RESTARTING(), { variant: 'info' });
+      setRestarting(true);
+    } catch (error) {
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+    } finally {
+      setConfirmRestart(false);
+      setProcessing(false);
+    }
+  };
+
+  const partition = async () => {
+    setProcessing(true);
+    try {
+      await SystemApi.partition();
       setRestarting(true);
     } catch (error) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
@@ -121,6 +133,17 @@ const SystemStatusForm: FC = () => {
         >
           {LL.RESTART()}
         </Button>
+        {data?.has_loader && (
+          <Button
+            startIcon={<PowerSettingsNewIcon />}
+            variant="outlined"
+            onClick={partition}
+            disabled={processing}
+            color="primary"
+          >
+            EMS-ESP-Loader
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

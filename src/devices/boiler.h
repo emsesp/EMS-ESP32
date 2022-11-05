@@ -124,6 +124,8 @@ class Boiler : public EMSdevice {
     uint8_t  burnMaxPower_;
     int8_t   boilHystOn_;
     int8_t   boilHystOff_;
+    int8_t   boil2HystOn_;
+    int8_t   boil2HystOff_;
     uint8_t  setFlowTemp_;       // boiler setpoint temp
     uint8_t  curBurnPow_;        // Burner current power %
     uint8_t  setBurnPow_;        // max output power in %
@@ -319,6 +321,12 @@ class Boiler : public EMSdevice {
     bool set_max_pump(const char * value, const int8_t id);
     bool set_hyst_on(const char * value, const int8_t id);
     bool set_hyst_off(const char * value, const int8_t id);
+    bool set_hyst2_on(const char * value, const int8_t id) {
+        return set_hyst_on(value, 2);
+    }
+    bool set_hyst2_off(const char * value, const int8_t id) {
+        return set_hyst_off(value, 2);
+    }
     bool set_burn_period(const char * value, const int8_t id);
     bool set_pump_delay(const char * value, const int8_t id);
     bool set_reset(const char * value, const int8_t id);
