@@ -1,5 +1,6 @@
 import type { Translation } from '../i18n-types';
-// prettier-ignore
+/* prettier-ignore */
+/* eslint-disable */
 
 const nl: Translation = {
   LANGUAGE: 'Taal',
