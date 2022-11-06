@@ -1021,21 +1021,25 @@ rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
   const sensor = req.body
   console.log('Write sensor: ' + JSON.stringify(sensor))
   objIndex = emsesp_sensordata.sensors.findIndex((obj) => obj.id == sensor.id)
-  emsesp_sensordata.sensors[objIndex].n = sensor.name
-  emsesp_sensordata.sensors[objIndex].o = sensor.offset
+  if (objIndex !== -1) {
+    emsesp_sensordata.sensors[objIndex].n = sensor.name
+    emsesp_sensordata.sensors[objIndex].o = sensor.offset
+  } else {
+    console.log('not found')
+  }
   res.sendStatus(200)
 })
 
 rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
   const analog = req.body
   console.log('Write analog: ' + JSON.stringify(analog))
-  objIndex = emsesp_sensordata.analogs.findIndex((obj) => obj.i == analog.i)
+  objIndex = emsesp_sensordata.analogs.findIndex((obj) => obj.g == analog.gpio)
 
   if (objIndex === -1) {
     console.log('new analog')
     emsesp_sensordata.analogs.push({
       id: analog.i.toString(),
-      i: analog.i,
+      g: analog.gpio,
       n: analog.name,
       f: analog.factor,
       o: analog.offset,
@@ -1044,13 +1048,13 @@ rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
     })
   } else {
     if (analog.type === -1) {
-      console.log('removing analog ' + analog.i)
+      console.log('removing analog gpio' + analog.gpio + ' index ' + objIndex)
       emsesp_sensordata.analogs[objIndex].t = -1
     } else {
-      console.log('updating analog ' + analog.i)
+      console.log('updating analog gpio' + analog.gpio + ' index ' + objIndex)
       emsesp_sensordata.analogs[objIndex].n = analog.name
-      emsesp_sensordata.analogs[objIndex].o = analog.offset
       emsesp_sensordata.analogs[objIndex].f = analog.factor
+      emsesp_sensordata.analogs[objIndex].o = analog.offset
       emsesp_sensordata.analogs[objIndex].u = analog.uom
       emsesp_sensordata.analogs[objIndex].t = analog.type
     }
