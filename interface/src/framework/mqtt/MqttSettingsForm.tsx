@@ -219,7 +219,7 @@ const MqttSettingsForm: FC = () => {
               />
             </Grid>
             {data.ha_enabled && (
-              <Grid item xs={6}>
+              <Grid item xs={2}>
                 <ValidatedTextField
                   name="discovery_prefix"
                   label={LL.MQTT_PUBLISH_TEXT_4()}
@@ -227,7 +227,7 @@ const MqttSettingsForm: FC = () => {
                   variant="outlined"
                   value={data.discovery_prefix}
                   onChange={updateFormValue}
-                  margin="normal"
+                  size="small"
                 />
               </Grid>
             )}

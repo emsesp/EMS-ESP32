@@ -172,7 +172,7 @@ const DashboardData: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 140px 40px;
+        --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) minmax(140px, max-content) 40px;
       `,
       BaseRow: `
         .td {
@@ -1038,32 +1038,34 @@ const DashboardData: FC = () => {
           </DialogTitle>
           <DialogContent dividers>
             <Grid container spacing={2}>
-              <Grid item>
+              <Grid item xs={12}>
+                <ValidatedTextField
+                  name="n"
+                  label={LL.ENTITY_NAME()}
+                  value={analog.n}
+                  fullWidth
+                  variant="outlined"
+                  onChange={updateValue(setAnalog)}
+                />
+              </Grid>
+              <Grid item xs={4}>
                 <ValidatedTextField
                   name="g"
                   label="GPIO"
                   value={analog.g}
+                  fullWidth
                   type="number"
                   variant="outlined"
                   autoFocus
                   onChange={updateValue(setAnalog)}
                 />
               </Grid>
-              <Grid item>
-                <ValidatedTextField
-                  name="n"
-                  label={LL.ENTITY_NAME()}
-                  value={analog.n}
-                  sx={{ width: '20ch' }}
-                  variant="outlined"
-                  onChange={updateValue(setAnalog)}
-                />
-              </Grid>
-              <Grid item>
+              <Grid item xs={8}>
                 <ValidatedTextField
                   name="t"
                   label={LL.TYPE()}
                   value={analog.t}
+                  fullWidth
                   select
                   onChange={updateValue(setAnalog)}
                 >
@@ -1076,11 +1078,12 @@ const DashboardData: FC = () => {
               </Grid>
               {analog.t >= AnalogType.COUNTER && analog.t <= AnalogType.RATE && (
                 <>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="u"
                       label={LL.UNIT()}
                       value={analog.u}
+                      fullWidth
                       select
                       onChange={updateValue(setAnalog)}
                     >
@@ -1092,12 +1095,12 @@ const DashboardData: FC = () => {
                     </ValidatedTextField>
                   </Grid>
                   {analog.t === AnalogType.ADC && (
-                    <Grid item>
+                    <Grid item xs={4}>
                       <ValidatedTextField
                         name="o"
                         label={LL.OFFSET()}
                         value={numberValue(analog.o)}
-                        sx={{ width: '20ch' }}
+                        fullWidth
                         type="number"
                         variant="outlined"
                         onChange={updateValue(setAnalog)}
@@ -1109,12 +1112,12 @@ const DashboardData: FC = () => {
                     </Grid>
                   )}
                   {analog.t === AnalogType.COUNTER && (
-                    <Grid item>
+                    <Grid item xs={4}>
                       <ValidatedTextField
                         name="o"
                         label={LL.STARTVALUE()}
                         value={numberValue(analog.o)}
-                        sx={{ width: '20ch' }}
+                        fullWidth
                         type="number"
                         variant="outlined"
                         onChange={updateValue(setAnalog)}
@@ -1122,12 +1125,12 @@ const DashboardData: FC = () => {
                       />
                     </Grid>
                   )}
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="f"
                       label={LL.FACTOR()}
                       value={numberValue(analog.f)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
@@ -1138,12 +1141,12 @@ const DashboardData: FC = () => {
               )}
               {analog.t === AnalogType.DIGITAL_OUT && (analog.id === '25' || analog.id === '26') && (
                 <>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="o"
                       label={LL.VALUE(0)}
                       value={numberValue(analog.o)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
@@ -1154,12 +1157,12 @@ const DashboardData: FC = () => {
               )}
               {analog.t === AnalogType.DIGITAL_OUT && analog.id !== '25' && analog.id !== '26' && (
                 <>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="o"
                       label={LL.VALUE(0)}
                       value={numberValue(analog.o)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
@@ -1170,12 +1173,12 @@ const DashboardData: FC = () => {
               )}
               {analog.t >= AnalogType.PWM_0 && (
                 <>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="f"
                       label={LL.FREQ()}
                       value={numberValue(analog.f)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
@@ -1185,12 +1188,12 @@ const DashboardData: FC = () => {
                       }}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="o"
                       label={LL.DUTY_CYCLE()}
                       value={numberValue(analog.o)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
