@@ -851,11 +851,11 @@ void Boiler::process_UBAParameterWW(std::shared_ptr<const Telegram> telegram) {
     // has_bitupdate(telegram, wwEquipt_,0,3);  //  8=boiler has ww
     has_update(telegram, wwActivated_, 1); // 0xFF means on
     has_update(telegram, wwSelTemp_, 2);
-    has_update(telegram, wwHystOn_, 3);         // Hyst on (default -5)
-    has_update(telegram, wwHystOff_, 4);        // Hyst off (default -1)
-    has_update(telegram, wwFlowTempOffset_, 5); // default 40
-    has_update(telegram, wwCircPump_, 6);       // 0xFF means on
-    has_update(telegram, wwCircMode_, 7);       // 1=1x3min 6=6x3min 7=continuous
+    has_update(telegram, wwHystOn_, 3);          // Hyst on (default -5)
+    has_update(telegram, wwHystOff_, 4);         // Hyst off (default -1)
+    has_update(telegram, wwFlowTempOffset_, 5);  // default 40
+    has_update(telegram, wwCircPump_, 6);        // 0xFF means on
+    has_enumupdate(telegram, wwCircMode_, 7, 1); // 1=1x3min 6=6x3min 7=continuous
     has_update(telegram, wwDisinfectionTemp_, 8);
     has_bitupdate(telegram, wwChargeType_, 10, 0); // 0 = charge pump, 0xff = 3-way valve
 
@@ -1028,7 +1028,7 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwHystOff_, 8);
     has_update(telegram, wwFlowTempOffset_, 9);
     has_update(telegram, wwCircPump_, 10);         // 0x01 means yes
-    has_update(telegram, wwCircMode_, 11);         // 1=1x3min... 6=6x3min, 7=continuous
+    has_enumupdate(telegram, wwCircMode_, 11, 1);  // 1=1x3min... 6=6x3min, 7=continuous
     has_update(telegram, wwDisinfectionTemp_, 12); // setting here, status in E9
     has_update(telegram, wwSelTempSingle_, 16);
     has_update(telegram, wwSelTempLow_, 18);
@@ -2188,24 +2188,15 @@ bool Boiler::set_ww_circulation_pump(const char * value, const int8_t id) {
 // Set the mode of circulation, 1x3min, ... 6x3min, continuous
 // true = on, false = off
 bool Boiler::set_ww_circulation_mode(const char * value, const int8_t id) {
-    int v;
-    if (!Helpers::value2number(value, v)) {
-        return false;
-    }
-
-    if (v < 7) {
-        // LOG_INFO("Setting dhw circulation mode %dx3min", v);
-    } else if (v == 7) {
-        // LOG_INFO("Setting dhw circulation mode continuous");
-    } else {
-        // LOG_WARNING("Set dhw circulation mode: Invalid value");
+    uint8_t v;
+    if (!Helpers::value2enum(value, v, FL_(enum_freq))) {
         return false;
     }
 
     if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
-        write_command(EMS_TYPE_UBAParameterWWPlus, 11, v, EMS_TYPE_UBAParameterWWPlus);
+        write_command(EMS_TYPE_UBAParameterWWPlus, 11, v + 1, EMS_TYPE_UBAParameterWWPlus);
     } else {
-        write_command(EMS_TYPE_UBAParameterWW, 7, v, EMS_TYPE_UBAParameterWW);
+        write_command(EMS_TYPE_UBAParameterWW, 7, v + 1, EMS_TYPE_UBAParameterWW);
     }
 
     return true;
