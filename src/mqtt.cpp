@@ -537,56 +537,17 @@ bool Mqtt::get_publish_onchange(uint8_t device_type) {
 }
 
 // MQTT onConnect - when an MQTT connect is established
-// send out some inital MQTT messages
 void Mqtt::on_connect() {
-    if (connecting_) { // prevent duplicated connections
-        return;
+    if (connecting_) {
+        return; // prevent duplicated connections
     }
 
     LOG_INFO("MQTT connected");
 
     connecting_ = true;
-    connectcount_++;
+    connectcount_++; // count # reconnects. not currently used.
 
     load_settings(); // reload MQTT settings - in case they have changes
-
-    // send info topic appended with the version information as JSON
-    StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> doc;
-    // first time to connect
-    if (connectcount_ == 1) {
-        doc["event"] = "start";
-    } else {
-        doc["event"] = "reconnect";
-    }
-
-    doc["version"] = EMSESP_APP_VERSION;
-#ifndef EMSESP_STANDALONE
-    if (WiFi.status() == WL_CONNECTED) {
-        doc["connection"]      = "WiFi";
-        doc["hostname"]        = WiFi.getHostname();
-        doc["SSID"]            = WiFi.SSID();
-        doc["BSSID"]           = WiFi.BSSIDstr();
-        doc["RSSI"]            = WiFi.RSSI();
-        doc["MAC"]             = WiFi.macAddress();
-        doc["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
-        doc["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
-        doc["IPv4 nameserver"] = uuid::printable_to_string(WiFi.dnsIP());
-        if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            doc["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
-        }
-    } else if (EMSESP::system_.ethernet_connected()) {
-        doc["connection"]      = "Ethernet";
-        doc["hostname"]        = ETH.getHostname();
-        doc["MAC"]             = ETH.macAddress();
-        doc["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
-        doc["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
-        doc["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
-        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            doc["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
-        }
-    }
-#endif
-    publish(F_(info), doc.as<JsonObject>()); // topic called "info"
 
     if (ha_enabled_) {
         queue_unsubscribe_message(discovery_prefix_ + "/+/" + mqtt_basename_ + "/#");
@@ -595,7 +556,8 @@ void Mqtt::on_connect() {
         ha_climate_reset(true);
     } else {
         // with disabled HA we subscribe and the broker sends all stored HA-emsesp-configs.
-        // In line 272 they are removed. If HA is enabled the subscriptions are removed.
+        // Around line 272 they are removed (search for "// remove HA topics if we don't use discover")
+        // If HA is enabled the subscriptions are removed.
         // As described in the doc (https://emsesp.github.io/docs/#/Troubleshooting?id=home-assistant):
         // disable HA, wait 5 minutes (to allow the broker to send all), than reenable HA again.
         queue_subscribe_message(discovery_prefix_ + "/+/" + mqtt_basename_ + "/#");

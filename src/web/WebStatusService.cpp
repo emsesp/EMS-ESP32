@@ -44,6 +44,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 #endif
         EMSESP::system_.syslog_init();
         mDNS_start();
+        EMSESP::system_.send_info_mqtt("connected");
         break;
 
     case ARDUINO_EVENT_ETH_START:
@@ -69,6 +70,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
             EMSESP::system_.syslog_init();
             EMSESP::system_.ethernet_connected(true);
             mDNS_start();
+            EMSESP::system_.send_info_mqtt("connected");
         }
         break;
 
@@ -106,9 +108,9 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         } else {
             EMSESP::logger().info("WiFi connected with IPv6=%s, hostname=%s", WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
         }
-        // EMSESP::system_.send_heartbeat();
         EMSESP::system_.syslog_init();
         mDNS_start();
+        EMSESP::system_.send_info_mqtt("connected");
         break;
 #endif
 
