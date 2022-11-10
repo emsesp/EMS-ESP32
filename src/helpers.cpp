@@ -262,6 +262,11 @@ char * Helpers::render_value(char * result, const float value, const int8_t form
 
     *result++       = '.';
     int32_t decimal = abs((int32_t)((value - whole) * p[format]));
+    for (int8_t i = 1; i < format; i++) {
+        if (decimal < p[i]) {
+            *result++ = '0'; // add leading zeros
+        }
+    }
     itoa(decimal, result, 10);
 
     return ret;
