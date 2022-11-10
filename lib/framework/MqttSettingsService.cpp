@@ -113,7 +113,6 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         if (_state.enabled) {
             // emsesp::EMSESP::logger().info("Network connection dropped, stopping MQTT client");
             _mqttClient.disconnect();
-            // onConfigUpdated();
         }
         break;
 
