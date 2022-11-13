@@ -197,7 +197,7 @@ export const DeviceValueUOM_s = [
   'kW',
   'W',
   'KB',
-  'second',
+  'seconds',
   'dBm',
   '°F',
   'mV',
