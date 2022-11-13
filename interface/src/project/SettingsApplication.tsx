@@ -141,8 +141,8 @@ const SettingsApplication: FC = () => {
         </ValidatedTextField>
         {data.board_profile === 'CUSTOM' && (
           <>
-            <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-              <Grid item xs={4}>
+            <Grid container spacing={1} sx={{ pt: 1 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
+              <Grid item xs={6} sm={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="rx_gpio"
@@ -156,7 +156,7 @@ const SettingsApplication: FC = () => {
                   disabled={saving}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={6} sm={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="tx_gpio"
@@ -170,7 +170,7 @@ const SettingsApplication: FC = () => {
                   disabled={saving}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={6} sm={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="pbutton_gpio"
@@ -184,7 +184,7 @@ const SettingsApplication: FC = () => {
                   disabled={saving}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={6} sm={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="dallas_gpio"
@@ -198,7 +198,7 @@ const SettingsApplication: FC = () => {
                   disabled={saving}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={6} sm={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="led_gpio"
@@ -212,7 +212,7 @@ const SettingsApplication: FC = () => {
                   disabled={saving}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={6} sm={4}>
                 <ValidatedTextField
                   name="phy_type"
                   label={LL.PHY_TYPE()}
@@ -231,8 +231,8 @@ const SettingsApplication: FC = () => {
               </Grid>
             </Grid>
             {data.phy_type !== 0 && (
-              <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-                <Grid item xs={4}>
+              <Grid container spacing={1} sx={{ pt: 1 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
+                <Grid item xs={6} sm={4}>
                   <ValidatedTextField
                     name="eth_power"
                     label={LL.GPIO_OF('PHY Power') + ' (-1=' + LL.DISABLED(1) + ')'}
@@ -245,7 +245,7 @@ const SettingsApplication: FC = () => {
                     disabled={saving}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={6} sm={4}>
                   <ValidatedTextField
                     name="eth_phy_addr"
                     label={LL.ADDRESS_OF('PHY I²C')}
@@ -258,7 +258,7 @@ const SettingsApplication: FC = () => {
                     disabled={saving}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={6} sm={4}>
                   <ValidatedTextField
                     name="eth_clock_mode"
                     label="PHY Clk"
@@ -399,13 +399,14 @@ const SettingsApplication: FC = () => {
             disabled={saving}
           />
           <BlockFormControlLabel
+            sx={{ pb: 2 }} 
             control={<Checkbox checked={data.shower_alert} onChange={updateFormValue} name="shower_alert" />}
             label={LL.ENABLE_SHOWER_ALERT()}
             disabled={!data.shower_timer}
           />
           {data.shower_alert && (
             <>
-              <Grid>
+              <Grid item sx={{ pr: 1, pb: 2 }}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="shower_alert_trigger"
@@ -421,8 +422,7 @@ const SettingsApplication: FC = () => {
                   disabled={!data.shower_timer}
                 />
               </Grid>
-              &nbsp;&nbsp;
-              <Grid item xs={4}>
+              <Grid item sx={{ pb: 3 }}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="shower_alert_coldshot"
@@ -441,11 +441,11 @@ const SettingsApplication: FC = () => {
             </>
           )}
         </Grid>
-        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+        <Typography variant="h6" color="primary">
           {LL.FORMATTING_OPTIONS()}
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               name="bool_dashboard"
               label={LL.BOOLEAN_FORMAT_DASHBOARD()}
@@ -462,7 +462,7 @@ const SettingsApplication: FC = () => {
               <MenuItem value={5}>1/0</MenuItem>
             </ValidatedTextField>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               name="bool_format"
               label={LL.BOOLEAN_FORMAT_API()}
@@ -481,7 +481,7 @@ const SettingsApplication: FC = () => {
               <MenuItem value={6}>1/0</MenuItem>
             </ValidatedTextField>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               name="enum_format"
               label={LL.ENUM_FORMAT()}

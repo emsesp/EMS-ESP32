@@ -172,7 +172,7 @@ const DashboardData: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) minmax(140px, max-content) 40px;
+        --data-table-library_grid-template-columns: minmax(0, 1fr) 35% 40px;
       `,
       BaseRow: `
         .td {
