@@ -214,12 +214,13 @@ const MqttSettingsForm: FC = () => {
           <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
             <Grid item>
               <BlockFormControlLabel
+                sx={{ pb: 2 }} 
                 control={<Checkbox name="ha_enabled" checked={data.ha_enabled} onChange={updateFormValue} />}
                 label={LL.MQTT_PUBLISH_TEXT_3()}
               />
             </Grid>
             {data.ha_enabled && (
-              <Grid item xs={6}>
+              <Grid item sx={{ pb: 3 }}>
                 <ValidatedTextField
                   name="discovery_prefix"
                   label={LL.MQTT_PUBLISH_TEXT_4()}
@@ -227,17 +228,17 @@ const MqttSettingsForm: FC = () => {
                   variant="outlined"
                   value={data.discovery_prefix}
                   onChange={updateFormValue}
-                  margin="normal"
+                  size="small"
                 />
               </Grid>
             )}
           </Grid>
         )}
-        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+        <Typography variant="h6" color="primary">
           {LL.MQTT_PUBLISH_INTERVALS()}&nbsp;(0=auto)
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_boiler"
@@ -253,7 +254,7 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_thermostat"
@@ -269,7 +270,7 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_solar"
@@ -285,7 +286,7 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_mixer"
@@ -301,7 +302,7 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_sensor"
@@ -317,7 +318,7 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_other"
