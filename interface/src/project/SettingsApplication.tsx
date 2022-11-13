@@ -141,7 +141,14 @@ const SettingsApplication: FC = () => {
         </ValidatedTextField>
         {data.board_profile === 'CUSTOM' && (
           <>
-            <Grid container spacing={1} sx={{ pt: 1 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
+            <Grid
+              container
+              spacing={1}
+              sx={{ pt: 1 }}
+              direction="row"
+              justifyContent="flex-start"
+              alignItems="flex-start"
+            >
               <Grid item xs={6} sm={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
@@ -231,7 +238,14 @@ const SettingsApplication: FC = () => {
               </Grid>
             </Grid>
             {data.phy_type !== 0 && (
-              <Grid container spacing={1} sx={{ pt: 1 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
+              <Grid
+                container
+                spacing={1}
+                sx={{ pt: 1 }}
+                direction="row"
+                justifyContent="flex-start"
+                alignItems="flex-start"
+              >
                 <Grid item xs={6} sm={4}>
                   <ValidatedTextField
                     name="eth_power"
@@ -399,7 +413,7 @@ const SettingsApplication: FC = () => {
             disabled={saving}
           />
           <BlockFormControlLabel
-            sx={{ pb: 2 }} 
+            sx={{ pb: 2 }}
             control={<Checkbox checked={data.shower_alert} onChange={updateFormValue} name="shower_alert" />}
             label={LL.ENABLE_SHOWER_ALERT()}
             disabled={!data.shower_timer}

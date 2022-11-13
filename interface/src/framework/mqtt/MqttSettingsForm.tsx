@@ -214,7 +214,7 @@ const MqttSettingsForm: FC = () => {
           <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
             <Grid item>
               <BlockFormControlLabel
-                sx={{ pb: 2 }} 
+                sx={{ pb: 2 }}
                 control={<Checkbox name="ha_enabled" checked={data.ha_enabled} onChange={updateFormValue} />}
                 label={LL.MQTT_PUBLISH_TEXT_3()}
               />
