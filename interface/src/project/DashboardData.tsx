@@ -584,7 +584,9 @@ const DashboardData: FC = () => {
           </DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
-              <Typography variant="body2">{LL.ID_OF(LL.SENSOR())}: {sensor.id}</Typography>
+              <Typography variant="body2">
+                {LL.ID_OF(LL.SENSOR())}: {sensor.id}
+              </Typography>
             </Box>
             <Grid container spacing={1}>
               <Grid item>

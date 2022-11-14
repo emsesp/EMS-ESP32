@@ -1772,6 +1772,11 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
         return false;
     }
 
+    //  no write/verify if there is no change, see https://github.com/emsesp/EMS-ESP32/issues/654
+    if (v == selFlowTemp_) {
+        return true;
+    }
+
     if (has_telegram_id(0xE4)) {
         write_command(EMS_TYPE_UBASetPoints, 0, v, 0xE4);
     } else {

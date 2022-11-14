@@ -1091,7 +1091,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
     // keep it compatible to v3.4, use english fullname, no prefix (basename prefix commented out)
     char object_id[130];
     if (have_tag) {
-        snprintf(object_id, sizeof(object_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag).c_str(), en_name);
+        snprintf(object_id, sizeof(object_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag, false).c_str(), en_name);
     } else {
         snprintf(object_id, sizeof(object_id), "%s_%s", device_name, en_name);
     }

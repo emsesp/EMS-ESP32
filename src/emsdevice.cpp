@@ -43,8 +43,8 @@ bool EMSdevice::has_entities() const {
     return false;
 }
 
-std::string EMSdevice::tag_to_string(uint8_t tag) {
-    return (Helpers::translated_word(DeviceValue::DeviceValueTAG_s[tag]));
+std::string EMSdevice::tag_to_string(uint8_t tag, const bool translate) {
+    return (translate ? Helpers::translated_word(DeviceValue::DeviceValueTAG_s[tag]) : DeviceValue::DeviceValueTAG_s[tag][0]);
 }
 
 std::string EMSdevice::tag_to_mqtt(uint8_t tag) {

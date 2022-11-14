@@ -269,7 +269,7 @@ void TxService::send_poll() const {
 }
 
 // Process the next telegram on the Tx queue
-// This is sent when we receieve a poll request
+// This is sent when we receive a poll request
 void TxService::send() {
     // don't process if we don't have a connection to the EMS bus
     if (!bus_connected()) {
