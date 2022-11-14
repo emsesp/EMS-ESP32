@@ -343,8 +343,8 @@ MAKE_PSTR_LIST(hpPower, "hppower", "compressor power output", "Kompressorleistun
 MAKE_PSTR_LIST(hpTc0, "hptc0", "heat carrier return (TC0)", "Kältemittel Rücklauf (TC0)", "Koudemiddel retour (TC0)", "Värmebärare Retur (TC0)", "temperatura nośnika ciepła na powrocie (TC0)", "kjølemiddel retur (TC0)")
 MAKE_PSTR_LIST(hpTc1, "hptc1", "heat carrier forward (TC1)", "Kältemittel Vorlauf (TC1)", "Koudemiddel aanvoer (TC1)", "Värmebärare Framledning (TC1)", "temperatura nośnika ciepła pierwotna (TC1)", "kjølemiddel tur (TC1)")
 MAKE_PSTR_LIST(hpTc3, "hptc3", "condenser temperature (TC3)", "Verflüssigertemperatur (TC3)", "Condensortemperatuur (TC3)", "Kondensortemperatur (TC3)", "temperatura skraplacza/na wyjściu sprężarki (TC3)", "kondensortemperatur (TC3)")
+MAKE_PSTR_LIST(hpTr1, "hptr1", "compressor temperature (TR1)", "Kompessortemperatur (TR1)", "Compressor temperatuur (TR1)", "Kompressor temp (TR1)", "kompressor temp (TR1)")
 MAKE_PSTR_LIST(hpTr3, "hptr3", "refrigerant temperature liquid side (condenser output) (TR3)", "Kältemittel (flüssig) (TR3)", "Temperatuur koudemiddel vloeibare zijde (TR3)", "Köldmedium temperatur (kondensorutlopp) (TR3)", "temperatura skraplacza ogrzew. (TR3)", "kjølemiddeltemperatur på væskesiden (TR3)")
-
 MAKE_PSTR_LIST(hpTr4, "hptr4", "evaporator inlet temperature (TR4)", "Verdampfer Eingang (TR4)", "Verdamper ingangstemperatuur (TR4)", "Förångare inloppstemp (TR4)", "innløpstemperatur for fordamperen (TR4)")
 MAKE_PSTR_LIST(hpTr5, "hptr5", "compressor inlet temperature (TR5)", "Kompessoreingang (TR5)", "Compressor ingangstemperatuur (TR5)", "Kompressor inloppstemp (TR5)", "kompressor innløpstemp (TR5)")
 MAKE_PSTR_LIST(hpTr6, "hptr6", "compressor outlet temperature (TR6)", "Kompressorausgang (TR6)", "Compressor uitgangstemperatuur (TR6)", "Kompressor utloppstemp (TR6)", "kompressor utløpstemp (TR6)")
@@ -352,6 +352,7 @@ MAKE_PSTR_LIST(hpTr7, "hptr7", "refrigerant temperature gas side (condenser inpu
 MAKE_PSTR_LIST(hpTl2, "hptl2", "air inlet temperature (TL2)", "Außenluft-Einlasstemperatur (TL2)", "Temperatuur luchtinlaat (TL2)", "Luftintagstemperatur (TL2)", "temperatura wlotu powietrza (TL2)", "luftinntakstemperatur (TL2)")
 MAKE_PSTR_LIST(hpPl1, "hppl1", "low pressure side temperature (PL1)", "Niederdruckfühler (PL1)", "Temperatuur lage drukzijde (PL1)", "Temperatur Lågtryckssidan (PL1)", "temperatura po stronie niskiego ciśnienia (PL1)", "temperatur lavtrykksiden (PL1)")
 MAKE_PSTR_LIST(hpPh1, "hpph1", "high pressure side temperature (PH1)", "Hochdruckfühler (PH1)", "Temperatuur hoge drukzijde (PH1)", "Temperatur Högtryckssidan (PH1)", "temperatura po stronie wysokiego ciśnienia (PH1)", "Temperatur Høytrykksiden (PH1)")
+MAKE_PSTR_LIST(hpTa4, "hpta4", "drain pan temp (TA4)", "Kondensatorwanne (TA4)")
 
 MAKE_PSTR_LIST(hpInput1, "hpin1", "input 1 state", "Eingang 1 Status", "Status input 1", "Status Ingång 1", "stan wejścia 1", "status Inggng 1")
 MAKE_PSTR_LIST(hpInput2, "hpin2", "input 2 state", "Eingang 2 Status", "Status input 2", "Status Ingång 2", "stan wejścia 2", "status Inggng 2")
