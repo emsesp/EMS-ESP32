@@ -49,7 +49,7 @@ class EMSdevice {
     static const char * device_type_2_device_name(const uint8_t device_type);
     static uint8_t      device_name_2_device_type(const char * topic);
     static std::string  uom_to_string(uint8_t uom);
-    static std::string  tag_to_string(uint8_t tag);
+    static std::string  tag_to_string(uint8_t tag, const bool translate = true);
     static std::string  tag_to_mqtt(uint8_t tag);
 
     bool has_tag(const uint8_t tag) const;
