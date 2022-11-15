@@ -245,7 +245,7 @@ MAKE_PSTR_LIST(cyl2, "cyl 2", "Zyl_2", "Cil 2", "Cyl 2", "cyl 2", "cyl 2")
 
 // Entity translations
 // Boiler
-MAKE_PSTR_LIST(wwtapactivated, "wwtapactivated", "turn on/off", "Durchlauferhitzer aktiv", "zet aan/uit", "sätt pa/av", "system przygotowywania c.w.u.", "slå på/av")
+MAKE_PSTR_LIST(wwtapactivated, "wwtapactivated", "turn on/off", "Durchlauferhitzer aktiv", "zet aan/uit", "sätt pa/av", "system przygotowywania", "slå på/av")
 MAKE_PSTR_LIST(reset, "reset", "Reset", "Reset", "Reset", "Nollställ", "kasowanie komunikatu", "nullstill")
 MAKE_PSTR_LIST(oilPreHeat, "oilpreheat", "oil preheating", "Ölvorwärmung", "Olie voorverwarming", "Förvärmning olja", "podgrzewanie oleju", "oljeforvarming")
 MAKE_PSTR_LIST(heatingActive, "heatingactive", "heating active", "Heizen aktiv", "Verwarming actief", "Uppvärmning aktiv", "ogrzewanie aktywne", "oppvarming aktiv")
