@@ -305,7 +305,7 @@ MAKE_PSTR_ENUM(enum_hybridStrategy1, FL_(cost_optimized), FL_(co2_optimized), FL
 MAKE_PSTR_ENUM(enum_lowNoiseMode, FL_(off), FL_(reduced_output), FL_(switchoff), FL_(perm))
 
 // heat pump
-MAKE_PSTR_ENUM(enum_hpactivity, FL_(none), FL_(heating), FL_(cooling), FL_(hot_water), FL_(pool))
+MAKE_PSTR_ENUM(enum_hpactivity, FL_(none), FL_(heating), FL_(cooling), FL_(hot_water), FL_(pool), FL_(nofrost))
 
 // solar
 MAKE_PSTR_ENUM(enum_solarmode, FL_(constant), FL_(pwm), FL_(analog))
