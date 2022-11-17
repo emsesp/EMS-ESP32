@@ -1,4 +1,5 @@
 #include <SystemStatus.h>
+#include <esp_ota_ops.h>
 
 #include "../../src/emsesp_stub.hpp" // proddy added
 
@@ -31,6 +32,8 @@ void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
         root["psram_size"] = emsesp::EMSESP::system_.PSram();
         root["free_psram"] = ESP.getFreePsram() / 1024;
     }
+    const esp_partition_t * factory_partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
+    root["has_loader"] = factory_partition != NULL;
 
     response->setLength();
     request->send(response);
