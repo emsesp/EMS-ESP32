@@ -210,6 +210,7 @@ MAKE_PSTR_LIST(constant, "constant", "konstant", "constant", "Konstant", "stały
 MAKE_PSTR_LIST(simple, "simple", "einfach", "simpel", "enkel", "prosty", "enkel")
 MAKE_PSTR_LIST(optimized, "optimized", "optimiert", "geoptimaliseerd", "optimerad", "zoptymalizowany", "optimalisert")
 MAKE_PSTR_LIST(nofrost, "nofrost", "Frostschutz", "Vorstbescherming", "Frostskydd", "ochrona przed zamarzaniem", "frostsikring")
+MAKE_PSTR_LIST(defrost, "defrost", "Abtauen", "ontdooien", "avfrostning", "rozmrażać", "tine")
 MAKE_PSTR_LIST(comfort, "comfort", "Komfort", "Comfort", "Komfort", "komfort", "komfort")
 MAKE_PSTR_LIST(night, "night", "Nacht", "Nacht", "Natt", "noc", "natt")
 MAKE_PSTR_LIST(day, "day", "Tag", "Dag", "Dag", "dzień", "dag")

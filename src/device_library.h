@@ -44,7 +44,7 @@
 {195, DeviceType::BOILER, "Condens 5000i/Greenstar 8000", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {203, DeviceType::BOILER, "Logamax U122/Cerapur", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {206, DeviceType::BOILER, "Ecomline Excellent", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{208, DeviceType::BOILER, "Logamax Plus/GB192/Condens GC9000", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{208, DeviceType::BOILER, "Logamax Plus/GB192/Condens GC9000/Greenstar ErP", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {210, DeviceType::BOILER, "Cascade MC400", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {211, DeviceType::BOILER, "EasyControl Adapter", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {228, DeviceType::BOILER, "Alternative Heatsource", DeviceFlags::EMS_DEVICE_FLAG_AM200},

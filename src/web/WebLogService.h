@@ -68,13 +68,13 @@ class WebLogService : public uuid::log::Handler {
 
     AsyncCallbackJsonWebHandler setValues_; // for POSTs
 
-    uint64_t                    last_transmit_        = 0;                // Last transmit time
-    size_t                      maximum_log_messages_ = MAX_LOG_MESSAGES; // Maximum number of log messages to buffer before they are output
-    unsigned long               log_message_id_       = 0;                // The next identifier to use for queued log messages
-    unsigned long               log_message_id_tail_  = 0;                // last event shown on the screen after fetch
-    std::list<QueuedLogMessage> log_messages_;                            // Queued log messages, in the order they were received
-    time_t                      time_offset_ = 0;
-    bool                        compact_     = true;
+    uint64_t                     last_transmit_        = 0;                // Last transmit time
+    size_t                       maximum_log_messages_ = MAX_LOG_MESSAGES; // Maximum number of log messages to buffer before they are output
+    unsigned long                log_message_id_       = 0;                // The next identifier to use for queued log messages
+    unsigned long                log_message_id_tail_  = 0;                // last event shown on the screen after fetch
+    std::deque<QueuedLogMessage> log_messages_;                            // Queued log messages, in the order they were received
+    time_t                       time_offset_ = 0;
+    bool                         compact_     = true;
 };
 
 } // namespace emsesp

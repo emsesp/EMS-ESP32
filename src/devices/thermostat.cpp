@@ -930,7 +930,8 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     // has_bitupdate(telegram, hc->summermode, 2, 4);
     // summermode is bit 4 for boilers and bit 6 for heatpumps: 0:winter, 1:summer
     telegram->read_value(hc->statusbyte, 2);
-    if (hc->statusbyte & 1) {
+    // use summertemp or hpoperatingstate, https://github.com/emsesp/EMS-ESP32/issues/747, #550, #503
+    if ((hc->statusbyte & 1) || !is_fetch(summer2_typeids[hc->hc()])) {
         has_update(hc->summermode, hc->statusbyte & 0x50 ? 1 : 0);
         has_update(hc->hpoperatingstate, EMS_VALUE_UINT_NOTSET);
     } else {
