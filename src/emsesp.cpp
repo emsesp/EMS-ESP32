@@ -416,7 +416,7 @@ void EMSESP::publish_all(bool force) {
         publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
         publish_device_values(EMSdevice::DeviceType::SOLAR);
         publish_device_values(EMSdevice::DeviceType::MIXER);
-        publish_other_values();      // switch and heat pump
+        publish_other_values();      // switch and heat pump, ...
         publish_sensor_values(true); // includes dallas and analog sensors
         system_.send_heartbeat();
     }
@@ -546,6 +546,12 @@ void EMSESP::publish_device_values(uint8_t device_type) {
 void EMSESP::publish_other_values() {
     publish_device_values(EMSdevice::DeviceType::SWITCH);
     publish_device_values(EMSdevice::DeviceType::HEATPUMP);
+    // other devices without values yet
+    // publish_device_values(EMSdevice::DeviceType::GATEWAY);
+    // publish_device_values(EMSdevice::DeviceType::CONNECT);
+    // publish_device_values(EMSdevice::DeviceType::ALERT);
+    // publish_device_values(EMSdevice::DeviceType::PUMP);
+    // publish_device_values(EMSdevice::DeviceType::GENERIC);
 }
 
 // publish both the dallas and analog sensor values

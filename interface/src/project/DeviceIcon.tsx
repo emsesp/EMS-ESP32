@@ -9,6 +9,8 @@ import { GiHeatHaze } from 'react-icons/gi';
 import { TiFlowSwitch } from 'react-icons/ti';
 import { VscVmConnect } from 'react-icons/vsc';
 import { AiOutlineGateway } from 'react-icons/ai';
+import { AiOutlineAlert } from 'react-icons/ai';
+import { AiOutlineChrome } from 'react-icons/ai';
 
 interface DeviceIconProps {
   type: string;
@@ -34,6 +36,10 @@ const DeviceIcon: FC<DeviceIconProps> = ({ type }) => {
       return <VscVmConnect />;
     case 'Gateway':
       return <AiOutlineGateway />;
+    case 'Alert':
+        return <AiOutlineAlert />;
+    case 'Pump':
+        return <AiOutlineChrome />;
     default:
       return null;
   }

@@ -56,6 +56,17 @@ std::string EMSdevice::uom_to_string(uint8_t uom) {
     if (EMSESP::system_.fahrenheit() && (uom == DeviceValueUOM::DEGREES || uom == DeviceValueUOM::DEGREES_R)) {
         return (DeviceValue::DeviceValueUOM_s[DeviceValueUOM::FAHRENHEIT]);
     }
+    /* translate times? https://github.com/emsesp/EMS-ESP32/issues/752
+    if (uom == DeviceValueUOM::HOURS) {
+        return (Helpers::translated_word(FL_(hours)));
+    }
+    if (uom == DeviceValueUOM::MINUTES) {
+        return (Helpers::translated_word(FL_(minutes)));
+    }
+    if (uom == DeviceValueUOM::SECONDS) {
+        return (Helpers::translated_word(FL_(seconds)));
+    }
+    */
     return (DeviceValue::DeviceValueUOM_s[uom]);
 }
 
@@ -107,6 +118,10 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return F_(switch);
     case DeviceType::GATEWAY:
         return F_(gateway);
+    case DeviceType::ALERT:
+        return F_(alert);
+    case DeviceType::PUMP:
+        return F_(pump);
     default:
         return Helpers::translated_word(FL_(unknown));
     }
@@ -128,41 +143,38 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!strcmp(lowtopic, F_(boiler))) {
         return DeviceType::BOILER;
     }
-
     if (!strcmp(lowtopic, F_(thermostat))) {
         return DeviceType::THERMOSTAT;
     }
-
     if (!strcmp(lowtopic, F_(system))) {
         return DeviceType::SYSTEM;
     }
-
     if (!strcmp(lowtopic, F_(heatpump))) {
         return DeviceType::HEATPUMP;
     }
-
     if (!strcmp(lowtopic, F_(solar))) {
         return DeviceType::SOLAR;
     }
-
     if (!strcmp(lowtopic, F_(mixer))) {
         return DeviceType::MIXER;
     }
-
     if (!strcmp(lowtopic, F_(dallassensor))) {
         return DeviceType::DALLASSENSOR;
     }
-
     if (!strcmp(lowtopic, F_(analogsensor))) {
         return DeviceType::ANALOGSENSOR;
     }
-
     if (!strcmp(lowtopic, F_(switch))) {
         return DeviceType::SWITCH;
     }
-
     if (!strcmp(lowtopic, F_(gateway))) {
         return DeviceType::GATEWAY;
+    }
+    if (!strcmp(lowtopic, F_(alert))) {
+        return DeviceType::ALERT;
+    }
+    if (!strcmp(lowtopic, F_(pump))) {
+        return DeviceType::PUMP;
     }
 
     return DeviceType::UNKNOWN;

@@ -153,8 +153,11 @@
 // Switches - 0x11
 { 71, DeviceType::SWITCH, "WM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
+// PM10 Pump module - 0x15
+{ 243, DeviceType::PUMP, "PM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
 // EM10 error contact and analog flowtemp control- 0x12
-{ 74, DeviceType::GATEWAY, "Error Module EM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{ 74, DeviceType::ALERT, "EM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Gateways - 0x48
 {189, DeviceType::GATEWAY, "KM200/MB LAN 2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
