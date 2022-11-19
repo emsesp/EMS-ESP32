@@ -86,8 +86,10 @@ const SystemStatusForm: FC = () => {
   const restart = async () => {
     setProcessing(true);
     try {
-      await SystemApi.restart();
-      setRestarting(true);
+      const response = await SystemApi.restart();
+      if (response.status === 200) {
+        setRestarting(true);
+      }
     } catch (error) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     } finally {
@@ -208,7 +210,7 @@ const SystemStatusForm: FC = () => {
     setProcessing(true);
     try {
       await SystemApi.factoryReset();
-      enqueueSnackbar(LL.SYSTEM_FACTORY_TEXT(), { variant: 'info' });
+      setRestarting(true);
     } catch (error) {
       enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     } finally {
