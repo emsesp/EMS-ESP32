@@ -112,18 +112,20 @@ const char * DeviceValue::DeviceValueUOM_s[] = {
     F_(uom_lmin),
     F_(uom_kwh),
     F_(uom_wh),
-    F_(uom_hours),
-    F_(uom_minutes),
+    FL_(hours)[0],
+    FL_(minutes)[0],
     F_(uom_ua),
     F_(uom_bar),
     F_(uom_kw),
     F_(uom_w),
     F_(uom_kb),
-    F_(uom_seconds),
+    FL_(seconds)[0],
     F_(uom_dbm),
     F_(uom_fahrenheit),
     F_(uom_mv),
-    F_(uom_sqm)
+    F_(uom_sqm),
+    F_(uom_m3),
+    F_(uom_l)
 
 };
 

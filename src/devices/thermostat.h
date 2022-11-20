@@ -396,7 +396,7 @@ class Thermostat : public EMSdevice {
     bool set_mode(const char * value, const int8_t id);
     bool set_control(const char * value, const int8_t id);
     bool set_holiday(const char * value, const int8_t id, const bool vacation = false);
-    bool set_vacation(const char * value, const int8_t id) {
+    inline bool set_vacation(const char * value, const int8_t id) {
         return set_holiday(value, id, true);
     }
     bool set_pause(const char * value, const int8_t id);
@@ -458,10 +458,10 @@ class Thermostat : public EMSdevice {
     bool set_wwDailyHeating(const char * value, const int8_t id);
     bool set_wwDailyHeatTime(const char * value, const int8_t id);
     bool set_wwwhenmodeoff(const char * value, const int8_t id);
-    bool set_wwVacation(const char * value, const int8_t id) {
+    inline bool set_wwVacation(const char * value, const int8_t id) {
         return set_holiday(value, DeviceValueTAG::TAG_WWC1, true);
     }
-    bool set_wwHoliday(const char * value, const int8_t id) {
+    inline bool set_wwHoliday(const char * value, const int8_t id) {
         return set_holiday(value, DeviceValueTAG::TAG_WWC1);
     }
 

@@ -192,7 +192,7 @@ export const DeviceValueUOM_s = [
   'Wh',
   'hours',
   'minutes',
-  'uA',
+  'µA',
   'bar',
   'kW',
   'W',
@@ -201,8 +201,8 @@ export const DeviceValueUOM_s = [
   'dBm',
   '°F',
   'mV',
-  'sqm',
-  'm3',
+  'm²',
+  'm³',
   'l'
 ];
 
