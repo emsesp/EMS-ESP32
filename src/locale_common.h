@@ -102,6 +102,8 @@ MAKE_PSTR_WORD(heatpump)
 MAKE_PSTR_WORD(generic)
 MAKE_PSTR_WORD(analogsensor)
 MAKE_PSTR_WORD(dallassensor)
+MAKE_PSTR_WORD(alert)
+MAKE_PSTR_WORD(pump)
 
 MAKE_PSTR(number, "number")
 MAKE_PSTR(enum, "enum")
@@ -195,17 +197,14 @@ MAKE_PSTR_LIST(tpl_input, "Format: <inv>[<evu1><evu2><evu3><comp><aux><cool><hea
 MAKE_PSTR_LIST(tpl_input4, "Format: <inv>[<comp><aux><cool><heat><dhw><pv>]")
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
-// These don't need translating, it will mess up HA and the API
+// Translating hours/minute/seconds in emsdevice.cpp
 MAKE_PSTR(uom_blank, " ")
 MAKE_PSTR(uom_percent, "%")
 MAKE_PSTR(uom_degrees, "°C")
-MAKE_PSTR(uom_hours, "hours")
-MAKE_PSTR(uom_minutes, "minutes")
-MAKE_PSTR(uom_seconds, "seconds")
 MAKE_PSTR(uom_kwh, "kWh")
 MAKE_PSTR(uom_wh, "Wh")
 MAKE_PSTR(uom_bar, "bar")
-MAKE_PSTR(uom_ua, "uA")
+MAKE_PSTR(uom_ua, "µA")
 MAKE_PSTR(uom_lmin, "l/min")
 MAKE_PSTR(uom_kw, "kW")
 MAKE_PSTR(uom_w, "W")
@@ -213,8 +212,8 @@ MAKE_PSTR(uom_kb, "KB")
 MAKE_PSTR(uom_dbm, "dBm")
 MAKE_PSTR(uom_fahrenheit, "°F")
 MAKE_PSTR(uom_mv, "mV")
-MAKE_PSTR(uom_sqm, "sqm")
-MAKE_PSTR(uom_m3, "m3")
+MAKE_PSTR(uom_sqm, "m²")
+MAKE_PSTR(uom_m3, "m³")
 MAKE_PSTR(uom_l, "l")
 
 // MQTT topics and prefixes

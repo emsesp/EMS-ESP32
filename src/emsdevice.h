@@ -338,6 +338,8 @@ class EMSdevice {
         SWITCH,
         CONTROLLER,
         CONNECT,
+        ALERT,
+        PUMP,
         GENERIC,
         UNKNOWN
     };

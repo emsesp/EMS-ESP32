@@ -124,6 +124,8 @@ const char * DeviceValue::DeviceValueUOM_s[] = {
     F_(uom_fahrenheit), //
     F_(uom_mv),         //
     F_(uom_sqm),        //
+    F_(uom_m3),
+    F_(uom_l),
     F_(uom_blank)       // connectivity
 
 };

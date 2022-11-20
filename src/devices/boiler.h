@@ -321,10 +321,10 @@ class Boiler : public EMSdevice {
     bool set_max_pump(const char * value, const int8_t id);
     bool set_hyst_on(const char * value, const int8_t id);
     bool set_hyst_off(const char * value, const int8_t id);
-    bool set_hyst2_on(const char * value, const int8_t id) {
+    inline bool set_hyst2_on(const char * value, const int8_t id) {
         return set_hyst_on(value, 2);
     }
-    bool set_hyst2_off(const char * value, const int8_t id) {
+    inline bool set_hyst2_off(const char * value, const int8_t id) {
         return set_hyst_off(value, 2);
     }
     bool set_burn_period(const char * value, const int8_t id);
@@ -356,26 +356,26 @@ class Boiler : public EMSdevice {
     bool set_blockHyst(const char * value, const int8_t id);     // pos 14?: Hyst. for bolier block (K)
     bool set_releaseWait(const char * value, const int8_t id);   // pos 15: Boiler release wait time (min)
     bool set_HpInLogic(const char * value, const int8_t id);
-    bool set_HpIn1Logic(const char * value, const int8_t id) {
+    inline bool set_HpIn1Logic(const char * value, const int8_t id) {
         return set_HpInLogic(value, 1);
     }
-    bool set_HpIn2Logic(const char * value, const int8_t id) {
+    inline bool set_HpIn2Logic(const char * value, const int8_t id) {
         return set_HpInLogic(value, 2);
     }
-    bool set_HpIn3Logic(const char * value, const int8_t id) {
+    inline bool set_HpIn3Logic(const char * value, const int8_t id) {
         return set_HpInLogic(value, 3);
     }
-    bool set_HpIn4Logic(const char * value, const int8_t id) {
+    inline bool set_HpIn4Logic(const char * value, const int8_t id) {
         return set_HpInLogic(value, 4);
     }
     bool set_maxHeat(const char * value, const int8_t id);
-    bool set_maxHeatComp(const char * value, const int8_t id) {
+    inline bool set_maxHeatComp(const char * value, const int8_t id) {
         return set_maxHeat(value, 2);
     }
-    bool set_maxHeatHeat(const char * value, const int8_t id) {
+    inline bool set_maxHeatHeat(const char * value, const int8_t id) {
         return set_maxHeat(value, 3);
     }
-    bool set_maxHeatDhw(const char * value, const int8_t id) {
+    inline bool set_maxHeatDhw(const char * value, const int8_t id) {
         return set_maxHeat(value, 4);
     }
 
