@@ -472,7 +472,7 @@ void Mqtt::start() {
         }
     });
 
-    // create will_topic with the base prefixed. It has to be static because asyncmqttclient destroys the reference
+    // create last will topic with the base prefixed. It has to be static because asyncmqttclient destroys the reference
     static char will_topic[MQTT_TOPIC_MAX_SIZE];
     snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "%s/status", mqtt_base_.c_str());
     mqttClient_->setWill(will_topic, 1, true, "offline"); // with qos 1, retain true
@@ -570,7 +570,8 @@ void Mqtt::on_connect() {
     // re-subscribe to all custom registered MQTT topics
     resubscribe();
 
-    publish_retain("status", "online", true); // say we're alive to the Last Will topic, with retain on
+    // publish to the last will topic (see Mqtt::start() function) to say we're alive
+    publish_retain("status", "online", true); // with retain on
 
     mqtt_publish_fails_ = 0; // reset fail count to 0
 
@@ -594,11 +595,13 @@ void Mqtt::ha_status() {
     doc["~"]       = mqtt_base_; // default ems-esp
     // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
-    doc["stat_t"]    = "~/heartbeat";
-    doc["object_id"] = "ems_esp_status";
-    doc["name"]      = "EMS-ESP status";
-    doc["ic"]        = F_(icondevice);
-    doc["val_tpl"]   = "{{value_json['bus_status']}}";
+    doc["stat_t"]       = "~/status";
+    doc["object_id"]    = "ems_esp_status";
+    doc["name"]         = "EMS-ESP status";
+    doc["payload_on"]   = "online";
+    doc["payload_off"]  = "offline";
+    doc["state_class"]  = "measurement";
+    doc["device_class"] = "connectivity";
 
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = "EMS-ESP";
@@ -609,25 +612,27 @@ void Mqtt::ha_status() {
     ids.add("ems-esp");
 
     char topic[MQTT_TOPIC_MAX_SIZE];
-    snprintf(topic, sizeof(topic), "sensor/%s/system/config", mqtt_basename_.c_str());
+    snprintf(topic, sizeof(topic), "binary_sensor/%s/system/config", mqtt_basename_.c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors - must match the MQTT payload keys
+    // these are all from the heartbeat MQTT topic
     if (!EMSESP::system_.ethernet_connected()) {
-        publish_system_ha_sensor_config(DeviceValueType::INT, ("WiFi RSSI"), ("rssi"), DeviceValueUOM::DBM);
-        publish_system_ha_sensor_config(DeviceValueType::INT, ("WiFi strength"), ("wifistrength"), DeviceValueUOM::PERCENT);
+        publish_system_ha_sensor_config(DeviceValueType::INT, "WiFi RSSI", "rssi", DeviceValueUOM::DBM);
+        publish_system_ha_sensor_config(DeviceValueType::INT, "WiFi strength", "wifistrength", DeviceValueUOM::PERCENT);
     }
 
-    publish_system_ha_sensor_config(DeviceValueType::INT, ("Uptime"), ("uptime"), DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, ("Uptime (sec)"), ("uptime_sec"), DeviceValueUOM::SECONDS);
-    publish_system_ha_sensor_config(DeviceValueType::BOOL, ("NTP status"), ("ntp_status"), DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, ("Free memory"), ("freemem"), DeviceValueUOM::KB);
-    publish_system_ha_sensor_config(DeviceValueType::INT, ("MQTT fails"), ("mqttfails"), DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, ("Rx received"), ("rxreceived"), DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, ("Rx fails"), ("rxfails"), DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, ("Tx reads"), ("txreads"), DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, ("Tx writes"), ("txwrites"), DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, ("Tx fails"), ("txfails"), DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::STRING, "EMS Bus", "bus_status", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, "Uptime", "uptime", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, "Uptime (sec)", "uptime_sec", DeviceValueUOM::SECONDS);
+    publish_system_ha_sensor_config(DeviceValueType::BOOL, "NTP status", "ntp_status", DeviceValueUOM::CONNECTIVITY);
+    publish_system_ha_sensor_config(DeviceValueType::INT, "Free memory", "freemem", DeviceValueUOM::KB);
+    publish_system_ha_sensor_config(DeviceValueType::INT, "MQTT fails", "mqttfails", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, "Rx received", "rxreceived", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, "Rx fails", "rxfails", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, "Tx reads", "txreads", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, "Tx writes", "txwrites", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT, "Tx fails", "txfails", DeviceValueUOM::NONE);
 }
 
 // add sub or pub task to the queue.
@@ -926,10 +931,10 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
 // MQTT discovery configs
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
-void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice::DeviceValueType
-                                    uint8_t               tag,      // EMSdevice::DeviceValueTAG
-                                    const char * const    fullname, // fullname, already translated
-                                    const char * const    en_name,
+void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdevice::DeviceValueType
+                                    uint8_t               tag,         // EMSdevice::DeviceValueTAG
+                                    const char * const    fullname,    // fullname, already translated
+                                    const char * const    en_name,     // original name
                                     const uint8_t         device_type, // EMSdevice::DeviceType
                                     const char * const    entity,      // same as shortname
                                     const uint8_t         uom,         // EMSdevice::DeviceValueUOM (0=NONE)
@@ -961,8 +966,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
     snprintf(uniq, sizeof(uniq), "%s_%s", device_name, new_entity);
     Helpers::replace_char(uniq, '.', '_');
 
-    // use_ha_sensor is true if we're using the Sensor Entity https://developers.home-assistant.io/docs/core/entity/sensor
-    bool use_ha_sensor = false;
+    bool set_ha_classes = false; // set to true if we want to set the state class and device class
 
     // create the topic, depending on the type and whether the device entity is writable (a command)
     // https://developers.home-assistant.io/docs/core/entity
@@ -993,12 +997,13 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
             break;
         }
     } else {
+        // these are Read only sensors. We can set the device class and state class
+        set_ha_classes = true;
         // plain old read only device entity
         if (type == DeviceValueType::BOOL) {
-            snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", mqtt_basename_.c_str(), uniq); // binary sensor
+            snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", mqtt_basename_.c_str(), uniq); // binary sensor (for booleans)
         } else {
-            use_ha_sensor = true;
-            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_basename_.c_str(), uniq); // normal HA sensor, not a boolean one
+            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_basename_.c_str(), uniq); // normal HA sensor
         }
     }
 
@@ -1123,12 +1128,9 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
         }
     }
 
-    // this next section is building using the Sensor Entity
-    // https://developers.home-assistant.io/docs/core/entity/sensor
-    // for read only sensors. It uses a device class to determine icon
-    // and state class
-
-    if (use_ha_sensor) {
+    // this next section is adding the state class, device class and sometimes the icon
+    // used for Sensor and Binary Sensor Entities in HA
+    if (set_ha_classes) {
         const char * dc_ha = "device_class"; // device class
 
         switch (uom) {
@@ -1186,6 +1188,10 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,     // EMSdevice
         case DeviceValueUOM::DBM:
             doc[sc_ha] = F_(measurement);
             doc[dc_ha] = "signal_strength";
+            break;
+        case DeviceValueUOM::CONNECTIVITY:
+            doc[sc_ha] = F_(measurement);
+            doc[dc_ha] = "connectivity";
             break;
         case DeviceValueUOM::NONE:
             // for device entities which have numerical values, with no UOM

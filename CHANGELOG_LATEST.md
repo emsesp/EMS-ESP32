@@ -17,6 +17,7 @@
 - Add min/max to customization table [#686](https://github.com/emsesp/EMS-ESP32/issues/686)
 - Add MD5 check [#637](https://github.com/emsesp/EMS-ESP32/issues/637)
 - Add more bus-ids [#673](https://github.com/emsesp/EMS-ESP32/issues/673)
+- Use HA connectivity device class for Status [#751](https://github.com/emsesp/EMS-ESP32/issues/751)
 
 ## Fixed
 

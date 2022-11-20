@@ -44,30 +44,31 @@ class DeviceValue {
         CMD // special for commands only
     };
 
-    // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp. Sequence is important!!
+    // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevicevalue.cpp. Sequence is important!!
     // also used with HA as uom
     enum DeviceValueUOM : uint8_t {
-        NONE = 0,   // 0
-        DEGREES,    // 1
-        DEGREES_R,  // 2
-        PERCENT,    // 3
-        LMIN,       // 4
-        KWH,        // 5
-        WH,         // 6
-        HOURS,      // 7
-        MINUTES,    // 8
-        UA,         // 9
-        BAR,        // 10
-        KW,         // 11
-        W,          // 12
-        KB,         // 13
-        SECONDS,    // 14
-        DBM,        // 15
-        FAHRENHEIT, // 16
-        MV,         // 17
-        SQM,        // 18 squaremeter
-        M3,         // 19 cubic meter
-        L           // 20
+        NONE = 0,    // 0
+        DEGREES,     // 1
+        DEGREES_R,   // 2
+        PERCENT,     // 3
+        LMIN,        // 4
+        KWH,         // 5
+        WH,          // 6
+        HOURS,       // 7
+        MINUTES,     // 8
+        UA,          // 9
+        BAR,         // 10
+        KW,          // 11
+        W,           // 12
+        KB,          // 13
+        SECONDS,     // 14
+        DBM,         // 15
+        FAHRENHEIT,  // 16
+        MV,          // 17
+        SQM,         // 18 square meter
+        M3,          // 19 cubic meter
+        L,           // 20
+        CONNECTIVITY // 21 - used in HA
     };
 
     // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
