@@ -393,9 +393,9 @@ class Thermostat : public EMSdevice {
     bool set_switchtime(const char * value, const uint16_t type_id, char * out, size_t len);
 
     // set functions - these use the id/hc
-    bool set_mode(const char * value, const int8_t id);
-    bool set_control(const char * value, const int8_t id);
-    bool set_holiday(const char * value, const int8_t id, const bool vacation = false);
+    bool        set_mode(const char * value, const int8_t id);
+    bool        set_control(const char * value, const int8_t id);
+    bool        set_holiday(const char * value, const int8_t id, const bool vacation = false);
     inline bool set_vacation(const char * value, const int8_t id) {
         return set_holiday(value, id, true);
     }
@@ -440,24 +440,24 @@ class Thermostat : public EMSdevice {
     bool set_remoteseltemp(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
-    bool set_wwmode(const char * value, const int8_t id);
-    bool set_wwtemp(const char * value, const int8_t id);
-    bool set_wwtemplow(const char * value, const int8_t id);
-    bool set_wwcircmode(const char * value, const int8_t id);
-    bool set_wwcharge(const char * value, const int8_t id);
-    bool set_wwchargeduration(const char * value, const int8_t id);
-    bool set_wwDisinfect(const char * value, const int8_t id);
-    bool set_wwDisinfectDay(const char * value, const int8_t id);
-    bool set_wwDisinfectHour(const char * value, const int8_t id);
-    bool set_wwMaxTemp(const char * value, const int8_t id);
-    bool set_wwOneTimeKey(const char * value, const int8_t id);
-    bool set_wwProgMode(const char * value, const int8_t id);
-    bool set_wwCircProg(const char * value, const int8_t id);
-    bool set_wwSwitchTime(const char * value, const int8_t id);
-    bool set_wwCircSwitchTime(const char * value, const int8_t id);
-    bool set_wwDailyHeating(const char * value, const int8_t id);
-    bool set_wwDailyHeatTime(const char * value, const int8_t id);
-    bool set_wwwhenmodeoff(const char * value, const int8_t id);
+    bool        set_wwmode(const char * value, const int8_t id);
+    bool        set_wwtemp(const char * value, const int8_t id);
+    bool        set_wwtemplow(const char * value, const int8_t id);
+    bool        set_wwcircmode(const char * value, const int8_t id);
+    bool        set_wwcharge(const char * value, const int8_t id);
+    bool        set_wwchargeduration(const char * value, const int8_t id);
+    bool        set_wwDisinfect(const char * value, const int8_t id);
+    bool        set_wwDisinfectDay(const char * value, const int8_t id);
+    bool        set_wwDisinfectHour(const char * value, const int8_t id);
+    bool        set_wwMaxTemp(const char * value, const int8_t id);
+    bool        set_wwOneTimeKey(const char * value, const int8_t id);
+    bool        set_wwProgMode(const char * value, const int8_t id);
+    bool        set_wwCircProg(const char * value, const int8_t id);
+    bool        set_wwSwitchTime(const char * value, const int8_t id);
+    bool        set_wwCircSwitchTime(const char * value, const int8_t id);
+    bool        set_wwDailyHeating(const char * value, const int8_t id);
+    bool        set_wwDailyHeatTime(const char * value, const int8_t id);
+    bool        set_wwwhenmodeoff(const char * value, const int8_t id);
     inline bool set_wwVacation(const char * value, const int8_t id) {
         return set_holiday(value, DeviceValueTAG::TAG_WWC1, true);
     }

@@ -54,16 +54,16 @@ class Heatpump : public EMSdevice {
     int16_t flowTemp_;
     int16_t retTemp_;
     int16_t sysRetTemp_;
-    int16_t  hpTc3_; // condenser temp.
-    int16_t  hpTr1_; // compressor temp.
-    int16_t  hpTr3_; // cond. temp. heating
-    int16_t  hpTr4_; // cond. temp. clg
-    int16_t  hpTr5_; // suction line temp.
-    int16_t  hpTr6_; // hot gas temp.
-    int16_t  hpTl2_; // inlet air temperature
-    int16_t  hpTa4_; // drain pan temp.
-    int16_t  hpJr0_; // low pressure sensor
-    int16_t  hpJr1_; // high pressure sensor
+    int16_t hpTc3_; // condenser temp.
+    int16_t hpTr1_; // compressor temp.
+    int16_t hpTr3_; // cond. temp. heating
+    int16_t hpTr4_; // cond. temp. clg
+    int16_t hpTr5_; // suction line temp.
+    int16_t hpTr6_; // hot gas temp.
+    int16_t hpTl2_; // inlet air temperature
+    int16_t hpTa4_; // drain pan temp.
+    int16_t hpJr0_; // low pressure sensor
+    int16_t hpJr1_; // high pressure sensor
 
     void process_HPMonitor1(std::shared_ptr<const Telegram> telegram);
     void process_HPMonitor2(std::shared_ptr<const Telegram> telegram);

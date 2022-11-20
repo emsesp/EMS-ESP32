@@ -72,8 +72,8 @@ MAKE_PSTR(iconua, "mdi:lightning-bolt-circle") // DeviceValueUOM::UA
 // MAKE_PSTR(iconbar, "mdi:gauge")                   // DeviceValueUOM::BAR
 // MAKE_PSTR(iconkw, "mdi:omega")                    // DeviceValueUOM::KW & W
 // MAKE_PSTR(icondbm, "mdi:wifi-strength-2")         // DeviceValueUOM::DBM
-MAKE_PSTR(iconnum, "mdi:counter")            // DeviceValueUOM::NONE
-MAKE_PSTR(icondevice, "mdi:home-automation") // for devices in HA
+MAKE_PSTR(iconnum, "mdi:counter") // DeviceValueUOM::NONE
+// MAKE_PSTR(icondevice, "mdi:home-automation") // for devices in HA
 
 uuid::log::Logger Mqtt::logger_{F_(mqtt), uuid::log::Facility::DAEMON};
 
