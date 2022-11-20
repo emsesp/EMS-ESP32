@@ -51,23 +51,21 @@ std::string EMSdevice::tag_to_mqtt(uint8_t tag) {
     return (DeviceValue::DeviceValueTAG_mqtt[tag]);
 }
 
-// convert UOM to a string - these don't need translating
+// convert UOM to a string - translating only for hours/minutes/seconds
 std::string EMSdevice::uom_to_string(uint8_t uom) {
-    if (EMSESP::system_.fahrenheit() && (uom == DeviceValueUOM::DEGREES || uom == DeviceValueUOM::DEGREES_R)) {
-        return (DeviceValue::DeviceValueUOM_s[DeviceValueUOM::FAHRENHEIT]);
+    switch (uom) {
+    case DeviceValueUOM::DEGREES:
+    case DeviceValueUOM::DEGREES_R:
+        return EMSESP::system_.fahrenheit() ? DeviceValue::DeviceValueUOM_s[DeviceValueUOM::FAHRENHEIT] : DeviceValue::DeviceValueUOM_s[uom];
+    case DeviceValueUOM::HOURS:
+        return Helpers::translated_word(FL_(hours));
+    case DeviceValueUOM::MINUTES:
+        return Helpers::translated_word(FL_(minutes));
+    case DeviceValueUOM::SECONDS:
+        return Helpers::translated_word(FL_(seconds));
+    default:
+        return DeviceValue::DeviceValueUOM_s[uom];
     }
-    /* translate times? https://github.com/emsesp/EMS-ESP32/issues/752
-    if (uom == DeviceValueUOM::HOURS) {
-        return (Helpers::translated_word(FL_(hours)));
-    }
-    if (uom == DeviceValueUOM::MINUTES) {
-        return (Helpers::translated_word(FL_(minutes)));
-    }
-    if (uom == DeviceValueUOM::SECONDS) {
-        return (Helpers::translated_word(FL_(seconds)));
-    }
-    */
-    return (DeviceValue::DeviceValueUOM_s[uom]);
 }
 
 std::string EMSdevice::brand_to_string() const {

@@ -197,13 +197,10 @@ MAKE_PSTR_LIST(tpl_input, "Format: <inv>[<evu1><evu2><evu3><comp><aux><cool><hea
 MAKE_PSTR_LIST(tpl_input4, "Format: <inv>[<comp><aux><cool><heat><dhw><pv>]")
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
-// These don't need translating, it will mess up HA and the API
+// Translating hours/minute/seconds in emsdevice.cpp
 MAKE_PSTR(uom_blank, " ")
 MAKE_PSTR(uom_percent, "%")
 MAKE_PSTR(uom_degrees, "°C")
-MAKE_PSTR(uom_hours, "hours")
-MAKE_PSTR(uom_minutes, "minutes")
-MAKE_PSTR(uom_seconds, "seconds")
 MAKE_PSTR(uom_kwh, "kWh")
 MAKE_PSTR(uom_wh, "Wh")
 MAKE_PSTR(uom_bar, "bar")
