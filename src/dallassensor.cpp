@@ -53,6 +53,12 @@ void DallasSensor::start() {
         FL_(info_cmd));
     Command::add(
         EMSdevice::DeviceType::DALLASSENSOR,
+        F_(values),
+        [&](const char * value, const int8_t id, JsonObject & output) { return command_info(value, 0, output); },
+        nullptr,
+        CommandFlag::HIDDEN); // this command is hidden
+    Command::add(
+        EMSdevice::DeviceType::DALLASSENSOR,
         F_(commands),
         [&](const char * value, const int8_t id, JsonObject & output) { return command_commands(value, id, output); },
         FL_(commands_cmd));
@@ -361,14 +367,18 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
 
     for (const auto & sensor : sensors_) {
         char val[10];
-        if (id == -1) { // show number and id
+        if (id == -1) { // show number and id, info command
             JsonObject dataSensor = output.createNestedObject(sensor.name());
             dataSensor["id"]      = sensor.id();
+            dataSensor["uom"]     = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
+            dataSensor["type"]    = F_(number);
             if (Helpers::hasValue(sensor.temperature_c)) {
                 dataSensor["temp"] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
             }
-        } else if (Helpers::hasValue(sensor.temperature_c)) {
+        } else if (id == 0 && Helpers::hasValue(sensor.temperature_c)) { // values command
             output[sensor.name()] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
+        } else if (Helpers::hasValue(sensor.temperature_c)) {
+            output[sensor.id()] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
         }
     }
 
@@ -377,6 +387,9 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
 
 // called from emsesp.cpp, similar to the emsdevice->get_value_info
 bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const int8_t id) {
+    if (sensors_.empty()) {
+        return false;
+    }
     // make a copy of the string command for parsing
     char command_s[30];
     strlcpy(command_s, cmd, sizeof(command_s));
@@ -390,7 +403,7 @@ bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const i
     }
 
     for (const auto & sensor : sensors_) {
-        if (strcmp(command_s, sensor.name().c_str()) == 0) {
+        if (strcmp(command_s, sensor.name().c_str()) == 0 || strcmp(command_s, sensor.id().c_str()) == 0) {
             output["id"]   = sensor.id();
             output["name"] = sensor.name();
             char val[10];
@@ -399,8 +412,6 @@ bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const i
             }
 
             output["type"]      = F_(number);
-            output["min"]       = serialized(Helpers::render_value(val, (int8_t)-55, 0, EMSESP::system_.fahrenheit() ? (uint8_t)2 : (uint8_t)0));
-            output["max"]       = serialized(Helpers::render_value(val, (int8_t)125, 0, EMSESP::system_.fahrenheit() ? (uint8_t)2 : (uint8_t)0));
             output["uom"]       = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
             output["writeable"] = false;
 
@@ -507,8 +518,8 @@ void DallasSensor::publish_values(const bool force) {
                 }
                 config["val_tpl"] = str;
 
-                // snprintf(str, sizeof(str), "%s_temperature_sensor_%s", Mqtt::basename().c_str(), sensor.name().c_str());
-                snprintf(str, sizeof(str), "temperature_sensor_%s", sensor.name().c_str());
+                // snprintf(str, sizeof(str), "%s_temperature_sensor_%s", Mqtt::basename().c_str(), sensor.id().c_str());
+                snprintf(str, sizeof(str), "temperature_sensor_%s", sensor.id().c_str());
                 config["object_id"] = str;
 
                 snprintf(str, sizeof(str), "%s", sensor.name().c_str());

@@ -1141,7 +1141,7 @@ const DashboardData: FC = () => {
                   </Grid>
                 </>
               )}
-              {analog.t === AnalogType.DIGITAL_OUT && (analog.id === '25' || analog.id === '26') && (
+              {analog.t === AnalogType.DIGITAL_OUT && (analog.g === 25 || analog.g === 26) && (
                 <>
                   <Grid item xs={4}>
                     <ValidatedTextField
@@ -1157,7 +1157,7 @@ const DashboardData: FC = () => {
                   </Grid>
                 </>
               )}
-              {analog.t === AnalogType.DIGITAL_OUT && analog.id !== '25' && analog.id !== '26' && (
+              {analog.t === AnalogType.DIGITAL_OUT && analog.g !== 25 && analog.g !== 26 && (
                 <>
                   <Grid item xs={4}>
                     <ValidatedTextField

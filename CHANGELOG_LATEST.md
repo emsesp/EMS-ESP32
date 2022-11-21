@@ -18,6 +18,7 @@
 - Add MD5 check [#637](https://github.com/emsesp/EMS-ESP32/issues/637)
 - Add more bus-ids [#673](https://github.com/emsesp/EMS-ESP32/issues/673)
 - Use HA connectivity device class for Status [#751](https://github.com/emsesp/EMS-ESP32/issues/751)
+- Add commands for analog sensors outputs
 
 ## Fixed
 
@@ -30,6 +31,8 @@
 - render mqtt float json values with trailing zero
 - removed flash strings
 - reload page after restart button is pressed
+- analog/dallas values command as list like ems-devices
+- analog/dallas HA-entities based on id
 
 ## **BREAKING CHANGES:**
 

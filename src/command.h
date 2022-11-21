@@ -54,12 +54,12 @@ using cmd_json_function_p = std::function<bool(const char * data, const int8_t i
 class Command {
   public:
     struct CmdFunction {
-        uint8_t                   device_type_; // DeviceType::
-        uint8_t                   flags_;       // mqtt flags for command subscriptions
-        const char *              cmd_;
-        const cmd_function_p      cmdfunction_;
-        const cmd_json_function_p cmdfunction_json_;
-        const char * const *      description_;
+        uint8_t              device_type_; // DeviceType::
+        uint8_t              flags_;       // mqtt flags for command subscriptions
+        const char *         cmd_;
+        cmd_function_p       cmdfunction_;
+        cmd_json_function_p  cmdfunction_json_;
+        const char * const * description_;
 
         CmdFunction(const uint8_t             device_type,
                     const uint8_t             flags,
@@ -113,6 +113,7 @@ class Command {
     static void                   show_all(uuid::console::Shell & shell);
     static Command::CmdFunction * find_command(const uint8_t device_type, const char * cmd);
 
+    static void erase_command(const uint8_t device_type, const char * cmd);
     static void show(uuid::console::Shell & shell, uint8_t device_type, bool verbose);
     static void show_devices(uuid::console::Shell & shell);
     static bool device_has_commands(const uint8_t device_type);
