@@ -230,6 +230,8 @@ MAKE_PSTR_LIST(climate, "HA climate config creation")
 MAKE_PSTR_LIST(list_syslog_level, "off", "emerg", "alert", "crit", "error", "warn", "notice", "info", "debug", "trace", "all")
 
 // sensors
+MAKE_PSTR_LIST(counter, "counter")
+MAKE_PSTR_LIST(digital_out, "digital_out")
 MAKE_PSTR_LIST(list_sensortype, "none", "digital in", "counter", "adc", "timer", "rate", "digital out", "pwm 0", "pwm 1", "pwm 2")
 
 // watch

@@ -116,7 +116,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         // handle dead endpoints like api/system or api/boiler
         // default to 'info' for SYSTEM, DALLASENSOR and ANALOGSENSOR, the other devices to 'values' for shortname version
         if (num_paths < (id_n > 0 ? 4 : 3)) {
-            if (device_type < EMSdevice::DeviceType::BOILER) {
+            if (device_type == EMSdevice::DeviceType::SYSTEM) {
                 command_p = F_(info);
             } else {
                 command_p = F_(values);
@@ -193,20 +193,26 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         return nullptr;
     }
 
+    // convert cmd to lowercase and compare
+    char * lowerCmd = strdup(command);
+    for (char * p = lowerCmd; *p; p++) {
+        *p = tolower(*p);
+    }
+
     // check prefix and valid number range, also check 'id'
-    if (!strncmp(command, "hc", 2) && command[2] >= '1' && command[2] <= '8') {
+    if (!strncmp(lowerCmd, "hc", 2) && command[2] >= '1' && command[2] <= '8') {
         id = command[2] - '0';
         command += 3;
-    } else if (!strncmp(command, "wwc", 3) && command[3] == '1' && command[4] == '0') {
+    } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] == '1' && command[4] == '0') {
         id = 19;
         command += 5;
-    } else if (!strncmp(command, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {
+    } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {
         id = command[3] - '0' + 8;
         command += 4;
-    } else if (!strncmp(command, "id", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '9') {
+    } else if (!strncmp(lowerCmd, "id", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '9') {
         id = command[3] - '0' + 10;
         command += 4;
-    } else if (!strncmp(command, "id", 2) && command[2] >= '1' && command[2] <= '9') {
+    } else if (!strncmp(lowerCmd, "id", 2) && command[2] >= '1' && command[2] <= '9') {
         id = command[2] - '0';
         command += 3;
     }
@@ -214,6 +220,7 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     if (command[0] == '/' || command[0] == '.' || command[0] == '_') {
         command++;
     }
+    free(lowerCmd);
     // return null for empty command
     if (command[0] == '\0') {
         return nullptr;
@@ -332,20 +339,27 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ch
         return nullptr;
     }
 
-    // convert cmd to lowercase and compare
-    char lowerCmd[30];
-    strlcpy(lowerCmd, cmd, sizeof(lowerCmd));
-    for (char * p = lowerCmd; *p; p++) {
-        *p = tolower(*p);
-    }
-
     for (auto & cf : cmdfunctions_) {
-        if (!strcmp(lowerCmd, cf.cmd_) && (cf.device_type_ == device_type)) {
+        if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type)) {
             return &cf;
         }
     }
 
     return nullptr; // command not found
+}
+
+void Command::erase_command(const uint8_t device_type, const char * cmd) {
+    if ((cmd == nullptr) || (strlen(cmd) == 0) || (cmdfunctions_.empty())) {
+        return;
+    }
+    auto it = cmdfunctions_.begin();
+    for (auto & cf : cmdfunctions_) {
+        if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type)) {
+            cmdfunctions_.erase(it);
+            return;
+        }
+        it++;
+    }
 }
 
 // list all commands for a specific device, output as json
