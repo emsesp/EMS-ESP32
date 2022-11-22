@@ -79,6 +79,7 @@
 {203, DeviceType::THERMOSTAT, "EasyControl CT200", DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
 
 // Thermostat - Buderus/Nefit/Bosch specific - 0x17 / 0x10 / 0x18 / 0x19-0x1B for hc2-4 / 0x38
+{  4, DeviceType::THERMOSTAT, "UI800", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 { 65, DeviceType::THERMOSTAT, "RC10", DeviceFlags::EMS_DEVICE_FLAG_RC20_N},// 0x17
 { 67, DeviceType::THERMOSTAT, "RC30", DeviceFlags::EMS_DEVICE_FLAG_RC30_N},// 0x10 - based on RC35
 { 77, DeviceType::THERMOSTAT, "RC20/Moduline 300", DeviceFlags::EMS_DEVICE_FLAG_RC20},// 0x17
@@ -116,6 +117,7 @@
 {192, DeviceType::THERMOSTAT, "FW120", DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},
 
 // Thermostat remote - 0x38
+{  3, DeviceType::THERMOSTAT, "RT800", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
 {200, DeviceType::THERMOSTAT, "RC100H", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
 
 // Solar Modules - 0x30 (for solar), 0x2A, 0x41 (for ww)
