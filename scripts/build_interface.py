@@ -24,6 +24,10 @@ def buildWeb():
     try:
         env.Execute("npm install")
         env.Execute("npx typesafe-i18n --no-watch")
+        with open("./src/i18n/i18n-util.ts") as r:
+            text = r.read().replace("Locales = 'pl'", "Locales = 'en'")
+        with open("./src/i18n/i18n-util.ts", "w") as w:
+            w.write(text)
         env.Execute("npm run build")
         buildPath = Path("build")
         wwwPath = Path("../data/www")

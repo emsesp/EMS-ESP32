@@ -1,8 +1,8 @@
-import type { Translation } from '../i18n-types';
+import type { BaseTranslation } from '../i18n-types';
 /* prettier-ignore */
 /* eslint-disable */
 
-const pl: Translation = {
+const pl: BaseTranslation = {
   LANGUAGE: 'Język',
   RETRY: 'Ponów',
   LOADING: 'Ładowanie',
