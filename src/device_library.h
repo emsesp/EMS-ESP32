@@ -41,7 +41,7 @@
 {170, DeviceType::BOILER, "Logano GB212", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {172, DeviceType::BOILER, "Enviline/Compress 6000AW/Hybrid 7000iAW/SupraEco/Geo 5xx", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 {173, DeviceType::BOILER, "Geo 5xx", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
-{195, DeviceType::BOILER, "Condens 5000i/Greenstar 8000", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{195, DeviceType::BOILER, "Condens 5000i/Greenstar 8000/GC9800IW", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {203, DeviceType::BOILER, "Logamax U122/Cerapur", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {206, DeviceType::BOILER, "Ecomline Excellent", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {208, DeviceType::BOILER, "Logamax Plus/GB192/Condens GC9000/Greenstar ErP", DeviceFlags::EMS_DEVICE_FLAG_NONE},
