@@ -1236,11 +1236,19 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["shower alert coldshot"] = settings.shower_alert_coldshot; // seconds
             node["shower alert trigger"]  = settings.shower_alert_trigger;  // minutes
         }
-        node["rx gpio"]         = settings.rx_gpio;
-        node["tx gpio"]         = settings.tx_gpio;
-        node["dallas gpio"]     = settings.dallas_gpio;
-        node["pbutton gpio"]    = settings.pbutton_gpio;
-        node["led gpio"]        = settings.led_gpio;
+        if (settings.board_profile == "CUSTOM") {
+            node["phy type"] = settings.phy_type;
+            if (settings.phy_type != PHY_type::PHY_TYPE_NONE) {
+                node["eth power"]      = settings.eth_power;
+                node["eth phy_addr"]   = settings.eth_phy_addr;
+                node["eth clock_mode"] = settings.eth_clock_mode;
+            }
+            node["rx gpio"]      = settings.rx_gpio;
+            node["tx gpio"]      = settings.tx_gpio;
+            node["dallas gpio"]  = settings.dallas_gpio;
+            node["pbutton gpio"] = settings.pbutton_gpio;
+            node["led gpio"]     = settings.led_gpio;
+        }
         node["hide led"]        = settings.hide_led;
         node["notoken api"]     = settings.notoken_api;
         node["readonly mode"]   = settings.readonly_mode;
