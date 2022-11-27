@@ -132,7 +132,7 @@
 #endif
 
 #ifndef EMSESP_DEFAULT_PHY_TYPE
-#define EMSESP_DEFAULT_PHY_TYPE 0 // No Ethernet, just Wifi
+#define EMSESP_DEFAULT_PHY_TYPE 0 // No Ethernet, just Wifi. PHY_type::PHY_TYPE_NONE,
 #endif
 
 // MQTT
