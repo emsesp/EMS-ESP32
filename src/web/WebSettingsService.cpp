@@ -89,17 +89,32 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 #elif CONFIG_IDF_TARGET_ESP32
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 #endif
+    settings.board_profile = "S32";
+
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
 #ifndef EMSESP_STANDALONE
         // unknown, check for ethernet, use default E32/S32
+        // data is led, dallas, rx, tx, pbutton, phy, eth_power, eth_addr, eth_clock
         if (ETH.begin(1, 16, 23, 18, ETH_PHY_LAN8720)) {
-            data                   = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0}; // BBQKees Gateway E32
+            // BBQKees Gateway E32
+            data                   = {EMSESP_DEFAULT_LED_GPIO, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0};
             settings.board_profile = "E32";
         } else {
-            data                   = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // BBQKees Gateway S32
+            // BBQKees Gateway S32
+            data                   = {EMSESP_DEFAULT_LED_GPIO,
+                                      EMSESP_DEFAULT_DALLAS_GPIO,
+                                      EMSESP_DEFAULT_RX_GPIO,
+                                      EMSESP_DEFAULT_TX_GPIO,
+                                      EMSESP_DEFAULT_PBUTTON_GPIO,
+                                      EMSESP_DEFAULT_PHY_TYPE,
+                                      0,
+                                      0,
+                                      0};
             settings.board_profile = "S32";
         }
         EMSESP::logger().info("No board profile found. Re-setting to %s", settings.board_profile.c_str());
+#else
+        settings.board_profile = "S32";
 #endif
     } else {
         EMSESP::logger().info("Loading board profile %s", settings.board_profile.c_str());
