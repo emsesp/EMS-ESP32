@@ -278,6 +278,7 @@ MAKE_PSTR_ENUM(enum_mode3, FL_(night), FL_(day), FL_(auto))              // RC35
 MAKE_PSTR_ENUM(enum_mode4, FL_(nofrost), FL_(eco), FL_(heat), FL_(auto)) // JUNKERS
 MAKE_PSTR_ENUM(enum_mode5, FL_(auto), FL_(off))                          // CRF
 MAKE_PSTR_ENUM(enum_mode6, FL_(nofrost), FL_(night), FL_(day))           // RC10
+MAKE_PSTR_ENUM(enum_mode_ha, FL_(off), FL_(heat), FL_(auto))             // HA climate
 
 MAKE_PSTR_ENUM(enum_modetype, FL_(eco), FL_(comfort))
 MAKE_PSTR_ENUM(enum_modetype3, FL_(night), FL_(day))
