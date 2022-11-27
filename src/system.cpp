@@ -541,7 +541,17 @@ void System::send_info_mqtt(const char * event_str) {
     doc["event"]   = event_str;
     doc["version"] = EMSESP_APP_VERSION;
 #ifndef EMSESP_STANDALONE
-    if (WiFi.status() == WL_CONNECTED) {
+    if (EMSESP::system_.ethernet_connected()) {
+        doc["connection"]      = "ethernet";
+        doc["hostname"]        = ETH.getHostname();
+        doc["MAC"]             = ETH.macAddress();
+        doc["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
+        doc["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
+        doc["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
+        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+            doc["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
+        }
+    } else if (WiFi.status() == WL_CONNECTED) {
         doc["connection"]      = "wifi";
         doc["hostname"]        = WiFi.getHostname();
         doc["SSID"]            = WiFi.SSID();
@@ -553,16 +563,6 @@ void System::send_info_mqtt(const char * event_str) {
         doc["IPv4 nameserver"] = uuid::printable_to_string(WiFi.dnsIP());
         if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
             doc["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
-        }
-    } else if (EMSESP::system_.ethernet_connected()) {
-        doc["connection"]      = "ethernet";
-        doc["hostname"]        = ETH.getHostname();
-        doc["MAC"]             = ETH.macAddress();
-        doc["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
-        doc["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
-        doc["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
-        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            doc["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
         }
     }
 #endif
@@ -1061,15 +1061,26 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["uptime"]   = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     // node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
-    node["freemem"]  = ESP.getFreeHeap() / 1024;  // kilobytes
-    node["free_app"] = EMSESP::system_.appFree(); // kilobytes
+    node["freemem"]  = ESP.getFreeHeap() / 1024;     // kilobytes
+    node["maxalloc"] = ESP.getMaxAllocHeap() / 1024; // kilobytes
+    node["free_app"] = EMSESP::system_.appFree();    // kilobytes
 #endif
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
 #ifndef EMSESP_STANDALONE
     // Network Status
     node = output.createNestedObject("Network Info");
-    if (WiFi.status() == WL_CONNECTED) {
+    if (EMSESP::system_.ethernet_connected()) {
+        node["connection"]      = "Ethernet";
+        node["hostname"]        = ETH.getHostname();
+        node["MAC"]             = ETH.macAddress();
+        node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
+        node["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
+        node["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
+        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+            node["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
+        }
+    } else if (WiFi.status() == WL_CONNECTED) {
         node["connection"] = "WiFi";
         node["hostname"]   = WiFi.getHostname();
         // node["SSID"]            = WiFi.SSID();
@@ -1082,22 +1093,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
             node["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
         }
-    } else if (EMSESP::system_.ethernet_connected()) {
-        node["connection"]      = "Ethernet";
-        node["hostname"]        = ETH.getHostname();
-        node["MAC"]             = ETH.macAddress();
-        node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
-        node["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
-        node["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
-        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            node["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
-        }
-        EMSESP::webSettingsService.read([&](WebSettings & settings) {
-            node["phy type"]       = settings.phy_type;
-            node["eth power"]      = settings.eth_power;
-            node["eth phy addr"]   = settings.eth_phy_addr;
-            node["eth clock mode"] = settings.eth_clock_mode;
-        });
     }
 #endif
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
