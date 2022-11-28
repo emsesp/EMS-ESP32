@@ -540,6 +540,16 @@ void System::send_info_mqtt(const char * event_str) {
     StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> doc;
     doc["event"]   = event_str;
     doc["version"] = EMSESP_APP_VERSION;
+
+    // if NTP is enabled send the boot_time in local time in ISO 8601 format (eg: 2022-11-15 20:46:38)
+    // https://github.com/emsesp/EMS-ESP32/issues/751
+    if (ntp_connected()) {
+        char   time_string[25];
+        time_t now = time(nullptr); // grab the current instant in unix seconds
+        strftime(time_string, 25, "%F %T", localtime(&now));
+        doc["boot_time"] = time_string;
+    }
+
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.ethernet_connected()) {
         doc["connection"]      = "ethernet";
@@ -582,7 +592,7 @@ bool System::heartbeat_json(JsonObject & output) {
 
     output["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     output["uptime_sec"] = uuid::get_uptime_sec();
-    bool value_b         = EMSESP::system_.ntp_connected();
+    bool value_b         = ntp_connected();
     if (Mqtt::ha_enabled()) {
         char s[12];
         output["ntp_status"] = Helpers::render_boolean(s, value_b); // for HA always render as string
@@ -1404,10 +1414,19 @@ std::string System::reset_reason(uint8_t cpu) const {
 // set NTP status
 void System::ntp_connected(bool b) {
     if (b != ntp_connected_) {
-        LOG_INFO(b ? "NTP connected" : "NTP disconnected");
+        LOG_INFO(b ? "NTP connected" : "NTP disconnected"); // if changed report it
     }
     ntp_connected_  = b;
     ntp_last_check_ = b ? uuid::get_uptime_sec() : 0;
+}
+
+// get NTP status
+bool System::ntp_connected() {
+    // timeout 2 hours, ntp sync is normally every hour.
+    if ((uuid::get_uptime_sec() - ntp_last_check_ > 7201) && ntp_connected_) {
+        ntp_connected(false);
+    }
+    return ntp_connected_;
 }
 
 } // namespace emsesp

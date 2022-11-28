@@ -180,14 +180,7 @@ class System {
     }
 
     void ntp_connected(bool b);
-
-    bool ntp_connected() {
-        // timeout 2 hours, ntp sync is normally every hour.
-        if ((uuid::get_uptime_sec() - ntp_last_check_ > 7201) && ntp_connected_) {
-            ntp_connected(false);
-        }
-        return ntp_connected_;
-    }
+    bool ntp_connected();
 
     bool network_connected() {
 #ifndef EMSESP_STANDALONE
