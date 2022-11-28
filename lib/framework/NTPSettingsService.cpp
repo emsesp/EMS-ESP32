@@ -50,7 +50,7 @@ void NTPSettingsService::configureNTP() {
     emsesp::EMSESP::system_.ntp_connected(false);
     if (connected_ && _state.enabled) {
         emsesp::EMSESP::logger().info("Starting NTP");
-        sntp_set_sync_interval(3600000); // onehour
+        sntp_set_sync_interval(3600000); // one hour
         sntp_set_time_sync_notification_cb(ntp_received);
         configTzTime(_state.tzFormat.c_str(), _state.server.c_str());
     } else {
@@ -83,4 +83,5 @@ void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVari
 void NTPSettingsService::ntp_received(struct timeval * tv) {
     // emsesp::EMSESP::logger().info("NTP sync to %d sec", tv->tv_sec);
     emsesp::EMSESP::system_.ntp_connected(true);
+    emsesp::EMSESP::system_.send_info_mqtt("connected");
 }
