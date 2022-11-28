@@ -1123,7 +1123,7 @@ const DashboardData: FC = () => {
                         type="number"
                         variant="outlined"
                         onChange={updateValue(setAnalog)}
-                        inputProps={{ min: '0', step: '1' }}
+                        inputProps={{ step: '0.001' }}
                       />
                     </Grid>
                   )}
@@ -1136,7 +1136,7 @@ const DashboardData: FC = () => {
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
-                      inputProps={{ min: '-100', max: '100', step: '0.1' }}
+                      inputProps={{ step: '0.001' }}
                     />
                   </Grid>
                 </>

@@ -2251,7 +2251,11 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
     } else {
         // check for the mode being a full string name
         if (!Helpers::value2enum(value, enum_index, mode_list)) {
-            return false; // not found
+            mode_list = FL_(enum_mode_ha);
+            if (Mqtt::ha_enabled() && !Helpers::value2enum(value, enum_index, mode_list)) {
+                LOG_WARNING("wrong mode: %s", value);
+                return false; // not found
+            }
         }
     }
 
