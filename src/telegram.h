@@ -290,6 +290,7 @@ class TxService : public EMSbus {
 
     void     start();
     void     send();
+    uint8_t  get_send_id();
     void     add(const uint8_t  operation,
                  const uint8_t  dest,
                  const uint16_t type_id,
