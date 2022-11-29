@@ -521,15 +521,14 @@ void DallasSensor::publish_values(const bool force) {
                 // snprintf(str, sizeof(str), "%s_temperature_sensor_%s", Mqtt::basename().c_str(), sensor.id().c_str());
                 snprintf(str, sizeof(str), "temperature_sensor_%s", sensor.id().c_str());
                 config["object_id"] = str;
+                config["uniq_id"]   = str; // same as object_id
 
                 snprintf(str, sizeof(str), "%s", sensor.name().c_str());
                 config["name"] = str;
 
-                snprintf(str, sizeof(str), "dallasensor_%s", sensor.id().c_str());
                 config["uniq_id"] = str;
-
-                JsonObject dev = config.createNestedObject("dev");
-                JsonArray  ids = dev.createNestedArray("ids");
+                JsonObject dev    = config.createNestedObject("dev");
+                JsonArray  ids    = dev.createNestedArray("ids");
                 ids.add("ems-esp");
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];

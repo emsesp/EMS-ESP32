@@ -454,12 +454,10 @@ void AnalogSensor::publish_values(const bool force) {
                 // snprintf(str, sizeof(str), "%s_analog_sensor_%s", Mqtt::basename().c_str(), sensor.name().c_str());
                 snprintf(str, sizeof(str), "analog_sensor_%d", sensor.gpio());
                 config["object_id"] = str;
+                config["uniq_id"]   = str; // same as object_id
 
                 snprintf(str, sizeof(str), "%s", sensor.name().c_str());
                 config["name"] = str;
-
-                snprintf(str, sizeof(str), "analogsensor_%d", sensor.gpio());
-                config["uniq_id"] = str;
 
                 if (sensor.uom() != DeviceValueUOM::NONE) {
                     config["unit_of_meas"] = EMSdevice::uom_to_string(sensor.uom());

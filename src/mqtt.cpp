@@ -591,12 +591,12 @@ void Mqtt::on_connect() {
 void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
-    doc["uniq_id"] = "ems-esp-system";
-    doc["~"]       = mqtt_base_; // default ems-esp
+    doc["uniq_id"]   = "ems-esp-system";
+    doc["object_id"] = "ems_esp_status";
+    doc["~"]         = mqtt_base_; // default ems-esp
     // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
     doc["stat_t"]       = "~/status";
-    doc["object_id"]    = "ems_esp_status";
     doc["name"]         = "EMS-ESP status";
     doc["payload_on"]   = "online";
     doc["payload_off"]  = "offline";
@@ -950,21 +950,29 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         return;
     }
 
+
+
     // create the device name
     auto device_name = EMSdevice::device_type_2_device_name(device_type);
 
     // create entity by add the hc/wwc tag if present, separating with a .
-    char new_entity[50];
+    char entity_with_tag[50];
     if (tag >= DeviceValueTAG::TAG_HC1) {
-        snprintf(new_entity, sizeof(new_entity), "%s.%s", EMSdevice::tag_to_mqtt(tag).c_str(), entity);
+        snprintf(entity_with_tag, sizeof(entity_with_tag), "%s.%s", EMSdevice::tag_to_mqtt(tag).c_str(), entity);
     } else {
-        snprintf(new_entity, sizeof(new_entity), "%s", entity);
+        snprintf(entity_with_tag, sizeof(entity_with_tag), "%s", entity);
     }
 
-    // build unique identifier which will be used in the topic, replacing all . with _ as not to break HA
-    char uniq[101];
-    snprintf(uniq, sizeof(uniq), "%s_%s", device_name, new_entity);
-    Helpers::replace_char(uniq, '.', '_');
+    // build unique identifier which will be used in the topic, also used as object_id
+    char uniq_id[70];
+    snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
+    Helpers::replace_char(uniq_id, '.', '_'); // replacing all . with _ as not to break HA
+
+    // build a config topic that will be prefix onto a HA type (e.g. number, switch)
+    // e.g. homeassistant/number/ems-esp/thermostat_hc1_manualtemp
+    char config_topic[70];
+    snprintf(config_topic, sizeof(config_topic), "%s/%s_%s/config", mqtt_basename_.c_str(), device_name, entity_with_tag);
+    Helpers::replace_char(config_topic, '.', '_'); // replacing all . with _ as not to break HA
 
     bool set_ha_classes = false; // set to true if we want to set the state class and device class
 
@@ -981,19 +989,19 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::ULONG:
             // number - https://www.home-assistant.io/integrations/number.mqtt
             // https://developers.home-assistant.io/docs/core/entity/number
-            snprintf(topic, sizeof(topic), "number/%s/%s/config", mqtt_basename_.c_str(), uniq);
+            snprintf(topic, sizeof(topic), "number/%s", config_topic);
             break;
         case DeviceValueType::BOOL:
             // switch - https://www.home-assistant.io/integrations/switch.mqtt
-            snprintf(topic, sizeof(topic), "switch/%s/%s/config", mqtt_basename_.c_str(), uniq);
+            snprintf(topic, sizeof(topic), "switch/%s", config_topic);
             break;
         case DeviceValueType::ENUM:
             // select - https://www.home-assistant.io/integrations/select.mqtt
-            snprintf(topic, sizeof(topic), "select/%s/%s/config", mqtt_basename_.c_str(), uniq);
+            snprintf(topic, sizeof(topic), "select/%s", config_topic);
             break;
         default:
             // plain old sensor
-            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_basename_.c_str(), uniq);
+            snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
             break;
         }
     } else {
@@ -1001,26 +1009,25 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         set_ha_classes = true;
         // plain old read only device entity
         if (type == DeviceValueType::BOOL) {
-            snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", mqtt_basename_.c_str(), uniq); // binary sensor (for booleans)
+            snprintf(topic, sizeof(topic), "binary_sensor/%s", config_topic); // binary sensor (for booleans)
         } else {
-            snprintf(topic, sizeof(topic), "sensor/%s/%s/config", mqtt_basename_.c_str(), uniq); // normal HA sensor
+            snprintf(topic, sizeof(topic), "sensor/%s", config_topic); // normal HA sensor
         }
     }
 
     // if we're asking to remove this topic, send an empty payload and exit
     // https://github.com/emsesp/EMS-ESP32/issues/196
     if (remove) {
-        LOG_DEBUG("Removing HA config for %s", uniq);
+        LOG_DEBUG("Removing HA config for %s", uniq_id);
         publish_ha(topic);
         return;
     }
 
-    bool have_tag = !EMSdevice::tag_to_string(tag).empty();
-
     // build the payload
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
-    doc["~"]       = mqtt_base_;
-    doc["uniq_id"] = uniq;
+    doc["~"]         = mqtt_base_;
+    doc["uniq_id"]   = uniq_id;
+    doc["object_id"] = uniq_id; // same as unique_id
 
     const char * ic_ha  = "ic";           // icon - only set this if there is no device class
     const char * sc_ha  = "state_class";  // state class
@@ -1031,8 +1038,8 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // note: there is no way to handle strings in HA so datetimes (e.g. set_datetime, set_holiday, set_wwswitchtime etc) are excluded
     if (has_cmd) {
         // command topic back to EMS-ESP
-        char command_topic[105];
-        snprintf(command_topic, sizeof(command_topic), "~/%s", uniq);
+        char command_topic[MQTT_TOPIC_MAX_SIZE];
+        snprintf(command_topic, sizeof(command_topic), "~/%s", uniq_id);
         Helpers::replace_char(command_topic, '_', '/');
         doc["command_topic"] = command_topic;
 
@@ -1082,31 +1089,19 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     char   ha_name[70];
     char * F_name = strdup(fullname);
     F_name[0]     = toupper(F_name[0]); // capitalize first letter
-    if (have_tag) {
-        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), F_name);
-    } else {
+    if (EMSdevice::tag_to_string(tag).empty()) {
         snprintf(ha_name, sizeof(ha_name), "%s", F_name);
-    }
-    free(F_name);
-    doc["name"] = ha_name;
-
-    // entity id is generated from the name, see https://www.home-assistant.io/docs/mqtt/discovery/#use-object_id-to-influence-the-entity-id
-    // so we override it to make it unique using entity_id
-    // See https://github.com/emsesp/EMS-ESP32/issues/596
-    // keep it compatible to v3.4, use english fullname, no prefix (basename prefix commented out)
-    char object_id[130];
-    if (have_tag) {
-        snprintf(object_id, sizeof(object_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag, false).c_str(), en_name);
     } else {
-        snprintf(object_id, sizeof(object_id), "%s_%s", device_name, en_name);
+        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), F_name);
     }
-    doc["object_id"] = object_id;
+    free(F_name); // very important!
+    doc["name"] = ha_name;
 
     // value template
     // if its nested mqtt format then use the appended entity name, otherwise take the original
     char val_tpl[75];
     if (is_nested()) {
-        snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", new_entity);
+        snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", entity_with_tag);
     } else {
         snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", entity);
     }
@@ -1230,8 +1225,7 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     char currtemp_s[30];
     char mode_str_tpl[400];
     char name_s[10];
-    char id_s[20];
-    char uniq_id_s[30];
+    char uniq_id_s[60];
     char temp_cmd_s[30];
     char mode_cmd_s[30];
     char min_s[10];
@@ -1269,18 +1263,17 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
              hc_mode_s,
              hc_mode_s);
 
-    snprintf(id_s, sizeof(id_s), "thermostat_hc%d", hc_num);
     snprintf(name_s, sizeof(name_s), "Hc%d", hc_num);
-    snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num);
+    snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_thermostat_hc%d", mqtt_basename_.c_str(), hc_num); // add basename
     snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/seltemp", hc_num);
     snprintf(mode_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/mode", hc_num);
 
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
     doc["~"]             = mqtt_base_;
-    doc["object_id"]     = id_s;
-    doc["name"]          = name_s;
     doc["uniq_id"]       = uniq_id_s;
+    doc["object_id"]     = uniq_id_s; // same as uniq_id
+    doc["name"]          = name_s;
     doc["mode_stat_t"]   = topic_t;
     doc["mode_stat_tpl"] = mode_str_tpl;
     doc["temp_cmd_t"]    = temp_cmd_s;
