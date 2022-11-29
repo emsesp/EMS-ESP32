@@ -77,7 +77,7 @@ class System {
     bool check_upgrade();
     bool heartbeat_json(JsonObject & output);
     void send_heartbeat();
-    void send_info_mqtt(const char * event_str);
+    void send_info_mqtt(const char * event_str, bool send_ntp = false);
 
     bool syslog_enabled() {
         return syslog_enabled_;

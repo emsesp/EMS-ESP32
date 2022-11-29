@@ -536,17 +536,17 @@ void System::loop() {
 }
 
 // send MQTT info topic appended with the version information as JSON, as a retained flag
-void System::send_info_mqtt(const char * event_str) {
+void System::send_info_mqtt(const char * event_str, bool send_ntp) {
     StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> doc;
     doc["event"]   = event_str;
     doc["version"] = EMSESP_APP_VERSION;
 
     // if NTP is enabled send the boot_time in local time in ISO 8601 format (eg: 2022-11-15 20:46:38)
     // https://github.com/emsesp/EMS-ESP32/issues/751
-    if (ntp_connected()) {
+    if (send_ntp) {
         char   time_string[25];
-        time_t now = time(nullptr); // grab the current instant in unix seconds
-        strftime(time_string, 25, "%F %T", localtime(&now));
+        time_t now = time(nullptr) - uuid::get_uptime_sec();
+        strftime(time_string, 25, "%FT%T%z", localtime(&now));
         doc["boot_time"] = time_string;
     }
 
@@ -1414,7 +1414,8 @@ std::string System::reset_reason(uint8_t cpu) const {
 // set NTP status
 void System::ntp_connected(bool b) {
     if (b != ntp_connected_) {
-        LOG_INFO(b ? "NTP connected" : "NTP disconnected"); // if changed report it
+        LOG_INFO(b ? "NTP connected" : "NTP disconnected");  // if changed report it
+        emsesp::EMSESP::system_.send_info_mqtt("connected", true); // send info topic, but only once
     }
     ntp_connected_  = b;
     ntp_last_check_ = b ? uuid::get_uptime_sec() : 0;
