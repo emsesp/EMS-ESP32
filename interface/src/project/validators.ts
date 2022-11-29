@@ -72,11 +72,11 @@ export const createSettingsValidator = (settings: Settings) =>
       syslog_host: [{ required: true, message: 'Host is required' }, IP_OR_HOSTNAME_VALIDATOR],
       syslog_port: [
         { required: true, message: 'Port is required' },
-        { type: 'number', min: 0, max: 65535, message: 'Port must be between 0 and 65535' }
+        { type: 'number', min: 0, max: 65535, message: 'Invalid Port' }
       ],
       syslog_mark_interval: [
         { required: true, message: 'Mark interval is required' },
-        { type: 'number', min: 0, max: 10, message: 'Port must be between 0 and 10' }
+        { type: 'number', min: 0, max: 10, message: ' must be between 0 and 10' }
       ]
     }),
     ...(settings.shower_alert && {
