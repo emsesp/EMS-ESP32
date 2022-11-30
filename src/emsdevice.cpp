@@ -350,13 +350,7 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) const {
 
 // list all the telegram type IDs for this device, outputting to a string (max size 200)
 char * EMSdevice::show_telegram_handlers(char * result, const size_t len, const uint8_t handlers) {
-    uint8_t size = telegram_functions_.size();
-
     strlcpy(result, "", len);
-
-    if (!size) {
-        return result;
-    }
 
     uint8_t i = 0;
     for (const auto & tf : telegram_functions_) {
