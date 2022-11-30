@@ -94,7 +94,6 @@ class Mqtt {
     static void publish_ha_sensor_config(uint8_t               type,
                                          uint8_t               tag,
                                          const char * const    fullname,
-                                         const char * const    en_name,
                                          const uint8_t         device_type,
                                          const char * const    entity,
                                          const uint8_t         uom,
