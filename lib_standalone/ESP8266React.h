@@ -74,7 +74,7 @@ class DummySettings {
     String   base               = "ems-esp";
     bool     publish_single     = false;
     bool     publish_single2cmd = false;
-    bool     send_response      = true;
+    bool     send_response      = false; // don't send response
     String   host               = "192.168.1.4";
     uint16_t port               = 1883;
     String   clientId           = "ems-esp";
