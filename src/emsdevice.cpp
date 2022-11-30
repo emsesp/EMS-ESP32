@@ -623,6 +623,7 @@ bool EMSdevice::is_readable(const void * value_p) const {
 }
 
 // check if value/command is readonly
+// matches valid tags too
 bool EMSdevice::is_readonly(const std::string & cmd, const int8_t id) const {
     uint8_t tag = id > 0 ? DeviceValueTAG::TAG_HC1 + id - 1 : DeviceValueTAG::TAG_NONE;
     for (const auto & dv : devicevalues_) {
