@@ -280,6 +280,7 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
         }
         return;
     }
+
     // for misconfigured mqtt servers and publish2command ignore echos
     if (publish_single_ && publish_single2cmd_ && lasttopic_ == topic && lastpayload_ == message) {
         LOG_DEBUG("Received echo message %s: %s", topic, message);
@@ -291,11 +292,12 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
         // add the base back
         char full_topic[MQTT_TOPIC_MAX_SIZE];
         snprintf(full_topic, sizeof(full_topic), "%s/%s", mqtt_base_.c_str(), mf.topic_.c_str());
+
         if ((!strcmp(topic, full_topic)) && (mf.mqtt_subfunction_)) {
             if (!(mf.mqtt_subfunction_)(message)) {
                 LOG_ERROR("error: invalid payload %s for this topic %s", message, topic);
                 if (send_response_) {
-                    Mqtt::publish(F_(response), "error: invalid data");
+                    Mqtt::publish("response", "error: invalid data");
                 }
             }
             return;
@@ -330,12 +332,12 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
         }
         LOG_ERROR(error);
         if (send_response_) {
-            Mqtt::publish(F_(response), error);
+            Mqtt::publish("response", error);
         }
     } else {
         // all good, send back json output from call
         if (send_response_) {
-            Mqtt::publish(F_(response), output);
+            Mqtt::publish("response", output);
         }
     }
 }
@@ -904,7 +906,6 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
     publish_ha_sensor_config(dv.type,
                              dv.tag,
                              dv.get_fullname().c_str(),
-                             (dv.fullname ? dv.fullname[0] : nullptr), // EN name
                              dv.device_type,
                              dv.short_name,
                              dv.uom,
@@ -925,7 +926,7 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
     JsonArray ids = dev_json.createNestedArray("ids");
     ids.add("ems-esp");
 
-    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
+    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
 }
 
 // MQTT discovery configs
@@ -934,7 +935,6 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
 void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdevice::DeviceValueType
                                     uint8_t               tag,         // EMSdevice::DeviceValueTAG
                                     const char * const    fullname,    // fullname, already translated
-                                    const char * const    en_name,     // original name
                                     const uint8_t         device_type, // EMSdevice::DeviceType
                                     const char * const    entity,      // same as shortname
                                     const uint8_t         uom,         // EMSdevice::DeviceValueUOM (0=NONE)
@@ -946,19 +946,17 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                                     const int16_t         dv_set_max,
                                     const JsonObject &    dev_json) {
     // ignore if name (fullname) is empty
-    if (fullname == nullptr || en_name == nullptr) {
+    if (!fullname) {
         return;
     }
-
-
 
     // create the device name
     auto device_name = EMSdevice::device_type_2_device_name(device_type);
 
-    // create entity by add the hc/wwc tag if present, separating with a .
+    // create entity by add the hc/wwc tag if present, separating with a _
     char entity_with_tag[50];
     if (tag >= DeviceValueTAG::TAG_HC1) {
-        snprintf(entity_with_tag, sizeof(entity_with_tag), "%s.%s", EMSdevice::tag_to_mqtt(tag).c_str(), entity);
+        snprintf(entity_with_tag, sizeof(entity_with_tag), "%s_%s", EMSdevice::tag_to_mqtt(tag).c_str(), entity);
     } else {
         snprintf(entity_with_tag, sizeof(entity_with_tag), "%s", entity);
     }
@@ -966,13 +964,11 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // build unique identifier which will be used in the topic, also used as object_id
     char uniq_id[70];
     snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
-    Helpers::replace_char(uniq_id, '.', '_'); // replacing all . with _ as not to break HA
 
     // build a config topic that will be prefix onto a HA type (e.g. number, switch)
     // e.g. homeassistant/number/ems-esp/thermostat_hc1_manualtemp
     char config_topic[70];
     snprintf(config_topic, sizeof(config_topic), "%s/%s_%s/config", mqtt_basename_.c_str(), device_name, entity_with_tag);
-    Helpers::replace_char(config_topic, '.', '_'); // replacing all . with _ as not to break HA
 
     bool set_ha_classes = false; // set to true if we want to set the state class and device class
 
@@ -1005,8 +1001,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             break;
         }
     } else {
-        // these are Read only sensors. We can set the device class and state class
-        set_ha_classes = true;
+        set_ha_classes = true; // these are Read only sensors. We can set the device class and state class
         // plain old read only device entity
         if (type == DeviceValueType::BOOL) {
             snprintf(topic, sizeof(topic), "binary_sensor/%s", config_topic); // binary sensor (for booleans)
@@ -1025,7 +1020,6 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build the payload
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
-    doc["~"]         = mqtt_base_;
     doc["uniq_id"]   = uniq_id;
     doc["object_id"] = uniq_id; // same as unique_id
 
@@ -1039,8 +1033,11 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     if (has_cmd) {
         // command topic back to EMS-ESP
         char command_topic[MQTT_TOPIC_MAX_SIZE];
-        snprintf(command_topic, sizeof(command_topic), "~/%s", uniq_id);
-        Helpers::replace_char(command_topic, '_', '/');
+        if (tag >= DeviceValueTAG::TAG_HC1) {
+            snprintf(command_topic, sizeof(command_topic), "%s/%s/%s/%s", mqtt_basename_.c_str(), device_name, EMSdevice::tag_to_mqtt(tag).c_str(), entity);
+        } else {
+            snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", mqtt_basename_.c_str(), device_name, entity);
+        }
         doc["command_topic"] = command_topic;
 
         // for enums, add options
@@ -1082,7 +1079,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // state topic
     char stat_t[MQTT_TOPIC_MAX_SIZE];
-    snprintf(stat_t, sizeof(stat_t), "~/%s", tag_to_topic(device_type, tag).c_str());
+    snprintf(stat_t, sizeof(stat_t), "%s/%s", mqtt_basename_.c_str(), tag_to_topic(device_type, tag).c_str());
     doc["stat_t"] = stat_t;
 
     // friendly name = <tag> <name>
@@ -1090,7 +1087,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     char * F_name = strdup(fullname);
     F_name[0]     = toupper(F_name[0]); // capitalize first letter
     if (EMSdevice::tag_to_string(tag).empty()) {
-        snprintf(ha_name, sizeof(ha_name), "%s", F_name);
+        snprintf(ha_name, sizeof(ha_name), "%s", F_name); // no tag
     } else {
         snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), F_name);
     }
@@ -1098,10 +1095,14 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     doc["name"] = ha_name;
 
     // value template
-    // if its nested mqtt format then use the appended entity name, otherwise take the original
+    // if its nested mqtt format then use the appended entity name, otherwise take the original name
     char val_tpl[75];
     if (is_nested()) {
-        snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", entity_with_tag);
+        if (tag >= DeviceValueTAG::TAG_HC1) {
+            snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s.%s}}", EMSdevice::tag_to_mqtt(tag).c_str(), entity);
+        } else {
+            snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", entity);
+        }
     } else {
         snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", entity);
     }
