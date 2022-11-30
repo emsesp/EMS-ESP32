@@ -547,7 +547,7 @@ void System::send_info_mqtt(const char * event_str, bool send_ntp) {
         char   time_string[25];
         time_t now = time(nullptr) - uuid::get_uptime_sec();
         strftime(time_string, 25, "%FT%T%z", localtime(&now));
-        doc["boot_time"] = time_string;
+        doc["boot time"] = time_string;
     }
 
 #ifndef EMSESP_STANDALONE
@@ -1071,9 +1071,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["uptime"]   = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     // node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
-    node["freemem"]  = ESP.getFreeHeap() / 1024;     // kilobytes
+    node["free mem"] = ESP.getFreeHeap() / 1024;     // kilobytes
     node["maxalloc"] = ESP.getMaxAllocHeap() / 1024; // kilobytes
-    node["free_app"] = EMSESP::system_.appFree();    // kilobytes
+    node["free app"] = EMSESP::system_.appFree();    // kilobytes
 #endif
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
@@ -1264,6 +1264,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["enum format"]     = settings.enum_format;
         node["analog enabled"]  = settings.analog_enabled;
         node["telnet enabled"]  = settings.telnet_enabled;
+        node["web log buffer"]  = settings.weblog_buffer;
     });
 
     // Devices - show EMS devices if we have any
@@ -1414,9 +1415,9 @@ std::string System::reset_reason(uint8_t cpu) const {
 // set NTP status
 void System::ntp_connected(bool b) {
     if (b != ntp_connected_) {
-        LOG_INFO(b ? "NTP connected" : "NTP disconnected");  // if changed report it
-        emsesp::EMSESP::system_.send_info_mqtt("connected", true); // send info topic, but only once
+        LOG_INFO(b ? "NTP connected" : "NTP disconnected"); // if changed report it
     }
+
     ntp_connected_  = b;
     ntp_last_check_ = b ? uuid::get_uptime_sec() : 0;
 }
@@ -1427,6 +1428,7 @@ bool System::ntp_connected() {
     if ((uuid::get_uptime_sec() - ntp_last_check_ > 7201) && ntp_connected_) {
         ntp_connected(false);
     }
+
     return ntp_connected_;
 }
 
