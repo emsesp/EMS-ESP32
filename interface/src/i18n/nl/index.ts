@@ -101,7 +101,7 @@ const nl: Translation = {
   NUM_DAYS: '{num} dag{{en}}',
   NUM_SECONDS: '{num} second{{en}}',
   NUM_HOURS: '{num} {{uur|uren}}',
-  NUM_MINUTES: '{num} minute{{n}}',
+  NUM_MINUTES: '{num} {{minuut|minuten}}',
   APPLICATION_SETTINGS: 'Applicatieinstellingen',
   CUSTOMIZATION: 'Custom aanpassingen',
   APPLICATION_RESTARTING: 'EMS-ESP herstarten',
