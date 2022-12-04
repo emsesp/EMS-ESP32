@@ -37,7 +37,7 @@ const de: Translation = {
   PRODUCT: 'Produkt',
   VERSION: 'Version',
   ENTITY_NAME: 'Entitätsname',
-  VALUE: 'Wert',
+  VALUE: '{{Wert|wert}}',
   SHOW_FAV: 'nur Favoriten anzeigen',
   DEVICE_SENSOR_DATA: 'Geräte- und Sensordaten',
   DEVICES_SENSORS: 'Geräte & Sensoren',
