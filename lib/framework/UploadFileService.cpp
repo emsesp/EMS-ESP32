@@ -29,9 +29,12 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         std::string extension = fname.substr(position + 1);
         size_t      fsize     = request->contentLength();
 
+#ifdef EMSESP_DEBUG
 #if defined(EMSESP_USE_SERIAL)
+        Serial.println();
         Serial.printf("Received filename: %s, len: %d, index: %d, ext: %s, fsize: %d", filename.c_str(), len, index, extension.c_str(), fsize);
         Serial.println();
+#endif
 #endif
 
         is_firmware = false;

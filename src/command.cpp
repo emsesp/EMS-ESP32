@@ -52,8 +52,10 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
+#ifdef EMSESP_DEBUG
 #if defined(EMSESP_USE_SERIAL)
     // Serial.println(p.path().c_str()); // dump paths, for debugging
+#endif
 #endif
 
     // re-calculate new path
