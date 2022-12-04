@@ -268,6 +268,21 @@ void TxService::send_poll() const {
     }
 }
 
+// get src id from next telegram to check poll in emsesp::incoming_telegram
+uint8_t TxService::get_send_id() {
+    static uint32_t count = 0;
+    if (!tx_telegrams_.empty() && tx_telegrams_.front().telegram_->src != ems_bus_id()) {
+        if (++count > 500) { // after 500 polls (~3-10 sec) there will be no master poll for this id
+            tx_telegrams_.pop_front();
+            count = 0;
+            return tx_telegrams_.empty() ? ems_bus_id() : tx_telegrams_.front().telegram_->src;
+        }
+        return tx_telegrams_.front().telegram_->src;
+    }
+    count = 0;
+    return ems_bus_id();
+}
+
 // Process the next telegram on the Tx queue
 // This is sent when we receive a poll request
 void TxService::send() {
@@ -463,7 +478,7 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
     }
 
     // build header. src, dest and offset have fixed positions
-    uint8_t src    = ems_bus_id(); // data[0]; we can only send data with own bus_id.
+    uint8_t src    = operation == Telegram::Operation::TX_RAW ? data[0] : ems_bus_id();
     uint8_t dest   = data[1];
     uint8_t offset = data[3];
 
@@ -499,7 +514,9 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
     }
 
     if (operation == Telegram::Operation::TX_RAW) {
-        if (dest & 0x80) {
+        if (src != ems_bus_id()) {
+            operation = Telegram::Operation::NONE; // do not check reply/ack for other ids
+        } else if (dest & 0x80) {
             operation = Telegram::Operation::TX_READ;
         } else {
             operation   = Telegram::Operation::TX_WRITE;
@@ -585,8 +602,8 @@ bool TxService::send_raw(const char * telegram_data) {
         }
     }
 
-    // check valid length and src
-    if ((count < 4) || ((data[0] & 0x7F) != ems_bus_id())) {
+    // check valid length
+    if (count < 4) {
         return false;
     }
 

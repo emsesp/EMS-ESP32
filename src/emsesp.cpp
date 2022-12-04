@@ -1255,7 +1255,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         }
 #endif
         // check for poll to us, if so send top message from Tx queue immediately and quit
-        if (poll_id == txservice_.ems_bus_id()) {
+        if (poll_id == txservice_.get_send_id()) {
             txservice_.send();
         }
         // send remote room temperature if active
