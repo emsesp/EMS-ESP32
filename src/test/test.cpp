@@ -1453,7 +1453,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // test direct commands
         EMSESP::mqtt_.incoming("ems-esp/boiler/selflowtemp", "56");
 
-        EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"send\",\"data\":\"01 02 03 04 05\"}"); // TODO check if works
+        EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"send\",\"data\":\"01 02 03 04 05\"}");
         // EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"pin\",\"id\":12,\"data\":\"1\"}");
 
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"wwmode\",\"data\":\"auto\"}");
