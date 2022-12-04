@@ -40,12 +40,12 @@ enum CommandFlag : uint8_t {
 
 // return status after calling a Command
 enum CommandRet : uint8_t {
-    FAIL = 0,   // 0 or FALSE
-    OK,         // 1 or TRUE
-    NOT_FOUND,  // 2
-    ERROR,      // 3
-    NOT_ALLOWED // needs authentication
-
+    FAIL = 0,    // 0 or FALSE
+    OK,          // 1 or TRUE
+    NOT_FOUND,   // 2
+    ERROR,       // 3
+    NOT_ALLOWED, // 4 - needs authentication
+    INVALID      // 5 - invalid (tag)
 };
 
 using cmd_function_p      = std::function<bool(const char * data, const int8_t id)>;

@@ -589,7 +589,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
         doc["value"] = value;
     }
 
-    Mqtt::publish(F_(response), doc.as<JsonObject>());
+    Mqtt::publish("response", doc.as<JsonObject>());
 }
 
 // builds json with the detail of each value, for a specific EMS device type or the dallas sensor

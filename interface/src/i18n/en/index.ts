@@ -37,7 +37,7 @@ const en: Translation = {
   VERSION: 'Version',
   BRAND: 'Brand',
   ENTITY_NAME: 'Entity Name',
-  VALUE: 'Value',
+  VALUE: '{{Value|value}}',
   SHOW_FAV: 'only show favorites',
   DEVICE_SENSOR_DATA: 'Device and Sensor Data',
   DEVICES_SENSORS: 'Devices & Sensors',

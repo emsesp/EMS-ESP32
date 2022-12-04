@@ -136,7 +136,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
 
     // send the json that came back from the command call
     // FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED = 400 (bad request), 200 (OK), 400 (not found), 400 (bad request), 401 (unauthorized)
-    int ret_codes[5] = {400, 200, 400, 400, 401};
+    int ret_codes[6] = {400, 200, 400, 400, 401, 400};
     response->setCode(ret_codes[return_code]);
     response->setLength();
     response->setContentType("application/json; charset=utf-8");

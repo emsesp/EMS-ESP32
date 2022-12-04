@@ -4,7 +4,7 @@
 
 ## Added
 
-- Translations in Web UI and all device entity names (DE, NL, SE, PL, NO, ...) [#22](https://github.com/emsesp/EMS-ESP32/issues/22)
+- Translations in Web UI and all device entity names (DE, NL, SE, PL, NO) [#22](https://github.com/emsesp/EMS-ESP32/issues/22)
 - Add support for Lolin C3 mini [#620](https://github.com/emsesp/EMS-ESP32/pull/620)
 - Add support for ESP32-S2 [#667](https://github.com/emsesp/EMS-ESP32/pull/667)
 - Add devices: Greenstar 30Ri boiler, Junkers FW500 thermostat, Buderus BC30 controller
@@ -17,8 +17,9 @@
 - Add min/max to customization table [#686](https://github.com/emsesp/EMS-ESP32/issues/686)
 - Add MD5 check [#637](https://github.com/emsesp/EMS-ESP32/issues/637)
 - Add more bus-ids [#673](https://github.com/emsesp/EMS-ESP32/issues/673)
-- Use HA connectivity device class for Status [#751](https://github.com/emsesp/EMS-ESP32/issues/751)
+- Use HA connectivity device class for Status, added boot time [#751](https://github.com/emsesp/EMS-ESP32/issues/751)
 - Add commands for analog sensors outputs
+- Support for multiple EMS-ESPs with MQTT and HA [[#759](https://github.com/emsesp/EMS-ESP32/issues/759)]
 
 ## Fixed
 
@@ -29,11 +30,13 @@
 - Discovery in HomeAssistant don't work with custom base topic. [#596](https://github.com/emsesp/EMS-ESP32/issues/596) Base topic containing `/` are changed to `_`
 - RF room temperature sensor are shown as thermostat
 - render mqtt float json values with trailing zero
-- removed flash strings
+- removed flash strings, to increase available heap memory
 - reload page after restart button is pressed
 - analog/dallas values command as list like ems-devices
 - analog/dallas HA-entities based on id
+- MQTT Base is a mandatory field. Removed MQTT topic length from settings.
 
 ## **BREAKING CHANGES:**
 
-- When upgrading from 3.4.x you may need to erase the flash on the ESP32 before uploading the firmware. Make sure you make a backup of the settings and customizations via the WebUI (System->Upload/Download)
+- When upgrading for the first time from 3.4.x on a BBQKees Gateway board you will need to use the [EMS-EPS Flasher](https://github.com/emsesp/EMS-ESP-Flasher/releases). Make sure you make a backup of the settings and customizations via the WebUI (System->Upload/Download).
+- Because of #759 the Home Assistant entity IDs have been renamed
