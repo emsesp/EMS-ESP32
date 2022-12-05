@@ -137,7 +137,7 @@ void MqttSettingsService::configureMqtt() {
         _mqttClient.setClientId(retainCstr(_state.clientId.c_str(), &_retainedClientId));
         _mqttClient.setKeepAlive(_state.keepAlive);
         _mqttClient.setCleanSession(_state.cleanSession);
-        _mqttClient.setMaxTopicLength(_state.maxTopicLength);
+        _mqttClient.setMaxTopicLength(FACTORY_MQTT_MAX_TOPIC_LENGTH); // hardcode. We don't take this from the settings anymore.
         _mqttClient.connect();
         // } else {
         // emsesp::EMSESP::logger().info("Error configuring Mqtt client");
@@ -187,8 +187,6 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.cleanSession = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
     newSettings.mqtt_qos     = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
     newSettings.mqtt_retain  = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
-
-    newSettings.maxTopicLength = FACTORY_MQTT_MAX_TOPIC_LENGTH; // hardcode. We don't take this from the settings anymore.
 
     newSettings.publish_time_boiler     = root["publish_time_boiler"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_thermostat = root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME;
