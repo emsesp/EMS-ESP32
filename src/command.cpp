@@ -284,12 +284,12 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         std::string ro = EMSESP::system_.readonly_mode() ? "[readonly] " : "";
 
         if ((value == nullptr) || (strlen(value) == 0)) {
-            LOG_INFO(("%sCalling command %s"), ro.c_str(), info_s);
+            LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
         } else {
             if (id > 0) {
-                LOG_INFO(("%sCalling command %s with value %s and id %d"), ro.c_str(), info_s, value, id);
+                LOG_DEBUG(("%sCalling command %s with value %s and id %d"), ro.c_str(), info_s, value, id);
             } else {
-                LOG_INFO(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
+                LOG_DEBUG(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
             }
         }
 
