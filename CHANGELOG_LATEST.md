@@ -2,6 +2,11 @@
 
 # [3.5.0]
 
+## **IMPORTANT! BREAKING CHANGES**
+
+- When upgrading to v3.5 for the first time from v3.4 on a BBQKees Gateway board you will need to use the [EMS-EPS Flasher](https://github.com/emsesp/EMS-ESP-Flasher/releases) to correctly re-partition the flash. Make sure you backup the settings and customizations from the WebUI (System->Upload/Download) and restore after the upgrade.
+- Since 3.5.0b11 we added support for multiple EMS-ESPs [#759] so they can co-exist with MQTT Discovery. The mqtt base is now included in each of the entity names to make them unique. Unfortunately this means in Home Assistant the entity IDs have also been renamed (for example from `number.boiler_burnminperiod` to `number.ems_esp_boiler_burnminperiod`) and any dashboards and automation scripts need to be adjusted accordingly.
+
 ## Added
 
 - Translations in Web UI and all device entity names (DE, NL, SE, PL, NO) [#22](https://github.com/emsesp/EMS-ESP32/issues/22)
@@ -35,8 +40,3 @@
 - analog/dallas values command as list like ems-devices
 - analog/dallas HA-entities based on id
 - MQTT Base is a mandatory field. Removed MQTT topic length from settings.
-
-## **BREAKING CHANGES:**
-
-- When upgrading for the first time from 3.4.x on a BBQKees Gateway board you will need to use the [EMS-EPS Flasher](https://github.com/emsesp/EMS-ESP-Flasher/releases). Make sure you make a backup of the settings and customizations via the WebUI (System->Upload/Download).
-- Because of #759 the Home Assistant entity IDs have been renamed
