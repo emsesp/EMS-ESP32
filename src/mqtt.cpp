@@ -593,8 +593,10 @@ void Mqtt::on_connect() {
 void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
-    doc["uniq_id"]   = "ems-esp-system";
-    doc["object_id"] = "ems_esp_status";
+    char uniq[70];
+    snprintf(uniq, sizeof(uniq), "%s_status", mqtt_basename_.c_str());
+    doc["uniq_id"]   = uniq;
+    doc["object_id"] = uniq;
     doc["~"]         = mqtt_base_; // default ems-esp
     // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
@@ -614,7 +616,7 @@ void Mqtt::ha_status() {
     ids.add("ems-esp");
 
     char topic[MQTT_TOPIC_MAX_SIZE];
-    snprintf(topic, sizeof(topic), "binary_sensor/%s/system/config", mqtt_basename_.c_str());
+    snprintf(topic, sizeof(topic), "binary_sensor/%s/status/config", mqtt_basename_.c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors - must match the MQTT payload keys
