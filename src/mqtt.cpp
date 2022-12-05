@@ -37,6 +37,7 @@ uint32_t    Mqtt::publish_time_mixer_;
 uint32_t    Mqtt::publish_time_sensor_;
 uint32_t    Mqtt::publish_time_other_;
 bool        Mqtt::mqtt_enabled_;
+bool        Mqtt::multiple_instances_;
 bool        Mqtt::ha_enabled_;
 uint8_t     Mqtt::nested_format_;
 std::string Mqtt::discovery_prefix_;
@@ -422,6 +423,7 @@ void Mqtt::load_settings() {
         publish_single2cmd_ = mqttSettings.publish_single2cmd;
         send_response_      = mqttSettings.send_response;
         discovery_prefix_   = mqttSettings.discovery_prefix.c_str();
+        multiple_instances_ = mqttSettings.multiple_instances;
 
         // convert to milliseconds
         publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000;
@@ -594,10 +596,10 @@ void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
     char uniq[70];
-    snprintf(uniq, sizeof(uniq), "%s_status", mqtt_basename_.c_str());
+    snprintf(uniq, sizeof(uniq), "%s_status", mqtt_basename_.c_str()); // always use basename
     doc["uniq_id"]   = uniq;
     doc["object_id"] = uniq;
-    doc["~"]         = mqtt_base_; // default ems-esp
+    doc["~"]         = mqtt_base_;
     // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
     doc["stat_t"]       = "~/status";
@@ -784,6 +786,7 @@ void Mqtt::process_queue() {
     if (message->topic.find(discovery_prefix_) == 0) {
         strlcpy(topic, message->topic.c_str(), sizeof(topic)); // leave topic as it is
     } else {
+        // it's a discovery topic, added the mqtt base to the topic path
         snprintf(topic, MQTT_TOPIC_MAX_SIZE, "%s/%s", mqtt_base_.c_str(), message->topic.c_str()); // uses base
     }
 
@@ -965,7 +968,12 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build unique identifier which will be used in the topic, also used as object_id
     char uniq_id[70];
-    snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
+    if (multiple_instances_) {
+        // prefix base name to each uniq_id
+        snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
+    } else {
+        snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
+    }
 
     // build a config topic that will be prefix onto a HA type (e.g. number, switch)
     // e.g. homeassistant/number/ems-esp/thermostat_hc1_manualtemp
@@ -1267,7 +1275,13 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
              hc_mode_s);
 
     snprintf(name_s, sizeof(name_s), "Hc%d", hc_num);
-    snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_thermostat_hc%d", mqtt_basename_.c_str(), hc_num); // add basename
+
+    if (Mqtt::multiple_instances()) {
+        snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_thermostat_hc%d", mqtt_basename_.c_str(), hc_num); // add basename
+    } else {
+        snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num); // backward compatible with v3.4
+    }
+
     snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/seltemp", hc_num);
     snprintf(mode_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/mode", hc_num);
 
