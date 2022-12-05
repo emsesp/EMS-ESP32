@@ -241,6 +241,22 @@ const MqttSettingsForm: FC = () => {
           <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
+              name="publish_time_heartbeat"
+              label={LL.MQTT_INT_HEARTBEAT()}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+              }}
+              fullWidth
+              variant="outlined"
+              value={numberValue(data.publish_time_heartbeat)}
+              type="number"
+              onChange={updateFormValue}
+              margin="normal"
+            />
+          </Grid>
+          <Grid item xs={6} sm={4}>
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
               name="publish_time_boiler"
               label={LL.MQTT_INT_BOILER()}
               InputProps={{

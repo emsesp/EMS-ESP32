@@ -512,12 +512,6 @@ void System::loop() {
     led_monitor();  // check status and report back using the LED
     system_check(); // check system health
 
-    // send out heartbeat
-    uint32_t currentMillis = uuid::get_uptime();
-    if (!last_heartbeat_ || (currentMillis - last_heartbeat_ > SYSTEM_HEARTBEAT_INTERVAL)) {
-        last_heartbeat_ = currentMillis;
-        send_heartbeat();
-    }
 #ifndef EMSESP_STANDALONE
 
 #if defined(EMSESP_DEBUG)

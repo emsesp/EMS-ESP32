@@ -245,6 +245,7 @@ const no: Translation = {
   MQTT_INT_THERMOSTATS: 'Termostat',
   MQTT_INT_SOLAR: 'Solpaneler',
   MQTT_INT_MIXER: 'Blandeventil',
+  MQTT_INT_HEARTBEAT: 'Heartbeat',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Standard',
   MQTT_CLEAN_SESSION: 'Benytt Clean Session',

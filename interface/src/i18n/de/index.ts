@@ -245,6 +245,7 @@ const de: Translation = {
   MQTT_INT_THERMOSTATS: 'Thermostate',
   MQTT_INT_SOLAR: 'Solarmodule',
   MQTT_INT_MIXER: 'Mischermodule',
+  MQTT_INT_HEARTBEAT: 'Heartbeat',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Standard',
   MQTT_CLEAN_SESSION: 'Setze `Clean Session`',

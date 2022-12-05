@@ -36,6 +36,7 @@ uint32_t    Mqtt::publish_time_solar_;
 uint32_t    Mqtt::publish_time_mixer_;
 uint32_t    Mqtt::publish_time_sensor_;
 uint32_t    Mqtt::publish_time_other_;
+uint32_t    Mqtt::publish_time_heartbeat_;
 bool        Mqtt::mqtt_enabled_;
 bool        Mqtt::ha_enabled_;
 uint8_t     Mqtt::nested_format_;
@@ -144,6 +145,12 @@ void Mqtt::loop() {
     if ((uint32_t)(currentMillis - last_mqtt_poll_) > MQTT_PUBLISH_WAIT) {
         last_mqtt_poll_ = currentMillis;
         process_queue();
+    }
+
+    // send heartbeat
+    if ((currentMillis - last_publish_heartbeat_ > publish_time_heartbeat_)) {
+        last_publish_heartbeat_ = currentMillis;
+        EMSESP::system_.send_heartbeat(); // send heartbeat
     }
 
     // dallas publish on change
@@ -430,6 +437,7 @@ void Mqtt::load_settings() {
         publish_time_mixer_      = mqttSettings.publish_time_mixer * 1000;
         publish_time_other_      = mqttSettings.publish_time_other * 1000;
         publish_time_sensor_     = mqttSettings.publish_time_sensor * 1000;
+        publish_time_heartbeat_  = mqttSettings.publish_time_heartbeat * 1000;
     });
 
     // create basename from base
@@ -510,6 +518,10 @@ void Mqtt::set_publish_time_other(uint16_t publish_time) {
 
 void Mqtt::set_publish_time_sensor(uint16_t publish_time) {
     publish_time_sensor_ = publish_time * 1000; // convert to milliseconds
+}
+
+void Mqtt::set_publish_time_heartbeat(uint16_t publish_time) {
+    publish_time_heartbeat_ = publish_time * 1000; // convert to milliseconds
 }
 
 bool Mqtt::get_publish_onchange(uint8_t device_type) {
