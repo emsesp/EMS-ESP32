@@ -845,6 +845,7 @@ void Mqtt::process_queue() {
               mqtt_message.retry_count_ + 1,
               message->payload.size(),
               packet_id);
+    LOG_DEBUG("Payload:%s", message->payload.c_str());
 
     if (packet_id == 0) {
         // it failed. if we retried n times, give up. remove from queue
