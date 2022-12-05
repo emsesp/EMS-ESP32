@@ -74,7 +74,6 @@ class MqttSettings {
     // connection settings
     uint16_t keepAlive;
     bool     cleanSession;
-    uint16_t maxTopicLength;
 
     // proddy EMS-ESP specific
     String   base;
