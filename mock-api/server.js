@@ -219,6 +219,7 @@ mqtt_settings = {
   client_id: 'ems-esp',
   keep_alive: 60,
   clean_session: true,
+  multiple_instances: false,
   publish_time_boiler: 10,
   publish_time_thermostat: 10,
   publish_time_solar: 10,
