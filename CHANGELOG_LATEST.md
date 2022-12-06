@@ -5,7 +5,6 @@
 ## **IMPORTANT! BREAKING CHANGES**
 
 - When upgrading to v3.5 for the first time from v3.4 on a BBQKees Gateway board you will need to use the [EMS-EPS Flasher](https://github.com/emsesp/EMS-ESP-Flasher/releases) to correctly re-partition the flash. Make sure you backup the settings and customizations from the WebUI (System->Upload/Download) and restore after the upgrade.
-- Since 3.5.0b11 we added support for multiple EMS-ESPs [#759] so they can co-exist with MQTT Discovery. The mqtt base is now included in each of the entity names to make them unique. Unfortunately this means in Home Assistant the entity IDs have also been renamed (for example from `number.boiler_burnminperiod` to `number.ems_esp_boiler_burnminperiod`) and any dashboards and automation scripts need to be adjusted accordingly.
 
 ## Added
 
