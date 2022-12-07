@@ -1154,6 +1154,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["ha enabled"]              = settings.ha_enabled;
         node["mqtt qos"]                = settings.mqtt_qos;
         node["mqtt retain"]             = settings.mqtt_retain;
+        node["publish time heartbeat"]  = settings.publish_time_heartbeat;
         node["publish time boiler"]     = settings.publish_time_boiler;
         node["publish time thermostat"] = settings.publish_time_thermostat;
         node["publish time solar"]      = settings.publish_time_solar;

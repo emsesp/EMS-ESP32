@@ -89,6 +89,7 @@ class DummySettings {
     uint16_t publish_time_mixer      = 10;
     uint16_t publish_time_other      = 10;
     uint16_t publish_time_sensor     = 10;
+    uint16_t publish_time_heartbeat  = 60;
 
     String hostname       = "ems-esp";
     String jwtSecret      = "ems-esp";

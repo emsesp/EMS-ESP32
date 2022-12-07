@@ -226,6 +226,7 @@ mqtt_settings = {
   publish_time_mixer: 10,
   publish_time_other: 10,
   publish_time_sensor: 10,
+  publish_time_heartbeat: 60,
   mqtt_qos: 0,
   mqtt_retain: false,
   ha_enabled: true,
