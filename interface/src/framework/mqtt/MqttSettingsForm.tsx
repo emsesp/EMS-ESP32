@@ -163,10 +163,6 @@ const MqttSettingsForm: FC = () => {
           </Grid>
         </Grid>
         <BlockFormControlLabel
-          control={<Checkbox name="multiple_instances" checked={data.multiple_instances} onChange={updateFormValue} />}
-          label={LL.MQTT_MULTIPLE_INSTANCES()}
-        />
-        <BlockFormControlLabel
           control={<Checkbox name="clean_session" checked={data.clean_session} onChange={updateFormValue} />}
           label={LL.MQTT_CLEAN_SESSION()}
         />
@@ -224,17 +220,25 @@ const MqttSettingsForm: FC = () => {
               />
             </Grid>
             {data.ha_enabled && (
-              <Grid item sx={{ pb: 3 }}>
-                <ValidatedTextField
-                  name="discovery_prefix"
-                  label={LL.MQTT_PUBLISH_TEXT_4()}
-                  fullWidth
-                  variant="outlined"
-                  value={data.discovery_prefix}
-                  onChange={updateFormValue}
-                  size="small"
-                />
-              </Grid>
+              <>
+                <Grid item>
+                  <BlockFormControlLabel
+                    control={<Checkbox name="multiple_instances" checked={data.multiple_instances} onChange={updateFormValue} />}
+                    label={LL.MQTT_MULTIPLE_INSTANCES()}
+                  />
+                </Grid>
+                <Grid item sx={{ pb: 3 }}>
+                  <ValidatedTextField
+                    name="discovery_prefix"
+                    label={LL.MQTT_PUBLISH_TEXT_4()}
+                    fullWidth
+                    variant="outlined"
+                    value={data.discovery_prefix}
+                    onChange={updateFormValue}
+                    size="small"
+                  />
+                </Grid>
+              </>
             )}
           </Grid>
         )}
