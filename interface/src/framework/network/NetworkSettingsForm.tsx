@@ -62,7 +62,9 @@ const WiFiSettingsForm: FC = () => {
           bandwidth20: false,
           tx_power: 20,
           nosleep: false,
-          enableMDNS: true
+          enableMDNS: true,
+          enableCORS: false,
+          CORSOrigin: '*'
         });
       }
       setInitialized(true);
@@ -162,11 +164,6 @@ const WiFiSettingsForm: FC = () => {
           label={LL.NETWORK_LOW_BAND()}
         />
 
-        <BlockFormControlLabel
-          control={<Checkbox name="enableMDNS" checked={data.enableMDNS} onChange={updateFormValue} />}
-          label={LL.NETWORK_USE_DNS()}
-        />
-
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.GENERAL_OPTIONS()}
         </Typography>
@@ -181,6 +178,28 @@ const WiFiSettingsForm: FC = () => {
           onChange={updateFormValue}
           margin="normal"
         />
+
+        <BlockFormControlLabel
+          control={<Checkbox name="enableMDNS" checked={data.enableMDNS} onChange={updateFormValue} />}
+          label={LL.NETWORK_USE_DNS()}
+        />
+
+        <BlockFormControlLabel
+          control={<Checkbox name="enableCORS" checked={data.enableCORS} onChange={updateFormValue} />}
+          label={LL.NETWORK_ENABLE_CORS()}
+        />
+        {data.enableCORS && (
+          <ValidatedTextField
+            fieldErrors={fieldErrors}
+            name="CORSOrigin"
+            label={LL.NETWORK_CORS_ORIGIN()}
+            fullWidth
+            variant="outlined"
+            value={data.CORSOrigin}
+            onChange={updateFormValue}
+            margin="normal"
+          />
+        )}
 
         <BlockFormControlLabel
           control={<Checkbox name="enableIPv6" checked={data.enableIPv6} onChange={updateFormValue} />}

@@ -1104,6 +1104,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["enable IPv6"]      = settings.enableIPv6;
         node["low bandwidth"]    = settings.bandwidth20;
         node["disable sleep"]    = settings.nosleep;
+        node["enable MDNS"]      = settings.enableMDNS;
+        node["enable CORS"]      = settings.enableCORS;
+        if (settings.enableCORS) {
+            node["CORS origin"] = settings.CORSOrigin;
+        }
     });
 #ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getAPSettingsService()->read([&](APSettings & settings) {

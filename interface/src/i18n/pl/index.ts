@@ -284,6 +284,8 @@ const pl: BaseTranslation = {
   NETWORK_DISABLE_SLEEP: 'Wyłącz tryb usypiania WiFi',
   NETWORK_LOW_BAND: 'Używaj zmniejszonej przepustowości WiFi',
   NETWORK_USE_DNS: 'Włącz wsparcie dla mDNS',
+  NETWORK_ENABLE_CORS: 'Włącz wsparcie dla CORS',
+  NETWORK_CORS_ORIGIN: 'CORS origin',
   NETWORK_ENABLE_IPV6: 'Włącz wsparcie dla IPv6',
   NETWORK_FIXED_IP: 'Użyj stałego adresu IP',
   NETWORK_GATEWAY: 'Brama',

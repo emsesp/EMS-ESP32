@@ -122,7 +122,11 @@ network_settings = {
   hostname: 'ems-esp',
   nosleep: true,
   tx_power: 20,
+  bandwidth20: false,
   static_ip_config: false,
+  enableMDNS: true,
+  enableCORS: false,
+  CORSOrigin: '*',
 }
 const network_status = {
   status: 3,

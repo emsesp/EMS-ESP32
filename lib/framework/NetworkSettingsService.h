@@ -39,6 +39,8 @@ class NetworkSettings {
     int8_t tx_power;
     bool   nosleep;
     bool   enableMDNS;
+    bool   enableCORS;
+    String CORSOrigin;
 
     // optional configuration for static IP address
     IPAddress localIP;
@@ -58,6 +60,8 @@ class NetworkSettings {
         root["tx_power"]         = settings.tx_power;
         root["nosleep"]          = settings.nosleep;
         root["enableMDNS"]       = settings.enableMDNS;
+        root["enableCORS"]       = settings.enableCORS;
+        root["CORSOrigin"]       = settings.CORSOrigin;
 
         // extended settings
         JsonUtils::writeIP(root, "local_ip", settings.localIP);
@@ -77,6 +81,8 @@ class NetworkSettings {
         settings.tx_power       = root["tx_power"] | 20;
         settings.nosleep        = root["nosleep"] | false;
         settings.enableMDNS     = root["enableMDNS"] | true;
+        settings.enableCORS     = root["enableCORS"] | false;
+        settings.CORSOrigin     = root["CORSOrigin"] | "*";
 
         // extended settings
         JsonUtils::readIP(root, "local_ip", settings.localIP);

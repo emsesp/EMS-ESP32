@@ -284,6 +284,8 @@ const nl: Translation = {
   NETWORK_DISABLE_SLEEP: 'WiFi Sleep Mode uitzetten',
   NETWORK_LOW_BAND: 'Lagere WiFi bandbreedte gebruiken',
   NETWORK_USE_DNS: 'Activeer mDNS Service',
+  NETWORK_ENABLE_CORS: 'Activeer CORS',
+  NETWORK_CORS_ORIGIN: 'CORS origin',
   NETWORK_ENABLE_IPV6: 'Activeer IPv6 support',
   NETWORK_FIXED_IP: 'Gebruik vast IP addres',
   NETWORK_GATEWAY: 'Gateway',

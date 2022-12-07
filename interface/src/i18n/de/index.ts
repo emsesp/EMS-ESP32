@@ -3,6 +3,7 @@ import type { Translation } from '../i18n-types';
 /* eslint-disable */
 
 const de: Translation = {
+//   ...en as Translation,
   LANGUAGE: 'Sprache',
   RETRY: 'Neuer Versuch',
   LOADING: 'Laden',
@@ -190,8 +191,8 @@ const de: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sind Sie sicher alle Einstellungen auf Werkseinstellung zu setzen?',
   VERSION_CHECK: 'Versionsprüfung',
   THE_LATEST: 'Die neueste',
-  OFFICIAL: 'official',
-  DEVELOPMENT: 'development',
+  OFFICIAL: 'offizielle',
+  DEVELOPMENT: 'Entwicklungs',
   VERSION_IS: 'Version ist',
   RELEASE_NOTES: 'Versionshinweise',
   EMS_ESP_VER: 'EMS-ESP Version',
@@ -284,6 +285,8 @@ const de: Translation = {
   NETWORK_DISABLE_SLEEP: 'Deaktiviere WiFi Schlafmodus',
   NETWORK_LOW_BAND: 'Verwende niedrige WiFi Bandbreite',
   NETWORK_USE_DNS: 'Aktiviere mDNS Service',
+  NETWORK_ENABLE_CORS: 'Aktiviere CORS',
+  NETWORK_CORS_ORIGIN: 'CORS origin',
   NETWORK_ENABLE_IPV6: 'Aktiviere IPv6 Unterstützung',
   NETWORK_FIXED_IP: 'Feste IP Adresse',
   NETWORK_GATEWAY: 'Gateway',

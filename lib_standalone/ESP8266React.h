@@ -103,6 +103,8 @@ class DummySettings {
     String dnsIP2         = "";
     bool   enableIPv6     = false;
     bool   enableMDNS     = true;
+    bool   enableCORS     = false;
+    String CORSOrigin     = "*";
 
     uint8_t phy_type       = 0;
     uint8_t eth_power      = 0; // 0 means -1

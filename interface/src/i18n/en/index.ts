@@ -284,6 +284,8 @@ const en: Translation = {
   NETWORK_DISABLE_SLEEP: 'Disable WiFi Sleep Mode',
   NETWORK_LOW_BAND: 'Use Lower WiFi Bandwidth',
   NETWORK_USE_DNS: 'Enable mDNS Service',
+  NETWORK_ENABLE_CORS: 'Enable CORS',
+  NETWORK_CORS_ORIGIN: 'CORS origin',
   NETWORK_ENABLE_IPV6: 'Enable IPv6 support',
   NETWORK_FIXED_IP: 'Use Fixed IP address',
   NETWORK_GATEWAY: 'Gateway',
