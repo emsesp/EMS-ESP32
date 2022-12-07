@@ -248,6 +248,7 @@ const no: Translation = {
   MQTT_INT_HEARTBEAT: 'Heartbeat',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Standard',
+  MQTT_MULTIPLE_INSTANCES: 'Enable Multiple Instances of EMS-ESP',
   MQTT_CLEAN_SESSION: 'Benytt Clean Session',
   MQTT_RETAIN_FLAG: 'Alltid sett Retain flag',
   INACTIVE: 'Innaktiv',

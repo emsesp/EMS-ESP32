@@ -248,6 +248,7 @@ const nl: Translation = {
   MQTT_INT_HEARTBEAT: 'Heartbeat',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Default',
+  MQTT_MULTIPLE_INSTANCES: 'Enable Multiple Instances of EMS-ESP',
   MQTT_CLEAN_SESSION: 'Clean Session aan',
   MQTT_RETAIN_FLAG: 'Retain flag aan',
   INACTIVE: 'Inactief',

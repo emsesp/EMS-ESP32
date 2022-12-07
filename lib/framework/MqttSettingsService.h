@@ -57,6 +57,10 @@ static String generateClientId() {
 #define FACTORY_MQTT_MAX_TOPIC_LENGTH 128
 #endif
 
+#ifndef FACTORY_MQTT_MULTIPLE_INSTANCES
+#define FACTORY_MQTT_MULTIPLE_INSTANCES false
+#endif
+
 class MqttSettings {
   public:
     // host and port - if enabled
@@ -74,6 +78,9 @@ class MqttSettings {
     // connection settings
     uint16_t keepAlive;
     bool     cleanSession;
+
+    // multiple instances
+    bool multiple_instances;
 
     // proddy EMS-ESP specific
     String   base;

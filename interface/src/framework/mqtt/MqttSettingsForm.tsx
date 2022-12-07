@@ -163,6 +163,10 @@ const MqttSettingsForm: FC = () => {
           </Grid>
         </Grid>
         <BlockFormControlLabel
+          control={<Checkbox name="multiple_instances" checked={data.multiple_instances} onChange={updateFormValue} />}
+          label={LL.MQTT_MULTIPLE_INSTANCES()}
+        />
+        <BlockFormControlLabel
           control={<Checkbox name="clean_session" checked={data.clean_session} onChange={updateFormValue} />}
           label={LL.MQTT_CLEAN_SESSION()}
         />

@@ -180,6 +180,10 @@ class Mqtt {
         return nested_format_ == NestedFormat::NESTED;
     }
 
+    static bool multiple_instances() {
+        return multiple_instances_;
+    }
+
     static void nested_format(uint8_t nested_format) {
         nested_format_ = nested_format;
     }
@@ -317,6 +321,7 @@ class Mqtt {
     static bool        mqtt_enabled_;
     static bool        ha_enabled_;
     static uint8_t     nested_format_;
+    static bool        multiple_instances_;
     static std::string discovery_prefix_;
     static bool        publish_single_;
     static bool        publish_single2cmd_;

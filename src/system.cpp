@@ -1147,6 +1147,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["client id"]               = settings.clientId;
         node["keep alive"]              = settings.keepAlive;
         node["clean session"]           = settings.cleanSession;
+        node["multiple instances"]      = settings.multiple_instances;
         node["base"]                    = settings.base;
         node["discovery prefix"]        = settings.discovery_prefix;
         node["nested format"]           = settings.nested_format;
