@@ -665,7 +665,7 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
     std::shared_ptr<MqttMessage> message;
     message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
 
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
     if (operation == Operation::PUBLISH) {
         if (message->payload.empty()) {
             LOG_INFO("[DEBUG] Adding to queue: (Publish) topic='%s' empty payload", message->topic.c_str());
@@ -860,8 +860,9 @@ void Mqtt::process_queue() {
               mqtt_message.retry_count_ + 1,
               message->payload.size(),
               packet_id);
-    LOG_DEBUG("Payload:%s", message->payload.c_str());
-
+#if defined(EMSESP_DEBUG)
+    LOG_DEBUG("Payload:%s", message->payload.c_str()); // extra message for #784
+#endif
     if (packet_id == 0) {
         // it failed. if we retried n times, give up. remove from queue
         if (mqtt_message.retry_count_ == (MQTT_PUBLISH_MAX_RETRY - 1)) {
