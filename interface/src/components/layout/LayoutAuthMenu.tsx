@@ -29,6 +29,7 @@ import { ReactComponent as GBflag } from '../../i18n/GB.svg';
 import { ReactComponent as SEflag } from '../../i18n/SE.svg';
 import { ReactComponent as PLflag } from '../../i18n/PL.svg';
 import { ReactComponent as NOflag } from '../../i18n/NO.svg';
+import { ReactComponent as FRflag } from '../../i18n/FR.svg';
 
 const ItemTypography = styled(Typography)<TypographyProps>({
   maxWidth: '250px',
@@ -96,6 +97,10 @@ const LayoutAuthMenu: FC = () => {
         <MenuItem key="no" value="no">
           <NOflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;NO
+        </MenuItem>
+        <MenuItem key="fr" value="fr">
+          <FRflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;FR
         </MenuItem>
       </TextField>
 
