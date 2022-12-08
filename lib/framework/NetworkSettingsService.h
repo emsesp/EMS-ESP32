@@ -72,6 +72,8 @@ class NetworkSettings {
     }
 
     static StateUpdateResult update(JsonObject & root, NetworkSettings & settings) {
+        auto enableCORS         = settings.enableCORS;
+        auto CORSOrigin         = settings.CORSOrigin;
         settings.ssid           = root["ssid"] | FACTORY_WIFI_SSID;
         settings.password       = root["password"] | FACTORY_WIFI_PASSWORD;
         settings.hostname       = root["hostname"] | FACTORY_WIFI_HOSTNAME;
@@ -102,6 +104,9 @@ class NetworkSettings {
         // as sensible defaults can be assumed for gateway and subnet
         if (settings.staticIPConfig && (IPUtils::isNotSet(settings.localIP) || IPUtils::isNotSet(settings.gatewayIP) || IPUtils::isNotSet(settings.subnetMask))) {
             settings.staticIPConfig = false;
+        }
+        if (enableCORS != settings.enableCORS || CORSOrigin != settings.CORSOrigin) {
+            return StateUpdateResult::CHANGED_RESTART; // tell WebUI that a restart is needed
         }
 
         return StateUpdateResult::CHANGED;

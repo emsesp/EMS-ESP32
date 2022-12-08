@@ -1,4 +1,5 @@
 import { FC, useContext, useEffect, useState } from 'react';
+import { useSnackbar } from 'notistack';
 
 import {
   Avatar,
@@ -18,6 +19,7 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import LockIcon from '@mui/icons-material/Lock';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
 import {
   BlockFormControlLabel,
@@ -25,11 +27,13 @@ import {
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
-  ValidatedTextField
+  ValidatedTextField,
+  MessageBox
 } from '../../components';
 import { NetworkSettings } from '../../types';
 import * as NetworkApi from '../../api/network';
 import { numberValue, updateValue, useRest } from '../../utils';
+import * as EMSESP from '../../project/api';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
@@ -38,14 +42,17 @@ import { validate } from '../../validators';
 import { createNetworkSettingsValidator } from '../../validators/network';
 
 import { useI18nContext } from '../../i18n/i18n-react';
+import RestartMonitor from '../system/RestartMonitor';
 
 const WiFiSettingsForm: FC = () => {
   const { LL } = useI18nContext();
+  const { enqueueSnackbar } = useSnackbar();
 
   const { selectedNetwork, deselectNetwork } = useContext(WiFiConnectionContext);
 
   const [initialized, setInitialized] = useState(false);
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<NetworkSettings>({
+  const [restarting, setRestarting] = useState(false);
+  const { loadData, saving, data, setData, saveData, errorMessage, restartNeeded } = useRest<NetworkSettings>({
     read: NetworkApi.readNetworkSettings,
     update: NetworkApi.updateNetworkSettings
   });
@@ -89,6 +96,15 @@ const WiFiSettingsForm: FC = () => {
         saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
+      }
+    };
+
+    const restart = async () => {
+      try {
+        await EMSESP.restart();
+        setRestarting(true);
+      } catch (error) {
+        enqueueSnackbar(LL.PROBLEM_UPDATING(), { variant: 'error' });
       }
     };
 
@@ -264,6 +280,14 @@ const WiFiSettingsForm: FC = () => {
             />
           </>
         )}
+        {restartNeeded && (
+          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT()}>
+            <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
+              {LL.RESTART()}
+            </Button>
+          </MessageBox>
+        )}
+        {!restartNeeded && (
         <ButtonRow>
           <Button
             startIcon={<SaveIcon />}
@@ -276,13 +300,14 @@ const WiFiSettingsForm: FC = () => {
             {LL.SAVE()}
           </Button>
         </ButtonRow>
+        )}
       </>
     );
   };
 
   return (
     <SectionContent title={LL.SETTINGS_OF(LL.NETWORK(1))} titleGutter>
-      {content()}
+      {restarting ? <RestartMonitor /> : content()}
     </SectionContent>
   );
 };
