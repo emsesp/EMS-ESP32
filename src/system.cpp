@@ -512,12 +512,6 @@ void System::loop() {
     led_monitor();  // check status and report back using the LED
     system_check(); // check system health
 
-    // send out heartbeat
-    uint32_t currentMillis = uuid::get_uptime();
-    if (!last_heartbeat_ || (currentMillis - last_heartbeat_ > SYSTEM_HEARTBEAT_INTERVAL)) {
-        last_heartbeat_ = currentMillis;
-        send_heartbeat();
-    }
 #ifndef EMSESP_STANDALONE
 
 #if defined(EMSESP_DEBUG)
@@ -1110,6 +1104,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["enable IPv6"]      = settings.enableIPv6;
         node["low bandwidth"]    = settings.bandwidth20;
         node["disable sleep"]    = settings.nosleep;
+        node["enable MDNS"]      = settings.enableMDNS;
+        node["enable CORS"]      = settings.enableCORS;
+        if (settings.enableCORS) {
+            node["CORS origin"] = settings.CORSOrigin;
+        }
     });
 #ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getAPSettingsService()->read([&](APSettings & settings) {
@@ -1160,6 +1159,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["ha enabled"]              = settings.ha_enabled;
         node["mqtt qos"]                = settings.mqtt_qos;
         node["mqtt retain"]             = settings.mqtt_retain;
+        node["publish time heartbeat"]  = settings.publish_time_heartbeat;
         node["publish time boiler"]     = settings.publish_time_boiler;
         node["publish time thermostat"] = settings.publish_time_thermostat;
         node["publish time solar"]      = settings.publish_time_solar;

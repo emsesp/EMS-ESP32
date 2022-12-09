@@ -244,7 +244,7 @@ char * Helpers::render_value(char * result, uint8_t value, int8_t format, const 
 
 // float: convert float to char
 // format is the precision, 0 to 8
-char * Helpers::render_value(char * result, const float value, const int8_t format) {
+char * Helpers::render_value(char * result, const double value, const int8_t format) {
     if (format > 8) {
         return nullptr;
     }

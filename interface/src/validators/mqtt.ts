@@ -11,5 +11,9 @@ export const MQTT_SETTINGS_VALIDATOR = new Schema({
   keep_alive: [
     { required: true, message: 'Keep alive is required' },
     { type: 'number', min: 1, max: 86400, message: 'Keep alive must be between 1 and 86400' }
+  ],
+  publish_time_heartbeat: [
+    { required: true, message: 'Heartbeat is required' },
+    { type: 'number', min: 10, max: 86400, message: 'Heartbeat must be between 10 and 86400' }
   ]
 });

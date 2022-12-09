@@ -284,8 +284,8 @@ void WebDataService::write_analog(AsyncWebServerRequest * request, JsonVariant &
 
         uint8_t     gpio   = analog["gpio"]; // this is the unique key, the GPIO
         std::string name   = analog["name"];
-        float       factor = analog["factor"];
-        float       offset = analog["offset"];
+        double      factor = analog["factor"];
+        double      offset = analog["offset"];
         uint8_t     uom    = analog["uom"];
         int8_t      type   = analog["type"];
         ok                 = EMSESP::analogsensor_.update(gpio, name, offset, factor, uom, type);

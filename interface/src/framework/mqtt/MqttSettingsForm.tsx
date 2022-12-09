@@ -163,10 +163,6 @@ const MqttSettingsForm: FC = () => {
           </Grid>
         </Grid>
         <BlockFormControlLabel
-          control={<Checkbox name="multiple_instances" checked={data.multiple_instances} onChange={updateFormValue} />}
-          label={LL.MQTT_MULTIPLE_INSTANCES()}
-        />
-        <BlockFormControlLabel
           control={<Checkbox name="clean_session" checked={data.clean_session} onChange={updateFormValue} />}
           label={LL.MQTT_CLEAN_SESSION()}
         />
@@ -224,17 +220,25 @@ const MqttSettingsForm: FC = () => {
               />
             </Grid>
             {data.ha_enabled && (
-              <Grid item sx={{ pb: 3 }}>
-                <ValidatedTextField
-                  name="discovery_prefix"
-                  label={LL.MQTT_PUBLISH_TEXT_4()}
-                  fullWidth
-                  variant="outlined"
-                  value={data.discovery_prefix}
-                  onChange={updateFormValue}
-                  size="small"
-                />
-              </Grid>
+              <>
+                <Grid item>
+                  <BlockFormControlLabel
+                    control={<Checkbox name="multiple_instances" checked={data.multiple_instances} onChange={updateFormValue} />}
+                    label={LL.MQTT_MULTIPLE_INSTANCES()}
+                  />
+                </Grid>
+                <Grid item sx={{ pb: 3 }}>
+                  <ValidatedTextField
+                    name="discovery_prefix"
+                    label={LL.MQTT_PUBLISH_TEXT_4()}
+                    fullWidth
+                    variant="outlined"
+                    value={data.discovery_prefix}
+                    onChange={updateFormValue}
+                    size="small"
+                  />
+                </Grid>
+              </>
             )}
           </Grid>
         )}
@@ -242,6 +246,22 @@ const MqttSettingsForm: FC = () => {
           {LL.MQTT_PUBLISH_INTERVALS()}&nbsp;(0=auto)
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+          <Grid item xs={6} sm={4}>
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="publish_time_heartbeat"
+              label={LL.MQTT_INT_HEARTBEAT()}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+              }}
+              fullWidth
+              variant="outlined"
+              value={numberValue(data.publish_time_heartbeat)}
+              type="number"
+              onChange={updateFormValue}
+              margin="normal"
+            />
+          </Grid>
           <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}

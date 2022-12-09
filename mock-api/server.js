@@ -122,7 +122,11 @@ network_settings = {
   hostname: 'ems-esp',
   nosleep: true,
   tx_power: 20,
+  bandwidth20: false,
   static_ip_config: false,
+  enableMDNS: true,
+  enableCORS: false,
+  CORSOrigin: '*',
 }
 const network_status = {
   status: 3,
@@ -226,6 +230,7 @@ mqtt_settings = {
   publish_time_mixer: 10,
   publish_time_other: 10,
   publish_time_sensor: 10,
+  publish_time_heartbeat: 60,
   mqtt_qos: 0,
   mqtt_retain: false,
   ha_enabled: true,

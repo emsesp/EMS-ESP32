@@ -163,6 +163,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["publish_time_mixer"]      = settings.publish_time_mixer;
     root["publish_time_other"]      = settings.publish_time_other;
     root["publish_time_sensor"]     = settings.publish_time_sensor;
+    root["publish_time_heartbeat"]  = settings.publish_time_heartbeat;
     root["mqtt_qos"]                = settings.mqtt_qos;
     root["mqtt_retain"]             = settings.mqtt_retain;
     root["ha_enabled"]              = settings.ha_enabled;
@@ -197,6 +198,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_time_mixer      = root["publish_time_mixer"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_other      = root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
+    newSettings.publish_time_heartbeat  = root["publish_time_heartbeat"] | EMSESP_DEFAULT_PUBLISH_HEARTBEAT;
 
     newSettings.ha_enabled         = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
     newSettings.nested_format      = root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT;
@@ -282,6 +284,11 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
 
     if (newSettings.publish_time_sensor != settings.publish_time_sensor) {
         emsesp::EMSESP::mqtt_.set_publish_time_sensor(newSettings.publish_time_sensor);
+        changed = true;
+    }
+
+    if (newSettings.publish_time_heartbeat != settings.publish_time_heartbeat) {
+        emsesp::EMSESP::mqtt_.set_publish_time_heartbeat(newSettings.publish_time_heartbeat);
         changed = true;
     }
 

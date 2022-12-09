@@ -90,6 +90,7 @@ class MqttSettings {
     uint16_t publish_time_mixer;
     uint16_t publish_time_other;
     uint16_t publish_time_sensor;
+    uint16_t publish_time_heartbeat;
     uint8_t  mqtt_qos;
     bool     mqtt_retain;
     bool     ha_enabled;

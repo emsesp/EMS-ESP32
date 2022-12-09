@@ -65,6 +65,7 @@ class Mqtt {
     void set_publish_time_mixer(uint16_t publish_time);
     void set_publish_time_other(uint16_t publish_time);
     void set_publish_time_sensor(uint16_t publish_time);
+    void set_publish_time_heartbeat(uint16_t publish_time);
     bool get_publish_onchange(uint8_t device_type);
 
     enum Operation : uint8_t { PUBLISH, SUBSCRIBE, UNSUBSCRIBE };
@@ -292,6 +293,7 @@ class Mqtt {
     uint32_t last_publish_mixer_      = 0;
     uint32_t last_publish_other_      = 0;
     uint32_t last_publish_sensor_     = 0;
+    uint32_t last_publish_heartbeat_  = 0;
     uint32_t last_publish_queue_      = 0;
 
     static bool     connecting_;
@@ -315,6 +317,7 @@ class Mqtt {
     static uint32_t    publish_time_mixer_;
     static uint32_t    publish_time_other_;
     static uint32_t    publish_time_sensor_;
+    static uint32_t    publish_time_heartbeat_;
     static bool        mqtt_enabled_;
     static bool        ha_enabled_;
     static uint8_t     nested_format_;
