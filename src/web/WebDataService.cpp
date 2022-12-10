@@ -166,6 +166,11 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
 void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
         auto * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXXLARGE_DYN);
+        if (!response) {
+            AsyncWebServerResponse * response = request->beginResponse(507); // Insufficient Storage
+            request->send(response);
+            return;
+        }
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == json["id"]) {
                 // wait max 2.5 sec for updated data (post_send_delay is 2 sec)

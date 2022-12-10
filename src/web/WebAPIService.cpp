@@ -101,8 +101,13 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     }
 
     // output json buffer
-    auto *     response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
-    JsonObject output   = response->getRoot();
+    auto * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
+    if (!response) {
+        AsyncWebServerResponse * response = request->beginResponse(507); // Insufficient Storage
+        request->send(response);
+        return;
+    }
+    JsonObject output = response->getRoot();
 
     // call command
     uint8_t return_code = Command::process(request->url().c_str(), is_admin, input, output);

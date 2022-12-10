@@ -201,6 +201,11 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
 void WebCustomizationService::device_entities(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
         auto * response = new MsgpackAsyncJsonResponse(true, EMSESP_JSON_SIZE_XXXLARGE_DYN);
+        if (!response) {
+            AsyncWebServerResponse * response = request->beginResponse(507); // Insufficient Storage
+            request->send(response);
+            return;
+        }
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == json["id"]) {
 #ifndef EMSESP_STANDALONE
