@@ -505,7 +505,7 @@ void DallasSensor::publish_values(const bool force) {
                 config["dev_cla"] = "temperature";
 
                 char stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/dallassensor_data", Mqtt::base().c_str());
+                snprintf(stat_t, sizeof(stat_t), "%s/dallassensor_data", Mqtt::base().c_str()); // use base path
                 config["stat_t"] = stat_t;
 
                 config["unit_of_meas"] = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);

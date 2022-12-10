@@ -440,7 +440,7 @@ void AnalogSensor::publish_values(const bool force) {
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
 
                 char stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::base().c_str());
+                snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::base().c_str()); // use base path
                 config["stat_t"] = stat_t;
 
                 char str[50];
