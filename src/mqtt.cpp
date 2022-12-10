@@ -443,6 +443,7 @@ void Mqtt::load_settings() {
     });
 
     // create basename from base
+    // by taking the MQTT base path and replacing all / with underscores
     mqtt_basename_ = mqtt_base_;
     std::replace(mqtt_basename_.begin(), mqtt_basename_.end(), '/', '_');
 }
@@ -608,18 +609,24 @@ void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
     char uniq[70];
-    snprintf(uniq, sizeof(uniq), "%s_status", mqtt_basename_.c_str()); // always use basename
+    if (Mqtt::multiple_instances()) {
+        snprintf(uniq, sizeof(uniq), "%s_system_status", mqtt_basename_.c_str());
+    } else {
+        strcpy(uniq, "system_status");
+    }
+
     doc["uniq_id"]   = uniq;
     doc["object_id"] = uniq;
-    doc["~"]         = mqtt_base_;
-    // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
-    // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
-    doc["stat_t"]       = "~/status";
+
+    doc["stat_t"]       = mqtt_base_ + "/status";
     doc["name"]         = "EMS-ESP status";
     doc["payload_on"]   = "online";
     doc["payload_off"]  = "offline";
     doc["state_class"]  = "measurement";
     doc["device_class"] = "connectivity";
+
+    // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
+    // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
 
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = "EMS-ESP";
@@ -630,7 +637,7 @@ void Mqtt::ha_status() {
     ids.add("ems-esp");
 
     char topic[MQTT_TOPIC_MAX_SIZE];
-    snprintf(topic, sizeof(topic), "binary_sensor/%s/status/config", mqtt_basename_.c_str());
+    snprintf(topic, sizeof(topic), "binary_sensor/%s/system_status/config", mqtt_basename_.c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors - must match the MQTT payload keys
@@ -982,7 +989,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build unique identifier which will be used in the topic, also used as object_id
     char uniq_id[70];
-    if (multiple_instances_) {
+    if (Mqtt::multiple_instances()) {
         // prefix base name to each uniq_id
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
     } else {
