@@ -37,9 +37,9 @@ const DeviceIcon: FC<DeviceIconProps> = ({ type }) => {
     case 'Gateway':
       return <AiOutlineGateway />;
     case 'Alert':
-        return <AiOutlineAlert />;
+      return <AiOutlineAlert />;
     case 'Pump':
-        return <AiOutlineChrome />;
+      return <AiOutlineChrome />;
     default:
       return null;
   }
