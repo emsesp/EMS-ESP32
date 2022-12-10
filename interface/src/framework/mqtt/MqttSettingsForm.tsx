@@ -223,7 +223,13 @@ const MqttSettingsForm: FC = () => {
               <>
                 <Grid item>
                   <BlockFormControlLabel
-                    control={<Checkbox name="multiple_instances" checked={data.multiple_instances} onChange={updateFormValue} />}
+                    control={
+                      <Checkbox
+                        name="multiple_instances"
+                        checked={data.multiple_instances}
+                        onChange={updateFormValue}
+                      />
+                    }
                     label={LL.MQTT_MULTIPLE_INSTANCES()}
                   />
                 </Grid>

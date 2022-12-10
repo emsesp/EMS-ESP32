@@ -5,6 +5,7 @@
 ## **IMPORTANT! BREAKING CHANGES**
 
 - When upgrading to v3.5 for the first time from v3.4 on a BBQKees Gateway board you will need to use the [EMS-EPS Flasher](https://github.com/emsesp/EMS-ESP-Flasher/releases) to correctly re-partition the flash. Make sure you backup the settings and customizations from the WebUI (System->Upload/Download) and restore after the upgrade.
+- Since 3.5.0b11 we have added support for multiple EMS-ESPs [#759] and also renamed the HA Entity IDs. For example what was previously `sensor.boiler_actual_boiler_temperature` is now using the shortname form `sensor.boiler_boiltemp` as opposed to the English description. Unfortunately this does means any HA dashboards, automation scripts and integrations (e.g. Grafana) need to be adjusted accordingly.
 
 ## Added
 

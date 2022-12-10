@@ -288,18 +288,18 @@ const WiFiSettingsForm: FC = () => {
           </MessageBox>
         )}
         {!restartNeeded && (
-        <ButtonRow>
-          <Button
-            startIcon={<SaveIcon />}
-            disabled={saving}
-            variant="outlined"
-            color="primary"
-            type="submit"
-            onClick={validateAndSubmit}
-          >
-            {LL.SAVE()}
-          </Button>
-        </ButtonRow>
+          <ButtonRow>
+            <Button
+              startIcon={<SaveIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={validateAndSubmit}
+            >
+              {LL.SAVE()}
+            </Button>
+          </ButtonRow>
         )}
       </>
     );
