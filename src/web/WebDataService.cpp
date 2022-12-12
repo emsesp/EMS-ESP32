@@ -167,11 +167,11 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
     if (json.is<JsonObject>()) {
         auto * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXXLARGE_DYN);
         if (!response->getSize()) {
-            // EMSESP::logger().err("Insufficient storage");
+            delete response;
             response = new MsgpackAsyncJsonResponse(false, 256);
-            response->setCode(507);
+            response->setCode(507); // Insufficient Storage
             response->setLength();
-            request->send(response); // Insufficient Storage (507)
+            request->send(response);
             return;
         }
         for (const auto & emsdevice : EMSESP::emsdevices) {
