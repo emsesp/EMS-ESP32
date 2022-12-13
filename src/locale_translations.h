@@ -367,6 +367,10 @@ MAKE_PSTR_LIST(maxHeatComp, "maxheatcomp", "heat limit compressor", "Heizgrenze 
 MAKE_PSTR_LIST(maxHeatHeat, "maxheatheat", "heat limit heating", "Heizgrenze Heizen", "heat limit heating", "heat limit heating", "limit ciepła dla ogrzewania", "maks varmegrense oppvarming")
 MAKE_PSTR_LIST(maxHeatDhw, "maxheatdhw", "heat limit dhw", "Heizgrenze Warmwasser", "heat limit dhw", "heat limit dhw", "limit ciepła dla c.w.u.", "varmegrense varmtvann")
 
+MAKE_PSTR_LIST(auxHeaterOnly, "auxheateronly", "auxilliary heater only", "nur Zusatzheizer")
+MAKE_PSTR_LIST(addHeaterDelay, "addheaterdelay", "additional heater on delay", "Zusatzheizer Einschaltverzögerung")
+MAKE_PSTR_LIST(minTempSilent, "mintempsilent", "min. outside temp. for silent mode", "Minimale Aussentemperatur Silentmodus")
+
 // hybrid heatpump
 MAKE_PSTR_LIST(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi")
 MAKE_PSTR_LIST(switchOverTemp, "switchovertemp", "outside switchover temperature", "Außentemperatur für Umschaltung", "Schakeltemperatuur buitentemperatuur", "Utomhus Omställningstemperatur", "zewnętrzna temperatura przełączania", "utendørstemp styring")
