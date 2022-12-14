@@ -68,7 +68,8 @@ class DeviceValue {
         SQM,         // 18 square meter
         M3,          // 19 cubic meter
         L,           // 20
-        CONNECTIVITY // 21 - used in HA
+        K_MIN,       // 21 - Kelvin * minutes
+        CONNECTIVITY // 22 - used in HA
     };
 
     // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp

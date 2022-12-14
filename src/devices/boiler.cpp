@@ -572,13 +572,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               &addHeaterDelay_,
                               DeviceValueType::USHORT,
                               FL_(addHeaterDelay),
-                              DeviceValueUOM::NONE,
+                              DeviceValueUOM::K_MIN,
                               MAKE_CF_CB(set_additionalHeaterDelay));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &minTempSilent_,
                               DeviceValueType::INT,
                               FL_(minTempSilent),
-                              DeviceValueUOM::NONE,
+                              DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_minTempSilent));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &tempParMode_,
