@@ -178,13 +178,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x48D, "HpPower", true, MAKE_PF_CB(process_HpPower));
         register_telegram_type(0x48F, "HpOutdoor", false, MAKE_PF_CB(process_HpOutdoor));
         register_telegram_type(0x48A, "HpPool", true, MAKE_PF_CB(process_HpPool));
-        register_telegram_type(0x4A2, "HpInput", false, MAKE_PF_CB(process_HpInput));
-        register_telegram_type(0x486, "HpInConfig", false, MAKE_PF_CB(process_HpInConfig));
-        register_telegram_type(0x492, "HpHeaterConfig", false, MAKE_PF_CB(process_HpHeaterConfig));
+        register_telegram_type(0x4A2, "HpInput", true, MAKE_PF_CB(process_HpInput));
+        register_telegram_type(0x486, "HpInConfig", true, MAKE_PF_CB(process_HpInConfig));
+        register_telegram_type(0x492, "HpHeaterConfig", true, MAKE_PF_CB(process_HpHeaterConfig));
 
-        register_telegram_type(0x488, "HPValve", false, MAKE_PF_CB(process_HpValve));
-        register_telegram_type(0x484, "HPSilentMode", false, MAKE_PF_CB(process_HpSilentMode));
-        register_telegram_type(0x491, "HPAdditionalHeater", false, MAKE_PF_CB(process_HpAdditionalHeater));
+        register_telegram_type(0x488, "HPValve", true, MAKE_PF_CB(process_HpValve));
+        register_telegram_type(0x484, "HPSilentMode", true, MAKE_PF_CB(process_HpSilentMode));
+        register_telegram_type(0x491, "HPAdditionalHeater", true, MAKE_PF_CB(process_HpAdditionalHeater));
     }
 
     /*
@@ -1200,6 +1200,7 @@ void Boiler::process_HpPool(std::shared_ptr<const Telegram> telegram) {
 
 // Heatpump inputs - type 0x4A2
 // Boiler(0x08) -> All(0x00), ?(0x04A2), data: 02 01 01 00 01 00
+// Boiler(0x08) -W-> Me(0x0B), HpInput(0x04A2), data: 20 07 06 01 00 (from #802)
 void Boiler::process_HpInput(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpInput[0].state, 2);
     has_update(telegram, hpInput[1].state, 3);
