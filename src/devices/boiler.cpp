@@ -182,6 +182,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x486, "HpInConfig", false, MAKE_PF_CB(process_HpInConfig));
         register_telegram_type(0x492, "HpHeaterConfig", false, MAKE_PF_CB(process_HpHeaterConfig));
 
+        register_telegram_type(0x488, "HPValve", false, MAKE_PF_CB(process_HpValve));
         register_telegram_type(0x484, "HPSilentMode", false, MAKE_PF_CB(process_HpSilentMode));
         register_telegram_type(0x491, "HPAdditionalHeater", false, MAKE_PF_CB(process_HpAdditionalHeater));
     }
@@ -579,6 +580,17 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(minTempSilent),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_minTempSilent));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &tempParMode_,
+                              DeviceValueType::INT,
+                              FL_(tempParMode),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_tempParMode));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxHeatMixValve_,
+                              DeviceValueType::INT,
+                              FL_(auxHeatMixValve),
+                              DeviceValueUOM::PERCENT);
     }
 
     // dhw - DEVICE_DATA_ww topic
@@ -1480,9 +1492,16 @@ void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, minTempSilent_, 11);
 }
 
+// Boiler(0x08) -B-> All(0x00), ?(0x0488), data: 8E 00 00 00 00 00 01 03
+void Boiler::process_HpValve(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, auxHeatMixValve_, 7);
+}
+
+
 // Boiler(0x08) -> All(0x00), ?(0x0491), data: 03 01 00 00 00 02 64 00 00 14 01 2C 00 0A 00 1E 00 1E 00 00 1E 0A 1E 05 05
 void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, auxHeaterOnly_, 1);
+    has_update(telegram, tempParMode_, 5);
     has_update(telegram, addHeaterDelay_, 10);
 }
 
@@ -2440,6 +2459,15 @@ bool Boiler::set_additionalHeaterOnly(const char * value, const int8_t id) {
     bool v;
     if (Helpers::value2bool(value, v)) {
         write_command(0x491, 1, v ? 1 : 0, 0x491);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_tempParMode(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2temperature(value, v)) {
+        write_command(0x491, 5, v, 0x491);
         return true;
     }
     return false;

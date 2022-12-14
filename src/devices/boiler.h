@@ -245,6 +245,8 @@ class Boiler : public EMSdevice {
     uint8_t  auxHeaterOnly_;
     uint16_t addHeaterDelay_;
     int8_t   minTempSilent_;
+    int8_t   tempParMode_;
+    int8_t   auxHeatMixValve_;
 
     /*
   // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
@@ -299,6 +301,7 @@ class Boiler : public EMSdevice {
     void process_amExtraMessage(std::shared_ptr<const Telegram> telegram);
     void process_HpSilentMode(std::shared_ptr<const Telegram> telegram);
     void process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram);
+    void process_HpValve(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
     bool        set_ww_mode(const char * value, const int8_t id);
@@ -387,6 +390,7 @@ class Boiler : public EMSdevice {
     bool set_minTempSilent(const char * value, const int8_t id);
     bool set_additionalHeaterOnly(const char * value, const int8_t id);
     bool set_additionalHeaterDelay(const char * value, const int8_t id);
+    bool set_tempParMode(const char * value, const int8_t id);
 
     /*
     bool set_hybridStrategy(const char * value, const int8_t id);

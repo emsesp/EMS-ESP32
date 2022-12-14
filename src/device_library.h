@@ -39,7 +39,7 @@
 {167, DeviceType::BOILER, "Cerapur Aero", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {168, DeviceType::BOILER, "Hybrid Heatpump", DeviceFlags::EMS_DEVICE_FLAG_HYBRID},
 {170, DeviceType::BOILER, "Logano GB212", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{172, DeviceType::BOILER, "Enviline/Compress 6000AW/Hybrid 7000iAW/SupraEco/Geo 5xx/WLW196i", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
+{172, DeviceType::BOILER, "Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 {173, DeviceType::BOILER, "Geo 5xx", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 {195, DeviceType::BOILER, "Condens 5000i/Greenstar 8000/GC9800IW", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {203, DeviceType::BOILER, "Logamax U122/Cerapur", DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -92,7 +92,7 @@
 { 94, DeviceType::THERMOSTAT, "RFM20 Remote", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x18
 {151, DeviceType::THERMOSTAT, "RC25", DeviceFlags::EMS_DEVICE_FLAG_RC25}, // 0x17
 {157, DeviceType::THERMOSTAT, "RC200/CW100", DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18
-{158, DeviceType::THERMOSTAT, "RC300/RC310/Moduline 3000/1010H/CW400/Sense II", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
+{158, DeviceType::THERMOSTAT, "RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 {165, DeviceType::THERMOSTAT, "RC100/Moduline 1000/1010", DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18, 0x38
 {172, DeviceType::THERMOSTAT, "Rego 2000/3000", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 {216, DeviceType::THERMOSTAT, "CRF200S", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
