@@ -52,8 +52,10 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
+#ifdef EMSESP_DEBUG
 #if defined(EMSESP_USE_SERIAL)
     // Serial.println(p.path().c_str()); // dump paths, for debugging
+#endif
 #endif
 
     // re-calculate new path
@@ -179,6 +181,8 @@ std::string Command::return_code_string(const uint8_t return_code) {
         return "Not Authorized";
     case CommandRet::FAIL:
         return "Failed";
+    case CommandRet::INVALID:
+        return "Invalid";
     default:
         break;
     }
@@ -270,18 +274,22 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         }
 
         auto description = Helpers::translated_word(cf->description_);
+        char info_s[100];
+        if (strlen(description)) {
+            snprintf(info_s, sizeof(info_s), "'%s/%s' (%s)", dname, cmd, description);
+        } else {
+            snprintf(info_s, sizeof(info_s), "'%s/%s'", dname, cmd);
+        }
+
+        std::string ro = EMSESP::system_.readonly_mode() ? "[readonly] " : "";
 
         if ((value == nullptr) || (strlen(value) == 0)) {
-            if (EMSESP::system_.readonly_mode()) {
-                LOG_INFO(("[readonly] Calling command '%s/%s' (%s)"), dname, cmd, description);
-            } else {
-                LOG_DEBUG(("Calling command '%s/%s' (%s)"), dname, cmd, description);
-            }
+            LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
         } else {
-            if (EMSESP::system_.readonly_mode()) {
-                LOG_INFO(("[readonly] Calling command '%s/%s' (%s) with value %s"), dname, cmd, description, value);
+            if (id > 0) {
+                LOG_DEBUG(("%sCalling command %s with value %s and id %d"), ro.c_str(), info_s, value, id);
             } else {
-                LOG_DEBUG(("Calling command '%s/%s' (%s) with value %s"), dname, cmd, description, value);
+                LOG_DEBUG(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
             }
         }
 
@@ -290,8 +298,13 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
             return_code = ((cf->cmdfunction_json_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
         }
 
-        if (cf->cmdfunction_ && !EMSESP::cmd_is_readonly(device_type, cmd, id)) {
-            return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;
+        // check if read-only. This also checks for valid tags (e.g. heating circuits)
+        if (cf->cmdfunction_) {
+            if (EMSESP::cmd_is_readonly(device_type, cmd, id)) {
+                return_code = CommandRet::INVALID; // readonly or invalid hc
+            } else {
+                return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;
+            }
         }
 
         // report back

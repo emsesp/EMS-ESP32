@@ -101,8 +101,16 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     }
 
     // output json buffer
-    auto *     response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
-    JsonObject output   = response->getRoot();
+    auto * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
+    if (!response->getSize()) {
+        delete response;
+        response = new PrettyAsyncJsonResponse(false, 256);
+        response->setCode(507); // Insufficient Storage
+        response->setLength();
+        request->send(response);
+        return;
+    }
+    JsonObject output = response->getRoot();
 
     // call command
     uint8_t return_code = Command::process(request->url().c_str(), is_admin, input, output);
@@ -136,7 +144,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
 
     // send the json that came back from the command call
     // FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED = 400 (bad request), 200 (OK), 400 (not found), 400 (bad request), 401 (unauthorized)
-    int ret_codes[5] = {400, 200, 400, 400, 401};
+    int ret_codes[6] = {400, 200, 400, 400, 401, 400};
     response->setCode(ret_codes[return_code]);
     response->setLength();
     response->setContentType("application/json; charset=utf-8");

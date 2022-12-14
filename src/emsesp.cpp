@@ -589,7 +589,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
         doc["value"] = value;
     }
 
-    Mqtt::publish(F_(response), doc.as<JsonObject>());
+    Mqtt::publish("response", doc.as<JsonObject>());
 }
 
 // builds json with the detail of each value, for a specific EMS device type or the dallas sensor
@@ -1255,7 +1255,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         }
 #endif
         // check for poll to us, if so send top message from Tx queue immediately and quit
-        if (poll_id == txservice_.ems_bus_id()) {
+        if (poll_id == txservice_.get_send_id()) {
             txservice_.send();
         }
         // send remote room temperature if active

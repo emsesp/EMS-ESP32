@@ -74,13 +74,14 @@ class DummySettings {
     String   base               = "ems-esp";
     bool     publish_single     = false;
     bool     publish_single2cmd = false;
-    bool     send_response      = true;
+    bool     send_response      = false; // don't send response
     String   host               = "192.168.1.4";
     uint16_t port               = 1883;
     String   clientId           = "ems-esp";
     String   username           = "";
     uint16_t keepAlive          = 60;
     bool     cleanSession       = false;
+    bool     multiple_instances = false;
 
     uint16_t publish_time_boiler     = 10;
     uint16_t publish_time_thermostat = 10;
@@ -88,6 +89,7 @@ class DummySettings {
     uint16_t publish_time_mixer      = 10;
     uint16_t publish_time_other      = 10;
     uint16_t publish_time_sensor     = 10;
+    uint16_t publish_time_heartbeat  = 60;
 
     String hostname       = "ems-esp";
     String jwtSecret      = "ems-esp";
@@ -101,6 +103,8 @@ class DummySettings {
     String dnsIP2         = "";
     bool   enableIPv6     = false;
     bool   enableMDNS     = true;
+    bool   enableCORS     = false;
+    String CORSOrigin     = "*";
 
     uint8_t phy_type       = 0;
     uint8_t eth_power      = 0; // 0 means -1

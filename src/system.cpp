@@ -512,12 +512,6 @@ void System::loop() {
     led_monitor();  // check status and report back using the LED
     system_check(); // check system health
 
-    // send out heartbeat
-    uint32_t currentMillis = uuid::get_uptime();
-    if (!last_heartbeat_ || (currentMillis - last_heartbeat_ > SYSTEM_HEARTBEAT_INTERVAL)) {
-        last_heartbeat_ = currentMillis;
-        send_heartbeat();
-    }
 #ifndef EMSESP_STANDALONE
 
 #if defined(EMSESP_DEBUG)
@@ -536,23 +530,23 @@ void System::loop() {
 }
 
 // send MQTT info topic appended with the version information as JSON, as a retained flag
-void System::send_info_mqtt(const char * event_str) {
+void System::send_info_mqtt(const char * event_str, bool send_ntp) {
     StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> doc;
     doc["event"]   = event_str;
     doc["version"] = EMSESP_APP_VERSION;
 
     // if NTP is enabled send the boot_time in local time in ISO 8601 format (eg: 2022-11-15 20:46:38)
     // https://github.com/emsesp/EMS-ESP32/issues/751
-    if (ntp_connected()) {
+    if (send_ntp) {
         char   time_string[25];
-        time_t now = time(nullptr); // grab the current instant in unix seconds
-        strftime(time_string, 25, "%F %T", localtime(&now));
-        doc["boot_time"] = time_string;
+        time_t now = time(nullptr) - uuid::get_uptime_sec();
+        strftime(time_string, 25, "%FT%T%z", localtime(&now));
+        doc["boot time"] = time_string;
     }
 
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.ethernet_connected()) {
-        doc["connection"]      = "ethernet";
+        doc["network"]         = "ethernet";
         doc["hostname"]        = ETH.getHostname();
         doc["MAC"]             = ETH.macAddress();
         doc["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
@@ -562,7 +556,7 @@ void System::send_info_mqtt(const char * event_str) {
             doc["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
         }
     } else if (WiFi.status() == WL_CONNECTED) {
-        doc["connection"]      = "wifi";
+        doc["network"]         = "wifi";
         doc["hostname"]        = WiFi.getHostname();
         doc["SSID"]            = WiFi.SSID();
         doc["BSSID"]           = WiFi.BSSIDstr();
@@ -896,19 +890,19 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.println("Network:");
     switch (WiFi.status()) {
     case WL_IDLE_STATUS:
-        shell.printfln(" Network: Idle");
+        shell.printfln(" Status: Idle");
         break;
 
     case WL_NO_SSID_AVAIL:
-        shell.printfln(" Network: Network not found");
+        shell.printfln(" Status: Network not found");
         break;
 
     case WL_SCAN_COMPLETED:
-        shell.printfln(" Network: Network scan complete");
+        shell.printfln(" Status: Network scan complete");
         break;
 
     case WL_CONNECTED:
-        shell.printfln(" Network: connected");
+        shell.printfln(" Status: connected");
         shell.printfln(" SSID: %s", WiFi.SSID().c_str());
         shell.printfln(" BSSID: %s", WiFi.BSSIDstr().c_str());
         shell.printfln(" RSSI: %d dBm (%d %%)", WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
@@ -943,7 +937,7 @@ void System::show_system(uuid::console::Shell & shell) {
     // show Ethernet if connected
     if (ethernet_connected_) {
         shell.println();
-        shell.printfln(" Ethernet Network: connected");
+        shell.printfln(" Status: Ethernet connected");
         shell.printfln(" MAC address: %s", ETH.macAddress().c_str());
         shell.printfln(" Hostname: %s", ETH.getHostname());
         shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
@@ -1071,9 +1065,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["uptime"]   = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     // node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
-    node["freemem"]  = ESP.getFreeHeap() / 1024;     // kilobytes
-    node["maxalloc"] = ESP.getMaxAllocHeap() / 1024; // kilobytes
-    node["free_app"] = EMSESP::system_.appFree();    // kilobytes
+    node["free mem"]  = ESP.getFreeHeap() / 1024;     // kilobytes
+    node["max alloc"] = ESP.getMaxAllocHeap() / 1024; // kilobytes
+    node["free app"]  = EMSESP::system_.appFree();    // kilobytes
 #endif
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
@@ -1081,7 +1075,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     // Network Status
     node = output.createNestedObject("Network Info");
     if (EMSESP::system_.ethernet_connected()) {
-        node["connection"]      = "Ethernet";
+        node["network"]         = "Ethernet";
         node["hostname"]        = ETH.getHostname();
         node["MAC"]             = ETH.macAddress();
         node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
@@ -1091,8 +1085,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
         }
     } else if (WiFi.status() == WL_CONNECTED) {
-        node["connection"] = "WiFi";
-        node["hostname"]   = WiFi.getHostname();
+        node["network"]  = "WiFi";
+        node["hostname"] = WiFi.getHostname();
         // node["SSID"]            = WiFi.SSID();
         // node["BSSID"]           = WiFi.BSSIDstr();
         node["RSSI"] = WiFi.RSSI();
@@ -1110,6 +1104,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["enable IPv6"]      = settings.enableIPv6;
         node["low bandwidth"]    = settings.bandwidth20;
         node["disable sleep"]    = settings.nosleep;
+        node["enable MDNS"]      = settings.enableMDNS;
+        node["enable CORS"]      = settings.enableCORS;
+        if (settings.enableCORS) {
+            node["CORS origin"] = settings.CORSOrigin;
+        }
     });
 #ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getAPSettingsService()->read([&](APSettings & settings) {
@@ -1150,15 +1149,17 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     }
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
         node["enabled"]                 = settings.enabled;
-        node["client_id"]               = settings.clientId;
+        node["client id"]               = settings.clientId;
         node["keep alive"]              = settings.keepAlive;
         node["clean session"]           = settings.cleanSession;
+        node["multiple instances"]      = settings.multiple_instances;
         node["base"]                    = settings.base;
         node["discovery prefix"]        = settings.discovery_prefix;
         node["nested format"]           = settings.nested_format;
         node["ha enabled"]              = settings.ha_enabled;
         node["mqtt qos"]                = settings.mqtt_qos;
         node["mqtt retain"]             = settings.mqtt_retain;
+        node["publish time heartbeat"]  = settings.publish_time_heartbeat;
         node["publish time boiler"]     = settings.publish_time_boiler;
         node["publish time thermostat"] = settings.publish_time_thermostat;
         node["publish time solar"]      = settings.publish_time_solar;
@@ -1245,7 +1246,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["phy type"] = settings.phy_type;
             if (settings.phy_type != PHY_type::PHY_TYPE_NONE) {
                 node["eth power"]      = settings.eth_power;
-                node["eth phy_addr"]   = settings.eth_phy_addr;
+                node["eth phy addr"]   = settings.eth_phy_addr;
                 node["eth clock_mode"] = settings.eth_clock_mode;
             }
             node["rx gpio"]      = settings.rx_gpio;
@@ -1264,6 +1265,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["enum format"]     = settings.enum_format;
         node["analog enabled"]  = settings.analog_enabled;
         node["telnet enabled"]  = settings.telnet_enabled;
+        node["web log buffer"]  = settings.weblog_buffer;
     });
 
     // Devices - show EMS devices if we have any
@@ -1416,6 +1418,7 @@ void System::ntp_connected(bool b) {
     if (b != ntp_connected_) {
         LOG_INFO(b ? "NTP connected" : "NTP disconnected"); // if changed report it
     }
+
     ntp_connected_  = b;
     ntp_last_check_ = b ? uuid::get_uptime_sec() : 0;
 }
@@ -1426,6 +1429,7 @@ bool System::ntp_connected() {
     if ((uuid::get_uptime_sec() - ntp_last_check_ > 7201) && ntp_connected_) {
         ntp_connected(false);
     }
+
     return ntp_connected_;
 }
 

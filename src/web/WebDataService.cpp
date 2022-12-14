@@ -166,6 +166,14 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
 void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
         auto * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXXLARGE_DYN);
+        if (!response->getSize()) {
+            delete response;
+            response = new MsgpackAsyncJsonResponse(false, 256);
+            response->setCode(507); // Insufficient Storage
+            response->setLength();
+            request->send(response);
+            return;
+        }
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == json["id"]) {
                 // wait max 2.5 sec for updated data (post_send_delay is 2 sec)
@@ -284,8 +292,8 @@ void WebDataService::write_analog(AsyncWebServerRequest * request, JsonVariant &
 
         uint8_t     gpio   = analog["gpio"]; // this is the unique key, the GPIO
         std::string name   = analog["name"];
-        float       factor = analog["factor"];
-        float       offset = analog["offset"];
+        double      factor = analog["factor"];
+        double      offset = analog["offset"];
         uint8_t     uom    = analog["uom"];
         int8_t      type   = analog["type"];
         ok                 = EMSESP::analogsensor_.update(gpio, name, offset, factor, uom, type);

@@ -296,7 +296,7 @@ void AnalogSensor::loop() {
 }
 
 // update analog information name and offset
-bool AnalogSensor::update(uint8_t gpio, const std::string & name, float offset, float factor, uint8_t uom, int8_t type) {
+bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type) {
     boolean found_sensor = false; // see if we can find the sensor in our customization list
 
     EMSESP::webCustomizationService.update(
@@ -375,7 +375,7 @@ void AnalogSensor::publish_sensor(const Sensor & sensor) const {
             snprintf(topic, sizeof(topic), "%s%s/%s", F_(analogsensor), "_data", sensor.name().c_str());
         }
         char payload[10];
-        Mqtt::publish(topic, Helpers::render_value(payload, sensor.value(), 2)); // always publish as floats
+        Mqtt::publish(topic, Helpers::render_value(payload, sensor.value(), 2)); // always publish as doubles
     }
 }
 
@@ -422,7 +422,7 @@ void AnalogSensor::publish_values(const bool force) {
                 case AnalogType::PWM_0:
                 case AnalogType::PWM_1:
                 case AnalogType::PWM_2:
-                    dataSensor["value"] = serialized(Helpers::render_value(s, sensor.value(), 2)); // float
+                    dataSensor["value"] = serialized(Helpers::render_value(s, sensor.value(), 2)); // double
                     break;
                 default:
                     dataSensor["value"] = (uint8_t)sensor.value(); // convert to char for 1 or 0
@@ -440,7 +440,7 @@ void AnalogSensor::publish_values(const bool force) {
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
 
                 char stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::base().c_str());
+                snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::base().c_str()); // use base path
                 config["stat_t"] = stat_t;
 
                 char str[50];
@@ -451,15 +451,17 @@ void AnalogSensor::publish_values(const bool force) {
                 }
                 config["val_tpl"] = str;
 
-                // snprintf(str, sizeof(str), "%s_analog_sensor_%s", Mqtt::basename().c_str(), sensor.name().c_str());
-                snprintf(str, sizeof(str), "analog_sensor_%d", sensor.gpio());
+                if (Mqtt::multiple_instances()) {
+                    snprintf(str, sizeof(str), "%s_analogsensor_%d", Mqtt::basename().c_str(), sensor.gpio());
+                } else {
+                    snprintf(str, sizeof(str), "analogsensor_%d", sensor.gpio());
+                }
+
                 config["object_id"] = str;
+                config["uniq_id"]   = str; // same as object_id
 
                 snprintf(str, sizeof(str), "%s", sensor.name().c_str());
                 config["name"] = str;
-
-                snprintf(str, sizeof(str), "analogsensor_%d", sensor.gpio());
-                config["uniq_id"] = str;
 
                 if (sensor.uom() != DeviceValueUOM::NONE) {
                     config["unit_of_meas"] = EMSdevice::uom_to_string(sensor.uom());
@@ -584,7 +586,7 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
 }
 
 // this creates the sensor, initializing everything
-AnalogSensor::Sensor::Sensor(const uint8_t gpio, const std::string & name, const float offset, const float factor, const uint8_t uom, const int8_t type)
+AnalogSensor::Sensor::Sensor(const uint8_t gpio, const std::string & name, const double offset, const double factor, const uint8_t uom, const int8_t type)
     : gpio_(gpio)
     , name_(name)
     , offset_(offset)

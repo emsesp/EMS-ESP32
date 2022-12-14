@@ -350,13 +350,7 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) const {
 
 // list all the telegram type IDs for this device, outputting to a string (max size 200)
 char * EMSdevice::show_telegram_handlers(char * result, const size_t len, const uint8_t handlers) {
-    uint8_t size = telegram_functions_.size();
-
     strlcpy(result, "", len);
-
-    if (!size) {
-        return result;
-    }
 
     uint8_t i = 0;
     for (const auto & tf : telegram_functions_) {
@@ -623,6 +617,7 @@ bool EMSdevice::is_readable(const void * value_p) const {
 }
 
 // check if value/command is readonly
+// matches valid tags too
 bool EMSdevice::is_readonly(const std::string & cmd, const int8_t id) const {
     uint8_t tag = id > 0 ? DeviceValueTAG::TAG_HC1 + id - 1 : DeviceValueTAG::TAG_NONE;
     for (const auto & dv : devicevalues_) {

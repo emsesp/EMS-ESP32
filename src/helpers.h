@@ -27,7 +27,7 @@ namespace emsesp {
 
 class Helpers {
   public:
-    static char * render_value(char * result, const float value, const int8_t format); // format is the precision
+    static char * render_value(char * result, const double value, const int8_t format); // format is the precision
     static char * render_value(char * result, const uint8_t value, const int8_t format, const uint8_t fahrenheit = 0);
     static char * render_value(char * result, const int8_t value, const int8_t format, const uint8_t fahrenheit = 0);
     static char * render_value(char * result, const uint16_t value, const int8_t format, const uint8_t fahrenheit = 0);

@@ -48,6 +48,8 @@ export interface NetworkSettings {
   dns_ip_1?: string;
   dns_ip_2?: string;
   enableMDNS: boolean;
+  enableCORS: boolean;
+  CORSOrigin: string;
 }
 
 export interface WiFiNetworkList {

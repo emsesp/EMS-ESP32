@@ -151,10 +151,17 @@ void Shower::set_shower_state(bool state, bool force) {
         ha_configdone_ = true;
 
         StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
-        doc["name"]    = "Shower Active";
-        doc["uniq_id"] = "shower_active";
-        doc["~"]       = Mqtt::base();
-        doc["stat_t"]  = "~/shower_active";
+
+        doc["name"] = "Shower Active";
+
+        char str[70];
+        snprintf(str, sizeof(str), "%s_shower_active", Mqtt::basename().c_str());
+        doc["uniq_id"]   = str;
+        doc["object_id"] = str;
+
+        char stat_t[50];
+        snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::base().c_str()); // use base path
+        doc["stat_t"] = stat_t;
 
         // always render boolean as strings for HA
         char result[12];
@@ -166,7 +173,7 @@ void Shower::set_shower_state(bool state, bool force) {
         ids.add("ems-esp");
 
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::base().c_str());
+        snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());
         Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
     }
 }

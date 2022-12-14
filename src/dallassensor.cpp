@@ -505,7 +505,7 @@ void DallasSensor::publish_values(const bool force) {
                 config["dev_cla"] = "temperature";
 
                 char stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/dallassensor_data", Mqtt::base().c_str());
+                snprintf(stat_t, sizeof(stat_t), "%s/dallassensor_data", Mqtt::base().c_str()); // use base path
                 config["stat_t"] = stat_t;
 
                 config["unit_of_meas"] = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
@@ -518,15 +518,17 @@ void DallasSensor::publish_values(const bool force) {
                 }
                 config["val_tpl"] = str;
 
-                // snprintf(str, sizeof(str), "%s_temperature_sensor_%s", Mqtt::basename().c_str(), sensor.id().c_str());
-                snprintf(str, sizeof(str), "temperature_sensor_%s", sensor.id().c_str());
+                if (Mqtt::multiple_instances()) {
+                    snprintf(str, sizeof(str), "%s_dallassensor_%s", Mqtt::basename().c_str(), sensor.id().c_str());
+                } else {
+                    snprintf(str, sizeof(str), "dallassensor_%s", sensor.id().c_str());
+                }
+
                 config["object_id"] = str;
+                config["uniq_id"]   = str; // same as object_id
 
                 snprintf(str, sizeof(str), "%s", sensor.name().c_str());
                 config["name"] = str;
-
-                snprintf(str, sizeof(str), "dallasensor_%s", sensor.id().c_str());
-                config["uniq_id"] = str;
 
                 JsonObject dev = config.createNestedObject("dev");
                 JsonArray  ids = dev.createNestedArray("ids");

@@ -44,8 +44,8 @@ class AnalogCustomization {
   public:
     uint8_t     gpio;
     std::string name;
-    float       offset;
-    float       factor;
+    double      offset;
+    double      factor;
     uint8_t     uom;  // 0 is none
     int8_t      type; // -1 is for deletion
 

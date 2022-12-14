@@ -77,7 +77,7 @@ class System {
     bool check_upgrade();
     bool heartbeat_json(JsonObject & output);
     void send_heartbeat();
-    void send_info_mqtt(const char * event_str);
+    void send_info_mqtt(const char * event_str, bool send_ntp = false);
 
     bool syslog_enabled() {
         return syslog_enabled_;
@@ -250,7 +250,6 @@ class System {
     static constexpr uint32_t HEALTHCHECK_LED_FLASH_DUARATION = 150;
     static constexpr uint8_t  HEALTHCHECK_NO_BUS              = (1 << 0); // 1
     static constexpr uint8_t  HEALTHCHECK_NO_NETWORK          = (1 << 1); // 2
-    static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL       = 60000;    // in milliseconds, how often the MQTT heartbeat is sent (1 min)
     static constexpr uint8_t  LED_ON                          = HIGH;     // LED on
 
 #ifndef EMSESP_STANDALONE
@@ -263,7 +262,6 @@ class System {
     int8_t wifi_quality(int8_t dBm);
 
     uint8_t  healthcheck_       = HEALTHCHECK_NO_NETWORK | HEALTHCHECK_NO_BUS; // start with all flags set, no wifi and no ems bus connection
-    uint32_t last_heartbeat_    = 0;
     uint32_t last_system_check_ = 0;
 
     bool upload_status_      = false; // true if we're in the middle of a OTA firmware upload

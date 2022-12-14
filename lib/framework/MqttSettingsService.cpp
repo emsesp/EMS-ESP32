@@ -137,7 +137,7 @@ void MqttSettingsService::configureMqtt() {
         _mqttClient.setClientId(retainCstr(_state.clientId.c_str(), &_retainedClientId));
         _mqttClient.setKeepAlive(_state.keepAlive);
         _mqttClient.setCleanSession(_state.cleanSession);
-        _mqttClient.setMaxTopicLength(_state.maxTopicLength);
+        _mqttClient.setMaxTopicLength(FACTORY_MQTT_MAX_TOPIC_LENGTH); // hardcode. We don't take this from the settings anymore.
         _mqttClient.connect();
         // } else {
         // emsesp::EMSESP::logger().info("Error configuring Mqtt client");
@@ -145,16 +145,16 @@ void MqttSettingsService::configureMqtt() {
 }
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
-    root["enabled"]          = settings.enabled;
-    root["host"]             = settings.host;
-    root["port"]             = settings.port;
-    root["base"]             = settings.base;
-    root["username"]         = settings.username;
-    root["password"]         = settings.password;
-    root["client_id"]        = settings.clientId;
-    root["keep_alive"]       = settings.keepAlive;
-    root["clean_session"]    = settings.cleanSession;
-    root["max_topic_length"] = settings.maxTopicLength;
+    root["enabled"]            = settings.enabled;
+    root["host"]               = settings.host;
+    root["port"]               = settings.port;
+    root["base"]               = settings.base;
+    root["username"]           = settings.username;
+    root["password"]           = settings.password;
+    root["client_id"]          = settings.clientId;
+    root["keep_alive"]         = settings.keepAlive;
+    root["clean_session"]      = settings.cleanSession;
+    root["multiple_instances"] = settings.multiple_instances;
 
     // added by proddy for EMS-ESP
     root["publish_time_boiler"]     = settings.publish_time_boiler;
@@ -163,6 +163,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["publish_time_mixer"]      = settings.publish_time_mixer;
     root["publish_time_other"]      = settings.publish_time_other;
     root["publish_time_sensor"]     = settings.publish_time_sensor;
+    root["publish_time_heartbeat"]  = settings.publish_time_heartbeat;
     root["mqtt_qos"]                = settings.mqtt_qos;
     root["mqtt_retain"]             = settings.mqtt_retain;
     root["ha_enabled"]              = settings.ha_enabled;
@@ -177,18 +178,19 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     MqttSettings newSettings = {};
     bool         changed     = false;
 
-    newSettings.enabled        = root["enabled"] | FACTORY_MQTT_ENABLED;
-    newSettings.host           = root["host"] | FACTORY_MQTT_HOST;
-    newSettings.port           = root["port"] | FACTORY_MQTT_PORT;
-    newSettings.base           = root["base"] | FACTORY_MQTT_BASE;
-    newSettings.username       = root["username"] | FACTORY_MQTT_USERNAME;
-    newSettings.password       = root["password"] | FACTORY_MQTT_PASSWORD;
-    newSettings.clientId       = root["client_id"] | FACTORY_MQTT_CLIENT_ID;
-    newSettings.keepAlive      = root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE;
-    newSettings.cleanSession   = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
-    newSettings.maxTopicLength = root["max_topic_length"] | FACTORY_MQTT_MAX_TOPIC_LENGTH;
-    newSettings.mqtt_qos       = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
-    newSettings.mqtt_retain    = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
+    newSettings.enabled            = root["enabled"] | FACTORY_MQTT_ENABLED;
+    newSettings.host               = root["host"] | FACTORY_MQTT_HOST;
+    newSettings.port               = root["port"] | FACTORY_MQTT_PORT;
+    newSettings.base               = root["base"] | FACTORY_MQTT_BASE;
+    newSettings.username           = root["username"] | FACTORY_MQTT_USERNAME;
+    newSettings.password           = root["password"] | FACTORY_MQTT_PASSWORD;
+    newSettings.clientId           = root["client_id"] | FACTORY_MQTT_CLIENT_ID;
+    newSettings.keepAlive          = root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE;
+    newSettings.cleanSession       = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
+    newSettings.multiple_instances = root["multiple_instances"] | FACTORY_MQTT_MULTIPLE_INSTANCES;
+
+    newSettings.mqtt_qos    = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
+    newSettings.mqtt_retain = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
 
     newSettings.publish_time_boiler     = root["publish_time_boiler"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_thermostat = root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME;
@@ -196,6 +198,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_time_mixer      = root["publish_time_mixer"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_other      = root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
+    newSettings.publish_time_heartbeat  = root["publish_time_heartbeat"] | EMSESP_DEFAULT_PUBLISH_HEARTBEAT;
 
     newSettings.ha_enabled         = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
     newSettings.nested_format      = root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT;
@@ -281,6 +284,11 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
 
     if (newSettings.publish_time_sensor != settings.publish_time_sensor) {
         emsesp::EMSESP::mqtt_.set_publish_time_sensor(newSettings.publish_time_sensor);
+        changed = true;
+    }
+
+    if (newSettings.publish_time_heartbeat != settings.publish_time_heartbeat) {
+        emsesp::EMSESP::mqtt_.set_publish_time_heartbeat(newSettings.publish_time_heartbeat);
         changed = true;
     }
 
