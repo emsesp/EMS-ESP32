@@ -233,6 +233,14 @@ const MqttSettingsForm: FC = () => {
                     label={LL.MQTT_MULTIPLE_INSTANCES()}
                   />
                 </Grid>
+                <Grid item>
+                  <BlockFormControlLabel
+                    control={
+                      <Checkbox name="entity_fullname" checked={data.entity_fullname} onChange={updateFormValue} />
+                    }
+                    label={LL.MQTT_ENTITY_FULLNAME()}
+                  />
+                </Grid>
                 <Grid item sx={{ pb: 3 }}>
                   <ValidatedTextField
                     name="discovery_prefix"

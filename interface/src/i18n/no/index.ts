@@ -249,6 +249,7 @@ const no: Translation = {
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Standard',
   MQTT_MULTIPLE_INSTANCES: 'Enable Multiple Instances of EMS-ESP',
+  MQTT_ENTITY_FULLNAME: 'Use v3.4 style Entity IDs',
   MQTT_CLEAN_SESSION: 'Benytt Clean Session',
   MQTT_RETAIN_FLAG: 'Alltid sett Retain flag',
   INACTIVE: 'Innaktiv',

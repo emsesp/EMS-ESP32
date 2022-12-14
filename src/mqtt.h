@@ -95,6 +95,7 @@ class Mqtt {
     static void publish_ha_sensor_config(uint8_t               type,
                                          uint8_t               tag,
                                          const char * const    fullname,
+                                         const char * const    en_name,
                                          const uint8_t         device_type,
                                          const char * const    entity,
                                          const uint8_t         uom,
@@ -182,6 +183,10 @@ class Mqtt {
 
     static bool multiple_instances() {
         return multiple_instances_;
+    }
+
+    static bool entity_fullname() {
+        return entity_fullname_;
     }
 
     static void nested_format(uint8_t nested_format) {
@@ -322,6 +327,7 @@ class Mqtt {
     static bool        ha_enabled_;
     static uint8_t     nested_format_;
     static bool        multiple_instances_;
+    static bool        entity_fullname_;
     static std::string discovery_prefix_;
     static bool        publish_single_;
     static bool        publish_single2cmd_;

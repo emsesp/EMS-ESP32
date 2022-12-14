@@ -249,6 +249,7 @@ const pl: BaseTranslation = {
   MQTT_QUEUE: 'Kolejka MQTT',
   DEFAULT: '{{Pozostałe|Domyślna|}}',
   MQTT_MULTIPLE_INSTANCES: 'Enable Multiple Instances of EMS-ESP',
+  MQTT_ENTITY_FULLNAME: 'Use v3.4 style Entity IDs',
   MQTT_CLEAN_SESSION: 'Ustawiaj flagę "Clean session"',
   MQTT_RETAIN_FLAG: 'Ustawiaj flagę "Retain"',
   INACTIVE: 'nieaktywny',

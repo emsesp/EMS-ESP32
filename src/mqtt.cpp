@@ -39,6 +39,7 @@ uint32_t    Mqtt::publish_time_other_;
 uint32_t    Mqtt::publish_time_heartbeat_;
 bool        Mqtt::mqtt_enabled_;
 bool        Mqtt::multiple_instances_;
+bool        Mqtt::entity_fullname_;
 bool        Mqtt::ha_enabled_;
 uint8_t     Mqtt::nested_format_;
 std::string Mqtt::discovery_prefix_;
@@ -431,6 +432,7 @@ void Mqtt::load_settings() {
         send_response_      = mqttSettings.send_response;
         discovery_prefix_   = mqttSettings.discovery_prefix.c_str();
         multiple_instances_ = mqttSettings.multiple_instances;
+        entity_fullname_    = mqttSettings.entity_fullname;
 
         // convert to milliseconds
         publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000;
@@ -932,6 +934,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
     publish_ha_sensor_config(dv.type,
                              dv.tag,
                              dv.get_fullname().c_str(),
+                             (dv.fullname ? dv.fullname[0] : nullptr), // EN name
                              dv.device_type,
                              dv.short_name,
                              dv.uom,
@@ -952,7 +955,7 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
     JsonArray ids = dev_json.createNestedArray("ids");
     ids.add("ems-esp");
 
-    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
+    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
 }
 
 // MQTT discovery configs
@@ -961,6 +964,7 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
 void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdevice::DeviceValueType
                                     uint8_t               tag,         // EMSdevice::DeviceValueTAG
                                     const char * const    fullname,    // fullname, already translated
+                                    const char * const    en_name,     // original name
                                     const uint8_t         device_type, // EMSdevice::DeviceType
                                     const char * const    entity,      // same as shortname
                                     const uint8_t         uom,         // EMSdevice::DeviceValueUOM (0=NONE)
@@ -989,11 +993,18 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build unique identifier which will be used in the topic, also used as object_id
     char uniq_id[70];
+    char entityid[50];
+    if (Mqtt::entity_fullname()) {
+        strlcpy(entityid, en_name, sizeof(entityid)); // old v3.4 style
+    } else {
+        strlcpy(entityid, entity_with_tag, sizeof(entityid));
+    }
+
     if (Mqtt::multiple_instances()) {
         // prefix base name to each uniq_id
-        snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
+        snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entityid);
     } else {
-        snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
+        snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entityid);
     }
 
     // build a config topic that will be prefix onto a HA type (e.g. number, switch)
