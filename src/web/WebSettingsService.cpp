@@ -89,7 +89,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 #elif CONFIG_IDF_TARGET_ESP32
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 #endif
-    settings.board_profile = "S32";
 
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
 // unknown, check for ethernet, use default E32/S32
