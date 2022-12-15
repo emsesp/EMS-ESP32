@@ -82,7 +82,6 @@ class DummySettings {
     uint16_t keepAlive          = 60;
     bool     cleanSession       = false;
     bool     multiple_instances = false;
-    bool     entity_fullname    = false;
 
     uint16_t publish_time_boiler     = 10;
     uint16_t publish_time_thermostat = 10;

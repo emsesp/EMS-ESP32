@@ -39,7 +39,6 @@ uint32_t    Mqtt::publish_time_other_;
 uint32_t    Mqtt::publish_time_heartbeat_;
 bool        Mqtt::mqtt_enabled_;
 bool        Mqtt::multiple_instances_;
-bool        Mqtt::entity_fullname_;
 bool        Mqtt::ha_enabled_;
 uint8_t     Mqtt::nested_format_;
 std::string Mqtt::discovery_prefix_;
@@ -432,7 +431,6 @@ void Mqtt::load_settings() {
         send_response_      = mqttSettings.send_response;
         discovery_prefix_   = mqttSettings.discovery_prefix.c_str();
         multiple_instances_ = mqttSettings.multiple_instances;
-        entity_fullname_    = mqttSettings.entity_fullname;
 
         // convert to milliseconds
         publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000;
@@ -993,18 +991,12 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build unique identifier which will be used in the topic, also used as object_id
     char uniq_id[70];
-    char entityid[50];
-    if (Mqtt::entity_fullname()) {
-        strlcpy(entityid, en_name, sizeof(entityid)); // old v3.4 style
-    } else {
-        strlcpy(entityid, entity_with_tag, sizeof(entityid));
-    }
-
     if (Mqtt::multiple_instances()) {
-        // prefix base name to each uniq_id
-        snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entityid);
+        // prefix base name to each uniq_id and use the shortname
+        snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
     } else {
-        snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entityid);
+        // old v3.4 style
+        snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, en_name);
     }
 
     // build a config topic that will be prefix onto a HA type (e.g. number, switch)

@@ -61,10 +61,6 @@ static String generateClientId() {
 #define FACTORY_MQTT_MULTIPLE_INSTANCES false
 #endif
 
-#ifndef FACTORY_MQTT_ENTITY_FULLNAME
-#define FACTORY_MQTT_ENTITY_FULLNAME false
-#endif
-
 class MqttSettings {
   public:
     // host and port - if enabled
@@ -85,9 +81,6 @@ class MqttSettings {
 
     // multiple instances
     bool multiple_instances;
-
-    // use v3.4 entity fullnames in Discovery
-    bool entity_fullname;
 
     // proddy EMS-ESP specific
     String   base;

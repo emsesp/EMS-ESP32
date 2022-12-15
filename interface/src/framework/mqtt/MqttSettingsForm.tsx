@@ -170,6 +170,7 @@ const MqttSettingsForm: FC = () => {
           control={<Checkbox name="mqtt_retain" checked={data.mqtt_retain} onChange={updateFormValue} />}
           label={LL.MQTT_RETAIN_FLAG()}
         />
+
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.FORMATTING()}
         </Typography>
@@ -214,49 +215,46 @@ const MqttSettingsForm: FC = () => {
           <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
             <Grid item>
               <BlockFormControlLabel
-                sx={{ pb: 2 }}
+                sx={{ pb: 1 }}
                 control={<Checkbox name="ha_enabled" checked={data.ha_enabled} onChange={updateFormValue} />}
                 label={LL.MQTT_PUBLISH_TEXT_3()}
               />
             </Grid>
             {data.ha_enabled && (
               <>
-                <Grid item>
-                  <BlockFormControlLabel
-                    control={
-                      <Checkbox
-                        name="multiple_instances"
-                        checked={data.multiple_instances}
-                        onChange={updateFormValue}
-                      />
-                    }
-                    label={LL.MQTT_MULTIPLE_INSTANCES()}
-                  />
-                </Grid>
-                <Grid item>
-                  <BlockFormControlLabel
-                    control={
-                      <Checkbox name="entity_fullname" checked={data.entity_fullname} onChange={updateFormValue} />
-                    }
-                    label={LL.MQTT_ENTITY_FULLNAME()}
-                  />
-                </Grid>
-                <Grid item sx={{ pb: 3 }}>
-                  <ValidatedTextField
-                    name="discovery_prefix"
-                    label={LL.MQTT_PUBLISH_TEXT_4()}
-                    fullWidth
-                    variant="outlined"
-                    value={data.discovery_prefix}
-                    onChange={updateFormValue}
-                    size="small"
-                  />
+                <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+                  <Grid item>
+                    <ValidatedTextField
+                      name="discovery_prefix"
+                      label={LL.MQTT_PUBLISH_TEXT_4()}
+                      fullWidth
+                      variant="outlined"
+                      value={data.discovery_prefix}
+                      onChange={updateFormValue}
+                      margin="normal"
+                    />
+                  </Grid>
+                  <Grid item>
+                    <ValidatedTextField
+                      name="multiple_instances"
+                      label={LL.MQTT_ENTITY_FORMAT()}
+                      value={data.multiple_instances}
+                      fullWidth
+                      variant="outlined"
+                      onChange={updateFormValue}
+                      margin="normal"
+                      select
+                    >
+                      <MenuItem value="false">{LL.MQTT_ENTITY_FORMAT_0()}</MenuItem>
+                      <MenuItem value="true">{LL.MQTT_ENTITY_FORMAT_1()}</MenuItem>
+                    </ValidatedTextField>
+                  </Grid>
                 </Grid>
               </>
             )}
           </Grid>
         )}
-        <Typography variant="h6" color="primary">
+        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.MQTT_PUBLISH_INTERVALS()}&nbsp;(0=auto)
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">

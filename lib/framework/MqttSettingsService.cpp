@@ -155,7 +155,6 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["keep_alive"]         = settings.keepAlive;
     root["clean_session"]      = settings.cleanSession;
     root["multiple_instances"] = settings.multiple_instances;
-    root["entity_fullname"]    = settings.entity_fullname;
 
     // added by proddy for EMS-ESP
     root["publish_time_boiler"]     = settings.publish_time_boiler;
@@ -189,7 +188,6 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.keepAlive          = root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE;
     newSettings.cleanSession       = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
     newSettings.multiple_instances = root["multiple_instances"] | FACTORY_MQTT_MULTIPLE_INSTANCES;
-    newSettings.entity_fullname    = root["entity_fullname"] | FACTORY_MQTT_ENTITY_FULLNAME;
     newSettings.mqtt_qos           = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
     newSettings.mqtt_retain        = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
 
