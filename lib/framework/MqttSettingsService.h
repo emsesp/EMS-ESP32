@@ -58,7 +58,7 @@ static String generateClientId() {
 #endif
 
 #ifndef FACTORY_MQTT_MULTIPLE_INSTANCES
-#define FACTORY_MQTT_MULTIPLE_INSTANCES false
+#define FACTORY_MQTT_MULTIPLE_INSTANCES true
 #endif
 
 class MqttSettings {
