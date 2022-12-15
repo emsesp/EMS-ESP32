@@ -24,6 +24,7 @@ import { ReactComponent as GBflag } from './i18n/GB.svg';
 import { ReactComponent as SEflag } from './i18n/SE.svg';
 import { ReactComponent as PLflag } from './i18n/PL.svg';
 import { ReactComponent as NOflag } from './i18n/NO.svg';
+import { ReactComponent as FRflag } from './i18n/FR.svg';
 
 const SignIn: FC = () => {
   const authenticationContext = useContext(AuthenticationContext);
@@ -132,6 +133,10 @@ const SignIn: FC = () => {
           <Button size="small" variant={locale === 'no' ? 'contained' : 'outlined'} onClick={() => selectLocale('no')}>
             <NOflag style={{ width: 24 }} />
             &nbsp;NO
+          </Button>
+          <Button size="small" variant={locale === 'fr' ? 'contained' : 'outlined'} onClick={() => selectLocale('fr')}>
+            <FRflag style={{ width: 24 }} />
+            &nbsp;FR
           </Button>
         </Box>
 
