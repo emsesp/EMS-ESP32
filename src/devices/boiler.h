@@ -243,6 +243,7 @@ class Boiler : public EMSdevice {
     uint8_t  releaseWait_;   // pos 15: Boiler release wait time (min)
 
     uint8_t  auxHeaterOnly_;
+    uint8_t  auxHeater_;
     uint16_t addHeaterDelay_;
     int8_t   minTempSilent_;
     int8_t   tempParMode_;
@@ -389,6 +390,7 @@ class Boiler : public EMSdevice {
     }
     bool set_minTempSilent(const char * value, const int8_t id);
     bool set_additionalHeaterOnly(const char * value, const int8_t id);
+    bool set_additionalHeater(const char * value, const int8_t id);
     bool set_additionalHeaterDelay(const char * value, const int8_t id);
     bool set_tempParMode(const char * value, const int8_t id);
 

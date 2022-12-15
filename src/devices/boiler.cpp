@@ -569,6 +569,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_additionalHeaterOnly));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxHeater_,
+                              DeviceValueType::BOOL,
+                              FL_(auxHeater),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_additionalHeater));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &addHeaterDelay_,
                               DeviceValueType::USHORT,
                               FL_(addHeaterDelay),
@@ -1502,8 +1508,9 @@ void Boiler::process_HpValve(std::shared_ptr<const Telegram> telegram) {
 // Boiler(0x08) -> All(0x00), ?(0x0491), data: 03 01 00 00 00 02 64 00 00 14 01 2C 00 0A 00 1E 00 1E 00 00 1E 0A 1E 05 05
 void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, auxHeaterOnly_, 1);
+    has_update(telegram, auxHeater_, 2);
     has_update(telegram, tempParMode_, 5);
-    has_update(telegram, addHeaterDelay_, 10);
+    // has_update(telegram, addHeaterDelay_, ?); // unknown position
 }
 
 // Settings AM200
@@ -2460,6 +2467,15 @@ bool Boiler::set_additionalHeaterOnly(const char * value, const int8_t id) {
     bool v;
     if (Helpers::value2bool(value, v)) {
         write_command(0x491, 1, v ? 1 : 0, 0x491);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_additionalHeater(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x491, 2, v ? 1 : 0, 0x491);
         return true;
     }
     return false;
