@@ -46,7 +46,7 @@ Adafruit_NeoPixel pixels(1, 7, NEO_GRB + NEO_KHZ800);
 namespace emsesp {
 
 // Languages supported. Note: the order is important and must match locale_translations.h
-const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE, EMSESP_LOCALE_NL, EMSESP_LOCALE_SE, EMSESP_LOCALE_PL, EMSESP_LOCALE_NO};
+const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE, EMSESP_LOCALE_NL, EMSESP_LOCALE_SE, EMSESP_LOCALE_PL, EMSESP_LOCALE_NO, EMSESP_LOCALE_FR};
 
 size_t num_languages = sizeof(languages) / sizeof(const char *);
 
