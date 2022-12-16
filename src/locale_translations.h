@@ -368,7 +368,7 @@ MAKE_PSTR_LIST(maxHeatComp, "maxheatcomp", "heat limit compressor", "Heizgrenze 
 MAKE_PSTR_LIST(maxHeatHeat, "maxheatheat", "heat limit heating", "Heizgrenze Heizen", "heat limit heating", "heat limit heating", "limit ciepła dla ogrzewania", "maks varmegrense oppvarming", "limite chaleur chauffage")
 MAKE_PSTR_LIST(maxHeatDhw, "maxheatdhw", "heat limit dhw", "Heizgrenze Warmwasser", "heat limit dhw", "heat limit dhw", "limit ciepła dla c.w.u.", "varmegrense varmtvann", "limite chaleur ecs")
 
-MAKE_PSTR_LIST(auxHeater, "auxheater", "auxilliary heater", "Zusatzheizer")
+MAKE_PSTR_LIST(auxHeater, "auxheater", "enable auxilliary heater", "Erlaube Zusatzheizer")
 MAKE_PSTR_LIST(auxHeaterOnly, "auxheateronly", "auxilliary heater only", "nur Zusatzheizer")
 MAKE_PSTR_LIST(addHeaterDelay, "addheaterdelay", "additional heater on delay", "Zusatzheizer Einschaltverzögerung")
 MAKE_PSTR_LIST(minTempSilent, "mintempsilent", "min. outside temp. for silent mode", "Minimale Aussentemperatur Silentmodus")
