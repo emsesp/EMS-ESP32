@@ -250,7 +250,7 @@ const de: Translation = {
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Standard',
   MQTT_ENTITY_FORMAT: 'Entity ID format',
-  MQTT_ENTITY_FORMAT_0: 'Single instance, long name',
+  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (depreciated)',
   MQTT_ENTITY_FORMAT_1: 'Multiple instances, short name',
   MQTT_CLEAN_SESSION: 'Setze `Clean Session`',
   MQTT_RETAIN_FLAG: 'Setze `Retain flag` immer',

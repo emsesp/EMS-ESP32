@@ -974,7 +974,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                                     const int16_t         dv_set_max,
                                     const JsonObject &    dev_json) {
     // ignore if name (fullname) is empty
-    if (!fullname) {
+    if (!fullname || !en_name) {
         return;
     }
 
@@ -990,13 +990,28 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     }
 
     // build unique identifier which will be used in the topic, also used as object_id
+    // and becomes the Entity ID in HA
     char uniq_id[70];
     if (Mqtt::multiple_instances()) {
         // prefix base name to each uniq_id and use the shortname
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
     } else {
         // old v3.4 style
-        snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, en_name);
+        // if there is no en_name take the shortname
+        if (en_name == nullptr || strlen(en_name) == 0) {
+            strlcpy(uniq_id, entity, sizeof(uniq_id));
+        } else {
+            // old v3.4 style
+            // take en_name and replace all spaces and lowercase it
+            char uniq_s[40];
+            strlcpy(uniq_s, en_name, sizeof(uniq_s));
+            Helpers::replace_char(uniq_s, ' ', '_');
+            if (EMSdevice::tag_to_string(tag).empty()) {
+                snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());
+            } else {
+                snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag).c_str(), Helpers::toLower(uniq_s).c_str());
+            }
+        }
     }
 
     // build a config topic that will be prefix onto a HA type (e.g. number, switch)
