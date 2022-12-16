@@ -68,7 +68,8 @@ class DeviceValue {
         SQM,         // 18 square meter
         M3,          // 19 cubic meter
         L,           // 20
-        K_MIN,       // 21 - Kelvin * minutes
+        KxMIN,       // 21 - Kelvin * minutes
+        KpMIN,       // 22 - Kelvin / minutes
         CONNECTIVITY // 22 - used in HA
     };
 

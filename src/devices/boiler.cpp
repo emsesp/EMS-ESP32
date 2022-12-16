@@ -575,11 +575,19 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_additionalHeater));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &addHeaterDelay_,
+                              &auxHeaterDelay_,
                               DeviceValueType::USHORT,
-                              FL_(addHeaterDelay),
-                              DeviceValueUOM::K_MIN,
+                              DeviceValueNumOp::DV_NUMOP_MUL10,
+                              FL_(auxHeaterDelay),
+                              DeviceValueUOM::KxMIN,
                               MAKE_CF_CB(set_additionalHeaterDelay));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxHeaterHyst_,
+                              DeviceValueType::USHORT,
+                              DeviceValueNumOp::DV_NUMOP_MUL5,
+                              FL_(auxHeaterHyst),
+                              DeviceValueUOM::KpMIN,
+                              MAKE_CF_CB(set_additionalHeaterHyst));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &minTempSilent_,
                               DeviceValueType::INT,
@@ -1497,6 +1505,7 @@ void Boiler::process_amExtraMessage(std::shared_ptr<const Telegram> telegram) {
 // Boiler(0x08) -> All(0x00), ?(0x0484), data: 01 90 00 F6 28 14 64 00 00 E1 00 1E 00 1E 01 64 01 64 54 20 00 00 (offset 25)
 void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, minTempSilent_, 11);
+    has_update(telegram, auxHeaterHyst_, 37);
 }
 
 // Boiler(0x08) -B-> All(0x00), ?(0x0488), data: 8E 00 00 00 00 00 01 03
@@ -1510,7 +1519,7 @@ void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram
     has_update(telegram, auxHeaterOnly_, 1);
     has_update(telegram, auxHeater_, 2);
     has_update(telegram, tempParMode_, 5);
-    // has_update(telegram, addHeaterDelay_, ?); // unknown position
+    has_update(telegram, auxHeaterDelay_, 16); // is / 10
 }
 
 // Settings AM200
@@ -2493,11 +2502,20 @@ bool Boiler::set_tempParMode(const char * value, const int8_t id) {
 bool Boiler::set_additionalHeaterDelay(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2number(value, v)) {
-        uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)(v & 0xFF)};
-        write_command(0x491, 10, data, 2, 0x491);
+        uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
+        write_command(0x491, 16, data, 2, 0x491);
         return true;
     }
     return false;
 }
 
+bool Boiler::set_additionalHeaterHyst(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
+        write_command(0x484, 37, data, 2, 0x484);
+        return true;
+    }
+    return false;
+}
 } // namespace emsesp

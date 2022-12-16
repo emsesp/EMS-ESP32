@@ -215,7 +215,8 @@ MAKE_PSTR(uom_mv, "mV")
 MAKE_PSTR(uom_sqm, "m²")
 MAKE_PSTR(uom_m3, "m³")
 MAKE_PSTR(uom_l, "l")
-MAKE_PSTR(uom_kmin, "K*min")
+MAKE_PSTR(uom_kxmin, "K*min")
+MAKE_PSTR(uom_kpmin, "K/min")
 
 // MQTT topics and prefixes
 MAKE_PSTR(heating_active, "heating_active")

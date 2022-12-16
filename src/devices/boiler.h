@@ -244,7 +244,8 @@ class Boiler : public EMSdevice {
 
     uint8_t  auxHeaterOnly_;
     uint8_t  auxHeater_;
-    uint16_t addHeaterDelay_;
+    uint16_t auxHeaterDelay_;
+    uint16_t auxHeaterHyst_;
     int8_t   minTempSilent_;
     int8_t   tempParMode_;
     int8_t   auxHeatMixValve_;
@@ -392,6 +393,7 @@ class Boiler : public EMSdevice {
     bool set_additionalHeaterOnly(const char * value, const int8_t id);
     bool set_additionalHeater(const char * value, const int8_t id);
     bool set_additionalHeaterDelay(const char * value, const int8_t id);
+    bool set_additionalHeaterHyst(const char * value, const int8_t id);
     bool set_tempParMode(const char * value, const int8_t id);
 
     /*
