@@ -188,9 +188,8 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.keepAlive          = root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE;
     newSettings.cleanSession       = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
     newSettings.multiple_instances = root["multiple_instances"] | FACTORY_MQTT_MULTIPLE_INSTANCES;
-
-    newSettings.mqtt_qos    = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
-    newSettings.mqtt_retain = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
+    newSettings.mqtt_qos           = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
+    newSettings.mqtt_retain        = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
 
     newSettings.publish_time_boiler     = root["publish_time_boiler"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_thermostat = root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME;

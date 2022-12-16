@@ -932,6 +932,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
     publish_ha_sensor_config(dv.type,
                              dv.tag,
                              dv.get_fullname().c_str(),
+                             (dv.fullname ? dv.fullname[0] : nullptr), // EN name
                              dv.device_type,
                              dv.short_name,
                              dv.uom,
@@ -952,7 +953,7 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
     JsonArray ids = dev_json.createNestedArray("ids");
     ids.add("ems-esp");
 
-    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
+    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
 }
 
 // MQTT discovery configs
@@ -961,6 +962,7 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
 void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdevice::DeviceValueType
                                     uint8_t               tag,         // EMSdevice::DeviceValueTAG
                                     const char * const    fullname,    // fullname, already translated
+                                    const char * const    en_name,     // original name
                                     const uint8_t         device_type, // EMSdevice::DeviceType
                                     const char * const    entity,      // same as shortname
                                     const uint8_t         uom,         // EMSdevice::DeviceValueUOM (0=NONE)
@@ -990,10 +992,11 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // build unique identifier which will be used in the topic, also used as object_id
     char uniq_id[70];
     if (Mqtt::multiple_instances()) {
-        // prefix base name to each uniq_id
+        // prefix base name to each uniq_id and use the shortname
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
     } else {
-        snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
+        // old v3.4 style
+        snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, en_name);
     }
 
     // build a config topic that will be prefix onto a HA type (e.g. number, switch)
