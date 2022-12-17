@@ -370,6 +370,7 @@ MAKE_PSTR_LIST(maxHeatDhw, "maxheatdhw", "heat limit dhw", "Heizgrenze Warmwasse
 
 // translations are in order en, de, nl, se, pl, no, fr, .... some missing
 MAKE_PSTR_LIST(auxHeater, "auxheater", "enable auxilliary heater", "Erlaube Zusatzheizer")
+MAKE_PSTR_LIST(auxHeaterStatus, "auxheaterstatus", "auxilliary heater status", "Status Zusatzheizer")
 MAKE_PSTR_LIST(auxHeaterOnly, "auxheateronly", "auxilliary heater only", "nur Zusatzheizer")
 MAKE_PSTR_LIST(auxHeaterDelay, "auxheaterdelay", "auxilliary heater on delay", "Zusatzheizer verzögert ein", "Bijverw. vertraagd aan", "Tillskottfördröjning på", "Opóźn. włączenie dogrz.", "Tilleggsvarmer forsinket på", "Chauff app tempo marche")
 MAKE_PSTR_LIST(auxHeaterHyst, "auxheaterhyst", "auxilliary heater on/off hyst", "Zusatzheizer Schalthysterese", "Aan/uit-hysteresis in verw. bedrijf instellen", "På/av-hystereses Husv.", "Histerez wł/wył Ogrzew.", "På/av-hysterese Oppvar.", "Hystérésis Marche en mode chauffage")

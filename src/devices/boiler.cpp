@@ -575,6 +575,11 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_additionalHeater));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxHeaterStatus_,
+                              DeviceValueType::BOOL,
+                              FL_(auxHeaterStatus),
+                              DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &auxHeaterDelay_,
                               DeviceValueType::USHORT,
                               DeviceValueNumOp::DV_NUMOP_MUL10,
@@ -1510,6 +1515,7 @@ void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
 
 // Boiler(0x08) -B-> All(0x00), ?(0x0488), data: 8E 00 00 00 00 00 01 03
 void Boiler::process_HpValve(std::shared_ptr<const Telegram> telegram) {
+    has_bitupdate(telegram, auxHeaterStatus_, 0, 2);
     has_update(telegram, auxHeatMixValve_, 7);
 }
 
