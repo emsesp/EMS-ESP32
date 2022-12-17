@@ -252,7 +252,7 @@ const de: Translation = {
   MQTT_ENTITY_FORMAT: 'Entitäts-ID Format',
   MQTT_ENTITY_FORMAT_0: 'Einzelinstanz, Langname (v3.4)',
   MQTT_ENTITY_FORMAT_1: 'Einzelinstanz, MQTT-Namen',
-  MQTT_ENTITY_FORMAT_1: 'Mehrfachinstanzen, MQTT-Namen',
+  MQTT_ENTITY_FORMAT_2: 'Mehrfachinstanzen, MQTT-Namen',
   MQTT_CLEAN_SESSION: 'Setze `Clean Session`',
   MQTT_RETAIN_FLAG: 'Setze `Retain flag` immer',
   INACTIVE: 'Inaktiv',
