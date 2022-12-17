@@ -236,17 +236,18 @@ const MqttSettingsForm: FC = () => {
                   </Grid>
                   <Grid item>
                     <ValidatedTextField
-                      name="multiple_instances"
+                      name="entity_format"
                       label={LL.MQTT_ENTITY_FORMAT()}
-                      value={data.multiple_instances}
+                      value={data.entity_format}
                       fullWidth
                       variant="outlined"
                       onChange={updateFormValue}
                       margin="normal"
                       select
                     >
-                      <MenuItem value={false as any}>{LL.MQTT_ENTITY_FORMAT_0()}</MenuItem>
-                      <MenuItem value={true as any}>{LL.MQTT_ENTITY_FORMAT_1()}</MenuItem>
+                      <MenuItem value={0}>{LL.MQTT_ENTITY_FORMAT_0()}</MenuItem>
+                      <MenuItem value={1}>{LL.MQTT_ENTITY_FORMAT_1()}</MenuItem>
+                      <MenuItem value={2}>{LL.MQTT_ENTITY_FORMAT_2()}</MenuItem>
                     </ValidatedTextField>
                   </Grid>
                 </Grid>

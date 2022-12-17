@@ -81,7 +81,7 @@ class DummySettings {
     String   username           = "";
     uint16_t keepAlive          = 60;
     bool     cleanSession       = false;
-    bool     multiple_instances = false;
+    uint8_t  entity_format      = 1;
 
     uint16_t publish_time_boiler     = 10;
     uint16_t publish_time_thermostat = 10;
