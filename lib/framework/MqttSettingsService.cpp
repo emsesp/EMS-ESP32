@@ -145,16 +145,16 @@ void MqttSettingsService::configureMqtt() {
 }
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
-    root["enabled"]            = settings.enabled;
-    root["host"]               = settings.host;
-    root["port"]               = settings.port;
-    root["base"]               = settings.base;
-    root["username"]           = settings.username;
-    root["password"]           = settings.password;
-    root["client_id"]          = settings.clientId;
-    root["keep_alive"]         = settings.keepAlive;
-    root["clean_session"]      = settings.cleanSession;
-    root["multiple_instances"] = settings.multiple_instances;
+    root["enabled"]       = settings.enabled;
+    root["host"]          = settings.host;
+    root["port"]          = settings.port;
+    root["base"]          = settings.base;
+    root["username"]      = settings.username;
+    root["password"]      = settings.password;
+    root["client_id"]     = settings.clientId;
+    root["keep_alive"]    = settings.keepAlive;
+    root["clean_session"] = settings.cleanSession;
+    root["entity_format"] = settings.entity_format;
 
     // added by proddy for EMS-ESP
     root["publish_time_boiler"]     = settings.publish_time_boiler;
@@ -178,18 +178,18 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     MqttSettings newSettings = {};
     bool         changed     = false;
 
-    newSettings.enabled            = root["enabled"] | FACTORY_MQTT_ENABLED;
-    newSettings.host               = root["host"] | FACTORY_MQTT_HOST;
-    newSettings.port               = root["port"] | FACTORY_MQTT_PORT;
-    newSettings.base               = root["base"] | FACTORY_MQTT_BASE;
-    newSettings.username           = root["username"] | FACTORY_MQTT_USERNAME;
-    newSettings.password           = root["password"] | FACTORY_MQTT_PASSWORD;
-    newSettings.clientId           = root["client_id"] | FACTORY_MQTT_CLIENT_ID;
-    newSettings.keepAlive          = root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE;
-    newSettings.cleanSession       = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
-    newSettings.multiple_instances = root["multiple_instances"] | FACTORY_MQTT_MULTIPLE_INSTANCES;
-    newSettings.mqtt_qos           = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
-    newSettings.mqtt_retain        = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
+    newSettings.enabled       = root["enabled"] | FACTORY_MQTT_ENABLED;
+    newSettings.host          = root["host"] | FACTORY_MQTT_HOST;
+    newSettings.port          = root["port"] | FACTORY_MQTT_PORT;
+    newSettings.base          = root["base"] | FACTORY_MQTT_BASE;
+    newSettings.username      = root["username"] | FACTORY_MQTT_USERNAME;
+    newSettings.password      = root["password"] | FACTORY_MQTT_PASSWORD;
+    newSettings.clientId      = root["client_id"] | FACTORY_MQTT_CLIENT_ID;
+    newSettings.keepAlive     = root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE;
+    newSettings.cleanSession  = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
+    newSettings.entity_format = root["entity_format"] | FACTORY_MQTT_ENTITY_FORMAT;
+    newSettings.mqtt_qos      = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
+    newSettings.mqtt_retain   = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
 
     newSettings.publish_time_boiler     = root["publish_time_boiler"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_thermostat = root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME;
@@ -223,7 +223,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
         changed = true;
     }
 
-    if (newSettings.multiple_instances != settings.multiple_instances) {
+    if (newSettings.entity_format != settings.entity_format) {
         changed = true;
     }
 

@@ -519,7 +519,7 @@ void DallasSensor::publish_values(const bool force) {
                 config["val_tpl"] = str;
 
                 char uniq_s[70];
-                if (Mqtt::multiple_instances()) {
+                if (Mqtt::entity_format() == 2) {
                     snprintf(uniq_s, sizeof(uniq_s), "%s_dallassensor_%s", Mqtt::basename().c_str(), sensor.id().c_str());
                 } else {
                     snprintf(uniq_s, sizeof(uniq_s), "dallassensor_%s", sensor.id().c_str());
