@@ -80,7 +80,7 @@ class MqttSettings {
     bool     cleanSession;
 
     // multiple instances
-    bool entity_format;
+    uint8_t entity_format;
 
     // proddy EMS-ESP specific
     String   base;
