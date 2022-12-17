@@ -368,6 +368,16 @@ MAKE_PSTR_LIST(maxHeatComp, "maxheatcomp", "heat limit compressor", "Heizgrenze 
 MAKE_PSTR_LIST(maxHeatHeat, "maxheatheat", "heat limit heating", "Heizgrenze Heizen", "heat limit heating", "heat limit heating", "limit ciepła dla ogrzewania", "maks varmegrense oppvarming", "limite chaleur chauffage")
 MAKE_PSTR_LIST(maxHeatDhw, "maxheatdhw", "heat limit dhw", "Heizgrenze Warmwasser", "heat limit dhw", "heat limit dhw", "limit ciepła dla c.w.u.", "varmegrense varmtvann", "limite chaleur ecs")
 
+// translations are in order en, de, nl, se, pl, no, fr, .... some missing
+MAKE_PSTR_LIST(auxHeater, "auxheater", "enable auxilliary heater", "Erlaube Zusatzheizer")
+MAKE_PSTR_LIST(auxHeaterStatus, "auxheaterstatus", "auxilliary heater status", "Status Zusatzheizer")
+MAKE_PSTR_LIST(auxHeaterOnly, "auxheateronly", "auxilliary heater only", "nur Zusatzheizer")
+MAKE_PSTR_LIST(auxHeaterDelay, "auxheaterdelay", "auxilliary heater on delay", "Zusatzheizer verzögert ein", "Bijverw. vertraagd aan", "Tillskottfördröjning på", "Opóźn. włączenie dogrz.", "Tilleggsvarmer forsinket på", "Chauff app tempo marche")
+MAKE_PSTR_LIST(auxHeaterHyst, "auxheaterhyst", "auxilliary heater on/off hyst", "Zusatzheizer Schalthysterese", "Aan/uit-hysteresis in verw. bedrijf instellen", "På/av-hystereses Husv.", "Histerez wł/wył Ogrzew.", "På/av-hysterese Oppvar.", "Hystérésis Marche en mode chauffage")
+MAKE_PSTR_LIST(minTempSilent, "mintempsilent", "min. outside temp. for silent mode", "Minimale Aussentemperatur Silentmodus")
+MAKE_PSTR_LIST(tempParMode, "tempparmode", "outside temp. parallel mode", "Aussentemperatur Parallelmodus")
+MAKE_PSTR_LIST(auxHeatMixValve, "auxheatmix", "aux. heater mixing valve", "Mischer Zusatzheizer")
+
 // hybrid heatpump
 MAKE_PSTR_LIST(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride")
 MAKE_PSTR_LIST(switchOverTemp, "switchovertemp", "outside switchover temperature", "Außentemperatur für Umschaltung", "Schakeltemperatuur buitentemperatuur", "Utomhus Omställningstemperatur", "zewnętrzna temperatura przełączania", "utendørstemp styring", "basculement par température extérieure")

@@ -78,29 +78,30 @@ const LayoutAuthMenu: FC = () => {
           <GBflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;EN
         </MenuItem>
+        <Divider />
         <MenuItem key="de" value="de">
           <DEflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;DE
+        </MenuItem>
+        <MenuItem key="fr" value="fr">
+          <FRflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;FR
         </MenuItem>
         <MenuItem key="nl" value="nl">
           <NLflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;NL
         </MenuItem>
-        <MenuItem key="se" value="se">
-          <SEflag style={{ width: 16, verticalAlign: 'middle' }} />
-          &nbsp;SE
+        <MenuItem key="no" value="no">
+          <NOflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;NO
         </MenuItem>
         <MenuItem key="pl" value="pl">
           <PLflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;PL
         </MenuItem>
-        <MenuItem key="no" value="no">
-          <NOflag style={{ width: 16, verticalAlign: 'middle' }} />
-          &nbsp;NO
-        </MenuItem>
-        <MenuItem key="fr" value="fr">
-          <FRflag style={{ width: 16, verticalAlign: 'middle' }} />
-          &nbsp;FR
+        <MenuItem key="se" value="se">
+          <SEflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;SE
         </MenuItem>
       </TextField>
 

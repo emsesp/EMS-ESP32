@@ -111,7 +111,7 @@ WebLogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_
 
 void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
 #ifndef EMSESP_STANDALONE
-    if (ESP.getMaxAllocHeap() < 20480) {
+    if (maximum_log_messages_ > 10 && ESP.getMaxAllocHeap() < 41984) {
         maximum_log_messages(maximum_log_messages_ > 25 ? maximum_log_messages_ - 25 : 10);
         // EMSESP::logger().warning("Low memory: WebLog buffer reduced to %d entries", maximum_log_messages_);
     }

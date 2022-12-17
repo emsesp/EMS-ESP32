@@ -118,25 +118,25 @@ const SignIn: FC = () => {
             <DEflag style={{ width: 24 }} />
             &nbsp;DE
           </Button>
+          <Button size="small" variant={locale === 'fr' ? 'contained' : 'outlined'} onClick={() => selectLocale('fr')}>
+            <FRflag style={{ width: 24 }} />
+            &nbsp;FR
+          </Button>
           <Button size="small" variant={locale === 'nl' ? 'contained' : 'outlined'} onClick={() => selectLocale('nl')}>
             <NLflag style={{ width: 24 }} />
             &nbsp;NL
-          </Button>
-          <Button size="small" variant={locale === 'se' ? 'contained' : 'outlined'} onClick={() => selectLocale('se')}>
-            <SEflag style={{ width: 24 }} />
-            &nbsp;SE
-          </Button>
-          <Button size="small" variant={locale === 'pl' ? 'contained' : 'outlined'} onClick={() => selectLocale('pl')}>
-            <PLflag style={{ width: 24 }} />
-            &nbsp;PL
           </Button>
           <Button size="small" variant={locale === 'no' ? 'contained' : 'outlined'} onClick={() => selectLocale('no')}>
             <NOflag style={{ width: 24 }} />
             &nbsp;NO
           </Button>
-          <Button size="small" variant={locale === 'fr' ? 'contained' : 'outlined'} onClick={() => selectLocale('fr')}>
-            <FRflag style={{ width: 24 }} />
-            &nbsp;FR
+          <Button size="small" variant={locale === 'pl' ? 'contained' : 'outlined'} onClick={() => selectLocale('pl')}>
+            <PLflag style={{ width: 24 }} />
+            &nbsp;PL
+          </Button>
+          <Button size="small" variant={locale === 'se' ? 'contained' : 'outlined'} onClick={() => selectLocale('se')}>
+            <SEflag style={{ width: 24 }} />
+            &nbsp;SE
           </Button>
         </Box>
 

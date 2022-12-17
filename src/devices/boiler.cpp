@@ -178,9 +178,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x48D, "HpPower", true, MAKE_PF_CB(process_HpPower));
         register_telegram_type(0x48F, "HpOutdoor", false, MAKE_PF_CB(process_HpOutdoor));
         register_telegram_type(0x48A, "HpPool", true, MAKE_PF_CB(process_HpPool));
-        register_telegram_type(0x4A2, "HpInput", false, MAKE_PF_CB(process_HpInput));
-        register_telegram_type(0x486, "HpInConfig", false, MAKE_PF_CB(process_HpInConfig));
-        register_telegram_type(0x492, "HpHeaterConfig", false, MAKE_PF_CB(process_HpHeaterConfig));
+        register_telegram_type(0x4A2, "HpInput", true, MAKE_PF_CB(process_HpInput));
+        register_telegram_type(0x486, "HpInConfig", true, MAKE_PF_CB(process_HpInConfig));
+        register_telegram_type(0x492, "HpHeaterConfig", true, MAKE_PF_CB(process_HpHeaterConfig));
+
+        register_telegram_type(0x488, "HPValve", true, MAKE_PF_CB(process_HpValve));
+        register_telegram_type(0x484, "HPSilentMode", true, MAKE_PF_CB(process_HpSilentMode));
+        register_telegram_type(0x491, "HPAdditionalHeater", true, MAKE_PF_CB(process_HpAdditionalHeater));
     }
 
     /*
@@ -558,6 +562,54 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(maxHeatDhw),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_maxHeatDhw));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxHeaterOnly_,
+                              DeviceValueType::BOOL,
+                              FL_(auxHeaterOnly),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_additionalHeaterOnly));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxHeater_,
+                              DeviceValueType::BOOL,
+                              FL_(auxHeater),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_additionalHeater));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxHeaterStatus_,
+                              DeviceValueType::BOOL,
+                              FL_(auxHeaterStatus),
+                              DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxHeaterDelay_,
+                              DeviceValueType::USHORT,
+                              DeviceValueNumOp::DV_NUMOP_MUL10,
+                              FL_(auxHeaterDelay),
+                              DeviceValueUOM::KMIN,
+                              MAKE_CF_CB(set_additionalHeaterDelay));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxHeaterHyst_,
+                              DeviceValueType::USHORT,
+                              DeviceValueNumOp::DV_NUMOP_MUL5,
+                              FL_(auxHeaterHyst),
+                              DeviceValueUOM::KMIN,
+                              MAKE_CF_CB(set_additionalHeaterHyst));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &minTempSilent_,
+                              DeviceValueType::INT,
+                              FL_(minTempSilent),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_minTempSilent));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &tempParMode_,
+                              DeviceValueType::INT,
+                              FL_(tempParMode),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_tempParMode));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxHeatMixValve_,
+                              DeviceValueType::INT,
+                              FL_(auxHeatMixValve),
+                              DeviceValueUOM::PERCENT);
     }
 
     // dhw - DEVICE_DATA_ww topic
@@ -1167,6 +1219,7 @@ void Boiler::process_HpPool(std::shared_ptr<const Telegram> telegram) {
 
 // Heatpump inputs - type 0x4A2
 // Boiler(0x08) -> All(0x00), ?(0x04A2), data: 02 01 01 00 01 00
+// Boiler(0x08) -W-> Me(0x0B), HpInput(0x04A2), data: 20 07 06 01 00 (from #802)
 void Boiler::process_HpInput(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpInput[0].state, 2);
     has_update(telegram, hpInput[1].state, 3);
@@ -1452,6 +1505,28 @@ void Boiler::process_amExtraMessage(std::shared_ptr<const Telegram> telegram) {
 }
 
 #pragma GCC diagnostic pop
+
+// Boiler(0x08) -> All(0x00), ?(0x0484), data: 00 00 14 28 0D 50 00 00 00 02 02 07 28 01 00 02 05 19 0A 0A 03 0D 07 00 0A
+// Boiler(0x08) -> All(0x00), ?(0x0484), data: 01 90 00 F6 28 14 64 00 00 E1 00 1E 00 1E 01 64 01 64 54 20 00 00 (offset 25)
+void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, minTempSilent_, 11);
+    has_update(telegram, auxHeaterHyst_, 37);
+}
+
+// Boiler(0x08) -B-> All(0x00), ?(0x0488), data: 8E 00 00 00 00 00 01 03
+void Boiler::process_HpValve(std::shared_ptr<const Telegram> telegram) {
+    has_bitupdate(telegram, auxHeaterStatus_, 0, 2);
+    has_update(telegram, auxHeatMixValve_, 7);
+}
+
+
+// Boiler(0x08) -> All(0x00), ?(0x0491), data: 03 01 00 00 00 02 64 00 00 14 01 2C 00 0A 00 1E 00 1E 00 00 1E 0A 1E 05 05
+void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, auxHeaterOnly_, 1);
+    has_update(telegram, auxHeater_, 2);
+    has_update(telegram, tempParMode_, 5);
+    has_update(telegram, auxHeaterDelay_, 16); // is / 10
+}
 
 // Settings AM200
 
@@ -2394,4 +2469,59 @@ bool Boiler::set_maxHeat(const char * value, const int8_t id) {
     return true;
 }
 
+bool Boiler::set_minTempSilent(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2temperature(value, v)) {
+        write_command(0x484, 11, v, 0x484);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_additionalHeaterOnly(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x491, 1, v ? 1 : 0, 0x491);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_additionalHeater(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x491, 2, v ? 1 : 0, 0x491);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_tempParMode(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2temperature(value, v)) {
+        write_command(0x491, 5, v, 0x491);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_additionalHeaterDelay(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
+        write_command(0x491, 16, data, 2, 0x491);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_additionalHeaterHyst(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
+        write_command(0x484, 37, data, 2, 0x484);
+        return true;
+    }
+    return false;
+}
 } // namespace emsesp

@@ -152,6 +152,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(0x23A, "RC300OutdoorTemp", true, MAKE_PF_CB(process_RC300OutdoorTemp));
         register_telegram_type(0x267, "RC300Floordry", false, MAKE_PF_CB(process_RC300Floordry));
         register_telegram_type(0x240, "RC300Settings", true, MAKE_PF_CB(process_RC300Settings));
+        register_telegram_type(0xBB, "HybridSettings", true, MAKE_PF_CB(process_HybridSettings));
 
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
@@ -172,7 +173,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
                 register_telegram_type(set_typeids[i], "JunkersSet", false, MAKE_PF_CB(process_JunkersSet));
             }
         }
-        register_telegram_type(0xBB, "HybridSettings", true, MAKE_PF_CB(process_JunkersHybridSettings));
+        register_telegram_type(0xBB, "HybridSettings", true, MAKE_PF_CB(process_HybridSettings));
         register_telegram_type(0x23, "JunkersSetMixer", true, MAKE_PF_CB(process_JunkersSetMixer));
         register_telegram_type(0x123, "JunkersRemote", false, MAKE_PF_CB(process_JunkersRemoteMonitor));
         register_telegram_type(0x1D3, "JunkersDhw", true, MAKE_PF_CB(process_JunkersWW));
@@ -869,7 +870,7 @@ void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram
 
 // 0xBB Heatpump optimization
 // ?(0xBB), data: 00 00 00 00 00 00 00 00 00 00 00 FF 02 0F 1E 0B 1A 00 14 03
-void Thermostat::process_JunkersHybridSettings(std::shared_ptr<const Telegram> telegram) {
+void Thermostat::process_HybridSettings(std::shared_ptr<const Telegram> telegram) {
     has_enumupdate(telegram, hybridStrategy_, 12, 1); // cost = 2, temperature = 3, mix = 4
     has_update(telegram, switchOverTemp_, 13);        // full degrees
     has_update(telegram, energyCostRatio_, 14);       // is *10
@@ -3471,6 +3472,64 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwDisinfectHour),
                               0,
                               1431);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &hybridStrategy_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_hybridStrategy),
+                              FL_(hybridStrategy),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_hybridStrategy));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &switchOverTemp_,
+                              DeviceValueType::INT,
+                              FL_(switchOverTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_switchOverTemp),
+                              -20,
+                              20);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &energyCostRatio_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(energyCostRatio),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_energyCostRatio),
+                              0,
+                              20);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &fossileFactor_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(fossileFactor),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_fossileFactor),
+                              0,
+                              5);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &electricFactor_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(electricFactor),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_electricFactor),
+                              0,
+                              5);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &delayBoiler_,
+                              DeviceValueType::UINT,
+                              FL_(delayBoiler),
+                              DeviceValueUOM::MINUTES,
+                              MAKE_CF_CB(set_delayBoiler),
+                              5,
+                              120);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &tempDiffBoiler_,
+                              DeviceValueType::UINT,
+                              FL_(tempDiffBoiler),
+                              DeviceValueUOM::DEGREES_R,
+                              MAKE_CF_CB(set_tempDiffBoiler),
+                              1,
+                              99);
         break;
     case EMS_DEVICE_FLAG_RC10:
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
