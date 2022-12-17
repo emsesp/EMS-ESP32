@@ -451,14 +451,15 @@ void AnalogSensor::publish_values(const bool force) {
                 }
                 config["val_tpl"] = str;
 
+                char uniq_s[70];
                 if (Mqtt::multiple_instances()) {
-                    snprintf(str, sizeof(str), "%s_analogsensor_%d", Mqtt::basename().c_str(), sensor.gpio());
+                    snprintf(uniq_s, sizeof(uniq_s), "%s_analogsensor_%d", Mqtt::basename().c_str(), sensor.gpio());
                 } else {
-                    snprintf(str, sizeof(str), "analogsensor_%d", sensor.gpio());
+                    snprintf(uniq_s, sizeof(uniq_s), "analogsensor_%d", sensor.gpio());
                 }
 
-                config["object_id"] = str;
-                config["uniq_id"]   = str; // same as object_id
+                config["object_id"] = uniq_s;
+                config["uniq_id"]   = uniq_s; // same as object_id
 
                 snprintf(str, sizeof(str), "%s", sensor.name().c_str());
                 config["name"] = str;

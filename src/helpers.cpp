@@ -678,6 +678,10 @@ std::string Helpers::toUpper(std::string const & s) {
 
 // replace char in char string
 void Helpers::replace_char(char * str, char find, char replace) {
+    if (str == nullptr) {
+        return;
+    }
+
     int i = 0;
 
     while (str[i] != '\0') {
