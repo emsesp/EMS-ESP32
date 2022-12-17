@@ -249,7 +249,7 @@ const nl: Translation = {
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Default',
   MQTT_ENTITY_FORMAT: 'Entity ID format',
-  MQTT_ENTITY_FORMAT_0: 'Single instance, long name',
+  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (depreciated)',
   MQTT_ENTITY_FORMAT_1: 'Multiple instances, short name',
   MQTT_CLEAN_SESSION: 'Clean Session aan',
   MQTT_RETAIN_FLAG: 'Retain flag aan',

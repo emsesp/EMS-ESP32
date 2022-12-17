@@ -223,6 +223,10 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
         changed = true;
     }
 
+    if (newSettings.multiple_instances != settings.multiple_instances) {
+        changed = true;
+    }
+
     //  if both settings are stored from older version, HA has priority
     if (newSettings.ha_enabled && newSettings.publish_single) {
         newSettings.publish_single = false;
@@ -258,44 +262,38 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
 
     if (newSettings.publish_time_boiler != settings.publish_time_boiler) {
         emsesp::EMSESP::mqtt_.set_publish_time_boiler(newSettings.publish_time_boiler);
-        changed = true;
     }
 
     if (newSettings.publish_time_thermostat != settings.publish_time_thermostat) {
         emsesp::EMSESP::mqtt_.set_publish_time_thermostat(newSettings.publish_time_thermostat);
-        changed = true;
     }
 
     if (newSettings.publish_time_solar != settings.publish_time_solar) {
         emsesp::EMSESP::mqtt_.set_publish_time_solar(newSettings.publish_time_solar);
-        changed = true;
     }
 
     if (newSettings.publish_time_mixer != settings.publish_time_mixer) {
         emsesp::EMSESP::mqtt_.set_publish_time_mixer(newSettings.publish_time_mixer);
-        changed = true;
     }
 
     if (newSettings.publish_time_other != settings.publish_time_other) {
         emsesp::EMSESP::mqtt_.set_publish_time_other(newSettings.publish_time_other);
-        changed = true;
     }
 
     if (newSettings.publish_time_sensor != settings.publish_time_sensor) {
         emsesp::EMSESP::mqtt_.set_publish_time_sensor(newSettings.publish_time_sensor);
-        changed = true;
     }
 
     if (newSettings.publish_time_heartbeat != settings.publish_time_heartbeat) {
         emsesp::EMSESP::mqtt_.set_publish_time_heartbeat(newSettings.publish_time_heartbeat);
-        changed = true;
     }
+
+    // save the new settings
+    settings = newSettings;
 
     if (changed) {
         emsesp::EMSESP::mqtt_.reset_mqtt();
     }
-
-    settings = newSettings;
 
     return StateUpdateResult::CHANGED;
 }

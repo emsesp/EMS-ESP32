@@ -1059,11 +1059,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     JsonObject node;
 
     // System
-    node             = output.createNestedObject("System Info");
-    node["version"]  = EMSESP_APP_VERSION;
-    node["platform"] = EMSESP_PLATFORM;
-    node["uptime"]   = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
-    // node["uptime (seconds)"] = uuid::get_uptime_sec();
+    node                     = output.createNestedObject("System Info");
+    node["version"]          = EMSESP_APP_VERSION;
+    node["platform"]         = EMSESP_PLATFORM;
+    node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+    node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
     node["free mem"]  = ESP.getFreeHeap() / 1024;     // kilobytes
     node["max alloc"] = ESP.getMaxAllocHeap() / 1024; // kilobytes

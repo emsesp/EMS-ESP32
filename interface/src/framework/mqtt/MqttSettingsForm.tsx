@@ -245,8 +245,8 @@ const MqttSettingsForm: FC = () => {
                       margin="normal"
                       select
                     >
-                      <MenuItem value="false">{LL.MQTT_ENTITY_FORMAT_0()}</MenuItem>
-                      <MenuItem value="true">{LL.MQTT_ENTITY_FORMAT_1()}</MenuItem>
+                      <MenuItem value={false as any}>{LL.MQTT_ENTITY_FORMAT_0()}</MenuItem>
+                      <MenuItem value={true as any}>{LL.MQTT_ENTITY_FORMAT_1()}</MenuItem>
                     </ValidatedTextField>
                   </Grid>
                 </Grid>
