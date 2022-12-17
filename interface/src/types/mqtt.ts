@@ -29,7 +29,7 @@ export interface MqttSettings {
   client_id: string;
   keep_alive: number;
   clean_session: boolean;
-  multiple_instances: boolean;
+  entity_format: number;
   publish_time_boiler: number;
   publish_time_thermostat: number;
   publish_time_solar: number;
