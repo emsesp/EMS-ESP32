@@ -579,14 +579,14 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueType::USHORT,
                               DeviceValueNumOp::DV_NUMOP_MUL10,
                               FL_(auxHeaterDelay),
-                              DeviceValueUOM::KxMIN,
+                              DeviceValueUOM::KMIN,
                               MAKE_CF_CB(set_additionalHeaterDelay));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &auxHeaterHyst_,
                               DeviceValueType::USHORT,
                               DeviceValueNumOp::DV_NUMOP_MUL5,
                               FL_(auxHeaterHyst),
-                              DeviceValueUOM::KpMIN,
+                              DeviceValueUOM::KMIN,
                               MAKE_CF_CB(set_additionalHeaterHyst));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &minTempSilent_,
