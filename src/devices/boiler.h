@@ -243,13 +243,15 @@ class Boiler : public EMSdevice {
     uint8_t  releaseWait_;   // pos 15: Boiler release wait time (min)
 
     uint8_t  auxHeaterOnly_;
-    uint8_t  auxHeater_;
+    uint8_t  auxHeaterOff_;
     uint8_t  auxHeaterStatus_;
     uint16_t auxHeaterDelay_;
-    uint16_t auxHeaterHyst_;
     int8_t   minTempSilent_;
     int8_t   tempParMode_;
     int8_t   auxHeatMixValve_;
+    uint16_t hpHystHeat_;
+    uint16_t hpHystCool_;
+    uint16_t hpHystPool_;
 
     /*
   // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
@@ -394,8 +396,18 @@ class Boiler : public EMSdevice {
     bool set_additionalHeaterOnly(const char * value, const int8_t id);
     bool set_additionalHeater(const char * value, const int8_t id);
     bool set_additionalHeaterDelay(const char * value, const int8_t id);
-    bool set_additionalHeaterHyst(const char * value, const int8_t id);
     bool set_tempParMode(const char * value, const int8_t id);
+
+    bool        set_hpHyst(const char * value, const int8_t id);
+    inline bool set_hpHystHeat(const char * value, const int8_t id) {
+        return set_hpHyst(value, 37);
+    }
+    inline bool set_hpHystCool(const char * value, const int8_t id) {
+        return set_hpHyst(value, 35);
+    }
+    inline bool set_hpHystPool(const char * value, const int8_t id) {
+        return set_hpHyst(value, 33);
+    }
 
     /*
     bool set_hybridStrategy(const char * value, const int8_t id);

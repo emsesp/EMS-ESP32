@@ -569,30 +569,48 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_additionalHeaterOnly));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &auxHeater_,
+                              &auxHeaterOff_,
                               DeviceValueType::BOOL,
-                              FL_(auxHeater),
+                              FL_(auxHeaterOff),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_additionalHeater));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &auxHeaterStatus_,
-                              DeviceValueType::BOOL,
-                              FL_(auxHeaterStatus),
-                              DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxHeaterStatus_, DeviceValueType::BOOL, FL_(auxHeaterStatus), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &auxHeaterDelay_,
                               DeviceValueType::USHORT,
                               DeviceValueNumOp::DV_NUMOP_MUL10,
                               FL_(auxHeaterDelay),
                               DeviceValueUOM::KMIN,
-                              MAKE_CF_CB(set_additionalHeaterDelay));
+                              MAKE_CF_CB(set_additionalHeaterDelay),
+                              10,
+                              1000);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &auxHeaterHyst_,
+                              &hpHystHeat_,
                               DeviceValueType::USHORT,
                               DeviceValueNumOp::DV_NUMOP_MUL5,
-                              FL_(auxHeaterHyst),
+                              FL_(hpHystHeat),
                               DeviceValueUOM::KMIN,
-                              MAKE_CF_CB(set_additionalHeaterHyst));
+                              MAKE_CF_CB(set_hpHystHeat),
+                              50,
+                              1500);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &hpHystCool_,
+                              DeviceValueType::USHORT,
+                              DeviceValueNumOp::DV_NUMOP_MUL5,
+                              FL_(hpHystCool),
+                              DeviceValueUOM::KMIN,
+                              MAKE_CF_CB(set_hpHystCool),
+                              50,
+                              1500);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &hpHystPool_,
+                              DeviceValueType::USHORT,
+                              DeviceValueNumOp::DV_NUMOP_MUL5,
+                              FL_(hpHystPool),
+                              DeviceValueUOM::KMIN,
+                              MAKE_CF_CB(set_hpHystPool),
+                              50,
+                              1500);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &minTempSilent_,
                               DeviceValueType::INT,
@@ -605,11 +623,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(tempParMode),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_tempParMode));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &auxHeatMixValve_,
-                              DeviceValueType::INT,
-                              FL_(auxHeatMixValve),
-                              DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxHeatMixValve_, DeviceValueType::INT, FL_(auxHeatMixValve), DeviceValueUOM::PERCENT);
     }
 
     // dhw - DEVICE_DATA_ww topic
@@ -1510,7 +1524,9 @@ void Boiler::process_amExtraMessage(std::shared_ptr<const Telegram> telegram) {
 // Boiler(0x08) -> All(0x00), ?(0x0484), data: 01 90 00 F6 28 14 64 00 00 E1 00 1E 00 1E 01 64 01 64 54 20 00 00 (offset 25)
 void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, minTempSilent_, 11);
-    has_update(telegram, auxHeaterHyst_, 37);
+    has_update(telegram, hpHystHeat_, 37); // is / 5
+    has_update(telegram, hpHystCool_, 35); // is / 5, maybe offset swapped with pool
+    has_update(telegram, hpHystPool_, 33); // is / 5
 }
 
 // Boiler(0x08) -B-> All(0x00), ?(0x0488), data: 8E 00 00 00 00 00 01 03
@@ -1523,7 +1539,7 @@ void Boiler::process_HpValve(std::shared_ptr<const Telegram> telegram) {
 // Boiler(0x08) -> All(0x00), ?(0x0491), data: 03 01 00 00 00 02 64 00 00 14 01 2C 00 0A 00 1E 00 1E 00 00 1E 0A 1E 05 05
 void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, auxHeaterOnly_, 1);
-    has_update(telegram, auxHeater_, 2);
+    has_update(telegram, auxHeaterOff_, 2);
     has_update(telegram, tempParMode_, 5);
     has_update(telegram, auxHeaterDelay_, 16); // is / 10
 }
@@ -2508,6 +2524,7 @@ bool Boiler::set_tempParMode(const char * value, const int8_t id) {
 bool Boiler::set_additionalHeaterDelay(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2number(value, v)) {
+        v /= 5;
         uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
         write_command(0x491, 16, data, 2, 0x491);
         return true;
@@ -2515,11 +2532,12 @@ bool Boiler::set_additionalHeaterDelay(const char * value, const int8_t id) {
     return false;
 }
 
-bool Boiler::set_additionalHeaterHyst(const char * value, const int8_t id) {
+bool Boiler::set_hpHyst(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2number(value, v)) {
+        v /= 10;
         uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
-        write_command(0x484, 37, data, 2, 0x484);
+        write_command(0x484, id, data, 2, 0x484);
         return true;
     }
     return false;

@@ -368,15 +368,17 @@ MAKE_PSTR_LIST(maxHeatComp, "maxheatcomp", "heat limit compressor", "Heizgrenze 
 MAKE_PSTR_LIST(maxHeatHeat, "maxheatheat", "heat limit heating", "Heizgrenze Heizen", "heat limit heating", "heat limit heating", "limit ciepła dla ogrzewania", "maks varmegrense oppvarming", "limite chaleur chauffage")
 MAKE_PSTR_LIST(maxHeatDhw, "maxheatdhw", "heat limit dhw", "Heizgrenze Warmwasser", "heat limit dhw", "heat limit dhw", "limit ciepła dla c.w.u.", "varmegrense varmtvann", "limite chaleur ecs")
 
-// translations are in order en, de, nl, se, pl, no, fr, .... some missing
-MAKE_PSTR_LIST(auxHeater, "auxheater", "enable auxilliary heater", "Erlaube Zusatzheizer")
-MAKE_PSTR_LIST(auxHeaterStatus, "auxheaterstatus", "auxilliary heater status", "Status Zusatzheizer")
-MAKE_PSTR_LIST(auxHeaterOnly, "auxheateronly", "auxilliary heater only", "nur Zusatzheizer")
+// translations missing, remember order en, de, nl, se, pl, no, fr
+MAKE_PSTR_LIST(auxHeaterOff, "auxheateroff", "disable auxilliary heater", "Verbiete Zusatzheizer", "Bijverwarming uitsc", "", "", "", "")
+MAKE_PSTR_LIST(auxHeaterStatus, "auxheaterstatus", "auxilliary heater status", "Status Zusatzheizer", "Bijverwarming", "", "", "", "")
+MAKE_PSTR_LIST(auxHeaterOnly, "auxheateronly", "auxilliary heater only", "nur Zusatzheizer","Alleen bijverwarming", "", "", "", "")
 MAKE_PSTR_LIST(auxHeaterDelay, "auxheaterdelay", "auxilliary heater on delay", "Zusatzheizer verzögert ein", "Bijverw. vertraagd aan", "Tillskottfördröjning på", "Opóźn. włączenie dogrz.", "Tilleggsvarmer forsinket på", "Chauff app tempo marche")
-MAKE_PSTR_LIST(auxHeaterHyst, "auxheaterhyst", "auxilliary heater on/off hyst", "Zusatzheizer Schalthysterese", "Aan/uit-hysteresis in verw. bedrijf instellen", "På/av-hystereses Husv.", "Histerez wł/wył Ogrzew.", "På/av-hysterese Oppvar.", "Hystérésis Marche en mode chauffage")
-MAKE_PSTR_LIST(minTempSilent, "mintempsilent", "min. outside temp. for silent mode", "Minimale Aussentemperatur Silentmodus")
-MAKE_PSTR_LIST(tempParMode, "tempparmode", "outside temp. parallel mode", "Aussentemperatur Parallelmodus")
-MAKE_PSTR_LIST(auxHeatMixValve, "auxheatmix", "aux. heater mixing valve", "Mischer Zusatzheizer")
+MAKE_PSTR_LIST(minTempSilent, "mintempsilent", "min. outside temp. for silent mode", "Minimale Aussentemperatur Silentmodus", " Stiller gebruik min. buitentemp", "", "", "", "")
+MAKE_PSTR_LIST(tempParMode, "tempparmode", "outside temp. parallel mode", "Aussentemperatur Parallelmodus", "Buitentemp. parallelbedr", "", "", "", "")
+MAKE_PSTR_LIST(auxHeatMixValve, "auxheatmix", "aux. heater mixing valve", "Mischer Zusatzheizer", "Bijverwarming menger", "", "", "", "")
+MAKE_PSTR_LIST(hpHystHeat, "hphystheat", "HP on/off hyst heat", "Schalthysterese Heizen", "Aan/uit-hysteresis in verw. bedrijf", "På/av-hystereses Husv.", "Histerez wł/wył Ogrzew.", "På/av-hysterese Oppvar.", "Hystérésis Marche en mode chauffage")
+MAKE_PSTR_LIST(hpHystCool, "hphystcool", "on/off hyst cool", "Schalthysterese Kühlen", "Aan/uit-hysteresis in koelbedrijf ", "", "", "", "")
+MAKE_PSTR_LIST(hpHystPool, "hphystpool", "on/off hyst pool", "Schalthysterese Pool", "an/uit-hysteresis in zwembadbedri", "", "", "", "")
 
 // hybrid heatpump
 MAKE_PSTR_LIST(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride")
