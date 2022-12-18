@@ -942,6 +942,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
                              dv.options_size,
                              dv_set_min,
                              dv_set_max,
+                             dv.numeric_operator,
                              dev_json.as<JsonObject>());
 }
 
@@ -953,7 +954,7 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
     JsonArray ids = dev_json.createNestedArray("ids");
     ids.add("ems-esp");
 
-    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, dev_json);
+    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, 0, dev_json);
 }
 
 // MQTT discovery configs
@@ -972,6 +973,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                                     uint8_t               options_size,
                                     const int16_t         dv_set_min,
                                     const int16_t         dv_set_max,
+                                    const int8_t          num_op,
                                     const JsonObject &    dev_json) {
     // ignore if name (fullname) is empty
     if (!fullname || !en_name) {
@@ -1097,15 +1099,19 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             // mode can be auto, slider or box. Because its fiddly and error prone, force conversion to box
             // but... this is not currently supported in HA MQTT Number yet!
             // doc["mode"] = "box";
+            if (num_op > 0) {
+                doc["step"] = 1.0 / num_op;
+            } else if (num_op < 0) {
+                doc["step"] = -num_op;
+            } else {
+                doc["step"] = 1;
+            }
         }
 
         // set min and max values, if we have a valid range
         if (dv_set_min != 0 || dv_set_max != 0) {
             doc["min"] = dv_set_min;
             doc["max"] = dv_set_max;
-            if ((uom == DeviceValueUOM::DEGREES) || (uom == DeviceValueUOM::DEGREES_R)) {
-                doc["step"] = 0.5;
-            }
         }
 
         // set icons

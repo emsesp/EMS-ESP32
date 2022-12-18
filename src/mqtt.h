@@ -105,6 +105,7 @@ class Mqtt {
                                          uint8_t               options_size,
                                          const int16_t         dv_set_min,
                                          const int16_t         dv_set_max,
+                                         const int8_t          num_op,
                                          const JsonObject &    dev_json);
 
     static void publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
