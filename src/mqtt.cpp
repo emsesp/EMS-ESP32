@@ -38,7 +38,7 @@ uint32_t    Mqtt::publish_time_sensor_;
 uint32_t    Mqtt::publish_time_other_;
 uint32_t    Mqtt::publish_time_heartbeat_;
 bool        Mqtt::mqtt_enabled_;
-bool        Mqtt::multiple_instances_;
+uint8_t     Mqtt::entity_format_;
 bool        Mqtt::ha_enabled_;
 uint8_t     Mqtt::nested_format_;
 std::string Mqtt::discovery_prefix_;
@@ -430,7 +430,7 @@ void Mqtt::load_settings() {
         publish_single2cmd_ = mqttSettings.publish_single2cmd;
         send_response_      = mqttSettings.send_response;
         discovery_prefix_   = mqttSettings.discovery_prefix.c_str();
-        multiple_instances_ = mqttSettings.multiple_instances;
+        entity_format_      = mqttSettings.entity_format;
 
         // convert to milliseconds
         publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000;
@@ -609,7 +609,7 @@ void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
     char uniq[70];
-    if (Mqtt::multiple_instances()) {
+    if (Mqtt::entity_format() == 2) {
         snprintf(uniq, sizeof(uniq), "%s_system_status", mqtt_basename_.c_str());
     } else {
         strcpy(uniq, "system_status");
@@ -991,10 +991,14 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build unique identifier also used as object_id and becomes the Entity ID in HA
     char uniq_id[70];
-    if (Mqtt::multiple_instances()) {
+    if (Mqtt::entity_format() == 2) {
         // prefix base name to each uniq_id and use the shortname
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
+    } else if (Mqtt::entity_format() == 1) {
+        // shortname, no mqtt base
+        snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
     } else {
+        // entity_format is 0
         // old v3.4 style
         // take en_name and replace all spaces and lowercase it
         char uniq_s[40];
@@ -1308,7 +1312,7 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
 
     snprintf(name_s, sizeof(name_s), "Hc%d", hc_num);
 
-    if (Mqtt::multiple_instances()) {
+    if (Mqtt::entity_format() == 2) {
         snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_thermostat_hc%d", mqtt_basename_.c_str(), hc_num); // add basename
     } else {
         snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num); // backward compatible with v3.4
