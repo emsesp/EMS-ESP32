@@ -49,27 +49,28 @@ class DeviceValue {
     enum DeviceValueUOM : uint8_t {
         NONE = 0,    // 0
         DEGREES,     // 1
-        DEGREES_R,   // 2
+        DEGREES_R,   // 2 - relative temperature
         PERCENT,     // 3
-        LMIN,        // 4
-        KWH,         // 5
-        WH,          // 6
+        LMIN,        // 4 - l/min
+        KWH,         // 5 - kWh
+        WH,          // 6 - Wh
         HOURS,       // 7
         MINUTES,     // 8
-        UA,          // 9
+        UA,          // 9 - µA
         BAR,         // 10
-        KW,          // 11
+        KW,          // 11 - kW
         W,           // 12
         KB,          // 13
         SECONDS,     // 14
-        DBM,         // 15
+        DBM,         // 15 - dBm
         FAHRENHEIT,  // 16
-        MV,          // 17
-        SQM,         // 18 square meter
-        M3,          // 19 cubic meter
-        L,           // 20
+        MV,          // 17 - mV
+        SQM,         // 18 - square meter
+        M3,          // 19 - cubic meter
+        L,           // 20 - liter
         KMIN,        // 21 - Kelvin * minutes
-        CONNECTIVITY // 22 - used in HA
+        K,           // 22 - Kelvin
+        CONNECTIVITY // 23 - used in HA
     };
 
     // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp

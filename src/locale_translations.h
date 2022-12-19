@@ -376,9 +376,11 @@ MAKE_PSTR_LIST(auxHeaterDelay, "auxheaterdelay", "auxilliary heater on delay", "
 MAKE_PSTR_LIST(minTempSilent, "mintempsilent", "min. outside temp. for silent mode", "Minimale Aussentemperatur Silentmodus", " Stiller gebruik min. buitentemp", "", "", "", "Fct silencieux: Temp. extérieure min.")
 MAKE_PSTR_LIST(tempParMode, "tempparmode", "outside temp. parallel mode", "Aussentemperatur Parallelmodus", "Buitentemp. parallelbedr", "", "", "", "Temp. ext. fct parallèle")
 MAKE_PSTR_LIST(auxHeatMixValve, "auxheatmix", "aux. heater mixing valve", "Mischer Zusatzheizer", "Bijverwarming menger", "", "", "", "Chauffage auxiliaire mélangeur")
-MAKE_PSTR_LIST(hpHystHeat, "hphystheat", "HP on/off hyst heat", "Schalthysterese Heizen", "Aan/uit-hysteresis in verw. bedrijf", "På/av-hystereses Husv.", "Histerez wł/wył Ogrzew.", "På/av-hysterese Oppvar.", "Hystérésis Marche en mode chauffage")
+MAKE_PSTR_LIST(hpHystHeat, "hphystheat", "on/off hyst heat", "Schalthysterese Heizen", "Aan/uit-hysteresis in verw. bedrijf", "På/av-hystereses Husv.", "Histerez wł/wył Ogrzew.", "På/av-hysterese Oppvar.", "Hystérésis Marche en mode chauffage")
 MAKE_PSTR_LIST(hpHystCool, "hphystcool", "on/off hyst cool", "Schalthysterese Kühlen", "Aan/uit-hysteresis in koelbedrijf ", "", "", "", "Hystérésis Marche en mode refroidissement")
 MAKE_PSTR_LIST(hpHystPool, "hphystpool", "on/off hyst pool", "Schalthysterese Pool", "an/uit-hysteresis in zwembadbedri", "", "", "", "Hystérésis Marche en mode piscine")
+MAKE_PSTR_LIST(tempDiffHeat, "tempdiffheat", "temp. diff. TC3/TC0 heat", "Temp.diff. TC3/TC0 Heizen", "Temp.vers. TC3/TC0 verw", "", "", "", "Delta T TC3/TC0 Chauff")
+MAKE_PSTR_LIST(tempDiffCool, "tempdiffcool", "temp. diff. TC3/TC0 cool", "Temp.diff. TC3/TC0 Kühlen", "Temp.vers. TC3/TC0 koel.", "", "", "", "Delta T TC3/TC0 Refroid.")
 
 // hybrid heatpump
 MAKE_PSTR_LIST(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride")
