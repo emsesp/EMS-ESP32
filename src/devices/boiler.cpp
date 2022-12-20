@@ -184,7 +184,9 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
         register_telegram_type(0x488, "HPValve", true, MAKE_PF_CB(process_HpValve));
         register_telegram_type(0x484, "HPSilentMode", true, MAKE_PF_CB(process_HpSilentMode));
+        register_telegram_type(0x48B, "HPPumps", true, MAKE_PF_CB(process_HpPumps));
         register_telegram_type(0x491, "HPAdditionalHeater", true, MAKE_PF_CB(process_HpAdditionalHeater));
+        register_telegram_type(0x499, "HPDhwSettings", true, MAKE_PF_CB(process_HpDhwSettings));
     }
 
     /*
@@ -625,6 +627,41 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_tempParMode));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxHeatMixValve_, DeviceValueType::INT, FL_(auxHeatMixValve), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &tempDiffHeat_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(tempDiffHeat),
+                              DeviceValueUOM::K,
+                              MAKE_CF_CB(set_tempDiffHeat),
+                              3,
+                              10);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &tempDiffCool_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(tempDiffCool),
+                              DeviceValueUOM::K,
+                              MAKE_CF_CB(set_tempDiffCool),
+                              3,
+                              10);
+        // heatpump DHW settings
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &wwComfOffTemp_,
+                              DeviceValueType::UINT,
+                              FL_(wwComfOffTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_wwComfOffTemp),
+                              15,
+                              65);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &wwEcoOffTemp_,
+                              DeviceValueType::UINT,
+                              FL_(wwEcoOffTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_wwEcoOffTemp),
+                              15,
+                              65);
     }
 
     // dhw - DEVICE_DATA_ww topic
@@ -1267,6 +1304,7 @@ void Boiler::process_HpInConfig(std::shared_ptr<const Telegram> telegram) {
     has_update(hpInput[3].option, option, 12);
 }
 
+// Boiler(0x08) -W-> Me(0x0B), HpHeaterConfig(0x0492), data: 03 00 00 04 00
 void Boiler::process_HpHeaterConfig(std::shared_ptr<const Telegram> telegram) {
     has_update(maxHeatComp_, 2);
     has_update(maxHeatHeat_, 3);
@@ -1537,6 +1575,12 @@ void Boiler::process_HpValve(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, auxHeatMixValve_, 7);
 }
 
+// Boiler(0x08) -B-> All(0x00), ?(0x048B), data: 00 00 0A 1E 4E 00 1E 01 2C 00 01 64 55 05 12 50 50 50 00 00 1E 01 2C 00
+// Boiler(0x08) -B-> All(0x00), ?(0x048B), data: 00 1E 00 96 00 1E (offset 24)
+void Boiler::process_HpPumps(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, tempDiffHeat_, 4); // is * 10
+    has_update(telegram, tempDiffCool_, 3); // is * 10
+}
 
 // Boiler(0x08) -> All(0x00), ?(0x0491), data: 03 01 00 00 00 02 64 00 00 14 01 2C 00 0A 00 1E 00 1E 00 00 1E 0A 1E 05 05
 void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram) {
@@ -1544,6 +1588,13 @@ void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram
     has_update(telegram, auxHeaterOff_, 2);
     has_update(telegram, tempParMode_, 5);
     has_update(telegram, auxHeaterDelay_, 16); // is / 10
+}
+
+// DHW 0x499
+// Boiler(0x08) -B-> All(0x00), ?(0x0499), data: 31 33 3F 3B 01
+void Boiler::process_HpDhwSettings(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, wwComfOffTemp_, 1);
+    has_update(telegram, wwEcoOffTemp_, 0);
 }
 
 // Settings AM200
@@ -2526,7 +2577,7 @@ bool Boiler::set_tempParMode(const char * value, const int8_t id) {
 bool Boiler::set_additionalHeaterDelay(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2number(value, v)) {
-        v /= 5;
+        v /= 10;
         uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
         write_command(0x491, 16, data, 2, 0x491);
         return true;
@@ -2537,11 +2588,30 @@ bool Boiler::set_additionalHeaterDelay(const char * value, const int8_t id) {
 bool Boiler::set_hpHyst(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2number(value, v)) {
-        v /= 10;
+        v /= 5;
         uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
         write_command(0x484, id, data, 2, 0x484);
         return true;
     }
     return false;
 }
+
+bool Boiler::set_tempDiff(const char * value, const int8_t id) {
+    float v;
+    if (Helpers::value2float(value, v)) {
+        write_command(0x48B, id, (uint8_t)(v * 10), 0x48B);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_wwOffTemp(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        write_command(0x499, id, v, 0x499);
+        return true;
+    }
+    return false;
+}
+
 } // namespace emsesp

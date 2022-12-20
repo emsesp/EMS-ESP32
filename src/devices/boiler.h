@@ -253,6 +253,11 @@ class Boiler : public EMSdevice {
     uint16_t hpHystHeat_;
     uint16_t hpHystCool_;
     uint16_t hpHystPool_;
+    uint8_t  tempDiffHeat_;
+    uint8_t  tempDiffCool_;
+
+    uint8_t wwComfOffTemp_;
+    uint8_t wwEcoOffTemp_;
 
     /*
   // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
@@ -308,6 +313,8 @@ class Boiler : public EMSdevice {
     void process_HpSilentMode(std::shared_ptr<const Telegram> telegram);
     void process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram);
     void process_HpValve(std::shared_ptr<const Telegram> telegram);
+    void process_HpPumps(std::shared_ptr<const Telegram> telegram);
+    void process_HpDhwSettings(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
     bool        set_ww_mode(const char * value, const int8_t id);
@@ -408,6 +415,20 @@ class Boiler : public EMSdevice {
     }
     inline bool set_hpHystPool(const char * value, const int8_t id) {
         return set_hpHyst(value, 33);
+    }
+    bool        set_tempDiff(const char * value, const int8_t id);
+    inline bool set_tempDiffHeat(const char * value, const int8_t id) {
+        return set_tempDiff(value, 4);
+    }
+    inline bool set_tempDiffCool(const char * value, const int8_t id) {
+        return set_tempDiff(value, 3);
+    }
+    bool        set_wwOffTemp(const char * value, const int8_t id);
+    inline bool set_wwComfOffTemp(const char * value, const int8_t id) {
+        return set_wwOffTemp(value, 1);
+    }
+    inline bool set_wwEcoOffTemp(const char * value, const int8_t id) {
+        return set_wwOffTemp(value, 0);
     }
 
     /*
