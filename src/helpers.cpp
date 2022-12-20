@@ -522,7 +522,7 @@ bool Helpers::hasValue(const uint16_t & value) {
 }
 
 bool Helpers::hasValue(const uint32_t & value) {
-    return (value != EMS_VALUE_ULONG_NOTSET);
+    return (value < EMS_VALUE_ULONG_NOTSET);
 }
 
 // checks if we can convert a char string to an int value

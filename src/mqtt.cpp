@@ -1119,6 +1119,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         switch (uom) {
         case DeviceValueUOM::DEGREES:
         case DeviceValueUOM::DEGREES_R:
+        case DeviceValueUOM::K:
             doc[ic_ha] = F_(icondegrees);
             break;
         case DeviceValueUOM::PERCENT:
@@ -1184,6 +1185,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         switch (uom) {
         case DeviceValueUOM::DEGREES:
         case DeviceValueUOM::DEGREES_R:
+        case DeviceValueUOM::K:
             doc[sc_ha] = F_(measurement);
             doc[dc_ha] = "temperature"; // no icon needed
             break;
