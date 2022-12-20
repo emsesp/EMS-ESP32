@@ -1302,6 +1302,7 @@ void Boiler::process_HpInConfig(std::shared_ptr<const Telegram> telegram) {
     has_update(hpInput[3].option, option, 12);
 }
 
+// Boiler(0x08) -W-> Me(0x0B), HpHeaterConfig(0x0492), data: 03 00 00 04 00
 void Boiler::process_HpHeaterConfig(std::shared_ptr<const Telegram> telegram) {
     has_update(maxHeatComp_, 2);
     has_update(maxHeatHeat_, 3);
