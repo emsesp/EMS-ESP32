@@ -190,6 +190,7 @@ class Boiler : public EMSdevice {
     int16_t  hpTc0_;
     int16_t  hpTc1_;
     int16_t  hpTc3_;
+    int16_t  hpTr1_;
     int16_t  hpTr3_;
     int16_t  hpTr4_;
     int16_t  hpTr5_;
@@ -293,7 +294,7 @@ class Boiler : public EMSdevice {
     void process_CascadeMessage(std::shared_ptr<const Telegram> telegram);
     void process_UBASettingsWW(std::shared_ptr<const Telegram> telegram);
     void process_HpPower(std::shared_ptr<const Telegram> telegram);
-    void process_HpOutdoor(std::shared_ptr<const Telegram> telegram);
+    void process_HpTemperatures(std::shared_ptr<const Telegram> telegram);
     void process_HpPool(std::shared_ptr<const Telegram> telegram);
     void process_HpInput(std::shared_ptr<const Telegram> telegram);
     void process_HpInConfig(std::shared_ptr<const Telegram> telegram);

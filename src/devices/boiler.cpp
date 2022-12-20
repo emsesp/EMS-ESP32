@@ -176,7 +176,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x494, "UBAEnergySupplied", false, MAKE_PF_CB(process_UBAEnergySupplied));
         register_telegram_type(0x495, "UBAInformation", false, MAKE_PF_CB(process_UBAInformation));
         register_telegram_type(0x48D, "HpPower", true, MAKE_PF_CB(process_HpPower));
-        register_telegram_type(0x48F, "HpOutdoor", false, MAKE_PF_CB(process_HpOutdoor));
+        register_telegram_type(0x48F, "HpTemperatures", false, MAKE_PF_CB(process_HpTemperatures));
         register_telegram_type(0x48A, "HpPool", true, MAKE_PF_CB(process_HpPool));
         register_telegram_type(0x4A2, "HpInput", true, MAKE_PF_CB(process_HpInput));
         register_telegram_type(0x486, "HpInConfig", true, MAKE_PF_CB(process_HpInConfig));
@@ -494,6 +494,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTc0_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTc0), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTc1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTc1), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTc3_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTc3), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr1), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr3_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr3), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr4_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr4), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr5_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr5), DeviceValueUOM::DEGREES);
@@ -1206,11 +1207,12 @@ void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
     has_update(hpPoolOn_, hpActivity_ == 4 ? 0xFF : 0);
 }
 
-// Heatpump outdoor unit - type 0x48F
-void Boiler::process_HpOutdoor(std::shared_ptr<const Telegram> telegram) {
+// Heatpump temperatures - type 0x48F
+void Boiler::process_HpTemperatures(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpTc0_, 6);
     has_update(telegram, hpTc1_, 4);
     has_update(telegram, hpTc3_, 2);
+    has_update(telegram, hpTr1_, 14);
     has_update(telegram, hpTr3_, 16);
     has_update(telegram, hpTr4_, 18);
     // has_update(telegram, hpTr5_, 20);
