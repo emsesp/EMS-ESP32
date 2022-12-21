@@ -662,6 +662,14 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               MAKE_CF_CB(set_wwEcoOffTemp),
                               15,
                               65);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &wwEcoPlusOffTemp_,
+                              DeviceValueType::UINT,
+                              FL_(wwEcoPlusOffTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_wwEcoPlusOffTemp),
+                              48,
+                              63);
     }
 
     // dhw - DEVICE_DATA_ww topic
@@ -1595,6 +1603,7 @@ void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram
 void Boiler::process_HpDhwSettings(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwComfOffTemp_, 1);
     has_update(telegram, wwEcoOffTemp_, 0);
+    has_update(telegram, wwEcoPlusOffTemp_, 5);
 }
 
 // Settings AM200

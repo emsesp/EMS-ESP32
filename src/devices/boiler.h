@@ -258,6 +258,7 @@ class Boiler : public EMSdevice {
 
     uint8_t wwComfOffTemp_;
     uint8_t wwEcoOffTemp_;
+    uint8_t wwEcoPlusOffTemp_;
 
     /*
   // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
@@ -430,7 +431,9 @@ class Boiler : public EMSdevice {
     inline bool set_wwEcoOffTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 0);
     }
-
+    inline bool set_wwEcoPlusOffTemp(const char * value, const int8_t id) {
+        return set_wwOffTemp(value, 5);
+    }
     /*
     bool set_hybridStrategy(const char * value, const int8_t id);
     bool set_switchOverTemp(const char * value, const int8_t id);
