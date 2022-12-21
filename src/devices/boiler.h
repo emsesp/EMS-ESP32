@@ -190,6 +190,7 @@ class Boiler : public EMSdevice {
     int16_t  hpTc0_;
     int16_t  hpTc1_;
     int16_t  hpTc3_;
+    int16_t  hpTr1_;
     int16_t  hpTr3_;
     int16_t  hpTr4_;
     int16_t  hpTr5_;
@@ -257,6 +258,7 @@ class Boiler : public EMSdevice {
 
     uint8_t wwComfOffTemp_;
     uint8_t wwEcoOffTemp_;
+    uint8_t wwEcoPlusOffTemp_;
 
     /*
   // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
@@ -298,7 +300,7 @@ class Boiler : public EMSdevice {
     void process_CascadeMessage(std::shared_ptr<const Telegram> telegram);
     void process_UBASettingsWW(std::shared_ptr<const Telegram> telegram);
     void process_HpPower(std::shared_ptr<const Telegram> telegram);
-    void process_HpOutdoor(std::shared_ptr<const Telegram> telegram);
+    void process_HpTemperatures(std::shared_ptr<const Telegram> telegram);
     void process_HpPool(std::shared_ptr<const Telegram> telegram);
     void process_HpInput(std::shared_ptr<const Telegram> telegram);
     void process_HpInConfig(std::shared_ptr<const Telegram> telegram);
@@ -429,7 +431,9 @@ class Boiler : public EMSdevice {
     inline bool set_wwEcoOffTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 0);
     }
-
+    inline bool set_wwEcoPlusOffTemp(const char * value, const int8_t id) {
+        return set_wwOffTemp(value, 5);
+    }
     /*
     bool set_hybridStrategy(const char * value, const int8_t id);
     bool set_switchOverTemp(const char * value, const int8_t id);
