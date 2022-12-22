@@ -26,10 +26,13 @@
 - Add commands for analog sensors outputs
 - Support for multiple EMS-ESPs with MQTT and HA [[#759](https://github.com/emsesp/EMS-ESP32/issues/759)]
 - Settings for heatpump silent mode and additional heater [[#802](https://github.com/emsesp/EMS-ESP32/issues/802)] [[#803](https://github.com/emsesp/EMS-ESP32/issues/803)]
+- Zone module MZ100 [#826](https://github.com/emsesp/EMS-ESP32/issues/826)
 
 ## Fixed
 
 - Factory Reset not working [#628](https://github.com/emsesp/EMS-ESP32/issues/628)
+- Valid 4 byte values [#820](https://github.com/emsesp/EMS-ESP32/issues/820)
+- Commands for multiple thermostats [#826](https://github.com/emsesp/EMS-ESP32/issues/826)
 
 ## Changed
 

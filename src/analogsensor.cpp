@@ -47,6 +47,7 @@ void AnalogSensor::start() {
         CommandFlag::HIDDEN); // this command is hidden
     Command::add(
         EMSdevice::DeviceType::ANALOGSENSOR,
+        0,
         F_(setvalue),
         [&](const char * value, const int8_t id) { return command_setvalue(value, id); },
         FL_(setiovalue_cmd),
@@ -120,6 +121,7 @@ void AnalogSensor::reload() {
             if (sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT) {
                 Command::add(
                     EMSdevice::DeviceType::ANALOGSENSOR,
+                    0,
                     sensor.name.c_str(),
                     [&](const char * value, const int8_t id) { return command_setvalue(value, sensor.gpio); },
                     sensor.type == AnalogType::COUNTER       ? FL_(counter)

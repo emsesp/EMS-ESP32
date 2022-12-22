@@ -251,8 +251,15 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     auto dname = EMSdevice::device_type_2_device_name(device_type);
 
+    uint8_t device_id = 0;
+    for (const auto & emsdevice : emsesp::EMSESP::emsdevices) {
+        if (emsdevice->device_type() == device_type && emsdevice->has_cmd(id, cmd)) {
+            device_id = emsdevice->device_id();
+        }
+    }
+
     // see if there is a command registered
-    auto cf = find_command(device_type, cmd);
+    auto cf = find_command(device_type, device_id, cmd);
 
     // check if its a call to and end-point to a device
     // except for system commands as this is a special device without any queryable entities (device values)
@@ -287,7 +294,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
             LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
         } else {
             if (id > 0) {
-                LOG_DEBUG(("%sCalling command %s with value %s and id %d"), ro.c_str(), info_s, value, id);
+                LOG_DEBUG(("%sCalling command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
             } else {
                 LOG_DEBUG(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
             }
@@ -321,9 +328,9 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 }
 
 // add a command to the list, which does not return json
-void Command::add(const uint8_t device_type, const char * cmd, const cmd_function_p cb, const char * const * description, uint8_t flags) {
+void Command::add(const uint8_t device_type, const uint8_t device_id, const char * cmd, const cmd_function_p cb, const char * const * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
-    if (find_command(device_type, cmd) != nullptr) {
+    if (find_command(device_type, device_id, cmd) != nullptr) {
         return;
     }
 
@@ -332,28 +339,28 @@ void Command::add(const uint8_t device_type, const char * cmd, const cmd_functio
         flags |= CommandFlag::HIDDEN;
     }
 
-    cmdfunctions_.emplace_back(device_type, flags, cmd, cb, nullptr, description); // callback for json is nullptr
+    cmdfunctions_.emplace_back(device_type, device_id, flags, cmd, cb, nullptr, description); // callback for json is nullptr
 }
 
 // add a command to the list, which does return a json object as output
 void Command::add(const uint8_t device_type, const char * cmd, const cmd_json_function_p cb, const char * const * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
-    if (find_command(device_type, cmd) != nullptr) {
+    if (find_command(device_type, 0, cmd) != nullptr) {
         return;
     }
 
-    cmdfunctions_.emplace_back(device_type, flags, cmd, nullptr, cb, description); // callback for json is included
+    cmdfunctions_.emplace_back(device_type, 0, flags, cmd, nullptr, cb, description); // callback for json is included
 }
 
 // see if a command exists for that device type
 // is not case sensitive
-Command::CmdFunction * Command::find_command(const uint8_t device_type, const char * cmd) {
+Command::CmdFunction * Command::find_command(const uint8_t device_type, const uint8_t device_id, const char * cmd) {
     if ((cmd == nullptr) || (strlen(cmd) == 0) || (cmdfunctions_.empty())) {
         return nullptr;
     }
 
     for (auto & cf : cmdfunctions_) {
-        if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type)) {
+        if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type) && (!device_id || cf.device_id_ == device_id)) {
             return &cf;
         }
     }
