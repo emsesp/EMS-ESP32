@@ -165,7 +165,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
 // Compresses the JSON using MsgPack https://msgpack.org/index.html
 void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        auto * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXXLARGE_DYN);
+        auto * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
         if (!response->getSize()) {
             delete response;
             response = new MsgpackAsyncJsonResponse(false, 256);
@@ -192,7 +192,8 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
                 // #endif
                 // #endif
 
-                response->setLength();
+                size_t length = response->setLength();
+                EMSESP::logger().debug("Dashboard buffer used: %d", length);
                 request->send(response);
                 return;
             }
