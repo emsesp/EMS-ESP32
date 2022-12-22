@@ -114,6 +114,15 @@ bool EMSESP::cmd_is_readonly(const uint8_t device_type, const uint8_t device_id,
     return false;
 }
 
+uint8_t EMSESP::device_id_from_cmd(const uint8_t device_type, const int8_t id, const char * cmd) {
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice && emsdevice->device_type() == device_type && emsdevice->has_cmd(id, cmd)) {
+            return emsdevice->device_id();
+        }
+    }
+    return 0;
+}
+
 // clears list of recognized devices
 void EMSESP::clear_all_devices() {
     // temporarily removed: clearing the list causes a crash, the associated commands and mqtt should also be removed.

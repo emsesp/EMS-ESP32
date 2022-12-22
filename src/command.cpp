@@ -249,14 +249,8 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject & output) {
     uint8_t return_code = CommandRet::OK;
 
-    auto dname = EMSdevice::device_type_2_device_name(device_type);
-
-    uint8_t device_id = 0;
-    for (const auto & emsdevice : emsesp::EMSESP::emsdevices) {
-        if (emsdevice->device_type() == device_type && emsdevice->has_cmd(id, cmd)) {
-            device_id = emsdevice->device_id();
-        }
-    }
+    auto    dname     = EMSdevice::device_type_2_device_name(device_type);
+    uint8_t device_id = EMSESP::device_id_from_cmd(device_type, id, cmd);
 
     // see if there is a command registered
     auto cf = find_command(device_type, device_id, cmd);
