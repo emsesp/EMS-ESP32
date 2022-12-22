@@ -802,9 +802,9 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
                     obj["v"] = Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
                 } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), dv.numeric_operator);
+                    obj["v"] = (*(uint32_t *)(dv.value_p) / dv.numeric_operator); // ULONG always have positive num_op
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), dv.numeric_operator);
+                    obj["v"] = (*(uint32_t *)(dv.value_p) / dv.numeric_operator);
                 } else {
                     obj["v"] = ""; // must have a value for sorting to work
                 }
@@ -912,9 +912,9 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
                 } else if (dv.type == DeviceValueType::USHORT) {
                     obj["v"] = Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
                 } else if (dv.type == DeviceValueType::ULONG) {
-                    obj["v"] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), dv.numeric_operator);
+                    obj["v"] = (*(uint32_t *)(dv.value_p) / dv.numeric_operator);
                 } else if (dv.type == DeviceValueType::TIME) {
-                    obj["v"] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), dv.numeric_operator);
+                    obj["v"] = (*(uint32_t *)(dv.value_p) / dv.numeric_operator);
                 }
             }
         }
