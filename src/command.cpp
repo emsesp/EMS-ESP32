@@ -307,7 +307,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
         // check if read-only. This also checks for valid tags (e.g. heating circuits)
         if (cf->cmdfunction_) {
-            if (EMSESP::cmd_is_readonly(device_type, cmd, id)) {
+            if (EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
                 return_code = CommandRet::INVALID; // readonly or invalid hc
             } else {
                 return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;

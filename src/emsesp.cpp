@@ -105,9 +105,9 @@ void EMSESP::fetch_device_values_type(const uint8_t device_type) {
     }
 }
 
-bool EMSESP::cmd_is_readonly(const uint8_t device_type, const char * cmd, const int8_t id) {
+bool EMSESP::cmd_is_readonly(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id) {
     for (const auto & emsdevice : emsdevices) {
-        if (emsdevice && (emsdevice->device_type() == device_type)) {
+        if (emsdevice && (emsdevice->device_type() == device_type) && (!device_id || emsdevice->device_id() == device_id)) {
             return emsdevice->is_readonly(cmd, id);
         }
     }
