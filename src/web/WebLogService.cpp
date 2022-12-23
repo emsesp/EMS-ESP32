@@ -78,6 +78,9 @@ size_t WebLogService::maximum_log_messages() const {
 }
 
 void WebLogService::maximum_log_messages(size_t count) {
+    if (count > maximum_log_messages_ && ESP.getMaxAllocHeap() < 41984) {
+        return;
+    }
     maximum_log_messages_ = std::max((size_t)1, count);
     while (log_messages_.size() > maximum_log_messages_) {
         log_messages_.pop_front();
