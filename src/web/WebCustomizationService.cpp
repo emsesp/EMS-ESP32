@@ -200,7 +200,7 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
 // send back list of device entities
 void WebCustomizationService::device_entities(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        auto * response = new MsgpackAsyncJsonResponse(true, EMSESP_JSON_SIZE_XXLARGE_DYN);
+        auto * response = new MsgpackAsyncJsonResponse(true, EMSESP_JSON_SIZE_XXXLARGE_DYN);
         if (!response->getSize()) {
             delete response;
             response = new MsgpackAsyncJsonResponse(true, 256);

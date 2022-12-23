@@ -80,7 +80,7 @@
 #endif
 
 #define EMSESP_JSON_SIZE_XXLARGE_DYN 16384  // for extra very very large json docs, using DynamicJsonDocument
-#define EMSESP_JSON_SIZE_XXXLARGE_DYN 20480 // web output (maybe for 4 hc)
+#define EMSESP_JSON_SIZE_XXXLARGE_DYN 12288 // web output (maybe for 4 hc)
 
 // helpers for callback functions
 #define MAKE_PF_CB(__f) [&](std::shared_ptr<const Telegram> t) { __f(t); }                  // for Process Function callbacks to EMSDevice::process_function_p
