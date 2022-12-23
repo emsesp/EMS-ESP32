@@ -66,16 +66,10 @@ MAKE_PSTR_WORD(measurement)
 MAKE_PSTR_WORD(total_increasing)
 MAKE_PSTR(icondegrees, "mdi:coolant-temperature") // DeviceValueUOM::DEGREES
 MAKE_PSTR(iconpercent, "mdi:percent-outline")     // DeviceValueUOM::PERCENT
-MAKE_PSTR(icontime, "mdi:clock-outline")          // DeviceValueUOM::SECONDS MINUTES & HOURS
 MAKE_PSTR(iconkb, "mdi:memory")                   // DeviceValueUOM::KB
 MAKE_PSTR(iconlmin, "mdi:water-boiler")           // DeviceValueUOM::LMIN
-// MAKE_PSTR(iconkwh, "mdi:transmission-tower")      // DeviceValueUOM::KWH & WH
-MAKE_PSTR(iconua, "mdi:lightning-bolt-circle") // DeviceValueUOM::UA
-// MAKE_PSTR(iconbar, "mdi:gauge")                   // DeviceValueUOM::BAR
-// MAKE_PSTR(iconkw, "mdi:omega")                    // DeviceValueUOM::KW & W
-// MAKE_PSTR(icondbm, "mdi:wifi-strength-2")         // DeviceValueUOM::DBM
-MAKE_PSTR(iconnum, "mdi:counter") // DeviceValueUOM::NONE
-// MAKE_PSTR(icondevice, "mdi:home-automation") // for devices in HA
+MAKE_PSTR(iconua, "mdi:lightning-bolt-circle")    // DeviceValueUOM::UA
+MAKE_PSTR(iconnum, "mdi:counter")                 // DeviceValueUOM::NONE
 
 uuid::log::Logger Mqtt::logger_{F_(mqtt), uuid::log::Facility::DAEMON};
 
@@ -1171,8 +1165,16 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         doc["payload_off"] = Helpers::render_boolean(result, false);
         doc[sc_ha]         = F_(measurement);
     } else {
-        // always set the uom
-        if (uom != DeviceValueUOM::NONE) {
+        // always set the uom, using the standards except for hours/minutes/seconds
+        // using HA specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
+        if (uom == DeviceValueUOM::HOURS) {
+            doc[uom_ha] = "h";
+        } else if (uom == DeviceValueUOM::MINUTES) {
+            doc[uom_ha] = "min";
+        } else if (uom == DeviceValueUOM::SECONDS) {
+            doc[uom_ha] = "s";
+        } else if (uom != DeviceValueUOM::NONE) {
+            // default
             doc[uom_ha] = EMSdevice::uom_to_string(uom);
         }
     }
@@ -1196,12 +1198,12 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueUOM::SECONDS:
         case DeviceValueUOM::MINUTES:
         case DeviceValueUOM::HOURS:
-            doc[ic_ha] = F_(icontime);
             if (type == DeviceValueType::TIME) {
                 doc[sc_ha] = F_(total_increasing);
             } else {
                 doc[sc_ha] = F_(measurement);
             }
+            doc[dc_ha] = "duration"; // https://github.com/emsesp/EMS-ESP32/issues/822
             break;
         case DeviceValueUOM::KB:
             doc[ic_ha] = F_(iconkb);
