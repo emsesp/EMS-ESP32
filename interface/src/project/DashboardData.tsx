@@ -467,11 +467,11 @@ const DashboardData: FC = () => {
           devicevalue: deviceValue
         });
         if (response.status === 204) {
-          enqueueSnackbar(LL.WRITE_COMMAND({ cmd: 'failed' }), { variant: 'error' });
+          enqueueSnackbar(LL.WRITE_CMD_FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
           enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar(LL.WRITE_COMMAND({ cmd: 'send' }), { variant: 'success' });
+          enqueueSnackbar(LL.WRITE_CMD_SENT(), { variant: 'success' });
         }
         setDeviceValue(undefined);
       } catch (error) {
