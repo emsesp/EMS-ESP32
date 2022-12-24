@@ -125,8 +125,8 @@ void MqttSettingsService::configureMqtt() {
     // disconnect if connected
     _mqttClient.disconnect();
     // only connect if WiFi is connected and MQTT is enabled
-    if (_state.enabled && emsesp::EMSESP::system_.network_connected()) {
-        // emsesp::EMSESP::logger().info("Configuring Mqtt client");
+    if (_state.enabled && emsesp::EMSESP::system_.network_connected() && !_state.host.isEmpty()) {
+        // emsesp::EMSESP::logger().info("Configuring MQTT client");
         _mqttClient.setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
         if (_state.username.length() > 0) {
             _mqttClient.setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername),
@@ -140,7 +140,7 @@ void MqttSettingsService::configureMqtt() {
         _mqttClient.setMaxTopicLength(FACTORY_MQTT_MAX_TOPIC_LENGTH); // hardcode. We don't take this from the settings anymore.
         _mqttClient.connect();
         // } else {
-        // emsesp::EMSESP::logger().info("Error configuring Mqtt client");
+        // emsesp::EMSESP::logger().info("Error configuring MQTT client");
     }
 }
 

@@ -75,6 +75,7 @@ class System {
     void wifi_tweak();
     void syslog_init();
     bool check_upgrade();
+    bool check_restore();
     bool heartbeat_json(JsonObject & output);
     void send_heartbeat();
     void send_info_mqtt(const char * event_str, bool send_ntp = false);
@@ -294,6 +295,7 @@ class System {
     uint8_t     bool_format_;
     uint8_t     enum_format_;
     bool        readonly_mode_;
+    std::string version_;
 
     // ethernet
     uint8_t phy_type_;

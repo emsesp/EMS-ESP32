@@ -29,40 +29,41 @@ namespace emsesp {
 
 class WebSettings {
   public:
-    String   locale;
-    uint8_t  tx_mode;
-    uint8_t  ems_bus_id;
-    bool     shower_timer;
-    bool     shower_alert;
-    uint8_t  shower_alert_trigger;
-    uint8_t  shower_alert_coldshot;
-    bool     syslog_enabled;
-    int8_t   syslog_level; // uuid::log::Level
-    uint32_t syslog_mark_interval;
-    String   syslog_host;
-    uint16_t syslog_port;
-    bool     trace_raw;
-    uint8_t  rx_gpio;
-    uint8_t  tx_gpio;
-    uint8_t  dallas_gpio;
-    bool     dallas_parasite;
-    uint8_t  led_gpio;
-    bool     hide_led;
-    bool     low_clock;
-    bool     telnet_enabled;
-    bool     notoken_api;
-    bool     readonly_mode;
-    bool     analog_enabled;
-    uint8_t  pbutton_gpio;
-    uint8_t  solar_maxflow;
-    String   board_profile;
-    uint8_t  bool_format;
-    uint8_t  bool_dashboard;
-    uint8_t  enum_format;
-    int8_t   weblog_level;
-    uint8_t  weblog_buffer;
-    bool     weblog_compact;
-    bool     fahrenheit;
+    std::string version;
+    String      locale;
+    uint8_t     tx_mode;
+    uint8_t     ems_bus_id;
+    bool        shower_timer;
+    bool        shower_alert;
+    uint8_t     shower_alert_trigger;
+    uint8_t     shower_alert_coldshot;
+    bool        syslog_enabled;
+    int8_t      syslog_level; // uuid::log::Level
+    uint32_t    syslog_mark_interval;
+    String      syslog_host;
+    uint16_t    syslog_port;
+    bool        trace_raw;
+    uint8_t     rx_gpio;
+    uint8_t     tx_gpio;
+    uint8_t     dallas_gpio;
+    bool        dallas_parasite;
+    uint8_t     led_gpio;
+    bool        hide_led;
+    bool        low_clock;
+    bool        telnet_enabled;
+    bool        notoken_api;
+    bool        readonly_mode;
+    bool        analog_enabled;
+    uint8_t     pbutton_gpio;
+    uint8_t     solar_maxflow;
+    String      board_profile;
+    uint8_t     bool_format;
+    uint8_t     bool_dashboard;
+    uint8_t     enum_format;
+    int8_t      weblog_level;
+    uint8_t     weblog_buffer;
+    bool        weblog_compact;
+    bool        fahrenheit;
 
     uint8_t phy_type;
     int8_t  eth_power; // -1 means disabled

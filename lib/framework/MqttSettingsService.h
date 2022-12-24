@@ -19,7 +19,7 @@
 #endif
 
 #ifndef FACTORY_MQTT_HOST
-#define FACTORY_MQTT_HOST "test.mosquitto.org"
+#define FACTORY_MQTT_HOST "" // is blank
 #endif
 
 #ifndef FACTORY_MQTT_PORT

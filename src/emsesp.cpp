@@ -1293,13 +1293,20 @@ void EMSESP::start() {
 
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
-    // do any system upgrades
-    if (system_.check_upgrade()) {
-        LOG_INFO("System needs a restart to apply new settings. Please wait.");
+    // see if we're restoring a settings file
+    if (system_.check_restore()) {
+        LOG_WARNING("System needs a restart to apply new settings. Please wait.");
         system_.system_restart();
     };
 
-    webSettingsService.begin();      // load EMS-ESP Application settings...
+    webSettingsService.begin(); // load EMS-ESP Application settings...
+
+    // do any system upgrades
+    if (system_.check_upgrade()) {
+        LOG_WARNING("System needs a restart to apply new settings. Please wait.");
+        system_.system_restart();
+    };
+
     system_.reload_settings();       // ... and store some of the settings locally
     webCustomizationService.begin(); // load the customizations
 
