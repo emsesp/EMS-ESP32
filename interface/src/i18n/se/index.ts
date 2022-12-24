@@ -204,7 +204,7 @@ const se: Translation = {
   FLASH: 'Flashminne (Storlek / Hastighet)',
   APPSIZE: 'Applikationer (Använt / Ledigt)',
   FILESYSTEM: 'Filsystem (Använt / Ledigt)',
-  BUFFER_SIZE: 'Bufferstorlek',
+  BUFFER_SIZE: 'Max Bufferstorlek',
   COMPACT: 'Komprimera',
   ENABLE_OTA: 'Aktivera OTA-uppdateringar',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Ladda ner entitetsanpassningar',

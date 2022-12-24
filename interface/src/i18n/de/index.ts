@@ -3,7 +3,6 @@ import type { Translation } from '../i18n-types';
 /* eslint-disable */
 
 const de: Translation = {
-//   ...en as Translation,
   LANGUAGE: 'Sprache',
   RETRY: 'Neuer Versuch',
   LOADING: 'Laden',
@@ -205,7 +204,7 @@ const de: Translation = {
   FLASH: 'Flash Speicher (Größe / Geschwindigkeit)',
   APPSIZE: 'Programm (Genutzt / Frei)',
   FILESYSTEM: 'Dateisystem (Genutzt / Frei)',
-  BUFFER_SIZE: 'Puffergröße',
+  BUFFER_SIZE: 'max. Puffergröße',
   COMPACT: 'Kompakte Darstellung',
   ENABLE_OTA: 'OTA Updates verwenden',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Herunterladen der individuellen Entitätsanpassungen',

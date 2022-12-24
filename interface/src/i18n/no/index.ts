@@ -204,7 +204,7 @@ const no: Translation = {
   FLASH: 'Flash Chip (Størrelse / Hastighet)',
   APPSIZE: 'Applikasjon (Brukt / Ledig)',
   FILESYSTEM: 'File System (Brukt / Ledig)',
-  BUFFER_SIZE: 'Buffer Størrelse',
+  BUFFER_SIZE: 'Max Buffer Størrelse',
   COMPACT: 'Komprimere',
   ENABLE_OTA: 'Aktiviser OTA oppdateringer',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Last ned objektstilpasninger',

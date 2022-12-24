@@ -74,6 +74,10 @@ void WebLogService::log_level(uuid::log::Level level) {
     uuid::log::Logger::register_handler(this, level);
 }
 
+size_t WebLogService::num_log_messages() const {
+    return log_messages_.size();
+}
+
 size_t WebLogService::maximum_log_messages() const {
     return maximum_log_messages_;
 }
