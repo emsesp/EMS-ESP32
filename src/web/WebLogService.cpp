@@ -120,7 +120,7 @@ WebLogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_
 void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
 #ifndef EMSESP_STANDALONE
     size_t maxAlloc = ESP.getMaxAllocHeap();
-    if (limit_log_messages_ > 5 && maxAlloc < 446080) {
+    if (limit_log_messages_ > 5 && maxAlloc < 46080) {
         --limit_log_messages_;
     } else if (limit_log_messages_ < maximum_log_messages_ && maxAlloc > 51200) {
         ++limit_log_messages_;
