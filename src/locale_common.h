@@ -197,7 +197,7 @@ MAKE_PSTR_LIST(tpl_input, "Format: <inv>[<evu1><evu2><evu3><comp><aux><cool><hea
 MAKE_PSTR_LIST(tpl_input4, "Format: <inv>[<comp><aux><cool><heat><dhw><pv>]")
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
-// Translating hours/minute/seconds in emsdevice.cpp
+// Translating hours/minute/seconds are done in emsdevice.cpp (uom_to_string())
 MAKE_PSTR(uom_blank, " ")
 MAKE_PSTR(uom_percent, "%")
 MAKE_PSTR(uom_degrees, "°C")

@@ -4,7 +4,7 @@ import { ValidateFieldsError } from 'async-validator';
 import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 
-import { MQTT_SETTINGS_VALIDATOR, validate } from '../../validators';
+import { createMqttSettingsValidator, validate } from '../../validators';
 import {
   BlockFormControlLabel,
   ButtonRow,
@@ -39,7 +39,7 @@ const MqttSettingsForm: FC = () => {
     const validateAndSubmit = async () => {
       try {
         setFieldErrors(undefined);
-        await validate(MQTT_SETTINGS_VALIDATOR, data);
+        await validate(createMqttSettingsValidator(data), data);
         saveData();
       } catch (errors: any) {
         setFieldErrors(errors);

@@ -27,6 +27,7 @@
 - Support for multiple EMS-ESPs with MQTT and HA [[#759](https://github.com/emsesp/EMS-ESP32/issues/759)]
 - Settings for heatpump silent mode and additional heater [[#802](https://github.com/emsesp/EMS-ESP32/issues/802)] [[#803](https://github.com/emsesp/EMS-ESP32/issues/803)]
 - Zone module MZ100 [#826](https://github.com/emsesp/EMS-ESP32/issues/826)
+- Default MQTT hostname is blank [#829](https://github.com/emsesp/EMS-ESP32/issues/829)
 
 ## Fixed
 
@@ -43,4 +44,5 @@
 - reload page after restart button is pressed
 - analog/dallas values command as list like ems-devices
 - analog/dallas HA-entities based on id
-- MQTT Base is a mandatory field. Removed MQTT topic length from settings.
+- MQTT Base is a mandatory field. Removed MQTT topic length from settings
+- HA duration class for time entities [[#822](https://github.com/emsesp/EMS-ESP32/issues/822

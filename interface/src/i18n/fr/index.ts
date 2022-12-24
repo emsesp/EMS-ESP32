@@ -69,8 +69,8 @@ const fr: Translation = {
   SENSOR: 'Capteur',
   TEMP_SENSOR: 'Capteur de température',
   TEMP_SENSORS: 'Capteurs de température',
-  WRITE_CMD_SENT: 'Envoyer la commande sent',
-  WRITE_CMD_FAILED: 'Envoyer la commande failed',
+  WRITE_CMD_SENT: 'Envoyer la commande sent', // TODO
+  WRITE_CMD_FAILED: 'Envoyer la commande failed', // TODO
   EMS_BUS_WARNING: 'Bus EMS déconnecté. Si ce message persiste après quelques secondes, vérifiez les paramètres et la configuration de la carte.',
   EMS_BUS_SCANNING: 'Scan des appareils EMS...',
   CONNECTED: 'Connecté',
@@ -249,10 +249,10 @@ const fr: Translation = {
   MQTT_INT_HEARTBEAT: 'Battements',
   MQTT_QUEUE: 'Queue MQTT',
   DEFAULT: 'Défaut',
-  MQTT_ENTITY_FORMAT: 'Entity ID format',
-  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)',
-  MQTT_ENTITY_FORMAT_1: 'Single instance, short name',
-  MQTT_ENTITY_FORMAT_2: 'Multiple instances, short name',
+  MQTT_ENTITY_FORMAT: 'Entity ID format', // TODO
+  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)',// TODO
+  MQTT_ENTITY_FORMAT_1: 'Single instance, short name', // TODO
+  MQTT_ENTITY_FORMAT_2: 'Multiple instances, short name', // TODO
   MQTT_CLEAN_SESSION: 'Flag Clean Session',
   MQTT_RETAIN_FLAG: 'Toujours activer le Retain Flag',
   INACTIVE: 'Inactif',

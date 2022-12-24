@@ -48,28 +48,28 @@ class DeviceValue {
     // also used with HA as uom
     enum DeviceValueUOM : uint8_t {
         NONE = 0,    // 0
-        DEGREES,     // 1
-        DEGREES_R,   // 2 - relative temperature
-        PERCENT,     // 3
+        DEGREES,     // 1 - °C
+        DEGREES_R,   // 2 - °C (relative temperature)
+        PERCENT,     // 3 - %
         LMIN,        // 4 - l/min
         KWH,         // 5 - kWh
         WH,          // 6 - Wh
-        HOURS,       // 7
-        MINUTES,     // 8
+        HOURS,       // 7 - h
+        MINUTES,     // 8 - m
         UA,          // 9 - µA
-        BAR,         // 10
+        BAR,         // 10 - bar
         KW,          // 11 - kW
-        W,           // 12
-        KB,          // 13
-        SECONDS,     // 14
+        W,           // 12 - W
+        KB,          // 13 - kB
+        SECONDS,     // 14 - s
         DBM,         // 15 - dBm
-        FAHRENHEIT,  // 16
+        FAHRENHEIT,  // 16 - °F
         MV,          // 17 - mV
-        SQM,         // 18 - square meter
-        M3,          // 19 - cubic meter
-        L,           // 20 - liter
-        KMIN,        // 21 - Kelvin * minutes
-        K,           // 22 - Kelvin
+        SQM,         // 18 - m²
+        M3,          // 19 - m³
+        L,           // 20 - L
+        KMIN,        // 21 - K*min
+        K,           // 22 - K
         CONNECTIVITY // 23 - used in HA
     };
 

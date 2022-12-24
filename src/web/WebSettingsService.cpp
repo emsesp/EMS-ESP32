@@ -80,6 +80,10 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
 
 // call on initialization and also when settings are updated via web or console
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
+    // load the version of the settings
+    // will be picked up in System::check_upgrade()
+    settings.version = root["version"] || "";
+
     // load default GPIO configuration based on board profile
     std::vector<int8_t> data; //  // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
 #if CONFIG_IDF_TARGET_ESP32C3

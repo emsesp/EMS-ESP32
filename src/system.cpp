@@ -290,6 +290,8 @@ void System::syslog_init() {
 // read some specific system settings to store locally for faster access
 void System::reload_settings() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
+        version_ = settings.version;
+
         pbutton_gpio_   = settings.pbutton_gpio;
         analog_enabled_ = settings.analog_enabled;
         low_clock_      = settings.low_clock;
@@ -969,10 +971,8 @@ void System::show_system(uuid::console::Shell & shell) {
 #endif
 }
 
-// handle upgrades from previous versions
-// or managing an uploaded files to replace settings files
-// returns true if we need a reboot
-bool System::check_upgrade() {
+// see if there is a restore of an older settings file that needs to be applied
+bool System::check_restore() {
     bool reboot_required = false;
 
 #ifndef EMSESP_STANDALONE
@@ -1008,6 +1008,50 @@ bool System::check_upgrade() {
         LittleFS.remove(TEMP_FILENAME_PATH);
     }
 #endif
+
+    return reboot_required;
+}
+
+// handle upgrades from previous versions
+// returns true if we need a reboot
+bool System::check_upgrade() {
+    std::string old_version;
+
+    // TODO fix
+
+    if (version_ != EMSESP_APP_VERSION) {
+        if (version_.empty()) {
+            LOG_DEBUG("No version, presuming fresh install. Setting to %s", EMSESP_APP_VERSION);
+            old_version = EMSESP_APP_VERSION;
+        } else {
+            LOG_DEBUG("Going from version %s to %s", version_, EMSESP_APP_VERSION);
+            old_version = version_;
+        }
+        // save the new version
+        version_ = EMSESP_APP_VERSION;
+        EMSESP::webSettingsService.update(
+            [&](WebSettings & settings) {
+                settings.version = EMSESP_APP_VERSION;
+                return StateUpdateResult::CHANGED;
+            },
+            "local");
+    }
+
+    if (old_version == EMSESP_APP_VERSION) {
+        return false; // no upgrades or reboot needed. we're on the latest
+    }
+
+    LOG_DEBUG("Doing upgrade..."); // TODO remove
+
+
+    // check variations between versions
+    // get major version
+
+    // get minor version
+
+    // get patch version (ignore alphanumerics)
+
+    bool reboot_required = false;
 
     return reboot_required;
 }

@@ -69,8 +69,8 @@ const se: Translation = {
   SENSOR: 'Sensor',
   TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperatursensorer',
-  WRITE_CMD_SENT: 'Skrivkommando sent',
-  WRITE_CMD_FAILED: 'Skrivkommando failed',
+  WRITE_CMD_SENT: 'Skrivkommando sent', // TODO
+  WRITE_CMD_FAILED: 'Skrivkommando failed', // TODO
   EMS_BUS_WARNING: 'EMS-buss nedkopplad. Om denna varning kvarstår efter några sekunder, kontrollera inställningar och enhets-profil.',
   EMS_BUS_SCANNING: 'Söker efter EMS-enheter...',
   CONNECTED: 'Ansluten',
@@ -249,10 +249,10 @@ const se: Translation = {
   MQTT_INT_HEARTBEAT: 'Heartbeat',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Standard',
-  MQTT_ENTITY_FORMAT: 'Entity ID format',
-  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)',
-  MQTT_ENTITY_FORMAT_1: 'Single instance, short name',
-  MQTT_ENTITY_FORMAT_2: 'Multiple instances, short name',
+  MQTT_ENTITY_FORMAT: 'Entity ID format', // TODO
+  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)', // TODO
+  MQTT_ENTITY_FORMAT_1: 'Single instance, short name', // TODO
+  MQTT_ENTITY_FORMAT_2: 'Multiple instances, short name', // TODO
   MQTT_CLEAN_SESSION: 'Använd "Clean Session"-flaggan',
   MQTT_RETAIN_FLAG: 'Använd "Always Retain"-flaggan',
   INACTIVE: 'Inaktiv',
