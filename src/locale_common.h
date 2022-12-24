@@ -214,7 +214,7 @@ MAKE_PSTR(uom_fahrenheit, "°F")
 MAKE_PSTR(uom_mv, "mV")
 MAKE_PSTR(uom_sqm, "m²")
 MAKE_PSTR(uom_m3, "m³")
-MAKE_PSTR(uom_l, "L")
+MAKE_PSTR(uom_l, "l")
 MAKE_PSTR(uom_kmin, "K*min")
 MAKE_PSTR(uom_k, "K")
 
