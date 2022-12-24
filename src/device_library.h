@@ -135,6 +135,7 @@
 {159, DeviceType::MIXER, "MM50", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {160, DeviceType::MIXER, "MM100", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {161, DeviceType::MIXER, "MM200", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
+{193, DeviceType::MIXER, "MZ100", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {204, DeviceType::MIXER, "MP100", DeviceFlags::EMS_DEVICE_FLAG_MP}, // pool
 
 // Heat Pumps - 0x38?

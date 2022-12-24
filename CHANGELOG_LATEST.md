@@ -24,13 +24,16 @@
 - Add more bus-ids [#673](https://github.com/emsesp/EMS-ESP32/issues/673)
 - Use HA connectivity device class for Status, added boot time [#751](https://github.com/emsesp/EMS-ESP32/issues/751)
 - Add commands for analog sensors outputs
-- Support for multiple EMS-ESPs with MQTT and HA [#759](https://github.com/emsesp/EMS-ESP32/issues/759)
-- Settings for heatpump silent mode and additional heater [#802](https://github.com/emsesp/EMS-ESP32/issues/802)] [[#803](https://github.com/emsesp/EMS-ESP32/issues/803)
+- Support for multiple EMS-ESPs with MQTT and HA [[#759](https://github.com/emsesp/EMS-ESP32/issues/759)]
+- Settings for heatpump silent mode and additional heater [[#802](https://github.com/emsesp/EMS-ESP32/issues/802)] [[#803](https://github.com/emsesp/EMS-ESP32/issues/803)]
+- Zone module MZ100 [#826](https://github.com/emsesp/EMS-ESP32/issues/826)
 - Default MQTT hostname is blank [#829](https://github.com/emsesp/EMS-ESP32/issues/829)
 
 ## Fixed
 
 - Factory Reset not working [#628](https://github.com/emsesp/EMS-ESP32/issues/628)
+- Valid 4 byte values [#820](https://github.com/emsesp/EMS-ESP32/issues/820)
+- Commands for multiple thermostats [#826](https://github.com/emsesp/EMS-ESP32/issues/826)
 
 ## Changed
 

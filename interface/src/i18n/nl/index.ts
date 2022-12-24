@@ -204,7 +204,7 @@ const nl: Translation = {
   FLASH: 'Flash Chip (Size / Speed)',
   APPSIZE: 'Application (Used / Free)',
   FILESYSTEM: 'File System (Used / Free)',
-  BUFFER_SIZE: 'Buffer Size',
+  BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
   ENABLE_OTA: 'Acitveer OTA Updates',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Download alle custom instellingen',

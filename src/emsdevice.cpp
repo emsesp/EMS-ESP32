@@ -273,6 +273,17 @@ bool EMSdevice::has_tag(const uint8_t tag) const {
     return false;
 }
 
+// check if the device has a command on the with this tag.
+bool EMSdevice::has_cmd(const int8_t id, const char * cmd) const {
+    uint8_t tag = DeviceValueTAG::TAG_HC1 + id - 1;
+    for (const auto & dv : devicevalues_) {
+        if ((id < 1 || dv.tag == tag) && dv.has_cmd && strcmp(dv.short_name, cmd) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // list of registered device entries
 // called from the command 'entities'
 void EMSdevice::list_device_entries(JsonObject & output) const {
@@ -507,7 +518,7 @@ void EMSdevice::add_device_value(uint8_t               tag,
     }
 
     // add the command to our library
-    Command::add(device_type_, short_name, f, fullname, flags);
+    Command::add(device_type_, device_id_, short_name, f, fullname, flags);
 }
 
 // single list of options
@@ -802,9 +813,9 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
                     obj["v"] = Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
                 } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), dv.numeric_operator);
+                    obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    obj["v"] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), dv.numeric_operator);
+                    obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
                 } else {
                     obj["v"] = ""; // must have a value for sorting to work
                 }
@@ -912,9 +923,9 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
                 } else if (dv.type == DeviceValueType::USHORT) {
                     obj["v"] = Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
                 } else if (dv.type == DeviceValueType::ULONG) {
-                    obj["v"] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), dv.numeric_operator);
+                    obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
                 } else if (dv.type == DeviceValueType::TIME) {
-                    obj["v"] = Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), dv.numeric_operator);
+                    obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
                 }
             }
         }

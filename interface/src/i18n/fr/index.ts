@@ -204,7 +204,7 @@ const fr: Translation = {
   FLASH: 'Flash Chip (Taille / Vitesse)',
   APPSIZE: 'Application (Utilisée / Libre)',
   FILESYSTEM: 'File System (Utilisée / Libre)',
-  BUFFER_SIZE: 'Taille du buffer',
+  BUFFER_SIZE: 'Max taille du buffer',
   COMPACT: 'Compact',
   ENABLE_OTA: 'Activer les updates OTA',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Télécharger les personnalisations d\'entités',

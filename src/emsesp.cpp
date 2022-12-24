@@ -105,13 +105,22 @@ void EMSESP::fetch_device_values_type(const uint8_t device_type) {
     }
 }
 
-bool EMSESP::cmd_is_readonly(const uint8_t device_type, const char * cmd, const int8_t id) {
+bool EMSESP::cmd_is_readonly(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id) {
     for (const auto & emsdevice : emsdevices) {
-        if (emsdevice && (emsdevice->device_type() == device_type)) {
+        if (emsdevice && (emsdevice->device_type() == device_type) && (!device_id || emsdevice->device_id() == device_id)) {
             return emsdevice->is_readonly(cmd, id);
         }
     }
     return false;
+}
+
+uint8_t EMSESP::device_id_from_cmd(const uint8_t device_type, const int8_t id, const char * cmd) {
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice && emsdevice->device_type() == device_type && emsdevice->has_cmd(id, cmd)) {
+            return emsdevice->device_id();
+        }
+    }
+    return 0;
 }
 
 // clears list of recognized devices
@@ -983,11 +992,11 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     // empty reply to version, read a generic device from database
     if (product_id == 0) {
         // check for known device IDs
-        if (device_id == 0x40) {
+        if (device_id == EMSdevice::EMS_DEVICE_ID_RFSENSOR) {
             // see: https://github.com/emsesp/EMS-ESP32/issues/103#issuecomment-911717342 and https://github.com/emsesp/EMS-ESP32/issues/624
             name        = "rf room temperature sensor";
             device_type = DeviceType::THERMOSTAT;
-        } else if (device_id == 0x17) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_ROOMTHERMOSTAT) {
             name        = "generic thermostat";
             device_type = DeviceType::THERMOSTAT;
             flags       = DeviceFlags::EMS_DEVICE_FLAG_RC10 | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE;
@@ -1010,7 +1019,11 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CONVERTER) {
             name = "converter"; // generic
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CLOCK) {
-            name = "clock"; // generic
+            name        = "clock"; // generic
+            device_type = DeviceType::CONTROLLER;
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_CONTROLLER) {
+            name        = "generic controller";
+            device_type = DeviceType::CONTROLLER;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER) {
             name        = "generic boiler";
             device_type = DeviceType::BOILER;

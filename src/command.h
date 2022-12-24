@@ -55,19 +55,22 @@ class Command {
   public:
     struct CmdFunction {
         uint8_t              device_type_; // DeviceType::
-        uint8_t              flags_;       // mqtt flags for command subscriptions
+        uint8_t              device_id_;
+        uint8_t              flags_; // mqtt flags for command subscriptions
         const char *         cmd_;
         cmd_function_p       cmdfunction_;
         cmd_json_function_p  cmdfunction_json_;
         const char * const * description_;
 
         CmdFunction(const uint8_t             device_type,
+                    const uint8_t             device_id,
                     const uint8_t             flags,
                     const char *              cmd,
                     const cmd_function_p      cmdfunction,
                     const cmd_json_function_p cmdfunction_json,
                     const char * const *      description)
             : device_type_(device_type)
+            , device_id_(device_id)
             , flags_(flags)
             , cmd_(cmd)
             , cmdfunction_(cmdfunction)
@@ -98,6 +101,14 @@ class Command {
 
     // with normal call back function taking a value and id
     static void add(const uint8_t        device_type,
+                    const uint8_t        device_id,
+                    const char *         cmd,
+                    const cmd_function_p cb,
+                    const char * const * description,
+                    uint8_t              flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
+
+    // same for system/dallas/analog devices
+    static void add(const uint8_t        device_type,
                     const char *         cmd,
                     const cmd_function_p cb,
                     const char * const * description,
@@ -111,7 +122,7 @@ class Command {
                     uint8_t                   flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
 
     static void                   show_all(uuid::console::Shell & shell);
-    static Command::CmdFunction * find_command(const uint8_t device_type, const char * cmd);
+    static Command::CmdFunction * find_command(const uint8_t device_type, const uint8_t device_id, const char * cmd);
 
     static void erase_command(const uint8_t device_type, const char * cmd);
     static void show(uuid::console::Shell & shell, uint8_t device_type, bool verbose);

@@ -215,7 +215,12 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request, J
                 JsonArray output = response->getRoot();
                 emsdevice->generate_values_web_customization(output);
 #endif
+#if defined(EMSESP_DEBUG)
+                size_t length = response->setLength();
+                EMSESP::logger().debug("Customization buffer used: %d", length);
+#else
                 response->setLength();
+#endif
                 request->send(response);
                 return;
             }
