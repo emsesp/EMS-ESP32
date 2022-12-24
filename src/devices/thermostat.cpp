@@ -214,7 +214,9 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const ui
             return heating_circuit;
         }
     }
+#if defined(EMSESP_DEBUG)
     LOG_DEBUG("Heating circuit not fond on device 0x%02X", device_id());
+#endif
     return nullptr; // not found
 }
 
@@ -3244,7 +3246,9 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         write_command(set_typeid, offset, (uint8_t)(temperature * (float)factor), validate_typeid);
         return true;
     }
+#if defined(EMSESP_DEBUG)
     LOG_DEBUG("temperature mode %d not found", mode);
+#endif
     return false;
 }
 

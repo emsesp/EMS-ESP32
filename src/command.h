@@ -107,6 +107,13 @@ class Command {
                     const char * const * description,
                     uint8_t              flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
 
+    // same for system/dallas/analog devices
+    static void add(const uint8_t        device_type,
+                    const char *         cmd,
+                    const cmd_function_p cb,
+                    const char * const * description,
+                    uint8_t              flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
+
     // callback function taking value, id and a json object for its output
     static void add(const uint8_t             device_type,
                     const char *              cmd,
