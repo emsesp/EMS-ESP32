@@ -74,7 +74,7 @@ class System {
     void reload_settings();
     void wifi_tweak();
     void syslog_init();
-    bool check_upgrade();
+    bool check_upgrade(bool factory_settings);
     bool check_restore();
     bool heartbeat_json(JsonObject & output);
     void send_heartbeat();
@@ -273,7 +273,7 @@ class System {
 
     // EMS-ESP settings
     // copies from WebSettings class in WebSettingsService.h and loaded with reload_settings()
-    std::string hostname_ = FACTORY_WIFI_HOSTNAME;
+    std::string hostname_;
     String      locale_;
     bool        hide_led_;
     uint8_t     led_gpio_;

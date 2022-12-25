@@ -19,6 +19,8 @@
 #include "system.h"
 #include "emsesp.h" // for send_raw_telegram() command
 
+#include <semver200.h>
+
 #if defined(EMSESP_DEBUG)
 #include "test/test.h"
 #endif
@@ -1014,44 +1016,81 @@ bool System::check_restore() {
 
 // handle upgrades from previous versions
 // returns true if we need a reboot
-bool System::check_upgrade() {
-    std::string old_version;
+bool System::check_upgrade(bool factory_settings) {
+    std::string settingsVersion{};
 
-    // TODO fix
+    // fetch current version from file
+    EMSESP::webSettingsService.read([&](WebSettings & settings) { settingsVersion = settings.version; });
 
-    if (version_ != EMSESP_APP_VERSION) {
-        if (version_.empty()) {
-            LOG_DEBUG("No version, presuming fresh install. Setting to %s", EMSESP_APP_VERSION);
-            old_version = EMSESP_APP_VERSION;
-        } else {
-            LOG_DEBUG("Going from version %s to %s", version_, EMSESP_APP_VERSION);
-            old_version = version_;
-        }
-        // save the new version
-        version_ = EMSESP_APP_VERSION;
-        EMSESP::webSettingsService.update(
-            [&](WebSettings & settings) {
-                settings.version = EMSESP_APP_VERSION;
-                return StateUpdateResult::CHANGED;
-            },
-            "local");
+    if (settingsVersion.empty() || (settingsVersion.length() < 5) || factory_settings) {
+        LOG_DEBUG("No prior version found, preparing fresh install of v%s", EMSESP_APP_VERSION);
+        settingsVersion = "0.0.0";
+
+        // check if its before 3.5.0b12 when we didn't store the version
+        // by checking ...
     }
 
-    if (old_version == EMSESP_APP_VERSION) {
-        return false; // no upgrades or reboot needed. we're on the latest
-    }
+    version::Semver200_version settings_version(settingsVersion);
+#ifdef EMSESP_DEBUG
+    LOG_NOTICE("Settings version: string %s, major %d, minor %d, patch %d, pre-release %s, build %s",
+               settingsVersion.c_str(),
+               settings_version.major(),
+               settings_version.minor(),
+               settings_version.patch(),
+               settings_version.build().c_str(),
+               settings_version.prerelease().c_str());
+#endif
 
-    LOG_DEBUG("Doing upgrade..."); // TODO remove
+    version::Semver200_version this_version(EMSESP_APP_VERSION);
+#ifdef EMSESP_DEBUG
+    LOG_NOTICE("This version: string %s, major %d, minor %d, patch %d, pre-release %s, build %s",
+               EMSESP_APP_VERSION,
+               this_version.major(),
+               this_version.minor(),
+               this_version.patch(),
+               this_version.prerelease().c_str(),
+               this_version.build().c_str());
+#endif
+
+    // save the new version to the settings
+
+    // TODO put back in after testing!
+    /*
+    EMSESP::webSettingsService.update(
+        [&](WebSettings & settings) {
+            settings.version = EMSESP_APP_VERSION;
+            return StateUpdateResult::CHANGED;
+        },
+        "local");
+        */
 
 
-    // check variations between versions
-    // get major version
-
-    // get minor version
-
-    // get patch version (ignore alphanumerics)
-
+    // compare versions
     bool reboot_required = false;
+    if (this_version > settings_version) {
+        LOG_NOTICE("Upgrading from version %d.%d.%d-%s to version %d.%d.%d-%s",
+                   settings_version.major(),
+                   settings_version.minor(),
+                   settings_version.patch(),
+                   settings_version.prerelease().c_str(),
+                   this_version.major(),
+                   this_version.minor(),
+                   this_version.patch(),
+                   this_version.prerelease().c_str());
+    } else if (this_version < settings_version) {
+        LOG_NOTICE("Downgrading from version %d.%d.%d-%s to version %d.%d.%d-%s",
+                   settings_version.major(),
+                   settings_version.minor(),
+                   settings_version.patch(),
+                   settings_version.prerelease().c_str(),
+                   this_version.major(),
+                   this_version.minor(),
+                   this_version.patch(),
+                   this_version.prerelease().c_str());
+    } else {
+        // same version, do nothing
+        return false;
+    }
 
     return reboot_required;
 }
@@ -1299,18 +1338,17 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["pbutton gpio"] = settings.pbutton_gpio;
             node["led gpio"]     = settings.led_gpio;
         }
-        node["hide led"]           = settings.hide_led;
-        node["notoken api"]        = settings.notoken_api;
-        node["readonly mode"]      = settings.readonly_mode;
-        node["fahrenheit"]         = settings.fahrenheit;
-        node["dallas parasite"]    = settings.dallas_parasite;
-        node["bool format"]        = settings.bool_format;
-        node["bool dashboard"]     = settings.bool_dashboard;
-        node["enum format"]        = settings.enum_format;
-        node["analog enabled"]     = settings.analog_enabled;
-        node["telnet enabled"]     = settings.telnet_enabled;
-        node["max web log buffer"] = settings.weblog_buffer;
-        node["web log buffered"]   = EMSESP::webLogService.num_log_messages();
+        node["hide led"]        = settings.hide_led;
+        node["notoken api"]     = settings.notoken_api;
+        node["readonly mode"]   = settings.readonly_mode;
+        node["fahrenheit"]      = settings.fahrenheit;
+        node["dallas parasite"] = settings.dallas_parasite;
+        node["bool format"]     = settings.bool_format;
+        node["bool dashboard"]  = settings.bool_dashboard;
+        node["enum format"]     = settings.enum_format;
+        node["analog enabled"]  = settings.analog_enabled;
+        node["telnet enabled"]  = settings.telnet_enabled;
+        node["web log buffer"]  = settings.weblog_buffer;
     });
 
     // Devices - show EMS devices if we have any

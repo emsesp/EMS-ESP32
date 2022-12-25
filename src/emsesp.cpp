@@ -1297,6 +1297,21 @@ void EMSESP::start() {
     }
 #endif
 
+// do a quick scan of the filesystem to see if we have a /config folder
+// so we know if this is a new install or not
+#ifndef EMSESP_STANDALONE
+    File root             = LittleFS.open("/config");
+    bool factory_settings = !root;
+    if (!root) {
+#ifdef EMSESP_DEBUG
+        Serial.println("No config found, assuming factory settings");
+#endif
+    }
+    root.close();
+#else
+    bool factory_settings = false;
+#endif
+
     esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
 
@@ -1315,12 +1330,13 @@ void EMSESP::start() {
     webSettingsService.begin(); // load EMS-ESP Application settings...
 
     // do any system upgrades
-    if (system_.check_upgrade()) {
+    if (system_.check_upgrade(factory_settings)) {
         LOG_WARNING("System needs a restart to apply new settings. Please wait.");
         system_.system_restart();
     };
 
-    system_.reload_settings();       // ... and store some of the settings locally
+    system_.reload_settings(); // ... and store some of the settings locally
+
     webCustomizationService.begin(); // load the customizations
 
     // start telnet service if it's enabled
