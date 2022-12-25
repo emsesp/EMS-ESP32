@@ -669,12 +669,12 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
 #if defined(EMSESP_DEBUG)
     if (operation == Operation::PUBLISH) {
         if (message->payload.empty()) {
-            LOG_INFO("[DEBUG] Adding to queue: (Publish) topic='%s' empty payload", message->topic.c_str());
+            LOG_INFO("[DEBUG] Adding to queue: (publish) topic='%s' empty payload", message->topic.c_str());
         } else {
-            LOG_INFO("[DEBUG] Adding to queue: (Publish) topic='%s' payload=%s", message->topic.c_str(), message->payload.c_str());
+            LOG_INFO("[DEBUG] Adding to queue: (publish) topic='%s' payload=%s", message->topic.c_str(), message->payload.c_str());
         }
     } else {
-        LOG_INFO("[DEBUG] Adding to queue: (Subscribe) topic='%s'", message->topic.c_str());
+        LOG_INFO("[DEBUG] Adding to queue: (subscribe) topic='%s'", message->topic.c_str());
     }
 #endif
 
