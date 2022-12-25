@@ -83,7 +83,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
     // load the version of the settings
     // will be picked up in System::check_upgrade()
-    settings.version = root["version"] || EMSESP_DEFAULT_VERSION;
+    settings.version = root["version"] | EMSESP_DEFAULT_VERSION;
 
     // load default GPIO configuration based on board profile
     std::vector<int8_t> data; //  // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode

@@ -295,7 +295,7 @@ class System {
     uint8_t     bool_format_;
     uint8_t     enum_format_;
     bool        readonly_mode_;
-    std::string version_;
+    String      version_;
 
     // ethernet
     uint8_t phy_type_;

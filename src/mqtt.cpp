@@ -192,6 +192,7 @@ void Mqtt::loop() {
 // print MQTT log and other stuff to console
 void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     shell.printfln("MQTT is %s", connected() ? F_(connected) : F_(disconnected));
+    shell.printfln("MQTT Entity ID format is %d", entity_format_);
 
     shell.printfln("MQTT publish errors: %lu", mqtt_publish_fails_);
     shell.println();

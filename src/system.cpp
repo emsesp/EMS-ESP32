@@ -220,7 +220,7 @@ void System::wifi_reconnect() {
 void System::format(uuid::console::Shell & shell) {
     auto msg = ("Formatting file system. This will reset all settings to their defaults");
     shell.logger().warning(msg);
-    shell.flush();
+    // shell.flush();
 
     EMSuart::stop();
 
@@ -1015,78 +1015,70 @@ bool System::check_restore() {
 }
 
 // handle upgrades from previous versions
+// this function will not be called on a clean install, with no settings files yet created
 // returns true if we need a reboot
 bool System::check_upgrade(bool factory_settings) {
-    std::string settingsVersion{};
+    bool        missing_version = true;
+    std::string settingsVersion{EMSESP_APP_VERSION}; // default setting version
 
-    // fetch current version from file
-    EMSESP::webSettingsService.read([&](WebSettings & settings) { settingsVersion = settings.version; });
+    if (!factory_settings) {
+        // fetch current version from settings file
+        EMSESP::webSettingsService.read([&](WebSettings & settings) { settingsVersion = settings.version.c_str(); });
 
-    if (settingsVersion.empty() || (settingsVersion.length() < 5) || factory_settings) {
-        LOG_DEBUG("No prior version found, preparing fresh install of v%s", EMSESP_APP_VERSION);
-        settingsVersion = "0.0.0";
-
-        // check if its before 3.5.0b12 when we didn't store the version
-        // by checking ...
+        // see if we're missing a version, will be < 3.5.0b13 from Dec 23 2022
+        missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
+        if (missing_version) {
+#ifdef EMSESP_DEBUG
+            LOG_DEBUG("No version information found (%s)", settingsVersion.c_str());
+#endif
+            settingsVersion = "3.4.4"; // this was the last stable version
+        }
     }
 
     version::Semver200_version settings_version(settingsVersion);
-#ifdef EMSESP_DEBUG
-    LOG_NOTICE("Settings version: string %s, major %d, minor %d, patch %d, pre-release %s, build %s",
-               settingsVersion.c_str(),
-               settings_version.major(),
-               settings_version.minor(),
-               settings_version.patch(),
-               settings_version.build().c_str(),
-               settings_version.prerelease().c_str());
-#endif
 
-    version::Semver200_version this_version(EMSESP_APP_VERSION);
-#ifdef EMSESP_DEBUG
-    LOG_NOTICE("This version: string %s, major %d, minor %d, patch %d, pre-release %s, build %s",
-               EMSESP_APP_VERSION,
-               this_version.major(),
-               this_version.minor(),
-               this_version.patch(),
-               this_version.prerelease().c_str(),
-               this_version.build().c_str());
-#endif
+    if (!missing_version) {
+        LOG_INFO("Current version from settings is %d.%d.%d-%s",
+                 settings_version.major(),
+                 settings_version.minor(),
+                 settings_version.patch(),
+                 settings_version.prerelease().c_str());
+    }
 
-    // save the new version to the settings
-
-    // TODO put back in after testing!
-    /*
+    // always save the new version to the settings
     EMSESP::webSettingsService.update(
         [&](WebSettings & settings) {
             settings.version = EMSESP_APP_VERSION;
             return StateUpdateResult::CHANGED;
         },
         "local");
-        */
 
+    if (factory_settings) {
+        return false; // fresh install, do nothing
+    }
+
+    version::Semver200_version this_version(EMSESP_APP_VERSION);
 
     // compare versions
     bool reboot_required = false;
     if (this_version > settings_version) {
-        LOG_NOTICE("Upgrading from version %d.%d.%d-%s to version %d.%d.%d-%s",
-                   settings_version.major(),
-                   settings_version.minor(),
-                   settings_version.patch(),
-                   settings_version.prerelease().c_str(),
-                   this_version.major(),
-                   this_version.minor(),
-                   this_version.patch(),
-                   this_version.prerelease().c_str());
+        LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+
+        // if we're coming from 3.4.4 or 3.5.0b14 then we need to apply new settings
+        if (missing_version) {
+#ifdef EMSESP_DEBUG
+            LOG_DEBUG("Setting MQTT ID Entity to v3.4 format");
+#endif
+            EMSESP::esp8266React.getMqttSettingsService()->update(
+                [&](MqttSettings & mqttSettings) {
+                    mqttSettings.entity_format = 0; // use old Entity ID format from v3.4
+                    return StateUpdateResult::CHANGED;
+                },
+                "local");
+        }
+
     } else if (this_version < settings_version) {
-        LOG_NOTICE("Downgrading from version %d.%d.%d-%s to version %d.%d.%d-%s",
-                   settings_version.major(),
-                   settings_version.minor(),
-                   settings_version.patch(),
-                   settings_version.prerelease().c_str(),
-                   this_version.major(),
-                   this_version.minor(),
-                   this_version.patch(),
-                   this_version.prerelease().c_str());
+        LOG_NOTICE("Downgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
     } else {
         // same version, do nothing
         return false;
