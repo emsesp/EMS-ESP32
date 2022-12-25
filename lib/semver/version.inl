@@ -90,13 +90,13 @@ int Basic_version<Parser, Comparator>::patch() const {
 template <typename Parser, typename Comparator>
 const std::string Basic_version<Parser, Comparator>::prerelease() const {
     std::string ss;
-    return splice(ss, ver_.prerelease_ids, ".", [](const auto & id) { return id.first; });
+    return splice(ss, ver_.prerelease_ids, ".", [](const Prerelease_identifier & id) { return id.first; });
 }
 
 template <typename Parser, typename Comparator>
 const std::string Basic_version<Parser, Comparator>::build() const {
     std::string ss;
-    return splice(ss, ver_.build_ids, ".", [](const auto & id) { return id; });
+    return splice(ss, ver_.build_ids, ".", [](const std::string & id) { return id; });
 }
 
 template <typename Parser, typename Comparator>
