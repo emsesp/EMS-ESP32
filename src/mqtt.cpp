@@ -987,7 +987,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     }
 
     // build unique identifier also used as object_id and becomes the Entity ID in HA
-    char uniq_id[70];
+    char uniq_id[80];
     if (Mqtt::entity_format() == 2) {
         // prefix base name to each uniq_id and use the shortname
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
@@ -998,7 +998,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         // entity_format is 0
         // old v3.4 style
         // take en_name and replace all spaces and lowercase it
-        char uniq_s[40];
+        char uniq_s[60];
         strlcpy(uniq_s, en_name, sizeof(uniq_s));
         Helpers::replace_char(uniq_s, ' ', '_');
         if (EMSdevice::tag_to_string(tag).empty()) {
