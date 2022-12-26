@@ -274,7 +274,7 @@ bool EMSdevice::has_tag(const uint8_t tag) const {
 }
 
 // check if the device has a command on the with this tag.
-bool EMSdevice::has_cmd(const int8_t id, const char * cmd) const {
+bool EMSdevice::has_cmd(const char * cmd, const int8_t id) const {
     uint8_t tag = DeviceValueTAG::TAG_HC1 + id - 1;
     for (const auto & dv : devicevalues_) {
         if ((id < 1 || dv.tag == tag) && dv.has_cmd && strcmp(dv.short_name, cmd) == 0) {
