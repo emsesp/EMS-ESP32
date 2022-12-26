@@ -29,6 +29,7 @@ bool Test::run_test(const char * command, int8_t id) {
         return false;
     }
 
+
     if (strcmp(command, "general") == 0) {
         EMSESP::logger().info("Testing general. Adding a Boiler and Thermostat");
 
@@ -52,6 +53,8 @@ bool Test::run_test(const char * command, int8_t id) {
 
         return true;
     }
+
+#ifndef EMSESP_DEBUG_LIMITED
 
     if (strcmp(command, "2thermostats") == 0) {
         EMSESP::logger().info("Testing with multiple thermostats...");
@@ -216,6 +219,8 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
+#endif
+
     return false;
 }
 
@@ -231,6 +236,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     EMSESP::watch(EMSESP::Watch::WATCH_RAW); // raw
 
     std::string command(20, '\0');
+
+#ifndef EMSESP_DEBUG_LIMITED
+
     if ((cmd.empty()) || (cmd == "default")) {
         command = EMSESP_DEBUG_DEFAULT;
     } else {
@@ -1547,6 +1555,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing %s", a);
 
 #pragma GCC diagnostic pop
+    }
+
+#endif
+
+    if (command == "limited") {
+        shell.printfln("Run a limited memory test...");
+
+        run_test("general");
     }
 }
 

@@ -41,7 +41,6 @@ class FSPersistence {
                 Serial.println();
 #endif
 #endif
-
                 _statefulService->updateWithoutPropagation(jsonObject, _stateUpdater);
                 settingsFile.close();
                 return;
@@ -96,6 +95,7 @@ class FSPersistence {
 // debug added by Proddy
 #if defined(EMSESP_DEBUG)
 #if defined(EMSESP_USE_SERIAL)
+        Serial.println();
         Serial.printf("Writing to file: %s: ", _filePath);
         serializeJson(jsonDocument, Serial);
         Serial.println();

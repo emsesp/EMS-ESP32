@@ -260,7 +260,7 @@ const UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn'
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken'
 const system_status = {
-  emsesp_version: '3.5.0demo',
+  emsesp_version: '3.5.0-demo',
   esp_platform: 'ESP32',
   max_alloc_heap: 89,
   psram_size: 0,

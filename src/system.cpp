@@ -19,6 +19,8 @@
 #include "system.h"
 #include "emsesp.h" // for send_raw_telegram() command
 
+#include <semver200.h>
+
 #if defined(EMSESP_DEBUG)
 #include "test/test.h"
 #endif
@@ -218,7 +220,7 @@ void System::wifi_reconnect() {
 void System::format(uuid::console::Shell & shell) {
     auto msg = ("Formatting file system. This will reset all settings to their defaults");
     shell.logger().warning(msg);
-    shell.flush();
+    // shell.flush();
 
     EMSuart::stop();
 
@@ -1013,45 +1015,74 @@ bool System::check_restore() {
 }
 
 // handle upgrades from previous versions
+// this function will not be called on a clean install, with no settings files yet created
 // returns true if we need a reboot
-bool System::check_upgrade() {
-    std::string old_version;
+bool System::check_upgrade(bool factory_settings) {
+    bool        missing_version = true;
+    std::string settingsVersion{EMSESP_APP_VERSION}; // default setting version
 
-    // TODO fix
+    if (!factory_settings) {
+        // fetch current version from settings file
+        EMSESP::webSettingsService.read([&](WebSettings & settings) { settingsVersion = settings.version.c_str(); });
 
-    if (version_ != EMSESP_APP_VERSION) {
-        if (version_.empty()) {
-            LOG_DEBUG("No version, presuming fresh install. Setting to %s", EMSESP_APP_VERSION);
-            old_version = EMSESP_APP_VERSION;
-        } else {
-            LOG_DEBUG("Going from version %s to %s", version_, EMSESP_APP_VERSION);
-            old_version = version_;
+        // see if we're missing a version, will be < 3.5.0b13 from Dec 23 2022
+        missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
+        if (missing_version) {
+#ifdef EMSESP_DEBUG
+            LOG_DEBUG("No version information found (%s)", settingsVersion.c_str());
+#endif
+            settingsVersion = "3.4.4"; // this was the last stable version
         }
-        // save the new version
-        version_ = EMSESP_APP_VERSION;
-        EMSESP::webSettingsService.update(
-            [&](WebSettings & settings) {
-                settings.version = EMSESP_APP_VERSION;
-                return StateUpdateResult::CHANGED;
-            },
-            "local");
     }
 
-    if (old_version == EMSESP_APP_VERSION) {
-        return false; // no upgrades or reboot needed. we're on the latest
+    version::Semver200_version settings_version(settingsVersion);
+
+    if (!missing_version) {
+        LOG_INFO("Current version from settings is %d.%d.%d-%s",
+                 settings_version.major(),
+                 settings_version.minor(),
+                 settings_version.patch(),
+                 settings_version.prerelease().c_str());
     }
 
-    LOG_DEBUG("Doing upgrade..."); // TODO remove
+    // always save the new version to the settings
+    EMSESP::webSettingsService.update(
+        [&](WebSettings & settings) {
+            settings.version = EMSESP_APP_VERSION;
+            return StateUpdateResult::CHANGED;
+        },
+        "local");
 
+    if (factory_settings) {
+        return false; // fresh install, do nothing
+    }
 
-    // check variations between versions
-    // get major version
+    version::Semver200_version this_version(EMSESP_APP_VERSION);
 
-    // get minor version
-
-    // get patch version (ignore alphanumerics)
-
+    // compare versions
     bool reboot_required = false;
+    if (this_version > settings_version) {
+        LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+
+        // if we're coming from 3.4.4 or 3.5.0b14 then we need to apply new settings
+        if (missing_version) {
+#ifdef EMSESP_DEBUG
+            LOG_DEBUG("Setting MQTT ID Entity to v3.4 format");
+#endif
+            EMSESP::esp8266React.getMqttSettingsService()->update(
+                [&](MqttSettings & mqttSettings) {
+                    mqttSettings.entity_format = 0; // use old Entity ID format from v3.4
+                    return StateUpdateResult::CHANGED;
+                },
+                "local");
+        }
+
+    } else if (this_version < settings_version) {
+        LOG_NOTICE("Downgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+    } else {
+        // same version, do nothing
+        return false;
+    }
 
     return reboot_required;
 }
@@ -1299,18 +1330,17 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["pbutton gpio"] = settings.pbutton_gpio;
             node["led gpio"]     = settings.led_gpio;
         }
-        node["hide led"]           = settings.hide_led;
-        node["notoken api"]        = settings.notoken_api;
-        node["readonly mode"]      = settings.readonly_mode;
-        node["fahrenheit"]         = settings.fahrenheit;
-        node["dallas parasite"]    = settings.dallas_parasite;
-        node["bool format"]        = settings.bool_format;
-        node["bool dashboard"]     = settings.bool_dashboard;
-        node["enum format"]        = settings.enum_format;
-        node["analog enabled"]     = settings.analog_enabled;
-        node["telnet enabled"]     = settings.telnet_enabled;
-        node["max web log buffer"] = settings.weblog_buffer;
-        node["web log buffered"]   = EMSESP::webLogService.num_log_messages();
+        node["hide led"]        = settings.hide_led;
+        node["notoken api"]     = settings.notoken_api;
+        node["readonly mode"]   = settings.readonly_mode;
+        node["fahrenheit"]      = settings.fahrenheit;
+        node["dallas parasite"] = settings.dallas_parasite;
+        node["bool format"]     = settings.bool_format;
+        node["bool dashboard"]  = settings.bool_dashboard;
+        node["enum format"]     = settings.enum_format;
+        node["analog enabled"]  = settings.analog_enabled;
+        node["telnet enabled"]  = settings.telnet_enabled;
+        node["web log buffer"]  = settings.weblog_buffer;
     });
 
     // Devices - show EMS devices if we have any

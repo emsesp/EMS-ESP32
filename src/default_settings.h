@@ -21,12 +21,12 @@
 
 // GENERAL SETTINGS
 
-#ifndef EMSESP_STANDALONE
+#ifndef EMSESP_DEFAULT_LOCALE
 #define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_EN // English
-#else
-// this is for debugging different languages in standalone version
-// #define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_DE // German
-#define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_EN // English
+#endif
+
+#ifndef EMSESP_DEFAULT_VERSION
+#define EMSESP_DEFAULT_VERSION ""
 #endif
 
 #ifndef EMSESP_DEFAULT_TX_MODE
@@ -228,5 +228,14 @@ enum {
 
 };
 
+#if CONFIG_IDF_TARGET_ESP32C3
+#define EMSESP_PLATFORM "ESP32-C3";
+#elif CONFIG_IDF_TARGET_ESP32S2
+#define EMSESP_PLATFORM "ESP32-S2";
+#elif CONFIG_IDF_TARGET_ESP32 || EMSESP_STANDALONE
+#define EMSESP_PLATFORM "ESP32";
+#else
+#error Target CONFIG_IDF_TARGET is not supported
+#endif
 
 #endif

@@ -192,6 +192,7 @@ void Mqtt::loop() {
 // print MQTT log and other stuff to console
 void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     shell.printfln("MQTT is %s", connected() ? F_(connected) : F_(disconnected));
+    shell.printfln("MQTT Entity ID format is %d", entity_format_);
 
     shell.printfln("MQTT publish errors: %lu", mqtt_publish_fails_);
     shell.println();
@@ -669,12 +670,12 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
 #if defined(EMSESP_DEBUG)
     if (operation == Operation::PUBLISH) {
         if (message->payload.empty()) {
-            LOG_INFO("[DEBUG] Adding to queue: (Publish) topic='%s' empty payload", message->topic.c_str());
+            LOG_INFO("[DEBUG] Adding to queue: (publish) topic='%s' empty payload", message->topic.c_str());
         } else {
-            LOG_INFO("[DEBUG] Adding to queue: (Publish) topic='%s' payload=%s", message->topic.c_str(), message->payload.c_str());
+            LOG_INFO("[DEBUG] Adding to queue: (publish) topic='%s' payload=%s", message->topic.c_str(), message->payload.c_str());
         }
     } else {
-        LOG_INFO("[DEBUG] Adding to queue: (Subscribe) topic='%s'", message->topic.c_str());
+        LOG_INFO("[DEBUG] Adding to queue: (subscribe) topic='%s'", message->topic.c_str());
     }
 #endif
 
@@ -986,7 +987,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     }
 
     // build unique identifier also used as object_id and becomes the Entity ID in HA
-    char uniq_id[70];
+    char uniq_id[80];
     if (Mqtt::entity_format() == 2) {
         // prefix base name to each uniq_id and use the shortname
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
@@ -997,7 +998,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         // entity_format is 0
         // old v3.4 style
         // take en_name and replace all spaces and lowercase it
-        char uniq_s[40];
+        char uniq_s[60];
         strlcpy(uniq_s, en_name, sizeof(uniq_s));
         Helpers::replace_char(uniq_s, ' ', '_');
         if (EMSdevice::tag_to_string(tag).empty()) {
