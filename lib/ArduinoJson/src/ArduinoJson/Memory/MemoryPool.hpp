@@ -14,6 +14,16 @@
 
 #define JSON_STRING_SIZE(SIZE) (SIZE + 1)
 
+// Computes the size required to store an array in a JsonDocument.
+// https://arduinojson.org/v6/how-to/determine-the-capacity-of-the-jsondocument/
+#define JSON_ARRAY_SIZE(NUMBER_OF_ELEMENTS) \
+  ((NUMBER_OF_ELEMENTS) * sizeof(ARDUINOJSON_NAMESPACE::VariantSlot))
+
+// Returns the size (in bytes) of an object with n elements.
+// Can be very handy to determine the size of a StaticMemoryPool.
+#define JSON_OBJECT_SIZE(NUMBER_OF_ELEMENTS) \
+  ((NUMBER_OF_ELEMENTS) * sizeof(ARDUINOJSON_NAMESPACE::VariantSlot))
+
 namespace ARDUINOJSON_NAMESPACE {
 
 // _begin                                   _end
@@ -173,7 +183,8 @@ class MemoryPool {
         return next;
 
       // jump to next terminator
-      while (*next) ++next;
+      while (*next)
+        ++next;
     }
     return 0;
   }
@@ -207,5 +218,36 @@ class MemoryPool {
   char *_begin, *_left, *_right, *_end;
   bool _overflowed;
 };
+
+template <typename TAdaptedString, typename TCallback>
+bool storeString(MemoryPool* pool, TAdaptedString str,
+                 StringStoragePolicy::Copy, TCallback callback) {
+  const char* copy = pool->saveString(str);
+  JsonString storedString(copy, str.size(), JsonString::Copied);
+  callback(storedString);
+  return copy != 0;
+}
+
+template <typename TAdaptedString, typename TCallback>
+bool storeString(MemoryPool*, TAdaptedString str, StringStoragePolicy::Link,
+                 TCallback callback) {
+  JsonString storedString(str.data(), str.size(), JsonString::Linked);
+  callback(storedString);
+  return !str.isNull();
+}
+
+template <typename TAdaptedString, typename TCallback>
+bool storeString(MemoryPool* pool, TAdaptedString str,
+                 StringStoragePolicy::LinkOrCopy policy, TCallback callback) {
+  if (policy.link)
+    return storeString(pool, str, StringStoragePolicy::Link(), callback);
+  else
+    return storeString(pool, str, StringStoragePolicy::Copy(), callback);
+}
+
+template <typename TAdaptedString, typename TCallback>
+bool storeString(MemoryPool* pool, TAdaptedString str, TCallback callback) {
+  return storeString(pool, str, str.storagePolicy(), callback);
+}
 
 }  // namespace ARDUINOJSON_NAMESPACE

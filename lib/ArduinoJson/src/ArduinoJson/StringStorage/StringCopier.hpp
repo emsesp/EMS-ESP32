@@ -10,7 +10,7 @@ namespace ARDUINOJSON_NAMESPACE {
 
 class StringCopier {
  public:
-  StringCopier(MemoryPool& pool) : _pool(&pool) {}
+  StringCopier(MemoryPool* pool) : _pool(pool) {}
 
   void startString() {
     _pool->getFreeZone(&_ptr, &_capacity);
@@ -19,18 +19,21 @@ class StringCopier {
       _pool->markAsOverflowed();
   }
 
-  String save() {
+  JsonString save() {
     ARDUINOJSON_ASSERT(_ptr);
     ARDUINOJSON_ASSERT(_size < _capacity);  // needs room for the terminator
-    return String(_pool->saveStringFromFreeZone(_size), _size, String::Copied);
+    return JsonString(_pool->saveStringFromFreeZone(_size), _size,
+                      JsonString::Copied);
   }
 
   void append(const char* s) {
-    while (*s) append(*s++);
+    while (*s)
+      append(*s++);
   }
 
   void append(const char* s, size_t n) {
-    while (n-- > 0) append(*s++);
+    while (n-- > 0)
+      append(*s++);
   }
 
   void append(char c) {
@@ -48,11 +51,11 @@ class StringCopier {
     return _size;
   }
 
-  String str() const {
+  JsonString str() const {
     ARDUINOJSON_ASSERT(_ptr);
     ARDUINOJSON_ASSERT(_size < _capacity);
     _ptr[_size] = 0;
-    return String(_ptr, _size, String::Copied);
+    return JsonString(_ptr, _size, JsonString::Copied);
   }
 
  private:
