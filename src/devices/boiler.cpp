@@ -615,6 +615,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               50,
                               1500);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &silentMode_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_silentMode),
+                              FL_(silentMode),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_silentMode));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &minTempSilent_,
                               DeviceValueType::INT,
                               FL_(minTempSilent),
@@ -1571,6 +1578,7 @@ void Boiler::process_amExtraMessage(std::shared_ptr<const Telegram> telegram) {
 // Boiler(0x08) -> All(0x00), ?(0x0484), data: 00 00 14 28 0D 50 00 00 00 02 02 07 28 01 00 02 05 19 0A 0A 03 0D 07 00 0A
 // Boiler(0x08) -> All(0x00), ?(0x0484), data: 01 90 00 F6 28 14 64 00 00 E1 00 1E 00 1E 01 64 01 64 54 20 00 00 (offset 25)
 void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, silentMode_, 10); // enum off-auto-on
     has_update(telegram, minTempSilent_, 11);
     has_update(telegram, hpHystHeat_, 37); // is / 5
     has_update(telegram, hpHystCool_, 35); // is / 5, maybe offset swapped with pool
@@ -2544,6 +2552,15 @@ bool Boiler::set_maxHeat(const char * value, const int8_t id) {
         return false;
     }
     write_command(0x492, id, v, 0x492);
+    return true;
+}
+
+bool Boiler::set_silentMode(const char * value, const int8_t id) {
+    uint8_t v;
+    if (!Helpers::value2enum(value, v, FL_(enum_silentMode))) {
+        return false;
+    }
+    write_command(0x484, 10, v, 0x484);
     return true;
 }
 

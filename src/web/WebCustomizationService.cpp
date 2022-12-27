@@ -201,11 +201,11 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
 void WebCustomizationService::device_entities(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
         size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE_DYN;
-        auto * response = new PrettyAsyncJsonResponse(true, buffer);
+        auto * response = new MsgpackAsyncJsonResponse(true, buffer);
         while (!response->getSize()) {
             delete response;
             buffer -= 1024;
-            response = new PrettyAsyncJsonResponse(true, buffer);
+            response = new MsgpackAsyncJsonResponse(true, buffer);
         }
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == json["id"]) {
