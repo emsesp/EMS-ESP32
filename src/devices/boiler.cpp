@@ -481,18 +481,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(hpBrineOut),
                               DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &hpSuctionGas_,
-                              DeviceValueType::SHORT,
-                              DeviceValueNumOp::DV_NUMOP_DIV10,
-                              FL_(hpSuctionGas),
-                              DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &hpHotGas_,
-                              DeviceValueType::SHORT,
-                              DeviceValueNumOp::DV_NUMOP_DIV10,
-                              FL_(hpHotGas),
-                              DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTc0_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTc0), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTc1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTc1), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTc3_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTc3), DeviceValueUOM::DEGREES);
@@ -1267,16 +1255,14 @@ void Boiler::process_HpTemperatures(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpTr1_, 14);
     has_update(telegram, hpTr3_, 16);
     has_update(telegram, hpTr4_, 18);
-    // has_update(telegram, hpTr5_, 20);
-    // has_update(telegram, hpTr6_, 0);
+    has_update(telegram, hpTr5_, 20);
+    has_update(telegram, hpTr6_, 0);
     has_update(telegram, hpTr7_, 30);
     has_update(telegram, hpTl2_, 12);
     has_update(telegram, hpPl1_, 26);
     has_update(telegram, hpPh1_, 28);
     has_update(telegram, hpBrineIn_, 8);
     has_update(telegram, hpBrineOut_, 10);
-    has_update(telegram, hpSuctionGas_, 20);
-    has_update(telegram, hpHotGas_, 0);
 }
 
 // Heatpump pool unit - type 0x48A
