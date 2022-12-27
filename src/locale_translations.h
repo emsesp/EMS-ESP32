@@ -336,8 +336,6 @@ MAKE_PSTR_LIST(hpCompSpd, "hpcompspd", "compressor speed", "Kompressor-Geschw.",
 MAKE_PSTR_LIST(hpCircSpd, "hpcircspd", "circulation pump speed", "Zirkulationspumpen-Geschw.", "Snelheid circulatiepomp", "Hastighet Cirkulationspump", "wysterowanie pompy obiegu grzewczego", "hastighet sirkulationspumpe", "vitesse pompe à circulation")
 MAKE_PSTR_LIST(hpBrineIn, "hpbrinein", "brine in/evaporator", "Sole in/Verdampfer", "pekel in/verdamper", "Brine in (förangare)", "temperatura glikolu na wejściu kolektora (TB0)", "brine in/fordamper", "entrée saumure/évaporateur")
 MAKE_PSTR_LIST(hpBrineOut, "hpbrineout", "brine out/condenser", "Sole aus/Kondensator", "pekel uit/condensor", "Brine ut (kondensor)", "temperatura glikolu na wyjściu kolektora (TB1)", "Brine ut/kondensor", "sortie saumure/condenseur")
-MAKE_PSTR_LIST(hpSuctionGas, "hpsuctiongas", "suction gas", "Gasansaugung", "Gasaanzuiging", "Gasintag", "temperatura gazu zasysanego (TR5)", "gassintag", "aspiration des gaz")
-MAKE_PSTR_LIST(hpHotGas, "hphotgas", "hot gas/compressed", "Heißgas/verdichtet", "heet gas/samengeperst", "Hetgas/komprimerad", "temperatura gorącego gazu (TR6)", "hetgass/komprimert", "gaz chaud/compressé")
 MAKE_PSTR_LIST(hpSwitchValve, "hpswitchvalve", "switch valve", "Schaltventil", "schakelklep", "Växelventil", "zawór przełączający", "skifteventil", "valve de commutation")
 MAKE_PSTR_LIST(hpActivity, "hpactivity", "compressor activity", "Kompressoraktivität", "Compressoractiviteit", "Kompressoraktivitet", "pompa ciepła, aktywność sprężarki", "", "activité du compresseur")
 
