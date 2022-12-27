@@ -11,13 +11,13 @@
 namespace ARDUINOJSON_NAMESPACE {
 
 template <typename TCharTraits, typename TAllocator>
-inline SizedRamString adaptString(
-    const std::basic_string<char, TCharTraits, TAllocator>& s) {
-  return SizedRamString(s.c_str(), s.size());
-}
+struct StringAdapter<std::basic_string<char, TCharTraits, TAllocator>, void> {
+  typedef SizedRamString AdaptedString;
 
-template <typename TCharTraits, typename TAllocator>
-struct IsString<std::basic_string<char, TCharTraits, TAllocator> > : true_type {
+  static AdaptedString adapt(
+      const std::basic_string<char, TCharTraits, TAllocator>& s) {
+    return AdaptedString(s.c_str(), s.size());
+  }
 };
 
 }  // namespace ARDUINOJSON_NAMESPACE

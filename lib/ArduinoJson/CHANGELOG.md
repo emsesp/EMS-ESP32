@@ -1,6 +1,41 @@
 ArduinoJson: change log
 =======================
 
+v6.20.0 (2022-12-26)
+-------
+
+* Add `JsonVariant::shallowCopy()` (issue #1343)
+* Fix `9.22337e+18 is outside the range of representable values of type 'long'`
+* Fix comparison operators for `JsonArray`, `JsonArrayConst`, `JsonObject`, and `JsonObjectConst`
+* Fix lax parsing of `true`, `false`, and `null` (issue #1781)
+* Remove undocumented `accept()` functions
+* Rename `addElement()` to `add()`
+* Remove `getElement()`, `getOrAddElement()`, `getMember()`, and `getOrAddMember()`
+* Remove undocumented `JsonDocument::data()` and `JsonDocument::memoryPool()`
+* Remove undocumented `JsonArrayIterator::internal()` and `JsonObjectIterator::internal()`
+* Rename things in `ARDUINOJSON_NAMESPACE` to match the public names
+* Add documentation to most public symbols
+* Remove support for naked `char` (was deprecated since 6.18.0)
+
+> ### BREAKING CHANGES
+>
+> This release hides `JsonVariant`'s functions that were only intended for internal use.
+> If you were using them in your programs, you must replace with `operator[]` and `to<JsonVariant>()`, like so:
+>
+> ```c++
+> // before
+> JsonVariant a = variant.getElement(idx);
+> JsonVariant b = variant.getOrAddElement(idx);
+> JsonVariant c = variant.getMember(key);
+> JsonVariant d = variant.getOrAddMember(key);
+>
+> // after
+> JsonVariant a = variant[idx];
+> JsonVariant b = idx < variant.size() ? variant[idx] : variant[idx].to<JsonVariant>();
+> JsonVariant c = variant[key];
+> JsonVariant d = variant.containsKey(key) ? variant[key] : variant[key].to<JsonVariant>();
+> ```
+
 v6.19.4 (2022-04-05)
 -------
 
