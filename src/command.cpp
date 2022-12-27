@@ -247,10 +247,13 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 // id may be used to represent a heating circuit for example
 // returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
 uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject & output) {
+    if (cmd == nullptr) {
+        return CommandRet::NOT_FOUND;
+    }
     uint8_t return_code = CommandRet::OK;
 
     auto    dname     = EMSdevice::device_type_2_device_name(device_type);
-    uint8_t device_id = EMSESP::device_id_from_cmd(device_type, id, cmd);
+    uint8_t device_id = EMSESP::device_id_from_cmd(device_type, cmd, id);
 
     // see if there is a command registered
     auto cf = find_command(device_type, device_id, cmd);

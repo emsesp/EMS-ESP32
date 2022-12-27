@@ -53,7 +53,7 @@ class EMSdevice {
     static std::string  tag_to_mqtt(uint8_t tag);
 
     bool has_tag(const uint8_t tag) const;
-    bool has_cmd(const int8_t id, const char * cmd) const;
+    bool has_cmd(const char * cmd, const int8_t id) const;
 
     inline uint8_t device_id() const {
         return device_id_;

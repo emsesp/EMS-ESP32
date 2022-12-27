@@ -101,14 +101,12 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     }
 
     // output json buffer
-    auto * response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
-    if (!response->getSize()) {
+    size_t buffer   = EMSESP_JSON_SIZE_XXLARGE_DYN;
+    auto * response = new PrettyAsyncJsonResponse(false, buffer);
+    while (!response->getSize()) {
         delete response;
-        response = new PrettyAsyncJsonResponse(false, 256);
-        response->setCode(507); // Insufficient Storage
-        response->setLength();
-        request->send(response);
-        return;
+        buffer -= 1024;
+        response = new PrettyAsyncJsonResponse(false, buffer);
     }
     JsonObject output = response->getRoot();
 
