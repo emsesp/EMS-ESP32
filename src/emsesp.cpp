@@ -307,6 +307,29 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
     shell.println();
 }
 
+// Dump all entities to Serial out
+// this is intended to run within the OS with lots of available memory!
+#if defined(EMSESP_STANDALONE_DUMP)
+void EMSESP::dump_all_values(uuid::console::Shell & shell) {
+    Serial.println("---- CSV START ----"); // marker use by py script
+    // add header for CSV
+    Serial.print("device name,device type,shortname,fullname,type [(enum values) | (min/max)],uom,readable,writeable,visible");
+    Serial.println();
+
+    for (const auto & device_class : EMSFactory::device_handlers()) {
+        // go through each device type so they are sorted
+        for (const auto & device : device_library_) {
+            if (device_class.first == device.device_type) {
+                emsdevices.push_back(EMSFactory::add(device.device_type, 0, device.product_id, "1.0", device.name, device.flags, EMSdevice::Brand::NO_BRAND));
+                emsdevices.back()->dump_value_info(); // dump all the entity information
+            }
+        }
+    }
+
+    Serial.println("---- CSV END ----"); // marker use by py script
+}
+#endif
+
 // show EMS device values to the shell console
 void EMSESP::show_device_values(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {

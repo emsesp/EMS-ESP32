@@ -201,6 +201,8 @@ class EMSdevice {
     bool        get_value_info(JsonObject & root, const char * cmd, const int8_t id);
     void        get_dv_info(JsonObject & json);
 
+    void dump_value_info();
+
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT, CONSOLE };
     bool generate_values(JsonObject & output, const uint8_t tag_filter, const bool nested, const uint8_t output_target);
     void generate_values_web(JsonObject & output);

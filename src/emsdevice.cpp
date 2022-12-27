@@ -443,20 +443,23 @@ void EMSdevice::add_device_value(uint8_t               tag,
     }
 
     // initialize the device value depending on it's type
+    // ignoring DeviceValueType::CMD and DeviceValueType::TIME
     if (type == DeviceValueType::STRING) {
         *(char *)(value_p) = {'\0'}; // this is important for string functions like strlen() to work later
     } else if (type == DeviceValueType::INT) {
-        *(int8_t *)(value_p) = EMS_VALUE_INT_NOTSET;
+        *(int8_t *)(value_p) = EMS_VALUE_DEFAULT_INT;
+    } else if (type == DeviceValueType::UINT) {
+        *(uint8_t *)(value_p) = EMS_VALUE_DEFAULT_UINT;
     } else if (type == DeviceValueType::SHORT) {
-        *(int16_t *)(value_p) = EMS_VALUE_SHORT_NOTSET;
+        *(int16_t *)(value_p) = EMS_VALUE_DEFAULT_SHORT;
     } else if (type == DeviceValueType::USHORT) {
-        *(uint16_t *)(value_p) = EMS_VALUE_USHORT_NOTSET;
+        *(uint16_t *)(value_p) = EMS_VALUE_DEFAULT_USHORT;
     } else if ((type == DeviceValueType::ULONG) || (type == DeviceValueType::TIME)) {
-        *(uint32_t *)(value_p) = EMS_VALUE_ULONG_NOTSET;
+        *(uint32_t *)(value_p) = EMS_VALUE_DEFAULT_ULONG;
     } else if (type == DeviceValueType::BOOL) {
-        *(int8_t *)(value_p) = EMS_VALUE_BOOL_NOTSET; // bool is uint8_t, but other initial value
-    } else {
-        *(uint8_t *)(value_p) = EMS_VALUE_UINT_NOTSET; // enums behave as uint8_t
+        *(int8_t *)(value_p) = EMS_VALUE_DEFAULT_BOOL; // bool is uint8_t, but other initial value
+    } else if (type == DeviceValueType::ENUM) {
+        *(uint8_t *)(value_p) = EMS_VALUE_DEFAULT_ENUM; // enums behave as uint8_t
     }
 
     // determine state
@@ -1058,6 +1061,117 @@ void EMSdevice::getCustomEntities(std::vector<std::string> & entity_ids) {
         }
     }
 }
+
+#if defined(EMSESP_STANDALONE_DUMP)
+// device name, device type, shortname, fullname, type [(enum values) | (min/max)], uom, readable, writeable, visible
+void EMSdevice::dump_value_info() {
+    for (auto & dv : devicevalues_) {
+        Serial.print(name_);
+        Serial.print(',');
+        Serial.print(device_type_name().c_str());
+        Serial.print(',');
+
+        Serial.print(dv.short_name);
+        Serial.print(',');
+        Serial.print(dv.get_fullname().c_str());
+        Serial.print(',');
+
+        // type and optional enum values and min/max
+        switch (dv.type) {
+        case DeviceValueType::ENUM: {
+            Serial.print("enum");
+            Serial.print(" (");
+            for (uint8_t i = 0; i < dv.options_size; i++) {
+                Serial.print(Helpers::translated_word(dv.options[i]));
+                if (i < dv.options_size - 1) {
+                    Serial.print('|');
+                }
+            }
+            Serial.print(')');
+            break;
+        }
+
+        case DeviceValueType::CMD: {
+            Serial.print("cmd");
+            Serial.print(" (");
+            for (uint8_t i = 0; i < dv.options_size; i++) {
+                Serial.print(Helpers::translated_word(dv.options[i]));
+                if (i < dv.options_size - 1) {
+                    Serial.print('|');
+                }
+            }
+            Serial.print(')');
+            break;
+        }
+
+        case DeviceValueType::USHORT:
+            Serial.print("ushort");
+            break;
+
+        case DeviceValueType::UINT:
+            Serial.print("uint");
+            break;
+
+        case DeviceValueType::SHORT:
+            Serial.print("short");
+            break;
+
+        case DeviceValueType::INT:
+            Serial.print("int");
+            break;
+
+        case DeviceValueType::ULONG:
+            Serial.print("ulong");
+            break;
+
+        case DeviceValueType::BOOL:
+            Serial.print("boolean");
+            break;
+
+        case DeviceValueType::TIME:
+            Serial.print("time");
+            break;
+
+        case DeviceValueType::STRING:
+            Serial.print("string");
+            break;
+
+        default:
+            break;
+        }
+
+        // min/max range
+        int16_t  dv_set_min;
+        uint16_t dv_set_max;
+        if (dv.get_min_max(dv_set_min, dv_set_max)) {
+            Serial.print(" (>=");
+            Serial.print(dv_set_min);
+            Serial.print("<=");
+            Serial.print(dv_set_max);
+            Serial.print(")");
+        }
+
+        Serial.print(",");
+
+        // uom
+        if (dv.uom == DeviceValue::DeviceValueUOM::DEGREES || dv.uom == DeviceValue::DeviceValueUOM::DEGREES_R) {
+            Serial.print('C'); // the degrees symbol doesn't print nicely in XLS
+        } else {
+            Serial.print(DeviceValue::DeviceValueUOM_s[dv.uom]);
+        }
+        Serial.print(",");
+
+        // readable, writeable, visible flags
+        Serial.print(!dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE) ? "true" : "false");
+        Serial.print(",");
+        Serial.print((dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY)) ? "true" : "false");
+        Serial.print(",");
+        Serial.print(!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) ? "true" : "false");
+
+        Serial.println();
+    }
+}
+#endif
 
 // builds json for a specific device value / entity
 // cmd is the endpoint or name of the device entity
