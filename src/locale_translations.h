@@ -373,6 +373,7 @@ MAKE_PSTR_LIST(auxHeaterOff, "auxheateroff", "disable auxilliary heater", "Verbi
 MAKE_PSTR_LIST(auxHeaterStatus, "auxheaterstatus", "auxilliary heater status", "Status Zusatzheizer", "Bijverwarming", "", "status dogrzewacza", "", "Chauffage auxiliaire")
 MAKE_PSTR_LIST(auxHeaterOnly, "auxheateronly", "auxilliary heater only", "nur Zusatzheizer","Alleen bijverwarming", "", "tylko dogrzewacz", "", "Que chauffage auxiliaire")
 MAKE_PSTR_LIST(auxHeaterDelay, "auxheaterdelay", "auxilliary heater on delay", "Zusatzheizer verzögert ein", "Bijverw. vertraagd aan", "Tillskottfördröjning på", "opóźnienie włączania dogrzewacza", "Tilleggsvarmer forsinket på", "Chauff app tempo marche")
+MAKE_PSTR_LIST(silentMode, "silentmode", "silent mode", "Silentmodus", " Stiller gebruik", "", "trybu cichego", "", "Fct silencieux")
 MAKE_PSTR_LIST(minTempSilent, "mintempsilent", "min. outside temp. for silent mode", "Minimale Aussentemperatur Silentmodus", " Stiller gebruik min. buitentemp", "", "minimalna temperatura zewnętrzna dla trybu cichego", "", "Fct silencieux: Temp. extérieure min.")
 MAKE_PSTR_LIST(tempParMode, "tempparmode", "outside temp. parallel mode", "Aussentemperatur Parallelmodus", "Buitentemp. parallelbedr", "", "maksymalna temperatura zewnętrzna dla dogrzewacza", "", "Temp. ext. fct parallèle")
 MAKE_PSTR_LIST(auxHeatMixValve, "auxheatmix", "aux. heater mixing valve", "Mischer Zusatzheizer", "Bijverwarming menger", "", "mieszacz dogrzewacza", "", "Chauffage auxiliaire mélangeur")

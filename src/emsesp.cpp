@@ -114,9 +114,9 @@ bool EMSESP::cmd_is_readonly(const uint8_t device_type, const uint8_t device_id,
     return false;
 }
 
-uint8_t EMSESP::device_id_from_cmd(const uint8_t device_type, const int8_t id, const char * cmd) {
+uint8_t EMSESP::device_id_from_cmd(const uint8_t device_type, const char * cmd, const int8_t id) {
     for (const auto & emsdevice : emsdevices) {
-        if (emsdevice && emsdevice->device_type() == device_type && emsdevice->has_cmd(id, cmd)) {
+        if (emsdevice && emsdevice->device_type() == device_type && emsdevice->has_cmd(cmd, id)) {
             return emsdevice->device_id();
         }
     }

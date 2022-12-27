@@ -165,14 +165,12 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
 // Compresses the JSON using MsgPack https://msgpack.org/index.html
 void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        auto * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXXLARGE_DYN);
-        if (!response->getSize()) {
+        size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE_DYN;
+        auto * response = new MsgpackAsyncJsonResponse(false, buffer);
+        while (!response->getSize()) {
             delete response;
-            response = new MsgpackAsyncJsonResponse(false, 256);
-            response->setCode(507); // Insufficient Storage
-            response->setLength();
-            request->send(response);
-            return;
+            buffer -= 1024;
+            response = new MsgpackAsyncJsonResponse(false, buffer);
         }
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == json["id"]) {
