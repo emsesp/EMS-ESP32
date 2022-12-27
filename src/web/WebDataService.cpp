@@ -166,11 +166,11 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
 void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
         size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE_DYN;
-        auto * response = new PrettyAsyncJsonResponse(false, buffer);
+        auto * response = new MsgpackAsyncJsonResponse(false, buffer);
         while (!response->getSize()) {
             delete response;
             buffer -= 1024;
-            response = new PrettyAsyncJsonResponse(false, buffer);
+            response = new MsgpackAsyncJsonResponse(false, buffer);
         }
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == json["id"]) {
