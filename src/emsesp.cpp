@@ -532,6 +532,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 if (emsdevice->ha_config_firstrun()) {
                     emsdevice->ha_config_clear();
                     emsdevice->ha_config_firstrun(false);
+                    return;
                 } else {
                     // see if we need to delete and /config topics before adding the payloads
                     emsdevice->mqtt_ha_entity_config_remove();
