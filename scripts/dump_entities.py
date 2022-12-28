@@ -1,5 +1,6 @@
-# use like
-#   make clean; make ARGS=-DEMSESP_STANDALONE_DUMP; echo "test dump" | ./emsesp | python3 ./scripts/dump_entities.py 
+# strips out lines between two markers
+# pipe a file into, for example:
+#  make clean; make ARGS=-DEMSESP_STANDALONE_DUMP; echo "test dump" | ./emsesp | python3 ./scripts/dump_entities.py 
 
 import fileinput
 with fileinput.input() as f_input:

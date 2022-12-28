@@ -1063,7 +1063,8 @@ void EMSdevice::getCustomEntities(std::vector<std::string> & entity_ids) {
 }
 
 #if defined(EMSESP_STANDALONE_DUMP)
-// device name, device type, shortname, fullname, type [(enum values) | (min/max)], uom, readable, writeable, visible
+// dumps all entity values in native English
+// device name,device type,product_id,shortname,fullname,type [(enum values) | (min/max)],uom,writeable,discovery_entityid
 void EMSdevice::dump_value_info() {
     for (auto & dv : devicevalues_) {
         Serial.print(name_);
@@ -1071,9 +1072,13 @@ void EMSdevice::dump_value_info() {
         Serial.print(device_type_name().c_str());
         Serial.print(',');
 
+        Serial.print(product_id_);
+        Serial.print(',');
+
         Serial.print(dv.short_name);
         Serial.print(',');
-        Serial.print(dv.get_fullname().c_str());
+
+        Serial.print(dv.fullname[0]);
         Serial.print(',');
 
         // type and optional enum values and min/max
@@ -1161,12 +1166,54 @@ void EMSdevice::dump_value_info() {
         }
         Serial.print(",");
 
-        // readable, writeable, visible flags
-        Serial.print(!dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE) ? "true" : "false");
+        // writeable flag
+        Serial.print(dv.has_cmd ? "true" : "false");
         Serial.print(",");
-        Serial.print((dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY)) ? "true" : "false");
-        Serial.print(",");
-        Serial.print(!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) ? "true" : "false");
+
+        // MQTT Discovery entity name, assuming we're using the default v3.5 option
+        char entity_with_tag[50];
+        if (dv.tag >= DeviceValueTAG::TAG_HC1) {
+            snprintf(entity_with_tag,
+                     sizeof(entity_with_tag),
+                     "%s_%s_%s",
+                     device_type_2_device_name(device_type_),
+                     EMSdevice::tag_to_mqtt(dv.tag).c_str(),
+                     dv.short_name);
+        } else {
+            // should really test for which device types have tags (like hc, wwc etc)
+            // snprintf(entity_with_tag, sizeof(entity_with_tag), "%s_[<tag>_]%s", device_type_2_device_name(device_type_), dv.short_name);
+            snprintf(entity_with_tag, sizeof(entity_with_tag), "%s_%s", device_type_2_device_name(device_type_), dv.short_name);
+        }
+
+        char entityid[150];
+        if (dv.has_cmd) {
+            switch (dv.type) {
+            case DeviceValueType::INT:
+            case DeviceValueType::UINT:
+            case DeviceValueType::SHORT:
+            case DeviceValueType::USHORT:
+            case DeviceValueType::ULONG:
+                snprintf(entityid, sizeof(entityid), "number.%s", entity_with_tag);
+                break;
+            case DeviceValueType::BOOL:
+                snprintf(entityid, sizeof(entityid), "switch.%s", entity_with_tag);
+                break;
+            case DeviceValueType::ENUM:
+                snprintf(entityid, sizeof(entityid), "select.%s", entity_with_tag);
+                break;
+            default:
+                snprintf(entityid, sizeof(entityid), "sensor.%s", entity_with_tag);
+                break;
+            }
+        } else {
+            if (dv.type == DeviceValueType::BOOL) {
+                snprintf(entityid, sizeof(entityid), "binary_sensor.%s", entity_with_tag); // binary sensor (for booleans)
+            } else {
+                snprintf(entityid, sizeof(entityid), "sensor.%s", entity_with_tag); // normal HA sensor
+            }
+        }
+
+        Serial.print(entityid);
 
         Serial.println();
     }

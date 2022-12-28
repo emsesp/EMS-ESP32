@@ -209,6 +209,10 @@
 #define EMSESP_DEFAULT_WEBLOG_COMPACT true
 #endif
 
+#ifndef EMSESP_DEFAULT_ENTITY_FORMAT
+#define EMSESP_DEFAULT_ENTITY_FORMAT 1 // in MQTT discovery, use shortnames and not multiple (prefixed with base)
+#endif
+
 // matches Web UI settings
 enum {
 
