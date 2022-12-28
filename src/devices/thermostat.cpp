@@ -194,6 +194,11 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     EMSESP::send_read_request(EMS_TYPE_RCTime, device_id);
     EMSESP::send_read_request(0x12, device_id); // read last error (only published on errors)
     EMSESP::send_read_request(0xA2, device_id); // read errorCode (only published on errors)
+
+#if defined(EMSESP_STANDALONE_DUMP)
+    // if we're just dumping out values, create a single dummy hc
+    register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, 0)); // hc=1, no flags
+#endif
 }
 
 // returns the heating circuit object based on the hc number

@@ -320,7 +320,14 @@ void EMSESP::dump_all_values(uuid::console::Shell & shell) {
         // go through each device type so they are sorted
         for (const auto & device : device_library_) {
             if (device_class.first == device.device_type) {
-                emsdevices.push_back(EMSFactory::add(device.device_type, 0, device.product_id, "1.0", device.name, device.flags, EMSdevice::Brand::NO_BRAND));
+                uint8_t device_id = 0;
+                // Mixer class looks at device_id to determine type, so fixing to 0x28 which will give all the settings except flowSetTemp
+                if ((device.device_type == DeviceType::MIXER) && (device.flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS)) {
+                    device_id = 0x28; // hard code
+                }
+
+                emsdevices.push_back(
+                    EMSFactory::add(device.device_type, device_id, device.product_id, "1.0", device.name, device.flags, EMSdevice::Brand::NO_BRAND));
                 emsdevices.back()->dump_value_info(); // dump all the entity information
             }
         }

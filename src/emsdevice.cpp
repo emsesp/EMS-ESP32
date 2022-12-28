@@ -1067,6 +1067,10 @@ void EMSdevice::getCustomEntities(std::vector<std::string> & entity_ids) {
 // device name,device type,product_id,shortname,fullname,type [(enum values) | (min/max)],uom,writeable,discovery_entityid
 void EMSdevice::dump_value_info() {
     for (auto & dv : devicevalues_) {
+        if (dv.fullname == nullptr) {
+            break; // ignore entities that don't have a fullname, like the thermostat climate thingy
+        }
+
         Serial.print(name_);
         Serial.print(',');
         Serial.print(device_type_name().c_str());
