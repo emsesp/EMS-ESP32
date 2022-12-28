@@ -992,12 +992,11 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         // prefix base name to each uniq_id and use the shortname
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
     } else if (Mqtt::entity_format() == 1) {
-        // shortname, no mqtt base
+        // shortname, no mqtt base. This is the default version.
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
     } else {
-        // entity_format is 0
-        // old v3.4 style
-        // take en_name and replace all spaces and lowercase it
+        // entity_format is 0, the old v3.4 style
+        // take en_name and replace all spaces
         char uniq_s[60];
         strlcpy(uniq_s, en_name, sizeof(uniq_s));
         Helpers::replace_char(uniq_s, ' ', '_');
