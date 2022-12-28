@@ -57,10 +57,6 @@ static String generateClientId() {
 #define FACTORY_MQTT_MAX_TOPIC_LENGTH 128
 #endif
 
-#ifndef FACTORY_MQTT_ENTITY_FORMAT
-#define FACTORY_MQTT_ENTITY_FORMAT 1 // use shortnames
-#endif
-
 class MqttSettings {
   public:
     // host and port - if enabled
@@ -79,9 +75,6 @@ class MqttSettings {
     uint16_t keepAlive;
     bool     cleanSession;
 
-    // multiple instances
-    uint8_t entity_format;
-
     // proddy EMS-ESP specific
     String   base;
     uint16_t publish_time_boiler;
@@ -99,6 +92,7 @@ class MqttSettings {
     bool     publish_single;
     bool     publish_single2cmd;
     bool     send_response;
+    uint8_t  entity_format;
 
     static void              read(MqttSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, MqttSettings & settings);

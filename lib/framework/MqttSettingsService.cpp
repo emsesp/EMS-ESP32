@@ -178,18 +178,17 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     MqttSettings newSettings = {};
     bool         changed     = false;
 
-    newSettings.enabled       = root["enabled"] | FACTORY_MQTT_ENABLED;
-    newSettings.host          = root["host"] | FACTORY_MQTT_HOST;
-    newSettings.port          = root["port"] | FACTORY_MQTT_PORT;
-    newSettings.base          = root["base"] | FACTORY_MQTT_BASE;
-    newSettings.username      = root["username"] | FACTORY_MQTT_USERNAME;
-    newSettings.password      = root["password"] | FACTORY_MQTT_PASSWORD;
-    newSettings.clientId      = root["client_id"] | FACTORY_MQTT_CLIENT_ID;
-    newSettings.keepAlive     = root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE;
-    newSettings.cleanSession  = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
-    newSettings.entity_format = root["entity_format"] | FACTORY_MQTT_ENTITY_FORMAT;
-    newSettings.mqtt_qos      = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
-    newSettings.mqtt_retain   = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
+    newSettings.enabled      = root["enabled"] | FACTORY_MQTT_ENABLED;
+    newSettings.host         = root["host"] | FACTORY_MQTT_HOST;
+    newSettings.port         = root["port"] | FACTORY_MQTT_PORT;
+    newSettings.base         = root["base"] | FACTORY_MQTT_BASE;
+    newSettings.username     = root["username"] | FACTORY_MQTT_USERNAME;
+    newSettings.password     = root["password"] | FACTORY_MQTT_PASSWORD;
+    newSettings.clientId     = root["client_id"] | FACTORY_MQTT_CLIENT_ID;
+    newSettings.keepAlive    = root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE;
+    newSettings.cleanSession = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
+    newSettings.mqtt_qos     = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
+    newSettings.mqtt_retain  = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
 
     newSettings.publish_time_boiler     = root["publish_time_boiler"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_thermostat = root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME;
@@ -205,6 +204,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_single     = root["publish_single"] | EMSESP_DEFAULT_PUBLISH_SINGLE;
     newSettings.publish_single2cmd = root["publish_single2cmd"] | EMSESP_DEFAULT_PUBLISH_SINGLE2CMD;
     newSettings.send_response      = root["send_response"] | EMSESP_DEFAULT_SEND_RESPONSE;
+    newSettings.entity_format      = root["entity_format"] | EMSESP_DEFAULT_ENTITY_FORMAT;
 
     if (newSettings.enabled != settings.enabled) {
         changed = true;

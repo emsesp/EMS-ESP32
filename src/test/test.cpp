@@ -29,7 +29,6 @@ bool Test::run_test(const char * command, int8_t id) {
         return false;
     }
 
-
     if (strcmp(command, "general") == 0) {
         EMSESP::logger().info("Testing general. Adding a Boiler and Thermostat");
 
@@ -244,6 +243,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     } else {
         command = cmd;
     }
+
+#if defined(EMSESP_STANDALONE_DUMP)
+    if (command == "dump") {
+        shell.printfln("Adding all devices and entities...");
+        EMSESP::dump_all_values(shell);
+    }
+#endif
 
     if (command == "general") {
         shell.printfln("Testing adding a general boiler & thermostat...");

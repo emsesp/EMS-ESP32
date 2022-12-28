@@ -63,6 +63,7 @@ DeviceValue::DeviceValue(uint8_t               device_type,
     // set the min/max
     set_custom_minmax();
 
+/*
 #ifdef EMSESP_STANDALONE
     // only added for debugging
     Serial.print(COLOR_BRIGHT_RED_BACKGROUND);
@@ -98,6 +99,7 @@ DeviceValue::DeviceValue(uint8_t               device_type,
     }
     Serial.println(COLOR_RESET);
 #endif
+*/
 }
 
 // mapping of UOM, to match order in DeviceValueUOM enum emsdevicevalue.h
