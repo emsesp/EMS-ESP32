@@ -120,6 +120,8 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return F_(alert);
     case DeviceType::PUMP:
         return F_(pump);
+    case DeviceType::HEATSOURCE:
+        return F_(heatsource);
     default:
         return Helpers::translated_word(FL_(unknown));
     }
@@ -173,6 +175,9 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     }
     if (!strcmp(lowtopic, F_(pump))) {
         return DeviceType::PUMP;
+    }
+    if (!strcmp(lowtopic, F_(heatsource))) {
+        return DeviceType::HEATSOURCE;
     }
 
     return DeviceType::UNKNOWN;

@@ -46,3 +46,4 @@
 - analog/dallas HA-entities based on id
 - MQTT Base is a mandatory field. Removed MQTT topic length from settings
 - HA duration class for time entities [[#822](https://github.com/emsesp/EMS-ESP32/issues/822
+- AM200 alternative heatsource as class heatsource [[#857](https://github.com/emsesp/EMS-ESP32/issues/857

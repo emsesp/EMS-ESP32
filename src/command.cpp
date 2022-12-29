@@ -208,16 +208,22 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         id = command[2] - '0';
         command += 3;
     } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] == '1' && command[4] == '0') {
-        id = 19;
+        id = 18;
         command += 5;
     } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {
-        id = command[3] - '0' + 8;
+        id = command[3] - '1' + 9;
         command += 4;
     } else if (!strncmp(lowerCmd, "id", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '9') {
         id = command[3] - '0' + 10;
         command += 4;
     } else if (!strncmp(lowerCmd, "id", 2) && command[2] >= '1' && command[2] <= '9') {
         id = command[2] - '0';
+        command += 3;
+    } else if (!strncmp(lowerCmd, "hs", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '6') {
+        id = command[3] - '0' + 28;
+        command += 4;
+    } else if (!strncmp(lowerCmd, "hs", 2) && command[2] >= '1' && command[2] <= '9') {
+        id = command[2] - '1' + 19;
         command += 3;
     }
     // remove separator

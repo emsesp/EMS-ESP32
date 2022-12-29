@@ -104,6 +104,7 @@ MAKE_PSTR_WORD(analogsensor)
 MAKE_PSTR_WORD(dallassensor)
 MAKE_PSTR_WORD(alert)
 MAKE_PSTR_WORD(pump)
+MAKE_PSTR_WORD(heatsource)
 
 MAKE_PSTR(number, "number")
 MAKE_PSTR(enum, "enum")
