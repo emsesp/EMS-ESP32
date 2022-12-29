@@ -197,7 +197,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
 #if defined(EMSESP_STANDALONE_DUMP)
     // if we're just dumping out values, create a single dummy hc
-    register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, 0)); // hc=1, no flags
+    register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, model)); // hc=1
 #endif
 }
 

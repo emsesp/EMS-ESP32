@@ -402,6 +402,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               99);
     }
     */
+
     // heatpump info
     if (model() == EMS_DEVICE_FLAG_HEATPUMP) {
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
