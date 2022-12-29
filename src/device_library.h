@@ -144,7 +144,7 @@
 {248, DeviceType::HEATPUMP, "Hybrid Manager HM200", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Heatsource - 0x60
-{228, DeviceType::HEATSOURCE, "Alternative Heatsource", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{228, DeviceType::HEATSOURCE, "AM200", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // alternative heatsource
 
 // Connect devices - 0x02
 {171, DeviceType::CONNECT, "OpenTherm Converter", DeviceFlags::EMS_DEVICE_FLAG_NONE},

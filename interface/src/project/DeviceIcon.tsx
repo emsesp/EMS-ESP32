@@ -19,7 +19,8 @@ interface DeviceIconProps {
 const DeviceIcon: FC<DeviceIconProps> = ({ type }) => {
   switch (type) {
     case 'Boiler':
-      return <CgSmartHomeBoiler />;
+    case 'Heatsource':
+        return <CgSmartHomeBoiler />;
     case 'Sensor':
       return <MdOutlineSensors />;
     case 'Solar':
