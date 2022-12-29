@@ -1898,7 +1898,7 @@ bool Boiler::set_ww_activated(const char * value, const int8_t id) {
     // https://github.com/emsesp/EMS-ESP/issues/268
     // 08 for HT3 seems to be wrong, see https://github.com/emsesp/EMS-ESP32/issues/89
     if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
-        write_command(EMS_TYPE_UBAParameterWWPlus, 1, v ? 1 : 0, EMS_TYPE_UBAParameterWWPlus);
+        write_command(EMS_TYPE_UBAParameterWWPlus, 5, v ? 1 : 0, EMS_TYPE_UBAParameterWWPlus);
     } else {
         write_command(EMS_TYPE_UBAParameterWW, 1, v ? 0xFF : 0, EMS_TYPE_UBAParameterWW);
     }
