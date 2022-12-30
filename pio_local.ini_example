@@ -37,7 +37,7 @@ extra_scripts =
 ; options for debugging are: EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
 [env:debug]
 board = esp32dev
-platform = espressif32
+platform = espressif32@5.2.0
 board_build.partitions = esp32_partition_debug.csv
 upload_protocol = esptool
 build_type = debug

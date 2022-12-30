@@ -63,7 +63,7 @@ DeviceValue::DeviceValue(uint8_t               device_type,
     // set the min/max
     set_custom_minmax();
 
-/*
+    /*
 #ifdef EMSESP_STANDALONE
     // only added for debugging
     Serial.print(COLOR_BRIGHT_RED_BACKGROUND);

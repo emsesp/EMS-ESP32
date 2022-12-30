@@ -1064,9 +1064,15 @@ void EMSdevice::getCustomEntities(std::vector<std::string> & entity_ids) {
 
 #if defined(EMSESP_STANDALONE_DUMP)
 // dumps all entity values in native English
-// device name,device type,product_id,shortname,fullname,type [(enum values) | (min/max)],uom,writeable,discovery_entityid
+// the code is intended to run only once standalone, outside the ESP32 so not optimized for memory efficiency
+// pipe symbols (|) are escaped so they can be converted to Markdown in the Wiki
+// format is: device name,device type,product id,shortname,fullname,type [options...] \\| (min/max),uom,writeable,discovery entityid v3.4, discovery entityid
 void EMSdevice::dump_value_info() {
     for (auto & dv : devicevalues_) {
+        if (dv.fullname == nullptr) {
+            break; // ignore entities that don't have a fullname, like the thermostat climate thingy
+        }
+
         Serial.print(name_);
         Serial.print(',');
         Serial.print(device_type_name().c_str());
@@ -1081,33 +1087,25 @@ void EMSdevice::dump_value_info() {
         Serial.print(dv.fullname[0]);
         Serial.print(',');
 
-        // type and optional enum values and min/max
+        // per type
         switch (dv.type) {
-        case DeviceValueType::ENUM: {
-            Serial.print("enum");
-            Serial.print(" (");
-            for (uint8_t i = 0; i < dv.options_size; i++) {
-                Serial.print(Helpers::translated_word(dv.options[i]));
-                if (i < dv.options_size - 1) {
-                    Serial.print('|');
-                }
+        case DeviceValueType::ENUM:
+        case DeviceValueType::CMD:
+            if (dv.type == DeviceValueType::ENUM) {
+                Serial.print("enum");
+            } else {
+                Serial.print("cmd");
             }
-            Serial.print(')');
-            break;
-        }
 
-        case DeviceValueType::CMD: {
-            Serial.print("cmd");
-            Serial.print(" (");
+            Serial.print(" [");
             for (uint8_t i = 0; i < dv.options_size; i++) {
-                Serial.print(Helpers::translated_word(dv.options[i]));
+                Serial.print(dv.options[i][0]);
                 if (i < dv.options_size - 1) {
-                    Serial.print('|');
+                    Serial.print("\\|");
                 }
             }
-            Serial.print(')');
+            Serial.print(']');
             break;
-        }
 
         case DeviceValueType::USHORT:
             Serial.print("ushort");
@@ -1170,50 +1168,65 @@ void EMSdevice::dump_value_info() {
         Serial.print(dv.has_cmd ? "true" : "false");
         Serial.print(",");
 
-        // MQTT Discovery entity name, assuming we're using the default v3.5 option
-        char entity_with_tag[50];
-        if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-            snprintf(entity_with_tag,
-                     sizeof(entity_with_tag),
-                     "%s_%s_%s",
-                     device_type_2_device_name(device_type_),
-                     EMSdevice::tag_to_mqtt(dv.tag).c_str(),
-                     dv.short_name);
-        } else {
-            // should really test for which device types have tags (like hc, wwc etc)
-            // snprintf(entity_with_tag, sizeof(entity_with_tag), "%s_[<tag>_]%s", device_type_2_device_name(device_type_), dv.short_name);
-            snprintf(entity_with_tag, sizeof(entity_with_tag), "%s_%s", device_type_2_device_name(device_type_), dv.short_name);
-        }
+        // MQTT Discovery entity name
+        // do this twice for the old and new formats
+        char entity_with_tag[200];
+        char entityid[500];
+        char entity_name[100];
 
-        char entityid[150];
-        if (dv.has_cmd) {
-            switch (dv.type) {
-            case DeviceValueType::INT:
-            case DeviceValueType::UINT:
-            case DeviceValueType::SHORT:
-            case DeviceValueType::USHORT:
-            case DeviceValueType::ULONG:
-                snprintf(entityid, sizeof(entityid), "number.%s", entity_with_tag);
-                break;
-            case DeviceValueType::BOOL:
-                snprintf(entityid, sizeof(entityid), "switch.%s", entity_with_tag);
-                break;
-            case DeviceValueType::ENUM:
-                snprintf(entityid, sizeof(entityid), "select.%s", entity_with_tag);
-                break;
-            default:
-                snprintf(entityid, sizeof(entityid), "sensor.%s", entity_with_tag);
-                break;
-            }
-        } else {
-            if (dv.type == DeviceValueType::BOOL) {
-                snprintf(entityid, sizeof(entityid), "binary_sensor.%s", entity_with_tag); // binary sensor (for booleans)
+        for (uint8_t count = 0; count < 2; count++) {
+            if (count) {
+                // new name, comes as last
+                Serial.print(",");
+                strcpy(entity_name, dv.short_name);
             } else {
-                snprintf(entityid, sizeof(entityid), "sensor.%s", entity_with_tag); // normal HA sensor
+                // old format, comes first
+                char uniq_s[100];
+                strlcpy(uniq_s, dv.fullname[0], sizeof(uniq_s));
+                Helpers::replace_char(uniq_s, ' ', '_');
+                strcpy(entity_name, uniq_s);
             }
-        }
 
-        Serial.print(entityid);
+            if (dv.tag >= DeviceValueTAG::TAG_HC1) {
+                snprintf(entity_with_tag,
+                         sizeof(entity_with_tag),
+                         "%s_%s_%s",
+                         device_type_2_device_name(device_type_),
+                         EMSdevice::tag_to_mqtt(dv.tag).c_str(),
+                         entity_name);
+            } else {
+                snprintf(entity_with_tag, sizeof(entity_with_tag), "%s_%s", device_type_2_device_name(device_type_), entity_name);
+            }
+
+            if (dv.has_cmd) {
+                switch (dv.type) {
+                case DeviceValueType::INT:
+                case DeviceValueType::UINT:
+                case DeviceValueType::SHORT:
+                case DeviceValueType::USHORT:
+                case DeviceValueType::ULONG:
+                    snprintf(entityid, sizeof(entityid), "number.%s", entity_with_tag);
+                    break;
+                case DeviceValueType::BOOL:
+                    snprintf(entityid, sizeof(entityid), "switch.%s", entity_with_tag);
+                    break;
+                case DeviceValueType::ENUM:
+                    snprintf(entityid, sizeof(entityid), "select.%s", entity_with_tag);
+                    break;
+                default:
+                    snprintf(entityid, sizeof(entityid), "sensor.%s", entity_with_tag);
+                    break;
+                }
+            } else {
+                if (dv.type == DeviceValueType::BOOL) {
+                    snprintf(entityid, sizeof(entityid), "binary_sensor.%s", entity_with_tag); // binary sensor (for booleans)
+                } else {
+                    snprintf(entityid, sizeof(entityid), "sensor.%s", entity_with_tag); // normal HA sensor
+                }
+            }
+
+            Serial.print(entityid);
+        }
 
         Serial.println();
     }
