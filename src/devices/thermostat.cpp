@@ -26,8 +26,6 @@ uuid::log::Logger Thermostat::logger_{F_(thermostat), uuid::log::Facility::CONSO
 
 Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    uint8_t model = this->model();
-
     // RF remote sensor seen at 0x40, maybe this is also for different hc with id 0x40 - 0x47? emsesp.cpp maps only 0x40
     if (device_id >= 0x40 && device_id <= 0x47) {
         register_telegram_type(0x0435, "RFTemp", false, MAKE_PF_CB(process_RemoteTemp));
@@ -48,6 +46,9 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     register_telegram_type(0xA2, "RCError", false, MAKE_PF_CB(process_RCError));
     register_telegram_type(0x12, "RCErrorMessage", false, MAKE_PF_CB(process_RCErrorMessage));
     register_telegram_type(0x13, "RCErrorMessage2", false, MAKE_PF_CB(process_RCErrorMessage));
+
+    uint8_t model = this->model();
+
     // RC10
     if (model == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         monitor_typeids = {0xB1};
@@ -194,11 +195,6 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     EMSESP::send_read_request(EMS_TYPE_RCTime, device_id);
     EMSESP::send_read_request(0x12, device_id); // read last error (only published on errors)
     EMSESP::send_read_request(0xA2, device_id); // read errorCode (only published on errors)
-
-#if defined(EMSESP_STANDALONE_DUMP)
-    // if we're just dumping out values, create a single dummy hc
-    register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, model)); // hc=1
-#endif
 }
 
 // returns the heating circuit object based on the hc number
@@ -3389,6 +3385,7 @@ void Thermostat::register_device_values() {
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &errorCode_, DeviceValueType::STRING, FL_(errorCode), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &lastCode_, DeviceValueType::STRING, FL_(lastCode), DeviceValueUOM::NONE);
 
+
     switch (this->model()) {
     case EMS_DEVICE_FLAG_RC100:
     case EMS_DEVICE_FLAG_RC300:
@@ -4013,6 +4010,11 @@ void Thermostat::register_device_values() {
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dateTime_, DeviceValueType::STRING, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         break;
     }
+
+#if defined(EMSESP_STANDALONE_DUMP)
+    // if we're just dumping out values, create a single dummy hc
+    register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, this->model())); // hc=1
+#endif
 }
 
 // registers the values for a heating circuit
@@ -4036,6 +4038,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         seltemp_divider  = DeviceValueNumOp::DV_NUMOP_DIV2;
         roomtemp_divider = DeviceValueNumOp::DV_NUMOP_DIV10;
     }
+
     if (has_flags(EMS_DEVICE_FLAG_NO_WRITE)) {
         register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES);
     } else {
