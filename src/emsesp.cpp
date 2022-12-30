@@ -313,14 +313,27 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 void EMSESP::dump_all_values(uuid::console::Shell & shell) {
     Serial.println("---- CSV START ----"); // marker use by py script
     // add header for CSV
-    Serial.print("device name,device type,product_id,shortname,fullname,type [(enum values) | (min/max)],uom,writeable,discovery_entityid");
+    Serial.print(
+        "device name,device type,product id,shortname,fullname,type [options...] \\| (min/max),uom,writeable,discovery entityid v3.4, discovery entityid");
     Serial.println();
 
     for (const auto & device_class : EMSFactory::device_handlers()) {
         // go through each device type so they are sorted
         for (const auto & device : device_library_) {
             if (device_class.first == device.device_type) {
-                emsdevices.push_back(EMSFactory::add(device.device_type, 0, device.product_id, "1.0", device.name, device.flags, EMSdevice::Brand::NO_BRAND));
+                uint8_t device_id = 0;
+                // Mixer class looks at device_id to determine type, so fixing to 0x28 which will give all the settings except flowSetTemp
+                if ((device.device_type == DeviceType::MIXER) && (device.flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS)) {
+                    // pick one as hc and the other as having wwc
+                    if (device.product_id == 160) { // MM100
+                        device_id = 0x28;           // wwc
+                    } else {
+                        device_id = 0x20; // hc
+                    }
+                }
+
+                emsdevices.push_back(
+                    EMSFactory::add(device.device_type, device_id, device.product_id, "1.0", device.name, device.flags, EMSdevice::Brand::NO_BRAND));
                 emsdevices.back()->dump_value_info(); // dump all the entity information
             }
         }
