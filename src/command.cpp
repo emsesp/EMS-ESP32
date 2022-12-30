@@ -271,7 +271,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 #if defined(EMSESP_DEBUG)
             LOG_DEBUG("[DEBUG] Calling %s command '%s' to retrieve attributes", dname, cmd);
 #endif
-            return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
+            return EMSESP::get_device_value_info(output, cmd, id, device_type, device_id) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
         }
     }
 
