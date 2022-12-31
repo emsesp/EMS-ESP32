@@ -352,9 +352,9 @@ class EMSdevice {
 
     // static device IDs
     static constexpr uint8_t EMS_DEVICE_ID_BOILER         = 0x08; // fixed device_id for Master Boiler/UBA
-    static constexpr uint8_t EMS_DEVICE_ID_BOILER_1       = 0x70; // fixed device_id for 1st. Cascade Boiler/UBA
-    static constexpr uint8_t EMS_DEVICE_ID_BOILER_F       = 0x7F; // fixed device_id for last Cascade Boiler/UBA
-    static constexpr uint8_t EMS_DEVICE_ID_AM200          = 0x60; // fixed device_id for alternative Heating AM200
+    static constexpr uint8_t EMS_DEVICE_ID_HS1            = 0x70; // fixed device_id for 1st. Cascade Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_HS16           = 0x7F; // fixed device_id for last Cascade Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_AHS1           = 0x60; // fixed device_id for alternative Heating AM200
     static constexpr uint8_t EMS_DEVICE_ID_CONTROLLER     = 0x09;
     static constexpr uint8_t EMS_DEVICE_ID_RS232          = 0x04;
     static constexpr uint8_t EMS_DEVICE_ID_TERMINAL       = 0x0A;

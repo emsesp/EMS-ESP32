@@ -1006,13 +1006,24 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     for (auto & device : device_library_) {
         if (device.product_id == product_id) {
             // sometimes boilers share the same productID as controllers
-            // so only add boilers if the device_id is 0x08 or 0x70.., which is fixed for EMS
+            // so only add boilers if the device_id is 0x08
+            // cascaded boilers with 0x70.., map to heatsources
             if (device.device_type == DeviceType::BOILER) {
-                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER
-                    || (device_id >= EMSdevice::EMS_DEVICE_ID_BOILER_1 && device_id <= EMSdevice::EMS_DEVICE_ID_BOILER_F)) {
+                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER) {
                     device_p = &device;
                     break;
                 }
+                if ((device_id >= EMSdevice::EMS_DEVICE_ID_HS1 && device_id <= EMSdevice::EMS_DEVICE_ID_HS16)) {
+                    device_p = &device;
+                    device_p->device_type = DeviceType::HEATSOURCE;
+                    break;
+                }
+            } else if (device.device_type == DeviceType::HEATSOURCE) {
+                device_p = &device;
+                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER) { // AHS as only heatsource on d 0x08
+                    device_p->device_type = DeviceType::BOILER;
+                }
+                break;
             } else {
                 // it's not a boiler, but we have a match
                 device_p = &device;

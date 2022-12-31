@@ -134,9 +134,12 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
             id_n += 8; // wwc1 has id 9
         } else if (input.containsKey("id")) {
             id_n = input["id"];
+        } else if (input.containsKey("ahs")) {
+            id_n = input["ahs"];
+            id_n += 18; // ahs1 has id 19
         } else if (input.containsKey("hs")) {
             id_n = input["hs"];
-            id_n += 18; // hs1 has id 19
+            id_n += 19; // hs1 has id 20
         }
     }
 
@@ -218,11 +221,14 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     } else if (!strncmp(lowerCmd, "id", 2) && command[2] >= '1' && command[2] <= '9') {
         id = command[2] - '0';
         command += 3;
+    } else if (!strncmp(lowerCmd, "ahs", 3) && command[2] >= '1' && command[2] <= '1') { // only ahs1 for now
+        id = command[2] - '1' + 19;
+        command += 4;
     } else if (!strncmp(lowerCmd, "hs", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '6') {
-        id = command[3] - '0' + 28;
+        id = command[3] - '0' + 29;
         command += 4;
     } else if (!strncmp(lowerCmd, "hs", 2) && command[2] >= '1' && command[2] <= '9') {
-        id = command[2] - '1' + 19;
+        id = command[2] - '1' + 20;
         command += 3;
     }
     // remove separator

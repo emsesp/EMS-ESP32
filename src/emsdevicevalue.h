@@ -98,6 +98,7 @@ class DeviceValue {
         TAG_WWC8,
         TAG_WWC9,
         TAG_WWC10,
+        TAG_AHS1,
         TAG_HS1,
         TAG_HS2,
         TAG_HS3,

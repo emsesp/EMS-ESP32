@@ -27,28 +27,6 @@ uuid::log::Logger Boiler::logger_{F_(boiler), uuid::log::Facility::CONSOLE};
 Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
 
-    // cascaded heating sources, only some values per individual heatsource (hs)
-    if (device_id >= EMSdevice::EMS_DEVICE_ID_BOILER_1) {
-        uint8_t hs = device_id - EMSdevice::EMS_DEVICE_ID_BOILER_1; // heating source id, count from 0
-        // Runtime of each heatingsource in 0x06DC, ff
-        register_telegram_type(0x6DC + hs, "CascadeMessage", false, MAKE_PF_CB(process_CascadeMessage));
-        register_device_value(DeviceValueTAG::TAG_HS1 + hs, &burnWorkMin_, DeviceValueType::TIME, FL_(burnWorkMin), DeviceValueUOM::MINUTES);
-        // selBurnpower in D2 and E4
-        // register_telegram_type(0xD2, "CascadePowerMessage", false, MAKE_PF_CB(process_CascadePowerMessage));
-        // individual Flowtemps and powervalues for each heatingsource in E4
-        register_telegram_type(0xE4, "UBAMonitorFastPlus", false, MAKE_PF_CB(process_UBAMonitorFastPlus));
-        register_device_value(DeviceValueTAG::TAG_HS1 + hs, &selFlowTemp_, DeviceValueType::UINT, FL_(selFlowTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_HS1 + hs, &selBurnPow_, DeviceValueType::UINT, FL_(selBurnPow), DeviceValueUOM::PERCENT);
-        register_device_value(DeviceValueTAG::TAG_HS1 + hs,
-                              &curFlowTemp_,
-                              DeviceValueType::USHORT,
-                              DeviceValueNumOp::DV_NUMOP_DIV10,
-                              FL_(curFlowTemp),
-                              DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_HS1 + hs, &curBurnPow_, DeviceValueType::UINT, FL_(curBurnPow), DeviceValueUOM::PERCENT);
-        return;
-    }
-
     // register values for master boiler/cascade module
     // reserve_telegram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
 
@@ -1251,14 +1229,6 @@ void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, setFlowTemp_, 0);    // boiler set temp from thermostat
     has_update(telegram, setBurnPow_, 1);     // max burner power in %
     has_update(telegram, wwSetPumpPower_, 2); // ww pump speed/power?
-}
-
-// 0x6DC, ff for cascaded heatsources (hs)
-void Boiler::process_CascadeMessage(std::shared_ptr<const Telegram> telegram) {
-    // uint8_t  hsActivated;
-    // has_update(telegram, hsActivated, 0);
-    telegram->read_value(burnWorkMin_, 3); // this is in seconds
-    burnWorkMin_ /= 60;
 }
 
 #pragma GCC diagnostic push

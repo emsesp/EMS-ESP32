@@ -28,6 +28,12 @@ class Heatsource : public EMSdevice {
     Heatsource(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
 
   private:
+    // hs1 .. hs16
+    uint32_t burnWorkMin_;
+    uint8_t  selBurnPow_;
+    uint8_t  curBurnPow_;
+
+    // ahs
     uint16_t curFlowTemp_;   // Current flow temperature
     uint16_t retTemp_;       // Return temperature
     int16_t  cylTopTemp_;    // TB1
@@ -58,6 +64,9 @@ class Heatsource : public EMSdevice {
     uint8_t  blockTerm_;     // pos 17: Config of block terminal: NO(00), NC(01)
     int8_t   blockHyst_;     // pos 14?: Hyst. for bolier block (K)
     uint8_t  releaseWait_;   // pos 15: Boiler release wait time (min)
+
+    void process_CascadeMessage(std::shared_ptr<const Telegram> telegram);
+    void process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram);
 
     void process_amTempMessage(std::shared_ptr<const Telegram> telegram);
     void process_amStatusMessage(std::shared_ptr<const Telegram> telegram);
