@@ -153,6 +153,8 @@ bool Test::run_test(const char * command, int8_t id) {
         // HC1 on 0x20
         uart_telegram({0xA0, 00, 0xFF, 00, 01, 0xD7, 00, 00, 00, 0x80, 00, 00, 00, 00, 03, 0xC5});
 
+        // TODO
+
         return true;
     }
 
@@ -1549,6 +1551,20 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.invoke_command("call mixer info");
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
+
+// shell.invoke_command("call mixer wwc1 info");
+// shell.invoke_command("call mixer wwc2 info");
+
+// test API
+#if defined(EMSESP_STANDALONE)
+        AsyncWebServerRequest request;
+        request.url("/api/mixer");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/mixer/hc1/pumpstatus");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/mixer/wwc2/pumpstatus");
+        EMSESP::webAPIService.webAPIService_get(&request);
+#endif
     }
 
     if (command == "crash") {

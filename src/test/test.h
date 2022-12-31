@@ -28,7 +28,7 @@ namespace emsesp {
 
 // #define EMSESP_DEBUG_DEFAULT "thermostat"
 // #define EMSESP_DEBUG_DEFAULT "solar"
-// #define EMSESP_DEBUG_DEFAULT "mixer"
+#define EMSESP_DEBUG_DEFAULT "mixer"
 // #define EMSESP_DEBUG_DEFAULT "web"
 // #define EMSESP_DEBUG_DEFAULT "mqtt"
 // #define EMSESP_DEBUG_DEFAULT "general"
@@ -52,7 +52,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "mqtt_post"
 // #define EMSESP_DEBUG_DEFAULT "api_wwmode"
 // #define EMSESP_DEBUG_DEFAULT "custom"
-#define EMSESP_DEBUG_DEFAULT "dump"
+// #define EMSESP_DEBUG_DEFAULT "dump"
 
 class Test {
   public:
