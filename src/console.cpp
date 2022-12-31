@@ -391,6 +391,11 @@ void EMSESPShell::add_console_commands() {
             }
 
             if (return_code == CommandRet::OK && json.size()) {
+                if (json.containsKey("api_data")) {
+                    JsonVariant data = json["api_data"];
+                    shell.println(data.as<String>());
+                    return;
+                }
                 serializeJsonPretty(doc, shell);
                 shell.println();
                 return;
