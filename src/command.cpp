@@ -116,13 +116,9 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     command_p = parse_command_string(command_p, id_n);
     if (command_p == nullptr) {
         // handle dead endpoints like api/system or api/boiler
-        // default to 'info' for SYSTEM, DALLASENSOR and ANALOGSENSOR, the other devices to 'values' for shortname version
+        // default to 'info' for SYSTEM, the other devices to 'values' for shortname version
         if (num_paths < (id_n > 0 ? 4 : 3)) {
-            if (device_type == EMSdevice::DeviceType::SYSTEM) {
-                command_p = F_(info);
-            } else {
-                command_p = F_(values);
-            }
+            command_p = device_type == EMSdevice::DeviceType::SYSTEM ? F_(info) : F_(values);
         } else {
             return message(CommandRet::NOT_FOUND, "missing or bad command", output);
         }
@@ -138,6 +134,9 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
             id_n += 8; // wwc1 has id 9
         } else if (input.containsKey("id")) {
             id_n = input["id"];
+        } else if (input.containsKey("hs")) {
+            id_n = input["hs"];
+            id_n += 18; // hs1 has id 19
         }
     }
 
@@ -271,7 +270,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 #if defined(EMSESP_DEBUG)
             LOG_DEBUG("[DEBUG] Calling %s command '%s' to retrieve attributes", dname, cmd);
 #endif
-            return EMSESP::get_device_value_info(output, cmd, id, device_type, device_id) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
+            return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
         }
     }
 

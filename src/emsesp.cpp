@@ -640,10 +640,12 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
 }
 
 // builds json with the detail of each value, for a specific EMS device type or the dallas sensor
-bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype, const uint8_t device_id) {
+bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     for (const auto & emsdevice : emsdevices) {
-        if (emsdevice->device_type() == devicetype && emsdevice->device_id() == device_id) {
-            return emsdevice->get_value_info(root, cmd, id);
+        if (emsdevice->device_type() == devicetype) {
+            if (emsdevice->get_value_info(root, cmd, id)) {
+                return true;
+            }
         }
     }
 
@@ -658,6 +660,10 @@ bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const in
         EMSESP::analogsensor_.get_value_info(root, cmd, id);
         return true;
     }
+
+    char error[100];
+    snprintf(error, sizeof(error), "cannot find values for entity '%s'", cmd);
+    root["message"] = error;
 
     return false;
 }

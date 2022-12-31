@@ -278,7 +278,7 @@ bool EMSdevice::has_tag(const uint8_t tag) const {
     return false;
 }
 
-// check if the device has a command on the with this tag.
+// check if the device has a command with this tag.
 bool EMSdevice::has_cmd(const char * cmd, const int8_t id) const {
     uint8_t tag = DeviceValueTAG::TAG_HC1 + id - 1;
     for (const auto & dv : devicevalues_) {
@@ -1420,10 +1420,6 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             return true;
         }
     }
-
-    char error[100];
-    snprintf(error, sizeof(error), "cannot find values for entity '%s'", cmd);
-    json["message"] = error;
 
     return false;
 }
