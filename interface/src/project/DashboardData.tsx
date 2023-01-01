@@ -74,8 +74,6 @@ import {
 
 import { useI18nContext } from '../i18n/i18n-react';
 
-import parseMilliseconds from 'parse-ms';
-
 const DashboardData: FC = () => {
   const { me } = useContext(AuthenticatedContext);
 
@@ -401,7 +399,10 @@ const DashboardData: FC = () => {
   const isCmdOnly = (dv: DeviceValue) => dv.v === '' && dv.c;
 
   const formatDurationMin = (duration_min: number) => {
-    const { days, hours, minutes } = parseMilliseconds(duration_min * 60000);
+    const days = Math.trunc((duration_min * 60000) / 86400000);
+    const hours = Math.trunc((duration_min * 60000) / 3600000) % 24;
+    const minutes = Math.trunc((duration_min * 60000) / 60000) % 60;
+
     let formatted = '';
     if (days) {
       formatted += LL.NUM_DAYS({ num: days }) + ' ';
