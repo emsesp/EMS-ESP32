@@ -234,7 +234,7 @@ const de: Translation = {
   OPTIONAL: 'Optional',
   FORMATTING: 'Formattierung',
   MQTT_FORMAT: 'Topic/Payload Format',
-  MQTT_NEST_1: 'Als Nester in in einem Gesamttopic',
+  MQTT_NEST_1: 'Eingebettet in einem Gesamttopic',
   MQTT_NEST_2: 'Als einzelne Topics',
   MQTT_RESPONSE: 'Veröffentliche die Kommandoantwort als `response` Topic',
   MQTT_PUBLISH_TEXT_1: 'Veröffentliche einzelne Werte bei Veränderung als eigene Topics',

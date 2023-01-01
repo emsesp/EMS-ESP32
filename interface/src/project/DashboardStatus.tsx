@@ -38,7 +38,6 @@ import * as EMSESP from './api';
 
 import type { Translation } from '../i18n/i18n-types';
 import { useI18nContext } from '../i18n/i18n-react';
-import parseMilliseconds from 'parse-ms';
 
 export const isConnected = ({ status }: Status) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
 
@@ -157,7 +156,11 @@ const DashboardStatus: FC = () => {
   };
 
   const formatDurationSec = (duration_sec: number) => {
-    const { days, hours, minutes, seconds } = parseMilliseconds(duration_sec * 1000);
+    const days = Math.trunc((duration_sec * 1000) / 86400000);
+    const hours = Math.trunc((duration_sec * 1000) / 3600000) % 24;
+    const minutes = Math.trunc((duration_sec * 1000) / 60000) % 60;
+    const seconds = Math.trunc((duration_sec * 1000) / 1000) % 60;
+
     let formatted = '';
     if (days) {
       formatted += LL.NUM_DAYS({ num: days }) + ' ';
