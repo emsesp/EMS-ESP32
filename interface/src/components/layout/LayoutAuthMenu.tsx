@@ -26,7 +26,7 @@ import { loadLocaleAsync } from '../../i18n/i18n-util.async';
 import { ReactComponent as NLflag } from '../../i18n/NL.svg';
 import { ReactComponent as DEflag } from '../../i18n/DE.svg';
 import { ReactComponent as GBflag } from '../../i18n/GB.svg';
-import { ReactComponent as SEflag } from '../../i18n/SE.svg';
+import { ReactComponent as SVflag } from '../../i18n/SV.svg';
 import { ReactComponent as PLflag } from '../../i18n/PL.svg';
 import { ReactComponent as NOflag } from '../../i18n/NO.svg';
 import { ReactComponent as FRflag } from '../../i18n/FR.svg';
@@ -99,9 +99,9 @@ const LayoutAuthMenu: FC = () => {
           <PLflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;PL
         </MenuItem>
-        <MenuItem key="se" value="se">
-          <SEflag style={{ width: 16, verticalAlign: 'middle' }} />
-          &nbsp;SE
+        <MenuItem key="sv" value="sv">
+          <SVflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;SV
         </MenuItem>
       </TextField>
 

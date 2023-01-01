@@ -9,7 +9,7 @@
 
 ## Added
 
-- Translations in Web UI and all device entity names (DE, NL, SE, PL, NO, FR) [#22](https://github.com/emsesp/EMS-ESP32/issues/22)
+- Translations in Web UI and all device entity names (DE, NL, SV, PL, NO, FR) [#22](https://github.com/emsesp/EMS-ESP32/issues/22)
 - Add support for Lolin C3 mini [#620](https://github.com/emsesp/EMS-ESP32/pull/620)
 - Add support for ESP32-S2 [#667](https://github.com/emsesp/EMS-ESP32/pull/667)
 - Add devices: Greenstar 30Ri boiler, Junkers FW500 thermostat, Buderus BC30 controller
