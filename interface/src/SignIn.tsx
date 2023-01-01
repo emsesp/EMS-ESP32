@@ -21,7 +21,7 @@ import { loadLocaleAsync } from './i18n/i18n-util.async';
 import { ReactComponent as NLflag } from './i18n/NL.svg';
 import { ReactComponent as DEflag } from './i18n/DE.svg';
 import { ReactComponent as GBflag } from './i18n/GB.svg';
-import { ReactComponent as SEflag } from './i18n/SE.svg';
+import { ReactComponent as SVflag } from './i18n/SV.svg';
 import { ReactComponent as PLflag } from './i18n/PL.svg';
 import { ReactComponent as NOflag } from './i18n/NO.svg';
 import { ReactComponent as FRflag } from './i18n/FR.svg';
@@ -134,9 +134,9 @@ const SignIn: FC = () => {
             <PLflag style={{ width: 24 }} />
             &nbsp;PL
           </Button>
-          <Button size="small" variant={locale === 'se' ? 'contained' : 'outlined'} onClick={() => selectLocale('se')}>
-            <SEflag style={{ width: 24 }} />
-            &nbsp;SE
+          <Button size="small" variant={locale === 'sv' ? 'contained' : 'outlined'} onClick={() => selectLocale('sv')}>
+            <SVflag style={{ width: 24 }} />
+            &nbsp;SV
           </Button>
         </Box>
 
