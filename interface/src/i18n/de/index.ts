@@ -122,7 +122,7 @@ const de: Translation = {
   LANGUAGE_ENTITIES: 'Sprache (für Geräteentitäten)',
   HIDE_LED: 'LED ausblenden',
   ENABLE_TELNET: 'Aktiviere Telnet Konsole',
-  ENABLE_ANALOG: 'Aktiviere Analogsensorsen',
+  ENABLE_ANALOG: 'Aktiviere Analogsensoren',
   CONVERT_FAHRENHEIT: 'Konvertiere Temperaturwerte in Fahrenheit',
   BYPASS_TOKEN: 'Zugriffstoken-Autorisierung bei API-Aufrufen umgehen',
   READONLY: 'Nur-Lese-Modus aktivieren (blockiert alle ausgehenden EMS Tx Write-Befehle)',
