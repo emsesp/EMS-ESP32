@@ -1232,14 +1232,14 @@ void Boiler::process_HpInConfig(std::shared_ptr<const Telegram> telegram) {
 
 // Boiler(0x08) -W-> Me(0x0B), HpHeaterConfig(0x0485)
 void Boiler::process_HpCooling(std::shared_ptr<const Telegram> telegram) {
-    has_update(pvCooling_, 21);
+    has_update(telegram, pvCooling_, 21);
 }
 
 // Boiler(0x08) -W-> Me(0x0B), HpHeaterConfig(0x0492), data: 03 00 00 04 00
 void Boiler::process_HpHeaterConfig(std::shared_ptr<const Telegram> telegram) {
-    has_update(maxHeatComp_, 2);
-    has_update(maxHeatHeat_, 3);
-    has_update(maxHeatDhw_, 4);
+    has_update(telegram, maxHeatComp_, 2);
+    has_update(telegram, maxHeatHeat_, 3);
+    has_update(telegram, maxHeatDhw_, 4);
 }
 
 // 0x2A - MC110Status
