@@ -1512,7 +1512,7 @@ bool Thermostat::set_tempDiffBoiler(const char * value, const int8_t id) {
 
 bool Thermostat::set_pvRaiseHeat(const char * value, const int8_t id) {
     int v;
-    if (Helpers::value2temperature(value, v, true)) {
+    if (Helpers::value2number(value, v)) {
         write_command(0x23E, 0, v, 0x23E);
         return true;
     }
@@ -1521,7 +1521,7 @@ bool Thermostat::set_pvRaiseHeat(const char * value, const int8_t id) {
 
 bool Thermostat::set_pvLowerCool(const char * value, const int8_t id) {
     int v;
-    if (Helpers::value2temperature(value, v, true)) {
+    if (Helpers::value2number(value, v)) {
         write_command(0x23E, 5, v, 0x23E);
         return true;
     }
@@ -3565,7 +3565,7 @@ void Thermostat::register_device_values() {
                               &pvRaiseHeat_,
                               DeviceValueType::INT,
                               FL_(pvRaiseHeat),
-                              DeviceValueUOM::DEGREES_R,
+                              DeviceValueUOM::K,
                               MAKE_CF_CB(set_pvRaiseHeat),
                               0,
                               5);
@@ -3573,7 +3573,7 @@ void Thermostat::register_device_values() {
                               &pvLowerCool_,
                               DeviceValueType::INT,
                               FL_(pvLowerCool),
-                              DeviceValueUOM::DEGREES_R,
+                              DeviceValueUOM::K,
                               MAKE_CF_CB(set_pvLowerCool),
                               -5,
                               0);

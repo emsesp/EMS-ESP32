@@ -489,7 +489,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueType::UINT,
                               DeviceValueNumOp::DV_NUMOP_MUL10,
                               FL_(auxMaxTemp),
-                              DeviceValueUOM::DEGREES,
+                              DeviceValueUOM::K,
                               MAKE_CF_CB(set_auxMaxTemp),
                               0,
                               10);
@@ -2290,7 +2290,7 @@ bool Boiler::set_auxHeatMode(const char * value, const int8_t id) {
 
 bool Boiler::set_auxMaxTemp(const char * value, const int8_t id) {
     float v;
-    if (Helpers::value2temperature(value, v)) {
+    if (Helpers::value2float(value, v)) {
         write_command(0x491, 14, (uint8_t)(v * 10), 0x491);
         return true;
     }
