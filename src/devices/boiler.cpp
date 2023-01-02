@@ -444,6 +444,18 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_maxHeatHeat));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &manDefrost_,
+                              DeviceValueType::BOOL,
+                              FL_(manDefrost),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_manDefrost));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &pvCooling_,
+                              DeviceValueType::BOOL,
+                              FL_(pvCooling),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_pvCooling));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &maxHeatDhw_,
                               DeviceValueType::ENUM,
                               FL_(enum_maxHeat),
@@ -472,6 +484,22 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               MAKE_CF_CB(set_additionalHeaterDelay),
                               10,
                               1000);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxMaxTemp_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_MUL10,
+                              FL_(auxMaxTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_auxMaxTemp),
+                              0,
+                              10);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxHeatMode_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_modetype),
+                              FL_(auxHeatMode),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_auxHeatMode));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpHystHeat_,
                               DeviceValueType::USHORT,
@@ -1202,6 +1230,11 @@ void Boiler::process_HpInConfig(std::shared_ptr<const Telegram> telegram) {
     has_update(hpInput[3].option, option, 12);
 }
 
+// Boiler(0x08) -W-> Me(0x0B), HpHeaterConfig(0x0485)
+void Boiler::process_HpCooling(std::shared_ptr<const Telegram> telegram) {
+    has_update(pvCooling_, 21);
+}
+
 // Boiler(0x08) -W-> Me(0x0B), HpHeaterConfig(0x0492), data: 03 00 00 04 00
 void Boiler::process_HpHeaterConfig(std::shared_ptr<const Telegram> telegram) {
     has_update(maxHeatComp_, 2);
@@ -1401,9 +1434,12 @@ void Boiler::process_HpPumps(std::shared_ptr<const Telegram> telegram) {
 
 // Boiler(0x08) -> All(0x00), ?(0x0491), data: 03 01 00 00 00 02 64 00 00 14 01 2C 00 0A 00 1E 00 1E 00 00 1E 0A 1E 05 05
 void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, manDefrost_, 0); // off/on
     has_update(telegram, auxHeaterOnly_, 1);
     has_update(telegram, auxHeaterOff_, 2);
+    has_update(telegram, auxHeatMode_, 4); // eco/comfort
     has_update(telegram, tempParMode_, 5);
+    has_update(telegram, auxMaxTemp_, 14);     // is *10
     has_update(telegram, auxHeaterDelay_, 16); // is / 10
 }
 
@@ -2238,6 +2274,42 @@ bool Boiler::set_additionalHeaterDelay(const char * value, const int8_t id) {
         v /= 10;
         uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
         write_command(0x491, 16, data, 2, 0x491);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_auxHeatMode(const char * value, const int8_t id) {
+    uint8_t v;
+    if (Helpers::value2enum(value, v, FL_(enum_modetype))) {
+        write_command(0x491, 4, v, 0x491);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_auxMaxTemp(const char * value, const int8_t id) {
+    float v;
+    if (Helpers::value2temperature(value, v)) {
+        write_command(0x491, 14, (uint8_t)(v * 10), 0x491);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_manDefrost(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x491, 0, v ? 1 : 0, 0x491);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_pvCooling(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x485, 21, v ? 1 : 0, 0x485);
         return true;
     }
     return false;

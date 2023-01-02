@@ -384,6 +384,12 @@ MAKE_PSTR_LIST(wwComfOffTemp, "wwcomfoff", "comfort switch off", "Komfort Aussch
 MAKE_PSTR_LIST(wwEcoOffTemp, "wwecooff", "eco switch off", "ECO Ausschalttemp", "Eco Uitschakeltemp.", "Ekoläge avstängningstemp.", "temperatura wyłączania w trybie eko", "", "Eco Temp. d'arrêt")
 MAKE_PSTR_LIST(wwEcoPlusOffTemp, "wwecoplusoff", "eco+ switch off", "ECO+ Ausschalttemp", "Eco+ Uitschakeltemp.", "Eko+ avstängningstemp.", "temperatura wyłączania w trybie eko+", "", "Eco+ Temp. d'arrêt")
 
+MAKE_PSTR_LIST(auxHeatMode, "auxheatrmode", "aux heater mode", "Modus Zusatzheizer", "", "", "", "", "")
+MAKE_PSTR_LIST(auxMaxTemp, "auxmaxtemp", "aux heater max temperature", "Zusatzheizer Maximaltemp.", "", "", "", "", "")
+MAKE_PSTR_LIST(manDefrost, "mandefrost", "manual defrost", "Manuelle Enteisung", "", "", "", "", "")
+MAKE_PSTR_LIST(pvCooling, "pvcooling", "Cooling only with PV", "Kühlen nur mit PV", "", "", "", "", "")
+
+
 // hybrid heatpump
 MAKE_PSTR_LIST(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride")
 MAKE_PSTR_LIST(switchOverTemp, "switchovertemp", "outside switchover temperature", "Außentemperatur für Umschaltung", "Schakeltemperatuur buitentemperatuur", "Utomhus Omställningstemperatur", "zewnętrzna temperatura przełączania", "utendørstemp styring", "basculement par température extérieure")
@@ -509,6 +515,8 @@ MAKE_PSTR_LIST(autodst, "autodst", "automatic change daylight saving time", "aut
 MAKE_PSTR_LIST(preheating, "preheating", "preheating in the clock program", "Vorheizen im Zeitprogramm", "Voorverwarming in het klokprogramma", "Förvärmning i tidsprogram", "podgrzewanie w programie czasowym", "forvarming i tidsprogram", "préchauffage dans programme horloge")
 MAKE_PSTR_LIST(offtemp, "offtemp", "temperature when mode is off", "Temperatur bei AUS", "Temperatuur bij UIT", "Temperatur Avslagen", "temperatura w trybie \"wył.\"", "temperatur avslått", "température lorsque mode désactivé")
 MAKE_PSTR_LIST(mixingvalves, "mixingvalves", "mixing valves", "Mischventile", "Mengkleppen", "Blandningsventiler", "zawory mieszające", "blandeventiler", "vannes mélange")
+MAKE_PSTR_LIST(pvRaiseHeat, "pvraiseheat", "raise heating with PV", "Heizanghebung mit PV", "", "", "", "", "")
+MAKE_PSTR_LIST(pvLowerCool, "pvlowercool", "lower cooling with PV", "Kühlabsenkung mit PV", "", "", "", "", "")
 
 // thermostat ww
 MAKE_PSTR_LIST(wwMode, "wwmode", "mode", "Modus", "Modus", "Läge", "tryb pracy", "modus", "mode")

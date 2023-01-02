@@ -212,6 +212,10 @@ class Boiler : public EMSdevice {
     uint8_t maxHeatHeat_;
     uint8_t maxHeatDhw_;
 
+    uint8_t  pvCooling_;
+    uint8_t  manDefrost_;
+    uint8_t  auxHeatMode_;
+    uint8_t  auxMaxTemp_;
     uint8_t  auxHeaterOnly_;
     uint8_t  auxHeaterOff_;
     uint8_t  auxHeaterStatus_;
@@ -274,6 +278,7 @@ class Boiler : public EMSdevice {
     void process_HpPool(std::shared_ptr<const Telegram> telegram);
     void process_HpInput(std::shared_ptr<const Telegram> telegram);
     void process_HpInConfig(std::shared_ptr<const Telegram> telegram);
+    void process_HpCooling(std::shared_ptr<const Telegram> telegram);
     void process_HpHeaterConfig(std::shared_ptr<const Telegram> telegram);
     void process_HybridHp(std::shared_ptr<const Telegram> telegram);
     void process_HpSilentMode(std::shared_ptr<const Telegram> telegram);
@@ -356,6 +361,10 @@ class Boiler : public EMSdevice {
     bool set_additionalHeater(const char * value, const int8_t id);
     bool set_additionalHeaterDelay(const char * value, const int8_t id);
     bool set_tempParMode(const char * value, const int8_t id);
+    bool set_auxHeatMode(const char * value, const int8_t id);
+    bool set_auxMaxTemp(const char * value, const int8_t id);
+    bool set_manDefrost(const char * value, const int8_t id);
+    bool set_pvCooling(const char * value, const int8_t id);
 
     bool        set_hpHyst(const char * value, const int8_t id);
     inline bool set_hpHystHeat(const char * value, const int8_t id) {
