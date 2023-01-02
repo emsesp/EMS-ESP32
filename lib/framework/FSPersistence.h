@@ -81,7 +81,7 @@ class FSPersistence {
         File settingsFile = _fs->open(_filePath, "w");
 
         // failed to open file, return false
-        if (!settingsFile) {
+        if (!settingsFile || !jsonObject.size()) {
 #if defined(EMSESP_DEBUG)
 #if defined(EMSESP_USE_SERIAL)
             Serial.println();
