@@ -1014,7 +1014,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
                     break;
                 }
                 if ((device_id >= EMSdevice::EMS_DEVICE_ID_HS1 && device_id <= EMSdevice::EMS_DEVICE_ID_HS16)) {
-                    device_p = &device;
+                    device_p              = &device;
                     device_p->device_type = DeviceType::HEATSOURCE;
                     break;
                 }
@@ -1084,6 +1084,10 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             device_type = DeviceType::BOILER;
             flags       = DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP;
             LOG_WARNING("Unknown EMS boiler. Using generic profile. Please report on GitHub.");
+        } else if (device_id >= 0x68 && device_id <= 0x6F) {
+            // test for https://github.com/emsesp/EMS-ESP32/issues/882
+            name        = "cascaded controller";
+            device_type = DeviceType::CONTROLLER;
         } else {
             LOG_WARNING("Unrecognized EMS device (device ID 0x%02X, no product ID). Please report on GitHub.", device_id);
             return false;
