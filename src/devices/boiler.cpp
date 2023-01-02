@@ -75,6 +75,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x48F, "HpTemperatures", false, MAKE_PF_CB(process_HpTemperatures));
         register_telegram_type(0x48A, "HpPool", true, MAKE_PF_CB(process_HpPool));
         register_telegram_type(0x4A2, "HpInput", true, MAKE_PF_CB(process_HpInput));
+        register_telegram_type(0x485, "HpCooling", true, MAKE_PF_CB(process_HpCooling));
         register_telegram_type(0x486, "HpInConfig", true, MAKE_PF_CB(process_HpInConfig));
         register_telegram_type(0x492, "HpHeaterConfig", true, MAKE_PF_CB(process_HpHeaterConfig));
 

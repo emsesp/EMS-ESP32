@@ -515,6 +515,7 @@ MAKE_PSTR_LIST(autodst, "autodst", "automatic change daylight saving time", "aut
 MAKE_PSTR_LIST(preheating, "preheating", "preheating in the clock program", "Vorheizen im Zeitprogramm", "Voorverwarming in het klokprogramma", "Förvärmning i tidsprogram", "podgrzewanie w programie czasowym", "forvarming i tidsprogram", "préchauffage dans programme horloge")
 MAKE_PSTR_LIST(offtemp, "offtemp", "temperature when mode is off", "Temperatur bei AUS", "Temperatuur bij UIT", "Temperatur Avslagen", "temperatura w trybie \"wył.\"", "temperatur avslått", "température lorsque mode désactivé")
 MAKE_PSTR_LIST(mixingvalves, "mixingvalves", "mixing valves", "Mischventile", "Mengkleppen", "Blandningsventiler", "zawory mieszające", "blandeventiler", "vannes mélange")
+MAKE_PSTR_LIST(pvEnable, "pvenable", "enable PV", "aktiviere PV", "", "", "", "", "")
 MAKE_PSTR_LIST(pvRaiseHeat, "pvraiseheat", "raise heating with PV", "Heizanghebung mit PV", "", "", "", "", "")
 MAKE_PSTR_LIST(pvLowerCool, "pvlowercool", "lower cooling with PV", "Kühlabsenkung mit PV", "", "", "", "", "")
 

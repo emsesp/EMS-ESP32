@@ -237,6 +237,7 @@ class Thermostat : public EMSdevice {
     uint8_t tempDiffBoiler_;  // relative temperature degrees
 
     // PV
+    uint8_t pvEnable_;
     uint8_t pvRaiseHeat_;
     uint8_t pvLowerCool_;
 
@@ -497,6 +498,7 @@ class Thermostat : public EMSdevice {
     bool set_tempDiffBoiler(const char * value, const int8_t id);
     bool set_roomsensor(const char * value, const int8_t id);
 
+    bool set_pvEnable(const char * value, const int8_t id);
     bool set_pvRaiseHeat(const char * value, const int8_t id);
     bool set_pvLowerCool(const char * value, const int8_t id);
 
