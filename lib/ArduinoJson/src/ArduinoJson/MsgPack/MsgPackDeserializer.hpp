@@ -37,7 +37,7 @@ class MsgPackDeserializer {
                                           NestingLimit nestingLimit) {
     DeserializationError::Code err;
 
-    uint8_t code = 0;  // TODO: why do we need to initialize this variable?
+    uint8_t code = 0;
     err = readByte(code);
     if (err)
       return err;
