@@ -69,8 +69,8 @@ const no: Translation = {
   SENSOR: 'Sensor',
   TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperaturesensorer',
-  WRITE_CMD_SENT: 'Skriv kommando sent', // TODO
-  WRITE_CMD_FAILED: 'Skriv kommando failed', // TODO
+  WRITE_CMD_SENT: 'Skriv kommando sent', // TODO translate
+  WRITE_CMD_FAILED: 'Skriv kommando failed', // TODO translate
   EMS_BUS_WARNING: 'EMS bussen koblet ned. Hvis denne advarselen fortsetter etter noen f¨sekunder sjekk instillinger og  prosessorkort',
   EMS_BUS_SCANNING: 'Søker etter EMS enheter...',
   CONNECTED: 'Tilkoblet',
@@ -249,10 +249,10 @@ const no: Translation = {
   MQTT_INT_HEARTBEAT: 'Heartbeat',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Standard',
-  MQTT_ENTITY_FORMAT: 'Entity ID format', // TODO
-  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)', // TODO
-  MQTT_ENTITY_FORMAT_1: 'Single instance, short name', // TODO
-  MQTT_ENTITY_FORMAT_2: 'Multiple instances, short name', // TODO
+  MQTT_ENTITY_FORMAT: 'Entity ID format', // TODO translate
+  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)', // TODO translate
+  MQTT_ENTITY_FORMAT_1: 'Single instance, short name', // TODO translate
+  MQTT_ENTITY_FORMAT_2: 'Multiple instances, short name', // TODO translate
   MQTT_CLEAN_SESSION: 'Benytt Clean Session',
   MQTT_RETAIN_FLAG: 'Alltid sett Retain flag',
   INACTIVE: 'Innaktiv',

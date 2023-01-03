@@ -69,8 +69,8 @@ const nl: Translation = {
   SENSOR: 'Sensor',
   TEMP_SENSOR: 'Temperatuur sensor',
   TEMP_SENSORS: 'Temperatuur Sensoren',
-  WRITE_CMD_SENT: 'Schrijf commando sent', // TODO
-  WRITE_CMD_FAILED: 'Schrijf commando failed', // TODO
+  WRITE_CMD_SENT: 'Schrijf commando sent', // TODO translate
+  WRITE_CMD_FAILED: 'Schrijf commando failed', // TODO translate
   EMS_BUS_WARNING: 'EMS bus niet gevonden. Als deze waarschuwing blijft staan na een paar seconden dan loop de instellingen na en in het bijzonder het apparaat type profiel na.',
   EMS_BUS_SCANNING: 'Scannen naar EMS apparaten...',
   CONNECTED: 'Verbonden',
@@ -249,10 +249,10 @@ const nl: Translation = {
   MQTT_INT_HEARTBEAT: 'Heartbeat',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Default',
-  MQTT_ENTITY_FORMAT: 'Entity ID format', // TODO
-  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)', // TODO
-  MQTT_ENTITY_FORMAT_1: 'Single instance, short name', // TODO
-  MQTT_ENTITY_FORMAT_2: 'Multiple instances, short name', // TODO
+  MQTT_ENTITY_FORMAT: 'Entity ID format', // TODO translate
+  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)', // TODO translate
+  MQTT_ENTITY_FORMAT_1: 'Single instance, short name', // TODO translate
+  MQTT_ENTITY_FORMAT_2: 'Multiple instances, short name', // TODO translate
   MQTT_CLEAN_SESSION: 'Clean Session aan',
   MQTT_RETAIN_FLAG: 'Retain flag aan',
   INACTIVE: 'Inactief',
