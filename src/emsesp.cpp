@@ -354,8 +354,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
     // do this in the order of factory classes to keep a consistent order when displaying
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : emsdevices) {
-            auto device_type = emsdevice->device_type();
-            if (emsdevice && (device_type == device_class.first)) {
+            if (emsdevice && (emsdevice->device_type() == device_class.first)) {
                 // print header, with device type translated
                 shell.printfln("%s: %s (%d)", emsdevice->device_type_2_device_name_translated(), emsdevice->to_string().c_str(), emsdevice->count_entities());
 
