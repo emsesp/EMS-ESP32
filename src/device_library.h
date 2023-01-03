@@ -30,7 +30,7 @@
 { 84, DeviceType::BOILER, "Logamax Plus GB022", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 95, DeviceType::BOILER, "Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3", DeviceFlags::EMS_DEVICE_FLAG_HT3},
 {115, DeviceType::BOILER, "Topline/GB162", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{121, DeviceType::BOILER, "Cascade MC40", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{121, DeviceType::BOILER, "Cascade MCM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {122, DeviceType::BOILER, "Proline", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {123, DeviceType::BOILER, "GBx72/Trendline/Cerapur/Greenstar Si/27i", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {131, DeviceType::BOILER, "GB212", DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -57,6 +57,7 @@
 { 89, DeviceType::CONTROLLER, "BC10 GB142", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 { 95, DeviceType::CONTROLLER, "HT3", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {114, DeviceType::CONTROLLER, "BC10", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{121, DeviceType::CONTROLLER, "MCM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {125, DeviceType::CONTROLLER, "BC25", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {152, DeviceType::CONTROLLER, "Controller", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {168, DeviceType::CONTROLLER, "Hybrid Heatpump", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
@@ -68,7 +69,6 @@
 {209, DeviceType::CONTROLLER, "ErP", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {218, DeviceType::CONTROLLER, "M200/RFM200", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x50
 {220, DeviceType::CONTROLLER, "BC30", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x16
-{121, DeviceType::CONTROLLER, "MC40", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {224, DeviceType::CONTROLLER, "9000i", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {229, DeviceType::CONTROLLER, "8700i", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {230, DeviceType::CONTROLLER, "BC Base", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09

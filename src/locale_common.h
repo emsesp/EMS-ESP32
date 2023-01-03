@@ -327,7 +327,7 @@ MAKE_PSTR_ENUM(enum_vr2Config, FL_(off), FL_(bypass))
 MAKE_PSTR_ENUM(enum_aPumpSignal, FL_(off), FL_(pwm), FL_(pwm_invers))
 MAKE_PSTR_ENUM(enum_bufBypass, FL_(no), FL_(mixer), FL_(valve))
 MAKE_PSTR_ENUM(enum_blockMode, FL_(off), FL_(auto), FL_(blocking))
-MAKE_PSTR_ENUM(enum_bufConfig, FL_(monovalent), FL_(bivalent))
+MAKE_PSTR_ENUM(enum_bufConfig, FL_(off), FL_(monovalent), FL_(bivalent))
 MAKE_PSTR_ENUM(enum_blockTerm, FL_(n_o), FL_(n_c))
 
 #pragma GCC diagnostic pop

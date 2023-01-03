@@ -887,7 +887,7 @@ void Thermostat::process_HybridSettings(std::shared_ptr<const Telegram> telegram
 // 0x23E PV settings
 void Thermostat::process_PVSettings(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, pvRaiseHeat_, 0);
-    has_update(telegram, pvEnable_, 3);
+    has_update(telegram, pvEnableWw_, 3);
     has_update(telegram, pvLowerCool_, 5);
 }
 
@@ -1511,7 +1511,7 @@ bool Thermostat::set_tempDiffBoiler(const char * value, const int8_t id) {
     return true;
 }
 
-bool Thermostat::set_pvEnable(const char * value, const int8_t id) {
+bool Thermostat::set_pvEnableWw(const char * value, const int8_t id) {
     bool v;
     if (Helpers::value2bool(value, v)) {
         write_command(0x23E, 3, v ? 0xFF : 0, 0x23E);
@@ -3572,11 +3572,11 @@ void Thermostat::register_device_values() {
                               1,
                               99);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &pvEnable_,
+                              &pvEnableWw_,
                               DeviceValueType::BOOL,
-                              FL_(pvEnable),
+                              FL_(pvEnableWw),
                               DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_pvEnable));
+                              MAKE_CF_CB(set_pvEnableWw));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &pvRaiseHeat_,
                               DeviceValueType::INT,

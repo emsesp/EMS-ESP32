@@ -26,7 +26,6 @@ uuid::log::Logger Boiler::logger_{F_(boiler), uuid::log::Facility::CONSOLE};
 
 Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-
     // register values for master boiler/cascade module
     // reserve_telegram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
 
@@ -444,18 +443,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(maxHeatHeat),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_maxHeatHeat));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &manDefrost_,
-                              DeviceValueType::BOOL,
-                              FL_(manDefrost),
-                              DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_manDefrost));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &pvCooling_,
-                              DeviceValueType::BOOL,
-                              FL_(pvCooling),
-                              DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_pvCooling));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &manDefrost_, DeviceValueType::BOOL, FL_(manDefrost), DeviceValueUOM::NONE, MAKE_CF_CB(set_manDefrost));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pvCooling_, DeviceValueType::BOOL, FL_(pvCooling), DeviceValueUOM::NONE, MAKE_CF_CB(set_pvCooling));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &maxHeatDhw_,
                               DeviceValueType::ENUM,
@@ -591,6 +580,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               MAKE_CF_CB(set_wwEcoPlusOffTemp),
                               48,
                               63);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &hpCircPumpWw_,
+                              DeviceValueType::BOOL,
+                              FL_(hpCircPumpWw),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_hpCircPumpWw));
     }
 
     // dhw - DEVICE_DATA_ww topic
@@ -1418,6 +1413,7 @@ void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpHystHeat_, 37); // is / 5
     has_update(telegram, hpHystCool_, 35); // is / 5, maybe offset swapped with pool
     has_update(telegram, hpHystPool_, 33); // is / 5
+    has_update(telegram, hpCircPumpWw_, 46);
 }
 
 // Boiler(0x08) -B-> All(0x00), ?(0x0488), data: 8E 00 00 00 00 00 01 03
@@ -2340,6 +2336,15 @@ bool Boiler::set_wwOffTemp(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2number(value, v)) {
         write_command(0x499, id, v, 0x499);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_hpCircPumpWw(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x484, 46, v ? 1 : 0, 0x484);
         return true;
     }
     return false;
