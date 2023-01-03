@@ -13,32 +13,35 @@ import { AiOutlineAlert } from 'react-icons/ai';
 import { AiOutlineChrome } from 'react-icons/ai';
 
 interface DeviceIconProps {
-  type: string;
+  type_id: number;
 }
 
-const DeviceIcon: FC<DeviceIconProps> = ({ type }) => {
-  switch (type) {
-    case 'Boiler':
-      return <CgSmartHomeBoiler />;
-    case 'Sensor':
+// matches emsdevice.h DeviceType
+const DeviceIcon: FC<DeviceIconProps> = ({ type_id }) => {
+  switch (type_id) {
+    case 1:
+    case 2:
       return <MdOutlineSensors />;
-    case 'Solar':
-      return <FaSolarPanel />;
-    case 'Thermostat':
+    case 3:
+      return <CgSmartHomeBoiler />;
+    case 4:
       return <MdThermostatAuto />;
-    case 'Mixer':
+    case 5:
       return <AiOutlineControl />;
-    case 'Heatpump':
+    case 6:
+      return <FaSolarPanel />;
+    case 7:
       return <GiHeatHaze />;
-    case 'Switch':
-      return <TiFlowSwitch />;
-    case 'Connect':
-      return <VscVmConnect />;
-    case 'Gateway':
+    case 8:
       return <AiOutlineGateway />;
-    case 'Alert':
+    case 9:
+      return <TiFlowSwitch />;
+    case 10:
+    case 11:
+      return <VscVmConnect />;
+    case 12:
       return <AiOutlineAlert />;
-    case 'Pump':
+    case 13:
       return <AiOutlineChrome />;
     default:
       return null;

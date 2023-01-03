@@ -240,10 +240,12 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     String old_local = settings.locale;
     settings.locale  = root["locale"] | EMSESP_DEFAULT_LOCALE;
+    check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
     EMSESP::system_.locale(settings.locale);
 #ifndef EMSESP_STANDALONE
     if (!old_local.equals(settings.locale)) {
-        add_flags(ChangeFlags::MQTT);
+        add_flags(ChangeFlags::RESTART); // force restart
+        // add_flags(ChangeFlags::MQTT);
     }
 #endif
 

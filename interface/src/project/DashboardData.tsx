@@ -142,7 +142,7 @@ const DashboardData: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 40px 100px repeat(1, minmax(0, 1fr)) 100px 40px;
+        --data-table-library_grid-template-columns: 40px 160px repeat(1, minmax(0, 1fr)) 100px 40px;
       `,
       BaseRow: `
         .td {
@@ -704,9 +704,9 @@ const DashboardData: FC = () => {
               {tableList.map((device: Device, index: number) => (
                 <Row key={device.id} item={device}>
                   <Cell stiff>
-                    <DeviceIcon type={device.t} />
+                    <DeviceIcon type_id={device.t} />
                   </Cell>
-                  <Cell stiff>{device.t}</Cell>
+                  <Cell stiff>{device.tn}</Cell>
                   <Cell>{device.n}</Cell>
                   <Cell stiff>{device.e}</Cell>
                   <Cell stiff>
@@ -719,7 +719,7 @@ const DashboardData: FC = () => {
               {(coreData.active_sensors > 0 || coreData.analog_enabled) && (
                 <Row key="sensor" item={{ id: 'sensor' }}>
                   <Cell>
-                    <DeviceIcon type="Sensor" />
+                    <DeviceIcon type_id={1} />
                   </Cell>
                   <Cell>Sensors</Cell>
                   <Cell>{LL.ATTACHED_SENSORS()}</Cell>
