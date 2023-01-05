@@ -72,6 +72,7 @@ MAKE_PSTR_WORD(publish)
 MAKE_PSTR_WORD(timeout)
 MAKE_PSTR_WORD(board_profile)
 MAKE_PSTR_WORD(setvalue)
+MAKE_PSTR_WORD(console)
 
 // for commands
 MAKE_PSTR_WORD(call)
