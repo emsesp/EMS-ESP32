@@ -355,8 +355,8 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_class.first)) {
-                // print header
-                shell.printfln("%s: %s (%d)", emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str(), emsdevice->count_entities());
+                // print header, with device type translated
+                shell.printfln("%s: %s (%d)", emsdevice->device_type_2_device_name_translated(), emsdevice->to_string().c_str(), emsdevice->count_entities());
 
                 DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN); // use max size
                 JsonObject          json = doc.to<JsonObject>();
@@ -829,7 +829,7 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 
 // find the device object that matches the deviceID and see if it has a matching telegram type handler
 // but only process if the telegram is sent to us or it's a broadcast (dest=0x00=all)
-// We also check for common telgram types, like the Version(0x02)
+// We also check for common telegram types, like the Version(0x02)
 // returns false if there are none found
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // if watching or reading...
@@ -950,12 +950,13 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
         }
     }
 
-    // for all device objects from emsdevice.h (UNKNOWN, SYSTEM, BOILER, THERMOSTAT, MIXER, SOLAR, HEATPUMP, GATEWAY, SWITCH, CONTROLLER, CONNECT)
+    // for all device objects from emsdevice.h
     // so we keep a consistent order
+    // don't translate the device type name
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_class.first)) {
-                shell.printf("%s: %s", emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
+                shell.printf("%s: %s", emsdevice->device_type_name(), emsdevice->to_string().c_str());
                 shell.println();
                 emsdevice->show_telegram_handlers(shell);
 

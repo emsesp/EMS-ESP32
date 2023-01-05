@@ -32,6 +32,21 @@
 // translations are in order en, de, nl, sv, pl, no, fr, ....
 // if there is no translation, it will default to en
 
+// device types, as display in Web and Console
+// TODO need completed translations
+MAKE_PSTR_LIST(boiler_device, "Boiler", "Kessel", "Boiler")
+MAKE_PSTR_LIST(thermostat_device, "Thermostat", "Thermostat", "Thermostaat")
+MAKE_PSTR_LIST(heatpump_device, "Heat Pump", "Wärmepumpe", "Warmtepomp")
+MAKE_PSTR_LIST(solar_device, "Solar Module", "Solarmodul", "Solar Module")
+MAKE_PSTR_LIST(connect_device, "Connect Module", "Verbindungsmodul", "Connect Module")
+MAKE_PSTR_LIST(mixer_device, "Mixer Module", "Mischermodul", "Mixer Module")
+MAKE_PSTR_LIST(controller_device, "Controller Module", "Kontrollmodul", "Controller Module")
+MAKE_PSTR_LIST(switch_device, "Switch Module","Schaltmodul","Switch Module")
+MAKE_PSTR_LIST(gateway_device, "Gateway Module","Gateway Modul","Gateway Module")
+MAKE_PSTR_LIST(alert_device, "Alert Module","Alarmmodul","Alert Module")
+MAKE_PSTR_LIST(pump_device, "Pump Module","Pumpenmodul","Pump Module")
+MAKE_PSTR_LIST(heatsource_device, "Heatsource","Heizquelle","Heatsource")
+
 // commands
 MAKE_PSTR_LIST(info_cmd, "lists all values", "Liste aller Werte")
 MAKE_PSTR_LIST(commands_cmd, "lists all commands", "Liste aller Kommandos")
@@ -134,7 +149,7 @@ MAKE_PSTR_LIST(vacuum, "vacuum", "Vakuum", "vacuum", "Vakuum", "próżnia", "vak
 MAKE_PSTR_LIST(co2_optimized, "co2 optimized", "CO2 optimiert", "CO2 geoptimaliseerd", "CO2-optimerad", "optymalizacja CO2", "co2 optimalisert", "optimisé en CO2")
 MAKE_PSTR_LIST(cost_optimized, "cost optimized", "kostenoptimiert", "kosten geoptimaliseerd", "kostnadsoptimerad", "optymalizacja kosztów", "kostnadsoptimalisert", "optimisé en coût")
 MAKE_PSTR_LIST(outside_temp_switched, "outside temp switched", "Außentemp. gesteuert", "Buitentemp. gestuurd", "Utomhustemp korrigerad", "temperatura zewn. przeł.", "utetemp optimalisert", "contrôle par temp. ext.")
-MAKE_PSTR_LIST(co2_cost_mix, "co2 cost mix", "Kostenmix", "Kostenmix", "Kostnadsmix", "mieszany koszt CO2", "", "coût mixte CO2")
+MAKE_PSTR_LIST(co2_cost_mix, "co2 cost mix", "Kostenmix", "Kostenmix", "Kostnadsmix", "mieszany koszt CO2", "", "coût mixte CO2") // TODO translate
 MAKE_PSTR_LIST(analog, "analog", "analog", "analoog", "analog", "analogowy", "analog", "analogique")
 MAKE_PSTR_LIST(normal, "normal", "normal", "normaal", "normal", "normalny", "normal", "normal")
 MAKE_PSTR_LIST(blocking, "blocking", "Blockierung", "Blokkering", "Blockering", "blokowanie", "blokkering", "bloquant")
@@ -448,7 +463,6 @@ MAKE_PSTR_LIST(wwSelTempLow, "wwseltemplow", "selected lower temperature", "unte
 MAKE_PSTR_LIST(wwSelTempOff, "wwseltempoff", "selected temperature for off", "Solltemperatur bei AUS", "Streeftemperatuur bij UIT", "Vald tempereatur för AV", "temperatura gdy grzanie wyłączone", "valgt tempereatur for av", "température sélectionnée pour arrêt")
 MAKE_PSTR_LIST(wwSelTempSingle, "wwseltempsingle", "single charge temperature", "Solltemperatur Einmalladung", "Streeftemperatuur enkele lading", "Temperatur Engångsladdning", "temperatura dodatkowej ciepłej wody", "temp engangsoppvarming", "température charge unique")
 MAKE_PSTR_LIST(wwCylMiddleTemp, "wwcylmiddletemp", "cylinder middle temperature (TS3)", "Speichertemperatur Mitte", "Buffer temperatuur midden", "Cylinder Temperatur Mitten (TS3)", "temperatura środka cylindra (TS3)", "vanntank midten temperatur (TS3)", "température moyenne ballon (TS3)")
-
 MAKE_PSTR_LIST(wwSetTemp, "wwsettemp", "set temperature", "Solltemperatur", "Streeftemperatuut", "Börtempertur", "temperatura zadana", "innstilt temperatur", "régler température")
 MAKE_PSTR_LIST(wwType, "wwtype", "type", "Typ", "type", "Typ", "typ", "type", "type")
 MAKE_PSTR_LIST(wwComfort, "wwcomfort", "comfort", "Komfort", "Comfort", "Komfort", "komfort", "komfort", "confort")
@@ -483,12 +497,11 @@ MAKE_PSTR_LIST(wwHystOn, "wwhyston", "hysteresis on temperature", "Einschalttemp
 MAKE_PSTR_LIST(wwHystOff, "wwhystoff", "hysteresis off temperature", "Ausschalttemperaturdifferenz", "Uitschakeltemperatuurverschil", "Hysteres AV-temperatur", "histereza wyłączania", "utkoblingstemperaturforskjell", "hystérésis température extinction")
 MAKE_PSTR_LIST(wwProgMode, "wwprogmode", "program", "Programmmodus", "Programma", "Program", "program", "program", "programme")
 MAKE_PSTR_LIST(wwCircProg, "wwcircprog", "circulation program", "Zirkulationsprogramm", "Circulatieprogramma", "Cirkulationsprogram", "program cyrkulacji c.w.u.", "sirkulationsprogram", "programme circulation")
-MAKE_PSTR_LIST(wwMaxTemp, "wwmaxtemp", "maximum temperature", "Maximale Temperatur", "Maximale temperatuur", "Maximal Temperatur", "temperatura maksymalna", "", "température max")
+MAKE_PSTR_LIST(wwMaxTemp, "wwmaxtemp", "maximum temperature", "Maximale Temperatur", "Maximale temperatuur", "Maximal Temperatur", "temperatura maksymalna", "", "température max") // TODO translate
 MAKE_PSTR_LIST(wwOneTimeKey, "wwonetimekey", "one time key function", "Einmalladungstaste", "Knop voor eenmalig laden buffer", "Engångsfunktion", "przycisk jednorazowego ogrzania", "engangsknapp varme", "fonction touche unique")
 MAKE_PSTR_LIST(wwSolarTemp, "wwsolartemp", "solar boiler temperature", "Solarboiler Temperatur", "Zonneboiler temperatuur", "Solpanel Temp", "temperatura zasobnika solarnego", "", "température chaudière solaire") // TODO translate
 
 // mqtt values / commands
-
 MAKE_PSTR_LIST(switchtime, "switchtime", "program switchtime", "Programm Schaltzeit", "Programma schakeltijd", "Program Bytestid", "program czasowy", "programbyttetid", "heure commutation programme")
 MAKE_PSTR_LIST(switchtime1, "switchtime1", "own1 program switchtime", "Programm 1 Schaltzeit", "Schakeltijd programma 1", "Program 1 Bytestid", "program przełączania 1", "byttetidprogram 1", "heure de commutation programme 1")
 MAKE_PSTR_LIST(switchtime2, "switchtime2", "own2 program switchtime", "Programm 2 Schaltzeit", "Schakeltijd programma 2", "Program 2 Bytestid", "program przełączania 2", "byttetid program 2", "heure de changement programme 2")
@@ -525,7 +538,6 @@ MAKE_PSTR_LIST(wwSetTempLow, "wwsettemplow", "set low temperature", "untere Soll
 MAKE_PSTR_LIST(wwWhenModeOff, "wwwhenmodeoff", "when thermostat mode off", "bei Thermostatmodus AUS", "Als Thermostaat op UIT", "när Termostatläge är AV", "gdy wyłączono na termostacie", "når modus er av", "lorsque mode thermostat off")
 MAKE_PSTR_LIST(wwExtra1, "wwextra1", "circuit 1 extra", "Kreis 1 Extra", "Circuit 1 extra", "Krets 1 Extra", "obieg dodatkowy 1", "ekstra krets 1", "circuit 1 extra")
 MAKE_PSTR_LIST(wwExtra2, "wwextra2", "circuit 2 extra", "Kreis 2 Extra", "Circuit 2 extra", "Kets 2 Extra", "obieg dodatkowy 2", "ekstra krets 2", "circuit 2 extra")
-
 MAKE_PSTR_LIST(wwCharge, "wwcharge", "charge", "Laden", "Laden", "Ladda", "grzanie", "lade", "charge")
 MAKE_PSTR_LIST(wwChargeDuration, "wwchargeduration", "charge duration", "Ladedauer", "Laadtijd", "Laddtid", "czas grzania dodatkowej ciepłej wody", "ladetid", "durée charge")
 MAKE_PSTR_LIST(wwDisinfect, "wwdisinfect", "disinfection", "Desinfektion", "Desinfectie", "Desinfektion", "dezynfekcja termiczna", "desinfeksjon", "désinfection")
@@ -549,7 +561,7 @@ MAKE_PSTR_LIST(heattemp, "heattemp", "heat temperature", "Heizen Temperatur", "T
 MAKE_PSTR_LIST(nighttemp, "nighttemp", "night temperature", "Nachttemperatur", "Nachttemperatuur", "Nattemperatur", "temperatura w nocy", "nattemperatur", "température de nuit")
 MAKE_PSTR_LIST(nighttemp2, "nighttemp", "night temperature T1", "Nachttemperatur T1", "Nachttemperatuur T1", "Nattemperatur T1", "temperatura w nocy T1", "nattemperatur T1", "température nuit T1")
 MAKE_PSTR_LIST(ecotemp, "ecotemp", "eco temperature", "eco Temperatur", "Temperatuur eco", "Eko-temperatur", "temperatura w trybie eko", "øko temperatur", "température éco")
-MAKE_PSTR_LIST(manualtemp, "manualtemp", "manual temperature", "manuelle Temperatur", "temperatuur handmatig", "Temperatur Manuell", "temperatura ustawiona ręcznie", "manuell temperatur", "température manuelle")
+MAKE_PSTR_LIST(manualtemp, "manualtemp", "manual temperature", "manuelle Temperatur", "Temperatuur handmatig", "Temperatur Manuell", "temperatura ustawiona ręcznie", "manuell temperatur", "température manuelle")
 MAKE_PSTR_LIST(tempautotemp, "tempautotemp", "temporary set temperature automode", "temporäre Solltemperatur", "Streeftemperatuur automodus tijdelijk", "Temporär Aktivering av Auto-läge", "zadana temperatura w pomieszczenia w trybie \"auto\" (tymczasowa)", "temporær valgt temp i automodus", "température temporaire mode automatique")
 MAKE_PSTR_LIST(remoteseltemp, "remoteseltemp", "temporary set temperature from remote", "temporäre Solltemperatur Remote", "Temperatuur van afstandsbedieding", "Temperatur från fjärruppkoppling", "zadana zdalnie temperatura a pomieszczeniu (tymczasowa)", "temporær valgt temp fra fjernbetjening", "température temporaire depuis télécommande")
 MAKE_PSTR_LIST(comforttemp, "comforttemp", "comfort temperature", "Komforttemperatur", "Comforttemperatuur", "Komforttemperatur", "temperatura w trybie komfort", "komforttemperatur", "température confort")
@@ -579,13 +591,11 @@ MAKE_PSTR_LIST(holidaymode, "holidaymode", "holiday mode", "Urlaubsbetrieb", "Va
 MAKE_PSTR_LIST(flowtempoffset, "flowtempoffset", "flow temperature offset for mixer", "Vorlauftemperaturanhebung", "Mixer aanvoertemperatuur offset", "Temperaturkorrigering Flödestemp. Blandningsventil", "korekta temperatury przepływu dla miksera", "temperaturkorrigering av blandingsventil", "décalage température de bascule pour mélangeur")
 MAKE_PSTR_LIST(reducemode, "reducemode", "reduce mode", "Absenkmodus", "Gereduceerde modus", "Reducerat Läge", "tryb zredukowany/obniżony", "", "mode réduction") // TODO translate
 MAKE_PSTR_LIST(noreducetemp, "noreducetemp", "no reduce below temperature", "Durchheizen unter", "Reduceermodus onderbreken onder", "Inaktivera reducering under", "bez redukcji poniżej temperatury", "inaktiver redusert nedre temp", "pas de réduction en dessous température")
-
 MAKE_PSTR_LIST(reducetemp, "reducetemp", "off/reduce switch temperature", "Absenkmodus unter", "Onderste afschakeltemperatuur", "Avslag/Reducera under", "tryb zredukowany poniżej temperatury", "nedre avstengningstemperatur", "arrêt/réduction température bascule")
 MAKE_PSTR_LIST(vacreducetemp, "vacreducetemp", "vacations off/reduce switch temperature", "Urlaub Absenkmodus unter", "Vakantiemodus onderste afschakeltemperatuur", "Helg Avslag/Reducering under", "tryb urlopowy poniżej temperatury", "feriemodus nedre utkoblingstemperatur", "vacances – arrêt/réduction température bascule")
 MAKE_PSTR_LIST(vacreducemode, "vacreducemode", "vacations reduce mode", "Urlaub Absenkmodus", "Vakantie afschakelmodus", "Helg reduceringsläge", "redukcja w trakcie urlopu", "ferieavstengningsmodus", "mode réduction vacances")
 MAKE_PSTR_LIST(nofrostmode, "nofrostmode", "nofrost mode", "Frostschutz Modus", "Vorstbeveiligingsmodus", "Frostskyddsläge", "temperatura wiodąca dla ochrony przed zamarzaniem", "frostbeskyttelsesmodus", "mode protection gel")
 MAKE_PSTR_LIST(remotetemp, "remotetemp", "room temperature from remote", "Raumtemperatur Remote", "Ruimtetemperatuur van afstandsbediening", "Rumstemperatur från fjärr", "temperatura w pomieszczeniu (z termostatu)", "romstemperatur fra fjernbetjening", "température pièce depuis télécommande")
-
 MAKE_PSTR_LIST(wwHolidays, "wwholidays", "holiday dates", "Feiertage", "Feestdagen", "Helgdagar", "dni świąteczne", "feriedager varmtvann", "dates vacances")
 MAKE_PSTR_LIST(wwVacations, "wwvacations", "vacation dates", "Urlaubstage", "Vakantiedagen", "Semesterdatum Varmvatten", "dni urlopowe", "ferie dato varmtvann", "dates vacances")
 MAKE_PSTR_LIST(holidays, "holidays", "holiday dates", "Feiertage", "Feestdagen", "Helgdatum", "święta", "helligdager", "dates vacances")
@@ -631,8 +641,6 @@ MAKE_PSTR_LIST(solarPumpTurnoffDiff, "turnoffdiff", "pump turn off difference", 
 MAKE_PSTR_LIST(pump2MinMod, "pump2minmod", "minimum pump 2 modulation", "minimale Modulation Pumpe 2", "Minimale modulatie pomp 2", "Min Modulering Pump 2", "minimalna modulacja pompy 2", "minimum pumpmodulering 2", "modulation minimale pompe 2")
 MAKE_PSTR_LIST(solarPump2TurnonDiff, "turnondiff2", "pump 2 turn on difference", "Einschalthysterese Pumpe 2", "Inschakelhysterese pomp 2", "Aktiveringshysteres Pump 2", "histereza załączenia pompy 2", "slå på hysteresepumpe 2", "différence activation pompe 2")
 MAKE_PSTR_LIST(solarPump2TurnoffDiff, "turnoffdiff2", "pump 2 turn off difference", "Ausschalthysterese Pumpe 2", "Uitschakelhysterese pomp 2", "Avslagshysteres Pump 2", "histereza wyłączenia pompy 2", "slå av hysteresepumpe 2", "différence arrêt pompe 2")
-
-
 MAKE_PSTR_LIST(collectorTemp, "collectortemp", "collector temperature (TS1)", "Kollektortemperatur (TS1)", "Collectortemperatuur (TS1)", "Kollektor Temperatur (TS1)", "temperatura kolektora (TS1)", "kollektor temperatur (TS1)", "température collecteur (TS1)")
 MAKE_PSTR_LIST(collector2Temp, "collector2temp", "collector 2 temperature (TS7)", "Kollector 2 Temperatur (TS7)", "Collector 2 temperatuur (TS7)", "Kollektor 2 Temperatur (TS7)", "temperatura kolektora 2 (TS7)", "kollektor 2 temperatur (TS7)", "température collecteur 2 (TS7)")
 MAKE_PSTR_LIST(cylBottomTemp, "cylbottomtemp", "cylinder bottom temperature (TS2)", "Speicher Bodentemperatur (TS2)", "Bodemtemperatuur zonneboiler (TS2)", "Cylindertemperatur Botten (TS2)", "temperatura na spodzie zasobnika (TS2)", "beredertemp i bunn (TS2)", "température fond de cylindre (TS2)")

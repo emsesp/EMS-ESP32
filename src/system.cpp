@@ -1351,7 +1351,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             for (const auto & emsdevice : EMSESP::emsdevices) {
                 if (emsdevice && (emsdevice->device_type() == device_class.first)) {
                     JsonObject obj    = devices.createNestedObject();
-                    obj["type"]       = emsdevice->device_type_name();
+                    obj["type"]       = emsdevice->device_type_name(); // non translated name
                     obj["name"]       = emsdevice->name();
                     obj["device id"]  = Helpers::hextoa(emsdevice->device_id());
                     obj["product id"] = emsdevice->product_id();

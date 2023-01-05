@@ -68,7 +68,7 @@ std::string EMSdevice::uom_to_string(uint8_t uom) {
     }
 }
 
-std::string EMSdevice::brand_to_string() const {
+const std::string EMSdevice::brand_to_string() {
     switch (brand_) {
     case EMSdevice::Brand::BOSCH:
         return "Bosch";
@@ -89,7 +89,7 @@ std::string EMSdevice::brand_to_string() const {
     }
 }
 
-// returns the name of the MQTT topic to use for a specific device, without the base
+// returns the short name of the device, used in MQTT and console commands, all lowercase
 const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     switch (device_type) {
     case DeviceType::SYSTEM:
@@ -127,7 +127,41 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     }
 }
 
-// returns device_type from a string
+// returns the translated name of a specific EMS device
+// excludes dallassensor, analogsensor and system
+const char * EMSdevice::device_type_2_device_name_translated() {
+    switch (device_type_) {
+    case DeviceType::BOILER:
+        return Helpers::translated_word(FL_(boiler_device));
+    case DeviceType::THERMOSTAT:
+        return Helpers::translated_word(FL_(thermostat_device));
+    case DeviceType::HEATPUMP:
+        return Helpers::translated_word(FL_(heatpump_device));
+    case DeviceType::SOLAR:
+        return Helpers::translated_word(FL_(solar_device));
+    case DeviceType::CONNECT:
+        return Helpers::translated_word(FL_(connect_device));
+    case DeviceType::MIXER:
+        return Helpers::translated_word(FL_(mixer_device));
+    case DeviceType::CONTROLLER:
+        return Helpers::translated_word(FL_(controller_device));
+    case DeviceType::SWITCH:
+        return Helpers::translated_word(FL_(switch_device));
+    case DeviceType::GATEWAY:
+        return Helpers::translated_word(FL_(gateway_device));
+    case DeviceType::ALERT:
+        return Helpers::translated_word(FL_(alert_device));
+    case DeviceType::PUMP:
+        return Helpers::translated_word(FL_(pump_device));
+    case DeviceType::HEATSOURCE:
+        return Helpers::translated_word(FL_(heatsource_device));
+    default:
+        break;
+    }
+    return Helpers::translated_word(FL_(unknown));
+}
+
+// returns device_type from a non-translated EN string
 uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!topic) {
         return DeviceType::UNKNOWN;
@@ -183,11 +217,9 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     return DeviceType::UNKNOWN;
 }
 
-// return name of the device type, capitalized
-std::string EMSdevice::device_type_name() const {
-    std::string s = device_type_2_device_name(device_type_);
-    s[0]          = toupper(s[0]);
-    return s;
+// return name of the device type, not translated
+const char * EMSdevice::device_type_name() {
+    return device_type_2_device_name(device_type_);
 }
 
 // 0=unknown, 1=bosch, 2=junkers, 3=buderus, 4=nefit, 5=sieger, 11=worcester
@@ -213,7 +245,7 @@ uint8_t EMSdevice::decode_brand(uint8_t value) {
 }
 
 // returns string of a human friendly description of the EMS device
-std::string EMSdevice::to_string() const {
+const std::string EMSdevice::to_string() {
     // for devices that haven't been lookup yet, don't show all details
     if (product_id_ == 0) {
         return std::string(name_) + " (DeviceID:" + Helpers::hextoa(device_id_) + ")";
@@ -228,12 +260,13 @@ std::string EMSdevice::to_string() const {
 }
 
 // returns out brand + device name
-std::string EMSdevice::to_string_short() const {
+// translated
+const std::string EMSdevice::to_string_short() {
     if (brand_ == Brand::NO_BRAND) {
-        return device_type_name() + ": " + name_;
+        return std::string(device_type_2_device_name_translated()) + ": " + name_;
     }
 
-    return device_type_name() + ": " + brand_to_string() + " " + name_;
+    return std::string(device_type_2_device_name_translated()) + ": " + brand_to_string() + " " + name_;
 }
 
 // for each telegram that has the fetch value set (true) do a read request

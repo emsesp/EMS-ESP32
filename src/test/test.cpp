@@ -153,8 +153,6 @@ bool Test::run_test(const char * command, int8_t id) {
         // HC1 on 0x20
         uart_telegram({0xA0, 00, 0xFF, 00, 01, 0xD7, 00, 00, 00, 0x80, 00, 00, 00, 00, 03, 0xC5});
 
-        // TODO
-
         return true;
     }
 
@@ -639,7 +637,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // toggle mode
         for (const auto & emsdevice : EMSESP::emsdevices) {
             Serial.print("Custom: ");
-            Serial.print(emsdevice->device_type_name().c_str());
+            Serial.print(emsdevice->device_type_name());
             Serial.print(" uniqueid=");
             Serial.println(emsdevice->unique_id());
 

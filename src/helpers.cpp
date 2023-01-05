@@ -718,7 +718,8 @@ uint8_t Helpers::count_items(const char * const ** list) {
 }
 
 // returns char pointer to translated description or fullname
-const char * Helpers::translated_word(const char * const * strings) {
+// if force_en is true always take the EN non-translated word
+const char * Helpers::translated_word(const char * const * strings, const bool force_en) {
     uint8_t language_index = EMSESP::system_.language_index();
     uint8_t index          = 0;
 
@@ -727,7 +728,7 @@ const char * Helpers::translated_word(const char * const * strings) {
     }
 
     // see how many translations we have for this entity. if there is no translation for this, revert to EN
-    if (Helpers::count_items(strings) >= language_index + 1 && strlen(strings[language_index])) {
+    if (force_en || (Helpers::count_items(strings) >= language_index + 1 && strlen(strings[language_index]))) {
         index = language_index;
     }
     return strings[index];
