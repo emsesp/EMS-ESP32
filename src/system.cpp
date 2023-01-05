@@ -620,7 +620,7 @@ bool System::heartbeat_json(JsonObject & output) {
     }
 
 #ifndef EMSESP_STANDALONE
-    output["freemem"] = ESP.getFreeHeap() / 1024;     // kilobytes
+    output["freemem"]   = ESP.getFreeHeap() / 1024;     // kilobytes
     output["max_alloc"] = ESP.getMaxAllocHeap() / 1024; // kilobytes
 #endif
 
