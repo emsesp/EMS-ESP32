@@ -55,6 +55,7 @@
 #include "dallassensor.h"
 #include "analogsensor.h"
 #include "console.h"
+#include "console_stream.h"
 #include "shower.h"
 #include "roomcontrol.h"
 #include "command.h"
@@ -62,25 +63,16 @@
 
 #define WATCH_ID_NONE 0 // no watch id set
 
-#ifndef EMSESP_STANDALONE
-#define EMSESP_JSON_SIZE_HA_CONFIG 1024 // for HA config payloads, using StaticJsonDocument
-#else
-#define EMSESP_JSON_SIZE_HA_CONFIG 2024 // for HA config payloads, using StaticJsonDocument
-#endif
-#define EMSESP_JSON_SIZE_SMALL 256       // for smaller json docs, using StaticJsonDocument
-#define EMSESP_JSON_SIZE_MEDIUM 768      // for medium json docs from ems devices, using StaticJsonDocument
-#define EMSESP_JSON_SIZE_LARGE 1024      // for large json docs from ems devices, like boiler or thermostat data, using StaticJsonDocument
-#define EMSESP_JSON_SIZE_MEDIUM_DYN 1024 // for large json docs, using DynamicJsonDocument
-#define EMSESP_JSON_SIZE_LARGE_DYN 2048  // for very large json docs, using DynamicJsonDocument
+// uses StaticJsonDocument
+#define EMSESP_JSON_SIZE_SMALL 256
+#define EMSESP_JSON_SIZE_MEDIUM 768
+#define EMSESP_JSON_SIZE_LARGE 1024 // used in forming HA config payloads, also in *AsyncJsonResponse
 
-#ifndef EMSESP_STANDALONE
-#define EMSESP_JSON_SIZE_XLARGE_DYN 4096 // for very very large json docs, using DynamicJsonDocument
-#else
-#define EMSESP_JSON_SIZE_XLARGE_DYN 16384 // for very very large json docs, using DynamicJsonDocument
-#endif
-
-#define EMSESP_JSON_SIZE_XXLARGE_DYN 16384  // for extra very very large json docs, using DynamicJsonDocument
-#define EMSESP_JSON_SIZE_XXXLARGE_DYN 20480 // web output (maybe for 4 hc)
+// used in larger buffers like DynamicJsonDocument
+#define EMSESP_JSON_SIZE_XLARGE 2048
+#define EMSESP_JSON_SIZE_XXLARGE 4096
+#define EMSESP_JSON_SIZE_XXXLARGE 16384
+#define EMSESP_JSON_SIZE_XXXXLARGE 20480 // web output
 
 // helpers for callback functions
 #define MAKE_PF_CB(__f) [&](std::shared_ptr<const Telegram> t) { __f(t); }                  // for Process Function callbacks to EMSDevice::process_function_p
@@ -94,13 +86,15 @@ using DeviceValueState = emsesp::DeviceValue::DeviceValueState;
 using DeviceValueTAG   = emsesp::DeviceValue::DeviceValueTAG;
 using DeviceValueNumOp = emsesp::DeviceValue::DeviceValueNumOp;
 
-
-class Shower; // forward declaration for compiler
+// forward declarations for compiler
+class EMSESPShell;
+class Shower;
 
 class EMSESP {
   public:
-    static void start();
-    static void loop();
+    ~EMSESP() = default;
+    virtual void start();
+    virtual void loop();
 
     static void publish_device_values(uint8_t device_type);
     static void publish_other_values();
@@ -219,7 +213,6 @@ class EMSESP {
     static System       system_;
     static DallasSensor dallassensor_;
     static AnalogSensor analogsensor_;
-    static Console      console_;
     static Shower       shower_;
     static RxService    rxservice_;
     static TxService    txservice_;
@@ -235,11 +228,9 @@ class EMSESP {
 
     static uuid::log::Logger logger();
 
+    EMSESP();
+
   private:
-    EMSESP() = delete;
-
-    static uuid::log::Logger logger_;
-
     static std::string device_tostring(const uint8_t device_id);
     static void        process_UBADevices(std::shared_ptr<const Telegram> telegram);
     static void        process_version(std::shared_ptr<const Telegram> telegram);
@@ -272,6 +263,19 @@ class EMSESP {
     static uint16_t wait_validate_;
     static bool     wait_km_;
     static uint32_t last_fetch_;
+
+    // UUID stuff
+    static constexpr auto &        serial_console_          = Serial;
+    static constexpr unsigned long SERIAL_CONSOLE_BAUD_RATE = 115200;
+
+    std::shared_ptr<EMSESPShell> shell_;
+#ifndef EMSESP_STANDALONE
+    uuid::telnet::TelnetService telnet_;
+#endif
+
+  protected:
+    //  EMSESP();
+    static uuid::log::Logger logger_;
 };
 
 } // namespace emsesp

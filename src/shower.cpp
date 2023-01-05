@@ -150,7 +150,7 @@ void Shower::set_shower_state(bool state, bool force) {
     if ((Mqtt::ha_enabled()) && (!ha_configdone_ || force)) {
         ha_configdone_ = true;
 
-        StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
+        StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
 
         doc["name"] = "Shower Active";
 
