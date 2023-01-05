@@ -102,6 +102,7 @@ export interface SensorData {
 export interface CoreData {
   connected: boolean;
   devices: Device[];
+  s_n: string;
   active_sensors: number;
   analog_enabled: boolean;
 }
