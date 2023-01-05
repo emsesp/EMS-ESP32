@@ -624,7 +624,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "custom") {
-        shell.printfln(F("Testing custom entities"));
+        shell.printfln("Testing custom entities");
 
         Mqtt::ha_enabled(true);
         Mqtt::send_response(false);
@@ -1382,7 +1382,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (command == "mqtt2") {
         shell.printfln("Testing MQTT large payloads...");
 
-        DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN);
+        DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXXLARGE);
 
         char key[8];
         char value[8];
@@ -1597,10 +1597,6 @@ void Test::rx_telegram(const std::vector<uint8_t> & rx_data) {
     }
     data[i] = EMSESP::rxservice_.calculate_crc(data, i);
     EMSESP::rxservice_.add(data, len + 1);
-
-#if defined(EMSESP_STANDALONE)
-    EMSESP::loop();
-#endif
 }
 
 // simulates a telegram straight from UART, but without the CRC which is added automatically
@@ -1614,10 +1610,6 @@ void Test::uart_telegram(const std::vector<uint8_t> & rx_data) {
     }
     data[i] = EMSESP::rxservice_.calculate_crc(data, i);
     EMSESP::incoming_telegram(data, i + 1);
-
-#if defined(EMSESP_STANDALONE)
-    EMSESP::loop();
-#endif
 }
 
 // takes raw string, assuming it contains the CRC. This is what is output from 'watch raw'
@@ -1655,10 +1647,6 @@ void Test::uart_telegram_withCRC(const char * rx_data) {
     }
 
     EMSESP::incoming_telegram(data, count + 1);
-
-#if defined(EMSESP_STANDALONE)
-    EMSESP::loop();
-#endif
 }
 
 // takes raw string, adds CRC to end
@@ -1698,10 +1686,6 @@ void Test::uart_telegram(const char * rx_data) {
     data[count + 1] = EMSESP::rxservice_.calculate_crc(data, count + 1); // add CRC
 
     EMSESP::incoming_telegram(data, count + 2);
-
-#if defined(EMSESP_STANDALONE)
-    EMSESP::loop();
-#endif
 }
 
 // Sends version telegram. Version is hardcoded to 1.0
