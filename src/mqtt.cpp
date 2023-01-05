@@ -307,9 +307,9 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
         }
     }
 
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL>     input_doc;
-    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE_DYN> output_doc;
-    JsonObject                                     input, output;
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> input_doc;
+    DynamicJsonDocument                        output_doc(EMSESP_JSON_SIZE_XLARGE);
+    JsonObject                                 input, output;
 
     // convert payload into a json doc
     // if the payload doesn't not contain the key 'value' or 'data', treat the whole payload as the 'value'
@@ -482,7 +482,10 @@ void Mqtt::start() {
 
     // create last will topic with the base prefixed. It has to be static because asyncmqttclient destroys the reference
     static char will_topic[MQTT_TOPIC_MAX_SIZE];
-    snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "%s/status", mqtt_base_.c_str());
+    if (!mqtt_base_.empty()) {
+        snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "%s/status", mqtt_base_.c_str());
+    }
+
     mqttClient_->setWill(will_topic, 1, true, "offline"); // with qos 1, retain true
 
     mqttClient_->onMessage([this](const char * topic, const char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
@@ -601,7 +604,7 @@ void Mqtt::on_connect() {
 // e.g. homeassistant/sensor/ems-esp/status/config
 // all the values from the heartbeat payload will be added as attributes to the entity state
 void Mqtt::ha_status() {
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
+    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
 
     char uniq[70];
     if (Mqtt::entity_format() == 2) {
@@ -647,6 +650,7 @@ void Mqtt::ha_status() {
     publish_system_ha_sensor_config(DeviceValueType::INT, "Uptime (sec)", "uptime_sec", DeviceValueUOM::SECONDS);
     publish_system_ha_sensor_config(DeviceValueType::BOOL, "NTP status", "ntp_status", DeviceValueUOM::CONNECTIVITY);
     publish_system_ha_sensor_config(DeviceValueType::INT, "Free memory", "freemem", DeviceValueUOM::KB);
+    publish_system_ha_sensor_config(DeviceValueType::INT, "Max Alloc", "max_alloc", DeviceValueUOM::KB);
     publish_system_ha_sensor_config(DeviceValueType::INT, "MQTT fails", "mqttfails", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, "Rx received", "rxreceived", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, "Rx fails", "rxfails", DeviceValueUOM::NONE);
@@ -896,7 +900,7 @@ void Mqtt::process_queue() {
 // create's a ha sensor config topic from a device value object
 // and also takes a flag (create_device_config) used to also create the main HA device config. This is only needed for one entity
 void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model, const std::string & brand, const bool remove, const bool create_device_config) {
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> dev_json;
+    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> dev_json;
 
     // always create the ids
     JsonArray ids = dev_json.createNestedArray("ids");
@@ -943,8 +947,8 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
 
 // publish HA sensor for System using the heartbeat tag
 void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom) {
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
-    JsonObject                                     dev_json = doc.createNestedObject("dev");
+    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
+    JsonObject                                 dev_json = doc.createNestedObject("dev");
 
     JsonArray ids = dev_json.createNestedArray("ids");
     ids.add("ems-esp");
@@ -1061,7 +1065,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     }
 
     // build the payload
-    DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
+    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
     doc["uniq_id"]   = uniq_id;
     doc["object_id"] = uniq_id; // same as unique_id
 
@@ -1331,7 +1335,7 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/seltemp", hc_num);
     snprintf(mode_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/mode", hc_num);
 
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
+    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
 
     doc["~"]             = mqtt_base_;
     doc["uniq_id"]       = uniq_id_s;
