@@ -17,31 +17,52 @@ interface DeviceIconProps {
 }
 
 // matches emsdevice.h DeviceType
+const enum DeviceType {
+  SYSTEM = 0,
+  DALLASSENSOR,
+  ANALOGSENSOR,
+  BOILER,
+  THERMOSTAT,
+  MIXER,
+  SOLAR,
+  HEATPUMP,
+  GATEWAY,
+  SWITCH,
+  CONTROLLER,
+  CONNECT,
+  ALERT,
+  PUMP,
+  GENERIC,
+  HEATSOURCE,
+  UNKNOWN
+}
+
 const DeviceIcon: FC<DeviceIconProps> = ({ type_id }) => {
   switch (type_id) {
-    case 1:
-    case 2:
+    case DeviceType.DALLASSENSOR:
+    case DeviceType.ANALOGSENSOR:
       return <MdOutlineSensors />;
-    case 3:
+    case DeviceType.BOILER:
+    case DeviceType.HEATSOURCE:
       return <CgSmartHomeBoiler />;
-    case 4:
+    case DeviceType.THERMOSTAT:
       return <MdThermostatAuto />;
-    case 5:
+    case DeviceType.MIXER:
       return <AiOutlineControl />;
-    case 6:
+    case DeviceType.SOLAR:
       return <FaSolarPanel />;
-    case 7:
+    case DeviceType.HEATPUMP:
       return <GiHeatHaze />;
-    case 8:
+    case DeviceType.GATEWAY:
       return <AiOutlineGateway />;
-    case 9:
+    case DeviceType.SWITCH:
       return <TiFlowSwitch />;
-    case 10:
-    case 11:
+    case DeviceType.CONTROLLER:
+    case DeviceType.CONNECT:
       return <VscVmConnect />;
-    case 12:
+    case DeviceType.ALERT:
       return <AiOutlineAlert />;
-    case 13:
+    case DeviceType.PUMP:
       return <AiOutlineChrome />;
     default:
       return null;

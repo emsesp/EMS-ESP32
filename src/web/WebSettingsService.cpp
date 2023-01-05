@@ -245,7 +245,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 #ifndef EMSESP_STANDALONE
     if (!old_local.equals(settings.locale)) {
         add_flags(ChangeFlags::RESTART); // force restart
-        // add_flags(ChangeFlags::MQTT);
     }
 #endif
 
