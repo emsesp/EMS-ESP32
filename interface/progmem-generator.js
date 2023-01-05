@@ -48,7 +48,7 @@ class ProgmemGenerator {
           const variable = 'ESP_REACT_DATA_' + fileInfo.length;
           const mimeType = mime.lookup(relativeFilePath);
           var size = 0;
-          writeStream.write('const uint8_t ' + variable + '[] PROGMEM = {');
+          writeStream.write('const uint8_t ' + variable + '[] = {');
           const zipBuffer = zlib.gzipSync(buffer);
           zipBuffer.forEach((b) => {
             if (!(size % bytesPerLine)) {
