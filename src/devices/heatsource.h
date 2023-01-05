@@ -47,6 +47,12 @@ class Heatsource : public EMSdevice {
     // uint8_t valveBypass_;   // VR2 position unknown
     // uint8_t heatSource_;    // OEV
 
+    uint8_t burner_;      // bit 5, offset 1, 54E
+    uint8_t aPump_;       // bit 0, offset 1, 54E
+    uint8_t heatRequest_; // offset 2, percent
+    uint8_t blockRemain_; // offset 24, 550 min
+    // uint8_t blocking_; // bool remain == 0
+
     // Settings:
     uint8_t  vr2Config_;     // pos 12: off(00)/Keelbypass(01)/(hc1pump(02) only standalone)
     uint8_t  ahsActivated_;  // pos 00: Alternate heat source activation: No(00),Yes(01)

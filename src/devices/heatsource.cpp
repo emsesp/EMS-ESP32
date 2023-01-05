@@ -161,6 +161,12 @@ Heatsource::Heatsource(uint8_t device_type, uint8_t device_id, uint8_t product_i
             DeviceValueTAG::TAG_AHS1 + ahs, &blockHyst_, DeviceValueType::INT, FL_(blockHyst), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_blockHyst), 0, 50);
         register_device_value(
             DeviceValueTAG::TAG_AHS1 + ahs, &releaseWait_, DeviceValueType::UINT, FL_(releaseWait), DeviceValueUOM::MINUTES, MAKE_CF_CB(set_releaseWait), 0, 240);
+
+        register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &burner_, DeviceValueType::BOOL, FL_(burner), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &aPump_, DeviceValueType::BOOL, FL_(aPump), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &heatRequest_, DeviceValueType::UINT, FL_(heatRequest), DeviceValueUOM::PERCENT);
+        // register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &blocking_, DeviceValueType::BOOL, FL_(blocking), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &blockRemain_, DeviceValueType::UINT, FL_(blockRemain), DeviceValueUOM::MINUTES);
     }
 
     // cascaded heating sources, only some values per individual heatsource (hs)
@@ -226,14 +232,11 @@ void Heatsource::process_amTempMessage(std::shared_ptr<const Telegram> telegram)
 void Heatsource::process_amStatusMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, aPumpMod_, 0); // PR1
     // offset 1: bitfield 01-pump on, 02-VR1 opening, 04-VR1 closing, 08-VB1 opening, 10-VB1 closing
-    // uint8_t stat = aPump_ | setValveBuffer_ << 3 | setValveReturn_ << 1;
-    // if (telegram->read_value(stat, 1)) {
-    //     has_update(aPump_, stat & 0x01);
-    //     has_update(valveBuffer_, (stat >> 3) & 0x03);
-    //     has_update(valveReturn_, (stat >> 1) & 0x03);
-    // }
     // actually we dont know the offset of VR2
     // has_update(telegram, valveBypass_, ?); // VR2
+    has_bitupdate(telegram, burner_, 1, 5);
+    has_bitupdate(telegram, aPump_, 1, 0);
+    has_update(telegram, heatRequest_, 2); // percent
     has_update(telegram, valveReturn_, 4); // VR1, percent
     has_update(telegram, valveBuffer_, 5); // VB1, percent
 }
@@ -275,6 +278,8 @@ void Heatsource::process_amCommandMessage(std::shared_ptr<const Telegram> telegr
 // Rx: 60 00 FF 00 04 50 00 FF 00 FF FF 00 0D 00 01 00 00 00 00 01 03 01 00 03 00 2D 19 C8 02 94 00 4A
 // Rx: 60 00 FF 19 04 50 00 FF FF 39
 void Heatsource::process_amExtraMessage(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, blockRemain_, 24); // minutes
+    // has_update(telegram, blocking_, 24);    // bool
 }
 
 #pragma GCC diagnostic pop
