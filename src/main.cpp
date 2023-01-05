@@ -18,10 +18,12 @@
 
 #include "emsesp.h"
 
+static emsesp::EMSESP application;
+
 void setup() {
-    emsesp::EMSESP::start();
+    application.start();
 }
 
 void loop() {
-    emsesp::EMSESP::loop();
+    application.loop();
 }
