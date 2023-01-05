@@ -18,6 +18,10 @@
 
 #include "emsesp.h"
 
+static_assert(uuid::thread_safe, "uuid-common must be thread-safe");
+static_assert(uuid::log::thread_safe, "uuid-log must be thread-safe");
+static_assert(uuid::console::thread_safe, "uuid-console must be thread-safe");
+
 namespace emsesp {
 
 AsyncWebServer webServer(80);
@@ -49,12 +53,15 @@ uuid::log::Logger EMSESP::logger() {
     return logger_;
 }
 
+#ifndef EMSESP_STANDALONE
+uuid::syslog::SyslogService System::syslog_;
+#endif
+
 // The services
 RxService    EMSESP::rxservice_;    // incoming Telegram Rx handler
 TxService    EMSESP::txservice_;    // outgoing Telegram Tx handler
 Mqtt         EMSESP::mqtt_;         // mqtt handler
 System       EMSESP::system_;       // core system services
-Console      EMSESP::console_;      // telnet and serial console
 DallasSensor EMSESP::dallassensor_; // Dallas sensors
 AnalogSensor EMSESP::analogsensor_; // Analog sensors
 Shower       EMSESP::shower_;       // Shower logic
@@ -358,7 +365,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                 // print header, with device type translated
                 shell.printfln("%s: %s (%d)", emsdevice->device_type_2_device_name_translated(), emsdevice->to_string().c_str(), emsdevice->count_entities());
 
-                DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN); // use max size
+                DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXXLARGE); // use max size
                 JsonObject          json = doc.to<JsonObject>();
 
                 emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::CONSOLE);
@@ -529,7 +536,7 @@ void EMSESP::reset_mqtt_ha() {
 // this will also create the HA /config topic
 // generate_values_json is called to build the device value (dv) object array
 void EMSESP::publish_device_values(uint8_t device_type) {
-    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
+    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE);
     JsonObject          json         = doc.to<JsonObject>();
     bool                need_publish = false;
     bool                nested       = (Mqtt::is_nested());
@@ -1322,10 +1329,57 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     }
 }
 
+// fetch devices one by one
+void EMSESP::scheduled_fetch_values() {
+    static uint8_t no = 0;
+    if (no || (uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
+        if (!no) {
+            last_fetch_ = uuid::get_uptime();
+            no          = 1;
+        }
+
+        if (txservice_.tx_queue_empty()) {
+            uint8_t i = 0;
+            for (const auto & emsdevice : emsdevices) {
+                if (++i >= no) {
+                    emsdevice->fetch_values();
+                    no++;
+                    return;
+                }
+            }
+            no = 0;
+        }
+    }
+}
+
+// EMSESP main class
+
+EMSESP::EMSESP()
+#ifndef EMSESP_STANDALONE
+    : telnet_([this](Stream & stream, const IPAddress & addr, uint16_t port) -> std::shared_ptr<uuid::console::Shell> {
+        return std::make_shared<emsesp::EMSESPConsole>(*this, stream, addr, port);
+    })
+#endif
+{
+}
+
 // start all the core services
 // the services must be loaded in the correct order
 void EMSESP::start() {
-    console_.start_serial();
+    serial_console_.begin(SERIAL_CONSOLE_BAUD_RATE);
+
+    shell_ = std::make_shared<EMSESPConsole>(*this, serial_console_, true);
+    shell_->maximum_log_messages(100);
+    shell_->start();
+#if defined(EMSESP_DEBUG)
+    shell_->log_level(uuid::log::Level::DEBUG);
+#else
+    shell_->log_level(uuid::log::Level::TRACE);
+#endif
+
+#if defined(EMSESP_STANDALONE)
+    shell_->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when running tests
+#endif
 
 // start the file system
 #ifndef EMSESP_STANDALONE
@@ -1333,6 +1387,12 @@ void EMSESP::start() {
         Serial.println("LittleFS Mount Failed. EMS-ESP stopped.");
         return;
     }
+#endif
+
+#ifndef EMSESP_STANDALONE
+    // start telnet
+    telnet_.default_write_timeout(1000);
+    telnet_.start();
 #endif
 
 // do a quick scan of the filesystem to see if we have a /config folder
@@ -1378,13 +1438,21 @@ void EMSESP::start() {
     webCustomizationService.begin(); // load the customizations
 
     // start telnet service if it's enabled
+    // default idle is 10 minutes, default write timeout is 0 (automatic)
+    // note, this must be started after the network/wifi for ESP32 otherwise it'll crash
     if (system_.telnet_enabled()) {
-        console_.start_telnet();
+#ifndef EMSESP_STANDALONE
+        telnet_.start();
+        telnet_.initial_idle_timeout(3600);  // in sec, one hour idle timeout
+        telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
+#endif
     }
 
     // start all the EMS-ESP services
-    mqtt_.start();   // mqtt init
+    mqtt_.start(); // mqtt init
+
     system_.start(); // starts commands, led, adc, button, network, syslog & uart
+
     LOG_INFO(("Starting EMS-ESP version %s (hostname: %s)"), EMSESP_APP_VERSION, system_.hostname().c_str()); // welcome message
 
     shower_.start();       // initialize shower timer and shower alert
@@ -1403,29 +1471,6 @@ void EMSESP::start() {
 #endif
 
     webServer.begin(); // start the web server
-}
-
-// fetch devices one by one
-void EMSESP::scheduled_fetch_values() {
-    static uint8_t no = 0;
-    if (no || (uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
-        if (!no) {
-            last_fetch_ = uuid::get_uptime();
-            no          = 1;
-        }
-
-        if (txservice_.tx_queue_empty()) {
-            uint8_t i = 0;
-            for (const auto & emsdevice : emsdevices) {
-                if (++i >= no) {
-                    emsdevice->fetch_values();
-                    no++;
-                    return;
-                }
-            }
-            no = 0;
-        }
-    }
 }
 
 // main loop calling all services
@@ -1447,10 +1492,15 @@ void EMSESP::loop() {
         scheduled_fetch_values();
     }
 
-    console_.loop(); // telnet/serial console
+    uuid::loop();
 
-    // https://github.com/emsesp/EMS-ESP32/issues/78#issuecomment-877599145
-    // delay(1); // helps telnet catch up. don't think its needed in ESP32 >3.1.0?
+#ifndef EMSESP_STANDALONE
+    if (system_.telnet_enabled()) {
+        telnet_.loop();
+    }
+#endif
+
+    Shell::loop_all(); // consoles
 }
 
 } // namespace emsesp
