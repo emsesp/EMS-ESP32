@@ -101,7 +101,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     }
 
     // output json buffer
-    size_t buffer   = EMSESP_JSON_SIZE_XXLARGE_DYN;
+    size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE;
     auto * response = new PrettyAsyncJsonResponse(false, buffer);
     while (!response->getSize()) {
         delete response;

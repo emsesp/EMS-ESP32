@@ -120,7 +120,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM_DYN);
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE);
     JsonObject root     = response->getRoot();
 
     root["status"]      = EMSESP::bus_status(); // 0, 1 or 2

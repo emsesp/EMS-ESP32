@@ -70,7 +70,7 @@ void WebDataService::scan_devices(AsyncWebServerRequest * request) {
 // this is used in the dashboard and contains all ems device information
 // /coreData endpoint
 void WebDataService::core_data(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE);
     JsonObject root     = response->getRoot();
 
     // list is already sorted by device type
@@ -105,7 +105,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
 // /sensorData endpoint
 // the "sensors" and "analogs" are arrays and must exist
 void WebDataService::sensor_data(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE);
     JsonObject root     = response->getRoot();
 
     // dallas sensors
@@ -166,7 +166,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
 // Compresses the JSON using MsgPack https://msgpack.org/index.html
 void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE_DYN;
+        size_t buffer   = EMSESP_JSON_SIZE_XXXXLARGE;
         auto * response = new MsgpackAsyncJsonResponse(false, buffer);
         while (!response->getSize()) {
             delete response;
