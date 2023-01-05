@@ -84,6 +84,7 @@ const DashboardData: FC = () => {
   const [coreData, setCoreData] = useState<CoreData>({
     connected: true,
     devices: [],
+    s_n: '',
     active_sensors: 0,
     analog_enabled: false
   });
@@ -721,7 +722,7 @@ const DashboardData: FC = () => {
                   <Cell>
                     <DeviceIcon type_id={1} />
                   </Cell>
-                  <Cell>Sensors</Cell>
+                  <Cell>{coreData.s_n}</Cell>
                   <Cell>{LL.ATTACHED_SENSORS()}</Cell>
                   <Cell>{coreData.active_sensors}</Cell>
                   <Cell>

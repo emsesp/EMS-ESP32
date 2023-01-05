@@ -37,14 +37,16 @@
 MAKE_PSTR_LIST(boiler_device, "Boiler", "Kessel", "Boiler")
 MAKE_PSTR_LIST(thermostat_device, "Thermostat", "Thermostat", "Thermostaat")
 MAKE_PSTR_LIST(heatpump_device, "Heat Pump", "Wärmepumpe", "Warmtepomp")
-MAKE_PSTR_LIST(solar_device, "Solar Module", "Solar Module", "Solar Module")
-MAKE_PSTR_LIST(connect_device, "Connect Module", "Connect Module", "Connect Module")
-MAKE_PSTR_LIST(mixer_device, "Mixer Module", "Mixer Module", "Mixer Module")
-MAKE_PSTR_LIST(controller_device, "Controller Module", "Controller Module", "Controller Module")
-MAKE_PSTR_LIST(switch_device, "Switch Module","Switch Module","Switch Module")
-MAKE_PSTR_LIST(gateway_device, "Gateway Module","Gateway Module","Gateway Module")
-MAKE_PSTR_LIST(alert_device, "Alert Module","Alert Module","Alert Module")
-MAKE_PSTR_LIST(pump_device, "Pump Module","Pump Module","Pump Module")
+MAKE_PSTR_LIST(solar_device, "Solar Module", "Solarmodul", "Solar Module")
+MAKE_PSTR_LIST(connect_device, "Connect Module", "Verbindungsmodul", "Connect Module")
+MAKE_PSTR_LIST(mixer_device, "Mixer Module", "Mischermodul", "Mixer Module")
+MAKE_PSTR_LIST(controller_device, "Controller Module", "Kontrollmodul", "Controller Module")
+MAKE_PSTR_LIST(switch_device, "Switch Module", "Schaltmodul", "Switch Module")
+MAKE_PSTR_LIST(gateway_device, "Gateway Module", "Gateway Modul", "Gateway Module")
+MAKE_PSTR_LIST(alert_device, "Alert Module", "Alarmmodul", "Alert Module")
+MAKE_PSTR_LIST(pump_device, "Pump Module", "Pumpenmodul", "Pump Module")
+MAKE_PSTR_LIST(heatsource_device, "Heatsource", "Heizquelle", "Heatsource")
+MAKE_PSTR_LIST(sensors_device, "Sensors", "Sensoren", "Sensoren", "Sensorer", "czujniki", "Sensorer", "Capteurs")
 
 // commands
 MAKE_PSTR_LIST(info_cmd, "lists all values", "Liste aller Werte")
@@ -89,7 +91,7 @@ MAKE_PSTR_LIST(tag_wwc7, "wwc7", "WWK7", "wwc7", "VVK7", "CWU7", "wwc7", "wwc7")
 MAKE_PSTR_LIST(tag_wwc8, "wwc8", "WWK8", "wwc8", "VVK8", "CWU8", "wwc8", "wwc8")
 MAKE_PSTR_LIST(tag_wwc9, "wwc9", "WWK9", "wwc9", "VVK9", "CWU9", "wwc9", "wwc9")
 MAKE_PSTR_LIST(tag_wwc10, "wwc10", "WWK10", "wwc10", "VVK10", "CWU10", "wwc10", "wwc10")
-MAKE_PSTR_LIST(tag_ahs, "ahs", "AHQ", "ahs", "AVK", "AŹC", "ahs", "ahs")
+MAKE_PSTR_LIST(tag_ahs1, "ahs1", "AHQ1", "ahs1", "AVK1", "AŹC1", "ahs1", "ahs1")
 MAKE_PSTR_LIST(tag_hs1, "hs1", "hs1", "hs1", "VK1", "ŹC1", "hs1", "hs1")
 MAKE_PSTR_LIST(tag_hs2, "hs2", "hs2", "hs2", "VK2", "ŹC2", "hs2", "hs2")
 MAKE_PSTR_LIST(tag_hs3, "hs3", "hs3", "hs3", "VK3", "ŹC3", "hs3", "hs3")
@@ -148,15 +150,15 @@ MAKE_PSTR_LIST(vacuum, "vacuum", "Vakuum", "vacuum", "Vakuum", "próżnia", "vak
 MAKE_PSTR_LIST(co2_optimized, "co2 optimized", "CO2 optimiert", "CO2 geoptimaliseerd", "CO2-optimerad", "optymalizacja CO2", "co2 optimalisert", "optimisé en CO2")
 MAKE_PSTR_LIST(cost_optimized, "cost optimized", "kostenoptimiert", "kosten geoptimaliseerd", "kostnadsoptimerad", "optymalizacja kosztów", "kostnadsoptimalisert", "optimisé en coût")
 MAKE_PSTR_LIST(outside_temp_switched, "outside temp switched", "Außentemp. gesteuert", "Buitentemp. gestuurd", "Utomhustemp korrigerad", "temperatura zewn. przeł.", "utetemp optimalisert", "contrôle par temp. ext.")
-MAKE_PSTR_LIST(co2_cost_mix, "co2 cost mix", "Kostenmix", "Kostenmix", "Kostnadsmix", "mieszany koszt CO2", "", "coût mixte CO2")
+MAKE_PSTR_LIST(co2_cost_mix, "co2 cost mix", "Kostenmix", "Kostenmix", "Kostnadsmix", "mieszany koszt CO2", "", "coût mixte CO2") // TODO translate
 MAKE_PSTR_LIST(analog, "analog", "analog", "analoog", "analog", "analogowy", "analog", "analogique")
 MAKE_PSTR_LIST(normal, "normal", "normal", "normaal", "normal", "normalny", "normal", "normal")
 MAKE_PSTR_LIST(blocking, "blocking", "Blockierung", "Blokkering", "Blockering", "blokowanie", "blokkering", "bloquant")
 MAKE_PSTR_LIST(extern, "extern", "extern", "extern", "extern", "zewnętrzny", "ekstern", "externe")
 MAKE_PSTR_LIST(intern, "intern", "intern", "intern", "intern", "wewnętrzny", "intern", "interne")
 MAKE_PSTR_LIST(lower, "lower", "niedirger", "lager", "lägre", "mniejszy", "nedre", "inférieur")
-MAKE_PSTR_LIST(error, "error", "Fehler", "error", "error", "błąd", "", "erreur")
-MAKE_PSTR_LIST(na, "n/a", "n/a", "n/a", "n/a", "nd.", "", "n/c")
+MAKE_PSTR_LIST(error, "error", "Fehler", "error", "error", "błąd", "", "erreur") // TODO translate
+MAKE_PSTR_LIST(na, "n/a", "n/a", "n/a", "n/a", "nd.", "", "n/c") // TODO translate
 
 // boiler
 MAKE_PSTR_LIST(time, "time", "Zeit", "Tijd", "Tid", "godzina", "tid", "heure")
@@ -171,8 +173,8 @@ MAKE_PSTR_LIST(intelligent, "intelligent", "Intelligent", "Intelligent", "Intell
 MAKE_PSTR_LIST(flow, "flow", "Durchfluss", "Volumestroom", "Flöde", "przepływ", "strømme", "débit")
 MAKE_PSTR_LIST(manual, "manual", "Manuell", "Hamdmatig", "Manuell", "ręczny", "manuell", "manuel")
 MAKE_PSTR_LIST(buffer, "buffer", "Speicher", "Buffer", "Buffert", "bufor", "buffer", "buffer")
-MAKE_PSTR_LIST(bufferedflow, "buffered flow", "Durchlaufspeicher", "Doorstroombuffer", "Buffertflöde", "przepływ buforowany", "bufret strømning", "")
-MAKE_PSTR_LIST(layeredbuffer, "layered buffer", "Schichtspeicher", "Gelaagde buffer", "Lagrad buffert", "bufor warstwowy", "lagdelt buffer", "")
+MAKE_PSTR_LIST(bufferedflow, "buffered flow", "Durchlaufspeicher", "Doorstroombuffer", "Buffertflöde", "przepływ buforowany", "bufret strømning", "") // TODO translate
+MAKE_PSTR_LIST(layeredbuffer, "layered buffer", "Schichtspeicher", "Gelaagde buffer", "Lagrad buffert", "bufor warstwowy", "lagdelt buffer", "") // TODO translate
 MAKE_PSTR_LIST(maintenance, "maintenance", "Wartung", "Onderhoud", "Underhåll", "przegląd", "vedlikehold", "maintenance")
 MAKE_PSTR_LIST(heating, "heating", "Heizen", "Verwarmen", "Uppvärmning", "ogrzewanie", "oppvarming", "chauffage")
 MAKE_PSTR_LIST(cooling, "cooling", "Kühlen", "Koelen", "Kyler", "chłodzenie", "kjøling", "refroidissement")
@@ -210,7 +212,7 @@ MAKE_PSTR_LIST(german, "german", "Deutsch", "Duits", "Tyska", "niemiecki", "tysk
 MAKE_PSTR_LIST(dutch, "dutch", "Niederländisch", "Nederlands", "Nederländska", "niderlandzki", "nederlandsk", "néerlandais")
 MAKE_PSTR_LIST(french, "french", "Französisch", "Frans", "Franska", "francuski", "fransk", "français")
 MAKE_PSTR_LIST(italian, "italian", "Italienisch", "Italiaans", "Italienska", "włoski", "italiensk", "italien")
-MAKE_PSTR_LIST(high, "high", "hoch", "hoog", "Hög", "wysoki", "", "haut")
+MAKE_PSTR_LIST(high, "high", "hoch", "hoog", "Hög", "wysoki", "", "haut") // TODO translate
 MAKE_PSTR_LIST(low, "low", "niedrig", "laag", "Låg", "niski", "lav", "bas")
 MAKE_PSTR_LIST(radiator, "radiator", "Heizkörper", "Radiator", "Radiator", "grzejniki", "radiator", "radiateur")
 MAKE_PSTR_LIST(convector, "convector", "Konvektor", "Convector", "Konvektor", "konwektory", "konvektor", "convecteur")
@@ -218,7 +220,7 @@ MAKE_PSTR_LIST(floor, "floor", "Fussboden", "Vloer", "Golv", "podłoga", "gulv",
 MAKE_PSTR_LIST(summer, "summer", "Sommer", "Zomer", "Sommar", "lato", "sommer", "été")
 MAKE_PSTR_LIST(winter, "winter", "Winter", "Winter", "Vinter", "zima", "vinter", "hiver")
 MAKE_PSTR_LIST(outdoor, "outdoor", "Außen", "Buiten", "Utomhus", "temp. zewnętrzna", "utendørs", "extérieur")
-MAKE_PSTR_LIST(room, "room", "Raum", "Kamer", "Rum", "temp. w pomieszczeniu", "", "pièce")
+MAKE_PSTR_LIST(room, "room", "Raum", "Kamer", "Rum", "temp. w pomieszczeniu", "", "pièce") // TODO translate
 MAKE_PSTR_LIST(room_outdoor, "room outdoor", "Raum+Außen", "Kamer+Buiten", "Rum+Ute", "temp. w pom. i zewn.", "rom utendørs", "pièce extérieure")
 MAKE_PSTR_LIST(power, "power", "Leistung", "Vermogen", "Effekt", "moc", "effekt", "puissance")
 MAKE_PSTR_LIST(constant, "constant", "konstant", "constant", "Konstant", "stały", "konstant", "constant")
@@ -293,8 +295,8 @@ MAKE_PSTR_LIST(burnMinPower, "burnminpower", "burner min power", "minimale Brenn
 MAKE_PSTR_LIST(burnMaxPower, "burnmaxpower", "burner max power", "maximale Brennerleistung", "Maximaal brandervermogen", "Värmepanna Max Effekt", "maksymalna moc źródła ciepła", "varmekjele maks effekt", "puissance max brûleur")
 MAKE_PSTR_LIST(boilHystOn, "boilhyston", "hysteresis on temperature", "Einschaltdifferenz", "ketel aan hysterese verschil", "Hysteres aktiveringstemperatur", "histereza załączania", "hysterese på temperatur", "hysteresis température d'allumage")
 MAKE_PSTR_LIST(boilHystOff, "boilhystoff", "hysteresis off temperature", "Ausschaltdifferenz", "ketel uit hysterese verschil", "Hysteres inaktiveringstemperatur", "histereza wyłączania", "hysterese av temperatur", "hysteresis température d'extinction")
-MAKE_PSTR_LIST(boil2HystOn, "boil2hyston", "hysteresis stage 2 on temperature", "Einschaltdifferenz Stufe 2", "ketel aan hysterese verschil 2", "Hysteres aktiveringstemperatur 2", "histereza załączania stopnia 2", "", "hysteresis état 2 température d'allumage")
-MAKE_PSTR_LIST(boil2HystOff, "boil2hystoff", "hysteresis stage 2 off temperature", "Ausschaltdifferenz Stufe 2", "ketel uit hysterese verschil 2", "Hysteres inaktiveringstemperatur 2", "histereza wyłączania stopnia 2", "", "hysteresis état 2 température d'extinction")
+MAKE_PSTR_LIST(boil2HystOn, "boil2hyston", "hysteresis stage 2 on temperature", "Einschaltdifferenz Stufe 2", "ketel aan hysterese verschil 2", "Hysteres aktiveringstemperatur 2", "histereza załączania stopnia 2", "", "hysteresis état 2 température d'allumage") // TODO translate
+MAKE_PSTR_LIST(boil2HystOff, "boil2hystoff", "hysteresis stage 2 off temperature", "Ausschaltdifferenz Stufe 2", "ketel uit hysterese verschil 2", "Hysteres inaktiveringstemperatur 2", "histereza wyłączania stopnia 2", "", "hysteresis état 2 température d'extinction") // TODO translate
 MAKE_PSTR_LIST(setFlowTemp, "setflowtemp", "set flow temperature", "Sollwert Vorlauftemperatur", "Ingestelde aanvoertemperatuur", "Börvärde Flödestemperatur", "zadana temperatura zasilania", "innstilt strømmetemperatur", "température du flux définie")
 MAKE_PSTR_LIST(setBurnPow, "setburnpow", "burner set power", "Sollwert Brennerleistung", "Ingesteld brandervermogen", "Värmepanna vald Effekt", "zadana moc palnika", "varmekjele valgt effekt", "puissance du brûleur définie")
 MAKE_PSTR_LIST(curBurnPow, "curburnpow", "burner current power", "Brennerleistung", "Brandervermogen", "Värmepanna aktuell effekt", "aktualna moc źródła ciepła", "brennereffekt", "puissance du brûleur actuelle")
@@ -302,7 +304,7 @@ MAKE_PSTR_LIST(burnStarts, "burnstarts", "burner starts", "Brenner Starts", "Aan
 MAKE_PSTR_LIST(burnWorkMin, "burnworkmin", "total burner operating time", "Brenner Laufzeit", "Totale branderlooptijd", "Värmepanna aktiva timmar", "łączny czas pracy palnika", "brennersteg tid i min", "durée de fonctionnement totale du brûleur")
 MAKE_PSTR_LIST(burn2WorkMin, "burn2workmin", "burner stage 2 operating time", "Brenner Stufe 2 Laufzeit", "Totale looptijd brander fase 2", "Värmepanna steg 2 aktiva timmar", "łączny czas pracy palnika 2 stopnia", "brennersteg2 tid i min", "durée de fonctionnement totale du brûleur état 2")
 MAKE_PSTR_LIST(heatWorkMin, "heatworkmin", "total heat operating time", "Heizung Laufzeit", "Totale looptijd verwarming", "Uppvärmning aktiva timmar", "łączny czas grzania", "varmetid i min", "durée de fonctionnement du chauffage")
-MAKE_PSTR_LIST(heatStarts, "heatstarts", "burner starts heating", "Brenner Starts Heizung", "Aantal brander starts verwarming", "Uppvärmning antal starter", "liczba uruchomień palnika na ogrzewanie", "", "démarrages du chauffage")
+MAKE_PSTR_LIST(heatStarts, "heatstarts", "burner starts heating", "Brenner Starts Heizung", "Aantal brander starts verwarming", "Uppvärmning antal starter", "liczba uruchomień palnika na ogrzewanie", "", "démarrages du chauffage") // TODO translate
 MAKE_PSTR_LIST(UBAuptime, "ubauptime", "total UBA operating time", "Anlagen-Gesamtlaufzeit", "totale looptijd branderautomaat (UBA)", "Total Tid", "łączny czas pracy układu sterowania", "totaltid", "durée de fonctionnement totale de l'appareil (UBA)")
 MAKE_PSTR_LIST(lastCode, "lastcode", "last error code", "Letzter Fehler", "Laatste foutcode", "Senaste Felkod", "ostatni błąd", "siste feilkode", "dernier code d'erreur")
 MAKE_PSTR_LIST(serviceCode, "servicecode", "service code", "Statusmeldung", "Statuscode", "Servicekod", "kod serwisowy", "servicekode", "code de service")
@@ -315,8 +317,8 @@ MAKE_PSTR_LIST(emergencyOps, "emergencyops", "emergency operation", "Notoperatio
 MAKE_PSTR_LIST(emergencyTemp, "emergencytemp", "emergency temperature", "Nottemperatur", "Noodtemperatuur", "Nöddrift temperatur", "temperatura w trybie awaryjnym", "nødtemperatur", "température d'urgence")
 
 // heatpump/compress specific
-MAKE_PSTR_LIST(upTimeControl, "uptimecontrol", "total operating time heat", "Betriebszeit Heizen gesamt", "Totale bedrijfstijd", "Total tid uppvärmning", "łączny czas generowania ciepła", "", "durée totale de fonctionnement chauffage")
-MAKE_PSTR_LIST(upTimeCompHeating, "uptimecompheating", "operating time compressor heating", "Betriebszeit Kompressor heizen", "Bedrijfstijd compressor verwarmingsbedrijf", "Total tid kompressor uppvärmning", "łączny czas ogrzewania (sprężarka)", "", "durée de fonctionnement compresseur chauffage")
+MAKE_PSTR_LIST(upTimeControl, "uptimecontrol", "total operating time heat", "Betriebszeit Heizen gesamt", "Totale bedrijfstijd", "Total tid uppvärmning", "łączny czas generowania ciepła", "", "durée totale de fonctionnement chauffage") // TODO translate
+MAKE_PSTR_LIST(upTimeCompHeating, "uptimecompheating", "operating time compressor heating", "Betriebszeit Kompressor heizen", "Bedrijfstijd compressor verwarmingsbedrijf", "Total tid kompressor uppvärmning", "łączny czas ogrzewania (sprężarka)", "", "durée de fonctionnement compresseur chauffage") // TODO translate
 MAKE_PSTR_LIST(upTimeCompCooling, "uptimecompcooling", "operating time compressor cooling", "Betriebszeit Kompressor kühlen", "Bedrijfstijd compressor koelbedrijf", "Total tid kompressor kyla", "łączny czas chłodzenia (sprężarka)", "Total tid kompressor kjøling", "durée de fonctionnement compresseur refroidissement")
 MAKE_PSTR_LIST(upTimeCompWw, "uptimecompww", "operating time compressor dhw", "Betriebszeit Kompressor", "Bedrijfstijd compressor warmwaterbedrijf", "Total tid kompressor varmvatten", "łączny czas grzania c.w.u. (sprężarka)", "Total tid kompressor varmtvann", "durée de fonctionnement compresseur ecs")
 MAKE_PSTR_LIST(upTimeCompPool, "uptimecomppool", "operating time compressor pool", "Betriebszeit Kompressor Pool", "Bedrijfstijd compressor voor zwembadbedrijf", "Total tid kompressor pool", "łączny czas podgrzewania basenu (sprężarka)", "Total tid kompressor basseng", "durée de fonctionnement compresseur piscine")
@@ -338,7 +340,7 @@ MAKE_PSTR_LIST(nrgSuppPool, "nrgsupppool", "total energy supplied pool", "gesamt
 MAKE_PSTR_LIST(auxElecHeatNrgConsTotal, "auxelecheatnrgconstotal", "total auxiliary electrical heater energy consumption", "Energieverbrauch el. Zusatzheizung", "Totaal energieverbruik electrisch verwarmingselement", "Energiförbrukning Eltillkott", "energia pobrana przez grzałki", "energiforbruk varmekolbe", "consommation totale énergie electrique auxiliaire chauffage")
 MAKE_PSTR_LIST(auxElecHeatNrgConsHeating, "auxelecheatnrgconsheating", "auxiliary electrical heater energy consumption heating", "Energieverbrauch el. Zusatzheizung Heizen", "Energieverbruik electrisch verwarmingselement voor verwarmingsbedrijf", "Energiförbrukning Eltillskott Uppvärmning", "energia pobrana przez grzałki na ogrzewanie", "energiforbruk varmekolbe oppvarming", "consommation énergie electrique auxiliaire chauffage")
 MAKE_PSTR_LIST(auxElecHeatNrgConsWW, "auxelecheatnrgconsww", "auxiliary electrical heater energy consumption dhw", "Energieverbrauch el. Zusatzheizung", "Energieverbruik electrisch verwarmingselement voor warmwaterbedrijf", "Energiförbrukning Eltillskott Varmvatten", "energia pobrana przez grzałki na c.w.u.", "energiförbruk varmekolbe varmvann", "consommation énergie electrique auxiliaire chauffage ecs")
-MAKE_PSTR_LIST(auxElecHeatNrgConsPool, "auxelecheatnrgconspool", "auxiliary electrical heater energy consumption pool", "Energieverbrauch el. Zusatzheizung Pool", "Energieverbruik electrisch verwarmingselement voor zwembadbedrijf", "Energiförbrukning Eltillskott Pool", "energia pobrana przez grzałki na podgrzewanie basenu", "", "consommation énergie electrique auxiliaire chauffage piscine")
+MAKE_PSTR_LIST(auxElecHeatNrgConsPool, "auxelecheatnrgconspool", "auxiliary electrical heater energy consumption pool", "Energieverbrauch el. Zusatzheizung Pool", "Energieverbruik electrisch verwarmingselement voor zwembadbedrijf", "Energiförbrukning Eltillskott Pool", "energia pobrana przez grzałki na podgrzewanie basenu", "", "consommation énergie electrique auxiliaire chauffage piscine") // TODO translate
 
 MAKE_PSTR_LIST(hpCompOn, "hpcompon", "hp compressor", "WP Kompressor", "WP compressor", "VP Kompressor", "sprężarka pompy ciepła", "vp kompressor", "compresseur pompe à chaleur")
 MAKE_PSTR_LIST(hpHeatingOn, "hpheatingon", "hp heating", "WP Heizen", "WP verwarmingsbedrijf", "VP Uppvärmning", "pompa ciepła, ogrzewanie", "vp oppvarmning", "chauffe pompe à chaleur")
@@ -351,7 +353,7 @@ MAKE_PSTR_LIST(hpCircSpd, "hpcircspd", "circulation pump speed", "Zirkulationspu
 MAKE_PSTR_LIST(hpBrineIn, "hpbrinein", "brine in/evaporator", "Sole in/Verdampfer", "pekel in/verdamper", "Brine in (förangare)", "temperatura glikolu na wejściu kolektora (TB0)", "brine in/fordamper", "entrée saumure/évaporateur")
 MAKE_PSTR_LIST(hpBrineOut, "hpbrineout", "brine out/condenser", "Sole aus/Kondensator", "pekel uit/condensor", "Brine ut (kondensor)", "temperatura glikolu na wyjściu kolektora (TB1)", "Brine ut/kondensor", "sortie saumure/condenseur")
 MAKE_PSTR_LIST(hpSwitchValve, "hpswitchvalve", "switch valve", "Schaltventil", "schakelklep", "Växelventil", "zawór przełączający", "skifteventil", "valve de commutation")
-MAKE_PSTR_LIST(hpActivity, "hpactivity", "compressor activity", "Kompressoraktivität", "Compressoractiviteit", "Kompressoraktivitet", "pompa ciepła, aktywność sprężarki", "", "activité du compresseur")
+MAKE_PSTR_LIST(hpActivity, "hpactivity", "compressor activity", "Kompressoraktivität", "Compressoractiviteit", "Kompressoraktivitet", "pompa ciepła, aktywność sprężarki", "", "activité du compresseur") // TODO translate
 
 MAKE_PSTR_LIST(hpPower, "hppower", "compressor power output", "Kompressorleistung", "Compressorvermogen", "Kompressoreffekt", "moc wyjściowa sprężarki", "kompressoreffekt", "puissance de sortie compresseur")
 MAKE_PSTR_LIST(hpTc0, "hptc0", "heat carrier return (TC0)", "Kältemittel Rücklauf (TC0)", "Koudemiddel retour (TC0)", "Värmebärare Retur (TC0)", "temperatura nośnika ciepła na powrocie (TC0)", "kjølemiddel retur (TC0)", "retour caloporteur (TC0)")
@@ -380,23 +382,29 @@ MAKE_PSTR_LIST(maxHeatComp, "maxheatcomp", "heat limit compressor", "Heizgrenze 
 MAKE_PSTR_LIST(maxHeatHeat, "maxheatheat", "heat limit heating", "Heizgrenze Heizen", "heat limit heating", "heat limit heating", "ograniczenie mocy w trybie ogrzewania", "maks varmegrense oppvarming", "limite chaleur chauffage")
 MAKE_PSTR_LIST(maxHeatDhw, "maxheatdhw", "heat limit dhw", "Heizgrenze Warmwasser", "heat limit dhw", "heat limit dhw", "ograniczenie mocy w trybie c.w.u.", "varmegrense varmtvann", "limite chaleur ecs")
 
-MAKE_PSTR_LIST(auxHeaterOff, "auxheateroff", "disable auxilliary heater", "Verbiete Zusatzheizer", "Bijverwarming uitsc", "Blockera eltillskott", "wyłącz dogrzewacz", "", "Désactiver chauff. d'app")
-MAKE_PSTR_LIST(auxHeaterStatus, "auxheaterstatus", "auxilliary heater status", "Status Zusatzheizer", "Bijverwarming", "Eltillskott Status", "status dogrzewacza", "", "Chauffage auxiliaire")
-MAKE_PSTR_LIST(auxHeaterOnly, "auxheateronly", "auxilliary heater only", "nur Zusatzheizer","Alleen bijverwarming", "Eltillskott Enbart", "tylko dogrzewacz", "", "Que chauffage auxiliaire")
+MAKE_PSTR_LIST(auxHeaterOff, "auxheateroff", "disable auxilliary heater", "Verbiete Zusatzheizer", "Bijverwarming uitsc", "Blockera eltillskott", "wyłącz dogrzewacz", "", "Désactiver chauff. d'app") // TODO translate
+MAKE_PSTR_LIST(auxHeaterStatus, "auxheaterstatus", "auxilliary heater status", "Status Zusatzheizer", "Bijverwarming", "Eltillskott Status", "status dogrzewacza", "", "Chauffage auxiliaire") // TODO translate
+MAKE_PSTR_LIST(auxHeaterOnly, "auxheateronly", "auxilliary heater only", "nur Zusatzheizer","Alleen bijverwarming", "Eltillskott Enbart", "tylko dogrzewacz", "", "Que chauffage auxiliaire") // TODO translate
 MAKE_PSTR_LIST(auxHeaterDelay, "auxheaterdelay", "auxilliary heater on delay", "Zusatzheizer verzögert ein", "Bijverw. vertraagd aan", "Eltillskottfördröjning på", "opóźnienie włączania dogrzewacza", "Tilleggsvarmer forsinket på", "Chauff app tempo marche")
-MAKE_PSTR_LIST(silentMode, "silentmode", "silent mode", "Silentmodus", " Stiller gebruik", "Tyst läge", "trybu cichego", "", "Fct silencieux")
-MAKE_PSTR_LIST(minTempSilent, "mintempsilent", "min. outside temp. for silent mode", "Minimale Aussentemperatur Silentmodus", " Stiller gebruik min. buitentemp", "Tyst läge min temp", "minimalna temperatura zewnętrzna dla trybu cichego", "", "Fct silencieux: Temp. extérieure min.")
-MAKE_PSTR_LIST(tempParMode, "tempparmode", "outside temp. parallel mode", "Aussentemperatur Parallelmodus", "Buitentemp. parallelbedr", "Parallelläge Utomhustemp.", "maksymalna temperatura zewnętrzna dla dogrzewacza", "", "Temp. ext. fct parallèle")
-MAKE_PSTR_LIST(auxHeatMixValve, "auxheatmix", "aux. heater mixing valve", "Mischer Zusatzheizer", "Bijverwarming menger", "Eltilskott Blandarventil", "mieszacz dogrzewacza", "", "Chauffage auxiliaire mélangeur")
+MAKE_PSTR_LIST(silentMode, "silentmode", "silent mode", "Silentmodus", " Stiller gebruik", "Tyst läge", "trybu cichego",  "", "Fct silencieux") // TODO translate
+MAKE_PSTR_LIST(minTempSilent, "mintempsilent", "min. outside temp. for silent mode", "Minimale Aussentemperatur Silentmodus", " Stiller gebruik min. buitentemp", "Tyst läge min temp", "minimalna temperatura zewnętrzna dla trybu cichego", "", "Fct silencieux: Temp. extérieure min.") // TODO translate
+MAKE_PSTR_LIST(tempParMode, "tempparmode", "outside temp. parallel mode", "Aussentemperatur Parallelmodus", "Buitentemp. parallelbedr", "Parallelläge Utomhustemp.", "maksymalna temperatura zewnętrzna dla dogrzewacza", "", "Temp. ext. fct parallèle") // TODO translate
+MAKE_PSTR_LIST(auxHeatMixValve, "auxheatmix", "aux. heater mixing valve", "Mischer Zusatzheizer", "Bijverwarming menger", "Eltilskott Blandarventil", "mieszacz dogrzewacza", "", "Chauffage auxiliaire mélangeur") // TODO translate
 MAKE_PSTR_LIST(hpHystHeat, "hphystheat", "on/off hyst heat", "Schalthysterese Heizen", "Aan/uit-hysteresis in verw. bedrijf", "Hstereses Uppvärm.", "histereza wł./wył. ogrzewania", "På/av-hysterese Oppvar.", "Hystérésis Marche en mode chauffage")
-MAKE_PSTR_LIST(hpHystCool, "hphystcool", "on/off hyst cool", "Schalthysterese Kühlen", "Aan/uit-hysteresis in koelbedrijf ", "Hystereses Kyla", "histereza wł./wył. chłodzenia", "", "Hystérésis Marche en mode refroidissement")
-MAKE_PSTR_LIST(hpHystPool, "hphystpool", "on/off hyst pool", "Schalthysterese Pool", "an/uit-hysteresis in zwembadbedri", "Hystereses Pool", "histereza wł./wył. podgrzewania basenu", "", "Hystérésis Marche en mode piscine")
-MAKE_PSTR_LIST(tempDiffHeat, "tempdiffheat", "temp. diff. TC3/TC0 heat", "Temp.diff. TC3/TC0 Heizen", "Temp.vers. TC3/TC0 verw", "Delta(T) TC3/TC0 Uppvärm.", "różnica temperatur TC3/TC0 w trakcie ogrzewania", "", "Delta T TC3/TC0 Chauff")
-MAKE_PSTR_LIST(tempDiffCool, "tempdiffcool", "temp. diff. TC3/TC0 cool", "Temp.diff. TC3/TC0 Kühlen", "Temp.vers. TC3/TC0 koel.", "Delta(T) TC3/TC0 Kyla", "różnica temperatur TC3/TC0 w trakcie chłodzenia", "", "Delta T TC3/TC0 Refroid.")
+MAKE_PSTR_LIST(hpHystCool, "hphystcool", "on/off hyst cool", "Schalthysterese Kühlen", "Aan/uit-hysteresis in koelbedrijf ", "Hystereses Kyla", "histereza wł./wył. chłodzenia", "", "Hystérésis Marche en mode refroidissement") // TODO translate
+MAKE_PSTR_LIST(hpHystPool, "hphystpool", "on/off hyst pool", "Schalthysterese Pool", "an/uit-hysteresis in zwembadbedri", "Hystereses Pool", "histereza wł./wył. podgrzewania basenu", "", "Hystérésis Marche en mode piscine") // TODO translate
+MAKE_PSTR_LIST(tempDiffHeat, "tempdiffheat", "temp. diff. TC3/TC0 heat", "Temp.diff. TC3/TC0 Heizen", "Temp.vers. TC3/TC0 verw", "Delta(T) TC3/TC0 Uppvärm.", "różnica temperatur TC3/TC0 w trakcie ogrzewania", "", "Delta T TC3/TC0 Chauff") // TODO translate
+MAKE_PSTR_LIST(tempDiffCool, "tempdiffcool", "temp. diff. TC3/TC0 cool", "Temp.diff. TC3/TC0 Kühlen", "Temp.vers. TC3/TC0 koel.", "Delta(T) TC3/TC0 Kyla", "różnica temperatur TC3/TC0 w trakcie chłodzenia", "", "Delta T TC3/TC0 Refroid.") // TODO translate
 
-MAKE_PSTR_LIST(wwComfOffTemp, "wwcomfoff", "comfort switch off", "Komfort Ausschalttemp", "Comfort Uitschakeltemp.", "Komfortläge avstängingstemp.", "temperatura wyłączania w trybie komfort", "", "Confort Temp. d'arrêt")
-MAKE_PSTR_LIST(wwEcoOffTemp, "wwecooff", "eco switch off", "ECO Ausschalttemp", "Eco Uitschakeltemp.", "Ekoläge avstängningstemp.", "temperatura wyłączania w trybie eko", "", "Eco Temp. d'arrêt")
-MAKE_PSTR_LIST(wwEcoPlusOffTemp, "wwecoplusoff", "eco+ switch off", "ECO+ Ausschalttemp", "Eco+ Uitschakeltemp.", "Eko+ avstängningstemp.", "temperatura wyłączania w trybie eko+", "", "Eco+ Temp. d'arrêt")
+MAKE_PSTR_LIST(wwComfOffTemp, "wwcomfoff", "comfort switch off", "Komfort Ausschalttemp", "Comfort Uitschakeltemp.", "Komfortläge avstängingstemp.", "temperatura wyłączania w trybie komfort", "", "Confort Temp. d'arrêt") // TODO translate
+MAKE_PSTR_LIST(wwEcoOffTemp, "wwecooff", "eco switch off", "ECO Ausschalttemp", "Eco Uitschakeltemp.", "Ekoläge avstängningstemp.", "temperatura wyłączania w trybie eko", "", "Eco Temp. d'arrêt") // TODO translate
+MAKE_PSTR_LIST(wwEcoPlusOffTemp, "wwecoplusoff", "eco+ switch off", "ECO+ Ausschalttemp", "Eco+ Uitschakeltemp.", "Eko+ avstängningstemp.", "temperatura wyłączania w trybie eko+", "", "Eco+ Temp. d'arrêt") // TODO translate
+
+MAKE_PSTR_LIST(auxHeatMode, "auxheatrmode", "aux heater mode", "Modus Zusatzheizer", "", "", "", "", "") // TODO translate
+MAKE_PSTR_LIST(auxMaxTemp, "auxmaxtemp", "aux heater max temperature", "Zusatzheizer Maximaltemp.", "", "", "", "", "") // TODO translate
+MAKE_PSTR_LIST(manDefrost, "mandefrost", "manual defrost", "Manuelle Enteisung", "", "", "", "", "") // TODO translate
+MAKE_PSTR_LIST(pvCooling, "pvcooling", "Cooling only with PV", "Kühlen nur mit PV", "", "", "", "", "") // TODO translate
+MAKE_PSTR_LIST(hpCircPumpWw, "hpcircpumpww", "circulation pump available during dhw", "", "", "", "", "", "") // TODO translate
 
 // hybrid heatpump
 MAKE_PSTR_LIST(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride")
@@ -406,31 +414,31 @@ MAKE_PSTR_LIST(fossileFactor, "fossilefactor", "fossile energy factor", "Energie
 MAKE_PSTR_LIST(electricFactor, "electricfactor", "electric energy factor", "Energiefaktor elektrisch", "Energiefactor electrisch", "Elektrisk energifaktor", "udział energii elektrycznej", "elektrisk energifaktor", "facteur énergie électrique")
 MAKE_PSTR_LIST(delayBoiler, "delayboiler", "delay boiler support", "Verzögerungs-Option", "Vertragingsoptie", "Fördröjningsoption", "opcja opóźnienia", "Fördörjningsoption", "option retardement chaudière")
 MAKE_PSTR_LIST(tempDiffBoiler, "tempdiffboiler", "temp diff boiler support", "Temperaturdifferenz-Option", "Verschiltemperatuuroptie", "Temperaturskillnadsoption", "opcja różnicy temperatur", "temperatursforskjell kjele", "option différence température")
-MAKE_PSTR_LIST(lowNoiseMode, "lownoisemode", "low noise mode", "Geräuscharmer Betrieb", "", "Tyst läge", "tryb cichy", "", "mode faible bruit")
-MAKE_PSTR_LIST(lowNoiseStart, "lownoisestart", "low noise starttime", "Start geräuscharmer Betrieb", "", "Tyst läge starttid", "początek trybu cichego", "", "heure démarrage faible bruit")
-MAKE_PSTR_LIST(lowNoiseStop, "lownoisestop", "low noise stoptime", "Stopp geräuscharmer Betrieb", "", "Tyst läge stopptid", "koniec trybu cichego", "", "heure arrêt faible bruit")
-MAKE_PSTR_LIST(energyPriceGas, "energypricegas", "energy price gas", "Energiepreis Gas", "", "Gaspris", "cena energii z gazu", "", "prix énergie gaz")
-MAKE_PSTR_LIST(energyPriceEl, "energypriceel", "energy price electric", "Energiepreis Eletrizität", "", "Elpris", "cena energii elektrycznej", "", "prix énergie électrique")
-MAKE_PSTR_LIST(energyPricePV, "energyfeedpv", "feed in PV", "PV Einspeisevergütung", "", "PV Energi", "zasilanie energią fotowoltaiczną", "", "alimentation PV")
-MAKE_PSTR_LIST(hybridDHW, "hybriddhw", "hybrid DHW", "Hybrid Warmwasser", "", "Hybridläge varmvatten", "hybrydowa c.w.u.", "", "ecs hybride")
-MAKE_PSTR_LIST(airPurgeMode, "airpurgemode", "air purge mode", "Luftspülung", "", "Luftreningsläge", "tryb oczyszczania powietrza", "", "mode purge air")
-MAKE_PSTR_LIST(heatPumpOutput, "heatpumpoutput", "heatpump output", "WP Leistung", "", "Värmepumpseffekt", "moc wyjściowa pompy ciepła", "", "sortie pompe à chaleur")
-MAKE_PSTR_LIST(coolingCircuit, "coolingcircuit", "cooling circuit", "Kühlkreislauf", "", "Kylkrets", "obwód chłodzący", "", "circuit refroidissement")
-MAKE_PSTR_LIST(compStartMod, "compstartmod", "compressor start modulation", "Kompressor Startleistung", "", "Kompressor startmodulering", "początkowa modulacja sprężarki", "", "modulation démarrage compresseur")
-MAKE_PSTR_LIST(heatDrainPan, "heatdrainpan", "heat drain pan", "Wärmeausgleichsgefäß", "", "Uppvärm. dränering", "zbiornik wyrównawczy ciepła", "", "bac récupération chaleur")
-MAKE_PSTR_LIST(heatCable, "heatcable", "heating cable", "Heizband", "heating cable", "värmekabel", "przewód grzejny", "", "câble chauffant")
+MAKE_PSTR_LIST(lowNoiseMode, "lownoisemode", "low noise mode", "Geräuscharmer Betrieb", "", "Tyst läge", "tryb cichy", "", "mode faible bruit") // TODO translate
+MAKE_PSTR_LIST(lowNoiseStart, "lownoisestart", "low noise starttime", "Start geräuscharmer Betrieb", "", "Tyst läge starttid", "początek trybu cichego", "", "heure démarrage faible bruit") // TODO translate
+MAKE_PSTR_LIST(lowNoiseStop, "lownoisestop", "low noise stoptime", "Stopp geräuscharmer Betrieb", "", "Tyst läge stopptid", "koniec trybu cichego", "", "heure arrêt faible bruit") // TODO translate
+MAKE_PSTR_LIST(energyPriceGas, "energypricegas", "energy price gas", "Energiepreis Gas", "", "Gaspris", "cena energii z gazu", "", "prix énergie gaz") // TODO translate
+MAKE_PSTR_LIST(energyPriceEl, "energypriceel", "energy price electric", "Energiepreis Eletrizität", "", "Elpris", "cena energii elektrycznej", "", "prix énergie électrique") // TODO translate
+MAKE_PSTR_LIST(energyPricePV, "energyfeedpv", "feed in PV", "PV Einspeisevergütung", "", "PV Energi", "zasilanie energią fotowoltaiczną", "", "alimentation PV") // TODO translate
+MAKE_PSTR_LIST(hybridDHW, "hybriddhw", "hybrid DHW", "Hybrid Warmwasser", "", "Hybridläge varmvatten", "hybrydowa c.w.u.", "", "ecs hybride") // TODO translate
+MAKE_PSTR_LIST(airPurgeMode, "airpurgemode", "air purge mode", "Luftspülung", "", "Luftreningsläge", "tryb oczyszczania powietrza", "", "mode purge air") // TODO translate
+MAKE_PSTR_LIST(heatPumpOutput, "heatpumpoutput", "heatpump output", "WP Leistung", "", "Värmepumpseffekt", "moc wyjściowa pompy ciepła", "", "sortie pompe à chaleur") // TODO translate
+MAKE_PSTR_LIST(coolingCircuit, "coolingcircuit", "cooling circuit", "Kühlkreislauf", "", "Kylkrets", "obwód chłodzący", "", "circuit refroidissement") // TODO translate
+MAKE_PSTR_LIST(compStartMod, "compstartmod", "compressor start modulation", "Kompressor Startleistung", "", "Kompressor startmodulering", "początkowa modulacja sprężarki", "", "modulation démarrage compresseur") // TODO translate
+MAKE_PSTR_LIST(heatDrainPan, "heatdrainpan", "heat drain pan", "Wärmeausgleichsgefäß", "", "Uppvärm. dränering", "zbiornik wyrównawczy ciepła", "", "bac récupération chaleur") // TODO translate
+MAKE_PSTR_LIST(heatCable, "heatcable", "heating cable", "Heizband", "heating cable", "värmekabel", "przewód grzejny", "", "câble chauffant") // TODO translate
 
 // alternative heatsource AM200
 MAKE_PSTR_LIST(aCylTopTemp, "cyltoptemp", "cylinder top temperature", "Speichertemperatur Oben", "Buffer temperatuur boven", "Cylindertemperatur Toppen", "temperatura na górze cylindra", "beredertemperatur topp", "température haut cylindre")
 MAKE_PSTR_LIST(aCylCenterTemp, "cylcentertemp", "cylinder center temperature", "Speichertemperatur Mitte", "Buffer temperatuur midden", "Cylindertemperatur Mitten", "temperatura na środku cylindra", "beredertemperatur midten", "température centre cylindre")
 MAKE_PSTR_LIST(aCylBottomTemp, "cylbottomtemp", "cylinder bottom temperature", "Speichertemperatur Unten", "Buffer temperatuur onder", "Cylindertemperatur Botten", "temperatura na dole cylindra", "beredertemperatur nederst", "température fond cylindre")
-MAKE_PSTR_LIST(aFlowTemp, "altflowtemp", "alternative hs flow temperature", "Alternativer WE Vorlauftemperatur", "Alternatieve warmtebron aanvoertemperatuur", "Alternativ flödestemp värmekälla", "temperatura zasilania z alternatywnego źródła", "", "température flux hs alternative")
-MAKE_PSTR_LIST(aRetTemp, "altrettemp", "alternative hs return temperature", "Alternativer WE Rücklauftemperatur", "Alternatieve warmtebron retourtemperatuur", "Alternativ returtemp värmekälla", "temperatura powrotu z alternatywnego źródła", "", "température retour hs alternative")
-MAKE_PSTR_LIST(sysFlowTemp, "sysflowtemp", "system flow temperature", "System Vorlauftemperatur", "Systeem aanvoertemperatuur", "Systemflödestemperatur", "temperatura zasilania systemu", "", "température flux système")
-MAKE_PSTR_LIST(sysRetTemp, "sysrettemp", "system return temperature", "System Rücklauftemperatur", "Systeem retourtemperatuur", "Systemreturtemperatur", "temperatura powrotu z systemu", "", "température retour système")
-MAKE_PSTR_LIST(valveByPass, "valvebypass", "bypass valve", "Bypass-Ventil", "Bypass klep", "Bypassventil", "zawór obejścia", "", "vanne dérivation")
-MAKE_PSTR_LIST(valveBuffer, "valvebuffer", "buffer valve", "Puffer-Ventil", "Bufferklep", "Buffertventil", "zawór bufora", "", "vanne tampon")
-MAKE_PSTR_LIST(valveReturn, "valvereturn", "return valve", "Rückfluss-Ventil", "Retourklep", "Returventil", "zawór powrotu", "", "vanne retour")
+MAKE_PSTR_LIST(aFlowTemp, "altflowtemp", "alternative hs flow temperature", "Alternativer WE Vorlauftemperatur", "Alternatieve warmtebron aanvoertemperatuur", "Alternativ flödestemp värmekälla", "temperatura zasilania z alternatywnego źródła", "", "température flux hs alternative") // TODO translate
+MAKE_PSTR_LIST(aRetTemp, "altrettemp", "alternative hs return temperature", "Alternativer WE Rücklauftemperatur", "Alternatieve warmtebron retourtemperatuur", "Alternativ returtemp värmekälla", "temperatura powrotu z alternatywnego źródła", "", "température retour hs alternative") // TODO translate
+MAKE_PSTR_LIST(sysFlowTemp, "sysflowtemp", "system flow temperature", "System Vorlauftemperatur", "Systeem aanvoertemperatuur", "Systemflödestemperatur", "temperatura zasilania systemu", "", "température flux système") // TODO translate
+MAKE_PSTR_LIST(sysRetTemp, "sysrettemp", "system return temperature", "System Rücklauftemperatur", "Systeem retourtemperatuur", "Systemreturtemperatur", "temperatura powrotu z systemu", "", "température retour système") // TODO translate
+MAKE_PSTR_LIST(valveByPass, "valvebypass", "bypass valve", "Bypass-Ventil", "Bypass klep", "Bypassventil", "zawór obejścia", "", "vanne dérivation") // TODO translate
+MAKE_PSTR_LIST(valveBuffer, "valvebuffer", "buffer valve", "Puffer-Ventil", "Bufferklep", "Buffertventil", "zawór bufora", "", "vanne tampon") // TODO translate
+MAKE_PSTR_LIST(valveReturn, "valvereturn", "return valve", "Rückfluss-Ventil", "Retourklep", "Returventil", "zawór powrotu", "", "vanne retour") // TODO translate
 MAKE_PSTR_LIST(aPumpMod, "altpumpmod", "alternative hs pump modulation", "Alternativer WE Pumpenmodulation", "Alternatieve warmtebron pomp modulatie", "Alternativ Pumpmodulering Värmekälla", "modulacja pompy alternatywnego źródła ciepła", "alternativ pumpemodulering varmekilde", "modulation alternative pompe hs")
 MAKE_PSTR_LIST(heatSource, "heatsource", "alternative heating active", "Alternativer Wärmeerzeuger aktiv", "Alternatieve warmtebron aktief", "Alternativ Värmekälla aktiv", "aktywne alternatywne źródło ciepła", "alternativ varmekilde aktiv", "chauffage alternatif actif")
 
@@ -464,7 +472,7 @@ MAKE_PSTR_LIST(wwFlowTempOffset, "wwflowtempoffset", "flow temperature offset", 
 MAKE_PSTR_LIST(wwMaxPower, "wwmaxpower", "max power", "max Leistung", "Maximaal vermogen", "Max Effekt", "moc maksymalna", "maks effekt", "puissance max")
 MAKE_PSTR_LIST(wwCircPump, "wwcircpump", "circulation pump available", "Zirkulationspumpe vorhanden", "Circulatiepomp aanwezig", "Cirkulationspump tillgänglig", "pompa cyrkulacyjna zainstalowana", "sirkulasjonspumpe tilgjengelig", "pompe circulation disponible")
 MAKE_PSTR_LIST(wwChargeType, "wwchargetype", "charging type", "Speicher-Ladungstyp", "Buffer laadtype", "Laddningstyp", "sposób grzania zasobnika", "varmetype", "type chargement")
-MAKE_PSTR_LIST(wwDisinfectionTemp, "wwdisinfectiontemp", "disinfection temperature", "Desinfektionstemperatur", "Desinfectietemperatuur", "Desinfektionstemperatur", "temperatura dezynfekcji termicznej", "", "température désinfection")
+MAKE_PSTR_LIST(wwDisinfectionTemp, "wwdisinfectiontemp", "disinfection temperature", "Desinfektionstemperatur", "Desinfectietemperatuur", "Desinfektionstemperatur", "temperatura dezynfekcji termicznej", "", "température désinfection") // TODO translate
 MAKE_PSTR_LIST(wwCircMode, "wwcircmode", "circulation pump mode", "Zirkulationspumpen-Modus", "Modus circulatiepomp", "Läge Cirkulationspump", "tryb pracy cyrkulacji", "modus sikulasjonspumpe", "mode pompe circulation")
 MAKE_PSTR_LIST(wwCirc, "wwcirc", "circulation active", "Zirkulation aktiv", "Circulatiepomp actief", "Cirkulation aktiv", "pompa cyrkulacyjna", "sirkulasjon aktiv", "circulation active")
 MAKE_PSTR_LIST(wwCurTemp, "wwcurtemp", "current intern temperature", "aktuelle interne Temperatur", "Huidige interne temperatuur", "Intern Temperatur", "temperatura zasobnika", "gjeldende intern temperatur", "température interne actuelle")
@@ -473,7 +481,7 @@ MAKE_PSTR_LIST(wwCurFlow, "wwcurflow", "current tap water flow", "aktueller Durc
 MAKE_PSTR_LIST(wwStorageTemp1, "wwstoragetemp1", "storage intern temperature", "interne Speichertemperatur", "Interne buffertemperatuur", "Beredare Intern Temperatur", "temperatura wewnątrz zasobnika", "intern temperatur bereder", "température interne stockage")
 MAKE_PSTR_LIST(wwStorageTemp2, "wwstoragetemp2", "storage extern temperature", "externer Speichertemperatur", "Externe buffertemperatuur", "Beredare Extern Tempereatur", "temperatura na wyjściu zasobnika", "ekstern temperatur bereder", "température externe stockage")
 MAKE_PSTR_LIST(wwActivated, "wwactivated", "activated", "aktiviert", "geactiveerd", "Aktiverad", "system przygotowywania c.w.u.", "aktivert", "activé")
-MAKE_PSTR_LIST(wwOneTime, "wwonetime", "one time charging", "Einmalladung", "Buffer eenmalig laden", "Engångsladdning", "jednorazowa dodatkowa ciepła woda", "", "charge unique")
+MAKE_PSTR_LIST(wwOneTime, "wwonetime", "one time charging", "Einmalladung", "Buffer eenmalig laden", "Engångsladdning", "jednorazowa dodatkowa ciepła woda", "", "charge unique") // TODO translate
 MAKE_PSTR_LIST(wwDisinfecting, "wwdisinfecting", "disinfecting", "Desinfizieren", "Desinfectie", "Desinficerar", "dezynfekcja termiczna", "desinfiserer", "désinfection")
 MAKE_PSTR_LIST(wwCharging, "wwcharging", "charging", "Laden", "Laden", "Värmer", "grzanie", "varmer", "chargement")
 MAKE_PSTR_LIST(wwChargeOptimization, "wwchargeoptimization", "charge optimization", "Ladungsoptimierung", "laadoptimalisatie", "Laddningsoptimering", "optymalizacja grzania", "oppvarmingsoptimalisering", "optimisation charge")
@@ -490,9 +498,9 @@ MAKE_PSTR_LIST(wwHystOn, "wwhyston", "hysteresis on temperature", "Einschalttemp
 MAKE_PSTR_LIST(wwHystOff, "wwhystoff", "hysteresis off temperature", "Ausschalttemperaturdifferenz", "Uitschakeltemperatuurverschil", "Hysteres AV-temperatur", "histereza wyłączania", "utkoblingstemperaturforskjell", "hystérésis température extinction")
 MAKE_PSTR_LIST(wwProgMode, "wwprogmode", "program", "Programmmodus", "Programma", "Program", "program", "program", "programme")
 MAKE_PSTR_LIST(wwCircProg, "wwcircprog", "circulation program", "Zirkulationsprogramm", "Circulatieprogramma", "Cirkulationsprogram", "program cyrkulacji c.w.u.", "sirkulationsprogram", "programme circulation")
-MAKE_PSTR_LIST(wwMaxTemp, "wwmaxtemp", "maximum temperature", "Maximale Temperatur", "Maximale temperatuur", "Maximal Temperatur", "temperatura maksymalna", "", "température max")
+MAKE_PSTR_LIST(wwMaxTemp, "wwmaxtemp", "maximum temperature", "Maximale Temperatur", "Maximale temperatuur", "Maximal Temperatur", "temperatura maksymalna", "", "température max") // TODO translate
 MAKE_PSTR_LIST(wwOneTimeKey, "wwonetimekey", "one time key function", "Einmalladungstaste", "Knop voor eenmalig laden buffer", "Engångsfunktion", "przycisk jednorazowego ogrzania", "engangsknapp varme", "fonction touche unique")
-MAKE_PSTR_LIST(wwSolarTemp, "wwsolartemp", "solar boiler temperature", "Solarboiler Temperatur", "Zonneboiler temperatuur", "Solpanel Temp", "temperatura zasobnika solarnego", "", "température chaudière solaire")
+MAKE_PSTR_LIST(wwSolarTemp, "wwsolartemp", "solar boiler temperature", "Solarboiler Temperatur", "Zonneboiler temperatuur", "Solpanel Temp", "temperatura zasobnika solarnego", "", "température chaudière solaire") // TODO translate
 
 // mqtt values / commands
 MAKE_PSTR_LIST(switchtime, "switchtime", "program switchtime", "Programm Schaltzeit", "Programma schakeltijd", "Program Bytestid", "program czasowy", "programbyttetid", "heure commutation programme")
@@ -505,10 +513,10 @@ MAKE_PSTR_LIST(errorCode, "errorcode", "error code", "Fehlernummer", "Foutmeldin
 MAKE_PSTR_LIST(ibaMainDisplay, "display", "display", "Anzeige", "Display", "Display", "wyświetlacz", "skjerm", "affichage")
 MAKE_PSTR_LIST(ibaLanguage, "language", "language", "Sprache", "Taal", "Sprak", "język", "språk", "langue")
 MAKE_PSTR_LIST(ibaClockOffset, "clockoffset", "clock offset", "Uhrkorrektur", "Klokcorrectie", "Tidskorrigering", "korekta zegara", "tidskorrigering", "offset horloge")
-MAKE_PSTR_LIST(ibaBuildingType, "building", "building type", "Gebäudetyp", "", "Byggnadstyp", "typ budynku", "bygningstype", "type bâtiment")
-MAKE_PSTR_LIST(heatingPID, "heatingpid", "heating PID", "Heizungs-PID", "", "Uppvärmning PID", "PID ogrzewania", "oppvarmings PID", "PID chauffage")
-MAKE_PSTR_LIST(ibaCalIntTemperature, "intoffset", "internal temperature offset", "Korrektur interner Temperatur", "", "Korrigering interntemperatur", "korekta temperatury w pomieszczeniu", "Korrigering interntemperatur", "offset température interne")
-MAKE_PSTR_LIST(ibaMinExtTemperature, "minexttemp", "minimal external temperature", "min. Aussentemperatur", "", "Min Extern Temperatur", "minimalna miejscowa temperatura zewnętrzna", "minimal eksterntemperatur", "température extérieure minimale")
+MAKE_PSTR_LIST(ibaBuildingType, "building", "building type", "Gebäudetyp", "", "Byggnadstyp", "typ budynku", "bygningstype", "type bâtiment") // TODO translate
+MAKE_PSTR_LIST(heatingPID, "heatingpid", "heating PID", "Heizungs-PID", "", "Uppvärmning PID", "PID ogrzewania", "oppvarmings PID", "PID chauffage") // TODO translate
+MAKE_PSTR_LIST(ibaCalIntTemperature, "intoffset", "internal temperature offset", "Korrektur interner Temperatur", "", "Korrigering interntemperatur", "korekta temperatury w pomieszczeniu", "Korrigering interntemperatur", "offset température interne") // TODO translate
+MAKE_PSTR_LIST(ibaMinExtTemperature, "minexttemp", "minimal external temperature", "min. Aussentemperatur", "", "Min Extern Temperatur", "minimalna miejscowa temperatura zewnętrzna", "minimal eksterntemperatur", "température extérieure minimale") // TODO translate
 MAKE_PSTR_LIST(backlight, "backlight", "key backlight", "Gegenlicht", "Toetsverlichting", "Bakgrundsbelysning", "podświetlenie klawiatury", "bakgrunnsbelysning", "rétroéclairage touches")
 MAKE_PSTR_LIST(damping, "damping", "damping outdoor temperature", "Dämpfung der Außentemperatur", "Demping buitentemperatuur", "Utomhustemperatur dämpning", "tłumienie temperatury zewnętrznej", "demping av utetemperatur", "température extérieure minimale")
 MAKE_PSTR_LIST(tempsensor1, "inttemp1", "temperature sensor 1", "Temperatursensor 1", "Temperatuursensor 1", "Temperatursensor 1", "czujnik temperatury 1", "temperatursensor 1", "sonde température 1")
@@ -521,6 +529,9 @@ MAKE_PSTR_LIST(autodst, "autodst", "automatic change daylight saving time", "aut
 MAKE_PSTR_LIST(preheating, "preheating", "preheating in the clock program", "Vorheizen im Zeitprogramm", "Voorverwarming in het klokprogramma", "Förvärmning i tidsprogram", "podgrzewanie w programie czasowym", "forvarming i tidsprogram", "préchauffage dans programme horloge")
 MAKE_PSTR_LIST(offtemp, "offtemp", "temperature when mode is off", "Temperatur bei AUS", "Temperatuur bij UIT", "Temperatur Avslagen", "temperatura w trybie \"wył.\"", "temperatur avslått", "température lorsque mode désactivé")
 MAKE_PSTR_LIST(mixingvalves, "mixingvalves", "mixing valves", "Mischventile", "Mengkleppen", "Blandningsventiler", "zawory mieszające", "blandeventiler", "vannes mélange")
+MAKE_PSTR_LIST(pvEnableWw, "pvenableww", "enable raise dhw", "aktiviere Anhebung WW", "", "", "", "", "") // TODO translate
+MAKE_PSTR_LIST(pvRaiseHeat, "pvraiseheat", "raise heating with PV", "Anhebung Heizen mit PV", "", "", "", "", "") // TODO translate
+MAKE_PSTR_LIST(pvLowerCool, "pvlowercool", "lower cooling with PV", "Kühlabsenkung mit PV", "", "", "", "", "") // TODO translate
 
 // thermostat ww
 MAKE_PSTR_LIST(wwMode, "wwmode", "mode", "Modus", "Modus", "Läge", "tryb pracy", "modus", "mode")
@@ -534,7 +545,7 @@ MAKE_PSTR_LIST(wwDisinfect, "wwdisinfect", "disinfection", "Desinfektion", "Desi
 MAKE_PSTR_LIST(wwDisinfectDay, "wwdisinfectday", "disinfection day", "Desinfektionstag", "Desinfectiedag", "Desinfektionsdag", "dzień dezynfekcji termicznej", "desinfeksjonsdag", "jour désinfection")
 MAKE_PSTR_LIST(wwDisinfectHour, "wwdisinfecthour", "disinfection hour", "Desinfektionsstunde", "Desinfectieuur", "Desinfektionstimme", "godzina dezynfekcji termicznej", "desinfeksjonstime", "heure désinfection")
 MAKE_PSTR_LIST(wwDisinfectTime, "wwdisinfecttime", "disinfection time", "Desinfektionsdauer", "Desinfectietijd", "Desinfektionstid", "maksymalny czas trwania dezynfekcji termicznej", "desinfeksjonstid", "durée désinfection")
-MAKE_PSTR_LIST(wwDailyHeating, "wwdailyheating", "daily heating", "täglich Heizen", "Dagelijks opwarmen", "Daglig Uppvärmning", "codzienne nagrzewanie", "", "chauffage quotidien")
+MAKE_PSTR_LIST(wwDailyHeating, "wwdailyheating", "daily heating", "täglich Heizen", "Dagelijks opwarmen", "Daglig Uppvärmning", "codzienne nagrzewanie", "", "chauffage quotidien") // TODO translate
 MAKE_PSTR_LIST(wwDailyHeatTime, "wwdailyheattime", "daily heating time", "tägliche Heizzeit", "Tijd dagelijkse opwarming", "Daglig Uppvärmningstid", "czas trwania codziennego nagrzewania", "daglig oppvarmingstid", "heure chauffage quotidien")
 
 // thermostat hc
@@ -558,8 +569,8 @@ MAKE_PSTR_LIST(comforttemp, "comforttemp", "comfort temperature", "Komforttemper
 MAKE_PSTR_LIST(summertemp, "summertemp", "summer temperature", "Sommertemperatur", "Zomertemperatuur", "Sommartemperatur", "temperatura przełączania lato/zima", "Sommertemperatur", "température été")
 MAKE_PSTR_LIST(designtemp, "designtemp", "design temperature", "Auslegungstemperatur", "Ontwerptemperatuur", "Design-temperatur", "temperatura projektowa", "designtemperatur", "température conception")
 MAKE_PSTR_LIST(offsettemp, "offsettemp", "offset temperature", "Temperaturanhebung", "Temperatuur offset", "Temperaturkorrigering", "korekta temperatury", "temperaturkorrigering", "température offset")
-MAKE_PSTR_LIST(minflowtemp, "minflowtemp", "min flow temperature", "min Vorlauftemperatur", "", "Min Flödestemperatur", "minimalna temperatura zasilania", "min turtemperatur", "température min flux")
-MAKE_PSTR_LIST(maxflowtemp, "maxflowtemp", "max flow temperature", "max Vorlauftemperatur", "", "Max Flödestemperatur", "maksymalna temperatura zasilania", "maks turtemperatur", "température max flux")
+MAKE_PSTR_LIST(minflowtemp, "minflowtemp", "min flow temperature", "min Vorlauftemperatur", "", "Min Flödestemperatur", "minimalna temperatura zasilania", "min turtemperatur", "température min flux") // TODO translate
+MAKE_PSTR_LIST(maxflowtemp, "maxflowtemp", "max flow temperature", "max Vorlauftemperatur", "", "Max Flödestemperatur", "maksymalna temperatura zasilania", "maks turtemperatur", "température max flux") // TODO translate
 MAKE_PSTR_LIST(roominfluence, "roominfluence", "room influence", "Raumeinfluss", "Ruimteinvloed", "Rumspåverkan", "wpływ pomieszczenia", "rominnflytelse", "influence pièce")
 MAKE_PSTR_LIST(roominfl_factor, "roominflfactor", "room influence factor", "Raumeinflussfaktor", "Factor ruimteinvloed", "Rumspåverkansfaktor", "współczynnik wpływu pomieszczenia", "rominnflytelsesfaktor", "facteur d'influence pièce")
 MAKE_PSTR_LIST(curroominfl, "curroominfl", "current room influence", "aktueller Raumeinfluss", "Huidige ruimteinvloed", "Aktuell Rumspåverkan", "aktualny wpływ pomieszczenia", "gjeldende rominnflytelse", "influence actuelle pièce")
@@ -579,7 +590,7 @@ MAKE_PSTR_LIST(holidaytemp, "holidaytemp", "holiday temperature", "Urlaubstemper
 MAKE_PSTR_LIST(summermode, "summermode", "summer mode", "Sommerbetrieb", "Zomerbedrijf", "Sommarläge", "aktualny tryb lato/zima", "sommermodus", "mode été")
 MAKE_PSTR_LIST(holidaymode, "holidaymode", "holiday mode", "Urlaubsbetrieb", "Vakantiebedrijf", "Helgläge", "tryb urlopowy", "feriemodus", "mode vacances")
 MAKE_PSTR_LIST(flowtempoffset, "flowtempoffset", "flow temperature offset for mixer", "Vorlauftemperaturanhebung", "Mixer aanvoertemperatuur offset", "Temperaturkorrigering Flödestemp. Blandningsventil", "korekta temperatury przepływu dla miksera", "temperaturkorrigering av blandingsventil", "décalage température de bascule pour mélangeur")
-MAKE_PSTR_LIST(reducemode, "reducemode", "reduce mode", "Absenkmodus", "Gereduceerde modus", "Reducerat Läge", "tryb zredukowany/obniżony", "", "mode réduction")
+MAKE_PSTR_LIST(reducemode, "reducemode", "reduce mode", "Absenkmodus", "Gereduceerde modus", "Reducerat Läge", "tryb zredukowany/obniżony", "", "mode réduction") // TODO translate
 MAKE_PSTR_LIST(noreducetemp, "noreducetemp", "no reduce below temperature", "Durchheizen unter", "Reduceermodus onderbreken onder", "Inaktivera reducering under", "bez redukcji poniżej temperatury", "inaktiver redusert nedre temp", "pas de réduction en dessous température")
 MAKE_PSTR_LIST(reducetemp, "reducetemp", "off/reduce switch temperature", "Absenkmodus unter", "Onderste afschakeltemperatuur", "Avslag/Reducera under", "tryb zredukowany poniżej temperatury", "nedre avstengningstemperatur", "arrêt/réduction température bascule")
 MAKE_PSTR_LIST(vacreducetemp, "vacreducetemp", "vacations off/reduce switch temperature", "Urlaub Absenkmodus unter", "Vakantiemodus onderste afschakeltemperatuur", "Helg Avslag/Reducering under", "tryb urlopowy poniżej temperatury", "feriemodus nedre utkoblingstemperatur", "vacances – arrêt/réduction température bascule")
@@ -635,12 +646,12 @@ MAKE_PSTR_LIST(collectorTemp, "collectortemp", "collector temperature (TS1)", "K
 MAKE_PSTR_LIST(collector2Temp, "collector2temp", "collector 2 temperature (TS7)", "Kollector 2 Temperatur (TS7)", "Collector 2 temperatuur (TS7)", "Kollektor 2 Temperatur (TS7)", "temperatura kolektora 2 (TS7)", "kollektor 2 temperatur (TS7)", "température collecteur 2 (TS7)")
 MAKE_PSTR_LIST(cylBottomTemp, "cylbottomtemp", "cylinder bottom temperature (TS2)", "Speicher Bodentemperatur (TS2)", "Bodemtemperatuur zonneboiler (TS2)", "Cylindertemperatur Botten (TS2)", "temperatura na spodzie zasobnika (TS2)", "beredertemp i bunn (TS2)", "température fond de cylindre (TS2)")
 MAKE_PSTR_LIST(cyl2BottomTemp, "cyl2bottomtemp", "second cylinder bottom temperature (TS5)", "2. Speicher Bodentemperatur (TS5)", "Bodemtemperatuur 2e boiler", "Sekundär Cylindertemperatur Botten (TS5)", "temperatura na spodzie drugiego zasobnika (TS5)", "skundær beredertemp i bunn (TS5)", "température fond de cylindre (TS5)")
-MAKE_PSTR_LIST(heatExchangerTemp, "heatexchangertemp", "heat exchanger temperature (TS6)", "wärmetauscher Temperatur (TS6)", "Temperatuur warmtewisselaar (TS6)", "Värmeväxlare Temperatur (TS6)", "temperatura wymiennika ciepła (TS6)", "", "température échangeur de chaleur (TS6)")
+MAKE_PSTR_LIST(heatExchangerTemp, "heatexchangertemp", "heat exchanger temperature (TS6)", "wärmetauscher Temperatur (TS6)", "Temperatuur warmtewisselaar (TS6)", "Värmeväxlare Temperatur (TS6)", "temperatura wymiennika ciepła (TS6)", "", "température échangeur de chaleur (TS6)") // TODO translate
 MAKE_PSTR_LIST(collectorMaxTemp, "collectormaxtemp", "maximum collector temperature", "maximale Kollektortemperatur", "Maximale collectortemperatuur", "Max Kollektortemperatur", "maksymalna temperatura kolektora", "maks kollektortemperatur", "température max. collecteur")
 MAKE_PSTR_LIST(collectorMinTemp, "collectormintemp", "minimum collector temperature", "minimale Kollektortemperatur", "Minimale collectortemperatuur", "Min Kollektortemperatur", "minimalna temperatura kolektora", "min kollektortemperatur", "température min. collecteur")
 MAKE_PSTR_LIST(cylMaxTemp, "cylmaxtemp", "maximum cylinder temperature", "maximale Speichertemperatur", "maximale temperatuur zonneboiler", "Max Cylindertemperatur", "maksymalna temperatura zasobnika", "maks beredertemperatur", "température max. cylindre")
 MAKE_PSTR_LIST(solarPumpMod, "solarpumpmod", "pump modulation (PS1)", "Pumpenmodulation (PS1)", "Pompmodulatie (PS1)", "Pumpmodulering (PS1)", "modulacja pompy solarnej (PS1)", "solpumpmodulering (PS1)", "modulation pompe (PS1)")
-MAKE_PSTR_LIST(cylPumpMod, "cylpumpmod", "cylinder pump modulation (PS5)", "Speicherpumpenmodulation (PS5)", "Modulatie zonneboilerpomp (PS5)", "Cylinderpumpmodulering (PS5)", "modulacja pompy zasobnika (PS5)", "", "modulation pompe cylindre (PS5)")
+MAKE_PSTR_LIST(cylPumpMod, "cylpumpmod", "cylinder pump modulation (PS5)", "Speicherpumpenmodulation (PS5)", "Modulatie zonneboilerpomp (PS5)", "Cylinderpumpmodulering (PS5)", "modulacja pompy zasobnika (PS5)", "", "modulation pompe cylindre (PS5)") // TODO translate
 MAKE_PSTR_LIST(solarPump, "solarpump", "pump (PS1)", "Pumpe (PS1)", "Pomp (PS1)", "Pump (PS1)", "pompa solarna (PS1)", "solpumpe (PS1)", "pompe solaire (PS1)")
 MAKE_PSTR_LIST(solarPump2, "solarpump2", "pump 2 (PS4)", "Pumpe 2 (PS4)", "Pomp 2 (PS4)", "Pump 2 (PS4)", "pompa solarna 2 (PS4)", "solpumpe 2 (PS4)", "pompe 2 (PS4)")
 MAKE_PSTR_LIST(solarPump2Mod, "solarpump2mod", "pump 2 modulation (PS4)", "Pumpe 2 Modulation (PS4)", "Modulatie pomp 2 (PS4)", "Pump 2 Modulering (PS4)", "modulacja pompy solarnej 2 (PS4)", "solpumpe2modulering (PS4)", "modulation pompe solaire 2 (PS4)")
@@ -660,7 +671,7 @@ MAKE_PSTR_LIST(wwTemp3, "wwtemp3", "temperature 3", "Temperatur 3", "Temperatuur
 MAKE_PSTR_LIST(wwTemp4, "wwtemp4", "temperature 4", "Temperatur 4", "Temperatuur 3", "Temperatur 3", "temperatura 3", "Temperatur 4", "température 4")
 MAKE_PSTR_LIST(wwTemp5, "wwtemp5", "temperature 5", "Temperatur 5", "Temperatuur 5", "Temperatur 4", "temperatura 4", "Temperatur 5", "température 5")
 MAKE_PSTR_LIST(wwTemp7, "wwtemp7", "temperature 7", "Temperatur 7", "Temperatuur 7", "Temperatur 5", "temperatura 5", "Temperatur 7", "température 7")
-MAKE_PSTR_LIST(wwPump, "wwpump", "pump", "Pumpe", "Pomp", "Pump", "pompa", "", "pompe")
+MAKE_PSTR_LIST(wwPump, "wwpump", "pump", "Pumpe", "Pomp", "Pump", "pompa", "", "pompe") // TODO translate
 // solar ww and mixer wwc
 MAKE_PSTR_LIST(wwMinTemp, "wwmintemp", "minimum temperature", "minimale Temperatur", "Minimale temperatuur", "Min Temperatur", "temperatura minimalna", "min temperatur", "température min")
 MAKE_PSTR_LIST(wwRedTemp, "wwredtemp", "reduced temperature", "reduzierte Temperatur", "Gereduceerde temperatuur", "Reducerad Temperatur", "temperatura zredukowana", "reducert temperatur", "température réduite")

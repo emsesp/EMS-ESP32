@@ -592,6 +592,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
 void EMSESP::publish_other_values() {
     publish_device_values(EMSdevice::DeviceType::SWITCH);
     publish_device_values(EMSdevice::DeviceType::HEATPUMP);
+    publish_device_values(EMSdevice::DeviceType::HEATSOURCE);
     // other devices without values yet
     // publish_device_values(EMSdevice::DeviceType::GATEWAY);
     // publish_device_values(EMSdevice::DeviceType::CONNECT);
@@ -642,7 +643,9 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
 bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->device_type() == devicetype) {
-            return emsdevice->get_value_info(root, cmd, id);
+            if (emsdevice->get_value_info(root, cmd, id)) {
+                return true;
+            }
         }
     }
 
@@ -657,6 +660,10 @@ bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const in
         EMSESP::analogsensor_.get_value_info(root, cmd, id);
         return true;
     }
+
+    char error[100];
+    snprintf(error, sizeof(error), "cannot find values for entity '%s'", cmd);
+    root["message"] = error;
 
     return false;
 }
@@ -1000,13 +1007,24 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     for (auto & device : device_library_) {
         if (device.product_id == product_id) {
             // sometimes boilers share the same productID as controllers
-            // so only add boilers if the device_id is 0x08 or 0x60 or 0x70.., which is fixed for EMS
+            // so only add boilers if the device_id is 0x08
+            // cascaded boilers with 0x70.., map to heatsources
             if (device.device_type == DeviceType::BOILER) {
-                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER || device_id == EMSdevice::EMS_DEVICE_ID_AM200
-                    || (device_id >= EMSdevice::EMS_DEVICE_ID_BOILER_1 && device_id <= EMSdevice::EMS_DEVICE_ID_BOILER_F)) {
+                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER) {
                     device_p = &device;
                     break;
                 }
+                if ((device_id >= EMSdevice::EMS_DEVICE_ID_HS1 && device_id <= EMSdevice::EMS_DEVICE_ID_HS16)) {
+                    device_p              = &device;
+                    device_p->device_type = DeviceType::HEATSOURCE;
+                    break;
+                }
+            } else if (device.device_type == DeviceType::HEATSOURCE) {
+                device_p = &device;
+                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER) { // AHS as only heatsource on d 0x08
+                    device_p->device_type = DeviceType::BOILER;
+                }
+                break;
             } else {
                 // it's not a boiler, but we have a match
                 device_p = &device;
@@ -1067,6 +1085,10 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             device_type = DeviceType::BOILER;
             flags       = DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP;
             LOG_WARNING("Unknown EMS boiler. Using generic profile. Please report on GitHub.");
+        } else if (device_id >= 0x68 && device_id <= 0x6F) {
+            // test for https://github.com/emsesp/EMS-ESP32/issues/882
+            name        = "cascaded controller";
+            device_type = DeviceType::CONTROLLER;
         } else {
             LOG_WARNING("Unrecognized EMS device (device ID 0x%02X, no product ID). Please report on GitHub.", device_id);
             return false;

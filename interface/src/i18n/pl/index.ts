@@ -99,7 +99,7 @@ const pl: BaseTranslation = {
   NUM_DEVICES: '{num} urządze{{ń|nie|nia|nia|ń}} EMS',
   NUM_TEMP_SENSORS: '{num} czujni{{ków|k|ki|ki|ków}} temperatury',
   NUM_ANALOG_SENSORS: '{num} inn{{ych|e|e|e|ych}} urządze{{ń|nie|nia(two)|nia|ń}} podłączon{{ych|e|e|e|ych}} do EMS-ESP',
-  NUM_DAYS: '{num} {{dni|dzień|dni|dni|dni}}',
+  NUM_DAYS: '{num} d{{ni|zień|ni|ni|ni}}',
   NUM_SECONDS: '{num} sekun{{d|da|dy|dy|d}}',
   NUM_HOURS: '{num} godzi{{n|na|ny|ny|n}}',
   NUM_MINUTES: '{num} minu{{t|ta|ty|ty|t}}',

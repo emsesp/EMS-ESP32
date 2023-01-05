@@ -206,7 +206,14 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
 
 // send the complete log buffer to the API, not filtering on log level
 void WebLogService::fetchLog(AsyncWebServerRequest * request) {
-    auto *     response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN + 192 * log_messages_.size());
+    // auto *     response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN + 192 * log_messages_.size());
+    size_t buffer   = EMSESP_JSON_SIZE_XLARGE_DYN + 192 * log_messages_.size();
+    auto * response = new MsgpackAsyncJsonResponse(false, buffer);
+    while (!response->getSize()) {
+        delete response;
+        buffer -= 1024;
+        response = new MsgpackAsyncJsonResponse(false, buffer);
+    }
     JsonObject root     = response->getRoot();
     JsonArray  log      = root.createNestedArray("events");
 

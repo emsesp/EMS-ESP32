@@ -236,6 +236,11 @@ class Thermostat : public EMSdevice {
     uint8_t delayBoiler_;     // minutes
     uint8_t tempDiffBoiler_;  // relative temperature degrees
 
+    // PV
+    uint8_t pvEnableWw_;
+    uint8_t pvRaiseHeat_;
+    uint8_t pvLowerCool_;
+
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
 
     // Generic Types
@@ -379,6 +384,7 @@ class Thermostat : public EMSdevice {
     void process_EasyMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersRemoteMonitor(std::shared_ptr<const Telegram> telegram);
     void process_HybridSettings(std::shared_ptr<const Telegram> telegram);
+    void process_PVSettings(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram);
     void process_JunkersWW(std::shared_ptr<const Telegram> telegram);
     void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
@@ -491,6 +497,11 @@ class Thermostat : public EMSdevice {
     bool set_delayBoiler(const char * value, const int8_t id);
     bool set_tempDiffBoiler(const char * value, const int8_t id);
     bool set_roomsensor(const char * value, const int8_t id);
+
+    bool set_pvEnableWw(const char * value, const int8_t id);
+    bool set_pvRaiseHeat(const char * value, const int8_t id);
+    bool set_pvLowerCool(const char * value, const int8_t id);
+
 };
 
 } // namespace emsesp

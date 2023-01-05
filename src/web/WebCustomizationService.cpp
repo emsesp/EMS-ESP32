@@ -46,8 +46,8 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
                securityManager->wrapRequest(std::bind(&WebCustomizationService::reset_customization, this, _1), AuthenticationPredicates::IS_ADMIN));
 
     _masked_entities_handler.setMethod(HTTP_POST);
-    _masked_entities_handler.setMaxContentLength(4096);
-    _masked_entities_handler.setMaxJsonBufferSize(4096);
+    _masked_entities_handler.setMaxContentLength(2048);
+    _masked_entities_handler.setMaxJsonBufferSize(2048);
     server->addHandler(&_masked_entities_handler);
 
     _device_entities_handler.setMethod(HTTP_POST);
