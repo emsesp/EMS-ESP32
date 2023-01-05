@@ -42,18 +42,10 @@ static bool          __output_pins[256];
 static int           __output_level[256];
 
 int main(int argc __attribute__((unused)), char * argv[] __attribute__((unused))) {
-    memset(__output_pins, 0, sizeof(__output_pins));
-    memset(__output_level, 0, sizeof(__output_level));
-
     setup();
-    loop(); // run once
-
-    static unsigned long __cycles = 0;
-
-    while (millis() <= 10 * 1000 && __cycles++ <= 10 * 1000) {
+    while (millis() <= 10 * 1000) {
         loop();
     }
-
     return 0;
 }
 
@@ -66,7 +58,7 @@ int64_t esp_timer_get_time() {
 }
 
 void delay(unsigned long millis) {
-    // __millis += millis;
+    __millis += millis;
 }
 
 void yield(void) {
