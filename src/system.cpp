@@ -54,10 +54,6 @@ size_t num_languages = sizeof(languages) / sizeof(const char *);
 
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
-#ifndef EMSESP_STANDALONE
-uuid::syslog::SyslogService System::syslog_;
-#endif
-
 // init statics
 PButton System::myPButton_;
 bool    System::restart_requested_ = false;
@@ -210,7 +206,6 @@ void System::system_restart() {
 void System::wifi_reconnect() {
     LOG_INFO("WiFi reconnecting...");
     Shell::loop_all();
-    EMSESP::console_.loop();
     delay(1000);                                                                   // wait a second
     EMSESP::webSettingsService.save();                                             // local settings
     EMSESP::esp8266React.getNetworkSettingsService()->callUpdateHandlers("local"); // in case we've changed ssid or password
@@ -220,8 +215,6 @@ void System::wifi_reconnect() {
 void System::format(uuid::console::Shell & shell) {
     auto msg = ("Formatting file system. This will reset all settings to their defaults");
     shell.logger().warning(msg);
-    // shell.flush();
-
     EMSuart::stop();
 
 #ifndef EMSESP_STANDALONE
@@ -251,7 +244,13 @@ void System::syslog_init() {
         }
         syslog_.log_level((uuid::log::Level)syslog_level_);
         syslog_.mark_interval(syslog_mark_interval_);
-        syslog_.destination(syslog_host_.c_str(), syslog_port_);
+
+        IPAddress addr;
+        if (!addr.fromString(syslog_host_.c_str())) {
+            addr = (uint32_t)0;
+        }
+        syslog_.destination(addr, syslog_port_);
+
         syslog_.hostname(hostname().c_str());
 
         // register the command
@@ -263,7 +262,7 @@ void System::syslog_init() {
         EMSESP::logger().info("Stopping Syslog");
         syslog_.log_level((uuid::log::Level)-1);
         syslog_.mark_interval(0);
-        syslog_.destination("");
+        // syslog_.destination("");
     }
 
     if (Mqtt::publish_single()) {
@@ -433,7 +432,6 @@ void System::button_OnVLongPress(PButton & b) {
     LOG_DEBUG("Button pressed - very long press");
 #ifndef EMSESP_STANDALONE
     LOG_WARNING("Performing factory reset...");
-    EMSESP::console_.loop();
     EMSESP::esp8266React.factoryReset();
 #endif
 }
@@ -622,7 +620,8 @@ bool System::heartbeat_json(JsonObject & output) {
     }
 
 #ifndef EMSESP_STANDALONE
-    output["freemem"] = ESP.getFreeHeap() / 1024; // kilobytes
+    output["freemem"] = ESP.getFreeHeap() / 1024;     // kilobytes
+    output["max_alloc"] = ESP.getMaxAllocHeap() / 1024; // kilobytes
 #endif
 
 #ifndef EMSESP_STANDALONE
