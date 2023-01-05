@@ -441,7 +441,6 @@ int Helpers::atoint(const char * value) {
 
 // rounds a number to 2 decimal places
 // example: round2(3.14159) -> 3.14
-// From mvdp:
 //  The conversion to Fahrenheit is different for absolute temperatures and relative temperatures like hysteresis.
 //  fahrenheit=0 - off, no conversion
 //  fahrenheit=1 - relative, 1.8t
