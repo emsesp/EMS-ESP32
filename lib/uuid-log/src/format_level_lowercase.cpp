@@ -38,20 +38,19 @@ static constexpr const char * pstr_level_lowercase_debug   = "debug";
 static constexpr const char * pstr_level_lowercase_trace   = "trace";
 static constexpr const char * pstr_level_lowercase_all     = "all";
 
-static const __FlashStringHelper * log_level_lowercase[(int)Level::ALL - (int)Level::OFF + 1] __attribute__((__aligned__(sizeof(uint32_t))))
-PROGMEM = {reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_off),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_emerg),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_crit),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_alert),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_err),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_warning),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_notice),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_info),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_debug),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_trace),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_all)};
+static const char * log_level_lowercase[(int)Level::ALL - (int)Level::OFF + 1] = {pstr_level_lowercase_off,
+                                                                                  pstr_level_lowercase_emerg,
+                                                                                  pstr_level_lowercase_crit,
+                                                                                  pstr_level_lowercase_alert,
+                                                                                  pstr_level_lowercase_err,
+                                                                                  pstr_level_lowercase_warning,
+                                                                                  pstr_level_lowercase_notice,
+                                                                                  pstr_level_lowercase_info,
+                                                                                  pstr_level_lowercase_debug,
+                                                                                  pstr_level_lowercase_trace,
+                                                                                  pstr_level_lowercase_all};
 
-const __FlashStringHelper * format_level_lowercase(Level level) {
+const char * format_level_lowercase(Level level) {
     return log_level_lowercase[(int)level + 1];
 }
 

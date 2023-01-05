@@ -1,6 +1,6 @@
 /*
  * uuid-console - Microcontroller console shell
- * Copyright 2019  Simon Arlott
+ * Copyright 2019,2022  Simon Arlott
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a std::copy of the GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -25,6 +25,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #ifndef __cpp_lib_make_unique
@@ -43,23 +44,39 @@ namespace uuid {
 namespace console {
 
 void Commands::add_command(const string_vector & name, command_function function) {
-    add_command(0, 0, name, string_vector{}, function, nullptr);
+    add_command(0, 0, 0, name, string_vector{}, function, nullptr);
 }
 
 void Commands::add_command(const string_vector & name, const string_vector & arguments, command_function function) {
-    add_command(0, 0, name, arguments, function, nullptr);
+    add_command(0, 0, 0, name, arguments, function, nullptr);
 }
 
 void Commands::add_command(const string_vector & name, const string_vector & arguments, command_function function, argument_completion_function arg_function) {
-    add_command(0, 0, name, arguments, function, arg_function);
+    add_command(0, 0, 0, name, arguments, function, arg_function);
+}
+
+void Commands::add_command(unsigned int context, const string_vector & name, command_function function) {
+    add_command(context, 0, 0, name, string_vector{}, function, nullptr);
+}
+
+void Commands::add_command(unsigned int context, const string_vector & name, const string_vector & arguments, command_function function) {
+    add_command(context, 0, 0, name, arguments, function, nullptr);
+}
+
+void Commands::add_command(unsigned int                 context,
+                           const string_vector &        name,
+                           const string_vector &        arguments,
+                           command_function             function,
+                           argument_completion_function arg_function) {
+    add_command(context, 0, 0, name, arguments, function, arg_function);
 }
 
 void Commands::add_command(unsigned int context, unsigned int flags, const string_vector & name, command_function function) {
-    add_command(context, flags, name, string_vector{}, function, nullptr);
+    add_command(context, flags, 0, name, string_vector{}, function, nullptr);
 }
 
 void Commands::add_command(unsigned int context, unsigned int flags, const string_vector & name, const string_vector & arguments, command_function function) {
-    add_command(context, flags, name, arguments, function, nullptr);
+    add_command(context, flags, 0, name, arguments, function, nullptr);
 }
 
 void Commands::add_command(unsigned int                 context,
@@ -68,34 +85,30 @@ void Commands::add_command(unsigned int                 context,
                            const string_vector &        arguments,
                            command_function             function,
                            argument_completion_function arg_function) {
-    commands_.emplace(std::piecewise_construct, std::forward_as_tuple(context), std::forward_as_tuple(flags, name, arguments, function, arg_function));
+    add_command(context, flags, 0, name, arguments, function, arg_function);
 }
 
-
-// added by proddy
-// note we should really iterate and free up the lambda code and any flashstrings
-void Commands::remove_all_commands() {
-    commands_.clear();
+void Commands::add_command(unsigned int context, unsigned int flags, unsigned int not_flags, const string_vector & name, command_function function) {
+    add_command(context, flags, not_flags, name, string_vector{}, function, nullptr);
 }
 
-// added by proddy
-// note we should really iterate and free up the lambda code and any flashstrings
-void Commands::remove_context_commands(unsigned int context) {
-    commands_.erase(context);
+void Commands::add_command(unsigned int          context,
+                           unsigned int          flags,
+                           unsigned int          not_flags,
+                           const string_vector & name,
+                           const string_vector & arguments,
+                           command_function      function) {
+    add_command(context, flags, not_flags, name, arguments, function, nullptr);
+}
 
-    /*
-    auto commands = commands_.equal_range(context);
-    for (auto command_it = commands.first; command_it != commands.second; command_it++) {
-        shell.printf("Got: ");
-        for (auto flash_name : command_it->second.name_) {
-            shell.printf("%s ", read_flash_string(flash_name).c_str());
-        }
-        shell.println();
-    }
-
-    size_t nun = commands_.erase(context);
-    shell.printfln("Erased %d commands", nun);
-    */
+void Commands::add_command(unsigned int                 context,
+                           unsigned int                 flags,
+                           unsigned int                 not_flags,
+                           const string_vector &        name,
+                           const string_vector &        arguments,
+                           command_function             function,
+                           argument_completion_function arg_function) {
+    commands_.emplace(std::piecewise_construct, std::forward_as_tuple(context), std::forward_as_tuple(flags, not_flags, name, arguments, function, arg_function));
 }
 
 Commands::Execution Commands::execute_command(Shell & shell, CommandLine && command_line) {
@@ -106,7 +119,7 @@ Commands::Execution Commands::execute_command(Shell & shell, CommandLine && comm
     result.error = nullptr;
 
     if (commands.exact.empty()) {
-        result.error = F("Command not found");
+        result.error = "Command not found";
     } else if (commands.exact.count(longest->first) == 1) {
         auto &                   command = longest->second;
         std::vector<std::string> arguments;
@@ -117,16 +130,16 @@ Commands::Execution Commands::execute_command(Shell & shell, CommandLine && comm
         command_line.reset();
 
         if (commands.partial.upper_bound(longest->first) != commands.partial.end() && !arguments.empty()) {
-            result.error = F("Command not found");
+            result.error = "Command not found";
         } else if (arguments.size() < command->minimum_arguments()) {
-            result.error = F("Not enough arguments for command");
+            result.error = "Not enough arguments for command";
         } else if (arguments.size() > command->maximum_arguments()) {
-            result.error = F("Too many arguments for command");
+            result.error = "Too many arguments for command";
         } else {
             command->function_(shell, arguments);
         }
     } else {
-        result.error = F("Fatal error (multiple commands found)");
+        result.error = "Fatal error (multiple commands found)";
     }
 
     return result;
@@ -145,7 +158,7 @@ bool Commands::find_longest_common_prefix(const std::multimap<size_t, const Comm
 
         for (size_t length = 0; all_match && length < shortest_match; length++) {
             for (auto command_it = std::next(commands.begin()); command_it != commands.end(); command_it++) {
-                if ((*std::next(first.begin(), length)) != (*std::next(command_it->second->name_.begin(), length))) {
+                if (*std::next(first.begin(), length) != *std::next(command_it->second->name_.begin(), length)) {
                     all_match = false;
                     break;
                 }
@@ -158,7 +171,7 @@ bool Commands::find_longest_common_prefix(const std::multimap<size_t, const Comm
 
         auto name_it = first.begin();
         for (size_t i = 0; i < component_prefix; i++) {
-            longest_name.push_back(std::move((*name_it)));
+            longest_name.push_back(std::move(*name_it));
             name_it++;
         }
     }
@@ -173,11 +186,17 @@ bool Commands::find_longest_common_prefix(const std::multimap<size_t, const Comm
             for (auto command_it = std::next(commands.begin()); command_it != commands.end(); command_it++) {
                 // This relies on the null terminator character limiting the
                 // length before it becomes longer than any of the strings
-                if (pgm_read_byte(reinterpret_cast<PGM_P>(first) + length)
-                    != pgm_read_byte(reinterpret_cast<PGM_P>(*std::next(command_it->second->name_.begin(), component_prefix)) + length)) {
+
+                if (pgm_read_byte(first + length) != pgm_read_byte((*std::next(command_it->second->name_.begin(), component_prefix)) + length)) {
                     all_match = false;
                     break;
                 }
+
+                // if (pgm_read_byte(reinterpret_cast<PGM_P>(first) + length)
+                //     != pgm_read_byte(reinterpret_cast<PGM_P>(*std::next(command_it->second->name_.begin(), component_prefix)) + length)) {
+                //     all_match = false;
+                //     break;
+                // }
             }
 
             if (all_match) {
@@ -223,12 +242,16 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
 
     auto   match = commands.partial.begin();
     size_t count;
+    bool   multiple_matches;
     if (match != commands.partial.end()) {
         count = commands.partial.count(match->first);
+        multiple_matches =
+            count > 1 || commands.partial.size() > count || (!commands.exact.empty() && commands.exact.rbegin()->first >= command_line.total_size());
     } else if (!commands.exact.empty()) {
         // Use prev() because both iterators must be forwards
-        match = std::prev(commands.exact.end());
-        count = commands.exact.count(match->first);
+        match            = std::prev(commands.exact.end());
+        count            = commands.exact.count(match->first);
+        multiple_matches = false;
     } else {
         return result;
     }
@@ -237,20 +260,13 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
     std::vector<std::string>                         temp_command_name;
     std::multimap<size_t, const Command *>::iterator temp_command_it;
 
-    if (commands.partial.size() > 1 && (commands.exact.empty() || command_line.total_size() > commands.exact.begin()->second->name_.size())) {
-        // There are multiple partial matching commands, find the longest common prefix
+    if (multiple_matches && (commands.exact.empty() || command_line.total_size() > commands.exact.begin()->second->name_.size())) {
+        // There are multiple matching commands, find the longest common prefix
         bool whole_components = find_longest_common_prefix(commands.partial, temp_command_name);
 
-        if (count == 1 && whole_components && temp_command_name.size() == match->first) {
-            // If the longest common prefix is the same as the single shortest matching command
-            // then there's no need for a temporary command, but add a trailing space because
-            // there are longer commands that matched.
-            temp_command_name.clear();
-            result.replacement.trailing_space = true;
-        }
-
+        // Construct a temporary command with the longest common prefix to use as the replacement
         if (!temp_command_name.empty() && command_line.total_size() <= temp_command_name.size()) {
-            temp_command                      = std::make_unique<Command>(0, string_vector{}, string_vector{}, nullptr, nullptr);
+            temp_command                      = std::make_unique<Command>(0, 0, string_vector{}, string_vector{}, nullptr, nullptr);
             count                             = 1;
             match                             = commands.partial.end();
             result.replacement.trailing_space = whole_components;
@@ -261,12 +277,12 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
         }
     }
 
-    if (count == 1 && !temp_command) {
+    if (count == 1 && !multiple_matches) {
         // Construct a replacement string for a single matching command
         auto & matching_command = match->second;
 
         for (auto & name : matching_command->name_) {
-            result.replacement->push_back(std::move((name)));
+            result.replacement->push_back(name);
         }
 
         if (command_line.total_size() > result.replacement->size()
@@ -290,7 +306,8 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
                 }
             }
 
-            auto potential_arguments = matching_command->arg_function_ ? matching_command->arg_function_(shell, arguments) : std::vector<std::string>{};
+            auto potential_arguments =
+                matching_command->arg_function_ ? matching_command->arg_function_(shell, arguments, last_argument) : std::vector<std::string>{};
 
             // Remove arguments that can't match
             if (!command_line.trailing_space) {
@@ -340,7 +357,7 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
                 remaining_help.escape_initial_parameters();
 
                 for (auto it = std::next(matching_command->arguments_.cbegin(), current_args_count); it != matching_command->arguments_.cend(); it++) {
-                    remaining_help->push_back(std::move((*it)));
+                    remaining_help->push_back(std::move(*it));
                 }
             }
 
@@ -366,13 +383,13 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
             // Add a space because there are more arguments for this command
             result.replacement.trailing_space = true;
         }
-    } else if (count > 1 || temp_command) {
+    } else if (count != 0) {
         // Provide help for all of the potential commands
-        for (auto command_it = commands.partial.begin(); command_it != commands.partial.end(); command_it++) {
+        for (auto command_it = commands.all.begin(); command_it != commands.all.end(); command_it++) {
             CommandLine help;
 
             auto line_it       = command_line->cbegin();
-            auto flash_name_it = command_it->second->name_.cbegin();
+            auto flash_name_it = (*command_it)->name_.cbegin();
 
             if (temp_command) {
                 // Skip parts of the command name/line when the longest common prefix was used
@@ -381,14 +398,19 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
                     skip--;
                 }
 
+                // Exact match that is shorter than the replacement
+                if (flash_name_it + skip > (*command_it)->name_.cend()) {
+                    continue;
+                }
+
                 flash_name_it += skip;
                 while (line_it != command_line->cend()) {
                     line_it++;
                 }
             }
 
-            for (; flash_name_it != command_it->second->name_.cend(); flash_name_it++) {
-                std::string name = (*flash_name_it);
+            for (; flash_name_it != (*command_it)->name_.cend(); flash_name_it++) {
+                std::string name = *flash_name_it;
 
                 // Skip parts of the command name that match the command line
                 if (line_it != command_line->cend()) {
@@ -404,22 +426,22 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
 
             help.escape_initial_parameters();
 
-            for (auto argument : command_it->second->arguments_) {
+            for (auto argument : (*command_it)->arguments_) {
                 // Skip parts of the command arguments that exist in the command line
                 if (line_it != command_line->cend()) {
                     line_it++;
                     continue;
                 }
 
-                help->push_back(std::move((argument)));
+                help->push_back(argument);
             }
 
             result.help.push_back(std::move(help));
         }
     }
 
-    if (count > 1 && !commands.exact.empty()) {
-        // Try to add a space to exact matches
+    if (multiple_matches && !commands.exact.empty() && result.replacement.total_size() == 0) {
+        // Try to add a space to exact matches if there's no other partial match replacement
         auto longest = commands.exact.crbegin();
 
         if (commands.exact.count(longest->first) == 1) {
@@ -449,7 +471,7 @@ Commands::Match Commands::find_command(Shell & shell, const CommandLine & comman
         bool   match   = true;
         bool   exact   = true;
 
-        if (!shell.has_flags(command.flags_)) {
+        if (!shell.has_flags(command.flags_, command.not_flags_)) {
             continue;
         }
 
@@ -457,7 +479,7 @@ Commands::Match Commands::find_command(Shell & shell, const CommandLine & comman
         auto line_it = command_line->cbegin();
 
         for (; name_it != command.name_.cend() && line_it != command_line->cend(); name_it++, line_it++) {
-            std::string name  = (*name_it);
+            std::string name  = *name_it;
             size_t      found = name.rfind(*line_it, 0);
 
             if (found == std::string::npos) {
@@ -491,41 +513,21 @@ Commands::Match Commands::find_command(Shell & shell, const CommandLine & comman
             } else {
                 commands.partial.emplace(command.name_.size(), &command);
             }
+            commands.all.push_back(&command);
         }
     }
 
     return commands;
 }
 
-void Commands::for_each_available_command(Shell & shell, apply_function f) const {
-    auto commands = commands_.equal_range(shell.context());
-
-    for (auto command_it = commands.first; command_it != commands.second; command_it++) {
-        if (shell.has_flags(command_it->second.flags_)) {
-            std::vector<std::string> name;
-            std::vector<std::string> arguments;
-
-            name.reserve(command_it->second.name_.size());
-            for (auto flash_name : command_it->second.name_) {
-                name.push_back(std::move((flash_name)));
-            }
-
-            arguments.reserve(command_it->second.arguments_.size());
-            for (auto flash_argument : command_it->second.arguments_) {
-                arguments.push_back(std::move((flash_argument)));
-            }
-
-            f(name, arguments);
-        }
-    }
-}
-
 Commands::Command::Command(unsigned int                 flags,
+                           unsigned int                 not_flags,
                            const string_vector          name,
                            const string_vector          arguments,
                            command_function             function,
                            argument_completion_function arg_function)
     : flags_(flags)
+    , not_flags_(not_flags)
     , name_(name)
     , arguments_(arguments)
     , function_(function)

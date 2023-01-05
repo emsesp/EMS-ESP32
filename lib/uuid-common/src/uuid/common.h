@@ -26,6 +26,20 @@
 #include <string>
 #include <vector>
 
+#ifndef UUID_COMMON_STD_MUTEX_AVAILABLE
+#if __has_include(<mutex>) && (!defined(_GLIBCXX_MUTEX) || defined(_GLIBCXX_HAS_GTHREADS))
+#define UUID_COMMON_STD_MUTEX_AVAILABLE 1
+#else
+#define UUID_COMMON_STD_MUTEX_AVAILABLE 0
+#endif
+#endif
+
+#if defined(ARDUINO_ARCH_ESP32) || UUID_COMMON_STD_MUTEX_AVAILABLE
+#define UUID_COMMON_THREAD_SAFE 1
+#else
+#define UUID_COMMON_THREAD_SAFE 0
+#endif
+
 /**
  * Common utilities.
  *
@@ -35,31 +49,15 @@
 namespace uuid {
 
 /**
- * String compare two flash strings
+ * Thread-safe status of the library.
  *
- * The flash string must be stored with appropriate alignment for
- * reading it on the platform.
- *
- * @param[in] a Pointer to string stored in flash.
- * @param[in] b Pointer to string stored in flash.
- * @param[in] n optional max length
- * @return 0 for match, otherwise diff
- * @since 1.0.0
+ * @since 1.1.2
  */
-int compare_flash_string(const __FlashStringHelper * a, const __FlashStringHelper * b);
-int compare_flash_string(const __FlashStringHelper * a, const __FlashStringHelper * b, size_t n);
-
-/**
- * Read a string from flash and convert it to a std::string.
- *
- * The flash string must be stored with appropriate alignment for
- * reading it on the platform.
- *
- * @param[in] flash_str Pointer to string stored in flash.
- * @return A string copy of the flash string.
- * @since 1.0.0
- */
-std::string read_flash_string(const __FlashStringHelper * flash_str);
+#if UUID_COMMON_THREAD_SAFE
+static constexpr bool thread_safe = true;
+#else
+static constexpr bool thread_safe = false;
+#endif
 
 /**
  * Append to a std::string by printing a Printable object.
@@ -104,8 +102,8 @@ void loop();
  */
 uint64_t get_uptime_ms();
 
-uint32_t get_uptime();     // added by proddy
-uint32_t get_uptime_sec(); // added by proddy
+uint32_t get_uptime();     // added by proddy for EMS-ESP
+uint32_t get_uptime_sec(); // added by proddy for EMS-ESP
 
 void set_uptime();
 

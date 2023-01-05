@@ -1,6 +1,6 @@
 /*
- * uuid-common - Microcontroller common utilities
- * Copyright 2019  Simon Arlott
+ * uuid-log - Microcontroller logging framework
+ * Copyright 2021  Simon Arlott
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,24 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <uuid/common.h>
-
-#include <Arduino.h>
-
-#include <string>
+#include <uuid/log.h>
 
 namespace uuid {
 
-std::string read_flash_string(const __FlashStringHelper * flash_str) {
-    if (flash_str == nullptr) {
-        return std::string(""); // prevent crash
-    }
+namespace log {
 
-    std::string str(::strlen_P(reinterpret_cast<PGM_P>(flash_str)), '\0');
-
-    ::strncpy_P(&str[0], reinterpret_cast<PGM_P>(flash_str), str.capacity() + 1);
-
-    return str;
+Handler::~Handler() {
+    Logger::unregister_handler(this);
 }
+
+} // namespace log
 
 } // namespace uuid

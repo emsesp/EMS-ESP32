@@ -38,20 +38,19 @@ static constexpr const char * pstr_level_uppercase_debug   = "DEBUG";
 static constexpr const char * pstr_level_uppercase_trace   = "TRACE";
 static constexpr const char * pstr_level_uppercase_all     = "ALL";
 
-static const __FlashStringHelper * log_level_uppercase[(int)Level::ALL - (int)Level::OFF + 1] __attribute__((__aligned__(sizeof(uint32_t))))
-PROGMEM = {reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_off),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_emerg),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_crit),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_alert),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_err),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_warning),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_notice),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_info),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_debug),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_trace),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_all)};
+static const char * log_level_uppercase[(int)Level::ALL - (int)Level::OFF + 1] = {pstr_level_uppercase_off,
+                                                                                  pstr_level_uppercase_emerg,
+                                                                                  pstr_level_uppercase_crit,
+                                                                                  pstr_level_uppercase_alert,
+                                                                                  pstr_level_uppercase_err,
+                                                                                  pstr_level_uppercase_warning,
+                                                                                  pstr_level_uppercase_notice,
+                                                                                  pstr_level_uppercase_info,
+                                                                                  pstr_level_uppercase_debug,
+                                                                                  pstr_level_uppercase_trace,
+                                                                                  pstr_level_uppercase_all};
 
-const __FlashStringHelper * format_level_uppercase(Level level) {
+const char * format_level_uppercase(Level level) {
     return log_level_uppercase[(int)level + 1];
 }
 

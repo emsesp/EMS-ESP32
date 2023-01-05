@@ -1,6 +1,6 @@
 /*
  * uuid-log - Microcontroller logging framework
- * Copyright 2019  Simon Arlott
+ * Copyright 2019,2021-2022  Simon Arlott
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@
 
 #include <Arduino.h>
 
+#include <algorithm>
+#include <atomic>
 #include <cstdarg>
 #include <cstdint>
 #include <list>
@@ -30,6 +32,24 @@
 #include <vector>
 
 #include <uuid/common.h>
+
+#ifndef UUID_COMMON_THREAD_SAFE
+#define UUID_COMMON_THREAD_SAFE 0
+#endif
+
+#ifndef UUID_COMMON_STD_MUTEX_AVAILABLE
+#define UUID_COMMON_STD_MUTEX_AVAILABLE 0
+#endif
+
+#if UUID_COMMON_STD_MUTEX_AVAILABLE
+#define UUID_LOG_THREAD_SAFE 1
+#else
+#define UUID_LOG_THREAD_SAFE 0
+#endif
+
+#if UUID_LOG_THREAD_SAFE
+#include <mutex>
+#endif
 
 namespace uuid {
 
@@ -69,6 +89,17 @@ namespace uuid {
 #define COLOR_BRIGHT_RED_BACKGROUND "\x1B[41;1m"
 
 namespace log {
+
+/**
+ * Thread-safe status of the library.
+ *
+ * @since 2.3.0
+ */
+#if UUID_COMMON_THREAD_SAFE && UUID_LOG_THREAD_SAFE
+static constexpr bool thread_safe = true;
+#else
+static constexpr bool thread_safe = false;
+#endif
 
 /**
  * Severity level of log messages.
@@ -158,10 +189,10 @@ char format_level_char(Level level);
  * Format a log level as an uppercase string.
  *
  * @param[in] level Log level.
- * @return Uppercase name of the log level (flash string).
+ * @return Uppercase name of the log level
  * @since 1.0.0
  */
-const __FlashStringHelper * format_level_uppercase(Level level);
+const char * format_level_uppercase(Level level);
 
 /**
  * Get all log levels as uppercase strings.
@@ -187,10 +218,10 @@ bool parse_level_uppercase(const std::string & name, Level & level);
  * Format a log level as a lowercase string.
  *
  * @param[in] level Log level.
- * @return Lowercase name of the log level (flash string).
+ * @return Lowercase name of the log level
  * @since 1.0.0
  */
-const __FlashStringHelper * format_level_lowercase(Level level);
+const char * format_level_lowercase(Level level);
 
 /**
  * Get all log levels as lowercase strings.
@@ -227,7 +258,7 @@ struct Message {
 	 * @param[in] uptime_ms System uptime, see uuid::get_uptime_ms().
 	 * @param[in] level Severity level of the message.
 	 * @param[in] facility Facility type of the process logging the message.
-	 * @param[in] name Logger name (flash string).
+	 * @param[in] name Logger name
 	 * @param[in] text Log message text.
 	 * @since 1.0.0
 	 */
@@ -257,7 +288,7 @@ struct Message {
     const Facility facility;
 
     /**
-	 * Name of the logger used (flash string).
+	 * Name of the logger used
 	 *
 	 * @since 1.0.0
 	 */
@@ -274,14 +305,24 @@ struct Message {
     const std::string text;
 };
 
+class Logger;
+
 /**
  * Logger handler used to process log messages.
  *
  * @since 1.0.0
  */
 class Handler {
+    /**
+	 * Logger needs to be able to access the private reference to
+	 * the registered log handlers.
+	 *
+	 * @since 2.1.2
+	 */
+    friend Logger;
+
   public:
-    virtual ~Handler() = default;
+    virtual ~Handler();
 
     /**
 	 * Add a new log message.
@@ -290,8 +331,19 @@ class Handler {
 	 * processed immediately so that log messages have minimal impact
 	 * at the time of use.
 	 *
+	 * Handlers must avoid holding a lock on a mutex used for adding
+	 * messages while processing those messages. Release the lock while
+	 * performing the processing.
+	 *
 	 * Queues should have a maximum size and discard the oldest message
 	 * when full.
+	 *
+	 * It is not safe for the handler to directly or indirectly do any
+	 * of the following while this function is being called:
+	 * - Log a message.
+	 * - Read the log level of any handler.
+	 * - Modify the log level of any handler.
+	 * - Unregister any handler.
 	 *
 	 * @param[in] message New log message, shared by all handlers.
 	 * @since 1.0.0
@@ -300,6 +352,17 @@ class Handler {
 
   protected:
     Handler() = default;
+
+  private:
+    /**
+	 * Reference to registered log handlers.
+	 *
+	 * Used in the destructor to safely unregister the handler even if
+	 * the underlying map has already been destroyed.
+	 *
+	 * @since 2.1.2
+	 */
+    std::weak_ptr<std::map<Handler *, Level>> handlers_;
 };
 
 /**
@@ -309,7 +372,7 @@ class Handler {
  */
 class Logger {
   public:
-/**
+    /**
 	 * This is the maximum length of any log message.
 	 *
 	 * Determines the size of the buffer used for format string
@@ -317,16 +380,12 @@ class Logger {
 	 *
 	 * @since 1.0.0
 	 */
-#if defined(EMSESP_STANDALONE)
-    static constexpr size_t MAX_LOG_LENGTH = 500;
-#else
     static constexpr size_t MAX_LOG_LENGTH = 255;
-#endif
 
     /**
 	 * Create a new logger with the given name and logging facility.
 	 *
-	 * @param[in] name Logger name (flash string).
+	 * @param[in] name Logger name
 	 * @param[in] facility Default logging facility for messages.
 	 *
 	 * @since 1.0.0
@@ -338,8 +397,6 @@ class Logger {
 	 * Register a log handler.
 	 *
 	 * Call again to change the log level.
-	 *
-	 * Do not call this function from a static initializer.
 	 *
 	 * @param[in] handler Handler object that will handle log
 	 *                    messages.
@@ -354,8 +411,6 @@ class Logger {
 	 *
 	 * It is safe to call this with a handler that is not registered.
 	 *
-	 * Do not call this function from a static initializer.
-	 *
 	 * @param[in] handler Handler object that will no longer handle
 	 *                    log messages.
 	 * @since 1.0.0
@@ -367,8 +422,6 @@ class Logger {
 	 *
 	 * It is safe to call this with a handler that is not registered.
 	 *
-	 * Do not call this function from a static initializer.
-	 *
 	 * @param[in] handler Handler object that may handle log
 	 *                    messages.
 	 * @return The current log level of the specified handler.
@@ -377,16 +430,70 @@ class Logger {
     static Level get_log_level(const Handler * handler);
 
     /**
-	 * Determine if the current log level is enabled by any registered
-	 * handlers.
+	 * Get the current global log level.
 	 *
-	 * @return The current minimum global log level across all
-	 *         handlers.
-	 * @since 1.0.0
+	 * @return The minimum log level across all handlers.
+	 * @since 3.0.0
 	 */
-    static inline bool enabled(Level level) {
-        return level <= level_;
+    static Level global_level() {
+        return global_level_;
+    };
+
+    /**
+	 * Determine if the specified log level is enabled by the effective
+	 * log level.
+	 *
+	 * @param[in] level Log level to check.
+	 * @return If the specified log level is enabled on this logger.
+	 * @since 3.0.0
+	 */
+    inline bool enabled(Level level) const {
+        return level <= global_level_ && level <= local_level_;
     }
+
+    /**
+	 * Get the default logging facility for new messages of this logger.
+	 *
+	 * @return The default logging facility for messages.
+	 * @since 2.3.0
+	 */
+    inline Facility facility() const {
+        return facility_;
+    }
+
+    /**
+	 * Get the log level.
+	 *
+	 * The effective log level will be depend on handlers.
+	 *
+	 * @return The log level of this logger.
+	 * @since 3.0.0
+	 */
+    inline Level level() const {
+        return local_level_;
+    }
+
+    /**
+	 * Set the log level.
+	 *
+	 * The effective log level will be depend on handlers.
+	 *
+	 * @param[in] level Log level for this logger.
+	 * @since 3.0.0
+	 */
+    inline void level(Level level) {
+        local_level_ = level;
+    }
+
+    /**
+	 * Get the effective log level.
+	 *
+	 * @return The effective log level for this logger.
+	 * @since 3.0.0
+	 */
+    Level effective_level() const {
+        return std::min(global_level(), local_level_);
+    };
 
     /**
 	 * Log a message at level Level::EMERG.
@@ -396,14 +503,6 @@ class Logger {
 	 * @since 1.0.0
 	 */
     void emerg(const char * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
-    /**
-	 * Log a message at level Level::EMERG.
-	 *
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ... Format string arguments.
-	 * @since 1.0.0
-	 */
-    void emerg(const __FlashStringHelper * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
 
     /**
 	 * Log a message at level Level::ALERT.
@@ -413,14 +512,6 @@ class Logger {
 	 * @since 1.0.0
 	 */
     void alert(const char * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
-    /**
-	 * Log a message at level Level::ALERT.
-	 *
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ... Format string arguments.
-	 * @since 1.0.0
-	 */
-    void alert(const __FlashStringHelper * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
 
     /**
 	 * Log a message at level Level::CRIT.
@@ -430,14 +521,6 @@ class Logger {
 	 * @since 1.0.0
 	 */
     void crit(const char * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
-    /**
-	 * Log a message at level Level::CRIT.
-	 *
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ... Format string arguments.
-	 * @since 1.0.0
-	 */
-    void crit(const __FlashStringHelper * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
 
     /**
 	 * Log a message at level Level::ERR.
@@ -447,14 +530,6 @@ class Logger {
 	 * @since 1.0.0
 	 */
     void err(const char * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
-    /**
-	 * Log a message at level Level::ERR.
-	 *
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ... Format string arguments.
-	 * @since 1.0.0
-	 */
-    void err(const __FlashStringHelper * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
 
     /**
 	 * Log a message at level Level::WARNING.
@@ -464,14 +539,6 @@ class Logger {
 	 * @since 1.0.0
 	 */
     void warning(const char * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
-    /**
-	 * Log a message at level Level::WARNING.
-	 *
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ... Format string arguments.
-	 * @since 1.0.0
-	 */
-    void warning(const __FlashStringHelper * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
 
     /**
 	 * Log a message at level Level::NOTICE.
@@ -481,14 +548,6 @@ class Logger {
 	 * @since 1.0.0
 	 */
     void notice(const char * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
-    /**
-	 * Log a message at level Level::NOTICE.
-	 *
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ... Format string arguments.
-	 * @since 1.0.0
-	 */
-    void notice(const __FlashStringHelper * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
 
     /**
 	 * Log a message at level Level::INFO.
@@ -498,13 +557,6 @@ class Logger {
 	 * @since 1.0.0
 	 */
     void info(const char * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
-    /**
-	 * Log a message at level Level::INFO.
-	 *
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ... Format string arguments.
-	 */
-    void info(const __FlashStringHelper * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
 
     /**
 	 * Log a message at level Level::DEBUG.
@@ -514,14 +566,6 @@ class Logger {
 	 * @since 1.0.0
 	 */
     void debug(const char * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
-    /**
-	 * Log a message at level Level::DEBUG.
-	 *
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ... Format string arguments.
-	 * @since 1.0.0
-	 */
-    void debug(const __FlashStringHelper * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
 
     /**
 	 * Log a message at level Level::TRACE.
@@ -531,14 +575,16 @@ class Logger {
 	 * @since 1.0.0
 	 */
     void trace(const char * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
+
     /**
-	 * Log a message at level Level::TRACE.
+	 * Log a message with default facility.
 	 *
-	 * @param[in] format Format string (flash string).
+	 * @param[in] level Severity level of the message.
+	 * @param[in] format Format string.
 	 * @param[in] ... Format string arguments.
-	 * @since 1.0.0
+	 * @since 3.0.0
 	 */
-    void trace(const __FlashStringHelper * format, ...) const /* __attribute__((format (printf, 2, 3))) */;
+    void log(Level level, const char * format, ...) const /* __attribute__((format (printf, 3, 4))) */;
 
     /**
 	 * Log a message with a custom facility.
@@ -549,17 +595,7 @@ class Logger {
 	 * @param[in] ... Format string arguments.
 	 * @since 1.0.0
 	 */
-    void log(Level level, Facility facility, const char * format, ...) const /* __attribute__((format (printf, 3, 4))) */;
-    /**
-	 * Log a message with a custom facility.
-	 *
-	 * @param[in] level Severity level of the message.
-	 * @param[in] facility Facility type of the process logging the message.
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ... Format string arguments.
-	 * @since 1.0.0
-	 */
-    void log(Level level, Facility facility, const __FlashStringHelper * format, ...) const /* __attribute__((format (printf, 4, 5))) */;
+    void log(Level level, Facility facility, const char * format, ...) const /* __attribute__((format (printf, 4, 5))) */;
 
   private:
     /**
@@ -568,6 +604,13 @@ class Logger {
 	 * @since 1.0.0
 	 */
     static void refresh_log_level();
+    /**
+	 * Get registered log handlers.
+	 *
+	 * @return The registered log handlers.
+	 * @since 2.1.2
+	 */
+    static std::shared_ptr<std::map<Handler *, Level>> & registered_handlers();
 
     /**
 	 * Log a message at the specified level.
@@ -578,15 +621,6 @@ class Logger {
 	 * @since 1.0.0
 	 */
     void vlog(Level level, const char * format, va_list ap) const;
-    /**
-	 * Log a message at the specified level.
-	 *
-	 * @param[in] level Severity level of the message.
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ap Variable arguments pointer for format string.
-	 * @since 1.0.0
-	 */
-    void vlog(Level level, const __FlashStringHelper * format, va_list ap) const;
 
     /**
 	 * Log a message at the specified level and facility.
@@ -598,16 +632,6 @@ class Logger {
 	 * @since 1.0.0
 	 */
     void vlog(Level level, Facility facility, const char * format, va_list ap) const;
-    /**
-	 * Log a message at the specified level and facility.
-	 *
-	 * @param[in] level Severity level of the message.
-	 * @param[in] facility Facility type of the process logging the message.
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ap Variable arguments pointer for format string.
-	 * @since 1.0.0
-	 */
-    void vlog(Level level, Facility facility, const __FlashStringHelper * format, va_list ap) const;
 
     /**
 	 * Dispatch a log message to all handlers that are registered to
@@ -623,11 +647,83 @@ class Logger {
 	 */
     void dispatch(Level level, Facility facility, std::vector<char> & text) const;
 
-    static std::map<Handler *, Level> handlers_; /*!< Registered log handlers. @since 1.0.0 */
-    static Level                      level_;    /*!< Minimum global log level across all handlers. @since 1.0.0 */
+    static std::atomic<Level> global_level_; /*!< Minimum global log level across all handlers. @since 3.0.0 */
+#if UUID_LOG_THREAD_SAFE
+    static std::mutex mutex_; /*!< Mutex for handlers. @since 2.3.0 */
+#endif
 
-    const char *   name_;     /*!< Logger name (flash string). @since 1.0.0 */
-    const Facility facility_; /*!< Default logging facility for messages. @since 1.0.0 */
+    const char *   name_;                    /*!< Logger name */
+    const Facility facility_;                /*!< Default logging facility for messages. @since 1.0.0 */
+    Level          local_level_{Level::ALL}; /*!< Logger level. @since 3.0.0 */
+};
+
+/**
+ * Basic log handler for writing messages to any object supporting the
+ * Print interface.
+ *
+ * Outputs all queued messages by default, which may result in the
+ * application blocking until writes complete if the Print destination
+ * buffer is full.
+ *
+ * @since 2.2.0
+ */
+class PrintHandler : public uuid::log::Handler {
+  public:
+    static constexpr size_t MAX_LOG_MESSAGES = 50; /*!< Maximum number of log messages to buffer before they are output. @since 2.2.0 */
+
+    /**
+	 * Create a new Print log handler.
+	 *
+	 * @param[in] print Destination for output of log messages.
+	 * @since 2.2.0
+	 */
+    PrintHandler(Print & print);
+    ~PrintHandler() = default;
+
+    /**
+	 * Get the maximum number of queued log messages.
+	 *
+	 * @return The maximum number of queued log messages.
+	 * @since 2.2.0
+	 */
+    size_t maximum_log_messages() const;
+    /**
+	 * Set the maximum number of queued log messages.
+	 *
+	 * Defaults to PrintHandler::MAX_LOG_MESSAGES.
+	 *
+	 * @since 2.2.0
+	 */
+    void maximum_log_messages(size_t count);
+
+    /**
+	 * Dispatch queued log messages.
+	 *
+	 * @param[in] count Maximum number of messages to output.
+	 * @since 2.2.0
+	 */
+    void loop(size_t count = SIZE_MAX);
+
+    /**
+	 * Add a new log message.
+	 *
+	 * This will be put in a queue for output at the next loop()
+	 * process. The queue has a maximum size of
+	 * get_maximum_log_messages() and will discard the oldest message
+	 * first.
+	 *
+	 * @param[in] message New log message, shared by all handlers.
+	 * @since 2.2.0
+	 */
+    virtual void operator<<(std::shared_ptr<Message> message);
+
+  private:
+    Print & print_; /*!< Destination for output of log messages. @since 2.2.0 */
+#if UUID_LOG_THREAD_SAFE
+    mutable std::mutex mutex_; /*!< Mutex for configuration, state and queued log messages. @since 2.3.0 */
+#endif
+    size_t maximum_log_messages_ = MAX_LOG_MESSAGES;   /*!< Maximum number of log messages to buffer before they are output. @since 2.2.0 */
+    std::list<std::shared_ptr<Message>> log_messages_; /*!< Queued log messages, in the order they were received. @since 2.2.0 */
 };
 
 } // namespace log
