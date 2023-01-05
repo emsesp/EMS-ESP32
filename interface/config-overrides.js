@@ -7,7 +7,7 @@ module.exports = function override(config, env) {
   const hosted = process.env.REACT_APP_HOSTED;
 
   if (env === 'production' && !hosted) {
-    // rename the ouput file, we need it's path to be short, for embedded FS
+    // rename the output file, we need it's path to be short, for embedded FS
     config.output.filename = 'js/[id].[chunkhash:4].js';
     config.output.chunkFilename = 'js/[id].[chunkhash:4].js';
 
