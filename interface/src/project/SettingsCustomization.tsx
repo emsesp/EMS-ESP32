@@ -180,7 +180,7 @@ const SettingsCustomization: FC = () => {
     return (
       <>
         {de.n && (de.n[0] === '!' ? LL.COMMAND() + ': ' + de.n.slice(1) : de.cn && de.cn !== '' ? de.cn : de.n) + ' '}(
-        <Link target="_blank" href={APIURL + devices?.devices[selectedDevice].t + '/' + de.id}>
+        <Link target="_blank" href={APIURL + devices?.devices[selectedDevice].tn + '/' + de.id}>
           {de.id}
         </Link>
         )

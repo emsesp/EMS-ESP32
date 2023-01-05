@@ -59,7 +59,8 @@ export interface Status {
 }
 export interface Device {
   id: string; // id index
-  t: string; // type
+  tn: string; // device type translated name
+  t: number; // device type id
   b: string; // brand
   n: string; // name
   d: number; // deviceid
@@ -110,7 +111,8 @@ export interface DeviceShort {
   d?: number; // deviceid
   p?: number; // productid
   s: string; // shortname
-  t?: string; // device type name
+  t?: number; // device type id
+  tn?: string; // device type internal name
 }
 
 export interface Devices {

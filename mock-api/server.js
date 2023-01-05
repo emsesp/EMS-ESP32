@@ -355,17 +355,20 @@ const emsesp_devices = {
     {
       i: 1,
       s: 'Thermostat (RC20/Moduline 300)',
-      t: 'thermostat',
+      t: 4,
+      tn: 'thermostat',
     },
     {
       i: 2,
       s: 'Boiler (Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i)',
-      t: 'boiler',
+      t: 3,
+      tn: 'boiler',
     },
     {
       i: 4,
       s: 'Thermostat (RC100/Moduline 1000/1010)',
-      t: 'thermostat',
+      t: 4,
+      tn: 'thermostat',
     },
   ],
 }
@@ -376,7 +379,8 @@ const emsesp_coredata = {
   devices: [
     {
       id: '2',
-      t: 'Boiler',
+      t: 3,
+      tn: 'Boiler',
       b: 'Nefit',
       n: 'GBx72/Trendline/Cerapur/Greenstar Si/27i',
       d: 8,
@@ -386,7 +390,8 @@ const emsesp_coredata = {
     },
     {
       id: '1',
-      t: 'Thermostat',
+      t: 4,
+      tn: 'Thermostat',
       b: '',
       n: 'RC20/Moduline 300',
       d: 23,
@@ -396,7 +401,8 @@ const emsesp_coredata = {
     },
     {
       id: '4',
-      t: 'Thermostat',
+      t: 4,
+      tn: 'Thermostat',
       b: 'Buderus',
       n: 'RC100/Moduline 1000/1010',
       d: 16,

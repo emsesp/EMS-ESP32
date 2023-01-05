@@ -89,7 +89,7 @@ MAKE_PSTR_WORD(customizations)
 MAKE_PSTR_WORD(value)
 MAKE_PSTR_WORD(entities)
 
-// devices
+// device types - lowercase, used in MQTT
 MAKE_PSTR_WORD(boiler)
 MAKE_PSTR_WORD(thermostat)
 MAKE_PSTR_WORD(switch)
