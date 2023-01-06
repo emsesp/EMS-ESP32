@@ -1,5 +1,7 @@
 # vscode
-.vscode
+.vscode/c_cpp_properties.json
+.vscode/extensions.json
+.vscode/launch.json
 
 # build
 build/
@@ -43,3 +45,4 @@ build_wrapper_output_directory/
 # other build files
 dump_entities.csv
 dump_entities.xls*
+

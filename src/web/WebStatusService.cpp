@@ -32,6 +32,8 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 
 // handles both WiFI and Ethernet
 void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
+#ifndef EMSESP_STANDALONE
+
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
         EMSESP::logger().warning("WiFi disconnected. Reason code=%s", disconnectReason(info.wifi_sta_disconnected.reason)); // IDF 4.0
@@ -39,9 +41,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         break;
 
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
-#ifndef EMSESP_STANDALONE
         EMSESP::logger().info("WiFi connected with IP=%s, hostname=%s", WiFi.localIP().toString().c_str(), WiFi.getHostname());
-#endif
         EMSESP::system_.syslog_init();
         mDNS_start();
         EMSESP::system_.send_info_mqtt("connected");
@@ -63,9 +63,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     case ARDUINO_EVENT_ETH_GOT_IP:
         // prevent double calls
         if (!EMSESP::system_.ethernet_connected()) {
-#ifndef EMSESP_STANDALONE
             EMSESP::logger().info("Ethernet connected with IP=%s, speed %d Mbps", ETH.localIP().toString().c_str(), ETH.linkSpeed());
-#endif
             // EMSESP::system_.send_heartbeat();
             EMSESP::system_.syslog_init();
             EMSESP::system_.ethernet_connected(true);
@@ -84,7 +82,6 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         EMSESP::system_.ethernet_connected(false);
         break;
 
-#ifndef EMSESP_STANDALONE
     case ARDUINO_EVENT_WIFI_STA_CONNECTED:
         EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
             if (networkSettings.enableIPv6) {
@@ -112,11 +109,11 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         mDNS_start();
         EMSESP::system_.send_info_mqtt("connected");
         break;
-#endif
 
     default:
         break;
     }
+#endif
 }
 
 void WebStatusService::webStatusService(AsyncWebServerRequest * request) {

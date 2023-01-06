@@ -1,3 +1,5 @@
+#ifdef EMSESP_STANDALONE
+
 #include <SecuritySettingsService.h>
 
 #if FT_ENABLED(FT_SECURITY)
@@ -135,5 +137,7 @@ ArRequestHandlerFunction SecuritySettingsService::wrapRequest(ArRequestHandlerFu
 ArJsonRequestHandlerFunction SecuritySettingsService::wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate) {
     return onRequest;
 }
+
+#endif
 
 #endif

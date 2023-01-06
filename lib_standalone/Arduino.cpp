@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef EMSESP_STANDALONE
+
 #include <Arduino.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -125,3 +127,5 @@ double ledcSetup(uint8_t chan, double freq, uint8_t bit_num) {
 };
 void ledcAttachPin(uint8_t pin, uint8_t chan){};
 void ledcWrite(uint8_t chan, uint32_t duty){};
+
+#endif
