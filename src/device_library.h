@@ -30,6 +30,7 @@
 { 84, DeviceType::BOILER, "Logamax Plus GB022", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 95, DeviceType::BOILER, "Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3", DeviceFlags::EMS_DEVICE_FLAG_HT3},
 {115, DeviceType::BOILER, "Topline/GB162", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{121, DeviceType::BOILER, "Cascade MCM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {122, DeviceType::BOILER, "Proline", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {123, DeviceType::BOILER, "GBx72/Trendline/Cerapur/Greenstar Si/27i", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {131, DeviceType::BOILER, "GB212", DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -47,7 +48,6 @@
 {208, DeviceType::BOILER, "Logamax Plus/GB192/Condens GC9000/Greenstar ErP", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {210, DeviceType::BOILER, "Cascade MC400", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {211, DeviceType::BOILER, "EasyControl Adapter", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{228, DeviceType::BOILER, "Alternative Heatsource", DeviceFlags::EMS_DEVICE_FLAG_AM200},
 {234, DeviceType::BOILER, "Logamax Plus GB122/Condense 2300", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Controllers - 0x09 / 0x10 / 0x50
@@ -57,6 +57,7 @@
 { 89, DeviceType::CONTROLLER, "BC10 GB142", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 { 95, DeviceType::CONTROLLER, "HT3", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {114, DeviceType::CONTROLLER, "BC10", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{121, DeviceType::CONTROLLER, "MCM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {125, DeviceType::CONTROLLER, "BC25", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {152, DeviceType::CONTROLLER, "Controller", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {168, DeviceType::CONTROLLER, "Hybrid Heatpump", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
@@ -138,11 +139,14 @@
 {193, DeviceType::MIXER, "MZ100", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {204, DeviceType::MIXER, "MP100", DeviceFlags::EMS_DEVICE_FLAG_MP}, // pool
 
-// Heat Pumps - 0x38?
+// Heat Pumps - 0x38? This is a thermostat like RC100H
 {252, DeviceType::HEATPUMP, "HP Module", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Heat Pumps - 0x53
 {248, DeviceType::HEATPUMP, "Hybrid Manager HM200", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
+// Heatsource - 0x60
+{228, DeviceType::HEATSOURCE, "AM200", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // alternative heatsource
 
 // Connect devices - 0x02
 {171, DeviceType::CONNECT, "OpenTherm Converter", DeviceFlags::EMS_DEVICE_FLAG_NONE},

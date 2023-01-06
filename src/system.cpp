@@ -1329,17 +1329,18 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
             node["pbutton gpio"] = settings.pbutton_gpio;
             node["led gpio"]     = settings.led_gpio;
         }
-        node["hide led"]        = settings.hide_led;
-        node["notoken api"]     = settings.notoken_api;
-        node["readonly mode"]   = settings.readonly_mode;
-        node["fahrenheit"]      = settings.fahrenheit;
-        node["dallas parasite"] = settings.dallas_parasite;
-        node["bool format"]     = settings.bool_format;
-        node["bool dashboard"]  = settings.bool_dashboard;
-        node["enum format"]     = settings.enum_format;
-        node["analog enabled"]  = settings.analog_enabled;
-        node["telnet enabled"]  = settings.telnet_enabled;
-        node["web log buffer"]  = settings.weblog_buffer;
+        node["hide led"]           = settings.hide_led;
+        node["notoken api"]        = settings.notoken_api;
+        node["readonly mode"]      = settings.readonly_mode;
+        node["fahrenheit"]         = settings.fahrenheit;
+        node["dallas parasite"]    = settings.dallas_parasite;
+        node["bool format"]        = settings.bool_format;
+        node["bool dashboard"]     = settings.bool_dashboard;
+        node["enum format"]        = settings.enum_format;
+        node["analog enabled"]     = settings.analog_enabled;
+        node["telnet enabled"]     = settings.telnet_enabled;
+        node["max web log buffer"] = settings.weblog_buffer;
+        node["web log buffer"]     = EMSESP::webLogService.num_log_messages();
     });
 
     // Devices - show EMS devices if we have any

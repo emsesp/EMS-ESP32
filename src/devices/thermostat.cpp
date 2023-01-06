@@ -154,6 +154,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(0x267, "RC300Floordry", false, MAKE_PF_CB(process_RC300Floordry));
         register_telegram_type(0x240, "RC300Settings", true, MAKE_PF_CB(process_RC300Settings));
         register_telegram_type(0xBB, "HybridSettings", true, MAKE_PF_CB(process_HybridSettings));
+        register_telegram_type(0x23E, "PVSettings", true, MAKE_PF_CB(process_PVSettings));
 
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
@@ -195,6 +196,11 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     EMSESP::send_read_request(EMS_TYPE_RCTime, device_id);
     EMSESP::send_read_request(0x12, device_id); // read last error (only published on errors)
     EMSESP::send_read_request(0xA2, device_id); // read errorCode (only published on errors)
+
+#if defined(EMSESP_STANDALONE_DUMP)
+    // if we're just dumping out values, create a single dummy hc
+    register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, model)); // hc=1
+#endif
 }
 
 // returns the heating circuit object based on the hc number
@@ -883,6 +889,13 @@ void Thermostat::process_HybridSettings(std::shared_ptr<const Telegram> telegram
     has_update(telegram, tempDiffBoiler_, 19);        // relative degrees
 }
 
+// 0x23E PV settings
+void Thermostat::process_PVSettings(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, pvRaiseHeat_, 0);
+    has_update(telegram, pvEnableWw_, 3);
+    has_update(telegram, pvLowerCool_, 5);
+}
+
 void Thermostat::process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
     if (hc == nullptr) {
@@ -1501,6 +1514,33 @@ bool Thermostat::set_tempDiffBoiler(const char * value, const int8_t id) {
     }
     write_command(0xBB, 19, v, 0xBB);
     return true;
+}
+
+bool Thermostat::set_pvEnableWw(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x23E, 3, v ? 0xFF : 0, 0x23E);
+        return true;
+    }
+    return false;
+}
+
+bool Thermostat::set_pvRaiseHeat(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        write_command(0x23E, 0, v, 0x23E);
+        return true;
+    }
+    return false;
+}
+
+bool Thermostat::set_pvLowerCool(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        write_command(0x23E, 5, v, 0x23E);
+        return true;
+    }
+    return false;
 }
 
 // 0xA5 - Set minimum external temperature
@@ -3536,6 +3576,11 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_tempDiffBoiler),
                               1,
                               99);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pvEnableWw_, DeviceValueType::BOOL, FL_(pvEnableWw), DeviceValueUOM::NONE, MAKE_CF_CB(set_pvEnableWw));
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &pvRaiseHeat_, DeviceValueType::INT, FL_(pvRaiseHeat), DeviceValueUOM::K, MAKE_CF_CB(set_pvRaiseHeat), 0, 5);
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &pvLowerCool_, DeviceValueType::INT, FL_(pvLowerCool), DeviceValueUOM::K, MAKE_CF_CB(set_pvLowerCool), -5, 0);
         break;
     case EMS_DEVICE_FLAG_RC10:
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,

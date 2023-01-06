@@ -34,6 +34,8 @@
 - Factory Reset not working [#628](https://github.com/emsesp/EMS-ESP32/issues/628)
 - Valid 4 byte values [#820](https://github.com/emsesp/EMS-ESP32/issues/820)
 - Commands for multiple thermostats [#826](https://github.com/emsesp/EMS-ESP32/issues/826)
+- API queries for multiple devices [#865](https://github.com/emsesp/EMS-ESP32/issues/865)
+- Console crash when using call with command `hcx` only. [#841](https://github.com/emsesp/EMS-ESP32/issues/841)
 
 ## Changed
 
@@ -46,3 +48,4 @@
 - analog/dallas HA-entities based on id
 - MQTT Base is a mandatory field. Removed MQTT topic length from settings
 - HA duration class for time entities [[#822](https://github.com/emsesp/EMS-ESP32/issues/822
+- AM200 alternative heatsource as class heatsource [[#857](https://github.com/emsesp/EMS-ESP32/issues/857

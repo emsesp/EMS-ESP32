@@ -185,7 +185,6 @@ char * WebLogService::messagetime(char * out, const uint64_t t, const size_t buf
 
 // send to web eventsource
 void WebLogService::transmit(const QueuedLogMessage & message) {
-    // TODO use StaticJsonDocument ?
     auto       jsonDocument = DynamicJsonDocument(EMSESP_JSON_SIZE_MEDIUM);
     JsonObject logEvent     = jsonDocument.to<JsonObject>();
     char       time_string[25];
@@ -207,9 +206,15 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
 
 // send the complete log buffer to the API, not filtering on log level
 void WebLogService::fetchLog(AsyncWebServerRequest * request) {
-    auto *     response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE + 192 * log_messages_.size());
-    JsonObject root     = response->getRoot();
-    JsonArray  log      = root.createNestedArray("events");
+    size_t buffer   = EMSESP_JSON_SIZE_XXLARGE + 192 * log_messages_.size();
+    auto * response = new MsgpackAsyncJsonResponse(false, buffer);
+    while (!response->getSize()) {
+        delete response;
+        buffer -= 1024;
+        response = new MsgpackAsyncJsonResponse(false, buffer);
+    }
+    JsonObject root = response->getRoot();
+    JsonArray  log  = root.createNestedArray("events");
 
     log_message_id_tail_ = log_messages_.back().id_;
     last_transmit_       = uuid::get_uptime_ms();

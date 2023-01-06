@@ -569,11 +569,15 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
             uint8_t             return_code = CommandRet::OK;
             JsonObject          json        = doc.to<JsonObject>();
 
+            if (cmd == nullptr) {
+                cmd = device_type == EMSdevice::DeviceType::SYSTEM ? F_(info) : F_(values);
+            }
+
             if (arguments.size() == 2) {
                 // no value specified, just the cmd
                 return_code = Command::call(device_type, cmd, nullptr, true, id, json);
             } else if (arguments.size() == 3) {
-                if (strncmp(cmd, "info", 4) == 0) {
+                if ((strncmp(cmd, F_(info), 4) == 0) || strncmp(cmd, F_(values), 6) == 0) {
                     // info has a id but no value
                     return_code = Command::call(device_type, cmd, nullptr, true, atoi(arguments.back().c_str()), json);
                 } else if (arguments[2] == "?") {
@@ -592,6 +596,11 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
             }
 
             if (return_code == CommandRet::OK && json.size()) {
+                if (json.containsKey("api_data")) {
+                    JsonVariant data = json["api_data"];
+                    shell.println(data.as<const char *>());
+                    return;
+                }
                 serializeJsonPretty(doc, shell);
                 shell.println();
                 return;

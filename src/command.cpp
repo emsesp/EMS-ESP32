@@ -116,13 +116,9 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     command_p = parse_command_string(command_p, id_n);
     if (command_p == nullptr) {
         // handle dead endpoints like api/system or api/boiler
-        // default to 'info' for SYSTEM, DALLASENSOR and ANALOGSENSOR, the other devices to 'values' for shortname version
+        // default to 'info' for SYSTEM, the other devices to 'values' for shortname version
         if (num_paths < (id_n > 0 ? 4 : 3)) {
-            if (device_type == EMSdevice::DeviceType::SYSTEM) {
-                command_p = F_(info);
-            } else {
-                command_p = F_(values);
-            }
+            command_p = device_type == EMSdevice::DeviceType::SYSTEM ? F_(info) : F_(values);
         } else {
             return message(CommandRet::NOT_FOUND, "missing or bad command", output);
         }
@@ -135,9 +131,15 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
             id_n = input["hc"];
         } else if (input.containsKey("wwc")) {
             id_n = input["wwc"];
-            id_n += 8; // wwc1 has id 9
+            id_n += DeviceValueTAG::TAG_WWC1 - DeviceValueTAG::TAG_HC1; // wwc1 has id 9
         } else if (input.containsKey("id")) {
             id_n = input["id"];
+        } else if (input.containsKey("ahs")) {
+            id_n = input["ahs"];
+            id_n += DeviceValueTAG::TAG_AHS1 - DeviceValueTAG::TAG_HC1; // ahs1 has id 19
+        } else if (input.containsKey("hs")) {
+            id_n = input["hs"];
+            id_n += DeviceValueTAG::TAG_HS1 - DeviceValueTAG::TAG_HC1; // hs1 has id 20
         }
     }
 
@@ -208,23 +210,33 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         id = command[2] - '0';
         command += 3;
     } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] == '1' && command[4] == '0') {
-        id = 19;
-        command += 5;
-    } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {
+        id = DeviceValueTAG::TAG_WWC10 - DeviceValueTAG::TAG_HC1 + 1; //18;    } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {
         id = command[3] - '0' + 8;
         command += 4;
     } else if (!strncmp(lowerCmd, "id", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '9') {
-        id = command[3] - '0' + 10;
+        id = command[3] - '1' + DeviceValueTAG::TAG_WWC1 - DeviceValueTAG::TAG_HC1 + 1; //9;
         command += 4;
     } else if (!strncmp(lowerCmd, "id", 2) && command[2] >= '1' && command[2] <= '9') {
         id = command[2] - '0';
         command += 3;
+    } else if (!strncmp(lowerCmd, "ahs", 3) && command[3] >= '1' && command[3] <= '1') { // only ahs1 for now
+        id = command[3] - '1' + DeviceValueTAG::TAG_AHS1 - DeviceValueTAG::TAG_HC1 + 1;  // 19;
+        command += 4;
+    } else if (!strncmp(lowerCmd, "hs", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '6') {
+        id = command[3] - '0' + DeviceValueTAG::TAG_HS10 - DeviceValueTAG::TAG_HC1 + 1; //29;
+        command += 4;
+    } else if (!strncmp(lowerCmd, "hs", 2) && command[2] >= '1' && command[2] <= '9') {
+        id = command[2] - '1' + DeviceValueTAG::TAG_HS1 - DeviceValueTAG::TAG_HC1 + 1; //20;
+        command += 3;
     }
+
     // remove separator
     if (command[0] == '/' || command[0] == '.' || command[0] == '_') {
         command++;
     }
+
     free(lowerCmd);
+
     // return null for empty command
     if (command[0] == '\0') {
         return nullptr;

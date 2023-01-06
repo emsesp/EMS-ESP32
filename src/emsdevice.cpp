@@ -120,6 +120,8 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return F_(alert);
     case DeviceType::PUMP:
         return F_(pump);
+    case DeviceType::HEATSOURCE:
+        return F_(heatsource);
     default:
         return Helpers::translated_word(FL_(unknown));
     }
@@ -151,6 +153,8 @@ const char * EMSdevice::device_type_2_device_name_translated() {
         return Helpers::translated_word(FL_(alert_device));
     case DeviceType::PUMP:
         return Helpers::translated_word(FL_(pump_device));
+    case DeviceType::HEATSOURCE:
+        return Helpers::translated_word(FL_(heatsource_device));
     default:
         break;
     }
@@ -205,6 +209,10 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     }
     if (!strcmp(lowtopic, F_(pump))) {
         return DeviceType::PUMP;
+    }
+
+    if (!strcmp(lowtopic, F_(heatsource))) {
+        return DeviceType::HEATSOURCE;
     }
 
     return DeviceType::UNKNOWN;
@@ -304,7 +312,7 @@ bool EMSdevice::has_tag(const uint8_t tag) const {
     return false;
 }
 
-// check if the device has a command on the with this tag.
+// check if the device has a command with this tag.
 bool EMSdevice::has_cmd(const char * cmd, const int8_t id) const {
     uint8_t tag = DeviceValueTAG::TAG_HC1 + id - 1;
     for (const auto & dv : devicevalues_) {
@@ -1435,10 +1443,6 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                     output["api_data"] = data;
                     return true;
                 } else {
-                    char error[100];
-                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, command_s);
-                    output.clear();
-                    output["message"] = error;
                     return false;
                 }
             }
