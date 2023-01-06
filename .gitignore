@@ -46,3 +46,4 @@ build_wrapper_output_directory/
 dump_entities.csv
 dump_entities.xls*
 
+.vscode/settings.json
