@@ -165,8 +165,8 @@ Heatsource::Heatsource(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &burner_, DeviceValueType::BOOL, FL_(burner), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &aPump_, DeviceValueType::BOOL, FL_(aPump), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &heatRequest_, DeviceValueType::UINT, FL_(heatRequest), DeviceValueUOM::PERCENT);
-        // register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &blocking_, DeviceValueType::BOOL, FL_(blocking), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &blockRemain_, DeviceValueType::UINT, FL_(blockRemain), DeviceValueUOM::MINUTES);
+        register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &blockRemainWw_, DeviceValueType::UINT, FL_(blockRemainWw), DeviceValueUOM::MINUTES);
     }
 
     // cascaded heating sources, only some values per individual heatsource (hs)
@@ -278,8 +278,8 @@ void Heatsource::process_amCommandMessage(std::shared_ptr<const Telegram> telegr
 // Rx: 60 00 FF 00 04 50 00 FF 00 FF FF 00 0D 00 01 00 00 00 00 01 03 01 00 03 00 2D 19 C8 02 94 00 4A
 // Rx: 60 00 FF 19 04 50 00 FF FF 39
 void Heatsource::process_amExtraMessage(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, blockRemain_, 24); // minutes
-    // has_update(telegram, blocking_, 24);    // bool
+    has_update(telegram, blockRemain_, 24);   // minutes
+    has_update(telegram, blockRemainWw_, 25); // minutes
 }
 
 #pragma GCC diagnostic pop
