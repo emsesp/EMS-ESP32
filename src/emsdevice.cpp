@@ -524,6 +524,9 @@ void EMSdevice::add_device_value(uint8_t               tag,
                         // get Mask
                         uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
                         state        = mask << 4; // set state high bits to flag, turn off active and ha flags
+                        if (mask & 0x80) {
+                            return;
+                        }
                         // see if there is a custom name in the entity string
                         if (has_custom_name) {
                             custom_fullname = entity_id.substr(custom_name_pos + 1);
