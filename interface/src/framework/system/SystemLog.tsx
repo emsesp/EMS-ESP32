@@ -210,6 +210,7 @@ const SystemLog: FC = () => {
               margin="normal"
               select
             >
+              <MenuItem value={-1}>OFF</MenuItem>
               <MenuItem value={3}>ERROR</MenuItem>
               <MenuItem value={4}>WARNING</MenuItem>
               <MenuItem value={5}>NOTICE</MenuItem>
