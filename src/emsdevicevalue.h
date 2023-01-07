@@ -178,7 +178,12 @@ class DeviceValue {
                 uint16_t              max,
                 uint8_t               state);
 
+    // has values
     bool hasValue() const;
+    bool has_tag() const {
+        return ((tag < DeviceValue::NUM_TAGS) && (tag != DeviceValue::DeviceValueTAG::TAG_NONE));
+    }
+
     bool get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max);
 
     void        set_custom_minmax();
@@ -204,7 +209,7 @@ class DeviceValue {
     static const char *         DeviceValueUOM_s[];
     static const char * const * DeviceValueTAG_s[];
     static const char * const   DeviceValueTAG_mqtt[];
-    static size_t               tag_count; // # tags
+    static uint8_t              NUM_TAGS; // # tags
 };
 
 }; // namespace emsesp
