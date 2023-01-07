@@ -50,7 +50,7 @@ namespace emsesp {
 // Languages supported. Note: the order is important and must match locale_translations.h
 const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE, EMSESP_LOCALE_NL, EMSESP_LOCALE_SV, EMSESP_LOCALE_PL, EMSESP_LOCALE_NO, EMSESP_LOCALE_FR};
 
-size_t num_languages = sizeof(languages) / sizeof(const char *);
+static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *);
 
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
@@ -61,7 +61,7 @@ bool    System::restart_requested_ = false;
 // find the index of the language
 // 0 = EN, 1 = DE, etc...
 uint8_t System::language_index() {
-    for (uint8_t i = 0; i < num_languages; i++) {
+    for (uint8_t i = 0; i < NUM_LANGUAGES; i++) {
         if (languages[i] == locale()) {
             return i;
         }
