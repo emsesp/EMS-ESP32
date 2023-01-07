@@ -83,6 +83,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x48B, "HPPumps", true, MAKE_PF_CB(process_HpPumps));
         register_telegram_type(0x491, "HPAdditionalHeater", true, MAKE_PF_CB(process_HpAdditionalHeater));
         register_telegram_type(0x499, "HPDhwSettings", true, MAKE_PF_CB(process_HpDhwSettings));
+        register_telegram_type(0x49C, "HPSettings2", true, MAKE_PF_CB(process_HpSettings2));
+        register_telegram_type(0x49D, "HPSettings3", true, MAKE_PF_CB(process_HpSettings3));
     }
 
     /*
@@ -555,6 +557,40 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               MAKE_CF_CB(set_tempDiffCool),
                               3,
                               10);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &vp_cooling_, DeviceValueType::BOOL, FL_(vp_cooling), DeviceValueUOM::NONE, MAKE_CF_CB(set_vp_cooling));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatCable_, DeviceValueType::BOOL, FL_(heatCable), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatCable));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &VC0valve_, DeviceValueType::BOOL, FL_(VC0valve), DeviceValueUOM::NONE, MAKE_CF_CB(set_VC0valve));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &primePump_, DeviceValueType::BOOL, FL_(primePump), DeviceValueUOM::NONE, MAKE_CF_CB(set_primePump));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &primePumpMod_,
+                              DeviceValueType::UINT,
+                              FL_(primePumpMod),
+                              DeviceValueUOM::PERCENT,
+                              MAKE_CF_CB(set_primePumpMod));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &hp3wayValve_,
+                              DeviceValueType::BOOL,
+                              FL_(hp3wayValve),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_hp3wayValve));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &elHeatStep1_,
+                              DeviceValueType::BOOL,
+                              FL_(elHeatStep1),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_elHeatStep1));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &elHeatStep2_,
+                              DeviceValueType::BOOL,
+                              FL_(elHeatStep2),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_elHeatStep2));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &elHeatStep3_,
+                              DeviceValueType::BOOL,
+                              FL_(elHeatStep3),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_elHeatStep3));
         // heatpump DHW settings
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                               &wwComfOffTemp_,
@@ -1446,6 +1482,25 @@ void Boiler::process_HpDhwSettings(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwComfOffTemp_, 1);
     has_update(telegram, wwEcoOffTemp_, 0);
     has_update(telegram, wwEcoPlusOffTemp_, 5);
+}
+
+// 0x49C:
+// Boiler(0x08) -B-> All(0x00), ?(0x049C), data: 00 00 00 00
+void Boiler::process_HpSettings2(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, vp_cooling_, 3);
+}
+
+// 0x49D
+// Boiler(0x08) -B-> All(0x00), ?(0x049D), data: 00 00 00 00 00 00 00 00 00 00 00 00
+void Boiler::process_HpSettings3(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, heatCable_, 2);
+    has_update(telegram, VC0valve_, 3);
+    has_update(telegram, primePump_, 4);
+    has_update(telegram, primePumpMod_, 5);
+    has_update(telegram, hp3wayValve_, 6);
+    has_update(telegram, elHeatStep1_, 7);
+    has_update(telegram, elHeatStep2_, 8);
+    has_update(telegram, elHeatStep3_, 9);
 }
 
 /*
@@ -2345,6 +2400,69 @@ bool Boiler::set_hpCircPumpWw(const char * value, const int8_t id) {
     bool v;
     if (Helpers::value2bool(value, v)) {
         write_command(0x484, 46, v ? 1 : 0, 0x484);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_vp_cooling(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x49C, 3, v ? 1 : 0, 0x49C);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_heatCable(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x49D, 2, v ? 1 : 0, 0x49D);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_VC0valve(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x49D, 3, v ? 1 : 0, 0x49D);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_primePump(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x49D, 4, v ? 1 : 0, 0x49D);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_primePumpMod(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        write_command(0x49D, 5, v, 0x49D);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_hp3wayValve(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x49D, 6, v ? 1 : 0, 0x49D);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_elHeatStep(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x49D, 6 + id, v ? 1 : 0, 0x49D);
         return true;
     }
     return false;
