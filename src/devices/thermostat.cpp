@@ -184,6 +184,11 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     // register device values for common values (not heating circuit)
     register_device_values();
 
+#if defined(EMSESP_STANDALONE_DUMP)
+    // if we're just dumping out values, create a single dummy hc1
+    register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, model)); // hc=1
+#endif
+
     // query all the heating circuits. This is only done once.
     // The automatic fetch will from now on only update the active heating circuits
     for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
@@ -196,11 +201,6 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     EMSESP::send_read_request(EMS_TYPE_RCTime, device_id);
     EMSESP::send_read_request(0x12, device_id); // read last error (only published on errors)
     EMSESP::send_read_request(0xA2, device_id); // read errorCode (only published on errors)
-
-#if defined(EMSESP_STANDALONE_DUMP)
-    // if we're just dumping out values, create a single dummy hc
-    register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, model)); // hc=1
-#endif
 }
 
 // returns the heating circuit object based on the hc number
@@ -4055,11 +4055,6 @@ void Thermostat::register_device_values() {
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dateTime_, DeviceValueType::STRING, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         break;
     }
-
-#if defined(EMSESP_STANDALONE_DUMP)
-    // if we're just dumping out values, create a single dummy hc
-    register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, this->model())); // hc=1
-#endif
 }
 
 // registers the values for a heating circuit

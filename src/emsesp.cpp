@@ -329,19 +329,27 @@ void EMSESP::dump_all_values(uuid::console::Shell & shell) {
         for (const auto & device : device_library_) {
             if (device_class.first == device.device_type) {
                 uint8_t device_id = 0;
-                // Mixer class looks at device_id to determine type, so fixing to 0x28 which will give all the settings except flowSetTemp
-                if ((device.device_type == DeviceType::MIXER) && (device.flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS)) {
-                    // pick one as hc and the other as having wwc
-                    if (device.product_id == 160) { // MM100
-                        device_id = 0x28;           // wwc
+                // Mixer class looks at device_id to determine type and the tag
+                // so fixing to 0x28 which will give all the settings except flowSetTemp
+                if (device.device_type == DeviceType::MIXER) {
+                    if (device.flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
+                        if (device.product_id == 160) { // MM100
+                            device_id = 0x28;           // wwc
+                        } else {
+                            device_id = 0x20; // hc
+                        }
                     } else {
-                        device_id = 0x20; // hc
+                        device_id = 0x20; // should cover all the other device types
                     }
                 }
 
+                // add the device and print out all the entities
+
+                // if (device.product_id == 69) { // only for testing mixer
                 emsdevices.push_back(
                     EMSFactory::add(device.device_type, device_id, device.product_id, "1.0", device.name, device.flags, EMSdevice::Brand::NO_BRAND));
-                emsdevices.back()->dump_value_info(); // dump all the entity information
+                emsdevices.back()->dump_value_info();
+                // } // only for testing mixer
             }
         }
     }
@@ -434,7 +442,7 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
                                sensor.name().c_str(),
                                COLOR_BRIGHT_GREEN,
                                Helpers::render_value(s, sensor.value(), 2),
-                               EMSdevice::uom_to_string(sensor.uom()).c_str(),
+                               EMSdevice::uom_to_string(sensor.uom()),
                                COLOR_RESET,
                                Helpers::render_value(s2, sensor.factor(), 4),
                                sensor.offset());
@@ -565,7 +573,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
         bool       nest_created = false;
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
-                if (nested && !nest_created && emsdevice->has_tag(tag)) {
+                if (nested && !nest_created && emsdevice->has_tags(tag)) {
                     json_hc      = doc.createNestedObject(EMSdevice::tag_to_mqtt(tag));
                     nest_created = true;
                 }
@@ -1197,7 +1205,7 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t
         bool       nest_created = false;
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
-                if (!nest_created && emsdevice->has_tag(tag)) {
+                if (!nest_created && emsdevice->has_tags(tag)) {
                     output_hc    = output.createNestedObject(EMSdevice::tag_to_mqtt(tag));
                     nest_created = true;
                 }
