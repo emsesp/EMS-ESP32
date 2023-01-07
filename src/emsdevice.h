@@ -47,15 +47,17 @@ class EMSdevice {
     // static functions, used outside the class like in console.cpp, command.cpp, emsesp.cpp, mqtt.cpp
     static const char * device_type_2_device_name(const uint8_t device_type);
     static uint8_t      device_name_2_device_type(const char * topic);
-    static std::string  uom_to_string(uint8_t uom);
-    static std::string  tag_to_string(uint8_t tag, const bool translate = true);
-    static std::string  tag_to_mqtt(uint8_t tag);
-    static uint8_t      decode_brand(uint8_t value);
+
+    static const char * tag_to_string(uint8_t tag, const bool translate = true);
+    static const char * uom_to_string(uint8_t uom);
+    static const char * tag_to_mqtt(uint8_t tag);
+
+    static uint8_t decode_brand(uint8_t value);
 
     const char * device_type_name();                     // returns short non-translated device type name
     const char * device_type_2_device_name_translated(); // returns translated device type name
 
-    bool has_tag(const uint8_t tag) const;
+    bool has_tags(const uint8_t tag) const;
     bool has_cmd(const char * cmd, const int8_t id) const;
 
     inline uint8_t device_id() const {
@@ -291,7 +293,7 @@ class EMSdevice {
     void mqtt_ha_entity_config_create();
     void mqtt_ha_entity_config_remove();
 
-    std::string telegram_type_name(std::shared_ptr<const Telegram> telegram) const;
+    const char * telegram_type_name(std::shared_ptr<const Telegram> telegram);
 
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);

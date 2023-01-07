@@ -43,16 +43,17 @@ bool EMSdevice::has_entities() const {
     return false;
 }
 
-std::string EMSdevice::tag_to_string(uint8_t tag, const bool translate) {
-    return (translate ? Helpers::translated_word(DeviceValue::DeviceValueTAG_s[tag]) : DeviceValue::DeviceValueTAG_s[tag][0]);
+const char * EMSdevice::tag_to_string(uint8_t tag, const bool translate) {
+    uint8_t tag_n = tag > DeviceValue::NUM_TAGS ? 0 : tag;
+    return (translate ? Helpers::translated_word(DeviceValue::DeviceValueTAG_s[tag_n]) : DeviceValue::DeviceValueTAG_s[tag_n][0]);
 }
 
-std::string EMSdevice::tag_to_mqtt(uint8_t tag) {
-    return (DeviceValue::DeviceValueTAG_mqtt[tag]);
+const char * EMSdevice::tag_to_mqtt(uint8_t tag) {
+    return (DeviceValue::DeviceValueTAG_mqtt[tag > DeviceValue::NUM_TAGS ? 0 : tag]);
 }
 
-// convert UOM to a string - translating only for hours/minutes/seconds
-std::string EMSdevice::uom_to_string(uint8_t uom) {
+// convert UOM to a char string - translating only for hours/minutes/seconds
+const char * EMSdevice::uom_to_string(uint8_t uom) {
     switch (uom) {
     case DeviceValueUOM::DEGREES:
     case DeviceValueUOM::DEGREES_R:
@@ -303,7 +304,7 @@ bool EMSdevice::is_fetch(uint16_t telegram_id) const {
 }
 
 // check for a tag to create a nest
-bool EMSdevice::has_tag(const uint8_t tag) const {
+bool EMSdevice::has_tags(const uint8_t tag) const {
     for (const auto & dv : devicevalues_) {
         if (dv.tag == tag && tag >= DeviceValueTAG::TAG_HC1) {
             return true;
@@ -331,8 +332,9 @@ void EMSdevice::list_device_entries(JsonObject & output) const {
         if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.type != DeviceValueType::CMD && !fullname.empty()) {
             // if we have a tag prefix it
             char key[50];
-            if (!EMSdevice::tag_to_mqtt(dv.tag).empty()) {
-                snprintf(key, sizeof(key), "%s.%s", EMSdevice::tag_to_mqtt(dv.tag).c_str(), dv.short_name);
+            auto tag_s = EMSdevice::tag_to_mqtt(dv.tag);
+            if (strlen(tag_s)) {
+                snprintf(key, sizeof(key), "%s.%s", tag_s, dv.short_name);
             } else {
                 snprintf(key, sizeof(key), "%s", dv.short_name);
             }
@@ -343,7 +345,7 @@ void EMSdevice::list_device_entries(JsonObject & output) const {
             details.add(fullname);
 
             // add uom
-            if (!uom_to_string(dv.uom).empty() && uom_to_string(dv.uom) != " ") {
+            if (dv.uom != DeviceValueUOM::NONE) {
                 details.add(EMSdevice::uom_to_string(dv.uom));
             }
         }
@@ -507,7 +509,13 @@ void EMSdevice::add_device_value(uint8_t               tag,
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         for (EntityCustomization entityCustomization : settings.entityCustomizations) {
             if ((entityCustomization.product_id == product_id()) && (entityCustomization.device_id == device_id())) {
-                std::string entity = tag < DeviceValueTAG::TAG_HC1 ? short_name : tag_to_mqtt(tag) + "/" + short_name;
+                char entity[70];
+                if (tag < DeviceValueTAG::TAG_HC1) {
+                    strncpy(entity, short_name, sizeof(entity));
+                } else {
+                    snprintf(entity, sizeof(entity), "%s/%s", tag_to_mqtt(tag), short_name);
+                }
+
                 for (std::string entity_id : entityCustomization.entity_ids) {
                     // if there is an appended custom name, strip it to get the true entity name
                     // and extract the new custom name
@@ -697,12 +705,12 @@ void EMSdevice::publish_value(void * value_p) const {
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
             if (Mqtt::publish_single2cmd()) {
                 if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-                    snprintf(topic, sizeof(topic), "%s/%s/%s", device_type_2_device_name(device_type_), tag_to_mqtt(dv.tag).c_str(), dv.short_name);
+                    snprintf(topic, sizeof(topic), "%s/%s/%s", device_type_2_device_name(device_type_), tag_to_mqtt(dv.tag), dv.short_name);
                 } else {
                     snprintf(topic, sizeof(topic), "%s/%s", device_type_2_device_name(device_type_), (dv.short_name));
                 }
             } else if (Mqtt::is_nested() && dv.tag >= DeviceValueTAG::TAG_HC1) {
-                snprintf(topic, sizeof(topic), "%s/%s/%s", Mqtt::tag_to_topic(device_type_, dv.tag).c_str(), tag_to_mqtt(dv.tag).c_str(), dv.short_name);
+                snprintf(topic, sizeof(topic), "%s/%s/%s", Mqtt::tag_to_topic(device_type_, dv.tag).c_str(), tag_to_mqtt(dv.tag), dv.short_name);
             } else {
                 snprintf(topic, sizeof(topic), "%s/%s", Mqtt::tag_to_topic(device_type_, dv.tag).c_str(), dv.short_name);
             }
@@ -772,7 +780,7 @@ std::string EMSdevice::get_value_uom(const char * key) const {
     strlcpy(new_key, key, sizeof(new_key));
     char * key_p = new_key;
 
-    for (uint8_t i = 0; i < DeviceValue::tag_count; i++) {
+    for (uint8_t i = 0; i < DeviceValue::NUM_TAGS; i++) {
         auto tag = Helpers::translated_word(DeviceValue::DeviceValueTAG_s[i]);
         if (tag) {
             std::string key2   = key; // copy string to a std::string so we can use the find function
@@ -863,17 +871,19 @@ void EMSdevice::generate_values_web(JsonObject & output) {
             auto mask = Helpers::hextoa((uint8_t)(dv.state >> 4), false); // create mask to a 2-char string
 
             // add name, prefixing the tag if it exists. This is the id used in the WebUI table and must be unique
-            if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
-                obj["id"] = mask + fullname;
-            } else {
+            if (dv.has_tag()) {
                 obj["id"] = mask + tag_to_string(dv.tag) + " " + fullname;
+            } else {
+                obj["id"] = mask + fullname;
             }
 
             // add commands and options
             if (dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY)) {
                 // add the name of the Command function
                 if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-                    obj["c"] = tag_to_mqtt(dv.tag) + "/" + dv.short_name;
+                    char c_s[50];
+                    snprintf(c_s, sizeof(c_s), "%s/%s", tag_to_mqtt(dv.tag), dv.short_name);
+                    obj["c"] = c_s;
                 } else {
                     obj["c"] = dv.short_name;
                 }
@@ -968,7 +978,9 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
 
         // id holds the shortname and must always have a value for the WebUI table to work
         if (dv.tag >= DeviceValueTAG::TAG_HC1) {
-            obj["id"] = tag_to_mqtt(dv.tag) + "/" + dv.short_name;
+            char id_s[50];
+            snprintf(id_s, sizeof(id_s), "%s/%s", tag_to_mqtt(dv.tag), dv.short_name);
+            obj["id"] = id_s;
         } else {
             obj["id"] = dv.short_name;
         }
@@ -978,12 +990,12 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
         auto fullname = Helpers::translated_word(dv.fullname);
         if (dv.type != DeviceValueType::CMD) {
             if (fullname) {
-                if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
-                    obj["n"] = fullname;
-                } else {
+                if (dv.has_tag()) {
                     char name[50];
-                    snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag).c_str(), fullname);
+                    snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag), fullname);
                     obj["n"] = name;
+                } else {
+                    obj["n"] = fullname;
                 }
             }
 
@@ -1030,7 +1042,12 @@ void EMSdevice::set_climate_minmax(uint8_t tag, int16_t min, uint16_t max) {
 // returns true if the entity has a mask set (not 0 the default)
 void EMSdevice::setCustomEntity(const std::string & entity_id) {
     for (auto & dv : devicevalues_) {
-        std::string entity_name = dv.tag < DeviceValueTAG::TAG_HC1 ? dv.short_name : tag_to_mqtt(dv.tag) + "/" + dv.short_name;
+        char entity_name[70];
+        if (dv.tag < DeviceValueTAG::TAG_HC1) {
+            strncpy(entity_name, dv.short_name, sizeof(entity_name));
+        } else {
+            snprintf(entity_name, sizeof(entity_name), "%s/%s", tag_to_mqtt(dv.tag), dv.short_name);
+        }
 
         // extra shortname
         std::string shortname;
@@ -1082,7 +1099,7 @@ void EMSdevice::setCustomEntity(const std::string & entity_id) {
 // populate a string vector with entities that have masks set or have a custom name
 void EMSdevice::getCustomEntities(std::vector<std::string> & entity_ids) {
     for (const auto & dv : devicevalues_) {
-        std::string entity_name = dv.tag < DeviceValueTAG::TAG_HC1 ? dv.short_name : tag_to_mqtt(dv.tag) + "/" + dv.short_name;
+        std::string entity_name = dv.tag < DeviceValueTAG::TAG_HC1 ? dv.short_name : std::string(tag_to_mqtt(dv.tag)) + "/" + dv.short_name;
         uint8_t     mask        = dv.state >> 4;
 
         if (mask || !dv.custom_fullname.empty()) {
@@ -1105,7 +1122,7 @@ void EMSdevice::dump_value_info() {
         if (dv.fullname != nullptr) {
             Serial.print(name_);
             Serial.print(',');
-            Serial.print(device_type_name().c_str());
+            Serial.print(device_type_name());
             Serial.print(',');
 
             Serial.print(product_id_);
@@ -1203,7 +1220,6 @@ void EMSdevice::dump_value_info() {
             char entityid[500];
             char entity_name[100];
 
-
             for (uint8_t count = 0; count < 2; count++) {
                 if (count) {
                     // new name, comes as last
@@ -1222,7 +1238,7 @@ void EMSdevice::dump_value_info() {
                              sizeof(entity_with_tag),
                              "%s_%s_%s",
                              device_type_2_device_name(device_type_),
-                             EMSdevice::tag_to_mqtt(dv.tag).c_str(),
+                             EMSdevice::tag_to_mqtt(dv.tag),
                              entity_name);
                 } else {
                     snprintf(entity_with_tag, sizeof(entity_with_tag), "%s_%s", device_type_2_device_name(device_type_), entity_name);
@@ -1300,14 +1316,16 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
 
             auto fullname = dv.get_fullname();
             if (!fullname.empty()) {
-                if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
-                    json["fullname"] = fullname;
+                if (dv.has_tag()) {
+                    char name[50];
+                    snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag), fullname.c_str());
+                    json["name"] = name;
                 } else {
-                    json["fullname"] = tag_to_string(dv.tag) + " " + fullname;
+                    json["fullname"] = fullname;
                 }
             }
 
-            if (!tag_to_mqtt(dv.tag).empty()) {
+            if (dv.tag != DeviceValueTAG::TAG_NONE) {
                 json["circuit"] = tag_to_mqtt(dv.tag);
             }
 
@@ -1419,7 +1437,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             }
 
             // add uom if it's not a " " (single space)
-            if (!uom_to_string(dv.uom).empty() && uom_to_string(dv.uom) != " ") {
+            if (dv.uom != DeviceValueUOM::NONE) {
                 json["uom"] = uom_to_string(dv.uom);
             }
 
@@ -1494,14 +1512,14 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             has_values = true; // flagged if we actually have data
 
             // we have a tag if it matches the filter given, and that the tag name is not empty/""
-            bool have_tag = ((dv.tag != tag_filter) && !tag_to_string(dv.tag).empty());
+            bool have_tag = ((dv.tag != tag_filter) && dv.has_tag());
 
             // create the name for the JSON key
             char name[80];
 
             if (output_target == OUTPUT_TARGET::API_VERBOSE || output_target == OUTPUT_TARGET::CONSOLE) {
                 if (have_tag) {
-                    snprintf(name, 80, "%s %s", tag_to_string(dv.tag).c_str(), fullname.c_str()); // prefix the tag
+                    snprintf(name, 80, "%s %s", tag_to_string(dv.tag), fullname.c_str()); // prefix the tag
                 } else {
                     strlcpy(name, fullname.c_str(), sizeof(name)); // use full name
                 }
@@ -1689,7 +1707,7 @@ bool EMSdevice::has_telegram_id(uint16_t id) const {
 }
 
 // return the name of the telegram type
-std::string EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> telegram) const {
+const char * EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> telegram) {
     // see if it's one of the common ones, like Version
     if (telegram->type_id == EMS_TYPE_VERSION) {
         return "Version";
@@ -1703,7 +1721,7 @@ std::string EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> telegr
         }
     }
 
-    return std::string{};
+    return "";
 }
 
 // take a telegram_type_id and call the matching handler

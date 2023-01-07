@@ -416,7 +416,9 @@ bool Command::list(const uint8_t device_type, JsonObject & output) {
         for (const auto & cf : cmdfunctions_) {
             if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == std::string(cf.cmd_))) {
                 if (cf.has_flags(CommandFlag::MQTT_SUB_FLAG_WW)) {
-                    output[cl] = EMSdevice::tag_to_string(DeviceValueTAG::TAG_DEVICE_DATA_WW) + " " + Helpers::translated_word(cf.description_);
+                    char s[100];
+                    snprintf(s, sizeof(s), "%s %s", EMSdevice::tag_to_string(DeviceValueTAG::TAG_DEVICE_DATA_WW), Helpers::translated_word(cf.description_));
+                    output[cl] = s;
                 } else {
                     output[cl] = Helpers::translated_word(cf.description_);
                 }

@@ -985,7 +985,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // create entity by add the hc/wwc tag if present, separating with a _
     char entity_with_tag[50];
     if (tag >= DeviceValueTAG::TAG_HC1) {
-        snprintf(entity_with_tag, sizeof(entity_with_tag), "%s_%s", EMSdevice::tag_to_mqtt(tag).c_str(), entity);
+        snprintf(entity_with_tag, sizeof(entity_with_tag), "%s_%s", EMSdevice::tag_to_mqtt(tag), entity);
     } else {
         snprintf(entity_with_tag, sizeof(entity_with_tag), "%s", entity);
     }
@@ -1004,10 +1004,10 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         char uniq_s[60];
         strlcpy(uniq_s, en_name, sizeof(uniq_s));
         Helpers::replace_char(uniq_s, ' ', '_');
-        if (EMSdevice::tag_to_string(tag).empty()) {
+        if (tag == DeviceValueTAG::TAG_NONE) {
             snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());
         } else {
-            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag).c_str(), Helpers::toLower(uniq_s).c_str());
+            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag), Helpers::toLower(uniq_s).c_str());
         }
     }
 
@@ -1080,7 +1080,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         // command topic back to EMS-ESP
         char command_topic[MQTT_TOPIC_MAX_SIZE];
         if (tag >= DeviceValueTAG::TAG_HC1) {
-            snprintf(command_topic, sizeof(command_topic), "%s/%s/%s/%s", mqtt_basename_.c_str(), device_name, EMSdevice::tag_to_mqtt(tag).c_str(), entity);
+            snprintf(command_topic, sizeof(command_topic), "%s/%s/%s/%s", mqtt_basename_.c_str(), device_name, EMSdevice::tag_to_mqtt(tag), entity);
         } else {
             snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", mqtt_basename_.c_str(), device_name, entity);
         }
@@ -1137,10 +1137,10 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     char   ha_name[70];
     char * F_name = strdup(fullname);
     F_name[0]     = toupper(F_name[0]); // capitalize first letter
-    if (EMSdevice::tag_to_string(tag).empty()) {
-        snprintf(ha_name, sizeof(ha_name), "%s", F_name); // no tag
+    if (tag != DeviceValueTAG::TAG_NONE) {
+        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag), F_name);
     } else {
-        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), F_name);
+        snprintf(ha_name, sizeof(ha_name), "%s", F_name); // no tag
     }
     free(F_name); // very important!
     doc["name"] = ha_name;
@@ -1150,7 +1150,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     char val_tpl[75];
     if (is_nested()) {
         if (tag >= DeviceValueTAG::TAG_HC1) {
-            snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s.%s}}", EMSdevice::tag_to_mqtt(tag).c_str(), entity);
+            snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s.%s}}", EMSdevice::tag_to_mqtt(tag), entity);
         } else {
             snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", entity);
         }
@@ -1383,7 +1383,7 @@ std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
     std::string topic = EMSdevice::device_type_2_device_name(device_type);
 
     // if there is a tag add it
-    if (!EMSdevice::tag_to_mqtt(tag).empty() && ((tag == DeviceValueTAG::TAG_BOILER_DATA_WW) || (!is_nested() && tag >= DeviceValueTAG::TAG_HC1))) {
+    if ((tag == DeviceValueTAG::TAG_BOILER_DATA_WW) || (!is_nested() && tag >= DeviceValueTAG::TAG_HC1)) {
         return topic + "_data_" + EMSdevice::tag_to_mqtt(tag);
     } else {
         return topic + "_data";
