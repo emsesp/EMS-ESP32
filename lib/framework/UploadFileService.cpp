@@ -29,14 +29,6 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         std::string extension = fname.substr(position + 1);
         size_t      fsize     = request->contentLength();
 
-#ifdef EMSESP_DEBUG
-#if defined(EMSESP_USE_SERIAL)
-        Serial.println();
-        Serial.printf("Received filename: %s, len: %d, index: %d, ext: %s, fsize: %d", filename.c_str(), len, index, extension.c_str(), fsize);
-        Serial.println();
-#endif
-#endif
-
         is_firmware = false;
         if ((extension == "bin") && (fsize > 1500000)) {
             is_firmware = true;
@@ -79,9 +71,6 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
                 }
                 request->onDisconnect(UploadFileService::handleEarlyDisconnect); // success, let's make sure we end the update if the client hangs up
             } else {
-#if defined(EMSESP_USE_SERIAL)
-                Update.printError(Serial);
-#endif
                 handleError(request, 507); // failed to begin, send an error response Insufficient Storage
                 return;
             }
@@ -99,16 +88,10 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         // if we haven't delt with an error, continue with the firmware update
         if (!request->_tempObject) {
             if (Update.write(data, len) != len) {
-#if defined(EMSESP_USE_SERIAL)
-                Update.printError(Serial);
-#endif
                 handleError(request, 500);
             }
             if (final) {
                 if (!Update.end(true)) {
-#if defined(EMSESP_USE_SERIAL)
-                    Update.printError(Serial);
-#endif
                     handleError(request, 500);
                 }
             }

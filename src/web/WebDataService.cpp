@@ -186,12 +186,6 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
                 emsdevice->generate_values_web(output);
 #endif
 
-                // #ifdef EMSESP_USE_SERIAL
-                // #ifdef EMSESP_DEBUG
-                //                 serializeJson(output, Serial);
-                // #endif
-                // #endif
-
 #if defined(EMSESP_DEBUG)
                 size_t length = response->setLength();
                 EMSESP::logger().debug("Dashboard buffer used: %d", length);
