@@ -20,7 +20,7 @@ const Settings: FC = () => {
     <>
       <RouterTabs value={routerTab}>
         <Tab value="application" label={LL.APPLICATION_SETTINGS()} />
-        <Tab value="customization" label={LL.CUSTOMIZATION()} />
+        <Tab value="customization" label={LL.CUSTOMIZATIONS()} />
       </RouterTabs>
       <Routes>
         <Route path="application" element={<SettingsApplication />} />

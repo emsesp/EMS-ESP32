@@ -688,7 +688,7 @@ const SettingsCustomization: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.USER_CUSTOMIZATION()} titleGutter>
+    <SectionContent title={LL.CUSTOMIZATIONS()} titleGutter>
       {renderContent()}
       {renderEditDialog()}
     </SectionContent>

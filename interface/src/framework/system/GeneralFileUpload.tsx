@@ -112,7 +112,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
             color="primary"
             onClick={() => downloadCustomizations()}
           >
-            {LL.CUSTOMIZATION()}
+            {LL.CUSTOMIZATIONS()}
           </Button>
         </>
       )}

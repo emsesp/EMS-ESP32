@@ -589,7 +589,7 @@ const emsesp_devicedata_4 = {
   ],
 }
 
-// CUSTOMIZATION
+// CUSTOMIZATIONS
 
 const emsesp_deviceentities_1 = [
   {
