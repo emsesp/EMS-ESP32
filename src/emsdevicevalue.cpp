@@ -114,7 +114,7 @@ const char * DeviceValue::DeviceValueUOM_s[] = {
 
 };
 
-// mapping of TAGs, to match order in DeviceValueTAG enum in emsdevice.h
+// mapping of TAGs, to match order in DeviceValueTAG enum in emsdevicevalue.h
 // must be an int of 4 bytes, 32bit aligned
 const char * const * DeviceValue::DeviceValueTAG_s[] = {
 

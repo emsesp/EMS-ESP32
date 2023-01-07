@@ -184,10 +184,11 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     // register device values for common values (not heating circuit)
     register_device_values();
 
-#if defined(EMSESP_STANDALONE_DUMP)
-    // if we're just dumping out values, create a single dummy hc1
-    register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, model)); // hc=1
-#endif
+    if (System::test_set_all_active()) {
+        Serial.println("DEBUG TEST: adding a fake hc");
+        // if we're just dumping out values, create a single dummy hc1
+        register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, model)); // hc=1
+    }
 
     // query all the heating circuits. This is only done once.
     // The automatic fetch will from now on only update the active heating circuits

@@ -56,7 +56,8 @@ uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
 // init statics
 PButton System::myPButton_;
-bool    System::restart_requested_ = false;
+bool    System::restart_requested_   = false;
+bool    System::test_set_all_active_ = false;
 
 // find the index of the language
 // 0 = EN, 1 = DE, etc...

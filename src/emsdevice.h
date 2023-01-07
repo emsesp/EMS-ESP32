@@ -417,7 +417,7 @@ class EMSdevice {
     uint8_t count_entities();
     bool    has_entities() const;
 
-#if defined(EMSESP_STANDALONE_DUMP)
+#if defined(EMSESP_STANDALONE)
     void dump_value_info();
 #endif
 

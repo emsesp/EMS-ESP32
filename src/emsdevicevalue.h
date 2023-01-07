@@ -181,7 +181,7 @@ class DeviceValue {
     // has values
     bool hasValue() const;
     bool has_tag() const {
-        return ((tag < DeviceValue::NUM_TAGS) && (tag != DeviceValue::DeviceValueTAG::TAG_NONE));
+        return ((tag < DeviceValue::NUM_TAGS) && (tag != DeviceValue::DeviceValueTAG::TAG_NONE) && strlen(DeviceValueTAG_s[tag][0]));
     }
 
     bool get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max);

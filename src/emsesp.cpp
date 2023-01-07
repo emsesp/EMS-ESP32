@@ -316,7 +316,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 
 // Dump all entities to Serial out
 // this is intended to run within the OS with lots of available memory!
-#if defined(EMSESP_STANDALONE_DUMP)
+#if defined(EMSESP_STANDALONE)
 void EMSESP::dump_all_values(uuid::console::Shell & shell) {
     Serial.println("---- CSV START ----"); // marker use by py script
     // add header for CSV

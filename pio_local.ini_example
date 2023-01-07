@@ -5,9 +5,9 @@
 ; options are: EMSESP_DEBUG, EMSESP_UART_DEBUG, EMSESP_DEBUG_SENSOR, EMSESP_WIFI_TWEAK, EMSESP_DEFAULT_BOARD_PROFILE EMSESP_DEBUG_LIMITED
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
 ; my_build_flags = -DEMSESP_DEBUG_SENSOR
-; my_build_flags = -DEMSESP_DEBUG -DEMSESP_USE_SERIAL
+; my_build_flags = -DEMSESP_DEBUG
 ; my_build_flags = -DEMSESP_DEBUG -DCORE_DEBUG_LEVEL=5 ; 5=verbose, 4=debug, 3=info
-my_build_flags = -DEMSESP_DEBUG -DEMSESP_DEBUG_LIMITED -DEMSESP_USE_SERIAL
+my_build_flags =
 
 [env:esp32_4M]
 ; if using OTA enter your details below

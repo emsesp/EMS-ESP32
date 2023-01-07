@@ -230,9 +230,17 @@ class System {
         return appused_;
     }
 
+    static bool test_set_all_active() {
+        return test_set_all_active_;
+    }
+    static void test_set_all_active(bool n) {
+        test_set_all_active_ = n;
+    }
+
   private:
     static uuid::log::Logger logger_;
     static bool              restart_requested_;
+    static bool              test_set_all_active_; // force all entities in a device to have a value
 
     // button
     static PButton            myPButton_; // PButton instance
