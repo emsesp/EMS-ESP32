@@ -67,9 +67,9 @@ static std::vector<std::string> log_level_autocomplete(Shell & shell, const std:
 
 static void setup_commands(std::shared_ptr<Commands> & commands) {
     // add for all contexts
-    // console, exit, help, logout
+    // log, exit, help
     for (unsigned int context = ShellContext::MAIN; context < ShellContext::END; context++) {
-        commands->add_command(context, CommandFlags::USER, {F_(console), F_(log)}, {F_(log_level_optional)}, console_log_level, log_level_autocomplete);
+        commands->add_command(context, CommandFlags::USER, {F_(log)}, {F_(log_level_optional)}, console_log_level, log_level_autocomplete);
 
         commands->add_command(context,
                               CommandFlags::USER,
@@ -78,7 +78,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
 
         commands->add_command(context, CommandFlags::USER, {F_(help)}, EMSESPShell::main_help_function);
 
-        commands->add_command(context, CommandFlags::USER, {F_(logout)}, EMSESPShell::main_logout_function);
+        // commands->add_command(context, CommandFlags::USER, {F_(logout)}, EMSESPShell::main_logout_function);
     }
 
     /* example of going into a new context
@@ -140,7 +140,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     //
 
 #if defined(EMSESP_DEBUG)
-    // create commands test and t
+    // create commands test
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           string_vector{"test"},
@@ -154,10 +154,6 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   Test::run_test(shell, arguments[0].c_str(), arguments[1].c_str());
                               }
                           });
-
-    commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{("t")}, [](Shell & shell, const std::vector<std::string> & arguments) {
-        Test::run_test(shell, "default");
-    });
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
@@ -710,11 +706,12 @@ std::string EMSESPShell::prompt_suffix() {
 }
 
 void EMSESPShell::end_of_transmission() {
-    if (context() != ShellContext::MAIN || has_flags(CommandFlags::ADMIN)) {
-        invoke_command(F_(exit));
-    } else {
-        invoke_command(F_(logout));
-    }
+    invoke_command(F_(exit));
+    // if (context() != ShellContext::MAIN || has_flags(CommandFlags::ADMIN)) {
+    //     invoke_command(F_(exit));
+    // } else {
+    //     invoke_command(F_(logout));
+    // }
 }
 
 void EMSESPShell::generic_exit_context_function(Shell & shell, const std::vector<std::string> & arguments) {
@@ -732,13 +729,6 @@ void EMSESPShell::main_exit_function(Shell & shell, const std::vector<std::strin
         EMSESPShell::main_exit_user_function(shell, NO_ARGUMENTS);
     }
 }
-
-void EMSESPShell::main_logout_function(Shell & shell, const std::vector<std::string> & arguments) {
-    if (shell.has_flags(CommandFlags::ADMIN)) {
-        EMSESPShell::main_exit_admin_function(shell, NO_ARGUMENTS);
-    }
-    EMSESPShell::main_exit_user_function(shell, NO_ARGUMENTS);
-};
 
 void EMSESPShell::main_exit_user_function(Shell & shell, const std::vector<std::string> & arguments) {
     shell.stop();
