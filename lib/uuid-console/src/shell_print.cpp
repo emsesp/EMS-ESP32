@@ -81,8 +81,6 @@ size_t Shell::vprintf(const char * format, va_list ap) {
 }
 
 void Shell::print_all_available_commands() {
-    // TODO add back sorting of commands?
-
     for (auto & available_command : available_commands()) {
         CommandLine command_line{available_command.name(), available_command.arguments()};
 
