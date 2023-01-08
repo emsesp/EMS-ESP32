@@ -746,7 +746,7 @@ std::vector<bool> EMSESPConsole::ptys_;
 #endif
 
 EMSESPConsole::EMSESPConsole(EMSESP & emsesp, Stream & stream, bool local)
-    : APP_SHELL_TYPE(emsesp, stream, ShellContext::MAIN, local ? (CommandFlags::USER | CommandFlags::LOCAL) : CommandFlags::USER)
+    : EMSESPShell(emsesp, stream, ShellContext::MAIN, local ? (CommandFlags::USER | CommandFlags::LOCAL) : CommandFlags::USER)
     , name_("ttyS0")
 #ifndef EMSESP_STANDALONE
     , pty_(std::numeric_limits<size_t>::max())
@@ -758,7 +758,7 @@ EMSESPConsole::EMSESPConsole(EMSESP & emsesp, Stream & stream, bool local)
 
 #ifndef EMSESP_STANDALONE
 EMSESPConsole::EMSESPConsole(EMSESP & emsesp, Stream & stream, const IPAddress & addr, uint16_t port)
-    : APP_SHELL_TYPE(emsesp, stream, ShellContext::MAIN, CommandFlags::USER)
+    : EMSESPShell(emsesp, stream, ShellContext::MAIN, CommandFlags::USER)
     , addr_(addr)
     , port_(port) {
     std::array<char, 16> text;

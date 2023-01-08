@@ -92,9 +92,12 @@ class Shower;
 
 class EMSESP {
   public:
+    EMSESP();
     ~EMSESP() = default;
     virtual void start();
     virtual void loop();
+
+    static uuid::log::Logger logger();
 
     static void publish_device_values(uint8_t device_type);
     static void publish_other_values();
@@ -225,10 +228,6 @@ class EMSESP {
     static WebAPIService           webAPIService;
     static WebLogService           webLogService;
     static WebCustomizationService webCustomizationService;
-
-    static uuid::log::Logger logger();
-
-    EMSESP();
 
   private:
     static std::string device_tostring(const uint8_t device_id);

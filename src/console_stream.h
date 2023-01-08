@@ -22,13 +22,9 @@
 
 #include "console.h"
 
-// #define APP_SHELL_TYPE uuid::console::StreamConsole, public EMSESPShell
-#define APP_SHELL_TYPE EMSESPShell
-// #define APP_SHELL_TYPE uuid::console::StreamConsole
-
 namespace emsesp {
 
-class EMSESPConsole : public APP_SHELL_TYPE {
+class EMSESPConsole : public EMSESPShell {
   public:
     EMSESPConsole(EMSESP & emsesp, Stream & stream, bool local);
 #ifndef ENV_NATIVE
