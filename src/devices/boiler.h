@@ -222,6 +222,8 @@ class Boiler : public EMSdevice {
     uint16_t auxHeaterDelay_;
     uint8_t  silentMode_;
     int8_t   minTempSilent_;
+    uint8_t  silentFrom_;
+    uint8_t  silentTo_;
     int8_t   tempParMode_;
     int8_t   auxHeatMixValve_;
     uint16_t hpHystHeat_;
@@ -370,6 +372,8 @@ class Boiler : public EMSdevice {
     }
     bool set_silentMode(const char * value, const int8_t id);
     bool set_minTempSilent(const char * value, const int8_t id);
+    bool set_silentFrom(const char * value, const int8_t id);
+    bool set_silentTo(const char * value, const int8_t id);
     bool set_additionalHeaterOnly(const char * value, const int8_t id);
     bool set_additionalHeater(const char * value, const int8_t id);
     bool set_additionalHeaterDelay(const char * value, const int8_t id);

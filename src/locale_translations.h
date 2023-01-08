@@ -395,6 +395,8 @@ MAKE_PSTR_LIST(hpHystCool, "hphystcool", "on/off hyst cool", "Schalthysterese K�
 MAKE_PSTR_LIST(hpHystPool, "hphystpool", "on/off hyst pool", "Schalthysterese Pool", "an/uit-hysteresis in zwembadbedri", "Hystereses Pool", "histereza wł./wył. podgrzewania basenu", "", "Hystérésis Marche en mode piscine") // TODO translate
 MAKE_PSTR_LIST(tempDiffHeat, "tempdiffheat", "temp. diff. TC3/TC0 heat", "Temp.diff. TC3/TC0 Heizen", "Temp.vers. TC3/TC0 verw", "Delta(T) TC3/TC0 Uppvärm.", "różnica temperatur TC3/TC0 w trakcie ogrzewania", "", "Delta T TC3/TC0 Chauff") // TODO translate
 MAKE_PSTR_LIST(tempDiffCool, "tempdiffcool", "temp. diff. TC3/TC0 cool", "Temp.diff. TC3/TC0 Kühlen", "Temp.vers. TC3/TC0 koel.", "Delta(T) TC3/TC0 Kyla", "różnica temperatur TC3/TC0 w trakcie chłodzenia", "", "Delta T TC3/TC0 Refroid.") // TODO translate
+MAKE_PSTR_LIST(silentFrom, "silentfrom", "silent mode from", "Silentmodus Start") // TODO translate
+MAKE_PSTR_LIST(silentTo, "silentto", "silent mode to", "Silentmodus Ende") // TODO translate
 
 MAKE_PSTR_LIST(wwComfOffTemp, "wwcomfoff", "comfort switch off", "Komfort Ausschalttemp", "Comfort Uitschakeltemp.", "Komfortläge avstängingstemp.", "temperatura wyłączania w trybie komfort", "", "Confort Temp. d'arrêt") // TODO translate
 MAKE_PSTR_LIST(wwEcoOffTemp, "wwecooff", "eco switch off", "ECO Ausschalttemp", "Eco Uitschakeltemp.", "Ekoläge avstängningstemp.", "temperatura wyłączania w trybie eko", "", "Eco Temp. d'arrêt") // TODO translate

@@ -527,6 +527,20 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_silentMode));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &silentFrom_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_MUL15,
+                              FL_(silentFrom),
+                              DeviceValueUOM::MINUTES,
+                              MAKE_CF_CB(set_silentFrom));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &silentTo_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_MUL15,
+                              FL_(silentTo),
+                              DeviceValueUOM::MINUTES,
+                              MAKE_CF_CB(set_silentTo));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &minTempSilent_,
                               DeviceValueType::INT,
                               FL_(minTempSilent),
@@ -1450,6 +1464,8 @@ void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpHystCool_, 35); // is / 5, maybe offset swapped with pool
     has_update(telegram, hpHystPool_, 33); // is / 5
     has_update(telegram, hpCircPumpWw_, 46);
+    has_update(telegram, silentFrom_, 52); // in steps of 15 min
+    has_update(telegram, silentTo_, 53);   // in steps of 15 min
 }
 
 // Boiler(0x08) -B-> All(0x00), ?(0x0488), data: 8E 00 00 00 00 00 01 03
@@ -2281,6 +2297,24 @@ bool Boiler::set_silentMode(const char * value, const int8_t id) {
         return false;
     }
     write_command(0x484, 10, v, 0x484);
+    return true;
+}
+
+bool Boiler::set_silentFrom(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(0x484, 52, v / 15, 0x484);
+    return true;
+}
+
+bool Boiler::set_silentTo(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(0x484, 53, v / 15, 0x484);
     return true;
 }
 
