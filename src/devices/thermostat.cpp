@@ -185,7 +185,6 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     register_device_values();
 
     if (System::test_set_all_active()) {
-        Serial.println("DEBUG TEST: adding a fake hc");
         // if we're just dumping out values, create a single dummy hc1
         register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, model)); // hc=1
     }

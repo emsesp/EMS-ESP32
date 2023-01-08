@@ -542,6 +542,7 @@ void Shell::process_command() {
             line_buffer_.clear();
             cursor_ = 0;
         }
+
         CommandLine command_line{line1};
 
         println();
