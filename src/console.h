@@ -47,7 +47,6 @@ class EMSESPShell : public uuid::console::Shell {
     static void generic_exit_context_function(Shell & shell, const std::vector<std::string> & arguments);
     static void main_help_function(Shell & shell, const std::vector<std::string> & arguments);
     static void main_exit_function(Shell & shell, const std::vector<std::string> & arguments);
-    static void main_logout_function(Shell & shell, const std::vector<std::string> & arguments);
 
     EMSESP & emsesp_;
 
