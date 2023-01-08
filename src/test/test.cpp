@@ -254,8 +254,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         // simulate HansRemmerswaal's setup - see https://github.com/emsesp/EMS-ESP32/issues/859
         add_device(0x08, 172); // 160 entities - boiler: Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i
-        add_device(0x10, 158); // 62 entities - thermostat: RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410
-        add_device(0x38, 200); // 4 entities - thermostat: RC100H
+        // add_device(0x10, 158); // 62 entities - thermostat: RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410
+        // add_device(0x38, 200); // 4 entities - thermostat: RC100H
 
         shell.invoke_command("show values");
 
