@@ -885,7 +885,7 @@ void System::show_system(uuid::console::Shell & shell) {
 #ifndef EMSESP_STANDALONE
     shell.printfln(" SDK version: %s", ESP.getSdkVersion());
     shell.printfln(" CPU frequency: %lu MHz", ESP.getCpuFreqMHz());
-    shell.printfln(" Free heap: %lu KB", (uint32_t)ESP.getFreeHeap() / 1024);
+    shell.printfln(" Free heap/Max alloc: %lu KB / %lu KB", ((uint32_t)ESP.getFreeHeap() / 1024), (ESP.getMaxAllocHeap() / 1024));
     shell.printfln(" App used/free: %lu KB / %lu KB", appUsed(), appFree());
     uint32_t FSused = LittleFS.usedBytes() / 1024;
     shell.printfln(" FS used/free: %lu KB / %lu KB", FSused, FStotal() - FSused);
