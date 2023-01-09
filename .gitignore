@@ -2,13 +2,13 @@
 .vscode/c_cpp_properties.json
 .vscode/extensions.json
 .vscode/launch.json
+.vscode/settings.json
 
 # build
 build/
 .clang_complete
 .gcc-flags.json
 cppcheck.out.xml
-debug.log
 
 # platformio
 .pio
@@ -45,5 +45,3 @@ build_wrapper_output_directory/
 # other build files
 dump_entities.csv
 dump_entities.xls*
-
-.vscode/settings.json
