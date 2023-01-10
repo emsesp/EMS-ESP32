@@ -596,14 +596,16 @@ bool Helpers::value2bool(const char * value, bool & value_b) {
         return false;
     }
 
-    std::string bool_str = toLower(value); // convert to lower case
+    std::string bool_str = value;
 
-    if ((bool_str == std::string(Helpers::translated_word(FL_(on)))) || (bool_str == "on") || (bool_str == "1") || (bool_str == "true")) {
+    if ((bool_str == std::string(Helpers::translated_word(FL_(on)))) || (bool_str == std::string(Helpers::translated_word(FL_(ON))))
+        || (bool_str == "on") || (bool_str == "1") || (bool_str == "true")) {
         value_b = true;
         return true; // is a bool
     }
 
-    if ((bool_str == std::string(Helpers::translated_word(FL_(off)))) || (bool_str == "off") || (bool_str == "0") || (bool_str == "false")) {
+    if ((bool_str == std::string(Helpers::translated_word(FL_(off)))) || (bool_str == std::string(Helpers::translated_word(FL_(OFF))))
+        || (bool_str == "off") || (bool_str == "0") || (bool_str == "false")) {
         value_b = false;
         return true; // is a bool
     }
