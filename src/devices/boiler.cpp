@@ -102,8 +102,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingActive_, DeviceValueType::BOOL, FL_(heatingActive), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &tapwaterActive_, DeviceValueType::BOOL, FL_(tapwaterActive), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &selFlowTemp_, DeviceValueType::UINT, FL_(selFlowTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flow_temp));
-    register_device_value(
-        DeviceValueTAG::TAG_DEVICE_DATA, &selBurnPow_, DeviceValueType::UINT, FL_(selBurnPow), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_burn_power), 0, 254);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingPumpMod_, DeviceValueType::UINT, FL_(heatingPumpMod), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingPump2Mod_, DeviceValueType::UINT, FL_(heatingPump2Mod), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
@@ -182,6 +180,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         DeviceValueTAG::TAG_DEVICE_DATA, &boil2HystOff_, DeviceValueType::INT, FL_(boil2HystOff), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst2_off), 0, 20);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setFlowTemp_, DeviceValueType::UINT, FL_(setFlowTemp), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setBurnPow_, DeviceValueType::UINT, FL_(setBurnPow), DeviceValueUOM::PERCENT);
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &selBurnPow_, DeviceValueType::UINT, FL_(selBurnPow), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_burn_power), 0, 254);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &curBurnPow_, DeviceValueType::UINT, FL_(curBurnPow), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &burnStarts_, DeviceValueType::ULONG, FL_(burnStarts), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &burnWorkMin_, DeviceValueType::TIME, FL_(burnWorkMin), DeviceValueUOM::MINUTES);
@@ -443,8 +443,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(maxHeatHeat),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_maxHeatHeat));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &manDefrost_, DeviceValueType::BOOL, FL_(manDefrost), DeviceValueUOM::NONE, MAKE_CF_CB(set_manDefrost));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pvCooling_, DeviceValueType::BOOL, FL_(pvCooling), DeviceValueUOM::NONE, MAKE_CF_CB(set_pvCooling));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &maxHeatDhw_,
                               DeviceValueType::ENUM,
@@ -452,6 +450,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(maxHeatDhw),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_maxHeatDhw));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &manDefrost_, DeviceValueType::BOOL, FL_(manDefrost), DeviceValueUOM::NONE, MAKE_CF_CB(set_manDefrost));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pvCooling_, DeviceValueType::BOOL, FL_(pvCooling), DeviceValueUOM::NONE, MAKE_CF_CB(set_pvCooling));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &auxHeaterOnly_,
                               DeviceValueType::BOOL,
@@ -556,6 +556,28 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               3,
                               10);
         // heatpump DHW settings
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &wwAlternatingOper_,
+                              DeviceValueType::BOOL,
+                              FL_(wwAlternatingOper),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_wwAlternatingOper));
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &wwAltOpPrioHeat_,
+                              DeviceValueType::UINT,
+                              FL_(wwAltOpPrioHeat),
+                              DeviceValueUOM::MINUTES,
+                              MAKE_CF_CB(set_wwAltOpPrioHeat),
+                              20,
+                              120);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &wwAltOpPrioWw_,
+                              DeviceValueType::UINT,
+                              FL_(wwAltOpPrioWw),
+                              DeviceValueUOM::MINUTES,
+                              MAKE_CF_CB(set_wwAltOpPrioWw),
+                              30,
+                              120);
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                               &wwComfOffTemp_,
                               DeviceValueType::UINT,
@@ -1058,6 +1080,7 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwCircPump_, 10);         // 0x01 means yes
     has_enumupdate(telegram, wwCircMode_, 11, 1);  // 1=1x3min... 6=6x3min, 7=continuous
     has_update(telegram, wwDisinfectionTemp_, 12); // setting here, status in E9
+    has_update(telegram, wwAlternatingOper_, 14);  // 0x01 means enabled
     has_update(telegram, wwSelTempSingle_, 16);
     has_update(telegram, wwSelTempLow_, 18);
     has_update(telegram, wwMaxTemp_, 20);
@@ -1408,6 +1431,8 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
 // Boiler(0x08) -> All(0x00), ?(0x0484), data: 00 00 14 28 0D 50 00 00 00 02 02 07 28 01 00 02 05 19 0A 0A 03 0D 07 00 0A
 // Boiler(0x08) -> All(0x00), ?(0x0484), data: 01 90 00 F6 28 14 64 00 00 E1 00 1E 00 1E 01 64 01 64 54 20 00 00 (offset 25)
 void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, wwAltOpPrioHeat_, 2); // range 20-120 minutes on Buderus WSW196i
+    has_update(telegram, wwAltOpPrioWw_, 3); // range 30-120 minutes on Buderus WSW196i
     has_update(telegram, silentMode_, 10); // enum off-auto-on
     has_update(telegram, minTempSilent_, 11);
     has_update(telegram, hpHystHeat_, 37); // is / 5
@@ -2345,6 +2370,30 @@ bool Boiler::set_hpCircPumpWw(const char * value, const int8_t id) {
     bool v;
     if (Helpers::value2bool(value, v)) {
         write_command(0x484, 46, v ? 1 : 0, 0x484);
+        return true;
+    }
+    return false;
+}
+
+// dhw alternating operation, turn on/off; heatpumps only?
+bool Boiler::set_wwAlternatingOper(const char * value, const int8_t id) {
+    bool v;
+    if (!Helpers::value2bool(value, v)) {
+        return false;
+    }
+    // if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) { // do we need/want this?
+    write_command(EMS_TYPE_UBAParameterWWPlus, 14, v ? 1 : 0, EMS_TYPE_UBAParameterWWPlus);
+    // } else {
+    //     write_command(EMS_TYPE_UBAParameterWW, 14, v ? 0xFF : 0, EMS_TYPE_UBAParameterWW);
+    // }
+    return true;
+}
+
+// dhw alternating operation, set prioitise heating (id=2) or dhw (id=3) time; heatpumps only?
+bool Boiler::set_wwAltOpPrio(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        write_command(0x484, id, v, 0x484);
         return true;
     }
     return false;

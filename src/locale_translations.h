@@ -405,6 +405,9 @@ MAKE_PSTR_LIST(auxMaxTemp, "auxmaxtemp", "aux heater max temperature", "Zusatzhe
 MAKE_PSTR_LIST(manDefrost, "mandefrost", "manual defrost", "Manuelle Enteisung", "", "", "", "", "") // TODO translate
 MAKE_PSTR_LIST(pvCooling, "pvcooling", "Cooling only with PV", "Kühlen nur mit PV", "", "", "", "", "") // TODO translate
 MAKE_PSTR_LIST(hpCircPumpWw, "hpcircpumpww", "circulation pump available during dhw", "", "", "", "", "", "") // TODO translate
+MAKE_PSTR_LIST(wwAlternatingOper, "wwalternatingop", "alternating operation", "", "", "", "praca naprzemienna", "", "") // TODO translate
+MAKE_PSTR_LIST(wwAltOpPrioHeat, "wwaltopprioheat", "prioritise heating during dhw", "", "", "", "czas na ogrzewanie w trakcie c.w.u", "", "") // TODO translate
+MAKE_PSTR_LIST(wwAltOpPrioWw, "wwaltopprioww", "prioritise dhw during heating", "", "", "", "czas na c.w.u w trakcie ogrzewania", "", "") // TODO translate
 
 // hybrid heatpump
 MAKE_PSTR_LIST(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride")
