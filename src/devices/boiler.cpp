@@ -479,7 +479,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &auxMaxTemp_,
                               DeviceValueType::UINT,
-                              DeviceValueNumOp::DV_NUMOP_MUL10,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(auxMaxTemp),
                               DeviceValueUOM::K,
                               MAKE_CF_CB(set_auxMaxTemp),
@@ -1488,7 +1488,7 @@ void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram
     has_update(telegram, auxHeaterOff_, 2);
     has_update(telegram, auxHeatMode_, 4); // eco/comfort
     has_update(telegram, tempParMode_, 5);
-    has_update(telegram, auxMaxTemp_, 14);     // is *10
+    has_update(telegram, auxMaxTemp_, 14);     // is * 10
     has_update(telegram, auxHeaterDelay_, 16); // is / 10
 }
 
