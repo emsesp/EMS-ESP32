@@ -220,7 +220,7 @@ MAKE_PSTR(tag_boiler_data_ww_mqtt, "ww")
 MAKE_PSTR(tag_device_data_ww_mqtt, "")
 
 // Home Assistant - this is special and has no translations
-MAKE_PSTR_LIST(climate, "")
+MAKE_PSTR_LIST(climate, "HA climate config creation")
 
 // syslog
 MAKE_PSTR_LIST(list_syslog_level, "off", "emerg", "alert", "crit", "error", "warn", "notice", "info", "debug", "trace", "all")
