@@ -188,7 +188,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
 
 #if defined(EMSESP_DEBUG)
                 size_t length = response->setLength();
-                EMSESP::logger().debug("Dashboard buffer used: %d", length);
+                EMSESP::logger().debug("[DEBUG] Dashboard buffer used: %d", length);
 #else
                 response->setLength();
 #endif
