@@ -1518,10 +1518,16 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             char name[80];
 
             if (output_target == OUTPUT_TARGET::API_VERBOSE || output_target == OUTPUT_TARGET::CONSOLE) {
-                if (have_tag) {
-                    snprintf(name, 80, "%s %s", tag_to_string(dv.tag), fullname.c_str()); // prefix the tag
+                char short_name[20];
+                if (output_target == OUTPUT_TARGET::CONSOLE) {
+                    snprintf(short_name, sizeof(short_name), " (%s)", dv.short_name);
                 } else {
-                    strlcpy(name, fullname.c_str(), sizeof(name)); // use full name
+                    strcpy(short_name, "");
+                }
+                if (have_tag) {
+                    snprintf(name, sizeof(name), "%s %s%s", tag_to_string(dv.tag), fullname.c_str(), short_name); // prefix the tag
+                } else {
+                    snprintf(name, sizeof(name), "%s%s", fullname.c_str(), short_name);
                 }
             } else {
                 strlcpy(name, (dv.short_name), sizeof(name)); // use short name
