@@ -24,6 +24,7 @@
 namespace emsesp {
 
 // no shell, called via the API or 'call system test' command
+// or http://ems-esp/api?device=system&cmd=test&data=boiler
 bool Test::run_test(const char * command, int8_t id) {
     if ((command == nullptr) || (strlen(command) == 0)) {
         return false;
@@ -69,7 +70,7 @@ bool Test::run_test(const char * command, int8_t id) {
 // the tests take a lot of memory when built for the ESP32
 // so only including the full set in standalone, otherwise a limited selection of basic tests
 //
-#ifndef EMSESP_STANDALONE
+#ifdef EMSESP_STANDALONE
 
     if (strcmp(command, "2thermostats") == 0) {
         EMSESP::logger().info("Testing with multiple thermostats...");
@@ -821,7 +822,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         */
 
         /*
-        requestX.url("/api/thermostat/mode/auto"); 
+        requestX.url("/api/thermostat/mode/auto");
         EMSESP::webAPIService.webAPIService_get(&requestX);
         return;
         */
