@@ -53,6 +53,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     }
 
 #ifdef EMSESP_DEBUG
+    Serial.print("[DEBUG] processing path: ");
     Serial.println(p.path().c_str()); // dump paths, for debugging
 #endif
 
