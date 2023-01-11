@@ -67,6 +67,10 @@ void AnalogSensor::reload() {
 #if defined(EMSESP_STANDALONE)
     analog_enabled_ = true; // for local offline testing
 #endif
+    for (auto sensor : sensors_) {
+        remove_ha_topic(sensor.gpio());
+        sensor.ha_registered = false;
+    }
     if (!analog_enabled_) {
         sensors_.clear();
         return;
@@ -607,11 +611,15 @@ std::string AnalogSensor::Sensor::name() const {
     return name_;
 }
 
-// set the counter value, id is gpio-no
+// set the dig_out/counter/DAC/PWM value, id is gpio-no
 bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
     float val;
     if (!Helpers::value2float(value, val)) {
-        return false;
+        bool b;
+        if (!Helpers::value2bool(value, b)) {
+            return false;
+        }
+        val = b ? 1 : 0;
     }
     for (auto & sensor : sensors_) {
         if (sensor.gpio() == gpio) {
