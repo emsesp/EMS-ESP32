@@ -23,10 +23,22 @@
 
 namespace emsesp {
 
-// no shell
+// no shell, called via the API or 'call system test' command
 bool Test::run_test(const char * command, int8_t id) {
     if ((command == nullptr) || (strlen(command) == 0)) {
         return false;
+    }
+
+    if (strcmp(command, "memory") == 0) {
+        EMSESP::logger().notice("Testing memory by adding lots of devices and entities...");
+
+        System::test_set_all_active(true); // include all entities and give them fake values
+
+        // simulate HansRemmerswaal's setup - see https://github.com/emsesp/EMS-ESP32/issues/859
+        add_device(0x08, 172); // 160 entities - boiler: Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i
+                               // add_device(0x10, 158); // 62 entities - thermostat: RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410
+                               // add_device(0x38, 200); // 4 entities - thermostat: RC100H
+        return true;
     }
 
     if (strcmp(command, "general") == 0) {
@@ -245,21 +257,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         command = cmd;
     }
 
-    // https://github.com/emsesp/EMS-ESP32/issues/869
-    if (command == "memory") {
-        EMSESP::logger().notice("Testing memory by adding lots of devices and entities...");
-        shell.printfln("Testing memory by adding lots of devices and entities...");
-
-        System::test_set_all_active(true);
-
-        // simulate HansRemmerswaal's setup - see https://github.com/emsesp/EMS-ESP32/issues/859
-        add_device(0x08, 172); // 160 entities - boiler: Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i
-        // add_device(0x10, 158); // 62 entities - thermostat: RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410
-        // add_device(0x38, 200); // 4 entities - thermostat: RC100H
-
-        shell.invoke_command("show values");
-    }
-
     if (command == "general") {
         shell.printfln("Testing adding a general boiler & thermostat...");
         run_test("general");
@@ -267,6 +264,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.invoke_command("show values");
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
+    }
+
+    // https://github.com/emsesp/EMS-ESP32/issues/869
+    if (command == "memory") {
+        shell.printfln("Testing memory by adding lots of devices and entities...");
+        run_test("memory");
+        shell.invoke_command("show values");
     }
 
 //
