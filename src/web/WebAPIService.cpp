@@ -100,6 +100,9 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         }
     }
 
+    // capture current heap memory before allocating the large return buffer
+    emsesp::EMSESP::system_.refreshHeapMem();
+
     // output json buffer
     size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE;
     auto * response = new PrettyAsyncJsonResponse(false, buffer);

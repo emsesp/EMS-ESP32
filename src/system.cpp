@@ -55,9 +55,11 @@ static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
 // init statics
-PButton System::myPButton_;
-bool    System::restart_requested_   = false;
-bool    System::test_set_all_active_ = false;
+PButton  System::myPButton_;
+bool     System::restart_requested_   = false;
+bool     System::test_set_all_active_ = false;
+uint32_t System::max_alloc_mem_;
+uint32_t System::heap_mem_;
 
 // find the index of the language
 // 0 = EN, 1 = DE, etc...
@@ -387,10 +389,13 @@ void System::start() {
         setCpuFrequencyMhz(160);
 #endif
     }
+
+    // get current memory values
     fstotal_ = LittleFS.totalBytes() / 1024; // read only once, it takes 500 ms to read
     psram_   = ESP.getPsramSize() / 1024;
     appused_ = ESP.getSketchSize() / 1024;
     appfree_ = ESP.getFreeSketchSpace() / 1024 - appused_;
+    refreshHeapMem(); // refresh free heap and max alloc heap
 #endif
 
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
@@ -621,8 +626,8 @@ bool System::heartbeat_json(JsonObject & output) {
     }
 
 #ifndef EMSESP_STANDALONE
-    output["freemem"]   = ESP.getFreeHeap() / 1024;     // kilobytes
-    output["max_alloc"] = ESP.getMaxAllocHeap() / 1024; // kilobytes
+    output["freemem"]   = getHeapMem();
+    output["max_alloc"] = getMaxAllocMem();
 #endif
 
 #ifndef EMSESP_STANDALONE
@@ -642,6 +647,8 @@ void System::send_heartbeat() {
     if (!Mqtt::connected()) {
         return;
     }
+
+    refreshHeapMem(); // refresh free heap and max alloc heap
 
     StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> doc;
     JsonObject                                  json = doc.to<JsonObject>();
@@ -879,13 +886,15 @@ void System::show_users(uuid::console::Shell & shell) {
 }
 
 void System::show_system(uuid::console::Shell & shell) {
+    refreshHeapMem(); // refresh free heap and max alloc heap
+
     shell.println("System:");
     shell.printfln(" Board profile: %s", board_profile().c_str());
     shell.printfln(" Uptime: %s", uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
 #ifndef EMSESP_STANDALONE
     shell.printfln(" SDK version: %s", ESP.getSdkVersion());
     shell.printfln(" CPU frequency: %lu MHz", ESP.getCpuFreqMHz());
-    shell.printfln(" Free heap/Max alloc: %lu KB / %lu KB", ((uint32_t)ESP.getFreeHeap() / 1024), (ESP.getMaxAllocHeap() / 1024));
+    shell.printfln(" Free heap/Max alloc: %lu KB / %lu KB", getHeapMem(), getMaxAllocMem());
     shell.printfln(" App used/free: %lu KB / %lu KB", appUsed(), appFree());
     uint32_t FSused = LittleFS.usedBytes() / 1024;
     shell.printfln(" FS used/free: %lu KB / %lu KB", FSused, FStotal() - FSused);
@@ -1140,9 +1149,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
-    node["free mem"]  = ESP.getFreeHeap() / 1024;     // kilobytes
-    node["max alloc"] = ESP.getMaxAllocHeap() / 1024; // kilobytes
-    node["free app"]  = EMSESP::system_.appFree();    // kilobytes
+    node["free mem"]  = getHeapMem();
+    node["max alloc"] = getMaxAllocMem();
+    node["free app"]  = EMSESP::system_.appFree(); // kilobytes
 #endif
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 

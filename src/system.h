@@ -230,6 +230,20 @@ class System {
         return appused_;
     }
 
+    // memory in kb
+    static uint32_t getMaxAllocMem() {
+        return max_alloc_mem_;
+    }
+    static uint32_t getHeapMem() {
+        return heap_mem_;
+    }
+    static void refreshHeapMem() {
+#ifndef EMSESP_STANDALONE
+        max_alloc_mem_ = ESP.getMaxAllocHeap() / 1024;
+        heap_mem_      = ESP.getFreeHeap() / 1024;
+#endif
+    }
+
     static bool test_set_all_active() {
         return test_set_all_active_;
     }
@@ -241,6 +255,8 @@ class System {
     static uuid::log::Logger logger_;
     static bool              restart_requested_;
     static bool              test_set_all_active_; // force all entities in a device to have a value
+    static uint32_t          max_alloc_mem_;
+    static uint32_t          heap_mem_;
 
     // button
     static PButton            myPButton_; // PButton instance
