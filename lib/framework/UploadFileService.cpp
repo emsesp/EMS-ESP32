@@ -70,6 +70,11 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
                 handleError(request, 503); // service unavailable
                 return;
             }
+#elif CONFIG_IDF_TARGET_ESP32S3
+            if (len > 12 && (data[0] != 0xE9 || data[12] != 3)) {
+                handleError(request, 503); // service unavailable
+                return;
+            }
 #endif
             // it's firmware - initialize the ArduinoOTA updater
             if (Update.begin(fsize)) {
