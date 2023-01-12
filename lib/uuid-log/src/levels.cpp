@@ -25,17 +25,7 @@ namespace uuid {
 namespace log {
 
 std::vector<Level> levels() {
-    return {Level::OFF,
-            Level::EMERG,
-            Level::ALERT,
-            Level::CRIT,
-            Level::ERR,
-            Level::WARNING,
-            Level::NOTICE,
-            Level::INFO,
-            Level::DEBUG,
-            Level::TRACE,
-            Level::ALL};
+    return {Level::OFF, Level::EMERG, Level::ALERT, Level::CRIT, Level::ERR, Level::WARNING, Level::NOTICE, Level::INFO, Level::DEBUG, Level::TRACE, Level::ALL};
 }
 
 } // namespace log
