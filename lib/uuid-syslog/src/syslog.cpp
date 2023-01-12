@@ -324,7 +324,7 @@ void SyslogService::loop() {
 }
 
 bool SyslogService::can_transmit() {
-    // TODO add this like in v3.5?
+    // TODO removed this, it was in <v3.5. Do we need to add it back? not sure what it did.
     /*
     if (!host_.empty() && (uint32_t)ip_ == 0) {
         WiFi.hostByName(host_.c_str(), ip_);
@@ -452,10 +452,9 @@ bool SyslogService::can_transmit() {
 bool SyslogService::transmit(const QueuedLogMessage & message) {
     struct tm tm;
 
-    // Changes for EMS-ESP by MichaelDvP
-    // TODO add this like in v3.5?
-    // int8_t tzh = 0;
-    // int8_t tzm = 0;
+    // Changes for EMS-ESP
+    int8_t tzh = 0;
+    int8_t tzm = 0;
 
     tm.tm_year = 0;
     if (message.time_.tv_sec != (time_t)-1) {
@@ -465,9 +464,9 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
         int16_t diff = 60 * (tm.tm_hour - utc.tm_hour) + tm.tm_min - utc.tm_min;
         diff         = diff > 720 ? diff - 1440 : diff < -720 ? diff + 1440 : diff;
 
-        // From previous EMS-ESP. Need to check if still needed.
-        // tzh          = diff / 60;
-        // tzm          = diff < 0 ? (0 - diff) % 60 : diff % 60;
+        // added for EMS-ESP
+        tzh = diff / 60;
+        tzm = diff < 0 ? (0 - diff) % 60 : diff % 60;
     }
 
     if (udp_.beginPacket(ip_, port_) != 1) {
@@ -494,30 +493,29 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
     udp_.printf("<%u>1 ", (uint8_t)(message.content_->facility * 8U) + std::min(7U, (unsigned int)message.content_->level));
 
     if (tm.tm_year != 0) {
-        udp_.printf_P("%04u-%02u-%02uT%02u:%02u:%02u.%06luZ",
-                      tm.tm_year + 1900,
-                      tm.tm_mon + 1,
-                      tm.tm_mday,
-                      tm.tm_hour,
-                      tm.tm_min,
-                      tm.tm_sec,
-                      (unsigned long)message.time_.tv_usec);
-
-        // udp_.printf("%04u-%02u-%02uT%02u:%02u:%02u.%06u%+02d:%02d",
+        // udp_.printf_P("%04u-%02u-%02uT%02u:%02u:%02u.%06luZ",
         //               tm.tm_year + 1900,
         //               tm.tm_mon + 1,
         //               tm.tm_mday,
         //               tm.tm_hour,
         //               tm.tm_min,
         //               tm.tm_sec,
-        //               (unsigned long)message.time_.tv_usec,
-        //               tzh,
-        //               tzm);
+        //               (unsigned long)message.time_.tv_usec);
+
+        // added for EMS-ESP
+        udp_.printf("%04u-%02u-%02uT%02u:%02u:%02u.%06lu%+02d:%02d",
+                    tm.tm_year + 1900,
+                    tm.tm_mon + 1,
+                    tm.tm_mday,
+                    tm.tm_hour,
+                    tm.tm_min,
+                    tm.tm_sec,
+                    (unsigned long)message.time_.tv_usec,
+                    tzh,
+                    tzm);
     } else {
         udp_.print('-');
     }
-
-    // Changes for EMS-ESP by MichaelDvP
 
     udp_.printf_P(PSTR(" %s %s - - - "), hostname_.c_str(), (message.content_->name));
 
