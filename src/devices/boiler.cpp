@@ -477,12 +477,21 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               10,
                               1000);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &auxMaxTemp_,
+                              &auxMaxLimit_,
                               DeviceValueType::UINT,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
-                              FL_(auxMaxTemp),
+                              FL_(auxMaxLimit),
                               DeviceValueUOM::K,
-                              MAKE_CF_CB(set_auxMaxTemp),
+                              MAKE_CF_CB(set_auxMaxLimit),
+                              0,
+                              10);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxLimitStart_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(auxLimitStart),
+                              DeviceValueUOM::K,
+                              MAKE_CF_CB(set_auxLimitStart),
                               0,
                               10);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
@@ -1488,7 +1497,8 @@ void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram
     has_update(telegram, auxHeaterOff_, 2);
     has_update(telegram, auxHeatMode_, 4); // eco/comfort
     has_update(telegram, tempParMode_, 5);
-    has_update(telegram, auxMaxTemp_, 14);     // is * 10
+    has_update(telegram, auxMaxLimit_, 14);    // is * 10
+    has_update(telegram, auxLimitStart_, 15);  // is * 10
     has_update(telegram, auxHeaterDelay_, 16); // is / 10
 }
 
@@ -2374,10 +2384,10 @@ bool Boiler::set_auxHeatMode(const char * value, const int8_t id) {
     return false;
 }
 
-bool Boiler::set_auxMaxTemp(const char * value, const int8_t id) {
+bool Boiler::set_auxLimit(const char * value, const int8_t id) {
     float v;
     if (Helpers::value2float(value, v)) {
-        write_command(0x491, 14, (uint8_t)(v * 10), 0x491);
+        write_command(0x491, id, (uint8_t)(v * 10), 0x491);
         return true;
     }
     return false;

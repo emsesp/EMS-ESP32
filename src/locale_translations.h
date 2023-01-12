@@ -403,7 +403,8 @@ MAKE_PSTR_LIST(wwEcoOffTemp, "wwecooff", "eco switch off", "ECO Ausschalttemp", 
 MAKE_PSTR_LIST(wwEcoPlusOffTemp, "wwecoplusoff", "eco+ switch off", "ECO+ Ausschalttemp", "Eco+ Uitschakeltemp.", "Eko+ avstängningstemp.", "temperatura wyłączania w trybie eko+", "", "Eco+ Temp. d'arrêt") // TODO translate
 
 MAKE_PSTR_LIST(auxHeatMode, "auxheatrmode", "aux heater mode", "Modus Zusatzheizer", "", "", "", "", "") // TODO translate
-MAKE_PSTR_LIST(auxMaxTemp, "auxmaxtemp", "aux heater max temperature", "Zusatzheizer Maximaltemp.", "", "", "", "", "") // TODO translate
+MAKE_PSTR_LIST(auxMaxLimit, "auxmaxlimit", "aux heater max limit", "Zusatzheizer max. Grenze", "", "", "", "", "") // TODO translate
+MAKE_PSTR_LIST(auxLimitStart, "auxlimitstart", "aux heater limit start", "Zusatzheizer Grenze Start", "", "", "", "", "") // TODO translate
 MAKE_PSTR_LIST(manDefrost, "mandefrost", "manual defrost", "Manuelle Enteisung", "", "", "", "", "") // TODO translate
 MAKE_PSTR_LIST(pvCooling, "pvcooling", "Cooling only with PV", "Kühlen nur mit PV", "", "", "", "", "") // TODO translate
 MAKE_PSTR_LIST(hpCircPumpWw, "hpcircpumpww", "circulation pump available during dhw", "", "", "", "", "", "") // TODO translate
