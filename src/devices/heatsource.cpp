@@ -74,6 +74,12 @@ Heatsource::Heatsource(uint8_t device_type, uint8_t device_id, uint8_t product_i
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(aCylBottomTemp),
                               DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_AHS1 + ahs,
+                              &flueGasTemp_,
+                              DeviceValueType::SHORT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(flueGasTemp),
+                              DeviceValueUOM::DEGREES);
         // register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &valveByPass_, DeviceValueType::BOOL, nullptr, FL_(valveByPass), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &valveBuffer_, DeviceValueType::UINT, FL_(valveBuffer), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_AHS1 + ahs, &valveReturn_, DeviceValueType::UINT, FL_(valveReturn), DeviceValueUOM::PERCENT);
@@ -220,6 +226,7 @@ void Heatsource::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> tele
 void Heatsource::process_amTempMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, curFlowTemp_, 0); // TB4
     has_update(telegram, retTemp_, 2);     // TR2
+    has_update(telegram, flueGasTemp_, 4);
     has_update(telegram, aFlowTemp_, 6);
     has_update(telegram, aRetTemp_, 8);
     has_update(telegram, cylTopTemp_, 10);

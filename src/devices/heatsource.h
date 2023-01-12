@@ -44,6 +44,7 @@ class Heatsource : public EMSdevice {
     uint8_t  aPumpMod_;      // PR1 - percent
     uint8_t  valveBuffer_;   // VB1
     uint8_t  valveReturn_;   // VR1
+    uint16_t flueGasTemp_;
     // uint8_t valveBypass_;   // VR2 position unknown
     // uint8_t heatSource_;    // OEV
 

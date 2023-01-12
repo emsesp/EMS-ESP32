@@ -456,7 +456,7 @@ MAKE_PSTR_LIST(burner, "burner", "burner", "Brenner", "", "", "", "", "") // TOD
 MAKE_PSTR_LIST(heatRequest, "heatrequest", "heat request", "Wärmeanforderung", "", "", "", "", "") // TODO translate
 MAKE_PSTR_LIST(blockRemain, "blockremain", "remaining blocktime", "verbleibende Blockzeit", "", "", "", "", "") // TODO translate
 MAKE_PSTR_LIST(blockRemainWw, "blockremainww", "remaining blocktime dhw", "verbleibende Blockzeit WW", "", "", "", "", "") // TODO translate
-
+MAKE_PSTR_LIST(flueGasTemp, "fluegastemp", "flue gas temperature", "Abgastemperatur", "", "", "", "", "") // TODO translate
 
 MAKE_PSTR_LIST(vr2Config, "vr2config", "vr2 configuration", "VR2 Konfiguration", "VR2 configuratie", "VR2 Konfiguration", "konfiguracja VR2", "vr2 konfigurasjon", "configuration vr2")
 MAKE_PSTR_LIST(ahsActivated, "ahsactivated", "alternate heat source activation", "Alt. Wärmeerzeuger aktiviert", "Altenatieve warmtebron geactiveerd", "Alternativ värmekälla aktivering", "aktywacja alternatywnego źródła ciepła", "alternativ varmekilde aktivering", "activation source chaleur alternative")
