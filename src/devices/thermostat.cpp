@@ -403,9 +403,9 @@ void Thermostat::add_ha_climate(std::shared_ptr<HeatingCircuit> hc) const {
 
     if (Helpers::hasValue(hc->selTemp) && is_readable(&hc->selTemp)) {
         if (Helpers::hasValue(hc->roomTemp) && is_readable(&hc->roomTemp)) {
-            hc->climate = 1;
+            hc->climate = 1; // use roomTemp as we have a sensor
         } else {
-            hc->climate = 0;
+            hc->climate = 0; // use selTemp, as there is no sensor present in the thermostat
         }
     } else {
         hc->climate = EMS_VALUE_UINT_NOTSET;
