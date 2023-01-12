@@ -33,7 +33,7 @@
 // if there is no translation, it will default to en
 
 // device types, as display in Web and Console
-// TODO translation
+// TODO translate
 MAKE_PSTR_LIST(boiler_device, "Boiler", "Kessel", "Boiler")
 MAKE_PSTR_LIST(thermostat_device, "Thermostat", "Thermostat", "Thermostaat")
 MAKE_PSTR_LIST(heatpump_device, "Heat Pump", "Wärmepumpe", "Warmtepomp")
