@@ -27,7 +27,6 @@
  */
 
 // common words
-MAKE_PSTR_WORD(debug)
 MAKE_PSTR_WORD(exit)
 MAKE_PSTR_WORD(help)
 MAKE_PSTR_WORD(log)
@@ -219,8 +218,8 @@ MAKE_PSTR(response, "response")
 MAKE_PSTR(tag_boiler_data_ww_mqtt, "ww")
 MAKE_PSTR(tag_device_data_ww_mqtt, "")
 
-// Home Assistant - this is special and has no translations
-MAKE_PSTR_LIST(climate, "HA climate config creation") // TODO needs a better name!
+// Discovery/Home Assistant - this is special device entity for 'climate', and has no translations
+MAKE_PSTR_LIST(climate, "Discovery current room temperature")
 
 // syslog
 MAKE_PSTR_LIST(list_syslog_level, "off", "emerg", "alert", "crit", "error", "warn", "notice", "info", "debug", "trace", "all")
