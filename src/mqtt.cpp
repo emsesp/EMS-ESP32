@@ -867,7 +867,9 @@ void Mqtt::process_queue() {
               message->payload.size(),
               packet_id);
 #if defined(EMSESP_DEBUG)
-    LOG_DEBUG("Payload:%s", message->payload.c_str()); // extra message for #784
+    if (!message->payload.empty()) {
+        LOG_DEBUG("Payload:%s", message->payload.c_str()); // extra message for #784
+    }
 #endif
     if (packet_id == 0) {
         // it failed. if we retried n times, give up. remove from queue
