@@ -157,8 +157,8 @@ void Shell::loop_normal() {
         // Interrupt (^C)
         line_buffer_.clear();
         println();
-        cursor_           = 0;
-        line_no_          = 0;
+        cursor_  = 0;
+        line_no_ = 0;
         // prompt_displayed_ = false;
         // display_prompt();
         break;
@@ -417,7 +417,7 @@ void Shell::loop_delay() {
 
         function_copy(*this);
 
-        // TODO comment this like in v3.5? display_prompt
+        // TODO comment this block out like we had < v3.5?
         if (running()) {
             display_prompt();
         }
@@ -448,7 +448,7 @@ void Shell::loop_blocking() {
             stop();
         }
 
-        // TODO comment this like in v3.5? display_prompt
+        // TODO comment this block out like we had < v3.5?
         if (running()) {
             display_prompt();
         }
@@ -561,11 +561,11 @@ void Shell::process_command() {
         }
     }
 
-    // TODO comment this like in v3.5? display_prompt
+    // TODO comment this block out like we had < v3.5?
     if (running()) {
         display_prompt();
     }
-    ::yield();
+    // ::yield();
 }
 
 void Shell::process_completion() {
