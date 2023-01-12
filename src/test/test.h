@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_DEBUG) || defined(EMSESP_STANDALONE)
 
 #ifndef EMSESP_TEST_H
 #define EMSESP_TEST_H
@@ -30,7 +30,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "solar"
 // #define EMSESP_DEBUG_DEFAULT "web"
 // #define EMSESP_DEBUG_DEFAULT "mqtt"
-// #define EMSESP_DEBUG_DEFAULT "general"
+#define EMSESP_DEBUG_DEFAULT "general"
 // #define EMSESP_DEBUG_DEFAULT "boiler"
 // #define EMSESP_DEBUG_DEFAULT "mqtt2"
 // #define EMSESP_DEBUG_DEFAULT "mqtt_nested"
@@ -52,7 +52,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "api_wwmode"
 // #define EMSESP_DEBUG_DEFAULT "custom"
 // #define EMSESP_DEBUG_DEFAULT "entity_dump"
-#define EMSESP_DEBUG_DEFAULT "memory"
+// #define EMSESP_DEBUG_DEFAULT "memory"
 
 class Test {
   public:
@@ -64,11 +64,8 @@ class Test {
     static void uart_telegram(const char * rx_data);
     static void uart_telegram_withCRC(const char * rx_data);
     static void add_device(uint8_t device_id, uint8_t product_id);
-    static void debug(uuid::console::Shell & shell, const std::string & command);
     static void refresh();
-#ifndef EMSESP_STANDALONE
     static void listDir(fs::FS & fs, const char * dirname, uint8_t levels);
-#endif
 };
 
 } // namespace emsesp

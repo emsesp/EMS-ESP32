@@ -154,18 +154,6 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   Test::run_test(shell, arguments[0].c_str(), arguments[1].c_str());
                               }
                           });
-
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::USER,
-                          string_vector{F_(debug)},
-                          string_vector{F_(name_optional)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) {
-                              if (arguments.empty()) {
-                                  Test::debug(shell, "default");
-                              } else {
-                                  Test::debug(shell, arguments.front());
-                              }
-                          });
 #endif
 
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{F_(su)}, [=](Shell & shell, const std::vector<std::string> & arguments) {
