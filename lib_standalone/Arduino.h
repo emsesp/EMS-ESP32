@@ -90,80 +90,79 @@ int vsnprintf_P(char * str, size_t size, const char * format, va_list ap);
 
 class Print;
 
-class NativeConsole: public Stream {
-public:
-	void begin(unsigned long baud __attribute__((unused))) {
+class NativeConsole : public Stream {
+  public:
+    void begin(unsigned long baud __attribute__((unused))) {
+    }
 
-	}
+    int available() override {
+        if (peek_ != -1)
+            return 1;
 
-	int available() override {
-		if (peek_ != -1)
-			return 1;
+        struct timeval timeout;
+        fd_set         rfds;
 
-		struct timeval timeout;
-		fd_set rfds;
+        FD_ZERO(&rfds);
+        FD_SET(STDIN_FILENO, &rfds);
 
-		FD_ZERO(&rfds);
-		FD_SET(STDIN_FILENO, &rfds);
+        timeout.tv_sec  = 0;
+        timeout.tv_usec = 1000;
 
-		timeout.tv_sec = 0;
-		timeout.tv_usec = 1000;
+        return ::select(STDIN_FILENO + 1, &rfds, NULL, NULL, &timeout) > 0 ? 1 : 0;
+    }
 
-		return ::select(STDIN_FILENO + 1, &rfds, NULL, NULL, &timeout) > 0 ? 1 : 0;
-	}
+    int read() override {
+        if (peek_ != -1) {
+            uint8_t c = peek_;
+            peek_     = -1;
+            return c;
+        }
 
-	int read() override {
-		if (peek_ != -1) {
-			uint8_t c = peek_;
-			peek_ = -1;
-			return c;
-		}
+        if (available() > 0) {
+            uint8_t c;
+            int     ret = ::read(STDIN_FILENO, &c, 1);
 
-		if (available() > 0) {
-			uint8_t c;
-			int ret = ::read(STDIN_FILENO, &c, 1);
+            if (ret == 0) {
+                /* Ctrl+D */
+                return '\x04';
+            } else if (ret == 1) {
+                /* Remap Ctrl+Z to Ctrl-\ */
+                if (c == '\x1A')
+                    c = '\x1C';
+                return c;
+            } else {
+                exit(1);
+            }
+        }
 
-			if (ret == 0) {
-				/* Ctrl+D */
-				return '\x04';
-			} else if (ret == 1) {
-				/* Remap Ctrl+Z to Ctrl-\ */
-				if (c == '\x1A')
-					c = '\x1C';
-				return c;
-			} else {
-				exit(1);
-			}
-		}
+        return -1;
+    }
 
-		return -1;
-	}
+    int peek() override {
+        if (peek_ == -1)
+            peek_ = read();
 
-	int peek() override {
-		if (peek_ == -1)
-			peek_ = read();
+        return peek_;
+    }
 
-		return peek_;
-	}
+    size_t write(uint8_t c) override {
+        if (::write(STDOUT_FILENO, &c, 1) == 1) {
+            return 1;
+        } else {
+            exit(1);
+        }
+    }
 
-	size_t write(uint8_t c) override {
-		if (::write(STDOUT_FILENO, &c, 1) == 1) {
-			return 1;
-		} else {
-			exit(1);
-		}
-	}
+    size_t write(const uint8_t * buffer, size_t size) {
+        if (::write(STDOUT_FILENO, buffer, size) == (ssize_t)size) {
+            return size;
+        } else {
+            exit(1);
+        }
+    }
 
-	size_t write(const uint8_t *buffer, size_t size) {
-		if (::write(STDOUT_FILENO, buffer, size) == (ssize_t)size) {
-			return size;
-		} else {
-			exit(1);
-		}
-	}
-
-private:
-	int peek_ = -1;
+  private:
+    int peek_ = -1;
 };
 
 #include "Network.h"
