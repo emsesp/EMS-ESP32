@@ -140,6 +140,8 @@ bool System::command_publish(const char * value, const int8_t id) {
 }
 
 // syslog level
+// commenting this out - really silly having a dedicated API to change the log level of syslog
+/*
 bool System::command_syslog_level(const char * value, const int8_t id) {
     uint8_t s = 0xff;
     if (Helpers::value2enum(value, s, FL_(list_syslog_level))) {
@@ -160,6 +162,7 @@ bool System::command_syslog_level(const char * value, const int8_t id) {
     }
     return false;
 }
+*/
 
 // watch
 bool System::command_watch(const char * value, const int8_t id) {
@@ -239,9 +242,10 @@ void System::syslog_init() {
         syslog_port_          = settings.syslog_port;
     });
 #ifndef EMSESP_STANDALONE
-    if (syslog_enabled_) {
+    if (!syslog_.started()) {
         // start & configure syslog
-        if (!was_enabled) {
+        // if (!was_enabled) {
+        if (!syslog_.started()) {
             syslog_.start();
             EMSESP::logger().info("Starting Syslog");
         }
@@ -257,7 +261,7 @@ void System::syslog_init() {
         syslog_.hostname(hostname().c_str());
 
         // register the command
-        Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, FL_(changeloglevel_cmd), CommandFlag::ADMIN_ONLY);
+        // Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, FL_(changeloglevel_cmd), CommandFlag::ADMIN_ONLY);
 
     } else if (was_enabled) {
         // in case service is still running, this flushes the queue
@@ -265,7 +269,7 @@ void System::syslog_init() {
         EMSESP::logger().info("Stopping Syslog");
         syslog_.log_level((uuid::log::Level)-1);
         syslog_.mark_interval(0);
-        // syslog_.destination("");
+        // syslog_.destination(""); // TODO do we need to add this back?
     }
 
     if (Mqtt::publish_single()) {
