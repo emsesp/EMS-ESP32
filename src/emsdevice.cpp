@@ -477,19 +477,19 @@ void EMSdevice::add_device_value(uint8_t               tag,
     if (type == DeviceValueType::STRING) {
         *(char *)(value_p) = {'\0'}; // this is important for string functions like strlen() to work later
     } else if (type == DeviceValueType::INT) {
-        *(int8_t *)(value_p) = System::test_set_all_active() ? 11 : EMS_VALUE_DEFAULT_INT;
+        *(int8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_INT_DUMMY : EMS_VALUE_DEFAULT_INT;
     } else if (type == DeviceValueType::UINT) {
-        *(uint8_t *)(value_p) = System::test_set_all_active() ? -12 : EMS_VALUE_DEFAULT_UINT;
+        *(uint8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_UINT_DUMMY : EMS_VALUE_DEFAULT_UINT;
     } else if (type == DeviceValueType::SHORT) {
-        *(int16_t *)(value_p) = System::test_set_all_active() ? -1234 : EMS_VALUE_DEFAULT_SHORT;
+        *(int16_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_SHORT_DUMMY : EMS_VALUE_DEFAULT_SHORT;
     } else if (type == DeviceValueType::USHORT) {
-        *(uint16_t *)(value_p) = System::test_set_all_active() ? 1234 : EMS_VALUE_DEFAULT_USHORT;
+        *(uint16_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_USHORT_DUMMY : EMS_VALUE_DEFAULT_USHORT;
     } else if ((type == DeviceValueType::ULONG) || (type == DeviceValueType::TIME)) {
-        *(uint32_t *)(value_p) = System::test_set_all_active() ? 12356 : EMS_VALUE_DEFAULT_ULONG;
+        *(uint32_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_ULONG_DUMMY : EMS_VALUE_DEFAULT_ULONG;
     } else if (type == DeviceValueType::BOOL) {
-        *(int8_t *)(value_p) = System::test_set_all_active() ? 1 : EMS_VALUE_DEFAULT_BOOL; // bool is uint8_t, but other initial value
+        *(int8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_BOOL_DUMMY : EMS_VALUE_DEFAULT_BOOL; // bool is uint8_t, but other initial value
     } else if (type == DeviceValueType::ENUM) {
-        *(uint8_t *)(value_p) = System::test_set_all_active() ? 1 : EMS_VALUE_DEFAULT_ENUM; // enums behave as uint8_t
+        *(uint8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_ENUM_DUMMY : EMS_VALUE_DEFAULT_ENUM; // enums behave as uint8_t
     }
 
     uint8_t     state           = DeviceValueState::DV_DEFAULT; // determine state
