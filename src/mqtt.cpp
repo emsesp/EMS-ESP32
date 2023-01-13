@@ -1003,7 +1003,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         if (EMSdevice::tag_to_string(tag).empty()) {
             snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());
         } else {
-            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag).c_str(), Helpers::toLower(uniq_s).c_str());
+            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag, false).c_str(), Helpers::toLower(uniq_s).c_str());
         }
     }
 
