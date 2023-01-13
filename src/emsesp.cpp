@@ -1415,12 +1415,6 @@ void EMSESP::start() {
     }
 #endif
 
-#ifndef EMSESP_STANDALONE
-    // start telnet
-    telnet_.default_write_timeout(1000);
-    telnet_.start();
-#endif
-
 // do a quick scan of the filesystem to see if we have a /config folder
 // so we know if this is a new install or not
 #ifndef EMSESP_STANDALONE
@@ -1504,8 +1498,9 @@ void EMSESP::loop() {
     esp8266React.loop(); // web services
     system_.loop();      // does LED and checks system health, and syslog service
 
-    // if we're doing an OTA upload, skip MQTT and EMS
+    // if we're doing an OTA upload, skip everything except from console refresh
     if (!system_.upload_status()) {
+        // service loops
         webLogService.loop(); // log in Web UI
         rxservice_.loop();    // process any incoming Rx telegrams
         shower_.loop();       // check for shower on/off
@@ -1526,7 +1521,7 @@ void EMSESP::loop() {
     }
 #endif
 
-    Shell::loop_all(); // consoles
+    Shell::loop_all();
 }
 
 } // namespace emsesp
