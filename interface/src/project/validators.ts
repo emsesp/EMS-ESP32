@@ -76,7 +76,7 @@ export const createSettingsValidator = (settings: Settings) =>
       ],
       syslog_mark_interval: [
         { required: true, message: 'Mark interval is required' },
-        { type: 'number', min: 0, max: 10, message: ' must be between 0 and 10' }
+        { type: 'number', min: 0, max: 10, message: 'Must be between 0 and 10' }
       ]
     }),
     ...(settings.shower_alert && {
