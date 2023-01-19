@@ -1,4 +1,4 @@
-import React, { FC, useContext } from 'react';
+import { FC, useContext } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { Tab } from '@mui/material';
