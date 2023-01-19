@@ -148,14 +148,14 @@ const SettingsCustomization: FC = () => {
     }
   }, [LL]);
 
-  const setInitialMask = (data: DeviceEntity[]) => {
+  const setOriginalSettings = (data: DeviceEntity[]) => {
     setDeviceEntities(data.map((de) => ({ ...de, o_m: de.m, o_cn: de.cn, o_mi: de.mi, o_ma: de.ma })));
   };
 
   const fetchDeviceEntities = async (unique_id: number) => {
     try {
       const new_deviceEntities = (await EMSESP.readDeviceEntities({ id: unique_id })).data;
-      setInitialMask(new_deviceEntities);
+      setOriginalSettings(new_deviceEntities);
     } catch (error) {
       setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
@@ -249,13 +249,17 @@ const SettingsCustomization: FC = () => {
     }
   };
 
+  function hasEntityChanged(de: DeviceEntity) {
+    return (de?.cn || '') !== (de?.o_cn || '') || de.m !== de.o_m || de.ma !== de.o_ma || de.mi !== de.o_mi;
+  }
+
   const getChanges = () => {
     if (!deviceEntities || selectedDevice === -1) {
       return [];
     }
 
     return deviceEntities
-      .filter((de) => de.m !== de.o_m || de.cn !== de.o_cn || de.ma !== de.o_ma || de.mi !== de.o_mi)
+      .filter((de) => hasEntityChanged(de))
       .map(
         (new_de) =>
           new_de.m.toString(16).padStart(2, '0') +
@@ -291,7 +295,7 @@ const SettingsCustomization: FC = () => {
       } catch (error) {
         enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       }
-      setInitialMask(deviceEntities);
+      setOriginalSettings(deviceEntities);
     }
   };
 

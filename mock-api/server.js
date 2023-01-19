@@ -354,7 +354,7 @@ settings = {
   bool_format: 1,
   bool_dashboard: 1,
   enum_format: 1,
-  fahrenheit: false
+  fahrenheit: false,
 }
 
 const emsesp_devices = {
@@ -969,6 +969,7 @@ function updateMask(entity, de, dd) {
 
       // see if the custom name has changed
       const old_custom_name = dd.data[dd_objIndex].cn
+      console.log('comparing old ' + old_custom_name + ' with new ' + new_custom_name)
       if (old_custom_name !== new_custom_name) {
         changed = true
         new_fullname = new_custom_name
@@ -984,6 +985,7 @@ function updateMask(entity, de, dd) {
         de[de_objIndex].m = current_mask
         de[de_objIndex].cn = new_fullname
         dd.data[dd_objIndex].id = current_mask.toString(16).padStart(2, '0') + new_fullname
+        dd.data[dd_objIndex].cn = new_fullname
       }
 
       console.log('new dd:')
