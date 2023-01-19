@@ -6,6 +6,7 @@ import { useSnackbar } from 'notistack';
 import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider, InputAdornment } from '@mui/material';
 
 import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
 import { validate } from '../validators';
@@ -19,7 +20,7 @@ import {
   ButtonRow,
   MessageBox
 } from '../components';
-import { numberValue, extractErrorMessage, updateValue, useRest } from '../utils';
+import { numberValue, extractErrorMessage, updateValueDirty, useRest } from '../utils';
 
 import * as EMSESP from './api';
 import { Settings, BOARD_PROFILES } from './types';
@@ -36,7 +37,18 @@ export function boardProfileSelectItems() {
 }
 
 const SettingsApplication: FC = () => {
-  const { loadData, saveData, saving, setData, data, errorMessage, restartNeeded } = useRest<Settings>({
+  const {
+    loadData,
+    saveData,
+    saving,
+    setData,
+    data,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    errorMessage,
+    restartNeeded
+  } = useRest<Settings>({
     read: EMSESP.readSettings,
     update: EMSESP.writeSettings
   });
@@ -46,7 +58,7 @@ const SettingsApplication: FC = () => {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const updateFormValue = updateValue(setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
   const [processingBoard, setProcessingBoard] = useState<boolean>(false);
@@ -431,7 +443,7 @@ const SettingsApplication: FC = () => {
                     endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
                   }}
                   variant="outlined"
-                  value={data.shower_alert_trigger}
+                  value={numberValue(data.shower_alert_trigger)}
                   type="number"
                   onChange={updateFormValue}
                   size="small"
@@ -447,7 +459,7 @@ const SettingsApplication: FC = () => {
                     endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
                   }}
                   variant="outlined"
-                  value={data.shower_alert_coldshot}
+                  value={numberValue(data.shower_alert_coldshot)}
                   type="number"
                   onChange={updateFormValue}
                   size="small"
@@ -566,7 +578,7 @@ const SettingsApplication: FC = () => {
                 label="Port"
                 fullWidth
                 variant="outlined"
-                value={data.syslog_port}
+                value={numberValue(data.syslog_port)}
                 type="number"
                 onChange={updateFormValue}
                 margin="normal"
@@ -603,7 +615,7 @@ const SettingsApplication: FC = () => {
                 }}
                 fullWidth
                 variant="outlined"
-                value={data.syslog_mark_interval}
+                value={numberValue(data.syslog_mark_interval)}
                 type="number"
                 onChange={updateFormValue}
                 margin="normal"
@@ -619,8 +631,19 @@ const SettingsApplication: FC = () => {
             </Button>
           </MessageBox>
         )}
-        {!restartNeeded && (
+
+        {!restartNeeded && dirtyFlags && dirtyFlags.length !== 0 && (
           <ButtonRow>
+            <Button
+              startIcon={<CancelIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={() => loadData()}
+            >
+              {LL.CANCEL()}
+            </Button>
             <Button
               startIcon={<SaveIcon />}
               disabled={saving}
@@ -629,7 +652,7 @@ const SettingsApplication: FC = () => {
               type="submit"
               onClick={validateAndSubmit}
             >
-              {LL.SAVE()}
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
             </Button>
           </ButtonRow>
         )}

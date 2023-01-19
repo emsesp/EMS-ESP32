@@ -634,7 +634,7 @@ const DashboardData: FC = () => {
               onClick={() => sendSensor()}
               color="warning"
             >
-              {LL.SAVE()}
+              {LL.UPDATE()}
             </Button>
           </DialogActions>
         </Dialog>
@@ -1056,7 +1056,7 @@ const DashboardData: FC = () => {
                 <ValidatedTextField
                   name="g"
                   label="GPIO"
-                  value={analog.g}
+                  value={numberValue(analog.g)}
                   fullWidth
                   type="number"
                   variant="outlined"
@@ -1235,7 +1235,7 @@ const DashboardData: FC = () => {
               onClick={() => sendAnalog()}
               color="warning"
             >
-              {LL.SAVE()}
+              {LL.UPDATE()}
             </Button>
           </DialogActions>
         </Dialog>

@@ -48,6 +48,8 @@ const sv: Translation = {
   RESET: 'Nollsäll',
   SEND: 'Skicka',
   SAVE: 'Spara',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Ta bort',
   PROBLEM_UPDATING: 'Problem vid uppdatering',
   PROBLEM_LOADING: 'Problem vid hämtning',

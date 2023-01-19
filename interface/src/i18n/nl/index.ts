@@ -48,6 +48,8 @@ const nl: Translation = {
   RESET: 'Reset',
   SEND: 'Verzenden',
   SAVE: 'Opslaan',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Verwijderen',
   PROBLEM_UPDATING: 'Probleem met updaten',
   PROBLEM_LOADING: 'Probleem met laden',

@@ -3,6 +3,7 @@ import { ValidateFieldsError } from 'async-validator';
 
 import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 import { createMqttSettingsValidator, validate } from '../../validators';
 import {
@@ -14,22 +15,23 @@ import {
   ValidatedTextField
 } from '../../components';
 import { MqttSettings } from '../../types';
-import { numberValue, updateValue, useRest } from '../../utils';
+import { numberValue, updateValueDirty, useRest } from '../../utils';
 import * as MqttApi from '../../api/mqtt';
 
 import { useI18nContext } from '../../i18n/i18n-react';
 
 const MqttSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<MqttSettings>({
-    read: MqttApi.readMqttSettings,
-    update: MqttApi.updateMqttSettings
-  });
+  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, saveData, errorMessage } =
+    useRest<MqttSettings>({
+      read: MqttApi.readMqttSettings,
+      update: MqttApi.updateMqttSettings
+    });
 
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValue(setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
 
   const content = () => {
     if (!data) {
@@ -372,18 +374,31 @@ const MqttSettingsForm: FC = () => {
             />
           </Grid>
         </Grid>
-        <ButtonRow>
-          <Button
-            startIcon={<SaveIcon />}
-            disabled={saving}
-            variant="outlined"
-            color="primary"
-            type="submit"
-            onClick={validateAndSubmit}
-          >
-            {LL.SAVE()}
-          </Button>
-        </ButtonRow>
+
+        {dirtyFlags && dirtyFlags.length !== 0 && (
+          <ButtonRow>
+            <Button
+              startIcon={<CancelIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={() => loadData()}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              startIcon={<SaveIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={validateAndSubmit}
+            >
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
+            </Button>
+          </ButtonRow>
+        )}
       </>
     );
   };

@@ -48,6 +48,8 @@ const fr: Translation = {
   RESET: 'Réinitialiser',
   SEND: 'Envoyer',
   SAVE: 'Sauvegarder',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Enlever',
   PROBLEM_UPDATING: 'Problème lors de la mise à jour',
   PROBLEM_LOADING: 'Problème lors du chargement',

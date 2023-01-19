@@ -48,6 +48,8 @@ const no: Translation = {
   RESET: 'Nullstill',
   SEND: 'Send',
   SAVE: 'Lagre',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Fjern',
   PROBLEM_UPDATING: 'Problem med oppdatering',
   PROBLEM_LOADING: 'Problem med opplasting',

@@ -185,7 +185,7 @@ const ManageUsersForm: FC = () => {
               type="submit"
               onClick={onSubmit}
             >
-              {LL.SAVE()}
+              {LL.UPDATE()}
             </Button>
           </Box>
 

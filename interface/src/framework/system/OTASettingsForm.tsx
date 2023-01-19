@@ -2,6 +2,7 @@ import { FC, useState } from 'react';
 
 import { Button, Checkbox } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 import * as SystemApi from '../../api/system';
 import {
@@ -14,7 +15,7 @@ import {
 } from '../../components';
 
 import { OTASettings } from '../../types';
-import { numberValue, updateValue, useRest } from '../../utils';
+import { numberValue, updateValueDirty, useRest } from '../../utils';
 
 import { ValidateFieldsError } from 'async-validator';
 import { validate } from '../../validators';
@@ -23,14 +24,15 @@ import { OTA_SETTINGS_VALIDATOR } from '../../validators/system';
 import { useI18nContext } from '../../i18n/i18n-react';
 
 const OTASettingsForm: FC = () => {
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<OTASettings>({
-    read: SystemApi.readOTASettings,
-    update: SystemApi.updateOTASettings
-  });
+  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, saveData, errorMessage } =
+    useRest<OTASettings>({
+      read: SystemApi.readOTASettings,
+      update: SystemApi.updateOTASettings
+    });
 
   const { LL } = useI18nContext();
 
-  const updateFormValue = updateValue(setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
@@ -76,18 +78,30 @@ const OTASettingsForm: FC = () => {
           onChange={updateFormValue}
           margin="normal"
         />
-        <ButtonRow>
-          <Button
-            startIcon={<SaveIcon />}
-            disabled={saving}
-            variant="outlined"
-            color="primary"
-            type="submit"
-            onClick={validateAndSubmit}
-          >
-            {LL.SAVE()}
-          </Button>
-        </ButtonRow>
+        {dirtyFlags && dirtyFlags.length !== 0 && (
+          <ButtonRow>
+            <Button
+              startIcon={<CancelIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={() => loadData()}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              startIcon={<SaveIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={validateAndSubmit}
+            >
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
+            </Button>
+          </ButtonRow>
+        )}
       </>
     );
   };

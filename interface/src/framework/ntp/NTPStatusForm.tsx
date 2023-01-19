@@ -129,7 +129,7 @@ const NTPStatusForm: FC = () => {
           color="primary"
           autoFocus
         >
-          {LL.SAVE()}
+          {LL.UPDATE()}
         </Button>
       </DialogActions>
     </Dialog>

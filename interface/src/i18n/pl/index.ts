@@ -48,6 +48,8 @@ const pl: BaseTranslation = {
   RESET: 'Reset{{uj|owanie|}}',
   SEND: 'Wyślij',
   SAVE: 'Zapisz',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Usuń',
   PROBLEM_UPDATING: 'Problem z aktualizacją!',
   PROBLEM_LOADING: 'Problem z załadowaniem!',

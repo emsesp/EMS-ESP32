@@ -4,6 +4,7 @@ import { range } from 'lodash';
 
 import { Button, Checkbox, MenuItem } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 import { createAPSettingsValidator, validate } from '../../validators';
 import {
@@ -16,7 +17,7 @@ import {
 } from '../../components';
 
 import { APProvisionMode, APSettings } from '../../types';
-import { numberValue, updateValue, useRest } from '../../utils';
+import { numberValue, updateValueDirty, useRest } from '../../utils';
 import * as APApi from '../../api/ap';
 
 import { useI18nContext } from '../../i18n/i18n-react';
@@ -26,16 +27,17 @@ export const isAPEnabled = ({ provision_mode }: APSettings) => {
 };
 
 const APSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<APSettings>({
-    read: APApi.readAPSettings,
-    update: APApi.updateAPSettings
-  });
+  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, saveData, errorMessage } =
+    useRest<APSettings>({
+      read: APApi.readAPSettings,
+      update: APApi.updateAPSettings
+    });
 
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValue(setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
 
   const content = () => {
     if (!data) {
@@ -163,18 +165,30 @@ const APSettingsForm: FC = () => {
             />
           </>
         )}
-        <ButtonRow>
-          <Button
-            startIcon={<SaveIcon />}
-            disabled={saving}
-            variant="outlined"
-            color="primary"
-            type="submit"
-            onClick={validateAndSubmit}
-          >
-            {LL.SAVE()}
-          </Button>
-        </ButtonRow>
+        {dirtyFlags && dirtyFlags.length !== 0 && (
+          <ButtonRow>
+            <Button
+              startIcon={<CancelIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={() => loadData()}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              startIcon={<SaveIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={validateAndSubmit}
+            >
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
+            </Button>
+          </ButtonRow>
+        )}
       </>
     );
   };

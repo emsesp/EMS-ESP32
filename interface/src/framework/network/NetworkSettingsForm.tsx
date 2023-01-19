@@ -20,6 +20,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import LockIcon from '@mui/icons-material/Lock';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 import {
   BlockFormControlLabel,
@@ -32,7 +33,7 @@ import {
 } from '../../components';
 import { NetworkSettings } from '../../types';
 import * as NetworkApi from '../../api/network';
-import { numberValue, updateValue, useRest } from '../../utils';
+import { numberValue, updateValueDirty, useRest } from '../../utils';
 import * as EMSESP from '../../project/api';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
@@ -52,7 +53,18 @@ const WiFiSettingsForm: FC = () => {
 
   const [initialized, setInitialized] = useState(false);
   const [restarting, setRestarting] = useState(false);
-  const { loadData, saving, data, setData, saveData, errorMessage, restartNeeded } = useRest<NetworkSettings>({
+  const {
+    loadData,
+    saving,
+    data,
+    setData,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    saveData,
+    errorMessage,
+    restartNeeded
+  } = useRest<NetworkSettings>({
     read: NetworkApi.readNetworkSettings,
     update: NetworkApi.updateNetworkSettings
   });
@@ -78,7 +90,7 @@ const WiFiSettingsForm: FC = () => {
     }
   }, [initialized, setInitialized, data, setData, selectedNetwork]);
 
-  const updateFormValue = updateValue(setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
@@ -287,8 +299,19 @@ const WiFiSettingsForm: FC = () => {
             </Button>
           </MessageBox>
         )}
-        {!restartNeeded && (
+
+        {!restartNeeded && dirtyFlags && dirtyFlags.length !== 0 && (
           <ButtonRow>
+            <Button
+              startIcon={<CancelIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={() => loadData()}
+            >
+              {LL.CANCEL()}
+            </Button>
             <Button
               startIcon={<SaveIcon />}
               disabled={saving}
@@ -297,7 +320,7 @@ const WiFiSettingsForm: FC = () => {
               type="submit"
               onClick={validateAndSubmit}
             >
-              {LL.SAVE()}
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
             </Button>
           </ButtonRow>
         )}

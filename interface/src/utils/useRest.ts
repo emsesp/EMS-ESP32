@@ -16,16 +16,22 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const [saving, setSaving] = useState<boolean>(false);
   const [data, setData] = useState<D>();
+  const [saving, setSaving] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>();
   const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
 
+  const [origData, setOrigData] = useState<D>();
+  const [dirtyFlags, setDirtyFlags] = useState<string[]>();
+
   const loadData = useCallback(async () => {
     setData(undefined);
+    setDirtyFlags([]);
     setErrorMessage(undefined);
     try {
-      setData((await read()).data);
+      const fetch_data = (await read()).data;
+      setData(fetch_data);
+      setOrigData(fetch_data);
     } catch (error) {
       const message = extractErrorMessage(error, LL.PROBLEM_LOADING());
       enqueueSnackbar(message, { variant: 'error' });
@@ -66,5 +72,16 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     loadData();
   }, [loadData]);
 
-  return { loadData, saveData, saving, setData, data, errorMessage, restartNeeded } as const;
+  return {
+    loadData,
+    saveData,
+    saving,
+    setData,
+    data,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    errorMessage,
+    restartNeeded
+  } as const;
 };

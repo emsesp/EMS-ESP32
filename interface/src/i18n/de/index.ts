@@ -15,6 +15,8 @@ const de: Translation = {
   DASHBOARD: 'Kontrollzentrum',
   SETTINGS_OF: '{0} Einstellungen',
   SAVED: 'gespeichert',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   HELP_OF: '{0} Hilfe',
   LOGGED_IN: 'Eingeloggt als {name}',
   PLEASE_SIGNIN: 'Bitte einloggen, um fortzufahren',

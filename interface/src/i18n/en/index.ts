@@ -48,6 +48,8 @@ const en: Translation = {
   RESET: 'Reset',
   SEND: 'Send',
   SAVE: 'Save',
+  APPLY_CHANGES: 'Apply Changes ({0})',
+  UPDATE: 'Update',
   REMOVE: 'Remove',
   PROBLEM_UPDATING: 'Problem updating',
   PROBLEM_LOADING: 'Problem loading',
