@@ -1,4 +1,4 @@
-import { FC, createRef, createContext, useContext, useEffect, useState, RefObject } from 'react';
+import { FC, createRef, useEffect, useState, RefObject } from 'react';
 import { SnackbarProvider } from 'notistack';
 
 import { IconButton } from '@mui/material';
@@ -23,10 +23,6 @@ const App: FC = () => {
     notistackRef.current.closeSnackbar(key);
   };
 
-  const ColorModeContext = createContext({ toggleColorMode: () => {} });
-
-  const colorMode = useContext(ColorModeContext);
-
   const [wasLoaded, setWasLoaded] = useState(false);
 
   useEffect(() => {
@@ -36,26 +32,24 @@ const App: FC = () => {
   if (!wasLoaded) return null;
 
   return (
-    <ColorModeContext.Provider value={colorMode}>
-      <TypesafeI18n locale={detectedLocale}>
-        <CustomTheme>
-          <SnackbarProvider
-            maxSnack={3}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-            ref={notistackRef}
-            action={(key) => (
-              <IconButton onClick={onClickDismiss(key)} size="small">
-                <CloseIcon />
-              </IconButton>
-            )}
-          >
-            <FeaturesLoader>
-              <AppRouting />
-            </FeaturesLoader>
-          </SnackbarProvider>
-        </CustomTheme>
-      </TypesafeI18n>
-    </ColorModeContext.Provider>
+    <TypesafeI18n locale={detectedLocale}>
+      <CustomTheme>
+        <SnackbarProvider
+          maxSnack={3}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          ref={notistackRef}
+          action={(key) => (
+            <IconButton onClick={onClickDismiss(key)} size="small">
+              <CloseIcon />
+            </IconButton>
+          )}
+        >
+          <FeaturesLoader>
+            <AppRouting />
+          </FeaturesLoader>
+        </SnackbarProvider>
+      </CustomTheme>
+    </TypesafeI18n>
   );
 };
 
