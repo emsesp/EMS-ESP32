@@ -73,7 +73,6 @@ const SystemLog: FC = () => {
   });
 
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [reconnectTimeout, setReconnectTimeout] = useState<NodeJS.Timeout>();
   const [logEntries, setLogEntries] = useState<LogEntries>({ events: [] });
   const [lastIndex, setLastIndex] = useState<number>(0);
 
@@ -162,7 +161,7 @@ const SystemLog: FC = () => {
 
   const fetchLog = useCallback(async () => {
     try {
-      setLogEntries((await SystemApi.readLogEntries()).data);
+      await SystemApi.readLogEntries();
     } catch (error) {
       setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
@@ -176,20 +175,15 @@ const SystemLog: FC = () => {
     const es = new EventSource(addAccessTokenParameter(LOG_EVENTSOURCE_URL));
     es.onmessage = onMessage;
     es.onerror = () => {
-      if (reconnectTimeout) {
-        es.close();
-        setReconnectTimeout(setTimeout(reloadPage, 1000));
-      }
+      es.close();
+      reloadPage();
     };
 
     return () => {
       es.close();
-      if (reconnectTimeout) {
-        clearTimeout(reconnectTimeout);
-      }
     };
     // eslint-disable-next-line
-  }, [reconnectTimeout]);
+  }, []);
 
   const content = () => {
     if (!data) {
@@ -210,6 +204,7 @@ const SystemLog: FC = () => {
               margin="normal"
               select
             >
+              <MenuItem value={-1}>OFF</MenuItem>
               <MenuItem value={3}>ERROR</MenuItem>
               <MenuItem value={4}>WARNING</MenuItem>
               <MenuItem value={5}>NOTICE</MenuItem>
