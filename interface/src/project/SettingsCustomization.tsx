@@ -249,19 +249,27 @@ const SettingsCustomization: FC = () => {
     }
   };
 
+  const getChanges = () => {
+    if (!deviceEntities || selectedDevice === -1) {
+      return [];
+    }
+
+    return deviceEntities
+      .filter((de) => de.m !== de.o_m || de.cn !== de.o_cn || de.ma !== de.o_ma || de.mi !== de.o_mi)
+      .map(
+        (new_de) =>
+          new_de.m.toString(16).padStart(2, '0') +
+          new_de.id +
+          (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
+          (new_de.cn ? new_de.cn : '') +
+          (new_de.mi ? '>' + new_de.mi : '') +
+          (new_de.ma ? '<' + new_de.ma : '')
+      );
+  };
+
   const saveCustomization = async () => {
     if (devices && deviceEntities && selectedDevice !== -1) {
-      const masked_entities = deviceEntities
-        .filter((de) => de.m !== de.o_m || de.cn !== de.o_cn || de.ma !== de.o_ma || de.mi !== de.o_mi)
-        .map(
-          (new_de) =>
-            new_de.m.toString(16).padStart(2, '0') +
-            new_de.id +
-            (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
-            (new_de.cn ? new_de.cn : '') +
-            (new_de.mi ? '>' + new_de.mi : '') +
-            (new_de.ma ? '<' + new_de.ma : '')
-        );
+      const masked_entities = getChanges();
 
       // check size in bytes to match buffer in CPP, which is 4096
       const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
@@ -545,35 +553,41 @@ const SettingsCustomization: FC = () => {
     </Dialog>
   );
 
-  const renderContent = () => (
-    <>
-      <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-        {LL.DEVICE_ENTITIES()}
-      </Typography>
-      {renderDeviceList()}
-      {renderDeviceData()}
-      <Box display="flex" flexWrap="wrap">
-        <Box flexGrow={1}>
+  const renderContent = () => {
+    const num_changes = getChanges().length;
+
+    return (
+      <>
+        <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+          {LL.DEVICE_ENTITIES()}
+        </Typography>
+        {renderDeviceList()}
+        {renderDeviceData()}
+        <Box display="flex" flexWrap="wrap">
+          <Box flexGrow={1}>
+            <ButtonRow>
+              {num_changes !== 0 && (
+                <Button startIcon={<SaveIcon />} variant="outlined" color="primary" onClick={() => saveCustomization()}>
+                  {LL.APPLY_CHANGES(num_changes)}
+                </Button>
+              )}
+            </ButtonRow>
+          </Box>
           <ButtonRow>
-            <Button startIcon={<SaveIcon />} variant="outlined" color="primary" onClick={() => saveCustomization()}>
-              {LL.SAVE()}
+            <Button
+              startIcon={<SettingsBackupRestoreIcon />}
+              variant="outlined"
+              color="error"
+              onClick={() => setConfirmReset(true)}
+            >
+              {LL.RESET(0)}
             </Button>
           </ButtonRow>
         </Box>
-        <ButtonRow>
-          <Button
-            startIcon={<SettingsBackupRestoreIcon />}
-            variant="outlined"
-            color="error"
-            onClick={() => setConfirmReset(true)}
-          >
-            {LL.RESET(0)}
-          </Button>
-        </ButtonRow>
-      </Box>
-      {renderResetDialog()}
-    </>
-  );
+        {renderResetDialog()}
+      </>
+    );
+  };
 
   const renderEditDialog = () => {
     if (deviceEntity) {
@@ -582,48 +596,7 @@ const SettingsCustomization: FC = () => {
         <Dialog open={!!deviceEntity} onClose={() => setDeviceEntity(undefined)}>
           <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY() + ' "' + de.id + '"'}</DialogTitle>
           <DialogContent dividers>
-            <ToggleButtonGroup
-              size="small"
-              color="secondary"
-              value={getMaskString(de.m)}
-              onChange={(event, mask) => {
-                de.m = getMaskNumber(mask);
-                if (de.n === '' && de.m & DeviceEntityMask.DV_READONLY) {
-                  de.m = de.m | DeviceEntityMask.DV_WEB_EXCLUDE;
-                }
-                if (de.m & DeviceEntityMask.DV_WEB_EXCLUDE) {
-                  de.m = de.m & ~DeviceEntityMask.DV_FAVORITE;
-                }
-                setMasks(['']);
-              }}
-            >
-              <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.n === undefined}>
-                <OptionIcon
-                  type="favorite"
-                  isSet={(de.m & DeviceEntityMask.DV_FAVORITE) === DeviceEntityMask.DV_FAVORITE}
-                />
-              </ToggleButton>
-              <ToggleButton value="4" disabled={!de.w || (de.m & 3) === 3}>
-                <OptionIcon
-                  type="readonly"
-                  isSet={(de.m & DeviceEntityMask.DV_READONLY) === DeviceEntityMask.DV_READONLY}
-                />
-              </ToggleButton>
-              <ToggleButton value="2" disabled={de.n === ''}>
-                <OptionIcon
-                  type="api_mqtt_exclude"
-                  isSet={(de.m & DeviceEntityMask.DV_API_MQTT_EXCLUDE) === DeviceEntityMask.DV_API_MQTT_EXCLUDE}
-                />
-              </ToggleButton>
-              <ToggleButton value="1" disabled={de.n === undefined}>
-                <OptionIcon
-                  type="web_exclude"
-                  isSet={(de.m & DeviceEntityMask.DV_WEB_EXCLUDE) === DeviceEntityMask.DV_WEB_EXCLUDE}
-                />
-              </ToggleButton>
-            </ToggleButtonGroup>
-
-            <Box color="warning.main" p={0} pl={0} pr={0} mt={2} mb={2}>
+            <Box color="warning.main" mb={2}>
               <Typography variant="body2">
                 {LL.DEFAULT(1) + ' ' + LL.NAME(1)}:&nbsp;{deviceEntity.n}
               </Typography>
@@ -679,7 +652,7 @@ const SettingsCustomization: FC = () => {
               onClick={() => updateEntity()}
               color="warning"
             >
-              {LL.SAVE()}
+              {LL.UPDATE()}
             </Button>
           </DialogActions>
         </Dialog>
