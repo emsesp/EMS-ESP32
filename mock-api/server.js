@@ -127,6 +127,12 @@ network_settings = {
   enableMDNS: true,
   enableCORS: false,
   CORSOrigin: '*',
+  enableIPv6: false,
+  local_ip: '',
+  gateway_ip: '',
+  subnet_mask: '',
+  dns_ip_1: '',
+  dns_ip_2: '',
 }
 const network_status = {
   status: 3,
@@ -348,6 +354,7 @@ settings = {
   bool_format: 1,
   bool_dashboard: 1,
   enum_format: 1,
+  fahrenheit: false
 }
 
 const emsesp_devices = {
@@ -411,6 +418,7 @@ const emsesp_coredata = {
       e: 3,
     },
   ],
+  s_n: 'Sensors',
   active_sensors: 8,
   analog_enabled: true,
 }
