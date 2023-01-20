@@ -1141,6 +1141,7 @@ void Boiler::process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram, wwSetTemp_, 0);
     has_update(telegram, wwCurTemp_, 1);
     has_update(telegram, wwCurTemp2_, 3);
+    has_update(telegram, wwCurFlow_, 11);
 
     has_update(telegram, wwWorkM_, 14, 3);  // force to 3 bytes
     has_update(telegram, wwStarts_, 17, 3); // force to 3 bytes
