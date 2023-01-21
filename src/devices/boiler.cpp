@@ -107,7 +107,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &selBurnPow_, DeviceValueType::UINT, FL_(selBurnPow), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_burn_power), 0, 254);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingPumpMod_, DeviceValueType::UINT, FL_(heatingPumpMod), DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingPump2Mod_, DeviceValueType::UINT, FL_(heatingPump2Mod), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &outdoorTemp_,
                           DeviceValueType::SHORT,
@@ -184,6 +183,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         DeviceValueTAG::TAG_DEVICE_DATA, &boil2HystOff_, DeviceValueType::INT, FL_(boil2HystOff), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst2_off), 0, 20);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setFlowTemp_, DeviceValueType::UINT, FL_(setFlowTemp), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setBurnPow_, DeviceValueType::UINT, FL_(setBurnPow), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &absBurnPow_, DeviceValueType::UINT, FL_(absBurnPow), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &curBurnPow_, DeviceValueType::UINT, FL_(curBurnPow), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &burnStarts_, DeviceValueType::ULONG, FL_(burnStarts), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &burnWorkMin_, DeviceValueType::TIME, FL_(burnWorkMin), DeviceValueUOM::MINUTES);
@@ -1055,9 +1055,11 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
 /*
  * UBAMonitorSlowPlus2 - type 0xE3
  * 88 00 E3 00 04 00 00 00 00 01 00 00 00 00 00 02 22 2B 64 46 01 00 00 61
+ * https://github.com/Th3M3/buderus_ems-wiki/blob/master/Quelle_08.md
+ * https://github.com/emsesp/EMS-ESP32/issues/908
  */
 void Boiler::process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, heatingPump2Mod_, 13); // Heat Pump Modulation
+    has_update(telegram, absBurnPow_, 13); // current burner absolute power (percent of rating plate power)
 }
 
 /*
@@ -1956,13 +1958,15 @@ bool Boiler::set_pump_delay(const char * value, const int8_t id) {
 // note some boilers do not have this setting, than it's done by thermostat
 // on a RC35 it's by EMSESP::send_write_request(0x37, 0x10, 2, &set, 1, 0); (set is 1,2,3) 1=hot, 2=eco, 3=intelligent
 // on a RC310 it's 1=high, 2=eco
+// eco key on controller: tele.05, offset 70: 0xAA =eco, 0x55= comfort, https://github.com/emsesp/EMS-ESP32/issues/908
 bool Boiler::set_ww_mode(const char * value, const int8_t id) {
     uint8_t set;
-    uint8_t comfort[] = {0x00, 0xD8, 0xEC};
+    uint8_t comfort[] = {0x00, 0xD8, 0xEC}; // heat, eco, intelligent
 
     if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
         if (Helpers::value2enum(value, set, FL_(enum_comfort1))) {
             write_command(EMS_TYPE_UBAParameterWWPlus, 13, comfort[set], EMS_TYPE_UBAParameterWWPlus);
+            write_command(0x05, 70, set ? 0xAA : 0x55); //
             return true;
         }
     } else {
