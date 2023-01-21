@@ -729,7 +729,7 @@ const char * Helpers::translated_word(const char * const * strings, const bool f
     }
 
     // see how many translations we have for this entity. if there is no translation for this, revert to EN
-    if (force_en || (Helpers::count_items(strings) >= language_index + 1 && strlen(strings[language_index]))) {
+    if (!force_en && (Helpers::count_items(strings) >= language_index + 1 && strlen(strings[language_index]))) {
         index = language_index;
     }
     return strings[index];
