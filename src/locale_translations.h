@@ -34,7 +34,7 @@
 
 // device types, as display in Web and Console
 // TODO need completed translations
-MAKE_PSTR_LIST(boiler_device, "Boiler", "Kessel", "Boiler", "Värmeanna")
+MAKE_PSTR_LIST(boiler_device, "Boiler", "Kessel", "Boiler", "Värmepanna")
 MAKE_PSTR_LIST(thermostat_device, "Thermostat", "Thermostat", "Thermostaat", "Termostat")
 MAKE_PSTR_LIST(heatpump_device, "Heat Pump", "Wärmepumpe", "Warmtepomp", "Värmepump")
 MAKE_PSTR_LIST(solar_device, "Solar Module", "Solarmodul", "Solar Module", "Solmodul")
