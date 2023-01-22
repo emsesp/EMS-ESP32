@@ -906,8 +906,8 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
     ids.add(ha_device);
 
     if (create_device_config) {
-        auto cap_name          = strdup(device_type_name);
-        cap_name[0]            = toupper(cap_name[0]); // capitalize
+        auto cap_name = strdup(device_type_name);
+        Helpers::CharToUpperUTF8(cap_name); // capitalize first letter
         dev_json["name"]       = std::string("EMS-ESP ") + cap_name;
         dev_json["mf"]         = brand;
         dev_json["mdl"]        = model;
@@ -1003,7 +1003,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         if (EMSdevice::tag_to_string(tag).empty()) {
             snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());
         } else {
-            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag).c_str(), Helpers::toLower(uniq_s).c_str());
+            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag, false).c_str(), Helpers::toLower(uniq_s).c_str());
         }
     }
 
@@ -1132,7 +1132,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // friendly name = <tag> <name>
     char   ha_name[70];
     char * F_name = strdup(fullname);
-    F_name[0]     = toupper(F_name[0]); // capitalize first letter
+    Helpers::CharToUpperUTF8(F_name); // capitalize first letter
     if (EMSdevice::tag_to_string(tag).empty()) {
         snprintf(ha_name, sizeof(ha_name), "%s", F_name); // no tag
     } else {

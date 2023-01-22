@@ -416,6 +416,9 @@ MAKE_PSTR_LIST(hp3wayValve, "hp3way", "3-way valve") // TODO translate
 MAKE_PSTR_LIST(elHeatStep1, "elheatstep1", "el. heater step 1") // TODO translate
 MAKE_PSTR_LIST(elHeatStep2, "elheatstep2", "el. heater step 2") // TODO translate
 MAKE_PSTR_LIST(elHeatStep3, "elheatstep3", "el. heater step 3") // TODO translate
+MAKE_PSTR_LIST(wwAlternatingOper, "wwalternatingop", "alternating operation", "", "", "", "praca naprzemienna", "", "") // TODO translate
+MAKE_PSTR_LIST(wwAltOpPrioHeat, "wwaltopprioheat", "prioritise heating during dhw", "", "", "", "czas na ogrzewanie w trakcie c.w.u", "", "") // TODO translate
+MAKE_PSTR_LIST(wwAltOpPrioWw, "wwaltopprioww", "prioritise dhw during heating", "", "", "", "czas na c.w.u w trakcie ogrzewania", "", "") // TODO translate
 
 // hybrid heatpump
 MAKE_PSTR_LIST(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride")
