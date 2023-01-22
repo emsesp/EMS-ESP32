@@ -1096,9 +1096,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             }
         } else if (type != DeviceValueType::STRING) {
             // Must be Numeric....
-            // mode can be auto, slider or box. Because its fiddly and error prone, force conversion to box
-            // but... this is not currently supported in HA MQTT Number yet!
-            // doc["mode"] = "box";
+            doc["mode"] = "box"; // auto, slider or box
             if (num_op > 0) {
                 doc["step"] = 1.0 / num_op;
             } else if (num_op < 0) {
