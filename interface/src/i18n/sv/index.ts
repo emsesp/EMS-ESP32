@@ -48,6 +48,8 @@ const sv: Translation = {
   RESET: 'Nollställ',
   SEND: 'Skicka',
   SAVE: 'Spara',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Ta bort',
   PROBLEM_UPDATING: 'Problem vid uppdatering',
   PROBLEM_LOADING: 'Problem vid hämtning',
@@ -104,7 +106,7 @@ const sv: Translation = {
   NUM_HOURS: '{num} timmar',
   NUM_MINUTES: '{num} minut{{er}}',
   APPLICATION_SETTINGS: 'Inställningar',
-  CUSTOMIZATION: 'Anpassa',
+  CUSTOMIZATIONS: 'Anpassningr',
   APPLICATION_RESTARTING: 'EMS-ESP startar om',
   INTERFACE_BOARD_PROFILE: 'Interface Hårdvaruprofil',
   BOARD_PROFILE_TEXT: 'Välj en förkonfigurerad hårdvaruprofil från listan nedan eller välj Anpassad för att konfigurera dina egna hårdvaruinställningar',
@@ -163,7 +165,6 @@ const sv: Translation = {
   NAME: 'Namn',
   CUSTOMIZATIONS_RESET: 'Är du säker på att du vill ta bort alla anpassningar inklusive inställningar för Temperatur och Analoga sensorer?',
   DEVICE_ENTITIES: 'Enhets-entiteter',
-  USER_CUSTOMIZATION: 'Användaranpassningar',
   SUPPORT_INFORMATION: 'Supportinformation',
   CLICK_HERE: 'Klicka Här',
   HELP_INFORMATION_1: 'Besök Wikin för instruktioner för hur du kan konfigurera EMS-ESP',
