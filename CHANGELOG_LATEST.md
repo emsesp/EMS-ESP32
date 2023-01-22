@@ -28,6 +28,11 @@
 - Settings for heatpump silent mode and additional heater [[#802](https://github.com/emsesp/EMS-ESP32/issues/802)] [[#803](https://github.com/emsesp/EMS-ESP32/issues/803)]
 - Zone module MZ100 [#826](https://github.com/emsesp/EMS-ESP32/issues/826)
 - Default MQTT hostname is blank [#829](https://github.com/emsesp/EMS-ESP32/issues/829)
+- wwCurFlow for ems+ devices [#829](https://github.com/emsesp/EMS-ESP32/issues/829)
+- Add Rego 3000, TR120RF thermostats [#917](https://github.com/emsesp/EMS-ESP32/issues/917)
+- Add config for ESP32-S3
+- Add heatpump silent mode and other entities [#896](https://github.com/emsesp/EMS-ESP32/issues/896)
+- Allow reboot to other partition (factory or asymetric OTA)
 
 ## Fixed
 
@@ -36,6 +41,10 @@
 - Commands for multiple thermostats [#826](https://github.com/emsesp/EMS-ESP32/issues/826)
 - API queries for multiple devices [#865](https://github.com/emsesp/EMS-ESP32/issues/865)
 - Console crash when using call with command `hcx` only. [#841](https://github.com/emsesp/EMS-ESP32/issues/841)
+- heatingPump2Mod was wrong, changed to absBurnPow [[#908](https://github.com/emsesp/EMS-ESP32/issues/908)
+- rounding of web input values
+- analog sensor with single gpio number [#915](https://github.com/emsesp/EMS-ESP32/issues/915)
+- HA dallas and analog configs: remove/rebuild on change [#888](https://github.com/emsesp/EMS-ESP32/issues/888)
 
 ## Changed
 
@@ -47,5 +56,5 @@
 - analog/dallas values command as list like ems-devices
 - analog/dallas HA-entities based on id
 - MQTT Base is a mandatory field. Removed MQTT topic length from settings
-- HA duration class for time entities [[#822](https://github.com/emsesp/EMS-ESP32/issues/822
-- AM200 alternative heatsource as class heatsource [[#857](https://github.com/emsesp/EMS-ESP32/issues/857
+- HA duration class for time entities [[#822](https://github.com/emsesp/EMS-ESP32/issues/822)
+- AM200 alternative heatsource as class heatsource [[#857](https://github.com/emsesp/EMS-ESP32/issues/857)

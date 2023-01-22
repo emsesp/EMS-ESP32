@@ -55,7 +55,7 @@ class Helpers {
     static std::string toLower(std::string const & s);
     static std::string toUpper(std::string const & s);
     static std::string toLower(const char * s);
-    static void CharToUpperUTF8(char * c);
+    static void        CharToUpperUTF8(char * c);
 
     static void replace_char(char * str, char find, char replace);
 

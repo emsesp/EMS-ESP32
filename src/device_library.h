@@ -32,7 +32,7 @@
 {115, DeviceType::BOILER, "Topline/GB162", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {121, DeviceType::BOILER, "Cascade MCM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {122, DeviceType::BOILER, "Proline", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{123, DeviceType::BOILER, "GBx72/Trendline/Cerapur/Greenstar Si/27i", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{123, DeviceType::BOILER, "GBx72/Trendline/Cerapur/Greenstar Si/27i-30i", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {131, DeviceType::BOILER, "GB212", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {132, DeviceType::BOILER, "GC7000F", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {133, DeviceType::BOILER, "Logano GB125/KB195i/Logamatic MC110", DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -98,6 +98,7 @@
 {172, DeviceType::THERMOSTAT, "Rego 2000/3000", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 {216, DeviceType::THERMOSTAT, "CRF200S", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {246, DeviceType::THERMOSTAT, "Comfort+2RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
+{253, DeviceType::THERMOSTAT, "Rego 3000", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 
 // Thermostat - Sieger - 0x10 / 0x17
 { 66, DeviceType::THERMOSTAT, "ES72/RC20", DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17 or remote
@@ -120,6 +121,7 @@
 // Thermostat remote - 0x38
 {  3, DeviceType::THERMOSTAT, "RT800", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
 {200, DeviceType::THERMOSTAT, "RC100H", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
+{249, DeviceType::THERMOSTAT, "TR120RF", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
 
 // Solar Modules - 0x30 (for solar), 0x2A, 0x41 (for ww)
 { 73, DeviceType::SOLAR, "SM10", DeviceFlags::EMS_DEVICE_FLAG_SM10},
@@ -140,6 +142,7 @@
 {204, DeviceType::MIXER, "MP100", DeviceFlags::EMS_DEVICE_FLAG_MP}, // pool
 
 // Heat Pumps - 0x38? This is a thermostat like RC100H
+// also prod-id of wifi module and wireless base
 {252, DeviceType::HEATPUMP, "HP Module", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Heat Pumps - 0x53

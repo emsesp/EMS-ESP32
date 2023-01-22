@@ -33,6 +33,8 @@
 #include "../esp32s2/rom/rtc.h"
 #elif CONFIG_IDF_TARGET_ESP32C3
 #include "../esp32c3/rom/rtc.h"
+#elif CONFIG_IDF_TARGET_ESP32S3
+#include "../esp32s3/rom/rtc.h"
 #else
 #error Target CONFIG_IDF_TARGET is not supported
 #endif
@@ -369,6 +371,8 @@ bool System::is_valid_gpio(uint8_t pin) {
 #elif CONFIG_IDF_TARGET_ESP32C3
     // https://www.wemos.cc/en/latest/c3/c3_mini.html
     if ((pin >= 11 && pin <= 19) || (pin > 21)) {
+#elif CONFIG_IDF_TARGET_ESP32S3
+    if ((pin >= 19 && pin <= 20) || (pin >= 22 && pin <= 37) || (pin >= 39 && pin <= 42) || (pin > 48)) {
 #endif
         return false; // bad pin
     }
@@ -1418,7 +1422,9 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
     } else if (board_profile == "C3MINI") {
         data = {7, 1, 4, 5, 9, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // Lolin C3 Mini
     } else if (board_profile == "S2MINI") {
-        data = {15, 7, 11, 12, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; //Lolin S2 Mini
+        data = {15, 7, 11, 12, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // Lolin S2 Mini
+    } else if (board_profile == "S3MINI") {
+        data = {17, 18, 8, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // Liligo S3
     } else if (board_profile == "CUSTOM") {
         // send back current values
         data = {(int8_t)EMSESP::system_.led_gpio_,

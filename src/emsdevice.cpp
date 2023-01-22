@@ -493,6 +493,7 @@ void EMSdevice::add_device_value(uint8_t               tag,
     std::string custom_fullname = std::string("");              // custom fullname
     auto        short_name      = name[0];                      // entity name
     bool        has_cmd         = (f != nullptr);               // is it a command?
+    bool        ignore          = false;                        // ignore this entity?
 
     // get fullname, getting translation if it exists
     const char * const * fullname;
@@ -523,7 +524,8 @@ void EMSdevice::add_device_value(uint8_t               tag,
                     if (shortname == entity) {
                         // get Mask
                         uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
-                        state        = mask << 4; // set state high bits to flag, turn off active and ha flags
+                        state        = mask << 4;             // set state high bits to flag, turn off active and ha flags
+                        ignore       = (mask & 0x80) == 0x80; // do not register
                         // see if there is a custom name in the entity string
                         if (has_custom_name) {
                             custom_fullname = entity_id.substr(custom_name_pos + 1);
@@ -534,6 +536,9 @@ void EMSdevice::add_device_value(uint8_t               tag,
             }
         }
     });
+    if (ignore) {
+        return;
+    }
 
     // add the device entity
     devicevalues_.emplace_back(

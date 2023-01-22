@@ -57,6 +57,9 @@ void WebLogService::start() {
         limit_log_messages_   = maximum_log_messages_;
         compact_              = settings.weblog_compact;
         uuid::log::Logger::register_handler(this, (uuid::log::Level)settings.weblog_level);
+        if ((uuid::log::Level)settings.weblog_level == uuid::log::Level::OFF) {
+            log_messages_.clear();
+        }
     });
 }
 
@@ -72,6 +75,9 @@ void WebLogService::log_level(uuid::log::Level level) {
         },
         "local");
     uuid::log::Logger::register_handler(this, level);
+    if (level == uuid::log::Level::OFF) {
+        log_messages_.clear();
+    }
 }
 
 size_t WebLogService::num_log_messages() const {
@@ -214,8 +220,8 @@ void WebLogService::fetchLog(AsyncWebServerRequest * request) {
         buffer -= 1024;
         response = new MsgpackAsyncJsonResponse(false, buffer);
     }
-    JsonObject root     = response->getRoot();
-    JsonArray  log      = root.createNestedArray("events");
+    JsonObject root = response->getRoot();
+    JsonArray  log  = root.createNestedArray("events");
 
     log_message_id_tail_ = log_messages_.back().id_;
     last_transmit_       = uuid::get_uptime_ms();

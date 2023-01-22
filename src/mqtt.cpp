@@ -906,7 +906,7 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
     ids.add(ha_device);
 
     if (create_device_config) {
-        auto cap_name          = strdup(device_type_name);
+        auto cap_name = strdup(device_type_name);
         Helpers::CharToUpperUTF8(cap_name); // capitalize first letter
         dev_json["name"]       = std::string("EMS-ESP ") + cap_name;
         dev_json["mf"]         = brand;

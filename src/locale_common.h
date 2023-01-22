@@ -227,7 +227,7 @@ MAKE_PSTR(tag_boiler_data_ww_mqtt, "ww")
 MAKE_PSTR(tag_device_data_ww_mqtt, "")
 
 // Home Assistant - this is special and has no translations
-MAKE_PSTR_LIST(climate, "")
+MAKE_PSTR_LIST(climate, "HA climate config creation")
 
 // syslog
 MAKE_PSTR_LIST(list_syslog_level, "off", "emerg", "alert", "crit", "error", "warn", "notice", "info", "debug", "trace", "all")
@@ -249,7 +249,7 @@ MAKE_PSTR_ENUM(enum_progMode, FL_(prog1), FL_(prog2))
 MAKE_PSTR_ENUM(enum_progMode4, FL_(proga), FL_(progb), FL_(progc), FL_(progd), FL_(proge), FL_(progf))
 MAKE_PSTR_ENUM(enum_climate, FL_(seltemp), FL_(roomtemp))
 MAKE_PSTR_ENUM(enum_charge, FL_(chargepump), FL_(3wayvalve))
-MAKE_PSTR_ENUM(enum_freq, FL_(1x3min), FL_(2x3min), FL_(3x3min), FL_(4x3min), FL_(5x3min), FL_(6x3min), FL_(continuous))
+MAKE_PSTR_ENUM(enum_freq, FL_(off), FL_(1x3min), FL_(2x3min), FL_(3x3min), FL_(4x3min), FL_(5x3min), FL_(6x3min), FL_(continuous))
 MAKE_PSTR_ENUM(enum_off_time_date_manual, FL_(off), FL_(time), FL_(date), FL_(manual))
 MAKE_PSTR_ENUM(enum_comfort, FL_(hot), FL_(eco), FL_(intelligent))
 MAKE_PSTR_ENUM(enum_comfort1, FL_(high_comfort), FL_(eco))
