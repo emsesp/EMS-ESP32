@@ -16,7 +16,7 @@
 #endif
 
 #ifndef FACTORY_OTA_ENABLED
-#define FACTORY_OTA_ENABLED true
+#define FACTORY_OTA_ENABLED false
 #endif
 
 #define OTA_SETTINGS_FILE "/config/otaSettings.json"
