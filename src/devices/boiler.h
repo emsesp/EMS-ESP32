@@ -64,7 +64,7 @@ class Boiler : public EMSdevice {
     uint8_t  wwChargeOptimization_; // DHW charge optimization
     uint8_t  wwDisinfectionTemp_;   // DHW disinfection temperature to prevent infection
     uint8_t  wwCircMode_;           // DHW circulation pump mode
-    uint8_t  wwCirc_;               // Circulation on/off
+    uint8_t  wwCirc_;               // DHW circulation on/off
     uint16_t wwCurTemp_;            // DHW current temperature
     uint16_t wwCurTemp2_;           // DHW current temperature storage
     uint8_t  wwCurFlow_;            // DHW current flow temp in l/min
@@ -91,6 +91,9 @@ class Boiler : public EMSdevice {
     uint16_t wwMixerTemp_;     // mixing temperature
     uint16_t wwCylMiddleTemp_; // Cyl middle temperature (TS3)
     uint16_t wwSolarTemp_;
+    uint8_t  wwAlternatingOper_;    // alternating operation on/off
+    uint8_t  wwAltOpPrioHeat_;      // alternating operation, prioritise heat time
+    uint8_t  wwAltOpPrioWw_;        // alternating operation, prioritise dhw time
 
     // main
     uint8_t  reset_;            // for reset command
@@ -394,6 +397,14 @@ class Boiler : public EMSdevice {
     }
     inline bool set_wwEcoPlusOffTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 5);
+    }
+    bool set_wwAlternatingOper(const char * value, const int8_t id);
+    bool set_wwAltOpPrio(const char * value, const int8_t id);
+    inline bool set_wwAltOpPrioHeat(const char * value, const int8_t id) {
+        return set_wwAltOpPrio(value, 2);
+    }
+    inline bool set_wwAltOpPrioWw(const char * value, const int8_t id) {
+        return set_wwAltOpPrio(value, 3);
     }
     /*
     bool set_hybridStrategy(const char * value, const int8_t id);
