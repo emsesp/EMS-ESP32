@@ -595,14 +595,16 @@ bool Helpers::value2bool(const char * value, bool & value_b) {
         return false;
     }
 
-    std::string bool_str = toLower(value); // convert to lower case
+    std::string bool_str = toLower(value);
 
-    if ((bool_str == std::string(Helpers::translated_word(FL_(on)))) || (bool_str == "on") || (bool_str == "1") || (bool_str == "true")) {
+    if ((bool_str == std::string(Helpers::translated_word(FL_(on)))) || (bool_str == toLower(Helpers::translated_word(FL_(ON)))) || (bool_str == "on")
+        || (bool_str == "1") || (bool_str == "true")) {
         value_b = true;
         return true; // is a bool
     }
 
-    if ((bool_str == std::string(Helpers::translated_word(FL_(off)))) || (bool_str == "off") || (bool_str == "0") || (bool_str == "false")) {
+    if ((bool_str == std::string(Helpers::translated_word(FL_(off)))) || (bool_str == toLower(Helpers::translated_word(FL_(OFF)))) || (bool_str == "off")
+        || (bool_str == "0") || (bool_str == "false")) {
         value_b = false;
         return true; // is a bool
     }
@@ -674,6 +676,53 @@ std::string Helpers::toUpper(std::string const & s) {
     std::transform(lc.begin(), lc.end(), lc.begin(), [](unsigned char c) { return std::toupper(c); });
     return lc;
 }
+
+// capitalizes one UTF-8 character in char array
+// works with Latin1 (1 byte), Polish amd some other (2 bytes) characters
+// TODO add special characters that occur in other supported languages
+#if defined(EMSESP_STANDALONE)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
+#endif
+void Helpers::CharToUpperUTF8(char * c) {
+    auto p   = (c + 1); // pointer to 2nd char of 2-byte unicode char
+    char p_v = *p;      // value of 2nd char in 2-byte unicode char
+
+    switch (*c) {
+    case (char)0xC3:
+        // grave, acute, circumflex, diaeresis, etc.
+        if ((p_v >= 0xA0) && (p_v <= 0xBE)) {
+            *p -= 0x20;
+        }
+        break;
+    case (char)0xC4:
+        switch (p_v) {
+        case (char)0x85: //ą (0xC4,0x85) -> Ą (0xC4,0x84)
+        case (char)0x87: //ć (0xC4,0x87) -> Ć (0xC4,0x86)
+        case (char)0x99: //ę (0xC4,0x99) -> Ę (0xC4,0x98)
+            *p -= 1;
+            break;
+        }
+        break;
+    case (char)0xC5:
+        switch (p_v) {
+        case (char)0x82: //ł (0xC5,0x82) -> Ł (0xC5,0x81)
+        case (char)0x84: //ń (0xC5,0x84) -> Ń (0xC5,0x83)
+        case (char)0x9B: //ś (0xC5,0x9B) -> Ś (0xC5,0x9A)
+        case (char)0xBA: //ź (0xC5,0xBA) -> Ź (0xC5,0xB9)
+        case (char)0xBC: //ż (0xC5,0xBC) -> Ż (0xC5,0xBB)
+            *p -= 1;
+            break;
+        }
+        break;
+    default:
+        *c = toupper(*c); // works on Latin1 letters
+        break;
+    }
+}
+#if defined(EMSESP_STANDALONE)
+#pragma GCC diagnostic pop
+#endif
 
 // replace char in char string
 void Helpers::replace_char(char * str, char find, char replace) {
