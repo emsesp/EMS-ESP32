@@ -22,16 +22,16 @@ INCLUDES  := src lib_standalone lib/ArduinoJson/src lib/uuid-common/src lib/uuid
 LIBRARIES := 
 
 CPPCHECK = cppcheck
-CHECKFLAGS = -q --force --std=c++17
-# CHECKFLAGS = -q --force --std=c++11
+# CHECKFLAGS = -q --force --std=c++17
+CHECKFLAGS = -q --force --std=c++11
 
 #----------------------------------------------------------------------
 # Languages Standard
 #----------------------------------------------------------------------
-C_STANDARD   := -std=c17
-CXX_STANDARD := -std=c++17
-# C_STANDARD   := -std=c11
-# CXX_STANDARD := -std=c++11
+# C_STANDARD   := -std=c17
+# CXX_STANDARD := -std=c++17
+C_STANDARD   := -std=c11
+CXX_STANDARD := -std=c++11
 
 #----------------------------------------------------------------------
 # Defined Symbols
@@ -79,7 +79,7 @@ CPPFLAGS  += -g3
 CPPFLAGS  += -Os
 
 CFLAGS    += $(CPPFLAGS)
-CFLAGS    += -Wall -Wextra -Werror -Wswitch-enum -Wno-unused-parameter -Wno-inconsistent-missing-override -Wno-unused-lambda-capture
+CFLAGS    += -Wall -Wextra -Werror -Wswitch-enum -Wno-unused-parameter 
 
 CXXFLAGS  += $(CFLAGS) -MMD
 
