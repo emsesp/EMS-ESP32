@@ -3571,28 +3571,11 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_tempDiffBoiler),
                               1,
                               99);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &pvEnableWw_,
-                              DeviceValueType::BOOL,
-                              FL_(pvEnableWw),
-                              DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_pvEnableWw));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &pvRaiseHeat_,
-                              DeviceValueType::INT,
-                              FL_(pvRaiseHeat),
-                              DeviceValueUOM::K,
-                              MAKE_CF_CB(set_pvRaiseHeat),
-                              0,
-                              5);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &pvLowerCool_,
-                              DeviceValueType::INT,
-                              FL_(pvLowerCool),
-                              DeviceValueUOM::K,
-                              MAKE_CF_CB(set_pvLowerCool),
-                              -5,
-                              0);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pvEnableWw_, DeviceValueType::BOOL, FL_(pvEnableWw), DeviceValueUOM::NONE, MAKE_CF_CB(set_pvEnableWw));
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &pvRaiseHeat_, DeviceValueType::INT, FL_(pvRaiseHeat), DeviceValueUOM::K, MAKE_CF_CB(set_pvRaiseHeat), 0, 5);
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &pvLowerCool_, DeviceValueType::INT, FL_(pvLowerCool), DeviceValueUOM::K, MAKE_CF_CB(set_pvLowerCool), -5, 0);
         break;
     case EMS_DEVICE_FLAG_RC10:
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,

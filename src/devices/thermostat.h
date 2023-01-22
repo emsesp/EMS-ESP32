@@ -501,7 +501,6 @@ class Thermostat : public EMSdevice {
     bool set_pvEnableWw(const char * value, const int8_t id);
     bool set_pvRaiseHeat(const char * value, const int8_t id);
     bool set_pvLowerCool(const char * value, const int8_t id);
-
 };
 
 } // namespace emsesp

@@ -48,10 +48,10 @@ class Heatsource : public EMSdevice {
     // uint8_t valveBypass_;   // VR2 position unknown
     // uint8_t heatSource_;    // OEV
 
-    uint8_t burner_;      // bit 5, offset 1, 54E
-    uint8_t aPump_;       // bit 0, offset 1, 54E
-    uint8_t heatRequest_; // offset 2, percent
-    uint8_t blockRemain_; // offset 24, 550 min
+    uint8_t burner_;        // bit 5, offset 1, 54E
+    uint8_t aPump_;         // bit 0, offset 1, 54E
+    uint8_t heatRequest_;   // offset 2, percent
+    uint8_t blockRemain_;   // offset 24, 550 min
     uint8_t blockRemainWw_; // offset 25, 550 min
 
     // Settings:
