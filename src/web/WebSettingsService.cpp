@@ -91,6 +91,8 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.board_profile = root["board_profile"] | "C3MINI";
 #elif CONFIG_IDF_TARGET_ESP32S2
     settings.board_profile = root["board_profile"] | "S2MINI";
+#elif CONFIG_IDF_TARGET_ESP32S3
+    settings.board_profile = root["board_profile"] | "S3MINI";
 #elif CONFIG_IDF_TARGET_ESP32
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 #endif

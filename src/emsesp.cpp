@@ -1034,12 +1034,6 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
                     device_p->device_type = DeviceType::HEATSOURCE;
                     break;
                 }
-            } else if (device.device_type == DeviceType::HEATSOURCE) {
-                device_p = &device;
-                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER) { // AHS as only heatsource on d 0x08
-                    device_p->device_type = DeviceType::BOILER;
-                }
-                break;
             } else {
                 // it's not a boiler, but we have a match
                 device_p = &device;
@@ -1059,6 +1053,17 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     auto name        = device_p->name;
     auto device_type = device_p->device_type;
     auto flags       = device_p->flags;
+
+    // check for integrated modules with same product id
+    if (device_type == DeviceType::HEATPUMP) {
+        if (device_id == EMSdevice::EMS_DEVICE_ID_MODEM) {
+            device_type = DeviceType::GATEWAY;
+            name        = "WiFi module";
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_RFBASE) {
+            device_type = DeviceType::CONNECT;
+            name        = "Wireless sensor base";
+        }
+    }
 
     // empty reply to version, read a generic device from database
     if (product_id == 0) {

@@ -252,7 +252,8 @@ export const BOARD_PROFILES: BoardProfiles = {
   OLIMEX: 'Olimex ESP32-EVB',
   OLIMEXPOE: 'Olimex ESP32-POE',
   C3MINI: 'Wemos C3 Mini',
-  S2MINI: 'Wemos S2 Mini'
+  S2MINI: 'Wemos S2 Mini',
+  S3MINI: 'Liligo S3'
 };
 
 export interface BoardProfileName {

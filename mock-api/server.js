@@ -1198,6 +1198,17 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.eth_power = 0
     data.eth_phy_addr = 0
     data.eth_clock_mode = 0
+  } else if (board_profile == 'S3MINI') {
+    // Liligo S3 mini
+    data.led_gpio = 17
+    data.dallas_gpio = 18
+    data.rx_gpio = 8
+    data.tx_gpio = 5
+    data.pbutton_gpio = 0
+    data.phy_type = 0
+    data.eth_power = 0
+    data.eth_phy_addr = 0
+    data.eth_clock_mode = 0
   }
 
   console.log('boardProfile POST. Sending back, profile: ' + board_profile + ', ' + 'data: ' + JSON.stringify(data))

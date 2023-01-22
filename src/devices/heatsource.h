@@ -44,8 +44,15 @@ class Heatsource : public EMSdevice {
     uint8_t  aPumpMod_;      // PR1 - percent
     uint8_t  valveBuffer_;   // VB1
     uint8_t  valveReturn_;   // VR1
+    uint16_t flueGasTemp_;
     // uint8_t valveBypass_;   // VR2 position unknown
     // uint8_t heatSource_;    // OEV
+
+    uint8_t burner_;        // bit 5, offset 1, 54E
+    uint8_t aPump_;         // bit 0, offset 1, 54E
+    uint8_t heatRequest_;   // offset 2, percent
+    uint8_t blockRemain_;   // offset 24, 550 min
+    uint8_t blockRemainWw_; // offset 25, 550 min
 
     // Settings:
     uint8_t  vr2Config_;     // pos 12: off(00)/Keelbypass(01)/(hc1pump(02) only standalone)

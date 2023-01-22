@@ -275,9 +275,9 @@ const SettingsCustomization: FC = () => {
     if (devices && deviceEntities && selectedDevice !== -1) {
       const masked_entities = getChanges();
 
-      // check size in bytes to match buffer in CPP, which is 4096
+      // check size in bytes to match buffer in CPP, which is 2048
       const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
-      if (bytes > 4000) {
+      if (bytes > 2000) {
         enqueueSnackbar(LL.CUSTOMIZATIONS_FULL(), { variant: 'warning' });
         return;
       }

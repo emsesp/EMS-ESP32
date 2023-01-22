@@ -75,6 +75,7 @@ void DallasSensor::reload() {
     });
 
     for (auto & sensor : sensors_) {
+        remove_ha_topic(sensor.id());
         sensor.ha_registered = false; // force HA configs to be re-created
     }
 }
@@ -498,7 +499,10 @@ void DallasSensor::publish_values(const bool force) {
         // create the HA MQTT config
         // to e.g. homeassistant/sensor/ems-esp/dallassensor_28-233D-9497-0C03/config
         if (Mqtt::ha_enabled()) {
-            if (!sensor.ha_registered || force) {
+            if (!has_value && sensor.ha_registered) {
+                remove_ha_topic(sensor.id());
+                sensor.ha_registered = false;
+            } else if (!sensor.ha_registered || force) {
                 LOG_DEBUG("Recreating HA config for sensor ID %s", sensor.id().c_str());
 
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;

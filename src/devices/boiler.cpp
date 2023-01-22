@@ -83,6 +83,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x48B, "HPPumps", true, MAKE_PF_CB(process_HpPumps));
         register_telegram_type(0x491, "HPAdditionalHeater", true, MAKE_PF_CB(process_HpAdditionalHeater));
         register_telegram_type(0x499, "HPDhwSettings", true, MAKE_PF_CB(process_HpDhwSettings));
+        register_telegram_type(0x49C, "HPSettings2", true, MAKE_PF_CB(process_HpSettings2));
+        register_telegram_type(0x49D, "HPSettings3", true, MAKE_PF_CB(process_HpSettings3));
     }
 
     /*
@@ -103,7 +105,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &tapwaterActive_, DeviceValueType::BOOL, FL_(tapwaterActive), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &selFlowTemp_, DeviceValueType::UINT, FL_(selFlowTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flow_temp));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingPumpMod_, DeviceValueType::UINT, FL_(heatingPumpMod), DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingPump2Mod_, DeviceValueType::UINT, FL_(heatingPump2Mod), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &outdoorTemp_,
                           DeviceValueType::SHORT,
@@ -180,6 +181,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         DeviceValueTAG::TAG_DEVICE_DATA, &boil2HystOff_, DeviceValueType::INT, FL_(boil2HystOff), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst2_off), 0, 20);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setFlowTemp_, DeviceValueType::UINT, FL_(setFlowTemp), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setBurnPow_, DeviceValueType::UINT, FL_(setBurnPow), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &absBurnPow_, DeviceValueType::UINT, FL_(absBurnPow), DeviceValueUOM::PERCENT);
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &selBurnPow_, DeviceValueType::UINT, FL_(selBurnPow), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_burn_power), 0, 254);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &curBurnPow_, DeviceValueType::UINT, FL_(curBurnPow), DeviceValueUOM::PERCENT);
@@ -475,12 +477,21 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               10,
                               1000);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &auxMaxTemp_,
+                              &auxMaxLimit_,
                               DeviceValueType::UINT,
-                              DeviceValueNumOp::DV_NUMOP_MUL10,
-                              FL_(auxMaxTemp),
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(auxMaxLimit),
                               DeviceValueUOM::K,
-                              MAKE_CF_CB(set_auxMaxTemp),
+                              MAKE_CF_CB(set_auxMaxLimit),
+                              0,
+                              10);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxLimitStart_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(auxLimitStart),
+                              DeviceValueUOM::K,
+                              MAKE_CF_CB(set_auxLimitStart),
                               0,
                               10);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
@@ -525,6 +536,20 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_silentMode));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &silentFrom_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_MUL15,
+                              FL_(silentFrom),
+                              DeviceValueUOM::MINUTES,
+                              MAKE_CF_CB(set_silentFrom));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &silentTo_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_MUL15,
+                              FL_(silentTo),
+                              DeviceValueUOM::MINUTES,
+                              MAKE_CF_CB(set_silentTo));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &minTempSilent_,
                               DeviceValueType::INT,
                               FL_(minTempSilent),
@@ -555,6 +580,40 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               MAKE_CF_CB(set_tempDiffCool),
                               3,
                               10);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &vp_cooling_, DeviceValueType::BOOL, FL_(vp_cooling), DeviceValueUOM::NONE, MAKE_CF_CB(set_vp_cooling));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatCable_, DeviceValueType::BOOL, FL_(heatCable), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatCable));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &VC0valve_, DeviceValueType::BOOL, FL_(VC0valve), DeviceValueUOM::NONE, MAKE_CF_CB(set_VC0valve));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &primePump_, DeviceValueType::BOOL, FL_(primePump), DeviceValueUOM::NONE, MAKE_CF_CB(set_primePump));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &primePumpMod_,
+                              DeviceValueType::UINT,
+                              FL_(primePumpMod),
+                              DeviceValueUOM::PERCENT,
+                              MAKE_CF_CB(set_primePumpMod));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &hp3wayValve_,
+                              DeviceValueType::BOOL,
+                              FL_(hp3wayValve),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_hp3wayValve));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &elHeatStep1_,
+                              DeviceValueType::BOOL,
+                              FL_(elHeatStep1),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_elHeatStep1));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &elHeatStep2_,
+                              DeviceValueType::BOOL,
+                              FL_(elHeatStep2),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_elHeatStep2));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &elHeatStep3_,
+                              DeviceValueType::BOOL,
+                              FL_(elHeatStep3),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_elHeatStep3));
         // heatpump DHW settings
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                               &wwAlternatingOper_,
@@ -901,11 +960,11 @@ void Boiler::process_UBAParameterWW(std::shared_ptr<const Telegram> telegram) {
     // has_bitupdate(telegram, wwEquipt_,0,3);  //  8=boiler has ww
     has_update(telegram, wwActivated_, 1); // 0xFF means on
     has_update(telegram, wwSelTemp_, 2);
-    has_update(telegram, wwHystOn_, 3);          // Hyst on (default -5)
-    has_update(telegram, wwHystOff_, 4);         // Hyst off (default -1)
-    has_update(telegram, wwFlowTempOffset_, 5);  // default 40
-    has_update(telegram, wwCircPump_, 6);        // 0xFF means on
-    has_enumupdate(telegram, wwCircMode_, 7, 1); // 1=1x3min 6=6x3min 7=continuous
+    has_update(telegram, wwHystOn_, 3);         // Hyst on (default -5)
+    has_update(telegram, wwHystOff_, 4);        // Hyst off (default -1)
+    has_update(telegram, wwFlowTempOffset_, 5); // default 40
+    has_update(telegram, wwCircPump_, 6);       // 0xFF means on
+    has_update(telegram, wwCircMode_, 7);       // 0=off, 1=1x3min 6=6x3min 7=continuous
     has_update(telegram, wwDisinfectionTemp_, 8);
     has_bitupdate(telegram, wwChargeType_, 10, 0); // 0 = charge pump, 0xff = 3-way valve
 
@@ -1018,9 +1077,11 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
 /*
  * UBAMonitorSlowPlus2 - type 0xE3
  * 88 00 E3 00 04 00 00 00 00 01 00 00 00 00 00 02 22 2B 64 46 01 00 00 61
+ * https://github.com/Th3M3/buderus_ems-wiki/blob/master/Quelle_08.md
+ * https://github.com/emsesp/EMS-ESP32/issues/908
  */
 void Boiler::process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, heatingPump2Mod_, 13); // Heat Pump Modulation
+    has_update(telegram, absBurnPow_, 13); // current burner absolute power (percent of rating plate power)
 }
 
 /*
@@ -1078,7 +1139,7 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwHystOff_, 8);
     has_update(telegram, wwFlowTempOffset_, 9);
     has_update(telegram, wwCircPump_, 10);         // 0x01 means yes
-    has_enumupdate(telegram, wwCircMode_, 11, 1);  // 1=1x3min... 6=6x3min, 7=continuous
+    has_update(telegram, wwCircMode_, 11);         // 0=off, 1=1x3min... 6=6x3min, 7=continuous
     has_update(telegram, wwDisinfectionTemp_, 12); // setting here, status in E9
     has_update(telegram, wwAlternatingOper_, 14);  // 0x01 means enabled
     has_update(telegram, wwSelTempSingle_, 16);
@@ -1105,6 +1166,7 @@ void Boiler::process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram, wwSetTemp_, 0);
     has_update(telegram, wwCurTemp_, 1);
     has_update(telegram, wwCurTemp2_, 3);
+    has_update(telegram, wwCurFlow_, 11);
 
     has_update(telegram, wwWorkM_, 14, 3);  // force to 3 bytes
     has_update(telegram, wwStarts_, 17, 3); // force to 3 bytes
@@ -1391,8 +1453,7 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
             snprintf(&code[3], sizeof(code) - 3, "(%d) %02d.%02d.%04d %02d:%02d - now", codeNo, start_day, start_month, start_year, start_hour, start_min);
         }
     } else { // no clock, the uptime is stored https://github.com/emsesp/EMS-ESP32/issues/121
-        uint32_t starttime = 0;
-        uint32_t endtime   = 0;
+        uint32_t starttime, endtime;
         telegram->read_value(starttime, 11, 3);
         telegram->read_value(endtime, 16, 3);
         snprintf(&code[3], sizeof(code) - 3, "(%d) @uptime %d - %d min", codeNo, starttime, endtime);
@@ -1440,6 +1501,8 @@ void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpHystCool_, 35); // is / 5, maybe offset swapped with pool
     has_update(telegram, hpHystPool_, 33); // is / 5
     has_update(telegram, hpCircPumpWw_, 46);
+    has_update(telegram, silentFrom_, 52); // in steps of 15 min
+    has_update(telegram, silentTo_, 53);   // in steps of 15 min
 }
 
 // Boiler(0x08) -B-> All(0x00), ?(0x0488), data: 8E 00 00 00 00 00 01 03
@@ -1462,7 +1525,8 @@ void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram
     has_update(telegram, auxHeaterOff_, 2);
     has_update(telegram, auxHeatMode_, 4); // eco/comfort
     has_update(telegram, tempParMode_, 5);
-    has_update(telegram, auxMaxTemp_, 14);     // is *10
+    has_update(telegram, auxMaxLimit_, 14);    // is * 10
+    has_update(telegram, auxLimitStart_, 15);  // is * 10
     has_update(telegram, auxHeaterDelay_, 16); // is / 10
 }
 
@@ -1472,6 +1536,25 @@ void Boiler::process_HpDhwSettings(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwComfOffTemp_, 1);
     has_update(telegram, wwEcoOffTemp_, 0);
     has_update(telegram, wwEcoPlusOffTemp_, 5);
+}
+
+// 0x49C:
+// Boiler(0x08) -B-> All(0x00), ?(0x049C), data: 00 00 00 00
+void Boiler::process_HpSettings2(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, vp_cooling_, 3);
+}
+
+// 0x49D
+// Boiler(0x08) -B-> All(0x00), ?(0x049D), data: 00 00 00 00 00 00 00 00 00 00 00 00
+void Boiler::process_HpSettings3(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, heatCable_, 2);
+    has_update(telegram, VC0valve_, 3);
+    has_update(telegram, primePump_, 4);
+    has_update(telegram, primePumpMod_, 5);
+    has_update(telegram, hp3wayValve_, 6);
+    has_update(telegram, elHeatStep1_, 7);
+    has_update(telegram, elHeatStep2_, 8);
+    has_update(telegram, elHeatStep3_, 9);
 }
 
 /*
@@ -1900,13 +1983,15 @@ bool Boiler::set_pump_delay(const char * value, const int8_t id) {
 // note some boilers do not have this setting, than it's done by thermostat
 // on a RC35 it's by EMSESP::send_write_request(0x37, 0x10, 2, &set, 1, 0); (set is 1,2,3) 1=hot, 2=eco, 3=intelligent
 // on a RC310 it's 1=high, 2=eco
+// eco key on controller: tele.05, offset 70: 0xAA =eco, 0x55= comfort, https://github.com/emsesp/EMS-ESP32/issues/908
 bool Boiler::set_ww_mode(const char * value, const int8_t id) {
     uint8_t set;
-    uint8_t comfort[] = {0x00, 0xD8, 0xEC};
+    uint8_t comfort[] = {0x00, 0xD8, 0xEC}; // heat, eco, intelligent
 
     if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
         if (Helpers::value2enum(value, set, FL_(enum_comfort1))) {
             write_command(EMS_TYPE_UBAParameterWWPlus, 13, comfort[set], EMS_TYPE_UBAParameterWWPlus);
+            write_command(0x05, 70, set ? 0xAA : 0x55); //
             return true;
         }
     } else {
@@ -2043,7 +2128,7 @@ bool Boiler::set_ww_circulation_pump(const char * value, const int8_t id) {
 }
 
 // Set the mode of circulation, 1x3min, ... 6x3min, continuous
-// true = on, false = off
+// if 0-off, switching is not possibe, if 1-7 switching to off is not possible
 bool Boiler::set_ww_circulation_mode(const char * value, const int8_t id) {
     uint8_t v;
     if (!Helpers::value2enum(value, v, FL_(enum_freq))) {
@@ -2051,9 +2136,9 @@ bool Boiler::set_ww_circulation_mode(const char * value, const int8_t id) {
     }
 
     if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
-        write_command(EMS_TYPE_UBAParameterWWPlus, 11, v + 1, EMS_TYPE_UBAParameterWWPlus);
+        write_command(EMS_TYPE_UBAParameterWWPlus, 11, v, EMS_TYPE_UBAParameterWWPlus);
     } else {
-        write_command(EMS_TYPE_UBAParameterWW, 7, v + 1, EMS_TYPE_UBAParameterWW);
+        write_command(EMS_TYPE_UBAParameterWW, 7, v, EMS_TYPE_UBAParameterWW);
     }
 
     return true;
@@ -2255,6 +2340,24 @@ bool Boiler::set_silentMode(const char * value, const int8_t id) {
     return true;
 }
 
+bool Boiler::set_silentFrom(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(0x484, 52, v / 15, 0x484);
+    return true;
+}
+
+bool Boiler::set_silentTo(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(0x484, 53, v / 15, 0x484);
+    return true;
+}
+
 bool Boiler::set_minTempSilent(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2temperature(value, v)) {
@@ -2311,10 +2414,10 @@ bool Boiler::set_auxHeatMode(const char * value, const int8_t id) {
     return false;
 }
 
-bool Boiler::set_auxMaxTemp(const char * value, const int8_t id) {
+bool Boiler::set_auxLimit(const char * value, const int8_t id) {
     float v;
     if (Helpers::value2float(value, v)) {
-        write_command(0x491, 14, (uint8_t)(v * 10), 0x491);
+        write_command(0x491, id, (uint8_t)(v * 10), 0x491);
         return true;
     }
     return false;
@@ -2376,17 +2479,76 @@ bool Boiler::set_hpCircPumpWw(const char * value, const int8_t id) {
     return false;
 }
 
+bool Boiler::set_vp_cooling(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x49C, 3, v ? 1 : 0, 0x49C);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_heatCable(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x49D, 2, v ? 1 : 0, 0x49D);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_VC0valve(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x49D, 3, v ? 1 : 0, 0x49D);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_primePump(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x49D, 4, v ? 1 : 0, 0x49D);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_primePumpMod(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        write_command(0x49D, 5, v, 0x49D);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_hp3wayValve(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x49D, 6, v ? 1 : 0, 0x49D);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_elHeatStep(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x49D, 6 + id, v ? 1 : 0, 0x49D);
+        return true;
+    }
+    return false;
+}
+
 // dhw alternating operation, turn on/off; heatpumps only?
 bool Boiler::set_wwAlternatingOper(const char * value, const int8_t id) {
     bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
-    // if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) { // do we need/want this?
     write_command(EMS_TYPE_UBAParameterWWPlus, 14, v ? 1 : 0, EMS_TYPE_UBAParameterWWPlus);
-    // } else {
-    //     write_command(EMS_TYPE_UBAParameterWW, 14, v ? 0xFF : 0, EMS_TYPE_UBAParameterWW);
-    // }
     return true;
 }
 

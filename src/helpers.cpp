@@ -249,10 +249,11 @@ char * Helpers::render_value(char * result, const double value, const int8_t for
         return nullptr;
     }
 
-    uint32_t p[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
+    uint32_t p[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
 
     char * ret   = result;
-    auto   whole = (int32_t)value;
+    double v     = value < 0 ? value - 1.0 / (2 * p[format]) : value + 1.0 / (2 * p[format]);
+    auto   whole = (int32_t)v;
 
     itoa(whole, result, 10);
 
@@ -261,7 +262,7 @@ char * Helpers::render_value(char * result, const double value, const int8_t for
     }
 
     *result++    = '.';
-    auto decimal = abs((int32_t)((value - whole) * p[format]));
+    auto decimal = abs((int32_t)((v - whole) * p[format]));
     for (int8_t i = 1; i < format; i++) {
         if (decimal < p[i]) {
             *result++ = '0'; // add leading zeros
@@ -776,7 +777,7 @@ const char * Helpers::translated_word(const char * const * strings, const bool f
     }
 
     // see how many translations we have for this entity. if there is no translation for this, revert to EN
-    if (force_en || (Helpers::count_items(strings) >= language_index + 1 && strlen(strings[language_index]))) {
+    if (!force_en && (Helpers::count_items(strings) >= language_index + 1 && strlen(strings[language_index]))) {
         index = language_index;
     }
     return strings[index];

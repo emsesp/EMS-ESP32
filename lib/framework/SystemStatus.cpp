@@ -31,12 +31,24 @@ void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
     root["fs_used"]          = FSused;
     root["fs_free"]          = emsesp::EMSESP::system_.FStotal() - FSused;
     root["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+
     if (emsesp::EMSESP::system_.PSram()) {
         root["psram_size"] = emsesp::EMSESP::system_.PSram();
         root["free_psram"] = ESP.getFreePsram() / 1024;
     }
-    const esp_partition_t * factory_partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
-    root["has_loader"]                        = factory_partition != NULL;
+
+    const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
+    if (partition != NULL) { // factory partition found
+        root["has_loader"] = true;
+    } else { // check for not empty, smaller OTA partition
+        partition = esp_ota_get_next_update_partition(NULL);
+        if (partition) {
+            uint64_t buffer;
+            esp_partition_read(partition, 0, &buffer, 8);
+            const esp_partition_t * running = esp_ota_get_running_partition();
+            root["has_loader"]              = (buffer != 0xFFFFFFFFFFFFFFFF && running->size != partition->size);
+        }
+    }
 
     response->setLength();
     request->send(response);
