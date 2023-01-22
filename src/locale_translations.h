@@ -34,18 +34,18 @@
 
 // device types, as display in Web and Console
 // TODO need completed translations
-MAKE_PSTR_LIST(boiler_device, "Boiler", "Kessel", "Boiler")
-MAKE_PSTR_LIST(thermostat_device, "Thermostat", "Thermostat", "Thermostaat")
-MAKE_PSTR_LIST(heatpump_device, "Heat Pump", "Wärmepumpe", "Warmtepomp")
-MAKE_PSTR_LIST(solar_device, "Solar Module", "Solarmodul", "Solar Module")
-MAKE_PSTR_LIST(connect_device, "Connect Module", "Verbindungsmodul", "Connect Module")
-MAKE_PSTR_LIST(mixer_device, "Mixer Module", "Mischermodul", "Mixer Module")
-MAKE_PSTR_LIST(controller_device, "Controller Module", "Kontrollmodul", "Controller Module")
-MAKE_PSTR_LIST(switch_device, "Switch Module", "Schaltmodul", "Switch Module")
-MAKE_PSTR_LIST(gateway_device, "Gateway Module", "Gateway Modul", "Gateway Module")
-MAKE_PSTR_LIST(alert_device, "Alert Module", "Alarmmodul", "Alert Module")
-MAKE_PSTR_LIST(pump_device, "Pump Module", "Pumpenmodul", "Pump Module")
-MAKE_PSTR_LIST(heatsource_device, "Heatsource", "Heizquelle", "Heatsource")
+MAKE_PSTR_LIST(boiler_device, "Boiler", "Kessel", "Boiler", "Värmeanna")
+MAKE_PSTR_LIST(thermostat_device, "Thermostat", "Thermostat", "Thermostaat", "Termostat")
+MAKE_PSTR_LIST(heatpump_device, "Heat Pump", "Wärmepumpe", "Warmtepomp", "Värmepump")
+MAKE_PSTR_LIST(solar_device, "Solar Module", "Solarmodul", "Solar Module", "Solmodul")
+MAKE_PSTR_LIST(connect_device, "Connect Module", "Verbindungsmodul", "Connect Module", "Uppkopplingsmodul")
+MAKE_PSTR_LIST(mixer_device, "Mixer Module", "Mischermodul", "Mixer Module", "Blandningsmodul")
+MAKE_PSTR_LIST(controller_device, "Controller Module", "Kontrollmodul", "Controller Module", "Styrmodul")
+MAKE_PSTR_LIST(switch_device, "Switch Module", "Schaltmodul", "Switch Module", "Relämodul")
+MAKE_PSTR_LIST(gateway_device, "Gateway Module", "Gateway Modul", "Gateway Module", "Gateway")
+MAKE_PSTR_LIST(alert_device, "Alert Module", "Alarmmodul", "Alert Module", "Larmmodul")
+MAKE_PSTR_LIST(pump_device, "Pump Module", "Pumpenmodul", "Pump Module", "Pumpmodul")
+MAKE_PSTR_LIST(heatsource_device, "Heatsource", "Heizquelle", "Heatsource", "Värmekälla")
 MAKE_PSTR_LIST(sensors_device, "Sensors", "Sensoren", "Sensoren", "Sensorer", "czujniki", "Sensorer", "Capteurs")
 
 // commands
@@ -157,7 +157,7 @@ MAKE_PSTR_LIST(blocking, "blocking", "Blockierung", "Blokkering", "Blockering", 
 MAKE_PSTR_LIST(extern, "extern", "extern", "extern", "extern", "zewnętrzny", "ekstern", "externe")
 MAKE_PSTR_LIST(intern, "intern", "intern", "intern", "intern", "wewnętrzny", "intern", "interne")
 MAKE_PSTR_LIST(lower, "lower", "niedirger", "lager", "lägre", "mniejszy", "nedre", "inférieur")
-MAKE_PSTR_LIST(error, "error", "Fehler", "error", "error", "błąd", "", "erreur") // TODO translate
+MAKE_PSTR_LIST(error, "error", "Fehler", "error", "Fel", "błąd", "", "erreur") // TODO translate
 MAKE_PSTR_LIST(na, "n/a", "n/a", "n/a", "n/a", "nd.", "", "n/c") // TODO translate
 
 // boiler
@@ -187,13 +187,13 @@ MAKE_PSTR_LIST(valve, "valve", "Ventil", "Klep", "Ventil", "zawór", "ventil", "
 MAKE_PSTR_LIST(none, "none", "keine", "geen", "ingen", "brak", "ingen", "aucun")
 MAKE_PSTR_LIST(hot_water, "hot water", "Warmwasser", "warm water", "varmvatten", "c.w.u.", "varmtvann", "eau chaude")
 MAKE_PSTR_LIST(pool, "pool", "Pool", "zwembad", "pool", "basen", "basseng", "piscine")
-MAKE_PSTR_LIST(outside_temp_alt, "outside temperature alt.", "Außentemp. alternativ", "", "", "temp. zewn. alternat.", "", "température extérieure alternative") // TODO translate
-MAKE_PSTR_LIST(outside_temp_par, "outside temperature parallel", "Außentemp. parallel", "", "", "temp. zewn. równoległa", "", "température extérieure parallèle") // TODO translate
-MAKE_PSTR_LIST(hp_prefered, "heatpump prefered", "Wärmepumpe bevorzugt", "", "", "preferowana pompa ciepła", "", "pompe à chaleur préférée") // TODO translate
-MAKE_PSTR_LIST(boiler_only, "boiler only", "nur Kessel", "", "", "tylko kocioł", "", "chaudière uniquement") // TODO translate
-MAKE_PSTR_LIST(reduced_output, "reduced output", "Reduzierte Leistung", "", "", "zmniejszona wydajność", "", "sortie réduite") // TODO translate
-MAKE_PSTR_LIST(switchoff, "switch off hp", "WP ausschalten", "", "", "wyłącz pompę ciepła", "", "éteindre la PAC") // TODO translate
-MAKE_PSTR_LIST(perm, "perm. reduced", "perm. reduziert", "", "", "stale zmniejszona wydajność", "", "réduction permanente") // TODO translate
+MAKE_PSTR_LIST(outside_temp_alt, "outside temperature alt.", "Außentemp. alternativ", "", "Alternativ utomhustemp.", "temp. zewn. alternat.", "", "température extérieure alternative") // TODO translate
+MAKE_PSTR_LIST(outside_temp_par, "outside temperature parallel", "Außentemp. parallel", "", "Parallell utomhustemp.", "temp. zewn. równoległa", "", "température extérieure parallèle") // TODO translate
+MAKE_PSTR_LIST(hp_prefered, "heatpump prefered", "Wärmepumpe bevorzugt", "", "Värmepump föredraget", "preferowana pompa ciepła", "", "pompe à chaleur préférée") // TODO translate
+MAKE_PSTR_LIST(boiler_only, "boiler only", "nur Kessel", "", "Värmepanna enbart", "tylko kocioł", "", "chaudière uniquement") // TODO translate
+MAKE_PSTR_LIST(reduced_output, "reduced output", "Reduzierte Leistung", "", "Reducerad produktion", "zmniejszona wydajność", "", "sortie réduite") // TODO translate
+MAKE_PSTR_LIST(switchoff, "switch off hp", "WP ausschalten", "", "Värmepump avstängd", "wyłącz pompę ciepła", "", "éteindre la PAC") // TODO translate
+MAKE_PSTR_LIST(perm, "perm. reduced", "perm. reduziert", "", "Permanent reducerad", "stale zmniejszona wydajność", "", "réduction permanente") // TODO translate
 
 // thermostat
 MAKE_PSTR_LIST(seltemp, "selTemp", "Solltemperatur", "Doeltemperatuur", "Börtemperatur", "temperatura zadana", "innstilt temperatur", "consigne température")
