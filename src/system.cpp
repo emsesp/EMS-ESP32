@@ -244,23 +244,21 @@ void System::syslog_init() {
         syslog_port_          = settings.syslog_port;
     });
 #ifndef EMSESP_STANDALONE
-    if (!syslog_.started()) {
+    if (syslog_enabled_) {
         // start & configure syslog
-        // if (!was_enabled) {
-        if (!syslog_.started()) {
+        if (!was_enabled) {
             syslog_.start();
             EMSESP::logger().info("Starting Syslog");
         }
         syslog_.log_level((uuid::log::Level)syslog_level_);
         syslog_.mark_interval(syslog_mark_interval_);
+        syslog_.hostname(hostname().c_str());
 
         IPAddress addr;
         if (!addr.fromString(syslog_host_.c_str())) {
             addr = (uint32_t)0;
         }
         syslog_.destination(addr, syslog_port_);
-
-        syslog_.hostname(hostname().c_str());
 
         // register the command
         // Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, FL_(changeloglevel_cmd), CommandFlag::ADMIN_ONLY);
@@ -1054,6 +1052,7 @@ bool System::check_upgrade(bool factory_settings) {
 
     version::Semver200_version settings_version(settingsVersion);
 
+#if defined(EMSESP_DEBUG)
     if (!missing_version) {
         LOG_INFO("Current version from settings is %d.%d.%d-%s",
                  settings_version.major(),
@@ -1061,6 +1060,7 @@ bool System::check_upgrade(bool factory_settings) {
                  settings_version.patch(),
                  settings_version.prerelease().c_str());
     }
+#endif
 
     // always save the new version to the settings
     EMSESP::webSettingsService.update(
