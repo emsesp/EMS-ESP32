@@ -7,6 +7,7 @@
 import argparse
 import requests
 import time
+from timeit import default_timer as timer
 import platform    # For getting the operating system name
 import subprocess  # For executing a shell command
 from termcolor import cprint
@@ -14,9 +15,19 @@ from termcolor import cprint
 def print_success(x): return cprint(x, 'green')
 def print_fail(x): return cprint(x, 'red')
 
-def run_test(ip, wait, name, token):
+def ping_until_up(ip, text):
+    print(text + "...", flush=True, end="")
+    param = '-n' if platform.system().lower()=='windows' else '-c'
+    command = ["ping", param, "2", ip]
+    while True:
+        if (subprocess.run(args=command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0):
+            print_success("Connected")
+            return
+        print(".", flush=True, end="")
+        time.sleep(1)
 
-    WAIT_REBOOT = 20
+def run_test(ip, wait, name, token):
+    WAIT_REBOOT = 10
     BASE_URL = "http://" + str(ip)
     INFO_URL = BASE_URL + "/api/system/info"
     RESTART_URL = BASE_URL + "/api/system/restart"
@@ -25,6 +36,8 @@ def run_test(ip, wait, name, token):
     GET_HEADERS_SECURE = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + str(token) }
     # BODY = json.dumps({ "value": 22.5 })
 
+    start = timer()
+
     # Print welcome message
     print()
     print("Benchmarking EMS-ESP, memory profiling")
@@ -32,55 +45,57 @@ def run_test(ip, wait, name, token):
     print(" Test Name: " + name)
     print(" 7 steps will run now:")
     print()
+    end = timer()
 
     # check if IP exists
-    print("1. Checking if EMS-ESP is reachable...", end="")
-    param = '-n' if platform.system().lower()=='windows' else '-c'
-    command = ["ping", param, "1", "-w2", ip]
-    if (subprocess.run(args=command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode != 0):
-        print_fail("Cannot connect to EMS-ESP")
-        return
-    print_success("Connected")
+    ping_until_up(ip, "(" + str(round(end - start, 1)) + ")  1. Checking if EMS-ESP is reachable")
+    end = timer()
 
     # Restart EMS-ESP
-    print("2. Doing a cold restart...", end="")
+    print("(" + str(round(end - start, 1)) + ")  2. Doing a cold restart...", end="")
     response = requests.get(RESTART_URL, headers=GET_HEADERS_SECURE, verify=False)
     if (response.status_code != 200):
-        print_fail("Failed.")
+        print_fail("Failed")
         return
     print_success("Success")
+    end = timer()
 
     # Wait for EMS-ESP to come back up and reconnect to WiFi
-    print("3. Waiting " + str(WAIT_REBOOT) + " seconds for EMS-ESP to come back up...")
-    time.sleep(WAIT_REBOOT)
+    ping_until_up(ip, "(" + str(round(end - start, 1)) + ")  3. Waiting for EMS-ESP to come back online")
+    end = timer()
 
-    print("4. Getting initial memory stats", end="")
+    print("(" + str(round(end - start, 1)) + ")  4. Getting initial memory stats...", flush=True, end="")
+    time.sleep(1)
     response = requests.get(INFO_URL, headers=GET_HEADERS, verify=False)
     uptime_a = response.json()['System Info']['uptime (seconds)']
     freemem_a = response.json()['System Info']['free mem']
     maxalloc_a = response.json()['System Info']['max alloc']
-    print(" -> uptime is " + str(uptime_a) + " secs, Free mem/Max alloc is " + str(freemem_a) + "/" + str(maxalloc_a) )
+    print_success("Uptime is " + str(uptime_a) + " secs, Free mem/Max alloc is " + str(freemem_a) + "/" + str(maxalloc_a) )
+    end = timer()
 
     # run test
-    print("5. Running test called '" + name + "'", end="")
+    print("(" + str(round(end - start, 1)) + ")  5. Running test called '" + name + "'...", end="")
     response = requests.get(TEST_URL, headers=GET_HEADERS, verify=False)
     test_output = response.json()['message']
     if (test_output != 'OK'):
-        print_fail(" -> Test Failed!")
+        print_fail("Test Failed!")
         return
-    print_success(" -> Test ran successfully")
+    print_success("Test ran successfully")
+    end = timer()
 
-    # wait 10 seconds
-    print("6. Waiting for " + str(wait) + " seconds...")
+    # wait n seconds
+    print("(" + str(round(end - start, 1)) + ")  6. Waiting for " + str(wait) + " seconds...", flush=True, end="")
     time.sleep(wait)
+    print_success("Done")
+    end = timer()
 
     # get latest stats
-    print("7. Getting latest memory stats", end="")
+    print("(" +  str(round(end - start, 1)) + ") 7. Getting latest memory stats...", end="")
     response = requests.get(INFO_URL, headers=GET_HEADERS, verify=False)
     uptime_b = response.json()['System Info']['uptime (seconds)']
     freemem_b = response.json()['System Info']['free mem']
     maxalloc_b = response.json()['System Info']['max alloc']
-    print(" -> uptime is " + str(uptime_b) + " secs, Free mem/Max alloc is " + str(freemem_b) + "/" + str(maxalloc_b) )
+    print_success("Uptime is " + str(uptime_b) + " secs, Free mem/Max alloc is " + str(freemem_b) + "/" + str(maxalloc_b) )
     print()
 
     # check if it worked and report back
@@ -99,7 +114,7 @@ def run_test(ip, wait, name, token):
 parser = argparse.ArgumentParser(description="Benchmark EMS-ESP, memory profiler")
 parser.add_argument("-i", "--ip", metavar="IP", type=str, default="ems-esp.local", help="IP address of EMS-ESP")
 parser.add_argument("-w", "--wait", metavar="WAIT", type=int, default="10", help="time to wait between test")
-parser.add_argument("-n", "--name", metavar="NAME", type=str, default="general", help="Name of test to run")
+parser.add_argument("-n", "--name", metavar="NAME", type=str, default="memory", help="Name of test to run")
 parser.add_argument("-t", "--token", metavar="TOKEN", type=str, help="Bearer Token")
 args = parser.parse_args()
 run_test(**vars(args))
