@@ -1,6 +1,14 @@
+# pre-reqs:
+#  1) termcolor - install with "% python3 -m pip install --upgrade termcolor" (e.g. from PlatformIO Core CLI)
+# Run with (example):
+#  % python3 ./scripts/run_memory_test.py -i 10.10.10.20 -w 30 -t eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg
+#  Note the token is required for the Restart command
+
 import argparse
 import requests
 import time
+import platform    # For getting the operating system name
+import subprocess  # For executing a shell command
 from termcolor import cprint
 
 def print_success(x): return cprint(x, 'green')
@@ -22,11 +30,20 @@ def run_test(ip, wait, name, token):
     print("Benchmarking EMS-ESP, memory profiling")
     print(" Base URL: " + BASE_URL)
     print(" Test Name: " + name)
-    print(" 6 steps will run now:")
+    print(" 7 steps will run now:")
     print()
 
+    # check if IP exists
+    print("1. Checking if EMS-ESP is reachable...", end="")
+    param = '-n' if platform.system().lower()=='windows' else '-c'
+    command = ["ping", param, "1", "-w2", ip]
+    if (subprocess.run(args=command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode != 0):
+        print_fail("Cannot connect to EMS-ESP")
+        return
+    print_success("Connected")
+
     # Restart EMS-ESP
-    print("1. Doing a cold restart...", end="")
+    print("2. Doing a cold restart...", end="")
     response = requests.get(RESTART_URL, headers=GET_HEADERS_SECURE, verify=False)
     if (response.status_code != 200):
         print_fail("Failed.")
@@ -34,10 +51,10 @@ def run_test(ip, wait, name, token):
     print_success("Success")
 
     # Wait for EMS-ESP to come back up and reconnect to WiFi
-    print("2. Waiting " + str(WAIT_REBOOT) + " seconds for EMS-ESP to come back up...")
+    print("3. Waiting " + str(WAIT_REBOOT) + " seconds for EMS-ESP to come back up...")
     time.sleep(WAIT_REBOOT)
 
-    print("3. Getting initial memory stats", end="")
+    print("4. Getting initial memory stats", end="")
     response = requests.get(INFO_URL, headers=GET_HEADERS, verify=False)
     uptime_a = response.json()['System Info']['uptime (seconds)']
     freemem_a = response.json()['System Info']['free mem']
@@ -45,7 +62,7 @@ def run_test(ip, wait, name, token):
     print(" -> uptime is " + str(uptime_a) + " secs, Free mem/Max alloc is " + str(freemem_a) + "/" + str(maxalloc_a) )
 
     # run test
-    print("4. Running test", end="")
+    print("5. Running test called '" + name + "'", end="")
     response = requests.get(TEST_URL, headers=GET_HEADERS, verify=False)
     test_output = response.json()['message']
     if (test_output != 'OK'):
@@ -54,11 +71,11 @@ def run_test(ip, wait, name, token):
     print_success(" -> Test ran successfully")
 
     # wait 10 seconds
-    print("5. Waiting for " + str(wait) + " seconds...")
+    print("6. Waiting for " + str(wait) + " seconds...")
     time.sleep(wait)
 
     # get latest stats
-    print("6. Getting latest memory stats", end="")
+    print("7. Getting latest memory stats", end="")
     response = requests.get(INFO_URL, headers=GET_HEADERS, verify=False)
     uptime_b = response.json()['System Info']['uptime (seconds)']
     freemem_b = response.json()['System Info']['free mem']
@@ -70,9 +87,8 @@ def run_test(ip, wait, name, token):
     if (uptime_b <= uptime_a):
         print(" Error! EMS-ESP crashed and restarted :-(")
     else:
-        print_success("Success!")
-        print("In the " + str(uptime_b - uptime_a) + " seconds, we have:")
-        cprint("Free mem/Max alloc before=" + str(freemem_a) + "/" + str(maxalloc_a) +
+        print("In the " + str(uptime_b - uptime_a) + " seconds elasped, we have Free mem/Max alloc: ", end="")
+        cprint("before=" + str(freemem_a) + "/" + str(maxalloc_a) +
               " after=" + str(freemem_b) + "/" + str(maxalloc_b) +
               " diff=" + str(freemem_a - freemem_b) + "/" + str(maxalloc_a - maxalloc_b), "cyan")
 
