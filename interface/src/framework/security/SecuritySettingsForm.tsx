@@ -2,7 +2,7 @@ import { FC, useContext, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
 
 import { Button } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
+import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 import * as SecurityApi from '../../api/security';
@@ -70,10 +70,10 @@ const SecuritySettingsForm: FC = () => {
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<SaveIcon />}
+              startIcon={<WarningIcon color="warning" />}
               disabled={saving}
-              variant="outlined"
-              color="primary"
+              variant="contained"
+              color="info"
               type="submit"
               onClick={validateAndSubmit}
             >

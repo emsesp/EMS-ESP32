@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 
 import { Button, Checkbox } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
+import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 import * as SystemApi from '../../api/system';
@@ -91,10 +91,10 @@ const OTASettingsForm: FC = () => {
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<SaveIcon />}
+              startIcon={<WarningIcon color="warning" />}
               disabled={saving}
-              variant="outlined"
-              color="primary"
+              variant="contained"
+              color="info"
               type="submit"
               onClick={validateAndSubmit}
             >

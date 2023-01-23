@@ -23,7 +23,7 @@ import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/r
 
 import { useSnackbar } from 'notistack';
 
-import SaveIcon from '@mui/icons-material/Save';
+import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
@@ -571,7 +571,12 @@ const SettingsCustomization: FC = () => {
           <Box flexGrow={1}>
             <ButtonRow>
               {num_changes !== 0 && (
-                <Button startIcon={<SaveIcon />} variant="outlined" color="primary" onClick={() => saveCustomization()}>
+                <Button
+                  startIcon={<WarningIcon color="warning" />}
+                  variant="contained"
+                  color="info"
+                  onClick={() => saveCustomization()}
+                >
                   {LL.APPLY_CHANGES(num_changes)}
                 </Button>
               )}
@@ -650,11 +655,11 @@ const SettingsCustomization: FC = () => {
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<SaveIcon />}
-              variant="outlined"
+              startIcon={<WarningIcon color="warning" />}
+              variant="contained"
               type="submit"
               onClick={() => updateEntity()}
-              color="warning"
+              color="info"
             >
               {LL.UPDATE()}
             </Button>

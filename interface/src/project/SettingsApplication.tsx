@@ -5,7 +5,7 @@ import { useSnackbar } from 'notistack';
 
 import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider, InputAdornment } from '@mui/material';
 
-import SaveIcon from '@mui/icons-material/Save';
+import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
@@ -645,10 +645,10 @@ const SettingsApplication: FC = () => {
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<SaveIcon />}
+              startIcon={<WarningIcon color="warning" />}
               disabled={saving}
-              variant="outlined"
-              color="primary"
+              variant="contained"
+              color="info"
               type="submit"
               onClick={validateAndSubmit}
             >

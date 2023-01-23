@@ -3,7 +3,7 @@ import { ValidateFieldsError } from 'async-validator';
 import { range } from 'lodash';
 
 import { Button, Checkbox, MenuItem } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
+import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 import { createAPSettingsValidator, validate } from '../../validators';
@@ -178,10 +178,10 @@ const APSettingsForm: FC = () => {
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<SaveIcon />}
+              startIcon={<WarningIcon color="warning" />}
               disabled={saving}
-              variant="outlined"
-              color="primary"
+              variant="contained"
+              color="info"
               type="submit"
               onClick={validateAndSubmit}
             >

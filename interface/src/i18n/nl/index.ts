@@ -14,7 +14,6 @@ const nl: Translation = {
   SU_PASSWORD: 'su Wachtwoord',
   DASHBOARD: 'Dashboard',
   SETTINGS_OF: '{0} Instellingen',
-  SAVED: 'opgeslagen',
   HELP_OF: '{0} Help',
   LOGGED_IN: 'Ingelogd als {name}',
   PLEASE_SIGNIN: 'Log in om verder te gaan',
@@ -47,7 +46,6 @@ const nl: Translation = {
   CANCEL: 'Annuleren',
   RESET: 'Reset',
   SEND: 'Verzenden',
-  SAVE: 'Opslaan',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
   REMOVE: 'Verwijderen',

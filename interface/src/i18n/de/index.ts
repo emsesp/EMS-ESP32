@@ -14,7 +14,6 @@ const de: Translation = {
   SU_PASSWORD: 'su Passwort',
   DASHBOARD: 'Kontrollzentrum',
   SETTINGS_OF: '{0} Einstellungen',
-  SAVED: 'gespeichert',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
   HELP_OF: '{0} Hilfe',
@@ -49,7 +48,6 @@ const de: Translation = {
   CANCEL: 'Abbrechen',
   RESET: 'Zurücksetzen',
   SEND: 'Senden',
-  SAVE: 'Speichern',
   REMOVE: 'Entfernen',
   PROBLEM_UPDATING: 'Problem beim Aktualisieren',
   PROBLEM_LOADING: 'Problem beim Laden',

@@ -17,7 +17,7 @@ import {
 
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
+import WarningIcon from '@mui/icons-material/Warning';
 import LockIcon from '@mui/icons-material/Lock';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -313,10 +313,10 @@ const WiFiSettingsForm: FC = () => {
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<SaveIcon />}
+              startIcon={<WarningIcon color="warning" />}
               disabled={saving}
-              variant="outlined"
-              color="primary"
+              variant="contained"
+              color="info"
               type="submit"
               onClick={validateAndSubmit}
             >

@@ -14,7 +14,6 @@ const sv: Translation = {
   SU_PASSWORD: 'su Lösenord',
   DASHBOARD: 'Kontrollpanel',
   SETTINGS_OF: '{0} Inställningar',
-  SAVED: 'Sparat',
   HELP_OF: '{0} Hjälp',
   LOGGED_IN: 'Inloggad som {name}',
   PLEASE_SIGNIN: 'Vänligen logga in för att fortsätta',
@@ -47,7 +46,6 @@ const sv: Translation = {
   CANCEL: 'Avbryt',
   RESET: 'Nollställ',
   SEND: 'Skicka',
-  SAVE: 'Spara',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
   REMOVE: 'Ta bort',

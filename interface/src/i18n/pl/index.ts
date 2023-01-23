@@ -14,7 +14,6 @@ const pl: BaseTranslation = {
   SU_PASSWORD: 'Hasło "su"',
   DASHBOARD: 'Pulpit',
   SETTINGS_OF: 'Ustawienia {0}',
-  SAVED: 'zostały zapisane.',
   HELP_OF: 'Pomoc {0}',
   LOGGED_IN: 'Zalogowano użytkownika {name}.',
   PLEASE_SIGNIN: 'Zaloguj się aby kontynuować.',
@@ -47,7 +46,6 @@ const pl: BaseTranslation = {
   CANCEL: 'Anuluj',
   RESET: 'Reset{{uj|owanie|}}',
   SEND: 'Wyślij',
-  SAVE: 'Zapisz',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
   REMOVE: 'Usuń',

@@ -14,7 +14,6 @@ const fr: Translation = {
   SU_PASSWORD: 'Mot de passe su',
   DASHBOARD: 'Tableau de bord',
   SETTINGS_OF: 'Paramètres {0}',
-  SAVED: 'sauvegardé',
   HELP_OF: 'Aide {0}',
   LOGGED_IN: 'Connecté en tant que {name}',
   PLEASE_SIGNIN: 'Veuillez vous connecter pour continuer',
@@ -47,7 +46,6 @@ const fr: Translation = {
   CANCEL: 'Annuler',
   RESET: 'Réinitialiser',
   SEND: 'Envoyer',
-  SAVE: 'Sauvegarder',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
   REMOVE: 'Enlever',

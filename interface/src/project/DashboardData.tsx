@@ -35,7 +35,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SendIcon from '@mui/icons-material/TrendingFlat';
-import SaveIcon from '@mui/icons-material/Save';
+import WarningIcon from '@mui/icons-material/Warning';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
@@ -628,11 +628,11 @@ const DashboardData: FC = () => {
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<SaveIcon />}
-              variant="outlined"
+              startIcon={<WarningIcon color="warning" />}
+              variant="contained"
               type="submit"
               onClick={() => sendSensor()}
-              color="warning"
+              color="info"
             >
               {LL.UPDATE()}
             </Button>
@@ -1229,11 +1229,11 @@ const DashboardData: FC = () => {
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<SaveIcon />}
-              variant="outlined"
+              startIcon={<WarningIcon color="warning" />}
+              variant="contained"
               type="submit"
               onClick={() => sendAnalog()}
-              color="warning"
+              color="info"
             >
               {LL.UPDATE()}
             </Button>

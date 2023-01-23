@@ -14,7 +14,6 @@ const no: Translation = {
   SU_PASSWORD: 'su Passord',
   DASHBOARD: 'Dashboard',
   SETTINGS_OF: '{0} Innstillinger',
-  SAVED: 'lagret',
   HELP_OF: '{0} Hjelp',
   LOGGED_IN: 'Logget in som {name}',
   PLEASE_SIGNIN: 'Venligst logge inn for å fortsetta',
@@ -47,7 +46,6 @@ const no: Translation = {
   CANCEL: 'Avbryt',
   RESET: 'Nullstill',
   SEND: 'Send',
-  SAVE: 'Lagre',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
   REMOVE: 'Fjern',
