@@ -61,6 +61,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
         setErrorMessage(message);
       } finally {
         setSaving(false);
+        setDirtyFlags([]);
       }
     },
     [update, enqueueSnackbar, LL]
