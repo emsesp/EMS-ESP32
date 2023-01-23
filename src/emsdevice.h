@@ -417,6 +417,16 @@ class EMSdevice {
     uint8_t count_entities();
     bool    has_entities() const;
 
+    /*
+    void reserve_device_values(uint8_t elements) {
+        devicevalues_.reserve(elements);
+    }
+
+    void reserve_telegram_functions(uint8_t elements) {
+        telegram_functions_.reserve(elements);
+    }
+    */
+
 #if defined(EMSESP_STANDALONE)
     void dump_value_info();
 #endif
@@ -450,10 +460,6 @@ class EMSdevice {
             , process_function_(process_function) {
         }
     };
-
-#ifdef EMSESP_STANDALONE
-    void debug_print_dv(const char * shortname);
-#endif
 
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 
