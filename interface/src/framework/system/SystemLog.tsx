@@ -226,10 +226,10 @@ const SystemLog: FC = () => {
               valueLabelDisplay="auto"
               name="max_messages"
               marks={[
-                { value: 25, label: '25' },
-                { value: 50, label: '50' },
-                { value: 75, label: '75' },
-                { value: 100, label: '100' }
+                { value: 25, label: '25%' },
+                { value: 50, label: '50%' },
+                { value: 75, label: '75%' },
+                { value: 100, label: '100%' }
               ]}
               step={25}
               min={25}

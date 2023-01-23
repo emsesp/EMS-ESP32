@@ -38,7 +38,7 @@ const APStatusForm: FC = () => {
       case APNetworkStatus.ACTIVE:
         return LL.ACTIVE();
       case APNetworkStatus.INACTIVE:
-        return LL.INACTIVE();
+        return LL.INACTIVE(0);
       case APNetworkStatus.LINGERING:
         return 'Lingering until idle';
       default:
