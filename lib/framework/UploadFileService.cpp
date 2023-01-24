@@ -38,7 +38,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
 #endif
 
         is_firmware = false;
-        if ((extension == "bin") && (fsize > 1500000)) {
+        if ((extension == "bin") && (fsize > 1000000)) {
             is_firmware = true;
         } else if (extension == "json") {
             md5[0] = '\0'; // clear md5
