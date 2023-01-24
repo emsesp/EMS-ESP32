@@ -204,7 +204,7 @@ const pl: BaseTranslation = {
   FLASH: 'Flash (rozmiar / taktowanie)',
   APPSIZE: 'Aplikacja (wykorzystane / wolne)',
   FILESYSTEM: 'System plików (wykorzystane / wolne)',
-  BUFFER_SIZE: 'Maksymalna wielkość bufora',
+  BUFFER_SIZE: 'Maksymalna pojemność bufora (ilość wpisów)',
   COMPACT: 'Kompaktowy',
   ENABLE_OTA: 'Aktywuj aktualizację OTA',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Pobierz personalizacje',
