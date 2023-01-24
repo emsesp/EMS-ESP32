@@ -17,6 +17,9 @@ import {
   Link
 } from '@mui/material';
 
+import { MessageBox } from '../components';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+
 import { Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
@@ -41,11 +44,14 @@ import { extractErrorMessage, updateValue } from '../utils';
 import { DeviceShort, Devices, DeviceEntity, DeviceEntityMask } from './types';
 
 import { useI18nContext } from '../i18n/i18n-react';
+import RestartMonitor from '../framework/system/RestartMonitor';
 
 export const APIURL = window.location.origin + '/api/';
 
 const SettingsCustomization: FC = () => {
   const { LL } = useI18nContext();
+  const [restarting, setRestarting] = useState<boolean>(false);
+  const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -66,7 +72,7 @@ const SettingsCustomization: FC = () => {
 
   const entities_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: 120px repeat(1, minmax(80px, 1fr)) 45px 45px 120px;
+      --data-table-library_grid-template-columns: 150px repeat(1, minmax(80px, 1fr)) 45px 45px 120px;
     `,
     BaseRow: `
       font-size: 14px;
@@ -210,6 +216,9 @@ const SettingsCustomization: FC = () => {
     if ((m & 8) === 8) {
       new_masks.push('8');
     }
+    if ((m & 128) === 128) {
+      new_masks.push('128');
+    }
     return new_masks;
   };
 
@@ -249,6 +258,15 @@ const SettingsCustomization: FC = () => {
     }
   };
 
+  const restart = async () => {
+    try {
+      await EMSESP.restart();
+      setRestarting(true);
+    } catch (error) {
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+    }
+  };
+
   const saveCustomization = async () => {
     if (devices && deviceEntities && selectedDevice !== -1) {
       const masked_entities = deviceEntities
@@ -277,6 +295,8 @@ const SettingsCustomization: FC = () => {
         });
         if (response.status === 200) {
           enqueueSnackbar(LL.CUSTOMIZATIONS_SAVED(), { variant: 'success' });
+        } else if (response.status === 201) {
+          setRestartNeeded(true);
         } else {
           enqueueSnackbar(LL.PROBLEM_UPDATING(), { variant: 'error' });
         }
@@ -300,7 +320,8 @@ const SettingsCustomization: FC = () => {
             <OptionIcon type="favorite" isSet={true} />={LL.CUSTOMIZATIONS_HELP_2()}&nbsp;&nbsp;
             <OptionIcon type="readonly" isSet={true} />={LL.CUSTOMIZATIONS_HELP_3()}&nbsp;&nbsp;
             <OptionIcon type="api_mqtt_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_4()}&nbsp;&nbsp;
-            <OptionIcon type="web_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_5()}
+            <OptionIcon type="web_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_5()}&nbsp;&nbsp;
+            <OptionIcon type="deleted" isSet={true} />={LL.CUSTOMIZATIONS_HELP_6()}
           </Typography>
         </Box>
         <ValidatedTextField
@@ -413,6 +434,9 @@ const SettingsCustomization: FC = () => {
               <ToggleButton value="1">
                 <OptionIcon type="web_exclude" isSet={true} />
               </ToggleButton>
+              <ToggleButton value="128">
+                <OptionIcon type="deleted" isSet={true} />
+              </ToggleButton>
             </ToggleButtonGroup>
           </Grid>
 
@@ -467,53 +491,61 @@ const SettingsCustomization: FC = () => {
                 {tableList.map((de: DeviceEntity) => (
                   <Row key={de.id} item={de} onClick={() => editEntity(de)}>
                     <Cell stiff>
-                      <ToggleButtonGroup
-                        size="small"
-                        color="secondary"
-                        value={getMaskString(de.m)}
-                        onChange={(event, mask) => {
-                          de.m = getMaskNumber(mask);
-                          if (de.n === '' && de.m & DeviceEntityMask.DV_READONLY) {
-                            de.m = de.m | DeviceEntityMask.DV_WEB_EXCLUDE;
-                          }
-                          if (de.m & DeviceEntityMask.DV_WEB_EXCLUDE) {
-                            de.m = de.m & ~DeviceEntityMask.DV_FAVORITE;
-                          }
-                          setMasks(['']);
-                        }}
-                      >
-                        <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.n === undefined}>
-                          <OptionIcon
-                            type="favorite"
-                            isSet={(de.m & DeviceEntityMask.DV_FAVORITE) === DeviceEntityMask.DV_FAVORITE}
-                          />
-                        </ToggleButton>
-                        <ToggleButton value="4" disabled={!de.w || (de.m & 3) === 3}>
-                          <OptionIcon
-                            type="readonly"
-                            isSet={(de.m & DeviceEntityMask.DV_READONLY) === DeviceEntityMask.DV_READONLY}
-                          />
-                        </ToggleButton>
-                        <ToggleButton value="2" disabled={de.n === ''}>
-                          <OptionIcon
-                            type="api_mqtt_exclude"
-                            isSet={
-                              (de.m & DeviceEntityMask.DV_API_MQTT_EXCLUDE) === DeviceEntityMask.DV_API_MQTT_EXCLUDE
+                      {!deviceEntity && (
+                        <ToggleButtonGroup
+                          size="small"
+                          color="secondary"
+                          value={getMaskString(de.m)}
+                          onChange={(event, mask) => {
+                            de.m = getMaskNumber(mask);
+                            if (de.n === '' && (de.m & DeviceEntityMask.DV_READONLY)) {
+                              de.m = de.m | DeviceEntityMask.DV_WEB_EXCLUDE;
                             }
-                          />
-                        </ToggleButton>
-                        <ToggleButton value="1" disabled={de.n === undefined}>
-                          <OptionIcon
-                            type="web_exclude"
-                            isSet={(de.m & DeviceEntityMask.DV_WEB_EXCLUDE) === DeviceEntityMask.DV_WEB_EXCLUDE}
-                          />
-                        </ToggleButton>
-                      </ToggleButtonGroup>
+                            if (de.m & DeviceEntityMask.DV_WEB_EXCLUDE) {
+                              de.m = de.m & ~DeviceEntityMask.DV_FAVORITE;
+                            }
+                            setMasks(['']);
+                          }}
+                        >
+                          <ToggleButton value="8" disabled={(de.m & 0x81) !== 0 || de.n === undefined}>
+                            <OptionIcon
+                              type="favorite"
+                              isSet={(de.m & DeviceEntityMask.DV_FAVORITE) === DeviceEntityMask.DV_FAVORITE}
+                            />
+                          </ToggleButton>
+                          <ToggleButton value="4" disabled={!de.w || (de.m & 0x83) >= 3}>
+                            <OptionIcon
+                              type="readonly"
+                              isSet={(de.m & DeviceEntityMask.DV_READONLY) === DeviceEntityMask.DV_READONLY}
+                            />
+                          </ToggleButton>
+                          <ToggleButton value="2" disabled={de.n === '' || (de.m & 0x80) !== 0}>
+                            <OptionIcon
+                              type="api_mqtt_exclude"
+                              isSet={
+                                (de.m & DeviceEntityMask.DV_API_MQTT_EXCLUDE) === DeviceEntityMask.DV_API_MQTT_EXCLUDE
+                              }
+                            />
+                          </ToggleButton>
+                          <ToggleButton value="1" disabled={de.n === undefined || (de.m & 0x80) !== 0}>
+                            <OptionIcon
+                              type="web_exclude"
+                              isSet={(de.m & DeviceEntityMask.DV_WEB_EXCLUDE) === DeviceEntityMask.DV_WEB_EXCLUDE}
+                            />
+                          </ToggleButton>
+                          <ToggleButton value="128" >
+                            <OptionIcon
+                              type="deleted"
+                              isSet={(de.m & DeviceEntityMask.DV_DELETED) === DeviceEntityMask.DV_DELETED}
+                            />
+                          </ToggleButton>
+                        </ToggleButtonGroup>
+                      )}
                     </Cell>
-                    <Cell>{formatName(de)}</Cell>
-                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}</Cell>
-                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}</Cell>
-                    <Cell>{formatValue(de.v)}</Cell>
+                    <Cell>{!deviceEntity && (formatName(de))}</Cell>
+                    <Cell>{!deviceEntity && !(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}</Cell>
+                    <Cell>{!deviceEntity && !(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}</Cell>
+                    <Cell>{!deviceEntity && (formatValue(de.v))}</Cell>
                   </Row>
                 ))}
               </Body>
@@ -552,25 +584,34 @@ const SettingsCustomization: FC = () => {
       </Typography>
       {renderDeviceList()}
       {renderDeviceData()}
-      <Box display="flex" flexWrap="wrap">
-        <Box flexGrow={1}>
+      {restartNeeded && (
+        <MessageBox my={2} level="warning" message={LL.RESTART_TEXT()}>
+          <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
+            {LL.RESTART()}
+          </Button>
+        </MessageBox>
+      )}
+      {!restartNeeded && (
+        <Box display="flex" flexWrap="wrap">
+          <Box flexGrow={1}>
+            <ButtonRow>
+              <Button startIcon={<SaveIcon />} variant="outlined" color="primary" onClick={() => saveCustomization()}>
+                {LL.SAVE()}
+              </Button>
+            </ButtonRow>
+          </Box>
           <ButtonRow>
-            <Button startIcon={<SaveIcon />} variant="outlined" color="primary" onClick={() => saveCustomization()}>
-              {LL.SAVE()}
+            <Button
+              startIcon={<SettingsBackupRestoreIcon />}
+              variant="outlined"
+              color="error"
+              onClick={() => setConfirmReset(true)}
+            >
+              {LL.RESET(0)}
             </Button>
           </ButtonRow>
         </Box>
-        <ButtonRow>
-          <Button
-            startIcon={<SettingsBackupRestoreIcon />}
-            variant="outlined"
-            color="error"
-            onClick={() => setConfirmReset(true)}
-          >
-            {LL.RESET(0)}
-          </Button>
-        </ButtonRow>
-      </Box>
+      )}
       {renderResetDialog()}
     </>
   );
@@ -582,48 +623,7 @@ const SettingsCustomization: FC = () => {
         <Dialog open={!!deviceEntity} onClose={() => setDeviceEntity(undefined)}>
           <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY() + ' "' + de.id + '"'}</DialogTitle>
           <DialogContent dividers>
-            <ToggleButtonGroup
-              size="small"
-              color="secondary"
-              value={getMaskString(de.m)}
-              onChange={(event, mask) => {
-                de.m = getMaskNumber(mask);
-                if (de.n === '' && de.m & DeviceEntityMask.DV_READONLY) {
-                  de.m = de.m | DeviceEntityMask.DV_WEB_EXCLUDE;
-                }
-                if (de.m & DeviceEntityMask.DV_WEB_EXCLUDE) {
-                  de.m = de.m & ~DeviceEntityMask.DV_FAVORITE;
-                }
-                setMasks(['']);
-              }}
-            >
-              <ToggleButton value="8" disabled={(de.m & 1) !== 0 || de.n === undefined}>
-                <OptionIcon
-                  type="favorite"
-                  isSet={(de.m & DeviceEntityMask.DV_FAVORITE) === DeviceEntityMask.DV_FAVORITE}
-                />
-              </ToggleButton>
-              <ToggleButton value="4" disabled={!de.w || (de.m & 3) === 3}>
-                <OptionIcon
-                  type="readonly"
-                  isSet={(de.m & DeviceEntityMask.DV_READONLY) === DeviceEntityMask.DV_READONLY}
-                />
-              </ToggleButton>
-              <ToggleButton value="2" disabled={de.n === ''}>
-                <OptionIcon
-                  type="api_mqtt_exclude"
-                  isSet={(de.m & DeviceEntityMask.DV_API_MQTT_EXCLUDE) === DeviceEntityMask.DV_API_MQTT_EXCLUDE}
-                />
-              </ToggleButton>
-              <ToggleButton value="1" disabled={de.n === undefined}>
-                <OptionIcon
-                  type="web_exclude"
-                  isSet={(de.m & DeviceEntityMask.DV_WEB_EXCLUDE) === DeviceEntityMask.DV_WEB_EXCLUDE}
-                />
-              </ToggleButton>
-            </ToggleButtonGroup>
-
-            <Box color="warning.main" p={0} pl={0} pr={0} mt={2} mb={2}>
+            <Box color="warning.main" mb={2}>
               <Typography variant="body2">
                 {LL.DEFAULT(1) + ' ' + LL.NAME(1)}:&nbsp;{deviceEntity.n}
               </Typography>
@@ -689,7 +689,7 @@ const SettingsCustomization: FC = () => {
 
   return (
     <SectionContent title={LL.USER_CUSTOMIZATION()} titleGutter>
-      {renderContent()}
+      {restarting ? <RestartMonitor /> : renderContent()}
       {renderEditDialog()}
     </SectionContent>
   );

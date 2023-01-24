@@ -32,7 +32,8 @@
 - Add Rego 3000, TR120RF thermostats [#917](https://github.com/emsesp/EMS-ESP32/issues/917)
 - Add config for ESP32-S3
 - Add heatpump silent mode and other entities [#896](https://github.com/emsesp/EMS-ESP32/issues/896)
-- Allow reboot to other partition (factory or asymmetric OTA)
+- Allow reboot to other partition (factory or asymetric OTA)
+- blacklist entities to remove from memory [#891](https://github.com/emsesp/EMS-ESP32/issues/891)
 
 ## Fixed
 

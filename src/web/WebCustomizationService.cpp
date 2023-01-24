@@ -235,6 +235,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request, J
 // saves it in the customization service
 // and updates the entity list real-time
 void WebCustomizationService::custom_entities(AsyncWebServerRequest * request, JsonVariant & json) {
+    bool need_reboot = false;
     if (json.is<JsonObject>()) {
         // find the device using the unique_id
         for (const auto & emsdevice : EMSESP::emsdevices) {
@@ -245,10 +246,47 @@ void WebCustomizationService::custom_entities(AsyncWebServerRequest * request, J
                     uint8_t device_id  = emsdevice->device_id();
 
                     // and set the mask and custom names immediately for any listed entities
-                    JsonArray entity_ids_json = json["entity_ids"];
+                    JsonArray                entity_ids_json = json["entity_ids"];
+                    std::vector<std::string> entity_ids;
                     for (const JsonVariant id : entity_ids_json) {
-                        emsdevice->setCustomEntity(id.as<std::string>());
+                        std::string id_s = id.as<std::string>();
+                        if (id_s[0] == '8') {
+                            entity_ids.push_back(id_s);
+                            need_reboot = true;
+                        } else {
+                            emsdevice->setCustomEntity(id_s);
+                        }
+                        // emsesp::EMSESP::logger().info(id.as<const char *>());
                     }
+                    // add deleted entities from file
+                    EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
+                        for (EntityCustomization entityCustomization : settings.entityCustomizations) {
+                            if (entityCustomization.device_id == device_id) {
+                                for (std::string entity_id : entityCustomization.entity_ids) {
+                                    uint8_t     mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
+                                    std::string name = DeviceValue::get_name(entity_id);
+                                    if (mask & 0x80) {
+                                        bool is_set = false;
+                                        for (const JsonVariant id : entity_ids_json) {
+                                            std::string id_s = id.as<std::string>();
+                                            id_s             = DeviceValue::get_name(id_s);
+                                            if (id_s == name) {
+                                                is_set      = true;
+                                                need_reboot = true;
+                                                break;
+                                            }
+                                        }
+                                        if (!is_set) {
+                                            entity_ids.push_back(entity_id);
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    });
+                    // get list of entities that have masks set or a custom fullname
+                    emsdevice->getCustomEntities(entity_ids);
 
                     // Save the list to the customization file
                     EMSESP::webCustomizationService.update(
@@ -263,18 +301,11 @@ void WebCustomizationService::custom_entities(AsyncWebServerRequest * request, J
                                 }
                             }
 
-                            if (!entity_ids_json.size()) {
-                                return StateUpdateResult::UNCHANGED; // nothing to add
-                            }
-
                             // create a new entry for this device if there are values
                             EntityCustomization new_entry;
                             new_entry.product_id = product_id;
                             new_entry.device_id  = device_id;
 
-                            // get list of entities that have masks set or a custom fullname
-                            std::vector<std::string> entity_ids;
-                            emsdevice->getCustomEntities(entity_ids);
                             new_entry.entity_ids = entity_ids;
 
                             // add the record and save
@@ -289,7 +320,7 @@ void WebCustomizationService::custom_entities(AsyncWebServerRequest * request, J
         }
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(200); // OK
+    AsyncWebServerResponse * response = request->beginResponse(need_reboot ? 201 : 200); // OK
     request->send(response);
 }
 

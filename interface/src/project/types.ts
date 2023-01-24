@@ -298,5 +298,6 @@ export enum DeviceEntityMask {
   DV_WEB_EXCLUDE = 1,
   DV_API_MQTT_EXCLUDE = 2,
   DV_READONLY = 4,
-  DV_FAVORITE = 8
+  DV_FAVORITE = 8,
+  DV_DELETED = 128
 }
