@@ -105,6 +105,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
             // BBQKees Gateway E32
             data                   = {EMSESP_DEFAULT_LED_GPIO, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0};
             settings.board_profile = "E32";
+            // TODO show MAC address in log
         } else
 #endif
         {
