@@ -1,8 +1,10 @@
 # pre-reqs:
-#  1) termcolor - install with "% python3 -m pip install --upgrade termcolor" (e.g. from PlatformIO Core CLI)
+#  1a) via python3 standalone - (sudo apt install python3-pip)
+#  1b) via PlatformIO's penv - (using the "PlatformIO Core CLI" menu option)
+#  2) install termcolor (python3 -m pip install --upgrade termcolor)
 # Run with (example):
 #  % python3 ./scripts/run_memory_test.py -i 10.10.10.20 -w 30 -t eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg
-#  Note the token is required for the Restart command
+#  Note the bearer token is required for the Restart command
 
 import argparse
 import requests
@@ -48,11 +50,11 @@ def run_test(ip, wait, name, token):
     end = timer()
 
     # check if IP exists
-    ping_until_up(ip, "(" + str(round(end - start, 1)) + ")  1. Checking if EMS-ESP is reachable")
+    ping_until_up(ip, "(" + str(round(end - start, 1)) + ")\t1. Checking if EMS-ESP is reachable")
     end = timer()
 
     # Restart EMS-ESP
-    print("(" + str(round(end - start, 1)) + ")  2. Doing a cold restart...", end="")
+    print("(" + str(round(end - start, 1)) + ")\t2. Doing a cold restart...", end="")
     response = requests.get(RESTART_URL, headers=GET_HEADERS_SECURE, verify=False)
     if (response.status_code != 200):
         print_fail("Failed")
@@ -61,10 +63,10 @@ def run_test(ip, wait, name, token):
     end = timer()
 
     # Wait for EMS-ESP to come back up and reconnect to WiFi
-    ping_until_up(ip, "(" + str(round(end - start, 1)) + ")  3. Waiting for EMS-ESP to come back online")
+    ping_until_up(ip, "(" + str(round(end - start, 1)) + ")\t3. Waiting for EMS-ESP to come back online")
     end = timer()
 
-    print("(" + str(round(end - start, 1)) + ")  4. Getting initial memory stats...", flush=True, end="")
+    print("(" + str(round(end - start, 1)) + ")\t4. Getting initial memory stats...", flush=True, end="")
     time.sleep(1)
     response = requests.get(INFO_URL, headers=GET_HEADERS, verify=False)
     uptime_a = response.json()['System Info']['uptime (seconds)']
@@ -74,7 +76,7 @@ def run_test(ip, wait, name, token):
     end = timer()
 
     # run test
-    print("(" + str(round(end - start, 1)) + ")  5. Running test called '" + name + "'...", end="")
+    print("(" + str(round(end - start, 1)) + ")\t5. Running test called '" + name + "'...", end="")
     response = requests.get(TEST_URL, headers=GET_HEADERS, verify=False)
     test_output = response.json()['message']
     if (test_output != 'OK'):
@@ -84,13 +86,13 @@ def run_test(ip, wait, name, token):
     end = timer()
 
     # wait n seconds
-    print("(" + str(round(end - start, 1)) + ")  6. Waiting for " + str(wait) + " seconds...", flush=True, end="")
+    print("(" + str(round(end - start, 1)) + ")\t6. Waiting for " + str(wait) + " seconds...", flush=True, end="")
     time.sleep(wait)
     print_success("Done")
     end = timer()
 
     # get latest stats
-    print("(" +  str(round(end - start, 1)) + ") 7. Getting latest memory stats...", end="")
+    print("(" +  str(round(end - start, 1)) + ")\t7. Getting latest memory stats...", end="")
     response = requests.get(INFO_URL, headers=GET_HEADERS, verify=False)
     uptime_b = response.json()['System Info']['uptime (seconds)']
     freemem_b = response.json()['System Info']['free mem']
@@ -102,10 +104,10 @@ def run_test(ip, wait, name, token):
     if (uptime_b <= uptime_a):
         print(" Error! EMS-ESP crashed and restarted :-(")
     else:
-        print("In the " + str(uptime_b - uptime_a) + " seconds elasped, we have Free mem/Max alloc: ", end="")
+        print("In the " + str(uptime_b - uptime_a) + " seconds elapsed, we have Free mem/Max alloc: ", end="")
         cprint("before=" + str(freemem_a) + "/" + str(maxalloc_a) +
               " after=" + str(freemem_b) + "/" + str(maxalloc_b) +
-              " diff=" + str(freemem_a - freemem_b) + "/" + str(maxalloc_a - maxalloc_b), "cyan")
+              " diff=" + str(freemem_a - freemem_b) + "/" + str(maxalloc_a - maxalloc_b), "cyan", attrs=["bold"])
 
     # finish
     print()
