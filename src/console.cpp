@@ -327,7 +327,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   networkSettings.ssid = arguments.front().c_str();
                                   return StateUpdateResult::CHANGED;
                               });
-                              shell.println("Use `wifi reconnect` to apply the new settings");
+                              shell.println("Use `wifi reconnect` to save and apply the new settings");
                           });
 
 
