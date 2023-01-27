@@ -49,6 +49,7 @@ class ProgmemGenerator {
           const mimeType = mime.lookup(relativeFilePath);
           var size = 0;
           writeStream.write('const uint8_t ' + variable + '[] = {');
+          // const zipBuffer = zlib.brotliCompressSync(buffer, { quality: 1 });
           const zipBuffer = zlib.gzipSync(buffer);
           zipBuffer.forEach((b) => {
             if (!(size % bytesPerLine)) {
