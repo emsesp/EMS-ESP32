@@ -47,3 +47,4 @@ dump_entities.csv
 dump_entities.xls*
 scripts/run.sh
 test_results.txt
+interface/build-analysis-*.html
