@@ -1,8 +1,8 @@
 from pathlib import Path
 from shutil import copytree, rmtree, copyfileobj
-from subprocess import check_output, Popen, PIPE, STDOUT, CalledProcessError
 import os
 import gzip
+# import brotli
 
 Import("env")
 
@@ -11,6 +11,10 @@ def gzipFile(file):
         with gzip.open(file + '.gz', 'wb') as f_out:
             copyfileobj(f_in, f_out)
     os.remove(file)
+    # with open(file + '.br', 'wb') as f_out:
+    #     with open(file, 'rb') as f_in:
+    #         f_out.write(brotli.compress(f_in.read(), quality=11))
+    #     os.remove(file)
 
 def flagExists(flag):
     buildFlags = env.ParseFlags(env["BUILD_FLAGS"])
@@ -29,16 +33,19 @@ def buildWeb():
         with open("./src/i18n/i18n-util.ts", "w") as w:
             w.write(text)
         env.Execute("npm run build")
+        
         buildPath = Path("build")
         wwwPath = Path("../data/www")
+        
         if wwwPath.exists() and wwwPath.is_dir():
-            rmtree(wwwPath)        
-        if not flagExists("PROGMEM_WWW"):
-            print("Copying web files to data directory")
-            copytree(buildPath, wwwPath)
-            for currentpath, folders, files in os.walk(wwwPath):
-                for file in files:
-                    gzipFile(os.path.join(currentpath, file))
+            rmtree(wwwPath)
+
+        print("Copying web files to data directory")
+        copytree(buildPath, wwwPath)
+        for currentpath, folders, files in os.walk(wwwPath):
+            for file in files:
+                gzipFile(os.path.join(currentpath, file))
+
     finally:
         os.chdir("..")
 
