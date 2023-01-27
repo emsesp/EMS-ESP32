@@ -949,8 +949,8 @@ void System::show_system(uuid::console::Shell & shell) {
 
     case WL_NO_SHIELD:
     default:
-        shell.printfln(" WiFi MAC address: %s", WiFi.macAddress().c_str());
-        shell.printfln(" WiFi Network: Unknown");
+        shell.printfln(" MAC address: %s", WiFi.macAddress().c_str()); // this is the same as ETH.macAddress()
+        shell.printfln(" WiFi Network: not connected");
         break;
     }
 
