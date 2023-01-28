@@ -269,8 +269,7 @@ void WebCustomizationService::custom_entities(AsyncWebServerRequest * request, J
                                         bool is_set = false;
                                         for (const JsonVariant id : entity_ids_json) {
                                             std::string id_s = id.as<std::string>();
-                                            id_s             = DeviceValue::get_name(id_s);
-                                            if (id_s == name) {
+                                            if (name == DeviceValue::get_name(id_s)) {
                                                 is_set      = true;
                                                 need_reboot = true;
                                                 break;
