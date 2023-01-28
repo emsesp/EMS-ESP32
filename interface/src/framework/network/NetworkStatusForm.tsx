@@ -67,7 +67,7 @@ const NetworkStatusForm: FC = () => {
   const networkStatus = ({ status }: NetworkStatus) => {
     switch (status) {
       case NetworkConnectionStatus.WIFI_STATUS_NO_SHIELD:
-        return LL.INACTIVE();
+        return LL.INACTIVE(1);
       case NetworkConnectionStatus.WIFI_STATUS_IDLE:
         return LL.IDLE();
       case NetworkConnectionStatus.WIFI_STATUS_NO_SSID_AVAIL:
