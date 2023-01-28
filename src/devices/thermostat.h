@@ -266,6 +266,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC30StatusMessage_curr     = 2;  // current temp
     static constexpr uint8_t EMS_OFFSET_RC30Set_mode               = 23; // position of thermostat mode
     static constexpr uint8_t EMS_OFFSET_RC30Set_temp               = 28; // position of thermostat setpoint temperature
+    static constexpr uint8_t EMS_OFFSET_RC30Set_temp_manual        = 29; // position of thermostat setpoint temperature for manual mode
     static constexpr uint8_t EMS_OFFSET_RC30Temp_temp_night        = 3;  // position of thermostat setpoint temperature for night time (T1)
     static constexpr uint8_t EMS_OFFSET_RC30Temp_temp_daylow       = 4;  // position of thermostat setpoint temperature for daylow time (T2)
     static constexpr uint8_t EMS_OFFSET_RC30Temp_temp_daymid       = 5;  // position of thermostat setpoint temperature for daymid time (T3)

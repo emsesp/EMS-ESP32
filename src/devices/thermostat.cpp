@@ -1131,6 +1131,7 @@ void Thermostat::process_RC300Floordry(std::shared_ptr<const Telegram> telegram)
 }
 
 // type 0x41 - data from the RC30 thermostat(0x10) - 14 bytes long
+// RC30Monitor(0x41), data: 80 20 00 AC 00 00 00 02 00 05 09 00 AC 00
 void Thermostat::process_RC30Monitor(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
     if (hc == nullptr) {
@@ -1144,6 +1145,8 @@ void Thermostat::process_RC30Monitor(std::shared_ptr<const Telegram> telegram) {
 }
 
 // type 0xA7 - for reading the mode from the RC30 thermostat (0x10) and all the installation settings
+// RC30Set(0xA7), data: 01 00 FF F6 01 06 00 01 0D 00 00 FF FF 01 02 02 02 00 00 05 1F 05 1F 01 0E 00 FF
+// RC30Set(0xA7), data: 00 00 20 02 (offset 27)
 void Thermostat::process_RC30Set(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
     if (hc == nullptr) {
@@ -1158,12 +1161,15 @@ void Thermostat::process_RC30Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, mixingvalves_, 17);        // Number of Mixing Valves: (0x00=0, 0x01=1, 0x02=2)
     has_update(telegram, brightness_, 18);          // Screen brightness 0F=dark F1=light
     has_update(telegram, hc->mode, 23);
-    has_update(telegram, offtemp_, 24);    // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
-    has_update(telegram, heatingpid_, 25); // PID setting 00=1 01=2 02=3
-    has_update(telegram, preheating_, 26); // Preheating in the clock program: (0x00 = off, 0xFF = on)
+    has_update(telegram, offtemp_, 24);         // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
+    has_update(telegram, heatingpid_, 25);      // PID setting 00=1 01=2 02=3
+    has_update(telegram, preheating_, 26);      // Preheating in the clock program: (0x00 = off, 0xFF = on)
+    has_update(telegram, hc->tempautotemp, 28); // is * 2
+    has_update(telegram, hc->manualtemp, 29);   // manualtemp is * 2
 }
 
 // type 0x40 (HC1) - for reading the operating mode from the RC30 thermostat (0x10)
+// RC30Temp(0x40), data: 01 01 02 20 24 28 2A 1E 0E 00 01 5A 32 05 4B 2D 00 28 00 3C FF 11 00 05 00
 void Thermostat::process_RC30Temp(std::shared_ptr<const Telegram> telegram) {
     // check to see we have a valid type. heating: 1 radiator, 2 convectors, 3 floors
     if (telegram->offset == 0 && telegram->message_data[0] == 0x00) {
@@ -2949,6 +2955,12 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
 
     } else if (model == EMS_DEVICE_FLAG_RC30) {
         switch (mode) {
+        case HeatingCircuit::Mode::MANUAL: // change the manual temp
+            offset     = EMS_OFFSET_RC30Set_temp_manual;
+            break;
+        case HeatingCircuit::Mode::TEMPAUTO: // change the tempautotemp
+            offset     = EMS_OFFSET_RC30Set_temp;
+            break;
         case HeatingCircuit::Mode::NIGHT: // change the night temp
             set_typeid = curve_typeids[hc->hc()];
             offset     = EMS_OFFSET_RC30Temp_temp_night;
@@ -2970,7 +2982,11 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             offset     = EMS_OFFSET_RC30Temp_temp_holiday;
             break;
         default:
-            offset = EMS_OFFSET_RC30Set_temp;
+            if (hc->manualtemp == 0) {
+                offset = EMS_OFFSET_RC30Set_temp;
+            } else {
+                offset = EMS_OFFSET_RC30Set_temp_manual;
+            }
             break;
         }
 
@@ -4264,6 +4280,15 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->daymidtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daymidtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daymidtemp));
         register_device_value(
             tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(dayhightemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
+        register_device_value(
+            tag, &hc->manualtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(manualtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_manualtemp));
+        register_device_value(tag,
+                              &hc->tempautotemp,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_DIV2,
+                              FL_(tempautotemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_tempautotemp));
         break;
     case EMS_DEVICE_FLAG_RC30_N:
     case EMS_DEVICE_FLAG_RC35:
