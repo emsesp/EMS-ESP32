@@ -673,6 +673,7 @@ void System::network_init(bool refresh) {
     last_system_check_ = 0; // force the LED to go from fast flash to pulse
     send_heartbeat();
 
+    // no ethernet present
     if (phy_type_ == PHY_type::PHY_TYPE_NONE) {
         return;
     }
@@ -683,14 +684,14 @@ void System::network_init(bool refresh) {
     uint8_t        phy_addr = eth_phy_addr_; // I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
     int8_t         power    = eth_power_;    // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
     eth_phy_type_t type     = (phy_type_ == PHY_type::PHY_TYPE_LAN8720) ? ETH_PHY_LAN8720 : ETH_PHY_TLK110; // Type of the Ethernet PHY (LAN8720 or TLK110)
-    // clock mode
-    // ETH_CLOCK_GPIO0_IN   = 0  RMII clock input to GPIO0
-    // ETH_CLOCK_GPIO0_OUT  = 1  RMII clock output from GPIO0
-    // ETH_CLOCK_GPIO16_OUT = 2  RMII clock output from GPIO16
-    // ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted clock
+    // clock mode:
+    //  ETH_CLOCK_GPIO0_IN   = 0  RMII clock input to GPIO0
+    //  ETH_CLOCK_GPIO0_OUT  = 1  RMII clock output from GPIO0
+    //  ETH_CLOCK_GPIO16_OUT = 2  RMII clock output from GPIO16
+    //  ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted clock
     auto clock_mode = (eth_clock_mode_t)eth_clock_mode_;
 
-    ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
+    eth_present_ = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
 }
 
 // check health of system, done every 5 seconds
@@ -907,6 +908,12 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.println();
 
     shell.println("Network:");
+
+    // show ethernet mac address if we have an eth controller present
+    if (eth_present_) {
+        shell.printfln(" Ethernet MAC address: %s", ETH.macAddress().c_str());
+    }
+
     switch (WiFi.status()) {
     case WL_IDLE_STATUS:
         shell.printfln(" Status: Idle");
@@ -921,7 +928,7 @@ void System::show_system(uuid::console::Shell & shell) {
         break;
 
     case WL_CONNECTED:
-        shell.printfln(" Status: connected");
+        shell.printfln(" Status: WiFi connected");
         shell.printfln(" SSID: %s", WiFi.SSID().c_str());
         shell.printfln(" BSSID: %s", WiFi.BSSIDstr().c_str());
         shell.printfln(" RSSI: %d dBm (%d %%)", WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
@@ -949,7 +956,7 @@ void System::show_system(uuid::console::Shell & shell) {
 
     case WL_NO_SHIELD:
     default:
-        shell.printfln(" MAC address: %s", WiFi.macAddress().c_str()); // this is the same as ETH.macAddress()
+        shell.printfln(" WiFi MAC address: %s", WiFi.macAddress().c_str());
         shell.printfln(" WiFi Network: not connected");
         break;
     }
@@ -958,7 +965,7 @@ void System::show_system(uuid::console::Shell & shell) {
     if (ethernet_connected_) {
         shell.println();
         shell.printfln(" Status: Ethernet connected");
-        shell.printfln(" MAC address: %s", ETH.macAddress().c_str());
+        shell.printfln(" Ethernet MAC address: %s", ETH.macAddress().c_str());
         shell.printfln(" Hostname: %s", ETH.getHostname());
         shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
         shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(ETH.gatewayIP()).c_str());
@@ -1168,9 +1175,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     // Network Status
     node = output.createNestedObject("Network Info");
     if (EMSESP::system_.ethernet_connected()) {
-        node["network"]         = "Ethernet";
-        node["hostname"]        = ETH.getHostname();
-        node["MAC"]             = ETH.macAddress();
+        node["network"]  = "Ethernet";
+        node["hostname"] = ETH.getHostname();
+        // node["MAC"]             = ETH.macAddress();
         node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
         node["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
         node["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
@@ -1180,9 +1187,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     } else if (WiFi.status() == WL_CONNECTED) {
         node["network"]  = "WiFi";
         node["hostname"] = WiFi.getHostname();
-        // node["SSID"]            = WiFi.SSID();
-        // node["BSSID"]           = WiFi.BSSIDstr();
-        node["RSSI"] = WiFi.RSSI();
+        node["RSSI"]     = WiFi.RSSI();
         // node["MAC"]             = WiFi.macAddress();
         node["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
         node["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());

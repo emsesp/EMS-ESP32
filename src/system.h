@@ -300,6 +300,8 @@ class System {
     bool     ntp_connected_  = false;
     uint32_t ntp_last_check_ = 0;
 
+    bool eth_present_ = false;
+
     // EMS-ESP settings
     // copies from WebSettings class in WebSettingsService.h and loaded with reload_settings()
     std::string hostname_;
