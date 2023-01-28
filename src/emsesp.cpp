@@ -1055,44 +1055,44 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         // check for known device IDs
         if (device_id == EMSdevice::EMS_DEVICE_ID_RFSENSOR) {
             // see: https://github.com/emsesp/EMS-ESP32/issues/103#issuecomment-911717342 and https://github.com/emsesp/EMS-ESP32/issues/624
-            name        = "rf room temperature sensor";
+            name        = "RF room temperature sensor";
             device_type = DeviceType::THERMOSTAT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_ROOMTHERMOSTAT) {
-            name        = "generic thermostat";
+            name        = "Generic thermostat";
             device_type = DeviceType::THERMOSTAT;
             flags       = DeviceFlags::EMS_DEVICE_FLAG_RC10 | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_RS232) {
             name        = "RS232";
             device_type = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_TERMINAL) {
-            name        = "terminal";
+            name        = "Terminal";
             device_type = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_SERVICEKEY) {
-            name        = "service key";
+            name        = "Service key";
             device_type = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CASCADE) {
-            name        = "cascade";
+            name        = "Cascade";
             device_type = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_EASYCOM) {
             // see https://github.com/emsesp/EMS-ESP/issues/460#issuecomment-709553012
-            name        = "modem";
+            name        = "Modem";
             device_type = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CONVERTER) {
-            name = "converter"; // generic
+            name        = "Converter"; // generic
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CLOCK) {
-            name        = "clock"; // generic
+            name        = "Clock"; // generic
             device_type = DeviceType::CONTROLLER;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CONTROLLER) {
-            name        = "generic controller";
+            name        = "Generic controller";
             device_type = DeviceType::CONTROLLER;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER) {
-            name        = "generic boiler";
+            name        = "Generic boiler";
             device_type = DeviceType::BOILER;
             flags       = DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP;
             LOG_WARNING("Unknown EMS boiler. Using generic profile. Please report on GitHub.");
         } else if (device_id >= 0x68 && device_id <= 0x6F) {
             // test for https://github.com/emsesp/EMS-ESP32/issues/882
-            name        = "cascaded controller";
+            name        = "Cascaded controller";
             device_type = DeviceType::CONTROLLER;
         } else {
             LOG_WARNING("Unrecognized EMS device (device ID 0x%02X, no product ID). Please report on GitHub.", device_id);

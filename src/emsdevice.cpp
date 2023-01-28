@@ -132,7 +132,7 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     case DeviceType::HEATSOURCE:
         return F_(heatsource);
     default:
-        return Helpers::translated_word(FL_(unknown));
+        return Helpers::translated_word(FL_(unknown), true);
     }
 }
 
@@ -167,7 +167,7 @@ const char * EMSdevice::device_type_2_device_name_translated() {
     default:
         break;
     }
-    return Helpers::translated_word(FL_(unknown));
+    return Helpers::translated_word(FL_(unknown_device));
 }
 
 // returns device_type from a non-translated EN string
