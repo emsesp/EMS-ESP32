@@ -47,6 +47,7 @@ MAKE_PSTR_LIST(alert_device, "Alert Module", "Alarmmodul", "Alert Module", "Larm
 MAKE_PSTR_LIST(pump_device, "Pump Module", "Pumpenmodul", "Pump Module", "Pumpmodul")
 MAKE_PSTR_LIST(heatsource_device, "Heatsource", "Heizquelle", "Heatsource", "Värmekälla")
 MAKE_PSTR_LIST(sensors_device, "Sensors", "Sensoren", "Sensoren", "Sensorer", "czujniki", "Sensorer", "Capteurs")
+MAKE_PSTR_LIST(unknown_device, "Unknown", "Unbekannt", "Onbekend", "Okänt", "Nieznane urządzenie", "Ukjent", "Inconnu")
 
 // commands
 MAKE_PSTR_LIST(info_cmd, "lists all values", "Liste aller Werte")

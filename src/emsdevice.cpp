@@ -124,7 +124,7 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     case DeviceType::HEATSOURCE:
         return F_(heatsource);
     default:
-        return Helpers::translated_word(FL_(unknown));
+        return Helpers::translated_word(FL_(unknown), true);
     }
 }
 
@@ -159,7 +159,7 @@ const char * EMSdevice::device_type_2_device_name_translated() {
     default:
         break;
     }
-    return Helpers::translated_word(FL_(unknown));
+    return Helpers::translated_word(FL_(unknown_device));
 }
 
 // returns device_type from a non-translated EN string
@@ -474,6 +474,7 @@ void EMSdevice::add_device_value(uint8_t               tag,
                                  uint16_t              max) {
     // initialize the device value depending on it's type
     // ignoring DeviceValueType::CMD and DeviceValueType::TIME
+
     if (type == DeviceValueType::STRING) {
         *(char *)(value_p) = {'\0'}; // this is important for string functions like strlen() to work later
     } else if (type == DeviceValueType::INT) {

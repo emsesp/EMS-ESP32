@@ -74,7 +74,7 @@ const NTPStatusForm: FC = () => {
       case NTPSyncStatus.NTP_DISABLED:
         return LL.NOT_ENABLED();
       case NTPSyncStatus.NTP_INACTIVE:
-        return LL.INACTIVE();
+        return LL.INACTIVE(0);
       case NTPSyncStatus.NTP_ACTIVE:
         return LL.ACTIVE();
       default:

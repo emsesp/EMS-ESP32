@@ -3,6 +3,7 @@ import Schema, { ValidateFieldsError } from 'async-validator';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import SaveIcon from '@mui/icons-material/Save';
 
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
@@ -88,13 +89,13 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<PersonAddIcon />}
+              startIcon={creating ? <PersonAddIcon /> : <SaveIcon />}
               variant="outlined"
               onClick={validateAndDone}
               color="primary"
               autoFocus
             >
-              {LL.ADD(0)}
+              {creating ? LL.ADD(0) : LL.UPDATE()}
             </Button>
           </DialogActions>
         </>

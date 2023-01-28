@@ -446,11 +446,11 @@ class EMSdevice {
     bool ha_config_firstrun_ = true; // this means a first setup of HA is needed after a restart
 
     struct TelegramFunction {
-        uint16_t           telegram_type_id_;   // it's type_id
-        const char *       telegram_type_name_; // e.g. RC20Message
-        bool               fetch_;              // if this type_id be queried automatically
-        bool               received_;
-        process_function_p process_function_;
+        const uint16_t           telegram_type_id_;   // it's type_id
+        const char *             telegram_type_name_; // e.g. RC20Message
+        bool                     fetch_;              // if this type_id be queried automatically
+        bool                     received_;
+        const process_function_p process_function_;
 
         TelegramFunction(uint16_t telegram_type_id, const char * telegram_type_name, bool fetch, bool received, const process_function_p process_function)
             : telegram_type_id_(telegram_type_id)
