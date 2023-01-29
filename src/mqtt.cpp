@@ -1088,7 +1088,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             for (uint8_t i = 0; i < options_size; i++) {
                 option_list.add(Helpers::translated_word(options[i]));
             }
-        } else if (type != DeviceValueType::STRING) {
+        } else if (type != DeviceValueType::STRING && type != DeviceValueType::BOOL) {
             // Must be Numeric....
             doc["mode"] = "box"; // auto, slider or box
             if (num_op > 0) {
