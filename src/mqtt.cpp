@@ -646,7 +646,7 @@ void Mqtt::ha_status() {
     }
 
     publish_system_ha_sensor_config(DeviceValueType::STRING, "EMS Bus", "bus_status", DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, "Uptime", "uptime", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::STRING, "Uptime", "uptime", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, "Uptime (sec)", "uptime_sec", DeviceValueUOM::SECONDS);
     publish_system_ha_sensor_config(DeviceValueType::BOOL, "NTP status", "ntp_status", DeviceValueUOM::CONNECTIVITY);
     publish_system_ha_sensor_config(DeviceValueType::INT, "Free memory", "freemem", DeviceValueUOM::KB);
