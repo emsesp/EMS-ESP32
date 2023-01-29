@@ -35,7 +35,6 @@ static constexpr uint16_t MAX_MQTT_MESSAGES = 300;
 namespace emsesp {
 
 using mqtt_sub_function_p = std::function<bool(const char * message)>;
-using cmdfunction_p       = std::function<bool(const char * data, const int8_t id)>;
 
 struct MqttMessage {
     const uint8_t     operation;
