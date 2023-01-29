@@ -250,6 +250,21 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 #endif
 
     //
+    // these may need mqtt restart to rebuild HA discovery topics
+    //
+    prev                 = settings.bool_format;
+    settings.bool_format = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
+    EMSESP::system_.bool_format(settings.bool_format);
+    if (Mqtt::ha_enabled())
+        check_flag(prev, settings.bool_format, ChangeFlags::MQTT);
+
+    prev                 = settings.enum_format;
+    settings.enum_format = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
+    EMSESP::system_.enum_format(settings.enum_format);
+    if (Mqtt::ha_enabled())
+        check_flag(prev, settings.enum_format, ChangeFlags::MQTT);
+
+    //
     // without checks or necessary restarts...
     //
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
@@ -264,14 +279,8 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.readonly_mode = root["readonly_mode"] | false;
     EMSESP::system_.readonly_mode(settings.readonly_mode);
 
-    settings.bool_format = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
-    EMSESP::system_.bool_format(settings.bool_format);
-
     settings.bool_dashboard = root["bool_dashboard"] | EMSESP_DEFAULT_BOOL_FORMAT;
     EMSESP::system_.bool_dashboard(settings.bool_dashboard);
-
-    settings.enum_format = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
-    EMSESP::system_.enum_format(settings.enum_format);
 
     settings.weblog_level   = root["weblog_level"] | EMSESP_DEFAULT_WEBLOG_LEVEL;
     settings.weblog_buffer  = root["weblog_buffer"] | EMSESP_DEFAULT_WEBLOG_BUFFER;
