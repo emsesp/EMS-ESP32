@@ -619,6 +619,7 @@ void Mqtt::ha_status() {
     doc["pl_off"]   = "offline";
     doc["stat_cla"] = "measurement";
     doc["dev_cla"]  = "connectivity";
+    doc["ent_cat"]  = "diagnostic";
 
     // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
@@ -1273,6 +1274,11 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         default:
             break;
         }
+    }
+
+    // add category "diagnostic" for system entities
+    if (device_type == EMSdevice::DeviceType::SYSTEM) {
+        doc["ent_cat"] = "diagnostic";
     }
 
     // add the dev json object to the end
