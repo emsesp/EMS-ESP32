@@ -610,15 +610,15 @@ void Mqtt::ha_status() {
         strcpy(uniq, "system_status");
     }
 
-    doc["uniq_id"]   = uniq;
-    doc["object_id"] = uniq;
+    doc["uniq_id"]  = uniq;
+    doc["obj_id"]   = uniq;
 
-    doc["stat_t"]       = mqtt_base_ + "/status";
-    doc["name"]         = "EMS-ESP status";
-    doc["payload_on"]   = "online";
-    doc["payload_off"]  = "offline";
-    doc["state_class"]  = "measurement";
-    doc["device_class"] = "connectivity";
+    doc["stat_t"]   = mqtt_base_ + "/status";
+    doc["name"]     = "EMS-ESP status";
+    doc["pl_on"]    = "online";
+    doc["pl_off"]   = "offline";
+    doc["stat_cla"] = "measurement";
+    doc["dev_cla"]  = "connectivity";
 
     // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
@@ -643,7 +643,7 @@ void Mqtt::ha_status() {
     }
 
     publish_system_ha_sensor_config(DeviceValueType::STRING, "EMS Bus", "bus_status", DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, "Uptime", "uptime", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::STRING, "Uptime", "uptime", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, "Uptime (sec)", "uptime_sec", DeviceValueUOM::SECONDS);
     publish_system_ha_sensor_config(DeviceValueType::BOOL, "NTP status", "ntp_status", DeviceValueUOM::CONNECTIVITY);
     publish_system_ha_sensor_config(DeviceValueType::INT, "Free memory", "freemem", DeviceValueUOM::KB);
@@ -1062,8 +1062,8 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build the payload
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
-    doc["uniq_id"]   = uniq_id;
-    doc["object_id"] = uniq_id; // same as unique_id
+    doc["uniq_id"] = uniq_id;
+    doc["obj_id"]  = uniq_id; // same as unique_id
 
     const char * ic_ha  = "ic";           // icon - only set this if there is no device class
     const char * sc_ha  = "state_class";  // state class
@@ -1080,7 +1080,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         } else {
             snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", mqtt_basename_.c_str(), device_name, entity);
         }
-        doc["command_topic"] = command_topic;
+        doc["cmd_t"] = command_topic;
 
         // for enums, add options
         if (type == DeviceValueType::ENUM) {
@@ -1088,7 +1088,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             for (uint8_t i = 0; i < options_size; i++) {
                 option_list.add(Helpers::translated_word(options[i]));
             }
-        } else if (type != DeviceValueType::STRING) {
+        } else if (type != DeviceValueType::STRING && type != DeviceValueType::BOOL) {
             // Must be Numeric....
             doc["mode"] = "box"; // auto, slider or box
             if (num_op > 0) {
@@ -1155,13 +1155,20 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // special case to handle booleans
     // applies to both Binary Sensor (read only) and a Switch (for a command)
-    // always render boolean as strings true & false
-    // and has no unit of measure or icon
+    // has no unit of measure or icon
     if (type == DeviceValueType::BOOL) {
-        char result[12];
-        doc["payload_on"]  = Helpers::render_boolean(result, true);
-        doc["payload_off"] = Helpers::render_boolean(result, false);
-        doc[sc_ha]         = F_(measurement);
+        if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+            doc["pl_on"]  = true;
+            doc["pl_off"] = false;
+        } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+            doc["pl_on"]  = 1;
+            doc["pl_off"] = 0;
+        } else {
+            char result[12];
+            doc["pl_on"]  = Helpers::render_boolean(result, true);
+            doc["pl_off"] = Helpers::render_boolean(result, false);
+        }
+        doc[sc_ha] = F_(measurement); //do we want this???
     } else {
         // always set the uom, using the standards except for hours/minutes/seconds
         // using HA specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
@@ -1333,7 +1340,7 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
 
     doc["~"]             = mqtt_base_;
     doc["uniq_id"]       = uniq_id_s;
-    doc["object_id"]     = uniq_id_s; // same as uniq_id
+    doc["obj_id"]        = uniq_id_s; // same as uniq_id
     doc["name"]          = name_s;
     doc["mode_stat_t"]   = topic_t;
     doc["mode_stat_tpl"] = mode_str_tpl;
