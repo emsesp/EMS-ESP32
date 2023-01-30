@@ -629,9 +629,9 @@ void Mqtt::ha_status() {
     dev["mf"]      = "proddy";
     dev["mdl"]     = "EMS-ESP";
     if (EMSESP::system_.ethernet_connected())
-        dev["cu"] = ETH.localIP().toString();
+        dev["cu"] = "http://" + ETH.localIP().toString();
     else
-        dev["cu"] = WiFi.localIP().toString();
+        dev["cu"] = "http://" + WiFi.localIP().toString();
     JsonArray ids = dev.createNestedArray("ids");
     ids.add("ems-esp");
 
