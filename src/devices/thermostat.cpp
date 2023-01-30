@@ -424,7 +424,7 @@ uint8_t Thermostat::HeatingCircuit::get_mode() const {
         } else if (mode == 0) {
             return HeatingCircuit::Mode::OFF;
         }
-    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC20) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC20 || model == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         if (mode == 0) {
             return HeatingCircuit::Mode::OFF;
         } else if (mode == 1) {
@@ -573,7 +573,7 @@ void Thermostat::process_RC20Temp(std::shared_ptr<const Telegram> telegram) {
     if (hc == nullptr) {
         return;
     }
-    has_update(telegram, hc->nighttemp, 3); // 0:off, 1:manual, 2:auto
+    has_update(telegram, hc->nighttemp, 3);
     has_update(telegram, hc->daylowtemp, 4);
     has_update(telegram, hc->daymidtemp, 5);
     has_update(telegram, hc->daytemp, 6);
@@ -2262,11 +2262,11 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
         mode_list = FL_(enum_mode6);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC20:
-    case EMSdevice::EMS_DEVICE_FLAG_RC20_N:
+    case EMSdevice::EMS_DEVICE_FLAG_RC30:
         mode_list = FL_(enum_mode2);
         break;
+    case EMSdevice::EMS_DEVICE_FLAG_RC20_N:
     case EMSdevice::EMS_DEVICE_FLAG_RC25:
-    case EMSdevice::EMS_DEVICE_FLAG_RC30:
     case EMSdevice::EMS_DEVICE_FLAG_RC35:
     case EMSdevice::EMS_DEVICE_FLAG_RC30_N:
         mode_list = FL_(enum_mode3);
@@ -2287,20 +2287,12 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
 
     uint8_t enum_index = 0;
 
-    // check for a mode number as a string with a single digit (0..9)
-    if (value[0] >= '0' && value[0] <= '9') {
-        enum_index = value[0] - '0';
-        if (enum_index >= Helpers::count_items(mode_list)) {
-            return false; // invalid number, not in enum
-        }
-    } else {
-        // check for the mode being a full string name
-        if (!Helpers::value2enum(value, enum_index, mode_list)) {
-            mode_list = FL_(enum_mode_ha);
-            if (Mqtt::ha_enabled() && !Helpers::value2enum(value, enum_index, mode_list)) {
-                LOG_WARNING("wrong mode: %s", value);
-                return false; // not found
-            }
+    // check for the mode being a full string name or single digit
+    if (!Helpers::value2enum(value, enum_index, mode_list)) {
+        mode_list = FL_(enum_mode_ha);
+        if (Mqtt::ha_enabled() && !Helpers::value2enum(value, enum_index, mode_list)) {
+            LOG_WARNING("wrong mode: %s", value);
+            return false; // not found
         }
     }
 
@@ -2956,10 +2948,10 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
     } else if (model == EMS_DEVICE_FLAG_RC30) {
         switch (mode) {
         case HeatingCircuit::Mode::MANUAL: // change the manual temp
-            offset     = EMS_OFFSET_RC30Set_temp_manual;
+            offset = EMS_OFFSET_RC30Set_temp_manual;
             break;
         case HeatingCircuit::Mode::TEMPAUTO: // change the tempautotemp
-            offset     = EMS_OFFSET_RC30Set_temp;
+            offset = EMS_OFFSET_RC30Set_temp;
             break;
         case HeatingCircuit::Mode::NIGHT: // change the night temp
             set_typeid = curve_typeids[hc->hc()];
@@ -2982,10 +2974,10 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             offset     = EMS_OFFSET_RC30Temp_temp_holiday;
             break;
         default:
-            if (hc->manualtemp == 0) {
-                offset = EMS_OFFSET_RC30Set_temp;
-            } else {
+            if (hc->get_mode() == HeatingCircuit::Mode::MANUAL) {
                 offset = EMS_OFFSET_RC30Set_temp_manual;
+            } else {
+                offset = EMS_OFFSET_RC30Set_temp;
             }
             break;
         }
@@ -4208,7 +4200,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->switchtime1, DeviceValueType::STRING, FL_(tpl_switchtime1), FL_(switchtime), DeviceValueUOM::NONE, MAKE_CF_CB(set_switchtime1));
         break;
     case EMS_DEVICE_FLAG_RC20_N:
-        register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
+        register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode3), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype3), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(
             tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daytemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
@@ -4253,7 +4245,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
         break;
     case EMS_DEVICE_FLAG_RC30:
-        register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode3), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
+        register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         register_device_value(tag, &hc->holiday, DeviceValueType::STRING, FL_(tpl_holidays), FL_(holidays), DeviceValueUOM::NONE, MAKE_CF_CB(set_holiday));
         register_device_value(tag, &hc->vacation, DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations), DeviceValueUOM::NONE, MAKE_CF_CB(set_vacation));
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode2), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
@@ -4280,6 +4272,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->daymidtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daymidtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daymidtemp));
         register_device_value(
             tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(dayhightemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
+        /*
         register_device_value(
             tag, &hc->manualtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(manualtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_manualtemp));
         register_device_value(tag,
@@ -4289,6 +4282,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               FL_(tempautotemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_tempautotemp));
+        */
         break;
     case EMS_DEVICE_FLAG_RC30_N:
     case EMS_DEVICE_FLAG_RC35:
