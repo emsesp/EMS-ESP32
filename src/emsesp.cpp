@@ -1528,7 +1528,12 @@ void EMSESP::loop() {
     if (system_.telnet_enabled()) {
         telnet_.loop();
     }
+#else
+    if (!shell_->running()) {
+        ::exit(0);
+    }
 #endif
+
 
     Shell::loop_all();
 }

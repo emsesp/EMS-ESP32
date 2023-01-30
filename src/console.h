@@ -44,7 +44,6 @@ class EMSESPShell : public uuid::console::Shell {
 
     virtual std::string console_name() = 0;
 
-    static void generic_exit_context_function(Shell & shell, const std::vector<std::string> & arguments);
     static void main_help_function(Shell & shell, const std::vector<std::string> & arguments);
     static void main_exit_function(Shell & shell, const std::vector<std::string> & arguments);
 
@@ -65,9 +64,6 @@ class EMSESPShell : public uuid::console::Shell {
     void        end_of_transmission() override;
 
   private:
-    static void main_exit_user_function(Shell & shell, const std::vector<std::string> & arguments);
-    static void main_exit_admin_function(Shell & shell, const std::vector<std::string> & arguments);
-
     std::string console_hostname_;
 };
 
