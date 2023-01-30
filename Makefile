@@ -79,7 +79,7 @@ CPPFLAGS  += -g3
 CPPFLAGS  += -Os
 
 CFLAGS    += $(CPPFLAGS)
-CFLAGS    += -Wall -Wextra -Werror -Wswitch-enum -Wno-unused-parameter 
+CFLAGS    += -Wall -Wextra -Werror -Wswitch-enum -Wno-unused-parameter -Wno-inconsistent-missing-override -Wno-unused-lambda-capture
 
 CXXFLAGS  += $(CFLAGS) -MMD
 

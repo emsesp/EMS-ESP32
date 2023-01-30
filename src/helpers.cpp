@@ -692,7 +692,7 @@ void Helpers::CharToUpperUTF8(char * c) {
     switch (*c) {
     case (char)0xC3:
         // grave, acute, circumflex, diaeresis, etc.
-        if ((p_v >= 0xA0) && (p_v <= 0xBE)) {
+        if ((p_v >= (char)0xA0) && (p_v <= (char)0xBE)) {
             *p -= 0x20;
         }
         break;
