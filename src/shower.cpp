@@ -167,10 +167,17 @@ void Shower::set_shower_state(bool state, bool force) {
         snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::base().c_str()); // use base path
         doc["stat_t"] = stat_t;
 
-        // always render boolean as strings for HA
-        char result[12];
-        doc[("payload_on")]  = Helpers::render_boolean(result, true);
-        doc[("payload_off")] = Helpers::render_boolean(result, false);
+        if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+            doc["pl_on"]  = true;
+            doc["pl_off"] = false;
+        } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+            doc["pl_on"]  = 1;
+            doc["pl_off"] = 0;
+        } else {
+            char result[12];
+            doc["pl_on"]  = Helpers::render_boolean(result, true);
+            doc["pl_off"] = Helpers::render_boolean(result, false);
+        }
 
         JsonObject dev = doc.createNestedObject("dev");
         JsonArray  ids = dev.createNestedArray("ids");

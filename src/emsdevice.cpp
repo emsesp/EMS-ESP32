@@ -1552,10 +1552,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
             if (dv.type == DeviceValueType::BOOL && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see how to render the value depending on the setting
                 auto value_b = (bool)*(uint8_t *)(dv.value_p);
-                if (Mqtt::ha_enabled() && (output_target == OUTPUT_TARGET::MQTT)) {
-                    char s[12];
-                    json[name] = Helpers::render_boolean(s, value_b); // for HA always render as string
-                } else if (output_target == OUTPUT_TARGET::CONSOLE) {
+                if (output_target == OUTPUT_TARGET::CONSOLE) {
                     char s[12];
                     json[name] = Helpers::render_boolean(s, value_b, true); // console use web settings
                 } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
