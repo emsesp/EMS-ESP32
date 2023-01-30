@@ -297,6 +297,8 @@ class Mqtt {
     uint32_t last_publish_heartbeat_  = 0;
     uint32_t last_publish_queue_      = 0;
 
+    bool first_connect_attempted_ = false;
+
     static bool     connecting_;
     static bool     initialized_;
     static uint32_t mqtt_publish_fails_;

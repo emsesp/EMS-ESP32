@@ -461,10 +461,12 @@ void Mqtt::start() {
     mqttClient_->onConnect([this](bool sessionPresent) { on_connect(); });
 
     mqttClient_->onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
-        if (!connecting_) {
+        // only show the error once, not every 2 seconds
+        if (!connecting_ && first_connect_attempted_) {
             return;
         }
-        connecting_ = false;
+        first_connect_attempted_ = true;
+        connecting_              = false;
         if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
             LOG_WARNING("MQTT disconnected: TCP");
         } else if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
