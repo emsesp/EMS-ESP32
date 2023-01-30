@@ -27,7 +27,6 @@ uuid::log::Logger Boiler::logger_{F_(boiler), uuid::log::Facility::CONSOLE};
 Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // register values for master boiler/cascade module
-    // reserve_telegram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
 
     // the telegram handlers...
     // common for all boilers
@@ -76,8 +75,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x4A2, "HpInput", true, MAKE_PF_CB(process_HpInput));
         register_telegram_type(0x485, "HpCooling", true, MAKE_PF_CB(process_HpCooling));
         register_telegram_type(0x486, "HpInConfig", true, MAKE_PF_CB(process_HpInConfig));
-        register_telegram_type(0x492, "HpHeaterConfig", true, MAKE_PF_CB(process_HpHeaterConfig));
 
+        register_telegram_type(0x492, "HpHeaterConfig", true, MAKE_PF_CB(process_HpHeaterConfig));
         register_telegram_type(0x488, "HPValve", true, MAKE_PF_CB(process_HpValve));
         register_telegram_type(0x484, "HPSilentMode", true, MAKE_PF_CB(process_HpSilentMode));
         register_telegram_type(0x48B, "HPPumps", true, MAKE_PF_CB(process_HpPumps));
