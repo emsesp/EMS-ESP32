@@ -1109,7 +1109,7 @@ void EMSdevice::dump_value_info() {
         if (dv.fullname != nullptr) {
             Serial.print(name_);
             Serial.print(',');
-            Serial.print(device_type_name().c_str());
+            Serial.print(device_type_name());
             Serial.print(',');
 
             Serial.print(product_id_);
