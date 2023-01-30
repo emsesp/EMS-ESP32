@@ -624,6 +624,7 @@ void Mqtt::ha_status() {
     doc["pl_off"]   = "offline";
     doc["stat_cla"] = "measurement";
     doc["dev_cla"]  = "connectivity";
+    doc["ent_cat"]  = "diagnostic";
 
     // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
@@ -633,7 +634,13 @@ void Mqtt::ha_status() {
     dev["sw"]      = "v" + std::string(EMSESP_APP_VERSION);
     dev["mf"]      = "proddy";
     dev["mdl"]     = "EMS-ESP";
-    JsonArray ids  = dev.createNestedArray("ids");
+#ifndef EMSESP_STANDALONE
+    if (EMSESP::system_.ethernet_connected())
+        dev["cu"] = "http://" + ETH.localIP().toString();
+    else
+        dev["cu"] = "http://" + WiFi.localIP().toString();
+#endif
+    JsonArray ids = dev.createNestedArray("ids");
     ids.add("ems-esp");
 
     char topic[MQTT_TOPIC_MAX_SIZE];
@@ -1092,7 +1099,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
         // for enums, add options
         if (type == DeviceValueType::ENUM) {
-            JsonArray option_list = doc.createNestedArray("options");
+            JsonArray option_list = doc.createNestedArray("ops"); // options
             for (uint8_t i = 0; i < options_size; i++) {
                 option_list.add(Helpers::translated_word(options[i]));
             }
@@ -1194,7 +1201,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // this next section is adding the state class, device class and sometimes the icon
     // used for Sensor and Binary Sensor Entities in HA
     if (set_ha_classes) {
-        const char * dc_ha = "device_class"; // device class
+        const char * dc_ha = "dev_cla"; // device class
 
         switch (uom) {
         case DeviceValueUOM::DEGREES:
@@ -1276,6 +1283,11 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         default:
             break;
         }
+    }
+
+    // add category "diagnostic" for system entities
+    if (device_type == EMSdevice::DeviceType::SYSTEM) {
+        doc["ent_cat"] = "diagnostic";
     }
 
     // add the dev json object to the end
