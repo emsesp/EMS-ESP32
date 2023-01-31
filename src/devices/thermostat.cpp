@@ -560,8 +560,8 @@ void Thermostat::process_RC20Set(std::shared_ptr<const Telegram> telegram) {
     if (hc == nullptr) {
         return;
     }
-    has_update(telegram, hc->mode, 23); // 0:off, 1:manual, 2:auto
-    // has_update(telegram, hc->nofrosttemp, 24); // guess, not confirmed yet, maybe nighttemp?
+    has_update(telegram, hc->mode, 23);        // 0:off, 1:manual, 2:auto
+    has_update(telegram, hc->nofrosttemp, 24); // for mode off
     // has_update(telegram, hc->tempautotemp, 28); // no need to read this
     has_update(telegram, hc->manualtemp, 29);
 }
@@ -1161,7 +1161,7 @@ void Thermostat::process_RC30Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, mixingvalves_, 17);        // Number of Mixing Valves: (0x00=0, 0x01=1, 0x02=2)
     has_update(telegram, brightness_, 18);          // Screen brightness 0F=dark F1=light
     has_update(telegram, hc->mode, 23);
-    has_update(telegram, offtemp_, 24);         // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
+    has_update(telegram, hc->nofrosttemp, 24);  // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
     has_update(telegram, heatingpid_, 25);      // PID setting 00=1 01=2 02=3
     has_update(telegram, preheating_, 26);      // Preheating in the clock program: (0x00 = off, 0xFF = on)
     has_update(telegram, hc->tempautotemp, 28); // is * 2
@@ -2038,18 +2038,6 @@ bool Thermostat::set_preheating(const char * value, const int8_t id) {
     return true;
 }
 
-bool Thermostat::set_offtemp(const char * value, const int8_t id) {
-    int ot;
-    if (!Helpers::value2temperature(value, ot, true)) {
-        return false;
-    }
-
-    auto t = (int8_t)(ot * 2);
-    write_command(EMS_TYPE_RC30Settings, 24, t, EMS_TYPE_RC30Settings);
-
-    return true;
-}
-
 bool Thermostat::set_mixingvalves(const char * value, const int8_t id) {
     int m;
     if (!Helpers::value2number(value, m, 0, 2)) {
@@ -2909,6 +2897,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         default:
             break;
         }
+
     } else if (model == EMS_DEVICE_FLAG_RC20) {
         switch (mode) {
         case HeatingCircuit::Mode::NIGHT:
@@ -2932,10 +2921,17 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             validate_typeid = set_typeid;
             break;
         case HeatingCircuit::Mode::MANUAL:
-            offset = EMS_OFFSET_RC20Set_temp_manual;
+            offset          = EMS_OFFSET_RC20Set_temp_manual;
+            validate_typeid = set_typeid;
+            break;
+        case HeatingCircuit::Mode::OFF:
+            offset          = EMS_OFFSET_RC20Set_temp_off;
+            validate_typeid = set_typeid;
             break;
         case HeatingCircuit::Mode::AUTO:
-            if (hc->get_mode() == HeatingCircuit::Mode::MANUAL) {
+            if (hc->get_mode() == HeatingCircuit::Mode::OFF) {
+                offset = EMS_OFFSET_RC20Set_temp_off;
+            } else if (hc->get_mode() == HeatingCircuit::Mode::MANUAL) {
                 offset = EMS_OFFSET_RC20Set_temp_manual;
             } else {
                 offset = EMS_OFFSET_RC20Set_temp_auto;
@@ -2947,37 +2943,50 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
 
     } else if (model == EMS_DEVICE_FLAG_RC30) {
         switch (mode) {
-        case HeatingCircuit::Mode::MANUAL: // change the manual temp
-            offset = EMS_OFFSET_RC30Set_temp_manual;
+        case HeatingCircuit::Mode::OFF:
+            offset          = EMS_OFFSET_RC30Set_temp_off;
+            validate_typeid = set_typeid;
             break;
-        case HeatingCircuit::Mode::TEMPAUTO: // change the tempautotemp
-            offset = EMS_OFFSET_RC30Set_temp;
+        case HeatingCircuit::Mode::MANUAL:
+            offset          = EMS_OFFSET_RC30Set_temp_manual;
+            validate_typeid = set_typeid;
             break;
-        case HeatingCircuit::Mode::NIGHT: // change the night temp
-            set_typeid = curve_typeids[hc->hc()];
-            offset     = EMS_OFFSET_RC30Temp_temp_night;
+        case HeatingCircuit::Mode::TEMPAUTO:
+            offset          = EMS_OFFSET_RC30Set_temp_auto;
+            validate_typeid = set_typeid;
             break;
-        case HeatingCircuit::Mode::DAYLOW: // change the offset temp
-            set_typeid = curve_typeids[hc->hc()];
-            offset     = EMS_OFFSET_RC30Temp_temp_daylow;
+        case HeatingCircuit::Mode::NIGHT:
+            set_typeid      = curve_typeids[hc->hc()];
+            offset          = EMS_OFFSET_RC30Temp_temp_night;
+            validate_typeid = set_typeid;
             break;
-        case HeatingCircuit::Mode::DAYMID: // change the offset of flowtemp
-            set_typeid = curve_typeids[hc->hc()];
-            offset     = EMS_OFFSET_RC30Temp_temp_daymid;
+        case HeatingCircuit::Mode::DAYLOW:
+            set_typeid      = curve_typeids[hc->hc()];
+            offset          = EMS_OFFSET_RC30Temp_temp_daylow;
+            validate_typeid = set_typeid;
             break;
-        case HeatingCircuit::Mode::DAY: // change the day temp
-            set_typeid = curve_typeids[hc->hc()];
-            offset     = EMS_OFFSET_RC30Temp_temp_day;
+        case HeatingCircuit::Mode::DAYMID:
+            set_typeid      = curve_typeids[hc->hc()];
+            offset          = EMS_OFFSET_RC30Temp_temp_daymid;
+            validate_typeid = set_typeid;
             break;
-        case HeatingCircuit::Mode::HOLIDAY: // change the holiday temp
-            set_typeid = curve_typeids[hc->hc()];
-            offset     = EMS_OFFSET_RC30Temp_temp_holiday;
+        case HeatingCircuit::Mode::DAY:
+            set_typeid      = curve_typeids[hc->hc()];
+            offset          = EMS_OFFSET_RC30Temp_temp_day;
+            validate_typeid = set_typeid;
+            break;
+        case HeatingCircuit::Mode::HOLIDAY:
+            set_typeid      = curve_typeids[hc->hc()];
+            offset          = EMS_OFFSET_RC30Temp_temp_holiday;
+            validate_typeid = set_typeid;
             break;
         default:
-            if (hc->get_mode() == HeatingCircuit::Mode::MANUAL) {
+            if (hc->get_mode() == HeatingCircuit::Mode::OFF) {
+                offset = EMS_OFFSET_RC30Set_temp_off;
+            } else if (hc->get_mode() == HeatingCircuit::Mode::MANUAL) {
                 offset = EMS_OFFSET_RC30Set_temp_manual;
             } else {
-                offset = EMS_OFFSET_RC30Set_temp;
+                offset = EMS_OFFSET_RC30Set_temp_auto;
             }
             break;
         }
@@ -3301,101 +3310,8 @@ bool Thermostat::set_temperature_value(const char * value, const int8_t id, cons
     uint8_t hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     if (Helpers::value2temperature(value, f, relative)) {
         return set_temperature(f, mode, hc_num);
-    } else {
-        return false;
     }
-}
-
-bool Thermostat::set_temp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::AUTO);
-}
-
-bool Thermostat::set_nighttemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::NIGHT);
-}
-
-bool Thermostat::set_daytemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::DAY);
-}
-
-bool Thermostat::set_daylowtemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::DAYLOW);
-}
-
-bool Thermostat::set_daymidtemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::DAYMID);
-}
-
-bool Thermostat::set_comforttemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::COMFORT);
-}
-
-bool Thermostat::set_nofrosttemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::NOFROST);
-}
-
-bool Thermostat::set_ecotemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::ECO);
-}
-
-bool Thermostat::set_heattemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::HEAT);
-}
-
-bool Thermostat::set_summertemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::SUMMER);
-}
-
-bool Thermostat::set_designtemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::DESIGN);
-}
-
-bool Thermostat::set_offsettemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::OFFSET);
-}
-
-bool Thermostat::set_holidaytemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::HOLIDAY);
-}
-
-bool Thermostat::set_manualtemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::MANUAL);
-}
-
-bool Thermostat::set_tempautotemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::TEMPAUTO);
-}
-
-bool Thermostat::set_noreducetemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::NOREDUCE);
-}
-
-bool Thermostat::set_reducetemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::REDUCE);
-}
-
-bool Thermostat::set_vacreducetemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::VACREDUCE);
-}
-
-bool Thermostat::set_flowtempoffset(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::FLOWOFFSET, true);
-}
-
-bool Thermostat::set_maxflowtemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::MAXFLOW);
-}
-
-bool Thermostat::set_minflowtemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::MINFLOW);
-}
-
-bool Thermostat::set_roominfluence(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::ROOMINFLUENCE, true);
-}
-
-bool Thermostat::set_remoteseltemp(const char * value, const int8_t id) {
-    return set_temperature_value(value, id, HeatingCircuit::Mode::REMOTESELTEMP);
+    return false;
 }
 
 // register main device values, top level for all thermostats (excluding heating circuits)
@@ -3660,15 +3576,6 @@ void Thermostat::register_device_values() {
                               FL_(ibaCalIntTemperature),
                               DeviceValueUOM::DEGREES_R,
                               MAKE_CF_CB(set_calinttemp));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &offtemp_,
-                              DeviceValueType::UINT,
-                              DeviceValueNumOp::DV_NUMOP_DIV2,
-                              FL_(offtemp),
-                              DeviceValueUOM::DEGREES,
-                              MAKE_CF_CB(set_offtemp),
-                              5,
-                              30);
         register_device_value(
             DeviceValueTAG::TAG_DEVICE_DATA_WW, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode3), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
@@ -4189,6 +4096,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(
             tag, &hc->manualtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(manualtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_manualtemp));
         register_device_value(
+            tag, &hc->nofrosttemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(offtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_offtemp));
+        register_device_value(
             tag, &hc->daylowtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daylowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daylowtemp));
         register_device_value(
             tag, &hc->daymidtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daymidtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daymidtemp));
@@ -4272,17 +4181,10 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->daymidtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daymidtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daymidtemp));
         register_device_value(
             tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(dayhightemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
-        /*
         register_device_value(
             tag, &hc->manualtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(manualtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_manualtemp));
-        register_device_value(tag,
-                              &hc->tempautotemp,
-                              DeviceValueType::UINT,
-                              DeviceValueNumOp::DV_NUMOP_DIV2,
-                              FL_(tempautotemp),
-                              DeviceValueUOM::DEGREES,
-                              MAKE_CF_CB(set_tempautotemp));
-        */
+        register_device_value(
+            tag, &hc->nofrosttemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(offtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_offtemp));
         break;
     case EMS_DEVICE_FLAG_RC30_N:
     case EMS_DEVICE_FLAG_RC35:
