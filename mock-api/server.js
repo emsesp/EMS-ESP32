@@ -127,6 +127,12 @@ network_settings = {
   enableMDNS: true,
   enableCORS: false,
   CORSOrigin: '*',
+  enableIPv6: false,
+  local_ip: '',
+  gateway_ip: '',
+  subnet_mask: '',
+  dns_ip_1: '',
+  dns_ip_2: '',
 }
 const network_status = {
   status: 3,
@@ -348,6 +354,7 @@ settings = {
   bool_format: 1,
   bool_dashboard: 1,
   enum_format: 1,
+  fahrenheit: false,
 }
 
 const emsesp_devices = {
@@ -411,6 +418,7 @@ const emsesp_coredata = {
       e: 3,
     },
   ],
+  s_n: 'Sensors',
   active_sensors: 8,
   analog_enabled: true,
 }
@@ -589,7 +597,7 @@ const emsesp_devicedata_4 = {
   ],
 }
 
-// CUSTOMIZATION
+// CUSTOMIZATIONS
 
 const emsesp_deviceentities_1 = [
   {
@@ -934,7 +942,10 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
 
 function updateMask(entity, de, dd) {
   const current_mask = parseInt(entity.slice(0, 2), 16)
-  const shortname_with_customname = entity.slice(2)
+
+  // strip of any min/max ranges
+  const shortname_with_customname = entity.slice(2).split('>')[0]
+
   const shortname = shortname_with_customname.split('|')[0]
   const new_custom_name = shortname_with_customname.split('|')[1]
 
@@ -961,6 +972,7 @@ function updateMask(entity, de, dd) {
 
       // see if the custom name has changed
       const old_custom_name = dd.data[dd_objIndex].cn
+      console.log('comparing old ' + old_custom_name + ' with new ' + new_custom_name)
       if (old_custom_name !== new_custom_name) {
         changed = true
         new_fullname = new_custom_name
@@ -976,6 +988,7 @@ function updateMask(entity, de, dd) {
         de[de_objIndex].m = current_mask
         de[de_objIndex].cn = new_fullname
         dd.data[dd_objIndex].id = current_mask.toString(16).padStart(2, '0') + new_fullname
+        dd.data[dd_objIndex].cn = new_fullname
       }
 
       console.log('new dd:')
