@@ -499,7 +499,7 @@ const SettingsCustomization: FC = () => {
                           value={getMaskString(de.m)}
                           onChange={(event, mask) => {
                             de.m = getMaskNumber(mask);
-                            if (de.n === '' && (de.m & DeviceEntityMask.DV_READONLY)) {
+                            if (de.n === '' && de.m & DeviceEntityMask.DV_READONLY) {
                               de.m = de.m | DeviceEntityMask.DV_WEB_EXCLUDE;
                             }
                             if (de.m & DeviceEntityMask.DV_WEB_EXCLUDE) {
@@ -534,7 +534,7 @@ const SettingsCustomization: FC = () => {
                               isSet={(de.m & DeviceEntityMask.DV_WEB_EXCLUDE) === DeviceEntityMask.DV_WEB_EXCLUDE}
                             />
                           </ToggleButton>
-                          <ToggleButton value="128" >
+                          <ToggleButton value="128">
                             <OptionIcon
                               type="deleted"
                               isSet={(de.m & DeviceEntityMask.DV_DELETED) === DeviceEntityMask.DV_DELETED}
@@ -543,10 +543,10 @@ const SettingsCustomization: FC = () => {
                         </ToggleButtonGroup>
                       )}
                     </Cell>
-                    <Cell>{!deviceEntity && (formatName(de))}</Cell>
+                    <Cell>{!deviceEntity && formatName(de)}</Cell>
                     <Cell>{!deviceEntity && !(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}</Cell>
                     <Cell>{!deviceEntity && !(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}</Cell>
-                    <Cell>{!deviceEntity && (formatValue(de.v))}</Cell>
+                    <Cell>{!deviceEntity && formatValue(de.v)}</Cell>
                   </Row>
                 ))}
               </Body>
