@@ -1078,7 +1078,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             name        = "Modem";
             device_type = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CONVERTER) {
-            name        = "Converter"; // generic
+            name = "Converter"; // generic
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CLOCK) {
             name        = "Clock"; // generic
             device_type = DeviceType::CONTROLLER;
