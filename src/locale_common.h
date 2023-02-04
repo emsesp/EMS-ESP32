@@ -268,8 +268,8 @@ MAKE_PSTR_ENUM(enum_summer, FL_(winter), FL_(summer))
 MAKE_PSTR_ENUM(enum_operatingstate, FL_(heating), FL_(off), FL_(cooling))
 
 MAKE_PSTR_ENUM(enum_mode, FL_(manual), FL_(auto))                        // RC100, RC300, RC310
-MAKE_PSTR_ENUM(enum_mode2, FL_(off), FL_(manual), FL_(auto))             // RC20
-MAKE_PSTR_ENUM(enum_mode3, FL_(night), FL_(day), FL_(auto))              // RC35, RC30, RC25
+MAKE_PSTR_ENUM(enum_mode2, FL_(off), FL_(manual), FL_(auto))             // RC20, RC30
+MAKE_PSTR_ENUM(enum_mode3, FL_(night), FL_(day), FL_(auto))              // RC35, RC30_N, RC25, RC20_N
 MAKE_PSTR_ENUM(enum_mode4, FL_(nofrost), FL_(eco), FL_(heat), FL_(auto)) // JUNKERS
 MAKE_PSTR_ENUM(enum_mode5, FL_(auto), FL_(off))                          // CRF
 MAKE_PSTR_ENUM(enum_mode6, FL_(nofrost), FL_(night), FL_(day))           // RC10

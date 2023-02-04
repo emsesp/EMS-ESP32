@@ -379,4 +379,12 @@ std::string DeviceValue::get_fullname() const {
     return customname;
 }
 
+std::string DeviceValue::get_name(std::string & entity) {
+    auto pos = entity.find('|');
+    if (pos != std::string::npos) {
+        return entity.substr(2, pos - 2);
+    }
+    return entity.substr(2);
+}
+
 } // namespace emsesp

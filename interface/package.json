@@ -8,8 +8,8 @@
     "@emotion/styled": "^11.10.5",
     "@msgpack/msgpack": "^2.8.0",
     "@mui/icons-material": "^5.11.0",
-    "@mui/material": "^5.11.6",
-    "@table-library/react-table-library": "4.0.23",
+    "@mui/material": "^5.11.7",
+    "@table-library/react-table-library": "4.0.24",
     "@types/lodash": "^4.14.191",
     "@types/node": "^18.11.18",
     "@types/react": "^18.0.27",
@@ -26,9 +26,9 @@
     "react-icons": "^4.7.1",
     "react-scripts": "^5.0.1",
     "sockette": "^2.0.6",
-    "typesafe-i18n": "^5.21.0",
-    "typescript": "^4.9.4",
-    "axios": "^1.2.6",
+    "typesafe-i18n": "^5.22.0",
+    "typescript": "^4.9.5",
+    "axios": "^1.3.2",
     "react-router-dom": "^6.8.0"
   },
   "scripts": {

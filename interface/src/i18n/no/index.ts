@@ -157,6 +157,7 @@ const no: Translation = {
   CUSTOMIZATIONS_HELP_3: 'inaktiviser skriving',
   CUSTOMIZATIONS_HELP_4: 'ekskludere fra MQTT og API',
   CUSTOMIZATIONS_HELP_5: 'gjemme fra Dashboard',
+  CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
   SELECT_DEVICE: 'Velg en enhet',
   SET_ALL: 'sett alle',
   OPTIONS: 'Alternativ',

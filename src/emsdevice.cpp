@@ -40,7 +40,17 @@ bool EMSdevice::has_entities() const {
             return true;
         }
     }
-    return false;
+
+    bool found = false;
+    EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
+        for (EntityCustomization entityCustomization : settings.entityCustomizations) {
+            if (entityCustomization.device_id == device_id() && entityCustomization.entity_ids.size()) {
+                found = true;
+                break;
+            }
+        }
+    });
+    return found;
 }
 
 const char * EMSdevice::tag_to_string(uint8_t tag, const bool translate) {
@@ -521,14 +531,9 @@ void EMSdevice::add_device_value(uint8_t               tag,
                 for (std::string entity_id : entityCustomization.entity_ids) {
                     // if there is an appended custom name, strip it to get the true entity name
                     // and extract the new custom name
-                    std::string shortname;
                     auto        custom_name_pos = entity_id.find('|');
                     bool        has_custom_name = (custom_name_pos != std::string::npos);
-                    if (has_custom_name) {
-                        shortname = entity_id.substr(2, custom_name_pos - 2);
-                    } else {
-                        shortname = entity_id.substr(2);
-                    }
+                    std::string shortname       = has_custom_name ? entity_id.substr(2, custom_name_pos - 2) : entity_id.substr(2);
 
                     // we found the device entity
                     if (shortname == entity) {
@@ -1029,6 +1034,23 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
             }
         }
     }
+
+    EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
+        for (EntityCustomization entityCustomization : settings.entityCustomizations) {
+            if ((entityCustomization.device_id == device_id())) {
+                for (std::string entity_id : entityCustomization.entity_ids) {
+                    uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
+                    if (mask & 0x80) {
+                        JsonObject obj = output.createNestedObject();
+                        obj["id"]      = DeviceValue::get_name(entity_id);
+                        obj["m"]       = mask;
+                        obj["w"]       = false;
+                    }
+                }
+                break;
+            }
+        }
+    });
 }
 
 void EMSdevice::set_climate_minmax(uint8_t tag, int16_t min, uint16_t max) {
@@ -1057,14 +1079,9 @@ void EMSdevice::setCustomEntity(const std::string & entity_id) {
         }
 
         // extra shortname
-        std::string shortname;
         auto        custom_name_pos = entity_id.find('|');
         bool        has_custom_name = (custom_name_pos != std::string::npos);
-        if (has_custom_name) {
-            shortname = entity_id.substr(2, custom_name_pos - 2);
-        } else {
-            shortname = entity_id.substr(2);
-        }
+        std::string shortname       = has_custom_name ? entity_id.substr(2, custom_name_pos - 2) : entity_id.substr(2);
 
         if (entity_name == shortname) {
             // check the masks
@@ -1106,10 +1123,25 @@ void EMSdevice::setCustomEntity(const std::string & entity_id) {
 // populate a string vector with entities that have masks set or have a custom name
 void EMSdevice::getCustomEntities(std::vector<std::string> & entity_ids) {
     for (const auto & dv : devicevalues_) {
-        std::string entity_name = dv.tag < DeviceValueTAG::TAG_HC1 ? dv.short_name : std::string(tag_to_mqtt(dv.tag)) + "/" + dv.short_name;
-        uint8_t     mask        = dv.state >> 4;
+        char name[100];
+        name[0] = '\0';
+        if (dv.has_tag()) {
+            // prefix tag
+            strcpy(name, tag_to_mqtt(dv.tag));
+            strcat(name, "/");
+        }
+        strcat(name, dv.short_name);
+        std::string entity_name = name;
 
-        if (mask || !dv.custom_fullname.empty()) {
+        uint8_t mask   = dv.state >> 4;
+        bool    is_set = false;
+        for (auto & eid : entity_ids) {
+            if (DeviceValue::get_name(eid) == entity_name) {
+                is_set = true;
+                break;
+            }
+        }
+        if (!is_set && (mask || !dv.custom_fullname.empty())) {
             if (dv.custom_fullname.empty()) {
                 entity_ids.push_back(Helpers::hextoa(mask, false) + entity_name);
             } else {

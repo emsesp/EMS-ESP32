@@ -157,6 +157,7 @@ const de: Translation = {
   CUSTOMIZATIONS_HELP_3: 'Schreibaktion deaktivieren',
   CUSTOMIZATIONS_HELP_4: 'von MQTT und API ausschließen',
   CUSTOMIZATIONS_HELP_5: 'Aus dem Kontrollzentrum ausblenden',
+  CUSTOMIZATIONS_HELP_6: 'Aus dem Speicher löschen',
   SELECT_DEVICE: 'Wählen Sie ein Gerät aus',
   SET_ALL: 'setzen Sie alle',
   OPTIONS: 'Optionen',

@@ -942,7 +942,10 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
 
 function updateMask(entity, de, dd) {
   const current_mask = parseInt(entity.slice(0, 2), 16)
-  const shortname_with_customname = entity.slice(2)
+
+  // strip of any min/max ranges
+  const shortname_with_customname = entity.slice(2).split('>')[0]
+
   const shortname = shortname_with_customname.split('|')[0]
   const new_custom_name = shortname_with_customname.split('|')[1]
 
