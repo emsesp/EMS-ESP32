@@ -26,11 +26,7 @@
     "react-icons": "^4.7.1",
     "react-scripts": "^5.0.1",
     "sockette": "^2.0.6",
-<<<<<<< HEAD
-    "typesafe-i18n": "5.22.0",
-=======
     "typesafe-i18n": "^5.24.0",
->>>>>>> 941146db (Warn user in WebUI of unsaved changes #911)
     "typescript": "^4.9.5",
     "axios": "^1.3.2",
     "react-router-dom": "^6.8.0"
