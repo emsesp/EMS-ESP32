@@ -1504,6 +1504,7 @@ void EMSESP::start() {
 
 // main loop calling all services
 void EMSESP::loop() {
+    
     esp8266React.loop(); // web services
     system_.loop();      // does LED and checks system health, and syslog service
 
@@ -1533,7 +1534,6 @@ void EMSESP::loop() {
         ::exit(0);
     }
 #endif
-
 
     Shell::loop_all();
 }
