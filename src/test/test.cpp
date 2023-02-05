@@ -1,7 +1,7 @@
 
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+* Copyright 2020  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1783,6 +1783,7 @@ void Test::add_device(uint8_t device_id, uint8_t product_id) {
     uart_telegram({device_id, EMSESP_DEFAULT_EMS_BUS_ID, EMSdevice::EMS_TYPE_VERSION, 0, product_id, 1, 0});
 }
 
+#ifdef EMSESP_DEBUG
 #ifndef EMSESP_STANDALONE
 void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
     Serial.println();
@@ -1816,6 +1817,7 @@ void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
         file = root.openNextFile();
     }
 }
+#endif
 #endif
 
 } // namespace emsesp
