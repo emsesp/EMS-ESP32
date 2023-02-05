@@ -236,13 +236,15 @@ void AnalogSensor::measure() {
         for (auto & sensor : sensors_) {
             if (sensor.type() == AnalogType::ADC) {
                 uint16_t a = analogReadMilliVolts(sensor.gpio()); // e.g. ADC1_CHANNEL_0_GPIO_NUM
-                if (!sensor.analog_) {                            // init first time
+
+                if (!sensor.analog_) { // init first time
                     sensor.analog_ = a;
                     sensor.sum_    = a * 512;
                 } else { // simple moving average filter
                     sensor.sum_    = (sensor.sum_ * 511) / 512 + a;
                     sensor.analog_ = sensor.sum_ / 512;
                 }
+
                 // detect change with little hysteresis on raw mV value
                 if (sensor.last_reading_ + 1 < sensor.analog_ || sensor.last_reading_ > sensor.analog_ + 1) {
                     sensor.set_value(((int32_t)sensor.analog_ - sensor.offset()) * sensor.factor());
@@ -254,6 +256,7 @@ void AnalogSensor::measure() {
             }
         }
     }
+
     // poll digital io every time with debounce
     // go through the list of digital sensors
     for (auto & sensor : sensors_) {
@@ -261,10 +264,12 @@ void AnalogSensor::measure() {
             || sensor.type() == AnalogType::RATE) {
             auto old_value       = sensor.value(); // remember current value before reading
             auto current_reading = digitalRead(sensor.gpio());
+
             if (sensor.poll_ != current_reading) {     // check for pinchange
                 sensor.polltime_ = uuid::get_uptime(); // remember time of pinchange
                 sensor.poll_     = current_reading;
             }
+
             // debounce and check for real pinchange
             if (uuid::get_uptime() - sensor.polltime_ >= 15 && sensor.poll_ != sensor.last_reading_) {
                 sensor.last_reading_ = sensor.poll_;
@@ -281,6 +286,7 @@ void AnalogSensor::measure() {
                     sensor.last_polltime_ = sensor.polltime_;
                 }
             }
+
             // see if there is a change and increment # reads
             if (old_value != sensor.value()) {
                 sensorreads_++;
@@ -371,7 +377,7 @@ bool AnalogSensor::updated_values() {
 
 // publish a single sensor to MQTT
 void AnalogSensor::publish_sensor(const Sensor & sensor) const {
-    if (Mqtt::publish_single()) {
+    if (Mqtt::ha_enabled() && Mqtt::publish_single()) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         if (Mqtt::publish_single2cmd()) {
             snprintf(topic, sizeof(topic), "%s/%s", F_(analogsensor), sensor.name().c_str());
@@ -388,9 +394,11 @@ void AnalogSensor::remove_ha_topic(const uint8_t gpio) const {
     if (!Mqtt::ha_enabled()) {
         return;
     }
+
 #ifdef EMSESP_DEBUG
     LOG_DEBUG("Removing HA config for analog sensor GPIO %02d", gpio);
 #endif
+
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
     Mqtt::publish_ha(topic);
@@ -398,6 +406,10 @@ void AnalogSensor::remove_ha_topic(const uint8_t gpio) const {
 
 // send all sensor values as a JSON package to MQTT
 void AnalogSensor::publish_values(const bool force) {
+    if (!Mqtt::ha_enabled()) {
+        return;
+    }
+
     uint8_t num_sensors = sensors_.size();
 
     if (num_sensors == 0) {
