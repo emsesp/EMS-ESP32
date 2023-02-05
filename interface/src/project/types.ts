@@ -48,6 +48,7 @@ export interface Stat {
   f: number; // fail
   q: number; // quality
 }
+
 export interface Status {
   status: busConnectionStatus;
   tx_mode: number;
@@ -57,6 +58,7 @@ export interface Status {
   num_analogs: number;
   stats: Stat[];
 }
+
 export interface Device {
   id: string; // id index
   tn: string; // device type translated name
