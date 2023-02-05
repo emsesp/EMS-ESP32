@@ -2,6 +2,7 @@ import { FC, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
 
 import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment } from '@mui/material';
+
 import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 
@@ -12,7 +13,8 @@ import {
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
-  ValidatedTextField
+  ValidatedTextField,
+  BlockNavigation
 } from '../../components';
 import { MqttSettings } from '../../types';
 import { numberValue, updateValueDirty, useRest } from '../../utils';
@@ -21,7 +23,7 @@ import * as MqttApi from '../../api/mqtt';
 import { useI18nContext } from '../../i18n/i18n-react';
 
 const MqttSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, saveData, errorMessage } =
+  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
     useRest<MqttSettings>({
       read: MqttApi.readMqttSettings,
       update: MqttApi.updateMqttSettings
@@ -405,6 +407,7 @@ const MqttSettingsForm: FC = () => {
 
   return (
     <SectionContent title={LL.SETTINGS_OF('MQTT')} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

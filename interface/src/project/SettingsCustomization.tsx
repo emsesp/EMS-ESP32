@@ -1,5 +1,7 @@
 import { FC, useState, useEffect, useCallback } from 'react';
 
+import { unstable_useBlocker as useBlocker } from 'react-router-dom';
+
 import {
   Button,
   Typography,
@@ -34,7 +36,7 @@ import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
 import OptionIcon from './OptionIcon';
 
-import { ButtonRow, FormLoader, ValidatedTextField, SectionContent, MessageBox } from '../components';
+import { ButtonRow, FormLoader, ValidatedTextField, SectionContent, MessageBox, BlockNavigation } from '../components';
 
 import * as EMSESP from './api';
 
@@ -54,6 +56,9 @@ const SettingsCustomization: FC = () => {
 
   const emptyDeviceEntity = { id: '', v: 0, n: '', cn: '', m: 0, w: false };
 
+  const [numChanges, setNumChanges] = useState<number>(0);
+  let blocker = useBlocker(numChanges !== 0);
+
   const [restarting, setRestarting] = useState<boolean>(false);
   const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
   const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([emptyDeviceEntity]);
@@ -66,6 +71,10 @@ const SettingsCustomization: FC = () => {
   const [deviceEntity, setDeviceEntity] = useState<DeviceEntity>();
   // eslint-disable-next-line
   const [masks, setMasks] = useState(() => ['']);
+
+  useEffect(() => {
+    countChanges();
+  });
 
   const entities_theme = useTheme({
     Table: `
@@ -278,6 +287,10 @@ const SettingsCustomization: FC = () => {
       );
   };
 
+  const countChanges = () => {
+    setNumChanges(getChanges().length);
+  };
+
   const restart = async () => {
     try {
       await EMSESP.restart();
@@ -451,34 +464,30 @@ const SettingsCustomization: FC = () => {
           </Grid>
 
           <Grid item>
-            <Tooltip arrow placement="top" title="set selected entities to be both visible and output">
-              <Button
-                size="small"
-                sx={{ fontSize: 10 }}
-                variant="outlined"
-                color="inherit"
-                onClick={() => maskDisabled(false)}
-              >
-                {LL.SET_ALL()}&nbsp;
-                <OptionIcon type="api_mqtt_exclude" isSet={false} />
-                <OptionIcon type="web_exclude" isSet={false} />
-              </Button>
-            </Tooltip>
+            <Button
+              size="small"
+              sx={{ fontSize: 10 }}
+              variant="outlined"
+              color="inherit"
+              onClick={() => maskDisabled(false)}
+            >
+              {LL.SET_ALL()}&nbsp;
+              <OptionIcon type="api_mqtt_exclude" isSet={false} />
+              <OptionIcon type="web_exclude" isSet={false} />
+            </Button>
           </Grid>
           <Grid item>
-            <Tooltip arrow placement="top" title="set selected entities to be not visible and not output">
-              <Button
-                size="small"
-                sx={{ fontSize: 10 }}
-                variant="outlined"
-                color="inherit"
-                onClick={() => maskDisabled(true)}
-              >
-                {LL.SET_ALL()}&nbsp;
-                <OptionIcon type="api_mqtt_exclude" isSet={true} />
-                <OptionIcon type="web_exclude" isSet={true} />
-              </Button>
-            </Tooltip>
+            <Button
+              size="small"
+              sx={{ fontSize: 10 }}
+              variant="outlined"
+              color="inherit"
+              onClick={() => maskDisabled(true)}
+            >
+              {LL.SET_ALL()}&nbsp;
+              <OptionIcon type="api_mqtt_exclude" isSet={true} />
+              <OptionIcon type="web_exclude" isSet={true} />
+            </Button>
           </Grid>
         </Grid>
         <Table data={{ nodes: shown_data }} theme={entities_theme} layout={{ custom: true }}>
@@ -511,7 +520,6 @@ const SettingsCustomization: FC = () => {
                             if (de.n === '' && de.m & DeviceEntityMask.DV_READONLY) {
                               de.m = de.m | DeviceEntityMask.DV_WEB_EXCLUDE;
                             }
-
                             if (de.m & DeviceEntityMask.DV_WEB_EXCLUDE) {
                               de.m = de.m & ~DeviceEntityMask.DV_FAVORITE;
                             }
@@ -590,8 +598,6 @@ const SettingsCustomization: FC = () => {
   );
 
   const renderContent = () => {
-    const num_changes = getChanges().length;
-
     return (
       <>
         <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
@@ -609,7 +615,7 @@ const SettingsCustomization: FC = () => {
         {!restartNeeded && (
           <Box display="flex" flexWrap="wrap">
             <Box flexGrow={1}>
-              {num_changes !== 0 && (
+              {numChanges !== 0 && (
                 <ButtonRow>
                   <Button
                     startIcon={<WarningIcon color="warning" />}
@@ -617,7 +623,7 @@ const SettingsCustomization: FC = () => {
                     color="info"
                     onClick={() => saveCustomization()}
                   >
-                    {LL.APPLY_CHANGES(num_changes)}
+                    {LL.APPLY_CHANGES(numChanges)}
                   </Button>
                 </ButtonRow>
               )}
@@ -712,6 +718,7 @@ const SettingsCustomization: FC = () => {
 
   return (
     <SectionContent title={LL.CUSTOMIZATIONS()} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {restarting ? <RestartMonitor /> : renderContent()}
       {renderEditDialog()}
     </SectionContent>

@@ -29,7 +29,8 @@ import {
   SectionContent,
   ValidatedPasswordField,
   ValidatedTextField,
-  MessageBox
+  MessageBox,
+  BlockNavigation
 } from '../../components';
 import { NetworkSettings } from '../../types';
 import * as NetworkApi from '../../api/network';
@@ -61,6 +62,7 @@ const WiFiSettingsForm: FC = () => {
     origData,
     dirtyFlags,
     setDirtyFlags,
+    blocker,
     saveData,
     errorMessage,
     restartNeeded
@@ -330,6 +332,7 @@ const WiFiSettingsForm: FC = () => {
 
   return (
     <SectionContent title={LL.SETTINGS_OF(LL.NETWORK(1))} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {restarting ? <RestartMonitor /> : content()}
     </SectionContent>
   );

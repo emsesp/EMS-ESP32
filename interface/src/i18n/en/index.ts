@@ -302,7 +302,11 @@ const en: Translation = {
   NEW_NAME_OF: 'New {0} name',
   ENTITY: 'entity',
   MIN: 'min',
-  MAX: 'max'
+  MAX: 'max',
+  BLOCK_NAVIGATE_1: 'You have unsaved changes',
+  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?',
+  STAY: 'Stay',
+  LEAVE: 'Leave'
 };
 
 export default en;

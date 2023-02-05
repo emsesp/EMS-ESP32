@@ -11,7 +11,8 @@ import {
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
-  ValidatedTextField
+  ValidatedTextField,
+  BlockNavigation
 } from '../../components';
 
 import { OTASettings } from '../../types';
@@ -24,7 +25,7 @@ import { OTA_SETTINGS_VALIDATOR } from '../../validators/system';
 import { useI18nContext } from '../../i18n/i18n-react';
 
 const OTASettingsForm: FC = () => {
-  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, saveData, errorMessage } =
+  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
     useRest<OTASettings>({
       read: SystemApi.readOTASettings,
       update: SystemApi.updateOTASettings
@@ -108,6 +109,7 @@ const OTASettingsForm: FC = () => {
 
   return (
     <SectionContent title={LL.SETTINGS_OF('OTA')} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

@@ -6,7 +6,14 @@ import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 import { validate } from '../../validators';
-import { BlockFormControlLabel, ButtonRow, FormLoader, SectionContent, ValidatedTextField } from '../../components';
+import {
+  BlockFormControlLabel,
+  ButtonRow,
+  FormLoader,
+  SectionContent,
+  ValidatedTextField,
+  BlockNavigation
+} from '../../components';
 import { NTPSettings } from '../../types';
 import { updateValueDirty, useRest } from '../../utils';
 import * as NTPApi from '../../api/ntp';
@@ -16,7 +23,7 @@ import { NTP_SETTINGS_VALIDATOR } from '../../validators/ntp';
 import { useI18nContext } from '../../i18n/i18n-react';
 
 const NTPSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, saveData, errorMessage } =
+  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
     useRest<NTPSettings>({
       read: NTPApi.readNTPSettings,
       update: NTPApi.updateNTPSettings
@@ -111,6 +118,7 @@ const NTPSettingsForm: FC = () => {
 
   return (
     <SectionContent title={LL.SETTINGS_OF('NTP')} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

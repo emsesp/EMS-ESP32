@@ -6,6 +6,8 @@ import { extractErrorMessage } from '.';
 
 import { useI18nContext } from '../i18n/i18n-react';
 
+import { unstable_useBlocker as useBlocker } from 'react-router-dom';
+
 export interface RestRequestOptions<D> {
   read: () => AxiosPromise<D>;
   update?: (value: D) => AxiosPromise<D>;
@@ -23,6 +25,8 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
 
   const [origData, setOrigData] = useState<D>();
   const [dirtyFlags, setDirtyFlags] = useState<string[]>();
+
+  let blocker = useBlocker(dirtyFlags?.length !== 0);
 
   const loadData = useCallback(async () => {
     setData(undefined);
@@ -82,6 +86,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     origData,
     dirtyFlags,
     setDirtyFlags,
+    blocker,
     errorMessage,
     restartNeeded
   } as const;

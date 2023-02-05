@@ -302,7 +302,11 @@ const sv: Translation = {
   NEW_NAME_OF: 'Byt namn {0}',
   ENTITY: 'Entitet',
   MIN: 'min',
-  MAX: 'max'
+  MAX: 'max',
+  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
+  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
+  STAY: 'Stay', // TODO translate
+  LEAVE: 'Leave' // TODO translate
 };
 
 export default sv;

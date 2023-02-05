@@ -1,5 +1,12 @@
 {
+<<<<<<< HEAD
    "adapter": "react",
    "baseLocale": "pl",
    "$schema": "https://unpkg.com/typesafe-i18n@5.22.0/schema/typesafe-i18n.json"
 }
+=======
+  "adapter": "react",
+  "baseLocale": "pl",
+  "$schema": "https://unpkg.com/typesafe-i18n@5.24.0/schema/typesafe-i18n.json"
+}
+>>>>>>> 941146db (Warn user in WebUI of unsaved changes #911)

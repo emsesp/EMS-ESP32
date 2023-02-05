@@ -1,11 +1,12 @@
 import { FC, useContext, useEffect } from 'react';
-import { Navigate, Routes, Route, useLocation } from 'react-router-dom';
+
+import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
+
 import { useSnackbar, VariantType } from 'notistack';
 
 import { useI18nContext } from './i18n/i18n-react';
 
 import { Authentication, AuthenticationContext } from './contexts/authentication';
-import { FeaturesContext } from './contexts/features';
 import { RequireAuthenticated, RequireUnauthenticated } from './components';
 
 import SignIn from './SignIn';
@@ -27,6 +28,7 @@ const RootRedirect: FC<SecurityRedirectProps> = ({ message, variant, signOut }) 
   return <Navigate to="/" />;
 };
 
+// TODO still need this?
 export const RemoveTrailingSlashes = () => {
   const location = useLocation();
   return (
@@ -42,7 +44,6 @@ export const RemoveTrailingSlashes = () => {
 };
 
 const AppRouting: FC = () => {
-  const { features } = useContext(FeaturesContext);
   const { LL } = useI18nContext();
 
   return (
@@ -51,16 +52,14 @@ const AppRouting: FC = () => {
       <Routes>
         <Route path="/unauthorized" element={<RootRedirect message={LL.PLEASE_SIGNIN()} signOut />} />
         <Route path="/fileUpdated" element={<RootRedirect message={LL.UPLOAD_SUCCESSFUL()} variant="success" />} />
-        {features.security && (
-          <Route
-            path="/"
-            element={
-              <RequireUnauthenticated>
-                <SignIn />
-              </RequireUnauthenticated>
-            }
-          />
-        )}
+        <Route
+          path="/"
+          element={
+            <RequireUnauthenticated>
+              <SignIn />
+            </RequireUnauthenticated>
+          }
+        />
         <Route
           path="/*"
           element={

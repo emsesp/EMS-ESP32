@@ -1,4 +1,4 @@
-import { FC, useCallback, useContext, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,11 +9,9 @@ import { ACCESS_TOKEN } from '../../api/endpoints';
 import { RequiredChildrenProps } from '../../utils';
 import { LoadingSpinner } from '../../components';
 import { Me } from '../../types';
-import { FeaturesContext } from '../features';
 import { AuthenticationContext } from './context';
 
 const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
-  const { features } = useContext(FeaturesContext);
   const { LL } = useI18nContext();
 
   const navigate = useNavigate();
@@ -43,11 +41,6 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
   };
 
   const refresh = useCallback(async () => {
-    if (!features.security) {
-      setMe({ admin: true, username: 'admin' });
-      setInitialized(true);
-      return;
-    }
     const accessToken = AuthenticationApi.getStorage().getItem(ACCESS_TOKEN);
     if (accessToken) {
       try {
@@ -62,7 +55,7 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
       setMe(undefined);
       setInitialized(true);
     }
-  }, [features]);
+  }, []);
 
   useEffect(() => {
     refresh();

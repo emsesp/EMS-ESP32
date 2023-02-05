@@ -27,6 +27,7 @@ const AccessPoint: FC = () => {
       </RouterTabs>
       <Routes>
         <Route path="status" element={<APStatusForm />} />
+        <Route index element={<Navigate to="status" />} />
         <Route
           path="settings"
           element={
@@ -35,6 +36,7 @@ const AccessPoint: FC = () => {
             </RequireAdmin>
           }
         />
+        {/* <Route path="/*" element={<Navigate to="status" />} /> */}
         <Route path="/*" element={<Navigate replace to="status" />} />
       </Routes>
     </>

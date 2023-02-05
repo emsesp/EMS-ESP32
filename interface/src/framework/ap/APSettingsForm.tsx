@@ -13,7 +13,8 @@ import {
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
-  ValidatedTextField
+  ValidatedTextField,
+  BlockNavigation
 } from '../../components';
 
 import { APProvisionMode, APSettings } from '../../types';
@@ -27,7 +28,7 @@ export const isAPEnabled = ({ provision_mode }: APSettings) => {
 };
 
 const APSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, saveData, errorMessage } =
+  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
     useRest<APSettings>({
       read: APApi.readAPSettings,
       update: APApi.updateAPSettings
@@ -195,6 +196,7 @@ const APSettingsForm: FC = () => {
 
   return (
     <SectionContent title={LL.SETTINGS_OF(LL.ACCESS_POINT(1))} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

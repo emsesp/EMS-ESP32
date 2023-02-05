@@ -7,7 +7,14 @@ import CancelIcon from '@mui/icons-material/Cancel';
 
 import * as SecurityApi from '../../api/security';
 import { SecuritySettings } from '../../types';
-import { ButtonRow, FormLoader, MessageBox, SectionContent, ValidatedPasswordField } from '../../components';
+import {
+  ButtonRow,
+  FormLoader,
+  MessageBox,
+  SectionContent,
+  ValidatedPasswordField,
+  BlockNavigation
+} from '../../components';
 import { SECURITY_SETTINGS_VALIDATOR, validate } from '../../validators';
 import { updateValueDirty, useRest } from '../../utils';
 import { AuthenticatedContext } from '../../contexts/authentication';
@@ -18,7 +25,7 @@ const SecuritySettingsForm: FC = () => {
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, saveData, errorMessage } =
+  const { loadData, saving, data, setData, origData, dirtyFlags, blocker, setDirtyFlags, saveData, errorMessage } =
     useRest<SecuritySettings>({
       read: SecurityApi.readSecuritySettings,
       update: SecurityApi.updateSecuritySettings
@@ -87,6 +94,7 @@ const SecuritySettingsForm: FC = () => {
 
   return (
     <SectionContent title={LL.SETTINGS_OF(LL.SECURITY(1))} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

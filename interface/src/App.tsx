@@ -4,8 +4,6 @@ import { SnackbarProvider } from 'notistack';
 import { IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-import { FeaturesLoader } from './contexts/features';
-
 import CustomTheme from './CustomTheme';
 import AppRouting from './AppRouting';
 
@@ -44,9 +42,9 @@ const App: FC = () => {
             </IconButton>
           )}
         >
-          <FeaturesLoader>
-            <AppRouting />
-          </FeaturesLoader>
+          {/* <FeaturesLoader> */}
+          <AppRouting />
+          {/* </FeaturesLoader> */}
         </SnackbarProvider>
       </CustomTheme>
     </TypesafeI18n>

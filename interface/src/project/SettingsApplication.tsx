@@ -18,7 +18,8 @@ import {
   BlockFormControlLabel,
   ValidatedTextField,
   ButtonRow,
-  MessageBox
+  MessageBox,
+  BlockNavigation
 } from '../components';
 import { numberValue, extractErrorMessage, updateValueDirty, useRest } from '../utils';
 
@@ -46,6 +47,7 @@ const SettingsApplication: FC = () => {
     origData,
     dirtyFlags,
     setDirtyFlags,
+    blocker,
     errorMessage,
     restartNeeded
   } = useRest<Settings>({
@@ -662,6 +664,7 @@ const SettingsApplication: FC = () => {
 
   return (
     <SectionContent title={LL.APPLICATION_SETTINGS()} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {restarting ? <RestartMonitor /> : content()}
     </SectionContent>
   );
