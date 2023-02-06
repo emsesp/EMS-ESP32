@@ -257,6 +257,7 @@ MAKE_PSTR_ENUM(enum_comfort2, FL_(eco), FL_(high_comfort))
 MAKE_PSTR_ENUM(enum_flow, FL_(off), FL_(flow), FL_(bufferedflow), FL_(buffer), FL_(layeredbuffer))
 MAKE_PSTR_ENUM(enum_reset, FL_(dash), FL_(maintenance), FL_(error))
 MAKE_PSTR_ENUM(enum_maxHeat, FL_(0kW), FL_(2kW), FL_(3kW), FL_(4kW), FL_(6kW), FL_(9kW))
+MAKE_PSTR_ENUM(enum_pumpMode, FL_(proportional), FL_(deltaP1), FL_(deltaP2), FL_(deltaP3), FL_(deltaP4))
 
 // thermostat lists
 MAKE_PSTR_ENUM(enum_ibaMainDisplay, FL_(internal_temperature), FL_(internal_setpoint), FL_(external_temperature), FL_(burner_temperature), FL_(ww_temperature), FL_(functioning_mode), FL_(time), FL_(date), FL_(smoke_temperature))

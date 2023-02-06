@@ -121,6 +121,7 @@ class Boiler : public EMSdevice {
     uint8_t  heatingTemp_;      // Heating temperature setting on the boiler
     uint8_t  pumpModMax_;       // Boiler circuit pump modulation max. power %
     uint8_t  pumpModMin_;       // Boiler circuit pump modulation min. power
+    uint8_t  pumpMode_;         // pump setting proportional/deltaP
     uint8_t  pumpDelay_;
     uint8_t  burnMinPeriod_;
     uint8_t  burnMinPower_;
@@ -331,6 +332,7 @@ class Boiler : public EMSdevice {
     bool        set_max_power(const char * value, const int8_t id);
     bool        set_min_pump(const char * value, const int8_t id);
     bool        set_max_pump(const char * value, const int8_t id);
+    bool        set_pumpMode(const char * value, const int8_t id);
     bool        set_hyst_on(const char * value, const int8_t id);
     bool        set_hyst_off(const char * value, const int8_t id);
     inline bool set_hyst2_on(const char * value, const int8_t id) {
