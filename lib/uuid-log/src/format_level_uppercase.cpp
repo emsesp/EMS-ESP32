@@ -26,17 +26,17 @@ namespace uuid {
 
 namespace log {
 
-static constexpr const char * pstr_level_uppercase_off __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM     = "OFF";
-static constexpr const char * pstr_level_uppercase_emerg __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM   = "EMERG";
-static constexpr const char * pstr_level_uppercase_crit __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM    = "CRIT";
-static constexpr const char * pstr_level_uppercase_alert __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM   = "ALERT";
-static constexpr const char * pstr_level_uppercase_err __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM     = "ERR";
-static constexpr const char * pstr_level_uppercase_warning __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = "WARNING";
-static constexpr const char * pstr_level_uppercase_notice __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM  = "NOTICE";
-static constexpr const char * pstr_level_uppercase_info __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM    = "INFO";
-static constexpr const char * pstr_level_uppercase_debug __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM   = "DEBUG";
-static constexpr const char * pstr_level_uppercase_trace __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM   = "TRACE";
-static constexpr const char * pstr_level_uppercase_all __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM     = "ALL";
+static constexpr const char * pstr_level_uppercase_off     = "OFF";
+static constexpr const char * pstr_level_uppercase_emerg   = "EMERG";
+static constexpr const char * pstr_level_uppercase_crit    = "CRIT";
+static constexpr const char * pstr_level_uppercase_alert   = "ALERT";
+static constexpr const char * pstr_level_uppercase_err     = "ERR";
+static constexpr const char * pstr_level_uppercase_warning = "WARNING";
+static constexpr const char * pstr_level_uppercase_notice  = "NOTICE";
+static constexpr const char * pstr_level_uppercase_info    = "INFO";
+static constexpr const char * pstr_level_uppercase_debug   = "DEBUG";
+static constexpr const char * pstr_level_uppercase_trace   = "TRACE";
+static constexpr const char * pstr_level_uppercase_all     = "ALL";
 
 static const __FlashStringHelper * log_level_uppercase[(int)Level::ALL - (int)Level::OFF + 1] __attribute__((__aligned__(sizeof(uint32_t))))
 PROGMEM = {reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_off),

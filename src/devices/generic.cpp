@@ -24,18 +24,8 @@ REGISTER_FACTORY(Generic, EMSdevice::DeviceType::GENERIC);
 
 uuid::log::Logger Generic::logger_{F_(generic), uuid::log::Facility::CONSOLE};
 
-Generic::Generic(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
+Generic::Generic(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    // RF-Sensor 0x40 sending temperature in telegram 0x435, see https://github.com/emsesp/EMS-ESP32/issues/103
-    if (device_id == 0x40) {
-        register_telegram_type(0x435, F("RFSensorMessage"), false, MAKE_PF_CB(process_RFSensorMessage));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &rfTemp_, DeviceValueType::SHORT, FL_(div10), FL_(RFTemp), DeviceValueUOM::DEGREES);
-    }
-}
-
-// type 0x435 rf remote sensor
-void Generic::process_RFSensorMessage(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, rfTemp_, 0); // is * 10
 }
 
 } // namespace emsesp

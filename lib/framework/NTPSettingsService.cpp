@@ -28,14 +28,14 @@ void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
     case ARDUINO_EVENT_ETH_DISCONNECTED:
-        emsesp::EMSESP::logger().info(F("WiFi connection dropped, stopping NTP"));
+        emsesp::EMSESP::logger().info("WiFi connection dropped, stopping NTP");
         connected_ = false;
         configureNTP();
         break;
 
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
     case ARDUINO_EVENT_ETH_GOT_IP:
-        // emsesp::EMSESP::logger().info(F("Got IP address, starting NTP synchronization"));
+        // emsesp::EMSESP::logger().info("Got IP address, starting NTP synchronization");
         connected_ = true;
         configureNTP();
         break;
@@ -49,7 +49,8 @@ void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
 void NTPSettingsService::configureNTP() {
     emsesp::EMSESP::system_.ntp_connected(false);
     if (connected_ && _state.enabled) {
-        emsesp::EMSESP::logger().info(F("Starting NTP"));
+        emsesp::EMSESP::logger().info("Starting NTP");
+        sntp_set_sync_interval(3600000); // one hour
         sntp_set_time_sync_notification_cb(ntp_received);
         configTzTime(_state.tzFormat.c_str(), _state.server.c_str());
     } else {
@@ -80,6 +81,7 @@ void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVari
 }
 
 void NTPSettingsService::ntp_received(struct timeval * tv) {
-    // emsesp::EMSESP::logger().info(F("NTP sync to %d sec"), tv->tv_sec);
+    // emsesp::EMSESP::logger().info("NTP sync to %d sec", tv->tv_sec);
     emsesp::EMSESP::system_.ntp_connected(true);
+    emsesp::EMSESP::system_.send_info_mqtt("connected", true); // send info topic with NTP time
 }

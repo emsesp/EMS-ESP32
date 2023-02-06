@@ -11,7 +11,11 @@ import { SECURITY_SETTINGS_VALIDATOR, validate } from '../../validators';
 import { updateValue, useRest } from '../../utils';
 import { AuthenticatedContext } from '../../contexts/authentication';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const SecuritySettingsForm: FC = () => {
+  const { LL } = useI18nContext();
+
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
   const { loadData, saving, data, setData, saveData, errorMessage } = useRest<SecuritySettings>({
     read: SecurityApi.readSecuritySettings,
@@ -42,18 +46,14 @@ const SecuritySettingsForm: FC = () => {
         <ValidatedPasswordField
           fieldErrors={fieldErrors}
           name="jwt_secret"
-          label="su Password"
+          label={LL.SU_PASSWORD()}
           fullWidth
           variant="outlined"
           value={data.jwt_secret}
           onChange={updateFormValue}
           margin="normal"
         />
-        <MessageBox
-          level="info"
-          message="The su (super user) password is used to sign authentication tokens and also enable admin privileges within the Console."
-          mt={1}
-        />
+        <MessageBox level="info" message={LL.SU_TEXT()} mt={1} />
         <ButtonRow>
           <Button
             startIcon={<SaveIcon />}
@@ -63,7 +63,7 @@ const SecuritySettingsForm: FC = () => {
             type="submit"
             onClick={validateAndSubmit}
           >
-            Save
+            {LL.SAVE()}
           </Button>
         </ButtonRow>
       </>
@@ -71,7 +71,7 @@ const SecuritySettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title="Security Settings" titleGutter>
+    <SectionContent title={LL.SETTINGS_OF(LL.SECURITY(1))} titleGutter>
       {content()}
     </SectionContent>
   );

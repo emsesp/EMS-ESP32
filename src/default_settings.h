@@ -15,10 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef EMSESP_DEFAULT_SETTINGS_H
 #define EMSESP_DEFAULT_SETTINGS_H
 
 // GENERAL SETTINGS
+
+#ifndef EMSESP_DEFAULT_LOCALE
+#define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_EN // English
+#endif
+
+#ifndef EMSESP_DEFAULT_VERSION
+#define EMSESP_DEFAULT_VERSION ""
+#endif
 
 #ifndef EMSESP_DEFAULT_TX_MODE
 #define EMSESP_DEFAULT_TX_MODE 1 // EMS1.0
@@ -123,7 +132,7 @@
 #endif
 
 #ifndef EMSESP_DEFAULT_PHY_TYPE
-#define EMSESP_DEFAULT_PHY_TYPE 0 // No Ethernet, just Wifi
+#define EMSESP_DEFAULT_PHY_TYPE 0 // No Ethernet, just Wifi. PHY_type::PHY_TYPE_NONE,
 #endif
 
 // MQTT
@@ -146,6 +155,10 @@
 
 #ifndef EMSESP_DEFAULT_PUBLISH_TIME
 #define EMSESP_DEFAULT_PUBLISH_TIME 10
+#endif
+
+#ifndef EMSESP_DEFAULT_PUBLISH_HEARTBEAT
+#define EMSESP_DEFAULT_PUBLISH_HEARTBEAT 60
 #endif
 
 #ifndef EMSESP_DEFAULT_NESTED_FORMAT
@@ -196,24 +209,39 @@
 #define EMSESP_DEFAULT_WEBLOG_COMPACT true
 #endif
 
+#ifndef EMSESP_DEFAULT_ENTITY_FORMAT
+#define EMSESP_DEFAULT_ENTITY_FORMAT 1 // in MQTT discovery, use shortnames and not multiple (prefixed with base)
+#endif
+
 // matches Web UI settings
 enum {
 
-    BOOL_FORMAT_ONOFF_STR = 1,
-    BOOL_FORMAT_ONOFF_STR_CAP,
-    BOOL_FORMAT_TRUEFALSE_STR,
-    BOOL_FORMAT_TRUEFALSE,
-    BOOL_FORMAT_10_STR,
-    BOOL_FORMAT_10
+    BOOL_FORMAT_ONOFF_STR = 1, // 1
+    BOOL_FORMAT_ONOFF_STR_CAP, // 2
+    BOOL_FORMAT_TRUEFALSE_STR, // 3
+    BOOL_FORMAT_TRUEFALSE,     // 4
+    BOOL_FORMAT_10_STR,        // 5
+    BOOL_FORMAT_10             // 6
 
 };
 
 enum {
 
-    ENUM_FORMAT_VALUE = 1,
-    ENUM_FORMAT_INDEX // 2
+    ENUM_FORMAT_VALUE = 1, // 1
+    ENUM_FORMAT_INDEX      // 2
 
 };
 
+#if CONFIG_IDF_TARGET_ESP32C3
+#define EMSESP_PLATFORM "ESP32-C3";
+#elif CONFIG_IDF_TARGET_ESP32S2
+#define EMSESP_PLATFORM "ESP32-S2";
+#elif CONFIG_IDF_TARGET_ESP32S3
+#define EMSESP_PLATFORM "ESP32-S3";
+#elif CONFIG_IDF_TARGET_ESP32 || EMSESP_STANDALONE
+#define EMSESP_PLATFORM "ESP32";
+#else
+#error Target CONFIG_IDF_TARGET is not supported
+#endif
 
 #endif

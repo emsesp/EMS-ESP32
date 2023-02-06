@@ -36,7 +36,7 @@ namespace log {
 std::map<Handler *, Level> Logger::handlers_;
 Level                      Logger::level_ = Level::OFF;
 
-Message::Message(uint64_t uptime_ms, Level level, Facility facility, const __FlashStringHelper * name, const std::string && text)
+Message::Message(uint64_t uptime_ms, Level level, Facility facility, const char * name, const std::string && text)
     : uptime_ms(uptime_ms)
     , level(level)
     , facility(facility)
@@ -44,7 +44,7 @@ Message::Message(uint64_t uptime_ms, Level level, Facility facility, const __Fla
     , text(std::move(text)) {
 }
 
-Logger::Logger(const __FlashStringHelper * name, Facility facility)
+Logger::Logger(const char * name, Facility facility)
     : name_(name)
     , facility_(facility){
 

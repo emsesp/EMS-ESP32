@@ -2,6 +2,8 @@ import { FC, useContext, useEffect } from 'react';
 import { Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { useSnackbar, VariantType } from 'notistack';
 
+import { useI18nContext } from './i18n/i18n-react';
+
 import { Authentication, AuthenticationContext } from './contexts/authentication';
 import { FeaturesContext } from './contexts/features';
 import { RequireAuthenticated, RequireUnauthenticated } from './components';
@@ -41,13 +43,14 @@ export const RemoveTrailingSlashes = () => {
 
 const AppRouting: FC = () => {
   const { features } = useContext(FeaturesContext);
+  const { LL } = useI18nContext();
 
   return (
     <Authentication>
       <RemoveTrailingSlashes />
       <Routes>
-        <Route path="/unauthorized" element={<RootRedirect message="Please sign in to continue" signOut />} />
-        <Route path="/fileUpdated" element={<RootRedirect message="Upload successful" variant="success" />} />
+        <Route path="/unauthorized" element={<RootRedirect message={LL.PLEASE_SIGNIN()} signOut />} />
+        <Route path="/fileUpdated" element={<RootRedirect message={LL.UPLOAD_SUCCESSFUL()} variant="success" />} />
         {features.security && (
           <Route
             path="/"

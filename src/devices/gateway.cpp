@@ -22,7 +22,7 @@ namespace emsesp {
 
 REGISTER_FACTORY(Gateway, EMSdevice::DeviceType::GATEWAY);
 
-Gateway::Gateway(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
+Gateway::Gateway(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
 }
 

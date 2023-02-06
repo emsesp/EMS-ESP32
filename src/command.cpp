@@ -52,8 +52,10 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
+#ifdef EMSESP_DEBUG
 #if defined(EMSESP_USE_SERIAL)
     // Serial.println(p.path().c_str()); // dump paths, for debugging
+#endif
 #endif
 
     // re-calculate new path
@@ -82,7 +84,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     // validate the device, make sure it exists
     uint8_t device_type = EMSdevice::device_name_2_device_type(device_s);
     if (!device_has_commands(device_type)) {
-        LOG_DEBUG(F("Command failed: unknown device '%s'"), device_s);
+        LOG_DEBUG("Command failed: unknown device '%s'", device_s);
         return message(CommandRet::ERROR, "unknown device", output);
     }
 
@@ -114,13 +116,9 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     command_p = parse_command_string(command_p, id_n);
     if (command_p == nullptr) {
         // handle dead endpoints like api/system or api/boiler
-        // default to 'info' for SYSTEM, DALLASENSOR and ANALOGSENSOR, the other devices to 'values' for shortname version
+        // default to 'info' for SYSTEM, the other devices to 'values' for shortname version
         if (num_paths < (id_n > 0 ? 4 : 3)) {
-            if (device_type < EMSdevice::DeviceType::BOILER) {
-                command_p = "info";
-            } else {
-                command_p = "values";
-            }
+            command_p = device_type == EMSdevice::DeviceType::SYSTEM ? F_(info) : F_(values);
         } else {
             return message(CommandRet::NOT_FOUND, "missing or bad command", output);
         }
@@ -133,9 +131,15 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
             id_n = input["hc"];
         } else if (input.containsKey("wwc")) {
             id_n = input["wwc"];
-            id_n += 8; // wwc1 has id 9
+            id_n += DeviceValueTAG::TAG_WWC1 - DeviceValueTAG::TAG_HC1; // wwc1 has id 9
         } else if (input.containsKey("id")) {
             id_n = input["id"];
+        } else if (input.containsKey("ahs")) {
+            id_n = input["ahs"];
+            id_n += DeviceValueTAG::TAG_AHS1 - DeviceValueTAG::TAG_HC1; // ahs1 has id 19
+        } else if (input.containsKey("hs")) {
+            id_n = input["hs"];
+            id_n += DeviceValueTAG::TAG_HS1 - DeviceValueTAG::TAG_HC1; // hs1 has id 20
         }
     }
 
@@ -170,15 +174,17 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
 std::string Command::return_code_string(const uint8_t return_code) {
     switch (return_code) {
     case CommandRet::ERROR:
-        return read_flash_string(F("Error"));
+        return "Error";
     case CommandRet::OK:
-        return read_flash_string(F("OK"));
+        return "OK";
     case CommandRet::NOT_FOUND:
-        return read_flash_string(F("Not Found"));
+        return "Not Found";
     case CommandRet::NOT_ALLOWED:
-        return read_flash_string(F("Not Authorized"));
+        return "Not Authorized";
     case CommandRet::FAIL:
-        return read_flash_string(F("Failed"));
+        return "Failed";
+    case CommandRet::INVALID:
+        return "Invalid";
     default:
         break;
     }
@@ -193,27 +199,43 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         return nullptr;
     }
 
+    // convert cmd to lowercase and compare
+    char * lowerCmd = strdup(command);
+    for (char * p = lowerCmd; *p; p++) {
+        *p = tolower(*p);
+    }
+
     // check prefix and valid number range, also check 'id'
-    if (!strncmp(command, "hc", 2) && command[2] >= '1' && command[2] <= '8') {
+    if (!strncmp(lowerCmd, "hc", 2) && command[2] >= '1' && command[2] <= '8') {
         id = command[2] - '0';
         command += 3;
-    } else if (!strncmp(command, "wwc", 3) && command[3] == '1' && command[4] == '0') {
-        id = 19;
+    } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] == '1' && command[4] == '0') {
+        id = DeviceValueTAG::TAG_WWC10 - DeviceValueTAG::TAG_HC1 + 1; //18;
         command += 5;
-    } else if (!strncmp(command, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {
-        id = command[3] - '0' + 8;
+    } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {
+        id = command[3] - '1' + DeviceValueTAG::TAG_WWC1 - DeviceValueTAG::TAG_HC1 + 1; //9;
         command += 4;
-    } else if (!strncmp(command, "id", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '9') {
+    } else if (!strncmp(lowerCmd, "id", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '9') {
         id = command[3] - '0' + 10;
         command += 4;
-    } else if (!strncmp(command, "id", 2) && command[2] >= '1' && command[2] <= '9') {
+    } else if (!strncmp(lowerCmd, "id", 2) && command[2] >= '1' && command[2] <= '9') {
         id = command[2] - '0';
+        command += 3;
+    } else if (!strncmp(lowerCmd, "ahs", 3) && command[3] >= '1' && command[3] <= '1') { // only ahs1 for now
+        id = command[3] - '1' + DeviceValueTAG::TAG_AHS1 - DeviceValueTAG::TAG_HC1 + 1;  // 19;
+        command += 4;
+    } else if (!strncmp(lowerCmd, "hs", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '6') {
+        id = command[3] - '0' + DeviceValueTAG::TAG_HS10 - DeviceValueTAG::TAG_HC1 + 1; //29;
+        command += 4;
+    } else if (!strncmp(lowerCmd, "hs", 2) && command[2] >= '1' && command[2] <= '9') {
+        id = command[2] - '1' + DeviceValueTAG::TAG_HS1 - DeviceValueTAG::TAG_HC1 + 1; //20;
         command += 3;
     }
     // remove separator
     if (command[0] == '/' || command[0] == '.' || command[0] == '_') {
         command++;
     }
+    free(lowerCmd);
     // return null for empty command
     if (command[0] == '\0') {
         return nullptr;
@@ -236,19 +258,23 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 // id may be used to represent a heating circuit for example
 // returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
 uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject & output) {
+    if (cmd == nullptr) {
+        return CommandRet::NOT_FOUND;
+    }
     uint8_t return_code = CommandRet::OK;
 
-    std::string dname = EMSdevice::device_type_2_device_name(device_type);
+    auto    dname     = EMSdevice::device_type_2_device_name(device_type);
+    uint8_t device_id = EMSESP::device_id_from_cmd(device_type, cmd, id);
 
     // see if there is a command registered
-    auto cf = find_command(device_type, cmd);
+    auto cf = find_command(device_type, device_id, cmd);
 
     // check if its a call to and end-point to a device
     // except for system commands as this is a special device without any queryable entities (device values)
     if ((device_type > EMSdevice::DeviceType::SYSTEM) && (!value || !strlen(value))) {
         if (!cf || !cf->cmdfunction_json_) {
 #if defined(EMSESP_DEBUG)
-            LOG_DEBUG(F("[DEBUG] Calling %s command '%s' to retrieve attributes"), dname.c_str(), cmd);
+            LOG_DEBUG("[DEBUG] Calling %s command '%s' to retrieve attributes", dname, cmd);
 #endif
             return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
         }
@@ -262,17 +288,23 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
             return CommandRet::NOT_ALLOWED; // command not allowed
         }
 
-        if ((value == nullptr) || (strlen(value) == 0)) {
-            if (EMSESP::system_.readonly_mode()) {
-                LOG_INFO(F("[readonly] Calling command '%s/%s' (%s)"), dname.c_str(), cmd, read_flash_string(cf->description_).c_str());
-            } else {
-                LOG_DEBUG(F("Calling command '%s/%s' (%s)"), dname.c_str(), cmd, read_flash_string(cf->description_).c_str());
-            }
+        auto description = Helpers::translated_word(cf->description_);
+        char info_s[100];
+        if (strlen(description)) {
+            snprintf(info_s, sizeof(info_s), "'%s/%s' (%s)", dname, cmd, description);
         } else {
-            if (EMSESP::system_.readonly_mode()) {
-                LOG_INFO(F("[readonly] Calling command '%s/%s' (%s) with value %s"), dname.c_str(), cmd, read_flash_string(cf->description_).c_str(), value);
+            snprintf(info_s, sizeof(info_s), "'%s/%s'", dname, cmd);
+        }
+
+        std::string ro = EMSESP::system_.readonly_mode() ? "[readonly] " : "";
+
+        if ((value == nullptr) || (strlen(value) == 0)) {
+            LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
+        } else {
+            if (id > 0) {
+                LOG_DEBUG(("%sCalling command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
             } else {
-                LOG_DEBUG(F("Calling command '%s/%s' (%s) with value %s"), dname.c_str(), cmd, read_flash_string(cf->description_).c_str(), value);
+                LOG_DEBUG(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
             }
         }
 
@@ -281,8 +313,13 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
             return_code = ((cf->cmdfunction_json_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
         }
 
-        if (cf->cmdfunction_ && !EMSESP::cmd_is_readonly(device_type, cmd, id)) {
-            return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;
+        // check if read-only. This also checks for valid tags (e.g. heating circuits)
+        if (cf->cmdfunction_) {
+            if (EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
+                return_code = CommandRet::INVALID; // readonly or invalid hc
+            } else {
+                return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;
+            }
         }
 
         // report back
@@ -294,56 +331,68 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     }
 
     // we didn't find the command and its not an endpoint, report error
-    LOG_DEBUG(F("Command failed: invalid command '%s'"), cmd);
+    LOG_DEBUG("Command failed: invalid command '%s'", cmd ? cmd : "");
     return message(CommandRet::NOT_FOUND, "invalid command", output);
 }
 
 // add a command to the list, which does not return json
-void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, const cmd_function_p cb, const __FlashStringHelper * description, uint8_t flags) {
+void Command::add(const uint8_t device_type, const uint8_t device_id, const char * cmd, const cmd_function_p cb, const char * const * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
-    if (find_command(device_type, read_flash_string(cmd).c_str()) != nullptr) {
+    if (find_command(device_type, device_id, cmd) != nullptr) {
         return;
     }
 
     // if the description is empty, it's hidden which means it will not show up in Web API or Console as an available command
-    if (description == nullptr) {
+    if (!description) {
         flags |= CommandFlag::HIDDEN;
     }
 
-    cmdfunctions_.emplace_back(device_type, flags, cmd, cb, nullptr, description); // callback for json is nullptr
+    cmdfunctions_.emplace_back(device_type, device_id, flags, cmd, cb, nullptr, description); // callback for json is nullptr
+}
+
+// same for system/dallas/analog devices with device_id 0
+void Command::add(const uint8_t device_type, const char * cmd, const cmd_function_p cb, const char * const * description, uint8_t flags) {
+    add(device_type, 0, cmd, cb, description, flags);
 }
 
 // add a command to the list, which does return a json object as output
-void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, const cmd_json_function_p cb, const __FlashStringHelper * description, uint8_t flags) {
+void Command::add(const uint8_t device_type, const char * cmd, const cmd_json_function_p cb, const char * const * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
-    if (find_command(device_type, read_flash_string(cmd).c_str()) != nullptr) {
+    if (find_command(device_type, 0, cmd) != nullptr) {
         return;
     }
 
-    cmdfunctions_.emplace_back(device_type, flags, cmd, nullptr, cb, description); // callback for json is included
+    cmdfunctions_.emplace_back(device_type, 0, flags, cmd, nullptr, cb, description); // callback for json is included
 }
 
 // see if a command exists for that device type
 // is not case sensitive
-Command::CmdFunction * Command::find_command(const uint8_t device_type, const char * cmd) {
+Command::CmdFunction * Command::find_command(const uint8_t device_type, const uint8_t device_id, const char * cmd) {
     if ((cmd == nullptr) || (strlen(cmd) == 0) || (cmdfunctions_.empty())) {
         return nullptr;
     }
 
-    // convert cmd to lowercase and compare
-    char lowerCmd[30];
-    strlcpy(lowerCmd, cmd, sizeof(lowerCmd));
-    for (char * p = lowerCmd; *p; p++) {
-        *p = tolower(*p);
-    }
-
     for (auto & cf : cmdfunctions_) {
-        if (!strcmp(lowerCmd, Helpers::toLower(read_flash_string(cf.cmd_)).c_str()) && (cf.device_type_ == device_type)) {
+        if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type) && (!device_id || cf.device_id_ == device_id)) {
             return &cf;
         }
     }
 
     return nullptr; // command not found
+}
+
+void Command::erase_command(const uint8_t device_type, const char * cmd) {
+    if ((cmd == nullptr) || (strlen(cmd) == 0) || (cmdfunctions_.empty())) {
+        return;
+    }
+    auto it = cmdfunctions_.begin();
+    for (auto & cf : cmdfunctions_) {
+        if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type)) {
+            cmdfunctions_.erase(it);
+            return;
+        }
+        it++;
+    }
 }
 
 // list all commands for a specific device, output as json
@@ -357,15 +406,19 @@ bool Command::list(const uint8_t device_type, JsonObject & output) {
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
         if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN)) {
-            sorted_cmds.push_back(read_flash_string(cf.cmd_));
+            sorted_cmds.push_back((cf.cmd_));
         }
     }
     sorted_cmds.sort();
 
     for (const auto & cl : sorted_cmds) {
         for (const auto & cf : cmdfunctions_) {
-            if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == read_flash_string(cf.cmd_))) {
-                output[cl] = cf.description_;
+            if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == std::string(cf.cmd_))) {
+                if (cf.has_flags(CommandFlag::MQTT_SUB_FLAG_WW)) {
+                    output[cl] = EMSdevice::tag_to_string(DeviceValueTAG::TAG_DEVICE_DATA_WW) + " " + Helpers::translated_word(cf.description_);
+                } else {
+                    output[cl] = Helpers::translated_word(cf.description_);
+                }
             }
         }
     }
@@ -376,7 +429,7 @@ bool Command::list(const uint8_t device_type, JsonObject & output) {
 // output list of all commands to console for a specific DeviceType
 void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbose) {
     if (cmdfunctions_.empty()) {
-        shell.println(F("No commands available"));
+        shell.println("No commands available");
         return;
     }
 
@@ -384,7 +437,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
         if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN)) {
-            sorted_cmds.push_back(read_flash_string(cf.cmd_));
+            sorted_cmds.push_back((cf.cmd_));
         }
     }
     sorted_cmds.sort();
@@ -404,7 +457,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     for (const auto & cl : sorted_cmds) {
         // find and print the description
         for (const auto & cf : cmdfunctions_) {
-            if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == read_flash_string(cf.cmd_))) {
+            if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == std::string(cf.cmd_))) {
                 uint8_t i = cl.length();
                 shell.print("  ");
                 if (cf.has_flags(MQTT_SUB_FLAG_HC)) {
@@ -424,7 +477,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                     shell.print(EMSdevice::tag_to_string(DeviceValueTAG::TAG_DEVICE_DATA_WW));
                     shell.print(' ');
                 }
-                shell.print(read_flash_string(cf.description_));
+                shell.print(Helpers::translated_word(cf.description_));
                 if (!cf.has_flags(CommandFlag::ADMIN_ONLY)) {
                     shell.print(' ');
                     shell.print(COLOR_BRIGHT_RED);
@@ -474,19 +527,19 @@ bool Command::device_has_commands(const uint8_t device_type) {
 
 // list sensors and EMS devices
 void Command::show_devices(uuid::console::Shell & shell) {
-    shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM).c_str());
+    shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
 
     if (EMSESP::dallassensor_.have_sensors()) {
-        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR).c_str());
+        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR));
     }
     if (EMSESP::analogsensor_.have_sensors()) {
-        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR).c_str());
+        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
     }
 
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_class.first) && (device_has_commands(device_class.first))) {
-                shell.printf("%s ", EMSdevice::device_type_2_device_name(device_class.first).c_str());
+                shell.printf("%s ", EMSdevice::device_type_2_device_name(device_class.first));
                 break; // we only want to show one (not multiple of the same device types)
             }
         }
@@ -497,12 +550,12 @@ void Command::show_devices(uuid::console::Shell & shell) {
 // output list of all commands to console
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
-    shell.println(F("Available commands (*=do not need authorization): "));
+    shell.println("Available commands (*=do not need authorization): ");
 
     // show system first
     shell.print(COLOR_BOLD_ON);
     shell.print(COLOR_YELLOW);
-    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM).c_str());
+    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
     shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::SYSTEM, true);
 
@@ -510,14 +563,14 @@ void Command::show_all(uuid::console::Shell & shell) {
     if (EMSESP::dallassensor_.have_sensors()) {
         shell.print(COLOR_BOLD_ON);
         shell.print(COLOR_YELLOW);
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR).c_str());
+        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR));
         shell.print(COLOR_RESET);
         show(shell, EMSdevice::DeviceType::DALLASSENSOR, true);
     }
     if (EMSESP::analogsensor_.have_sensors()) {
         shell.print(COLOR_BOLD_ON);
         shell.print(COLOR_YELLOW);
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR).c_str());
+        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
         shell.print(COLOR_RESET);
         show(shell, EMSdevice::DeviceType::ANALOGSENSOR, true);
     }
@@ -527,7 +580,7 @@ void Command::show_all(uuid::console::Shell & shell) {
         if (Command::device_has_commands(device_class.first)) {
             shell.print(COLOR_BOLD_ON);
             shell.print(COLOR_YELLOW);
-            shell.printf(" %s: ", EMSdevice::device_type_2_device_name(device_class.first).c_str());
+            shell.printf(" %s: ", EMSdevice::device_type_2_device_name(device_class.first));
             shell.print(COLOR_RESET);
             show(shell, device_class.first, true);
         }

@@ -61,51 +61,51 @@ typedef enum {
 } wifi_auth_mode_t;
 
 typedef struct {
-    uint32_t status;          /**< status of scanning APs: 0 — success, 1 - failure */
-    uint8_t  number;          /**< number of scan results */
-    uint8_t  scan_id;         /**< scan sequence number, used for block scan */
+    uint32_t status;  /**< status of scanning APs: 0 — success, 1 - failure */
+    uint8_t  number;  /**< number of scan results */
+    uint8_t  scan_id; /**< scan sequence number, used for block scan */
 } wifi_event_sta_scan_done_t;
 
 /** Argument structure for WIFI_EVENT_STA_CONNECTED event */
 typedef struct {
-    uint8_t ssid[32];         /**< SSID of connected AP */
-    uint8_t ssid_len;         /**< SSID length of connected AP */
-    uint8_t bssid[6];         /**< BSSID of connected AP*/
-    uint8_t channel;          /**< channel of connected AP*/
-    wifi_auth_mode_t authmode;/**< authentication mode used by AP*/
+    uint8_t          ssid[32]; /**< SSID of connected AP */
+    uint8_t          ssid_len; /**< SSID length of connected AP */
+    uint8_t          bssid[6]; /**< BSSID of connected AP*/
+    uint8_t          channel;  /**< channel of connected AP*/
+    wifi_auth_mode_t authmode; /**< authentication mode used by AP*/
 } wifi_event_sta_connected_t;
 
 /** Argument structure for WIFI_EVENT_STA_DISCONNECTED event */
 typedef struct {
-    uint8_t ssid[32];         /**< SSID of disconnected AP */
-    uint8_t ssid_len;         /**< SSID length of disconnected AP */
-    uint8_t bssid[6];         /**< BSSID of disconnected AP */
-    uint8_t reason;           /**< reason of disconnection */
+    uint8_t ssid[32]; /**< SSID of disconnected AP */
+    uint8_t ssid_len; /**< SSID length of disconnected AP */
+    uint8_t bssid[6]; /**< BSSID of disconnected AP */
+    uint8_t reason;   /**< reason of disconnection */
 } wifi_event_sta_disconnected_t;
 
 /** Argument structure for WIFI_EVENT_STA_AUTHMODE_CHANGE event */
 typedef struct {
-    wifi_auth_mode_t old_mode;         /**< the old auth mode of AP */
-    wifi_auth_mode_t new_mode;         /**< the new auth mode of AP */
+    wifi_auth_mode_t old_mode; /**< the old auth mode of AP */
+    wifi_auth_mode_t new_mode; /**< the new auth mode of AP */
 } wifi_event_sta_authmode_change_t;
 
 /** Argument structure for WIFI_EVENT_STA_WPS_ER_PIN event */
 typedef struct {
-    uint8_t pin_code[8];         /**< PIN code of station in enrollee mode */
+    uint8_t pin_code[8]; /**< PIN code of station in enrollee mode */
 } wifi_event_sta_wps_er_pin_t;
 
 /** Argument structure for WIFI_EVENT_STA_WPS_ER_FAILED event */
 typedef enum {
-    WPS_FAIL_REASON_NORMAL = 0,     /**< ESP32 WPS normal fail reason */
-    WPS_FAIL_REASON_RECV_M2D,       /**< ESP32 WPS receive M2D frame */
+    WPS_FAIL_REASON_NORMAL = 0, /**< ESP32 WPS normal fail reason */
+    WPS_FAIL_REASON_RECV_M2D,   /**< ESP32 WPS receive M2D frame */
     WPS_FAIL_REASON_MAX
 } wifi_event_sta_wps_fail_reason_t;
 
 typedef union {
-	wifi_event_sta_scan_done_t wifi_scan_done;
-	wifi_event_sta_authmode_change_t wifi_sta_authmode_change;
-	wifi_event_sta_connected_t wifi_sta_connected;
-	wifi_event_sta_disconnected_t wifi_sta_disconnected;
+    wifi_event_sta_scan_done_t       wifi_scan_done;
+    wifi_event_sta_authmode_change_t wifi_sta_authmode_change;
+    wifi_event_sta_connected_t       wifi_sta_connected;
+    wifi_event_sta_disconnected_t    wifi_sta_disconnected;
 } arduino_event_info_t;
 
 typedef struct {

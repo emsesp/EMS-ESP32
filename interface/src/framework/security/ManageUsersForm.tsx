@@ -20,6 +20,8 @@ import { createUserValidator } from '../../validators';
 import { useRest } from '../../utils';
 import { AuthenticatedContext } from '../../contexts/authentication';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 import GenerateToken from './GenerateToken';
 import UserForm from './UserForm';
 
@@ -34,9 +36,11 @@ const ManageUsersForm: FC = () => {
   const [generatingToken, setGeneratingToken] = useState<string>();
   const authenticatedContext = useContext(AuthenticatedContext);
 
+  const { LL } = useI18nContext();
+
   const table_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 90px 120px;
+      --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) minmax(120px, max-content) 120px;
     `,
     BaseRow: `
       font-size: 14px;
@@ -136,8 +140,8 @@ const ManageUsersForm: FC = () => {
             <>
               <Header>
                 <HeaderRow>
-                  <HeaderCell resize>USERNAME</HeaderCell>
-                  <HeaderCell stiff>IS ADMIN</HeaderCell>
+                  <HeaderCell resize>{LL.USERNAME(1)}</HeaderCell>
+                  <HeaderCell stiff>{LL.IS_ADMIN(0)}</HeaderCell>
                   <HeaderCell stiff />
                 </HeaderRow>
               </Header>
@@ -169,9 +173,7 @@ const ManageUsersForm: FC = () => {
           )}
         </Table>
 
-        {noAdminConfigured() && (
-          <MessageBox level="warning" message="You must have at least one admin user configured" my={2} />
-        )}
+        {noAdminConfigured() && <MessageBox level="warning" message={LL.USER_WARNING()} my={2} />}
 
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
@@ -183,14 +185,14 @@ const ManageUsersForm: FC = () => {
               type="submit"
               onClick={onSubmit}
             >
-              Save
+              {LL.SAVE()}
             </Button>
           </Box>
 
           <Box flexWrap="nowrap" whiteSpace="nowrap">
             <ButtonRow>
               <Button startIcon={<PersonAddIcon />} variant="outlined" color="secondary" onClick={createUser}>
-                Add
+                {LL.ADD(0)}
               </Button>
             </ButtonRow>
           </Box>
@@ -210,7 +212,7 @@ const ManageUsersForm: FC = () => {
   };
 
   return (
-    <SectionContent title="Manage Users" titleGutter>
+    <SectionContent title={LL.MANAGE_USERS()} titleGutter>
       {content()}
     </SectionContent>
   );

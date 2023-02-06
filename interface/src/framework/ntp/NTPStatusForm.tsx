@@ -16,7 +16,8 @@ import {
   ListItemText,
   TextField,
   Theme,
-  useTheme
+  useTheme,
+  Typography
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -30,6 +31,8 @@ import { NTPStatus, NTPSyncStatus } from '../../types';
 import { ButtonRow, FormLoader, SectionContent } from '../../components';
 import { extractErrorMessage, formatDateTime, formatLocalDateTime, useRest } from '../../utils';
 import { AuthenticatedContext } from '../../contexts/authentication';
+
+import { useI18nContext } from '../../i18n/i18n-react';
 
 export const isNtpActive = ({ status }: NTPStatus) => status === NTPSyncStatus.NTP_ACTIVE;
 export const isNtpEnabled = ({ status }: NTPStatus) => status !== NTPSyncStatus.NTP_DISABLED;
@@ -47,19 +50,6 @@ export const ntpStatusHighlight = ({ status }: NTPStatus, theme: Theme) => {
   }
 };
 
-export const ntpStatus = ({ status }: NTPStatus) => {
-  switch (status) {
-    case NTPSyncStatus.NTP_DISABLED:
-      return 'Disabled';
-    case NTPSyncStatus.NTP_INACTIVE:
-      return 'Inactive';
-    case NTPSyncStatus.NTP_ACTIVE:
-      return 'Active';
-    default:
-      return 'Unknown';
-  }
-};
-
 const NTPStatusForm: FC = () => {
   const { loadData, data, errorMessage } = useRest<NTPStatus>({ read: NTPApi.readNTPStatus });
   const [localTime, setLocalTime] = useState<string>('');
@@ -67,6 +57,8 @@ const NTPStatusForm: FC = () => {
   const [processing, setProcessing] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
   const { me } = useContext(AuthenticatedContext);
+
+  const { LL } = useI18nContext();
 
   const updateLocalTime = (event: React.ChangeEvent<HTMLInputElement>) => setLocalTime(event.target.value);
 
@@ -77,59 +69,71 @@ const NTPStatusForm: FC = () => {
 
   const theme = useTheme();
 
+  const ntpStatus = ({ status }: NTPStatus) => {
+    switch (status) {
+      case NTPSyncStatus.NTP_DISABLED:
+        return LL.DISABLED(0);
+      case NTPSyncStatus.NTP_INACTIVE:
+        return LL.INACTIVE(0);
+      case NTPSyncStatus.NTP_ACTIVE:
+        return LL.ACTIVE();
+      default:
+        return LL.UNKNOWN();
+    }
+  };
+
   const configureTime = async () => {
     setProcessing(true);
     try {
       await NTPApi.updateTime({
         local_time: formatLocalDateTime(new Date(localTime))
       });
-      enqueueSnackbar('Time set', { variant: 'success' });
+      enqueueSnackbar(LL.TIME_SET(), { variant: 'success' });
       setSettingTime(false);
       loadData();
-    } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem updating time'), { variant: 'error' });
+    } catch (error) {
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     } finally {
       setProcessing(false);
     }
   };
 
-  const renderSetTimeDialog = () => {
-    return (
-      <Dialog open={settingTime} onClose={() => setSettingTime(false)}>
-        <DialogTitle>Set Time</DialogTitle>
-        <DialogContent dividers>
-          <Box mb={2}>Enter local date and time below to set the device's time.</Box>
-          <TextField
-            label="Local Time"
-            type="datetime-local"
-            value={localTime}
-            onChange={updateLocalTime}
-            disabled={processing}
-            variant="outlined"
-            fullWidth
-            InputLabelProps={{
-              shrink: true
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setSettingTime(false)} color="secondary">
-            Cancel
-          </Button>
-          <Button
-            startIcon={<AccessTimeIcon />}
-            variant="outlined"
-            onClick={configureTime}
-            disabled={processing}
-            color="primary"
-            autoFocus
-          >
-            Set Time
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-  };
+  const renderSetTimeDialog = () => (
+    <Dialog open={settingTime} onClose={() => setSettingTime(false)}>
+      <DialogTitle>{LL.SET_TIME(1)}</DialogTitle>
+      <DialogContent dividers>
+        <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
+          <Typography variant="body2">{LL.SET_TIME_TEXT()}</Typography>
+        </Box>
+        <TextField
+          label={LL.LOCAL_TIME()}
+          type="datetime-local"
+          value={localTime}
+          onChange={updateLocalTime}
+          disabled={processing}
+          fullWidth
+          InputLabelProps={{
+            shrink: true
+          }}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setSettingTime(false)} color="secondary">
+          {LL.CANCEL()}
+        </Button>
+        <Button
+          startIcon={<AccessTimeIcon />}
+          variant="outlined"
+          onClick={configureTime}
+          disabled={processing}
+          color="primary"
+          autoFocus
+        >
+          {LL.SAVE()}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 
   const content = () => {
     if (!data) {
@@ -145,7 +149,7 @@ const NTPStatusForm: FC = () => {
                 <UpdateIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Status" secondary={ntpStatus(data)} />
+            <ListItemText primary={LL.STATUS_OF('')} secondary={ntpStatus(data)} />
           </ListItem>
           <Divider variant="inset" component="li" />
           {isNtpEnabled(data) && (
@@ -156,7 +160,7 @@ const NTPStatusForm: FC = () => {
                     <DnsIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="NTP Server" secondary={data.server} />
+                <ListItemText primary={LL.NTP_SERVER()} secondary={data.server} />
               </ListItem>
               <Divider variant="inset" component="li" />
             </>
@@ -167,7 +171,7 @@ const NTPStatusForm: FC = () => {
                 <AccessTimeIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Local Time" secondary={formatDateTime(data.local_time)} />
+            <ListItemText primary={LL.LOCAL_TIME()} secondary={formatDateTime(data.local_time)} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -176,7 +180,7 @@ const NTPStatusForm: FC = () => {
                 <SwapVerticalCircleIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="UTC Time" secondary={formatDateTime(data.utc_time)} />
+            <ListItemText primary={LL.UTC_TIME()} secondary={formatDateTime(data.utc_time)} />
           </ListItem>
           <Divider variant="inset" component="li" />
         </List>
@@ -184,7 +188,7 @@ const NTPStatusForm: FC = () => {
           <Box flexGrow={1}>
             <ButtonRow>
               <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
-                Refresh
+                {LL.REFRESH()}
               </Button>
             </ButtonRow>
           </Box>
@@ -192,7 +196,7 @@ const NTPStatusForm: FC = () => {
             <Box flexWrap="nowrap" whiteSpace="nowrap">
               <ButtonRow>
                 <Button onClick={openSetTime} variant="outlined" color="primary" startIcon={<AccessTimeIcon />}>
-                  Set Time
+                  {LL.SET_TIME(0)}
                 </Button>
               </ButtonRow>
             </Box>
@@ -204,7 +208,7 @@ const NTPStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title="NTP Status" titleGutter>
+    <SectionContent title={LL.STATUS_OF('NTP')} titleGutter>
       {content()}
     </SectionContent>
   );

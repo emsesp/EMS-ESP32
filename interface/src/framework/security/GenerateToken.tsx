@@ -19,6 +19,8 @@ import { MessageBox } from '../../components';
 import * as SecurityApi from '../../api/security';
 import { Token } from '../../types';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 interface GenerateTokenProps {
   username?: string;
   onClose: () => void;
@@ -28,15 +30,17 @@ const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
   const [token, setToken] = useState<Token>();
   const open = !!username;
 
+  const { LL } = useI18nContext();
+
   const { enqueueSnackbar } = useSnackbar();
 
   const getToken = useCallback(async () => {
     try {
       setToken((await SecurityApi.generateToken(username)).data);
-    } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem generating token'), { variant: 'error' });
+    } catch (error) {
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     }
-  }, [username, enqueueSnackbar]);
+  }, [username, enqueueSnackbar, LL]);
 
   useEffect(() => {
     if (open) {
@@ -46,16 +50,11 @@ const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
 
   return (
     <Dialog onClose={onClose} aria-labelledby="generate-token-dialog-title" open={!!username} fullWidth maxWidth="sm">
-      <DialogTitle id="generate-token-dialog-title">Access Token for {username}</DialogTitle>
+      <DialogTitle id="generate-token-dialog-title">{LL.ACCESS_TOKEN_FOR() + ' ' + username}</DialogTitle>
       <DialogContent dividers>
         {token ? (
           <>
-            <MessageBox
-              message="The token below is used with REST API calls that require authorization. It can be passed either as a Bearer token in the
-        'Authorization' header or in the 'access_token' URL query parameter."
-              level="info"
-              my={2}
-            />
+            <MessageBox message={LL.ACCESS_TOKEN_TEXT()} level="info" my={2} />
             <Box mt={2} mb={2}>
               <TextField label="Token" multiline value={token.token} fullWidth contentEditable={false} />
             </Box>
@@ -63,13 +62,13 @@ const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
         ) : (
           <Box m={4} textAlign="center">
             <LinearProgress />
-            <Typography variant="h6">Generating token&hellip;</Typography>
+            <Typography variant="h6">{LL.GENERATING_TOKEN()}&hellip;</Typography>
           </Box>
         )}
       </DialogContent>
       <DialogActions>
         <Button startIcon={<CloseIcon />} variant="outlined" onClick={onClose} color="secondary">
-          Close
+          {LL.CLOSE()}
         </Button>
       </DialogActions>
     </Dialog>

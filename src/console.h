@@ -26,36 +26,8 @@
 #include "system.h"
 #include "mqtt.h"
 
-using uuid::flash_string_vector;
-using uuid::read_flash_string;
 using uuid::console::Commands;
 using uuid::console::Shell;
-using uuid::log::Level;
-
-#define LOG_DEBUG(...) logger_.debug(__VA_ARGS__)
-#define LOG_INFO(...) logger_.info(__VA_ARGS__)
-#define LOG_TRACE(...) logger_.trace(__VA_ARGS__)
-#define LOG_NOTICE(...) logger_.notice(__VA_ARGS__)
-#define LOG_WARNING(...) logger_.warning(__VA_ARGS__)
-#define LOG_ERROR(...) logger_.err(__VA_ARGS__)
-
-// clang-format off
-// strings stored 32 bit aligned on ESP8266/ESP32
-#define MAKE_STR(string_name, string_literal) static constexpr const char * __str__##string_name = string_literal;
-#define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = string_literal;
-#define MAKE_PSTR_WORD(string_name) MAKE_PSTR(string_name, #string_name)
-#define F_(string_name) FPSTR(__pstr__##string_name)
-#define FSTR_(string_name) __str__##string_name
-#define MAKE_PSTR_LIST(list_name, ...) static const __FlashStringHelper * const __pstr__##list_name[] PROGMEM = {__VA_ARGS__, nullptr};
-#define FL_(list_name) (__pstr__##list_name)
-// clang-format on
-
-// localizations
-#include "locale_EN.h"
-
-#ifdef LOCAL
-#undef LOCAL
-#endif
 
 static constexpr uint32_t INVALID_PASSWORD_DELAY_MS = 2000;
 
@@ -64,19 +36,14 @@ namespace emsesp {
 using LogLevel    = ::uuid::log::Level;
 using LogFacility = ::uuid::log::Facility;
 
-enum CommandFlags : uint8_t {
-
-    USER  = 0,
-    ADMIN = (1 << 0),
-    LOCAL = (1 << 1)
-
-};
+#ifdef LOCAL
+#undef LOCAL
+#endif
+enum CommandFlags : uint8_t { USER = 0, ADMIN = (1 << 0), LOCAL = (1 << 1) };
 
 enum ShellContext : uint8_t {
-
     MAIN = 0,
     SYSTEM,
-
 };
 
 class EMSESPShell : virtual public uuid::console::Shell {

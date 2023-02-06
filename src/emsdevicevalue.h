@@ -25,7 +25,6 @@
 
 #include "helpers.h"          // for conversions
 #include "default_settings.h" // for enum types
-#include <uuid/common.h>      // for read_flash_string
 
 namespace emsesp {
 
@@ -45,30 +44,33 @@ class DeviceValue {
         CMD // special for commands only
     };
 
-    // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp. Sequence is important!!
+    // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevicevalue.cpp. Sequence is important!!
     // also used with HA as uom
     enum DeviceValueUOM : uint8_t {
-        NONE = 0,   // 0
-        DEGREES,    // 1
-        DEGREES_R,  // 2
-        PERCENT,    // 3
-        LMIN,       // 4
-        KWH,        // 5
-        WH,         // 6
-        HOURS,      // 7
-        MINUTES,    // 8
-        UA,         // 9
-        BAR,        // 10
-        KW,         // 11
-        W,          // 12
-        KB,         // 13
-        SECONDS,    // 14
-        DBM,        // 15
-        FAHRENHEIT, // 16
-        MV,         // 17
-        SQM,        // 18 squaremeter
-        M3,         // 19 cubic meter
-        L           // 20
+        NONE = 0,    // 0
+        DEGREES,     // 1 - °C
+        DEGREES_R,   // 2 - °C (relative temperature)
+        PERCENT,     // 3 - %
+        LMIN,        // 4 - l/min
+        KWH,         // 5 - kWh
+        WH,          // 6 - Wh
+        HOURS,       // 7 - h
+        MINUTES,     // 8 - m
+        UA,          // 9 - µA
+        BAR,         // 10 - bar
+        KW,          // 11 - kW
+        W,           // 12 - W
+        KB,          // 13 - kB
+        SECONDS,     // 14 - s
+        DBM,         // 15 - dBm
+        FAHRENHEIT,  // 16 - °F
+        MV,          // 17 - mV
+        SQM,         // 18 - m²
+        M3,          // 19 - m³
+        L,           // 20 - L
+        KMIN,        // 21 - K*min
+        K,           // 22 - K
+        CONNECTIVITY // 23 - used in HA
     };
 
     // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
@@ -96,7 +98,7 @@ class DeviceValue {
         TAG_WWC8,
         TAG_WWC9,
         TAG_WWC10,
-        TAG_AHS,
+        TAG_AHS1,
         TAG_HS1,
         TAG_HS2,
         TAG_HS3,
@@ -130,55 +132,63 @@ class DeviceValue {
         DV_FAVORITE         = (1 << 7)  // 128 - sort to front
     };
 
-    uint8_t                             device_type;  // EMSdevice::DeviceType
-    uint8_t                             tag;          // DeviceValueTAG::*
-    void *                              value_p;      // pointer to variable of any type
-    uint8_t                             type;         // DeviceValueType::*
-    const __FlashStringHelper * const * options;      // options as a flash char array
-    uint8_t                             options_size; // number of options in the char array, calculated
-    const __FlashStringHelper *         short_name;   // used in MQTT
-    const __FlashStringHelper *         full_name;    // used in Web and Console
-    uint8_t                             uom;          // DeviceValueUOM::*
-    uint8_t                             ha;           // DevcieValueHA::
-    bool                                has_cmd;      // true if there is a Console/MQTT command which matches the short_name
-    int16_t                             min;          // min range
-    uint16_t                            max;          // max range
-    uint8_t                             state;        // DeviceValueState::*
+    // numeric operators
+    // negative numbers used for multipliers
+    enum DeviceValueNumOp : int8_t {
+        DV_NUMOP_NONE   = 0, // default
+        DV_NUMOP_DIV2   = 2,
+        DV_NUMOP_DIV10  = 10,
+        DV_NUMOP_DIV60  = 60,
+        DV_NUMOP_DIV100 = 100,
+        DV_NUMOP_MUL5   = -5,
+        DV_NUMOP_MUL10  = -10,
+        DV_NUMOP_MUL15  = -15
+    };
 
-    DeviceValue(uint8_t                             device_type,
-                uint8_t                             tag,
-                void *                              value_p,
-                uint8_t                             type,
-                const __FlashStringHelper * const * options,
-                uint8_t                             options_size,
-                const __FlashStringHelper *         short_name,
-                const __FlashStringHelper *         full_name,
-                uint8_t                             uom,
-                uint8_t                             ha,
-                bool                                has_cmd,
-                int16_t                             min,
-                uint16_t                            max,
-                uint8_t                             state)
-        : device_type(device_type)
-        , tag(tag)
-        , value_p(value_p)
-        , type(type)
-        , options(options)
-        , options_size(options_size)
-        , short_name(short_name)
-        , full_name(full_name)
-        , uom(uom)
-        , ha(ha)
-        , has_cmd(has_cmd)
-        , min(min)
-        , max(max)
-        , state(state) {
-    }
+    uint8_t               device_type;    // EMSdevice::DeviceType
+    uint8_t               tag;            // DeviceValueTAG::*
+    void *                value_p;        // pointer to variable of any type
+    uint8_t               type;           // DeviceValueType::*
+    const char * const ** options;        // options as a flash char array
+    const char * const *  options_single; // options are not translated
+    int8_t                numeric_operator;
+    uint8_t               options_size;    // number of options in the char array, calculated
+    const char * const    short_name;      // used in MQTT and API
+    const char * const *  fullname;        // used in Web and Console, is translated
+    std::string           custom_fullname; // optional, from customization
+    uint8_t               uom;             // DeviceValueUOM::*
+    bool                  has_cmd;         // true if there is a Console/MQTT command which matches the short_name
+    int16_t               min;             // min range
+    uint16_t              max;             // max range
+    uint8_t               state;           // DeviceValueState::*
+
+    DeviceValue(uint8_t               device_type,
+                uint8_t               tag,
+                void *                value_p,
+                uint8_t               type,
+                const char * const ** options,
+                const char * const *  options_single,
+                int8_t                numeric_operator,
+                const char * const    short_name,
+                const char * const *  fullname,
+                std::string &         custom_fullname,
+                uint8_t               uom,
+                bool                  has_cmd,
+                int16_t               min,
+                uint16_t              max,
+                uint8_t               state);
 
     bool hasValue() const;
-    bool get_min_max(int16_t & dv_set_min, int16_t & dv_set_max);
+    bool get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max);
 
-    // state flags
+    void               set_custom_minmax();
+    bool               get_custom_min(int16_t & val);
+    bool               get_custom_max(uint16_t & val);
+    std::string        get_custom_fullname() const;
+    std::string        get_fullname() const;
+    static std::string get_name(std::string & entity);
+
+    // dv state flags
     void add_state(uint8_t s) {
         state |= s;
     }
@@ -192,10 +202,10 @@ class DeviceValue {
         return state;
     }
 
-    static const __FlashStringHelper *       DeviceValueUOM_s[];
-    static const __FlashStringHelper * const DeviceValueTAG_s[];
-    static const __FlashStringHelper * const DeviceValueTAG_mqtt[];
-    static size_t                            tag_count; // # tags
+    static const char *         DeviceValueUOM_s[];
+    static const char * const * DeviceValueTAG_s[];
+    static const char * const   DeviceValueTAG_mqtt[];
+    static size_t               tag_count; // # tags
 };
 
 }; // namespace emsesp

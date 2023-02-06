@@ -32,9 +32,12 @@ import { ButtonRow, FormLoader, SectionContent } from '../components';
 
 import { Status, busConnectionStatus, Stat } from './types';
 
-import { formatDurationSec, pluralize, extractErrorMessage, useRest } from '../utils';
+import { extractErrorMessage, useRest } from '../utils';
 
 import * as EMSESP from './api';
+
+import type { Translation } from '../i18n/i18n-types';
+import { useI18nContext } from '../i18n/i18n-react';
 
 export const isConnected = ({ status }: Status) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
 
@@ -48,19 +51,6 @@ const busStatusHighlight = ({ status }: Status, theme: Theme) => {
       return theme.palette.error.main;
     default:
       return theme.palette.warning.main;
-  }
-};
-
-const busStatus = ({ status }: Status) => {
-  switch (status) {
-    case busConnectionStatus.BUS_STATUS_CONNECTED:
-      return 'Connected';
-    case busConnectionStatus.BUS_STATUS_TX_ERRORS:
-      return 'Tx issues - try a different Tx Mode';
-    case busConnectionStatus.BUS_STATUS_OFFLINE:
-      return 'Disconnected';
-    default:
-      return 'Unknown';
   }
 };
 
@@ -81,11 +71,31 @@ const showQuality = (stat: Stat) => {
 const DashboardStatus: FC = () => {
   const { loadData, data, errorMessage } = useRest<Status>({ read: EMSESP.readStatus });
 
+  const { LL } = useI18nContext();
+
   const theme = useTheme();
   const [confirmScan, setConfirmScan] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
 
   const { me } = useContext(AuthenticatedContext);
+
+  const showName = (id: any) => {
+    let name: keyof Translation['STATUS_NAMES'] = id;
+    return LL.STATUS_NAMES[name]();
+  };
+
+  const busStatus = ({ status }: Status) => {
+    switch (status) {
+      case busConnectionStatus.BUS_STATUS_CONNECTED:
+        return LL.CONNECTED(0);
+      case busConnectionStatus.BUS_STATUS_TX_ERRORS:
+        return LL.TX_ISSUES();
+      case busConnectionStatus.BUS_STATUS_OFFLINE:
+        return LL.DISCONNECTED();
+      default:
+        return 'Unknown';
+    }
+  };
 
   const stats_theme = tableTheme({
     Table: `
@@ -137,24 +147,44 @@ const DashboardStatus: FC = () => {
   const scan = async () => {
     try {
       await EMSESP.scanDevices();
-      enqueueSnackbar('Scanning for devices...', { variant: 'info' });
-    } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem initiating scan'), { variant: 'error' });
+      enqueueSnackbar(LL.SCANNING() + '...', { variant: 'info' });
+    } catch (error) {
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
     } finally {
       setConfirmScan(false);
     }
   };
 
+  const formatDurationSec = (duration_sec: number) => {
+    const days = Math.trunc((duration_sec * 1000) / 86400000);
+    const hours = Math.trunc((duration_sec * 1000) / 3600000) % 24;
+    const minutes = Math.trunc((duration_sec * 1000) / 60000) % 60;
+    const seconds = Math.trunc((duration_sec * 1000) / 1000) % 60;
+
+    let formatted = '';
+    if (days) {
+      formatted += LL.NUM_DAYS({ num: days }) + ' ';
+    }
+    if (hours) {
+      formatted += LL.NUM_HOURS({ num: hours }) + ' ';
+    }
+    if (minutes) {
+      formatted += LL.NUM_MINUTES({ num: minutes }) + ' ';
+    }
+    formatted += LL.NUM_SECONDS({ num: seconds });
+    return formatted;
+  };
+
   const renderScanDialog = () => (
     <Dialog open={confirmScan} onClose={() => setConfirmScan(false)}>
-      <DialogTitle>EMS Device Scan</DialogTitle>
-      <DialogContent dividers>Are you sure you want to initiate a full device scan of the EMS bus?</DialogContent>
+      <DialogTitle>{LL.SCAN_DEVICES()}</DialogTitle>
+      <DialogContent dividers>{LL.EMS_SCAN()}</DialogContent>
       <DialogActions>
         <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmScan(false)} color="secondary">
-          Cancel
+          {LL.CANCEL()}
         </Button>
         <Button startIcon={<PermScanWifiIcon />} variant="outlined" onClick={scan} color="primary" autoFocus>
-          Scan
+          {LL.SCAN()}
         </Button>
       </DialogActions>
     </Dialog>
@@ -174,7 +204,10 @@ const DashboardStatus: FC = () => {
                 <DirectionsBusIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="EMS Bus Status" secondary={busStatus(data) + formatDurationSec(data.uptime)} />
+            <ListItemText
+              primary={LL.EMS_BUS_STATUS()}
+              secondary={busStatus(data) + ' (' + formatDurationSec(data.uptime) + ')'}
+            />
           </ListItem>
           <ListItem>
             <ListItemAvatar>
@@ -183,13 +216,13 @@ const DashboardStatus: FC = () => {
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary="Active Devices &amp; Sensors"
+              primary={LL.ACTIVE_DEVICES()}
               secondary={
-                pluralize(data.num_devices, 'EMS Device') +
+                LL.NUM_DEVICES({ num: data.num_devices }) +
                 ', ' +
-                pluralize(data.num_sensors, 'Temperature Sensor') +
+                LL.NUM_TEMP_SENSORS({ num: data.num_sensors }) +
                 ', ' +
-                pluralize(data.num_analogs, 'Analog Sensor')
+                LL.NUM_ANALOG_SENSORS({ num: data.num_analogs })
               }
             />
           </ListItem>
@@ -200,15 +233,15 @@ const DashboardStatus: FC = () => {
                 <Header>
                   <HeaderRow>
                     <HeaderCell resize></HeaderCell>
-                    <HeaderCell stiff>SUCCESS</HeaderCell>
-                    <HeaderCell stiff>FAIL</HeaderCell>
-                    <HeaderCell stiff>QUALITY</HeaderCell>
+                    <HeaderCell stiff>{LL.SUCCESS()}</HeaderCell>
+                    <HeaderCell stiff>{LL.FAIL()}</HeaderCell>
+                    <HeaderCell stiff>{LL.QUALITY()}</HeaderCell>
                   </HeaderRow>
                 </Header>
                 <Body>
                   {tableList.map((stat: Stat) => (
                     <Row key={stat.id} item={stat}>
-                      <Cell>{stat.id}</Cell>
+                      <Cell>{showName(stat.id)}</Cell>
                       <Cell stiff>{Intl.NumberFormat().format(stat.s)}</Cell>
                       <Cell stiff>{Intl.NumberFormat().format(stat.f)}</Cell>
                       <Cell stiff>{showQuality(stat)}</Cell>
@@ -223,7 +256,7 @@ const DashboardStatus: FC = () => {
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
             <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
-              Refresh
+              {LL.REFRESH()}
             </Button>
           </Box>
           <Box flexWrap="nowrap" whiteSpace="nowrap">
@@ -235,7 +268,7 @@ const DashboardStatus: FC = () => {
                 disabled={!me.admin}
                 onClick={() => setConfirmScan(true)}
               >
-                Scan for new devices
+                {LL.SCAN_DEVICES()}
               </Button>
             </ButtonRow>
           </Box>
@@ -245,7 +278,7 @@ const DashboardStatus: FC = () => {
   };
 
   return (
-    <SectionContent title="EMS Bus &amp; Activity Status" titleGutter>
+    <SectionContent title={LL.EMS_BUS_STATUS_TITLE()} titleGutter>
       {content()}
     </SectionContent>
   );

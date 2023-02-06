@@ -11,6 +11,6 @@ export function readMqttSettings(): AxiosPromise<MqttSettings> {
   return AXIOS.get('/mqttSettings');
 }
 
-export function updateMqttSettings(ntpSettings: MqttSettings): AxiosPromise<MqttSettings> {
-  return AXIOS.post('/mqttSettings', ntpSettings);
+export function updateMqttSettings(mqttSettings: MqttSettings): AxiosPromise<MqttSettings> {
+  return AXIOS.post('/mqttSettings', mqttSettings);
 }

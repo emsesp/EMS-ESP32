@@ -42,29 +42,35 @@ namespace uuid {
 
 namespace console {
 
-void Commands::add_command(const flash_string_vector & name, command_function function) {
-    add_command(0, 0, name, flash_string_vector{}, function, nullptr);
+void Commands::add_command(const string_vector & name, command_function function) {
+    add_command(0, 0, name, string_vector{}, function, nullptr);
 }
 
-void Commands::add_command(const flash_string_vector & name, const flash_string_vector & arguments, command_function function) {
+void Commands::add_command(const string_vector & name, const string_vector & arguments, command_function function) {
     add_command(0, 0, name, arguments, function, nullptr);
 }
 
-void Commands::add_command(const flash_string_vector & name, const flash_string_vector & arguments, command_function function, argument_completion_function arg_function) {
+void Commands::add_command(const string_vector & name, const string_vector & arguments, command_function function, argument_completion_function arg_function) {
     add_command(0, 0, name, arguments, function, arg_function);
 }
 
-void Commands::add_command(unsigned int context, unsigned int flags, const flash_string_vector & name, command_function function) {
-    add_command(context, flags, name, flash_string_vector{}, function, nullptr);
+void Commands::add_command(unsigned int context, unsigned int flags, const string_vector & name, command_function function) {
+    add_command(context, flags, name, string_vector{}, function, nullptr);
 }
 
-void Commands::add_command(unsigned int context, unsigned int flags, const flash_string_vector & name, const flash_string_vector & arguments, command_function function) {
+void Commands::add_command(unsigned int context, unsigned int flags, const string_vector & name, const string_vector & arguments, command_function function) {
     add_command(context, flags, name, arguments, function, nullptr);
 }
 
-void Commands::add_command(unsigned int context, unsigned int flags, const flash_string_vector & name, const flash_string_vector & arguments, command_function function, argument_completion_function arg_function) {
+void Commands::add_command(unsigned int                 context,
+                           unsigned int                 flags,
+                           const string_vector &        name,
+                           const string_vector &        arguments,
+                           command_function             function,
+                           argument_completion_function arg_function) {
     commands_.emplace(std::piecewise_construct, std::forward_as_tuple(context), std::forward_as_tuple(flags, name, arguments, function, arg_function));
 }
+
 
 // added by proddy
 // note we should really iterate and free up the lambda code and any flashstrings
@@ -139,7 +145,7 @@ bool Commands::find_longest_common_prefix(const std::multimap<size_t, const Comm
 
         for (size_t length = 0; all_match && length < shortest_match; length++) {
             for (auto command_it = std::next(commands.begin()); command_it != commands.end(); command_it++) {
-                if (read_flash_string(*std::next(first.begin(), length)) != read_flash_string(*std::next(command_it->second->name_.begin(), length))) {
+                if ((*std::next(first.begin(), length)) != (*std::next(command_it->second->name_.begin(), length))) {
                     all_match = false;
                     break;
                 }
@@ -152,7 +158,7 @@ bool Commands::find_longest_common_prefix(const std::multimap<size_t, const Comm
 
         auto name_it = first.begin();
         for (size_t i = 0; i < component_prefix; i++) {
-            longest_name.push_back(std::move(read_flash_string(*name_it)));
+            longest_name.push_back(std::move((*name_it)));
             name_it++;
         }
     }
@@ -167,7 +173,8 @@ bool Commands::find_longest_common_prefix(const std::multimap<size_t, const Comm
             for (auto command_it = std::next(commands.begin()); command_it != commands.end(); command_it++) {
                 // This relies on the null terminator character limiting the
                 // length before it becomes longer than any of the strings
-                if (pgm_read_byte(reinterpret_cast<PGM_P>(first) + length) != pgm_read_byte(reinterpret_cast<PGM_P>(*std::next(command_it->second->name_.begin(), component_prefix)) + length)) {
+                if (pgm_read_byte(reinterpret_cast<PGM_P>(first) + length)
+                    != pgm_read_byte(reinterpret_cast<PGM_P>(*std::next(command_it->second->name_.begin(), component_prefix)) + length)) {
                     all_match = false;
                     break;
                 }
@@ -179,7 +186,7 @@ bool Commands::find_longest_common_prefix(const std::multimap<size_t, const Comm
         }
 
         if (chars_prefix > 0) {
-            longest_name.push_back(std::move(read_flash_string(first).substr(0, chars_prefix)));
+            longest_name.push_back(std::string(first).substr(0, chars_prefix));
             return false;
         }
     }
@@ -243,7 +250,7 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
         }
 
         if (!temp_command_name.empty() && command_line.total_size() <= temp_command_name.size()) {
-            temp_command                      = std::make_unique<Command>(0, flash_string_vector{}, flash_string_vector{}, nullptr, nullptr);
+            temp_command                      = std::make_unique<Command>(0, string_vector{}, string_vector{}, nullptr, nullptr);
             count                             = 1;
             match                             = commands.partial.end();
             result.replacement.trailing_space = whole_components;
@@ -259,10 +266,11 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
         auto & matching_command = match->second;
 
         for (auto & name : matching_command->name_) {
-            result.replacement->push_back(std::move(read_flash_string(name)));
+            result.replacement->push_back(std::move((name)));
         }
 
-        if (command_line.total_size() > result.replacement->size() && command_line.total_size() <= matching_command->name_.size() + matching_command->maximum_arguments()) {
+        if (command_line.total_size() > result.replacement->size()
+            && command_line.total_size() <= matching_command->name_.size() + matching_command->maximum_arguments()) {
             // Try to auto-complete arguments
             std::vector<std::string> arguments{std::next(command_line->cbegin(), result.replacement->size()), command_line->cend()};
 
@@ -332,7 +340,7 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
                 remaining_help.escape_initial_parameters();
 
                 for (auto it = std::next(matching_command->arguments_.cbegin(), current_args_count); it != matching_command->arguments_.cend(); it++) {
-                    remaining_help->push_back(std::move(read_flash_string(*it)));
+                    remaining_help->push_back(std::move((*it)));
                 }
             }
 
@@ -380,7 +388,7 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
             }
 
             for (; flash_name_it != command_it->second->name_.cend(); flash_name_it++) {
-                std::string name = read_flash_string(*flash_name_it);
+                std::string name = (*flash_name_it);
 
                 // Skip parts of the command name that match the command line
                 if (line_it != command_line->cend()) {
@@ -403,7 +411,7 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
                     continue;
                 }
 
-                help->push_back(std::move(read_flash_string(argument)));
+                help->push_back(std::move((argument)));
             }
 
             result.help.push_back(std::move(help));
@@ -416,7 +424,7 @@ Commands::Completion Commands::complete_command(Shell & shell, const CommandLine
 
         if (commands.exact.count(longest->first) == 1) {
             for (auto & name : longest->second->name_) {
-                result.replacement->push_back(std::move(read_flash_string(name)));
+                result.replacement->push_back(name);
             }
 
             // Add a space because there are sub-commands for a command that has matched exactly
@@ -449,7 +457,7 @@ Commands::Match Commands::find_command(Shell & shell, const CommandLine & comman
         auto line_it = command_line->cbegin();
 
         for (; name_it != command.name_.cend() && line_it != command_line->cend(); name_it++, line_it++) {
-            std::string name  = read_flash_string(*name_it);
+            std::string name  = (*name_it);
             size_t      found = name.rfind(*line_it, 0);
 
             if (found == std::string::npos) {
@@ -499,12 +507,12 @@ void Commands::for_each_available_command(Shell & shell, apply_function f) const
 
             name.reserve(command_it->second.name_.size());
             for (auto flash_name : command_it->second.name_) {
-                name.push_back(std::move(read_flash_string(flash_name)));
+                name.push_back(std::move((flash_name)));
             }
 
             arguments.reserve(command_it->second.arguments_.size());
             for (auto flash_argument : command_it->second.arguments_) {
-                arguments.push_back(std::move(read_flash_string(flash_argument)));
+                arguments.push_back(std::move((flash_argument)));
             }
 
             f(name, arguments);
@@ -512,7 +520,11 @@ void Commands::for_each_available_command(Shell & shell, apply_function f) const
     }
 }
 
-Commands::Command::Command(unsigned int flags, const flash_string_vector name, const flash_string_vector arguments, command_function function, argument_completion_function arg_function)
+Commands::Command::Command(unsigned int                 flags,
+                           const string_vector          name,
+                           const string_vector          arguments,
+                           command_function             function,
+                           argument_completion_function arg_function)
     : flags_(flags)
     , name_(name)
     , arguments_(arguments)
@@ -524,7 +536,7 @@ Commands::Command::~Command() {
 }
 
 size_t Commands::Command::minimum_arguments() const {
-    return std::count_if(arguments_.cbegin(), arguments_.cend(), [](const __FlashStringHelper * argument) { return pgm_read_byte(argument) == '<'; });
+    return std::count_if(arguments_.cbegin(), arguments_.cend(), [](const char * argument) { return pgm_read_byte(argument) == '<'; });
 }
 
 } // namespace console

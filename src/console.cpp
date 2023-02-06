@@ -45,26 +45,26 @@ EMSESPShell::EMSESPShell()
 }
 
 void EMSESPShell::started() {
-    logger().log(LogLevel::DEBUG, LogFacility::CONSOLE, F("User session opened on console %s"), console_name().c_str());
+    logger().log(LogLevel::DEBUG, LogFacility::CONSOLE, ("User session opened on console %s"), console_name().c_str());
 }
 
 void EMSESPShell::stopped() {
     if (has_flags(CommandFlags::ADMIN)) {
-        logger().log(LogLevel::DEBUG, LogFacility::AUTH, F("su session closed on console %s"), console_name().c_str());
+        logger().log(LogLevel::DEBUG, LogFacility::AUTH, ("su session closed on console %s"), console_name().c_str());
     }
-    logger().log(LogLevel::DEBUG, LogFacility::CONSOLE, F("User session closed on console %s"), console_name().c_str());
+    logger().log(LogLevel::DEBUG, LogFacility::CONSOLE, ("User session closed on console %s"), console_name().c_str());
 }
 
 // show welcome banner
 // this is one of the first functions called when the shell is started
 void EMSESPShell::display_banner() {
     println();
-    printfln(F("┌──────────────────────────────────────┐"));
-    printfln(F("│ %sEMS-ESP version %-10s%s           │"), COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
-    printfln(F("│ %s%shttps://github.com/emsesp/EMS-ESP32%s  │"), COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
-    printfln(F("│                                      │"));
-    printfln(F("│ type %shelp%s to show available commands │"), COLOR_UNDERLINE, COLOR_RESET);
-    printfln(F("└──────────────────────────────────────┘"));
+    printfln("┌────────────────────────────────────────────┐");
+    printfln("│ %sEMS-ESP version %-10s%s               │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
+    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s        │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│                                            │");
+    printfln("│ type %shelp%s to show available commands       │", COLOR_UNDERLINE, COLOR_RESET);
+    printfln("└────────────────────────────────────────────┘");
     println();
 
     // set console name
@@ -100,9 +100,9 @@ void EMSESPShell::add_console_commands() {
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          flash_string_vector{F_(show)},
+                          string_vector{F_(show)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                              shell.printfln(F("%s%sEMS-ESP version %s%s"), COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
+                              shell.printfln("%s%sEMS-ESP version %s%s", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
                               shell.println();
                               EMSESP::show_device_values(shell);
                               EMSESP::show_sensor_values(shell);
@@ -110,36 +110,36 @@ void EMSESPShell::add_console_commands() {
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          flash_string_vector{F_(show), F_(devices)},
+                          string_vector{F_(show), F_(devices)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { EMSESP::show_devices(shell); });
 
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          flash_string_vector{F_(show), F_(ems)},
+                          string_vector{F_(show), F_(ems)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { EMSESP::show_ems(shell); });
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          flash_string_vector{F_(show), F_(values)},
+                          string_vector{F_(show), F_(values)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { EMSESP::show_device_values(shell); });
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          flash_string_vector{F_(show), F_(mqtt)},
+                          string_vector{F_(show), F_(mqtt)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Mqtt::show_mqtt(shell); });
 
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          flash_string_vector{F_(show), F_(commands)},
+                          string_vector{F_(show), F_(commands)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Command::show_all(shell); });
 
     commands->add_command(
         ShellContext::MAIN,
         CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(bus_id)},
-        flash_string_vector{F_(deviceid_mandatory)},
+        string_vector{F_(set), F_(bus_id)},
+        string_vector{F_(deviceid_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
             uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
             if ((device_id == 0x0B) || (device_id == 0x0D) || (device_id == 0x0A) || (device_id == 0x0F) || (device_id == 0x12)) {
@@ -151,24 +151,17 @@ void EMSESPShell::add_console_commands() {
                     },
                     "local");
             } else {
-                shell.println(F("Must be 0B, 0D, 0A, 0F or 12"));
+                shell.println("Must be 0B, 0D, 0A, 0E, 0F, or 48 - 4D");
             }
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{
-                read_flash_string(F("0B")),
-                read_flash_string(F("0D")),
-                read_flash_string(F("0A")),
-                read_flash_string(F("0F")),
-                read_flash_string(F("12")),
-
-            };
+            return std::vector<std::string>{"0B", "0D", "0A", "0E", "0F", "48", "49", "4A", "4B", "4C", "4D"};
         });
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
-                          flash_string_vector{F_(set), F_(tx_mode)},
-                          flash_string_vector{F_(n_mandatory)},
+                          string_vector{F_(set), F_(tx_mode)},
+                          string_vector{F_(n_mandatory)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
                               // save the tx_mode
@@ -183,13 +176,13 @@ void EMSESPShell::add_console_commands() {
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
-                          flash_string_vector{F_(scan), F_(devices)},
-                          flash_string_vector{F_(deep_optional)},
+                          string_vector{F_(scan), F_(devices)},
+                          string_vector{F_(deep_optional)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               if (arguments.size() == 0) {
                                   EMSESP::scan_devices();
                               } else {
-                                  shell.printfln(F("Performing a deep scan..."));
+                                  shell.printfln("Performing a deep scan...");
                                   EMSESP::clear_all_devices();
                                   std::vector<uint8_t> Device_Ids;
 
@@ -222,9 +215,10 @@ void EMSESPShell::add_console_commands() {
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          flash_string_vector{F_(set)},
+                          string_vector{F_(set)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                               EMSESP::webSettingsService.read([&](WebSettings & settings) {
+                                  shell.printfln("Language: %s", settings.locale.c_str());
                                   shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                   shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
                                   shell.printfln(F_(board_profile_fmt), settings.board_profile.c_str());
@@ -233,13 +227,13 @@ void EMSESPShell::add_console_commands() {
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          flash_string_vector{F_(read)},
-                          flash_string_vector{F_(deviceid_mandatory), F_(typeid_mandatory), F_(offset_optional), F_(length_optional)},
+                          string_vector{F_(read)},
+                          string_vector{F_(deviceid_mandatory), F_(typeid_mandatory), F_(offset_optional), F_(length_optional)},
                           [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
                               uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
 
                               if (!EMSESP::valid_device(device_id)) {
-                                  shell.printfln(F("Invalid deviceID"));
+                                  shell.printfln("Invalid deviceID");
                                   return;
                               }
 
@@ -260,38 +254,40 @@ void EMSESPShell::add_console_commands() {
 #ifndef EMSESP_STANDALONE
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          flash_string_vector{F_(set), F_(timeout)},
-                          flash_string_vector{F_(n_mandatory)},
+                          string_vector{F_(set), F_(timeout)},
+                          string_vector{F_(n_mandatory)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint16_t value = Helpers::atoint(arguments.front().c_str());
                               telnet_.initial_idle_timeout(value * 60);
-                              shell.printfln(F("Telnet timeout set to %d minutes"), value);
+                              shell.printfln("Telnet timeout set to %d minutes", value);
                           });
 #endif
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          flash_string_vector{F_(watch)},
-                          flash_string_vector{F_(watch_format_optional), F_(watchid_optional)},
+                          string_vector{F_(watch)},
+                          string_vector{F_(watch_format_optional), F_(watchid_optional)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint16_t watch_id = WATCH_ID_NONE;
 
+                              // only use english commands, not the translations
                               if (!arguments.empty()) {
                                   // get raw/pretty
-                                  if (arguments[0] == read_flash_string(F_(raw))) {
+                                  if (arguments[0] == (F_(raw))) {
                                       EMSESP::watch(EMSESP::WATCH_RAW); // raw
-                                  } else if (arguments[0] == read_flash_string(F_(on))) {
+                                  } else if (arguments[0] == (FL_(on)[0])) {
                                       EMSESP::watch(EMSESP::WATCH_ON); // on
-                                  } else if (arguments[0] == read_flash_string(F_(off))) {
+                                  } else if (arguments[0] == (FL_(off)[0])) {
                                       EMSESP::watch(EMSESP::WATCH_OFF); // off
-                                  } else if (arguments[0] == read_flash_string(F_(unknown))) {
+                                  } else if (arguments[0] == (FL_(unknown)[0])) {
                                       EMSESP::watch(EMSESP::WATCH_UNKNOWN); // unknown
                                       watch_id = WATCH_ID_NONE;
                                   } else {
                                       watch_id = Helpers::hextoint(arguments[0].c_str());
-                                      if (watch_id && ((EMSESP::watch() == EMSESP::WATCH_OFF) || (EMSESP::watch() == EMSESP::WATCH_UNKNOWN))) {
+                                      if (watch_id > 0 && ((EMSESP::watch() == EMSESP::WATCH_OFF) || (EMSESP::watch() == EMSESP::WATCH_UNKNOWN))) {
                                           EMSESP::watch(EMSESP::WATCH_ON); // on
-                                      } else if (!watch_id) {
+                                      } else if (watch_id == 0) {
+                                          EMSESP::watch(EMSESP::WATCH_OFF); // off
                                           return;
                                       }
                                   }
@@ -302,41 +298,44 @@ void EMSESPShell::add_console_commands() {
                                   }
 
                                   EMSESP::watch_id(watch_id);
+                              } else {
+                                  shell.printfln("Invalid: use watch raw|on|off|unknown|id [id]");
+                                  return;
                               }
 
                               uint8_t watch = EMSESP::watch();
                               if (watch == EMSESP::WATCH_OFF) {
-                                  shell.printfln(F("Watching telegrams is off"));
+                                  shell.printfln("Watching telegrams is off");
                                   return;
                               }
 
                               // if logging is off, the watch won't show anything, show force it back to NOTICE
                               if (shell.log_level() < Level::NOTICE) {
                                   shell.log_level(Level::NOTICE);
-                                  shell.printfln(F("Setting log level to Notice"));
+                                  shell.printfln("Setting log level to Notice");
                               }
 
                               if (watch == EMSESP::WATCH_ON) {
-                                  shell.printfln(F("Watching incoming telegrams, displayed in decoded format"));
+                                  shell.printfln("Watching incoming telegrams, displayed in decoded format");
                               } else if (watch == EMSESP::WATCH_RAW) {
-                                  shell.printfln(F("Watching incoming telegrams, displayed as raw bytes")); // WATCH_RAW
+                                  shell.printfln("Watching incoming telegrams, displayed as raw bytes"); // WATCH_RAW
                               } else {
-                                  shell.printfln(F("Watching unknown telegrams")); // WATCH_UNKNOWN
+                                  shell.printfln("Watching unknown telegrams"); // WATCH_UNKNOWN
                               }
 
                               watch_id = EMSESP::watch_id();
                               if (watch_id > 0x80) {
-                                  shell.printfln(F("Filtering only telegrams that match a telegram type of 0x%02X"), watch_id);
+                                  shell.printfln("Filtering only telegrams that match a telegram type of 0x%02X", watch_id);
                               } else if (watch_id != WATCH_ID_NONE) {
-                                  shell.printfln(F("Filtering only telegrams that match a deviceID or telegram type of 0x%02X"), watch_id);
+                                  shell.printfln("Filtering only telegrams that match a deviceID or telegram type of 0x%02X", watch_id);
                               }
                           });
 
     commands->add_command(
         ShellContext::MAIN,
         CommandFlags::ADMIN,
-        flash_string_vector{F_(call)},
-        flash_string_vector{F_(device_type_optional), F_(cmd_optional), F_(data_optional), F_(id_optional)},
+        string_vector{F_(call)},
+        string_vector{F_(device_type_optional), F_(cmd_optional), F_(data_optional), F_(id_optional)},
         [&](Shell & shell, const std::vector<std::string> & arguments) {
             if (arguments.empty()) {
                 Command::show_all(shell); // list options
@@ -346,7 +345,7 @@ void EMSESPShell::add_console_commands() {
             // validate the device_type
             uint8_t device_type = EMSdevice::device_name_2_device_type(arguments[0].c_str());
             if (!Command::device_has_commands(device_type)) {
-                shell.print(F("Invalid device. Available devices are: "));
+                shell.print("Invalid device. Available devices are: ");
                 Command::show_devices(shell);
                 return;
             }
@@ -354,7 +353,7 @@ void EMSESPShell::add_console_commands() {
 
             // validate that a command is present
             if (arguments.size() < 2) {
-                shell.print(F("Missing command. Available commands are: "));
+                shell.print("Missing command. Available commands are: ");
                 Command::show(shell, device_type, false); // non-verbose mode
                 return;
             }
@@ -365,11 +364,15 @@ void EMSESPShell::add_console_commands() {
             uint8_t             return_code = CommandRet::OK;
             JsonObject          json        = doc.to<JsonObject>();
 
+            if (cmd == nullptr) {
+                cmd = device_type == EMSdevice::DeviceType::SYSTEM ? F_(info) : F_(values);
+            }
+
             if (arguments.size() == 2) {
                 // no value specified, just the cmd
                 return_code = Command::call(device_type, cmd, nullptr, true, id, json);
             } else if (arguments.size() == 3) {
-                if (strncmp(cmd, "info", 4) == 0) {
+                if (strncmp(cmd, F_(info), 4) == 0 || strncmp(cmd, F_(values), 6) == 0) {
                     // info has a id but no value
                     return_code = Command::call(device_type, cmd, nullptr, true, atoi(arguments.back().c_str()), json);
                 } else if (arguments[2] == "?") {
@@ -388,17 +391,22 @@ void EMSESPShell::add_console_commands() {
             }
 
             if (return_code == CommandRet::OK && json.size()) {
+                if (json.containsKey("api_data")) {
+                    JsonVariant data = json["api_data"];
+                    shell.println(data.as<const char *>());
+                    return;
+                }
                 serializeJsonPretty(doc, shell);
                 shell.println();
                 return;
             }
 
             if (return_code == CommandRet::NOT_FOUND) {
-                shell.println(F("Unknown command"));
-                shell.print(F("Available commands are: "));
+                shell.println("Unknown command");
+                shell.print("Available commands are: ");
                 Command::show(shell, device_type, false); // non-verbose mode
             } else if (return_code != CommandRet::OK) {
-                shell.printfln(F("Bad syntax (error code %d)"), return_code);
+                shell.printfln("Bad syntax (error code %d)", return_code);
             }
         },
         [&](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) -> std::vector<std::string> {
@@ -419,7 +427,7 @@ void EMSESPShell::add_console_commands() {
                 if (Command::device_has_commands(device_type)) {
                     for (const auto & cf : Command::commands()) {
                         if (cf.device_type_ == device_type) {
-                            command_list.emplace_back(read_flash_string(cf.cmd_));
+                            command_list.emplace_back(cf.cmd_);
                         }
                     }
                     return command_list;
@@ -443,8 +451,8 @@ void Console::load_standard_commands(unsigned int context) {
     // create commands test and t
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
-                                       flash_string_vector{F("test")},
-                                       flash_string_vector{F_(name_optional), F_(data_optional)},
+                                       string_vector{"test"},
+                                       string_vector{F_(name_optional), F_(data_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            if (arguments.empty()) {
                                                Test::run_test(shell, "default");
@@ -455,7 +463,7 @@ void Console::load_standard_commands(unsigned int context) {
                                            }
                                        });
 
-    EMSESPShell::commands->add_command(context, CommandFlags::USER, flash_string_vector{F("t")}, [](Shell & shell, const std::vector<std::string> & arguments) {
+    EMSESPShell::commands->add_command(context, CommandFlags::USER, string_vector{("t")}, [](Shell & shell, const std::vector<std::string> & arguments) {
         Test::run_test(shell, "default");
     });
 #endif
@@ -463,8 +471,8 @@ void Console::load_standard_commands(unsigned int context) {
 #if defined(EMSESP_DEBUG)
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
-                                       flash_string_vector{F_(debug)},
-                                       flash_string_vector{F_(name_optional)},
+                                       string_vector{F_(debug)},
+                                       string_vector{F_(name_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            if (arguments.empty()) {
                                                Test::debug(shell, "default");
@@ -477,8 +485,8 @@ void Console::load_standard_commands(unsigned int context) {
     EMSESPShell::commands->add_command(
         context,
         CommandFlags::USER,
-        flash_string_vector{F_(log)},
-        flash_string_vector{F_(log_level_optional)},
+        string_vector{F_(log)},
+        string_vector{F_(log_level_optional)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
             if (!arguments.empty()) {
                 uuid::log::Level level;
@@ -489,7 +497,7 @@ void Console::load_standard_commands(unsigned int context) {
                     return;
                 }
             } else {
-                shell.print(F("levels: "));
+                shell.print("levels: ");
                 std::vector<std::string> v = uuid::log::levels_lowercase();
                 size_t                   i = v.size();
                 while (i--) {
@@ -506,22 +514,22 @@ void Console::load_standard_commands(unsigned int context) {
 
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
-                                       flash_string_vector{F_(help)},
+                                       string_vector{F_(help)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            shell.print_all_available_commands();
                                        });
 
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
-                                       flash_string_vector{F_(exit)},
+                                       string_vector{F_(exit)},
                                        [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { shell.stop(); });
 
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
-                                       flash_string_vector{F_(su)},
+                                       string_vector{F_(su)},
                                        [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            auto become_admin = [](Shell & shell) {
-                                               shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("su session opened on console"));
+                                               shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, ("su session opened on console"));
                                                shell.add_flags(CommandFlags::ADMIN);
                                            };
 
@@ -537,8 +545,8 @@ void Console::load_standard_commands(unsigned int context) {
                                                                become_admin(shell);
                                                            } else {
                                                                shell.delay_until(now + INVALID_PASSWORD_DELAY_MS, [](Shell & shell) {
-                                                                   shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Invalid su password on console"));
-                                                                   shell.println(F("su: incorrect password"));
+                                                                   shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, "Invalid su password on console");
+                                                                   shell.println("su: incorrect password");
                                                                });
                                                            }
                                                        });
@@ -552,21 +560,21 @@ void Console::load_standard_commands(unsigned int context) {
 void Console::load_system_commands(unsigned int context) {
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(restart)},
+                                       string_vector{F_(restart)},
                                        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
                                            EMSESP::system_.system_restart();
                                        });
 
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(wifi), F_(reconnect)},
+                                       string_vector{F_(wifi), F_(reconnect)},
                                        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
                                            EMSESP::system_.wifi_reconnect();
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::MAIN,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(format)},
+                                       string_vector{F_(format)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
                                                if (completed) {
@@ -574,7 +582,7 @@ void Console::load_system_commands(unsigned int context) {
                                                        if (securitySettings.jwtSecret.equals(password.c_str())) {
                                                            EMSESP::system_.format(shell);
                                                        } else {
-                                                           shell.println(F("incorrect password"));
+                                                           shell.println("incorrect password");
                                                        }
                                                    });
                                                }
@@ -583,7 +591,7 @@ void Console::load_system_commands(unsigned int context) {
 
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(passwd)},
+                                       string_vector{F_(passwd)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            shell.enter_password(F_(new_password_prompt1), [](Shell & shell, bool completed, const std::string & password1) {
                                                if (completed) {
@@ -597,9 +605,9 @@ void Console::load_system_commands(unsigned int context) {
                                                                                             return StateUpdateResult::CHANGED;
                                                                                         },
                                                                                         "local");
-                                                                                    shell.println(F("su password updated"));
+                                                                                    shell.println("su password updated");
                                                                                 } else {
-                                                                                    shell.println(F("Passwords do not match"));
+                                                                                    shell.println("Passwords do not match");
                                                                                 }
                                                                             }
                                                                         });
@@ -609,7 +617,7 @@ void Console::load_system_commands(unsigned int context) {
 
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
-                                       flash_string_vector{F_(show), F_(system)},
+                                       string_vector{F_(show), F_(system)},
                                        [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            EMSESP::system_.show_system(shell);
                                            shell.println();
@@ -617,8 +625,8 @@ void Console::load_system_commands(unsigned int context) {
 
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(hostname)},
-                                       flash_string_vector{F_(name_mandatory)},
+                                       string_vector{F_(set), F_(hostname)},
+                                       string_vector{F_(name_mandatory)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            shell.println("The network connection will be reset...");
                                            Shell::loop_all();
@@ -633,8 +641,8 @@ void Console::load_system_commands(unsigned int context) {
 
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(wifi), F_(ssid)},
-                                       flash_string_vector{F_(name_mandatory)},
+                                       string_vector{F_(set), F_(wifi), F_(ssid)},
+                                       string_vector{F_(name_mandatory)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            EMSESP::esp8266React.getNetworkSettingsService()->updateWithoutPropagation([&](NetworkSettings & networkSettings) {
                                                networkSettings.ssid = arguments.front().c_str();
@@ -646,8 +654,8 @@ void Console::load_system_commands(unsigned int context) {
     // added by mvdp
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F("mqtt"), F("subscribe")},
-                                       flash_string_vector{F("<topic>")},
+                                       string_vector{("mqtt"), ("subscribe")},
+                                       string_vector{("<topic>")},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            Mqtt::subscribe(arguments.front());
                                            shell.println("subscribing");
@@ -655,7 +663,7 @@ void Console::load_system_commands(unsigned int context) {
 
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(wifi), F_(password)},
+                                       string_vector{F_(set), F_(wifi), F_(password)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            shell.enter_password(F_(new_password_prompt1), [](Shell & shell, bool completed, const std::string & password1) {
                                                if (completed) {
@@ -670,7 +678,7 @@ void Console::load_system_commands(unsigned int context) {
                                                                                         });
                                                                                     shell.println("Use `wifi reconnect` to save and apply the new settings");
                                                                                 } else {
-                                                                                    shell.println(F("Passwords do not match"));
+                                                                                    shell.println("Passwords do not match");
                                                                                 }
                                                                             }
                                                                         });
@@ -680,13 +688,14 @@ void Console::load_system_commands(unsigned int context) {
 
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(board_profile)},
-                                       flash_string_vector{F_(name_mandatory)},
+                                       string_vector{F_(set), F_(board_profile)},
+                                       string_vector{F_(name_mandatory)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
                                            std::string         board_profile = Helpers::toUpper(arguments.front());
                                            if (!EMSESP::system_.load_board_profile(data, board_profile)) {
-                                               shell.println(F("Invalid board profile (S32, E32, MH-ET, NODEMCU, OLIMEX, OLIMEXPOE, CUSTOM)"));
+                                               shell.println(
+                                                   "Invalid board profile (S32, E32, MH-ET, NODEMCU, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, S3MINI, CUSTOM)");
                                                return;
                                            }
                                            EMSESP::webSettingsService.update(
@@ -709,7 +718,7 @@ void Console::load_system_commands(unsigned int context) {
                                        });
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(show), F_(users)},
+                                       string_vector{F_(show), F_(users)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            EMSESP::system_.show_users(shell);
                                        });
@@ -725,14 +734,14 @@ std::string EMSESPShell::prompt_suffix() {
 }
 
 void EMSESPShell::end_of_transmission() {
-    invoke_command(read_flash_string(F_(exit)));
+    invoke_command(F_(exit));
 }
 
 EMSESPStreamConsole::EMSESPStreamConsole(Stream & stream, bool local)
     : uuid::console::Shell(commands, ShellContext::MAIN, local ? (CommandFlags::USER | CommandFlags::LOCAL) : CommandFlags::USER)
     , uuid::console::StreamConsole(stream)
     , EMSESPShell()
-    , name_(read_flash_string(F("Serial")))
+    , name_("Serial")
     , pty_(SIZE_MAX)
     , addr_()
     , port_(0) {
@@ -758,14 +767,14 @@ EMSESPStreamConsole::EMSESPStreamConsole(Stream & stream, const IPAddress & addr
     snprintf(text.data(), text.size(), "pty%u", (uint16_t)pty_);
     name_ = text.data();
 #ifndef EMSESP_STANDALONE
-    logger().info(F("Allocated console %s for connection from [%s]:%u"), name_.c_str(), uuid::printable_to_string(addr_).c_str(), port_);
+    logger().info("Allocated console %s for connection from [%s]:%u", name_.c_str(), uuid::printable_to_string(addr_).c_str(), port_);
 #endif
 }
 
 EMSESPStreamConsole::~EMSESPStreamConsole() {
     if (pty_ != SIZE_MAX) {
 #ifndef EMSESP_STANDALONE
-        logger().info(F("Shutdown console %s for connection from [%s]:%u"), name_.c_str(), uuid::printable_to_string(addr_).c_str(), port_);
+        logger().info("Shutdown console %s for connection from [%s]:%u", name_.c_str(), uuid::printable_to_string(addr_).c_str(), port_);
 #endif
         ptys_[pty_] = false;
         ptys_.shrink_to_fit();

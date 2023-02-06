@@ -3,6 +3,7 @@
 using namespace std::placeholders; // for `_1` etc
 
 static bool is_firmware = false;
+static char md5[33]     = "\0";
 
 UploadFileService::UploadFileService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
@@ -28,29 +29,66 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         std::string extension = fname.substr(position + 1);
         size_t      fsize     = request->contentLength();
 
+#ifdef EMSESP_DEBUG
 #if defined(EMSESP_USE_SERIAL)
+        Serial.println();
         Serial.printf("Received filename: %s, len: %d, index: %d, ext: %s, fsize: %d", filename.c_str(), len, index, extension.c_str(), fsize);
         Serial.println();
 #endif
+#endif
 
-        if ((extension == "bin") && (fsize > 1500000)) {
+        is_firmware = false;
+        if ((extension == "bin") && (fsize > 1000000)) {
             is_firmware = true;
         } else if (extension == "json") {
-            is_firmware = false;
+            md5[0] = '\0'; // clear md5
+        } else if (extension == "md5") {
+            if (len == 32) {
+                memcpy(md5, data, 32);
+                md5[32] = '\0';
+            }
+            return;
         } else {
-            is_firmware = false;
+            md5[0] = '\0';
             return; // not support file type
         }
 
         if (is_firmware) {
+            // Check firmware header, 0xE9 magic offset 0 indicates esp bin, chip offset 12: esp32:0, S2:2, C3:5
+#if CONFIG_IDF_TARGET_ESP32 // ESP32/PICO-D4
+            if (len > 12 && (data[0] != 0xE9 || data[12] != 0)) {
+                handleError(request, 503); // service unavailable
+                return;
+            }
+#elif CONFIG_IDF_TARGET_ESP32S2
+            if (len > 12 && (data[0] != 0xE9 || data[12] != 2)) {
+                handleError(request, 503); // service unavailable
+                return;
+            }
+#elif CONFIG_IDF_TARGET_ESP32C3
+            if (len > 12 && (data[0] != 0xE9 || data[12] != 5)) {
+                handleError(request, 503); // service unavailable
+                return;
+            }
+#elif CONFIG_IDF_TARGET_ESP32S3
+            if (len > 12 && (data[0] != 0xE9 || data[12] != 3)) {
+                handleError(request, 503); // service unavailable
+                return;
+            }
+#endif
             // it's firmware - initialize the ArduinoOTA updater
             if (Update.begin(fsize)) {
+                if (strlen(md5) == 32) {
+                    Update.setMD5(md5);
+                    md5[0] = '\0';
+                }
                 request->onDisconnect(UploadFileService::handleEarlyDisconnect); // success, let's make sure we end the update if the client hangs up
             } else {
 #if defined(EMSESP_USE_SERIAL)
                 Update.printError(Serial);
 #endif
-                handleError(request, 500); // failed to begin, send an error response
+                handleError(request, 507); // failed to begin, send an error response Insufficient Storage
+                return;
             }
         } else {
             // its a normal file, open a new temp file to write the contents too
@@ -62,7 +100,6 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         if (len) {
             request->_tempFile.write(data, len); // stream the incoming chunk to the opened file
         }
-
     } else {
         // if we haven't delt with an error, continue with the firmware update
         if (!request->_tempObject) {
@@ -99,6 +136,11 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
     if (is_firmware && !request->_tempObject) {
         request->onDisconnect(RestartService::restartNow);
         AsyncWebServerResponse * response = request->beginResponse(200);
+        request->send(response);
+        return;
+    }
+    if (strlen(md5) == 32) {
+        AsyncWebServerResponse * response = request->beginResponse(201, "text/plain", md5); // created
         request->send(response);
         return;
     }

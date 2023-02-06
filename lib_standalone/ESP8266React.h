@@ -26,41 +26,9 @@
 
 class DummySettings {
   public:
-    uint8_t  tx_mode               = 1;
-    uint8_t  ems_bus_id            = 0x0B;
-    bool     syslog_enabled        = false;
-    int8_t   syslog_level          = 3; // uuid::log::Level
-    uint32_t syslog_mark_interval  = 0;
-    String   syslog_host           = "192.168.1.4";
-    uint16_t syslog_port           = 514;
-    bool     shower_timer          = true;
-    bool     shower_alert          = false;
-    uint8_t  shower_alert_coldshot = 10;
-    uint8_t  shower_alert_trigger  = 7;
-    bool     hide_led              = false;
-    bool     notoken_api           = false;
-    bool     readonly_mode         = false;
-    uint8_t  bool_format           = 1; // using "on" and "off"
-    uint8_t  bool_dashboard        = 1;
-    uint8_t  enum_format           = 1;
-    bool     nosleep               = false;
-    bool     fahrenheit            = false;
-    bool     bandwidth20           = false;
-    bool     telnet_enabled        = false;
-    String   board_profile         = "CUSTOM";
-    bool     trace_raw             = false;
-    bool     analog_enabled        = true; // analog is enabled
-    int8_t   weblog_level          = 1;
-    uint8_t  weblog_buffer         = 50;
-    bool     weblog_compact        = true;
-    uint8_t  rx_gpio               = 0;
-    uint8_t  tx_gpio               = 0;
-    uint8_t  dallas_gpio           = 16; // to ensure its enabled
-    bool     dallas_parasite       = false;
-    uint8_t  led_gpio              = 0;
-    bool     low_clock             = false;
-    uint8_t  pbutton_gpio          = false;
-    uint8_t  solar_maxflow         = 30;
+    // SYSTEM
+    bool bandwidth20 = false;
+    bool nosleep     = false;
 
     // MQTT
     uint16_t publish_time       = 10;
@@ -73,13 +41,14 @@ class DummySettings {
     String   base               = "ems-esp";
     bool     publish_single     = false;
     bool     publish_single2cmd = false;
-    bool     send_response      = true;
+    bool     send_response      = false; // don't send response
     String   host               = "192.168.1.4";
     uint16_t port               = 1883;
     String   clientId           = "ems-esp";
     String   username           = "";
     uint16_t keepAlive          = 60;
     bool     cleanSession       = false;
+    uint8_t  entity_format      = 1;
 
     uint16_t publish_time_boiler     = 10;
     uint16_t publish_time_thermostat = 10;
@@ -87,6 +56,7 @@ class DummySettings {
     uint16_t publish_time_mixer      = 10;
     uint16_t publish_time_other      = 10;
     uint16_t publish_time_sensor     = 10;
+    uint16_t publish_time_heartbeat  = 60;
 
     String hostname       = "ems-esp";
     String jwtSecret      = "ems-esp";
@@ -100,13 +70,8 @@ class DummySettings {
     String dnsIP2         = "";
     bool   enableIPv6     = false;
     bool   enableMDNS     = true;
-
-    uint8_t phy_type       = 0;
-    uint8_t eth_power      = 0; // 0 means -1
-    uint8_t eth_phy_addr   = 0;
-    uint8_t eth_clock_mode = 0;
-
-#define FACTORY_MQTT_MAX_TOPIC_LENGTH 128
+    bool   enableCORS     = false;
+    String CORSOrigin     = "*";
 
     static void read(DummySettings & settings, JsonObject & root){};
     static void read(DummySettings & settings){};

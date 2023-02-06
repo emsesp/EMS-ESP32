@@ -22,16 +22,21 @@ namespace emsesp {
 
 REGISTER_FACTORY(Switch, EMSdevice::DeviceType::SWITCH);
 
-Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
+Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // WM10 module, device_id 0x11
-    register_telegram_type(0x9C, F("WM10MonitorMessage"), false, MAKE_PF_CB(process_WM10MonitorMessage));
-    register_telegram_type(0x9D, F("WM10SetMessage"), false, MAKE_PF_CB(process_WM10SetMessage));
-    register_telegram_type(0x1E, F("WM10TempMessage"), false, MAKE_PF_CB(process_WM10TempMessage));
+    register_telegram_type(0x9C, "WM10MonitorMessage", false, MAKE_PF_CB(process_WM10MonitorMessage));
+    register_telegram_type(0x9D, "WM10SetMessage", false, MAKE_PF_CB(process_WM10SetMessage));
+    register_telegram_type(0x1E, "WM10TempMessage", false, MAKE_PF_CB(process_WM10TempMessage));
 
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &activated_, DeviceValueType::BOOL, nullptr, FL_(activated), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &status_, DeviceValueType::INT, nullptr, FL_(status), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &activated_, DeviceValueType::BOOL, FL_(activated), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &flowTempHc_,
+                          DeviceValueType::USHORT,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(flowTempHc),
+                          DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &status_, DeviceValueType::INT, FL_(status), DeviceValueUOM::NONE);
 }
 
 // message 0x9D switch on/off

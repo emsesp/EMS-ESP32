@@ -25,9 +25,10 @@ void FactoryResetService::factoryReset() {
     File root = fs->open(FS_CONFIG_DIRECTORY);
     File file;
     while (file = root.openNextFile()) {
-        char * pathStr = strdup(file.name());
+        String path = file.path();
         file.close();
-        fs->remove(pathStr);
+        fs->remove(path);
     }
+
     RestartService::restartNow();
 }

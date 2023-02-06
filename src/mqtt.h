@@ -65,6 +65,7 @@ class Mqtt {
     void set_publish_time_mixer(uint16_t publish_time);
     void set_publish_time_other(uint16_t publish_time);
     void set_publish_time_sensor(uint16_t publish_time);
+    void set_publish_time_heartbeat(uint16_t publish_time);
     bool get_publish_onchange(uint8_t device_type);
 
     enum Operation : uint8_t { PUBLISH, SUBSCRIBE, UNSUBSCRIBE };
@@ -79,35 +80,36 @@ class Mqtt {
     static void resubscribe();
 
     static void publish(const std::string & topic, const std::string & payload);
-    static void publish(const __FlashStringHelper * topic, const char * payload);
+    static void publish(const char * topic, const char * payload);
     static void publish(const std::string & topic, const JsonObject & payload);
-    static void publish(const __FlashStringHelper * topic, const JsonObject & payload);
-    static void publish(const __FlashStringHelper * topic, const std::string & payload);
+    static void publish(const char * topic, const JsonObject & payload);
+    static void publish(const char * topic, const std::string & payload);
     static void publish_retain(const std::string & topic, const JsonObject & payload, bool retain);
-    static void publish_retain(const __FlashStringHelper * topic, const std::string & payload, bool retain);
-    static void publish_retain(const __FlashStringHelper * topic, const JsonObject & payload, bool retain);
-    static void publish_ha(const std::string & topic, const JsonObject & payload);
-    static void publish_ha(const __FlashStringHelper * topic, const JsonObject & payload);
-    static void publish_ha(const std::string & topic);
+    static void publish_retain(const char * topic, const std::string & payload, bool retain);
+    static void publish_retain(const char * topic, const JsonObject & payload, bool retain);
+    static void publish_ha(const char * topic, const JsonObject & payload);
+    static void publish_ha(const char * topic);
 
     static void
     publish_ha_sensor_config(DeviceValue & dv, const std::string & model, const std::string & brand, const bool remove, const bool create_device_config = false);
-    static void publish_ha_sensor_config(uint8_t                             type,
-                                         uint8_t                             tag,
-                                         const __FlashStringHelper *         name,
-                                         const uint8_t                       device_type,
-                                         const __FlashStringHelper *         entity,
-                                         const uint8_t                       uom,
-                                         const bool                          remove,
-                                         const bool                          has_cmd,
-                                         const __FlashStringHelper * const * options,
-                                         uint8_t                             options_size,
-                                         const int16_t                       dv_set_min,
-                                         const int16_t                       dv_set_max,
-                                         const JsonObject &                  dev_json);
+    static void publish_ha_sensor_config(uint8_t               type,
+                                         uint8_t               tag,
+                                         const char * const    fullname,
+                                         const char * const    en_name,
+                                         const uint8_t         device_type,
+                                         const char * const    entity,
+                                         const uint8_t         uom,
+                                         const bool            remove,
+                                         const bool            has_cmd,
+                                         const char * const ** options,
+                                         uint8_t               options_size,
+                                         const int16_t         dv_set_min,
+                                         const int16_t         dv_set_max,
+                                         const int8_t          num_op,
+                                         const JsonObject &    dev_json);
 
-    static void publish_system_ha_sensor_config(uint8_t type, const __FlashStringHelper * name, const __FlashStringHelper * entity, const uint8_t uom);
-    static void publish_ha_climate_config(uint8_t tag, bool has_roomtemp, bool remove = false);
+    static void publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
+    static void publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove = false, const int16_t min = 5, const uint16_t max = 30);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -142,6 +144,10 @@ class Mqtt {
         return mqtt_base_;
     }
 
+    static std::string basename() {
+        return mqtt_basename_;
+    }
+
     // returns the discovery MQTT topic prefix and adds a /
     static std::string discovery_prefix() {
         if (discovery_prefix_.empty()) {
@@ -162,10 +168,22 @@ class Mqtt {
         return mqtt_publish_fails_;
     }
 
+    static uint32_t publish_queued() {
+        return mqtt_messages_.size();
+    }
+
+    static uint8_t connect_count() {
+        return connectcount_;
+    }
+
     static void reset_mqtt();
 
     static bool is_nested() {
         return nested_format_ == NestedFormat::NESTED;
+    }
+
+    static uint8_t entity_format() {
+        return entity_format_;
     }
 
     static void nested_format(uint8_t nested_format) {
@@ -173,7 +191,7 @@ class Mqtt {
     }
 
     static bool publish_single() {
-        return publish_single_;
+        return mqtt_enabled_ && publish_single_;
     }
 
     static bool publish_single2cmd() {
@@ -185,7 +203,7 @@ class Mqtt {
     }
 
     static bool ha_enabled() {
-        return ha_enabled_;
+        return mqtt_enabled_ && ha_enabled_;
     }
 
     static void ha_enabled(bool ha_enabled) {
@@ -277,6 +295,7 @@ class Mqtt {
     uint32_t last_publish_mixer_      = 0;
     uint32_t last_publish_other_      = 0;
     uint32_t last_publish_sensor_     = 0;
+    uint32_t last_publish_heartbeat_  = 0;
     uint32_t last_publish_queue_      = 0;
 
     static bool     connecting_;
@@ -285,8 +304,12 @@ class Mqtt {
     static uint8_t  connectcount_;
     static bool     ha_climate_reset_;
 
+    static std::string lasttopic_;
+    static std::string lastpayload_;
+
     // settings, copied over
     static std::string mqtt_base_;
+    static std::string mqtt_basename_;
     static uint8_t     mqtt_qos_;
     static bool        mqtt_retain_;
     static uint32_t    publish_time_;
@@ -296,9 +319,11 @@ class Mqtt {
     static uint32_t    publish_time_mixer_;
     static uint32_t    publish_time_other_;
     static uint32_t    publish_time_sensor_;
+    static uint32_t    publish_time_heartbeat_;
     static bool        mqtt_enabled_;
     static bool        ha_enabled_;
     static uint8_t     nested_format_;
+    static uint8_t     entity_format_;
     static std::string discovery_prefix_;
     static bool        publish_single_;
     static bool        publish_single2cmd_;

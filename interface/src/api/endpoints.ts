@@ -1,4 +1,4 @@
-import axios, { AxiosPromise, CancelToken } from 'axios';
+import axios, { AxiosPromise, CancelToken, AxiosProgressEvent } from 'axios';
 
 import { decode } from '@msgpack/msgpack';
 
@@ -89,7 +89,7 @@ function calculateEventSourceRoot(endpointPath: string) {
 
 export interface FileUploadConfig {
   cancelToken?: CancelToken;
-  onUploadProgress?: (progressEvent: ProgressEvent) => void;
+  onUploadProgress?: (progressEvent: AxiosProgressEvent) => void;
 }
 
 export const startUploadFile = (url: string, file: File, config?: FileUploadConfig): AxiosPromise<void> => {

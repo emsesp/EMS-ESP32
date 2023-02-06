@@ -25,7 +25,6 @@
 
 #ifndef EMSESP_STANDALONE
 #include "driver/adc.h"
-#include <esp_bt.h>
 #endif
 
 #include <uuid/log.h>
@@ -36,39 +35,40 @@ class AnalogSensor {
   public:
     class Sensor {
       public:
-        Sensor(const uint8_t gpio, const std::string & name, const float offset, const float factor, const uint8_t uom, const int8_t type);
+        Sensor(const uint8_t gpio, const std::string & name, const double offset, const double factor, const uint8_t uom, const int8_t type);
         ~Sensor() = default;
 
-        void set_offset(const float offset) {
+        void set_offset(const double offset) {
             offset_ = offset;
         }
 
         std::string name() const;
-        void        set_name(const std::string & name) {
-                   name_ = name;
+
+        void set_name(const std::string & name) {
+            name_ = name;
         }
 
         uint8_t gpio() const {
             return gpio_;
         }
 
-        float value() const {
+        double value() const {
             return value_;
         }
 
-        void set_value(float value) {
+        void set_value(const double value) {
             value_ = value;
         }
 
-        float factor() const {
+        double factor() const {
             return factor_;
         }
 
-        void set_factor(float factor) {
+        void set_factor(const double factor) {
             factor_ = factor;
         }
 
-        float offset() const {
+        double offset() const {
             return offset_;
         }
 
@@ -84,7 +84,7 @@ class AnalogSensor {
             return type_;
         }
 
-        void set_type(int8_t type) {
+        void set_type(const int8_t type) {
             type_ = type;
         }
 
@@ -101,10 +101,10 @@ class AnalogSensor {
       private:
         uint8_t     gpio_;
         std::string name_;
-        float       offset_;
-        float       factor_;
+        double      offset_;
+        double      factor_;
         uint8_t     uom_;
-        float       value_; // float because of the factor is a float
+        double      value_; // double because of the factor is a double
         int8_t      type_;
     };
 
@@ -157,7 +157,7 @@ class AnalogSensor {
         return sensors_.size();
     }
 
-    bool update(uint8_t gpio, const std::string & name, float offset, float factor, uint8_t uom, int8_t type);
+    bool update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type);
     bool get_value_info(JsonObject & output, const char * cmd, const int8_t id) const;
 
 #ifdef EMSESP_DEBUG

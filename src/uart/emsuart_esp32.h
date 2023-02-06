@@ -26,8 +26,7 @@
 
 #define EMS_MAXBUFFERSIZE 33 // max size of the buffer. EMS packets are max 32 bytes, plus extra for BRK
 
-#define EMSUART_NUM UART_NUM_2 // on the ESP32 we're using UART2
-#define EMSUART UART2          // for intr setting
+#define EMSUART_NUM UART_NUM_1 // on C3 and S2 there is no UART2, use UART1 for all
 #define EMSUART_BAUD 9600      // uart baud rate for the EMS circuit
 
 #define EMS_TXMODE_DEFAULT 1

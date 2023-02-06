@@ -24,55 +24,58 @@ REGISTER_FACTORY(Mixer, EMSdevice::DeviceType::MIXER);
 
 uuid::log::Logger Mixer::logger_{F_(mixer), uuid::log::Facility::CONSOLE};
 
-Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
+Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // Pool module
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MP) {
-        register_telegram_type(0x5BA, F("HpPoolStatus"), true, MAKE_PF_CB(process_HpPoolStatus));
+        register_telegram_type(0x5BA, "HpPoolStatus", true, MAKE_PF_CB(process_HpPoolStatus));
         type_ = Type::MP;
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolTemp_, DeviceValueType::SHORT, FL_(div10), FL_(poolTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &poolTemp_,
+                              DeviceValueType::SHORT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(poolTemp),
+                              DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolShuntStatus_, DeviceValueType::ENUM, FL_(enum_shunt), FL_(poolShuntStatus), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolShunt_, DeviceValueType::UINT, nullptr, FL_(poolShunt), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolShunt_, DeviceValueType::UINT, FL_(poolShunt), DeviceValueUOM::PERCENT);
     }
 
     // EMS+
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         if (device_id >= 0x20 && device_id <= 0x27) {
-            register_telegram_type(device_id - 0x20 + 0x02D7, F("MMPLUSStatusMessage_HC"), false, MAKE_PF_CB(process_MMPLUSStatusMessage_HC));
-            // register_telegram_type(device_id - 0x20 + 0x02E1, F("MMPLUSStetMessage_HC"), true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
+            register_telegram_type(device_id - 0x20 + 0x02D7, "MMPLUSStatusMessage_HC", false, MAKE_PF_CB(process_MMPLUSStatusMessage_HC));
+            // register_telegram_type(device_id - 0x20 + 0x02E1, "MMPLUSStetMessage_HC", true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
             type_       = Type::HC;
             hc_         = device_id - 0x20 + 1;
             uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
-            register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
-            register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
-            register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
-            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
+            register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempHc), DeviceValueUOM::DEGREES);
+            register_device_value(tag, &status_, DeviceValueType::INT, FL_(mixerStatus), DeviceValueUOM::PERCENT);
+            register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
+            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
         } else if (device_id >= 0x28 && device_id <= 0x29) {
-            register_telegram_type(device_id - 0x28 + 0x0331, F("MMPLUSStatusMessage_WWC"), false, MAKE_PF_CB(process_MMPLUSStatusMessage_WWC));
-            register_telegram_type(device_id - 0x28 + 0x0313, F("MMPLUSConfigMessage_WWC"), true, MAKE_PF_CB(process_MMPLUSConfigMessage_WWC));
-            // register_telegram_type(device_id - 0x28 + 0x033B, F("MMPLUSSetMessage_WWC"), true, MAKE_PF_CB(process_MMPLUSSetMessage_WWC));
+            register_telegram_type(device_id - 0x28 + 0x0331, "MMPLUSStatusMessage_WWC", false, MAKE_PF_CB(process_MMPLUSStatusMessage_WWC));
+            register_telegram_type(device_id - 0x28 + 0x0313, "MMPLUSConfigMessage_WWC", true, MAKE_PF_CB(process_MMPLUSConfigMessage_WWC));
+            // register_telegram_type(device_id - 0x28 + 0x033B, "MMPLUSSetMessage_WWC", true, MAKE_PF_CB(process_MMPLUSSetMessage_WWC));
             type_       = Type::WWC;
             hc_         = device_id - 0x28 + 1;
             uint8_t tag = DeviceValueTAG::TAG_WWC1 + hc_ - 1;
-            register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(wwTemp), DeviceValueUOM::DEGREES);
-            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(wwPumpStatus), DeviceValueUOM::NONE);
-            register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(wwTempStatus), DeviceValueUOM::NONE);
+            register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp), DeviceValueUOM::DEGREES);
+            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, FL_(wwPumpStatus), DeviceValueUOM::NONE);
+            register_device_value(tag, &status_, DeviceValueType::INT, FL_(wwTempStatus), DeviceValueUOM::NONE);
 
-            register_device_value(tag, &wwMaxTemp_, DeviceValueType::UINT, nullptr, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp));
-            register_device_value(tag, &wwDiffTemp_, DeviceValueType::INT, nullptr, FL_(wwDiffTemp), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_wwDiffTemp));
+            register_device_value(tag, &wwMaxTemp_, DeviceValueType::UINT, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp));
+            register_device_value(tag, &wwDiffTemp_, DeviceValueType::INT, FL_(wwDiffTemp), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_wwDiffTemp));
             register_device_value(tag,
                                   &wwDisinfectionTemp_,
                                   DeviceValueType::UINT,
-                                  nullptr,
                                   FL_(wwDisinfectionTemp),
                                   DeviceValueUOM::DEGREES,
                                   MAKE_CF_CB(set_wwDisinfectionTemp));
-            register_device_value(tag, &wwReducedTemp_, DeviceValueType::UINT, nullptr, FL_(wwRedTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwReducedTemp));
-            register_device_value(tag, &wwRequiredTemp_, DeviceValueType::UINT, nullptr, FL_(wwRequiredTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwRequiredTemp));
+            register_device_value(tag, &wwReducedTemp_, DeviceValueType::UINT, FL_(wwRedTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwReducedTemp));
+            register_device_value(tag, &wwRequiredTemp_, DeviceValueType::UINT, FL_(wwRequiredTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwRequiredTemp));
             register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                                   &wwCircPump_,
                                   DeviceValueType::BOOL,
-                                  nullptr,
                                   FL_(wwCircPump),
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_wwCircPump));
@@ -82,67 +85,71 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
 
     // EMS 1.0
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MM10) {
-        register_telegram_type(0x00AA, F("MMConfigMessage"), true, MAKE_PF_CB(process_MMConfigMessage));
-        register_telegram_type(0x00AB, F("MMStatusMessage"), false, MAKE_PF_CB(process_MMStatusMessage));
-        register_telegram_type(0x00AC, F("MMSetMessage"), false, MAKE_PF_CB(process_MMSetMessage));
+        register_telegram_type(0x00AA, "MMConfigMessage", true, MAKE_PF_CB(process_MMConfigMessage));
+        register_telegram_type(0x00AB, "MMStatusMessage", false, MAKE_PF_CB(process_MMStatusMessage));
+        register_telegram_type(0x00AC, "MMSetMessage", false, MAKE_PF_CB(process_MMSetMessage));
         type_       = Type::HC;
         hc_         = device_id - 0x20 + 1;
         uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
-        register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
-        register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
-        register_device_value(tag, &activated_, DeviceValueType::BOOL, nullptr, FL_(activated), DeviceValueUOM::NONE, MAKE_CF_CB(set_activated));
-        register_device_value(
-            tag, &setValveTime_, DeviceValueType::UINT, FL_(mul10), FL_(mixerSetTime), DeviceValueUOM::SECONDS, MAKE_CF_CB(set_setValveTime), 10, 120);
+        register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempHc), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &status_, DeviceValueType::INT, FL_(mixerStatus), DeviceValueUOM::PERCENT);
+        register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
+        register_device_value(tag, &activated_, DeviceValueType::BOOL, FL_(activated), DeviceValueUOM::NONE, MAKE_CF_CB(set_activated));
+        register_device_value(tag,
+                              &setValveTime_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_MUL10,
+                              FL_(mixerSetTime),
+                              DeviceValueUOM::SECONDS,
+                              MAKE_CF_CB(set_setValveTime),
+                              10,
+                              120);
     }
 
     // HT3
     if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         if (device_id >= 0x40) { // special DHW pos 10
-            register_telegram_type(0x34, F("UBAMonitorWW"), false, MAKE_PF_CB(process_IPMMonitorWW));
-            register_telegram_type(0x1E, F("HydrTemp"), false, MAKE_PF_CB(process_IPMHydrTemp));
-            register_telegram_type(0x33, F("UBAParameterWW"), true, MAKE_PF_CB(process_IPMParameterWW));
-            // register_telegram_type(0x10D, F("wwNTCStatus"), false, MAKE_PF_CB(process_wwNTCStatus));
+            register_telegram_type(0x34, "UBAMonitorWW", false, MAKE_PF_CB(process_IPMMonitorWW));
+            register_telegram_type(0x1E, "HydrTemp", false, MAKE_PF_CB(process_IPMHydrTemp));
+            register_telegram_type(0x33, "UBAParameterWW", true, MAKE_PF_CB(process_IPMParameterWW));
+            // register_telegram_type(0x10D, "wwNTCStatus", false, MAKE_PF_CB(process_wwNTCStatus));
             type_       = Type::WWC;
             hc_         = device_id - 0x40 + 1;
             uint8_t tag = DeviceValueTAG::TAG_WWC9 + hc_ - 1;
-            register_device_value(tag, &wwSelTemp_, DeviceValueType::UINT, nullptr, FL_(wwSelTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwSelTemp));
-            register_device_value(tag, &wwCurTemp_1_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp), DeviceValueUOM::DEGREES);
-            register_device_value(tag, &wwCurTemp_2_, DeviceValueType::USHORT, FL_(div10), FL_(wwCurTemp2), DeviceValueUOM::DEGREES);
-            register_device_value(tag, &HydrTemp_, DeviceValueType::USHORT, FL_(div10), FL_(hydrTemp), DeviceValueUOM::DEGREES);
-            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE);
-            register_device_value(
-                tag, &wwFlowTempOffset_, DeviceValueType::UINT, nullptr, FL_(wwFlowTempOffset), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_wwFlowTempOffset));
-            register_device_value(tag, &wwHystOn_, DeviceValueType::INT, nullptr, FL_(wwHystOn), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_wwHystOn));
-            register_device_value(tag, &wwHystOff_, DeviceValueType::INT, nullptr, FL_(wwHystOff), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_wwHystOff));
+            register_device_value(tag, &wwSelTemp_, DeviceValueType::UINT, FL_(wwSelTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwSelTemp));
+            register_device_value(tag, &wwCurTemp_1_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwCurTemp), DeviceValueUOM::DEGREES);
+            register_device_value(tag, &wwCurTemp_2_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwCurTemp2), DeviceValueUOM::DEGREES);
+            register_device_value(tag, &HydrTemp_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hydrTemp), DeviceValueUOM::DEGREES);
+            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, FL_(pumpStatus), DeviceValueUOM::NONE);
+            register_device_value(tag, &wwFlowTempOffset_, DeviceValueType::UINT, FL_(wwFlowTempOffset), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_wwFlowTempOffset));
+            register_device_value(tag, &wwHystOn_, DeviceValueType::INT, FL_(wwHystOn), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_wwHystOn));
+            register_device_value(tag, &wwHystOff_, DeviceValueType::INT, FL_(wwHystOff), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_wwHystOff));
             register_device_value(tag,
                                   &wwDisinfectionTemp_,
                                   DeviceValueType::UINT,
-                                  nullptr,
                                   FL_(wwDisinfectionTemp),
                                   DeviceValueUOM::DEGREES,
                                   MAKE_CF_CB(set_wwDisinfectionTemp));
             register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW,
                                   &wwCircPump_,
                                   DeviceValueType::BOOL,
-                                  nullptr,
                                   FL_(wwCircPump),
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_wwCircPump));
             register_device_value(tag, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircMode));
         } else {
-            register_telegram_type(0x010C, F("IPMStatusMessage"), false, MAKE_PF_CB(process_IPMStatusMessage));
-            register_telegram_type(0x011E, F("IPMTempMessage"), false, MAKE_PF_CB(process_IPMTempMessage));
-            // register_telegram_type(0x0123, F("IPMSetMessage"), false, MAKE_PF_CB(process_IPMSetMessage));
+            register_telegram_type(0x010C, "IPMStatusMessage", false, MAKE_PF_CB(process_IPMStatusMessage));
+            register_telegram_type(0x011E, "IPMTempMessage", false, MAKE_PF_CB(process_IPMTempMessage));
+            // register_telegram_type(0x0123, "IPMSetMessage", false, MAKE_PF_CB(process_IPMSetMessage));
             type_       = Type::HC;
             hc_         = device_id - 0x20 + 1;
             uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
-            register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
-            register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
-            register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
-            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
-            register_device_value(tag, &flowTempVf_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempVf), DeviceValueUOM::DEGREES);
+            register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempHc), DeviceValueUOM::DEGREES);
+            register_device_value(tag, &status_, DeviceValueType::INT, FL_(mixerStatus), DeviceValueUOM::PERCENT);
+            register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
+            register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
+            register_device_value(tag, &flowTempVf_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempVf), DeviceValueUOM::DEGREES);
         }
     }
 }
@@ -382,7 +389,7 @@ bool Mixer::set_setValveTime(const char * value, const int8_t id) {
 
 bool Mixer::set_wwMaxTemp(const char * value, const int8_t id) {
     uint8_t wwc = device_id() - 0x28;
-    float   v   = 0;
+    float   v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -392,7 +399,7 @@ bool Mixer::set_wwMaxTemp(const char * value, const int8_t id) {
 
 bool Mixer::set_wwDiffTemp(const char * value, const int8_t id) {
     uint8_t wwc = device_id() - 0x28;
-    float   v   = 0;
+    float   v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -402,7 +409,7 @@ bool Mixer::set_wwDiffTemp(const char * value, const int8_t id) {
 
 bool Mixer::set_wwReducedTemp(const char * value, const int8_t id) {
     uint8_t wwc = device_id() - 0x28;
-    float   v   = 0;
+    float   v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -412,7 +419,7 @@ bool Mixer::set_wwReducedTemp(const char * value, const int8_t id) {
 
 bool Mixer::set_wwRequiredTemp(const char * value, const int8_t id) {
     uint8_t wwc = device_id() - 0x28;
-    float   v   = 0;
+    float   v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -421,7 +428,7 @@ bool Mixer::set_wwRequiredTemp(const char * value, const int8_t id) {
 }
 
 bool Mixer::set_wwDisinfectionTemp(const char * value, const int8_t id) {
-    float v = 0;
+    float v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
@@ -435,7 +442,7 @@ bool Mixer::set_wwDisinfectionTemp(const char * value, const int8_t id) {
 }
 
 bool Mixer::set_wwCircPump(const char * value, const int8_t id) {
-    bool v = false;
+    bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }

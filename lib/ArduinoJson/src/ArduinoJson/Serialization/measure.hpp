@@ -5,14 +5,15 @@
 #pragma once
 
 #include <ArduinoJson/Serialization/Writers/DummyWriter.hpp>
+#include <ArduinoJson/Variant/VariantFunctions.hpp>
 
 namespace ARDUINOJSON_NAMESPACE {
 
-template <template <typename> class TSerializer, typename TSource>
-size_t measure(const TSource &source) {
+template <template <typename> class TSerializer>
+size_t measure(JsonVariantConst source) {
   DummyWriter dp;
   TSerializer<DummyWriter> serializer(dp);
-  return source.accept(serializer);
+  return variantAccept(VariantAttorney::getData(source), serializer);
 }
 
 }  // namespace ARDUINOJSON_NAMESPACE

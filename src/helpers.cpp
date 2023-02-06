@@ -177,10 +177,11 @@ char * Helpers::smallitoa(char * result, const uint16_t value) {
 // for strings only
 char * Helpers::render_boolean(char * result, const bool value, const bool dashboard) {
     uint8_t bool_format_ = dashboard ? EMSESP::system_.bool_dashboard() : EMSESP::system_.bool_format();
+
     if (bool_format_ == BOOL_FORMAT_ONOFF_STR) {
-        strlcpy(result, value ? read_flash_string(F_(on)).c_str() : read_flash_string(F_(off)).c_str(), 5);
+        strlcpy(result, value ? translated_word(FL_(on)) : translated_word(FL_(off)), 12);
     } else if (bool_format_ == BOOL_FORMAT_ONOFF_STR_CAP) {
-        strlcpy(result, value ? read_flash_string(F_(ON)).c_str() : read_flash_string(F_(OFF)).c_str(), 5);
+        strlcpy(result, value ? translated_word(FL_(ON)) : translated_word(FL_(OFF)), 12);
     } else if ((bool_format_ == BOOL_FORMAT_10) || (bool_format_ == BOOL_FORMAT_10_STR)) {
         strlcpy(result, value ? "1" : "0", 2);
     } else {
@@ -243,15 +244,16 @@ char * Helpers::render_value(char * result, uint8_t value, int8_t format, const 
 
 // float: convert float to char
 // format is the precision, 0 to 8
-char * Helpers::render_value(char * result, const float value, const int8_t format) {
+char * Helpers::render_value(char * result, const double value, const int8_t format) {
     if (format > 8) {
         return nullptr;
     }
 
-    uint32_t p[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
+    uint32_t p[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
 
     char * ret   = result;
-    auto   whole = (int32_t)value;
+    double v     = value < 0 ? value - 1.0 / (2 * p[format]) : value + 1.0 / (2 * p[format]);
+    auto   whole = (int32_t)v;
 
     itoa(whole, result, 10);
 
@@ -259,8 +261,13 @@ char * Helpers::render_value(char * result, const float value, const int8_t form
         result++;
     }
 
-    *result++       = '.';
-    int32_t decimal = abs((int32_t)((value - whole) * p[format]));
+    *result++    = '.';
+    auto decimal = abs((int32_t)((v - whole) * p[format]));
+    for (int8_t i = 1; i < format; i++) {
+        if (decimal < p[i]) {
+            *result++ = '0'; // add leading zeros
+        }
+    }
     itoa(decimal, result, 10);
 
     return ret;
@@ -296,7 +303,7 @@ char * Helpers::render_value(char * result, const int32_t value, const int8_t fo
     } else if (format > 0) {
         strlcat(result, itoa(new_value / format, s, 10), sizeof(s));
         strlcat(result, ".", sizeof(s));
-        strlcat(result, itoa(new_value % format, s, 10), sizeof(s));
+        strlcat(result, itoa(((new_value % format) * 10) / format, s, 10), sizeof(s));
     } else {
         strlcat(result, itoa(new_value * format * -1, s, 10), sizeof(s));
     }
@@ -336,9 +343,9 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
     if (!hasValue(value)) {
         return nullptr;
     }
-    result[0]         = '\0';
-    int32_t new_value = fahrenheit ? format ? value * 1.8 + 32 * format * (fahrenheit - 1) : value * 1.8 + 32 * (fahrenheit - 1) : value;
-    char    s[10]     = {0};
+    result[0]          = '\0';
+    uint32_t new_value = fahrenheit ? format ? value * 1.8 + 32 * format * (fahrenheit - 1) : value * 1.8 + 32 * (fahrenheit - 1) : value;
+    char     s[10]     = {0};
 
 #ifndef EMSESP_STANDALONE
     if (!format) {
@@ -346,7 +353,7 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
     } else if (format > 0) {
         strlcpy(result, ltoa(new_value / format, s, 10), sizeof(s));
         strlcat(result, ".", sizeof(s));
-        strlcat(result, ltoa(new_value % format, s, 10), sizeof(s));
+        strlcat(result, itoa(((new_value % format) * 10) / format, s, 10), sizeof(s));
     } else {
         strlcpy(result, ltoa(new_value * format * -1, s, 10), sizeof(s));
     }
@@ -439,17 +446,41 @@ int Helpers::atoint(const char * value) {
 //  The conversion to Fahrenheit is different for absolute temperatures and relative temperatures like hysteresis.
 //  fahrenheit=0 - off, no conversion
 //  fahrenheit=1 - relative, 1.8t
-//  fahrenheit=2 - absolute, 1.8t + 32(fahrenheit-1).
-float Helpers::round2(float value, const int8_t divider, const uint8_t fahrenheit) {
-    float val = (value * 100 + 0.5);
-    if (divider > 0) {
-        val = ((value / divider) * 100 + 0.5);
-    } else if (divider < 0) {
-        val = value * -100 * divider;
+//  fahrenheit=2 - absolute, 1.8t + 32(fahrenheit-1)
+float Helpers::transformNumFloat(float value, const int8_t numeric_operator, const uint8_t fahrenheit) {
+    float val;
+
+    switch (numeric_operator) {
+    case DeviceValueNumOp::DV_NUMOP_DIV2:
+        val = ((value / 2) * 100 + 0.5);
+        break;
+    case DeviceValueNumOp::DV_NUMOP_DIV10:
+        val = ((value / 10) * 100 + 0.5);
+        break;
+    case DeviceValueNumOp::DV_NUMOP_DIV60:
+        val = ((value / 60) * 100 + 0.5);
+        break;
+    case DeviceValueNumOp::DV_NUMOP_DIV100:
+        val = ((value / 100) * 100 + 0.5);
+        break;
+    case DeviceValueNumOp::DV_NUMOP_MUL5:
+        val = value * 100 * 5;
+        break;
+    case DeviceValueNumOp::DV_NUMOP_MUL10:
+        val = value * 100 * 10;
+        break;
+    case DeviceValueNumOp::DV_NUMOP_MUL15:
+        val = value * 100 * 15;
+        break;
+    default:
+        val = (value * 100 + 0.5); // no ops
+        break;
     }
+
     if (value < 0) { // negative rounding
         val = val - 1;
     }
+
     if (fahrenheit) {
         val = val * 1.8 + 3200 * (fahrenheit - 1);
     }
@@ -492,7 +523,7 @@ bool Helpers::hasValue(const uint16_t & value) {
 }
 
 bool Helpers::hasValue(const uint32_t & value) {
-    return (value != EMS_VALUE_ULONG_NOTSET);
+    return (value != EMS_VALUE_ULONG_NOTSET && value != EMS_VALUE_ULLONG_NOTSET);
 }
 
 // checks if we can convert a char string to an int value
@@ -566,14 +597,16 @@ bool Helpers::value2bool(const char * value, bool & value_b) {
         return false;
     }
 
-    std::string bool_str = toLower(value); // convert to lower case
+    std::string bool_str = toLower(value);
 
-    if ((bool_str == read_flash_string(F_(on))) || (bool_str == "1") || (bool_str == "true")) {
+    if ((bool_str == std::string(Helpers::translated_word(FL_(on)))) || (bool_str == toLower(Helpers::translated_word(FL_(ON)))) || (bool_str == "on")
+        || (bool_str == "1") || (bool_str == "true")) {
         value_b = true;
         return true; // is a bool
     }
 
-    if ((bool_str == read_flash_string(F_(off))) || (bool_str == "0") || (bool_str == "false")) {
+    if ((bool_str == std::string(Helpers::translated_word(FL_(off)))) || (bool_str == toLower(Helpers::translated_word(FL_(OFF)))) || (bool_str == "off")
+        || (bool_str == "0") || (bool_str == "false")) {
         value_b = false;
         return true; // is a bool
     }
@@ -582,20 +615,50 @@ bool Helpers::value2bool(const char * value, bool & value_b) {
 }
 
 // checks to see if a string is member of a vector and return the index, also allow true/false for on/off
-bool Helpers::value2enum(const char * value, uint8_t & value_ui, const __FlashStringHelper * const * strs) {
+// this for a list of lists, when using translated strings
+bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * const ** strs) {
     if ((value == nullptr) || (strlen(value) == 0)) {
         return false;
     }
     std::string str = toLower(value);
 
     for (value_ui = 0; strs[value_ui]; value_ui++) {
-        std::string str1 = toLower(read_flash_string(strs[value_ui]));
+        std::string str1 = toLower(std::string(Helpers::translated_word(strs[value_ui])));
+        std::string str2 = toLower((strs[value_ui][0])); // also check for default language
         if ((str1 != "")
-            && ((str1 == read_flash_string(F_(off)) && str == "false") || (str1 == read_flash_string(F_(on)) && str == "true") || (str == str1)
+            && ((str2 == "off" && str == "false") || (str2 == "on" && str == "true") || (str == str1) || (str == str2)
                 || (value[0] == ('0' + value_ui) && value[1] == '\0'))) {
             return true;
         }
     }
+
+    return false;
+}
+
+// finds the string (value) of a list vector (strs)
+// returns true if found, and sets the value_ui to the index, else false
+// also allow true/false for on/off
+bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * const * strs) {
+    if ((value == nullptr) || (strlen(value) == 0)) {
+        return false;
+    }
+    std::string str = toLower(value);
+
+    std::string s_on  = Helpers::translated_word(FL_(on));
+    std::string s_off = Helpers::translated_word(FL_(off));
+
+    // stops when a nullptr is found, which is the end delimeter of a MAKE_PSTR_LIST()
+    // could use count_items() to avoid buffer over-run but this works
+    for (value_ui = 0; strs[value_ui]; value_ui++) {
+        std::string enum_str = toLower((strs[value_ui]));
+
+        if ((enum_str != "")
+            && ((enum_str == "off" && (str == s_off || str == "false")) || (enum_str == "on" && (str == s_on || str == "true")) || (str == enum_str)
+                || (value[0] == ('0' + value_ui) && value[1] == '\0'))) {
+            return true;
+        }
+    }
+
     return false;
 }
 
@@ -606,23 +669,109 @@ std::string Helpers::toLower(std::string const & s) {
     return lc;
 }
 
+std::string Helpers::toLower(const char * s) {
+    return toLower(std::string(s));
+}
+
 std::string Helpers::toUpper(std::string const & s) {
     std::string lc = s;
     std::transform(lc.begin(), lc.end(), lc.begin(), [](unsigned char c) { return std::toupper(c); });
     return lc;
 }
 
+// capitalizes one UTF-8 character in char array
+// works with Latin1 (1 byte), Polish amd some other (2 bytes) characters
+// TODO add special characters that occur in other supported languages
+void Helpers::CharToUpperUTF8(char * c) {
+    switch (*c) {
+    case 0xC3:
+        // grave, acute, circumflex, diaeresis, etc.
+        if ((*(c + 1) >= 0xA0) && (*(c + 1) <= 0xBE)) {
+            *(c + 1) -= 0x20;
+        }
+        break;
+    case 0xC4:
+        switch (*(c + 1)) {
+        case 0x85: //ą (0xC4,0x85) -> Ą (0xC4,0x84)
+        case 0x87: //ć (0xC4,0x87) -> Ć (0xC4,0x86)
+        case 0x99: //ę (0xC4,0x99) -> Ę (0xC4,0x98)
+            *(c + 1) -= 1;
+            break;
+        }
+        break;
+    case 0xC5:
+        switch (*(c + 1)) {
+        case 0x82: //ł (0xC5,0x82) -> Ł (0xC5,0x81)
+        case 0x84: //ń (0xC5,0x84) -> Ń (0xC5,0x83)
+        case 0x9B: //ś (0xC5,0x9B) -> Ś (0xC5,0x9A)
+        case 0xBA: //ź (0xC5,0xBA) -> Ź (0xC5,0xB9)
+        case 0xBC: //ż (0xC5,0xBC) -> Ż (0xC5,0xBB)
+            *(c + 1) -= 1;
+            break;
+        }
+        break;
+    default:
+        *c = toupper(*c); //works on Latin1 letters
+        break;
+    }
+}
+
 // replace char in char string
 void Helpers::replace_char(char * str, char find, char replace) {
+    if (str == nullptr) {
+        return;
+    }
+
     int i = 0;
 
     while (str[i] != '\0') {
-        /*Replace the matched character...*/
+        // Replace the matched character...
         if (str[i] == find)
             str[i] = replace;
 
         i++;
     }
+}
+
+// count number of items in a list
+// the end of a list has a nullptr
+uint8_t Helpers::count_items(const char * const * list) {
+    uint8_t list_size = 0;
+    if (list != nullptr) {
+        while (list[list_size]) {
+            list_size++;
+        }
+    }
+    return list_size;
+}
+
+// count number of items in a list of lists
+// the end of a list has a nullptr
+uint8_t Helpers::count_items(const char * const ** list) {
+    uint8_t list_size = 0;
+    if (list != nullptr) {
+        while (list[list_size]) {
+            list_size++;
+        }
+    }
+    return list_size;
+}
+
+// returns char pointer to translated description or fullname
+// if force_en is true always take the EN non-translated word
+const char * Helpers::translated_word(const char * const * strings, const bool force_en) {
+    uint8_t language_index = EMSESP::system_.language_index();
+    uint8_t index          = 0;
+
+    if (!strings) {
+        return ""; // no translations
+    }
+
+    // see how many translations we have for this entity. if there is no translation for this, revert to EN
+    if (!force_en && (Helpers::count_items(strings) >= language_index + 1 && strlen(strings[language_index]))) {
+        index = language_index;
+    }
+    return strings[index];
 }
 
 } // namespace emsesp

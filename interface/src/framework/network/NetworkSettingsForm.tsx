@@ -1,4 +1,5 @@
 import { FC, useContext, useEffect, useState } from 'react';
+import { useSnackbar } from 'notistack';
 
 import {
   Avatar,
@@ -10,13 +11,15 @@ import {
   ListItemAvatar,
   ListItemSecondaryAction,
   ListItemText,
-  Typography
+  Typography,
+  InputAdornment
 } from '@mui/material';
 
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import LockIcon from '@mui/icons-material/Lock';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
 import {
   BlockFormControlLabel,
@@ -24,11 +27,13 @@ import {
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
-  ValidatedTextField
+  ValidatedTextField,
+  MessageBox
 } from '../../components';
 import { NetworkSettings } from '../../types';
 import * as NetworkApi from '../../api/network';
 import { numberValue, updateValue, useRest } from '../../utils';
+import * as EMSESP from '../../project/api';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
@@ -36,11 +41,18 @@ import { ValidateFieldsError } from 'async-validator';
 import { validate } from '../../validators';
 import { createNetworkSettingsValidator } from '../../validators/network';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+import RestartMonitor from '../system/RestartMonitor';
+
 const WiFiSettingsForm: FC = () => {
+  const { LL } = useI18nContext();
+  const { enqueueSnackbar } = useSnackbar();
+
   const { selectedNetwork, deselectNetwork } = useContext(WiFiConnectionContext);
 
   const [initialized, setInitialized] = useState(false);
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<NetworkSettings>({
+  const [restarting, setRestarting] = useState(false);
+  const { loadData, saving, data, setData, saveData, errorMessage, restartNeeded } = useRest<NetworkSettings>({
     read: NetworkApi.readNetworkSettings,
     update: NetworkApi.updateNetworkSettings
   });
@@ -57,7 +69,9 @@ const WiFiSettingsForm: FC = () => {
           bandwidth20: false,
           tx_power: 20,
           nosleep: false,
-          enableMDNS: true
+          enableMDNS: true,
+          enableCORS: false,
+          CORSOrigin: '*'
         });
       }
       setInitialized(true);
@@ -82,6 +96,15 @@ const WiFiSettingsForm: FC = () => {
         saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
+      }
+    };
+
+    const restart = async () => {
+      try {
+        await EMSESP.restart();
+        setRestarting(true);
+      } catch (error) {
+        enqueueSnackbar(LL.PROBLEM_UPDATING(), { variant: 'error' });
       }
     };
 
@@ -111,7 +134,7 @@ const WiFiSettingsForm: FC = () => {
           <ValidatedTextField
             fieldErrors={fieldErrors}
             name="ssid"
-            label="SSID (leave blank to disable WiFi)"
+            label={'SSID (' + LL.NETWORK_BLANK_SSID() + ')'}
             fullWidth
             variant="outlined"
             value={data.ssid}
@@ -123,7 +146,7 @@ const WiFiSettingsForm: FC = () => {
           <ValidatedPasswordField
             fieldErrors={fieldErrors}
             name="password"
-            label="Password"
+            label={LL.PASSWORD()}
             fullWidth
             variant="outlined"
             value={data.password}
@@ -135,7 +158,10 @@ const WiFiSettingsForm: FC = () => {
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="tx_power"
-          label="WiFi Tx Power (dBm)"
+          label={LL.TX_POWER()}
+          InputProps={{
+            endAdornment: <InputAdornment position="end">dBm</InputAdornment>
+          }}
           fullWidth
           variant="outlined"
           value={numberValue(data.tx_power)}
@@ -146,27 +172,22 @@ const WiFiSettingsForm: FC = () => {
 
         <BlockFormControlLabel
           control={<Checkbox name="nosleep" checked={data.nosleep} onChange={updateFormValue} />}
-          label="Disable WiFi Sleep Mode"
+          label={LL.NETWORK_DISABLE_SLEEP()}
         />
 
         <BlockFormControlLabel
           control={<Checkbox name="bandwidth20" checked={data.bandwidth20} onChange={updateFormValue} />}
-          label="Use Lower WiFi Bandwidth"
-        />
-
-        <BlockFormControlLabel
-          control={<Checkbox name="enableMDNS" checked={data.enableMDNS} onChange={updateFormValue} />}
-          label="Enable mDNS Service"
+          label={LL.NETWORK_LOW_BAND()}
         />
 
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          General
+          {LL.GENERAL_OPTIONS()}
         </Typography>
 
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="hostname"
-          label="Hostname"
+          label={LL.HOSTNAME()}
           fullWidth
           variant="outlined"
           value={data.hostname}
@@ -175,20 +196,42 @@ const WiFiSettingsForm: FC = () => {
         />
 
         <BlockFormControlLabel
+          control={<Checkbox name="enableMDNS" checked={data.enableMDNS} onChange={updateFormValue} />}
+          label={LL.NETWORK_USE_DNS()}
+        />
+
+        <BlockFormControlLabel
+          control={<Checkbox name="enableCORS" checked={data.enableCORS} onChange={updateFormValue} />}
+          label={LL.NETWORK_ENABLE_CORS()}
+        />
+        {data.enableCORS && (
+          <ValidatedTextField
+            fieldErrors={fieldErrors}
+            name="CORSOrigin"
+            label={LL.NETWORK_CORS_ORIGIN()}
+            fullWidth
+            variant="outlined"
+            value={data.CORSOrigin}
+            onChange={updateFormValue}
+            margin="normal"
+          />
+        )}
+
+        <BlockFormControlLabel
           control={<Checkbox name="enableIPv6" checked={data.enableIPv6} onChange={updateFormValue} />}
-          label="Enable IPv6 support"
+          label={LL.NETWORK_ENABLE_IPV6()}
         />
 
         <BlockFormControlLabel
           control={<Checkbox name="static_ip_config" checked={data.static_ip_config} onChange={updateFormValue} />}
-          label="Use Fixed IP address"
+          label={LL.NETWORK_FIXED_IP()}
         />
         {data.static_ip_config && (
           <>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="local_ip"
-              label="Local IP"
+              label={LL.AP_LOCAL_IP()}
               fullWidth
               variant="outlined"
               value={data.local_ip}
@@ -198,7 +241,7 @@ const WiFiSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="gateway_ip"
-              label="Gateway"
+              label={LL.NETWORK_GATEWAY()}
               fullWidth
               variant="outlined"
               value={data.gateway_ip}
@@ -208,7 +251,7 @@ const WiFiSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="subnet_mask"
-              label="Subnet"
+              label={LL.NETWORK_SUBNET()}
               fullWidth
               variant="outlined"
               value={data.subnet_mask}
@@ -218,7 +261,7 @@ const WiFiSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="dns_ip_1"
-              label="DNS IP #1"
+              label="DNS #1"
               fullWidth
               variant="outlined"
               value={data.dns_ip_1}
@@ -228,7 +271,7 @@ const WiFiSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="dns_ip_2"
-              label="DNS IP #2"
+              label="DNS #2"
               fullWidth
               variant="outlined"
               value={data.dns_ip_2}
@@ -237,25 +280,34 @@ const WiFiSettingsForm: FC = () => {
             />
           </>
         )}
-        <ButtonRow>
-          <Button
-            startIcon={<SaveIcon />}
-            disabled={saving}
-            variant="outlined"
-            color="primary"
-            type="submit"
-            onClick={validateAndSubmit}
-          >
-            Save
-          </Button>
-        </ButtonRow>
+        {restartNeeded && (
+          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT()}>
+            <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
+              {LL.RESTART()}
+            </Button>
+          </MessageBox>
+        )}
+        {!restartNeeded && (
+          <ButtonRow>
+            <Button
+              startIcon={<SaveIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={validateAndSubmit}
+            >
+              {LL.SAVE()}
+            </Button>
+          </ButtonRow>
+        )}
       </>
     );
   };
 
   return (
-    <SectionContent title="Network Settings" titleGutter>
-      {content()}
+    <SectionContent title={LL.SETTINGS_OF(LL.NETWORK(1))} titleGutter>
+      {restarting ? <RestartMonitor /> : content()}
     </SectionContent>
   );
 };

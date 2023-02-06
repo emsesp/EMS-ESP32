@@ -49,8 +49,6 @@ import DeviceIcon from './DeviceIcon';
 
 import { IconContext } from 'react-icons';
 
-import { formatDurationMin, pluralize } from '../utils';
-
 import { AuthenticatedContext } from '../contexts/authentication';
 
 import { ButtonRow, ValidatedTextField, SectionContent, MessageBox } from '../components';
@@ -74,12 +72,23 @@ import {
   DeviceEntityMask
 } from './types';
 
+import { useI18nContext } from '../i18n/i18n-react';
+
 const DashboardData: FC = () => {
   const { me } = useContext(AuthenticatedContext);
 
+  const { LL } = useI18nContext();
+
   const { enqueueSnackbar } = useSnackbar();
 
-  const [coreData, setCoreData] = useState<CoreData>({ connected: true, devices: [], active_sensors: 0, analog_enabled: false });
+  const [coreData, setCoreData] = useState<CoreData>({
+    connected: true,
+    devices: [],
+    s_n: '',
+    active_sensors: 0,
+    analog_enabled: false
+  });
+
   const [deviceData, setDeviceData] = useState<DeviceData>({ label: '', data: [] });
   const [sensorData, setSensorData] = useState<SensorData>({ sensors: [], analogs: [] });
   const [deviceValue, setDeviceValue] = useState<DeviceValue>();
@@ -134,7 +143,7 @@ const DashboardData: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 40px 100px repeat(1, minmax(0, 1fr)) 80px 40px;
+        --data-table-library_grid-template-columns: 40px 160px repeat(1, minmax(0, 1fr)) 100px 40px;
       `,
       BaseRow: `
         .td {
@@ -162,7 +171,7 @@ const DashboardData: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 140px 40px;
+        --data-table-library_grid-template-columns: minmax(0, 1fr) 35% 40px;
       `,
       BaseRow: `
         .td {
@@ -319,10 +328,10 @@ const DashboardData: FC = () => {
 
   const handleDownloadCsv = () => {
     const columns = [
-      { accessor: (dv: any) => dv.id.slice(2), name: 'Entity' },
+      { accessor: (dv: any) => dv.id.slice(2), name: LL.ENTITY_NAME() },
       {
         accessor: (dv: any) => (typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v),
-        name: 'Value'
+        name: LL.VALUE(0)
       },
       { accessor: (dv: any) => DeviceValueUOM_s[dv.u], name: 'UoM' }
     ];
@@ -354,10 +363,10 @@ const DashboardData: FC = () => {
   const fetchCoreData = useCallback(async () => {
     try {
       setCoreData((await EMSESP.readCoreData()).data);
-    } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Failed to fetch core data'), { variant: 'error' });
+    } catch (error) {
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     }
-  }, [enqueueSnackbar]);
+  }, [enqueueSnackbar, LL]);
 
   useEffect(() => {
     fetchCoreData();
@@ -375,20 +384,38 @@ const DashboardData: FC = () => {
     const unique_id = parseInt(id);
     try {
       setDeviceData((await EMSESP.readDeviceData({ id: unique_id })).data);
-    } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem fetching device data'), { variant: 'error' });
+    } catch (error) {
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     }
   };
 
   const fetchSensorData = async () => {
     try {
       setSensorData((await EMSESP.readSensorData()).data);
-    } catch (error: unknown) {
-      enqueueSnackbar(extractErrorMessage(error, 'Problem fetching sensor data'), { variant: 'error' });
+    } catch (error) {
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
     }
   };
 
   const isCmdOnly = (dv: DeviceValue) => dv.v === '' && dv.c;
+
+  const formatDurationMin = (duration_min: number) => {
+    const days = Math.trunc((duration_min * 60000) / 86400000);
+    const hours = Math.trunc((duration_min * 60000) / 3600000) % 24;
+    const minutes = Math.trunc((duration_min * 60000) / 60000) % 60;
+
+    let formatted = '';
+    if (days) {
+      formatted += LL.NUM_DAYS({ num: days }) + ' ';
+    }
+    if (hours) {
+      formatted += LL.NUM_HOURS({ num: hours }) + ' ';
+    }
+    if (minutes) {
+      formatted += LL.NUM_MINUTES({ num: minutes });
+    }
+    return formatted;
+  };
 
   function formatValue(value: any, uom: number) {
     if (value === undefined) {
@@ -396,9 +423,11 @@ const DashboardData: FC = () => {
     }
     switch (uom) {
       case DeviceValueUOM.HOURS:
-        return value ? formatDurationMin(value * 60) : '0 hours';
+        return value ? formatDurationMin(value * 60) : LL.NUM_HOURS({ num: 0 });
       case DeviceValueUOM.MINUTES:
-        return value ? formatDurationMin(value) : '0 minutes';
+        return value ? formatDurationMin(value) : LL.NUM_MINUTES({ num: 0 });
+      case DeviceValueUOM.SECONDS:
+        return LL.NUM_SECONDS({ num: value });
       case DeviceValueUOM.NONE:
         if (typeof value === 'number') {
           return new Intl.NumberFormat().format(value);
@@ -414,12 +443,23 @@ const DashboardData: FC = () => {
           ' ' +
           DeviceValueUOM_s[uom]
         );
-      case DeviceValueUOM.SECONDS:
-        return pluralize(value, DeviceValueUOM_s[uom]);
       default:
         return new Intl.NumberFormat().format(value) + ' ' + DeviceValueUOM_s[uom];
     }
   }
+
+  const setUom = (uom: number) => {
+    switch (uom) {
+      case DeviceValueUOM.HOURS:
+        return LL.HOURS();
+      case DeviceValueUOM.MINUTES:
+        return LL.MINUTES();
+      case DeviceValueUOM.SECONDS:
+        return LL.SECONDS();
+      default:
+        return DeviceValueUOM_s[uom];
+    }
+  };
 
   const sendDeviceValue = async () => {
     if (deviceValue) {
@@ -429,15 +469,15 @@ const DashboardData: FC = () => {
           devicevalue: deviceValue
         });
         if (response.status === 204) {
-          enqueueSnackbar('Write command failed', { variant: 'error' });
+          enqueueSnackbar(LL.WRITE_CMD_FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
-          enqueueSnackbar('Write access denied', { variant: 'error' });
+          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar('Write command sent', { variant: 'success' });
+          enqueueSnackbar(LL.WRITE_CMD_SENT(), { variant: 'success' });
         }
         setDeviceValue(undefined);
-      } catch (error: unknown) {
-        enqueueSnackbar(extractErrorMessage(error, 'Problem writing value'), { variant: 'error' });
+      } catch (error) {
+        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       } finally {
         refreshData();
         setDeviceValue(undefined);
@@ -449,7 +489,7 @@ const DashboardData: FC = () => {
     if (deviceValue) {
       return (
         <Dialog open={deviceValue !== undefined} onClose={() => setDeviceValue(undefined)}>
-          <DialogTitle>{isCmdOnly(deviceValue) ? 'Run Command' : 'Change Value'}</DialogTitle>
+          <DialogTitle>{isCmdOnly(deviceValue) ? LL.RUN_COMMAND() : LL.CHANGE_VALUE()}</DialogTitle>
           <DialogContent dividers>
             {deviceValue.l && (
               <ValidatedTextField
@@ -470,7 +510,7 @@ const DashboardData: FC = () => {
               <ValidatedTextField
                 name="v"
                 label={deviceValue.id.slice(2)}
-                value={deviceValue.u ? numberValue(deviceValue.v) : deviceValue.v}
+                value={typeof deviceValue.v === 'number' ? Math.round(deviceValue.v * 10) / 10 : deviceValue.v}
                 autoFocus
                 multiline={deviceValue.u ? false : true}
                 sx={{ width: '30ch' }}
@@ -478,7 +518,7 @@ const DashboardData: FC = () => {
                 onChange={updateValue(setDeviceValue)}
                 inputProps={deviceValue.u ? { min: deviceValue.m, max: deviceValue.x, step: deviceValue.s } : {}}
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">{DeviceValueUOM_s[deviceValue.u]}</InputAdornment>
+                  startAdornment: <InputAdornment position="start">{setUom(deviceValue.u)}</InputAdornment>
                 }}
               />
             )}
@@ -491,7 +531,7 @@ const DashboardData: FC = () => {
               onClick={() => setDeviceValue(undefined)}
               color="secondary"
             >
-              Cancel
+              {LL.CANCEL()}
             </Button>
             <Button
               startIcon={<SendIcon />}
@@ -500,7 +540,7 @@ const DashboardData: FC = () => {
               onClick={() => sendDeviceValue()}
               color="warning"
             >
-              Send
+              {LL.SEND()}
             </Button>
           </DialogActions>
         </Dialog>
@@ -521,15 +561,15 @@ const DashboardData: FC = () => {
           offset: sensor.o
         });
         if (response.status === 204) {
-          enqueueSnackbar('Sensor change failed', { variant: 'error' });
+          enqueueSnackbar(LL.UPLOAD_OF(LL.SENSOR()) + ' ' + LL.FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
-          enqueueSnackbar('Access denied', { variant: 'error' });
+          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar('Sensor updated', { variant: 'success' });
+          enqueueSnackbar(LL.UPDATED_OF(LL.SENSOR()), { variant: 'success' });
         }
         setSensor(undefined);
-      } catch (error: unknown) {
-        enqueueSnackbar(extractErrorMessage(error, 'Problem updating sensor'), { variant: 'error' });
+      } catch (error) {
+        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       } finally {
         setSensor(undefined);
         fetchSensorData();
@@ -541,16 +581,20 @@ const DashboardData: FC = () => {
     if (sensor) {
       return (
         <Dialog open={sensor !== undefined} onClose={() => setSensor(undefined)}>
-          <DialogTitle>Edit Temperature Sensor</DialogTitle>
+          <DialogTitle>
+            {LL.EDIT()} {LL.TEMP_SENSOR()}
+          </DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
-              <Typography variant="body2">Sensor ID {sensor.id}</Typography>
+              <Typography variant="body2">
+                {LL.ID_OF(LL.SENSOR())}: {sensor.id}
+              </Typography>
             </Box>
             <Grid container spacing={1}>
               <Grid item>
                 <ValidatedTextField
                   name="n"
-                  label="Name"
+                  label={LL.ENTITY_NAME()}
                   value={sensor.n}
                   autoFocus
                   sx={{ width: '30ch' }}
@@ -560,7 +604,7 @@ const DashboardData: FC = () => {
               <Grid item>
                 <ValidatedTextField
                   name="o"
-                  label="Offset"
+                  label={LL.OFFSET()}
                   value={numberValue(sensor.o)}
                   sx={{ width: '12ch' }}
                   type="number"
@@ -581,7 +625,7 @@ const DashboardData: FC = () => {
               onClick={() => setSensor(undefined)}
               color="secondary"
             >
-              Cancel
+              {LL.CANCEL()}
             </Button>
             <Button
               startIcon={<SaveIcon />}
@@ -590,7 +634,7 @@ const DashboardData: FC = () => {
               onClick={() => sendSensor()}
               color="warning"
             >
-              Save
+              {LL.SAVE()}
             </Button>
           </DialogActions>
         </Dialog>
@@ -602,35 +646,35 @@ const DashboardData: FC = () => {
     if (coreData && coreData.devices.length > 0 && deviceDialog !== -1) {
       return (
         <Dialog open={deviceDialog !== -1} onClose={() => setDeviceDialog(-1)}>
-          <DialogTitle>Device Details</DialogTitle>
+          <DialogTitle>{LL.DEVICE_DETAILS()}</DialogTitle>
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
-                <ListItemText primary="Type" secondary={coreData.devices[deviceDialog].t} />
+                <ListItemText primary={LL.TYPE()} secondary={coreData.devices[deviceDialog].t} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Name" secondary={coreData.devices[deviceDialog].n} />
+                <ListItemText primary={LL.NAME(0)} secondary={coreData.devices[deviceDialog].n} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Brand" secondary={coreData.devices[deviceDialog].b} />
+                <ListItemText primary={LL.BRAND()} secondary={coreData.devices[deviceDialog].b} />
               </ListItem>
               <ListItem>
                 <ListItemText
-                  primary="Device ID"
+                  primary={LL.ID_OF(LL.DEVICE())}
                   secondary={'0x' + ('00' + coreData.devices[deviceDialog].d.toString(16).toUpperCase()).slice(-2)}
                 />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Product ID" secondary={coreData.devices[deviceDialog].p} />
+                <ListItemText primary={LL.ID_OF(LL.PRODUCT())} secondary={coreData.devices[deviceDialog].p} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Version" secondary={coreData.devices[deviceDialog].v} />
+                <ListItemText primary={LL.VERSION()} secondary={coreData.devices[deviceDialog].v} />
               </ListItem>
             </List>
           </DialogContent>
           <DialogActions>
             <Button variant="outlined" onClick={() => setDeviceDialog(-1)} color="secondary">
-              Close
+              {LL.CLOSE()}
             </Button>
           </DialogActions>
         </Dialog>
@@ -640,17 +684,20 @@ const DashboardData: FC = () => {
 
   const renderCoreData = () => (
     <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
-      {!coreData.connected && <MessageBox my={2} level="error" message="EMSbus disconnected, check settings and board profile" />}
-      {coreData.connected && coreData.devices.length === 0 && <MessageBox my={2} level="warning" message="Scanning for EMS devices..." />}
+      {!coreData.connected && <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />}
+      {coreData.connected && coreData.devices.length === 0 && (
+        <MessageBox my={2} level="warning" message={LL.EMS_BUS_SCANNING()} />
+      )}
+
       <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
         {(tableList: any) => (
           <>
             <Header>
               <HeaderRow>
                 <HeaderCell stiff />
-                <HeaderCell stiff>TYPE</HeaderCell>
-                <HeaderCell resize>DESCRIPTION</HeaderCell>
-                <HeaderCell stiff>ENTITIES</HeaderCell>
+                <HeaderCell stiff>{LL.TYPE()}</HeaderCell>
+                <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
+                <HeaderCell stiff>{LL.ENTITIES()}</HeaderCell>
                 <HeaderCell stiff />
               </HeaderRow>
             </Header>
@@ -658,9 +705,9 @@ const DashboardData: FC = () => {
               {tableList.map((device: Device, index: number) => (
                 <Row key={device.id} item={device}>
                   <Cell stiff>
-                    <DeviceIcon type={device.t} />
+                    <DeviceIcon type_id={device.t} />
                   </Cell>
-                  <Cell stiff>{device.t}</Cell>
+                  <Cell stiff>{device.tn}</Cell>
                   <Cell>{device.n}</Cell>
                   <Cell stiff>{device.e}</Cell>
                   <Cell stiff>
@@ -673,10 +720,10 @@ const DashboardData: FC = () => {
               {(coreData.active_sensors > 0 || coreData.analog_enabled) && (
                 <Row key="sensor" item={{ id: 'sensor' }}>
                   <Cell>
-                    <DeviceIcon type="Sensor" />
+                    <DeviceIcon type_id={1} />
                   </Cell>
-                  <Cell>Sensors</Cell>
-                  <Cell>Attached EMS-ESP Sensors</Cell>
+                  <Cell>{coreData.s_n}</Cell>
+                  <Cell>{LL.ATTACHED_SENSORS()}</Cell>
                   <Cell>{coreData.active_sensors}</Cell>
                   <Cell>
                     <IconButton size="small" onClick={() => addAnalogSensor()}>
@@ -723,7 +770,7 @@ const DashboardData: FC = () => {
           control={<Checkbox size="small" name="onlyFav" checked={onlyFav} onChange={() => setOnlyFav(!onlyFav)} />}
           label={
             <span style={{ fontSize: '12px' }}>
-              only show favorites&nbsp;
+              {LL.SHOW_FAV()}&nbsp;
               <StarIcon color="primary" sx={{ fontSize: 12 }} />
             </span>
           }
@@ -749,7 +796,7 @@ const DashboardData: FC = () => {
                       endIcon={getSortIcon(dv_sort.state, 'NAME')}
                       onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'NAME' })}
                     >
-                      ENTITY NAME
+                      {LL.ENTITY_NAME()}
                     </Button>
                   </HeaderCell>
                   <HeaderCell resize>
@@ -759,7 +806,7 @@ const DashboardData: FC = () => {
                       endIcon={getSortIcon(dv_sort.state, 'VALUE')}
                       onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
                     >
-                      VALUE
+                      {LL.VALUE(0)}
                     </Button>
                   </HeaderCell>
                   <HeaderCell stiff />
@@ -806,7 +853,7 @@ const DashboardData: FC = () => {
   const renderDallasData = () => (
     <>
       <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="secondary">
-        Temperature Sensors
+        {LL.TEMP_SENSORS()}
       </Typography>
       <Table
         data={{ nodes: sensorData.sensors }}
@@ -825,7 +872,7 @@ const DashboardData: FC = () => {
                     endIcon={getSortIcon(sensor_sort.state, 'NAME')}
                     onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'NAME' })}
                   >
-                    NAME
+                    {LL.ENTITY_NAME()}
                   </Button>
                 </HeaderCell>
                 <HeaderCell stiff>
@@ -835,7 +882,7 @@ const DashboardData: FC = () => {
                     endIcon={getSortIcon(sensor_sort.state, 'TEMPERATURE')}
                     onClick={() => sensor_sort.fns.onToggleSort({ sortKey: 'TEMPERATURE' })}
                   >
-                    TEMPERATURE
+                    {LL.VALUE(0)}
                   </Button>
                 </HeaderCell>
                 <HeaderCell stiff />
@@ -865,7 +912,7 @@ const DashboardData: FC = () => {
   const renderAnalogData = () => (
     <>
       <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="secondary">
-        Analog Sensors
+        {LL.ANALOG_SENSORS()}
       </Typography>
 
       <Table data={{ nodes: sensorData.analogs }} theme={analog_theme} sort={analog_sort} layout={{ custom: true }}>
@@ -890,7 +937,7 @@ const DashboardData: FC = () => {
                     endIcon={getSortIcon(analog_sort.state, 'NAME')}
                     onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'NAME' })}
                   >
-                    NAME
+                    {LL.ENTITY_NAME()}
                   </Button>
                 </HeaderCell>
                 <HeaderCell stiff>
@@ -900,10 +947,10 @@ const DashboardData: FC = () => {
                     endIcon={getSortIcon(analog_sort.state, 'TYPE')}
                     onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'TYPE' })}
                   >
-                    TYPE
+                    {LL.TYPE()}
                   </Button>
                 </HeaderCell>
-                <HeaderCell stiff>VALUE</HeaderCell>
+                <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
                 <HeaderCell stiff />
               </HeaderRow>
             </Header>
@@ -943,14 +990,14 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar('Analog deletion failed', { variant: 'error' });
+          enqueueSnackbar(LL.DELETION_OF(LL.ANALOG_SENSOR()) + ' ' + LL.FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
-          enqueueSnackbar('Access denied', { variant: 'error' });
+          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar('Analog sensor removed', { variant: 'success' });
+          enqueueSnackbar(LL.REMOVED_OF(LL.ANALOG_SENSOR()), { variant: 'success' });
         }
-      } catch (error: unknown) {
-        enqueueSnackbar(extractErrorMessage(error, 'Problem updating analog sensor'), { variant: 'error' });
+      } catch (error) {
+        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       } finally {
         setAnalog(undefined);
         fetchSensorData();
@@ -971,14 +1018,14 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar('Analog sensor update failed', { variant: 'error' });
+          enqueueSnackbar(LL.UPDATE_OF(LL.ANALOG_SENSOR()) + ' ' + LL.FAILED(), { variant: 'error' });
         } else if (response.status === 403) {
-          enqueueSnackbar('Access denied', { variant: 'error' });
+          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
         } else {
-          enqueueSnackbar('Analog sensor updated', { variant: 'success' });
+          enqueueSnackbar(LL.UPDATED_OF(LL.ANALOG_SENSOR()), { variant: 'success' });
         }
-      } catch (error: unknown) {
-        enqueueSnackbar(extractErrorMessage(error, 'Problem updating analog'), { variant: 'error' });
+      } catch (error) {
+        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       } finally {
         setAnalog(undefined);
         fetchSensorData();
@@ -990,32 +1037,42 @@ const DashboardData: FC = () => {
     if (analog) {
       return (
         <Dialog open={analog !== undefined} onClose={() => setAnalog(undefined)}>
-          <DialogTitle>Edit Analog Sensor</DialogTitle>
+          <DialogTitle>
+            {LL.EDIT()} {LL.ANALOG_SENSOR()}
+          </DialogTitle>
           <DialogContent dividers>
             <Grid container spacing={2}>
-              <Grid item>
+              <Grid item xs={12}>
+                <ValidatedTextField
+                  name="n"
+                  label={LL.ENTITY_NAME()}
+                  value={analog.n}
+                  fullWidth
+                  variant="outlined"
+                  onChange={updateValue(setAnalog)}
+                />
+              </Grid>
+              <Grid item xs={4}>
                 <ValidatedTextField
                   name="g"
                   label="GPIO"
                   value={analog.g}
+                  fullWidth
                   type="number"
                   variant="outlined"
                   autoFocus
                   onChange={updateValue(setAnalog)}
                 />
               </Grid>
-              <Grid item>
+              <Grid item xs={8}>
                 <ValidatedTextField
-                  name="n"
-                  label="Name"
-                  value={analog.n}
-                  sx={{ width: '20ch' }}
-                  variant="outlined"
+                  name="t"
+                  label={LL.TYPE()}
+                  value={analog.t}
+                  fullWidth
+                  select
                   onChange={updateValue(setAnalog)}
-                />
-              </Grid>
-              <Grid item>
-                <ValidatedTextField name="t" label="Type" value={analog.t} select onChange={updateValue(setAnalog)}>
+                >
                   {AnalogTypeNames.map((val, i) => (
                     <MenuItem key={i} value={i}>
                       {val}
@@ -1025,8 +1082,15 @@ const DashboardData: FC = () => {
               </Grid>
               {analog.t >= AnalogType.COUNTER && analog.t <= AnalogType.RATE && (
                 <>
-                  <Grid item>
-                    <ValidatedTextField name="u" label="UoM" value={analog.u} select onChange={updateValue(setAnalog)}>
+                  <Grid item xs={4}>
+                    <ValidatedTextField
+                      name="u"
+                      label={LL.UNIT()}
+                      value={analog.u}
+                      fullWidth
+                      select
+                      onChange={updateValue(setAnalog)}
+                    >
                       {DeviceValueUOM_s.map((val, i) => (
                         <MenuItem key={i} value={i}>
                           {val}
@@ -1035,12 +1099,12 @@ const DashboardData: FC = () => {
                     </ValidatedTextField>
                   </Grid>
                   {analog.t === AnalogType.ADC && (
-                    <Grid item>
+                    <Grid item xs={4}>
                       <ValidatedTextField
                         name="o"
-                        label="Offset"
+                        label={LL.OFFSET()}
                         value={numberValue(analog.o)}
-                        sx={{ width: '20ch' }}
+                        fullWidth
                         type="number"
                         variant="outlined"
                         onChange={updateValue(setAnalog)}
@@ -1052,41 +1116,41 @@ const DashboardData: FC = () => {
                     </Grid>
                   )}
                   {analog.t === AnalogType.COUNTER && (
-                    <Grid item>
+                    <Grid item xs={4}>
                       <ValidatedTextField
                         name="o"
-                        label="Start Value"
+                        label={LL.STARTVALUE()}
                         value={numberValue(analog.o)}
-                        sx={{ width: '20ch' }}
+                        fullWidth
                         type="number"
                         variant="outlined"
                         onChange={updateValue(setAnalog)}
-                        inputProps={{ min: '0', step: '1' }}
+                        inputProps={{ step: '0.001' }}
                       />
                     </Grid>
                   )}
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="f"
-                      label="Factor"
+                      label={LL.FACTOR()}
                       value={numberValue(analog.f)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
-                      inputProps={{ min: '-100', max: '100', step: '0.1' }}
+                      inputProps={{ step: '0.001' }}
                     />
                   </Grid>
                 </>
               )}
-              {analog.t === AnalogType.DIGITAL_OUT && (analog.id === '25' || analog.id === '26') && (
+              {analog.t === AnalogType.DIGITAL_OUT && (analog.g === 25 || analog.g === 26) && (
                 <>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="o"
-                      label="DAC Value"
+                      label={LL.VALUE(0)}
                       value={numberValue(analog.o)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
@@ -1095,14 +1159,14 @@ const DashboardData: FC = () => {
                   </Grid>
                 </>
               )}
-              {analog.t === AnalogType.DIGITAL_OUT && analog.id !== '25' && analog.id !== '26' && (
+              {analog.t === AnalogType.DIGITAL_OUT && analog.g !== 25 && analog.g !== 26 && (
                 <>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="o"
-                      label="Value"
+                      label={LL.VALUE(0)}
                       value={numberValue(analog.o)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
@@ -1113,12 +1177,12 @@ const DashboardData: FC = () => {
               )}
               {analog.t >= AnalogType.PWM_0 && (
                 <>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="f"
-                      label="Frequency"
+                      label={LL.FREQ()}
                       value={numberValue(analog.f)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
@@ -1128,12 +1192,12 @@ const DashboardData: FC = () => {
                       }}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="o"
-                      label="Dutycycle"
+                      label={LL.DUTY_CYCLE()}
                       value={numberValue(analog.o)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
@@ -1147,13 +1211,13 @@ const DashboardData: FC = () => {
               )}
             </Grid>
             <Box color="warning.main" mt={2}>
-              <Typography variant="body2">Warning: be careful when assigning a GPIO!</Typography>
+              <Typography variant="body2">{LL.WARN_GPIO()}</Typography>
             </Box>
           </DialogContent>
           <DialogActions>
             <Box flexGrow={1} sx={{ '& button': { mt: 0 } }}>
               <Button startIcon={<RemoveIcon />} variant="outlined" color="error" onClick={() => sendRemoveAnalog()}>
-                Remove
+                {LL.REMOVE()}
               </Button>
             </Box>
             <Button
@@ -1162,7 +1226,7 @@ const DashboardData: FC = () => {
               onClick={() => setAnalog(undefined)}
               color="secondary"
             >
-              Cancel
+              {LL.CANCEL()}
             </Button>
             <Button
               startIcon={<SaveIcon />}
@@ -1171,7 +1235,7 @@ const DashboardData: FC = () => {
               onClick={() => sendAnalog()}
               color="warning"
             >
-              Save
+              {LL.SAVE()}
             </Button>
           </DialogActions>
         </Dialog>
@@ -1180,7 +1244,7 @@ const DashboardData: FC = () => {
   };
 
   return (
-    <SectionContent title="Device and Sensor Data" titleGutter>
+    <SectionContent title={LL.DEVICE_SENSOR_DATA()} titleGutter>
       {renderCoreData()}
       {renderDeviceData()}
       {renderDeviceDialog()}
@@ -1191,11 +1255,11 @@ const DashboardData: FC = () => {
       {renderAnalogDialog()}
       <ButtonRow>
         <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
-          Refresh
+          {LL.REFRESH()}
         </Button>
         {device_select.state.id && device_select.state.id !== 'sensor' && (
           <Button startIcon={<DownloadIcon />} variant="outlined" onClick={handleDownloadCsv}>
-            Export
+            {LL.EXPORT()}
           </Button>
         )}
       </ButtonRow>

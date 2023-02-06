@@ -12,6 +12,7 @@ import {
   ValidatedPasswordField,
   ValidatedTextField
 } from '../../components';
+
 import { OTASettings } from '../../types';
 import { numberValue, updateValue, useRest } from '../../utils';
 
@@ -19,11 +20,15 @@ import { ValidateFieldsError } from 'async-validator';
 import { validate } from '../../validators';
 import { OTA_SETTINGS_VALIDATOR } from '../../validators/system';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const OTASettingsForm: FC = () => {
   const { loadData, saving, data, setData, saveData, errorMessage } = useRest<OTASettings>({
     read: SystemApi.readOTASettings,
     update: SystemApi.updateOTASettings
   });
+
+  const { LL } = useI18nContext();
 
   const updateFormValue = updateValue(setData);
 
@@ -48,7 +53,7 @@ const OTASettingsForm: FC = () => {
       <>
         <BlockFormControlLabel
           control={<Checkbox name="enabled" checked={data.enabled} onChange={updateFormValue} />}
-          label="Enable OTA Updates"
+          label={LL.ENABLE_OTA()}
         />
         <ValidatedTextField
           fieldErrors={fieldErrors}
@@ -64,7 +69,7 @@ const OTASettingsForm: FC = () => {
         <ValidatedPasswordField
           fieldErrors={fieldErrors}
           name="password"
-          label="Password"
+          label={LL.PASSWORD()}
           fullWidth
           variant="outlined"
           value={data.password}
@@ -80,7 +85,7 @@ const OTASettingsForm: FC = () => {
             type="submit"
             onClick={validateAndSubmit}
           >
-            Save
+            {LL.SAVE()}
           </Button>
         </ButtonRow>
       </>
@@ -88,7 +93,7 @@ const OTASettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title="OTA Settings" titleGutter>
+    <SectionContent title={LL.SETTINGS_OF('OTA')} titleGutter>
       {content()}
     </SectionContent>
   );

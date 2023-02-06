@@ -24,6 +24,9 @@ class FSPersistence {
     }
 
     void readFromFS() {
+        Serial.println();
+        Serial.print("Fake reading file ");
+        Serial.println(_filePath);
         applyDefaults();
     }
 

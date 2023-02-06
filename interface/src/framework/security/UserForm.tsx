@@ -3,6 +3,7 @@ import Schema, { ValidateFieldsError } from 'async-validator';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import SaveIcon from '@mui/icons-material/Save';
 
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
@@ -10,6 +11,8 @@ import { BlockFormControlLabel, ValidatedPasswordField, ValidatedTextField } fro
 import { User } from '../../types';
 import { updateValue } from '../../utils';
 import { validate } from '../../validators';
+
+import { useI18nContext } from '../../i18n/i18n-react';
 
 interface UserFormProps {
   creating: boolean;
@@ -23,6 +26,8 @@ interface UserFormProps {
 }
 
 const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDoneEditing, onCancelEditing }) => {
+  const { LL } = useI18nContext();
+
   const updateFormValue = updateValue(setUser);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
   const open = !!user;
@@ -49,12 +54,14 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
     <Dialog onClose={onCancelEditing} open={!!user} fullWidth maxWidth="sm">
       {user && (
         <>
-          <DialogTitle id="user-form-dialog-title">{creating ? 'Add' : 'Modify'} User</DialogTitle>
+          <DialogTitle id="user-form-dialog-title">
+            {creating ? LL.ADD(1) : LL.MODIFY()}&nbsp;{LL.USER(1)}
+          </DialogTitle>
           <DialogContent dividers>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="username"
-              label="Username"
+              label={LL.USERNAME(1)}
               fullWidth
               variant="outlined"
               value={user.username}
@@ -65,7 +72,7 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
             <ValidatedPasswordField
               fieldErrors={fieldErrors}
               name="password"
-              label="Password"
+              label={LL.PASSWORD()}
               fullWidth
               variant="outlined"
               value={user.password}
@@ -74,21 +81,21 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
             />
             <BlockFormControlLabel
               control={<Checkbox name="admin" checked={user.admin} onChange={updateFormValue} />}
-              label="is Admin?"
+              label={LL.IS_ADMIN(1)}
             />
           </DialogContent>
           <DialogActions>
             <Button startIcon={<CancelIcon />} variant="outlined" onClick={onCancelEditing} color="secondary">
-              Cancel
+              {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<PersonAddIcon />}
+              startIcon={creating ? <PersonAddIcon /> : <SaveIcon />}
               variant="outlined"
               onClick={validateAndDone}
               color="primary"
               autoFocus
             >
-              Add
+              {creating ? LL.ADD(0) : LL.SAVE()}
             </Button>
           </DialogActions>
         </>

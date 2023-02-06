@@ -68,11 +68,10 @@ void   ledcWrite(uint8_t chan, uint32_t duty);
 
 #define PROGMEM
 #define PGM_P const char *
-#define PSTR(s) s
 
 class __FlashStringHelper;
 #define FPSTR(string_literal) (reinterpret_cast<const __FlashStringHelper *>(string_literal))
-#define F(string_literal) (FPSTR(PSTR(string_literal)))
+#define F(string_literal) (FPSTR((string_literal)))
 
 int snprintf_P(char * str, size_t size, const char * format, ...);
 int vsnprintf_P(char * str, size_t size, const char * format, va_list ap);
@@ -97,7 +96,7 @@ class Print {
     virtual size_t write(uint8_t c)                           = 0;
     virtual size_t write(const uint8_t * buffer, size_t size) = 0;
     size_t         print(char c) {
-        return write((uint8_t)c);
+                return write((uint8_t)c);
     }
     size_t print(const char * data) {
         return write(reinterpret_cast<const uint8_t *>(data), strlen(data));

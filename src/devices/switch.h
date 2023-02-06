@@ -25,7 +25,7 @@ namespace emsesp {
 
 class Switch : public EMSdevice {
   public:
-    Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand);
+    Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
 
   private:
     void process_WM10SetMessage(std::shared_ptr<const Telegram> telegram);

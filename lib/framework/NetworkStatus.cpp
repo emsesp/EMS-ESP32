@@ -24,8 +24,23 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
         root["status"] = (uint8_t)wifi_status;
     }
 
-    // for Wifi
-    if (wifi_status == WL_CONNECTED) {
+    // for both connections show ethernet
+    if (ethernet_connected) {
+        // Ethernet
+        root["local_ip"]    = ETH.localIP().toString();
+        root["local_ipv6"]  = ETH.localIPv6().toString();
+        root["mac_address"] = ETH.macAddress();
+        root["subnet_mask"] = ETH.subnetMask().toString();
+        root["gateway_ip"]  = ETH.gatewayIP().toString();
+        IPAddress dnsIP1    = ETH.dnsIP(0);
+        IPAddress dnsIP2    = ETH.dnsIP(1);
+        if (IPUtils::isSet(dnsIP1)) {
+            root["dns_ip_1"] = dnsIP1.toString();
+        }
+        if (IPUtils::isSet(dnsIP2)) {
+            root["dns_ip_2"] = dnsIP2.toString();
+        }
+    } else if (wifi_status == WL_CONNECTED) {
         root["local_ip"]    = WiFi.localIP().toString();
         root["local_ipv6"]  = WiFi.localIPv6().toString();
         root["mac_address"] = WiFi.macAddress();
@@ -45,21 +60,6 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
             root["dns_ip_1"] = dnsIP1.toString();
         }
         if (dnsIP2 != INADDR_NONE) {
-            root["dns_ip_2"] = dnsIP2.toString();
-        }
-    } else if (ethernet_connected) {
-        // Ethernet
-        root["local_ip"]    = ETH.localIP().toString();
-        root["local_ipv6"]  = ETH.localIPv6().toString();
-        root["mac_address"] = ETH.macAddress();
-        root["subnet_mask"] = ETH.subnetMask().toString();
-        root["gateway_ip"]  = ETH.gatewayIP().toString();
-        IPAddress dnsIP1    = ETH.dnsIP(0);
-        IPAddress dnsIP2    = ETH.dnsIP(1);
-        if (IPUtils::isSet(dnsIP1)) {
-            root["dns_ip_1"] = dnsIP1.toString();
-        }
-        if (IPUtils::isSet(dnsIP2)) {
             root["dns_ip_2"] = dnsIP2.toString();
         }
     }

@@ -15,6 +15,8 @@ export interface MqttStatus {
   client_id: string;
   disconnect_reason: MqttDisconnectReason;
   mqtt_fails: number;
+  mqtt_queued: number;
+  connect_count: number;
 }
 
 export interface MqttSettings {
@@ -27,13 +29,14 @@ export interface MqttSettings {
   client_id: string;
   keep_alive: number;
   clean_session: boolean;
-  max_topic_length: number;
+  entity_format: number;
   publish_time_boiler: number;
   publish_time_thermostat: number;
   publish_time_solar: number;
   publish_time_mixer: number;
   publish_time_other: number;
   publish_time_sensor: number;
+  publish_time_heartbeat: number;
   mqtt_qos: number;
   mqtt_retain: boolean;
   ha_enabled: boolean;

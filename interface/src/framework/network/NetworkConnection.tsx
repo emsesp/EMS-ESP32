@@ -11,12 +11,16 @@ import NetworkStatusForm from './NetworkStatusForm';
 import WiFiNetworkScanner from './WiFiNetworkScanner';
 import NetworkSettingsForm from './NetworkSettingsForm';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const NetworkConnection: FC = () => {
-  useLayoutTitle('Network Connection');
+  const { LL } = useI18nContext();
+  useLayoutTitle(LL.NETWORK(0));
+
+  const { routerTab } = useRouterTab();
 
   const authenticatedContext = useContext(AuthenticatedContext);
   const navigate = useNavigate();
-  const { routerTab } = useRouterTab();
 
   const [selectedNetwork, setSelectedNetwork] = useState<WiFiNetwork>();
 
@@ -41,9 +45,9 @@ const NetworkConnection: FC = () => {
       }}
     >
       <RouterTabs value={routerTab}>
-        <Tab value="status" label="Network Status" />
-        <Tab value="scan" label="Scan WiFi Networks" disabled={!authenticatedContext.me.admin} />
-        <Tab value="settings" label="Network Settings" disabled={!authenticatedContext.me.admin} />
+        <Tab value="status" label={LL.STATUS_OF(LL.NETWORK(1))} />
+        <Tab value="scan" label={LL.NETWORK_SCAN()} disabled={!authenticatedContext.me.admin} />
+        <Tab value="settings" label={LL.SETTINGS_OF(LL.NETWORK(1))} disabled={!authenticatedContext.me.admin} />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<NetworkStatusForm />} />

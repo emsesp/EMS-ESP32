@@ -68,13 +68,16 @@ void NetworkSettingsService::manageSTA() {
             } else {
                 esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_STA, WIFI_BW_HT40);
             }
-            esp_wifi_set_max_tx_power(networkSettings.tx_power * 4);
             if (networkSettings.nosleep) {
                 WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
             }
+            WiFi.begin(_state.ssid.c_str(), _state.password.c_str()); // attempt to connect to the network
+            esp_wifi_set_max_tx_power(networkSettings.tx_power * 4);  // set power after wifi is startet for C3
         });
-
-        WiFi.begin(_state.ssid.c_str(), _state.password.c_str()); // attempt to connect to the network
+#ifdef BOARD_C3_MINI_V1
+        // v1 needs this value, see https://github.com/emsesp/EMS-ESP32/pull/620#discussion_r993173979
+        WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
+#endif
     }
 }
 

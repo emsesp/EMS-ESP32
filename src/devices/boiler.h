@@ -25,7 +25,7 @@ namespace emsesp {
 
 class Boiler : public EMSdevice {
   public:
-    Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand);
+    Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
 
   private:
     static uuid::log::Logger logger_;
@@ -64,7 +64,7 @@ class Boiler : public EMSdevice {
     uint8_t  wwChargeOptimization_; // DHW charge optimization
     uint8_t  wwDisinfectionTemp_;   // DHW disinfection temperature to prevent infection
     uint8_t  wwCircMode_;           // DHW circulation pump mode
-    uint8_t  wwCirc_;               // Circulation on/off
+    uint8_t  wwCirc_;               // DHW circulation on/off
     uint16_t wwCurTemp_;            // DHW current temperature
     uint16_t wwCurTemp2_;           // DHW current temperature storage
     uint8_t  wwCurFlow_;            // DHW current flow temp in l/min
@@ -90,6 +90,10 @@ class Boiler : public EMSdevice {
     uint8_t  wwTapActivated_;  // maintenance-mode to switch DHW off
     uint16_t wwMixerTemp_;     // mixing temperature
     uint16_t wwCylMiddleTemp_; // Cyl middle temperature (TS3)
+    uint16_t wwSolarTemp_;
+    uint8_t  wwAlternatingOper_; // alternating operation on/off
+    uint8_t  wwAltOpPrioHeat_;   // alternating operation, prioritise heat time
+    uint8_t  wwAltOpPrioWw_;     // alternating operation, prioritise dhw time
 
     // main
     uint8_t  reset_;            // for reset command
@@ -97,7 +101,7 @@ class Boiler : public EMSdevice {
     uint8_t  tapwaterActive_;   // Hot tap water is on/off
     uint8_t  selFlowTemp_;      // Selected flow temperature
     uint8_t  selBurnPow_;       // Burner max power % (can be > 100%)
-    uint8_t  heatingPump2Mod_;  // heatpump modulation from 0xE3 (heatpumps)
+    uint8_t  absBurnPow_;       // absolute burner power in % of rating plate
     uint8_t  heatingPumpMod_;   // Pump modulation %
     int16_t  outdoorTemp_;      // Outside temperature
     uint16_t curFlowTemp_;      // Current flow temperature
@@ -117,16 +121,20 @@ class Boiler : public EMSdevice {
     uint8_t  heatingTemp_;      // Heating temperature setting on the boiler
     uint8_t  pumpModMax_;       // Boiler circuit pump modulation max. power %
     uint8_t  pumpModMin_;       // Boiler circuit pump modulation min. power
+    uint8_t  pumpMode_;         // pump setting proportional/deltaP
     uint8_t  pumpDelay_;
     uint8_t  burnMinPeriod_;
     uint8_t  burnMinPower_;
     uint8_t  burnMaxPower_;
     int8_t   boilHystOn_;
     int8_t   boilHystOff_;
+    int8_t   boil2HystOn_;
+    int8_t   boil2HystOff_;
     uint8_t  setFlowTemp_;       // boiler setpoint temp
     uint8_t  curBurnPow_;        // Burner current power %
     uint8_t  setBurnPow_;        // max output power in %
     uint32_t burnStarts_;        // burner restarts
+    uint32_t heatStarts_;        // burner starts for heating
     uint32_t burnWorkMin_;       // Total burner operating time
     uint32_t burn2WorkMin_;      // burner stage 2 operating time
     uint32_t heatWorkMin_;       // Total heat operating time
@@ -175,8 +183,6 @@ class Boiler : public EMSdevice {
     uint8_t  hpCircSpd_;
     uint16_t hpBrineIn_;
     uint16_t hpBrineOut_;
-    uint16_t hpSuctionGas_;
-    uint16_t hpHotGas_;
     uint8_t  hpSwitchValve_;
     uint8_t  hpActivity_;
     uint8_t  hpHeatingOn_;
@@ -186,6 +192,7 @@ class Boiler : public EMSdevice {
     int16_t  hpTc0_;
     int16_t  hpTc1_;
     int16_t  hpTc3_;
+    int16_t  hpTr1_;
     int16_t  hpTr3_;
     int16_t  hpTr4_;
     int16_t  hpTr5_;
@@ -198,44 +205,58 @@ class Boiler : public EMSdevice {
     // Pool unit
     int8_t poolSetTemp_;
 
-    // Alternative Heatsource AM200
-    int16_t cylTopTemp_;    // TB1
-    int16_t cylCenterTemp_; // TB2
-    int16_t cylBottomTemp_; // TB3
-    int16_t aFlowTemp_;     // TA1
-    int16_t aRetTemp_;      // TR1
-    uint8_t aPumpMod_;      // PR1 - percent
-    // uint8_t valveByPass_;    // VR2
-    uint8_t valveBuffer_; // VB1
-    uint8_t valveReturn_; // VR1
-    // uint8_t heatSource_;     // OEV
-    // Settings:
-    uint8_t  vr2Config_;     // pos 12: off(00)/Keelbypass(01)/(hc1pump(02) only standalone)
-    uint8_t  ahsActivated_;  // pos 00: Alternate heat source activation: No(00),Yes(01)
-    uint8_t  aPumpConfig_;   // pos 04: Buffer primary pump->Config pump: No(00),Yes(01)
-    uint8_t  aPumpSignal_;   // pos 03: Output for PR1 pump: On/Off(00),PWM(01),PWM invers(02)
-    uint8_t  aPumpMin_;      // pos 21: Min output pump PR1 (%)
-    uint8_t  tempRise_;      // pos 01: AHS return temp rise: No(00),Yes(01) (mixer VR1)
-    uint8_t  setReturnTemp_; // pos 06: Set temp return (°C) (VR1)
-    uint16_t mixRuntime_;    // pos 10/11?: Mixer run time (s) (VR1)
-    // uint8_t  setFlowTemp_;   // pos 07: Set flow temp AHS (°C) (Buffer)
-    uint8_t  bufBypass_;     // pos 02: Puffer bypass: No(00), Mischer(01), Ventil(02) (Buffer)
-    uint16_t bufMixRuntime_; // pos 8/9: Bypass mixer run time: [time] (s) (Buffer)
-    uint8_t  bufConfig_;     // pos 20: Konfig WW-Speicher Monovalent(01), Bivalent(02) (buffer)
-    uint8_t  blockMode_;     // pos 16: Config htg. blocking mode: No(00),Automatic(01),Always block02) (blocking)
-    uint8_t  blockTerm_;     // pos 17: Config of block terminal: NO(00), NC(01)
-    int8_t   blockHyst_;     // pos 14?: Hyst. for bolier block (K)
-    uint8_t  releaseWait_;   // pos 15: Boiler release wait time (min)
+    // Inputs
+    struct {
+        uint8_t state;
+        char    option[12]; // logic, block_comp, block_dhw, block_heat, block_cool, overheat_protect, evu_blocktime1,2,3, block_heater, Solar
+    } hpInput[4];
 
+    // Heater limits
+    uint8_t maxHeatComp_;
+    uint8_t maxHeatHeat_;
+    uint8_t maxHeatDhw_;
 
+    uint8_t  pvCooling_;
+    uint8_t  manDefrost_;
+    uint8_t  auxHeatMode_;
+    uint8_t  auxMaxLimit_;
+    uint8_t  auxLimitStart_;
+    uint8_t  auxHeaterOnly_;
+    uint8_t  auxHeaterOff_;
+    uint8_t  auxHeaterStatus_;
+    uint16_t auxHeaterDelay_;
+    uint8_t  silentMode_;
+    int8_t   minTempSilent_;
+    uint8_t  silentFrom_;
+    uint8_t  silentTo_;
+    int8_t   tempParMode_;
+    int8_t   auxHeatMixValve_;
+    uint16_t hpHystHeat_;
+    uint16_t hpHystCool_;
+    uint16_t hpHystPool_;
+    uint8_t  tempDiffHeat_;
+    uint8_t  tempDiffCool_;
+    uint8_t  hpCircPumpWw_;
 
+    uint8_t wwComfOffTemp_;
+    uint8_t wwEcoOffTemp_;
+    uint8_t wwEcoPlusOffTemp_;
+
+    uint8_t vp_cooling_;
+    uint8_t heatCable_;
+    uint8_t VC0valve_;
+    uint8_t primePump_;
+    uint8_t primePumpMod_;
+    uint8_t hp3wayValve_;
+    uint8_t elHeatStep1_;
+    uint8_t elHeatStep2_;
+    uint8_t elHeatStep3_;
 
     /*
- * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
- * thermostat always overwrites settings in boiler
- * enable settings here if no thermostat is used in system
- *
-// HybridHP
+  // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
+  // thermostat always overwrites settings in boiler
+  //enable settings here if no thermostat is used in system
+  // HybridHP
     uint8_t hybridStrategy_;  // cost = 2, temperature = 3, mix = 4
     int8_t  switchOverTemp_;  // degrees
     uint8_t energyCostRatio_; // is *10
@@ -243,7 +264,7 @@ class Boiler : public EMSdevice {
     uint8_t electricFactor_;  // is * 10
     uint8_t delayBoiler_;     // minutes
     uint8_t tempDiffBoiler_;  // relative temperature degrees
-    */
+  */
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
@@ -271,42 +292,55 @@ class Boiler : public EMSdevice {
     void process_CascadeMessage(std::shared_ptr<const Telegram> telegram);
     void process_UBASettingsWW(std::shared_ptr<const Telegram> telegram);
     void process_HpPower(std::shared_ptr<const Telegram> telegram);
-    void process_HpOutdoor(std::shared_ptr<const Telegram> telegram);
+    void process_HpTemperatures(std::shared_ptr<const Telegram> telegram);
     void process_HpPool(std::shared_ptr<const Telegram> telegram);
+    void process_HpInput(std::shared_ptr<const Telegram> telegram);
+    void process_HpInConfig(std::shared_ptr<const Telegram> telegram);
+    void process_HpCooling(std::shared_ptr<const Telegram> telegram);
+    void process_HpHeaterConfig(std::shared_ptr<const Telegram> telegram);
     void process_HybridHp(std::shared_ptr<const Telegram> telegram);
-    void process_amTempMessage(std::shared_ptr<const Telegram> telegram);
-    void process_amStatusMessage(std::shared_ptr<const Telegram> telegram);
-    void process_amSettingMessage(std::shared_ptr<const Telegram> telegram);
-    void process_amCommandMessage(std::shared_ptr<const Telegram> telegram);
-    void process_amExtraMessage(std::shared_ptr<const Telegram> telegram);
+    void process_HpSilentMode(std::shared_ptr<const Telegram> telegram);
+    void process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram);
+    void process_HpValve(std::shared_ptr<const Telegram> telegram);
+    void process_HpPumps(std::shared_ptr<const Telegram> telegram);
+    void process_HpDhwSettings(std::shared_ptr<const Telegram> telegram);
+    void process_HpSettings2(std::shared_ptr<const Telegram> telegram);
+    void process_HpSettings3(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
-    bool set_ww_mode(const char * value, const int8_t id);
-    bool set_ww_activated(const char * value, const int8_t id);
-    bool set_tapwarmwater_activated(const char * value, const int8_t id);
-    bool set_ww_onetime(const char * value, const int8_t id);
-    bool set_ww_disinfect(const char * value, const int8_t id);
-    bool set_ww_circulation(const char * value, const int8_t id);
-    bool set_ww_circulation_pump(const char * value, const int8_t id);
-    bool set_ww_circulation_mode(const char * value, const int8_t id);
-    bool set_ww_temp(const char * value, const int8_t id);
-    bool set_ww_temp_low(const char * value, const int8_t id);
-    bool set_ww_temp_single(const char * value, const int8_t id);
-    bool set_ww_disinfect_temp(const char * value, const int8_t id);
-    bool set_ww_maxpower(const char * value, const int8_t id);
-    bool set_ww_maxtemp(const char * value, const int8_t id);
-    bool set_ww_flowTempOffset(const char * value, const int8_t id);
-    bool set_ww_chargeOptimization(const char * value, const int8_t id);
-    bool set_flow_temp(const char * value, const int8_t id);
-    bool set_burn_power(const char * value, const int8_t id);
-    bool set_heating_activated(const char * value, const int8_t id);
-    bool set_heating_temp(const char * value, const int8_t id);
-    bool set_min_power(const char * value, const int8_t id);
-    bool set_max_power(const char * value, const int8_t id);
-    bool set_min_pump(const char * value, const int8_t id);
-    bool set_max_pump(const char * value, const int8_t id);
-    bool set_hyst_on(const char * value, const int8_t id);
-    bool set_hyst_off(const char * value, const int8_t id);
+    bool        set_ww_mode(const char * value, const int8_t id);
+    bool        set_ww_activated(const char * value, const int8_t id);
+    bool        set_tapwarmwater_activated(const char * value, const int8_t id);
+    bool        set_ww_onetime(const char * value, const int8_t id);
+    bool        set_ww_disinfect(const char * value, const int8_t id);
+    bool        set_ww_circulation(const char * value, const int8_t id);
+    bool        set_ww_circulation_pump(const char * value, const int8_t id);
+    bool        set_ww_circulation_mode(const char * value, const int8_t id);
+    bool        set_ww_temp(const char * value, const int8_t id);
+    bool        set_ww_temp_low(const char * value, const int8_t id);
+    bool        set_ww_temp_single(const char * value, const int8_t id);
+    bool        set_ww_disinfect_temp(const char * value, const int8_t id);
+    bool        set_ww_maxpower(const char * value, const int8_t id);
+    bool        set_ww_maxtemp(const char * value, const int8_t id);
+    bool        set_ww_flowTempOffset(const char * value, const int8_t id);
+    bool        set_ww_chargeOptimization(const char * value, const int8_t id);
+    bool        set_flow_temp(const char * value, const int8_t id);
+    bool        set_burn_power(const char * value, const int8_t id);
+    bool        set_heating_activated(const char * value, const int8_t id);
+    bool        set_heating_temp(const char * value, const int8_t id);
+    bool        set_min_power(const char * value, const int8_t id);
+    bool        set_max_power(const char * value, const int8_t id);
+    bool        set_min_pump(const char * value, const int8_t id);
+    bool        set_max_pump(const char * value, const int8_t id);
+    bool        set_pumpMode(const char * value, const int8_t id);
+    bool        set_hyst_on(const char * value, const int8_t id);
+    bool        set_hyst_off(const char * value, const int8_t id);
+    inline bool set_hyst2_on(const char * value, const int8_t id) {
+        return set_hyst_on(value, 2);
+    }
+    inline bool set_hyst2_off(const char * value, const int8_t id) {
+        return set_hyst_off(value, 2);
+    }
     bool set_burn_period(const char * value, const int8_t id);
     bool set_pump_delay(const char * value, const int8_t id);
     bool set_reset(const char * value, const int8_t id);
@@ -319,23 +353,100 @@ class Boiler : public EMSdevice {
     bool set_emergency_temp(const char * value, const int8_t id);
     bool set_emergency_ops(const char * value, const int8_t id);
 
-    bool set_vr2Config(const char * value, const int8_t id);     // pos 12: off(00)/Keelbypass(01)/(hc1pump(02) only standalone)
-    bool set_ahsActivated(const char * value, const int8_t id);  // pos 00: Alternate heat source activation: No(00),Yes(01)
-    bool set_aPumpConfig(const char * value, const int8_t id);   // pos 04: Buffer primary pump->Config pump: No(00),Yes(01)
-    bool set_aPumpSignal(const char * value, const int8_t id);   // pos 03: Output for PR1 pump: On/Off(00),PWM(01),PWM invers(02)
-    bool set_aPumpMin(const char * value, const int8_t id);      // pos 21: Min output pump PR1 (%)
-    bool set_tempRise(const char * value, const int8_t id);      // pos 01: AHS return temp rise: No(00),Yes(01) (mixer VR1)
-    bool set_setReturnTemp(const char * value, const int8_t id); // pos 06: Set temp return (°C) (VR1)
-    bool set_mixRuntime(const char * value, const int8_t id);    // pos 10/11?: Mixer run time (s) (VR1)
-    bool set_setFlowTemp(const char * value, const int8_t id);   // pos 07: Set flow temp AHS (°C) (Buffer)
-    bool set_bufBypass(const char * value, const int8_t id);     // pos 02: Puffer bypass: No(00), Mischer(01), Ventil(02) (Buffer)
-    bool set_bufMixRuntime(const char * value, const int8_t id); // pos 8/9: Bypass mixer run time: [time] (s) (Buffer)
-    bool set_bufConfig(const char * value, const int8_t id);     // pos 20: Konfig WW-Speicher Monovalent(01), Bivalent(02) (buffer)
-    bool set_blockMode(const char * value, const int8_t id);     // pos 16: Config htg. blocking mode: No(00),Automatic(01),Always block02) (blocking)
-    bool set_blockTerm(const char * value, const int8_t id);     // pos 17: Config of block terminal: NO(00), NC(01)
-    bool set_blockHyst(const char * value, const int8_t id);     // pos 14?: Hyst. for bolier block (K)
-    bool set_releaseWait(const char * value, const int8_t id);   // pos 15: Boiler release wait time (min)
+    bool        set_HpInLogic(const char * value, const int8_t id);
+    inline bool set_HpIn1Logic(const char * value, const int8_t id) {
+        return set_HpInLogic(value, 1);
+    }
+    inline bool set_HpIn2Logic(const char * value, const int8_t id) {
+        return set_HpInLogic(value, 2);
+    }
+    inline bool set_HpIn3Logic(const char * value, const int8_t id) {
+        return set_HpInLogic(value, 3);
+    }
+    inline bool set_HpIn4Logic(const char * value, const int8_t id) {
+        return set_HpInLogic(value, 4);
+    }
+    bool        set_maxHeat(const char * value, const int8_t id);
+    inline bool set_maxHeatComp(const char * value, const int8_t id) {
+        return set_maxHeat(value, 2);
+    }
+    inline bool set_maxHeatHeat(const char * value, const int8_t id) {
+        return set_maxHeat(value, 3);
+    }
+    inline bool set_maxHeatDhw(const char * value, const int8_t id) {
+        return set_maxHeat(value, 4);
+    }
+    bool set_silentMode(const char * value, const int8_t id);
+    bool set_minTempSilent(const char * value, const int8_t id);
+    bool set_silentFrom(const char * value, const int8_t id);
+    bool set_silentTo(const char * value, const int8_t id);
+    bool set_additionalHeaterOnly(const char * value, const int8_t id);
+    bool set_additionalHeater(const char * value, const int8_t id);
+    bool set_additionalHeaterDelay(const char * value, const int8_t id);
+    bool set_tempParMode(const char * value, const int8_t id);
+    bool set_auxHeatMode(const char * value, const int8_t id);
+    bool set_manDefrost(const char * value, const int8_t id);
+    bool set_pvCooling(const char * value, const int8_t id);
+    bool set_hpCircPumpWw(const char * value, const int8_t id);
 
+    bool        set_auxLimit(const char * value, const int8_t id);
+    inline bool set_auxMaxLimit(const char * value, const int8_t id) {
+        return set_auxLimit(value, 14);
+    }
+    inline bool set_auxLimitStart(const char * value, const int8_t id) {
+        return set_auxLimit(value, 15);
+    }
+    bool        set_hpHyst(const char * value, const int8_t id);
+    inline bool set_hpHystHeat(const char * value, const int8_t id) {
+        return set_hpHyst(value, 37);
+    }
+    inline bool set_hpHystCool(const char * value, const int8_t id) {
+        return set_hpHyst(value, 35);
+    }
+    inline bool set_hpHystPool(const char * value, const int8_t id) {
+        return set_hpHyst(value, 33);
+    }
+    bool        set_tempDiff(const char * value, const int8_t id);
+    inline bool set_tempDiffHeat(const char * value, const int8_t id) {
+        return set_tempDiff(value, 4);
+    }
+    inline bool set_tempDiffCool(const char * value, const int8_t id) {
+        return set_tempDiff(value, 3);
+    }
+    bool        set_wwOffTemp(const char * value, const int8_t id);
+    inline bool set_wwComfOffTemp(const char * value, const int8_t id) {
+        return set_wwOffTemp(value, 1);
+    }
+    inline bool set_wwEcoOffTemp(const char * value, const int8_t id) {
+        return set_wwOffTemp(value, 0);
+    }
+    inline bool set_wwEcoPlusOffTemp(const char * value, const int8_t id) {
+        return set_wwOffTemp(value, 5);
+    }
+    bool        set_vp_cooling(const char * value, const int8_t id);
+    bool        set_heatCable(const char * value, const int8_t id);
+    bool        set_VC0valve(const char * value, const int8_t id);
+    bool        set_primePump(const char * value, const int8_t id);
+    bool        set_primePumpMod(const char * value, const int8_t id);
+    bool        set_hp3wayValve(const char * value, const int8_t id);
+    bool        set_elHeatStep(const char * value, const int8_t id);
+    inline bool set_elHeatStep1(const char * value, const int8_t id) {
+        return set_elHeatStep(value, 1);
+    }
+    inline bool set_elHeatStep2(const char * value, const int8_t id) {
+        return set_elHeatStep(value, 2);
+    }
+    inline bool set_elHeatStep3(const char * value, const int8_t id) {
+        return set_elHeatStep(value, 3);
+    }
+    bool        set_wwAlternatingOper(const char * value, const int8_t id);
+    bool        set_wwAltOpPrio(const char * value, const int8_t id);
+    inline bool set_wwAltOpPrioHeat(const char * value, const int8_t id) {
+        return set_wwAltOpPrio(value, 2);
+    }
+    inline bool set_wwAltOpPrioWw(const char * value, const int8_t id) {
+        return set_wwAltOpPrio(value, 3);
+    }
     /*
     bool set_hybridStrategy(const char * value, const int8_t id);
     bool set_switchOverTemp(const char * value, const int8_t id);

@@ -1,4 +1,5 @@
 export interface Settings {
+  locale: string;
   tx_mode: number;
   ems_bus_id: number;
   syslog_enabled: boolean;
@@ -32,6 +33,7 @@ export interface Settings {
   eth_power: number;
   eth_phy_addr: number;
   eth_clock_mode: number;
+  platform: string;
 }
 
 export enum busConnectionStatus {
@@ -41,7 +43,7 @@ export enum busConnectionStatus {
 }
 
 export interface Stat {
-  id: string; // name
+  id: string; // id - needs to be a string
   s: number; // success
   f: number; // fail
   q: number; // quality
@@ -57,7 +59,8 @@ export interface Status {
 }
 export interface Device {
   id: string; // id index
-  t: string; // type
+  tn: string; // device type translated name
+  t: number; // device type id
   b: string; // brand
   n: string; // name
   d: number; // deviceid
@@ -99,6 +102,7 @@ export interface SensorData {
 export interface CoreData {
   connected: boolean;
   devices: Device[];
+  s_n: string;
   active_sensors: number;
   analog_enabled: boolean;
 }
@@ -108,7 +112,8 @@ export interface DeviceShort {
   d?: number; // deviceid
   p?: number; // productid
   s: string; // shortname
-  t?: string; // device type name
+  t?: number; // device type id
+  tn?: string; // device type internal name
 }
 
 export interface Devices {
@@ -136,12 +141,18 @@ export interface DeviceEntity {
   id: string; // shortname
   v?: any; // value, in any format, optional
   n?: string; // fullname, optional
+  cn?: string; // custom fullname, optional
   m: number; // mask
-  om?: number; // original mask before edits
+  o_m?: number; // original mask before edits
+  o_cn?: string; // original cn before edits
   w: boolean; // writeable
+  mi?: string; // min value
+  ma?: string; // max value
+  o_mi?: string;
+  o_ma?: string;
 }
 
-export interface MaskedEntities {
+export interface CustomEntities {
   id: number;
   entity_ids: string[];
 }
@@ -171,7 +182,9 @@ export enum DeviceValueUOM {
   MV,
   SQM,
   M3,
-  L
+  L,
+  KMIN,
+  K
 }
 
 export const DeviceValueUOM_s = [
@@ -184,18 +197,20 @@ export const DeviceValueUOM_s = [
   'Wh',
   'hours',
   'minutes',
-  'uA',
+  'µA',
   'bar',
   'kW',
   'W',
   'KB',
-  'second',
+  'seconds',
   'dBm',
   '°F',
   'mV',
-  'sqm',
-  'm3',
-  'l'
+  'm²',
+  'm³',
+  'l',
+  'K*min',
+  'K'
 ];
 
 export enum AnalogType {
@@ -235,7 +250,10 @@ export const BOARD_PROFILES: BoardProfiles = {
   'MH-ET': 'MH-ET Live D1 Mini',
   LOLIN: 'Lolin D32',
   OLIMEX: 'Olimex ESP32-EVB',
-  OLIMEXPOE: 'Olimex ESP32-POE'
+  OLIMEXPOE: 'Olimex ESP32-POE',
+  C3MINI: 'Wemos C3 Mini',
+  S2MINI: 'Wemos S2 Mini',
+  S3MINI: 'Liligo S3'
 };
 
 export interface BoardProfileName {
@@ -280,5 +298,6 @@ export enum DeviceEntityMask {
   DV_WEB_EXCLUDE = 1,
   DV_API_MQTT_EXCLUDE = 2,
   DV_READONLY = 4,
-  DV_FAVORITE = 8
+  DV_FAVORITE = 8,
+  DV_DELETED = 128
 }

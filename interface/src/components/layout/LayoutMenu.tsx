@@ -15,9 +15,12 @@ import ProjectMenu from '../../project/ProjectMenu';
 import LayoutMenuItem from './LayoutMenuItem';
 import { AuthenticatedContext } from '../../contexts/authentication';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const LayoutMenu: FC = () => {
   const { features } = useContext(FeaturesContext);
   const authenticatedContext = useContext(AuthenticatedContext);
+  const { LL } = useI18nContext();
 
   return (
     <>
@@ -28,12 +31,17 @@ const LayoutMenu: FC = () => {
         </List>
       )}
       <List disablePadding component="nav">
-        <LayoutMenuItem icon={SettingsEthernetIcon} label="Network Connection" to="/network" />
-        <LayoutMenuItem icon={SettingsInputAntennaIcon} label="Access Point" to="/ap" />
-        {features.ntp && <LayoutMenuItem icon={AccessTimeIcon} label="Network Time" to="/ntp" />}
+        <LayoutMenuItem icon={SettingsEthernetIcon} label={LL.NETWORK(0)} to="/network" />
+        <LayoutMenuItem icon={SettingsInputAntennaIcon} label={LL.ACCESS_POINT(0)} to="/ap" />
+        {features.ntp && <LayoutMenuItem icon={AccessTimeIcon} label="NTP" to="/ntp" />}
         {features.mqtt && <LayoutMenuItem icon={DeviceHubIcon} label="MQTT" to="/mqtt" />}
-        <LayoutMenuItem icon={LockIcon} label="Security" to="/security" disabled={!authenticatedContext.me.admin} />
-        <LayoutMenuItem icon={SettingsIcon} label="System" to="/system" />
+        <LayoutMenuItem
+          icon={LockIcon}
+          label={LL.SECURITY(0)}
+          to="/security"
+          disabled={!authenticatedContext.me.admin}
+        />
+        <LayoutMenuItem icon={SettingsIcon} label={LL.SYSTEM(0)} to="/system" />
       </List>
     </>
   );

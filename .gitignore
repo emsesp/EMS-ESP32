@@ -13,7 +13,6 @@ debug.log
 # platformio
 .pio
 pio_local.ini
-/.VSCodeCounter
 
 # OS specific
 .DS_Store
@@ -31,7 +30,18 @@ test.sh
 scripts/__pycache__
 .temp
 
+# i18n generated files
+interface/src/i18n/i18n-react.tsx
+interface/src/i18n/i18n-types.ts
+interface/src/i18n/i18n-util.ts
+interface/src/i18n/i18n-util.sync.ts
+interface/src/i18n/i18n-util.async.ts
+
 # sonar
 .scannerwork/
 sonar/
 build_wrapper_output_directory/
+
+# other build files
+dump_entities.csv
+dump_entities.xls*

@@ -24,12 +24,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -U platformio
           platformio upgrade
-          platformio update
+          pio pkg update
 
       - name: Build WebUI
         run: |
           cd interface
           npm ci
+          npx typesafe-i18n --no-watch
+          sed -i "s/= 'pl'/= 'en'/" ./src/i18n/i18n-util.ts
           npm run build
 
       - name: Build firmware

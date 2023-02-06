@@ -12,8 +12,12 @@ import OTASettingsForm from './OTASettingsForm';
 
 import SystemLog from './SystemLog';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const System: FC = () => {
-  useLayoutTitle('System');
+  const { LL } = useI18nContext();
+
+  useLayoutTitle(LL.SYSTEM(0));
 
   const { me } = useContext(AuthenticatedContext);
   const { features } = useContext(FeaturesContext);
@@ -22,11 +26,11 @@ const System: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="status" label="System Status" />
-        <Tab value="log" label="System Log" />
+        <Tab value="status" label={LL.STATUS_OF(LL.SYSTEM(1))} />
+        <Tab value="log" label={LL.LOG_OF(LL.SYSTEM(2))} />
 
-        {features.ota && <Tab value="ota" label="OTA Settings" disabled={!me.admin} />}
-        {features.upload_firmware && <Tab value="upload" label="Upload/Download" disabled={!me.admin} />}
+        {features.ota && <Tab value="ota" label={LL.SETTINGS_OF('OTA')} disabled={!me.admin} />}
+        {features.upload_firmware && <Tab value="upload" label={LL.UPLOAD_DOWNLOAD()} disabled={!me.admin} />}
       </RouterTabs>
       <Routes>
         <Route path="status" element={<SystemStatusForm />} />

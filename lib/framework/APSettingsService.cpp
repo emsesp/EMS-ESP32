@@ -49,9 +49,12 @@ void APSettingsService::startAP() {
     WiFi.softAPConfig(_state.localIP, _state.gatewayIP, _state.subnetMask);
     esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_AP, WIFI_BW_HT20);
     WiFi.softAP(_state.ssid.c_str(), _state.password.c_str(), _state.channel, _state.ssidHidden, _state.maxClients);
+#if CONFIG_IDF_TARGET_ESP32C3
+    WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
+#endif
     if (!_dnsServer) {
         IPAddress apIp = WiFi.softAPIP();
-        emsesp::EMSESP::logger().info(F("Starting Access Point with captive portal on %s"), apIp.toString().c_str());
+        emsesp::EMSESP::logger().info("Starting Access Point with captive portal on %s", apIp.toString().c_str());
         _dnsServer = new DNSServer;
         _dnsServer->start(DNS_PORT, "*", apIp);
     }
@@ -59,7 +62,7 @@ void APSettingsService::startAP() {
 
 void APSettingsService::stopAP() {
     if (_dnsServer) {
-        emsesp::EMSESP::logger().info(F("Stopping Access Point"));
+        emsesp::EMSESP::logger().info("Stopping Access Point");
         _dnsServer->stop();
         delete _dnsServer;
         _dnsServer = nullptr;

@@ -5,18 +5,22 @@ import { Tab } from '@mui/material';
 
 import { RouterTabs, useRouterTab, useLayoutTitle } from '../components';
 
+import { useI18nContext } from '../i18n/i18n-react';
+
 import SettingsApplication from './SettingsApplication';
 import SettingsCustomization from './SettingsCustomization';
 
 const Settings: FC = () => {
-  useLayoutTitle('Settings');
+  const { LL } = useI18nContext();
   const { routerTab } = useRouterTab();
+
+  useLayoutTitle(LL.SETTINGS_OF(''));
 
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="application" label="Application Settings" />
-        <Tab value="customization" label="Customization" />
+        <Tab value="application" label={LL.APPLICATION_SETTINGS()} />
+        <Tab value="customization" label={LL.CUSTOMIZATION()} />
       </RouterTabs>
       <Routes>
         <Route path="application" element={<SettingsApplication />} />

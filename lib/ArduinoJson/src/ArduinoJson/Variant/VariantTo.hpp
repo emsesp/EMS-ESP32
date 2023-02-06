@@ -7,26 +7,26 @@
 #include <ArduinoJson/Namespace.hpp>
 
 namespace ARDUINOJSON_NAMESPACE {
-class ArrayRef;
-class ObjectRef;
-class VariantRef;
+class JsonArray;
+class JsonObject;
+class JsonVariant;
 
 // A metafunction that returns the type of the value returned by
-// VariantRef::to<T>()
+// JsonVariant::to<T>()
 template <typename T>
 struct VariantTo {};
 
 template <>
-struct VariantTo<ArrayRef> {
-  typedef ArrayRef type;
+struct VariantTo<JsonArray> {
+  typedef JsonArray type;
 };
 template <>
-struct VariantTo<ObjectRef> {
-  typedef ObjectRef type;
+struct VariantTo<JsonObject> {
+  typedef JsonObject type;
 };
 template <>
-struct VariantTo<VariantRef> {
-  typedef VariantRef type;
+struct VariantTo<JsonVariant> {
+  typedef JsonVariant type;
 };
 
 }  // namespace ARDUINOJSON_NAMESPACE

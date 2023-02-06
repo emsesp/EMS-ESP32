@@ -14,6 +14,8 @@ import { NetworkConnectionStatus, NetworkStatus } from '../../types';
 import * as NetworkApi from '../../api/network';
 import { useRest } from '../../utils';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const isConnected = ({ status }: NetworkStatus) =>
   status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED ||
   status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED;
@@ -35,29 +37,6 @@ const networkStatusHighlight = ({ status }: NetworkStatus, theme: Theme) => {
   }
 };
 
-const networkStatus = ({ status }: NetworkStatus) => {
-  switch (status) {
-    case NetworkConnectionStatus.WIFI_STATUS_NO_SHIELD:
-      return 'Inactive';
-    case NetworkConnectionStatus.WIFI_STATUS_IDLE:
-      return 'Idle';
-    case NetworkConnectionStatus.WIFI_STATUS_NO_SSID_AVAIL:
-      return 'No SSID Available';
-    case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
-      return 'Connected (WiFi)';
-    case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
-      return 'Connected (Ethernet)';
-    case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
-      return 'Connection Failed';
-    case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
-      return 'Connection Lost';
-    case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
-      return 'Disconnected';
-    default:
-      return 'Unknown';
-  }
-};
-
 export const isWiFi = ({ status }: NetworkStatus) => status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED;
 export const isEthernet = ({ status }: NetworkStatus) => status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED;
 
@@ -65,7 +44,7 @@ const dnsServers = ({ dns_ip_1, dns_ip_2 }: NetworkStatus) => {
   if (!dns_ip_1) {
     return 'none';
   }
-  return dns_ip_1 + (dns_ip_2 === '0.0.0.0' ? '' : ',' + dns_ip_2);
+  return dns_ip_1 + (!dns_ip_2 || dns_ip_2 === '0.0.0.0' ? '' : ',' + dns_ip_2);
 };
 
 const IPs = (status: NetworkStatus) => {
@@ -81,7 +60,32 @@ const IPs = (status: NetworkStatus) => {
 const NetworkStatusForm: FC = () => {
   const { loadData, data, errorMessage } = useRest<NetworkStatus>({ read: NetworkApi.readNetworkStatus });
 
+  const { LL } = useI18nContext();
+
   const theme = useTheme();
+
+  const networkStatus = ({ status }: NetworkStatus) => {
+    switch (status) {
+      case NetworkConnectionStatus.WIFI_STATUS_NO_SHIELD:
+        return LL.INACTIVE(1);
+      case NetworkConnectionStatus.WIFI_STATUS_IDLE:
+        return LL.IDLE();
+      case NetworkConnectionStatus.WIFI_STATUS_NO_SSID_AVAIL:
+        return 'No SSID Available';
+      case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
+        return LL.CONNECTED(0) + ' (WiFi)';
+      case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
+        return LL.CONNECTED(0) + ' (Ethernet)';
+      case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
+        return LL.CONNECTED(1) + ' ' + LL.FAILED();
+      case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
+        return LL.CONNECTED(1) + ' ' + LL.LOST();
+      case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
+        return LL.DISCONNECTED();
+      default:
+        return LL.UNKNOWN();
+    }
+  };
 
   const content = () => {
     if (!data) {
@@ -120,7 +124,7 @@ const NetworkStatusForm: FC = () => {
                 <ListItemAvatar>
                   <Avatar>IP</Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="IP Address" secondary={IPs(data)} />
+                <ListItemText primary={LL.ADDRESS_OF('IP')} secondary={IPs(data)} />
               </ListItem>
               <Divider variant="inset" component="li" />
               <ListItem>
@@ -129,14 +133,14 @@ const NetworkStatusForm: FC = () => {
                     <DeviceHubIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="MAC Address" secondary={data.mac_address} />
+                <ListItemText primary={LL.ADDRESS_OF('MAC')} secondary={data.mac_address} />
               </ListItem>
               <Divider variant="inset" component="li" />
               <ListItem>
                 <ListItemAvatar>
                   <Avatar>#</Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="Subnet Mask" secondary={data.subnet_mask} />
+                <ListItemText primary={LL.NETWORK_SUBNET()} secondary={data.subnet_mask} />
               </ListItem>
               <Divider variant="inset" component="li" />
               <ListItem>
@@ -145,7 +149,7 @@ const NetworkStatusForm: FC = () => {
                     <SettingsInputComponentIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="Gateway IP" secondary={data.gateway_ip || 'none'} />
+                <ListItemText primary={LL.NETWORK_GATEWAY()} secondary={data.gateway_ip || 'none'} />
               </ListItem>
               <Divider variant="inset" component="li" />
               <ListItem>
@@ -154,7 +158,7 @@ const NetworkStatusForm: FC = () => {
                     <DnsIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="DNS Server IP" secondary={dnsServers(data)} />
+                <ListItemText primary={LL.NETWORK_DNS()} secondary={dnsServers(data)} />
               </ListItem>
               <Divider variant="inset" component="li" />
             </>
@@ -162,7 +166,7 @@ const NetworkStatusForm: FC = () => {
         </List>
         <ButtonRow>
           <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
-            Refresh
+            {LL.REFRESH()}
           </Button>
         </ButtonRow>
       </>
@@ -170,7 +174,7 @@ const NetworkStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title="Network Status" titleGutter>
+    <SectionContent title={LL.STATUS_OF(LL.NETWORK(1))} titleGutter>
       {content()}
     </SectionContent>
   );

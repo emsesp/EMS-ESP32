@@ -31,10 +31,10 @@ class EMSdevice {
   public:
     virtual ~EMSdevice() = default; // destructor of base class must always be virtual because it's a polymorphic class
 
-    static constexpr uint8_t EMS_DEVICES_MAX_TELEGRAMS = 20;
+    using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
 
     // device_type defines which derived class to use, e.g. BOILER, THERMOSTAT etc..
-    EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand)
+    EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
         : device_type_(device_type)
         , device_id_(device_id)
         , product_id_(product_id)
@@ -44,15 +44,19 @@ class EMSdevice {
         strlcpy(version_, version, sizeof(version_));
     }
 
-    std::string device_type_name() const;
+    // static functions, used outside the class like in console.cpp, command.cpp, emsesp.cpp, mqtt.cpp
+    static const char * device_type_2_device_name(const uint8_t device_type);
+    static uint8_t      device_name_2_device_type(const char * topic);
+    static std::string  uom_to_string(uint8_t uom);
+    static std::string  tag_to_string(uint8_t tag, const bool translate = true);
+    static std::string  tag_to_mqtt(uint8_t tag);
+    static uint8_t      decode_brand(uint8_t value);
 
-    static std::string device_type_2_device_name(const uint8_t device_type);
-    static uint8_t     device_name_2_device_type(const char * topic);
-    static std::string uom_to_string(uint8_t uom);
-    static std::string tag_to_string(uint8_t tag);
-    static std::string tag_to_mqtt(uint8_t tag);
+    const char * device_type_name();                     // returns short non-translated device type name
+    const char * device_type_2_device_name_translated(); // returns translated device type name
 
     bool has_tag(const uint8_t tag) const;
+    bool has_cmd(const char * cmd, const int8_t id) const;
 
     inline uint8_t device_id() const {
         return device_id_;
@@ -104,15 +108,14 @@ class EMSdevice {
         return brand_;
     }
 
-    inline void name(const std::string & name) {
+    inline void name(const char * name) {
         name_ = name;
     }
 
-    inline std::string name() const {
+    inline const char * name() const {
         return name_;
     }
 
-    // unique id of a device
     inline uint8_t unique_id() const {
         return unique_id_;
     }
@@ -173,11 +176,9 @@ class EMSdevice {
         }
     }
 
-    std::string    brand_to_string() const;
-    static uint8_t decode_brand(uint8_t value);
-
-    std::string to_string() const;
-    std::string to_string_short() const;
+    const std::string brand_to_string();
+    const std::string to_string();
+    const std::string to_string_short();
 
     enum Handlers : uint8_t { ALL, RECEIVED, FETCHED, PENDING, IGNORED };
 
@@ -187,12 +188,11 @@ class EMSdevice {
     void   list_device_entries(JsonObject & output) const;
     void   add_handlers_ignored(const uint16_t handler);
 
-    void mask_entity(const std::string & entity_id);
-    void getMaskedEntities(std::vector<std::string> & entity_ids);
+    void set_climate_minmax(uint8_t tag, int16_t min, uint16_t max);
+    void setCustomEntity(const std::string & entity_id);
+    void getCustomEntities(std::vector<std::string> & entity_ids);
 
-    using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
-
-    void register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, const process_function_p cb);
+    void register_telegram_type(const uint16_t telegram_type_id, const char * telegram_type_name, bool fetch, const process_function_p cb);
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);
 
     std::string get_value_uom(const char * key) const;
@@ -204,41 +204,77 @@ class EMSdevice {
     void generate_values_web(JsonObject & output);
     void generate_values_web_customization(JsonArray & output);
 
-    void register_device_value(uint8_t                             tag,
-                               void *                              value_p,
-                               uint8_t                             type,
-                               const __FlashStringHelper * const * options,
-                               const __FlashStringHelper *         short_name,
-                               const __FlashStringHelper *         full_name,
-                               uint8_t                             uom,
-                               bool                                has_cmd,
-                               int16_t                             min,
-                               uint16_t                            max);
+    void add_device_value(uint8_t               tag,
+                          void *                value_p,
+                          uint8_t               type,
+                          const char * const ** options,
+                          const char * const *  options_single,
+                          int8_t                numeric_operator,
+                          const char * const *  name,
+                          uint8_t               uom,
+                          const cmd_function_p  f,
+                          int16_t               min,
+                          uint16_t              max);
 
-    void register_device_value(uint8_t                             tag,
-                               void *                              value_p,
-                               uint8_t                             type,
-                               const __FlashStringHelper * const * options,
-                               const __FlashStringHelper * const * name,
-                               uint8_t                             uom,
-                               const cmd_function_p                f,
-                               int16_t                             min,
-                               uint16_t                            max);
+    void register_device_value(uint8_t               tag,
+                               void *                value_p,
+                               uint8_t               type,
+                               const char * const ** options,
+                               const char * const *  name,
+                               uint8_t               uom,
+                               const cmd_function_p  f,
+                               int16_t               min,
+                               uint16_t              max);
 
-    void register_device_value(uint8_t                             tag,
-                               void *                              value_p,
-                               uint8_t                             type,
-                               const __FlashStringHelper * const * options,
-                               const __FlashStringHelper * const * name,
-                               uint8_t                             uom,
-                               const cmd_function_p                f);
+    void
+    register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom, const cmd_function_p f);
 
-    void register_device_value(uint8_t                             tag,
-                               void *                              value_p,
-                               uint8_t                             type,
-                               const __FlashStringHelper * const * options,
-                               const __FlashStringHelper * const * name,
-                               uint8_t                             uom);
+    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom);
+
+    void register_device_value(uint8_t              tag,
+                               void *               value_p,
+                               uint8_t              type,
+                               int8_t               numeric_operator,
+                               const char * const * name,
+                               uint8_t              uom,
+                               const cmd_function_p f = nullptr);
+
+    void register_device_value(uint8_t              tag,
+                               void *               value_p,
+                               uint8_t              type,
+                               int8_t               numeric_operator,
+                               const char * const * name,
+                               uint8_t              uom,
+                               const cmd_function_p f,
+                               int16_t              min,
+                               uint16_t             max);
+
+    // single list of options
+    void register_device_value(uint8_t              tag,
+                               void *               value_p,
+                               uint8_t              type,
+                               const char * const * options_single,
+                               const char * const * name,
+                               uint8_t              uom,
+                               const cmd_function_p f = nullptr);
+
+    // single list of options, with no translations, with min and max
+    void register_device_value(uint8_t              tag,
+                               void *               value_p,
+                               uint8_t              type,
+                               const char * const * options_single,
+                               const char * const * name,
+                               uint8_t              uom,
+                               const cmd_function_p f,
+                               int16_t              min,
+                               uint16_t             max);
+
+    // no options, optional function f
+    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f = nullptr);
+
+    // no options, with min/max
+    void
+    register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f, int16_t min, uint16_t max);
 
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid) const;
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid) const;
@@ -301,15 +337,35 @@ class EMSdevice {
         SWITCH,
         CONTROLLER,
         CONNECT,
+        ALERT,
+        PUMP,
         GENERIC,
+        HEATSOURCE,
         UNKNOWN
     };
 
+    static constexpr uint8_t EMS_DEVICES_MAX_TELEGRAMS = 20;
+
     // static device IDs
-    static constexpr uint8_t EMS_DEVICE_ID_BOILER   = 0x08; // fixed device_id for Master Boiler/UBA
-    static constexpr uint8_t EMS_DEVICE_ID_BOILER_1 = 0x70; // fixed device_id for 1st. Cascade Boiler/UBA
-    static constexpr uint8_t EMS_DEVICE_ID_BOILER_F = 0x7F; // fixed device_id for last Cascade Boiler/UBA
-    static constexpr uint8_t EMS_DEVICE_ID_AM200    = 0x60; // fixed device_id for alternative Heating AM200
+    static constexpr uint8_t EMS_DEVICE_ID_BOILER         = 0x08; // fixed device_id for Master Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_HS1            = 0x70; // fixed device_id for 1st. Cascade Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_HS16           = 0x7F; // fixed device_id for last Cascade Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_AHS1           = 0x60; // fixed device_id for alternative Heating AM200
+    static constexpr uint8_t EMS_DEVICE_ID_CONTROLLER     = 0x09;
+    static constexpr uint8_t EMS_DEVICE_ID_RS232          = 0x04;
+    static constexpr uint8_t EMS_DEVICE_ID_TERMINAL       = 0x0A;
+    static constexpr uint8_t EMS_DEVICE_ID_SERVICEKEY     = 0x0B;
+    static constexpr uint8_t EMS_DEVICE_ID_CASCADE        = 0x0C;
+    static constexpr uint8_t EMS_DEVICE_ID_EASYCOM        = 0x0D;
+    static constexpr uint8_t EMS_DEVICE_ID_CONVERTER      = 0x0E;
+    static constexpr uint8_t EMS_DEVICE_ID_CLOCK          = 0x0F;
+    static constexpr uint8_t EMS_DEVICE_ID_SWITCH         = 0x11; // Switch WM10
+    static constexpr uint8_t EMS_DEVICE_ID_ALERT          = 0x12; // Error module EM10
+    static constexpr uint8_t EMS_DEVICE_ID_PUMP           = 0x15; // Pump module PM10
+    static constexpr uint8_t EMS_DEVICE_ID_MODEM          = 0x48;
+    static constexpr uint8_t EMS_DEVICE_ID_RFSENSOR       = 0x40; // RF sensor only sending, no reply
+    static constexpr uint8_t EMS_DEVICE_ID_RFBASE         = 0x50;
+    static constexpr uint8_t EMS_DEVICE_ID_ROOMTHERMOSTAT = 0x17; // TADO using this with no version reply
 
     // generic type IDs
     static constexpr uint16_t EMS_TYPE_VERSION    = 0x02; // type ID for Version information. Generic across all EMS devices.
@@ -327,7 +383,6 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_HT3      = 3;
     static constexpr uint8_t EMS_DEVICE_FLAG_HEATPUMP = 4;
     static constexpr uint8_t EMS_DEVICE_FLAG_HYBRID   = 5;
-    static constexpr uint8_t EMS_DEVICE_FLAG_AM200    = 6;
 
     // Solar Module
     static constexpr uint8_t EMS_DEVICE_FLAG_SM10  = 1;
@@ -360,28 +415,32 @@ class EMSdevice {
     uint8_t count_entities();
     bool    has_entities() const;
 
+#if defined(EMSESP_STANDALONE_DUMP)
+    void dump_value_info();
+#endif
+
   private:
-    uint8_t     unique_id_;
-    uint8_t     device_type_ = DeviceType::SYSTEM;
-    uint8_t     device_id_   = 0;
-    uint8_t     product_id_  = 0;
-    char        version_[6];
-    std::string name_; // the long name for the EMS model
-    uint8_t     flags_ = 0;
-    uint8_t     brand_ = Brand::NO_BRAND;
+    uint8_t      unique_id_;
+    uint8_t      device_type_ = DeviceType::SYSTEM;
+    uint8_t      device_id_   = 0;
+    uint8_t      product_id_  = 0;
+    char         version_[6];
+    const char * name_; // the long name for the EMS model
+    uint8_t      flags_ = 0;
+    uint8_t      brand_ = Brand::NO_BRAND;
 
     bool ha_config_done_     = false;
     bool has_update_         = false;
     bool ha_config_firstrun_ = true; // this means a first setup of HA is needed after a restart
 
     struct TelegramFunction {
-        uint16_t                    telegram_type_id_;   // it's type_id
-        const __FlashStringHelper * telegram_type_name_; // e.g. RC20Message
-        bool                        fetch_;              // if this type_id be queried automatically
-        bool                        received_;
-        process_function_p          process_function_;
+        uint16_t           telegram_type_id_;   // it's type_id
+        const char *       telegram_type_name_; // e.g. RC20Message
+        bool               fetch_;              // if this type_id be queried automatically
+        bool               received_;
+        process_function_p process_function_;
 
-        TelegramFunction(uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, bool received, const process_function_p process_function)
+        TelegramFunction(uint16_t telegram_type_id, const char * telegram_type_name, bool fetch, bool received, const process_function_p process_function)
             : telegram_type_id_(telegram_type_id)
             , telegram_type_name_(telegram_type_name)
             , fetch_(fetch)
@@ -390,10 +449,13 @@ class EMSdevice {
         }
     };
 
+#ifdef EMSESP_STANDALONE
+    void debug_print_dv(const char * shortname);
+#endif
+
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 
-    // device values
-    std::vector<DeviceValue> devicevalues_;
+    std::vector<DeviceValue> devicevalues_; // all the device values
 
     std::vector<uint16_t> handlers_ignored_;
 };

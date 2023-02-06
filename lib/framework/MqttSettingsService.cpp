@@ -80,11 +80,11 @@ AsyncMqttClient * MqttSettingsService::getMqttClient() {
 }
 
 void MqttSettingsService::onMqttConnect(bool sessionPresent) {
-    // emsesp::EMSESP::logger().info(F("Connected to MQTT, %s"), (sessionPresent) ? F("with persistent session") : F("without persistent session"));
+    // emsesp::EMSESP::logger().info("Connected to MQTT, %s", (sessionPresent) ? ("with persistent session") : ("without persistent session"));
 }
 
 void MqttSettingsService::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-    // emsesp::EMSESP::logger().info(F("Disconnected from MQTT reason: %d"), (uint8_t)reason);
+    // emsesp::EMSESP::logger().info("Disconnected from MQTT reason: %d", (uint8_t)reason);
     _disconnectReason = reason;
     _disconnectedAt   = uuid::get_uptime();
 }
@@ -104,16 +104,15 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     case ARDUINO_EVENT_ETH_GOT_IP6:
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
         if (_state.enabled) {
-            // emsesp::EMSESP::logger().info(F("Network connection found, starting MQTT client"));
+            // emsesp::EMSESP::logger().info("IPv4 Network connection found, starting MQTT client");
             onConfigUpdated();
         }
         break;
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
     case ARDUINO_EVENT_ETH_DISCONNECTED:
         if (_state.enabled) {
-            // emsesp::EMSESP::logger().info(F("Network connection dropped, stopping MQTT client"));
+            // emsesp::EMSESP::logger().info("Network connection dropped, stopping MQTT client");
             _mqttClient.disconnect();
-            // onConfigUpdated();
         }
         break;
 
@@ -126,8 +125,8 @@ void MqttSettingsService::configureMqtt() {
     // disconnect if connected
     _mqttClient.disconnect();
     // only connect if WiFi is connected and MQTT is enabled
-    if (_state.enabled && emsesp::EMSESP::system_.network_connected()) {
-        // emsesp::EMSESP::logger().info(F("Configuring Mqtt client"));
+    if (_state.enabled && emsesp::EMSESP::system_.network_connected() && !_state.host.isEmpty()) {
+        // emsesp::EMSESP::logger().info("Configuring MQTT client");
         _mqttClient.setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
         if (_state.username.length() > 0) {
             _mqttClient.setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername),
@@ -138,24 +137,24 @@ void MqttSettingsService::configureMqtt() {
         _mqttClient.setClientId(retainCstr(_state.clientId.c_str(), &_retainedClientId));
         _mqttClient.setKeepAlive(_state.keepAlive);
         _mqttClient.setCleanSession(_state.cleanSession);
-        _mqttClient.setMaxTopicLength(_state.maxTopicLength);
+        _mqttClient.setMaxTopicLength(FACTORY_MQTT_MAX_TOPIC_LENGTH); // hardcode. We don't take this from the settings anymore.
         _mqttClient.connect();
         // } else {
-        // emsesp::EMSESP::logger().info(F("Error configuring Mqtt client"));
+        // emsesp::EMSESP::logger().info("Error configuring MQTT client");
     }
 }
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
-    root["enabled"]          = settings.enabled;
-    root["host"]             = settings.host;
-    root["port"]             = settings.port;
-    root["base"]             = settings.base;
-    root["username"]         = settings.username;
-    root["password"]         = settings.password;
-    root["client_id"]        = settings.clientId;
-    root["keep_alive"]       = settings.keepAlive;
-    root["clean_session"]    = settings.cleanSession;
-    root["max_topic_length"] = settings.maxTopicLength;
+    root["enabled"]       = settings.enabled;
+    root["host"]          = settings.host;
+    root["port"]          = settings.port;
+    root["base"]          = settings.base;
+    root["username"]      = settings.username;
+    root["password"]      = settings.password;
+    root["client_id"]     = settings.clientId;
+    root["keep_alive"]    = settings.keepAlive;
+    root["clean_session"] = settings.cleanSession;
+    root["entity_format"] = settings.entity_format;
 
     // added by proddy for EMS-ESP
     root["publish_time_boiler"]     = settings.publish_time_boiler;
@@ -164,6 +163,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["publish_time_mixer"]      = settings.publish_time_mixer;
     root["publish_time_other"]      = settings.publish_time_other;
     root["publish_time_sensor"]     = settings.publish_time_sensor;
+    root["publish_time_heartbeat"]  = settings.publish_time_heartbeat;
     root["mqtt_qos"]                = settings.mqtt_qos;
     root["mqtt_retain"]             = settings.mqtt_retain;
     root["ha_enabled"]              = settings.ha_enabled;
@@ -178,18 +178,17 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     MqttSettings newSettings = {};
     bool         changed     = false;
 
-    newSettings.enabled        = root["enabled"] | FACTORY_MQTT_ENABLED;
-    newSettings.host           = root["host"] | FACTORY_MQTT_HOST;
-    newSettings.port           = root["port"] | FACTORY_MQTT_PORT;
-    newSettings.base           = root["base"] | FACTORY_MQTT_BASE;
-    newSettings.username       = root["username"] | FACTORY_MQTT_USERNAME;
-    newSettings.password       = root["password"] | FACTORY_MQTT_PASSWORD;
-    newSettings.clientId       = root["client_id"] | FACTORY_MQTT_CLIENT_ID;
-    newSettings.keepAlive      = root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE;
-    newSettings.cleanSession   = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
-    newSettings.maxTopicLength = root["max_topic_length"] | FACTORY_MQTT_MAX_TOPIC_LENGTH;
-    newSettings.mqtt_qos       = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
-    newSettings.mqtt_retain    = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
+    newSettings.enabled      = root["enabled"] | FACTORY_MQTT_ENABLED;
+    newSettings.host         = root["host"] | FACTORY_MQTT_HOST;
+    newSettings.port         = root["port"] | FACTORY_MQTT_PORT;
+    newSettings.base         = root["base"] | FACTORY_MQTT_BASE;
+    newSettings.username     = root["username"] | FACTORY_MQTT_USERNAME;
+    newSettings.password     = root["password"] | FACTORY_MQTT_PASSWORD;
+    newSettings.clientId     = root["client_id"] | FACTORY_MQTT_CLIENT_ID;
+    newSettings.keepAlive    = root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE;
+    newSettings.cleanSession = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
+    newSettings.mqtt_qos     = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
+    newSettings.mqtt_retain  = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
 
     newSettings.publish_time_boiler     = root["publish_time_boiler"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_thermostat = root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME;
@@ -197,6 +196,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_time_mixer      = root["publish_time_mixer"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_other      = root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
+    newSettings.publish_time_heartbeat  = root["publish_time_heartbeat"] | EMSESP_DEFAULT_PUBLISH_HEARTBEAT;
 
     newSettings.ha_enabled         = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
     newSettings.nested_format      = root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT;
@@ -204,6 +204,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_single     = root["publish_single"] | EMSESP_DEFAULT_PUBLISH_SINGLE;
     newSettings.publish_single2cmd = root["publish_single2cmd"] | EMSESP_DEFAULT_PUBLISH_SINGLE2CMD;
     newSettings.send_response      = root["send_response"] | EMSESP_DEFAULT_SEND_RESPONSE;
+    newSettings.entity_format      = root["entity_format"] | EMSESP_DEFAULT_ENTITY_FORMAT;
 
     if (newSettings.enabled != settings.enabled) {
         changed = true;
@@ -219,6 +220,10 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     }
 
     if (newSettings.discovery_prefix != settings.discovery_prefix) {
+        changed = true;
+    }
+
+    if (newSettings.entity_format != settings.entity_format) {
         changed = true;
     }
 
@@ -257,39 +262,38 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
 
     if (newSettings.publish_time_boiler != settings.publish_time_boiler) {
         emsesp::EMSESP::mqtt_.set_publish_time_boiler(newSettings.publish_time_boiler);
-        changed = true;
     }
 
     if (newSettings.publish_time_thermostat != settings.publish_time_thermostat) {
         emsesp::EMSESP::mqtt_.set_publish_time_thermostat(newSettings.publish_time_thermostat);
-        changed = true;
     }
 
     if (newSettings.publish_time_solar != settings.publish_time_solar) {
         emsesp::EMSESP::mqtt_.set_publish_time_solar(newSettings.publish_time_solar);
-        changed = true;
     }
 
     if (newSettings.publish_time_mixer != settings.publish_time_mixer) {
         emsesp::EMSESP::mqtt_.set_publish_time_mixer(newSettings.publish_time_mixer);
-        changed = true;
     }
 
     if (newSettings.publish_time_other != settings.publish_time_other) {
         emsesp::EMSESP::mqtt_.set_publish_time_other(newSettings.publish_time_other);
-        changed = true;
     }
 
     if (newSettings.publish_time_sensor != settings.publish_time_sensor) {
         emsesp::EMSESP::mqtt_.set_publish_time_sensor(newSettings.publish_time_sensor);
-        changed = true;
     }
+
+    if (newSettings.publish_time_heartbeat != settings.publish_time_heartbeat) {
+        emsesp::EMSESP::mqtt_.set_publish_time_heartbeat(newSettings.publish_time_heartbeat);
+    }
+
+    // save the new settings
+    settings = newSettings;
 
     if (changed) {
         emsesp::EMSESP::mqtt_.reset_mqtt();
     }
-
-    settings = newSettings;
 
     return StateUpdateResult::CHANGED;
 }

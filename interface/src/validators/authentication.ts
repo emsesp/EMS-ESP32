@@ -2,11 +2,9 @@ import Schema from 'async-validator';
 
 export const SIGN_IN_REQUEST_VALIDATOR = new Schema({
   username: {
-    required: true,
-    message: 'Please provide a username'
+    required: true
   },
   password: {
-    required: true,
-    message: 'Please provide a password'
+    required: true
   }
 });

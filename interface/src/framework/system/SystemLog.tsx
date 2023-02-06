@@ -15,6 +15,9 @@ import DownloadIcon from '@mui/icons-material/GetApp';
 import { useSnackbar } from 'notistack';
 
 import { EVENT_SOURCE_ROOT } from '../../api/endpoints';
+
+import { useI18nContext } from '../../i18n/i18n-react';
+
 export const LOG_EVENTSOURCE_URL = EVENT_SOURCE_ROOT + 'log';
 
 const useWindowSize = () => {
@@ -63,6 +66,8 @@ const levelLabel = (level: LogLevel) => {
 const SystemLog: FC = () => {
   useWindowSize();
 
+  const { LL } = useI18nContext();
+
   const { loadData, data, setData } = useRest<LogSettings>({
     read: SystemApi.readLogSettings
   });
@@ -104,10 +109,10 @@ const SystemLog: FC = () => {
           compact: data.compact
         });
         if (response.status !== 200) {
-          enqueueSnackbar('Problem applying log settings', { variant: 'error' });
+          enqueueSnackbar(LL.PROBLEM_UPDATING(), { variant: 'error' });
         }
-      } catch (error: unknown) {
-        enqueueSnackbar(extractErrorMessage(error, 'Problem applying log settings'), { variant: 'error' });
+      } catch (error) {
+        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
       }
     }
   };
@@ -158,10 +163,10 @@ const SystemLog: FC = () => {
   const fetchLog = useCallback(async () => {
     try {
       setLogEntries((await SystemApi.readLogEntries()).data);
-    } catch (error: unknown) {
-      setErrorMessage(extractErrorMessage(error, 'Failed to fetch log'));
+    } catch (error) {
+      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
-  }, []);
+  }, [LL]);
 
   useEffect(() => {
     fetchLog();
@@ -197,7 +202,7 @@ const SystemLog: FC = () => {
           <Grid item xs={4}>
             <ValidatedTextField
               name="level"
-              label="Log Level"
+              label={LL.LOG_LEVEL()}
               value={data.level}
               fullWidth
               variant="outlined"
@@ -205,6 +210,7 @@ const SystemLog: FC = () => {
               margin="normal"
               select
             >
+              <MenuItem value={-1}>OFF</MenuItem>
               <MenuItem value={3}>ERROR</MenuItem>
               <MenuItem value={4}>WARNING</MenuItem>
               <MenuItem value={5}>NOTICE</MenuItem>
@@ -214,7 +220,7 @@ const SystemLog: FC = () => {
             </ValidatedTextField>
           </Grid>
           <Grid item xs={3}>
-            <FormLabel>Buffer size</FormLabel>
+            <FormLabel>{LL.BUFFER_SIZE()}</FormLabel>
             <Slider
               value={data.max_messages}
               valueLabelDisplay="auto"
@@ -235,12 +241,12 @@ const SystemLog: FC = () => {
           <Grid item>
             <BlockFormControlLabel
               control={<Checkbox checked={data.compact} onChange={updateFormValue} name="compact" />}
-              label="Compact"
+              label={LL.COMPACT()}
             />
           </Grid>
           <Grid item>
             <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={onDownload}>
-              Export
+              {LL.EXPORT()}
             </Button>
           </Grid>
         </Grid>
@@ -273,7 +279,7 @@ const SystemLog: FC = () => {
   };
 
   return (
-    <SectionContent title="System Log" titleGutter id="log-window">
+    <SectionContent title={LL.LOG_OF(LL.SYSTEM(2))} titleGutter id="log-window">
       {content()}
     </SectionContent>
   );

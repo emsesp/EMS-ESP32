@@ -122,7 +122,17 @@ network_settings = {
   hostname: 'ems-esp',
   nosleep: true,
   tx_power: 20,
+  bandwidth20: false,
   static_ip_config: false,
+  enableMDNS: true,
+  enableCORS: false,
+  CORSOrigin: '*',
+  enableIPv6: false,
+  local_ip: '',
+  gateway_ip: '',
+  subnet_mask: '',
+  dns_ip_1: '',
+  dns_ip_2: '',
 }
 const network_status = {
   status: 3,
@@ -219,13 +229,14 @@ mqtt_settings = {
   client_id: 'ems-esp',
   keep_alive: 60,
   clean_session: true,
-  max_topic_length: 128,
+  entity_format: 1,
   publish_time_boiler: 10,
   publish_time_thermostat: 10,
   publish_time_solar: 10,
   publish_time_mixer: 10,
   publish_time_other: 10,
   publish_time_sensor: 10,
+  publish_time_heartbeat: 60,
   mqtt_qos: 0,
   mqtt_retain: false,
   ha_enabled: true,
@@ -240,6 +251,8 @@ const mqtt_status = {
   client_id: 'ems-esp',
   disconnect_reason: 0,
   mqtt_fails: 0,
+  mqtt_queued: 1,
+  connect_count: 2,
 }
 
 // SYSTEM
@@ -253,18 +266,20 @@ const UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn'
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken'
 const system_status = {
-  emsesp_version: '3.4demo',
+  emsesp_version: '3.5.0-demo',
   esp_platform: 'ESP32',
-  max_alloc_heap: 113792,
+  max_alloc_heap: 89,
   psram_size: 0,
   free_psram: 0,
   cpu_freq_mhz: 240,
-  free_heap: 193340,
-  sdk_version: 'v3.3.5-1-g85c43024c',
-  flash_chip_size: 4194304,
+  free_heap: 143,
+  sdk_version: 'v4.4.2',
+  flash_chip_size: 4096,
   flash_chip_speed: 40000000,
-  fs_total: 65536,
-  fs_used: 16384,
+  fs_used: 40,
+  fs_free: 24,
+  app_used: 1863,
+  app_free: 121,
   uptime: '000+00:15:42.707',
 }
 security_settings = {
@@ -302,11 +317,12 @@ const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile'
 const EMSESP_WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue'
 const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor'
 const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalog'
-const EMSESP_MASKED_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'maskedEntities'
+const EMSESP_CUSTOM_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities'
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations'
 
 settings = {
-  tx_mode: 1,
+  locale: 'en',
+  tx_mode: 4,
   ems_bus_id: 11,
   syslog_enabled: false,
   syslog_level: 3,
@@ -338,40 +354,40 @@ settings = {
   bool_format: 1,
   bool_dashboard: 1,
   enum_format: 1,
+  fahrenheit: false,
 }
 
 const emsesp_devices = {
   devices: [
     {
       i: 1,
-      d: 23,
-      p: 77,
       s: 'Thermostat (RC20/Moduline 300)',
-      t: 'thermostat1',
+      t: 4,
+      tn: 'thermostat',
     },
     {
       i: 2,
-      d: 8,
-      p: 123,
       s: 'Boiler (Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i)',
-      t: 'boiler',
+      t: 3,
+      tn: 'boiler',
     },
     {
       i: 4,
-      d: 16,
-      p: 165,
       s: 'Thermostat (RC100/Moduline 1000/1010)',
-      t: 'thermostat2',
+      t: 4,
+      tn: 'thermostat',
     },
   ],
 }
 
 const emsesp_coredata = {
+  connected: true,
   // devices: [],
   devices: [
     {
       id: '2',
-      t: 'Boiler',
+      t: 3,
+      tn: 'Boiler',
       b: 'Nefit',
       n: 'GBx72/Trendline/Cerapur/Greenstar Si/27i',
       d: 8,
@@ -381,7 +397,8 @@ const emsesp_coredata = {
     },
     {
       id: '1',
-      t: 'Thermostat',
+      t: 4,
+      tn: 'Thermostat',
       b: '',
       n: 'RC20/Moduline 300',
       d: 23,
@@ -391,7 +408,8 @@ const emsesp_coredata = {
     },
     {
       id: '4',
-      t: 'Thermostat',
+      t: 4,
+      tn: 'Thermostat',
       b: 'Buderus',
       n: 'RC100/Moduline 1000/1010',
       d: 16,
@@ -400,6 +418,7 @@ const emsesp_coredata = {
       e: 3,
     },
   ],
+  s_n: 'Sensors',
   active_sensors: 8,
   analog_enabled: true,
 }
@@ -429,13 +448,13 @@ const status = {
   num_sensors: 1,
   num_analogs: 1,
   stats: [
-    { id: 'EMS Telegrams Received (Rx)', s: 56506, f: 11, q: 100 },
-    { id: 'EMS Reads (Tx)', s: 9026, f: 0, q: 100 },
-    { id: 'EMS Writes (Tx)', s: 33, f: 2, q: 95 },
-    { id: 'Temperature Sensor Reads', s: 56506, f: 11, q: 100 },
-    { id: 'Analog Sensor Reads', s: 0, f: 0, q: 100 },
-    { id: 'MQTT Publishes', s: 12, f: 10, q: 20 },
-    { id: 'API Calls', s: 0, f: 0, q: 0 },
+    { id: '0', s: 56506, f: 11, q: 100 },
+    { id: '1', s: 9026, f: 0, q: 100 },
+    { id: '2', s: 33, f: 2, q: 95 },
+    { id: '3', s: 56506, f: 11, q: 100 },
+    { id: '4', s: 0, f: 0, q: 100 },
+    { id: '5', s: 12, f: 10, q: 20 },
+    { id: '6', s: 0, f: 0, q: 0 },
   ],
 }
 
@@ -446,7 +465,7 @@ const emsesp_devicedata_1 = {
     {
       v: '(0)',
       u: 0,
-      id: '00error code',
+      id: '08my custom error code',
     },
     {
       v: '14:54:39 06/06/2021',
@@ -578,14 +597,15 @@ const emsesp_devicedata_4 = {
   ],
 }
 
-// CUSTOMIZATION
+// CUSTOMIZATIONS
 
 const emsesp_deviceentities_1 = [
   {
     v: '(0)',
     n: 'error code',
+    cn: 'my custom error code',
     id: 'errorcode',
-    m: 0,
+    m: 8,
     w: false,
   },
   {
@@ -595,24 +615,13 @@ const emsesp_deviceentities_1 = [
     m: 0,
     w: false,
   },
-  // {
-  //   v: 'test data',
-  //   n: 'test',
-  //   id: 'test',
-  //   m: 0,
-  //   w: false,
-  // },
-  {
-    v: 'roomTemp',
-    id: 'hc1/HA climate config creation',
-    m: 0,
-    w: false,
-  },
   {
     v: 18.2,
     n: 'hc1 selected room temperature',
     id: 'hc1/seltemp',
     m: 0,
+    mi: 5,
+    ma: 52,
     w: true,
   },
   {
@@ -632,7 +641,7 @@ const emsesp_deviceentities_1 = [
 ]
 
 const emsesp_deviceentities_2 = [
-  { u: 0, n: '', id: 'reset', m: 8, w: false },
+  { u: 0, n: '!reset', id: 'reset', m: 8, w: false },
   { v: false, n: 'heating active', id: 'heatingactive', m: 8, w: false },
   { v: false, n: 'tapwater active', id: 'tapwateractive', m: 4, w: false },
   { v: 5, n: 'selected flow temperature', id: 'selflowtemp', m: 4, w: true },
@@ -852,6 +861,7 @@ rest_server.post(UPLOAD_FILE_ENDPOINT, (req, res) => {
   res.sendStatus(200)
 })
 rest_server.post(SIGN_IN_ENDPOINT, (req, res) => {
+  console.log('Signed in as ' + req.body.username)
   res.json(signin)
 })
 rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
@@ -931,29 +941,69 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
 })
 
 function updateMask(entity, de, dd) {
-  const shortname = entity.slice(2)
-  const new_mask = parseInt(entity.slice(0, 2), 16)
+  const current_mask = parseInt(entity.slice(0, 2), 16)
 
-  objIndex = de.findIndex((obj) => obj.id == shortname)
-  if (objIndex !== -1) {
-    de[objIndex].m = new_mask
-    const fullname = de[objIndex].n
-    objIndex = dd.data.findIndex((obj) => obj.id.slice(2) == fullname)
-    if (objIndex !== -1) {
+  // strip of any min/max ranges
+  const shortname_with_customname = entity.slice(2).split('>')[0]
+
+  const shortname = shortname_with_customname.split('|')[0]
+  const new_custom_name = shortname_with_customname.split('|')[1]
+
+  // find in de
+  de_objIndex = de.findIndex((obj) => obj.id === shortname)
+  if (de_objIndex !== -1) {
+    if (de[de_objIndex].cn) {
+      fullname = de[de_objIndex].cn
+    } else {
+      fullname = de[de_objIndex].n
+    }
+
+    // find in dd, either looking for fullname or custom name
+    dd_objIndex = dd.data.findIndex((obj) => obj.id.slice(2) === fullname)
+    if (dd_objIndex !== -1) {
+      let changed = new Boolean(false)
+
       // see if the mask has changed
-      const old_mask = parseInt(dd.data[objIndex].id.slice(0, 2), 16)
-      if (old_mask !== new_mask) {
-        const mask_hex = entity.slice(0, 2)
-        console.log('Updating ' + dd.data[objIndex].id + ' -> ' + mask_hex + fullname)
-        dd.data[objIndex].id = mask_hex + fullname
+      const old_mask = parseInt(dd.data[dd_objIndex].id.slice(0, 2), 16)
+      if (old_mask !== current_mask) {
+        changed = true
+        console.log('mask has changed to ' + current_mask.toString(16))
       }
+
+      // see if the custom name has changed
+      const old_custom_name = dd.data[dd_objIndex].cn
+      console.log('comparing old ' + old_custom_name + ' with new ' + new_custom_name)
+      if (old_custom_name !== new_custom_name) {
+        changed = true
+        new_fullname = new_custom_name
+        console.log('name has changed to ' + new_custom_name)
+      } else {
+        new_fullname = fullname
+      }
+
+      if (changed) {
+        console.log(
+          'Updating ' + dd.data[dd_objIndex].id + ' -> ' + current_mask.toString(16).padStart(2, '0') + new_fullname,
+        )
+        de[de_objIndex].m = current_mask
+        de[de_objIndex].cn = new_fullname
+        dd.data[dd_objIndex].id = current_mask.toString(16).padStart(2, '0') + new_fullname
+        dd.data[dd_objIndex].cn = new_fullname
+      }
+
+      console.log('new dd:')
+      console.log(dd.data[dd_objIndex])
+      console.log('new de:')
+      console.log(de[de_objIndex])
+    } else {
+      console.log('error, dd not found')
     }
   } else {
-    console.log("can't locate record for name " + shortname)
+    console.log("can't locate record for shortname " + shortname)
   }
 }
 
-rest_server.post(EMSESP_MASKED_ENTITIES_ENDPOINT, (req, res) => {
+rest_server.post(EMSESP_CUSTOM_ENTITIES_ENDPOINT, (req, res) => {
   const id = req.body.id
   console.log('customization id = ' + id)
   console.log(req.body.entity_ids)
@@ -995,21 +1045,25 @@ rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
   const sensor = req.body
   console.log('Write sensor: ' + JSON.stringify(sensor))
   objIndex = emsesp_sensordata.sensors.findIndex((obj) => obj.id == sensor.id)
-  emsesp_sensordata.sensors[objIndex].n = sensor.name
-  emsesp_sensordata.sensors[objIndex].o = sensor.offset
+  if (objIndex !== -1) {
+    emsesp_sensordata.sensors[objIndex].n = sensor.name
+    emsesp_sensordata.sensors[objIndex].o = sensor.offset
+  } else {
+    console.log('not found')
+  }
   res.sendStatus(200)
 })
 
 rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
   const analog = req.body
   console.log('Write analog: ' + JSON.stringify(analog))
-  objIndex = emsesp_sensordata.analogs.findIndex((obj) => obj.i == analog.i)
+  objIndex = emsesp_sensordata.analogs.findIndex((obj) => obj.g == analog.gpio)
 
   if (objIndex === -1) {
     console.log('new analog')
     emsesp_sensordata.analogs.push({
       id: analog.i.toString(),
-      i: analog.i,
+      g: analog.gpio,
       n: analog.name,
       f: analog.factor,
       o: analog.offset,
@@ -1018,13 +1072,13 @@ rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
     })
   } else {
     if (analog.type === -1) {
-      console.log('removing analog ' + analog.i)
+      console.log('removing analog gpio' + analog.gpio + ' index ' + objIndex)
       emsesp_sensordata.analogs[objIndex].t = -1
     } else {
-      console.log('updating analog ' + analog.i)
+      console.log('updating analog gpio' + analog.gpio + ' index ' + objIndex)
       emsesp_sensordata.analogs[objIndex].n = analog.name
-      emsesp_sensordata.analogs[objIndex].o = analog.offset
       emsesp_sensordata.analogs[objIndex].f = analog.factor
+      emsesp_sensordata.analogs[objIndex].o = analog.offset
       emsesp_sensordata.analogs[objIndex].u = analog.uom
       emsesp_sensordata.analogs[objIndex].t = analog.type
     }
@@ -1125,6 +1179,39 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.eth_power = 12
     data.eth_phy_addr = 0
     data.eth_clock_mode = 3
+  } else if (board_profile == 'C3MINI') {
+    // Lolin C3 mini
+    data.led_gpio = 7
+    data.dallas_gpio = 1
+    data.rx_gpio = 4
+    data.tx_gpio = 5
+    data.pbutton_gpio = 9
+    data.phy_type = 0
+    data.eth_power = 0
+    data.eth_phy_addr = 0
+    data.eth_clock_mode = 0
+  } else if (board_profile == 'S2MINI') {
+    // Lolin C3 mini
+    data.led_gpio = 15
+    data.dallas_gpio = 7
+    data.rx_gpio = 11
+    data.tx_gpio = 12
+    data.pbutton_gpio = 0
+    data.phy_type = 0
+    data.eth_power = 0
+    data.eth_phy_addr = 0
+    data.eth_clock_mode = 0
+  } else if (board_profile == 'S3MINI') {
+    // Liligo S3 mini
+    data.led_gpio = 17
+    data.dallas_gpio = 18
+    data.rx_gpio = 8
+    data.tx_gpio = 5
+    data.pbutton_gpio = 0
+    data.phy_type = 0
+    data.eth_power = 0
+    data.eth_phy_addr = 0
+    data.eth_clock_mode = 0
   }
 
   console.log('boardProfile POST. Sending back, profile: ' + board_profile + ', ' + 'data: ' + JSON.stringify(data))
@@ -1135,7 +1222,7 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
 // EMS-ESP API specific
 const emsesp_info = {
   System: {
-    version: '3.4.2',
+    version: '3.5.0',
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,

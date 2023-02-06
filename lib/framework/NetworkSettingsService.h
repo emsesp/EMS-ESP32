@@ -39,6 +39,8 @@ class NetworkSettings {
     int8_t tx_power;
     bool   nosleep;
     bool   enableMDNS;
+    bool   enableCORS;
+    String CORSOrigin;
 
     // optional configuration for static IP address
     IPAddress localIP;
@@ -58,6 +60,8 @@ class NetworkSettings {
         root["tx_power"]         = settings.tx_power;
         root["nosleep"]          = settings.nosleep;
         root["enableMDNS"]       = settings.enableMDNS;
+        root["enableCORS"]       = settings.enableCORS;
+        root["CORSOrigin"]       = settings.CORSOrigin;
 
         // extended settings
         JsonUtils::writeIP(root, "local_ip", settings.localIP);
@@ -68,6 +72,8 @@ class NetworkSettings {
     }
 
     static StateUpdateResult update(JsonObject & root, NetworkSettings & settings) {
+        auto enableCORS         = settings.enableCORS;
+        auto CORSOrigin         = settings.CORSOrigin;
         settings.ssid           = root["ssid"] | FACTORY_WIFI_SSID;
         settings.password       = root["password"] | FACTORY_WIFI_PASSWORD;
         settings.hostname       = root["hostname"] | FACTORY_WIFI_HOSTNAME;
@@ -77,6 +83,8 @@ class NetworkSettings {
         settings.tx_power       = root["tx_power"] | 20;
         settings.nosleep        = root["nosleep"] | false;
         settings.enableMDNS     = root["enableMDNS"] | true;
+        settings.enableCORS     = root["enableCORS"] | false;
+        settings.CORSOrigin     = root["CORSOrigin"] | "*";
 
         // extended settings
         JsonUtils::readIP(root, "local_ip", settings.localIP);
@@ -96,6 +104,9 @@ class NetworkSettings {
         // as sensible defaults can be assumed for gateway and subnet
         if (settings.staticIPConfig && (IPUtils::isNotSet(settings.localIP) || IPUtils::isNotSet(settings.gatewayIP) || IPUtils::isNotSet(settings.subnetMask))) {
             settings.staticIPConfig = false;
+        }
+        if (enableCORS != settings.enableCORS || CORSOrigin != settings.CORSOrigin) {
+            return StateUpdateResult::CHANGED_RESTART; // tell WebUI that a restart is needed
         }
 
         return StateUpdateResult::CHANGED;

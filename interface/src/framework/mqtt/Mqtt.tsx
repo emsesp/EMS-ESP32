@@ -9,7 +9,11 @@ import { AuthenticatedContext } from '../../contexts/authentication';
 import MqttStatusForm from './MqttStatusForm';
 import MqttSettingsForm from './MqttSettingsForm';
 
+import { useI18nContext } from '../../i18n/i18n-react';
+
 const Mqtt: FC = () => {
+  const { LL } = useI18nContext();
+
   useLayoutTitle('MQTT');
 
   const authenticatedContext = useContext(AuthenticatedContext);
@@ -18,8 +22,8 @@ const Mqtt: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="status" label="MQTT Status" />
-        <Tab value="settings" label="MQTT Settings" disabled={!authenticatedContext.me.admin} />
+        <Tab value="status" label={LL.STATUS_OF('MQTT')} />
+        <Tab value="settings" label={LL.SETTINGS_OF('MQTT')} disabled={!authenticatedContext.me.admin} />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<MqttStatusForm />} />

@@ -34,21 +34,21 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-        EMSESP::logger().warning(F("WiFi disconnected. Reason code=%d"), info.wifi_sta_disconnected.reason); // IDF 4.0
+        EMSESP::logger().warning("WiFi disconnected. Reason code=%s", disconnectReason(info.wifi_sta_disconnected.reason)); // IDF 4.0
         WiFi.disconnect(true);
         break;
 
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
 #ifndef EMSESP_STANDALONE
-        EMSESP::logger().info(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
+        EMSESP::logger().info("WiFi connected with IP=%s, hostname=%s", WiFi.localIP().toString().c_str(), WiFi.getHostname());
 #endif
-        // EMSESP::system_.send_heartbeat(); // send from mqtt start
         EMSESP::system_.syslog_init();
         mDNS_start();
+        EMSESP::system_.send_info_mqtt("connected");
         break;
 
     case ARDUINO_EVENT_ETH_START:
-        // EMSESP::logger().info(F("Ethernet initialized"));
+        // EMSESP::logger().info("Ethernet initialized");
         ETH.setHostname(EMSESP::system_.hostname().c_str());
 
         // configure for static IP
@@ -64,22 +64,23 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         // prevent double calls
         if (!EMSESP::system_.ethernet_connected()) {
 #ifndef EMSESP_STANDALONE
-            EMSESP::logger().info(F("Ethernet connected with IP=%s, speed %d Mbps"), ETH.localIP().toString().c_str(), ETH.linkSpeed());
+            EMSESP::logger().info("Ethernet connected with IP=%s, speed %d Mbps", ETH.localIP().toString().c_str(), ETH.linkSpeed());
 #endif
-            // EMSESP::system_.send_heartbeat(); // send from mqtt start
+            // EMSESP::system_.send_heartbeat();
             EMSESP::system_.syslog_init();
             EMSESP::system_.ethernet_connected(true);
             mDNS_start();
+            EMSESP::system_.send_info_mqtt("connected");
         }
         break;
 
     case ARDUINO_EVENT_ETH_DISCONNECTED:
-        EMSESP::logger().warning(F("Ethernet disconnected"));
+        EMSESP::logger().warning("Ethernet disconnected");
         EMSESP::system_.ethernet_connected(false);
         break;
 
     case ARDUINO_EVENT_ETH_STOP:
-        EMSESP::logger().info(F("Ethernet stopped"));
+        EMSESP::logger().info("Ethernet stopped");
         EMSESP::system_.ethernet_connected(false);
         break;
 
@@ -103,13 +104,13 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
     case ARDUINO_EVENT_ETH_GOT_IP6:
         if (EMSESP::system_.ethernet_connected()) {
-            EMSESP::logger().info(F("Ethernet connected with IPv6=%s, speed %d Mbps"), ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
+            EMSESP::logger().info("Ethernet connected with IPv6=%s, speed %d Mbps", ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
         } else {
-            EMSESP::logger().info(F("WiFi connected with IPv6=%s, hostname=%s"), WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
+            EMSESP::logger().info("WiFi connected with IPv6=%s, hostname=%s", WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
         }
-        // EMSESP::system_.send_heartbeat(); // send from mqtt start
         EMSESP::system_.syslog_init();
         mDNS_start();
+        EMSESP::system_.send_info_mqtt("connected");
         break;
 #endif
 
@@ -133,47 +134,47 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     JsonObject statJson;
 
     statJson       = statsJson.createNestedObject();
-    statJson["id"] = "EMS Telegrams Received (Rx)";
+    statJson["id"] = "0";
     statJson["s"]  = EMSESP::rxservice_.telegram_count();
     statJson["f"]  = EMSESP::rxservice_.telegram_error_count();
     statJson["q"]  = EMSESP::rxservice_.quality();
 
     statJson       = statsJson.createNestedObject();
-    statJson["id"] = "EMS Reads (Tx)";
+    statJson["id"] = "1";
     statJson["s"]  = EMSESP::txservice_.telegram_read_count();
     statJson["f"]  = EMSESP::txservice_.telegram_read_fail_count();
     statJson["q"]  = EMSESP::txservice_.read_quality();
 
     statJson       = statsJson.createNestedObject();
-    statJson["id"] = "EMS Writes (Tx)";
+    statJson["id"] = "2";
     statJson["s"]  = EMSESP::txservice_.telegram_write_count();
     statJson["f"]  = EMSESP::txservice_.telegram_write_fail_count();
     statJson["q"]  = EMSESP::txservice_.write_quality();
 
     if (EMSESP::dallassensor_.dallas_enabled()) {
         statJson       = statsJson.createNestedObject();
-        statJson["id"] = "Temperature Sensor Reads";
+        statJson["id"] = "3";
         statJson["s"]  = EMSESP::dallassensor_.reads();
         statJson["f"]  = EMSESP::dallassensor_.fails();
         statJson["q"]  = EMSESP::dallassensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::dallassensor_.fails()) / EMSESP::dallassensor_.reads());
     }
     if (EMSESP::analog_enabled()) {
         statJson       = statsJson.createNestedObject();
-        statJson["id"] = "Analog Sensor Reads";
+        statJson["id"] = "4";
         statJson["s"]  = EMSESP::analogsensor_.reads();
         statJson["f"]  = EMSESP::analogsensor_.fails();
         statJson["q"]  = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
     }
     if (Mqtt::enabled()) {
         statJson       = statsJson.createNestedObject();
-        statJson["id"] = "MQTT Publishes";
+        statJson["id"] = "5";
         statJson["s"]  = Mqtt::publish_count();
         statJson["f"]  = Mqtt::publish_fails();
         statJson["q"]  = Mqtt::publish_count() == 0 ? 100 : 100 - (uint8_t)((100 * Mqtt::publish_fails()) / (Mqtt::publish_count() + Mqtt::publish_fails()));
     }
 
     statJson       = statsJson.createNestedObject();
-    statJson["id"] = "API Calls";
+    statJson["id"] = "6";
     statJson["s"]  = WebAPIService::api_count(); // + WebAPIService::api_fails();
     statJson["f"]  = WebAPIService::api_fails();
     statJson["q"] =
@@ -182,7 +183,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.syslog_enabled()) {
         statJson       = statsJson.createNestedObject();
-        statJson["id"] = "Syslog Messages";
+        statJson["id"] = "7";
         statJson["s"]  = EMSESP::system_.syslog_count();
         statJson["f"]  = EMSESP::system_.syslog_fails();
         statJson["q"]  = EMSESP::system_.syslog_count() == 0
@@ -202,7 +203,7 @@ void WebStatusService::mDNS_start() const {
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
         if (networkSettings.enableMDNS) {
             if (!MDNS.begin(EMSESP::system_.hostname().c_str())) {
-                EMSESP::logger().warning(F("Failed to start mDNS responder service"));
+                EMSESP::logger().warning("Failed to start mDNS responder service");
                 return;
             }
 
@@ -214,16 +215,83 @@ void WebStatusService::mDNS_start() const {
             MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
             MDNS.addServiceTxt("http", "tcp", "address", address_s.c_str());
 
-            EMSESP::logger().info(F("mDNS responder service started"));
+            EMSESP::logger().info("mDNS responder service started");
         }
     });
 #else
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
         if (networkSettings.enableMDNS) {
-            EMSESP::logger().info(F("mDNS responder service started"));
+            EMSESP::logger().info("mDNS responder service started");
         }
     });
 #endif
+}
+
+const char * WebStatusService::disconnectReason(uint8_t code) {
+#ifndef EMSESP_STANDALONE
+    switch (code) {
+    case WIFI_REASON_UNSPECIFIED: // = 1,
+        return "unspecifiied";
+    case WIFI_REASON_AUTH_EXPIRE: // = 2,
+        return "auth expire";
+    case WIFI_REASON_AUTH_LEAVE: // = 3,
+        return "auth leave";
+    case WIFI_REASON_ASSOC_EXPIRE: // = 4,
+        return "assoc expired";
+    case WIFI_REASON_ASSOC_TOOMANY: // = 5,
+        return "assoc too many";
+    case WIFI_REASON_NOT_AUTHED: // = 6,
+        return "not authed";
+    case WIFI_REASON_NOT_ASSOCED: // = 7,
+        return "not assoced";
+    case WIFI_REASON_ASSOC_LEAVE: // = 8,
+        return "assoc leave";
+    case WIFI_REASON_ASSOC_NOT_AUTHED: // = 9,
+        return "assoc not authed";
+    case WIFI_REASON_DISASSOC_PWRCAP_BAD: // = 10,
+        return "disassoc powerCAP bad";
+    case WIFI_REASON_DISASSOC_SUPCHAN_BAD: // = 11,
+        return "disassoc supchan bad";
+    case WIFI_REASON_IE_INVALID: // = 13,
+        return "IE invalid";
+    case WIFI_REASON_MIC_FAILURE: // = 14,
+        return "MIC failure";
+    case WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT: // = 15,
+        return "4way handshake timeout";
+    case WIFI_REASON_GROUP_KEY_UPDATE_TIMEOUT: // = 16,
+        return "group key-update timeout";
+    case WIFI_REASON_IE_IN_4WAY_DIFFERS: // = 17,
+        return "IE in 4way differs";
+    case WIFI_REASON_GROUP_CIPHER_INVALID: // = 18,
+        return "group cipher invalid";
+    case WIFI_REASON_PAIRWISE_CIPHER_INVALID: // = 19,
+        return "pairwise cipher invalid";
+    case WIFI_REASON_AKMP_INVALID: // = 20,
+        return "AKMP invalid";
+    case WIFI_REASON_UNSUPP_RSN_IE_VERSION: // = 21,
+        return "unsupported RSN_IE version";
+    case WIFI_REASON_INVALID_RSN_IE_CAP: // = 22,
+        return "invalid RSN_IE_CAP";
+    case WIFI_REASON_802_1X_AUTH_FAILED: // = 23,
+        return "802 X1 auth failed";
+    case WIFI_REASON_CIPHER_SUITE_REJECTED: // = 24,
+        return "cipher suite rejected";
+    case WIFI_REASON_BEACON_TIMEOUT: // = 200,
+        return "beacon timeout";
+    case WIFI_REASON_NO_AP_FOUND: // = 201,
+        return "no AP found";
+    case WIFI_REASON_AUTH_FAIL: // = 202,
+        return "auth fail";
+    case WIFI_REASON_ASSOC_FAIL: // = 203,
+        return "assoc fail";
+    case WIFI_REASON_HANDSHAKE_TIMEOUT: // = 204,
+        return "handshake timeout";
+    default:
+        return "unknown";
+    }
+#endif
+
+    return "";
 }
 
 } // namespace emsesp

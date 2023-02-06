@@ -30,9 +30,10 @@ class WebStatusService {
     WebStatusService(AsyncWebServer * server, SecurityManager * securityManager);
 
   private:
-    void webStatusService(AsyncWebServerRequest * request);
-    void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
-    void mDNS_start() const;
+    void         webStatusService(AsyncWebServerRequest * request);
+    void         WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
+    void         mDNS_start() const;
+    const char * disconnectReason(uint8_t code);
 };
 
 } // namespace emsesp

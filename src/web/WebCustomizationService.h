@@ -27,7 +27,7 @@
 
 // POST
 #define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
-#define MASKED_ENTITIES_PATH "/rest/maskedEntities"
+#define CUSTOM_ENTITIES_PATH "/rest/customEntities"
 #define RESET_CUSTOMIZATION_SERVICE_PATH "/rest/resetCustomizations"
 
 namespace emsesp {
@@ -44,8 +44,8 @@ class AnalogCustomization {
   public:
     uint8_t     gpio;
     std::string name;
-    float       offset;
-    float       factor;
+    double      offset;
+    double      factor;
     uint8_t     uom;  // 0 is none
     int8_t      type; // -1 is for deletion
 
@@ -63,7 +63,7 @@ class EntityCustomization {
   public:
     uint8_t                  product_id; // device's product id
     uint8_t                  device_id;  // device's device id
-    std::vector<std::string> entity_ids; // array of entity ids with masks
+    std::vector<std::string> entity_ids; // array of entity ids with masks and optional custom fullname
 };
 
 class WebCustomization {
@@ -93,7 +93,7 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
     void devices(AsyncWebServerRequest * request);
 
     // POST
-    void masked_entities(AsyncWebServerRequest * request, JsonVariant & json);
+    void custom_entities(AsyncWebServerRequest * request, JsonVariant & json);
     void device_entities(AsyncWebServerRequest * request, JsonVariant & json);
     void reset_customization(AsyncWebServerRequest * request);
 

@@ -54,8 +54,12 @@ void WebLogService::begin() {
 void WebLogService::start() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         maximum_log_messages_ = settings.weblog_buffer;
+        limit_log_messages_   = maximum_log_messages_;
         compact_              = settings.weblog_compact;
         uuid::log::Logger::register_handler(this, (uuid::log::Level)settings.weblog_level);
+        if ((uuid::log::Level)settings.weblog_level == uuid::log::Level::OFF) {
+            log_messages_.clear();
+        }
     });
 }
 
@@ -71,6 +75,13 @@ void WebLogService::log_level(uuid::log::Level level) {
         },
         "local");
     uuid::log::Logger::register_handler(this, level);
+    if (level == uuid::log::Level::OFF) {
+        log_messages_.clear();
+    }
+}
+
+size_t WebLogService::num_log_messages() const {
+    return log_messages_.size();
 }
 
 size_t WebLogService::maximum_log_messages() const {
@@ -79,6 +90,9 @@ size_t WebLogService::maximum_log_messages() const {
 
 void WebLogService::maximum_log_messages(size_t count) {
     maximum_log_messages_ = std::max((size_t)1, count);
+    if (limit_log_messages_ > maximum_log_messages_) {
+        limit_log_messages_ = maximum_log_messages_;
+    }
     while (log_messages_.size() > maximum_log_messages_) {
         log_messages_.pop_front();
     }
@@ -110,7 +124,15 @@ WebLogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_
 }
 
 void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
-    if (log_messages_.size() >= maximum_log_messages_) {
+#ifndef EMSESP_STANDALONE
+    size_t maxAlloc = ESP.getMaxAllocHeap();
+    if (limit_log_messages_ > 5 && maxAlloc < 46080) {
+        --limit_log_messages_;
+    } else if (limit_log_messages_ < maximum_log_messages_ && maxAlloc > 51200) {
+        ++limit_log_messages_;
+    }
+#endif
+    while (log_messages_.size() >= limit_log_messages_) {
         log_messages_.pop_front();
     }
 
@@ -190,9 +212,16 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
 
 // send the complete log buffer to the API, not filtering on log level
 void WebLogService::fetchLog(AsyncWebServerRequest * request) {
-    auto *     response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN + 192 * log_messages_.size());
-    JsonObject root     = response->getRoot();
-    JsonArray  log      = root.createNestedArray("events");
+    // auto *     response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN + 192 * log_messages_.size());
+    size_t buffer   = EMSESP_JSON_SIZE_XLARGE_DYN + 192 * log_messages_.size();
+    auto * response = new MsgpackAsyncJsonResponse(false, buffer);
+    while (!response->getSize()) {
+        delete response;
+        buffer -= 1024;
+        response = new MsgpackAsyncJsonResponse(false, buffer);
+    }
+    JsonObject root = response->getRoot();
+    JsonArray  log  = root.createNestedArray("events");
 
     log_message_id_tail_ = log_messages_.back().id_;
     last_transmit_       = uuid::get_uptime_ms();

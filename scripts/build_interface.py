@@ -20,16 +20,21 @@ def flagExists(flag):
 
 def buildWeb():
     os.chdir("interface")
-    print("Building interface with npm")
+    print("Building web interface...")
     try:
         env.Execute("npm install")
+        env.Execute("npx typesafe-i18n --no-watch")
+        with open("./src/i18n/i18n-util.ts") as r:
+            text = r.read().replace("Locales = 'pl'", "Locales = 'en'")
+        with open("./src/i18n/i18n-util.ts", "w") as w:
+            w.write(text)
         env.Execute("npm run build")
         buildPath = Path("build")
         wwwPath = Path("../data/www")
         if wwwPath.exists() and wwwPath.is_dir():
             rmtree(wwwPath)        
         if not flagExists("PROGMEM_WWW"):
-            print("Copying interface to data directory")
+            print("Copying web files to data directory")
             copytree(buildPath, wwwPath)
             for currentpath, folders, files in os.walk(wwwPath):
                 for file in files:
@@ -40,4 +45,4 @@ def buildWeb():
 if (len(BUILD_TARGETS) == 0 or "upload" in BUILD_TARGETS):
     buildWeb()
 else:
-    print("Skipping build interface step for target(s): " + ", ".join(BUILD_TARGETS))
+    print("Skipping build web interface for target(s): " + ", ".join(BUILD_TARGETS))

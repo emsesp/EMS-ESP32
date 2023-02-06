@@ -19,7 +19,7 @@
 #endif
 
 #ifndef FACTORY_MQTT_HOST
-#define FACTORY_MQTT_HOST "test.mosquitto.org"
+#define FACTORY_MQTT_HOST "" // is blank
 #endif
 
 #ifndef FACTORY_MQTT_PORT
@@ -74,7 +74,6 @@ class MqttSettings {
     // connection settings
     uint16_t keepAlive;
     bool     cleanSession;
-    uint16_t maxTopicLength;
 
     // proddy EMS-ESP specific
     String   base;
@@ -84,6 +83,7 @@ class MqttSettings {
     uint16_t publish_time_mixer;
     uint16_t publish_time_other;
     uint16_t publish_time_sensor;
+    uint16_t publish_time_heartbeat;
     uint8_t  mqtt_qos;
     bool     mqtt_retain;
     bool     ha_enabled;
@@ -92,6 +92,7 @@ class MqttSettings {
     bool     publish_single;
     bool     publish_single2cmd;
     bool     send_response;
+    uint8_t  entity_format;
 
     static void              read(MqttSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, MqttSettings & settings);

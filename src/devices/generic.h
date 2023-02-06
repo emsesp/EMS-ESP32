@@ -25,14 +25,10 @@ namespace emsesp {
 
 class Generic : public EMSdevice {
   public:
-    Generic(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const std::string & name, uint8_t flags, uint8_t brand);
+    Generic(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
 
   private:
     static uuid::log::Logger logger_;
-
-    int16_t rfTemp_;
-
-    void process_RFSensorMessage(std::shared_ptr<const Telegram> telegram);
 };
 
 } // namespace emsesp

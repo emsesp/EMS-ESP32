@@ -46,10 +46,29 @@ static constexpr uint8_t  EMS_VALUE_UINT_NOTSET   = 0xFF;       // for 8-bit uns
 static constexpr int8_t   EMS_VALUE_INT_NOTSET    = 0x7F;       // for signed 8-bit ints/bytes
 static constexpr uint16_t EMS_VALUE_USHORT_NOTSET = 0x7D00;     //  32000: for 2-byte unsigned shorts
 static constexpr int16_t  EMS_VALUE_SHORT_NOTSET  = 0x7D00;     //  32000: for 2-byte signed shorts
-static constexpr uint32_t EMS_VALUE_ULONG_NOTSET  = 0x00FFFFFF; // for 3-byte and 4-byte longs
+static constexpr uint32_t EMS_VALUE_ULONG_NOTSET  = 0x00FFFFFF; // for 3-byte longs
+static constexpr uint32_t EMS_VALUE_ULLONG_NOTSET = 0xFFFFFFFF; // for 4-byte longs
 
 static constexpr uint8_t EMS_MAX_TELEGRAM_LENGTH         = 32; // max length of a complete EMS telegram
 static constexpr uint8_t EMS_MAX_TELEGRAM_MESSAGE_LENGTH = 27; // max length of message block, assuming EMS1.0
+
+#if defined(EMSESP_STANDALONE_DUMP)
+#define EMS_VALUE_DEFAULT_INT 11
+#define EMS_VALUE_DEFAULT_UINT -12
+#define EMS_VALUE_DEFAULT_SHORT -1234
+#define EMS_VALUE_DEFAULT_USHORT 1234
+#define EMS_VALUE_DEFAULT_ULONG 12356
+#define EMS_VALUE_DEFAULT_BOOL 1
+#define EMS_VALUE_DEFAULT_ENUM 1
+#else
+#define EMS_VALUE_DEFAULT_INT EMS_VALUE_INT_NOTSET
+#define EMS_VALUE_DEFAULT_UINT EMS_VALUE_UINT_NOTSET
+#define EMS_VALUE_DEFAULT_SHORT EMS_VALUE_SHORT_NOTSET
+#define EMS_VALUE_DEFAULT_USHORT EMS_VALUE_USHORT_NOTSET
+#define EMS_VALUE_DEFAULT_ULONG EMS_VALUE_ULONG_NOTSET
+#define EMS_VALUE_DEFAULT_BOOL EMS_VALUE_BOOL_NOTSET
+#define EMS_VALUE_DEFAULT_ENUM EMS_VALUE_UINT_NOTSET
+#endif
 
 namespace emsesp {
 
@@ -250,11 +269,7 @@ class RxService : public EMSbus {
         if (telegram_error_count_ == 0) {
             return 100; // all good, 100%
         }
-        if (telegram_error_count_ >= telegram_count_) {
-            return 100;
-        }
-        uint8_t q = ((float)telegram_error_count_ / telegram_count_ * 100);
-
+        uint8_t q = (telegram_error_count_ * 100 / (telegram_count_ + telegram_error_count_));
         return (q <= EMS_BUS_QUALITY_RX_THRESHOLD ? 100 : 100 - q);
     }
 
@@ -294,6 +309,7 @@ class TxService : public EMSbus {
 
     void     start();
     void     send();
+    uint8_t  get_send_id();
     void     add(const uint8_t  operation,
                  const uint8_t  dest,
                  const uint16_t type_id,
@@ -304,12 +320,12 @@ class TxService : public EMSbus {
                  const bool     front = false);
     void     add(const uint8_t operation, const uint8_t * data, const uint8_t length, const uint16_t validateid, const bool front = false);
     void     read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0, const uint8_t length = 0);
-    void     send_raw(const char * telegram_data);
+    bool     send_raw(const char * telegram_data);
     void     send_poll() const;
     void     retry_tx(const uint8_t operation, const uint8_t * data, const uint8_t length);
     bool     is_last_tx(const uint8_t src, const uint8_t dest) const;
     uint16_t post_send_query();
-    uint16_t read_next_tx(uint8_t offset);
+    uint16_t read_next_tx(const uint8_t offset, const uint8_t length);
 
     uint8_t retry_count() const {
         return retry_count_;
