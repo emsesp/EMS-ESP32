@@ -183,6 +183,12 @@ MAKE_PSTR_LIST(disinfecting, "disinfecting", "Desinfizieren", "Desinfecteren", "
 MAKE_PSTR_LIST(no_heat, "no heat", "keine Wärme", "Geen warmte", "Ingen värme", "brak ciepła", "ingen varme", "pas de chauffage")
 MAKE_PSTR_LIST(heatrequest, "heat request", "Wärmeanforderung", "Verwarmignsverzoek", "Värmeförfrågan", "zapotrzebowanie na ciepło", "varmeforespørsel", "demande de chauffage")
 MAKE_PSTR_LIST(valve, "valve", "Ventil", "Klep", "Ventil", "zawór", "ventil", "valve")
+MAKE_PSTR_LIST(proportional, "proportional", "", "", "", "", "", "", "") // TODO translate
+MAKE_PSTR_LIST(deltaP1, "deltaP-1", "", "", "", "", "", "", "") // TODO translate
+MAKE_PSTR_LIST(deltaP2, "deltaP-2", "", "", "", "", "", "", "") // TODO translate
+MAKE_PSTR_LIST(deltaP3, "deltaP-3", "", "", "", "", "", "", "") // TODO translate
+MAKE_PSTR_LIST(deltaP4, "deltaP-4", "", "", "", "", "", "", "") // TODO translate
+
 
 // heatpump
 MAKE_PSTR_LIST(none, "none", "keine", "geen", "ingen", "brak", "ingen", "aucun")
@@ -316,6 +322,7 @@ MAKE_PSTR_LIST(maintenanceType, "maintenance", "maintenance scheduled", "Wartung
 MAKE_PSTR_LIST(maintenanceTime, "maintenancetime", "time to next maintenance", "Wartung in", "Onderhoud in", "Tid till nästa underhall", "czas do kolejnego przeglądu", "vedlikeholdstid", "durée avant la prochaine maintenance")
 MAKE_PSTR_LIST(emergencyOps, "emergencyops", "emergency operation", "Notoperation", "Noodoperatie", "Nöddrift", "praca w trybie awaryjnym", "nøddrift", "opération d'urgence")
 MAKE_PSTR_LIST(emergencyTemp, "emergencytemp", "emergency temperature", "Nottemperatur", "Noodtemperatuur", "Nöddrift temperatur", "temperatura w trybie awaryjnym", "nødtemperatur", "température d'urgence")
+MAKE_PSTR_LIST(pumpMode, "pumpmode", "boiler pump mode", "Kesselpumpen Modus", "", "", "", "", "") // TODO translate
 
 // heatpump/compress specific
 MAKE_PSTR_LIST(upTimeControl, "uptimecontrol", "total operating time heat", "Betriebszeit Heizen gesamt", "Totale bedrijfstijd", "Total tid uppvärmning", "łączny czas generowania ciepła", "", "durée totale de fonctionnement chauffage") // TODO translate
