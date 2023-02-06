@@ -158,6 +158,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           MAKE_CF_CB(set_heating_temp));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pumpModMax_, DeviceValueType::UINT, FL_(pumpModMax), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_max_pump));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pumpModMin_, DeviceValueType::UINT, FL_(pumpModMin), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_min_pump));
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &pumpMode_, DeviceValueType::ENUM, FL_(enum_pumpMode), FL_(pumpMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_pumpMode));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pumpDelay_, DeviceValueType::UINT, FL_(pumpDelay), DeviceValueUOM::MINUTES, MAKE_CF_CB(set_pump_delay));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &burnMinPeriod_,
@@ -942,6 +944,7 @@ void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, pumpDelay_, 8);
     has_update(telegram, pumpModMax_, 9);
     has_update(telegram, pumpModMin_, 10);
+    has_update(telegram, pumpMode_, 11);
     has_update(telegram, boil2HystOff_, 12);
     has_update(telegram, boil2HystOn_, 13);
 }
@@ -1915,6 +1918,15 @@ bool Boiler::set_max_pump(const char * value, const int8_t id) {
     }
 
     return true;
+}
+
+bool Boiler::set_pumpMode(const char * value, const int8_t id) {
+    uint8_t v;
+    if (Helpers::value2enum(value, v, FL_(enum_pumpMode))) {
+        write_command(EMS_TYPE_UBAParameters, 11, v, EMS_TYPE_UBAParameters);
+        return true;
+    }
+    return false;
 }
 
 // set boiler on hysteresis

@@ -34,6 +34,7 @@
 - Add heatpump silent mode and other entities [#896](https://github.com/emsesp/EMS-ESP32/issues/896)
 - Allow reboot to other partition (factory or asymetric OTA)
 - Blacklist entities to remove from memory [#891](https://github.com/emsesp/EMS-ESP32/issues/891)
+- Add boiler pump operating mode [#944](https://github.com/emsesp/EMS-ESP32/issues/944)
 
 ## Fixed
 
