@@ -93,11 +93,10 @@ const SignIn: FC = () => {
         sx={(theme) => ({
           textAlign: 'center',
           padding: theme.spacing(2),
-          paddingTop: '200px',
+          paddingTop: '172px',
           backgroundImage: 'url("/app/icon.png")',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: '50% ' + theme.spacing(2),
-          backgroundSize: 'auto 150px',
           width: '100%'
         })}
       >
