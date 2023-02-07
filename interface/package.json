@@ -8,28 +8,28 @@
     "@emotion/styled": "^11.10.5",
     "@msgpack/msgpack": "^2.8.0",
     "@mui/icons-material": "^5.11.0",
-    "@mui/material": "^5.11.7",
+    "@mui/material": "^5.11.8",
     "@table-library/react-table-library": "4.0.24",
-    "@types/lodash": "^4.14.191",
-    "@types/node": "^18.11.19",
+    "@types/node": "^18.13.0",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
     "@types/react-router-dom": "^5.3.3",
+    "@types/lodash-es": "^4.17.6",
     "async-validator": "^4.2.5",
+    "axios": "^1.3.2",
     "jwt-decode": "^3.1.2",
-    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "notistack": "^2.0.8",
     "react": "^18.2.0",
     "react-app-rewired": "^2.2.1",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-icons": "^4.7.1",
+    "react-router-dom": "^6.8.1",
     "react-scripts": "^5.0.1",
     "sockette": "^2.0.6",
     "typesafe-i18n": "^5.24.0",
-    "typescript": "^4.9.5",
-    "axios": "^1.3.2",
-    "react-router-dom": "^6.8.1"
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -99,6 +99,7 @@
   "devDependencies": {
     "http-proxy-middleware": "^2.0.6",
     "nodemon": "^2.0.20",
-    "npm-run-all": "^4.1.5"
+    "npm-run-all": "^4.1.5",
+    "webpack-bundle-analyzer": "^4.7.0"
   }
 }
