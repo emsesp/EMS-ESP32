@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
-import { range } from 'lodash';
+import { range } from 'lodash-es';
 
 import { Button, Checkbox, MenuItem } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
