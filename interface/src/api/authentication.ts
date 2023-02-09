@@ -3,7 +3,7 @@ import * as H from 'history';
 import jwtDecode from 'jwt-decode';
 import { Path } from 'react-router-dom';
 
-import { Me, SignInRequest, SignInResponse } from '../types';
+import { Me, SignInRequest, SignInResponse } from 'types';
 
 import { ACCESS_TOKEN, AXIOS } from './endpoints';
 import { PROJECT_PATH } from './env';

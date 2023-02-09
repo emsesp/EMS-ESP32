@@ -5,7 +5,7 @@ import { Button, Checkbox, MenuItem } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-import { validate } from '../../validators';
+import { validate } from 'validators';
 import {
   BlockFormControlLabel,
   ButtonRow,
@@ -13,14 +13,14 @@ import {
   SectionContent,
   ValidatedTextField,
   BlockNavigation
-} from '../../components';
-import { NTPSettings } from '../../types';
-import { updateValueDirty, useRest } from '../../utils';
-import * as NTPApi from '../../api/ntp';
+} from 'components';
+import { NTPSettings } from 'types';
+import { updateValueDirty, useRest } from 'utils';
+import * as NTPApi from 'api/ntp';
 import { selectedTimeZone, timeZoneSelectItems, TIME_ZONES } from './TZ';
-import { NTP_SETTINGS_VALIDATOR } from '../../validators/ntp';
+import { NTP_SETTINGS_VALIDATOR } from 'validators/ntp';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const NTPSettingsForm: FC = () => {
   const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =

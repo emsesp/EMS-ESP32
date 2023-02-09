@@ -3,15 +3,15 @@ import { Navigate, Routes, Route, useNavigate } from 'react-router-dom';
 
 import { Tab } from '@mui/material';
 
-import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from '../../components';
-import { WiFiNetwork } from '../../types';
-import { AuthenticatedContext } from '../../contexts/authentication';
+import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
+import { WiFiNetwork } from 'types';
+import { AuthenticatedContext } from 'contexts/authentication';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import NetworkStatusForm from './NetworkStatusForm';
 import WiFiNetworkScanner from './WiFiNetworkScanner';
 import NetworkSettingsForm from './NetworkSettingsForm';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const NetworkConnection: FC = () => {
   const { LL } = useI18nContext();

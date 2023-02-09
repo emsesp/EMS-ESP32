@@ -4,13 +4,13 @@ import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 
 import { useSnackbar, VariantType } from 'notistack';
 
-import { useI18nContext } from './i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
-import { Authentication, AuthenticationContext } from './contexts/authentication';
-import { RequireAuthenticated, RequireUnauthenticated } from './components';
+import { Authentication, AuthenticationContext } from 'contexts/authentication';
+import { RequireAuthenticated, RequireUnauthenticated } from 'components';
 
-import SignIn from './SignIn';
-import AuthenticatedRouting from './AuthenticatedRouting';
+import SignIn from 'SignIn';
+import AuthenticatedRouting from 'AuthenticatedRouting';
 
 interface SecurityRedirectProps {
   message: string;
@@ -28,7 +28,6 @@ const RootRedirect: FC<SecurityRedirectProps> = ({ message, variant, signOut }) 
   return <Navigate to="/" />;
 };
 
-// TODO still need this?
 export const RemoveTrailingSlashes = () => {
   const location = useLocation();
   return (

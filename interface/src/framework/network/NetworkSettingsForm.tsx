@@ -31,19 +31,19 @@ import {
   ValidatedTextField,
   MessageBox,
   BlockNavigation
-} from '../../components';
-import { NetworkSettings } from '../../types';
-import * as NetworkApi from '../../api/network';
-import { numberValue, updateValueDirty, useRest } from '../../utils';
-import * as EMSESP from '../../project/api';
+} from 'components';
+import { NetworkSettings } from 'types';
+import * as NetworkApi from 'api/network';
+import { numberValue, updateValueDirty, useRest } from 'utils';
+import * as EMSESP from 'project/api';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
 import { ValidateFieldsError } from 'async-validator';
-import { validate } from '../../validators';
-import { createNetworkSettingsValidator } from '../../validators/network';
+import { validate } from 'validators';
+import { createNetworkSettingsValidator } from 'validators/network';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 import RestartMonitor from '../system/RestartMonitor';
 
 const WiFiSettingsForm: FC = () => {

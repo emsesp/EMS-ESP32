@@ -6,12 +6,12 @@ import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import ComputerIcon from '@mui/icons-material/Computer';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
-import * as APApi from '../../api/ap';
-import { APNetworkStatus, APStatus } from '../../types';
-import { ButtonRow, FormLoader, SectionContent } from '../../components';
-import { useRest } from '../../utils';
+import * as APApi from 'api/ap';
+import { APNetworkStatus, APStatus } from 'types';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { useRest } from 'utils';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
   switch (status) {

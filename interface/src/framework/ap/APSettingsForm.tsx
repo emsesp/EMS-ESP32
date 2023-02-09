@@ -6,7 +6,7 @@ import { Button, Checkbox, MenuItem } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-import { createAPSettingsValidator, validate } from '../../validators';
+import { createAPSettingsValidator, validate } from 'validators';
 import {
   BlockFormControlLabel,
   ButtonRow,
@@ -15,13 +15,13 @@ import {
   ValidatedPasswordField,
   ValidatedTextField,
   BlockNavigation
-} from '../../components';
+} from 'components';
 
-import { APProvisionMode, APSettings } from '../../types';
-import { numberValue, updateValueDirty, useRest } from '../../utils';
-import * as APApi from '../../api/ap';
+import { APProvisionMode, APSettings } from 'types';
+import { numberValue, updateValueDirty, useRest } from 'utils';
+import * as APApi from 'api/ap';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 export const isAPEnabled = ({ provision_mode }: APSettings) => {
   return provision_mode === APProvisionMode.AP_MODE_ALWAYS || provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;

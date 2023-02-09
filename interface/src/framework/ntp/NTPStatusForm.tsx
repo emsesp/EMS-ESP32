@@ -26,13 +26,13 @@ import UpdateIcon from '@mui/icons-material/Update';
 import DnsIcon from '@mui/icons-material/Dns';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-import * as NTPApi from '../../api/ntp';
-import { NTPStatus, NTPSyncStatus } from '../../types';
-import { ButtonRow, FormLoader, SectionContent } from '../../components';
-import { extractErrorMessage, formatDateTime, formatLocalDateTime, useRest } from '../../utils';
-import { AuthenticatedContext } from '../../contexts/authentication';
+import * as NTPApi from 'api/ntp';
+import { NTPStatus, NTPSyncStatus } from 'types';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { extractErrorMessage, formatDateTime, formatLocalDateTime, useRest } from 'utils';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 export const isNtpActive = ({ status }: NTPStatus) => status === NTPSyncStatus.NTP_ACTIVE;
 export const isNtpEnabled = ({ status }: NTPStatus) => status !== NTPSyncStatus.NTP_DISABLED;
@@ -127,7 +127,6 @@ const NTPStatusForm: FC = () => {
           onClick={configureTime}
           disabled={processing}
           color="primary"
-          autoFocus
         >
           {LL.UPDATE()}
         </Button>

@@ -5,7 +5,7 @@ import { ListItem, ListItemButton, ListItemIcon, ListItemText, SvgIconProps } fr
 
 import { grey } from '@mui/material/colors';
 
-import { routeMatches } from '../../utils';
+import { routeMatches } from 'utils';
 
 interface LayoutMenuItemProps {
   icon: React.ComponentType<SvgIconProps>;

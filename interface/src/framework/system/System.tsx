@@ -3,15 +3,15 @@ import { Navigate, Routes, Route } from 'react-router-dom';
 
 import { Tab } from '@mui/material';
 
-import { useRouterTab, RouterTabs, useLayoutTitle, RequireAdmin } from '../../components';
-import { AuthenticatedContext } from '../../contexts/authentication';
+import { useRouterTab, RouterTabs, useLayoutTitle, RequireAdmin } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
 import UploadFileForm from './UploadFileForm';
 import SystemStatusForm from './SystemStatusForm';
 import OTASettingsForm from './OTASettingsForm';
 
 import SystemLog from './SystemLog';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const System: FC = () => {
   const { LL } = useI18nContext();

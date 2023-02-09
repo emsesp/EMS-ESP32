@@ -9,12 +9,12 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LockIcon from '@mui/icons-material/Lock';
 import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 
-import ProjectMenu from '../../project/ProjectMenu';
+import ProjectMenu from 'project/ProjectMenu';
 
 import LayoutMenuItem from './LayoutMenuItem';
-import { AuthenticatedContext } from '../../contexts/authentication';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const LayoutMenu: FC = () => {
   const authenticatedContext = useContext(AuthenticatedContext);

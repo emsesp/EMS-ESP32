@@ -19,9 +19,8 @@ import {
   Link
 } from '@mui/material';
 
-import { Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 
 import { useSnackbar } from 'notistack';
 
@@ -36,17 +35,17 @@ import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
 import OptionIcon from './OptionIcon';
 
-import { ButtonRow, FormLoader, ValidatedTextField, SectionContent, MessageBox, BlockNavigation } from '../components';
+import { ButtonRow, FormLoader, ValidatedTextField, SectionContent, MessageBox, BlockNavigation } from 'components';
 
 import * as EMSESP from './api';
 
-import { extractErrorMessage, updateValue } from '../utils';
+import { extractErrorMessage, updateValue } from 'utils';
 
 import { DeviceShort, Devices, DeviceEntity, DeviceEntityMask } from './types';
 
-import { useI18nContext } from '../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
-import RestartMonitor from '../framework/system/RestartMonitor';
+import RestartMonitor from 'framework/system/RestartMonitor';
 
 export const APIURL = window.location.origin + '/api/';
 
@@ -57,7 +56,7 @@ const SettingsCustomization: FC = () => {
   const emptyDeviceEntity = { id: '', v: 0, n: '', cn: '', m: 0, w: false };
 
   const [numChanges, setNumChanges] = useState<number>(0);
-  let blocker = useBlocker(numChanges !== 0);
+  const blocker = useBlocker(numChanges !== 0);
 
   const [restarting, setRestarting] = useState<boolean>(false);
   const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
@@ -201,15 +200,15 @@ const SettingsCustomization: FC = () => {
   }
 
   const getMaskNumber = (newMask: string[]) => {
-    var new_mask = 0;
-    for (let entry of newMask) {
+    let new_mask = 0;
+    for (const entry of newMask) {
       new_mask |= Number(entry);
     }
     return new_mask;
   };
 
   const getMaskString = (m: number) => {
-    var new_masks = [];
+    let new_masks: string[] = [];
     if ((m & 1) === 1) {
       new_masks.push('1');
     }
@@ -561,7 +560,6 @@ const SettingsCustomization: FC = () => {
                         </ToggleButtonGroup>
                       )}
                     </Cell>
-
                     <Cell>{!deviceEntity && formatName(de)}</Cell>
                     <Cell>{!deviceEntity && !(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}</Cell>
                     <Cell>{!deviceEntity && !(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}</Cell>
@@ -584,13 +582,7 @@ const SettingsCustomization: FC = () => {
         <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmReset(false)} color="secondary">
           {LL.CANCEL()}
         </Button>
-        <Button
-          startIcon={<SettingsBackupRestoreIcon />}
-          variant="outlined"
-          onClick={resetCustomization}
-          autoFocus
-          color="error"
-        >
+        <Button startIcon={<SettingsBackupRestoreIcon />} variant="outlined" onClick={resetCustomization} color="error">
           {LL.RESET(0)}
         </Button>
       </DialogActions>

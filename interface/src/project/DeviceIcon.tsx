@@ -1,16 +1,12 @@
 import { FC } from 'react';
 
 import { CgSmartHomeBoiler } from 'react-icons/cg';
-import { MdOutlineSensors } from 'react-icons/md';
 import { FaSolarPanel } from 'react-icons/fa';
-import { MdThermostatAuto } from 'react-icons/md';
-import { AiOutlineControl } from 'react-icons/ai';
+import { MdThermostatAuto, MdOutlineSensors } from 'react-icons/md';
 import { GiHeatHaze } from 'react-icons/gi';
 import { TiFlowSwitch } from 'react-icons/ti';
 import { VscVmConnect } from 'react-icons/vsc';
-import { AiOutlineGateway } from 'react-icons/ai';
-import { AiOutlineAlert } from 'react-icons/ai';
-import { AiOutlineChrome } from 'react-icons/ai';
+import { AiOutlineControl, AiOutlineGateway, AiOutlineAlert, AiOutlineChrome } from 'react-icons/ai';
 
 interface DeviceIconProps {
   type_id: number;

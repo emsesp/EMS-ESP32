@@ -2,13 +2,13 @@ import { FC, useCallback, useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
-import * as AuthenticationApi from '../../api/authentication';
-import { ACCESS_TOKEN } from '../../api/endpoints';
-import { RequiredChildrenProps } from '../../utils';
-import { LoadingSpinner } from '../../components';
-import { Me } from '../../types';
+import * as AuthenticationApi from 'api/authentication';
+import { ACCESS_TOKEN } from 'api/endpoints';
+import { RequiredChildrenProps } from 'utils';
+import { LoadingSpinner } from 'components';
+import { Me } from 'types';
 import { AuthenticationContext } from './context';
 
 const Authentication: FC<RequiredChildrenProps> = ({ children }) => {

@@ -6,7 +6,7 @@ import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment } from '@m
 import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-import { createMqttSettingsValidator, validate } from '../../validators';
+import { createMqttSettingsValidator, validate } from 'validators';
 import {
   BlockFormControlLabel,
   ButtonRow,
@@ -15,12 +15,12 @@ import {
   ValidatedPasswordField,
   ValidatedTextField,
   BlockNavigation
-} from '../../components';
-import { MqttSettings } from '../../types';
-import { numberValue, updateValueDirty, useRest } from '../../utils';
-import * as MqttApi from '../../api/mqtt';
+} from 'components';
+import { MqttSettings } from 'types';
+import { numberValue, updateValueDirty, useRest } from 'utils';
+import * as MqttApi from 'api/mqtt';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const MqttSettingsForm: FC = () => {
   const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =

@@ -2,7 +2,7 @@ import { FC } from 'react';
 import type { Blocker } from '@remix-run/router';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 interface BlockNavigationProps {
   blocker: Blocker;
@@ -19,7 +19,7 @@ const BlockNavigation: FC<BlockNavigationProps> = ({ blocker }) => {
         <Button variant="outlined" onClick={() => blocker.reset?.()} color="secondary">
           {LL.STAY()}
         </Button>
-        <Button variant="contained" onClick={() => blocker.proceed?.()} color="primary" autoFocus>
+        <Button variant="contained" onClick={() => blocker.proceed?.()} color="primary">
           {LL.LEAVE()}
         </Button>
       </DialogActions>

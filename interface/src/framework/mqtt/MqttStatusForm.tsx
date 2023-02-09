@@ -7,12 +7,12 @@ import ReportIcon from '@mui/icons-material/Report';
 import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
 import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 
-import { ButtonRow, FormLoader, SectionContent } from '../../components';
-import { MqttStatus, MqttDisconnectReason } from '../../types';
-import * as MqttApi from '../../api/mqtt';
-import { useRest } from '../../utils';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { MqttStatus, MqttDisconnectReason } from 'types';
+import * as MqttApi from 'api/mqtt';
+import { useRest } from 'utils';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 export const mqttStatusHighlight = ({ enabled, connected }: MqttStatus, theme: Theme) => {
   if (!enabled) {

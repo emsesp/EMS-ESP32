@@ -2,19 +2,19 @@ import { FC, useCallback, useEffect } from 'react';
 import { Navigate, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AxiosError } from 'axios';
 
-import * as AuthenticationApi from './api/authentication';
-import { PROJECT_PATH } from './api/env';
-import { AXIOS } from './api/endpoints';
-import { Layout, RequireAdmin } from './components';
+import * as AuthenticationApi from 'api/authentication';
+import { PROJECT_PATH } from 'api/env';
+import { AXIOS } from 'api/endpoints';
+import { Layout, RequireAdmin } from 'components';
 
-import ProjectRouting from './project/ProjectRouting';
+import ProjectRouting from 'project/ProjectRouting';
 
-import NetworkConnection from './framework/network/NetworkConnection';
-import AccessPoint from './framework/ap/AccessPoint';
-import NetworkTime from './framework/ntp/NetworkTime';
-import Mqtt from './framework/mqtt/Mqtt';
-import System from './framework/system/System';
-import Security from './framework/security/Security';
+import NetworkConnection from 'framework/network/NetworkConnection';
+import AccessPoint from 'framework/ap/AccessPoint';
+import NetworkTime from 'framework/ntp/NetworkTime';
+import Mqtt from 'framework/mqtt/Mqtt';
+import System from 'framework/system/System';
+import Security from 'framework/security/Security';
 
 const AuthenticatedRouting: FC = () => {
   const location = useLocation();

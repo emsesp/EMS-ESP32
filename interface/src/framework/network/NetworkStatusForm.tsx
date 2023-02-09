@@ -9,12 +9,12 @@ import DnsIcon from '@mui/icons-material/Dns';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import RouterIcon from '@mui/icons-material/Router';
 
-import { ButtonRow, FormLoader, SectionContent } from '../../components';
-import { NetworkConnectionStatus, NetworkStatus } from '../../types';
-import * as NetworkApi from '../../api/network';
-import { useRest } from '../../utils';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { NetworkConnectionStatus, NetworkStatus } from 'types';
+import * as NetworkApi from 'api/network';
+import { useRest } from 'utils';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const isConnected = ({ status }: NetworkStatus) =>
   status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED ||

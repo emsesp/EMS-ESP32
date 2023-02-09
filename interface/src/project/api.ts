@@ -1,5 +1,5 @@
 import { AxiosPromise } from 'axios';
-import { AXIOS, AXIOS_API, AXIOS_BIN } from '../api/endpoints';
+import { AXIOS, AXIOS_API, AXIOS_BIN } from 'api/endpoints';
 
 import {
   BoardProfile,

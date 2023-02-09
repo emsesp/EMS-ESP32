@@ -1,8 +1,18 @@
 {
   "name": "EMS-ESP",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "private": true,
-  "proxy": "http://localhost:3080",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "preview_standalone": "npm-run-all -p preview typesafe-i18n mock-api",
+    "mock-api": "nodemon --watch ../mock-api ../mock-api/server.js",
+    "standalone": "npm-run-all -p dev typesafe-i18n mock-api",
+    "typesafe-i18n": "typesafe-i18n",
+    "format": "prettier --write '**/*.{ts,tsx,js,css,json,md}'",
+    "lint": "eslint . --ext .ts,.tsx"
+  },
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
@@ -10,96 +20,47 @@
     "@mui/icons-material": "^5.11.0",
     "@mui/material": "^5.11.8",
     "@table-library/react-table-library": "4.0.24",
+    "@types/lodash-es": "^4.17.6",
     "@types/node": "^18.13.0",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
     "@types/react-router-dom": "^5.3.3",
-    "@types/lodash-es": "^4.17.6",
     "async-validator": "^4.2.5",
     "axios": "^1.3.2",
     "jwt-decode": "^3.1.2",
     "lodash-es": "^4.17.21",
     "notistack": "^2.0.8",
     "react": "^18.2.0",
-    "react-app-rewired": "^2.2.1",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-icons": "^4.7.1",
     "react-router-dom": "^6.8.1",
-    "react-scripts": "^5.0.1",
     "sockette": "^2.0.6",
     "typesafe-i18n": "^5.24.0",
     "typescript": "^4.9.5"
   },
-  "scripts": {
-    "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
-    "test": "react-app-rewired test",
-    "eject": "react-scripts eject",
-    "format": "prettier --write '**/*.{ts,tsx,js,css,json,md}'",
-    "build-hosted": "env-cmd -f .env.hosted npm run build",
-    "build-localhost": "PUBLIC_URL=/ react-app-rewired build",
-    "mock-api": "nodemon --watch ../mock-api ../mock-api/server.js",
-    "standalone": "npm-run-all -p start typesafe-i18n mock-api",
-    "lint": "eslint . --ext .ts,.tsx",
-    "typesafe-i18n": "typesafe-i18n"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ],
-    "rules": {
-      "eol-last": 1,
-      "react/jsx-closing-bracket-location": 1,
-      "react/jsx-closing-tag-location": 1,
-      "react/jsx-wrap-multilines": 1,
-      "react/jsx-curly-newline": 1,
-      "no-multiple-empty-lines": [
-        1,
-        {
-          "max": 1
-        }
-      ],
-      "no-trailing-spaces": 1,
-      "semi": 1,
-      "no-extra-semi": 1,
-      "react/jsx-max-props-per-line": [
-        1,
-        {
-          "when": "multiline"
-        }
-      ],
-      "react/jsx-first-prop-new-line": [
-        1,
-        "multiline"
-      ],
-      "@typescript-eslint/no-shadow": 1,
-      "max-len": [
-        1,
-        {
-          "code": 220
-        }
-      ],
-      "arrow-parens": 1
-    }
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
   "devDependencies": {
-    "http-proxy-middleware": "^2.0.6",
+    "@typescript-eslint/eslint-plugin": "^5.51.0",
+    "@typescript-eslint/parser": "^5.51.0",
+    "@vitejs/plugin-react-swc": "^3.1.0",
+    "babel-plugin-styled-components": "^2.0.7",
+    "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "eslint": "^8.33.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-import-resolver-typescript": "^3.5.3",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-refresh": "^0.3.3",
     "nodemon": "^2.0.20",
     "npm-run-all": "^4.1.5",
-    "webpack-bundle-analyzer": "^4.7.0"
+    "prettier": "^2.8.4",
+    "rollup-plugin-visualizer": "^5.9.0",
+    "vite": "^4.1.1",
+    "vite-plugin-svgr": "^2.4.0",
+    "vite-tsconfig-paths": "^4.0.5",
+    "@types/styled-components": "^5.1.26",
+    "@swc/plugin-styled-components": "^1.5.41",
+    "styled-components": "^5.3.6"
   }
 }

@@ -3,9 +3,9 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { Tab } from '@mui/material';
 
-import { RouterTabs, useRouterTab, useLayoutTitle } from '../components';
+import { RouterTabs, useRouterTab, useLayoutTitle } from 'components';
 
-import { useI18nContext } from '../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 import SettingsApplication from './SettingsApplication';
 import SettingsCustomization from './SettingsCustomization';

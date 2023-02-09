@@ -4,13 +4,13 @@ import { SnackbarProvider } from 'notistack';
 import { IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-import CustomTheme from './CustomTheme';
-import AppRouting from './AppRouting';
+import CustomTheme from 'CustomTheme';
+import AppRouting from 'AppRouting';
 
 import { localStorageDetector } from 'typesafe-i18n/detectors';
-import TypesafeI18n from './i18n/i18n-react';
-import { detectLocale } from './i18n/i18n-util';
-import { loadLocaleAsync } from './i18n/i18n-util.async';
+import TypesafeI18n from 'i18n/i18n-react';
+import { detectLocale } from 'i18n/i18n-util';
+import { loadLocaleAsync } from 'i18n/i18n-util.async';
 
 const detectedLocale = detectLocale(localStorageDetector);
 

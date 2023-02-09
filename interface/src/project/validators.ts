@@ -1,5 +1,5 @@
 import Schema, { InternalRuleItem } from 'async-validator';
-import { IP_OR_HOSTNAME_VALIDATOR } from '../validators/shared';
+import { IP_OR_HOSTNAME_VALIDATOR } from 'validators/shared';
 import { Settings } from './types';
 
 export const GPIO_VALIDATOR = {

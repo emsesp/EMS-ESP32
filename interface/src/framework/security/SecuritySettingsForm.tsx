@@ -5,21 +5,14 @@ import { Button } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-import * as SecurityApi from '../../api/security';
-import { SecuritySettings } from '../../types';
-import {
-  ButtonRow,
-  FormLoader,
-  MessageBox,
-  SectionContent,
-  ValidatedPasswordField,
-  BlockNavigation
-} from '../../components';
-import { SECURITY_SETTINGS_VALIDATOR, validate } from '../../validators';
-import { updateValueDirty, useRest } from '../../utils';
-import { AuthenticatedContext } from '../../contexts/authentication';
+import * as SecurityApi from 'api/security';
+import { SecuritySettings } from 'types';
+import { ButtonRow, FormLoader, MessageBox, SectionContent, ValidatedPasswordField, BlockNavigation } from 'components';
+import { SECURITY_SETTINGS_VALIDATOR, validate } from 'validators';
+import { updateValueDirty, useRest } from 'utils';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const SecuritySettingsForm: FC = () => {
   const { LL } = useI18nContext();

@@ -17,19 +17,19 @@ import {
 import PersonIcon from '@mui/icons-material/Person';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
-import { AuthenticatedContext } from '../../contexts/authentication';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-import { I18nContext } from '../../i18n/i18n-react';
-import type { Locales } from '../../i18n/i18n-types';
-import { loadLocaleAsync } from '../../i18n/i18n-util.async';
+import { I18nContext } from 'i18n/i18n-react';
+import type { Locales } from 'i18n/i18n-types';
+import { loadLocaleAsync } from 'i18n/i18n-util.async';
 
-import { ReactComponent as NLflag } from '../../i18n/NL.svg';
-import { ReactComponent as DEflag } from '../../i18n/DE.svg';
-import { ReactComponent as GBflag } from '../../i18n/GB.svg';
-import { ReactComponent as SVflag } from '../../i18n/SV.svg';
-import { ReactComponent as PLflag } from '../../i18n/PL.svg';
-import { ReactComponent as NOflag } from '../../i18n/NO.svg';
-import { ReactComponent as FRflag } from '../../i18n/FR.svg';
+import { ReactComponent as NLflag } from 'i18n/NL.svg';
+import { ReactComponent as DEflag } from 'i18n/DE.svg';
+import { ReactComponent as GBflag } from 'i18n/GB.svg';
+import { ReactComponent as SVflag } from 'i18n/SV.svg';
+import { ReactComponent as PLflag } from 'i18n/PL.svg';
+import { ReactComponent as NOflag } from 'i18n/NO.svg';
+import { ReactComponent as FRflag } from 'i18n/FR.svg';
 
 const ItemTypography = styled(Typography)<TypographyProps>({
   maxWidth: '250px',

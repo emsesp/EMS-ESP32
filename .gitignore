@@ -29,6 +29,8 @@ node_modules
 test.sh
 scripts/__pycache__
 .temp
+*.sln
+*.sw?
 
 # i18n generated files
 interface/src/i18n/i18n-react.tsx
@@ -47,4 +49,6 @@ dump_entities.csv
 dump_entities.xls*
 scripts/run.sh
 test_results.txt
-interface/build-analysis-*.html
+
+# bundle analyzer
+stats.html

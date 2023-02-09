@@ -9,18 +9,17 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 
-import { Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 
-import * as SecurityApi from '../../api/security';
-import { SecuritySettings, User } from '../../types';
-import { ButtonRow, FormLoader, MessageBox, SectionContent } from '../../components';
-import { createUserValidator } from '../../validators';
-import { useRest } from '../../utils';
-import { AuthenticatedContext } from '../../contexts/authentication';
+import * as SecurityApi from 'api/security';
+import { SecuritySettings, User } from 'types';
+import { ButtonRow, FormLoader, MessageBox, SectionContent } from 'components';
+import { createUserValidator } from 'validators';
+import { useRest } from 'utils';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 import GenerateToken from './GenerateToken';
 import UserForm from './UserForm';

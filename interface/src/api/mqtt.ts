@@ -1,5 +1,5 @@
 import { AxiosPromise } from 'axios';
-import { MqttSettings, MqttStatus } from '../types';
+import { MqttSettings, MqttStatus } from 'types';
 
 import { AXIOS } from './endpoints';
 

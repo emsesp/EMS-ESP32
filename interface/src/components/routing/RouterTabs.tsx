@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { Tabs, useMediaQuery, useTheme } from '@mui/material';
 
-import { RequiredChildrenProps } from '../../utils';
+import { RequiredChildrenProps } from 'utils';
 
 interface RouterTabsProps extends RequiredChildrenProps {
   value: string | false;
@@ -15,6 +15,7 @@ const RouterTabs: FC<RouterTabsProps> = ({ value, children }) => {
   const theme = useTheme();
   const smallDown = useMediaQuery(theme.breakpoints.down('sm'));
 
+  // TODO fix this
   const handleTabChange = (event: React.ChangeEvent<{}>, path: string) => {
     navigate(path);
   };

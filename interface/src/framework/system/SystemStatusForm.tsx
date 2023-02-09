@@ -31,17 +31,17 @@ import BuildIcon from '@mui/icons-material/Build';
 import TimerIcon from '@mui/icons-material/Timer';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-import { ButtonRow, FormLoader, SectionContent, MessageBox } from '../../components';
-import { SystemStatus, Version } from '../../types';
-import * as SystemApi from '../../api/system';
-import { extractErrorMessage, useRest } from '../../utils';
+import { ButtonRow, FormLoader, SectionContent, MessageBox } from 'components';
+import { SystemStatus, Version } from 'types';
+import * as SystemApi from 'api/system';
+import { extractErrorMessage, useRest } from 'utils';
 
-import { AuthenticatedContext } from '../../contexts/authentication';
+import { AuthenticatedContext } from 'contexts/authentication';
 
 import axios from 'axios';
 import RestartMonitor from './RestartMonitor';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 export const VERSIONCHECK_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/latest';
 export const VERSIONCHECK_DEV_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/tags/latest';
@@ -131,7 +131,6 @@ const SystemStatusForm: FC = () => {
           onClick={restart}
           disabled={processing}
           color="primary"
-          autoFocus
         >
           {LL.RESTART()}
         </Button>
@@ -238,7 +237,6 @@ const SystemStatusForm: FC = () => {
           variant="outlined"
           onClick={factoryReset}
           disabled={processing}
-          autoFocus
           color="error"
         >
           {LL.FACTORY_RESET()}

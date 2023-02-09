@@ -9,7 +9,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
-import { validate } from '../validators';
+import { validate } from 'validators';
 import { createSettingsValidator } from './validators';
 
 import {
@@ -20,14 +20,14 @@ import {
   ButtonRow,
   MessageBox,
   BlockNavigation
-} from '../components';
-import { numberValue, extractErrorMessage, updateValueDirty, useRest } from '../utils';
+} from 'components';
+import { numberValue, extractErrorMessage, updateValueDirty, useRest } from 'utils';
 
 import * as EMSESP from './api';
 import { Settings, BOARD_PROFILES } from './types';
 
-import { useI18nContext } from '../i18n/i18n-react';
-import RestartMonitor from '../framework/system/RestartMonitor';
+import { useI18nContext } from 'i18n/i18n-react';
+import RestartMonitor from 'framework/system/RestartMonitor';
 
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
@@ -505,9 +505,9 @@ const SettingsApplication: FC = () => {
             >
               <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
               <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
-              <MenuItem value={3}>"true"/"false"</MenuItem>
+              <MenuItem value={3}>&quot;true&quot;/&quot;false&quot;</MenuItem>
               <MenuItem value={4}>true/false</MenuItem>
-              <MenuItem value={5}>"1"/"0"</MenuItem>
+              <MenuItem value={5}>&quot;1&quot;/&quot;0&quot;</MenuItem>
               <MenuItem value={6}>1/0</MenuItem>
             </ValidatedTextField>
           </Grid>

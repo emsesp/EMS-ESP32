@@ -3,13 +3,13 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { Tab } from '@mui/material';
 
-import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from '../../components';
-import { AuthenticatedContext } from '../../contexts/authentication';
+import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
 
 import NTPStatusForm from './NTPStatusForm';
 import NTPSettingsForm from './NTPSettingsForm';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const NetworkTime: FC = () => {
   const { LL } = useI18nContext();

@@ -1,6 +1,6 @@
 import { AxiosPromise } from 'axios';
 
-import { SecuritySettings, Token } from '../types';
+import { SecuritySettings, Token } from 'types';
 
 import { AXIOS } from './endpoints';
 

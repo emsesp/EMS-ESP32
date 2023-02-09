@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { Navigate, Routes, Route } from 'react-router-dom';
 
-import { RequireAdmin } from '../components';
+import { RequireAdmin } from 'components';
 
 import Dashboard from './Dashboard';
 import Settings from './Settings';

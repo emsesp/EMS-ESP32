@@ -2,7 +2,7 @@ import { FC } from 'react';
 
 import { Box, Divider, Drawer, Toolbar, Typography, styled } from '@mui/material';
 
-import { PROJECT_NAME } from '../../api/env';
+import { PROJECT_NAME } from 'api/env';
 
 import LayoutMenu from './LayoutMenu';
 import { DRAWER_WIDTH } from './Layout';
