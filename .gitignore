@@ -6,6 +6,7 @@
 
 # build
 build/
+dist/
 .clang_complete
 .gcc-flags.json
 cppcheck.out.xml

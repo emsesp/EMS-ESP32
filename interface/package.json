@@ -5,8 +5,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build-hosted": "tsc && vite build --mode hosted",
     "preview": "vite preview",
-    "preview_standalone": "npm-run-all -p preview typesafe-i18n mock-api",
+    "preview-standalone": "npm-run-all -p preview typesafe-i18n mock-api",
     "mock-api": "nodemon --watch ../mock-api ../mock-api/server.js",
     "standalone": "npm-run-all -p dev typesafe-i18n mock-api",
     "typesafe-i18n": "typesafe-i18n",
