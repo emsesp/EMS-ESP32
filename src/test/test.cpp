@@ -249,7 +249,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     // init stuff
     Mqtt::ha_enabled(true);
     EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
-    EMSESP::watch(EMSESP::Watch::WATCH_RAW); // raw mode
+
+    // EMSESP::watch(EMSESP::Watch::WATCH_RAW); // raw mode
+    EMSESP::watch(EMSESP::Watch::WATCH_ON); // verbose mode
 
     std::string command(20, '\0');
     if ((cmd.empty()) || (cmd == "default")) {
