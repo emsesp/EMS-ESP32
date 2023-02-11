@@ -1037,7 +1037,7 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
 
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         for (EntityCustomization entityCustomization : settings.entityCustomizations) {
-            if ((entityCustomization.device_id == device_id())) {
+            if (entityCustomization.device_id == device_id()) {
                 for (std::string entity_id : entityCustomization.entity_ids) {
                     uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
                     if (mask & 0x80) {
