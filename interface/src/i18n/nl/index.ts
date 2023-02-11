@@ -239,8 +239,9 @@ const nl: Translation = {
   MQTT_RESPONSE: 'Publiceer commando output naar een `response` topic',
   MQTT_PUBLISH_TEXT_1: 'Publiceer enkele waarde topics on change',
   MQTT_PUBLISH_TEXT_2: 'Publiceer naar commando topics (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Activeer MQTT Discovery (Home Assistant, Domoticz)',
+  MQTT_PUBLISH_TEXT_3: 'Activeer MQTT Discovery',
   MQTT_PUBLISH_TEXT_4: 'Prefix voor de Discovery topics',
+  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
   MQTT_PUBLISH_INTERVALS: 'Publicatie intervallen',
   MQTT_INT_BOILER: 'CV ketels en warmtepompen',
   MQTT_INT_THERMOSTATS: 'Thermostaten',

@@ -239,8 +239,9 @@ const de: Translation = {
   MQTT_RESPONSE: 'Veröffentliche die Kommandoantwort als `response` Topic',
   MQTT_PUBLISH_TEXT_1: 'Veröffentliche einzelne Werte bei Veränderung als eigene Topics',
   MQTT_PUBLISH_TEXT_2: 'Veröffentliche als Kommando-Topic (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Aktiviere `MQTT Discovery` (Home Assistant, Domoticz)',
+  MQTT_PUBLISH_TEXT_3: 'Aktiviere `MQTT Discovery`',
   MQTT_PUBLISH_TEXT_4: 'Prefix für die `Discovery`-Topics',
+  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
   MQTT_PUBLISH_INTERVALS: 'Veröffentlichungs-Intervalle',
   MQTT_INT_BOILER: 'Boiler und Wärmepumpen',
   MQTT_INT_THERMOSTATS: 'Thermostate',

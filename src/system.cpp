@@ -1244,6 +1244,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["entity format"]           = settings.entity_format;
         node["base"]                    = settings.base;
         node["discovery prefix"]        = settings.discovery_prefix;
+        node["discovery type"]          = settings.discovery_type;
         node["nested format"]           = settings.nested_format;
         node["ha enabled"]              = settings.ha_enabled;
         node["mqtt qos"]                = settings.mqtt_qos;

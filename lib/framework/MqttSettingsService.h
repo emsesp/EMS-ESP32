@@ -89,6 +89,7 @@ class MqttSettings {
     bool     ha_enabled;
     uint8_t  nested_format;
     String   discovery_prefix;
+    uint8_t  discovery_type;
     bool     publish_single;
     bool     publish_single2cmd;
     bool     send_response;

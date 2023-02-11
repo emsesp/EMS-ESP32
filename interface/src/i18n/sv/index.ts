@@ -239,8 +239,9 @@ const sv: Translation = {
   MQTT_RESPONSE: 'Publish-kommando som ett `response` topic',
   MQTT_PUBLISH_TEXT_1: 'Publicera single value topics vid värdeförändring',
   MQTT_PUBLISH_TEXT_2: 'Publicera till kommando-topics (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Aktivera MQTT Discovery (Home Assistant, Domoticz)',
+  MQTT_PUBLISH_TEXT_3: 'Aktivera MQTT Discovery',
   MQTT_PUBLISH_TEXT_4: 'Prefix för  Discovery topics',
+  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
   MQTT_PUBLISH_INTERVALS: 'Publiceringsintervall',
   MQTT_INT_BOILER: 'Värmepump/panna',
   MQTT_INT_THERMOSTATS: 'Termostater',

@@ -229,6 +229,21 @@ const MqttSettingsForm: FC = () => {
                 <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
                   <Grid item>
                     <ValidatedTextField
+                      name="entity_format"
+                      label={LL.MQTT_PUBLISH_TEXT_5()}
+                      value={data.discovery_type}
+                      fullWidth
+                      variant="outlined"
+                      onChange={updateFormValue}
+                      margin="normal"
+                      select
+                    >
+                      <MenuItem value={0}>Home Assistant</MenuItem>
+                      <MenuItem value={1}>Domoticz</MenuItem>
+                    </ValidatedTextField>
+                  </Grid>
+                  <Grid item>
+                    <ValidatedTextField
                       name="discovery_prefix"
                       label={LL.MQTT_PUBLISH_TEXT_4()}
                       fullWidth

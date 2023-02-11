@@ -185,6 +185,10 @@ class Mqtt {
         return entity_format_;
     }
 
+    static uint8_t discovery_type() {
+        return discovery_type_;
+    }
+
     static void nested_format(uint8_t nested_format) {
         nested_format_ = nested_format;
     }
@@ -326,6 +330,7 @@ class Mqtt {
     static uint8_t     nested_format_;
     static uint8_t     entity_format_;
     static std::string discovery_prefix_;
+    static uint8_t     discovery_type_;
     static bool        publish_single_;
     static bool        publish_single2cmd_;
     static bool        send_response_;

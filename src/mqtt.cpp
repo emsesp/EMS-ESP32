@@ -42,6 +42,7 @@ uint8_t     Mqtt::entity_format_;
 bool        Mqtt::ha_enabled_;
 uint8_t     Mqtt::nested_format_;
 std::string Mqtt::discovery_prefix_;
+uint8_t     Mqtt::discovery_type_;
 bool        Mqtt::send_response_;
 bool        Mqtt::publish_single_;
 bool        Mqtt::publish_single2cmd_;
@@ -1024,7 +1025,6 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     }
 
     // build a config topic that will be prefix onto a HA type (e.g. number, switch)
-    // e.g. homeassistant/number/ems-esp/thermostat_hc1_manualtemp
     char config_topic[70];
     snprintf(config_topic, sizeof(config_topic), "%s/%s_%s/config", mqtt_basename_.c_str(), device_name, entity_with_tag);
 
@@ -1041,9 +1041,15 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::SHORT:
         case DeviceValueType::USHORT:
         case DeviceValueType::ULONG:
-            // number - https://www.home-assistant.io/integrations/number.mqtt
-            // https://developers.home-assistant.io/docs/core/entity/number
-            snprintf(topic, sizeof(topic), "number/%s", config_topic);
+            if (discovery_type() == 0) {
+                // Home Assistant
+                // number - https://www.home-assistant.io/integrations/number.mqtt
+                snprintf(topic, sizeof(topic), "number/%s", config_topic);
+            } else {
+                // Domoticz
+                // Does not support number, use sensor
+                snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
+            }
             break;
         case DeviceValueType::BOOL:
             // switch - https://www.home-assistant.io/integrations/switch.mqtt

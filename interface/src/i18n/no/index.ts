@@ -239,8 +239,9 @@ const no: Translation = {
   MQTT_RESPONSE: 'Publiser kommandoer til en `response` topic',
   MQTT_PUBLISH_TEXT_1: 'Publiser singel verdi topics ved endringer',
   MQTT_PUBLISH_TEXT_2: 'Publiser til kommando topics (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Aktiver MQTT Discovery (Home Assistant, Domoticz)',
+  MQTT_PUBLISH_TEXT_3: 'Aktiver MQTT Discovery',
   MQTT_PUBLISH_TEXT_4: 'Prefiks for Discovery topics',
+  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
   MQTT_PUBLISH_INTERVALS: 'Publiseringsintervall',
   MQTT_INT_BOILER: 'Fyr/Varmepumpe',
   MQTT_INT_THERMOSTATS: 'Termostat',

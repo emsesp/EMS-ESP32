@@ -239,8 +239,9 @@ const pl: BaseTranslation = {
   MQTT_RESPONSE: 'Rezultat wykonania komendy publikuj w temacie "response"',
   MQTT_PUBLISH_TEXT_1: 'Tematy z pojedynczą wartością publikuj po jej zmianie',
   MQTT_PUBLISH_TEXT_2: 'Publikuj w tematach "command" (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Włącz opcję "MQTT discovery" (Home Assistant, Domoticz)',
+  MQTT_PUBLISH_TEXT_3: 'Włącz opcję "MQTT discovery',
   MQTT_PUBLISH_TEXT_4: 'Prefiks dla "MQTT discovery"',
+  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
   MQTT_PUBLISH_INTERVALS: 'Interwały publikowania',
   MQTT_INT_BOILER: 'Kotły i pompy ciepła',
   MQTT_INT_THERMOSTATS: 'Termostaty',
