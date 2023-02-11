@@ -265,7 +265,7 @@ void Shell::loop_normal() {
                 } else if (esc_ == 11) { // F1
                     set_command_str("help");
                 } else if (esc_ == 12) { // F2
-                    set_command_str("show");
+                    set_command_str("show values");
                 } else if (esc_ == 13) { // F3
                     set_command_str("log notice");
                 } else if (esc_ == 14) { // F4
