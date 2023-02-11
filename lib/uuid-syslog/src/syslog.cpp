@@ -132,13 +132,17 @@ void SyslogService::log_level(uuid::log::Level level) {
         remove_queued_messages(level);
     }
 
-    static bool level_set     = false;
-    bool        level_changed = !level_set || (level != log_level());
-    level_set                 = true;
+    // commented out for EMS-ESP
 
+    /*
+    static bool level_set = false;
+    level_set             = true;
+    bool level_changed = !level_set || (level != log_level());
+    
     if (level_changed) {
-        logger_.info("Log level set to %S", uuid::log::format_level_uppercase(level));
+         logger_.info("Log level set to %S", uuid::log::format_level_uppercase(level));
     }
+    */
 
     uuid::log::Logger::register_handler(this, level);
 }
@@ -170,17 +174,38 @@ size_t SyslogService::current_log_messages() const {
 }
 
 std::pair<IPAddress, uint16_t> SyslogService::destination() const {
-    return std::make_pair(host_, port_);
+    return std::make_pair(ip_, port_);
 }
 
-void SyslogService::destination(IPAddress host, uint16_t port) {
-    ip_   = host;
+void SyslogService::destination(IPAddress ip, uint16_t port) {
+    ip_   = ip;
     port_ = port;
 
     if ((uint32_t)ip_ == (uint32_t)0) {
         started_ = false;
         remove_queued_messages(log_level());
-        // host_.clear();
+        host_.clear();
+    }
+}
+
+void SyslogService::destination(const char * host, uint16_t port) {
+    if (host == nullptr || host[0] == '\0') {
+        started_ = false;
+        remove_queued_messages(log_level());
+        ip_ = (IPAddress)(uint32_t)0;
+        host_.clear();
+        return;
+    }
+    host_ = host;
+    port_ = port;
+    if (ip_.fromString(host)) {
+        host_.clear();
+        if ((uint32_t)ip_ == (uint32_t)0) {
+            started_ = false;
+            remove_queued_messages(log_level());
+        }
+    } else {
+        ip_ = (IPAddress)(uint32_t)0;
     }
 }
 
@@ -207,7 +232,7 @@ void SyslogService::mark_interval(unsigned long interval) {
 SyslogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_ptr<uuid::log::Message> && content)
     : id_(id)
     , content_(std::move(content)) {
-    // Added by proddy for EMS-ESP
+    // Added for EMS-ESP
     // check for Ethernet too. This assumes the network has already started.
     if (time_good_ || emsesp::EMSESP::system_.network_connected()) {
 #if UUID_SYSLOG_HAVE_GETTIMEOFDAY
@@ -324,25 +349,23 @@ void SyslogService::loop() {
 }
 
 bool SyslogService::can_transmit() {
-    // TODO removed this, it was in <v3.5. Do we need to add it back? not sure what it did.
-    /*
+    // TODO this should be checked for Eth
     if (!host_.empty() && (uint32_t)ip_ == 0) {
         WiFi.hostByName(host_.c_str(), ip_);
     }
-    */
 
 #if UUID_SYSLOG_HAVE_IPADDRESS_TYPE
-    if (host_.isV4() && (uint32_t)host_ == (uint32_t)0) {
+    if (ip_.isV4() && (uint32_t)ip_ == (uint32_t)0) {
         return false;
     }
 #else
-    if ((uint32_t)host_ == (uint32_t)0) {
+    if ((uint32_t)ip_ == (uint32_t)0) {
         return false;
     }
 #endif
 
-    if (WiFi.status() != WL_CONNECTED) {
-        return false;
+    if (!emsesp::EMSESP::system_.network_connected()) {
+        return false; // added by proddy. Check Ethernet
     }
 
     const uint64_t now           = uuid::get_uptime_ms();
@@ -350,14 +373,14 @@ bool SyslogService::can_transmit() {
 
 #if UUID_SYSLOG_ARP_CHECK
 #if UUID_SYSLOG_HAVE_IPADDRESS_TYPE
-    if (host_.isV4())
+    if (ip_.isV4())
 #endif
     {
         message_delay = UUID_SYSLOG_UDP_IPV4_ARP_MESSAGE_DELAY;
     }
 #endif
 #if UUID_SYSLOG_NDP_CHECK && UUID_SYSLOG_HAVE_IPADDRESS_TYPE
-    if (host_.isV6()) {
+    if (ip_.isV6()) {
         message_delay = UUID_SYSLOG_UDP_IPV6_NDP_MESSAGE_DELAY;
     }
 #endif
@@ -368,12 +391,12 @@ bool SyslogService::can_transmit() {
 
 #if UUID_SYSLOG_ARP_CHECK
 #if UUID_SYSLOG_HAVE_IPADDRESS_TYPE
-    if (host_.isV4())
+    if (ip_.isV4())
 #endif
     {
         ip4_addr_t ipaddr;
 
-        ip4_addr_set_u32(&ipaddr, (uint32_t)host_);
+        ip4_addr_set_u32(&ipaddr, (uint32_t)ip_);
 
         if (!ip4_addr_isloopback(&ipaddr) && !ip4_addr_ismulticast(&ipaddr) && !ip4_addr_isbroadcast(&ipaddr, netif_default)) {
             struct eth_addr *  eth_ret = nullptr;
@@ -400,10 +423,10 @@ bool SyslogService::can_transmit() {
 #endif
 
 #if UUID_SYSLOG_NDP_CHECK && UUID_SYSLOG_HAVE_IPADDRESS_TYPE
-    if (host_.isV6()) {
+    if (ip_.isV6()) {
         ip6_addr_t ip6addr;
 
-        IP6_ADDR(&ip6addr, host_.raw6()[0], host_.raw6()[1], host_.raw6()[2], host_.raw6()[3]);
+        IP6_ADDR(&ip6addr, ip_.raw6()[0], ip_.raw6()[1], ip_.raw6()[2], ip_.raw6()[3]);
         ip6_addr_assign_zone(&ip6addr, IP6_UNICAST, netif_default);
 
         if (!ip6_addr_isloopback(&ip6addr) && !ip6_addr_ismulticast(&ip6addr)) {
@@ -517,7 +540,7 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
         udp_.print('-');
     }
 
-    udp_.printf_P(PSTR(" %s %s - - - "), hostname_.c_str(), (message.content_->name));
+    udp_.printf(" %s %s - - - ", hostname_.c_str(), message.content_->name);
 
     char id_c_str[15];
     snprintf(id_c_str, sizeof(id_c_str), " %lu: ", message.id_);

@@ -161,6 +161,9 @@ class SyslogService : public uuid::log::Handler {
 	 */
     void destination(IPAddress host, uint16_t port = DEFAULT_PORT);
 
+    // added for EMS-ESP
+    void destination(const char * host, uint16_t port = DEFAULT_PORT);
+
     /**
 	 * Get local hostname.
 	 *
@@ -310,7 +313,6 @@ class SyslogService : public uuid::log::Handler {
     bool        started_   = false;            /*!< Flag to indicate that messages have started being transmitted. @since 1.0.0 */
     bool        level_set_ = false;            /*!< Flag to indicate that the log level has been set at least once. @since 2.2.0 */
     WiFiUDP     udp_;                          /*!< UDP client. @since 1.0.0 */
-    IPAddress   host_;                         /*!< Host to send messages to. @since 1.0.0 */
     uint16_t    port_          = DEFAULT_PORT; /*!< Port to send messages to. @since 1.0.0 */
     uint64_t    last_transmit_ = 0;            /*!< Last transmit time. @since 1.0.0 */
     std::string hostname_{'-'};                /*!< Local hostname. @since 1.0.0 */
@@ -324,7 +326,8 @@ class SyslogService : public uuid::log::Handler {
     uint64_t                    last_message_  = 0;                       /*!< Last message/mark time. @since 2.0.0 */
 
     // added by MichaelDvP for EMS-ESP
-    IPAddress     ip_; /*!< Host-IP to send messages to. @since 1.0.0 */
+    IPAddress     ip_;   /*!< Host to send messages to. @since 1.0.0 */
+    std::string   host_; /*!< Host-IP to send messages to */
     unsigned long log_message_fails_ = 0;
 };
 

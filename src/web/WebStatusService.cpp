@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
         EMSESP::logger().info("WiFi connected with IP=%s, hostname=%s", WiFi.localIP().toString().c_str(), WiFi.getHostname());
-        EMSESP::system_.syslog_init();
+        // EMSESP::system_.syslog_init();
         mDNS_start();
         EMSESP::system_.send_info_mqtt("connected");
         break;
@@ -65,7 +65,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         if (!EMSESP::system_.ethernet_connected()) {
             EMSESP::logger().info("Ethernet connected with IP=%s, speed %d Mbps", ETH.localIP().toString().c_str(), ETH.linkSpeed());
             // EMSESP::system_.send_heartbeat();
-            EMSESP::system_.syslog_init();
+            // EMSESP::system_.syslog_init();
             EMSESP::system_.ethernet_connected(true);
             mDNS_start();
             EMSESP::system_.send_info_mqtt("connected");
@@ -105,7 +105,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         } else {
             EMSESP::logger().info("WiFi connected with IPv6=%s, hostname=%s", WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
         }
-        EMSESP::system_.syslog_init();
+        // EMSESP::system_.syslog_init();
         mDNS_start();
         EMSESP::system_.send_info_mqtt("connected");
         break;
