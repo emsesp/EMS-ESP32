@@ -350,7 +350,8 @@ void Command::add(const uint8_t device_type, const uint8_t device_id, const char
     cmdfunctions_.emplace_back(device_type, device_id, flags, cmd, cb, nullptr, description); // callback for json is nullptr
 }
 
-// same for system/dallas/analog devices with device_id 0
+// add a command with no json output
+// system/dallas/analog devices uses device_id 0
 void Command::add(const uint8_t device_type, const char * cmd, const cmd_function_p cb, const char * const * description, uint8_t flags) {
     add(device_type, 0, cmd, cb, description, flags);
 }
