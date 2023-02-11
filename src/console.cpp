@@ -69,10 +69,11 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     // add for all contexts
     // log, exit, help
     for (unsigned int context = ShellContext::MAIN; context < ShellContext::END; context++) {
-        commands->add_command(context, CommandFlags::USER, {F_(log)}, {F_(log_level_optional)}, console_log_level, log_level_autocomplete);
         commands->add_command(context, CommandFlags::USER, {F_(exit)}, EMSESPShell::main_exit_function);
         commands->add_command(context, CommandFlags::USER, {F_(help)}, EMSESPShell::main_help_function);
     }
+
+    commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(log)}, {F_(log_level_optional)}, console_log_level, log_level_autocomplete);
 
     //
     // Show commands
