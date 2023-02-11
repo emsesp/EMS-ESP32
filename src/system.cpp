@@ -147,7 +147,7 @@ bool System::command_publish(const char * value, const int8_t id) {
 }
 
 // syslog level
-// commenting this out - really silly having a dedicated API to change the log level of syslog
+// commenting this out - don't see the point on having an API service to change the syslog level
 /*
 bool System::command_syslog_level(const char * value, const int8_t id) {
     uint8_t s = 0xff;
@@ -238,9 +238,6 @@ void System::format(uuid::console::Shell & shell) {
 }
 
 void System::syslog_init() {
-#ifndef EMSESP_STANDALONE
-    bool was_enabled = syslog_enabled_;
-#endif
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         syslog_enabled_       = settings.syslog_enabled;
         syslog_level_         = settings.syslog_level;
@@ -251,30 +248,25 @@ void System::syslog_init() {
 #ifndef EMSESP_STANDALONE
     if (syslog_enabled_) {
         // start & configure syslog
-        if (!was_enabled) {
-            syslog_.start();
-            EMSESP::logger().info("Starting Syslog");
-        }
+        EMSESP::logger().info("Starting Syslog");
+        syslog_.start();
+
         syslog_.log_level((uuid::log::Level)syslog_level_);
         syslog_.mark_interval(syslog_mark_interval_);
+        syslog_.destination(syslog_host_.c_str(), syslog_port_);
         syslog_.hostname(hostname().c_str());
 
-        IPAddress addr;
-        if (!addr.fromString(syslog_host_.c_str())) {
-            addr = (uint32_t)0;
-        }
-        syslog_.destination(addr, syslog_port_);
-
         // register the command
+        // removed in 3.6.0
         // Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, FL_(changeloglevel_cmd), CommandFlag::ADMIN_ONLY);
 
-    } else if (was_enabled) {
+    } else if (syslog_.started()) {
         // in case service is still running, this flushes the queue
         // https://github.com/emsesp/EMS-ESP/issues/496
         EMSESP::logger().info("Stopping Syslog");
-        syslog_.log_level((uuid::log::Level)-1);
+        syslog_.log_level((uuid::log::Level)-1); // stop server
         syslog_.mark_interval(0);
-        // syslog_.destination(""); // TODO do we need to add this back?
+        syslog_.destination("");
     }
 
     if (Mqtt::publish_single()) {
@@ -417,7 +409,6 @@ void System::start() {
     led_init(false);     // init LED
     button_init(false);  // the special button
     network_init(false); // network
-    syslog_init();       // start Syslog
 
     EMSESP::uart_init(); // start UART
 }
@@ -747,23 +738,21 @@ void System::system_check() {
 }
 
 // commands - takes static function pointers
+// can be called via Console using 'call system <cmd>'
 void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, FL_(send_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
+
+    // restart and watch (and test) are also exposed as Console commands
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, FL_(watch_cmd));
-
-    if (Mqtt::enabled()) {
-        Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, FL_(publish_cmd));
-    }
+#if defined(EMSESP_DEBUG)
+    Command::add(EMSdevice::DeviceType::SYSTEM, ("test"), System::command_test, FL_(test_cmd));
+#endif
 
     // these commands will return data in JSON format
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, FL_(system_info_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, FL_(commands_cmd));
-
-#if defined(EMSESP_DEBUG)
-    Command::add(EMSdevice::DeviceType::SYSTEM, ("test"), System::command_test, FL_(test_cmd));
-#endif
 
     // MQTT subscribe "ems-esp/system/#"
     Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system/#", nullptr); // use empty function callback
