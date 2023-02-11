@@ -1455,7 +1455,8 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
             snprintf(&code[3], sizeof(code) - 3, "(%d) %02d.%02d.%04d %02d:%02d - now", codeNo, start_day, start_month, start_year, start_hour, start_min);
         }
     } else { // no clock, the uptime is stored https://github.com/emsesp/EMS-ESP32/issues/121
-        uint32_t starttime, endtime;
+        uint32_t starttime = 0;
+        uint32_t endtime   = 0;
         telegram->read_value(starttime, 11, 3);
         telegram->read_value(endtime, 16, 3);
         snprintf(&code[3], sizeof(code) - 3, "(%d) @uptime %d - %d min", codeNo, starttime, endtime);
