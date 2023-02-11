@@ -453,10 +453,14 @@ void Mqtt::start() {
     }
 
     // if already initialized, don't do it again
+    // also to prevent duplicated loading from MqttSettingsService::onConfigUpdated()
     if (initialized_) {
         return;
     }
     initialized_ = true;
+
+    // add the 'publish' command ('call system publish' in console or via API)
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, FL_(publish_cmd));
 
     mqttClient_->onConnect([this](bool sessionPresent) { on_connect(); });
 
@@ -1180,7 +1184,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             doc["pl_on"]  = Helpers::render_boolean(result, true);
             doc["pl_off"] = Helpers::render_boolean(result, false);
         }
-        // doc[sc_ha] = F_(measurement); // TODO do we want this???
+        // doc[sc_ha] = F_(measurement); // not needed
     } else {
         // always set the uom, using the standards except for hours/minutes/seconds
         // using HA specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
