@@ -9,17 +9,17 @@ export default defineConfig(({ command, mode }) => {
   if (mode === 'hosted') {
     return {
       // hosted, ignore all errors, output to dist
-      plugins: [react({ plugins: [['@swc/plugin-styled-components', {}]] }), viteTsconfigPaths(), svgrPlugin()]
+      //       plugins: [react({ plugins: [['@swc/plugin-styled-components', {}]] }), viteTsconfigPaths(), svgrPlugin()]
+      plugins: [react(), viteTsconfigPaths(), svgrPlugin(), visualizer({ gzipSize: true }) as PluginOption]
     };
   } else {
     // normal build
     return {
       plugins: [
-        react({ plugins: [['@swc/plugin-styled-components', {}]] }),
+        react(),
         viteTsconfigPaths(),
         svgrPlugin(),
-        ProgmemGenerator({ outputPath: '../lib/framework/WWWData.h', bytesPerLine: 20 }),
-        visualizer({ gzipSize: true }) as PluginOption
+        ProgmemGenerator({ outputPath: '../lib/framework/WWWData.h', bytesPerLine: 20 })
       ],
       build: {
         outDir: 'build',
