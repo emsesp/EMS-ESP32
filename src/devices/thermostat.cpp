@@ -1195,11 +1195,8 @@ void Thermostat::process_RC35Monitor(std::shared_ptr<const Telegram> telegram) {
     // exit if the 15th byte (second from last) is 0x00, which I think is calculated flow setpoint temperature
     // with weather controlled RC35s this value is >=5, otherwise can be zero and our setpoint temps will be incorrect
     // see https://github.com/emsesp/EMS-ESP/issues/373#issuecomment-627907301
-    if (telegram->offset > 0 || telegram->message_length < 15) {
-        return;
-    }
-
-    if (telegram->message_data[14] == 0x00) {
+    // some RC30_N have only 13 byte, use byte 0 for active detection.
+    if (telegram->offset > 0 || telegram->message_data[0] == 0x00) {
         return;
     }
 
