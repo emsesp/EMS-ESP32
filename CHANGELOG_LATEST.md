@@ -1,6 +1,6 @@
 # Changelog
 
-# [3.6.0]
+# [3.5.1]
 
 ## **IMPORTANT! BREAKING CHANGES**
 
@@ -16,4 +16,5 @@
 
 ## Changed
 
-- 
+- Use byte 0 for detection RC30 active heatingcircuit [#786](https://github.com/emsesp/EMS-ESP32/issues/786)
+- Write repeated selflowtemp if tx-queue is empty without verify [#954](https://github.com/emsesp/EMS-ESP32/issues/954)
