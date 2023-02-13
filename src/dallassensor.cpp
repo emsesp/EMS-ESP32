@@ -439,7 +439,7 @@ bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const i
 
 // publish a single sensor to MQTT
 void DallasSensor::publish_sensor(const Sensor & sensor) {
-    if (Mqtt::ha_enabled() && Mqtt::publish_single()) {
+    if (Mqtt::enabled() && Mqtt::publish_single()) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         if (Mqtt::publish_single2cmd()) {
             snprintf(topic, sizeof(topic), "%s/%s", (F_(dallassensor)), sensor.name().c_str());
@@ -469,7 +469,7 @@ void DallasSensor::remove_ha_topic(const std::string & id) {
 
 // send all dallas sensor values as a JSON package to MQTT
 void DallasSensor::publish_values(const bool force) {
-    if (!Mqtt::ha_enabled()) {
+    if (!Mqtt::enabled()) {
         return;
     }
 

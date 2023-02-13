@@ -377,7 +377,7 @@ bool AnalogSensor::updated_values() {
 
 // publish a single sensor to MQTT
 void AnalogSensor::publish_sensor(const Sensor & sensor) const {
-    if (Mqtt::ha_enabled() && Mqtt::publish_single()) {
+    if (Mqtt::enabled() && Mqtt::publish_single()) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         if (Mqtt::publish_single2cmd()) {
             snprintf(topic, sizeof(topic), "%s/%s", F_(analogsensor), sensor.name().c_str());
@@ -406,7 +406,7 @@ void AnalogSensor::remove_ha_topic(const uint8_t gpio) const {
 
 // send all sensor values as a JSON package to MQTT
 void AnalogSensor::publish_values(const bool force) {
-    if (!Mqtt::ha_enabled()) {
+    if (!Mqtt::enabled()) {
         return;
     }
 
