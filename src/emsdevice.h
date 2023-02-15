@@ -366,6 +366,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_ID_RFSENSOR       = 0x40; // RF sensor only sending, no reply
     static constexpr uint8_t EMS_DEVICE_ID_RFBASE         = 0x50;
     static constexpr uint8_t EMS_DEVICE_ID_ROOMTHERMOSTAT = 0x17; // TADO using this with no version reply
+    static constexpr uint8_t EMS_DEVICE_ID_TADO_OLD       = 0x19; // TADO using this with no broadcast and version
 
     // generic type IDs
     static constexpr uint16_t EMS_TYPE_VERSION    = 0x02; // type ID for Version information. Generic across all EMS devices.

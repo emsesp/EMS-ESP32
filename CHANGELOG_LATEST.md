@@ -8,7 +8,7 @@
 
 ## Added
 
--
+- detect old Tado thermostat, device-id 0x19, no entities
 
 ## Fixed
 
