@@ -8,11 +8,12 @@
 
 ## Added
 
-- detect old Tado thermostat, device-id 0x19, no entities
+- Detect old Tado thermostat, device-id 0x19, no entities
 
 ## Fixed
 
--
+- HA-discovery for analog sensor commands [#1035](https://github.com/emsesp/EMS-ESP32/issues/1035)
+
 
 ## Changed
 
