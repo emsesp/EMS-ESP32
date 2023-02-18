@@ -9,6 +9,7 @@
 ## Added
 
 - Detect old Tado thermostat, device-id 0x19, no entities
+- Some more HM200 entities [#500](https://github.com/emsesp/EMS-ESP32/issues/500)
 
 ## Fixed
 

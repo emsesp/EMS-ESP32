@@ -512,13 +512,17 @@ void AnalogSensor::publish_values(const bool force) {
                     config["mode"]  = "box"; // auto, slider or box
                     config["step"]  = 0.1;
                 } else if (sensor.type() == AnalogType::COUNTER) {
-                    snprintf(topic, sizeof(topic), "number/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
+                    snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
                     snprintf(command_topic, sizeof(command_topic), "%s/analogsensor/%s", Mqtt::basename().c_str(), sensor.name().c_str());
-                    config["cmd_t"] = command_topic;
-                    config["mode"]  = "box"; // auto, slider or box
-                    config["step"]  = sensor.factor();
+                    config["cmd_t"]    = command_topic;
+                    config["stat_cla"] = "total_increasing";
+                    // config["mode"]  = "box"; // auto, slider or box
+                    // config["step"]  = sensor.factor();
+                } else if (sensor.type() == AnalogType::DIGITAL_IN) {
+                    snprintf(topic, sizeof(topic), "binary-sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
                 } else {
                     snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
+                    config["stat_cla"] = "measurement";
                 }
 
                 JsonObject dev = config.createNestedObject("dev");
