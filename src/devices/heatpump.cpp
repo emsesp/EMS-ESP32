@@ -38,9 +38,19 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &airHumidity_, DeviceValueType::UINT, FL_(airHumidity), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dewTemperature_, DeviceValueType::UINT, FL_(dewTemperature), DeviceValueUOM::DEGREES);
 
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &flowTemp_, DeviceValueType::UINT, FL_(curFlowTemp), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &retTemp_, DeviceValueType::UINT, FL_(retTemp), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &sysRetTemp_, DeviceValueType::UINT, FL_(sysRetTemp), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &flowTemp_,
+                          DeviceValueType::SHORT,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(curFlowTemp),
+                          DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &retTemp_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(retTemp), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &sysRetTemp_,
+                          DeviceValueType::SHORT,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(sysRetTemp),
+                          DeviceValueUOM::DEGREES);
 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTa4_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTa4), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr1), DeviceValueUOM::DEGREES);
