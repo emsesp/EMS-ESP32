@@ -54,6 +54,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
       try {
         const response = await update(toSave);
         setOrigData(response.data);
+        setData(response.data);
         if (response.status === 202) {
           setRestartNeeded(true);
         } else {
