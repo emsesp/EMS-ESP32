@@ -1118,7 +1118,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/core@npm:^1.3.30":
+"@swc/core@npm:^1.3.35":
   version: 1.3.35
   resolution: "@swc/core@npm:1.3.35"
   dependencies:
@@ -1445,14 +1445,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitejs/plugin-react-swc@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "@vitejs/plugin-react-swc@npm:3.1.0"
+"@vitejs/plugin-react-swc@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "@vitejs/plugin-react-swc@npm:3.2.0"
   dependencies:
-    "@swc/core": ^1.3.30
+    "@swc/core": ^1.3.35
   peerDependencies:
     vite: ^4
-  checksum: 903fef0b133f122a76f048bdb398db45b35e11e33fb8a03f00beb0ceba9c6bacfbee32397910f0e985e23b7785d70aafb4a3a21d00c2991aacd57262c24b55bd
+  checksum: 9df519fee5e6a9d8e7e15d037954d0acd1ee5d408fe7eef9d88f03172eb840b7300fc84b26fd93213b309c376a8712e88d6348179ad91c815d55cb6324f9d4ab
   languageName: node
   linkType: hard
 
@@ -1475,7 +1475,7 @@ __metadata:
     "@types/react-router-dom": ^5.3.3
     "@typescript-eslint/eslint-plugin": ^5.52.0
     "@typescript-eslint/parser": ^5.52.0
-    "@vitejs/plugin-react-swc": ^3.1.0
+    "@vitejs/plugin-react-swc": ^3.2.0
     async-validator: ^4.2.5
     axios: ^1.3.3
     eslint: ^8.34.0
