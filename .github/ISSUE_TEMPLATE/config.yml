@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: EMS-ESP Docs
+    url: https://emsesp.github.io/docs/
+    about: All the information related to EMS-ESP.
+  - name: EMS-ESP Discussions and Support
+    url: https://github.com/emsesp/EMS-ESP32/discussions
+    about: EMS-ESP usage Questions, Feature Requests and Projects.
+  - name: EMS-ESP Users Chat
+    url: https://discord.gg/3J3GgnzpyT
+    about: Chat for feedback, questions and troubleshooting.
