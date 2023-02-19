@@ -1,35 +1,48 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: bug
-assignees: ''
-
+name: Problem Report
+about: Create a Report to help us improve
 ---
 
-*Before creating a new issue please check that you have:*
+<!-- Thanks for reporting a problem for this project. READ THIS FIRST:
 
-* *searched the existing [issues](https://github.com/emsesp/EMS-ESP32/issues) (both open and closed)*
-* *searched the [documentation help section](https://emsesp.github.io/docs)*
+Please DO NOT OPEN AN ISSUE if your EMS-ESP version is not the latest from the dev branch, please update your device before submitting your issue. Your problem might already be solved. The latest precompiled binaries of EMS-ESP can be downloaded from https://github.com/emsesp/EMS-ESP32/releases/tag/latest
 
-*Completing this template will help developers and contributors to address the issue. Try to be as specific and extensive as possible. If the information provided is not enough the issue will likely be closed.*
+Please take a few minutes to complete the requested information below.
 
-*You can now remove this line and the above ones. Text in italic is meant to be replaced by your own words. If any of the sections below are not relevant to the issue (for instance, the screenshots) then you can delete them.*
+-->
 
-**Bug description**
-*A clear and concise description of what the bug is. Mention which EMS-ESP version you're using.*
+### PROBLEM DESCRIPTION
+_A clear and concise description of what the problem is._
 
-**Steps to reproduce**
-*Steps to reproduce the behavior.*
 
-**Expected behavior**
-*A clear and concise description of what you expected to happen.*
+### REQUESTED INFORMATION
+_Make sure your have performed every step and checked the applicable boxes before submitting your issue. Thank you!_
 
-**Screenshots**
-*If applicable, add screenshots to help explain your problem.*
+- [ ] Searched the problem in [issues](https://github.com/emsesp/EMS-ESP32/issues)
+- [ ] Searched the problem in [discussions](https://github.com/emsesp/EMS-ESP32/discussions)
+- [ ] Searched the problem in the [docs](https://emsesp.github.io/docs/Troubleshooting/)
+- [ ] Searched the problem in the [chat](https://discord.gg/3J3GgnzpyT)
+- [ ] Provide the output of http://ems-esp.local/api/system :
+```lua
+  System information output here:
 
-**Device information**
-*Copy-paste here the information as it is outputted by the device. You can get this information by from http://ems-esp.local/api/system*
 
-**Additional context**
-*Add any other context about the problem here.*
+```
+
+### TO REPRODUCE
+_Steps to reproduce the behavior:_
+
+
+### EXPECTED BEHAVIOUR
+_A clear and concise description of what you expected to happen._
+
+
+### SCREENSHOTS
+_If applicable, add screenshots to help explain your problem._
+
+
+### ADDITIONAL CONTEXT
+_Add any other context about the problem here._
+
+
+**(Please, remember to close the issue when the problem has been addressed)**
