@@ -178,7 +178,7 @@ class EMSdevice {
         }
     }
 
-    const std::string brand_to_string();
+    const char *      brand_to_char();
     const std::string to_string();
     const std::string to_string_short();
 

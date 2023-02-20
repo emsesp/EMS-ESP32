@@ -912,7 +912,7 @@ void Mqtt::process_queue() {
 
 // create's a ha sensor config topic from a device value object
 // and also takes a flag (create_device_config) used to also create the main HA device config. This is only needed for one entity
-void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model, const std::string & brand, const bool remove, const bool create_device_config) {
+void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config) {
     StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> dev_json;
 
     // always create the ids

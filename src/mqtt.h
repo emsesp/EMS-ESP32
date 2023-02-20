@@ -89,8 +89,7 @@ class Mqtt {
     static void publish_ha(const char * topic, const JsonObject & payload);
     static void publish_ha(const char * topic);
 
-    static void
-    publish_ha_sensor_config(DeviceValue & dv, const std::string & model, const std::string & brand, const bool remove, const bool create_device_config = false);
+    static void publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config = false);
     static void publish_ha_sensor_config(uint8_t               type,
                                          uint8_t               tag,
                                          const char * const    fullname,

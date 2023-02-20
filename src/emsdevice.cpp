@@ -79,7 +79,7 @@ const char * EMSdevice::uom_to_string(uint8_t uom) {
     }
 }
 
-const std::string EMSdevice::brand_to_string() {
+const char * EMSdevice::brand_to_char() {
     switch (brand_) {
     case EMSdevice::Brand::BOSCH:
         return "Bosch";
@@ -267,8 +267,8 @@ const std::string EMSdevice::to_string() {
         return std::string(name_) + " (DeviceID:" + Helpers::hextoa(device_id_) + ", ProductID:" + Helpers::itoa(product_id_) + ", Version:" + version_ + ")";
     }
 
-    return brand_to_string() + " " + name_ + " (DeviceID:" + Helpers::hextoa(device_id_) + ", ProductID:" + Helpers::itoa(product_id_) + ", Version:" + version_
-           + ")";
+    return std::string(brand_to_char()) + " " + name_ + " (DeviceID:" + Helpers::hextoa(device_id_) + ", ProductID:" + Helpers::itoa(product_id_)
+           + ", Version:" + version_ + ")";
 }
 
 // returns out brand + device name
@@ -278,7 +278,7 @@ const std::string EMSdevice::to_string_short() {
         return std::string(device_type_2_device_name_translated()) + ": " + name_;
     }
 
-    return std::string(device_type_2_device_name_translated()) + ": " + brand_to_string() + " " + name_;
+    return std::string(device_type_2_device_name_translated()) + ": " + brand_to_char() + " " + name_;
 }
 
 // for each telegram that has the fetch value set (true) do a read request
@@ -458,30 +458,18 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const ch
 }
 
 // add to device value library, also know now as a "device entity"
-// arguments are:
-//  tag: to be used to group mqtt together, either as separate topics as a nested object
-//  value_p: pointer to the value from the .h file
-//  type: one of DeviceValueType
-//  options: options for enum, which are translated as a list of lists
-//  options_single: list of names
-//  numeric_operator: to divide or multiply, see DeviceValueNumOps::
-//  short_name: used in MQTT as keys
-//  fullname: used in Web and Console unless empty (nullptr) - can be translated
-//  uom: unit of measure from DeviceValueUOM
-//  has_cmd: true if this is an associated command
-//  min: min allowed value
-//  max: max allowed value
-void EMSdevice::add_device_value(uint8_t               tag,
-                                 void *                value_p,
-                                 uint8_t               type,
-                                 const char * const ** options,
-                                 const char * const *  options_single,
-                                 int8_t                numeric_operator,
-                                 const char * const *  name,
-                                 uint8_t               uom,
-                                 const cmd_function_p  f,
-                                 int16_t               min,
-                                 uint16_t              max) {
+void EMSdevice::add_device_value(uint8_t               tag,              // to be used to group mqtt together, either as separate topics as a nested object
+                                 void *                value_p,          // pointer to the value from the .h file
+                                 uint8_t               type,             // one of DeviceValueType
+                                 const char * const ** options,          // options for enum, which are translated as a list of lists
+                                 const char * const *  options_single,   // list of names
+                                 int8_t                numeric_operator, // to divide or multiply, see DeviceValueNumOps::
+                                 const char * const *  name,             // shortname, used in MQTT as the key
+                                 uint8_t               uom,              // unit of measure from DeviceValueUOM
+                                 const cmd_function_p  f,                // command function pointer
+                                 int16_t               min,              // min allowed value
+                                 uint16_t              max               // max allowed value
+) {
     // initialize the device value depending on it's type
     // ignoring DeviceValueType::CMD and DeviceValueType::TIME
 
@@ -512,7 +500,12 @@ void EMSdevice::add_device_value(uint8_t               tag,
     // get fullname, getting translation if it exists
     const char * const * fullname;
     if (Helpers::count_items(name) == 1) {
-        fullname = nullptr; // no translations available, use empty to prevent crash
+#ifdef EMSESP_DEBUG
+        // when compiling in debug, we don't use all the translations to save on Flash memory
+        fullname = &name[0]; // use shortname when debugging
+#else
+        fullname = nullptr; // no translations available, use empty
+#endif
     } else {
         fullname = &name[1]; // translations start at index 1
     }
@@ -1533,11 +1526,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
     for (auto & dv : devicevalues_) {
         // check if it exists, there is a value for the entity. Set the flag to ACTIVE
         // not that this will override any previously removed states
-        if (dv.hasValue()) {
-            dv.add_state(DeviceValueState::DV_ACTIVE);
-        } else {
-            dv.remove_state(DeviceValueState::DV_ACTIVE);
-        }
+        (dv.hasValue()) ? dv.add_state(DeviceValueState::DV_ACTIVE) : dv.remove_state(DeviceValueState::DV_ACTIVE);
 
         auto fullname = dv.get_fullname();
 
@@ -1720,7 +1709,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
         if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && (dv.type != DeviceValueType::CMD) && dv.has_state(DeviceValueState::DV_ACTIVE)
             && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             // create_device_config is only done once for the EMS device. It can added to any entity, so we take the first
-            Mqtt::publish_ha_sensor_config(dv, name(), brand_to_string(), false, create_device_config);
+            Mqtt::publish_ha_sensor_config(dv, name(), brand_to_char(), false, create_device_config);
             dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
             create_device_config = false; // only create the main config once
         }

@@ -83,7 +83,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
             obj["id"]      = Helpers::smallitoa(buffer, emsdevice->unique_id()); // a unique id as a string
             obj["tn"]      = emsdevice->device_type_2_device_name_translated();  // translated device type name
             obj["t"]       = emsdevice->device_type();                           // device type number
-            obj["b"]       = emsdevice->brand_to_string();                       // brand
+            obj["b"]       = emsdevice->brand_to_char();                         // brand
             obj["n"]       = emsdevice->name();                                  // name
             obj["d"]       = emsdevice->device_id();                             // deviceid
             obj["p"]       = emsdevice->product_id();                            // productid
