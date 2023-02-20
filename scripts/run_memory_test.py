@@ -10,7 +10,7 @@ import argparse
 import requests
 import time
 from timeit import default_timer as timer
-import platform    # For getting the operating system name
+import platform    # For getting the operating system type
 import subprocess  # For executing a shell command
 from termcolor import cprint
 
@@ -19,17 +19,18 @@ def print_fail(x): return cprint(x, 'red')
 
 def ping_until_up(ip, text):
     print(text + "...", flush=True, end="")
+    time.sleep(1)
     param = '-n' if platform.system().lower()=='windows' else '-c'
     command = ["ping", param, "2", ip]
     while True:
         if (subprocess.run(args=command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0):
             print_success("Connected")
+            time.sleep(1)
             return
         print(".", flush=True, end="")
         time.sleep(1)
 
 def run_test(ip, wait, name, token):
-    WAIT_REBOOT = 10
     BASE_URL = "http://" + str(ip)
     INFO_URL = BASE_URL + "/api/system/info"
     RESTART_URL = BASE_URL + "/api/system/restart"
@@ -72,7 +73,7 @@ def run_test(ip, wait, name, token):
     uptime_a = response.json()['System Info']['uptime (seconds)']
     freemem_a = response.json()['System Info']['free mem']
     maxalloc_a = response.json()['System Info']['max alloc']
-    print_success("Uptime is " + str(uptime_a) + " secs, Free mem/Max alloc is " + str(freemem_a) + "/" + str(maxalloc_a) )
+    print_success("Uptime is " + str(uptime_a) + " secs, Free mem/Max alloc before=" + str(freemem_a) + "/" + str(maxalloc_a) )
     end = timer()
 
     # run test
@@ -97,7 +98,7 @@ def run_test(ip, wait, name, token):
     uptime_b = response.json()['System Info']['uptime (seconds)']
     freemem_b = response.json()['System Info']['free mem']
     maxalloc_b = response.json()['System Info']['max alloc']
-    print_success("Uptime is " + str(uptime_b) + " secs, Free mem/Max alloc is " + str(freemem_b) + "/" + str(maxalloc_b) )
+    print_success("Uptime is " + str(uptime_b) + " secs, Free mem/Max alloc after=" + str(freemem_b) + "/" + str(maxalloc_b) )
     print()
 
     # check if it worked and report back
