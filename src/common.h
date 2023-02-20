@@ -48,8 +48,8 @@ using string_vector = std::vector<const char *>;
 #define FL_(list_name) (__pstr__L_##list_name)
 
 #ifdef EMSESP_DEBUG
-// In debug mode just take one language (en) to save Flash space
-#define MAKE_PSTR_LIST(list_name, en, ...) static const char * const __pstr__L_##list_name[]  = {en, nullptr};
+// In debug mode just take one language (en) to save on Flash space
+#define MAKE_PSTR_LIST(list_name, shortname, ...) static const char * const __pstr__L_##list_name[]  = {shortname, nullptr};
 #else
 #define MAKE_PSTR_LIST(list_name, ...) static const char * const __pstr__L_##list_name[]  = {__VA_ARGS__, nullptr};
 #endif
