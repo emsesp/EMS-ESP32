@@ -18,6 +18,8 @@
 
 #include "system.h"
 #include "emsesp.h" // for send_raw_telegram() command
+#include "esp_ota_ops.h"
+
 
 #include <semver200.h>
 
@@ -268,7 +270,6 @@ void System::syslog_init() {
         syslog_.mark_interval(0);
         syslog_.destination("");
     }
-
     if (Mqtt::publish_single()) {
         if (Mqtt::publish_single2cmd()) {
             Mqtt::publish("system/syslog", syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
@@ -397,7 +398,7 @@ void System::start() {
     fstotal_ = LittleFS.totalBytes() / 1024; // read only once, it takes 500 ms to read
     psram_   = ESP.getPsramSize() / 1024;
     appused_ = ESP.getSketchSize() / 1024;
-    appfree_ = ESP.getFreeSketchSpace() / 1024 - appused_;
+    appfree_ = esp_ota_get_running_partition()->size / 1024 - appused_;
     refreshHeapMem(); // refresh free heap and max alloc heap
 #endif
 
