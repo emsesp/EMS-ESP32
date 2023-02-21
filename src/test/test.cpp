@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(EMSESP_DEBUG) || defined(EMSESP_STANDALONE)
+#if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
 
 #include "test.h"
 
@@ -1785,7 +1785,7 @@ void Test::add_device(uint8_t device_id, uint8_t product_id) {
     uart_telegram({device_id, EMSESP_DEFAULT_EMS_BUS_ID, EMSdevice::EMS_TYPE_VERSION, 0, product_id, 1, 0});
 }
 
-#ifdef EMSESP_DEBUG
+#ifdef EMSESP_TEST
 #ifndef EMSESP_STANDALONE
 void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
     Serial.println();

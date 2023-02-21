@@ -55,14 +55,13 @@ class System {
     static bool command_publish(const char * value, const int8_t id);
     static bool command_fetch(const char * value, const int8_t id);
     static bool command_restart(const char * value, const int8_t id);
-#if defined(EMSESP_DEBUG)
-    static bool command_test(const char * value, const int8_t id);
-#endif
     static bool command_syslog_level(const char * value, const int8_t id);
     static bool command_watch(const char * value, const int8_t id);
-
     static bool command_info(const char * value, const int8_t id, JsonObject & output);
     static bool command_commands(const char * value, const int8_t id, JsonObject & output);
+#if defined(EMSESP_TEST)
+    static bool command_test(const char * value, const int8_t id);
+#endif
 
     std::string reset_reason(uint8_t cpu) const;
 

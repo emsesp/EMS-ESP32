@@ -21,7 +21,7 @@
 #include "emsesp.h"
 #include "version.h"
 
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
 #include "test/test.h"
 #endif
 
@@ -66,13 +66,9 @@ static std::vector<std::string> log_level_autocomplete(Shell & shell, const std:
 }
 
 static void setup_commands(std::shared_ptr<Commands> & commands) {
-    // add for all contexts
     // log, exit, help
-    for (unsigned int context = ShellContext::MAIN; context < ShellContext::END; context++) {
-        commands->add_command(context, CommandFlags::USER, {F_(exit)}, EMSESPShell::main_exit_function);
-        commands->add_command(context, CommandFlags::USER, {F_(help)}, EMSESPShell::main_help_function);
-    }
-
+    commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(exit)}, EMSESPShell::main_exit_function);
+    commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(help)}, EMSESPShell::main_help_function);
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(log)}, {F_(log_level_optional)}, console_log_level, log_level_autocomplete);
 
     //
@@ -125,7 +121,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     // System commands
     //
 
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
     // create commands test
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
@@ -238,7 +234,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
 #endif
 */
 
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
     // only for debug
     commands->add_command(
         ShellContext::MAIN,

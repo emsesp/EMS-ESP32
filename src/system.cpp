@@ -25,7 +25,7 @@
 
 #include <semver200.h>
 
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
 #include "test/test.h"
 #endif
 
@@ -54,7 +54,7 @@ Adafruit_NeoPixel pixels(1, 7, NEO_GRB + NEO_KHZ800);
 namespace emsesp {
 
 // Languages supported. Note: the order is important and must match locale_translations.h
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
 // in Debug mode use one language (en) to save flash memory needed for the tests
 const char * const languages[] = {EMSESP_LOCALE_EN};
 #else
@@ -260,7 +260,6 @@ void System::syslog_init() {
         syslog_.destination(syslog_host_.c_str(), syslog_port_);
         syslog_.hostname(hostname().c_str());
 
-        // register the command
         // removed in 3.6.0
         // Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, FL_(changeloglevel_cmd), CommandFlag::ADMIN_ONLY);
 
@@ -356,9 +355,7 @@ void System::wifi_tweak() {
     bool         s1 = WiFi.getSleep();
     WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
     bool s2 = WiFi.getSleep();
-#if defined(EMSESP_DEBUG)
-    LOG_DEBUG("[DEBUG] Adjusting WiFi - Tx power %d->%d, Sleep %d->%d", p1, p2, s1, s2);
-#endif
+    LOG_DEBUG("Adjusting WiFi - Tx power %d->%d, Sleep %d->%d", p1, p2, s1, s2);
 #endif
 }
 
@@ -420,7 +417,7 @@ void System::start() {
 void System::button_OnClick(PButton & b) {
     LOG_DEBUG("Button pressed - single click");
 
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
 #ifndef EMSESP_STANDALONE
     Test::listDir(LittleFS, FS_CONFIG_DIRECTORY, 3);
 #endif
@@ -749,7 +746,7 @@ void System::commands_init() {
     // restart and watch (and test) are also exposed as Console commands
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, FL_(watch_cmd));
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
     Command::add(EMSdevice::DeviceType::SYSTEM, ("test"), System::command_test, FL_(test_cmd));
 #endif
 
@@ -1045,9 +1042,7 @@ bool System::check_upgrade(bool factory_settings) {
         // see if we're missing a version, will be < 3.5.0b13 from Dec 23 2022
         missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
         if (missing_version) {
-#ifdef EMSESP_DEBUG
             LOG_DEBUG("No version information found (%s)", settingsVersion.c_str());
-#endif
             settingsVersion = "3.4.4"; // this was the last stable version
         }
     }
@@ -1085,9 +1080,7 @@ bool System::check_upgrade(bool factory_settings) {
 
         // if we're coming from 3.4.4 or 3.5.0b14 then we need to apply new settings
         if (missing_version) {
-#ifdef EMSESP_DEBUG
             LOG_DEBUG("Setting MQTT ID Entity to v3.4 format");
-#endif
             EMSESP::esp8266React.getMqttSettingsService()->update(
                 [&](MqttSettings & mqttSettings) {
                     mqttSettings.entity_format = 0; // use old Entity ID format from v3.4
@@ -1400,7 +1393,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     return true;
 }
 
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
 // run a test, e.g. http://ems-esp/api?device=system&cmd=test&data=boiler
 bool System::command_test(const char * value, const int8_t id) {
     return Test::run_test(value, id);

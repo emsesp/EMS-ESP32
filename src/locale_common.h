@@ -189,7 +189,7 @@ MAKE_NOTRANSLATION(tpl_date, "Format: < dd.mm.yyyy >")
 MAKE_NOTRANSLATION(tpl_input, "Format: <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]")
 MAKE_NOTRANSLATION(tpl_input4, "Format: <inv>[<comp><aux><cool><heat><dhw><pv>]")
 
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
 MAKE_NOTRANSLATION(test_cmd, "run a test")
 #endif
 
