@@ -240,15 +240,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.low_clock = root["low_clock"] | false;
     check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
 
-    String old_local = settings.locale;
-    settings.locale  = root["locale"] | EMSESP_DEFAULT_LOCALE;
-    EMSESP::system_.locale(settings.locale);
-#ifndef EMSESP_STANDALONE
-    if (!old_local.equals(settings.locale)) {
-        add_flags(ChangeFlags::RESTART); // force restart
-    }
-#endif
-
     //
     // these may need mqtt restart to rebuild HA discovery topics
     //
@@ -267,6 +258,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     //
     // without checks or necessary restarts...
     //
+    settings.locale  = root["locale"] | EMSESP_DEFAULT_LOCALE;
+    EMSESP::system_.locale(settings.locale);
+
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
 
