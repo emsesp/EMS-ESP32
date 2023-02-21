@@ -60,7 +60,7 @@ bool Shell::running() const {
 }
 
 void Shell::start() {
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
     uuid::log::Logger::register_handler(this, uuid::log::Level::DEBUG); // added for EMS-ESP
 #else
     uuid::log::Logger::register_handler(this, uuid::log::Level::INFO);

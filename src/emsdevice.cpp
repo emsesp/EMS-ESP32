@@ -283,7 +283,9 @@ const std::string EMSdevice::to_string_short() {
 
 // for each telegram that has the fetch value set (true) do a read request
 void EMSdevice::fetch_values() {
+#if defined(EMSESP_DEBUG)
     EMSESP::logger().debug("Fetching values for deviceID 0x%02X", device_id());
+#endif
 
     for (const auto & tf : telegram_functions_) {
         if (tf.fetch_) {
@@ -294,7 +296,9 @@ void EMSdevice::fetch_values() {
 
 // toggle on/off automatic fetch for a telegramID
 void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
+#if defined(EMSESP_DEBUG)
     EMSESP::logger().debug("Toggling fetch for deviceID 0x%02X, telegramID 0x%02X to %d", device_id(), telegram_id, toggle);
+#endif
 
     for (auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram_id) {
@@ -1480,7 +1484,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             // if we're filtering on an attribute, go find it
             if (attribute_s) {
 #if defined(EMSESP_DEBUG)
-                EMSESP::logger().debug("[DEBUG] Attribute '%s'", attribute_s);
+                EMSESP::logger().debug("Attribute '%s'", attribute_s);
 #endif
                 if (json.containsKey(attribute_s)) {
                     JsonVariant data = json[attribute_s];
@@ -1765,7 +1769,9 @@ bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
             // if the data block is empty and we have not received data before, assume that this telegram
             // is not recognized by the bus master. So remove it from the automatic fetch list
             if (telegram->message_length == 0 && telegram->offset == 0 && !tf.received_) {
+#if defined(EMSESP_DEBUG)
                 EMSESP::logger().debug("This telegram (%s) is not recognized by the EMS bus", tf.telegram_type_name_);
+#endif
                 tf.fetch_ = false;
                 return false;
             }

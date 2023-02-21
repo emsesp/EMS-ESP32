@@ -372,7 +372,7 @@ void Mqtt::on_publish(uint16_t packetId) const {
     // find the MQTT message in the queue and remove it
     if (mqtt_messages_.empty()) {
 #if defined(EMSESP_DEBUG)
-        LOG_DEBUG("[DEBUG] No message stored for ACK pid %d", packetId);
+        LOG_DEBUG("No message stored for ACK pid %d", packetId);
 #endif
         return;
     }
@@ -382,7 +382,7 @@ void Mqtt::on_publish(uint16_t packetId) const {
     // if the last published failed, don't bother checking it. wait for the next retry
     if (mqtt_message.packet_id_ == 0) {
 #if defined(EMSESP_DEBUG)
-        LOG_DEBUG("[DEBUG] ACK for failed message pid 0");
+        LOG_DEBUG("ACK for failed message pid 0");
 #endif
         return;
     }
@@ -393,7 +393,7 @@ void Mqtt::on_publish(uint16_t packetId) const {
     }
 
 #if defined(EMSESP_DEBUG)
-    LOG_DEBUG("[DEBUG] ACK pid %d", packetId);
+    LOG_DEBUG("ACK pid %d", packetId);
 #endif
 
     mqtt_messages_.pop_front(); // always remove from queue, regardless if there was a successful ACK
@@ -685,12 +685,12 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
 #if defined(EMSESP_DEBUG)
     if (operation == Operation::PUBLISH) {
         if (message->payload.empty()) {
-            LOG_INFO("[DEBUG] Adding to queue: (publish) topic='%s' empty payload", message->topic.c_str());
+            LOG_INFO("Adding to queue: (publish) topic='%s' empty payload", message->topic.c_str());
         } else {
-            LOG_INFO("[DEBUG] Adding to queue: (publish) topic='%s' payload=%s", message->topic.c_str(), message->payload.c_str());
+            LOG_INFO("Adding to queue: (publish) topic='%s' payload=%s", message->topic.c_str(), message->payload.c_str());
         }
     } else {
-        LOG_INFO("[DEBUG] Adding to queue: (subscribe) topic='%s'", message->topic.c_str());
+        LOG_INFO("Adding to queue: (subscribe) topic='%s'", message->topic.c_str());
     }
 #endif
 
@@ -773,7 +773,7 @@ void Mqtt::publish_ha(const char * topic) {
 
     std::string fulltopic = Mqtt::discovery_prefix() + topic;
 #if defined(EMSESP_DEBUG)
-    LOG_DEBUG("[DEBUG] Publishing empty HA topic=%s", fulltopic.c_str());
+    LOG_DEBUG("Publishing empty HA topic=%s", fulltopic.c_str());
 #endif
 
     queue_publish_message(fulltopic, "", true); // publish with retain to remove from broker
@@ -793,7 +793,7 @@ void Mqtt::publish_ha(const char * topic, const JsonObject & payload) {
 #if defined(EMSESP_STANDALONE)
     LOG_DEBUG("Publishing HA topic=%s, payload=%s", fulltopic.c_str(), payload_text.c_str());
 #elif defined(EMSESP_DEBUG)
-    LOG_DEBUG("[debug] Publishing HA topic=%s, payload=%s", fulltopic.c_str(), payload_text.c_str());
+    LOG_DEBUG("Publishing HA topic=%s, payload=%s", fulltopic.c_str(), payload_text.c_str());
 #endif
 
     // queue messages if the MQTT connection is not yet established. to ensure we don't miss messages
@@ -823,7 +823,7 @@ void Mqtt::process_queue() {
     // it will have a real packet ID
     if (mqtt_message.packet_id_ > 0) {
 #if defined(EMSESP_DEBUG)
-        LOG_DEBUG("[DEBUG] Waiting for QOS-ACK");
+        LOG_DEBUG("Waiting for QOS-ACK");
 #endif
         // if we don't get the ack within 10 minutes, republish with new packet_id
         if (uuid::get_uptime_sec() - last_publish_queue_ < 600) {
@@ -870,6 +870,7 @@ void Mqtt::process_queue() {
     uint16_t packet_id = mqttClient_->publish(topic, mqtt_qos_, message->retain, message->payload.c_str(), message->payload.size(), false, mqtt_message.id_);
     lasttopic_         = topic;
     lastpayload_       = message->payload;
+
     LOG_DEBUG("Publishing topic %s (#%02d, retain=%d, retry=%d, size=%d, pid=%d)",
               topic,
               mqtt_message.id_,
@@ -877,11 +878,11 @@ void Mqtt::process_queue() {
               mqtt_message.retry_count_ + 1,
               message->payload.size(),
               packet_id);
-#if defined(EMSESP_DEBUG)
+
     if (!message->payload.empty()) {
         LOG_DEBUG("Payload:%s", message->payload.c_str()); // extra message for #784
     }
-#endif
+
     if (packet_id == 0) {
         // it failed. if we retried n times, give up. remove from queue
         if (mqtt_message.retry_count_ == (MQTT_PUBLISH_MAX_RETRY - 1)) {
@@ -901,9 +902,7 @@ void Mqtt::process_queue() {
     // but add the packet_id so we can check it later
     if (mqtt_qos_ != 0) {
         mqtt_messages_.front().packet_id_ = packet_id;
-#if defined(EMSESP_DEBUG)
-        LOG_DEBUG("[DEBUG] Setting packetID for ACK to %d", packet_id);
-#endif
+        LOG_DEBUG("Setting packetID for ACK to %d", packet_id);
         return;
     }
 

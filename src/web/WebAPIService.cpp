@@ -126,7 +126,6 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         emsesp::EMSESP::logger().err(error);
         api_fails_++;
     } else {
-        // emsesp::EMSESP::logger().debug("API command called successfully");
         // if there was no json output from the call, default to the output message 'OK'.
         if (!output.size()) {
             output["message"] = "OK";

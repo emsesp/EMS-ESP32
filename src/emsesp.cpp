@@ -1430,7 +1430,7 @@ void EMSESP::start() {
     File root             = LittleFS.open("/config");
     bool factory_settings = !root;
     if (!root) {
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
         Serial.println("No config found, assuming factory settings");
 #endif
     }
@@ -1442,7 +1442,7 @@ void EMSESP::start() {
     esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
 
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
     LOG_NOTICE("System is running in Debug mode");
 #endif
 

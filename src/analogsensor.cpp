@@ -395,9 +395,7 @@ void AnalogSensor::remove_ha_topic(const uint8_t gpio) const {
         return;
     }
 
-#ifdef EMSESP_DEBUG
     LOG_DEBUG("Removing HA config for analog sensor GPIO %02d", gpio);
-#endif
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
@@ -701,7 +699,7 @@ bool AnalogSensor::command_commands(const char * value, const int8_t id, JsonObj
 }
 
 // hard coded tests
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
 void AnalogSensor::test() {
     sensors_.emplace_back(36, "test12", 0, 0.1, 17, AnalogType::ADC);
     sensors_.back().set_value(12.4);

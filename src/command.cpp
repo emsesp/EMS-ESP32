@@ -52,10 +52,12 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
+    /*
 #ifdef EMSESP_DEBUG
-    Serial.print("[DEBUG] processing path: ");
+    Serial.print("Processing path: ");
     Serial.println(p.path().c_str()); // dump paths, for debugging
 #endif
+*/
 
     // re-calculate new path
     // if there is only a path (URL) and no body then error!
@@ -273,9 +275,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // except for system commands as this is a special device without any queryable entities (device values)
     if ((device_type > EMSdevice::DeviceType::SYSTEM) && (!value || !strlen(value))) {
         if (!cf || !cf->cmdfunction_json_) {
-#if defined(EMSESP_DEBUG)
-            LOG_DEBUG("[DEBUG] Calling %s command '%s' to retrieve attributes", dname, cmd);
-#endif
+            LOG_DEBUG("Calling %s command '%s' to retrieve attributes", dname, cmd);
             return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
         }
     }

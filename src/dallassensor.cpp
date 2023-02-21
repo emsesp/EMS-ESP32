@@ -91,7 +91,7 @@ void DallasSensor::loop() {
     if (state_ == State::IDLE) {
         if (time_now - last_activity_ >= READ_INTERVAL_MS) {
 #ifdef EMSESP_DEBUG_SENSOR
-            LOG_DEBUG("[DEBUG] Read sensor temperature");
+            LOG_DEBUG("Read sensor temperature");
 #endif
             if (bus_.reset() || parasite_) {
                 YIELD;
@@ -456,9 +456,7 @@ void DallasSensor::remove_ha_topic(const std::string & id) {
     if (!Mqtt::ha_enabled()) {
         return;
     }
-#ifdef EMSESP_DEBUG
     LOG_DEBUG("Removing HA config for temperature sensor ID %s", id.c_str());
-#endif
     // use '_' as HA doesn't like '-' in the topic name
     std::string sensorid = id;
     std::replace(sensorid.begin(), sensorid.end(), '-', '_');
@@ -600,9 +598,7 @@ bool DallasSensor::Sensor::apply_customization() {
         auto sensors = settings.sensorCustomizations;
         if (!sensors.empty()) {
             for (const auto & sensor : sensors) {
-#if defined(EMSESP_DEBUG)
                 LOG_DEBUG("Loading customization for dallas sensor %s", sensor.id.c_str());
-#endif
                 if (id_ == sensor.id) {
                     set_name(sensor.name);
                     set_offset(sensor.offset);
@@ -617,7 +613,7 @@ bool DallasSensor::Sensor::apply_customization() {
 }
 
 // hard coded tests
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
 void DallasSensor::test() {
     // add 2 dallas sensors
     uint8_t addr[ADDR_LEN] = {1, 2, 3, 4, 5, 6, 7, 8};

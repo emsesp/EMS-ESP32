@@ -188,7 +188,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
 
 #if defined(EMSESP_DEBUG)
                 size_t length = response->setLength();
-                EMSESP::logger().debug("[DEBUG] Dashboard buffer used: %d", length);
+                EMSESP::logger().debug("Dashboard buffer used: %d", length);
 #else
                 response->setLength();
 #endif
@@ -245,7 +245,9 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
                 if (return_code != CommandRet::OK) {
                     EMSESP::logger().err("Write command failed %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
                 } else {
+#if defined(EMSESP_DEBUG)
                     EMSESP::logger().debug("Write command successful");
+#endif
                 }
 
                 response->setCode((return_code == CommandRet::OK) ? 200 : 204);
