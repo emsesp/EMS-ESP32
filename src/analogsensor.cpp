@@ -68,7 +68,7 @@ void AnalogSensor::reload() {
     analog_enabled_ = true; // for local offline testing
 #endif
     for (auto sensor : sensors_) {
-        remove_ha_topic(sensor.gpio());
+        remove_ha_topic(sensor.type(), sensor.gpio());
         sensor.ha_registered = false;
     }
     if (!analog_enabled_) {
@@ -333,7 +333,7 @@ bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset,
 
     // if the sensor exists and we're using HA, delete the old HA record
     if (found_sensor && Mqtt::ha_enabled()) {
-        remove_ha_topic(gpio); // the GPIO
+        remove_ha_topic(type, gpio); // the GPIO
     }
 
     // we didn't find it, it's new, so create and store it
@@ -384,7 +384,7 @@ void AnalogSensor::publish_sensor(const Sensor & sensor) const {
 }
 
 // send empty config topic to remove the entry from HA
-void AnalogSensor::remove_ha_topic(const uint8_t gpio) const {
+void AnalogSensor::remove_ha_topic(const int8_t type, const uint8_t gpio) const {
     if (!Mqtt::ha_enabled()) {
         return;
     }
@@ -392,7 +392,21 @@ void AnalogSensor::remove_ha_topic(const uint8_t gpio) const {
     LOG_DEBUG("Removing HA config for analog sensor GPIO %02d", gpio);
 #endif
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
+#if CONFIG_IDF_TARGET_ESP32
+    if (type == AnalogType::DIGITAL_OUT && gpio != 25 && gpio != 26) {
+#else
+    if (type == AnalogType::DIGITAL_OUT)
+#endif
+        snprintf(topic, sizeof(topic), "switch/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
+    } else if (type == AnalogType::DIGITAL_OUT) { // DAC
+        snprintf(topic, sizeof(topic), "number/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
+    } else if (type >= AnalogType::PWM_0) {
+        snprintf(topic, sizeof(topic), "number/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
+    } else if (type == AnalogType::DIGITAL_IN) {
+        snprintf(topic, sizeof(topic), "binary-sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
+    } else {
+        snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
+    }
     Mqtt::publish_ha(topic);
 }
 
