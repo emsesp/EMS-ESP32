@@ -1668,8 +1668,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
 // this is called when an MQTT publish is done via an EMS Device in emsesp.cpp::publish_device_values()
 void EMSdevice::mqtt_ha_entity_config_remove() {
     for (auto & dv : devicevalues_) {
-        if ((dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED)
-             || (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && dv.has_state(DeviceValueState::DV_HA_CONFIG_RECREATE)))
+        if (dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED)
             && ((dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) || (!dv.has_state(DeviceValueState::DV_ACTIVE)))) {
             dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
             dv.remove_state(DeviceValueState::DV_HA_CONFIG_RECREATE);
@@ -1723,6 +1722,9 @@ void EMSdevice::mqtt_ha_entity_config_create() {
 void EMSdevice::ha_config_clear() {
     for (auto & dv : devicevalues_) {
         dv.add_state(DeviceValueState::DV_HA_CONFIG_RECREATE);
+        if (ha_config_firstrun()) {
+            dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED); // make sure it is removed if not active
+        }
     }
 
     ha_config_done(false); // this will force the recreation of the main HA device config
