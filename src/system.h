@@ -247,7 +247,7 @@ class System {
         return test_set_all_active_;
     }
     static void test_set_all_active(bool n) {
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
         if (n) {
             logger_.debug("Using dummy entity values");
         }

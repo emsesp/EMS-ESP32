@@ -613,7 +613,7 @@ bool DallasSensor::Sensor::apply_customization() {
 }
 
 // hard coded tests
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
 void DallasSensor::test() {
     // add 2 dallas sensors
     uint8_t addr[ADDR_LEN] = {1, 2, 3, 4, 5, 6, 7, 8};

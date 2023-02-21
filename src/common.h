@@ -19,10 +19,10 @@
 #ifndef EMSESP_COMMON_H
 #define EMSESP_COMMON_H
 
-// logging
 #include <uuid/log.h>
 
 using uuid::log::Level;
+
 #if defined(EMSESP_DEBUG)
 #define LOG_DEBUG(...) logger_.debug(__VA_ARGS__)
 #else
@@ -52,8 +52,8 @@ using string_vector = std::vector<const char *>;
 #define F_(string_name) (__pstr__##string_name)
 #define FL_(list_name) (__pstr__L_##list_name)
 
-#ifdef EMSESP_DEBUG
-// In debug mode just take one language (en) to save on Flash space
+#if defined(EMSESP_TEST)
+// In testing just take one language (en) to save on Flash space
 #define MAKE_TRANSLATION(list_name, shortname, en, ...)   static const char * const __pstr__L_##list_name[] = {shortname, en, nullptr};
 #else
 #define MAKE_TRANSLATION(list_name, ...)       static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr};

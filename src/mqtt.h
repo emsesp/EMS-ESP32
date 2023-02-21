@@ -114,7 +114,7 @@ class Mqtt {
 
     static void ha_status();
 
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
     void incoming(const char * topic, const char * payload = ""); // for testing only
 #endif
 

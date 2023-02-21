@@ -1442,10 +1442,7 @@ void EMSESP::start() {
     esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
 
-#if defined(EMSESP_DEBUG)
-    LOG_NOTICE("System is running in Debug mode");
-#endif
-
+    LOG_DEBUG("System is running in Debug mode");
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
     // see if we're restoring a settings file

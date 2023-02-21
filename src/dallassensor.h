@@ -111,7 +111,7 @@ class DallasSensor {
 
     bool update(const std::string & id, const std::string & name, int16_t offset);
 
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_TEST)
     void test();
 #endif
 

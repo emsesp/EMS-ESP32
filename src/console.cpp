@@ -219,47 +219,6 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     //
     // SET commands
     //
-
-    /*
-#ifndef EMSESP_STANDALONE
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::USER,
-                          string_vector{F_(set), F_(timeout)},
-                          string_vector{F_(n_mandatory)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) {
-                              uint16_t value = Helpers::atoint(arguments.front().c_str());
-                              telnet_.initial_idle_timeout(value * 60);
-                              shell.printfln("Console timeout set to %d minutes", value);
-                          });
-#endif
-*/
-
-#if defined(EMSESP_DEBUG)
-    // only for debug
-    commands->add_command(
-        ShellContext::MAIN,
-        CommandFlags::ADMIN,
-        string_vector{F_(set), "mqtt"},
-        string_vector{"[on|off]"},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            auto b = arguments.front();
-
-            if ((b == "on") || (b == "off")) {
-                to_app(shell).esp8266React.getMqttSettingsService()->updateWithoutPropagation([&](MqttSettings & settings) {
-                    settings.enabled = (b == "on");
-                    shell.printfln("MQTT %s", settings.enabled ? "enabled" : "disabled");
-                    return StateUpdateResult::CHANGED;
-                });
-                emsesp::EMSESP::mqtt_.reset_mqtt();
-            } else {
-                shell.println("Must be on or off");
-            }
-        },
-        [](Shell & shell, const std::vector<std::string> & current_arguments, const std::string & next_argument) -> std::vector<std::string> {
-            return std::vector<std::string>{"on", "off"};
-        });
-#endif
-
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
                           string_vector{F_(set), F_(wifi), F_(password)},

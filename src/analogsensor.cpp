@@ -699,7 +699,7 @@ bool AnalogSensor::command_commands(const char * value, const int8_t id, JsonObj
 }
 
 // hard coded tests
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
 void AnalogSensor::test() {
     sensors_.emplace_back(36, "test12", 0, 0.1, 17, AnalogType::ADC);
     sensors_.back().set_value(12.4);

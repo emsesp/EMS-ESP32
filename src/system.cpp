@@ -417,7 +417,7 @@ void System::start() {
 void System::button_OnClick(PButton & b) {
     LOG_DEBUG("Button pressed - single click");
 
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
 #ifndef EMSESP_STANDALONE
     Test::listDir(LittleFS, FS_CONFIG_DIRECTORY, 3);
 #endif
@@ -521,21 +521,6 @@ void System::loop() {
 
     led_monitor();  // check status and report back using the LED
     system_check(); // check system health
-
-#ifndef EMSESP_STANDALONE
-
-#if defined(EMSESP_DEBUG)
-/*
-    static uint32_t last_memcheck_ = 0;
-    if (currentMillis - last_memcheck_ > 10000) { // 10 seconds
-        last_memcheck_ = currentMillis;
-        show_mem("core");
-    }
-    */
-#endif
-
-#endif
-
 #endif
 }
 

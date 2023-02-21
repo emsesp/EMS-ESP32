@@ -52,13 +52,6 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
-    /*
-#ifdef EMSESP_DEBUG
-    Serial.print("Processing path: ");
-    Serial.println(p.path().c_str()); // dump paths, for debugging
-#endif
-*/
-
     // re-calculate new path
     // if there is only a path (URL) and no body then error!
     size_t num_paths = p.paths().size();

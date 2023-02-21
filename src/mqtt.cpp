@@ -249,7 +249,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     shell.println();
 }
 
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
 // simulate receiving a MQTT message, used only for testing
 void Mqtt::incoming(const char * topic, const char * payload) {
     if (payload != nullptr) {
@@ -371,9 +371,7 @@ void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t devic
 void Mqtt::on_publish(uint16_t packetId) const {
     // find the MQTT message in the queue and remove it
     if (mqtt_messages_.empty()) {
-#if defined(EMSESP_DEBUG)
         LOG_DEBUG("No message stored for ACK pid %d", packetId);
-#endif
         return;
     }
 
@@ -392,9 +390,7 @@ void Mqtt::on_publish(uint16_t packetId) const {
         mqtt_publish_fails_++; // increment error count
     }
 
-#if defined(EMSESP_DEBUG)
     LOG_DEBUG("ACK pid %d", packetId);
-#endif
 
     mqtt_messages_.pop_front(); // always remove from queue, regardless if there was a successful ACK
 }
@@ -772,9 +768,7 @@ void Mqtt::publish_ha(const char * topic) {
     }
 
     std::string fulltopic = Mqtt::discovery_prefix() + topic;
-#if defined(EMSESP_DEBUG)
     LOG_DEBUG("Publishing empty HA topic=%s", fulltopic.c_str());
-#endif
 
     queue_publish_message(fulltopic, "", true); // publish with retain to remove from broker
 }
@@ -790,11 +784,7 @@ void Mqtt::publish_ha(const char * topic, const JsonObject & payload) {
     serializeJson(payload, payload_text); // convert json to string
 
     std::string fulltopic = Mqtt::discovery_prefix() + topic;
-#if defined(EMSESP_STANDALONE)
     LOG_DEBUG("Publishing HA topic=%s, payload=%s", fulltopic.c_str(), payload_text.c_str());
-#elif defined(EMSESP_DEBUG)
-    LOG_DEBUG("Publishing HA topic=%s, payload=%s", fulltopic.c_str(), payload_text.c_str());
-#endif
 
     // queue messages if the MQTT connection is not yet established. to ensure we don't miss messages
     queue_publish_message(fulltopic, payload_text, true); // with retain true

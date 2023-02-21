@@ -39,11 +39,10 @@ void OTASettingsService::configureArduinoOTA() {
         _arduinoOTA->onEnd([]() { emsesp::EMSESP::system_.upload_status(false); });
 
         _arduinoOTA->onProgress([](unsigned int progress, unsigned int total) {
-#if defined(EMSESP_DEBUG)
-            Serial.printf("Progress: %u%%\r\n", (progress / (total / 100)));
-#endif
+            // Serial.printf("Progress: %u%%\r\n", (progress / (total / 100)));
         });
         _arduinoOTA->onError([](ota_error_t error) {
+            /*
 #if defined(EMSESP_DEBUG)
             Serial.printf("Error[%u]: ", error);
             if (error == OTA_AUTH_ERROR)
@@ -57,6 +56,7 @@ void OTASettingsService::configureArduinoOTA() {
             else if (error == OTA_END_ERROR)
                 Serial.println("End Failed");
 #endif
+*/
         });
 
         _arduinoOTA->setMdnsEnabled(false); // disable as handled in NetworkSettingsService.cpp. https://github.com/emsesp/EMS-ESP32/issues/161
