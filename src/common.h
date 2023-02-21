@@ -41,20 +41,26 @@ using string_vector = std::vector<const char *>;
 // clang-format off
 
 #define FPSTR(pstr_pointer) pstr_pointer
-#define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] = string_literal;
-#define MAKE_PSTR_WORD(string_name) MAKE_PSTR(string_name, #string_name)
+#define MAKE_WORD_CUSTOM(string_name, string_literal) static const char __pstr__##string_name[] = string_literal;
+#define MAKE_WORD(string_name) MAKE_WORD_CUSTOM(string_name, #string_name)
 
 #define F_(string_name) (__pstr__##string_name)
 #define FL_(list_name) (__pstr__L_##list_name)
 
 #ifdef EMSESP_DEBUG
 // In debug mode just take one language (en) to save on Flash space
-#define MAKE_PSTR_LIST(list_name, shortname, ...) static const char * const __pstr__L_##list_name[]  = {shortname, nullptr};
+#define MAKE_TRANSLATION(list_name, shortname, en, ...)   static const char * const __pstr__L_##list_name[] = {shortname, en, nullptr};
 #else
-#define MAKE_PSTR_LIST(list_name, ...) static const char * const __pstr__L_##list_name[]  = {__VA_ARGS__, nullptr};
+#define MAKE_TRANSLATION(list_name, ...)       static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr};
 #endif
 
-#define MAKE_PSTR_ENUM(enum_name, ...) static const char * const * __pstr__L_##enum_name[]  = {__VA_ARGS__, nullptr};
+#define MAKE_NOTRANSLATION(list_name, ...)     static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr};
+
+// fixed strings, no translations
+#define MAKE_ENUM_FIXED(enum_name, ...) static const char * const __pstr__L_##enum_name[] = {__VA_ARGS__, nullptr};
+
+// with translations
+#define MAKE_ENUM(enum_name, ...)       static const char * const * __pstr__L_##enum_name[] = {__VA_ARGS__, nullptr};
 
 // clang-format on
 

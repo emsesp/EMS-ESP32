@@ -464,7 +464,7 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
                                  const char * const ** options,          // options for enum, which are translated as a list of lists
                                  const char * const *  options_single,   // list of names
                                  int8_t                numeric_operator, // to divide or multiply, see DeviceValueNumOps::
-                                 const char * const *  name,             // shortname, used in MQTT as the key
+                                 const char * const *  name,             // list of names, including shortname and translations
                                  uint8_t               uom,              // unit of measure from DeviceValueUOM
                                  const cmd_function_p  f,                // command function pointer
                                  int16_t               min,              // min allowed value
@@ -500,12 +500,7 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
     // get fullname, getting translation if it exists
     const char * const * fullname;
     if (Helpers::count_items(name) == 1) {
-#ifdef EMSESP_DEBUG
-        // when compiling in debug, we don't use all the translations to save on Flash memory
-        fullname = &name[0]; // use shortname when debugging
-#else
         fullname = nullptr; // no translations available, use empty
-#endif
     } else {
         fullname = &name[1]; // translations start at index 1
     }

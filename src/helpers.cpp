@@ -646,7 +646,7 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
     std::string s_on  = Helpers::translated_word(FL_(on));
     std::string s_off = Helpers::translated_word(FL_(off));
 
-    // stops when a nullptr is found, which is the end delimeter of a MAKE_PSTR_LIST()
+    // stops when a nullptr is found, which is the end delimeter of a MAKE_TRANSLATION()
     // could use count_items() to avoid buffer over-run but this works
     for (value_ui = 0; strs[value_ui]; value_ui++) {
         std::string enum_str = toLower((strs[value_ui]));

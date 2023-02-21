@@ -18,8 +18,10 @@
 
 #include "system.h"
 #include "emsesp.h" // for send_raw_telegram() command
-#include "esp_ota_ops.h"
 
+#ifndef EMSESP_STANDALONE
+#include "esp_ota_ops.h"
+#endif
 
 #include <semver200.h>
 

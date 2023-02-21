@@ -63,14 +63,14 @@ std::string Mqtt::lastpayload_ = "";
 
 // Home Assistant specific
 // icons from https://materialdesignicons.com used with the UOMs (unit of measurements)
-MAKE_PSTR_WORD(measurement)
-MAKE_PSTR_WORD(total_increasing)
-MAKE_PSTR(icondegrees, "mdi:coolant-temperature") // DeviceValueUOM::DEGREES
-MAKE_PSTR(iconpercent, "mdi:percent-outline")     // DeviceValueUOM::PERCENT
-MAKE_PSTR(iconkb, "mdi:memory")                   // DeviceValueUOM::KB
-MAKE_PSTR(iconlmin, "mdi:water-boiler")           // DeviceValueUOM::LMIN
-MAKE_PSTR(iconua, "mdi:lightning-bolt-circle")    // DeviceValueUOM::UA
-MAKE_PSTR(iconnum, "mdi:counter")                 // DeviceValueUOM::NONE
+MAKE_WORD(measurement)
+MAKE_WORD(total_increasing)
+MAKE_WORD_CUSTOM(icondegrees, "mdi:coolant-temperature") // DeviceValueUOM::DEGREES
+MAKE_WORD_CUSTOM(iconpercent, "mdi:percent-outline")     // DeviceValueUOM::PERCENT
+MAKE_WORD_CUSTOM(iconkb, "mdi:memory")                   // DeviceValueUOM::KB
+MAKE_WORD_CUSTOM(iconlmin, "mdi:water-boiler")           // DeviceValueUOM::LMIN
+MAKE_WORD_CUSTOM(iconua, "mdi:lightning-bolt-circle")    // DeviceValueUOM::UA
+MAKE_WORD_CUSTOM(iconnum, "mdi:counter")                 // DeviceValueUOM::NONE
 
 uuid::log::Logger Mqtt::logger_{F_(mqtt), uuid::log::Facility::DAEMON};
 
