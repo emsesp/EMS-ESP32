@@ -104,7 +104,7 @@ ap_settings = {
   ssid_hidden: true,
   max_clients: 4
 };
-const ap_status = {
+ap_status = {
   status: 1,
   ip_address: '192.168.4.1',
   mac_address: '3C:61:05:03:AB:2D',
