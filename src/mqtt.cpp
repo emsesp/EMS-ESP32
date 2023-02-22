@@ -137,7 +137,7 @@ void Mqtt::loop() {
 
     uint32_t currentMillis = uuid::get_uptime();
 
-    // publish top item from MQTT queue to stop flooding
+    // publish MQTT queue, but timed to avoid overloading the TCP pipe
     if ((uint32_t)(currentMillis - last_mqtt_poll_) > MQTT_PUBLISH_WAIT) {
         last_mqtt_poll_ = currentMillis;
         process_queue();
@@ -212,7 +212,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
         return;
     }
 
-    shell.printfln("MQTT queue (%d/%d messages):", mqtt_messages_.size(), MAX_MQTT_MESSAGES);
+    shell.printfln("MQTT queue (%d):", mqtt_messages_.size());
 
     for (const auto & message : mqtt_messages_) {
         auto content = message.content_;
@@ -677,31 +677,26 @@ void Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
     // take the topic and prefix the base, unless its for HA
     std::shared_ptr<MqttMessage> message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
 
-#if defined(EMSESP_DEBUG)
     if (operation == Operation::PUBLISH) {
         if (message->payload.empty()) {
-            LOG_INFO("Adding to queue: (publish) topic='%s' empty payload", message->topic.c_str());
+            LOG_DEBUG("Adding to queue: (publish) topic='%s' empty payload", message->topic.c_str());
         } else {
-            LOG_INFO("Adding to queue: (publish) topic='%s' payload=%s", message->topic.c_str(), message->payload.c_str());
+            LOG_DEBUG("Adding to queue: (publish) topic='%s' payload=%s", message->topic.c_str(), message->payload.c_str());
         }
     } else {
-        LOG_INFO("Adding to queue: (subscribe) topic='%s'", message->topic.c_str());
+        LOG_DEBUG("Adding to queue: (subscribe) topic='%s'", message->topic.c_str());
     }
-#endif
 
-    // TODO : to look at with @MichaelDvP ...
-    // 1. check heap instead of counting?
-    // 2. reduce the time to process the queue so it empties quicker?
-    // 3. if the queue is full, just exit and don't remove the last message?
 #ifndef EMSESP_STANDALONE
-
-    if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES) {
+    // TODO to look at with @MichaelDvP ...
+    // TODO also reduce the time to process the queue so it empties quicker? I changed MQTT_PUBLISH_WAIT from 100 to 75
+    // anything below 65MB available free heap is dangerously low
+    if (ESP.getFreeHeap() < (65 * 1024)) {
         // mqtt_messages_.pop_front();
         LOG_WARNING("Queue overflow");
         mqtt_publish_fails_++;
-        return; // don't add
+        return; // TODO - don't add top queue. Check will this have negative side affects?
     }
-
 #endif
 
     mqtt_messages_.emplace_back(mqtt_message_id_++, std::move(message));
@@ -770,15 +765,18 @@ void Mqtt::publish_retain(const char * topic, const JsonObject & payload, bool r
 }
 
 // publish empty payload to remove the topic
-void Mqtt::publish_ha(const char * topic) {
+void Mqtt::remove_topic(const char * topic) {
     if (!enabled()) {
         return;
     }
 
-    std::string fulltopic = Mqtt::discovery_prefix() + topic;
-    LOG_DEBUG("Publishing empty HA topic=%s", fulltopic.c_str());
-
-    queue_publish_message(fulltopic, "", true); // publish with retain to remove from broker
+    if (ha_enabled_) {
+        LOG_DEBUG("Publishing HA topic %s%s", Mqtt::discovery_prefix().c_str(), topic);
+        queue_publish_message(Mqtt::discovery_prefix() + topic, "", true); // publish with retain to remove from broker
+    } else {
+        LOG_DEBUG("Publishing topic %s", topic);
+        queue_publish_message(topic, "", true); // publish with retain to remove from broker
+    }
 }
 
 // publish a Home Assistant config topic and payload, with retain flag off.
@@ -1076,7 +1074,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // https://github.com/emsesp/EMS-ESP32/issues/196
     if (remove) {
         LOG_DEBUG("Removing HA config for %s", uniq_id);
-        publish_ha(topic);
+        remove_topic(topic);
         return;
     }
 
@@ -1088,6 +1086,8 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     const char * ic_ha  = "ic";           // icon - only set this if there is no device class
     const char * sc_ha  = "stat_cla";     // state class
     const char * uom_ha = "unit_of_meas"; // unit of measure
+
+    char sample_val[30] = "0"; // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
 
     // handle commands, which are device entities that are writable
     // we add the command topic parameter
@@ -1108,6 +1108,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             for (uint8_t i = 0; i < options_size; i++) {
                 option_list.add(Helpers::translated_word(options[i]));
             }
+            snprintf(sample_val, sizeof(sample_val), "'%s'", Helpers::translated_word(options[0]));
         } else if (type != DeviceValueType::STRING && type != DeviceValueType::BOOL) {
             // Must be Numeric....
             doc["mode"] = "box"; // auto, slider or box
@@ -1124,6 +1125,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         if (dv_set_min != 0 || dv_set_max != 0) {
             doc["min"] = dv_set_min;
             doc["max"] = dv_set_max;
+            snprintf(sample_val, sizeof(sample_val), "%i", dv_set_min);
         }
 
         // set icons
@@ -1151,7 +1153,8 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     char   ha_name[70];
     char * F_name = strdup(fullname);
     Helpers::CharToUpperUTF8(F_name); // capitalize first letter
-    if (tag != DeviceValueTAG::TAG_NONE) {
+    if (tag > DeviceValueTAG::TAG_HEARTBEAT) {
+        // exclude heartbeat tag
         snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag), F_name);
     } else {
         snprintf(ha_name, sizeof(ha_name), "%s", F_name); // no tag
@@ -1161,17 +1164,15 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // value template
     // if its nested mqtt format then use the appended entity name, otherwise take the original name
-    char val_tpl[75];
-    if (is_nested()) {
-        if (tag >= DeviceValueTAG::TAG_HC1) {
-            snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s.%s}}", EMSdevice::tag_to_mqtt(tag), entity);
-        } else {
-            snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", entity);
-        }
+    char val_obj[100];
+    char val_cond[200];
+    if (is_nested() && tag >= DeviceValueTAG::TAG_HC1) {
+        snprintf(val_obj, sizeof(val_obj), "value_json.%s.%s", EMSdevice::tag_to_mqtt(tag), entity);
+        snprintf(val_cond, sizeof(val_cond), "value_json.%s is defined and %s is defined", EMSdevice::tag_to_mqtt(tag), val_obj);
     } else {
-        snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", entity);
+        snprintf(val_obj, sizeof(val_obj), "value_json.%s", entity);
+        snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
     }
-    doc["val_tpl"] = val_tpl;
 
     // special case to handle booleans
     // applies to both Binary Sensor (read only) and a Switch (for a command)
@@ -1180,6 +1181,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
             doc["pl_on"]  = true;
             doc["pl_off"] = false;
+            snprintf(sample_val, sizeof(sample_val), "false");
         } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
             doc["pl_on"]  = 1;
             doc["pl_off"] = 0;
@@ -1187,8 +1189,8 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             char result[12];
             doc["pl_on"]  = Helpers::render_boolean(result, true);
             doc["pl_off"] = Helpers::render_boolean(result, false);
+            snprintf(sample_val, sizeof(sample_val), "'%s'", Helpers::render_boolean(result, false));
         }
-        // doc[sc_ha] = F_(measurement); // not needed
     } else {
         // always set the uom, using the standards except for hours/minutes/seconds
         // using HA specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
@@ -1202,6 +1204,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             doc[uom_ha] = EMSdevice::uom_to_string(uom); // default
         }
     }
+    doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
 
     // this next section is adding the state class, device class and sometimes the icon
     // used for Sensor and Binary Sensor Entities in HA
@@ -1298,6 +1301,9 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // add the dev json object to the end
     doc["dev"] = dev_json;
 
+    // add "availability" section
+    add_avty_to_doc(stat_t, doc.as<JsonObject>(), val_cond);
+
     publish_ha(topic, doc.as<JsonObject>());
 }
 
@@ -1309,6 +1315,9 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     char hc_mode_s[30];
     char seltemp_s[30];
     char currtemp_s[30];
+    char hc_mode_cond[70];
+    char seltemp_cond[70];
+    char currtemp_cond[170];
     char mode_str_tpl[400];
     char name_s[10];
     char uniq_id_s[60];
@@ -1319,31 +1328,39 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
 
     snprintf(topic, sizeof(topic), "climate/%s/thermostat_hc%d/config", mqtt_basename_.c_str(), hc_num);
     if (remove) {
-        publish_ha(topic); // publish empty payload with retain flag
+        remove_topic(topic); // publish empty payload with retain flag
         return;
     }
 
     if (Mqtt::is_nested()) {
         // nested format
         snprintf(hc_mode_s, sizeof(hc_mode_s), "value_json.hc%d.mode", hc_num);
-        snprintf(seltemp_s, sizeof(seltemp_s), "{{value_json.hc%d.seltemp}}", hc_num);
+        snprintf(hc_mode_cond, sizeof(hc_mode_cond), "value_json.hc%d is undefined or %s is undefined", hc_num, hc_mode_s);
+        snprintf(seltemp_s, sizeof(seltemp_s), "value_json.hc%d.seltemp", hc_num);
+        snprintf(seltemp_cond, sizeof(seltemp_cond), "value_json.hc%d is defined and %s is defined", hc_num, seltemp_s);
+
         if (has_roomtemp) {
-            snprintf(currtemp_s, sizeof(currtemp_s), "{{value_json.hc%d.currtemp}}", hc_num);
+            snprintf(currtemp_s, sizeof(currtemp_s), "value_json.hc%d.currtemp", hc_num);
+            snprintf(currtemp_cond, sizeof(currtemp_cond), "value_json.hc%d is defined and %s is defined", hc_num, currtemp_s);
         }
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_NONE).c_str());
     } else {
         // single format
         snprintf(hc_mode_s, sizeof(hc_mode_s), "value_json.mode");
-        snprintf(seltemp_s, sizeof(seltemp_s), "{{value_json.seltemp}}");
+        snprintf(hc_mode_cond, sizeof(hc_mode_cond), "%s is undefined", hc_mode_s);
+        snprintf(seltemp_s, sizeof(seltemp_s), "value_json.seltemp");
+        snprintf(seltemp_cond, sizeof(seltemp_cond), "%s is defined", seltemp_s);
+
         if (has_roomtemp) {
-            snprintf(currtemp_s, sizeof(currtemp_s), "{{value_json.currtemp}}");
+            snprintf(currtemp_s, sizeof(currtemp_s), "value_json.currtemp");
+            snprintf(currtemp_cond, sizeof(currtemp_cond), "%s is defined", currtemp_s);
         }
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_HC1 + hc_num - 1).c_str());
     }
 
     snprintf(mode_str_tpl,
              sizeof(mode_str_tpl),
-             "{%%if %s=='manual'%%}heat{%%elif %s=='day'%%}heat{%%elif %s=='night'%%}off{%%elif %s=='off'%%}off{%%else%%}auto{%%endif%%}",
+             "{%%if %s%%}off{%%elif %s=='manual'%%}heat{%%elif %s=='day'%%}heat{%%elif %s=='night'%%}off{%%elif %s=='off'%%}off{%%else%%}auto{%%endif%%}",
              hc_mode_s,
              hc_mode_s,
              hc_mode_s,
@@ -1360,7 +1377,7 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/seltemp", hc_num);
     snprintf(mode_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/mode", hc_num);
 
-    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
+    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc; // doc is 787 typically so 1024 should be enough
 
     doc["~"]             = mqtt_base_;
     doc["uniq_id"]       = uniq_id_s;
@@ -1370,17 +1387,17 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     doc["mode_stat_tpl"] = mode_str_tpl;
     doc["temp_cmd_t"]    = temp_cmd_s;
     doc["temp_stat_t"]   = topic_t;
-    doc["temp_stat_tpl"] = seltemp_s;
-    doc["mode_cmd_t"]    = mode_cmd_s;
+    doc["temp_stat_tpl"] = (std::string) "{{" + seltemp_s + " if " + seltemp_cond + " else 0}}";
 
     if (has_roomtemp) {
         doc["curr_temp_t"]   = topic_t;
-        doc["curr_temp_tpl"] = currtemp_s;
+        doc["curr_temp_tpl"] = (std::string) "{{" + currtemp_s + " if " + currtemp_cond + " else 0}}";
     }
 
-    doc["min_temp"]  = Helpers::render_value(min_s, min, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
-    doc["max_temp"]  = Helpers::render_value(max_s, max, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
-    doc["temp_step"] = "0.5";
+    doc["min_temp"]   = Helpers::render_value(min_s, min, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+    doc["max_temp"]   = Helpers::render_value(max_s, max, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+    doc["temp_step"]  = "0.5";
+    doc["mode_cmd_t"] = mode_cmd_s;
 
     // the HA climate component only responds to auto, heat and off
     JsonArray modes = doc.createNestedArray("modes");
@@ -1392,6 +1409,9 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     JsonObject dev = doc.createNestedObject("dev");
     JsonArray  ids = dev.createNestedArray("ids");
     ids.add("ems-esp-thermostat");
+
+    // add "availability" section
+    add_avty_to_doc(topic_t, doc.as<JsonObject>(), seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond);
 
     publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 }
@@ -1414,5 +1434,40 @@ std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
         return topic + "_data";
     }
 }
+
+// adds "availability" section to HA Discovery config
+void Mqtt::add_avty_to_doc(const char * state_t, const JsonObject & doc, const char * cond1, const char * cond2, const char * negcond) {
+    const char * tpl_draft = "{{'online' if %s else 'offline'}}";
+    char         tpl[150];
+    JsonArray    avty = doc.createNestedArray("avty");
+
+    StaticJsonDocument<512> avty_json;
+
+    snprintf(tpl, sizeof(tpl), "%s/status", mqtt_base_.c_str());
+    avty_json["t"] = tpl;
+    snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
+    avty_json["val_tpl"] = tpl;
+    avty.add(avty_json);
+
+    avty_json["t"] = state_t;
+    snprintf(tpl, sizeof(tpl), tpl_draft, cond1 == nullptr ? "value is defined" : cond1);
+    avty_json["val_tpl"] = tpl;
+    avty.add(avty_json);
+
+    if (cond2 != nullptr) {
+        snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
+        avty_json["val_tpl"] = tpl;
+        avty.add(avty_json);
+    }
+
+    if (negcond != nullptr) {
+        snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
+        avty_json["val_tpl"] = tpl;
+        avty.add(avty_json);
+    }
+
+    doc["avty_mode"] = "all";
+}
+
 
 } // namespace emsesp

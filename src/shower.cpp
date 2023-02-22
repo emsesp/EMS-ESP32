@@ -168,8 +168,8 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["stat_t"] = stat_t;
 
         if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-            doc["pl_on"]  = true;
-            doc["pl_off"] = false;
+            doc["pl_on"]  = "true";
+            doc["pl_off"] = "false";
         } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
             doc["pl_on"]  = 1;
             doc["pl_off"] = 0;
@@ -182,6 +182,9 @@ void Shower::set_shower_state(bool state, bool force) {
         JsonObject dev = doc.createNestedObject("dev");
         JsonArray  ids = dev.createNestedArray("ids");
         ids.add("ems-esp");
+
+        // add "availability" section
+        Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>());
 
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());

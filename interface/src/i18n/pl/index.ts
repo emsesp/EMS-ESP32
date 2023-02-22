@@ -157,7 +157,7 @@ const pl: BaseTranslation = {
   CUSTOMIZATIONS_HELP_3: 'zablokuj akcje zapisu',
   CUSTOMIZATIONS_HELP_4: 'wyklucz z MQTT i API',
   CUSTOMIZATIONS_HELP_5: 'ukryj na pulpicie',
-  CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
+  CUSTOMIZATIONS_HELP_6: 'usuń z pamięci',
   SELECT_DEVICE: 'wybierz urządzenie',
   SET_ALL: 'Ustaw wszystko jako',
   OPTIONS: 'Opcje',
@@ -201,7 +201,7 @@ const pl: BaseTranslation = {
   CPU_FREQ: 'Taktowanie CPU',
   HEAP: 'HEAP (wolne / maksymalny przydział)',
   PSRAM: 'PSRAM (rozmiar / wolne)',
-  FLASH: 'Flash (rozmiar / taktowanie)',
+  FLASH: 'FLASH (rozmiar / taktowanie)',
   APPSIZE: 'Aplikacja (wykorzystane / wolne)',
   FILESYSTEM: 'System plików (wykorzystane / wolne)',
   BUFFER_SIZE: 'Maksymalna pojemność bufora (ilość wpisów)',

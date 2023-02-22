@@ -396,10 +396,9 @@ void AnalogSensor::remove_ha_topic(const uint8_t gpio) const {
     }
 
     LOG_DEBUG("Removing HA config for analog sensor GPIO %02d", gpio);
-
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
-    Mqtt::publish_ha(topic);
+    Mqtt::remove_topic(topic);
 }
 
 // send all sensor values as a JSON package to MQTT
@@ -457,13 +456,16 @@ void AnalogSensor::publish_values(const bool force) {
                 snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::base().c_str()); // use base path
                 config["stat_t"] = stat_t;
 
-                char str[50];
+                char val_obj[50];
+                char val_cond[65];
                 if (Mqtt::is_nested()) {
-                    snprintf(str, sizeof(str), "{{value_json['%02d'].value}}", sensor.gpio());
+                    snprintf(val_obj, sizeof(val_obj), "value_json['%02d'].value", sensor.gpio());
+                    snprintf(val_cond, sizeof(val_cond), "value_json['%02d'] is defined", sensor.gpio());
                 } else {
-                    snprintf(str, sizeof(str), "{{value_json['%s']}", sensor.name().c_str());
+                    snprintf(val_obj, sizeof(val_obj), "value_json['%s']", sensor.name().c_str());
+                    snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
                 }
-                config["val_tpl"] = str;
+                config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + "}}";
 
                 char uniq_s[70];
                 if (Mqtt::entity_format() == 2) {
@@ -475,8 +477,9 @@ void AnalogSensor::publish_values(const bool force) {
                 config["object_id"] = uniq_s;
                 config["uniq_id"]   = uniq_s; // same as object_id
 
-                snprintf(str, sizeof(str), "%s", sensor.name().c_str());
-                config["name"] = str;
+                char name[50];
+                snprintf(name, sizeof(name), "%s", sensor.name().c_str());
+                config["name"] = name;
 
                 if (sensor.uom() != DeviceValueUOM::NONE) {
                     config["unit_of_meas"] = EMSdevice::uom_to_string(sensor.uom());
@@ -485,6 +488,9 @@ void AnalogSensor::publish_values(const bool force) {
                 JsonObject dev = config.createNestedObject("dev");
                 JsonArray  ids = dev.createNestedArray("ids");
                 ids.add("ems-esp");
+
+                // add "availability" section
+                Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());

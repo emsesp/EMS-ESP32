@@ -29,9 +29,6 @@
 
 using uuid::console::Shell;
 
-// size of queue
-static constexpr uint16_t MAX_MQTT_MESSAGES = 300;
-
 namespace emsesp {
 
 using mqtt_sub_function_p = std::function<bool(const char * message)>;
@@ -87,7 +84,7 @@ class Mqtt {
     static void publish_retain(const char * topic, const std::string & payload, bool retain);
     static void publish_retain(const char * topic, const JsonObject & payload, bool retain);
     static void publish_ha(const char * topic, const JsonObject & payload);
-    static void publish_ha(const char * topic);
+    static void remove_topic(const char * topic);
 
     static void publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config = false);
     static void publish_ha_sensor_config(uint8_t               type,
@@ -242,6 +239,9 @@ class Mqtt {
 
     static std::string tag_to_topic(uint8_t device_type, uint8_t tag);
 
+    static void
+    add_avty_to_doc(const char * state_t, const JsonObject & doc, const char * cond1 = nullptr, const char * cond2 = nullptr, const char * negcond = nullptr);
+
     struct QueuedMqttMessage {
         const uint32_t                           id_;
         const std::shared_ptr<const MqttMessage> content_;
@@ -263,8 +263,8 @@ class Mqtt {
     static AsyncMqttClient * mqttClient_;
     static uint32_t          mqtt_message_id_;
 
-    static constexpr uint32_t MQTT_PUBLISH_WAIT      = 100; // delay between sending publishes, to account for large payloads
-    static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY = 3;   // max retries for giving up on publishing
+    static constexpr uint32_t MQTT_PUBLISH_WAIT      = 75; // delay in ms between sending publishes, to account for large payloads
+    static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY = 3;  // max retries for giving up on publishing
 
     static void queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain);
     static void queue_publish_message(const std::string & topic, const std::string & payload, bool retain);

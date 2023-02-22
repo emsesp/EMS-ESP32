@@ -1670,6 +1670,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
 
 // remove the Home Assistant configs for each device value/entity if its not visible or active or marked as read-only
 // this is called when an MQTT publish is done via an EMS Device in emsesp.cpp::publish_device_values()
+// TODO remove topic remove on cold start
 void EMSdevice::mqtt_ha_entity_config_remove() {
     for (auto & dv : devicevalues_) {
         if (dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED)
