@@ -482,7 +482,7 @@ void EMSESP::publish_all(bool force) {
     }
 }
 
-// on command "publish HA" loop and wait between devices for publishing all sensors
+// loop and wait between devices for publishing all values
 void EMSESP::publish_all_loop() {
     if (!Mqtt::connected() || !publish_all_idx_) {
         return;
@@ -557,14 +557,14 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 // we may have some RETAINED /config topics that reference fields in the data payloads that no longer exist
                 // remove them immediately to prevent HA from complaining
                 // we need to do this first before the data payload is published, and only done once!
-                if (emsdevice->ha_config_firstrun()) {
-                    emsdevice->ha_config_clear();
-                    emsdevice->ha_config_firstrun(false);
-                    return;
-                } else {
-                    // see if we need to delete and /config topics before adding the payloads
-                    emsdevice->mqtt_ha_entity_config_remove();
-                }
+                // TODO remove
+                // if (emsdevice->ha_config_firstrun()) {
+                //     emsdevice->ha_config_clear();
+                //     emsdevice->ha_config_firstrun(false);
+                //     return;
+                // } else {
+                // see if we need to delete and /config topics before adding the payloads
+                emsdevice->mqtt_ha_entity_config_remove();
             }
         }
     }
@@ -581,7 +581,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
             }
         }
         if (need_publish && ((!nested && tag >= DeviceValueTAG::TAG_DEVICE_DATA_WW) || (tag == DeviceValueTAG::TAG_BOILER_DATA_WW))) {
-            Mqtt::publish(Mqtt::tag_to_topic(device_type, tag), json);
+            Mqtt::queue_publish(Mqtt::tag_to_topic(device_type, tag), json);
             json         = doc.to<JsonObject>();
             need_publish = false;
         }
@@ -590,7 +590,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
         if (doc.overflowed()) {
             LOG_WARNING("MQTT buffer overflow, please use individual topics");
         }
-        Mqtt::publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE), json);
+        Mqtt::queue_publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE), json);
     }
 
     // we want to create the /config topic after the data payload to prevent HA from throwing up a warning
@@ -598,6 +598,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
                 emsdevice->mqtt_ha_entity_config_create();
+                // EMSESP::mqtt_.loop(); // TODO experimental
             }
         }
     }
@@ -651,7 +652,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
         doc["value"] = value;
     }
 
-    Mqtt::publish("response", doc.as<JsonObject>());
+    Mqtt::queue_publish("response", doc.as<JsonObject>());
 }
 
 // builds json with the detail of each value, for a specific EMS device type or the dallas sensor

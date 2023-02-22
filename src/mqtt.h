@@ -75,16 +75,16 @@ class Mqtt {
     static void subscribe(const std::string & topic);
     static void resubscribe();
 
-    static void publish(const std::string & topic, const std::string & payload);
-    static void publish(const char * topic, const char * payload);
-    static void publish(const std::string & topic, const JsonObject & payload);
-    static void publish(const char * topic, const JsonObject & payload);
-    static void publish(const char * topic, const std::string & payload);
-    static void publish_retain(const std::string & topic, const JsonObject & payload, bool retain);
-    static void publish_retain(const char * topic, const std::string & payload, bool retain);
-    static void publish_retain(const char * topic, const JsonObject & payload, bool retain);
-    static void publish_ha(const char * topic, const JsonObject & payload);
-    static void remove_topic(const char * topic);
+    static void queue_publish(const std::string & topic, const std::string & payload);
+    static void queue_publish(const char * topic, const char * payload);
+    static void queue_publish(const std::string & topic, const JsonObject & payload);
+    static void queue_publish(const char * topic, const JsonObject & payload);
+    static void queue_publish(const char * topic, const std::string & payload);
+    static void queue_publish_retain(const std::string & topic, const JsonObject & payload, bool retain);
+    static void queue_publish_retain(const char * topic, const std::string & payload, bool retain);
+    static void queue_publish_retain(const char * topic, const JsonObject & payload, bool retain);
+    static void queue_ha(const char * topic, const JsonObject & payload);
+    static void queue_remove_topic(const char * topic);
 
     static void publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config = false);
     static void publish_ha_sensor_config(uint8_t               type,
@@ -263,8 +263,8 @@ class Mqtt {
     static AsyncMqttClient * mqttClient_;
     static uint32_t          mqtt_message_id_;
 
-    static constexpr uint32_t MQTT_PUBLISH_WAIT      = 75; // delay in ms between sending publishes, to account for large payloads
-    static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY = 3;  // max retries for giving up on publishing
+    static constexpr uint32_t MQTT_PUBLISH_WAIT      = 100; // delay in ms between sending publishes, to account for large payloads
+    static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY = 3;   // max retries for giving up on publishing
 
     static void queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain);
     static void queue_publish_message(const std::string & topic, const std::string & payload, bool retain);

@@ -447,7 +447,7 @@ void DallasSensor::publish_sensor(const Sensor & sensor) {
             snprintf(topic, sizeof(topic), "%s%s/%s", (F_(dallassensor)), "_data", sensor.name().c_str());
         }
         char payload[10];
-        Mqtt::publish(topic, Helpers::render_value(payload, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
+        Mqtt::queue_publish(topic, Helpers::render_value(payload, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
     }
 }
 
@@ -462,7 +462,7 @@ void DallasSensor::remove_ha_topic(const std::string & id) {
     std::replace(sensorid.begin(), sensorid.end(), '-', '_');
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "sensor/%s/dallassensor_%s/config", Mqtt::basename().c_str(), sensorid.c_str());
-    Mqtt::remove_topic(topic);
+    Mqtt::queue_remove_topic(topic);
 }
 
 // send all dallas sensor values as a JSON package to MQTT
@@ -555,14 +555,14 @@ void DallasSensor::publish_values(const bool force) {
 
                 snprintf(topic, sizeof(topic), "sensor/%s/dallassensor_%s/config", Mqtt::basename().c_str(), sensorid.c_str());
 
-                Mqtt::publish_ha(topic, config.as<JsonObject>());
+                Mqtt::queue_ha(topic, config.as<JsonObject>());
 
                 sensor.ha_registered = true;
             }
         }
     }
 
-    Mqtt::publish("dallassensor_data", doc.as<JsonObject>());
+    Mqtt::queue_publish("dallassensor_data", doc.as<JsonObject>());
 }
 
 

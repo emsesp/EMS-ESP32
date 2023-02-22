@@ -82,7 +82,7 @@ void Shower::loop() {
                         char s[50];
                         snprintf(s, 50, "%d minutes and %d seconds", (uint8_t)(duration_ / 60000), (uint8_t)((duration_ / 1000) % 60));
                         doc["duration"] = s;
-                        Mqtt::publish("shower_data", doc.as<JsonObject>());
+                        Mqtt::queue_publish("shower_data", doc.as<JsonObject>());
                         LOG_DEBUG("[Shower] finished with duration %d", duration_);
                     }
                 }
@@ -144,7 +144,7 @@ void Shower::set_shower_state(bool state, bool force) {
 
     // always publish as a string
     char s[12];
-    Mqtt::publish("shower_active", Helpers::render_boolean(s, shower_state_)); // https://github.com/emsesp/EMS-ESP/issues/369
+    Mqtt::queue_publish("shower_active", Helpers::render_boolean(s, shower_state_)); // https://github.com/emsesp/EMS-ESP/issues/369
 
     // send out HA MQTT Discovery config topic
     if ((Mqtt::ha_enabled()) && (!ha_configdone_ || force)) {
@@ -188,7 +188,8 @@ void Shower::set_shower_state(bool state, bool force) {
 
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());
-        Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+
+        Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
     }
 }
 

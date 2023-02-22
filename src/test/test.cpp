@@ -1472,7 +1472,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Size of JSON payload = %d", jo.memoryUsage());
         shell.printfln("Length of JSON payload = %d", measureJson(jo));
 
-        Mqtt::publish("test", jo);
+        Mqtt::queue_publish("test", jo);
         Mqtt::show_mqtt(shell); // show queue
         ok = true;
     }
@@ -1523,7 +1523,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         strlcpy(system_topic, "ems-esp/system", sizeof(system_topic));
 
         // test publishing
-        EMSESP::mqtt_.publish(boiler_topic, "test me");
+        EMSESP::mqtt_.queue_publish(boiler_topic, "test me");
 
         // test receiving
         EMSESP::mqtt_.incoming(boiler_topic, ""); // test if ignore empty payloads, should return values

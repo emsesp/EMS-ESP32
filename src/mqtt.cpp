@@ -301,7 +301,7 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
             if (!(mf.mqtt_subfunction_)(message)) {
                 LOG_ERROR("error: invalid payload %s for this topic %s", message, topic);
                 if (send_response_) {
-                    Mqtt::publish("response", "error: invalid data");
+                    Mqtt::queue_publish("response", "error: invalid data");
                 }
             }
             return;
@@ -336,12 +336,12 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
         }
         LOG_ERROR(error);
         if (send_response_) {
-            Mqtt::publish("response", error);
+            Mqtt::queue_publish("response", error);
         }
     } else {
         // all good, send back json output from call
         if (send_response_) {
-            Mqtt::publish("response", output);
+            Mqtt::queue_publish("response", output);
         }
     }
 }
@@ -589,7 +589,7 @@ void Mqtt::on_connect() {
     resubscribe();
 
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
-    publish_retain("status", "online", true); // with retain on
+    queue_publish_retain("status", "online", true); // with retain on
 
     mqtt_publish_fails_ = 0; // reset fail count to 0
 
@@ -643,7 +643,7 @@ void Mqtt::ha_status() {
 
     char topic[MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "binary_sensor/%s/system_status/config", mqtt_basename_.c_str());
-    Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+    Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors - must match the MQTT payload keys
     // these are all from the heartbeat MQTT topic
@@ -673,6 +673,17 @@ void Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
         return;
     }
 
+#ifndef EMSESP_STANDALONE
+    // anything below 65MB available free heap is dangerously low, so we stop adding to prevent a crash
+    // instead of doing a mqtt_messages_.pop_front()
+    auto free_heap = ESP.getFreeHeap() / 1024;
+    if (free_heap < 65) {
+        LOG_WARNING("Queue overflow (size %d, heap=%d)", mqtt_messages_.size(), free_heap);
+        mqtt_publish_fails_++;
+        return; // don't add to top of queue
+    }
+#endif
+
     // take the topic and prefix the base, unless its for HA
     std::shared_ptr<MqttMessage> message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
 
@@ -685,21 +696,6 @@ void Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
     } else {
         LOG_DEBUG("Adding to queue: (subscribe) topic='%s'", message->topic.c_str());
     }
-
-#ifndef EMSESP_STANDALONE
-    // TODO to look at with @MichaelDvP ...
-    // TODO also reduce the time to process the queue so it empties quicker? I changed MQTT_PUBLISH_WAIT from 100 to 75
-    // TODO or call process_queue() to process the front of queue immediately?
-    // TODO because it takes 10 seconds (default publish interval) before the queue gets published
-    // TODO and does returning with mqtt_messages_.pop_front() have any negative side affects?
-
-    // anything below 65MB available free heap is dangerously low
-    if (ESP.getFreeHeap() < (65 * 1024)) {
-        LOG_WARNING("Queue overflow (size %d)", mqtt_messages_.size());
-        mqtt_publish_fails_++;
-        return; // don't add to top of queue
-    }
-#endif
 
     mqtt_messages_.emplace_back(mqtt_message_id_++, std::move(message));
 
@@ -725,40 +721,40 @@ void Mqtt::queue_unsubscribe_message(const std::string & topic) {
 }
 
 // MQTT Publish, using a user's retain flag
-void Mqtt::publish(const std::string & topic, const std::string & payload) {
+void Mqtt::queue_publish(const std::string & topic, const std::string & payload) {
     queue_publish_message(topic, payload, mqtt_retain_);
 }
 
 // MQTT Publish, using a user's retain flag - except for char * strings
-void Mqtt::publish(const char * topic, const char * payload) {
+void Mqtt::queue_publish(const char * topic, const char * payload) {
     queue_publish_message((topic), payload, mqtt_retain_);
 }
 
 // MQTT Publish, using a specific retain flag, topic is a flash string
-void Mqtt::publish(const char * topic, const std::string & payload) {
+void Mqtt::queue_publish(const char * topic, const std::string & payload) {
     queue_publish_message((topic), payload, mqtt_retain_);
 }
 
-void Mqtt::publish(const char * topic, const JsonObject & payload) {
-    publish_retain(topic, payload, mqtt_retain_);
+void Mqtt::queue_publish(const char * topic, const JsonObject & payload) {
+    queue_publish_retain(topic, payload, mqtt_retain_);
 }
 
 // publish json doc, only if its not empty
-void Mqtt::publish(const std::string & topic, const JsonObject & payload) {
-    publish_retain(topic, payload, mqtt_retain_);
+void Mqtt::queue_publish(const std::string & topic, const JsonObject & payload) {
+    queue_publish_retain(topic, payload, mqtt_retain_);
 }
 
 // MQTT Publish, using a specific retain flag, topic is a flash string, forcing retain flag
-void Mqtt::publish_retain(const char * topic, const std::string & payload, bool retain) {
+void Mqtt::queue_publish_retain(const char * topic, const std::string & payload, bool retain) {
     queue_publish_message((topic), payload, retain);
 }
 
 // publish json doc, only if its not empty, using the retain flag
-void Mqtt::publish_retain(const std::string & topic, const JsonObject & payload, bool retain) {
-    publish_retain(topic.c_str(), payload, retain);
+void Mqtt::queue_publish_retain(const std::string & topic, const JsonObject & payload, bool retain) {
+    queue_publish_retain(topic.c_str(), payload, retain);
 }
 
-void Mqtt::publish_retain(const char * topic, const JsonObject & payload, bool retain) {
+void Mqtt::queue_publish_retain(const char * topic, const JsonObject & payload, bool retain) {
     if (enabled() && payload.size()) {
         std::string payload_text;
         serializeJson(payload, payload_text); // convert json to string
@@ -767,7 +763,7 @@ void Mqtt::publish_retain(const char * topic, const JsonObject & payload, bool r
 }
 
 // publish empty payload to remove the topic
-void Mqtt::remove_topic(const char * topic) {
+void Mqtt::queue_remove_topic(const char * topic) {
     if (!enabled()) {
         return;
     }
@@ -781,8 +777,8 @@ void Mqtt::remove_topic(const char * topic) {
     }
 }
 
-// publish a Home Assistant config topic and payload, with retain flag off.
-void Mqtt::publish_ha(const char * topic, const JsonObject & payload) {
+// queue a Home Assistant config topic and payload, with retain flag off.
+void Mqtt::queue_ha(const char * topic, const JsonObject & payload) {
     if (!enabled()) {
         return;
     }
@@ -863,6 +859,7 @@ void Mqtt::process_queue() {
     }
 
     // else try and publish it
+    // this is where the *real* publish happens
     uint16_t packet_id = mqttClient_->publish(topic, mqtt_qos_, message->retain, message->payload.c_str(), message->payload.size(), false, mqtt_message.id_);
     lasttopic_         = topic;
     lastpayload_       = message->payload;
@@ -1074,7 +1071,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // https://github.com/emsesp/EMS-ESP32/issues/196
     if (remove) {
         LOG_DEBUG("Removing HA config for %s", uniq_id);
-        remove_topic(topic);
+        queue_remove_topic(topic);
         return;
     }
 
@@ -1304,7 +1301,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // add "availability" section
     add_avty_to_doc(stat_t, doc.as<JsonObject>(), val_cond);
 
-    publish_ha(topic, doc.as<JsonObject>());
+    queue_ha(topic, doc.as<JsonObject>());
 }
 
 void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint16_t max) {
@@ -1328,7 +1325,7 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
 
     snprintf(topic, sizeof(topic), "climate/%s/thermostat_hc%d/config", mqtt_basename_.c_str(), hc_num);
     if (remove) {
-        remove_topic(topic); // publish empty payload with retain flag
+        queue_remove_topic(topic); // publish empty payload with retain flag
         return;
     }
 
@@ -1413,7 +1410,7 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     // add "availability" section
     add_avty_to_doc(topic_t, doc.as<JsonObject>(), seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond);
 
-    publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+    queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 }
 
 // based on the device and tag, create the MQTT topic name (without the basename)

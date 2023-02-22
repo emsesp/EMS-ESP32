@@ -770,7 +770,7 @@ void EMSdevice::publish_value(void * value_p) const {
             }
 
             if (payload[0] != '\0') {
-                Mqtt::publish(topic, payload);
+                Mqtt::queue_publish(topic, payload);
             }
         }
     }
@@ -1639,6 +1639,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                         json[name] = time_value;
                     }
                 }
+
                 // commenting out - we don't want Commands in MQTT or Console
                 //  else if (dv.type == DeviceValueType::CMD && output_target != EMSdevice::OUTPUT_TARGET::MQTT) {
                 //     json[name] = "";
@@ -1670,7 +1671,6 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
 
 // remove the Home Assistant configs for each device value/entity if its not visible or active or marked as read-only
 // this is called when an MQTT publish is done via an EMS Device in emsesp.cpp::publish_device_values()
-// TODO remove topic remove on cold start
 void EMSdevice::mqtt_ha_entity_config_remove() {
     for (auto & dv : devicevalues_) {
         if (dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED)
@@ -1681,6 +1681,7 @@ void EMSdevice::mqtt_ha_entity_config_remove() {
             if (dv.short_name == FL_(climate)[0]) {
                 Mqtt::publish_ha_climate_config(dv.tag, false, true); // delete topic (remove = true)
             } else {
+                // TODO check if we still need to remove topic on a cold start?
                 Mqtt::publish_ha_sensor_config(dv, "", "", true); // delete topic (remove = true)
             }
         }
@@ -1696,7 +1697,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
     // create climate if roomtemp is visible
     // create the discovery topic if if hasn't already been created, not a command (like reset) and is active and visible
     for (auto & dv : devicevalues_) {
-        // TODO removed
+        // TODO remove
         // if (dv.has_state(DeviceValueState::DV_HA_CONFIG_RECREATE)) {
         //     dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
         //     dv.remove_state(DeviceValueState::DV_HA_CONFIG_RECREATE);
@@ -1730,7 +1731,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
 // remove all config topics in HA
 void EMSdevice::ha_config_clear() {
     for (auto & dv : devicevalues_) {
-        // dv.add_state(DeviceValueState::DV_HA_CONFIG_RECREATE); // TODO removed
+        // dv.add_state(DeviceValueState::DV_HA_CONFIG_RECREATE); // TODO remove
         if (ha_config_firstrun()) {
             dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED); // make sure it is removed if not active
         }

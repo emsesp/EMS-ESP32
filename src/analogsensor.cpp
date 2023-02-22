@@ -385,7 +385,7 @@ void AnalogSensor::publish_sensor(const Sensor & sensor) const {
             snprintf(topic, sizeof(topic), "%s%s/%s", F_(analogsensor), "_data", sensor.name().c_str());
         }
         char payload[10];
-        Mqtt::publish(topic, Helpers::render_value(payload, sensor.value(), 2)); // always publish as doubles
+        Mqtt::queue_publish(topic, Helpers::render_value(payload, sensor.value(), 2)); // always publish as doubles
     }
 }
 
@@ -398,7 +398,7 @@ void AnalogSensor::remove_ha_topic(const uint8_t gpio) const {
     LOG_DEBUG("Removing HA config for analog sensor GPIO %02d", gpio);
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
-    Mqtt::remove_topic(topic);
+    Mqtt::queue_remove_topic(topic);
 }
 
 // send all sensor values as a JSON package to MQTT
@@ -495,14 +495,14 @@ void AnalogSensor::publish_values(const bool force) {
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
 
-                Mqtt::publish_ha(topic, config.as<JsonObject>());
+                Mqtt::queue_ha(topic, config.as<JsonObject>());
 
                 sensor.ha_registered = true;
             }
         }
     }
 
-    Mqtt::publish("analogsensor_data", doc.as<JsonObject>());
+    Mqtt::queue_publish("analogsensor_data", doc.as<JsonObject>());
 }
 
 // called from emsesp.cpp, similar to the emsdevice->get_value_info

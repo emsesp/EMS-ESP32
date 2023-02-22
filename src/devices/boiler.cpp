@@ -847,7 +847,7 @@ void Boiler::check_active(const bool force) {
     if (heatingActive_ != val || force) {
         heatingActive_ = val;
         char s[12];
-        Mqtt::publish(F_(heating_active), Helpers::render_boolean(s, b));
+        Mqtt::queue_publish(F_(heating_active), Helpers::render_boolean(s, b));
     }
 
     // check if we can use tapactivated in flow systems
@@ -871,7 +871,7 @@ void Boiler::check_active(const bool force) {
     if (tapwaterActive_ != val || force) {
         tapwaterActive_ = val;
         char s[12];
-        Mqtt::publish(F_(tapwater_active), Helpers::render_boolean(s, b));
+        Mqtt::queue_publish(F_(tapwater_active), Helpers::render_boolean(s, b));
         EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
     }
 }

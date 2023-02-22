@@ -185,9 +185,9 @@ bool System::command_watch(const char * value, const int8_t id) {
         }
         if (Mqtt::publish_single() && w != EMSESP::watch()) {
             if (Mqtt::publish_single2cmd()) {
-                Mqtt::publish("system/watch", EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
+                Mqtt::queue_publish("system/watch", EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
             } else {
-                Mqtt::publish("system_data/watch", EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
+                Mqtt::queue_publish("system_data/watch", EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
             }
         }
         EMSESP::watch(w);
@@ -195,9 +195,9 @@ bool System::command_watch(const char * value, const int8_t id) {
     } else if (i) {
         if (Mqtt::publish_single() && i != EMSESP::watch_id()) {
             if (Mqtt::publish_single2cmd()) {
-                Mqtt::publish("system/watch", Helpers::hextoa(i));
+                Mqtt::queue_publish("system/watch", Helpers::hextoa(i));
             } else {
-                Mqtt::publish("system_data/watch", Helpers::hextoa(i));
+                Mqtt::queue_publish("system_data/watch", Helpers::hextoa(i));
             }
         }
         EMSESP::watch_id(i);
@@ -273,21 +273,21 @@ void System::syslog_init() {
     }
     if (Mqtt::publish_single()) {
         if (Mqtt::publish_single2cmd()) {
-            Mqtt::publish("system/syslog", syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
+            Mqtt::queue_publish("system/syslog", syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
             if (EMSESP::watch_id() == 0 || EMSESP::watch() == 0) {
-                Mqtt::publish("system/watch",
-                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch()) : (FL_(list_watch)[EMSESP::watch()]));
+                Mqtt::queue_publish("system/watch",
+                                    EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch()) : (FL_(list_watch)[EMSESP::watch()]));
             } else {
-                Mqtt::publish("system/watch", Helpers::hextoa(EMSESP::watch_id()));
+                Mqtt::queue_publish("system/watch", Helpers::hextoa(EMSESP::watch_id()));
             }
 
         } else {
-            Mqtt::publish("system_data/syslog", syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
+            Mqtt::queue_publish("system_data/syslog", syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
             if (EMSESP::watch_id() == 0 || EMSESP::watch() == 0) {
-                Mqtt::publish("system_data/watch",
-                              EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch()) : (FL_(list_watch)[EMSESP::watch()]));
+                Mqtt::queue_publish("system_data/watch",
+                                    EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch()) : (FL_(list_watch)[EMSESP::watch()]));
             } else {
-                Mqtt::publish("system_data/watch", Helpers::hextoa(EMSESP::watch_id()));
+                Mqtt::queue_publish("system_data/watch", Helpers::hextoa(EMSESP::watch_id()));
             }
         }
     }
@@ -565,7 +565,7 @@ void System::send_info_mqtt(const char * event_str, bool send_ntp) {
         }
     }
 #endif
-    Mqtt::publish_retain(F_(info), doc.as<JsonObject>(), true); // topic called "info" and it's Retained
+    Mqtt::queue_publish_retain(F_(info), doc.as<JsonObject>(), true); // topic called "info" and it's Retained
 }
 
 // create the json for heartbeat
@@ -638,7 +638,7 @@ void System::send_heartbeat() {
     JsonObject                                  json = doc.to<JsonObject>();
 
     if (heartbeat_json(json)) {
-        Mqtt::publish(F_(heartbeat), json); // send to MQTT with retain off. This will add to MQTT queue.
+        Mqtt::queue_publish(F_(heartbeat), json); // send to MQTT with retain off. This will add to MQTT queue.
     }
 }
 
