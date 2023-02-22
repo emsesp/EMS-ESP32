@@ -266,10 +266,10 @@ class Mqtt {
     static constexpr uint32_t MQTT_PUBLISH_WAIT      = 100; // delay between sending publishes, to account for large payloads
     static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY = 3;   // max retries for giving up on publishing
 
-    static std::shared_ptr<const MqttMessage> queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain);
-    static std::shared_ptr<const MqttMessage> queue_publish_message(const std::string & topic, const std::string & payload, bool retain);
-    static std::shared_ptr<const MqttMessage> queue_subscribe_message(const std::string & topic);
-    static std::shared_ptr<const MqttMessage> queue_unsubscribe_message(const std::string & topic);
+    static void queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain);
+    static void queue_publish_message(const std::string & topic, const std::string & payload, bool retain);
+    static void queue_subscribe_message(const std::string & topic);
+    static void queue_unsubscribe_message(const std::string & topic);
 
     void on_publish(uint16_t packetId) const;
     void on_message(const char * topic, const char * payload, size_t len) const;
