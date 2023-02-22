@@ -54,7 +54,7 @@ Adafruit_NeoPixel pixels(1, 7, NEO_GRB + NEO_KHZ800);
 namespace emsesp {
 
 // Languages supported. Note: the order is important and must match locale_translations.h
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
 // in Debug mode use one language (en) to save flash memory needed for the tests
 const char * const languages[] = {EMSESP_LOCALE_EN};
 #else
