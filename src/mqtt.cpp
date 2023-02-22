@@ -669,14 +669,13 @@ void Mqtt::ha_status() {
 // add sub or pub task to the queue.
 // returns a pointer to the message created
 // the base is not included in the topic
-std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain) {
+void Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain) {
     if (topic.empty()) {
-        return nullptr;
+        return;
     }
 
     // take the topic and prefix the base, unless its for HA
-    std::shared_ptr<MqttMessage> message;
-    message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
+    std::shared_ptr<MqttMessage> message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
 
 #if defined(EMSESP_DEBUG)
     if (operation == Operation::PUBLISH) {
@@ -690,33 +689,39 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
     }
 #endif
 
-    // if the queue is full, make room but removing the last one
-    if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES) {
-        mqtt_messages_.pop_front();
-        LOG_WARNING("Queue overflow, removing one message");
+    // TODO : to look at with @MichaelDvP ...
+    // 1. check heap instead of counting?
+    // 2. reduce the time to process the queue so it empties quicker?
+    // 3. if the queue is full, just exit and don't remove the last message?
+    // if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES) {
+    if (ESP.getFreeHeap() < (70 * 1024)) { // check for 70MB (which is around size of 223 on a 4MB ESP32)
+        // mqtt_messages_.pop_front();
+        LOG_WARNING("Queue overflow");
         mqtt_publish_fails_++;
+        return; // don't add
     }
+
     mqtt_messages_.emplace_back(mqtt_message_id_++, std::move(message));
 
-    return mqtt_messages_.back().content_; // this is because the message has been moved
+    return;
 }
 
 // add MQTT message to queue, payload is a string
-std::shared_ptr<const MqttMessage> Mqtt::queue_publish_message(const std::string & topic, const std::string & payload, bool retain) {
+void Mqtt::queue_publish_message(const std::string & topic, const std::string & payload, bool retain) {
     if (!enabled()) {
-        return nullptr;
+        return;
     };
-    return queue_message(Operation::PUBLISH, topic, payload, retain);
+    queue_message(Operation::PUBLISH, topic, payload, retain);
 }
 
 // add MQTT subscribe message to queue
-std::shared_ptr<const MqttMessage> Mqtt::queue_subscribe_message(const std::string & topic) {
-    return queue_message(Operation::SUBSCRIBE, topic, "", false); // no payload
+void Mqtt::queue_subscribe_message(const std::string & topic) {
+    queue_message(Operation::SUBSCRIBE, topic, "", false); // no payload
 }
 
 // add MQTT unsubscribe message to queue
-std::shared_ptr<const MqttMessage> Mqtt::queue_unsubscribe_message(const std::string & topic) {
-    return queue_message(Operation::UNSUBSCRIBE, topic, "", false); // no payload
+void Mqtt::queue_unsubscribe_message(const std::string & topic) {
+    queue_message(Operation::UNSUBSCRIBE, topic, "", false); // no payload
 }
 
 // MQTT Publish, using a user's retain flag
@@ -964,7 +969,7 @@ void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
 void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdevice::DeviceValueType
                                     uint8_t               tag,         // EMSdevice::DeviceValueTAG
                                     const char * const    fullname,    // fullname, already translated
-                                    const char * const    en_name,     // original name
+                                    const char * const    en_name,     // original name in english
                                     const uint8_t         device_type, // EMSdevice::DeviceType
                                     const char * const    entity,      // same as shortname
                                     const uint8_t         uom,         // EMSdevice::DeviceValueUOM (0=NONE)
@@ -1062,6 +1067,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             snprintf(topic, sizeof(topic), "sensor/%s", config_topic); // normal HA sensor
         }
     }
+
 
     // if we're asking to remove this topic, send an empty payload and exit
     // https://github.com/emsesp/EMS-ESP32/issues/196
