@@ -1676,7 +1676,7 @@ void EMSdevice::mqtt_ha_entity_config_remove() {
         if (dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED)
             && ((dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) || (!dv.has_state(DeviceValueState::DV_ACTIVE)))) {
             dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-            dv.remove_state(DeviceValueState::DV_HA_CONFIG_RECREATE);
+            // dv.remove_state(DeviceValueState::DV_HA_CONFIG_RECREATE); // TODO remove
 
             if (dv.short_name == FL_(climate)[0]) {
                 Mqtt::publish_ha_climate_config(dv.tag, false, true); // delete topic (remove = true)
@@ -1696,10 +1696,11 @@ void EMSdevice::mqtt_ha_entity_config_create() {
     // create climate if roomtemp is visible
     // create the discovery topic if if hasn't already been created, not a command (like reset) and is active and visible
     for (auto & dv : devicevalues_) {
-        if (dv.has_state(DeviceValueState::DV_HA_CONFIG_RECREATE)) {
-            dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-            dv.remove_state(DeviceValueState::DV_HA_CONFIG_RECREATE);
-        }
+        // TODO removed
+        // if (dv.has_state(DeviceValueState::DV_HA_CONFIG_RECREATE)) {
+        //     dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+        //     dv.remove_state(DeviceValueState::DV_HA_CONFIG_RECREATE);
+        // }
 
         if ((dv.short_name == FL_(climate)[0]) && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE) && dv.has_state(DeviceValueState::DV_ACTIVE)) {
             if (*(int8_t *)(dv.value_p) == 1 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
@@ -1729,7 +1730,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
 // remove all config topics in HA
 void EMSdevice::ha_config_clear() {
     for (auto & dv : devicevalues_) {
-        dv.add_state(DeviceValueState::DV_HA_CONFIG_RECREATE);
+        // dv.add_state(DeviceValueState::DV_HA_CONFIG_RECREATE); // TODO removed
         if (ha_config_firstrun()) {
             dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED); // make sure it is removed if not active
         }

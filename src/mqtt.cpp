@@ -667,7 +667,6 @@ void Mqtt::ha_status() {
 }
 
 // add sub or pub task to the queue.
-// returns a pointer to the message created
 // the base is not included in the topic
 void Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain) {
     if (topic.empty()) {
@@ -690,12 +689,15 @@ void Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
 #ifndef EMSESP_STANDALONE
     // TODO to look at with @MichaelDvP ...
     // TODO also reduce the time to process the queue so it empties quicker? I changed MQTT_PUBLISH_WAIT from 100 to 75
+    // TODO or call process_queue() to process the front of queue immediately?
+    // TODO because it takes 10 seconds (default publish interval) before the queue gets published
+    // TODO and does returning with mqtt_messages_.pop_front() have any negative side affects?
+
     // anything below 65MB available free heap is dangerously low
     if (ESP.getFreeHeap() < (65 * 1024)) {
-        // mqtt_messages_.pop_front();
-        LOG_WARNING("Queue overflow");
+        LOG_WARNING("Queue overflow (size %d)", mqtt_messages_.size());
         mqtt_publish_fails_++;
-        return; // TODO - don't add top queue. Check will this have negative side affects?
+        return; // don't add to top of queue
     }
 #endif
 
@@ -818,9 +820,7 @@ void Mqtt::process_queue() {
     // if this has already been published and we're waiting for an ACK, don't publish again
     // it will have a real packet ID
     if (mqtt_message.packet_id_ > 0) {
-#if defined(EMSESP_DEBUG)
         LOG_DEBUG("Waiting for QOS-ACK");
-#endif
         // if we don't get the ack within 10 minutes, republish with new packet_id
         if (uuid::get_uptime_sec() - last_publish_queue_ < 600) {
             return;

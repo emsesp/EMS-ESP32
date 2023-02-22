@@ -124,7 +124,7 @@ class DeviceValue {
         DV_ACTIVE             = (1 << 0), // 1 - has a validated real value
         DV_HA_CONFIG_CREATED  = (1 << 1), // 2 - set if the HA config topic has been created
         DV_HA_CLIMATE_NO_RT   = (1 << 2), // 4 - climate created without roomTemp
-        DV_HA_CONFIG_RECREATE = (1 << 3), // 8 - set on reconnect to recreate HA config topic
+        DV_HA_CONFIG_RECREATE = (1 << 3), // 8 - set on reconnect to recreate HA config topic // TODO remove
 
         // high nibble as mask for exclusions & special functions
         DV_WEB_EXCLUDE      = (1 << 4), // 16 - not shown on web
