@@ -693,13 +693,16 @@ void Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
     // 1. check heap instead of counting?
     // 2. reduce the time to process the queue so it empties quicker?
     // 3. if the queue is full, just exit and don't remove the last message?
-    // if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES) {
-    if (ESP.getFreeHeap() < (70 * 1024)) { // check for 70MB (which is around size of 223 on a 4MB ESP32)
+#ifndef EMSESP_STANDALONE
+
+    if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES) {
         // mqtt_messages_.pop_front();
         LOG_WARNING("Queue overflow");
         mqtt_publish_fails_++;
         return; // don't add
     }
+
+#endif
 
     mqtt_messages_.emplace_back(mqtt_message_id_++, std::move(message));
 
