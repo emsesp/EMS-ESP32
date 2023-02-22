@@ -1074,6 +1074,8 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     const char * sc_ha  = "stat_cla";     // state class
     const char * uom_ha = "unit_of_meas"; // unit of measure
 
+    char sample_val[30] = "0"; // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
+
     // handle commands, which are device entities that are writable
     // we add the command topic parameter
     // note: there is no way to handle strings in HA so datetimes (e.g. set_datetime, set_holiday, set_wwswitchtime etc) are excluded
@@ -1093,6 +1095,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             for (uint8_t i = 0; i < options_size; i++) {
                 option_list.add(Helpers::translated_word(options[i]));
             }
+            snprintf(sample_val, sizeof(sample_val), "'%s'", Helpers::translated_word(options[0]));
         } else if (type != DeviceValueType::STRING && type != DeviceValueType::BOOL) {
             // Must be Numeric....
             doc["mode"] = "box"; // auto, slider or box
@@ -1109,6 +1112,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         if (dv_set_min != 0 || dv_set_max != 0) {
             doc["min"] = dv_set_min;
             doc["max"] = dv_set_max;
+            snprintf(sample_val, sizeof(sample_val), "%i", dv_set_min);
         }
 
         // set icons
@@ -1146,17 +1150,15 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // value template
     // if its nested mqtt format then use the appended entity name, otherwise take the original name
-    char val_tpl[75];
-    if (is_nested()) {
-        if (tag >= DeviceValueTAG::TAG_HC1) {
-            snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s.%s}}", EMSdevice::tag_to_mqtt(tag).c_str(), entity);
-        } else {
-            snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", entity);
-        }
+    char val_obj[100];
+    char val_cond[200];
+    if (is_nested() && tag >= DeviceValueTAG::TAG_HC1) {
+        snprintf(val_obj, sizeof(val_obj), "value_json.%s.%s", EMSdevice::tag_to_mqtt(tag).c_str(), entity);
+        snprintf(val_cond, sizeof(val_cond), "value_json.%s is defined and %s is defined", EMSdevice::tag_to_mqtt(tag).c_str(), val_obj);
     } else {
-        snprintf(val_tpl, sizeof(val_tpl), "{{value_json.%s}}", entity);
+        snprintf(val_obj, sizeof(val_obj), "value_json.%s", entity);
+        snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
     }
-    doc["val_tpl"] = val_tpl;
 
     // special case to handle booleans
     // applies to both Binary Sensor (read only) and a Switch (for a command)
@@ -1165,6 +1167,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
             doc["pl_on"]  = true;
             doc["pl_off"] = false;
+            snprintf(sample_val, sizeof(sample_val), "false");
         } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
             doc["pl_on"]  = 1;
             doc["pl_off"] = 0;
@@ -1172,6 +1175,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             char result[12];
             doc["pl_on"]  = Helpers::render_boolean(result, true);
             doc["pl_off"] = Helpers::render_boolean(result, false);
+            snprintf(sample_val, sizeof(sample_val), "'%s'", Helpers::render_boolean(result, false));
         }
         doc[sc_ha] = F_(measurement); //do we want this???
     } else {
@@ -1188,6 +1192,8 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             doc[uom_ha] = EMSdevice::uom_to_string(uom);
         }
     }
+
+    doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
 
     // this next section is adding the state class, device class and sometimes the icon
     // used for Sensor and Binary Sensor Entities in HA
@@ -1284,6 +1290,9 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // add the dev json object to the end
     doc["dev"] = dev_json;
 
+    // add "availability" section
+    add_avty_to_doc(stat_t, doc.as<JsonObject>(), val_cond);
+
     publish_ha(topic, doc.as<JsonObject>());
 }
 
@@ -1295,6 +1304,9 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     char hc_mode_s[30];
     char seltemp_s[30];
     char currtemp_s[30];
+    char hc_mode_cond[70];
+    char seltemp_cond[70];
+    char currtemp_cond[170];
     char mode_str_tpl[400];
     char name_s[10];
     char uniq_id_s[60];
@@ -1312,24 +1324,31 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     if (Mqtt::is_nested()) {
         // nested format
         snprintf(hc_mode_s, sizeof(hc_mode_s), "value_json.hc%d.mode", hc_num);
-        snprintf(seltemp_s, sizeof(seltemp_s), "{{value_json.hc%d.seltemp}}", hc_num);
+        snprintf(hc_mode_cond, sizeof(hc_mode_cond), "value_json.hc%d is undefined or %s is undefined", hc_num, hc_mode_s);
+        snprintf(seltemp_s, sizeof(seltemp_s), "value_json.hc%d.seltemp", hc_num);
+        snprintf(seltemp_cond, sizeof(seltemp_cond), "value_json.hc%d is defined and %s is defined", hc_num, seltemp_s);
         if (has_roomtemp) {
-            snprintf(currtemp_s, sizeof(currtemp_s), "{{value_json.hc%d.currtemp}}", hc_num);
+            snprintf(currtemp_s, sizeof(currtemp_s), "value_json.hc%d.currtemp", hc_num);
+            snprintf(currtemp_cond, sizeof(currtemp_cond), "value_json.hc%d is defined and %s is defined", hc_num, currtemp_s);
         }
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_NONE).c_str());
     } else {
         // single format
         snprintf(hc_mode_s, sizeof(hc_mode_s), "value_json.mode");
-        snprintf(seltemp_s, sizeof(seltemp_s), "{{value_json.seltemp}}");
+        snprintf(hc_mode_cond, sizeof(hc_mode_cond), "%s is undefined", hc_mode_s);
+        snprintf(seltemp_s, sizeof(seltemp_s), "value_json.seltemp");
+        snprintf(seltemp_cond, sizeof(seltemp_cond), "%s is defined", seltemp_s);
         if (has_roomtemp) {
-            snprintf(currtemp_s, sizeof(currtemp_s), "{{value_json.currtemp}}");
+            snprintf(currtemp_s, sizeof(currtemp_s), "value_json.currtemp");
+            snprintf(currtemp_cond, sizeof(currtemp_cond), "%s is defined", currtemp_s);
         }
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_HC1 + hc_num - 1).c_str());
     }
 
     snprintf(mode_str_tpl,
              sizeof(mode_str_tpl),
-             "{%%if %s=='manual'%%}heat{%%elif %s=='day'%%}heat{%%elif %s=='night'%%}off{%%elif %s=='off'%%}off{%%else%%}auto{%%endif%%}",
+             "{%%if %s%%}off{%%elif %s=='manual'%%}heat{%%elif %s=='day'%%}heat{%%elif %s=='night'%%}off{%%elif %s=='off'%%}off{%%else%%}auto{%%endif%%}",
+             hc_mode_cond,
              hc_mode_s,
              hc_mode_s,
              hc_mode_s,
@@ -1346,7 +1365,7 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/seltemp", hc_num);
     snprintf(mode_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/mode", hc_num);
 
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
+    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG + 512> doc;
 
     doc["~"]             = mqtt_base_;
     doc["uniq_id"]       = uniq_id_s;
@@ -1356,12 +1375,10 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     doc["mode_stat_tpl"] = mode_str_tpl;
     doc["temp_cmd_t"]    = temp_cmd_s;
     doc["temp_stat_t"]   = topic_t;
-    doc["temp_stat_tpl"] = seltemp_s;
-    doc["mode_cmd_t"]    = mode_cmd_s;
-
+    doc["temp_stat_tpl"] = (std::string) "{{" + seltemp_s + " if " + seltemp_cond + " else 0}}";
     if (has_roomtemp) {
         doc["curr_temp_t"]   = topic_t;
-        doc["curr_temp_tpl"] = currtemp_s;
+        doc["curr_temp_tpl"] = (std::string) "{{" + currtemp_s + " if " + currtemp_cond + " else 0}}";
     }
 
     doc["min_temp"]  = Helpers::render_value(min_s, min, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
@@ -1369,8 +1386,8 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     doc["temp_step"] = "0.5";
 
     // the HA climate component only responds to auto, heat and off
-    JsonArray modes = doc.createNestedArray("modes");
-
+    doc["mode_cmd_t"] = mode_cmd_s;
+    JsonArray modes   = doc.createNestedArray("modes");
     modes.add("auto");
     modes.add("heat");
     modes.add("off");
@@ -1378,6 +1395,9 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     JsonObject dev = doc.createNestedObject("dev");
     JsonArray  ids = dev.createNestedArray("ids");
     ids.add("ems-esp-thermostat");
+
+    // add "availability" section
+    add_avty_to_doc(topic_t, doc.as<JsonObject>(), seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond);
 
     publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 }
@@ -1399,6 +1419,38 @@ std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
     } else {
         return topic + "_data";
     }
+}
+
+// adds "availability" section to HA Discovery config
+void Mqtt::add_avty_to_doc(const char * state_t, const JsonObject & doc, const char * cond1, const char * cond2, const char * negcond) {
+    const char * tpl_draft = "{{'online' if %s else 'offline'}}";
+    char         tpl[150];
+    JsonArray    avty = doc.createNestedArray("avty");
+
+    StaticJsonDocument<512> avty_json;
+
+    snprintf(tpl, sizeof(tpl), "%s/status", mqtt_base_.c_str());
+    avty_json["t"] = tpl;
+    snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
+    avty_json["val_tpl"] = tpl;
+    avty.add(avty_json);
+
+    avty_json["t"] = state_t;
+    snprintf(tpl, sizeof(tpl), tpl_draft, cond1 == nullptr ? "value is defined" : cond1);
+    avty_json["val_tpl"] = tpl;
+    avty.add(avty_json);
+    if (cond2 != nullptr) {
+        snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
+        avty_json["val_tpl"] = tpl;
+        avty.add(avty_json);
+    }
+    if (negcond != nullptr) {
+        snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
+        avty_json["val_tpl"] = tpl;
+        avty.add(avty_json);
+    }
+
+    doc["avty_mode"] = "all";
 }
 
 } // namespace emsesp
