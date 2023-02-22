@@ -98,6 +98,17 @@ MAKE_WORD(alert)
 MAKE_WORD(pump)
 MAKE_WORD(heatsource)
 
+// brands
+MAKE_WORD_CUSTOM(bosch, "Bosch")
+MAKE_WORD_CUSTOM(junkers, "Junkers")
+MAKE_WORD_CUSTOM(buderus, "Buderus")
+MAKE_WORD_CUSTOM(nefit, "Nefit")
+MAKE_WORD_CUSTOM(sieger, "Sieger")
+MAKE_WORD_CUSTOM(worcester, "Worcester")
+MAKE_WORD_CUSTOM(ivt, "IVT")
+MAKE_WORD_CUSTOM(no_brand, "")
+
+// types
 MAKE_WORD_CUSTOM(number, "number")
 MAKE_WORD_CUSTOM(enum, "enum")
 MAKE_WORD_CUSTOM(text, "text")

@@ -82,21 +82,21 @@ const char * EMSdevice::uom_to_string(uint8_t uom) {
 const char * EMSdevice::brand_to_char() {
     switch (brand_) {
     case EMSdevice::Brand::BOSCH:
-        return "Bosch";
+        return F_(bosch);
     case EMSdevice::Brand::JUNKERS:
-        return "Junkers";
+        return F_(junkers);
     case EMSdevice::Brand::BUDERUS:
-        return "Buderus";
+        return F_(buderus);
     case EMSdevice::Brand::NEFIT:
-        return "Nefit";
+        return F_(nefit);
     case EMSdevice::Brand::SIEGER:
-        return "Sieger";
+        return F_(sieger);
     case EMSdevice::Brand::WORCESTER:
-        return "Worcester";
+        return F_(worcester);
     case EMSdevice::Brand::IVT:
-        return "IVT";
+        return F_(ivt);
     default:
-        return "";
+        return F_(no_brand);
     }
 }
 
@@ -1676,6 +1676,7 @@ void EMSdevice::mqtt_ha_entity_config_remove() {
             && ((dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) || (!dv.has_state(DeviceValueState::DV_ACTIVE)))) {
             dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
             dv.remove_state(DeviceValueState::DV_HA_CONFIG_RECREATE);
+
             if (dv.short_name == FL_(climate)[0]) {
                 Mqtt::publish_ha_climate_config(dv.tag, false, true); // delete topic (remove = true)
             } else {
@@ -1698,6 +1699,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
             dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
             dv.remove_state(DeviceValueState::DV_HA_CONFIG_RECREATE);
         }
+
         if ((dv.short_name == FL_(climate)[0]) && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE) && dv.has_state(DeviceValueState::DV_ACTIVE)) {
             if (*(int8_t *)(dv.value_p) == 1 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
                 dv.remove_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
@@ -1710,6 +1712,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
                 Mqtt::publish_ha_climate_config(dv.tag, false, false, dv.min, dv.max);
             }
         }
+
         if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && (dv.type != DeviceValueType::CMD) && dv.has_state(DeviceValueState::DV_ACTIVE)
             && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             // create_device_config is only done once for the EMS device. It can added to any entity, so we take the first
