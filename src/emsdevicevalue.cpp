@@ -115,7 +115,6 @@ const char * DeviceValue::DeviceValueUOM_s[] = {
 };
 
 // mapping of TAGs, to match order in DeviceValueTAG enum in emsdevicevalue.h
-// must be an int of 4 bytes, 32bit aligned
 const char * const * DeviceValue::DeviceValueTAG_s[] = {
 
     FL_(tag_none),           // ""
@@ -161,7 +160,7 @@ const char * const * DeviceValue::DeviceValueTAG_s[] = {
 
 };
 
-// MQTT topics derived from tags
+// tags used in MQTT topic names. Macthes sequence from DeviceValueTAG_s
 const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
 
     FL_(tag_none)[0],            // ""
@@ -251,6 +250,11 @@ bool DeviceValue::hasValue() const {
     }
 
     return has_value;
+}
+
+// See if the device value has a tag and it's not empty
+bool DeviceValue::has_tag() const {
+    return ((tag < DeviceValue::NUM_TAGS) && (tag != TAG_NONE) && strlen(DeviceValueTAG_s[tag][0]));
 }
 
 // set the min and max value for a device value
