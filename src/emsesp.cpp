@@ -535,24 +535,6 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     bool                nested       = (Mqtt::is_nested());
 
     // group by device type
-    if (Mqtt::ha_enabled()) {
-        for (const auto & emsdevice : emsdevices) {
-            if (emsdevice && (emsdevice->device_type() == device_type)) {
-                // specially for MQTT Discovery
-                // we may have some RETAINED /config topics that reference fields in the data payloads that no longer exist
-                // remove them immediately to prevent HA from complaining
-                // we need to do this first before the data payload is published, and only done once!
-                if (emsdevice->ha_config_firstrun()) {
-                    emsdevice->ha_config_clear();
-                    emsdevice->ha_config_firstrun(false);
-                    return;
-                } else {
-                    // see if we need to delete and /config topics before adding the payloads
-                    emsdevice->mqtt_ha_entity_config_remove();
-                }
-            }
-        }
-    }
     for (uint8_t tag = DeviceValueTAG::TAG_BOILER_DATA_WW; tag <= DeviceValueTAG::TAG_HS16; tag++) {
         JsonObject json_hc      = json;
         bool       nest_created = false;

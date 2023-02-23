@@ -685,7 +685,7 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
 #endif
 
     // if the queue is full, make room but removing the last one
-    if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES) {
+    if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES || ESP.getFreeHeap() < (60 * 1024)) {
         mqtt_messages_.pop_front();
         LOG_WARNING("Queue overflow, removing one message");
         mqtt_publish_fails_++;
@@ -1304,8 +1304,8 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     char hc_mode_s[30];
     char seltemp_s[30];
     char currtemp_s[30];
-    char hc_mode_cond[70];
-    char seltemp_cond[70];
+    char hc_mode_cond[80];
+    char seltemp_cond[80];
     char currtemp_cond[170];
     char mode_str_tpl[400];
     char name_s[10];
@@ -1434,17 +1434,20 @@ void Mqtt::add_avty_to_doc(const char * state_t, const JsonObject & doc, const c
     snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
     avty_json["val_tpl"] = tpl;
     avty.add(avty_json);
+    avty.clear();
 
     avty_json["t"] = state_t;
     snprintf(tpl, sizeof(tpl), tpl_draft, cond1 == nullptr ? "value is defined" : cond1);
     avty_json["val_tpl"] = tpl;
     avty.add(avty_json);
     if (cond2 != nullptr) {
+        avty.clear();
         snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
         avty_json["val_tpl"] = tpl;
         avty.add(avty_json);
     }
     if (negcond != nullptr) {
+        avty.clear();
         snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
         avty_json["val_tpl"] = tpl;
         avty.add(avty_json);
