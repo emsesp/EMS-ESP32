@@ -565,6 +565,8 @@ void Shell::process_command() {
     if (running()) {
         display_prompt();
     }
+
+    // don't think we need this for EMS-ESP on ESP32
     // ::yield();
 }
 
