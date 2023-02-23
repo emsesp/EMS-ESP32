@@ -45,6 +45,7 @@ class Solar : public EMSdevice {
     uint8_t solarPump2Mod_;     // PS4: modulation solar pump
     uint8_t m1Valve_;           // M1:  heat assistance valve
     uint8_t m1Power_;           // M1:  heat assistance valve
+    uint8_t vs1Status_;         // VS1: status
 
     // 0x363 heat counter
     uint16_t heatCntFlowTemp_;

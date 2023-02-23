@@ -534,8 +534,8 @@ void DallasSensor::publish_values(const bool force) {
                     snprintf(uniq_s, sizeof(uniq_s), "dallassensor_%s", sensor.id().c_str());
                 }
 
-                config["object_id"] = uniq_s;
-                config["uniq_id"]   = uniq_s; // same as object_id
+                config["obj_id"]  = uniq_s;
+                config["uniq_id"] = uniq_s; // same as object_id/obj_id
 
                 char name[50];
                 snprintf(name, sizeof(name), "%s", sensor.name().c_str());
