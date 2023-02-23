@@ -317,6 +317,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cylPumpMod_, DeviceValueType::UINT, FL_(cylPumpMod), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &valveStatus_, DeviceValueType::BOOL, FL_(valveStatus), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &vs1Status_, DeviceValueType::BOOL, FL_(vs1Status), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cylHeated_, DeviceValueType::BOOL, FL_(cylHeated), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &collectorShutdown_, DeviceValueType::BOOL, FL_(collectorShutdown), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
@@ -820,6 +821,7 @@ void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
  * byte 10 = PS1 Solar circuit pump for collector array 1: test=b0001(1), on=b0100(4) and off=b0011(3)
  */
 void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
+    has_bitupdate(telegram, vs1Status_, 0, 2);   // on if bit 2 set
     has_bitupdate(telegram, valveStatus_, 4, 2); // on if bit 2 set
     has_bitupdate(telegram, solarPump_, 10, 2);  // on if bit 2 set
     has_bitupdate(telegram, solarPump2_, 1, 2);  // on if bit 2 set
