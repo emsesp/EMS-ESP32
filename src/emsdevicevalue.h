@@ -120,11 +120,10 @@ class DeviceValue {
     // states of a device value
     enum DeviceValueState : uint8_t {
         // low nibble active state of the device value
-        DV_DEFAULT            = 0,        // 0 - does not yet have a value
-        DV_ACTIVE             = (1 << 0), // 1 - has a validated real value
-        DV_HA_CONFIG_CREATED  = (1 << 1), // 2 - set if the HA config topic has been created
-        DV_HA_CLIMATE_NO_RT   = (1 << 2), // 4 - climate created without roomTemp
-        DV_HA_CONFIG_RECREATE = (1 << 3), // 8 - set on reconnect to recreate HA config topic // TODO remove
+        DV_DEFAULT           = 0,        // 0 - does not yet have a value
+        DV_ACTIVE            = (1 << 0), // 1 - has a validated real value
+        DV_HA_CONFIG_CREATED = (1 << 1), // 2 - set if the HA config topic has been created
+        DV_HA_CLIMATE_NO_RT  = (1 << 2), // 4 - climate created without roomTemp
 
         // high nibble as mask for exclusions & special functions
         DV_WEB_EXCLUDE      = (1 << 4), // 16 - not shown on web
@@ -179,12 +178,8 @@ class DeviceValue {
                 uint16_t              max,
                 uint8_t               state);
 
-    // has values
     bool hasValue() const;
-    bool has_tag() const {
-        return ((tag < DeviceValue::NUM_TAGS) && (tag != DeviceValue::DeviceValueTAG::TAG_NONE) && strlen(DeviceValueTAG_s[tag][0]));
-    }
-
+    bool has_tag() const;
     bool get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max);
 
     void               set_custom_minmax();

@@ -541,7 +541,7 @@ void EMSESP::reset_mqtt_ha() {
 }
 
 // create json doc for the devices values and add to MQTT publish queue
-// this will also create the HA /config topic
+// this will also create the HA /config topic for each device value
 // generate_values_json is called to build the device value (dv) object array
 void EMSESP::publish_device_values(uint8_t device_type) {
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE);
@@ -550,24 +550,6 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     bool                nested       = (Mqtt::is_nested());
 
     // group by device type
-    if (Mqtt::ha_enabled()) {
-        for (const auto & emsdevice : emsdevices) {
-            if (emsdevice && (emsdevice->device_type() == device_type)) {
-                // specially for MQTT Discovery
-                // we may have some RETAINED /config topics that reference fields in the data payloads that no longer exist
-                // remove them immediately to prevent HA from complaining
-                // we need to do this first before the data payload is published, and only done once!
-                // TODO remove
-                // if (emsdevice->ha_config_firstrun()) {
-                //     emsdevice->ha_config_clear();
-                //     emsdevice->ha_config_firstrun(false);
-                //     return;
-                // } else {
-                // see if we need to delete and /config topics before adding the payloads
-                emsdevice->mqtt_ha_entity_config_remove();
-            }
-        }
-    }
     for (uint8_t tag = DeviceValueTAG::TAG_BOILER_DATA_WW; tag <= DeviceValueTAG::TAG_HS16; tag++) {
         JsonObject json_hc      = json;
         bool       nest_created = false;
@@ -586,6 +568,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
             need_publish = false;
         }
     }
+
     if (need_publish) {
         if (doc.overflowed()) {
             LOG_WARNING("MQTT buffer overflow, please use individual topics");
@@ -598,7 +581,6 @@ void EMSESP::publish_device_values(uint8_t device_type) {
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
                 emsdevice->mqtt_ha_entity_config_create();
-                // EMSESP::mqtt_.loop(); // TODO experimental
             }
         }
     }
@@ -1073,7 +1055,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             // see: https://github.com/emsesp/EMS-ESP32/issues/103#issuecomment-911717342 and https://github.com/emsesp/EMS-ESP32/issues/624
             name        = "RF room temperature sensor";
             device_type = DeviceType::THERMOSTAT;
-        } else if (device_id == EMSdevice::EMS_DEVICE_ID_ROOMTHERMOSTAT) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_ROOMTHERMOSTAT || device_id == EMSdevice::EMS_DEVICE_ID_TADO_OLD) {
             name        = "Generic thermostat";
             device_type = DeviceType::THERMOSTAT;
             flags       = DeviceFlags::EMS_DEVICE_FLAG_RC10 | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE;
