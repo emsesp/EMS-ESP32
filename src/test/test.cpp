@@ -265,10 +265,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (command == "general") {
         shell.printfln("Testing adding a general boiler & thermostat...");
         run_test("general");
-        shell.invoke_command("show devices");
-        shell.invoke_command("show values");
+        // shell.invoke_command("show devices");
+        // shell.invoke_command("show values");
         shell.invoke_command("call system publish");
-        shell.invoke_command("show mqtt");
+        // shell.invoke_command("show mqtt");
         ok = true;
     }
 
