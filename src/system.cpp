@@ -144,8 +144,8 @@ bool System::command_publish(const char * value, const int8_t id) {
         }
     }
 
-    EMSESP::publish_all();
     LOG_INFO("Publishing all data to MQTT");
+    EMSESP::publish_all();
 
     return true;
 }
