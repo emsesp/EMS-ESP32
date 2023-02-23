@@ -986,7 +986,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // create entity by add the hc/wwc tag if present, separating with an _
     char entity_with_tag[50];
-    if (has_tag) {
+    if (tag >= DeviceValueTAG::TAG_HC1) {
         snprintf(entity_with_tag, sizeof(entity_with_tag), "%s_%s", EMSdevice::tag_to_mqtt(tag), entity);
     } else {
         snprintf(entity_with_tag, sizeof(entity_with_tag), "%s", entity);
