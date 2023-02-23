@@ -31,6 +31,9 @@ using uuid::console::Shell;
 
 namespace emsesp {
 
+// size of queue
+static constexpr uint16_t MAX_MQTT_MESSAGES = 300;
+
 using mqtt_sub_function_p = std::function<bool(const char * message)>;
 
 struct MqttMessage {
