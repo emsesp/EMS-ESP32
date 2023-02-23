@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import axios, { AxiosPromise, CancelTokenSource, AxiosProgressEvent } from 'axios';
+import { AxiosPromise, CancelTokenSource, AxiosProgressEvent, isCancel } from 'axios';
 import { useSnackbar } from 'notistack';
 
 import { extractErrorMessage } from 'utils';
@@ -40,7 +40,7 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
 
   const uploadFile = async (images: File[]) => {
     try {
-      const cancelToken = axios.CancelToken.source();
+      const cancelToken = CancelToken.source();
       setUploadCancelToken(cancelToken);
       setUploading(true);
       const response = await upload(images[0], {
@@ -55,7 +55,7 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
         enqueueSnackbar(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL(), { variant: 'success' });
       }
     } catch (error) {
-      if (axios.isCancel(error)) {
+      if (isCancel(error)) {
         enqueueSnackbar(LL.UPLOAD() + ' ' + LL.ABORTED(), { variant: 'warning' });
       } else {
         resetUploadingStates();
