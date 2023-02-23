@@ -69,7 +69,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             }
 #endif
             // it's firmware - initialize the ArduinoOTA updater
-            if (Update.begin(fsize)) {
+            if (Update.begin()) {
                 if (strlen(md5) == 32) {
                     Update.setMD5(md5);
                     md5[0] = '\0';
