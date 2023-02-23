@@ -1157,9 +1157,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@table-library/react-table-library@npm:4.0.26":
-  version: 4.0.26
-  resolution: "@table-library/react-table-library@npm:4.0.26"
+"@table-library/react-table-library@npm:4.0.28":
+  version: 4.0.28
+  resolution: "@table-library/react-table-library@npm:4.0.28"
   dependencies:
     clsx: 1.1.1
     react-virtualized-auto-sizer: 1.0.7
@@ -1168,7 +1168,7 @@ __metadata:
     "@emotion/react": ">= 11"
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: c618f9c1c21207688cce5d6b59f5beaedaf788327c9e57f528342d627ebc7e301c1869eeadf162ab63b228ee7c182e4f5f5cbe5505c29c0c0f3d994e6389af68
+  checksum: de4e429d5659e22b101cfef8aafb430fcad20a20af803982e50ed0ba070968c0bd5a3ef02e64c34eb1b40fb7415f417cf3c30b483b0b1bbad9099f15d6489a8d
   languageName: node
   linkType: hard
 
@@ -1230,10 +1230,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.14.0":
-  version: 18.14.0
-  resolution: "@types/node@npm:18.14.0"
-  checksum: d83fcf5e4ed544755dd9028f5cbb6b9d46235043159111bb2ad62223729aee581c0144a9f6df8ba73d74011db9ed4ebd7af2fd5e0996714e3beb508a5da8ac5c
+"@types/node@npm:^18.14.1":
+  version: 18.14.1
+  resolution: "@types/node@npm:18.14.1"
+  checksum: 58556bbdb0050e44a4934742c1da2530812782c06d266a758e669e44c5aa196166c5fce45fdb03f016876717e3840478b3220129bb77367f979607564047f0a3
   languageName: node
   linkType: hard
 
@@ -1466,10 +1466,10 @@ __metadata:
     "@mui/icons-material": ^5.11.9
     "@mui/material": ^5.11.10
     "@remix-run/router": ^1.3.2
-    "@table-library/react-table-library": 4.0.26
+    "@table-library/react-table-library": 4.0.28
     "@types/lodash-es": ^4.17.6
     "@types/mime-types": ^2
-    "@types/node": ^18.14.0
+    "@types/node": ^18.14.1
     "@types/react": ^18.0.28
     "@types/react-dom": ^18.0.11
     "@types/react-router-dom": ^5.3.3
@@ -1477,7 +1477,7 @@ __metadata:
     "@typescript-eslint/parser": ^5.53.0
     "@vitejs/plugin-react-swc": ^3.2.0
     async-validator: ^4.2.5
-    axios: ^1.3.3
+    axios: ^1.3.4
     eslint: ^8.34.0
     eslint-config-prettier: ^8.6.0
     eslint-import-resolver-typescript: ^3.5.3
@@ -1742,14 +1742,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.3.3":
-  version: 1.3.3
-  resolution: "axios@npm:1.3.3"
+"axios@npm:^1.3.4":
+  version: 1.3.4
+  resolution: "axios@npm:1.3.4"
   dependencies:
     follow-redirects: ^1.15.0
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
-  checksum: b734a4bc348e2fa27150a7d4289d783fa405feb3f79f8daf28fd05813a12c8525ae9d3854aafe7ba041b005a4a751a0ba3b923331ceed41296ae14c7e54e2f26
+  checksum: 7440edefcf8498bc3cdf39de00443e8101f249972c83b739c6e880d9d669fea9486372dbe8739e88b3bf8bb1ad15f6106693f206f078f4516fe8fd47b1c3093c
   languageName: node
   linkType: hard
 
