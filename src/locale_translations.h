@@ -247,7 +247,7 @@ MAKE_TRANSLATION(outside_basepoint, "outside basepoint", "Basispunkt Außentemp.
 MAKE_TRANSLATION(functioning_mode, "functioning mode", "Funktionsweise", "Functiemodus", "Driftläge", "tryb pracy", "driftsmodus", "mode de fonctionnement")
 
 // MQTT Discovery - this is special device entity for 'climate'
-MAKE_TRANSLATION(climate, "Discovery current room temperature", "") // TODO translate
+MAKE_TRANSLATION(haclimate, "haclimate", "Discovery current room temperature") // TODO translate
 
 // mixer
 MAKE_TRANSLATION(stopped, "stopped", "gestoppt", "gestopt", "stoppad", "zatrzymany", "stoppet", "arrêté")
@@ -675,6 +675,7 @@ MAKE_TRANSLATION(solarPump, "solarpump", "pump (PS1)", "Pumpe (PS1)", "Pomp (PS1
 MAKE_TRANSLATION(solarPump2, "solarpump2", "pump 2 (PS4)", "Pumpe 2 (PS4)", "Pomp 2 (PS4)", "Pump 2 (PS4)", "pompa solarna 2 (PS4)", "solpumpe 2 (PS4)", "pompe 2 (PS4)")
 MAKE_TRANSLATION(solarPump2Mod, "solarpump2mod", "pump 2 modulation (PS4)", "Pumpe 2 Modulation (PS4)", "Modulatie pomp 2 (PS4)", "Pump 2 Modulering (PS4)", "modulacja pompy solarnej 2 (PS4)", "solpumpe2modulering (PS4)", "modulation pompe solaire 2 (PS4)")
 MAKE_TRANSLATION(valveStatus, "valvestatus", "valve status", "Ventilstatus", "Klepstatus", "Ventilstatus", "stan zaworu", "ventilstatus", "statut valve")
+MAKE_TRANSLATION(vs1Status, "vs1status", "valve status VS1", "Ventilstatus VS1", "Klepstatus VS1", "Ventilstatus VS1", "stan zaworu VS1", "ventilstatus VS1", "statut valve VS1")
 MAKE_TRANSLATION(cylHeated, "cylheated", "cyl heated", "Speichertemperatur erreicht", "Boilertemperatuur behaald", "Värmepanna Uppvärmd", "zasobnik został nagrzany", "bereder oppvarmt", "cylindre chauffé")
 MAKE_TRANSLATION(collectorShutdown, "collectorshutdown", "collector shutdown", "Kollektorabschaltung", "Collector afschakeling", "Kollektor Avstängning", "wyłączenie kolektora", "kollektor stengt", "arrêt collecteur")
 MAKE_TRANSLATION(pumpWorkTime, "pumpworktime", "pump working time", "Pumpenlaufzeit", "Pomplooptijd", "Pump Drifttid", "czas pracy pompy", "driftstid pumpe", "durée fonctionnement pompe")
