@@ -881,7 +881,7 @@ void Boiler::check_active(const bool force) {
         EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
     }
 
-    if (!Helpers::hasValue(forceHeatingOff_, true)) {
+    if (!Helpers::hasValue(forceHeatingOff_, EMS_VALUE_BOOL)) {
         EMSESP::webSettingsService.read([&](WebSettings & settings) { forceHeatingOff_ = (settings.boiler_heatingoff || selFlowTemp_ == 0) ? 1 : 0; });
         has_update(&forceHeatingOff_);
     }
@@ -2599,9 +2599,9 @@ bool Boiler::set_wwAltOpPrio(const char * value, const int8_t id) {
 bool Boiler::set_forceHeatingOff(const char * value, const int8_t id) {
     bool v;
     if (Helpers::value2bool(value, v)) {
-        forceHeatingOff_ = v;
-        if (!v) {
-            uint8_t data[] = {heatingTemp_, 0x64};
+        has_update(forceHeatingOff_, v);
+        if (!v && Helpers::hasValue(heatingTemp_)) {
+            uint8_t data[] = {heatingTemp_, (Helpers::hasValue(burnMaxPower_) ? burnMaxPower_ : (uint8_t)100), (Helpers::hasValue(pumpModMax_) ? pumpModMax_ : (uint8_t)0), 0};
             write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
         }
         return true;
