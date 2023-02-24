@@ -10,6 +10,7 @@
 
 - Detect old Tado thermostat, device-id 0x19, no entities
 - Some more HM200 entities [#500](https://github.com/emsesp/EMS-ESP32/issues/500)
+- Add entity to force heating off (for systems without thermostat) [#951](https://github.com/emsesp/EMS-ESP32/issues/951)
 
 ## Fixed
 
