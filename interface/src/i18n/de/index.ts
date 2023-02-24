@@ -127,6 +127,7 @@ const de: Translation = {
   BYPASS_TOKEN: 'Zugriffstoken-Autorisierung bei API-Aufrufen umgehen',
   READONLY: 'Nur-Lese-Modus aktivieren (blockiert alle ausgehenden EMS Tx Write-Befehle)',
   UNDERCLOCK_CPU: 'CPU-Geschwindigkeit untertakten',
+  HEATINGOFF: 'Boiler Start mit Heizung ausgeschaltet',
   ENABLE_SHOWER_TIMER: 'Duschtimer aktivieren',
   ENABLE_SHOWER_ALERT: 'Duschalarm aktivieren',
   TRIGGER_TIME: 'Auslösezeit',

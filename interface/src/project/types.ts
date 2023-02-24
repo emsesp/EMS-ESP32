@@ -7,6 +7,7 @@ export interface Settings {
   syslog_mark_interval: number;
   syslog_host: string;
   syslog_port: number;
+  boiler_heatingoff: boolean;
   shower_timer: boolean;
   shower_alert: boolean;
   shower_alert_coldshot: number;

@@ -127,6 +127,7 @@ const pl: BaseTranslation = {
   BYPASS_TOKEN: 'Pomiń autoryzację tokenem w wywołaniach API',
   READONLY: 'Tryb pracy "tylko do odczytu" (blokuje wszystkie komendy zapisu na magistralę EMS)',
   UNDERCLOCK_CPU: 'Obniż taktowanie CPU',
+  HEATINGOFF: 'Start boiler with forced heating off',
   ENABLE_SHOWER_TIMER: 'Aktywuj minutnik prysznica',
   ENABLE_SHOWER_ALERT: 'Aktywuj alarm prysznica',
   TRIGGER_TIME: 'Wyzwalaj po czasie',

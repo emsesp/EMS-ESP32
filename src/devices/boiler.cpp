@@ -881,8 +881,9 @@ void Boiler::check_active(const bool force) {
         EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
     }
 
-    if (forceHeatingOff_ == EMS_VALUE_BOOL_NOTSET) {
-        forceHeatingOff_ = selFlowTemp_ == 0 ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
+    if (!Helpers::hasValue(forceHeatingOff_, true)) {
+        EMSESP::webSettingsService.read([&](WebSettings & settings) { forceHeatingOff_ = (settings.boiler_heatingoff || selFlowTemp_ == 0) ? 1 : 0; });
+        has_update(&forceHeatingOff_);
     }
 }
 
@@ -1085,9 +1086,9 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, heatWorkMin_, 19, 3);  // force to 3 bytes
     has_update(telegram, heatStarts_, 22, 3);   // force to 3 bytes
 
-    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON) {
-        uint8_t data[4] = {0, 0, 0, 0};
-        write_command(0x1A, 0, data, 4, 0);
+    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0) {
+        uint8_t data[] = {0, 0, 0, 0};
+        write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
     }
 }
 
@@ -1120,9 +1121,9 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, heatingPumpMod_, 25);
     // temperature measurements at 4, see #620
 
-    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON) {
-        uint8_t data[4] = {0, 0, 0, 0};
-        write_command(0x1A, 0, data, 4, 0);
+    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0) {
+        uint8_t data[] = {0, 0, 0, 0};
+        write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
     }
 }
 
@@ -2599,6 +2600,10 @@ bool Boiler::set_forceHeatingOff(const char * value, const int8_t id) {
     bool v;
     if (Helpers::value2bool(value, v)) {
         forceHeatingOff_ = v;
+        if (!v) {
+            uint8_t data[] = {heatingTemp_, 0x64};
+            write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
+        }
         return true;
     }
     return false;

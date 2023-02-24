@@ -47,6 +47,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["syslog_mark_interval"]  = settings.syslog_mark_interval;
     root["syslog_host"]           = settings.syslog_host;
     root["syslog_port"]           = settings.syslog_port;
+    root["boiler_heatingoff"]     = settings.boiler_heatingoff;
     root["shower_timer"]          = settings.shower_timer;
     root["shower_alert"]          = settings.shower_alert;
     root["shower_alert_coldshot"] = settings.shower_alert_coldshot;
@@ -258,14 +259,15 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     //
     // without checks or necessary restarts...
     //
-    settings.locale  = root["locale"] | EMSESP_DEFAULT_LOCALE;
+    settings.locale = root["locale"] | EMSESP_DEFAULT_LOCALE;
     EMSESP::system_.locale(settings.locale);
 
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
 
-    settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
-    settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
+    settings.notoken_api       = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
+    settings.solar_maxflow     = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
+    settings.boiler_heatingoff = root["boiler_heatingoff"] | EMSESP_DEFAULT_BOILER_HEATINGOFF;
 
     settings.fahrenheit = root["fahrenheit"] | false;
     EMSESP::system_.fahrenheit(settings.fahrenheit);
