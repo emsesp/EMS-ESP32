@@ -608,36 +608,40 @@ let emsesp_schedule = {
       active: true,
       flags: 31,
       time: '07:30',
+      e_min: 0,
       cmd: 'hc1/mode',
       value: 'day',
-      description: 'Turn on central heating in morning'
+      desc: 'Turn on central heating in morning'
     },
     {
       id: '2',
       active: true,
       flags: 31,
       time: '23:00',
+      e_min: 0,
       cmd: 'hc1/mode',
       value: 'night',
-      description: 'Turn off central heating for the night'
+      desc: 'Turn off central heating for the night'
     },
     {
       id: '3',
       active: true,
       flags: 128,
       time: '00:01',
+      e_min: 0,
       cmd: 'thermostat/hc2/seltemp',
       value: '20',
-      description: 'Force thermostat temperature to 20 degrees every minute'
+      desc: 'Force thermostat temperature to 20 degrees every minute'
     },
     {
       id: '4',
       active: false,
       flags: 85,
       time: '04:00',
+      e_min: 0,
       cmd: 'system/restart',
       value: '',
-      description: 'auto restart EMS-EPS at 4am every other day'
+      desc: 'auto restart EMS-EPS at 4am every other day'
     }
   ]
 };
