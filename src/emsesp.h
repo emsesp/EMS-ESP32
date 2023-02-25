@@ -43,6 +43,7 @@
 #include "web/WebDataService.h"
 #include "web/WebSettingsService.h"
 #include "web/WebCustomizationService.h"
+#include "web/WebSchedulerService.h"
 #include "web/WebAPIService.h"
 #include "web/WebLogService.h"
 
@@ -228,6 +229,7 @@ class EMSESP {
     static WebAPIService           webAPIService;
     static WebLogService           webLogService;
     static WebCustomizationService webCustomizationService;
+    static WebSchedulerService     webSchedulerService;
 
   private:
     static std::string device_tostring(const uint8_t device_id);

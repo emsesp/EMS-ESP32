@@ -31,10 +31,12 @@ FS                      dummyFS;
 ESP8266React            EMSESP::esp8266React(&webServer, &dummyFS);
 WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
+WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 #else
 ESP8266React            EMSESP::esp8266React(&webServer, &LittleFS);
 WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
+WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 #endif
 
 WebStatusService EMSESP::webStatusService = WebStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
@@ -1445,6 +1447,7 @@ void EMSESP::start() {
     system_.reload_settings(); // ... and store some of the settings locally
 
     webCustomizationService.begin(); // load the customizations
+    webSchedulerService.begin();     // load the scheduler events
 
     // start telnet service if it's enabled
     // default idle is 10 minutes, default write timeout is 0 (automatic)
@@ -1490,13 +1493,14 @@ void EMSESP::loop() {
     // if we're doing an OTA upload, skip everything except from console refresh
     if (!system_.upload_status()) {
         // service loops
-        webLogService.loop(); // log in Web UI
-        rxservice_.loop();    // process any incoming Rx telegrams
-        shower_.loop();       // check for shower on/off
-        dallassensor_.loop(); // read dallas sensor temperatures
-        analogsensor_.loop(); // read analog sensor values
-        publish_all_loop();   // with HA messages in parts to avoid flooding the mqtt queue
-        mqtt_.loop();         // sends out anything in the MQTT queue
+        webLogService.loop();       // log in Web UI
+        rxservice_.loop();          // process any incoming Rx telegrams
+        shower_.loop();             // check for shower on/off
+        dallassensor_.loop();       // read dallas sensor temperatures
+        analogsensor_.loop();       // read analog sensor values
+        publish_all_loop();         // with HA messages in parts to avoid flooding the mqtt queue
+        mqtt_.loop();               // sends out anything in the MQTT queue
+        webSchedulerService.loop(); // handle any scheduled jobs
 
         // force a query on the EMS devices to fetch latest data at a set interval (1 min)
         scheduled_fetch_values();

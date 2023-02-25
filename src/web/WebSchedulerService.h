@@ -1,0 +1,66 @@
+/*
+ * EMS-ESP - https://github.com/emsesp/EMS-ESP
+ * Copyright 2020-2023  Paul Derbyshire
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef WebSchedulerService_h
+#define WebSchedulerService_h
+
+#define EMSESP_SCHEDULER_FILE "/config/emsespScheduler.json"
+#define EMSESP_SCHEDULER_SERVICE_PATH "/rest/schedule" // GET and POST
+
+namespace emsesp {
+
+class ScheduleItem {
+  public:
+    boolean     active;
+    uint8_t     flags;
+    uint16_t    elapsed_min; // total mins from 00:00
+    std::string time;        // HH:MM
+    std::string cmd;
+    std::string value;
+    std::string description;
+};
+
+class WebScheduler {
+  public:
+    std::list<ScheduleItem> scheduleItems;
+
+    static void              read(WebScheduler & webScheduler, JsonObject & root);
+    static StateUpdateResult update(JsonObject & root, WebScheduler & webScheduler);
+};
+
+class WebSchedulerService : public StatefulService<WebScheduler> {
+  public:
+    WebSchedulerService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
+
+    void begin();
+    void loop();
+
+// make all functions public so we can test in the debug and standalone mode
+#ifndef EMSESP_STANDALONE
+  private:
+#endif
+
+    HttpEndpoint<WebScheduler>  _httpEndpoint;
+    FSPersistence<WebScheduler> _fsPersistence;
+
+    // void endpointScheduler(AsyncWebServerRequest * request); // GET
+};
+
+} // namespace emsesp
+
+#endif
