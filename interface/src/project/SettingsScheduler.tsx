@@ -13,7 +13,10 @@ import {
   MenuItem,
   ToggleButtonGroup,
   Checkbox,
-  TextField
+  TextField,
+  Radio,
+  RadioGroup,
+  FormControlLabel
 } from '@mui/material';
 
 import { useTheme } from '@table-library/react-table-library/theme';
@@ -38,18 +41,17 @@ import {
   BlockNavigation
 } from 'components';
 
-import * as EMSESP from './api';
-
 import { extractErrorMessage, updateValue } from 'utils';
+
 import { validate } from 'validators';
 import { schedulerItemValidation } from './validators';
+import { ValidateFieldsError } from 'async-validator';
 
 import { ScheduleItem, ScheduleFlag } from './types';
 
-import Schema, { ValidateFieldsError } from 'async-validator';
-
 import { useI18nContext } from 'i18n/i18n-react';
 
+import * as EMSESP from './api';
 export const APIURL = window.location.origin + '/api/';
 
 const SettingsScheduler: FC = () => {
@@ -444,6 +446,26 @@ const SettingsScheduler: FC = () => {
               LL.SCHEDULE()}
           </DialogTitle>
           <DialogContent dividers>
+            {creating && (
+              <RadioGroup
+                row
+                name="schedule-type"
+                onChange={(event) => {
+                  if ((event.target as HTMLInputElement).value === 't') {
+                    scheduleItem.flags = ScheduleFlag.SCHEDULE_TIMER;
+                    scheduleItem.time = '01:00';
+                  } else {
+                    scheduleItem.flags = 0;
+                  }
+                  updateValue(setScheduleItem);
+                  setFlags(['']); // refresh screen
+                }}
+              >
+                <FormControlLabel value="w" control={<Radio />} label={LL.WEEKLY()} />
+                <FormControlLabel value="t" control={<Radio />} label={LL.TIMER()} />
+              </RadioGroup>
+            )}
+
             <TextField
               name="description"
               label={LL.DESCRIPTION()}
@@ -457,6 +479,7 @@ const SettingsScheduler: FC = () => {
               control={<Checkbox checked={scheduleItem.active} onChange={updateValue(setScheduleItem)} name="active" />}
               label={LL.ACTIVE()}
             />
+
             {(scheduleItem.flags & ScheduleFlag.SCHEDULE_TIMER) === ScheduleFlag.SCHEDULE_TIMER ? (
               <TextField
                 name="time"
@@ -482,6 +505,7 @@ const SettingsScheduler: FC = () => {
                 onChange={updateValue(setScheduleItem)}
               />
             )}
+
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="cmd"
