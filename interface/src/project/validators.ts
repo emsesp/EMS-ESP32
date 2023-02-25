@@ -1,6 +1,6 @@
 import Schema, { InternalRuleItem } from 'async-validator';
 import { IP_OR_HOSTNAME_VALIDATOR } from 'validators/shared';
-import { Settings } from './types';
+import { Settings, ScheduleItem } from './types';
 
 export const GPIO_VALIDATOR = {
   validator(rule: InternalRuleItem, value: number, callback: (error?: string) => void) {
@@ -83,4 +83,9 @@ export const createSettingsValidator = (settings: Settings) =>
       shower_alert_trigger: [{ type: 'number', min: 1, max: 20, message: 'Time must be between 1 and 20 minutes' }],
       shower_alert_coldshot: [{ type: 'number', min: 1, max: 10, message: 'Time must be between 1 and 10 seconds' }]
     })
+  });
+
+export const schedulerItemValidation = (si: ScheduleItem, creating: boolean) =>
+  new Schema({
+    cmd: [{ required: true, message: 'Command is required' }]
   });

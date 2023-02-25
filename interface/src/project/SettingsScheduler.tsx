@@ -1,5 +1,4 @@
 import { FC, useState, useEffect, useCallback } from 'react';
-
 import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 
 import {
@@ -27,6 +26,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
+import AddIcon from '@mui/icons-material/Add';
 
 import {
   ValidatedTextField,
@@ -41,8 +41,12 @@ import {
 import * as EMSESP from './api';
 
 import { extractErrorMessage, updateValue } from 'utils';
+import { validate } from 'validators';
+import { schedulerItemValidation } from './validators';
 
 import { ScheduleItem, ScheduleFlag } from './types';
+
+import Schema, { ValidateFieldsError } from 'async-validator';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -56,24 +60,27 @@ const SettingsScheduler: FC = () => {
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
 
-  const [errorMessage, setErrorMessage] = useState<string>();
-
   const emptySchedule = {
-    id: '',
+    id: '0',
     active: false,
     deleted: false,
     flags: 0,
-    time: '',
+    time: '12:00',
     cmd: '',
     value: '',
     description: ''
   };
   const [schedule, setSchedule] = useState<ScheduleItem[]>([emptySchedule]);
   const [scheduleItem, setScheduleItem] = useState<ScheduleItem>();
-
   const [ntpAvailable, setNTPavailable] = useState<boolean>(true);
-
   const [dow, setDow] = useState<string[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string>();
+  const [creating, setCreating] = useState<boolean>(false);
+
+  const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
+
+  // eslint-disable-next-line
+  const [flags, setFlags] = useState(() => ['']);
 
   function getDayNames() {
     const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
@@ -83,9 +90,6 @@ const SettingsScheduler: FC = () => {
     });
     return days.map((date) => formatter.format(date));
   }
-
-  // eslint-disable-next-line
-  const [flags, setFlags] = useState(() => ['']);
 
   useEffect(() => {
     setNumChanges(getNumChanges());
@@ -238,15 +242,15 @@ const SettingsScheduler: FC = () => {
           ntp_available: ntpAvailable,
           schedule: schedule
             .filter((si) => !si.deleted)
-            .map((new_si) => {
+            .map((condensed_si) => {
               return {
-                id: new_si.id,
-                active: new_si.active,
-                flags: new_si.flags,
-                time: new_si.time,
-                cmd: new_si.cmd,
-                value: new_si.value,
-                description: new_si.description
+                id: condensed_si.id, // will be ignored
+                active: condensed_si.active,
+                flags: condensed_si.flags,
+                time: condensed_si.time,
+                cmd: condensed_si.cmd,
+                value: condensed_si.value,
+                description: condensed_si.description
               };
             })
         });
@@ -301,28 +305,41 @@ const SettingsScheduler: FC = () => {
       si.description = '';
     }
     setScheduleItem(si);
+    setCreating(false);
+  };
+
+  function makeid() {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < 4) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+  }
+
+  const addScheduleItem = () => {
+    setScheduleItem({
+      id: makeid(), // random ID of 4 strings
+      active: false,
+      deleted: false,
+      flags: 0,
+      time: '12:00',
+      cmd: '',
+      value: '',
+      description: ''
+    });
+    setCreating(true);
   };
 
   const updateScheduleItem = () => {
     if (scheduleItem) {
-      setSchedule((prevState) => {
-        const newState = prevState.map((obj) => {
-          if (obj.id === scheduleItem.id) {
-            return {
-              ...obj,
-              active: scheduleItem.active,
-              time: scheduleItem.time,
-              cmd: scheduleItem.cmd,
-              value: scheduleItem.value,
-              description: scheduleItem.description
-            };
-          }
-          return obj;
-        });
-        return newState;
-      });
+      const new_schedule = [...schedule.filter((si) => si.id !== scheduleItem.id), scheduleItem];
+      setSchedule(new_schedule);
+      setScheduleItem(undefined);
     }
-    setScheduleItem(undefined);
   };
 
   const renderSchedule = () => {
@@ -401,12 +418,24 @@ const SettingsScheduler: FC = () => {
     updateScheduleItem();
   };
 
+  const validateScheduleItem = async () => {
+    if (scheduleItem) {
+      try {
+        setFieldErrors(undefined);
+        await validate(schedulerItemValidation(scheduleItem, creating), scheduleItem);
+        updateScheduleItem();
+      } catch (errors: any) {
+        setFieldErrors(errors);
+      }
+    }
+  };
+
   const renderEditSchedule = () => {
     if (scheduleItem) {
       return (
         <Dialog open={!!scheduleItem} onClose={() => setScheduleItem(undefined)}>
           <DialogTitle>
-            {LL.EDIT() +
+            {(creating ? LL.ADD(0) : LL.EDIT()) +
               ' ' +
               ((scheduleItem.flags & ScheduleFlag.SCHEDULE_TIMER) === ScheduleFlag.SCHEDULE_TIMER
                 ? LL.TIMER()
@@ -428,9 +457,8 @@ const SettingsScheduler: FC = () => {
               control={<Checkbox checked={scheduleItem.active} onChange={updateValue(setScheduleItem)} name="active" />}
               label={LL.ACTIVE()}
             />
-
             {(scheduleItem.flags & ScheduleFlag.SCHEDULE_TIMER) === ScheduleFlag.SCHEDULE_TIMER ? (
-              <ValidatedTextField
+              <TextField
                 name="time"
                 label={LL.TIMER()}
                 value={scheduleItem.time}
@@ -443,7 +471,7 @@ const SettingsScheduler: FC = () => {
                 <MenuItem value={'00:00'}>{LL.SCHEDULE_TIMER_1()}</MenuItem>
                 <MenuItem value={'00:01'}>{LL.SCHEDULE_TIMER_2()}</MenuItem>
                 <MenuItem value={'01:00'}>{LL.SCHEDULE_TIMER_3()}</MenuItem>
-              </ValidatedTextField>
+              </TextField>
             ) : (
               <TextField
                 name="time"
@@ -454,9 +482,9 @@ const SettingsScheduler: FC = () => {
                 onChange={updateValue(setScheduleItem)}
               />
             )}
-
-            <TextField
-              name="command"
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="cmd"
               label={LL.COMMAND()}
               fullWidth
               value={scheduleItem.cmd}
@@ -474,16 +502,18 @@ const SettingsScheduler: FC = () => {
             />
           </DialogContent>
           <DialogActions>
-            <Box flexGrow={1} sx={{ '& button': { mt: 0 } }}>
-              <Button
-                startIcon={<RemoveIcon />}
-                variant="outlined"
-                color="error"
-                onClick={() => removeScheduleItem(scheduleItem)}
-              >
-                {LL.REMOVE()}
-              </Button>
-            </Box>
+            {!creating && (
+              <Box flexGrow={1} sx={{ '& button': { mt: 0 } }}>
+                <Button
+                  startIcon={<RemoveIcon />}
+                  variant="outlined"
+                  color="error"
+                  onClick={() => removeScheduleItem(scheduleItem)}
+                >
+                  {LL.REMOVE()}
+                </Button>
+              </Box>
+            )}
             <Button
               startIcon={<CancelIcon />}
               variant="outlined"
@@ -496,10 +526,10 @@ const SettingsScheduler: FC = () => {
               startIcon={<DoneIcon />}
               variant="outlined"
               type="submit"
-              onClick={() => updateScheduleItem()}
+              onClick={() => validateScheduleItem()}
               color="primary"
             >
-              {LL.UPDATE()}
+              {creating ? LL.ADD(0) : LL.UPDATE()}
             </Button>
           </DialogActions>
         </Dialog>
@@ -533,6 +563,13 @@ const SettingsScheduler: FC = () => {
               </Button>
             </ButtonRow>
           )}
+        </Box>
+        <Box flexWrap="nowrap" whiteSpace="nowrap">
+          <ButtonRow>
+            <Button startIcon={<AddIcon />} variant="outlined" color="secondary" onClick={() => addScheduleItem()}>
+              {LL.ADD(0)}
+            </Button>
+          </ButtonRow>
         </Box>
       </Box>
     </SectionContent>
