@@ -1,1 +1,1 @@
-#define EMSESP_APP_VERSION "3.5.0-tec.6"
+#define EMSESP_APP_VERSION "3.5.0-tec.7"
