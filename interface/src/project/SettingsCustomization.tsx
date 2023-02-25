@@ -104,6 +104,7 @@ const SettingsCustomization: FC = () => {
       .th {
         border-bottom: 1px solid #565656;
         font-weight: 500;
+        height: 32px;
       }
 
       &:nth-of-type(1) .th {
@@ -352,6 +353,7 @@ const SettingsCustomization: FC = () => {
           variant="outlined"
           fullWidth
           value={selectedDevice}
+          disabled={numChanges !== 0}
           onChange={changeSelectedDevice}
           margin="normal"
           select
@@ -495,11 +497,7 @@ const SettingsCustomization: FC = () => {
               <Header>
                 <HeaderRow>
                   <HeaderCell stiff>{LL.OPTIONS()}</HeaderCell>
-                  <HeaderCell resize>
-                    <Button fullWidth style={{ fontSize: '14px', justifyContent: 'flex-start' }}>
-                      {LL.NAME(1)}
-                    </Button>
-                  </HeaderCell>
+                  <HeaderCell resize>{LL.NAME(1)}</HeaderCell>
                   <HeaderCell stiff>{LL.MIN()}</HeaderCell>
                   <HeaderCell stiff>{LL.MAX()}</HeaderCell>
                   <HeaderCell resize>{LL.VALUE(0)}</HeaderCell>
@@ -522,7 +520,7 @@ const SettingsCustomization: FC = () => {
                             if (de.m & DeviceEntityMask.DV_WEB_EXCLUDE) {
                               de.m = de.m & ~DeviceEntityMask.DV_FAVORITE;
                             }
-                            setMasks(['']);
+                            setMasks(['']); // forces a refresh
                           }}
                         >
                           <ToggleButton value="8" disabled={(de.m & 0x81) !== 0 || de.n === undefined}>
@@ -610,6 +608,14 @@ const SettingsCustomization: FC = () => {
               {numChanges !== 0 && (
                 <ButtonRow>
                   <Button
+                    startIcon={<CancelIcon />}
+                    variant="outlined"
+                    color="secondary"
+                    onClick={() => devices && fetchDeviceEntities(devices.devices[selectedDevice].i)}
+                  >
+                    {LL.CANCEL()}
+                  </Button>
+                  <Button
                     startIcon={<WarningIcon color="warning" />}
                     variant="contained"
                     color="info"
@@ -639,10 +645,9 @@ const SettingsCustomization: FC = () => {
 
   const renderEditDialog = () => {
     if (deviceEntity) {
-      const de = deviceEntity;
       return (
         <Dialog open={!!deviceEntity} onClose={() => setDeviceEntity(undefined)}>
-          <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY() + ' "' + de.id + '"'}</DialogTitle>
+          <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY() + ' "' + deviceEntity.id + '"'}</DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" mb={2}>
               <Typography variant="body2">
@@ -660,28 +665,30 @@ const SettingsCustomization: FC = () => {
                   onChange={updateValue(setDeviceEntity)}
                 />
               </Grid>
-              {typeof de.v === 'number' && de.w && !(de.m & DeviceEntityMask.DV_READONLY) && (
-                <>
-                  <Grid item>
-                    <TextField
-                      name="mi"
-                      label={LL.MIN()}
-                      value={deviceEntity.mi}
-                      sx={{ width: '8ch' }}
-                      onChange={updateValue(setDeviceEntity)}
-                    />
-                  </Grid>
-                  <Grid item>
-                    <TextField
-                      name="ma"
-                      label={LL.MAX()}
-                      value={deviceEntity.ma}
-                      sx={{ width: '8ch' }}
-                      onChange={updateValue(setDeviceEntity)}
-                    />
-                  </Grid>
-                </>
-              )}
+              {typeof deviceEntity.v === 'number' &&
+                deviceEntity.w &&
+                !(deviceEntity.m & DeviceEntityMask.DV_READONLY) && (
+                  <>
+                    <Grid item>
+                      <TextField
+                        name="mi"
+                        label={LL.MIN()}
+                        value={deviceEntity.mi}
+                        sx={{ width: '8ch' }}
+                        onChange={updateValue(setDeviceEntity)}
+                      />
+                    </Grid>
+                    <Grid item>
+                      <TextField
+                        name="ma"
+                        label={LL.MAX()}
+                        value={deviceEntity.ma}
+                        sx={{ width: '8ch' }}
+                        onChange={updateValue(setDeviceEntity)}
+                      />
+                    </Grid>
+                  </>
+                )}
             </Grid>
           </DialogContent>
           <DialogActions>

@@ -16,7 +16,9 @@ import {
   WriteValue,
   WriteSensor,
   WriteAnalog,
-  SensorData
+  SensorData,
+  ScheduleItem,
+  Schedule
 } from './types';
 
 export function restart(): AxiosPromise<void> {
@@ -93,4 +95,12 @@ export function getSettings(): AxiosPromise<void> {
 
 export function getCustomizations(): AxiosPromise<void> {
   return AXIOS.get('/getCustomizations');
+}
+
+export function readSchedule(): AxiosPromise<ScheduleItem[]> {
+  return AXIOS.get('/getSchedule');
+}
+
+export function writeSchedule(schedule: Schedule): AxiosPromise<void> {
+  return AXIOS.post('/writeSchedule', schedule);
 }

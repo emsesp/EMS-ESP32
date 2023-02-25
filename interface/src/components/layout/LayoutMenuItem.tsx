@@ -3,9 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 
 import { ListItem, ListItemButton, ListItemIcon, ListItemText, SvgIconProps } from '@mui/material';
 
-import { grey } from '@mui/material/colors';
-
 import { routeMatches } from 'utils';
+
+import { grey } from '@mui/material/colors';
 
 interface LayoutMenuItemProps {
   icon: React.ComponentType<SvgIconProps>;
@@ -17,13 +17,15 @@ interface LayoutMenuItemProps {
 const LayoutMenuItem: FC<LayoutMenuItemProps> = ({ icon: Icon, label, to, disabled }) => {
   const { pathname } = useLocation();
 
+  const selected = routeMatches(to, pathname);
+
   return (
-    <ListItem disablePadding selected={routeMatches(to, pathname)}>
-      <ListItemButton component={Link} to={to} disabled={disabled}>
-        <ListItemIcon sx={{ color: grey[500] }}>
+    <ListItem disablePadding>
+      <ListItemButton component={Link} to={to} disabled={disabled} selected={selected}>
+        <ListItemIcon sx={{ color: selected ? '#90caf9' : grey[500] }}>
           <Icon />
         </ListItemIcon>
-        <ListItemText>{label}</ListItemText>
+        <ListItemText sx={{ color: selected ? '#90caf9' : grey[100] }}>{label}</ListItemText>
       </ListItemButton>
     </ListItem>
   );

@@ -320,6 +320,7 @@ const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor';
 const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalog';
 const EMSESP_CUSTOM_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations';
+const EMSESP_WRITE_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSchedule';
 
 settings = {
   locale: 'en',
@@ -597,6 +598,46 @@ const emsesp_devicedata_4 = {
     }
   ]
 };
+
+// SCHEDULE
+let emsesp_schedule = [
+  {
+    id: '1',
+    active: true,
+    flags: 31,
+    time: '07:30',
+    cmd: 'hc1/mode',
+    value: 'day',
+    description: 'Turn on central heating in morning'
+  },
+  {
+    id: '2',
+    active: true,
+    flags: 31,
+    time: '23:00',
+    cmd: 'hc1/mode',
+    value: 'night',
+    description: 'Turn off central heating for the night'
+  },
+  {
+    id: '3',
+    active: true,
+    flags: 128,
+    time: '00:01',
+    cmd: 'thermostat/hc2/seltemp',
+    value: '20',
+    description: 'Force thermostat temperature to 20 degrees every minute'
+  },
+  {
+    id: '4',
+    active: false,
+    flags: 85,
+    time: '04:00',
+    cmd: 'system/restart',
+    value: '',
+    description: 'auto restart EMS-EPS at 4am every other day'
+  }
+];
 
 // CUSTOMIZATIONS
 
@@ -1020,6 +1061,12 @@ rest_server.post(EMSESP_CUSTOM_ENTITIES_ENDPOINT, (req, res) => {
   res.sendStatus(200);
 });
 
+rest_server.post(EMSESP_WRITE_SCHEDULE_ENDPOINT, (req, res) => {
+  console.log('write schedule');
+  console.log(req.body.schedule);
+  res.sendStatus(200);
+});
+
 rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
   const devicevalue = req.body.devicevalue;
   const id = req.body.id;
@@ -1308,9 +1355,15 @@ rest_server.get(GET_SETTINGS_ENDPOINT, (req, res) => {
 
 const GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations';
 rest_server.get(GET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
-  console.log('Customizations:');
+  console.log('Customization');
   // not implemented yet
   res.sendStatus(200);
+});
+
+const GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'getSchedule';
+rest_server.get(GET_SCHEDULE_ENDPOINT, (req, res) => {
+  console.log('Sending Schedule data');
+  res.json(emsesp_schedule);
 });
 
 // start server

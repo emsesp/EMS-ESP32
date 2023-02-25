@@ -307,7 +307,15 @@ const en: Translation = {
   BLOCK_NAVIGATE_1: 'You have unsaved changes',
   BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?',
   STAY: 'Stay',
-  LEAVE: 'Leave'
+  LEAVE: 'Leave',
+  SCHEDULER: 'Scheduler',
+  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP.',
+  SCHEDULER_HELP_2: 'The NTP service needs to be active if using the calendar.',
+  SCHEDULE: 'Schedule',
+  TIME: 'Time',
+  TIMER: 'Timer',
+  WEEKLY: 'Weekly',
+  SCHEDULE_SAVED: 'Schedule updated'
 };
 
 export default en;

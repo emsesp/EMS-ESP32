@@ -307,7 +307,15 @@ const no: Translation = {
   BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
   BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
   STAY: 'Stay', // TODO translate
-  LEAVE: 'Leave' // TODO translate
+  LEAVE: 'Leave', // TODO translate
+  SCHEDULER: 'Scheduler', // TODO translate
+  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP.', // TODO translate
+  SCHEDULER_HELP_2: 'The NTP service needs to be active if using the calendar.', // TODO translate
+  SCHEDULE: 'Schedule', // TODO translate
+  TIME: 'Time', // TODO translate
+  TIMER: 'Timer', // TODO translate
+  WEEKLY: 'Weekly', // TODO translate
+  SCHEDULE_SAVED: 'Schedule updated' // TODO translate
 };
 
 export default no;

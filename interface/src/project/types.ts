@@ -303,3 +303,36 @@ export enum DeviceEntityMask {
   DV_FAVORITE = 8,
   DV_DELETED = 128
 }
+
+export interface ScheduleItem {
+  id: string; // unique index
+  active: boolean;
+  deleted?: boolean; // optional
+  flags: number;
+  time: string;
+  cmd: string;
+  value: string;
+  description?: string; // optional
+  o_active?: boolean;
+  o_deleted?: boolean;
+  o_flags?: number;
+  o_time?: string;
+  o_cmd?: string;
+  o_value?: string;
+  o_description?: string;
+}
+
+export interface Schedule {
+  schedule: ScheduleItem[];
+}
+
+export enum ScheduleFlag {
+  SCHEDULE_MON = 1,
+  SCHEDULE_TUE = 2,
+  SCHEDULE_WED = 4,
+  SCHEDULE_THU = 8,
+  SCHEDULE_FRI = 16,
+  SCHEDULE_SAT = 32,
+  SCHEDULE_SUN = 64,
+  SCHEDULE_TIMER = 128
+}

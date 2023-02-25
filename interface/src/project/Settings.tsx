@@ -9,6 +9,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 
 import SettingsApplication from './SettingsApplication';
 import SettingsCustomization from './SettingsCustomization';
+import SettingsScheduler from './SettingsScheduler';
 
 const Settings: FC = () => {
   const { LL } = useI18nContext();
@@ -21,10 +22,12 @@ const Settings: FC = () => {
       <RouterTabs value={routerTab}>
         <Tab value="application" label={LL.APPLICATION_SETTINGS()} />
         <Tab value="customization" label={LL.CUSTOMIZATIONS()} />
+        <Tab value="scheduler" label={LL.SCHEDULER()} />
       </RouterTabs>
       <Routes>
         <Route path="application" element={<SettingsApplication />} />
         <Route path="customization" element={<SettingsCustomization />} />
+        <Route path="scheduler" element={<SettingsScheduler />} />
         <Route path="/*" element={<Navigate replace to="application" />} />
       </Routes>
     </>
