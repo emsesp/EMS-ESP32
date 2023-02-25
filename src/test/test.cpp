@@ -280,6 +280,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
+    if (command == "string2minutes") {
+        shell.printfln("Testing string2minutes()...");
+        std::string time_s = "12:00";
+        shell.printfln("Testing %s is %d", time_s.c_str(), Helpers::string2minutes(time_s));
+        std::string time_s2 = "12:12";
+        shell.printfln("Testing %s is %d", time_s2.c_str(), Helpers::string2minutes(time_s2));
+        std::string time_s3 = "00:50";
+        shell.printfln("Testing %s is %d", time_s3.c_str(), Helpers::string2minutes(time_s3));
+        std::string time_s4 = "03:49";
+        shell.printfln("Testing %s is %d", time_s4.c_str(), Helpers::string2minutes(time_s4));
+        ok = true;
+    }
+
 // THESE ONLY WORK WITH AN ESP32, not in standalone mode
 #ifndef EMSESP_STANDALONE
     if (command == "ls") {
