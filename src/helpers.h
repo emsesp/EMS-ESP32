@@ -49,6 +49,7 @@ class Helpers {
     static int         atoint(const char * value);
     static bool        check_abs(const int32_t i);
     static uint32_t    abs(const int32_t i);
+    static uint16_t    string2minutes(const std::string & str);
 
     static float transformNumFloat(float value, const int8_t numeric_operator, const uint8_t fahrenheit = 0);
 

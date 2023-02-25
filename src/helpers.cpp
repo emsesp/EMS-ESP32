@@ -783,4 +783,55 @@ const char * Helpers::translated_word(const char * const * strings, const bool f
     return strings[index];
 }
 
+uint16_t Helpers::string2minutes(const std::string & str) {
+    uint8_t  i     = 0;
+    uint16_t res   = 0;
+    uint16_t tmp   = 0;
+    uint8_t  state = 0;
+
+    while (str[i] != '\0') {
+        // If we got a digit
+        if (str[i] >= '0' && str[i] <= '9') {
+            tmp = tmp * 10 + str[i] - '0';
+        }
+        // Or if we got a colon
+        else if (str[i] == ':') {
+            // If we were reading the hours
+            if (state == 0) {
+                res = 60 * tmp;
+            }
+            // Or if we were reading the minutes
+            else if (state == 1) {
+                if (tmp > 60) {
+                    return 0;
+                }
+                Serial.print("*");
+                Serial.print(tmp);
+                Serial.println("*");
+
+                res += tmp;
+            }
+            // Or we got an extra colon
+            else {
+                return 0;
+            }
+
+            state++;
+            tmp = 0;
+        }
+
+        // Or we got something wrong
+        else {
+            return 0;
+        }
+        i++;
+    }
+
+    if (state == 1 && tmp < 60) {
+        return res + tmp;
+    } else {
+        return 0; // Or if we were not, something is wrong in the given string
+    }
+}
+
 } // namespace emsesp
