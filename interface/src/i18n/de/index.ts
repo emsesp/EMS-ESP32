@@ -309,13 +309,16 @@ const de: Translation = {
   STAY: 'Stay', // TODO translate
   LEAVE: 'Leave', // TODO translate
   SCHEDULER: 'Scheduler', // TODO translate
-  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP.', // TODO translate
-  SCHEDULER_HELP_2: 'The NTP service needs to be active if using the calendar.', // TODO translate
+  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP', // TODO translate
+  SCHEDULER_HELP_2: 'The NTP service needs to be active if using the calendar', // TODO translate
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
   TIMER: 'Timer', // TODO translate
   WEEKLY: 'Weekly', // TODO translate
-  SCHEDULE_SAVED: 'Schedule updated' // TODO translate
+  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_TIMER_1: 'on startup', // TODO translate
+  SCHEDULE_TIMER_2: 'every minute', // TODO translate
+  SCHEDULE_TIMER_3: 'every hour' // TODO translate
 };
 
 export default de;

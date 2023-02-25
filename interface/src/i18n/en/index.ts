@@ -309,13 +309,16 @@ const en: Translation = {
   STAY: 'Stay',
   LEAVE: 'Leave',
   SCHEDULER: 'Scheduler',
-  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP.',
-  SCHEDULER_HELP_2: 'The NTP service needs to be active if using the calendar.',
+  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP',
+  SCHEDULER_HELP_2: 'The NTP service needs to be active if using the calendar',
   SCHEDULE: 'Schedule',
   TIME: 'Time',
   TIMER: 'Timer',
   WEEKLY: 'Weekly',
-  SCHEDULE_SAVED: 'Schedule updated'
+  SCHEDULE_SAVED: 'Schedule updated',
+  SCHEDULE_TIMER_1: 'on startup',
+  SCHEDULE_TIMER_2: 'every minute',
+  SCHEDULE_TIMER_3: 'every hour'
 };
 
 export default en;

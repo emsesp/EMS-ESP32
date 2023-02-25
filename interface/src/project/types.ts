@@ -323,6 +323,7 @@ export interface ScheduleItem {
 }
 
 export interface Schedule {
+  ntp_available: boolean;
   schedule: ScheduleItem[];
 }
 

@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogTitle,
   ToggleButton,
+  MenuItem,
   ToggleButtonGroup,
   Checkbox,
   TextField
@@ -27,7 +28,15 @@ import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
 
-import { ButtonRow, FormLoader, BlockFormControlLabel, SectionContent, BlockNavigation } from 'components';
+import {
+  ValidatedTextField,
+  MessageBox,
+  ButtonRow,
+  FormLoader,
+  BlockFormControlLabel,
+  SectionContent,
+  BlockNavigation
+} from 'components';
 
 import * as EMSESP from './api';
 
@@ -61,6 +70,8 @@ const SettingsScheduler: FC = () => {
   };
   const [schedule, setSchedule] = useState<ScheduleItem[]>([emptySchedule]);
   const [scheduleItem, setScheduleItem] = useState<ScheduleItem>();
+
+  const [ntpAvailable, setNTPavailable] = useState<boolean>(true);
 
   const [dow, setDow] = useState<string[]>([]);
 
@@ -136,7 +147,9 @@ const SettingsScheduler: FC = () => {
 
   const fetchSchedule = useCallback(async () => {
     try {
-      setOriginalSchedule((await EMSESP.readSchedule()).data);
+      const response = await EMSESP.readSchedule();
+      setNTPavailable(response.data.ntp_available);
+      setOriginalSchedule(response.data.schedule);
     } catch (error) {
       setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
@@ -222,6 +235,7 @@ const SettingsScheduler: FC = () => {
     if (schedule) {
       try {
         const response = await EMSESP.writeSchedule({
+          ntp_available: ntpAvailable,
           schedule: schedule
             .filter((si) => !si.deleted)
             .map((new_si) => {
@@ -406,7 +420,6 @@ const SettingsScheduler: FC = () => {
               label={LL.DESCRIPTION()}
               value={scheduleItem.description}
               fullWidth
-              autoFocus
               margin="normal"
               sx={{ width: '60ch' }}
               onChange={updateValue(setScheduleItem)}
@@ -415,14 +428,33 @@ const SettingsScheduler: FC = () => {
               control={<Checkbox checked={scheduleItem.active} onChange={updateValue(setScheduleItem)} name="active" />}
               label={LL.ACTIVE()}
             />
-            <TextField
-              name="time"
-              type="time"
-              label={LL.TIME()}
-              value={scheduleItem.time}
-              margin="normal"
-              onChange={updateValue(setScheduleItem)}
-            />
+
+            {(scheduleItem.flags & ScheduleFlag.SCHEDULE_TIMER) === ScheduleFlag.SCHEDULE_TIMER ? (
+              <ValidatedTextField
+                name="time"
+                label={LL.TIMER()}
+                value={scheduleItem.time}
+                fullWidth
+                variant="outlined"
+                onChange={updateValue(setScheduleItem)}
+                margin="normal"
+                select
+              >
+                <MenuItem value={'00:00'}>{LL.SCHEDULE_TIMER_1()}</MenuItem>
+                <MenuItem value={'00:01'}>{LL.SCHEDULE_TIMER_2()}</MenuItem>
+                <MenuItem value={'01:00'}>{LL.SCHEDULE_TIMER_3()}</MenuItem>
+              </ValidatedTextField>
+            ) : (
+              <TextField
+                name="time"
+                type="time"
+                label={LL.TIME()}
+                value={scheduleItem.time}
+                margin="normal"
+                onChange={updateValue(setScheduleItem)}
+              />
+            )}
+
             <TextField
               name="command"
               label={LL.COMMAND()}
@@ -480,8 +512,8 @@ const SettingsScheduler: FC = () => {
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       <Box mb={2} color="warning.main">
         <Typography variant="body2">{LL.SCHEDULER_HELP_1()}</Typography>
-        <Typography variant="body2">{LL.SCHEDULER_HELP_2()}</Typography>
       </Box>
+      {!ntpAvailable && <MessageBox level="warning" message={LL.SCHEDULER_HELP_2()} mt={1} />}
       {renderSchedule()}
       {renderEditSchedule()}
       <Box display="flex" flexWrap="wrap">
