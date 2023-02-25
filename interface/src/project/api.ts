@@ -97,9 +97,9 @@ export function getCustomizations(): AxiosPromise<void> {
 }
 
 export function readSchedule(): AxiosPromise<Schedule> {
-  return AXIOS.get('/getSchedule');
+  return AXIOS.get('/schedule');
 }
 
 export function writeSchedule(schedule: Schedule): AxiosPromise<void> {
-  return AXIOS.post('/writeSchedule', schedule);
+  return AXIOS.post('/schedule', schedule);
 }
