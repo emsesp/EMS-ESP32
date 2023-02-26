@@ -1066,6 +1066,7 @@ rest_server.post(EMSESP_CUSTOM_ENTITIES_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_WRITE_SCHEDULE_ENDPOINT, (req, res) => {
   console.log('write schedule');
   console.log(req.body.schedule);
+  emsesp_schedule = req.body;
   res.sendStatus(200);
 });
 
