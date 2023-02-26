@@ -9,9 +9,9 @@ const LOCALE_FORMAT = new Intl.DateTimeFormat([...window.navigator.languages], {
 });
 
 export const formatDateTime = (dateTime: string) => {
-  return LOCALE_FORMAT.format(new Date(dateTime.substr(0, 19)));
+  return LOCALE_FORMAT.format(new Date(dateTime.substring(0, 19)));
 };
 
 export const formatLocalDateTime = (date: Date) => {
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, -1).substr(0, 19);
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, -1).substring(0, 19);
 };
