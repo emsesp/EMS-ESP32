@@ -323,17 +323,16 @@ export interface ScheduleItem {
 }
 
 export interface Schedule {
-  ntp_available: boolean;
   schedule: ScheduleItem[];
 }
 
 export enum ScheduleFlag {
-  SCHEDULE_MON = 1,
-  SCHEDULE_TUE = 2,
-  SCHEDULE_WED = 4,
-  SCHEDULE_THU = 8,
-  SCHEDULE_FRI = 16,
-  SCHEDULE_SAT = 32,
-  SCHEDULE_SUN = 64,
+  SCHEDULE_MON = 2,
+  SCHEDULE_TUE = 4,
+  SCHEDULE_WED = 8,
+  SCHEDULE_THU = 16,
+  SCHEDULE_FRI = 32,
+  SCHEDULE_SAT = 64,
+  SCHEDULE_SUN = 1,
   SCHEDULE_TIMER = 128
 }

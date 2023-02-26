@@ -74,7 +74,6 @@ const SettingsScheduler: FC = () => {
   };
   const [schedule, setSchedule] = useState<ScheduleItem[]>([emptySchedule]);
   const [scheduleItem, setScheduleItem] = useState<ScheduleItem>();
-  const [ntpAvailable, setNTPavailable] = useState<boolean>(true);
   const [dow, setDow] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>();
   const [creating, setCreating] = useState<boolean>(false);
@@ -86,7 +85,7 @@ const SettingsScheduler: FC = () => {
 
   function getDayNames() {
     const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
-    const days = [2, 3, 4, 5, 6, 7, 1].map((day) => {
+    const days = [1, 2, 3, 4, 5, 6, 7].map((day) => {
       const dd = day < 10 ? `0${day}` : day;
       return new Date(`2017-01-${dd}T00:00:00+00:00`);
     });
@@ -154,7 +153,6 @@ const SettingsScheduler: FC = () => {
   const fetchSchedule = useCallback(async () => {
     try {
       const response = await EMSESP.readSchedule();
-      setNTPavailable(response.data.ntp_available);
       setOriginalSchedule(response.data.schedule);
     } catch (error) {
       setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
@@ -241,7 +239,6 @@ const SettingsScheduler: FC = () => {
     if (schedule) {
       try {
         const response = await EMSESP.writeSchedule({
-          ntp_available: ntpAvailable,
           schedule: schedule
             .filter((si) => !si.deleted)
             .map((condensed_si) => {
@@ -271,25 +268,25 @@ const SettingsScheduler: FC = () => {
   function showFlag(si: ScheduleItem, flag: number) {
     let text = '';
     if ((flag & ScheduleFlag.SCHEDULE_MON) === ScheduleFlag.SCHEDULE_MON) {
-      text = dow[0];
-    }
-    if ((flag & ScheduleFlag.SCHEDULE_TUE) === ScheduleFlag.SCHEDULE_TUE) {
       text = dow[1];
     }
-    if ((flag & ScheduleFlag.SCHEDULE_WED) === ScheduleFlag.SCHEDULE_WED) {
+    if ((flag & ScheduleFlag.SCHEDULE_TUE) === ScheduleFlag.SCHEDULE_TUE) {
       text = dow[2];
     }
-    if ((flag & ScheduleFlag.SCHEDULE_THU) === ScheduleFlag.SCHEDULE_THU) {
+    if ((flag & ScheduleFlag.SCHEDULE_WED) === ScheduleFlag.SCHEDULE_WED) {
       text = dow[3];
     }
-    if ((flag & ScheduleFlag.SCHEDULE_FRI) === ScheduleFlag.SCHEDULE_FRI) {
+    if ((flag & ScheduleFlag.SCHEDULE_THU) === ScheduleFlag.SCHEDULE_THU) {
       text = dow[4];
     }
-    if ((flag & ScheduleFlag.SCHEDULE_SAT) === ScheduleFlag.SCHEDULE_SAT) {
+    if ((flag & ScheduleFlag.SCHEDULE_FRI) === ScheduleFlag.SCHEDULE_FRI) {
       text = dow[5];
     }
-    if ((flag & ScheduleFlag.SCHEDULE_SUN) === ScheduleFlag.SCHEDULE_SUN) {
+    if ((flag & ScheduleFlag.SCHEDULE_SAT) === ScheduleFlag.SCHEDULE_SAT) {
       text = dow[6];
+    }
+    if ((flag & ScheduleFlag.SCHEDULE_SUN) === ScheduleFlag.SCHEDULE_SUN) {
+      text = dow[0];
     }
     if ((flag & ScheduleFlag.SCHEDULE_TIMER) === ScheduleFlag.SCHEDULE_TIMER) {
       text = LL.TIMER();
@@ -391,13 +388,13 @@ const SettingsScheduler: FC = () => {
                         setFlags(['']); // forces refresh
                       }}
                     >
-                      <ToggleButton value="1">{showFlag(si, ScheduleFlag.SCHEDULE_MON)}</ToggleButton>
-                      <ToggleButton value="2">{showFlag(si, ScheduleFlag.SCHEDULE_TUE)}</ToggleButton>
-                      <ToggleButton value="4">{showFlag(si, ScheduleFlag.SCHEDULE_WED)}</ToggleButton>
-                      <ToggleButton value="8">{showFlag(si, ScheduleFlag.SCHEDULE_THU)}</ToggleButton>
-                      <ToggleButton value="16">{showFlag(si, ScheduleFlag.SCHEDULE_FRI)}</ToggleButton>
-                      <ToggleButton value="32">{showFlag(si, ScheduleFlag.SCHEDULE_SAT)}</ToggleButton>
-                      <ToggleButton value="64">{showFlag(si, ScheduleFlag.SCHEDULE_SUN)}</ToggleButton>
+                      <ToggleButton value="2">{showFlag(si, ScheduleFlag.SCHEDULE_MON)}</ToggleButton>
+                      <ToggleButton value="4">{showFlag(si, ScheduleFlag.SCHEDULE_TUE)}</ToggleButton>
+                      <ToggleButton value="8">{showFlag(si, ScheduleFlag.SCHEDULE_WED)}</ToggleButton>
+                      <ToggleButton value="16">{showFlag(si, ScheduleFlag.SCHEDULE_THU)}</ToggleButton>
+                      <ToggleButton value="32">{showFlag(si, ScheduleFlag.SCHEDULE_FRI)}</ToggleButton>
+                      <ToggleButton value="64">{showFlag(si, ScheduleFlag.SCHEDULE_SAT)}</ToggleButton>
+                      <ToggleButton value="1">{showFlag(si, ScheduleFlag.SCHEDULE_SUN)}</ToggleButton>
                       <ToggleButton value="128">{showFlag(si, ScheduleFlag.SCHEDULE_TIMER)}</ToggleButton>
                     </ToggleButtonGroup>
                   </Cell>
@@ -567,7 +564,7 @@ const SettingsScheduler: FC = () => {
       <Box mb={2} color="warning.main">
         <Typography variant="body2">{LL.SCHEDULER_HELP_1()}</Typography>
       </Box>
-      {!ntpAvailable && <MessageBox level="warning" message={LL.SCHEDULER_HELP_2()} mt={1} />}
+      <MessageBox level="info" message={LL.SCHEDULER_HELP_2()} mb={2} mt={1} />
       {renderSchedule()}
       {renderEditSchedule()}
       <Box display="flex" flexWrap="wrap">
