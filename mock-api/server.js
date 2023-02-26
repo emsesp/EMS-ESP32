@@ -320,7 +320,7 @@ const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor';
 const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalog';
 const EMSESP_CUSTOM_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations';
-const EMSESP_WRITE_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSchedule';
+const EMSESP_WRITE_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
 
 settings = {
   locale: 'en',
@@ -601,14 +601,12 @@ const emsesp_devicedata_4 = {
 
 // SCHEDULE
 let emsesp_schedule = {
-  ntp_available: true,
   schedule: [
     {
       id: '1',
       active: true,
       flags: 31,
       time: '07:30',
-      e_min: 0,
       cmd: 'hc1/mode',
       value: 'day',
       desc: 'Turn on central heating in morning'
@@ -618,7 +616,6 @@ let emsesp_schedule = {
       active: true,
       flags: 31,
       time: '23:00',
-      e_min: 0,
       cmd: 'hc1/mode',
       value: 'night',
       desc: 'Turn off central heating for the night'
@@ -628,7 +625,6 @@ let emsesp_schedule = {
       active: true,
       flags: 128,
       time: '00:01',
-      e_min: 0,
       cmd: 'thermostat/hc2/seltemp',
       value: '20',
       desc: 'Force thermostat temperature to 20 degrees every minute'
@@ -636,12 +632,11 @@ let emsesp_schedule = {
     {
       id: '4',
       active: false,
-      flags: 85,
+      flags: 1,
       time: '04:00',
-      e_min: 0,
       cmd: 'system/restart',
       value: '',
-      desc: 'auto restart EMS-EPS at 4am every other day'
+      desc: 'auto restart EMS-EPS at 4am every Sunday'
     }
   ]
 };
@@ -1367,7 +1362,7 @@ rest_server.get(GET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
   res.sendStatus(200);
 });
 
-const GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'getSchedule';
+const GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
 rest_server.get(GET_SCHEDULE_ENDPOINT, (req, res) => {
   console.log('Sending Schedule data');
   res.json(emsesp_schedule);
