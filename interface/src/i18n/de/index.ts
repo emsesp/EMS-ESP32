@@ -208,6 +208,7 @@ const de: Translation = {
   COMPACT: 'Kompakte Darstellung',
   ENABLE_OTA: 'OTA Updates verwenden',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Herunterladen der individuellen Entitätsanpassungen',
+  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Herunterladen der Anwendungseinstellungen. Vorsicht beim Teilen der Einstellungen, da sie Passwörter und andere sensitive Einstellungen enthalten',
   UPLOAD_TEXT: 'Hochladen von neuer Firmware (.bin), Geräte- oder Entitätseinstellungen (.json), zur optionalen Validitätsprüfung zuerst die (.md5) Datei hochladen',
   UPLOADING: 'Hochladen',
@@ -310,7 +311,7 @@ const de: Translation = {
   LEAVE: 'Leave', // TODO translate
   SCHEDULER: 'Scheduler', // TODO translate
   SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP', // TODO translate
-  SCHEDULER_HELP_2: 'The NTP service needs to be active if using the calendar', // TODO translate
+  SCHEDULER_HELP_2: 'Note: The NTP service needs to be active if using the calendar', // TODO translate
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
   TIMER: 'Timer', // TODO translate

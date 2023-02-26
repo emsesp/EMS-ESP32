@@ -69,6 +69,19 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
     }
   };
 
+  const downloadSchedule = async () => {
+    try {
+      const response = await EMSESP.readSchedule();
+      if (response.status !== 200) {
+        enqueueSnackbar(LL.PROBLEM_LOADING(), { variant: 'error' });
+      } else {
+        saveFile(response.data, 'schedule');
+      }
+    } catch (error) {
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+    }
+  };
+
   return (
     <>
       {!uploading && (
@@ -113,6 +126,14 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
             onClick={() => downloadCustomizations()}
           >
             {LL.CUSTOMIZATIONS()}
+          </Button>
+          <Box color="warning.main">
+            <Typography mt={2} mb={1} variant="body2">
+              {LL.DOWNLOAD_SCHEDULE_TEXT()}{' '}
+            </Typography>
+          </Box>
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => downloadSchedule()}>
+            {LL.SCHEDULE()}
           </Button>
         </>
       )}

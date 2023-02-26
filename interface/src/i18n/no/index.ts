@@ -208,6 +208,7 @@ const no: Translation = {
   COMPACT: 'Komprimere',
   ENABLE_OTA: 'Aktiviser OTA oppdateringer',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Last ned objektstilpasninger',
+  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Last ned applikasjonskonfigurasjon. Vær varsom med å dele fila da den inneholder passord og annen sensitiv system informasjon',
   UPLOAD_TEXT: 'Last opp en ny firmware (.bin) fil, innstillinger eller tilpassninger (.json) fil nedenfor',
   UPLOADING: 'Opplasting',
@@ -310,7 +311,7 @@ const no: Translation = {
   LEAVE: 'Leave', // TODO translate
   SCHEDULER: 'Scheduler', // TODO translate
   SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP', // TODO translate
-  SCHEDULER_HELP_2: 'The NTP service needs to be active if using the calendar', // TODO translate
+  SCHEDULER_HELP_2: 'Note: The NTP service needs to be active if using the calendar', // TODO translate
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
   TIMER: 'Timer', // TODO translate

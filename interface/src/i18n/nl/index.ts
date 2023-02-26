@@ -208,6 +208,7 @@ const nl: Translation = {
   COMPACT: 'Compact',
   ENABLE_OTA: 'Acitveer OTA Updates',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Download alle custom instellingen',
+  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Download de applicatie settings. Wees voorzichting met het delen van dit bestand want het bevat o.a. de wachtwoorden in plain text',
   UPLOAD_TEXT: 'Upload een nieuwe firmware (.bin) file, instellingen of custom instellingen (.json) bestand hieronder',
   UPLOADING: 'Uploading',
@@ -310,7 +311,7 @@ const nl: Translation = {
   LEAVE: 'Leave', // TODO translate
   SCHEDULER: 'Scheduler', // TODO translate
   SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP', // TODO translate
-  SCHEDULER_HELP_2: 'The NTP service needs to be active if using the calendar', // TODO translate
+  SCHEDULER_HELP_2: 'Note: The NTP service needs to be active if using the calendar', // TODO translate
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
   TIMER: 'Timer', // TODO translate
