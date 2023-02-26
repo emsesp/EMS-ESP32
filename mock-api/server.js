@@ -1,20 +1,20 @@
 const express = require('express');
 const compression = require('compression');
-const SSE = require('express-sse');
 const path = require('path');
 const msgpack = require('@msgpack/msgpack');
-const WebSocket = require('ws');
 
 // REST API
 const rest_server = express();
 const port = 3080;
-const REST_ENDPOINT_ROOT = '/rest/';
+
 rest_server.use(compression());
 rest_server.use(express.static(path.join(__dirname, '../interface/build')));
 rest_server.use(express.json());
 
-// API endpoint
+// endpoints
 const API_ENDPOINT_ROOT = '/api/';
+const REST_ENDPOINT_ROOT = '/rest/';
+const EVENTSOURCE_ENDPOINT_ROOT = '/es/';
 
 // LOG
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings';
@@ -1371,32 +1371,10 @@ rest_server.get(GET_SCHEDULE_ENDPOINT, (req, res) => {
 
 // start server
 const expressServer = rest_server.listen(port, () =>
-  console.log(`EMS-ESP REST API server running on http://localhost:${port}/api`)
+  console.log(`EMS-ESP REST API server running on http://localhost:${port}/`)
 );
 
-// start websocket server
-const websocketServer = new WebSocket.Server({
-  noServer: true,
-  path: '/ws'
-});
-console.log('WebSocket server is listening to /ws');
-
-expressServer.on('upgrade', (request, socket, head) => {
-  websocketServer.handleUpgrade(request, socket, head, (websocket) => {
-    websocketServer.emit('connection', websocket, request);
-  });
-});
-
-websocketServer.on('connection', function connection(websocketConnection, connectionRequest) {
-  const [_path, params] = connectionRequest?.url?.split('?');
-  console.log(params);
-
-  websocketConnection.on('message', (message) => {
-    const parsedMessage = JSON.parse(message);
-    console.log(parsedMessage);
-  });
-});
-
+// event source
 var count = 8;
 var log_index = 0;
 const ES_ENDPOINT_ROOT = '/es/';
@@ -1406,8 +1384,6 @@ rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Connection', 'keep-alive');
-  // res.setHeader('Content-Encoding', 'deflate')
-  // res.setHeader('X-Accel-Buffering', 'no')
   res.flushHeaders();
 
   var timer = setInterval(function () {
@@ -1421,7 +1397,6 @@ rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
       m: 'incoming message #' + count + '/' + log_index
     };
     const sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`;
-    // console.log('sending log #' + count)
     res.write(sseFormattedResponse);
     res.flush(); // this is important
 

@@ -9,7 +9,6 @@ export default defineConfig(({ command, mode }) => {
   if (mode === 'hosted') {
     return {
       // hosted, ignore all errors, output to dist
-      //       plugins: [react({ plugins: [['@swc/plugin-styled-components', {}]] }), viteTsconfigPaths(), svgrPlugin()]
       plugins: [react(), viteTsconfigPaths(), svgrPlugin(), visualizer({ gzipSize: true }) as PluginOption]
     };
   } else {
@@ -33,8 +32,12 @@ export default defineConfig(({ command, mode }) => {
           '/api': {
             target: 'http://localhost:3080',
             changeOrigin: true,
-            secure: false,
-            ws: true
+            secure: false
+          },
+          '/es': {
+            target: 'http://localhost:3080',
+            changeOrigin: true,
+            secure: false
           }
         }
       }
