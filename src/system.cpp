@@ -252,7 +252,7 @@ void System::syslog_init() {
 #ifndef EMSESP_STANDALONE
     if (syslog_enabled_) {
         // start & configure syslog
-        EMSESP::logger().info("Starting Syslog");
+        EMSESP::logger().info("Starting Syslog service");
         syslog_.start();
 
         syslog_.log_level((uuid::log::Level)syslog_level_);

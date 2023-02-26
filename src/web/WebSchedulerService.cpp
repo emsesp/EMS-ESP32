@@ -30,7 +30,7 @@ WebSchedulerService::WebSchedulerService(AsyncWebServer * server, FS * fs, Secur
 // load the settings when the service starts
 void WebSchedulerService::begin() {
     _fsPersistence.readFromFS();
-    EMSESP::logger().info("Starting Scheduler");
+    EMSESP::logger().info("Starting Scheduler service");
 }
 
 // this creates the scheduler file, saving it to the FS
@@ -100,54 +100,59 @@ void WebSchedulerService::loop() {
         return;
     }
 
-    time_t          now       = time(nullptr);
-    tm *            tm        = localtime(&now);
-    static int      last_min  = 0;
-    static uint32_t starttime = now / 60;
+    time_t     now            = time(nullptr);
+    tm *       tm             = localtime(&now);
+    static int last_min       = 100;                    // some high marker
+    auto       uptime_seconds = uuid::get_uptime_sec(); // sync to EMS-ESP clock
+    auto       uptime_min     = uptime_seconds / 60;    // sync to EMS-ESP clock
 
-    // check if we're on the minute
-    if (tm->tm_min == last_min || tm->tm_year < 122) {
+    // check if we're on the minute - taking the EMS-ESP uptime
+    // with the exception of allowing the first pass (on boot) through
+    if (uptime_min == last_min || tm->tm_year < 122) {
         return;
     }
+    last_min = uptime_min;
 
-    last_min            = tm->tm_min;
-    bool     has_NTP    = tm->tm_year > 120;
-    uint8_t  dow        = 1 << tm->tm_wday; // 1 is Sunday
-    uint16_t min        = tm->tm_hour * 60 + tm->tm_min;
-    uint32_t check_time = now / 60 - starttime;
+    // find the real dow and minute from NTP or RTC
+    uint8_t  real_dow = 1 << tm->tm_wday; // 1 is Sunday
+    uint16_t real_min = tm->tm_hour * 60 + tm->tm_min;
 
-#ifdef EMSESP_DEBUG
-    EMSESP::logger().debug("On the minute. dow=%d, min=%d", dow, min);
-#endif
+    bool has_NTP = tm->tm_year > 120;
 
     for (const ScheduleItem & scheduleItem : *scheduleItems) {
-#ifdef EMSESP_DEBUG
-        EMSESP::logger().debug("Checking active=%d, flags=%d and elapsed_min=%d", scheduleItem.active, scheduleItem.flags, scheduleItem.elapsed_min);
-#endif
-
         if (scheduleItem.active
-            && ((has_NTP && (dow & scheduleItem.flags) && min == scheduleItem.elapsed_min)                                 // day of week scheduling - Weekly
-                || (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0 && check_time == 0) // only on boot
-                || (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min > 0
-                    && (check_time % scheduleItem.elapsed_min == 0)))) { // periodic - Timer
-            StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> docin;
-            StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> docout; // only for commands without output
-            JsonObject                                 in  = docin.to<JsonObject>();
-            JsonObject                                 out = docout.to<JsonObject>();
-            in["data"]                                     = scheduleItem.value;
+            && ((has_NTP && (real_dow & scheduleItem.flags) && real_min == scheduleItem.elapsed_min)                       // day of week scheduling - Weekly
+                || (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0 && uptime_min == 0) // only on boot
+                || (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min > 0 && (uptime_seconds % scheduleItem.elapsed_min == 0)
+                    && uptime_min))) { // periodic - Timer, avoid first minute
+            StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc_input;
+            JsonObject                                 input = doc_input.to<JsonObject>();
+            input["data"]                                    = scheduleItem.value;
 
-#ifdef EMSESP_DEBUG
-            EMSESP::logger().debug("Calling scheduled command %s with data %s", scheduleItem.cmd.c_str(), scheduleItem.value.c_str());
-#endif
+            StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc_output; // only for commands without output
+            JsonObject                                 output = doc_output.to<JsonObject>();
 
-            if (CommandRet::OK != Command::process(scheduleItem.cmd.c_str(), true, in, out)) {
-                EMSESP::logger().warning("Scheduled command %s with data %s failed", scheduleItem.cmd.c_str(), scheduleItem.value.c_str());
+            // prefix "api/" to command string
+            auto    command_str = "/api/" + scheduleItem.cmd;
+            uint8_t return_code = Command::process(command_str.c_str(), true, input, output); // admin set
+
+            if (return_code != CommandRet::OK) {
+                char error[100];
+                if (output.size()) {
+                    snprintf(error,
+                             sizeof(error),
+                             "Call failed with error: %s (%s)",
+                             (const char *)output["message"],
+                             Command::return_code_string(return_code).c_str());
+                } else {
+                    snprintf(error, sizeof(error), "Call failed with error code (%s)", Command::return_code_string(return_code).c_str());
+                }
+                emsesp::EMSESP::logger().err(error);
             } else {
-                EMSESP::logger().debug("Scheduled command %s with data %s executed", scheduleItem.cmd.c_str(), scheduleItem.value.c_str());
+                EMSESP::logger().debug("Scheduled command %s with data %s successfully", scheduleItem.cmd.c_str(), scheduleItem.value.c_str());
             }
         }
     }
 }
-
 
 } // namespace emsesp
