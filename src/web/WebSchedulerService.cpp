@@ -36,8 +36,11 @@ void WebSchedulerService::begin() {
 // this creates the scheduler file, saving it to the FS
 void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
     JsonArray schedule = root.createNestedArray("schedule");
+    uint8_t   count    = 0;
+    char      s[3];
     for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
         JsonObject si     = schedule.createNestedObject();
+        si["id"]          = Helpers::smallitoa(s, count++); // create unique ID as a string
         si["active"]      = scheduleItem.active;
         si["flags"]       = scheduleItem.flags;
         si["time"]        = scheduleItem.time;
@@ -71,6 +74,7 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
             // create each schedule item, overwriting any previous settings
             // ignore the id (as this is only used in the web for table rendering)
             auto si        = ScheduleItem();
+            si.id          = schedule["id"].as<std::string>();
             si.active      = schedule["active"];
             si.flags       = schedule["flags"];
             si.time        = schedule["time"].as<std::string>();

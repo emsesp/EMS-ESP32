@@ -28,6 +28,7 @@ namespace emsesp {
 
 class ScheduleItem {
   public:
+    std::string id; // unqiue id
     boolean     active;
     uint8_t     flags;
     uint16_t    elapsed_min; // total mins from 00:00
@@ -60,7 +61,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     HttpEndpoint<WebScheduler>  _httpEndpoint;
     FSPersistence<WebScheduler> _fsPersistence;
 
-    std::list<ScheduleItem> * scheduleItems;
+    std::list<ScheduleItem> * scheduleItems; // pointer to the list of schedule events
 };
 
 } // namespace emsesp
