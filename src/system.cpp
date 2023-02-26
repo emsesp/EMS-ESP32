@@ -541,15 +541,18 @@ void System::send_info_mqtt(const char * event_str, bool send_ntp) {
 
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.ethernet_connected()) {
-        doc["network"]         = "ethernet";
-        doc["hostname"]        = ETH.getHostname();
+        doc["network"]  = "ethernet";
+        doc["hostname"] = ETH.getHostname();
+        /*
         doc["MAC"]             = ETH.macAddress();
         doc["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
         doc["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
         doc["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
         if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
             doc["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
-        }
+    }
+            */
+
     } else if (WiFi.status() == WL_CONNECTED) {
         doc["network"]         = "wifi";
         doc["hostname"]        = WiFi.getHostname();
