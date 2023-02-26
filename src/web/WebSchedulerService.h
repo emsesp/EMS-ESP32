@@ -22,6 +22,8 @@
 #define EMSESP_SCHEDULER_FILE "/config/emsespScheduler.json"
 #define EMSESP_SCHEDULER_SERVICE_PATH "/rest/schedule" // GET and POST
 
+#define SCHEDULEFLAG_SCHEDULE_TIMER 0x80 // 7th bit for Timer
+
 namespace emsesp {
 
 class ScheduleItem {
@@ -58,7 +60,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     HttpEndpoint<WebScheduler>  _httpEndpoint;
     FSPersistence<WebScheduler> _fsPersistence;
 
-    // void endpointScheduler(AsyncWebServerRequest * request); // GET
+    std::list<ScheduleItem> * scheduleItems;
 };
 
 } // namespace emsesp
