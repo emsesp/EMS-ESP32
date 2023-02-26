@@ -33,7 +33,6 @@ import AddIcon from '@mui/icons-material/Add';
 
 import {
   ValidatedTextField,
-  MessageBox,
   ButtonRow,
   FormLoader,
   BlockFormControlLabel,
@@ -243,7 +242,7 @@ const SettingsScheduler: FC = () => {
             .filter((si) => !si.deleted)
             .map((condensed_si) => {
               return {
-                id: condensed_si.id, // will be ignored
+                id: condensed_si.id,
                 active: condensed_si.active,
                 flags: condensed_si.flags,
                 time: condensed_si.time,
@@ -335,7 +334,10 @@ const SettingsScheduler: FC = () => {
 
   const updateScheduleItem = () => {
     if (scheduleItem) {
-      const new_schedule = [...schedule.filter((si) => si.id !== scheduleItem.id), scheduleItem];
+      const new_schedule = [...schedule.filter((si) => si.id !== scheduleItem.id), scheduleItem].sort((a, b) =>
+        a.time.localeCompare(b.time)
+      );
+
       setSchedule(new_schedule);
       setScheduleItem(undefined);
     }
@@ -564,7 +566,6 @@ const SettingsScheduler: FC = () => {
       <Box mb={2} color="warning.main">
         <Typography variant="body2">{LL.SCHEDULER_HELP_1()}</Typography>
       </Box>
-      <MessageBox level="info" message={LL.SCHEDULER_HELP_2()} mb={2} mt={1} />
       {renderSchedule()}
       {renderEditSchedule()}
       <Box display="flex" flexWrap="wrap">

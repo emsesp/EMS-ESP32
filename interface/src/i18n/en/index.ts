@@ -311,7 +311,6 @@ const en: Translation = {
   LEAVE: 'Leave',
   SCHEDULER: 'Scheduler',
   SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP',
-  SCHEDULER_HELP_2: 'Note: The NTP service needs to be active if using the calendar',
   SCHEDULE: 'Schedule',
   TIME: 'Time',
   TIMER: 'Timer',
