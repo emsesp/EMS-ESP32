@@ -30,6 +30,7 @@ WebSchedulerService::WebSchedulerService(AsyncWebServer * server, FS * fs, Secur
 // load the settings when the service starts
 void WebSchedulerService::begin() {
     _fsPersistence.readFromFS();
+    EMSESP::logger().info("Starting Scheduler");
 }
 
 // this creates the scheduler file, saving it to the FS
@@ -87,38 +88,54 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
 }
 
 // process any scheduled jobs
+// checks on the minute
 void WebSchedulerService::loop() {
-    /*
-    
-    // quit if nothing in the webScheduler.scheduleItems list
-    if (!webScheduler.scheduleItems.count()) {
+    // get list of scheduler events and exit if it's empty
+    EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems = &webScheduler.scheduleItems; });
+    if (scheduleItems->size() == 0) {
         return;
     }
 
-    // trigger first on elapsed time and process any Timer events
-    // elapsed time is scheduleItems.elapsed_time and already calculated
+    time_t          now       = time(nullptr);
+    tm *            tm        = localtime(&now);
+    static int      last_min  = 0;
+    static uint32_t starttime = now / 60;
 
-    // next trigger on the minute and process all the Weekly events
-
-    time_t     now      = time(nullptr);
-    tm *       tm       = localtime(&now);
-    static int last_min = 0;
-
+    // check if we're on the minute
     if (tm->tm_min == last_min || tm->tm_year < 122) {
         return;
     }
 
-    last_min     = tm->tm_min;
-    uint8_t  dow = 1 << tm->tm_wday; // I used 0 for Monday but can change
-    uint16_t min = tm->tm_hour * 60 + tm->tm_min;
+    last_min            = tm->tm_min;
+    bool     has_NTP    = tm->tm_year > 120;
+    uint8_t  dow        = 1 << tm->tm_wday; // 1 is Sunday
+    uint16_t min        = tm->tm_hour * 60 + tm->tm_min;
+    uint32_t check_time = now / 60 - starttime;
 
-    for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
-        if ((dow & scheduleItem.flags) && min == scheduleItem.elapsed_min) {
+#ifdef EMSESP_DEBUG
+    EMSESP::logger().debug("On the minute. dow=%d, min=%d", dow, min);
+#endif
+
+    for (const ScheduleItem & scheduleItem : *scheduleItems) {
+#ifdef EMSESP_DEBUG
+        EMSESP::logger().debug("Checking active=%d, flags=%d and elapsed_min=%d", scheduleItem.active, scheduleItem.flags, scheduleItem.elapsed_min);
+#endif
+
+        if (scheduleItem.active
+            && ((has_NTP && (dow & scheduleItem.flags) && min == scheduleItem.elapsed_min)                                 // day of week scheduling - Weekly
+                || (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0 && check_time == 0) // only on boot
+                || (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min > 0
+                    && (check_time % scheduleItem.elapsed_min == 0)))) { // periodic - Timer
             StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> docin;
             StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> docout; // only for commands without output
             JsonObject                                 in  = docin.to<JsonObject>();
             JsonObject                                 out = docout.to<JsonObject>();
             in["data"]                                     = scheduleItem.value;
+
+#ifdef EMSESP_DEBUG
+            EMSESP::logger().debug("Calling scheduled command %s with data %s", scheduleItem.cmd.c_str(), scheduleItem.value.c_str());
+#endif
+
             if (CommandRet::OK != Command::process(scheduleItem.cmd.c_str(), true, in, out)) {
                 EMSESP::logger().warning("Scheduled command %s with data %s failed", scheduleItem.cmd.c_str(), scheduleItem.value.c_str());
             } else {
@@ -126,8 +143,6 @@ void WebSchedulerService::loop() {
             }
         }
     }
-
-    */
 }
 
 
