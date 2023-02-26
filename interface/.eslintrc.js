@@ -1,5 +1,5 @@
 module.exports = {
-  plugins: ['react-refresh'],
+  plugins: ['@typescript-eslint', 'deprecation'],
   extends: [
     // By extending from a plugin config, we can get recommended rules without having to add them manually.
     'eslint:recommended',
@@ -8,7 +8,6 @@ module.exports = {
     'plugin:import/typescript',
     'plugin:jsx-a11y/recommended',
     'plugin:@typescript-eslint/recommended',
-    // 'plugin:react-refresh/recommended',
     // This disables the formatting rules in ESLint that Prettier is going to be responsible for handling.
     // Make sure it's always the last config, so it gets the chance to override other configs.
     'eslint-config-prettier'
@@ -30,6 +29,8 @@ module.exports = {
     }
   },
   parserOptions: {
+    ecmaVersion: 2020,
+    sourceType: 'module',
     project: ['tsconfig.json'],
     createDefaultProgram: true
   },
@@ -43,6 +44,7 @@ module.exports = {
     'react/prop-types': 'off',
     'react/self-closing-comp': 'warn',
     '@typescript-eslint/consistent-type-definitions': ['off', 'type'],
-    '@typescript-eslint/explicit-function-return-type': 'off'
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    'deprecation/deprecation': 'warn'
   }
 };
