@@ -1034,7 +1034,7 @@ bool System::check_upgrade(bool factory_settings) {
         missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
         if (missing_version) {
             LOG_DEBUG("No version information found (%s)", settingsVersion.c_str());
-            settingsVersion = "3.4.4"; // this was the last stable version
+            settingsVersion = "3.5.0"; // this was the last stable version
         }
     }
 

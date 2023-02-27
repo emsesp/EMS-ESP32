@@ -396,14 +396,6 @@ class Boiler : public EMSdevice {
     inline bool set_auxLimitStart(const char * value, const int8_t id) {
         return set_auxLimit(value, 15);
     }
-
-    bool        set_auxLimit(const char * value, const int8_t id);
-    inline bool set_auxMaxLimit(const char * value, const int8_t id) {
-        return set_auxLimit(value, 14);
-    }
-    inline bool set_auxLimitStart(const char * value, const int8_t id) {
-        return set_auxLimit(value, 15);
-    }
     bool        set_hpHyst(const char * value, const int8_t id);
     inline bool set_hpHystHeat(const char * value, const int8_t id) {
         return set_hpHyst(value, 37);

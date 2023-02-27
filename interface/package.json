@@ -8,8 +8,8 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "build-hosted": "tsc && vite build --mode hosted",
+    "build": "vite build",
+    "build-hosted": "vite build --mode hosted",
     "preview": "vite preview",
     "preview-standalone": "npm-run-all -p preview typesafe-i18n mock-api",
     "mock-api": "nodemon --watch ../mock-api ../mock-api/server.js",

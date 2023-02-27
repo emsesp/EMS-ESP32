@@ -1273,7 +1273,7 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
 // EMS-ESP API specific
 const emsesp_info = {
   System: {
-    version: '3.5.0',
+    version: '3.6.0',
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
