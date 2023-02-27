@@ -100,11 +100,11 @@ void WebSchedulerService::loop() {
         return;
     }
 
-    time_t     now            = time(nullptr);
-    tm *       tm             = localtime(&now);
-    static int last_min       = 100;                    // some high marker
-    auto       uptime_seconds = uuid::get_uptime_sec(); // sync to EMS-ESP clock
-    auto       uptime_min     = uptime_seconds / 60;    // sync to EMS-ESP clock
+    time_t          now            = time(nullptr);
+    tm *            tm             = localtime(&now);
+    static uint32_t last_min       = 100;                    // some high marker
+    uint32_t        uptime_seconds = uuid::get_uptime_sec(); // sync to EMS-ESP clock
+    uint32_t        uptime_min     = uptime_seconds / 60;    // sync to EMS-ESP clock
 
     // check if we're on the minute - taking the EMS-ESP uptime
     // with the exception of allowing the first pass (on boot) through
