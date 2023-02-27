@@ -23,6 +23,7 @@
 #define EMSESP_SCHEDULER_SERVICE_PATH "/rest/schedule" // GET and POST
 
 #define SCHEDULEFLAG_SCHEDULE_TIMER 0x80 // 7th bit for Timer
+#define MAX_STARTUP_RETRIES 3            // retry the statup commands x times
 
 namespace emsesp {
 
@@ -36,6 +37,7 @@ class ScheduleItem {
     std::string cmd;
     std::string value;
     std::string description;
+    uint8_t     retry_cnt;
 };
 
 class WebScheduler {
@@ -52,6 +54,9 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
 
     void begin();
     void loop();
+
+  private:
+    bool command(const char * cmd, const char * data);
 
 // make all functions public so we can test in the debug and standalone mode
 #ifndef EMSESP_STANDALONE

@@ -44,7 +44,6 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
         si["active"]      = scheduleItem.active;
         si["flags"]       = scheduleItem.flags;
         si["time"]        = scheduleItem.time;
-        si["e_min"]       = scheduleItem.elapsed_min;
         si["cmd"]         = scheduleItem.cmd;
         si["value"]       = scheduleItem.value;
         si["description"] = scheduleItem.description;
@@ -84,6 +83,7 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
 
             // calculated elapsed minutes
             si.elapsed_min = Helpers::string2minutes(si.time);
+            si.retry_cnt   = 0xFF; // no starup retries
 
             webScheduler.scheduleItems.push_back(si); // add to list
         }
@@ -91,67 +91,98 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
     return StateUpdateResult::CHANGED;
 }
 
+// execute scheduled command
+bool WebSchedulerService::command(const char * cmd, const char * data) {
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc_input;
+    JsonObject                                 input = doc_input.to<JsonObject>();
+    if (strlen(data)) { // empty data queries a value
+        input["data"] = data;
+    }
+
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc_output; // only for commands without output
+    JsonObject                                 output = doc_output.to<JsonObject>();
+
+    // prefix "api/" to command string
+    char command_str[100];
+    snprintf(command_str, sizeof(command_str), "/api/%s", cmd);
+    uint8_t return_code = Command::process(command_str, true, input, output); // admin set
+
+    if (return_code == CommandRet::OK) {
+        EMSESP::logger().debug("Scheduled command %s with data %s successfully", cmd, data);
+        if (strlen(data) == 0 && Mqtt::enabled() && Mqtt::send_response() && output.size()) {
+            Mqtt::queue_publish("response", output);
+        }
+        return true;
+    }
+
+    char error[100];
+    if (output.size()) {
+        snprintf(error,
+                 sizeof(error),
+                 "Scheduled command %s failed with error: %s (%s)",
+                 cmd,
+                 (const char *)output["message"],
+                 Command::return_code_string(return_code).c_str());
+    } else {
+        snprintf(error, sizeof(error), "Scheduled command %s failed with error code (%s)", cmd, Command::return_code_string(return_code).c_str());
+    }
+    emsesp::EMSESP::logger().err(error);
+    return false;
+}
+
 // process any scheduled jobs
 // checks on the minute
 void WebSchedulerService::loop() {
+    // initialize static value on startup
+    static int8_t   last_tm_min     = -1; // invalid value also used for startup commands
+    static uint32_t last_uptime_min = 0;
+
     // get list of scheduler events and exit if it's empty
     EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems = &webScheduler.scheduleItems; });
     if (scheduleItems->size() == 0) {
         return;
     }
 
-    time_t          now            = time(nullptr);
-    tm *            tm             = localtime(&now);
-    static uint32_t last_min       = 100;                    // some high marker
-    uint32_t        uptime_seconds = uuid::get_uptime_sec(); // sync to EMS-ESP clock
-    uint32_t        uptime_min     = uptime_seconds / 60;    // sync to EMS-ESP clock
-
-    // check if we're on the minute - taking the EMS-ESP uptime
-    // with the exception of allowing the first pass (on boot) through
-    if (uptime_min == last_min || tm->tm_year < 122) {
-        return;
-    }
-    last_min = uptime_min;
-
-    // find the real dow and minute from NTP or RTC
-    uint8_t  real_dow = 1 << tm->tm_wday; // 1 is Sunday
-    uint16_t real_min = tm->tm_hour * 60 + tm->tm_min;
-
-    bool has_NTP = tm->tm_year > 120;
-
-    for (const ScheduleItem & scheduleItem : *scheduleItems) {
-        if (scheduleItem.active
-            && ((has_NTP && (real_dow & scheduleItem.flags) && real_min == scheduleItem.elapsed_min)                       // day of week scheduling - Weekly
-                || (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0 && uptime_min == 0) // only on boot
-                || (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min > 0 && (uptime_seconds % scheduleItem.elapsed_min == 0)
-                    && uptime_min))) { // periodic - Timer, avoid first minute
-            StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc_input;
-            JsonObject                                 input = doc_input.to<JsonObject>();
-            input["data"]                                    = scheduleItem.value;
-
-            StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc_output; // only for commands without output
-            JsonObject                                 output = doc_output.to<JsonObject>();
-
-            // prefix "api/" to command string
-            auto    command_str = "/api/" + scheduleItem.cmd;
-            uint8_t return_code = Command::process(command_str.c_str(), true, input, output); // admin set
-
-            if (return_code != CommandRet::OK) {
-                char error[100];
-                if (output.size()) {
-                    snprintf(error,
-                             sizeof(error),
-                             "Call failed with error: %s (%s)",
-                             (const char *)output["message"],
-                             Command::return_code_string(return_code).c_str());
-                } else {
-                    snprintf(error, sizeof(error), "Call failed with error code (%s)", Command::return_code_string(return_code).c_str());
-                }
-                emsesp::EMSESP::logger().err(error);
-            } else {
-                EMSESP::logger().debug("Scheduled command %s with data %s successfully", scheduleItem.cmd.c_str(), scheduleItem.value.c_str());
+    // check startup commands
+    if (last_tm_min == -1) {
+        for (ScheduleItem & scheduleItem : *scheduleItems) {
+            if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0) {
+                scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), scheduleItem.value.c_str()) ? 0xFF : 0;
             }
         }
+        last_tm_min = 0; // startup done, now use for RTC
+    }
+    // check timer every minute, sync to EMS-ESP clock
+    uint32_t uptime_min = uuid::get_uptime_sec() / 60;
+    if (last_uptime_min != uptime_min || last_uptime_min == -1) {
+        for (ScheduleItem & scheduleItem : *scheduleItems) {
+            // retry startupcommands not yet executed
+            if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0
+                && scheduleItem.retry_cnt < MAX_STARTUP_RETRIES) {
+                scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), scheduleItem.value.c_str()) ? 0xFF : scheduleItem.retry_cnt + 1;
+            }
+            // scheduled timer commands
+            if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min > 0
+                && (uptime_min % scheduleItem.elapsed_min == 0)) {
+                command(scheduleItem.cmd.c_str(), scheduleItem.value.c_str());
+            }
+        }
+        last_uptime_min = uptime_min;
+    }
+    // check calender, sync to RTC, only execute if year is valid
+    time_t now = time(nullptr);
+    tm *   tm  = localtime(&now);
+    if (tm->tm_min != last_tm_min && tm->tm_year > 120) {
+        // find the real dow and minute from NTP or RTC
+        uint8_t  real_dow = 1 << tm->tm_wday; // 1 is Sunday
+        uint16_t real_min = tm->tm_hour * 60 + tm->tm_min;
+
+        for (const ScheduleItem & scheduleItem : *scheduleItems) {
+            if (scheduleItem.active && (real_dow & scheduleItem.flags) && real_min == scheduleItem.elapsed_min) {
+                command(scheduleItem.cmd.c_str(), scheduleItem.value.c_str());
+            }
+        }
+        last_tm_min = tm->tm_min;
     }
 }
 
