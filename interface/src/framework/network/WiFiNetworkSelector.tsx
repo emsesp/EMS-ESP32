@@ -6,13 +6,13 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import LockIcon from '@mui/icons-material/Lock';
 import WifiIcon from '@mui/icons-material/Wifi';
 
-import { MessageBox } from '../../components';
+import { MessageBox } from 'components';
 
-import { WiFiEncryptionType, WiFiNetwork, WiFiNetworkList } from '../../types';
+import { WiFiEncryptionType, WiFiNetwork, WiFiNetworkList } from 'types';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 interface WiFiNetworkSelectorProps {
   networkList: WiFiNetworkList;

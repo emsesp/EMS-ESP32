@@ -31,16 +31,6 @@ class FSPersistence {
             DeserializationError error        = deserializeJson(jsonDocument, settingsFile);
             if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
                 JsonObject jsonObject = jsonDocument.as<JsonObject>();
-
-// debug added by Proddy
-#if defined(EMSESP_DEBUG)
-#if defined(EMSESP_USE_SERIAL)
-                Serial.println();
-                Serial.printf("Reading file: %s: ", _filePath);
-                serializeJson(jsonDocument, Serial);
-                Serial.println();
-#endif
-#endif
                 _statefulService->updateWithoutPropagation(jsonObject, _stateUpdater);
                 settingsFile.close();
                 return;
@@ -48,15 +38,8 @@ class FSPersistence {
             settingsFile.close();
         }
 
-// If we reach here we have not been successful in loading the config,
-// hard-coded emergency defaults are now applied.
-#if defined(EMSESP_DEBUG)
-#if defined(EMSESP_USE_SERIAL)
-        Serial.println();
-        Serial.printf("Applying defaults for %s: ", _filePath);
-        Serial.println();
-#endif
-#endif
+        // If we reach here we have not been successful in loading the config,
+        // hard-coded emergency defaults are now applied.
         applyDefaults();
         writeToFS(); // added to make sure the initial file is created
     }
@@ -82,25 +65,8 @@ class FSPersistence {
 
         // failed to open file, return false
         if (!settingsFile || !jsonObject.size()) {
-#if defined(EMSESP_DEBUG)
-#if defined(EMSESP_USE_SERIAL)
-            Serial.println();
-            Serial.printf("Cannot write to file system.");
-            Serial.println();
-#endif
-#endif
             return false;
         }
-
-// debug added by Proddy
-#if defined(EMSESP_DEBUG)
-#if defined(EMSESP_USE_SERIAL)
-        Serial.println();
-        Serial.printf("Writing to file: %s: ", _filePath);
-        serializeJson(jsonDocument, Serial);
-        Serial.println();
-#endif
-#endif
 
         // serialize the data to the file
         serializeJson(jsonDocument, settingsFile);

@@ -18,7 +18,6 @@
 
 #include "uuid/syslog.h"
 
-
 #include "../../../src/emsesp.h"
 
 #ifndef UUID_SYSLOG_HAVE_GETTIMEOFDAY
@@ -30,12 +29,6 @@
 
 #ifndef UUID_SYSLOG_HAVE_GETTIMEOFDAY
 #define UUID_SYSLOG_HAVE_GETTIMEOFDAY 0
-#endif
-
-#ifndef UUID_SYSLOG_HAVE_IPADDRESS_TYPE
-#if defined(ARDUINO_ARCH_ESP8266)
-#define UUID_SYSLOG_HAVE_IPADDRESS_TYPE 1
-#endif
 #endif
 
 #ifndef UUID_SYSLOG_HAVE_IPADDRESS_TYPE
@@ -77,10 +70,25 @@
 #include <algorithm>
 #include <list>
 #include <memory>
+#if UUID_SYSLOG_THREAD_SAFE
+#include <mutex>
+#endif
 #include <string>
 
 #include <uuid/common.h>
 #include <uuid/log.h>
+
+#ifndef UUID_SYSLOG_UDP_BASE_MESSAGE_DELAY
+#define UUID_SYSLOG_UDP_BASE_MESSAGE_DELAY 100
+#endif
+
+#ifndef UUID_SYSLOG_UDP_IPV4_ARP_MESSAGE_DELAY
+#define UUID_SYSLOG_UDP_IPV4_ARP_MESSAGE_DELAY 10
+#endif
+
+#ifndef UUID_SYSLOG_UDP_IPV6_NDP_MESSAGE_DELAY
+#define UUID_SYSLOG_UDP_IPV6_NDP_MESSAGE_DELAY 10
+#endif
 
 static const char __pstr__logger_name[] = "syslog";
 
@@ -91,10 +99,6 @@ namespace syslog {
 uuid::log::Logger SyslogService::logger_{__pstr__logger_name, uuid::log::Facility::SYSLOG};
 bool              SyslogService::QueuedLogMessage::time_good_ = false;
 
-SyslogService::~SyslogService() {
-    uuid::log::Logger::unregister_handler(this);
-}
-
 void SyslogService::start() {
     uuid::log::Logger::register_handler(this, uuid::log::Level::ALL);
 }
@@ -104,6 +108,9 @@ uuid::log::Level SyslogService::log_level() const {
 }
 
 void SyslogService::remove_queued_messages(uuid::log::Level level) {
+#if UUID_SYSLOG_THREAD_SAFE
+    std::lock_guard<std::mutex> lock{mutex_};
+#endif
     unsigned long offset = 0;
 
     for (auto it = log_messages_.begin(); it != log_messages_.end();) {
@@ -125,22 +132,32 @@ void SyslogService::log_level(uuid::log::Level level) {
         remove_queued_messages(level);
     }
 
-    static bool level_set     = false;
-    bool        level_changed = !level_set || (level != log_level());
-    level_set                 = true;
+    // commented out for EMS-ESP
 
+    /*
+    static bool level_set = false;
+    level_set             = true;
+    bool level_changed = !level_set || (level != log_level());
+    
     if (level_changed) {
-        logger_.info(F("Log level set to %S"), uuid::log::format_level_uppercase(level));
+         logger_.info("Log level set to %S", uuid::log::format_level_uppercase(level));
     }
+    */
 
     uuid::log::Logger::register_handler(this, level);
 }
 
 size_t SyslogService::maximum_log_messages() const {
+#if UUID_SYSLOG_THREAD_SAFE
+    std::lock_guard<std::mutex> lock{mutex_};
+#endif
     return maximum_log_messages_;
 }
 
 void SyslogService::maximum_log_messages(size_t count) {
+#if UUID_SYSLOG_THREAD_SAFE
+    std::lock_guard<std::mutex> lock{mutex_};
+#endif
     maximum_log_messages_ = std::max((size_t)1, count);
 
     while (log_messages_.size() > maximum_log_messages_) {
@@ -148,12 +165,20 @@ void SyslogService::maximum_log_messages(size_t count) {
     }
 }
 
+size_t SyslogService::current_log_messages() const {
+#if UUID_SYSLOG_THREAD_SAFE
+    std::lock_guard<std::mutex> lock{mutex_};
+#endif
+
+    return log_messages_.size();
+}
+
 std::pair<IPAddress, uint16_t> SyslogService::destination() const {
     return std::make_pair(ip_, port_);
 }
 
-void SyslogService::destination(IPAddress host, uint16_t port) {
-    ip_   = host;
+void SyslogService::destination(IPAddress ip, uint16_t port) {
+    ip_   = ip;
     port_ = port;
 
     if ((uint32_t)ip_ == (uint32_t)0) {
@@ -207,7 +232,8 @@ void SyslogService::mark_interval(unsigned long interval) {
 SyslogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_ptr<uuid::log::Message> && content)
     : id_(id)
     , content_(std::move(content)) {
-    // Added by proddy - check for Ethernet too. This assumes the network has already started.
+    // Added for EMS-ESP
+    // check for Ethernet too. This assumes the network has already started.
     if (time_good_ || emsesp::EMSESP::system_.network_connected()) {
 #if UUID_SYSLOG_HAVE_GETTIMEOFDAY
         if (gettimeofday(&time_, nullptr) != 0) {
@@ -229,9 +255,9 @@ SyslogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_
     }
 }
 
-void SyslogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
+/* Mutex already locked by caller. */
+void SyslogService::add_message(std::shared_ptr<uuid::log::Message> & message) {
     if (log_messages_.size() >= maximum_log_messages_) {
-        log_messages_overflow_ = true;
         log_messages_.pop_front();
         log_message_fails_++;
     }
@@ -239,25 +265,71 @@ void SyslogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
     log_messages_.emplace_back(log_message_id_++, std::move(message));
 }
 
+void SyslogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
+#if UUID_SYSLOG_THREAD_SAFE
+    std::lock_guard<std::mutex> lock{mutex_};
+#endif
+
+    add_message(message);
+}
+
 void SyslogService::loop() {
-    while (!log_messages_.empty() && can_transmit()) {
+#if UUID_SYSLOG_THREAD_SAFE
+    std::unique_lock<std::mutex> lock{mutex_};
+#endif
+    size_t count = std::max((size_t)1, MAX_LOG_MESSAGES);
+
+    while (!log_messages_.empty()) {
+#if UUID_SYSLOG_THREAD_SAFE
+        lock.unlock();
+#endif
+
+        if (!can_transmit())
+            return;
+
+#if UUID_SYSLOG_THREAD_SAFE
+        lock.lock();
+
+        if (log_messages_.empty())
+            break;
+#endif
+
         auto message = log_messages_.front();
 
-        started_               = true;
-        log_messages_overflow_ = false;
-        auto ok                = transmit(message);
+        started_ = true;
+
+#if UUID_SYSLOG_THREAD_SAFE
+        lock.unlock();
+#endif
+
+        auto ok = transmit(message);
         if (ok) {
-            // The transmit() may have called yield() allowing
-            // other messages to have been added to the queue.
-            if (!log_messages_overflow_) {
+#if UUID_SYSLOG_THREAD_SAFE
+            lock.lock();
+#endif
+
+            last_message_ = last_transmit_;
+            if (!log_messages_.empty() && log_messages_.front().content_ == message.content_) {
                 log_messages_.pop_front();
             }
-            last_message_ = uuid::get_uptime_ms();
+
+#if UUID_SYSLOG_THREAD_SAFE
+            lock.unlock();
+#endif
         }
 
         ::yield();
 
+#if UUID_SYSLOG_THREAD_SAFE
+        lock.lock();
+#endif
+
         if (!ok) {
+            break;
+        }
+
+        count--;
+        if (count == 0) {
             break;
         }
     }
@@ -266,19 +338,22 @@ void SyslogService::loop() {
         if (uuid::get_uptime_ms() - last_message_ >= mark_interval_) {
             // This is generated manually because the log level may not
             // be high enough to receive INFO messages.
-            operator<<(std::make_shared<uuid::log::Message>(uuid::get_uptime_ms(),
-                                                            uuid::log::Level::INFO,
-                                                            uuid::log::Facility::SYSLOG,
-                                                            (__pstr__logger_name),
-                                                            (F("-- MARK --"))));
+            auto message = std::make_shared<uuid::log::Message>(uuid::get_uptime_ms(),
+                                                                uuid::log::Level::INFO,
+                                                                uuid::log::Facility::SYSLOG,
+                                                                (__pstr__logger_name),
+                                                                "-- MARK --");
+            add_message(message);
         }
     }
 }
 
 bool SyslogService::can_transmit() {
+    // TODO this should be checked for Eth
     if (!host_.empty() && (uint32_t)ip_ == 0) {
         WiFi.hostByName(host_.c_str(), ip_);
     }
+
 #if UUID_SYSLOG_HAVE_IPADDRESS_TYPE
     if (ip_.isV4() && (uint32_t)ip_ == (uint32_t)0) {
         return false;
@@ -294,23 +369,23 @@ bool SyslogService::can_transmit() {
     }
 
     const uint64_t now           = uuid::get_uptime_ms();
-    uint64_t       message_delay = 100;
+    uint64_t       message_delay = UUID_SYSLOG_UDP_BASE_MESSAGE_DELAY;
 
 #if UUID_SYSLOG_ARP_CHECK
 #if UUID_SYSLOG_HAVE_IPADDRESS_TYPE
     if (ip_.isV4())
 #endif
     {
-        message_delay = 10;
+        message_delay = UUID_SYSLOG_UDP_IPV4_ARP_MESSAGE_DELAY;
     }
 #endif
 #if UUID_SYSLOG_NDP_CHECK && UUID_SYSLOG_HAVE_IPADDRESS_TYPE
     if (ip_.isV6()) {
-        message_delay = 10;
+        message_delay = UUID_SYSLOG_UDP_IPV6_NDP_MESSAGE_DELAY;
     }
 #endif
 
-    if (now < last_transmit_ || now - last_transmit_ < message_delay) {
+    if (started_ && (now < last_transmit_ || now - last_transmit_ < message_delay)) {
         return false;
     }
 
@@ -361,23 +436,14 @@ bool SyslogService::can_transmit() {
 
             for (size_t i = 0; i < LWIP_IPV6_NUM_ADDRESSES; i++) {
                 if (ip6_addr_isvalid(netif_ip6_addr_state(netif_default, i))) {
-                    if (ip6_addr_isglobal(&ip6addr)) {
-                        if (ip6_addr_isglobal(netif_ip6_addr(netif_default, i))) {
-                            have_address = true;
-                            break;
-                        }
-                    } else if (ip6_addr_issitelocal(&ip6addr)) {
-                        if (ip6_addr_issitelocal(netif_ip6_addr(netif_default, i))) {
-                            have_address = true;
-                            break;
-                        }
-                    } else if (ip6_addr_isuniquelocal(&ip6addr)) {
-                        if (ip6_addr_isuniquelocal(netif_ip6_addr(netif_default, i))) {
-                            have_address = true;
-                            break;
-                        }
-                    } else if (ip6_addr_islinklocal(&ip6addr)) {
+                    if (ip6_addr_islinklocal(&ip6addr)) {
                         if (ip6_addr_islinklocal(netif_ip6_addr(netif_default, i))) {
+                            have_address = true;
+                            break;
+                        }
+                    } else if (ip6_addr_isglobal(&ip6addr) || ip6_addr_isuniquelocal(&ip6addr) || ip6_addr_issitelocal(&ip6addr)) {
+                        if (ip6_addr_isglobal(netif_ip6_addr(netif_default, i)) || ip6_addr_isuniquelocal(netif_ip6_addr(netif_default, i))
+                            || ip6_addr_issitelocal(netif_ip6_addr(netif_default, i))) {
                             have_address = true;
                             break;
                         }
@@ -408,8 +474,10 @@ bool SyslogService::can_transmit() {
 
 bool SyslogService::transmit(const QueuedLogMessage & message) {
     struct tm tm;
-    int8_t    tzh = 0;
-    int8_t    tzm = 0;
+
+    // Changes for EMS-ESP
+    int8_t tzh = 0;
+    int8_t tzm = 0;
 
     tm.tm_year = 0;
     if (message.time_.tv_sec != (time_t)-1) {
@@ -418,8 +486,10 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
         localtime_r(&message.time_.tv_sec, &tm);
         int16_t diff = 60 * (tm.tm_hour - utc.tm_hour) + tm.tm_min - utc.tm_min;
         diff         = diff > 720 ? diff - 1440 : diff < -720 ? diff + 1440 : diff;
-        tzh          = diff / 60;
-        tzm          = diff < 0 ? (0 - diff) % 60 : diff % 60;
+
+        // added for EMS-ESP
+        tzh = diff / 60;
+        tzm = diff < 0 ? (0 - diff) % 60 : diff % 60;
     }
 
     if (udp_.beginPacket(ip_, port_) != 1) {
@@ -427,26 +497,53 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
         return false;
     }
 
-    udp_.printf_P(PSTR("<%u>1 "), ((unsigned int)message.content_->facility * 8) + std::min(7U, (unsigned int)message.content_->level));
+    /*
+	 * The level is constrained to 0-7 by design in RFC 5424 because higher
+	 * severity values would be a different severity in another facility. The
+	 * TRACE level and all other invalid values (because of the conversion to
+	 * unsigned) are converted to DEBUG.
+	 *
+	 * RFC 5424 requires that the facility MUST be 0-23. Values here are allowed
+	 * to go up to 31 because there is no obvious candidate to convert them to
+	 * and because the multiplication by a factor of 256 means that (with the
+	 * cast back to uint8_t) higher values just overflow into other facilities
+	 * (which is easier than doing it by modulo 24). The enum doesn't allow
+	 * values that are out of range of the RFC.
+	 *
+	 * The maximum possible priority value does not exceed the requirement that
+	 * the PRI part MUST be 3-5 characters.
+	 */
+    udp_.printf("<%u>1 ", (uint8_t)(message.content_->facility * 8U) + std::min(7U, (unsigned int)message.content_->level));
+
     if (tm.tm_year != 0) {
-        udp_.printf_P(PSTR("%04u-%02u-%02uT%02u:%02u:%02u.%06u%+02d:%02d"),
-                      tm.tm_year + 1900,
-                      tm.tm_mon + 1,
-                      tm.tm_mday,
-                      tm.tm_hour,
-                      tm.tm_min,
-                      tm.tm_sec,
-                      (uint32_t)message.time_.tv_usec,
-                      tzh,
-                      tzm);
+        // udp_.printf_P("%04u-%02u-%02uT%02u:%02u:%02u.%06luZ",
+        //               tm.tm_year + 1900,
+        //               tm.tm_mon + 1,
+        //               tm.tm_mday,
+        //               tm.tm_hour,
+        //               tm.tm_min,
+        //               tm.tm_sec,
+        //               (unsigned long)message.time_.tv_usec);
+
+        // added for EMS-ESP
+        udp_.printf("%04u-%02u-%02uT%02u:%02u:%02u.%06lu%+02d:%02d",
+                    tm.tm_year + 1900,
+                    tm.tm_mon + 1,
+                    tm.tm_mday,
+                    tm.tm_hour,
+                    tm.tm_min,
+                    tm.tm_sec,
+                    (unsigned long)message.time_.tv_usec,
+                    tzh,
+                    tzm);
     } else {
         udp_.print('-');
     }
 
-    udp_.printf_P(PSTR(" %s %s - - - "), hostname_.c_str(), (message.content_->name));
+    udp_.printf(" %s %s - - - ", hostname_.c_str(), message.content_->name);
 
     char id_c_str[15];
-    snprintf_P(id_c_str, sizeof(id_c_str), PSTR(" %lu: "), message.id_);
+    snprintf(id_c_str, sizeof(id_c_str), " %lu: ", message.id_);
     std::string msgstr = uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3) + ' ' + uuid::log::format_level_char(message.content_->level) + id_c_str
                          + message.content_->text;
     for (uint16_t i = 0; i < msgstr.length(); i++) {

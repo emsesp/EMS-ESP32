@@ -1,41 +1,44 @@
 import { FC, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
-import { range } from 'lodash';
+import { range } from 'lodash-es';
 
 import { Button, Checkbox, MenuItem } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
+import WarningIcon from '@mui/icons-material/Warning';
+import CancelIcon from '@mui/icons-material/Cancel';
 
-import { createAPSettingsValidator, validate } from '../../validators';
+import { createAPSettingsValidator, validate } from 'validators';
 import {
   BlockFormControlLabel,
   ButtonRow,
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
-  ValidatedTextField
-} from '../../components';
+  ValidatedTextField,
+  BlockNavigation
+} from 'components';
 
-import { APProvisionMode, APSettings } from '../../types';
-import { numberValue, updateValue, useRest } from '../../utils';
-import * as APApi from '../../api/ap';
+import { APProvisionMode, APSettings } from 'types';
+import { numberValue, updateValueDirty, useRest } from 'utils';
+import * as APApi from 'api/ap';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 export const isAPEnabled = ({ provision_mode }: APSettings) => {
   return provision_mode === APProvisionMode.AP_MODE_ALWAYS || provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;
 };
 
 const APSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<APSettings>({
-    read: APApi.readAPSettings,
-    update: APApi.updateAPSettings
-  });
+  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
+    useRest<APSettings>({
+      read: APApi.readAPSettings,
+      update: APApi.updateAPSettings
+    });
 
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValue(setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
 
   const content = () => {
     if (!data) {
@@ -163,24 +166,37 @@ const APSettingsForm: FC = () => {
             />
           </>
         )}
-        <ButtonRow>
-          <Button
-            startIcon={<SaveIcon />}
-            disabled={saving}
-            variant="outlined"
-            color="primary"
-            type="submit"
-            onClick={validateAndSubmit}
-          >
-            {LL.SAVE()}
-          </Button>
-        </ButtonRow>
+        {dirtyFlags && dirtyFlags.length !== 0 && (
+          <ButtonRow>
+            <Button
+              startIcon={<CancelIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={() => loadData()}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              startIcon={<WarningIcon color="warning" />}
+              disabled={saving}
+              variant="contained"
+              color="info"
+              type="submit"
+              onClick={validateAndSubmit}
+            >
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
+            </Button>
+          </ButtonRow>
+        )}
       </>
     );
   };
 
   return (
     <SectionContent title={LL.SETTINGS_OF(LL.ACCESS_POINT(1))} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

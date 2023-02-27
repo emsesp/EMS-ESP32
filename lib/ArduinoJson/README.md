@@ -1,17 +1,18 @@
 <p align="center">
-  <a href="https://arduinojson.org/"><img alt="ArduinoJson" src="logo.svg" /></a>
+  <a href="https://arduinojson.org/"><img alt="ArduinoJson" src="https://arduinojson.org/images/logo.svg" width="200" /></a>
 </p>
 
 ---
 
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bblanchon/ArduinoJson/ci.yml?branch=6.x)](https://github.com/bblanchon/ArduinoJson/actions?query=workflow%3A%22Continuous+Integration%22+branch%3A6.x)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bblanchon/ArduinoJson/ci.yml?branch=6.x&logo=github)](https://github.com/bblanchon/ArduinoJson/actions?query=workflow%3A%22Continuous+Integration%22+branch%3A6.x)
 [![Continuous Integration](https://ci.appveyor.com/api/projects/status/m7s53wav1l0abssg/branch/6.x?svg=true)](https://ci.appveyor.com/project/bblanchon/arduinojson/branch/6.x)
 [![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/arduinojson.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:arduinojson)
 [![Coveralls branch](https://img.shields.io/coveralls/github/bblanchon/ArduinoJson/6.x?logo=coveralls)](https://coveralls.io/github/bblanchon/ArduinoJson?branch=6.x)  
-[![Arduino Library Manager](https://img.shields.io/static/v1?label=Arduino&message=v6.20.0&logo=arduino&logoColor=white&color=blue)](https://www.ardu-badge.com/ArduinoJson/6.20.0)
-[![PlatformIO Registry](https://badges.registry.platformio.org/packages/bblanchon/library/ArduinoJson.svg?version=6.20.0)](https://registry.platformio.org/packages/libraries/bblanchon/ArduinoJson?version=6.20.0) 
-[![GitHub stars](https://img.shields.io/github/stars/bblanchon/ArduinoJson?style=flat&logo=github)](https://github.com/bblanchon/ArduinoJson/stargazers)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/bblanchon?logo=github)](https://github.com/sponsors/bblanchon)
+[![Arduino Library Manager](https://img.shields.io/static/v1?label=Arduino&message=v6.20.1&logo=arduino&logoColor=white&color=blue)](https://www.ardu-badge.com/ArduinoJson/6.20.1)
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/bblanchon/library/ArduinoJson.svg?version=6.20.1)](https://registry.platformio.org/packages/libraries/bblanchon/ArduinoJson?version=6.20.1) 
+[![ESP IDF](https://img.shields.io/static/v1?label=ESP+IDF&message=v6.20.1&logo=cpu&logoColor=white&color=blue)](https://components.espressif.com/components/bblanchon/arduinojson)  
+[![GitHub stars](https://img.shields.io/github/stars/bblanchon/ArduinoJson?style=flat&logo=github&color=orange)](https://github.com/bblanchon/ArduinoJson/stargazers)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/bblanchon?logo=github&color=orange)](https://github.com/sponsors/bblanchon)
 
 ArduinoJson is a C++ JSON library for Arduino and IoT (Internet Of Things).
 
@@ -99,7 +100,6 @@ ArduinoJson is a C++ JSON library for Arduino and IoT (Internet Of Things).
     * Most popular of all Arduino libraries on [GitHub](https://github.com/search?o=desc&q=arduino+library&s=stars&type=Repositories)
     * [Used in hundreds of projects](https://www.hackster.io/search?i=projects&q=arduinojson)
     * [Responsive support](https://github.com/bblanchon/ArduinoJson/issues?q=is%3Aissue+is%3Aclosed)
-    * [Discord server](https://discord.gg/DzN6hHHD4h)
 
 ## Quickstart
 

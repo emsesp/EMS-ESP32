@@ -1,13 +1,13 @@
 import { FC, useRef, useState } from 'react';
 
-import * as SystemApi from '../../api/system';
-import { SectionContent } from '../../components';
-import { FileUploadConfig } from '../../api/endpoints';
+import * as SystemApi from 'api/system';
+import { SectionContent } from 'components';
+import { FileUploadConfig } from 'api/endpoints';
 
 import GeneralFileUpload from './GeneralFileUpload';
 import RestartMonitor from './RestartMonitor';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const UploadFileForm: FC = () => {
   const [restarting, setRestarting] = useState<boolean>();

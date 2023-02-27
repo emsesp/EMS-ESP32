@@ -1,5 +1,5 @@
 import { AxiosPromise } from 'axios';
-import { NTPSettings, NTPStatus, Time } from '../types';
+import { NTPSettings, NTPStatus, Time } from 'types';
 
 import { AXIOS } from './endpoints';
 

@@ -2,7 +2,7 @@ import { FC } from 'react';
 
 import { Typography, Button, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@mui/material';
 
-import { SectionContent } from '../components';
+import { SectionContent } from 'components';
 
 import { useSnackbar } from 'notistack';
 
@@ -12,9 +12,9 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import EastIcon from '@mui/icons-material/East';
 
-import { extractErrorMessage } from '../utils';
+import { extractErrorMessage } from 'utils';
 
-import { useI18nContext } from '../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 import * as EMSESP from './api';
 

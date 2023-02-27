@@ -1,6 +1,6 @@
 import { AxiosPromise } from 'axios';
 
-import { Features } from '../types';
+import { Features } from 'types';
 
 import { AXIOS } from './endpoints';
 

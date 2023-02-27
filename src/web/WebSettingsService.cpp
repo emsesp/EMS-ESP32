@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -240,14 +240,22 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.low_clock = root["low_clock"] | false;
     check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
 
-    String old_local = settings.locale;
-    settings.locale  = root["locale"] | EMSESP_DEFAULT_LOCALE;
-    EMSESP::system_.locale(settings.locale);
-#ifndef EMSESP_STANDALONE
-    if (!old_local.equals(settings.locale)) {
-        add_flags(ChangeFlags::RESTART); // force restart
+    //
+    // these may need mqtt restart to rebuild HA discovery topics
+    //
+    prev                 = settings.bool_format;
+    settings.bool_format = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
+    EMSESP::system_.bool_format(settings.bool_format);
+    if (Mqtt::ha_enabled()) {
+        check_flag(prev, settings.bool_format, ChangeFlags::MQTT);
     }
-#endif
+
+    prev                 = settings.enum_format;
+    settings.enum_format = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
+    EMSESP::system_.enum_format(settings.enum_format);
+    if (Mqtt::ha_enabled()) {
+        check_flag(prev, settings.enum_format, ChangeFlags::MQTT);
+    }
 
     //
     // these may need mqtt restart to rebuild HA discovery topics
@@ -267,6 +275,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     //
     // without checks or necessary restarts...
     //
+    settings.locale = root["locale"] | EMSESP_DEFAULT_LOCALE;
+    EMSESP::system_.locale(settings.locale);
+
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
 

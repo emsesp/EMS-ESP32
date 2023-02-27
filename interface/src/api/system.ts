@@ -1,6 +1,6 @@
 import { AxiosPromise } from 'axios';
 
-import { OTASettings, SystemStatus, LogSettings, LogEntries } from '../types';
+import { OTASettings, SystemStatus, LogSettings, LogEntries } from 'types';
 
 import { AXIOS, AXIOS_BIN, FileUploadConfig, startUploadFile } from './endpoints';
 

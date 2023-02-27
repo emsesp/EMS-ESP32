@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,8 +92,8 @@ class Boiler : public EMSdevice {
     uint16_t wwCylMiddleTemp_; // Cyl middle temperature (TS3)
     uint16_t wwSolarTemp_;
     uint8_t  wwAlternatingOper_; // alternating operation on/off
-    uint8_t  wwAltOpPrioHeat_;   // alternating operation, prioritise heat time
-    uint8_t  wwAltOpPrioWw_;     // alternating operation, prioritise dhw time
+    uint8_t  wwAltOpPrioHeat_;   // alternating operation, prioritize heat time
+    uint8_t  wwAltOpPrioWw_;     // alternating operation, prioritize dhw time
 
     // main
     uint8_t  reset_;            // for reset command

@@ -1,5 +1,5 @@
 import Schema from 'async-validator';
-import { NetworkSettings } from '../types';
+import { NetworkSettings } from 'types';
 import { HOSTNAME_VALIDATOR, IP_ADDRESS_VALIDATOR } from './shared';
 
 export const createNetworkSettingsValidator = (networkSettings: NetworkSettings) =>

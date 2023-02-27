@@ -1,5 +1,5 @@
 import { AxiosPromise } from 'axios';
-import { AXIOS, AXIOS_API, AXIOS_BIN } from '../api/endpoints';
+import { AXIOS, AXIOS_API, AXIOS_BIN } from 'api/endpoints';
 
 import {
   BoardProfile,
@@ -16,7 +16,8 @@ import {
   WriteValue,
   WriteSensor,
   WriteAnalog,
-  SensorData
+  SensorData,
+  Schedule
 } from './types';
 
 export function restart(): AxiosPromise<void> {
@@ -93,4 +94,12 @@ export function getSettings(): AxiosPromise<void> {
 
 export function getCustomizations(): AxiosPromise<void> {
   return AXIOS.get('/getCustomizations');
+}
+
+export function readSchedule(): AxiosPromise<Schedule> {
+  return AXIOS.get('/schedule');
+}
+
+export function writeSchedule(schedule: Schedule): AxiosPromise<void> {
+  return AXIOS.post('/schedule', schedule);
 }

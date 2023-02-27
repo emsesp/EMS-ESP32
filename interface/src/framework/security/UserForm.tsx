@@ -7,12 +7,12 @@ import SaveIcon from '@mui/icons-material/Save';
 
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
-import { BlockFormControlLabel, ValidatedPasswordField, ValidatedTextField } from '../../components';
-import { User } from '../../types';
-import { updateValue } from '../../utils';
-import { validate } from '../../validators';
+import { BlockFormControlLabel, ValidatedPasswordField, ValidatedTextField } from 'components';
+import { User } from 'types';
+import { updateValue } from 'utils';
+import { validate } from 'validators';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 interface UserFormProps {
   creating: boolean;
@@ -93,9 +93,8 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
               variant="outlined"
               onClick={validateAndDone}
               color="primary"
-              autoFocus
             >
-              {creating ? LL.ADD(0) : LL.SAVE()}
+              {creating ? LL.ADD(0) : LL.UPDATE()}
             </Button>
           </DialogActions>
         </>

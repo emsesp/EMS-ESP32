@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import { Me } from '../../types';
+import { Me } from 'types';
 
 export interface AuthenticationContextValue {
   refresh: () => Promise<void>;

@@ -14,7 +14,6 @@ const fr: Translation = {
   SU_PASSWORD: 'Mot de passe su',
   DASHBOARD: 'Tableau de bord',
   SETTINGS_OF: 'Paramètres {0}',
-  SAVED: 'sauvegardé',
   HELP_OF: 'Aide {0}',
   LOGGED_IN: 'Connecté en tant que {name}',
   PLEASE_SIGNIN: 'Veuillez vous connecter pour continuer',
@@ -47,7 +46,8 @@ const fr: Translation = {
   CANCEL: 'Annuler',
   RESET: 'Réinitialiser',
   SEND: 'Envoyer',
-  SAVE: 'Sauvegarder',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Enlever',
   PROBLEM_UPDATING: 'Problème lors de la mise à jour',
   PROBLEM_LOADING: 'Problème lors du chargement',
@@ -104,7 +104,7 @@ const fr: Translation = {
   NUM_HOURS: '{num} heure{{s}}',
   NUM_MINUTES: '{num} minute{{s}}',
   APPLICATION_SETTINGS: 'Paramètres de l\'application',
-  CUSTOMIZATION: 'Personnalisation',
+  CUSTOMIZATIONS: 'Personnalisation',
   APPLICATION_RESTARTING: 'EMS-ESP redémarre',
   INTERFACE_BOARD_PROFILE: 'Profile de carte d\'interface',
   BOARD_PROFILE_TEXT: 'Sélectionnez un profil de carte d\'interface préconfiguré dans la liste ci-dessous ou choisissez Personnalisé pour configurer vos propres paramètres matériels',
@@ -157,14 +157,13 @@ const fr: Translation = {
   CUSTOMIZATIONS_HELP_3: 'désactiver l\'action d\'écriture',
   CUSTOMIZATIONS_HELP_4: 'exclure de MQTT et de l\'API',
   CUSTOMIZATIONS_HELP_5: 'cacher du Tableau de bord',
-  CUSTOMIZATIONS_HELP_6: 'remove from memory',
+  CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
   SELECT_DEVICE: 'Sélectionnez un appareil',
   SET_ALL: 'tout régler',
   OPTIONS: 'Options',
   NAME: 'Nom',
   CUSTOMIZATIONS_RESET: 'Êtes-vous sûr de vouloir supprimer toutes les personnalisations, y compris les paramètres personnalisés des capteurs de température et analogiques ?',
   DEVICE_ENTITIES: 'Entités de l\'appareil',
-  USER_CUSTOMIZATION: 'Personnalisation de l\'utilisateur',
   SUPPORT_INFORMATION: 'Information de support',
   CLICK_HERE: 'Cliquez ici',
   HELP_INFORMATION_1: 'Visitez le wiki en ligne pour obtenir des instructions sur la façon de configurer EMS-ESP.',
@@ -209,6 +208,7 @@ const fr: Translation = {
   COMPACT: 'Compact',
   ENABLE_OTA: 'Activer les updates OTA',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Télécharger les personnalisations d\'entités',
+  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Téléchargez les paramètres de l\'application. Soyez prudent lorsque vous partagez vos paramètres car ce fichier contient des mots de passe et d\'autres informations système sensibles.',
   UPLOAD_TEXT: 'Téléchargez un nouveau fichier de firmware (.bin), un fichier de paramètres ou de personnalisations (.json) ci-dessous, pour une validation optionnelle téléchargez d\'abord un fichier (.md5)',
   UPLOADING: 'Téléchargement',
@@ -240,8 +240,9 @@ const fr: Translation = {
   MQTT_RESPONSE: 'Publier le résultat des commandes dans un topic `response`',
   MQTT_PUBLISH_TEXT_1: 'Publier des topics à valeur unique sur changement',
   MQTT_PUBLISH_TEXT_2: 'Publier vers des topics de commande (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Activer la découverte MQTT (Home Assistant, Domoticz)',
+  MQTT_PUBLISH_TEXT_3: 'Activer la découverte MQTT',
   MQTT_PUBLISH_TEXT_4: 'Préfixe pour les topics découverte',
+  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
   MQTT_PUBLISH_INTERVALS: 'Intervalles de publication',
   MQTT_INT_BOILER: 'Chaudières et pompes à chaleur',
   MQTT_INT_THERMOSTATS: 'Thermostats',
@@ -303,7 +304,21 @@ const fr: Translation = {
   NEW_NAME_OF: 'Nouveau nom de {0}',
   ENTITY: 'entité',
   MIN: 'min',
-  MAX: 'max'
+  MAX: 'max',
+  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
+  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
+  STAY: 'Stay', // TODO translate
+  LEAVE: 'Leave', // TODO translate
+  SCHEDULER: 'Scheduler', // TODO translate
+  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP', // TODO translate
+  SCHEDULE: 'Schedule', // TODO translate
+  TIME: 'Time', // TODO translate
+  TIMER: 'Timer', // TODO translate
+  WEEKLY: 'Weekly', // TODO translate
+  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_TIMER_1: 'on startup', // TODO translate
+  SCHEDULE_TIMER_2: 'every minute', // TODO translate
+  SCHEDULE_TIMER_3: 'every hour' // TODO translate
 };
 
 export default fr;

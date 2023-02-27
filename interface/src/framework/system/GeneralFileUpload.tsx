@@ -3,19 +3,19 @@ import { AxiosPromise } from 'axios';
 
 import { Typography, Button, Box } from '@mui/material';
 
-import { FileUploadConfig } from '../../api/endpoints';
+import { FileUploadConfig } from 'api/endpoints';
 
-import { SingleUpload, useFileUpload } from '../../components';
+import { SingleUpload, useFileUpload } from 'components';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
 
 import { useSnackbar } from 'notistack';
 
-import { extractErrorMessage } from '../../utils';
+import { extractErrorMessage } from 'utils';
 
-import * as EMSESP from '../../project/api';
+import * as EMSESP from 'project/api';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 interface UploadFileProps {
   uploadGeneralFile: (file: File, config?: FileUploadConfig) => AxiosPromise<void>;
@@ -69,6 +69,19 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
     }
   };
 
+  const downloadSchedule = async () => {
+    try {
+      const response = await EMSESP.readSchedule();
+      if (response.status !== 200) {
+        enqueueSnackbar(LL.PROBLEM_LOADING(), { variant: 'error' });
+      } else {
+        saveFile(response.data, 'schedule');
+      }
+    } catch (error) {
+      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+    }
+  };
+
   return (
     <>
       {!uploading && (
@@ -112,7 +125,15 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
             color="primary"
             onClick={() => downloadCustomizations()}
           >
-            {LL.CUSTOMIZATION()}
+            {LL.CUSTOMIZATIONS()}
+          </Button>
+          <Box color="warning.main">
+            <Typography mt={2} mb={1} variant="body2">
+              {LL.DOWNLOAD_SCHEDULE_TEXT()}{' '}
+            </Typography>
+          </Box>
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => downloadSchedule()}>
+            {LL.SCHEDULE()}
           </Button>
         </>
       )}

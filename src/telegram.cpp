@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -211,9 +211,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
         LOG_TRACE("Rx: %s", Helpers::data_to_hex(data, length).c_str());
     }
 
-#ifdef EMSESP_DEBUG
-    LOG_DEBUG("[DEBUG] New Rx telegram, message length %d", message_length);
-#endif
+    LOG_DEBUG("New Rx telegram, message length %d", message_length);
 
     // if we don't have a type_id exit,
     // do not exit on empty message, it is checked for toggle fetch
@@ -443,9 +441,7 @@ void TxService::add(const uint8_t  operation,
                     const bool     front) {
     auto telegram = std::make_shared<Telegram>(operation, ems_bus_id(), dest, type_id, offset, message_data, message_length);
 
-#ifdef EMSESP_DEBUG
-    LOG_DEBUG("[DEBUG] New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
-#endif
+    LOG_DEBUG("New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
 
     // if the queue is full, make room by removing the last one
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
@@ -507,9 +503,7 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 
     // if we don't have a type_id or empty data block, exit
     if ((type_id == 0) || (message_length == 0)) {
-#ifdef EMSESP_DEBUG
-        LOG_DEBUG("[DEBUG] Tx telegram type %d failed, length %d", type_id, message_length);
-#endif
+        LOG_DEBUG("Tx telegram type %d failed, length %d", type_id, message_length);
         return;
     }
 
@@ -537,9 +531,7 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
         tx_telegrams_.pop_front();
     }
 
-#ifdef EMSESP_DEBUG
-    LOG_DEBUG("[DEBUG] New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
-#endif
+    LOG_DEBUG("New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
 
     if (front) {
         // tx_telegrams_.push_front(qtxt); // add to front of queue
@@ -639,13 +631,11 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         return;
     }
 
-#ifdef EMSESP_DEBUG
-    LOG_DEBUG("[DEBUG] Last Tx %s operation failed. Retry #%d. sent message: %s, received: %s",
+    LOG_DEBUG("Last Tx %s operation failed. Retry #%d. sent message: %s, received: %s",
               (operation == Telegram::Operation::TX_WRITE) ? ("Write") : ("Read"),
               retry_count_,
               telegram_last_->to_string().c_str(),
               Helpers::data_to_hex(data, length - 1).c_str());
-#endif
 
     // add to the top of the queue
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -178,7 +178,7 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
 
 // send back a list of devices used in the customization web page
 void WebCustomizationService::devices(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN);
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE);
     JsonObject root     = response->getRoot();
 
     // list is already sorted by device type
@@ -201,7 +201,7 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
 // send back list of device entities
 void WebCustomizationService::device_entities(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE_DYN;
+        size_t buffer   = EMSESP_JSON_SIZE_XXXXLARGE;
         auto * response = new MsgpackAsyncJsonResponse(true, buffer);
         while (!response->getSize()) {
             delete response;

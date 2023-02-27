@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,14 +107,14 @@ DeviceValue::DeviceValue(uint8_t               device_type,
 // must be an int of 4 bytes, 32bit aligned
 const char * DeviceValue::DeviceValueUOM_s[] = {
 
-    F_(uom_blank), F_(uom_degrees), F_(uom_degrees), F_(uom_percent), F_(uom_lmin), F_(uom_kwh),     F_(uom_wh),  FL_(hours)[0],      FL_(minutes)[0],
-    F_(uom_ua),    F_(uom_bar),     F_(uom_kw),      F_(uom_w),       F_(uom_kb),   FL_(seconds)[0], F_(uom_dbm), F_(uom_fahrenheit), F_(uom_mv),
-    F_(uom_sqm),   F_(uom_m3),      F_(uom_l),       F_(uom_kmin),    F_(uom_k),    F_(uom_blank)
+    F_(uom_blank), // 0
+    F_(uom_degrees), F_(uom_degrees), F_(uom_percent), F_(uom_lmin), F_(uom_kwh),  F_(uom_wh),      FL_(hours)[0], FL_(minutes)[0],
+    F_(uom_ua),      F_(uom_bar),     F_(uom_kw),      F_(uom_w),    F_(uom_kb),   FL_(seconds)[0], F_(uom_dbm),   F_(uom_fahrenheit),
+    F_(uom_mv),      F_(uom_sqm),     F_(uom_m3),      F_(uom_l),    F_(uom_kmin), F_(uom_k),       F_(uom_blank)
 
 };
 
-// mapping of TAGs, to match order in DeviceValueTAG enum in emsdevice.h
-// must be an int of 4 bytes, 32bit aligned
+// mapping of TAGs, to match order in DeviceValueTAG enum in emsdevicevalue.h
 const char * const * DeviceValue::DeviceValueTAG_s[] = {
 
     FL_(tag_none),           // ""
@@ -160,7 +160,7 @@ const char * const * DeviceValue::DeviceValueTAG_s[] = {
 
 };
 
-// MQTT topics derived from tags
+// tags used in MQTT topic names. Macthes sequence from DeviceValueTAG_s
 const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
 
     FL_(tag_none)[0],            // ""
@@ -207,7 +207,7 @@ const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
 };
 
 // count #tags once at compile time
-size_t DeviceValue::tag_count = sizeof(DeviceValue::DeviceValueTAG_s) / sizeof(char * const *);
+uint8_t DeviceValue::NUM_TAGS = sizeof(DeviceValue::DeviceValueTAG_s) / sizeof(char * const *);
 
 // checks whether the device value has an actual value
 // returns true if its valid
@@ -250,6 +250,11 @@ bool DeviceValue::hasValue() const {
     }
 
     return has_value;
+}
+
+// See if the device value has a tag and it's not empty
+bool DeviceValue::has_tag() const {
+    return ((tag < DeviceValue::NUM_TAGS) && (tag != TAG_NONE) && strlen(DeviceValueTAG_s[tag][0]));
 }
 
 // set the min and max value for a device value

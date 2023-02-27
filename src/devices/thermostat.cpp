@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -216,9 +216,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const ui
             return heating_circuit;
         }
     }
-#if defined(EMSESP_DEBUG)
     LOG_DEBUG("Heating circuit not fond on device 0x%02X", device_id());
-#endif
     return nullptr; // not found
 }
 
@@ -398,9 +396,9 @@ void Thermostat::add_ha_climate(std::shared_ptr<HeatingCircuit> hc) const {
 
     if (Helpers::hasValue(hc->selTemp) && is_readable(&hc->selTemp)) {
         if (Helpers::hasValue(hc->roomTemp) && is_readable(&hc->roomTemp)) {
-            hc->climate = 1;
+            hc->climate = 1; // use roomTemp as we have a sensor
         } else {
-            hc->climate = 0;
+            hc->climate = 0; // use selTemp, as there is no sensor present in the thermostat
         }
     } else {
         hc->climate = EMS_VALUE_UINT_NOTSET;
@@ -1192,10 +1190,9 @@ void Thermostat::process_RC30Temp(std::shared_ptr<const Telegram> telegram) {
 
 // type 0x3E (HC1), 0x48 (HC2), 0x52 (HC3), 0x5C (HC4) - data from the RC35 thermostat (0x10) - 16 bytes
 void Thermostat::process_RC35Monitor(std::shared_ptr<const Telegram> telegram) {
-    // exit if the 15th byte (second from last) is 0x00, which I think is calculated flow setpoint temperature
-    // with weather controlled RC35s this value is >=5, otherwise can be zero and our setpoint temps will be incorrect
-    // see https://github.com/emsesp/EMS-ESP/issues/373#issuecomment-627907301
-    if (telegram->offset > 0 || telegram->message_length < 15) {
+    // Check if heatingciruit is active, see https://github.com/emsesp/EMS-ESP32/issues/786
+    // some RC30_N have only 13 byte, use byte 0 for active detection.
+    if (telegram->offset > 0 || telegram->message_data[0] == 0x00) {
         return;
     }
 
@@ -3299,9 +3296,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         write_command(set_typeid, offset, (uint8_t)(temperature * (float)factor), validate_typeid);
         return true;
     }
-#if defined(EMSESP_DEBUG)
     LOG_DEBUG("temperature mode %d not found", mode);
-#endif
     return false;
 }
 
@@ -3343,7 +3338,6 @@ void Thermostat::register_device_values() {
     // Common for all thermostats
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &errorCode_, DeviceValueType::STRING, FL_(errorCode), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &lastCode_, DeviceValueType::STRING, FL_(lastCode), DeviceValueUOM::NONE);
-
 
     switch (this->model()) {
     case EMS_DEVICE_FLAG_RC100:
@@ -4000,7 +3994,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_temp), 0, 30);
     }
     register_device_value(tag, &hc->roomTemp, DeviceValueType::SHORT, roomtemp_divider, FL_(roomTemp), DeviceValueUOM::DEGREES);
-    register_device_value(tag, &hc->climate, DeviceValueType::ENUM, FL_(enum_climate), FL_(climate), DeviceValueUOM::NONE, nullptr, 5, 30);
+    register_device_value(tag, &hc->climate, DeviceValueType::ENUM, FL_(enum_climate), FL_(haclimate), DeviceValueUOM::NONE, nullptr, 5, 30);
 
     switch (model) {
     case EMS_DEVICE_FLAG_RC10:

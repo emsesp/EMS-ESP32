@@ -1,0 +1,5 @@
+node_modules/
+build/
+.prettierrc
+.eslintrc.js
+env.d.ts

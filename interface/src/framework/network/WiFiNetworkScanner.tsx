@@ -4,13 +4,13 @@ import { useSnackbar } from 'notistack';
 import { Button } from '@mui/material';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 
-import * as NetworkApi from '../../api/network';
-import { WiFiNetwork, WiFiNetworkList } from '../../types';
-import { ButtonRow, FormLoader, SectionContent } from '../../components';
+import * as NetworkApi from 'api/network';
+import { WiFiNetwork, WiFiNetworkList } from 'types';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 
 import WiFiNetworkSelector from './WiFiNetworkSelector';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const NUM_POLLS = 10;
 const POLLING_FREQUENCY = 500;
