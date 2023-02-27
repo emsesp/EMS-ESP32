@@ -152,11 +152,12 @@ void WebSchedulerService::loop() {
         }
         last_tm_min = 0; // startup done, now use for RTC
     }
+
     // check timer every minute, sync to EMS-ESP clock
     uint32_t uptime_min = uuid::get_uptime_sec() / 60;
-    if (last_uptime_min != uptime_min || last_uptime_min == -1) {
+    if (last_uptime_min != uptime_min) {
         for (ScheduleItem & scheduleItem : *scheduleItems) {
-            // retry startupcommands not yet executed
+            // retry startup commands not yet executed
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0
                 && scheduleItem.retry_cnt < MAX_STARTUP_RETRIES) {
                 scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), scheduleItem.value.c_str()) ? 0xFF : scheduleItem.retry_cnt + 1;
@@ -169,11 +170,12 @@ void WebSchedulerService::loop() {
         }
         last_uptime_min = uptime_min;
     }
+
     // check calender, sync to RTC, only execute if year is valid
     time_t now = time(nullptr);
     tm *   tm  = localtime(&now);
     if (tm->tm_min != last_tm_min && tm->tm_year > 120) {
-        // find the real dow and minute from NTP or RTC
+        // find the real dow and minute from RTC
         uint8_t  real_dow = 1 << tm->tm_wday; // 1 is Sunday
         uint16_t real_min = tm->tm_hour * 60 + tm->tm_min;
 
