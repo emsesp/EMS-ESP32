@@ -383,6 +383,7 @@ const SettingsApplication: FC = () => {
             <MenuItem value="no">Norsk (NO)</MenuItem>
             <MenuItem value="pl">Polski (PL)</MenuItem>
             <MenuItem value="sv">Svenska (SV)</MenuItem>
+            <MenuItem value="tr">Türk (TR)</MenuItem>
           </ValidatedTextField>
         </Box>
         {data.led_gpio !== 0 && (
