@@ -92,10 +92,10 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
 }
 
 // execute scheduled command
-bool WebSchedulerService::command(std::string cmd, std::string data) {
+bool WebSchedulerService::command(const char * cmd, const char * data) {
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc_input;
     JsonObject                                 input = doc_input.to<JsonObject>();
-    if (data.length()) {
+    if (strlen(data)) { // empty data queries a value
         input["data"] = data;
     }
 
@@ -103,19 +103,28 @@ bool WebSchedulerService::command(std::string cmd, std::string data) {
     JsonObject                                 output = doc_output.to<JsonObject>();
 
     // prefix "api/" to command string
-    auto    command_str = "/api/" + cmd;
-    uint8_t return_code = Command::process(command_str.c_str(), true, input, output); // admin set
+    char command_str[100];
+    snprintf(command_str, sizeof(command_str), "/api/%s", cmd);
+    uint8_t return_code = Command::process(command_str, true, input, output); // admin set
 
     if (return_code == CommandRet::OK) {
-        EMSESP::logger().debug("Scheduled command %s with data %s successfully", cmd.c_str(), data.c_str());
+        EMSESP::logger().debug("Scheduled command %s with data %s successfully", cmd, data);
+        if (strlen(data) == 0 && Mqtt::enabled() && Mqtt::send_response() && output.size()) {
+            Mqtt::queue_publish("response", output);
+        }
         return true;
     }
 
     char error[100];
     if (output.size()) {
-        snprintf(error, sizeof(error), "Scheduled command %s failed with error: %s (%s)", cmd.c_str(), (const char *)output["message"], Command::return_code_string(return_code).c_str());
+        snprintf(error,
+                 sizeof(error),
+                 "Scheduled command %s failed with error: %s (%s)",
+                 cmd,
+                 (const char *)output["message"],
+                 Command::return_code_string(return_code).c_str());
     } else {
-        snprintf(error, sizeof(error), "Scheduled command %s failed with error code (%s)", cmd.c_str(), Command::return_code_string(return_code).c_str());
+        snprintf(error, sizeof(error), "Scheduled command %s failed with error code (%s)", cmd, Command::return_code_string(return_code).c_str());
     }
     emsesp::EMSESP::logger().err(error);
     return false;
@@ -138,7 +147,7 @@ void WebSchedulerService::loop() {
     if (last_tm_min == -1) {
         for (ScheduleItem & scheduleItem : *scheduleItems) {
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0) {
-                scheduleItem.retry_cnt = command(scheduleItem.cmd, scheduleItem.value) ? 0xFF : 0;
+                scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), scheduleItem.value.c_str()) ? 0xFF : 0;
             }
         }
         last_tm_min = 0; // startup done, now use for RTC
@@ -150,12 +159,12 @@ void WebSchedulerService::loop() {
             // retry startupcommands not yet executed
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0
                 && scheduleItem.retry_cnt < MAX_STARTUP_RETRIES) {
-                scheduleItem.retry_cnt = command(scheduleItem.cmd, scheduleItem.value) ? 0xFF : scheduleItem.retry_cnt + 1;
+                scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), scheduleItem.value.c_str()) ? 0xFF : scheduleItem.retry_cnt + 1;
             }
             // scheduled timer commands
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min > 0
                 && (uptime_min % scheduleItem.elapsed_min == 0)) {
-                command(scheduleItem.cmd, scheduleItem.value);
+                command(scheduleItem.cmd.c_str(), scheduleItem.value.c_str());
             }
         }
         last_uptime_min = uptime_min;
@@ -170,7 +179,7 @@ void WebSchedulerService::loop() {
 
         for (const ScheduleItem & scheduleItem : *scheduleItems) {
             if (scheduleItem.active && (real_dow & scheduleItem.flags) && real_min == scheduleItem.elapsed_min) {
-                command(scheduleItem.cmd, scheduleItem.value);
+                command(scheduleItem.cmd.c_str(), scheduleItem.value.c_str());
             }
         }
         last_tm_min = tm->tm_min;

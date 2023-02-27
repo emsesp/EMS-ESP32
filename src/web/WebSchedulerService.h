@@ -54,7 +54,9 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
 
     void begin();
     void loop();
-    bool command(std::string cmd, std::string data);
+
+  private:
+    bool command(const char * cmd, const char * data);
 
 // make all functions public so we can test in the debug and standalone mode
 #ifndef EMSESP_STANDALONE
