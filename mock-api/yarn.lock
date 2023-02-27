@@ -117,9 +117,7 @@ __metadata:
     "@msgpack/msgpack": ^2.8.0
     compression: ^1.7.4
     express: ^4.18.2
-    express-sse: ^0.5.3
     nodemon: ^2.0.20
-    ws: ^8.12.1
   languageName: unknown
   linkType: soft
 
@@ -482,13 +480,6 @@ __metadata:
   version: 1.8.1
   resolution: "etag@npm:1.8.1"
   checksum: 571aeb3dbe0f2bbd4e4fadbdb44f325fc75335cd5f6f6b6a091e6a06a9f25ed5392f0863c5442acb0646787446e816f13cbfc6edce5b07658541dff573cab1ff
-  languageName: node
-  linkType: hard
-
-"express-sse@npm:^0.5.3":
-  version: 0.5.3
-  resolution: "express-sse@npm:0.5.3"
-  checksum: 81ecc2645930a0f53e3ffccd425653c570210ae214e7e96cba3b6d258d7d07e2f74f743532e65e02637bf9801f3c9ded59705a72001f744c65415771c7c2bc1d
   languageName: node
   linkType: hard
 
@@ -1693,21 +1684,6 @@ __metadata:
   version: 1.0.2
   resolution: "wrappy@npm:1.0.2"
   checksum: 159da4805f7e84a3d003d8841557196034155008f817172d4e986bd591f74aa82aa7db55929a54222309e01079a65a92a9e6414da5a6aa4b01ee44a511ac3ee5
-  languageName: node
-  linkType: hard
-
-"ws@npm:^8.12.1":
-  version: 8.12.1
-  resolution: "ws@npm:8.12.1"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ">=5.0.2"
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: 97301c1c4d838fc81bd413f370f75c12aabe44527b31323b761eab3043a9ecb7e32ffd668548382c9a6a5ad3a1c3a9249608e8338e6b939f2f9540f1e21970b5
   languageName: node
   linkType: hard
 
