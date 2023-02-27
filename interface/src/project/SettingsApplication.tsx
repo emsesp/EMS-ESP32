@@ -5,10 +5,11 @@ import { useSnackbar } from 'notistack';
 
 import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider, InputAdornment } from '@mui/material';
 
-import SaveIcon from '@mui/icons-material/Save';
+import WarningIcon from '@mui/icons-material/Warning';
+import CancelIcon from '@mui/icons-material/Cancel';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
-import { validate } from '../validators';
+import { validate } from 'validators';
 import { createSettingsValidator } from './validators';
 
 import {
@@ -17,15 +18,16 @@ import {
   BlockFormControlLabel,
   ValidatedTextField,
   ButtonRow,
-  MessageBox
-} from '../components';
-import { numberValue, extractErrorMessage, updateValue, useRest } from '../utils';
+  MessageBox,
+  BlockNavigation
+} from 'components';
+import { numberValue, extractErrorMessage, updateValueDirty, useRest } from 'utils';
 
 import * as EMSESP from './api';
 import { Settings, BOARD_PROFILES } from './types';
 
-import { useI18nContext } from '../i18n/i18n-react';
-import RestartMonitor from '../framework/system/RestartMonitor';
+import { useI18nContext } from 'i18n/i18n-react';
+import RestartMonitor from 'framework/system/RestartMonitor';
 
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
@@ -36,7 +38,19 @@ export function boardProfileSelectItems() {
 }
 
 const SettingsApplication: FC = () => {
-  const { loadData, saveData, saving, setData, data, errorMessage, restartNeeded } = useRest<Settings>({
+  const {
+    loadData,
+    saveData,
+    saving,
+    setData,
+    data,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    blocker,
+    errorMessage,
+    restartNeeded
+  } = useRest<Settings>({
     read: EMSESP.readSettings,
     update: EMSESP.writeSettings
   });
@@ -46,7 +60,7 @@ const SettingsApplication: FC = () => {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const updateFormValue = updateValue(setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
   const [processingBoard, setProcessingBoard] = useState<boolean>(false);
@@ -431,7 +445,7 @@ const SettingsApplication: FC = () => {
                     endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
                   }}
                   variant="outlined"
-                  value={data.shower_alert_trigger}
+                  value={numberValue(data.shower_alert_trigger)}
                   type="number"
                   onChange={updateFormValue}
                   size="small"
@@ -447,7 +461,7 @@ const SettingsApplication: FC = () => {
                     endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
                   }}
                   variant="outlined"
-                  value={data.shower_alert_coldshot}
+                  value={numberValue(data.shower_alert_coldshot)}
                   type="number"
                   onChange={updateFormValue}
                   size="small"
@@ -491,9 +505,9 @@ const SettingsApplication: FC = () => {
             >
               <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
               <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
-              <MenuItem value={3}>"true"/"false"</MenuItem>
+              <MenuItem value={3}>&quot;true&quot;/&quot;false&quot;</MenuItem>
               <MenuItem value={4}>true/false</MenuItem>
-              <MenuItem value={5}>"1"/"0"</MenuItem>
+              <MenuItem value={5}>&quot;1&quot;/&quot;0&quot;</MenuItem>
               <MenuItem value={6}>1/0</MenuItem>
             </ValidatedTextField>
           </Grid>
@@ -566,7 +580,7 @@ const SettingsApplication: FC = () => {
                 label="Port"
                 fullWidth
                 variant="outlined"
-                value={data.syslog_port}
+                value={numberValue(data.syslog_port)}
                 type="number"
                 onChange={updateFormValue}
                 margin="normal"
@@ -603,7 +617,7 @@ const SettingsApplication: FC = () => {
                 }}
                 fullWidth
                 variant="outlined"
-                value={data.syslog_mark_interval}
+                value={numberValue(data.syslog_mark_interval)}
                 type="number"
                 onChange={updateFormValue}
                 margin="normal"
@@ -619,17 +633,28 @@ const SettingsApplication: FC = () => {
             </Button>
           </MessageBox>
         )}
-        {!restartNeeded && (
+
+        {!restartNeeded && dirtyFlags && dirtyFlags.length !== 0 && (
           <ButtonRow>
             <Button
-              startIcon={<SaveIcon />}
+              startIcon={<CancelIcon />}
               disabled={saving}
               variant="outlined"
               color="primary"
               type="submit"
+              onClick={() => loadData()}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              startIcon={<WarningIcon color="warning" />}
+              disabled={saving}
+              variant="contained"
+              color="info"
+              type="submit"
               onClick={validateAndSubmit}
             >
-              {LL.SAVE()}
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
             </Button>
           </ButtonRow>
         )}
@@ -639,6 +664,7 @@ const SettingsApplication: FC = () => {
 
   return (
     <SectionContent title={LL.APPLICATION_SETTINGS()} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {restarting ? <RestartMonitor /> : content()}
     </SectionContent>
   );

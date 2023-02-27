@@ -2,21 +2,21 @@ import { FC, useState, useEffect, useCallback, useLayoutEffect } from 'react';
 
 import { Box, styled, Button, Checkbox, MenuItem, Grid, Slider, FormLabel } from '@mui/material';
 
-import * as SystemApi from '../../api/system';
-import { addAccessTokenParameter } from '../../api/authentication';
+import * as SystemApi from 'api/system';
+import { addAccessTokenParameter } from 'api/authentication';
 
-import { SectionContent, FormLoader, BlockFormControlLabel, ValidatedTextField } from '../../components';
+import { SectionContent, FormLoader, BlockFormControlLabel, ValidatedTextField } from 'components';
 
-import { LogSettings, LogEntry, LogEntries, LogLevel } from '../../types';
-import { updateValue, useRest, extractErrorMessage } from '../../utils';
+import { LogSettings, LogEntry, LogEntries, LogLevel } from 'types';
+import { updateValue, useRest, extractErrorMessage } from 'utils';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
 
 import { useSnackbar } from 'notistack';
 
-import { EVENT_SOURCE_ROOT } from '../../api/endpoints';
+import { EVENT_SOURCE_ROOT } from 'api/endpoints';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 export const LOG_EVENTSOURCE_URL = EVENT_SOURCE_ROOT + 'log';
 
@@ -73,7 +73,6 @@ const SystemLog: FC = () => {
   });
 
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [reconnectTimeout, setReconnectTimeout] = useState<NodeJS.Timeout>();
   const [logEntries, setLogEntries] = useState<LogEntries>({ events: [] });
   const [lastIndex, setLastIndex] = useState<number>(0);
 
@@ -138,7 +137,7 @@ const SystemLog: FC = () => {
 
   const onDownload = () => {
     let result = '';
-    for (let i of logEntries.events) {
+    for (const i of logEntries.events) {
       result += i.t + ' ' + levelLabel(i.l) + ' ' + i.i + ': [' + i.n + '] ' + i.m + '\n';
     }
     const a = document.createElement('a');
@@ -162,7 +161,7 @@ const SystemLog: FC = () => {
 
   const fetchLog = useCallback(async () => {
     try {
-      setLogEntries((await SystemApi.readLogEntries()).data);
+      await SystemApi.readLogEntries();
     } catch (error) {
       setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
@@ -176,20 +175,15 @@ const SystemLog: FC = () => {
     const es = new EventSource(addAccessTokenParameter(LOG_EVENTSOURCE_URL));
     es.onmessage = onMessage;
     es.onerror = () => {
-      if (reconnectTimeout) {
-        es.close();
-        setReconnectTimeout(setTimeout(reloadPage, 1000));
-      }
+      es.close();
+      reloadPage();
     };
 
     return () => {
       es.close();
-      if (reconnectTimeout) {
-        clearTimeout(reconnectTimeout);
-      }
     };
     // eslint-disable-next-line
-  }, [reconnectTimeout]);
+  }, []);
 
   const content = () => {
     if (!data) {

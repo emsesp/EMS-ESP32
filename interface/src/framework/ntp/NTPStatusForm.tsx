@@ -26,13 +26,13 @@ import UpdateIcon from '@mui/icons-material/Update';
 import DnsIcon from '@mui/icons-material/Dns';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-import * as NTPApi from '../../api/ntp';
-import { NTPStatus, NTPSyncStatus } from '../../types';
-import { ButtonRow, FormLoader, SectionContent } from '../../components';
-import { extractErrorMessage, formatDateTime, formatLocalDateTime, useRest } from '../../utils';
-import { AuthenticatedContext } from '../../contexts/authentication';
+import * as NTPApi from 'api/ntp';
+import { NTPStatus, NTPSyncStatus } from 'types';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { extractErrorMessage, formatDateTime, formatLocalDateTime, useRest } from 'utils';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 export const isNtpActive = ({ status }: NTPStatus) => status === NTPSyncStatus.NTP_ACTIVE;
 export const isNtpEnabled = ({ status }: NTPStatus) => status !== NTPSyncStatus.NTP_DISABLED;
@@ -72,7 +72,7 @@ const NTPStatusForm: FC = () => {
   const ntpStatus = ({ status }: NTPStatus) => {
     switch (status) {
       case NTPSyncStatus.NTP_DISABLED:
-        return LL.DISABLED(0);
+        return LL.NOT_ENABLED();
       case NTPSyncStatus.NTP_INACTIVE:
         return LL.INACTIVE(0);
       case NTPSyncStatus.NTP_ACTIVE:
@@ -127,9 +127,8 @@ const NTPStatusForm: FC = () => {
           onClick={configureTime}
           disabled={processing}
           color="primary"
-          autoFocus
         >
-          {LL.SAVE()}
+          {LL.UPDATE()}
         </Button>
       </DialogActions>
     </Dialog>

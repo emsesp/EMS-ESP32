@@ -14,7 +14,6 @@ const nl: Translation = {
   SU_PASSWORD: 'su Wachtwoord',
   DASHBOARD: 'Dashboard',
   SETTINGS_OF: '{0} Instellingen',
-  SAVED: 'opgeslagen',
   HELP_OF: '{0} Help',
   LOGGED_IN: 'Ingelogd als {name}',
   PLEASE_SIGNIN: 'Log in om verder te gaan',
@@ -47,7 +46,8 @@ const nl: Translation = {
   CANCEL: 'Annuleren',
   RESET: 'Reset',
   SEND: 'Verzenden',
-  SAVE: 'Opslaan',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Verwijderen',
   PROBLEM_UPDATING: 'Probleem met updaten',
   PROBLEM_LOADING: 'Probleem met laden',
@@ -104,7 +104,7 @@ const nl: Translation = {
   NUM_HOURS: '{num} {{uur|uren}}',
   NUM_MINUTES: '{num} {{minuut|minuten}}',
   APPLICATION_SETTINGS: 'Applicatieinstellingen',
-  CUSTOMIZATION: 'Custom aanpassingen',
+  CUSTOMIZATIONS: 'Custom aanpassingen',
   APPLICATION_RESTARTING: 'EMS-ESP herstarten',
   INTERFACE_BOARD_PROFILE: 'Interface Apparaatprofiel',
   BOARD_PROFILE_TEXT: 'Selecteer een vooraf ingesteld apparaat profiel uit de lijst of kies Eigen om zelf uw hardware te configureren',
@@ -157,14 +157,13 @@ const nl: Translation = {
   CUSTOMIZATIONS_HELP_3: 'Zet schrijfacties uit',
   CUSTOMIZATIONS_HELP_4: 'Uitsluiten van MQTT en API',
   CUSTOMIZATIONS_HELP_5: 'verberg van het Dashboard',
-  CUSTOMIZATIONS_HELP_6: 'remove from memory',
+  CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
   SELECT_DEVICE: 'Selecteer een apparaat',
   SET_ALL: 'Alles aanzetten',
   OPTIONS: 'Opties',
   NAME: 'Naam',
   CUSTOMIZATIONS_RESET: 'Weet je zeker dat je alle custom aanpassingen wilt verwijderen inclusief de custom instellingen voor analoge temperatuursensoren?',
   DEVICE_ENTITIES: 'Apparaat Entiteiten',
-  USER_CUSTOMIZATION: 'Custom Instellingen',
   SUPPORT_INFORMATION: 'Support Informatie',
   CLICK_HERE: 'Klik Hier',
   HELP_INFORMATION_1: 'Bezoek de online wiki om instructies te vinden om EMS-ESP te configureren',
@@ -209,6 +208,7 @@ const nl: Translation = {
   COMPACT: 'Compact',
   ENABLE_OTA: 'Acitveer OTA Updates',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Download alle custom instellingen',
+  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Download de applicatie settings. Wees voorzichting met het delen van dit bestand want het bevat o.a. de wachtwoorden in plain text',
   UPLOAD_TEXT: 'Upload een nieuwe firmware (.bin) file, instellingen of custom instellingen (.json) bestand hieronder',
   UPLOADING: 'Uploading',
@@ -240,8 +240,9 @@ const nl: Translation = {
   MQTT_RESPONSE: 'Publiceer commando output naar een `response` topic',
   MQTT_PUBLISH_TEXT_1: 'Publiceer enkele waarde topics on change',
   MQTT_PUBLISH_TEXT_2: 'Publiceer naar commando topics (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Activeer MQTT Discovery (Home Assistant, Domoticz)',
+  MQTT_PUBLISH_TEXT_3: 'Activeer MQTT Discovery',
   MQTT_PUBLISH_TEXT_4: 'Prefix voor de Discovery topics',
+  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
   MQTT_PUBLISH_INTERVALS: 'Publicatie intervallen',
   MQTT_INT_BOILER: 'CV ketels en warmtepompen',
   MQTT_INT_THERMOSTATS: 'Thermostaten',
@@ -303,7 +304,21 @@ const nl: Translation = {
   NEW_NAME_OF: 'Hernoem {0}',
   ENTITY: 'Entiteit',
   MIN: 'min',
-  MAX: 'max'
+  MAX: 'max',
+  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
+  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
+  STAY: 'Stay', // TODO translate
+  LEAVE: 'Leave', // TODO translate
+  SCHEDULER: 'Scheduler', // TODO translate
+  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP', // TODO translate
+  SCHEDULE: 'Schedule', // TODO translate
+  TIME: 'Time', // TODO translate
+  TIMER: 'Timer', // TODO translate
+  WEEKLY: 'Weekly', // TODO translate
+  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_TIMER_1: 'on startup', // TODO translate
+  SCHEDULE_TIMER_2: 'every minute', // TODO translate
+  SCHEDULE_TIMER_3: 'every hour' // TODO translate
 };
 
 export default nl;

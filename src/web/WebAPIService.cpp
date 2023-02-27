@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,8 +100,11 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         }
     }
 
+    // capture current heap memory before allocating the large return buffer
+    emsesp::EMSESP::system_.refreshHeapMem();
+
     // output json buffer
-    size_t buffer   = EMSESP_JSON_SIZE_XXLARGE_DYN;
+    size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE;
     auto * response = new PrettyAsyncJsonResponse(false, buffer);
     while (!response->getSize()) {
         delete response;
@@ -123,7 +126,6 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         emsesp::EMSESP::logger().err(error);
         api_fails_++;
     } else {
-        // emsesp::EMSESP::logger().debug("API command called successfully");
         // if there was no json output from the call, default to the output message 'OK'.
         if (!output.size()) {
             output["message"] = "OK";

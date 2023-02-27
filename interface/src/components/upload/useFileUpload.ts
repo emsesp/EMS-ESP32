@@ -2,12 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import axios, { AxiosPromise, CancelTokenSource, AxiosProgressEvent } from 'axios';
 import { useSnackbar } from 'notistack';
 
-import { extractErrorMessage } from '../../utils';
-import { FileUploadConfig } from '../../api/endpoints';
+import { extractErrorMessage } from 'utils';
+import { FileUploadConfig } from 'api/endpoints';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
-interface MediaUploadOptions {
+interface MediaUploadOptions {  
   upload: (file: File, config?: FileUploadConfig) => AxiosPromise<void>;
 }
 

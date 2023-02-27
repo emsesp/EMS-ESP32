@@ -16,9 +16,8 @@ import {
   useTheme
 } from '@mui/material';
 
-import { Table } from '@table-library/react-table-library/table';
 import { useTheme as tableTheme } from '@table-library/react-table-library/theme';
-import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -26,18 +25,18 @@ import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 
-import { AuthenticatedContext } from '../contexts/authentication';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-import { ButtonRow, FormLoader, SectionContent } from '../components';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 
 import { Status, busConnectionStatus, Stat } from './types';
 
-import { extractErrorMessage, useRest } from '../utils';
+import { extractErrorMessage, useRest } from 'utils';
 
 import * as EMSESP from './api';
 
-import type { Translation } from '../i18n/i18n-types';
-import { useI18nContext } from '../i18n/i18n-react';
+import type { Translation } from 'i18n/i18n-types';
+import { useI18nContext } from 'i18n/i18n-react';
 
 export const isConnected = ({ status }: Status) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
 
@@ -80,7 +79,7 @@ const DashboardStatus: FC = () => {
   const { me } = useContext(AuthenticatedContext);
 
   const showName = (id: any) => {
-    let name: keyof Translation['STATUS_NAMES'] = id;
+    const name: keyof Translation['STATUS_NAMES'] = id;
     return LL.STATUS_NAMES[name]();
   };
 
@@ -183,7 +182,7 @@ const DashboardStatus: FC = () => {
         <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmScan(false)} color="secondary">
           {LL.CANCEL()}
         </Button>
-        <Button startIcon={<PermScanWifiIcon />} variant="outlined" onClick={scan} color="primary" autoFocus>
+        <Button startIcon={<PermScanWifiIcon />} variant="outlined" onClick={scan} color="primary">
           {LL.SCAN()}
         </Button>
       </DialogActions>
@@ -226,13 +225,13 @@ const DashboardStatus: FC = () => {
               }
             />
           </ListItem>
-          <Box m={3}></Box>
+          <Box m={3} />
           <Table data={{ nodes: data.stats }} theme={stats_theme} layout={{ custom: true }}>
             {(tableList: any) => (
               <>
                 <Header>
                   <HeaderRow>
-                    <HeaderCell resize></HeaderCell>
+                    <HeaderCell resize />
                     <HeaderCell stiff>{LL.SUCCESS()}</HeaderCell>
                     <HeaderCell stiff>{LL.FAIL()}</HeaderCell>
                     <HeaderCell stiff>{LL.QUALITY()}</HeaderCell>

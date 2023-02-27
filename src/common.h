@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,11 +19,16 @@
 #ifndef EMSESP_COMMON_H
 #define EMSESP_COMMON_H
 
-// logging
 #include <uuid/log.h>
 
 using uuid::log::Level;
+
+#if defined(EMSESP_DEBUG)
 #define LOG_DEBUG(...) logger_.debug(__VA_ARGS__)
+#else
+#define LOG_DEBUG(...)
+#endif
+
 #define LOG_INFO(...) logger_.info(__VA_ARGS__)
 #define LOG_TRACE(...) logger_.trace(__VA_ARGS__)
 #define LOG_NOTICE(...) logger_.notice(__VA_ARGS__)
@@ -41,13 +46,26 @@ using string_vector = std::vector<const char *>;
 // clang-format off
 
 #define FPSTR(pstr_pointer) pstr_pointer
-#define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] = string_literal;
-#define MAKE_PSTR_WORD(string_name) MAKE_PSTR(string_name, #string_name)
+#define MAKE_WORD_CUSTOM(string_name, string_literal) static const char __pstr__##string_name[] = string_literal;
+#define MAKE_WORD(string_name) MAKE_WORD_CUSTOM(string_name, #string_name)
 
 #define F_(string_name) (__pstr__##string_name)
 #define FL_(list_name) (__pstr__L_##list_name)
-#define MAKE_PSTR_LIST(list_name, ...) static const char * const __pstr__L_##list_name[]  = {__VA_ARGS__, nullptr};
-#define MAKE_PSTR_ENUM(enum_name, ...) static const char * const * __pstr__L_##enum_name[]  = {__VA_ARGS__, nullptr};
+
+#if defined(EMSESP_TEST)
+// In testing just take one language (en) to save on Flash space
+#define MAKE_TRANSLATION(list_name, shortname, en, ...)   static const char * const __pstr__L_##list_name[] = {shortname, en, nullptr};
+#else
+#define MAKE_TRANSLATION(list_name, ...)       static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr};
+#endif
+
+#define MAKE_NOTRANSLATION(list_name, ...)     static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr};
+
+// fixed strings, no translations
+#define MAKE_ENUM_FIXED(enum_name, ...) static const char * const __pstr__L_##enum_name[] = {__VA_ARGS__, nullptr};
+
+// with translations
+#define MAKE_ENUM(enum_name, ...)       static const char * const * __pstr__L_##enum_name[] = {__VA_ARGS__, nullptr};
 
 // clang-format on
 

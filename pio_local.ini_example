@@ -2,12 +2,11 @@
 
 [common]
 ; custom build flags
-; options are: EMSESP_DEBUG, EMSESP_UART_DEBUG, EMSESP_DEBUG_SENSOR, EMSESP_WIFI_TWEAK, EMSESP_DEFAULT_BOARD_PROFILE EMSESP_DEBUG_LIMITED
-; my_build_flags = -DEMSESP_DEBUG -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
-; my_build_flags = -DEMSESP_DEBUG_SENSOR
-; my_build_flags = -DEMSESP_DEBUG -DEMSESP_USE_SERIAL
-; my_build_flags = -DEMSESP_DEBUG -DCORE_DEBUG_LEVEL=5 ; 5=verbose, 4=debug, 3=info
-my_build_flags = -DEMSESP_DEBUG -DEMSESP_DEBUG_LIMITED -DEMSESP_USE_SERIAL
+; options are: EMSESP_DEBUG, EMSESP_UART_DEBUG, EMSESP_DEBUG_SENSOR, EMSESP_WIFI_TWEAK, EMSESP_DEFAULT_BOARD_PROFILE, EMSESP_TEST
+; my_build_flags = -DEMSESP_DEBUG -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\" ; hard code the default board name
+; my_build_flags = -DEMSESP_DEBUG_SENSOR ; additional debug for the dallas sensors
+; my_build_flags = -DEMSESP_DEBUG -DCORE_DEBUG_LEVEL=5 ; verbose debugging 5=verbose, 4=debug, 3=info
+; my_build_flags = -DEMSESP_DEBUG ; enables DEBUG to the log. Will generate a lot of traffic on Console and Syslog
 
 [env:esp32_4M]
 ; if using OTA enter your details below
@@ -18,10 +17,16 @@ my_build_flags = -DEMSESP_DEBUG -DEMSESP_DEBUG_LIMITED -DEMSESP_USE_SERIAL
 ;  upload_port = ems-esp.local
 ; for USB use
 upload_port = /dev/ttyUSB*
-; upload_port = COM3
+; upload_port = COM5
+
+; override arduino espressif core
+; platform = espressif32 ; take latest
+; platform = espressif32@6.0.1
+; platform = espressif32@5.3.0
+; platform = espressif32@5.2.0
 
 extra_scripts =
-  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
 
 [env:esp32_16M]
@@ -37,7 +42,7 @@ extra_scripts =
 ; options for debugging are: EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
 [env:debug]
 board = esp32dev
-platform = espressif32@5.2.0
+platform = espressif32
 board_build.partitions = esp32_partition_debug.csv
 upload_protocol = esptool
 build_type = debug

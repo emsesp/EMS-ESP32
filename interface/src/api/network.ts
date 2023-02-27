@@ -1,6 +1,6 @@
 import { AxiosPromise } from 'axios';
 
-import { WiFiNetworkList, NetworkSettings, NetworkStatus } from '../types';
+import { WiFiNetworkList, NetworkSettings, NetworkStatus } from 'types';
 
 import { AXIOS } from './endpoints';
 

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,14 +32,25 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_telegram_type(0x999, "HPFunctionTest", true, MAKE_PF_CB(process_HPFunctionTest));
     register_telegram_type(0x9A0, "HPTemperature", false, MAKE_PF_CB(process_HPTemperature));
     register_telegram_type(0x99B, "HPFlowTemp", false, MAKE_PF_CB(process_HPFlowTemp));
+    register_telegram_type(0x99C, "HPComp", false, MAKE_PF_CB(process_HPComp));
 
     // device values
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &airHumidity_, DeviceValueType::UINT, FL_(airHumidity), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dewTemperature_, DeviceValueType::UINT, FL_(dewTemperature), DeviceValueUOM::DEGREES);
 
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &flowTemp_, DeviceValueType::UINT, FL_(curFlowTemp), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &retTemp_, DeviceValueType::UINT, FL_(retTemp), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &sysRetTemp_, DeviceValueType::UINT, FL_(sysRetTemp), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &flowTemp_,
+                          DeviceValueType::SHORT,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(curFlowTemp),
+                          DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &retTemp_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(retTemp), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &sysRetTemp_,
+                          DeviceValueType::SHORT,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(sysRetTemp),
+                          DeviceValueUOM::DEGREES);
 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTa4_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTa4), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr1), DeviceValueUOM::DEGREES);
@@ -50,6 +61,9 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTl2_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTl2), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpJr0_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpPl1), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpJr1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpPh1), DeviceValueUOM::DEGREES);
+
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingPumpMod_, DeviceValueType::UINT, FL_(heatingPumpMod), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCompSpd_, DeviceValueType::UINT, FL_(hpCompSpd), DeviceValueUOM::PERCENT);
 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &controlStrategy_,
@@ -177,6 +191,7 @@ void Heatpump::process_HPFlowTemp(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, flowTemp_, 4);
     has_update(telegram, retTemp_, 6);
     has_update(telegram, sysRetTemp_, 14);
+    has_update(telegram, heatingPumpMod_, 19);
 }
 
 // 0x0998 HPSettings
@@ -193,6 +208,14 @@ void Heatpump::process_HPSettings(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, switchOverTemp_, 14);
 }
 
+// 0x099C HPComp
+// Broadcast (0x099C), data: 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 76 00 00
+//                     data: 00 2B 00 03 04 13 00 00 00 00 00 02 02 02 (offset 24)
+void Heatpump::process_HPComp(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, hpCompSpd_, 51);
+}
+
+// 0x999 HPFunctionTest
 void Heatpump::process_HPFunctionTest(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, airPurgeMode_, 0);
     has_update(telegram, heatPumpOutput_, 2);

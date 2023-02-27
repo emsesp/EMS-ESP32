@@ -1,11 +1,9 @@
-import { FC, useContext } from 'react';
+import { FC } from 'react';
 
 import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 
 import LayoutAuthMenu from './LayoutAuthMenu';
-
-import { FeaturesContext } from '../../contexts/features';
 
 export const DRAWER_WIDTH = 240;
 
@@ -15,8 +13,6 @@ interface LayoutAppBarProps {
 }
 
 const LayoutAppBar: FC<LayoutAppBarProps> = ({ title, onToggleDrawer }) => {
-  const { features } = useContext(FeaturesContext);
-
   return (
     <AppBar
       position="fixed"
@@ -41,7 +37,7 @@ const LayoutAppBar: FC<LayoutAppBarProps> = ({ title, onToggleDrawer }) => {
           {title}
         </Typography>
         <Box flexGrow={1} />
-        {features.security && <LayoutAuthMenu />}
+        <LayoutAuthMenu />
       </Toolbar>
     </AppBar>
   );

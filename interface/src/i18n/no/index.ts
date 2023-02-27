@@ -14,7 +14,6 @@ const no: Translation = {
   SU_PASSWORD: 'su Passord',
   DASHBOARD: 'Dashboard',
   SETTINGS_OF: '{0} Innstillinger',
-  SAVED: 'lagret',
   HELP_OF: '{0} Hjelp',
   LOGGED_IN: 'Logget in som {name}',
   PLEASE_SIGNIN: 'Venligst logge inn for å fortsetta',
@@ -47,7 +46,8 @@ const no: Translation = {
   CANCEL: 'Avbryt',
   RESET: 'Nullstill',
   SEND: 'Send',
-  SAVE: 'Lagre',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Fjern',
   PROBLEM_UPDATING: 'Problem med oppdatering',
   PROBLEM_LOADING: 'Problem med opplasting',
@@ -104,7 +104,7 @@ const no: Translation = {
   NUM_HOURS: '{num} time{{r}}',
   NUM_MINUTES: '{num} minutt{{er}}',
   APPLICATION_SETTINGS: 'Innstillinger',
-  CUSTOMIZATION: 'Tilpasninger',
+  CUSTOMIZATIONS: 'Tilpasninger',
   APPLICATION_RESTARTING: 'EMS-ESP restarter',
   INTERFACE_BOARD_PROFILE: 'Interface Prosessor Profil',
   BOARD_PROFILE_TEXT: 'Velg en pre-konfigurert prosessor profil fra listen under eller velg  Tilpasset for å konfigurere dine egne innstillinger',
@@ -157,14 +157,13 @@ const no: Translation = {
   CUSTOMIZATIONS_HELP_3: 'inaktiviser skriving',
   CUSTOMIZATIONS_HELP_4: 'ekskludere fra MQTT og API',
   CUSTOMIZATIONS_HELP_5: 'gjemme fra Dashboard',
-  CUSTOMIZATIONS_HELP_6: 'remove from memory',
+  CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
   SELECT_DEVICE: 'Velg en enhet',
   SET_ALL: 'sett alle',
   OPTIONS: 'Alternativ',
   NAME: 'Navn',
   CUSTOMIZATIONS_RESET: 'Er du sikker på att du vil fjerne tilpassninger inkludert innstillinger for Temperatur og Analoge sensorer?',
   DEVICE_ENTITIES: 'Enhets objekter',
-  USER_CUSTOMIZATION: 'Brukertilpasninger',
   SUPPORT_INFORMATION: 'Supportinformasjon',
   CLICK_HERE: 'Klikk her',
   HELP_INFORMATION_1: 'Besøk wiki for instruksjoner for å konfigurere EMS-ESP',
@@ -209,6 +208,7 @@ const no: Translation = {
   COMPACT: 'Komprimere',
   ENABLE_OTA: 'Aktiviser OTA oppdateringer',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Last ned objektstilpasninger',
+  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Last ned applikasjonskonfigurasjon. Vær varsom med å dele fila da den inneholder passord og annen sensitiv system informasjon',
   UPLOAD_TEXT: 'Last opp en ny firmware (.bin) fil, innstillinger eller tilpassninger (.json) fil nedenfor',
   UPLOADING: 'Opplasting',
@@ -240,8 +240,9 @@ const no: Translation = {
   MQTT_RESPONSE: 'Publiser kommandoer til en `response` topic',
   MQTT_PUBLISH_TEXT_1: 'Publiser singel verdi topics ved endringer',
   MQTT_PUBLISH_TEXT_2: 'Publiser til kommando topics (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Aktiver MQTT Discovery (Home Assistant, Domoticz)',
+  MQTT_PUBLISH_TEXT_3: 'Aktiver MQTT Discovery',
   MQTT_PUBLISH_TEXT_4: 'Prefiks for Discovery topics',
+  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
   MQTT_PUBLISH_INTERVALS: 'Publiseringsintervall',
   MQTT_INT_BOILER: 'Fyr/Varmepumpe',
   MQTT_INT_THERMOSTATS: 'Termostat',
@@ -303,7 +304,21 @@ const no: Translation = {
   NEW_NAME_OF: 'Bytt navn {0}',
   ENTITY: 'Entitet',
   MIN: 'min',
-  MAX: 'max'
+  MAX: 'max',
+  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
+  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
+  STAY: 'Stay', // TODO translate
+  LEAVE: 'Leave', // TODO translate
+  SCHEDULER: 'Scheduler', // TODO translate
+  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP', // TODO translate
+  SCHEDULE: 'Schedule', // TODO translate
+  TIME: 'Time', // TODO translate
+  TIMER: 'Timer', // TODO translate
+  WEEKLY: 'Weekly', // TODO translate
+  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_TIMER_1: 'on startup', // TODO translate
+  SCHEDULE_TIMER_2: 'every minute', // TODO translate
+  SCHEDULE_TIMER_3: 'every hour' // TODO translate
 };
 
 export default no;

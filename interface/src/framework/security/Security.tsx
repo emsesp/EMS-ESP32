@@ -3,12 +3,12 @@ import { Navigate, Routes, Route } from 'react-router-dom';
 
 import { Tab } from '@mui/material';
 
-import { RouterTabs, useRouterTab, useLayoutTitle } from '../../components';
+import { RouterTabs, useRouterTab, useLayoutTitle } from 'components';
 
 import SecuritySettingsForm from './SecuritySettingsForm';
 import ManageUsersForm from './ManageUsersForm';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const Security: FC = () => {
   const { LL } = useI18nContext();

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ void WebDataService::scan_devices(AsyncWebServerRequest * request) {
 // this is used in the dashboard and contains all ems device information
 // /coreData endpoint
 void WebDataService::core_data(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE);
     JsonObject root     = response->getRoot();
 
     // list is already sorted by device type
@@ -83,7 +83,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
             obj["id"]      = Helpers::smallitoa(buffer, emsdevice->unique_id()); // a unique id as a string
             obj["tn"]      = emsdevice->device_type_2_device_name_translated();  // translated device type name
             obj["t"]       = emsdevice->device_type();                           // device type number
-            obj["b"]       = emsdevice->brand_to_string();                       // brand
+            obj["b"]       = emsdevice->brand_to_char();                         // brand
             obj["n"]       = emsdevice->name();                                  // name
             obj["d"]       = emsdevice->device_id();                             // deviceid
             obj["p"]       = emsdevice->product_id();                            // productid
@@ -106,7 +106,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
 // /sensorData endpoint
 // the "sensors" and "analogs" are arrays and must exist
 void WebDataService::sensor_data(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE);
     JsonObject root     = response->getRoot();
 
     // dallas sensors
@@ -167,7 +167,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
 // Compresses the JSON using MsgPack https://msgpack.org/index.html
 void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE_DYN;
+        size_t buffer   = EMSESP_JSON_SIZE_XXXXLARGE;
         auto * response = new MsgpackAsyncJsonResponse(false, buffer);
         while (!response->getSize()) {
             delete response;
@@ -185,12 +185,6 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
                 JsonObject output = response->getRoot();
                 emsdevice->generate_values_web(output);
 #endif
-
-                // #ifdef EMSESP_USE_SERIAL
-                // #ifdef EMSESP_DEBUG
-                //                 serializeJson(output, Serial);
-                // #endif
-                // #endif
 
 #if defined(EMSESP_DEBUG)
                 size_t length = response->setLength();
@@ -251,7 +245,9 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
                 if (return_code != CommandRet::OK) {
                     EMSESP::logger().err("Write command failed %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
                 } else {
+#if defined(EMSESP_DEBUG)
                     EMSESP::logger().debug("Write command successful");
+#endif
                 }
 
                 response->setCode((return_code == CommandRet::OK) ? 200 : 204);

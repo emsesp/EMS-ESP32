@@ -48,6 +48,7 @@ export interface Stat {
   f: number; // fail
   q: number; // quality
 }
+
 export interface Status {
   status: busConnectionStatus;
   tx_mode: number;
@@ -57,6 +58,7 @@ export interface Status {
   num_analogs: number;
   stats: Stat[];
 }
+
 export interface Device {
   id: string; // id index
   tn: string; // device type translated name
@@ -143,13 +145,13 @@ export interface DeviceEntity {
   n?: string; // fullname, optional
   cn?: string; // custom fullname, optional
   m: number; // mask
+  w: boolean; // writeable
   o_m?: number; // original mask before edits
   o_cn?: string; // original cn before edits
-  w: boolean; // writeable
   mi?: string; // min value
   ma?: string; // max value
-  o_mi?: string;
-  o_ma?: string;
+  o_mi?: string; // original min value
+  o_ma?: string; // original max value
 }
 
 export interface CustomEntities {
@@ -300,4 +302,37 @@ export enum DeviceEntityMask {
   DV_READONLY = 4,
   DV_FAVORITE = 8,
   DV_DELETED = 128
+}
+
+export interface ScheduleItem {
+  id: string; // unique index
+  active: boolean;
+  deleted?: boolean; // optional
+  flags: number;
+  time: string;
+  cmd: string;
+  value: string;
+  description?: string; // optional
+  o_active?: boolean;
+  o_deleted?: boolean;
+  o_flags?: number;
+  o_time?: string;
+  o_cmd?: string;
+  o_value?: string;
+  o_description?: string;
+}
+
+export interface Schedule {
+  schedule: ScheduleItem[];
+}
+
+export enum ScheduleFlag {
+  SCHEDULE_MON = 2,
+  SCHEDULE_TUE = 4,
+  SCHEDULE_WED = 8,
+  SCHEDULE_THU = 16,
+  SCHEDULE_FRI = 32,
+  SCHEDULE_SAT = 64,
+  SCHEDULE_SUN = 1,
+  SCHEDULE_TIMER = 128
 }

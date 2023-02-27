@@ -22,10 +22,9 @@ import {
 
 import { useSnackbar } from 'notistack';
 
-import { Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
-import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useRowSelect } from '@table-library/react-table-library/select';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
@@ -35,7 +34,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SendIcon from '@mui/icons-material/TrendingFlat';
-import SaveIcon from '@mui/icons-material/Save';
+import WarningIcon from '@mui/icons-material/Warning';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
@@ -49,13 +48,13 @@ import DeviceIcon from './DeviceIcon';
 
 import { IconContext } from 'react-icons';
 
-import { AuthenticatedContext } from '../contexts/authentication';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-import { ButtonRow, ValidatedTextField, SectionContent, MessageBox } from '../components';
+import { ButtonRow, ValidatedTextField, SectionContent, MessageBox } from 'components';
 
 import * as EMSESP from './api';
 
-import { numberValue, updateValue, extractErrorMessage } from '../utils';
+import { numberValue, updateValue, extractErrorMessage } from 'utils';
 
 import {
   SensorData,
@@ -72,7 +71,7 @@ import {
   DeviceEntityMask
 } from './types';
 
-import { useI18nContext } from '../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const DashboardData: FC = () => {
   const { me } = useContext(AuthenticatedContext);
@@ -502,7 +501,9 @@ const DashboardData: FC = () => {
                 onChange={updateValue(setDeviceValue)}
               >
                 {deviceValue.l.map((val) => (
-                  <MenuItem value={val}>{val}</MenuItem>
+                  <MenuItem value={val} key={val}>
+                    {val}
+                  </MenuItem>
                 ))}
               </ValidatedTextField>
             )}
@@ -628,13 +629,13 @@ const DashboardData: FC = () => {
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<SaveIcon />}
-              variant="outlined"
+              startIcon={<WarningIcon color="warning" />}
+              variant="contained"
               type="submit"
               onClick={() => sendSensor()}
-              color="warning"
+              color="info"
             >
-              {LL.SAVE()}
+              {LL.UPDATE()}
             </Button>
           </DialogActions>
         </Dialog>
@@ -1056,7 +1057,7 @@ const DashboardData: FC = () => {
                 <ValidatedTextField
                   name="g"
                   label="GPIO"
-                  value={analog.g}
+                  value={numberValue(analog.g)}
                   fullWidth
                   type="number"
                   variant="outlined"
@@ -1229,13 +1230,13 @@ const DashboardData: FC = () => {
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<SaveIcon />}
-              variant="outlined"
+              startIcon={<WarningIcon color="warning" />}
+              variant="contained"
               type="submit"
               onClick={() => sendAnalog()}
-              color="warning"
+              color="info"
             >
-              {LL.SAVE()}
+              {LL.UPDATE()}
             </Button>
           </DialogActions>
         </Dialog>

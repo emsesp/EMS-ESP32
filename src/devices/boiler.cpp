@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ uuid::log::Logger Boiler::logger_{F_(boiler), uuid::log::Facility::CONSOLE};
 Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // register values for master boiler/cascade module
-    // reserve_telegram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
 
     // the telegram handlers...
     // common for all boilers
@@ -76,8 +75,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x4A2, "HpInput", true, MAKE_PF_CB(process_HpInput));
         register_telegram_type(0x485, "HpCooling", true, MAKE_PF_CB(process_HpCooling));
         register_telegram_type(0x486, "HpInConfig", true, MAKE_PF_CB(process_HpInConfig));
-        register_telegram_type(0x492, "HpHeaterConfig", true, MAKE_PF_CB(process_HpHeaterConfig));
 
+        register_telegram_type(0x492, "HpHeaterConfig", true, MAKE_PF_CB(process_HpHeaterConfig));
         register_telegram_type(0x488, "HPValve", true, MAKE_PF_CB(process_HpValve));
         register_telegram_type(0x484, "HPSilentMode", true, MAKE_PF_CB(process_HpSilentMode));
         register_telegram_type(0x48B, "HPPumps", true, MAKE_PF_CB(process_HpPumps));
@@ -848,7 +847,7 @@ void Boiler::check_active(const bool force) {
     if (heatingActive_ != val || force) {
         heatingActive_ = val;
         char s[12];
-        Mqtt::publish(F_(heating_active), Helpers::render_boolean(s, b));
+        Mqtt::queue_publish(F_(heating_active), Helpers::render_boolean(s, b));
     }
 
     // check if we can use tapactivated in flow systems
@@ -872,7 +871,7 @@ void Boiler::check_active(const bool force) {
     if (tapwaterActive_ != val || force) {
         tapwaterActive_ = val;
         char s[12];
-        Mqtt::publish(F_(tapwater_active), Helpers::render_boolean(s, b));
+        Mqtt::queue_publish(F_(tapwater_active), Helpers::render_boolean(s, b));
         EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
     }
 }
@@ -1456,7 +1455,8 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
             snprintf(&code[3], sizeof(code) - 3, "(%d) %02d.%02d.%04d %02d:%02d - now", codeNo, start_day, start_month, start_year, start_hour, start_min);
         }
     } else { // no clock, the uptime is stored https://github.com/emsesp/EMS-ESP32/issues/121
-        uint32_t starttime, endtime;
+        uint32_t starttime = 0;
+        uint32_t endtime   = 0;
         telegram->read_value(starttime, 11, 3);
         telegram->read_value(endtime, 16, 3);
         snprintf(&code[3], sizeof(code) - 3, "(%d) @uptime %d - %d min", codeNo, starttime, endtime);
@@ -1712,6 +1712,7 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
 
     //  no write/verify if there is no change, see https://github.com/emsesp/EMS-ESP32/issues/654
     if (v == selFlowTemp_) {
+        EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, device_id(), EMS_TYPE_UBASetPoints, 0, (uint8_t *)&v, 1, 0, false);
         return true;
     }
 

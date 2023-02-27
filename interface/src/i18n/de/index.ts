@@ -14,7 +14,8 @@ const de: Translation = {
   SU_PASSWORD: 'su Passwort',
   DASHBOARD: 'Kontrollzentrum',
   SETTINGS_OF: '{0} Einstellungen',
-  SAVED: 'gespeichert',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   HELP_OF: '{0} Hilfe',
   LOGGED_IN: 'Eingeloggt als {name}',
   PLEASE_SIGNIN: 'Bitte einloggen, um fortzufahren',
@@ -47,7 +48,6 @@ const de: Translation = {
   CANCEL: 'Abbrechen',
   RESET: 'Zurücksetzen',
   SEND: 'Senden',
-  SAVE: 'Speichern',
   REMOVE: 'Entfernen',
   PROBLEM_UPDATING: 'Problem beim Aktualisieren',
   PROBLEM_LOADING: 'Problem beim Laden',
@@ -104,7 +104,7 @@ const de: Translation = {
   NUM_HOURS: '{num} Stunde{{n}}',
   NUM_MINUTES: '{num} Minute{{n}}',
   APPLICATION_SETTINGS: 'Anwendungseinstellungen',
-  CUSTOMIZATION: 'Anpassungen',
+  CUSTOMIZATIONS: 'Anpassungen',
   APPLICATION_RESTARTING: 'EMS-ESP startet neu',
   INTERFACE_BOARD_PROFILE: 'Interface Platinenprofil',
   BOARD_PROFILE_TEXT: 'Wählen Sie ein vorkonfiguriertes Platinenprofil aus der Liste unten aus oder wählen Sie "Custom", um Ihre eigenen Hardwareeinstellungen zu konfigurieren',
@@ -164,7 +164,6 @@ const de: Translation = {
   NAME: 'Name',
   CUSTOMIZATIONS_RESET: 'Möchten Sie wirklich alle Anpassungen entfernen, einschließlich der benutzerdefinierten Einstellungen der Temperatur- und Analogsensoren?',
   DEVICE_ENTITIES: 'Geräteentitäten',
-  USER_CUSTOMIZATION: 'Benutzeranpassung',
   SUPPORT_INFORMATION: 'Unterstützende Informationen',
   CLICK_HERE: 'Hier klicken',
   HELP_INFORMATION_1: 'EMS-ESP Konfigurationsanweisungen und mehr finden Sie im Online-Wiki',
@@ -209,6 +208,7 @@ const de: Translation = {
   COMPACT: 'Kompakte Darstellung',
   ENABLE_OTA: 'OTA Updates verwenden',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Herunterladen der individuellen Entitätsanpassungen',
+  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Herunterladen der Anwendungseinstellungen. Vorsicht beim Teilen der Einstellungen, da sie Passwörter und andere sensitive Einstellungen enthalten',
   UPLOAD_TEXT: 'Hochladen von neuer Firmware (.bin), Geräte- oder Entitätseinstellungen (.json), zur optionalen Validitätsprüfung zuerst die (.md5) Datei hochladen',
   UPLOADING: 'Hochladen',
@@ -240,8 +240,9 @@ const de: Translation = {
   MQTT_RESPONSE: 'Veröffentliche die Kommandoantwort als `response` Topic',
   MQTT_PUBLISH_TEXT_1: 'Veröffentliche einzelne Werte bei Veränderung als eigene Topics',
   MQTT_PUBLISH_TEXT_2: 'Veröffentliche als Kommando-Topic (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Aktiviere `MQTT Discovery` (Home Assistant, Domoticz)',
+  MQTT_PUBLISH_TEXT_3: 'Aktiviere `MQTT Discovery`',
   MQTT_PUBLISH_TEXT_4: 'Prefix für die `Discovery`-Topics',
+  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
   MQTT_PUBLISH_INTERVALS: 'Veröffentlichungs-Intervalle',
   MQTT_INT_BOILER: 'Boiler und Wärmepumpen',
   MQTT_INT_THERMOSTATS: 'Thermostate',
@@ -303,7 +304,21 @@ const de: Translation = {
   NEW_NAME_OF: 'Ändere {0}',
   ENTITY: 'Entität',
   MIN: 'min',
-  MAX: 'max'
+  MAX: 'max',
+  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
+  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
+  STAY: 'Stay', // TODO translate
+  LEAVE: 'Leave', // TODO translate
+  SCHEDULER: 'Scheduler', // TODO translate
+  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP', // TODO translate
+  SCHEDULE: 'Schedule', // TODO translate
+  TIME: 'Time', // TODO translate
+  TIMER: 'Timer', // TODO translate
+  WEEKLY: 'Weekly', // TODO translate
+  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_TIMER_1: 'on startup', // TODO translate
+  SCHEDULE_TIMER_2: 'every minute', // TODO translate
+  SCHEDULE_TIMER_3: 'every hour' // TODO translate
 };
 
 export default de;

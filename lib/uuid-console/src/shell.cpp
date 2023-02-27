@@ -45,21 +45,23 @@ namespace uuid {
 
 namespace console {
 
-// cppcheck-suppress passedByValue
-Shell::Shell(std::shared_ptr<Commands> commands, unsigned int context, unsigned int flags)
-    : commands_(std::move(commands))
+Shell::Shell(Stream & stream, std::shared_ptr<Commands> commands, unsigned int context, unsigned int flags)
+    : stream_(stream)
+    , commands_(std::move(commands))
     , flags_(flags) {
     enter_context(context);
 }
 
-Shell::~Shell() {
-    uuid::log::Logger::unregister_handler(this);
+void Shell::started() {
+}
+
+bool Shell::running() const {
+    return !stopped_;
 }
 
 void Shell::start() {
-#ifdef EMSESP_DEBUG
-    uuid::log::Logger::register_handler(this, uuid::log::Level::DEBUG); // added by proddy
-    //uuid::log::Logger::register_handler(this, uuid::log::Level::INFO); // added by proddy
+#if defined(EMSESP_DEBUG)
+    uuid::log::Logger::register_handler(this, uuid::log::Level::DEBUG); // added for EMS-ESP
 #else
     uuid::log::Logger::register_handler(this, uuid::log::Level::INFO);
 #endif
@@ -71,17 +73,10 @@ void Shell::start() {
     }
     display_banner();
     display_prompt();
-    shells_.insert(shared_from_this());
+    registered_shells().insert(shared_from_this());
     idle_time_ = uuid::get_uptime_ms();
     started();
 };
-
-void Shell::started() {
-}
-
-bool Shell::running() const {
-    return !stopped_;
-}
 
 void Shell::stop() {
     if (mode_ == Mode::BLOCKING) {
@@ -106,6 +101,10 @@ bool Shell::exit_context() {
     } else {
         return false;
     }
+}
+
+Commands::AvailableCommands Shell::available_commands() const {
+    return commands_->available_commands(*this);
 }
 
 void Shell::loop_one() {
@@ -144,7 +143,7 @@ void Shell::set_command_str(const char * str) {
 }
 
 void Shell::loop_normal() {
-    const int input = read_one_char();
+    const int input = stream_.read();
 
     if (input < 0) {
         check_idle_timeout();
@@ -160,6 +159,8 @@ void Shell::loop_normal() {
         println();
         cursor_  = 0;
         line_no_ = 0;
+        // prompt_displayed_ = false;
+        // display_prompt();
         break;
 
     case '\x04':
@@ -264,7 +265,7 @@ void Shell::loop_normal() {
                 } else if (esc_ == 11) { // F1
                     set_command_str("help");
                 } else if (esc_ == 12) { // F2
-                    set_command_str("show");
+                    set_command_str("show values");
                 } else if (esc_ == 13) { // F3
                     set_command_str("log notice");
                 } else if (esc_ == 14) { // F4
@@ -304,18 +305,20 @@ void Shell::loop_normal() {
     }
 
     // common for all, display the complete line
+    // added for EMS-ESP
     erase_current_line();
     prompt_displayed_ = false;
     display_prompt();
+
     if (cursor_) {
-        printf(F("\033[%dD"), cursor_);
+        printf("\033[%dD", cursor_);
     }
 
     previous_ = c;
 
     // This is a hack to let TelnetStream know that command
     // execution is complete and that output can be flushed.
-    available_char();
+    stream_.available();
 
     idle_time_ = uuid::get_uptime_ms();
 }
@@ -326,7 +329,7 @@ Shell::PasswordData::PasswordData(const char * password_prompt, password_functio
 }
 
 void Shell::loop_password() {
-    const int input = read_one_char();
+    const int input = stream_.read();
 
     if (input < 0) {
         check_idle_timeout();
@@ -393,7 +396,7 @@ void Shell::loop_password() {
 
     // This is a hack to let TelnetStream know that command
     // execution is complete and that output can be flushed.
-    available_char();
+    stream_.available();
 
     idle_time_ = uuid::get_uptime_ms();
 }
@@ -414,9 +417,10 @@ void Shell::loop_delay() {
 
         function_copy(*this);
 
-        // if (running()) {
-        //     display_prompt();
-        // }
+        // TODO comment this block out like we had < v3.5?
+        if (running()) {
+            display_prompt();
+        }
 
         idle_time_ = uuid::get_uptime_ms();
     }
@@ -444,9 +448,10 @@ void Shell::loop_blocking() {
             stop();
         }
 
-        // if (running()) {
-        //     display_prompt();
-        // }
+        // TODO comment this block out like we had < v3.5?
+        if (running()) {
+            display_prompt();
+        }
 
         idle_time_ = uuid::get_uptime_ms();
     }
@@ -513,14 +518,17 @@ void Shell::maximum_command_line_length(size_t length) {
 }
 
 void Shell::process_command() {
+    // added for EMS-ESP
     if (line_buffer_.empty()) {
         println();
         return;
     }
+
     uint8_t no = line_no_ ? line_no_ : MAX_LINES;
     while (--no) {
         line_old_[no] = line_old_[no - 1];
     }
+
     line_no_     = 0;
     line_old_[0] = line_buffer_;
     while (!line_buffer_.empty()) {
@@ -534,6 +542,7 @@ void Shell::process_command() {
             line_buffer_.clear();
             cursor_ = 0;
         }
+
         CommandLine command_line{line1};
 
         println();
@@ -542,18 +551,23 @@ void Shell::process_command() {
         if (!command_line->empty()) {
             if (commands_) {
                 auto execution = commands_->execute_command(*this, std::move(command_line));
+
                 if (execution.error != nullptr) {
                     println(execution.error);
                 }
             } else {
-                println(F("No commands configured"));
+                println("No commands configured");
             }
         }
-        ::yield();
     }
-    // if (running()) {
-    //     display_prompt();
-    // }
+
+    // TODO comment this block out like we had < v3.5?
+    if (running()) {
+        display_prompt();
+    }
+
+    // don't think we need this for EMS-ESP on ESP32
+    // ::yield();
 }
 
 void Shell::process_completion() {
@@ -561,9 +575,11 @@ void Shell::process_completion() {
 
     if (!command_line->empty() && commands_) {
         auto completion = commands_->complete_command(*this, command_line);
+        bool redisplay  = false;
 
         if (!completion.help.empty()) {
             println();
+            redisplay = true;
 
             for (auto & help : completion.help) {
                 std::string help_line = help.to_string(maximum_command_line_length_);
@@ -573,7 +589,17 @@ void Shell::process_completion() {
         }
 
         if (!completion.replacement->empty()) {
+            if (!redisplay) {
+                erase_current_line();
+                prompt_displayed_ = false;
+                redisplay         = true;
+            }
+
             line_buffer_ = completion.replacement.to_string(maximum_command_line_length_);
+        }
+
+        if (redisplay) {
+            display_prompt();
         }
     }
 
@@ -599,9 +625,15 @@ void Shell::process_password(bool completed) {
 
 void Shell::invoke_command(const std::string & line) {
     erase_current_line();
-    prompt_displayed_ = false;
-    line_buffer_      = line;
-    display_prompt();
+    if (!line_buffer_.empty()) {
+        println();
+        prompt_displayed_ = false;
+    }
+    if (!prompt_displayed_) {
+        display_prompt();
+    }
+    line_buffer_ = line;
+    print(line_buffer_);
     process_command();
 }
 

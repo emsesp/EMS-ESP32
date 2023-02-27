@@ -2,34 +2,38 @@ import { FC, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
 
 import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
 
-import { createMqttSettingsValidator, validate } from '../../validators';
+import WarningIcon from '@mui/icons-material/Warning';
+import CancelIcon from '@mui/icons-material/Cancel';
+
+import { createMqttSettingsValidator, validate } from 'validators';
 import {
   BlockFormControlLabel,
   ButtonRow,
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
-  ValidatedTextField
-} from '../../components';
-import { MqttSettings } from '../../types';
-import { numberValue, updateValue, useRest } from '../../utils';
-import * as MqttApi from '../../api/mqtt';
+  ValidatedTextField,
+  BlockNavigation
+} from 'components';
+import { MqttSettings } from 'types';
+import { numberValue, updateValueDirty, useRest } from 'utils';
+import * as MqttApi from 'api/mqtt';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const MqttSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<MqttSettings>({
-    read: MqttApi.readMqttSettings,
-    update: MqttApi.updateMqttSettings
-  });
+  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
+    useRest<MqttSettings>({
+      read: MqttApi.readMqttSettings,
+      update: MqttApi.updateMqttSettings
+    });
 
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValue(setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
 
   const content = () => {
     if (!data) {
@@ -225,6 +229,21 @@ const MqttSettingsForm: FC = () => {
                 <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
                   <Grid item>
                     <ValidatedTextField
+                      name="entity_format"
+                      label={LL.MQTT_PUBLISH_TEXT_5()}
+                      value={data.discovery_type}
+                      fullWidth
+                      variant="outlined"
+                      onChange={updateFormValue}
+                      margin="normal"
+                      select
+                    >
+                      <MenuItem value={0}>Home Assistant</MenuItem>
+                      <MenuItem value={1}>Domoticz</MenuItem>
+                    </ValidatedTextField>
+                  </Grid>
+                  <Grid item>
+                    <ValidatedTextField
                       name="discovery_prefix"
                       label={LL.MQTT_PUBLISH_TEXT_4()}
                       fullWidth
@@ -372,24 +391,38 @@ const MqttSettingsForm: FC = () => {
             />
           </Grid>
         </Grid>
-        <ButtonRow>
-          <Button
-            startIcon={<SaveIcon />}
-            disabled={saving}
-            variant="outlined"
-            color="primary"
-            type="submit"
-            onClick={validateAndSubmit}
-          >
-            {LL.SAVE()}
-          </Button>
-        </ButtonRow>
+
+        {dirtyFlags && dirtyFlags.length !== 0 && (
+          <ButtonRow>
+            <Button
+              startIcon={<CancelIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={() => loadData()}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              startIcon={<WarningIcon color="warning" />}
+              disabled={saving}
+              variant="contained"
+              color="info"
+              type="submit"
+              onClick={validateAndSubmit}
+            >
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
+            </Button>
+          </ButtonRow>
+        )}
       </>
     );
   };
 
   return (
     <SectionContent title={LL.SETTINGS_OF('MQTT')} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

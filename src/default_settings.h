@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -167,6 +167,10 @@
 
 #ifndef EMSESP_DEFAULT_DISCOVERY_PREFIX
 #define EMSESP_DEFAULT_DISCOVERY_PREFIX "homeassistant"
+#endif
+
+#ifndef EMSESP_DEFAULT_DISCOVERY_TYPE
+#define EMSESP_DEFAULT_DISCOVERY_TYPE 0 // HA
 #endif
 
 #ifndef EMSESP_DEFAULT_PUBLISH_SINGLE

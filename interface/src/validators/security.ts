@@ -1,5 +1,5 @@
 import Schema, { InternalRuleItem } from 'async-validator';
-import { User } from '../types';
+import { User } from 'types';
 
 export const SECURITY_SETTINGS_VALIDATOR = new Schema({
   jwt_secret: [

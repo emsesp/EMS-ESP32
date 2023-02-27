@@ -3,12 +3,12 @@ import { Navigate, Routes, Route } from 'react-router-dom';
 
 import { Tab } from '@mui/material';
 
-import { AuthenticatedContext } from '../../contexts/authentication';
+import { AuthenticatedContext } from 'contexts/authentication';
 import APStatusForm from './APStatusForm';
 import APSettingsForm from './APSettingsForm';
-import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from '../../components';
+import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const AccessPoint: FC = () => {
   const { LL } = useI18nContext();
@@ -27,6 +27,7 @@ const AccessPoint: FC = () => {
       </RouterTabs>
       <Routes>
         <Route path="status" element={<APStatusForm />} />
+        <Route index element={<Navigate to="status" />} />
         <Route
           path="settings"
           element={
@@ -35,6 +36,7 @@ const AccessPoint: FC = () => {
             </RequireAdmin>
           }
         />
+        {/* <Route path="/*" element={<Navigate to="status" />} /> */}
         <Route path="/*" element={<Navigate replace to="status" />} />
       </Routes>
     </>

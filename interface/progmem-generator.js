@@ -4,6 +4,7 @@ var zlib = require('zlib');
 var mime = require('mime-types');
 
 const ARDUINO_INCLUDES = '#include <Arduino.h>\n\n';
+const INDENT = '  ';
 
 function getFilesSync(dir, files = []) {
   readdirSync(dir, { withFileTypes: true }).forEach((entry) => {
@@ -28,17 +29,16 @@ function cleanAndOpen(path) {
   return createWriteStream(path, { flags: 'w+' });
 }
 
-class ProgmemGenerator {
-  constructor(options = {}) {
-    const { outputPath, bytesPerLine = 20, indent = '  ', includes = ARDUINO_INCLUDES } = options;
-    this.options = { outputPath, bytesPerLine, indent, includes };
-  }
-
-  apply(compiler) {
-    compiler.hooks.emit.tapAsync({ name: 'ProgmemGenerator' }, (compilation, callback) => {
-      const { outputPath, bytesPerLine, indent, includes } = this.options;
+export default function ProgmemGenerator({ outputPath = './WWWData.h', bytesPerLine = 20 }) {
+  return {
+    name: 'ProgmemGenerator',
+    writeBundle: () => {
+      console.log('Generating ' + outputPath);
+      const includes = ARDUINO_INCLUDES;
+      const indent = INDENT;
       const fileInfo = [];
-      const writeStream = cleanAndOpen(resolve(compilation.options.context, outputPath));
+      const writeStream = cleanAndOpen(resolve(outputPath));
+
       try {
         const writeIncludes = () => {
           writeStream.write(includes);
@@ -48,7 +48,8 @@ class ProgmemGenerator {
           const variable = 'ESP_REACT_DATA_' + fileInfo.length;
           const mimeType = mime.lookup(relativeFilePath);
           var size = 0;
-          writeStream.write('const uint8_t ' + variable + '[] PROGMEM = {');
+          writeStream.write('const uint8_t ' + variable + '[] = {');
+          // const zipBuffer = zlib.brotliCompressSync(buffer, { quality: 1 });
           const zipBuffer = zlib.gzipSync(buffer);
           zipBuffer.forEach((b) => {
             if (!(size % bytesPerLine)) {
@@ -72,17 +73,18 @@ class ProgmemGenerator {
 
         const writeFiles = () => {
           // process static files
-          const buildPath = compilation.options.output.path;
+          const buildPath = resolve('build');
           for (const filePath of getFilesSync(buildPath)) {
             const readStream = readFileSync(filePath);
             const relativeFilePath = relative(buildPath, filePath);
             writeFile(relativeFilePath, readStream);
           }
+
           // process assets
-          const { assets } = compilation;
-          Object.keys(assets).forEach((relativeFilePath) => {
-            writeFile(relativeFilePath, coherseToBuffer(assets[relativeFilePath].source()));
-          });
+          // const { assets } = compilation;
+          // Object.keys(assets).forEach((relativeFilePath) => {
+          //   writeFile(relativeFilePath, coherseToBuffer(assets[relativeFilePath].source()));
+          // });
         };
 
         const generateWWWClass = () => {
@@ -109,13 +111,11 @@ ${indent.repeat(2)}}
         writeWWWClass();
 
         writeStream.on('finish', () => {
-          callback();
+          // callback();
         });
       } finally {
         writeStream.end();
       }
-    });
-  }
+    }
+  };
 }
-
-module.exports = ProgmemGenerator;

@@ -13,13 +13,13 @@ import {
 
 import CloseIcon from '@mui/icons-material/Close';
 
-import { extractErrorMessage } from '../../utils';
+import { extractErrorMessage } from 'utils';
 import { useSnackbar } from 'notistack';
-import { MessageBox } from '../../components';
-import * as SecurityApi from '../../api/security';
-import { Token } from '../../types';
+import { MessageBox } from 'components';
+import * as SecurityApi from 'api/security';
+import { Token } from 'types';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 interface GenerateTokenProps {
   username?: string;

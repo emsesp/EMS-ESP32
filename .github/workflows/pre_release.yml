@@ -1,24 +1,22 @@
-name: "pre-release"
+name: 'pre-release'
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - "dev"
+      - 'dev'
 
 jobs:
   pre-release:
-
-    name: "Automatic pre-release build"
+    name: 'Automatic pre-release build'
     runs-on: ubuntu-latest
 
     steps:
-    
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
       - uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
 
       - name: Get EMS-ESP source code and version
         id: build_info
@@ -34,24 +32,23 @@ jobs:
       - name: Build WebUI
         run: |
           cd interface
-          npm ci
-          npx typesafe-i18n --no-watch
+          yarn install
+          yarn run typesafe-i18n --no-watch
           sed -i "s/= 'pl'/= 'en'/" ./src/i18n/i18n-util.ts
-          npm run build
+          yarn run build
 
       - name: Build firmware
         run: |
           platformio run -e ci
 
       - name: Create a GH Release
-        id: "automatic_releases"
-        uses: "marvinpinto/action-automatic-releases@latest"
+        id: 'automatic_releases'
+        uses: 'marvinpinto/action-automatic-releases@latest'
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          repo_token: '${{ secrets.GITHUB_TOKEN }}'
           title: Development Build v${{steps.build_info.outputs.VERSION}}
-          automatic_release_tag: "latest"
+          automatic_release_tag: 'latest'
           prerelease: true
           files: |
             CHANGELOG_LATEST.md
             ./build/firmware/*.*
-            

@@ -5,10 +5,10 @@ import {
   AuthenticatedContext,
   AuthenticatedContextValue,
   AuthenticationContext
-} from '../../contexts/authentication/context';
-import { storeLoginRedirect } from '../../api/authentication';
+} from 'contexts/authentication/context';
+import { storeLoginRedirect } from 'api/authentication';
 
-import { RequiredChildrenProps } from '../../utils';
+import { RequiredChildrenProps } from 'utils';
 
 const RequireAuthenticated: FC<RequiredChildrenProps> = ({ children }) => {
   const authenticationContext = useContext(AuthenticationContext);

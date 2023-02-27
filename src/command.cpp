@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,12 +51,6 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
             return message(CommandRet::ERROR, "unrecognized path", output); // error
         }
     }
-
-#ifdef EMSESP_DEBUG
-#if defined(EMSESP_USE_SERIAL)
-    // Serial.println(p.path().c_str()); // dump paths, for debugging
-#endif
-#endif
 
     // re-calculate new path
     // if there is only a path (URL) and no body then error!
@@ -210,13 +204,11 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         id = command[2] - '0';
         command += 3;
     } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] == '1' && command[4] == '0') {
-        id = DeviceValueTAG::TAG_WWC10 - DeviceValueTAG::TAG_HC1 + 1; //18;
-        command += 5;
-    } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {
-        id = command[3] - '1' + DeviceValueTAG::TAG_WWC1 - DeviceValueTAG::TAG_HC1 + 1; //9;
+        id = DeviceValueTAG::TAG_WWC10 - DeviceValueTAG::TAG_HC1 + 1; //18;    } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {
+        id = command[3] - '0' + 8;
         command += 4;
     } else if (!strncmp(lowerCmd, "id", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '9') {
-        id = command[3] - '0' + 10;
+        id = command[3] - '1' + DeviceValueTAG::TAG_WWC1 - DeviceValueTAG::TAG_HC1 + 1; //9;
         command += 4;
     } else if (!strncmp(lowerCmd, "id", 2) && command[2] >= '1' && command[2] <= '9') {
         id = command[2] - '0';
@@ -231,11 +223,14 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         id = command[2] - '1' + DeviceValueTAG::TAG_HS1 - DeviceValueTAG::TAG_HC1 + 1; //20;
         command += 3;
     }
+
     // remove separator
     if (command[0] == '/' || command[0] == '.' || command[0] == '_') {
         command++;
     }
+
     free(lowerCmd);
+
     // return null for empty command
     if (command[0] == '\0') {
         return nullptr;
@@ -273,9 +268,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // except for system commands as this is a special device without any queryable entities (device values)
     if ((device_type > EMSdevice::DeviceType::SYSTEM) && (!value || !strlen(value))) {
         if (!cf || !cf->cmdfunction_json_) {
-#if defined(EMSESP_DEBUG)
-            LOG_DEBUG("[DEBUG] Calling %s command '%s' to retrieve attributes", dname, cmd);
-#endif
+            LOG_DEBUG("Calling %s command '%s' to retrieve attributes", dname, cmd);
             return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
         }
     }
@@ -350,7 +343,8 @@ void Command::add(const uint8_t device_type, const uint8_t device_id, const char
     cmdfunctions_.emplace_back(device_type, device_id, flags, cmd, cb, nullptr, description); // callback for json is nullptr
 }
 
-// same for system/dallas/analog devices with device_id 0
+// add a command with no json output
+// system/dallas/analog devices uses device_id 0
 void Command::add(const uint8_t device_type, const char * cmd, const cmd_function_p cb, const char * const * description, uint8_t flags) {
     add(device_type, 0, cmd, cb, description, flags);
 }
@@ -415,7 +409,9 @@ bool Command::list(const uint8_t device_type, JsonObject & output) {
         for (const auto & cf : cmdfunctions_) {
             if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == std::string(cf.cmd_))) {
                 if (cf.has_flags(CommandFlag::MQTT_SUB_FLAG_WW)) {
-                    output[cl] = EMSdevice::tag_to_string(DeviceValueTAG::TAG_DEVICE_DATA_WW) + " " + Helpers::translated_word(cf.description_);
+                    char s[100];
+                    snprintf(s, sizeof(s), "%s %s", EMSdevice::tag_to_string(DeviceValueTAG::TAG_DEVICE_DATA_WW), Helpers::translated_word(cf.description_));
+                    output[cl] = s;
                 } else {
                     output[cl] = Helpers::translated_word(cf.description_);
                 }

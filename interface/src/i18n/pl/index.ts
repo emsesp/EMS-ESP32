@@ -14,7 +14,6 @@ const pl: BaseTranslation = {
   SU_PASSWORD: 'Hasło "su"',
   DASHBOARD: 'Pulpit',
   SETTINGS_OF: 'Ustawienia {0}',
-  SAVED: 'zostały zapisane.',
   HELP_OF: 'Pomoc {0}',
   LOGGED_IN: 'Zalogowano użytkownika {name}.',
   PLEASE_SIGNIN: 'Zaloguj się aby kontynuować.',
@@ -47,7 +46,8 @@ const pl: BaseTranslation = {
   CANCEL: 'Anuluj',
   RESET: 'Reset{{uj|owanie|}}',
   SEND: 'Wyślij',
-  SAVE: 'Zapisz',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Usuń',
   PROBLEM_UPDATING: 'Problem z uaktualnieniem!',
   PROBLEM_LOADING: 'Problem z załadowaniem!',
@@ -104,7 +104,7 @@ const pl: BaseTranslation = {
   NUM_HOURS: '{num} godzi{{n|na|ny|ny|n}}',
   NUM_MINUTES: '{num} minu{{t|ta|ty|ty|t}}',
   APPLICATION_SETTINGS: 'Ustawienia aplikacji',
-  CUSTOMIZATION: 'Personalizacja',
+  CUSTOMIZATIONS: 'Personalizacja',
   APPLICATION_RESTARTING: 'Trwa ponowne uruchamianie',
   INTERFACE_BOARD_PROFILE: 'Profil płytki interfejsu',
   BOARD_PROFILE_TEXT: 'Wybierz z listy gotowy profil płytki interfejsu lub "własny..." i samodzielnie skonfiguruj posiadany sprzęt.',
@@ -157,14 +157,13 @@ const pl: BaseTranslation = {
   CUSTOMIZATIONS_HELP_3: 'zablokuj akcje zapisu',
   CUSTOMIZATIONS_HELP_4: 'wyklucz z MQTT i API',
   CUSTOMIZATIONS_HELP_5: 'ukryj na pulpicie',
-  CUSTOMIZATIONS_HELP_6: 'remove from memory',
+  CUSTOMIZATIONS_HELP_6: 'usuń z pamięci',
   SELECT_DEVICE: 'wybierz urządzenie',
   SET_ALL: 'Ustaw wszystko jako',
   OPTIONS: 'Opcje',
   NAME: '{{Nazwa|nazwa|}}',
   CUSTOMIZATIONS_RESET:  'Czy jesteś pewien, że chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury 1-Wire® i urządzeń podłączonych do EMS-ESP?',
   DEVICE_ENTITIES: 'Encje urządzenia',
-  USER_CUSTOMIZATION: 'Personalizacje użytkownika',
   SUPPORT_INFORMATION: 'Informacje dotyczące wsparcia',
   CLICK_HERE: 'Kliknij tu',
   HELP_INFORMATION_1: 'Aby uzyskać instrukcje dotyczące konfiguracji EMS-ESP skorzystaj z wiki w internecie',
@@ -202,13 +201,14 @@ const pl: BaseTranslation = {
   CPU_FREQ: 'Taktowanie CPU',
   HEAP: 'HEAP (wolne / maksymalny przydział)',
   PSRAM: 'PSRAM (rozmiar / wolne)',
-  FLASH: 'Flash (rozmiar / taktowanie)',
+  FLASH: 'FLASH (rozmiar / taktowanie)',
   APPSIZE: 'Aplikacja (wykorzystane / wolne)',
   FILESYSTEM: 'System plików (wykorzystane / wolne)',
   BUFFER_SIZE: 'Maksymalna pojemność bufora (ilość wpisów)',
   COMPACT: 'Kompaktowy',
   ENABLE_OTA: 'Aktywuj aktualizację OTA',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Pobierz personalizacje',
+  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Pobierz ustawienia aplikacji. Uważaj jeśli udostępniasz plik z ustawieniami, ponieważ zawiera on hasła oraz inne wrażliwe informacje!',
   UPLOAD_TEXT: 'Wyślij firmware (.bin), ustawienia lub personalizacje (.json). Opcjonalnie, wyślij wcześniej plik walidacji (.md5).',
   UPLOADING: 'Wysłano',
@@ -240,8 +240,9 @@ const pl: BaseTranslation = {
   MQTT_RESPONSE: 'Rezultat wykonania komendy publikuj w temacie "response"',
   MQTT_PUBLISH_TEXT_1: 'Tematy z pojedynczą wartością publikuj po jej zmianie',
   MQTT_PUBLISH_TEXT_2: 'Publikuj w tematach "command" (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Włącz opcję "MQTT discovery" (Home Assistant, Domoticz)',
+  MQTT_PUBLISH_TEXT_3: 'Włącz opcję "MQTT discovery',
   MQTT_PUBLISH_TEXT_4: 'Prefiks dla "MQTT discovery"',
+  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
   MQTT_PUBLISH_INTERVALS: 'Interwały publikowania',
   MQTT_INT_BOILER: 'Kotły i pompy ciepła',
   MQTT_INT_THERMOSTATS: 'Termostaty',
@@ -303,7 +304,21 @@ const pl: BaseTranslation = {
   NEW_NAME_OF: 'Nowa nazwa {0}',
   ENTITY: 'encji',
   MIN: 'Min.',
-  MAX: 'Maks.'
+  MAX: 'Maks.',
+  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
+  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
+  STAY: 'Stay', // TODO translate
+  LEAVE: 'Leave', // TODO translate
+  SCHEDULER: 'Scheduler', // TODO translate
+  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP', // TODO translate
+  SCHEDULE: 'Schedule', // TODO translate  SCHEDULE: 'Schedule', // TODO translate
+  TIME: 'Time', // TODO translate
+  TIMER: 'Timer', // TODO translate
+  WEEKLY: 'Weekly', // TODO translate
+  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_TIMER_1: 'on startup', // TODO translate
+  SCHEDULE_TIMER_2: 'every minute', // TODO translate
+  SCHEDULE_TIMER_3: 'every hour' // TODO translate
 };
 
 export default pl;

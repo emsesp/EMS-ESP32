@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -136,7 +136,7 @@ void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
         log_messages_.pop_front();
     }
 
-    log_messages_.emplace_back(log_message_id_++, std::move(message));
+    log_messages_.emplace_back(++log_message_id_, std::move(message));
 
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
         if (!settings.enabled || (time(nullptr) < 1500000000L)) {
@@ -191,9 +191,9 @@ char * WebLogService::messagetime(char * out, const uint64_t t, const size_t buf
 
 // send to web eventsource
 void WebLogService::transmit(const QueuedLogMessage & message) {
-    auto       jsonDocument = DynamicJsonDocument(EMSESP_JSON_SIZE_MEDIUM);
-    JsonObject logEvent     = jsonDocument.to<JsonObject>();
-    char       time_string[25];
+    StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> jsonDocument;
+    JsonObject                                  logEvent = jsonDocument.to<JsonObject>();
+    char                                        time_string[25];
 
     logEvent["t"] = messagetime(time_string, message.content_->uptime_ms, sizeof(time_string));
     logEvent["l"] = message.content_->level;
@@ -212,32 +212,8 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
 
 // send the complete log buffer to the API, not filtering on log level
 void WebLogService::fetchLog(AsyncWebServerRequest * request) {
-    // auto *     response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN + 192 * log_messages_.size());
-    size_t buffer   = EMSESP_JSON_SIZE_XLARGE_DYN + 192 * log_messages_.size();
-    auto * response = new MsgpackAsyncJsonResponse(false, buffer);
-    while (!response->getSize()) {
-        delete response;
-        buffer -= 1024;
-        response = new MsgpackAsyncJsonResponse(false, buffer);
-    }
-    JsonObject root = response->getRoot();
-    JsonArray  log  = root.createNestedArray("events");
-
-    log_message_id_tail_ = log_messages_.back().id_;
-    last_transmit_       = uuid::get_uptime_ms();
-    for (const auto & message : log_messages_) {
-        JsonObject logEvent = log.createNestedObject();
-        char       time_string[25];
-
-        logEvent["t"] = messagetime(time_string, message.content_->uptime_ms, sizeof(time_string));
-        logEvent["l"] = message.content_->level;
-        logEvent["i"] = message.id_;
-        logEvent["n"] = message.content_->name;
-        logEvent["m"] = message.content_->text;
-    }
-    log_message_id_tail_ = log_messages_.back().id_;
-    response->setLength();
-    request->send(response);
+    log_message_id_tail_ = 0;
+    request->send(200);
 }
 
 // sets the values like level after a POST

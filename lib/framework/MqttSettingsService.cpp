@@ -169,6 +169,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["ha_enabled"]              = settings.ha_enabled;
     root["nested_format"]           = settings.nested_format;
     root["discovery_prefix"]        = settings.discovery_prefix;
+    root["discovery_type"]          = settings.discovery_type;
     root["publish_single"]          = settings.publish_single;
     root["publish_single2cmd"]      = settings.publish_single2cmd;
     root["send_response"]           = settings.send_response;
@@ -201,6 +202,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.ha_enabled         = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
     newSettings.nested_format      = root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT;
     newSettings.discovery_prefix   = root["discovery_prefix"] | EMSESP_DEFAULT_DISCOVERY_PREFIX;
+    newSettings.discovery_type     = root["discovery_type"] | EMSESP_DEFAULT_DISCOVERY_TYPE;
     newSettings.publish_single     = root["publish_single"] | EMSESP_DEFAULT_PUBLISH_SINGLE;
     newSettings.publish_single2cmd = root["publish_single2cmd"] | EMSESP_DEFAULT_PUBLISH_SINGLE2CMD;
     newSettings.send_response      = root["send_response"] | EMSESP_DEFAULT_SEND_RESPONSE;
@@ -220,6 +222,10 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     }
 
     if (newSettings.discovery_prefix != settings.discovery_prefix) {
+        changed = true;
+    }
+
+    if (newSettings.discovery_type != settings.discovery_type) {
         changed = true;
     }
 

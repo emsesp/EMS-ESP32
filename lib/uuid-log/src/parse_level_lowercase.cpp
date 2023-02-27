@@ -28,7 +28,7 @@ namespace log {
 
 bool parse_level_lowercase(const std::string & name, Level & level) {
     for (auto value : levels()) {
-        if (!strcmp_P(name.c_str(), reinterpret_cast<PGM_P>(format_level_lowercase(value)))) {
+        if (!strcmp(name.c_str(), format_level_lowercase(value))) {
             level = value;
             return true;
         }

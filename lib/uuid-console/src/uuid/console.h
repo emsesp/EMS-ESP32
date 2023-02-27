@@ -1,6 +1,6 @@
 /*
  * uuid-console - Microcontroller console shell
- * Copyright 2019  Simon Arlott
+ * Copyright 2019,2021-2022  Simon Arlott
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <deque>
 #include <functional>
+#include <iterator>
 #include <limits>
 #include <list>
 #include <memory>
@@ -36,6 +37,24 @@
 #include <uuid/common.h>
 #include <uuid/log.h>
 
+#ifndef UUID_LOG_THREAD_SAFE
+#define UUID_LOG_THREAD_SAFE 0
+#endif
+
+#ifndef UUID_COMMON_STD_MUTEX_AVAILABLE
+#define UUID_COMMON_STD_MUTEX_AVAILABLE 0
+#endif
+
+#if UUID_COMMON_STD_MUTEX_AVAILABLE
+#define UUID_CONSOLE_THREAD_SAFE 1
+#else
+#define UUID_CONSOLE_THREAD_SAFE 0
+#endif
+
+#if UUID_CONSOLE_THREAD_SAFE
+#include <mutex>
+#endif
+
 namespace uuid {
 
 /**
@@ -46,24 +65,754 @@ namespace uuid {
  */
 namespace console {
 
+/**
+ * Thread-safe status of the library.
+ *
+ * @since 1.0.0
+ */
+#if UUID_COMMON_THREAD_SAFE && UUID_LOG_THREAD_SAFE && UUID_CONSOLE_THREAD_SAFE
+static constexpr bool thread_safe = true;
+#else
+static constexpr bool thread_safe = false;
+#endif
+
 class Commands;
+class CommandLine;
+class Shell;
+
+/**
+ * Container of commands for use by a Shell.
+ *
+ * These should normally be stored in a std::shared_ptr and reused.
+ *
+ * @since 0.1.0
+ */
+class Commands {
+  private:
+    class Command;
+
+  public:
+    struct Completion;
+
+    /**
+	 * Result of a command execution operation.
+	 *
+	 * @since 0.1.0
+	 */
+    struct Execution {
+        const char * error; /*!< Error message if the command could not be executed. @since 0.1.0 */
+    };
+
+    /**
+	 * Function to handle a command.
+	 *
+	 * @param[in] shell Shell instance that is executing the command.
+	 * @param[in] arguments Command line arguments.
+	 * @since 0.1.0
+	 */
+    using command_function = std::function<void(Shell & shell, std::vector<std::string> & arguments)>;
+    /**
+	 * Function to obtain completions for a command line.
+	 *
+	 * This is a vector instead of set so that a custom sort order can
+	 * be used. It should normally be sorted lexicographically so that
+	 * the list of options is not confusing.
+	 *
+	 * @param[in] shell Shell instance that has a command line matching
+	 *                  this command.
+	 * @param[in] current_arguments Command line arguments prior to (but
+	 *                              excluding) the argument being
+	 *                              completed.
+	 * @param[in] next_argument Next argument (the one being completed).
+	 * @return Possible values for the next argument on the command
+	 *         line.
+	 * @since 2.0.0
+	 */
+    using argument_completion_function =
+        std::function<const std::vector<std::string>(Shell & shell, const std::vector<std::string> & current_arguments, const std::string & next_argument)>;
+
+    /**
+	 * Available command for execution on a Shell.
+	 *
+	 * @since 0.9.0
+	 */
+    class AvailableCommand {
+      public:
+        /**
+		 * Construct a new command that is available for execution on a Shell.
+		 *
+		 * @since 0.9.0
+		 */
+        AvailableCommand(const Command & command);
+
+        /**
+		 * Get the name of the command.
+		 *
+		 * @return Name of the command as a std::vector of strings.
+		 * @since 0.9.0
+		 */
+        inline const std::vector<std::string> & name() const {
+            return name_;
+        }
+
+        /**
+		 * Get the help text of the command's arguments.
+		 *
+		 * @return Help text for arguments that the command accepts as a std::vector of strings.
+		 * @since 0.9.0
+		 */
+        inline const std::vector<std::string> & arguments() const {
+            return arguments_;
+        }
+
+        /**
+		 * Get the function to be used when the command is executed.
+		 *
+		 * @return Function that can be used to execute the command.
+		 * @since 0.9.0
+		 */
+        inline const command_function & function() const {
+            return command_.function_;
+        };
+
+        /**
+		 * Get the function to be used to perform argument completions for the command.
+		 *
+		 * @return Function that can be used to perform argument completions for the command.
+		 * @since 0.9.0
+		 */
+        inline const argument_completion_function & arg_function() const {
+            return command_.arg_function_;
+        };
+
+        /**
+		 * Get the shell flags that must be set for this command to be available.
+		 *
+		 * @return Shell flags.
+		 * @since 0.9.0
+		 */
+        inline int flags() const {
+            return command_.flags_;
+        }
+
+        /**
+		 * Get the shell flags that must not be set for this command to be available.
+		 *
+		 * @return Shell flags.
+		 * @since 0.9.0
+		 */
+        inline int not_flags() const {
+            return command_.not_flags_;
+        }
+
+      private:
+        const Commands::Command & command_;   /*!< Command that is available. @since 0.9.0 */
+        std::vector<std::string>  name_;      /*!< Name of the command. @since 0.9.0 */
+        std::vector<std::string>  arguments_; /*!< Help text for arguments that the command accepts. @since 0.9.0 */
+    };
+
+    /**
+	 * Available commands in the shell's context with the current flags.
+	 *
+	 * Iterators are invalidated if the commands, context or flags for
+	 * the shell change.
+	 *
+	 * @since 0.9.0
+	 */
+    class AvailableCommands {
+      public:
+        using command_iterator = std::multimap<unsigned int, Command>::const_iterator; /*!< Type of the underlying command iterator. @since 0.9.0 */
+
+        /**
+		 * Iterator of available commands for execution on a Shell.
+		 *
+		 * @since 0.9.0
+		 */
+        class const_iterator {
+          public:
+            using iterator_category = std::bidirectional_iterator_tag; /*!< Category of this iterator (bidirectional).  @since 0.9.0 */
+            using difference_type   = std::size_t;                     /*!< Type used by std::distance(). @since 0.9.0 */
+            using value_type        = AvailableCommand;                /*!< Type of this iterator's values. @since 0.9.0 */
+            using pointer           = const value_type *;              /*!< Pointer type of this iterator. @since 0.9.0 */
+            using reference         = const value_type &;              /*!< Reference type of this iterator. @since 0.9.0 */
+
+            /**
+			 * Create an iterator describing an available command in a
+			 * shell with the current flags.
+			 *
+			 * Iterators are invalidated if the commands, context or flags for
+			 * the shell change.
+			 *
+			 * @param[in] shell Shell that is accessing commands.
+			 * @param[in] begin Beginning of command iterators.
+			 * @param[in] command Initial command iterator.
+			 * @param[in] end End of command iterators.
+			 * @since 0.9.0
+			 */
+            const_iterator(const Shell & shell, const command_iterator & begin, const command_iterator & command, const command_iterator & end);
+
+            /**
+			 * Dereference the current available command.
+			 *
+			 * @returns A pointer to the current available command,
+			 *          that remains valid only while the iterator at
+			 *          this position exists.
+			 * @since 0.9.0
+			 */
+            inline reference operator*() const {
+                return *available_command_;
+            }
+            /**
+			 * Access the current available command.
+			 *
+			 * @returns A reference to the current available command,
+			 *          that remains valid only while the iterator at
+			 *          this position exists.
+			 * @since 0.9.0
+			 */
+            inline pointer operator->() const {
+                return available_command_.get();
+            }
+
+            /**
+			 * Pre-increment the current iterator to the next
+			 * available command.
+			 *
+			 * @returns The iterator to the next available command.
+			 * @since 0.9.0
+			 */
+            const_iterator & operator++();
+            /**
+			 * Post-increment the current iterator to the next
+			 * available command.
+			 *
+			 * @returns The current iterator.
+			 * @since 0.9.0
+			 */
+            inline const_iterator operator++(int) {
+                auto tmp = *this;
+                ++(*this);
+                return tmp;
+            }
+
+            /**
+			 * Pre-decrement the current iterator to the previous
+			 * available command.
+			 *
+			 * @returns The iterator to the previous available command.
+			 * @since 0.9.0
+			 */
+            const_iterator & operator--();
+            /**
+			 * Post-decrement the current iterator to the previous
+			 * available command.
+			 *
+			 * @returns The current iterator.
+			 * @since 0.9.0
+			 */
+            inline const_iterator operator--(int) {
+                auto tmp = *this;
+                --(*this);
+                return tmp;
+            }
+
+            /**
+			 * Compare an available commands iterator to another available
+			 * commands iterator for equality.
+			 *
+			 * @param[in] lhs Left-hand side available commands iterator.
+			 * @param[in] rhs Right-hand side available commands iterator.
+			 * @return True if the available commands iterators are equal, otherwise false.
+			 * @since 0.9.0
+			 */
+            friend inline bool operator==(const const_iterator & lhs, const const_iterator & rhs) {
+                return lhs.command_ == rhs.command_;
+            }
+            /**
+			 * Compare an available commands iterator to another available
+			 * commands iterator for inequality.
+			 *
+			 * @param[in] lhs Left-hand side available commands iterator.
+			 * @param[in] rhs Right-hand side available commands iterator.
+			 * @return True if the available commands iterators are not equal, otherwise false.
+			 * @since 0.9.0
+			 */
+            friend inline bool operator!=(const const_iterator & lhs, const const_iterator & rhs) {
+                return lhs.command_ != rhs.command_;
+            }
+
+          private:
+            /**
+			 * Update the available command from the current command iterator.
+			 *
+			 * @since 0.9.0
+			 */
+            void update();
+
+            const Shell &                     shell_;             /*!< Shell that is accessing commands. @since 0.9.0 */
+            const command_iterator            begin_;             /*!< Beginning of command iterators. @since 0.9.0 */
+            command_iterator                  command_;           /*!< Current command iterator. @since 0.9.0 */
+            const command_iterator            end_;               /*!< End of command iterators. @since 0.9.0 */
+            std::shared_ptr<AvailableCommand> available_command_; /*!< Current available command. @since 0.9.0 */
+        };
+
+        /**
+		 * Create an iterable object describing available commands in a
+		 * shell with the current flags.
+		 *
+		 * Iterators are invalidated if the commands, context or flags for
+		 * the shell change.
+		 *
+		 * @param[in] shell Shell that is accessing commands.
+		 * @param[in] begin Beginning of command iterators.
+		 * @param[in] end End of command iterators.
+		 * @since 0.9.0
+		 */
+        AvailableCommands(const Shell & shell, const command_iterator & begin, const command_iterator & end);
+
+        /**
+		 * Returns an iterator to the first command.
+		 *
+		 * @since 0.9.0
+		 */
+        inline const_iterator begin() const {
+            return cbegin();
+        }
+        /**
+		 * Returns an iterator to the first command.
+		 *
+		 * @since 0.9.0
+		 */
+        const_iterator cbegin() const;
+        /**
+		 * Returns an iterator to the element following the last command.
+		 *
+		 * @since 0.9.0
+		 */
+        inline const_iterator end() const {
+            return cend();
+        }
+        /**
+		 * Returns an iterator to the element following the last command.
+		 *
+		 * @since 0.9.0
+		 */
+        const_iterator cend() const;
+
+      private:
+        const Shell &    shell_; /*!< Shell that is accessing commands. @since 0.9.0 */
+        command_iterator begin_; /*!< Beginning of command iterators. @since 0.9.0 */
+        command_iterator end_;   /*!< End of command iterators. @since 0.9.0 */
+    };
+
+    /**
+	 * Construct a new container of commands for use by a Shell.
+	 *
+	 * This should normally be stored in a std::shared_ptr and reused.
+	 *
+	 * @since 0.1.0
+	 */
+    Commands()  = default;
+    ~Commands() = default;
+
+    /**
+	 * Add a command with no arguments to the list of commands in this
+	 * container.
+	 *
+	 * The shell context for the command will default to 0 and not
+	 * require any flags for it to be available.
+	 *
+	 * @param[in] name Name of the command as a std::vector of strings.
+	 * @param[in] function Function to be used when the command is
+	 *                     executed.
+	 * @since 0.2.0
+	 */
+    void add_command(const string_vector & name, command_function function);
+    /**
+	 * Add a command with arguments to the list of commands in this
+	 * container.
+	 *
+	 * The shell context for the command will default to 0 and not
+	 * require any flags for it to be available.
+	 *
+	 * @param[in] name Name of the command as a std::vector of strings.
+	 * @param[in] arguments Help text for arguments that the command
+	 *                      accepts as a std::vector of strings
+	 *                      (use "<" to indicate a required argument).
+	 * @param[in] function Function to be used when the command is
+	 *                     executed.
+	 * @since 0.2.0
+	 */
+    void add_command(const string_vector & name, const string_vector & arguments, command_function function);
+    /**
+	 * Add a command with arguments and automatic argument completion
+	 * to the list of commands in this container.
+	 *
+	 * The shell context for the command will default to 0 and not
+	 * require any flags for it to be available.
+	 *
+	 * @param[in] name Name of the command as a std::vector of strings.
+	 * @param[in] arguments Help text for arguments that the command
+	 *                      accepts as a std::vector of strings
+	 *                      (use "<" to indicate a required argument).
+	 * @param[in] function Function to be used when the command is
+	 *                     executed.
+	 * @param[in] arg_function Function to be used to perform argument
+	 *                         completions for this command.
+	 * @since 0.2.0
+	 */
+    void add_command(const string_vector & name, const string_vector & arguments, command_function function, argument_completion_function arg_function);
+
+    /**
+	 * Add a command with no arguments to the list of commands in this
+	 * container.
+	 *
+	 * The command will not require any flags for it to be available.
+	 *
+	 * @param[in] context Shell context in which this command is
+	 *                    available.
+	 * @param[in] name Name of the command as a std::vector of 
+	 *                 strings.
+	 * @param[in] function Function to be used when the command is
+	 *                     executed.
+	 * @since 0.8.0
+	 */
+    void add_command(unsigned int context, const string_vector & name, command_function function);
+    /**
+	 * Add a command with arguments to the list of commands in this
+	 * container.
+	 *
+	 * The command will not require any flags for it to be available.
+	 *
+	 * @param[in] context Shell context in which this command is
+	 *                    available.
+	 * @param[in] name Name of the command as a std::vector of 
+	 *                 strings.
+	 * @param[in] arguments Help text for arguments that the command
+	 *                      accepts as a std::vector of  strings
+	 *                      (use "<" to indicate a required argument).
+	 * @param[in] function Function to be used when the command is
+	 *                     executed.
+	 * @since 0.8.0
+	 */
+    void add_command(unsigned int context, const string_vector & name, const string_vector & arguments, command_function function);
+    /**
+	 * Add a command with arguments and automatic argument completion
+	 * to the list of commands in this container.
+	 *
+	 * The command will not require any flags for it to be available.
+	 *
+	 * @param[in] context Shell context in which this command is
+	 *                    available.
+	 * @param[in] name Name of the command as a std::vector of 
+	 *                 strings.
+	 * @param[in] arguments Help text for arguments that the command
+	 *                      accepts as a std::vector of strings
+	 *                      (use "<" to indicate a required argument).
+	 * @param[in] function Function to be used when the command is
+	 *                     executed.
+	 * @param[in] arg_function Function to be used to perform argument
+	 *                         completions for this command.
+	 * @since 0.8.0
+	 */
+    void add_command(unsigned int                 context,
+                     const string_vector &        name,
+                     const string_vector &        arguments,
+                     command_function             function,
+                     argument_completion_function arg_function);
+    /**
+	 * Add a command with no arguments to the list of commands in this
+	 * container.
+	 *
+	 * @param[in] context Shell context in which this command is
+	 *                    available.
+	 * @param[in] flags Shell flags that must be set for this command
+	 *                  to be available.
+	 * @param[in] name Name of the command as a std::vector of
+	 *                 strings.
+	 * @param[in] function Function to be used when the command is
+	 *                     executed.
+	 * @since 0.1.0
+	 */
+    void add_command(unsigned int context, unsigned int flags, const string_vector & name, command_function function);
+    /**
+	 * Add a command with arguments to the list of commands in this
+	 * container.
+	 *
+	 * @param[in] context Shell context in which this command is
+	 *                    available.
+	 * @param[in] flags Shell flags that must be set for this command
+	 *                  to be available.
+	 * @param[in] name Name of the command as a std::vector of 
+	 *                 strings.
+	 * @param[in] arguments Help text for arguments that the command
+	 *                      accepts as a std::vector of strings
+	 *                      (use "<" to indicate a required argument).
+	 * @param[in] function Function to be used when the command is
+	 *                     executed.
+	 * @since 0.1.0
+	 */
+    void add_command(unsigned int context, unsigned int flags, const string_vector & name, const string_vector & arguments, command_function function);
+    /**
+	 * Add a command with arguments and automatic argument completion
+	 * to the list of commands in this container.
+	 *
+	 * @param[in] context Shell context in which this command is
+	 *                    available.
+	 * @param[in] flags Shell flags that must be set for this command
+	 *                  to be available.
+	 * @param[in] name Name of the command as a std::vector of 
+	 *                 strings.
+	 * @param[in] arguments Help text for arguments that the command
+	 *                      accepts as a std::vector of strings
+	 *                      (use "<" to indicate a required argument).
+	 * @param[in] function Function to be used when the command is
+	 *                     executed.
+	 * @param[in] arg_function Function to be used to perform argument
+	 *                         completions for this command.
+	 * @since 0.1.0
+	 */
+    void add_command(unsigned int                 context,
+                     unsigned int                 flags,
+                     const string_vector &        name,
+                     const string_vector &        arguments,
+                     command_function             function,
+                     argument_completion_function arg_function);
+    /**
+	 * Add a command with no arguments to the list of commands in this
+	 * container.
+	 *
+	 * @param[in] context Shell context in which this command is
+	 *                    available.
+	 * @param[in] flags Shell flags that must be set for this command
+	 *                  to be available.
+	 * @param[in] not_flags Shell flags that must not be set for this command
+	 *                      to be available.
+	 * @param[in] name Name of the command as a std::vector of 
+	 *                 strings.
+	 * @param[in] function Function to be used when the command is
+	 *                     executed.
+	 * @since 0.8.0
+	 */
+    void add_command(unsigned int context, unsigned int flags, unsigned int not_flags, const string_vector & name, command_function function);
+    /**
+	 * Add a command with arguments to the list of commands in this
+	 * container.
+	 *
+	 * @param[in] context Shell context in which this command is
+	 *                    available.
+	 * @param[in] flags Shell flags that must be set for this command
+	 *                  to be available.
+	 * @param[in] not_flags Shell flags that must not be set for this command
+	 *                      to be available.
+	 * @param[in] name Name of the command as a std::vector of 
+	 *                 strings.
+	 * @param[in] arguments Help text for arguments that the command
+	 *                      accepts as a std::vector of strings
+	 *                      (use "<" to indicate a required argument).
+	 * @param[in] function Function to be used when the command is
+	 *                     executed.
+	 * @since 0.8.0
+	 */
+    void add_command(unsigned int          context,
+                     unsigned int          flags,
+                     unsigned int          not_flags,
+                     const string_vector & name,
+                     const string_vector & arguments,
+                     command_function      function);
+    /**
+	 * Add a command with arguments and automatic argument completion
+	 * to the list of commands in this container.
+	 *
+	 * @param[in] context Shell context in which this command is
+	 *                    available.
+	 * @param[in] flags Shell flags that must be set for this command
+	 *                  to be available.
+	 * @param[in] not_flags Shell flags that must not be set for this command
+	 *                      to be available.
+	 * @param[in] name Name of the command as a std::vector of 
+	 *                 strings.
+	 * @param[in] arguments Help text for arguments that the command
+	 *                      accepts as a std::vector of strings
+	 *                      (use "<" to indicate a required argument).
+	 * @param[in] function Function to be used when the command is
+	 *                     executed.
+	 * @param[in] arg_function Function to be used to perform argument
+	 *                         completions for this command.
+	 * @since 0.8.0
+	 */
+    void add_command(unsigned int                 context,
+                     unsigned int                 flags,
+                     unsigned int                 not_flags,
+                     const string_vector &        name,
+                     const string_vector &        arguments,
+                     command_function             function,
+                     argument_completion_function arg_function);
+
+    /**
+	 * Execute a command for a Shell if it exists in the current
+	 * context and with the current flags.
+	 *
+	 * @param[in] shell Shell that is executing the command.
+	 * @param[in] command_line Command line parameters.
+	 * @return An object describing the result of the command execution
+	 *         operation.
+	 * @since 0.1.0
+	 */
+    Execution execute_command(Shell & shell, CommandLine && command_line);
+
+    /**
+	 * Complete a partial command for a Shell if it exists in the
+	 * current context and with the current flags.
+	 *
+	 * @param[in] shell Shell that is completing the command.
+	 * @param[in] command_line Command line parameters.
+	 * @return An object describing the result of the command
+	 *         completion operation.
+	 * @since 0.1.0
+	 */
+    Completion complete_command(Shell & shell, const CommandLine & command_line);
+
+    /**
+	 * Get the available commands in the current context and with the
+	 * current flags.
+	 *
+	 * This iterable object and its iterators are invalidated if the
+	 * commands, context or flags for the shell change.
+	 *
+	 * @param[in] shell Shell that is accessing commands.
+	 * @return An iterable object describing the available commands.
+	 * @since 0.9.0
+	 */
+    AvailableCommands available_commands(const Shell & shell) const;
+
+  private:
+    /**
+	 * Command for execution on a Shell.
+	 * @since 0.1.0
+	 */
+    class Command {
+      public:
+        /**
+		 * Create a command for execution on a Shell.
+		 *
+		 * @param[in] flags Shell flags that must be set for this command
+		 *                  to be available.
+		 * @param[in] not_flags Shell flags that must not be set for this
+		 *                      command to be available.
+		 * @param[in] name Name of the command as a std::vector of 
+		 *                 strings.
+		 * @param[in] arguments Help text for arguments that the command
+		 *                      accepts as a std::vector of strings
+		 *                      (use "<" to indicate a required argument).
+		 * @param[in] function Function to be used when the command is
+		 *                     executed.
+		 * @param[in] arg_function Function to be used to perform argument
+		 *                         completions for this command.
+		 * @since 0.8.0
+		 */
+        Command(unsigned int                 flags,
+                unsigned int                 not_flags,
+                const string_vector          name,
+                const string_vector          arguments,
+                command_function             function,
+                argument_completion_function arg_function);
+        ~Command();
+
+        /**
+		 * Determine the minimum number of arguments for this command
+		 * based on the help text for the arguments that begin with the
+		 * "<" character.
+		 *
+		 * @return The minimum number of arguments for this command.
+		 * @since 0.1.0
+		 */
+        size_t minimum_arguments() const;
+        /**
+		 * Determine the maximum number of arguments for this command
+		 * based on the length of help text for the arguments.
+		 *
+		 * @return The maximum number of arguments for this command.
+		 * @since 0.1.0
+		 */
+        inline size_t maximum_arguments() const {
+            return arguments_.size();
+        }
+
+        unsigned int                 flags_;        /*!< Shell flags that must be set for this command to be available. @since 0.1.0 */
+        unsigned int                 not_flags_;    /*!< Shell flags that must not be set for this command to be available. @since 0.8.0 */
+        const string_vector          name_;         /*!< Name of the command as a std::vector of strings. @since 0.1.0 */
+        const string_vector          arguments_;    /*!< Help text for arguments that the command accepts as a std::vector of strings. @since 0.1.0 */
+        command_function             function_;     /*!< Function to be used when the command is executed. @since 0.1.0 */
+        argument_completion_function arg_function_; /*!< Function to be used to perform argument completions for this command. @since 0.1.0 */
+
+      private:
+        Command(const Command &)             = delete;
+        Command & operator=(const Command &) = delete;
+    };
+
+    /**
+	 * Result of a command find operation.
+	 *
+	 * Each matching command is returned in a map grouped by size.
+	 * @since 0.1.0
+	 */
+    struct Match {
+        std::multimap<size_t, const Command *> exact; /*!< Commands that match the command line exactly, grouped by the size of the command names. @since 0.1.0 */
+        std::multimap<size_t, const Command *> partial; /*!< Commands that the command line partially matches, grouped by the size of the command names. @since 0.1.0 */
+        std::vector<const Command *> all;               /*!< Commands that match the command line, in defined order. @since 0.7.6 */
+    };
+
+    /**
+	 * Find commands by matching them against the command line.
+	 *
+	 * @param[in] shell Shell that is accessing commands.
+	 * @param[in] command_line Command line parameters.
+	 * @return An object describing the result of the command find
+	 *         operation.
+	 * @since 0.1.0
+	 */
+    Match find_command(Shell & shell, const CommandLine & command_line);
+
+    /**
+	 * Find the longest common prefix from a shortest match of commands.
+	 *
+	 * @param[in] commands All commands that matched (at least 2).
+	 * @param[out] longest_name The longest common prefix as a list of
+	 *                          strings.
+	 * @return True if the longest common prefix is made up of whole
+	 *          components, false if the last part is constructed from
+	 *          a partial component.
+	 * @since 0.1.0
+	 */
+    static bool find_longest_common_prefix(const std::multimap<size_t, const Command *> & commands, std::vector<std::string> & longest_name);
+
+    /**
+	 * Find the longest common prefix from a list of potential arguments.
+	 *
+	 * @param[in] arguments All potential arguments (at least 2).
+	 * @return The longest common prefix, which could be empty.
+	 * @since 0.1.0
+	 */
+    static std::string find_longest_common_prefix(const std::vector<std::string> & arguments);
+
+    std::multimap<unsigned int, Command> commands_; /*!< Commands stored in this container, separated by context. @since 0.1.0 */
+};
 
 /**
  * Base class for a command shell.
  *
  * Must be constructed within a std::shared_ptr.
  *
- * Requires a derived class to provide input/output. Derived classes
- * should use virtual inheritance to allow the behaviour to be further
- * extended.
- *
  * @since 0.1.0
  */
 class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Handler, public ::Stream {
   public:
-    static constexpr size_t  MAX_COMMAND_LINE_LENGTH = 80; /*!< Maximum length of a command line. @since 0.1.0 */
-    static constexpr size_t  MAX_LOG_MESSAGES        = 20; /*!< Maximum number of log messages to buffer before they are output. @since 0.1.0 */
-    static constexpr uint8_t MAX_LINES               = 5;  /*!< Maximum lines in buffer */
+    static constexpr size_t MAX_COMMAND_LINE_LENGTH = 80; /*!< Maximum length of a command line. @since 0.1.0 */
+    static constexpr size_t MAX_LOG_MESSAGES        = 20; /*!< Maximum number of log messages to buffer before they are output. @since 0.1.0 */
+
+    // added for EMS-ESP
+    static constexpr uint8_t MAX_LINES = 5; /*!< Maximum lines in buffer */
 
     /**
 	 * Function to handle the response to a password entry prompt.
@@ -96,7 +845,25 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 */
     using blocking_function = std::function<bool(Shell & shell, bool stop)>;
 
-    ~Shell() override;
+    /**
+	 * Create a new Shell operating on a Stream with the given commands,
+	 * default context and initial flags.
+	 *
+	 * The default context is put on the stack and cannot be removed.
+	 *
+	 * The Stream must remain valid until the Shell has been destroyed.
+	 * Monitor the Shell using a std::weak_ptr and destroy the Stream
+	 * only after it has expired.
+	 *
+	 * @param[in] stream Stream used for the input/output of this shell.
+	 * @param[in] commands Commands available for execution in this shell.
+	 * @param[in] context Default context for the shell.
+	 * @param[in] flags Initial flags for the shell.
+	 * @since 3.0.0
+	 */
+    Shell(Stream & stream, std::shared_ptr<Commands> commands, unsigned int context = 0, unsigned int flags = 0);
+
+    ~Shell() = default;
 
     /**
 	 * Loop through all registered shell objects.
@@ -118,7 +885,6 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 * The started() function will be called after startup is complete.
 	 *
 	 * Do not call this function more than once.
-	 * Do not call this function from a static initializer.
 	 *
 	 * @since 0.1.0
 	 */
@@ -159,9 +925,7 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 * @return Logger instance.
 	 * @since 0.1.0
 	 */
-    static inline const uuid::log::Logger & logger() {
-        return logger_;
-    }
+    static const uuid::log::Logger & logger();
     /**
 	 * Add a new log message.
 	 *
@@ -172,7 +936,7 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 * @param[in] message New log message, shared by all handlers.
 	 * @since 0.1.0
 	 */
-    virtual void operator<<(std::shared_ptr<uuid::log::Message> message) override;
+    virtual void operator<<(std::shared_ptr<uuid::log::Message> message);
     /**
 	 * Get the current log level.
 	 *
@@ -294,6 +1058,22 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
         flags_ |= flags;
     }
     /**
+	 * Check if the current flags include all of the specified flags
+	 * and none of the specified not_flags.
+	 *
+	 * Flags are not affected by execution context. The current flags
+	 * affect which commands are available (for access control).
+	 *
+	 * @param[in] flags Flag bits to check for presence of.
+	 * @param[in] not_flags Flag bits to check for absence of.
+	 * @return True if the current flags includes all of the specified
+	 *         flags and none of the specified not_flags, otherwise false.
+	 * @since 0.8.0
+	 */
+    inline bool has_flags(unsigned int flags, unsigned int not_flags = 0) const {
+        return has_all_flags(flags) && !has_any_flags(not_flags);
+    }
+    /**
 	 * Check if the current flags include all of the specified flags.
 	 *
 	 * Flags are not affected by execution context. The current flags
@@ -302,10 +1082,24 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 * @param[in] flags Flag bits to check for.
 	 * @return True if the current flags includes all of the specified
 	 *         flags, otherwise false.
-	 * @since 0.1.0
+	 * @since 0.8.0
 	 */
-    inline bool has_flags(unsigned int flags) const {
+    inline bool has_all_flags(unsigned int flags) const {
         return (flags_ & flags) == flags;
+    }
+    /**
+	 * Check if the current flags include any of the specified flags.
+	 *
+	 * Flags are not affected by execution context. The current flags
+	 * affect which commands are available (for access control).
+	 *
+	 * @param[in] flags Flag bits to check for.
+	 * @return True if the current flags includes any of the specified
+	 *         flags, otherwise false.
+	 * @since 0.8.0
+	 */
+    inline bool has_any_flags(unsigned int flags) const {
+        return (flags_ & flags) != 0;
     }
     /**
 	 * Remove one or more flags from the current flags.
@@ -422,18 +1216,18 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 *
 	 * @param[in] data Data to be output.
 	 * @return The number of bytes that were output.
-	 * @since 0.1.0
+	 * @since 3.0.0
 	 */
-    size_t write(uint8_t data) override = 0;
+    size_t write(uint8_t data) final override;
     /**
 	 * Write an array of bytes to the output stream.
 	 *
 	 * @param[in] buffer Buffer to be output.
 	 * @param[in] size Length of the buffer.
 	 * @return The number of bytes that were output.
-	 * @since 0.1.0
+	 * @since 3.0.0
 	 */
-    size_t write(const uint8_t * buffer, size_t size) override = 0;
+    size_t write(const uint8_t * buffer, size_t size) final override;
     /**
 	 * Does nothing.
 	 *
@@ -442,9 +1236,9 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 * output function. Later versions move it to Print as an empty
 	 * virtual function so this is here for backward compatibility.
 	 *
-	 * @since 0.2.0
+	 * @since 3.0.0
 	 */
-    void flush() override;
+    void flush() final override;
 
     using ::Print::print; /*!< Include standard Arduino print() functions. */
     /**
@@ -473,15 +1267,7 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 * @since 0.1.0
 	 */
     size_t printf(const char * format, ...) /* __attribute__((format(printf, 2, 3))) */;
-    /**
-	 * Output a message.
-	 *
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ... Format string arguments.
-	 * @return The number of bytes that were output.
-	 * @since 0.1.0
-	 */
-    size_t printf(const __FlashStringHelper * format, ...) /* __attribute__((format(printf, 2, 3))) */;
+
     /**
 	 * Output a message followed by CRLF end of line characters.
 	 *
@@ -491,16 +1277,18 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 * @since 0.1.0
 	 */
     size_t printfln(const char * format, ...) /* __attribute__((format (printf, 2, 3))) */;
-    /**
-	 * Output a message followed by CRLF end of line characters.
-	 *
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ... Format string arguments.
-	 * @return The number of bytes that were output, including CRLF.
-	 * @since 0.1.0
-	 */
-    size_t printfln(const __FlashStringHelper * format, ...) /* __attribute__((format(printf, 2, 3))) */;
 
+    /**
+	 * Get the available commands in the current context and with the
+	 * current flags.
+	 *
+	 * The iterable object and its iterators are invalidated if the
+	 * commands, context or flags for the shell change.
+	 *
+	 * @return An iterable object describing the available commands.
+	 * @since 0.9.0
+	 */
+    Commands::AvailableCommands available_commands() const;
     /**
 	 * Output a list of all available commands with their arguments.
 	 *
@@ -508,45 +1296,7 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 */
     void print_all_available_commands();
 
-    /**
-	 * Invoke a command on the shell.
-	 *
-	 * This will output a prompt with the provided command line and
-	 * then try to execute it.
-	 *
-	 * Intended for use from end_of_transmission() to execute an "exit"
-	 * or "logout" command.
-	 *
-	 * @param[in] line The command line to be executed.
-	 * @since 0.1.0
-	 */
-    void invoke_command(const std::string & line);
-
   protected:
-    /**
-	 * Default constructor used by intermediate derived classes for
-	 * multiple inheritance.
-	 *
-	 * This does not initialise the shell completely so the outer
-	 * derived class must call the public constructor or there will be
-	 * no commands. Does not put any default context on the stack.
-	 *
-	 * @since 0.1.0
-	 */
-    Shell() = default;
-    /**
-	 * Create a new Shell with the given commands, default context and
-	 * initial flags.
-	 *
-	 * The default context is put on the stack and cannot be removed.
-	 *
-	 * @param[in] commands Commands available for execution in this shell.
-	 * @param[in] context Default context for the shell.
-	 * @param[in] flags Initial flags for the shell.
-	 * @since 0.1.0
-	 */
-    Shell(std::shared_ptr<Commands> commands, unsigned int context = 0, unsigned int flags = 0);
-
     /**
 	 * Output ANSI escape sequence to erase the current line.
 	 *
@@ -637,6 +1387,22 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 * @since 0.1.0
 	 */
     virtual void stopped();
+
+    // change for EMS-ESP to make public so can be used in test.cpp
+  public:
+    /**
+	 * Invoke a command on the shell.
+	 *
+	 * This will output a prompt with the provided command line and
+	 * then try to execute it.
+	 *
+	 * Intended for use from end_of_transmission() to execute an "exit"
+	 * or "logout" command.
+	 *
+	 * @param[in] line The command line to be executed.
+	 * @since 0.1.0
+	 */
+    void invoke_command(const std::string & line);
 
   private:
     /**
@@ -731,7 +1497,7 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
         explicit BlockingData(blocking_function && blocking_function);
         ~BlockingData() override = default;
 
-        blocking_function blocking_function_;         /*!< Function execute on every loop_one(). @since 0.2.0 */
+        blocking_function blocking_function_;         /*!< Function executed on every loop_one(). @since 0.2.0 */
         bool              consume_line_feed_ = true;  /*!< Stream input should try to consume the first line feed following a carriage return. @since 0.2.0 */
         bool              stop_              = false; /*!< There is a stop pending for the shell. @since 0.2.0 */
     };
@@ -757,12 +1523,20 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
         QueuedLogMessage(unsigned long id, std::shared_ptr<uuid::log::Message> && content);
         ~QueuedLogMessage() = default;
 
-        const unsigned long                             id_;      /*!< Sequential identifier for this log message. @since 0.1.0 */
-        const std::shared_ptr<const uuid::log::Message> content_; /*!< Log message content. @since 0.1.0 */
+        unsigned long                             id_;      /*!< Sequential identifier for this log message. @since 0.1.0 */
+        std::shared_ptr<const uuid::log::Message> content_; /*!< Log message content. @since 0.1.0 */
     };
 
     Shell(const Shell &)             = delete;
     Shell & operator=(const Shell &) = delete;
+
+    /**
+	 * Get registered running shells to be executed.
+	 *
+	 * @return Registered running shells to be executed.
+	 * @since 0.7.4
+	 */
+    static std::set<std::shared_ptr<Shell>> & registered_shells();
 
     /**
 	 * Perform one execution step in Mode::NORMAL mode.
@@ -796,29 +1570,6 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 * @since 0.2.0
 	 */
     void loop_blocking();
-
-    /**
-	 * Check for at least one character of available input.
-	 *
-	 * @return True if a character is available, otherwise false.
-	 * @since 0.2.0
-	 */
-    virtual bool available_char() = 0;
-    /**
-	 * Read one character from the available input.
-	 *
-	 * @return An unsigned char if input is available, otherwise -1.
-	 * @since 0.1.0
-	 */
-    virtual int read_one_char() = 0;
-    /**
-	 * Read one character from the available input without advancing to
-	 * the next one.
-	 *
-	 * @return An unsigned char if input is available, otherwise -1.
-	 * @since 0.2.0
-	 */
-    virtual int peek_one_char() = 0;
 
     /**
 	 * Output a prompt on the shell.
@@ -884,33 +1635,27 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 * @since 0.1.0
 	 */
     size_t vprintf(const char * format, va_list ap);
-    /**
-	 * Output a message.
-	 *
-	 * @param[in] format Format string (flash string).
-	 * @param[in] ap Variable arguments pointer for format string.
-	 * @return The number of bytes that were output.
-	 * @since 0.1.0
-	 */
-    size_t vprintf(const __FlashStringHelper * format, va_list ap);
-    void   set_command_str(const char * str);
 
-    static const uuid::log::Logger          logger_; /*!< uuid::log::Logger instance for shells. @since 0.1.0 */
-    static std::set<std::shared_ptr<Shell>> shells_; /*!< Registered running shells to be executed. @since 0.1.0 */
+    // added for EMS-ESP
+    void        set_command_str(const char * str);
+    std::string line_old_[MAX_LINES]; /*!< old Command line buffer.*/
+    uint8_t     line_no_ = 0;
+    uint8_t     cursor_  = 0; /*!< cursor position from end of line */
+    uint8_t     esc_     = 0; /*!< esc sequence running */
 
-    std::shared_ptr<Commands>   commands_;           /*!< Commands available for execution in this shell. @since 0.1.0 */
-    std::deque<unsigned int>    context_;            /*!< Context stack for this shell. Should never be empty. @since 0.1.0 */
-    unsigned int                flags_          = 0; /*!< Current flags for this shell. Affects which commands are available. @since 0.1.0 */
-    unsigned long               log_message_id_ = 0; /*!< The next identifier to use for queued log messages. @since 0.1.0 */
-    std::list<QueuedLogMessage> log_messages_;       /*!< Queued log messages, in the order they were received. @since 0.1.0 */
+    Stream &                  stream_;    /*!< Stream used for the input/output of this shell. @since 3.0.0 */
+    std::shared_ptr<Commands> commands_;  /*!< Commands available for execution in this shell. @since 0.1.0 */
+    std::deque<unsigned int>  context_;   /*!< Context stack for this shell. Affects which commands are available. Should never be empty. @since 0.1.0 */
+    unsigned int              flags_ = 0; /*!< Current flags for this shell. Affects which commands are available. @since 0.1.0 */
+#if UUID_CONSOLE_THREAD_SAFE
+    mutable std::mutex mutex_; /*!< Mutex for queued log messages. @since 1.0.0 */
+#endif
+    unsigned long               log_message_id_ = 0;                      /*!< The next identifier to use for queued log messages. @since 0.1.0 */
+    std::list<QueuedLogMessage> log_messages_;                            /*!< Queued log messages, in the order they were received. @since 0.1.0 */
     size_t                      maximum_log_messages_ = MAX_LOG_MESSAGES; /*!< Maximum command line length in bytes. @since 0.6.0 */
-    std::string                 line_buffer_;         /*!< Command line buffer. Limited to maximum_command_line_length() bytes. @since 0.1.0 */
-    std::string                 line_old_[MAX_LINES]; /*!< old Command line buffer.*/
-    uint8_t                     line_no_                     = 0;
+    std::string                 line_buffer_; /*!< Command line buffer. Limited to maximum_command_line_length() bytes. @since 0.1.0 */
     size_t                      maximum_command_line_length_ = MAX_COMMAND_LINE_LENGTH; /*!< Maximum command line length in bytes. @since 0.6.0 */
     unsigned char               previous_  = 0; /*!< Previous character that was entered on the command line. Used to detect CRLF line endings. @since 0.1.0 */
-    uint8_t                     cursor_    = 0; /*!< cursor position from end of line */
-    uint8_t                     esc_       = 0; /*!< esc sequence running */
     Mode                        mode_      = Mode::NORMAL; /*!< Current execution mode. @since 0.1.0 */
     std::unique_ptr<ModeData>   mode_data_ = nullptr;      /*!< Data associated with the current execution mode. @since 0.1.0 */
     bool                        stopped_   = false;        /*!< Indicates that the shell has been stopped. @since 0.1.0 */
@@ -1101,415 +1846,15 @@ class CommandLine {
 };
 
 /**
- * Container of commands for use by a Shell.
+ * Result of a command completion operation.
  *
- * These should normally be stored in a std::shared_ptr and reused.
- *
- * @since 0.1.0
- */
-class Commands {
-  public:
-    /**
-	 * Result of a command completion operation.
-	 *
-	 * Each space-delimited parameter is a separate string.
-	 *
-	 * @since 0.1.0
-	 */
-    struct Completion {
-        std::list<CommandLine> help;        /*!< Suggestions for matching commands. @since 0.1.0 */
-        CommandLine            replacement; /*!< Replacement matching full or partial command line. @since 0.1.0 */
-    };
-
-    /**
-	 * Result of a command execution operation.
-	 *
-	 * @since 0.1.0
-	 */
-    struct Execution {
-        const __FlashStringHelper * error; /*!< Error message if the command could not be executed. @since 0.1.0 */
-    };
-
-    /**
-	 * Function to handle a command.
-	 *
-	 * @param[in] shell Shell instance that is executing the command.
-	 * @param[in] arguments Command line arguments.
-	 * @since 0.1.0
-	 */
-    using command_function = std::function<void(Shell & shell, std::vector<std::string> & arguments)>;
-    /**
-	 * Function to obtain completions for a command line.
-	 *
-	 * This is a vector instead of set so that a custom sort order can
-	 * be used. It should normally be sorted lexicographically so that
-	 * the list of options is not confusing.
-	 *
-	 * @param[in] shell Shell instance that has a command line matching
-	 *                  this command.
-	 * @param[in] arguments Command line arguments prior to (but
-	 *                      excluding) the argument being completed.
-	 * @return Possible values for the next argument on the command
-	 *         line.
-	 * @since 0.1.0
-	 */
-    using argument_completion_function = std::function<const std::vector<std::string>(Shell & shell, const std::vector<std::string> & arguments)>;
-
-    /**
-	 * Function to apply an operation to a command.
-	 *
-	 * @param[in] name Name of the command as a std::vector of strings.
-	 * @param[in] arguments Help text for arguments that the command
-	 *                      accepts as a std::vector of strings.
-	 * @since 0.4.0
-	 */
-    using apply_function = std::function<void(std::vector<std::string> & name, std::vector<std::string> & arguments)>;
-
-    /**
-	 * Construct a new container of commands for use by a Shell.
-	 *
-	 * This should normally be stored in a std::shared_ptr and reused.
-	 *
-	 * @since 0.1.0
-	 */
-    Commands()  = default;
-    ~Commands() = default;
-
-    /**
-	 * Add a command with no arguments to the list of commands in this
-	 * container.
-	 *
-	 * The shell context for the command will default to 0 and not
-	 * require any flags for it to be available.
-	 *
-	 * @param[in] name Name of the command as a std::vector of flash
-	 *                 strings.
-	 * @param[in] function Function to be used when the command is
-	 *                     executed.
-	 * @since 0.2.0
-	 */
-    void add_command(const string_vector & name, command_function function);
-    /**
-	 * Add a command with arguments to the list of commands in this
-	 * container.
-	 *
-	 * The shell context for the command will default to 0 and not
-	 * require any flags for it to be available.
-	 *
-	 * @param[in] name Name of the command as a std::vector of flash
-	 *                 strings.
-	 * @param[in] arguments Help text for arguments that the command
-	 *                      accepts as a std::vector of flash strings
-	 *                      (use "<" to indicate a required argument).
-	 * @param[in] function Function to be used when the command is
-	 *                     executed.
-	 * @since 0.2.0
-	 */
-    void add_command(const string_vector & name, const string_vector & arguments, command_function function);
-    /**
-	 * Add a command with arguments and automatic argument completion
-	 * to the list of commands in this container.
-	 *
-	 * The shell context for the command will default to 0 and not
-	 * require any flags for it to be available.
-	 *
-	 * @param[in] name Name of the command as a std::vector of flash
-	 *                 strings.
-	 * @param[in] arguments Help text for arguments that the command
-	 *                      accepts as a std::vector of flash strings
-	 *                      (use "<" to indicate a required argument).
-	 * @param[in] function Function to be used when the command is
-	 *                     executed.
-	 * @param[in] arg_function Function to be used to perform argument
-	 *                         completions for this command.
-	 * @since 0.2.0
-	 */
-    void add_command(const string_vector & name, const string_vector & arguments, command_function function, argument_completion_function arg_function);
-    /**
-	 * Add a command with no arguments to the list of commands in this
-	 * container.
-	 *
-	 * @param[in] context Shell context in which this command is
-	 *                    available.
-	 * @param[in] flags Shell flags that must be set for this command
-	 *                  to be available.
-	 * @param[in] name Name of the command as a std::vector of flash
-	 *                 strings.
-	 * @param[in] function Function to be used when the command is
-	 *                     executed.
-	 * @since 0.1.0
-	 */
-    void add_command(unsigned int context, unsigned int flags, const string_vector & name, command_function function);
-    /**
-	 * Add a command with arguments to the list of commands in this
-	 * container.
-	 *
-	 * @param[in] context Shell context in which this command is
-	 *                    available.
-	 * @param[in] flags Shell flags that must be set for this command
-	 *                  to be available.
-	 * @param[in] name Name of the command as a std::vector of flash
-	 *                 strings.
-	 * @param[in] arguments Help text for arguments that the command
-	 *                      accepts as a std::vector of flash strings
-	 *                      (use "<" to indicate a required argument).
-	 * @param[in] function Function to be used when the command is
-	 *                     executed.
-	 * @since 0.1.0
-	 */
-    void add_command(unsigned int context, unsigned int flags, const string_vector & name, const string_vector & arguments, command_function function);
-    /**
-	 * Add a command with arguments and automatic argument completion
-	 * to the list of commands in this container.
-	 *
-	 * @param[in] context Shell context in which this command is
-	 *                    available.
-	 * @param[in] flags Shell flags that must be set for this command
-	 *                  to be available.
-	 * @param[in] name Name of the command as a std::vector of flash
-	 *                 strings.
-	 * @param[in] arguments Help text for arguments that the command
-	 *                      accepts as a std::vector of flash strings
-	 *                      (use "<" to indicate a required argument).
-	 * @param[in] function Function to be used when the command is
-	 *                     executed.
-	 * @param[in] arg_function Function to be used to perform argument
-	 *                         completions for this command.
-	 * @since 0.1.0
-	 */
-    void add_command(unsigned int                 context,
-                     unsigned int                 flags,
-                     const string_vector &        name,
-                     const string_vector &        arguments,
-                     command_function             function,
-                     argument_completion_function arg_function);
-
-    /**
-	 * Execute a command for a Shell if it exists in the current
-	 * context and with the current flags.
-	 *
-	 * @param[in] shell Shell that is executing the command.
-	 * @param[in] command_line Command line parameters.
-	 * @return An object describing the result of the command execution
-	 *         operation.
-	 * @since 0.1.0
-	 */
-    Execution execute_command(Shell & shell, CommandLine && command_line);
-
-    /**
-	 * Complete a partial command for a Shell if it exists in the
-	 * current context and with the current flags.
-	 *
-	 * @param[in] shell Shell that is completing the command.
-	 * @param[in] command_line Command line parameters.
-	 * @return An object describing the result of the command
-	 *         completion operation.
-	 * @since 0.1.0
-	 */
-    Completion complete_command(Shell & shell, const CommandLine & command_line);
-
-    /**
-	 * Applies the given function object f to all commands in the
-	 * current context and with the current flags.
-	 *
-	 * @param[in] shell Shell that is accessing commands.
-	 * @param[in] f Function to apply to each command.
-	 * @since 0.4.0
-	 */
-    void for_each_available_command(Shell & shell, apply_function f) const;
-
-    void remove_context_commands(unsigned int context); // added by proddy
-    void remove_all_commands();                         // added by proddy
-
-  private:
-    /**
-	 * Command for execution on a Shell.
-	 * @since 0.1.0
-	 */
-    class Command {
-      public:
-        /**
-		 * Create a command for execution on a Shell.
-		 *
-		 * @param[in] flags Shell flags that must be set for this command
-		 *                  to be available.
-		 * @param[in] name Name of the command as a std::vector of flash
-		 *                 strings.
-		 * @param[in] arguments Help text for arguments that the command
-		 *                      accepts as a std::vector of flash strings
-		 *                      (use "<" to indicate a required argument).
-		 * @param[in] function Function to be used when the command is
-		 *                     executed.
-		 * @param[in] arg_function Function to be used to perform argument
-		 *                         completions for this command.
-		 * @since 0.1.0
-		 */
-        Command(unsigned int flags, const string_vector name, const string_vector arguments, command_function function, argument_completion_function arg_function);
-        ~Command();
-
-        /**
-		 * Determine the minimum number of arguments for this command
-		 * based on the help text for the arguments that begin with the
-		 * "<" character.
-		 *
-		 * @return The minimum number of arguments for this command.
-		 * @since 0.1.0
-		 */
-        size_t minimum_arguments() const;
-        /**
-		 * Determine the maximum number of arguments for this command
-		 * based on the length of help text for the arguments.
-		 *
-		 * @return The maximum number of arguments for this command.
-		 * @since 0.1.0
-		 */
-        inline size_t maximum_arguments() const {
-            return arguments_.size();
-        }
-
-        unsigned int                 flags_;        /*!< Shell flags that must be set for this command to be available. @since 0.1.0 */
-        const string_vector          name_;         /*!< Name of the command as a std::vector of flash strings. @since 0.1.0 */
-        const string_vector          arguments_;    /*!< Help text for arguments that the command accepts as a std::vector of flash strings. @since 0.1.0 */
-        command_function             function_;     /*!< Function to be used when the command is executed. @since 0.1.0 */
-        argument_completion_function arg_function_; /*!< Function to be used to perform argument completions for this command. @since 0.1.0 */
-
-      private:
-        Command(const Command &)             = delete;
-        Command & operator=(const Command &) = delete;
-    };
-
-    /**
-	 * Result of a command find operation.
-	 *
-	 * Each matching command is returned in a map grouped by size.
-	 * @since 0.1.0
-	 */
-    struct Match {
-        std::multimap<size_t, const Command *> exact; /*!< Commands that match the command line exactly, grouped by the size of the command names. @since 0.1.0 */
-        std::multimap<size_t, const Command *> partial; /*!< Commands that the command line partially matches, grouped by the size of the command names. @since 0.1.0 */
-    };
-
-    /**
-	 * Find commands by matching them against the command line.
-	 *
-	 * @param[in] shell Shell that is accessing commands.
-	 * @param[in] command_line Command line parmeters.
-	 * @return An object describing the result of the command find
-	 *         operation.
-	 * @since 0.1.0
-	 */
-    Match find_command(Shell & shell, const CommandLine & command_line);
-
-    /**
-	 * Find the longest common prefix from a shortest match of commands.
-	 *
-	 * @param[in] commands All commands that matched (at least 2).
-	 * @param[out] longest_name The longest common prefix as a list of
-	 *                          strings.
-	 * @return True if the longest common prefix is made up of whole
-	 *          components, false if the last part is constructed from
-	 *          a partial component.
-	 * @since 0.1.0
-	 */
-    static bool find_longest_common_prefix(const std::multimap<size_t, const Command *> & commands, std::vector<std::string> & longest_name);
-
-    /**
-	 * Find the longest common prefix from a list of potential arguments.
-	 *
-	 * @param[in] arguments All potential arguments (at least 2).
-	 * @return The longest common prefix, which could be empty.
-	 * @since 0.1.0
-	 */
-    static std::string find_longest_common_prefix(const std::vector<std::string> & arguments);
-
-    std::multimap<unsigned int, Command> commands_; /*!< Commands stored in this container, separated by context. @since 0.1.0 */
-};
-
-/**
- * A command shell console using a Stream for input/output.
- *
- * Must be constructed within a std::shared_ptr.
- *
- * Derived classes must call the Shell constructor explicitly.
+ * Each space-delimited parameter is a separate string.
  *
  * @since 0.1.0
  */
-class StreamConsole : virtual public Shell {
-  public:
-    /**
-	 * Create a new StreamConsole shell with the given commands,
-	 * default context and initial flags.
-	 *
-	 * The default context is put on the stack and cannot be removed.
-	 *
-	 * @param[in] commands Commands available for execution in this shell.
-	 * @param[in] stream Stream used for the input/output of this shell.
-	 * @param[in] context Default context for the shell.
-	 * @param[in] flags Initial flags for the shell.
-	 * @since 0.1.0
-	 */
-    StreamConsole(std::shared_ptr<Commands> commands, Stream & stream, unsigned int context = 0, unsigned int flags = 0);
-    ~StreamConsole() override = default;
-
-    /**
-	 * Write one byte to the output stream.
-	 *
-	 * @param[in] data Data to be output.
-	 * @return The number of bytes that were output.
-	 * @since 0.1.0
-	 */
-    size_t write(uint8_t data) override;
-    /**
-	 * Write an array of bytes to the output stream.
-	 *
-	 * @param[in] buffer Buffer to be output.
-	 * @param[in] size Length of the buffer.
-	 * @return The number of bytes that were output.
-	 * @since 0.1.0
-	 */
-    size_t write(const uint8_t * buffer, size_t size) override;
-
-  protected:
-    /**
-	 * Constructor used by intermediate derived classes for multiple
-	 * inheritance.
-	 *
-	 * This does not initialise the shell completely so the outer
-	 * derived class must call the public constructor or there will be
-	 * no commands. Does not put any default context on the stack.
-	 *
-	 * @since 0.1.0
-	 */
-    explicit StreamConsole(Stream & stream);
-
-  private:
-    StreamConsole(const StreamConsole &)             = delete;
-    StreamConsole & operator=(const StreamConsole &) = delete;
-
-    /**
-	 * Check for at least one character of available input.
-	 *
-	 * @return True if a character is available, otherwise false.
-	 * @since 0.2.0
-	 */
-    bool available_char() override;
-    /**
-	 * Read one character from the available input.
-	 *
-	 * @return An unsigned char if input is available, otherwise -1.
-	 * @since 0.1.0
-	 */
-    int read_one_char() override;
-    /**
-	 * Read one character from the available input without advancing to
-	 * the next one.
-	 *
-	 * @return An unsigned char if input is available, otherwise -1.
-	 * @since 0.2.0
-	 */
-    int peek_one_char() override;
-
-    Stream & stream_; /*!< Stream used for the input/output of this shell. @since 0.1.0 */
+struct Commands::Completion {
+    std::list<CommandLine> help;        /*!< Suggestions for matching commands. @since 0.1.0 */
+    CommandLine            replacement; /*!< Replacement matching full or partial command line. @since 0.1.0 */
 };
 
 } // namespace console

@@ -14,7 +14,6 @@ const sv: Translation = {
   SU_PASSWORD: 'su Lösenord',
   DASHBOARD: 'Kontrollpanel',
   SETTINGS_OF: '{0} Inställningar',
-  SAVED: 'Sparat',
   HELP_OF: '{0} Hjälp',
   LOGGED_IN: 'Inloggad som {name}',
   PLEASE_SIGNIN: 'Vänligen logga in för att fortsätta',
@@ -47,7 +46,8 @@ const sv: Translation = {
   CANCEL: 'Avbryt',
   RESET: 'Nollställ',
   SEND: 'Skicka',
-  SAVE: 'Spara',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Ta bort',
   PROBLEM_UPDATING: 'Problem vid uppdatering',
   PROBLEM_LOADING: 'Problem vid hämtning',
@@ -104,7 +104,7 @@ const sv: Translation = {
   NUM_HOURS: '{num} timmar',
   NUM_MINUTES: '{num} minut{{er}}',
   APPLICATION_SETTINGS: 'Inställningar',
-  CUSTOMIZATION: 'Anpassa',
+  CUSTOMIZATIONS: 'Anpassningr',
   APPLICATION_RESTARTING: 'EMS-ESP startar om',
   INTERFACE_BOARD_PROFILE: 'Interface Hårdvaruprofil',
   BOARD_PROFILE_TEXT: 'Välj en förkonfigurerad hårdvaruprofil från listan nedan eller välj Anpassad för att konfigurera dina egna hårdvaruinställningar',
@@ -157,14 +157,13 @@ const sv: Translation = {
   CUSTOMIZATIONS_HELP_3: 'Inaktivera skrivningar',
   CUSTOMIZATIONS_HELP_4: 'Exkludera från MQTT & API',
   CUSTOMIZATIONS_HELP_5: 'Göm från Kontrollpanel',
-  CUSTOMIZATIONS_HELP_6: 'remove from memory',
+  CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
   SELECT_DEVICE: 'Välj en enhet',
   SET_ALL: 'ställ in alla',
   OPTIONS: 'Alternativ',
   NAME: 'Namn',
   CUSTOMIZATIONS_RESET: 'Är du säker på att du vill ta bort alla anpassningar inklusive inställningar för Temperatur och Analoga sensorer?',
   DEVICE_ENTITIES: 'Enhets-entiteter',
-  USER_CUSTOMIZATION: 'Användaranpassningar',
   SUPPORT_INFORMATION: 'Supportinformation',
   CLICK_HERE: 'Klicka Här',
   HELP_INFORMATION_1: 'Besök Wikin för instruktioner för hur du kan konfigurera EMS-ESP',
@@ -209,6 +208,7 @@ const sv: Translation = {
   COMPACT: 'Komprimera',
   ENABLE_OTA: 'Aktivera OTA-uppdateringar',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Ladda ner entitetsanpassningar',
+  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Ladda ner applikationsinställningar. Var försiktig om du delar dina iställlningar då de innehåller lösenord och annan känslig systeminformation',
   UPLOAD_TEXT: 'Ladda upp ett nytt firmware (.bin), inställningar eller anpassningar (.json) nedan',
   UPLOADING: 'Laddar upp',
@@ -240,8 +240,9 @@ const sv: Translation = {
   MQTT_RESPONSE: 'Publish-kommando som ett `response` topic',
   MQTT_PUBLISH_TEXT_1: 'Publicera single value topics vid värdeförändring',
   MQTT_PUBLISH_TEXT_2: 'Publicera till kommando-topics (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Aktivera MQTT Discovery (Home Assistant, Domoticz)',
+  MQTT_PUBLISH_TEXT_3: 'Aktivera MQTT Discovery',
   MQTT_PUBLISH_TEXT_4: 'Prefix för  Discovery topics',
+  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
   MQTT_PUBLISH_INTERVALS: 'Publiceringsintervall',
   MQTT_INT_BOILER: 'Värmepump/panna',
   MQTT_INT_THERMOSTATS: 'Termostater',
@@ -303,7 +304,21 @@ const sv: Translation = {
   NEW_NAME_OF: 'Byt namn {0}',
   ENTITY: 'Entitet',
   MIN: 'min',
-  MAX: 'max'
+  MAX: 'max',
+  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
+  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
+  STAY: 'Stay', // TODO translate
+  LEAVE: 'Leave', // TODO translate
+  SCHEDULER: 'Scheduler', // TODO translate
+  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP', // TODO translate
+  SCHEDULE: 'Schedule', // TODO translate
+  TIME: 'Time', // TODO translate
+  TIMER: 'Timer', // TODO translate
+  WEEKLY: 'Weekly', // TODO translate
+  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_TIMER_1: 'on startup', // TODO translate
+  SCHEDULE_TIMER_2: 'every minute', // TODO translate
+  SCHEDULE_TIMER_3: 'every hour' // TODO translate
 };
 
 export default sv;

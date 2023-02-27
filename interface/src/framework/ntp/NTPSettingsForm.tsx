@@ -2,27 +2,36 @@ import { FC, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
 
 import { Button, Checkbox, MenuItem } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
+import WarningIcon from '@mui/icons-material/Warning';
+import CancelIcon from '@mui/icons-material/Cancel';
 
-import { validate } from '../../validators';
-import { BlockFormControlLabel, ButtonRow, FormLoader, SectionContent, ValidatedTextField } from '../../components';
-import { NTPSettings } from '../../types';
-import { updateValue, useRest } from '../../utils';
-import * as NTPApi from '../../api/ntp';
+import { validate } from 'validators';
+import {
+  BlockFormControlLabel,
+  ButtonRow,
+  FormLoader,
+  SectionContent,
+  ValidatedTextField,
+  BlockNavigation
+} from 'components';
+import { NTPSettings } from 'types';
+import { updateValueDirty, useRest } from 'utils';
+import * as NTPApi from 'api/ntp';
 import { selectedTimeZone, timeZoneSelectItems, TIME_ZONES } from './TZ';
-import { NTP_SETTINGS_VALIDATOR } from '../../validators/ntp';
+import { NTP_SETTINGS_VALIDATOR } from 'validators/ntp';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const NTPSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<NTPSettings>({
-    read: NTPApi.readNTPSettings,
-    update: NTPApi.updateNTPSettings
-  });
+  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
+    useRest<NTPSettings>({
+      read: NTPApi.readNTPSettings,
+      update: NTPApi.updateNTPSettings
+    });
 
   const { LL } = useI18nContext();
 
-  const updateFormValue = updateValue(setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
@@ -79,24 +88,37 @@ const NTPSettingsForm: FC = () => {
           <MenuItem disabled>{LL.TIME_ZONE()}...</MenuItem>
           {timeZoneSelectItems()}
         </ValidatedTextField>
-        <ButtonRow>
-          <Button
-            startIcon={<SaveIcon />}
-            disabled={saving}
-            variant="outlined"
-            color="primary"
-            type="submit"
-            onClick={validateAndSubmit}
-          >
-            {LL.SAVE()}
-          </Button>
-        </ButtonRow>
+        {dirtyFlags && dirtyFlags.length !== 0 && (
+          <ButtonRow>
+            <Button
+              startIcon={<CancelIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={() => loadData()}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              startIcon={<WarningIcon color="warning" />}
+              disabled={saving}
+              variant="contained"
+              color="info"
+              type="submit"
+              onClick={validateAndSubmit}
+            >
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
+            </Button>
+          </ButtonRow>
+        )}
       </>
     );
   };
 
   return (
     <SectionContent title={LL.SETTINGS_OF('NTP')} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );
