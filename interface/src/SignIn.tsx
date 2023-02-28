@@ -103,10 +103,12 @@ const SignIn: FC = () => {
       >
         <Typography variant="h4">{PROJECT_NAME}</Typography>
         <Box
+          mt={2}
+          mb={2}
           sx={{
             '& button, & a, & .MuiCard-root': {
-              mt: 0.5,
-              mx: 0.5
+              mt: 1,
+              mx: 1
             }
           }}
         >
