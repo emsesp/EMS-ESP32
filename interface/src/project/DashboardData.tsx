@@ -651,7 +651,7 @@ const DashboardData: FC = () => {
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
-                <ListItemText primary={LL.TYPE()} secondary={coreData.devices[deviceDialog].t} />
+                <ListItemText primary={LL.TYPE()} secondary={coreData.devices[deviceDialog].tn} />
               </ListItem>
               <ListItem>
                 <ListItemText primary={LL.NAME(0)} secondary={coreData.devices[deviceDialog].n} />
