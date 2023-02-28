@@ -237,7 +237,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     check_flag(prev, settings.ems_bus_id, ChangeFlags::RESTART);
 
     prev               = settings.low_clock;
-    settings.low_clock = root["low_clock"] | false;
+    settings.low_clock = root["low_clock"];
     check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
 
     //
@@ -284,10 +284,10 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
     settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
 
-    settings.fahrenheit = root["fahrenheit"] | false;
+    settings.fahrenheit = root["fahrenheit"];
     EMSESP::system_.fahrenheit(settings.fahrenheit);
 
-    settings.readonly_mode = root["readonly_mode"] | false;
+    settings.readonly_mode = root["readonly_mode"];
     EMSESP::system_.readonly_mode(settings.readonly_mode);
 
     settings.bool_dashboard = root["bool_dashboard"] | EMSESP_DEFAULT_BOOL_FORMAT;
