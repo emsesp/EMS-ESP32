@@ -3,11 +3,12 @@ import { Navigate, Routes, Route, useNavigate, useLocation } from 'react-router-
 import { AxiosError } from 'axios';
 
 import * as AuthenticationApi from 'api/authentication';
-import { PROJECT_PATH } from 'api/env';
 import { AXIOS } from 'api/endpoints';
 import { Layout, RequireAdmin } from 'components';
 
-import ProjectRouting from 'project/ProjectRouting';
+import Dashboard from './project/Dashboard';
+import Settings from './project/Settings';
+import Help from './project/Help';
 
 import NetworkConnection from 'framework/network/NetworkConnection';
 import AccessPoint from 'framework/ap/AccessPoint';
@@ -39,7 +40,17 @@ const AuthenticatedRouting: FC = () => {
   return (
     <Layout>
       <Routes>
-        <Route path={`/${PROJECT_PATH}/*`} element={<ProjectRouting />} />
+        <Route path="/dashboard/*" element={<Dashboard />} />
+        <Route
+          path="/settings/*"
+          element={
+            <RequireAdmin>
+              <Settings />
+            </RequireAdmin>
+          }
+        />
+        <Route path="/help/*" element={<Help />} />
+
         <Route path="/network/*" element={<NetworkConnection />} />
         <Route path="/ap/*" element={<AccessPoint />} />
         <Route path="/ntp/*" element={<NetworkTime />} />
