@@ -30,6 +30,7 @@ import { ReactComponent as SVflag } from 'i18n/SV.svg';
 import { ReactComponent as PLflag } from 'i18n/PL.svg';
 import { ReactComponent as NOflag } from 'i18n/NO.svg';
 import { ReactComponent as FRflag } from 'i18n/FR.svg';
+import { ReactComponent as TRflag } from 'i18n/TR.svg';
 
 const ItemTypography = styled(Typography)<TypographyProps>({
   maxWidth: '250px',
@@ -102,6 +103,10 @@ const LayoutAuthMenu: FC = () => {
         <MenuItem key="sv" value="sv">
           <SVflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;SV
+        </MenuItem>
+        <MenuItem key="tr" value="tr">
+          <TRflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;TR
         </MenuItem>
       </TextField>
 
