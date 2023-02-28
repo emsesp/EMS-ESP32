@@ -100,7 +100,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     // reset is a command uses a dummy variable which is always zero, shown as blank, but provides command enum options
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &reset_, DeviceValueType::CMD, FL_(enum_reset), FL_(reset), DeviceValueUOM::NONE, MAKE_CF_CB(set_reset));
     has_update(reset_, 0);
-
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &forceHeatingOff_,
+                          DeviceValueType::BOOL,
+                          FL_(forceHeatingOff),
+                          DeviceValueUOM::NONE,
+                          MAKE_CF_CB(set_forceHeatingOff));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingActive_, DeviceValueType::BOOL, FL_(heatingActive), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &tapwaterActive_, DeviceValueType::BOOL, FL_(tapwaterActive), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &selFlowTemp_, DeviceValueType::UINT, FL_(selFlowTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flow_temp));
@@ -875,6 +880,11 @@ void Boiler::check_active(const bool force) {
         Mqtt::publish(F_(tapwater_active), Helpers::render_boolean(s, b));
         EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
     }
+
+    if (!Helpers::hasValue(forceHeatingOff_, EMS_VALUE_BOOL)) {
+        EMSESP::webSettingsService.read([&](WebSettings & settings) { forceHeatingOff_ = (settings.boiler_heatingoff || selFlowTemp_ == 0) ? 1 : 0; });
+        has_update(&forceHeatingOff_);
+    }
 }
 
 // 0x18
@@ -1075,6 +1085,11 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, burn2WorkMin_, 16, 3); // force to 3 bytes
     has_update(telegram, heatWorkMin_, 19, 3);  // force to 3 bytes
     has_update(telegram, heatStarts_, 22, 3);   // force to 3 bytes
+
+    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0) {
+        uint8_t data[] = {0, 0, 0, 0};
+        write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
+    }
 }
 
 /*
@@ -1105,6 +1120,11 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, heatStarts_, 22, 3);   // force to 3 bytes
     has_update(telegram, heatingPumpMod_, 25);
     // temperature measurements at 4, see #620
+
+    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0) {
+        uint8_t data[] = {0, 0, 0, 0};
+        write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
+    }
 }
 
 /*
@@ -1711,7 +1731,9 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
     }
 
     //  no write/verify if there is no change, see https://github.com/emsesp/EMS-ESP32/issues/654
+    // put it to end of tx-queue
     if (v == selFlowTemp_) {
+        EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, device_id(), EMS_TYPE_UBASetPoints, 0, (uint8_t *) &v, 1, 0, false);
         return true;
     }
 
@@ -2569,6 +2591,19 @@ bool Boiler::set_wwAltOpPrio(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2number(value, v)) {
         write_command(0x484, id, v, 0x484);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_forceHeatingOff(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        has_update(forceHeatingOff_, v);
+        if (!v && Helpers::hasValue(heatingTemp_)) {
+            uint8_t data[] = {heatingTemp_, (Helpers::hasValue(burnMaxPower_) ? burnMaxPower_ : (uint8_t)100), (Helpers::hasValue(pumpModMax_) ? pumpModMax_ : (uint8_t)0), 0};
+            write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
+        }
         return true;
     }
     return false;
