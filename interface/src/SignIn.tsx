@@ -25,6 +25,7 @@ import { ReactComponent as SVflag } from 'i18n/SV.svg';
 import { ReactComponent as PLflag } from 'i18n/PL.svg';
 import { ReactComponent as NOflag } from 'i18n/NO.svg';
 import { ReactComponent as FRflag } from 'i18n/FR.svg';
+import { ReactComponent as TRflag } from 'i18n/TR.svg';
 
 const SignIn: FC = () => {
   const authenticationContext = useContext(AuthenticationContext);
@@ -136,6 +137,10 @@ const SignIn: FC = () => {
           <Button size="small" variant={locale === 'sv' ? 'contained' : 'outlined'} onClick={() => selectLocale('sv')}>
             <SVflag style={{ width: 24 }} />
             &nbsp;SV
+          </Button>
+          <Button size="small" variant={locale === 'tr' ? 'contained' : 'outlined'} onClick={() => selectLocale('tr')}>
+            <TRflag style={{ width: 24 }} />
+            &nbsp;TR
           </Button>
         </Box>
 

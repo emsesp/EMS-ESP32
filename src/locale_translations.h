@@ -28,151 +28,153 @@
 #define EMSESP_LOCALE_PL "pl"
 #define EMSESP_LOCALE_NO "no"
 #define EMSESP_LOCALE_FR "fr"
+#define EMSESP_LOCALE_TR "tr"
 
-// translations are in order en, de, nl, sv, pl, no, fr, ....
+// translations are in order en, de, nl, sv, pl, no, fr, tr, ....
 // if there is no translation, it will default to en
 
 // device types, as display in Web and Console
-MAKE_TRANSLATION(boiler_device, "Boiler", "Kessel", "Boiler", "Värmepanna") // TODO translate
-MAKE_TRANSLATION(thermostat_device, "Thermostat", "Thermostat", "Thermostaat", "Termostat") // TODO translate
-MAKE_TRANSLATION(heatpump_device, "Heat Pump", "Wärmepumpe", "Warmtepomp", "Värmepump") // TODO translate
-MAKE_TRANSLATION(solar_device, "Solar Module", "Solarmodul", "Solar Module", "Solmodul") // TODO translate
-MAKE_TRANSLATION(connect_device, "Connect Module", "Verbindungsmodul", "Connect Module", "Uppkopplingsmodul") // TODO translate
-MAKE_TRANSLATION(mixer_device, "Mixer Module", "Mischermodul", "Mixer Module", "Blandningsmodul") // TODO translate
-MAKE_TRANSLATION(controller_device, "Controller Module", "Kontrollmodul", "Controller Module", "Styrmodul") // TODO translate
-MAKE_TRANSLATION(switch_device, "Switch Module", "Schaltmodul", "Switch Module", "Relämodul") // TODO translate
-MAKE_TRANSLATION(gateway_device, "Gateway Module", "Gateway Modul", "Gateway Module", "Gateway") // TODO translate
-MAKE_TRANSLATION(alert_device, "Alert Module", "Alarmmodul", "Alert Module", "Larmmodul") // TODO translate
-MAKE_TRANSLATION(pump_device, "Pump Module", "Pumpenmodul", "Pump Module", "Pumpmodul") // TODO translate
-MAKE_TRANSLATION(heatsource_device, "Heatsource", "Heizquelle", "Heatsource", "Värmekälla") // TODO translate
-MAKE_TRANSLATION(sensors_device, "Sensors", "Sensoren", "Sensoren", "Sensorer", "czujniki", "Sensorer", "Capteurs") // TODO translate
-MAKE_TRANSLATION(unknown_device, "Unknown", "Unbekannt", "Onbekend", "Okänt", "Nieznane urządzenie", "Ukjent", "Inconnu") // TODO translate
+MAKE_TRANSLATION(boiler_device, "Boiler", "Kessel", "Boiler", "Värmepanna", "Kocioł", "", "", "Kazan")
+MAKE_TRANSLATION(thermostat_device, "Thermostat", "Thermostat", "Thermostaat",  "Termostat", "Termostat", "", "", "Termostat")
+MAKE_TRANSLATION(heatpump_device, "Heat Pump", "Wärmepumpe", "Warmtepomp",  "Värmepump", "Pompa ciepła", "", "", "Isı Pompası")
+MAKE_TRANSLATION(solar_device, "Solar Module", "Solarmodul", "Solar Module",  "Solmodul", "Moduł solarny", "", "", "Güneş Enerjisi Cihazı")
+MAKE_TRANSLATION(connect_device, "Connect Module", "Verbindungsmodul", "Connect Module",  "Uppkopplingsmodul", "Moduł przyłączeniowy", "", "", "Güneş Enerjisi Cihazı")
+MAKE_TRANSLATION(mixer_device, "Mixer Module", "Mischermodul", "Mixer Module",  "Blandningsmodul", "Moduł mieszacza", "", "", "Karışım Cihazı")
+MAKE_TRANSLATION(controller_device, "Controller Module", "Kontrollmodul", "Controller Module",  "Styrmodul", "Moduł sterujący", "", "", "Kontrol Ünitesi")
+MAKE_TRANSLATION(switch_device, "Switch Module", "Schaltmodul", "Switch Module",  "Relämodul", "Moduł przełączający", "", "", "Anahtar")
+MAKE_TRANSLATION(gateway_device, "Gateway Module", "Gateway Modul", "Gateway Module",  "Gateway", "Moduł IP", "", "", "Ağ Geçidi")
+MAKE_TRANSLATION(alert_device, "Alert Module", "Alarmmodul", "Alert Module",  "Larmmodul", "Moduł alarmowy", "", "", "Alarm Cihazı")
+MAKE_TRANSLATION(pump_device, "Pump Module", "Pumpenmodul", "Pump Module",  "Pumpmodul", "Moduł pompy", "", "", "Pompa")
+MAKE_TRANSLATION(heatsource_device, "Heatsource", "Heizquelle", "Heatsource",  "Värmekälla", "Źródło ciepła", "", "", "Isı Kaynağı")
+MAKE_TRANSLATION(sensors_device, "Sensors", "Sensoren", "Sensoren", "Sensorer", "czujniki", "Sensorer", "Capteurs", "Sensör Cihazı")
+MAKE_TRANSLATION(unknown_device, "Unknown", "Unbekannt", "Onbekend", "Okänt", "Nieznane urządzenie", "Ukjent", "Inconnu")
 
 // commands
-MAKE_TRANSLATION(info_cmd, "lists all values", "Liste aller Werte")
-MAKE_TRANSLATION(commands_cmd, "lists all commands", "Liste aller Kommandos")
-MAKE_TRANSLATION(entities_cmd, "lists all entities", "Liste aller Entitäten")
-MAKE_TRANSLATION(send_cmd, "send a telegram", "Sende EMS-Telegramm")
-MAKE_TRANSLATION(setiovalue_cmd, "set io value", "Setze Wertevorgabe")
-MAKE_TRANSLATION(changeloglevel_cmd, "change log level", "Ändere Sysloglevel")
-MAKE_TRANSLATION(fetch_cmd, "refresh all EMS values", "Lese alle EMS-Werte neu")
-MAKE_TRANSLATION(restart_cmd, "restart EMS-ESP", "Neustart")
-MAKE_TRANSLATION(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme")
-MAKE_TRANSLATION(publish_cmd, "publish all to MQTT", "Publiziere MQTT")
-MAKE_TRANSLATION(system_info_cmd, "show system status", "Zeige System-Status")
+MAKE_TRANSLATION(info_cmd, "lists all values", "Liste aller Werte", "", "", "", "", "", "Tüm değerleri listele")
+MAKE_TRANSLATION(commands_cmd, "lists all commands", "Liste aller Kommandos", "", "", "", "", "", "Tüm komutları listele")
+MAKE_TRANSLATION(entities_cmd, "lists all entities", "Liste aller Entitäten", "", "", "", "", "", "Tüm varlıkları listele")
+MAKE_TRANSLATION(send_cmd, "send a telegram", "Sende EMS-Telegramm", "", "", "", "", "", "Bir telegram gönder")
+MAKE_TRANSLATION(setiovalue_cmd, "set io value", "Setze Wertevorgabe", "", "", "", "", "", "Giriş/Çıkış değerlerini ayarla")
+MAKE_TRANSLATION(changeloglevel_cmd, "change log level", "Ändere Sysloglevel", "", "", "", "", "", "Kayıt seviyesini değiştir")
+MAKE_TRANSLATION(fetch_cmd, "refresh all EMS values", "Lese alle EMS-Werte neu", "", "", "", "", "", "Bütün EMS değerlerini yenile")
+MAKE_TRANSLATION(restart_cmd, "restart EMS-ESP", "Neustart", "", "", "", "", "", "EMS-ESPyi yeniden başlat")
+MAKE_TRANSLATION(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme", "", "", "", "", "", "Gelen telegramları ")
+MAKE_TRANSLATION(publish_cmd, "publish all to MQTT", "Publiziere MQTT", "", "", "", "", "", "Hepsini MQTTye gönder")
+MAKE_TRANSLATION(system_info_cmd, "show system status", "Zeige System-Status", "", "", "", "", "", "Sistem Durumunu Göster")
 
 // tags
-MAKE_TRANSLATION(tag_boiler_data_ww, "dhw", "WW", "dhw", "VV", "CWU", "dhw", "ecs")
-MAKE_TRANSLATION(tag_device_data_ww, "dhw", "WW", "dhw", "VV", "CWU", "dhw", "ecs")
-MAKE_TRANSLATION(tag_hc1, "hc1", "HK1", "hc1", "VK1", "OG1", "hc1", "hc1")
-MAKE_TRANSLATION(tag_hc2, "hc2", "HK2", "hc2", "VK2", "OG2", "hc2", "hc2")
-MAKE_TRANSLATION(tag_hc3, "hc3", "HK3", "hc3", "VK3", "OG3", "hc3", "hc3")
-MAKE_TRANSLATION(tag_hc4, "hc4", "HK4", "hc4", "VK4", "OG4", "hc4", "hc4")
-MAKE_TRANSLATION(tag_hc5, "hc5", "HK5", "hc5", "VK5", "OG5", "hc5", "hc5")
-MAKE_TRANSLATION(tag_hc6, "hc6", "HK6", "hc6", "vk6", "OG6", "hc6", "hc6")
-MAKE_TRANSLATION(tag_hc7, "hc7", "HK7", "hc7", "VK7", "OG7", "hc7", "hc7")
-MAKE_TRANSLATION(tag_hc8, "hc8", "HK8", "hc8", "VK8", "OG8", "hc8", "hc8")
-MAKE_TRANSLATION(tag_wwc1, "wwc1", "WWK1", "wwc1", "VVK1", "CWU1", "wwc1", "wwc1")
-MAKE_TRANSLATION(tag_wwc2, "wwc2", "WWK2", "wwc2", "VVK2", "CWU2", "wwc2", "wwc2")
-MAKE_TRANSLATION(tag_wwc3, "wwc3", "WWK3", "wwc3", "VVK3", "CWU3", "wwc3", "wwc3")
-MAKE_TRANSLATION(tag_wwc4, "wwc4", "WWK4", "wwc4", "VVK4", "CWU4", "wwc4", "wwc4")
-MAKE_TRANSLATION(tag_wwc5, "wwc5", "WWK5", "wwc5", "VVK5", "CWU5", "wwc5", "wwc5")
-MAKE_TRANSLATION(tag_wwc6, "wwc6", "WWK6", "wwc6", "VVK6", "CWU6", "wwc6", "wwc6")
-MAKE_TRANSLATION(tag_wwc7, "wwc7", "WWK7", "wwc7", "VVK7", "CWU7", "wwc7", "wwc7")
-MAKE_TRANSLATION(tag_wwc8, "wwc8", "WWK8", "wwc8", "VVK8", "CWU8", "wwc8", "wwc8")
-MAKE_TRANSLATION(tag_wwc9, "wwc9", "WWK9", "wwc9", "VVK9", "CWU9", "wwc9", "wwc9")
-MAKE_TRANSLATION(tag_wwc10, "wwc10", "WWK10", "wwc10", "VVK10", "CWU10", "wwc10", "wwc10")
-MAKE_TRANSLATION(tag_ahs1, "ahs1", "AHQ1", "ahs1", "AVK1", "AŹC1", "ahs1", "ahs1")
-MAKE_TRANSLATION(tag_hs1, "hs1", "hs1", "hs1", "VK1", "ŹC1", "hs1", "hs1")
-MAKE_TRANSLATION(tag_hs2, "hs2", "hs2", "hs2", "VK2", "ŹC2", "hs2", "hs2")
-MAKE_TRANSLATION(tag_hs3, "hs3", "hs3", "hs3", "VK3", "ŹC3", "hs3", "hs3")
-MAKE_TRANSLATION(tag_hs4, "hs4", "hs4", "hs4", "VK4", "ŹC4", "hs4", "hs4")
-MAKE_TRANSLATION(tag_hs5, "hs5", "hs5", "hs5", "VK5", "ŹC5", "hs5", "hs5")
-MAKE_TRANSLATION(tag_hs6, "hs6", "hs6", "hs6", "VK6", "ŹC6", "hs6", "hs6")
-MAKE_TRANSLATION(tag_hs7, "hs7", "hs7", "hs7", "VK7", "ŹC7", "hs7", "hs7")
-MAKE_TRANSLATION(tag_hs8, "hs8", "hs8", "hs8", "VK8", "ŹC8", "hs8", "hs8")
-MAKE_TRANSLATION(tag_hs9, "hs9", "hs9", "hs9", "VK9", "ŹC9", "hs9", "hs9")
-MAKE_TRANSLATION(tag_hs10, "hs10", "hs10", "hs10", "VK10", "ŹC10", "hs10", "hs10")
-MAKE_TRANSLATION(tag_hs11, "hs11", "hs11", "hs11", "VK11", "ŹC11", "hs11", "hs11")
-MAKE_TRANSLATION(tag_hs12, "hs12", "hs12", "hs12", "VK12", "ŹC12", "hs12", "hs12")
-MAKE_TRANSLATION(tag_hs13, "hs13", "hs13", "hs13", "VK13", "ŹC13", "hs13", "hs13")
-MAKE_TRANSLATION(tag_hs14, "hs14", "hs14", "hs14", "VK14", "ŹC14", "hs14", "hs14")
-MAKE_TRANSLATION(tag_hs15, "hs15", "hs15", "hs15", "VK15", "ŹC15", "hs15", "hs15")
-MAKE_TRANSLATION(tag_hs16, "hs16", "hs16", "hs16", "VK16", "ŹC16", "hs16", "hs16")
+MAKE_TRANSLATION(tag_boiler_data_ww, "dhw", "WW", "dhw", "VV", "CWU", "dhw", "ecs", "SKS")
+MAKE_TRANSLATION(tag_device_data_ww, "dhw", "WW", "dhw", "VV", "CWU", "dhw", "ecs", "SKS")
+MAKE_TRANSLATION(tag_hc1, "hc1", "HK1", "hc1", "VK1", "OG1", "hc1", "hc1", "ID1")
+MAKE_TRANSLATION(tag_hc2, "hc2", "HK2", "hc2", "VK2", "OG2", "hc2", "hc2", "ID2")
+MAKE_TRANSLATION(tag_hc3, "hc3", "HK3", "hc3", "VK3", "OG3", "hc3", "hc3", "ID3")
+MAKE_TRANSLATION(tag_hc4, "hc4", "HK4", "hc4", "VK4", "OG4", "hc4", "hc4", "ID4")
+MAKE_TRANSLATION(tag_hc5, "hc5", "HK5", "hc5", "VK5", "OG5", "hc5", "hc5", "ID5")
+MAKE_TRANSLATION(tag_hc6, "hc6", "HK6", "hc6", "vk6", "OG6", "hc6", "hc6", "ID6")
+MAKE_TRANSLATION(tag_hc7, "hc7", "HK7", "hc7", "VK7", "OG7", "hc7", "hc7", "ID7")
+MAKE_TRANSLATION(tag_hc8, "hc8", "HK8", "hc8", "VK8", "OG8", "hc8", "hc8", "ID8")
+MAKE_TRANSLATION(tag_wwc1, "wwc1", "WWK1", "wwc1", "VVK1", "CWU1", "wwc1", "wwc1", "SKS1")
+MAKE_TRANSLATION(tag_wwc2, "wwc2", "WWK2", "wwc2", "VVK2", "CWU2", "wwc2", "wwc2", "SKS2")
+MAKE_TRANSLATION(tag_wwc3, "wwc3", "WWK3", "wwc3", "VVK3", "CWU3", "wwc3", "wwc3", "SKS3")
+MAKE_TRANSLATION(tag_wwc4, "wwc4", "WWK4", "wwc4", "VVK4", "CWU4", "wwc4", "wwc4", "SKS4")
+MAKE_TRANSLATION(tag_wwc5, "wwc5", "WWK5", "wwc5", "VVK5", "CWU5", "wwc5", "wwc5", "SKS5")
+MAKE_TRANSLATION(tag_wwc6, "wwc6", "WWK6", "wwc6", "VVK6", "CWU6", "wwc6", "wwc6", "SKS6")
+MAKE_TRANSLATION(tag_wwc7, "wwc7", "WWK7", "wwc7", "VVK7", "CWU7", "wwc7", "wwc7", "SKS7")
+MAKE_TRANSLATION(tag_wwc8, "wwc8", "WWK8", "wwc8", "VVK8", "CWU8", "wwc8", "wwc8", "SKS8")
+MAKE_TRANSLATION(tag_wwc9, "wwc9", "WWK9", "wwc9", "VVK9", "CWU9", "wwc9", "wwc9", "SKS9")
+MAKE_TRANSLATION(tag_wwc10, "wwc10", "WWK10", "wwc10", "VVK10", "CWU10", "wwc10", "wwc10", "SKS10")
+MAKE_TRANSLATION(tag_ahs1, "ahs1", "AHQ1", "ahs1", "AVK1", "AŹC1", "ahs1", "ahs1", "ahs1")
+MAKE_TRANSLATION(tag_hs1, "hs1", "hs1", "hs1", "VK1", "ŹC1", "hs1", "hs1", "hs1")
+MAKE_TRANSLATION(tag_hs2, "hs2", "hs2", "hs2", "VK2", "ŹC2", "hs2", "hs2", "hs2")
+MAKE_TRANSLATION(tag_hs3, "hs3", "hs3", "hs3", "VK3", "ŹC3", "hs3", "hs3", "hs3")
+MAKE_TRANSLATION(tag_hs4, "hs4", "hs4", "hs4", "VK4", "ŹC4", "hs4", "hs4", "hs4")
+MAKE_TRANSLATION(tag_hs5, "hs5", "hs5", "hs5", "VK5", "ŹC5", "hs5", "hs5", "hs5")
+MAKE_TRANSLATION(tag_hs6, "hs6", "hs6", "hs6", "VK6", "ŹC6", "hs6", "hs6", "hs6")
+MAKE_TRANSLATION(tag_hs7, "hs7", "hs7", "hs7", "VK7", "ŹC7", "hs7", "hs7", "hs7")
+MAKE_TRANSLATION(tag_hs8, "hs8", "hs8", "hs8", "VK8", "ŹC8", "hs8", "hs8", "hs8")
+MAKE_TRANSLATION(tag_hs9, "hs9", "hs9", "hs9", "VK9", "ŹC9", "hs9", "hs9", "hs9")
+MAKE_TRANSLATION(tag_hs10, "hs10", "hs10", "hs10", "VK10", "ŹC10", "hs10", "hs10", "hs10")
+MAKE_TRANSLATION(tag_hs11, "hs11", "hs11", "hs11", "VK11", "ŹC11", "hs11", "hs11", "hs11")
+MAKE_TRANSLATION(tag_hs12, "hs12", "hs12", "hs12", "VK12", "ŹC12", "hs12", "hs12", "hs12")
+MAKE_TRANSLATION(tag_hs13, "hs13", "hs13", "hs13", "VK13", "ŹC13", "hs13", "hs13", "hs13")
+MAKE_TRANSLATION(tag_hs14, "hs14", "hs14", "hs14", "VK14", "ŹC14", "hs14", "hs14", "hs14")
+MAKE_TRANSLATION(tag_hs15, "hs15", "hs15", "hs15", "VK15", "ŹC15", "hs15", "hs15", "hs15")
+MAKE_TRANSLATION(tag_hs16, "hs16", "hs16", "hs16", "VK16", "ŹC16", "hs16", "hs16", "hs16")
+
 
 // General
-MAKE_TRANSLATION(on, "on", "an", "aan", "på", "włączono", "på", "on")
-MAKE_TRANSLATION(off, "off", "aus", "uit", "av", "wyłączono", "av", "off")
-MAKE_TRANSLATION(ON, "ON", "AN", "AAN", "PÅ", "wł.", "PÅ", "ON")
-MAKE_TRANSLATION(OFF, "OFF", "AUS", "UIT", "AV", "wył.", "AV", "OFF")
+MAKE_TRANSLATION(on, "on", "an", "aan", "på", "włączono", "på", "on", "açık")
+MAKE_TRANSLATION(off, "off", "aus", "uit", "av", "wyłączono", "av", "off", "kapalı")
+MAKE_TRANSLATION(ON, "ON", "AN", "AAN", "PÅ", "wł.", "PÅ", "ON", "AÇIK")
+MAKE_TRANSLATION(OFF, "OFF", "AUS", "UIT", "AV", "wył.", "AV", "OFF", "KAPALI")
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
 // uom - also used with HA see https://github.com/home-assistant/core/blob/d7ac4bd65379e11461c7ce0893d3533d8d8b8cbf/homeassistant/const.py#L384
-MAKE_TRANSLATION(minutes, "minutes", "Minuten", "Minuten", "Minuter", "minut", "Minutter", "minutes")
-MAKE_TRANSLATION(hours, "hours", "Stunden", "Uren", "Timmar", "godzin", "Timer", "heures")
-MAKE_TRANSLATION(days, "days", "Tage", "Dagen", "Dagar", "dni", "Dager", "jours")
-MAKE_TRANSLATION(seconds, "seconds", "Sekunden", "Seconden", "Sekunder", "sekund", "Sekunder", "secondes")
+MAKE_TRANSLATION(minutes, "minutes", "Minuten", "Minuten", "Minuter", "minut", "Minutter", "minutes", "dakika")
+MAKE_TRANSLATION(hours, "hours", "Stunden", "Uren", "Timmar", "godzin", "Timer", "heures", "saat")
+MAKE_TRANSLATION(days, "days", "Tage", "Dagen", "Dagar", "dni", "Dager", "jours", "gün")
+MAKE_TRANSLATION(seconds, "seconds", "Sekunden", "Seconden", "Sekunder", "sekund", "Sekunder", "secondes", "saniye")
 
 // Enum translations
 // general
-MAKE_TRANSLATION(day_mo, "mo", "Mo", "Mo", "Må", "poniedziałek", "Ma", "lun")
-MAKE_TRANSLATION(day_tu, "tu", "Di", "Di", "Ti", "wtorek", "Ti", "mar")
-MAKE_TRANSLATION(day_we, "we", "Mi", "Wo", "On", "środa", "On", "mer")
-MAKE_TRANSLATION(day_th, "th", "Do", "Do", "To", "czwartek", "To", "jeu")
-MAKE_TRANSLATION(day_fr, "fr", "Fr", "Vr", "Fr", "piątek", "Fr", "ven")
-MAKE_TRANSLATION(day_sa, "sa", "Sa", "Za", "Lö", "sobota", "Lø", "sam")
-MAKE_TRANSLATION(day_su, "su", "So", "Zo", "Sö", "niedziela", "Sø", "dim")
-MAKE_TRANSLATION(all, "all", "Alle", "Alle", "Alla", "codziennie", "alle", "tous")
-MAKE_TRANSLATION(own_1, "own 1", "Eigen 1", "Eigen 1", "Egen 1", "własny 1", "Egen 1", "propre 1")
-MAKE_TRANSLATION(family, "family", "Familie", "Familie", "Familj", "rodzina", "familie", "famille")
-MAKE_TRANSLATION(morning, "morning", "Morgends", "'s ochtends", "Morgon", "zmiana 1", "morgen", "matin")
-MAKE_TRANSLATION(evening, "evening", "Abends", "'s avonds", "Kväll", "zmiana 2", "kveld", "soir")
-MAKE_TRANSLATION(seniors, "seniors", "Senioren", "Senioren", "Seniorer", "senior", "seniorer", "séniors")
-MAKE_TRANSLATION(no, "no", "nein", "nee", "nej", "nie", "nei", "non")
-MAKE_TRANSLATION(new, "new", "Neu", "Nieuw", "Ny", "nowy", "ny", "nouveau")
-MAKE_TRANSLATION(own_2, "own 2", "Eigen 2", "Eigen 2", "Egen 2", "własny 2", "egen 2", "propre 2")
-MAKE_TRANSLATION(singles, "singles", "Singles", "Singles", "Singlar", "osoba samotna", "single", "seuls")
-MAKE_TRANSLATION(am, "am", "Vormittag", "Ochtend", "Förmiddag", "do południa", "formiddag", "matin")
-MAKE_TRANSLATION(pm, "pm", "Nachmittag", "Namiddag", "Eftermiddag", "po południu", "ettermiddag", "après-midi")
-MAKE_TRANSLATION(midday, "midday", "Mittag", "Middag", "Middag", "południe", "middag", "midi")
-MAKE_TRANSLATION(unknown, "unknown", "Unbekannt", "Onbekend", "Okänt", "nieznany", "ukjent", "inconnu")
-MAKE_TRANSLATION(flat, "flat", "flach", "vlak", "Platt", "płaski", "flat", "plat")
-MAKE_TRANSLATION(vacuum, "vacuum", "Vakuum", "vacuum", "Vakuum", "próżnia", "vakum", "vide")
-MAKE_TRANSLATION(co2_optimized, "co2 optimized", "CO2 optimiert", "CO2 geoptimaliseerd", "CO2-optimerad", "optymalizacja CO2", "co2 optimalisert", "optimisé en CO2")
-MAKE_TRANSLATION(cost_optimized, "cost optimized", "kostenoptimiert", "kosten geoptimaliseerd", "kostnadsoptimerad", "optymalizacja kosztów", "kostnadsoptimalisert", "optimisé en coût")
-MAKE_TRANSLATION(outside_temp_switched, "outside temp switched", "Außentemp. gesteuert", "Buitentemp. gestuurd", "Utomhustemp korrigerad", "temperatura zewn. przeł.", "utetemp optimalisert", "contrôle par temp. ext.")
-MAKE_TRANSLATION(co2_cost_mix, "co2 cost mix", "Kostenmix", "Kostenmix", "Kostnadsmix", "mieszany koszt CO2", "", "coût mixte CO2") // TODO translate
-MAKE_TRANSLATION(analog, "analog", "analog", "analoog", "analog", "analogowy", "analog", "analogique")
-MAKE_TRANSLATION(normal, "normal", "normal", "normaal", "normal", "normalny", "normal", "normal")
-MAKE_TRANSLATION(blocking, "blocking", "Blockierung", "Blokkering", "Blockering", "blokowanie", "blokkering", "bloquant")
-MAKE_TRANSLATION(extern, "extern", "extern", "extern", "extern", "zewnętrzny", "ekstern", "externe")
-MAKE_TRANSLATION(intern, "intern", "intern", "intern", "intern", "wewnętrzny", "intern", "interne")
-MAKE_TRANSLATION(lower, "lower", "niedirger", "lager", "lägre", "mniejszy", "nedre", "inférieur")
-MAKE_TRANSLATION(error, "error", "Fehler", "error", "Fel", "błąd", "", "erreur") // TODO translate
-MAKE_TRANSLATION(na, "n/a", "n/a", "n/a", "n/a", "nd.", "", "n/c") // TODO translate
+MAKE_TRANSLATION(day_mo, "mo", "Mo", "Mo", "Må", "poniedziałek", "Ma", "lun", "pzt")
+MAKE_TRANSLATION(day_tu, "tu", "Di", "Di", "Ti", "wtorek", "Ti", "mar", "sal")
+MAKE_TRANSLATION(day_we, "we", "Mi", "Wo", "On", "środa", "On", "mer", "çar")
+MAKE_TRANSLATION(day_th, "th", "Do", "Do", "To", "czwartek", "To", "jeu", "per")
+MAKE_TRANSLATION(day_fr, "fr", "Fr", "Vr", "Fr", "piątek", "Fr", "ven", "cum")
+MAKE_TRANSLATION(day_sa, "sa", "Sa", "Za", "Lö", "sobota", "Lø", "sam", "cts")
+MAKE_TRANSLATION(day_su, "su", "So", "Zo", "Sö", "niedziela", "Sø", "dim", "paz")
+MAKE_TRANSLATION(all, "all", "Alle", "Alle", "Alla", "codziennie", "alle", "tous", "tüm")
+MAKE_TRANSLATION(own_1, "own 1", "Eigen 1", "Eigen 1", "Egen 1", "własny 1", "Egen 1", "propre 1", "kendi 1")
+MAKE_TRANSLATION(family, "family", "Familie", "Familie", "Familj", "rodzina", "familie", "famille", "aile")
+MAKE_TRANSLATION(morning, "morning", "Morgends", "'s ochtends", "Morgon", "zmiana 1", "morgen", "matin", "sabah")
+MAKE_TRANSLATION(evening, "evening", "Abends", "'s avonds", "Kväll", "zmiana 2", "kveld", "soir", "akşam")
+MAKE_TRANSLATION(seniors, "seniors", "Senioren", "Senioren", "Seniorer", "senior", "seniorer", "séniors", "yaşlılar")
+MAKE_TRANSLATION(no, "no", "nein", "nee", "nej", "nie", "nei", "non", "hayır")
+MAKE_TRANSLATION(new, "new", "Neu", "Nieuw", "Ny", "nowy", "ny", "nouveau", "yeni")
+MAKE_TRANSLATION(own_2, "own 2", "Eigen 2", "Eigen 2", "Egen 2", "własny 2", "egen 2", "propre 2", "kendi 2")
+MAKE_TRANSLATION(singles, "singles", "Singles", "Singles", "Singlar", "osoba samotna", "single", "seuls", "")
+MAKE_TRANSLATION(am, "am", "Vormittag", "Ochtend", "Förmiddag", "do południa", "formiddag", "matin", "sabah")
+MAKE_TRANSLATION(pm, "pm", "Nachmittag", "Namiddag", "Eftermiddag", "po południu", "ettermiddag", "après-midi", "akşam")
+MAKE_TRANSLATION(midday, "midday", "Mittag", "Middag", "Middag", "południe", "middag", "midi", "öğlen")
+MAKE_TRANSLATION(unknown, "unknown", "Unbekannt", "Onbekend", "Okänt", "nieznany", "ukjent", "inconnu", "bilinmeyen")
+MAKE_TRANSLATION(flat, "flat", "flach", "vlak", "Platt", "płaski", "flat", "plat", "düz")
+MAKE_TRANSLATION(vacuum, "vacuum", "Vakuum", "vacuum", "Vakuum", "próżnia", "vakum", "vide", "vakum")
+MAKE_TRANSLATION(co2_optimized, "co2 optimized", "CO2 optimiert", "CO2 geoptimaliseerd", "CO2-optimerad", "optymalizacja CO2", "co2 optimalisert", "optimisé en CO2", "CO2 verimli")
+MAKE_TRANSLATION(cost_optimized, "cost optimized", "kostenoptimiert", "kosten geoptimaliseerd", "kostnadsoptimerad", "optymalizacja kosztów", "kostnadsoptimalisert", "optimisé en coût", "maliyet odaklı")
+MAKE_TRANSLATION(outside_temp_switched, "outside temp switched", "Außentemp. gesteuert", "Buitentemp. gestuurd", "Utomhustemp korrigerad", "temperatura zewn. przeł.", "utetemp optimalisert", "contrôle par temp. ext.", "dış hava sıcaklığına bağlı")
+MAKE_TRANSLATION(co2_cost_mix, "co2 cost mix", "Kostenmix", "Kostenmix", "Kostnadsmix", "mieszany koszt CO2", "", "coût mixte CO2", "karışık maliyet") // TODO translate
+MAKE_TRANSLATION(analog, "analog", "analog", "analoog", "analog", "analogowy", "analog", "analogique", "analog")
+MAKE_TRANSLATION(normal, "normal", "normal", "normaal", "normal", "normalny", "normal", "normal", "normal")
+MAKE_TRANSLATION(blocking, "blocking", "Blockierung", "Blokkering", "Blockering", "blokowanie", "blokkering", "bloquant", "engelleme")
+MAKE_TRANSLATION(extern, "extern", "extern", "extern", "extern", "zewnętrzny", "ekstern", "externe", "dış")
+MAKE_TRANSLATION(intern, "intern", "intern", "intern", "intern", "wewnętrzny", "intern", "interne", "iç")
+MAKE_TRANSLATION(lower, "lower", "niedirger", "lager", "lägre", "mniejszy", "nedre", "inférieur", "daha düşük")
+MAKE_TRANSLATION(error, "error", "Fehler", "error", "Fel", "błąd", "", "erreur", "Hata") // TODO translate
+MAKE_TRANSLATION(na, "n/a", "n/a", "n/a", "n/a", "nd.", "", "n/c", "mevcut değil") // TODO translate
 
 // boiler
-MAKE_TRANSLATION(time, "time", "Zeit", "Tijd", "Tid", "godzina", "tid", "heure")
-MAKE_TRANSLATION(date, "date", "Datum", "Datum", "Datum", "data", "dato", "date")
-MAKE_TRANSLATION(continuous, "continuous", "kontinuierlich", "continue", "kontinuerlig", "ciągły", "kontinuerlig", "continu")
-MAKE_TRANSLATION(3wayvalve, "3-way valve", "3-Wege Ventil", "3-weg klep", "trevägsventil", "zawór 3-drogowy", "treveisventil", "vanne 3 voies")
-MAKE_TRANSLATION(chargepump, "chargepump", "Ladepumpe", "laadpomp", "laddpump", "pompa ładująca", "ladepumpe", "pompe de charge")
-MAKE_TRANSLATION(hot, "hot", "Heiß", "Heet", "Het", "gorący", "het", "chaud")
-MAKE_TRANSLATION(high_comfort, "high comfort", "gehobener Komfort", "Verhoogd comfort", "Förhöjd komfort", "wysoki komfort", "høy komfort", "comfort")
-MAKE_TRANSLATION(eco, "eco", "Eco", "Eco", "Eko", "eko", "øko", "éco")
-MAKE_TRANSLATION(intelligent, "intelligent", "Intelligent", "Intelligent", "Intelligent", "inteligentny", "intelligent", "intelligent")
-MAKE_TRANSLATION(flow, "flow", "Durchfluss", "Volumestroom", "Flöde", "przepływ", "strømme", "débit")
-MAKE_TRANSLATION(manual, "manual", "Manuell", "Hamdmatig", "Manuell", "ręczny", "manuell", "manuel")
-MAKE_TRANSLATION(buffer, "buffer", "Speicher", "Buffer", "Buffert", "bufor", "buffer", "buffer")
-MAKE_TRANSLATION(bufferedflow, "buffered flow", "Durchlaufspeicher", "Doorstroombuffer", "Buffertflöde", "przepływ buforowany", "bufret strømning", "") // TODO translate
-MAKE_TRANSLATION(layeredbuffer, "layered buffer", "Schichtspeicher", "Gelaagde buffer", "Lagrad buffert", "bufor warstwowy", "lagdelt buffer", "") // TODO translate
-MAKE_TRANSLATION(maintenance, "maintenance", "Wartung", "Onderhoud", "Underhåll", "przegląd", "vedlikehold", "maintenance")
-MAKE_TRANSLATION(heating, "heating", "Heizen", "Verwarmen", "Uppvärmning", "ogrzewanie", "oppvarming", "chauffage")
-MAKE_TRANSLATION(cooling, "cooling", "Kühlen", "Koelen", "Kyler", "chłodzenie", "kjøling", "refroidissement")
-MAKE_TRANSLATION(disinfecting, "disinfecting", "Desinfizieren", "Desinfecteren", "Desinficerar", "dezynfekcja termiczna", "desinfisering", "désinfection")
-MAKE_TRANSLATION(no_heat, "no heat", "keine Wärme", "Geen warmte", "Ingen värme", "brak ciepła", "ingen varme", "pas de chauffage")
-MAKE_TRANSLATION(heatrequest, "heat request", "Wärmeanforderung", "Verwarmignsverzoek", "Värmeförfrågan", "zapotrzebowanie na ciepło", "varmeforespørsel", "demande de chauffage")
-MAKE_TRANSLATION(valve, "valve", "Ventil", "Klep", "Ventil", "zawór", "ventil", "valve")
+MAKE_TRANSLATION(time, "time", "Zeit", "Tijd", "Tid", "godzina", "tid", "heure", "zaman")
+MAKE_TRANSLATION(date, "date", "Datum", "Datum", "Datum", "data", "dato", "date", "tarih")
+MAKE_TRANSLATION(continuous, "continuous", "kontinuierlich", "continue", "kontinuerlig", "ciągły", "kontinuerlig", "continu", "devam eden")
+MAKE_TRANSLATION(3wayvalve, "3-way valve", "3-Wege Ventil", "3-weg klep", "trevägsventil", "zawór 3-drogowy", "treveisventil", "vanne 3 voies" ,"3 yollu vana")
+MAKE_TRANSLATION(chargepump, "chargepump", "Ladepumpe", "laadpomp", "laddpump", "pompa ładująca", "ladepumpe", "pompe de charge", "besleme pompası")
+MAKE_TRANSLATION(hot, "hot", "Heiß", "Heet", "Het", "gorący", "het", "chaud", "sıcak")
+MAKE_TRANSLATION(high_comfort, "high comfort", "gehobener Komfort", "Verhoogd comfort", "Förhöjd komfort", "wysoki komfort", "høy komfort", "comfort", "komfor")
+MAKE_TRANSLATION(eco, "eco", "Eco", "Eco", "Eko", "eko", "øko", "éco", "eko")
+MAKE_TRANSLATION(intelligent, "intelligent", "Intelligent", "Intelligent", "Intelligent", "inteligentny", "intelligent", "intelligent", "akıllı")
+MAKE_TRANSLATION(flow, "flow", "Durchfluss", "Volumestroom", "Flöde", "przepływ", "strømme", "débit", "akım")
+MAKE_TRANSLATION(manual, "manual", "Manuell", "Hamdmatig", "Manuell", "ręczny", "manuell", "manuel", "manuel")
+MAKE_TRANSLATION(buffer, "buffer", "Speicher", "Buffer", "Buffert", "bufor", "buffer", "buffer", "tampon")
+MAKE_TRANSLATION(bufferedflow, "buffered flow", "Durchlaufspeicher", "Doorstroombuffer", "Buffertflöde", "przepływ buforowany", "bufret strømning", "", "tampon akım") // TODO translate
+MAKE_TRANSLATION(layeredbuffer, "layered buffer", "Schichtspeicher", "Gelaagde buffer", "Lagrad buffert", "bufor warstwowy", "lagdelt buffer", "", "katmanlı akım") // TODO translate
+MAKE_TRANSLATION(maintenance, "maintenance", "Wartung", "Onderhoud", "Underhåll", "przegląd", "vedlikehold", "maintenance", "bakım")
+MAKE_TRANSLATION(heating, "heating", "Heizen", "Verwarmen", "Uppvärmning", "ogrzewanie", "oppvarming", "chauffage", "ısıtma")
+MAKE_TRANSLATION(cooling, "cooling", "Kühlen", "Koelen", "Kyler", "chłodzenie", "kjøling", "refroidissement", "soğuma")
+MAKE_TRANSLATION(disinfecting, "disinfecting", "Desinfizieren", "Desinfecteren", "Desinficerar", "dezynfekcja termiczna", "desinfisering", "désinfection", "dezenfeksiyon")
+MAKE_TRANSLATION(no_heat, "no heat", "keine Wärme", "Geen warmte", "Ingen värme", "brak ciepła", "ingen varme", "pas de chauffage", "ısınma yok")
+MAKE_TRANSLATION(heatrequest, "heat request", "Wärmeanforderung", "Verwarmignsverzoek", "Värmeförfrågan", "zapotrzebowanie na ciepło", "varmeforespørsel", "demande de chauffage", "ısınma ihtiyacı")
+MAKE_TRANSLATION(valve, "valve", "Ventil", "Klep", "Ventil", "zawór", "ventil", "valve", "vana")
 MAKE_TRANSLATION(proportional, "proportional", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(deltaP1, "deltaP-1", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(deltaP2, "deltaP-2", "", "", "", "", "", "", "") // TODO translate
@@ -180,85 +182,86 @@ MAKE_TRANSLATION(deltaP3, "deltaP-3", "", "", "", "", "", "", "") // TODO transl
 MAKE_TRANSLATION(deltaP4, "deltaP-4", "", "", "", "", "", "", "") // TODO translate
 
 // heatpump
-MAKE_TRANSLATION(none, "none", "keine", "geen", "ingen", "brak", "ingen", "aucun")
-MAKE_TRANSLATION(hot_water, "hot water", "Warmwasser", "warm water", "varmvatten", "c.w.u.", "varmtvann", "eau chaude")
-MAKE_TRANSLATION(pool, "pool", "Pool", "zwembad", "pool", "basen", "basseng", "piscine")
-MAKE_TRANSLATION(outside_temp_alt, "outside temperature alt.", "Außentemp. alternativ", "", "Alternativ utomhustemp.", "temp. zewn. alternat.", "", "température extérieure alternative") // TODO translate
-MAKE_TRANSLATION(outside_temp_par, "outside temperature parallel", "Außentemp. parallel", "", "Parallell utomhustemp.", "temp. zewn. równoległa", "", "température extérieure parallèle") // TODO translate
-MAKE_TRANSLATION(hp_prefered, "heatpump prefered", "Wärmepumpe bevorzugt", "", "Värmepump föredraget", "preferowana pompa ciepła", "", "pompe à chaleur préférée") // TODO translate
-MAKE_TRANSLATION(boiler_only, "boiler only", "nur Kessel", "", "Värmepanna enbart", "tylko kocioł", "", "chaudière uniquement") // TODO translate
-MAKE_TRANSLATION(reduced_output, "reduced output", "Reduzierte Leistung", "", "Reducerad produktion", "zmniejszona wydajność", "", "sortie réduite") // TODO translate
-MAKE_TRANSLATION(switchoff, "switch off hp", "WP ausschalten", "", "Värmepump avstängd", "wyłącz pompę ciepła", "", "éteindre la PAC") // TODO translate
-MAKE_TRANSLATION(perm, "perm. reduced", "perm. reduziert", "", "Permanent reducerad", "stale zmniejszona wydajność", "", "réduction permanente") // TODO translate
+MAKE_TRANSLATION(none, "none", "keine", "geen", "ingen", "brak", "ingen", "aucun", "hiçbiri")
+MAKE_TRANSLATION(hot_water, "hot water", "Warmwasser", "warm water", "varmvatten", "c.w.u.", "varmtvann", "eau chaude", "sıcak su")
+MAKE_TRANSLATION(pool, "pool", "Pool", "zwembad", "pool", "basen", "basseng", "piscine", "havuz")
+MAKE_TRANSLATION(outside_temp_alt, "outside temperature alt.", "Außentemp. alternativ", "", "Alternativ utomhustemp.", "temp. zewn. alternat.", "", "température extérieure alternative", "alternatif dış sıcaklık") // TODO translate
+MAKE_TRANSLATION(outside_temp_par, "outside temperature parallel", "Außentemp. parallel", "", "Parallell utomhustemp.", "temp. zewn. równoległa", "", "température extérieure parallèle", "paralel dış sıcaklık") // TODO translate
+MAKE_TRANSLATION(hp_prefered, "heatpump prefered", "Wärmepumpe bevorzugt", "", "Värmepump föredraget", "preferowana pompa ciepła", "", "pompe à chaleur préférée", "tercih edilen pompa") // TODO translate
+MAKE_TRANSLATION(boiler_only, "boiler only", "nur Kessel", "", "Värmepanna enbart", "tylko kocioł", "", "chaudière uniquement", "sadece kazan") // TODO translate
+MAKE_TRANSLATION(reduced_output, "reduced output", "Reduzierte Leistung", "", "Reducerad produktion", "zmniejszona wydajność", "", "sortie réduite", "düşürülmüş çıkış") // TODO translate
+MAKE_TRANSLATION(switchoff, "switch off hp", "WP ausschalten", "", "Värmepump avstängd", "wyłącz pompę ciepła", "", "éteindre la PAC", "ısı pompasını kapat") // TODO translate
+MAKE_TRANSLATION(perm, "perm. reduced", "perm. reduziert", "", "Permanent reducerad", "stale zmniejszona wydajność", "", "réduction permanente", "sürekli azaltılmış") // TODO translate
 
 // thermostat
-MAKE_TRANSLATION(seltemp, "selTemp", "Solltemperatur", "Doeltemperatuur", "Börtemperatur", "temperatura zadana", "innstilt temperatur", "consigne température")
-MAKE_TRANSLATION(roomtemp, "roomTemp", "Raumtemperatur", "Kamertemperatuur", "Rumstemperatur", "temperatura w pomieszczeniu", "romstemperatur", "température de la pièce")
-MAKE_TRANSLATION(own_prog, "own prog", "Eigenprog.", "Eigen prog.", "Egen prog.", "program własny", "eget prog.", "programme propre")
-MAKE_TRANSLATION(std_prog, "std prog", "Standardprog.", "Standaard prog.", "Standardprog.", "program standardowy", "standardprog.", "programme standard")
-MAKE_TRANSLATION(light, "light", "Leicht", "Licht", "Lätt", "lekki", "lett", "léger")
-MAKE_TRANSLATION(medium, "medium", "Mittel", "Middel", "Medel", "średni", "medium", "medium")
-MAKE_TRANSLATION(heavy, "heavy", "Schwer", "Zwaar", "Tung", "ciężki", "tung", "lourd")
-MAKE_TRANSLATION(start, "start", "Start", "Start", "Start", "start", "start", "début")
-MAKE_TRANSLATION(heat, "heat", "Heizen", "Verwarmen", "Värme", "ciepło", "varmer", "chaleur")
-MAKE_TRANSLATION(hold, "hold", "Halten", "Pauzeren", "Paus", "pauza", "pause", "pause")
-MAKE_TRANSLATION(cool, "cool", "Kühlen", "Koelen", "Kyla", "zimno", "kjøler", "froid")
-MAKE_TRANSLATION(end, "end", "Ende", "Einde", "Slut", "koniec", "slutt", "fin")
-MAKE_TRANSLATION(german, "german", "Deutsch", "Duits", "Tyska", "niemiecki", "tysk", "allemand")
-MAKE_TRANSLATION(dutch, "dutch", "Niederländisch", "Nederlands", "Nederländska", "niderlandzki", "nederlandsk", "néerlandais")
-MAKE_TRANSLATION(french, "french", "Französisch", "Frans", "Franska", "francuski", "fransk", "français")
-MAKE_TRANSLATION(italian, "italian", "Italienisch", "Italiaans", "Italienska", "włoski", "italiensk", "italien")
+MAKE_TRANSLATION(seltemp, "selTemp", "Solltemperatur", "Doeltemperatuur", "Börtemperatur", "temperatura zadana", "innstilt temperatur", "consigne température", "ayarlanmış sıcaklık")
+MAKE_TRANSLATION(roomtemp, "roomTemp", "Raumtemperatur", "Kamertemperatuur", "Rumstemperatur", "temperatura w pomieszczeniu", "romstemperatur", "température de la pièce", "oda sıcaklığı")
+MAKE_TRANSLATION(own_prog, "own prog", "Eigenprog.", "Eigen prog.", "Egen prog.", "program własny", "eget prog.", "programme propre", "isteğe göre ayarlanmış program")
+MAKE_TRANSLATION(std_prog, "std prog", "Standardprog.", "Standaard prog.", "Standardprog.", "program standardowy", "standardprog.", "programme standard", "sandart pogram")
+MAKE_TRANSLATION(light, "light", "Leicht", "Licht", "Lätt", "lekki", "lett", "léger", "düşük")
+MAKE_TRANSLATION(medium, "medium", "Mittel", "Middel", "Medel", "średni", "medium", "medium", "orta")
+MAKE_TRANSLATION(heavy, "heavy", "Schwer", "Zwaar", "Tung", "ciężki", "tung", "lourd", "yüksek")
+MAKE_TRANSLATION(start, "start", "Start", "Start", "Start", "start", "start", "début", "başlat")
+MAKE_TRANSLATION(heat, "heat", "Heizen", "Verwarmen", "Värme", "ciepło", "varmer", "chaleur", "ısıtma")
+MAKE_TRANSLATION(hold, "hold", "Halten", "Pauzeren", "Paus", "pauza", "pause", "pause", "durdur")
+MAKE_TRANSLATION(cool, "cool", "Kühlen", "Koelen", "Kyla", "zimno", "kjøler", "froid", "soğutma")
+MAKE_TRANSLATION(end, "end", "Ende", "Einde", "Slut", "koniec", "slutt", "fin", "bitti")
+MAKE_TRANSLATION(german, "german", "Deutsch", "Duits", "Tyska", "niemiecki", "tysk", "allemand", "Almanca")
+MAKE_TRANSLATION(dutch, "dutch", "Niederländisch", "Nederlands", "Nederländska", "niderlandzki", "nederlandsk", "néerlandais", "Flemenkçe")
+MAKE_TRANSLATION(french, "french", "Französisch", "Frans", "Franska", "francuski", "fransk", "français", "Fransızca")
+MAKE_TRANSLATION(italian, "italian", "Italienisch", "Italiaans", "Italienska", "włoski", "italiensk", "italien", "İtalyanca")
+
 MAKE_TRANSLATION(high, "high", "hoch", "hoog", "Hög", "wysoki", "", "haut") // TODO translate
-MAKE_TRANSLATION(low, "low", "niedrig", "laag", "Låg", "niski", "lav", "bas")
-MAKE_TRANSLATION(radiator, "radiator", "Heizkörper", "Radiator", "Radiator", "grzejniki", "radiator", "radiateur")
-MAKE_TRANSLATION(convector, "convector", "Konvektor", "Convector", "Konvektor", "konwektory", "konvektor", "convecteur")
-MAKE_TRANSLATION(floor, "floor", "Fussboden", "Vloer", "Golv", "podłoga", "gulv", "sol")
-MAKE_TRANSLATION(summer, "summer", "Sommer", "Zomer", "Sommar", "lato", "sommer", "été")
-MAKE_TRANSLATION(winter, "winter", "Winter", "Winter", "Vinter", "zima", "vinter", "hiver")
-MAKE_TRANSLATION(outdoor, "outdoor", "Außen", "Buiten", "Utomhus", "temp. zewnętrzna", "utendørs", "extérieur")
-MAKE_TRANSLATION(room, "room", "Raum", "Kamer", "Rum", "temp. w pomieszczeniu", "", "pièce") // TODO translate
-MAKE_TRANSLATION(room_outdoor, "room outdoor", "Raum+Außen", "Kamer+Buiten", "Rum+Ute", "temp. w pom. i zewn.", "rom utendørs", "pièce extérieure")
-MAKE_TRANSLATION(power, "power", "Leistung", "Vermogen", "Effekt", "moc", "effekt", "puissance")
-MAKE_TRANSLATION(constant, "constant", "konstant", "constant", "Konstant", "stały", "konstant", "constant")
-MAKE_TRANSLATION(simple, "simple", "einfach", "simpel", "enkel", "prosty", "enkel", "simple")
-MAKE_TRANSLATION(optimized, "optimized", "optimiert", "geoptimaliseerd", "optimerad", "zoptymalizowany", "optimalisert", "optimisé")
-MAKE_TRANSLATION(nofrost, "nofrost", "Frostschutz", "Vorstbescherming", "Frostskydd", "ochrona przed zamarzaniem", "frostsikring", "protection gel")
-MAKE_TRANSLATION(defrost, "defrost", "Abtauen", "ontdooien", "avfrostning", "rozmrażać", "tine", "dégivrage")
-MAKE_TRANSLATION(comfort, "comfort", "Komfort", "Comfort", "Komfort", "komfort", "komfort", "comfort")
-MAKE_TRANSLATION(night, "night", "Nacht", "Nacht", "Natt", "noc", "natt", "nuit")
-MAKE_TRANSLATION(day, "day", "Tag", "Dag", "Dag", "dzień", "dag", "jour")
-MAKE_TRANSLATION(holiday, "holiday", "Urlaub", "Vakantie", "Helgdag", "urlop?", "ferie", "vacances")
-MAKE_TRANSLATION(reduce, "reduce", "reduziert", "gereduceerd", "Reducera", "zredukowany", "redusere", "réduit")
-MAKE_TRANSLATION(noreduce, "no reduce", "unreduziert", "niet gerduceerd", "oreducerad", "bez redukcji", "ingen reduksjon", "pas de réduction")
-MAKE_TRANSLATION(offset, "offset", "Anhebung", "offset", "Förskutning", "przesunięcie", "kompensasjon", "offset")
-MAKE_TRANSLATION(design, "design", "Auslegung", "Ontwero", "Design", "projekt", "design", "design")
-MAKE_TRANSLATION(minflow, "min flow", "min. Durchfluss", "Min. Doorstroom", "Min flöde", "minimalny przepływ", "min strømming", "flux min")
-MAKE_TRANSLATION(maxflow, "max flow", "max. Durchfluss", "Max. Doorstroom", "Max flöde", "maksymalny przepływ", "maks strømming", "flux max")
-MAKE_TRANSLATION(fast, "fast", "schnell", "snel", "snabb", "szybkie", "hurtig", "rapide")
-MAKE_TRANSLATION(slow, "slow", "langsam", "langzaam", "långsam", "powolne", "langsom", "lent")
-MAKE_TRANSLATION(internal_temperature, "internal temperature", "Interne Temperatur", "Interne Temperatuur", "Interntemperatur", "temperatura wewnętrzna", "interntemperatur", "température interne")
-MAKE_TRANSLATION(internal_setpoint, "internal setpoint", "Interner Sollwert", "Interne Streeftemperatuur", "Internt börvärde", "nastawa wewnętrzna", "internt settpunkt", "consigne interne")
+MAKE_TRANSLATION(low, "low", "niedrig", "laag", "Låg", "niski", "lav", "bas", "düşük")
+MAKE_TRANSLATION(radiator, "radiator", "Heizkörper", "Radiator", "Radiator", "grzejniki", "radiator", "radiateur", "radyatör")
+MAKE_TRANSLATION(convector, "convector", "Konvektor", "Convector", "Konvektor", "konwektory", "konvektor", "convecteur", "convector")
+MAKE_TRANSLATION(floor, "floor", "Fussboden", "Vloer", "Golv", "podłoga", "gulv", "sol", "yer")
+MAKE_TRANSLATION(summer, "summer", "Sommer", "Zomer", "Sommar", "lato", "sommer", "été", "yaz")
+MAKE_TRANSLATION(winter, "winter", "Winter", "Winter", "Vinter", "zima", "vinter", "hiver", "kış")
+MAKE_TRANSLATION(outdoor, "outdoor", "Außen", "Buiten", "Utomhus", "temp. zewnętrzna", "utendørs", "extérieur", "dış")
+MAKE_TRANSLATION(room, "room", "Raum", "Kamer", "Rum", "temp. w pomieszczeniu", "", "pièce", "oda") // TODO translate
+MAKE_TRANSLATION(room_outdoor, "room outdoor", "Raum+Außen", "Kamer+Buiten", "Rum+Ute", "temp. w pom. i zewn.", "rom utendørs", "pièce extérieure", "oda ve dış")
+MAKE_TRANSLATION(power, "power", "Leistung", "Vermogen", "Effekt", "moc", "effekt", "puissance", "güç")
+MAKE_TRANSLATION(constant, "constant", "konstant", "constant", "Konstant", "stały", "konstant", "constant", "sabit")
+MAKE_TRANSLATION(simple, "simple", "einfach", "simpel", "enkel", "prosty", "enkel", "simple", "basit")
+MAKE_TRANSLATION(optimized, "optimized", "optimiert", "geoptimaliseerd", "optimerad", "zoptymalizowany", "optimalisert", "optimisé", "optimize")
+MAKE_TRANSLATION(nofrost, "nofrost", "Frostschutz", "Vorstbescherming", "Frostskydd", "ochrona przed zamarzaniem", "frostsikring", "protection gel", "Donma koruması")
+MAKE_TRANSLATION(defrost, "defrost", "Abtauen", "ontdooien", "avfrostning", "rozmrażać", "tine", "dégivrage", "buz çözücü")
+MAKE_TRANSLATION(comfort, "comfort", "Komfort", "Comfort", "Komfort", "komfort", "komfort", "comfort", "konfor")
+MAKE_TRANSLATION(night, "night", "Nacht", "Nacht", "Natt", "noc", "natt", "nuit", "gece")
+MAKE_TRANSLATION(day, "day", "Tag", "Dag", "Dag", "dzień", "dag", "jour", "gün")
+MAKE_TRANSLATION(holiday, "holiday", "Urlaub", "Vakantie", "Helgdag", "urlop?", "ferie", "vacances", "tatil")
+MAKE_TRANSLATION(reduce, "reduce", "reduziert", "gereduceerd", "Reducera", "zredukowany", "redusere", "réduit", "düşür")
+MAKE_TRANSLATION(noreduce, "no reduce", "unreduziert", "niet gerduceerd", "oreducerad", "bez redukcji", "ingen reduksjon", "pas de réduction", "düşürme")
+MAKE_TRANSLATION(offset, "offset", "Anhebung", "offset", "Förskutning", "przesunięcie", "kompensasjon", "offset", "kompansasyon")
+MAKE_TRANSLATION(design, "design", "Auslegung", "Ontwero", "Design", "projekt", "design", "design", "tasarım")
+MAKE_TRANSLATION(minflow, "min flow", "min. Durchfluss", "Min. Doorstroom", "Min flöde", "minimalny przepływ", "min strømming", "flux min", "minimum akış")
+MAKE_TRANSLATION(maxflow, "max flow", "max. Durchfluss", "Max. Doorstroom", "Max flöde", "maksymalny przepływ", "maks strømming", "flux max", "maksimum akış")
+MAKE_TRANSLATION(fast, "fast", "schnell", "snel", "snabb", "szybkie", "hurtig", "rapide", "hızlı")
+MAKE_TRANSLATION(slow, "slow", "langsam", "langzaam", "långsam", "powolne", "langsom", "lent", "yavaş")
+MAKE_TRANSLATION(internal_temperature, "internal temperature", "Interne Temperatur", "Interne Temperatuur", "Interntemperatur", "temperatura wewnętrzna", "interntemperatur", "température interne", "oda sıcaklığı")
+MAKE_TRANSLATION(internal_setpoint, "internal setpoint", "Interner Sollwert", "Interne Streeftemperatuur", "Internt börvärde", "nastawa wewnętrzna", "internt settpunkt", "consigne interne", "istenen oda sıcaklığı")
 MAKE_TRANSLATION(external_temperature, "external temperature", "Externe Temperatur", "Externe Temperatuur", "Extern temperatur", "temperatura zewnętrzna", "ekstern temperatur", "température externe")
-MAKE_TRANSLATION(burner_temperature, "burner temperature", "Brennertemperatur", "Brander Temperuur", "Brännartemperatur", "temperatura palnika", "brennertemperatur", "température du brûleur")
-MAKE_TRANSLATION(ww_temperature, "ww temperature", "Wassertemperatur", "Watertemperatuur", "Vattentemperatur", "temperatura c.w.u.", "vanntemperatur", "température de l'eau")
-MAKE_TRANSLATION(smoke_temperature, "smoke temperature", "Abgastemperatur", "Buitentemperatuur", "Rökgastemperatur", "temperatura dymu", "røykgasstemperatur", "température des gaz d'échappement")
-MAKE_TRANSLATION(weather_compensated, "weather compensated", "Wetter kompensiert", "Weer gecompenseerd", "Väderkompenserad", "skompensow. pogodą", "værkompensert", "compensation par l'extérieur")
-MAKE_TRANSLATION(outside_basepoint, "outside basepoint", "Basispunkt Außentemp.", "Buiten basispunt", "Utomhus baspunkt", "temp. zewn. z pkt. pocz.", "utendørs basispunkt", "point de base temp. ext.")
-MAKE_TRANSLATION(functioning_mode, "functioning mode", "Funktionsweise", "Functiemodus", "Driftläge", "tryb pracy", "driftsmodus", "mode de fonctionnement")
+MAKE_TRANSLATION(burner_temperature, "burner temperature", "Brennertemperatur", "Brander Temperuur", "Brännartemperatur", "temperatura palnika", "brennertemperatur", "température du brûleur", "kazan sıcaklığı")
+MAKE_TRANSLATION(ww_temperature, "ww temperature", "Wassertemperatur", "Watertemperatuur", "Vattentemperatur", "temperatura c.w.u.", "vanntemperatur", "température de l'eau", "Kullanım suyu sıcaklığı")
+MAKE_TRANSLATION(smoke_temperature, "smoke temperature", "Abgastemperatur", "Buitentemperatuur", "Rökgastemperatur", "temperatura dymu", "røykgasstemperatur", "température des gaz d'échappement", "baca gazı sıcaklığı")
+MAKE_TRANSLATION(weather_compensated, "weather compensated", "Wetter kompensiert", "Weer gecompenseerd", "Väderkompenserad", "skompensow. pogodą", "værkompensert", "compensation par l'extérieur", "hava durumuna göre dengelenmiş")
+MAKE_TRANSLATION(outside_basepoint, "outside basepoint", "Basispunkt Außentemp.", "Buiten basispunt", "Utomhus baspunkt", "temp. zewn. z pkt. pocz.", "utendørs basispunkt", "point de base temp. ext.", "dış hava sıcaklığı taban noktası")
+MAKE_TRANSLATION(functioning_mode, "functioning mode", "Funktionsweise", "Functiemodus", "Driftläge", "tryb pracy", "driftsmodus", "mode de fonctionnement", "işletme konumu")
 
 // MQTT Discovery - this is special device entity for 'climate'
 MAKE_TRANSLATION(haclimate, "haclimate", "Discovery current room temperature") // TODO translate
 
 // mixer
-MAKE_TRANSLATION(stopped, "stopped", "gestoppt", "gestopt", "stoppad", "zatrzymany", "stoppet", "arrêté")
-MAKE_TRANSLATION(opening, "opening", "öffnen", "openen", "öppnar", "otwieranie", "åpner", "ouverture")
-MAKE_TRANSLATION(closing, "closing", "schließen", "sluiten", "stänger", "zamykanie", "stenger", "fermeture")
-MAKE_TRANSLATION(open, "open", "offen", "Open", "Öppen", "otwórz", "åpen", "ouvert")
-MAKE_TRANSLATION(close, "close", "geschlossen", "Gesloten", "Stängd", "zamknij", "stengt", "fermé")
+MAKE_TRANSLATION(stopped, "stopped", "gestoppt", "gestopt", "stoppad", "zatrzymany", "stoppet", "arrêté", "durdu")
+MAKE_TRANSLATION(opening, "opening", "öffnen", "openen", "öppnar", "otwieranie", "åpner", "ouverture", "açılıyor")
+MAKE_TRANSLATION(closing, "closing", "schließen", "sluiten", "stänger", "zamykanie", "stenger", "fermeture", "kapanıyor")
+MAKE_TRANSLATION(open, "open", "offen", "Open", "Öppen", "otwórz", "åpen", "ouvert", "açık")
+MAKE_TRANSLATION(close, "close", "geschlossen", "Gesloten", "Stängd", "zamknij", "stengt", "fermé", "kapalı")
 
 // solar ww
-MAKE_TRANSLATION(cyl1, "cyl 1", "Zyl_1", "Cil 1", "Cyl 1", "cyl 1", "cyl 1", "cyl 1")
-MAKE_TRANSLATION(cyl2, "cyl 2", "Zyl_2", "Cil 2", "Cyl 2", "cyl 2", "cyl 2", "cyl 2")
+MAKE_TRANSLATION(cyl1, "cyl 1", "Zyl_1", "Cil 1", "Cyl 1", "cyl 1", "cyl 1", "cyl 1", "cly 1")
+MAKE_TRANSLATION(cyl2, "cyl 2", "Zyl_2", "Cil 2", "Cyl 2", "cyl 2", "cyl 2", "cyl 2", "cly 1")
 
 // Entity translations
 // Boiler
@@ -269,7 +272,7 @@ MAKE_TRANSLATION(heatingActive, "heatingactive", "heating active", "Heizen aktiv
 MAKE_TRANSLATION(tapwaterActive, "tapwateractive", "tapwater active", "Warmwasser aktiv", "Warm water actief", "Varmvatten aktiv", "c.w.u. aktywne", "varmtvann aktiv", "eau chaude active")
 MAKE_TRANSLATION(selFlowTemp, "selflowtemp", "selected flow temperature", "Sollwert Vorlauftemperatur", "Ingestelde aanvoertemperatuur", "Börvärde Flödestemperatur", "wybrana temperatura zasilania", "valgt turtemperatur", "température de flux selectionnée")
 MAKE_TRANSLATION(selBurnPow, "selburnpow", "burner selected max power", "Sollwert Brennerleistung", "Ingestelde maximale brandervermogen", "Brännare vald maxeffekt", "wybrana moc źródła ciepła", "settpunkt brennerkapasitet", "puissance max du brûleur selectionnée")
-MAKE_TRANSLATION(absBurnPow, "absburnpow", "burner current power (absolute)", "Brennerleistung (absolut)", "Brandervermogen (abs)", "Värmepanna aktuell effekt (abs)", "aktualna moc źródła ciepła (abs)", "brennereffekt", "puissance du brûleur actuelle (abs)")
+MAKE_TRANSLATION(absBurnPow, "absburnpow", "burner current power (absolute)", "Brennerleistung (absolut)", "Brandervermogen (abs)", "Värmepanna aktuell effekt (abs)", "aktualna moc źródła ciepła (absolutna)", "brennereffekt", "puissance du brûleur actuelle (abs)")
 MAKE_TRANSLATION(heatingPumpMod, "heatingpumpmod", "heating pump modulation", "Heizungspumpe 1 Modulation", "Modulatie verwarmingspomp", "Modulering Värmepump", "wysterowanie pompy c.o.", "varmepumpemodulering", "modulation de la pompe à chaleur")
 MAKE_TRANSLATION(outdoorTemp, "outdoortemp", "outside temperature", "Aussentemperatur", "Buitentemperatuur", "Utomhustemperatur", "temperatura zewnętrzna", "utetemperatur", "température extérieure")
 MAKE_TRANSLATION(curFlowTemp, "curflowtemp", "current flow temperature", "aktuelle Vorlauftemperatur", "Huidige aanvoertemperatuur", "Flödestemperatur", "temperatura zasilania", "aktuell strømmetemperatur", "température actuelle du flux")
@@ -368,7 +371,7 @@ MAKE_TRANSLATION(hpTr7, "hptr7", "refrigerant temperature gas side (condenser in
 MAKE_TRANSLATION(hpTl2, "hptl2", "air inlet temperature (TL2)", "Außenluft-Einlasstemperatur (TL2)", "Temperatuur luchtinlaat (TL2)", "Luftintagstemperatur (TL2)", "temperatura wlotu powietrza (TL2)", "luftinntakstemperatur (TL2)", "température entrée air (TL2)")
 MAKE_TRANSLATION(hpPl1, "hppl1", "low pressure side temperature (PL1)", "Niederdruckfühler (PL1)", "Temperatuur lage drukzijde (PL1)", "Temperatur Lågtryckssidan (PL1)", "temperatura po stronie niskiego ciśnienia (PL1)", "temperatur lavtrykksiden (PL1)", "température côté basse pression (PL1)")
 MAKE_TRANSLATION(hpPh1, "hpph1", "high pressure side temperature (PH1)", "Hochdruckfühler (PH1)", "Temperatuur hoge drukzijde (PH1)", "Temperatur Högtryckssidan (PH1)", "temperatura po stronie wysokiego ciśnienia (PH1)", "Temperatur Høytrykksiden (PH1)", "température côté bhauteasse pression (PH1)")
-MAKE_TRANSLATION(hpTa4, "hpta4", "drain pan temp (TA4)", "Kondensatorwanne (TA4)")
+MAKE_TRANSLATION(hpTa4, "hpta4", "drain pan temp (TA4)", "Kondensatorwanne (TA4)", "", "", "temperatura ociekacza (TA4)", "", "") // TODO translate
 
 MAKE_TRANSLATION(hpInput1, "hpin1", "input 1 state", "Eingang 1 Status", "Status input 1", "Status Ingång 1", "stan wejścia 1", "status Inggng 1", "état entrée 1")
 MAKE_TRANSLATION(hpInput2, "hpin2", "input 2 state", "Eingang 2 Status", "Status input 2", "Status Ingång 2", "stan wejścia 2", "status Inggng 2", "état entrée 2")
@@ -385,8 +388,8 @@ MAKE_TRANSLATION(maxHeatDhw, "maxheatdhw", "heat limit dhw", "Heizgrenze Warmwas
 MAKE_TRANSLATION(auxHeaterOff, "auxheateroff", "disable aux heater", "Verbiete Zusatzheizer", "Bijverwarming uitsc", "Blockera eltillskott", "wyłącz dogrzewacz", "", "Désactiver chauff. d'app") // TODO translate
 MAKE_TRANSLATION(auxHeaterStatus, "auxheaterstatus", "aux heater status", "Status Zusatzheizer", "Bijverwarming", "Eltillskott Status", "status dogrzewacza", "", "Chauffage auxiliaire") // TODO translate
 MAKE_TRANSLATION(auxHeaterOnly, "auxheateronly", "aux heater only", "nur Zusatzheizer","Alleen bijverwarming", "Eltillskott Enbart", "tylko dogrzewacz", "", "Que chauffage auxiliaire") // TODO translate
-MAKE_TRANSLATION(auxHeaterDelay, "auxheaterdelay", "aux heater on delay", "Zusatzheizer verzögert ein", "Bijverw. vertraagd aan", "Eltillskottfördröjning på", "opóźnienie włączania dogrzewacza", "Tilleggsvarmer forsinket på", "Chauff app tempo marche")
-MAKE_TRANSLATION(silentMode, "silentmode", "silent mode", "Silentmodus", " Stiller gebruik", "Tyst läge", "trybu cichego",  "", "Fct silencieux") // TODO translate
+MAKE_TRANSLATION(auxHeaterDelay, "auxheaterdelay", "aux heater on delay", "Zusatzheizer verzögert ein", "Bijverw. vertraagd aan", "Eltillskottfördröjning på", "opóźnienie włączenia dogrzewacza", "Tilleggsvarmer forsinket på", "Chauff app tempo marche")
+MAKE_TRANSLATION(silentMode, "silentmode", "silent mode", "Silentmodus", " Stiller gebruik", "Tyst läge", "tryb cichy",  "", "Fct silencieux") // TODO translate
 MAKE_TRANSLATION(minTempSilent, "mintempsilent", "min outside temp for silent mode", "Minimale Aussentemperatur Silentmodus", " Stiller gebruik min. buitentemp", "Tyst läge min temp", "minimalna temperatura zewnętrzna dla trybu cichego", "", "Fct silencieux: Temp. extérieure min.") // TODO translate
 MAKE_TRANSLATION(tempParMode, "tempparmode", "outside temp parallel mode", "Aussentemperatur Parallelmodus", "Buitentemp. parallelbedr", "Parallelläge Utomhustemp.", "maksymalna temperatura zewnętrzna dla dogrzewacza", "", "Temp. ext. fct parallèle") // TODO translate
 MAKE_TRANSLATION(auxHeatMixValve, "auxheatmix", "aux heater mixing valve", "Mischer Zusatzheizer", "Bijverwarming menger", "Eltilskott Blandarventil", "mieszacz dogrzewacza", "", "Chauffage auxiliaire mélangeur") // TODO translate
@@ -395,27 +398,27 @@ MAKE_TRANSLATION(hpHystCool, "hphystcool", "on/off hyst cool", "Schalthysterese 
 MAKE_TRANSLATION(hpHystPool, "hphystpool", "on/off hyst pool", "Schalthysterese Pool", "an/uit-hysteresis in zwembadbedri", "Hystereses Pool", "histereza wł./wył. podgrzewania basenu", "", "Hystérésis Marche en mode piscine") // TODO translate
 MAKE_TRANSLATION(tempDiffHeat, "tempdiffheat", "temp diff TC3/TC0 heat", "Temp.diff. TC3/TC0 Heizen", "Temp.vers. TC3/TC0 verw", "Delta(T) TC3/TC0 Uppvärm.", "różnica temperatur TC3/TC0 w trakcie ogrzewania", "", "Delta T TC3/TC0 Chauff") // TODO translate
 MAKE_TRANSLATION(tempDiffCool, "tempdiffcool", "temp diff TC3/TC0 cool", "Temp.diff. TC3/TC0 Kühlen", "Temp.vers. TC3/TC0 koel.", "Delta(T) TC3/TC0 Kyla", "różnica temperatur TC3/TC0 w trakcie chłodzenia", "", "Delta T TC3/TC0 Refroid.") // TODO translate
-MAKE_TRANSLATION(silentFrom, "silentfrom", "silent mode from", "Silentmodus Start") // TODO translate
-MAKE_TRANSLATION(silentTo, "silentto", "silent mode to", "Silentmodus Ende") // TODO translate
+MAKE_TRANSLATION(silentFrom, "silentfrom", "silent mode from", "Silentmodus Start", "", "", "początek trybu cichego", "", "") // TODO translate
+MAKE_TRANSLATION(silentTo, "silentto", "silent mode to", "Silentmodus Ende", "", "", "koniec trybu cichego", "", "") // TODO translate
 
 MAKE_TRANSLATION(wwComfOffTemp, "wwcomfoff", "comfort switch off", "Komfort Ausschalttemp", "Comfort Uitschakeltemp.", "Komfortläge avstängingstemp.", "temperatura wyłączania w trybie komfort", "", "Confort Temp. d'arrêt") // TODO translate
 MAKE_TRANSLATION(wwEcoOffTemp, "wwecooff", "eco switch off", "ECO Ausschalttemp", "Eco Uitschakeltemp.", "Ekoläge avstängningstemp.", "temperatura wyłączania w trybie eko", "", "Eco Temp. d'arrêt") // TODO translate
 MAKE_TRANSLATION(wwEcoPlusOffTemp, "wwecoplusoff", "eco+ switch off", "ECO+ Ausschalttemp", "Eco+ Uitschakeltemp.", "Eko+ avstängningstemp.", "temperatura wyłączania w trybie eko+", "", "Eco+ Temp. d'arrêt") // TODO translate
 
-MAKE_TRANSLATION(auxHeatMode, "auxheatrmode", "aux heater mode", "Modus Zusatzheizer", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(auxMaxLimit, "auxmaxlimit", "aux heater max limit", "Zusatzheizer max. Grenze", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(auxLimitStart, "auxlimitstart", "aux heater limit start", "Zusatzheizer Grenze Start", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(manDefrost, "mandefrost", "manual defrost", "Manuelle Enteisung", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(pvCooling, "pvcooling", "Cooling only with PV", "Kühlen nur mit PV", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(hpCircPumpWw, "hpcircpumpww", "circulation pump available during dhw", "", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(vp_cooling, "vpcooling", "valve/pump cooling") // TODO translate
-MAKE_TRANSLATION(VC0valve, "vc0valve", "VC0 valve") // TODO translate
-MAKE_TRANSLATION(primePump, "primepump", "primary heatpump") // TODO translate
-MAKE_TRANSLATION(primePumpMod, "primepumpmod", "primary heatpump modulation") // TODO translate
-MAKE_TRANSLATION(hp3wayValve, "hp3way", "3-way valve") // TODO translate
-MAKE_TRANSLATION(elHeatStep1, "elheatstep1", "electric heater step 1") // TODO translate
-MAKE_TRANSLATION(elHeatStep2, "elheatstep2", "electric heater step 2") // TODO translate
-MAKE_TRANSLATION(elHeatStep3, "elheatstep3", "electric heater step 3") // TODO translate
+MAKE_TRANSLATION(auxHeatMode, "auxheatrmode", "aux heater mode", "Modus Zusatzheizer", "", "", "tryb pracy dogrzewacza po blokadzie z Zakładu Energetycznego", "", "") // TODO translate
+MAKE_TRANSLATION(auxMaxLimit, "auxmaxlimit", "aux heater max limit", "Zusatzheizer max. Grenze", "", "", "dogrzewacz, maksymalny limit", "", "") // TODO translate
+MAKE_TRANSLATION(auxLimitStart, "auxlimitstart", "aux heater limit start", "Zusatzheizer Grenze Start", "", "", "dogrzewacz, początek ograniczenia", "", "") // TODO translate
+MAKE_TRANSLATION(manDefrost, "mandefrost", "manual defrost", "Manuelle Enteisung", "", "", "ręczne odladzanie", "", "") // TODO translate
+MAKE_TRANSLATION(pvCooling, "pvcooling", "Cooling only with PV", "Kühlen nur mit PV", "", "", "chłodzenie tylko z PV", "", "") // TODO translate
+MAKE_TRANSLATION(hpCircPumpWw, "hpcircpumpww", "circulation pump available during dhw", "", "", "", "pompa cyrkulacji dostępna w trakcie c.w.u.", "", "") // TODO translate
+MAKE_TRANSLATION(vp_cooling, "vpcooling", "valve/pump cooling", "", "", "", "zawór/pompa chłodzenia", "", "") // TODO translate
+MAKE_TRANSLATION(VC0valve, "vc0valve", "VC0 valve", "", "", "", "zawór VC0", "", "") // TODO translate
+MAKE_TRANSLATION(primePump, "primepump", "primary heatpump", "", "", "", "główna pompa ciepła", "", "") // TODO translate
+MAKE_TRANSLATION(primePumpMod, "primepumpmod", "primary heatpump modulation", "", "", "", "wysterowanie głównej pompy ciepła", "", "") // TODO translate
+MAKE_TRANSLATION(hp3wayValve, "hp3way", "3-way valve", "", "", "", "zawór 3-drogowy pompy ciepła", "", "") // TODO translate
+MAKE_TRANSLATION(elHeatStep1, "elheatstep1", "el. heater step 1", "", "", "", "dogrzewacz poziom 1", "", "") // TODO translate
+MAKE_TRANSLATION(elHeatStep2, "elheatstep2", "el. heater step 2", "", "", "", "dogrzewacz poziom 2", "", "") // TODO translate
+MAKE_TRANSLATION(elHeatStep3, "elheatstep3", "el. heater step 3", "", "", "", "dogrzewacz poziom 3", "", "") // TODO translate
 MAKE_TRANSLATION(wwAlternatingOper, "wwalternatingop", "alternating operation", "", "", "", "praca naprzemienna", "", "") // TODO translate
 MAKE_TRANSLATION(wwAltOpPrioHeat, "wwaltopprioheat", "prioritise heating during dhw", "", "", "", "czas na ogrzewanie w trakcie c.w.u", "", "") // TODO translate
 MAKE_TRANSLATION(wwAltOpPrioWw, "wwaltopprioww", "prioritise dhw during heating", "", "", "", "czas na c.w.u w trakcie ogrzewania", "", "") // TODO translate
@@ -433,7 +436,7 @@ MAKE_TRANSLATION(lowNoiseStart, "lownoisestart", "low noise starttime", "Start g
 MAKE_TRANSLATION(lowNoiseStop, "lownoisestop", "low noise stoptime", "Stopp geräuscharmer Betrieb", "", "Tyst läge stopptid", "koniec trybu cichego", "", "heure arrêt faible bruit") // TODO translate
 MAKE_TRANSLATION(energyPriceGas, "energypricegas", "energy price gas", "Energiepreis Gas", "", "Gaspris", "cena energii z gazu", "", "prix énergie gaz") // TODO translate
 MAKE_TRANSLATION(energyPriceEl, "energypriceel", "energy price electric", "Energiepreis Eletrizität", "", "Elpris", "cena energii elektrycznej", "", "prix énergie électrique") // TODO translate
-MAKE_TRANSLATION(energyPricePV, "energyfeedpv", "feed in PV", "PV Einspeisevergütung", "", "PV Energi", "zasilanie energią fotowoltaiczną", "", "alimentation PV") // TODO translate
+MAKE_TRANSLATION(energyPricePV, "energyfeedpv", "feed in PV", "PV Einspeisevergütung", "", "PV Energi", "zasilanie energią PV", "", "alimentation PV") // TODO translate
 MAKE_TRANSLATION(hybridDHW, "hybriddhw", "hybrid DHW", "Hybrid Warmwasser", "", "Hybridläge varmvatten", "hybrydowa c.w.u.", "", "ecs hybride") // TODO translate
 MAKE_TRANSLATION(airPurgeMode, "airpurgemode", "air purge mode", "Luftspülung", "", "Luftreningsläge", "tryb oczyszczania powietrza", "", "mode purge air") // TODO translate
 MAKE_TRANSLATION(heatPumpOutput, "heatpumpoutput", "heatpump output", "WP Leistung", "", "Värmepumpseffekt", "moc wyjściowa pompy ciepła", "", "sortie pompe à chaleur") // TODO translate
@@ -456,11 +459,12 @@ MAKE_TRANSLATION(valveReturn, "valvereturn", "return valve", "Rückfluss-Ventil"
 MAKE_TRANSLATION(aPumpMod, "apumpmod", "alternative hs pump modulation", "Alternativer WE Pumpenmodulation", "Alternatieve warmtebron pomp modulatie", "Alternativ Pumpmodulering Värmekälla", "modulacja pompy alternatywnego źródła ciepła", "alternativ pumpemodulering varmekilde", "modulation alternative pompe hs")
 MAKE_TRANSLATION(heatSource, "heatsource", "alternative heating active", "Alternativer Wärmeerzeuger aktiv", "Alternatieve warmtebron aktief", "Alternativ Värmekälla aktiv", "aktywne alternatywne źródło ciepła", "alternativ varmekilde aktiv", "chauffage alternatif actif")
 MAKE_TRANSLATION(aPump, "apump", "alternative hs pump", "Alternativer WE Pumpe", "Alternatieve warmtebron pomp", "Alternativ Pump Värmekälla", "pompy alternatywnego źródła ciepła", "alternativ pumpe varmekilde", "alternative pompe hs")
-MAKE_TRANSLATION(burner, "burner", "burner", "Brenner", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(heatRequest, "heatrequest", "heat request", "Wärmeanforderung", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(blockRemain, "blockremain", "remaining blocktime", "verbleibende Blockzeit", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(blockRemainWw, "blockremainww", "remaining blocktime dhw", "verbleibende Blockzeit WW", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(flueGasTemp, "fluegastemp", "flue gas temperature", "Abgastemperatur", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(burner, "burner", "burner", "Brenner", "", "", "palnik", "", "") // TODO translate
+MAKE_TRANSLATION(heatRequest, "heatrequest", "heat request", "Wärmeanforderung", "", "", "zapotrzebowanie na ciepło", "", "") // TODO translate
+MAKE_TRANSLATION(blockRemain, "blockremain", "remaining blocktime", "verbleibende Blockzeit", "", "", "czas do końca blokady", "", "") // TODO translate
+MAKE_TRANSLATION(blockRemainWw, "blockremainww", "remaining blocktime dhw", "verbleibende Blockzeit WW", "", "", "czas do końca blokady c.w.u.", "", "") // TODO translate
+MAKE_TRANSLATION(flueGasTemp, "fluegastemp", "flue gas temperature", "Abgastemperatur", "", "", "temperatura spalin", "", "") // TODO translate
+
 MAKE_TRANSLATION(vr2Config, "vr2config", "vr2 configuration", "VR2 Konfiguration", "VR2 configuratie", "VR2 Konfiguration", "konfiguracja VR2", "vr2 konfigurasjon", "configuration vr2")
 MAKE_TRANSLATION(ahsActivated, "ahsactivated", "alternate heat source activation", "Alt. Wärmeerzeuger aktiviert", "Altenatieve warmtebron geactiveerd", "Alternativ värmekälla aktivering", "aktywacja alternatywnego źródła ciepła", "alternativ varmekilde aktivering", "activation source chaleur alternative")
 MAKE_TRANSLATION(aPumpConfig, "apumpconfig", "primary pump config", "Konfig. Hauptpumpe", "Primaire pomp configuratie", "Konfiguration Primärpump", "konfiguracja pompy głównej", "konfiguration Primærpumpe", "configuration pompe primaire")
@@ -489,11 +493,11 @@ MAKE_TRANSLATION(wwComfort, "wwcomfort", "comfort", "Komfort", "Comfort", "Komfo
 MAKE_TRANSLATION(wwComfort1, "wwcomfort1", "comfort mode", "Komfort-Modus", "Comfort modus", "Komfortläge", "tryb komfortu", "komfort modus", "mode confort")
 MAKE_TRANSLATION(wwFlowTempOffset, "wwflowtempoffset", "flow temperature offset", "Vorlauftemperaturanhebung", "Aanvoertemperatuur offset", "Flödestemperatur förskjutning", "korekta temperatury wypływu", "flyttemperaturforskyvning", "offset température flux")
 MAKE_TRANSLATION(wwMaxPower, "wwmaxpower", "max power", "max Leistung", "Maximaal vermogen", "Max Effekt", "moc maksymalna", "maks effekt", "puissance max")
-MAKE_TRANSLATION(wwCircPump, "wwcircpump", "circulation pump available", "Zirkulationspumpe vorhanden", "Circulatiepomp aanwezig", "Cirkulationspump tillgänglig", "pompa cyrkulacyjna zainstalowana", "sirkulasjonspumpe tilgjengelig", "pompe circulation disponible")
+MAKE_TRANSLATION(wwCircPump, "wwcircpump", "circulation pump available", "Zirkulationspumpe vorhanden", "Circulatiepomp aanwezig", "Cirkulationspump tillgänglig", "pompa cyrkulacji zainstalowana", "sirkulasjonspumpe tilgjengelig", "pompe circulation disponible")
 MAKE_TRANSLATION(wwChargeType, "wwchargetype", "charging type", "Speicher-Ladungstyp", "Buffer laadtype", "Laddningstyp", "sposób grzania zasobnika", "varmetype", "type chargement")
 MAKE_TRANSLATION(wwDisinfectionTemp, "wwdisinfectiontemp", "disinfection temperature", "Desinfektionstemperatur", "Desinfectietemperatuur", "Desinfektionstemperatur", "temperatura dezynfekcji termicznej", "", "température désinfection") // TODO translate
 MAKE_TRANSLATION(wwCircMode, "wwcircmode", "circulation pump mode", "Zirkulationspumpen-Modus", "Modus circulatiepomp", "Läge Cirkulationspump", "tryb pracy cyrkulacji", "modus sikulasjonspumpe", "mode pompe circulation")
-MAKE_TRANSLATION(wwCirc, "wwcirc", "circulation active", "Zirkulation aktiv", "Circulatiepomp actief", "Cirkulation aktiv", "pompa cyrkulacyjna", "sirkulasjon aktiv", "circulation active")
+MAKE_TRANSLATION(wwCirc, "wwcirc", "circulation active", "Zirkulation aktiv", "Circulatiepomp actief", "Cirkulation aktiv", "pompa cyrkulacji", "sirkulasjon aktiv", "circulation active")
 MAKE_TRANSLATION(wwCurTemp, "wwcurtemp", "current intern temperature", "aktuelle interne Temperatur", "Huidige interne temperatuur", "Intern Temperatur", "temperatura zasobnika", "gjeldende intern temperatur", "température interne actuelle")
 MAKE_TRANSLATION(wwCurTemp2, "wwcurtemp2", "current extern temperature", "aktuelle externe Temperatur", "Huidige externe temperatuur", "Extern Temperatur", "temperatura wypływu", "gjeldende ekstern temperaur", "température externe actuelle")
 MAKE_TRANSLATION(wwCurFlow, "wwcurflow", "current tap water flow", "aktueller Durchfluss", "Hudige warmwater doorstroming", "Aktuellt tappvattenflöde", "aktualny przepływ", "gjeldende strømningshastighet", "débit actuel eau robinet")
@@ -548,9 +552,9 @@ MAKE_TRANSLATION(autodst, "autodst", "automatic change daylight saving time", "a
 MAKE_TRANSLATION(preheating, "preheating", "preheating in the clock program", "Vorheizen im Zeitprogramm", "Voorverwarming in het klokprogramma", "Förvärmning i tidsprogram", "podgrzewanie w programie czasowym", "forvarming i tidsprogram", "préchauffage dans programme horloge")
 MAKE_TRANSLATION(offtemp, "offtemp", "temperature when mode is off", "Temperatur bei AUS", "Temperatuur bij UIT", "Temperatur Avslagen", "temperatura w trybie \"wył.\"", "temperatur avslått", "température lorsque mode désactivé")
 MAKE_TRANSLATION(mixingvalves, "mixingvalves", "mixing valves", "Mischventile", "Mengkleppen", "Blandningsventiler", "zawory mieszające", "blandeventiler", "vannes mélange")
-MAKE_TRANSLATION(pvEnableWw, "pvenableww", "enable raise dhw", "aktiviere Anhebung WW", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(pvRaiseHeat, "pvraiseheat", "raise heating with PV", "Anhebung Heizen mit PV", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(pvLowerCool, "pvlowercool", "lower cooling with PV", "Kühlabsenkung mit PV", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(pvEnableWw, "pvenableww", "enable raise dhw", "aktiviere Anhebung WW", "", "", "podwyższenie c.w.u. z PV", "", "") // TODO translate
+MAKE_TRANSLATION(pvRaiseHeat, "pvraiseheat", "raise heating with PV", "Anhebung Heizen mit PV", "", "", "podwyższenie grzania z PV", "", "") // TODO translate
+MAKE_TRANSLATION(pvLowerCool, "pvlowercool", "lower cooling with PV", "Kühlabsenkung mit PV", "", "", "obniżenie chłodzenia z PV", "", "") // TODO translate
 
 // thermostat ww
 MAKE_TRANSLATION(wwMode, "wwmode", "mode", "Modus", "Modus", "Läge", "tryb pracy", "modus", "mode")
@@ -638,7 +642,7 @@ MAKE_TRANSLATION(mixerStatus, "valvestatus", "mixing valve actuator (VC1)", "Mis
 MAKE_TRANSLATION(flowTempVf, "flowtempvf", "flow temperature in header (T0/Vf)", "Vorlauftemperatur am Verteiler (T0/Vf)", "aanvoertemperatuur verdeler (T0/Vf)", "Flödestemperatur Fördelare (T0/Vf)", "temperatura zasilania na rozdzielaczu (T0/Vf)", "turtemperatur ved fordeleren (T0/Vf)", "température départ collecteur (T0/Vf)")
 MAKE_TRANSLATION(mixerSetTime, "valvesettime", "time to set valve", "Zeit zum Einstellen des Ventils", "Inschakeltijd mengklep", "Inställningstid Ventil", "czas na ustawienie zaworu", "instillningstid ventil", "délai activation vanne")
 // mixer prefixed with wwc
-MAKE_TRANSLATION(wwPumpStatus, "pumpstatus", "pump status in assigned wwc (PC1)", "Pumpenstatus des wwk (PC1)", "Pompstatus in WW circuit (PC1)", "Pumpstatus i VV-krets (PC1)", "stan pompy w obwodzie c.w.u. (PC1)", "Pumpestatus i VV-krets (PC1)", "état pompe wwc (PC1)")
+MAKE_TRANSLATION(wwPumpStatus, "pumpstatus", "pump status in assigned wwc (PC1)", "Pumpenstatus des wwk (PC1)", "Pompstatus in WW circuit (PC1)", "Pumpstatus i VV-krets (PC1)", "stan pompy w obwodzie c.w.u. (PC1)", "Pumpestatus i VV-krets (PC1)", "état pompe wwc (PC1)", "Kullanım suyu devresindeki(PC1) pompa durumu")
 MAKE_TRANSLATION(wwTempStatus, "wwtempstatus", "temperature switch in assigned wwc (MC1)", "Temperaturschalter des wwk (MC1)", "Temperatuurschakeling in WW circuit (MC1)", "Temperaturventil i VV-krets (MC1)", "temperatura w obwodzie c.w.u. (MC1)", "temperaturventil i VV-krets (MC1)", "température bascule wwc (MC1).")
 MAKE_TRANSLATION(wwTemp, "wwtemp", "current temperature", "aktuelle Temperatur", "huidige temperatuur", "Aktuell Temperatur", "temperatura c.w.u.", "aktuell temperatur", "température actuelle")
 // mixer pool
