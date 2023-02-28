@@ -42,9 +42,7 @@ const App: FC = () => {
             </IconButton>
           )}
         >
-          {/* <FeaturesLoader> */}
           <AppRouting />
-          {/* </FeaturesLoader> */}
         </SnackbarProvider>
       </CustomTheme>
     </TypesafeI18n>
