@@ -127,6 +127,7 @@ const no: Translation = {
   BYPASS_TOKEN: 'Utelat Aksess Token authorisering av API kall',
   READONLY: 'Aktiver read-only modus (blokker all EMS Tx Skriving)',
   UNDERCLOCK_CPU: 'Underklokking av prosessorhastighet',
+  HEATINGOFF: 'Start boiler with forced heating off',
   ENABLE_SHOWER_TIMER: 'Aktiver Dusjtimer',
   ENABLE_SHOWER_ALERT: 'Aktiver Dusj-varsling',
   TRIGGER_TIME: 'Aktiveringstid',

@@ -240,6 +240,9 @@ class Mqtt {
 
     static std::string tag_to_topic(uint8_t device_type, uint8_t tag);
 
+    static void
+    add_avty_to_doc(const char * state_t, const JsonObject & doc, const char * cond1 = nullptr, const char * cond2 = nullptr, const char * negcond = nullptr);
+
     struct QueuedMqttMessage {
         const uint32_t                           id_;
         const std::shared_ptr<const MqttMessage> content_;
