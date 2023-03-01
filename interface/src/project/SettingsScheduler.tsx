@@ -97,7 +97,7 @@ const SettingsScheduler: FC = () => {
 
   const schedule_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: 32px 324px 72px repeat(1, minmax(100px, 1fr)) 100px 100px;
+      --data-table-library_grid-template-columns: 140px 48px 324px 72px 240px repeat(1, minmax(100px, 1fr));
     `,
     BaseRow: `
       font-size: 14px;
@@ -106,13 +106,13 @@ const SettingsScheduler: FC = () => {
       }
     `,
     BaseCell: `
-      &:nth-of-type(1) {
-        text-align: center;
-      },
       &:nth-of-type(2) {
         text-align: center;
       },
       &:nth-of-type(3) {
+        text-align: center;
+      },
+      &:nth-of-type(4) {
         text-align: center;
       },
     `,
@@ -121,6 +121,7 @@ const SettingsScheduler: FC = () => {
       background-color: black;
       color: #90CAF9;
       .th {
+        padding: 8px;
         border-bottom: 1px solid #565656;
         font-weight: 500;
         height: 36px;
@@ -131,6 +132,7 @@ const SettingsScheduler: FC = () => {
       position: relative;
       cursor: pointer;
       .td {
+        padding: 8px;
         border-top: 1px solid #565656;
         border-bottom: 1px solid #565656;
       }
@@ -167,6 +169,7 @@ const SettingsScheduler: FC = () => {
     setSchedule(
       data.map((si) => ({
         ...si,
+        o_id: si.id,
         o_active: si.active,
         o_deleted: si.deleted,
         o_flags: si.flags,
@@ -217,6 +220,7 @@ const SettingsScheduler: FC = () => {
 
   function hasScheduleChanged(si: ScheduleItem) {
     return (
+      si.id !== si.o_id ||
       (si?.description || '') !== (si?.o_description || '') ||
       si.active !== si.o_active ||
       si.deleted !== si.o_deleted ||
@@ -302,25 +306,14 @@ const SettingsScheduler: FC = () => {
     if (si.description === undefined) {
       si.description = '';
     }
-    setScheduleItem(si);
     setCreating(false);
+    setScheduleItem(si);
   };
 
-  function makeid() {
-    let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    let counter = 0;
-    while (counter < 4) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      counter += 1;
-    }
-    return result;
-  }
-
   const addScheduleItem = () => {
+    setCreating(true);
     setScheduleItem({
-      id: makeid(), // random ID of 4 strings
+      id: '',
       active: false,
       deleted: false,
       flags: 0,
@@ -329,7 +322,6 @@ const SettingsScheduler: FC = () => {
       value: '',
       description: ''
     });
-    setCreating(true);
   };
 
   const updateScheduleItem = () => {
@@ -337,7 +329,6 @@ const SettingsScheduler: FC = () => {
       const new_schedule = [...schedule.filter((si) => si.id !== scheduleItem.id), scheduleItem].sort((a, b) =>
         a.time.localeCompare(b.time)
       );
-
       setSchedule(new_schedule);
       setScheduleItem(undefined);
     }
@@ -354,19 +345,20 @@ const SettingsScheduler: FC = () => {
           <>
             <Header>
               <HeaderRow>
+                <HeaderCell stiff>{LL.NAME()}</HeaderCell>
                 <HeaderCell stiff>
                   <CheckIcon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
                 </HeaderCell>
                 <HeaderCell stiff>{LL.SCHEDULE()}</HeaderCell>
                 <HeaderCell stiff>{LL.TIME()}</HeaderCell>
                 <HeaderCell stiff>{LL.COMMAND()}</HeaderCell>
-                <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
-                <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
+                <HeaderCell>{LL.VALUE(0)}</HeaderCell>
               </HeaderRow>
             </Header>
             <Body>
               {tableList.map((si: ScheduleItem) => (
                 <Row key={si.id} item={si} onClick={() => editScheduleItem(si)}>
+                  <Cell>{si.id}</Cell>
                   <Cell stiff>
                     <Checkbox
                       size="small"
@@ -403,7 +395,6 @@ const SettingsScheduler: FC = () => {
                   <Cell>{si.time}</Cell>
                   <Cell>{si.cmd}</Cell>
                   <Cell>{si.value}</Cell>
-                  <Cell>{si.description}</Cell>
                 </Row>
               ))}
             </Body>
@@ -423,7 +414,7 @@ const SettingsScheduler: FC = () => {
     if (scheduleItem) {
       try {
         setFieldErrors(undefined);
-        await validate(schedulerItemValidation(scheduleItem, creating), scheduleItem);
+        await validate(schedulerItemValidation(schedule, creating), scheduleItem);
         updateScheduleItem();
       } catch (errors: any) {
         setFieldErrors(errors);
@@ -436,35 +427,44 @@ const SettingsScheduler: FC = () => {
       return (
         <Dialog open={!!scheduleItem} onClose={() => setScheduleItem(undefined)}>
           <DialogTitle>
-            {(creating ? LL.ADD(0) : LL.EDIT()) +
-              ' ' +
-              ((scheduleItem.flags & ScheduleFlag.SCHEDULE_TIMER) === ScheduleFlag.SCHEDULE_TIMER
-                ? LL.TIMER()
-                : LL.WEEKLY()) +
-              ' ' +
-              LL.SCHEDULE()}
+            {creating ? LL.ADD(0) + ' ' + LL.NEW() + ' ' + LL.SCHEDULE() : LL.EDIT() + " '" + scheduleItem.id + "'"}
           </DialogTitle>
           <DialogContent dividers>
-            {creating && (
-              <RadioGroup
-                row
-                name="schedule-type"
-                onChange={(event) => {
-                  if ((event.target as HTMLInputElement).value === 't') {
-                    scheduleItem.flags = ScheduleFlag.SCHEDULE_TIMER;
-                    scheduleItem.time = '01:00';
-                  } else {
-                    scheduleItem.flags = 0;
-                  }
-                  updateValue(setScheduleItem);
-                  setFlags(['']); // refresh screen
-                }}
-              >
-                <FormControlLabel value="w" control={<Radio />} label={LL.WEEKLY()} />
-                <FormControlLabel value="t" control={<Radio />} label={LL.TIMER()} />
-              </RadioGroup>
+            {creating ? (
+              <>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors}
+                  name="id"
+                  label={LL.NAME()}
+                  value={scheduleItem.id}
+                  fullWidth
+                  margin="normal"
+                  sx={{ width: '60ch' }}
+                  onChange={updateValue(setScheduleItem)}
+                />
+                <RadioGroup
+                  row
+                  name="schedule-type"
+                  onChange={(event) => {
+                    if ((event.target as HTMLInputElement).value === 't') {
+                      scheduleItem.flags = ScheduleFlag.SCHEDULE_TIMER;
+                      scheduleItem.time = '01:00';
+                    } else {
+                      scheduleItem.flags = 0;
+                    }
+                    updateValue(setScheduleItem);
+                    setFlags(['']); // refresh screen
+                  }}
+                >
+                  <FormControlLabel value="w" control={<Radio />} label={LL.WEEKLY()} />
+                  <FormControlLabel value="t" control={<Radio />} label={LL.TIMER()} />
+                </RadioGroup>
+              </>
+            ) : (
+              <Typography variant="h6" color="primary" sx={{ pb: 1 }}>
+                {LL.TYPE()}:&nbsp;{scheduleItem.flags & ScheduleFlag.SCHEDULE_TIMER ? LL.TIMER() : LL.WEEKLY()}
+              </Typography>
             )}
-
             <TextField
               name="description"
               label={LL.DESCRIPTION()}
@@ -504,7 +504,6 @@ const SettingsScheduler: FC = () => {
                 onChange={updateValue(setScheduleItem)}
               />
             )}
-
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="cmd"

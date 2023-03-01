@@ -305,7 +305,7 @@ export enum DeviceEntityMask {
 }
 
 export interface ScheduleItem {
-  id: string; // unique index
+  id: string; // unique index which is name
   active: boolean;
   deleted?: boolean; // optional
   flags: number;
@@ -313,6 +313,7 @@ export interface ScheduleItem {
   cmd: string;
   value: string;
   description?: string; // optional
+  o_id?: string;
   o_active?: boolean;
   o_deleted?: boolean;
   o_flags?: number;

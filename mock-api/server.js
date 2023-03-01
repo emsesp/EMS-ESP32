@@ -603,40 +603,40 @@ const emsesp_devicedata_4 = {
 let emsesp_schedule = {
   schedule: [
     {
-      id: '1',
+      id: 'hc1_on',
       active: true,
       flags: 31,
       time: '07:30',
       cmd: 'hc1/mode',
       value: 'day',
-      desc: 'Turn on central heating in morning'
+      description: 'Turn on central heating in morning'
     },
     {
-      id: '2',
+      id: 'hc1_off',
       active: true,
       flags: 31,
       time: '23:00',
       cmd: 'hc1/mode',
       value: 'night',
-      desc: 'Turn off central heating for the night'
+      description: 'Turn off central heating for the night'
     },
     {
-      id: '3',
+      id: 'set_roomtemp',
       active: true,
       flags: 128,
       time: '00:01',
       cmd: 'thermostat/hc2/seltemp',
       value: '20',
-      desc: 'Force thermostat temperature to 20 degrees every minute'
+      description: 'Force thermostat temperature to 20 degrees every minute'
     },
     {
-      id: '4',
+      id: 'restart',
       active: false,
       flags: 1,
       time: '04:00',
       cmd: 'system/restart',
       value: '',
-      desc: 'auto restart EMS-EPS at 4am every Sunday'
+      description: 'auto restart EMS-EPS at 4am every Sunday'
     }
   ]
 };

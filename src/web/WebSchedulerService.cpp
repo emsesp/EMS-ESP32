@@ -36,11 +36,9 @@ void WebSchedulerService::begin() {
 // this creates the scheduler file, saving it to the FS
 void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
     JsonArray schedule = root.createNestedArray("schedule");
-    uint8_t   count    = 0;
-    char      s[3];
     for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
         JsonObject si     = schedule.createNestedObject();
-        si["id"]          = Helpers::smallitoa(s, count++); // create unique ID as a string
+        si["id"]          = scheduleItem.id; // name, is unqiue
         si["active"]      = scheduleItem.active;
         si["flags"]       = scheduleItem.flags;
         si["time"]        = scheduleItem.time;
@@ -55,8 +53,8 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
 StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webScheduler) {
 #ifdef EMSESP_STANDALONE
     // invoke some fake data for testing
-    const char * json =
-        "{[{\"active\":true,\"flags\":31,\"time\": \"07:30\",\"cmd\": \"hc1/mode\",\"value\": \"day\",\"description\": \"turn on central heating\"}]}";
+    const char * json = "{[{\"id\":\"test1\",\"active\":true,\"flags\":31,\"time\": \"07:30\",\"cmd\": \"hc1/mode\",\"value\": \"day\",\"description\": \"turn "
+                        "on central heating\"}]}";
     StaticJsonDocument<500> doc;
     deserializeJson(doc, json);
     root = doc.as<JsonObject>();

@@ -85,7 +85,29 @@ export const createSettingsValidator = (settings: Settings) =>
     })
   });
 
-export const schedulerItemValidation = (si: ScheduleItem, creating: boolean) =>
+export const schedulerItemValidation = (schedule: ScheduleItem[], creating: boolean) =>
   new Schema({
-    cmd: [{ required: true, message: 'Command is required' }]
+    id: [
+      { required: true, message: 'Name is required' },
+      {
+        type: 'string',
+        pattern: /^[a-zA-Z0-9_\\.]{1,24}$/,
+        message: "Must be 1-24 characters: alpha numeric, '_' or '.'"
+      },
+      ...(creating ? [uniqueIDValidator(schedule)] : [])
+    ],
+    cmd: [
+      { required: true, message: 'Command is required' },
+      { type: 'string', min: 1, max: 32, message: 'Command must be 1-32 characters' }
+    ]
   });
+
+export const uniqueIDValidator = (schedule: ScheduleItem[]) => ({
+  validator(rule: InternalRuleItem, id: string, callback: (error?: string) => void) {
+    if (id && schedule.find((si) => si.id === id)) {
+      callback('Name already in use');
+    } else {
+      callback();
+    }
+  }
+});
