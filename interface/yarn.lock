@@ -1165,9 +1165,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@table-library/react-table-library@npm:4.0.28":
-  version: 4.0.28
-  resolution: "@table-library/react-table-library@npm:4.0.28"
+"@table-library/react-table-library@npm:4.0.29":
+  version: 4.0.29
+  resolution: "@table-library/react-table-library@npm:4.0.29"
   dependencies:
     clsx: 1.1.1
     react-virtualized-auto-sizer: 1.0.7
@@ -1176,7 +1176,7 @@ __metadata:
     "@emotion/react": ">= 11"
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: de4e429d5659e22b101cfef8aafb430fcad20a20af803982e50ed0ba070968c0bd5a3ef02e64c34eb1b40fb7415f417cf3c30b483b0b1bbad9099f15d6489a8d
+  checksum: f0daace88cc8fe20d23a7f0430c293cd737ae9d0f5deb8ef17eec238917ae0fd1d196453e2a8549cdd6e92533c4e2469dc0aeb6333555502b8b1e5df4ab2bdf4
   languageName: node
   linkType: hard
 
@@ -1238,10 +1238,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.14.2":
-  version: 18.14.2
-  resolution: "@types/node@npm:18.14.2"
-  checksum: 53c07e721f6ae33de71306f6a0b75dae6066a4f55bd5484c93bd59ff25f0c5f004ceafeef509a4d0cb9e24a247efc34d50489bcc1b05a53ecc68e2fc088e65cb
+"@types/node@npm:^18.14.4":
+  version: 18.14.4
+  resolution: "@types/node@npm:18.14.4"
+  checksum: 3f2f625777747b9f87e793eea5a8bbf1ac2c828846bda5811d07a457d55cfe6762239779759de61e7b7e917632b9ceee3f7ffd2a024117e7ec364dc1b4eb8d55
   languageName: node
   linkType: hard
 
@@ -1485,10 +1485,10 @@ __metadata:
     "@mui/icons-material": ^5.11.11
     "@mui/material": ^5.11.11
     "@remix-run/router": ^1.3.3
-    "@table-library/react-table-library": 4.0.28
+    "@table-library/react-table-library": 4.0.29
     "@types/lodash-es": ^4.17.6
     "@types/mime-types": ^2
-    "@types/node": ^18.14.2
+    "@types/node": ^18.14.4
     "@types/react": ^18.0.28
     "@types/react-dom": ^18.0.11
     "@types/react-router-dom": ^5.3.3

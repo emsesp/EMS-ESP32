@@ -85,26 +85,26 @@ export const createSettingsValidator = (settings: Settings) =>
     })
   });
 
-export const schedulerItemValidation = (schedule: ScheduleItem[], creating: boolean) =>
+export const schedulerItemValidation = (schedule: ScheduleItem[], o_id: string) =>
   new Schema({
     id: [
       { required: true, message: 'Name is required' },
       {
         type: 'string',
-        pattern: /^[a-zA-Z0-9_\\.]{1,24}$/,
-        message: "Must be 1-24 characters: alpha numeric, '_' or '.'"
+        pattern: /^[a-zA-Z0-9_\\.]{1,15}$/,
+        message: "Must be 1-15 characters: alpha numeric, '_' or '.'"
       },
-      ...(creating ? [uniqueIDValidator(schedule)] : [])
+      ...[uniqueIDValidator(schedule, o_id)]
     ],
     cmd: [
       { required: true, message: 'Command is required' },
-      { type: 'string', min: 1, max: 32, message: 'Command must be 1-32 characters' }
+      { type: 'string', min: 1, max: 64, message: 'Command must be 1-64 characters' }
     ]
   });
 
-export const uniqueIDValidator = (schedule: ScheduleItem[]) => ({
+export const uniqueIDValidator = (schedule: ScheduleItem[], o_id: string) => ({
   validator(rule: InternalRuleItem, id: string, callback: (error?: string) => void) {
-    if (id && schedule.find((si) => si.id === id)) {
+    if (id && o_id !== id && schedule.find((si) => si.id === id)) {
       callback('Name already in use');
     } else {
       callback();

@@ -51,7 +51,6 @@ import { ScheduleItem, ScheduleFlag } from './types';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import * as EMSESP from './api';
-export const APIURL = window.location.origin + '/api/';
 
 const SettingsScheduler: FC = () => {
   const { LL, locale } = useI18nContext();
@@ -69,7 +68,8 @@ const SettingsScheduler: FC = () => {
     time: '12:00',
     cmd: '',
     value: '',
-    description: ''
+    description: '',
+    o_id: ''
   };
   const [schedule, setSchedule] = useState<ScheduleItem[]>([emptySchedule]);
   const [scheduleItem, setScheduleItem] = useState<ScheduleItem>();
@@ -97,7 +97,7 @@ const SettingsScheduler: FC = () => {
 
   const schedule_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: 140px 48px 324px 72px 240px repeat(1, minmax(100px, 1fr));
+      --data-table-library_grid-template-columns: 152px 36px 324px 72px 240px repeat(1, minmax(100px, 1fr));
     `,
     BaseRow: `
       font-size: 14px;
@@ -106,22 +106,18 @@ const SettingsScheduler: FC = () => {
       }
     `,
     BaseCell: `
+      &:nth-of-type(1) {
+        padding: 8px;
+      }
       &:nth-of-type(2) {
         text-align: center;
-      },
-      &:nth-of-type(3) {
-        text-align: center;
-      },
-      &:nth-of-type(4) {
-        text-align: center;
-      },
+      }
     `,
     HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
       .th {
-        padding: 8px;
         border-bottom: 1px solid #565656;
         font-weight: 500;
         height: 36px;
@@ -132,7 +128,6 @@ const SettingsScheduler: FC = () => {
       position: relative;
       cursor: pointer;
       .td {
-        padding: 8px;
         border-top: 1px solid #565656;
         border-bottom: 1px solid #565656;
       }
@@ -325,13 +320,8 @@ const SettingsScheduler: FC = () => {
   };
 
   const updateScheduleItem = () => {
-    if (scheduleItem) {
-      const new_schedule = [...schedule.filter((si) => si.id !== scheduleItem.id), scheduleItem].sort((a, b) =>
-        a.time.localeCompare(b.time)
-      );
-      setSchedule(new_schedule);
-      setScheduleItem(undefined);
-    }
+    setSchedule([...schedule.filter((si) => creating || si.o_id !== scheduleItem.o_id), scheduleItem]);
+    setScheduleItem(undefined);
   };
 
   const renderSchedule = () => {
@@ -340,7 +330,11 @@ const SettingsScheduler: FC = () => {
     }
 
     return (
-      <Table data={{ nodes: schedule.filter((si) => !si.deleted) }} theme={schedule_theme} layout={{ custom: true }}>
+      <Table
+        data={{ nodes: schedule.filter((si) => !si.deleted).sort((a, b) => a.time.localeCompare(b.time)) }}
+        theme={schedule_theme}
+        layout={{ custom: true }}
+      >
         {(tableList: any) => (
           <>
             <Header>
@@ -414,7 +408,7 @@ const SettingsScheduler: FC = () => {
     if (scheduleItem) {
       try {
         setFieldErrors(undefined);
-        await validate(schedulerItemValidation(schedule, creating), scheduleItem);
+        await validate(schedulerItemValidation(schedule, scheduleItem.o_id), scheduleItem);
         updateScheduleItem();
       } catch (errors: any) {
         setFieldErrors(errors);
@@ -422,44 +416,47 @@ const SettingsScheduler: FC = () => {
     }
   };
 
+  const closeDialog = () => {
+    setScheduleItem(undefined);
+    setFieldErrors();
+  };
+
   const renderEditSchedule = () => {
     if (scheduleItem) {
       return (
-        <Dialog open={!!scheduleItem} onClose={() => setScheduleItem(undefined)}>
+        <Dialog open={!!scheduleItem} onClose={() => closeDialog()}>
           <DialogTitle>
             {creating ? LL.ADD(0) + ' ' + LL.NEW() + ' ' + LL.SCHEDULE() : LL.EDIT() + " '" + scheduleItem.id + "'"}
           </DialogTitle>
           <DialogContent dividers>
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="id"
+              label={LL.NAME()}
+              value={scheduleItem.id}
+              fullWidth
+              margin="normal"
+              sx={{ width: '60ch' }}
+              onChange={updateValue(setScheduleItem)}
+            />
             {creating ? (
-              <>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors}
-                  name="id"
-                  label={LL.NAME()}
-                  value={scheduleItem.id}
-                  fullWidth
-                  margin="normal"
-                  sx={{ width: '60ch' }}
-                  onChange={updateValue(setScheduleItem)}
-                />
-                <RadioGroup
-                  row
-                  name="schedule-type"
-                  onChange={(event) => {
-                    if ((event.target as HTMLInputElement).value === 't') {
-                      scheduleItem.flags = ScheduleFlag.SCHEDULE_TIMER;
-                      scheduleItem.time = '01:00';
-                    } else {
-                      scheduleItem.flags = 0;
-                    }
-                    updateValue(setScheduleItem);
-                    setFlags(['']); // refresh screen
-                  }}
-                >
-                  <FormControlLabel value="w" control={<Radio />} label={LL.WEEKLY()} />
-                  <FormControlLabel value="t" control={<Radio />} label={LL.TIMER()} />
-                </RadioGroup>
-              </>
+              <RadioGroup
+                row
+                name="schedule-type"
+                onChange={(event) => {
+                  if ((event.target as HTMLInputElement).value === 't') {
+                    scheduleItem.flags = ScheduleFlag.SCHEDULE_TIMER;
+                    scheduleItem.time = '01:00';
+                  } else {
+                    scheduleItem.flags = 0;
+                  }
+                  updateValue(setScheduleItem);
+                  setFlags(['']); // refresh screen
+                }}
+              >
+                <FormControlLabel value="w" control={<Radio />} label={LL.WEEKLY()} />
+                <FormControlLabel value="t" control={<Radio />} label={LL.TIMER()} />
+              </RadioGroup>
             ) : (
               <Typography variant="h6" color="primary" sx={{ pb: 1 }}>
                 {LL.TYPE()}:&nbsp;{scheduleItem.flags & ScheduleFlag.SCHEDULE_TIMER ? LL.TIMER() : LL.WEEKLY()}
@@ -536,16 +533,11 @@ const SettingsScheduler: FC = () => {
                 </Button>
               </Box>
             )}
-            <Button
-              startIcon={<CancelIcon />}
-              variant="outlined"
-              onClick={() => setScheduleItem(undefined)}
-              color="secondary"
-            >
+            <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => closeDialog()} color="secondary">
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<DoneIcon />}
+              startIcon={creating ? <AddIcon /> : <DoneIcon />}
               variant="outlined"
               type="submit"
               onClick={() => validateScheduleItem()}
