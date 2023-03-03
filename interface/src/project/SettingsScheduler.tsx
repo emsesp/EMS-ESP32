@@ -185,7 +185,7 @@ const SettingsScheduler: FC = () => {
   };
 
   const getFlagString = (f: number) => {
-    let new_flags: string[] = [];
+    const new_flags: string[] = [];
     if ((f & 1) === 1) {
       new_flags.push('1');
     }

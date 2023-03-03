@@ -1238,10 +1238,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.14.4":
-  version: 18.14.4
-  resolution: "@types/node@npm:18.14.4"
-  checksum: 3f2f625777747b9f87e793eea5a8bbf1ac2c828846bda5811d07a457d55cfe6762239779759de61e7b7e917632b9ceee3f7ffd2a024117e7ec364dc1b4eb8d55
+"@types/node@npm:^18.14.5":
+  version: 18.14.5
+  resolution: "@types/node@npm:18.14.5"
+  checksum: 415fb0edc132baa9580f1b7a381a3f10b662f5d7a7d11641917fa0961788ccede3272badc414aadc47306e9fc35c5f6c59159ac470b46d3f3a15fb0446224c8c
   languageName: node
   linkType: hard
 
@@ -1488,7 +1488,7 @@ __metadata:
     "@table-library/react-table-library": 4.0.29
     "@types/lodash-es": ^4.17.6
     "@types/mime-types": ^2
-    "@types/node": ^18.14.4
+    "@types/node": ^18.14.5
     "@types/react": ^18.0.28
     "@types/react-dom": ^18.0.11
     "@types/react-router-dom": ^5.3.3
@@ -1508,18 +1508,18 @@ __metadata:
     jwt-decode: ^3.1.2
     lodash-es: ^4.17.21
     mime-types: ^2.1.35
-    nodemon: ^2.0.20
+    nodemon: ^2.0.21
     notistack: ^2.0.8
     npm-run-all: ^4.1.5
     prettier: ^2.8.4
     react: ^18.2.0
     react-dom: ^18.2.0
     react-dropzone: ^14.2.3
-    react-icons: ^4.7.1
+    react-icons: ^4.8.0
     react-router-dom: ^6.8.2
     rollup-plugin-visualizer: ^5.9.0
     sockette: ^2.0.6
-    typesafe-i18n: ^5.24.1
+    typesafe-i18n: ^5.24.2
     typescript: ^4.9.5
     vite: ^4.1.4
     vite-plugin-svgr: ^2.4.0
@@ -4118,9 +4118,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemon@npm:^2.0.20":
-  version: 2.0.20
-  resolution: "nodemon@npm:2.0.20"
+"nodemon@npm:^2.0.21":
+  version: 2.0.21
+  resolution: "nodemon@npm:2.0.21"
   dependencies:
     chokidar: ^3.5.2
     debug: ^3.2.7
@@ -4134,7 +4134,7 @@ __metadata:
     undefsafe: ^2.0.5
   bin:
     nodemon: bin/nodemon.js
-  checksum: 9fe858682414fe703179f4fe36c86e71f40d2693b5345c09803d7b191816a6589c5df8f1f9873bffee92893880183b95a031c86340e46b364ef1b0b7f619edbf
+  checksum: 0b9fe2d11fd95c51b66d61bd1ee85cddf579c9e674c9429752a74f445f1b98576235ae860858783728baa3666c87e4ef938ab67167cc34fe4bb8fcec74d6885b
   languageName: node
   linkType: hard
 
@@ -4600,12 +4600,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-icons@npm:^4.7.1":
-  version: 4.7.1
-  resolution: "react-icons@npm:4.7.1"
+"react-icons@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "react-icons@npm:4.8.0"
   peerDependencies:
     react: "*"
-  checksum: ed3cbdc5fc0c4d7d2debf78fdc8c4c80aeacf85a506a9a3c11b1d5922de393ac0a6542012b7fb81761e9280c54d0f26827d50a92b54ec8f0c8e52364d89970b5
+  checksum: 4dbba7ad989c295b410e19b2a702722dae44368cb04b6515f9471353552f31ac80bd350f121d5bff79f81504b84039ede44d09e9f035f48bb1032e6eace126c4
   languageName: node
   linkType: hard
 
@@ -5434,14 +5434,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typesafe-i18n@npm:^5.24.1":
-  version: 5.24.1
-  resolution: "typesafe-i18n@npm:5.24.1"
+"typesafe-i18n@npm:^5.24.2":
+  version: 5.24.2
+  resolution: "typesafe-i18n@npm:5.24.2"
   peerDependencies:
     typescript: ">=3.5.1"
   bin:
     typesafe-i18n: cli/typesafe-i18n.mjs
-  checksum: a28f08f9ec47f282f2a17151b6258a17952648646f6829362a11d93bccf0c129e7574a801b22fe1373c3341962274eaf91db1012c034e8e16b816cd2b7deebb0
+  checksum: c87b86ca2d310d48ddae3ccfd65059a4edc3c9129fd7c86a266cff38a22ff54fa290108da25f0c8b0335aac5b1cedb2d33ecc11e80139170a12dc8b4a03dd7df
   languageName: node
   linkType: hard
 
