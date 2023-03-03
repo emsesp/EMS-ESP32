@@ -209,7 +209,7 @@ const SettingsCustomization: FC = () => {
   };
 
   const getMaskString = (m: number) => {
-    let new_masks: string[] = [];
+    const new_masks: string[] = [];
     if ((m & 1) === 1) {
       new_masks.push('1');
     }
