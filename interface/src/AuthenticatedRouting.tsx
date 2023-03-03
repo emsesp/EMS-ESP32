@@ -64,7 +64,7 @@ const AuthenticatedRouting: FC = () => {
           }
         />
         <Route path="/system/*" element={<System />} />
-        <Route path="/*" element={<Navigate to={AuthenticationApi.getDefaultRoute} />} />
+        <Route path="/*" element={<Navigate to="/" />} />
       </Routes>
     </Layout>
   );
