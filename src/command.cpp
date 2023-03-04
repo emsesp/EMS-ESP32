@@ -158,15 +158,22 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 data_p      = device_end + 1;
                 int8_t id_d = -1;
                 data_p      = parse_command_string(data_p, id_d);
-                char data_s[50];
-                strcpy(data_s, data_p);
-                strcat(data_s, "/value");
-                uint8_t device_type = EMSdevice::device_name_2_device_type(device_p);
-                if (CommandRet::OK == Command::call(device_type, data_s, "", true, id_d, output)) {
-                    if (output.containsKey("api_data")) {
-                        data = output["api_data"];
-                    }
+                if (data_p == nullptr) {
+                    return CommandRet::INVALID;
                 }
+                char data_s[40];
+                strlcpy(data_s, Helpers::toLower(data_p).c_str(), 30);
+                if (strstr(data_s, "/value") == nullptr) {
+                    strcat(data_s, "/value");
+                }
+                uint8_t device_type = EMSdevice::device_name_2_device_type(device_p);
+                if (CommandRet::OK != Command::call(device_type, data_s, "", true, id_d, output)) {
+                    return CommandRet::INVALID;
+                }
+                if (!output.containsKey("api_data")) {
+                    return CommandRet::INVALID;
+                }
+                data = output["api_data"];
                 output.clear();
             }
         }

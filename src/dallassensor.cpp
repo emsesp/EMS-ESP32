@@ -404,7 +404,7 @@ bool DallasSensor::get_value_info(JsonObject & output, const char * cmd, const i
     }
 
     for (const auto & sensor : sensors_) {
-        if (strcmp(command_s, sensor.name().c_str()) == 0 || strcmp(command_s, sensor.id().c_str()) == 0) {
+        if (Helpers::toLower(command_s) == Helpers::toLower(sensor.name().c_str()) || Helpers::toLower(command_s) == Helpers::toLower(sensor.id().c_str())) {
             output["id"]   = sensor.id();
             output["name"] = sensor.name();
             char val[10];
