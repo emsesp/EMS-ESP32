@@ -64,6 +64,9 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
     Serial.println(COLOR_RESET);
 #endif
 
+    for (ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
+        Command::erase_command(EMSdevice::DeviceType::SCHEDULER, scheduleItem.description.c_str());
+    }
     webScheduler.scheduleItems.clear();
 
     if (root["schedule"].is<JsonArray>()) {
@@ -84,9 +87,144 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
             si.retry_cnt   = 0xFF; // no starup retries
 
             webScheduler.scheduleItems.push_back(si); // add to list
+            if (!webScheduler.scheduleItems.back().description.empty()) {
+                Command::add(
+                    EMSdevice::DeviceType::SCHEDULER,
+                    webScheduler.scheduleItems.back().description.c_str(),
+                    [webScheduler](const char * value, const int8_t id) {
+                        return EMSESP::webSchedulerService.command_setvalue(value, webScheduler.scheduleItems.back().description);
+                    },
+                    FL_(schedule_cmd),
+                    CommandFlag::ADMIN_ONLY);
+            }
         }
     }
+    EMSESP::webSchedulerService.publish(true);
     return StateUpdateResult::CHANGED;
+}
+
+// set active by api command
+bool WebSchedulerService::command_setvalue(const char * value, const std::string name) {
+    bool v;
+    if (!Helpers::value2bool(value, v)) {
+        return false;
+    }
+    EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems = &webScheduler.scheduleItems; });
+    for (ScheduleItem & scheduleItem : *scheduleItems) {
+        if (scheduleItem.description == name) {
+            if (scheduleItem.active == v) {
+                return true;
+            }
+            scheduleItem.active = v;
+            publish_single(name.c_str(), v);
+            if (EMSESP::mqtt_.get_publish_onchange(0)) {
+                publish();
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+void WebSchedulerService::publish_single(const char * name, const bool state) {
+    if (!Mqtt::publish_single() || name == nullptr || name[0] == '\0') {
+        return;
+    }
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    if (Mqtt::publish_single2cmd()) {
+        snprintf(topic, sizeof(topic), "%s/%s", F_(scheduler), name);
+    } else {
+        snprintf(topic, sizeof(topic), "%s%s/%s", F_(scheduler), "_data", name);
+    }
+    char payload[12];
+    Mqtt::queue_publish(topic, Helpers::render_boolean(payload, state));
+}
+
+// publish to Mqtt
+void WebSchedulerService::publish(const bool force) {
+    EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems = &webScheduler.scheduleItems; });
+    if (scheduleItems->size() == 0) {
+        return;
+    }
+    if (Mqtt::publish_single() && force) {
+        for (const ScheduleItem & scheduleItem : *scheduleItems) {
+            publish_single(scheduleItem.description.c_str(), scheduleItem.active);
+        }
+    }
+
+    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE);
+    for (const ScheduleItem & scheduleItem : *scheduleItems) {
+        if (!scheduleItem.description.empty() && !doc.containsKey(scheduleItem.description)) {
+            if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                doc[scheduleItem.description] = scheduleItem.active;
+            } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                doc[scheduleItem.description] = scheduleItem.active ? 1 : 0;
+            } else {
+                char result[12];
+                doc[scheduleItem.description] = Helpers::render_boolean(result, scheduleItem.active);
+            }
+
+            // create HA config
+            if (Mqtt::ha_enabled() && force) {
+                StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
+                char                                        stat_t[50];
+                snprintf(stat_t, sizeof(stat_t), "%s/scheduler_data", Mqtt::base().c_str());
+                config["stat_t"] = stat_t;
+
+                char val_obj[50];
+                char val_cond[65];
+                snprintf(val_obj, sizeof(val_obj), "value_json['%s']", scheduleItem.description.c_str());
+                snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
+                config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + "}}";
+
+                char uniq_s[70];
+                snprintf(uniq_s, sizeof(uniq_s), "scheduler_%s", scheduleItem.description.c_str());
+
+                config["obj_id"]  = uniq_s;
+                config["uniq_id"] = uniq_s; // same as object_id
+                config["name"]    = scheduleItem.description.c_str();
+
+                char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+                char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+                snprintf(topic, sizeof(topic), "switch/%s/scheduler_%s/config", Mqtt::basename().c_str(), scheduleItem.description.c_str());
+                snprintf(command_topic, sizeof(command_topic), "%s/scheduler/%s", Mqtt::basename().c_str(), scheduleItem.description.c_str());
+                config["cmd_t"] = command_topic;
+                if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                    config["pl_on"]  = true;
+                    config["pl_off"] = false;
+                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                    config["pl_on"]  = 1;
+                    config["pl_off"] = 0;
+                } else {
+                    char result[12];
+                    config["pl_on"]  = Helpers::render_boolean(result, true);
+                    config["pl_off"] = Helpers::render_boolean(result, false);
+                }
+
+                JsonObject dev = config.createNestedObject("dev");
+                JsonArray  ids = dev.createNestedArray("ids");
+                ids.add("ems-esp");
+
+                // add "availability" section
+                Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
+                Mqtt::queue_ha(topic, config.as<JsonObject>());
+            }
+        }
+    }
+    Mqtt::queue_publish("scheduler_data", doc.as<JsonObject>());
+}
+
+bool WebSchedulerService::has_commands() {
+    EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems = &webScheduler.scheduleItems; });
+    if (scheduleItems->size() == 0) {
+        return false;
+    }
+    for (const ScheduleItem & scheduleItem : *scheduleItems) {
+        if (!scheduleItem.description.empty()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // execute scheduled command

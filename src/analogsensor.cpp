@@ -128,7 +128,8 @@ void AnalogSensor::reload() {
                     [&](const char * value, const int8_t id) { return command_setvalue(value, sensor.gpio); },
                     sensor.type == AnalogType::COUNTER       ? FL_(counter)
                     : sensor.type == AnalogType::DIGITAL_OUT ? FL_(digital_out)
-                                                             : FL_(pwm));
+                                                             : FL_(pwm),
+                    CommandFlag::ADMIN_ONLY);
             }
         }
         return true;

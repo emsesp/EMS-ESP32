@@ -310,7 +310,7 @@ const en: Translation = {
   STAY: 'Stay',
   LEAVE: 'Leave',
   SCHEDULER: 'Scheduler',
-  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP',
+  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP. Add entity name to control activation by api/mqtt',
   SCHEDULE: 'Schedule',
   TIME: 'Time',
   TIMER: 'Timer',

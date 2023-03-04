@@ -478,7 +478,8 @@ void EMSESP::publish_all(bool force) {
         publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
         publish_device_values(EMSdevice::DeviceType::SOLAR);
         publish_device_values(EMSdevice::DeviceType::MIXER);
-        publish_other_values();      // switch and heat pump, ...
+        publish_other_values(); // switch and heat pump, ...
+        webSchedulerService.publish();
         publish_sensor_values(true); // includes dallas and analog sensors
         system_.send_heartbeat();
     }
@@ -510,6 +511,7 @@ void EMSESP::publish_all_loop() {
         break;
     case 5:
         publish_other_values(); // switch and heat pump
+        webSchedulerService.publish(true);
         break;
     case 6:
         publish_sensor_values(true, true);

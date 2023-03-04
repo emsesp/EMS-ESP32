@@ -145,6 +145,33 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         data = input["value"];
     }
 
+    // check if data is entity like device/hc/name/value
+    if (data.is<const char *>()) {
+        const char * d = data.as<const char *>();
+        if (strlen(d)) {
+            char * device_end = strchr(d, '/');
+            if (device_end != nullptr) {
+                char         device_s[15] = {'\0'};
+                const char * device_p     = device_s;
+                const char * data_p       = nullptr;
+                strlcpy(device_s, d, device_end - d + 1);
+                data_p      = device_end + 1;
+                int8_t id_d = -1;
+                data_p      = parse_command_string(data_p, id_d);
+                char data_s[50];
+                strcpy(data_s, data_p);
+                strcat(data_s, "/value");
+                uint8_t device_type = EMSdevice::device_name_2_device_type(device_p);
+                if (CommandRet::OK == Command::call(device_type, data_s, "", true, id_d, output)) {
+                    if (output.containsKey("api_data")) {
+                        data = output["api_data"];
+                    }
+                }
+                output.clear();
+            }
+        }
+    }
+
     // call the command based on the type
     uint8_t return_code = CommandRet::ERROR;
     if (data.is<const char *>()) {
@@ -204,11 +231,13 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         id = command[2] - '0';
         command += 3;
     } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] == '1' && command[4] == '0') {
-        id = DeviceValueTAG::TAG_WWC10 - DeviceValueTAG::TAG_HC1 + 1; //18;    } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {
-        id = command[3] - '0' + 8;
+        id = DeviceValueTAG::TAG_WWC10 - DeviceValueTAG::TAG_HC1 + 1; //18;
+        command += 5;
+    } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {
+        id = command[3] - '1' + DeviceValueTAG::TAG_WWC1 - DeviceValueTAG::TAG_HC1 + 1; //9;
         command += 4;
     } else if (!strncmp(lowerCmd, "id", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '9') {
-        id = command[3] - '1' + DeviceValueTAG::TAG_WWC1 - DeviceValueTAG::TAG_HC1 + 1; //9;
+        id = command[3] - '0' + 10;
         command += 4;
     } else if (!strncmp(lowerCmd, "id", 2) && command[2] >= '1' && command[2] <= '9') {
         id = command[2] - '0';
@@ -499,6 +528,10 @@ bool Command::device_has_commands(const uint8_t device_type) {
         return true; // we always have System
     }
 
+    if (device_type == EMSdevice::DeviceType::SCHEDULER) {
+        return EMSESP::webSchedulerService.has_commands();
+    }
+
     if (device_type == EMSdevice::DeviceType::DALLASSENSOR) {
         return (EMSESP::dallassensor_.have_sensors());
     }
@@ -554,6 +587,13 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
     shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::SYSTEM, true);
+
+    // show scheduler
+    shell.print(COLOR_BOLD_ON);
+    shell.print(COLOR_YELLOW);
+    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
+    shell.print(COLOR_RESET);
+    show(shell, EMSdevice::DeviceType::SCHEDULER, true);
 
     // show sensors
     if (EMSESP::dallassensor_.have_sensors()) {
