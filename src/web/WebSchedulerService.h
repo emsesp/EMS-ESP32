@@ -29,14 +29,14 @@ namespace emsesp {
 
 class ScheduleItem {
   public:
-    std::string id; // unqiue id, is the name
+    std::string id; // unqiue id
     boolean     active;
     uint8_t     flags;
     uint16_t    elapsed_min; // total mins from 00:00
     std::string time;        // HH:MM
     std::string cmd;
     std::string value;
-    std::string description;
+    std::string name;
     uint8_t     retry_cnt;
 };
 
