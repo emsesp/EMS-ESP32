@@ -1341,7 +1341,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
 
     // search device value with this tag
     for (auto & dv : devicevalues_) {
-        if (!strcmp(command_s, dv.short_name) && (tag <= 0 || tag == dv.tag)) {
+        if (Helpers::toLower(command_s) == Helpers::toLower(dv.short_name) && (tag <= 0 || tag == dv.tag)) {
             uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
             const char * type  = "type";
