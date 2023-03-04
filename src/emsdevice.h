@@ -322,6 +322,7 @@ class EMSdevice {
         SYSTEM = 0,   // this is us (EMS-ESP)
         DALLASSENSOR, // for internal dallas sensors
         ANALOGSENSOR, // for internal analog sensors
+        SCHEDULER,
         BOILER,
         THERMOSTAT,
         MIXER,

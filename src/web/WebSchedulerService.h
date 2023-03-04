@@ -54,6 +54,10 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
 
     void begin();
     void loop();
+    void publish_single(const char * name, const bool state);
+    void publish(const bool force = false);
+    bool has_commands();
+    bool command_setvalue(const char * value, const std::string name);
 
   private:
     bool command(const char * cmd, const char * data);

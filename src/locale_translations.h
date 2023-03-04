@@ -61,6 +61,7 @@ MAKE_TRANSLATION(restart_cmd, "restart EMS-ESP", "Neustart", "", "", "", "", "",
 MAKE_TRANSLATION(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme", "", "", "", "", "", "Gelen telegramları ")
 MAKE_TRANSLATION(publish_cmd, "publish all to MQTT", "Publiziere MQTT", "", "", "", "", "", "Hepsini MQTTye gönder")
 MAKE_TRANSLATION(system_info_cmd, "show system status", "Zeige System-Status", "", "", "", "", "", "Sistem Durumunu Göster")
+MAKE_TRANSLATION(schedule_cmd, "enable schedule item", "Aktiviere Zeitplan", "", "", "", "", "", "")
 
 // tags
 MAKE_TRANSLATION(tag_boiler_data_ww, "dhw", "WW", "dhw", "VV", "CWU", "dhw", "ecs", "SKS")

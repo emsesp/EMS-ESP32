@@ -14,8 +14,6 @@ const de: Translation = {
   SU_PASSWORD: 'su Passwort',
   DASHBOARD: 'Kontrollzentrum',
   SETTINGS_OF: '{0} Einstellungen',
-  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
-  UPDATE: 'Update', // TODO translate
   HELP_OF: '{0} Hilfe',
   LOGGED_IN: 'Eingeloggt als {name}',
   PLEASE_SIGNIN: 'Bitte einloggen, um fortzufahren',
@@ -32,11 +30,11 @@ const de: Translation = {
   REFRESH: 'Aktualisieren',
   EXPORT: 'Exportieren',
   DEVICE_DETAILS: 'Geräte Details',
-  BRAND: 'Marke',
   ID_OF: '{0} ID',
   DEVICE: 'Geräte',
   PRODUCT: 'Produkt',
   VERSION: 'Version',
+  BRAND: 'Marke',
   ENTITY_NAME: 'Entitätsname',
   VALUE: '{{Wert|wert}}',
   SHOW_FAV: 'nur Favoriten anzeigen',
@@ -48,6 +46,8 @@ const de: Translation = {
   CANCEL: 'Abbrechen',
   RESET: 'Zurücksetzen',
   SEND: 'Senden',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Entfernen',
   PROBLEM_UPDATING: 'Problem beim Aktualisieren',
   PROBLEM_LOADING: 'Problem beim Laden',
@@ -208,7 +208,7 @@ const de: Translation = {
   COMPACT: 'Kompakte Darstellung',
   ENABLE_OTA: 'OTA Updates verwenden',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Herunterladen der individuellen Entitätsanpassungen',
-  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
+  DOWNLOAD_SCHEDULE_TEXT: 'Herunterladen geplanter Befehle',
   DOWNLOAD_SETTINGS_TEXT: 'Herunterladen der Anwendungseinstellungen. Vorsicht beim Teilen der Einstellungen, da sie Passwörter und andere sensitive Einstellungen enthalten',
   UPLOAD_TEXT: 'Hochladen von neuer Firmware (.bin), Geräte- oder Entitätseinstellungen (.json), zur optionalen Validitätsprüfung zuerst die (.md5) Datei hochladen',
   UPLOADING: 'Hochladen',
@@ -305,20 +305,20 @@ const de: Translation = {
   ENTITY: 'Entität',
   MIN: 'min',
   MAX: 'max',
-  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
-  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
-  STAY: 'Stay', // TODO translate
-  LEAVE: 'Leave', // TODO translate
-  SCHEDULER: 'Scheduler', // TODO translate
-  SCHEDULER_HELP_1: 'Add custom scheduled commands to automate EMS-ESP', // TODO translate
-  SCHEDULE: 'Schedule', // TODO translate
-  TIME: 'Time', // TODO translate
-  TIMER: 'Timer', // TODO translate
-  WEEKLY: 'Weekly', // TODO translate
-  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
-  SCHEDULE_TIMER_1: 'on startup', // TODO translate
-  SCHEDULE_TIMER_2: 'every minute', // TODO translate
-  SCHEDULE_TIMER_3: 'every hour' // TODO translate
+  BLOCK_NAVIGATE_1: 'Sie haben ungesicherte Änderungen',
+  BLOCK_NAVIGATE_2: 'Beim verlassen der Seite verlieren Sie ungesicherte Einstellungen. Wollen Sie die Seite wirklich verlassen?',
+  STAY: 'Bleiben',
+  LEAVE: 'Verlassen',
+  SCHEDULER: 'Planer',
+  SCHEDULER_HELP_1: 'Fügen Sie eigene, geplante Befehle zur Automatisierung hinzu. Vergeben Sie einen Entitätsnamen um die Aktivierung über API/Mqtt zu steuern',
+  SCHEDULE: 'Zeitplan',
+  TIME: 'Zeit',
+  TIMER: 'Timer',
+  WEEKLY: 'Wöchentlich',
+  SCHEDULE_SAVED: 'Plan gespeichert',
+  SCHEDULE_TIMER_1: 'beim Start',
+  SCHEDULE_TIMER_2: 'jede Minute',
+  SCHEDULE_TIMER_3: 'jede Stunde'
 };
 
 export default de;

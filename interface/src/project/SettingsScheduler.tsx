@@ -464,7 +464,7 @@ const SettingsScheduler: FC = () => {
             )}
             <TextField
               name="description"
-              label={LL.DESCRIPTION()}
+              label={LL.ENTITY_NAME()}
               value={scheduleItem.description}
               fullWidth
               margin="normal"

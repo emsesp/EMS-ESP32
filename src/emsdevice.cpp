@@ -105,6 +105,8 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     switch (device_type) {
     case DeviceType::SYSTEM:
         return F_(system);
+    case DeviceType::SCHEDULER:
+        return F_(scheduler);
     case DeviceType::BOILER:
         return F_(boiler);
     case DeviceType::THERMOSTAT:
@@ -194,6 +196,9 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!strcmp(lowtopic, F_(system))) {
         return DeviceType::SYSTEM;
     }
+    if (!strcmp(lowtopic, F_(scheduler))) {
+        return DeviceType::SCHEDULER;
+    }
     if (!strcmp(lowtopic, F_(heatpump))) {
         return DeviceType::HEATPUMP;
     }
@@ -221,10 +226,6 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!strcmp(lowtopic, F_(pump))) {
         return DeviceType::PUMP;
     }
-    if (!strcmp(lowtopic, F_(heatsource))) {
-        return DeviceType::HEATSOURCE;
-    }
-
     if (!strcmp(lowtopic, F_(heatsource))) {
         return DeviceType::HEATSOURCE;
     }
@@ -546,10 +547,6 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
             }
         }
     });
-    if (ignore) {
-        return;
-    }
-
     if (ignore) {
         return;
     }
