@@ -44,7 +44,6 @@
     "react-icons": "^4.8.0",
     "react-router-dom": "^6.8.2",
     "sockette": "^2.0.6",
-    "styled-components": "^5.3.8",
     "typesafe-i18n": "^5.24.2",
     "typescript": "^4.9.5"
   },
