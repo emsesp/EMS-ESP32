@@ -482,7 +482,7 @@ void AnalogSensor::publish_values(const bool force) {
                 config["stat_t"] = stat_t;
 
                 char val_obj[50];
-                char val_cond[65];
+                char val_cond[95];
                 if (Mqtt::is_nested()) {
                     snprintf(val_obj, sizeof(val_obj), "value_json['%02d'].value", sensor.gpio());
                     snprintf(val_cond, sizeof(val_cond), "value_json['%02d'] is defined and %s is defined", sensor.gpio(), val_obj);
