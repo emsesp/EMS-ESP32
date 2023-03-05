@@ -520,12 +520,12 @@ void DallasSensor::publish_values(const bool force) {
                 char val_cond[65];
                 if (Mqtt::is_nested()) {
                     snprintf(val_obj, sizeof(val_obj), "value_json['%s'].temp", sensor.id().c_str());
-                    snprintf(val_cond, sizeof(val_cond), "value_json['%s'] is defined", sensor.id().c_str());
+                    snprintf(val_cond, sizeof(val_cond), "%s is defined and %s is defined", sensor.id().c_str(), val_obj);
                 } else {
                     snprintf(val_obj, sizeof(val_obj), "value_json['%s']", sensor.name().c_str());
                     snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
                 }
-                config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + "}}";
+                config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else -55}}";
 
                 char uniq_s[70];
                 if (Mqtt::entity_format() == 2) {

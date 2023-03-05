@@ -229,7 +229,7 @@ const MqttSettingsForm: FC = () => {
                 <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
                   <Grid item>
                     <ValidatedTextField
-                      name="entity_format"
+                      name="discovery_type"
                       label={LL.MQTT_PUBLISH_TEXT_5()}
                       value={data.discovery_type}
                       fullWidth
