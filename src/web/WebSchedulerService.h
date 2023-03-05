@@ -23,7 +23,7 @@
 #define EMSESP_SCHEDULER_SERVICE_PATH "/rest/schedule" // GET and POST
 
 #define SCHEDULEFLAG_SCHEDULE_TIMER 0x80 // 7th bit for Timer
-#define MAX_STARTUP_RETRIES 3            // retry the statup commands x times
+#define MAX_STARTUP_RETRIES 3            // retry the start-up commands x times
 
 namespace emsesp {
 
