@@ -90,8 +90,8 @@ export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: 
     name: [
       {
         type: 'string',
-        pattern: /^[a-zA-Z0-9_\\.]{1,15}$/,
-        message: "Must be 1-15 characters: alpha numeric, '_' or '.'"
+        pattern: /^[a-zA-Z0-9_\\.]{0,15}$/,
+        message: "Must be <15 characters: alpha numeric, '_' or '.'"
       },
       ...[uniqueNameValidator(schedule, scheduleItem.o_name)]
     ],
