@@ -34,11 +34,14 @@ void WebSchedulerService::begin() {
 }
 
 // this creates the scheduler file, saving it to the FS
+// and also calls when the Scheduler web page is refreshed
 void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
     JsonArray schedule = root.createNestedArray("schedule");
+    uint8_t   counter  = 0;
+    char      s[3];
     for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
         JsonObject si = schedule.createNestedObject();
-        si["id"]      = scheduleItem.id; // name, is unqiue
+        si["id"]      = Helpers::smallitoa(s, ++counter); // id is only used to render the table and must be unique
         si["active"]  = scheduleItem.active;
         si["flags"]   = scheduleItem.flags;
         si["time"]    = scheduleItem.time;
@@ -48,7 +51,7 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
     }
 }
 
-// call on initialization and also when the page is saved via web UI
+// call on initialization and also when the Scheduile web page is updated
 // this loads the data into the internal class
 StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webScheduler) {
 #ifdef EMSESP_STANDALONE
@@ -83,7 +86,7 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
 
             // calculated elapsed minutes
             si.elapsed_min = Helpers::string2minutes(si.time);
-            si.retry_cnt   = 0xFF; // no starup retries
+            si.retry_cnt   = 0xFF; // no startup retries
 
             webScheduler.scheduleItems.push_back(si); // add to list
             if (!webScheduler.scheduleItems.back().name.empty()) {
@@ -266,7 +269,7 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
 }
 
 // process any scheduled jobs
-// checks on the minute
+// checks on the minute and at startup
 void WebSchedulerService::loop() {
     // initialize static value on startup
     static int8_t   last_tm_min     = -1; // invalid value also used for startup commands
