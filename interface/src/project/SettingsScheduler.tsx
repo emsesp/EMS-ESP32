@@ -13,6 +13,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Checkbox,
+  Grid,
   TextField,
   Divider
 } from '@mui/material';
@@ -51,7 +52,6 @@ import { useI18nContext } from 'i18n/i18n-react';
 import * as EMSESP from './api';
 
 function makeid() {
-  // TODO finish this!
   let result = '';
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const charactersLength = characters.length;
@@ -330,7 +330,7 @@ const SettingsScheduler: FC = () => {
   const addScheduleItem = () => {
     setCreating(true);
     setScheduleItem({
-      id: '',
+      id: makeid(),
       active: false,
       deleted: false,
       flags: 0,
@@ -342,7 +342,9 @@ const SettingsScheduler: FC = () => {
   };
 
   const updateScheduleItem = () => {
-    setSchedule([...schedule.filter((si) => creating || si.o_id !== scheduleItem.o_id), scheduleItem]);
+    if (scheduleItem) {
+      setSchedule([...schedule.filter((si) => creating || si.o_id !== scheduleItem.o_id), scheduleItem]);
+    }
     setScheduleItem(undefined);
   };
 
@@ -366,7 +368,7 @@ const SettingsScheduler: FC = () => {
                 <HeaderCell stiff>{LL.TIME()}</HeaderCell>
                 <HeaderCell stiff>{LL.COMMAND()}</HeaderCell>
                 <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
-                <HeaderCell stiff>{LL.NAME()}</HeaderCell>
+                <HeaderCell stiff>{LL.NAME(0)}</HeaderCell>
               </HeaderRow>
             </Header>
             <Body>
@@ -409,7 +411,7 @@ const SettingsScheduler: FC = () => {
     if (scheduleItem) {
       try {
         setFieldErrors(undefined);
-        await validate(schedulerItemValidation(schedule, scheduleItem.o_id), scheduleItem);
+        await validate(schedulerItemValidation(schedule, scheduleItem), scheduleItem);
         updateScheduleItem();
       } catch (errors: any) {
         setFieldErrors(errors);
@@ -419,7 +421,7 @@ const SettingsScheduler: FC = () => {
 
   const closeDialog = () => {
     setScheduleItem(undefined);
-    setFieldErrors();
+    setFieldErrors(undefined);
   };
 
   const renderEditSchedule = () => {
@@ -431,7 +433,7 @@ const SettingsScheduler: FC = () => {
             {creating ? LL.ADD(0) + ' ' + LL.NEW() : LL.EDIT()}&nbsp;{LL.SCHEDULE()}
           </DialogTitle>
           <DialogContent dividers>
-            <Box display="flex" flexWrap="wrap" mb={2}>
+            <Box display="flex" flexWrap="wrap" mb={1}>
               <Box flexGrow={1}>
                 <ToggleButtonGroup
                   size="small"
@@ -478,33 +480,36 @@ const SettingsScheduler: FC = () => {
                 )}
               </Box>
             </Box>
+            <BlockFormControlLabel
+              control={<Checkbox checked={scheduleItem.active} onChange={updateValue(setScheduleItem)} name="active" />}
+              label={LL.ACTIVE()}
+            />
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="name"
-              label={LL.NAME()}
+              label={LL.NAME(0)}
               value={scheduleItem.name}
               fullWidth
               margin="normal"
               sx={{ width: '60ch' }}
               onChange={updateValue(setScheduleItem)}
             />
-            <BlockFormControlLabel
-              control={<Checkbox checked={scheduleItem.active} onChange={updateValue(setScheduleItem)} name="active" />}
-              label={LL.ACTIVE()}
-            />
-            <TextField
-              name="time"
-              type="time"
-              label={isTimer ? LL.TIMER() : LL.TIME()}
-              value={scheduleItem.time}
-              margin="normal"
-              onChange={updateValue(setScheduleItem)}
-            />
-            {isTimer && (
-              <Box color="warning.main">
-                <Typography variant="body2">{LL.SCHEDULER_HELP_2()}</Typography>
-              </Box>
-            )}
+
+            <Grid container spacing={0} direction="row" justifyContent="flex-start" alignItems="flex-start">
+              <TextField
+                name="time"
+                type="time"
+                label={isTimer ? LL.TIMER() : LL.TIME()}
+                value={scheduleItem.time}
+                margin="normal"
+                onChange={updateValue(setScheduleItem)}
+              />
+              {isTimer && (
+                <Box color="warning.main" ml={2} mt={4}>
+                  <Typography variant="body2">{LL.SCHEDULER_HELP_2()}</Typography>
+                </Box>
+              )}
+            </Grid>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="cmd"
