@@ -50,6 +50,7 @@ MAKE_TRANSLATION(sensors_device, "Sensors", "Sensoren", "Sensoren", "Sensorer", 
 MAKE_TRANSLATION(unknown_device, "Unknown", "Unbekannt", "Onbekend", "Okänt", "Nieznane urządzenie", "Ukjent", "Inconnu")
 
 // commands
+// TODO translate
 MAKE_TRANSLATION(info_cmd, "lists all values", "Liste aller Werte", "", "", "", "", "", "Tüm değerleri listele")
 MAKE_TRANSLATION(commands_cmd, "lists all commands", "Liste aller Kommandos", "", "", "", "", "", "Tüm komutları listele")
 MAKE_TRANSLATION(entities_cmd, "lists all entities", "Liste aller Entitäten", "", "", "", "", "", "Tüm varlıkları listele")

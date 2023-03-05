@@ -10,7 +10,7 @@
       "linux": {
         "options": {
           "env": {
-            // Workaroung for sdl2 `-m32` crash
+            // Workaround for sdl2 `-m32` crash
             // https://bugs.launchpad.net/ubuntu/+source/libsdl2/+bug/1775067/comments/7
             "DBUS_FATAL_WARNINGS": "0"
           }

@@ -1050,8 +1050,7 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
 
 void EMSdevice::set_climate_minmax(uint8_t tag, int16_t min, uint16_t max) {
     for (auto & dv : devicevalues_) {
-        // TODO check if pointer reference is safe. strcpy better?
-        if (dv.tag == tag && dv.short_name == FL_(haclimate[0])) {
+        if (dv.tag == tag && (strcmp(dv.short_name, FL_(haclimate[0])) == 0)) {
             if (dv.min != min || dv.max != max) {
                 dv.min = min;
                 dv.max = max;

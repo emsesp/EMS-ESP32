@@ -1071,7 +1071,7 @@ bool System::check_upgrade(bool factory_settings) {
 
         // if we're coming from 3.4.4 or 3.5.0b14 then we need to apply new settings
         if (missing_version) {
-            LOG_DEBUG("Setting MQTT ID Entity to v3.4 format");
+            LOG_DEBUG("Setting MQTT Entity ID format to v3.4 format");
             EMSESP::esp8266React.getMqttSettingsService()->update(
                 [&](MqttSettings & mqttSettings) {
                     mqttSettings.entity_format = 0; // use old Entity ID format from v3.4

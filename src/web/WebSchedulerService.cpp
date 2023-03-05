@@ -34,27 +34,30 @@ void WebSchedulerService::begin() {
 }
 
 // this creates the scheduler file, saving it to the FS
+// and also calls when the Scheduler web page is refreshed
 void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
     JsonArray schedule = root.createNestedArray("schedule");
+    uint8_t   counter  = 0;
+    char      s[3];
     for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
-        JsonObject si     = schedule.createNestedObject();
-        si["id"]          = scheduleItem.id; // name, is unqiue
-        si["active"]      = scheduleItem.active;
-        si["flags"]       = scheduleItem.flags;
-        si["time"]        = scheduleItem.time;
-        si["cmd"]         = scheduleItem.cmd;
-        si["value"]       = scheduleItem.value;
-        si["description"] = scheduleItem.description;
+        JsonObject si = schedule.createNestedObject();
+        si["id"]      = Helpers::smallitoa(s, ++counter); // id is only used to render the table and must be unique
+        si["active"]  = scheduleItem.active;
+        si["flags"]   = scheduleItem.flags;
+        si["time"]    = scheduleItem.time;
+        si["cmd"]     = scheduleItem.cmd;
+        si["value"]   = scheduleItem.value;
+        si["name"]    = scheduleItem.name;
     }
 }
 
-// call on initialization and also when the page is saved via web UI
+// call on initialization and also when the Scheduile web page is updated
 // this loads the data into the internal class
 StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webScheduler) {
 #ifdef EMSESP_STANDALONE
     // invoke some fake data for testing
-    const char * json = "{[{\"id\":\"test1\",\"active\":true,\"flags\":31,\"time\": \"07:30\",\"cmd\": \"hc1/mode\",\"value\": \"day\",\"description\": \"turn "
-                        "on central heating\"}]}";
+    const char * json =
+        "{[{\"id\":\"01\",\"active\":true,\"flags\":31,\"time\": \"07:30\",\"cmd\": \"hc1/mode\",\"value\": \"day\",\"name\": \"turn on central heating\"}]}";
     StaticJsonDocument<500> doc;
     deserializeJson(doc, json);
     root = doc.as<JsonObject>();
@@ -65,7 +68,7 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
 #endif
 
     for (ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
-        Command::erase_command(EMSdevice::DeviceType::SCHEDULER, scheduleItem.description.c_str());
+        Command::erase_command(EMSdevice::DeviceType::SCHEDULER, scheduleItem.name.c_str());
     }
     webScheduler.scheduleItems.clear();
 
@@ -73,26 +76,25 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
         for (const JsonObject schedule : root["schedule"].as<JsonArray>()) {
             // create each schedule item, overwriting any previous settings
             // ignore the id (as this is only used in the web for table rendering)
-            auto si        = ScheduleItem();
-            si.id          = schedule["id"].as<std::string>();
-            si.active      = schedule["active"];
-            si.flags       = schedule["flags"];
-            si.time        = schedule["time"].as<std::string>();
-            si.cmd         = schedule["cmd"].as<std::string>();
-            si.value       = schedule["value"].as<std::string>();
-            si.description = schedule["description"].as<std::string>();
+            auto si   = ScheduleItem();
+            si.active = schedule["active"];
+            si.flags  = schedule["flags"];
+            si.time   = schedule["time"].as<std::string>();
+            si.cmd    = schedule["cmd"].as<std::string>();
+            si.value  = schedule["value"].as<std::string>();
+            si.name   = schedule["name"].as<std::string>();
 
             // calculated elapsed minutes
             si.elapsed_min = Helpers::string2minutes(si.time);
-            si.retry_cnt   = 0xFF; // no starup retries
+            si.retry_cnt   = 0xFF; // no startup retries
 
             webScheduler.scheduleItems.push_back(si); // add to list
-            if (!webScheduler.scheduleItems.back().description.empty()) {
+            if (!webScheduler.scheduleItems.back().name.empty()) {
                 Command::add(
                     EMSdevice::DeviceType::SCHEDULER,
-                    webScheduler.scheduleItems.back().description.c_str(),
+                    webScheduler.scheduleItems.back().name.c_str(),
                     [webScheduler](const char * value, const int8_t id) {
-                        return EMSESP::webSchedulerService.command_setvalue(value, webScheduler.scheduleItems.back().description);
+                        return EMSESP::webSchedulerService.command_setvalue(value, webScheduler.scheduleItems.back().name);
                     },
                     FL_(schedule_cmd),
                     CommandFlag::ADMIN_ONLY);
@@ -111,7 +113,7 @@ bool WebSchedulerService::command_setvalue(const char * value, const std::string
     }
     EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems = &webScheduler.scheduleItems; });
     for (ScheduleItem & scheduleItem : *scheduleItems) {
-        if (scheduleItem.description == name) {
+        if (scheduleItem.name == name) {
             if (scheduleItem.active == v) {
                 return true;
             }
@@ -148,20 +150,20 @@ void WebSchedulerService::publish(const bool force) {
     }
     if (Mqtt::publish_single() && force) {
         for (const ScheduleItem & scheduleItem : *scheduleItems) {
-            publish_single(scheduleItem.description.c_str(), scheduleItem.active);
+            publish_single(scheduleItem.name.c_str(), scheduleItem.active);
         }
     }
 
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE);
     for (const ScheduleItem & scheduleItem : *scheduleItems) {
-        if (!scheduleItem.description.empty() && !doc.containsKey(scheduleItem.description)) {
+        if (!scheduleItem.name.empty() && !doc.containsKey(scheduleItem.name)) {
             if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                doc[scheduleItem.description] = scheduleItem.active;
+                doc[scheduleItem.name] = scheduleItem.active;
             } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                doc[scheduleItem.description] = scheduleItem.active ? 1 : 0;
+                doc[scheduleItem.name] = scheduleItem.active ? 1 : 0;
             } else {
                 char result[12];
-                doc[scheduleItem.description] = Helpers::render_boolean(result, scheduleItem.active);
+                doc[scheduleItem.name] = Helpers::render_boolean(result, scheduleItem.active);
             }
 
             // create HA config
@@ -173,21 +175,21 @@ void WebSchedulerService::publish(const bool force) {
 
                 char val_obj[50];
                 char val_cond[65];
-                snprintf(val_obj, sizeof(val_obj), "value_json['%s']", scheduleItem.description.c_str());
+                snprintf(val_obj, sizeof(val_obj), "value_json['%s']", scheduleItem.name.c_str());
                 snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
                 config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + "}}";
 
                 char uniq_s[70];
-                snprintf(uniq_s, sizeof(uniq_s), "scheduler_%s", scheduleItem.description.c_str());
+                snprintf(uniq_s, sizeof(uniq_s), "scheduler_%s", scheduleItem.name.c_str());
 
                 config["obj_id"]  = uniq_s;
                 config["uniq_id"] = uniq_s; // same as object_id
-                config["name"]    = scheduleItem.description.c_str();
+                config["name"]    = scheduleItem.name.c_str();
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-                snprintf(topic, sizeof(topic), "switch/%s/scheduler_%s/config", Mqtt::basename().c_str(), scheduleItem.description.c_str());
-                snprintf(command_topic, sizeof(command_topic), "%s/scheduler/%s", Mqtt::basename().c_str(), scheduleItem.description.c_str());
+                snprintf(topic, sizeof(topic), "switch/%s/scheduler_%s/config", Mqtt::basename().c_str(), scheduleItem.name.c_str());
+                snprintf(command_topic, sizeof(command_topic), "%s/scheduler/%s", Mqtt::basename().c_str(), scheduleItem.name.c_str());
                 config["cmd_t"] = command_topic;
                 if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                     config["pl_on"]  = true;
@@ -220,7 +222,7 @@ bool WebSchedulerService::has_commands() {
         return false;
     }
     for (const ScheduleItem & scheduleItem : *scheduleItems) {
-        if (!scheduleItem.description.empty()) {
+        if (!scheduleItem.name.empty()) {
             return true;
         }
     }
@@ -267,7 +269,7 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
 }
 
 // process any scheduled jobs
-// checks on the minute
+// checks on the minute and at startup
 void WebSchedulerService::loop() {
     // initialize static value on startup
     static int8_t   last_tm_min     = -1; // invalid value also used for startup commands

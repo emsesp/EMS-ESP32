@@ -417,7 +417,6 @@ void Shell::loop_delay() {
 
         function_copy(*this);
 
-        // TODO comment this block out like we had < v3.5?
         if (running()) {
             display_prompt();
         }
@@ -448,7 +447,6 @@ void Shell::loop_blocking() {
             stop();
         }
 
-        // TODO comment this block out like we had < v3.5?
         if (running()) {
             display_prompt();
         }
@@ -561,7 +559,6 @@ void Shell::process_command() {
         }
     }
 
-    // TODO comment this block out like we had < v3.5?
     if (running()) {
         display_prompt();
     }
