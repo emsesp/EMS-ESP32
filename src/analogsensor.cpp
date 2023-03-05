@@ -483,12 +483,22 @@ void AnalogSensor::publish_values(const bool force) {
 
                 char val_obj[50];
                 char val_cond[95];
-                if (Mqtt::is_nested()) {
-                    snprintf(val_obj, sizeof(val_obj), "value_json['%02d'].value", sensor.gpio());
-                    snprintf(val_cond, sizeof(val_cond), "value_json['%02d'] is defined and %s is defined", sensor.gpio(), val_obj);
+                if (Mqtt::discovery_type() == 0) { // Homeassistant
+                    if (Mqtt::is_nested()) {
+                        snprintf(val_obj, sizeof(val_obj), "value_json['%02d'].value", sensor.gpio());
+                        snprintf(val_cond, sizeof(val_cond), "value_json['%02d'] is defined and %s is defined", sensor.gpio(), val_obj);
+                    } else {
+                        snprintf(val_obj, sizeof(val_obj), "value_json['%s']", sensor.name().c_str());
+                        snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
+                    }
                 } else {
-                    snprintf(val_obj, sizeof(val_obj), "value_json['%s']", sensor.name().c_str());
-                    snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
+                    if (Mqtt::is_nested()) {
+                        snprintf(val_obj, sizeof(val_obj), "value_json.%02d.value", sensor.gpio());
+                        snprintf(val_cond, sizeof(val_cond), "value_json.%02d is defined and %s is defined", sensor.gpio(), val_obj);
+                    } else {
+                        snprintf(val_obj, sizeof(val_obj), "value_json.%s", sensor.name().c_str());
+                        snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
+                    }
                 }
                 char sample_val[12] = "0";
                 if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::DIGITAL_OUT) {
