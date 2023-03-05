@@ -424,6 +424,7 @@ void Mqtt::load_settings() {
         send_response_      = mqttSettings.send_response;
         discovery_prefix_   = mqttSettings.discovery_prefix.c_str();
         entity_format_      = mqttSettings.entity_format;
+        discovery_type_     = mqttSettings.discovery_type;
 
         // convert to milliseconds
         publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000;
@@ -648,7 +649,7 @@ void Mqtt::ha_status() {
 
     // create the sensors - must match the MQTT payload keys
     // these are all from the heartbeat MQTT topic
-    if (!EMSESP::system_.ethernet_connected()) {
+    if (!EMSESP::system_.ethernet_connected() || WiFi.isConnected()) {
         publish_system_ha_sensor_config(DeviceValueType::INT, "WiFi RSSI", "rssi", DeviceValueUOM::DBM);
         publish_system_ha_sensor_config(DeviceValueType::INT, "WiFi strength", "wifistrength", DeviceValueUOM::PERCENT);
     }
