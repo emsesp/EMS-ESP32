@@ -28,7 +28,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
 import AddIcon from '@mui/icons-material/Add';
-import CircleIcon from '@mui/icons-material/Circle';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 import {
   ValidatedTextField,
@@ -375,7 +375,7 @@ const SettingsScheduler: FC = () => {
               {tableList.map((si: ScheduleItem) => (
                 <Row key={si.id} item={si} onClick={() => editScheduleItem(si)}>
                   <Cell stiff>
-                    <CircleIcon sx={{ color: si.active ? 'green' : 'red', fontSize: 8 }} />
+                    {si.active && <CheckCircleIcon sx={{ color: '#79D200', fontSize: 16, verticalAlign: 'middle' }} />}
                   </Cell>
                   <Cell stiff>
                     <Stack spacing={1} direction="row">
@@ -482,10 +482,20 @@ const SettingsScheduler: FC = () => {
                 )}
               </Box>
             </Box>
-            <BlockFormControlLabel
-              control={<Checkbox checked={scheduleItem.active} onChange={updateValue(setScheduleItem)} name="active" />}
-              label={LL.ACTIVE()}
-            />
+            <Grid container>
+              <BlockFormControlLabel
+                control={
+                  <Checkbox checked={scheduleItem.active} onChange={updateValue(setScheduleItem)} name="active" />
+                }
+                label={LL.ACTIVE()}
+              />
+              {scheduleItem.active && (
+                <Grid item sx={{ mt: 1 }}>
+                  <CheckCircleIcon sx={{ color: '#79D200', fontSize: 16, verticalAlign: 'middle' }} />
+                </Grid>
+              )}
+            </Grid>
+
             <Grid container>
               <TextField
                 name="time"
