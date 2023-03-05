@@ -149,7 +149,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     if (data.is<const char *>()) {
         const char * d = data.as<const char *>();
         if (strlen(d)) {
-            char * device_end = strchr(d, '/');
+            char * device_end = (char *)strchr(d, '/');
             if (device_end != nullptr) {
                 char         device_s[15] = {'\0'};
                 const char * device_p     = device_s;
