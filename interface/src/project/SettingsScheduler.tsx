@@ -24,11 +24,11 @@ import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-li
 import { useSnackbar } from 'notistack';
 
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
-import CheckIcon from '@mui/icons-material/Check';
 import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
 import AddIcon from '@mui/icons-material/Add';
+import CircleIcon from '@mui/icons-material/Circle';
 
 import {
   ValidatedTextField,
@@ -108,7 +108,7 @@ const SettingsScheduler: FC = () => {
 
   const schedule_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: 36px 324px 72px 240px repeat(1, minmax(100px, 1fr)) 152px;
+      --data-table-library_grid-template-columns: 36px 324px 50px 192px repeat(1, minmax(100px, 1fr)) 160px;
     `,
     BaseRow: `
       font-size: 14px;
@@ -374,7 +374,9 @@ const SettingsScheduler: FC = () => {
             <Body>
               {tableList.map((si: ScheduleItem) => (
                 <Row key={si.id} item={si} onClick={() => editScheduleItem(si)}>
-                  <Cell stiff>{si.active && <CheckIcon sx={{ fontSize: 16, verticalAlign: 'middle' }} />}</Cell>
+                  <Cell stiff>
+                    <CircleIcon sx={{ color: si.active ? 'green' : 'red', fontSize: 8 }} />
+                  </Cell>
                   <Cell stiff>
                     <Stack spacing={1} direction="row">
                       <Divider orientation="vertical" flexItem />
@@ -484,18 +486,7 @@ const SettingsScheduler: FC = () => {
               control={<Checkbox checked={scheduleItem.active} onChange={updateValue(setScheduleItem)} name="active" />}
               label={LL.ACTIVE()}
             />
-            <ValidatedTextField
-              fieldErrors={fieldErrors}
-              name="name"
-              label={LL.NAME(0)}
-              value={scheduleItem.name}
-              fullWidth
-              margin="normal"
-              sx={{ width: '60ch' }}
-              onChange={updateValue(setScheduleItem)}
-            />
-
-            <Grid container spacing={0} direction="row" justifyContent="flex-start" alignItems="flex-start">
+            <Grid container>
               <TextField
                 name="time"
                 type="time"
@@ -526,6 +517,15 @@ const SettingsScheduler: FC = () => {
               margin="normal"
               fullWidth
               value={scheduleItem.value}
+              onChange={updateValue(setScheduleItem)}
+            />
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="name"
+              label={LL.NAME(0)}
+              value={scheduleItem.name}
+              fullWidth
+              margin="normal"
               onChange={updateValue(setScheduleItem)}
             />
           </DialogContent>
