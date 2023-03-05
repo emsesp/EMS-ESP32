@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "platformio.platformio-ide",
+    "arcanis.vscode-zipfs",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode"
+  ],
+  "unwantedRecommendations": ["ms-vscode.cpptools-extension-pack"]
+}

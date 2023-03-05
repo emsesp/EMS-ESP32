@@ -50,7 +50,8 @@ import { useI18nContext } from 'i18n/i18n-react';
 
 import * as EMSESP from './api';
 
-function makeid() { // TODO finish this!
+function makeid() {
+  // TODO finish this!
   let result = '';
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const charactersLength = characters.length;
@@ -427,7 +428,7 @@ const SettingsScheduler: FC = () => {
       return (
         <Dialog open={!!scheduleItem} onClose={() => closeDialog()}>
           <DialogTitle>
-            {creating ? (LL.ADD(0)+" "+LL.NEW()) : LL.EDIT()}&nbsp;{LL.SCHEDULE()}
+            {creating ? LL.ADD(0) + ' ' + LL.NEW() : LL.EDIT()}&nbsp;{LL.SCHEDULE()}
           </DialogTitle>
           <DialogContent dividers>
             <Box display="flex" flexWrap="wrap" mb={2}>
