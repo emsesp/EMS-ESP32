@@ -1445,22 +1445,23 @@ void Mqtt::add_avty_to_doc(const char * state_t, const JsonObject & doc, const c
     snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
     avty_json["val_tpl"] = tpl;
     avty.add(avty_json);
-    avty.clear();
-
+    avty_json.clear();
     avty_json["t"] = state_t;
     snprintf(tpl, sizeof(tpl), tpl_draft, cond1 == nullptr ? "value is defined" : cond1);
     avty_json["val_tpl"] = tpl;
     avty.add(avty_json);
 
     if (cond2 != nullptr) {
-        avty.clear();
+        avty_json.clear();
+        avty_json["t"] = state_t;
         snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
         avty_json["val_tpl"] = tpl;
         avty.add(avty_json);
     }
 
     if (negcond != nullptr) {
-        avty.clear();
+        avty_json.clear();
+        avty_json["t"] = state_t;
         snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
         avty_json["val_tpl"] = tpl;
         avty.add(avty_json);
