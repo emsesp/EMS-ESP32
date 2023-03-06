@@ -565,6 +565,9 @@ bool Command::device_has_commands(const uint8_t device_type) {
 void Command::show_devices(uuid::console::Shell & shell) {
     shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
 
+    if (EMSESP::webSchedulerService.has_commands()) {
+        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
+    }
     if (EMSESP::dallassensor_.have_sensors()) {
         shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR));
     }
@@ -596,11 +599,17 @@ void Command::show_all(uuid::console::Shell & shell) {
     show(shell, EMSdevice::DeviceType::SYSTEM, true);
 
     // show scheduler
-    shell.print(COLOR_BOLD_ON);
-    shell.print(COLOR_YELLOW);
-    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
-    shell.print(COLOR_RESET);
-    show(shell, EMSdevice::DeviceType::SCHEDULER, true);
+    if (EMSESP::webSchedulerService.has_commands()) {
+        shell.print(COLOR_BOLD_ON);
+        shell.print(COLOR_YELLOW);
+        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
+        shell.println(COLOR_RESET);
+        shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+        shell.println(COLOR_RESET);
+        shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+        shell.print(COLOR_RESET);
+        show(shell, EMSdevice::DeviceType::SCHEDULER, true);
+    }
 
     // show sensors
     if (EMSESP::dallassensor_.have_sensors()) {
