@@ -128,6 +128,74 @@ bool WebSchedulerService::command_setvalue(const char * value, const std::string
     return false;
 }
 
+// process json output for info/commands and value_info
+bool WebSchedulerService::get_value_info(JsonObject & output, const char * cmd) {
+    EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems = &webScheduler.scheduleItems; });
+    if (scheduleItems->size() == 0) {
+        return false;
+    }
+    if (Helpers::toLower(cmd) == "commands") {
+        output["info"]     = "lists all values";
+        output["commands"] = "lists all commands";
+        for (const ScheduleItem & scheduleItem : *scheduleItems) {
+            if (!scheduleItem.name.empty()) {
+                output[scheduleItem.name] = "activate schedule";
+            }
+        }
+        return true;
+    }
+    if (strlen(cmd) == 0 || Helpers::toLower(cmd) == "values" || Helpers::toLower(cmd) == "info") {
+        // list all names
+        for (const ScheduleItem & scheduleItem : *scheduleItems) {
+            if (!scheduleItem.name.empty()) {
+                if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                    output[scheduleItem.name] = scheduleItem.active;
+                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                    output[scheduleItem.name] = scheduleItem.active ? 1 : 0;
+                } else {
+                    char result[12];
+                    output[scheduleItem.name] = Helpers::render_boolean(result, scheduleItem.active);
+                }
+            }
+        }
+        return (output.size() > 0);
+    }
+    char command_s[30];
+    strlcpy(command_s, cmd, sizeof(command_s));
+    char * attribute_s = nullptr;
+
+    // check specific attribute to fetch instead of the complete record
+    char * breakp = strchr(command_s, '/');
+    if (breakp) {
+        *breakp     = '\0';
+        attribute_s = breakp + 1;
+    }
+    JsonVariant data;
+    for (const ScheduleItem & scheduleItem : *scheduleItems) {
+        if (Helpers::toLower(scheduleItem.name) == Helpers::toLower(command_s)) {
+            if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                output[scheduleItem.name] = scheduleItem.active;
+            } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                output[scheduleItem.name] = scheduleItem.active ? 1 : 0;
+            } else {
+                char result[12];
+                output[scheduleItem.name] = Helpers::render_boolean(result, scheduleItem.active);
+            }
+            data = output[scheduleItem.name];
+        }
+    }
+    if (attribute_s && !strcmp(attribute_s, "value")) {
+        output.clear();
+        output["api_data"] = data;
+    }
+    if (output.size()) {
+        return true;
+    }
+    output["message"] = "unknown command";
+    return false;
+}
+
+// publish single value
 void WebSchedulerService::publish_single(const char * name, const bool state) {
     if (!Mqtt::publish_single() || name == nullptr || name[0] == '\0') {
         return;
@@ -213,7 +281,9 @@ void WebSchedulerService::publish(const bool force) {
             }
         }
     }
-    Mqtt::queue_publish("scheduler_data", doc.as<JsonObject>());
+    if (doc.size() > 0) {
+        Mqtt::queue_publish("scheduler_data", doc.as<JsonObject>());
+    }
 }
 
 bool WebSchedulerService::has_commands() {

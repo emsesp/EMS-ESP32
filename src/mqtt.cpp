@@ -424,6 +424,7 @@ void Mqtt::load_settings() {
         send_response_      = mqttSettings.send_response;
         discovery_prefix_   = mqttSettings.discovery_prefix.c_str();
         entity_format_      = mqttSettings.entity_format;
+        discovery_type_     = mqttSettings.discovery_type;
 
         // convert to milliseconds
         publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000;
@@ -648,7 +649,7 @@ void Mqtt::ha_status() {
 
     // create the sensors - must match the MQTT payload keys
     // these are all from the heartbeat MQTT topic
-    if (!EMSESP::system_.ethernet_connected()) {
+    if (!EMSESP::system_.ethernet_connected() || WiFi.isConnected()) {
         publish_system_ha_sensor_config(DeviceValueType::INT, "WiFi RSSI", "rssi", DeviceValueUOM::DBM);
         publish_system_ha_sensor_config(DeviceValueType::INT, "WiFi strength", "wifistrength", DeviceValueUOM::PERCENT);
     }
@@ -1311,8 +1312,8 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     char seltemp_s[30];
     char currtemp_s[30];
     char hc_mode_cond[80];
-    char seltemp_cond[80];
-    char currtemp_cond[170];
+    char seltemp_cond[100];
+    char currtemp_cond[100];
     char mode_str_tpl[400];
     char name_s[10];
     char uniq_id_s[60];
@@ -1371,9 +1372,9 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     }
 
     snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/seltemp", hc_num);
-    snprintf(mode_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/mode", hc_num);
+    snprintf(mode_cmd_s, sizeof(mode_cmd_s), "~/thermostat/hc%d/mode", hc_num);
 
-    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc; // doc is 787 typically so 1024 should be enough
+    StaticJsonDocument<EMSESP_JSON_SIZE_XLARGE> doc; // 1024 is not enough
 
     doc["~"]             = mqtt_base_;
     doc["uniq_id"]       = uniq_id_s;
@@ -1444,22 +1445,23 @@ void Mqtt::add_avty_to_doc(const char * state_t, const JsonObject & doc, const c
     snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
     avty_json["val_tpl"] = tpl;
     avty.add(avty_json);
-    avty.clear();
-
+    avty_json.clear();
     avty_json["t"] = state_t;
     snprintf(tpl, sizeof(tpl), tpl_draft, cond1 == nullptr ? "value is defined" : cond1);
     avty_json["val_tpl"] = tpl;
     avty.add(avty_json);
 
     if (cond2 != nullptr) {
-        avty.clear();
+        avty_json.clear();
+        avty_json["t"] = state_t;
         snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
         avty_json["val_tpl"] = tpl;
         avty.add(avty_json);
     }
 
     if (negcond != nullptr) {
-        avty.clear();
+        avty_json.clear();
+        avty_json["t"] = state_t;
         snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
         avty_json["val_tpl"] = tpl;
         avty.add(avty_json);

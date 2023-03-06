@@ -443,13 +443,32 @@ void AnalogSensor::publish_values(const bool force) {
                 case AnalogType::PWM_2:
                     dataSensor["value"] = serialized(Helpers::render_value(s, sensor.value(), 2)); // double
                     break;
+                case AnalogType::DIGITAL_IN:
+                case AnalogType::DIGITAL_OUT:
+                    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                        dataSensor["value"] = sensor.value() != 0;
+                    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                        dataSensor["value"] = sensor.value() != 0 ? 1 : 0;
+                    } else {
+                        char result[12];
+                        dataSensor["value"] = Helpers::render_boolean(result, sensor.value() != 0);
+                    }
+                    break;
                 default:
-                    dataSensor["value"] = (uint8_t)sensor.value(); // convert to char for 1 or 0
                     break;
                 }
+            } else if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::DIGITAL_OUT) {
+                if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                    doc[sensor.name()] = sensor.value() != 0;
+                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                    doc[sensor.name()] = sensor.value() != 0 ? 1 : 0;
+                } else {
+                    char result[12];
+                    doc[sensor.name()] = Helpers::render_boolean(result, sensor.value() != 0);
+                }
             } else {
-                // not nested
-                doc[sensor.name()] = sensor.value();
+                char s[10];
+                doc[sensor.name()] = serialized(Helpers::render_value(s, sensor.value(), 2));
             }
 
             // create HA config
@@ -463,15 +482,19 @@ void AnalogSensor::publish_values(const bool force) {
                 config["stat_t"] = stat_t;
 
                 char val_obj[50];
-                char val_cond[65];
+                char val_cond[95];
                 if (Mqtt::is_nested()) {
                     snprintf(val_obj, sizeof(val_obj), "value_json['%02d'].value", sensor.gpio());
-                    snprintf(val_cond, sizeof(val_cond), "value_json['%02d'] is defined", sensor.gpio());
+                    snprintf(val_cond, sizeof(val_cond), "value_json['%02d'] is defined and %s is defined", sensor.gpio(), val_obj);
                 } else {
                     snprintf(val_obj, sizeof(val_obj), "value_json['%s']", sensor.name().c_str());
                     snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
                 }
-                config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + "}}";
+                char sample_val[12] = "0";
+                if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::DIGITAL_OUT) {
+                    Helpers::render_boolean(sample_val, false);
+                }
+                config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
 
                 char uniq_s[70];
                 if (Mqtt::entity_format() == 2) {

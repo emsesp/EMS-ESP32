@@ -653,14 +653,17 @@ bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const in
 
     // specific for the dallassensor
     if (devicetype == DeviceType::DALLASSENSOR) {
-        EMSESP::dallassensor_.get_value_info(root, cmd, id);
-        return true;
+        return EMSESP::dallassensor_.get_value_info(root, cmd, id);
     }
 
     // analog sensor
     if (devicetype == DeviceType::ANALOGSENSOR) {
-        EMSESP::analogsensor_.get_value_info(root, cmd, id);
-        return true;
+        return EMSESP::analogsensor_.get_value_info(root, cmd, id);
+    }
+
+    // scheduler
+    if (devicetype == DeviceType::SCHEDULER) {
+        return EMSESP::webSchedulerService.get_value_info(root, cmd);
     }
 
     char error[100];
