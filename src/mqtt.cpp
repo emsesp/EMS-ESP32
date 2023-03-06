@@ -1312,8 +1312,8 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     char seltemp_s[30];
     char currtemp_s[30];
     char hc_mode_cond[80];
-    char seltemp_cond[80];
-    char currtemp_cond[170];
+    char seltemp_cond[100];
+    char currtemp_cond[100];
     char mode_str_tpl[400];
     char name_s[10];
     char uniq_id_s[60];
@@ -1372,9 +1372,9 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     }
 
     snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/seltemp", hc_num);
-    snprintf(mode_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/mode", hc_num);
+    snprintf(mode_cmd_s, sizeof(mode_cmd_s), "~/thermostat/hc%d/mode", hc_num);
 
-    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc; // doc is 787 typically so 1024 should be enough
+    StaticJsonDocument<EMSESP_JSON_SIZE_XLARGE> doc; // 1024 is not enough
 
     doc["~"]             = mqtt_base_;
     doc["uniq_id"]       = uniq_id_s;
