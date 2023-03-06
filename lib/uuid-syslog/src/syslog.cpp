@@ -349,7 +349,7 @@ void SyslogService::loop() {
 }
 
 bool SyslogService::can_transmit() {
-    // TODO this should be checked for Eth
+    // TODO this should be checked also for Eth
     if (!host_.empty() && (uint32_t)ip_ == 0) {
         WiFi.hostByName(host_.c_str(), ip_);
     }

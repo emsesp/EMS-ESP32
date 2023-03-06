@@ -305,14 +305,14 @@ export enum DeviceEntityMask {
 }
 
 export interface ScheduleItem {
-  id: string; // unique index which is name
+  id: string; // unique index
   active: boolean;
   deleted?: boolean; // optional
   flags: number;
   time: string;
   cmd: string;
   value: string;
-  description?: string; // optional
+  name?: string; // optional
   o_id?: string;
   o_active?: boolean;
   o_deleted?: boolean;
@@ -320,7 +320,7 @@ export interface ScheduleItem {
   o_time?: string;
   o_cmd?: string;
   o_value?: string;
-  o_description?: string;
+  o_name?: string;
 }
 
 export interface Schedule {
@@ -328,12 +328,12 @@ export interface Schedule {
 }
 
 export enum ScheduleFlag {
+  SCHEDULE_SUN = 1,
   SCHEDULE_MON = 2,
   SCHEDULE_TUE = 4,
   SCHEDULE_WED = 8,
   SCHEDULE_THU = 16,
   SCHEDULE_FRI = 32,
   SCHEDULE_SAT = 64,
-  SCHEDULE_SUN = 1,
   SCHEDULE_TIMER = 128
 }

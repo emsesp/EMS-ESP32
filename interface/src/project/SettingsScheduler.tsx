@@ -5,18 +5,17 @@ import {
   Button,
   Typography,
   Box,
+  Stack,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   ToggleButton,
-  MenuItem,
   ToggleButtonGroup,
   Checkbox,
+  Grid,
   TextField,
-  Radio,
-  RadioGroup,
-  FormControlLabel
+  Divider
 } from '@mui/material';
 
 import { useTheme } from '@table-library/react-table-library/theme';
@@ -25,11 +24,11 @@ import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-li
 import { useSnackbar } from 'notistack';
 
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
-import CheckIcon from '@mui/icons-material/Check';
 import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
 import AddIcon from '@mui/icons-material/Add';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 import {
   ValidatedTextField,
@@ -52,6 +51,18 @@ import { useI18nContext } from 'i18n/i18n-react';
 
 import * as EMSESP from './api';
 
+function makeid() {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  let counter = 0;
+  while (counter < 4) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    counter += 1;
+  }
+  return result;
+}
+
 const SettingsScheduler: FC = () => {
   const { LL, locale } = useI18nContext();
 
@@ -68,8 +79,8 @@ const SettingsScheduler: FC = () => {
     time: '12:00',
     cmd: '',
     value: '',
-    description: '',
-    o_id: ''
+    name: '',
+    o_name: ''
   };
   const [schedule, setSchedule] = useState<ScheduleItem[]>([emptySchedule]);
   const [scheduleItem, setScheduleItem] = useState<ScheduleItem>();
@@ -97,7 +108,7 @@ const SettingsScheduler: FC = () => {
 
   const schedule_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: 152px 36px 324px 72px 240px repeat(1, minmax(100px, 1fr));
+      --data-table-library_grid-template-columns: 36px 324px 50px 192px repeat(1, minmax(100px, 1fr)) 160px;
     `,
     BaseRow: `
       font-size: 14px;
@@ -106,10 +117,10 @@ const SettingsScheduler: FC = () => {
       }
     `,
     BaseCell: `
-      &:nth-of-type(1) {
-        padding: 8px;
-      }
       &:nth-of-type(2) {
+        text-align: center;
+      }
+      &:nth-of-type(1) {
         text-align: center;
       }
     `,
@@ -171,7 +182,7 @@ const SettingsScheduler: FC = () => {
         o_time: si.time,
         o_cmd: si.cmd,
         o_value: si.value,
-        o_description: si.description
+        o_name: si.name
       }))
     );
   };
@@ -216,7 +227,7 @@ const SettingsScheduler: FC = () => {
   function hasScheduleChanged(si: ScheduleItem) {
     return (
       si.id !== si.o_id ||
-      (si?.description || '') !== (si?.o_description || '') ||
+      (si?.name || '') !== (si?.o_name || '') ||
       si.active !== si.o_active ||
       si.deleted !== si.o_deleted ||
       si.flags !== si.o_flags ||
@@ -247,7 +258,7 @@ const SettingsScheduler: FC = () => {
                 time: condensed_si.time,
                 cmd: condensed_si.cmd,
                 value: condensed_si.value,
-                description: condensed_si.description
+                name: condensed_si.name
               };
             })
         });
@@ -263,43 +274,54 @@ const SettingsScheduler: FC = () => {
     }
   };
 
-  function showFlag(si: ScheduleItem, flag: number) {
-    let text = '';
+  function getFlagName(flag: number) {
     if ((flag & ScheduleFlag.SCHEDULE_MON) === ScheduleFlag.SCHEDULE_MON) {
-      text = dow[1];
+      return dow[1];
     }
     if ((flag & ScheduleFlag.SCHEDULE_TUE) === ScheduleFlag.SCHEDULE_TUE) {
-      text = dow[2];
+      return dow[2];
     }
     if ((flag & ScheduleFlag.SCHEDULE_WED) === ScheduleFlag.SCHEDULE_WED) {
-      text = dow[3];
+      return dow[3];
     }
     if ((flag & ScheduleFlag.SCHEDULE_THU) === ScheduleFlag.SCHEDULE_THU) {
-      text = dow[4];
+      return dow[4];
     }
     if ((flag & ScheduleFlag.SCHEDULE_FRI) === ScheduleFlag.SCHEDULE_FRI) {
-      text = dow[5];
+      return dow[5];
     }
     if ((flag & ScheduleFlag.SCHEDULE_SAT) === ScheduleFlag.SCHEDULE_SAT) {
-      text = dow[6];
+      return dow[6];
     }
     if ((flag & ScheduleFlag.SCHEDULE_SUN) === ScheduleFlag.SCHEDULE_SUN) {
-      text = dow[0];
+      return dow[0];
     }
     if ((flag & ScheduleFlag.SCHEDULE_TIMER) === ScheduleFlag.SCHEDULE_TIMER) {
-      text = LL.TIMER();
+      return LL.TIMER();
     }
-
-    return (
-      <Typography variant="button" sx={{ fontSize: 10 }} color={(si.flags & flag) === flag ? 'primary' : 'grey'}>
-        {text}
-      </Typography>
-    );
+    return '';
   }
 
+  const dayBox = (si: ScheduleItem, flag: number) => (
+    <>
+      <Box>
+        <Typography sx={{ fontSize: 11 }} color={(si.flags & flag) === flag ? 'primary' : 'grey'}>
+          {getFlagName(flag)}
+        </Typography>
+      </Box>
+      <Divider orientation="vertical" flexItem />
+    </>
+  );
+
+  const showFlag = (si: ScheduleItem, flag: number) => (
+    <Typography variant="button" sx={{ fontSize: 10 }} color={(si.flags & flag) === flag ? 'primary' : 'grey'}>
+      {getFlagName(flag)}
+    </Typography>
+  );
+
   const editScheduleItem = (si: ScheduleItem) => {
-    if (si.description === undefined) {
-      si.description = '';
+    if (si.name === undefined) {
+      si.name = '';
     }
     setCreating(false);
     setScheduleItem(si);
@@ -308,19 +330,21 @@ const SettingsScheduler: FC = () => {
   const addScheduleItem = () => {
     setCreating(true);
     setScheduleItem({
-      id: '',
+      id: makeid(),
       active: false,
       deleted: false,
       flags: 0,
       time: '12:00',
       cmd: '',
       value: '',
-      description: ''
+      name: ''
     });
   };
 
   const updateScheduleItem = () => {
-    setSchedule([...schedule.filter((si) => creating || si.o_id !== scheduleItem.o_id), scheduleItem]);
+    if (scheduleItem) {
+      setSchedule([...schedule.filter((si) => creating || si.o_id !== scheduleItem.o_id), scheduleItem]);
+    }
     setScheduleItem(undefined);
   };
 
@@ -339,56 +363,37 @@ const SettingsScheduler: FC = () => {
           <>
             <Header>
               <HeaderRow>
-                <HeaderCell stiff>{LL.NAME()}</HeaderCell>
-                <HeaderCell stiff>
-                  <CheckIcon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
-                </HeaderCell>
+                <HeaderCell />
                 <HeaderCell stiff>{LL.SCHEDULE()}</HeaderCell>
                 <HeaderCell stiff>{LL.TIME()}</HeaderCell>
                 <HeaderCell stiff>{LL.COMMAND()}</HeaderCell>
-                <HeaderCell>{LL.VALUE(0)}</HeaderCell>
+                <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
+                <HeaderCell stiff>{LL.NAME(0)}</HeaderCell>
               </HeaderRow>
             </Header>
             <Body>
               {tableList.map((si: ScheduleItem) => (
                 <Row key={si.id} item={si} onClick={() => editScheduleItem(si)}>
-                  <Cell>{si.id}</Cell>
                   <Cell stiff>
-                    <Checkbox
-                      size="small"
-                      checked={si.active}
-                      onChange={() => {
-                        si.active = !si.active;
-                        setFlags(['']); // forces refresh
-                      }}
-                    />
+                    {si.active && <CheckCircleIcon sx={{ color: '#79D200', fontSize: 16, verticalAlign: 'middle' }} />}
                   </Cell>
                   <Cell stiff>
-                    <ToggleButtonGroup
-                      size="small"
-                      color="secondary"
-                      value={getFlagString(si.flags)}
-                      onChange={(event, flag) => {
-                        si.flags = getFlagNumber(flag);
-                        if (si.flags & ScheduleFlag.SCHEDULE_TIMER) {
-                          si.flags = ScheduleFlag.SCHEDULE_TIMER;
-                        }
-                        setFlags(['']); // forces refresh
-                      }}
-                    >
-                      <ToggleButton value="2">{showFlag(si, ScheduleFlag.SCHEDULE_MON)}</ToggleButton>
-                      <ToggleButton value="4">{showFlag(si, ScheduleFlag.SCHEDULE_TUE)}</ToggleButton>
-                      <ToggleButton value="8">{showFlag(si, ScheduleFlag.SCHEDULE_WED)}</ToggleButton>
-                      <ToggleButton value="16">{showFlag(si, ScheduleFlag.SCHEDULE_THU)}</ToggleButton>
-                      <ToggleButton value="32">{showFlag(si, ScheduleFlag.SCHEDULE_FRI)}</ToggleButton>
-                      <ToggleButton value="64">{showFlag(si, ScheduleFlag.SCHEDULE_SAT)}</ToggleButton>
-                      <ToggleButton value="1">{showFlag(si, ScheduleFlag.SCHEDULE_SUN)}</ToggleButton>
-                      <ToggleButton value="128">{showFlag(si, ScheduleFlag.SCHEDULE_TIMER)}</ToggleButton>
-                    </ToggleButtonGroup>
+                    <Stack spacing={1} direction="row">
+                      <Divider orientation="vertical" flexItem />
+                      {dayBox(si, ScheduleFlag.SCHEDULE_MON)}
+                      {dayBox(si, ScheduleFlag.SCHEDULE_TUE)}
+                      {dayBox(si, ScheduleFlag.SCHEDULE_WED)}
+                      {dayBox(si, ScheduleFlag.SCHEDULE_THU)}
+                      {dayBox(si, ScheduleFlag.SCHEDULE_FRI)}
+                      {dayBox(si, ScheduleFlag.SCHEDULE_SAT)}
+                      {dayBox(si, ScheduleFlag.SCHEDULE_SUN)}
+                      {dayBox(si, ScheduleFlag.SCHEDULE_TIMER)}
+                    </Stack>
                   </Cell>
                   <Cell>{si.time}</Cell>
                   <Cell>{si.cmd}</Cell>
                   <Cell>{si.value}</Cell>
+                  <Cell>{si.name}</Cell>
                 </Row>
               ))}
             </Body>
@@ -408,7 +413,7 @@ const SettingsScheduler: FC = () => {
     if (scheduleItem) {
       try {
         setFieldErrors(undefined);
-        await validate(schedulerItemValidation(schedule, scheduleItem.o_id), scheduleItem);
+        await validate(schedulerItemValidation(schedule, scheduleItem), scheduleItem);
         updateScheduleItem();
       } catch (errors: any) {
         setFieldErrors(errors);
@@ -418,89 +423,94 @@ const SettingsScheduler: FC = () => {
 
   const closeDialog = () => {
     setScheduleItem(undefined);
-    setFieldErrors();
+    setFieldErrors(undefined);
   };
 
   const renderEditSchedule = () => {
     if (scheduleItem) {
+      const isTimer = scheduleItem.flags === ScheduleFlag.SCHEDULE_TIMER;
       return (
         <Dialog open={!!scheduleItem} onClose={() => closeDialog()}>
           <DialogTitle>
-            {creating ? LL.ADD(0) + ' ' + LL.NEW() + ' ' + LL.SCHEDULE() : LL.EDIT() + " '" + scheduleItem.id + "'"}
+            {creating ? LL.ADD(0) + ' ' + LL.NEW() : LL.EDIT()}&nbsp;{LL.SCHEDULE()}
           </DialogTitle>
           <DialogContent dividers>
-            <ValidatedTextField
-              fieldErrors={fieldErrors}
-              name="id"
-              label={LL.NAME()}
-              value={scheduleItem.id}
-              fullWidth
-              margin="normal"
-              sx={{ width: '60ch' }}
-              onChange={updateValue(setScheduleItem)}
-            />
-            {creating ? (
-              <RadioGroup
-                row
-                name="schedule-type"
-                onChange={(event) => {
-                  if ((event.target as HTMLInputElement).value === 't') {
-                    scheduleItem.flags = ScheduleFlag.SCHEDULE_TIMER;
-                    scheduleItem.time = '01:00';
-                  } else {
-                    scheduleItem.flags = 0;
-                  }
-                  updateValue(setScheduleItem);
-                  setFlags(['']); // refresh screen
-                }}
-              >
-                <FormControlLabel value="w" control={<Radio />} label={LL.WEEKLY()} />
-                <FormControlLabel value="t" control={<Radio />} label={LL.TIMER()} />
-              </RadioGroup>
-            ) : (
-              <Typography variant="h6" color="primary" sx={{ pb: 1 }}>
-                {LL.TYPE()}:&nbsp;{scheduleItem.flags & ScheduleFlag.SCHEDULE_TIMER ? LL.TIMER() : LL.WEEKLY()}
-              </Typography>
-            )}
-            <TextField
-              name="description"
-              label={LL.ENTITY_NAME()}
-              value={scheduleItem.description}
-              fullWidth
-              margin="normal"
-              sx={{ width: '60ch' }}
-              onChange={updateValue(setScheduleItem)}
-            />
-            <BlockFormControlLabel
-              control={<Checkbox checked={scheduleItem.active} onChange={updateValue(setScheduleItem)} name="active" />}
-              label={LL.ACTIVE()}
-            />
+            <Box display="flex" flexWrap="wrap" mb={1}>
+              <Box flexGrow={1}>
+                <ToggleButtonGroup
+                  size="small"
+                  color="secondary"
+                  value={getFlagString(scheduleItem.flags)}
+                  onChange={(event, flag) => {
+                    scheduleItem.flags = getFlagNumber(flag) & 127;
+                    setFlags(['']); // forces refresh
+                  }}
+                >
+                  <ToggleButton value="2">{showFlag(scheduleItem, ScheduleFlag.SCHEDULE_MON)}</ToggleButton>
+                  <ToggleButton value="4">{showFlag(scheduleItem, ScheduleFlag.SCHEDULE_TUE)}</ToggleButton>
+                  <ToggleButton value="8">{showFlag(scheduleItem, ScheduleFlag.SCHEDULE_WED)}</ToggleButton>
+                  <ToggleButton value="16">{showFlag(scheduleItem, ScheduleFlag.SCHEDULE_THU)}</ToggleButton>
+                  <ToggleButton value="32">{showFlag(scheduleItem, ScheduleFlag.SCHEDULE_FRI)}</ToggleButton>
+                  <ToggleButton value="64">{showFlag(scheduleItem, ScheduleFlag.SCHEDULE_SAT)}</ToggleButton>
+                  <ToggleButton value="1">{showFlag(scheduleItem, ScheduleFlag.SCHEDULE_SUN)}</ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+              <Box flexWrap="nowrap" whiteSpace="nowrap">
+                {isTimer ? (
+                  <Button
+                    size="large"
+                    sx={{ bgcolor: '#334f65' }}
+                    variant="contained"
+                    onClick={() => {
+                      scheduleItem.flags = 0;
+                      setFlags(['']); // forces refresh
+                    }}
+                  >
+                    {showFlag(scheduleItem, ScheduleFlag.SCHEDULE_TIMER)}
+                  </Button>
+                ) : (
+                  <Button
+                    size="large"
+                    variant="outlined"
+                    onClick={() => {
+                      scheduleItem.flags = ScheduleFlag.SCHEDULE_TIMER;
+                      setFlags(['']); // forces refresh
+                    }}
+                  >
+                    {showFlag(scheduleItem, ScheduleFlag.SCHEDULE_TIMER)}
+                  </Button>
+                )}
+              </Box>
+            </Box>
+            <Grid container>
+              <BlockFormControlLabel
+                control={
+                  <Checkbox checked={scheduleItem.active} onChange={updateValue(setScheduleItem)} name="active" />
+                }
+                label={LL.ACTIVE()}
+              />
+              {scheduleItem.active && (
+                <Grid item sx={{ mt: 1 }}>
+                  <CheckCircleIcon sx={{ color: '#79D200', fontSize: 16, verticalAlign: 'middle' }} />
+                </Grid>
+              )}
+            </Grid>
 
-            {(scheduleItem.flags & ScheduleFlag.SCHEDULE_TIMER) === ScheduleFlag.SCHEDULE_TIMER ? (
-              <TextField
-                name="time"
-                label={LL.TIMER()}
-                value={scheduleItem.time}
-                fullWidth
-                variant="outlined"
-                onChange={updateValue(setScheduleItem)}
-                margin="normal"
-                select
-              >
-                <MenuItem value={'00:00'}>{LL.SCHEDULE_TIMER_1()}</MenuItem>
-                <MenuItem value={'00:01'}>{LL.SCHEDULE_TIMER_2()}</MenuItem>
-                <MenuItem value={'01:00'}>{LL.SCHEDULE_TIMER_3()}</MenuItem>
-              </TextField>
-            ) : (
+            <Grid container>
               <TextField
                 name="time"
                 type="time"
-                label={LL.TIME()}
+                label={isTimer ? LL.TIMER() : LL.TIME()}
                 value={scheduleItem.time}
                 margin="normal"
                 onChange={updateValue(setScheduleItem)}
               />
-            )}
+              {isTimer && (
+                <Box color="warning.main" ml={2} mt={4}>
+                  <Typography variant="body2">{LL.SCHEDULER_HELP_2()}</Typography>
+                </Box>
+              )}
+            </Grid>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="cmd"
@@ -517,6 +527,15 @@ const SettingsScheduler: FC = () => {
               margin="normal"
               fullWidth
               value={scheduleItem.value}
+              onChange={updateValue(setScheduleItem)}
+            />
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="name"
+              label={LL.NAME(0)}
+              value={scheduleItem.name}
+              fullWidth
+              margin="normal"
               onChange={updateValue(setScheduleItem)}
             />
           </DialogContent>

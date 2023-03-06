@@ -311,10 +311,10 @@ const de: Translation = {
   LEAVE: 'Verlassen',
   SCHEDULER: 'Planer',
   SCHEDULER_HELP_1: 'Fügen Sie eigene, geplante Befehle zur Automatisierung hinzu. Vergeben Sie einen Entitätsnamen um die Aktivierung über API/Mqtt zu steuern',
+  SCHEDULER_HELP_2: 'Use 00:00 to trigger on boot', // TODO translate
   SCHEDULE: 'Zeitplan',
   TIME: 'Zeit',
   TIMER: 'Timer',
-  WEEKLY: 'Wöchentlich',
   SCHEDULE_SAVED: 'Plan gespeichert',
   SCHEDULE_TIMER_1: 'beim Start',
   SCHEDULE_TIMER_2: 'jede Minute',
