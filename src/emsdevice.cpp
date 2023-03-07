@@ -1055,7 +1055,6 @@ void EMSdevice::set_climate_minmax(uint8_t tag, int16_t min, uint16_t max) {
                 dv.min = min;
                 dv.max = max;
                 dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                Mqtt::publish_ha_climate_config(dv.tag, false, true); // delete topic (remove = true)
             }
             return;
         }

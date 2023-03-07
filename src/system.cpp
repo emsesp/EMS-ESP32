@@ -58,7 +58,7 @@ namespace emsesp {
 // in Debug mode use one language (en) to save flash memory needed for the tests
 const char * const languages[] = {EMSESP_LOCALE_EN};
 #else
-const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE, EMSESP_LOCALE_NL, EMSESP_LOCALE_SV, EMSESP_LOCALE_PL, EMSESP_LOCALE_NO, EMSESP_LOCALE_FR};
+const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE, EMSESP_LOCALE_NL, EMSESP_LOCALE_SV, EMSESP_LOCALE_PL, EMSESP_LOCALE_NO, EMSESP_LOCALE_FR, EMSESP_LOCALE_TR};
 #endif
 
 static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *);
