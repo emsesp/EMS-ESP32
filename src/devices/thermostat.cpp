@@ -1193,7 +1193,8 @@ void Thermostat::process_RC30Temp(std::shared_ptr<const Telegram> telegram) {
 // type 0x3E (HC1), 0x48 (HC2), 0x52 (HC3), 0x5C (HC4) - data from the RC35 thermostat (0x10) - 16 bytes
 void Thermostat::process_RC35Monitor(std::shared_ptr<const Telegram> telegram) {
     // Check if heatingciruit is active, see https://github.com/emsesp/EMS-ESP32/issues/786
-    if (telegram->offset > 0 || telegram->message_data[0] == 0x00) {
+    uint16_t active = 0;
+    if (!telegram->read_value(active, 3)) {
         return;
     }
 
