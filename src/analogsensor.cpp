@@ -404,7 +404,7 @@ void AnalogSensor::remove_ha_topic(const int8_t type, const uint8_t gpio) const 
     } else if (type >= AnalogType::PWM_0) {
         snprintf(topic, sizeof(topic), "number/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
     } else if (type == AnalogType::DIGITAL_IN) {
-        snprintf(topic, sizeof(topic), "binary-sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
+        snprintf(topic, sizeof(topic), "binary_sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
     } else {
         snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
     }
@@ -561,7 +561,7 @@ void AnalogSensor::publish_values(const bool force) {
                     // config["mode"]  = "box"; // auto, slider or box
                     // config["step"]  = sensor.factor();
                 } else if (sensor.type() == AnalogType::DIGITAL_IN) {
-                    snprintf(topic, sizeof(topic), "binary-sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
+                    snprintf(topic, sizeof(topic), "binary_sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
                 } else {
                     snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
                     config["stat_cla"] = "measurement";
