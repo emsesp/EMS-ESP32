@@ -297,7 +297,7 @@ const SettingsScheduler: FC = () => {
       return dow[0];
     }
     if ((flag & ScheduleFlag.SCHEDULE_TIMER) === ScheduleFlag.SCHEDULE_TIMER) {
-      return LL.TIMER();
+      return LL.TIMER(0);
     }
     return '';
   }
@@ -364,9 +364,9 @@ const SettingsScheduler: FC = () => {
             <Header>
               <HeaderRow>
                 <HeaderCell />
-                <HeaderCell stiff>{LL.SCHEDULE()}</HeaderCell>
-                <HeaderCell stiff>{LL.TIME()}</HeaderCell>
-                <HeaderCell stiff>{LL.COMMAND()}</HeaderCell>
+                <HeaderCell stiff>{LL.SCHEDULE(0)}</HeaderCell>
+                <HeaderCell stiff>{LL.TIME(0)}</HeaderCell>
+                <HeaderCell stiff>{LL.COMMAND(0)}</HeaderCell>
                 <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
                 <HeaderCell stiff>{LL.NAME(0)}</HeaderCell>
               </HeaderRow>
@@ -432,7 +432,7 @@ const SettingsScheduler: FC = () => {
       return (
         <Dialog open={!!scheduleItem} onClose={() => closeDialog()}>
           <DialogTitle>
-            {creating ? LL.ADD(0) + ' ' + LL.NEW() : LL.EDIT()}&nbsp;{LL.SCHEDULE()}
+            {creating ? LL.ADD(1) + ' ' + LL.NEW() : LL.EDIT()}&nbsp;{LL.SCHEDULE(1)}
           </DialogTitle>
           <DialogContent dividers>
             <Box display="flex" flexWrap="wrap" mb={1}>
@@ -500,7 +500,7 @@ const SettingsScheduler: FC = () => {
               <TextField
                 name="time"
                 type="time"
-                label={isTimer ? LL.TIMER() : LL.TIME()}
+                label={isTimer ? LL.TIMER(1) : LL.TIME(1)}
                 value={scheduleItem.time}
                 margin="normal"
                 onChange={updateValue(setScheduleItem)}
@@ -514,7 +514,7 @@ const SettingsScheduler: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="cmd"
-              label={LL.COMMAND()}
+              label={LL.COMMAND(0)}
               fullWidth
               value={scheduleItem.cmd}
               margin="normal"
@@ -522,7 +522,7 @@ const SettingsScheduler: FC = () => {
             />
             <TextField
               name="value"
-              label={LL.VALUE(1)}
+              label={LL.VALUE(0)}
               multiline
               margin="normal"
               fullWidth

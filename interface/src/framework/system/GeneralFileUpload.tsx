@@ -133,7 +133,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
             </Typography>
           </Box>
           <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => downloadSchedule()}>
-            {LL.SCHEDULE()}
+            {LL.SCHEDULE(0)}
           </Button>
         </>
       )}
