@@ -647,12 +647,14 @@ void Mqtt::ha_status() {
     snprintf(topic, sizeof(topic), "binary_sensor/%s/system_status/config", mqtt_basename_.c_str());
     Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
-    // create the sensors - must match the MQTT payload keys
-    // these are all from the heartbeat MQTT topic
+// create the sensors - must match the MQTT payload keys
+// these are all from the heartbeat MQTT topic
+#ifndef EMSESP_STANDALONE
     if (!EMSESP::system_.ethernet_connected() || WiFi.isConnected()) {
         publish_system_ha_sensor_config(DeviceValueType::INT, "WiFi RSSI", "rssi", DeviceValueUOM::DBM);
         publish_system_ha_sensor_config(DeviceValueType::INT, "WiFi strength", "wifistrength", DeviceValueUOM::PERCENT);
     }
+#endif
 
     publish_system_ha_sensor_config(DeviceValueType::STRING, "EMS Bus", "bus_status", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::STRING, "Uptime", "uptime", DeviceValueUOM::NONE);
