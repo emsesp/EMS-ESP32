@@ -98,7 +98,7 @@
 {172, DeviceType::THERMOSTAT, "Rego 2000/3000", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 {216, DeviceType::THERMOSTAT, "CRF200S", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {246, DeviceType::THERMOSTAT, "Comfort+2RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
-{253, DeviceType::THERMOSTAT, "Rego 3000", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
+{253, DeviceType::THERMOSTAT, "Rego 3000/UI800", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 
 // Thermostat - Sieger - 0x10 / 0x17
 { 66, DeviceType::THERMOSTAT, "ES72/RC20", DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17 or remote
@@ -121,7 +121,7 @@
 // Thermostat remote - 0x38
 {  3, DeviceType::THERMOSTAT, "RT800", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
 {200, DeviceType::THERMOSTAT, "RC100H", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
-{249, DeviceType::THERMOSTAT, "TR120RF", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
+{249, DeviceType::THERMOSTAT, "TR120RF/CR20RF", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
 
 // Solar Modules - 0x30 (for solar), 0x2A, 0x41 (for ww)
 { 73, DeviceType::SOLAR, "SM10", DeviceFlags::EMS_DEVICE_FLAG_SM10},
