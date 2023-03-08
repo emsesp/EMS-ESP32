@@ -46,8 +46,8 @@ const pl: BaseTranslation = {
   CANCEL: 'Anuluj',
   RESET: 'Reset{{uj|owanie|}}',
   SEND: 'Wyślij',
-  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
-  UPDATE: 'Update', // TODO translate
+  APPLY_CHANGES: 'Zapisz zmiany ({0})',
+  UPDATE: 'Uaktualnij',
   REMOVE: 'Usuń',
   PROBLEM_UPDATING: 'Problem z uaktualnieniem!',
   PROBLEM_LOADING: 'Problem z załadowaniem!',
@@ -147,8 +147,8 @@ const pl: BaseTranslation = {
   HOURS: 'godzin',
   RESTART: 'Restart',
   RESTART_TEXT: 'Aby zastosować wprowadzone zmiany interfejs EMS-ESP musi zostać zrestartowany.',
-  RESTART_CONFIRM: 'Jesteś pewien, że chcesz zrestartować interfejs EMS-ESP?',
-  COMMAND: 'KOMENDA',
+  RESTART_CONFIRM: 'Na pewno chcesz zrestartować interfejs EMS-ESP?',
+  COMMAND: '{{Komenda|KOMENDA|}}',
   CUSTOMIZATIONS_RESTART: 'Wszystkie personalizacje zostały usunięte. Restartuję...',
   CUSTOMIZATIONS_FULL: 'Wybrano za dużo obiektów. Wprowadź zmiany w mniejszych partiach.',
   CUSTOMIZATIONS_SAVED: 'Personalizacje zostały zapisane.',
@@ -162,7 +162,7 @@ const pl: BaseTranslation = {
   SET_ALL: 'Ustaw wszystko jako',
   OPTIONS: 'Opcje',
   NAME: '{{Nazwa|nazwa|}}',
-  CUSTOMIZATIONS_RESET:  'Czy jesteś pewien, że chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury 1-Wire® i urządzeń podłączonych do EMS-ESP?',
+  CUSTOMIZATIONS_RESET:  'Na pewno chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury 1-Wire® i urządzeń podłączonych do EMS-ESP?',
   DEVICE_ENTITIES: 'Encje urządzenia',
   SUPPORT_INFORMATION: 'Informacje dotyczące wsparcia',
   CLICK_HERE: 'Kliknij tu',
@@ -188,7 +188,7 @@ const pl: BaseTranslation = {
   USE: 'Aby zaktualizować firmware skorzystaj z funkcji',
   FACTORY_RESET: 'Ustawienia fabryczne',
   SYSTEM_FACTORY_TEXT: 'Interfejs EMS-ESP został przywrócony do ustawień fabrycznych i zostanie teraz ponownie uruchomiony.',
-  SYSTEM_FACTORY_TEXT_DIALOG: 'Czy jesteś pewien, że chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP? ',
+  SYSTEM_FACTORY_TEXT_DIALOG: 'Na pewno chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP? ',
   VERSION_CHECK: 'Sprawd{{ź|zanie|}} wersj{{ę|i|}}',
   THE_LATEST: 'Najnowsza',
   OFFICIAL: 'oficjalna',
@@ -207,8 +207,8 @@ const pl: BaseTranslation = {
   BUFFER_SIZE: 'Maksymalna pojemność bufora (ilość wpisów)',
   COMPACT: 'Kompaktowy',
   ENABLE_OTA: 'Aktywuj aktualizację OTA',
-  DOWNLOAD_CUSTOMIZATION_TEXT: 'Pobierz personalizacje',
-  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
+  DOWNLOAD_CUSTOMIZATION_TEXT: 'Pobierz personalizacje.',
+  DOWNLOAD_SCHEDULE_TEXT: 'Pobierz harmonogram zdarzeń.',
   DOWNLOAD_SETTINGS_TEXT: 'Pobierz ustawienia aplikacji. Uważaj jeśli udostępniasz plik z ustawieniami, ponieważ zawiera on hasła oraz inne wrażliwe informacje!',
   UPLOAD_TEXT: 'Wyślij firmware (.bin), ustawienia lub personalizacje (.json). Opcjonalnie, wyślij wcześniej plik walidacji (.md5).',
   UPLOADING: 'Wysłano',
@@ -242,7 +242,7 @@ const pl: BaseTranslation = {
   MQTT_PUBLISH_TEXT_2: 'Publikuj w tematach "command" (ioBroker)',
   MQTT_PUBLISH_TEXT_3: 'Włącz opcję "MQTT discovery',
   MQTT_PUBLISH_TEXT_4: 'Prefiks dla "MQTT discovery"',
-  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
+  MQTT_PUBLISH_TEXT_5: 'Typ "MQTT discovery"',
   MQTT_PUBLISH_INTERVALS: 'Interwały publikowania',
   MQTT_INT_BOILER: 'Kotły i pompy ciepła',
   MQTT_INT_THERMOSTATS: 'Termostaty',
@@ -300,25 +300,25 @@ const pl: BaseTranslation = {
   ADDRESS_OF: 'Adres {0}',
   ADMIN: 'Użytkownik "administrator".',
   GUEST: 'Użytkownik "gość".',
-  NEW: 'Nowy',
+  NEW: 'nowego',
   NEW_NAME_OF: 'Nowa nazwa {0}',
   ENTITY: 'encji',
   MIN: 'Min.',
   MAX: 'Maks.',
-  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
-  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
-  STAY: 'Stay', // TODO translate
-  LEAVE: 'Leave', // TODO translate
-  SCHEDULER: 'Scheduler', // TODO translate
-  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.', // TODO translate
-  SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
-  SCHEDULE: 'Schedule', // TODO translate
-  TIME: 'Time', // TODO translate
-  TIMER: 'Timer', // TODO translate
-  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
-  SCHEDULE_TIMER_1: 'on startup', // TODO translate
-  SCHEDULE_TIMER_2: 'every minute', // TODO translate
-  SCHEDULE_TIMER_3: 'every hour' // TODO translate
+  BLOCK_NAVIGATE_1: 'Niezapisane zmiany!',
+  BLOCK_NAVIGATE_2: 'Jeśli przejdziesz do innej strony, wprowadzone zmiany w ustawieniach zostaną utracone. Na pewno chcesz opuścić tę stronę?',
+  STAY: 'Pozostań',
+  LEAVE: 'Opuść',
+  SCHEDULER: 'Harmonogram',
+  SCHEDULER_HELP_1: 'Zautomatyzuj wykonywanie komend, dodając poniżej harmonogram zdarzeń. Nadaj mu unikalną nazwę, aby móc go aktywować/dezaktywować przez API/MQTT.',
+  SCHEDULER_HELP_2: 'Wpisz 00:00 aby wykonywać jednorazowo przy starcie.',
+  SCHEDULE: '{{H|h|}}armonogram{{|u|}}',
+  TIME: '{{Zegar|Godzina|}}',
+  TIMER: '{{m|M|}}inutnik',
+  SCHEDULE_SAVED: 'Harmonogram został uaktualniony.',
+  SCHEDULE_TIMER_1: 'przy starcie',
+  SCHEDULE_TIMER_2: 'co minutę',
+  SCHEDULE_TIMER_3: 'co godzinę'
 };
 
 export default pl;
