@@ -1323,10 +1323,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^18.11.11, @types/node@npm:^18.14.6":
+"@types/node@npm:*, @types/node@npm:^18.11.11":
   version: 18.14.6
   resolution: "@types/node@npm:18.14.6"
   checksum: 2f88f482cabadc6dbddd627a1674239e68c3c9beab56eb4ae2309fb96fd17fc3a509d99b0309bafe13b58529574f49ecf3a583f2ebe2896dd32fe4be436dc96e
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^18.15.0":
+  version: 18.15.0
+  resolution: "@types/node@npm:18.15.0"
+  checksum: d81372276dd5053b1743338b61a2178ff9722dc609189d01fc7d1c2acd539414039e0e4780678730514390dad3f29c366a28c29e8dbd5b0025651181f6dd6669
   languageName: node
   linkType: hard
 
@@ -1782,7 +1789,7 @@ __metadata:
     "@table-library/react-table-library": 4.0.29
     "@types/lodash-es": ^4.17.6
     "@types/mime-types": ^2
-    "@types/node": ^18.14.6
+    "@types/node": ^18.15.0
     "@types/react": ^18.0.28
     "@types/react-dom": ^18.0.11
     "@types/react-router-dom": ^5.3.3
@@ -1805,7 +1812,7 @@ __metadata:
     lodash-es: ^4.17.21
     mime-types: ^2.1.35
     nodemon: ^2.0.21
-    notistack: ^3.0.0
+    notistack: 2.0.8
     npm-run-all: ^4.1.5
     prettier: ^2.8.4
     react: latest
@@ -3571,15 +3578,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"goober@npm:^2.0.33":
-  version: 2.1.12
-  resolution: "goober@npm:2.1.12"
-  peerDependencies:
-    csstype: ^3.0.10
-  checksum: 5945cbe92413031b8859d9087d125a744149e237c8bcf6c15db1998ee3d1b6d680ee4a47dd420f95684b76f72eebc34e98155e8a1cb06748d00cbdc05ede186d
-  languageName: node
-  linkType: hard
-
 "gopd@npm:^1.0.1":
   version: 1.0.1
   resolution: "gopd@npm:1.0.1"
@@ -4702,16 +4700,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"notistack@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "notistack@npm:3.0.0"
+"notistack@npm:2.0.8":
+  version: 2.0.8
+  resolution: "notistack@npm:2.0.8"
   dependencies:
     clsx: ^1.1.0
-    goober: ^2.0.33
+    hoist-non-react-statics: ^3.3.0
   peerDependencies:
+    "@emotion/react": ^11.4.1
+    "@emotion/styled": ^11.3.0
+    "@mui/material": ^5.0.0
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: e061b965aa36f69051150321bec89c28709da683a73e35ec54599d24930c11d29ecb020700a3017bb53abacc59742d6663ff1e66958ca2dec9e41d1e06f0cf32
+  peerDependenciesMeta:
+    "@emotion/react":
+      optional: true
+    "@emotion/styled":
+      optional: true
+  checksum: f95952ea7209840f6f05a65e74f0fb4e7a1bb321753b2955ae6052f2205d47a6a3c50a42b72db11eac2fc491c4105b4687bed89e79287399530973fa133a5380
   languageName: node
   linkType: hard
 
