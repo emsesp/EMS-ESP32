@@ -1812,7 +1812,6 @@ __metadata:
     lodash-es: ^4.17.21
     mime-types: ^2.1.35
     nodemon: ^2.0.21
-    notistack: 2.0.8
     npm-run-all: ^4.1.5
     prettier: ^2.8.4
     react: latest
@@ -1820,6 +1819,7 @@ __metadata:
     react-dropzone: ^14.2.3
     react-icons: ^4.8.0
     react-router-dom: ^6.8.2
+    react-toastify: ^9.1.1
     rollup-plugin-visualizer: ^5.9.0
     sockette: ^2.0.6
     typesafe-i18n: ^5.24.2
@@ -2355,7 +2355,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clsx@npm:^1.1.0, clsx@npm:^1.2.1":
+"clsx@npm:^1.1.1, clsx@npm:^1.2.1":
   version: 1.2.1
   resolution: "clsx@npm:1.2.1"
   checksum: 30befca8019b2eb7dbad38cff6266cf543091dae2825c856a62a8ccf2c3ab9c2907c4d12b288b73101196767f66812365400a227581484a05f968b0307cfaf12
@@ -4700,27 +4700,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"notistack@npm:2.0.8":
-  version: 2.0.8
-  resolution: "notistack@npm:2.0.8"
-  dependencies:
-    clsx: ^1.1.0
-    hoist-non-react-statics: ^3.3.0
-  peerDependencies:
-    "@emotion/react": ^11.4.1
-    "@emotion/styled": ^11.3.0
-    "@mui/material": ^5.0.0
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-  peerDependenciesMeta:
-    "@emotion/react":
-      optional: true
-    "@emotion/styled":
-      optional: true
-  checksum: f95952ea7209840f6f05a65e74f0fb4e7a1bb321753b2955ae6052f2205d47a6a3c50a42b72db11eac2fc491c4105b4687bed89e79287399530973fa133a5380
-  languageName: node
-  linkType: hard
-
 "npm-run-all@npm:^4.1.5":
   version: 4.1.5
   resolution: "npm-run-all@npm:4.1.5"
@@ -5205,6 +5184,18 @@ __metadata:
   peerDependencies:
     react: ">=16.8"
   checksum: 9e98d03e1f18bfd5a35144a0c675adaf7c46a9ad436efdea2b52ef3a6e501ac6174a67ea90004e1339cd45019d6b1eb370627518320f7af9323ae74e0c6756ad
+  languageName: node
+  linkType: hard
+
+"react-toastify@npm:^9.1.1":
+  version: 9.1.1
+  resolution: "react-toastify@npm:9.1.1"
+  dependencies:
+    clsx: ^1.1.1
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: 2039255539961a9b4d77b2656f120b20abe46cb0c699a7f3c0af23b4ef669d9c4d24dae6b8f4954b5efd83edf6d6e23614a29e94e9ee0d2647741fba9ba2db85
   languageName: node
   linkType: hard
 

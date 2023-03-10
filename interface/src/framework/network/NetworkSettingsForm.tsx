@@ -1,5 +1,5 @@
 import { FC, useContext, useEffect, useState } from 'react';
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
 import {
   Avatar,
@@ -48,7 +48,6 @@ import RestartMonitor from '../system/RestartMonitor';
 
 const WiFiSettingsForm: FC = () => {
   const { LL } = useI18nContext();
-  const { enqueueSnackbar } = useSnackbar();
 
   const { selectedNetwork, deselectNetwork } = useContext(WiFiConnectionContext);
 
@@ -118,7 +117,7 @@ const WiFiSettingsForm: FC = () => {
         await EMSESP.restart();
         setRestarting(true);
       } catch (error) {
-        enqueueSnackbar(LL.PROBLEM_UPDATING(), { variant: 'error' });
+        toast.error(LL.PROBLEM_UPDATING());
       }
     };
 

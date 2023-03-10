@@ -1,5 +1,5 @@
 import { FC, useContext, useState, useEffect } from 'react';
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 import {
   Avatar,
   Box,
@@ -61,7 +61,6 @@ const SystemStatusForm: FC = () => {
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
   const [confirmFactoryReset, setConfirmFactoryReset] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
-  const { enqueueSnackbar } = useSnackbar();
   const [showingVersion, setShowingVersion] = useState<boolean>(false);
   const [latestVersion, setLatestVersion] = useState<Version>();
   const [latestDevVersion, setLatestDevVersion] = useState<Version>();
@@ -91,7 +90,7 @@ const SystemStatusForm: FC = () => {
         setRestarting(true);
       }
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     } finally {
       setConfirmRestart(false);
       setProcessing(false);
@@ -104,7 +103,7 @@ const SystemStatusForm: FC = () => {
       await SystemApi.partition();
       setRestarting(true);
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     } finally {
       setConfirmRestart(false);
       setProcessing(false);
@@ -211,7 +210,7 @@ const SystemStatusForm: FC = () => {
       await SystemApi.factoryReset();
       setRestarting(true);
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
     } finally {
       setConfirmFactoryReset(false);
       setProcessing(false);

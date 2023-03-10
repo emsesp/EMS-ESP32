@@ -2,7 +2,7 @@ import { FC, useContext, useEffect } from 'react';
 
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 
-import { useSnackbar, VariantType } from 'notistack';
+import { toast } from 'react-toastify';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -14,17 +14,17 @@ import AuthenticatedRouting from 'AuthenticatedRouting';
 
 interface SecurityRedirectProps {
   message: string;
-  variant?: VariantType;
+  // variant?: VariantType;
   signOut?: boolean;
 }
 
-const RootRedirect: FC<SecurityRedirectProps> = ({ message, variant, signOut }) => {
+const RootRedirect: FC<SecurityRedirectProps> = ({ message, signOut }) => {
   const authenticationContext = useContext(AuthenticationContext);
-  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
     signOut && authenticationContext.signOut(false);
-    enqueueSnackbar(message, { variant });
-  }, [message, variant, signOut, authenticationContext, enqueueSnackbar]);
+    // TODO toast variant
+    toast.error(message);
+  }, [message, signOut, authenticationContext]);
   return <Navigate to="/" />;
 };
 
@@ -50,7 +50,7 @@ const AppRouting: FC = () => {
       <RemoveTrailingSlashes />
       <Routes>
         <Route path="/unauthorized" element={<RootRedirect message={LL.PLEASE_SIGNIN()} signOut />} />
-        <Route path="/fileUpdated" element={<RootRedirect message={LL.UPLOAD_SUCCESSFUL()} variant="success" />} />
+        <Route path="/fileUpdated" element={<RootRedirect message={LL.UPLOAD_SUCCESSFUL()} />} />
         <Route
           path="/"
           element={

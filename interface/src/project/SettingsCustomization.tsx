@@ -22,7 +22,7 @@ import {
 import { useTheme } from '@table-library/react-table-library/theme';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
 import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -51,7 +51,6 @@ export const APIURL = window.location.origin + '/api/';
 
 const SettingsCustomization: FC = () => {
   const { LL } = useI18nContext();
-  const { enqueueSnackbar } = useSnackbar();
 
   const emptyDeviceEntity = { id: '', v: 0, n: '', cn: '', m: 0, w: false };
 
@@ -257,9 +256,9 @@ const SettingsCustomization: FC = () => {
   const resetCustomization = async () => {
     try {
       await EMSESP.resetCustomizations();
-      enqueueSnackbar(LL.CUSTOMIZATIONS_RESTART(), { variant: 'info' });
+      toast.info(LL.CUSTOMIZATIONS_RESTART());
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
     } finally {
       setConfirmReset(false);
     }
@@ -296,7 +295,7 @@ const SettingsCustomization: FC = () => {
       await EMSESP.restart();
       setRestarting(true);
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
     }
   };
 
@@ -307,7 +306,7 @@ const SettingsCustomization: FC = () => {
       // check size in bytes to match buffer in CPP, which is 2048
       const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
       if (bytes > 2000) {
-        enqueueSnackbar(LL.CUSTOMIZATIONS_FULL(), { variant: 'warning' });
+        toast.warning(LL.CUSTOMIZATIONS_FULL());
         return;
       }
 
@@ -317,14 +316,14 @@ const SettingsCustomization: FC = () => {
           entity_ids: masked_entities
         });
         if (response.status === 200) {
-          enqueueSnackbar(LL.CUSTOMIZATIONS_SAVED(), { variant: 'success' });
+          toast.success(LL.CUSTOMIZATIONS_SAVED());
         } else if (response.status === 201) {
           setRestartNeeded(true);
         } else {
-          enqueueSnackbar(LL.PROBLEM_UPDATING(), { variant: 'error' });
+          toast.error(LL.PROBLEM_UPDATING());
         }
       } catch (error) {
-        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       }
       setOriginalSettings(deviceEntities);
     }

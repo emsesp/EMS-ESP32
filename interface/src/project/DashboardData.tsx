@@ -20,7 +20,7 @@ import {
   Checkbox
 } from '@mui/material';
 
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
 import { useTheme } from '@table-library/react-table-library/theme';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
@@ -77,8 +77,6 @@ const DashboardData: FC = () => {
   const { me } = useContext(AuthenticatedContext);
 
   const { LL } = useI18nContext();
-
-  const { enqueueSnackbar } = useSnackbar();
 
   const [coreData, setCoreData] = useState<CoreData>({
     connected: true,
@@ -363,9 +361,9 @@ const DashboardData: FC = () => {
     try {
       setCoreData((await EMSESP.readCoreData()).data);
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
-  }, [enqueueSnackbar, LL]);
+  }, [LL]);
 
   useEffect(() => {
     fetchCoreData();
@@ -384,7 +382,7 @@ const DashboardData: FC = () => {
     try {
       setDeviceData((await EMSESP.readDeviceData({ id: unique_id })).data);
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
 
@@ -392,7 +390,7 @@ const DashboardData: FC = () => {
     try {
       setSensorData((await EMSESP.readSensorData()).data);
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
 
@@ -468,15 +466,15 @@ const DashboardData: FC = () => {
           devicevalue: deviceValue
         });
         if (response.status === 204) {
-          enqueueSnackbar(LL.WRITE_CMD_FAILED(), { variant: 'error' });
+          toast.error(LL.WRITE_CMD_FAILED());
         } else if (response.status === 403) {
-          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
+          toast.error(LL.ACCESS_DENIED());
         } else {
-          enqueueSnackbar(LL.WRITE_CMD_SENT(), { variant: 'success' });
+          toast.success(LL.WRITE_CMD_SENT());
         }
         setDeviceValue(undefined);
       } catch (error) {
-        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         refreshData();
         setDeviceValue(undefined);
@@ -562,15 +560,15 @@ const DashboardData: FC = () => {
           offset: sensor.o
         });
         if (response.status === 204) {
-          enqueueSnackbar(LL.UPLOAD_OF(LL.SENSOR()) + ' ' + LL.FAILED(), { variant: 'error' });
+          toast.error(LL.UPLOAD_OF(LL.SENSOR()) + ' ' + LL.FAILED());
         } else if (response.status === 403) {
-          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
+          toast.error(LL.ACCESS_DENIED());
         } else {
-          enqueueSnackbar(LL.UPDATED_OF(LL.SENSOR()), { variant: 'success' });
+          toast.success(LL.UPDATED_OF(LL.SENSOR()));
         }
         setSensor(undefined);
       } catch (error) {
-        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         setSensor(undefined);
         fetchSensorData();
@@ -991,14 +989,14 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar(LL.DELETION_OF(LL.ANALOG_SENSOR()) + ' ' + LL.FAILED(), { variant: 'error' });
+          toast.error(LL.DELETION_OF(LL.ANALOG_SENSOR()) + ' ' + LL.FAILED());
         } else if (response.status === 403) {
-          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
+          toast.error(LL.ACCESS_DENIED());
         } else {
-          enqueueSnackbar(LL.REMOVED_OF(LL.ANALOG_SENSOR()), { variant: 'success' });
+          toast.success(LL.REMOVED_OF(LL.ANALOG_SENSOR()));
         }
       } catch (error) {
-        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         setAnalog(undefined);
         fetchSensorData();
@@ -1019,14 +1017,14 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar(LL.UPDATE_OF(LL.ANALOG_SENSOR()) + ' ' + LL.FAILED(), { variant: 'error' });
+          toast.error(LL.UPDATE_OF(LL.ANALOG_SENSOR()) + ' ' + LL.FAILED());
         } else if (response.status === 403) {
-          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
+          toast.error(LL.ACCESS_DENIED());
         } else {
-          enqueueSnackbar(LL.UPDATED_OF(LL.ANALOG_SENSOR()), { variant: 'success' });
+          toast.success(LL.UPDATED_OF(LL.ANALOG_SENSOR()));
         }
       } catch (error) {
-        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         setAnalog(undefined);
         fetchSensorData();

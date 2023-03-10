@@ -4,7 +4,7 @@ import { Typography, Button, Box, List, ListItem, ListItemText, Link, ListItemAv
 
 import { SectionContent } from 'components';
 
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
 import CommentIcon from '@mui/icons-material/CommentTwoTone';
 import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
@@ -21,8 +21,6 @@ import * as EMSESP from './api';
 const HelpInformation: FC = () => {
   const { LL } = useI18nContext();
 
-  const { enqueueSnackbar } = useSnackbar();
-
   const saveFile = (json: any, endpoint: string) => {
     const a = document.createElement('a');
     const filename = 'emsesp_' + endpoint + '.txt';
@@ -35,7 +33,7 @@ const HelpInformation: FC = () => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    enqueueSnackbar(LL.DOWNLOAD_SUCCESSFUL(), { variant: 'info' });
+    toast.info(LL.DOWNLOAD_SUCCESSFUL());
   };
 
   const callAPI = async (endpoint: string) => {
@@ -46,12 +44,12 @@ const HelpInformation: FC = () => {
         id: 0
       });
       if (response.status !== 200) {
-        enqueueSnackbar(LL.PROBLEM_LOADING(), { variant: 'error' });
+        toast.error(LL.PROBLEM_LOADING());
       } else {
         saveFile(response.data, endpoint);
       }
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
 

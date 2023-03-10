@@ -1,5 +1,5 @@
 import { FC, useContext, useState } from 'react';
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
 import {
   Avatar,
@@ -55,7 +55,6 @@ const NTPStatusForm: FC = () => {
   const [localTime, setLocalTime] = useState<string>('');
   const [settingTime, setSettingTime] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
-  const { enqueueSnackbar } = useSnackbar();
   const { me } = useContext(AuthenticatedContext);
 
   const { LL } = useI18nContext();
@@ -88,11 +87,11 @@ const NTPStatusForm: FC = () => {
       await NTPApi.updateTime({
         local_time: formatLocalDateTime(new Date(localTime))
       });
-      enqueueSnackbar(LL.TIME_SET(), { variant: 'success' });
+      toast.success(LL.TIME_SET());
       setSettingTime(false);
       loadData();
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
     } finally {
       setProcessing(false);
     }

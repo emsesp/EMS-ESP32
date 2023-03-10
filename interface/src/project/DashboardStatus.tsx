@@ -1,5 +1,5 @@
 import { FC, useState, useContext, useEffect } from 'react';
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 import {
   Avatar,
   Button,
@@ -74,7 +74,6 @@ const DashboardStatus: FC = () => {
 
   const theme = useTheme();
   const [confirmScan, setConfirmScan] = useState<boolean>(false);
-  const { enqueueSnackbar } = useSnackbar();
 
   const { me } = useContext(AuthenticatedContext);
 
@@ -146,9 +145,9 @@ const DashboardStatus: FC = () => {
   const scan = async () => {
     try {
       await EMSESP.scanDevices();
-      enqueueSnackbar(LL.SCANNING() + '...', { variant: 'info' });
+      toast.info(LL.SCANNING() + '...');
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
     } finally {
       setConfirmScan(false);
     }

@@ -21,7 +21,7 @@ import {
 import { useTheme } from '@table-library/react-table-library/theme';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -65,8 +65,6 @@ function makeid() {
 
 const SettingsScheduler: FC = () => {
   const { LL, locale } = useI18nContext();
-
-  const { enqueueSnackbar } = useSnackbar();
 
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
@@ -263,12 +261,12 @@ const SettingsScheduler: FC = () => {
             })
         });
         if (response.status === 200) {
-          enqueueSnackbar(LL.SCHEDULE_SAVED(), { variant: 'success' });
+          toast.success(LL.SCHEDULE_SAVED());
         } else {
-          enqueueSnackbar(LL.PROBLEM_UPDATING(), { variant: 'error' });
+          toast.error(LL.PROBLEM_UPDATING());
         }
       } catch (error) {
-        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       }
       setOriginalSchedule(schedule);
     }

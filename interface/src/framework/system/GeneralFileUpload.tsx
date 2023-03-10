@@ -9,7 +9,7 @@ import { SingleUpload, useFileUpload } from 'components';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
 
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
 import { extractErrorMessage } from 'utils';
 
@@ -23,8 +23,6 @@ interface UploadFileProps {
 
 const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
   const [uploadFile, cancelUpload, uploading, uploadProgress, md5] = useFileUpload({ upload: uploadGeneralFile });
-
-  const { enqueueSnackbar } = useSnackbar();
 
   const { LL } = useI18nContext();
 
@@ -40,19 +38,18 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    enqueueSnackbar(LL.DOWNLOAD_SUCCESSFUL(), { variant: 'info' });
+    toast.info(LL.DOWNLOAD_SUCCESSFUL());
   };
 
   const downloadSettings = async () => {
     try {
       const response = await EMSESP.getSettings();
       if (response.status !== 200) {
-        enqueueSnackbar(LL.PROBLEM_LOADING(), { variant: 'error' });
-      } else {
+        toast.error(LL.PROBLEM_LOADING());
         saveFile(response.data, 'settings');
       }
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
 
@@ -60,12 +57,12 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
     try {
       const response = await EMSESP.getCustomizations();
       if (response.status !== 200) {
-        enqueueSnackbar(LL.PROBLEM_LOADING(), { variant: 'error' });
+        toast.error(LL.PROBLEM_LOADING());
       } else {
         saveFile(response.data, 'customizations');
       }
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
 
@@ -73,12 +70,11 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
     try {
       const response = await EMSESP.readSchedule();
       if (response.status !== 200) {
-        enqueueSnackbar(LL.PROBLEM_LOADING(), { variant: 'error' });
-      } else {
+        toast.error(LL.PROBLEM_LOADING());
         saveFile(response.data, 'schedule');
       }
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
 

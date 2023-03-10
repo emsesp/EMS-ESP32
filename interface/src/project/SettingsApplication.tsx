@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
 
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
 import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider, InputAdornment } from '@mui/material';
 
@@ -58,8 +58,6 @@ const SettingsApplication: FC = () => {
 
   const { LL } = useI18nContext();
 
-  const { enqueueSnackbar } = useSnackbar();
-
   const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
@@ -85,7 +83,7 @@ const SettingsApplication: FC = () => {
         });
       }
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
     } finally {
       setProcessingBoard(false);
     }
@@ -124,7 +122,7 @@ const SettingsApplication: FC = () => {
         await EMSESP.restart();
         setRestarting(true);
       } catch (error) {
-        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       }
     };
 
