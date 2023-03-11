@@ -14,7 +14,6 @@ import AuthenticatedRouting from 'AuthenticatedRouting';
 
 interface SecurityRedirectProps {
   message: string;
-  // variant?: VariantType;
   signOut?: boolean;
 }
 
@@ -22,8 +21,7 @@ const RootRedirect: FC<SecurityRedirectProps> = ({ message, signOut }) => {
   const authenticationContext = useContext(AuthenticationContext);
   useEffect(() => {
     signOut && authenticationContext.signOut(false);
-    // TODO toast variant
-    toast.error(message);
+    toast.success(message);
   }, [message, signOut, authenticationContext]);
   return <Navigate to="/" />;
 };
