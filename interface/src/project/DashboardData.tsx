@@ -120,6 +120,7 @@ const DashboardData: FC = () => {
 
       &.tr.tr-body.row-select.row-select-single-selected {
         background-color: #3d4752;
+        font-weight: normal;
       }
 
       &:hover .td {
