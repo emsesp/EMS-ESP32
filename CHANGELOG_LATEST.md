@@ -2,10 +2,6 @@
 
 # [3.5.1]
 
-## **IMPORTANT! BREAKING CHANGES**
-
--
-
 ## Added
 
 - Detect old Tado thermostat, device-id 0x19, no entities
