@@ -269,6 +269,7 @@ MAKE_PSTR_LIST(cyl2, "cyl 2", "Zyl_2", "Cil 2", "Cyl 2", "cyl 2", "cyl 2", "cyl 
 
 // Entity translations
 // Boiler
+MAKE_PSTR_LIST(forceHeatingOff, "heatingoff", "force heating off", "Heizen abschalten", "", "", "", "", "")
 MAKE_PSTR_LIST(wwtapactivated, "wwtapactivated", "turn on/off", "Durchlauferhitzer aktiv", "zet aan/uit", "på/av", "system przygotowywania", "slå på/av", "ecs activée")
 MAKE_PSTR_LIST(reset, "reset", "Reset", "Reset", "Reset", "Nollställ", "kasowanie komunikatu", "nullstill", "reset")
 MAKE_PSTR_LIST(oilPreHeat, "oilpreheat", "oil preheating", "Ölvorwärmung", "Olie voorverwarming", "Förvärmning olja", "podgrzewanie oleju", "oljeforvarming", "préchauffage de l'huile")
@@ -683,6 +684,7 @@ MAKE_PSTR_LIST(solarPump, "solarpump", "pump (PS1)", "Pumpe (PS1)", "Pomp (PS1)"
 MAKE_PSTR_LIST(solarPump2, "solarpump2", "pump 2 (PS4)", "Pumpe 2 (PS4)", "Pomp 2 (PS4)", "Pump 2 (PS4)", "pompa solarna 2 (PS4)", "solpumpe 2 (PS4)", "pompe 2 (PS4)")
 MAKE_PSTR_LIST(solarPump2Mod, "solarpump2mod", "pump 2 modulation (PS4)", "Pumpe 2 Modulation (PS4)", "Modulatie pomp 2 (PS4)", "Pump 2 Modulering (PS4)", "modulacja pompy solarnej 2 (PS4)", "solpumpe2modulering (PS4)", "modulation pompe solaire 2 (PS4)")
 MAKE_PSTR_LIST(valveStatus, "valvestatus", "valve status", "Ventilstatus", "Klepstatus", "Ventilstatus", "stan zaworu", "ventilstatus", "statut valve")
+MAKE_PSTR_LIST(vs1Status, "vs1status", "valve status VS1", "Ventilstatus VS1", "Klepstatus VS1", "Ventilstatus VS1", "stan zaworu VS1", "ventilstatus VS1", "statut valve VS1")
 MAKE_PSTR_LIST(cylHeated, "cylheated", "cyl heated", "Speichertemperatur erreicht", "Boilertemperatuur behaald", "Värmepanna Uppvärmd", "zasobnik został nagrzany", "bereder oppvarmt", "cylindre chauffé")
 MAKE_PSTR_LIST(collectorShutdown, "collectorshutdown", "collector shutdown", "Kollektorabschaltung", "Collector afschakeling", "Kollektor Avstängning", "wyłączenie kolektora", "kollektor stengt", "arrêt collecteur")
 MAKE_PSTR_LIST(pumpWorkTime, "pumpworktime", "pump working time", "Pumpenlaufzeit", "Pomplooptijd", "Pump Drifttid", "czas pracy pompy", "driftstid pumpe", "durée fonctionnement pompe")

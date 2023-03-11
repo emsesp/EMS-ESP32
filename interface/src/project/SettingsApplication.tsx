@@ -408,6 +408,11 @@ const SettingsApplication: FC = () => {
           label={LL.UNDERCLOCK_CPU()}
           disabled={saving}
         />
+        <BlockFormControlLabel
+          control={<Checkbox checked={data.boiler_heatingoff} onChange={updateFormValue} name="boiler_heatingoff" />}
+          label={LL.HEATINGOFF()}
+          disabled={saving}
+        />
         <Grid container spacing={0} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <BlockFormControlLabel
             control={<Checkbox checked={data.shower_timer} onChange={updateFormValue} name="shower_timer" />}

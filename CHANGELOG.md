@@ -5,7 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [3.5.0]
+# [3.5.1] March 11 2023
+
+## Added
+
+- Detect old Tado thermostat, device-id 0x19, no entities
+- Some more HM200 entities [#500](https://github.com/emsesp/EMS-ESP32/issues/500)
+- Add entity to force heating off (for systems without thermostat) [#951](https://github.com/emsesp/EMS-ESP32/issues/951)
+
+## Fixed
+
+- HA-discovery for analog sensor commands [#1035](https://github.com/emsesp/EMS-ESP32/issues/1035)
+
+## Changed
+
+- Use byte 0 for detection RC30 active heatingcircuit [#786](https://github.com/emsesp/EMS-ESP32/issues/786)
+- Write repeated selflowtemp if tx-queue is empty without verify [#954](https://github.com/emsesp/EMS-ESP32/issues/954)
+- HA discovery recreate after disconnect by device [#1067](https://github.com/emsesp/EMS-ESP32/issues/1067)
+- File upload: check flash size (overflow) instead of filesize
+
+
+# [3.5.0] February 6 2023
 
 ## **IMPORTANT! BREAKING CHANGES**
 
@@ -67,19 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - HA duration class for time entities [[#822](https://github.com/emsesp/EMS-ESP32/issues/822)
 - AM200 alternative heatsource as class heatsource [[#857](https://github.com/emsesp/EMS-ESP32/issues/857)
 
-# [3.4.4]
-
-## Fixed
-
-- Fix for new installations with filesystem not initializing
-
-# [3.4.3]
-
-## Fixed
-
-- Fix for new installations with filesystem not initializing
-
-# [3.4.2]
+# [3.4.2] September 18 2022
 
 ## Added
 

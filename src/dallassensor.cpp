@@ -514,13 +514,16 @@ void DallasSensor::publish_values(const bool force) {
 
                 config["unit_of_meas"] = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
 
-                char str[50];
+                char val_obj[50];
+                char val_cond[65];
                 if (Mqtt::is_nested()) {
-                    snprintf(str, sizeof(str), "{{value_json['%s'].temp}}", sensor.id().c_str());
+                    snprintf(val_obj, sizeof(val_obj), "value_json['%s'].temp", sensor.id().c_str());
+                    snprintf(val_cond, sizeof(val_cond), "value_json['%s'] is defined", sensor.id().c_str());
                 } else {
-                    snprintf(str, sizeof(str), "{{value_json['%s']}}", sensor.name().c_str());
+                    snprintf(val_obj, sizeof(val_obj), "value_json['%s']", sensor.name().c_str());
+                    snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
                 }
-                config["val_tpl"] = str;
+                config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + "}}";
 
                 char uniq_s[70];
                 if (Mqtt::entity_format() == 2) {
@@ -529,15 +532,19 @@ void DallasSensor::publish_values(const bool force) {
                     snprintf(uniq_s, sizeof(uniq_s), "dallassensor_%s", sensor.id().c_str());
                 }
 
-                config["object_id"] = uniq_s;
+                config["obj_id"] = uniq_s;
                 config["uniq_id"]   = uniq_s; // same as object_id
 
-                snprintf(str, sizeof(str), "%s", sensor.name().c_str());
-                config["name"] = str;
+                char name[50];
+                snprintf(name, sizeof(name), "%s", sensor.name().c_str());
+                config["name"] = name;
 
                 JsonObject dev = config.createNestedObject("dev");
                 JsonArray  ids = dev.createNestedArray("ids");
                 ids.add("ems-esp");
+
+                // add "availability" section
+                Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 // use '_' as HA doesn't like '-' in the topic name

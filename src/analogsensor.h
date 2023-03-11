@@ -170,7 +170,7 @@ class AnalogSensor {
 
     static uuid::log::Logger logger_;
 
-    void remove_ha_topic(const uint8_t id) const;
+    void remove_ha_topic(const int8_t type, const uint8_t id) const;
     bool command_setvalue(const char * value, const int8_t gpio);
     void measure();
     bool command_info(const char * value, const int8_t id, JsonObject & output) const;

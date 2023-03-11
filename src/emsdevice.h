@@ -289,7 +289,6 @@ class EMSdevice {
     void publish_all_values();
 
     void mqtt_ha_entity_config_create();
-    void mqtt_ha_entity_config_remove();
 
     std::string telegram_type_name(std::shared_ptr<const Telegram> telegram) const;
 
@@ -304,13 +303,6 @@ class EMSdevice {
     }
     void ha_config_done(const bool v) {
         ha_config_done_ = v;
-    }
-
-    bool ha_config_firstrun() const {
-        return ha_config_firstrun_;
-    }
-    void ha_config_firstrun(const bool v) {
-        ha_config_firstrun_ = v;
     }
 
     enum Brand : uint8_t {
@@ -366,6 +358,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_ID_RFSENSOR       = 0x40; // RF sensor only sending, no reply
     static constexpr uint8_t EMS_DEVICE_ID_RFBASE         = 0x50;
     static constexpr uint8_t EMS_DEVICE_ID_ROOMTHERMOSTAT = 0x17; // TADO using this with no version reply
+    static constexpr uint8_t EMS_DEVICE_ID_TADO_OLD       = 0x19; // TADO using this with no broadcast and version
 
     // generic type IDs
     static constexpr uint16_t EMS_TYPE_VERSION    = 0x02; // type ID for Version information. Generic across all EMS devices.
@@ -431,7 +424,6 @@ class EMSdevice {
 
     bool ha_config_done_     = false;
     bool has_update_         = false;
-    bool ha_config_firstrun_ = true; // this means a first setup of HA is needed after a restart
 
     struct TelegramFunction {
         uint16_t           telegram_type_id_;   // it's type_id
