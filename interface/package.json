@@ -65,7 +65,9 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^2.8.4",
     "rollup-plugin-visualizer": "^5.9.0",
+    "terser": "^5.16.6",
     "vite": "^4.1.4",
+    "vite-plugin-minify": "^1.5.2",
     "vite-plugin-svgr": "^2.4.0",
     "vite-tsconfig-paths": "^4.0.5"
   },
