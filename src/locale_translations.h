@@ -252,7 +252,7 @@ MAKE_TRANSLATION(outside_basepoint, "outside basepoint", "Basispunkt Außentemp.
 MAKE_TRANSLATION(functioning_mode, "functioning mode", "Funktionsweise", "Functiemodus", "Driftläge", "tryb pracy", "driftsmodus", "mode de fonctionnement", "işletme konumu")
 
 // MQTT Discovery - this is special device entity for 'climate'
-MAKE_TRANSLATION(haclimate, "haclimate", "Discovery current room temperature") // TODO translate
+MAKE_TRANSLATION(haclimate, "haclimate", "Discovery current room temperature", "Discovery Temperatur") // TODO translate
 
 // mixer
 MAKE_TRANSLATION(stopped, "stopped", "gestoppt", "gestopt", "stoppad", "zatrzymany", "stoppet", "arrêté", "durdu")
