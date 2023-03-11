@@ -31,12 +31,13 @@ const App: FC = () => {
           autoClose={2000}
           hideProgressBar={false}
           newestOnTop={false}
-          closeOnClick={false}
+          closeOnClick={true}
           rtl={false}
           pauseOnFocusLoss={false}
           draggable={false}
           pauseOnHover={false}
           transition={Slide}
+          closeButton={false}
           theme="light"
         />
       </CustomTheme>
