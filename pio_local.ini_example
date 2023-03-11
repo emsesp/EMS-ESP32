@@ -10,6 +10,7 @@
 ;  -DCORE_DEBUG_LEVEL=5 ; verbose core level debugging 5=verbose, 4=debug, 3=info
 ;  -DEMSESP_TEST ; enable the tests. EN language only
 ;  -DEMSESP_DE_ONLY ; only DE translated entity names
+;  -DEMSESP_EN_ONLY ; only EN translated entity names
 ; my_build_flags = -DEMSESP_DEBUG
 
 [env:esp32_4M]
