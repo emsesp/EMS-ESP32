@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from 'react';
 
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.minimal.css';
+import { ToastContainer, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 import CustomTheme from 'CustomTheme';
 import AppRouting from 'AppRouting';
@@ -31,12 +31,13 @@ const App: FC = () => {
           autoClose={2000}
           hideProgressBar={false}
           newestOnTop={false}
-          closeOnClick
+          closeOnClick={false}
           rtl={false}
-          pauseOnFocusLoss
+          pauseOnFocusLoss={false}
           draggable={false}
-          pauseOnHover
-          theme="dark"
+          pauseOnHover={false}
+          transition={Slide}
+          theme="light"
         />
       </CustomTheme>
     </TypesafeI18n>

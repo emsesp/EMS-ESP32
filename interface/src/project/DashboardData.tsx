@@ -120,8 +120,6 @@ const DashboardData: FC = () => {
 
       &.tr.tr-body.row-select.row-select-single-selected {
         background-color: #3d4752;
-        color: white;
-        font-weight: normal;
       }
 
       &:hover .td {
@@ -158,8 +156,7 @@ const DashboardData: FC = () => {
       HeaderRow: `
         .th {
           padding: 8px;
-          height: 42px;
-          font-weight: 500;
+          height: 36px;
       `
     }
   ]);
@@ -182,7 +179,7 @@ const DashboardData: FC = () => {
       `,
       HeaderRow: `
         .th {
-          height: 32px;
+          height: 86px;
         }
       `,
       Row: `

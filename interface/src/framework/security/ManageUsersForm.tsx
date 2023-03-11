@@ -50,8 +50,7 @@ const ManageUsersForm: FC = () => {
       color: #90CAF9;
       .th {
         padding: 8px;
-        height: 42px;
-        font-weight: 500;
+        height: 36px;
         border-bottom: 1px solid #565656;
       }
     `,

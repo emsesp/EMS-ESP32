@@ -128,7 +128,6 @@ const SettingsScheduler: FC = () => {
       color: #90CAF9;
       .th {
         border-bottom: 1px solid #565656;
-        font-weight: 500;
         height: 36px;
       }
     `,
@@ -139,11 +138,6 @@ const SettingsScheduler: FC = () => {
       .td {
         border-top: 1px solid #565656;
         border-bottom: 1px solid #565656;
-      }
-      &.tr.tr-body.row-select.row-select-single-selected {
-        background-color: #3d4752;
-        color: white;
-        font-weight: normal;
       }
       &:hover .td {
         border-top: 1px solid #177ac9;

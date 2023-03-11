@@ -102,8 +102,7 @@ const SettingsCustomization: FC = () => {
 
       .th {
         border-bottom: 1px solid #565656;
-        font-weight: 500;
-        height: 32px;
+        height: 36px;
       }
 
       &:nth-of-type(1) .th {
@@ -122,8 +121,6 @@ const SettingsCustomization: FC = () => {
 
       &.tr.tr-body.row-select.row-select-single-selected {
         background-color: #3d4752;
-        color: white;
-        font-weight: normal;
       }
 
       &:hover .td {
