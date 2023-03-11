@@ -179,7 +179,7 @@ const DashboardData: FC = () => {
       `,
       HeaderRow: `
         .th {
-          height: 86px;
+          height: 36px;
         }
       `,
       Row: `
