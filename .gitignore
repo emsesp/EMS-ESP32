@@ -51,5 +51,3 @@ build_wrapper_output_directory/
 # entity dump results
 dump_entities.csv
 dump_entities.xls*
-
-react-toastify/
