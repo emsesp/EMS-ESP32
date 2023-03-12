@@ -1011,9 +1011,9 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         strlcpy(uniq_s, en_name, sizeof(uniq_s));
         Helpers::replace_char(uniq_s, ' ', '_');
         if (has_tag) {
-            snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());
-        } else {
             snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", device_name, DeviceValue::DeviceValueTAG_s[tag][0], Helpers::toLower(uniq_s).c_str());
+        } else {
+            snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());
         }
     }
 
