@@ -19,7 +19,7 @@ const no: Translation = {
   UPLOAD_SUCCESSFUL: 'Opplasting lykkes',
   DOWNLOAD_SUCCESSFUL: 'Nedlasting lykkes',
   INVALID_LOGIN: 'Ugyldig innlogging',
-  NETWORK: 'Nettverk',
+  NETWORK: 'Nettverk1',
   SECURITY: 'Sikkerhet',
   ONOFF_CAP: 'PÅ/AV',
   ONOFF: 'på/av',
