@@ -19,8 +19,7 @@
 
 // clang-format off
 
-// Define languages here
-// Makes sure they are also added in same order to languages[] in system.cpp
+// Define language codes here and add to languages[] in system.cpp
 #define EMSESP_LOCALE_EN "en"
 #define EMSESP_LOCALE_DE "de"
 #define EMSESP_LOCALE_NL "nl"
@@ -30,8 +29,11 @@
 #define EMSESP_LOCALE_FR "fr"
 #define EMSESP_LOCALE_TR "tr"
 
-// translations are in order en, de, nl, sv, pl, no, fr, tr, ....
+// IMPORTANT!
+//  translations are in the order: en, de, nl, sv, pl, no, fr, tr
+//
 // if there is no translation, it will default to en
+//
 
 // device types, as display in Web and Console
 MAKE_TRANSLATION(boiler_device, "Boiler", "Kessel", "Boiler", "Värmepanna", "Kocioł", "", "", "Kazan")
