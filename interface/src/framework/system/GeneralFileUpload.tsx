@@ -3,19 +3,19 @@ import { AxiosPromise } from 'axios';
 
 import { Typography, Button, Box } from '@mui/material';
 
-import { FileUploadConfig } from '../../api/endpoints';
+import { FileUploadConfig } from 'api/endpoints';
 
-import { SingleUpload, useFileUpload } from '../../components';
+import { SingleUpload, useFileUpload } from 'components';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
 
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
-import { extractErrorMessage } from '../../utils';
+import { extractErrorMessage } from 'utils';
 
-import * as EMSESP from '../../project/api';
+import * as EMSESP from 'project/api';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 interface UploadFileProps {
   uploadGeneralFile: (file: File, config?: FileUploadConfig) => AxiosPromise<void>;
@@ -23,8 +23,6 @@ interface UploadFileProps {
 
 const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
   const [uploadFile, cancelUpload, uploading, uploadProgress, md5] = useFileUpload({ upload: uploadGeneralFile });
-
-  const { enqueueSnackbar } = useSnackbar();
 
   const { LL } = useI18nContext();
 
@@ -40,19 +38,18 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    enqueueSnackbar(LL.DOWNLOAD_SUCCESSFUL(), { variant: 'info' });
+    toast.info(LL.DOWNLOAD_SUCCESSFUL());
   };
 
   const downloadSettings = async () => {
     try {
       const response = await EMSESP.getSettings();
       if (response.status !== 200) {
-        enqueueSnackbar(LL.PROBLEM_LOADING(), { variant: 'error' });
-      } else {
+        toast.error(LL.PROBLEM_LOADING());
         saveFile(response.data, 'settings');
       }
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
 
@@ -60,12 +57,24 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
     try {
       const response = await EMSESP.getCustomizations();
       if (response.status !== 200) {
-        enqueueSnackbar(LL.PROBLEM_LOADING(), { variant: 'error' });
+        toast.error(LL.PROBLEM_LOADING());
       } else {
         saveFile(response.data, 'customizations');
       }
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
+    }
+  };
+
+  const downloadSchedule = async () => {
+    try {
+      const response = await EMSESP.readSchedule();
+      if (response.status !== 200) {
+        toast.error(LL.PROBLEM_LOADING());
+        saveFile(response.data, 'schedule');
+      }
+    } catch (error) {
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
 
@@ -112,7 +121,15 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
             color="primary"
             onClick={() => downloadCustomizations()}
           >
-            {LL.CUSTOMIZATION()}
+            {LL.CUSTOMIZATIONS()}
+          </Button>
+          <Box color="warning.main">
+            <Typography mt={2} mb={1} variant="body2">
+              {LL.DOWNLOAD_SCHEDULE_TEXT()}{' '}
+            </Typography>
+          </Box>
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => downloadSchedule()}>
+            {LL.SCHEDULE(0)}
           </Button>
         </>
       )}

@@ -1,4 +1,6 @@
 import type { Translation } from '../i18n-types';
+/* prettier-ignore */
+/* eslint-disable */
 
 const nl: Translation = {
   LANGUAGE: 'Taal',
@@ -12,7 +14,6 @@ const nl: Translation = {
   SU_PASSWORD: 'su Wachtwoord',
   DASHBOARD: 'Dashboard',
   SETTINGS_OF: '{0} Instellingen',
-  SAVED: 'opgeslagen',
   HELP_OF: '{0} Help',
   LOGGED_IN: 'Ingelogd als {name}',
   PLEASE_SIGNIN: 'Log in om verder te gaan',
@@ -45,7 +46,8 @@ const nl: Translation = {
   CANCEL: 'Annuleren',
   RESET: 'Reset',
   SEND: 'Verzenden',
-  SAVE: 'Opslaan',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Verwijderen',
   PROBLEM_UPDATING: 'Probleem met updaten',
   PROBLEM_LOADING: 'Probleem met laden',
@@ -64,11 +66,12 @@ const nl: Translation = {
   STARTVALUE: 'Startwaarde',
   WARN_GPIO: 'Waarschuwing: let op met het koppelen van de juiste GPIO pin!',
   EDIT: 'Wijzigen',
-  TEMP_SENSOR: '{{Sensor|Temperatuur sensor}}',
+  SENSOR: 'Sensor',
+  TEMP_SENSOR: 'Temperatuur sensor',
   TEMP_SENSORS: 'Temperatuur Sensoren',
-  WRITE_COMMAND: 'Schrijf commando {cmd}',
-  EMS_BUS_WARNING:
-    'EMS bus niet gevonden. Als deze waarschuwing blijft staan na een paar seconden dan loop de instellingen na en in het bijzonder het apparaat type profiel na.',
+  WRITE_CMD_SENT: 'Schrijf commando sent', // TODO translate
+  WRITE_CMD_FAILED: 'Schrijf commando failed', // TODO translate
+  EMS_BUS_WARNING: 'EMS bus niet gevonden. Als deze waarschuwing blijft staan na een paar seconden dan loop de instellingen na en in het bijzonder het apparaat type profiel na.',
   EMS_BUS_SCANNING: 'Scannen naar EMS apparaten...',
   CONNECTED: 'Verbonden',
   TX_ISSUES: 'Tx bus probleem. Probeer een andere Tx verzendmodus',
@@ -96,16 +99,15 @@ const nl: Translation = {
   NUM_DEVICES: '{num} Apparaat{{en}}',
   NUM_TEMP_SENSORS: '{num} Temperatuursensor{{en}}',
   NUM_ANALOG_SENSORS: '{num} Analoge sensor{{en}}',
-  NUM_DAYS: '{num} Dag{{en}}',
-  NUM_SECONDS: '{num} Second{{en}}',
-  NUM_HOURS: '{num} Uur{{en}}',
-  NUM_MINUTES: '{num} Minuut{{en}}',
+  NUM_DAYS: '{num} dag{{en}}',
+  NUM_SECONDS: '{num} second{{en}}',
+  NUM_HOURS: '{num} {{uur|uren}}',
+  NUM_MINUTES: '{num} {{minuut|minuten}}',
   APPLICATION_SETTINGS: 'Applicatieinstellingen',
-  CUSTOMIZATION: 'Custom aanpassingen',
+  CUSTOMIZATIONS: 'Custom aanpassingen',
   APPLICATION_RESTARTING: 'EMS-ESP herstarten',
   INTERFACE_BOARD_PROFILE: 'Interface Apparaatprofiel',
-  BOARD_PROFILE_TEXT:
-    'Selecteer een vooraf ingesteld apparaat profiel uit de lijst of kies Eigen om zelf uw hardware te configureren',
+  BOARD_PROFILE_TEXT: 'Selecteer een vooraf ingesteld apparaat profiel uit de lijst of kies Eigen om zelf uw hardware te configureren',
   BOARD_PROFILE: 'Apparaatprofiel',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -155,14 +157,13 @@ const nl: Translation = {
   CUSTOMIZATIONS_HELP_3: 'Zet schrijfacties uit',
   CUSTOMIZATIONS_HELP_4: 'Uitsluiten van MQTT en API',
   CUSTOMIZATIONS_HELP_5: 'verberg van het Dashboard',
+  CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
   SELECT_DEVICE: 'Selecteer een apparaat',
   SET_ALL: 'Alles aanzetten',
   OPTIONS: 'Opties',
   NAME: 'Naam',
-  CUSTOMIZATIONS_RESET:
-    'Weet je zeker dat je alle custom aanpassingen wilt verwijderen inclusief de custom instellingen voor analoge temperatuursensoren?',
+  CUSTOMIZATIONS_RESET: 'Weet je zeker dat je alle custom aanpassingen wilt verwijderen inclusief de custom instellingen voor analoge temperatuursensoren?',
   DEVICE_ENTITIES: 'Apparaat Entiteiten',
-  USER_CUSTOMIZATION: 'Custom Instellingen',
   SUPPORT_INFORMATION: 'Support Informatie',
   CLICK_HERE: 'Klik Hier',
   HELP_INFORMATION_1: 'Bezoek de online wiki om instructies te vinden om EMS-ESP te configureren',
@@ -203,12 +204,12 @@ const nl: Translation = {
   FLASH: 'Flash Chip (Size / Speed)',
   APPSIZE: 'Application (Used / Free)',
   FILESYSTEM: 'File System (Used / Free)',
-  BUFFER_SIZE: 'Buffer Size',
+  BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
   ENABLE_OTA: 'Acitveer OTA Updates',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Download alle custom instellingen',
-  DOWNLOAD_SETTINGS_TEXT:
-    'Download de applicatie settings. Wees voorzichting met het delen van dit bestand want het bevat o.a. de wachtwoorden in plain text',
+  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Download de applicatie settings. Wees voorzichting met het delen van dit bestand want het bevat o.a. de wachtwoorden in plain text',
   UPLOAD_TEXT: 'Upload een nieuwe firmware (.bin) file, instellingen of custom instellingen (.json) bestand hieronder',
   UPLOADING: 'Uploading',
   UPLOAD_DROP_TEXT: 'Sleep bestand hierheen of klik hier',
@@ -219,13 +220,11 @@ const nl: Translation = {
   USER_WARNING: 'U dient tenminste 1 admin gebruiker te configureren',
   ADD: 'Toevoegen',
   ACCESS_TOKEN_FOR: 'Access Token voor',
-  ACCESS_TOKEN_TEXT:
-    'Het token hieronder wordt gebruikt voor de REST API calls die authorisatie nodig hebben. Het kan zowel als Bearer token in de Authorization header of in acccess_token URL query parameter gebruikt worden',
+  ACCESS_TOKEN_TEXT: 'Het token hieronder wordt gebruikt voor de REST API calls die authorisatie nodig hebben. Het kan zowel als Bearer token in de Authorization header of in acccess_token URL query parameter gebruikt worden',
   GENERATING_TOKEN: 'Token aan het genereren',
   USER: 'Gebruiker',
   MODIFY: 'Aanpassen',
-  SU_TEXT:
-    'Het su (super user) wachtwoord wordt gebruikt om authorisatie tokens te signeren en ook om admin privileges te activeren in de console.',
+  SU_TEXT: 'Het su (super user) wachtwoord wordt gebruikt om authorisatie tokens te signeren en ook om admin privileges te activeren in de console.',
   NOT_ENABLED: 'Niet geactiveerd',
   ERRORS_OF: '{0} Foutmeldingen',
   DISCONNECT_REASON: 'Verbinding verbroken vanwege',
@@ -241,15 +240,21 @@ const nl: Translation = {
   MQTT_RESPONSE: 'Publiceer commando output naar een `response` topic',
   MQTT_PUBLISH_TEXT_1: 'Publiceer enkele waarde topics on change',
   MQTT_PUBLISH_TEXT_2: 'Publiceer naar commando topics (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Activeer MQTT Discovery (Home Assistant, Domoticz)',
+  MQTT_PUBLISH_TEXT_3: 'Activeer MQTT Discovery',
   MQTT_PUBLISH_TEXT_4: 'Prefix voor de Discovery topics',
+  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
   MQTT_PUBLISH_INTERVALS: 'Publicatie intervallen',
   MQTT_INT_BOILER: 'CV ketels en warmtepompen',
   MQTT_INT_THERMOSTATS: 'Thermostaten',
   MQTT_INT_SOLAR: 'Solar Modules',
   MQTT_INT_MIXER: 'Mixer Modules',
+  MQTT_INT_HEARTBEAT: 'Heartbeat',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Default',
+  MQTT_ENTITY_FORMAT: 'Entity ID format', // TODO translate
+  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)', // TODO translate
+  MQTT_ENTITY_FORMAT_1: 'Single instance, short name', // TODO translate
+  MQTT_ENTITY_FORMAT_2: 'Multiple instances, short name', // TODO translate
   MQTT_CLEAN_SESSION: 'Clean Session aan',
   MQTT_RETAIN_FLAG: 'Retain flag aan',
   INACTIVE: 'Inactief',
@@ -285,6 +290,8 @@ const nl: Translation = {
   NETWORK_DISABLE_SLEEP: 'WiFi Sleep Mode uitzetten',
   NETWORK_LOW_BAND: 'Lagere WiFi bandbreedte gebruiken',
   NETWORK_USE_DNS: 'Activeer mDNS Service',
+  NETWORK_ENABLE_CORS: 'Activeer CORS',
+  NETWORK_CORS_ORIGIN: 'CORS origin',
   NETWORK_ENABLE_IPV6: 'Activeer IPv6 support',
   NETWORK_FIXED_IP: 'Gebruik vast IP addres',
   NETWORK_GATEWAY: 'Gateway',
@@ -297,7 +304,21 @@ const nl: Translation = {
   NEW_NAME_OF: 'Hernoem {0}',
   ENTITY: 'Entiteit',
   MIN: 'min',
-  MAX: 'max'
+  MAX: 'max',
+  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
+  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
+  STAY: 'Stay', // TODO translate
+  LEAVE: 'Leave', // TODO translate
+  SCHEDULER: 'Scheduler', // TODO translate
+  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.', // TODO translate
+  SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
+  SCHEDULE: 'Schedule', // TODO translate
+  TIME: 'Time', // TODO translate
+  TIMER: 'Timer', // TODO translate
+  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_TIMER_1: 'on startup', // TODO translate
+  SCHEDULE_TIMER_2: 'every minute', // TODO translate
+  SCHEDULE_TIMER_3: 'every hour' // TODO translate
 };
 
 export default nl;

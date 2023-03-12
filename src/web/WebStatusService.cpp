@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 
 // handles both WiFI and Ethernet
 void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
+#ifndef EMSESP_STANDALONE
+
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
         EMSESP::logger().warning("WiFi disconnected. Reason code=%s", disconnectReason(info.wifi_sta_disconnected.reason)); // IDF 4.0
@@ -39,11 +41,10 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         break;
 
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
-#ifndef EMSESP_STANDALONE
         EMSESP::logger().info("WiFi connected with IP=%s, hostname=%s", WiFi.localIP().toString().c_str(), WiFi.getHostname());
-#endif
-        EMSESP::system_.syslog_init();
+        // EMSESP::system_.syslog_init();
         mDNS_start();
+        EMSESP::system_.send_info_mqtt("connected");
         break;
 
     case ARDUINO_EVENT_ETH_START:
@@ -62,13 +63,12 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     case ARDUINO_EVENT_ETH_GOT_IP:
         // prevent double calls
         if (!EMSESP::system_.ethernet_connected()) {
-#ifndef EMSESP_STANDALONE
             EMSESP::logger().info("Ethernet connected with IP=%s, speed %d Mbps", ETH.localIP().toString().c_str(), ETH.linkSpeed());
-#endif
             // EMSESP::system_.send_heartbeat();
-            EMSESP::system_.syslog_init();
+            // EMSESP::system_.syslog_init();
             EMSESP::system_.ethernet_connected(true);
             mDNS_start();
+            EMSESP::system_.send_info_mqtt("connected");
         }
         break;
 
@@ -82,7 +82,6 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         EMSESP::system_.ethernet_connected(false);
         break;
 
-#ifndef EMSESP_STANDALONE
     case ARDUINO_EVENT_WIFI_STA_CONNECTED:
         EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
             if (networkSettings.enableIPv6) {
@@ -106,19 +105,19 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         } else {
             EMSESP::logger().info("WiFi connected with IPv6=%s, hostname=%s", WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
         }
-        // EMSESP::system_.send_heartbeat();
-        EMSESP::system_.syslog_init();
+        // EMSESP::system_.syslog_init();
         mDNS_start();
+        EMSESP::system_.send_info_mqtt("connected");
         break;
-#endif
 
     default:
         break;
     }
+#endif
 }
 
 void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM_DYN);
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE);
     JsonObject root     = response->getRoot();
 
     root["status"]      = EMSESP::bus_status(); // 0, 1 or 2

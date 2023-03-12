@@ -37,6 +37,8 @@ class AllocatorOwner {
   TAllocator _allocator;
 };
 
+// A JsonDocument that uses the provided allocator to allocate its memory pool.
+// https://arduinojson.org/v6/api/basicjsondocument/
 template <typename TAllocator>
 class BasicJsonDocument : AllocatorOwner<TAllocator>, public JsonDocument {
  public:
@@ -65,16 +67,16 @@ class BasicJsonDocument : AllocatorOwner<TAllocator>, public JsonDocument {
   BasicJsonDocument(
       const T& src,
       typename enable_if<
-          is_same<T, VariantRef>::value || is_same<T, VariantConstRef>::value ||
-          is_same<T, ArrayRef>::value || is_same<T, ArrayConstRef>::value ||
-          is_same<T, ObjectRef>::value ||
-          is_same<T, ObjectConstRef>::value>::type* = 0)
+          is_same<T, JsonVariant>::value ||
+          is_same<T, JsonVariantConst>::value || is_same<T, JsonArray>::value ||
+          is_same<T, JsonArrayConst>::value || is_same<T, JsonObject>::value ||
+          is_same<T, JsonObjectConst>::value>::type* = 0)
       : JsonDocument(allocPool(src.memoryUsage())) {
     set(src);
   }
 
   // disambiguate
-  BasicJsonDocument(VariantRef src)
+  BasicJsonDocument(JsonVariant src)
       : JsonDocument(allocPool(src.memoryUsage())) {
     set(src);
   }
@@ -104,6 +106,8 @@ class BasicJsonDocument : AllocatorOwner<TAllocator>, public JsonDocument {
     return *this;
   }
 
+  // Reduces the capacity of the memory pool to match the current usage.
+  // https://arduinojson.org/v6/api/basicjsondocument/shrinktofit/
   void shrinkToFit() {
     ptrdiff_t bytes_reclaimed = _pool.squash();
     if (bytes_reclaimed == 0)
@@ -119,6 +123,8 @@ class BasicJsonDocument : AllocatorOwner<TAllocator>, public JsonDocument {
     _data.movePointers(ptr_offset, ptr_offset - bytes_reclaimed);
   }
 
+  // Reclaims the memory leaked when removing and replacing values.
+  // https://arduinojson.org/v6/api/jsondocument/garbagecollect/
   bool garbageCollect() {
     // make a temporary clone and move assign
     BasicJsonDocument tmp(*this);
@@ -146,7 +152,7 @@ class BasicJsonDocument : AllocatorOwner<TAllocator>, public JsonDocument {
   }
 
   void freePool() {
-    this->deallocate(memoryPool().buffer());
+    this->deallocate(getPool()->buffer());
   }
 
   void copyAssignFrom(const JsonDocument& src) {

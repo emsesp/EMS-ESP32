@@ -1,0 +1,23 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "PlatformIO: Execute EMS-ESP (standalone)",
+      "type": "shell",
+      "command": "./.pio/build/standalone/program",
+      "linux": {
+        "options": {
+          "env": {
+            // Workaround for sdl2 `-m32` crash
+            // https://bugs.launchpad.net/ubuntu/+source/libsdl2/+bug/1775067/comments/7
+            "DBUS_FATAL_WARNINGS": "0"
+          }
+        }
+      },
+      "dependsOn": ["PlatformIO: Build EMS-ESP (standalone)"],
+      "problemMatcher": []
+    }
+  ]
+}

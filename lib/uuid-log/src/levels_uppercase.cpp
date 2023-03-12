@@ -27,17 +27,17 @@ namespace uuid {
 namespace log {
 
 std::vector<std::string> levels_uppercase() {
-    return {uuid::read_flash_string(format_level_uppercase(Level::OFF)),
-            uuid::read_flash_string(format_level_uppercase(Level::EMERG)),
-            uuid::read_flash_string(format_level_uppercase(Level::ALERT)),
-            uuid::read_flash_string(format_level_uppercase(Level::CRIT)),
-            uuid::read_flash_string(format_level_uppercase(Level::ERR)),
-            uuid::read_flash_string(format_level_uppercase(Level::WARNING)),
-            uuid::read_flash_string(format_level_uppercase(Level::NOTICE)),
-            uuid::read_flash_string(format_level_uppercase(Level::INFO)),
-            uuid::read_flash_string(format_level_uppercase(Level::DEBUG)),
-            uuid::read_flash_string(format_level_uppercase(Level::TRACE)),
-            uuid::read_flash_string(format_level_uppercase(Level::ALL))};
+    return {format_level_uppercase(Level::OFF),
+            format_level_uppercase(Level::EMERG),
+            format_level_uppercase(Level::ALERT),
+            format_level_uppercase(Level::CRIT),
+            format_level_uppercase(Level::ERR),
+            format_level_uppercase(Level::WARNING),
+            format_level_uppercase(Level::NOTICE),
+            format_level_uppercase(Level::INFO),
+            format_level_uppercase(Level::DEBUG),
+            format_level_uppercase(Level::TRACE),
+            format_level_uppercase(Level::ALL)};
 }
 
 } // namespace log

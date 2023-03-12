@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,14 +55,13 @@ class System {
     static bool command_publish(const char * value, const int8_t id);
     static bool command_fetch(const char * value, const int8_t id);
     static bool command_restart(const char * value, const int8_t id);
-#if defined(EMSESP_DEBUG)
-    static bool command_test(const char * value, const int8_t id);
-#endif
     static bool command_syslog_level(const char * value, const int8_t id);
     static bool command_watch(const char * value, const int8_t id);
-
     static bool command_info(const char * value, const int8_t id, JsonObject & output);
     static bool command_commands(const char * value, const int8_t id, JsonObject & output);
+#if defined(EMSESP_TEST)
+    static bool command_test(const char * value, const int8_t id);
+#endif
 
     std::string reset_reason(uint8_t cpu) const;
 
@@ -74,9 +73,11 @@ class System {
     void reload_settings();
     void wifi_tweak();
     void syslog_init();
-    bool check_upgrade();
+    bool check_upgrade(bool factory_settings);
+    bool check_restore();
     bool heartbeat_json(JsonObject & output);
     void send_heartbeat();
+    void send_info_mqtt(const char * event_str, bool send_ntp = false);
 
     bool syslog_enabled() {
         return syslog_enabled_;
@@ -179,14 +180,7 @@ class System {
     }
 
     void ntp_connected(bool b);
-
-    bool ntp_connected() {
-        // timeout 2 hours, ntp sync is normally every hour.
-        if ((uuid::get_uptime_sec() - ntp_last_check_ > 7201) && ntp_connected_) {
-            ntp_connected(false);
-        }
-        return ntp_connected_;
-    }
+    bool ntp_connected();
 
     bool network_connected() {
 #ifndef EMSESP_STANDALONE
@@ -235,9 +229,38 @@ class System {
         return appused_;
     }
 
+    // memory in kb
+    static uint32_t getMaxAllocMem() {
+        return max_alloc_mem_;
+    }
+    static uint32_t getHeapMem() {
+        return heap_mem_;
+    }
+    static void refreshHeapMem() {
+#ifndef EMSESP_STANDALONE
+        max_alloc_mem_ = ESP.getMaxAllocHeap() / 1024;
+        heap_mem_      = ESP.getFreeHeap() / 1024;
+#endif
+    }
+
+    static bool test_set_all_active() {
+        return test_set_all_active_;
+    }
+    static void test_set_all_active(bool n) {
+#if defined(EMSESP_TEST)
+        if (n) {
+            logger_.debug("Using dummy entity values");
+        }
+#endif
+        test_set_all_active_ = n;
+    }
+
   private:
     static uuid::log::Logger logger_;
     static bool              restart_requested_;
+    static bool              test_set_all_active_; // force all entities in a device to have a value
+    static uint32_t          max_alloc_mem_;
+    static uint32_t          heap_mem_;
 
     // button
     static PButton            myPButton_; // PButton instance
@@ -256,7 +279,6 @@ class System {
     static constexpr uint32_t HEALTHCHECK_LED_FLASH_DUARATION = 150;
     static constexpr uint8_t  HEALTHCHECK_NO_BUS              = (1 << 0); // 1
     static constexpr uint8_t  HEALTHCHECK_NO_NETWORK          = (1 << 1); // 2
-    static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL       = 60000;    // in milliseconds, how often the MQTT heartbeat is sent (1 min)
     static constexpr uint8_t  LED_ON                          = HIGH;     // LED on
 
 #ifndef EMSESP_STANDALONE
@@ -269,7 +291,6 @@ class System {
     int8_t wifi_quality(int8_t dBm);
 
     uint8_t  healthcheck_       = HEALTHCHECK_NO_NETWORK | HEALTHCHECK_NO_BUS; // start with all flags set, no wifi and no ems bus connection
-    uint32_t last_heartbeat_    = 0;
     uint32_t last_system_check_ = 0;
 
     bool upload_status_      = false; // true if we're in the middle of a OTA firmware upload
@@ -278,9 +299,11 @@ class System {
     bool     ntp_connected_  = false;
     uint32_t ntp_last_check_ = 0;
 
+    bool eth_present_ = false;
+
     // EMS-ESP settings
     // copies from WebSettings class in WebSettingsService.h and loaded with reload_settings()
-    std::string hostname_ = FACTORY_WIFI_HOSTNAME;
+    std::string hostname_;
     String      locale_;
     bool        hide_led_;
     uint8_t     led_gpio_;
@@ -302,6 +325,7 @@ class System {
     uint8_t     bool_format_;
     uint8_t     enum_format_;
     bool        readonly_mode_;
+    String      version_;
 
     // ethernet
     uint8_t phy_type_;

@@ -1,23 +1,20 @@
-import { FC, useCallback, useContext, useEffect, useState } from 'react';
-import { useSnackbar } from 'notistack';
+import { FC, useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
-import * as AuthenticationApi from '../../api/authentication';
-import { ACCESS_TOKEN } from '../../api/endpoints';
-import { RequiredChildrenProps } from '../../utils';
-import { LoadingSpinner } from '../../components';
-import { Me } from '../../types';
-import { FeaturesContext } from '../features';
+import * as AuthenticationApi from 'api/authentication';
+import { ACCESS_TOKEN } from 'api/endpoints';
+import { RequiredChildrenProps } from 'utils';
+import { LoadingSpinner } from 'components';
+import { Me } from 'types';
 import { AuthenticationContext } from './context';
 
 const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
-  const { features } = useContext(FeaturesContext);
   const { LL } = useI18nContext();
 
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
 
   const [initialized, setInitialized] = useState<boolean>(false);
   const [me, setMe] = useState<Me>();
@@ -27,7 +24,7 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
       AuthenticationApi.getStorage().setItem(ACCESS_TOKEN, accessToken);
       const decodedMe = AuthenticationApi.decodeMeJWT(accessToken);
       setMe(decodedMe);
-      enqueueSnackbar(LL.LOGGED_IN({ name: decodedMe.username }), { variant: 'success' });
+      toast.success(LL.LOGGED_IN({ name: decodedMe.username }));
     } catch (error) {
       setMe(undefined);
       throw new Error('Failed to parse JWT');
@@ -43,11 +40,6 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
   };
 
   const refresh = useCallback(async () => {
-    if (!features.security) {
-      setMe({ admin: true, username: 'admin' });
-      setInitialized(true);
-      return;
-    }
     const accessToken = AuthenticationApi.getStorage().getItem(ACCESS_TOKEN);
     if (accessToken) {
       try {
@@ -62,7 +54,7 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
       setMe(undefined);
       setInitialized(true);
     }
-  }, [features]);
+  }, []);
 
   useEffect(() => {
     refresh();

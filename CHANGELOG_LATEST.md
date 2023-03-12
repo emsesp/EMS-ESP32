@@ -1,35 +1,26 @@
 # Changelog
 
-# [3.5.0]
+# [3.6.0]
+
+## **IMPORTANT! BREAKING CHANGES**
 
 ## Added
 
-- Translations in Web UI and all device entity names (DE, NL, SE, PL, NO, ...) [#22](https://github.com/emsesp/EMS-ESP32/issues/22)
-- Add support for Lolin C3 mini [#620](https://github.com/emsesp/EMS-ESP32/pull/620)
-- Add support for ESP32-S2 [#667](https://github.com/emsesp/EMS-ESP32/pull/667)
-- Add devices: Greenstar 30Ri boiler, Junkers FW500 thermostat, Buderus BC30 controller
-- Add program memory info
-- Add mqtt queue and connection infos
-- Adapt min/max if ems-value is not in this range
-- Add heat pump settings for inputs and limits [#600](https://github.com/emsesp/EMS-ESP32/issues/600)
-- Add hybrid heatpump [#500](https://github.com/emsesp/EMS-ESP32/issues/500)
-- Add translated tags
-- Add min/max to customization table [#686](https://github.com/emsesp/EMS-ESP32/issues/686)
-- Add MD5 check [#637](https://github.com/emsesp/EMS-ESP32/issues/637)
-- Add more bus-ids [#673](https://github.com/emsesp/EMS-ESP32/issues/673)
+- Workaround for better Domoticz MQTT intergration? [#904](https://github.com/emsesp/EMS-ESP32/issues/904)
+- Warn user in WebUI of unsaved changes [#911](https://github.com/emsesp/EMS-ESP32/issues/911)
+- Detect old Tado thermostat, device-id 0x19, no entities
+- Some more HM200 entities [#500](https://github.com/emsesp/EMS-ESP32/issues/500)
+- Custom Scheduler [#701](https://github.com/emsesp/EMS-ESP32/issues/701)
 
 ## Fixed
 
-- Factory Reset not working [#628](https://github.com/emsesp/EMS-ESP32/issues/628)
+- HA-discovery for analog sensor commands [#1035](https://github.com/emsesp/EMS-ESP32/issues/1035)
 
 ## Changed
 
-- Discovery in HomeAssistant don't work with custom base topic. [#596](https://github.com/emsesp/EMS-ESP32/issues/596) Base topic containing `/` are changed to `_`
-- RF room temperature sensor are shown as thermostat
-- render mqtt float json values with trailing zero
-- removed flash strings
-- reload page after restart button is pressed
-
-## **BREAKING CHANGES:**
-
-- When upgrading from 3.4.x you may need to erase the flash on the ESP32 before uploading the firmware. Make sure you make a backup of the settings and customizations via the WebUI (System->Upload/Download)
+- Optional upgrade to platform-espressif32 6.0.0 (after 5.3.0) [#862](https://github.com/emsesp/EMS-ESP32/issues/862)
+- Use byte 0 for detection RC30 active heatingcircuit [#786](https://github.com/emsesp/EMS-ESP32/issues/786)
+- Write repeated selflowtemp if tx-queue is empty without verify [#954](https://github.com/emsesp/EMS-ESP32/issues/954)
+- HA discovery recreate after disconnect by device [#1067](https://github.com/emsesp/EMS-ESP32/issues/1067)
+- File upload: check flash size (overflow) instead of filesize
+- Improved HA Discovery so previous configs no longer need to be removed when starting [#1077](https://github.com/emsesp/EMS-ESP32/pull/1077) (thanks @pswid!)

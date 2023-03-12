@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios, { AxiosPromise, CancelTokenSource, AxiosProgressEvent } from 'axios';
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
-import { extractErrorMessage } from '../../utils';
-import { FileUploadConfig } from '../../api/endpoints';
+import { extractErrorMessage } from 'utils';
+import { FileUploadConfig } from 'api/endpoints';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 interface MediaUploadOptions {
   upload: (file: File, config?: FileUploadConfig) => AxiosPromise<void>;
@@ -14,7 +14,6 @@ interface MediaUploadOptions {
 const useFileUpload = ({ upload }: MediaUploadOptions) => {
   const { LL } = useI18nContext();
 
-  const { enqueueSnackbar } = useSnackbar();
   const [uploading, setUploading] = useState<boolean>(false);
   const [md5, setMd5] = useState<string>('');
   const [uploadProgress, setUploadProgress] = useState<AxiosProgressEvent>();
@@ -49,17 +48,17 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
       });
       resetUploadingStates();
       if (response.status === 200) {
-        enqueueSnackbar(LL.UPLOAD() + ' ' + LL.SUCCESSFUL(), { variant: 'success' });
+        toast.success(LL.UPLOAD() + ' ' + LL.SUCCESSFUL());
       } else if (response.status === 201) {
         setMd5(String(response.data));
-        enqueueSnackbar(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL(), { variant: 'success' });
+        toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
       }
     } catch (error) {
       if (axios.isCancel(error)) {
-        enqueueSnackbar(LL.UPLOAD() + ' ' + LL.ABORTED(), { variant: 'warning' });
+        toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
       } else {
         resetUploadingStates();
-        enqueueSnackbar(extractErrorMessage(error, LL.UPLOAD() + ' ' + LL.FAILED()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.UPLOAD() + ' ' + LL.FAILED()));
       }
     }
   };

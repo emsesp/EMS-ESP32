@@ -15,6 +15,7 @@ export interface SystemStatus {
   free_mem: number;
   psram_size?: number;
   free_psram?: number;
+  has_loader: boolean;
 }
 
 export interface OTASettings {

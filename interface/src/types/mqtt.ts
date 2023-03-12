@@ -29,13 +29,14 @@ export interface MqttSettings {
   client_id: string;
   keep_alive: number;
   clean_session: boolean;
-  max_topic_length: number;
+  entity_format: number;
   publish_time_boiler: number;
   publish_time_thermostat: number;
   publish_time_solar: number;
   publish_time_mixer: number;
   publish_time_other: number;
   publish_time_sensor: number;
+  publish_time_heartbeat: number;
   mqtt_qos: number;
   mqtt_retain: boolean;
   ha_enabled: boolean;
@@ -44,4 +45,5 @@ export interface MqttSettings {
   publish_single: boolean;
   publish_single2cmd: boolean;
   discovery_prefix: string;
+  discovery_type: number;
 }

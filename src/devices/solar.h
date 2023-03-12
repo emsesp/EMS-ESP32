@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ class Solar : public EMSdevice {
     uint8_t solarPump2Mod_;     // PS4: modulation solar pump
     uint8_t m1Valve_;           // M1:  heat assistance valve
     uint8_t m1Power_;           // M1:  heat assistance valve
+    uint8_t vs1Status_;         // VS1: status
 
     // 0x363 heat counter
     uint16_t heatCntFlowTemp_;

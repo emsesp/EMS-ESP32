@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@ DeviceValue::DeviceValue(uint8_t               device_type,
     // set the min/max
     set_custom_minmax();
 
+    /*
 #ifdef EMSESP_STANDALONE
     // only added for debugging
     Serial.print(COLOR_BRIGHT_RED_BACKGROUND);
@@ -98,37 +99,22 @@ DeviceValue::DeviceValue(uint8_t               device_type,
     }
     Serial.println(COLOR_RESET);
 #endif
+*/
 }
 
-// mapping of UOM, to match order in DeviceValueUOM enum emsdevice.h
+// mapping of UOM, to match order in DeviceValueUOM enum emsdevicevalue.h
 // also maps to DeviceValueUOM in interface/src/project/types.ts for the Web UI
 // must be an int of 4 bytes, 32bit aligned
 const char * DeviceValue::DeviceValueUOM_s[] = {
 
-    F_(uom_blank),
-    F_(uom_degrees),
-    F_(uom_degrees),
-    F_(uom_percent),
-    F_(uom_lmin),
-    F_(uom_kwh),
-    F_(uom_wh),
-    F_(uom_hours),
-    F_(uom_minutes),
-    F_(uom_ua),
-    F_(uom_bar),
-    F_(uom_kw),
-    F_(uom_w),
-    F_(uom_kb),
-    F_(uom_seconds),
-    F_(uom_dbm),
-    F_(uom_fahrenheit),
-    F_(uom_mv),
-    F_(uom_sqm)
+    F_(uom_blank), // 0
+    F_(uom_degrees), F_(uom_degrees), F_(uom_percent), F_(uom_lmin), F_(uom_kwh),  F_(uom_wh),      FL_(hours)[0], FL_(minutes)[0],
+    F_(uom_ua),      F_(uom_bar),     F_(uom_kw),      F_(uom_w),    F_(uom_kb),   FL_(seconds)[0], F_(uom_dbm),   F_(uom_fahrenheit),
+    F_(uom_mv),      F_(uom_sqm),     F_(uom_m3),      F_(uom_l),    F_(uom_kmin), F_(uom_k),       F_(uom_blank)
 
 };
 
-// mapping of TAGs, to match order in DeviceValueTAG enum in emsdevice.h
-// must be an int of 4 bytes, 32bit aligned
+// mapping of TAGs, to match order in DeviceValueTAG enum in emsdevicevalue.h
 const char * const * DeviceValue::DeviceValueTAG_s[] = {
 
     FL_(tag_none),           // ""
@@ -154,7 +140,7 @@ const char * const * DeviceValue::DeviceValueTAG_s[] = {
     FL_(tag_wwc8),           // "wwc8"
     FL_(tag_wwc9),           // "wwc9"
     FL_(tag_wwc10),          // "wwc10"
-    FL_(tag_ahs),            // "ahs"
+    FL_(tag_ahs1),           // "ahs1"
     FL_(tag_hs1),            // "hs1"
     FL_(tag_hs2),            // "hs2"
     FL_(tag_hs3),            // "hs3"
@@ -174,7 +160,7 @@ const char * const * DeviceValue::DeviceValueTAG_s[] = {
 
 };
 
-// MQTT topics derived from tags
+// tags used in MQTT topic names. Macthes sequence from DeviceValueTAG_s
 const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
 
     FL_(tag_none)[0],            // ""
@@ -200,7 +186,7 @@ const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
     FL_(tag_wwc8)[0],            // "wwc8"
     FL_(tag_wwc9)[0],            // "wwc9"
     FL_(tag_wwc10)[0],           // "wwc10"
-    FL_(tag_ahs)[0],             // "ahs"
+    FL_(tag_ahs1)[0],            // "ahs1"
     FL_(tag_hs1)[0],             // "hs1"
     FL_(tag_hs2)[0],             // "hs2"
     FL_(tag_hs3)[0],             // "hs3"
@@ -221,7 +207,7 @@ const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
 };
 
 // count #tags once at compile time
-size_t DeviceValue::tag_count = sizeof(DeviceValue::DeviceValueTAG_s) / sizeof(char * const *);
+uint8_t DeviceValue::NUM_TAGS = sizeof(DeviceValue::DeviceValueTAG_s) / sizeof(char * const *);
 
 // checks whether the device value has an actual value
 // returns true if its valid
@@ -264,6 +250,11 @@ bool DeviceValue::hasValue() const {
     }
 
     return has_value;
+}
+
+// See if the device value has a tag and it's not empty
+bool DeviceValue::has_tag() const {
+    return ((tag < DeviceValue::NUM_TAGS) && (tag != TAG_NONE) && strlen(DeviceValueTAG_s[tag][0]));
 }
 
 // set the min and max value for a device value
@@ -390,6 +381,14 @@ std::string DeviceValue::get_fullname() const {
         return Helpers::translated_word(fullname);
     }
     return customname;
+}
+
+std::string DeviceValue::get_name(std::string & entity) {
+    auto pos = entity.find('|');
+    if (pos != std::string::npos) {
+        return entity.substr(2, pos - 2);
+    }
+    return entity.substr(2);
 }
 
 } // namespace emsesp

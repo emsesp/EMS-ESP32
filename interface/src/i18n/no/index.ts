@@ -1,4 +1,6 @@
 import type { Translation } from '../i18n-types';
+/* prettier-ignore */
+/* eslint-disable */
 
 const no: Translation = {
   LANGUAGE: 'Språk',
@@ -12,7 +14,6 @@ const no: Translation = {
   SU_PASSWORD: 'su Passord',
   DASHBOARD: 'Dashboard',
   SETTINGS_OF: '{0} Innstillinger',
-  SAVED: 'lagret',
   HELP_OF: '{0} Hjelp',
   LOGGED_IN: 'Logget in som {name}',
   PLEASE_SIGNIN: 'Venligst logge inn for å fortsetta',
@@ -45,7 +46,8 @@ const no: Translation = {
   CANCEL: 'Avbryt',
   RESET: 'Nullstill',
   SEND: 'Send',
-  SAVE: 'Lagre',
+  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
+  UPDATE: 'Update', // TODO translate
   REMOVE: 'Fjern',
   PROBLEM_UPDATING: 'Problem med oppdatering',
   PROBLEM_LOADING: 'Problem med opplasting',
@@ -64,11 +66,12 @@ const no: Translation = {
   STARTVALUE: 'Startverdi',
   WARN_GPIO: 'Advarsel: vær forsiktig ved aktivering av GPIO!',
   EDIT: 'Endre',
-  TEMP_SENSOR: '{{Sensor|Temperatursensor}}',
+  SENSOR: 'Sensor',
+  TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperaturesensorer',
-  WRITE_COMMAND: 'Skriv kommando {cmd}',
-  EMS_BUS_WARNING:
-    'EMS bussen koblet ned. Hvis denne advarselen fortsetter etter noen f¨sekunder sjekk instillinger og  prosessorkort',
+  WRITE_CMD_SENT: 'Skriv kommando sent', // TODO translate
+  WRITE_CMD_FAILED: 'Skriv kommando failed', // TODO translate
+  EMS_BUS_WARNING: 'EMS bussen koblet ned. Hvis denne advarselen fortsetter etter noen f¨sekunder sjekk instillinger og  prosessorkort',
   EMS_BUS_SCANNING: 'Søker etter EMS enheter...',
   CONNECTED: 'Tilkoblet',
   TX_ISSUES: 'Tx problemer - prøv en annen Tx Modus',
@@ -96,16 +99,15 @@ const no: Translation = {
   NUM_DEVICES: '{num} Enhet{{er}}',
   NUM_TEMP_SENSORS: '{num} Temperatursensor{{er}}',
   NUM_ANALOG_SENSORS: '{num} Analogsensor{{er}}',
-  NUM_DAYS: '{num} Dag{{er}}',
-  NUM_SECONDS: '{num} Sekund{{er}}',
-  NUM_HOURS: '{num} Time{{r}}',
-  NUM_MINUTES: '{num} Minutt{{er}}',
+  NUM_DAYS: '{num} sag{{er}}',
+  NUM_SECONDS: '{num} sekund{{er}}',
+  NUM_HOURS: '{num} time{{r}}',
+  NUM_MINUTES: '{num} minutt{{er}}',
   APPLICATION_SETTINGS: 'Innstillinger',
-  CUSTOMIZATION: 'Tilpasninger',
+  CUSTOMIZATIONS: 'Tilpasninger',
   APPLICATION_RESTARTING: 'EMS-ESP restarter',
   INTERFACE_BOARD_PROFILE: 'Interface Prosessor Profil',
-  BOARD_PROFILE_TEXT:
-    'Velg en pre-konfigurert prosessor profil fra listen under eller velg  Tilpasset for å konfigurere dine egne innstillinger',
+  BOARD_PROFILE_TEXT: 'Velg en pre-konfigurert prosessor profil fra listen under eller velg  Tilpasset for å konfigurere dine egne innstillinger',
   BOARD_PROFILE: 'Prosessor Profil',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -155,21 +157,19 @@ const no: Translation = {
   CUSTOMIZATIONS_HELP_3: 'inaktiviser skriving',
   CUSTOMIZATIONS_HELP_4: 'ekskludere fra MQTT og API',
   CUSTOMIZATIONS_HELP_5: 'gjemme fra Dashboard',
+  CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
   SELECT_DEVICE: 'Velg en enhet',
   SET_ALL: 'sett alle',
   OPTIONS: 'Alternativ',
   NAME: 'Navn',
-  CUSTOMIZATIONS_RESET:
-    'Er du sikker på att du vil fjerne tilpassninger inkludert innstillinger for Temperatur og Analoge sensorer?',
+  CUSTOMIZATIONS_RESET: 'Er du sikker på att du vil fjerne tilpassninger inkludert innstillinger for Temperatur og Analoge sensorer?',
   DEVICE_ENTITIES: 'Enhets objekter',
-  USER_CUSTOMIZATION: 'Brukertilpasninger',
   SUPPORT_INFORMATION: 'Supportinformasjon',
   CLICK_HERE: 'Klikk her',
   HELP_INFORMATION_1: 'Besøk wiki for instruksjoner for å konfigurere EMS-ESP',
   HELP_INFORMATION_2: 'For community-support besøk vår Discord-server',
   HELP_INFORMATION_3: 'For å be om en ny funksjon eller melde feil',
-  HELP_INFORMATION_4:
-    'husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
+  HELP_INFORMATION_4: 'husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
   HELP_INFORMATION_5: 'EMS-ESP er gratis og åpen kildekode. Bidra til utviklingen ved å gi oss en stjerne på GitHub!',
   SUPPORT_INFO: 'Supportinfo',
   UPLOAD_OF: '{0} Opplasning',
@@ -204,12 +204,12 @@ const no: Translation = {
   FLASH: 'Flash Chip (Størrelse / Hastighet)',
   APPSIZE: 'Applikasjon (Brukt / Ledig)',
   FILESYSTEM: 'File System (Brukt / Ledig)',
-  BUFFER_SIZE: 'Buffer Størrelse',
+  BUFFER_SIZE: 'Max Buffer Størrelse',
   COMPACT: 'Komprimere',
   ENABLE_OTA: 'Aktiviser OTA oppdateringer',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Last ned objektstilpasninger',
-  DOWNLOAD_SETTINGS_TEXT:
-    'Last ned applikasjonskonfigurasjon. Vær varsom med å dele fila da den inneholder passord og annen sensitiv system informasjon',
+  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Last ned applikasjonskonfigurasjon. Vær varsom med å dele fila da den inneholder passord og annen sensitiv system informasjon',
   UPLOAD_TEXT: 'Last opp en ny firmware (.bin) fil, innstillinger eller tilpassninger (.json) fil nedenfor',
   UPLOADING: 'Opplasting',
   UPLOAD_DROP_TEXT: 'Slipp fil eller klikk her',
@@ -220,13 +220,11 @@ const no: Translation = {
   USER_WARNING: 'Du må ha minst en admin bruker konfigurert',
   ADD: 'Legg til',
   ACCESS_TOKEN_FOR: 'Aksess Token for',
-  ACCESS_TOKEN_TEXT:
-    'Token nedenfor benyttes med REST API-kall som krever autorisering. Den kan sendes med enten som en Bearer token i Authorization-headern eller i access_token URL query-parameter.',
+  ACCESS_TOKEN_TEXT: 'Token nedenfor benyttes med REST API-kall som krever autorisering. Den kan sendes med enten som en Bearer token i Authorization-headern eller i access_token URL query-parameter.',
   GENERATING_TOKEN: 'Generer token',
   USER: 'Bruker',
   MODIFY: 'Endre',
-  SU_TEXT:
-    'su brukeren (super user) passord benyttes for å signere autentiserings token samt å tillate admin privileger i konsoll modus.',
+  SU_TEXT: 'su brukeren (super user) passord benyttes for å signere autentiserings token samt å tillate admin privileger i konsoll modus.',
   NOT_ENABLED: 'Ikke aktiv',
   ERRORS_OF: '{0} Feil',
   DISCONNECT_REASON: 'Årsak til nedkobling',
@@ -242,15 +240,21 @@ const no: Translation = {
   MQTT_RESPONSE: 'Publiser kommandoer til en `response` topic',
   MQTT_PUBLISH_TEXT_1: 'Publiser singel verdi topics ved endringer',
   MQTT_PUBLISH_TEXT_2: 'Publiser til kommando topics (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Aktiver MQTT Discovery (Home Assistant, Domoticz)',
+  MQTT_PUBLISH_TEXT_3: 'Aktiver MQTT Discovery',
   MQTT_PUBLISH_TEXT_4: 'Prefiks for Discovery topics',
+  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
   MQTT_PUBLISH_INTERVALS: 'Publiseringsintervall',
   MQTT_INT_BOILER: 'Fyr/Varmepumpe',
   MQTT_INT_THERMOSTATS: 'Termostat',
   MQTT_INT_SOLAR: 'Solpaneler',
   MQTT_INT_MIXER: 'Blandeventil',
+  MQTT_INT_HEARTBEAT: 'Heartbeat',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Standard',
+  MQTT_ENTITY_FORMAT: 'Entity ID format', // TODO translate
+  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)', // TODO translate
+  MQTT_ENTITY_FORMAT_1: 'Single instance, short name', // TODO translate
+  MQTT_ENTITY_FORMAT_2: 'Multiple instances, short name', // TODO translate
   MQTT_CLEAN_SESSION: 'Benytt Clean Session',
   MQTT_RETAIN_FLAG: 'Alltid sett Retain flag',
   INACTIVE: 'Innaktiv',
@@ -286,6 +290,8 @@ const no: Translation = {
   NETWORK_DISABLE_SLEEP: 'Hindre at trådløst nettverk går i Sleep Mode',
   NETWORK_LOW_BAND: 'Benytt smalere båndbredde på trådløst nettverk',
   NETWORK_USE_DNS: 'Aktiviser mDNS Service',
+  NETWORK_ENABLE_CORS: 'Aktiviser CORS',
+  NETWORK_CORS_ORIGIN: 'CORS origin',
   NETWORK_ENABLE_IPV6: 'Aktiviser IPv6 støtte',
   NETWORK_FIXED_IP: 'Benytt statisk IP adresse',
   NETWORK_GATEWAY: 'Gateway',
@@ -298,7 +304,21 @@ const no: Translation = {
   NEW_NAME_OF: 'Bytt navn {0}',
   ENTITY: 'Entitet',
   MIN: 'min',
-  MAX: 'max'
+  MAX: 'max',
+  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
+  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
+  STAY: 'Stay', // TODO translate
+  LEAVE: 'Leave', // TODO translate
+  SCHEDULER: 'Scheduler', // TODO translate
+  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.', // TODO translate
+  SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
+  SCHEDULE: 'Schedule', // TODO translate
+  TIME: 'Time', // TODO translate
+  TIMER: 'Timer', // TODO translate
+  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_TIMER_1: 'on startup', // TODO translate
+  SCHEDULE_TIMER_2: 'every minute', // TODO translate
+  SCHEDULE_TIMER_3: 'every hour' // TODO translate
 };
 
 export default no;

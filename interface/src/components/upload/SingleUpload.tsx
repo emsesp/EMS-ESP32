@@ -8,7 +8,7 @@ import { Box, Button, LinearProgress, Theme, Typography, useTheme } from '@mui/m
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const getBorderColor = (theme: Theme, props: DropzoneState) => {
   if (props.isDragAccept) {

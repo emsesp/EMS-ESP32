@@ -17,18 +17,20 @@ import {
 import PersonIcon from '@mui/icons-material/Person';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
-import { AuthenticatedContext } from '../../contexts/authentication';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-import { I18nContext } from '../../i18n/i18n-react';
-import type { Locales } from '../../i18n/i18n-types';
-import { loadLocaleAsync } from '../../i18n/i18n-util.async';
+import { I18nContext } from 'i18n/i18n-react';
+import type { Locales } from 'i18n/i18n-types';
+import { loadLocaleAsync } from 'i18n/i18n-util.async';
 
-import { ReactComponent as NLflag } from '../../i18n/NL.svg';
-import { ReactComponent as DEflag } from '../../i18n/DE.svg';
-import { ReactComponent as GBflag } from '../../i18n/GB.svg';
-import { ReactComponent as SEflag } from '../../i18n/SE.svg';
-import { ReactComponent as PLflag } from '../../i18n/PL.svg';
-import { ReactComponent as NOflag } from '../../i18n/NO.svg';
+import { ReactComponent as NLflag } from 'i18n/NL.svg';
+import { ReactComponent as DEflag } from 'i18n/DE.svg';
+import { ReactComponent as GBflag } from 'i18n/GB.svg';
+import { ReactComponent as SVflag } from 'i18n/SV.svg';
+import { ReactComponent as PLflag } from 'i18n/PL.svg';
+import { ReactComponent as NOflag } from 'i18n/NO.svg';
+import { ReactComponent as FRflag } from 'i18n/FR.svg';
+import { ReactComponent as TRflag } from 'i18n/TR.svg';
 
 const ItemTypography = styled(Typography)<TypographyProps>({
   maxWidth: '250px',
@@ -77,25 +79,34 @@ const LayoutAuthMenu: FC = () => {
           <GBflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;EN
         </MenuItem>
+        <Divider />
         <MenuItem key="de" value="de">
           <DEflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;DE
+        </MenuItem>
+        <MenuItem key="fr" value="fr">
+          <FRflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;FR
         </MenuItem>
         <MenuItem key="nl" value="nl">
           <NLflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;NL
         </MenuItem>
-        <MenuItem key="se" value="se">
-          <SEflag style={{ width: 16, verticalAlign: 'middle' }} />
-          &nbsp;SE
+        <MenuItem key="no" value="no">
+          <NOflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;NO
         </MenuItem>
         <MenuItem key="pl" value="pl">
           <PLflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;PL
         </MenuItem>
-        <MenuItem key="no" value="no">
-          <NOflag style={{ width: 16, verticalAlign: 'middle' }} />
-          &nbsp;NO
+        <MenuItem key="sv" value="sv">
+          <SVflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;SV
+        </MenuItem>
+        <MenuItem key="tr" value="tr">
+          <TRflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;TR
         </MenuItem>
       </TextField>
 

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,9 +100,18 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         }
     }
 
+    // capture current heap memory before allocating the large return buffer
+    emsesp::EMSESP::system_.refreshHeapMem();
+
     // output json buffer
-    auto *     response = new PrettyAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
-    JsonObject output   = response->getRoot();
+    size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE;
+    auto * response = new PrettyAsyncJsonResponse(false, buffer);
+    while (!response->getSize()) {
+        delete response;
+        buffer -= 1024;
+        response = new PrettyAsyncJsonResponse(false, buffer);
+    }
+    JsonObject output = response->getRoot();
 
     // call command
     uint8_t return_code = Command::process(request->url().c_str(), is_admin, input, output);
@@ -117,7 +126,6 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         emsesp::EMSESP::logger().err(error);
         api_fails_++;
     } else {
-        // emsesp::EMSESP::logger().debug("API command called successfully");
         // if there was no json output from the call, default to the output message 'OK'.
         if (!output.size()) {
             output["message"] = "OK";
@@ -136,7 +144,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
 
     // send the json that came back from the command call
     // FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED = 400 (bad request), 200 (OK), 400 (not found), 400 (bad request), 401 (unauthorized)
-    int ret_codes[5] = {400, 200, 400, 400, 401};
+    int ret_codes[6] = {400, 200, 400, 400, 401, 400};
     response->setCode(ret_codes[return_code]);
     response->setLength();
     response->setContentType("application/json; charset=utf-8");

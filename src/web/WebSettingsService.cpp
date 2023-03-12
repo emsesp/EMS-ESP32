@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
 }
 
 void WebSettings::read(WebSettings & settings, JsonObject & root) {
+    root["version"]               = settings.version;
     root["locale"]                = settings.locale;
     root["tx_mode"]               = settings.tx_mode;
     root["ems_bus_id"]            = settings.ems_bus_id;
@@ -80,17 +81,45 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
 
 // call on initialization and also when settings are updated via web or console
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
+    // load the version of the settings
+    // will be picked up in System::check_upgrade()
+    settings.version = root["version"] | EMSESP_DEFAULT_VERSION;
+
     // load default GPIO configuration based on board profile
     std::vector<int8_t> data; //  // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
 #if CONFIG_IDF_TARGET_ESP32C3
     settings.board_profile = root["board_profile"] | "C3MINI";
 #elif CONFIG_IDF_TARGET_ESP32S2
     settings.board_profile = root["board_profile"] | "S2MINI";
+#elif CONFIG_IDF_TARGET_ESP32S3
+    settings.board_profile = root["board_profile"] | "S3MINI";
 #elif CONFIG_IDF_TARGET_ESP32
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 #endif
+
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
-        settings.board_profile = "CUSTOM";
+// unknown, check for ethernet, use default E32/S32
+// data is led, dallas, rx, tx, pbutton, phy, eth_power, eth_addr, eth_clock
+#ifndef EMSESP_STANDALONE
+        if (ETH.begin(1, 16, 23, 18, ETH_PHY_LAN8720)) {
+            // BBQKees Gateway E32
+            data                   = {EMSESP_DEFAULT_LED_GPIO, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0};
+            settings.board_profile = "E32";
+        } else
+#endif
+        {
+            // BBQKees Gateway S32
+            data                   = {EMSESP_DEFAULT_LED_GPIO,
+                                      EMSESP_DEFAULT_DALLAS_GPIO,
+                                      EMSESP_DEFAULT_RX_GPIO,
+                                      EMSESP_DEFAULT_TX_GPIO,
+                                      EMSESP_DEFAULT_PBUTTON_GPIO,
+                                      EMSESP_DEFAULT_PHY_TYPE,
+                                      0,
+                                      0,
+                                      0};
+            settings.board_profile = "S32";
+        }
         EMSESP::logger().info("No board profile found. Re-setting to %s", settings.board_profile.c_str());
     } else {
         EMSESP::logger().info("Loading board profile %s", settings.board_profile.c_str());
@@ -208,41 +237,61 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     check_flag(prev, settings.ems_bus_id, ChangeFlags::RESTART);
 
     prev               = settings.low_clock;
-    settings.low_clock = root["low_clock"] | false;
+    settings.low_clock = root["low_clock"];
     check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
 
-    String old_local = settings.locale;
-    settings.locale  = root["locale"] | EMSESP_DEFAULT_LOCALE;
-    EMSESP::system_.locale(settings.locale);
-#ifndef EMSESP_STANDALONE
-    if (!old_local.equals(settings.locale)) {
-        add_flags(ChangeFlags::MQTT);
+    //
+    // these may need mqtt restart to rebuild HA discovery topics
+    //
+    prev                 = settings.bool_format;
+    settings.bool_format = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
+    EMSESP::system_.bool_format(settings.bool_format);
+    if (Mqtt::ha_enabled()) {
+        check_flag(prev, settings.bool_format, ChangeFlags::MQTT);
     }
-#endif
+
+    prev                 = settings.enum_format;
+    settings.enum_format = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
+    EMSESP::system_.enum_format(settings.enum_format);
+    if (Mqtt::ha_enabled()) {
+        check_flag(prev, settings.enum_format, ChangeFlags::MQTT);
+    }
+
+    //
+    // these may need mqtt restart to rebuild HA discovery topics
+    //
+    prev                 = settings.bool_format;
+    settings.bool_format = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
+    EMSESP::system_.bool_format(settings.bool_format);
+    if (Mqtt::ha_enabled())
+        check_flag(prev, settings.bool_format, ChangeFlags::MQTT);
+
+    prev                 = settings.enum_format;
+    settings.enum_format = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
+    EMSESP::system_.enum_format(settings.enum_format);
+    if (Mqtt::ha_enabled())
+        check_flag(prev, settings.enum_format, ChangeFlags::MQTT);
 
     //
     // without checks or necessary restarts...
     //
+    settings.locale = root["locale"] | EMSESP_DEFAULT_LOCALE;
+    EMSESP::system_.locale(settings.locale);
+
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
 
     settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
     settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
 
-    settings.fahrenheit = root["fahrenheit"] | false;
+    settings.fahrenheit = root["fahrenheit"];
     EMSESP::system_.fahrenheit(settings.fahrenheit);
 
-    settings.readonly_mode = root["readonly_mode"] | false;
+    settings.readonly_mode = root["readonly_mode"];
     EMSESP::system_.readonly_mode(settings.readonly_mode);
-
-    settings.bool_format = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
-    EMSESP::system_.bool_format(settings.bool_format);
 
     settings.bool_dashboard = root["bool_dashboard"] | EMSESP_DEFAULT_BOOL_FORMAT;
     EMSESP::system_.bool_dashboard(settings.bool_dashboard);
-
-    settings.enum_format = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
-    EMSESP::system_.enum_format(settings.enum_format);
 
     settings.weblog_level   = root["weblog_level"] | EMSESP_DEFAULT_WEBLOG_LEVEL;
     settings.weblog_buffer  = root["weblog_buffer"] | EMSESP_DEFAULT_WEBLOG_BUFFER;

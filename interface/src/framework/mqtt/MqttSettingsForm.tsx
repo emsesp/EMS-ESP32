@@ -2,34 +2,38 @@ import { FC, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
 
 import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
 
-import { MQTT_SETTINGS_VALIDATOR, validate } from '../../validators';
+import WarningIcon from '@mui/icons-material/Warning';
+import CancelIcon from '@mui/icons-material/Cancel';
+
+import { createMqttSettingsValidator, validate } from 'validators';
 import {
   BlockFormControlLabel,
   ButtonRow,
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
-  ValidatedTextField
-} from '../../components';
-import { MqttSettings } from '../../types';
-import { numberValue, updateValue, useRest } from '../../utils';
-import * as MqttApi from '../../api/mqtt';
+  ValidatedTextField,
+  BlockNavigation
+} from 'components';
+import { MqttSettings } from 'types';
+import { numberValue, updateValueDirty, useRest } from 'utils';
+import * as MqttApi from 'api/mqtt';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const MqttSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<MqttSettings>({
-    read: MqttApi.readMqttSettings,
-    update: MqttApi.updateMqttSettings
-  });
+  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
+    useRest<MqttSettings>({
+      read: MqttApi.readMqttSettings,
+      update: MqttApi.updateMqttSettings
+    });
 
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValue(setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
 
   const content = () => {
     if (!data) {
@@ -39,7 +43,7 @@ const MqttSettingsForm: FC = () => {
     const validateAndSubmit = async () => {
       try {
         setFieldErrors(undefined);
-        await validate(MQTT_SETTINGS_VALIDATOR, data);
+        await validate(createMqttSettingsValidator(data), data);
         saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
@@ -170,6 +174,7 @@ const MqttSettingsForm: FC = () => {
           control={<Checkbox name="mqtt_retain" checked={data.mqtt_retain} onChange={updateFormValue} />}
           label={LL.MQTT_RETAIN_FLAG()}
         />
+
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.FORMATTING()}
         </Typography>
@@ -214,22 +219,58 @@ const MqttSettingsForm: FC = () => {
           <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
             <Grid item>
               <BlockFormControlLabel
+                sx={{ pb: 1 }}
                 control={<Checkbox name="ha_enabled" checked={data.ha_enabled} onChange={updateFormValue} />}
                 label={LL.MQTT_PUBLISH_TEXT_3()}
               />
             </Grid>
             {data.ha_enabled && (
-              <Grid item xs={6}>
-                <ValidatedTextField
-                  name="discovery_prefix"
-                  label={LL.MQTT_PUBLISH_TEXT_4()}
-                  fullWidth
-                  variant="outlined"
-                  value={data.discovery_prefix}
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              </Grid>
+              <>
+                <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+                  <Grid item>
+                    <ValidatedTextField
+                      name="discovery_type"
+                      label={LL.MQTT_PUBLISH_TEXT_5()}
+                      value={data.discovery_type}
+                      fullWidth
+                      variant="outlined"
+                      onChange={updateFormValue}
+                      margin="normal"
+                      select
+                    >
+                      <MenuItem value={0}>Home Assistant</MenuItem>
+                      <MenuItem value={1}>Domoticz</MenuItem>
+                    </ValidatedTextField>
+                  </Grid>
+                  <Grid item>
+                    <ValidatedTextField
+                      name="discovery_prefix"
+                      label={LL.MQTT_PUBLISH_TEXT_4()}
+                      fullWidth
+                      variant="outlined"
+                      value={data.discovery_prefix}
+                      onChange={updateFormValue}
+                      margin="normal"
+                    />
+                  </Grid>
+                  <Grid item>
+                    <ValidatedTextField
+                      name="entity_format"
+                      label={LL.MQTT_ENTITY_FORMAT()}
+                      value={data.entity_format}
+                      fullWidth
+                      variant="outlined"
+                      onChange={updateFormValue}
+                      margin="normal"
+                      select
+                    >
+                      <MenuItem value={0}>{LL.MQTT_ENTITY_FORMAT_0()}</MenuItem>
+                      <MenuItem value={1}>{LL.MQTT_ENTITY_FORMAT_1()}</MenuItem>
+                      <MenuItem value={2}>{LL.MQTT_ENTITY_FORMAT_2()}</MenuItem>
+                    </ValidatedTextField>
+                  </Grid>
+                </Grid>
+              </>
             )}
           </Grid>
         )}
@@ -237,7 +278,23 @@ const MqttSettingsForm: FC = () => {
           {LL.MQTT_PUBLISH_INTERVALS()}&nbsp;(0=auto)
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="publish_time_heartbeat"
+              label={LL.MQTT_INT_HEARTBEAT()}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+              }}
+              fullWidth
+              variant="outlined"
+              value={numberValue(data.publish_time_heartbeat)}
+              type="number"
+              onChange={updateFormValue}
+              margin="normal"
+            />
+          </Grid>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_boiler"
@@ -253,7 +310,7 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_thermostat"
@@ -269,7 +326,7 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_solar"
@@ -285,7 +342,7 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_mixer"
@@ -301,7 +358,7 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_sensor"
@@ -317,7 +374,7 @@ const MqttSettingsForm: FC = () => {
               margin="normal"
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_other"
@@ -334,24 +391,38 @@ const MqttSettingsForm: FC = () => {
             />
           </Grid>
         </Grid>
-        <ButtonRow>
-          <Button
-            startIcon={<SaveIcon />}
-            disabled={saving}
-            variant="outlined"
-            color="primary"
-            type="submit"
-            onClick={validateAndSubmit}
-          >
-            {LL.SAVE()}
-          </Button>
-        </ButtonRow>
+
+        {dirtyFlags && dirtyFlags.length !== 0 && (
+          <ButtonRow>
+            <Button
+              startIcon={<CancelIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={() => loadData()}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              startIcon={<WarningIcon color="warning" />}
+              disabled={saving}
+              variant="contained"
+              color="info"
+              type="submit"
+              onClick={validateAndSubmit}
+            >
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
+            </Button>
+          </ButtonRow>
+        )}
       </>
     );
   };
 
   return (
     <SectionContent title={LL.SETTINGS_OF('MQTT')} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

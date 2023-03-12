@@ -1,6 +1,6 @@
 /*
  * uuid-console - Microcontroller console shell
- * Copyright 2019  Simon Arlott
+ * Copyright 2019,2022  Simon Arlott
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,12 +28,12 @@ int Shell::available() {
     if (mode_ == Mode::BLOCKING) {
         auto * blocking_data = reinterpret_cast<Shell::BlockingData *>(mode_data_.get());
 
-        if (!available_char()) {
+        if (!stream_.available()) {
             return 0;
         }
 
         if (blocking_data->consume_line_feed_) {
-            const int input = peek_one_char();
+            const int input = stream_.peek();
 
             if (input >= 0) {
                 const unsigned char c = input;
@@ -42,7 +42,7 @@ int Shell::available() {
 
                 if (previous_ == '\x0D' && c == '\x0A') {
                     // Consume the first LF following a CR
-                    read_one_char();
+                    stream_.read();
                     previous_ = c;
                     return available();
                 }
@@ -62,7 +62,7 @@ int Shell::available() {
 int Shell::read() {
     if (mode_ == Mode::BLOCKING) {
         auto *    blocking_data = reinterpret_cast<Shell::BlockingData *>(mode_data_.get());
-        const int input         = read_one_char();
+        const int input         = stream_.read();
 
         if (input >= 0) {
             const unsigned char c = input;
@@ -90,7 +90,7 @@ int Shell::read() {
 int Shell::peek() {
     if (mode_ == Mode::BLOCKING) {
         auto *    blocking_data = reinterpret_cast<Shell::BlockingData *>(mode_data_.get());
-        const int input         = peek_one_char();
+        const int input         = stream_.peek();
 
         if (blocking_data->consume_line_feed_) {
             if (input >= 0) {
@@ -100,7 +100,7 @@ int Shell::peek() {
 
                 if (previous_ == '\x0D' && c == '\x0A') {
                     // Consume the first LF following a CR
-                    read_one_char();
+                    stream_.read();
                     previous_ = c;
                     return peek();
                 }
@@ -112,6 +112,15 @@ int Shell::peek() {
         return -1;
     }
 }
+
+size_t Shell::write(uint8_t data) {
+    return stream_.write(data);
+}
+
+size_t Shell::write(const uint8_t * buffer, size_t size) {
+    return stream_.write(buffer, size);
+}
+
 
 void Shell::flush() {
     // This is a pure virtual function in Arduino's Stream class, which

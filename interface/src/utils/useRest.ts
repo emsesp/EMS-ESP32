@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
+
 import { AxiosPromise } from 'axios';
 
 import { extractErrorMessage } from '.';
 
-import { useI18nContext } from '../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
+
+import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 
 export interface RestRequestOptions<D> {
   read: () => AxiosPromise<D>;
@@ -14,24 +17,30 @@ export interface RestRequestOptions<D> {
 export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
   const { LL } = useI18nContext();
 
-  const { enqueueSnackbar } = useSnackbar();
-
-  const [saving, setSaving] = useState<boolean>(false);
   const [data, setData] = useState<D>();
+  const [saving, setSaving] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>();
   const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
 
+  const [origData, setOrigData] = useState<D>();
+  const [dirtyFlags, setDirtyFlags] = useState<string[]>();
+
+  const blocker = useBlocker(dirtyFlags?.length !== 0);
+
   const loadData = useCallback(async () => {
     setData(undefined);
+    setDirtyFlags([]);
     setErrorMessage(undefined);
     try {
-      setData((await read()).data);
+      const fetch_data = (await read()).data;
+      setData(fetch_data);
+      setOrigData(fetch_data);
     } catch (error) {
       const message = extractErrorMessage(error, LL.PROBLEM_LOADING());
-      enqueueSnackbar(message, { variant: 'error' });
+      toast.error(message);
       setErrorMessage(message);
     }
-  }, [read, enqueueSnackbar, LL]);
+  }, [read, LL]);
 
   const save = useCallback(
     async (toSave: D) => {
@@ -43,21 +52,23 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
       setErrorMessage(undefined);
       try {
         const response = await update(toSave);
+        setOrigData(response.data);
         setData(response.data);
         if (response.status === 202) {
           setRestartNeeded(true);
         } else {
-          enqueueSnackbar(LL.SETTINGS_OF('') + ' ' + LL.SAVED(), { variant: 'success' });
+          toast.success(LL.UPDATED_OF(LL.SETTINGS_OF('')));
         }
       } catch (error) {
         const message = extractErrorMessage(error, LL.PROBLEM_UPDATING());
-        enqueueSnackbar(message, { variant: 'error' });
+        toast.error(message);
         setErrorMessage(message);
       } finally {
         setSaving(false);
+        setDirtyFlags([]);
       }
     },
-    [update, enqueueSnackbar, LL]
+    [update, LL]
   );
 
   const saveData = () => data && save(data);
@@ -66,5 +77,17 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     loadData();
   }, [loadData]);
 
-  return { loadData, saveData, saving, setData, data, errorMessage, restartNeeded } as const;
+  return {
+    loadData,
+    saveData,
+    saving,
+    setData,
+    data,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    blocker,
+    errorMessage,
+    restartNeeded
+  } as const;
 };

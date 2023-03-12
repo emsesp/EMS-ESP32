@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,8 +44,8 @@ class AnalogCustomization {
   public:
     uint8_t     gpio;
     std::string name;
-    float       offset;
-    float       factor;
+    double      offset;
+    double      factor;
     uint8_t     uom;  // 0 is none
     int8_t      type; // -1 is for deletion
 

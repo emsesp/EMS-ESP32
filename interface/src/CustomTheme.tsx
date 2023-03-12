@@ -4,7 +4,7 @@ import { CssBaseline } from '@mui/material';
 import { createTheme, responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import { blueGrey, blue } from '@mui/material/colors';
 
-import { RequiredChildrenProps } from './utils';
+import { RequiredChildrenProps } from 'utils';
 
 const theme = responsiveFontSizes(
   createTheme({

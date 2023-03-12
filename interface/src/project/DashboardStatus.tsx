@@ -1,5 +1,5 @@
 import { FC, useState, useContext, useEffect } from 'react';
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 import {
   Avatar,
   Button,
@@ -16,9 +16,8 @@ import {
   useTheme
 } from '@mui/material';
 
-import { Table } from '@table-library/react-table-library/table';
 import { useTheme as tableTheme } from '@table-library/react-table-library/theme';
-import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -26,19 +25,18 @@ import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 
-import { AuthenticatedContext } from '../contexts/authentication';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-import { ButtonRow, FormLoader, SectionContent } from '../components';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 
 import { Status, busConnectionStatus, Stat } from './types';
 
-import { extractErrorMessage, useRest } from '../utils';
+import { extractErrorMessage, useRest } from 'utils';
 
 import * as EMSESP from './api';
 
-import type { Translation } from '../i18n/i18n-types';
-import { useI18nContext } from '../i18n/i18n-react';
-import parseMilliseconds from 'parse-ms';
+import type { Translation } from 'i18n/i18n-types';
+import { useI18nContext } from 'i18n/i18n-react';
 
 export const isConnected = ({ status }: Status) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
 
@@ -76,12 +74,11 @@ const DashboardStatus: FC = () => {
 
   const theme = useTheme();
   const [confirmScan, setConfirmScan] = useState<boolean>(false);
-  const { enqueueSnackbar } = useSnackbar();
 
   const { me } = useContext(AuthenticatedContext);
 
   const showName = (id: any) => {
-    let name: keyof Translation['STATUS_NAMES'] = id;
+    const name: keyof Translation['STATUS_NAMES'] = id;
     return LL.STATUS_NAMES[name]();
   };
 
@@ -111,8 +108,7 @@ const DashboardStatus: FC = () => {
       color: #90CAF9;
 
       .th {
-        height: 42px;
-        font-weight: 500;
+        height: 36px;
         border-bottom: 1px solid #565656;
       }
     `,
@@ -148,16 +144,20 @@ const DashboardStatus: FC = () => {
   const scan = async () => {
     try {
       await EMSESP.scanDevices();
-      enqueueSnackbar(LL.SCANNING() + '...', { variant: 'info' });
+      toast.info(LL.SCANNING() + '...');
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
     } finally {
       setConfirmScan(false);
     }
   };
 
   const formatDurationSec = (duration_sec: number) => {
-    const { days, hours, minutes, seconds } = parseMilliseconds(duration_sec * 1000);
+    const days = Math.trunc((duration_sec * 1000) / 86400000);
+    const hours = Math.trunc((duration_sec * 1000) / 3600000) % 24;
+    const minutes = Math.trunc((duration_sec * 1000) / 60000) % 60;
+    const seconds = Math.trunc((duration_sec * 1000) / 1000) % 60;
+
     let formatted = '';
     if (days) {
       formatted += LL.NUM_DAYS({ num: days }) + ' ';
@@ -180,7 +180,7 @@ const DashboardStatus: FC = () => {
         <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmScan(false)} color="secondary">
           {LL.CANCEL()}
         </Button>
-        <Button startIcon={<PermScanWifiIcon />} variant="outlined" onClick={scan} color="primary" autoFocus>
+        <Button startIcon={<PermScanWifiIcon />} variant="outlined" onClick={scan} color="primary">
           {LL.SCAN()}
         </Button>
       </DialogActions>
@@ -223,13 +223,13 @@ const DashboardStatus: FC = () => {
               }
             />
           </ListItem>
-          <Box m={3}></Box>
+          <Box m={3} />
           <Table data={{ nodes: data.stats }} theme={stats_theme} layout={{ custom: true }}>
             {(tableList: any) => (
               <>
                 <Header>
                   <HeaderRow>
-                    <HeaderCell resize></HeaderCell>
+                    <HeaderCell resize />
                     <HeaderCell stiff>{LL.SUCCESS()}</HeaderCell>
                     <HeaderCell stiff>{LL.FAIL()}</HeaderCell>
                     <HeaderCell stiff>{LL.QUALITY()}</HeaderCell>

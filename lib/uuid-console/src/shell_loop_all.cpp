@@ -1,6 +1,6 @@
 /*
  * uuid-console - Microcontroller console shell
- * Copyright 2019  Simon Arlott
+ * Copyright 2019,2021  Simon Arlott
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,15 +25,21 @@ namespace uuid {
 
 namespace console {
 
-std::set<std::shared_ptr<Shell>> Shell::shells_;
+std::set<std::shared_ptr<Shell>> & Shell::registered_shells() {
+    static std::set<std::shared_ptr<Shell>> shells;
+
+    return shells;
+}
 
 void Shell::loop_all() {
-    for (auto shell = shells_.begin(); shell != shells_.end();) {
+    auto & shells = registered_shells();
+
+    for (auto shell = shells.begin(); shell != shells.end();) {
         shell->get()->loop_one();
 
         // This avoids copying the shared_ptr every time loop_one() is called
         if (!shell->get()->running()) {
-            shell = shells_.erase(shell);
+            shell = shells.erase(shell);
         } else {
             shell++;
         }

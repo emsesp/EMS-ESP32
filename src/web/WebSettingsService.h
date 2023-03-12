@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ namespace emsesp {
 
 class WebSettings {
   public:
+    String   version;
     String   locale;
     uint8_t  tx_mode;
     uint8_t  ems_bus_id;

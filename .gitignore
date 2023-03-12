@@ -1,35 +1,53 @@
 # vscode
-.vscode
+.vscode/c_cpp_properties.json
+# .vscode/extensions.json
+.vscode/launch.json
+# .vscode/settings.json
 
-# build
-build/
+# c++ compiling
 .clang_complete
 .gcc-flags.json
 cppcheck.out.xml
-debug.log
 
 # platformio
 .pio
 pio_local.ini
-/.VSCodeCounter
 
 # OS specific
 .DS_Store
 *Thumbs.db
-
-# project specfic
-/scripts/stackdmp.txt
 emsesp
+
+# web specfic
+build/
+dist/
 /data/www
 /lib/framework/WWWData.h
 /interface/build
 node_modules
 /interface/.eslintcache
+stats.html
+*.sln
+*.sw?
+
+# scripts
 test.sh
+scripts/run.sh
 scripts/__pycache__
-.temp
+/scripts/stackdmp.txt
+
+# i18n generated files
+interface/src/i18n/i18n-react.tsx
+interface/src/i18n/i18n-types.ts
+interface/src/i18n/i18n-util.ts
+interface/src/i18n/i18n-util.sync.ts
+interface/src/i18n/i18n-util.async.ts
 
 # sonar
 .scannerwork/
 sonar/
 build_wrapper_output_directory/
+
+# entity dump results
+dump_entities.csv
+dump_entities.xls*

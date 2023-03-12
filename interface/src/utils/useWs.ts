@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Sockette from 'sockette';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es';
 
-import { addAccessTokenParameter } from '../api/authentication';
+import { addAccessTokenParameter } from 'api/authentication';
 
 interface WebSocketIdMessage {
   type: 'id';
@@ -17,7 +17,7 @@ interface WebSocketPayloadMessage<D> {
 
 export type WebSocketMessage<D> = WebSocketIdMessage | WebSocketPayloadMessage<D>;
 
-export const useWs = <D>(wsUrl: string, wsThrottle: number = 100) => {
+export const useWs = <D>(wsUrl: string, wsThrottle = 100) => {
   const ws = useRef<Sockette>();
   const clientId = useRef<string>();
 
@@ -43,7 +43,7 @@ export const useWs = <D>(wsUrl: string, wsThrottle: number = 100) => {
     }
   }, []);
 
-  const doSaveData = useCallback((newData: D, clearData: boolean = false) => {
+  const doSaveData = useCallback((newData: D, clearData = false) => {
     if (!ws.current) {
       return;
     }
@@ -55,11 +55,7 @@ export const useWs = <D>(wsUrl: string, wsThrottle: number = 100) => {
 
   const saveData = useRef(debounce(doSaveData, wsThrottle));
 
-  const updateData = (
-    newData: React.SetStateAction<D | undefined>,
-    transmitData: boolean = true,
-    clearData: boolean = false
-  ) => {
+  const updateData = (newData: React.SetStateAction<D | undefined>, transmitData: true, clearData: false) => {
     setData(newData);
     setTransmit(transmitData);
     setClear(clearData);

@@ -29,13 +29,8 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         std::string extension = fname.substr(position + 1);
         size_t      fsize     = request->contentLength();
 
-#if defined(EMSESP_USE_SERIAL)
-        Serial.printf("Received filename: %s, len: %d, index: %d, ext: %s, fsize: %d", filename.c_str(), len, index, extension.c_str(), fsize);
-        Serial.println();
-#endif
-
         is_firmware = false;
-        if ((extension == "bin") && (fsize > 1500000)) {
+        if ((extension == "bin") && (fsize > 1000000)) {
             is_firmware = true;
         } else if (extension == "json") {
             md5[0] = '\0'; // clear md5
@@ -67,18 +62,20 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
                 handleError(request, 503); // service unavailable
                 return;
             }
+#elif CONFIG_IDF_TARGET_ESP32S3
+            if (len > 12 && (data[0] != 0xE9 || data[12] != 3)) {
+                handleError(request, 503); // service unavailable
+                return;
+            }
 #endif
             // it's firmware - initialize the ArduinoOTA updater
-            if (Update.begin(fsize)) {
+            if (Update.begin()) {
                 if (strlen(md5) == 32) {
                     Update.setMD5(md5);
                     md5[0] = '\0';
                 }
                 request->onDisconnect(UploadFileService::handleEarlyDisconnect); // success, let's make sure we end the update if the client hangs up
             } else {
-#if defined(EMSESP_USE_SERIAL)
-                Update.printError(Serial);
-#endif
                 handleError(request, 507); // failed to begin, send an error response Insufficient Storage
                 return;
             }
@@ -96,16 +93,10 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         // if we haven't delt with an error, continue with the firmware update
         if (!request->_tempObject) {
             if (Update.write(data, len) != len) {
-#if defined(EMSESP_USE_SERIAL)
-                Update.printError(Serial);
-#endif
                 handleError(request, 500);
             }
             if (final) {
                 if (!Update.end(true)) {
-#if defined(EMSESP_USE_SERIAL)
-                    Update.printError(Serial);
-#endif
                     handleError(request, 500);
                 }
             }

@@ -13,13 +13,13 @@ import {
 
 import CloseIcon from '@mui/icons-material/Close';
 
-import { extractErrorMessage } from '../../utils';
-import { useSnackbar } from 'notistack';
-import { MessageBox } from '../../components';
-import * as SecurityApi from '../../api/security';
-import { Token } from '../../types';
+import { extractErrorMessage } from 'utils';
+import { toast } from 'react-toastify';
+import { MessageBox } from 'components';
+import * as SecurityApi from 'api/security';
+import { Token } from 'types';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 interface GenerateTokenProps {
   username?: string;
@@ -32,15 +32,13 @@ const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
 
   const { LL } = useI18nContext();
 
-  const { enqueueSnackbar } = useSnackbar();
-
   const getToken = useCallback(async () => {
     try {
       setToken((await SecurityApi.generateToken(username)).data);
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
     }
-  }, [username, enqueueSnackbar, LL]);
+  }, [username, LL]);
 
   useEffect(() => {
     if (open) {

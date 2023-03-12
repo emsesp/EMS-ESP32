@@ -1,4 +1,6 @@
 
+#ifdef EMSESP_STANDALONE
+
 #include <Arduino.h>
 #include "WString.h"
 
@@ -66,3 +68,5 @@ size_t strlcat(char * dst, const char * src, size_t siz) {
 
     return (dlen + (s - src)); /* count does not include NUL */
 }
+
+#endif

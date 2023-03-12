@@ -48,6 +48,7 @@ export interface Stat {
   f: number; // fail
   q: number; // quality
 }
+
 export interface Status {
   status: busConnectionStatus;
   tx_mode: number;
@@ -57,9 +58,11 @@ export interface Status {
   num_analogs: number;
   stats: Stat[];
 }
+
 export interface Device {
   id: string; // id index
-  t: string; // type
+  tn: string; // device type translated name
+  t: number; // device type id
   b: string; // brand
   n: string; // name
   d: number; // deviceid
@@ -101,6 +104,7 @@ export interface SensorData {
 export interface CoreData {
   connected: boolean;
   devices: Device[];
+  s_n: string;
   active_sensors: number;
   analog_enabled: boolean;
 }
@@ -110,7 +114,8 @@ export interface DeviceShort {
   d?: number; // deviceid
   p?: number; // productid
   s: string; // shortname
-  t?: string; // device type name
+  t?: number; // device type id
+  tn?: string; // device type internal name
 }
 
 export interface Devices {
@@ -140,13 +145,13 @@ export interface DeviceEntity {
   n?: string; // fullname, optional
   cn?: string; // custom fullname, optional
   m: number; // mask
+  w: boolean; // writeable
   o_m?: number; // original mask before edits
   o_cn?: string; // original cn before edits
-  w: boolean; // writeable
   mi?: string; // min value
   ma?: string; // max value
-  o_mi?: string;
-  o_ma?: string;
+  o_mi?: string; // original min value
+  o_ma?: string; // original max value
 }
 
 export interface CustomEntities {
@@ -179,7 +184,9 @@ export enum DeviceValueUOM {
   MV,
   SQM,
   M3,
-  L
+  L,
+  KMIN,
+  K
 }
 
 export const DeviceValueUOM_s = [
@@ -192,18 +199,20 @@ export const DeviceValueUOM_s = [
   'Wh',
   'hours',
   'minutes',
-  'uA',
+  'µA',
   'bar',
   'kW',
   'W',
   'KB',
-  'second',
+  'seconds',
   'dBm',
   '°F',
   'mV',
-  'sqm',
-  'm3',
-  'l'
+  'm²',
+  'm³',
+  'l',
+  'K*min',
+  'K'
 ];
 
 export enum AnalogType {
@@ -245,7 +254,8 @@ export const BOARD_PROFILES: BoardProfiles = {
   OLIMEX: 'Olimex ESP32-EVB',
   OLIMEXPOE: 'Olimex ESP32-POE',
   C3MINI: 'Wemos C3 Mini',
-  S2MINI: 'Wemos S2 Mini'
+  S2MINI: 'Wemos S2 Mini',
+  S3MINI: 'Liligo S3'
 };
 
 export interface BoardProfileName {
@@ -290,5 +300,40 @@ export enum DeviceEntityMask {
   DV_WEB_EXCLUDE = 1,
   DV_API_MQTT_EXCLUDE = 2,
   DV_READONLY = 4,
-  DV_FAVORITE = 8
+  DV_FAVORITE = 8,
+  DV_DELETED = 128
+}
+
+export interface ScheduleItem {
+  id: string; // unique index
+  active: boolean;
+  deleted?: boolean; // optional
+  flags: number;
+  time: string;
+  cmd: string;
+  value: string;
+  name?: string; // optional
+  o_id?: string;
+  o_active?: boolean;
+  o_deleted?: boolean;
+  o_flags?: number;
+  o_time?: string;
+  o_cmd?: string;
+  o_value?: string;
+  o_name?: string;
+}
+
+export interface Schedule {
+  schedule: ScheduleItem[];
+}
+
+export enum ScheduleFlag {
+  SCHEDULE_SUN = 1,
+  SCHEDULE_MON = 2,
+  SCHEDULE_TUE = 4,
+  SCHEDULE_WED = 8,
+  SCHEDULE_THU = 16,
+  SCHEDULE_FRI = 32,
+  SCHEDULE_SAT = 64,
+  SCHEDULE_TIMER = 128
 }

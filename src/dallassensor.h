@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ class DallasSensor {
 
         std::string name() const;
         void        set_name(const std::string & name) {
-                   name_ = name;
+            name_ = name;
         }
 
         bool apply_customization();
@@ -111,7 +111,7 @@ class DallasSensor {
 
     bool update(const std::string & id, const std::string & name, int16_t offset);
 
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_TEST)
     void test();
 #endif
 

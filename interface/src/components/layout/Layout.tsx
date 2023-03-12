@@ -3,8 +3,8 @@ import { useLocation } from 'react-router-dom';
 
 import { Box, Toolbar } from '@mui/material';
 
-import { PROJECT_NAME } from '../../api/env';
-import { RequiredChildrenProps } from '../../utils';
+import { PROJECT_NAME } from 'api/env';
+import { RequiredChildrenProps } from 'utils';
 
 import LayoutDrawer from './LayoutDrawer';
 import LayoutAppBar from './LayoutAppBar';

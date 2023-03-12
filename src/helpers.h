@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ namespace emsesp {
 
 class Helpers {
   public:
-    static char * render_value(char * result, const float value, const int8_t format); // format is the precision
+    static char * render_value(char * result, const double value, const int8_t format); // format is the precision
     static char * render_value(char * result, const uint8_t value, const int8_t format, const uint8_t fahrenheit = 0);
     static char * render_value(char * result, const int8_t value, const int8_t format, const uint8_t fahrenheit = 0);
     static char * render_value(char * result, const uint16_t value, const int8_t format, const uint8_t fahrenheit = 0);
@@ -49,12 +49,14 @@ class Helpers {
     static int         atoint(const char * value);
     static bool        check_abs(const int32_t i);
     static uint32_t    abs(const int32_t i);
+    static uint16_t    string2minutes(const std::string & str);
 
     static float transformNumFloat(float value, const int8_t numeric_operator, const uint8_t fahrenheit = 0);
 
     static std::string toLower(std::string const & s);
     static std::string toUpper(std::string const & s);
     static std::string toLower(const char * s);
+    static void        CharToUpperUTF8(char * c);
 
     static void replace_char(char * str, char find, char replace);
 
@@ -77,7 +79,7 @@ class Helpers {
     static uint8_t count_items(const char * const ** list);
     static uint8_t count_items(const char * const * list);
 
-    static const char * translated_word(const char * const * strings);
+    static const char * translated_word(const char * const * strings, const bool force_en = false);
 
 #ifdef EMSESP_STANDALONE
     static char * ultostr(char * ptr, uint32_t value, const uint8_t base);

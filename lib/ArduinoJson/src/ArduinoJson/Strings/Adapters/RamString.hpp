@@ -8,9 +8,14 @@
 #include <string.h>  // strcmp
 
 #include <ArduinoJson/Polyfills/assert.hpp>
-#include <ArduinoJson/Strings/IsString.hpp>
+#include <ArduinoJson/Strings/StoragePolicy.hpp>
+#include <ArduinoJson/Strings/StringAdapter.hpp>
 
 namespace ARDUINOJSON_NAMESPACE {
+
+template <typename T>
+struct IsChar
+    : integral_constant<bool, is_integral<T>::value && sizeof(T) == 1> {};
 
 class ZeroTerminatedRamString {
  public:
@@ -48,30 +53,49 @@ class ZeroTerminatedRamString {
     return stringCompare(a, b) == 0;
   }
 
+  StringStoragePolicy::Copy storagePolicy() const {
+    return StringStoragePolicy::Copy();
+  }
+
  protected:
   const char* _str;
 };
 
+template <typename TChar>
+struct StringAdapter<TChar*, typename enable_if<IsChar<TChar>::value>::type> {
+  typedef ZeroTerminatedRamString AdaptedString;
+
+  static AdaptedString adapt(const TChar* p) {
+    return AdaptedString(reinterpret_cast<const char*>(p));
+  }
+};
+
+template <typename TChar, size_t N>
+struct StringAdapter<TChar[N], typename enable_if<IsChar<TChar>::value>::type> {
+  typedef ZeroTerminatedRamString AdaptedString;
+
+  static AdaptedString adapt(const TChar* p) {
+    return AdaptedString(reinterpret_cast<const char*>(p));
+  }
+};
+
+class StaticStringAdapter : public ZeroTerminatedRamString {
+ public:
+  StaticStringAdapter(const char* str) : ZeroTerminatedRamString(str) {}
+
+  StringStoragePolicy::Link storagePolicy() const {
+    return StringStoragePolicy::Link();
+  }
+};
+
 template <>
-struct IsString<char*> : true_type {};
+struct StringAdapter<const char*, void> {
+  typedef StaticStringAdapter AdaptedString;
 
-inline ZeroTerminatedRamString adaptString(const char* s) {
-  return ZeroTerminatedRamString(s);
-}
-
-template <>
-struct IsString<unsigned char*> : true_type {};
-
-inline ZeroTerminatedRamString adaptString(const unsigned char* s) {
-  return adaptString(reinterpret_cast<const char*>(s));
-}
-
-template <>
-struct IsString<signed char*> : true_type {};
-
-inline ZeroTerminatedRamString adaptString(const signed char* s) {
-  return adaptString(reinterpret_cast<const char*>(s));
-}
+  static AdaptedString adapt(const char* p) {
+    return AdaptedString(p);
+  }
+};
 
 class SizedRamString {
  public:
@@ -97,23 +121,23 @@ class SizedRamString {
     return _str;
   }
 
+  StringStoragePolicy::Copy storagePolicy() const {
+    return StringStoragePolicy::Copy();
+  }
+
  protected:
   const char* _str;
   size_t _size;
 };
 
-inline SizedRamString adaptString(const char* s, size_t n) {
-  return SizedRamString(s, n);
-}
+template <typename TChar>
+struct SizedStringAdapter<TChar*,
+                          typename enable_if<IsChar<TChar>::value>::type> {
+  typedef SizedRamString AdaptedString;
 
-template <size_t N>
-struct IsString<char[N]> : true_type {};
+  static AdaptedString adapt(const TChar* p, size_t n) {
+    return AdaptedString(reinterpret_cast<const char*>(p), n);
+  }
+};
 
-template <size_t N>
-struct IsString<const char[N]> : true_type {};
-
-template <size_t N>
-inline SizedRamString adaptString(char s[N]) {
-  return SizedRamString(s, strlen(s));
-}
 }  // namespace ARDUINOJSON_NAMESPACE

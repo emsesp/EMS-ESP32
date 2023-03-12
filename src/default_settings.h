@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,12 +21,12 @@
 
 // GENERAL SETTINGS
 
-#ifndef EMSESP_STANDALONE
+#ifndef EMSESP_DEFAULT_LOCALE
 #define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_EN // English
-#else
-// this is for debugging different languages in standalone version
-// #define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_DE // German
-#define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_EN // English
+#endif
+
+#ifndef EMSESP_DEFAULT_VERSION
+#define EMSESP_DEFAULT_VERSION ""
 #endif
 
 #ifndef EMSESP_DEFAULT_TX_MODE
@@ -132,7 +132,7 @@
 #endif
 
 #ifndef EMSESP_DEFAULT_PHY_TYPE
-#define EMSESP_DEFAULT_PHY_TYPE 0 // No Ethernet, just Wifi
+#define EMSESP_DEFAULT_PHY_TYPE 0 // No Ethernet, just Wifi. PHY_type::PHY_TYPE_NONE,
 #endif
 
 // MQTT
@@ -157,12 +157,20 @@
 #define EMSESP_DEFAULT_PUBLISH_TIME 10
 #endif
 
+#ifndef EMSESP_DEFAULT_PUBLISH_HEARTBEAT
+#define EMSESP_DEFAULT_PUBLISH_HEARTBEAT 60
+#endif
+
 #ifndef EMSESP_DEFAULT_NESTED_FORMAT
 #define EMSESP_DEFAULT_NESTED_FORMAT 1
 #endif
 
 #ifndef EMSESP_DEFAULT_DISCOVERY_PREFIX
 #define EMSESP_DEFAULT_DISCOVERY_PREFIX "homeassistant"
+#endif
+
+#ifndef EMSESP_DEFAULT_DISCOVERY_TYPE
+#define EMSESP_DEFAULT_DISCOVERY_TYPE 0 // HA
 #endif
 
 #ifndef EMSESP_DEFAULT_PUBLISH_SINGLE
@@ -205,6 +213,10 @@
 #define EMSESP_DEFAULT_WEBLOG_COMPACT true
 #endif
 
+#ifndef EMSESP_DEFAULT_ENTITY_FORMAT
+#define EMSESP_DEFAULT_ENTITY_FORMAT 1 // in MQTT discovery, use shortnames and not multiple (prefixed with base)
+#endif
+
 // matches Web UI settings
 enum {
 
@@ -224,5 +236,16 @@ enum {
 
 };
 
+#if CONFIG_IDF_TARGET_ESP32C3
+#define EMSESP_PLATFORM "ESP32-C3";
+#elif CONFIG_IDF_TARGET_ESP32S2
+#define EMSESP_PLATFORM "ESP32-S2";
+#elif CONFIG_IDF_TARGET_ESP32S3
+#define EMSESP_PLATFORM "ESP32-S3";
+#elif CONFIG_IDF_TARGET_ESP32 || EMSESP_STANDALONE
+#define EMSESP_PLATFORM "ESP32";
+#else
+#error Target CONFIG_IDF_TARGET is not supported
+#endif
 
 #endif

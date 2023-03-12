@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +30,10 @@ class WebStatusService {
     WebStatusService(AsyncWebServer * server, SecurityManager * securityManager);
 
   private:
-    void webStatusService(AsyncWebServerRequest * request);
-    void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
-    void mDNS_start() const;
+    void         webStatusService(AsyncWebServerRequest * request);
+    void         WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
+    void         mDNS_start() const;
     const char * disconnectReason(uint8_t code);
-
 };
 
 } // namespace emsesp

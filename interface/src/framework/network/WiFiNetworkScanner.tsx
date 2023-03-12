@@ -1,16 +1,16 @@
 import { useEffect, FC, useState, useCallback, useRef } from 'react';
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
 import { Button } from '@mui/material';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 
-import * as NetworkApi from '../../api/network';
-import { WiFiNetwork, WiFiNetworkList } from '../../types';
-import { ButtonRow, FormLoader, SectionContent } from '../../components';
+import * as NetworkApi from 'api/network';
+import { WiFiNetwork, WiFiNetworkList } from 'types';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 
 import WiFiNetworkSelector from './WiFiNetworkSelector';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const NUM_POLLS = 10;
 const POLLING_FREQUENCY = 500;
@@ -24,20 +24,15 @@ const compareNetworks = (network1: WiFiNetwork, network2: WiFiNetwork) => {
 const WiFiNetworkScanner: FC = () => {
   const { LL } = useI18nContext();
 
-  const { enqueueSnackbar } = useSnackbar();
-
   const pollCount = useRef(0);
   const [networkList, setNetworkList] = useState<WiFiNetworkList>();
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  const finishedWithError = useCallback(
-    (message: string) => {
-      enqueueSnackbar(message, { variant: 'error' });
-      setNetworkList(undefined);
-      setErrorMessage(message);
-    },
-    [enqueueSnackbar]
-  );
+  const finishedWithError = useCallback((message: string) => {
+    toast.error(message);
+    setNetworkList(undefined);
+    setErrorMessage(message);
+  }, []);
 
   const pollNetworkList = useCallback(async () => {
     try {

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,7 +82,7 @@ void Shower::loop() {
                         char s[50];
                         snprintf(s, 50, "%d minutes and %d seconds", (uint8_t)(duration_ / 60000), (uint8_t)((duration_ / 1000) % 60));
                         doc["duration"] = s;
-                        Mqtt::publish("shower_data", doc.as<JsonObject>());
+                        Mqtt::queue_publish("shower_data", doc.as<JsonObject>());
                         LOG_DEBUG("[Shower] finished with duration %d", duration_);
                     }
                 }
@@ -144,30 +144,52 @@ void Shower::set_shower_state(bool state, bool force) {
 
     // always publish as a string
     char s[12];
-    Mqtt::publish("shower_active", Helpers::render_boolean(s, shower_state_)); // https://github.com/emsesp/EMS-ESP/issues/369
+    Mqtt::queue_publish("shower_active", Helpers::render_boolean(s, shower_state_)); // https://github.com/emsesp/EMS-ESP/issues/369
 
     // send out HA MQTT Discovery config topic
     if ((Mqtt::ha_enabled()) && (!ha_configdone_ || force)) {
         ha_configdone_ = true;
 
-        StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
-        doc["name"]    = "Shower Active";
-        doc["uniq_id"] = "shower_active";
-        doc["~"]       = Mqtt::base();
-        doc["stat_t"]  = "~/shower_active";
+        StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
 
-        // always render boolean as strings for HA
-        char result[12];
-        doc[("payload_on")]  = Helpers::render_boolean(result, true);
-        doc[("payload_off")] = Helpers::render_boolean(result, false);
+        doc["name"] = "Shower Active";
+
+        char str[70];
+        if (Mqtt::entity_format() == 2) {
+            snprintf(str, sizeof(str), "%s_shower_active", Mqtt::basename().c_str());
+        } else {
+            snprintf(str, sizeof(str), "shower_active"); // v3.4 compatible
+        }
+        doc["uniq_id"]   = str;
+        doc["object_id"] = str;
+
+        char stat_t[50];
+        snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::base().c_str()); // use base path
+        doc["stat_t"] = stat_t;
+
+        if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+            doc["pl_on"]  = "true";
+            doc["pl_off"] = "false";
+        } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+            doc["pl_on"]  = 1;
+            doc["pl_off"] = 0;
+        } else {
+            char result[12];
+            doc["pl_on"]  = Helpers::render_boolean(result, true);
+            doc["pl_off"] = Helpers::render_boolean(result, false);
+        }
 
         JsonObject dev = doc.createNestedObject("dev");
         JsonArray  ids = dev.createNestedArray("ids");
         ids.add("ems-esp");
 
+        // add "availability" section
+        Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>());
+
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::base().c_str());
-        Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+        snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());
+
+        Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
     }
 }
 

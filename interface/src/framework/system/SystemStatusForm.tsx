@@ -1,5 +1,5 @@
 import { FC, useContext, useState, useEffect } from 'react';
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 import {
   Avatar,
   Box,
@@ -31,17 +31,17 @@ import BuildIcon from '@mui/icons-material/Build';
 import TimerIcon from '@mui/icons-material/Timer';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-import { ButtonRow, FormLoader, SectionContent, MessageBox } from '../../components';
-import { SystemStatus, Version } from '../../types';
-import * as SystemApi from '../../api/system';
-import { extractErrorMessage, useRest } from '../../utils';
+import { ButtonRow, FormLoader, SectionContent, MessageBox } from 'components';
+import { SystemStatus, Version } from 'types';
+import * as SystemApi from 'api/system';
+import { extractErrorMessage, useRest } from 'utils';
 
-import { AuthenticatedContext } from '../../contexts/authentication';
+import { AuthenticatedContext } from 'contexts/authentication';
 
 import axios from 'axios';
 import RestartMonitor from './RestartMonitor';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 export const VERSIONCHECK_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/latest';
 export const VERSIONCHECK_DEV_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/tags/latest';
@@ -61,7 +61,6 @@ const SystemStatusForm: FC = () => {
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
   const [confirmFactoryReset, setConfirmFactoryReset] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
-  const { enqueueSnackbar } = useSnackbar();
   const [showingVersion, setShowingVersion] = useState<boolean>(false);
   const [latestVersion, setLatestVersion] = useState<Version>();
   const [latestDevVersion, setLatestDevVersion] = useState<Version>();
@@ -86,11 +85,25 @@ const SystemStatusForm: FC = () => {
   const restart = async () => {
     setProcessing(true);
     try {
-      await SystemApi.restart();
-      enqueueSnackbar(LL.APPLICATION_RESTARTING(), { variant: 'info' });
+      const response = await SystemApi.restart();
+      if (response.status === 200) {
+        setRestarting(true);
+      }
+    } catch (error) {
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
+    } finally {
+      setConfirmRestart(false);
+      setProcessing(false);
+    }
+  };
+
+  const partition = async () => {
+    setProcessing(true);
+    try {
+      await SystemApi.partition();
       setRestarting(true);
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     } finally {
       setConfirmRestart(false);
       setProcessing(false);
@@ -117,10 +130,20 @@ const SystemStatusForm: FC = () => {
           onClick={restart}
           disabled={processing}
           color="primary"
-          autoFocus
         >
           {LL.RESTART()}
         </Button>
+        {data?.has_loader && (
+          <Button
+            startIcon={<PowerSettingsNewIcon />}
+            variant="outlined"
+            onClick={partition}
+            disabled={processing}
+            color="primary"
+          >
+            EMS-ESP-Loader
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
@@ -185,9 +208,9 @@ const SystemStatusForm: FC = () => {
     setProcessing(true);
     try {
       await SystemApi.factoryReset();
-      enqueueSnackbar(LL.SYSTEM_FACTORY_TEXT(), { variant: 'info' });
+      setRestarting(true);
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
     } finally {
       setConfirmFactoryReset(false);
       setProcessing(false);
@@ -213,7 +236,6 @@ const SystemStatusForm: FC = () => {
           variant="outlined"
           onClick={factoryReset}
           disabled={processing}
-          autoFocus
           color="error"
         >
           {LL.FACTORY_RESET()}

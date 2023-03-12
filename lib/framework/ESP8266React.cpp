@@ -25,6 +25,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
         ArRequestHandlerFunction requestHandler = [contentType, content, len](AsyncWebServerRequest * request) {
             AsyncWebServerResponse * response = request->beginResponse_P(200, contentType, content, len);
             response->addHeader("Content-Encoding", "gzip");
+            // response->addHeader("Content-Encoding", "br"); // only works over HTTPS
             request->send(response);
         };
         server->on(uri.c_str(), HTTP_GET, requestHandler);
@@ -46,6 +47,13 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
 
 void ESP8266React::begin() {
     _networkSettingsService.begin();
+    _networkSettingsService.read([&](NetworkSettings & networkSettings) {
+        if (networkSettings.enableCORS) {
+            DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", networkSettings.CORSOrigin);
+            DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Accept, Content-Type, Authorization");
+            DefaultHeaders::Instance().addHeader("Access-Control-Allow-Credentials", "true");
+        }
+    });
     _apSettingsService.begin();
     _ntpSettingsService.begin();
     _otaSettingsService.begin();

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -244,15 +244,16 @@ char * Helpers::render_value(char * result, uint8_t value, int8_t format, const 
 
 // float: convert float to char
 // format is the precision, 0 to 8
-char * Helpers::render_value(char * result, const float value, const int8_t format) {
+char * Helpers::render_value(char * result, const double value, const int8_t format) {
     if (format > 8) {
         return nullptr;
     }
 
-    uint32_t p[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
+    uint32_t p[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
 
     char * ret   = result;
-    auto   whole = (int32_t)value;
+    double v     = value < 0 ? value - 1.0 / (2 * p[format]) : value + 1.0 / (2 * p[format]);
+    auto   whole = (int32_t)v;
 
     itoa(whole, result, 10);
 
@@ -260,8 +261,13 @@ char * Helpers::render_value(char * result, const float value, const int8_t form
         result++;
     }
 
-    *result++       = '.';
-    int32_t decimal = abs((int32_t)((value - whole) * p[format]));
+    *result++    = '.';
+    auto decimal = abs((int32_t)((v - whole) * p[format]));
+    for (int8_t i = 1; i < format; i++) {
+        if (decimal < p[i]) {
+            *result++ = '0'; // add leading zeros
+        }
+    }
     itoa(decimal, result, 10);
 
     return ret;
@@ -297,7 +303,7 @@ char * Helpers::render_value(char * result, const int32_t value, const int8_t fo
     } else if (format > 0) {
         strlcat(result, itoa(new_value / format, s, 10), sizeof(s));
         strlcat(result, ".", sizeof(s));
-        strlcat(result, itoa(((new_value % format) * 10 + format / 2) / format, s, 10), sizeof(s));
+        strlcat(result, itoa(((new_value % format) * 10) / format, s, 10), sizeof(s));
     } else {
         strlcat(result, itoa(new_value * format * -1, s, 10), sizeof(s));
     }
@@ -347,7 +353,7 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
     } else if (format > 0) {
         strlcpy(result, ltoa(new_value / format, s, 10), sizeof(s));
         strlcat(result, ".", sizeof(s));
-        strlcat(result, itoa(((new_value % format) * 10 + format / 2) / format, s, 10), sizeof(s));
+        strlcat(result, itoa(((new_value % format) * 10) / format, s, 10), sizeof(s));
     } else {
         strlcpy(result, ltoa(new_value * format * -1, s, 10), sizeof(s));
     }
@@ -436,7 +442,6 @@ int Helpers::atoint(const char * value) {
 
 // rounds a number to 2 decimal places
 // example: round2(3.14159) -> 3.14
-// From mvdp:
 //  The conversion to Fahrenheit is different for absolute temperatures and relative temperatures like hysteresis.
 //  fahrenheit=0 - off, no conversion
 //  fahrenheit=1 - relative, 1.8t
@@ -517,7 +522,7 @@ bool Helpers::hasValue(const uint16_t & value) {
 }
 
 bool Helpers::hasValue(const uint32_t & value) {
-    return (value != EMS_VALUE_ULONG_NOTSET);
+    return (value != EMS_VALUE_ULONG_NOTSET && value != EMS_VALUE_ULLONG_NOTSET);
 }
 
 // checks if we can convert a char string to an int value
@@ -591,14 +596,16 @@ bool Helpers::value2bool(const char * value, bool & value_b) {
         return false;
     }
 
-    std::string bool_str = toLower(value); // convert to lower case
+    std::string bool_str = toLower(value);
 
-    if ((bool_str == std::string(Helpers::translated_word(FL_(on)))) || (bool_str == "on") || (bool_str == "1") || (bool_str == "true")) {
+    if ((bool_str == std::string(Helpers::translated_word(FL_(on)))) || (bool_str == toLower(Helpers::translated_word(FL_(ON)))) || (bool_str == "on")
+        || (bool_str == "1") || (bool_str == "true")) {
         value_b = true;
         return true; // is a bool
     }
 
-    if ((bool_str == std::string(Helpers::translated_word(FL_(off)))) || (bool_str == "off") || (bool_str == "0") || (bool_str == "false")) {
+    if ((bool_str == std::string(Helpers::translated_word(FL_(off)))) || (bool_str == toLower(Helpers::translated_word(FL_(OFF)))) || (bool_str == "off")
+        || (bool_str == "0") || (bool_str == "false")) {
         value_b = false;
         return true; // is a bool
     }
@@ -639,7 +646,7 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
     std::string s_on  = Helpers::translated_word(FL_(on));
     std::string s_off = Helpers::translated_word(FL_(off));
 
-    // stops when a nullptr is found, which is the end delimeter of a MAKE_PSTR_LIST()
+    // stops when a nullptr is found, which is the end delimeter of a MAKE_TRANSLATION()
     // could use count_items() to avoid buffer over-run but this works
     for (value_ui = 0; strs[value_ui]; value_ui++) {
         std::string enum_str = toLower((strs[value_ui]));
@@ -671,8 +678,59 @@ std::string Helpers::toUpper(std::string const & s) {
     return lc;
 }
 
+// capitalizes one UTF-8 character in char array
+// works with Latin1 (1 byte), Polish amd some other (2 bytes) characters
+// TODO add special characters that occur in other supported languages
+#if defined(EMSESP_STANDALONE)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
+#endif
+void Helpers::CharToUpperUTF8(char * c) {
+    auto p   = (c + 1); // pointer to 2nd char of 2-byte unicode char
+    char p_v = *p;      // value of 2nd char in 2-byte unicode char
+
+    switch (*c) {
+    case (char)0xC3:
+        // grave, acute, circumflex, diaeresis, etc.
+        if ((p_v >= (char)0xA0) && (p_v <= (char)0xBE)) {
+            *p -= 0x20;
+        }
+        break;
+    case (char)0xC4:
+        switch (p_v) {
+        case (char)0x85: //ą (0xC4,0x85) -> Ą (0xC4,0x84)
+        case (char)0x87: //ć (0xC4,0x87) -> Ć (0xC4,0x86)
+        case (char)0x99: //ę (0xC4,0x99) -> Ę (0xC4,0x98)
+            *p -= 1;
+            break;
+        }
+        break;
+    case (char)0xC5:
+        switch (p_v) {
+        case (char)0x82: //ł (0xC5,0x82) -> Ł (0xC5,0x81)
+        case (char)0x84: //ń (0xC5,0x84) -> Ń (0xC5,0x83)
+        case (char)0x9B: //ś (0xC5,0x9B) -> Ś (0xC5,0x9A)
+        case (char)0xBA: //ź (0xC5,0xBA) -> Ź (0xC5,0xB9)
+        case (char)0xBC: //ż (0xC5,0xBC) -> Ż (0xC5,0xBB)
+            *p -= 1;
+            break;
+        }
+        break;
+    default:
+        *c = toupper(*c); // works on Latin1 letters
+        break;
+    }
+}
+#if defined(EMSESP_STANDALONE)
+#pragma GCC diagnostic pop
+#endif
+
 // replace char in char string
 void Helpers::replace_char(char * str, char find, char replace) {
+    if (str == nullptr) {
+        return;
+    }
+
     int i = 0;
 
     while (str[i] != '\0') {
@@ -709,7 +767,8 @@ uint8_t Helpers::count_items(const char * const ** list) {
 }
 
 // returns char pointer to translated description or fullname
-const char * Helpers::translated_word(const char * const * strings) {
+// if force_en is true always take the EN non-translated word
+const char * Helpers::translated_word(const char * const * strings, const bool force_en) {
     uint8_t language_index = EMSESP::system_.language_index();
     uint8_t index          = 0;
 
@@ -718,10 +777,61 @@ const char * Helpers::translated_word(const char * const * strings) {
     }
 
     // see how many translations we have for this entity. if there is no translation for this, revert to EN
-    if (Helpers::count_items(strings) >= language_index + 1 && strlen(strings[language_index])) {
+    if (!force_en && (Helpers::count_items(strings) >= language_index + 1 && strlen(strings[language_index]))) {
         index = language_index;
     }
     return strings[index];
+}
+
+uint16_t Helpers::string2minutes(const std::string & str) {
+    uint8_t  i     = 0;
+    uint16_t res   = 0;
+    uint16_t tmp   = 0;
+    uint8_t  state = 0;
+
+    while (str[i] != '\0') {
+        // If we got a digit
+        if (str[i] >= '0' && str[i] <= '9') {
+            tmp = tmp * 10 + str[i] - '0';
+        }
+        // Or if we got a colon
+        else if (str[i] == ':') {
+            // If we were reading the hours
+            if (state == 0) {
+                res = 60 * tmp;
+            }
+            // Or if we were reading the minutes
+            else if (state == 1) {
+                if (tmp > 60) {
+                    return 0;
+                }
+                Serial.print("*");
+                Serial.print(tmp);
+                Serial.println("*");
+
+                res += tmp;
+            }
+            // Or we got an extra colon
+            else {
+                return 0;
+            }
+
+            state++;
+            tmp = 0;
+        }
+
+        // Or we got something wrong
+        else {
+            return 0;
+        }
+        i++;
+    }
+
+    if (state == 1 && tmp < 60) {
+        return res + tmp;
+    } else {
+        return 0; // Or if we were not, something is wrong in the given string
+    }
 }
 
 } // namespace emsesp

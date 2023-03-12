@@ -1,6 +1,6 @@
 import { AxiosPromise } from 'axios';
 
-import { OTASettings, SystemStatus, LogSettings, LogEntries } from '../types';
+import { OTASettings, SystemStatus, LogSettings, LogEntries } from 'types';
 
 import { AXIOS, AXIOS_BIN, FileUploadConfig, startUploadFile } from './endpoints';
 
@@ -10,6 +10,10 @@ export function readSystemStatus(timeout?: number): AxiosPromise<SystemStatus> {
 
 export function restart(): AxiosPromise<void> {
   return AXIOS.post('/restart');
+}
+
+export function partition(): AxiosPromise<void> {
+  return AXIOS.post('/partition');
 }
 
 export function factoryReset(): AxiosPromise<void> {

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
 
 #ifndef EMSESP_TEST_H
 #define EMSESP_TEST_H
@@ -28,7 +28,6 @@ namespace emsesp {
 
 // #define EMSESP_DEBUG_DEFAULT "thermostat"
 // #define EMSESP_DEBUG_DEFAULT "solar"
-// #define EMSESP_DEBUG_DEFAULT "mixer"
 // #define EMSESP_DEBUG_DEFAULT "web"
 // #define EMSESP_DEBUG_DEFAULT "mqtt"
 #define EMSESP_DEBUG_DEFAULT "general"
@@ -52,6 +51,8 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "mqtt_post"
 // #define EMSESP_DEBUG_DEFAULT "api_wwmode"
 // #define EMSESP_DEBUG_DEFAULT "custom"
+// #define EMSESP_DEBUG_DEFAULT "entity_dump"
+// #define EMSESP_DEBUG_DEFAULT "memory"
 
 class Test {
   public:
@@ -63,10 +64,8 @@ class Test {
     static void uart_telegram(const char * rx_data);
     static void uart_telegram_withCRC(const char * rx_data);
     static void add_device(uint8_t device_id, uint8_t product_id);
-    static void debug(uuid::console::Shell & shell, const std::string & command);
-#ifndef EMSESP_STANDALONE
+    static void refresh();
     static void listDir(fs::FS & fs, const char * dirname, uint8_t levels);
-#endif
 };
 
 } // namespace emsesp

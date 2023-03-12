@@ -1,7 +1,7 @@
 
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,30 +44,33 @@ class DeviceValue {
         CMD // special for commands only
     };
 
-    // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp. Sequence is important!!
+    // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevicevalue.cpp. Sequence is important!!
     // also used with HA as uom
     enum DeviceValueUOM : uint8_t {
-        NONE = 0,   // 0
-        DEGREES,    // 1
-        DEGREES_R,  // 2
-        PERCENT,    // 3
-        LMIN,       // 4
-        KWH,        // 5
-        WH,         // 6
-        HOURS,      // 7
-        MINUTES,    // 8
-        UA,         // 9
-        BAR,        // 10
-        KW,         // 11
-        W,          // 12
-        KB,         // 13
-        SECONDS,    // 14
-        DBM,        // 15
-        FAHRENHEIT, // 16
-        MV,         // 17
-        SQM,        // 18 squaremeter
-        M3,         // 19 cubic meter
-        L           // 20
+        NONE = 0,    // 0
+        DEGREES,     // 1 - °C
+        DEGREES_R,   // 2 - °C (relative temperature)
+        PERCENT,     // 3 - %
+        LMIN,        // 4 - l/min
+        KWH,         // 5 - kWh
+        WH,          // 6 - Wh
+        HOURS,       // 7 - h
+        MINUTES,     // 8 - m
+        UA,          // 9 - µA
+        BAR,         // 10 - bar
+        KW,          // 11 - kW
+        W,           // 12 - W
+        KB,          // 13 - kB
+        SECONDS,     // 14 - s
+        DBM,         // 15 - dBm
+        FAHRENHEIT,  // 16 - °F
+        MV,          // 17 - mV
+        SQM,         // 18 - m²
+        M3,          // 19 - m³
+        L,           // 20 - L
+        KMIN,        // 21 - K*min
+        K,           // 22 - K
+        CONNECTIVITY // 23 - used in HA
     };
 
     // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
@@ -95,7 +98,7 @@ class DeviceValue {
         TAG_WWC8,
         TAG_WWC9,
         TAG_WWC10,
-        TAG_AHS,
+        TAG_AHS1,
         TAG_HS1,
         TAG_HS2,
         TAG_HS3,
@@ -176,13 +179,15 @@ class DeviceValue {
                 uint8_t               state);
 
     bool hasValue() const;
+    bool has_tag() const;
     bool get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max);
 
-    void        set_custom_minmax();
-    bool        get_custom_min(int16_t & val);
-    bool        get_custom_max(uint16_t & val);
-    std::string get_custom_fullname() const;
-    std::string get_fullname() const;
+    void               set_custom_minmax();
+    bool               get_custom_min(int16_t & val);
+    bool               get_custom_max(uint16_t & val);
+    std::string        get_custom_fullname() const;
+    std::string        get_fullname() const;
+    static std::string get_name(std::string & entity);
 
     // dv state flags
     void add_state(uint8_t s) {
@@ -201,7 +206,7 @@ class DeviceValue {
     static const char *         DeviceValueUOM_s[];
     static const char * const * DeviceValueTAG_s[];
     static const char * const   DeviceValueTAG_mqtt[];
-    static size_t               tag_count; // # tags
+    static uint8_t              NUM_TAGS; // # tags
 };
 
 }; // namespace emsesp

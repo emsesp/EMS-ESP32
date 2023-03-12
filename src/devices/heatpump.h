@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,8 @@ class Heatpump : public EMSdevice {
     uint8_t energyPriceEl_;
     uint8_t energyPricePV_;
     int8_t  switchOverTemp_;
+    uint8_t heatingPumpMod_;
+    uint8_t hpCompSpd_;
 
     // Function test
     uint8_t airPurgeMode_;
@@ -50,10 +52,28 @@ class Heatpump : public EMSdevice {
     uint8_t heatDrainPan_;
     uint8_t heatCable_;
 
+    // HM200 temperatures
+    int16_t flowTemp_;   // TH1
+    int16_t retTemp_;    // TH2
+    int16_t sysRetTemp_; // TH3
+    int16_t hpTc3_;      // condenser temp.
+    int16_t hpTr1_;      // compressor temp.
+    int16_t hpTr3_;      // cond. temp. heating
+    int16_t hpTr4_;      // cond. temp. clg
+    int16_t hpTr5_;      // suction line temp.
+    int16_t hpTr6_;      // hot gas temp.
+    int16_t hpTl2_;      // inlet air temperature
+    int16_t hpTa4_;      // drain pan temp.
+    int16_t hpJr0_;      // low pressure sensor
+    int16_t hpJr1_;      // high pressure sensor
+
     void process_HPMonitor1(std::shared_ptr<const Telegram> telegram);
     void process_HPMonitor2(std::shared_ptr<const Telegram> telegram);
     void process_HPSettings(std::shared_ptr<const Telegram> telegram);
     void process_HPFunctionTest(std::shared_ptr<const Telegram> telegram);
+    void process_HPTemperature(std::shared_ptr<const Telegram> telegram);
+    void process_HPFlowTemp(std::shared_ptr<const Telegram> telegram);
+    void process_HPComp(std::shared_ptr<const Telegram> telegram);
 
     bool set_controlStrategy(const char * value, const int8_t id);
     bool set_lowNoiseMode(const char * value, const int8_t id);
@@ -64,7 +84,6 @@ class Heatpump : public EMSdevice {
     bool set_energyPriceEl(const char * value, const int8_t id);
     bool set_energyPricePV(const char * value, const int8_t id);
     bool set_switchOverTemp(const char * value, const int8_t id);
-
     bool set_airPurgeMode(const char * value, const int8_t id);
     bool set_heatPumpOutput(const char * value, const int8_t id);
     bool set_coolingCircuit(const char * value, const int8_t id);

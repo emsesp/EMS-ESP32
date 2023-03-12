@@ -1,10 +1,10 @@
 import { FC, useCallback, useEffect, useState } from 'react';
 
-import * as FeaturesApi from '../../api/features';
+import * as FeaturesApi from 'api/features';
 
-import { extractErrorMessage, RequiredChildrenProps } from '../../utils';
-import { Features } from '../../types';
-import { ApplicationError, LoadingSpinner } from '../../components';
+import { extractErrorMessage, RequiredChildrenProps } from 'utils';
+import { Features } from 'types';
+import { ApplicationError, LoadingSpinner } from 'components';
 
 import { FeaturesContext } from '.';
 

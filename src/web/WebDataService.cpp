@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ void WebDataService::scan_devices(AsyncWebServerRequest * request) {
 // this is used in the dashboard and contains all ems device information
 // /coreData endpoint
 void WebDataService::core_data(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE);
     JsonObject root     = response->getRoot();
 
     // list is already sorted by device type
@@ -81,8 +81,9 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
         if (emsdevice && (emsdevice->device_type() != EMSdevice::DeviceType::CONTROLLER || emsdevice->count_entities() > 0)) {
             JsonObject obj = devices.createNestedObject();
             obj["id"]      = Helpers::smallitoa(buffer, emsdevice->unique_id()); // a unique id as a string
-            obj["t"]       = emsdevice->device_type_name();                      // type
-            obj["b"]       = emsdevice->brand_to_string();                       // brand
+            obj["tn"]      = emsdevice->device_type_2_device_name_translated();  // translated device type name
+            obj["t"]       = emsdevice->device_type();                           // device type number
+            obj["b"]       = emsdevice->brand_to_char();                         // brand
             obj["n"]       = emsdevice->name();                                  // name
             obj["d"]       = emsdevice->device_id();                             // deviceid
             obj["p"]       = emsdevice->product_id();                            // productid
@@ -92,6 +93,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     }
 
     // sensors stuff
+    root["s_n"]            = Helpers::translated_word(FL_(sensors_device));
     root["active_sensors"] = EMSESP::dallassensor_.no_sensors() + (EMSESP::analogsensor_.analog_enabled() ? EMSESP::analogsensor_.no_sensors() : 0);
     root["analog_enabled"] = EMSESP::analogsensor_.analog_enabled();
     root["connected"]      = EMSESP::bus_status() != 2;
@@ -104,7 +106,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
 // /sensorData endpoint
 // the "sensors" and "analogs" are arrays and must exist
 void WebDataService::sensor_data(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE);
     JsonObject root     = response->getRoot();
 
     // dallas sensors
@@ -165,7 +167,13 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
 // Compresses the JSON using MsgPack https://msgpack.org/index.html
 void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        auto * response = new MsgpackAsyncJsonResponse(false, EMSESP_JSON_SIZE_XXXLARGE_DYN);
+        size_t buffer   = EMSESP_JSON_SIZE_XXXXLARGE;
+        auto * response = new MsgpackAsyncJsonResponse(false, buffer);
+        while (!response->getSize()) {
+            delete response;
+            buffer -= 1024;
+            response = new MsgpackAsyncJsonResponse(false, buffer);
+        }
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == json["id"]) {
                 // wait max 2.5 sec for updated data (post_send_delay is 2 sec)
@@ -178,13 +186,12 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
                 emsdevice->generate_values_web(output);
 #endif
 
-                // #ifdef EMSESP_USE_SERIAL
-                // #ifdef EMSESP_DEBUG
-                //                 serializeJson(output, Serial);
-                // #endif
-                // #endif
-
+#if defined(EMSESP_DEBUG)
+                size_t length = response->setLength();
+                EMSESP::logger().debug("Dashboard buffer used: %d", length);
+#else
                 response->setLength();
+#endif
                 request->send(response);
                 return;
             }
@@ -238,7 +245,9 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
                 if (return_code != CommandRet::OK) {
                     EMSESP::logger().err("Write command failed %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
                 } else {
+#if defined(EMSESP_DEBUG)
                     EMSESP::logger().debug("Write command successful");
+#endif
                 }
 
                 response->setCode((return_code == CommandRet::OK) ? 200 : 204);
@@ -284,8 +293,8 @@ void WebDataService::write_analog(AsyncWebServerRequest * request, JsonVariant &
 
         uint8_t     gpio   = analog["gpio"]; // this is the unique key, the GPIO
         std::string name   = analog["name"];
-        float       factor = analog["factor"];
-        float       offset = analog["offset"];
+        double      factor = analog["factor"];
+        double      offset = analog["offset"];
         uint8_t     uom    = analog["uom"];
         int8_t      type   = analog["type"];
         ok                 = EMSESP::analogsensor_.update(gpio, name, offset, factor, uom, type);

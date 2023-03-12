@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -191,7 +191,6 @@ class Thermostat : public EMSdevice {
     int8_t  brightness_;   // Screen brightness 0F=dark F1=light
     uint8_t preheating_;   // Preheating in the clock program: (0x00 = off, 0xFF = on)
     uint8_t autodst_;      // Automatic change Daylight Saving time: (0x00 = off, 0xFF = on)
-    uint8_t offtemp_;      // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
     uint8_t mixingvalves_; // Number of Mixing Valves: (0x00=0, 0x01=1, 0x02=2)
 
     int8_t  dampedoutdoortemp_;
@@ -236,6 +235,11 @@ class Thermostat : public EMSdevice {
     uint8_t delayBoiler_;     // minutes
     uint8_t tempDiffBoiler_;  // relative temperature degrees
 
+    // PV
+    uint8_t pvEnableWw_;
+    uint8_t pvRaiseHeat_;
+    uint8_t pvLowerCool_;
+
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
 
     // Generic Types
@@ -250,6 +254,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC20StatusMessage_setpoint = 1;  // setpoint temp
     static constexpr uint8_t EMS_OFFSET_RC20StatusMessage_curr     = 2;  // current temp
     static constexpr uint8_t EMS_OFFSET_RC20Set_mode               = 23; // position of thermostat mode
+    static constexpr uint8_t EMS_OFFSET_RC20Set_temp_off           = 24; // position of thermostat setpoint mode:off
     static constexpr uint8_t EMS_OFFSET_RC20Set_temp_auto          = 28; // position of thermostat setpoint temperature
     static constexpr uint8_t EMS_OFFSET_RC20Set_temp_manual        = 29; // position of thermostat setpoint temperature
 
@@ -260,7 +265,9 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC30StatusMessage_setpoint = 1;  // setpoint temp
     static constexpr uint8_t EMS_OFFSET_RC30StatusMessage_curr     = 2;  // current temp
     static constexpr uint8_t EMS_OFFSET_RC30Set_mode               = 23; // position of thermostat mode
-    static constexpr uint8_t EMS_OFFSET_RC30Set_temp               = 28; // position of thermostat setpoint temperature
+    static constexpr uint8_t EMS_OFFSET_RC30Set_temp_off           = 24; // position of thermostat setpoint mode:off
+    static constexpr uint8_t EMS_OFFSET_RC30Set_temp_auto          = 28; // position of thermostat setpoint temperature
+    static constexpr uint8_t EMS_OFFSET_RC30Set_temp_manual        = 29; // position of thermostat setpoint temperature for manual mode
     static constexpr uint8_t EMS_OFFSET_RC30Temp_temp_night        = 3;  // position of thermostat setpoint temperature for night time (T1)
     static constexpr uint8_t EMS_OFFSET_RC30Temp_temp_daylow       = 4;  // position of thermostat setpoint temperature for daylow time (T2)
     static constexpr uint8_t EMS_OFFSET_RC30Temp_temp_daymid       = 5;  // position of thermostat setpoint temperature for daymid time (T3)
@@ -378,7 +385,8 @@ class Thermostat : public EMSdevice {
     void process_JunkersSet2(std::shared_ptr<const Telegram> telegram);
     void process_EasyMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersRemoteMonitor(std::shared_ptr<const Telegram> telegram);
-    void process_JunkersHybridSettings(std::shared_ptr<const Telegram> telegram);
+    void process_HybridSettings(std::shared_ptr<const Telegram> telegram);
+    void process_PVSettings(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram);
     void process_JunkersWW(std::shared_ptr<const Telegram> telegram);
     void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
@@ -393,42 +401,19 @@ class Thermostat : public EMSdevice {
     bool set_switchtime(const char * value, const uint16_t type_id, char * out, size_t len);
 
     // set functions - these use the id/hc
-    bool set_mode(const char * value, const int8_t id);
-    bool set_control(const char * value, const int8_t id);
-    bool set_holiday(const char * value, const int8_t id, const bool vacation = false);
-    bool set_vacation(const char * value, const int8_t id) {
+    bool        set_mode(const char * value, const int8_t id);
+    bool        set_control(const char * value, const int8_t id);
+    bool        set_holiday(const char * value, const int8_t id, const bool vacation = false);
+    inline bool set_vacation(const char * value, const int8_t id) {
         return set_holiday(value, id, true);
     }
     bool set_pause(const char * value, const int8_t id);
     bool set_party(const char * value, const int8_t id);
     bool set_summermode(const char * value, const int8_t id);
-
-    bool set_temp(const char * value, const int8_t id);
-    bool set_nighttemp(const char * value, const int8_t id);
-    bool set_daytemp(const char * value, const int8_t id);
-    bool set_daylowtemp(const char * value, const int8_t id);
-    bool set_daymidtemp(const char * value, const int8_t id);
-    bool set_comforttemp(const char * value, const int8_t id);
-    bool set_nofrosttemp(const char * value, const int8_t id);
-    bool set_ecotemp(const char * value, const int8_t id);
-    bool set_heattemp(const char * value, const int8_t id);
-    bool set_summertemp(const char * value, const int8_t id);
-    bool set_designtemp(const char * value, const int8_t id);
-    bool set_offsettemp(const char * value, const int8_t id);
-    bool set_holidaytemp(const char * value, const int8_t id);
-    bool set_manualtemp(const char * value, const int8_t id);
-    bool set_tempautotemp(const char * value, const int8_t id);
-    bool set_noreducetemp(const char * value, const int8_t id);
-    bool set_reducetemp(const char * value, const int8_t id);
-    bool set_vacreducetemp(const char * value, const int8_t id);
     bool set_vacreducemode(const char * value, const int8_t id);
     bool set_nofrostmode(const char * value, const int8_t id);
     bool set_remotetemp(const char * value, const int8_t id);
-    bool set_roominfluence(const char * value, const int8_t id);
     bool set_roominfl_factor(const char * value, const int8_t id);
-    bool set_flowtempoffset(const char * value, const int8_t id);
-    bool set_minflowtemp(const char * value, const int8_t id);
-    bool set_maxflowtemp(const char * value, const int8_t id);
     bool set_reducemode(const char * value, const int8_t id);
     bool set_switchtime1(const char * value, const int8_t id);
     bool set_switchtime2(const char * value, const int8_t id);
@@ -437,31 +422,103 @@ class Thermostat : public EMSdevice {
     bool set_wwprio(const char * value, const int8_t id);
     bool set_fastheatup(const char * value, const int8_t id);
     bool set_switchonoptimization(const char * value, const int8_t id);
-    bool set_remoteseltemp(const char * value, const int8_t id);
+
+    inline bool set_temp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::AUTO);
+    }
+    inline bool set_nighttemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::NIGHT);
+    }
+    inline bool set_daytemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::DAY);
+    }
+    inline bool set_daylowtemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::DAYLOW);
+    }
+    inline bool set_daymidtemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::DAYMID);
+    }
+    inline bool set_comforttemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::COMFORT);
+    }
+    inline bool set_nofrosttemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::NOFROST);
+    }
+    inline bool set_ecotemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::ECO);
+    }
+    inline bool set_heattemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::HEAT);
+    }
+    inline bool set_summertemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::SUMMER);
+    }
+    inline bool set_designtemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::DESIGN);
+    }
+    inline bool set_offsettemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::OFFSET);
+    }
+    inline bool set_holidaytemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::HOLIDAY);
+    }
+    inline bool set_offtemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::OFF);
+    }
+    inline bool set_manualtemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::MANUAL);
+    }
+    inline bool set_tempautotemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::TEMPAUTO);
+    }
+    inline bool set_noreducetemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::NOREDUCE);
+    }
+    inline bool set_reducetemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::REDUCE);
+    }
+    inline bool set_vacreducetemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::VACREDUCE);
+    }
+    inline bool set_flowtempoffset(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::FLOWOFFSET, true);
+    }
+    inline bool set_maxflowtemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::MAXFLOW);
+    }
+    inline bool set_minflowtemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::MINFLOW);
+    }
+    inline bool set_roominfluence(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::ROOMINFLUENCE, true);
+    }
+    inline bool set_remoteseltemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::REMOTESELTEMP);
+    }
 
     // set functions - these don't use the id/hc, the parameters are ignored
-    bool set_wwmode(const char * value, const int8_t id);
-    bool set_wwtemp(const char * value, const int8_t id);
-    bool set_wwtemplow(const char * value, const int8_t id);
-    bool set_wwcircmode(const char * value, const int8_t id);
-    bool set_wwcharge(const char * value, const int8_t id);
-    bool set_wwchargeduration(const char * value, const int8_t id);
-    bool set_wwDisinfect(const char * value, const int8_t id);
-    bool set_wwDisinfectDay(const char * value, const int8_t id);
-    bool set_wwDisinfectHour(const char * value, const int8_t id);
-    bool set_wwMaxTemp(const char * value, const int8_t id);
-    bool set_wwOneTimeKey(const char * value, const int8_t id);
-    bool set_wwProgMode(const char * value, const int8_t id);
-    bool set_wwCircProg(const char * value, const int8_t id);
-    bool set_wwSwitchTime(const char * value, const int8_t id);
-    bool set_wwCircSwitchTime(const char * value, const int8_t id);
-    bool set_wwDailyHeating(const char * value, const int8_t id);
-    bool set_wwDailyHeatTime(const char * value, const int8_t id);
-    bool set_wwwhenmodeoff(const char * value, const int8_t id);
-    bool set_wwVacation(const char * value, const int8_t id) {
+    bool        set_wwmode(const char * value, const int8_t id);
+    bool        set_wwtemp(const char * value, const int8_t id);
+    bool        set_wwtemplow(const char * value, const int8_t id);
+    bool        set_wwcircmode(const char * value, const int8_t id);
+    bool        set_wwcharge(const char * value, const int8_t id);
+    bool        set_wwchargeduration(const char * value, const int8_t id);
+    bool        set_wwDisinfect(const char * value, const int8_t id);
+    bool        set_wwDisinfectDay(const char * value, const int8_t id);
+    bool        set_wwDisinfectHour(const char * value, const int8_t id);
+    bool        set_wwMaxTemp(const char * value, const int8_t id);
+    bool        set_wwOneTimeKey(const char * value, const int8_t id);
+    bool        set_wwProgMode(const char * value, const int8_t id);
+    bool        set_wwCircProg(const char * value, const int8_t id);
+    bool        set_wwSwitchTime(const char * value, const int8_t id);
+    bool        set_wwCircSwitchTime(const char * value, const int8_t id);
+    bool        set_wwDailyHeating(const char * value, const int8_t id);
+    bool        set_wwDailyHeatTime(const char * value, const int8_t id);
+    bool        set_wwwhenmodeoff(const char * value, const int8_t id);
+    inline bool set_wwVacation(const char * value, const int8_t id) {
         return set_holiday(value, DeviceValueTAG::TAG_WWC1, true);
     }
-    bool set_wwHoliday(const char * value, const int8_t id) {
+    inline bool set_wwHoliday(const char * value, const int8_t id) {
         return set_holiday(value, DeviceValueTAG::TAG_WWC1);
     }
 
@@ -481,7 +538,6 @@ class Thermostat : public EMSdevice {
     bool set_autodst(const char * value, const int8_t id);
     bool set_preheating(const char * value, const int8_t id);
     bool set_mixingvalves(const char * value, const int8_t id);
-    bool set_offtemp(const char * value, const int8_t id);
 
     bool set_hybridStrategy(const char * value, const int8_t id);
     bool set_switchOverTemp(const char * value, const int8_t id);
@@ -491,6 +547,10 @@ class Thermostat : public EMSdevice {
     bool set_delayBoiler(const char * value, const int8_t id);
     bool set_tempDiffBoiler(const char * value, const int8_t id);
     bool set_roomsensor(const char * value, const int8_t id);
+
+    bool set_pvEnableWw(const char * value, const int8_t id);
+    bool set_pvRaiseHeat(const char * value, const int8_t id);
+    bool set_pvLowerCool(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

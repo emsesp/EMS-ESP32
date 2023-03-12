@@ -1,7 +1,7 @@
 #
 # GNUMakefile for EMS-ESP
-# (c) 2020 Paul Derbyshire
 #
+
 NUMJOBS=${NUMJOBS:-" -j4 "}
 MAKEFLAGS+="j "
 #----------------------------------------------------------------------
@@ -17,23 +17,30 @@ MAKEFLAGS+="j "
 #TARGET    := $(notdir $(CURDIR))
 TARGET    := emsesp
 BUILD     := build
-SOURCES   := src src/* lib_standalone lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src src/devices lib/ArduinoJson/src lib/PButton
-INCLUDES  := src lib_standalone lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src lib/uuid-telnet/src lib/uuid-syslog/src lib/* src/devices
+SOURCES   := src src/* lib_standalone lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src src/devices lib/ArduinoJson/src lib/PButton lib/semver
+INCLUDES  := src lib_standalone lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src lib/uuid-telnet/src lib/uuid-syslog/src lib/semver lib/* src/devices
 LIBRARIES := 
 
 CPPCHECK = cppcheck
+# CHECKFLAGS = -q --force --std=c++17
 CHECKFLAGS = -q --force --std=c++11
 
 #----------------------------------------------------------------------
 # Languages Standard
 #----------------------------------------------------------------------
+# C_STANDARD   := -std=c17
+# CXX_STANDARD := -std=c++17
 C_STANDARD   := -std=c11
 CXX_STANDARD := -std=c++11
 
 #----------------------------------------------------------------------
 # Defined Symbols
 #----------------------------------------------------------------------
-DEFINES += -DFACTORY_WIFI_HOSTNAME=\"ems-esp\" -DARDUINOJSON_ENABLE_STD_STRING=1 -DARDUINOJSON_ENABLE_PROGMEM=1 -DARDUINOJSON_ENABLE_ARDUINO_STRING -DARDUINOJSON_USE_DOUBLE=0 -DEMSESP_DEBUG -DEMSESP_STANDALONE -DEMSESP_USE_SERIAL -DEMSESP_DEFAULT_BOARD_PROFILE=\"LOLIN\"
+DEFINES += -DARDUINOJSON_ENABLE_STD_STRING=1 -DARDUINOJSON_ENABLE_PROGMEM=1 -DARDUINOJSON_ENABLE_ARDUINO_STRING -DARDUINOJSON_USE_DOUBLE=0 
+DEFINES += -DEMSESP_DEBUG -DEMSESP_STANDALONE -DEMSESP_TEST
+DEFINES += $(ARGS)
+
+DEFAULTS = -DEMSESP_DEFAULT_LOCALE=\"en\" -DEMSESP_DEFAULT_TX_MODE=8 -DEMSESP_DEFAULT_VERSION=\"3.6.0-dev\" -DEMSESP_DEFAULT_BOARD_PROFILE=\"S32\"
 
 #----------------------------------------------------------------------
 # Sources & Files
@@ -66,15 +73,13 @@ CXX := /usr/bin/g++
 # CXXFLAGS  C++ Compiler Flags
 # LDFLAGS   Linker Flags
 #----------------------------------------------------------------------
-CPPFLAGS  += $(DEFINES) $(INCLUDE)
+CPPFLAGS  += $(DEFINES) $(DEFAULTS) $(INCLUDE)
 CPPFLAGS  += -ggdb
 CPPFLAGS  += -g3
 CPPFLAGS  += -Os
 
 CFLAGS    += $(CPPFLAGS)
-CFLAGS    += -Wall
-CFLAGS    += -Wextra
-CFLAGS    += -Wno-unused-parameter
+CFLAGS    += -Wall -Wextra -Werror -Wswitch-enum -Wno-unused-parameter -Wno-inconsistent-missing-override -Wno-unused-lambda-capture
 
 CXXFLAGS  += $(CFLAGS) -MMD
 
@@ -114,6 +119,8 @@ COMPILE.cpp = $(CXX) $(CXX_STANDARD) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
 # Targets
 #----------------------------------------------------------------------
 .PHONY: all
+.SILENT: $(OUTPUT)
+
 all: $(OUTPUT)
 
 $(OUTPUT): $(OBJS)

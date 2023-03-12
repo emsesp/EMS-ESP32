@@ -20,12 +20,11 @@ import {
   Checkbox
 } from '@mui/material';
 
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
-import { Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
-import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useRowSelect } from '@table-library/react-table-library/select';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
@@ -35,7 +34,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SendIcon from '@mui/icons-material/TrendingFlat';
-import SaveIcon from '@mui/icons-material/Save';
+import WarningIcon from '@mui/icons-material/Warning';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
@@ -49,13 +48,13 @@ import DeviceIcon from './DeviceIcon';
 
 import { IconContext } from 'react-icons';
 
-import { AuthenticatedContext } from '../contexts/authentication';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-import { ButtonRow, ValidatedTextField, SectionContent, MessageBox } from '../components';
+import { ButtonRow, ValidatedTextField, SectionContent, MessageBox } from 'components';
 
 import * as EMSESP from './api';
 
-import { numberValue, updateValue, extractErrorMessage } from '../utils';
+import { numberValue, updateValue, extractErrorMessage } from 'utils';
 
 import {
   SensorData,
@@ -72,20 +71,17 @@ import {
   DeviceEntityMask
 } from './types';
 
-import { useI18nContext } from '../i18n/i18n-react';
-
-import parseMilliseconds from 'parse-ms';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const DashboardData: FC = () => {
   const { me } = useContext(AuthenticatedContext);
 
   const { LL } = useI18nContext();
 
-  const { enqueueSnackbar } = useSnackbar();
-
   const [coreData, setCoreData] = useState<CoreData>({
     connected: true,
     devices: [],
+    s_n: '',
     active_sensors: 0,
     analog_enabled: false
   });
@@ -124,7 +120,6 @@ const DashboardData: FC = () => {
 
       &.tr.tr-body.row-select.row-select-single-selected {
         background-color: #3d4752;
-        color: white;
         font-weight: normal;
       }
 
@@ -144,7 +139,7 @@ const DashboardData: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 40px 100px repeat(1, minmax(0, 1fr)) 100px 40px;
+        --data-table-library_grid-template-columns: 40px 160px repeat(1, minmax(0, 1fr)) 100px 40px;
       `,
       BaseRow: `
         .td {
@@ -162,8 +157,7 @@ const DashboardData: FC = () => {
       HeaderRow: `
         .th {
           padding: 8px;
-          height: 42px;
-          font-weight: 500;
+          height: 36px;
       `
     }
   ]);
@@ -172,7 +166,7 @@ const DashboardData: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 140px 40px;
+        --data-table-library_grid-template-columns: minmax(0, 1fr) 35% 40px;
       `,
       BaseRow: `
         .td {
@@ -186,7 +180,7 @@ const DashboardData: FC = () => {
       `,
       HeaderRow: `
         .th {
-          height: 32px;
+          height: 36px;
         }
       `,
       Row: `
@@ -365,9 +359,9 @@ const DashboardData: FC = () => {
     try {
       setCoreData((await EMSESP.readCoreData()).data);
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
-  }, [enqueueSnackbar, LL]);
+  }, [LL]);
 
   useEffect(() => {
     fetchCoreData();
@@ -386,7 +380,7 @@ const DashboardData: FC = () => {
     try {
       setDeviceData((await EMSESP.readDeviceData({ id: unique_id })).data);
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
 
@@ -394,14 +388,17 @@ const DashboardData: FC = () => {
     try {
       setSensorData((await EMSESP.readSensorData()).data);
     } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
 
   const isCmdOnly = (dv: DeviceValue) => dv.v === '' && dv.c;
 
   const formatDurationMin = (duration_min: number) => {
-    const { days, hours, minutes } = parseMilliseconds(duration_min * 60000);
+    const days = Math.trunc((duration_min * 60000) / 86400000);
+    const hours = Math.trunc((duration_min * 60000) / 3600000) % 24;
+    const minutes = Math.trunc((duration_min * 60000) / 60000) % 60;
+
     let formatted = '';
     if (days) {
       formatted += LL.NUM_DAYS({ num: days }) + ' ';
@@ -467,15 +464,15 @@ const DashboardData: FC = () => {
           devicevalue: deviceValue
         });
         if (response.status === 204) {
-          enqueueSnackbar(LL.WRITE_COMMAND({ cmd: 'failed' }), { variant: 'error' });
+          toast.error(LL.WRITE_CMD_FAILED());
         } else if (response.status === 403) {
-          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
+          toast.error(LL.ACCESS_DENIED());
         } else {
-          enqueueSnackbar(LL.WRITE_COMMAND({ cmd: 'send' }), { variant: 'success' });
+          toast.success(LL.WRITE_CMD_SENT());
         }
         setDeviceValue(undefined);
       } catch (error) {
-        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         refreshData();
         setDeviceValue(undefined);
@@ -500,7 +497,9 @@ const DashboardData: FC = () => {
                 onChange={updateValue(setDeviceValue)}
               >
                 {deviceValue.l.map((val) => (
-                  <MenuItem value={val}>{val}</MenuItem>
+                  <MenuItem value={val} key={val}>
+                    {val}
+                  </MenuItem>
                 ))}
               </ValidatedTextField>
             )}
@@ -559,15 +558,15 @@ const DashboardData: FC = () => {
           offset: sensor.o
         });
         if (response.status === 204) {
-          enqueueSnackbar(LL.UPLOAD_OF(LL.TEMP_SENSOR(0)) + ' ' + LL.FAILED(), { variant: 'error' });
+          toast.error(LL.UPLOAD_OF(LL.SENSOR()) + ' ' + LL.FAILED());
         } else if (response.status === 403) {
-          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
+          toast.error(LL.ACCESS_DENIED());
         } else {
-          enqueueSnackbar(LL.UPDATED_OF(LL.TEMP_SENSOR(0)), { variant: 'success' });
+          toast.success(LL.UPDATED_OF(LL.SENSOR()));
         }
         setSensor(undefined);
       } catch (error) {
-        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         setSensor(undefined);
         fetchSensorData();
@@ -580,11 +579,13 @@ const DashboardData: FC = () => {
       return (
         <Dialog open={sensor !== undefined} onClose={() => setSensor(undefined)}>
           <DialogTitle>
-            {LL.EDIT()} {LL.TEMP_SENSOR(0)}
+            {LL.EDIT()} {LL.TEMP_SENSOR()}
           </DialogTitle>
           <DialogContent dividers>
             <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
-              <Typography variant="body2">{LL.ID_OF(LL.TEMP_SENSOR(1))}: {sensor.id}</Typography>
+              <Typography variant="body2">
+                {LL.ID_OF(LL.SENSOR())}: {sensor.id}
+              </Typography>
             </Box>
             <Grid container spacing={1}>
               <Grid item>
@@ -624,13 +625,13 @@ const DashboardData: FC = () => {
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<SaveIcon />}
-              variant="outlined"
+              startIcon={<WarningIcon color="warning" />}
+              variant="contained"
               type="submit"
               onClick={() => sendSensor()}
-              color="warning"
+              color="info"
             >
-              {LL.SAVE()}
+              {LL.UPDATE()}
             </Button>
           </DialogActions>
         </Dialog>
@@ -646,7 +647,7 @@ const DashboardData: FC = () => {
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
-                <ListItemText primary={LL.TYPE()} secondary={coreData.devices[deviceDialog].t} />
+                <ListItemText primary={LL.TYPE()} secondary={coreData.devices[deviceDialog].tn} />
               </ListItem>
               <ListItem>
                 <ListItemText primary={LL.NAME(0)} secondary={coreData.devices[deviceDialog].n} />
@@ -701,9 +702,9 @@ const DashboardData: FC = () => {
               {tableList.map((device: Device, index: number) => (
                 <Row key={device.id} item={device}>
                   <Cell stiff>
-                    <DeviceIcon type={device.t} />
+                    <DeviceIcon type_id={device.t} />
                   </Cell>
-                  <Cell stiff>{device.t}</Cell>
+                  <Cell stiff>{device.tn}</Cell>
                   <Cell>{device.n}</Cell>
                   <Cell stiff>{device.e}</Cell>
                   <Cell stiff>
@@ -716,9 +717,9 @@ const DashboardData: FC = () => {
               {(coreData.active_sensors > 0 || coreData.analog_enabled) && (
                 <Row key="sensor" item={{ id: 'sensor' }}>
                   <Cell>
-                    <DeviceIcon type="Sensor" />
+                    <DeviceIcon type_id={1} />
                   </Cell>
-                  <Cell>Sensors</Cell>
+                  <Cell>{coreData.s_n}</Cell>
                   <Cell>{LL.ATTACHED_SENSORS()}</Cell>
                   <Cell>{coreData.active_sensors}</Cell>
                   <Cell>
@@ -986,14 +987,14 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar(LL.DELETION_OF(LL.ANALOG_SENSOR()) + ' ' + LL.FAILED(), { variant: 'error' });
+          toast.error(LL.DELETION_OF(LL.ANALOG_SENSOR()) + ' ' + LL.FAILED());
         } else if (response.status === 403) {
-          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
+          toast.error(LL.ACCESS_DENIED());
         } else {
-          enqueueSnackbar(LL.REMOVED_OF(LL.ANALOG_SENSOR()), { variant: 'success' });
+          toast.success(LL.REMOVED_OF(LL.ANALOG_SENSOR()));
         }
       } catch (error) {
-        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         setAnalog(undefined);
         fetchSensorData();
@@ -1014,14 +1015,14 @@ const DashboardData: FC = () => {
         });
 
         if (response.status === 204) {
-          enqueueSnackbar(LL.UPDATE_OF(LL.ANALOG_SENSOR()) + ' ' + LL.FAILED(), { variant: 'error' });
+          toast.error(LL.UPDATE_OF(LL.ANALOG_SENSOR()) + ' ' + LL.FAILED());
         } else if (response.status === 403) {
-          enqueueSnackbar(LL.ACCESS_DENIED(), { variant: 'error' });
+          toast.error(LL.ACCESS_DENIED());
         } else {
-          enqueueSnackbar(LL.UPDATED_OF(LL.ANALOG_SENSOR()), { variant: 'success' });
+          toast.success(LL.UPDATED_OF(LL.ANALOG_SENSOR()));
         }
       } catch (error) {
-        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         setAnalog(undefined);
         fetchSensorData();
@@ -1038,32 +1039,34 @@ const DashboardData: FC = () => {
           </DialogTitle>
           <DialogContent dividers>
             <Grid container spacing={2}>
-              <Grid item>
+              <Grid item xs={12}>
+                <ValidatedTextField
+                  name="n"
+                  label={LL.ENTITY_NAME()}
+                  value={analog.n}
+                  fullWidth
+                  variant="outlined"
+                  onChange={updateValue(setAnalog)}
+                />
+              </Grid>
+              <Grid item xs={4}>
                 <ValidatedTextField
                   name="g"
                   label="GPIO"
-                  value={analog.g}
+                  value={numberValue(analog.g)}
+                  fullWidth
                   type="number"
                   variant="outlined"
                   autoFocus
                   onChange={updateValue(setAnalog)}
                 />
               </Grid>
-              <Grid item>
-                <ValidatedTextField
-                  name="n"
-                  label={LL.ENTITY_NAME()}
-                  value={analog.n}
-                  sx={{ width: '20ch' }}
-                  variant="outlined"
-                  onChange={updateValue(setAnalog)}
-                />
-              </Grid>
-              <Grid item>
+              <Grid item xs={8}>
                 <ValidatedTextField
                   name="t"
                   label={LL.TYPE()}
                   value={analog.t}
+                  fullWidth
                   select
                   onChange={updateValue(setAnalog)}
                 >
@@ -1076,11 +1079,12 @@ const DashboardData: FC = () => {
               </Grid>
               {analog.t >= AnalogType.COUNTER && analog.t <= AnalogType.RATE && (
                 <>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="u"
                       label={LL.UNIT()}
                       value={analog.u}
+                      fullWidth
                       select
                       onChange={updateValue(setAnalog)}
                     >
@@ -1092,12 +1096,12 @@ const DashboardData: FC = () => {
                     </ValidatedTextField>
                   </Grid>
                   {analog.t === AnalogType.ADC && (
-                    <Grid item>
+                    <Grid item xs={4}>
                       <ValidatedTextField
                         name="o"
                         label={LL.OFFSET()}
                         value={numberValue(analog.o)}
-                        sx={{ width: '20ch' }}
+                        fullWidth
                         type="number"
                         variant="outlined"
                         onChange={updateValue(setAnalog)}
@@ -1109,41 +1113,41 @@ const DashboardData: FC = () => {
                     </Grid>
                   )}
                   {analog.t === AnalogType.COUNTER && (
-                    <Grid item>
+                    <Grid item xs={4}>
                       <ValidatedTextField
                         name="o"
                         label={LL.STARTVALUE()}
                         value={numberValue(analog.o)}
-                        sx={{ width: '20ch' }}
+                        fullWidth
                         type="number"
                         variant="outlined"
                         onChange={updateValue(setAnalog)}
-                        inputProps={{ min: '0', step: '1' }}
+                        inputProps={{ step: '0.001' }}
                       />
                     </Grid>
                   )}
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="f"
                       label={LL.FACTOR()}
                       value={numberValue(analog.f)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
-                      inputProps={{ min: '-100', max: '100', step: '0.1' }}
+                      inputProps={{ step: '0.001' }}
                     />
                   </Grid>
                 </>
               )}
-              {analog.t === AnalogType.DIGITAL_OUT && (analog.id === '25' || analog.id === '26') && (
+              {analog.t === AnalogType.DIGITAL_OUT && (analog.g === 25 || analog.g === 26) && (
                 <>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="o"
                       label={LL.VALUE(0)}
                       value={numberValue(analog.o)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
@@ -1152,14 +1156,14 @@ const DashboardData: FC = () => {
                   </Grid>
                 </>
               )}
-              {analog.t === AnalogType.DIGITAL_OUT && analog.id !== '25' && analog.id !== '26' && (
+              {analog.t === AnalogType.DIGITAL_OUT && analog.g !== 25 && analog.g !== 26 && (
                 <>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="o"
                       label={LL.VALUE(0)}
                       value={numberValue(analog.o)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
@@ -1170,12 +1174,12 @@ const DashboardData: FC = () => {
               )}
               {analog.t >= AnalogType.PWM_0 && (
                 <>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="f"
                       label={LL.FREQ()}
                       value={numberValue(analog.f)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
@@ -1185,12 +1189,12 @@ const DashboardData: FC = () => {
                       }}
                     />
                   </Grid>
-                  <Grid item>
+                  <Grid item xs={4}>
                     <ValidatedTextField
                       name="o"
                       label={LL.DUTY_CYCLE()}
                       value={numberValue(analog.o)}
-                      sx={{ width: '20ch' }}
+                      fullWidth
                       type="number"
                       variant="outlined"
                       onChange={updateValue(setAnalog)}
@@ -1222,13 +1226,13 @@ const DashboardData: FC = () => {
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={<SaveIcon />}
-              variant="outlined"
+              startIcon={<WarningIcon color="warning" />}
+              variant="contained"
               type="submit"
               onClick={() => sendAnalog()}
-              color="warning"
+              color="info"
             >
-              {LL.SAVE()}
+              {LL.UPDATE()}
             </Button>
           </DialogActions>
         </Dialog>

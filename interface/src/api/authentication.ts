@@ -3,15 +3,12 @@ import * as H from 'history';
 import jwtDecode from 'jwt-decode';
 import { Path } from 'react-router-dom';
 
-import { Features, Me, SignInRequest, SignInResponse } from '../types';
+import { Me, SignInRequest, SignInResponse } from 'types';
 
 import { ACCESS_TOKEN, AXIOS } from './endpoints';
-import { PROJECT_PATH } from './env';
 
 export const SIGN_IN_PATHNAME = 'loginPathname';
 export const SIGN_IN_SEARCH = 'loginSearch';
-
-export const getDefaultRoute = (features: Features) => (features.project ? `/${PROJECT_PATH}` : '/wifi');
 
 export function verifyAuthorization(): AxiosPromise<void> {
   return AXIOS.get('/verifyAuthorization');
@@ -21,9 +18,6 @@ export function signIn(request: SignInRequest): AxiosPromise<SignInResponse> {
   return AXIOS.post('/signIn', request);
 }
 
-/**
- * Fallback to sessionStorage if localStorage is absent. WebView may not have local storage enabled.
- */
 export function getStorage() {
   return localStorage || sessionStorage;
 }
@@ -40,12 +34,12 @@ export function clearLoginRedirect() {
   getStorage().removeItem(SIGN_IN_SEARCH);
 }
 
-export function fetchLoginRedirect(features: Features): Partial<Path> {
+export function fetchLoginRedirect(): Partial<Path> {
   const signInPathname = getStorage().getItem(SIGN_IN_PATHNAME);
   const signInSearch = getStorage().getItem(SIGN_IN_SEARCH);
   clearLoginRedirect();
   return {
-    pathname: signInPathname || getDefaultRoute(features),
+    pathname: signInPathname || `/dashboard`,
     search: (signInPathname && signInSearch) || undefined
   };
 }
