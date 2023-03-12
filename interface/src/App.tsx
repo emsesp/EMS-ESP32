@@ -1,8 +1,7 @@
-import { FC, createRef, useEffect, useState, RefObject } from 'react';
-import { SnackbarProvider } from 'notistack';
+import { FC, useEffect, useState } from 'react';
 
-import { IconButton } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import { ToastContainer, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 import CustomTheme from 'CustomTheme';
 import AppRouting from 'AppRouting';
@@ -15,12 +14,6 @@ import { loadLocaleAsync } from 'i18n/i18n-util.async';
 const detectedLocale = detectLocale(localStorageDetector);
 
 const App: FC = () => {
-  const notistackRef: RefObject<any> = createRef();
-
-  const onClickDismiss = (key: string | number | undefined) => () => {
-    notistackRef.current.closeSnackbar(key);
-  };
-
   const [wasLoaded, setWasLoaded] = useState(false);
 
   useEffect(() => {
@@ -32,18 +25,21 @@ const App: FC = () => {
   return (
     <TypesafeI18n locale={detectedLocale}>
       <CustomTheme>
-        <SnackbarProvider
-          maxSnack={3}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-          ref={notistackRef}
-          action={(key) => (
-            <IconButton onClick={onClickDismiss(key)} size="small">
-              <CloseIcon />
-            </IconButton>
-          )}
-        >
-          <AppRouting />
-        </SnackbarProvider>
+        <AppRouting />
+        <ToastContainer
+          position="bottom-left"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick={true}
+          rtl={false}
+          pauseOnFocusLoss={false}
+          draggable={false}
+          pauseOnHover={false}
+          transition={Slide}
+          closeButton={false}
+          theme="light"
+        />
       </CustomTheme>
     </TypesafeI18n>
   );

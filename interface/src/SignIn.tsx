@@ -1,6 +1,6 @@
 import { FC, useContext, useState } from 'react';
 import { ValidateFieldsError } from 'async-validator';
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
 import { Box, Fab, Paper, Typography, Button } from '@mui/material';
 import ForwardIcon from '@mui/icons-material/Forward';
@@ -29,7 +29,6 @@ import { ReactComponent as TRflag } from 'i18n/TR.svg';
 
 const SignIn: FC = () => {
   const authenticationContext = useContext(AuthenticationContext);
-  const { enqueueSnackbar } = useSnackbar();
 
   const [signInRequest, setSignInRequest] = useState<SignInRequest>({
     username: '',
@@ -61,10 +60,10 @@ const SignIn: FC = () => {
     } catch (error) {
       if (error.response) {
         if (error.response?.status === 401) {
-          enqueueSnackbar(LL.INVALID_LOGIN(), { variant: 'warning' });
+          toast.warn(LL.INVALID_LOGIN());
         }
       } else {
-        enqueueSnackbar(extractErrorMessage(error, LL.ERROR()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.ERROR()));
       }
       setProcessing(false);
     }

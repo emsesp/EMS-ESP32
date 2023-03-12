@@ -12,7 +12,7 @@ import { updateValue, useRest, extractErrorMessage } from 'utils';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
 
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 
 import { EVENT_SOURCE_ROOT } from 'api/endpoints';
 
@@ -93,8 +93,6 @@ const SystemLog: FC = () => {
 
   const updateFormValue = updateValue(setData);
 
-  const { enqueueSnackbar } = useSnackbar();
-
   const reloadPage = () => {
     window.location.reload();
   };
@@ -108,10 +106,10 @@ const SystemLog: FC = () => {
           compact: data.compact
         });
         if (response.status !== 200) {
-          enqueueSnackbar(LL.PROBLEM_UPDATING(), { variant: 'error' });
+          toast.error(LL.PROBLEM_UPDATING());
         }
       } catch (error) {
-        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       }
     }
   };

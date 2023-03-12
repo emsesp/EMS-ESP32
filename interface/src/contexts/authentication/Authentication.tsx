@@ -1,5 +1,5 @@
 import { FC, useCallback, useEffect, useState } from 'react';
-import { useSnackbar } from 'notistack';
+import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 import { useI18nContext } from 'i18n/i18n-react';
@@ -15,7 +15,6 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
   const { LL } = useI18nContext();
 
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
 
   const [initialized, setInitialized] = useState<boolean>(false);
   const [me, setMe] = useState<Me>();
@@ -25,7 +24,7 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
       AuthenticationApi.getStorage().setItem(ACCESS_TOKEN, accessToken);
       const decodedMe = AuthenticationApi.decodeMeJWT(accessToken);
       setMe(decodedMe);
-      enqueueSnackbar(LL.LOGGED_IN({ name: decodedMe.username }), { variant: 'success' });
+      toast.success(LL.LOGGED_IN({ name: decodedMe.username }));
     } catch (error) {
       setMe(undefined);
       throw new Error('Failed to parse JWT');

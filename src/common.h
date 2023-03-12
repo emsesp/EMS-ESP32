@@ -52,9 +52,11 @@ using string_vector = std::vector<const char *>;
 #define F_(string_name) (__pstr__##string_name)
 #define FL_(list_name) (__pstr__L_##list_name)
 
-#if defined(EMSESP_TEST)
+#if defined(EMSESP_TEST) || defined(EMSESP_EN_ONLY)
 // In testing just take one language (en) to save on Flash space
 #define MAKE_TRANSLATION(list_name, shortname, en, ...)   static const char * const __pstr__L_##list_name[] = {shortname, en, nullptr};
+#elif defined(EMSESP_DE_ONLY)
+#define MAKE_TRANSLATION(list_name, shortname, en, de, ...)   static const char * const __pstr__L_##list_name[] = {shortname, de, nullptr};
 #else
 #define MAKE_TRANSLATION(list_name, ...)       static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr};
 #endif
