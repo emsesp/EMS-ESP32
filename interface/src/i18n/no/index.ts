@@ -8,7 +8,7 @@ const no: Translation = {
   LOADING: 'Laster',
   IS_REQUIRED: '{0} er nødvendig',
   SIGN_IN: 'Logg inn',
-  SIGN_OUT: 'Logg ut',
+  SIGN_OUT: 'Logg ut her',
   USERNAME: 'Brukernavn',
   PASSWORD: 'Passord',
   SU_PASSWORD: 'su Passord',
