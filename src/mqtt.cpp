@@ -1152,7 +1152,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     Helpers::CharToUpperUTF8(F_name); // capitalize first letter
     if (has_tag) {
         // exclude heartbeat tag
-        snprintf(ha_name, sizeof(ha_name), "%s %s", DeviceValue::DeviceValueTAG_s[tag][0], F_name);
+        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag), F_name);
     } else {
         snprintf(ha_name, sizeof(ha_name), "%s", F_name); // no tag
     }
