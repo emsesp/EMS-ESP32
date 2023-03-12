@@ -503,59 +503,61 @@ const SettingsCustomization: FC = () => {
                 {tableList.map((de: DeviceEntity) => (
                   <Row key={de.id} item={de} onClick={() => editEntity(de)}>
                     <Cell stiff>
-                      <ToggleButtonGroup
-                        size="small"
-                        color="secondary"
-                        value={getMaskString(de.m)}
-                        onChange={(event, mask) => {
-                          de.m = getMaskNumber(mask);
-                          if (de.n === '' && de.m & DeviceEntityMask.DV_READONLY) {
-                            de.m = de.m | DeviceEntityMask.DV_WEB_EXCLUDE;
-                          }
-                          if (de.m & DeviceEntityMask.DV_WEB_EXCLUDE) {
-                            de.m = de.m & ~DeviceEntityMask.DV_FAVORITE;
-                          }
-                          setMasks(['']); // forces a refresh
-                        }}
-                      >
-                        <ToggleButton value="8" disabled={(de.m & 0x81) !== 0 || de.n === undefined}>
-                          <OptionIcon
-                            type="favorite"
-                            isSet={(de.m & DeviceEntityMask.DV_FAVORITE) === DeviceEntityMask.DV_FAVORITE}
-                          />
-                        </ToggleButton>
-                        <ToggleButton value="4" disabled={!de.w || (de.m & 0x83) >= 3}>
-                          <OptionIcon
-                            type="readonly"
-                            isSet={(de.m & DeviceEntityMask.DV_READONLY) === DeviceEntityMask.DV_READONLY}
-                          />
-                        </ToggleButton>
-                        <ToggleButton value="2" disabled={de.n === '' || (de.m & 0x80) !== 0}>
-                          <OptionIcon
-                            type="api_mqtt_exclude"
-                            isSet={
-                              (de.m & DeviceEntityMask.DV_API_MQTT_EXCLUDE) === DeviceEntityMask.DV_API_MQTT_EXCLUDE
+                      {!deviceEntity && (
+                        <ToggleButtonGroup
+                          size="small"
+                          color="secondary"
+                          value={getMaskString(de.m)}
+                          onChange={(event, mask) => {
+                            de.m = getMaskNumber(mask);
+                            if (de.n === '' && de.m & DeviceEntityMask.DV_READONLY) {
+                              de.m = de.m | DeviceEntityMask.DV_WEB_EXCLUDE;
                             }
-                          />
-                        </ToggleButton>
-                        <ToggleButton value="1" disabled={de.n === undefined || (de.m & 0x80) !== 0}>
-                          <OptionIcon
-                            type="web_exclude"
-                            isSet={(de.m & DeviceEntityMask.DV_WEB_EXCLUDE) === DeviceEntityMask.DV_WEB_EXCLUDE}
-                          />
-                        </ToggleButton>
-                        <ToggleButton value="128">
-                          <OptionIcon
-                            type="deleted"
-                            isSet={(de.m & DeviceEntityMask.DV_DELETED) === DeviceEntityMask.DV_DELETED}
-                          />
-                        </ToggleButton>
-                      </ToggleButtonGroup>
+                            if (de.m & DeviceEntityMask.DV_WEB_EXCLUDE) {
+                              de.m = de.m & ~DeviceEntityMask.DV_FAVORITE;
+                            }
+                            setMasks(['']); // forces a refresh
+                          }}
+                        >
+                          <ToggleButton value="8" disabled={(de.m & 0x81) !== 0 || de.n === undefined}>
+                            <OptionIcon
+                              type="favorite"
+                              isSet={(de.m & DeviceEntityMask.DV_FAVORITE) === DeviceEntityMask.DV_FAVORITE}
+                            />
+                          </ToggleButton>
+                          <ToggleButton value="4" disabled={!de.w || (de.m & 0x83) >= 3}>
+                            <OptionIcon
+                              type="readonly"
+                              isSet={(de.m & DeviceEntityMask.DV_READONLY) === DeviceEntityMask.DV_READONLY}
+                            />
+                          </ToggleButton>
+                          <ToggleButton value="2" disabled={de.n === '' || (de.m & 0x80) !== 0}>
+                            <OptionIcon
+                              type="api_mqtt_exclude"
+                              isSet={
+                                (de.m & DeviceEntityMask.DV_API_MQTT_EXCLUDE) === DeviceEntityMask.DV_API_MQTT_EXCLUDE
+                              }
+                            />
+                          </ToggleButton>
+                          <ToggleButton value="1" disabled={de.n === undefined || (de.m & 0x80) !== 0}>
+                            <OptionIcon
+                              type="web_exclude"
+                              isSet={(de.m & DeviceEntityMask.DV_WEB_EXCLUDE) === DeviceEntityMask.DV_WEB_EXCLUDE}
+                            />
+                          </ToggleButton>
+                          <ToggleButton value="128">
+                            <OptionIcon
+                              type="deleted"
+                              isSet={(de.m & DeviceEntityMask.DV_DELETED) === DeviceEntityMask.DV_DELETED}
+                            />
+                          </ToggleButton>
+                        </ToggleButtonGroup>
+                      )}
                     </Cell>
-                    <Cell>{formatName(de)}</Cell>
-                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}</Cell>
-                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}</Cell>
-                    <Cell>{formatValue(de.v)}</Cell>
+                    <Cell>{!deviceEntity && formatName(de)}</Cell>
+                    <Cell>{!deviceEntity && !(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}</Cell>
+                    <Cell>{!deviceEntity && !(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}</Cell>
+                    <Cell>{!deviceEntity && formatValue(de.v)}</Cell>
                   </Row>
                 ))}
               </Body>
