@@ -1,4 +1,4 @@
-name: Sonar Check2
+name: Sonar Check
 on:
   push:
     branches:
