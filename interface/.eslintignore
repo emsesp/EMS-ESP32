@@ -1,6 +1,7 @@
 node_modules/
 build/
+dist/
 .prettierrc
-.eslintrc.js
+.eslintrc*
 .yarn/
 env.d.ts
