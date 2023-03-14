@@ -1010,10 +1010,11 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         char uniq_s[60];
         strlcpy(uniq_s, en_name, sizeof(uniq_s));
         Helpers::replace_char(uniq_s, ' ', '_');
+        Helpers::replace_char(uniq_s, '+', '2'); //changes 'eco+_switch_off' to 'eco2_switch_off' (HA ignores '+')
         if (has_tag) {
-            snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());
-        } else {
             snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", device_name, DeviceValue::DeviceValueTAG_s[tag][0], Helpers::toLower(uniq_s).c_str());
+        } else {
+            snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());
         }
     }
 
@@ -1152,7 +1153,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     Helpers::CharToUpperUTF8(F_name); // capitalize first letter
     if (has_tag) {
         // exclude heartbeat tag
-        snprintf(ha_name, sizeof(ha_name), "%s %s", DeviceValue::DeviceValueTAG_s[tag][0], F_name);
+        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag), F_name);
     } else {
         snprintf(ha_name, sizeof(ha_name), "%s", F_name); // no tag
     }
