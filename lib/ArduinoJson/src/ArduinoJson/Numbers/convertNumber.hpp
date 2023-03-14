@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -8,9 +8,7 @@
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wconversion"
 #elif defined(__GNUC__)
-#  if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
-#    pragma GCC diagnostic push
-#  endif
+#  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wconversion"
 #endif
 
@@ -19,7 +17,7 @@
 #include <ArduinoJson/Polyfills/limits.hpp>
 #include <ArduinoJson/Polyfills/type_traits.hpp>
 
-namespace ARDUINOJSON_NAMESPACE {
+ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 // uint32 -> int32
 // uint64 -> int32
@@ -128,12 +126,10 @@ template <typename TOut, typename TIn>
 TOut convertNumber(TIn value) {
   return canConvertNumber<TOut>(value) ? TOut(value) : 0;
 }
-}  // namespace ARDUINOJSON_NAMESPACE
+ARDUINOJSON_END_PRIVATE_NAMESPACE
 
 #if defined(__clang__)
 #  pragma clang diagnostic pop
 #elif defined(__GNUC__)
-#  if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
-#    pragma GCC diagnostic pop
-#  endif
+#  pragma GCC diagnostic pop
 #endif

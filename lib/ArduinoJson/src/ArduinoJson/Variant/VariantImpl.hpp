@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -13,7 +13,7 @@
 
 #include <string.h>  // for strcmp
 
-namespace ARDUINOJSON_NAMESPACE {
+ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 template <typename T>
 inline T VariantData::asIntegral() const {
@@ -148,4 +148,4 @@ inline void convertToJson(const VariantRefBase<TDerived>& src,
   dst.set(src.template as<JsonVariantConst>());
 }
 
-}  // namespace ARDUINOJSON_NAMESPACE
+ARDUINOJSON_END_PRIVATE_NAMESPACE

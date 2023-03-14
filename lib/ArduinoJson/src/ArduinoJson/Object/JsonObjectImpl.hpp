@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -7,7 +7,7 @@
 #include <ArduinoJson/Array/JsonArray.hpp>
 #include <ArduinoJson/Object/JsonObject.hpp>
 
-namespace ARDUINOJSON_NAMESPACE {
+ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
 template <typename TString>
 inline JsonArray JsonObject::createNestedArray(const TString& key) const {
@@ -18,6 +18,10 @@ template <typename TChar>
 inline JsonArray JsonObject::createNestedArray(TChar* key) const {
   return operator[](key).template to<JsonArray>();
 }
+
+ARDUINOJSON_END_PUBLIC_NAMESPACE
+
+ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 template <typename TDerived>
 template <typename TString>
@@ -65,7 +69,7 @@ VariantRefBase<TDerived>::containsKey(TChar* key) const {
 template <typename TDerived>
 template <typename TString>
 inline typename enable_if<IsString<TString*>::value,
-                          MemberProxy<TDerived, TString*> >::type
+                          MemberProxy<TDerived, TString*>>::type
 VariantRefBase<TDerived>::operator[](TString* key) const {
   return MemberProxy<TDerived, TString*>(derived(), key);
 }
@@ -73,9 +77,9 @@ VariantRefBase<TDerived>::operator[](TString* key) const {
 template <typename TDerived>
 template <typename TString>
 inline typename enable_if<IsString<TString>::value,
-                          MemberProxy<TDerived, TString> >::type
+                          MemberProxy<TDerived, TString>>::type
 VariantRefBase<TDerived>::operator[](const TString& key) const {
   return MemberProxy<TDerived, TString>(derived(), key);
 }
 
-}  // namespace ARDUINOJSON_NAMESPACE
+ARDUINOJSON_END_PRIVATE_NAMESPACE
