@@ -46,6 +46,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
       const response = await EMSESP.getSettings();
       if (response.status !== 200) {
         toast.error(LL.PROBLEM_LOADING());
+      } else {
         saveFile(response.data, 'settings');
       }
     } catch (error) {
@@ -71,6 +72,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
       const response = await EMSESP.readSchedule();
       if (response.status !== 200) {
         toast.error(LL.PROBLEM_LOADING());
+      } else {
         saveFile(response.data, 'schedule');
       }
     } catch (error) {
