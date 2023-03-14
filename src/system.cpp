@@ -531,8 +531,8 @@ void System::loop() {
 void System::send_info_mqtt(const char * event_str, bool send_ntp) {
     // use dynamic json becaues it is called from NTP-callback from lwip task with small stack
     DynamicJsonDocument doc = DynamicJsonDocument(EMSESP_JSON_SIZE_MEDIUM);
-    doc["event"]   = event_str;
-    doc["version"] = EMSESP_APP_VERSION;
+    doc["event"]            = event_str;
+    doc["version"]          = EMSESP_APP_VERSION;
 
     // if NTP is enabled send the boot_time in local time in ISO 8601 format (eg: 2022-11-15 20:46:38)
     // https://github.com/emsesp/EMS-ESP32/issues/751
