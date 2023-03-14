@@ -1,19 +1,19 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
 
 #include <ArduinoJson/Variant/VariantRefBase.hpp>
 
-namespace ARDUINOJSON_NAMESPACE {
+ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 // A proxy class to get or set a member of an object.
 // https://arduinojson.org/v6/api/jsonobject/subscript/
 template <typename TUpstream, typename TStringRef>
 class MemberProxy
-    : public VariantRefBase<MemberProxy<TUpstream, TStringRef> >,
-      public VariantOperators<MemberProxy<TUpstream, TStringRef> > {
+    : public VariantRefBase<MemberProxy<TUpstream, TStringRef>>,
+      public VariantOperators<MemberProxy<TUpstream, TStringRef>> {
   friend class VariantAttorney;
 
  public:
@@ -61,4 +61,4 @@ class MemberProxy
   TStringRef _key;
 };
 
-}  // namespace ARDUINOJSON_NAMESPACE
+ARDUINOJSON_END_PRIVATE_NAMESPACE

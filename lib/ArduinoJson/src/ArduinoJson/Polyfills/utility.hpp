@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include <ArduinoJson/Namespace.hpp>
+#include "type_traits.hpp"
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-struct VariantTag {};
-
-template <typename T>
-struct IsVariant : is_base_of<VariantTag, T> {};
+template <class T>
+T&& forward(typename remove_reference<T>::type& t) noexcept {
+  return static_cast<T&&>(t);
+}
 
 ARDUINOJSON_END_PRIVATE_NAMESPACE

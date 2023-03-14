@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -19,12 +19,6 @@
 #  define FORCE_INLINE
 #  define NO_INLINE
 
-#endif
-
-#if __cplusplus >= 201103L
-#  define NOEXCEPT noexcept
-#else
-#  define NOEXCEPT throw()
 #endif
 
 #if defined(__has_attribute)

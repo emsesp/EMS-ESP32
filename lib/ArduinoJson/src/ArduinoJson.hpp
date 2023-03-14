@@ -1,8 +1,12 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
+
+#if __cplusplus < 201103L && (!defined(_MSC_VER) || _MSC_VER < 1910)
+#  error ArduinoJson requires C++11 or newer. Configure your compiler for C++11 or downgrade ArduinoJson to 6.20.
+#endif
 
 #include "ArduinoJson/Configuration.hpp"
 
@@ -45,36 +49,3 @@
 #include "ArduinoJson/MsgPack/MsgPackSerializer.hpp"
 
 #include "ArduinoJson/compatibility.hpp"
-
-namespace ArduinoJson {
-using ARDUINOJSON_NAMESPACE::BasicJsonDocument;
-using ARDUINOJSON_NAMESPACE::copyArray;
-using ARDUINOJSON_NAMESPACE::DeserializationError;
-using ARDUINOJSON_NAMESPACE::deserializeJson;
-using ARDUINOJSON_NAMESPACE::deserializeMsgPack;
-using ARDUINOJSON_NAMESPACE::DynamicJsonDocument;
-using ARDUINOJSON_NAMESPACE::JsonArray;
-using ARDUINOJSON_NAMESPACE::JsonArrayConst;
-using ARDUINOJSON_NAMESPACE::JsonDocument;
-using ARDUINOJSON_NAMESPACE::JsonFloat;
-using ARDUINOJSON_NAMESPACE::JsonInteger;
-using ARDUINOJSON_NAMESPACE::JsonObject;
-using ARDUINOJSON_NAMESPACE::JsonObjectConst;
-using ARDUINOJSON_NAMESPACE::JsonPair;
-using ARDUINOJSON_NAMESPACE::JsonPairConst;
-using ARDUINOJSON_NAMESPACE::JsonString;
-using ARDUINOJSON_NAMESPACE::JsonUInt;
-using ARDUINOJSON_NAMESPACE::JsonVariant;
-using ARDUINOJSON_NAMESPACE::JsonVariantConst;
-using ARDUINOJSON_NAMESPACE::measureJson;
-using ARDUINOJSON_NAMESPACE::serialized;
-using ARDUINOJSON_NAMESPACE::serializeJson;
-using ARDUINOJSON_NAMESPACE::serializeJsonPretty;
-using ARDUINOJSON_NAMESPACE::serializeMsgPack;
-using ARDUINOJSON_NAMESPACE::StaticJsonDocument;
-
-namespace DeserializationOption {
-using ARDUINOJSON_NAMESPACE::Filter;
-using ARDUINOJSON_NAMESPACE::NestingLimit;
-}  // namespace DeserializationOption
-}  // namespace ArduinoJson

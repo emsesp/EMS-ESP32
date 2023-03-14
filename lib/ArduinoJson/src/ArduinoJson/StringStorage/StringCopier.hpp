@@ -1,12 +1,12 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
 
 #include <ArduinoJson/Memory/MemoryPool.hpp>
 
-namespace ARDUINOJSON_NAMESPACE {
+ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 class StringCopier {
  public:
@@ -68,4 +68,5 @@ class StringCopier {
   // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.UninitializedObject)
   size_t _size, _capacity;
 };
-}  // namespace ARDUINOJSON_NAMESPACE
+
+ARDUINOJSON_END_PRIVATE_NAMESPACE
