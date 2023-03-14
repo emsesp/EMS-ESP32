@@ -1,7 +1,7 @@
 ﻿/*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -29,8 +29,7 @@
 #define EMSESP_LOCALE_FR "fr"
 #define EMSESP_LOCALE_TR "tr"
 
-// IMPORTANT!
-//  translations are in the order: en, de, nl, sv, pl, no, fr, tr
+// IMPORTANT! translations are in the order: en, de, nl, sv, pl, no, fr, tr
 //
 // if there is no translation, it will default to en
 //
