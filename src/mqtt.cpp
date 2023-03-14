@@ -612,7 +612,7 @@ void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
 
     char uniq[70];
-    if (Mqtt::entity_format() == 2) {
+    if (Mqtt::entity_format() == entitiyFormat::MULTI_SHORT) {
         snprintf(uniq, sizeof(uniq), "%s_system_status", mqtt_basename_.c_str());
     } else {
         strcpy(uniq, "system_status");
@@ -998,10 +998,10 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build unique identifier also used as object_id which also becomes the Entity ID in HA
     char uniq_id[80];
-    if (Mqtt::entity_format() == 2) {
+    if (Mqtt::entity_format() == entitiyFormat::MULTI_SHORT) {
         // prefix base name to each uniq_id and use the shortname
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
-    } else if (Mqtt::entity_format() == 1) {
+    } else if (Mqtt::entity_format() == entitiyFormat::SINGLE_SHORT) {
         // shortname, no mqtt base. This is the default version.
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
     } else {
@@ -1035,7 +1035,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::SHORT:
         case DeviceValueType::USHORT:
         case DeviceValueType::ULONG:
-            if (discovery_type() == 0) {
+            if (discovery_type() == discoveryType::HOMEASSISTANT) {
                 // Home Assistant
                 // number - https://www.home-assistant.io/integrations/number.mqtt
                 snprintf(topic, sizeof(topic), "number/%s", config_topic);
@@ -1368,7 +1368,7 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
 
     snprintf(name_s, sizeof(name_s), "Hc%d", hc_num);
 
-    if (Mqtt::entity_format() == 2) {
+    if (Mqtt::entity_format() == entitiyFormat::MULTI_SHORT) {
         snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_thermostat_hc%d", mqtt_basename_.c_str(), hc_num); // add basename
     } else {
         snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num); // backward compatible with v3.4

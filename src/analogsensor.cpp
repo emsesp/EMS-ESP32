@@ -497,7 +497,7 @@ void AnalogSensor::publish_values(const bool force) {
                 config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
 
                 char uniq_s[70];
-                if (Mqtt::entity_format() == 2) {
+                if (Mqtt::entity_format() == Mqtt::entitiyFormat::MULTI_SHORT) {
                     snprintf(uniq_s, sizeof(uniq_s), "%s_analogsensor_%02d", Mqtt::basename().c_str(), sensor.gpio());
                 } else {
                     snprintf(uniq_s, sizeof(uniq_s), "analogsensor_%02d", sensor.gpio());

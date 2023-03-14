@@ -53,6 +53,9 @@ struct MqttMessage {
 
 class Mqtt {
   public:
+    enum discoveryType : uint8_t { HOMEASSISTANT, DOMOTICZ };
+    enum entitiyFormat : uint8_t { SINGLE_LONG, SINGLE_SHORT, MULTI_SHORT };
+
     void loop();
     void start();
 

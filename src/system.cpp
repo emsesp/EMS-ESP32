@@ -529,7 +529,8 @@ void System::loop() {
 
 // send MQTT info topic appended with the version information as JSON, as a retained flag
 void System::send_info_mqtt(const char * event_str, bool send_ntp) {
-    StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> doc;
+    // use dynamic json becaues it is called from NTP-callback from lwip task with small stack
+    DynamicJsonDocument doc = DynamicJsonDocument(EMSESP_JSON_SIZE_MEDIUM);
     doc["event"]   = event_str;
     doc["version"] = EMSESP_APP_VERSION;
 
