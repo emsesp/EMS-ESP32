@@ -17,6 +17,7 @@ const enum DeviceType {
   SYSTEM = 0,
   DALLASSENSOR,
   ANALOGSENSOR,
+  SCHEDULER,
   BOILER,
   THERMOSTAT,
   MIXER,
