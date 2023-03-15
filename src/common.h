@@ -54,10 +54,13 @@ using string_vector = std::vector<const char *>;
 
 #if defined(EMSESP_TEST) || defined(EMSESP_EN_ONLY)
 // In testing just take one language (en) to save on Flash space
+#define MAKE_WORD_TRANSLATION(list_name, en, ...)   static const char * const __pstr__L_##list_name[] = {en, nullptr};
 #define MAKE_TRANSLATION(list_name, shortname, en, ...)   static const char * const __pstr__L_##list_name[] = {shortname, en, nullptr};
 #elif defined(EMSESP_DE_ONLY)
+#define MAKE_WORD_TRANSLATION(list_name, en, de, ...)   static const char * const __pstr__L_##list_name[] = {de, nullptr};
 #define MAKE_TRANSLATION(list_name, shortname, en, de, ...)   static const char * const __pstr__L_##list_name[] = {shortname, de, nullptr};
 #else
+#define MAKE_WORD_TRANSLATION(list_name, ...)       static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr};
 #define MAKE_TRANSLATION(list_name, ...)       static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr};
 #endif
 
