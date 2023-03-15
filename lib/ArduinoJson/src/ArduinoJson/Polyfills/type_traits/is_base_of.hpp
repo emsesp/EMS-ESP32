@@ -1,12 +1,14 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
 
 #include <ArduinoJson/Namespace.hpp>
 
-namespace ARDUINOJSON_NAMESPACE {
+#include "remove_reference.hpp"
+
+ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 // A meta-function that returns true if Derived inherits from TBase is an
 // integral type.
@@ -18,6 +20,8 @@ class is_base_of {
 
  public:
   static const bool value =
-      sizeof(probe(reinterpret_cast<TDerived*>(0))) == sizeof(int);
+      sizeof(probe(reinterpret_cast<typename remove_reference<TDerived>::type*>(
+          0))) == sizeof(int);
 };
-}  // namespace ARDUINOJSON_NAMESPACE
+
+ARDUINOJSON_END_PRIVATE_NAMESPACE
