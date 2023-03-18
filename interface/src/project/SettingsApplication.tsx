@@ -106,6 +106,7 @@ const SettingsApplication: FC = () => {
 
     const changeBoardProfile = (event: React.ChangeEvent<HTMLInputElement>) => {
       const board_profile = event.target.value;
+      updateFormValue(event);
       if (board_profile === 'CUSTOM') {
         setData({
           ...data,
