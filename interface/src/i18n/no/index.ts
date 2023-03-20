@@ -16,11 +16,11 @@ const no: Translation = {
   SETTINGS_OF: '{0} Innstillinger',
   HELP_OF: '{0} Hjelp',
   LOGGED_IN: 'Logget in som {name}',
-  PLEASE_SIGNIN: 'Venligst logge inn for å fortsetta',
+  PLEASE_SIGNIN: 'Venligst logge inn for å fortsette',
   UPLOAD_SUCCESSFUL: 'Opplasting lykkes',
   DOWNLOAD_SUCCESSFUL: 'Nedlasting lykkes',
   INVALID_LOGIN: 'Ugyldig innlogging',
-  NETWORK: 'Nettverk',
+  NETWORK: 'Nettverk1',
   SECURITY: 'Sikkerhet',
   ONOFF_CAP: 'PÅ/AV',
   ONOFF: 'på/av',
@@ -46,8 +46,8 @@ const no: Translation = {
   CANCEL: 'Avbryt',
   RESET: 'Nullstill',
   SEND: 'Send',
-  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
-  UPDATE: 'Update', // TODO translate
+  APPLY_CHANGES: 'Bruk endringer ({0})',
+  UPDATE: 'Oppdater',
   REMOVE: 'Fjern',
   PROBLEM_UPDATING: 'Problem med oppdatering',
   PROBLEM_LOADING: 'Problem med opplasting',
@@ -69,14 +69,14 @@ const no: Translation = {
   SENSOR: 'Sensor',
   TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperaturesensorer',
-  WRITE_CMD_SENT: 'Skriv kommando sent', // TODO translate
-  WRITE_CMD_FAILED: 'Skriv kommando failed', // TODO translate
-  EMS_BUS_WARNING: 'EMS bussen koblet ned. Hvis denne advarselen fortsetter etter noen f¨sekunder sjekk instillinger og  prosessorkort',
+  WRITE_CMD_SENT: 'Skriv kommando sent',
+  WRITE_CMD_FAILED: 'Skriv kommando failed',
+  EMS_BUS_WARNING: 'EMS bussen koblet ned. Hvis denne advarselen fortsetter etter noen få sekunder sjekk instillinger og prosessorkort',
   EMS_BUS_SCANNING: 'Søker etter EMS enheter...',
   CONNECTED: 'Tilkoblet',
   TX_ISSUES: 'Tx problemer - prøv en annen Tx Modus',
   DISCONNECTED: 'Frakoblet',
-  EMS_SCAN: 'Er du sikker på du vil starte full søking av EMS bussen?',
+  EMS_SCAN: 'Er du sikker på du vil starte full søking av EMS bussen ?',
   EMS_BUS_STATUS: 'EMS Buss Status',
   ACTIVE_DEVICES: 'Aktive Enheter og Sensorer',
   EMS_DEVICE: 'EMS Enhet',
@@ -99,7 +99,7 @@ const no: Translation = {
   NUM_DEVICES: '{num} Enhet{{er}}',
   NUM_TEMP_SENSORS: '{num} Temperatursensor{{er}}',
   NUM_ANALOG_SENSORS: '{num} Analogsensor{{er}}',
-  NUM_DAYS: '{num} Dag{{er}}',
+  NUM_DAYS: '{num} sag{{er}}',
   NUM_SECONDS: '{num} Sekund{{er}}',
   NUM_HOURS: '{num} Time{{r}}',
   NUM_MINUTES: '{num} Minutt{{er}}',
@@ -157,7 +157,7 @@ const no: Translation = {
   CUSTOMIZATIONS_HELP_3: 'inaktiviser skriving',
   CUSTOMIZATIONS_HELP_4: 'ekskludere fra MQTT og API',
   CUSTOMIZATIONS_HELP_5: 'gjemme fra Dashboard',
-  CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
+  CUSTOMIZATIONS_HELP_6: 'fjern fra minne',
   SELECT_DEVICE: 'Velg en enhet',
   SET_ALL: 'sett alle',
   OPTIONS: 'Alternativ',
@@ -208,7 +208,7 @@ const no: Translation = {
   COMPACT: 'Komprimere',
   ENABLE_OTA: 'Aktiviser OTA oppdateringer',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Last ned objektstilpasninger',
-  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
+  DOWNLOAD_SCHEDULE_TEXT: 'Last ned tidsplan',
   DOWNLOAD_SETTINGS_TEXT: 'Last ned applikasjonskonfigurasjon. Vær varsom med å dele fila da den inneholder passord og annen sensitiv system informasjon',
   UPLOAD_TEXT: 'Last opp en ny firmware (.bin) fil, innstillinger eller tilpassninger (.json) fil nedenfor',
   UPLOADING: 'Opplasting',
@@ -242,7 +242,7 @@ const no: Translation = {
   MQTT_PUBLISH_TEXT_2: 'Publiser til kommando topics (ioBroker)',
   MQTT_PUBLISH_TEXT_3: 'Aktiver MQTT Discovery',
   MQTT_PUBLISH_TEXT_4: 'Prefiks for Discovery topics',
-  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
+  MQTT_PUBLISH_TEXT_5: 'Oppdagelsestype',
   MQTT_PUBLISH_INTERVALS: 'Publiseringsintervall',
   MQTT_INT_BOILER: 'Fyr/Varmepumpe',
   MQTT_INT_THERMOSTATS: 'Termostat',
@@ -251,12 +251,12 @@ const no: Translation = {
   MQTT_INT_HEARTBEAT: 'Heartbeat',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Standard',
-  MQTT_ENTITY_FORMAT: 'Entity ID format', // TODO translate
-  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)', // TODO translate
-  MQTT_ENTITY_FORMAT_1: 'Single instance, short name', // TODO translate
-  MQTT_ENTITY_FORMAT_2: 'Multiple instances, short name', // TODO translate
+  MQTT_ENTITY_FORMAT: 'Enhets ID format',
+  MQTT_ENTITY_FORMAT_0: 'Enkelt forekomst, langt navn (v3.4)',
+  MQTT_ENTITY_FORMAT_1: 'Enkelt forekomst, kort navn',
+  MQTT_ENTITY_FORMAT_2: 'Flere forekomster, kort navn',
   MQTT_CLEAN_SESSION: 'Benytt Clean Session',
-  MQTT_RETAIN_FLAG: 'Alltid sett Retain flag',
+  MQTT_RETAIN_FLAG: 'Alltid sett behold flagg',
   INACTIVE: 'Innaktiv',
   ACTIVE: 'Aktiv',
   UNKNOWN: 'Ukjent',
@@ -305,20 +305,20 @@ const no: Translation = {
   ENTITY: 'Entitet',
   MIN: 'min',
   MAX: 'max',
-  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
+  BLOCK_NAVIGATE_1: 'du har ulagrede endringer',
   BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
-  STAY: 'Stay', // TODO translate
-  LEAVE: 'Leave', // TODO translate
-  SCHEDULER: 'Scheduler', // TODO translate
-  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.', // TODO translate
-  SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
-  SCHEDULE: 'Schedule', // TODO translate
-  TIME: 'Time', // TODO translate
-  TIMER: 'Timer', // TODO translate
-  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
-  SCHEDULE_TIMER_1: 'on startup', // TODO translate
-  SCHEDULE_TIMER_2: 'every minute', // TODO translate
-  SCHEDULE_TIMER_3: 'every hour' // TODO translate
+  STAY: 'Bli værende',
+  LEAVE: 'Logg ut',
+  SCHEDULER: 'Planlegger',
+  SCHEDULER_HELP_1: 'Automatiser kommandoer ved å legge til planlagte hendelser nedenfor. Angi et unikt navn for å aktivere/deaktivere aktivering via API/MQTT',
+  SCHEDULER_HELP_2: 'Bruk 00:00 for å utløse én gang ved oppstart',
+  SCHEDULE: 'Planlegg',
+  TIME: 'Tid',
+  TIMER: 'Timer',
+  SCHEDULE_SAVED: 'Tidsplanen er oppdatert',
+  SCHEDULE_TIMER_1: 'ved oppstart',
+  SCHEDULE_TIMER_2: 'hvert minutt',
+  SCHEDULE_TIMER_3: 'hver time',
 };
 
 export default no;
