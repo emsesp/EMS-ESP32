@@ -26,7 +26,7 @@
     "@mui/icons-material": "^5.11.11",
     "@mui/material": "^5.11.13",
     "@remix-run/router": "^1.4.0",
-    "@table-library/react-table-library": "4.0.29",
+    "@table-library/react-table-library": "4.1.0",
     "@types/lodash-es": "^4.17.7",
     "@types/node": "^18.15.3",
     "@types/react": "^18.0.28",
@@ -47,7 +47,7 @@
     "react-toastify": "^9.1.1",
     "sockette": "^2.0.6",
     "typesafe-i18n": "^5.24.2",
-    "typescript": "^4.9.5"
+    "typescript": "^5.0.2"
   },
   "devDependencies": {
     "@types/mime-types": "^2",
@@ -68,10 +68,10 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "nodemon": "^2.0.21",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.8.4",
+    "prettier": "^2.8.5",
     "rollup-plugin-visualizer": "^5.9.0",
     "terser": "^5.16.6",
-    "vite": "^4.1.4",
+    "vite": "^4.2.1",
     "vite-plugin-minify": "^1.5.2",
     "vite-plugin-svgr": "^2.4.0",
     "vite-tsconfig-paths": "^4.0.7"
