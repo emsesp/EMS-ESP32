@@ -29,8 +29,7 @@
 #define EMSESP_LOCALE_FR "fr"
 #define EMSESP_LOCALE_TR "tr"
 
-// IMPORTANT!
-//  translations are in the order: en, de, nl, sv, pl, no, fr, tr
+// IMPORTANT! translations are in the order: en, de, nl, sv, pl, no, fr, tr
 //
 // if there is no translation, it will default to en
 //
@@ -214,6 +213,7 @@ MAKE_WORD_TRANSLATION(german, "german", "Deutsch", "Duits", "Tyska", "niemiecki"
 MAKE_WORD_TRANSLATION(dutch, "dutch", "Niederländisch", "Nederlands", "Nederländska", "niderlandzki", "nederlandsk", "néerlandais", "Flemenkçe")
 MAKE_WORD_TRANSLATION(french, "french", "Französisch", "Frans", "Franska", "francuski", "fransk", "français", "Fransızca")
 MAKE_WORD_TRANSLATION(italian, "italian", "Italienisch", "Italiaans", "Italienska", "włoski", "italiensk", "italien", "İtalyanca")
+
 MAKE_WORD_TRANSLATION(high, "high", "hoch", "hoog", "Hög", "wysoki", "høy", "haut") // TODO translate
 MAKE_WORD_TRANSLATION(low, "low", "niedrig", "laag", "Låg", "niski", "lav", "bas", "düşük")
 MAKE_WORD_TRANSLATION(radiator, "radiator", "Heizkörper", "Radiator", "Radiator", "grzejniki", "radiator", "radiateur", "radyatör")
