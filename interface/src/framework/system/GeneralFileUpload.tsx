@@ -69,7 +69,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
 
   const downloadSchedule = async () => {
     try {
-      const response = await EMSESP.readSchedule();
+      const response = await EMSESP.getSchedule();
       if (response.status !== 200) {
         toast.error(LL.PROBLEM_LOADING());
       } else {

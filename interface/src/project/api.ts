@@ -96,6 +96,10 @@ export function getCustomizations(): AxiosPromise<void> {
   return AXIOS.get('/getCustomizations');
 }
 
+export function getSchedule(): AxiosPromise<Schedule> {
+  return AXIOS.get('/getSchedule');
+}
+
 export function readSchedule(): AxiosPromise<Schedule> {
   return AXIOS.get('/schedule');
 }
