@@ -203,7 +203,7 @@ void WebAPIService::getSchedule(AsyncWebServerRequest * request) {
 
     root["type"] = "schedule";
 
-    System::extractSettings(EMSESP_SCHEDULER_FILE, "Schedule", root, FS_BUFFER_SIZE);
+    System::extractSettings(EMSESP_SCHEDULER_FILE, "Schedule", root);
 
     response->setLength();
     request->send(response);
