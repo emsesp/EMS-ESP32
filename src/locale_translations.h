@@ -268,11 +268,11 @@ MAKE_WORD_TRANSLATION(cyl2, "cyl 2", "Zyl_2", "Cil 2", "Cyl 2", "cyl 2", "cyl 2"
 
 // Entity translations
 // Boiler
-MAKE_TRANSLATION(wwtapactivated, "wwtapactivated", "Durchlauferhitzer aktiv", "zet aan/uit", "på/av", "system przygotowywania", "Varmtvann active", "ecs activée", "")
-MAKE_TRANSLATION(reset, "reset", "Reset", "Reset", "Nollställ", "kasowanie komunikatu", "nullstill", "reset", "")
-MAKE_TRANSLATION(oilPreHeat, "oilpreheat", "Ölvorwärmung", "Olie voorverwarming", "Förvärmning olja", "podgrzewanie oleju", "oljeforvarming", "préchauffage de l'huile", "")
-MAKE_TRANSLATION(heatingActive, "heatingactive", "Heizen aktiv", "Verwarming actief", "Uppvärmning aktiv", "c.o. aktywne", "oppvarming aktiv", "chauffage actif", "")
-MAKE_TRANSLATION(tapwaterActive, "tapwateractive", "Warmwasser aktiv", "Warm water actief", "Varmvatten aktiv", "c.w.u. aktywne", "varmtvann aktiv", "eau chaude active", "")
+MAKE_TRANSLATION(wwtapactivated, "wwtapactivated", "turn on/off", "Durchlauferhitzer aktiv", "zet aan/uit", "på/av", "system przygotowywania", "Varmtvann active", "ecs activée", "")
+MAKE_TRANSLATION(reset, "reset", "Reset", "Reset", "Reset", "Nollställ", "kasowanie komunikatu", "nullstill", "reset", "")
+MAKE_TRANSLATION(oilPreHeat, "oilpreheat", "oil preheating", "Ölvorwärmung", "Olie voorverwarming", "Förvärmning olja", "podgrzewanie oleju", "oljeforvarming", "préchauffage de l'huile", "")
+MAKE_TRANSLATION(heatingActive, "heatingactive", "heating active", "Heizen aktiv", "Verwarming actief", "Uppvärmning aktiv", "c.o. aktywne", "oppvarming aktiv", "chauffage actif", "")
+MAKE_TRANSLATION(tapwaterActive, "tapwateractive", "tapwater active", "Warmwasser aktiv", "Warm water actief", "Varmvatten aktiv", "c.w.u. aktywne", "varmtvann aktiv", "eau chaude active", "")
 MAKE_TRANSLATION(selFlowTemp, "selflowtemp", "selected flow temperature", "Sollwert Vorlauftemperatur", "Ingestelde aanvoertemperatuur", "Börvärde Flödestemperatur", "wybrana temperatura zasilania", "valgt turtemperatur", "température de flux selectionnée", "")
 MAKE_TRANSLATION(selBurnPow, "selburnpow", "burner selected max power", "Sollwert Brennerleistung", "Ingestelde maximale brandervermogen", "Brännare vald maxeffekt", "wybrana moc źródła ciepła", "settpunkt brennerkapasitet", "puissance max du brûleur selectionnée", "")
 MAKE_TRANSLATION(absBurnPow, "absburnpow", "burner current power (absolute)", "Brennerleistung (absolut)", "Brandervermogen (abs)", "Värmepanna aktuell effekt (abs)", "aktualna moc źródła ciepła (absolutna)", "brennereffekt", "puissance du brûleur actuelle (abs)", "")
