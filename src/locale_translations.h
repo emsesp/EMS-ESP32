@@ -116,7 +116,7 @@ MAKE_WORD_TRANSLATION(OFF, "OFF", "AUS", "UIT", "AV", "wył.", "AV", "OFF", "KAP
 MAKE_WORD_TRANSLATION(minutes, "minutes", "Minuten", "Minuten", "Minuter", "minut", "Minutter", "minutes", "dakika")
 MAKE_WORD_TRANSLATION(hours, "hours", "Stunden", "Uren", "Timmar", "godzin", "Timer", "heures", "saat")
 MAKE_WORD_TRANSLATION(days, "days", "Tage", "Dagen", "Dagar", "dni", "Dager", "jours", "gün")
-MAKE_WORD_TRANSLATION(seconds, "seconds", "Sekunden", "Seconden", "Sekunder", "Sekunder", "Sekunder", "secondes", "saniye")
+MAKE_WORD_TRANSLATION(seconds, "seconds", "Sekunden", "Seconden", "Sekunder", "sekundy", "Sekunder", "secondes", "saniye")
 
 // Enum translations
 // general
