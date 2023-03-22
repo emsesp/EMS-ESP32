@@ -60,13 +60,11 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     bool command_setvalue(const char * value, const std::string name);
     bool get_value_info(JsonObject & output, const char * cmd);
 
-  private:
-    bool command(const char * cmd, const char * data);
-
 // make all functions public so we can test in the debug and standalone mode
 #ifndef EMSESP_STANDALONE
   private:
 #endif
+    bool command(const char * cmd, const char * data);
 
     HttpEndpoint<WebScheduler>  _httpEndpoint;
     FSPersistence<WebScheduler> _fsPersistence;
