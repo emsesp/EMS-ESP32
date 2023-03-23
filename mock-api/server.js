@@ -450,13 +450,13 @@ const status = {
   num_sensors: 1,
   num_analogs: 1,
   stats: [
-    { id: '0', s: 56506, f: 11, q: 100 },
-    { id: '1', s: 9026, f: 0, q: 100 },
-    { id: '2', s: 33, f: 2, q: 95 },
-    { id: '3', s: 56506, f: 11, q: 100 },
-    { id: '4', s: 0, f: 0, q: 100 },
-    { id: '5', s: 12, f: 10, q: 20 },
-    { id: '6', s: 0, f: 0, q: 0 }
+    { id: 0, s: 56506, f: 11, q: 100 },
+    { id: 1, s: 9026, f: 0, q: 100 },
+    { id: 2, s: 33, f: 2, q: 95 },
+    { id: 3, s: 56506, f: 11, q: 100 },
+    { id: 4, s: 0, f: 0, q: 100 },
+    { id: 5, s: 12, f: 10, q: 20 },
+    { id: 6, s: 0, f: 0, q: 0 }
   ]
 };
 
@@ -603,7 +603,7 @@ const emsesp_devicedata_4 = {
 let emsesp_schedule = {
   schedule: [
     {
-      id: '1',
+      id: 1,
       active: true,
       flags: 6,
       time: '07:30',
@@ -612,7 +612,7 @@ let emsesp_schedule = {
       name: 'day_mode'
     },
     {
-      id: '2',
+      id: 2,
       active: true,
       flags: 31,
       time: '23:00',
@@ -621,7 +621,7 @@ let emsesp_schedule = {
       name: 'night_mode'
     },
     {
-      id: '3',
+      id: 3,
       active: true,
       flags: 10,
       time: '00:00',
@@ -630,7 +630,7 @@ let emsesp_schedule = {
       name: 'temp_20'
     },
     {
-      id: '4',
+      id: 4,
       active: false,
       flags: 1,
       time: '04:00',
