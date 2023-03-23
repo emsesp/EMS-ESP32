@@ -162,7 +162,7 @@ const SettingsApplication: FC = () => {
               justifyContent="flex-start"
               alignItems="flex-start"
             >
-              <Grid item xs={6} sm={4}>
+              <Grid item xs={12} sm={6} md={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="rx_gpio"
@@ -176,7 +176,7 @@ const SettingsApplication: FC = () => {
                   disabled={saving}
                 />
               </Grid>
-              <Grid item xs={6} sm={4}>
+              <Grid item xs={12} sm={6} md={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="tx_gpio"
@@ -190,7 +190,7 @@ const SettingsApplication: FC = () => {
                   disabled={saving}
                 />
               </Grid>
-              <Grid item xs={6} sm={4}>
+              <Grid item xs={12} sm={6} md={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="pbutton_gpio"
@@ -204,7 +204,7 @@ const SettingsApplication: FC = () => {
                   disabled={saving}
                 />
               </Grid>
-              <Grid item xs={6} sm={4}>
+              <Grid item xs={12} sm={6} md={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="dallas_gpio"
@@ -218,7 +218,7 @@ const SettingsApplication: FC = () => {
                   disabled={saving}
                 />
               </Grid>
-              <Grid item xs={6} sm={4}>
+              <Grid item xs={12} sm={6} md={4}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="led_gpio"
@@ -232,7 +232,7 @@ const SettingsApplication: FC = () => {
                   disabled={saving}
                 />
               </Grid>
-              <Grid item xs={6} sm={4}>
+              <Grid item xs={12} sm={6} md={4}>
                 <ValidatedTextField
                   name="phy_type"
                   label={LL.PHY_TYPE()}
@@ -259,7 +259,7 @@ const SettingsApplication: FC = () => {
                 justifyContent="flex-start"
                 alignItems="flex-start"
               >
-                <Grid item xs={6} sm={4}>
+                <Grid item xs={12} sm={6} md={4}>
                   <ValidatedTextField
                     name="eth_power"
                     label={LL.GPIO_OF('PHY Power') + ' (-1=' + LL.DISABLED(1) + ')'}
@@ -272,7 +272,7 @@ const SettingsApplication: FC = () => {
                     disabled={saving}
                   />
                 </Grid>
-                <Grid item xs={6} sm={4}>
+                <Grid item xs={12} sm={6} md={4}>
                   <ValidatedTextField
                     name="eth_phy_addr"
                     label={LL.ADDRESS_OF('PHY I²C')}
@@ -285,7 +285,7 @@ const SettingsApplication: FC = () => {
                     disabled={saving}
                   />
                 </Grid>
-                <Grid item xs={6} sm={4}>
+                <Grid item xs={12} sm={6} md={4}>
                   <ValidatedTextField
                     name="eth_clock_mode"
                     label="PHY Clk"
@@ -311,7 +311,7 @@ const SettingsApplication: FC = () => {
           {LL.SETTINGS_OF(LL.EMS_BUS(0))}
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-          <Grid item xs={6}>
+          <Grid item xs={12} sm={6}>
             <ValidatedTextField
               name="tx_mode"
               label={LL.TX_MODE()}
@@ -329,7 +329,7 @@ const SettingsApplication: FC = () => {
               <MenuItem value={4}>{LL.HARDWARE()}</MenuItem>
             </ValidatedTextField>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12} sm={6}>
             <ValidatedTextField
               name="ems_bus_id"
               label={LL.ID_OF(LL.EMS_BUS(1))}
@@ -358,20 +358,16 @@ const SettingsApplication: FC = () => {
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.GENERAL_OPTIONS()}
         </Typography>
-        <Box
-          sx={{
-            '& .MuiTextField-root': { width: '25ch' }
-          }}
-        >
+        <Grid item>
           <ValidatedTextField
             name="locale"
             label={LL.LANGUAGE_ENTITIES()}
             disabled={saving}
             value={data.locale}
+            fullWidth
             variant="outlined"
             onChange={updateFormValue}
             margin="normal"
-            size="small"
             select
           >
             <MenuItem value="en">English (EN)</MenuItem>
@@ -384,7 +380,7 @@ const SettingsApplication: FC = () => {
             <MenuItem value="sv">Svenska (SV)</MenuItem>
             <MenuItem value="tr">Türk (TR)</MenuItem>
           </ValidatedTextField>
-        </Box>
+        </Grid>
         {data.led_gpio !== 0 && (
           <BlockFormControlLabel
             control={<Checkbox checked={data.hide_led} onChange={updateFormValue} name="hide_led" />}
@@ -429,14 +425,15 @@ const SettingsApplication: FC = () => {
             disabled={saving}
           />
           <BlockFormControlLabel
-            sx={{ pb: 2 }}
             control={<Checkbox checked={data.shower_alert} onChange={updateFormValue} name="shower_alert" />}
             label={LL.ENABLE_SHOWER_ALERT()}
             disabled={!data.shower_timer}
           />
+          </Grid>
+          <Grid container sx={{ pt: 2 }} rowSpacing={3} spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
           {data.shower_alert && (
             <>
-              <Grid item sx={{ pr: 1, pb: 2 }}>
+              <Grid item xs={12} sm={6}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="shower_alert_trigger"
@@ -446,13 +443,13 @@ const SettingsApplication: FC = () => {
                   }}
                   variant="outlined"
                   value={numberValue(data.shower_alert_trigger)}
+                  fullWidth
                   type="number"
                   onChange={updateFormValue}
-                  size="small"
                   disabled={!data.shower_timer}
                 />
               </Grid>
-              <Grid item sx={{ pb: 3 }}>
+              <Grid item xs={12} sm={6}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="shower_alert_coldshot"
@@ -462,20 +459,20 @@ const SettingsApplication: FC = () => {
                   }}
                   variant="outlined"
                   value={numberValue(data.shower_alert_coldshot)}
+                  fullWidth
                   type="number"
                   onChange={updateFormValue}
-                  size="small"
                   disabled={!data.shower_timer}
                 />
               </Grid>
             </>
           )}
         </Grid>
-        <Typography variant="h6" color="primary">
+        <Typography sx={{ pt: 3 }} variant="h6" color="primary">
           {LL.FORMATTING_OPTIONS()}
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-          <Grid item xs={6} sm={4}>
+          <Grid item xs={12} sm={6} md={4}>
             <ValidatedTextField
               name="bool_dashboard"
               label={LL.BOOLEAN_FORMAT_DASHBOARD()}
@@ -492,7 +489,7 @@ const SettingsApplication: FC = () => {
               <MenuItem value={5}>1/0</MenuItem>
             </ValidatedTextField>
           </Grid>
-          <Grid item xs={6} sm={4}>
+          <Grid item xs={12} sm={6} md={4}>
             <ValidatedTextField
               name="bool_format"
               label={LL.BOOLEAN_FORMAT_API()}
@@ -511,7 +508,7 @@ const SettingsApplication: FC = () => {
               <MenuItem value={6}>1/0</MenuItem>
             </ValidatedTextField>
           </Grid>
-          <Grid item xs={6} sm={4}>
+          <Grid item xs={12} sm={6} md={4}>
             <ValidatedTextField
               name="enum_format"
               label={LL.ENUM_FORMAT()}
@@ -560,7 +557,7 @@ const SettingsApplication: FC = () => {
         />
         {data.syslog_enabled && (
           <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
-            <Grid item xs={4}>
+            <Grid item xs={12} sm={6}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_host"
@@ -573,7 +570,7 @@ const SettingsApplication: FC = () => {
                 disabled={saving}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={12} sm={6}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_port"
@@ -587,7 +584,7 @@ const SettingsApplication: FC = () => {
                 disabled={saving}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={12} sm={6}>
               <ValidatedTextField
                 name="syslog_level"
                 label={LL.LOG_LEVEL()}
@@ -607,7 +604,7 @@ const SettingsApplication: FC = () => {
                 <MenuItem value={9}>ALL</MenuItem>
               </ValidatedTextField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={12} sm={6}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_mark_interval"
