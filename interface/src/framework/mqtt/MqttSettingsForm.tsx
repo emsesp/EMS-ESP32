@@ -190,7 +190,14 @@ const MqttSettingsForm: FC = () => {
           label={LL.MQTT_RESPONSE()}
         />
         {!data.ha_enabled && (
-          <Grid container rowSpacing={-1} spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+          <Grid
+            container
+            rowSpacing={-1}
+            spacing={1}
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="flex-start"
+          >
             <Grid item>
               <BlockFormControlLabel
                 control={<Checkbox name="publish_single" checked={data.publish_single} onChange={updateFormValue} />}
@@ -218,7 +225,14 @@ const MqttSettingsForm: FC = () => {
               />
             </Grid>
             {data.ha_enabled && (
-              <Grid container sx={{ pl: 1 }} spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+              <Grid
+                container
+                sx={{ pl: 1 }}
+                spacing={1}
+                direction="row"
+                justifyContent="flex-start"
+                alignItems="flex-start"
+              >
                 <Grid item xs={12} sm={6} md={4}>
                   <ValidatedTextField
                     name="discovery_type"
