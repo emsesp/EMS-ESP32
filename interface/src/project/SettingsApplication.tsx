@@ -429,8 +429,16 @@ const SettingsApplication: FC = () => {
             label={LL.ENABLE_SHOWER_ALERT()}
             disabled={!data.shower_timer}
           />
-          </Grid>
-          <Grid container sx={{ pt: 2 }} rowSpacing={3} spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+        </Grid>
+        <Grid
+          container
+          sx={{ pt: 2 }}
+          rowSpacing={3}
+          spacing={1}
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="flex-start"
+        >
           {data.shower_alert && (
             <>
               <Grid item xs={12} sm={6}>

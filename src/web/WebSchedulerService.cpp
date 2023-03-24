@@ -38,7 +38,6 @@ void WebSchedulerService::begin() {
 void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
     JsonArray schedule = root.createNestedArray("schedule");
     uint8_t   counter  = 0;
-    char      s[3];
     for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
         JsonObject si = schedule.createNestedObject();
         si["id"]      = counter++; // id is only used to render the table and must be unique
