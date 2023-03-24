@@ -41,7 +41,7 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
     char      s[3];
     for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
         JsonObject si = schedule.createNestedObject();
-        si["id"]      = Helpers::smallitoa(s, ++counter); // id is only used to render the table and must be unique
+        si["id"]      = counter++; // id is only used to render the table and must be unique
         si["active"]  = scheduleItem.active;
         si["flags"]   = scheduleItem.flags;
         si["time"]    = scheduleItem.time;

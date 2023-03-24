@@ -131,47 +131,47 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     JsonObject statJson;
 
     statJson       = statsJson.createNestedObject();
-    statJson["id"] = "0";
+    statJson["id"] = 0;
     statJson["s"]  = EMSESP::rxservice_.telegram_count();
     statJson["f"]  = EMSESP::rxservice_.telegram_error_count();
     statJson["q"]  = EMSESP::rxservice_.quality();
 
     statJson       = statsJson.createNestedObject();
-    statJson["id"] = "1";
+    statJson["id"] = 1;
     statJson["s"]  = EMSESP::txservice_.telegram_read_count();
     statJson["f"]  = EMSESP::txservice_.telegram_read_fail_count();
     statJson["q"]  = EMSESP::txservice_.read_quality();
 
     statJson       = statsJson.createNestedObject();
-    statJson["id"] = "2";
+    statJson["id"] = 2;
     statJson["s"]  = EMSESP::txservice_.telegram_write_count();
     statJson["f"]  = EMSESP::txservice_.telegram_write_fail_count();
     statJson["q"]  = EMSESP::txservice_.write_quality();
 
     if (EMSESP::dallassensor_.dallas_enabled()) {
         statJson       = statsJson.createNestedObject();
-        statJson["id"] = "3";
+        statJson["id"] = 3;
         statJson["s"]  = EMSESP::dallassensor_.reads();
         statJson["f"]  = EMSESP::dallassensor_.fails();
         statJson["q"]  = EMSESP::dallassensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::dallassensor_.fails()) / EMSESP::dallassensor_.reads());
     }
     if (EMSESP::analog_enabled()) {
         statJson       = statsJson.createNestedObject();
-        statJson["id"] = "4";
+        statJson["id"] = 4;
         statJson["s"]  = EMSESP::analogsensor_.reads();
         statJson["f"]  = EMSESP::analogsensor_.fails();
         statJson["q"]  = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
     }
     if (Mqtt::enabled()) {
         statJson       = statsJson.createNestedObject();
-        statJson["id"] = "5";
+        statJson["id"] = 5;
         statJson["s"]  = Mqtt::publish_count();
         statJson["f"]  = Mqtt::publish_fails();
         statJson["q"]  = Mqtt::publish_count() == 0 ? 100 : 100 - (uint8_t)((100 * Mqtt::publish_fails()) / (Mqtt::publish_count() + Mqtt::publish_fails()));
     }
 
     statJson       = statsJson.createNestedObject();
-    statJson["id"] = "6";
+    statJson["id"] = 6;
     statJson["s"]  = WebAPIService::api_count(); // + WebAPIService::api_fails();
     statJson["f"]  = WebAPIService::api_fails();
     statJson["q"] =
@@ -180,7 +180,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.syslog_enabled()) {
         statJson       = statsJson.createNestedObject();
-        statJson["id"] = "7";
+        statJson["id"] = 7;
         statJson["s"]  = EMSESP::system_.syslog_count();
         statJson["f"]  = EMSESP::system_.syslog_fails();
         statJson["q"]  = EMSESP::system_.syslog_count() == 0

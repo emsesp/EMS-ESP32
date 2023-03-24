@@ -52,15 +52,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 import * as EMSESP from './api';
 
 function makeid() {
-  let result = '';
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const charactersLength = characters.length;
-  let counter = 0;
-  while (counter < 4) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    counter += 1;
-  }
-  return result;
+  return Math.floor(Math.random() * (Math.floor(200) - 100) + 100);
 }
 
 const SettingsScheduler: FC = () => {
@@ -70,7 +62,7 @@ const SettingsScheduler: FC = () => {
   const blocker = useBlocker(numChanges !== 0);
 
   const emptySchedule = {
-    id: '0',
+    id: 0,
     active: false,
     deleted: false,
     flags: 0,
