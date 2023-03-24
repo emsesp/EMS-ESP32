@@ -1352,7 +1352,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                 if (dv.has_tag()) {
                     char name[50];
                     snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag), fullname.c_str());
-                    json["name"] = name;
+                    json["fullname"] = name;
                 } else {
                     json["fullname"] = fullname;
                 }

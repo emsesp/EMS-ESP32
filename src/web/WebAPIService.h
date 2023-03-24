@@ -22,6 +22,7 @@
 #define EMSESP_API_SERVICE_PATH "/api"
 #define GET_SETTINGS_PATH "/rest/getSettings"
 #define GET_CUSTOMIZATIONS_PATH "/rest/getCustomizations"
+#define GET_SCHEDULE_PATH "/rest/getSchedule"
 
 namespace emsesp {
 
@@ -51,6 +52,7 @@ class WebAPIService {
 
     void getSettings(AsyncWebServerRequest * request);
     void getCustomizations(AsyncWebServerRequest * request);
+    void getSchedule(AsyncWebServerRequest * request);
 };
 
 } // namespace emsesp
