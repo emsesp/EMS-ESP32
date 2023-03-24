@@ -43,7 +43,7 @@ export enum busConnectionStatus {
 }
 
 export interface Stat {
-  id: string; // id - needs to be a string
+  id: number; // id
   s: number; // success
   f: number; // fail
   q: number; // quality
@@ -305,7 +305,7 @@ export enum DeviceEntityMask {
 }
 
 export interface ScheduleItem {
-  id: string; // unique index
+  id: number; // unique index
   active: boolean;
   deleted?: boolean; // optional
   flags: number;
@@ -313,7 +313,7 @@ export interface ScheduleItem {
   cmd: string;
   value: string;
   name?: string; // optional
-  o_id?: string;
+  o_id?: number;
   o_active?: boolean;
   o_deleted?: boolean;
   o_flags?: number;

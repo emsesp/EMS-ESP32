@@ -1,7 +1,7 @@
 ﻿/*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- *
+ * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -35,35 +35,35 @@
 //
 
 // device types, as display in Web and Console
-MAKE_WORD_TRANSLATION(boiler_device, "Boiler", "Kessel", "Boiler", "Värmepanna", "Kocioł", "Varmekjele", "", "Kazan") // TODO translate
-MAKE_WORD_TRANSLATION(thermostat_device, "Thermostat", "Thermostat", "Thermostaat",  "Termostat", "Termostat", "Termostat", "", "Termostat") // TODO translate
-MAKE_WORD_TRANSLATION(heatpump_device, "Heat Pump", "Wärmepumpe", "Warmtepomp",  "Värmepump", "Pompa ciepła", "Varmepumpe", "", "Isı Pompası") // TODO translate
-MAKE_WORD_TRANSLATION(solar_device, "Solar Module", "Solarmodul", "Solar Module",  "Solmodul", "Moduł solarny", "Solmodul", "", "Güneş Enerjisi Cihazı") // TODO translate
-MAKE_WORD_TRANSLATION(connect_device, "Connect Module", "Verbindungsmodul", "Connect Module",  "Uppkopplingsmodul", "Moduł przyłączeń", "Sammenkoblingsmodul", "", "Güneş Enerjisi Cihazı") // TODO translate
-MAKE_WORD_TRANSLATION(mixer_device, "Mixer Module", "Mischermodul", "Mixer Module",  "Blandningsmodul", "Moduł mieszacza", "Miksermodul", "", "Karışım Cihazı") // TODO translate
-MAKE_WORD_TRANSLATION(controller_device, "Controller Module", "Kontrollmodul", "Controller Module",  "Styrmodul", "Moduł sterujący", "Styremodul", "", "Kontrol Ünitesi") // TODO translate
-MAKE_WORD_TRANSLATION(switch_device, "Switch Module", "Schaltmodul", "Switch Module",  "Relämodul", "Moduł przełączający", "Switch modul", "", "Anahtar") // TODO translate
-MAKE_WORD_TRANSLATION(gateway_device, "Gateway Module", "Gateway Modul", "Gateway Module",  "Gateway", "Moduł IP", "Gateway", "", "Ağ Geçidi") // TODO translate
-MAKE_WORD_TRANSLATION(alert_device, "Alert Module", "Alarmmodul", "Alert Module",  "Larmmodul", "Moduł alarmowy", "Alarmmodul", "", "Alarm Cihazı") // TODO translate
-MAKE_WORD_TRANSLATION(pump_device, "Pump Module", "Pumpenmodul", "Pump Module",  "Pumpmodul", "Moduł pompy", "Pumpemodul", "", "Pompa") // TODO translate
-MAKE_WORD_TRANSLATION(heatsource_device, "Heatsource", "Heizquelle", "Heatsource",  "Värmekälla", "Źródło ciepła", "Varmekilde", "", "Isı Kaynağı") // TODO translate
+MAKE_WORD_TRANSLATION(boiler_device, "Boiler", "Kessel", "Boiler", "Värmepanna", "Kocioł", "Varmekjele", "", "Kazan")
+MAKE_WORD_TRANSLATION(thermostat_device, "Thermostat", "Thermostat", "Thermostaat",  "Termostat", "Termostat", "Termostat", "", "Termostat")
+MAKE_WORD_TRANSLATION(heatpump_device, "Heat Pump", "Wärmepumpe", "Warmtepomp",  "Värmepump", "Pompa ciepła", "Varmepumpe", "", "Isı Pompası")
+MAKE_WORD_TRANSLATION(solar_device, "Solar Module", "Solarmodul", "Solar Module",  "Solmodul", "Moduł solarny", "Solmodul", "", "Güneş Enerjisi Cihazı")
+MAKE_WORD_TRANSLATION(connect_device, "Connect Module", "Verbindungsmodul", "Connect Module",  "Uppkopplingsmodul", "Moduł przyłączeń", "Sammenkoblingsmodul", "", "Güneş Enerjisi Cihazı")
+MAKE_WORD_TRANSLATION(mixer_device, "Mixer Module", "Mischermodul", "Mixer Module",  "Blandningsmodul", "Moduł mieszacza", "Miksermodul", "", "Karışım Cihazı")
+MAKE_WORD_TRANSLATION(controller_device, "Controller Module", "Kontrollmodul", "Controller Module",  "Styrmodul", "Moduł sterujący", "Styremodul", "", "Kontrol Ünitesi")
+MAKE_WORD_TRANSLATION(switch_device, "Switch Module", "Schaltmodul", "Switch Module",  "Relämodul", "Moduł przełączający", "Switch modul", "", "Anahtar")
+MAKE_WORD_TRANSLATION(gateway_device, "Gateway Module", "Gateway Modul", "Gateway Module",  "Gateway", "Moduł IP", "Gateway", "", "Ağ Geçidi")
+MAKE_WORD_TRANSLATION(alert_device, "Alert Module", "Alarmmodul", "Alert Module",  "Larmmodul", "Moduł alarmowy", "Alarmmodul", "", "Alarm Cihazı")
+MAKE_WORD_TRANSLATION(pump_device, "Pump Module", "Pumpenmodul", "Pump Module",  "Pumpmodul", "Moduł pompy", "Pumpemodul", "", "Pompa")
+MAKE_WORD_TRANSLATION(heatsource_device, "Heatsource", "Heizquelle", "Heatsource",  "Värmekälla", "Źródło ciepła", "Varmekilde", "", "Isı Kaynağı")
 MAKE_WORD_TRANSLATION(sensors_device, "Sensors", "Sensoren", "Sensoren", "Sensorer", "Czujniki", "Sensorer", "Capteurs", "Sensör Cihazı")
-MAKE_WORD_TRANSLATION(unknown_device, "Unknown", "Unbekannt", "Onbekend", "Okänt", "Nieznane urządzenie", "Ukjent", "Inconnu", "") // TODO translate
+MAKE_WORD_TRANSLATION(unknown_device, "Unknown", "Unbekannt", "Onbekend", "Okänt", "Nieznane urządzenie", "Ukjent", "Inconnu", "")
 
 // commands
 // TODO translate
-MAKE_WORD_TRANSLATION(info_cmd, "lists all values", "Liste aller Werte", "", "", "wyświetl wszystkie wartości", "Viser alle verdier", "", "Tüm değerleri listele") // TODO translate
-MAKE_WORD_TRANSLATION(commands_cmd, "lists all commands", "Liste aller Kommandos", "", "", "wyświetl wszystkie komendy", "Viser alle kommandoer", "", "Tüm komutları listele") // TODO translate
-MAKE_WORD_TRANSLATION(entities_cmd, "lists all entities", "Liste aller Entitäten", "", "", "wyświetl wszsytkie encje", "Viser alle enheter", "", "Tüm varlıkları listele") // TODO translate
-MAKE_WORD_TRANSLATION(send_cmd, "send a telegram", "Sende EMS-Telegramm", "", "", "wyślij telegram", "send et telegram", "", "Bir telegram gönder") // TODO translate
-MAKE_WORD_TRANSLATION(setiovalue_cmd, "set io value", "Setze Wertevorgabe", "", "", "ustaw wartość", "sett en io verdi", "", "Giriş/Çıkış değerlerini ayarla") // TODO translate
-MAKE_WORD_TRANSLATION(changeloglevel_cmd, "change log level", "Ändere Sysloglevel", "", "", "zmień poziom log-u", "endre loggnivå", "", "Kayıt seviyesini değiştir") // TODO translate
-MAKE_WORD_TRANSLATION(fetch_cmd, "refresh all EMS values", "Lese alle EMS-Werte neu", "", "", "odśwież wszystkie wartości EMS", "oppfrisk alle EMS verdier", "", "Bütün EMS değerlerini yenile") // TODO translate
-MAKE_WORD_TRANSLATION(restart_cmd, "restart EMS-ESP", "Neustart", "", "", "uruchom ponownie EMS-ESP", "restart EMS-ESP", "", "EMS-ESPyi yeniden başlat") // TODO translate
-MAKE_WORD_TRANSLATION(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme", "", "", "obserwuj przyczodzące telegramy", "se innkommende telegrammer", "", "Gelen telegramları ") // TODO translate
-MAKE_WORD_TRANSLATION(publish_cmd, "publish all to MQTT", "Publiziere MQTT", "", "", "opublikuj wszystko na MQTT", "Publiser alt til MQTT", "", "Hepsini MQTTye gönder") // TODO translate
-MAKE_WORD_TRANSLATION(system_info_cmd, "show system status", "Zeige System-Status", "", "", "pokaż status systemu", "vis system status", "", "Sistem Durumunu Göster") // TODO translate
-MAKE_WORD_TRANSLATION(schedule_cmd, "enable schedule item", "Aktiviere Zeitplan", "", "", "aktywuj wybrany harmonogram", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(info_cmd, "lists all values", "Liste aller Werte", "", "", "wyświetl wszystkie wartości", "Viser alle verdier", "", "Tüm değerleri listele")
+MAKE_WORD_TRANSLATION(commands_cmd, "lists all commands", "Liste aller Kommandos", "", "", "wyświetl wszystkie komendy", "Viser alle kommandoer", "", "Tüm komutları listele")
+MAKE_WORD_TRANSLATION(entities_cmd, "lists all entities", "Liste aller Entitäten", "", "", "wyświetl wszsytkie encje", "Viser alle enheter", "", "Tüm varlıkları listele")
+MAKE_WORD_TRANSLATION(send_cmd, "send a telegram", "Sende EMS-Telegramm", "", "", "wyślij telegram", "send et telegram", "", "Bir telegram gönder")
+MAKE_WORD_TRANSLATION(setiovalue_cmd, "set io value", "Setze Wertevorgabe", "", "", "ustaw wartość", "sett en io verdi", "", "Giriş/Çıkış değerlerini ayarla")
+MAKE_WORD_TRANSLATION(changeloglevel_cmd, "change log level", "Ändere Sysloglevel", "", "", "zmień poziom log-u", "endre loggnivå", "", "Kayıt seviyesini değiştir")
+MAKE_WORD_TRANSLATION(fetch_cmd, "refresh all EMS values", "Lese alle EMS-Werte neu", "", "", "odśwież wszystkie wartości EMS", "oppfrisk alle EMS verdier", "", "Bütün EMS değerlerini yenile")
+MAKE_WORD_TRANSLATION(restart_cmd, "restart EMS-ESP", "Neustart", "", "", "uruchom ponownie EMS-ESP", "restart EMS-ESP", "se innkommende telegrammer", "EMS-ESPyi yeniden başlat")
+MAKE_WORD_TRANSLATION(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme", "", "", "obserwuj przyczodzące telegramy", "se innkommende telegrammer", "", "Gelen telegramları ")
+MAKE_WORD_TRANSLATION(publish_cmd, "publish all to MQTT", "Publiziere MQTT", "", "", "opublikuj wszystko na MQTT", "Publiser alt til MQTT", "", "Hepsini MQTTye gönder")
+MAKE_WORD_TRANSLATION(system_info_cmd, "show system status", "Zeige System-Status", "", "", "pokaż status systemu", "vis system status", "", "Sistem Durumunu Göster")
+MAKE_WORD_TRANSLATION(schedule_cmd, "enable schedule item", "Aktiviere Zeitplan", "", "", "aktywuj wybrany harmonogram", "", "", "")
 
 // tags
 MAKE_WORD_TRANSLATION(tag_boiler_data_ww, "dhw", "WW", "dhw", "VV", "CWU", "dhw", "ecs", "SKS")
@@ -104,6 +104,7 @@ MAKE_WORD_TRANSLATION(tag_hs14, "hs14", "hs14", "hs14", "VK14", "ŹC14", "hs14",
 MAKE_WORD_TRANSLATION(tag_hs15, "hs15", "hs15", "hs15", "VK15", "ŹC15", "hs15", "hs15", "hs15")
 MAKE_WORD_TRANSLATION(tag_hs16, "hs16", "hs16", "hs16", "VK16", "ŹC16", "hs16", "hs16", "hs16")
 
+
 // General
 MAKE_WORD_TRANSLATION(on, "on", "an", "aan", "på", "włączono", "på", "on", "açık")
 MAKE_WORD_TRANSLATION(off, "off", "aus", "uit", "av", "wyłączono", "av", "off", "kapalı")
@@ -115,19 +116,19 @@ MAKE_WORD_TRANSLATION(OFF, "OFF", "AUS", "UIT", "AV", "wył.", "AV", "OFF", "KAP
 MAKE_WORD_TRANSLATION(minutes, "minutes", "Minuten", "Minuten", "Minuter", "minut", "Minutter", "minutes", "dakika")
 MAKE_WORD_TRANSLATION(hours, "hours", "Stunden", "Uren", "Timmar", "godzin", "Timer", "heures", "saat")
 MAKE_WORD_TRANSLATION(days, "days", "Tage", "Dagen", "Dagar", "dni", "Dager", "jours", "gün")
-MAKE_WORD_TRANSLATION(seconds, "seconds", "Sekunden", "Seconden", "Sekunder", "sekund", "Sekunder", "secondes", "saniye")
+MAKE_WORD_TRANSLATION(seconds, "seconds", "Sekunden", "Seconden", "Sekunder", "sekundy", "Sekunder", "secondes", "saniye")
 
 // Enum translations
 // general
-MAKE_WORD_TRANSLATION(day_mo, "mo", "Mo", "Mo", "Må", "poniedziałek", "Ma", "lun", "pzt")
-MAKE_WORD_TRANSLATION(day_tu, "tu", "Di", "Di", "Ti", "wtorek", "Ti", "mar", "sal")
-MAKE_WORD_TRANSLATION(day_we, "we", "Mi", "Wo", "On", "środa", "On", "mer", "çar")
-MAKE_WORD_TRANSLATION(day_th, "th", "Do", "Do", "To", "czwartek", "To", "jeu", "per")
-MAKE_WORD_TRANSLATION(day_fr, "fr", "Fr", "Vr", "Fr", "piątek", "Fr", "ven", "cum")
-MAKE_WORD_TRANSLATION(day_sa, "sa", "Sa", "Za", "Lö", "sobota", "Lø", "sam", "cts")
-MAKE_WORD_TRANSLATION(day_su, "su", "So", "Zo", "Sö", "niedziela", "Sø", "dim", "paz")
+MAKE_WORD_TRANSLATION(day_mo, "mo", "Mo", "Mo", "Må", "poniedziałek", "ma", "lun", "pzt")
+MAKE_WORD_TRANSLATION(day_tu, "tu", "Di", "Di", "Ti", "wtorek", "ti", "mar", "sal")
+MAKE_WORD_TRANSLATION(day_we, "we", "Mi", "Wo", "On", "środa", "on", "mer", "çar")
+MAKE_WORD_TRANSLATION(day_th, "th", "Do", "Do", "To", "czwartek", "to", "jeu", "per")
+MAKE_WORD_TRANSLATION(day_fr, "fr", "Fr", "Vr", "Fr", "piątek", "fr", "ven", "cum")
+MAKE_WORD_TRANSLATION(day_sa, "sa", "Sa", "Za", "Lö", "sobota", "lø", "sam", "cts")
+MAKE_WORD_TRANSLATION(day_su, "su", "So", "Zo", "Sö", "niedziela", "sø", "dim", "paz")
 MAKE_WORD_TRANSLATION(all, "all", "Alle", "Alle", "Alla", "codziennie", "alle", "tous", "tüm")
-MAKE_WORD_TRANSLATION(own_1, "own 1", "Eigen 1", "Eigen 1", "Egen 1", "własny 1", "Egen 1", "propre 1", "kendi 1")
+MAKE_WORD_TRANSLATION(own_1, "own 1", "Eigen 1", "Eigen 1", "Egen 1", "własny 1", "egen 1", "propre 1", "kendi 1")
 MAKE_WORD_TRANSLATION(family, "family", "Familie", "Familie", "Familj", "rodzina", "familie", "famille", "aile")
 MAKE_WORD_TRANSLATION(morning, "morning", "Morgends", "'s ochtends", "Morgon", "zmiana 1", "morgen", "matin", "sabah")
 MAKE_WORD_TRANSLATION(evening, "evening", "Abends", "'s avonds", "Kväll", "zmiana 2", "kveld", "soir", "akşam")
@@ -212,6 +213,7 @@ MAKE_WORD_TRANSLATION(german, "german", "Deutsch", "Duits", "Tyska", "niemiecki"
 MAKE_WORD_TRANSLATION(dutch, "dutch", "Niederländisch", "Nederlands", "Nederländska", "niderlandzki", "nederlandsk", "néerlandais", "Flemenkçe")
 MAKE_WORD_TRANSLATION(french, "french", "Französisch", "Frans", "Franska", "francuski", "fransk", "français", "Fransızca")
 MAKE_WORD_TRANSLATION(italian, "italian", "Italienisch", "Italiaans", "Italienska", "włoski", "italiensk", "italien", "İtalyanca")
+
 MAKE_WORD_TRANSLATION(high, "high", "hoch", "hoog", "Hög", "wysoki", "høy", "haut") // TODO translate
 MAKE_WORD_TRANSLATION(low, "low", "niedrig", "laag", "Låg", "niski", "lav", "bas", "düşük")
 MAKE_WORD_TRANSLATION(radiator, "radiator", "Heizkörper", "Radiator", "Radiator", "grzejniki", "radiator", "radiateur", "radyatör")
@@ -413,16 +415,16 @@ MAKE_TRANSLATION(manDefrost, "mandefrost", "manual defrost", "Manuelle Enteisung
 MAKE_TRANSLATION(pvCooling, "pvcooling", "Cooling only with PV", "Kühlen nur mit PV", "", "", "chłodzenie tylko z PV", "kjøling med solpanel", "", "") // TODO translate
 MAKE_TRANSLATION(hpCircPumpWw, "hpcircpumpww", "circulation pump available during dhw", "", "", "", "pompa cyrkulacji dostępna w trakcie c.w.u.", "sirkulasjonspumpe tilgjengelig under varmtvann", "", "") // TODO translate
 MAKE_TRANSLATION(vp_cooling, "vpcooling", "valve/pump cooling", "", "", "", "zawór/pompa chłodzenia", "varmepumpe kjøling", "", "") // TODO translate
-MAKE_TRANSLATION(VC0valve, "vc0valve", "VC0 valve", "VC0 Ventil", "", "", "zawór VC0", "vc0 ventil", "", "") // TODO translate
-MAKE_TRANSLATION(primePump, "primepump", "primary heatpump", "Hauptpumpe", "", "", "główna pompa ciepła", "primærpumpe", "", "") // TODO translate
-MAKE_TRANSLATION(primePumpMod, "primepumpmod", "primary heatpump modulation", "Modulation Hauptpumpe", "", "", "wysterowanie głównej pompy ciepła", "primærpumpelast", "", "") // TODO translate
-MAKE_TRANSLATION(hp3wayValve, "hp3way", "3-way valve", "3-Wege-Ventil", "", "", "zawór 3-drogowy pompy ciepła", "3-veisventil", "", "") // TODO translate
-MAKE_TRANSLATION(elHeatStep1, "elheatstep1", "el. heater step 1", "El. Heizer Stufe 1", "", "", "dogrzewacz poziom 1", "el-kolbe steg 1", "", "") // TODO translate
-MAKE_TRANSLATION(elHeatStep2, "elheatstep2", "el. heater step 2", "El. Heizer Stufe 2", "", "", "dogrzewacz poziom 2", "el-kolbe steg 2", "", "") // TODO translate
-MAKE_TRANSLATION(elHeatStep3, "elheatstep3", "el. heater step 3", "El. Heizer Stufe 3", "", "", "dogrzewacz poziom 3", "el-kolbe steg 3", "", "") // TODO translate
-MAKE_TRANSLATION(wwAlternatingOper, "wwalternatingop", "alternating operation", "Wechselbetrieb", "", "", "praca naprzemienna", "alternativ drift", "") // TODO translate
-MAKE_TRANSLATION(wwAltOpPrioHeat, "wwaltopprioheat", "prioritise heating during dhw", "Heizen bevorzugt vor WW", "", "", "czas na ogrzewanie w trakcie c.w.u", "prioritert oppvarmning", "", "") // TODO translate
-MAKE_TRANSLATION(wwAltOpPrioWw, "wwaltopprioww", "prioritise dhw during heating", "WW bevorzugt vor Heizen", "", "", "czas na c.w.u w trakcie ogrzewania", "prioritert varmtvann", "", "") // TODO translate
+MAKE_TRANSLATION(VC0valve, "vc0valve", "VC0 valve", "", "", "", "zawór VC0", "vc0 ventil", "", "") // TODO translate
+MAKE_TRANSLATION(primePump, "primepump", "primary heatpump", "", "", "", "główna pompa ciepła", "primærpumpe", "", "") // TODO translate
+MAKE_TRANSLATION(primePumpMod, "primepumpmod", "primary heatpump modulation", "", "", "", "wysterowanie głównej pompy ciepła", "primærpumpelast", "", "") // TODO translate
+MAKE_TRANSLATION(hp3wayValve, "hp3way", "3-way valve", "", "", "", "zawór 3-drogowy pompy ciepła", "3-veisventil", "", "") // TODO translate
+MAKE_TRANSLATION(elHeatStep1, "elheatstep1", "el. heater step 1", "", "", "", "dogrzewacz poziom 1", "el-kolbe steg 1", "", "") // TODO translate
+MAKE_TRANSLATION(elHeatStep2, "elheatstep2", "el. heater step 2", "", "", "", "dogrzewacz poziom 2", "el-kolbe steg 2", "", "") // TODO translate
+MAKE_TRANSLATION(elHeatStep3, "elheatstep3", "el. heater step 3", "", "", "", "dogrzewacz poziom 3", "el-kolbe steg 3", "", "") // TODO translate
+MAKE_TRANSLATION(wwAlternatingOper, "wwalternatingop", "alternating operation", "", "", "", "praca naprzemienna", "alternativ drift", "") // TODO translate
+MAKE_TRANSLATION(wwAltOpPrioHeat, "wwaltopprioheat", "prioritise heating during dhw", "", "", "", "czas na ogrzewanie w trakcie c.w.u", "prioritert oppvarmning", "", "") // TODO translate
+MAKE_TRANSLATION(wwAltOpPrioWw, "wwaltopprioww", "prioritise dhw during heating", "", "", "", "czas na c.w.u w trakcie ogrzewania", "prioritert varmtvann", "", "") // TODO translate
 
 // hybrid heatpump
 MAKE_TRANSLATION(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride", "")
