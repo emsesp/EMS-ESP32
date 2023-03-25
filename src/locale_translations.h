@@ -59,7 +59,7 @@ MAKE_WORD_TRANSLATION(send_cmd, "send a telegram", "Sende EMS-Telegramm", "", ""
 MAKE_WORD_TRANSLATION(setiovalue_cmd, "set io value", "Setze Wertevorgabe", "", "", "ustaw wartość", "sett en io verdi", "", "Giriş/Çıkış değerlerini ayarla") // TODO translate
 MAKE_WORD_TRANSLATION(changeloglevel_cmd, "change log level", "Ändere Sysloglevel", "", "", "zmień poziom log-u", "endre loggnivå", "", "Kayıt seviyesini değiştir") // TODO translate
 MAKE_WORD_TRANSLATION(fetch_cmd, "refresh all EMS values", "Lese alle EMS-Werte neu", "", "", "odśwież wszystkie wartości EMS", "oppfrisk alle EMS verdier", "", "Bütün EMS değerlerini yenile") // TODO translate
-MAKE_WORD_TRANSLATION(restart_cmd, "restart EMS-ESP", "Neustart", "", "", "uruchom ponownie EMS-ESP", "restart EMS-ESP", "se innkommende telegrammer", "EMS-ESPyi yeniden başlat") // TODO translate
+MAKE_WORD_TRANSLATION(restart_cmd, "restart EMS-ESP", "Neustart", "", "", "uruchom ponownie EMS-ESP", "restart EMS-ESP", "", "EMS-ESPyi yeniden başlat") // TODO translate
 MAKE_WORD_TRANSLATION(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme", "", "", "obserwuj przyczodzące telegramy", "se innkommende telegrammer", "", "Gelen telegramları ") // TODO translate
 MAKE_WORD_TRANSLATION(publish_cmd, "publish all to MQTT", "Publiziere MQTT", "", "", "opublikuj wszystko na MQTT", "Publiser alt til MQTT", "", "Hepsini MQTTye gönder") // TODO translate
 MAKE_WORD_TRANSLATION(system_info_cmd, "show system status", "Zeige System-Status", "", "", "pokaż status systemu", "vis system status", "", "Sistem Durumunu Göster") // TODO translate
