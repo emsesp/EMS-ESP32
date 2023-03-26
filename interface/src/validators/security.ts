@@ -8,6 +8,16 @@ export const SECURITY_SETTINGS_VALIDATOR = new Schema({
   ]
 });
 
+export const createUniqueUsernameValidator = (users: User[]) => ({
+  validator(rule: InternalRuleItem, username: string, callback: (error?: string) => void) {
+    if (username && users.find((u) => u.username === username)) {
+      callback('Username already in use');
+    } else {
+      callback();
+    }
+  }
+});
+
 export const createUserValidator = (users: User[], creating: boolean) =>
   new Schema({
     username: [
@@ -24,13 +34,3 @@ export const createUserValidator = (users: User[], creating: boolean) =>
       { type: 'string', min: 1, max: 64, message: 'Password must be 1-64 characters' }
     ]
   });
-
-export const createUniqueUsernameValidator = (users: User[]) => ({
-  validator(rule: InternalRuleItem, username: string, callback: (error?: string) => void) {
-    if (username && users.find((u) => u.username === username)) {
-      callback('Username already in use');
-    } else {
-      callback();
-    }
-  }
-});

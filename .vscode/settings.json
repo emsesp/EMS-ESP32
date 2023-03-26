@@ -4,6 +4,7 @@
     "**/.pnp.*": true
   },
   "eslint.nodePath": "interface/.yarn/sdks",
+  "eslint.workingDirectories": ["interface"],
   "prettier.prettierPath": "interface/.yarn/sdks/prettier/index.js",
   "typescript.tsdk": "interface/.yarn/sdks/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true

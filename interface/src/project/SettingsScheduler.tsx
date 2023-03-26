@@ -92,6 +92,26 @@ const SettingsScheduler: FC = () => {
     return days.map((date) => formatter.format(date));
   }
 
+  function hasScheduleChanged(si: ScheduleItem) {
+    return (
+      si.id !== si.o_id ||
+      (si?.name || '') !== (si?.o_name || '') ||
+      si.active !== si.o_active ||
+      si.deleted !== si.o_deleted ||
+      si.flags !== si.o_flags ||
+      si.time !== si.o_time ||
+      si.cmd !== si.o_cmd ||
+      si.value !== si.o_value
+    );
+  }
+
+  const getNumChanges = () => {
+    if (!schedule) {
+      return 0;
+    }
+    return schedule.filter((si) => hasScheduleChanged(si)).length;
+  };
+
   useEffect(() => {
     setNumChanges(getNumChanges());
   });
@@ -141,20 +161,6 @@ const SettingsScheduler: FC = () => {
     `
   });
 
-  const fetchSchedule = useCallback(async () => {
-    try {
-      const response = await EMSESP.readSchedule();
-      setOriginalSchedule(response.data.schedule);
-    } catch (error) {
-      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-    setDow(getDayNames());
-  }, [LL]);
-
-  useEffect(() => {
-    fetchSchedule();
-  }, [fetchSchedule]);
-
   const setOriginalSchedule = (data: ScheduleItem[]) => {
     setSchedule(
       data.map((si) => ({
@@ -170,6 +176,20 @@ const SettingsScheduler: FC = () => {
       }))
     );
   };
+
+  const fetchSchedule = useCallback(async () => {
+    try {
+      const response = await EMSESP.readSchedule();
+      setOriginalSchedule(response.data.schedule);
+    } catch (error) {
+      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
+    }
+    setDow(getDayNames());
+  }, [LL]);
+
+  useEffect(() => {
+    fetchSchedule();
+  }, [fetchSchedule]);
 
   const getFlagNumber = (newFlag: string[]) => {
     let new_flag = 0;
@@ -206,26 +226,6 @@ const SettingsScheduler: FC = () => {
       new_flags.push('128');
     }
     return new_flags;
-  };
-
-  function hasScheduleChanged(si: ScheduleItem) {
-    return (
-      si.id !== si.o_id ||
-      (si?.name || '') !== (si?.o_name || '') ||
-      si.active !== si.o_active ||
-      si.deleted !== si.o_deleted ||
-      si.flags !== si.o_flags ||
-      si.time !== si.o_time ||
-      si.cmd !== si.o_cmd ||
-      si.value !== si.o_value
-    );
-  }
-
-  const getNumChanges = () => {
-    if (!schedule) {
-      return 0;
-    }
-    return schedule.filter((si) => hasScheduleChanged(si)).length;
   };
 
   const saveSchedule = async () => {

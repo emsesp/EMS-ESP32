@@ -63,14 +63,14 @@ const SettingsApplication: FC = () => {
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
   const [processingBoard, setProcessingBoard] = useState<boolean>(false);
 
-  const updateBoardProfile = async (board_profile: string) => {
+  const updateBoardProfile = async (boardProfile: string) => {
     setProcessingBoard(true);
     try {
-      const response = await EMSESP.getBoardProfile({ board_profile: board_profile });
+      const response = await EMSESP.getBoardProfile({ board_profile: boardProfile });
       if (data) {
         setData({
           ...data,
-          board_profile: board_profile,
+          board_profile: boardProfile,
           led_gpio: response.data.led_gpio,
           dallas_gpio: response.data.dallas_gpio,
           rx_gpio: response.data.rx_gpio,
@@ -105,15 +105,15 @@ const SettingsApplication: FC = () => {
     };
 
     const changeBoardProfile = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const board_profile = event.target.value;
+      const boardProfile = event.target.value;
       updateFormValue(event);
-      if (board_profile === 'CUSTOM') {
+      if (boardProfile === 'CUSTOM') {
         setData({
           ...data,
-          board_profile: board_profile
+          board_profile: boardProfile
         });
       } else {
-        updateBoardProfile(board_profile);
+        updateBoardProfile(boardProfile);
       }
     };
 

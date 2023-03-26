@@ -30,6 +30,8 @@ import { ReactComponent as TRflag } from 'i18n/TR.svg';
 const SignIn: FC = () => {
   const authenticationContext = useContext(AuthenticationContext);
 
+  const { LL, setLocale, locale } = useContext(I18nContext);
+
   const [signInRequest, setSignInRequest] = useState<SignInRequest>({
     username: '',
     password: ''
@@ -38,20 +40,6 @@ const SignIn: FC = () => {
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
   const updateLoginRequestValue = updateValue(setSignInRequest);
-
-  const validateAndSignIn = async () => {
-    setProcessing(true);
-    SIGN_IN_REQUEST_VALIDATOR.messages({
-      required: LL.IS_REQUIRED('%s')
-    });
-    try {
-      await validate(SIGN_IN_REQUEST_VALIDATOR, signInRequest);
-      signIn();
-    } catch (errors: any) {
-      setFieldErrors(errors);
-      setProcessing(false);
-    }
-  };
 
   const signIn = async () => {
     try {
@@ -69,9 +57,21 @@ const SignIn: FC = () => {
     }
   };
 
-  const submitOnEnter = onEnterCallback(signIn);
+  const validateAndSignIn = async () => {
+    setProcessing(true);
+    SIGN_IN_REQUEST_VALIDATOR.messages({
+      required: LL.IS_REQUIRED('%s')
+    });
+    try {
+      await validate(SIGN_IN_REQUEST_VALIDATOR, signInRequest);
+      signIn();
+    } catch (errors: any) {
+      setFieldErrors(errors);
+      setProcessing(false);
+    }
+  };
 
-  const { LL, setLocale, locale } = useContext(I18nContext);
+  const submitOnEnter = onEnterCallback(signIn);
 
   const selectLocale = async (loc: Locales) => {
     localStorage.setItem('lang', loc);

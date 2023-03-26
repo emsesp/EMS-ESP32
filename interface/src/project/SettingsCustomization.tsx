@@ -70,6 +70,32 @@ const SettingsCustomization: FC = () => {
   // eslint-disable-next-line
   const [masks, setMasks] = useState(() => ['']);
 
+  function hasEntityChanged(de: DeviceEntity) {
+    return (de?.cn || '') !== (de?.o_cn || '') || de.m !== de.o_m || de.ma !== de.o_ma || de.mi !== de.o_mi;
+  }
+
+  const getChanges = () => {
+    if (!deviceEntities || selectedDevice === -1) {
+      return [];
+    }
+
+    return deviceEntities
+      .filter((de) => hasEntityChanged(de))
+      .map(
+        (new_de) =>
+          new_de.m.toString(16).padStart(2, '0') +
+          new_de.id +
+          (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
+          (new_de.cn ? new_de.cn : '') +
+          (new_de.mi ? '>' + new_de.mi : '') +
+          (new_de.ma ? '<' + new_de.ma : '')
+      );
+  };
+
+  const countChanges = () => {
+    setNumChanges(getChanges().length);
+  };
+
   useEffect(() => {
     countChanges();
   });
@@ -259,32 +285,6 @@ const SettingsCustomization: FC = () => {
     } finally {
       setConfirmReset(false);
     }
-  };
-
-  function hasEntityChanged(de: DeviceEntity) {
-    return (de?.cn || '') !== (de?.o_cn || '') || de.m !== de.o_m || de.ma !== de.o_ma || de.mi !== de.o_mi;
-  }
-
-  const getChanges = () => {
-    if (!deviceEntities || selectedDevice === -1) {
-      return [];
-    }
-
-    return deviceEntities
-      .filter((de) => hasEntityChanged(de))
-      .map(
-        (new_de) =>
-          new_de.m.toString(16).padStart(2, '0') +
-          new_de.id +
-          (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
-          (new_de.cn ? new_de.cn : '') +
-          (new_de.mi ? '>' + new_de.mi : '') +
-          (new_de.ma ? '<' + new_de.ma : '')
-      );
-  };
-
-  const countChanges = () => {
-    setNumChanges(getChanges().length);
   };
 
   const restart = async () => {
