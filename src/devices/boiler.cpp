@@ -1098,7 +1098,13 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     has_bitupdate(telegram, ignWork_, 2, 3);
     has_bitupdate(telegram, heatingPump_, 2, 5);
     has_bitupdate(telegram, wwCirc_, 2, 7);
-    //has_update(telegram, exhaustTemp_, 6);
+    
+    /* Update exhaust temperature if it is unequal 0 */
+    const uint8_t exhaustTempOffset{6};
+    uint16_t exhaustTemp{0};
+    if (telegram->read_value(exhaustTemp, exhaustTempOffset))
+        has_update(telegram, exhaustTemp_, exhaustTempOffset);
+    
     has_update(telegram, burnStarts_, 10, 3);   // force to 3 bytes
     has_update(telegram, burnWorkMin_, 13, 3);  // force to 3 bytes
     has_update(telegram, burn2WorkMin_, 16, 3); // force to 3 bytes
