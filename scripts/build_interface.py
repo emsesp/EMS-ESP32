@@ -39,6 +39,7 @@ def buildWeb():
             text = r.read().replace("Locales = 'pl'", "Locales = 'en'")
         with open("./src/i18n/i18n-util.ts", "w") as w:
             w.write(text)
+        print("Setting locale to 'en'")
         env.Execute("yarn run build")
 
         buildPath = Path("build")
