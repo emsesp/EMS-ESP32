@@ -216,7 +216,7 @@ void WebAPIService::getEntities(AsyncWebServerRequest * request) {
 
     root["type"] = "entities";
 
-    System::extractSettings(EMSESP_ENTITY_FILE, "Entites", root);
+    System::extractSettings(EMSESP_ENTITY_FILE, "Entities", root);
 
     response->setLength();
     request->send(response);

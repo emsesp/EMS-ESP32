@@ -166,7 +166,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 #ifndef EMSESP_STANDALONE
     String old_syslog_host = settings.syslog_host;
     settings.syslog_host   = root["syslog_host"] | EMSESP_DEFAULT_SYSLOG_HOST;
-    if (!old_syslog_host.equals(settings.syslog_host)) {
+    if (old_syslog_host != settings.syslog_host) {
         add_flags(ChangeFlags::SYSLOG);
     }
 #endif
@@ -260,7 +260,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     String old_locale = settings.locale;
     settings.locale   = root["locale"] | EMSESP_DEFAULT_LOCALE;
     EMSESP::system_.locale(settings.locale);
-    if (Mqtt::ha_enabled() && !old_locale.equals(settings.locale)) {
+    if (Mqtt::ha_enabled() && old_locale != settings.locale) {
         add_flags(ChangeFlags::MQTT);
     }
 
