@@ -37,6 +37,7 @@ WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * security
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&WebAPIService::getCustomizations, this, _1), AuthenticationPredicates::IS_ADMIN));
     server->on(GET_SCHEDULE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebAPIService::getSchedule, this, _1), AuthenticationPredicates::IS_ADMIN));
+    server->on(GET_ENTITIES_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebAPIService::getEntities, this, _1), AuthenticationPredicates::IS_ADMIN));
 }
 
 // HTTP GET
@@ -204,6 +205,18 @@ void WebAPIService::getSchedule(AsyncWebServerRequest * request) {
     root["type"] = "schedule";
 
     System::extractSettings(EMSESP_SCHEDULER_FILE, "Schedule", root);
+
+    response->setLength();
+    request->send(response);
+}
+
+void WebAPIService::getEntities(AsyncWebServerRequest * request) {
+    auto *     response = new AsyncJsonResponse(false, FS_BUFFER_SIZE);
+    JsonObject root     = response->getRoot();
+
+    root["type"] = "entities";
+
+    System::extractSettings(EMSESP_ENTITY_FILE, "Entites", root);
 
     response->setLength();
     request->send(response);

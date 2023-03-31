@@ -318,7 +318,9 @@ const tr: Translation = {
   SCHEDULE_SAVED: 'Schedule updated', // TODO translate
   SCHEDULE_TIMER_1: 'on startup', // TODO translate
   SCHEDULE_TIMER_2: 'every minute', // TODO translate
-  SCHEDULE_TIMER_3: 'every hour' // TODO translate
+  SCHEDULE_TIMER_3: 'every hour', // TODO translate
+  CUSTOM_ENTITIES: 'Custom entities',
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus'
 };
 
 export default tr;

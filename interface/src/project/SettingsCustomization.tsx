@@ -245,6 +245,7 @@ const SettingsCustomization: FC = () => {
     if (devices) {
       const selected_device = parseInt(event.target.value, 10);
       setSelectedDevice(selected_device);
+      setNumChanges(0);
       fetchDeviceEntities(devices?.devices[selected_device].i);
       setRestartNeeded(false);
     }

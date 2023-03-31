@@ -336,6 +336,7 @@ class EMSdevice {
         PUMP,
         GENERIC,
         HEATSOURCE,
+        CUSTOM,
         UNKNOWN
     };
 

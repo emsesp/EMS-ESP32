@@ -539,6 +539,10 @@ bool Command::device_has_commands(const uint8_t device_type) {
         return EMSESP::webSchedulerService.has_commands();
     }
 
+    if (device_type == EMSdevice::DeviceType::CUSTOM) {
+        return (EMSESP::webEntityService.count_entities() != 0);
+    }
+
     if (device_type == EMSdevice::DeviceType::DALLASSENSOR) {
         return (EMSESP::dallassensor_.have_sensors());
     }
