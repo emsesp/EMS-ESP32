@@ -28,7 +28,7 @@
     "@table-library/react-table-library": "4.1.0",
     "@types/lodash-es": "^4.17.7",
     "@types/node": "^18.15.11",
-    "@types/react": "^18.0.32",
+    "@types/react": "^18.0.33",
     "@types/react-dom": "^18.0.11",
     "@types/react-router-dom": "^5.3.3",
     "@yarnpkg/pnpify": "^4.0.0-rc.42",
@@ -51,8 +51,8 @@
   "devDependencies": {
     "@types/mime-types": "^2",
     "@types/styled-components": "^5",
-    "@typescript-eslint/eslint-plugin": "^5.57.0",
-    "@typescript-eslint/parser": "^5.57.0",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
     "@vitejs/plugin-react-swc": "^3.2.0",
     "eslint": "^8.37.0",
     "eslint-config-airbnb": "^19.0.4",
@@ -72,7 +72,7 @@
     "vite": "^4.2.1",
     "vite-plugin-minify": "^1.5.2",
     "vite-plugin-svgr": "^2.4.0",
-    "vite-tsconfig-paths": "^4.0.7"
+    "vite-tsconfig-paths": "^4.0.8"
   },
   "packageManager": "yarn@3.4.1"
 }
