@@ -318,7 +318,9 @@ const de: Translation = {
   SCHEDULE_SAVED: 'Plan gespeichert',
   SCHEDULE_TIMER_1: 'beim Start',
   SCHEDULE_TIMER_2: 'jede Minute',
-  SCHEDULE_TIMER_3: 'jede Stunde'
+  SCHEDULE_TIMER_3: 'jede Stunde',
+  CUSTOM_ENTITIES: 'Individuelle Entitäten',
+  ENTITIES_HELP_1: 'Abfrage von Werten auf dem EMS-Bus'
 };
 
 export default de;

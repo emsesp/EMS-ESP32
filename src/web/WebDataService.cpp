@@ -91,6 +91,18 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
             obj["e"]       = emsdevice->count_entities();                        // number of entities (device values)
         }
     }
+    if (EMSESP::webEntityService.count_entities()) {
+        JsonObject obj = devices.createNestedObject();
+        obj["id"]      = "99";                                         // the last unique id as a string
+        obj["tn"]      = "Custom";                                     // translated device type name
+        obj["t"]       = EMSdevice::DeviceType::CUSTOM;                // device type number
+        obj["b"]       = 0;                                            // brand
+        obj["n"]       = Helpers::translated_word(FL_(custom_device)); // name
+        obj["d"]       = 0;                                            // deviceid
+        obj["p"]       = 0;                                            // productid
+        obj["v"]       = 0;                                            // version
+        obj["e"]       = EMSESP::webEntityService.count_entities();    // number of entities (device values)
+    }
 
     // sensors stuff
     root["s_n"]            = Helpers::translated_word(FL_(sensors_device));
@@ -196,6 +208,15 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
                 return;
             }
         }
+#ifndef EMSESP_STANDALONE
+        if (json["id"] == 99) {
+            JsonObject output = response->getRoot();
+            EMSESP::webEntityService.generate_value_web(output);
+            response->setLength();
+            request->send(response);
+            return;
+        }
+#endif
     }
 
     // invalid but send ok
@@ -255,6 +276,37 @@ void WebDataService::write_value(AsyncWebServerRequest * request, JsonVariant & 
                 request->send(response);
                 return;
             }
+        }
+        if (unique_id == 99) {
+            // parse the command as it could have a hc or wwc prefixed, e.g. hc2/seltemp
+            const char * cmd        = dv["c"];
+            int8_t       id         = -1;
+            cmd                     = Command::parse_command_string(cmd, id);
+            auto *      response    = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
+            JsonObject  output      = response->getRoot();
+            JsonVariant data        = dv["v"]; // the value in any format
+            uint8_t     return_code = CommandRet::OK;
+            uint8_t     device_type = EMSdevice::DeviceType::CUSTOM;
+            if (data.is<int>()) {
+                char s[10];
+                return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0), true, id, output);
+            } else if (data.is<float>()) {
+                char s[10];
+                return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<float>(), 1), true, id, output);
+            } else if (data.is<bool>()) {
+                return_code = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true, id, output);
+            }
+            if (return_code != CommandRet::OK) {
+                EMSESP::logger().err("Write command failed %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
+            } else {
+#if defined(EMSESP_DEBUG)
+                EMSESP::logger().debug("Write command successful");
+#endif
+            }
+            response->setCode((return_code == CommandRet::OK) ? 200 : 204);
+            response->setLength();
+            request->send(response);
+            return;
         }
     }
 

@@ -98,6 +98,7 @@ MAKE_WORD(alert)
 MAKE_WORD(pump)
 MAKE_WORD(heatsource)
 MAKE_WORD(scheduler)
+MAKE_WORD(custom)
 
 // brands
 MAKE_WORD_CUSTOM(bosch, "Bosch")

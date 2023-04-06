@@ -318,7 +318,9 @@ const pl: BaseTranslation = {
   SCHEDULE_SAVED: 'Harmonogram został uaktualniony.',
   SCHEDULE_TIMER_1: 'przy starcie',
   SCHEDULE_TIMER_2: 'co minutę',
-  SCHEDULE_TIMER_3: 'co godzinę'
+  SCHEDULE_TIMER_3: 'co godzinę',
+  CUSTOM_ENTITIES: 'Custom entities',
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus'
 };
 
 export default pl;

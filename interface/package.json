@@ -21,9 +21,9 @@
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
-    "@msgpack/msgpack": "^2.8.0",
-    "@mui/icons-material": "^5.11.16",
-    "@mui/material": "^5.11.16",
+    "@msgpack/msgpack": "^3.0.0-beta2",
+    "@mui/icons-material": "^5.11.11",
+    "@mui/material": "^5.11.15",
     "@remix-run/router": "^1.5.0",
     "@table-library/react-table-library": "4.1.0",
     "@types/lodash-es": "^4.17.7",

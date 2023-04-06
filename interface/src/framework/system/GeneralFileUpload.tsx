@@ -67,6 +67,19 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
     }
   };
 
+  const downloadEntities = async () => {
+    try {
+      const response = await EMSESP.getEntities();
+      if (response.status !== 200) {
+        toast.error(LL.PROBLEM_LOADING());
+      } else {
+        saveFile(response.data, 'entities');
+      }
+    } catch (error) {
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
+    }
+  };
+
   const downloadSchedule = async () => {
     try {
       const response = await EMSESP.getSchedule();
@@ -124,6 +137,14 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
             onClick={() => downloadCustomizations()}
           >
             {LL.CUSTOMIZATIONS()}
+          </Button>
+          <Button sx={{ ml: 2 }}
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={() => downloadEntities()}
+          >
+            {LL.ENTITIES()}
           </Button>
           <Box color="warning.main">
             <Typography mt={2} mb={1} variant="body2">

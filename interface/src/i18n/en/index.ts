@@ -318,7 +318,9 @@ const en: Translation = {
   SCHEDULE_SAVED: 'Schedule updated',
   SCHEDULE_TIMER_1: 'on startup',
   SCHEDULE_TIMER_2: 'every minute',
-  SCHEDULE_TIMER_3: 'every hour'
+  SCHEDULE_TIMER_3: 'every hour',
+  CUSTOM_ENTITIES: 'Custom entities',
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus'
 };
 
 export default en;

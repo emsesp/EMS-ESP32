@@ -32,11 +32,13 @@ ESP8266React            EMSESP::esp8266React(&webServer, &dummyFS);
 WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
+WebEntityService        EMSESP::webEntityService        = WebEntityService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 #else
 ESP8266React            EMSESP::esp8266React(&webServer, &LittleFS);
 WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
+WebEntityService        EMSESP::webEntityService        = WebEntityService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 #endif
 
 WebStatusService EMSESP::webStatusService = WebStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
@@ -480,6 +482,7 @@ void EMSESP::publish_all(bool force) {
         publish_device_values(EMSdevice::DeviceType::MIXER);
         publish_other_values(); // switch and heat pump, ...
         webSchedulerService.publish();
+        webEntityService.publish();
         publish_sensor_values(true); // includes dallas and analog sensors
         system_.send_heartbeat();
     }
@@ -512,6 +515,7 @@ void EMSESP::publish_all_loop() {
     case 5:
         publish_other_values(); // switch and heat pump
         webSchedulerService.publish(true);
+        webEntityService.publish(true);
         break;
     case 6:
         publish_sensor_values(true, true);
@@ -601,6 +605,7 @@ void EMSESP::publish_other_values() {
     // publish_device_values(EMSdevice::DeviceType::ALERT);
     // publish_device_values(EMSdevice::DeviceType::PUMP);
     // publish_device_values(EMSdevice::DeviceType::GENERIC);
+    webEntityService.publish();
 }
 
 // publish both the dallas and analog sensor values
@@ -664,6 +669,11 @@ bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const in
     // scheduler
     if (devicetype == DeviceType::SCHEDULER) {
         return EMSESP::webSchedulerService.get_value_info(root, cmd);
+    }
+
+    // own entities
+    if (devicetype == DeviceType::CUSTOM) {
+        return EMSESP::webEntityService.get_value_info(root, cmd);
     }
 
     char error[100];
@@ -866,6 +876,9 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         return false;
     }
 
+    // Check for custom entities reding this telegram
+    webEntityService.get_value(telegram);
+
     // check for common types, like the Version(0x02)
     if (telegram->type_id == EMSdevice::EMS_TYPE_VERSION) {
         process_version(telegram);
@@ -1063,6 +1076,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             name        = "RF room temperature sensor";
             device_type = DeviceType::THERMOSTAT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_ROOMTHERMOSTAT || device_id == EMSdevice::EMS_DEVICE_ID_TADO_OLD) {
+            // see https://github.com/emsesp/EMS-ESP32/issues/174
             name        = "Generic thermostat";
             device_type = DeviceType::THERMOSTAT;
             flags       = DeviceFlags::EMS_DEVICE_FLAG_RC10 | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE;
@@ -1078,7 +1092,8 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CASCADE) {
             name        = "Cascade";
             device_type = DeviceType::CONNECT;
-        } else if (device_id == EMSdevice::EMS_DEVICE_ID_EASYCOM) {
+        } else if (device_id == EMSdevice::EMS_DEVICE_ID_EASYCOM
+                   || (device_id >= EMSdevice::EMS_DEVICE_ID_MODEM && device_id <= EMSdevice::EMS_DEVICE_ID_MODEM + 5)) {
             // see https://github.com/emsesp/EMS-ESP/issues/460#issuecomment-709553012
             name        = "Modem";
             device_type = DeviceType::CONNECT;
@@ -1372,6 +1387,7 @@ void EMSESP::scheduled_fetch_values() {
                     return;
                 }
             }
+            webEntityService.fetch();
             no = 0;
         }
     }
@@ -1453,6 +1469,7 @@ void EMSESP::start() {
 
     webCustomizationService.begin(); // load the customizations
     webSchedulerService.begin();     // load the scheduler events
+    webEntityService.begin();        // load the custom telegram reads
 
     // start telnet service if it's enabled
     // default idle is 10 minutes, default write timeout is 0 (automatic)

@@ -318,7 +318,9 @@ const no: Translation = {
   SCHEDULE_SAVED: 'Planlegger er oppdatert',
   SCHEDULE_TIMER_1: 'ved oppstart',
   SCHEDULE_TIMER_2: 'hvert minutt',
-  SCHEDULE_TIMER_3: 'hver time'
+  SCHEDULE_TIMER_3: 'hver time',
+  CUSTOM_ENTITIES: 'Custom entities',
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus'
 };
 
 export default no;

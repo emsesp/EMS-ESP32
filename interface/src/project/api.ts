@@ -17,7 +17,8 @@ import {
   WriteSensor,
   WriteAnalog,
   SensorData,
-  Schedule
+  Schedule,
+  Entities
 } from './types';
 
 export function restart(): AxiosPromise<void> {
@@ -94,6 +95,18 @@ export function getSettings(): AxiosPromise<void> {
 
 export function getCustomizations(): AxiosPromise<void> {
   return AXIOS.get('/getCustomizations');
+}
+
+export function getEntities(): AxiosPromise<void> {
+  return AXIOS.get('/getEntities');
+}
+
+export function readEntities(): AxiosPromise<void> {
+  return AXIOS.get('/entity');
+}
+
+export function writeEntities(entities: Entities): AxiosPromise<void> {
+  return AXIOS.post('/entity', entities);
 }
 
 export function getSchedule(): AxiosPromise<Schedule> {
