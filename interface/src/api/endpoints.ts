@@ -7,8 +7,11 @@ export const API_BASE_URL = '/rest/';
 export const ES_BASE_URL = '/es/';
 export const EMSESP_API_BASE_URL = '/api/';
 export const ACCESS_TOKEN = 'access_token';
-export const WEB_SOCKET_ROOT = calculateWebSocketRoot(WS_BASE_URL);
-export const EVENT_SOURCE_ROOT = calculateEventSourceRoot(ES_BASE_URL);
+
+const location = window.location;
+const webProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+export const WEB_SOCKET_ROOT = webProtocol + '//' + location.host + WS_BASE_URL;
+export const EVENT_SOURCE_ROOT = location.protocol + '//' + location.host + ES_BASE_URL;
 
 export const AXIOS = axios.create({
   baseURL: API_BASE_URL,
@@ -75,17 +78,6 @@ export const AXIOS_BIN = axios.create({
     }
   ]
 });
-
-function calculateWebSocketRoot(webSocketPath: string) {
-  const location = window.location;
-  const webProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return webProtocol + '//' + location.host + webSocketPath;
-}
-
-function calculateEventSourceRoot(endpointPath: string) {
-  const location = window.location;
-  return location.protocol + '//' + location.host + endpointPath;
-}
 
 export interface FileUploadConfig {
   cancelToken?: CancelToken;

@@ -1032,6 +1032,8 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     //has_update(telegram, temperatur_, 13); // unknown temperature
     //has_update(telegram, temperatur_, 27); // unknown temperature
 
+    has_update(telegram, exhaustTemp_, 31);
+
     // read 3 char service code / installation status as appears on the display
     if ((telegram->message_length > 3) && (telegram->offset == 0)) {
         char serviceCode[4] = {0};
@@ -1096,7 +1098,7 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     has_bitupdate(telegram, ignWork_, 2, 3);
     has_bitupdate(telegram, heatingPump_, 2, 5);
     has_bitupdate(telegram, wwCirc_, 2, 7);
-    has_update(telegram, exhaustTemp_, 6);
+    // has_update(telegram, exhaustTemp_, 6);   // Disabled until verified as valid location, see #1147.
     has_update(telegram, burnStarts_, 10, 3);   // force to 3 bytes
     has_update(telegram, burnWorkMin_, 13, 3);  // force to 3 bytes
     has_update(telegram, burn2WorkMin_, 16, 3); // force to 3 bytes

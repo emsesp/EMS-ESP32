@@ -102,7 +102,6 @@ const DashboardData: FC = () => {
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
-
       .th {
         border-bottom: 1px solid #565656;
       }
@@ -111,18 +110,15 @@ const DashboardData: FC = () => {
       background-color: #1e1e1e;
       position: relative;
       cursor: pointer;
-    
       .td {
         padding: 8px;
         border-top: 1px solid #565656;
         border-bottom: 1px solid #565656;
       }
-
       &.tr.tr-body.row-select.row-select-single-selected {
         background-color: #3d4752;
         font-weight: normal;
       }
-
       &:hover .td {
         border-top: 1px solid #177ac9;
         border-bottom: 1px solid #177ac9;
@@ -279,6 +275,53 @@ const DashboardData: FC = () => {
     }
   );
 
+  const fetchSensorData = async () => {
+    try {
+      setSensorData((await EMSESP.readSensorData()).data);
+    } catch (error) {
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
+    }
+  };
+
+  const fetchDeviceData = async (id: string) => {
+    const unique_id = parseInt(id);
+    try {
+      setDeviceData((await EMSESP.readDeviceData({ id: unique_id })).data);
+    } catch (error) {
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
+    }
+  };
+
+  const fetchCoreData = useCallback(async () => {
+    try {
+      setCoreData((await EMSESP.readCoreData()).data);
+    } catch (error) {
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
+    }
+  }, [LL]);
+
+  useEffect(() => {
+    fetchCoreData();
+  }, [fetchCoreData]);
+
+  const refreshDataIndex = (selectedDevice: string) => {
+    if (selectedDevice === 'sensor') {
+      fetchSensorData();
+      return;
+    }
+
+    setSensorData({ sensors: [], analogs: [] });
+    if (selectedDevice) {
+      fetchDeviceData(selectedDevice);
+    } else {
+      fetchCoreData();
+    }
+  };
+
+  const refreshData = () => {
+    refreshDataIndex(device_select.state.id);
+  };
+
   function onSelectChange(action: any, state: any) {
     if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
       refreshData();
@@ -337,36 +380,6 @@ const DashboardData: FC = () => {
     );
   };
 
-  const refreshDataIndex = (selectedDevice: string) => {
-    if (selectedDevice === 'sensor') {
-      fetchSensorData();
-      return;
-    }
-
-    setSensorData({ sensors: [], analogs: [] });
-    if (selectedDevice) {
-      fetchDeviceData(selectedDevice);
-    } else {
-      fetchCoreData();
-    }
-  };
-
-  const refreshData = () => {
-    refreshDataIndex(device_select.state.id);
-  };
-
-  const fetchCoreData = useCallback(async () => {
-    try {
-      setCoreData((await EMSESP.readCoreData()).data);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-  }, [LL]);
-
-  useEffect(() => {
-    fetchCoreData();
-  }, [fetchCoreData]);
-
   useEffect(() => {
     const timer = setInterval(() => refreshData(), 60000);
     return () => {
@@ -374,23 +387,6 @@ const DashboardData: FC = () => {
     };
     // eslint-disable-next-line
   }, [analog, sensor, deviceValue, sensorData]);
-
-  const fetchDeviceData = async (id: string) => {
-    const unique_id = parseInt(id);
-    try {
-      setDeviceData((await EMSESP.readDeviceData({ id: unique_id })).data);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-  };
-
-  const fetchSensorData = async () => {
-    try {
-      setSensorData((await EMSESP.readSensorData()).data);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-  };
 
   const isCmdOnly = (dv: DeviceValue) => dv.v === '' && dv.c;
 

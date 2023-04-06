@@ -5,3 +5,5 @@ dist/
 .eslintrc*
 .yarn/
 env.d.ts
+progmem-generator.js
+vite.config.ts
