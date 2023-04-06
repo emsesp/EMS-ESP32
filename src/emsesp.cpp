@@ -383,7 +383,6 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                 emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::CONSOLE);
 
                 // print line
-                uint8_t id = 0;
                 for (JsonPair p : json) {
                     const char * key = p.key().c_str();
                     shell.printf("  %s: ", key);
@@ -402,7 +401,6 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
 
                     shell.print(COLOR_RESET);
                     shell.println();
-                    id++;
                 }
                 shell.println();
             }
@@ -961,12 +959,14 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
     shell.println();
 
     // count the number of thermostats
+    /*
     uint8_t num_thermostats = 0;
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == DeviceType::THERMOSTAT)) {
             num_thermostats++;
         }
     }
+    */
 
     // for all device objects from emsdevice.h
     // so we keep a consistent order

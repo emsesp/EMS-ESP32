@@ -101,17 +101,17 @@ export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: 
     ]
   });
 
-  export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) => ({
-    validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
-      if (name && o_name && o_name !== name && schedule.find((si) => si.name === name)) {
-        callback('Name already in use');
-      } else {
-        callback();
-      }
+export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) => ({
+  validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
+    if (name && o_name && o_name !== name && schedule.find((si) => si.name === name)) {
+      callback('Name already in use');
+    } else {
+      callback();
     }
-  });
+  }
+});
 
-  export const entityItemValidation = (entity: EntityItem[], entityItem: EntityItem) =>
+export const entityItemValidation = (entity: EntityItem[], entityItem: EntityItem) =>
   new Schema({
     name: [
       { required: true, message: 'Name is required' },
@@ -129,19 +129,19 @@ export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: 
     type_id: [
       { required: true, message: 'Type_id is required' },
       { type: 'string', pattern: /^[A-F0-9]{1,4}$/, message: 'Must be a hex number' }
-    ], 
+    ],
     offset: [
       { required: true, message: 'Offset is required' },
       { type: 'number', min: 0, max: 255, message: 'Must be between 0 and 255' }
     ]
   });
 
-  export const uniqueEntityNameValidator = (entity: EntityItem[], o_name?: string) => ({
-    validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
-      if (name && o_name && o_name !== name && entity.find((ei) => ei.name === name)) {
-        callback('Name already in use');
-      } else {
-        callback();
-      }
+export const uniqueEntityNameValidator = (entity: EntityItem[], o_name?: string) => ({
+  validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
+    if (name && o_name && o_name !== name && entity.find((ei) => ei.name === name)) {
+      callback('Name already in use');
+    } else {
+      callback();
     }
-  });
+  }
+});
