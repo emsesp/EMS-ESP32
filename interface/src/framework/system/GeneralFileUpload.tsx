@@ -138,7 +138,8 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
           >
             {LL.CUSTOMIZATIONS()}
           </Button>
-          <Button sx={{ ml: 2 }}
+          <Button
+            sx={{ ml: 2 }}
             startIcon={<DownloadIcon />}
             variant="outlined"
             color="primary"
