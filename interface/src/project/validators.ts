@@ -85,6 +85,16 @@ export const createSettingsValidator = (settings: Settings) =>
     })
   });
 
+export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) => ({
+  validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
+    if (name && o_name && o_name !== name && schedule.find((si) => si.name === name)) {
+      callback('Name already in use');
+    } else {
+      callback();
+    }
+  }
+});
+
 export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: ScheduleItem) =>
   new Schema({
     name: [
@@ -100,13 +110,3 @@ export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: 
       { type: 'string', min: 1, max: 64, message: 'Command must be 1-64 characters' }
     ]
   });
-
-export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) => ({
-  validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
-    if (name && o_name && o_name !== name && schedule.find((si) => si.name === name)) {
-      callback('Name already in use');
-    } else {
-      callback();
-    }
-  }
-});
