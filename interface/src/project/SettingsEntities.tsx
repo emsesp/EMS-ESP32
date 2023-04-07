@@ -69,7 +69,7 @@ const SettingsEntities: FC = () => {
 
   const entity_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: repeat(1, minmax(60px, 1fr)) 80px 80px 80px 80px;
+      --data-table-library_grid-template-columns: repeat(1, minmax(60px, 1fr)) minmax(80px, auto) 80px 80px 80px;
     `,
     BaseRow: `
       font-size: 14px;
@@ -88,7 +88,7 @@ const SettingsEntities: FC = () => {
         text-align: center;
       }
       &:nth-of-type(5) {
-        text-align: right;
+        text-align: center;
       }
     `,
     HeaderRow: `
@@ -186,7 +186,7 @@ const SettingsEntities: FC = () => {
             })
         });
         if (response.status === 200) {
-          toast.success(LL.SUCCESS());
+          toast.success(LL.ENTITIES_SAVED());
         } else {
           toast.error(LL.PROBLEM_UPDATING());
         }
@@ -211,7 +211,7 @@ const SettingsEntities: FC = () => {
       factor: 1,
       val_type: 2,
       uom: 0,
-      name: 'name',
+      name: '',
       deleted: false
     });
   };
@@ -256,10 +256,10 @@ const SettingsEntities: FC = () => {
             <Header>
               <HeaderRow>
                 <HeaderCell>{LL.NAME(0)}</HeaderCell>
-                <HeaderCell stiff>Device ID</HeaderCell>
+                <HeaderCell stiff>{LL.ID_OF(LL.DEVICE())}</HeaderCell>
                 <HeaderCell stiff>Type ID</HeaderCell>
                 <HeaderCell stiff>Offset</HeaderCell>
-                <HeaderCell stiff>{LL.VALUE()}</HeaderCell>
+                <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
               </HeaderRow>
             </Header>
             <Body>
@@ -307,7 +307,7 @@ const SettingsEntities: FC = () => {
       return (
         <Dialog open={!!entityItem} onClose={() => closeDialog()}>
           <DialogTitle>
-            {creating ? LL.ADD(1) + ' ' + LL.NEW() : LL.EDIT()}&nbsp;{LL.CUSTOM_ENTITIES()}
+            {creating ? LL.ADD(1) + ' ' + LL.NEW(1) : LL.EDIT()}&nbsp;{LL.CUSTOM_ENTITIES(1)}
           </DialogTitle>
           <DialogContent dividers>
             <Box display="flex" flexWrap="wrap" mb={1}>
@@ -329,7 +329,7 @@ const SettingsEntities: FC = () => {
               <Grid item xs={4}>
                 <ValidatedTextField
                   name="device_id"
-                  label="Device ID"
+                  label={LL.ID_OF(LL.DEVICE())}
                   margin="normal"
                   fullWidth
                   value={entityItem.device_id}
@@ -451,7 +451,7 @@ const SettingsEntities: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.CUSTOM_ENTITIES()} titleGutter>
+    <SectionContent title={LL.CUSTOM_ENTITIES(0)} titleGutter>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       <Box mb={2} color="warning.main">
         <Typography variant="body2">{LL.ENTITIES_HELP_1()}</Typography>

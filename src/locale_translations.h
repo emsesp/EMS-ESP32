@@ -49,7 +49,8 @@ MAKE_WORD_TRANSLATION(pump_device, "Pump Module", "Pumpenmodul", "Pump Module", 
 MAKE_WORD_TRANSLATION(heatsource_device, "Heatsource", "Heizquelle", "Heatsource",  "Värmekälla", "Źródło ciepła", "Varmekilde", "", "Isı Kaynağı") // TODO translate
 MAKE_WORD_TRANSLATION(sensors_device, "Sensors", "Sensoren", "Sensoren", "Sensorer", "Czujniki", "Sensorer", "Capteurs", "Sensör Cihazı")
 MAKE_WORD_TRANSLATION(unknown_device, "Unknown", "Unbekannt", "Onbekend", "Okänt", "Nieznane urządzenie", "Ukjent", "Inconnu", "") // TODO translate
-MAKE_WORD_TRANSLATION(custom_device, "User defined entities", "Nutzer deklarierte Entitäten", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(custom_device, "Custom", "", "", "", "Niestandardowe", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(custom_device_name, "User defined entities", "Nutzer deklarierte Entitäten", "", "", "Encje zdefiniowane przez użytkownika", "", "", "") // TODO translate
 
 // commands
 // TODO translate
@@ -61,11 +62,11 @@ MAKE_WORD_TRANSLATION(setiovalue_cmd, "set io value", "Setze Wertevorgabe", "", 
 MAKE_WORD_TRANSLATION(changeloglevel_cmd, "change log level", "Ändere Sysloglevel", "", "", "zmień poziom log-u", "endre loggnivå", "", "Kayıt seviyesini değiştir") // TODO translate
 MAKE_WORD_TRANSLATION(fetch_cmd, "refresh all EMS values", "Lese alle EMS-Werte neu", "", "", "odśwież wszystkie wartości EMS", "oppfrisk alle EMS verdier", "", "Bütün EMS değerlerini yenile") // TODO translate
 MAKE_WORD_TRANSLATION(restart_cmd, "restart EMS-ESP", "Neustart", "", "", "uruchom ponownie EMS-ESP", "restart EMS-ESP", "", "EMS-ESPyi yeniden başlat") // TODO translate
-MAKE_WORD_TRANSLATION(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme", "", "", "obserwuj przyczodzące telegramy", "se innkommende telegrammer", "", "Gelen telegramları ") // TODO translate
+MAKE_WORD_TRANSLATION(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme", "", "", "obserwuj przychodzące telegramy", "se innkommende telegrammer", "", "Gelen telegramları ") // TODO translate
 MAKE_WORD_TRANSLATION(publish_cmd, "publish all to MQTT", "Publiziere MQTT", "", "", "opublikuj wszystko na MQTT", "Publiser alt til MQTT", "", "Hepsini MQTTye gönder") // TODO translate
 MAKE_WORD_TRANSLATION(system_info_cmd, "show system status", "Zeige System-Status", "", "", "pokaż status systemu", "vis system status", "", "Sistem Durumunu Göster") // TODO translate
 MAKE_WORD_TRANSLATION(schedule_cmd, "enable schedule item", "Aktiviere Zeitplan", "", "", "aktywuj wybrany harmonogram", "", "", "") // TODO translate
-MAKE_WORD_TRANSLATION(entity_cmd, "set custom value on ems", "Sende eigene Entitäten zu EMS", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(entity_cmd, "set custom value on ems", "Sende eigene Entitäten zu EMS", "", "", "wyślij własną wartość na EMS", "", "", "") // TODO translate
 
 // tags
 MAKE_WORD_TRANSLATION(tag_boiler_data_ww, "dhw", "WW", "dhw", "VV", "CWU", "dhw", "ecs", "SKS")

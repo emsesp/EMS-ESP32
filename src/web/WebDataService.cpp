@@ -93,15 +93,15 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     }
     if (EMSESP::webEntityService.count_entities()) {
         JsonObject obj = devices.createNestedObject();
-        obj["id"]      = "99";                                         // the last unique id as a string
-        obj["tn"]      = "Custom";                                     // translated device type name
-        obj["t"]       = EMSdevice::DeviceType::CUSTOM;                // device type number
-        obj["b"]       = 0;                                            // brand
-        obj["n"]       = Helpers::translated_word(FL_(custom_device)); // name
-        obj["d"]       = 0;                                            // deviceid
-        obj["p"]       = 0;                                            // productid
-        obj["v"]       = 0;                                            // version
-        obj["e"]       = EMSESP::webEntityService.count_entities();    // number of entities (device values)
+        obj["id"]      = "99";                                              // the last unique id as a string
+        obj["tn"]      = Helpers::translated_word(FL_(custom_device));      // translated device type name
+        obj["t"]       = EMSdevice::DeviceType::CUSTOM;                     // device type number
+        obj["b"]       = Helpers::translated_word(FL_(na));                 // brand
+        obj["n"]       = Helpers::translated_word(FL_(custom_device_name)); // name
+        obj["d"]       = 0;                                                 // deviceid
+        obj["p"]       = 0;                                                 // productid
+        obj["v"]       = 0;                                                 // version
+        obj["e"]       = EMSESP::webEntityService.count_entities();         // number of entities (device values)
     }
 
     // sensors stuff

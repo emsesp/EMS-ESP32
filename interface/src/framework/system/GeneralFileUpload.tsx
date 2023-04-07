@@ -145,7 +145,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
             color="primary"
             onClick={() => downloadEntities()}
           >
-            {LL.ENTITIES()}
+            {LL.CUSTOM_ENTITIES(0)}
           </Button>
           <Box color="warning.main">
             <Typography mt={2} mb={1} variant="body2">

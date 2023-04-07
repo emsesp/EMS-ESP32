@@ -240,7 +240,7 @@ const pl: BaseTranslation = {
   MQTT_RESPONSE: 'Rezultat wykonania komendy publikuj w temacie "response"',
   MQTT_PUBLISH_TEXT_1: 'Tematy z pojedynczą wartością publikuj po jej zmianie',
   MQTT_PUBLISH_TEXT_2: 'Publikuj w tematach "command" (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Włącz opcję "MQTT discovery',
+  MQTT_PUBLISH_TEXT_3: 'Włącz opcję "MQTT discovery"',
   MQTT_PUBLISH_TEXT_4: 'Prefiks dla "MQTT discovery"',
   MQTT_PUBLISH_TEXT_5: 'Typ "MQTT discovery"',
   MQTT_PUBLISH_INTERVALS: 'Interwały publikowania',
@@ -287,7 +287,7 @@ const pl: BaseTranslation = {
   NETWORK_BLANK_SSID: 'pozostaw puste aby wyłączyć WiFi',
   TX_POWER: 'Moc nadawania',
   HOSTNAME: 'Nazwa w sieci',
-  NETWORK_DISABLE_SLEEP: 'Wyłącz tryb usypiania WiFi',
+  NETWORK_DISABLE_SLEEP: 'Wyłącz tryb uśpienia WiFi',
   NETWORK_LOW_BAND: 'Używaj mniejszej szerokości pasma WiFi (20MHz)',
   NETWORK_USE_DNS: 'Włącz wsparcie dla mDNS',
   NETWORK_ENABLE_CORS: 'Włącz wsparcie dla CORS',
@@ -300,7 +300,7 @@ const pl: BaseTranslation = {
   ADDRESS_OF: 'Adres {0}',
   ADMIN: 'Użytkownik "administrator".',
   GUEST: 'Użytkownik "gość".',
-  NEW: 'nowego',
+  NEW: 'nowe{{go|j|}}',
   NEW_NAME_OF: 'Nowa nazwa {0}',
   ENTITY: 'encji',
   MIN: 'Min.',
@@ -319,8 +319,9 @@ const pl: BaseTranslation = {
   SCHEDULE_TIMER_1: 'przy starcie',
   SCHEDULE_TIMER_2: 'co minutę',
   SCHEDULE_TIMER_3: 'co godzinę',
-  CUSTOM_ENTITIES: 'Custom entities',
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus'
+  CUSTOM_ENTITIES: '{{N|n|}}iestandardowe{{|j|}} encj{{e|i|}}',
+  ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje pobierane z magistrali EMS.',
+  ENTITIES_SAVED: 'Niestandardowe encje zostały uaktualnione.'
 };
 
 export default pl;

@@ -416,7 +416,7 @@ const SettingsScheduler: FC = () => {
       return (
         <Dialog open={!!scheduleItem} onClose={() => closeDialog()}>
           <DialogTitle>
-            {creating ? LL.ADD(1) + ' ' + LL.NEW() : LL.EDIT()}&nbsp;{LL.SCHEDULE(1)}
+            {creating ? LL.ADD(1) + ' ' + LL.NEW(0) : LL.EDIT()}&nbsp;{LL.SCHEDULE(1)}
           </DialogTitle>
           <DialogContent dividers>
             <Box display="flex" flexWrap="wrap" mb={1}>

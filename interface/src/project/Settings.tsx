@@ -24,7 +24,7 @@ const Settings: FC = () => {
         <Tab value="application" label={LL.APPLICATION_SETTINGS()} />
         <Tab value="customization" label={LL.CUSTOMIZATIONS()} />
         <Tab value="scheduler" label={LL.SCHEDULER()} />
-        <Tab value="customentities" label={LL.CUSTOM_ENTITIES()} />
+        <Tab value="customentities" label={LL.CUSTOM_ENTITIES(0)} />
       </RouterTabs>
       <Routes>
         <Route path="application" element={<SettingsApplication />} />
