@@ -24,7 +24,7 @@ const pl: BaseTranslation = {
   SECURITY: '{{B|b|}}ezpieczeństw{{o|a|}}',
   ONOFF_CAP: 'wł./wył.',
   ONOFF: 'włączono/wyłączono',
-  TYPE: 'Typ',
+  TYPE: '{{T|t|}}yp{{|u|}}',
   DESCRIPTION: 'Opis',
   ENTITIES: 'Encje',
   REFRESH: 'Odśwież',

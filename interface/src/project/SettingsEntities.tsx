@@ -259,7 +259,7 @@ const SettingsEntities: FC = () => {
               <HeaderRow>
                 <HeaderCell>{LL.NAME(0)}</HeaderCell>
                 <HeaderCell stiff>{LL.ID_OF(LL.DEVICE())}</HeaderCell>
-                <HeaderCell stiff>Type ID</HeaderCell>
+                <HeaderCell stiff>{LL.ID_OF(LL.TYPE(1))}</HeaderCell>
                 <HeaderCell stiff>Offset</HeaderCell>
                 <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
               </HeaderRow>
@@ -344,7 +344,7 @@ const SettingsEntities: FC = () => {
               <Grid item xs={4}>
                 <ValidatedTextField
                   name="type_id"
-                  label="Type ID"
+                  label={LL.ID_OF(LL.TYPE(1))}
                   margin="normal"
                   fullWidth
                   value={entityItem.type_id}

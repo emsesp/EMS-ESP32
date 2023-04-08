@@ -643,7 +643,7 @@ const DashboardData: FC = () => {
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
-                <ListItemText primary={LL.TYPE()} secondary={coreData.devices[deviceDialog].tn} />
+                <ListItemText primary={LL.TYPE(0)} secondary={coreData.devices[deviceDialog].tn} />
               </ListItem>
               <ListItem>
                 <ListItemText primary={LL.NAME(0)} secondary={coreData.devices[deviceDialog].n} />
@@ -688,7 +688,7 @@ const DashboardData: FC = () => {
             <Header>
               <HeaderRow>
                 <HeaderCell stiff />
-                <HeaderCell stiff>{LL.TYPE()}</HeaderCell>
+                <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
                 <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
                 <HeaderCell stiff>{LL.ENTITIES()}</HeaderCell>
                 <HeaderCell stiff />
@@ -940,7 +940,7 @@ const DashboardData: FC = () => {
                     endIcon={getSortIcon(analog_sort.state, 'TYPE')}
                     onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'TYPE' })}
                   >
-                    {LL.TYPE()}
+                    {LL.TYPE(0)}
                   </Button>
                 </HeaderCell>
                 <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
@@ -1060,7 +1060,7 @@ const DashboardData: FC = () => {
               <Grid item xs={8}>
                 <ValidatedTextField
                   name="t"
-                  label={LL.TYPE()}
+                  label={LL.TYPE(0)}
                   value={analog.t}
                   fullWidth
                   select
