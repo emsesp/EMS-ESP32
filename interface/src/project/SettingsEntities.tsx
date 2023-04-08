@@ -69,7 +69,7 @@ const SettingsEntities: FC = () => {
 
   const entity_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: repeat(1, minmax(60px, 1fr)) minmax(80px, auto) 80px 80px 80px;
+      --data-table-library_grid-template-columns: repeat(1, minmax(60px, 1fr)) minmax(60px, auto) minmax(60px, auto) minmax(60px, auto) minmax(60px, auto);
     `,
     BaseRow: `
       font-size: 14px;
@@ -78,6 +78,8 @@ const SettingsEntities: FC = () => {
       }
     `,
     BaseCell: `
+      padding-left: 10px;
+      padding-right: 10px;
       &:nth-of-type(2) {
         text-align: center;
       }
@@ -88,7 +90,7 @@ const SettingsEntities: FC = () => {
         text-align: center;
       }
       &:nth-of-type(5) {
-        text-align: center;
+        text-align: right;
       }
     `,
     HeaderRow: `
