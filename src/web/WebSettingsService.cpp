@@ -247,20 +247,27 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     prev                 = settings.bool_format;
     settings.bool_format = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
     EMSESP::system_.bool_format(settings.bool_format);
-    if (Mqtt::ha_enabled())
+    if (Mqtt::ha_enabled()) {
         check_flag(prev, settings.bool_format, ChangeFlags::MQTT);
+    }
 
     prev                 = settings.enum_format;
     settings.enum_format = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
     EMSESP::system_.enum_format(settings.enum_format);
-    if (Mqtt::ha_enabled())
+    if (Mqtt::ha_enabled()) {
         check_flag(prev, settings.enum_format, ChangeFlags::MQTT);
+    }
+
+    String old_locale = settings.locale;
+    settings.locale   = root["locale"] | EMSESP_DEFAULT_LOCALE;
+    EMSESP::system_.locale(settings.locale);
+    if (Mqtt::ha_enabled() && !old_locale.equals(settings.locale)) {
+        add_flags(ChangeFlags::MQTT);
+    }
 
     //
     // without checks or necessary restarts...
     //
-    settings.locale = root["locale"] | EMSESP_DEFAULT_LOCALE;
-    EMSESP::system_.locale(settings.locale);
 
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
