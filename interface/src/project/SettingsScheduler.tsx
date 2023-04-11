@@ -72,12 +72,12 @@ const SettingsScheduler: FC = () => {
     name: '',
     o_name: ''
   };
+
   const [schedule, setSchedule] = useState<ScheduleItem[]>([emptySchedule]);
   const [scheduleItem, setScheduleItem] = useState<ScheduleItem>();
   const [dow, setDow] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>();
   const [creating, setCreating] = useState<boolean>(false);
-
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
   // eslint-disable-next-line

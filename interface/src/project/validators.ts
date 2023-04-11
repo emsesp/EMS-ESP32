@@ -85,6 +85,16 @@ export const createSettingsValidator = (settings: Settings) =>
     })
   });
 
+export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) => ({
+  validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
+    if (name && o_name && o_name !== name && schedule.find((si) => si.name === name)) {
+      callback('Name already in use');
+    } else {
+      callback();
+    }
+  }
+});
+
 export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: ScheduleItem) =>
   new Schema({
     name: [
@@ -101,9 +111,9 @@ export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: 
     ]
   });
 
-export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) => ({
+export const uniqueEntityNameValidator = (entities: EntityItem[], o_name?: string) => ({
   validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
-    if (name && o_name && o_name !== name && schedule.find((si) => si.name === name)) {
+    if (name && o_name && o_name !== name && entities.find((ei) => ei.name === name)) {
       callback('Name already in use');
     } else {
       callback();
@@ -111,7 +121,7 @@ export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) =
   }
 });
 
-export const entityItemValidation = (entity: EntityItem[], entityItem: EntityItem) =>
+export const entityItemValidation = (entities: EntityItem[], entityItem: EntityItem) =>
   new Schema({
     name: [
       { required: true, message: 'Name is required' },
@@ -120,28 +130,15 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
         pattern: /^[a-zA-Z0-9_\\.]{1,15}$/,
         message: "Must be <15 characters: alpha numeric, '_' or '.'"
       },
-      ...[uniqueEntityNameValidator(entity, entityItem.o_name)]
+      ...[uniqueEntityNameValidator(entities, entityItem.o_name)]
     ],
-    device_id: [
-      { required: true, message: 'Device_id is required' },
-      { type: 'string', pattern: /^[A-F0-9]{1,2}$/, message: 'Must be a hex number' }
-    ],
-    type_id: [
-      { required: true, message: 'Type_id is required' },
-      { type: 'string', pattern: /^[A-F0-9]{1,4}$/, message: 'Must be a hex number' }
-    ],
-    offset: [
-      { required: true, message: 'Offset is required' },
-      { type: 'number', min: 0, max: 255, message: 'Must be between 0 and 255' }
-    ]
+    device_id: [{ type: 'hex', required: true, message: 'ID must be a hex value' }]
+    // type_id: [
+    //   { required: true, message: 'Type_id is required' },
+    //   { type: 'string', pattern: /^[A-F0-9]{1,4}$/, message: 'Must be a hex number' }
+    // ],
+    // offset: [
+    //   { required: true, message: 'Offset is required' },
+    //   { type: 'number', min: 0, max: 255, message: 'Must be between 0 and 255' }
+    // ]
   });
-
-export const uniqueEntityNameValidator = (entity: EntityItem[], o_name?: string) => ({
-  validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
-    if (name && o_name && o_name !== name && entity.find((ei) => ei.name === name)) {
-      callback('Name already in use');
-    } else {
-      callback();
-    }
-  }
-});

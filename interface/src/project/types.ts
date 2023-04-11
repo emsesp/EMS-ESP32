@@ -339,25 +339,27 @@ export enum ScheduleFlag {
 }
 
 export interface EntityItem {
+  id: number; // unique number
   name: string;
-  device_id: string;
-  type_id: string;
+  device_id: number;
+  type_id: number;
   offset: number;
   factor: number;
   uom: number;
   val_type: number;
   value?: number;
+  deleted?: boolean; // optional
+  o_id?: number;
   o_name?: string;
-  o_device_id?: string;
-  o_type_id?: string;
+  o_device_id?: number;
+  o_type_id?: number;
   o_offset?: number;
   o_factor?: number;
   o_uom?: number;
   o_val_type?: number;
-  deleted?: boolean; // optional
   o_deleted?: boolean;
 }
 
 export interface Entities {
-  entity: EntityItem[];
+  entities: EntityItem[];
 }

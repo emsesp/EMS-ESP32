@@ -97,18 +97,6 @@ export function getCustomizations(): AxiosPromise<void> {
   return AXIOS.get('/getCustomizations');
 }
 
-export function getEntities(): AxiosPromise<void> {
-  return AXIOS.get('/getEntities');
-}
-
-export function readEntities(): AxiosPromise<void> {
-  return AXIOS.get('/entity');
-}
-
-export function writeEntities(entities: Entities): AxiosPromise<void> {
-  return AXIOS.post('/entity', entities);
-}
-
 export function getSchedule(): AxiosPromise<Schedule> {
   return AXIOS.get('/getSchedule');
 }
@@ -119,4 +107,16 @@ export function readSchedule(): AxiosPromise<Schedule> {
 
 export function writeSchedule(schedule: Schedule): AxiosPromise<void> {
   return AXIOS.post('/schedule', schedule);
+}
+
+export function getEntities(): AxiosPromise<Entities> {
+  return AXIOS.get('/getEntities');
+}
+
+export function readEntities(): AxiosPromise<Entities> {
+  return AXIOS.get('/entities');
+}
+
+export function writeEntities(entities: Entities): AxiosPromise<void> {
+  return AXIOS.post('/entities', entities);
 }

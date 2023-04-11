@@ -60,7 +60,6 @@ const ManageUsersForm: FC = () => {
         border-top: 1px solid #565656;
         border-bottom: 1px solid #565656;
       }
-
       &:nth-of-type(odd) .td {
         background-color: #303030;
       }

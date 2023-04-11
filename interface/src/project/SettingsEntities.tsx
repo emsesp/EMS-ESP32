@@ -10,7 +10,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
   MenuItem,
   InputAdornment
 } from '@mui/material';
@@ -33,35 +32,61 @@ import { extractErrorMessage, updateValue } from 'utils';
 
 import { validate } from 'validators';
 import { entityItemValidation } from './validators';
+import { ValidateFieldsError } from 'async-validator';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
-import { ValidateFieldsError } from 'async-validator';
-
 import * as EMSESP from './api';
 
+function makeid() {
+  return Math.floor(Math.random() * (Math.floor(200) - 100) + 100);
+}
+
 const SettingsEntities: FC = () => {
-  const { LL, locale } = useI18nContext();
+  const { LL } = useI18nContext();
 
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
 
   const emptyEntity = {
+    id: 0,
+    name: '',
     device_id: 8,
-    type_id: 2,
+    type_id: 0,
     offset: 0,
     factor: 1,
     uom: 0,
     val_type: 2,
-    name: 'name',
-    deleted: false
+    deleted: false,
+    o_name: ''
   };
-  const [entity, setEntity] = useState<EntityItem[]>([emptyEntity]);
+
+  const [entities, setEntities] = useState<EntityItem[]>([emptyEntity]);
   const [entityItem, setEntityItem] = useState<EntityItem>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [creating, setCreating] = useState<boolean>(false);
-
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
+
+  function hasEntityChanged(ei: EntityItem) {
+    return (
+      ei.id !== ei.o_id ||
+      (ei?.name || '') !== (ei?.o_name || '') ||
+      ei.device_id !== ei.o_device_id ||
+      ei.type_id !== ei.o_type_id ||
+      ei.offset !== ei.o_offset ||
+      ei.uom !== ei.o_uom ||
+      ei.factor !== ei.o_factor ||
+      ei.val_type !== ei.o_val_type ||
+      ei.deleted !== ei.o_deleted
+    );
+  }
+
+  const getNumChanges = () => {
+    if (!entities) {
+      return 0;
+    }
+    return entities.filter((ei) => hasEntityChanged(ei)).length;
+  };
 
   useEffect(() => {
     setNumChanges(getNumChanges());
@@ -78,6 +103,9 @@ const SettingsEntities: FC = () => {
       }
     `,
     BaseCell: `
+      &:nth-of-type(1) {
+        padding: 8px;
+      }
       &:nth-of-type(2) {
         text-align: center;
       }
@@ -88,7 +116,7 @@ const SettingsEntities: FC = () => {
         text-align: center;
       }
       &:nth-of-type(5) {
-        text-align: right;
+        text-align: center;
       }
     `,
     HeaderRow: `
@@ -118,23 +146,11 @@ const SettingsEntities: FC = () => {
     `
   });
 
-  const fetchEntities = useCallback(async () => {
-    try {
-      const response = await EMSESP.readEntities();
-      setOriginalEntity(response.data.entity);
-    } catch (error) {
-      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-  }, [LL]);
-
-  useEffect(() => {
-    fetchEntities();
-  }, [fetchEntities]);
-
   const setOriginalEntity = (data: EntityItem[]) => {
-    setEntity(
+    setEntities(
       data.map((ei) => ({
         ...ei,
+        o_id: ei.id,
         o_device_id: ei.device_id,
         o_type_id: ei.type_id,
         o_offset: ei.offset,
@@ -147,41 +163,35 @@ const SettingsEntities: FC = () => {
     );
   };
 
-  function hasEntityChanged(ei: EntityItem) {
-    return (
-      ei.device_id !== ei.o_device_id ||
-      ei.type_id !== ei.o_type_id ||
-      ei.name !== ei.o_name ||
-      ei.offset !== ei.o_offset ||
-      ei.uom !== ei.o_uom ||
-      ei.factor !== ei.o_factor ||
-      ei.val_type !== ei.o_val_type ||
-      ei.deleted !== ei.o_deleted
-    );
-  }
-
-  const getNumChanges = () => {
-    if (!entity) {
-      return 0;
+  const fetchEntities = useCallback(async () => {
+    try {
+      const response = await EMSESP.readEntities();
+      setOriginalEntity(response.data.entities);
+    } catch (error) {
+      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
-    return entity.filter((ei) => hasEntityChanged(ei)).length;
-  };
+  }, [LL]);
 
-  const saveEntity = async () => {
-    if (entity) {
+  useEffect(() => {
+    void fetchEntities();
+  }, [fetchEntities]);
+
+  const saveEntities = async () => {
+    if (entities) {
       try {
         const response = await EMSESP.writeEntities({
-          entity: entity
+          entities: entities
             .filter((ei) => !ei.deleted)
             .map((condensed_ei) => {
               return {
+                id: condensed_ei.id,
+                name: condensed_ei.name,
                 device_id: condensed_ei.device_id,
                 type_id: condensed_ei.type_id,
                 offset: condensed_ei.offset,
                 factor: condensed_ei.factor,
-                val_type: condensed_ei.val_type,
                 uom: condensed_ei.uom,
-                name: condensed_ei.name
+                val_type: condensed_ei.val_type
               };
             })
         });
@@ -193,7 +203,7 @@ const SettingsEntities: FC = () => {
       } catch (error) {
         toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       }
-      setOriginalEntity(entity);
+      setOriginalEntity(entities);
     }
   };
 
@@ -205,20 +215,22 @@ const SettingsEntities: FC = () => {
   const addEntityItem = () => {
     setCreating(true);
     setEntityItem({
-      device_id: 8,
-      type_id: 2,
+      id: makeid(),
+      device_id: 11,
+      type_id: 0,
       offset: 0,
       factor: 1,
       val_type: 2,
       uom: 0,
-      name: 'name',
+      name: '',
       deleted: false
     });
   };
 
   const updateEntityItem = () => {
+    console.log('here');
     if (entityItem) {
-      setEntity([...entity.filter((ei) => creating || ei.o_name !== entityItem.o_name), entityItem]);
+      setEntities([...entities.filter((ei) => creating || ei.o_id !== entityItem.o_id), entityItem]);
     }
     setEntityItem(undefined);
   };
@@ -233,24 +245,20 @@ const SettingsEntities: FC = () => {
     return new Intl.NumberFormat().format(value) + ' ' + DeviceValueUOM_s[uom];
   }
 
-  function showHex(value: string, digit: number) {
+  function showHex(value: number, digit: number) {
     if (digit === 4) {
-      return '0x' + ('000' + value).slice(-4);
+      return '0x' + ('000' + value.toString(16).toUpperCase()).slice(-4);
     }
-    return '0x' + ('0' + value).slice(-2);
+    return '0x' + ('0' + value.toString(16).toUpperCase()).slice(-2);
   }
 
   const renderEntity = () => {
-    if (!entity) {
+    if (!entities) {
       return <FormLoader errorMessage={errorMessage} />;
     }
 
     return (
-      <Table
-        data={{ nodes: entity.filter((ei) => !ei.deleted).sort((a, b) => a.name.localeCompare(b.time)) }}
-        theme={entity_theme}
-        layout={{ custom: true }}
-      >
+      <Table data={{ nodes: entities.filter((ei) => !ei.deleted) }} theme={entity_theme} layout={{ custom: true }}>
         {(tableList: any) => (
           <>
             <Header>
@@ -259,7 +267,7 @@ const SettingsEntities: FC = () => {
                 <HeaderCell stiff>Device ID</HeaderCell>
                 <HeaderCell stiff>Type ID</HeaderCell>
                 <HeaderCell stiff>Offset</HeaderCell>
-                <HeaderCell stiff>{LL.VALUE()}</HeaderCell>
+                <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
               </HeaderRow>
             </Header>
             <Body>
@@ -287,11 +295,16 @@ const SettingsEntities: FC = () => {
 
   const validateEntityItem = async () => {
     if (entityItem) {
+      console.log(1);
       try {
         setFieldErrors(undefined);
-        await validate(entityItemValidation(entity, entityItem), entityItem);
+        console.log(2);
+        await validate(entityItemValidation(entities, entityItem), entityItem);
+        console.log(3);
         updateEntityItem();
       } catch (errors: any) {
+        console.log(4);
+        console.log(errors);
         setFieldErrors(errors);
       }
     }
@@ -307,7 +320,7 @@ const SettingsEntities: FC = () => {
       return (
         <Dialog open={!!entityItem} onClose={() => closeDialog()}>
           <DialogTitle>
-            {creating ? LL.ADD(1) + ' ' + LL.NEW() : LL.EDIT()}&nbsp;{LL.CUSTOM_ENTITIES()}
+            {creating ? LL.ADD(1) + ' ' + LL.NEW() : LL.EDIT()}&nbsp;{LL.ENTITY()}
           </DialogTitle>
           <DialogContent dividers>
             <Box display="flex" flexWrap="wrap" mb={1}>
@@ -323,11 +336,12 @@ const SettingsEntities: FC = () => {
                   value={entityItem.name}
                   margin="normal"
                   fullWidth
-                  onChange={updateValue(setEntityItem)}
+                  // onChange={updateValue(setEntityItem)}
                 />
               </Grid>
               <Grid item xs={4}>
                 <ValidatedTextField
+                  fieldErrors={fieldErrors}
                   name="device_id"
                   label="Device ID"
                   margin="normal"
@@ -341,6 +355,7 @@ const SettingsEntities: FC = () => {
               </Grid>
               <Grid item xs={4}>
                 <ValidatedTextField
+                  fieldErrors={fieldErrors}
                   name="type_id"
                   label="Type ID"
                   margin="normal"
@@ -354,6 +369,7 @@ const SettingsEntities: FC = () => {
               </Grid>
               <Grid item xs={4}>
                 <ValidatedTextField
+                  fieldErrors={fieldErrors}
                   name="offset"
                   label="Offset"
                   margin="normal"
@@ -469,7 +485,7 @@ const SettingsEntities: FC = () => {
                 startIcon={<WarningIcon color="warning" />}
                 variant="contained"
                 color="info"
-                onClick={() => saveEntity()}
+                onClick={() => saveEntities()}
               >
                 {LL.APPLY_CHANGES(numChanges)}
               </Button>

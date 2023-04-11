@@ -319,8 +319,8 @@ const pl: BaseTranslation = {
   SCHEDULE_TIMER_1: 'przy starcie',
   SCHEDULE_TIMER_2: 'co minutę',
   SCHEDULE_TIMER_3: 'co godzinę',
-  CUSTOM_ENTITIES: 'Custom entities',
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus'
+  CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus' // TODO translate
 };
 
 export default pl;

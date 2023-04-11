@@ -23,12 +23,12 @@
     "@emotion/styled": "^11.10.6",
     "@msgpack/msgpack": "^3.0.0-beta2",
     "@mui/icons-material": "^5.11.16",
-    "@mui/material": "^5.11.16",
+    "@mui/material": "^5.12.0",
     "@remix-run/router": "^1.5.0",
     "@table-library/react-table-library": "4.1.0",
     "@types/lodash-es": "^4.17.7",
     "@types/node": "^18.15.11",
-    "@types/react": "^18.0.33",
+    "@types/react": "^18.0.34",
     "@types/react-dom": "^18.0.11",
     "@types/react-router-dom": "^5.3.3",
     "@yarnpkg/pnpify": "^4.0.0-rc.42",
@@ -46,15 +46,15 @@
     "react-toastify": "^9.1.2",
     "sockette": "^2.0.6",
     "typesafe-i18n": "^5.24.3",
-    "typescript": "^5.0.3"
+    "typescript": "^5.0.4"
   },
   "devDependencies": {
     "@types/mime-types": "^2",
     "@types/styled-components": "^5",
-    "@typescript-eslint/eslint-plugin": "^5.57.1",
-    "@typescript-eslint/parser": "^5.57.1",
-    "@vitejs/plugin-react-swc": "^3.2.0",
-    "eslint": "^8.37.0",
+    "@typescript-eslint/eslint-plugin": "^5.58.0",
+    "@typescript-eslint/parser": "^5.58.0",
+    "@vitejs/plugin-react-swc": "^3.3.0",
+    "eslint": "^8.38.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-prettier": "^8.8.0",
@@ -68,11 +68,11 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^2.8.7",
     "rollup-plugin-visualizer": "^5.9.0",
-    "terser": "^5.16.8",
+    "terser": "^5.16.9",
     "vite": "^4.2.1",
     "vite-plugin-minify": "^1.5.2",
     "vite-plugin-svgr": "^2.4.0",
-    "vite-tsconfig-paths": "^4.0.8"
+    "vite-tsconfig-paths": "^4.1.0"
   },
   "packageManager": "yarn@3.4.1"
 }

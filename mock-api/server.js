@@ -599,6 +599,32 @@ const emsesp_devicedata_4 = {
   ]
 };
 
+// CUSTOM ENTITIES
+let emsesp_entities = {
+  entities: [
+    {
+      id: 0,
+      name: 'test1',
+      device_id: 8,
+      type_id: 2,
+      offset: 0,
+      factor: 0,
+      uom: 2,
+      val_type: 2
+    },
+    {
+      id: 1,
+      name: 'test2',
+      device_id: 11,
+      type_id: 222,
+      offset: 2,
+      factor: 2,
+      uom: 4,
+      val_type: 5
+    }
+  ]
+};
+
 // SCHEDULE
 let emsesp_schedule = {
   schedule: [
@@ -1367,6 +1393,12 @@ const GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
 rest_server.get(GET_SCHEDULE_ENDPOINT, (req, res) => {
   console.log('Sending Schedule data');
   res.json(emsesp_schedule);
+});
+
+const GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
+rest_server.get(GET_ENTITIES_ENDPOINT, (req, res) => {
+  console.log('Sending Entities data');
+  res.json(emsesp_entities);
 });
 
 // start server
