@@ -815,8 +815,8 @@ void Mqtt::process_queue() {
 #if defined(EMSESP_DEBUG)
         LOG_DEBUG("[DEBUG] Waiting for QOS-ACK");
 #endif
-        // if we don't get the ack within 10 minutes, republish with new packet_id
-        if (uuid::get_uptime_sec() - last_publish_queue_ < 600) {
+        // if we don't get the ack within 10 seconds, republish with new packet_id
+        if (uuid::get_uptime_sec() - last_publish_queue_ < 10) {
             return;
         }
     }

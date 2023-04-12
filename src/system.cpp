@@ -659,7 +659,6 @@ void System::network_init(bool refresh) {
     }
 
     last_system_check_ = 0; // force the LED to go from fast flash to pulse
-    send_heartbeat();
 
     if (phy_type_ == PHY_type::PHY_TYPE_NONE) {
         return;
@@ -715,7 +714,6 @@ void System::system_check() {
                     digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
 #endif
                 }
-                send_heartbeat();
             } else {
                 // turn off LED so we're ready to the flashes
                 if (led_gpio_) {

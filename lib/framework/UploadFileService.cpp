@@ -71,7 +71,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
                 return;
             }
 #elif CONFIG_IDF_TARGET_ESP32S3
-            if (len > 12 && (data[0] != 0xE9 || data[12] != 3)) {
+            if (len > 12 && (data[0] != 0xE9 || data[12] != 9)) {
                 handleError(request, 503); // service unavailable
                 return;
             }
