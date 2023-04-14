@@ -47,13 +47,13 @@ const SettingsEntities: FC = () => {
   const blocker = useBlocker(numChanges !== 0);
 
   const emptyEntity = {
-    device_id: 8,
-    type_id: 2,
+    device_id: '',
+    type_id: '',
     offset: 0,
     factor: 1,
     uom: 0,
     val_type: 2,
-    name: 'name',
+    name: '',
     deleted: false
   };
   const [entity, setEntity] = useState<EntityItem[]>([emptyEntity]);
@@ -204,16 +204,7 @@ const SettingsEntities: FC = () => {
 
   const addEntityItem = () => {
     setCreating(true);
-    setEntityItem({
-      device_id: 8,
-      type_id: 2,
-      offset: 0,
-      factor: 1,
-      val_type: 2,
-      uom: 0,
-      name: 'name',
-      deleted: false
-    });
+    setEntityItem(emptyEntity);
   };
 
   const updateEntityItem = () => {
