@@ -320,7 +320,8 @@ const de: Translation = {
   SCHEDULE_TIMER_2: 'jede Minute',
   SCHEDULE_TIMER_3: 'jede Stunde',
   CUSTOM_ENTITIES: 'Individuelle Entitäten',
-  ENTITIES_HELP_1: 'Abfrage von Werten auf dem EMS-Bus'
+  ENTITIES_HELP_1: 'Abfrage von Werten auf dem EMS-Bus',
+  WRITEABLE: 'Schreibbar'
 };
 
 export default de;
