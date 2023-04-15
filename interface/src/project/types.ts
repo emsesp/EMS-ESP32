@@ -356,6 +356,8 @@ export interface EntityItem {
   o_val_type?: number;
   deleted?: boolean; // optional
   o_deleted?: boolean;
+  write: boolean;
+  o_write?: boolean;
 }
 
 export interface Entities {

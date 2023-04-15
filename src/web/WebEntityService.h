@@ -34,6 +34,7 @@ class EntityItem {
     uint8_t     uom;
     std::string name;
     double      factor;
+    bool        writeable;
     uint32_t    val;
 };
 

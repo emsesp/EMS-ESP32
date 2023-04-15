@@ -46,6 +46,7 @@ void WebEntity::read(WebEntity & webEntity, JsonObject & root) {
         ei["name"]      = entityItem.name;
         ei["uom"]       = entityItem.uom;
         ei["val_type"]  = entityItem.valuetype;
+        ei["write"]     = entityItem.writeable;
         EMSESP::webEntityService.render_value(ei, entityItem, true);
     }
 }
@@ -68,6 +69,7 @@ StateUpdateResult WebEntity::update(JsonObject & root, WebEntity & webEntity) {
             entityItem.name      = ei["name"].as<std::string>();
             entityItem.uom       = ei["uom"];
             entityItem.valuetype = ei["val_type"];
+            entityItem.writeable = ei["write"];
 
             if (entityItem.valuetype == DeviceValueType::BOOL) {
                 entityItem.val = EMS_VALUE_DEFAULT_BOOL;
@@ -84,12 +86,16 @@ StateUpdateResult WebEntity::update(JsonObject & root, WebEntity & webEntity) {
             }
 
             webEntity.entityItems.push_back(entityItem); // add to list
-            Command::add(
-                EMSdevice::DeviceType::CUSTOM,
-                webEntity.entityItems.back().name.c_str(),
-                [webEntity](const char * value, const int8_t id) { return EMSESP::webEntityService.command_setvalue(value, webEntity.entityItems.back().name); },
-                FL_(entity_cmd),
-                CommandFlag::ADMIN_ONLY);
+            if (entityItem.writeable) {
+                Command::add(
+                    EMSdevice::DeviceType::CUSTOM,
+                    webEntity.entityItems.back().name.c_str(),
+                    [webEntity](const char * value, const int8_t id) {
+                        return EMSESP::webEntityService.command_setvalue(value, webEntity.entityItems.back().name);
+                    },
+                    FL_(entity_cmd),
+                    CommandFlag::ADMIN_ONLY);
+            }
         }
     }
     return StateUpdateResult::CHANGED;
@@ -215,7 +221,7 @@ bool WebEntityService::get_value_info(JsonObject & output, const char * cmd) {
             output["name"]      = entity.name;
             output["uom"]       = EMSdevice::uom_to_string(entity.uom);
             output["readable"]  = true;
-            output["writeable"] = true;
+            output["writeable"] = entity.writeable;
             output["visible"]   = true;
             render_value(output, entity, true);
             if (attribute_s) {
@@ -250,8 +256,8 @@ void WebEntityService::publish_single(const EntityItem & entity) {
     } else {
         snprintf(topic, sizeof(topic), "%s/%s", "custom_data", entity.name.c_str());
     }
-    StaticJsonDocument<256> doc;
-    JsonObject              output = doc.to<JsonObject>();
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
+    JsonObject                                 output = doc.to<JsonObject>();
     render_value(output, entity, true);
     Mqtt::queue_publish(topic, output["value"].as<std::string>());
 }
@@ -343,7 +349,9 @@ void WebEntityService::generate_value_web(JsonObject & output) {
         JsonObject obj = data.createNestedObject(); // create the object, we know there is a value
         obj["id"]      = "00" + entity.name;
         obj["u"]       = entity.uom;
-        obj["c"]       = entity.name;
+        if (entity.writeable) {
+            obj["c"] = entity.name;
+        }
         switch (entity.valuetype) {
         case DeviceValueType::BOOL: {
             char s[12];

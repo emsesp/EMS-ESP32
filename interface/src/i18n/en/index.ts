@@ -320,7 +320,8 @@ const en: Translation = {
   SCHEDULE_TIMER_2: 'every minute',
   SCHEDULE_TIMER_3: 'every hour',
   CUSTOM_ENTITIES: 'Custom entities',
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus'
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus',
+  WRITEABLE: 'Writeable'
 };
 
 export default en;

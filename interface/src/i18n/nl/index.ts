@@ -320,7 +320,8 @@ const nl: Translation = {
   SCHEDULE_TIMER_2: 'every minute', // TODO translate
   SCHEDULE_TIMER_3: 'every hour', // TODO translate
   CUSTOM_ENTITIES: 'Custom entities',
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus'
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus',
+  WRITEABLE: 'Writeable' // TODO translate
 };
 
 export default nl;

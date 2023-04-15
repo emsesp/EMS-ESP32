@@ -10,8 +10,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
   MenuItem,
+  Checkbox,
   InputAdornment
 } from '@mui/material';
 
@@ -26,7 +26,14 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
 import AddIcon from '@mui/icons-material/Add';
 
-import { ValidatedTextField, ButtonRow, FormLoader, SectionContent, BlockNavigation } from 'components';
+import {
+  ValidatedTextField,
+  ButtonRow,
+  FormLoader,
+  SectionContent,
+  BlockNavigation,
+  BlockFormControlLabel
+} from 'components';
 
 import { DeviceValueUOM_s, EntityItem } from './types';
 import { extractErrorMessage, updateValue } from 'utils';
@@ -47,13 +54,14 @@ const SettingsEntities: FC = () => {
   const blocker = useBlocker(numChanges !== 0);
 
   const emptyEntity = {
-    device_id: 8,
-    type_id: 2,
+    device_id: '',
+    type_id: '',
     offset: 0,
     factor: 1,
     uom: 0,
     val_type: 2,
-    name: 'name',
+    name: '',
+    write: false,
     deleted: false
   };
   const [entity, setEntity] = useState<EntityItem[]>([emptyEntity]);
@@ -142,6 +150,7 @@ const SettingsEntities: FC = () => {
         o_uom: ei.uom,
         o_val_type: ei.val_type,
         o_name: ei.name,
+        o_write: ei.write,
         o_deleted: ei.deleted
       }))
     );
@@ -156,6 +165,7 @@ const SettingsEntities: FC = () => {
       ei.uom !== ei.o_uom ||
       ei.factor !== ei.o_factor ||
       ei.val_type !== ei.o_val_type ||
+      ei.write !== ei.o_write ||
       ei.deleted !== ei.o_deleted
     );
   }
@@ -181,7 +191,8 @@ const SettingsEntities: FC = () => {
                 factor: condensed_ei.factor,
                 val_type: condensed_ei.val_type,
                 uom: condensed_ei.uom,
-                name: condensed_ei.name
+                name: condensed_ei.name,
+                write: condensed_ei.write
               };
             })
         });
@@ -204,16 +215,7 @@ const SettingsEntities: FC = () => {
 
   const addEntityItem = () => {
     setCreating(true);
-    setEntityItem({
-      device_id: 8,
-      type_id: 2,
-      offset: 0,
-      factor: 1,
-      val_type: 2,
-      uom: 0,
-      name: 'name',
-      deleted: false
-    });
+    setEntityItem(emptyEntity);
   };
 
   const updateEntityItem = () => {
@@ -315,7 +317,7 @@ const SettingsEntities: FC = () => {
               <Box flexWrap="nowrap" whiteSpace="nowrap"></Box>
             </Box>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
+              <Grid item xs={8}>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="name"
@@ -324,6 +326,14 @@ const SettingsEntities: FC = () => {
                   margin="normal"
                   fullWidth
                   onChange={updateValue(setEntityItem)}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <BlockFormControlLabel
+                  control={
+                    <Checkbox checked={entityItem.write} onChange={updateValue(setEntityItem)} name="write" />
+                  }
+                  label={LL.WRITEABLE()}
                 />
               </Grid>
               <Grid item xs={4}>
