@@ -24,7 +24,7 @@
     "tsconfigRootDir": ".",
     "project": ["tsconfig.json"]
   },
-  "plugins": ["react", "@typescript-eslint"],
+  "plugins": ["react", "@typescript-eslint", "autofix", "react-hooks"],
   "settings": {
     "import/resolver": {
       "typescript": {
@@ -36,7 +36,6 @@
     }
   },
   "rules": {
-    "react-hooks/exhaustive-deps": "off",
     "object-shorthand": "error",
     "no-console": "warn",
     "@typescript-eslint/consistent-type-definitions": ["off", "type"],
@@ -52,6 +51,29 @@
     "@typescript-eslint/no-unused-expressions": "off",
     "@typescript-eslint/no-implied-eval": "off",
     "@typescript-eslint/no-misused-promises": "off",
+    "arrow-body-style": ["error", "as-needed"],
+    "react-hooks/exhaustive-deps": "error",
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports"
+      }
+    ],
+    // "autofix/no-unused-vars": [
+    //   "error",
+    //   {
+    //     "argsIgnorePattern": "^_",
+    //     "ignoreRestSiblings": true,
+    //     "destructuredArrayIgnorePattern": "^_"
+    //   }
+    // ],
+    "react/self-closing-comp": [
+      "error",
+      {
+        "component": true,
+        "html": true
+      }
+    ],
     "@typescript-eslint/ban-types": [
       "error",
       {

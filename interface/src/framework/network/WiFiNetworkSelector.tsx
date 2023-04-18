@@ -47,7 +47,7 @@ const WiFiNetworkSelector: FC<WiFiNetworkSelectorProps> = ({ networkList }) => {
 
   const renderNetwork = (network: WiFiNetwork) => {
     return (
-      <ListItem key={network.bssid} button onClick={() => wifiConnectionContext.selectNetwork(network)}>
+      <ListItem key={network.bssid} onClick={() => wifiConnectionContext.selectNetwork(network)}>
         <ListItemAvatar>
           <Avatar>{isNetworkOpen(network) ? <LockOpenIcon /> : <LockIcon />}</Avatar>
         </ListItemAvatar>

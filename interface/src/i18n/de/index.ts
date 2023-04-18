@@ -311,7 +311,7 @@ const de: Translation = {
   LEAVE: 'Verlassen',
   SCHEDULER: 'Planer',
   SCHEDULER_HELP_1: 'Fügen Sie eigene, geplante Befehle zur Automatisierung hinzu. Vergeben Sie einen Entitätsnamen um die Aktivierung über API/Mqtt zu steuern',
-  SCHEDULER_HELP_2: 'Use 00:00 to trigger on boot', // TODO translate
+  SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
   SCHEDULE: 'Zeitplan',
   TIME: 'Zeit',
   TIMER: 'Timer',
@@ -320,7 +320,8 @@ const de: Translation = {
   SCHEDULE_TIMER_2: 'jede Minute',
   SCHEDULE_TIMER_3: 'jede Stunde',
   CUSTOM_ENTITIES: 'Individuelle Entitäten',
-  ENTITIES_HELP_1: 'Abfrage von Werten auf dem EMS-Bus'
+  ENTITIES_HELP_1: 'Abfrage von Werten auf dem EMS-Bus',
+  WRITEABLE: 'Schreibbar'
 };
 
 export default de;

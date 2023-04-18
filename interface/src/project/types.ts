@@ -346,8 +346,9 @@ export interface EntityItem {
   offset: number;
   factor: number;
   uom: number;
-  val_type: number;
+  value_type: number;
   value?: number;
+  writeable: boolean;
   deleted?: boolean; // optional
   o_id?: number;
   o_name?: string;
@@ -356,8 +357,9 @@ export interface EntityItem {
   o_offset?: number;
   o_factor?: number;
   o_uom?: number;
-  o_val_type?: number;
+  o_value_type?: number;
   o_deleted?: boolean;
+  o_writeable?: boolean;
 }
 
 export interface Entities {

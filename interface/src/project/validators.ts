@@ -1,6 +1,7 @@
-import Schema, { InternalRuleItem } from 'async-validator';
+import type { InternalRuleItem } from 'async-validator';
+import Schema from 'async-validator';
 import { IP_OR_HOSTNAME_VALIDATOR } from 'validators/shared';
-import { Settings, ScheduleItem, EntityItem } from './types';
+import type { Settings, ScheduleItem, EntityItem } from './types';
 
 export const GPIO_VALIDATOR = {
   validator(rule: InternalRuleItem, value: number, callback: (error?: string) => void) {
@@ -111,17 +112,7 @@ export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: 
     ]
   });
 
-export const uniqueEntityNameValidator = (entities: EntityItem[], o_name?: string) => ({
-  validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
-    if (name && o_name && o_name !== name && entities.find((ei) => ei.name === name)) {
-      callback('Name already in use');
-    } else {
-      callback();
-    }
-  }
-});
-
-export const entityItemValidation = (entities: EntityItem[], entityItem: EntityItem) =>
+export const entityItemValidation = (entities: EntityItem[], creating: boolean) =>
   new Schema({
     name: [
       { required: true, message: 'Name is required' },
@@ -129,8 +120,7 @@ export const entityItemValidation = (entities: EntityItem[], entityItem: EntityI
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{1,15}$/,
         message: "Must be <15 characters: alpha numeric, '_' or '.'"
-      },
-      ...[uniqueEntityNameValidator(entities, entityItem.o_name)]
+      }
     ],
     device_id: [{ type: 'hex', required: true, message: 'ID must be a hex value' }]
     // type_id: [

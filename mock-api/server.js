@@ -14,7 +14,6 @@ rest_server.use(express.json());
 // endpoints
 const API_ENDPOINT_ROOT = '/api/';
 const REST_ENDPOINT_ROOT = '/rest/';
-const EVENTSOURCE_ENDPOINT_ROOT = '/es/';
 
 // LOG
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings';
@@ -610,7 +609,8 @@ let emsesp_entities = {
       offset: 0,
       factor: 0,
       uom: 2,
-      val_type: 2
+      value: 1,
+      value_type: 2
     },
     {
       id: 1,
@@ -620,7 +620,8 @@ let emsesp_entities = {
       offset: 2,
       factor: 2,
       uom: 4,
-      val_type: 5
+      value: 2,
+      value_type: 5
     }
   ]
 };

@@ -320,7 +320,9 @@ const sv: Translation = {
   SCHEDULE_TIMER_2: 'every minute', // TODO translate
   SCHEDULE_TIMER_3: 'every hour', // TODO translate
   CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus' // TODO translate
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
+  WRITEABLE: 'Writeable' // TODO translate
+
 };
 
 export default sv;

@@ -1,4 +1,5 @@
-import { FC, useState, useEffect, useCallback } from 'react';
+import type { FC } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 
 import {
@@ -43,9 +44,10 @@ import { extractErrorMessage, updateValue } from 'utils';
 
 import { validate } from 'validators';
 import { schedulerItemValidation } from './validators';
-import { ValidateFieldsError } from 'async-validator';
+import type { ValidateFieldsError } from 'async-validator';
 
-import { ScheduleItem, ScheduleFlag } from './types';
+import type { ScheduleItem } from './types';
+import { ScheduleFlag } from './types';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -105,6 +107,7 @@ const SettingsScheduler: FC = () => {
     );
   }
 
+  // TODO fix
   const getNumChanges = () => {
     if (!schedule) {
       return 0;
@@ -184,12 +187,12 @@ const SettingsScheduler: FC = () => {
     } catch (error) {
       setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
-    setDow(getDayNames());
   }, [LL]);
 
   useEffect(() => {
-    fetchSchedule();
-  }, [fetchSchedule]);
+    void fetchSchedule();
+    setDow(getDayNames());
+  }, [getDayNames, fetchSchedule]);
 
   const getFlagNumber = (newFlag: string[]) => {
     let new_flag = 0;
@@ -234,17 +237,15 @@ const SettingsScheduler: FC = () => {
         const response = await EMSESP.writeSchedule({
           schedule: schedule
             .filter((si) => !si.deleted)
-            .map((condensed_si) => {
-              return {
-                id: condensed_si.id,
-                active: condensed_si.active,
-                flags: condensed_si.flags,
-                time: condensed_si.time,
-                cmd: condensed_si.cmd,
-                value: condensed_si.value,
-                name: condensed_si.name
-              };
-            })
+            .map((condensed_si) => ({
+              id: condensed_si.id,
+              active: condensed_si.active,
+              flags: condensed_si.flags,
+              time: condensed_si.time,
+              cmd: condensed_si.cmd,
+              value: condensed_si.value,
+              name: condensed_si.name
+            }))
         });
         if (response.status === 200) {
           toast.success(LL.SCHEDULE_SAVED());

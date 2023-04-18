@@ -33,24 +33,27 @@ void WebEntityService::begin() {
     EMSESP::logger().info("Starting custom entity service");
 }
 
-// this creates the scheduler file, saving it to the FS
-// and also calls when the Scheduler web page is refreshed
+// this creates the entity file, saving it to the FS
+// and also calls when the Entity web page is refreshed
 void WebEntity::read(WebEntity & webEntity, JsonObject & root) {
-    JsonArray entity = root.createNestedArray("entity");
+    JsonArray entity  = root.createNestedArray("entity");
+    uint8_t   counter = 0;
     for (const EntityItem & entityItem : webEntity.entityItems) {
-        JsonObject ei   = entity.createNestedObject();
-        ei["device_id"] = Helpers::hextoa(entityItem.device_id, false);
-        ei["type_id"]   = Helpers::hextoa(entityItem.type_id, false);
-        ei["offset"]    = entityItem.offset;
-        ei["factor"]    = entityItem.factor;
-        ei["name"]      = entityItem.name;
-        ei["uom"]       = entityItem.uom;
-        ei["val_type"]  = entityItem.valuetype;
+        JsonObject ei    = entity.createNestedObject();
+        ei["id"]         = counter++; // id is only used to render the table and must be unique
+        ei["device_id"]  = Helpers::hextoa(entityItem.device_id, false);
+        ei["type_id"]    = Helpers::hextoa(entityItem.type_id, false);
+        ei["offset"]     = entityItem.offset;
+        ei["factor"]     = entityItem.factor;
+        ei["name"]       = entityItem.name;
+        ei["uom"]        = entityItem.uom;
+        ei["value_type"] = entityItem.value_type;
+        ei["writeable"]  = entityItem.writeable;
         EMSESP::webEntityService.render_value(ei, entityItem, true);
     }
 }
 
-// call on initialization and also when the Schedule web page is updated
+// call on initialization and also when the Entity web page is updated
 // this loads the data into the internal class
 StateUpdateResult WebEntity::update(JsonObject & root, WebEntity & webEntity) {
     for (EntityItem & entityItem : webEntity.entityItems) {
@@ -60,36 +63,42 @@ StateUpdateResult WebEntity::update(JsonObject & root, WebEntity & webEntity) {
 
     if (root["entity"].is<JsonArray>()) {
         for (const JsonObject ei : root["entity"].as<JsonArray>()) {
-            auto entityItem      = EntityItem();
-            entityItem.device_id = Helpers::hextoint(ei["device_id"]);
-            entityItem.type_id   = Helpers::hextoint(ei["type_id"]);
-            entityItem.offset    = ei["offset"];
-            entityItem.factor    = ei["factor"];
-            entityItem.name      = ei["name"].as<std::string>();
-            entityItem.uom       = ei["uom"];
-            entityItem.valuetype = ei["val_type"];
+            auto entityItem       = EntityItem();
+            entityItem.device_id  = Helpers::hextoint(ei["device_id"]); // TODO don't need
+            entityItem.type_id    = Helpers::hextoint(ei["type_id"]);
+            entityItem.offset     = ei["offset"];
+            entityItem.factor     = ei["factor"];
+            entityItem.name       = ei["name"].as<std::string>();
+            entityItem.uom        = ei["uom"];
+            entityItem.value_type = ei["value_type"];
+            entityItem.writeable  = ei["writeable"];
 
-            if (entityItem.valuetype == DeviceValueType::BOOL) {
-                entityItem.val = EMS_VALUE_DEFAULT_BOOL;
-            } else if (entityItem.valuetype == DeviceValueType::INT) {
-                entityItem.val = EMS_VALUE_DEFAULT_INT;
-            } else if (entityItem.valuetype == DeviceValueType::UINT) {
-                entityItem.val = EMS_VALUE_DEFAULT_UINT;
-            } else if (entityItem.valuetype == DeviceValueType::SHORT) {
-                entityItem.val = EMS_VALUE_DEFAULT_SHORT;
-            } else if (entityItem.valuetype == DeviceValueType::USHORT) {
-                entityItem.val = EMS_VALUE_DEFAULT_USHORT;
-            } else { // if (entityItem.valuetype == DeviceValueType::ULONG || entityItem.valuetype == DeviceValueType::TIME) {
-                entityItem.val = EMS_VALUE_DEFAULT_ULONG;
+            if (entityItem.value_type == DeviceValueType::BOOL) {
+                entityItem.value = EMS_VALUE_DEFAULT_BOOL;
+            } else if (entityItem.value_type == DeviceValueType::INT) {
+                entityItem.value = EMS_VALUE_DEFAULT_INT;
+            } else if (entityItem.value_type == DeviceValueType::UINT) {
+                entityItem.value = EMS_VALUE_DEFAULT_UINT;
+            } else if (entityItem.value_type == DeviceValueType::SHORT) {
+                entityItem.value = EMS_VALUE_DEFAULT_SHORT;
+            } else if (entityItem.value_type == DeviceValueType::USHORT) {
+                entityItem.value = EMS_VALUE_DEFAULT_USHORT;
+            } else { // if (entityItem.value_type == DeviceValueType::ULONG || entityItem.valuetype == DeviceValueType::TIME) {
+                entityItem.value = EMS_VALUE_DEFAULT_ULONG;
             }
 
             webEntity.entityItems.push_back(entityItem); // add to list
-            Command::add(
-                EMSdevice::DeviceType::CUSTOM,
-                webEntity.entityItems.back().name.c_str(),
-                [webEntity](const char * value, const int8_t id) { return EMSESP::webEntityService.command_setvalue(value, webEntity.entityItems.back().name); },
-                FL_(entity_cmd),
-                CommandFlag::ADMIN_ONLY);
+
+            if (entityItem.writeable) {
+                Command::add(
+                    EMSdevice::DeviceType::CUSTOM,
+                    webEntity.entityItems.back().name.c_str(),
+                    [webEntity](const char * value, const int8_t id) {
+                        return EMSESP::webEntityService.command_setvalue(value, webEntity.entityItems.back().name);
+                    },
+                    FL_(entity_cmd),
+                    CommandFlag::ADMIN_ONLY);
+            }
         }
     }
     return StateUpdateResult::CHANGED;
@@ -100,7 +109,7 @@ bool WebEntityService::command_setvalue(const char * value, const std::string na
     EMSESP::webEntityService.read([&](WebEntity & webEntity) { entityItems = &webEntity.entityItems; });
     for (EntityItem & entityItem : *entityItems) {
         if (entityItem.name == name) {
-            if (entityItem.valuetype == DeviceValueType::BOOL) {
+            if (entityItem.value_type == DeviceValueType::BOOL) {
                 bool v;
                 if (!Helpers::value2bool(value, v)) {
                     return false;
@@ -112,9 +121,9 @@ bool WebEntityService::command_setvalue(const char * value, const std::string na
                     return false;
                 }
                 int v = f / entityItem.factor;
-                if (entityItem.valuetype == DeviceValueType::UINT || entityItem.valuetype == DeviceValueType::INT) {
+                if (entityItem.value_type == DeviceValueType::UINT || entityItem.value_type == DeviceValueType::INT) {
                     EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v, 0);
-                } else if (entityItem.valuetype == DeviceValueType::USHORT || entityItem.valuetype == DeviceValueType::SHORT) {
+                } else if (entityItem.value_type == DeviceValueType::USHORT || entityItem.value_type == DeviceValueType::SHORT) {
                     uint8_t v1[2] = {(uint8_t)(v >> 8), (uint8_t)(v & 0xFF)};
                     EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v1, 2, 0);
                 } else {
@@ -122,6 +131,7 @@ bool WebEntityService::command_setvalue(const char * value, const std::string na
                     EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v1, 3, 0);
                 }
             }
+
             publish_single(entityItem);
             if (EMSESP::mqtt_.get_publish_onchange(0)) {
                 publish();
@@ -136,42 +146,42 @@ bool WebEntityService::command_setvalue(const char * value, const std::string na
 void WebEntityService::render_value(JsonObject & output, EntityItem entity, const bool useVal) {
     char        payload[12];
     std::string name = useVal ? "value" : entity.name;
-    switch (entity.valuetype) {
+    switch (entity.value_type) {
     case DeviceValueType::BOOL:
-        if ((uint8_t)entity.val != EMS_VALUE_BOOL_NOTSET) {
+        if ((uint8_t)entity.value != EMS_VALUE_BOOL_NOTSET) {
             if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                output[name] = (uint8_t)entity.val ? true : false;
+                output[name] = (uint8_t)entity.value ? true : false;
             } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                output[name] = (uint8_t)entity.val ? 1 : 0;
+                output[name] = (uint8_t)entity.value ? 1 : 0;
             } else {
-                output[name] = Helpers::render_boolean(payload, (uint8_t)entity.val);
+                output[name] = Helpers::render_boolean(payload, (uint8_t)entity.value);
             }
         }
         break;
     case DeviceValueType::INT:
-        if ((int8_t)entity.val != EMS_VALUE_INT_NOTSET) {
-            output[name] = serialized(Helpers::render_value(payload, entity.factor * (int8_t)entity.val, 2));
+        if ((int8_t)entity.value != EMS_VALUE_INT_NOTSET) {
+            output[name] = serialized(Helpers::render_value(payload, entity.factor * (int8_t)entity.value, 2));
         }
         break;
     case DeviceValueType::UINT:
-        if ((uint8_t)entity.val != EMS_VALUE_UINT_NOTSET) {
-            output[name] = serialized(Helpers::render_value(payload, entity.factor * (uint8_t)entity.val, 2));
+        if ((uint8_t)entity.value != EMS_VALUE_UINT_NOTSET) {
+            output[name] = serialized(Helpers::render_value(payload, entity.factor * (uint8_t)entity.value, 2));
         }
         break;
     case DeviceValueType::SHORT:
-        if ((int16_t)entity.val != EMS_VALUE_SHORT_NOTSET) {
-            output[name] = serialized(Helpers::render_value(payload, entity.factor * (int16_t)entity.val, 2));
+        if ((int16_t)entity.value != EMS_VALUE_SHORT_NOTSET) {
+            output[name] = serialized(Helpers::render_value(payload, entity.factor * (int16_t)entity.value, 2));
         }
         break;
     case DeviceValueType::USHORT:
-        if ((uint16_t)entity.val != EMS_VALUE_USHORT_NOTSET) {
-            output[name] = serialized(Helpers::render_value(payload, entity.factor * (uint16_t)entity.val, 2));
+        if ((uint16_t)entity.value != EMS_VALUE_USHORT_NOTSET) {
+            output[name] = serialized(Helpers::render_value(payload, entity.factor * (uint16_t)entity.value, 2));
         }
         break;
     case DeviceValueType::ULONG:
     case DeviceValueType::TIME:
-        if (entity.val != EMS_VALUE_ULONG_NOTSET) {
-            output[name] = serialized(Helpers::render_value(payload, entity.factor * entity.val, 2));
+        if (entity.value != EMS_VALUE_ULONG_NOTSET) {
+            output[name] = serialized(Helpers::render_value(payload, entity.factor * entity.value, 2));
         }
         break;
     default:
@@ -215,7 +225,7 @@ bool WebEntityService::get_value_info(JsonObject & output, const char * cmd) {
             output["name"]      = entity.name;
             output["uom"]       = EMSdevice::uom_to_string(entity.uom);
             output["readable"]  = true;
-            output["writeable"] = true;
+            output["writeable"] = entity.writeable;
             output["visible"]   = true;
             render_value(output, entity, true);
             if (attribute_s) {
@@ -250,8 +260,8 @@ void WebEntityService::publish_single(const EntityItem & entity) {
     } else {
         snprintf(topic, sizeof(topic), "%s/%s", "custom_data", entity.name.c_str());
     }
-    StaticJsonDocument<256> doc;
-    JsonObject              output = doc.to<JsonObject>();
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
+    JsonObject                                 output = doc.to<JsonObject>();
     render_value(output, entity, true);
     Mqtt::queue_publish(topic, output["value"].as<std::string>());
 }
@@ -326,8 +336,10 @@ uint8_t WebEntityService::count_entities() {
     if (entityItems->size() == 0) {
         return 0;
     }
+
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE);
     JsonObject          output = doc.to<JsonObject>();
+
     for (const EntityItem & entity : *entityItems) {
         render_value(output, entity);
     }
@@ -337,46 +349,51 @@ uint8_t WebEntityService::count_entities() {
 // send to dashboard, msgpack don't like serialized, use number
 void WebEntityService::generate_value_web(JsonObject & output) {
     EMSESP::webEntityService.read([&](WebEntity & webEntity) { entityItems = &webEntity.entityItems; });
+
     output["label"] = (std::string) "Custom Entities";
     JsonArray data  = output.createNestedArray("data");
+
     for (const EntityItem & entity : *entityItems) {
         JsonObject obj = data.createNestedObject(); // create the object, we know there is a value
         obj["id"]      = "00" + entity.name;
         obj["u"]       = entity.uom;
-        obj["c"]       = entity.name;
-        switch (entity.valuetype) {
+        if (entity.writeable) {
+            obj["c"] = entity.name;
+        }
+
+        switch (entity.value_type) {
         case DeviceValueType::BOOL: {
             char s[12];
-            obj["v"]    = Helpers::render_boolean(s, (uint8_t)entity.val);
+            obj["v"]    = Helpers::render_boolean(s, (uint8_t)entity.value);
             JsonArray l = obj.createNestedArray("l");
             l.add(Helpers::render_boolean(s, false, true));
             l.add(Helpers::render_boolean(s, true, true));
             break;
         }
         case DeviceValueType::INT:
-            if ((int8_t)entity.val != EMS_VALUE_INT_NOTSET) {
-                obj["v"] = Helpers::transformNumFloat(entity.factor * (int8_t)entity.val, 0);
+            if ((int8_t)entity.value != EMS_VALUE_INT_NOTSET) {
+                obj["v"] = Helpers::transformNumFloat(entity.factor * (int8_t)entity.value, 0);
             }
             break;
         case DeviceValueType::UINT:
-            if ((uint8_t)entity.val != EMS_VALUE_UINT_NOTSET) {
-                obj["v"] = Helpers::transformNumFloat(entity.factor * (uint8_t)entity.val, 0);
+            if ((uint8_t)entity.value != EMS_VALUE_UINT_NOTSET) {
+                obj["v"] = Helpers::transformNumFloat(entity.factor * (uint8_t)entity.value, 0);
             }
             break;
         case DeviceValueType::SHORT:
-            if ((int16_t)entity.val != EMS_VALUE_SHORT_NOTSET) {
-                obj["v"] = Helpers::transformNumFloat(entity.factor * (int16_t)entity.val, 0);
+            if ((int16_t)entity.value != EMS_VALUE_SHORT_NOTSET) {
+                obj["v"] = Helpers::transformNumFloat(entity.factor * (int16_t)entity.value, 0);
             }
             break;
         case DeviceValueType::USHORT:
-            if ((uint16_t)entity.val != EMS_VALUE_USHORT_NOTSET) {
-                obj["v"] = Helpers::transformNumFloat(entity.factor * (uint16_t)entity.val, 0);
+            if ((uint16_t)entity.value != EMS_VALUE_USHORT_NOTSET) {
+                obj["v"] = Helpers::transformNumFloat(entity.factor * (uint16_t)entity.value, 0);
             }
             break;
         case DeviceValueType::ULONG:
         case DeviceValueType::TIME:
-            if (entity.val != EMS_VALUE_ULONG_NOTSET) {
-                obj["v"] = Helpers::transformNumFloat(entity.factor * entity.val, 0);
+            if (entity.value != EMS_VALUE_ULONG_NOTSET) {
+                obj["v"] = Helpers::transformNumFloat(entity.factor * entity.value, 0);
             }
             break;
         default:
@@ -402,13 +419,13 @@ bool WebEntityService::get_value(std::shared_ptr<const Telegram> telegram) {
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3};
     for (auto & entity : *entityItems) {
         if (telegram->type_id == entity.type_id && telegram->src == entity.device_id && telegram->offset <= entity.offset
-            && (telegram->offset + telegram->message_length) >= (entity.offset + len[entity.valuetype])) {
-            uint32_t val = 0;
-            for (uint8_t i = 0; i < len[entity.valuetype]; i++) {
-                val = (val << 8) + telegram->message_data[i + entity.offset - telegram->offset];
+            && (telegram->offset + telegram->message_length) >= (entity.offset + len[entity.value_type])) {
+            uint32_t value = 0;
+            for (uint8_t i = 0; i < len[entity.value_type]; i++) {
+                value = (value << 8) + telegram->message_data[i + entity.offset - telegram->offset];
             }
-            if (val != entity.val) {
-                entity.val = val;
+            if (value != entity.value) {
+                entity.value = value;
                 if (Mqtt::publish_single()) {
                     publish_single(entity);
                 } else if (EMSESP::mqtt_.get_publish_onchange(0)) {

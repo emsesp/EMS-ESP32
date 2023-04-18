@@ -1,71 +1,40 @@
-import { FC, useState, useEffect, useCallback } from 'react';
+import type { FC } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 
-import {
-  Button,
-  Typography,
-  Box,
-  Grid,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-  InputAdornment
-} from '@mui/material';
+import { Button, Typography, Box } from '@mui/material';
 
 import { useTheme } from '@table-library/react-table-library/theme';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 
 import { toast } from 'react-toastify';
 
-import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
-import DoneIcon from '@mui/icons-material/Done';
 import AddIcon from '@mui/icons-material/Add';
 
-import { ValidatedTextField, ButtonRow, FormLoader, SectionContent, BlockNavigation } from 'components';
+import { ButtonRow, FormLoader, SectionContent, BlockNavigation } from 'components';
 
-import { DeviceValueUOM_s, EntityItem } from './types';
-import { extractErrorMessage, updateValue } from 'utils';
+import SettingsEntitiesDialog from './SettingsEntitiesDialog';
 
-import { validate } from 'validators';
-import { entityItemValidation } from './validators';
-import { ValidateFieldsError } from 'async-validator';
+import type { EntityItem } from './types';
+import { DeviceValueUOM_s } from './types';
+import { extractErrorMessage } from 'utils';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
 import * as EMSESP from './api';
-
-function makeid() {
-  return Math.floor(Math.random() * (Math.floor(200) - 100) + 100);
-}
+import { entityItemValidation } from './validators';
 
 const SettingsEntities: FC = () => {
   const { LL } = useI18nContext();
-
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
-
-  const emptyEntity = {
-    id: 0,
-    name: '',
-    device_id: 8,
-    type_id: 0,
-    offset: 0,
-    factor: 1,
-    uom: 0,
-    val_type: 2,
-    deleted: false,
-    o_name: ''
-  };
-
-  const [entities, setEntities] = useState<EntityItem[]>([emptyEntity]);
-  const [entityItem, setEntityItem] = useState<EntityItem>();
+  const [entities, setEntities] = useState<EntityItem[]>([]);
+  const [selectedEntityItem, setSelectedEntityItem] = useState<EntityItem>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [creating, setCreating] = useState<boolean>(false);
-  const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
   function hasEntityChanged(ei: EntityItem) {
     return (
@@ -76,21 +45,15 @@ const SettingsEntities: FC = () => {
       ei.offset !== ei.o_offset ||
       ei.uom !== ei.o_uom ||
       ei.factor !== ei.o_factor ||
-      ei.val_type !== ei.o_val_type ||
+      ei.value_type !== ei.o_value_type ||
+      ei.writeable !== ei.o_writeable ||
       ei.deleted !== ei.o_deleted
     );
   }
 
-  const getNumChanges = () => {
-    if (!entities) {
-      return 0;
-    }
-    return entities.filter((ei) => hasEntityChanged(ei)).length;
-  };
-
   useEffect(() => {
-    setNumChanges(getNumChanges());
-  });
+    setNumChanges(entities ? entities.filter((ei) => hasEntityChanged(ei)).length : 0);
+  }, [entities]);
 
   const entity_theme = useTheme({
     Table: `
@@ -156,8 +119,9 @@ const SettingsEntities: FC = () => {
         o_offset: ei.offset,
         o_factor: ei.factor,
         o_uom: ei.uom,
-        o_val_type: ei.val_type,
+        o_value_type: ei.value_type,
         o_name: ei.name,
+        o_writeable: ei.writeable,
         o_deleted: ei.deleted
       }))
     );
@@ -182,19 +146,19 @@ const SettingsEntities: FC = () => {
         const response = await EMSESP.writeEntities({
           entities: entities
             .filter((ei) => !ei.deleted)
-            .map((condensed_ei) => {
-              return {
-                id: condensed_ei.id,
-                name: condensed_ei.name,
-                device_id: condensed_ei.device_id,
-                type_id: condensed_ei.type_id,
-                offset: condensed_ei.offset,
-                factor: condensed_ei.factor,
-                uom: condensed_ei.uom,
-                val_type: condensed_ei.val_type
-              };
-            })
+            .map((condensed_ei) => ({
+              id: condensed_ei.id,
+              name: condensed_ei.name,
+              device_id: condensed_ei.device_id,
+              type_id: condensed_ei.type_id,
+              offset: condensed_ei.offset,
+              factor: condensed_ei.factor,
+              uom: condensed_ei.uom,
+              writeable: condensed_ei.writeable,
+              value_type: condensed_ei.value_type
+            }))
         });
+
         if (response.status === 200) {
           toast.success(LL.SUCCESS());
         } else {
@@ -207,42 +171,48 @@ const SettingsEntities: FC = () => {
     }
   };
 
-  const editEntityItem = (ei: EntityItem) => {
+  const editEntityItem = useCallback((ei: EntityItem) => {
     setCreating(false);
-    setEntityItem(ei);
+    setSelectedEntityItem(ei);
+    setDialogOpen(true);
+  }, []);
+
+  const onDialogClose = () => {
+    setDialogOpen(false);
   };
 
+  const onDialogSave = (updatedItem: EntityItem) => {
+    if (creating) {
+      setEntities([...entities.filter((ei) => creating || ei.o_id !== updatedItem.o_id), updatedItem]);
+    } else {
+      setEntities(entities.map((ei) => (ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei)));
+    }
+    setDialogOpen(false);
+  };
+
+  // TODO need callback here too?
   const addEntityItem = () => {
     setCreating(true);
-    setEntityItem({
-      id: makeid(),
+    setSelectedEntityItem({
+      id: Math.floor(Math.random() * (Math.floor(200) - 100) + 100),
       device_id: 11,
       type_id: 0,
       offset: 0,
       factor: 1,
-      val_type: 2,
+      value_type: 2,
       uom: 0,
       name: '',
+      writeable: false,
       deleted: false
     });
-  };
-
-  const updateEntityItem = () => {
-    console.log('here');
-    if (entityItem) {
-      setEntities([...entities.filter((ei) => creating || ei.o_id !== entityItem.o_id), entityItem]);
-    }
-    setEntityItem(undefined);
+    setDialogOpen(true);
   };
 
   function formatValue(value: any, uom: number) {
     if (value === undefined) {
       return '';
     }
-    if (uom === 0) {
-      return new Intl.NumberFormat().format(value);
-    }
-    return new Intl.NumberFormat().format(value) + ' ' + DeviceValueUOM_s[uom];
+    return new Intl.NumberFormat().format(value) + (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom]);
   }
 
   function showHex(value: number, digit: number) {
@@ -287,185 +257,6 @@ const SettingsEntities: FC = () => {
     );
   };
 
-  const removeEntityItem = (ei: EntityItem) => {
-    ei.deleted = true;
-    setEntityItem(ei);
-    updateEntityItem();
-  };
-
-  const validateEntityItem = async () => {
-    if (entityItem) {
-      console.log(1);
-      try {
-        setFieldErrors(undefined);
-        console.log(2);
-        await validate(entityItemValidation(entities, entityItem), entityItem);
-        console.log(3);
-        updateEntityItem();
-      } catch (errors: any) {
-        console.log(4);
-        console.log(errors);
-        setFieldErrors(errors);
-      }
-    }
-  };
-
-  const closeDialog = () => {
-    setEntityItem(undefined);
-    setFieldErrors(undefined);
-  };
-
-  const renderEditEntity = () => {
-    if (entityItem) {
-      return (
-        <Dialog open={!!entityItem} onClose={() => closeDialog()}>
-          <DialogTitle>
-            {creating ? LL.ADD(1) + ' ' + LL.NEW() : LL.EDIT()}&nbsp;{LL.ENTITY()}
-          </DialogTitle>
-          <DialogContent dividers>
-            <Box display="flex" flexWrap="wrap" mb={1}>
-              <Box flexGrow={1}></Box>
-              <Box flexWrap="nowrap" whiteSpace="nowrap"></Box>
-            </Box>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors}
-                  name="name"
-                  label={LL.NAME(0)}
-                  value={entityItem.name}
-                  margin="normal"
-                  fullWidth
-                  // onChange={updateValue(setEntityItem)}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors}
-                  name="device_id"
-                  label="Device ID"
-                  margin="normal"
-                  fullWidth
-                  value={entityItem.device_id}
-                  onChange={updateValue(setEntityItem)}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">0x</InputAdornment>
-                  }}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors}
-                  name="type_id"
-                  label="Type ID"
-                  margin="normal"
-                  fullWidth
-                  value={entityItem.type_id}
-                  onChange={updateValue(setEntityItem)}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">0x</InputAdornment>
-                  }}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors}
-                  name="offset"
-                  label="Offset"
-                  margin="normal"
-                  fullWidth
-                  type="number"
-                  value={entityItem.offset}
-                  onChange={updateValue(setEntityItem)}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <ValidatedTextField
-                  name="val_type"
-                  label="Value Type"
-                  value={entityItem.val_type}
-                  variant="outlined"
-                  onChange={updateValue(setEntityItem)}
-                  margin="normal"
-                  fullWidth
-                  select
-                >
-                  <MenuItem value={0}>BOOL</MenuItem>
-                  <MenuItem value={1}>INT</MenuItem>
-                  <MenuItem value={2}>UINT</MenuItem>
-                  <MenuItem value={3}>SHORT</MenuItem>
-                  <MenuItem value={4}>USHORT</MenuItem>
-                  <MenuItem value={5}>ULONG</MenuItem>
-                  <MenuItem value={6}>TIME</MenuItem>
-                </ValidatedTextField>
-              </Grid>
-              {entityItem.val_type !== 0 && (
-                <>
-                  <Grid item xs={4}>
-                    <ValidatedTextField
-                      name="factor"
-                      label={LL.FACTOR()}
-                      value={entityItem.factor}
-                      variant="outlined"
-                      onChange={updateValue(setEntityItem)}
-                      fullWidth
-                      margin="normal"
-                      type="number"
-                      inputProps={{ step: '0.001' }}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <ValidatedTextField
-                      name="uom"
-                      label={LL.UNIT()}
-                      value={entityItem.uom}
-                      margin="normal"
-                      fullWidth
-                      onChange={updateValue(setEntityItem)}
-                      select
-                    >
-                      {DeviceValueUOM_s.map((val, i) => (
-                        <MenuItem key={i} value={i}>
-                          {val}
-                        </MenuItem>
-                      ))}
-                    </ValidatedTextField>
-                  </Grid>
-                </>
-              )}
-            </Grid>
-          </DialogContent>
-          <DialogActions>
-            {!creating && (
-              <Box flexGrow={1}>
-                <Button
-                  startIcon={<RemoveIcon />}
-                  variant="outlined"
-                  color="error"
-                  onClick={() => removeEntityItem(entityItem)}
-                >
-                  {LL.REMOVE()}
-                </Button>
-              </Box>
-            )}
-            <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => closeDialog()} color="secondary">
-              {LL.CANCEL()}
-            </Button>
-            <Button
-              startIcon={creating ? <AddIcon /> : <DoneIcon />}
-              variant="outlined"
-              type="submit"
-              onClick={() => validateEntityItem()}
-              color="primary"
-            >
-              {creating ? LL.ADD(0) : LL.UPDATE()}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      );
-    }
-  };
-
   return (
     <SectionContent title={LL.CUSTOM_ENTITIES()} titleGutter>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
@@ -473,10 +264,21 @@ const SettingsEntities: FC = () => {
         <Typography variant="body2">{LL.ENTITIES_HELP_1()}</Typography>
       </Box>
       {renderEntity()}
-      {renderEditEntity()}
+
+      {selectedEntityItem && (
+        <SettingsEntitiesDialog
+          open={dialogOpen}
+          creating={creating}
+          onClose={onDialogClose}
+          onSave={onDialogSave}
+          selectedEntityItem={selectedEntityItem}
+          validator={entityItemValidation(entities, creating)}
+        />
+      )}
+
       <Box display="flex" flexWrap="wrap">
         <Box flexGrow={1}>
-          {numChanges !== 0 && (
+          {numChanges > 0 && (
             <ButtonRow>
               <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => fetchEntities()} color="secondary">
                 {LL.CANCEL()}
