@@ -64,8 +64,8 @@ StateUpdateResult WebEntity::update(JsonObject & root, WebEntity & webEntity) {
     if (root["entity"].is<JsonArray>()) {
         for (const JsonObject ei : root["entity"].as<JsonArray>()) {
             auto entityItem       = EntityItem();
-            entityItem.device_id  = Helpers::hextoint(ei["device_id"]); // TODO don't need
-            entityItem.type_id    = Helpers::hextoint(ei["type_id"]);
+            entityItem.device_id  = ei["device_id"]; // send as numeric, will be converted to string in web
+            entityItem.type_id    = ei["type_id"];
             entityItem.offset     = ei["offset"];
             entityItem.factor     = ei["factor"];
             entityItem.name       = ei["name"].as<std::string>();
