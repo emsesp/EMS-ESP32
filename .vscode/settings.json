@@ -3,6 +3,10 @@
     "**/.yarn": true,
     "**/.pnp.*": true
   },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+    // "source.organizeImports": true
+  },
   "eslint.nodePath": "interface/.yarn/sdks",
   "eslint.workingDirectories": ["interface"],
   "prettier.prettierPath": "interface/.yarn/sdks/prettier/index.js",
