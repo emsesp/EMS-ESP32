@@ -325,7 +325,7 @@ const no: Translation = {
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
   SEARCH: 'Search' // TODO translate
-
+  
 };
 
 export default no;

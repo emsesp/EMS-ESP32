@@ -325,7 +325,6 @@ const de: Translation = {
   WRITEABLE: 'Schreibbar',
   SHOWING: 'Showing', // TODO translate
   SEARCH: 'Search' // TODO translate
-
 };
 
 export default de;

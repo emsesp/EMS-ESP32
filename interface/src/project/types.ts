@@ -360,6 +360,7 @@ export interface EntityItem {
   o_value_type?: number;
   o_deleted?: boolean;
   o_writeable?: boolean;
+
 }
 
 export interface Entities {

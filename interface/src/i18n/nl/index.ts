@@ -325,7 +325,7 @@ const nl: Translation = {
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
   SEARCH: 'Zoek'
-
+  
 };
 
 export default nl;
