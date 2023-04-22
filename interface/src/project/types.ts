@@ -146,12 +146,12 @@ export interface DeviceEntity {
   cn?: string; // custom fullname, optional
   m: number; // mask
   w: boolean; // writeable
+  mi?: number; // min value
+  ma?: number; // max value
   o_m?: number; // original mask before edits
   o_cn?: string; // original cn before edits
-  mi?: string; // min value
-  ma?: string; // max value
-  o_mi?: string; // original min value
-  o_ma?: string; // original max value
+  o_mi?: number; // original min value
+  o_ma?: number; // original max value
 }
 
 export interface CustomEntities {
