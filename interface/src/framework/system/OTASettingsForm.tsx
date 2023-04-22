@@ -1,9 +1,11 @@
-import { FC, useState } from 'react';
-
-import { Button, Checkbox } from '@mui/material';
-import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Button, Checkbox } from '@mui/material';
+import { useState } from 'react';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 
+import type { OTASettings } from 'types';
 import * as SystemApi from 'api/system';
 import {
   BlockFormControlLabel,
@@ -15,14 +17,11 @@ import {
   BlockNavigation
 } from 'components';
 
-import { OTASettings } from 'types';
+import { useI18nContext } from 'i18n/i18n-react';
 import { numberValue, updateValueDirty, useRest } from 'utils';
 
-import { ValidateFieldsError } from 'async-validator';
 import { validate } from 'validators';
 import { OTA_SETTINGS_VALIDATOR } from 'validators/system';
-
-import { useI18nContext } from 'i18n/i18n-react';
 
 const OTASettingsForm: FC = () => {
   const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =

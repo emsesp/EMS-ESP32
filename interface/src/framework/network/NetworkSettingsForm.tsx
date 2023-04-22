@@ -1,6 +1,9 @@
-import { FC, useContext, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
-
+import CancelIcon from '@mui/icons-material/Cancel';
+import DeleteIcon from '@mui/icons-material/Delete';
+import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import WarningIcon from '@mui/icons-material/Warning';
 import {
   Avatar,
   Button,
@@ -14,14 +17,14 @@ import {
   Typography,
   InputAdornment
 } from '@mui/material';
+import { useContext, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import type { FC} from 'react';
 
-import LockOpenIcon from '@mui/icons-material/LockOpen';
-import DeleteIcon from '@mui/icons-material/Delete';
-import WarningIcon from '@mui/icons-material/Warning';
-import LockIcon from '@mui/icons-material/Lock';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import CancelIcon from '@mui/icons-material/Cancel';
 
+
+import type { NetworkSettings } from 'types';
+import * as NetworkApi from 'api/network';
 import {
   BlockFormControlLabel,
   ButtonRow,
@@ -32,18 +35,16 @@ import {
   MessageBox,
   BlockNavigation
 } from 'components';
-import { NetworkSettings } from 'types';
-import * as NetworkApi from 'api/network';
-import { numberValue, updateValueDirty, useRest } from 'utils';
+import { useI18nContext } from 'i18n/i18n-react';
 import * as EMSESP from 'project/api';
+import { numberValue, updateValueDirty, useRest } from 'utils';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
-import { ValidateFieldsError } from 'async-validator';
+import type { ValidateFieldsError } from 'async-validator';
 import { validate } from 'validators';
 import { createNetworkSettingsValidator } from 'validators/network';
 
-import { useI18nContext } from 'i18n/i18n-react';
 import RestartMonitor from '../system/RestartMonitor';
 
 const WiFiSettingsForm: FC = () => {

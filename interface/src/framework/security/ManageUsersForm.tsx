@@ -1,28 +1,26 @@
-import { FC, useContext, useState } from 'react';
-
-import { Button, IconButton, Box } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
-import DeleteIcon from '@mui/icons-material/Delete';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import SaveIcon from '@mui/icons-material/Save';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import { Button, IconButton, Box } from '@mui/material';
 
-import { useTheme } from '@table-library/react-table-library/theme';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
-
-import * as SecurityApi from 'api/security';
-import { SecuritySettings, User } from 'types';
-import { ButtonRow, FormLoader, MessageBox, SectionContent } from 'components';
-import { createUserValidator } from 'validators';
-import { useRest } from 'utils';
-import { AuthenticatedContext } from 'contexts/authentication';
-
-import { useI18nContext } from 'i18n/i18n-react';
+import { useTheme } from '@table-library/react-table-library/theme';
+import { useContext, useState } from 'react';
 
 import GenerateToken from './GenerateToken';
 import UserForm from './UserForm';
+import type { FC } from 'react';
+import type { SecuritySettings, User } from 'types';
+import * as SecurityApi from 'api/security';
+import { ButtonRow, FormLoader, MessageBox, SectionContent } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
+import { useI18nContext } from 'i18n/i18n-react';
+import { useRest } from 'utils';
+import { createUserValidator } from 'validators';
 
 const ManageUsersForm: FC = () => {
   const { loadData, saving, data, setData, saveData, errorMessage } = useRest<SecuritySettings>({

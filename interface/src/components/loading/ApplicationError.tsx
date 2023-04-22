@@ -1,7 +1,6 @@
-import { FC } from 'react';
-
-import { Box, Paper, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
+import { Box, Paper, Typography } from '@mui/material';
+import type { FC } from 'react';
 
 interface ApplicationErrorProps {
   message?: string;

@@ -1,4 +1,5 @@
-import { FC, useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import type { FC } from 'react';
 
 import * as SystemApi from 'api/system';
 import { FormLoader } from 'components';

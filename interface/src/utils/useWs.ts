@@ -1,6 +1,6 @@
+import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Sockette from 'sockette';
-import { debounce } from 'lodash-es';
 
 import { addAccessTokenParameter } from 'api/authentication';
 

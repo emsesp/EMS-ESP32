@@ -1,4 +1,4 @@
-import { FC, useCallback, useState, useEffect } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Dialog,
   DialogTitle,
@@ -10,16 +10,16 @@ import {
   TextField,
   Button
 } from '@mui/material';
+import { useCallback, useState, useEffect } from 'react';
 
-import CloseIcon from '@mui/icons-material/Close';
-
-import { extractErrorMessage } from 'utils';
 import { toast } from 'react-toastify';
-import { MessageBox } from 'components';
+import type { FC } from 'react';
+import type { Token } from 'types';
 import * as SecurityApi from 'api/security';
-import { Token } from 'types';
+import { MessageBox } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
+import { extractErrorMessage } from 'utils';
 
 interface GenerateTokenProps {
   username?: string;

@@ -1,7 +1,11 @@
-import { FC, useState, useEffect, useCallback } from 'react';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DoneIcon from '@mui/icons-material/Done';
 
-import { unstable_useBlocker as useBlocker } from 'react-router-dom';
-
+import FilterListIcon from '@mui/icons-material/FilterList';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import SearchIcon from '@mui/icons-material/Search';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
+import WarningIcon from '@mui/icons-material/Warning';
 import {
   Button,
   Typography,
@@ -18,34 +22,24 @@ import {
   TextField,
   Link
 } from '@mui/material';
-
-import { useTheme } from '@table-library/react-table-library/theme';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
-
+import { useTheme } from '@table-library/react-table-library/theme';
+import { useState, useEffect, useCallback } from 'react';
+import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
-import WarningIcon from '@mui/icons-material/Warning';
-import CancelIcon from '@mui/icons-material/Cancel';
-import DoneIcon from '@mui/icons-material/Done';
-
-import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
 import OptionIcon from './OptionIcon';
 
-import { ButtonRow, FormLoader, ValidatedTextField, SectionContent, MessageBox, BlockNavigation } from 'components';
-
 import * as EMSESP from './api';
 
-import { extractErrorMessage, updateValue } from 'utils';
-
-import { DeviceShort, Devices, DeviceEntity, DeviceEntityMask } from './types';
-
-import { useI18nContext } from 'i18n/i18n-react';
+import { DeviceEntityMask } from './types';
+import type { DeviceShort, Devices, DeviceEntity } from './types';
+import type { FC } from 'react';
+import { ButtonRow, FormLoader, ValidatedTextField, SectionContent, MessageBox, BlockNavigation } from 'components';
 
 import RestartMonitor from 'framework/system/RestartMonitor';
+import { useI18nContext } from 'i18n/i18n-react';
+import { extractErrorMessage, updateValue } from 'utils';
 
 export const APIURL = window.location.origin + '/api/';
 
@@ -584,61 +578,59 @@ const SettingsCustomization: FC = () => {
     </Dialog>
   );
 
-  const renderContent = () => {
-    return (
-      <>
-        <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-          {LL.DEVICE_ENTITIES()}
-        </Typography>
-        {renderDeviceList()}
-        {renderDeviceData()}
-        {restartNeeded && (
-          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT()}>
-            <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
-              {LL.RESTART()}
-            </Button>
-          </MessageBox>
-        )}
-        {!restartNeeded && (
-          <Box display="flex" flexWrap="wrap">
-            <Box flexGrow={1}>
-              {numChanges !== 0 && (
-                <ButtonRow>
-                  <Button
-                    startIcon={<CancelIcon />}
-                    variant="outlined"
-                    color="secondary"
-                    onClick={() => devices && fetchDeviceEntities(devices.devices[selectedDevice].i)}
-                  >
-                    {LL.CANCEL()}
-                  </Button>
-                  <Button
-                    startIcon={<WarningIcon color="warning" />}
-                    variant="contained"
-                    color="info"
-                    onClick={() => saveCustomization()}
-                  >
-                    {LL.APPLY_CHANGES(numChanges)}
-                  </Button>
-                </ButtonRow>
-              )}
-            </Box>
-            <ButtonRow>
-              <Button
-                startIcon={<SettingsBackupRestoreIcon />}
-                variant="outlined"
-                color="error"
-                onClick={() => setConfirmReset(true)}
-              >
-                {LL.RESET(0)}
-              </Button>
-            </ButtonRow>
+  const renderContent = () => (
+    <>
+      <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+        {LL.DEVICE_ENTITIES()}
+      </Typography>
+      {renderDeviceList()}
+      {renderDeviceData()}
+      {restartNeeded && (
+        <MessageBox my={2} level="warning" message={LL.RESTART_TEXT()}>
+          <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
+            {LL.RESTART()}
+          </Button>
+        </MessageBox>
+      )}
+      {!restartNeeded && (
+        <Box display="flex" flexWrap="wrap">
+          <Box flexGrow={1}>
+            {numChanges !== 0 && (
+              <ButtonRow>
+                <Button
+                  startIcon={<CancelIcon />}
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => devices && fetchDeviceEntities(devices.devices[selectedDevice].i)}
+                >
+                  {LL.CANCEL()}
+                </Button>
+                <Button
+                  startIcon={<WarningIcon color="warning" />}
+                  variant="contained"
+                  color="info"
+                  onClick={() => saveCustomization()}
+                >
+                  {LL.APPLY_CHANGES(numChanges)}
+                </Button>
+              </ButtonRow>
+            )}
           </Box>
-        )}
-        {renderResetDialog()}
-      </>
-    );
-  };
+          <ButtonRow>
+            <Button
+              startIcon={<SettingsBackupRestoreIcon />}
+              variant="outlined"
+              color="error"
+              onClick={() => setConfirmReset(true)}
+            >
+              {LL.RESET(0)}
+            </Button>
+          </ButtonRow>
+        </Box>
+      )}
+      {renderResetDialog()}
+    </>
+  );
 
   const renderEditDialog = () => {
     if (deviceEntity) {

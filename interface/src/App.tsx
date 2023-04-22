@@ -1,10 +1,11 @@
-import { FC, useEffect, useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import { ToastContainer, Slide } from 'react-toastify';
+import type { FC } from 'react';
+
 import 'react-toastify/dist/ReactToastify.min.css';
 
-import CustomTheme from 'CustomTheme';
 import AppRouting from 'AppRouting';
+import CustomTheme from 'CustomTheme';
 
 import { localStorageDetector } from 'typesafe-i18n/detectors';
 import TypesafeI18n from 'i18n/i18n-react';

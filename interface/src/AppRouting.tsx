@@ -1,16 +1,16 @@
-import { FC, useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
+import type { FC } from 'react';
 
-import { useI18nContext } from 'i18n/i18n-react';
-
-import { Authentication, AuthenticationContext } from 'contexts/authentication';
+import AuthenticatedRouting from 'AuthenticatedRouting';
+import SignIn from 'SignIn';
 import { RequireAuthenticated, RequireUnauthenticated } from 'components';
 
-import SignIn from 'SignIn';
-import AuthenticatedRouting from 'AuthenticatedRouting';
+import { Authentication, AuthenticationContext } from 'contexts/authentication';
+import { useI18nContext } from 'i18n/i18n-react';
 
 interface SecurityRedirectProps {
   message: string;

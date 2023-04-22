@@ -1,42 +1,38 @@
-import { FC, useState, useContext, useEffect } from 'react';
-import { toast } from 'react-toastify';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DeviceHubIcon from '@mui/icons-material/DeviceHub';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import {
   Avatar,
-  Button,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Box,
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Theme,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
   useTheme
 } from '@mui/material';
-
+import { Body, Cell, Header, HeaderCell, HeaderRow, Row, Table } from '@table-library/react-table-library/table';
 import { useTheme as tableTheme } from '@table-library/react-table-library/theme';
-import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
-
-import DeviceHubIcon from '@mui/icons-material/DeviceHub';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
-import CancelIcon from '@mui/icons-material/Cancel';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
-
-import { AuthenticatedContext } from 'contexts/authentication';
-
-import { ButtonRow, FormLoader, SectionContent } from 'components';
-
-import { Status, busConnectionStatus, Stat } from './types';
-
-import { extractErrorMessage, useRest } from 'utils';
+import { useContext, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 import * as EMSESP from './api';
+import { busConnectionStatus } from './types';
+import type { Stat, Status } from './types';
+import type { Theme } from '@mui/material';
 
 import type { Translation } from 'i18n/i18n-types';
+import type { FC } from 'react';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import { extractErrorMessage, useRest } from 'utils';
 
 export const isConnected = ({ status }: Status) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
 

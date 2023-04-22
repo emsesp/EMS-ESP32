@@ -1,11 +1,10 @@
-import { FC } from 'react';
+import { ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { Link, useLocation } from 'react-router-dom';
-
-import { ListItem, ListItemButton, ListItemIcon, ListItemText, SvgIconProps } from '@mui/material';
+import type { SvgIconProps } from '@mui/material';
+import type { FC } from 'react';
 
 import { routeMatches } from 'utils';
-
-import { grey } from '@mui/material/colors';
 
 interface LayoutMenuItemProps {
   icon: React.ComponentType<SvgIconProps>;

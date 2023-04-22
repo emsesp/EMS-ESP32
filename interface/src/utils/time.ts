@@ -8,10 +8,7 @@ const LOCALE_FORMAT = new Intl.DateTimeFormat([...window.navigator.languages], {
   hour12: false
 });
 
-export const formatDateTime = (dateTime: string) => {
-  return LOCALE_FORMAT.format(new Date(dateTime.substring(0, 19)));
-};
+export const formatDateTime = (dateTime: string) => LOCALE_FORMAT.format(new Date(dateTime.substring(0, 19)));
 
-export const formatLocalDateTime = (date: Date) => {
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, -1).substring(0, 19);
-};
+export const formatLocalDateTime = (date: Date) =>
+  new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, -1).substring(0, 19);

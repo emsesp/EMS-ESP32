@@ -1,7 +1,4 @@
-import { AxiosPromise } from 'axios';
-import { AXIOS, AXIOS_API, AXIOS_BIN } from 'api/endpoints';
-
-import {
+import type {
   BoardProfile,
   BoardProfileName,
   APIcall,
@@ -20,6 +17,8 @@ import {
   Schedule,
   Entities
 } from './types';
+import type { AxiosPromise } from 'axios';
+import { AXIOS, AXIOS_API, AXIOS_BIN } from 'api/endpoints';
 
 export function restart(): AxiosPromise<void> {
   return AXIOS.post('/restart');

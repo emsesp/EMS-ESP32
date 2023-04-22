@@ -1,11 +1,13 @@
-import { FC, useState } from 'react';
-import { ValidateFieldsError } from 'async-validator';
-
-import { Button, Checkbox, MenuItem } from '@mui/material';
-import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Button, Checkbox, MenuItem } from '@mui/material';
+import { useState } from 'react';
+import { selectedTimeZone, timeZoneSelectItems, TIME_ZONES } from './TZ';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 
-import { validate } from 'validators';
+import type { NTPSettings } from 'types';
+import * as NTPApi from 'api/ntp';
 import {
   BlockFormControlLabel,
   ButtonRow,
@@ -14,13 +16,10 @@ import {
   ValidatedTextField,
   BlockNavigation
 } from 'components';
-import { NTPSettings } from 'types';
-import { updateValueDirty, useRest } from 'utils';
-import * as NTPApi from 'api/ntp';
-import { selectedTimeZone, timeZoneSelectItems, TIME_ZONES } from './TZ';
-import { NTP_SETTINGS_VALIDATOR } from 'validators/ntp';
-
 import { useI18nContext } from 'i18n/i18n-react';
+import { updateValueDirty, useRest } from 'utils';
+import { validate } from 'validators';
+import { NTP_SETTINGS_VALIDATOR } from 'validators/ntp';
 
 const NTPSettingsForm: FC = () => {
   const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =

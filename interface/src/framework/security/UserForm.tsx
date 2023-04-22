@@ -1,18 +1,18 @@
-import { FC, useState, useEffect } from 'react';
-import Schema, { ValidateFieldsError } from 'async-validator';
-
 import CancelIcon from '@mui/icons-material/Cancel';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SaveIcon from '@mui/icons-material/Save';
 
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { useState, useEffect } from 'react';
+import type Schema from 'async-validator';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 
+import type { User } from 'types';
 import { BlockFormControlLabel, ValidatedPasswordField, ValidatedTextField } from 'components';
-import { User } from 'types';
+import { useI18nContext } from 'i18n/i18n-react';
 import { updateValue } from 'utils';
 import { validate } from 'validators';
-
-import { useI18nContext } from 'i18n/i18n-react';
 
 interface UserFormProps {
   creating: boolean;

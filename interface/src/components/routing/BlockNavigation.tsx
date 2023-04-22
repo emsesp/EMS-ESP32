@@ -1,6 +1,6 @@
-import { FC } from 'react';
-import type { Blocker } from '@remix-run/router';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import type { Blocker } from '@remix-run/router';
+import type { FC } from 'react';
 
 import { useI18nContext } from 'i18n/i18n-react';
 

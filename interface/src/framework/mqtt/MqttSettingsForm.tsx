@@ -1,12 +1,12 @@
-import { FC, useState } from 'react';
-import { ValidateFieldsError } from 'async-validator';
-
-import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment } from '@mui/material';
-
-import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment } from '@mui/material';
+import { useState } from 'react';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 
-import { createMqttSettingsValidator, validate } from 'validators';
+import type { MqttSettings } from 'types';
+import * as MqttApi from 'api/mqtt';
 import {
   BlockFormControlLabel,
   ButtonRow,
@@ -16,11 +16,10 @@ import {
   ValidatedTextField,
   BlockNavigation
 } from 'components';
-import { MqttSettings } from 'types';
-import { numberValue, updateValueDirty, useRest } from 'utils';
-import * as MqttApi from 'api/mqtt';
-
 import { useI18nContext } from 'i18n/i18n-react';
+import { numberValue, updateValueDirty, useRest } from 'utils';
+
+import { createMqttSettingsValidator, validate } from 'validators';
 
 const MqttSettingsForm: FC = () => {
   const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =

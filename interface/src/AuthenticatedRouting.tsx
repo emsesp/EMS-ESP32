@@ -1,21 +1,21 @@
-import { FC, useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Navigate, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { AxiosError } from 'axios';
+import Dashboard from './project/Dashboard';
+import Help from './project/Help';
+import Settings from './project/Settings';
+import type { AxiosError } from 'axios';
+import type { FC } from 'react';
 
 import * as AuthenticationApi from 'api/authentication';
 import { AXIOS } from 'api/endpoints';
 import { Layout, RequireAdmin } from 'components';
 
-import Dashboard from './project/Dashboard';
-import Settings from './project/Settings';
-import Help from './project/Help';
-
-import NetworkConnection from 'framework/network/NetworkConnection';
 import AccessPoint from 'framework/ap/AccessPoint';
-import NetworkTime from 'framework/ntp/NetworkTime';
 import Mqtt from 'framework/mqtt/Mqtt';
-import System from 'framework/system/System';
+import NetworkConnection from 'framework/network/NetworkConnection';
+import NetworkTime from 'framework/ntp/NetworkTime';
 import Security from 'framework/security/Security';
+import System from 'framework/system/System';
 
 const AuthenticatedRouting: FC = () => {
   const location = useLocation();

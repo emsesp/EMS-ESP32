@@ -1,22 +1,17 @@
-import { FC } from 'react';
-
+import CommentIcon from '@mui/icons-material/CommentTwoTone';
+import EastIcon from '@mui/icons-material/East';
+import DownloadIcon from '@mui/icons-material/GetApp';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
 import { Typography, Button, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@mui/material';
+import { toast } from 'react-toastify';
+import * as EMSESP from './api';
+import type { FC } from 'react';
 
 import { SectionContent } from 'components';
 
-import { toast } from 'react-toastify';
-
-import CommentIcon from '@mui/icons-material/CommentTwoTone';
-import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import DownloadIcon from '@mui/icons-material/GetApp';
-import EastIcon from '@mui/icons-material/East';
-
-import { extractErrorMessage } from 'utils';
-
 import { useI18nContext } from 'i18n/i18n-react';
-
-import * as EMSESP from './api';
+import { extractErrorMessage } from 'utils';
 
 const HelpInformation: FC = () => {
   const { LL } = useI18nContext();

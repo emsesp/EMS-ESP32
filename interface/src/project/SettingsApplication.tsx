@@ -1,17 +1,16 @@
-import { FC, useState } from 'react';
-import { ValidateFieldsError } from 'async-validator';
-
-import { toast } from 'react-toastify';
-
-import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider, InputAdornment } from '@mui/material';
-
-import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider, InputAdornment } from '@mui/material';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
 
-import { validate } from 'validators';
+import * as EMSESP from './api';
+import { BOARD_PROFILES } from './types';
 import { createSettingsValidator } from './validators';
-
+import type { Settings } from './types';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 import {
   SectionContent,
   FormLoader,
@@ -21,13 +20,11 @@ import {
   MessageBox,
   BlockNavigation
 } from 'components';
-import { numberValue, extractErrorMessage, updateValueDirty, useRest } from 'utils';
 
-import * as EMSESP from './api';
-import { Settings, BOARD_PROFILES } from './types';
-
-import { useI18nContext } from 'i18n/i18n-react';
 import RestartMonitor from 'framework/system/RestartMonitor';
+import { useI18nContext } from 'i18n/i18n-react';
+import { numberValue, extractErrorMessage, updateValueDirty, useRest } from 'utils';
+import { validate } from 'validators';
 
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (

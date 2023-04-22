@@ -1,14 +1,12 @@
-import { FC } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-
 import { Tab } from '@mui/material';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import DashboardData from './DashboardData';
+import DashboardStatus from './DashboardStatus';
+import type { FC } from 'react';
 
 import { RouterTabs, useRouterTab, useLayoutTitle } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
-
-import DashboardStatus from './DashboardStatus';
-import DashboardData from './DashboardData';
 
 const Dashboard: FC = () => {
   const { routerTab } = useRouterTab();

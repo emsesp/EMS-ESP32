@@ -1,14 +1,13 @@
-import { useEffect, FC, useState, useCallback, useRef } from 'react';
+import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
+import { Button } from '@mui/material';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { toast } from 'react-toastify';
 
-import { Button } from '@mui/material';
-import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
-
-import * as NetworkApi from 'api/network';
-import { WiFiNetwork, WiFiNetworkList } from 'types';
-import { ButtonRow, FormLoader, SectionContent } from 'components';
-
 import WiFiNetworkSelector from './WiFiNetworkSelector';
+import type { FC } from 'react';
+import type { WiFiNetwork, WiFiNetworkList } from 'types';
+import * as NetworkApi from 'api/network';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 

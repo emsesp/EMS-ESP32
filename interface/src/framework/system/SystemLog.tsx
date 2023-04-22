@@ -1,22 +1,19 @@
-import { FC, useState, useEffect, useCallback, useLayoutEffect } from 'react';
-
+import DownloadIcon from '@mui/icons-material/GetApp';
 import { Box, styled, Button, Checkbox, MenuItem, Grid, Slider, FormLabel } from '@mui/material';
+import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
+import { toast } from 'react-toastify';
+import type { FC } from 'react';
 
-import * as SystemApi from 'api/system';
+import type { LogSettings, LogEntry, LogEntries } from 'types';
 import { addAccessTokenParameter } from 'api/authentication';
+import { EVENT_SOURCE_ROOT } from 'api/endpoints';
+import * as SystemApi from 'api/system';
 
 import { SectionContent, FormLoader, BlockFormControlLabel, ValidatedTextField } from 'components';
 
-import { LogSettings, LogEntry, LogEntries, LogLevel } from 'types';
-import { updateValue, useRest, extractErrorMessage } from 'utils';
-
-import DownloadIcon from '@mui/icons-material/GetApp';
-
-import { toast } from 'react-toastify';
-
-import { EVENT_SOURCE_ROOT } from 'api/endpoints';
-
 import { useI18nContext } from 'i18n/i18n-react';
+import { LogLevel } from 'types';
+import { updateValue, useRest, extractErrorMessage } from 'utils';
 
 export const LOG_EVENTSOURCE_URL = EVENT_SOURCE_ROOT + 'log';
 

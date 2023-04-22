@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
+import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-import { AxiosPromise } from 'axios';
-
 import { extractErrorMessage } from '.';
+import type { AxiosPromise } from 'axios';
 
 import { useI18nContext } from 'i18n/i18n-react';
-
-import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 
 export interface RestRequestOptions<D> {
   read: () => AxiosPromise<D>;
