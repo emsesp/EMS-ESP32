@@ -190,7 +190,7 @@ const SettingsCustomization: FC = () => {
   };
 
   useEffect(() => {
-    fetchDevices();
+    void fetchDevices();
   }, [fetchDevices]);
 
   function formatValue(value: any) {
@@ -266,7 +266,7 @@ const SettingsCustomization: FC = () => {
       const selected_device = parseInt(event.target.value, 10);
       setSelectedDevice(selected_device);
       setNumChanges(0);
-      fetchDeviceEntities(devices?.devices[selected_device].i);
+      void fetchDeviceEntities(devices?.devices[selected_device].i);
       setRestartNeeded(false);
     }
   };

@@ -42,7 +42,7 @@ const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
 
   useEffect(() => {
     if (open) {
-      getToken();
+      void getToken();
     }
   }, [open, getToken]);
 

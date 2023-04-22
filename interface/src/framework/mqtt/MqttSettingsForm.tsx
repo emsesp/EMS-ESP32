@@ -43,7 +43,7 @@ const MqttSettingsForm: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(createMqttSettingsValidator(data), data);
-        saveData();
+        void saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
       }

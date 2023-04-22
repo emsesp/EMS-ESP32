@@ -75,7 +75,7 @@ const WiFiNetworkScanner: FC = () => {
   }, [finishedWithError, pollNetworkList, LL]);
 
   useEffect(() => {
-    startNetworkScan();
+    void startNetworkScan();
   }, [startNetworkScan]);
 
   const renderNetworkScanner = () => {

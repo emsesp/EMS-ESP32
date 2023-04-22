@@ -31,7 +31,7 @@ const RestartMonitor: FC = () => {
   });
 
   useEffect(() => {
-    poll.current();
+    void poll.current();
   }, []);
 
   useEffect(() => () => timeoutId && clearTimeout(timeoutId), [timeoutId]);

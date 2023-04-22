@@ -14,12 +14,12 @@ import { ValidatedTextField } from 'components';
 import { AuthenticationContext } from 'contexts/authentication';
 
 import { ReactComponent as DEflag } from 'i18n/DE.svg';
+import { ReactComponent as FRflag } from 'i18n/FR.svg';
 import { ReactComponent as GBflag } from 'i18n/GB.svg';
 import { ReactComponent as NLflag } from 'i18n/NL.svg';
 import { ReactComponent as NOflag } from 'i18n/NO.svg';
 import { ReactComponent as PLflag } from 'i18n/PL.svg';
 import { ReactComponent as SVflag } from 'i18n/SV.svg';
-import { ReactComponent as FRflag } from 'i18n/FR.svg';
 import { ReactComponent as TRflag } from 'i18n/TR.svg';
 import { I18nContext } from 'i18n/i18n-react';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
@@ -63,7 +63,7 @@ const SignIn: FC = () => {
     });
     try {
       await validate(SIGN_IN_REQUEST_VALIDATOR, signInRequest);
-      signIn();
+      void signIn();
     } catch (errors: any) {
       setFieldErrors(errors);
       setProcessing(false);

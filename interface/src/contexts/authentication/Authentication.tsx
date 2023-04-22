@@ -57,7 +57,7 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
   if (initialized) {

@@ -95,7 +95,7 @@ const SettingsApplication: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(createSettingsValidator(data), data);
-        saveData();
+        void saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
       }
@@ -110,12 +110,12 @@ const SettingsApplication: FC = () => {
           board_profile: boardProfile
         });
       } else {
-        updateBoardProfile(boardProfile);
+        void updateBoardProfile(boardProfile);
       }
     };
 
     const restart = async () => {
-      validateAndSubmit();
+      void validateAndSubmit();
       try {
         await EMSESP.restart();
         setRestarting(true);

@@ -1,16 +1,16 @@
 import AppsIcon from '@mui/icons-material/Apps';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import BuildIcon from '@mui/icons-material/Build';
-import TimerIcon from '@mui/icons-material/Timer';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DevicesIcon from '@mui/icons-material/Devices';
 import FolderIcon from '@mui/icons-material/Folder';
 import MemoryIcon from '@mui/icons-material/Memory';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import SdCardAlertIcon from '@mui/icons-material/SdCardAlert';
 import SdStorageIcon from '@mui/icons-material/SdStorage';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
+import TimerIcon from '@mui/icons-material/Timer';
 import {
   Avatar,
   Box,
@@ -34,11 +34,11 @@ import { toast } from 'react-toastify';
 import RestartMonitor from './RestartMonitor';
 import type { FC } from 'react';
 
-import { useI18nContext } from 'i18n/i18n-react';
 import type { SystemStatus, Version } from 'types';
 import * as SystemApi from 'api/system';
 import { ButtonRow, FormLoader, SectionContent, MessageBox } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
+import { useI18nContext } from 'i18n/i18n-react';
 import { extractErrorMessage, useRest } from 'utils';
 
 export const VERSIONCHECK_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/latest';
@@ -64,14 +64,14 @@ const SystemStatusForm: FC = () => {
   const [latestDevVersion, setLatestDevVersion] = useState<Version>();
 
   useEffect(() => {
-    axios.get(VERSIONCHECK_ENDPOINT).then((response) => {
+    void axios.get(VERSIONCHECK_ENDPOINT).then((response) => {
       setLatestVersion({
         version: response.data.name,
         url: response.data.assets[1].browser_download_url,
         changelog: response.data.assets[0].browser_download_url
       });
     });
-    axios.get(VERSIONCHECK_DEV_ENDPOINT).then((response) => {
+    void axios.get(VERSIONCHECK_DEV_ENDPOINT).then((response) => {
       setLatestDevVersion({
         version: response.data.name.split(/\s+/).splice(-1),
         url: response.data.assets[1].browser_download_url,

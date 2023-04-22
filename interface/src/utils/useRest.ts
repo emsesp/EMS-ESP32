@@ -72,7 +72,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
   const saveData = () => data && save(data);
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [loadData]);
 
   return {

@@ -23,7 +23,7 @@ const FeaturesLoader: FC<RequiredChildrenProps> = (props) => {
   }, []);
 
   useEffect(() => {
-    loadFeatures();
+    void loadFeatures();
   }, [loadFeatures]);
 
   if (features) {

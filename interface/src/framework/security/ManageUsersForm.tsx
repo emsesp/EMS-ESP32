@@ -123,7 +123,7 @@ const ManageUsersForm: FC = () => {
 
     const onSubmit = async () => {
       await saveData();
-      authenticatedContext.refresh();
+      void authenticatedContext.refresh();
     };
 
     const user_table = data.users.map((u) => ({ ...u, id: u.username }));

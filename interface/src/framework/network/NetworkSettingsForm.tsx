@@ -19,9 +19,11 @@ import {
 } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import type { FC} from 'react';
-
-
+import RestartMonitor from '../system/RestartMonitor';
+import { WiFiConnectionContext } from './WiFiConnectionContext';
+import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 
 import type { NetworkSettings } from 'types';
 import * as NetworkApi from 'api/network';
@@ -39,13 +41,8 @@ import { useI18nContext } from 'i18n/i18n-react';
 import * as EMSESP from 'project/api';
 import { numberValue, updateValueDirty, useRest } from 'utils';
 
-import { WiFiConnectionContext } from './WiFiConnectionContext';
-import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
-import type { ValidateFieldsError } from 'async-validator';
 import { validate } from 'validators';
 import { createNetworkSettingsValidator } from 'validators/network';
-
-import RestartMonitor from '../system/RestartMonitor';
 
 const WiFiSettingsForm: FC = () => {
   const { LL } = useI18nContext();
@@ -107,7 +104,7 @@ const WiFiSettingsForm: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(createNetworkSettingsValidator(data), data);
-        saveData();
+        void saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
       }

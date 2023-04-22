@@ -45,7 +45,7 @@ const OTASettingsForm: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(OTA_SETTINGS_VALIDATOR, data);
-        saveData();
+        void saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
       }

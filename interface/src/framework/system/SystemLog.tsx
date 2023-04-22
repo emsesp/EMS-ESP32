@@ -117,7 +117,7 @@ const SystemLog: FC = () => {
         ...data,
         level: parseInt(event.target.value)
       });
-      sendSettings(data.max_messages, parseInt(event.target.value));
+      void sendSettings(data.max_messages, parseInt(event.target.value));
     }
   };
 
@@ -163,7 +163,7 @@ const SystemLog: FC = () => {
   }, [LL]);
 
   useEffect(() => {
-    fetchLog();
+    void fetchLog();
   }, [fetchLog]);
 
   useEffect(() => {
