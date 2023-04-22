@@ -601,6 +601,7 @@ const emsesp_devicedata_4 = {
 
 // CUSTOM ENTITIES
 let emsesp_entities = {
+  // entities: []
   entities: [
     {
       id: 0,
