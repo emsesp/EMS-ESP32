@@ -21,7 +21,7 @@
 #define WebEntityService_h
 
 #define EMSESP_ENTITY_FILE "/config/emsespEntity.json"
-#define EMSESP_ENTITY_SERVICE_PATH "/rest/entity" // GET and POST
+#define EMSESP_ENTITY_SERVICE_PATH "/rest/entities" // GET and POST
 
 namespace emsesp {
 

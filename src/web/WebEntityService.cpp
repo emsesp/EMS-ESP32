@@ -36,7 +36,7 @@ void WebEntityService::begin() {
 // this creates the entity file, saving it to the FS
 // and also calls when the Entity web page is refreshed
 void WebEntity::read(WebEntity & webEntity, JsonObject & root) {
-    JsonArray entity  = root.createNestedArray("entity");
+    JsonArray entity  = root.createNestedArray("entities");
     uint8_t   counter = 0;
     for (const EntityItem & entityItem : webEntity.entityItems) {
         JsonObject ei    = entity.createNestedObject();
@@ -61,8 +61,8 @@ StateUpdateResult WebEntity::update(JsonObject & root, WebEntity & webEntity) {
     }
     webEntity.entityItems.clear();
 
-    if (root["entity"].is<JsonArray>()) {
-        for (const JsonObject ei : root["entity"].as<JsonArray>()) {
+    if (root["entities"].is<JsonArray>()) {
+        for (const JsonObject ei : root["entities"].as<JsonArray>()) {
             auto entityItem       = EntityItem();
             entityItem.device_id  = ei["device_id"]; // send as numeric, will be converted to string in web
             entityItem.type_id    = ei["type_id"];
