@@ -32,9 +32,9 @@ interface OptionIconProps {
 const OptionIcon: FC<OptionIconProps> = ({ type, isSet }) => {
   const Icon = OPTION_ICONS[type][isSet ? 0 : 1];
   return isSet ? (
-    <Icon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />
+    <Icon color="primary" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
   ) : (
-    <Icon sx={{ fontSize: 14, verticalAlign: 'middle' }} />
+    <Icon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
   );
 };
 

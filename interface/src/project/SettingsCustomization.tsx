@@ -1,7 +1,4 @@
 import CancelIcon from '@mui/icons-material/Cancel';
-import DoneIcon from '@mui/icons-material/Done';
-
-import FilterListIcon from '@mui/icons-material/FilterList';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import SearchIcon from '@mui/icons-material/Search';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
@@ -17,10 +14,10 @@ import {
   DialogTitle,
   ToggleButton,
   ToggleButtonGroup,
-  Tooltip,
   Grid,
   TextField,
-  Link
+  Link,
+  InputAdornment
 } from '@mui/material';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
@@ -28,71 +25,38 @@ import { useState, useEffect, useCallback } from 'react';
 import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import EntityMaskToggle from './EntityMaskToggle';
 import OptionIcon from './OptionIcon';
+import SettingsCustomizationDialog from './SettingsCustomizationDialog';
 
 import * as EMSESP from './api';
 
 import { DeviceEntityMask } from './types';
 import type { DeviceShort, Devices, DeviceEntity } from './types';
 import type { FC } from 'react';
-import { ButtonRow, FormLoader, ValidatedTextField, SectionContent, MessageBox, BlockNavigation } from 'components';
+import { ButtonRow, FormLoader, SectionContent, MessageBox, BlockNavigation } from 'components';
 
 import RestartMonitor from 'framework/system/RestartMonitor';
 import { useI18nContext } from 'i18n/i18n-react';
-import { extractErrorMessage, updateValue } from 'utils';
+import { extractErrorMessage } from 'utils';
 
 export const APIURL = window.location.origin + '/api/';
 
 const SettingsCustomization: FC = () => {
   const { LL } = useI18nContext();
-
-  const emptyDeviceEntity = { id: '', v: 0, n: '', cn: '', m: 0, w: false };
-
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
-
   const [restarting, setRestarting] = useState<boolean>(false);
   const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
-  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([emptyDeviceEntity]);
+  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>();
   const [devices, setDevices] = useState<Devices>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selectedDevice, setSelectedDevice] = useState<number>(-1);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
   const [selectedFilters, setSelectedFilters] = useState<number>(0);
   const [search, setSearch] = useState('');
-  const [deviceEntity, setDeviceEntity] = useState<DeviceEntity>();
-  // eslint-disable-next-line
-  const [masks, setMasks] = useState(() => ['']);
-
-  function hasEntityChanged(de: DeviceEntity) {
-    return (de?.cn || '') !== (de?.o_cn || '') || de.m !== de.o_m || de.ma !== de.o_ma || de.mi !== de.o_mi;
-  }
-
-  const getChanges = () => {
-    if (!deviceEntities || selectedDevice === -1) {
-      return [];
-    }
-
-    return deviceEntities
-      .filter((de) => hasEntityChanged(de))
-      .map(
-        (new_de) =>
-          new_de.m.toString(16).padStart(2, '0') +
-          new_de.id +
-          (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
-          (new_de.cn ? new_de.cn : '') +
-          (new_de.mi ? '>' + new_de.mi : '') +
-          (new_de.ma ? '<' + new_de.ma : '')
-      );
-  };
-
-  const countChanges = () => {
-    setNumChanges(getChanges().length);
-  };
-
-  useEffect(() => {
-    countChanges();
-  });
+  const [selectedDeviceEntity, setSelectedDeviceEntity] = useState<DeviceEntity>();
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
   const entities_theme = useTheme({
     Table: `
@@ -119,12 +83,10 @@ const SettingsCustomization: FC = () => {
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
-
       .th {
         border-bottom: 1px solid #565656;
         height: 36px;
       }
-
       &:nth-of-type(1) .th {
         text-align: center;
       }
@@ -133,21 +95,17 @@ const SettingsCustomization: FC = () => {
       background-color: #1e1e1e;
       position: relative;
       cursor: pointer;
-    
       .td {
         border-top: 1px solid #565656;
         border-bottom: 1px solid #565656;
       }
-
       &.tr.tr-body.row-select.row-select-single-selected {
         background-color: #3d4752;
       }
-
       &:hover .td {
         border-top: 1px solid #177ac9;
         border-bottom: 1px solid #177ac9;
       }
-
       &:nth-of-type(odd) .td {
         background-color: #303030;
       }
@@ -168,6 +126,28 @@ const SettingsCustomization: FC = () => {
     `
   });
 
+  function hasEntityChanged(de: DeviceEntity) {
+    return (de?.cn || '') !== (de?.o_cn || '') || de.m !== de.o_m || de.ma !== de.o_ma || de.mi !== de.o_mi;
+  }
+
+  useEffect(() => {
+    if (deviceEntities) {
+      setNumChanges(
+        deviceEntities
+          .filter((de) => hasEntityChanged(de))
+          .map(
+            (new_de) =>
+              new_de.m.toString(16).padStart(2, '0') +
+              new_de.id +
+              (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
+              (new_de.cn ? new_de.cn : '') +
+              (new_de.mi ? '>' + new_de.mi : '') +
+              (new_de.ma ? '<' + new_de.ma : '')
+          ).length
+      );
+    }
+  }, [deviceEntities]);
+
   const fetchDevices = useCallback(async () => {
     try {
       setDevices((await EMSESP.readDevices()).data);
@@ -175,6 +155,11 @@ const SettingsCustomization: FC = () => {
       setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   }, [LL]);
+
+  // on mount
+  useEffect(() => {
+    void fetchDevices();
+  }, [fetchDevices]);
 
   const setOriginalSettings = (data: DeviceEntity[]) => {
     setDeviceEntities(data.map((de) => ({ ...de, o_m: de.m, o_cn: de.cn, o_mi: de.mi, o_ma: de.ma })));
@@ -188,10 +173,6 @@ const SettingsCustomization: FC = () => {
       setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
-
-  useEffect(() => {
-    void fetchDevices();
-  }, [fetchDevices]);
 
   function formatValue(value: any) {
     if (typeof value === 'number') {
@@ -246,7 +227,7 @@ const SettingsCustomization: FC = () => {
 
   const maskDisabled = (set: boolean) => {
     setDeviceEntities(
-      deviceEntities.map(function (de) {
+      deviceEntities?.map(function (de) {
         if ((de.m & selectedFilters || !selectedFilters) && de.id.toLowerCase().includes(search.toLowerCase())) {
           return {
             ...de,
@@ -291,9 +272,45 @@ const SettingsCustomization: FC = () => {
     }
   };
 
+  const onDialogClose = () => {
+    setDialogOpen(false);
+  };
+
+  const updateDeviceEntity = (updatedItem: DeviceEntity) => {
+    setDeviceEntities(deviceEntities?.map((de) => (de.id === updatedItem.id ? { ...de, ...updatedItem } : de)));
+  };
+
+  const onDialogSave = (updatedItem: DeviceEntity) => {
+    setDialogOpen(false);
+    updateDeviceEntity(updatedItem);
+  };
+
+  const editDeviceEntity = useCallback((de: DeviceEntity) => {
+    if (de.n === undefined || (de.n && de.n[0] === '!')) {
+      return;
+    }
+
+    if (de.cn === undefined) {
+      de.cn = '';
+    }
+
+    setSelectedDeviceEntity(de);
+    setDialogOpen(true);
+  }, []);
+
   const saveCustomization = async () => {
     if (devices && deviceEntities && selectedDevice !== -1) {
-      const masked_entities = getChanges();
+      const masked_entities = deviceEntities
+        .filter((de) => hasEntityChanged(de))
+        .map(
+          (new_de) =>
+            new_de.m.toString(16).padStart(2, '0') +
+            new_de.id +
+            (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
+            (new_de.cn ? new_de.cn : '') +
+            (new_de.mi ? '>' + new_de.mi : '') +
+            (new_de.ma ? '<' + new_de.ma : '')
+        );
 
       // check size in bytes to match buffer in CPP, which is 2048
       const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
@@ -329,8 +346,8 @@ const SettingsCustomization: FC = () => {
     return (
       <>
         <Box mb={2} color="warning.main">
-          <Typography variant="body2">{LL.CUSTOMIZATIONS_HELP_1()}</Typography>
-          <Typography variant="body2">
+          <Typography variant="body2">{LL.CUSTOMIZATIONS_HELP_1()}.</Typography>
+          <Typography variant="body2" mt={1}>
             <OptionIcon type="favorite" isSet={true} />={LL.CUSTOMIZATIONS_HELP_2()}&nbsp;&nbsp;
             <OptionIcon type="readonly" isSet={true} />={LL.CUSTOMIZATIONS_HELP_3()}&nbsp;&nbsp;
             <OptionIcon type="api_mqtt_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_4()}&nbsp;&nbsp;
@@ -338,7 +355,7 @@ const SettingsCustomization: FC = () => {
             <OptionIcon type="deleted" isSet={true} />={LL.CUSTOMIZATIONS_HELP_6()}
           </Typography>
         </Box>
-        <ValidatedTextField
+        <TextField
           name="device"
           label={LL.EMS_DEVICE()}
           variant="outlined"
@@ -357,39 +374,16 @@ const SettingsCustomization: FC = () => {
               {device.s}
             </MenuItem>
           ))}
-        </ValidatedTextField>
+        </TextField>
       </>
     );
   };
 
-  const editEntity = (de: DeviceEntity) => {
-    if (de.n === undefined || (de.n && de.n[0] === '!')) {
+  const renderDeviceData = () => {
+    if (!deviceEntities) {
       return;
     }
 
-    if (de.cn === undefined) {
-      de.cn = '';
-    }
-    setDeviceEntity(de);
-  };
-
-  const updateEntity = () => {
-    if (deviceEntity) {
-      setDeviceEntities((prevState) => {
-        const newState = prevState.map((obj) => {
-          if (obj.id === deviceEntity.id) {
-            return { ...obj, cn: deviceEntity.cn, mi: deviceEntity.mi, ma: deviceEntity.ma };
-          }
-          return obj;
-        });
-        return newState;
-      });
-    }
-
-    setDeviceEntity(undefined);
-  };
-
-  const renderDeviceData = () => {
     if (devices?.devices.length === 0 || deviceEntities[0].id === '') {
       return;
     }
@@ -401,33 +395,23 @@ const SettingsCustomization: FC = () => {
     return (
       <>
         <Grid container mb={1} mt={0} spacing={1} direction="row" justifyContent="flex-start" alignItems="center">
-          <Grid item>
-            <Typography variant="subtitle2" color="primary">
-              #:
-            </Typography>
-          </Grid>
-          <Grid item>
-            <Typography variant="subtitle2">
-              {shown_data.length}/{deviceEntities.length}
-            </Typography>
-          </Grid>
-          <Grid item>
-            <SearchIcon color="primary" sx={{ fontSize: 16, verticalAlign: 'middle' }} />:
-          </Grid>
           <Grid item xs={2}>
             <TextField
               size="small"
               variant="outlined"
+              placeholder={LL.SEARCH()}
               onChange={(event) => {
                 setSearch(event.target.value);
               }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="primary" sx={{ fontSize: 16 }} />
+                  </InputAdornment>
+                )
+              }}
             />
           </Grid>
-          <Tooltip arrow placement="top" title="apply filter">
-            <Grid item>
-              <FilterListIcon color="primary" sx={{ fontSize: 14, verticalAlign: 'middle' }} />:
-            </Grid>
-          </Tooltip>
           <Grid item>
             <ToggleButtonGroup
               size="small"
@@ -454,7 +438,6 @@ const SettingsCustomization: FC = () => {
               </ToggleButton>
             </ToggleButtonGroup>
           </Grid>
-
           <Grid item>
             <Button
               size="small"
@@ -481,6 +464,11 @@ const SettingsCustomization: FC = () => {
               <OptionIcon type="web_exclude" isSet={true} />
             </Button>
           </Grid>
+          <Grid item>
+            <Typography variant="subtitle2" color="primary">
+              {LL.SHOWING()}&nbsp;{shown_data.length}/{deviceEntities.length}
+            </Typography>
+          </Grid>
         </Grid>
         <Table data={{ nodes: shown_data }} theme={entities_theme} layout={{ custom: true }}>
           {(tableList: any) => (
@@ -496,63 +484,14 @@ const SettingsCustomization: FC = () => {
               </Header>
               <Body>
                 {tableList.map((de: DeviceEntity) => (
-                  <Row key={de.id} item={de} onClick={() => editEntity(de)}>
+                  <Row key={de.id} item={de} onClick={() => editDeviceEntity(de)}>
                     <Cell stiff>
-                      {!deviceEntity && (
-                        <ToggleButtonGroup
-                          size="small"
-                          color="secondary"
-                          value={getMaskString(de.m)}
-                          onChange={(event, mask) => {
-                            de.m = getMaskNumber(mask);
-                            if (de.n === '' && de.m & DeviceEntityMask.DV_READONLY) {
-                              de.m = de.m | DeviceEntityMask.DV_WEB_EXCLUDE;
-                            }
-                            if (de.m & DeviceEntityMask.DV_WEB_EXCLUDE) {
-                              de.m = de.m & ~DeviceEntityMask.DV_FAVORITE;
-                            }
-                            setMasks(['']); // forces a refresh
-                          }}
-                        >
-                          <ToggleButton value="8" disabled={(de.m & 0x81) !== 0 || de.n === undefined}>
-                            <OptionIcon
-                              type="favorite"
-                              isSet={(de.m & DeviceEntityMask.DV_FAVORITE) === DeviceEntityMask.DV_FAVORITE}
-                            />
-                          </ToggleButton>
-                          <ToggleButton value="4" disabled={!de.w || (de.m & 0x83) >= 3}>
-                            <OptionIcon
-                              type="readonly"
-                              isSet={(de.m & DeviceEntityMask.DV_READONLY) === DeviceEntityMask.DV_READONLY}
-                            />
-                          </ToggleButton>
-                          <ToggleButton value="2" disabled={de.n === '' || (de.m & 0x80) !== 0}>
-                            <OptionIcon
-                              type="api_mqtt_exclude"
-                              isSet={
-                                (de.m & DeviceEntityMask.DV_API_MQTT_EXCLUDE) === DeviceEntityMask.DV_API_MQTT_EXCLUDE
-                              }
-                            />
-                          </ToggleButton>
-                          <ToggleButton value="1" disabled={de.n === undefined || (de.m & 0x80) !== 0}>
-                            <OptionIcon
-                              type="web_exclude"
-                              isSet={(de.m & DeviceEntityMask.DV_WEB_EXCLUDE) === DeviceEntityMask.DV_WEB_EXCLUDE}
-                            />
-                          </ToggleButton>
-                          <ToggleButton value="128">
-                            <OptionIcon
-                              type="deleted"
-                              isSet={(de.m & DeviceEntityMask.DV_DELETED) === DeviceEntityMask.DV_DELETED}
-                            />
-                          </ToggleButton>
-                        </ToggleButtonGroup>
-                      )}
+                      <EntityMaskToggle onUpdate={updateDeviceEntity} de={de} />
                     </Cell>
-                    <Cell>{!deviceEntity && formatName(de)}</Cell>
-                    <Cell>{!deviceEntity && !(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}</Cell>
-                    <Cell>{!deviceEntity && !(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}</Cell>
-                    <Cell>{!deviceEntity && formatValue(de.v)}</Cell>
+                    <Cell>{formatName(de)}</Cell>
+                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}</Cell>
+                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}</Cell>
+                    <Cell>{formatValue(de.v)}</Cell>
                   </Row>
                 ))}
               </Body>
@@ -632,83 +571,18 @@ const SettingsCustomization: FC = () => {
     </>
   );
 
-  const renderEditDialog = () => {
-    if (deviceEntity) {
-      return (
-        <Dialog open={!!deviceEntity} onClose={() => setDeviceEntity(undefined)}>
-          <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY() + ' "' + deviceEntity.id + '"'}</DialogTitle>
-          <DialogContent dividers>
-            <Box color="warning.main" mb={2}>
-              <Typography variant="body2">
-                {LL.DEFAULT(1) + ' ' + LL.NAME(1)}:&nbsp;{deviceEntity.n}
-              </Typography>
-            </Box>
-            <Grid container spacing={1}>
-              <Grid item>
-                <TextField
-                  name="cn"
-                  label={LL.NEW_NAME_OF(LL.ENTITY())}
-                  value={deviceEntity.cn}
-                  autoFocus
-                  sx={{ width: '30ch' }}
-                  onChange={updateValue(setDeviceEntity)}
-                />
-              </Grid>
-              {typeof deviceEntity.v === 'number' &&
-                deviceEntity.w &&
-                !(deviceEntity.m & DeviceEntityMask.DV_READONLY) && (
-                  <>
-                    <Grid item>
-                      <TextField
-                        name="mi"
-                        label={LL.MIN()}
-                        value={deviceEntity.mi}
-                        sx={{ width: '8ch' }}
-                        onChange={updateValue(setDeviceEntity)}
-                      />
-                    </Grid>
-                    <Grid item>
-                      <TextField
-                        name="ma"
-                        label={LL.MAX()}
-                        value={deviceEntity.ma}
-                        sx={{ width: '8ch' }}
-                        onChange={updateValue(setDeviceEntity)}
-                      />
-                    </Grid>
-                  </>
-                )}
-            </Grid>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              startIcon={<CancelIcon />}
-              variant="outlined"
-              onClick={() => setDeviceEntity(undefined)}
-              color="secondary"
-            >
-              {LL.CANCEL()}
-            </Button>
-            <Button
-              startIcon={<DoneIcon />}
-              variant="outlined"
-              type="submit"
-              onClick={() => updateEntity()}
-              color="primary"
-            >
-              {LL.UPDATE()}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      );
-    }
-  };
-
   return (
     <SectionContent title={LL.CUSTOMIZATIONS()} titleGutter>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {restarting ? <RestartMonitor /> : renderContent()}
-      {renderEditDialog()}
+      {selectedDeviceEntity && (
+        <SettingsCustomizationDialog
+          open={dialogOpen}
+          onClose={onDialogClose}
+          onSave={onDialogSave}
+          selectedDeviceEntity={selectedDeviceEntity}
+        />
+      )}
     </SectionContent>
   );
 };
