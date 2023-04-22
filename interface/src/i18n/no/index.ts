@@ -315,13 +315,13 @@ const no: Translation = {
   SCHEDULE: 'Planlegg',
   TIME: 'Tid',
   TIMER: 'Timer',
-  SCHEDULE_SAVED: 'Planlegger er oppdatert',
+  SCHEDULE_UPDATED: 'Planlegger er oppdatert',
   SCHEDULE_TIMER_1: 'ved oppstart',
   SCHEDULE_TIMER_2: 'hvert minutt',
   SCHEDULE_TIMER_3: 'hver time',
   CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
   ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
-  ENTITIES_SAVED: 'Entities Saved', // TODO translate
+  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Writeable' // TODO translate
 };
 

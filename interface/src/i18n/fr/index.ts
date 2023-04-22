@@ -315,13 +315,13 @@ const fr: Translation = {
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
   TIMER: 'Timer', // TODO translate
-  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_UPDATED: 'Schedule updated', // TODO translate
   SCHEDULE_TIMER_1: 'on startup', // TODO translate
   SCHEDULE_TIMER_2: 'every minute', // TODO translate
   SCHEDULE_TIMER_3: 'every hour', // TODO translate
   CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
   ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
-  ENTITIES_SAVED: 'Entities Saved', // TODO translate
+  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Writeable' // TODO translate
 };
 

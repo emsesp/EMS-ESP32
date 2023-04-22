@@ -315,13 +315,13 @@ const pl: BaseTranslation = {
   SCHEDULE: '{{H|h|}}armonogram{{|u|}}',
   TIME: '{{Zegar|Godzina|}}',
   TIMER: '{{m|M|}}inutnik',
-  SCHEDULE_SAVED: 'Harmonogram został uaktualniony.',
+  SCHEDULE_UPDATED: 'Harmonogram został uaktualniony.',
   SCHEDULE_TIMER_1: 'przy starcie',
   SCHEDULE_TIMER_2: 'co minutę',
   SCHEDULE_TIMER_3: 'co godzinę',
   CUSTOM_ENTITIES: '{{N|n|}}iestandardowe{{|j|}} encj{{e|i|}}',
   ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje pobierane z magistrali EMS.',
-  ENTITIES_SAVED: 'Niestandardowe encje zostały uaktualnione.',
+  ENTITIES_UPDATED: 'Niestandardowe encje zostały uaktualnione.',
   WRITEABLE: 'Writeable' // TODO translate
 };
 

@@ -315,13 +315,13 @@ const de: Translation = {
   SCHEDULE: 'Zeitplan',
   TIME: 'Zeit',
   TIMER: 'Timer',
-  SCHEDULE_SAVED: 'Plan gespeichert',
+  SCHEDULE_UPDATED: 'Plan gespeichert',
   SCHEDULE_TIMER_1: 'beim Start',
   SCHEDULE_TIMER_2: 'jede Minute',
   SCHEDULE_TIMER_3: 'jede Stunde',
   CUSTOM_ENTITIES: 'Individuelle Entitäten',
   ENTITIES_HELP_1: 'Abfrage von Werten auf dem EMS-Bus',
-  ENTITIES_SAVED: 'Entities Saved', // TODO translate
+  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Schreibbar'
 };
 
