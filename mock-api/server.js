@@ -1019,13 +1019,14 @@ function updateMask(entity, de, dd) {
 
   // strip of any min/max ranges
   const shortname_with_customname = entity.slice(2).split('>')[0];
-
   const shortname = shortname_with_customname.split('|')[0];
   const new_custom_name = shortname_with_customname.split('|')[1];
+  const has_min_max = entity.slice(2).split('>')[1];
 
   // find in de
   de_objIndex = de.findIndex((obj) => obj.id === shortname);
   if (de_objIndex !== -1) {
+    // get current name
     if (de[de_objIndex].cn) {
       fullname = de[de_objIndex].cn;
     } else {
@@ -1046,7 +1047,7 @@ function updateMask(entity, de, dd) {
 
       // see if the custom name has changed
       const old_custom_name = dd.data[dd_objIndex].cn;
-      console.log('comparing old ' + old_custom_name + ' with new ' + new_custom_name);
+      console.log('comparing names, old (' + old_custom_name + ') with new (' + new_custom_name + ')');
       if (old_custom_name !== new_custom_name) {
         changed = true;
         new_fullname = new_custom_name;
@@ -1055,12 +1056,33 @@ function updateMask(entity, de, dd) {
         new_fullname = fullname;
       }
 
-      if (changed) {
+      // see if min or max has changed
+      // get current min/max values if they exist
+      const current_min = dd.data[dd_objIndex].min;
+      const current_max = dd.data[dd_objIndex].max;
+      new_min = current_min;
+      new_max = current_max;
+      if (has_min_max) {
+        new_min = parseInt(has_min_max.split('<')[0]);
+        new_max = parseInt(has_min_max.split('<')[1]);
+        if (current_min !== new_min || current_max !== new_max) {
+          changed = true;
+          console.log('min/max has changed to ' + new_min + '/' + new_max);
+        }
+      }
+
+      if (changed === true) {
         console.log(
           'Updating ' + dd.data[dd_objIndex].id + ' -> ' + current_mask.toString(16).padStart(2, '0') + new_fullname
         );
         de[de_objIndex].m = current_mask;
         de[de_objIndex].cn = new_fullname;
+        if (new_min) {
+          de[de_objIndex].mi = new_min;
+        }
+        if (new_max) {
+          de[de_objIndex].ma = new_max;
+        }
         dd.data[dd_objIndex].id = current_mask.toString(16).padStart(2, '0') + new_fullname;
         dd.data[dd_objIndex].cn = new_fullname;
       }
