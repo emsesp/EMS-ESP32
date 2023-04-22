@@ -51,6 +51,7 @@ const SettingsEntitiesDialog = ({
 
   const updateFormValue = updateValue(setEditItem);
 
+  // on mount
   useEffect(() => {
     if (open) {
       setFieldErrors(undefined);
