@@ -1028,9 +1028,8 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
             int16_t  dv_set_min;
             uint16_t dv_set_max;
             if (dv.get_min_max(dv_set_min, dv_set_max)) {
-                char s[10];
-                obj["mi"] = Helpers::render_value(s, dv_set_min, 0, fahrenheit);
-                obj["ma"] = Helpers::render_value(s, dv_set_max, 0, fahrenheit);
+                obj["mi"] = dv_set_min;
+                obj["ma"] = dv_set_max;
             }
         }
     }
