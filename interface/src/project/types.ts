@@ -60,7 +60,7 @@ export interface Status {
 }
 
 export interface Device {
-  id: string; // id index
+  id: number; // id index
   tn: string; // device type translated name
   t: number; // device type id
   b: string; // brand
@@ -341,19 +341,19 @@ export enum ScheduleFlag {
 export interface EntityItem {
   id: number; // unique number
   name: string;
-  device_id: number;
-  type_id: number;
+  device_id: number | string;
+  type_id: number | string;
   offset: number;
   factor: number;
   uom: number;
   value_type: number;
-  value?: number;
+  value?: number; // optional
   writeable: boolean;
   deleted?: boolean; // optional
   o_id?: number;
   o_name?: string;
-  o_device_id?: number;
-  o_type_id?: number;
+  o_device_id?: number | string;
+  o_type_id?: number | string;
   o_offset?: number;
   o_factor?: number;
   o_uom?: number;

@@ -1,7 +1,7 @@
-import type { InternalRuleItem } from 'async-validator';
 import Schema from 'async-validator';
+import type { Settings } from './types';
+import type { InternalRuleItem } from 'async-validator';
 import { IP_OR_HOSTNAME_VALIDATOR } from 'validators/shared';
-import type { Settings, ScheduleItem, EntityItem } from './types';
 
 export const GPIO_VALIDATOR = {
   validator(rule: InternalRuleItem, value: number, callback: (error?: string) => void) {
@@ -86,25 +86,14 @@ export const createSettingsValidator = (settings: Settings) =>
     })
   });
 
-export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) => ({
-  validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
-    if (name && o_name && o_name !== name && schedule.find((si) => si.name === name)) {
-      callback('Name already in use');
-    } else {
-      callback();
-    }
-  }
-});
-
-export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: ScheduleItem) =>
+export const schedulerItemValidation = () =>
   new Schema({
     name: [
       {
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{0,15}$/,
         message: "Must be <15 characters: alpha numeric, '_' or '.'"
-      },
-      ...[uniqueNameValidator(schedule, scheduleItem.o_name)]
+      }
     ],
     cmd: [
       { required: true, message: 'Command is required' },
@@ -112,7 +101,7 @@ export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: 
     ]
   });
 
-export const entityItemValidation = (entities: EntityItem[], creating: boolean) =>
+export const entityItemValidation = () =>
   new Schema({
     name: [
       { required: true, message: 'Name is required' },
@@ -122,13 +111,30 @@ export const entityItemValidation = (entities: EntityItem[], creating: boolean) 
         message: "Must be <15 characters: alpha numeric, '_' or '.'"
       }
     ],
-    device_id: [{ type: 'hex', required: true, message: 'ID must be a hex value' }]
-    // type_id: [
-    //   { required: true, message: 'Type_id is required' },
-    //   { type: 'string', pattern: /^[A-F0-9]{1,4}$/, message: 'Must be a hex number' }
-    // ],
-    // offset: [
-    //   { required: true, message: 'Offset is required' },
-    //   { type: 'number', min: 0, max: 255, message: 'Must be between 0 and 255' }
-    // ]
+    device_id: [
+      { required: true, message: 'Device ID is required' },
+      {
+        validator(rule: InternalRuleItem, value: string, callback: (error?: string) => void) {
+          if (isNaN(parseInt(value, 16))) {
+            callback('Must be a hex number');
+          }
+          callback();
+        }
+      }
+    ],
+    type_id: [
+      { required: true, message: 'Type ID is required' },
+      {
+        validator(rule: InternalRuleItem, value: string, callback: (error?: string) => void) {
+          if (isNaN(parseInt(value, 16))) {
+            callback('Must be a hex number');
+          }
+          callback();
+        }
+      }
+    ],
+    offset: [
+      { required: true, message: 'Offset is required' },
+      { type: 'number', min: 0, max: 255, message: 'Must be between 0 and 255' }
+    ]
   });

@@ -1,36 +1,30 @@
-import type { FC } from 'react';
+import AddIcon from '@mui/icons-material/Add';
+import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Button, Typography, Box } from '@mui/material';
+import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import { useTheme } from '@table-library/react-table-library/theme';
 import { useState, useEffect, useCallback } from 'react';
 import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 
-import { Button, Typography, Box } from '@mui/material';
-
-import { useTheme } from '@table-library/react-table-library/theme';
-import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
-
 import { toast } from 'react-toastify';
 
-import WarningIcon from '@mui/icons-material/Warning';
-import CancelIcon from '@mui/icons-material/Cancel';
-import AddIcon from '@mui/icons-material/Add';
-
+import SettingsEntitiesDialog from './SettingsEntitiesDialog';
+import * as EMSESP from './api';
+import { DeviceValueUOM_s } from './types';
+import { entityItemValidation } from './validators';
+import type { EntityItem } from './types';
+import type { FC } from 'react';
 import { ButtonRow, FormLoader, SectionContent, BlockNavigation } from 'components';
 
-import SettingsEntitiesDialog from './SettingsEntitiesDialog';
-
-import type { EntityItem } from './types';
-import { DeviceValueUOM_s } from './types';
-import { extractErrorMessage } from 'utils';
-
 import { useI18nContext } from 'i18n/i18n-react';
-
-import * as EMSESP from './api';
-import { entityItemValidation } from './validators';
+import { extractErrorMessage } from 'utils';
 
 const SettingsEntities: FC = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
-  const [entities, setEntities] = useState<EntityItem[]>([]);
+  const [entities, setEntities] = useState<EntityItem[]>();
   const [selectedEntityItem, setSelectedEntityItem] = useState<EntityItem>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [creating, setCreating] = useState<boolean>(false);
@@ -52,7 +46,9 @@ const SettingsEntities: FC = () => {
   }
 
   useEffect(() => {
-    setNumChanges(entities ? entities.filter((ei) => hasEntityChanged(ei)).length : 0);
+    if (entities) {
+      setNumChanges(entities ? entities.filter((ei) => hasEntityChanged(ei)).length : 0);
+    }
   }, [entities]);
 
   const entity_theme = useTheme({
@@ -109,28 +105,24 @@ const SettingsEntities: FC = () => {
     `
   });
 
-  const setOriginalEntity = (data: EntityItem[]) => {
-    setEntities(
-      data.map((ei) => ({
-        ...ei,
-        o_id: ei.id,
-        o_device_id: ei.device_id,
-        o_type_id: ei.type_id,
-        o_offset: ei.offset,
-        o_factor: ei.factor,
-        o_uom: ei.uom,
-        o_value_type: ei.value_type,
-        o_name: ei.name,
-        o_writeable: ei.writeable,
-        o_deleted: ei.deleted
-      }))
-    );
-  };
-
   const fetchEntities = useCallback(async () => {
     try {
       const response = await EMSESP.readEntities();
-      setOriginalEntity(response.data.entities);
+      setEntities(
+        response.data.entities.map((ei) => ({
+          ...ei,
+          o_id: ei.id,
+          o_device_id: ei.device_id,
+          o_type_id: ei.type_id,
+          o_offset: ei.offset,
+          o_factor: ei.factor,
+          o_uom: ei.uom,
+          o_value_type: ei.value_type,
+          o_name: ei.name,
+          o_writeable: ei.writeable,
+          o_deleted: ei.deleted
+        }))
+      );
     } catch (error) {
       setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
@@ -160,14 +152,14 @@ const SettingsEntities: FC = () => {
         });
 
         if (response.status === 200) {
-          toast.success(LL.SUCCESS());
+          toast.success(LL.ENTITIES_UPDATED());
         } else {
           toast.error(LL.PROBLEM_UPDATING());
         }
+        void fetchEntities();
       } catch (error) {
         toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       }
-      setOriginalEntity(entities);
     }
   };
 
@@ -182,26 +174,25 @@ const SettingsEntities: FC = () => {
   };
 
   const onDialogSave = (updatedItem: EntityItem) => {
-    if (creating) {
+    setDialogOpen(false);
+    if (entities && creating) {
       setEntities([...entities.filter((ei) => creating || ei.o_id !== updatedItem.o_id), updatedItem]);
     } else {
-      setEntities(entities.map((ei) => (ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei)));
+      setEntities(entities?.map((ei) => (ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei)));
     }
-    setDialogOpen(false);
   };
 
-  // TODO need callback here too?
   const addEntityItem = () => {
     setCreating(true);
     setSelectedEntityItem({
       id: Math.floor(Math.random() * (Math.floor(200) - 100) + 100),
+      name: '',
       device_id: 11,
       type_id: 0,
       offset: 0,
       factor: 1,
-      value_type: 2,
       uom: 0,
-      name: '',
+      value_type: 2,
       writeable: false,
       deleted: false
     });
@@ -234,8 +225,8 @@ const SettingsEntities: FC = () => {
             <Header>
               <HeaderRow>
                 <HeaderCell>{LL.NAME(0)}</HeaderCell>
-                <HeaderCell stiff>Device ID</HeaderCell>
-                <HeaderCell stiff>Type ID</HeaderCell>
+                <HeaderCell stiff>{LL.ID_OF(LL.DEVICE())}</HeaderCell>
+                <HeaderCell stiff>{LL.ID_OF(LL.TYPE(1))}</HeaderCell>
                 <HeaderCell stiff>Offset</HeaderCell>
                 <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
               </HeaderRow>
@@ -244,8 +235,8 @@ const SettingsEntities: FC = () => {
               {tableList.map((ei: EntityItem) => (
                 <Row key={ei.name} item={ei} onClick={() => editEntityItem(ei)}>
                   <Cell>{ei.name}</Cell>
-                  <Cell>{showHex(ei.device_id, 2)}</Cell>
-                  <Cell>{showHex(ei.type_id, 4)}</Cell>
+                  <Cell>{showHex(ei.device_id as number, 2)}</Cell>
+                  <Cell>{showHex(ei.type_id as number, 4)}</Cell>
                   <Cell>{ei.offset}</Cell>
                   <Cell>{formatValue(ei.value, ei.uom)}</Cell>
                 </Row>
@@ -258,11 +249,12 @@ const SettingsEntities: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.CUSTOM_ENTITIES()} titleGutter>
+    <SectionContent title={LL.CUSTOM_ENTITIES(0)} titleGutter>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       <Box mb={2} color="warning.main">
         <Typography variant="body2">{LL.ENTITIES_HELP_1()}</Typography>
       </Box>
+
       {renderEntity()}
 
       {selectedEntityItem && (
@@ -272,7 +264,7 @@ const SettingsEntities: FC = () => {
           onClose={onDialogClose}
           onSave={onDialogSave}
           selectedEntityItem={selectedEntityItem}
-          validator={entityItemValidation(entities, creating)}
+          validator={entityItemValidation()}
         />
       )}
 

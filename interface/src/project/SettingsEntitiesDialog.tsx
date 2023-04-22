@@ -1,35 +1,32 @@
-import { useState, useEffect } from 'react';
-
+import AddIcon from '@mui/icons-material/Add';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DoneIcon from '@mui/icons-material/Done';
+import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import {
-  Grid,
-  Button,
   Box,
+  Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Checkbox,
+  Grid,
   InputAdornment,
   MenuItem
 } from '@mui/material';
+import { useEffect, useState } from 'react';
 
-import { ValidatedTextField, BlockFormControlLabel } from 'components';
+import { DeviceValueUOM_s } from './types';
+import type { EntityItem } from './types';
+import type Schema from 'async-validator';
+import type { ValidateFieldsError } from 'async-validator';
 
-import DoneIcon from '@mui/icons-material/Done';
-import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
-import CancelIcon from '@mui/icons-material/Cancel';
-import AddIcon from '@mui/icons-material/Add';
+import { BlockFormControlLabel, ValidatedTextField } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
-import { validate } from 'validators';
-import type { ValidateFieldsError } from 'async-validator';
-import type Schema from 'async-validator';
-
 import { updateValue } from 'utils';
-
-import type { EntityItem } from './types';
-import { DeviceValueUOM_s } from './types';
+import { validate } from 'validators';
 
 type SettingsEntitiesDialogProps = {
   open: boolean;
@@ -58,6 +55,12 @@ const SettingsEntitiesDialog = ({
     if (open) {
       setFieldErrors(undefined);
       setEditItem(selectedEntityItem);
+      // convert to hex strings straight away
+      setEditItem({
+        ...selectedEntityItem,
+        device_id: ('0' + selectedEntityItem.device_id.toString(16).toUpperCase()).slice(-2),
+        type_id: ('000' + selectedEntityItem.type_id.toString(16).toUpperCase()).slice(-4)
+      });
     }
   }, [open, selectedEntityItem]);
 
@@ -69,6 +72,12 @@ const SettingsEntitiesDialog = ({
     try {
       setFieldErrors(undefined);
       await validate(validator, editItem);
+      if (typeof editItem.device_id === 'string') {
+        editItem.device_id = parseInt(editItem.device_id, 16);
+      }
+      if (typeof editItem.type_id === 'string') {
+        editItem.type_id = parseInt(editItem.type_id, 16);
+      }
       onSave(editItem);
     } catch (errors: any) {
       setFieldErrors(errors);
@@ -83,13 +92,12 @@ const SettingsEntitiesDialog = ({
   return (
     <Dialog open={open} onClose={close}>
       <DialogTitle>
-        {creating ? LL.ADD(1) + ' ' + LL.NEW() : LL.EDIT()}&nbsp;{LL.ENTITY()}
+        {creating ? LL.ADD(1) + ' ' + LL.NEW(1) : LL.EDIT()}&nbsp;{LL.ENTITY()}
       </DialogTitle>
       <DialogContent dividers>
         <Box display="flex" flexWrap="wrap" mb={1}>
           <Box flexWrap="nowrap" whiteSpace="nowrap" />
         </Box>
-
         <Grid container spacing={2}>
           <Grid item xs={8}>
             <ValidatedTextField
@@ -102,10 +110,9 @@ const SettingsEntitiesDialog = ({
               onChange={updateFormValue}
             />
           </Grid>
-
           <Grid item xs={4} mt={3}>
             <BlockFormControlLabel
-              control={<Checkbox checked={selectedEntityItem.writeable} onChange={updateFormValue} name="write" />}
+              control={<Checkbox checked={editItem.writeable} onChange={updateFormValue} name="writeable" />}
               label={LL.WRITEABLE()}
             />
           </Grid>
@@ -113,28 +120,26 @@ const SettingsEntitiesDialog = ({
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="device_id"
-              label="Device ID"
+              label={LL.ID_OF(LL.DEVICE())}
               margin="normal"
               fullWidth
               value={editItem.device_id}
               onChange={updateFormValue}
-              InputProps={{
-                startAdornment: <InputAdornment position="start">0x</InputAdornment>
-              }}
+              inputProps={{ style: { textTransform: 'uppercase' } }}
+              InputProps={{ startAdornment: <InputAdornment position="start">0x</InputAdornment> }}
             />
           </Grid>
           <Grid item xs={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="type_id"
-              label="Type ID"
+              label={LL.ID_OF(LL.TYPE(1))}
               margin="normal"
               fullWidth
               value={editItem.type_id}
               onChange={updateFormValue}
-              InputProps={{
-                startAdornment: <InputAdornment position="start">0x</InputAdornment>
-              }}
+              inputProps={{ style: { textTransform: 'uppercase' } }}
+              InputProps={{ startAdornment: <InputAdornment position="start">0x</InputAdornment> }}
             />
           </Grid>
           <Grid item xs={4}>
@@ -169,7 +174,8 @@ const SettingsEntitiesDialog = ({
               <MenuItem value={6}>TIME</MenuItem>
             </ValidatedTextField>
           </Grid>
-          {selectedEntityItem.value_type !== 0 && (
+
+          {editItem.value_type !== 0 && (
             <>
               <Grid item xs={4}>
                 <ValidatedTextField
