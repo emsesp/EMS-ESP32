@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -75,33 +75,32 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
 
     // list is already sorted by device type
     JsonArray devices = root.createNestedArray("devices");
-    char      buffer[3];
     for (const auto & emsdevice : EMSESP::emsdevices) {
         // ignore controller
         if (emsdevice && (emsdevice->device_type() != EMSdevice::DeviceType::CONTROLLER || emsdevice->count_entities() > 0)) {
             JsonObject obj = devices.createNestedObject();
-            obj["id"]      = Helpers::smallitoa(buffer, emsdevice->unique_id()); // a unique id as a string
-            obj["tn"]      = emsdevice->device_type_2_device_name_translated();  // translated device type name
-            obj["t"]       = emsdevice->device_type();                           // device type number
-            obj["b"]       = emsdevice->brand_to_char();                         // brand
-            obj["n"]       = emsdevice->name();                                  // name
-            obj["d"]       = emsdevice->device_id();                             // deviceid
-            obj["p"]       = emsdevice->product_id();                            // productid
-            obj["v"]       = emsdevice->version();                               // version
-            obj["e"]       = emsdevice->count_entities();                        // number of entities (device values)
+            obj["id"]      = emsdevice->unique_id();                            // a unique id
+            obj["tn"]      = emsdevice->device_type_2_device_name_translated(); // translated device type name
+            obj["t"]       = emsdevice->device_type();                          // device type number
+            obj["b"]       = emsdevice->brand_to_char();                        // brand
+            obj["n"]       = emsdevice->name();                                 // name
+            obj["d"]       = emsdevice->device_id();                            // deviceid
+            obj["p"]       = emsdevice->product_id();                           // productid
+            obj["v"]       = emsdevice->version();                              // version
+            obj["e"]       = emsdevice->count_entities();                       // number of entities (device values)
         }
     }
     if (EMSESP::webEntityService.count_entities()) {
         JsonObject obj = devices.createNestedObject();
-        obj["id"]      = "99";                                         // the last unique id as a string
-        obj["tn"]      = "Custom";                                     // translated device type name
-        obj["t"]       = EMSdevice::DeviceType::CUSTOM;                // device type number
-        obj["b"]       = 0;                                            // brand
-        obj["n"]       = Helpers::translated_word(FL_(custom_device)); // name
-        obj["d"]       = 0;                                            // deviceid
-        obj["p"]       = 0;                                            // productid
-        obj["v"]       = 0;                                            // version
-        obj["e"]       = EMSESP::webEntityService.count_entities();    // number of entities (device values)
+        obj["id"]      = 99;                                                // the last unique id
+        obj["tn"]      = Helpers::translated_word(FL_(custom_device));      // translated device type name
+        obj["t"]       = EMSdevice::DeviceType::CUSTOM;                     // device type number
+        obj["b"]       = Helpers::translated_word(FL_(na));                 // brand
+        obj["n"]       = Helpers::translated_word(FL_(custom_device_name)); // name
+        obj["d"]       = 0;                                                 // deviceid
+        obj["p"]       = 0;                                                 // productid
+        obj["v"]       = 0;                                                 // version
+        obj["e"]       = EMSESP::webEntityService.count_entities();         // number of entities (device values)
     }
 
     // sensors stuff

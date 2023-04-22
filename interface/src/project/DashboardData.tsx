@@ -1,5 +1,19 @@
-import { FC, useState, useContext, useCallback, useEffect } from 'react';
-
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
+import EditIcon from '@mui/icons-material/Edit';
+import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
+import DownloadIcon from '@mui/icons-material/GetApp';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
+import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
+import StarIcon from '@mui/icons-material/Star';
+import SendIcon from '@mui/icons-material/TrendingFlat';
+import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
+import WarningIcon from '@mui/icons-material/Warning';
 import {
   Button,
   Typography,
@@ -19,59 +33,26 @@ import {
   FormControlLabel,
   Checkbox
 } from '@mui/material';
-
-import { toast } from 'react-toastify';
-
-import { useTheme } from '@table-library/react-table-library/theme';
+import { useRowSelect } from '@table-library/react-table-library/select';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
-import { useRowSelect } from '@table-library/react-table-library/select';
-
-import DownloadIcon from '@mui/icons-material/GetApp';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import EditIcon from '@mui/icons-material/Edit';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
-import CancelIcon from '@mui/icons-material/Cancel';
-import SendIcon from '@mui/icons-material/TrendingFlat';
-import WarningIcon from '@mui/icons-material/Warning';
-import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
-import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
-import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
-import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
-import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
-import StarIcon from '@mui/icons-material/Star';
-
-import DeviceIcon from './DeviceIcon';
+import { useTheme } from '@table-library/react-table-library/theme';
+import { useState, useContext, useCallback, useEffect } from 'react';
 
 import { IconContext } from 'react-icons';
-
-import { AuthenticatedContext } from 'contexts/authentication';
-
-import { ButtonRow, ValidatedTextField, SectionContent, MessageBox } from 'components';
+import { toast } from 'react-toastify';
+import DeviceIcon from './DeviceIcon';
 
 import * as EMSESP from './api';
 
-import { numberValue, updateValue, extractErrorMessage } from 'utils';
-
-import {
-  SensorData,
-  Device,
-  CoreData,
-  DeviceData,
-  DeviceValue,
-  DeviceValueUOM,
-  DeviceValueUOM_s,
-  AnalogType,
-  AnalogTypeNames,
-  Sensor,
-  Analog,
-  DeviceEntityMask
-} from './types';
+import { DeviceValueUOM, DeviceValueUOM_s, AnalogType, AnalogTypeNames, DeviceEntityMask } from './types';
+import type { SensorData, Device, CoreData, DeviceData, DeviceValue, Sensor, Analog } from './types';
+import type { FC } from 'react';
+import { ButtonRow, ValidatedTextField, SectionContent, MessageBox } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
+import { numberValue, updateValue, extractErrorMessage } from 'utils';
 
 const DashboardData: FC = () => {
   const { me } = useContext(AuthenticatedContext);
@@ -301,20 +282,20 @@ const DashboardData: FC = () => {
   }, [LL]);
 
   useEffect(() => {
-    fetchCoreData();
+    void fetchCoreData();
   }, [fetchCoreData]);
 
   const refreshDataIndex = (selectedDevice: string) => {
     if (selectedDevice === 'sensor') {
-      fetchSensorData();
+      void fetchSensorData();
       return;
     }
 
     setSensorData({ sensors: [], analogs: [] });
     if (selectedDevice) {
-      fetchDeviceData(selectedDevice);
+      void fetchDeviceData(selectedDevice);
     } else {
-      fetchCoreData();
+      void fetchCoreData();
     }
   };
 
@@ -344,11 +325,12 @@ const DashboardData: FC = () => {
     return sc;
   };
 
-  const makeCsvData = (columns: any, data: any) => {
-    return data.reduce((csvString: any, rowItem: any) => {
-      return csvString + columns.map(({ accessor }: any) => escapeCsvCell(accessor(rowItem))).join(';') + '\r\n';
-    }, columns.map(({ name }: any) => escapeCsvCell(name)).join(';') + '\r\n');
-  };
+  const makeCsvData = (columns: any, data: any) =>
+    data.reduce(
+      (csvString: any, rowItem: any) =>
+        csvString + columns.map(({ accessor }: any) => escapeCsvCell(accessor(rowItem))).join(';') + '\r\n',
+      columns.map(({ name }: any) => escapeCsvCell(name)).join(';') + '\r\n'
+    );
 
   const downloadAsCsv = (columns: any, data: any, filename: string) => {
     const csvData = makeCsvData(columns, data);
@@ -565,7 +547,7 @@ const DashboardData: FC = () => {
         toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         setSensor(undefined);
-        fetchSensorData();
+        void fetchSensorData();
       }
     }
   };
@@ -643,7 +625,7 @@ const DashboardData: FC = () => {
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
-                <ListItemText primary={LL.TYPE()} secondary={coreData.devices[deviceDialog].tn} />
+                <ListItemText primary={LL.TYPE(0)} secondary={coreData.devices[deviceDialog].tn} />
               </ListItem>
               <ListItem>
                 <ListItemText primary={LL.NAME(0)} secondary={coreData.devices[deviceDialog].n} />
@@ -688,7 +670,7 @@ const DashboardData: FC = () => {
             <Header>
               <HeaderRow>
                 <HeaderCell stiff />
-                <HeaderCell stiff>{LL.TYPE()}</HeaderCell>
+                <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
                 <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
                 <HeaderCell stiff>{LL.ENTITIES()}</HeaderCell>
                 <HeaderCell stiff />
@@ -940,7 +922,7 @@ const DashboardData: FC = () => {
                     endIcon={getSortIcon(analog_sort.state, 'TYPE')}
                     onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'TYPE' })}
                   >
-                    {LL.TYPE()}
+                    {LL.TYPE(0)}
                   </Button>
                 </HeaderCell>
                 <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
@@ -993,7 +975,7 @@ const DashboardData: FC = () => {
         toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         setAnalog(undefined);
-        fetchSensorData();
+        void fetchSensorData();
       }
     }
   };
@@ -1021,7 +1003,7 @@ const DashboardData: FC = () => {
         toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         setAnalog(undefined);
-        fetchSensorData();
+        void fetchSensorData();
       }
     }
   };
@@ -1060,7 +1042,7 @@ const DashboardData: FC = () => {
               <Grid item xs={8}>
                 <ValidatedTextField
                   name="t"
-                  label={LL.TYPE()}
+                  label={LL.TYPE(0)}
                   value={analog.t}
                   fullWidth
                   select

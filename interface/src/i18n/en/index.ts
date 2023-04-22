@@ -321,6 +321,7 @@ const en: Translation = {
   SCHEDULE_TIMER_3: 'every hour',
   CUSTOM_ENTITIES: 'Custom Entities',
   ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus',
+  ENTITIES_SAVED: 'Entities Saved',
   WRITEABLE: 'Writeable'
 };
 

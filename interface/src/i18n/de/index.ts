@@ -321,6 +321,7 @@ const de: Translation = {
   SCHEDULE_TIMER_3: 'jede Stunde',
   CUSTOM_ENTITIES: 'Individuelle Entitäten',
   ENTITIES_HELP_1: 'Abfrage von Werten auf dem EMS-Bus',
+  ENTITIES_SAVED: 'Entities Saved', // TODO translate
   WRITEABLE: 'Schreibbar'
 };
 
