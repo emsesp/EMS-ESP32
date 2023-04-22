@@ -322,7 +322,10 @@ const de: Translation = {
   CUSTOM_ENTITIES: 'Individuelle Entitäten',
   ENTITIES_HELP_1: 'Abfrage von Werten auf dem EMS-Bus',
   ENTITIES_UPDATED: 'Entities Updated', // TODO translate
-  WRITEABLE: 'Schreibbar'
+  WRITEABLE: 'Schreibbar',
+  SHOWING: 'Showing', // TODO translate
+  SEARCH: 'Search' // TODO translate
+
 };
 
 export default de;

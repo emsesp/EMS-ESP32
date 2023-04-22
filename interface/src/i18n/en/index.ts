@@ -322,7 +322,9 @@ const en: Translation = {
   CUSTOM_ENTITIES: 'Custom Entities',
   ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus',
   ENTITIES_UPDATED: 'Entities Updated',
-  WRITEABLE: 'Writeable'
+  WRITEABLE: 'Writeable',
+  SHOWING: 'Showing',
+  SEARCH: 'Search'
 };
 
 export default en;

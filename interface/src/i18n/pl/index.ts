@@ -322,7 +322,10 @@ const pl: BaseTranslation = {
   CUSTOM_ENTITIES: '{{N|n|}}iestandardowe{{|j|}} encj{{e|i|}}',
   ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje pobierane z magistrali EMS.',
   ENTITIES_UPDATED: 'Niestandardowe encje zostały uaktualnione.',
-  WRITEABLE: 'Writeable' // TODO translate
+  WRITEABLE: 'Writeable', // TODO translate
+  SHOWING: 'Showing', // TODO translate
+  SEARCH: 'Search' // TODO translate
+
 };
 
 export default pl;

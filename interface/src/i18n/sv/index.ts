@@ -322,7 +322,9 @@ const sv: Translation = {
   CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
   ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
   ENTITIES_UPDATED: 'Entities Updated', // TODO translate
-  WRITEABLE: 'Writeable' // TODO translate
+  WRITEABLE: 'Writeable', // TODO translate
+  SHOWING: 'Showing', // TODO translate
+  SEARCH: 'Search' // TODO translate
 
 };
 
