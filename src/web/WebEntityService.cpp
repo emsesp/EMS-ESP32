@@ -41,8 +41,8 @@ void WebEntity::read(WebEntity & webEntity, JsonObject & root) {
     for (const EntityItem & entityItem : webEntity.entityItems) {
         JsonObject ei    = entity.createNestedObject();
         ei["id"]         = counter++; // id is only used to render the table and must be unique
-        ei["device_id"]  = Helpers::hextoa(entityItem.device_id, false);
-        ei["type_id"]    = Helpers::hextoa(entityItem.type_id, false);
+        ei["device_id"]  = entityItem.device_id;
+        ei["type_id"]    = entityItem.type_id;
         ei["offset"]     = entityItem.offset;
         ei["factor"]     = entityItem.factor;
         ei["name"]       = entityItem.name;
