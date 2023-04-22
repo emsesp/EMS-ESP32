@@ -320,6 +320,7 @@ const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalog';
 const EMSESP_CUSTOM_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations';
 const EMSESP_WRITE_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
+const EMSESP_WRITE_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
 
 settings = {
   locale: 'en',
@@ -386,7 +387,7 @@ const emsesp_coredata = {
   // devices: [],
   devices: [
     {
-      id: '2',
+      id: 2,
       t: 4,
       tn: 'Boiler',
       b: 'Nefit',
@@ -397,7 +398,7 @@ const emsesp_coredata = {
       e: 68
     },
     {
-      id: '1',
+      id: 1,
       t: 5,
       tn: 'Thermostat',
       b: '',
@@ -408,7 +409,7 @@ const emsesp_coredata = {
       e: 5
     },
     {
-      id: '4',
+      id: 4,
       t: 5,
       tn: 'Thermostat',
       b: 'Buderus',
@@ -610,7 +611,8 @@ let emsesp_entities = {
       factor: 0,
       uom: 2,
       value: 1,
-      value_type: 2
+      value_type: 2,
+      writeable: false
     },
     {
       id: 1,
@@ -621,7 +623,8 @@ let emsesp_entities = {
       factor: 2,
       uom: 4,
       value: 2,
-      value_type: 5
+      value_type: 5,
+      writeable: true
     }
   ]
 };
@@ -1094,6 +1097,13 @@ rest_server.post(EMSESP_WRITE_SCHEDULE_ENDPOINT, (req, res) => {
   console.log('write schedule');
   console.log(req.body.schedule);
   emsesp_schedule = req.body;
+  res.sendStatus(200);
+});
+
+rest_server.post(EMSESP_WRITE_ENTITIES_ENDPOINT, (req, res) => {
+  console.log('write entities');
+  console.log(req.body.entities);
+  emsesp_entities = req.body;
   res.sendStatus(200);
 });
 
