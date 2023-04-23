@@ -1,5 +1,6 @@
 import DownloadIcon from '@mui/icons-material/GetApp';
-import { Box, styled, Button, Checkbox, MenuItem, Grid, Slider, FormLabel } from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Box, styled, Button, Checkbox, MenuItem, Grid } from '@mui/material';
 import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { toast } from 'react-toastify';
 import type { FC } from 'react';
@@ -9,7 +10,7 @@ import { addAccessTokenParameter } from 'api/authentication';
 import { EVENT_SOURCE_ROOT } from 'api/endpoints';
 import * as SystemApi from 'api/system';
 
-import { SectionContent, FormLoader, BlockFormControlLabel, ValidatedTextField } from 'components';
+import { SectionContent, FormLoader, BlockFormControlLabel, ValidatedTextField, ButtonRow } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { LogLevel } from 'types';
@@ -90,16 +91,12 @@ const SystemLog: FC = () => {
 
   const updateFormValue = updateValue(setData);
 
-  const reloadPage = () => {
-    window.location.reload();
-  };
-
-  const sendSettings = async (new_max_messages: number, new_level: number) => {
+  const sendSettings = async () => {
     if (data) {
       try {
         const response = await SystemApi.updateLogSettings({
-          level: new_level,
-          max_messages: new_max_messages,
+          level: data.level,
+          max_messages: data.max_messages,
           compact: data.compact
         });
         if (response.status !== 200) {
@@ -108,25 +105,6 @@ const SystemLog: FC = () => {
       } catch (error) {
         toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       }
-    }
-  };
-
-  const changeLevel = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (data) {
-      setData({
-        ...data,
-        level: parseInt(event.target.value)
-      });
-      void sendSettings(data.max_messages, parseInt(event.target.value));
-    }
-  };
-
-  const changeMaxMessages = (event: Event, value: number | number[]) => {
-    if (data) {
-      setData({
-        ...data,
-        max_messages: value as number
-      });
     }
   };
 
@@ -171,7 +149,7 @@ const SystemLog: FC = () => {
     es.onmessage = onMessage;
     es.onerror = () => {
       es.close();
-      reloadPage();
+      window.location.reload();
     };
 
     return () => {
@@ -188,14 +166,14 @@ const SystemLog: FC = () => {
     return (
       <>
         <Grid container spacing={3} direction="row" justifyContent="flex-start" alignItems="center">
-          <Grid item xs={4}>
+          <Grid item xs={2}>
             <ValidatedTextField
               name="level"
               label={LL.LOG_LEVEL()}
               value={data.level}
               fullWidth
               variant="outlined"
-              onChange={changeLevel}
+              onChange={updateFormValue}
               margin="normal"
               select
             >
@@ -208,24 +186,22 @@ const SystemLog: FC = () => {
               <MenuItem value={9}>ALL</MenuItem>
             </ValidatedTextField>
           </Grid>
-          <Grid item xs={3}>
-            <FormLabel>{LL.BUFFER_SIZE()}</FormLabel>
-            <Slider
-              value={data.max_messages}
-              valueLabelDisplay="auto"
+          <Grid item xs={2}>
+            <ValidatedTextField
               name="max_messages"
-              marks={[
-                { value: 25, label: '25' },
-                { value: 50, label: '50' },
-                { value: 75, label: '75' },
-                { value: 100, label: '100' }
-              ]}
-              step={25}
-              min={25}
-              max={100}
-              onChange={changeMaxMessages}
-              onChangeCommitted={() => sendSettings(data.max_messages, data.level)}
-            />
+              label={LL.BUFFER_SIZE()}
+              value={data.max_messages}
+              fullWidth
+              variant="outlined"
+              onChange={updateFormValue}
+              margin="normal"
+              select
+            >
+              <MenuItem value={25}>25</MenuItem>
+              <MenuItem value={50}>50</MenuItem>
+              <MenuItem value={75}>75</MenuItem>
+              <MenuItem value={100}>100</MenuItem>
+            </ValidatedTextField>
           </Grid>
           <Grid item>
             <BlockFormControlLabel
@@ -233,11 +209,19 @@ const SystemLog: FC = () => {
               label={LL.COMPACT()}
             />
           </Grid>
-          <Grid item>
+          <ButtonRow>
             <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={onDownload}>
               {LL.EXPORT()}
             </Button>
-          </Grid>
+            <Button
+              startIcon={<WarningIcon color="warning" />}
+              variant="contained"
+              color="info"
+              onClick={() => sendSettings()}
+            >
+              {LL.UPDATE()}
+            </Button>
+          </ButtonRow>
         </Grid>
         <Box
           sx={{
