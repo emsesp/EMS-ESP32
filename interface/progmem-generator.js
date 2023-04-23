@@ -1,5 +1,5 @@
-const { resolve, relative, sep } = require('path');
 const { readdirSync, existsSync, unlinkSync, readFileSync, createWriteStream } = require('fs');
+const { resolve, relative, sep } = require('path');
 var zlib = require('zlib');
 var mime = require('mime-types');
 
@@ -18,9 +18,9 @@ function getFilesSync(dir, files = []) {
   return files;
 }
 
-function coherseToBuffer(input) {
-  return Buffer.isBuffer(input) ? input : Buffer.from(input);
-}
+// function coherseToBuffer(input) {
+//   return Buffer.isBuffer(input) ? input : Buffer.from(input);
+// }
 
 function cleanAndOpen(path) {
   if (existsSync(path)) {
@@ -87,9 +87,9 @@ export default function ProgmemGenerator({ outputPath = './WWWData.h', bytesPerL
           // });
         };
 
-        const generateWWWClass = () => {
+        const generateWWWClass = () =>
           // eslint-disable-next-line max-len
-          return `typedef std::function<void(const String& uri, const String& contentType, const uint8_t * content, size_t len)> RouteRegistrationHandler;
+          `typedef std::function<void(const String& uri, const String& contentType, const uint8_t * content, size_t len)> RouteRegistrationHandler;
 
 class WWWData {
 ${indent}public:
@@ -100,8 +100,6 @@ ${fileInfo
 ${indent.repeat(2)}}
 };
 `;
-        };
-
         const writeWWWClass = () => {
           writeStream.write(generateWWWClass());
         };
