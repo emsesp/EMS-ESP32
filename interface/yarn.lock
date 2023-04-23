@@ -1348,10 +1348,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.15.13":
-  version: 18.15.13
-  resolution: "@types/node@npm:18.15.13"
-  checksum: 6e5f61c559e60670a7a8fb88e31226ecc18a21be103297ca4cf9848f0a99049dae77f04b7ae677205f2af494f3701b113ba8734f4b636b355477a6534dbb8ada
+"@types/node@npm:^18.16.0":
+  version: 18.16.0
+  resolution: "@types/node@npm:18.16.0"
+  checksum: 6e158e0e8a49f597f590f1d4c94a7b89b7ae707c0134540359559b14427e94dbde289c7557c8a2fe33baaaad478248a819fdccaa2b97a76dfa47bc61ab7f2ab6
   languageName: node
   linkType: hard
 
@@ -1744,7 +1744,7 @@ __metadata:
     "@table-library/react-table-library": 4.1.0
     "@types/lodash-es": ^4.17.7
     "@types/mime-types": ^2
-    "@types/node": ^18.15.13
+    "@types/node": ^18.16.0
     "@types/react": ^18.0.38
     "@types/react-dom": ^18.0.11
     "@types/react-router-dom": ^5.3.3
@@ -1772,7 +1772,7 @@ __metadata:
     mime-types: ^2.1.35
     nodemon: ^2.0.22
     npm-run-all: ^4.1.5
-    prettier: ^2.8.7
+    prettier: ^2.8.8
     react: latest
     react-dom: latest
     react-dropzone: ^14.2.3
@@ -5204,12 +5204,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.8.7":
-  version: 2.8.7
-  resolution: "prettier@npm:2.8.7"
+"prettier@npm:^2.8.8":
+  version: 2.8.8
+  resolution: "prettier@npm:2.8.8"
   bin:
     prettier: bin-prettier.js
-  checksum: 84c5b62f7d4909ae5b18b1a4cee67f6a30a548244c8919e67158dee1453f4fa4ff4d291c6f2e41e21d443a0c405f03ec27690502d4ad90c3a7c59bcaf38b51ba
+  checksum: 463ea8f9a0946cd5b828d8cf27bd8b567345cf02f56562d5ecde198b91f47a76b7ac9eae0facd247ace70e927143af6135e8cf411986b8cb8478784a4d6d724a
   languageName: node
   linkType: hard
 
