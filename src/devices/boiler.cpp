@@ -833,7 +833,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
 // Check if hot tap water or heating is active
 // Values will always be posted first time as heatingActive_ and tapwaterActive_ will have values EMS_VALUE_BOOL_NOTSET
-void Boiler::check_active(const bool force) {
+void Boiler::check_active() {
     if (!Helpers::hasValue(boilerState_)) {
         return;
     }
@@ -844,7 +844,7 @@ void Boiler::check_active(const bool force) {
     // check if heating is active, bits 2 and 4 must be set
     b   = ((boilerState_ & 0x09) == 0x09);
     val = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
-    if (heatingActive_ != val || force) {
+    if (heatingActive_ != val) {
         heatingActive_ = val;
         char s[12];
         Mqtt::queue_publish(F_(heating_active), Helpers::render_boolean(s, b));
@@ -868,7 +868,7 @@ void Boiler::check_active(const bool force) {
     }
 
     val = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
-    if (tapwaterActive_ != val || force) {
+    if (tapwaterActive_ != val) {
         tapwaterActive_ = val;
         char s[12];
         Mqtt::queue_publish(F_(tapwater_active), Helpers::render_boolean(s, b));
