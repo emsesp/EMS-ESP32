@@ -187,30 +187,28 @@ const SettingsEntities: FC = () => {
     setSelectedEntityItem({
       id: Math.floor(Math.random() * (Math.floor(200) - 100) + 100),
       name: '',
-      device_id: 11,
-      type_id: 0,
+      device_id: '',
+      type_id: '',
       offset: 0,
       factor: 1,
       uom: 0,
-      value_type: 2,
+      value_type: 0,
       writeable: false,
       deleted: false
     });
     setDialogOpen(true);
   };
 
-  function formatValue(value: any, uom: number) {
-    if (value === undefined) {
-      return '';
-    }
-    return new Intl.NumberFormat().format(value) + (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom]);
+  function formatValue(value: any, uom: any) {
+    return value === undefined || uom === undefined
+      ? ''
+      : new Intl.NumberFormat().format(value) + (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom]);
   }
 
   function showHex(value: number, digit: number) {
-    if (digit === 4) {
-      return '0x' + ('000' + value.toString(16).toUpperCase()).slice(-4);
-    }
-    return '0x' + ('0' + value.toString(16).toUpperCase()).slice(-2);
+    return digit === 4
+      ? '0x' + ('000' + value.toString(16).toUpperCase()).slice(-4)
+      : '0x' + ('0' + value.toString(16).toUpperCase()).slice(-2);
   }
 
   const renderEntity = () => {

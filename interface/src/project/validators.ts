@@ -112,22 +112,20 @@ export const entityItemValidation = () =>
       }
     ],
     device_id: [
-      { required: true, message: 'Device ID is required' },
       {
         validator(rule: InternalRuleItem, value: string, callback: (error?: string) => void) {
           if (isNaN(parseInt(value, 16))) {
-            callback('Must be a hex number');
+            callback('Is required and must be in hex format');
           }
           callback();
         }
       }
     ],
     type_id: [
-      { required: true, message: 'Type ID is required' },
       {
         validator(rule: InternalRuleItem, value: string, callback: (error?: string) => void) {
           if (isNaN(parseInt(value, 16))) {
-            callback('Must be a hex number');
+            callback('Is required and must be in hex format');
           }
           callback();
         }

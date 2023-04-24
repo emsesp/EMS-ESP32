@@ -344,8 +344,8 @@ export interface EntityItem {
   device_id: number | string;
   type_id: number | string;
   offset: number;
-  factor: number;
-  uom: number;
+  factor?: number; // optional
+  uom?: number; // optional
   value_type: number;
   value?: number; // optional
   writeable: boolean;

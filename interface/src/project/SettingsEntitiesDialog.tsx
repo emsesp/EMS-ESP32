@@ -59,8 +59,8 @@ const SettingsEntitiesDialog = ({
       // convert to hex strings straight away
       setEditItem({
         ...selectedEntityItem,
-        device_id: ('0' + selectedEntityItem.device_id.toString(16).toUpperCase()).slice(-2),
-        type_id: ('000' + selectedEntityItem.type_id.toString(16).toUpperCase()).slice(-4)
+        device_id: selectedEntityItem.device_id.toString(16).toUpperCase().slice(-2),
+        type_id: selectedEntityItem.type_id.toString(16).toUpperCase().slice(-4)
       });
     }
   }, [open, selectedEntityItem]);
@@ -123,8 +123,9 @@ const SettingsEntitiesDialog = ({
               name="device_id"
               label={LL.ID_OF(LL.DEVICE())}
               margin="normal"
+              type="string"
               fullWidth
-              value={editItem.device_id}
+              value={editItem.device_id as string}
               onChange={updateFormValue}
               inputProps={{ style: { textTransform: 'uppercase' } }}
               InputProps={{ startAdornment: <InputAdornment position="start">0x</InputAdornment> }}
@@ -157,7 +158,7 @@ const SettingsEntitiesDialog = ({
           </Grid>
           <Grid item xs={4}>
             <ValidatedTextField
-              name="val_type"
+              name="value_type"
               label="Value Type"
               value={editItem.value_type}
               variant="outlined"
