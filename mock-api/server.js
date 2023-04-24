@@ -444,6 +444,7 @@ const emsesp_sensordata = {
 
 const status = {
   status: 0,
+  // status: 2,
   tx_mode: 1,
   uptime: 77186,
   num_devices: 2,
