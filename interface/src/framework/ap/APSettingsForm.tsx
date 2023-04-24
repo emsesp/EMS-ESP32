@@ -49,7 +49,7 @@ const APSettingsForm: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(createAPSettingsValidator(data), data);
-        void saveData();
+        await saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
       }

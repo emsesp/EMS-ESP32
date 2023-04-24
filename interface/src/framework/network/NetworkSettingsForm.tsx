@@ -104,7 +104,7 @@ const WiFiSettingsForm: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(createNetworkSettingsValidator(data), data);
-        void saveData();
+        await saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
       }

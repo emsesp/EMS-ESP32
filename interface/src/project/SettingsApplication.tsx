@@ -95,7 +95,7 @@ const SettingsApplication: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(createSettingsValidator(data), data);
-        void saveData();
+        await saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
       }
@@ -115,7 +115,7 @@ const SettingsApplication: FC = () => {
     };
 
     const restart = async () => {
-      void validateAndSubmit();
+      await validateAndSubmit();
       try {
         await EMSESP.restart();
         setRestarting(true);

@@ -63,7 +63,7 @@ const SignIn: FC = () => {
     });
     try {
       await validate(SIGN_IN_REQUEST_VALIDATOR, signInRequest);
-      void signIn();
+      await signIn();
     } catch (errors: any) {
       setFieldErrors(errors);
       setProcessing(false);

@@ -43,7 +43,7 @@ const NTPSettingsForm: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(NTP_SETTINGS_VALIDATOR, data);
-        void saveData();
+        await saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
       }

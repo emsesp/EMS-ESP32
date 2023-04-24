@@ -156,7 +156,7 @@ const SettingsEntities: FC = () => {
         } else {
           toast.error(LL.PROBLEM_UPDATING());
         }
-        void fetchEntities();
+        await fetchEntities();
       } catch (error) {
         toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       }

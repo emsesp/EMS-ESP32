@@ -547,7 +547,7 @@ const DashboardData: FC = () => {
         toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         setSensor(undefined);
-        void fetchSensorData();
+        await fetchSensorData();
       }
     }
   };
@@ -975,7 +975,7 @@ const DashboardData: FC = () => {
         toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         setAnalog(undefined);
-        void fetchSensorData();
+        await fetchSensorData();
       }
     }
   };
@@ -1003,7 +1003,7 @@ const DashboardData: FC = () => {
         toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       } finally {
         setAnalog(undefined);
-        void fetchSensorData();
+        await fetchSensorData();
       }
     }
   };

@@ -90,7 +90,7 @@ const NTPStatusForm: FC = () => {
       });
       toast.success(LL.TIME_SET());
       setSettingTime(false);
-      void loadData();
+      await loadData();
     } catch (error) {
       toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
     } finally {

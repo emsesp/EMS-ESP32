@@ -149,7 +149,7 @@ const SettingsScheduler: FC = () => {
         } else {
           toast.error(LL.PROBLEM_UPDATING());
         }
-        void fetchSchedule();
+        await fetchSchedule();
       } catch (error) {
         toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
       }
