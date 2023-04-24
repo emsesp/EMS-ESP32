@@ -2,7 +2,6 @@ import DownloadIcon from '@mui/icons-material/GetApp';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, styled, Button, Checkbox, MenuItem, Grid } from '@mui/material';
 import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
-import { toast } from 'react-toastify';
 import type { FC } from 'react';
 
 import type { LogSettings, LogEntry, LogEntries } from 'types';
@@ -14,7 +13,7 @@ import { SectionContent, FormLoader, BlockFormControlLabel, ValidatedTextField, 
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { LogLevel } from 'types';
-import { updateValue, useRest, extractErrorMessage } from 'utils';
+import { useRest, updateValueDirty, extractErrorMessage } from 'utils';
 
 export const LOG_EVENTSOURCE_URL = EVENT_SOURCE_ROOT + 'log';
 
@@ -66,8 +65,9 @@ const SystemLog: FC = () => {
 
   const { LL } = useI18nContext();
 
-  const { loadData, data, setData } = useRest<LogSettings>({
-    read: SystemApi.readLogSettings
+  const { loadData, data, setData, saveData, origData, dirtyFlags, setDirtyFlags } = useRest<LogSettings>({
+    read: SystemApi.readLogSettings,
+    update: SystemApi.updateLogSettings
   });
 
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -89,24 +89,7 @@ const SystemLog: FC = () => {
     return data?.compact ? label : label.padEnd(7, '\xa0');
   };
 
-  const updateFormValue = updateValue(setData);
-
-  const sendSettings = async () => {
-    if (data) {
-      try {
-        const response = await SystemApi.updateLogSettings({
-          level: data.level,
-          max_messages: data.max_messages,
-          compact: data.compact
-        });
-        if (response.status !== 200) {
-          toast.error(LL.PROBLEM_UPDATING());
-        }
-      } catch (error) {
-        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-      }
-    }
-  };
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
 
   const onDownload = () => {
     let result = '';
@@ -213,14 +196,11 @@ const SystemLog: FC = () => {
             <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={onDownload}>
               {LL.EXPORT()}
             </Button>
-            <Button
-              startIcon={<WarningIcon color="warning" />}
-              variant="contained"
-              color="info"
-              onClick={() => sendSettings()}
-            >
-              {LL.UPDATE()}
-            </Button>
+            {dirtyFlags && dirtyFlags.length !== 0 && (
+              <Button startIcon={<WarningIcon color="warning" />} variant="contained" color="info" onClick={saveData}>
+                {LL.UPDATE()}
+              </Button>
+            )}
           </ButtonRow>
         </Grid>
         <Box
