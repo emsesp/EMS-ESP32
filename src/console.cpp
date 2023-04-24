@@ -619,12 +619,12 @@ void EMSESPShell::stopped() {
 // show welcome banner
 void EMSESPShell::display_banner() {
     println();
-    printfln("┌──────────────────────────────────────┐");
-    printfln("│ %sEMS-ESP version %-12s%s         │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
-    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s  │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
-    printfln("│                                      │");
-    printfln("│ type %shelp%s to show available commands │", COLOR_UNDERLINE, COLOR_RESET);
-    printfln("└──────────────────────────────────────┘");
+    printfln("┌───────────────────────────────────────┐");
+    printfln("│ %sEMS-ESP version %-12s%s          │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
+    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s   │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│                                       │");
+    printfln("│ type %shelp%s to show available commands  │", COLOR_UNDERLINE, COLOR_RESET);
+    printfln("└───────────────────────────────────────┘");
     println();
 
     // set console name
