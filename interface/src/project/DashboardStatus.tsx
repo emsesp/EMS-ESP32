@@ -73,24 +73,6 @@ const DashboardStatus: FC = () => {
 
   const { me } = useContext(AuthenticatedContext);
 
-  const showName = (id: any) => {
-    const name: keyof Translation['STATUS_NAMES'] = id;
-    return LL.STATUS_NAMES[name]();
-  };
-
-  const busStatus = ({ status }: Status) => {
-    switch (status) {
-      case busConnectionStatus.BUS_STATUS_CONNECTED:
-        return LL.CONNECTED(0);
-      case busConnectionStatus.BUS_STATUS_TX_ERRORS:
-        return LL.TX_ISSUES();
-      case busConnectionStatus.BUS_STATUS_OFFLINE:
-        return LL.DISCONNECTED();
-      default:
-        return 'Unknown';
-    }
-  };
-
   const stats_theme = tableTheme({
     Table: `
       --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 90px 90px 80px;
@@ -137,15 +119,9 @@ const DashboardStatus: FC = () => {
     // eslint-disable-next-line
   }, []);
 
-  const scan = async () => {
-    try {
-      await EMSESP.scanDevices();
-      toast.info(LL.SCANNING() + '...');
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    } finally {
-      setConfirmScan(false);
-    }
+  const showName = (id: any) => {
+    const name: keyof Translation['STATUS_NAMES'] = id;
+    return LL.STATUS_NAMES[name]();
   };
 
   const formatDurationSec = (duration_sec: number) => {
@@ -166,6 +142,31 @@ const DashboardStatus: FC = () => {
     }
     formatted += LL.NUM_SECONDS({ num: seconds });
     return formatted;
+  };
+
+  const busStatus = () => {
+    if (data) {
+      switch (data.status) {
+        case busConnectionStatus.BUS_STATUS_CONNECTED:
+          return LL.CONNECTED(0) + ' (' + formatDurationSec(data.uptime) + ')';
+        case busConnectionStatus.BUS_STATUS_TX_ERRORS:
+          return LL.TX_ISSUES();
+        case busConnectionStatus.BUS_STATUS_OFFLINE:
+          return LL.DISCONNECTED();
+      }
+    }
+    return 'Unknown';
+  };
+
+  const scan = async () => {
+    try {
+      await EMSESP.scanDevices();
+      toast.info(LL.SCANNING() + '...');
+    } catch (error) {
+      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
+    } finally {
+      setConfirmScan(false);
+    }
   };
 
   const renderScanDialog = () => (
@@ -197,10 +198,7 @@ const DashboardStatus: FC = () => {
                 <DirectionsBusIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText
-              primary={LL.EMS_BUS_STATUS()}
-              secondary={busStatus(data) + ' (' + formatDurationSec(data.uptime) + ')'}
-            />
+            <ListItemText primary={LL.EMS_BUS_STATUS()} secondary={busStatus()} />
           </ListItem>
           <ListItem>
             <ListItemAvatar>
