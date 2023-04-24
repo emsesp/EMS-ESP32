@@ -74,7 +74,7 @@ const en: Translation = {
   EMS_BUS_WARNING: 'EMS bus disconnected. If this warning still persists after a few seconds please check settings and board profile',
   EMS_BUS_SCANNING: 'Scanning for EMS devices...',
   CONNECTED: 'Connected',
-  TX_ISSUES: 'Tx issues - try a different Tx Mode',
+  TX_ISSUES: 'Tx issues - check Tx Mode',
   DISCONNECTED: 'Disconnected',
   EMS_SCAN: 'Are you sure you want to initiate a full device scan of the EMS bus?',
   EMS_BUS_STATUS: 'EMS Bus Status',
