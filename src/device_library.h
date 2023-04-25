@@ -97,6 +97,7 @@
 {158, DeviceType::THERMOSTAT, "RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 {165, DeviceType::THERMOSTAT, "RC100/Moduline 1000/1010", DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18, 0x38
 {172, DeviceType::THERMOSTAT, "Rego 2000/3000", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
+{215, DeviceType::THERMOSTAT, "Comfort RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {216, DeviceType::THERMOSTAT, "CRF200S", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {246, DeviceType::THERMOSTAT, "Comfort+2RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {253, DeviceType::THERMOSTAT, "Rego 3000/UI800", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
