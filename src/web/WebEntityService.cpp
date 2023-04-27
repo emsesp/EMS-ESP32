@@ -51,7 +51,7 @@ void WebEntity::read(WebEntity & webEntity, JsonObject & root) {
     }
 }
 
-// call on initialization and also when the Schedule web page is updated
+// call on initialization and also when the Entity web page is updated
 // this loads the data into the internal class
 StateUpdateResult WebEntity::update(JsonObject & root, WebEntity & webEntity) {
     for (EntityItem & entityItem : webEntity.entityItems) {
@@ -111,7 +111,7 @@ bool WebEntityService::command_setvalue(const char * value, const std::string na
                 if (!Helpers::value2bool(value, v)) {
                     return false;
                 }
-                EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v ? 0xFF : 0, 0);
+                EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v ? entityItem.type_id > 0xFF ? 1 : 0xFF : 0, 0);
             } else {
                 float f;
                 if (!Helpers::value2float(value, f)) {
@@ -326,7 +326,7 @@ void WebEntityService::publish(const bool force) {
     // EMSESP::logger().debug("publish %d custom entities", output.size());
 }
 
-// count only entities with valid value
+// count only entities with valid value or command to show in dashboard
 uint8_t WebEntityService::count_entities() {
     EMSESP::webEntityService.read([&](WebEntity & webEntity) { entityItems = &webEntity.entityItems; });
     if (entityItems->size() == 0) {
@@ -334,10 +334,12 @@ uint8_t WebEntityService::count_entities() {
     }
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE);
     JsonObject          output = doc.to<JsonObject>();
+    uint8_t             count  = 0;
     for (const EntityItem & entity : *entityItems) {
         render_value(output, entity);
+        count += (output.containsKey(entity.name) || entity.writeable) ? 1 : 0;
     }
-    return output.size();
+    return count;
 }
 
 // send to dashboard, msgpack don't like serialized, use number
@@ -345,6 +347,7 @@ void WebEntityService::generate_value_web(JsonObject & output) {
     EMSESP::webEntityService.read([&](WebEntity & webEntity) { entityItems = &webEntity.entityItems; });
     output["label"] = (std::string) "Custom Entities";
     JsonArray data  = output.createNestedArray("data");
+    uint8_t   index = 0;
     for (const EntityItem & entity : *entityItems) {
         JsonObject obj = data.createNestedObject(); // create the object, we know there is a value
         obj["id"]      = "00" + entity.name;
@@ -389,6 +392,11 @@ void WebEntityService::generate_value_web(JsonObject & output) {
             break;
         default:
             break;
+        }
+        if (!obj.containsKey("v") && !obj.containsKey("c")) {
+            data.remove(index);
+        } else {
+            index++;
         }
     }
 }
