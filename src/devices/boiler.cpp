@@ -1291,28 +1291,36 @@ void Boiler::process_HpInput(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpInput[3].state, 5);
 }
 
-// Heatpump inputs settings- type 0x486
+// Heatpump inputs settings- type 0x486 (https://github.com/emsesp/EMS-ESP32/issues/600)
 // Boiler(0x08) -> All(0x00), ?(0x0486), data: 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 // Boiler(0x08) -> All(0x00), ?(0x0486), data: 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 01 00 00 00 00 00 (offset 25)
 // Boiler(0x08) -> All(0x00), ?(0x0486), data: 00 00 (offset 51)
 void Boiler::process_HpInConfig(std::shared_ptr<const Telegram> telegram) {
     char option[12];
-    for (uint8_t i = 0; i < 2; i++) {
-        for (uint8_t j = 0; j < 11; j++) {
+    // inputs 1,2,3 <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]
+    for (uint8_t i = 0; i < 3; i++) {
+        for (uint8_t j = 0; j < 9; j++) {
             option[j] = hpInput[i].option[j] - '0';
-            telegram->read_value(option[j], j * 4 + i);
+            telegram->read_value(option[j], j * 3 + i); // offsets 0-26
             option[j] = option[j] ? '1' : '0';
         }
-        option[11] = '\0'; // terminate string
-        has_update(hpInput[i].option, option, 12);
+        option[9] = hpInput[i].option[9] - '0';
+        telegram->read_value(option[9], 39 + i); // add offsets 39-41
+        option[9]  = option[9] ? '1' : '0';
+        option[10] = '\0'; // terminate string
+        has_update(hpInput[i].option, option, 11);
     }
-    for (uint8_t j = 0; j < 9; j++) {
+    // input 4 <inv>[<comp><aux><cool><heat><dhw><pv>]
+    for (uint8_t j = 0; j < 6; j++) {
         option[j] = hpInput[3].option[j] - '0';
-        telegram->read_value(option[j], 42 + j);
+        telegram->read_value(option[j], 42 + j); // offsets 42-47
         option[j] = option[j] ? '1' : '0';
     }
-    option[9] = '\0'; // terminate string
-    has_update(hpInput[3].option, option, 12);
+    option[6] = hpInput[3].option[6] - '0';
+    telegram->read_value(option[6], 52); // add offsets 52 (pv)
+    option[6] = option[6] ? '1' : '0';
+    option[7] = '\0'; // terminate string
+    has_update(hpInput[3].option, option, 8);
 }
 
 // Boiler(0x08) -W-> Me(0x0B), HpHeaterConfig(0x0485)
@@ -2311,27 +2319,33 @@ bool Boiler::set_HpInLogic(const char * value, const int8_t id) {
         write_command(0x486, id == 4 ? 42 : id - 1, v ? 1 : 0, 0x486);
         return true;
     }
-    if (strlen(value) == 11 && id != 4) {
-        uint8_t v[11];
-        for (uint8_t i = 0; i < 11; i++) {
+    if (strlen(value) == 10 && id != 4) {
+        uint8_t v[10];
+        for (uint8_t i = 0; i < 10; i++) {
             v[i] = value[i] - '0';
             if (v[i] > 1) {
                 return false;
             }
+        }
+        for (uint8_t i = 0; i < 9; i++) {
             write_command(0x486, i * 3 + id - 1, v[i]);
         }
+        write_command(0x486, 39 + id - 1, v[9]);
         return true;
     }
     // input 4
-    if (strlen(value) == 8 && id == 4) {
-        uint8_t v[11];
+    if (strlen(value) == 7 && id == 4) {
+        uint8_t v[10];
         for (uint8_t i = 0; i < 8; i++) {
             v[i] = value[i] - '0';
             if (v[i] > 1) {
                 return false;
             }
+        }
+        for (uint8_t i = 0; i < 7; i++) {
             write_command(0x486, 42 + i, v[i]);
         }
+        write_command(0x486, 52, v[7]);
         return true;
     }
     return false;
