@@ -37,7 +37,7 @@ type SettingsSchedulerDialogProps = {
   creating: boolean;
   onClose: () => void;
   onSave: (ei: ScheduleItem) => void;
-  selectedSchedulerItem: ScheduleItem;
+  selectedItem: ScheduleItem;
   validator: Schema;
   dow: string[];
 };
@@ -47,12 +47,12 @@ const SettingsSchedulerDialog = ({
   creating,
   onClose,
   onSave,
-  selectedSchedulerItem,
+  selectedItem,
   validator,
   dow
 }: SettingsSchedulerDialogProps) => {
   const { LL } = useI18nContext();
-  const [editItem, setEditItem] = useState<ScheduleItem>(selectedSchedulerItem);
+  const [editItem, setEditItem] = useState<ScheduleItem>(selectedItem);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
   const updateFormValue = updateValue(setEditItem);
@@ -60,9 +60,9 @@ const SettingsSchedulerDialog = ({
   useEffect(() => {
     if (open) {
       setFieldErrors(undefined);
-      setEditItem(selectedSchedulerItem);
+      setEditItem(selectedItem);
     }
-  }, [open, selectedSchedulerItem]);
+  }, [open, selectedItem]);
 
   const close = () => {
     onClose();

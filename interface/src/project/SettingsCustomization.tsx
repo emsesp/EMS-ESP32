@@ -156,7 +156,6 @@ const SettingsCustomization: FC = () => {
     }
   }, [LL]);
 
-  // on mount
   useEffect(() => {
     void fetchDevices();
   }, [fetchDevices]);
@@ -580,7 +579,7 @@ const SettingsCustomization: FC = () => {
           open={dialogOpen}
           onClose={onDialogClose}
           onSave={onDialogSave}
-          selectedDeviceEntity={selectedDeviceEntity}
+          selectedItem={selectedDeviceEntity}
         />
       )}
     </SectionContent>

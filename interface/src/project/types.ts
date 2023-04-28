@@ -71,7 +71,7 @@ export interface Device {
   e: number; // number of entries
 }
 
-export interface Sensor {
+export interface TemperatureSensor {
   id: string; // id string
   n: string; // name/alias
   t?: number; // temp, optional
@@ -79,34 +79,33 @@ export interface Sensor {
   u: number; // uom
 }
 
-export interface Analog {
-  id: string; // id string
+export interface AnalogSensor {
+  id: number;
   g: number; // GPIO
   n: string;
-  v: number; // is optional
+  v: number;
   u: number;
   o: number;
   f: number;
   t: number;
+  d: boolean; // deleted flag
 }
 
-export interface WriteSensor {
+export interface WriteTemperatureSensor {
   id: string;
   name: string;
   offset: number;
 }
 
 export interface SensorData {
-  sensors: Sensor[];
-  analogs: Analog[];
+  ts: TemperatureSensor[];
+  as: AnalogSensor[];
+  analog_enabled: boolean;
 }
 
 export interface CoreData {
   connected: boolean;
   devices: Device[];
-  s_n: string;
-  active_sensors: number;
-  analog_enabled: boolean;
 }
 
 export interface DeviceShort {
@@ -216,6 +215,7 @@ export const DeviceValueUOM_s = [
 ];
 
 export enum AnalogType {
+  REMOVED = -1,
   NOTUSED = 0,
   DIGITAL_IN,
   COUNTER,
@@ -281,18 +281,20 @@ export interface APIcall {
   id: any;
 }
 
-export interface WriteValue {
+export interface WriteDeviceValue {
   id: number;
   devicevalue: DeviceValue;
 }
 
-export interface WriteAnalog {
+export interface WriteAnalogSensor {
+  id: number;
   gpio: number;
   name: string;
   factor: number;
   offset: number;
   uom: number;
   type: number;
+  deleted: boolean;
 }
 
 export enum DeviceEntityMask {

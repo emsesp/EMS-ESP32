@@ -10,9 +10,9 @@ import type {
   DeviceEntity,
   UniqueID,
   CustomEntities,
-  WriteValue,
-  WriteSensor,
-  WriteAnalog,
+  WriteDeviceValue,
+  WriteTemperatureSensor,
+  WriteAnalogSensor,
   SensorData,
   Schedule,
   Entities
@@ -68,16 +68,16 @@ export function writeCustomEntities(customEntities: CustomEntities): AxiosPromis
   return AXIOS.post('/customEntities', customEntities);
 }
 
-export function writeValue(writevalue: WriteValue): AxiosPromise<void> {
-  return AXIOS.post('/writeValue', writevalue);
+export function writeDeviceValue(dv: WriteDeviceValue): AxiosPromise<void> {
+  return AXIOS.post('/writeDeviceValue', dv);
 }
 
-export function writeSensor(writesensor: WriteSensor): AxiosPromise<void> {
-  return AXIOS.post('/writeSensor', writesensor);
+export function writeTemperatureSensor(ts: WriteTemperatureSensor): AxiosPromise<void> {
+  return AXIOS.post('/writeTemperatureSensor', ts);
 }
 
-export function writeAnalog(writeanalog: WriteAnalog): AxiosPromise<void> {
-  return AXIOS.post('/writeAnalog', writeanalog);
+export function writeAnalogSensor(as: WriteAnalogSensor): AxiosPromise<void> {
+  return AXIOS.post('/writeAnalogSensor', as);
 }
 
 export function resetCustomizations(): AxiosPromise<void> {

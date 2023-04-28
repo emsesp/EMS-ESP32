@@ -270,7 +270,7 @@ const SettingsScheduler: FC = () => {
           creating={creating}
           onClose={onDialogClose}
           onSave={onDialogSave}
-          selectedSchedulerItem={selectedScheduleItem}
+          selectedItem={selectedScheduleItem}
           validator={schedulerItemValidation()}
           dow={dow}
         />

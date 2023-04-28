@@ -15,7 +15,7 @@ interface DeviceIconProps {
 // matches emsdevice.h DeviceType
 const enum DeviceType {
   SYSTEM = 0,
-  DALLASSENSOR,
+  TEMPERATURESENSOR,
   ANALOGSENSOR,
   SCHEDULER,
   BOILER,
@@ -37,7 +37,7 @@ const enum DeviceType {
 
 const DeviceIcon: FC<DeviceIconProps> = ({ type_id }) => {
   switch (type_id) {
-    case DeviceType.DALLASSENSOR:
+    case DeviceType.TEMPERATURESENSOR:
     case DeviceType.ANALOGSENSOR:
       return <MdOutlineSensors />;
     case DeviceType.BOILER:

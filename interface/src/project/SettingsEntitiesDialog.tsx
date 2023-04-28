@@ -12,7 +12,8 @@ import {
   DialogTitle,
   Grid,
   InputAdornment,
-  MenuItem
+  MenuItem,
+  TextField
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 
@@ -33,7 +34,7 @@ type SettingsEntitiesDialogProps = {
   creating: boolean;
   onClose: () => void;
   onSave: (ei: EntityItem) => void;
-  selectedEntityItem: EntityItem;
+  selectedItem: EntityItem;
   validator: Schema;
 };
 
@@ -42,28 +43,26 @@ const SettingsEntitiesDialog = ({
   creating,
   onClose,
   onSave,
-  selectedEntityItem,
+  selectedItem,
   validator
 }: SettingsEntitiesDialogProps) => {
   const { LL } = useI18nContext();
-  const [editItem, setEditItem] = useState<EntityItem>(selectedEntityItem);
+  const [editItem, setEditItem] = useState<EntityItem>(selectedItem);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-
   const updateFormValue = updateValue(setEditItem);
 
-  // on mount
   useEffect(() => {
     if (open) {
       setFieldErrors(undefined);
-      setEditItem(selectedEntityItem);
+      setEditItem(selectedItem);
       // convert to hex strings straight away
       setEditItem({
-        ...selectedEntityItem,
-        device_id: selectedEntityItem.device_id.toString(16).toUpperCase().slice(-2),
-        type_id: selectedEntityItem.type_id.toString(16).toUpperCase().slice(-4)
+        ...selectedItem,
+        device_id: selectedItem.device_id.toString(16).toUpperCase().slice(-2),
+        type_id: selectedItem.type_id.toString(16).toUpperCase().slice(-4)
       });
     }
-  }, [open, selectedEntityItem]);
+  }, [open, selectedItem]);
 
   const close = () => {
     onClose();
@@ -157,7 +156,7 @@ const SettingsEntitiesDialog = ({
             />
           </Grid>
           <Grid item xs={4}>
-            <ValidatedTextField
+            <TextField
               name="value_type"
               label="Value Type"
               value={editItem.value_type}
@@ -174,13 +173,13 @@ const SettingsEntitiesDialog = ({
               <MenuItem value={4}>USHORT</MenuItem>
               <MenuItem value={5}>ULONG</MenuItem>
               <MenuItem value={6}>TIME</MenuItem>
-            </ValidatedTextField>
+            </TextField>
           </Grid>
 
           {editItem.value_type !== 0 && (
             <>
               <Grid item xs={4}>
-                <ValidatedTextField
+                <TextField
                   name="factor"
                   label={LL.FACTOR()}
                   value={editItem.factor}
@@ -193,7 +192,7 @@ const SettingsEntitiesDialog = ({
                 />
               </Grid>
               <Grid item xs={4}>
-                <ValidatedTextField
+                <TextField
                   name="uom"
                   label={LL.UNIT()}
                   value={editItem.uom}
@@ -207,7 +206,7 @@ const SettingsEntitiesDialog = ({
                       {val}
                     </MenuItem>
                   ))}
-                </ValidatedTextField>
+                </TextField>
               </Grid>
             </>
           )}

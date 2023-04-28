@@ -1,6 +1,6 @@
 import DownloadIcon from '@mui/icons-material/GetApp';
 import WarningIcon from '@mui/icons-material/Warning';
-import { Box, styled, Button, Checkbox, MenuItem, Grid } from '@mui/material';
+import { Box, styled, Button, Checkbox, MenuItem, Grid, TextField } from '@mui/material';
 import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import type { FC } from 'react';
 
@@ -138,7 +138,6 @@ const SystemLog: FC = () => {
     return () => {
       es.close();
     };
-    // eslint-disable-next-line
   }, []);
 
   const content = () => {
@@ -150,7 +149,7 @@ const SystemLog: FC = () => {
       <>
         <Grid container spacing={3} direction="row" justifyContent="flex-start" alignItems="center">
           <Grid item xs={2}>
-            <ValidatedTextField
+            <TextField
               name="level"
               label={LL.LOG_LEVEL()}
               value={data.level}
@@ -167,10 +166,10 @@ const SystemLog: FC = () => {
               <MenuItem value={6}>INFO</MenuItem>
               <MenuItem value={7}>DEBUG</MenuItem>
               <MenuItem value={9}>ALL</MenuItem>
-            </ValidatedTextField>
+            </TextField>
           </Grid>
           <Grid item xs={2}>
-            <ValidatedTextField
+            <TextField
               name="max_messages"
               label={LL.BUFFER_SIZE()}
               value={data.max_messages}
@@ -184,7 +183,7 @@ const SystemLog: FC = () => {
               <MenuItem value={50}>50</MenuItem>
               <MenuItem value={75}>75</MenuItem>
               <MenuItem value={100}>100</MenuItem>
-            </ValidatedTextField>
+            </TextField>
           </Grid>
           <Grid item>
             <BlockFormControlLabel

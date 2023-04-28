@@ -18,8 +18,8 @@
 
 // code originally written by nomis - https://github.com/nomis
 
-#ifndef EMSESP_DALLASSENSOR_H
-#define EMSESP_DALLASSENSOR_H
+#ifndef EMSESP_TEMPERATURESENSOR_H
+#define EMSESP_TEMPERATURESENSOR_H
 
 #include "helpers.h"
 #include "mqtt.h"
@@ -33,7 +33,7 @@
 
 namespace emsesp {
 
-class DallasSensor {
+class TemperatureSensor {
   public:
     class Sensor {
       public:
@@ -73,8 +73,8 @@ class DallasSensor {
         int16_t     offset_;
     };
 
-    DallasSensor()  = default;
-    ~DallasSensor() = default;
+    TemperatureSensor()  = default;
+    ~TemperatureSensor() = default;
 
     void start();
     void loop();
@@ -97,7 +97,7 @@ class DallasSensor {
         return sensorfails_;
     }
 
-    bool dallas_enabled() {
+    bool sensor_enabled() {
         return (dallas_gpio_ != 0);
     }
 
@@ -128,7 +128,7 @@ class DallasSensor {
     static constexpr size_t SCRATCHPAD_CONFIG   = 4;
     static constexpr size_t SCRATCHPAD_CNT_REM  = 6;
 
-    // dallas chips
+    // dallas chip types
     static constexpr uint8_t TYPE_DS18B20 = 0x28;
     static constexpr uint8_t TYPE_DS18S20 = 0x10;
     static constexpr uint8_t TYPE_DS1822  = 0x22;

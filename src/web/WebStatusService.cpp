@@ -124,7 +124,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     root["tx_mode"]     = EMSESP::txservice_.tx_mode();
     root["uptime"]      = EMSbus::bus_uptime();
     root["num_devices"] = EMSESP::count_devices(); // excluding Controller
-    root["num_sensors"] = EMSESP::dallassensor_.no_sensors();
+    root["num_sensors"] = EMSESP::temperaturesensor_.no_sensors();
     root["num_analogs"] = EMSESP::analogsensor_.no_sensors();
 
     JsonArray  statsJson = root.createNestedArray("stats");
@@ -148,12 +148,13 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     statJson["f"]  = EMSESP::txservice_.telegram_write_fail_count();
     statJson["q"]  = EMSESP::txservice_.write_quality();
 
-    if (EMSESP::dallassensor_.dallas_enabled()) {
+    if (EMSESP::temperaturesensor_.sensor_enabled()) {
         statJson       = statsJson.createNestedObject();
         statJson["id"] = 3;
-        statJson["s"]  = EMSESP::dallassensor_.reads();
-        statJson["f"]  = EMSESP::dallassensor_.fails();
-        statJson["q"]  = EMSESP::dallassensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::dallassensor_.fails()) / EMSESP::dallassensor_.reads());
+        statJson["s"]  = EMSESP::temperaturesensor_.reads();
+        statJson["f"]  = EMSESP::temperaturesensor_.fails();
+        statJson["q"] =
+            EMSESP::temperaturesensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::temperaturesensor_.fails()) / EMSESP::temperaturesensor_.reads());
     }
     if (EMSESP::analog_enabled()) {
         statJson       = statsJson.createNestedObject();

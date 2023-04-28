@@ -26,17 +26,12 @@ type SettingsCustomizationDialogProps = {
   open: boolean;
   onClose: () => void;
   onSave: (di: DeviceEntity) => void;
-  selectedDeviceEntity: DeviceEntity;
+  selectedItem: DeviceEntity;
 };
 
-const SettingsCustomizationDialog = ({
-  open,
-  onClose,
-  onSave,
-  selectedDeviceEntity
-}: SettingsCustomizationDialogProps) => {
+const SettingsCustomizationDialog = ({ open, onClose, onSave, selectedItem }: SettingsCustomizationDialogProps) => {
   const { LL } = useI18nContext();
-  const [editItem, setEditItem] = useState<DeviceEntity>(selectedDeviceEntity);
+  const [editItem, setEditItem] = useState<DeviceEntity>(selectedItem);
   const [error, setError] = useState<boolean>(false);
 
   const updateFormValue = updateValue(setEditItem);
@@ -47,9 +42,9 @@ const SettingsCustomizationDialog = ({
   useEffect(() => {
     if (open) {
       setError(false);
-      setEditItem(selectedDeviceEntity);
+      setEditItem(selectedItem);
     }
-  }, [open, selectedDeviceEntity]);
+  }, [open, selectedItem]);
 
   const close = () => {
     onClose();

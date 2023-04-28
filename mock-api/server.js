@@ -314,9 +314,9 @@ const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData';
 const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities';
 const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'status';
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
-const EMSESP_WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue';
-const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor';
-const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalog';
+const EMSESP_WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
+const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeTemperatureSensor';
+const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalogSensor';
 const EMSESP_CUSTOM_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations';
 const EMSESP_WRITE_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
@@ -419,27 +419,25 @@ const emsesp_coredata = {
       v: '04.01',
       e: 3
     }
-  ],
-  s_n: 'Sensors',
-  active_sensors: 8,
-  analog_enabled: true
+  ]
 };
 
 const emsesp_sensordata = {
-  sensors: [
+  // ts: [],
+  ts: [
     { id: '28-233D-9497-0C03', n: 'Dallas 1', t: 25.7, o: 1.2, u: 1 },
     { id: '28-243D-7437-1E3A', n: 'Dallas 2 outside', t: 26.1, o: 0, u: 1 },
     { id: '28-243E-7437-1E3B', n: 'Zolder', t: 27.1, o: 0, u: 16 },
     { id: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1 }
   ],
-  // sensors: [],
-  analogs: [
-    { id: '1', g: 36, n: 'motor', v: 0, u: 0, o: 17, f: 0, t: 0 },
-    { id: '2', g: 37, n: 'External switch', v: 13, u: 0, o: 17, f: 0, t: 1 },
-    { id: '3', g: 39, n: 'Pulse count', v: 144, u: 0, o: 0, f: 0, t: 2 },
-    { id: '4', g: 40, n: 'Pressure', v: 16, u: 17, o: 0, f: 0, t: 3 }
-  ]
-  // analogs: [],
+  // as: [],
+  as: [
+    { id: 1, g: 36, n: 'motor', v: 0, u: 0, o: 17, f: 0, t: 0, d: false },
+    { id: 2, g: 37, n: 'External switch', v: 13, u: 0, o: 17, f: 0, t: 1, d: false },
+    { id: 3, g: 39, n: 'Pulse count', v: 144, u: 0, o: 0, f: 0, t: 2, d: false },
+    { id: 4, g: 40, n: 'Pressure', v: 16, u: 17, o: 0, f: 0, t: 3, d: false }
+  ],
+  analog_enabled: true
 };
 
 const status = {
@@ -965,6 +963,7 @@ rest_server.get(EMSESP_CORE_DATA_ENDPOINT, (req, res) => {
 });
 rest_server.get(EMSESP_SENSOR_DATA_ENDPOINT, (req, res) => {
   console.log('send back sensor data...');
+  console.log(emsesp_sensordata);
   res.json(emsesp_sensordata);
 });
 rest_server.get(EMSESP_DEVICES_ENDPOINT, (req, res) => {
@@ -1154,12 +1153,12 @@ rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
 });
 
 rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
-  const sensor = req.body;
-  console.log('Write sensor: ' + JSON.stringify(sensor));
-  objIndex = emsesp_sensordata.sensors.findIndex((obj) => obj.id == sensor.id);
+  const ts = req.body;
+  console.log('Write temperaure sensor: ' + JSON.stringify(ts));
+  objIndex = emsesp_sensordata.ts.findIndex((obj) => obj.id == ts.id);
   if (objIndex !== -1) {
-    emsesp_sensordata.sensors[objIndex].n = sensor.name;
-    emsesp_sensordata.sensors[objIndex].o = sensor.offset;
+    emsesp_sensordata.ts[objIndex].n = ts.name;
+    emsesp_sensordata.ts[objIndex].o = ts.offset;
   } else {
     console.log('not found');
   }
@@ -1167,32 +1166,37 @@ rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
 });
 
 rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
-  const analog = req.body;
-  console.log('Write analog: ' + JSON.stringify(analog));
-  objIndex = emsesp_sensordata.analogs.findIndex((obj) => obj.g == analog.gpio);
+  const as = req.body;
+  console.log('Write analog sensor: ' + JSON.stringify(as));
+  objIndex = emsesp_sensordata.as.findIndex((obj) => obj.g == as.gpio);
 
   if (objIndex === -1) {
-    console.log('new analog');
-    emsesp_sensordata.analogs.push({
-      id: analog.i.toString(),
-      g: analog.gpio,
-      n: analog.name,
-      f: analog.factor,
-      o: analog.offset,
-      u: analog.uom,
-      t: analog.type
+    console.log('new analog entry found');
+    emsesp_sensordata.as.push({
+      id: as.id,
+      g: as.gpio,
+      n: as.name,
+      f: as.factor,
+      o: as.offset,
+      u: as.uom,
+      t: as.type,
+      d: as.deleted
     });
   } else {
-    if (analog.type === -1) {
-      console.log('removing analog gpio' + analog.gpio + ' index ' + objIndex);
-      emsesp_sensordata.analogs[objIndex].t = -1;
+    if (as.deleted) {
+      console.log('removing analog gpio' + as.gpio + ' index ' + objIndex);
+      emsesp_sensordata.as[objIndex].d = true;
+      var filtered = emsesp_sensordata.as.filter(function (value, index, arr) {
+        return !value.d;
+      });
+      emsesp_sensordata.as = filtered;
     } else {
-      console.log('updating analog gpio' + analog.gpio + ' index ' + objIndex);
-      emsesp_sensordata.analogs[objIndex].n = analog.name;
-      emsesp_sensordata.analogs[objIndex].f = analog.factor;
-      emsesp_sensordata.analogs[objIndex].o = analog.offset;
-      emsesp_sensordata.analogs[objIndex].u = analog.uom;
-      emsesp_sensordata.analogs[objIndex].t = analog.type;
+      console.log('updating analog gpio' + as.gpio + ' index ' + objIndex);
+      emsesp_sensordata.as[objIndex].n = as.name;
+      emsesp_sensordata.as[objIndex].f = as.factor;
+      emsesp_sensordata.as[objIndex].o = as.offset;
+      emsesp_sensordata.as[objIndex].u = as.uom;
+      emsesp_sensordata.as[objIndex].t = as.type;
     }
   }
 
@@ -1339,7 +1343,7 @@ const emsesp_info = {
     'uptime (seconds)': 110434,
     freemem: 131,
     'reset reason': 'Software reset CPU / Software reset CPU',
-    'Dallas sensors': 3
+    'Sensor sensors': 3
   },
   Network: {
     connection: 'Ethernet',
@@ -1362,8 +1366,8 @@ const emsesp_info = {
     MQTT: 'connected',
     'MQTT publishes': 46336,
     'MQTT publish fails': 0,
-    'Dallas reads': 22086,
-    'Dallas fails': 0
+    'Sensor reads': 22086,
+    'Sensor fails': 0
   },
   Devices: [
     {

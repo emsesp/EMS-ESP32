@@ -643,24 +643,24 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
-    if (command == "dallas") {
-        shell.printfln("Testing adding Dallas sensor");
-        emsesp::EMSESP::dallassensor_.test();
+    if (command == "temperature") {
+        shell.printfln("Testing adding Temperature sensor");
+        emsesp::EMSESP::temperaturesensor_.test();
         ok = true;
     }
 
-    if (command == "dallas_full") {
-        shell.printfln("Testing adding and changing Dallas sensor");
+    if (command == "temperature_full") {
+        shell.printfln("Testing adding and changing Temperature sensor");
         Mqtt::ha_enabled(true);
         Mqtt::nested_format(1);
         // Mqtt::nested_format(0);
 
-        emsesp::EMSESP::dallassensor_.test();
+        emsesp::EMSESP::temperaturesensor_.test();
         shell.invoke_command("show");
         shell.invoke_command("call system publish");
 
         // rename
-        EMSESP::dallassensor_.update("01-0203-0405-0607", "testdallas", 2);
+        EMSESP::temperaturesensor_.update("01-0203-0405-0607", "testtemperature", 2);
         shell.invoke_command("show");
         shell.invoke_command("call system publish");
         ok = true;
@@ -923,10 +923,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         */
 
         /*
-        requestX.url("/api/dallassensor/xxxx");
+        requestX.url("/api/temperaturesensor/xxxx");
         EMSESP::webAPIService.webAPIService_get(&requestX);
         emsesp::EMSESP::logger().notice("****");
-        requestX.url("/api/dallassensor/info");
+        requestX.url("/api/temperaturesensor/info");
         EMSESP::webAPIService.webAPIService_get(&requestX);
         return;
         */
@@ -1091,15 +1091,15 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         char data6[] = "{\"id\":2,\"devicevalue\":{\"v\":\"44\",\"u\":1,\"n\":\"hc2 selected room temperature\",\"c\":\"hc2/seltemp\"}";
         deserializeJson(doc, data6);
         json = doc.as<JsonVariant>();
-        request.url("/rest/writeValue");
-        EMSESP::webDataService.write_value(&request, json);
+        request.url("/rest/writeDeviceValue");
+        EMSESP::webDataService.write_device_value(&request, json);
 
         // write value from web - testing hc9/seltemp - should fail!
         char data7[] = "{\"id\":2,\"devicevalue\":{\"v\":\"55\",\"u\":1,\"n\":\"hc2 selected room temperature\",\"c\":\"hc9/seltemp\"}";
         deserializeJson(doc, data7);
         json = doc.as<JsonVariant>();
-        request.url("/rest/writeValue");
-        EMSESP::webDataService.write_value(&request, json);
+        request.url("/rest/writeDeviceValue");
+        EMSESP::webDataService.write_device_value(&request, json);
 
         // emsesp::EMSESP::logger().notice("*");
 

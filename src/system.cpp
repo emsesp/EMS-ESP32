@@ -141,7 +141,7 @@ bool System::command_publish(const char * value, const int8_t id) {
         } else if (value_s == "other") {
             EMSESP::publish_other_values(); // switch and heat pump
             return true;
-        } else if ((value_s == (F_(dallassensor))) || (value_s == (F_(analogsensor)))) {
+        } else if ((value_s == (F_(temperaturesensor))) || (value_s == (F_(analogsensor)))) {
             EMSESP::publish_sensor_values(true);
             return true;
         }
@@ -611,9 +611,9 @@ bool System::heartbeat_json(JsonObject & output) {
     output["apicalls"] = WebAPIService::api_count(); // + WebAPIService::api_fails();
     output["apifails"] = WebAPIService::api_fails();
 
-    if (EMSESP::dallas_enabled() || EMSESP::analog_enabled()) {
-        output["sensorreads"] = EMSESP::dallassensor_.reads() + EMSESP::analogsensor_.reads();
-        output["sensorfails"] = EMSESP::dallassensor_.fails() + EMSESP::analogsensor_.fails();
+    if (EMSESP::sensor_enabled() || EMSESP::analog_enabled()) {
+        output["sensorreads"] = EMSESP::temperaturesensor_.reads() + EMSESP::analogsensor_.reads();
+        output["sensorfails"] = EMSESP::temperaturesensor_.fails() + EMSESP::analogsensor_.fails();
     }
 
 #ifndef EMSESP_STANDALONE
@@ -1267,10 +1267,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 
     // Sensor Status
     node = output.createNestedObject("Sensor Info");
-    if (EMSESP::dallas_enabled()) {
-        node["temperature sensors"]      = EMSESP::dallassensor_.no_sensors();
-        node["temperature sensor reads"] = EMSESP::dallassensor_.reads();
-        node["temperature sensor fails"] = EMSESP::dallassensor_.fails();
+    if (EMSESP::sensor_enabled()) {
+        node["temperature sensors"]      = EMSESP::temperaturesensor_.no_sensors();
+        node["temperature sensor reads"] = EMSESP::temperaturesensor_.reads();
+        node["temperature sensor fails"] = EMSESP::temperaturesensor_.fails();
     }
     if (EMSESP::analog_enabled()) {
         node["analog sensors"]      = EMSESP::analogsensor_.no_sensors();
@@ -1418,7 +1418,7 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
     } else if (board_profile == "LOLIN") {
         data = {2, 18, 17, 16, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // Lolin D32
     } else if (board_profile == "OLIMEX") {
-        data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, -1, 0, 0}; // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
+        data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, -1, 0, 0}; // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Temperature sensor)
     } else if (board_profile == "OLIMEXPOE") {
         data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, 12, 0, 3}; // Olimex ESP32-POE
     } else if (board_profile == "C3MINI") {

@@ -4,6 +4,8 @@
 
 ## **IMPORTANT! BREAKING CHANGES**
 
+- dallassensor has been renamed to temperaturesensor in MQTT payloads
+
 ## Added
 
 - Workaround for better Domoticz MQTT intergration? [#904](https://github.com/emsesp/EMS-ESP32/issues/904)
@@ -29,3 +31,5 @@
 - Improved HA Discovery so previous configs no longer need to be removed when starting [#1077](https://github.com/emsesp/EMS-ESP32/pull/1077) (thanks @pswid!)
 - Enlarge UART-Stack to 2,5k
 - Retry timeout for Mqtt-QOS1/2 10seconds
+- Optimize WebUI rendering when using Dialog Boxes [#1116](https://github.com/emsesp/EMS-ESP32/issues/1116)
+- Optimize Web libraries to reduce bundle size (3.6.x) [#1112](https://github.com/emsesp/EMS-ESP32/issues/1112)

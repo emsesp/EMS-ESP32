@@ -380,7 +380,7 @@ void Command::add(const uint8_t device_type, const uint8_t device_id, const char
 }
 
 // add a command with no json output
-// system/dallas/analog devices uses device_id 0
+// system/temperature/analog devices uses device_id 0
 void Command::add(const uint8_t device_type, const char * cmd, const cmd_function_p cb, const char * const * description, uint8_t flags) {
     add(device_type, 0, cmd, cb, description, flags);
 }
@@ -543,8 +543,8 @@ bool Command::device_has_commands(const uint8_t device_type) {
         return (EMSESP::webEntityService.count_entities() != 0);
     }
 
-    if (device_type == EMSdevice::DeviceType::DALLASSENSOR) {
-        return (EMSESP::dallassensor_.have_sensors());
+    if (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR) {
+        return (EMSESP::temperaturesensor_.have_sensors());
     }
 
     if (device_type == EMSdevice::DeviceType::ANALOGSENSOR) {
@@ -572,8 +572,8 @@ void Command::show_devices(uuid::console::Shell & shell) {
     if (EMSESP::webSchedulerService.has_commands()) {
         shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
     }
-    if (EMSESP::dallassensor_.have_sensors()) {
-        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR));
+    if (EMSESP::temperaturesensor_.have_sensors()) {
+        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
     }
     if (EMSESP::analogsensor_.have_sensors()) {
         shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
@@ -616,12 +616,12 @@ void Command::show_all(uuid::console::Shell & shell) {
     }
 
     // show sensors
-    if (EMSESP::dallassensor_.have_sensors()) {
+    if (EMSESP::temperaturesensor_.have_sensors()) {
         shell.print(COLOR_BOLD_ON);
         shell.print(COLOR_YELLOW);
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR));
+        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
         shell.print(COLOR_RESET);
-        show(shell, EMSdevice::DeviceType::DALLASSENSOR, true);
+        show(shell, EMSdevice::DeviceType::TEMPERATURESENSOR, true);
     }
     if (EMSESP::analogsensor_.have_sensors()) {
         shell.print(COLOR_BOLD_ON);

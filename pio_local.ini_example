@@ -6,7 +6,7 @@
 ;  -DEMSESP_UART_DEBUG ; debugging UART
 ;  -DEMSESP_DEBUG ; enables DEBUG to the log. Will generate a lot of extra traffic on Console and Syslog
 ;  -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\" ; hard code the default board name
-;  -DEMSESP_DEBUG_SENSOR ; additional debug for the dallas sensors
+;  -DEMSESP_DEBUG_SENSOR ; additional debug for the sensors
 ;  -DCORE_DEBUG_LEVEL=5 ; verbose core level debugging 5=verbose, 4=debug, 3=info
 ;  -DEMSESP_TEST ; enable the tests. EN language only
 ;  -DEMSESP_DE_ONLY ; only DE translated entity names

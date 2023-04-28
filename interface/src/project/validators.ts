@@ -1,5 +1,5 @@
 import Schema from 'async-validator';
-import type { Settings } from './types';
+import type { AnalogSensor, Settings } from './types';
 import type { InternalRuleItem } from 'async-validator';
 import { IP_OR_HOSTNAME_VALIDATOR } from 'validators/shared';
 
@@ -134,5 +134,30 @@ export const entityItemValidation = () =>
     offset: [
       { required: true, message: 'Offset is required' },
       { type: 'number', min: 0, max: 255, message: 'Must be between 0 and 255' }
+    ]
+  });
+
+export const temperatureSensorItemValidation = () =>
+  new Schema({
+    n: [{ required: true, message: 'Name is required' }]
+  });
+
+export const isGPIOUniqueValidator = (sensors: AnalogSensor[]) => ({
+  validator(rule: InternalRuleItem, gpio: number, callback: (error?: string) => void) {
+    if (sensors.find((as) => as.g === gpio)) {
+      callback('GPIO already in use');
+    } else {
+      callback();
+    }
+  }
+});
+
+export const analogSensorItemValidation = (sensors: AnalogSensor[], creating: boolean) =>
+  new Schema({
+    n: [{ required: true, message: 'Name is required' }],
+    g: [
+      { required: true, message: 'GPIO is required' },
+      GPIO_VALIDATOR,
+      ...(creating ? [isGPIOUniqueValidator(sensors)] : [])
     ]
   });

@@ -261,7 +261,7 @@ const SettingsEntities: FC = () => {
           creating={creating}
           onClose={onDialogClose}
           onSave={onDialogSave}
-          selectedEntityItem={selectedEntityItem}
+          selectedItem={selectedEntityItem}
           validator={entityItemValidation()}
         />
       )}

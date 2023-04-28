@@ -149,7 +149,7 @@ void Mqtt::loop() {
         EMSESP::system_.send_heartbeat(); // send heartbeat
     }
 
-    // dallas publish on change
+    // temperature and analog sensor publish on change
     if (!publish_time_sensor_) {
         EMSESP::publish_sensor_values(false);
     }

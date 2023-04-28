@@ -119,8 +119,8 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return F_(connect);
     case DeviceType::MIXER:
         return F_(mixer);
-    case DeviceType::DALLASSENSOR:
-        return F_(dallassensor);
+    case DeviceType::TEMPERATURESENSOR:
+        return F_(temperaturesensor);
     case DeviceType::ANALOGSENSOR:
         return F_(analogsensor);
     case DeviceType::CONTROLLER:
@@ -143,7 +143,7 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
 }
 
 // returns the translated name of a specific EMS device
-// excludes dallassensor, analogsensor and system
+// excludes temperaturesensor, analogsensor and system
 const char * EMSdevice::device_type_2_device_name_translated() {
     switch (device_type_) {
     case DeviceType::BOILER:
@@ -210,8 +210,8 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!strcmp(lowtopic, F_(mixer))) {
         return DeviceType::MIXER;
     }
-    if (!strcmp(lowtopic, F_(dallassensor))) {
-        return DeviceType::DALLASSENSOR;
+    if (!strcmp(lowtopic, F_(temperaturesensor))) {
+        return DeviceType::TEMPERATURESENSOR;
     }
     if (!strcmp(lowtopic, F_(analogsensor))) {
         return DeviceType::ANALOGSENSOR;

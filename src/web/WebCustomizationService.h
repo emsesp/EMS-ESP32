@@ -32,7 +32,7 @@
 
 namespace emsesp {
 
-// Customization for dallas sensor
+// Customization for temperature sensor
 class SensorCustomization {
   public:
     std::string id;

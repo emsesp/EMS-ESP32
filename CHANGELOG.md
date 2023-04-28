@@ -212,7 +212,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added pool data to telegrams 0x494 & 0x495 [#102](https://github.com/emsesp/EMS-ESP32/issues/102)
 - Add RC300 second summermode telegram [#108](https://github.com/emsesp/EMS-ESP32/issues/108)
 - Add support for the RC25 thermostat [#106](https://github.com/emsesp/EMS-ESP32/issues/106)
-- Add new command 'entities' for a device, e.g. http://ems-esp/api/boiler/entities to show the shortname, description and HA Entity name (if HA enabled) [#116](https://github.com/emsesp/EMS-ESP32/issues/116)
+- Add new command 'entities' for a device, e.g. <http://ems-esp/api/boiler/entities> to show the shortname, description and HA Entity name (if HA enabled) [#116](https://github.com/emsesp/EMS-ESP32/issues/116)
 - Support for Junkers program and remote (fb10/fb110) temperature
 - Home Assistant `state_class` attribute for Wh, kWh, W and KW [#129](https://github.com/emsesp/EMS-ESP32/issues/129)
 - Add current room influence for RC300 [#136](https://github.com/emsesp/EMS-ESP32/issues/136)
@@ -434,4 +434,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - some names of mqtt-tags like in v2.2.1
 - new ESP32 partition side to allow for smoother OTA and fallback
 - Network Gateway IP is optional (#682)emsesp/EMS-ESP
-- moved to a new GitHub repo https://github.com/emsesp/EMS-ESP32
+- moved to a new GitHub repo <https://github.com/emsesp/EMS-ESP32>

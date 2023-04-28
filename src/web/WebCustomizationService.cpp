@@ -57,17 +57,17 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
 
 // this creates the customization file, saving it to the FS
 void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
-    // Dallas Sensor customization
-    JsonArray sensorsJson = root.createNestedArray("sensors");
+    // Temperature Sensor customization
+    JsonArray sensorsJson = root.createNestedArray("ts");
     for (const SensorCustomization & sensor : settings.sensorCustomizations) {
         JsonObject sensorJson = sensorsJson.createNestedObject();
-        sensorJson["id"]      = sensor.id;     // is
+        sensorJson["id"]      = sensor.id;     // ID of chip
         sensorJson["name"]    = sensor.name;   // n
         sensorJson["offset"]  = sensor.offset; // o
     }
 
     // Analog Sensor customization
-    JsonArray analogJson = root.createNestedArray("analogs");
+    JsonArray analogJson = root.createNestedArray("as");
     for (const AnalogCustomization & sensor : settings.analogCustomizations) {
         JsonObject sensorJson = analogJson.createNestedObject();
         sensorJson["gpio"]    = sensor.gpio;   // g
@@ -98,7 +98,7 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
 StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization & settings) {
 #ifdef EMSESP_STANDALONE
     // invoke some fake data for testing
-    const char * json = "{\"sensors\":[],\"analogs\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom "
+    const char * json = "{\"ts\":[],\"as\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom "
                         "name for heating active\",\"08tapwateractive\"]}]}";
 
     StaticJsonDocument<500> doc;
@@ -111,10 +111,10 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
     Serial.println(COLOR_RESET);
 #endif
 
-    // Dallas Sensor customization
+    // Temperature Sensor customization
     settings.sensorCustomizations.clear();
-    if (root["sensors"].is<JsonArray>()) {
-        for (const JsonObject sensorJson : root["sensors"].as<JsonArray>()) {
+    if (root["ts"].is<JsonArray>()) {
+        for (const JsonObject sensorJson : root["ts"].as<JsonArray>()) {
             // create each of the sensor, overwriting any previous settings
             auto sensor   = SensorCustomization();
             sensor.id     = sensorJson["id"].as<std::string>();
@@ -126,8 +126,8 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
 
     // Analog Sensor customization
     settings.analogCustomizations.clear();
-    if (root["analogs"].is<JsonArray>()) {
-        for (const JsonObject analogJson : root["analogs"].as<JsonArray>()) {
+    if (root["as"].is<JsonArray>()) {
+        for (const JsonObject analogJson : root["as"].as<JsonArray>()) {
             // create each of the sensor, overwriting any previous settings
             auto sensor   = AnalogCustomization();
             sensor.gpio   = analogJson["gpio"];

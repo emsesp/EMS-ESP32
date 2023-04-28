@@ -15,7 +15,8 @@ import {
   ListItemSecondaryAction,
   ListItemText,
   Typography,
-  InputAdornment
+  InputAdornment,
+  TextField
 } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
@@ -165,7 +166,6 @@ const WiFiSettingsForm: FC = () => {
             margin="normal"
           />
         )}
-
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="tx_power"
@@ -180,21 +180,17 @@ const WiFiSettingsForm: FC = () => {
           type="number"
           margin="normal"
         />
-
         <BlockFormControlLabel
           control={<Checkbox name="nosleep" checked={data.nosleep} onChange={updateFormValue} />}
           label={LL.NETWORK_DISABLE_SLEEP()}
         />
-
         <BlockFormControlLabel
           control={<Checkbox name="bandwidth20" checked={data.bandwidth20} onChange={updateFormValue} />}
           label={LL.NETWORK_LOW_BAND()}
         />
-
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.GENERAL_OPTIONS()}
         </Typography>
-
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="hostname"
@@ -205,19 +201,16 @@ const WiFiSettingsForm: FC = () => {
           onChange={updateFormValue}
           margin="normal"
         />
-
         <BlockFormControlLabel
           control={<Checkbox name="enableMDNS" checked={data.enableMDNS} onChange={updateFormValue} />}
           label={LL.NETWORK_USE_DNS()}
         />
-
         <BlockFormControlLabel
           control={<Checkbox name="enableCORS" checked={data.enableCORS} onChange={updateFormValue} />}
           label={LL.NETWORK_ENABLE_CORS()}
         />
         {data.enableCORS && (
-          <ValidatedTextField
-            fieldErrors={fieldErrors}
+          <TextField
             name="CORSOrigin"
             label={LL.NETWORK_CORS_ORIGIN()}
             fullWidth
@@ -227,12 +220,10 @@ const WiFiSettingsForm: FC = () => {
             margin="normal"
           />
         )}
-
         <BlockFormControlLabel
           control={<Checkbox name="enableIPv6" checked={data.enableIPv6} onChange={updateFormValue} />}
           label={LL.NETWORK_ENABLE_IPV6()}
         />
-
         <BlockFormControlLabel
           control={<Checkbox name="static_ip_config" checked={data.static_ip_config} onChange={updateFormValue} />}
           label={LL.NETWORK_FIXED_IP()}
