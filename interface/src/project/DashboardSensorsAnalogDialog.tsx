@@ -83,6 +83,25 @@ const DashboardSensorsAnalogDialog = ({
       </DialogTitle>
       <DialogContent dividers>
         <Grid container spacing={2}>
+          <Grid item xs={4}>
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="g"
+              label="GPIO"
+              disabled={!creating}
+              value={numberValue(editItem.g)}
+              type="number"
+              variant="outlined"
+              onChange={updateFormValue}
+            />
+          </Grid>
+          {creating && (
+            <Grid item>
+              <Box color="warning.main" mt={2}>
+                <Typography variant="body2">{LL.WARN_GPIO()}</Typography>
+              </Box>
+            </Grid>
+          )}
           <Grid item xs={12}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
@@ -91,19 +110,6 @@ const DashboardSensorsAnalogDialog = ({
               value={editItem.n}
               fullWidth
               variant="outlined"
-              onChange={updateFormValue}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <ValidatedTextField
-              fieldErrors={fieldErrors}
-              name="g"
-              label="GPIO"
-              value={numberValue(editItem.g)}
-              fullWidth
-              type="number"
-              variant="outlined"
-              autoFocus
               onChange={updateFormValue}
             />
           </Grid>
@@ -207,7 +213,7 @@ const DashboardSensorsAnalogDialog = ({
                   name="f"
                   label={LL.FREQ()}
                   value={numberValue(editItem.f)}
-                  fullWidth
+                  // fullWidth
                   type="number"
                   variant="outlined"
                   onChange={updateFormValue}
@@ -222,7 +228,7 @@ const DashboardSensorsAnalogDialog = ({
                   name="o"
                   label={LL.DUTY_CYCLE()}
                   value={numberValue(editItem.o)}
-                  fullWidth
+                  // fullWidth
                   type="number"
                   variant="outlined"
                   onChange={updateFormValue}
@@ -235,9 +241,6 @@ const DashboardSensorsAnalogDialog = ({
             </>
           )}
         </Grid>
-        <Box color="warning.main" mt={2}>
-          <Typography variant="body2">{LL.WARN_GPIO()}</Typography>
-        </Box>
       </DialogContent>
       <DialogActions>
         {!creating && (
