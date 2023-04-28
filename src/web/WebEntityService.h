@@ -57,7 +57,7 @@ class WebEntityService : public StatefulService<WebEntity> {
     bool    get_value_info(JsonObject & output, const char * cmd);
     bool    get_value(std::shared_ptr<const Telegram> telegram);
     void    fetch();
-    void    render_value(JsonObject & output, EntityItem entity, const bool useVal = false);
+    void    render_value(JsonObject & output, EntityItem entity, const bool useVal = false, const bool web = false);
     uint8_t count_entities();
     void    generate_value_web(JsonObject & output);
 

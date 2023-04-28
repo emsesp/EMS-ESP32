@@ -346,7 +346,7 @@ export interface EntityItem {
   factor: number;
   uom: number;
   val_type: number;
-  value?: number;
+  value?: any;
   o_name?: string;
   o_device_id?: string;
   o_type_id?: string;

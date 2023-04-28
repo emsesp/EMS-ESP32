@@ -208,7 +208,7 @@ class Boiler : public EMSdevice {
     // Inputs
     struct {
         uint8_t state;
-        char    option[12]; // logic, block_comp, block_dhw, block_heat, block_cool, overheat_protect, evu_blocktime1,2,3, block_heater, Solar
+        char    option[16]; // logic, block_comp, block_dhw, block_heat, block_cool, overheat_protect, evu_blocktime1,2,3, block_heater, Solar, brine lowpressure, brine pump modulation
     } hpInput[4];
 
     // Heater limits

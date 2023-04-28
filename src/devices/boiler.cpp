@@ -1296,31 +1296,25 @@ void Boiler::process_HpInput(std::shared_ptr<const Telegram> telegram) {
 // Boiler(0x08) -> All(0x00), ?(0x0486), data: 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 01 00 00 00 00 00 (offset 25)
 // Boiler(0x08) -> All(0x00), ?(0x0486), data: 00 00 (offset 51)
 void Boiler::process_HpInConfig(std::shared_ptr<const Telegram> telegram) {
-    char option[12];
-    // inputs 1,2,3 <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]
+    char option[16];
+    // inputs 1,2,3 <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
+    uint8_t index[] = {0, 3, 6, 9, 12, 15, 18, 21, 24, 39, 36, 30, 27};
     for (uint8_t i = 0; i < 3; i++) {
-        for (uint8_t j = 0; j < 9; j++) {
-            option[j] = hpInput[i].option[j] - '0';
-            telegram->read_value(option[j], j * 3 + i); // offsets 0-26
-            option[j] = option[j] ? '1' : '0';
+        for (uint8_t j = 0; j < 13; j++) {
+            telegram->read_value(option[j], index[j] + i); // offsets 0-26
+            option[j] = j < 12 ? option[j] ? '1' : '0' : option[j];
         }
-        option[9] = hpInput[i].option[9] - '0';
-        telegram->read_value(option[9], 39 + i); // add offsets 39-41
-        option[9]  = option[9] ? '1' : '0';
-        option[10] = '\0'; // terminate string
-        has_update(hpInput[i].option, option, 11);
+        Helpers::smallitoa(&option[12], (uint16_t)option[12]);
+        has_update(hpInput[i].option, option, 16);
     }
-    // input 4 <inv>[<comp><aux><cool><heat><dhw><pv>]
-    for (uint8_t j = 0; j < 6; j++) {
-        option[j] = hpInput[3].option[j] - '0';
-        telegram->read_value(option[j], 42 + j); // offsets 42-47
-        option[j] = option[j] ? '1' : '0';
+    // input 4 <inv>[<comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
+    uint8_t index4[] = {42, 43, 44, 45, 46, 47, 52, 50, 49, 48};
+    for (uint8_t j = 0; j < 10; j++) {
+        telegram->read_value(option[j], index4[j]); // offsets 42-47
+        option[j] = j < 10 ? option[j] ? '1' : '0' : option[j];
     }
-    option[6] = hpInput[3].option[6] - '0';
-    telegram->read_value(option[6], 52); // add offsets 52 (pv)
-    option[6] = option[6] ? '1' : '0';
-    option[7] = '\0'; // terminate string
-    has_update(hpInput[3].option, option, 8);
+    Helpers::smallitoa(&option[9], (uint16_t)option[9]);
+    has_update(hpInput[3].option, option, 13);
 }
 
 // Boiler(0x08) -W-> Me(0x0B), HpHeaterConfig(0x0485)
@@ -2311,44 +2305,41 @@ bool Boiler::set_emergency_ops(const char * value, const int8_t id) {
 }
 
 bool Boiler::set_HpInLogic(const char * value, const int8_t id) {
-    if (id == 0 || id > 4) {
+    if (id == 0 || id > 4 || strlen(value) > 15) {
         return false;
     }
     bool v;
-    if (Helpers::value2bool(value, v)) {
+    if (strlen(value) == 1 && Helpers::value2bool(value, v)) {
         write_command(0x486, id == 4 ? 42 : id - 1, v ? 1 : 0, 0x486);
         return true;
     }
-    if (strlen(value) == 10 && id != 4) {
-        uint8_t v[10];
-        for (uint8_t i = 0; i < 10; i++) {
-            v[i] = value[i] - '0';
-            if (v[i] > 1) {
-                return false;
+    char option[] = {"xxxxxxxxxxxxxxx"};
+    strncpy(option, value, strlen(value)); // copy without termination
+    // inputs 1,2,3 <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
+    if (id < 4) {
+        uint8_t index[] = {0, 3, 6, 9, 12, 15, 18, 21, 24, 39, 36, 30};
+        for (uint8_t i = 0; i < 12; i++) {
+            if (option[i] == '0' || option[i] == '1') {
+                write_command(0x486, index[i] + id - 1, option[i] - '0');
             }
         }
-        for (uint8_t i = 0; i < 9; i++) {
-            write_command(0x486, i * 3 + id - 1, v[i]);
+        if (option[12] >= '0' && option[12] <= '9') {
+            write_command(0x486, 27, (uint8_t)atoi(&option[12]));
         }
-        write_command(0x486, 39 + id - 1, v[9]);
         return true;
     }
-    // input 4
-    if (strlen(value) == 7 && id == 4) {
-        uint8_t v[10];
-        for (uint8_t i = 0; i < 8; i++) {
-            v[i] = value[i] - '0';
-            if (v[i] > 1) {
-                return false;
-            }
+
+    // input 4: <inv>[<comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
+    uint8_t index4[] = {42, 43, 44, 45, 46, 47, 52, 50, 49};
+    for (uint8_t i = 0; i < 9; i++) {
+        if (option[i] == '0' || option[i] == '1') {
+            write_command(0x486, index4[i], option[i] - '0');
         }
-        for (uint8_t i = 0; i < 7; i++) {
-            write_command(0x486, 42 + i, v[i]);
-        }
-        write_command(0x486, 52, v[7]);
-        return true;
     }
-    return false;
+    if (option[9] >= '0' && option[9] <= '9') {
+        write_command(0x486, 48, (uint8_t)atoi(&option[9]));
+    }
+    return true;
 }
 
 bool Boiler::set_maxHeat(const char * value, const int8_t id) {

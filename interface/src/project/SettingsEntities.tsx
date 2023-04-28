@@ -226,13 +226,11 @@ const SettingsEntities: FC = () => {
   };
 
   function formatValue(value: any, uom: number) {
-    if (value === undefined) {
-      return '';
-    }
-    if (uom === 0) {
-      return new Intl.NumberFormat().format(value);
-    }
-    return new Intl.NumberFormat().format(value) + ' ' + DeviceValueUOM_s[uom];
+    return value === undefined || uom === undefined
+      ? ''
+      : typeof value === 'number'
+      ? new Intl.NumberFormat().format(value) + (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom])
+      : value;
   }
 
   function showHex(value: string, digit: number) {

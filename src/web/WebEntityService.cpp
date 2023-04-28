@@ -47,7 +47,7 @@ void WebEntity::read(WebEntity & webEntity, JsonObject & root) {
         ei["uom"]       = entityItem.uom;
         ei["val_type"]  = entityItem.valuetype;
         ei["write"]     = entityItem.writeable;
-        EMSESP::webEntityService.render_value(ei, entityItem, true);
+        EMSESP::webEntityService.render_value(ei, entityItem, true, true);
     }
 }
 
@@ -139,13 +139,15 @@ bool WebEntityService::command_setvalue(const char * value, const std::string na
 }
 
 // output of a single value
-void WebEntityService::render_value(JsonObject & output, EntityItem entity, const bool useVal) {
+void WebEntityService::render_value(JsonObject & output, EntityItem entity, const bool useVal, const bool web) {
     char        payload[12];
     std::string name = useVal ? "value" : entity.name;
     switch (entity.valuetype) {
     case DeviceValueType::BOOL:
         if ((uint8_t)entity.val != EMS_VALUE_BOOL_NOTSET) {
-            if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+            if (web) {
+                output[name] = Helpers::render_boolean(payload, (uint8_t)entity.val, true);
+            } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                 output[name] = (uint8_t)entity.val ? true : false;
             } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
                 output[name] = (uint8_t)entity.val ? 1 : 0;
@@ -358,7 +360,7 @@ void WebEntityService::generate_value_web(JsonObject & output) {
         switch (entity.valuetype) {
         case DeviceValueType::BOOL: {
             char s[12];
-            obj["v"]    = Helpers::render_boolean(s, (uint8_t)entity.val);
+            obj["v"]    = Helpers::render_boolean(s, (uint8_t)entity.val, true);
             JsonArray l = obj.createNestedArray("l");
             l.add(Helpers::render_boolean(s, false, true));
             l.add(Helpers::render_boolean(s, true, true));
