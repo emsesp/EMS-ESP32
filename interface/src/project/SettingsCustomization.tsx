@@ -547,7 +547,7 @@ const SettingsCustomization: FC = () => {
                   startIcon={<WarningIcon color="warning" />}
                   variant="contained"
                   color="info"
-                  onClick={() => saveCustomization()}
+                  onClick={saveCustomization}
                 >
                   {LL.APPLY_CHANGES(numChanges)}
                 </Button>

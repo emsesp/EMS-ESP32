@@ -116,7 +116,6 @@ const DashboardStatus: FC = () => {
     return () => {
       clearInterval(timer);
     };
-    // eslint-disable-next-line
   }, []);
 
   const showName = (id: any) => {

@@ -130,7 +130,7 @@ const SettingsEntities: FC = () => {
 
   useEffect(() => {
     void fetchEntities();
-  }, [fetchEntities]);
+  }, []);
 
   const saveEntities = async () => {
     if (entities) {
@@ -270,14 +270,14 @@ const SettingsEntities: FC = () => {
         <Box flexGrow={1}>
           {numChanges > 0 && (
             <ButtonRow>
-              <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => fetchEntities()} color="secondary">
+              <Button startIcon={<CancelIcon />} variant="outlined" onClick={fetchEntities} color="secondary">
                 {LL.CANCEL()}
               </Button>
               <Button
                 startIcon={<WarningIcon color="warning" />}
                 variant="contained"
                 color="info"
-                onClick={() => saveEntities()}
+                onClick={saveEntities}
               >
                 {LL.APPLY_CHANGES(numChanges)}
               </Button>
@@ -286,7 +286,7 @@ const SettingsEntities: FC = () => {
         </Box>
         <Box flexWrap="nowrap" whiteSpace="nowrap">
           <ButtonRow>
-            <Button startIcon={<AddIcon />} variant="outlined" color="secondary" onClick={() => addEntityItem()}>
+            <Button startIcon={<AddIcon />} variant="outlined" color="secondary" onClick={addEntityItem}>
               {LL.ADD(0)}
             </Button>
           </ButtonRow>

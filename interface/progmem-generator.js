@@ -88,7 +88,6 @@ export default function ProgmemGenerator({ outputPath = './WWWData.h', bytesPerL
         };
 
         const generateWWWClass = () =>
-          // eslint-disable-next-line max-len
           `typedef std::function<void(const String& uri, const String& contentType, const uint8_t * content, size_t len)> RouteRegistrationHandler;
 
 class WWWData {

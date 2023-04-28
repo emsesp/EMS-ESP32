@@ -322,7 +322,6 @@ const DashboardDevices: FC = () => {
     return () => {
       clearInterval(timer);
     };
-    // eslint-disable-next-line
   }, [analog, sensor, deviceValue, sensorData]);
 
   const isCmdOnly = (dv: DeviceValue) => dv.v === '' && dv.c;

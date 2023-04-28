@@ -116,7 +116,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
               {LL.DOWNLOAD_SETTINGS_TEXT()}
             </Typography>
           </Box>
-          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => downloadSettings()}>
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={downloadSettings}>
             {LL.SETTINGS_OF('')}
           </Button>
           <Box color="warning.main">
@@ -124,12 +124,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
               {LL.DOWNLOAD_CUSTOMIZATION_TEXT()}{' '}
             </Typography>
           </Box>
-          <Button
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => downloadCustomizations()}
-          >
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={downloadCustomizations}>
             {LL.CUSTOMIZATIONS()}
           </Button>
           <Button
@@ -137,7 +132,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
             startIcon={<DownloadIcon />}
             variant="outlined"
             color="primary"
-            onClick={() => downloadEntities()}
+            onClick={downloadEntities}
           >
             {LL.CUSTOM_ENTITIES(0)}
           </Button>
@@ -146,7 +141,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
               {LL.DOWNLOAD_SCHEDULE_TEXT()}{' '}
             </Typography>
           </Box>
-          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => downloadSchedule()}>
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={downloadSchedule}>
             {LL.SCHEDULE(0)}
           </Button>
         </>

@@ -280,14 +280,14 @@ const SettingsScheduler: FC = () => {
         <Box flexGrow={1}>
           {numChanges !== 0 && (
             <ButtonRow>
-              <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => fetchSchedule()} color="secondary">
+              <Button startIcon={<CancelIcon />} variant="outlined" onClick={fetchSchedule} color="secondary">
                 {LL.CANCEL()}
               </Button>
               <Button
                 startIcon={<WarningIcon color="warning" />}
                 variant="contained"
                 color="info"
-                onClick={() => saveSchedule()}
+                onClick={saveSchedule}
               >
                 {LL.APPLY_CHANGES(numChanges)}
               </Button>
@@ -296,7 +296,7 @@ const SettingsScheduler: FC = () => {
         </Box>
         <Box flexWrap="nowrap" whiteSpace="nowrap">
           <ButtonRow>
-            <Button startIcon={<AddIcon />} variant="outlined" color="secondary" onClick={() => addScheduleItem()}>
+            <Button startIcon={<AddIcon />} variant="outlined" color="secondary" onClick={addScheduleItem}>
               {LL.ADD(0)}
             </Button>
           </ButtonRow>

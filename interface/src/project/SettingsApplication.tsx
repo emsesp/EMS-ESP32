@@ -643,7 +643,7 @@ const SettingsApplication: FC = () => {
               variant="outlined"
               color="primary"
               type="submit"
-              onClick={() => loadData()}
+              onClick={loadData}
             >
               {LL.CANCEL()}
             </Button>
