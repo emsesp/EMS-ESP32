@@ -2,6 +2,7 @@ import DownloadIcon from '@mui/icons-material/GetApp';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, styled, Button, Checkbox, MenuItem, Grid, TextField } from '@mui/material';
 import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
+import { toast } from 'react-toastify';
 import type { FC } from 'react';
 
 import type { LogSettings, LogEntry, LogEntries } from 'types';
@@ -9,7 +10,7 @@ import { addAccessTokenParameter } from 'api/authentication';
 import { EVENT_SOURCE_ROOT } from 'api/endpoints';
 import * as SystemApi from 'api/system';
 
-import { SectionContent, FormLoader, BlockFormControlLabel, ValidatedTextField, ButtonRow } from 'components';
+import { SectionContent, FormLoader, BlockFormControlLabel, BlockNavigation } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { LogLevel } from 'types';
@@ -65,9 +66,8 @@ const SystemLog: FC = () => {
 
   const { LL } = useI18nContext();
 
-  const { loadData, data, setData, saveData, origData, dirtyFlags, setDirtyFlags } = useRest<LogSettings>({
-    read: SystemApi.readLogSettings,
-    update: SystemApi.updateLogSettings
+  const { loadData, data, setData, origData, dirtyFlags, blocker, setDirtyFlags } = useRest<LogSettings>({
+    read: SystemApi.readLogSettings
   });
 
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -125,7 +125,7 @@ const SystemLog: FC = () => {
 
   useEffect(() => {
     void fetchLog();
-  }, [fetchLog]);
+  }, []);
 
   useEffect(() => {
     const es = new EventSource(addAccessTokenParameter(LOG_EVENTSOURCE_URL));
@@ -139,6 +139,27 @@ const SystemLog: FC = () => {
       es.close();
     };
   }, []);
+
+  const saveSettings = async () => {
+    if (data) {
+      try {
+        const response = await SystemApi.updateLogSettings({
+          level: data.level,
+          max_messages: data.max_messages,
+          compact: data.compact
+        });
+
+        if (response.status !== 200) {
+          toast.error(LL.PROBLEM_UPDATING());
+        } else {
+          setDirtyFlags([]);
+          toast.success(LL.UPDATED_OF(LL.SETTINGS_OF('')));
+        }
+      } catch (error) {
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
+      }
+    }
+  };
 
   const content = () => {
     if (!data) {
@@ -191,16 +212,28 @@ const SystemLog: FC = () => {
               label={LL.COMPACT()}
             />
           </Grid>
-          <ButtonRow>
+          <Box
+            sx={{
+              '& button, & a, & .MuiCard-root': {
+                mt: 3,
+                mx: 0.6
+              }
+            }}
+          >
             <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={onDownload}>
               {LL.EXPORT()}
             </Button>
             {dirtyFlags && dirtyFlags.length !== 0 && (
-              <Button startIcon={<WarningIcon color="warning" />} variant="contained" color="info" onClick={saveData}>
-                {LL.UPDATE()}
+              <Button
+                startIcon={<WarningIcon color="warning" />}
+                variant="contained"
+                color="info"
+                onClick={saveSettings}
+              >
+                {LL.APPLY_CHANGES(dirtyFlags.length)}
               </Button>
             )}
-          </ButtonRow>
+          </Box>
         </Grid>
         <Box
           sx={{
@@ -232,6 +265,7 @@ const SystemLog: FC = () => {
 
   return (
     <SectionContent title={LL.LOG_OF(LL.SYSTEM(2))} titleGutter id="log-window">
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );
