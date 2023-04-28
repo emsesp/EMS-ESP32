@@ -6,12 +6,8 @@ import type { FC } from 'react';
 import { PROJECT_NAME } from 'api/env';
 
 const LayoutDrawerLogo = styled('img')(({ theme }) => ({
-  [theme.breakpoints.down('sm')]: {
-    height: 24,
-    marginRight: theme.spacing(2)
-  },
   [theme.breakpoints.up('sm')]: {
-    height: 36,
+    height: 38,
     marginRight: theme.spacing(2)
   }
 }));
@@ -27,9 +23,7 @@ const LayoutDrawer: FC<LayoutDrawerProps> = ({ mobileOpen, onClose }) => {
       <Toolbar disableGutters>
         <Box display="flex" alignItems="center" px={2}>
           <LayoutDrawerLogo src="/app/icon.png" alt={PROJECT_NAME} />
-          <Typography variant="h6" color="textPrimary">
-            {PROJECT_NAME}
-          </Typography>
+          <Typography variant="h6">{PROJECT_NAME}</Typography>
         </Box>
         <Divider absolute />
       </Toolbar>
