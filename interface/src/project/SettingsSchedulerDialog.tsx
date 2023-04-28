@@ -131,7 +131,7 @@ const SettingsSchedulerDialog = ({
   return (
     <Dialog open={open} onClose={close}>
       <DialogTitle>
-        {creating ? LL.ADD(1) + ' ' + LL.NEW(1) : LL.EDIT()}&nbsp;{LL.ENTITY()}
+        {creating ? LL.ADD(1) + ' ' + LL.NEW(1) : LL.EDIT()}&nbsp;{LL.SCHEDULE(0)}
       </DialogTitle>
       <DialogContent dividers>
         <Box display="flex" flexWrap="wrap" mb={1}>
@@ -215,7 +215,7 @@ const SettingsSchedulerDialog = ({
         />
         <TextField
           name="value"
-          label={LL.VALUE(0)}
+          label={LL.VALUE(1)}
           multiline
           margin="normal"
           fullWidth

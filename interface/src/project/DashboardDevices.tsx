@@ -1,5 +1,3 @@
-import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
-import CancelIcon from '@mui/icons-material/Cancel';
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
@@ -9,27 +7,19 @@ import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDown
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import StarIcon from '@mui/icons-material/Star';
-import SendIcon from '@mui/icons-material/TrendingFlat';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
-import WarningIcon from '@mui/icons-material/Warning';
 import {
   Button,
   Typography,
-  Box,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  MenuItem,
-  InputAdornment,
-  FormHelperText,
   IconButton,
   List,
   ListItem,
   ListItemText,
-  Grid,
   FormControlLabel,
   Checkbox
 } from '@mui/material';
@@ -41,35 +31,34 @@ import { useState, useContext, useCallback, useEffect } from 'react';
 
 import { IconContext } from 'react-icons';
 import { toast } from 'react-toastify';
+import DashboarDevicesDialog from './DashboardDevicesDialog';
 import DeviceIcon from './DeviceIcon';
 
 import * as EMSESP from './api';
 
 import { DeviceValueUOM, DeviceValueUOM_s, DeviceEntityMask } from './types';
-import type { SensorData, Device, CoreData, DeviceData, DeviceValue, TemperatureSensor, AnalogSensor } from './types';
+import type { Device, CoreData, DeviceData, DeviceValue } from './types';
 import type { FC } from 'react';
-import { ButtonRow, ValidatedTextField, SectionContent, MessageBox } from 'components';
+import { ButtonRow, SectionContent, MessageBox } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
-import { numberValue, updateValue, extractErrorMessage } from 'utils';
+import { extractErrorMessage } from 'utils';
 
 const DashboardDevices: FC = () => {
   const { me } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
   const [deviceData, setDeviceData] = useState<DeviceData>({ label: '', data: [] });
-  const [deviceValue, setDeviceValue] = useState<DeviceValue>();
-  const [deviceDialog, setDeviceDialog] = useState<number>(-1);
+  const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
+  const [deviceDetails, setDeviceDetails] = useState<number>(-1);
   const [onlyFav, setOnlyFav] = useState(false);
+  const [selectedDevice, setSelectedDevice] = useState<number>();
+  const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
+
   const [coreData, setCoreData] = useState<CoreData>({
     connected: true,
     devices: []
   });
-  const [selectedDevice, setSelectedDevice] = useState<number>();
-
-  const [sensorData, setSensorData] = useState<SensorData>({ ts: [], as: [] });
-  const [analog, setAnalog] = useState<AnalogSensor>();
-  const [sensor, setSensor] = useState<TemperatureSensor>();
 
   const common_theme = useTheme({
     BaseRow: `
@@ -198,14 +187,6 @@ const DashboardDevices: FC = () => {
     }
   );
 
-  // const fetchSensorData = async () => {
-  //   try {
-  //     setSensorData((await EMSESP.readSensorData()).data);
-  //   } catch (error) {
-  //     toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-  //   }
-  // };
-
   const fetchDeviceData = async (id: number) => {
     try {
       setDeviceData((await EMSESP.readDeviceData({ id })).data);
@@ -224,46 +205,19 @@ const DashboardDevices: FC = () => {
 
   useEffect(() => {
     void fetchCoreData();
-  }, [fetchCoreData]);
-
-  // const refreshDataIndex = (selectedDevice: string) => {
-  //   // if (selectedDevice === 'sensor') {
-  //   //   void fetchSensorData();
-  //   //   return;
-  //   // }
-
-  //   // setSensorData({ sensors: [], analogs: [] });
-  //   if (selectedDevice) {
-  //     void fetchDeviceData(selectedDevice);
-  //   } else {
-  //     void fetchCoreData();
-  //   }
-  // };
+  }, []);
 
   const refreshData = () => {
-    // const selectedDevice = device_select.state.id;
-    // if (selectedDevice === 'sensor') {
-    //   //   void fetchSensorData();
-    //   return;
-    // }
-
-    // setSensorData({ sensors: [], analogs: [] });
     if (selectedDevice) {
       void fetchDeviceData(selectedDevice);
     } else {
       void fetchCoreData();
     }
-
-    // refreshDataIndex(device_select.state.id);
   };
 
   function onSelectChange(action: any, state: any) {
     setSelectedDevice(device_select.state.id);
-    if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
-      refreshData();
-    } else {
-      // setSensorData({ sensors: [], analogs: [] });
-    }
+    refreshData();
   }
 
   const escapeCsvCell = (cell: any) => {
@@ -322,7 +276,7 @@ const DashboardDevices: FC = () => {
     return () => {
       clearInterval(timer);
     };
-  }, [analog, sensor, deviceValue, sensorData]);
+  }, []);
 
   const isCmdOnly = (dv: DeviceValue) => dv.v === '' && dv.c;
 
@@ -375,140 +329,60 @@ const DashboardDevices: FC = () => {
     }
   }
 
-  const setUom = (uom: number) => {
-    switch (uom) {
-      case DeviceValueUOM.HOURS:
-        return LL.HOURS();
-      case DeviceValueUOM.MINUTES:
-        return LL.MINUTES();
-      case DeviceValueUOM.SECONDS:
-        return LL.SECONDS();
-      default:
-        return DeviceValueUOM_s[uom];
-    }
-  };
-
-  const sendDeviceValue = async () => {
-    if (deviceValue) {
-      try {
-        const response = await EMSESP.writeDeviceValue({
-          id: Number(device_select.state.id),
-          devicevalue: deviceValue
-        });
-        if (response.status === 204) {
-          toast.error(LL.WRITE_CMD_FAILED());
-        } else if (response.status === 403) {
-          toast.error(LL.ACCESS_DENIED());
-        } else {
-          toast.success(LL.WRITE_CMD_SENT());
-        }
-        setDeviceValue(undefined);
-      } catch (error) {
-        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-      } finally {
-        refreshData();
-        setDeviceValue(undefined);
+  const deviceValueDialogSave = async (dv: DeviceValue) => {
+    try {
+      const response = await EMSESP.writeDeviceValue({
+        id: Number(device_select.state.id),
+        devicevalue: dv
+      });
+      if (response.status === 204) {
+        toast.error(LL.WRITE_CMD_FAILED());
+      } else if (response.status === 403) {
+        toast.error(LL.ACCESS_DENIED());
+      } else {
+        toast.success(LL.WRITE_CMD_SENT());
       }
+    } catch (error) {
+      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
+    } finally {
+      setDeviceValueDialogOpen(false);
+      setSelectedDeviceValue(undefined);
+      refreshData();
     }
   };
 
-  const renderDeviceValueDialog = () => {
-    if (deviceValue) {
+  const renderDeviceDetails = () => {
+    if (coreData && coreData.devices.length > 0 && deviceDetails !== -1) {
       return (
-        <Dialog open={deviceValue !== undefined} onClose={() => setDeviceValue(undefined)}>
-          <DialogTitle>{isCmdOnly(deviceValue) ? LL.RUN_COMMAND() : LL.CHANGE_VALUE()}</DialogTitle>
-          <DialogContent dividers>
-            {deviceValue.l && (
-              <ValidatedTextField
-                name="v"
-                label={deviceValue.id.slice(2)}
-                value={deviceValue.v}
-                autoFocus
-                sx={{ width: '30ch' }}
-                select
-                onChange={updateValue(setDeviceValue)}
-              >
-                {deviceValue.l.map((val) => (
-                  <MenuItem value={val} key={val}>
-                    {val}
-                  </MenuItem>
-                ))}
-              </ValidatedTextField>
-            )}
-            {!deviceValue.l && (
-              <ValidatedTextField
-                name="v"
-                label={deviceValue.id.slice(2)}
-                value={typeof deviceValue.v === 'number' ? Math.round(deviceValue.v * 10) / 10 : deviceValue.v}
-                autoFocus
-                multiline={deviceValue.u ? false : true}
-                sx={{ width: '30ch' }}
-                type={deviceValue.u ? 'number' : 'text'}
-                onChange={updateValue(setDeviceValue)}
-                inputProps={deviceValue.u ? { min: deviceValue.m, max: deviceValue.x, step: deviceValue.s } : {}}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">{setUom(deviceValue.u)}</InputAdornment>
-                }}
-              />
-            )}
-            {deviceValue.h && <FormHelperText>{deviceValue.h}</FormHelperText>}
-          </DialogContent>
-          <DialogActions>
-            <Button
-              startIcon={<CancelIcon />}
-              variant="outlined"
-              onClick={() => setDeviceValue(undefined)}
-              color="secondary"
-            >
-              {LL.CANCEL()}
-            </Button>
-            <Button
-              startIcon={<SendIcon />}
-              variant="outlined"
-              type="submit"
-              onClick={() => sendDeviceValue()}
-              color="warning"
-            >
-              {LL.SEND()}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      );
-    }
-  };
-
-  const renderDeviceDialog = () => {
-    if (coreData && coreData.devices.length > 0 && deviceDialog !== -1) {
-      return (
-        <Dialog open={deviceDialog !== -1} onClose={() => setDeviceDialog(-1)}>
+        <Dialog open={deviceDetails !== -1} onClose={() => setDeviceDetails(-1)}>
           <DialogTitle>{LL.DEVICE_DETAILS()}</DialogTitle>
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
-                <ListItemText primary={LL.TYPE(0)} secondary={coreData.devices[deviceDialog].tn} />
+                <ListItemText primary={LL.TYPE(0)} secondary={coreData.devices[deviceDetails].tn} />
               </ListItem>
               <ListItem>
-                <ListItemText primary={LL.NAME(0)} secondary={coreData.devices[deviceDialog].n} />
+                <ListItemText primary={LL.NAME(0)} secondary={coreData.devices[deviceDetails].n} />
               </ListItem>
               <ListItem>
-                <ListItemText primary={LL.BRAND()} secondary={coreData.devices[deviceDialog].b} />
+                <ListItemText primary={LL.BRAND()} secondary={coreData.devices[deviceDetails].b} />
               </ListItem>
               <ListItem>
                 <ListItemText
                   primary={LL.ID_OF(LL.DEVICE())}
-                  secondary={'0x' + ('00' + coreData.devices[deviceDialog].d.toString(16).toUpperCase()).slice(-2)}
+                  secondary={'0x' + ('00' + coreData.devices[deviceDetails].d.toString(16).toUpperCase()).slice(-2)}
                 />
               </ListItem>
               <ListItem>
-                <ListItemText primary={LL.ID_OF(LL.PRODUCT())} secondary={coreData.devices[deviceDialog].p} />
+                <ListItemText primary={LL.ID_OF(LL.PRODUCT())} secondary={coreData.devices[deviceDetails].p} />
               </ListItem>
               <ListItem>
-                <ListItemText primary={LL.VERSION()} secondary={coreData.devices[deviceDialog].v} />
+                <ListItemText primary={LL.VERSION()} secondary={coreData.devices[deviceDetails].v} />
               </ListItem>
             </List>
           </DialogContent>
           <DialogActions>
-            <Button variant="outlined" onClick={() => setDeviceDialog(-1)} color="secondary">
+            <Button variant="outlined" onClick={() => setDeviceDetails(-1)} color="secondary">
               {LL.CLOSE()}
             </Button>
           </DialogActions>
@@ -546,7 +420,7 @@ const DashboardDevices: FC = () => {
                   <Cell>{device.n}</Cell>
                   <Cell stiff>{device.e}</Cell>
                   <Cell stiff>
-                    <IconButton size="small" onClick={() => setDeviceDialog(index)}>
+                    <IconButton size="small" onClick={() => setDeviceDetails(index)}>
                       <InfoOutlinedIcon color="info" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
                     </IconButton>
                   </Cell>
@@ -559,14 +433,19 @@ const DashboardDevices: FC = () => {
     </IconContext.Provider>
   );
 
+  const deviceValueDialogClose = () => {
+    setDeviceValueDialogOpen(false);
+  };
+
   const renderDeviceData = () => {
-    if (!device_select.state.id || device_select.state.id === 'sensor') {
+    if (!device_select.state.id) {
       return;
     }
 
     const sendCommand = (dv: DeviceValue) => {
       if (dv.c && me.admin && !hasMask(dv.id, DeviceEntityMask.DV_READONLY)) {
-        setDeviceValue(dv);
+        setSelectedDeviceValue(dv);
+        setDeviceValueDialogOpen(true);
       }
     };
 
@@ -662,8 +541,17 @@ const DashboardDevices: FC = () => {
     <SectionContent title={LL.DEVICE_DATA()} titleGutter>
       {renderCoreData()}
       {renderDeviceData()}
-      {renderDeviceDialog()}
-      {renderDeviceValueDialog()}
+      {renderDeviceDetails()}
+      {console.log('redndering device data')}
+
+      {selectedDeviceValue && (
+        <DashboarDevicesDialog
+          open={deviceValueDialogOpen}
+          onClose={deviceValueDialogClose}
+          onSave={deviceValueDialogSave}
+          selectedItem={selectedDeviceValue}
+        />
+      )}
 
       <ButtonRow>
         <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>

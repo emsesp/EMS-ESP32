@@ -46,7 +46,6 @@ const tr: Translation = {
   CHANGE_VALUE: 'Değeri Değiştir',
   CANCEL: 'İptal',
   RESET: 'Reset',
-  SEND: 'Gönder',
   APPLY_CHANGES: 'Apply Changes ({0})',
   UPDATE: 'Update',
   REMOVE: 'Kaldır',

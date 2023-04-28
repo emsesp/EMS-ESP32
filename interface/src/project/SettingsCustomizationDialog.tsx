@@ -67,13 +67,11 @@ const SettingsCustomizationDialog = ({ open, onClose, onSave, selectedItem }: Se
       <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY()}</DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main">
-          <Typography variant="body2">
-            {LL.ENTITY()}:&nbsp;{editItem.id}
-          </Typography>
+          <Typography variant="body2">{editItem.id}</Typography>
         </Box>
         <Box color="warning.main" mt={1} mb={2}>
           <Typography variant="body2">
-            {LL.DEFAULT(1) + ' ' + LL.NAME(1)}:&nbsp;{editItem.n}
+            {LL.DEFAULT(1) + ' ' + LL.ENTITY_NAME()}:&nbsp;{editItem.n}
           </Typography>
         </Box>
         <Box mb={3}>

@@ -46,7 +46,6 @@ const no: Translation = {
   CHANGE_VALUE: 'Endre Verdi',
   CANCEL: 'Avbryt',
   RESET: 'Nullstill',
-  SEND: 'Send',
   APPLY_CHANGES: 'Utfør endringer({0})',
   UPDATE: 'Oppdater',
   REMOVE: 'Fjern',

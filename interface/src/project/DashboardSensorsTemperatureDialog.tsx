@@ -69,7 +69,7 @@ const DashboardSensorsTemperatureDialog = ({
   return (
     <Dialog open={open} onClose={close}>
       <DialogTitle>
-        {LL.EDIT()} {LL.TEMP_SENSOR()}
+        {LL.EDIT()}&nbsp;{LL.TEMP_SENSOR()}
       </DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>

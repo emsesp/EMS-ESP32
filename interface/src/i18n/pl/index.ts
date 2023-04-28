@@ -46,7 +46,6 @@ const pl: BaseTranslation = {
   CHANGE_VALUE: 'Zmień wartość',
   CANCEL: 'Anuluj',
   RESET: 'Reset{{uj|owanie|}}',
-  SEND: 'Wyślij',
   APPLY_CHANGES: 'Zapisz zmiany ({0})',
   UPDATE: 'Uaktualnij',
   REMOVE: 'Usuń',

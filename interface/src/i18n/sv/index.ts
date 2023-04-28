@@ -46,7 +46,6 @@ const sv: Translation = {
   CHANGE_VALUE: 'Ändra Värde',
   CANCEL: 'Avbryt',
   RESET: 'Nollställ',
-  SEND: 'Skicka',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
   REMOVE: 'Ta bort',

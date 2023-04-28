@@ -46,7 +46,6 @@ const nl: Translation = {
   CHANGE_VALUE: 'Wijzig waarde',
   CANCEL: 'Annuleren',
   RESET: 'Reset',
-  SEND: 'Verzenden',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
   REMOVE: 'Verwijderen',

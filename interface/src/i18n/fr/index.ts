@@ -46,7 +46,6 @@ const fr: Translation = {
   CHANGE_VALUE: 'Changer la valeur',
   CANCEL: 'Annuler',
   RESET: 'Réinitialiser',
-  SEND: 'Envoyer',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
   REMOVE: 'Enlever',

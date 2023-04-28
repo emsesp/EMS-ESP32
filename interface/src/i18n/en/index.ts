@@ -46,7 +46,6 @@ const en: Translation = {
   CHANGE_VALUE: 'Change Value',
   CANCEL: 'Cancel',
   RESET: 'Reset',
-  SEND: 'Send',
   APPLY_CHANGES: 'Apply Changes ({0})',
   UPDATE: 'Update',
   REMOVE: 'Remove',
