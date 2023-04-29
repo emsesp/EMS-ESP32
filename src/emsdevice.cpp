@@ -838,7 +838,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
             JsonObject obj        = data.createNestedObject(); // create the object, we know there is a value
             uint8_t    fahrenheit = 0;
 
-            // handle Booleans (true, false), use strings, no native true/false)
+            // handle Booleans (true, false), use strings, not native true/false)
             if (dv.type == DeviceValueType::BOOL) {
                 auto value_b = (bool)*(uint8_t *)(dv.value_p);
                 char s[12];
