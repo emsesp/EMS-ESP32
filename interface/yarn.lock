@@ -270,20 +270,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/cache@npm:^11.10.7":
-  version: 11.10.7
-  resolution: "@emotion/cache@npm:11.10.7"
-  dependencies:
-    "@emotion/memoize": ^0.8.0
-    "@emotion/sheet": ^1.2.1
-    "@emotion/utils": ^1.2.0
-    "@emotion/weak-memoize": ^0.3.0
-    stylis: 4.1.3
-  checksum: 0175b8be5117342e76e100fca92932a34c3641160c733a34534153eab7f1c1b2cecafee6d9a7a0646acf7be3c52b0654dc34900439316ae473b59a9eb1a1c8f3
-  languageName: node
-  linkType: hard
-
-"@emotion/cache@npm:^11.10.8":
+"@emotion/cache@npm:^11.10.7, @emotion/cache@npm:^11.10.8":
   version: 11.10.8
   resolution: "@emotion/cache@npm:11.10.8"
   dependencies:
@@ -947,7 +934,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remix-run/router@npm:1.5.0, @remix-run/router@npm:^1.5.0":
+"@remix-run/router@npm:1.5.0":
   version: 1.5.0
   resolution: "@remix-run/router@npm:1.5.0"
   checksum: 63c3695df0470943213f8144183501bbb6a8176671f2ed4547ffa1852f79fd71054b4b4a715795e9e250198991d9e6e121b3fcab9c27df37871dcdfbc8de83a1
@@ -1277,10 +1264,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.16.2":
-  version: 18.16.2
-  resolution: "@types/node@npm:18.16.2"
-  checksum: ddcaecb88ffd85c9d6780d19839c40f00719d8159390225daed84a1c30cdbee50fe6ecef2f9c69010d07b7af3358bb800801f2f312fc985e8f183289eb32c6ad
+"@types/node@npm:^18.16.3":
+  version: 18.16.3
+  resolution: "@types/node@npm:18.16.3"
+  checksum: 8405ceea1306790484e15f696be5e9f7f62b9bb385b2f03fcdefd07fcc2cb20052ebf5c1ffde7b81a0090a09454a48a685f22e1704ea7ead99971233e6f0d80d
   languageName: node
   linkType: hard
 
@@ -1346,18 +1333,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*":
-  version: 18.0.33
-  resolution: "@types/react@npm:18.0.33"
-  dependencies:
-    "@types/prop-types": "*"
-    "@types/scheduler": "*"
-    csstype: ^3.0.2
-  checksum: 12610df107eeac48d63f23c64b9c2f91acf6413faa9868e374433b1bab7a27ce95b0a0198b0712da34e2a1672ce43e04fa0b484e81e985baae3b056e204e27ac
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:^18.2.0":
+"@types/react@npm:*, @types/react@npm:^18.2.0":
   version: 18.2.0
   resolution: "@types/react@npm:18.2.0"
   dependencies:
@@ -1523,10 +1499,9 @@ __metadata:
     "@msgpack/msgpack": ^3.0.0-beta2
     "@mui/icons-material": ^5.11.16
     "@mui/material": ^5.12.2
-    "@remix-run/router": ^1.5.0
     "@table-library/react-table-library": 4.1.2
     "@types/lodash-es": ^4.17.7
-    "@types/node": ^18.16.2
+    "@types/node": ^18.16.3
     "@types/react": ^18.2.0
     "@types/react-dom": ^18.2.1
     "@types/react-router-dom": ^5.3.3
@@ -5416,13 +5391,6 @@ __metadata:
   version: 3.1.1
   resolution: "strip-json-comments@npm:3.1.1"
   checksum: 9681a6257b925a7fa0f285851c0e613cc934a50661fa7bb41ca9cbbff89686bb4a0ee366e6ecedc4daafd01e83eee0720111ab294366fe7c185e935475ebcecd
-  languageName: node
-  linkType: hard
-
-"stylis@npm:4.1.3":
-  version: 4.1.3
-  resolution: "stylis@npm:4.1.3"
-  checksum: 3e4670f26f79bcfba628dcc2756d9d415edfcbf4ec51e40f3b628fd15286222257317cad57390752964eba85cca6163a7621ce90038d68dd630a674479e52334
   languageName: node
   linkType: hard
 
