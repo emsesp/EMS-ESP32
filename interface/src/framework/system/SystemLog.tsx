@@ -31,7 +31,7 @@ const useWindowSize = () => {
   return size;
 };
 
-const LogEntryLine = styled('div')(({ theme }) => ({
+const LogEntryLine = styled('div')(() => ({
   color: '#bbbbbb',
   fontFamily: 'monospace',
   fontSize: '14px',
@@ -125,7 +125,7 @@ const SystemLog: FC = () => {
 
   useEffect(() => {
     void fetchLog();
-  }, []);
+  }, [fetchLog]);
 
   useEffect(() => {
     const es = new EventSource(addAccessTokenParameter(LOG_EVENTSOURCE_URL));
@@ -138,7 +138,7 @@ const SystemLog: FC = () => {
     return () => {
       es.close();
     };
-  }, []);
+  });
 
   const saveSettings = async () => {
     if (data) {

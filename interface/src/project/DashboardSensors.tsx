@@ -102,16 +102,18 @@ const DashboardSensors: FC = () => {
   ]);
 
   const fetchSensorData = useCallback(async () => {
-    try {
-      setSensorData((await EMSESP.readSensorData()).data);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
+    if (!analogDialogOpen && !temperatureDialogOpen) {
+      try {
+        setSensorData((await EMSESP.readSensorData()).data);
+      } catch (error) {
+        toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
+      }
     }
-  }, [LL]);
+  }, [LL, analogDialogOpen, temperatureDialogOpen]);
 
   useEffect(() => {
     void fetchSensorData();
-  }, []);
+  }, [fetchSensorData]);
 
   const getSortIcon = (state: any, sortKey: any) => {
     if (state.sortKey === sortKey && state.reverse) {
@@ -160,11 +162,11 @@ const DashboardSensors: FC = () => {
   );
 
   useEffect(() => {
-    const timer = setInterval(() => fetchSensorData(), 60000);
+    const timer = setInterval(() => fetchSensorData(), 30000);
     return () => {
       clearInterval(timer);
     };
-  }, [fetchSensorData]);
+  });
 
   const formatDurationMin = (duration_min: number) => {
     const days = Math.trunc((duration_min * 60000) / 86400000);

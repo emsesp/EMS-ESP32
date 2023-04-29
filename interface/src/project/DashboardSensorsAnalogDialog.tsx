@@ -213,7 +213,7 @@ const DashboardSensorsAnalogDialog = ({
                   name="f"
                   label={LL.FREQ()}
                   value={numberValue(editItem.f)}
-                  // fullWidth
+                  fullWidth
                   type="number"
                   variant="outlined"
                   onChange={updateFormValue}
@@ -228,7 +228,7 @@ const DashboardSensorsAnalogDialog = ({
                   name="o"
                   label={LL.DUTY_CYCLE()}
                   value={numberValue(editItem.o)}
-                  // fullWidth
+                  fullWidth
                   type="number"
                   variant="outlined"
                   onChange={updateFormValue}

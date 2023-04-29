@@ -117,7 +117,6 @@ const SettingsScheduler: FC = () => {
     }
   }, [LL]);
 
-  // on mount
   useEffect(() => {
     const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
     const days = [1, 2, 3, 4, 5, 6, 7].map((day) => {

@@ -826,6 +826,7 @@ const emsesp_deviceentities_4 = [
 // LOG
 rest_server.get(FETCH_LOG_ENDPOINT, (req, res) => {
   const encoded = msgpack.encode(fetch_log);
+  console.log('fetchlog');
   res.write(encoded, 'binary');
   res.end(null, 'binary');
 });

@@ -83,6 +83,7 @@ export const useWs = <D>(wsUrl: string, wsThrottle = 100) => {
       }
     });
     ws.current = instance;
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     return instance.close;
   }, [wsUrl, onMessage]);
 

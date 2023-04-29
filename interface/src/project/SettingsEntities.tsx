@@ -130,7 +130,7 @@ const SettingsEntities: FC = () => {
 
   useEffect(() => {
     void fetchEntities();
-  }, []);
+  }, [fetchEntities]);
 
   const saveEntities = async () => {
     if (entities) {

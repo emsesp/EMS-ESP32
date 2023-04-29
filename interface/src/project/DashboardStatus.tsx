@@ -116,7 +116,7 @@ const DashboardStatus: FC = () => {
     return () => {
       clearInterval(timer);
     };
-  }, []);
+  });
 
   const showName = (id: any) => {
     const name: keyof Translation['STATUS_NAMES'] = id;

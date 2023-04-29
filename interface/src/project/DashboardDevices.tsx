@@ -27,7 +27,7 @@ import { useRowSelect } from '@table-library/react-table-library/select';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useCallback } from 'react';
 
 import { IconContext } from 'react-icons';
 import { toast } from 'react-toastify';
@@ -183,24 +183,26 @@ const DashboardDevices: FC = () => {
   );
 
   const fetchDeviceData = async (id: number) => {
-    try {
-      setDeviceData((await EMSESP.readDeviceData({ id })).data);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
+    if (!deviceValueDialogOpen) {
+      try {
+        setDeviceData((await EMSESP.readDeviceData({ id })).data);
+      } catch (error) {
+        toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
+      }
     }
   };
 
-  const fetchCoreData = async () => {
+  const fetchCoreData = useCallback(async () => {
     try {
       setCoreData((await EMSESP.readCoreData()).data);
     } catch (error) {
       toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
-  };
+  }, [LL]);
 
   useEffect(() => {
     void fetchCoreData();
-  }, []);
+  }, [fetchCoreData]);
 
   const refreshData = () => {
     if (selectedDevice) {
@@ -280,7 +282,7 @@ const DashboardDevices: FC = () => {
     return () => {
       clearInterval(timer);
     };
-  }, []);
+  });
 
   const deviceValueDialogSave = async (dv: DeviceValue) => {
     try {
