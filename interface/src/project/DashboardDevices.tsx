@@ -11,7 +11,6 @@ import StarIcon from '@mui/icons-material/Star';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
 import {
   Button,
-  Typography,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -21,7 +20,8 @@ import {
   ListItem,
   ListItemText,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  Box
 } from '@mui/material';
 import { useRowSelect } from '@table-library/react-table-library/select';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
@@ -46,6 +46,9 @@ import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { extractErrorMessage } from 'utils';
+
+const topOffset = () => document.getElementById('devices-window')?.getBoundingClientRect().bottom || 0;
+const leftOffset = () => document.getElementById('devices-window')?.getBoundingClientRect().left || 0;
 
 const DashboardDevices: FC = () => {
   const { me } = useContext(AuthenticatedContext);
@@ -416,10 +419,18 @@ const DashboardDevices: FC = () => {
     );
 
     return (
-      <>
-        <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="secondary">
-          {deviceData.label}
-        </Typography>
+      <Box
+        sx={{
+          backgroundColor: 'black',
+          overflowY: 'scroll',
+          position: 'absolute',
+          right: 18,
+          bottom: 18,
+          left: () => leftOffset(),
+          top: () => topOffset(),
+          p: 1
+        }}
+      >
         <FormControlLabel
           control={<Checkbox size="small" name="onlyFav" checked={onlyFav} onChange={() => setOnlyFav(!onlyFav)} />}
           label={
@@ -488,12 +499,12 @@ const DashboardDevices: FC = () => {
             </>
           )}
         </Table>
-      </>
+      </Box>
     );
   };
 
   return (
-    <SectionContent title={LL.DEVICE_DATA()} titleGutter>
+    <SectionContent title={LL.DEVICE_DATA()} titleGutter id="devices-window">
       {renderCoreData()}
       {renderDeviceData()}
       {renderDeviceDetails()}
