@@ -36,7 +36,6 @@ const AccessPoint: FC = () => {
             </RequireAdmin>
           }
         />
-        {/* <Route path="/*" element={<Navigate to="status" />} /> */}
         <Route path="/*" element={<Navigate replace to="status" />} />
       </Routes>
     </>
