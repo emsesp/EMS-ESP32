@@ -1474,7 +1474,7 @@ rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
     res.write(sseFormattedResponse);
     res.flush(); // this is important
 
-    // if buffer full start over
+    // if buffer is full, start over
     if (log_index > 50) {
       fetch_log.events = [];
       log_index = 0;
