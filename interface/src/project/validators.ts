@@ -161,3 +161,18 @@ export const analogSensorItemValidation = (sensors: AnalogSensor[], creating: bo
       ...(creating ? [isGPIOUniqueValidator(sensors)] : [])
     ]
   });
+
+export const deviceValueItemValidation = (isNumber: boolean) =>
+  new Schema({
+    v: [
+      { required: true, message: 'Value is required' },
+      {
+        validator(rule: InternalRuleItem, value: string, callback: (error?: string) => void) {
+          if (isNumber && isNaN(+value)) {
+            callback('Not a valid number');
+          }
+          callback();
+        }
+      }
+    ]
+  });

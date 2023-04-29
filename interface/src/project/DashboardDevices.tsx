@@ -27,7 +27,7 @@ import { useRowSelect } from '@table-library/react-table-library/select';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { useState, useContext, useCallback, useEffect } from 'react';
+import { useState, useContext, useEffect } from 'react';
 
 import { IconContext } from 'react-icons';
 import { toast } from 'react-toastify';
@@ -35,8 +35,10 @@ import DashboarDevicesDialog from './DashboardDevicesDialog';
 import DeviceIcon from './DeviceIcon';
 
 import * as EMSESP from './api';
+import { formatValue, isNumberUOM } from './deviceValue';
 
-import { DeviceValueUOM, DeviceValueUOM_s, DeviceEntityMask } from './types';
+import { DeviceValueUOM_s, DeviceEntityMask } from './types';
+import { deviceValueItemValidation } from './validators';
 import type { Device, CoreData, DeviceData, DeviceValue } from './types';
 import type { FC } from 'react';
 import { ButtonRow, SectionContent, MessageBox } from 'components';
@@ -174,16 +176,9 @@ const DashboardDevices: FC = () => {
       },
       sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
-        NAME: (array) => array.sort((a, b) => a.id.slice(2).localeCompare(b.id.slice(2))),
+        NAME: (array) => array.sort((a, b) => a.id.toString().slice(2).localeCompare(b.id.toString().slice(2))),
         VALUE: (array) => array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
       }
-    }
-  );
-
-  const device_select = useRowSelect(
-    { nodes: coreData.devices },
-    {
-      onChange: onSelectChange
     }
   );
 
@@ -195,13 +190,13 @@ const DashboardDevices: FC = () => {
     }
   };
 
-  const fetchCoreData = useCallback(async () => {
+  const fetchCoreData = async () => {
     try {
       setCoreData((await EMSESP.readCoreData()).data);
     } catch (error) {
       toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
-  }, [LL]);
+  };
 
   useEffect(() => {
     void fetchCoreData();
@@ -216,9 +211,18 @@ const DashboardDevices: FC = () => {
   };
 
   function onSelectChange(action: any, state: any) {
-    setSelectedDevice(device_select.state.id);
-    refreshData();
+    setSelectedDevice(state.id);
+    if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
+      void fetchDeviceData(state.id);
+    }
   }
+
+  const device_select = useRowSelect(
+    { nodes: coreData.devices },
+    {
+      onChange: onSelectChange
+    }
+  );
 
   const escapeCsvCell = (cell: any) => {
     if (cell == null) {
@@ -277,57 +281,6 @@ const DashboardDevices: FC = () => {
       clearInterval(timer);
     };
   }, []);
-
-  const isCmdOnly = (dv: DeviceValue) => dv.v === '' && dv.c;
-
-  const formatDurationMin = (duration_min: number) => {
-    const days = Math.trunc((duration_min * 60000) / 86400000);
-    const hours = Math.trunc((duration_min * 60000) / 3600000) % 24;
-    const minutes = Math.trunc((duration_min * 60000) / 60000) % 60;
-
-    let formatted = '';
-    if (days) {
-      formatted += LL.NUM_DAYS({ num: days }) + ' ';
-    }
-    if (hours) {
-      formatted += LL.NUM_HOURS({ num: hours }) + ' ';
-    }
-    if (minutes) {
-      formatted += LL.NUM_MINUTES({ num: minutes });
-    }
-    return formatted;
-  };
-
-  function formatValue(value: any, uom: number) {
-    if (value === undefined) {
-      return '';
-    }
-    switch (uom) {
-      case DeviceValueUOM.HOURS:
-        return value ? formatDurationMin(value * 60) : LL.NUM_HOURS({ num: 0 });
-      case DeviceValueUOM.MINUTES:
-        return value ? formatDurationMin(value) : LL.NUM_MINUTES({ num: 0 });
-      case DeviceValueUOM.SECONDS:
-        return LL.NUM_SECONDS({ num: value });
-      case DeviceValueUOM.NONE:
-        if (typeof value === 'number') {
-          return new Intl.NumberFormat().format(value);
-        }
-        return value;
-      case DeviceValueUOM.DEGREES:
-      case DeviceValueUOM.DEGREES_R:
-      case DeviceValueUOM.FAHRENHEIT:
-        return (
-          new Intl.NumberFormat(undefined, {
-            minimumFractionDigits: 1
-          }).format(value) +
-          ' ' +
-          DeviceValueUOM_s[uom]
-        );
-      default:
-        return new Intl.NumberFormat().format(value) + ' ' + DeviceValueUOM_s[uom];
-    }
-  }
 
   const deviceValueDialogSave = async (dv: DeviceValue) => {
     try {
@@ -515,11 +468,11 @@ const DashboardDevices: FC = () => {
                 {tableList.map((dv: DeviceValue) => (
                   <Row key={dv.id} item={dv} onClick={() => sendCommand(dv)}>
                     <Cell>{renderNameCell(dv)}</Cell>
-                    <Cell>{formatValue(dv.v, dv.u)}</Cell>
+                    <Cell>{formatValue(LL, dv.v, dv.u)}</Cell>
                     <Cell stiff>
                       {dv.c && me.admin && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
                         <IconButton size="small" onClick={() => sendCommand(dv)}>
-                          {isCmdOnly(dv) ? (
+                          {dv.v === '' && dv.c ? (
                             <PlayArrowIcon color="primary" sx={{ fontSize: 16 }} />
                           ) : (
                             <EditIcon color="primary" sx={{ fontSize: 16 }} />
@@ -542,7 +495,6 @@ const DashboardDevices: FC = () => {
       {renderCoreData()}
       {renderDeviceData()}
       {renderDeviceDetails()}
-      {console.log('redndering device data')}
 
       {selectedDeviceValue && (
         <DashboarDevicesDialog
@@ -550,6 +502,7 @@ const DashboardDevices: FC = () => {
           onClose={deviceValueDialogClose}
           onSave={deviceValueDialogSave}
           selectedItem={selectedDeviceValue}
+          validator={deviceValueItemValidation(isNumberUOM(selectedDeviceValue.u))}
         />
       )}
 

@@ -488,7 +488,8 @@ const emsesp_devicedata_1 = {
       v: 'auto',
       u: 0,
       id: '00hc1 mode',
-      c: 'hc1/mode'
+      c: 'hc1/mode',
+      l: ['off', 'on', 'auto']
     }
   ]
 };
@@ -497,8 +498,8 @@ const emsesp_devicedata_2 = {
   label: 'Boiler: Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i',
   data: [
     { v: '', u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
-    { v: 'false', u: 0, id: '08heating active' },
-    { v: 'false', u: 0, id: '04tapwater active' },
+    { v: 'off', u: 0, id: '08heating active' },
+    { v: 'off', u: 0, id: '04tapwater active' },
     { v: 5, u: 1, id: '04selected flow temperature', c: 'selflowtemp' },
     { v: 0, u: 3, id: '0Eburner selected max power', c: 'selburnpow' },
     { v: 0, u: 3, id: '00heating pump modulation' },
@@ -506,14 +507,14 @@ const emsesp_devicedata_2 = {
     { v: 52.7, u: 1, id: '00return temperature' },
     { v: 1.3, u: 10, id: '00system pressure' },
     { v: 54.9, u: 1, id: '00actual boiler temperature' },
-    { v: 'false', u: 0, id: '00gas' },
-    { v: 'false', u: 0, id: '00gas stage 2' },
+    { v: 'off', u: 0, id: '00gas' },
+    { v: 'off', u: 0, id: '00gas stage 2' },
     { v: 0, u: 9, id: '00flame current' },
-    { v: 'false', u: 0, id: '00heating pump' },
-    { v: 'false', u: 0, id: '00fan' },
-    { v: 'false', u: 0, id: '00ignition' },
-    { v: 'false', u: 0, id: '00oil preheating' },
-    { v: 'true', u: 0, id: '00heating activated', c: 'heatingactivated', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00heating pump' },
+    { v: 'off', u: 0, id: '00fan' },
+    { v: 'off', u: 0, id: '00ignition' },
+    { v: 'off', u: 0, id: '00oil preheating' },
+    { v: 'on', u: 0, id: '00heating activated', c: 'heatingactivated', l: ['off', 'on'] },
     { v: 80, u: 1, id: '00heating temperature', c: 'heatingtemp' },
     { v: 70, u: 3, id: '00burner pump max power', c: 'pumpmodmax' },
     { v: 30, u: 3, id: '00burner pump min power', c: 'pumpmodmin' },
@@ -537,14 +538,14 @@ const emsesp_devicedata_2 = {
     { v: 'manual', u: 0, id: '00maintenance scheduled', c: 'maintenance', l: ['off', 'time', 'date', 'manual'] },
     { v: 6000, u: 7, id: '00time to next maintenance', c: 'maintenancetime' },
     { v: '01.01.2012', u: 0, id: '00next maintenance date', c: 'maintenancedate', o: 'Format: < dd.mm.yyyy >' },
-    { v: 'true', u: 0, id: '00dhw turn on/off', c: 'wwtapactivated', l: ['off', 'on'] },
+    { v: 'on', u: 0, id: '00dhw turn on/off', c: 'wwtapactivated', l: ['off', 'on'] },
     { v: 62, u: 1, id: '00dhw set temperature' },
     { v: 60, u: 1, id: '00dhw selected temperature', c: 'wwseltemp' },
     { v: 'flow', u: 0, id: '00dhw type' },
     { v: 'hot', u: 0, id: '00dhw comfort', c: 'wwcomfort', l: ['hot', 'eco', 'intelligent'] },
     { v: 40, u: 2, id: '00dhw flow temperature offset', c: 'wwflowtempoffset' },
     { v: 100, u: 3, id: '00dhw max power', c: 'wwmaxpower' },
-    { v: 'false', u: 0, id: '00dhw circulation pump available', c: 'wwcircpump', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw circulation pump available', c: 'wwcircpump', l: ['off', 'on'] },
     { v: '3-way valve', u: 0, id: '00dhw charging type' },
     { v: -5, u: 2, id: '00dhw hysteresis on temperature', c: 'wwhyston' },
     { v: 0, u: 2, id: '00dhw hysteresis off temperature', c: 'wwhystoff' },
@@ -556,18 +557,18 @@ const emsesp_devicedata_2 = {
       c: 'wwcircmode',
       l: ['off', '1x3min', '2x3min', '3x3min', '4x3min', '5x3min', '6x3min', 'continuous']
     },
-    { v: 'false', u: 0, id: '00dhw circulation active', c: 'wwcirc', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw circulation active', c: 'wwcirc', l: ['off', 'on'] },
     { v: 47.3, u: 1, id: '00dhw current intern temperature' },
     { v: 0, u: 4, id: '00dhw current tap water flow' },
     { v: 47.3, u: 1, id: '00dhw storage intern temperature' },
-    { v: 'true', u: 0, id: '00dhw activated', c: 'wwactivated', l: ['off', 'on'] },
-    { v: 'false', u: 0, id: '00dhw one time charging', c: 'wwonetime', l: ['off', 'on'] },
-    { v: 'false', u: 0, id: '00dhw disinfecting', c: 'wwdisinfecting', l: ['off', 'on'] },
-    { v: 'false', u: 0, id: '00dhw charging' },
-    { v: 'false', u: 0, id: '00dhw recharging' },
-    { v: 'true', u: 0, id: '00dhw temperature ok' },
-    { v: 'false', u: 0, id: '00dhw active' },
-    { v: 'true', u: 0, id: '00dhw 3way valve active' },
+    { v: 'on', u: 0, id: '00dhw activated', c: 'wwactivated', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw one time charging', c: 'wwonetime', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw disinfecting', c: 'wwdisinfecting', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw charging' },
+    { v: 'off', u: 0, id: '00dhw recharging' },
+    { v: 'on', u: 0, id: '00dhw temperature ok' },
+    { v: 'off', u: 0, id: '00dhw active' },
+    { v: 'on', u: 0, id: '00dhw 3way valve active' },
     { v: 0, u: 3, id: '00dhw set pump power' },
     { v: 288768, u: 0, id: '00dhw starts' },
     { v: 102151, u: 8, id: '00dhw active time' }
@@ -593,7 +594,8 @@ const emsesp_devicedata_4 = {
       v: 'off',
       u: 0,
       id: '02hc2 mode',
-      c: 'hc2/mode'
+      c: 'hc2/mode',
+      l: ['off', 'on', 'auto']
     }
   ]
 };
@@ -963,7 +965,7 @@ rest_server.get(EMSESP_CORE_DATA_ENDPOINT, (req, res) => {
 });
 rest_server.get(EMSESP_SENSOR_DATA_ENDPOINT, (req, res) => {
   console.log('send back sensor data...');
-  console.log(emsesp_sensordata);
+  // console.log(emsesp_sensordata);
   res.json(emsesp_sensordata);
 });
 rest_server.get(EMSESP_DEVICES_ENDPOINT, (req, res) => {
