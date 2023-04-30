@@ -133,7 +133,7 @@ const DashboardDevices: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: minmax(0, 1fr) 35% 40px;
+        --data-table-library_grid-template-columns: minmax(0, 1fr) 30% 40px;
       `,
       BaseRow: `
         .td {
@@ -429,18 +429,18 @@ const DashboardDevices: FC = () => {
           right: 18,
           bottom: 18,
           left: () => leftOffset(),
-          top: () => topOffset(),
-          p: 1
+          top: () => topOffset()
         }}
       >
         <FormControlLabel
           control={<Checkbox size="small" name="onlyFav" checked={onlyFav} onChange={() => setOnlyFav(!onlyFav)} />}
           label={
             <span style={{ fontSize: '12px' }}>
-              {LL.SHOW_FAV()}&nbsp;
-              <StarIcon color="primary" sx={{ fontSize: 12 }} />
+              {LL.SHOW_FAV()}&nbsp;(
+              <StarIcon color="primary" sx={{ fontSize: 12 }} />)
             </span>
           }
+          labelPlacement="start"
         />
         <Table
           data={{
