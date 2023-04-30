@@ -174,7 +174,7 @@ const fr: Translation = {
   SUPPORT_INFO: 'Information de support',
   UPLOAD_OF: 'Upload de {0}',
   UPLOAD: 'Upload',
-  DOWNLOAD: 'Download',
+  DOWNLOAD: '{{D|d|d}}ownload',
   ABORTED: 'annulé',
   FAILED: 'échoué',
   SUCCESSFUL: 'réussi',
@@ -182,7 +182,7 @@ const fr: Translation = {
   LOG_OF: '{0} Log',
   STATUS_OF: 'Statut {0}',
   UPLOAD_DOWNLOAD: 'Upload/Download',
-  SYSTEM_VERSION_RUNNING: 'Vous utilisez actuellement la version',
+  VERSION_ON: 'You are currently on', // TODO translate
   SYSTEM_APPLY_FIRMWARE: 'pour appliquer le nouveau firmware',
   CLOSE: 'Fermer',
   USE: 'Utiliser',
@@ -193,7 +193,7 @@ const fr: Translation = {
   THE_LATEST: 'La dernière',
   OFFICIAL: 'officielle',
   DEVELOPMENT: 'développement',
-  VERSION_IS: 'version est',
+  RELEASE_IS: 'release est', // TODO translate
   RELEASE_NOTES: 'notes de version',
   EMS_ESP_VER: 'Version EMS-ESP',
   PLATFORM: 'Appareil (Plateforme / SDK)',

@@ -150,10 +150,10 @@ const SystemStatusForm: FC = () => {
     <Dialog open={showingVersion} onClose={() => setShowingVersion(false)}>
       <DialogTitle>{LL.VERSION_CHECK(1)}</DialogTitle>
       <DialogContent dividers>
-        <MessageBox my={0} level="info" message={LL.SYSTEM_VERSION_RUNNING() + ' ' + data?.emsesp_version} />
+        <MessageBox my={0} level="info" message={LL.VERSION_ON() + ' v' + data?.emsesp_version} />
         {latestVersion && (
           <Box mt={2} mb={2}>
-            {LL.THE_LATEST()}&nbsp;<u>{LL.OFFICIAL()}</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestVersion.version}</b>
+            {LL.THE_LATEST()}&nbsp;<u>{LL.OFFICIAL()}</u>&nbsp;{LL.RELEASE_IS()}&nbsp;<b>{latestVersion.version}</b>
             &nbsp;(
             <Link target="_blank" href={latestVersion.changelog} color="primary">
               {LL.RELEASE_NOTES()}
@@ -168,7 +168,7 @@ const SystemStatusForm: FC = () => {
 
         {latestDevVersion && (
           <Box mt={2} mb={2}>
-            {LL.THE_LATEST()}&nbsp;<u>{LL.DEVELOPMENT()}</u>&nbsp;{LL.VERSION_IS()}&nbsp;
+            {LL.THE_LATEST()}&nbsp;<u>{LL.DEVELOPMENT()}</u>&nbsp;{LL.RELEASE_IS()}&nbsp;
             <b>{latestDevVersion.version}</b>
             &nbsp;(
             <Link target="_blank" href={latestDevVersion.changelog} color="primary">

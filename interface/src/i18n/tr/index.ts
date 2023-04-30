@@ -174,7 +174,7 @@ const tr: Translation = {
   SUPPORT_INFO: 'Destek Bilgisi',
   UPLOAD_OF: '{0} Yüklemesi',
   UPLOAD: 'Yükleme',
-  DOWNLOAD: 'İndirme',
+  DOWNLOAD: '{{İ|i|i}}İndirme',
   ABORTED: 'iptal edildi',
   FAILED: 'başarısız',
   SUCCESSFUL: 'başarılı',
@@ -182,7 +182,7 @@ const tr: Translation = {
   LOG_OF: '{0} Kaydı',
   STATUS_OF: '{0} Durumu',
   UPLOAD_DOWNLOAD: 'Yükleme/İndirme',
-  SYSTEM_VERSION_RUNNING: 'Şu anda çalıştırdığınız sürüm',
+  VERSION_ON: 'You are currently on', // TODO translate
   SYSTEM_APPLY_FIRMWARE: 'yeni bellenimi uygulamak için',
   CLOSE: 'Kapat',
   USE: 'KUllan',
@@ -193,7 +193,7 @@ const tr: Translation = {
   THE_LATEST: 'En son',
   OFFICIAL: 'resmi',
   DEVELOPMENT: 'geliştirme',
-  VERSION_IS: 'sürüm: ',
+  RELEASE_IS: 'release is', // TODO translate
   RELEASE_NOTES: 'yayınlanma notları',
   EMS_ESP_VER: 'EMS-ESP Sürümü',
   PLATFORM: 'Cihaz (Platform / SDK)',

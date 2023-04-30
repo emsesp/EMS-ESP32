@@ -174,7 +174,7 @@ const de: Translation = {
   SUPPORT_INFO: 'Support Info',
   UPLOAD_OF: '{0} Hochladen',
   UPLOAD: 'Hochladen',
-  DOWNLOAD: 'Herunterladen',
+  DOWNLOAD: '{{H|h|h}}erunterladen',
   ABORTED: 'abgebrochen',
   FAILED: 'gescheitert',
   SUCCESSFUL: 'erfolgreich',
@@ -182,7 +182,7 @@ const de: Translation = {
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Hoch-/Herunterladen',
-  SYSTEM_VERSION_RUNNING: 'Sie verwenden die Version',
+  VERSION_ON: 'You are currently on', // TODO translate
   SYSTEM_APPLY_FIRMWARE: 'um die neue Firmware anzuwenden',
   CLOSE: 'Schließen',
   USE: 'Verwenden Sie',
@@ -193,7 +193,7 @@ const de: Translation = {
   THE_LATEST: 'Die neueste',
   OFFICIAL: 'offizielle',
   DEVELOPMENT: 'Entwicklungs',
-  VERSION_IS: 'Version ist',
+  RELEASE_IS: 'release ist', // TODO translate
   RELEASE_NOTES: 'Versionshinweise',
   EMS_ESP_VER: 'EMS-ESP Version',
   PLATFORM: 'Platform (Platform / SDK)',

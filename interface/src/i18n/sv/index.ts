@@ -174,7 +174,7 @@ const sv: Translation = {
   SUPPORT_INFO: 'Supportinfo',
   UPLOAD_OF: '{0} Uppladdning',
   UPLOAD: 'Uppladdning',
-  DOWNLOAD: 'Nedladdning',
+  DOWNLOAD: '{{N|n|n}}edladdning',
   ABORTED: 'Avbruten',
   FAILED: 'Misslyckades',
   SUCCESSFUL: 'Lyckades',
@@ -182,7 +182,7 @@ const sv: Translation = {
   LOG_OF: '{0} Logg',
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Upp/Nedladdning',
-  SYSTEM_VERSION_RUNNING: 'Du använder version',
+  VERSION_ON: 'You are currently on', // TODO translate
   SYSTEM_APPLY_FIRMWARE: 'för att aktivera ny firmware',
   CLOSE: 'Stäng',
   USE: 'Använd',
@@ -193,7 +193,7 @@ const sv: Translation = {
   THE_LATEST: 'Den senaste',
   OFFICIAL: 'officiell',
   DEVELOPMENT: 'utveckling',
-  VERSION_IS: 'version är',
+  RELEASE_IS: 'release är', // TODO translate
   RELEASE_NOTES: 'release-logg',
   EMS_ESP_VER: 'EMS-ESP Version',
   PLATFORM: 'Enhet (Plattform / SDK)',

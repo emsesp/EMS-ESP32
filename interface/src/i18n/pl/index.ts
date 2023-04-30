@@ -182,7 +182,7 @@ const pl: BaseTranslation = {
   LOG_OF: 'Log {0}',
   STATUS_OF: 'Status {0}',
   UPLOAD_DOWNLOAD: 'Przesyłanie plików',
-  SYSTEM_VERSION_RUNNING: 'Obecnie zainstalowana wersja to:',
+  VERSION_ON: 'You are currently on', // TODO translate
   SYSTEM_APPLY_FIRMWARE: '',
   CLOSE: 'Zamknij',
   USE: 'Aby zaktualizować firmware skorzystaj z funkcji',
@@ -193,7 +193,7 @@ const pl: BaseTranslation = {
   THE_LATEST: 'Najnowsza',
   OFFICIAL: 'oficjalna',
   DEVELOPMENT: 'testowa',
-  VERSION_IS: 'wersja to',
+  RELEASE_IS: 'release to', // TODO translate
   RELEASE_NOTES: 'lista zmian',
   EMS_ESP_VER: 'Wersja EMS-ESP',
   PLATFORM: 'Urządzenie (platforma / SDK)',
