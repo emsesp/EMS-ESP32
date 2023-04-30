@@ -16,8 +16,7 @@
     "standalone": "npm-run-all -p dev typesafe-i18n mock-api",
     "typesafe-i18n": "typesafe-i18n",
     "format": "prettier --write '**/*.{ts,tsx,js,css,json,md}'",
-    "lint": "eslint . --cache --max-warnings=0",
-    "lint-fixall": "eslint . --cache --fix"
+    "lint": "eslint . --cache --fix"
   },
   "dependencies": {
     "@emotion/react": "^11.10.8",
