@@ -63,15 +63,13 @@ export const formatValueNoUOM = (value: any, uom: number) => {
   switch (uom) {
     case DeviceValueUOM.NONE:
       if (typeof value === 'number') {
-        return new Intl.NumberFormat().format(value);
+        return Number(value);
       }
       return value;
     case DeviceValueUOM.DEGREES:
     case DeviceValueUOM.DEGREES_R:
     case DeviceValueUOM.FAHRENHEIT:
-      return new Intl.NumberFormat(undefined, {
-        minimumFractionDigits: 1
-      }).format(Number(value));
+      return Number(value).toFixed(1);
     default:
       return value;
   }
