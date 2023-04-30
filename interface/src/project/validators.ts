@@ -171,11 +171,13 @@ export const deviceValueItemValidation = (dv: DeviceValue) =>
         validator(rule: InternalRuleItem, value: string, callback: (error?: string) => void) {
           if (dv.u !== DeviceValueUOM.NONE && isNaN(+value)) {
             // not a number
-            dv.m && dv.x ? callback('Must be a number between ' + dv.m + ' and ' + dv.x) : callback('Must be a number');
+            dv.m && dv.x
+              ? callback('Value must be a number between ' + dv.m + ' and ' + dv.x)
+              : callback('Value must be a number');
           }
           // is a number
           (dv.m && Number(value) < dv.m) || (dv.x && Number(value) > dv.x)
-            ? callback('Must be between ' + dv.m + ' and ' + dv.x)
+            ? callback('Value must be between ' + dv.m + ' and ' + dv.x)
             : callback();
         }
       }

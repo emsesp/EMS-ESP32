@@ -69,7 +69,7 @@ const en: Translation = {
   SENSOR: 'Sensor',
   TEMP_SENSOR: 'Temperature Sensor',
   TEMP_SENSORS: 'Temperature Sensors',
-  WRITE_CMD_SENT: 'Write command has been sent',
+  WRITE_CMD_SENT: 'Write command sent',
   WRITE_CMD_FAILED: 'Write command failed',
   EMS_BUS_WARNING: 'EMS bus disconnected. If this warning still persists after a few seconds please check settings and board profile',
   EMS_BUS_SCANNING: 'Scanning for EMS devices...',
