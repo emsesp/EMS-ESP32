@@ -199,10 +199,12 @@ const SettingsEntities: FC = () => {
     setDialogOpen(true);
   };
 
-  function formatValue(value: any, uom: any) {
+  function formatValue(value: any, uom: number) {
     return value === undefined || uom === undefined
       ? ''
-      : new Intl.NumberFormat().format(value) + (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom]);
+      : typeof value === 'number'
+      ? new Intl.NumberFormat().format(value) + (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom])
+      : value;
   }
 
   function showHex(value: number, digit: number) {

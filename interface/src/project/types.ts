@@ -346,12 +346,12 @@ export interface EntityItem {
   device_id: number | string;
   type_id: number | string;
   offset: number;
-  factor?: number; // optional
-  uom?: number; // optional
+  factor: number;
+  uom: number;
   value_type: number;
-  value?: number; // optional
+  value?: any;
   writeable: boolean;
-  deleted?: boolean; // optional
+  deleted?: boolean;
   o_id?: number;
   o_name?: string;
   o_device_id?: number | string;
