@@ -76,10 +76,3 @@ export const formatValueNoUOM = (value: any, uom: number) => {
       return value;
   }
 };
-
-export function isNumberUOM(uom: number) {
-  if (uom === DeviceValueUOM.NONE) {
-    return false;
-  }
-  return true;
-}

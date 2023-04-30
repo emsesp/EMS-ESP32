@@ -35,7 +35,7 @@ import DashboarDevicesDialog from './DashboardDevicesDialog';
 import DeviceIcon from './DeviceIcon';
 
 import * as EMSESP from './api';
-import { formatValue, isNumberUOM } from './deviceValue';
+import { formatValue } from './deviceValue';
 
 import { DeviceValueUOM_s, DeviceEntityMask } from './types';
 import { deviceValueItemValidation } from './validators';
@@ -186,12 +186,10 @@ const DashboardDevices: FC = () => {
   );
 
   const fetchDeviceData = async (id: number) => {
-    if (!deviceValueDialogOpen) {
-      try {
-        setDeviceData((await EMSESP.readDeviceData({ id })).data);
-      } catch (error) {
-        toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-      }
+    try {
+      setDeviceData((await EMSESP.readDeviceData({ id })).data);
+    } catch (error) {
+      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
     }
   };
 
@@ -208,6 +206,9 @@ const DashboardDevices: FC = () => {
   }, [fetchCoreData]);
 
   const refreshData = () => {
+    if (deviceValueDialogOpen) {
+      return;
+    }
     if (selectedDevice) {
       void fetchDeviceData(selectedDevice);
     } else {
@@ -288,9 +289,10 @@ const DashboardDevices: FC = () => {
   });
 
   const deviceValueDialogSave = async (dv: DeviceValue) => {
+    const selectedDeviceID = Number(device_select.state.id);
     try {
       const response = await EMSESP.writeDeviceValue({
-        id: Number(device_select.state.id),
+        id: selectedDeviceID,
         devicevalue: dv
       });
       if (response.status === 204) {
@@ -304,8 +306,8 @@ const DashboardDevices: FC = () => {
       toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
     } finally {
       setDeviceValueDialogOpen(false);
+      await fetchDeviceData(selectedDeviceID);
       setSelectedDeviceValue(undefined);
-      refreshData();
     }
   };
 
@@ -515,7 +517,7 @@ const DashboardDevices: FC = () => {
           onClose={deviceValueDialogClose}
           onSave={deviceValueDialogSave}
           selectedItem={selectedDeviceValue}
-          validator={deviceValueItemValidation(isNumberUOM(selectedDeviceValue.u))}
+          validator={deviceValueItemValidation(selectedDeviceValue)}
         />
       )}
 

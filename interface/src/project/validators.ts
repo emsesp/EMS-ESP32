@@ -1,5 +1,6 @@
 import Schema from 'async-validator';
-import type { AnalogSensor, Settings } from './types';
+import { DeviceValueUOM } from './types';
+import type { AnalogSensor, DeviceValue, Settings } from './types';
 import type { InternalRuleItem } from 'async-validator';
 import { IP_OR_HOSTNAME_VALIDATOR } from 'validators/shared';
 
@@ -162,16 +163,20 @@ export const analogSensorItemValidation = (sensors: AnalogSensor[], creating: bo
     ]
   });
 
-export const deviceValueItemValidation = (isNumber: boolean) =>
+export const deviceValueItemValidation = (dv: DeviceValue) =>
   new Schema({
     v: [
       { required: true, message: 'Value is required' },
       {
         validator(rule: InternalRuleItem, value: string, callback: (error?: string) => void) {
-          if (isNumber && isNaN(+value)) {
-            callback('Not a valid number');
+          if (dv.u !== DeviceValueUOM.NONE && isNaN(+value)) {
+            // not a number
+            dv.m && dv.x ? callback('Must be a number between ' + dv.m + ' and ' + dv.x) : callback('Must be a number');
           }
-          callback();
+          // is a number
+          (dv.m && Number(value) < dv.m) || (dv.x && Number(value) > dv.x)
+            ? callback('Must be between ' + dv.m + ' and ' + dv.x)
+            : callback();
         }
       }
     ]

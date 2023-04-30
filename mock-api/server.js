@@ -474,10 +474,12 @@ const emsesp_devicedata_1 = {
       id: '00date/time'
     },
     {
-      v: 18,
+      v: 18.2,
       u: 1,
-      id: '00hc1 selected room temperature',
-      c: 'hc1/seltemp'
+      id: '00Chosen Room Temperature',
+      c: 'hc1/seltemp',
+      m: 5,
+      x: 52
     },
     {
       v: 22.6,
@@ -693,7 +695,7 @@ const emsesp_deviceentities_1 = [
   },
   {
     v: 18.2,
-    n: 'hc1 selected room temperature',
+    n: 'Chosen Room Temperature',
     id: 'hc1/seltemp',
     m: 0,
     mi: 5,

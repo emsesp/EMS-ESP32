@@ -128,9 +128,9 @@ export interface DeviceValue {
   c?: string; // command, optional
   l?: string[]; // list, optional
   h?: string; // help text, optional
-  s?: string; // steps for up/down, optional
-  m?: string; // min, optional
-  x?: string; // max, optional
+  s?: number; // steps for up/down, optional
+  m?: number; // min, optional
+  x?: number; // max, optional
 }
 
 export interface DeviceData {
