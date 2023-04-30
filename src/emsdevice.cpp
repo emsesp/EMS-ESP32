@@ -922,20 +922,19 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                     }
                 }
                 // handle INTs
-                // add steps to numeric values with numeric_operator
+                // add min and max values and steps, as integer values
                 else {
-                    char s[10];
                     if (dv.numeric_operator > 0) {
-                        obj["s"] = Helpers::render_value(s, (float)1 / dv.numeric_operator, 1);
+                        obj["s"] = (float)1 / dv.numeric_operator;
                     } else if (dv.numeric_operator < 0) {
-                        obj["s"] = Helpers::render_value(s, (float)(-1) * dv.numeric_operator, 0);
+                        obj["s"] = (float)(-1) * dv.numeric_operator;
                     }
 
                     int16_t  dv_set_min;
                     uint16_t dv_set_max;
                     if (dv.get_min_max(dv_set_min, dv_set_max)) {
-                        obj["m"] = Helpers::render_value(s, dv_set_min, 0);
-                        obj["x"] = Helpers::render_value(s, dv_set_max, 0);
+                        obj["m"] = dv_set_min;
+                        obj["x"] = dv_set_max;
                     }
                 }
             }
