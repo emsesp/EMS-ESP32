@@ -4,7 +4,10 @@
 
 ## **IMPORTANT! BREAKING CHANGES**
 
-- dallassensor has been renamed to temperaturesensor in MQTT payloads
+There are breaking changes in 3.6.0. Please read carefully before applying the update.
+
+- The sensors have been renamed. `dallassensor` is now `temperaturesensor` in MQTT and `ts` in the Customizations file. Also `analogs` is now `analogsensor` in MQTT and `as` in the Customizations file. If you have customizations, make backup first using the Download option and rename the JSON arrays to `as` and `ts` respectively. Also removed any MQTT topics that start with `dallassensor` using something like MQTTExplorer.
+- The format of the Custom Entities has changed, so you will need to manually re-create them.
 
 ## Added
 
