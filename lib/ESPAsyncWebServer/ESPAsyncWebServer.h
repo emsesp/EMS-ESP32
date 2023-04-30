@@ -229,8 +229,8 @@ class AsyncWebServerRequest {
     const String& contentType() const { return _contentType; }
     size_t contentLength() const { return _contentLength; }
     bool multipart() const { return _isMultipart; }
-    const __FlashStringHelper *methodToString() const;
-    const __FlashStringHelper *requestedConnTypeToString() const;
+    const char *methodToString() const;
+    const char *requestedConnTypeToString() const;
     RequestedConnectionType requestedConnType() const { return _reqconntype; }
     bool isExpectedRequestedConnType(RequestedConnectionType erct1, RequestedConnectionType erct2 = RCT_NOT_USED, RequestedConnectionType erct3 = RCT_NOT_USED);
     void onDisconnect (ArDisconnectHandler fn);
