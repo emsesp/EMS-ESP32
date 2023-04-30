@@ -6,6 +6,10 @@ import type { FC } from 'react';
 import { PROJECT_NAME } from 'api/env';
 
 const LayoutDrawerLogo = styled('img')(({ theme }) => ({
+  [theme.breakpoints.down('sm')]: {
+    height: 24,
+    marginRight: theme.spacing(2)
+  },
   [theme.breakpoints.up('sm')]: {
     height: 38,
     marginRight: theme.spacing(2)
