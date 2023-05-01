@@ -66,7 +66,7 @@ const SystemLog: FC = () => {
 
   const { LL } = useI18nContext();
 
-  const { loadData, data, setData, origData, dirtyFlags, blocker, setDirtyFlags } = useRest<LogSettings>({
+  const { loadData, data, setData, origData, dirtyFlags, blocker, setDirtyFlags, setOrigData } = useRest<LogSettings>({
     read: SystemApi.readLogSettings
   });
 
@@ -152,6 +152,7 @@ const SystemLog: FC = () => {
         if (response.status !== 200) {
           toast.error(LL.PROBLEM_UPDATING());
         } else {
+          setOrigData(response.data);
           setDirtyFlags([]);
           toast.success(LL.UPDATED_OF(LL.SETTINGS_OF('')));
         }
