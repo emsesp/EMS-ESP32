@@ -84,6 +84,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     origData,
     dirtyFlags,
     setDirtyFlags,
+    setOrigData,
     blocker,
     errorMessage,
     restartNeeded
