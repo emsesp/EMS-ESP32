@@ -7,6 +7,7 @@ import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDown
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import StarIcon from '@mui/icons-material/Star';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
 import {
@@ -193,8 +194,23 @@ const DashboardDevices: FC = () => {
     }
   };
 
+  function onSelectChange(action: any, state: any) {
+    setSelectedDevice(state.id);
+    if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
+      void fetchDeviceData(state.id);
+    }
+  }
+
+  const device_select = useRowSelect(
+    { nodes: coreData.devices },
+    {
+      onChange: onSelectChange
+    }
+  );
+
   const fetchCoreData = useCallback(async () => {
     try {
+      setSelectedDevice(undefined);
       setCoreData((await EMSESP.readCoreData()).data);
     } catch (error) {
       toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
@@ -215,20 +231,6 @@ const DashboardDevices: FC = () => {
       void fetchCoreData();
     }
   };
-
-  function onSelectChange(action: any, state: any) {
-    setSelectedDevice(state.id);
-    if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
-      void fetchDeviceData(state.id);
-    }
-  }
-
-  const device_select = useRowSelect(
-    { nodes: coreData.devices },
-    {
-      onChange: onSelectChange
-    }
-  );
 
   const escapeCsvCell = (cell: any) => {
     if (cell == null) {
@@ -358,7 +360,12 @@ const DashboardDevices: FC = () => {
         <MessageBox my={2} level="warning" message={LL.EMS_BUS_SCANNING()} />
       )}
 
-      <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
+      <Table
+        data={{ nodes: selectedDevice ? coreData.devices.filter((dv) => dv.id === selectedDevice) : coreData.devices }}
+        select={device_select}
+        theme={device_theme}
+        layout={{ custom: true }}
+      >
         {(tableList: any) => (
           <>
             <Header>
@@ -398,7 +405,7 @@ const DashboardDevices: FC = () => {
   };
 
   const renderDeviceData = () => {
-    if (!device_select.state.id) {
+    if (!selectedDevice) {
       return;
     }
 
@@ -521,16 +528,32 @@ const DashboardDevices: FC = () => {
         />
       )}
 
-      <ButtonRow>
-        <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
-          {LL.REFRESH()}
-        </Button>
-        {device_select.state.id && device_select.state.id !== 'sensor' && (
-          <Button startIcon={<DownloadIcon />} variant="outlined" onClick={handleDownloadCsv}>
-            {LL.EXPORT()}
-          </Button>
-        )}
-      </ButtonRow>
+      <Box display="flex" flexWrap="wrap">
+        <Box flexGrow={1}>
+          <ButtonRow>
+            <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
+              {LL.REFRESH()}
+            </Button>
+            {device_select.state.id && device_select.state.id !== 'sensor' && (
+              <Button startIcon={<DownloadIcon />} variant="outlined" onClick={handleDownloadCsv}>
+                {LL.EXPORT()}
+              </Button>
+            )}
+          </ButtonRow>
+        </Box>
+        <Box flexWrap="nowrap" whiteSpace="nowrap">
+          <ButtonRow>
+            <Button
+              startIcon={<SettingsBackupRestoreIcon />}
+              variant="outlined"
+              onClick={fetchCoreData}
+              color="warning"
+            >
+              {LL.RESET(0)}
+            </Button>
+          </ButtonRow>
+        </Box>
+      </Box>
     </SectionContent>
   );
 };
