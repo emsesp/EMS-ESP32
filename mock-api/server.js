@@ -492,6 +492,13 @@ const emsesp_devicedata_1 = {
       id: '00hc1 mode',
       c: 'hc1/mode',
       l: ['off', 'on', 'auto']
+    },
+    {
+      v: '00 mo 00:00 T1',
+      u: 0,
+      id: '00hc1 program switchtime',
+      c: 'hc1/switchtime',
+      h: '<nn> [ not_set | day hh:mm Tn ]'
     }
   ]
 };

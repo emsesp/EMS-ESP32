@@ -83,6 +83,22 @@ const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator 
     }
   };
 
+  const showHelperText = (dv: DeviceValue) => {
+    if (dv.h) {
+      return dv.h;
+    }
+    if (dv.l) {
+      return '[ ' + dv.l.join(' | ') + ' ]';
+    }
+    if (dv.u !== DeviceValueUOM.NONE) {
+      if (dv.m && dv.x) {
+        return '<number between ' + dv.m + ' and ' + dv.x + '>';
+      }
+      return '<number>';
+    }
+    return '';
+  };
+
   return (
     <Dialog open={open} onClose={close}>
       <DialogTitle>{selectedItem.v === '' && selectedItem.c ? LL.RUN_COMMAND() : LL.CHANGE_VALUE()}</DialogTitle>
@@ -90,7 +106,7 @@ const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator 
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
           <Typography variant="body2">{editItem.id.slice(2)}</Typography>
         </Box>
-        <Grid container spacing={1}>
+        <Grid>
           <Grid item>
             {editItem.l && (
               <TextField
@@ -125,7 +141,9 @@ const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator 
               />
             )}
           </Grid>
-          {editItem.h && <FormHelperText>{editItem.h}</FormHelperText>}
+          <Grid item>
+            <FormHelperText>format:&nbsp;{showHelperText(editItem)}</FormHelperText>
+          </Grid>
         </Grid>
       </DialogContent>
 
