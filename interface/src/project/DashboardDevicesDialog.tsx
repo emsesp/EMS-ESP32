@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 
-import { formatValueNoUOM } from './deviceValue';
 import { DeviceValueUOM, DeviceValueUOM_s } from './types';
 import type { DeviceValue } from './types';
 import type Schema from 'async-validator';
@@ -48,11 +47,6 @@ const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator 
     if (open) {
       setFieldErrors(undefined);
       setEditItem(selectedItem);
-      // format value and convert to string
-      setEditItem({
-        ...selectedItem,
-        v: formatValueNoUOM(selectedItem.v, selectedItem.u)
-      });
     }
   }, [open, selectedItem]);
 
@@ -90,13 +84,20 @@ const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator 
     if (dv.l) {
       return '[ ' + dv.l.join(' | ') + ' ]';
     }
+
+    let helperText = '<';
     if (dv.u !== DeviceValueUOM.NONE) {
+      helperText += 'n';
       if (dv.m && dv.x) {
-        return '<number between ' + dv.m + ' and ' + dv.x + '>';
+        helperText += ' between ' + dv.m + ' and ' + dv.x;
       }
-      return '<number>';
+      if (dv.s) {
+        helperText += ' , step ' + dv.s;
+      }
+    } else {
+      helperText += 'text';
     }
-    return '';
+    return helperText + '>';
   };
 
   return (
@@ -108,7 +109,7 @@ const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator 
         </Box>
         <Grid>
           <Grid item>
-            {editItem.l && (
+            {editItem.l ? (
               <TextField
                 name="v"
                 label={LL.VALUE(1)}
@@ -124,8 +125,22 @@ const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator 
                   </MenuItem>
                 ))}
               </TextField>
-            )}
-            {!editItem.l && (
+            ) : editItem.u !== DeviceValueUOM.NONE ? (
+              <ValidatedTextField
+                fieldErrors={fieldErrors}
+                name="v"
+                label={LL.VALUE(1)}
+                value={Math.round(editItem.v * 10) / 10}
+                autoFocus
+                type="number"
+                sx={{ width: '30ch' }}
+                onChange={updateFormValue}
+                inputProps={editItem.u ? { min: editItem.m, max: editItem.x, step: editItem.s } : {}}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">{setUom(editItem.u)}</InputAdornment>
+                }}
+              />
+            ) : (
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="v"
@@ -135,9 +150,6 @@ const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator 
                 sx={{ width: '30ch' }}
                 multiline={editItem.u ? false : true}
                 onChange={updateFormValue}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">{setUom(editItem.u)}</InputAdornment>
-                }}
               />
             )}
           </Grid>

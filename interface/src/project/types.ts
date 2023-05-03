@@ -123,7 +123,7 @@ export interface Devices {
 
 export interface DeviceValue {
   id: string; // index, contains mask+name
-  v: any; // value, in any format
+  v: any; // value, Number or String
   u: number; // uom
   c?: string; // command, optional
   l?: string[]; // list, optional

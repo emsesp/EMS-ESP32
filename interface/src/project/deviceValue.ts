@@ -54,23 +54,3 @@ export function formatValue(LL: TranslationFunctions, value: any, uom: number) {
       return new Intl.NumberFormat().format(value) + ' ' + DeviceValueUOM_s[uom];
   }
 }
-
-export const formatValueNoUOM = (value: any, uom: number) => {
-  if (value === undefined) {
-    return '';
-  }
-
-  switch (uom) {
-    case DeviceValueUOM.NONE:
-      if (typeof value === 'number') {
-        return Number(value);
-      }
-      return value;
-    case DeviceValueUOM.DEGREES:
-    case DeviceValueUOM.DEGREES_R:
-    case DeviceValueUOM.FAHRENHEIT:
-      return Number(value).toFixed(1);
-    default:
-      return value;
-  }
-};

@@ -168,13 +168,11 @@ export const deviceValueItemValidation = (dv: DeviceValue) =>
     v: [
       { required: true, message: 'Value is required' },
       {
-        validator(rule: InternalRuleItem, value: string, callback: (error?: string) => void) {
-          if (dv.u !== DeviceValueUOM.NONE && isNaN(+value)) {
-            callback('Not a valid number');
+        validator(rule: InternalRuleItem, value: any, callback: (error?: string) => void) {
+          if (typeof value === 'number' && dv.m && dv.x && (value < dv.m || value > dv.x)) {
+            callback('Value out of range');
           }
-          (dv.m && Number(value) < dv.m) || (dv.x && Number(value) > dv.x)
-            ? callback('Value out of range')
-            : callback();
+          callback();
         }
       }
     ]
