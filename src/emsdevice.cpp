@@ -513,7 +513,7 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
     // get fullname, getting translation if it exists
     const char * const * fullname;
     if (Helpers::count_items(name) == 1) {
-        fullname = nullptr; // no translations available, use empty
+        fullname = nullptr;  // no translations available, use empty
     } else {
         fullname = &name[1]; // translations start at index 1
     }
@@ -838,7 +838,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
             JsonObject obj        = data.createNestedObject(); // create the object, we know there is a value
             uint8_t    fahrenheit = 0;
 
-            // handle Booleans (true, false), use strings, not native true/false)
+            // handle Booleans (true, false), output as strings according to the user settings
             if (dv.type == DeviceValueType::BOOL) {
                 auto value_b = (bool)*(uint8_t *)(dv.value_p);
                 char s[12];
@@ -1303,7 +1303,7 @@ void EMSdevice::dump_value_info() {
                     if (dv.type == DeviceValueType::BOOL) {
                         snprintf(entityid, sizeof(entityid), "binary_sensor.%s", entity_with_tag); // binary sensor (for booleans)
                     } else {
-                        snprintf(entityid, sizeof(entityid), "sensor.%s", entity_with_tag); // normal HA sensor
+                        snprintf(entityid, sizeof(entityid), "sensor.%s", entity_with_tag);        // normal HA sensor
                     }
                 }
 

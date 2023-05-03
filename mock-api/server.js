@@ -479,7 +479,8 @@ const emsesp_devicedata_1 = {
       id: '00Chosen Room Temperature',
       c: 'hc1/seltemp',
       m: 5,
-      x: 52
+      x: 52,
+      s: 0.5
     },
     {
       v: 22.6,
@@ -508,7 +509,7 @@ const emsesp_devicedata_2 = {
   data: [
     { v: '', u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
     { v: 'off', u: 0, id: '08heating active' },
-    { v: 'off', u: 0, id: '04tapwater active' },
+    { v: 'off2', u: 0, id: '04tapwater active' },
     { v: 5, u: 1, id: '04selected flow temperature', c: 'selflowtemp' },
     { v: 0, u: 3, id: '0Eburner selected max power', c: 'selburnpow' },
     { v: 0, u: 3, id: '00heating pump modulation' },
