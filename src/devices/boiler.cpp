@@ -1300,19 +1300,25 @@ void Boiler::process_HpInConfig(std::shared_ptr<const Telegram> telegram) {
     // inputs 1,2,3 <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
     uint8_t index[] = {0, 3, 6, 9, 12, 15, 18, 21, 24, 39, 36, 30, 27};
     for (uint8_t i = 0; i < 3; i++) {
-        for (uint8_t j = 0; j < 13; j++) {
-            telegram->read_value(option[j], index[j] + i); // offsets 0-26
-            option[j] = j < 12 ? option[j] ? '1' : '0' : option[j];
+        for (uint8_t j = 0; j < 12; j++) {
+            option[j] = hpInput[i].option[j] - '0';
+            telegram->read_value(option[j], index[j] + i);
+            option[j] = option[j] == 1 ? '1' : '0';
         }
+        option[12] = atoi(&hpInput[i].option[12]);
+        telegram->read_value(option[12], 27 + i); // modulation
         Helpers::smallitoa(&option[12], (uint16_t)option[12]);
         has_update(hpInput[i].option, option, 16);
     }
     // input 4 <inv>[<comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
     uint8_t index4[] = {42, 43, 44, 45, 46, 47, 52, 50, 49, 48};
-    for (uint8_t j = 0; j < 10; j++) {
-        telegram->read_value(option[j], index4[j]); // offsets 42-47
-        option[j] = j < 10 ? option[j] ? '1' : '0' : option[j];
+    for (uint8_t j = 0; j < 9; j++) {
+        option[j] = hpInput[3].option[j] - '0';
+        telegram->read_value(option[j], index4[j]);
+        option[j] = option[j] == 1 ? '1' : '0';
     }
+    option[9] = atoi(&hpInput[3].option[9]);
+    telegram->read_value(option[9], 48); // modulation
     Helpers::smallitoa(&option[9], (uint16_t)option[9]);
     has_update(hpInput[3].option, option, 13);
 }
