@@ -546,7 +546,7 @@ const DashboardDevices: FC = () => {
             <Button
               startIcon={<SettingsBackupRestoreIcon />}
               variant="outlined"
-              onClick={fetchCoreData}
+              onClick={() => device_select.fns.onRemoveAll()}
               color="warning"
             >
               {LL.RESET(0)}
