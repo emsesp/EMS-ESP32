@@ -91,6 +91,8 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
             obj["e"]       = emsdevice->count_entities();                       // number of entities (device values)
         }
     }
+
+    // add any custom entities
     if (EMSESP::webEntityService.count_entities()) {
         JsonObject obj = devices.createNestedObject();
         obj["id"]      = 99;                                                // the last unique id
@@ -156,7 +158,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
             if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
                 obj["v"] = Helpers::transformNumFloat(sensor.value(), 0); // is optional and is a float
             } else {
-                obj["v"] = 0; // must have a value for web sorting to work
+                obj["v"] = 0;                                             // must have a value for web sorting to work
             }
         }
     }
