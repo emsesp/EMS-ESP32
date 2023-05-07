@@ -530,7 +530,7 @@ const emsesp_devicedata_7 = {
   data: [
     { v: '', u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
     { v: 'off', u: 0, id: '08heating active' },
-    { v: 'off2', u: 0, id: '04tapwater active' },
+    { v: 'off', u: 0, id: '04tapwater active' },
     { v: 5, u: 1, id: '04selected flow temperature', c: 'selflowtemp' },
     { v: 0, u: 3, id: '0Eburner selected max power', c: 'selburnpow' },
     { v: 0, u: 3, id: '00heating pump modulation' },
