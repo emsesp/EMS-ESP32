@@ -1089,7 +1089,7 @@ const emsesp_devicedata_3 = {
     {
       v: '',
       u: 0,
-      id: '08Reset',
+      id: '08reset',
       c: 'reset',
       l: ['-', 'maintenance', 'error']
     },
