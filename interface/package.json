@@ -21,7 +21,6 @@
   "dependencies": {
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
-    "@msgpack/msgpack": "^3.0.0-beta2",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.12.3",
     "@table-library/react-table-library": "4.1.4",
@@ -39,7 +38,6 @@
     "react-dom": "latest",
     "react-dropzone": "^14.2.3",
     "react-icons": "^4.8.0",
-    "react-number-format": "^5.1.4",
     "react-router-dom": "^6.11.1",
     "react-toastify": "^9.1.2",
     "sockette": "^2.0.6",

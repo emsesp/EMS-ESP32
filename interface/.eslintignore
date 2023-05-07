@@ -7,5 +7,6 @@ dist/
 .eslintrc*
 env.d.ts
 progmem-generator.js
+unpack.ts
 vite.config.ts
 package.json
