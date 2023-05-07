@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import type { RequiredChildrenProps } from 'utils';
 import { PROJECT_NAME } from 'api/env';
 
-export const DRAWER_WIDTH = 240;
+export const DRAWER_WIDTH = 210;
 
 const Layout: FC<RequiredChildrenProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);

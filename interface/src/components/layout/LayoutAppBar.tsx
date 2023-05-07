@@ -3,7 +3,7 @@ import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material';
 import LayoutAuthMenu from './LayoutAuthMenu';
 import type { FC } from 'react';
 
-export const DRAWER_WIDTH = 240;
+export const DRAWER_WIDTH = 210;
 
 interface LayoutAppBarProps {
   title: string;
