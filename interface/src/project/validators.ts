@@ -1,5 +1,4 @@
 import Schema from 'async-validator';
-import { DeviceValueUOM } from './types';
 import type { AnalogSensor, DeviceValue, Settings } from './types';
 import type { InternalRuleItem } from 'async-validator';
 import { IP_OR_HOSTNAME_VALIDATOR } from 'validators/shared';
