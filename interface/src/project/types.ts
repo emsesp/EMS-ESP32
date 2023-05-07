@@ -367,3 +367,26 @@ export interface EntityItem {
 export interface Entities {
   entities: EntityItem[];
 }
+
+// matches emsdevice.h DeviceType
+export const enum DeviceType {
+  SYSTEM = 0,
+  TEMPERATURESENSOR,
+  ANALOGSENSOR,
+  SCHEDULER,
+  BOILER,
+  THERMOSTAT,
+  MIXER,
+  SOLAR,
+  HEATPUMP,
+  GATEWAY,
+  SWITCH,
+  CONTROLLER,
+  CONNECT,
+  ALERT,
+  PUMP,
+  GENERIC,
+  HEATSOURCE,
+  CUSTOM,
+  UNKNOWN
+}

@@ -38,7 +38,7 @@ import DeviceIcon from './DeviceIcon';
 import * as EMSESP from './api';
 import { formatValue } from './deviceValue';
 
-import { DeviceValueUOM_s, DeviceEntityMask } from './types';
+import { DeviceValueUOM_s, DeviceEntityMask, DeviceType } from './types';
 import { deviceValueItemValidation } from './validators';
 import type { Device, CoreData, DeviceData, DeviceValue } from './types';
 import type { FC } from 'react';
@@ -315,32 +315,37 @@ const DashboardDevices: FC = () => {
 
   const renderDeviceDetails = () => {
     if (coreData && coreData.devices.length > 0 && deviceDetails !== -1) {
+      const device = coreData.devices[deviceDetails];
       return (
         <Dialog open={deviceDetails !== -1} onClose={() => setDeviceDetails(-1)}>
           <DialogTitle>{LL.DEVICE_DETAILS()}</DialogTitle>
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
-                <ListItemText primary={LL.TYPE(0)} secondary={coreData.devices[deviceDetails].tn} />
+                <ListItemText primary={LL.TYPE(0)} secondary={device.tn} />
               </ListItem>
               <ListItem>
-                <ListItemText primary={LL.NAME(0)} secondary={coreData.devices[deviceDetails].n} />
+                <ListItemText primary={LL.NAME(0)} secondary={device.n} />
               </ListItem>
-              <ListItem>
-                <ListItemText primary={LL.BRAND()} secondary={coreData.devices[deviceDetails].b} />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary={LL.ID_OF(LL.DEVICE())}
-                  secondary={'0x' + ('00' + coreData.devices[deviceDetails].d.toString(16).toUpperCase()).slice(-2)}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary={LL.ID_OF(LL.PRODUCT())} secondary={coreData.devices[deviceDetails].p} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary={LL.VERSION()} secondary={coreData.devices[deviceDetails].v} />
-              </ListItem>
+              {device.t !== DeviceType.CUSTOM && (
+                <>
+                  <ListItem>
+                    <ListItemText primary={LL.BRAND()} secondary={device.b} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText
+                      primary={LL.ID_OF(LL.DEVICE())}
+                      secondary={'0x' + ('00' + device.d.toString(16).toUpperCase()).slice(-2)}
+                    />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary={LL.ID_OF(LL.PRODUCT())} secondary={device.p} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary={LL.VERSION()} secondary={device.v} />
+                  </ListItem>
+                </>
+              )}
             </List>
           </DialogContent>
           <DialogActions>

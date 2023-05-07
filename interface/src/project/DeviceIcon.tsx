@@ -6,33 +6,11 @@ import { GiHeatHaze } from 'react-icons/gi';
 import { MdThermostatAuto, MdOutlineSensors, MdOutlineExtension } from 'react-icons/md';
 import { TiFlowSwitch } from 'react-icons/ti';
 import { VscVmConnect } from 'react-icons/vsc';
+import { DeviceType } from './types';
 import type { FC } from 'react';
 
 interface DeviceIconProps {
   type_id: number;
-}
-
-// matches emsdevice.h DeviceType
-const enum DeviceType {
-  SYSTEM = 0,
-  TEMPERATURESENSOR,
-  ANALOGSENSOR,
-  SCHEDULER,
-  BOILER,
-  THERMOSTAT,
-  MIXER,
-  SOLAR,
-  HEATPUMP,
-  GATEWAY,
-  SWITCH,
-  CONTROLLER,
-  CONNECT,
-  ALERT,
-  PUMP,
-  GENERIC,
-  HEATSOURCE,
-  CUSTOM,
-  UNKNOWN
 }
 
 const DeviceIcon: FC<DeviceIconProps> = ({ type_id }) => {
