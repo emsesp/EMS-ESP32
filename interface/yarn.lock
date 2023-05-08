@@ -1151,90 +1151,90 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/core-darwin-arm64@npm:1.3.49":
-  version: 1.3.49
-  resolution: "@swc/core-darwin-arm64@npm:1.3.49"
+"@swc/core-darwin-arm64@npm:1.3.56":
+  version: 1.3.56
+  resolution: "@swc/core-darwin-arm64@npm:1.3.56"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@swc/core-darwin-x64@npm:1.3.49":
-  version: 1.3.49
-  resolution: "@swc/core-darwin-x64@npm:1.3.49"
+"@swc/core-darwin-x64@npm:1.3.56":
+  version: 1.3.56
+  resolution: "@swc/core-darwin-x64@npm:1.3.56"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@swc/core-linux-arm-gnueabihf@npm:1.3.49":
-  version: 1.3.49
-  resolution: "@swc/core-linux-arm-gnueabihf@npm:1.3.49"
+"@swc/core-linux-arm-gnueabihf@npm:1.3.56":
+  version: 1.3.56
+  resolution: "@swc/core-linux-arm-gnueabihf@npm:1.3.56"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
-"@swc/core-linux-arm64-gnu@npm:1.3.49":
-  version: 1.3.49
-  resolution: "@swc/core-linux-arm64-gnu@npm:1.3.49"
+"@swc/core-linux-arm64-gnu@npm:1.3.56":
+  version: 1.3.56
+  resolution: "@swc/core-linux-arm64-gnu@npm:1.3.56"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@swc/core-linux-arm64-musl@npm:1.3.49":
-  version: 1.3.49
-  resolution: "@swc/core-linux-arm64-musl@npm:1.3.49"
+"@swc/core-linux-arm64-musl@npm:1.3.56":
+  version: 1.3.56
+  resolution: "@swc/core-linux-arm64-musl@npm:1.3.56"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@swc/core-linux-x64-gnu@npm:1.3.49":
-  version: 1.3.49
-  resolution: "@swc/core-linux-x64-gnu@npm:1.3.49"
+"@swc/core-linux-x64-gnu@npm:1.3.56":
+  version: 1.3.56
+  resolution: "@swc/core-linux-x64-gnu@npm:1.3.56"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@swc/core-linux-x64-musl@npm:1.3.49":
-  version: 1.3.49
-  resolution: "@swc/core-linux-x64-musl@npm:1.3.49"
+"@swc/core-linux-x64-musl@npm:1.3.56":
+  version: 1.3.56
+  resolution: "@swc/core-linux-x64-musl@npm:1.3.56"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@swc/core-win32-arm64-msvc@npm:1.3.49":
-  version: 1.3.49
-  resolution: "@swc/core-win32-arm64-msvc@npm:1.3.49"
+"@swc/core-win32-arm64-msvc@npm:1.3.56":
+  version: 1.3.56
+  resolution: "@swc/core-win32-arm64-msvc@npm:1.3.56"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@swc/core-win32-ia32-msvc@npm:1.3.49":
-  version: 1.3.49
-  resolution: "@swc/core-win32-ia32-msvc@npm:1.3.49"
+"@swc/core-win32-ia32-msvc@npm:1.3.56":
+  version: 1.3.56
+  resolution: "@swc/core-win32-ia32-msvc@npm:1.3.56"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
-"@swc/core-win32-x64-msvc@npm:1.3.49":
-  version: 1.3.49
-  resolution: "@swc/core-win32-x64-msvc@npm:1.3.49"
+"@swc/core-win32-x64-msvc@npm:1.3.56":
+  version: 1.3.56
+  resolution: "@swc/core-win32-x64-msvc@npm:1.3.56"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@swc/core@npm:^1.3.42":
-  version: 1.3.49
-  resolution: "@swc/core@npm:1.3.49"
+"@swc/core@npm:^1.3.56":
+  version: 1.3.56
+  resolution: "@swc/core@npm:1.3.56"
   dependencies:
-    "@swc/core-darwin-arm64": 1.3.49
-    "@swc/core-darwin-x64": 1.3.49
-    "@swc/core-linux-arm-gnueabihf": 1.3.49
-    "@swc/core-linux-arm64-gnu": 1.3.49
-    "@swc/core-linux-arm64-musl": 1.3.49
-    "@swc/core-linux-x64-gnu": 1.3.49
-    "@swc/core-linux-x64-musl": 1.3.49
-    "@swc/core-win32-arm64-msvc": 1.3.49
-    "@swc/core-win32-ia32-msvc": 1.3.49
-    "@swc/core-win32-x64-msvc": 1.3.49
+    "@swc/core-darwin-arm64": 1.3.56
+    "@swc/core-darwin-x64": 1.3.56
+    "@swc/core-linux-arm-gnueabihf": 1.3.56
+    "@swc/core-linux-arm64-gnu": 1.3.56
+    "@swc/core-linux-arm64-musl": 1.3.56
+    "@swc/core-linux-x64-gnu": 1.3.56
+    "@swc/core-linux-x64-musl": 1.3.56
+    "@swc/core-win32-arm64-msvc": 1.3.56
+    "@swc/core-win32-ia32-msvc": 1.3.56
+    "@swc/core-win32-x64-msvc": 1.3.56
   peerDependencies:
     "@swc/helpers": ^0.5.0
   dependenciesMeta:
@@ -1261,7 +1261,7 @@ __metadata:
   peerDependenciesMeta:
     "@swc/helpers":
       optional: true
-  checksum: 3a8463047fb79a4bc5987cd24f935e19e59dfe967648c6abbc0b61f9197b76109de832fb03e5e6452459f9e2165b565f86dbc9ecd9506f58bd4befff8e0ddc47
+  checksum: c468e281f0249742bc0ba4b7cd4076cdbf87bfc82b8bd5ad1ca8940d36372ca22754df80ab54b22613121680718eab26b92c48c8c9f5f3abb24434f05e5e1ea0
   languageName: node
   linkType: hard
 
@@ -1557,14 +1557,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitejs/plugin-react-swc@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "@vitejs/plugin-react-swc@npm:3.3.0"
+"@vitejs/plugin-react-swc@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "@vitejs/plugin-react-swc@npm:3.3.1"
   dependencies:
-    "@swc/core": ^1.3.42
+    "@swc/core": ^1.3.56
   peerDependencies:
     vite: ^4
-  checksum: 29e7389540ac448328c3450cde81b4a48815a6a57bf823b3b94b4372084d0a7a7cabb39041e9d6b6c31ebdb7f5739e54d91cfc9ec29f724daa2b9b027ecc9376
+  checksum: 72ab0a72d41c949009a2f71836894fb0003939329a2d1bb59b1181b03d21fda5002ccd20b40b48ddc8f12511cc8717122141f49ac51e97263df3c3f3142ae937
   languageName: node
   linkType: hard
 
@@ -1584,7 +1584,7 @@ __metadata:
     "@types/react-router-dom": ^5.3.3
     "@typescript-eslint/eslint-plugin": ^5.59.2
     "@typescript-eslint/parser": ^5.59.2
-    "@vitejs/plugin-react-swc": ^3.3.0
+    "@vitejs/plugin-react-swc": ^3.3.1
     async-validator: ^4.2.5
     axios: ^1.4.0
     eslint: ^8.40.0
@@ -1612,7 +1612,7 @@ __metadata:
     react-toastify: ^9.1.2
     rollup-plugin-visualizer: ^5.9.0
     sockette: ^2.0.6
-    terser: ^5.17.1
+    terser: ^5.17.2
     typesafe-i18n: ^5.24.3
     typescript: ^5.0.4
     vite: ^4.3.5
@@ -5578,9 +5578,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"terser@npm:^5.17.1":
-  version: 5.17.1
-  resolution: "terser@npm:5.17.1"
+"terser@npm:^5.17.2":
+  version: 5.17.2
+  resolution: "terser@npm:5.17.2"
   dependencies:
     "@jridgewell/source-map": ^0.3.2
     acorn: ^8.5.0
@@ -5588,7 +5588,7 @@ __metadata:
     source-map-support: ~0.5.20
   bin:
     terser: bin/terser
-  checksum: 00d4712b954307709b4e14cf17e0ab2fc2d527b480a50f212414aad12a739fb374d7b3391da2b73f82e21c9d469111ad2cd1d054861759624bd67c6dea4bd76a
+  checksum: f0fb4d18a4003c1d87621ded41e04fb601cb00b0386126845bd992331839ef8e04eb38dd9d00dea72cd50edfefe599b22f18738e07b0ffe4f28bdd8d43fbfb93
   languageName: node
   linkType: hard
 
