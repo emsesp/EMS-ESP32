@@ -205,6 +205,21 @@ const DashboardDevices: FC = () => {
     }
   );
 
+  const escFunction = useCallback((event) => {
+    if (event.keyCode === 27) {
+      if (device_select) {
+        device_select.fns.onRemoveAll();
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('keydown', escFunction);
+    return () => {
+      document.removeEventListener('keydown', escFunction);
+    };
+  }, [escFunction]);
+
   const fetchCoreData = useCallback(async () => {
     try {
       setSelectedDevice(undefined);
