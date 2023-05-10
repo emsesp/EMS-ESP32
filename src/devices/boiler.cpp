@@ -86,6 +86,26 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x49D, "HPSettings3", true, MAKE_PF_CB(process_HpSettings3));
     }
 
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_HIU) {
+        register_telegram_type(0x772, "HIUSettings", false, MAKE_PF_CB(process_HIUSettings));
+        register_telegram_type(0x779, "HIUMonitor", false, MAKE_PF_CB(process_HIUMonitor));
+
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &keepWarmTemp_,
+                              DeviceValueType::UINT,
+                              FL_(keepWarmTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_keepWarmTemp));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &setReturnTemp_,
+                              DeviceValueType::UINT,
+                              FL_(setReturnTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_returnTemp));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cwFlowRate_, DeviceValueType::USHORT, FL_(cwFlowRate), DeviceValueUOM::LMIN);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &netFlowTemp_, DeviceValueType::USHORT, FL_(netFlowTemp), DeviceValueUOM::DEGREES);
+    }
+
     /*
     * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
     * thermostat always overwrites settings in boiler
@@ -1568,6 +1588,39 @@ void Boiler::process_HpSettings3(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, elHeatStep1_, 7);
     has_update(telegram, elHeatStep2_, 8);
     has_update(telegram, elHeatStep3_, 9);
+}
+
+// HIU unit
+
+// boiler(0x08) -B-> All(0x00), ?(0x0779), data: 06 05 01 01 AD 02 EF FF FF 00 00 7F FF
+void Boiler::process_HIUMonitor(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, netFlowTemp_, 5); // is * 10
+    has_update(telegram, cwFlowRate_, 9);  // is * 10
+}
+
+// Boiler(0x08) -W-> ME(0x0x), ?(0x0772), data: 00 00 00 00 00
+void Boiler::process_HIUSettings(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, keepWarmTemp_, 1);
+    has_update(telegram, setReturnTemp_, 2);
+}
+
+// HIU Settings
+bool Boiler::set_keepWarmTemp(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+    write_command(0x772, 1, v, 0x772);
+    return true;
+}
+
+bool Boiler::set_returnTemp(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+    write_command(0x772, 2, v, 0x772);
+    return true;
 }
 
 /*

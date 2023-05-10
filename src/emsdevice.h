@@ -381,6 +381,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_HT3      = 3;
     static constexpr uint8_t EMS_DEVICE_FLAG_HEATPUMP = 4;
     static constexpr uint8_t EMS_DEVICE_FLAG_HYBRID   = 5;
+    static constexpr uint8_t EMS_DEVICE_FLAG_HIU      = 6;
 
     // Solar Module
     static constexpr uint8_t EMS_DEVICE_FLAG_SM10  = 1;
