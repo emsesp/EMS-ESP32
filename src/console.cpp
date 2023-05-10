@@ -569,7 +569,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
             if (current_arguments.size() == 0) {
                 std::vector<std::string> devices_list;
                 devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
-                devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR));
+                devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
                 devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
                 for (const auto & device_class : EMSFactory::device_handlers()) {
                     if (Command::device_has_commands(device_class.first)) {
@@ -619,12 +619,12 @@ void EMSESPShell::stopped() {
 // show welcome banner
 void EMSESPShell::display_banner() {
     println();
-    printfln("┌──────────────────────────────────────┐");
-    printfln("│ %sEMS-ESP version %-12s%s         │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
-    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s  │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
-    printfln("│                                      │");
-    printfln("│ type %shelp%s to show available commands │", COLOR_UNDERLINE, COLOR_RESET);
-    printfln("└──────────────────────────────────────┘");
+    printfln("┌───────────────────────────────────────┐");
+    printfln("│ %sEMS-ESP version %-12s%s          │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
+    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s   │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│                                       │");
+    printfln("│ type %shelp%s to show available commands  │", COLOR_UNDERLINE, COLOR_RESET);
+    printfln("└───────────────────────────────────────┘");
     println();
 
     // set console name

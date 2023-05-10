@@ -1,16 +1,13 @@
-import { FC } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-
 import { Tab } from '@mui/material';
-
-import { RouterTabs, useRouterTab, useLayoutTitle } from 'components';
-
-import { useI18nContext } from 'i18n/i18n-react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import SettingsApplication from './SettingsApplication';
 import SettingsCustomization from './SettingsCustomization';
-import SettingsScheduler from './SettingsScheduler';
 import SettingsEntities from './SettingsEntities';
+import SettingsScheduler from './SettingsScheduler';
+import type { FC } from 'react';
+import { RouterTabs, useRouterTab, useLayoutTitle } from 'components';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const Settings: FC = () => {
   const { LL } = useI18nContext();
@@ -24,7 +21,7 @@ const Settings: FC = () => {
         <Tab value="application" label={LL.APPLICATION_SETTINGS()} />
         <Tab value="customization" label={LL.CUSTOMIZATIONS()} />
         <Tab value="scheduler" label={LL.SCHEDULER()} />
-        <Tab value="customentities" label={LL.CUSTOM_ENTITIES()} />
+        <Tab value="customentities" label={LL.CUSTOM_ENTITIES(0)} />
       </RouterTabs>
       <Routes>
         <Route path="application" element={<SettingsApplication />} />

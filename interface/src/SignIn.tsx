@@ -1,31 +1,30 @@
-import { FC, useContext, useState } from 'react';
-import { ValidateFieldsError } from 'async-validator';
-import { toast } from 'react-toastify';
-
-import { Box, Fab, Paper, Typography, Button } from '@mui/material';
 import ForwardIcon from '@mui/icons-material/Forward';
+import { Box, Fab, Paper, Typography, Button } from '@mui/material';
+import { useContext, useState } from 'react';
+import { toast } from 'react-toastify';
+import type { ValidateFieldsError } from 'async-validator';
 
+import type { Locales } from 'i18n/i18n-types';
+import type { FC } from 'react';
+import type { SignInRequest } from 'types';
 import * as AuthenticationApi from 'api/authentication';
 import { PROJECT_NAME } from 'api/env';
+
+import { ValidatedTextField } from 'components';
 import { AuthenticationContext } from 'contexts/authentication';
 
-import { extractErrorMessage, onEnterCallback, updateValue } from 'utils';
-import { SignInRequest } from 'types';
-import { ValidatedTextField } from 'components';
-import { SIGN_IN_REQUEST_VALIDATOR, validate } from 'validators';
-
-import { I18nContext } from 'i18n/i18n-react';
-import type { Locales } from 'i18n/i18n-types';
-import { loadLocaleAsync } from 'i18n/i18n-util.async';
-
-import { ReactComponent as NLflag } from 'i18n/NL.svg';
 import { ReactComponent as DEflag } from 'i18n/DE.svg';
-import { ReactComponent as GBflag } from 'i18n/GB.svg';
-import { ReactComponent as SVflag } from 'i18n/SV.svg';
-import { ReactComponent as PLflag } from 'i18n/PL.svg';
-import { ReactComponent as NOflag } from 'i18n/NO.svg';
 import { ReactComponent as FRflag } from 'i18n/FR.svg';
+import { ReactComponent as GBflag } from 'i18n/GB.svg';
+import { ReactComponent as NLflag } from 'i18n/NL.svg';
+import { ReactComponent as NOflag } from 'i18n/NO.svg';
+import { ReactComponent as PLflag } from 'i18n/PL.svg';
+import { ReactComponent as SVflag } from 'i18n/SV.svg';
 import { ReactComponent as TRflag } from 'i18n/TR.svg';
+import { I18nContext } from 'i18n/i18n-react';
+import { loadLocaleAsync } from 'i18n/i18n-util.async';
+import { extractErrorMessage, onEnterCallback, updateValue } from 'utils';
+import { SIGN_IN_REQUEST_VALIDATOR, validate } from 'validators';
 
 const SignIn: FC = () => {
   const authenticationContext = useContext(AuthenticationContext);
@@ -64,7 +63,7 @@ const SignIn: FC = () => {
     });
     try {
       await validate(SIGN_IN_REQUEST_VALIDATOR, signInRequest);
-      signIn();
+      await signIn();
     } catch (errors: any) {
       setFieldErrors(errors);
       setProcessing(false);

@@ -1,6 +1,7 @@
-import Schema, { InternalRuleItem } from 'async-validator';
+import Schema from 'async-validator';
+import type { AnalogSensor, DeviceValue, Settings } from './types';
+import type { InternalRuleItem } from 'async-validator';
 import { IP_OR_HOSTNAME_VALIDATOR } from 'validators/shared';
-import { Settings, ScheduleItem, EntityItem } from './types';
 
 export const GPIO_VALIDATOR = {
   validator(rule: InternalRuleItem, value: number, callback: (error?: string) => void) {
@@ -85,15 +86,14 @@ export const createSettingsValidator = (settings: Settings) =>
     })
   });
 
-export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: ScheduleItem) =>
+export const schedulerItemValidation = () =>
   new Schema({
     name: [
       {
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{0,15}$/,
         message: "Must be <15 characters: alpha numeric, '_' or '.'"
-      },
-      ...[uniqueNameValidator(schedule, scheduleItem.o_name)]
+      }
     ],
     cmd: [
       { required: true, message: 'Command is required' },
@@ -101,17 +101,7 @@ export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: 
     ]
   });
 
-export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) => ({
-  validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
-    if (name && o_name && o_name !== name && schedule.find((si) => si.name === name)) {
-      callback('Name already in use');
-    } else {
-      callback();
-    }
-  }
-});
-
-export const entityItemValidation = (entity: EntityItem[], entityItem: EntityItem) =>
+export const entityItemValidation = () =>
   new Schema({
     name: [
       { required: true, message: 'Name is required' },
@@ -119,16 +109,27 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{1,15}$/,
         message: "Must be <15 characters: alpha numeric, '_' or '.'"
-      },
-      ...[uniqueEntityNameValidator(entity, entityItem.o_name)]
+      }
     ],
     device_id: [
-      { required: true, message: 'Device_id is required' },
-      { type: 'string', pattern: /^[A-F0-9]{1,2}$/, message: 'Must be a hex number' }
+      {
+        validator(rule: InternalRuleItem, value: string, callback: (error?: string) => void) {
+          if (isNaN(parseInt(value, 16))) {
+            callback('Is required and must be in hex format');
+          }
+          callback();
+        }
+      }
     ],
     type_id: [
-      { required: true, message: 'Type_id is required' },
-      { type: 'string', pattern: /^[A-F0-9]{1,4}$/, message: 'Must be a hex number' }
+      {
+        validator(rule: InternalRuleItem, value: string, callback: (error?: string) => void) {
+          if (isNaN(parseInt(value, 16))) {
+            callback('Is required and must be in hex format');
+          }
+          callback();
+        }
+      }
     ],
     offset: [
       { required: true, message: 'Offset is required' },
@@ -136,12 +137,42 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
     ]
   });
 
-export const uniqueEntityNameValidator = (entity: EntityItem[], o_name?: string) => ({
-  validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
-    if (name && o_name && o_name !== name && entity.find((ei) => ei.name === name)) {
-      callback('Name already in use');
+export const temperatureSensorItemValidation = () =>
+  new Schema({
+    n: [{ required: true, message: 'Name is required' }]
+  });
+
+export const isGPIOUniqueValidator = (sensors: AnalogSensor[]) => ({
+  validator(rule: InternalRuleItem, gpio: number, callback: (error?: string) => void) {
+    if (sensors.find((as) => as.g === gpio)) {
+      callback('GPIO already in use');
     } else {
       callback();
     }
   }
 });
+
+export const analogSensorItemValidation = (sensors: AnalogSensor[], creating: boolean) =>
+  new Schema({
+    n: [{ required: true, message: 'Name is required' }],
+    g: [
+      { required: true, message: 'GPIO is required' },
+      GPIO_VALIDATOR,
+      ...(creating ? [isGPIOUniqueValidator(sensors)] : [])
+    ]
+  });
+
+export const deviceValueItemValidation = (dv: DeviceValue) =>
+  new Schema({
+    v: [
+      { required: true, message: 'Value is required' },
+      {
+        validator(rule: InternalRuleItem, value: any, callback: (error?: string) => void) {
+          if (typeof value === 'number' && dv.m && dv.x && (value < dv.m || value > dv.x)) {
+            callback('Value out of range');
+          }
+          callback();
+        }
+      }
+    ]
+  });

@@ -1,42 +1,38 @@
-import { FC, useState, useContext, useEffect } from 'react';
-import { toast } from 'react-toastify';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DeviceHubIcon from '@mui/icons-material/DeviceHub';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import {
   Avatar,
-  Button,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Box,
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Theme,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
   useTheme
 } from '@mui/material';
-
+import { Body, Cell, Header, HeaderCell, HeaderRow, Row, Table } from '@table-library/react-table-library/table';
 import { useTheme as tableTheme } from '@table-library/react-table-library/theme';
-import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
-
-import DeviceHubIcon from '@mui/icons-material/DeviceHub';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
-import CancelIcon from '@mui/icons-material/Cancel';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
-
-import { AuthenticatedContext } from 'contexts/authentication';
-
-import { ButtonRow, FormLoader, SectionContent } from 'components';
-
-import { Status, busConnectionStatus, Stat } from './types';
-
-import { extractErrorMessage, useRest } from 'utils';
+import { useContext, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 import * as EMSESP from './api';
+import { busConnectionStatus } from './types';
+import type { Stat, Status } from './types';
+import type { Theme } from '@mui/material';
 
 import type { Translation } from 'i18n/i18n-types';
+import type { FC } from 'react';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import { extractErrorMessage, useRest } from 'utils';
 
 export const isConnected = ({ status }: Status) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
 
@@ -76,24 +72,6 @@ const DashboardStatus: FC = () => {
   const [confirmScan, setConfirmScan] = useState<boolean>(false);
 
   const { me } = useContext(AuthenticatedContext);
-
-  const showName = (id: any) => {
-    const name: keyof Translation['STATUS_NAMES'] = id;
-    return LL.STATUS_NAMES[name]();
-  };
-
-  const busStatus = ({ status }: Status) => {
-    switch (status) {
-      case busConnectionStatus.BUS_STATUS_CONNECTED:
-        return LL.CONNECTED(0);
-      case busConnectionStatus.BUS_STATUS_TX_ERRORS:
-        return LL.TX_ISSUES();
-      case busConnectionStatus.BUS_STATUS_OFFLINE:
-        return LL.DISCONNECTED();
-      default:
-        return 'Unknown';
-    }
-  };
 
   const stats_theme = tableTheme({
     Table: `
@@ -138,18 +116,11 @@ const DashboardStatus: FC = () => {
     return () => {
       clearInterval(timer);
     };
-    // eslint-disable-next-line
-  }, []);
+  });
 
-  const scan = async () => {
-    try {
-      await EMSESP.scanDevices();
-      toast.info(LL.SCANNING() + '...');
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    } finally {
-      setConfirmScan(false);
-    }
+  const showName = (id: any) => {
+    const name: keyof Translation['STATUS_NAMES'] = id;
+    return LL.STATUS_NAMES[name]();
   };
 
   const formatDurationSec = (duration_sec: number) => {
@@ -170,6 +141,31 @@ const DashboardStatus: FC = () => {
     }
     formatted += LL.NUM_SECONDS({ num: seconds });
     return formatted;
+  };
+
+  const busStatus = () => {
+    if (data) {
+      switch (data.status) {
+        case busConnectionStatus.BUS_STATUS_CONNECTED:
+          return LL.CONNECTED(0) + ' (' + formatDurationSec(data.uptime) + ')';
+        case busConnectionStatus.BUS_STATUS_TX_ERRORS:
+          return LL.TX_ISSUES();
+        case busConnectionStatus.BUS_STATUS_OFFLINE:
+          return LL.DISCONNECTED();
+      }
+    }
+    return 'Unknown';
+  };
+
+  const scan = async () => {
+    try {
+      await EMSESP.scanDevices();
+      toast.info(LL.SCANNING() + '...');
+    } catch (error) {
+      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
+    } finally {
+      setConfirmScan(false);
+    }
   };
 
   const renderScanDialog = () => (
@@ -201,10 +197,7 @@ const DashboardStatus: FC = () => {
                 <DirectionsBusIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText
-              primary={LL.EMS_BUS_STATUS()}
-              secondary={busStatus(data) + ' (' + formatDurationSec(data.uptime) + ')'}
-            />
+            <ListItemText primary={LL.EMS_BUS_STATUS()} secondary={busStatus()} />
           </ListItem>
           <ListItem>
             <ListItemAvatar>

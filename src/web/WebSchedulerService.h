@@ -29,7 +29,6 @@ namespace emsesp {
 
 class ScheduleItem {
   public:
-    std::string id; // unqiue id
     boolean     active;
     uint8_t     flags;
     uint16_t    elapsed_min; // total mins from 00:00

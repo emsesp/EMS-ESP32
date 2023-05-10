@@ -1,8 +1,7 @@
-import { AxiosPromise } from 'axios';
-
-import { WiFiNetworkList, NetworkSettings, NetworkStatus } from 'types';
-
 import { AXIOS } from './endpoints';
+import type { AxiosPromise } from 'axios';
+
+import type { WiFiNetworkList, NetworkSettings, NetworkStatus } from 'types';
 
 export function readNetworkStatus(): AxiosPromise<NetworkStatus> {
   return AXIOS.get('/networkStatus');

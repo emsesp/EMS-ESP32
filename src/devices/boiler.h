@@ -35,7 +35,7 @@ class Boiler : public EMSdevice {
         return (flags() & 0x0F);
     }
 
-    void check_active(const bool force = false);
+    void check_active();
 
     uint8_t boilerState_ = EMS_VALUE_UINT_NOTSET; // Boiler state flag - FOR INTERNAL USE
 

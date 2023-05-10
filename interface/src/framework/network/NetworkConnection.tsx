@@ -1,16 +1,15 @@
-import { FC, useCallback, useContext, useState } from 'react';
-import { Navigate, Routes, Route, useNavigate } from 'react-router-dom';
-
 import { Tab } from '@mui/material';
-
-import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
-import { WiFiNetwork } from 'types';
-import { AuthenticatedContext } from 'contexts/authentication';
-import { WiFiConnectionContext } from './WiFiConnectionContext';
-import NetworkStatusForm from './NetworkStatusForm';
-import WiFiNetworkScanner from './WiFiNetworkScanner';
+import { useCallback, useContext, useState } from 'react';
+import { Navigate, Routes, Route, useNavigate } from 'react-router-dom';
 import NetworkSettingsForm from './NetworkSettingsForm';
+import NetworkStatusForm from './NetworkStatusForm';
+import { WiFiConnectionContext } from './WiFiConnectionContext';
+import WiFiNetworkScanner from './WiFiNetworkScanner';
+import type { FC } from 'react';
 
+import type { WiFiNetwork } from 'types';
+import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const NetworkConnection: FC = () => {

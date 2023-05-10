@@ -1,20 +1,21 @@
-import { FC } from 'react';
-import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, Theme, useTheme } from '@mui/material';
-
-import SettingsInputComponentIcon from '@mui/icons-material/SettingsInputComponent';
-import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
-import WifiIcon from '@mui/icons-material/Wifi';
 import DnsIcon from '@mui/icons-material/Dns';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import RouterIcon from '@mui/icons-material/Router';
+import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
+import SettingsInputComponentIcon from '@mui/icons-material/SettingsInputComponent';
+import WifiIcon from '@mui/icons-material/Wifi';
+import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, useTheme } from '@mui/material';
+import type { Theme } from '@mui/material';
+import type { FC } from 'react';
 
-import { ButtonRow, FormLoader, SectionContent } from 'components';
-import { NetworkConnectionStatus, NetworkStatus } from 'types';
+import type { NetworkStatus } from 'types';
 import * as NetworkApi from 'api/network';
-import { useRest } from 'utils';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
+import { NetworkConnectionStatus } from 'types';
+import { useRest } from 'utils';
 
 const isConnected = ({ status }: NetworkStatus) =>
   status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED ||

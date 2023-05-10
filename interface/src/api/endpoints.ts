@@ -1,6 +1,7 @@
-import axios, { AxiosPromise, CancelToken, AxiosProgressEvent } from 'axios';
+import axios from 'axios';
+import { unpack } from './unpack';
 
-import { decode } from '@msgpack/msgpack';
+import type { AxiosPromise, CancelToken, AxiosProgressEvent } from 'axios';
 
 export const WS_BASE_URL = '/ws/';
 export const API_BASE_URL = '/rest/';
@@ -72,11 +73,8 @@ export const AXIOS_BIN = axios.create({
       return JSON.stringify(data);
     }
   ],
-  transformResponse: [
-    (data) => {
-      return decode(data);
-    }
-  ]
+  // transformResponse: [(data) => decode(data)]
+  transformResponse: [(data) => unpack(data)] // new using msgpackr
 });
 
 export interface FileUploadConfig {

@@ -1,9 +1,10 @@
-import { FC, useContext } from 'react';
+import { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
+import type { FC } from 'react';
 
+import type { RequiredChildrenProps } from 'utils';
 import * as AuthenticationApi from 'api/authentication';
 import { AuthenticationContext } from 'contexts/authentication';
-import { RequiredChildrenProps } from 'utils';
 
 const RequireUnauthenticated: FC<RequiredChildrenProps> = ({ children }) => {
   const authenticationContext = useContext(AuthenticationContext);

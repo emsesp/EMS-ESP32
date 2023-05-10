@@ -1,6 +1,9 @@
-import { FC, useContext, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
-
+import CancelIcon from '@mui/icons-material/Cancel';
+import DeleteIcon from '@mui/icons-material/Delete';
+import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import WarningIcon from '@mui/icons-material/Warning';
 import {
   Avatar,
   Button,
@@ -12,16 +15,19 @@ import {
   ListItemSecondaryAction,
   ListItemText,
   Typography,
-  InputAdornment
+  InputAdornment,
+  TextField
 } from '@mui/material';
+import { useContext, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import RestartMonitor from '../system/RestartMonitor';
+import { WiFiConnectionContext } from './WiFiConnectionContext';
+import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 
-import LockOpenIcon from '@mui/icons-material/LockOpen';
-import DeleteIcon from '@mui/icons-material/Delete';
-import WarningIcon from '@mui/icons-material/Warning';
-import LockIcon from '@mui/icons-material/Lock';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import CancelIcon from '@mui/icons-material/Cancel';
-
+import type { NetworkSettings } from 'types';
+import * as NetworkApi from 'api/network';
 import {
   BlockFormControlLabel,
   ButtonRow,
@@ -32,19 +38,12 @@ import {
   MessageBox,
   BlockNavigation
 } from 'components';
-import { NetworkSettings } from 'types';
-import * as NetworkApi from 'api/network';
-import { numberValue, updateValueDirty, useRest } from 'utils';
+import { useI18nContext } from 'i18n/i18n-react';
 import * as EMSESP from 'project/api';
+import { numberValue, updateValueDirty, useRest } from 'utils';
 
-import { WiFiConnectionContext } from './WiFiConnectionContext';
-import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
-import { ValidateFieldsError } from 'async-validator';
 import { validate } from 'validators';
 import { createNetworkSettingsValidator } from 'validators/network';
-
-import { useI18nContext } from 'i18n/i18n-react';
-import RestartMonitor from '../system/RestartMonitor';
 
 const WiFiSettingsForm: FC = () => {
   const { LL } = useI18nContext();
@@ -106,7 +105,7 @@ const WiFiSettingsForm: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(createNetworkSettingsValidator(data), data);
-        saveData();
+        await saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
       }
@@ -167,7 +166,6 @@ const WiFiSettingsForm: FC = () => {
             margin="normal"
           />
         )}
-
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="tx_power"
@@ -182,21 +180,17 @@ const WiFiSettingsForm: FC = () => {
           type="number"
           margin="normal"
         />
-
         <BlockFormControlLabel
           control={<Checkbox name="nosleep" checked={data.nosleep} onChange={updateFormValue} />}
           label={LL.NETWORK_DISABLE_SLEEP()}
         />
-
         <BlockFormControlLabel
           control={<Checkbox name="bandwidth20" checked={data.bandwidth20} onChange={updateFormValue} />}
           label={LL.NETWORK_LOW_BAND()}
         />
-
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.GENERAL_OPTIONS()}
         </Typography>
-
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="hostname"
@@ -207,19 +201,16 @@ const WiFiSettingsForm: FC = () => {
           onChange={updateFormValue}
           margin="normal"
         />
-
         <BlockFormControlLabel
           control={<Checkbox name="enableMDNS" checked={data.enableMDNS} onChange={updateFormValue} />}
           label={LL.NETWORK_USE_DNS()}
         />
-
         <BlockFormControlLabel
           control={<Checkbox name="enableCORS" checked={data.enableCORS} onChange={updateFormValue} />}
           label={LL.NETWORK_ENABLE_CORS()}
         />
         {data.enableCORS && (
-          <ValidatedTextField
-            fieldErrors={fieldErrors}
+          <TextField
             name="CORSOrigin"
             label={LL.NETWORK_CORS_ORIGIN()}
             fullWidth
@@ -229,12 +220,10 @@ const WiFiSettingsForm: FC = () => {
             margin="normal"
           />
         )}
-
         <BlockFormControlLabel
           control={<Checkbox name="enableIPv6" checked={data.enableIPv6} onChange={updateFormValue} />}
           label={LL.NETWORK_ENABLE_IPV6()}
         />
-
         <BlockFormControlLabel
           control={<Checkbox name="static_ip_config" checked={data.static_ip_config} onChange={updateFormValue} />}
           label={LL.NETWORK_FIXED_IP()}
@@ -309,7 +298,7 @@ const WiFiSettingsForm: FC = () => {
               variant="outlined"
               color="primary"
               type="submit"
-              onClick={() => loadData()}
+              onClick={loadData}
             >
               {LL.CANCEL()}
             </Button>

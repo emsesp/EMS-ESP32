@@ -1,12 +1,13 @@
-import { FC, useEffect, useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import { ToastContainer, Slide } from 'react-toastify';
+
 import 'react-toastify/dist/ReactToastify.min.css';
 
-import CustomTheme from 'CustomTheme';
-import AppRouting from 'AppRouting';
-
 import { localStorageDetector } from 'typesafe-i18n/detectors';
+import type { FC } from 'react';
+import AppRouting from 'AppRouting';
+import CustomTheme from 'CustomTheme';
+
 import TypesafeI18n from 'i18n/i18n-react';
 import { detectLocale } from 'i18n/i18n-util';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
@@ -17,7 +18,7 @@ const App: FC = () => {
   const [wasLoaded, setWasLoaded] = useState(false);
 
   useEffect(() => {
-    loadLocaleAsync(detectedLocale).then(() => setWasLoaded(true));
+    void loadLocaleAsync(detectedLocale).then(() => setWasLoaded(true));
   }, []);
 
   if (!wasLoaded) return null;

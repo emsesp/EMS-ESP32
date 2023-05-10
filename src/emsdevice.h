@@ -319,9 +319,9 @@ class EMSdevice {
     };
 
     enum DeviceType : uint8_t {
-        SYSTEM = 0,   // this is us (EMS-ESP)
-        DALLASSENSOR, // for internal dallas sensors
-        ANALOGSENSOR, // for internal analog sensors
+        SYSTEM = 0,        // this is us (EMS-ESP)
+        TEMPERATURESENSOR, // for internal temperature sensors
+        ANALOGSENSOR,      // for internal analog sensors
         SCHEDULER,
         BOILER,
         THERMOSTAT,

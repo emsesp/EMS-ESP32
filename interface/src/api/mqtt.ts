@@ -1,7 +1,6 @@
-import { AxiosPromise } from 'axios';
-import { MqttSettings, MqttStatus } from 'types';
-
 import { AXIOS } from './endpoints';
+import type { AxiosPromise } from 'axios';
+import type { MqttSettings, MqttStatus } from 'types';
 
 export function readMqttStatus(): AxiosPromise<MqttStatus> {
   return AXIOS.get('/mqttStatus');

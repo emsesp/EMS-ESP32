@@ -1,16 +1,15 @@
-import { FC, useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-
 import { Box, Toolbar } from '@mui/material';
-
-import { PROJECT_NAME } from 'api/env';
-import { RequiredChildrenProps } from 'utils';
-
-import LayoutDrawer from './LayoutDrawer';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import LayoutAppBar from './LayoutAppBar';
+import LayoutDrawer from './LayoutDrawer';
 import { LayoutContext } from './context';
+import type { FC } from 'react';
 
-export const DRAWER_WIDTH = 240;
+import type { RequiredChildrenProps } from 'utils';
+import { PROJECT_NAME } from 'api/env';
+
+export const DRAWER_WIDTH = 210;
 
 const Layout: FC<RequiredChildrenProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);

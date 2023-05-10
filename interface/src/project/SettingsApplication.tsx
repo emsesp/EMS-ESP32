@@ -1,17 +1,16 @@
-import { FC, useState } from 'react';
-import { ValidateFieldsError } from 'async-validator';
-
-import { toast } from 'react-toastify';
-
-import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider, InputAdornment } from '@mui/material';
-
-import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider, InputAdornment, TextField } from '@mui/material';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
 
-import { validate } from 'validators';
+import * as EMSESP from './api';
+import { BOARD_PROFILES } from './types';
 import { createSettingsValidator } from './validators';
-
+import type { Settings } from './types';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 import {
   SectionContent,
   FormLoader,
@@ -21,13 +20,11 @@ import {
   MessageBox,
   BlockNavigation
 } from 'components';
-import { numberValue, extractErrorMessage, updateValueDirty, useRest } from 'utils';
 
-import * as EMSESP from './api';
-import { Settings, BOARD_PROFILES } from './types';
-
-import { useI18nContext } from 'i18n/i18n-react';
 import RestartMonitor from 'framework/system/RestartMonitor';
+import { useI18nContext } from 'i18n/i18n-react';
+import { numberValue, extractErrorMessage, updateValueDirty, useRest } from 'utils';
+import { validate } from 'validators';
 
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
@@ -98,7 +95,7 @@ const SettingsApplication: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(createSettingsValidator(data), data);
-        saveData();
+        await saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
       }
@@ -113,12 +110,12 @@ const SettingsApplication: FC = () => {
           board_profile: boardProfile
         });
       } else {
-        updateBoardProfile(boardProfile);
+        void updateBoardProfile(boardProfile);
       }
     };
 
     const restart = async () => {
-      validateAndSubmit();
+      await validateAndSubmit();
       try {
         await EMSESP.restart();
         setRestarting(true);
@@ -135,7 +132,7 @@ const SettingsApplication: FC = () => {
         <Box color="warning.main">
           <Typography variant="body2">{LL.BOARD_PROFILE_TEXT()}</Typography>
         </Box>
-        <ValidatedTextField
+        <TextField
           name="board_profile"
           label={LL.BOARD_PROFILE()}
           value={data.board_profile}
@@ -151,7 +148,7 @@ const SettingsApplication: FC = () => {
           <MenuItem key={'CUSTOM'} value={'CUSTOM'}>
             {LL.CUSTOM()}&hellip;
           </MenuItem>
-        </ValidatedTextField>
+        </TextField>
         {data.board_profile === 'CUSTOM' && (
           <>
             <Grid
@@ -233,7 +230,7 @@ const SettingsApplication: FC = () => {
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
-                <ValidatedTextField
+                <TextField
                   name="phy_type"
                   label={LL.PHY_TYPE()}
                   disabled={saving}
@@ -247,7 +244,7 @@ const SettingsApplication: FC = () => {
                   <MenuItem value={0}>{LL.DISABLED(1)}</MenuItem>
                   <MenuItem value={1}>LAN8720</MenuItem>
                   <MenuItem value={2}>TLK110</MenuItem>
-                </ValidatedTextField>
+                </TextField>
               </Grid>
             </Grid>
             {data.phy_type !== 0 && (
@@ -260,7 +257,7 @@ const SettingsApplication: FC = () => {
                 alignItems="flex-start"
               >
                 <Grid item xs={12} sm={6} md={4}>
-                  <ValidatedTextField
+                  <TextField
                     name="eth_power"
                     label={LL.GPIO_OF('PHY Power') + ' (-1=' + LL.DISABLED(1) + ')'}
                     fullWidth
@@ -273,7 +270,7 @@ const SettingsApplication: FC = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                  <ValidatedTextField
+                  <TextField
                     name="eth_phy_addr"
                     label={LL.ADDRESS_OF('PHY I²C')}
                     fullWidth
@@ -286,7 +283,7 @@ const SettingsApplication: FC = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                  <ValidatedTextField
+                  <TextField
                     name="eth_clock_mode"
                     label="PHY Clk"
                     disabled={saving}
@@ -301,7 +298,7 @@ const SettingsApplication: FC = () => {
                     <MenuItem value={1}>GPIO0_OUT</MenuItem>
                     <MenuItem value={2}>GPIO16_OUT</MenuItem>
                     <MenuItem value={3}>GPIO17_OUT</MenuItem>
-                  </ValidatedTextField>
+                  </TextField>
                 </Grid>
               </Grid>
             )}
@@ -312,7 +309,7 @@ const SettingsApplication: FC = () => {
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <Grid item xs={12} sm={6}>
-            <ValidatedTextField
+            <TextField
               name="tx_mode"
               label={LL.TX_MODE()}
               disabled={saving}
@@ -327,10 +324,10 @@ const SettingsApplication: FC = () => {
               <MenuItem value={2}>EMS+</MenuItem>
               <MenuItem value={3}>HT3</MenuItem>
               <MenuItem value={4}>{LL.HARDWARE()}</MenuItem>
-            </ValidatedTextField>
+            </TextField>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <ValidatedTextField
+            <TextField
               name="ems_bus_id"
               label={LL.ID_OF(LL.EMS_BUS(1))}
               disabled={saving}
@@ -352,14 +349,14 @@ const SettingsApplication: FC = () => {
               <MenuItem value={0x4b}>Gateway 4 (0x4B)</MenuItem>
               <MenuItem value={0x4c}>Gateway 5 (0x4C)</MenuItem>
               <MenuItem value={0x4d}>Gateway 7 (0x4D)</MenuItem>
-            </ValidatedTextField>
+            </TextField>
           </Grid>
         </Grid>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.GENERAL_OPTIONS()}
         </Typography>
         <Grid item>
-          <ValidatedTextField
+          <TextField
             name="locale"
             label={LL.LANGUAGE_ENTITIES()}
             disabled={saving}
@@ -379,7 +376,7 @@ const SettingsApplication: FC = () => {
             <MenuItem value="pl">Polski (PL)</MenuItem>
             <MenuItem value="sv">Svenska (SV)</MenuItem>
             <MenuItem value="tr">Türk (TR)</MenuItem>
-          </ValidatedTextField>
+          </TextField>
         </Grid>
         {data.led_gpio !== 0 && (
           <BlockFormControlLabel
@@ -481,7 +478,7 @@ const SettingsApplication: FC = () => {
         </Typography>
         <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <Grid item xs={12} sm={6} md={4}>
-            <ValidatedTextField
+            <TextField
               name="bool_dashboard"
               label={LL.BOOLEAN_FORMAT_DASHBOARD()}
               value={data.bool_dashboard}
@@ -495,10 +492,10 @@ const SettingsApplication: FC = () => {
               <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
               <MenuItem value={3}>true/false</MenuItem>
               <MenuItem value={5}>1/0</MenuItem>
-            </ValidatedTextField>
+            </TextField>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
-            <ValidatedTextField
+            <TextField
               name="bool_format"
               label={LL.BOOLEAN_FORMAT_API()}
               value={data.bool_format}
@@ -514,10 +511,10 @@ const SettingsApplication: FC = () => {
               <MenuItem value={4}>true/false</MenuItem>
               <MenuItem value={5}>&quot;1&quot;/&quot;0&quot;</MenuItem>
               <MenuItem value={6}>1/0</MenuItem>
-            </ValidatedTextField>
+            </TextField>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
-            <ValidatedTextField
+            <TextField
               name="enum_format"
               label={LL.ENUM_FORMAT()}
               value={data.enum_format}
@@ -529,7 +526,7 @@ const SettingsApplication: FC = () => {
             >
               <MenuItem value={1}>{LL.VALUE(1)}</MenuItem>
               <MenuItem value={2}>{LL.INDEX()}</MenuItem>
-            </ValidatedTextField>
+            </TextField>
           </Grid>
         </Grid>
         {data.dallas_gpio !== 0 && (
@@ -593,7 +590,7 @@ const SettingsApplication: FC = () => {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <ValidatedTextField
+              <TextField
                 name="syslog_level"
                 label={LL.LOG_LEVEL()}
                 value={data.syslog_level}
@@ -610,7 +607,7 @@ const SettingsApplication: FC = () => {
                 <MenuItem value={6}>INFO</MenuItem>
                 <MenuItem value={7}>DEBUG</MenuItem>
                 <MenuItem value={9}>ALL</MenuItem>
-              </ValidatedTextField>
+              </TextField>
             </Grid>
             <Grid item xs={12} sm={6}>
               <ValidatedTextField
@@ -638,7 +635,6 @@ const SettingsApplication: FC = () => {
             </Button>
           </MessageBox>
         )}
-
         {!restartNeeded && dirtyFlags && dirtyFlags.length !== 0 && (
           <ButtonRow>
             <Button
@@ -647,7 +643,7 @@ const SettingsApplication: FC = () => {
               variant="outlined"
               color="primary"
               type="submit"
-              onClick={() => loadData()}
+              onClick={loadData}
             >
               {LL.CANCEL()}
             </Button>

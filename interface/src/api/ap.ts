@@ -1,7 +1,7 @@
-import { AxiosPromise } from 'axios';
-
-import { APSettings, APStatus } from 'types';
 import { AXIOS } from './endpoints';
+import type { AxiosPromise } from 'axios';
+
+import type { APSettings, APStatus } from 'types';
 
 export function readAPStatus(): AxiosPromise<APStatus> {
   return AXIOS.get('/apStatus');

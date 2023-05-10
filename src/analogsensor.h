@@ -112,8 +112,7 @@ class AnalogSensor {
     ~AnalogSensor() = default;
 
     enum AnalogType : int8_t {
-        MARK_DELETED = -1, // mark for deletion
-        NOTUSED,           // 0 - disabled
+        NOTUSED, // 0 - disabled
         DIGITAL_IN,
         COUNTER,
         ADC,
@@ -157,7 +156,7 @@ class AnalogSensor {
         return sensors_.size();
     }
 
-    bool update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type);
+    bool update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted = false);
     bool get_value_info(JsonObject & output, const char * cmd, const int8_t id) const;
 
 #if defined(EMSESP_TEST)

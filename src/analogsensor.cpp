@@ -301,7 +301,8 @@ void AnalogSensor::loop() {
 }
 
 // update analog information name and offset
-bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type) {
+// a type of -1 is used to delete the sensor
+bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted) {
     boolean found_sensor = false; // see if we can find the sensor in our customization list
 
     EMSESP::webCustomizationService.update(
@@ -313,7 +314,7 @@ bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset,
                 if (AnalogCustomization.gpio == gpio) {
                     found_sensor = true; // found the record
                     // see if it's marked for deletion
-                    if (type == AnalogType::MARK_DELETED) {
+                    if (deleted) {
                         LOG_DEBUG("Removing analog sensor GPIO %02d", gpio);
                         settings.analogCustomizations.remove(AnalogCustomization);
                     } else {

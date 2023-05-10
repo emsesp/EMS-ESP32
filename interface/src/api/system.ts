@@ -1,8 +1,8 @@
-import { AxiosPromise } from 'axios';
+import { AXIOS, AXIOS_BIN, startUploadFile } from './endpoints';
+import type { FileUploadConfig } from './endpoints';
+import type { AxiosPromise } from 'axios';
 
-import { OTASettings, SystemStatus, LogSettings, LogEntries } from 'types';
-
-import { AXIOS, AXIOS_BIN, FileUploadConfig, startUploadFile } from './endpoints';
+import type { OTASettings, SystemStatus, LogSettings, LogEntries } from 'types';
 
 export function readSystemStatus(timeout?: number): AxiosPromise<SystemStatus> {
   return AXIOS.get('/systemStatus', { timeout });

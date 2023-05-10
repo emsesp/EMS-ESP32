@@ -1,8 +1,7 @@
-import { AxiosPromise } from 'axios';
-
-import { SecuritySettings, Token } from 'types';
-
 import { AXIOS } from './endpoints';
+import type { AxiosPromise } from 'axios';
+
+import type { SecuritySettings, Token } from 'types';
 
 export function readSecuritySettings(): AxiosPromise<SecuritySettings> {
   return AXIOS.get('/securitySettings');

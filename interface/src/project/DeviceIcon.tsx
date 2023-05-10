@@ -1,43 +1,21 @@
-import { FC } from 'react';
-
+import { AiOutlineControl, AiOutlineGateway, AiOutlineAlert, AiOutlineChrome } from 'react-icons/ai';
 import { CgSmartHomeBoiler } from 'react-icons/cg';
+
 import { FaSolarPanel } from 'react-icons/fa';
-import { MdThermostatAuto, MdOutlineSensors, MdOutlineExtension } from 'react-icons/md';
 import { GiHeatHaze } from 'react-icons/gi';
+import { MdThermostatAuto, MdOutlineSensors, MdOutlineExtension } from 'react-icons/md';
 import { TiFlowSwitch } from 'react-icons/ti';
 import { VscVmConnect } from 'react-icons/vsc';
-import { AiOutlineControl, AiOutlineGateway, AiOutlineAlert, AiOutlineChrome } from 'react-icons/ai';
+import { DeviceType } from './types';
+import type { FC } from 'react';
 
 interface DeviceIconProps {
   type_id: number;
 }
 
-// matches emsdevice.h DeviceType
-const enum DeviceType {
-  SYSTEM = 0,
-  DALLASSENSOR,
-  ANALOGSENSOR,
-  SCHEDULER,
-  BOILER,
-  THERMOSTAT,
-  MIXER,
-  SOLAR,
-  HEATPUMP,
-  GATEWAY,
-  SWITCH,
-  CONTROLLER,
-  CONNECT,
-  ALERT,
-  PUMP,
-  GENERIC,
-  HEATSOURCE,
-  CUSTOM,
-  UNKNOWN
-}
-
 const DeviceIcon: FC<DeviceIconProps> = ({ type_id }) => {
   switch (type_id) {
-    case DeviceType.DALLASSENSOR:
+    case DeviceType.TEMPERATURESENSOR:
     case DeviceType.ANALOGSENSOR:
       return <MdOutlineSensors />;
     case DeviceType.BOILER:

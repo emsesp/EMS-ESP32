@@ -79,7 +79,7 @@ class WebSettings {
         UART    = (1 << 0), // 1
         SYSLOG  = (1 << 1), // 2
         ADC     = (1 << 2), // 4 - analog
-        DALLAS  = (1 << 3), // 8
+        SENSOR  = (1 << 3), // 8
         SHOWER  = (1 << 4), // 16
         LED     = (1 << 5), // 32
         BUTTON  = (1 << 6), // 64

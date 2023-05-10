@@ -1,13 +1,12 @@
-import { FC, useContext } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-
 import { Tab } from '@mui/material';
+import { useContext } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import MqttSettingsForm from './MqttSettingsForm';
+import MqttStatusForm from './MqttStatusForm';
+import type { FC } from 'react';
 
 import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
-
-import MqttStatusForm from './MqttStatusForm';
-import MqttSettingsForm from './MqttSettingsForm';
 
 import { useI18nContext } from 'i18n/i18n-react';
 

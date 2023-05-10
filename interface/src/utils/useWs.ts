@@ -1,6 +1,6 @@
+import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Sockette from 'sockette';
-import { debounce } from 'lodash-es';
 
 import { addAccessTokenParameter } from 'api/authentication';
 
@@ -83,6 +83,7 @@ export const useWs = <D>(wsUrl: string, wsThrottle = 100) => {
       }
     });
     ws.current = instance;
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     return instance.close;
   }, [wsUrl, onMessage]);
 

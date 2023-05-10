@@ -20,7 +20,7 @@
 
 #include "system.h"
 #include "mqtt.h"
-#include "dallassensor.h"
+#include "temperaturesensor.h"
 #include "version.h"
 #include "default_settings.h"
 
@@ -33,9 +33,9 @@
 namespace emsesp {
 class EMSESP {
   public:
-    static Mqtt         mqtt_;
-    static System       system_;
-    static DallasSensor dallassensor_;
+    static Mqtt              mqtt_;
+    static System            system_;
+    static TemperatureSensor temperaturesensor_;
 
     static uuid::log::Logger logger();
     static ESP8266React      esp8266React;

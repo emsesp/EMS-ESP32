@@ -1,9 +1,8 @@
-import { FC } from 'react';
-import { useNavigate } from 'react-router-dom';
-
 import { Tabs, useMediaQuery, useTheme } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import type { FC } from 'react';
 
-import { RequiredChildrenProps } from 'utils';
+import type { RequiredChildrenProps } from 'utils';
 
 interface RouterTabsProps extends RequiredChildrenProps {
   value: string | false;

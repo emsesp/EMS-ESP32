@@ -1,10 +1,9 @@
-import { FC } from 'react';
-
 import { CssBaseline } from '@mui/material';
-import { createTheme, responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import { blueGrey, blue } from '@mui/material/colors';
+import { createTheme, responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
+import type { FC } from 'react';
 
-import { RequiredChildrenProps } from 'utils';
+import type { RequiredChildrenProps } from 'utils';
 
 const theme = responsiveFontSizes(
   createTheme({

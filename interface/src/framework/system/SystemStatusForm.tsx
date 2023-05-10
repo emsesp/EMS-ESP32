@@ -1,5 +1,16 @@
-import { FC, useContext, useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
+import AppsIcon from '@mui/icons-material/Apps';
+import BuildIcon from '@mui/icons-material/Build';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DevicesIcon from '@mui/icons-material/Devices';
+import FolderIcon from '@mui/icons-material/Folder';
+import MemoryIcon from '@mui/icons-material/Memory';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SdCardAlertIcon from '@mui/icons-material/SdCardAlert';
+import SdStorageIcon from '@mui/icons-material/SdStorage';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
+import TimerIcon from '@mui/icons-material/Timer';
 import {
   Avatar,
   Box,
@@ -17,31 +28,18 @@ import {
   Typography
 } from '@mui/material';
 
-import DevicesIcon from '@mui/icons-material/Devices';
-import ShowChartIcon from '@mui/icons-material/ShowChart';
-import MemoryIcon from '@mui/icons-material/Memory';
-import AppsIcon from '@mui/icons-material/Apps';
-import SdStorageIcon from '@mui/icons-material/SdStorage';
-import SdCardAlertIcon from '@mui/icons-material/SdCardAlert';
-import FolderIcon from '@mui/icons-material/Folder';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
-import BuildIcon from '@mui/icons-material/Build';
-import TimerIcon from '@mui/icons-material/Timer';
-import CancelIcon from '@mui/icons-material/Cancel';
-
-import { ButtonRow, FormLoader, SectionContent, MessageBox } from 'components';
-import { SystemStatus, Version } from 'types';
-import * as SystemApi from 'api/system';
-import { extractErrorMessage, useRest } from 'utils';
-
-import { AuthenticatedContext } from 'contexts/authentication';
-
 import axios from 'axios';
+import { useContext, useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import RestartMonitor from './RestartMonitor';
+import type { FC } from 'react';
 
+import type { SystemStatus, Version } from 'types';
+import * as SystemApi from 'api/system';
+import { ButtonRow, FormLoader, SectionContent, MessageBox } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import { extractErrorMessage, useRest } from 'utils';
 
 export const VERSIONCHECK_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/latest';
 export const VERSIONCHECK_DEV_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/tags/latest';
@@ -66,14 +64,14 @@ const SystemStatusForm: FC = () => {
   const [latestDevVersion, setLatestDevVersion] = useState<Version>();
 
   useEffect(() => {
-    axios.get(VERSIONCHECK_ENDPOINT).then((response) => {
+    void axios.get(VERSIONCHECK_ENDPOINT).then((response) => {
       setLatestVersion({
         version: response.data.name,
         url: response.data.assets[1].browser_download_url,
         changelog: response.data.assets[0].browser_download_url
       });
     });
-    axios.get(VERSIONCHECK_DEV_ENDPOINT).then((response) => {
+    void axios.get(VERSIONCHECK_DEV_ENDPOINT).then((response) => {
       setLatestDevVersion({
         version: response.data.name.split(/\s+/).splice(-1),
         url: response.data.assets[1].browser_download_url,
@@ -148,61 +146,59 @@ const SystemStatusForm: FC = () => {
     </Dialog>
   );
 
-  const renderVersionDialog = () => {
-    return (
-      <Dialog open={showingVersion} onClose={() => setShowingVersion(false)}>
-        <DialogTitle>{LL.VERSION_CHECK(1)}</DialogTitle>
-        <DialogContent dividers>
-          <MessageBox my={0} level="info" message={LL.SYSTEM_VERSION_RUNNING() + ' ' + data?.emsesp_version} />
-          {latestVersion && (
-            <Box mt={2} mb={2}>
-              {LL.THE_LATEST()}&nbsp;<u>{LL.OFFICIAL()}</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestVersion.version}</b>
-              &nbsp;(
-              <Link target="_blank" href={latestVersion.changelog} color="primary">
-                {LL.RELEASE_NOTES()}
-              </Link>
-              )&nbsp;(
-              <Link target="_blank" href={latestVersion.url} color="primary">
-                {LL.DOWNLOAD(1)}
-              </Link>
-              )
-            </Box>
-          )}
-
-          {latestDevVersion && (
-            <Box mt={2} mb={2}>
-              {LL.THE_LATEST()}&nbsp;<u>{LL.DEVELOPMENT()}</u>&nbsp;{LL.VERSION_IS()}&nbsp;
-              <b>{latestDevVersion.version}</b>
-              &nbsp;(
-              <Link target="_blank" href={latestDevVersion.changelog} color="primary">
-                {LL.RELEASE_NOTES()}
-              </Link>
-              )&nbsp;(
-              <Link target="_blank" href={latestDevVersion.url} color="primary">
-                {LL.DOWNLOAD(1)}
-              </Link>
-              )
-            </Box>
-          )}
-
-          <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>
-            <Typography variant="body2">
-              {LL.USE()}&nbsp;
-              <Link href={uploadURL} color="primary">
-                {LL.UPLOAD()}
-              </Link>
-              &nbsp;{LL.SYSTEM_APPLY_FIRMWARE()}
-            </Typography>
+  const renderVersionDialog = () => (
+    <Dialog open={showingVersion} onClose={() => setShowingVersion(false)}>
+      <DialogTitle>{LL.VERSION_CHECK(1)}</DialogTitle>
+      <DialogContent dividers>
+        <MessageBox my={0} level="info" message={LL.VERSION_ON() + ' v' + data?.emsesp_version} />
+        {latestVersion && (
+          <Box mt={2} mb={2}>
+            {LL.THE_LATEST()}&nbsp;<u>{LL.OFFICIAL()}</u>&nbsp;{LL.RELEASE_IS()}&nbsp;<b>{latestVersion.version}</b>
+            &nbsp;(
+            <Link target="_blank" href={latestVersion.changelog} color="primary">
+              {LL.RELEASE_NOTES()}
+            </Link>
+            )&nbsp;(
+            <Link target="_blank" href={latestVersion.url} color="primary">
+              {LL.DOWNLOAD(1)}
+            </Link>
+            )
           </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" onClick={() => setShowingVersion(false)} color="secondary">
-            {LL.CLOSE()}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-  };
+        )}
+
+        {latestDevVersion && (
+          <Box mt={2} mb={2}>
+            {LL.THE_LATEST()}&nbsp;<u>{LL.DEVELOPMENT()}</u>&nbsp;{LL.RELEASE_IS()}&nbsp;
+            <b>{latestDevVersion.version}</b>
+            &nbsp;(
+            <Link target="_blank" href={latestDevVersion.changelog} color="primary">
+              {LL.RELEASE_NOTES()}
+            </Link>
+            )&nbsp;(
+            <Link target="_blank" href={latestDevVersion.url} color="primary">
+              {LL.DOWNLOAD(1)}
+            </Link>
+            )
+          </Box>
+        )}
+
+        <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>
+          <Typography variant="body2">
+            {LL.USE()}&nbsp;
+            <Link href={uploadURL} color="primary">
+              {LL.UPLOAD()}
+            </Link>
+            &nbsp;{LL.SYSTEM_APPLY_FIRMWARE()}
+          </Typography>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button variant="outlined" onClick={() => setShowingVersion(false)} color="secondary">
+          {LL.CLOSE()}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 
   const factoryReset = async () => {
     setProcessing(true);

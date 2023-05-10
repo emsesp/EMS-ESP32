@@ -107,7 +107,7 @@ class Command {
                     const char * const * description,
                     uint8_t              flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
 
-    // same for system/dallas/analog devices
+    // same for system/temperature/analog devices
     static void add(const uint8_t        device_type,
                     const char *         cmd,
                     const cmd_function_p cb,

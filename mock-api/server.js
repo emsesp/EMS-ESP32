@@ -14,7 +14,6 @@ rest_server.use(express.json());
 // endpoints
 const API_ENDPOINT_ROOT = '/api/';
 const REST_ENDPOINT_ROOT = '/rest/';
-const EVENTSOURCE_ENDPOINT_ROOT = '/es/';
 
 // LOG
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings';
@@ -315,12 +314,13 @@ const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData';
 const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities';
 const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'status';
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
-const EMSESP_WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeValue';
-const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeSensor';
-const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalog';
+const EMSESP_WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
+const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeTemperatureSensor';
+const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalogSensor';
 const EMSESP_CUSTOM_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations';
 const EMSESP_WRITE_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
+const EMSESP_WRITE_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
 
 settings = {
   locale: 'en',
@@ -359,17 +359,18 @@ settings = {
   fahrenheit: false
 };
 
+// this is used in customizations
 const emsesp_devices = {
   devices: [
     {
-      i: 1,
+      i: 2,
       s: 'Thermostat (RC20/Moduline 300)',
       t: 5,
       tn: 'thermostat'
     },
     {
-      i: 2,
-      s: 'Boiler (Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i)',
+      i: 7,
+      s: 'Boiler (GBx72/Trendline/Cerapur/Greenstar Si/27i)',
       t: 4,
       tn: 'boiler'
     },
@@ -387,7 +388,7 @@ const emsesp_coredata = {
   // devices: [],
   devices: [
     {
-      id: '2',
+      id: 7,
       t: 4,
       tn: 'Boiler',
       b: 'Nefit',
@@ -398,7 +399,29 @@ const emsesp_coredata = {
       e: 68
     },
     {
-      id: '1',
+      id: 3,
+      t: 4,
+      tn: 'Boiler',
+      b: 'Buderus',
+      n: 'GB125/GB135/MC10',
+      d: 8,
+      p: 123,
+      v: '06.01',
+      e: 56
+    },
+    {
+      id: 1,
+      t: 5,
+      tn: 'Thermostat',
+      b: 'Buderus',
+      n: 'RC35',
+      d: 24,
+      p: 86,
+      v: '04.01',
+      e: 58
+    },
+    {
+      id: 2,
       t: 5,
       tn: 'Thermostat',
       b: '',
@@ -406,10 +429,10 @@ const emsesp_coredata = {
       d: 23,
       p: 77,
       v: '03.03',
-      e: 5
+      e: 6
     },
     {
-      id: '4',
+      id: 4,
       t: 5,
       tn: 'Thermostat',
       b: 'Buderus',
@@ -418,32 +441,64 @@ const emsesp_coredata = {
       p: 165,
       v: '04.01',
       e: 3
+    },
+    {
+      id: 5,
+      t: 6,
+      tn: 'Mixer Module',
+      b: 'Buderus',
+      n: 'MM10',
+      d: 32,
+      p: 69,
+      v: '01.01',
+      e: 6
+    },
+    {
+      id: 6,
+      t: 7,
+      tn: 'Solar Module',
+      b: 'Buderus',
+      n: 'SM10',
+      d: 48,
+      p: 73,
+      v: '01.02',
+      e: 16
+    },
+    {
+      id: 99,
+      t: 17,
+      tn: 'Custom',
+      b: '',
+      n: 'User defined entities',
+      d: 1,
+      p: 1,
+      v: '',
+      e: 1
     }
-  ],
-  s_n: 'Sensors',
-  active_sensors: 8,
-  analog_enabled: true
+  ]
 };
 
 const emsesp_sensordata = {
-  sensors: [
+  // ts: [],
+  ts: [
     { id: '28-233D-9497-0C03', n: 'Dallas 1', t: 25.7, o: 1.2, u: 1 },
     { id: '28-243D-7437-1E3A', n: 'Dallas 2 outside', t: 26.1, o: 0, u: 1 },
     { id: '28-243E-7437-1E3B', n: 'Zolder', t: 27.1, o: 0, u: 16 },
     { id: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1 }
   ],
-  // sensors: [],
-  analogs: [
-    { id: '1', g: 36, n: 'motor', v: 0, u: 0, o: 17, f: 0, t: 0 },
-    { id: '2', g: 37, n: 'External switch', v: 13, u: 0, o: 17, f: 0, t: 1 },
-    { id: '3', g: 39, n: 'Pulse count', v: 144, u: 0, o: 0, f: 0, t: 2 },
-    { id: '4', g: 40, n: 'Pressure', v: 16, u: 17, o: 0, f: 0, t: 3 }
-  ]
-  // analogs: [],
+  // as: [],
+  as: [
+    { id: 1, g: 36, n: 'motor', v: 0, u: 0, o: 17, f: 0, t: 0, d: false },
+    { id: 2, g: 37, n: 'External switch', v: 13, u: 0, o: 17, f: 0, t: 1, d: false },
+    { id: 3, g: 39, n: 'Pulse count', v: 144, u: 0, o: 0, f: 0, t: 2, d: false },
+    { id: 4, g: 40, n: 'Pressure', v: 16, u: 17, o: 0, f: 0, t: 3, d: false }
+  ],
+  analog_enabled: true
 };
 
 const status = {
   status: 0,
+  // status: 2,
   tx_mode: 1,
   uptime: 77186,
   num_devices: 2,
@@ -461,45 +516,21 @@ const status = {
 };
 
 // Dashboard data
-const emsesp_devicedata_1 = {
-  label: 'Thermostat: RC20/Moduline 300',
-  data: [
-    {
-      v: '(0)',
-      u: 0,
-      id: '08my custom error code'
-    },
-    {
-      v: '14:54:39 06/06/2021',
-      u: 0,
-      id: '00date/time'
-    },
-    {
-      v: 18,
-      u: 1,
-      id: '00hc1 selected room temperature',
-      c: 'hc1/seltemp'
-    },
-    {
-      v: 22.6,
-      u: 1,
-      id: '00hc1 current room temperature'
-    },
-    {
-      v: 'auto',
-      u: 0,
-      id: '00hc1 mode',
-      c: 'hc1/mode'
-    }
-  ]
-};
+// 7 - Nefit Trendline boiler
+// 1 - RC35 thermo
+// 2 - RC20 thermo
+// 3 - Buderus GB125 boiler
+// 4 - RC100 themo
+// 5 - Mixer MM10
+// 6 - Solar SM10
+// 99 - Custom
 
-const emsesp_devicedata_2 = {
+const emsesp_devicedata_7 = {
   label: 'Boiler: Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i',
   data: [
     { v: '', u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
-    { v: 'false', u: 0, id: '08heating active' },
-    { v: 'false', u: 0, id: '04tapwater active' },
+    { v: 'off', u: 0, id: '08heating active' },
+    { v: 'off', u: 0, id: '04tapwater active' },
     { v: 5, u: 1, id: '04selected flow temperature', c: 'selflowtemp' },
     { v: 0, u: 3, id: '0Eburner selected max power', c: 'selburnpow' },
     { v: 0, u: 3, id: '00heating pump modulation' },
@@ -507,14 +538,14 @@ const emsesp_devicedata_2 = {
     { v: 52.7, u: 1, id: '00return temperature' },
     { v: 1.3, u: 10, id: '00system pressure' },
     { v: 54.9, u: 1, id: '00actual boiler temperature' },
-    { v: 'false', u: 0, id: '00gas' },
-    { v: 'false', u: 0, id: '00gas stage 2' },
+    { v: 'off', u: 0, id: '00gas' },
+    { v: 'off', u: 0, id: '00gas stage 2' },
     { v: 0, u: 9, id: '00flame current' },
-    { v: 'false', u: 0, id: '00heating pump' },
-    { v: 'false', u: 0, id: '00fan' },
-    { v: 'false', u: 0, id: '00ignition' },
-    { v: 'false', u: 0, id: '00oil preheating' },
-    { v: 'true', u: 0, id: '00heating activated', c: 'heatingactivated', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00heating pump' },
+    { v: 'off', u: 0, id: '00fan' },
+    { v: 'off', u: 0, id: '00ignition' },
+    { v: 'off', u: 0, id: '00oil preheating' },
+    { v: 'on', u: 0, id: '00heating activated', c: 'heatingactivated', l: ['off', 'on'] },
     { v: 80, u: 1, id: '00heating temperature', c: 'heatingtemp' },
     { v: 70, u: 3, id: '00burner pump max power', c: 'pumpmodmax' },
     { v: 30, u: 3, id: '00burner pump min power', c: 'pumpmodmin' },
@@ -538,14 +569,14 @@ const emsesp_devicedata_2 = {
     { v: 'manual', u: 0, id: '00maintenance scheduled', c: 'maintenance', l: ['off', 'time', 'date', 'manual'] },
     { v: 6000, u: 7, id: '00time to next maintenance', c: 'maintenancetime' },
     { v: '01.01.2012', u: 0, id: '00next maintenance date', c: 'maintenancedate', o: 'Format: < dd.mm.yyyy >' },
-    { v: 'true', u: 0, id: '00dhw turn on/off', c: 'wwtapactivated', l: ['off', 'on'] },
+    { v: 'on', u: 0, id: '00dhw turn on/off', c: 'wwtapactivated', l: ['off', 'on'] },
     { v: 62, u: 1, id: '00dhw set temperature' },
     { v: 60, u: 1, id: '00dhw selected temperature', c: 'wwseltemp' },
     { v: 'flow', u: 0, id: '00dhw type' },
     { v: 'hot', u: 0, id: '00dhw comfort', c: 'wwcomfort', l: ['hot', 'eco', 'intelligent'] },
     { v: 40, u: 2, id: '00dhw flow temperature offset', c: 'wwflowtempoffset' },
     { v: 100, u: 3, id: '00dhw max power', c: 'wwmaxpower' },
-    { v: 'false', u: 0, id: '00dhw circulation pump available', c: 'wwcircpump', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw circulation pump available', c: 'wwcircpump', l: ['off', 'on'] },
     { v: '3-way valve', u: 0, id: '00dhw charging type' },
     { v: -5, u: 2, id: '00dhw hysteresis on temperature', c: 'wwhyston' },
     { v: 0, u: 2, id: '00dhw hysteresis off temperature', c: 'wwhystoff' },
@@ -557,21 +588,971 @@ const emsesp_devicedata_2 = {
       c: 'wwcircmode',
       l: ['off', '1x3min', '2x3min', '3x3min', '4x3min', '5x3min', '6x3min', 'continuous']
     },
-    { v: 'false', u: 0, id: '00dhw circulation active', c: 'wwcirc', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw circulation active', c: 'wwcirc', l: ['off', 'on'] },
     { v: 47.3, u: 1, id: '00dhw current intern temperature' },
     { v: 0, u: 4, id: '00dhw current tap water flow' },
     { v: 47.3, u: 1, id: '00dhw storage intern temperature' },
-    { v: 'true', u: 0, id: '00dhw activated', c: 'wwactivated', l: ['off', 'on'] },
-    { v: 'false', u: 0, id: '00dhw one time charging', c: 'wwonetime', l: ['off', 'on'] },
-    { v: 'false', u: 0, id: '00dhw disinfecting', c: 'wwdisinfecting', l: ['off', 'on'] },
-    { v: 'false', u: 0, id: '00dhw charging' },
-    { v: 'false', u: 0, id: '00dhw recharging' },
-    { v: 'true', u: 0, id: '00dhw temperature ok' },
-    { v: 'false', u: 0, id: '00dhw active' },
-    { v: 'true', u: 0, id: '00dhw 3way valve active' },
+    { v: 'on', u: 0, id: '00dhw activated', c: 'wwactivated', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw one time charging', c: 'wwonetime', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw disinfecting', c: 'wwdisinfecting', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw charging' },
+    { v: 'off', u: 0, id: '00dhw recharging' },
+    { v: 'on', u: 0, id: '00dhw temperature ok' },
+    { v: 'off', u: 0, id: '00dhw active' },
+    { v: 'on', u: 0, id: '00dhw 3way valve active' },
     { v: 0, u: 3, id: '00dhw set pump power' },
     { v: 288768, u: 0, id: '00dhw starts' },
     { v: 102151, u: 8, id: '00dhw active time' }
+  ]
+};
+
+const emsesp_devicedata_1 = {
+  label: 'Thermostat: RC35',
+  data: [
+    {
+      v: '22(816) 01.05.2023 13:07 (1 min)',
+      u: 0,
+      id: '00last error code'
+    },
+    {
+      v: '05.05.2023 09:44',
+      u: 0,
+      id: '00date/time',
+      c: 'datetime',
+      h: '< NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1) >'
+    },
+    {
+      v: -2.4,
+      u: 2,
+      id: '00internal temperature offset',
+      c: 'intoffset',
+      m: -5,
+      x: 5,
+      s: '0.1'
+    },
+    {
+      v: -11,
+      u: 1,
+      id: '00minimal external temperature',
+      c: 'minexttemp',
+      m: -30,
+      x: 0,
+      s: '1'
+    },
+    {
+      v: 29.5,
+      u: 1,
+      id: '00temperature sensor 1'
+    },
+    {
+      v: 32.5,
+      u: 1,
+      id: '00temperature sensor 2'
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00damping outdoor temperature',
+      c: 'damping',
+      l: ['off', 'on']
+    },
+    {
+      v: 13,
+      u: 1,
+      id: '00damped outdoor temperature'
+    },
+    {
+      v: 'medium',
+      u: 0,
+      id: '00building type',
+      c: 'building',
+      l: ['light', 'medium', 'heavy']
+    },
+    {
+      v: 'auto',
+      u: 0,
+      id: '00dhw mode',
+      c: 'wwmode',
+      l: ['off', 'on', 'auto']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw circulation pump mode',
+      c: 'wwcircmode',
+      l: ['off', 'on', 'auto']
+    },
+    {
+      v: 'std prog',
+      u: 0,
+      id: '00dhw program',
+      c: 'wwprogmode',
+      l: ['std prog', 'own prog']
+    },
+    {
+      v: 'std prog',
+      u: 0,
+      id: '00dhw circulation program',
+      c: 'wwcircprog',
+      l: ['std prog', 'own prog']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw disinfecting',
+      c: 'wwdisinfecting',
+      l: ['off', 'on']
+    },
+    {
+      v: 'tu',
+      u: 0,
+      id: '00dhw disinfection day',
+      c: 'wwdisinfectday',
+      l: ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su', 'all']
+    },
+    {
+      v: 1,
+      u: 0,
+      id: '00dhw disinfection hour',
+      c: 'wwdisinfecthour',
+      m: 0,
+      x: 23,
+      s: '1'
+    },
+    {
+      v: 60,
+      u: 1,
+      id: '00dhw maximum temperature',
+      c: 'wwmaxtemp',
+      m: 60,
+      x: 80,
+      s: '1'
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00dhw one time key function',
+      c: 'wwonetimekey',
+      l: ['off', 'on']
+    },
+    {
+      v: '00 mo 06:00 on',
+      u: 0,
+      id: '00dhw program switchtime',
+      c: 'wwswitchtime',
+      h: '<nn> [ not_set | day hh:mm on|off ]'
+    },
+    {
+      v: '00 mo 06:30 on',
+      u: 0,
+      id: '00dhw circulation program switchtime',
+      c: 'wwcircswitchtime',
+      h: '<nn> [ not_set | day hh:mm on|off ]'
+    },
+    {
+      v: '01.01.2000-01.01.2000',
+      u: 0,
+      id: '00dhw holiday dates',
+      c: 'wwholidays',
+      h: '< dd.mm.yyyy-dd.mm.yyyy >'
+    },
+    {
+      v: '01.01.2019-12.01.2019',
+      u: 0,
+      id: '00dhw vacation dates',
+      c: 'wwvacations',
+      h: '< dd.mm.yyyy-dd.mm.yyyy >'
+    },
+    {
+      v: 21,
+      u: 1,
+      id: '00hc2 selected room temperature',
+      c: 'hc2/seltemp',
+      m: 0,
+      x: 30,
+      s: '0.5'
+    },
+    {
+      v: 'auto',
+      u: 0,
+      id: '00hc2 mode',
+      c: 'hc2/mode',
+      l: ['night', 'day', 'auto']
+    },
+    {
+      v: 'day',
+      u: 0,
+      id: '00hc2 mode type'
+    },
+    {
+      v: 21,
+      u: 1,
+      id: '00hc2 day temperature',
+      c: 'hc2/daytemp',
+      m: 5,
+      x: 30,
+      s: '0.5'
+    },
+    {
+      v: 17,
+      u: 1,
+      id: '00hc2 night temperature',
+      c: 'hc2/nighttemp',
+      m: 5,
+      x: 30,
+      s: '0.5'
+    },
+    {
+      v: 58,
+      u: 1,
+      id: '00hc2 design temperature',
+      c: 'hc2/designtemp',
+      m: 30,
+      x: 90,
+      s: '1'
+    },
+    {
+      v: 0,
+      u: 2,
+      id: '00hc2 offset temperature',
+      c: 'hc2/offsettemp',
+      m: -5,
+      x: 5,
+      s: '0.5'
+    },
+    {
+      v: 15,
+      u: 1,
+      id: '00hc2 holiday temperature',
+      c: 'hc2/holidaytemp',
+      m: 5,
+      x: 30,
+      s: '0.5'
+    },
+    {
+      v: 34,
+      u: 1,
+      id: '00hc2 target flow temperature'
+    },
+    {
+      v: 17,
+      u: 1,
+      id: '00hc2 summer temperature',
+      c: 'hc2/summertemp',
+      m: 9,
+      x: 25,
+      s: '1'
+    },
+    {
+      v: 'winter',
+      u: 0,
+      id: '00hc2 summer mode'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00hc2 holiday mode'
+    },
+    {
+      v: -10,
+      u: 1,
+      id: '00hc2 nofrost temperature',
+      c: 'hc2/nofrosttemp',
+      m: -20,
+      x: 10,
+      s: '1'
+    },
+    {
+      v: 'outdoor',
+      u: 0,
+      id: '00hc2 nofrost mode',
+      c: 'hc2/nofrostmode',
+      l: ['off', 'outdoor', 'room']
+    },
+    {
+      v: 0,
+      u: 2,
+      id: '00hc2 room influence',
+      c: 'hc2/roominfluence',
+      m: 0,
+      x: 10,
+      s: '1'
+    },
+    {
+      v: 15,
+      u: 1,
+      id: '00hc2 min flow temperature',
+      c: 'hc2/minflowtemp',
+      m: 5,
+      x: 70,
+      s: '1'
+    },
+    {
+      v: 85,
+      u: 1,
+      id: '00hc2 max flow temperature',
+      c: 'hc2/maxflowtemp',
+      m: 30,
+      x: 90,
+      s: '1'
+    },
+    {
+      v: 0,
+      u: 2,
+      id: '00hc2 flow temperature offset for mixer',
+      c: 'hc2/flowtempoffset',
+      m: 0,
+      x: 20,
+      s: '1'
+    },
+    {
+      v: 'radiator',
+      u: 0,
+      id: '00hc2 heating type',
+      c: 'hc2/heatingtype',
+      l: ['off', 'radiator', 'convector', 'floor']
+    },
+    {
+      v: 'outdoor',
+      u: 0,
+      id: '00hc2 reduce mode',
+      c: 'hc2/reducemode',
+      l: ['nofrost', 'reduce', 'room', 'outdoor']
+    },
+    {
+      v: 'outdoor',
+      u: 0,
+      id: '00hc2 control mode',
+      c: 'hc2/controlmode',
+      l: ['outdoor', 'room']
+    },
+    {
+      v: 'RC3x',
+      u: 0,
+      id: '00hc2 control device',
+      c: 'hc2/control',
+      l: ['off', 'RC20', 'RC3x']
+    },
+    {
+      v: '01.01.2000-01.01.2000',
+      u: 0,
+      id: '00hc2 holiday dates',
+      c: 'hc2/holidays',
+      h: '< dd.mm.yyyy-dd.mm.yyyy >'
+    },
+    {
+      v: '01.01.2020-12.01.2020',
+      u: 0,
+      id: '00hc2 vacation dates',
+      c: 'hc2/vacations',
+      h: '< dd.mm.yyyy-dd.mm.yyyy >'
+    },
+    {
+      v: 'own 1',
+      u: 0,
+      id: '00hc2 program',
+      c: 'hc2/program',
+      l: ['own 1', 'family', 'morning', 'evening', 'am', 'pm', 'midday', 'singles', 'seniors', 'new', 'own 2']
+    },
+    {
+      v: 0,
+      u: 7,
+      id: '00hc2 pause time',
+      c: 'hc2/pause',
+      m: 0,
+      x: 99,
+      s: '1'
+    },
+    {
+      v: 0,
+      u: 7,
+      id: '00hc2 party time',
+      c: 'hc2/party',
+      m: 0,
+      x: 99,
+      s: '1'
+    },
+    {
+      v: 0,
+      u: 1,
+      id: '00hc2 temporary set temperature automode',
+      c: 'hc2/tempautotemp',
+      m: 0,
+      x: 30,
+      s: '0.5'
+    },
+    {
+      v: -20,
+      u: 1,
+      id: '00hc2 no reduce below temperature',
+      c: 'hc2/noreducetemp',
+      m: -30,
+      x: 10,
+      s: '1'
+    },
+    {
+      v: 8,
+      u: 1,
+      id: '00hc2 off/reduce switch temperature',
+      c: 'hc2/reducetemp',
+      m: -20,
+      x: 10,
+      s: '1'
+    },
+    {
+      v: 5,
+      u: 1,
+      id: '00hc2 vacations off/reduce switch temperature',
+      c: 'hc2/vacreducetemp',
+      m: -20,
+      x: 10,
+      s: '1'
+    },
+    {
+      v: 'outdoor',
+      u: 0,
+      id: '00hc2 vacations reduce mode',
+      c: 'hc2/vacreducemode',
+      l: ['nofrost', 'reduce', 'room', 'outdoor']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00hc2 dhw priority',
+      c: 'hc2/wwprio',
+      l: ['off', 'on']
+    },
+    {
+      v: '00 mo 05:50 on',
+      u: 0,
+      id: '00hc2 own1 program switchtime',
+      c: 'hc2/switchtime1',
+      h: '<nn> [ not_set | day hh:mm on|off ]'
+    },
+    {
+      v: '00 mo 06:30 on',
+      u: 0,
+      id: '00hc2 own2 program switchtime',
+      c: 'hc2/switchtime2',
+      h: '<nn> [ not_set | day hh:mm on|off ]'
+    }
+  ]
+};
+
+const emsesp_devicedata_2 = {
+  label: 'Thermostat: RC20/Moduline 300',
+  data: [
+    {
+      v: '(0)',
+      u: 0,
+      id: '08my custom error code'
+    },
+    {
+      v: '14:54:39 06/06/2021',
+      u: 0,
+      id: '00date/time'
+    },
+    {
+      v: 18.2,
+      u: 1,
+      id: '00Chosen Room Temperature',
+      c: 'hc1/seltemp',
+      m: 5,
+      x: 52,
+      s: 0.5
+    },
+    {
+      v: 22.6,
+      u: 1,
+      id: '00hc1 current room temperature'
+    },
+    {
+      v: 'auto',
+      u: 0,
+      id: '00hc1 mode',
+      c: 'hc1/mode',
+      l: ['off', 'on', 'auto']
+    },
+    {
+      v: '00 mo 00:00 T1',
+      u: 0,
+      id: '00hc1 program switchtime',
+      c: 'hc1/switchtime',
+      h: '<nn> [ not_set | day hh:mm Tn ]'
+    }
+  ]
+};
+
+const emsesp_devicedata_3 = {
+  label: 'Boiler: GB125/GB135/MC10',
+  data: [
+    {
+      v: '',
+      u: 0,
+      id: '08reset',
+      c: 'reset',
+      l: ['-', 'maintenance', 'error']
+    },
+    {
+      v: 34,
+      u: 1,
+      id: '08selected flow temperature',
+      c: 'selflowtemp',
+      m: 0,
+      x: 90,
+      s: '1'
+    },
+    {
+      v: 30.7,
+      u: 1,
+      id: '08current flow temperature'
+    },
+    {
+      v: 176544,
+      u: 0,
+      id: '08burner starts'
+    },
+    {
+      v: '6L(517) 18.01.2023 10:18 (0 min)',
+      u: 0,
+      id: '08last error code'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00force heating off',
+      c: 'heatingoff',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00heating active'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00tapwater active'
+    },
+    {
+      v: 0,
+      u: 3,
+      id: '00heating pump modulation'
+    },
+    {
+      v: 15,
+      u: 1,
+      id: '00outside temperature'
+    },
+    {
+      v: 30.7,
+      u: 1,
+      id: '00actual boiler temperature'
+    },
+    {
+      v: 29,
+      u: 1,
+      id: '00exhaust temperature'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00gas'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00gas stage 2'
+    },
+    {
+      v: 0,
+      u: 9,
+      id: '00flame current'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00heating pump'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00fan'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00ignition'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00oil preheating'
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00heating activated',
+      c: 'heatingactivated',
+      l: ['off', 'on']
+    },
+    {
+      v: 90,
+      u: 1,
+      id: '00heating temperature',
+      c: 'heatingtemp',
+      m: 0,
+      x: 90,
+      s: '1'
+    },
+    {
+      v: 100,
+      u: 3,
+      id: '00boiler pump max power',
+      c: 'pumpmodmax',
+      m: 0,
+      x: 100,
+      s: '1'
+    },
+    {
+      v: 100,
+      u: 3,
+      id: '00boiler pump min power',
+      c: 'pumpmodmin',
+      m: 0,
+      x: 100,
+      s: '1'
+    },
+    {
+      v: 'deltaP-2',
+      u: 0,
+      id: '00boiler pump mode',
+      c: 'pumpmode',
+      l: ['proportional', 'deltaP-1', 'deltaP-2', 'deltaP-3', 'deltaP-4']
+    },
+    {
+      v: 6,
+      u: 8,
+      id: '00pump delay',
+      c: 'pumpdelay',
+      m: 0,
+      x: 60,
+      s: '1'
+    },
+    {
+      v: 15,
+      u: 8,
+      id: '00burner min period',
+      c: 'burnminperiod',
+      m: 0,
+      x: 120,
+      s: '1'
+    },
+    {
+      v: 0,
+      u: 3,
+      id: '00burner min power',
+      c: 'burnminpower',
+      m: 0,
+      x: 100,
+      s: '1'
+    },
+    {
+      v: 100,
+      u: 3,
+      id: '00burner max power',
+      c: 'burnmaxpower',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: -8,
+      u: 2,
+      id: '00hysteresis on temperature',
+      c: 'boilhyston',
+      m: -20,
+      x: 0,
+      s: '1'
+    },
+    {
+      v: 15,
+      u: 2,
+      id: '00hysteresis off temperature',
+      c: 'boilhystoff',
+      m: 0,
+      x: 20,
+      s: '1'
+    },
+    {
+      v: -8,
+      u: 2,
+      id: '00hysteresis stage 2 on temperature',
+      c: 'boil2hyston',
+      m: -20,
+      x: 0,
+      s: '1'
+    },
+    {
+      v: 8,
+      u: 2,
+      id: '00hysteresis stage 2 off temperature',
+      c: 'boil2hystoff',
+      m: 0,
+      x: 20,
+      s: '1'
+    },
+    {
+      v: 34,
+      u: 1,
+      id: '00set flow temperature'
+    },
+    {
+      v: 100,
+      u: 3,
+      id: '00burner set power'
+    },
+    {
+      v: 100,
+      u: 3,
+      id: '00burner selected max power',
+      c: 'selburnpow',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 0,
+      u: 3,
+      id: '00burner current power'
+    },
+    {
+      v: 822273,
+      u: 8,
+      id: '00total burner operating time'
+    },
+    {
+      v: 0,
+      u: 8,
+      id: '00burner stage 2 operating time'
+    },
+    {
+      v: 787124,
+      u: 8,
+      id: '00total heat operating time'
+    },
+    {
+      v: 173700,
+      u: 0,
+      id: '00burner starts heating'
+    },
+    {
+      v: 5495341,
+      u: 8,
+      id: '00total UBA operating time'
+    },
+    {
+      v: '0Y',
+      u: 0,
+      id: '00service code'
+    },
+    {
+      v: 0,
+      u: 0,
+      id: '00service code number'
+    },
+    {
+      v: 'H00',
+      u: 0,
+      id: '00maintenance message'
+    },
+    {
+      v: 'date',
+      u: 0,
+      id: '00maintenance scheduled',
+      c: 'maintenance',
+      l: ['off', 'time', 'date', 'manual']
+    },
+    {
+      v: 6000,
+      u: 7,
+      id: '00time to next maintenance',
+      c: 'maintenancetime',
+      m: 0,
+      x: 31999,
+      s: '1'
+    },
+    {
+      v: '30.06.2023',
+      u: 0,
+      id: '00next maintenance date',
+      c: 'maintenancedate',
+      h: '< dd.mm.yyyy >'
+    },
+    {
+      v: 46,
+      u: 1,
+      id: '00dhw set temperature'
+    },
+    {
+      v: 47,
+      u: 1,
+      id: '00dhw selected temperature',
+      c: 'wwseltemp',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 'buffer',
+      u: 0,
+      id: '00dhw type'
+    },
+    {
+      v: 'hot',
+      u: 0,
+      id: '00dhw comfort',
+      c: 'wwcomfort',
+      l: ['hot', 'eco', 'intelligent']
+    },
+    {
+      v: 40,
+      u: 2,
+      id: '00dhw flow temperature offset',
+      c: 'wwflowtempoffset',
+      m: 0,
+      x: 100,
+      s: '1'
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00dhw circulation pump available',
+      c: 'wwcircpump',
+      l: ['off', 'on']
+    },
+    {
+      v: 'chargepump',
+      u: 0,
+      id: '00dhw charging type'
+    },
+    {
+      v: -5,
+      u: 2,
+      id: '00dhw hysteresis on temperature',
+      c: 'wwhyston',
+      m: -126,
+      x: 126,
+      s: '1'
+    },
+    {
+      v: -1,
+      u: 2,
+      id: '00dhw hysteresis off temperature',
+      c: 'wwhystoff',
+      m: -126,
+      x: 126,
+      s: '1'
+    },
+    {
+      v: 70,
+      u: 1,
+      id: '00dhw disinfection temperature',
+      c: 'wwdisinfectiontemp',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 'continuous',
+      u: 0,
+      id: '00dhw circulation pump mode',
+      c: 'wwcircmode',
+      l: ['off', '1x3min', '2x3min', '3x3min', '4x3min', '5x3min', '6x3min', 'continuous']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw circulation active',
+      c: 'wwcirc',
+      l: ['off', 'on']
+    },
+    {
+      v: 60.7,
+      u: 1,
+      id: '00dhw current intern temperature'
+    },
+    {
+      v: 0,
+      u: 4,
+      id: '00dhw current tap water flow'
+    },
+    {
+      v: 60.7,
+      u: 1,
+      id: '00dhw storage intern temperature'
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00dhw activated',
+      c: 'wwactivated',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw one time charging',
+      c: 'wwonetime',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw disinfecting',
+      c: 'wwdisinfecting',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw charging'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw recharging'
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00dhw temperature ok'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw active'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw 3-way valve active'
+    },
+    {
+      v: 0,
+      u: 3,
+      id: '00dhw set pump power'
+    },
+    {
+      v: 6976,
+      u: 0,
+      id: '00dhw starts'
+    },
+    {
+      v: 80644,
+      u: 8,
+      id: '00dhw active time'
+    }
   ]
 };
 
@@ -594,7 +1575,236 @@ const emsesp_devicedata_4 = {
       v: 'off',
       u: 0,
       id: '02hc2 mode',
-      c: 'hc2/mode'
+      c: 'hc2/mode',
+      l: ['off', 'on', 'auto']
+    }
+  ]
+};
+
+const emsesp_devicedata_5 = {
+  label: 'Mixer Module: MM10',
+  data: [
+    {
+      v: 30,
+      u: 1,
+      id: '00hc2 flow temperature (TC1)'
+    },
+    {
+      v: 100,
+      u: 3,
+      id: '00hc2 mixing valve actuator (VC1)'
+    },
+    {
+      v: 34,
+      u: 1,
+      id: '00hc2 setpoint flow temperature',
+      c: 'hc2/flowsettemp',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00hc2 pump status (PC1)',
+      c: 'hc2/pumpstatus',
+      l: ['off', 'on']
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00hc2 activated',
+      c: 'hc2/activated',
+      l: ['off', 'on']
+    },
+    {
+      v: 120,
+      u: 14,
+      id: '00hc2 time to set valve',
+      c: 'hc2/valvesettime',
+      m: 10,
+      x: 120,
+      s: '10'
+    }
+  ]
+};
+
+const emsesp_devicedata_6 = {
+  label: 'Solar Module: SM10',
+  data: [
+    {
+      v: 43.9,
+      u: 1,
+      id: '00collector temperature (TS1)'
+    },
+    {
+      v: 28.3,
+      u: 1,
+      id: '00cylinder bottom temperature (TS2)'
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00pump (PS1)'
+    },
+    {
+      v: 181884,
+      u: 8,
+      id: '00pump working time'
+    },
+    {
+      v: 90,
+      u: 1,
+      id: '00maximum cylinder temperature',
+      c: 'cylmaxtemp',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00collector shutdown'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00cyl heated'
+    },
+    {
+      v: 32,
+      u: 3,
+      id: '00pump modulation (PS1)'
+    },
+    {
+      v: 30,
+      u: 3,
+      id: '00minimum pump modulation',
+      c: 'pumpminmod',
+      m: 0,
+      x: 100,
+      s: '1'
+    },
+    {
+      v: 10,
+      u: 2,
+      id: '00pump turn on difference',
+      c: 'turnondiff',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 5,
+      u: 2,
+      id: '00pump turn off difference',
+      c: 'turnoffdiff',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 899,
+      u: 12,
+      id: '00actual solar power'
+    },
+    {
+      v: 94,
+      u: 6,
+      id: '00energy last hour'
+    },
+    {
+      v: 3,
+      u: 4,
+      id: '00maximum solar flow',
+      c: 'maxflow',
+      m: 0,
+      x: 25,
+      s: '0.1'
+    },
+    {
+      v: 37,
+      u: 1,
+      id: '00dhw minimum temperature',
+      c: 'wwmintemp',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00solarmodule enabled',
+      c: 'solarenabled',
+      l: ['off', 'on']
+    },
+    {
+      v: 11,
+      u: 0,
+      id: '00unknown setting 3',
+      c: 'setting3',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 2,
+      u: 0,
+      id: '00unknown setting 4',
+      c: 'setting4',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 0,
+      u: 0,
+      id: '00unknown datafield 11'
+    },
+    {
+      v: 1,
+      u: 0,
+      id: '00unknown datafield 12'
+    },
+    {
+      v: 0,
+      u: 0,
+      id: '00unknown datafield 1'
+    },
+    {
+      v: 0,
+      u: 0,
+      id: '00unknown datafield 0'
+    }
+  ]
+};
+
+const emsesp_devicedata_99 = {
+  label: 'User defined entities',
+  data: [
+    {
+      v: 5,
+      u: 1,
+      id: '00boiler_flowtemp',
+      c: 'boiler_flowtemp'
+    }
+  ]
+};
+
+// CUSTOM ENTITIES
+let emsesp_entities = {
+  // entities: []
+  entities: [
+    {
+      id: 0,
+      device_id: 8,
+      type_id: 24,
+      offset: 0,
+      factor: 1,
+      name: 'boiler_flowtemp',
+      uom: 1,
+      value_type: 1,
+      writeable: true
     }
   ]
 };
@@ -643,7 +1853,7 @@ let emsesp_schedule = {
 
 // CUSTOMIZATIONS
 
-const emsesp_deviceentities_1 = [
+const emsesp_deviceentities_2 = [
   {
     v: '(0)',
     n: 'error code',
@@ -661,7 +1871,7 @@ const emsesp_deviceentities_1 = [
   },
   {
     v: 18.2,
-    n: 'hc1 selected room temperature',
+    n: 'Chosen Room Temperature',
     id: 'hc1/seltemp',
     m: 0,
     mi: 5,
@@ -684,7 +1894,7 @@ const emsesp_deviceentities_1 = [
   }
 ];
 
-const emsesp_deviceentities_2 = [
+const emsesp_deviceentities_7 = [
   { u: 0, n: '!reset', id: 'reset', m: 8, w: false },
   { v: false, n: 'heating active', id: 'heatingactive', m: 8, w: false },
   { v: false, n: 'tapwater active', id: 'tapwateractive', m: 4, w: false },
@@ -794,6 +2004,7 @@ const emsesp_deviceentities_4 = [
 // LOG
 rest_server.get(FETCH_LOG_ENDPOINT, (req, res) => {
   const encoded = msgpack.encode(fetch_log);
+  console.log('fetchlog');
   res.write(encoded, 'binary');
   res.end(null, 'binary');
 });
@@ -933,6 +2144,7 @@ rest_server.get(EMSESP_CORE_DATA_ENDPOINT, (req, res) => {
 });
 rest_server.get(EMSESP_SENSOR_DATA_ENDPOINT, (req, res) => {
   console.log('send back sensor data...');
+  // console.log(emsesp_sensordata);
   res.json(emsesp_sensordata);
 });
 rest_server.get(EMSESP_DEVICES_ENDPOINT, (req, res) => {
@@ -948,40 +2160,63 @@ rest_server.get(EMSESP_STATUS_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
   const id = req.body.id;
   console.log('send back device data for ' + id);
+  let data = {};
+  if (id === 7) {
+    data = emsesp_devicedata_7;
+  }
   if (id === 1) {
-    const encoded = msgpack.encode(emsesp_devicedata_1);
-    res.write(encoded, 'binary');
-    res.end(null, 'binary');
+    data = emsesp_devicedata_1;
   }
   if (id === 2) {
-    const encoded = msgpack.encode(emsesp_devicedata_2);
-    res.write(encoded, 'binary');
-    res.end(null, 'binary');
+    data = emsesp_devicedata_2;
+  }
+  if (id === 3) {
+    data = emsesp_devicedata_3;
   }
   if (id === 4) {
-    const encoded = msgpack.encode(emsesp_devicedata_4);
-    res.write(encoded, 'binary');
-    res.end(null, 'binary');
+    data = emsesp_devicedata_4;
   }
+  if (id === 5) {
+    data = emsesp_devicedata_5;
+  }
+  if (id === 6) {
+    data = emsesp_devicedata_6;
+  }
+  if (id === 99) {
+    data = emsesp_devicedata_99;
+  }
+  res.write(msgpack.encode(data), 'binary');
+  res.end(null, 'binary');
 });
 
 rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
   const id = req.body.id;
+  let data = null;
+
+  if (id === 7) {
+    data = emsesp_deviceentities_7;
+  }
   if (id === 1) {
-    const encoded = msgpack.encode(emsesp_deviceentities_1);
-    res.write(encoded, 'binary');
-    res.end(null, 'binary');
+    data = emsesp_deviceentities_1;
   }
   if (id === 2) {
-    const encoded = msgpack.encode(emsesp_deviceentities_2);
-    res.write(encoded, 'binary');
-    res.end(null, 'binary');
+    data = emsesp_deviceentities_2;
+  }
+  if (id === 3) {
+    data = emsesp_deviceentities_3;
   }
   if (id === 4) {
-    const encoded = msgpack.encode(emsesp_deviceentities_4);
-    res.write(encoded, 'binary');
-    res.end(null, 'binary');
+    data = emsesp_deviceentities_4;
   }
+  if (id === 5) {
+    data = emsesp_deviceentities_5;
+  }
+  if (id === 6) {
+    data = emsesp_deviceentities_6;
+  }
+
+  res.write(msgpack.encode(data), 'binary');
+  res.end(null, 'binary');
 });
 
 function updateMask(entity, de, dd) {
@@ -989,13 +2224,14 @@ function updateMask(entity, de, dd) {
 
   // strip of any min/max ranges
   const shortname_with_customname = entity.slice(2).split('>')[0];
-
   const shortname = shortname_with_customname.split('|')[0];
   const new_custom_name = shortname_with_customname.split('|')[1];
+  const has_min_max = entity.slice(2).split('>')[1];
 
   // find in de
   de_objIndex = de.findIndex((obj) => obj.id === shortname);
   if (de_objIndex !== -1) {
+    // get current name
     if (de[de_objIndex].cn) {
       fullname = de[de_objIndex].cn;
     } else {
@@ -1016,7 +2252,7 @@ function updateMask(entity, de, dd) {
 
       // see if the custom name has changed
       const old_custom_name = dd.data[dd_objIndex].cn;
-      console.log('comparing old ' + old_custom_name + ' with new ' + new_custom_name);
+      console.log('comparing names, old (' + old_custom_name + ') with new (' + new_custom_name + ')');
       if (old_custom_name !== new_custom_name) {
         changed = true;
         new_fullname = new_custom_name;
@@ -1025,12 +2261,33 @@ function updateMask(entity, de, dd) {
         new_fullname = fullname;
       }
 
-      if (changed) {
+      // see if min or max has changed
+      // get current min/max values if they exist
+      const current_min = dd.data[dd_objIndex].min;
+      const current_max = dd.data[dd_objIndex].max;
+      new_min = current_min;
+      new_max = current_max;
+      if (has_min_max) {
+        new_min = parseInt(has_min_max.split('<')[0]);
+        new_max = parseInt(has_min_max.split('<')[1]);
+        if (current_min !== new_min || current_max !== new_max) {
+          changed = true;
+          console.log('min/max has changed to ' + new_min + '/' + new_max);
+        }
+      }
+
+      if (changed === true) {
         console.log(
           'Updating ' + dd.data[dd_objIndex].id + ' -> ' + current_mask.toString(16).padStart(2, '0') + new_fullname
         );
         de[de_objIndex].m = current_mask;
         de[de_objIndex].cn = new_fullname;
+        if (new_min) {
+          de[de_objIndex].mi = new_min;
+        }
+        if (new_max) {
+          de[de_objIndex].ma = new_max;
+        }
         dd.data[dd_objIndex].id = current_mask.toString(16).padStart(2, '0') + new_fullname;
         dd.data[dd_objIndex].cn = new_fullname;
       }
@@ -1052,12 +2309,20 @@ rest_server.post(EMSESP_CUSTOM_ENTITIES_ENDPOINT, (req, res) => {
   console.log('customization id = ' + id);
   console.log(req.body.entity_ids);
   for (const entity of req.body.entity_ids) {
-    if (id === 1) {
+    if (id === 7) {
+      updateMask(entity, emsesp_deviceentities_7, emsesp_devicedata_7);
+    } else if (id === 1) {
       updateMask(entity, emsesp_deviceentities_1, emsesp_devicedata_1);
     } else if (id === 2) {
       updateMask(entity, emsesp_deviceentities_2, emsesp_devicedata_2);
+    } else if (id === 3) {
+      updateMask(entity, emsesp_deviceentities_3, emsesp_devicedata_3);
     } else if (id === 4) {
       updateMask(entity, emsesp_deviceentities_4, emsesp_devicedata_4);
+    } else if (id === 5) {
+      updateMask(entity, emsesp_deviceentities_5, emsesp_devicedata_5);
+    } else if (id === 6) {
+      updateMask(entity, emsesp_deviceentities_6, emsesp_devicedata_6);
     }
   }
   res.sendStatus(200);
@@ -1070,35 +2335,67 @@ rest_server.post(EMSESP_WRITE_SCHEDULE_ENDPOINT, (req, res) => {
   res.sendStatus(200);
 });
 
+rest_server.post(EMSESP_WRITE_ENTITIES_ENDPOINT, (req, res) => {
+  console.log('write entities');
+  console.log(req.body.entities);
+  emsesp_entities = req.body;
+  res.sendStatus(200);
+});
+
 rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
   const devicevalue = req.body.devicevalue;
   const id = req.body.id;
+  if (id === 7) {
+    console.log('Write device value for: ' + JSON.stringify(devicevalue));
+    objIndex = emsesp_devicedata_7.data.findIndex((obj) => obj.c == devicevalue.c);
+    emsesp_devicedata_7.data[objIndex] = devicevalue;
+  }
   if (id === 1) {
-    console.log('Write device value for Thermostat: ' + JSON.stringify(devicevalue));
+    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_1.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_1.data[objIndex] = devicevalue;
   }
   if (id === 2) {
-    console.log('Write device value for Boiler: ' + JSON.stringify(devicevalue));
+    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_2.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_2.data[objIndex] = devicevalue;
   }
+  if (id === 3) {
+    console.log('Write device value for: ' + JSON.stringify(devicevalue));
+    objIndex = emsesp_devicedata_3.data.findIndex((obj) => obj.c == devicevalue.c);
+    emsesp_devicedata_3.data[objIndex] = devicevalue;
+  }
   if (id === 4) {
-    console.log('Write device value for Thermostat2: ' + JSON.stringify(devicevalue));
+    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_4.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_4.data[objIndex] = devicevalue;
+  }
+  if (id === 5) {
+    console.log('Write device value for: ' + JSON.stringify(devicevalue));
+    objIndex = emsesp_devicedata_5.data.findIndex((obj) => obj.c == devicevalue.c);
+    emsesp_devicedata_5.data[objIndex] = devicevalue;
+  }
+  if (id === 6) {
+    console.log('Write device value for: ' + JSON.stringify(devicevalue));
+    objIndex = emsesp_devicedata_6.data.findIndex((obj) => obj.c == devicevalue.c);
+    emsesp_devicedata_6.data[objIndex] = devicevalue;
+  }
+  if (id === 99) {
+    console.log('Write device value for: ' + JSON.stringify(devicevalue));
+    objIndex = emsesp_devicedata_99.data.findIndex((obj) => obj.c == devicevalue.c);
+    emsesp_devicedata_99.data[objIndex] = devicevalue;
   }
 
   res.sendStatus(200);
 });
 
 rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
-  const sensor = req.body;
-  console.log('Write sensor: ' + JSON.stringify(sensor));
-  objIndex = emsesp_sensordata.sensors.findIndex((obj) => obj.id == sensor.id);
+  const ts = req.body;
+  console.log('Write temperaure sensor: ' + JSON.stringify(ts));
+  objIndex = emsesp_sensordata.ts.findIndex((obj) => obj.id == ts.id);
   if (objIndex !== -1) {
-    emsesp_sensordata.sensors[objIndex].n = sensor.name;
-    emsesp_sensordata.sensors[objIndex].o = sensor.offset;
+    emsesp_sensordata.ts[objIndex].n = ts.name;
+    emsesp_sensordata.ts[objIndex].o = ts.offset;
   } else {
     console.log('not found');
   }
@@ -1106,32 +2403,37 @@ rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
 });
 
 rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
-  const analog = req.body;
-  console.log('Write analog: ' + JSON.stringify(analog));
-  objIndex = emsesp_sensordata.analogs.findIndex((obj) => obj.g == analog.gpio);
+  const as = req.body;
+  console.log('Write analog sensor: ' + JSON.stringify(as));
+  objIndex = emsesp_sensordata.as.findIndex((obj) => obj.g == as.gpio);
 
   if (objIndex === -1) {
-    console.log('new analog');
-    emsesp_sensordata.analogs.push({
-      id: analog.i.toString(),
-      g: analog.gpio,
-      n: analog.name,
-      f: analog.factor,
-      o: analog.offset,
-      u: analog.uom,
-      t: analog.type
+    console.log('new analog entry found');
+    emsesp_sensordata.as.push({
+      id: as.id,
+      g: as.gpio,
+      n: as.name,
+      f: as.factor,
+      o: as.offset,
+      u: as.uom,
+      t: as.type,
+      d: as.deleted
     });
   } else {
-    if (analog.type === -1) {
-      console.log('removing analog gpio' + analog.gpio + ' index ' + objIndex);
-      emsesp_sensordata.analogs[objIndex].t = -1;
+    if (as.deleted) {
+      console.log('removing analog gpio' + as.gpio + ' index ' + objIndex);
+      emsesp_sensordata.as[objIndex].d = true;
+      var filtered = emsesp_sensordata.as.filter(function (value, index, arr) {
+        return !value.d;
+      });
+      emsesp_sensordata.as = filtered;
     } else {
-      console.log('updating analog gpio' + analog.gpio + ' index ' + objIndex);
-      emsesp_sensordata.analogs[objIndex].n = analog.name;
-      emsesp_sensordata.analogs[objIndex].f = analog.factor;
-      emsesp_sensordata.analogs[objIndex].o = analog.offset;
-      emsesp_sensordata.analogs[objIndex].u = analog.uom;
-      emsesp_sensordata.analogs[objIndex].t = analog.type;
+      console.log('updating analog gpio' + as.gpio + ' index ' + objIndex);
+      emsesp_sensordata.as[objIndex].n = as.name;
+      emsesp_sensordata.as[objIndex].f = as.factor;
+      emsesp_sensordata.as[objIndex].o = as.offset;
+      emsesp_sensordata.as[objIndex].u = as.uom;
+      emsesp_sensordata.as[objIndex].t = as.type;
     }
   }
 
@@ -1278,7 +2580,7 @@ const emsesp_info = {
     'uptime (seconds)': 110434,
     freemem: 131,
     'reset reason': 'Software reset CPU / Software reset CPU',
-    'Dallas sensors': 3
+    'Sensor sensors': 3
   },
   Network: {
     connection: 'Ethernet',
@@ -1301,8 +2603,8 @@ const emsesp_info = {
     MQTT: 'connected',
     'MQTT publishes': 46336,
     'MQTT publish fails': 0,
-    'Dallas reads': 22086,
-    'Dallas fails': 0
+    'Sensor reads': 22086,
+    'Sensor fails': 0
   },
   Devices: [
     {
@@ -1369,6 +2671,12 @@ rest_server.get(GET_SCHEDULE_ENDPOINT, (req, res) => {
   res.json(emsesp_schedule);
 });
 
+const GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
+rest_server.get(GET_ENTITIES_ENDPOINT, (req, res) => {
+  console.log('Sending Entities data');
+  res.json(emsesp_entities);
+});
+
 // start server
 const expressServer = rest_server.listen(port, () =>
   console.log(`EMS-ESP REST API server running on http://localhost:${port}/`)
@@ -1400,7 +2708,7 @@ rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
     res.write(sseFormattedResponse);
     res.flush(); // this is important
 
-    // if buffer full start over
+    // if buffer is full, start over
     if (log_index > 50) {
       fetch_log.events = [];
       log_index = 0;
