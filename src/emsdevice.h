@@ -155,7 +155,7 @@ class EMSdevice {
         }
     }
 
-    inline void has_enumupdate(std::shared_ptr<const Telegram> telegram, uint8_t & value, const uint8_t index, uint8_t s = 0) {
+    inline void has_enumupdate(std::shared_ptr<const Telegram> telegram, uint8_t & value, const uint8_t index, int8_t s = 0) {
         if (telegram->read_enumvalue(value, index, s)) {
             has_update_ = true;
             publish_value((void *)&value);
@@ -337,6 +337,7 @@ class EMSdevice {
         GENERIC,
         HEATSOURCE,
         CUSTOM,
+        VENTILATION,
         UNKNOWN
     };
 

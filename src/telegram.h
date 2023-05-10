@@ -137,7 +137,7 @@ class Telegram {
         return (val != value);
     }
 
-    bool read_enumvalue(uint8_t & value, const uint8_t index, uint8_t start = 0) const {
+    bool read_enumvalue(uint8_t & value, const uint8_t index, int8_t start = 0) const {
         if ((index < this->offset) || ((index - this->offset) >= this->message_length)) {
             return false;
         }
