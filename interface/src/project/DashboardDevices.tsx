@@ -1,3 +1,4 @@
+import CancelIcon from '@mui/icons-material/Cancel';
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
@@ -7,9 +8,9 @@ import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDown
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import StarIcon from '@mui/icons-material/Star';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
+
 import {
   Button,
   Dialog,
@@ -22,7 +23,9 @@ import {
   ListItemText,
   FormControlLabel,
   Checkbox,
-  Box
+  Box,
+  Grid,
+  Typography
 } from '@mui/material';
 import { useRowSelect } from '@table-library/react-table-library/select';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
@@ -47,9 +50,6 @@ import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { extractErrorMessage } from 'utils';
-
-const topOffset = () => document.getElementById('devices-window')?.getBoundingClientRect().bottom || 0;
-const leftOffset = () => document.getElementById('devices-window')?.getBoundingClientRect().left || 0;
 
 const DashboardDevices: FC = () => {
   const { me } = useContext(AuthenticatedContext);
@@ -134,12 +134,9 @@ const DashboardDevices: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: minmax(0, 1fr) 30% 40px;
-      `,
-      BaseRow: `
-        .td {
-          height: 32px;
-        }
+        --data-table-library_grid-template-columns: 300px 150px 40px;
+        height: auto;
+        max-height: 92%;
       `,
       BaseCell: `
         &:nth-of-type(2) {
@@ -148,7 +145,7 @@ const DashboardDevices: FC = () => {
       `,
       HeaderRow: `
         .th {
-          height: 36px;
+          border-top: 1px solid #565656;
         }
       `,
       Row: `
@@ -365,12 +362,7 @@ const DashboardDevices: FC = () => {
         <MessageBox my={2} level="warning" message={LL.EMS_BUS_SCANNING()} />
       )}
 
-      <Table
-        data={{ nodes: selectedDevice ? coreData.devices.filter((dv) => dv.id === selectedDevice) : coreData.devices }}
-        select={device_select}
-        theme={device_theme}
-        layout={{ custom: true }}
-      >
+      <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
         {(tableList: any) => (
           <>
             <Header>
@@ -436,24 +428,49 @@ const DashboardDevices: FC = () => {
       <Box
         sx={{
           backgroundColor: 'black',
-          overflowY: 'scroll',
           position: 'absolute',
-          right: 18,
-          bottom: 18,
-          left: () => leftOffset(),
-          top: () => topOffset()
+          right: 32,
+          bottom: 8,
+          top: 128,
+          border: '1px solid #177ac9',
+          zIndex: 'modal'
         }}
       >
-        <FormControlLabel
-          control={<Checkbox size="small" name="onlyFav" checked={onlyFav} onChange={() => setOnlyFav(!onlyFav)} />}
-          label={
-            <span style={{ fontSize: '12px' }}>
-              {LL.SHOW_FAV()}&nbsp;(
-              <StarIcon color="primary" sx={{ fontSize: 12 }} />)
-            </span>
-          }
-          labelPlacement="start"
-        />
+        <Grid container justifyContent="space-between">
+          <Box color="warning.main" ml={1}>
+            <Typography variant="h6">{deviceData.label}</Typography>
+          </Box>
+          <Grid item justifyContent="flex-end">
+            <Button
+              startIcon={<CancelIcon />}
+              size="small"
+              color="info"
+              onClick={() => device_select.fns.onRemoveAll()}
+            />
+          </Grid>
+        </Grid>
+        <Grid item>
+          <FormControlLabel
+            control={<Checkbox size="small" name="onlyFav" checked={onlyFav} onChange={() => setOnlyFav(!onlyFav)} />}
+            label={
+              <span style={{ fontSize: '12px' }}>
+                {LL.SHOW_FAV()}&nbsp;(
+                <StarIcon color="primary" sx={{ fontSize: 12 }} />)
+              </span>
+            }
+            labelPlacement="start"
+          />
+          <Button
+            sx={{ ml: 28 }}
+            startIcon={<DownloadIcon />}
+            size="small"
+            variant="outlined"
+            onClick={handleDownloadCsv}
+          >
+            {LL.EXPORT()}
+          </Button>
+        </Grid>
+
         <Table
           data={{
             nodes: onlyFav
@@ -462,7 +479,7 @@ const DashboardDevices: FC = () => {
           }}
           theme={data_theme}
           sort={dv_sort}
-          layout={{ custom: true }}
+          layout={{ custom: true, fixedHeader: true }}
         >
           {(tableList: any) => (
             <>
@@ -522,7 +539,6 @@ const DashboardDevices: FC = () => {
       {renderCoreData()}
       {renderDeviceData()}
       {renderDeviceDetails()}
-
       {selectedDeviceValue && (
         <DashboarDevicesDialog
           open={deviceValueDialogOpen}
@@ -532,33 +548,11 @@ const DashboardDevices: FC = () => {
           validator={deviceValueItemValidation(selectedDeviceValue)}
         />
       )}
-
-      <Box display="flex" flexWrap="wrap">
-        <Box flexGrow={1}>
-          <ButtonRow>
-            <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
-              {LL.REFRESH()}
-            </Button>
-            {device_select.state.id && device_select.state.id !== 'sensor' && (
-              <Button startIcon={<DownloadIcon />} variant="outlined" onClick={handleDownloadCsv}>
-                {LL.EXPORT()}
-              </Button>
-            )}
-          </ButtonRow>
-        </Box>
-        <Box flexWrap="nowrap" whiteSpace="nowrap">
-          <ButtonRow>
-            <Button
-              startIcon={<SettingsBackupRestoreIcon />}
-              variant="outlined"
-              onClick={() => device_select.fns.onRemoveAll()}
-              color="warning"
-            >
-              {LL.RESET(0)}
-            </Button>
-          </ButtonRow>
-        </Box>
-      </Box>
+      <ButtonRow>
+        <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
+          {LL.REFRESH()}
+        </Button>
+      </ButtonRow>
     </SectionContent>
   );
 };
