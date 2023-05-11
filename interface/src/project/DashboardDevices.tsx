@@ -436,7 +436,9 @@ const DashboardDevices: FC = () => {
     }
 
     const sendCommand = (dv: DeviceValue) => {
-      setSelectedDeviceValueWriteable(dv.c && me.admin && !hasMask(dv.id, DeviceEntityMask.DV_READONLY));
+      if (dv.c !== undefined) {
+        setSelectedDeviceValueWriteable(me.admin && !hasMask(dv.id, DeviceEntityMask.DV_READONLY));
+      }
       setSelectedDeviceValue(dv);
       setDeviceValueDialogOpen(true);
     };

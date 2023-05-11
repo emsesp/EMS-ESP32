@@ -109,7 +109,15 @@ const DashboarDevicesDialog = ({
   };
 
   return (
-    <Dialog open={open} onClose={close}>
+    <Dialog
+      open={open}
+      onClose={close}
+      sx={{
+        '& .MuiDialog-paper': {
+          borderRadius: '16px'
+        }
+      }}
+    >
       <DialogTitle>
         {selectedItem.v === '' && selectedItem.c ? LL.RUN_COMMAND() : writeable ? LL.CHANGE_VALUE() : LL.VALUE(1)}
       </DialogTitle>
