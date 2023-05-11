@@ -133,7 +133,7 @@ const DashboardDevices: FC = () => {
       Table: `
         --data-table-library_grid-template-columns: 200px 130px 40px;
         height: auto;
-        max-height: 96%;
+        max-height: 93%;
         overflow-y: scroll;
         ::-webkit-scrollbar {
           display:none;
@@ -484,21 +484,8 @@ const DashboardDevices: FC = () => {
         <Grid container justifyContent="space-between">
           <Box color="warning.main" ml={1}>
             <Typography variant="h6">
-              {truncate(coreData.devices[deviceIndex].n, 35)}
+              {truncate(coreData.devices[deviceIndex].n, 31)}
               &nbsp;({shown_data.length})
-              <IconButton sx={{ ml: 1 }} onClick={() => setShowDeviceInfo(true)}>
-                <InfoOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-              </IconButton>
-              <IconButton onClick={handleDownloadCsv}>
-                <DownloadIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-              </IconButton>
-              <IconButton onClick={() => setOnlyFav(!onlyFav)}>
-                {onlyFav ? (
-                  <StarIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-                ) : (
-                  <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-                )}
-              </IconButton>
             </Typography>
           </Box>
           <Grid item justifyContent="flex-end">
@@ -506,6 +493,22 @@ const DashboardDevices: FC = () => {
               <CancelIcon color="info" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
             </IconButton>
           </Grid>
+        </Grid>
+
+        <Grid>
+          <IconButton onClick={() => setShowDeviceInfo(true)}>
+            <InfoOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+          </IconButton>
+          <IconButton onClick={handleDownloadCsv}>
+            <DownloadIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+          </IconButton>
+          <IconButton onClick={() => setOnlyFav(!onlyFav)}>
+            {onlyFav ? (
+              <StarIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+            ) : (
+              <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+            )}
+          </IconButton>
         </Grid>
 
         <Table

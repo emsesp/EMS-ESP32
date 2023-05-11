@@ -114,7 +114,7 @@ const DashboarDevicesDialog = ({
       onClose={close}
       sx={{
         '& .MuiDialog-paper': {
-          borderRadius: '16px'
+          borderRadius: '12px'
         }
       }}
     >
