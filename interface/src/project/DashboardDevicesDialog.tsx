@@ -33,10 +33,18 @@ type DashboardDevicesDialogProps = {
   onClose: () => void;
   onSave: (as: DeviceValue) => void;
   selectedItem: DeviceValue;
+  writeable: boolean;
   validator: Schema;
 };
 
-const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator }: DashboardDevicesDialogProps) => {
+const DashboarDevicesDialog = ({
+  open,
+  onClose,
+  onSave,
+  selectedItem,
+  writeable,
+  validator
+}: DashboardDevicesDialogProps) => {
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<DeviceValue>(selectedItem);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
@@ -102,7 +110,9 @@ const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator 
 
   return (
     <Dialog open={open} onClose={close}>
-      <DialogTitle>{selectedItem.v === '' && selectedItem.c ? LL.RUN_COMMAND() : LL.CHANGE_VALUE()}</DialogTitle>
+      <DialogTitle>
+        {selectedItem.v === '' && selectedItem.c ? LL.RUN_COMMAND() : writeable ? LL.CHANGE_VALUE() : LL.VALUE(1)}
+      </DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
           <Typography variant="body2">{editItem.id.slice(2)}</Typography>
@@ -114,6 +124,7 @@ const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator 
                 name="v"
                 label={LL.VALUE(1)}
                 value={editItem.v}
+                disabled={!writeable}
                 autoFocus
                 sx={{ width: '30ch' }}
                 select
@@ -132,6 +143,7 @@ const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator 
                 label={LL.VALUE(1)}
                 value={Math.round(editItem.v * 10) / 10}
                 autoFocus
+                disabled={!writeable}
                 type="number"
                 sx={{ width: '30ch' }}
                 onChange={updateFormValue}
@@ -146,6 +158,7 @@ const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator 
                 name="v"
                 label={LL.VALUE(1)}
                 value={editItem.v}
+                disabled={!writeable}
                 autoFocus
                 sx={{ width: '30ch' }}
                 multiline={editItem.u ? false : true}
@@ -153,19 +166,29 @@ const DashboarDevicesDialog = ({ open, onClose, onSave, selectedItem, validator 
               />
             )}
           </Grid>
-          <Grid item>
-            <FormHelperText>format:&nbsp;{showHelperText(editItem)}</FormHelperText>
-          </Grid>
+          {writeable && (
+            <Grid item>
+              <FormHelperText>format:&nbsp;{showHelperText(editItem)}</FormHelperText>
+            </Grid>
+          )}
         </Grid>
       </DialogContent>
 
       <DialogActions>
-        <Button startIcon={<CancelIcon />} variant="outlined" onClick={close} color="secondary">
-          {LL.CANCEL()}
-        </Button>
-        <Button startIcon={<WarningIcon color="warning" />} variant="contained" onClick={save} color="info">
-          {LL.UPDATE()}
-        </Button>
+        {writeable ? (
+          <>
+            <Button startIcon={<CancelIcon />} variant="outlined" onClick={close} color="secondary">
+              {LL.CANCEL()}
+            </Button>
+            <Button startIcon={<WarningIcon color="warning" />} variant="contained" onClick={save} color="info">
+              {LL.UPDATE()}
+            </Button>
+          </>
+        ) : (
+          <Button variant="outlined" onClick={close} color="secondary">
+            {LL.CLOSE()}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

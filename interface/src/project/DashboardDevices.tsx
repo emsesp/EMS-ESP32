@@ -55,6 +55,7 @@ const DashboardDevices: FC = () => {
   const { LL } = useI18nContext();
   const [deviceData, setDeviceData] = useState<DeviceData>({ data: [] });
   const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
+  const [selectedDeviceValueWriteable, setSelectedDeviceValueWriteable] = useState<boolean>(false);
   const [onlyFav, setOnlyFav] = useState(false);
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
 
@@ -103,7 +104,7 @@ const DashboardDevices: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 40px 160px repeat(1, minmax(0, 1fr));
+        --data-table-library_grid-template-columns: 40px 130px repeat(1, minmax(0, 1fr));
       `,
       BaseRow: `
         .td {
@@ -130,7 +131,7 @@ const DashboardDevices: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 300px 150px 40px;
+        --data-table-library_grid-template-columns: 200px 130px 40px;
         height: auto;
         max-height: 96%;
         overflow-y: scroll;
@@ -435,10 +436,9 @@ const DashboardDevices: FC = () => {
     }
 
     const sendCommand = (dv: DeviceValue) => {
-      if (dv.c && me.admin && !hasMask(dv.id, DeviceEntityMask.DV_READONLY)) {
-        setSelectedDeviceValue(dv);
-        setDeviceValueDialogOpen(true);
-      }
+      setSelectedDeviceValueWriteable(dv.c && me.admin && !hasMask(dv.id, DeviceEntityMask.DV_READONLY));
+      setSelectedDeviceValue(dv);
+      setDeviceValueDialogOpen(true);
     };
 
     const renderNameCell = (dv: DeviceValue) => (
@@ -576,6 +576,7 @@ const DashboardDevices: FC = () => {
           onClose={deviceValueDialogClose}
           onSave={deviceValueDialogSave}
           selectedItem={selectedDeviceValue}
+          writeable={selectedDeviceValueWriteable}
           validator={deviceValueItemValidation(selectedDeviceValue)}
         />
       )}
