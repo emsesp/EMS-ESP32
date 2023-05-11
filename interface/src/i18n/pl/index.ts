@@ -37,7 +37,6 @@ const pl: BaseTranslation = {
   VERSION: 'Wersja',
   ENTITY_NAME: 'Nazwa encji',
   VALUE: '{{W|w|}}artość',
-  SHOW_FAV: 'Pokaż tylko "ulubione"',
   DEVICE_DATA: 'Dane z urządzeń',
   SENSOR_DATA: 'Dane z czujników',
   DEVICES: 'Urządzenia',

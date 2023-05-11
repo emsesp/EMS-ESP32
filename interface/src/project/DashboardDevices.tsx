@@ -9,6 +9,7 @@ import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutl
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import StarIcon from '@mui/icons-material/Star';
+import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
 
 import {
@@ -21,8 +22,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  FormControlLabel,
-  Checkbox,
   Box,
   Grid,
   Typography
@@ -54,12 +53,14 @@ import { extractErrorMessage } from 'utils';
 const DashboardDevices: FC = () => {
   const { me } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
-  const [deviceData, setDeviceData] = useState<DeviceData>({ label: '', data: [] });
+  const [deviceData, setDeviceData] = useState<DeviceData>({ data: [] });
   const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
-  const [deviceDetails, setDeviceDetails] = useState<number>(-1);
   const [onlyFav, setOnlyFav] = useState(false);
-  const [selectedDevice, setSelectedDevice] = useState<number>();
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
+
+  const [showDeviceInfo, setShowDeviceInfo] = useState<boolean>(false);
+
+  const [selectedDevice, setSelectedDevice] = useState<number>();
 
   const [coreData, setCoreData] = useState<CoreData>({
     connected: true,
@@ -95,11 +96,6 @@ const DashboardDevices: FC = () => {
         border-top: 1px solid #177ac9;
         border-bottom: 1px solid #177ac9;
       }
-    `,
-    Cell: `
-      &:last-of-type {
-        text-align: right;
-      },
     `
   });
 
@@ -107,7 +103,7 @@ const DashboardDevices: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 40px 160px repeat(1, minmax(0, 1fr)) 100px 40px;
+        --data-table-library_grid-template-columns: 40px 160px repeat(1, minmax(0, 1fr));
       `,
       BaseRow: `
         .td {
@@ -136,7 +132,11 @@ const DashboardDevices: FC = () => {
       Table: `
         --data-table-library_grid-template-columns: 300px 150px 40px;
         height: auto;
-        max-height: 92%;
+        max-height: 96%;
+        overflow-y: scroll;
+        ::-webkit-scrollbar {
+          display:none;
+        }
       `,
       BaseCell: `
         &:nth-of-type(2) {
@@ -192,6 +192,7 @@ const DashboardDevices: FC = () => {
   };
 
   function onSelectChange(action: any, state: any) {
+    setDeviceData({ data: [] });
     setSelectedDevice(state.id);
     if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
       void fetchDeviceData(state.id);
@@ -205,13 +206,20 @@ const DashboardDevices: FC = () => {
     }
   );
 
-  const escFunction = useCallback((event) => {
-    if (event.keyCode === 27) {
-      if (device_select) {
-        device_select.fns.onRemoveAll();
+  const resetDeviceSelect = () => {
+    device_select.fns.onRemoveAll();
+  };
+
+  const escFunction = useCallback(
+    (event: any) => {
+      if (event.keyCode === 27) {
+        if (device_select) {
+          resetDeviceSelect();
+        }
       }
-    }
-  }, []);
+    },
+    [device_select]
+  );
 
   useEffect(() => {
     document.addEventListener('keydown', escFunction);
@@ -288,10 +296,18 @@ const DashboardDevices: FC = () => {
       },
       { accessor: (dv: any) => DeviceValueUOM_s[dv.u], name: 'UoM' }
     ];
+
+    // TODO create filename from selected device
+    const deviceIndex = coreData.devices.findIndex((d) => d.id === device_select.state.id);
+    if (deviceIndex === -1) {
+      return;
+    }
+    const filename = coreData.devices[deviceIndex].tn + '_' + coreData.devices[deviceIndex].n;
+
     downloadAsCsv(
       columns,
       onlyFav ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE)) : deviceData.data,
-      'device_entities'
+      filename
     );
   };
 
@@ -326,42 +342,47 @@ const DashboardDevices: FC = () => {
   };
 
   const renderDeviceDetails = () => {
-    if (coreData && coreData.devices.length > 0 && deviceDetails !== -1) {
-      const device = coreData.devices[deviceDetails];
+    if (showDeviceInfo) {
+      // find record based on device_seelct.state.id
+      const deviceIndex = coreData.devices.findIndex((d) => d.id === device_select.state.id);
+      if (deviceIndex === -1) {
+        return;
+      }
+
       return (
-        <Dialog open={deviceDetails !== -1} onClose={() => setDeviceDetails(-1)}>
+        <Dialog open={showDeviceInfo} onClose={() => setShowDeviceInfo(false)}>
           <DialogTitle>{LL.DEVICE_DETAILS()}</DialogTitle>
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
-                <ListItemText primary={LL.TYPE(0)} secondary={device.tn} />
+                <ListItemText primary={LL.TYPE(0)} secondary={coreData.devices[deviceIndex].tn} />
               </ListItem>
               <ListItem>
-                <ListItemText primary={LL.NAME(0)} secondary={device.n} />
+                <ListItemText primary={LL.NAME(0)} secondary={coreData.devices[deviceIndex].n} />
               </ListItem>
-              {device.t !== DeviceType.CUSTOM && (
+              {coreData.devices[deviceIndex].t !== DeviceType.CUSTOM && (
                 <>
                   <ListItem>
-                    <ListItemText primary={LL.BRAND()} secondary={device.b} />
+                    <ListItemText primary={LL.BRAND()} secondary={coreData.devices[deviceIndex].b} />
                   </ListItem>
                   <ListItem>
                     <ListItemText
                       primary={LL.ID_OF(LL.DEVICE())}
-                      secondary={'0x' + ('00' + device.d.toString(16).toUpperCase()).slice(-2)}
+                      secondary={'0x' + ('00' + coreData.devices[deviceIndex].d.toString(16).toUpperCase()).slice(-2)}
                     />
                   </ListItem>
                   <ListItem>
-                    <ListItemText primary={LL.ID_OF(LL.PRODUCT())} secondary={device.p} />
+                    <ListItemText primary={LL.ID_OF(LL.PRODUCT())} secondary={coreData.devices[deviceIndex].p} />
                   </ListItem>
                   <ListItem>
-                    <ListItemText primary={LL.VERSION()} secondary={device.v} />
+                    <ListItemText primary={LL.VERSION()} secondary={coreData.devices[deviceIndex].v} />
                   </ListItem>
                 </>
               )}
             </List>
           </DialogContent>
           <DialogActions>
-            <Button variant="outlined" onClick={() => setDeviceDetails(-1)} color="secondary">
+            <Button variant="outlined" onClick={() => setShowDeviceInfo(false)} color="secondary">
               {LL.CLOSE()}
             </Button>
           </DialogActions>
@@ -385,24 +406,16 @@ const DashboardDevices: FC = () => {
                 <HeaderCell stiff />
                 <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
                 <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
-                <HeaderCell stiff>{LL.ENTITIES()}</HeaderCell>
-                <HeaderCell stiff />
               </HeaderRow>
             </Header>
             <Body>
-              {tableList.map((device: Device, index: number) => (
+              {tableList.map((device: Device) => (
                 <Row key={device.id} item={device}>
                   <Cell stiff>
                     <DeviceIcon type_id={device.t} />
                   </Cell>
                   <Cell stiff>{device.tn}</Cell>
                   <Cell>{device.n}</Cell>
-                  <Cell stiff>{device.e}</Cell>
-                  <Cell stiff>
-                    <IconButton size="small" onClick={() => setDeviceDetails(index)}>
-                      <InfoOutlinedIcon color="info" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
-                    </IconButton>
-                  </Cell>
                 </Row>
               ))}
             </Body>
@@ -439,13 +452,28 @@ const DashboardDevices: FC = () => {
       </>
     );
 
+    const shown_data = onlyFav
+      ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
+      : deviceData.data;
+
+    function truncate(str, length) {
+      if (str.length > length) {
+        return str.slice(0, length) + '...';
+      } else return str;
+    }
+
+    const deviceIndex = coreData.devices.findIndex((d) => d.id === device_select.state.id);
+    if (deviceIndex === -1) {
+      return;
+    }
+
     return (
       <Box
         sx={{
           backgroundColor: 'black',
           position: 'absolute',
-          right: 32,
-          bottom: 8,
+          right: 16,
+          bottom: 16,
           top: 128,
           border: '1px solid #177ac9',
           zIndex: 'modal'
@@ -453,45 +481,33 @@ const DashboardDevices: FC = () => {
       >
         <Grid container justifyContent="space-between">
           <Box color="warning.main" ml={1}>
-            <Typography variant="h6">{deviceData.label}</Typography>
+            <Typography variant="h6">
+              {truncate(coreData.devices[deviceIndex].n, 35)}
+              &nbsp;({shown_data.length})
+              <IconButton sx={{ ml: 1 }} onClick={() => setShowDeviceInfo(true)}>
+                <InfoOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+              </IconButton>
+              <IconButton onClick={handleDownloadCsv}>
+                <DownloadIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+              </IconButton>
+              <IconButton onClick={() => setOnlyFav(!onlyFav)}>
+                {onlyFav ? (
+                  <StarIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                ) : (
+                  <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                )}
+              </IconButton>
+            </Typography>
           </Box>
           <Grid item justifyContent="flex-end">
-            <Button
-              startIcon={<CancelIcon />}
-              size="small"
-              color="info"
-              onClick={() => device_select.fns.onRemoveAll()}
-            />
+            <IconButton onClick={resetDeviceSelect}>
+              <CancelIcon color="info" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+            </IconButton>
           </Grid>
-        </Grid>
-        <Grid item>
-          <FormControlLabel
-            control={<Checkbox size="small" name="onlyFav" checked={onlyFav} onChange={() => setOnlyFav(!onlyFav)} />}
-            label={
-              <span style={{ fontSize: '12px' }}>
-                {LL.SHOW_FAV()}&nbsp;(
-                <StarIcon color="primary" sx={{ fontSize: 12 }} />)
-              </span>
-            }
-            labelPlacement="start"
-          />
-          <Button
-            sx={{ ml: 28 }}
-            startIcon={<DownloadIcon />}
-            size="small"
-            variant="outlined"
-            onClick={handleDownloadCsv}
-          >
-            {LL.EXPORT()}
-          </Button>
         </Grid>
 
         <Table
-          data={{
-            nodes: onlyFav
-              ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
-              : deviceData.data
-          }}
+          data={{ nodes: shown_data }}
           theme={data_theme}
           sort={dv_sort}
           layout={{ custom: true, fixedHeader: true }}

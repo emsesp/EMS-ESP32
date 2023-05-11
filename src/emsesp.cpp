@@ -340,7 +340,7 @@ void EMSESP::dump_all_values(uuid::console::Shell & shell) {
                         if (device.product_id == 160) { // MM100
                             device_id = 0x28;           // wwc
                         } else {
-                            device_id = 0x20; // hc
+                            device_id = 0x20;           // hc
                         }
                     } else {
                         device_id = 0x20; // should cover all the other device types
@@ -906,7 +906,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
                     if (telegram->type_id == publish_id_) {
                         publish_id_ = 0;
                     }
-                    emsdevice->has_update(false); // reset flag
+                    emsdevice->has_update(false);                        // reset flag
                     if (!Mqtt::publish_single()) {
                         publish_device_values(emsdevice->device_type()); // publish to MQTT if we explicitly have too
                     }
@@ -1098,7 +1098,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             name        = "Modem";
             device_type = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CONVERTER) {
-            name = "Converter"; // generic
+            name = "Converter";    // generic
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CLOCK) {
             name        = "Clock"; // generic
             device_type = DeviceType::CONTROLLER;
@@ -1124,6 +1124,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     emsdevices.push_back(EMSFactory::add(device_type, device_id, product_id, version, name, flags, brand));
 
     // assign a unique ID. Note that this is not actual unique after a restart as it's dependent on the order that devices are found
+    // can't be 0 otherwise web won't work
     emsdevices.back()->unique_id(++unique_id_count_);
 
     // sort devices based on type
@@ -1365,7 +1366,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #endif
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data); // check if there is a message for the roomcontroller
 
-        rxservice_.add(data, length); // add to RxQueue
+        rxservice_.add(data, length);                                    // add to RxQueue
     }
 }
 
@@ -1465,7 +1466,7 @@ void EMSESP::start() {
         system_.system_restart();
     };
 
-    system_.reload_settings(); // ... and store some of the settings locally
+    system_.reload_settings();       // ... and store some of the settings locally
 
     webCustomizationService.begin(); // load the customizations
     webSchedulerService.begin();     // load the scheduler events
@@ -1483,16 +1484,16 @@ void EMSESP::start() {
     }
 
     // start all the EMS-ESP services
-    mqtt_.start(); // mqtt init
+    mqtt_.start();   // mqtt init
 
     system_.start(); // starts commands, led, adc, button, network, syslog & uart
 
     LOG_INFO(("Starting EMS-ESP version %s (hostname: %s)"), EMSESP_APP_VERSION, system_.hostname().c_str()); // welcome message
 
-    shower_.start();            // initialize shower timer and shower alert
-    temperaturesensor_.start(); // Temperature external sensors
-    analogsensor_.start();      // Analog external sensors
-    webLogService.start();      // apply settings to weblog service
+    shower_.start();                                                                                          // initialize shower timer and shower alert
+    temperaturesensor_.start();                                                                               // Temperature external sensors
+    analogsensor_.start();                                                                                    // Analog external sensors
+    webLogService.start();                                                                                    // apply settings to weblog service
 
     // Load our library of known devices into stack mem. Names are stored in Flash memory
     device_library_ = {

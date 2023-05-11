@@ -37,7 +37,6 @@ const tr: Translation = {
   BRAND: 'Marka',
   ENTITY_NAME: 'Valık Adı',
   VALUE: '{{Değer|değer}}',
-  SHOW_FAV: 'sadece favorileri göster',
   DEVICE_DATA: 'Cihaz Bilgisi',
   SENSOR_DATA: 'Sensör Bilgisi',
   DEVICES: 'Cihazlar',

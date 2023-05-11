@@ -37,7 +37,6 @@ const sv: Translation = {
   BRAND: 'Fabrikat',
   ENTITY_NAME: 'Entitetsnamn',
   VALUE: '{{Värde|värde}}',
-  SHOW_FAV: 'Visa enbart favoriter',
   DEVICE_DATA: 'Enhets data',
   SENSOR_DATA: 'Sensor data',
   DEVICES: 'Enheter',
