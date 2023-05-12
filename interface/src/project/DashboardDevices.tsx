@@ -490,7 +490,7 @@ const DashboardDevices: FC = () => {
           </Box>
           <Grid item justifyContent="flex-end">
             <IconButton onClick={resetDeviceSelect}>
-              <CancelIcon color="info" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+              <CancelIcon color="info" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
             </IconButton>
           </Grid>
         </Grid>
@@ -508,6 +508,9 @@ const DashboardDevices: FC = () => {
             ) : (
               <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
             )}
+          </IconButton>
+          <IconButton onClick={refreshData}>
+            <RefreshIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
           </IconButton>
         </Grid>
 
