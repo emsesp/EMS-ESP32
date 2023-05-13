@@ -30,7 +30,7 @@ import { useRowSelect } from '@table-library/react-table-library/select';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { useState, useContext, useEffect, useCallback } from 'react';
+import { useState, useContext, useEffect, useCallback, useLayoutEffect } from 'react';
 
 import { IconContext } from 'react-icons';
 import { toast } from 'react-toastify';
@@ -50,23 +50,45 @@ import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { extractErrorMessage } from 'utils';
 
+const useWindowSize = () => {
+  const [size, setSize] = useState([0, 0]);
+  useLayoutEffect(() => {
+    function updateSize() {
+      setSize([window.innerWidth, window.innerHeight]);
+    }
+    window.addEventListener('resize', updateSize);
+    updateSize();
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+  return size;
+};
+
 const DashboardDevices: FC = () => {
+  useWindowSize();
+
   const { me } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
   const [deviceData, setDeviceData] = useState<DeviceData>({ data: [] });
   const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
-  const [selectedDeviceValueWriteable, setSelectedDeviceValueWriteable] = useState<boolean>(false);
   const [onlyFav, setOnlyFav] = useState(false);
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
-
   const [showDeviceInfo, setShowDeviceInfo] = useState<boolean>(false);
-
   const [selectedDevice, setSelectedDevice] = useState<number>();
-
   const [coreData, setCoreData] = useState<CoreData>({
     connected: true,
     devices: []
   });
+
+  const leftOffset = () => {
+    const left = document.getElementById('devices-window')?.getBoundingClientRect().left;
+    const right = document.getElementById('devices-window')?.getBoundingClientRect().right;
+
+    if (!left || !right) {
+      return 0;
+    }
+
+    return left + (right - left < 400 ? 0 : 200);
+  };
 
   const common_theme = useTheme({
     BaseRow: `
@@ -104,7 +126,7 @@ const DashboardDevices: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 40px 130px repeat(1, minmax(0, 1fr));
+        --data-table-library_grid-template-columns: 40px repeat(1, minmax(0, 1fr)) 130px;
       `,
       BaseRow: `
         .td {
@@ -131,7 +153,7 @@ const DashboardDevices: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 200px 130px 40px;
+        --data-table-library_grid-template-columns: minmax(0, 1fr) 150px 40px;
         height: auto;
         max-height: 93%;
         overflow-y: scroll;
@@ -215,7 +237,7 @@ const DashboardDevices: FC = () => {
     (event: any) => {
       if (event.keyCode === 27) {
         if (device_select) {
-          resetDeviceSelect();
+          device_select.fns.onRemoveAll();
         }
       }
     },
@@ -298,7 +320,6 @@ const DashboardDevices: FC = () => {
       { accessor: (dv: any) => DeviceValueUOM_s[dv.u], name: 'UoM' }
     ];
 
-    // TODO create filename from selected device
     const deviceIndex = coreData.devices.findIndex((d) => d.id === device_select.state.id);
     if (deviceIndex === -1) {
       return;
@@ -344,7 +365,6 @@ const DashboardDevices: FC = () => {
 
   const renderDeviceDetails = () => {
     if (showDeviceInfo) {
-      // find record based on device_seelct.state.id
       const deviceIndex = coreData.devices.findIndex((d) => d.id === device_select.state.id);
       if (deviceIndex === -1) {
         return;
@@ -405,8 +425,8 @@ const DashboardDevices: FC = () => {
             <Header>
               <HeaderRow>
                 <HeaderCell stiff />
-                <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
                 <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
+                <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
               </HeaderRow>
             </Header>
             <Body>
@@ -415,8 +435,8 @@ const DashboardDevices: FC = () => {
                   <Cell stiff>
                     <DeviceIcon type_id={device.t} />
                   </Cell>
-                  <Cell stiff>{device.tn}</Cell>
                   <Cell>{device.n}</Cell>
+                  <Cell stiff>{device.tn}</Cell>
                 </Row>
               ))}
             </Body>
@@ -435,10 +455,7 @@ const DashboardDevices: FC = () => {
       return;
     }
 
-    const sendCommand = (dv: DeviceValue) => {
-      if (dv.c !== undefined) {
-        setSelectedDeviceValueWriteable(me.admin && !hasMask(dv.id, DeviceEntityMask.DV_READONLY));
-      }
+    const showDeviceValue = (dv: DeviceValue) => {
       setSelectedDeviceValue(dv);
       setDeviceValueDialogOpen(true);
     };
@@ -458,12 +475,6 @@ const DashboardDevices: FC = () => {
       ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
       : deviceData.data;
 
-    function truncate(str, length) {
-      if (str.length > length) {
-        return str.slice(0, length) + '...';
-      } else return str;
-    }
-
     const deviceIndex = coreData.devices.findIndex((d) => d.id === device_select.state.id);
     if (deviceIndex === -1) {
       return;
@@ -477,18 +488,19 @@ const DashboardDevices: FC = () => {
           right: 16,
           bottom: 16,
           top: 128,
+          left: () => leftOffset(),
           border: '1px solid #177ac9',
           zIndex: 'modal'
         }}
       >
         <Grid container justifyContent="space-between">
           <Box color="warning.main" ml={1}>
-            <Typography variant="h6">
-              {truncate(coreData.devices[deviceIndex].n, 31)}
+            <Typography noWrap variant="h6">
+              {coreData.devices[deviceIndex].n}
               &nbsp;({shown_data.length})
             </Typography>
           </Box>
-          <Grid item justifyContent="flex-end">
+          <Grid item zeroMinWidth justifyContent="flex-end">
             <IconButton onClick={resetDeviceSelect}>
               <CancelIcon color="info" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
             </IconButton>
@@ -549,12 +561,12 @@ const DashboardDevices: FC = () => {
               </Header>
               <Body>
                 {tableList.map((dv: DeviceValue) => (
-                  <Row key={dv.id} item={dv} onClick={() => sendCommand(dv)}>
+                  <Row key={dv.id} item={dv} onClick={() => showDeviceValue(dv)}>
                     <Cell>{renderNameCell(dv)}</Cell>
                     <Cell>{formatValue(LL, dv.v, dv.u)}</Cell>
                     <Cell stiff>
                       {dv.c && me.admin && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
-                        <IconButton size="small" onClick={() => sendCommand(dv)}>
+                        <IconButton size="small" onClick={() => showDeviceValue(dv)}>
                           {dv.v === '' && dv.c ? (
                             <PlayArrowIcon color="primary" sx={{ fontSize: 16 }} />
                           ) : (
@@ -584,7 +596,11 @@ const DashboardDevices: FC = () => {
           onClose={deviceValueDialogClose}
           onSave={deviceValueDialogSave}
           selectedItem={selectedDeviceValue}
-          writeable={selectedDeviceValueWriteable}
+          writeable={
+            me.admin &&
+            selectedDeviceValue.c !== undefined &&
+            !hasMask(selectedDeviceValue.id, DeviceEntityMask.DV_READONLY)
+          }
           validator={deviceValueItemValidation(selectedDeviceValue)}
         />
       )}
