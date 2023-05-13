@@ -50,22 +50,8 @@ import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { extractErrorMessage } from 'utils';
 
-const useWindowSize = () => {
-  const [size, setSize] = useState([0, 0]);
-  useLayoutEffect(() => {
-    function updateSize() {
-      setSize([window.innerWidth, window.innerHeight]);
-    }
-    window.addEventListener('resize', updateSize);
-    updateSize();
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
-  return size;
-};
-
 const DashboardDevices: FC = () => {
-  useWindowSize();
-
+  const [size, setSize] = useState([0, 0]);
   const { me } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
   const [deviceData, setDeviceData] = useState<DeviceData>({ data: [] });
@@ -78,6 +64,15 @@ const DashboardDevices: FC = () => {
     connected: true,
     devices: []
   });
+
+  useLayoutEffect(() => {
+    function updateSize() {
+      setSize([window.innerWidth, window.innerHeight]);
+    }
+    window.addEventListener('resize', updateSize);
+    updateSize();
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
 
   const leftOffset = () => {
     const left = document.getElementById('devices-window')?.getBoundingClientRect().left;
@@ -103,7 +98,7 @@ const DashboardDevices: FC = () => {
       }
     `,
     Row: `
-      background-color: #1e1e1e;
+      background-color: #1E1E1E;
       position: relative;
       cursor: pointer;
       .td {
@@ -155,16 +150,22 @@ const DashboardDevices: FC = () => {
       Table: `
         --data-table-library_grid-template-columns: minmax(0, 1fr) 150px 40px;
         height: auto;
-        max-height: 93%;
+        max-height: 100%;
         overflow-y: scroll;
         ::-webkit-scrollbar {
           display:none;
         }
       `,
       BaseCell: `
+        &:nth-of-type(1) {
+          border-left: 1px solid #177ac9;
+        },
         &:nth-of-type(2) {
           text-align: right;
         },
+        &:nth-of-type(3) {
+          border-right: 1px solid #177ac9;
+        }
       `,
       HeaderRow: `
         .th {
@@ -485,46 +486,48 @@ const DashboardDevices: FC = () => {
         sx={{
           backgroundColor: 'black',
           position: 'absolute',
-          right: 16,
-          bottom: 16,
-          top: 128,
           left: () => leftOffset(),
-          border: '1px solid #177ac9',
+          right: 16,
+          bottom: 0,
+          top: 128,
+          maxHeight: () => size[1] - 210,
           zIndex: 'modal'
         }}
       >
-        <Grid container justifyContent="space-between">
-          <Box color="warning.main" ml={1}>
-            <Typography noWrap variant="h6">
-              {coreData.devices[deviceIndex].n}
-              &nbsp;({shown_data.length})
-            </Typography>
-          </Box>
-          <Grid item zeroMinWidth justifyContent="flex-end">
-            <IconButton onClick={resetDeviceSelect}>
-              <CancelIcon color="info" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+        <Box sx={{ border: '1px solid #177ac9' }}>
+          <Grid container justifyContent="space-between">
+            <Box color="warning.main" ml={1}>
+              <Typography noWrap variant="h6">
+                {coreData.devices[deviceIndex].n}
+                &nbsp;({shown_data.length})
+              </Typography>
+            </Box>
+            <Grid item zeroMinWidth justifyContent="flex-end">
+              <IconButton onClick={resetDeviceSelect}>
+                <CancelIcon color="info" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+              </IconButton>
+            </Grid>
+          </Grid>
+
+          <Grid item xs>
+            <IconButton onClick={() => setShowDeviceInfo(true)}>
+              <InfoOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+            </IconButton>
+            <IconButton onClick={handleDownloadCsv}>
+              <DownloadIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+            </IconButton>
+            <IconButton onClick={() => setOnlyFav(!onlyFav)}>
+              {onlyFav ? (
+                <StarIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+              ) : (
+                <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+              )}
+            </IconButton>
+            <IconButton onClick={refreshData}>
+              <RefreshIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
             </IconButton>
           </Grid>
-        </Grid>
-
-        <Grid>
-          <IconButton onClick={() => setShowDeviceInfo(true)}>
-            <InfoOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-          </IconButton>
-          <IconButton onClick={handleDownloadCsv}>
-            <DownloadIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-          </IconButton>
-          <IconButton onClick={() => setOnlyFav(!onlyFav)}>
-            {onlyFav ? (
-              <StarIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-            ) : (
-              <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-            )}
-          </IconButton>
-          <IconButton onClick={refreshData}>
-            <RefreshIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-          </IconButton>
-        </Grid>
+        </Box>
 
         <Table
           data={{ nodes: shown_data }}
