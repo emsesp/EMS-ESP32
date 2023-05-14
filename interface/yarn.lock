@@ -1331,10 +1331,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.1.3":
-  version: 20.1.3
-  resolution: "@types/node@npm:20.1.3"
-  checksum: f0f841d95ff083c739b7898bd45e8e31c29e1d0f46047b6e9a5118ca102913f40bfd9b4ef16967895d8a6e7747ad27d1e23533669423b76687980db0ca006388
+"@types/node@npm:^20.1.4":
+  version: 20.1.4
+  resolution: "@types/node@npm:20.1.4"
+  checksum: 696ed2619db9a4b07635fca8c8194bf4c356a3aed9612ada03ab1a1b43a7c1de2817771ee1390b0018971c302ace442ad650eed41cab22b64467645897b384e8
   languageName: node
   linkType: hard
 
@@ -1578,7 +1578,7 @@ __metadata:
     "@mui/material": ^5.13.0
     "@table-library/react-table-library": 4.1.4
     "@types/lodash-es": ^4.17.7
-    "@types/node": ^20.1.3
+    "@types/node": ^20.1.4
     "@types/react": ^18.2.6
     "@types/react-dom": ^18.2.4
     "@types/react-router-dom": ^5.3.3
