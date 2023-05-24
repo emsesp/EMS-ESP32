@@ -176,13 +176,13 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.pbutton_gpio = root["pbutton_gpio"] | default_pbutton_gpio;
     check_flag(prev, settings.pbutton_gpio, ChangeFlags::BUTTON);
 
-    // dallas
+    // temperaturesensor
     prev                 = settings.dallas_gpio;
     settings.dallas_gpio = root["dallas_gpio"] | default_dallas_gpio;
-    check_flag(prev, settings.dallas_gpio, ChangeFlags::DALLAS);
+    check_flag(prev, settings.dallas_gpio, ChangeFlags::SENSOR);
     prev                     = settings.dallas_parasite;
     settings.dallas_parasite = root["dallas_parasite"] | EMSESP_DEFAULT_DALLAS_PARASITE;
-    check_flag(prev, settings.dallas_parasite, ChangeFlags::DALLAS);
+    check_flag(prev, settings.dallas_parasite, ChangeFlags::SENSOR);
 
     // shower
     prev                  = settings.shower_timer;
@@ -301,8 +301,8 @@ void WebSettingsService::onUpdate() {
         EMSESP::shower_.start();
     }
 
-    if (WebSettings::has_flags(WebSettings::ChangeFlags::DALLAS)) {
-        EMSESP::dallassensor_.start();
+    if (WebSettings::has_flags(WebSettings::ChangeFlags::SENSOR)) {
+        EMSESP::temperaturesensor_.start();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::UART)) {

@@ -37,15 +37,14 @@ const fr: Translation = {
   BRAND: 'Marque',
   ENTITY_NAME: 'Nom de l\'entité',
   VALUE: 'Valeur',
-  SHOW_FAV: 'ne montrer que les favoris',
-  DEVICE_SENSOR_DATA: 'Données des appareils et capteurs',
-  DEVICES_SENSORS: 'Appareils et capteurs',
-  ATTACHED_SENSORS: 'Capteurs EMS-ESP connectés',
+  DEVICE_DATA: 'Données des appareils',
+  SENSOR_DATA: 'Données des capteurs',
+  DEVICES: 'Appareils',
+  SENSORS: 'Capteurs',
   RUN_COMMAND: 'Lancer une commande',
   CHANGE_VALUE: 'Changer la valeur',
   CANCEL: 'Annuler',
   RESET: 'Réinitialiser',
-  SEND: 'Envoyer',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
   REMOVE: 'Enlever',
@@ -174,7 +173,7 @@ const fr: Translation = {
   SUPPORT_INFO: 'Information de support',
   UPLOAD_OF: 'Upload de {0}',
   UPLOAD: 'Upload',
-  DOWNLOAD: 'Download',
+  DOWNLOAD: '{{D|d|d}}ownload',
   ABORTED: 'annulé',
   FAILED: 'échoué',
   SUCCESSFUL: 'réussi',
@@ -182,7 +181,7 @@ const fr: Translation = {
   LOG_OF: '{0} Log',
   STATUS_OF: 'Statut {0}',
   UPLOAD_DOWNLOAD: 'Upload/Download',
-  SYSTEM_VERSION_RUNNING: 'Vous utilisez actuellement la version',
+  VERSION_ON: 'You are currently on', // TODO translate
   SYSTEM_APPLY_FIRMWARE: 'pour appliquer le nouveau firmware',
   CLOSE: 'Fermer',
   USE: 'Utiliser',
@@ -193,7 +192,7 @@ const fr: Translation = {
   THE_LATEST: 'La dernière',
   OFFICIAL: 'officielle',
   DEVELOPMENT: 'développement',
-  VERSION_IS: 'version est',
+  RELEASE_IS: 'release est', // TODO translate
   RELEASE_NOTES: 'notes de version',
   EMS_ESP_VER: 'Version EMS-ESP',
   PLATFORM: 'Appareil (Plateforme / SDK)',
@@ -315,13 +314,16 @@ const fr: Translation = {
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
   TIMER: 'Timer', // TODO translate
-  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_UPDATED: 'Schedule updated', // TODO translate
   SCHEDULE_TIMER_1: 'on startup', // TODO translate
   SCHEDULE_TIMER_2: 'every minute', // TODO translate
   SCHEDULE_TIMER_3: 'every hour', // TODO translate
-  CUSTOM_ENTITIES: 'Custom entities', // TODO translate
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus', // TODO translate
-  WRITEABLE: 'Writeable' // TODO translate
+  CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
+  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
+  WRITEABLE: 'Writeable', // TODO translate
+  SHOWING: 'Showing', // TODO translate
+  SEARCH: 'Search' // TODO translate
 };
 
 export default fr;

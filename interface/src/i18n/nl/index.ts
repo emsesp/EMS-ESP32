@@ -37,15 +37,14 @@ const nl: Translation = {
   BRAND: 'Merk',
   ENTITY_NAME: 'Entiteit',
   VALUE: '{{Waarde|waarde}}',
-  SHOW_FAV: 'alleen favorieten weergeven',
-  DEVICE_SENSOR_DATA: 'Apparaat en Sensor data',
-  DEVICES_SENSORS: 'Apparaten & Sensoren',
-  ATTACHED_SENSORS: 'Aangesloten EMS-ESP sensoren',
+  SENSOR_DATA: 'Sensor data',
+  DEVICE_DATA: 'Apparaat data',
+  DEVICES: 'Apparaten',
+  SENSORS: 'Sensoren',
   RUN_COMMAND: 'Call commando',
   CHANGE_VALUE: 'Wijzig waarde',
   CANCEL: 'Annuleren',
   RESET: 'Reset',
-  SEND: 'Verzenden',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
   REMOVE: 'Verwijderen',
@@ -136,7 +135,7 @@ const nl: Translation = {
   BOOLEAN_FORMAT_API: 'Boolean formaat API/MQTT',
   ENUM_FORMAT: 'Enum formaat API/MQTT',
   INDEX: 'Index',
-  ENABLE_PARASITE: 'Activeer Dallas parasitaire modus',
+  ENABLE_PARASITE: 'Activeer parasitaire modus',
   LOGGING: 'Logging',
   LOG_HEX: 'Log EMS telegrammen in hexadecimaal',
   ENABLE_SYSLOG: 'Activeer Syslog',
@@ -174,7 +173,7 @@ const nl: Translation = {
   SUPPORT_INFO: 'Support Info',
   UPLOAD_OF: '{0} Upload',
   UPLOAD: 'Upload',
-  DOWNLOAD: 'Download',
+  DOWNLOAD: '{{D|d|d}}ownload',
   ABORTED: 'afgebroken',
   FAILED: 'mislukt',
   SUCCESSFUL: 'successvol',
@@ -182,7 +181,7 @@ const nl: Translation = {
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Upload/Download',
-  SYSTEM_VERSION_RUNNING: 'op dit moment draai je versie',
+  VERSION_ON: 'You are currently on', // TODO translate
   SYSTEM_APPLY_FIRMWARE: 'om de nieuwe firmware te activeren',
   CLOSE: 'Sluiten',
   USE: 'Gebruik',
@@ -193,7 +192,7 @@ const nl: Translation = {
   THE_LATEST: 'De laatste',
   OFFICIAL: 'official',
   DEVELOPMENT: 'development',
-  VERSION_IS: 'versie is',
+  RELEASE_IS: 'release is',
   RELEASE_NOTES: 'release notes',
   EMS_ESP_VER: 'EMS-ESP Version',
   PLATFORM: 'Apparaat (Platform / SDK)',
@@ -315,13 +314,17 @@ const nl: Translation = {
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
   TIMER: 'Timer', // TODO translate
-  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_UPDATED: 'Schedule updated', // TODO translate
   SCHEDULE_TIMER_1: 'on startup', // TODO translate
   SCHEDULE_TIMER_2: 'every minute', // TODO translate
   SCHEDULE_TIMER_3: 'every hour', // TODO translate
-  CUSTOM_ENTITIES: 'Custom entities',
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus',
-  WRITEABLE: 'Writeable' // TODO translate
+  CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
+  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
+  WRITEABLE: 'Writeable', // TODO translate
+  SHOWING: 'Showing', // TODO translate
+  SEARCH: 'Zoek'
+  
 };
 
 export default nl;

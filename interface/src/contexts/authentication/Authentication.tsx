@@ -1,15 +1,15 @@
-import { FC, useCallback, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { AuthenticationContext } from './context';
+import type { FC } from 'react';
 
-import { useI18nContext } from 'i18n/i18n-react';
-
+import type { Me } from 'types';
+import type { RequiredChildrenProps } from 'utils';
 import * as AuthenticationApi from 'api/authentication';
 import { ACCESS_TOKEN } from 'api/endpoints';
-import { RequiredChildrenProps } from 'utils';
 import { LoadingSpinner } from 'components';
-import { Me } from 'types';
-import { AuthenticationContext } from './context';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
   const { LL } = useI18nContext();
@@ -57,7 +57,7 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
   if (initialized) {

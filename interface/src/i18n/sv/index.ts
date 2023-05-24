@@ -37,15 +37,14 @@ const sv: Translation = {
   BRAND: 'Fabrikat',
   ENTITY_NAME: 'Entitetsnamn',
   VALUE: '{{Värde|värde}}',
-  SHOW_FAV: 'Visa enbart favoriter',
-  DEVICE_SENSOR_DATA: 'Enhets och Sensor-data',
-  DEVICES_SENSORS: 'Enheter & Sensorer',
-  ATTACHED_SENSORS: 'Anslutna EMS-ESP Sensorer',
+  DEVICE_DATA: 'Enhets data',
+  SENSOR_DATA: 'Sensor data',
+  DEVICES: 'Enheter',
+  SENSORS: 'Sensorer',
   RUN_COMMAND: 'Kör Kommando',
   CHANGE_VALUE: 'Ändra Värde',
   CANCEL: 'Avbryt',
   RESET: 'Nollställ',
-  SEND: 'Skicka',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
   REMOVE: 'Ta bort',
@@ -174,7 +173,7 @@ const sv: Translation = {
   SUPPORT_INFO: 'Supportinfo',
   UPLOAD_OF: '{0} Uppladdning',
   UPLOAD: 'Uppladdning',
-  DOWNLOAD: 'Nedladdning',
+  DOWNLOAD: '{{N|n|n}}edladdning',
   ABORTED: 'Avbruten',
   FAILED: 'Misslyckades',
   SUCCESSFUL: 'Lyckades',
@@ -182,7 +181,7 @@ const sv: Translation = {
   LOG_OF: '{0} Logg',
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Upp/Nedladdning',
-  SYSTEM_VERSION_RUNNING: 'Du använder version',
+  VERSION_ON: 'You are currently on', // TODO translate
   SYSTEM_APPLY_FIRMWARE: 'för att aktivera ny firmware',
   CLOSE: 'Stäng',
   USE: 'Använd',
@@ -193,7 +192,7 @@ const sv: Translation = {
   THE_LATEST: 'Den senaste',
   OFFICIAL: 'officiell',
   DEVELOPMENT: 'utveckling',
-  VERSION_IS: 'version är',
+  RELEASE_IS: 'release är', // TODO translate
   RELEASE_NOTES: 'release-logg',
   EMS_ESP_VER: 'EMS-ESP Version',
   PLATFORM: 'Enhet (Plattform / SDK)',
@@ -315,13 +314,17 @@ const sv: Translation = {
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
   TIMER: 'Timer', // TODO translate
-  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_UPDATED: 'Schedule updated', // TODO translate
   SCHEDULE_TIMER_1: 'on startup', // TODO translate
   SCHEDULE_TIMER_2: 'every minute', // TODO translate
   SCHEDULE_TIMER_3: 'every hour', // TODO translate
-  CUSTOM_ENTITIES: 'Custom entities',
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus',
-  WRITEABLE: 'Writeable' // TODO translate
+  CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
+  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
+  WRITEABLE: 'Writeable', // TODO translate
+  SHOWING: 'Showing', // TODO translate
+  SEARCH: 'Search' // TODO translate
+
 };
 
 export default sv;

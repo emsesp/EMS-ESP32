@@ -1,11 +1,10 @@
-import { AxiosPromise } from 'axios';
-import * as H from 'history';
 import jwtDecode from 'jwt-decode';
-import { Path } from 'react-router-dom';
-
-import { Me, SignInRequest, SignInResponse } from 'types';
-
 import { ACCESS_TOKEN, AXIOS } from './endpoints';
+import type { AxiosPromise } from 'axios';
+import type * as H from 'history';
+import type { Path } from 'react-router-dom';
+
+import type { Me, SignInRequest, SignInResponse } from 'types';
 
 export const SIGN_IN_PATHNAME = 'loginPathname';
 export const SIGN_IN_SEARCH = 'loginSearch';
@@ -45,7 +44,7 @@ export function fetchLoginRedirect(): Partial<Path> {
 }
 
 export const clearAccessToken = () => localStorage.removeItem(ACCESS_TOKEN);
-export const decodeMeJWT = (accessToken: string): Me => jwtDecode(accessToken) as Me;
+export const decodeMeJWT = (accessToken: string): Me => jwtDecode(accessToken);
 
 export function addAccessTokenParameter(url: string) {
   const accessToken = getStorage().getItem(ACCESS_TOKEN);

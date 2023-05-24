@@ -4,6 +4,11 @@
 
 ## **IMPORTANT! BREAKING CHANGES**
 
+There are breaking changes in 3.6.0. Please read carefully before applying the update.
+
+- The sensors have been renamed. `dallassensor` is now `temperaturesensor` in MQTT and `ts` in the Customizations file. Also `analogs` is now `analogsensor` in MQTT and `as` in the Customizations file. If you have customizations, make backup first using the Download option and rename the JSON arrays to `as` and `ts` respectively. Also removed any MQTT topics that start with `dallassensor` using something like MQTTExplorer.
+- The format of the Custom Entities has changed, so you will need to manually re-create them.
+
 ## Added
 
 - Workaround for better Domoticz MQTT intergration? [#904](https://github.com/emsesp/EMS-ESP32/issues/904)
@@ -29,3 +34,5 @@
 - Improved HA Discovery so previous configs no longer need to be removed when starting [#1077](https://github.com/emsesp/EMS-ESP32/pull/1077) (thanks @pswid!)
 - Enlarge UART-Stack to 2,5k
 - Retry timeout for Mqtt-QOS1/2 10seconds
+- Optimize WebUI rendering when using Dialog Boxes [#1116](https://github.com/emsesp/EMS-ESP32/issues/1116)
+- Optimize Web libraries to reduce bundle size (3.6.x) [#1112](https://github.com/emsesp/EMS-ESP32/issues/1112)

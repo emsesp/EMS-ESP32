@@ -1,17 +1,16 @@
-import { FC, useContext } from 'react';
-
-import { Divider, List } from '@mui/material';
-
-import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import DeviceHubIcon from '@mui/icons-material/DeviceHub';
-import SettingsIcon from '@mui/icons-material/Settings';
-import LockIcon from '@mui/icons-material/Lock';
-import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 
-import TuneIcon from '@mui/icons-material/Tune';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import InfoIcon from '@mui/icons-material/Info';
+import LockIcon from '@mui/icons-material/Lock';
+import SettingsIcon from '@mui/icons-material/Settings';
+import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
+import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
+import TuneIcon from '@mui/icons-material/Tune';
+import { Divider, List } from '@mui/material';
+import { useContext } from 'react';
+import type { FC } from 'react';
 
 import LayoutMenuItem from 'components/layout/LayoutMenuItem';
 

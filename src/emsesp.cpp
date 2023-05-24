@@ -62,13 +62,13 @@ uuid::syslog::SyslogService System::syslog_;
 #endif
 
 // The services
-RxService    EMSESP::rxservice_;    // incoming Telegram Rx handler
-TxService    EMSESP::txservice_;    // outgoing Telegram Tx handler
-Mqtt         EMSESP::mqtt_;         // mqtt handler
-System       EMSESP::system_;       // core system services
-DallasSensor EMSESP::dallassensor_; // Dallas sensors
-AnalogSensor EMSESP::analogsensor_; // Analog sensors
-Shower       EMSESP::shower_;       // Shower logic
+RxService         EMSESP::rxservice_;         // incoming Telegram Rx handler
+TxService         EMSESP::txservice_;         // outgoing Telegram Tx handler
+Mqtt              EMSESP::mqtt_;              // mqtt handler
+System            EMSESP::system_;            // core system services
+TemperatureSensor EMSESP::temperaturesensor_; // Temperature sensors
+AnalogSensor      EMSESP::analogsensor_;      // Analog sensors
+Shower            EMSESP::shower_;            // Shower logic
 
 // static/common variables
 uint16_t EMSESP::watch_id_         = WATCH_ID_NONE; // for when log is TRACE. 0 means no trace set
@@ -340,7 +340,7 @@ void EMSESP::dump_all_values(uuid::console::Shell & shell) {
                         if (device.product_id == 160) { // MM100
                             device_id = 0x28;           // wwc
                         } else {
-                            device_id = 0x20; // hc
+                            device_id = 0x20;           // hc
                         }
                     } else {
                         device_id = 0x20; // should cover all the other device types
@@ -408,15 +408,15 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
     }
 }
 
-// show Dallas temperature sensors and Analog sensors
+// show temperature sensors and Analog sensors
 void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
-    if (dallassensor_.have_sensors()) {
+    if (temperaturesensor_.have_sensors()) {
         shell.printfln("Temperature sensors:");
         char    s[10];
         char    s2[10];
         uint8_t fahrenheit = EMSESP::system_.fahrenheit() ? 2 : 0;
 
-        for (const auto & sensor : dallassensor_.sensors()) {
+        for (const auto & sensor : temperaturesensor_.sensors()) {
             if (Helpers::hasValue(sensor.temperature_c)) {
                 shell.printfln("  %s: %s%s °%c%s (offset %s, ID: %s)",
                                sensor.name().c_str(),
@@ -481,7 +481,7 @@ void EMSESP::publish_all(bool force) {
         publish_other_values(); // switch and heat pump, ...
         webSchedulerService.publish();
         webEntityService.publish();
-        publish_sensor_values(true); // includes dallas and analog sensors
+        publish_sensor_values(true); // includes temperature and analog sensors
         system_.send_heartbeat();
     }
 }
@@ -541,8 +541,8 @@ void EMSESP::reset_mqtt_ha() {
         emsdevice->ha_config_clear();
     }
 
-    // force the re-creating of the dallas and analog sensor topics (for HA)
-    dallassensor_.reload();
+    // force the re-creating of the temperature and analog sensor topics (for HA)
+    temperaturesensor_.reload();
     analogsensor_.reload();
 }
 
@@ -606,11 +606,11 @@ void EMSESP::publish_other_values() {
     webEntityService.publish();
 }
 
-// publish both the dallas and analog sensor values
+// publish both the temperature and analog sensor values
 void EMSESP::publish_sensor_values(const bool time, const bool force) {
-    if (dallas_enabled()) {
-        if (dallassensor_.updated_values() || time || force) {
-            dallassensor_.publish_values(force);
+    if (sensor_enabled()) {
+        if (temperaturesensor_.updated_values() || time || force) {
+            temperaturesensor_.publish_values(force);
         }
     }
 
@@ -644,7 +644,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
     Mqtt::queue_publish("response", doc.as<JsonObject>());
 }
 
-// builds json with the detail of each value, for a specific EMS device type or the dallas sensor
+// builds json with the detail of each value, for a specific EMS device type or the temperature sensor
 bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->device_type() == devicetype) {
@@ -654,9 +654,9 @@ bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const in
         }
     }
 
-    // specific for the dallassensor
-    if (devicetype == DeviceType::DALLASSENSOR) {
-        return EMSESP::dallassensor_.get_value_info(root, cmd, id);
+    // specific for the temperaturesensor
+    if (devicetype == DeviceType::TEMPERATURESENSOR) {
+        return EMSESP::temperaturesensor_.get_value_info(root, cmd, id);
     }
 
     // analog sensor
@@ -906,7 +906,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
                     if (telegram->type_id == publish_id_) {
                         publish_id_ = 0;
                     }
-                    emsdevice->has_update(false); // reset flag
+                    emsdevice->has_update(false);                        // reset flag
                     if (!Mqtt::publish_single()) {
                         publish_device_values(emsdevice->device_type()); // publish to MQTT if we explicitly have too
                     }
@@ -1098,7 +1098,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             name        = "Modem";
             device_type = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CONVERTER) {
-            name = "Converter"; // generic
+            name = "Converter";    // generic
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CLOCK) {
             name        = "Clock"; // generic
             device_type = DeviceType::CONTROLLER;
@@ -1124,6 +1124,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     emsdevices.push_back(EMSFactory::add(device_type, device_id, product_id, version, name, flags, brand));
 
     // assign a unique ID. Note that this is not actual unique after a restart as it's dependent on the order that devices are found
+    // can't be 0 otherwise web won't work
     emsdevices.back()->unique_id(++unique_id_count_);
 
     // sort devices based on type
@@ -1365,7 +1366,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #endif
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data); // check if there is a message for the roomcontroller
 
-        rxservice_.add(data, length); // add to RxQueue
+        rxservice_.add(data, length);                                    // add to RxQueue
     }
 }
 
@@ -1465,7 +1466,7 @@ void EMSESP::start() {
         system_.system_restart();
     };
 
-    system_.reload_settings(); // ... and store some of the settings locally
+    system_.reload_settings();       // ... and store some of the settings locally
 
     webCustomizationService.begin(); // load the customizations
     webSchedulerService.begin();     // load the scheduler events
@@ -1483,16 +1484,16 @@ void EMSESP::start() {
     }
 
     // start all the EMS-ESP services
-    mqtt_.start(); // mqtt init
+    mqtt_.start();   // mqtt init
 
     system_.start(); // starts commands, led, adc, button, network, syslog & uart
 
     LOG_INFO(("Starting EMS-ESP version %s (hostname: %s)"), EMSESP_APP_VERSION, system_.hostname().c_str()); // welcome message
 
-    shower_.start();       // initialize shower timer and shower alert
-    dallassensor_.start(); // Dallas external sensors
-    analogsensor_.start(); // Analog external sensors
-    webLogService.start(); // apply settings to weblog service
+    shower_.start();                                                                                          // initialize shower timer and shower alert
+    temperaturesensor_.start();                                                                               // Temperature external sensors
+    analogsensor_.start();                                                                                    // Analog external sensors
+    webLogService.start();                                                                                    // apply settings to weblog service
 
     // Load our library of known devices into stack mem. Names are stored in Flash memory
     device_library_ = {
@@ -1518,7 +1519,7 @@ void EMSESP::loop() {
         webLogService.loop();       // log in Web UI
         rxservice_.loop();          // process any incoming Rx telegrams
         shower_.loop();             // check for shower on/off
-        dallassensor_.loop();       // read dallas sensor temperatures
+        temperaturesensor_.loop();  // read sensor temperatures
         analogsensor_.loop();       // read analog sensor values
         publish_all_loop();         // with HA messages in parts to avoid flooding the mqtt queue
         mqtt_.loop();               // sends out anything in the MQTT queue

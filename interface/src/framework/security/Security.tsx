@@ -1,12 +1,10 @@
-import { FC } from 'react';
-import { Navigate, Routes, Route } from 'react-router-dom';
-
 import { Tab } from '@mui/material';
+import { Navigate, Routes, Route } from 'react-router-dom';
+import ManageUsersForm from './ManageUsersForm';
+import SecuritySettingsForm from './SecuritySettingsForm';
+import type { FC } from 'react';
 
 import { RouterTabs, useRouterTab, useLayoutTitle } from 'components';
-
-import SecuritySettingsForm from './SecuritySettingsForm';
-import ManageUsersForm from './ManageUsersForm';
 
 import { useI18nContext } from 'i18n/i18n-react';
 

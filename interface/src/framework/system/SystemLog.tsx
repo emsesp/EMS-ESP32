@@ -1,39 +1,24 @@
-import { FC, useState, useEffect, useCallback, useLayoutEffect } from 'react';
-
-import { Box, styled, Button, Checkbox, MenuItem, Grid, Slider, FormLabel } from '@mui/material';
-
-import * as SystemApi from 'api/system';
-import { addAccessTokenParameter } from 'api/authentication';
-
-import { SectionContent, FormLoader, BlockFormControlLabel, ValidatedTextField } from 'components';
-
-import { LogSettings, LogEntry, LogEntries, LogLevel } from 'types';
-import { updateValue, useRest, extractErrorMessage } from 'utils';
-
 import DownloadIcon from '@mui/icons-material/GetApp';
-
+import WarningIcon from '@mui/icons-material/Warning';
+import { Box, styled, Button, Checkbox, MenuItem, Grid, TextField } from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import type { FC } from 'react';
 
+import type { LogSettings, LogEntry, LogEntries } from 'types';
+import { addAccessTokenParameter } from 'api/authentication';
 import { EVENT_SOURCE_ROOT } from 'api/endpoints';
+import * as SystemApi from 'api/system';
+
+import { SectionContent, FormLoader, BlockFormControlLabel, BlockNavigation } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
+import { LogLevel } from 'types';
+import { useRest, updateValueDirty, extractErrorMessage } from 'utils';
 
 export const LOG_EVENTSOURCE_URL = EVENT_SOURCE_ROOT + 'log';
 
-const useWindowSize = () => {
-  const [size, setSize] = useState([0, 0]);
-  useLayoutEffect(() => {
-    function updateSize() {
-      setSize([window.innerWidth, window.innerHeight]);
-    }
-    window.addEventListener('resize', updateSize);
-    updateSize();
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
-  return size;
-};
-
-const LogEntryLine = styled('div')(({ theme }) => ({
+const LogEntryLine = styled('div')(() => ({
   color: '#bbbbbb',
   fontFamily: 'monospace',
   fontSize: '14px',
@@ -64,11 +49,9 @@ const levelLabel = (level: LogLevel) => {
 };
 
 const SystemLog: FC = () => {
-  useWindowSize();
-
   const { LL } = useI18nContext();
 
-  const { loadData, data, setData } = useRest<LogSettings>({
+  const { loadData, data, setData, origData, dirtyFlags, blocker, setDirtyFlags, setOrigData } = useRest<LogSettings>({
     read: SystemApi.readLogSettings
   });
 
@@ -91,47 +74,7 @@ const SystemLog: FC = () => {
     return data?.compact ? label : label.padEnd(7, '\xa0');
   };
 
-  const updateFormValue = updateValue(setData);
-
-  const reloadPage = () => {
-    window.location.reload();
-  };
-
-  const sendSettings = async (new_max_messages: number, new_level: number) => {
-    if (data) {
-      try {
-        const response = await SystemApi.updateLogSettings({
-          level: new_level,
-          max_messages: new_max_messages,
-          compact: data.compact
-        });
-        if (response.status !== 200) {
-          toast.error(LL.PROBLEM_UPDATING());
-        }
-      } catch (error) {
-        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-      }
-    }
-  };
-
-  const changeLevel = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (data) {
-      setData({
-        ...data,
-        level: parseInt(event.target.value)
-      });
-      sendSettings(data.max_messages, parseInt(event.target.value));
-    }
-  };
-
-  const changeMaxMessages = (event: Event, value: number | number[]) => {
-    if (data) {
-      setData({
-        ...data,
-        max_messages: value as number
-      });
-    }
-  };
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
 
   const onDownload = () => {
     let result = '';
@@ -166,7 +109,7 @@ const SystemLog: FC = () => {
   }, [LL]);
 
   useEffect(() => {
-    fetchLog();
+    void fetchLog();
   }, [fetchLog]);
 
   useEffect(() => {
@@ -174,14 +117,35 @@ const SystemLog: FC = () => {
     es.onmessage = onMessage;
     es.onerror = () => {
       es.close();
-      reloadPage();
+      window.location.reload();
     };
 
     return () => {
       es.close();
     };
-    // eslint-disable-next-line
-  }, []);
+  });
+
+  const saveSettings = async () => {
+    if (data) {
+      try {
+        const response = await SystemApi.updateLogSettings({
+          level: data.level,
+          max_messages: data.max_messages,
+          compact: data.compact
+        });
+
+        if (response.status !== 200) {
+          toast.error(LL.PROBLEM_UPDATING());
+        } else {
+          setOrigData(response.data);
+          setDirtyFlags([]);
+          toast.success(LL.UPDATED_OF(LL.SETTINGS_OF('')));
+        }
+      } catch (error) {
+        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
+      }
+    }
+  };
 
   const content = () => {
     if (!data) {
@@ -191,14 +155,14 @@ const SystemLog: FC = () => {
     return (
       <>
         <Grid container spacing={3} direction="row" justifyContent="flex-start" alignItems="center">
-          <Grid item xs={4}>
-            <ValidatedTextField
+          <Grid item xs={2}>
+            <TextField
               name="level"
               label={LL.LOG_LEVEL()}
               value={data.level}
               fullWidth
               variant="outlined"
-              onChange={changeLevel}
+              onChange={updateFormValue}
               margin="normal"
               select
             >
@@ -209,26 +173,24 @@ const SystemLog: FC = () => {
               <MenuItem value={6}>INFO</MenuItem>
               <MenuItem value={7}>DEBUG</MenuItem>
               <MenuItem value={9}>ALL</MenuItem>
-            </ValidatedTextField>
+            </TextField>
           </Grid>
-          <Grid item xs={3}>
-            <FormLabel>{LL.BUFFER_SIZE()}</FormLabel>
-            <Slider
-              value={data.max_messages}
-              valueLabelDisplay="auto"
+          <Grid item xs={2}>
+            <TextField
               name="max_messages"
-              marks={[
-                { value: 25, label: '25' },
-                { value: 50, label: '50' },
-                { value: 75, label: '75' },
-                { value: 100, label: '100' }
-              ]}
-              step={25}
-              min={25}
-              max={100}
-              onChange={changeMaxMessages}
-              onChangeCommitted={() => sendSettings(data.max_messages, data.level)}
-            />
+              label={LL.BUFFER_SIZE()}
+              value={data.max_messages}
+              fullWidth
+              variant="outlined"
+              onChange={updateFormValue}
+              margin="normal"
+              select
+            >
+              <MenuItem value={25}>25</MenuItem>
+              <MenuItem value={50}>50</MenuItem>
+              <MenuItem value={75}>75</MenuItem>
+              <MenuItem value={100}>100</MenuItem>
+            </TextField>
           </Grid>
           <Grid item>
             <BlockFormControlLabel
@@ -236,16 +198,33 @@ const SystemLog: FC = () => {
               label={LL.COMPACT()}
             />
           </Grid>
-          <Grid item>
+          <Box
+            sx={{
+              '& button, & a, & .MuiCard-root': {
+                mt: 3,
+                mx: 0.6
+              }
+            }}
+          >
             <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={onDownload}>
               {LL.EXPORT()}
             </Button>
-          </Grid>
+            {dirtyFlags && dirtyFlags.length !== 0 && (
+              <Button
+                startIcon={<WarningIcon color="warning" />}
+                variant="contained"
+                color="info"
+                onClick={saveSettings}
+              >
+                {LL.APPLY_CHANGES(dirtyFlags.length)}
+              </Button>
+            )}
+          </Box>
         </Grid>
         <Box
           sx={{
             backgroundColor: 'black',
-            overflow: 'scroll',
+            overflowY: 'scroll',
             position: 'absolute',
             right: 18,
             bottom: 18,
@@ -272,6 +251,7 @@ const SystemLog: FC = () => {
 
   return (
     <SectionContent title={LL.LOG_OF(LL.SYSTEM(2))} titleGutter id="log-window">
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

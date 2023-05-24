@@ -45,7 +45,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "dv"
 // #define EMSESP_DEBUG_DEFAULT "lastcode"
 // #define EMSESP_DEBUG_DEFAULT "2thermostats"
-// #define EMSESP_DEBUG_DEFAULT "dallas"
+// #define EMSESP_DEBUG_DEFAULT "temperature"
 // #define EMSESP_DEBUG_DEFAULT "analog"
 // #define EMSESP_DEBUG_DEFAULT "api_values"
 // #define EMSESP_DEBUG_DEFAULT "mqtt_post"

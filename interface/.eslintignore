@@ -1,9 +1,12 @@
 node_modules/
 build/
 dist/
+.yarn/
+
 .prettierrc
 .eslintrc*
-.yarn/
 env.d.ts
 progmem-generator.js
+unpack.ts
 vite.config.ts
+package.json

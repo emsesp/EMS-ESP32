@@ -37,15 +37,14 @@ const de: Translation = {
   BRAND: 'Marke',
   ENTITY_NAME: 'Entitätsname',
   VALUE: '{{Wert|wert}}',
-  SHOW_FAV: 'nur Favoriten anzeigen',
-  DEVICE_SENSOR_DATA: 'Geräte- und Sensordaten',
-  DEVICES_SENSORS: 'Geräte & Sensoren',
-  ATTACHED_SENSORS: 'Angeschlossene EMS-ESP Sensoren',
+  DEVICE_DATA: 'Gerätedaten',
+  SENSOR_DATA: 'Sensordaten',
+  DEVICES: 'Geräte',
+  SENSORS: 'Sensoren',
   RUN_COMMAND: 'Befehl ausführen',
   CHANGE_VALUE: 'Wert ändern',
   CANCEL: 'Abbrechen',
   RESET: 'Zurücksetzen',
-  SEND: 'Senden',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
   REMOVE: 'Entfernen',
@@ -174,7 +173,7 @@ const de: Translation = {
   SUPPORT_INFO: 'Support Info',
   UPLOAD_OF: '{0} Hochladen',
   UPLOAD: 'Hochladen',
-  DOWNLOAD: 'Herunterladen',
+  DOWNLOAD: '{{H|h|h}}erunterladen',
   ABORTED: 'abgebrochen',
   FAILED: 'gescheitert',
   SUCCESSFUL: 'erfolgreich',
@@ -182,7 +181,7 @@ const de: Translation = {
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Hoch-/Herunterladen',
-  SYSTEM_VERSION_RUNNING: 'Sie verwenden die Version',
+  VERSION_ON: 'You are currently on', // TODO translate
   SYSTEM_APPLY_FIRMWARE: 'um die neue Firmware anzuwenden',
   CLOSE: 'Schließen',
   USE: 'Verwenden Sie',
@@ -193,7 +192,7 @@ const de: Translation = {
   THE_LATEST: 'Die neueste',
   OFFICIAL: 'offizielle',
   DEVELOPMENT: 'Entwicklungs',
-  VERSION_IS: 'Version ist',
+  RELEASE_IS: 'release ist', // TODO translate
   RELEASE_NOTES: 'Versionshinweise',
   EMS_ESP_VER: 'EMS-ESP Version',
   PLATFORM: 'Platform (Platform / SDK)',
@@ -311,17 +310,20 @@ const de: Translation = {
   LEAVE: 'Verlassen',
   SCHEDULER: 'Planer',
   SCHEDULER_HELP_1: 'Fügen Sie eigene, geplante Befehle zur Automatisierung hinzu. Vergeben Sie einen Entitätsnamen um die Aktivierung über API/Mqtt zu steuern',
-  SCHEDULER_HELP_2: 'Use 00:00 to trigger on boot', // TODO translate
+  SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
   SCHEDULE: 'Zeitplan',
   TIME: 'Zeit',
   TIMER: 'Timer',
-  SCHEDULE_SAVED: 'Plan gespeichert',
+  SCHEDULE_UPDATED: 'Plan gespeichert',
   SCHEDULE_TIMER_1: 'beim Start',
   SCHEDULE_TIMER_2: 'jede Minute',
   SCHEDULE_TIMER_3: 'jede Stunde',
   CUSTOM_ENTITIES: 'Individuelle Entitäten',
   ENTITIES_HELP_1: 'Abfrage von Werten auf dem EMS-Bus',
-  WRITEABLE: 'Schreibbar'
+  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
+  WRITEABLE: 'Schreibbar',
+  SHOWING: 'Showing', // TODO translate
+  SEARCH: 'Search' // TODO translate
 };
 
 export default de;

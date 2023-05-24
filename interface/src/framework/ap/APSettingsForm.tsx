@@ -1,12 +1,13 @@
-import { FC, useState } from 'react';
-import { ValidateFieldsError } from 'async-validator';
-import { range } from 'lodash-es';
-
-import { Button, Checkbox, MenuItem } from '@mui/material';
-import WarningIcon from '@mui/icons-material/Warning';
 import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Button, Checkbox, MenuItem } from '@mui/material';
+import { range } from 'lodash-es';
+import { useState } from 'react';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 
-import { createAPSettingsValidator, validate } from 'validators';
+import type { APSettings } from 'types';
+import * as APApi from 'api/ap';
 import {
   BlockFormControlLabel,
   ButtonRow,
@@ -17,15 +18,14 @@ import {
   BlockNavigation
 } from 'components';
 
-import { APProvisionMode, APSettings } from 'types';
-import { numberValue, updateValueDirty, useRest } from 'utils';
-import * as APApi from 'api/ap';
-
 import { useI18nContext } from 'i18n/i18n-react';
+import { APProvisionMode } from 'types';
+import { numberValue, updateValueDirty, useRest } from 'utils';
 
-export const isAPEnabled = ({ provision_mode }: APSettings) => {
-  return provision_mode === APProvisionMode.AP_MODE_ALWAYS || provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;
-};
+import { createAPSettingsValidator, validate } from 'validators';
+
+export const isAPEnabled = ({ provision_mode }: APSettings) =>
+  provision_mode === APProvisionMode.AP_MODE_ALWAYS || provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;
 
 const APSettingsForm: FC = () => {
   const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
@@ -49,7 +49,7 @@ const APSettingsForm: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(createAPSettingsValidator(data), data);
-        saveData();
+        await saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
       }
@@ -174,7 +174,7 @@ const APSettingsForm: FC = () => {
               variant="outlined"
               color="primary"
               type="submit"
-              onClick={() => loadData()}
+              onClick={loadData}
             >
               {LL.CANCEL()}
             </Button>

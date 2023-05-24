@@ -1,12 +1,12 @@
-import { FC, useContext } from 'react';
+import { Tab } from '@mui/material';
+import { useContext } from 'react';
 import { Navigate, Routes, Route } from 'react-router-dom';
 
-import { Tab } from '@mui/material';
-
-import { AuthenticatedContext } from 'contexts/authentication';
-import APStatusForm from './APStatusForm';
 import APSettingsForm from './APSettingsForm';
+import APStatusForm from './APStatusForm';
+import type { FC } from 'react';
 import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -36,7 +36,6 @@ const AccessPoint: FC = () => {
             </RequireAdmin>
           }
         />
-        {/* <Route path="/*" element={<Navigate to="status" />} /> */}
         <Route path="/*" element={<Navigate replace to="status" />} />
       </Routes>
     </>

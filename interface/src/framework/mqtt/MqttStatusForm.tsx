@@ -1,18 +1,18 @@
-import { FC } from 'react';
-import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, Theme, useTheme } from '@mui/material';
-
+import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ReportIcon from '@mui/icons-material/Report';
 import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
-import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
+import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, useTheme } from '@mui/material';
+import type { Theme } from '@mui/material';
+import type { FC } from 'react';
 
-import { ButtonRow, FormLoader, SectionContent } from 'components';
-import { MqttStatus, MqttDisconnectReason } from 'types';
+import type { MqttStatus } from 'types';
 import * as MqttApi from 'api/mqtt';
-import { useRest } from 'utils';
-
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import { MqttDisconnectReason } from 'types';
+import { useRest } from 'utils';
 
 export const mqttStatusHighlight = ({ enabled, connected }: MqttStatus, theme: Theme) => {
   if (!enabled) {
@@ -83,50 +83,48 @@ const MqttStatusForm: FC = () => {
       return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
-    const renderConnectionStatus = () => {
-      return (
-        <>
-          {!data.connected && (
-            <>
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar>
-                    <ReportIcon />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={LL.DISCONNECT_REASON()} secondary={disconnectReason(data)} />
-              </ListItem>
-              <Divider variant="inset" component="li" />
-            </>
-          )}
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar>#</Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.ID_OF(LL.CLIENT())} secondary={data.client_id} />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: mqttQueueHighlight(data, theme) }}>
-                <AutoAwesomeMotionIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.MQTT_QUEUE()} secondary={data.mqtt_queued} />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: mqttPublishHighlight(data, theme) }}>
-                <SpeakerNotesOffIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.ERRORS_OF('MQTT')} secondary={data.mqtt_fails} />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-        </>
-      );
-    };
+    const renderConnectionStatus = () => (
+      <>
+        {!data.connected && (
+          <>
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar>
+                  <ReportIcon />
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText primary={LL.DISCONNECT_REASON()} secondary={disconnectReason(data)} />
+            </ListItem>
+            <Divider variant="inset" component="li" />
+          </>
+        )}
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar>#</Avatar>
+          </ListItemAvatar>
+          <ListItemText primary={LL.ID_OF(LL.CLIENT())} secondary={data.client_id} />
+        </ListItem>
+        <Divider variant="inset" component="li" />
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar sx={{ bgcolor: mqttQueueHighlight(data, theme) }}>
+              <AutoAwesomeMotionIcon />
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText primary={LL.MQTT_QUEUE()} secondary={data.mqtt_queued} />
+        </ListItem>
+        <Divider variant="inset" component="li" />
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar sx={{ bgcolor: mqttPublishHighlight(data, theme) }}>
+              <SpeakerNotesOffIcon />
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText primary={LL.ERRORS_OF('MQTT')} secondary={data.mqtt_fails} />
+        </ListItem>
+        <Divider variant="inset" component="li" />
+      </>
+    );
 
     return (
       <>

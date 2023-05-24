@@ -1,4 +1,5 @@
-import { FC, useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import type { FC } from 'react';
 
 import * as SystemApi from 'api/system';
 import { FormLoader } from 'components';
@@ -30,7 +31,7 @@ const RestartMonitor: FC = () => {
   });
 
   useEffect(() => {
-    poll.current();
+    void poll.current();
   }, []);
 
   useEffect(() => () => timeoutId && clearTimeout(timeoutId), [timeoutId]);

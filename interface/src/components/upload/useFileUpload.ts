@@ -1,11 +1,12 @@
+import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
-import axios, { AxiosPromise, CancelTokenSource, AxiosProgressEvent } from 'axios';
 import { toast } from 'react-toastify';
 
-import { extractErrorMessage } from 'utils';
-import { FileUploadConfig } from 'api/endpoints';
+import type { FileUploadConfig } from 'api/endpoints';
+import type { AxiosPromise, CancelTokenSource, AxiosProgressEvent } from 'axios';
 
 import { useI18nContext } from 'i18n/i18n-react';
+import { extractErrorMessage } from 'utils';
 
 interface MediaUploadOptions {
   upload: (file: File, config?: FileUploadConfig) => AxiosPromise<void>;
@@ -31,11 +32,12 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
     resetUploadingStates();
   }, [uploadCancelToken]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       uploadCancelToken?.cancel();
-    };
-  }, [uploadCancelToken]);
+    },
+    [uploadCancelToken]
+  );
 
   const uploadFile = async (images: File[]) => {
     try {

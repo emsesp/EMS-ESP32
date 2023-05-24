@@ -54,7 +54,7 @@
 #include "telegram.h"
 #include "mqtt.h"
 #include "system.h"
-#include "dallassensor.h"
+#include "temperaturesensor.h"
 #include "analogsensor.h"
 #include "console.h"
 #include "console_stream.h"
@@ -148,8 +148,8 @@ class EMSESP {
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
-    static bool dallas_enabled() {
-        return (dallassensor_.dallas_enabled());
+    static bool sensor_enabled() {
+        return (temperaturesensor_.sensor_enabled());
     }
 
     static bool analog_enabled() {
@@ -214,13 +214,13 @@ class EMSESP {
     static std::vector<std::unique_ptr<EMSdevice>> emsdevices;
 
     // services
-    static Mqtt         mqtt_;
-    static System       system_;
-    static DallasSensor dallassensor_;
-    static AnalogSensor analogsensor_;
-    static Shower       shower_;
-    static RxService    rxservice_;
-    static TxService    txservice_;
+    static Mqtt              mqtt_;
+    static System            system_;
+    static TemperatureSensor temperaturesensor_;
+    static AnalogSensor      analogsensor_;
+    static Shower            shower_;
+    static RxService         rxservice_;
+    static TxService         txservice_;
 
     // web controllers
     static ESP8266React            esp8266React;

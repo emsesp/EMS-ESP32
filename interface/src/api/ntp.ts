@@ -1,7 +1,6 @@
-import { AxiosPromise } from 'axios';
-import { NTPSettings, NTPStatus, Time } from 'types';
-
 import { AXIOS } from './endpoints';
+import type { AxiosPromise } from 'axios';
+import type { NTPSettings, NTPStatus, Time } from 'types';
 
 export function readNTPStatus(): AxiosPromise<NTPStatus> {
   return AXIOS.get('/ntpStatus');

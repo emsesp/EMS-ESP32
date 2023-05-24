@@ -1,6 +1,9 @@
-import { FC, useContext, useState } from 'react';
-import { toast } from 'react-toastify';
-
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DnsIcon from '@mui/icons-material/Dns';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
+import UpdateIcon from '@mui/icons-material/Update';
 import {
   Avatar,
   Box,
@@ -15,24 +18,22 @@ import {
   ListItemAvatar,
   ListItemText,
   TextField,
-  Theme,
   useTheme,
   Typography
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
-import UpdateIcon from '@mui/icons-material/Update';
-import DnsIcon from '@mui/icons-material/Dns';
-import CancelIcon from '@mui/icons-material/Cancel';
+import { useContext, useState } from 'react';
+import { toast } from 'react-toastify';
+import type { Theme } from '@mui/material';
+import type { FC } from 'react';
 
+import type { NTPStatus } from 'types';
 import * as NTPApi from 'api/ntp';
-import { NTPStatus, NTPSyncStatus } from 'types';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
-import { extractErrorMessage, formatDateTime, formatLocalDateTime, useRest } from 'utils';
 import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
+import { NTPSyncStatus } from 'types';
+import { extractErrorMessage, formatDateTime, formatLocalDateTime, useRest } from 'utils';
 
 export const isNtpActive = ({ status }: NTPStatus) => status === NTPSyncStatus.NTP_ACTIVE;
 export const isNtpEnabled = ({ status }: NTPStatus) => status !== NTPSyncStatus.NTP_DISABLED;
@@ -89,7 +90,7 @@ const NTPStatusForm: FC = () => {
       });
       toast.success(LL.TIME_SET());
       setSettingTime(false);
-      loadData();
+      await loadData();
     } catch (error) {
       toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
     } finally {

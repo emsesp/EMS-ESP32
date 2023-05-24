@@ -3,9 +3,30 @@
     "**/.yarn": true,
     "**/.pnp.*": true
   },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+    // "source.organizeImports": true
+  },
   "eslint.nodePath": "interface/.yarn/sdks",
   "eslint.workingDirectories": ["interface"],
   "prettier.prettierPath": "interface/.yarn/sdks/prettier/index.js",
   "typescript.tsdk": "interface/.yarn/sdks/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "files.associations": {
+    "*.tsx": "typescriptreact",
+    "*.tcc": "cpp",
+    "optional": "cpp",
+    "istream": "cpp",
+    "ostream": "cpp",
+    "ratio": "cpp",
+    "system_error": "cpp",
+    "array": "cpp",
+    "functional": "cpp",
+    "regex": "cpp",
+    "tuple": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp",
+    "string": "cpp",
+    "string_view": "cpp"
+  }
 }

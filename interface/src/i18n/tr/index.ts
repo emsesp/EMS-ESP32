@@ -37,15 +37,14 @@ const tr: Translation = {
   BRAND: 'Marka',
   ENTITY_NAME: 'Valık Adı',
   VALUE: '{{Değer|değer}}',
-  SHOW_FAV: 'sadece favorileri göster',
-  DEVICE_SENSOR_DATA: 'Cihaz ve Sensör Bilgisi',
-  DEVICES_SENSORS: 'Cihazlar & Sensörler',
-  ATTACHED_SENSORS: 'Eklenmiş EMS-ESP Sensörler',
+  DEVICE_DATA: 'Cihaz Bilgisi',
+  SENSOR_DATA: 'Sensör Bilgisi',
+  DEVICES: 'Cihazlar',
+  SENSORS: 'Sensörler',
   RUN_COMMAND: 'Çalıştırma Komutu',
   CHANGE_VALUE: 'Değeri Değiştir',
   CANCEL: 'İptal',
   RESET: 'Reset',
-  SEND: 'Gönder',
   APPLY_CHANGES: 'Apply Changes ({0})',
   UPDATE: 'Update',
   REMOVE: 'Kaldır',
@@ -174,7 +173,7 @@ const tr: Translation = {
   SUPPORT_INFO: 'Destek Bilgisi',
   UPLOAD_OF: '{0} Yüklemesi',
   UPLOAD: 'Yükleme',
-  DOWNLOAD: 'İndirme',
+  DOWNLOAD: '{{İ|i|i}}İndirme',
   ABORTED: 'iptal edildi',
   FAILED: 'başarısız',
   SUCCESSFUL: 'başarılı',
@@ -182,7 +181,7 @@ const tr: Translation = {
   LOG_OF: '{0} Kaydı',
   STATUS_OF: '{0} Durumu',
   UPLOAD_DOWNLOAD: 'Yükleme/İndirme',
-  SYSTEM_VERSION_RUNNING: 'Şu anda çalıştırdığınız sürüm',
+  VERSION_ON: 'You are currently on', // TODO translate
   SYSTEM_APPLY_FIRMWARE: 'yeni bellenimi uygulamak için',
   CLOSE: 'Kapat',
   USE: 'KUllan',
@@ -193,7 +192,7 @@ const tr: Translation = {
   THE_LATEST: 'En son',
   OFFICIAL: 'resmi',
   DEVELOPMENT: 'geliştirme',
-  VERSION_IS: 'sürüm: ',
+  RELEASE_IS: 'release is', // TODO translate
   RELEASE_NOTES: 'yayınlanma notları',
   EMS_ESP_VER: 'EMS-ESP Sürümü',
   PLATFORM: 'Cihaz (Platform / SDK)',
@@ -315,13 +314,17 @@ const tr: Translation = {
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
   TIMER: 'Timer', // TODO translate
-  SCHEDULE_SAVED: 'Schedule updated', // TODO translate
+  SCHEDULE_UPDATED: 'Schedule updated', // TODO translate
   SCHEDULE_TIMER_1: 'on startup', // TODO translate
   SCHEDULE_TIMER_2: 'every minute', // TODO translate
   SCHEDULE_TIMER_3: 'every hour', // TODO translate
-  CUSTOM_ENTITIES: 'Custom entities',
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus',
-  WRITEABLE: 'Writeable' // TODO translate
+  CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
+  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
+  WRITEABLE: 'Writeable', // TODO translate
+  SHOWING: 'Showing', // TODO translate
+  SEARCH: 'Search' // TODO translate
+
 };
 
 export default tr;

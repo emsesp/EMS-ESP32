@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -21,21 +21,22 @@
 #define WebEntityService_h
 
 #define EMSESP_ENTITY_FILE "/config/emsespEntity.json"
-#define EMSESP_ENTITY_SERVICE_PATH "/rest/entity" // GET and POST
+#define EMSESP_ENTITY_SERVICE_PATH "/rest/entities" // GET and POST
 
 namespace emsesp {
 
 class EntityItem {
   public:
+    uint8_t     id;
     uint8_t     device_id;
     uint16_t    type_id;
     uint8_t     offset;
-    int8_t      valuetype;
+    int8_t      value_type;
     uint8_t     uom;
     std::string name;
     double      factor;
     bool        writeable;
-    uint32_t    val;
+    uint32_t    value;
 };
 
 class WebEntity {
@@ -66,7 +67,7 @@ class WebEntityService : public StatefulService<WebEntity> {
     HttpEndpoint<WebEntity>  _httpEndpoint;
     FSPersistence<WebEntity> _fsPersistence;
 
-    std::list<EntityItem> * entityItems; // pointer to the list of schedule events
+    std::list<EntityItem> * entityItems; // pointer to the list of entity items
     bool                    ha_registered_ = false;
 };
 

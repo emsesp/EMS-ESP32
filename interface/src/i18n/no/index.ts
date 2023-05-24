@@ -37,15 +37,14 @@ const no: Translation = {
   BRAND: 'Fabrikat',
   ENTITY_NAME: 'Objektsnavn',
   VALUE: '{{Verdi|verdi}}',
-  SHOW_FAV: ' Vis kun favoritter',
-  DEVICE_SENSOR_DATA: 'Enheter og Sensordata',
-  DEVICES_SENSORS: 'Enheter og Sensorer',
-  ATTACHED_SENSORS: 'Tilkoblede EMS-ESP Sensorer',
+  DEVICE_DATA: 'Enheterdata',
+  SENSOR_DATA: 'Sensordata',
+  DEVICES: 'Enheter',
+  SENSORS: 'Sensorer',
   RUN_COMMAND: 'Kjør kommando',
   CHANGE_VALUE: 'Endre Verdi',
   CANCEL: 'Avbryt',
   RESET: 'Nullstill',
-  SEND: 'Send',
   APPLY_CHANGES: 'Utfør endringer({0})',
   UPDATE: 'Oppdater',
   REMOVE: 'Fjern',
@@ -174,7 +173,7 @@ const no: Translation = {
   SUPPORT_INFO: 'Supportinfo',
   UPLOAD_OF: '{0} Opplasning',
   UPLOAD: 'Opplasning',
-  DOWNLOAD: 'Nedlasting',
+  DOWNLOAD: '{{N|n|n}}edlasting',
   ABORTED: 'avbrutt',
   FAILED: 'feilet',
   SUCCESSFUL: 'vellykket',
@@ -182,7 +181,7 @@ const no: Translation = {
   LOG_OF: '{0} Logg',
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Opp/Nedlasting',
-  SYSTEM_VERSION_RUNNING: 'Du benytter versjon',
+  VERSION_ON: 'You are currently on', // TODO translate
   SYSTEM_APPLY_FIRMWARE: 'for å aktivere ny firmware',
   CLOSE: 'Steng',
   USE: 'Bruk',
@@ -193,7 +192,7 @@ const no: Translation = {
   THE_LATEST: 'Den nyeste',
   OFFICIAL: 'official',
   DEVELOPMENT: 'development',
-  VERSION_IS: 'versjonen er',
+  RELEASE_IS: 'release er',
   RELEASE_NOTES: 'release notes',
   EMS_ESP_VER: 'EMS-ESP Version',
   PLATFORM: 'Enhet (Platform / SDK)',
@@ -315,13 +314,17 @@ const no: Translation = {
   SCHEDULE: 'Planlegg',
   TIME: 'Tid',
   TIMER: 'Timer',
-  SCHEDULE_SAVED: 'Planlegger er oppdatert',
+  SCHEDULE_UPDATED: 'Planlegger er oppdatert',
   SCHEDULE_TIMER_1: 'ved oppstart',
   SCHEDULE_TIMER_2: 'hvert minutt',
   SCHEDULE_TIMER_3: 'hver time',
-  CUSTOM_ENTITIES: 'Custom entities',
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS-bus',
-  WRITEABLE: 'Writeable' // TODO translate
+  CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
+  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
+  WRITEABLE: 'Writeable', // TODO translate
+  SHOWING: 'Showing', // TODO translate
+  SEARCH: 'Search' // TODO translate
+  
 };
 
 export default no;

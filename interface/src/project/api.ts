@@ -1,7 +1,4 @@
-import { AxiosPromise } from 'axios';
-import { AXIOS, AXIOS_API, AXIOS_BIN } from 'api/endpoints';
-
-import {
+import type {
   BoardProfile,
   BoardProfileName,
   APIcall,
@@ -13,13 +10,15 @@ import {
   DeviceEntity,
   UniqueID,
   CustomEntities,
-  WriteValue,
-  WriteSensor,
-  WriteAnalog,
+  WriteDeviceValue,
+  WriteTemperatureSensor,
+  WriteAnalogSensor,
   SensorData,
   Schedule,
   Entities
 } from './types';
+import type { AxiosPromise } from 'axios';
+import { AXIOS, AXIOS_API, AXIOS_BIN } from 'api/endpoints';
 
 export function restart(): AxiosPromise<void> {
   return AXIOS.post('/restart');
@@ -69,16 +68,16 @@ export function writeCustomEntities(customEntities: CustomEntities): AxiosPromis
   return AXIOS.post('/customEntities', customEntities);
 }
 
-export function writeValue(writevalue: WriteValue): AxiosPromise<void> {
-  return AXIOS.post('/writeValue', writevalue);
+export function writeDeviceValue(dv: WriteDeviceValue): AxiosPromise<void> {
+  return AXIOS.post('/writeDeviceValue', dv);
 }
 
-export function writeSensor(writesensor: WriteSensor): AxiosPromise<void> {
-  return AXIOS.post('/writeSensor', writesensor);
+export function writeTemperatureSensor(ts: WriteTemperatureSensor): AxiosPromise<void> {
+  return AXIOS.post('/writeTemperatureSensor', ts);
 }
 
-export function writeAnalog(writeanalog: WriteAnalog): AxiosPromise<void> {
-  return AXIOS.post('/writeAnalog', writeanalog);
+export function writeAnalogSensor(as: WriteAnalogSensor): AxiosPromise<void> {
+  return AXIOS.post('/writeAnalogSensor', as);
 }
 
 export function resetCustomizations(): AxiosPromise<void> {
@@ -97,18 +96,6 @@ export function getCustomizations(): AxiosPromise<void> {
   return AXIOS.get('/getCustomizations');
 }
 
-export function getEntities(): AxiosPromise<void> {
-  return AXIOS.get('/getEntities');
-}
-
-export function readEntities(): AxiosPromise<void> {
-  return AXIOS.get('/entity');
-}
-
-export function writeEntities(entities: Entities): AxiosPromise<void> {
-  return AXIOS.post('/entity', entities);
-}
-
 export function getSchedule(): AxiosPromise<Schedule> {
   return AXIOS.get('/getSchedule');
 }
@@ -119,4 +106,16 @@ export function readSchedule(): AxiosPromise<Schedule> {
 
 export function writeSchedule(schedule: Schedule): AxiosPromise<void> {
   return AXIOS.post('/schedule', schedule);
+}
+
+export function getEntities(): AxiosPromise<Entities> {
+  return AXIOS.get('/getEntities');
+}
+
+export function readEntities(): AxiosPromise<Entities> {
+  return AXIOS.get('/entities');
+}
+
+export function writeEntities(entities: Entities): AxiosPromise<void> {
+  return AXIOS.post('/entities', entities);
 }

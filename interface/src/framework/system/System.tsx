@@ -1,15 +1,14 @@
-import { FC, useContext } from 'react';
-import { Navigate, Routes, Route } from 'react-router-dom';
-
 import { Tab } from '@mui/material';
+import { useContext } from 'react';
+import { Navigate, Routes, Route } from 'react-router-dom';
+import OTASettingsForm from './OTASettingsForm';
+import SystemLog from './SystemLog';
+import SystemStatusForm from './SystemStatusForm';
+import UploadFileForm from './UploadFileForm';
+import type { FC } from 'react';
 
 import { useRouterTab, RouterTabs, useLayoutTitle, RequireAdmin } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
-import UploadFileForm from './UploadFileForm';
-import SystemStatusForm from './SystemStatusForm';
-import OTASettingsForm from './OTASettingsForm';
-
-import SystemLog from './SystemLog';
 
 import { useI18nContext } from 'i18n/i18n-react';
 

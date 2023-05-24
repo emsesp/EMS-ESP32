@@ -1,18 +1,16 @@
-import { FC, useContext } from 'react';
-
-import { Avatar, Badge, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText } from '@mui/material';
-
-import LockOpenIcon from '@mui/icons-material/LockOpen';
 import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 import WifiIcon from '@mui/icons-material/Wifi';
-
-import { MessageBox } from 'components';
-
-import { WiFiEncryptionType, WiFiNetwork, WiFiNetworkList } from 'types';
+import { Avatar, Badge, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText } from '@mui/material';
+import { useContext } from 'react';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
+import type { FC } from 'react';
+import type { WiFiNetwork, WiFiNetworkList } from 'types';
+import { MessageBox } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
+import { WiFiEncryptionType } from 'types';
 
 interface WiFiNetworkSelectorProps {
   networkList: WiFiNetworkList;
@@ -45,24 +43,22 @@ const WiFiNetworkSelector: FC<WiFiNetworkSelectorProps> = ({ networkList }) => {
 
   const wifiConnectionContext = useContext(WiFiConnectionContext);
 
-  const renderNetwork = (network: WiFiNetwork) => {
-    return (
-      <ListItem key={network.bssid} button onClick={() => wifiConnectionContext.selectNetwork(network)}>
-        <ListItemAvatar>
-          <Avatar>{isNetworkOpen(network) ? <LockOpenIcon /> : <LockIcon />}</Avatar>
-        </ListItemAvatar>
-        <ListItemText
-          primary={network.ssid}
-          secondary={'Security: ' + networkSecurityMode(network) + ', Ch: ' + network.channel}
-        />
-        <ListItemIcon>
-          <Badge badgeContent={network.rssi + 'db'}>
-            <WifiIcon />
-          </Badge>
-        </ListItemIcon>
-      </ListItem>
-    );
-  };
+  const renderNetwork = (network: WiFiNetwork) => (
+    <ListItem key={network.bssid} onClick={() => wifiConnectionContext.selectNetwork(network)}>
+      <ListItemAvatar>
+        <Avatar>{isNetworkOpen(network) ? <LockOpenIcon /> : <LockIcon />}</Avatar>
+      </ListItemAvatar>
+      <ListItemText
+        primary={network.ssid}
+        secondary={'Security: ' + networkSecurityMode(network) + ', Ch: ' + network.channel}
+      />
+      <ListItemIcon>
+        <Badge badgeContent={network.rssi + 'db'}>
+          <WifiIcon />
+        </Badge>
+      </ListItemIcon>
+    </ListItem>
+  );
 
   if (networkList.networks.length === 0) {
     return <MessageBox mt={2} mb={1} message={LL.NETWORK_NO_WIFI()} level="info" />;

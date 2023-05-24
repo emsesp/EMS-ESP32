@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import { Features } from 'types';
+import type { Features } from 'types';
 
 export interface FeaturesContextValue {
   features: Features;

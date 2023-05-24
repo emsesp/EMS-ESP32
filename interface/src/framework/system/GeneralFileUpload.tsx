@@ -1,21 +1,15 @@
-import { FC } from 'react';
-import { AxiosPromise } from 'axios';
-
+import DownloadIcon from '@mui/icons-material/GetApp';
 import { Typography, Button, Box } from '@mui/material';
-
-import { FileUploadConfig } from 'api/endpoints';
+import { toast } from 'react-toastify';
+import type { FileUploadConfig } from 'api/endpoints';
+import type { AxiosPromise } from 'axios';
+import type { FC } from 'react';
 
 import { SingleUpload, useFileUpload } from 'components';
 
-import DownloadIcon from '@mui/icons-material/GetApp';
-
-import { toast } from 'react-toastify';
-
-import { extractErrorMessage } from 'utils';
-
-import * as EMSESP from 'project/api';
-
 import { useI18nContext } from 'i18n/i18n-react';
+import * as EMSESP from 'project/api';
+import { extractErrorMessage } from 'utils';
 
 interface UploadFileProps {
   uploadGeneralFile: (file: File, config?: FileUploadConfig) => AxiosPromise<void>;
@@ -122,7 +116,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
               {LL.DOWNLOAD_SETTINGS_TEXT()}
             </Typography>
           </Box>
-          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => downloadSettings()}>
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={downloadSettings}>
             {LL.SETTINGS_OF('')}
           </Button>
           <Box color="warning.main">
@@ -130,12 +124,7 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
               {LL.DOWNLOAD_CUSTOMIZATION_TEXT()}{' '}
             </Typography>
           </Box>
-          <Button
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => downloadCustomizations()}
-          >
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={downloadCustomizations}>
             {LL.CUSTOMIZATIONS()}
           </Button>
           <Button
@@ -143,16 +132,16 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
             startIcon={<DownloadIcon />}
             variant="outlined"
             color="primary"
-            onClick={() => downloadEntities()}
+            onClick={downloadEntities}
           >
-            {LL.ENTITIES()}
+            {LL.CUSTOM_ENTITIES(0)}
           </Button>
           <Box color="warning.main">
             <Typography mt={2} mb={1} variant="body2">
               {LL.DOWNLOAD_SCHEDULE_TEXT()}{' '}
             </Typography>
           </Box>
-          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => downloadSchedule()}>
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={downloadSchedule}>
             {LL.SCHEDULE(0)}
           </Button>
         </>

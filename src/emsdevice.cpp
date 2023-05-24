@@ -119,8 +119,8 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return F_(connect);
     case DeviceType::MIXER:
         return F_(mixer);
-    case DeviceType::DALLASSENSOR:
-        return F_(dallassensor);
+    case DeviceType::TEMPERATURESENSOR:
+        return F_(temperaturesensor);
     case DeviceType::ANALOGSENSOR:
         return F_(analogsensor);
     case DeviceType::CONTROLLER:
@@ -143,7 +143,7 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
 }
 
 // returns the translated name of a specific EMS device
-// excludes dallassensor, analogsensor and system
+// excludes temperaturesensor, analogsensor and system
 const char * EMSdevice::device_type_2_device_name_translated() {
     switch (device_type_) {
     case DeviceType::BOILER:
@@ -210,8 +210,8 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!strcmp(lowtopic, F_(mixer))) {
         return DeviceType::MIXER;
     }
-    if (!strcmp(lowtopic, F_(dallassensor))) {
-        return DeviceType::DALLASSENSOR;
+    if (!strcmp(lowtopic, F_(temperaturesensor))) {
+        return DeviceType::TEMPERATURESENSOR;
     }
     if (!strcmp(lowtopic, F_(analogsensor))) {
         return DeviceType::ANALOGSENSOR;
@@ -513,7 +513,7 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
     // get fullname, getting translation if it exists
     const char * const * fullname;
     if (Helpers::count_items(name) == 1) {
-        fullname = nullptr; // no translations available, use empty
+        fullname = nullptr;  // no translations available, use empty
     } else {
         fullname = &name[1]; // translations start at index 1
     }
@@ -824,8 +824,9 @@ std::string EMSdevice::get_value_uom(const char * key) const {
 // except additional data is stored in the JSON document needed for the Web UI like the UOM and command
 // v=value, u=uom, n=name, c=cmd, h=help string, s=step, m=min, x=max
 void EMSdevice::generate_values_web(JsonObject & output) {
-    output["label"] = to_string_short();
-    JsonArray data  = output.createNestedArray("data");
+    // output["label"] = to_string_short();
+    // output["label"] = name_;
+    JsonArray data = output.createNestedArray("data");
 
     for (auto & dv : devicevalues_) {
         auto fullname = dv.get_fullname();
@@ -838,7 +839,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
             JsonObject obj        = data.createNestedObject(); // create the object, we know there is a value
             uint8_t    fahrenheit = 0;
 
-            // handle Booleans (true, false), use strings, no native true/false)
+            // handle Booleans (true, false), output as strings according to the user settings
             if (dv.type == DeviceValueType::BOOL) {
                 auto value_b = (bool)*(uint8_t *)(dv.value_p);
                 char s[12];
@@ -922,20 +923,19 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                     }
                 }
                 // handle INTs
-                // add steps to numeric values with numeric_operator
+                // add min and max values and steps, as integer values
                 else {
-                    char s[10];
                     if (dv.numeric_operator > 0) {
-                        obj["s"] = Helpers::render_value(s, (float)1 / dv.numeric_operator, 1);
+                        obj["s"] = (float)1 / dv.numeric_operator;
                     } else if (dv.numeric_operator < 0) {
-                        obj["s"] = Helpers::render_value(s, (float)(-1) * dv.numeric_operator, 0);
+                        obj["s"] = (float)(-1) * dv.numeric_operator;
                     }
 
                     int16_t  dv_set_min;
                     uint16_t dv_set_max;
                     if (dv.get_min_max(dv_set_min, dv_set_max)) {
-                        obj["m"] = Helpers::render_value(s, dv_set_min, 0);
-                        obj["x"] = Helpers::render_value(s, dv_set_max, 0);
+                        obj["m"] = dv_set_min;
+                        obj["x"] = dv_set_max;
                     }
                 }
             }
@@ -1028,9 +1028,8 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
             int16_t  dv_set_min;
             uint16_t dv_set_max;
             if (dv.get_min_max(dv_set_min, dv_set_max)) {
-                char s[10];
-                obj["mi"] = Helpers::render_value(s, dv_set_min, 0, fahrenheit);
-                obj["ma"] = Helpers::render_value(s, dv_set_max, 0, fahrenheit);
+                obj["mi"] = dv_set_min;
+                obj["ma"] = dv_set_max;
             }
         }
     }
@@ -1305,7 +1304,7 @@ void EMSdevice::dump_value_info() {
                     if (dv.type == DeviceValueType::BOOL) {
                         snprintf(entityid, sizeof(entityid), "binary_sensor.%s", entity_with_tag); // binary sensor (for booleans)
                     } else {
-                        snprintf(entityid, sizeof(entityid), "sensor.%s", entity_with_tag); // normal HA sensor
+                        snprintf(entityid, sizeof(entityid), "sensor.%s", entity_with_tag);        // normal HA sensor
                     }
                 }
 

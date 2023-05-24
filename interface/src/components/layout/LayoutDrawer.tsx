@@ -1,11 +1,9 @@
-import { FC } from 'react';
-
 import { Box, Divider, Drawer, Toolbar, Typography, styled } from '@mui/material';
+import { DRAWER_WIDTH } from './Layout';
+import LayoutMenu from './LayoutMenu';
+import type { FC } from 'react';
 
 import { PROJECT_NAME } from 'api/env';
-
-import LayoutMenu from './LayoutMenu';
-import { DRAWER_WIDTH } from './Layout';
 
 const LayoutDrawerLogo = styled('img')(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
@@ -13,7 +11,7 @@ const LayoutDrawerLogo = styled('img')(({ theme }) => ({
     marginRight: theme.spacing(2)
   },
   [theme.breakpoints.up('sm')]: {
-    height: 36,
+    height: 38,
     marginRight: theme.spacing(2)
   }
 }));
@@ -29,9 +27,7 @@ const LayoutDrawer: FC<LayoutDrawerProps> = ({ mobileOpen, onClose }) => {
       <Toolbar disableGutters>
         <Box display="flex" alignItems="center" px={2}>
           <LayoutDrawerLogo src="/app/icon.png" alt={PROJECT_NAME} />
-          <Typography variant="h6" color="textPrimary">
-            {PROJECT_NAME}
-          </Typography>
+          <Typography variant="h6">{PROJECT_NAME}</Typography>
         </Box>
         <Divider absolute />
       </Toolbar>

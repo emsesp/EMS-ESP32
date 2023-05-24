@@ -60,7 +60,7 @@ export interface Status {
 }
 
 export interface Device {
-  id: string; // id index
+  id: number; // id index
   tn: string; // device type translated name
   t: number; // device type id
   b: string; // brand
@@ -68,10 +68,9 @@ export interface Device {
   d: number; // deviceid
   p: number; // productid
   v: string; // version
-  e: number; // number of entries
 }
 
-export interface Sensor {
+export interface TemperatureSensor {
   id: string; // id string
   n: string; // name/alias
   t?: number; // temp, optional
@@ -79,34 +78,33 @@ export interface Sensor {
   u: number; // uom
 }
 
-export interface Analog {
-  id: string; // id string
+export interface AnalogSensor {
+  id: number;
   g: number; // GPIO
   n: string;
-  v: number; // is optional
+  v: number;
   u: number;
   o: number;
   f: number;
   t: number;
+  d: boolean; // deleted flag
 }
 
-export interface WriteSensor {
+export interface WriteTemperatureSensor {
   id: string;
   name: string;
   offset: number;
 }
 
 export interface SensorData {
-  sensors: Sensor[];
-  analogs: Analog[];
+  ts: TemperatureSensor[];
+  as: AnalogSensor[];
+  analog_enabled: boolean;
 }
 
 export interface CoreData {
   connected: boolean;
   devices: Device[];
-  s_n: string;
-  active_sensors: number;
-  analog_enabled: boolean;
 }
 
 export interface DeviceShort {
@@ -124,18 +122,17 @@ export interface Devices {
 
 export interface DeviceValue {
   id: string; // index, contains mask+name
-  v: any; // value, in any format
+  v: any; // value, Number or String
   u: number; // uom
   c?: string; // command, optional
   l?: string[]; // list, optional
   h?: string; // help text, optional
-  s?: string; // steps for up/down, optional
-  m?: string; // min, optional
-  x?: string; // max, optional
+  s?: number; // steps for up/down, optional
+  m?: number; // min, optional
+  x?: number; // max, optional
 }
 
 export interface DeviceData {
-  label: string;
   data: DeviceValue[];
 }
 
@@ -146,12 +143,12 @@ export interface DeviceEntity {
   cn?: string; // custom fullname, optional
   m: number; // mask
   w: boolean; // writeable
+  mi?: number; // min value
+  ma?: number; // max value
   o_m?: number; // original mask before edits
   o_cn?: string; // original cn before edits
-  mi?: string; // min value
-  ma?: string; // max value
-  o_mi?: string; // original min value
-  o_ma?: string; // original max value
+  o_mi?: number; // original min value
+  o_ma?: number; // original max value
 }
 
 export interface CustomEntities {
@@ -216,6 +213,7 @@ export const DeviceValueUOM_s = [
 ];
 
 export enum AnalogType {
+  REMOVED = -1,
   NOTUSED = 0,
   DIGITAL_IN,
   COUNTER,
@@ -281,18 +279,20 @@ export interface APIcall {
   id: any;
 }
 
-export interface WriteValue {
+export interface WriteDeviceValue {
   id: number;
   devicevalue: DeviceValue;
 }
 
-export interface WriteAnalog {
+export interface WriteAnalogSensor {
+  id: number;
   gpio: number;
   name: string;
   factor: number;
   offset: number;
   uom: number;
   type: number;
+  deleted: boolean;
 }
 
 export enum DeviceEntityMask {
@@ -339,27 +339,52 @@ export enum ScheduleFlag {
 }
 
 export interface EntityItem {
+  id: number; // unique number
   name: string;
-  device_id: string;
-  type_id: string;
+  device_id: number | string;
+  type_id: number | string;
   offset: number;
   factor: number;
   uom: number;
-  val_type: number;
-  value?: number;
+  value_type: number;
+  value?: any;
+  writeable: boolean;
+  deleted?: boolean;
+  o_id?: number;
   o_name?: string;
-  o_device_id?: string;
-  o_type_id?: string;
+  o_device_id?: number | string;
+  o_type_id?: number | string;
   o_offset?: number;
   o_factor?: number;
   o_uom?: number;
-  o_val_type?: number;
-  deleted?: boolean; // optional
+  o_value_type?: number;
   o_deleted?: boolean;
-  write: boolean;
-  o_write?: boolean;
+  o_writeable?: boolean;
 }
 
 export interface Entities {
-  entity: EntityItem[];
+  entities: EntityItem[];
+}
+
+// matches emsdevice.h DeviceType
+export const enum DeviceType {
+  SYSTEM = 0,
+  TEMPERATURESENSOR,
+  ANALOGSENSOR,
+  SCHEDULER,
+  BOILER,
+  THERMOSTAT,
+  MIXER,
+  SOLAR,
+  HEATPUMP,
+  GATEWAY,
+  SWITCH,
+  CONTROLLER,
+  CONNECT,
+  ALERT,
+  PUMP,
+  GENERIC,
+  HEATSOURCE,
+  CUSTOM,
+  UNKNOWN
 }
