@@ -37,7 +37,6 @@ const no: Translation = {
   BRAND: 'Fabrikat',
   ENTITY_NAME: 'Objektsnavn',
   VALUE: '{{Verdi|verdi}}',
-  SHOW_FAV: ' Vis kun favoritter',
   DEVICE_DATA: 'Enheterdata',
   SENSOR_DATA: 'Sensordata',
   DEVICES: 'Enheter',

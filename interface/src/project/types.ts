@@ -68,7 +68,6 @@ export interface Device {
   d: number; // deviceid
   p: number; // productid
   v: string; // version
-  e: number; // number of entries
 }
 
 export interface TemperatureSensor {
@@ -134,7 +133,6 @@ export interface DeviceValue {
 }
 
 export interface DeviceData {
-  label: string;
   data: DeviceValue[];
 }
 

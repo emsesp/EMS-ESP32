@@ -395,8 +395,7 @@ const emsesp_coredata = {
       n: 'GBx72/Trendline/Cerapur/Greenstar Si/27i',
       d: 8,
       p: 123,
-      v: '06.01',
-      e: 68
+      v: '06.01'
     },
     {
       id: 3,
@@ -406,8 +405,7 @@ const emsesp_coredata = {
       n: 'GB125/GB135/MC10',
       d: 8,
       p: 123,
-      v: '06.01',
-      e: 56
+      v: '06.01'
     },
     {
       id: 1,
@@ -417,8 +415,7 @@ const emsesp_coredata = {
       n: 'RC35',
       d: 24,
       p: 86,
-      v: '04.01',
-      e: 58
+      v: '04.01'
     },
     {
       id: 2,
@@ -428,8 +425,7 @@ const emsesp_coredata = {
       n: 'RC20/Moduline 300',
       d: 23,
       p: 77,
-      v: '03.03',
-      e: 6
+      v: '03.03'
     },
     {
       id: 4,
@@ -439,8 +435,7 @@ const emsesp_coredata = {
       n: 'RC100/Moduline 1000/1010',
       d: 16,
       p: 165,
-      v: '04.01',
-      e: 3
+      v: '04.01'
     },
     {
       id: 5,
@@ -450,8 +445,7 @@ const emsesp_coredata = {
       n: 'MM10',
       d: 32,
       p: 69,
-      v: '01.01',
-      e: 6
+      v: '01.01'
     },
     {
       id: 6,
@@ -461,8 +455,7 @@ const emsesp_coredata = {
       n: 'SM10',
       d: 48,
       p: 73,
-      v: '01.02',
-      e: 16
+      v: '01.02'
     },
     {
       id: 99,
@@ -472,8 +465,7 @@ const emsesp_coredata = {
       n: 'User defined entities',
       d: 1,
       p: 1,
-      v: '',
-      e: 1
+      v: ''
     }
   ]
 };
@@ -526,7 +518,6 @@ const status = {
 // 99 - Custom
 
 const emsesp_devicedata_7 = {
-  label: 'Boiler: Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i',
   data: [
     { v: '', u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
     { v: 'off', u: 0, id: '08heating active' },
@@ -607,7 +598,6 @@ const emsesp_devicedata_7 = {
 };
 
 const emsesp_devicedata_1 = {
-  label: 'Thermostat: RC35',
   data: [
     {
       v: '22(816) 01.05.2023 13:07 (1 min)',
@@ -1040,7 +1030,6 @@ const emsesp_devicedata_1 = {
 };
 
 const emsesp_devicedata_2 = {
-  label: 'Thermostat: RC20/Moduline 300',
   data: [
     {
       v: '(0)',
@@ -1084,7 +1073,6 @@ const emsesp_devicedata_2 = {
 };
 
 const emsesp_devicedata_3 = {
-  label: 'Boiler: GB125/GB135/MC10',
   data: [
     {
       v: '',
@@ -1557,7 +1545,6 @@ const emsesp_devicedata_3 = {
 };
 
 const emsesp_devicedata_4 = {
-  label: 'Thermostat: RC100/Moduline 1000/1010',
   data: [
     {
       v: 16,
@@ -1582,7 +1569,6 @@ const emsesp_devicedata_4 = {
 };
 
 const emsesp_devicedata_5 = {
-  label: 'Mixer Module: MM10',
   data: [
     {
       v: 30,
@@ -1630,7 +1616,6 @@ const emsesp_devicedata_5 = {
 };
 
 const emsesp_devicedata_6 = {
-  label: 'Solar Module: SM10',
   data: [
     {
       v: 43.9,
@@ -1780,7 +1765,6 @@ const emsesp_devicedata_6 = {
 };
 
 const emsesp_devicedata_99 = {
-  label: 'User defined entities',
   data: [
     {
       v: 5,

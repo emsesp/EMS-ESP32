@@ -37,7 +37,6 @@ const de: Translation = {
   BRAND: 'Marke',
   ENTITY_NAME: 'Entitätsname',
   VALUE: '{{Wert|wert}}',
-  SHOW_FAV: 'nur Favoriten anzeigen',
   DEVICE_DATA: 'Gerätedaten',
   SENSOR_DATA: 'Sensordaten',
   DEVICES: 'Geräte',
