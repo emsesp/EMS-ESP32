@@ -49,7 +49,7 @@ MAKE_WORD_TRANSLATION(pump_device, "Pump Module", "Pumpenmodul", "Pump Module", 
 MAKE_WORD_TRANSLATION(heatsource_device, "Heatsource", "Heizquelle", "Heatsource",  "Värmekälla", "Źródło ciepła", "Varmekilde", "", "Isı Kaynağı") // TODO translate
 MAKE_WORD_TRANSLATION(sensors_device, "Sensors", "Sensoren", "Sensoren", "Sensorer", "Czujniki", "Sensorer", "Capteurs", "Sensör Cihazı")
 MAKE_WORD_TRANSLATION(unknown_device, "Unknown", "Unbekannt", "Onbekend", "Okänt", "Nieznane urządzenie", "Ukjent", "Inconnu", "") // TODO translate
-MAKE_WORD_TRANSLATION(custom_device, "Custom", "", "", "", "Niestandardowe", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(custom_device, "Custom", "Nutzerdefiniert", "", "", "Niestandardowe", "", "", "") // TODO translate
 MAKE_WORD_TRANSLATION(custom_device_name, "User defined entities", "Nutzer deklarierte Entitäten", "", "", "Encje zdefiniowane przez użytkownika", "", "", "") // TODO translate
 MAKE_WORD_TRANSLATION(ventilation_device, "Ventilation", "Lüftung", "", "", "", "", "", "") // TODO translate
 
@@ -62,8 +62,8 @@ MAKE_WORD_TRANSLATION(send_cmd, "send a telegram", "Sende EMS-Telegramm", "", ""
 MAKE_WORD_TRANSLATION(setiovalue_cmd, "set io value", "Setze Wertevorgabe", "", "", "ustaw wartość", "sett en io verdi", "", "Giriş/Çıkış değerlerini ayarla") // TODO translate
 MAKE_WORD_TRANSLATION(changeloglevel_cmd, "change log level", "Ändere Sysloglevel", "", "", "zmień poziom log-u", "endre loggnivå", "", "Kayıt seviyesini değiştir") // TODO translate
 MAKE_WORD_TRANSLATION(fetch_cmd, "refresh all EMS values", "Lese alle EMS-Werte neu", "", "", "odśwież wszystkie wartości EMS", "oppfrisk alle EMS verdier", "", "Bütün EMS değerlerini yenile") // TODO translate
-MAKE_WORD_TRANSLATION(restart_cmd, "restart EMS-ESP", "Neustart", "", "", "uruchom ponownie EMS-ESP", "restart EMS-ESP", "", "EMS-ESPyi yeniden başlat") // TODO translate
-MAKE_WORD_TRANSLATION(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme", "", "", "obserwuj przychodzące telegramy", "se innkommende telegrammer", "", "Gelen telegramları ") // TODO translate
+MAKE_WORD_TRANSLATION(restart_cmd, "restart EMS-ESP", "Neustart", "", "", "uruchom ponownie EMS-ESP", "restart EMS-ESP", "redémarrer EMS-ESP", "EMS-ESPyi yeniden başlat") // TODO translate
+MAKE_WORD_TRANSLATION(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme", "", "", "obserwuj przyczodzące telegramy", "se innkommende telegrammer", "", "Gelen telegramları ") // TODO translate
 MAKE_WORD_TRANSLATION(publish_cmd, "publish all to MQTT", "Publiziere MQTT", "", "", "opublikuj wszystko na MQTT", "Publiser alt til MQTT", "", "Hepsini MQTTye gönder") // TODO translate
 MAKE_WORD_TRANSLATION(system_info_cmd, "show system status", "Zeige System-Status", "", "", "pokaż status systemu", "vis system status", "", "Sistem Durumunu Göster") // TODO translate
 MAKE_WORD_TRANSLATION(schedule_cmd, "enable schedule item", "Aktiviere Zeitplan", "", "", "aktywuj wybrany harmonogram", "", "", "") // TODO translate
@@ -769,8 +769,8 @@ MAKE_TRANSLATION(RFTemp, "rftemp", "RF room temperature sensor", "RF Raumtempera
 // ventilation
 MAKE_TRANSLATION(outFresh, "outfresh", "outdoor fresh air", "Außenlufttemp.")
 MAKE_TRANSLATION(inFresh, "infresh", "indoor fresh air", "Zulufttemp.")
-MAKE_TRANSLATION(outEx, "outexhaust", "outdoor exhaust air", "Ablufttemp.")
-MAKE_TRANSLATION(inEx, "inexhaust", "indoor exhaust air", "Fortlufttemp.")
+MAKE_TRANSLATION(outEx, "outexhaust", "outdoor exhaust air", "Fortlufttemp.")
+MAKE_TRANSLATION(inEx, "inexhaust", "indoor exhaust air", "Ablufttemp.")
 MAKE_TRANSLATION(ventMode, "ventmode", "ventilation mode", "Belüftungsmodus")
 MAKE_TRANSLATION(ventInSpeed, "ventinspeed", "in blower speed", "Zuluft-Drehzahl")
 MAKE_TRANSLATION(ventOutSpeed, "ventoutspeed", "out blower speed", "Abluft-Drehzahl")
