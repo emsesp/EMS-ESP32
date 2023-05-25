@@ -156,6 +156,11 @@ const DashboardDevices: FC = () => {
           display:none;
         }
       `,
+      BaseRow: `
+      .td {
+        height: 32px;
+      }
+     `,
       BaseCell: `
         &:nth-of-type(1) {
           border-left: 1px solid #177ac9;
@@ -499,7 +504,6 @@ const DashboardDevices: FC = () => {
             <Box color="warning.main" ml={1}>
               <Typography noWrap variant="h6">
                 {coreData.devices[deviceIndex].n}
-                &nbsp;({shown_data.length})
               </Typography>
             </Box>
             <Grid item zeroMinWidth justifyContent="flex-end">
@@ -510,22 +514,25 @@ const DashboardDevices: FC = () => {
           </Grid>
 
           <Grid item xs>
-            <IconButton onClick={() => setShowDeviceInfo(true)}>
-              <InfoOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-            </IconButton>
-            <IconButton onClick={handleDownloadCsv}>
-              <DownloadIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-            </IconButton>
-            <IconButton onClick={() => setOnlyFav(!onlyFav)}>
-              {onlyFav ? (
-                <StarIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-              ) : (
-                <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-              )}
-            </IconButton>
-            <IconButton onClick={refreshData}>
-              <RefreshIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-            </IconButton>
+            <Typography sx={{ ml: 1 }} variant="subtitle2" color="primary">
+              {shown_data.length + ' ' + LL.ENTITIES()}
+              <IconButton onClick={() => setShowDeviceInfo(true)}>
+                <InfoOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+              </IconButton>
+              <IconButton onClick={handleDownloadCsv}>
+                <DownloadIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+              </IconButton>
+              <IconButton onClick={() => setOnlyFav(!onlyFav)}>
+                {onlyFav ? (
+                  <StarIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                ) : (
+                  <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                )}
+              </IconButton>
+              <IconButton onClick={refreshData}>
+                <RefreshIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+              </IconButton>
+            </Typography>
           </Grid>
         </Box>
 
