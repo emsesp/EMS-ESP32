@@ -31,15 +31,20 @@ Ventilation::Ventilation(uint8_t device_type, uint8_t device_id, uint8_t product
     register_telegram_type(0x5D9, "Airquality", false, MAKE_PF_CB(process_VOCMessage));
     // register_telegram_type(0x5, "VentilationSet", true, MAKE_PF_CB(process_SetMessage));
 
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &outFresh_, DeviceValueType::SHORT, FL_(outFresh), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &inFresh_, DeviceValueType::SHORT, FL_(inFresh), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &outEx_, DeviceValueType::SHORT, FL_(outEx), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &inEx_, DeviceValueType::SHORT, FL_(inEx), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &outFresh_,
+                          DeviceValueType::SHORT,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(outFresh),
+                          DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &inFresh_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(inFresh), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &outEx_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(outEx), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &inEx_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(inEx), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ventInSpeed_, DeviceValueType::UINT, FL_(ventInSpeed), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ventOutSpeed_, DeviceValueType::UINT, FL_(ventOutSpeed), DeviceValueUOM::PERCENT);
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &mode_, DeviceValueType::ENUM, FL_(enum_ventMode), FL_(ventInSpeed), DeviceValueUOM::NONE, MAKE_CF_CB(set_ventMode));
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &voc_, DeviceValueType::USHORT, FL_(airquality), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &voc_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(airquality), DeviceValueUOM::NONE);
 }
 
 // message
@@ -50,7 +55,7 @@ void Ventilation::process_SetMessage(std::shared_ptr<const Telegram> telegram) {
 void Ventilation::process_MonitorMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, outEx_, 0);     // Fortluft
     has_update(telegram, inEx_, 7);      // Abluft
-    has_update(telegram, outFresh_, 13); // Auﬂenluft
+    has_update(telegram, outFresh_, 13); // Au√üenluft
     has_update(telegram, inFresh_, 15);  // Zuluft
 }
 
