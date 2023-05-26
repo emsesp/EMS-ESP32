@@ -17,6 +17,11 @@ There are breaking changes in 3.6.0. Please read carefully before applying the u
 - Some more HM200 entities [#500](https://github.com/emsesp/EMS-ESP32/issues/500)
 - Custom Scheduler [#701](https://github.com/emsesp/EMS-ESP32/issues/701)
 - Custom Entities read from EMS bus
+- Build S3 binary with github actions
+- Greenstar HIU [#1158](https://github.com/emsesp/EMS-ESP32/issues/1158)
+- AM200 code 10 [#1161](https://github.com/emsesp/EMS-ESP32/issues/1161)
+- Ventilation device [#1172](https://github.com/emsesp/EMS-ESP32/issues/1172)
+- Turn ETH off on wifi connect [#1167](https://github.com/emsesp/EMS-ESP32/issues/1167)
 
 ## Fixed
 
@@ -26,7 +31,7 @@ There are breaking changes in 3.6.0. Please read carefully before applying the u
 
 ## Changed
 
-- Optional upgrade to platform-espressif32 6.1.0 (after 5.3.0) [#862](https://github.com/emsesp/EMS-ESP32/issues/862)
+- Optional upgrade to platform-espressif32 6.3.0 (after 5.3.0) [#862](https://github.com/emsesp/EMS-ESP32/issues/862)
 - Use byte 3 for detection RC30 active heatingcircuit [#786](https://github.com/emsesp/EMS-ESP32/issues/786)
 - Write repeated selflowtemp if tx-queue is empty without verify [#954](https://github.com/emsesp/EMS-ESP32/issues/954)
 - HA discovery recreate after disconnect by device [#1067](https://github.com/emsesp/EMS-ESP32/issues/1067)
