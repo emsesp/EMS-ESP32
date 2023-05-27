@@ -24,7 +24,6 @@ REGISTER_FACTORY(Heatsource, EMSdevice::DeviceType::HEATSOURCE);
 
 Heatsource::Heatsource(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-
     // AM200 alternative heatsource
     if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER || (device_id >= EMSdevice::EMS_DEVICE_ID_AHS1 && device_id < EMSdevice::EMS_DEVICE_ID_HS1)) {
         uint8_t tag = device_id == EMSdevice::EMS_DEVICE_ID_BOILER

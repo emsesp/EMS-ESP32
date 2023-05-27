@@ -87,9 +87,9 @@ class Boiler : public EMSdevice {
     uint32_t wwWorkM_;              // DHW minutes
     int8_t   wwHystOn_;
     int8_t   wwHystOff_;
-    uint8_t  wwTapActivated_;  // maintenance-mode to switch DHW off
-    uint16_t wwMixerTemp_;     // mixing temperature
-    uint16_t wwCylMiddleTemp_; // Cyl middle temperature (TS3)
+    uint8_t  wwTapActivated_;    // maintenance-mode to switch DHW off
+    uint16_t wwMixerTemp_;       // mixing temperature
+    uint16_t wwCylMiddleTemp_;   // Cyl middle temperature (TS3)
     uint16_t wwSolarTemp_;
     uint8_t  wwAlternatingOper_; // alternating operation on/off
     uint8_t  wwAltOpPrioHeat_;   // alternating operation, prioritize heat time
@@ -208,7 +208,7 @@ class Boiler : public EMSdevice {
     // Inputs
     struct {
         uint8_t state;
-        char    option[16]; // logic, block_comp, block_dhw, block_heat, block_cool, overheat_protect, evu_blocktime1,2,3, block_heater, Solar, brine lowpressure, brine pump modulation
+        char option[16]; // logic, block_comp, block_dhw, block_heat, block_cool, overheat_protect, evu_blocktime1,2,3, block_heater, Solar, brine lowpressure, brine pump modulation
     } hpInput[4];
 
     // Heater limits
@@ -256,7 +256,7 @@ class Boiler : public EMSdevice {
     uint16_t cwFlowRate_;  // cold water flow rate *10
     uint16_t netFlowTemp_; // heat network flow temperature *10
     uint8_t  keepWarmTemp_;
-    uint8_t setReturnTemp_;
+    uint8_t  setReturnTemp_;
 
     /*
   // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat

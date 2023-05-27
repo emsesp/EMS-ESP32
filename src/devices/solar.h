@@ -58,9 +58,9 @@ class Solar : public EMSdevice {
     uint32_t energyLastHour_;
     uint32_t energyToday_;
     uint32_t energyTotal_;
-    uint32_t pumpWorkTime_;  // Total solar pump operating time
-    uint32_t pump2WorkTime_; // Total solar pump 2 operating time
-    uint32_t m1WorkTime_;    // differential control work time
+    uint32_t pumpWorkTime_;      // Total solar pump operating time
+    uint32_t pump2WorkTime_;     // Total solar pump 2 operating time
+    uint32_t m1WorkTime_;        // differential control work time
     uint8_t  cylHeated_;
     uint8_t  collectorShutdown_; // Collector shutdown on/off
 

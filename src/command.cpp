@@ -46,7 +46,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         if (!strncmp(path, Mqtt::base().c_str(), Mqtt::base().length())) {
             char new_path[Mqtt::MQTT_TOPIC_MAX_SIZE];
             strlcpy(new_path, path, sizeof(new_path));
-            p.parse(new_path + Mqtt::base().length() + 1); // re-parse the stripped path
+            p.parse(new_path + Mqtt::base().length() + 1);                  // re-parse the stripped path
         } else {
             return message(CommandRet::ERROR, "unrecognized path", output); // error
         }
@@ -194,7 +194,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     } else if (data.isNull()) {
         return_code = Command::call(device_type, command_p, "", is_admin, id_n, output); // empty, will do a query instead
     } else {
-        return message(CommandRet::ERROR, "cannot parse command", output); // can't process
+        return message(CommandRet::ERROR, "cannot parse command", output);               // can't process
     }
     return return_code;
 }

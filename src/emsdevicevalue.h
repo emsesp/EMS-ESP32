@@ -145,12 +145,12 @@ class DeviceValue {
         DV_NUMOP_MUL15  = -15
     };
 
-    uint8_t               device_type;    // EMSdevice::DeviceType
-    uint8_t               tag;            // DeviceValueTAG::*
-    void *                value_p;        // pointer to variable of any type
-    uint8_t               type;           // DeviceValueType::*
-    const char * const ** options;        // options as a flash char array
-    const char * const *  options_single; // options are not translated
+    uint8_t               device_type;     // EMSdevice::DeviceType
+    uint8_t               tag;             // DeviceValueTAG::*
+    void *                value_p;         // pointer to variable of any type
+    uint8_t               type;            // DeviceValueType::*
+    const char * const ** options;         // options as a flash char array
+    const char * const *  options_single;  // options are not translated
     int8_t                numeric_operator;
     uint8_t               options_size;    // number of options in the char array, calculated
     const char * const    short_name;      // used in MQTT and API

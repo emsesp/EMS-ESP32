@@ -43,7 +43,8 @@ static inline EMSESP & to_app(Shell & shell) {
 }
 
 #define NO_ARGUMENTS                                                                                                                                           \
-    std::vector<std::string> {}
+    std::vector<std::string> {                                                                                                                                 \
+    }
 
 // add static functions here....
 
@@ -430,11 +431,11 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               if (!arguments.empty()) {
                                   // get raw/pretty
                                   if (arguments[0] == (F_(raw))) {
-                                      to_app(shell).watch(to_app(shell).WATCH_RAW); // raw
+                                      to_app(shell).watch(to_app(shell).WATCH_RAW);     // raw
                                   } else if (arguments[0] == (FL_(on)[0])) {
-                                      to_app(shell).watch(to_app(shell).WATCH_ON); // on
+                                      to_app(shell).watch(to_app(shell).WATCH_ON);      // on
                                   } else if (arguments[0] == (FL_(off)[0])) {
-                                      to_app(shell).watch(to_app(shell).WATCH_OFF); // off
+                                      to_app(shell).watch(to_app(shell).WATCH_OFF);     // off
                                   } else if (arguments[0] == (FL_(unknown)[0])) {
                                       to_app(shell).watch(to_app(shell).WATCH_UNKNOWN); // unknown
                                       watch_id = WATCH_ID_NONE;
@@ -442,7 +443,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                       watch_id = Helpers::hextoint(arguments[0].c_str());
                                       if (watch_id > 0
                                           && ((to_app(shell).watch() == to_app(shell).WATCH_OFF) || (to_app(shell).watch() == to_app(shell).WATCH_UNKNOWN))) {
-                                          to_app(shell).watch(to_app(shell).WATCH_ON); // on
+                                          to_app(shell).watch(to_app(shell).WATCH_ON);  // on
                                       } else if (watch_id == 0) {
                                           to_app(shell).watch(to_app(shell).WATCH_OFF); // off
                                           return;
@@ -477,7 +478,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               } else if (watch == to_app(shell).WATCH_RAW) {
                                   shell.printfln("Watching incoming telegrams, displayed as raw bytes"); // WATCH_RAW
                               } else {
-                                  shell.printfln("Watching unknown telegrams"); // WATCH_UNKNOWN
+                                  shell.printfln("Watching unknown telegrams");                          // WATCH_UNKNOWN
                               }
 
                               watch_id = to_app(shell).watch_id();
